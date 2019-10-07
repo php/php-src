@@ -6327,7 +6327,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_reflection_method_setAccessible, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_reflection_method_getClosure, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_reflection_method_getClosure, 0, 0, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
