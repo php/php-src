@@ -2627,6 +2627,7 @@ COMMAND $cmd
 			if (!$cfg['keep']['php']) {
 				@unlink($test_file);
 			}
+			@unlink($tmp_post);
 
 			if (!$leaked && !$failed_headers) {
 				if (isset($section_text['XFAIL'])) {
@@ -2656,6 +2657,7 @@ COMMAND $cmd
 			if (!$cfg['keep']['php']) {
 				@unlink($test_file);
 			}
+			@unlink($tmp_post);
 
 			if (!$leaked && !$failed_headers) {
 				if (isset($section_text['XFAIL'])) {
@@ -2693,10 +2695,6 @@ COMMAND $cmd
 
 	if ($warn) {
 		$restype[] = 'WARN';
-	}
-
-	if ($passed) {
-		@unlink($tmp_post);
 	}
 
 	if (!$passed) {
