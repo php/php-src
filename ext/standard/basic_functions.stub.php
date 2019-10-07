@@ -254,7 +254,7 @@ function array_product(array $arg) {}
 
 function array_reduce(array $arg, callable $callback, $initial = null) {}
 
-function array_filter(array $arg, callable $callback, int $use_keys = 0): array {}
+function array_filter(array $arg, callable $callback = UNKNOWN, int $use_keys = 0): array {}
 
 function array_map(?callable $callback, array $arr1, array ...$arrays): array {}
 

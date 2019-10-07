@@ -38,10 +38,10 @@ function localtime(int $timestamp = UNKNOWN, bool $associative = false): array {
 function getdate(int $timestamp = UNKNOWN): array {}
 
 /** @return DateTime|false */
-function date_create(string $time, ?DateTimeZone $timezone = null) {}
+function date_create(string $time = "now", ?DateTimeZone $timezone = null) {}
 
 /** @return DateTime|false */
-function date_create_immutable(string $time, ?DateTimeZone $timezone = null) {}
+function date_create_immutable(string $time = "now", ?DateTimeZone $timezone = null) {}
 
 /** @return DateTime|false */
 function date_create_from_format(string $format, string $time, ?DateTimeZone $timezone = null) {}
@@ -158,7 +158,7 @@ interface DateTimeInterface {
 }
 
 class DateTime implements DateTimeInterface {
-    public function __construct(string $time, ?DateTimeZone $timezone = null);
+    public function __construct(string $time = "now", ?DateTimeZone $timezone = null);
 
     /** @return DateTime */
     public static function __set_state(array $array);
@@ -195,11 +195,11 @@ class DateTime implements DateTimeInterface {
     public function setISODate(int $year, int $week, int $day = 1);
 
     /** @return DateTime */
-    public function setTimestamp(int $timestampt);
+    public function setTimestamp(int $timestamp);
 }
 
 class DateTimeImmutable implements DateTimeInterface {
-    public function __construct(string $time, ?DateTimeZone $timezone = null);
+    public function __construct(string $time = "now", ?DateTimeZone $timezone = null);
 
     /** @return DateTimeZone */
     public static function __set_state(array $array);

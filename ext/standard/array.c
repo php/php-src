@@ -6044,7 +6044,7 @@ PHP_FUNCTION(array_reduce)
 }
 /* }}} */
 
-/* {{{ proto array array_filter(array input [, mixed callback])
+/* {{{ proto array array_filter(array input [, mixed callback [, int use_type]])
    Filters elements from the array via the callback. */
 PHP_FUNCTION(array_filter)
 {
