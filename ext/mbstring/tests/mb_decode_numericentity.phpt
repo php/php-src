@@ -14,8 +14,12 @@ $convmap = array(0x0, 0x2FFFF, 0, 0xFFFF);
 echo mb_decode_numericentity($str1, $convmap, "UTF-8")."\n";
 echo mb_decode_numericentity($str2, $convmap, "UTF-8")."\n";
 echo mb_decode_numericentity($str3, $convmap, "UTF-8")."\n";
+
+$convmap = [];
+echo mb_decode_numericentity('f&ouml;o', $convmap, "UTF-8")."\n";
 ?>
 --EXPECT--
 ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ
 ƒΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩαβγδεζηθικλμνξοπρςστυφχψωϑϒϖ•…′″‾⁄℘ℑℜ™ℵ←↑→↓↔↵⇐⇑⇒⇓⇔∀∂∃∅∇∈∉∋∏∑−∗√∝∞∠∧∨∩∪∫∴∼≅≈≠≡≤≥⊂⊃⊄⊆⊇⊕⊗⊥⋅⌈⌉⌊⌋〈〉◊♠♣♥♦
 aŒbœcŠdše€fg
+f&ouml;o

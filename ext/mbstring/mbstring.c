@@ -3666,20 +3666,14 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 	}
 
 	/* conversion map */
-	convmap = NULL;
 	i = zend_hash_num_elements(target_hash);
-	if (i > 0) {
-		convmap = (int *)safe_emalloc(i, sizeof(int), 0);
-		mapelm = convmap;
-		mapsize = 0;
-		ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-			*mapelm++ = zval_get_long(hash_entry);
-			mapsize++;
-		} ZEND_HASH_FOREACH_END();
-	}
-	if (convmap == NULL) {
-		RETURN_FALSE;
-	}
+	convmap = (int *)safe_emalloc(i, sizeof(int), 0);
+	mapelm = convmap;
+	mapsize = 0;
+	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
+		*mapelm++ = zval_get_long(hash_entry);
+		mapsize++;
+	} ZEND_HASH_FOREACH_END();
 	mapsize /= 4;
 
 	ret = mbfl_html_numeric_entity(&string, &result, convmap, mapsize, type);
