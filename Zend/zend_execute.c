@@ -1079,6 +1079,33 @@ static zend_never_inline ZEND_ATTRIBUTE_UNUSED int zend_verify_internal_arg_type
 	return 1;
 }
 
+#if ZEND_DEBUG
+/* Determine whether an internal call should throw, because the passed arguments violate
+ * an arginfo constraint. This is only checked in debug builds. In release builds, we
+ * trust that arginfo matches what is enforced by zend_parse_parameters. */
+static zend_always_inline zend_bool zend_internal_call_should_throw(zend_function *fbc, zend_execute_data *call)
+{
+	if (fbc->common.required_num_args > ZEND_CALL_NUM_ARGS(call)) {
+		return 1;
+	}
+
+	if ((fbc->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) &&
+			!zend_verify_internal_arg_types(fbc, call)) {
+		return 1;
+	}
+
+	return 0;
+}
+
+static ZEND_COLD void zend_internal_call_arginfo_violation(zend_function *fbc)
+{
+	zend_error(E_CORE_ERROR, "Arginfo / zpp mismatch during call of %s%s%s()",
+		fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
+		fbc->common.scope ? "::" : "",
+		ZSTR_VAL(fbc->common.function_name));
+}
+#endif
+
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data)
 {
 	zend_execute_data *ptr = EX(prev_execute_data);
