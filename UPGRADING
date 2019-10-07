@@ -28,11 +28,11 @@ PHP 7.4 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/notice-for-non-valid-array-container
   . get_declared_classes() no longer returns anonymous classes that haven't
     been instantiated yet.
-  . "fn" is now a reserved keyword. In particular it can no longer be used as a
+  . "fn" is now a reserved keyword. In particular, it can no longer be used as a
     function or class name. It can still be used as a method or class constant
     name.
   . Passing the result of a (non-reference) list() assignment by reference is
-    consistently disallowed now. Previously this worked if the right hand side
+    consistently disallowed now. Previously this worked if the right-hand side
     was a simple (CV) variable and did not occur as part of the list().
   . `<?php` at the end of the file (without trailing newline) will now be
     interpreted as an opening PHP tag. Previously it was interpreted either as
@@ -281,7 +281,7 @@ PHP 7.4 UPGRADE NOTES
   . The preg_replace_callback() and preg_replace_callback_array() functions now
     accept an additional $flags argument, with support for the
     PREG_OFFSET_CAPTURE and PREG_UNMATCHED_AS_NULL flags. This influences the
-    format of the matches array passed to to the callback function.
+    format of the matches array passed to the callback function.
 
 - PDO:
   . The username and password can now be specified as part of the PDO DSN for
@@ -325,7 +325,7 @@ PHP 7.4 UPGRADE NOTES
 
     RFC: https://wiki.php.net/rfc/custom_object_serialization
 
-  . A new 'max_depth' option for unserialize(), as well as a
+  . A new 'max_depth' option for unserialize(), as well as an
     unserialize_max_depth ini setting have been added. These control the
     maximum depth of structures permitted during unserialization, and are
     intended to prevent stack overflows. The default depth limit is 4096 and
@@ -695,7 +695,7 @@ PHP 7.4 UPGRADE NOTES
 - configure now regards additional CFLAGS and LDFLAGS set as environment
   variables.
 
-- OPcache now supports an arbitrary amount of separate caches per user via the
+- OPcache now supports an arbitrary amount of separate caches per user via
   the INI directive opcache.cache_id. All processes with the same cache ID and
   user share an OPcache instance.
 
