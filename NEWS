@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Fixed bug #78272 (calling preg_match() before pcntl_fork() will freeze
     child process). (Nikita)
 
+- PDO_MySQL:
+  . Fixed bug #78623 (Regression caused by "SP call yields additional empty
+    result set"). (cmb)
+
 - Session:
   . Fixed bug #78624 (session_gc return value for user defined session 
     handlers). (bshaffer)
