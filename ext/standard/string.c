@@ -5359,7 +5359,7 @@ PHP_FUNCTION(str_repeat)
 }
 /* }}} */
 
-/* {{{ proto array|string|false count_chars(string input [, int mode])
+/* {{{ proto array|string count_chars(string input [, int mode])
    Returns info about what characters are used in input */
 PHP_FUNCTION(count_chars)
 {
@@ -5379,8 +5379,8 @@ PHP_FUNCTION(count_chars)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mymode < 0 || mymode > 4) {
-		php_error_docref(NULL, E_WARNING, "Unknown mode");
-		RETURN_FALSE;
+		zend_value_error("Unknown mode");
+		return;
 	}
 
 	buf = (const unsigned char *) ZSTR_VAL(input);

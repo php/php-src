@@ -196,7 +196,7 @@ static const func_info_t func_infos[] = {
 	FN("str_replace",                  MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY | MAY_BE_ARRAY_OF_OBJECT),
 	FN("str_ireplace",                 MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY | MAY_BE_ARRAY_OF_OBJECT),
 	F1("str_repeat",                   MAY_BE_NULL | MAY_BE_STRING),
-	F1("count_chars",                  MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
+	F1("count_chars",                  MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
 	F1("chunk_split",                  MAY_BE_FALSE | MAY_BE_STRING),
 	FN("trim",                         MAY_BE_STRING),
 	FN("ltrim",                        MAY_BE_STRING),
