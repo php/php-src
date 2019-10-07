@@ -5,17 +5,7 @@ Test symlink(), linkinfo(), link() and is_link() functions : usage variations - 
 if ( substr(PHP_OS, 0, 3) == 'WIN' ) {
     die('skip no symlinks on Windows');
 }
-
-// Skip if being run by root (files are always readable, writeable and executable)
-$filename = __FILE__.".check_root.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-        unlink ($filename);
-        die('skip cannot be run as root');
-}
-
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php

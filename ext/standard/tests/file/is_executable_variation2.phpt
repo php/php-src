@@ -5,16 +5,7 @@ Test is_executable() function: usage variations - file/dir with diff. perms
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip not for windows');
 }
-// Skip if being run by root
-$filename = __FILE__.".root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-        unlink ($filename);
-        die('skip cannot be run as root');
-}
-
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
