@@ -1322,7 +1322,7 @@ PHP_FUNCTION(php_sapi_name)
 
 /* }}} */
 
-/* {{{ proto string php_uname(void)
+/* {{{ proto string php_uname([ string $mode = "a"])
    Return information about the system PHP was built on */
 PHP_FUNCTION(php_uname)
 {
