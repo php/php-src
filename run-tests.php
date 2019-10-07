@@ -3507,6 +3507,8 @@ function junit_path_to_classname($file_name)
 {
 	global $JUNIT;
 
+	if (!junit_enabled()) return '';
+
 	$ret = $JUNIT['name'];
 	$_tmp = array();
 
