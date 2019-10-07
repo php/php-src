@@ -521,7 +521,7 @@ PHP_FUNCTION(proc_open)
 		Z_PARAM_STRING_EX(cwd, cwd_len, 1, 0)
 		Z_PARAM_ARRAY_EX(environment, 1, 0)
 		Z_PARAM_ARRAY_EX(other_options, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	memset(&env, 0, sizeof(env));
 

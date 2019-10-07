@@ -1085,7 +1085,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		Z_PARAM_ZVAL(subpats)
 		Z_PARAM_LONG(flags)
 		Z_PARAM_LONG(start_offset)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* Compile regex or get it from cache. */
 	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {
@@ -2446,7 +2446,7 @@ static PHP_FUNCTION(preg_split)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(limit_val)
 		Z_PARAM_LONG(flags)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* Compile regex or get it from cache. */
 	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {

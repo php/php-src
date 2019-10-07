@@ -1957,7 +1957,7 @@ PHP_FUNCTION(strrpos)
 		Z_PARAM_STR(needle)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
@@ -2003,7 +2003,7 @@ PHP_FUNCTION(strripos)
 		Z_PARAM_STR(needle)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(needle) == 1) {
 		/* Single character search can shortcut memcmps
@@ -6064,7 +6064,7 @@ PHP_FUNCTION(strpbrk)
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR(haystack)
 		Z_PARAM_STR(char_list)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ZSTR_LEN(char_list)) {
 		php_error_docref(NULL, E_WARNING, "The character list cannot be empty");
@@ -6100,7 +6100,7 @@ PHP_FUNCTION(substr_compare)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_EX(len, len_is_default, 1, 0)
 		Z_PARAM_BOOL(cs)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!len_is_default && len <= 0) {
 		if (len == 0) {

@@ -555,7 +555,7 @@ PHP_FUNCTION(proc_nice)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(pri)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	errno = 0;
 	php_ignore_value(nice(pri));

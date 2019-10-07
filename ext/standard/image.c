@@ -1233,7 +1233,7 @@ PHP_FUNCTION(image_type_to_extension)
 		Z_PARAM_LONG(image_type)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(inc_dot)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	switch (image_type) {
 		case IMAGE_FILETYPE_GIF:

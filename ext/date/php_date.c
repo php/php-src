@@ -936,7 +936,7 @@ static void php_date(INTERNAL_FUNCTION_PARAMETERS, int localtime)
 		Z_PARAM_STR(format)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(ts)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_NUM_ARGS() == 1) {
 		ts = php_time();
@@ -1096,7 +1096,7 @@ PHP_FUNCTION(idate)
 		Z_PARAM_STR(format)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(ts)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(format) != 1) {
 		php_error_docref(NULL, E_WARNING, "idate format is one char");
@@ -1168,7 +1168,7 @@ PHP_FUNCTION(strtotime)
 		Z_PARAM_STR(times)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(preset_ts)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	tzi = get_timezone_info();
 
@@ -1214,7 +1214,7 @@ PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 		Z_PARAM_LONG(mon)
 		Z_PARAM_LONG(day)
 		Z_PARAM_LONG(yea)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* Initialize structure with current time */
 	now = timelib_time_ctor();
@@ -1299,7 +1299,7 @@ PHP_FUNCTION(checkdate)
 		Z_PARAM_LONG(m)
 		Z_PARAM_LONG(d)
 		Z_PARAM_LONG(y)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (y < 1 || y > 32767 || !timelib_valid_date(y, m, d)) {
 		RETURN_FALSE;
@@ -1327,7 +1327,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 		Z_PARAM_STR(format)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(timestamp)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(format) == 0) {
 		RETURN_FALSE;
@@ -1445,7 +1445,7 @@ PHP_FUNCTION(localtime)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(timestamp)
 		Z_PARAM_BOOL(associative)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_NUM_ARGS() == 0) {
 		timestamp = (zend_long) php_time();
@@ -1496,7 +1496,7 @@ PHP_FUNCTION(getdate)
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(timestamp)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_NUM_ARGS() == 0) {
 		timestamp = (zend_long) php_time();
@@ -2396,7 +2396,7 @@ PHP_FUNCTION(date_create)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(time_str, time_str_len)
 		Z_PARAM_OBJECT_OF_CLASS_EX(timezone_object, date_ce_timezone, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_date_instantiate(date_ce_date, return_value);
 	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, NULL, timezone_object, 0)) {
@@ -2419,7 +2419,7 @@ PHP_FUNCTION(date_create_immutable)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(time_str, time_str_len)
 		Z_PARAM_OBJECT_OF_CLASS_EX(timezone_object, date_ce_timezone, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_date_instantiate(date_ce_immutable, return_value);
 	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, NULL, timezone_object, 0)) {
@@ -2443,7 +2443,7 @@ PHP_FUNCTION(date_create_from_format)
 		Z_PARAM_STRING(time_str, time_str_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_OBJECT_OF_CLASS_EX(timezone_object, date_ce_timezone, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_date_instantiate(date_ce_date, return_value);
 	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, format_str, timezone_object, 0)) {
@@ -2467,7 +2467,7 @@ PHP_FUNCTION(date_create_immutable_from_format)
 		Z_PARAM_STRING(time_str, time_str_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_OBJECT_OF_CLASS_EX(timezone_object, date_ce_timezone, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_date_instantiate(date_ce_immutable, return_value);
 	if (!php_date_initialize(Z_PHPDATE_P(return_value), time_str, time_str_len, format_str, timezone_object, 0)) {
@@ -2622,7 +2622,7 @@ PHP_METHOD(DateTime, __set_state)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ARRAY(array)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	myht = Z_ARRVAL_P(array);
 
@@ -2644,7 +2644,7 @@ PHP_METHOD(DateTimeImmutable, __set_state)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ARRAY(array)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	myht = Z_ARRVAL_P(array);
 
@@ -2794,7 +2794,7 @@ PHP_FUNCTION(date_parse)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(date)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	parsed_time = timelib_strtotime(ZSTR_VAL(date), ZSTR_LEN(date), &error, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAM_PASSTHRU, parsed_time, error);
@@ -2813,7 +2813,7 @@ PHP_FUNCTION(date_parse_from_format)
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR(format)
 		Z_PARAM_STR(date)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	parsed_time = timelib_parse_from_format(ZSTR_VAL(format), ZSTR_VAL(date), ZSTR_LEN(date), &error, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	php_date_do_return_parsed_time(INTERNAL_FUNCTION_PARAM_PASSTHRU, parsed_time, error);
@@ -3495,7 +3495,7 @@ PHP_FUNCTION(timezone_open)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(tz)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	tzobj = Z_PHPTIMEZONE_P(php_date_instantiate(date_ce_timezone, return_value));
 	if (SUCCESS != timezone_initialize(tzobj, ZSTR_VAL(tz), ZSTR_LEN(tz))) {
@@ -3620,7 +3620,7 @@ PHP_FUNCTION(timezone_name_from_abbr)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(gmtoffset)
 		Z_PARAM_LONG(isdst)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	tzid = timelib_timezone_id_from_abbr(ZSTR_VAL(abbr), gmtoffset, isdst);
 
@@ -4028,7 +4028,7 @@ PHP_METHOD(DateInterval, __set_state)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ARRAY(array)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	myht = Z_ARRVAL_P(array);
 
@@ -4066,7 +4066,7 @@ PHP_FUNCTION(date_interval_create_from_date_string)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STR(time_str)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	time = timelib_strtotime(ZSTR_VAL(time_str), ZSTR_LEN(time_str), &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 
@@ -4425,7 +4425,7 @@ PHP_FUNCTION(timezone_identifiers_list)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(what)
 		Z_PARAM_STRING_EX(option, option_len, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* Extra validation */
 	if (what == PHP_DATE_TIMEZONE_PER_COUNTRY && option_len != 2) {
@@ -4506,7 +4506,7 @@ PHP_FUNCTION(date_default_timezone_set)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(zone, zone_len)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!timelib_timezone_id_is_valid(zone, DATE_TIMEZONEDB)) {
 		php_error_docref(NULL, E_NOTICE, "Timezone ID '%s' is invalid", zone);
@@ -4557,7 +4557,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 		Z_PARAM_DOUBLE(longitude)
 		Z_PARAM_DOUBLE(zenith)
 		Z_PARAM_DOUBLE(gmt_offset)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
@@ -4661,7 +4661,7 @@ PHP_FUNCTION(date_sun_info)
 		Z_PARAM_LONG(time)
 		Z_PARAM_DOUBLE(latitude)
 		Z_PARAM_DOUBLE(longitude)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* Initialize time struct */
 	t = timelib_time_ctor();
@@ -4912,7 +4912,7 @@ PHP_METHOD(DatePeriod, __set_state)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ARRAY(array)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	myht = Z_ARRVAL_P(array);
 

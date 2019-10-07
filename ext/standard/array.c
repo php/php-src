@@ -694,7 +694,7 @@ PHP_FUNCTION(krsort)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sort_type)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	cmp = php_get_key_compare_func(sort_type, 1);
 
@@ -716,7 +716,7 @@ PHP_FUNCTION(ksort)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sort_type)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	cmp = php_get_key_compare_func(sort_type, 0);
 
@@ -863,7 +863,7 @@ PHP_FUNCTION(asort)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sort_type)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	cmp = php_get_data_compare_func(sort_type, 0);
 
@@ -885,7 +885,7 @@ PHP_FUNCTION(arsort)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sort_type)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	cmp = php_get_data_compare_func(sort_type, 1);
 
@@ -907,7 +907,7 @@ PHP_FUNCTION(sort)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sort_type)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	cmp = php_get_data_compare_func(sort_type, 0);
 
@@ -929,7 +929,7 @@ PHP_FUNCTION(rsort)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sort_type)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	cmp = php_get_data_compare_func(sort_type, 1);
 
@@ -3009,7 +3009,7 @@ PHP_FUNCTION(shuffle)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_array_data_shuffle(array);
 

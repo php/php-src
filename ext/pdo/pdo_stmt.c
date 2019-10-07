@@ -424,7 +424,7 @@ static PHP_METHOD(PDOStatement, execute)
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY_EX(input_params, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PDO_STMT_CLEAR_ERR();
 
@@ -1251,7 +1251,7 @@ static PHP_METHOD(PDOStatement, fetch)
 		Z_PARAM_LONG(how)
 		Z_PARAM_LONG(ori)
 		Z_PARAM_LONG(off)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PDO_STMT_CLEAR_ERR();
 
@@ -1284,7 +1284,7 @@ static PHP_METHOD(PDOStatement, fetchObject)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR_EX(class_name, 1, 0)
 		Z_PARAM_ARRAY(ctor_args)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PDO_STMT_CLEAR_ERR();
 
@@ -1343,7 +1343,7 @@ static PHP_METHOD(PDOStatement, fetchColumn)
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(col_n)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PDO_STMT_CLEAR_ERR();
 
@@ -1373,7 +1373,7 @@ static PHP_METHOD(PDOStatement, fetchAll)
 		Z_PARAM_LONG(how)
 		Z_PARAM_ZVAL(arg2)
 		Z_PARAM_ZVAL(ctor_args)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!pdo_stmt_verify_mode(stmt, how, 1)) {
 		RETURN_FALSE;
@@ -1694,7 +1694,7 @@ static PHP_METHOD(PDOStatement, setAttribute)
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(attr)
 		Z_PARAM_ZVAL_EX(value, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!stmt->methods->set_attribute) {
 		goto fail;
@@ -1735,7 +1735,7 @@ static PHP_METHOD(PDOStatement, getAttribute)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(attr)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!stmt->methods->get_attribute) {
 		if (!generic_stmt_attr_get(stmt, return_value, attr)) {
@@ -1789,7 +1789,7 @@ static PHP_METHOD(PDOStatement, getColumnMeta)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(colno)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if(colno < 0) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "42P10", "column number must be non-negative");

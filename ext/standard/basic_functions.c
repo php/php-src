@@ -3247,7 +3247,7 @@ PHP_NAMED_FUNCTION(zif_inet_ntop)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(address, address_len)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 #ifdef HAVE_IPV6
 	if (address_len == 16) {
@@ -3279,7 +3279,7 @@ PHP_NAMED_FUNCTION(php_inet_pton)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(address, address_len)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	memset(buffer, 0, sizeof(buffer));
 
@@ -3389,7 +3389,7 @@ PHP_FUNCTION(getenv)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_BOOL(local_only)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!str) {
 		array_init(return_value);
@@ -3692,7 +3692,7 @@ PHP_FUNCTION(getopt)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY(p_longopts)
 		Z_PARAM_ZVAL(zoptind)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* Init zoptind to 1 */
 	if (zoptind) {
@@ -3873,7 +3873,7 @@ PHP_FUNCTION(sleep)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(num)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (num < 0) {
 		php_error_docref(NULL, E_WARNING, "Number of seconds must be greater than or equal to 0");
@@ -4603,7 +4603,7 @@ PHP_FUNCTION(highlight_file)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(i)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (php_check_open_basedir(filename)) {
 		RETURN_FALSE;
@@ -4644,7 +4644,7 @@ PHP_FUNCTION(php_strip_whitespace)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH(filename, filename_len)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_output_start_default();
 
@@ -4680,7 +4680,7 @@ PHP_FUNCTION(highlight_string)
 		Z_PARAM_ZVAL(expr)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(i)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!try_convert_to_string(expr)) {
 		return;
@@ -4975,7 +4975,7 @@ PHP_FUNCTION(print_r)
 		Z_PARAM_ZVAL(var)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(do_return)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (do_return) {
 		RETURN_STR(zend_print_zval_r_to_str(var, 0));
@@ -5395,7 +5395,7 @@ PHP_FUNCTION(parse_ini_file)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(process_sections)
 		Z_PARAM_LONG(scanner_mode)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (filename_len == 0) {
 		php_error_docref(NULL, E_WARNING, "Filename cannot be empty!");
@@ -5436,7 +5436,7 @@ PHP_FUNCTION(parse_ini_string)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(process_sections)
 		Z_PARAM_LONG(scanner_mode)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (INT_MAX - str_len < ZEND_MMAP_AHEAD) {
 		RETVAL_FALSE;
