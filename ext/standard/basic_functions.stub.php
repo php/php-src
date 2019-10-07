@@ -499,9 +499,8 @@ function ucwords(string $str, string $delimiters = " \t\r\n\f\v"): string {}
 
 /**
  * @param string|array $from
- * @return string|false
  */
-function strtr(string $str, $from, string $to = UNKNOWN) {}
+function strtr(string $str, $from, string $to = UNKNOWN): string {}
 
 function strrev(string $str): string {}
 
