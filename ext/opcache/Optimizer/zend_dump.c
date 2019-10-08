@@ -139,7 +139,7 @@ void zend_dump_var(const zend_op_array *op_array, zend_uchar var_type, int var_n
 		fprintf(stderr, "CV%d($%s)", var_num, op_array->vars[var_num]->val);
 	} else if (var_type == IS_VAR) {
 		fprintf(stderr, "V%d", var_num);
-	} else if (var_type == IS_TMP_VAR) {
+	} else if (var_type == IS_TMP_VAR || !(var_type & (IS_VAR|IS_CV))) {
 		fprintf(stderr, "T%d", var_num);
 	} else {
 		fprintf(stderr, "X%d", var_num);
@@ -688,6 +688,12 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	}
 	if (opline->result_type == IS_CONST) {
 		zend_dump_const(CRT_CONSTANT_EX(op_array, opline, opline->result, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
+#if 0
+	} else if (opline->result_type & IS_SMART_BRANCH_JMPZ) {
+		fprintf(stderr, " jmpz");
+	} else if (opline->result_type & IS_SMART_BRANCH_JMPNZ) {
+		fprintf(stderr, " jmpnz");
+#endif
 	} else if (ssa && ssa->ops && ssa->ops[opline - op_array->opcodes].result_use >= 0) {
 		if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 			if (ssa && ssa->ops) {

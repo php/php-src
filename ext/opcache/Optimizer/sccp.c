@@ -314,6 +314,7 @@ static zend_bool try_replace_op1(
 					zval_ptr_dtor_nogc(&zv);
 					ZVAL_FALSE(&zv);
 					opline->opcode = ZEND_QM_ASSIGN;
+					opline->result_type = IS_TMP_VAR;
 					opline->op1_type = IS_CONST;
 					opline->op1.constant = zend_optimizer_add_literal(ctx->scdf.op_array, &zv);
 					opline->op2_type = IS_UNUSED;
@@ -2292,7 +2293,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 					}
 					ssa_op->result_def = var_num;
 					opline->opcode = ZEND_QM_ASSIGN;
-					opline->result_type = old_type;
+					opline->result_type = old_type & (IS_TMP_VAR|IS_VAR|IS_CV);
 					opline->result.var = old_var;
 					Z_TRY_ADDREF_P(value);
 					zend_optimizer_update_op1_const(ctx->scdf.op_array, opline, value);

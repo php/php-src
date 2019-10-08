@@ -2321,28 +2321,20 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 						goto done;
 					case ZEND_JMPZ:
 					case ZEND_JMPNZ:
-					case ZEND_JMPZNZ:
-					case ZEND_JMPZ_EX:
-					case ZEND_JMPNZ_EX:
-						if (i != ssa->cfg.blocks[b].start &&
-						    ((opline-1)->opcode == ZEND_IS_EQUAL ||
-						     (opline-1)->opcode == ZEND_IS_NOT_EQUAL ||
-						     (opline-1)->opcode == ZEND_IS_SMALLER ||
-						     (opline-1)->opcode == ZEND_IS_SMALLER_OR_EQUAL ||
-						     (opline-1)->opcode == ZEND_CASE)) {
-							/* skip */
-						} else if (i != ssa->cfg.blocks[b].start &&
-						           (opline->opcode == ZEND_JMPZ ||
-						           (opline->opcode == ZEND_JMPNZ)) &&
-							       zend_is_smart_branch(opline-1)) {
-						    /* smart branch */
+						if (opline > op_array->opcodes &&
+						    ((opline-1)->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
+							/* smart branch */
 							if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
 								goto jit_failure;
 							}
-						} else {
-							if (!zend_jit_bool_jmpznz(&dasm_state, opline, b, op_array, ssa, ra)) {
-								goto jit_failure;
-							}
+							goto done;
+						}
+						/* break missing intentionally */
+					case ZEND_JMPZNZ:
+					case ZEND_JMPZ_EX:
+					case ZEND_JMPNZ_EX:
+						if (!zend_jit_bool_jmpznz(&dasm_state, opline, b, op_array, ssa, ra)) {
+							goto jit_failure;
 						}
 						goto done;
 					case ZEND_FETCH_DIM_R:
@@ -2468,14 +2460,13 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 					break;
 				case ZEND_JMPZ:
 				case ZEND_JMPNZ:
-					if (i != ssa->cfg.blocks[b].start) {
-						if (zend_is_smart_branch(opline-1)) {
-						    /* smart branch */
-							if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
-								goto jit_failure;
-							}
-							break;
+					if (opline > op_array->opcodes &&
+					    ((opline-1)->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
+						/* smart branch */
+						if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
+							goto jit_failure;
 						}
+						goto done;
 					}
 					/* break missing intentionally */
 				case ZEND_JMPZ_EX:

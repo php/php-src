@@ -139,6 +139,7 @@ constant_binary_op:
 						MAKE_NOP(opline);
 					} else {
 						opline->opcode = ZEND_QM_ASSIGN;
+						opline->result_type = IS_TMP_VAR;
 						SET_UNUSED(opline->op2);
 						zend_optimizer_update_op1_const(op_array, opline, &result);
 					}
@@ -589,6 +590,7 @@ constant_binary_op:
 					MAKE_NOP(opline);
 				} else {
 					opline->opcode = ZEND_QM_ASSIGN;
+					opline->result_type = IS_TMP_VAR;
 					zend_optimizer_update_op1_const(op_array, opline, &c);
 				}
 			}

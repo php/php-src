@@ -73,15 +73,6 @@ static void strip_leading_nops(zend_op_array *op_array, zend_basic_block *b)
 	zend_op *opcodes = op_array->opcodes;
 
 	do {
-	    /* check if NOP breaks incorrect smart branch */
-		if (b->len == 2
-		 && (opcodes[b->start + 1].opcode == ZEND_JMPZ
-		  || opcodes[b->start + 1].opcode == ZEND_JMPNZ)
-		 && (opcodes[b->start + 1].op1_type & (IS_CV|IS_CONST))
-		 && b->start > 0
-		 && zend_is_smart_branch(opcodes + b->start - 1)) {
-			break;
-		}
 		b->start++;
 		b->len--;
 	} while (b->len > 0 && opcodes[b->start].opcode == ZEND_NOP);
@@ -110,14 +101,6 @@ static void strip_nops(zend_op_array *op_array, zend_basic_block *b)
 			if (i != j) {
 				op_array->opcodes[j] = op_array->opcodes[i];
 			}
-			j++;
-		}
-		if (i + 1 < b->start + b->len
-		 && (op_array->opcodes[i+1].opcode == ZEND_JMPZ
-		  || op_array->opcodes[i+1].opcode == ZEND_JMPNZ)
-		 && op_array->opcodes[i+1].op1_type & (IS_CV|IS_CONST)
-		 && zend_is_smart_branch(op_array->opcodes + j - 1)) {
-			/* don't remove NOP, that splits incorrect smart branch */
 			j++;
 		}
 		i++;
@@ -462,6 +445,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					opline->opcode =
 						((opline->opcode != ZEND_IS_NOT_EQUAL) == ((Z_TYPE(ZEND_OP1_LITERAL(opline))) == IS_TRUE)) ?
 						ZEND_BOOL : ZEND_BOOL_NOT;
+					opline->result_type = IS_TMP_VAR;
 					COPY_NODE(opline->op1, opline->op2);
 					SET_UNUSED(opline->op2);
 					++(*opt_count);
@@ -475,6 +459,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					opline->opcode =
 						((opline->opcode != ZEND_IS_NOT_EQUAL) == ((Z_TYPE(ZEND_OP2_LITERAL(opline))) == IS_TRUE)) ?
 						ZEND_BOOL : ZEND_BOOL_NOT;
+					opline->result_type = IS_TMP_VAR;
 					SET_UNUSED(opline->op2);
 					++(*opt_count);
 					goto optimize_bool;
@@ -610,7 +595,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			optimize_jmpznz:
 				if (opline->op1_type == IS_TMP_VAR &&
 				    (!zend_bitset_in(used_ext, VAR_NUM(opline->op1.var)) ||
-				     (opline->result_type == opline->op1_type &&
+				     ((opline->result_type & IS_TMP_VAR) != 0 &&
 				      opline->result.var == opline->op1.var))) {
 					src = VAR_SOURCE(opline->op1);
 					if (src) {
@@ -797,6 +782,7 @@ optimize_constant_binary_op:
 						literal_dtor(&ZEND_OP1_LITERAL(opline));
 						literal_dtor(&ZEND_OP2_LITERAL(opline));
 						opline->opcode = ZEND_QM_ASSIGN;
+						opline->result_type = IS_TMP_VAR;
 						SET_UNUSED(opline->op2);
 						zend_optimizer_update_op1_const(op_array, opline, &result);
 						++(*opt_count);
@@ -1687,7 +1673,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 			if (opline->result_type == IS_VAR) {
 				var_num = VAR_NUM(opline->result.var);
 				zend_bitset_incl(defined_here, var_num);
-			} else if (opline->result_type == IS_TMP_VAR) {
+			} else if (opline->result_type & IS_TMP_VAR) {
 				var_num = VAR_NUM(opline->result.var);
 				switch (opline->opcode) {
 					case ZEND_ADD_ARRAY_ELEMENT:
@@ -1769,7 +1755,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 				} else {
 					zend_bitset_excl(usage, VAR_NUM(opline->result.var));
 				}
-			} else if (opline->result_type == IS_TMP_VAR) {
+			} else if (opline->result_type & IS_TMP_VAR) {
 				if (!zend_bitset_in(usage, VAR_NUM(opline->result.var))) {
 					switch (opline->opcode) {
 						case ZEND_POST_INC:
