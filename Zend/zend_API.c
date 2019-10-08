@@ -438,6 +438,9 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest) 
 				return 0;
 			}
 		}
+		if (UNEXPECTED(EG(exception))) {
+			return 0;
+		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
 		*dest = 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
@@ -479,6 +482,9 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_long_cap_weak(zval *arg, zend_long *de
 				return 0;
 			}
 		}
+		if (UNEXPECTED(EG(exception))) {
+			return 0;
+		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
 		*dest = 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
@@ -513,6 +519,9 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest) /
 			} else {
 				return 0;
 			}
+		}
+		if (UNEXPECTED(EG(exception))) {
+			return 0;
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
 		*dest = 0.0;
@@ -3163,12 +3172,9 @@ get_function_via_handler:
 	if (retval) {
 		if (fcc->calling_scope && !call_via_handler) {
 			if (fcc->function_handler->common.fn_flags & ZEND_ACC_ABSTRACT) {
+				retval = 0;
 				if (error) {
 					zend_spprintf(error, 0, "cannot call abstract method %s::%s()", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
-					retval = 0;
-				} else {
-					zend_throw_error(NULL, "Cannot call abstract method %s::%s()", ZSTR_VAL(fcc->calling_scope->name), ZSTR_VAL(fcc->function_handler->common.function_name));
-					retval = 0;
 				}
 			} else if (!fcc->object && !(fcc->function_handler->common.fn_flags & ZEND_ACC_STATIC)) {
 				int severity;

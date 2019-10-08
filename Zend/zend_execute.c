@@ -792,6 +792,12 @@ static ZEND_COLD void zend_verify_arg_error(
 	const char *fname, *fsep, *fclass;
 	const char *need_msg, *need_kind, *need_or_null, *given_msg, *given_kind;
 
+	if (EG(exception)) {
+		/* The type verification itself might have already thrown an exception
+		 * through a promoted warning. */
+		return;
+	}
+
 	if (value) {
 		zend_verify_type_error_common(
 			zf, arg_info, ce, value,
