@@ -2,16 +2,7 @@
 Test is_writable() and its alias is_writeable() function: basic functionality
 --SKIPIF--
 <?php
-// Skip if being run by root (files are always readable, writeable and executable)
-$filename = __DIR__."/is_writable_basic_root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-	unlink ($filename);
-	die('skip cannot be run as root');
-}
-
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php

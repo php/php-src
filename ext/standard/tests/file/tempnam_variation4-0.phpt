@@ -5,15 +5,7 @@ Test tempnam() function: usage variations - permissions(0000 to 0350) of dir
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip Not valid for Windows');
 }
-// Skip if being run by root
-$filename = __DIR__."/tempnam_variation4-0_root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-        unlink ($filename);
-        die('skip cannot be run as root');
-}
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
