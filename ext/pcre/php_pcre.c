@@ -556,7 +556,7 @@ static zend_always_inline size_t calculate_unit_length(pcre_cache_entry *pce, ch
 
 /* {{{ pcre_get_compiled_regex_cache
  */
-PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
+PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, int locale_aware)
 {
 	pcre2_code			*re = NULL;
 	uint32_t			 coptions = 0;
@@ -577,7 +577,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	zend_string 		*key;
 	pcre_cache_entry *ret;
 
-	if (BG(locale_string) &&
+	if (locale_aware && BG(locale_string) &&
 		(ZSTR_LEN(BG(locale_string)) != 1 && ZSTR_VAL(BG(locale_string))[0] != 'C')) {
 		key = zend_string_alloc(ZSTR_LEN(regex) + ZSTR_LEN(BG(locale_string)) + 1, 0);
 		memcpy(ZSTR_VAL(key), ZSTR_VAL(BG(locale_string)), ZSTR_LEN(BG(locale_string)) + 1);
@@ -855,6 +855,14 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	}
 
 	return ret;
+}
+/* }}} */
+
+/* {{{ pcre_get_compiled_regex_cache
+ */
+PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
+{
+	return pcre_get_compiled_regex_cache_ex(regex, 1);
 }
 /* }}} */
 
