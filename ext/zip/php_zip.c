@@ -1566,7 +1566,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 	struct zip *intern;
 	zval *self = ZEND_THIS;
 	char *path = ".";
-	char *remove_path = NULL;
+	char *remove_path = NULL, *save_remove_path;
 	char *add_path = NULL;
 	size_t  add_path_len, remove_path_len = 0, path_len = 1;
 	zend_long remove_all_path = 0;
@@ -1598,10 +1598,11 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 		RETURN_FALSE;
 	}
 
+	save_remove_path = remove_path;
 	if (remove_path && remove_path_len > 1) {
 		size_t real_len = strlen(remove_path);
 		if ((real_len > 1) && ((remove_path[real_len - 1] == '/') || (remove_path[real_len - 1] == '\\'))) {
-			remove_path[real_len - 1] = '\0';
+			remove_path = estrndup(remove_path, real_len - 1);
 			remove_path_len -= 1;
 		}
 	}
@@ -1661,6 +1662,9 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 				}
 			}
 		}
+	}
+	if (remove_path != save_remove_path) {
+		efree(remove_path);
 	}
 }
 /* }}} */
