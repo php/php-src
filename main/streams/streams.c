@@ -148,10 +148,16 @@ static zend_llist *php_get_wrapper_errors_list(php_stream_wrapper *wrapper)
 /* {{{ wrapper error reporting */
 void php_stream_display_wrapper_errors(php_stream_wrapper *wrapper, const char *path, const char *caption)
 {
-	char *tmp = estrdup(path);
+	char *tmp;
 	char *msg;
 	int free_msg = 0;
 
+	if (EG(exception)) {
+		/* Don't emit additional warnings if an exception has already been thrown. */
+		return;
+	}
+
+	tmp = estrdup(path);
 	if (wrapper) {
 		zend_llist *err_list = php_get_wrapper_errors_list(wrapper);
 		if (err_list) {

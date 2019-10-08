@@ -374,6 +374,11 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		}
 		efree(pathdup);
 
+		if (EG(exception)) {
+			php_stream_close(stream);
+			return NULL;
+		}
+
 		return stream;
 	} else {
 		/* invalid php://thingy */
