@@ -141,3 +141,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_SQLite3Result_reset arginfo_class_SQLite3_close
 
 #define arginfo_class_SQLite3Result_finalize arginfo_class_SQLite3_close
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3_setAuthorizer, 0, 0, 1)
+	ZEND_ARG_INFO(0, callback)
+ZEND_END_ARG_INFO()
