@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2019, PHP 7.2.24
+?? ??? 2019, PHP 7.2.25
+
+
+24 Oct 2019, PHP 7.2.24
 
 - Core:
   . Fixed bug #78535 (auto_detect_line_endings value not parsed as bool).
