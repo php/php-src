@@ -4253,7 +4253,9 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 	OPLINE = opline; \
 	ZEND_VM_CONTINUE()
 #define ZEND_VM_SMART_BRANCH(_result, _check) do { \
-		if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
+		if ((_check) && UNEXPECTED(EG(exception))) { \
+			OPLINE = EX(opline); \
+		} else if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
 			if (_result) { \
 				ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
 			} else { \
@@ -4268,9 +4270,6 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 		} else { \
 			ZVAL_BOOL(EX_VAR(opline->result.var), _result); \
 			ZEND_VM_SET_NEXT_OPCODE(opline + 1); \
-		} \
-		if ((_check) && UNEXPECTED(EG(exception))) { \
-			OPLINE = EX(opline); \
 		} \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
