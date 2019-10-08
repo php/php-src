@@ -10,7 +10,22 @@ class Foo {
 	public bool $bool = false;
     public iterable $iter = [];
 }
-echo "ok\n";
+var_dump(new Foo);
 ?>
 --EXPECT--
-ok
+object(Foo)#1 (6) {
+  ["int"]=>
+  int(1)
+  ["flt"]=>
+  float(2.2)
+  ["flt2"]=>
+  float(2)
+  ["arr"]=>
+  array(0) {
+  }
+  ["bool"]=>
+  bool(false)
+  ["iter"]=>
+  array(0) {
+  }
+}

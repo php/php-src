@@ -5352,6 +5352,7 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 }
 /* }}} */
 
+/* May convert value from int to float. */
 static zend_bool zend_is_valid_default_value(zend_type type, zval *value)
 {
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(type));
@@ -5367,6 +5368,7 @@ static zend_bool zend_is_valid_default_value(zend_type type, zval *value)
 	}
 	if ((ZEND_TYPE_MASK(type) & MAY_BE_DOUBLE) && Z_TYPE_P(value) == IS_LONG) {
 		/* Integers are allowed as initializers for floating-point values. */
+		convert_to_double(value);
 		return 1;
 	}
 	if ((ZEND_TYPE_MASK(type) & MAY_BE_ITERABLE) && Z_TYPE_P(value) == IS_ARRAY) {
