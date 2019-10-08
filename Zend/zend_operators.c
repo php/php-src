@@ -2961,6 +2961,9 @@ process_double:
 		}
 		if (allow_errors == -1) {
 			zend_error(E_NOTICE, "A non well formed numeric value encountered");
+			if (EG(exception)) {
+				return 0;
+			}
 		}
 	}
 

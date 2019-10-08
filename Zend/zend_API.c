@@ -339,6 +339,9 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_long_weak(zval *arg, zend_long *dest) 
 				return 0;
 			}
 		}
+		if (UNEXPECTED(EG(exception))) {
+			return 0;
+		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
 		*dest = 0;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_TRUE)) {
@@ -373,6 +376,9 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_double_weak(zval *arg, double *dest) /
 			} else {
 				return 0;
 			}
+		}
+		if (UNEXPECTED(EG(exception))) {
+			return 0;
 		}
 	} else if (EXPECTED(Z_TYPE_P(arg) < IS_TRUE)) {
 		*dest = 0.0;
