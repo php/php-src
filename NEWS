@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.12
 
+- Iconv:
+  . Fixed bug #78642 (Wrong libiconv version displayed). (gedas at martynas,
+    cmb).
+
 24 Oct 2019, PHP 7.3.11
 
 - Core:
