@@ -106,6 +106,7 @@ PHP_MINIT_FUNCTION(array) /* {{{ */
 	REGISTER_LONG_CONSTANT("SORT_STRING", PHP_SORT_STRING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_LOCALE_STRING", PHP_SORT_LOCALE_STRING, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_NATURAL", PHP_SORT_NATURAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SORT_IDENTICAL", PHP_SORT_IDENTICAL, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SORT_FLAG_CASE", PHP_SORT_FLAG_CASE, CONST_CS | CONST_PERSISTENT);
 
 	REGISTER_LONG_CONSTANT("CASE_LOWER", CASE_LOWER, CONST_CS | CONST_PERSISTENT);
@@ -388,6 +389,33 @@ static int php_array_reverse_data_compare(const void *a, const void *b) /* {{{ *
 }
 /* }}} */
 
+static int php_array_data_identical(const void *a, const void *b)
+{
+	Bucket *f;
+	Bucket *s;
+	zval *first;
+	zval *second;
+
+	f = (Bucket *) a;
+	s = (Bucket *) b;
+
+	first = &f->val;
+	second = &s->val;
+
+	if (UNEXPECTED(Z_TYPE_P(first) == IS_INDIRECT)) {
+		first = Z_INDIRECT_P(first);
+	}
+	if (UNEXPECTED(Z_TYPE_P(second) == IS_INDIRECT)) {
+		second = Z_INDIRECT_P(second);
+	}
+	return zend_is_identical(first, second) == 1 ? 0 : 1;
+}
+
+static int php_array_reverse_data_identical(const void *a, const void *b)
+{
+	return php_array_data_identical(a, b) * -1;
+}
+
 static int php_array_data_compare_numeric(const void *a, const void *b) /* {{{ */
 {
 	Bucket *f;
@@ -660,6 +688,14 @@ static compare_func_t php_get_data_compare_func(zend_long sort_type, int reverse
 				return php_array_reverse_data_compare_string_locale;
 			} else {
 				return php_array_data_compare_string_locale;
+			}
+			break;
+
+		case PHP_SORT_IDENTICAL:
+			if (reverse) {
+				return php_array_reverse_data_identical;
+			} else {
+				return php_array_data_identical;
 			}
 			break;
 
