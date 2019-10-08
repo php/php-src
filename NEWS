@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed bug #78620 (Out of memory error). (cmb, Nikita)
   . Fixed bug #78632 (method_exists() in php74 works differently from php73 in
     checking priv. methods). (Nikita)
+  . Fixed bug #78644 (SEGFAULT in ZEND_UNSET_OBJ_SPEC_VAR_CONST_HANDLER).
+    (Nikita)
 
 - Iconv:
   . Fixed bug #78642 (Wrong libiconv version displayed). (gedas at martynas,

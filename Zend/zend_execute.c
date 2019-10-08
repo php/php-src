@@ -2765,6 +2765,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 
 			/* this should modify object only if it's empty */
 			if (type == BP_VAR_UNSET) {
+				ZVAL_NULL(result);
 				return;
 			}
 
