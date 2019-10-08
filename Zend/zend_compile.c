@@ -1970,7 +1970,7 @@ static inline uint32_t zend_emit_jump(uint32_t opnum_target) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_is_smart_branch(zend_op *opline) /* {{{ */
+ZEND_API int zend_is_smart_branch(const zend_op *opline) /* {{{ */
 {
 	switch (opline->opcode) {
 		case ZEND_IS_IDENTICAL:
