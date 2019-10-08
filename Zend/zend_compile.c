@@ -5392,10 +5392,6 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 			op_array->required_num_args = i + 1;
 		}
 
-		opline = zend_emit_op(NULL, opcode, NULL, &default_node);
-		SET_NODE(opline->result, &var_node);
-		opline->op1.num = i + 1;
-
 		arg_info = &arg_infos[i];
 		arg_info->name = zend_string_copy(name);
 		arg_info->pass_by_reference = is_ref;
@@ -5443,6 +5439,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 									"with a float type can only be float, integer, or NULL");
 							}
+							convert_to_double(&default_node.u.constant);
 							break;
 
 						case IS_ITERABLE:
@@ -5467,7 +5464,13 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 					}
 				}
 			}
+		}
 
+		opline = zend_emit_op(NULL, opcode, NULL, &default_node);
+		SET_NODE(opline->result, &var_node);
+		opline->op1.num = i + 1;
+
+		if (type_ast) {
 			/* Allocate cache slot to speed-up run-time class resolution */
 			if (opline->opcode == ZEND_RECV_INIT) {
 				if (ZEND_TYPE_IS_CLASS(arg_info->type)) {

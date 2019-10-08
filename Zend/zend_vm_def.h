@@ -5248,17 +5248,19 @@ ZEND_VM_HOT_HANDLER(64, ZEND_RECV_INIT, NUM, CONST, CACHE_SLOT)
 					ZVAL_COPY_VALUE(cache_val, param);
 				}
 			}
+			ZEND_VM_C_GOTO(recv_init_check_type);
 		} else {
 			ZVAL_COPY(param, default_value);
 		}
-	}
+	} else {
+ZEND_VM_C_LABEL(recv_init_check_type):
+		if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
+			zval *default_value = RT_CONSTANT(opline, opline->op2);
 
-	if (UNEXPECTED((EX(func)->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0)) {
-		zval *default_value = RT_CONSTANT(opline, opline->op2);
-
-		SAVE_OPLINE();
-		if (UNEXPECTED(!zend_verify_recv_arg_type(EX(func), arg_num, param, default_value, CACHE_ADDR(opline->extended_value)))) {
-			HANDLE_EXCEPTION();
+			SAVE_OPLINE();
+			if (UNEXPECTED(!zend_verify_recv_arg_type(EX(func), arg_num, param, default_value, CACHE_ADDR(opline->extended_value)))) {
+				HANDLE_EXCEPTION();
+			}
 		}
 	}
 
