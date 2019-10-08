@@ -6121,6 +6121,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags) /
 						zend_error_noreturn(E_COMPILE_ERROR,
 								"Default value for property of type float can only be float or int");
 					}
+					convert_to_double(&value_zv);
 				} else if (!ZEND_SAME_FAKE_TYPE(ZEND_TYPE_CODE(type), Z_TYPE(value_zv))) {
 					zend_error_noreturn(E_COMPILE_ERROR,
 							"Default value for property of type %s can only be %s",
