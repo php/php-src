@@ -286,7 +286,7 @@ PHP_MINIT_FUNCTION(miconv)
 	{
 		static char buf[16];
 		snprintf(buf, sizeof(buf), "%d.%d",
-		    ((_libiconv_version >> 8) & 0x0f), (_libiconv_version & 0x0f));
+			_libiconv_version >> 8, _libiconv_version & 0xff);
 		version = buf;
 	}
 #elif HAVE_GLIBC_ICONV
