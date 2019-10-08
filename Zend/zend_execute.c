@@ -4246,21 +4246,13 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 	OPLINE++
 
 
-#ifndef VM_SMART_OPCODES
-# define VM_SMART_OPCODES 1
-#endif
-
-#if VM_SMART_OPCODES
-# define ZEND_VM_REPEATABLE_OPCODE \
+#define ZEND_VM_REPEATABLE_OPCODE \
 	do {
-# define ZEND_VM_REPEAT_OPCODE(_opcode) \
+#define ZEND_VM_REPEAT_OPCODE(_opcode) \
 	} while (UNEXPECTED((++opline)->opcode == _opcode)); \
 	OPLINE = opline; \
 	ZEND_VM_CONTINUE()
-# define ZEND_VM_SMART_BRANCH(_result, _check) do { \
-		if ((_check) && UNEXPECTED(EG(exception))) { \
-			break; \
-		} \
+#define ZEND_VM_SMART_BRANCH(_result, _check) do { \
 		if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
 			if (_result) { \
 				ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
@@ -4274,40 +4266,49 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 				ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
 			} \
 		} else { \
-			break; \
+			ZVAL_BOOL(EX_VAR(opline->result.var), _result); \
+			ZEND_VM_SET_NEXT_OPCODE(opline + 1); \
+		} \
+		if ((_check) && UNEXPECTED(EG(exception))) { \
+			OPLINE = EX(opline); \
 		} \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
-# define ZEND_VM_SMART_BRANCH_JMPZ(_result, _check) do { \
+#define ZEND_VM_SMART_BRANCH_JMPZ(_result, _check) do { \
 		if ((_check) && UNEXPECTED(EG(exception))) { \
-			break; \
-		} \
-		if (_result) { \
+			OPLINE = EX(opline); \
+		} else if (_result) { \
 			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
 		} else { \
 			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
 		} \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
-# define ZEND_VM_SMART_BRANCH_JMPNZ(_result, _check) do { \
+#define ZEND_VM_SMART_BRANCH_JMPNZ(_result, _check) do { \
 		if ((_check) && UNEXPECTED(EG(exception))) { \
-			break; \
-		} \
-		if (!(_result)) { \
+			OPLINE = EX(opline); \
+		} else if (!(_result)) { \
 			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
 		} else { \
 			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
 		} \
+		ZEND_VM_CONTINUE(); \
+	} while (0)
+#define ZEND_VM_SMART_BRANCH_NONE(_result, _check) do { \
+		ZVAL_BOOL(EX_VAR(opline->result.var), _result); \
+		ZEND_VM_NEXT_OPCODE_EX(_check, 1); \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
 #define ZEND_VM_SMART_BRANCH_TRUE() do { \
 		if (EXPECTED((opline+1)->opcode == ZEND_JMPNZ)) { \
 			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
-			ZEND_VM_CONTINUE(); \
 		} else if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
 			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
-			ZEND_VM_CONTINUE(); \
+		} else { \
+			ZVAL_TRUE(EX_VAR(opline->result.var)); \
+			ZEND_VM_SET_NEXT_OPCODE(opline + 1); \
 		} \
+		ZEND_VM_CONTINUE(); \
 	} while (0)
 #define ZEND_VM_SMART_BRANCH_TRUE_JMPZ() do { \
 		ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
@@ -4317,14 +4318,20 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 		ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
+#define ZEND_VM_SMART_BRANCH_TRUE_NONE() do { \
+		ZVAL_TRUE(EX_VAR(opline->result.var)); \
+		ZEND_VM_NEXT_OPCODE(); \
+	} while (0)
 #define ZEND_VM_SMART_BRANCH_FALSE() do { \
 		if (EXPECTED((opline+1)->opcode == ZEND_JMPNZ)) { \
 			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
-			ZEND_VM_CONTINUE(); \
 		} else if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
 			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
-			ZEND_VM_CONTINUE(); \
+		} else { \
+			ZVAL_FALSE(EX_VAR(opline->result.var)); \
+			ZEND_VM_SET_NEXT_OPCODE(opline + 1); \
 		} \
+		ZEND_VM_CONTINUE(); \
 	} while (0)
 #define ZEND_VM_SMART_BRANCH_FALSE_JMPZ() do { \
 		ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
@@ -4334,15 +4341,10 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 		ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
-#else
-# define ZEND_VM_REPEATABLE_OPCODE
-# define ZEND_VM_REPEAT_OPCODE(_opcode)
-# define ZEND_VM_SMART_BRANCH(_result, _check)
-# define ZEND_VM_SMART_BRANCH_JMPZ(_result, _check)
-# define ZEND_VM_SMART_BRANCH_JMPNZ(_result, _check)
-# define ZEND_VM_SMART_BRANCH_TRUE()
-# define ZEND_VM_SMART_BRANCH_FALSE()
-#endif
+#define ZEND_VM_SMART_BRANCH_FALSE_NONE() do { \
+		ZVAL_FALSE(EX_VAR(opline->result.var)); \
+		ZEND_VM_NEXT_OPCODE(); \
+	} while (0)
 
 #ifdef __GNUC__
 # define ZEND_VM_GUARD(name) __asm__("#" #name)

@@ -811,19 +811,19 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 			($extra_spec['SMART_BRANCH'] == 1 ?
 					"ZEND_VM_SMART_BRANCH_JMPZ(\\1, \\2)"
 				:	($extra_spec['SMART_BRANCH'] == 2 ?
-						"ZEND_VM_SMART_BRANCH_JMPNZ(\\1, \\2)" : ""))
+						"ZEND_VM_SMART_BRANCH_JMPNZ(\\1, \\2)" : "ZEND_VM_SMART_BRANCH_NONE(\\1, \\2)"))
 			:	"ZEND_VM_SMART_BRANCH(\\1, \\2)",
 		"/ZEND_VM_SMART_BRANCH_TRUE\(\s*\)/" => isset($extra_spec['SMART_BRANCH']) ?
 			($extra_spec['SMART_BRANCH'] == 1 ?
 					"ZEND_VM_SMART_BRANCH_TRUE_JMPZ()"
 				:	($extra_spec['SMART_BRANCH'] == 2 ?
-						"ZEND_VM_SMART_BRANCH_TRUE_JMPNZ()" : ""))
+						"ZEND_VM_SMART_BRANCH_TRUE_JMPNZ()" : "ZEND_VM_SMART_BRANCH_TRUE_NONE()"))
 			:	"ZEND_VM_SMART_BRANCH_TRUE()",
 		"/ZEND_VM_SMART_BRANCH_FALSE\(\s*\)/" => isset($extra_spec['SMART_BRANCH']) ?
 			($extra_spec['SMART_BRANCH'] == 1 ?
 					"ZEND_VM_SMART_BRANCH_FALSE_JMPZ()"
 				:	($extra_spec['SMART_BRANCH'] == 2 ?
-						"ZEND_VM_SMART_BRANCH_FALSE_JMPNZ()" : ""))
+						"ZEND_VM_SMART_BRANCH_FALSE_JMPNZ()" : "ZEND_VM_SMART_BRANCH_FALSE_NONE()"))
 			:	"ZEND_VM_SMART_BRANCH_FALSE()",
 		"/opline->extended_value\s*&\s*ZEND_ISEMPTY/" => isset($extra_spec['ISSET']) ?
 			($extra_spec['ISSET'] == 0 ? "0" : "1")
