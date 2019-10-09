@@ -21,6 +21,7 @@
 #include <ext/standard/info.h>
 #include <ext/standard/php_var.h>
 #include <main/php_variables.h>
+#include <zend_exceptions.c>
 
 #ifdef __SANITIZE_ADDRESS__
 # include "sanitizer/lsan_interface.h"
@@ -34,9 +35,22 @@ const char HARDCODED_INI[] =
 	"implicit_flush=1\n"
 	"output_buffering=0\n"
 	"error_reporting=0\n"
+	/* Let the timeout be enforced by libfuzzer, not PHP. */
+	"max_execution_time=0\n"
 	/* Reduce oniguruma limits to speed up fuzzing */
 	"mbstring.regex_stack_limit=10000\n"
-	"mbstring.regex_retry_limit=10000";
+	"mbstring.regex_retry_limit=10000\n"
+	/* For the "execute" fuzzer disable some functions that are likely to have
+	 * undesirable consequences (shell execution, file system writes). */
+	"allow_url_include=0\n"
+	"allow_url_fopen=0\n"
+	"open_basedir=/tmp\n"
+	"disable_functions=dl,mail,mb_send_mail"
+	",shell_exec,exec,system,proc_open,popen,passthru,pcntl_exec"
+	",chgrp,chmod,chown,copy,file_put_contents,lchgrp,lchown,link,mkdir"
+	",move_uploaded_file,rename,rmdir,symlink,tempname,touch,unlink,fopen"
+	",fsockopen,stream_socket_pair"
+;
 
 static int startup(sapi_module_struct *sapi_module)
 {
@@ -174,7 +188,7 @@ int fuzzer_shutdown_php()
 	return SUCCESS;
 }
 
-int fuzzer_do_request(zend_file_handle *file_handle, char *filename)
+int fuzzer_do_request(zend_file_handle *file_handle, char *filename, zend_bool execute)
 {
 	int retval = FAILURE; /* failure by default */
 
@@ -186,41 +200,33 @@ int fuzzer_do_request(zend_file_handle *file_handle, char *filename)
 		return FAILURE;
 	}
 
-	SG(headers_sent) = 1;
-	SG(request_info).no_headers = 1;
+	// Commented out to avoid leaking the header callback.
+	//SG(headers_sent) = 1;
+	//SG(request_info).no_headers = 1;
 	php_register_variable("PHP_SELF", filename, NULL);
 
 	zend_first_try {
 		zend_op_array *op_array = zend_compile_file(file_handle, ZEND_REQUIRE);
+		CG(compiled_filename) = NULL; /* Why??? */
 		if (op_array) {
+			if (execute) {
+				zend_execute(op_array, NULL);
+			}
 			destroy_op_array(op_array);
 			efree(op_array);
 		}
-		if (EG(exception)) {
-			zend_object_release(EG(exception));
-			EG(exception) = NULL;
-		}
-		/*retval = php_execute_script(file_handle);*/
+		zend_clear_exception();
 	} zend_end_try();
 
+	/* Make sure GC is always enabled during shutdown,
+	 * even if it was disabled during exection of the script. */
+	gc_enable(1);
 	php_request_shutdown((void *) 0);
 
 	return (retval == SUCCESS) ? SUCCESS : FAILURE;
 }
 
-
-int fuzzer_do_request_f(char *filename)
-{
-	zend_file_handle file_handle;
-	file_handle.type = ZEND_HANDLE_FILENAME;
-	file_handle.filename = filename;
-	file_handle.handle.fp = NULL;
-	file_handle.opened_path = NULL;
-
-	return fuzzer_do_request(&file_handle, filename);
-}
-
-int fuzzer_do_request_from_buffer(char *filename, char *data, size_t data_len)
+int fuzzer_do_request_from_buffer(char *filename, char *data, size_t data_len, zend_bool execute)
 {
 	zend_file_handle file_handle;
 	file_handle.filename = filename;
@@ -235,7 +241,7 @@ int fuzzer_do_request_from_buffer(char *filename, char *data, size_t data_len)
 	file_handle.len = data_len;
 	file_handle.type = ZEND_HANDLE_STREAM;
 
-	return fuzzer_do_request(&file_handle, filename);
+	return fuzzer_do_request(&file_handle, filename, execute);
 }
 
 // Call named PHP function with N zval arguments
