@@ -10,6 +10,7 @@ PHP                                                                        NEWS
     checking priv. methods). (Nikita)
   . Fixed bug #78644 (SEGFAULT in ZEND_UNSET_OBJ_SPEC_VAR_CONST_HANDLER).
     (Nikita)
+  . Fixed bug #78658 (Memory corruption using Closure::bindTo). (Nikita)
 
 - COM:
   . Fixed bug #78650 (new COM Crash). (cmb)
