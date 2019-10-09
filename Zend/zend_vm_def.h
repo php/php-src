@@ -7578,24 +7578,11 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 	/* Set the new yielded key */
 	if (OP2_TYPE != IS_UNUSED) {
 		zval *key = GET_OP2_ZVAL_PTR(BP_VAR_R);
-
-		/* Consts, temporary variables and references need copying */
-		if (OP2_TYPE == IS_CONST) {
-			ZVAL_COPY_VALUE(&generator->key, key);
-			if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->key))) {
-				Z_ADDREF(generator->key);
-			}
-		} else if (OP2_TYPE == IS_TMP_VAR) {
-			ZVAL_COPY_VALUE(&generator->key, key);
-		} else if ((OP2_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(key)) {
-			ZVAL_COPY(&generator->key, Z_REFVAL_P(key));
-			FREE_OP2_IF_VAR();
-		} else {
-			ZVAL_COPY_VALUE(&generator->key, key);
-			if (OP2_TYPE == IS_CV) {
-				if (Z_OPT_REFCOUNTED_P(key)) Z_ADDREF_P(key);
-			}
+		if ((OP2_TYPE & (IS_CV|IS_VAR)) && UNEXPECTED(Z_TYPE_P(key)) == IS_REFERENCE) {
+			key = Z_REFVAL_P(key);
 		}
+		ZVAL_COPY(&generator->key, key);
+		FREE_OP2();
 
 		if (Z_TYPE(generator->key) == IS_LONG
 		    && Z_LVAL(generator->key) > generator->largest_used_integer_key
