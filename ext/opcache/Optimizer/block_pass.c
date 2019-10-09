@@ -883,6 +883,18 @@ optimize_const_unary_op:
 					/* strip T = QM_ASSIGN(T) */
 					MAKE_NOP(opline);
 					++(*opt_count);
+				} else if (opline->op1_type == IS_TMP_VAR &&
+				           opline->result_type == IS_TMP_VAR &&
+				           !zend_bitset_in(used_ext, VAR_NUM(opline->op1.var))) {
+					/* T1 = ..., T2 = QM_ASSIGN(T1) to T2 = ..., NOP */
+					src = VAR_SOURCE(opline->op1);
+					if (src) {
+						src->result.var = opline->result.var;
+						VAR_SOURCE(opline->op1) = NULL;
+						VAR_SOURCE(opline->result) = src;
+						MAKE_NOP(opline);
+						++(*opt_count);
+					}
 				}
 				break;
 		}
