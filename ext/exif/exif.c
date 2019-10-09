@@ -105,6 +105,7 @@ ZEND_BEGIN_MODULE_GLOBALS(exif)
 	char * encode_jis;
 	char * decode_jis_be;
 	char * decode_jis_le;
+	HashTable *tag_table_cache;
 ZEND_END_MODULE_GLOBALS(exif)
 
 ZEND_DECLARE_MODULE_GLOBALS(exif)
@@ -170,6 +171,7 @@ static PHP_GINIT_FUNCTION(exif)
 	exif_globals->encode_jis        = NULL;
 	exif_globals->decode_jis_be     = NULL;
 	exif_globals->decode_jis_le     = NULL;
+	exif_globals->tag_table_cache   = NULL;
 }
 /* }}} */
 
@@ -192,6 +194,10 @@ PHP_MINIT_FUNCTION(exif)
 PHP_MSHUTDOWN_FUNCTION(exif)
 {
 	UNREGISTER_INI_ENTRIES();
+	if (EXIF_G(tag_table_cache)) {
+		zend_hash_destroy(EXIF_G(tag_table_cache));
+		free(EXIF_G(tag_table_cache));
+	}
 	return SUCCESS;
 }
 /* }}} */
@@ -694,7 +700,6 @@ static tag_info_array tag_table_IFD = {
   { 0x8773, "ICC_Profile"},
   { 0x8822, "ExposureProgram"},
   { 0x8824, "SpectralSensity"},
-  { 0x8828, "OECF"},
   { 0x8825, "GPS_IFD_Pointer"},
   { 0x8827, "ISOSpeedRatings"},
   { 0x8828, "OECF"},
@@ -1323,25 +1328,61 @@ static const maker_note_type maker_note_array[] = {
 };
 /* }}} */
 
+static HashTable *exif_make_tag_ht(tag_info_type *tag_table)
+{
+	HashTable *ht = malloc(sizeof(HashTable));
+	zend_hash_init(ht, 0, NULL, NULL, 1);
+	while (tag_table->Tag != TAG_END_OF_LIST) {
+		if (!zend_hash_index_add_ptr(ht, tag_table->Tag, tag_table->Desc)) {
+			zend_error(E_CORE_ERROR, "Duplicate tag %x", tag_table->Tag);
+		}
+		tag_table++;
+	}
+	return ht;
+}
+
+static void exif_tag_ht_dtor(zval *zv)
+{
+	HashTable *ht = Z_PTR_P(zv);
+	zend_hash_destroy(ht);
+	free(ht);
+}
+
+static HashTable *exif_get_tag_ht(tag_info_type *tag_table)
+{
+	HashTable *ht;
+
+	if (!EXIF_G(tag_table_cache)) {
+		EXIF_G(tag_table_cache) = malloc(sizeof(HashTable));
+		zend_hash_init(EXIF_G(tag_table_cache), 0, NULL, exif_tag_ht_dtor, 1);
+	}
+
+	ht = zend_hash_index_find_ptr(EXIF_G(tag_table_cache), (uintptr_t) tag_table);
+	if (ht) {
+		return ht;
+	}
+
+	ht = exif_make_tag_ht(tag_table);
+	zend_hash_index_add_new_ptr(EXIF_G(tag_table_cache), (uintptr_t) tag_table, ht);
+	return ht;
+}
+
 /* {{{ exif_get_tagname
 	Get headername for tag_num or NULL if not defined */
 static char * exif_get_tagname(int tag_num, char *ret, int len, tag_table_type tag_table)
 {
-	int i, t;
 	char tmp[32];
-
-	for (i = 0; (t = tag_table[i].Tag) != TAG_END_OF_LIST; i++) {
-		if (t == tag_num) {
-			if (ret && len)  {
-				strlcpy(ret, tag_table[i].Desc, abs(len));
-				if (len < 0) {
-					memset(ret + strlen(ret), ' ', -len - strlen(ret) - 1);
-					ret[-len - 1] = '\0';
-				}
-				return ret;
+	char *desc = zend_hash_index_find_ptr(exif_get_tag_ht(tag_table), tag_num);
+	if (desc) {
+		if (ret && len)  {
+			strlcpy(ret, desc, abs(len));
+			if (len < 0) {
+				memset(ret + strlen(ret), ' ', -len - strlen(ret) - 1);
+				ret[-len - 1] = '\0';
 			}
-			return tag_table[i].Desc;
+			return ret;
 		}
+		return desc;
 	}
 
 	if (ret && len) {
