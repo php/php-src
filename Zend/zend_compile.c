@@ -670,7 +670,7 @@ void zend_do_free(znode *op1) /* {{{ */
 			opline--;
 		}
 
-		if ((opline->result_type & IS_TMP_VAR) != 0 && opline->result.var == op1->u.op.var) {
+		if (opline->result_type == IS_TMP_VAR && opline->result.var == op1->u.op.var) {
 			switch (opline->opcode) {
 				case ZEND_BOOL:
 				case ZEND_BOOL_NOT:
@@ -2000,18 +2000,19 @@ ZEND_API int zend_is_smart_branch(const zend_op *opline) /* {{{ */
 static inline uint32_t zend_emit_cond_jump(zend_uchar opcode, znode *cond, uint32_t opnum_target) /* {{{ */
 {
 	uint32_t opnum = get_next_op_number();
-	zend_op *opline = CG(active_op_array)->opcodes + opnum -1;
+	zend_op *opline = CG(active_op_array)->opcodes + opnum - 1;
 
-	if (cond->op_type == IS_TMP_VAR
-	 && opnum > 0
-	 && opline->result_type == IS_TMP_VAR
-	 && opline->result.var == cond->u.op.var
-	 && zend_is_smart_branch(opline)) {
-		if (opcode == ZEND_JMPZ) {
-			opline->result_type = IS_TMP_VAR | IS_SMART_BRANCH_JMPZ;
-		} else {
-			ZEND_ASSERT(opcode == ZEND_JMPNZ);
-			opline->result_type = IS_TMP_VAR | IS_SMART_BRANCH_JMPNZ;
+	if (cond->op_type == IS_TMP_VAR && opnum > 0) {
+		opline = CG(active_op_array)->opcodes + opnum - 1;
+		if (opline->result_type == IS_TMP_VAR
+		 && opline->result.var == cond->u.op.var
+		 && zend_is_smart_branch(opline)) {
+			if (opcode == ZEND_JMPZ) {
+				opline->result_type = IS_TMP_VAR | IS_SMART_BRANCH_JMPZ;
+			} else {
+				ZEND_ASSERT(opcode == ZEND_JMPNZ);
+				opline->result_type = IS_TMP_VAR | IS_SMART_BRANCH_JMPNZ;
+			}
 		}
 	}
 	opline = zend_emit_op(NULL, opcode, cond, NULL);

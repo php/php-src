@@ -1055,6 +1055,8 @@ static void zend_revert_pass_two(zend_op_array *op_array)
 		if (opline->op2_type == IS_CONST) {
 			ZEND_PASS_TWO_UNDO_CONSTANT(op_array, opline, opline->op2);
 		}
+		/* reset smart branch flags IS_SMART_BRANCH_JMP[N]Z */
+		opline->result_type &= (IS_TMP_VAR|IS_VAR|IS_CV|IS_CONST);
 		opline++;
 	}
 #if !ZEND_USE_ABS_CONST_ADDR
@@ -1157,15 +1159,12 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 							 && (opline+1)->op1_type == IS_TMP_VAR
 							 && (opline+1)->op1.var == opline->result.var) {
 								opline->result_type = IS_SMART_BRANCH_JMPZ | IS_TMP_VAR;
-								break;
 							} else if ((opline+1)->opcode == ZEND_JMPNZ
 							 && (opline+1)->op1_type == IS_TMP_VAR
 							 && (opline+1)->op1.var == opline->result.var) {
 								opline->result_type = IS_SMART_BRANCH_JMPNZ | IS_TMP_VAR;
-								break;
 							}
 						}
-						opline->result_type = IS_TMP_VAR;
 					}
 					break;
 			}
@@ -1278,15 +1277,12 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 							 && (opline+1)->op1_type == IS_TMP_VAR
 							 && (opline+1)->op1.var == opline->result.var) {
 								opline->result_type = IS_SMART_BRANCH_JMPZ | IS_TMP_VAR;
-								break;
 							} else if ((opline+1)->opcode == ZEND_JMPNZ
 							 && (opline+1)->op1_type == IS_TMP_VAR
 							 && (opline+1)->op1.var == opline->result.var) {
 								opline->result_type = IS_SMART_BRANCH_JMPNZ | IS_TMP_VAR;
-								break;
 							}
 						}
-						opline->result_type = IS_TMP_VAR;
 					}
 					break;
 			}
