@@ -11,6 +11,8 @@ PHP                                                                        NEWS
   . Fixed bug #78644 (SEGFAULT in ZEND_UNSET_OBJ_SPEC_VAR_CONST_HANDLER).
     (Nikita)
   . Fixed bug #78658 (Memory corruption using Closure::bindTo). (Nikita)
+  . Fixed bug #78656 (Parse errors classified as highest log-level). (Erik
+    Lundin)
 
 - COM:
   . Fixed bug #78650 (new COM Crash). (cmb)
