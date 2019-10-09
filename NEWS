@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #78644 (SEGFAULT in ZEND_UNSET_OBJ_SPEC_VAR_CONST_HANDLER).
     (Nikita)
 
+- COM:
+  . Fixed bug #78650 (new COM Crash). (cmb)
+
 - Iconv:
   . Fixed bug #78642 (Wrong libiconv version displayed). (gedas at martynas,
     cmb).
