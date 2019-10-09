@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.12
 
+- Core:
+  . Fixed bug #78658 (Memory corruption using Closure::bindTo). (Nikita)
+
 - Iconv:
   . Fixed bug #78642 (Wrong libiconv version displayed). (gedas at martynas,
     cmb).
