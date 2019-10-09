@@ -1939,15 +1939,28 @@ typedef struct {
 	int             read_thumbnail;
 	int             read_all;
 	int             ifd_nesting_level;
+	int             num_errors;
 	/* internal */
 	file_section_list 	file;
 } image_info_type;
 /* }}} */
 
+#define EXIF_MAX_ERRORS 10
+
 /* {{{ exif_error_docref */
-static void exif_error_docref(const char *docref EXIFERR_DC, const image_info_type *ImageInfo, int type, const char *format, ...)
+static void exif_error_docref(const char *docref EXIFERR_DC, image_info_type *ImageInfo, int type, const char *format, ...)
 {
 	va_list args;
+
+	if (ImageInfo) {
+		if (++ImageInfo->num_errors > EXIF_MAX_ERRORS) {
+			if (ImageInfo->num_errors == EXIF_MAX_ERRORS+1) {
+				php_error_docref(docref, type,
+					"Further exif parsing errors have been suppressed");
+			}
+			return;
+		}
+	}
 
 	va_start(args, format);
 #ifdef EXIF_DEBUG
@@ -4337,6 +4350,7 @@ static int exif_read_from_impl(image_info_type *ImageInfo, php_stream *stream, i
 
 
 	ImageInfo->ifd_nesting_level = 0;
+	ImageInfo->num_errors = 0;
 
 	/* Scan the headers */
 	ret = exif_scan_FILE_header(ImageInfo);
