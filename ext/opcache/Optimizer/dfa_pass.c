@@ -358,7 +358,6 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 
 		do {
 			if (call_info->caller_call_opline->opcode == ZEND_DO_ICALL
-			 && call_info->caller_call_opline->result_type == IS_VAR
 			 && call_info->callee_func
 			 && ZSTR_LEN(call_info->callee_func->common.function_name) == sizeof("in_array")-1
 			 && memcmp(ZSTR_VAL(call_info->callee_func->common.function_name), "in_array", sizeof("in_array")-1) == 0
