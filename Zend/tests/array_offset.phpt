@@ -1,5 +1,5 @@
 --TEST--
-Ensure "undefined offset" notice formats message corectly when undefined key is negative
+Ensure "undefined offset" notice formats message correctly when undefined key is negative
 --FILE--
 <?php
 
