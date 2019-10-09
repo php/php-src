@@ -4488,8 +4488,9 @@ PHP_FUNCTION(exif_read_data)
 		exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "CCDWidth", "%dmm", (int)ImageInfo.CCDWidth);
 	}
 	if(ImageInfo.ExposureTime>0) {
-		if(ImageInfo.ExposureTime <= 0.5) {
-			exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "ExposureTime", "%0.3F s (1/%d)", ImageInfo.ExposureTime, (int)(0.5 + 1/ImageInfo.ExposureTime));
+		float recip_exposure_time = 0.5f + 1.0f/ImageInfo.ExposureTime;
+		if (ImageInfo.ExposureTime <= 0.5 && recip_exposure_time < INT_MAX) {
+			exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "ExposureTime", "%0.3F s (1/%d)", ImageInfo.ExposureTime, (int) recip_exposure_time);
 		} else {
 			exif_iif_add_fmt(&ImageInfo, SECTION_COMPUTED, "ExposureTime", "%0.3F s", ImageInfo.ExposureTime);
 		}
