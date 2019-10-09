@@ -868,7 +868,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	zend_shared_alloc_destroy_xlat_table();
 
 	info.checksum = zend_adler32(ADLER32_INIT, buf, script->size);
-	info.checksum = zend_adler32(info.checksum, (signed char*)ZSTR_VAL((zend_string*)ZCG(mem)), info.str_size);
+	info.checksum = zend_adler32(info.checksum, (unsigned char*)ZSTR_VAL((zend_string*)ZCG(mem)), info.str_size);
 
 #ifdef HAVE_SYS_UIO_H
 	vec[0].iov_base = &info;
@@ -1371,6 +1371,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	zend_accel_hash_entry *bucket;
 	void *mem, *checkpoint, *buf;
 	int cache_it = 1;
+	unsigned int actual_checksum;
 	int ok;
 
 	if (!full_path) {
@@ -1458,8 +1459,8 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 
 	/* verify checksum */
 	if (ZCG(accel_directives).file_cache_consistency_checks &&
-	    zend_adler32(ADLER32_INIT, mem, info.mem_size + info.str_size) != info.checksum) {
-		zend_accel_error(ACCEL_LOG_WARNING, "corrupted file '%s'\n", filename);
+	    (actual_checksum = zend_adler32(ADLER32_INIT, mem, info.mem_size + info.str_size)) != info.checksum) {
+		zend_accel_error(ACCEL_LOG_WARNING, "corrupted file '%s' excepted checksum: 0x%08x actual checksum: 0x%08x\n", filename, info.checksum, actual_checksum);
 		unlink(filename);
 		zend_arena_release(&CG(arena), checkpoint);
 		efree(filename);
@@ -1545,6 +1546,8 @@ use_process_mem:
 		zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(script->script.filename), ZSTR_LEN(script->script.filename), 0, script);
 
 		zend_shared_alloc_unlock();
+		zend_accel_error(ACCEL_LOG_INFO, "File cached script loaded into memory '%s'", ZSTR_VAL(script->script.filename));
+
 		zend_arena_release(&CG(arena), checkpoint);
 	}
 	efree(filename);
