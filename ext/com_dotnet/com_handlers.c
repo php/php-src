@@ -172,6 +172,11 @@ static void com_write_dimension(zend_object *object, zval *offset, zval *value)
 	}
 }
 
+static zval *com_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot)
+{
+	return NULL;
+}
+
 static int com_property_exists(zend_object *object, zend_string *member, int check_empty, void **cache_slot)
 {
 	DISPID dispid;
@@ -531,7 +536,7 @@ zend_object_handlers php_com_object_handlers = {
 	com_property_write,
 	com_read_dimension,
 	com_write_dimension,
-	NULL,
+	com_get_property_ptr_ptr,
 	com_property_exists,
 	com_property_delete,
 	com_dimension_exists,
