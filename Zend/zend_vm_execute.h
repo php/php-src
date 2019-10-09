@@ -8353,7 +8353,7 @@ array_key_exists_array:
 }
 
 /* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
@@ -8438,133 +8438,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_TMP_HANDLER(Z
 	}
 
 	/* Set the new yielded key */
-	if (IS_TMP_VAR != IS_UNUSED) {
-		zval *key = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
-		if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_TYPE_P(key)) == IS_REFERENCE) {
-			key = Z_REFVAL_P(key);
-		}
-		ZVAL_COPY(&generator->key, key);
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-		if (Z_TYPE(generator->key) == IS_LONG
-		    && Z_LVAL(generator->key) > generator->largest_used_integer_key
-		) {
-			generator->largest_used_integer_key = Z_LVAL(generator->key);
-		}
-	} else {
-		/* If no key was specified we use auto-increment keys */
-		generator->largest_used_integer_key++;
-		ZVAL_LONG(&generator->key, generator->largest_used_integer_key);
-	}
-
-	if (RETURN_VALUE_USED(opline)) {
-		/* If the return value of yield is used set the send
-		 * target and initialize it to NULL */
-		generator->send_target = EX_VAR(opline->result.var);
-		ZVAL_NULL(generator->send_target);
-	} else {
-		generator->send_target = NULL;
-	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
-	/* The GOTO VM uses a local opline variable. We need to set the opline
-	 * variable in execute_data so we don't resume at an old position. */
-	SAVE_OPLINE();
-
-	ZEND_VM_RETURN();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
-
-	SAVE_OPLINE();
-	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
-	}
-
-	/* Destroy the previously yielded value */
-	zval_ptr_dtor(&generator->value);
-
-	/* Destroy the previously yielded key */
-	zval_ptr_dtor(&generator->key);
-
-	/* Set the new yielded value */
-	if (IS_CONST != IS_UNUSED) {
-		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
-			/* Constants and temporary variables aren't yieldable by reference,
-			 * but we still allow them with a notice. */
-			if (IS_CONST & (IS_CONST|IS_TMP_VAR)) {
-				zval *value;
-
-				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-
-				value = RT_CONSTANT(opline, opline->op1);
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_CONST == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->value))) {
-						Z_ADDREF(generator->value);
-					}
-				}
-			} else {
-				zval *value_ptr = NULL;
-
-				/* If a function call result is yielded and the function did
-				 * not return by reference we throw a notice. */
-				do {
-					if (IS_CONST == IS_VAR) {
-						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
-						if (opline->extended_value == ZEND_RETURNS_FUNCTION
-						 && !Z_ISREF_P(value_ptr)) {
-							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-							ZVAL_COPY(&generator->value, value_ptr);
-							break;
-						}
-					}
-					if (Z_ISREF_P(value_ptr)) {
-						Z_ADDREF_P(value_ptr);
-					} else {
-						ZVAL_MAKE_REF_EX(value_ptr, 2);
-					}
-					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				} while (0);
-
-			}
-		} else {
-			zval *value = RT_CONSTANT(opline, opline->op1);
-
-			/* Consts, temporary variables and references need copying */
-			if (IS_CONST == IS_CONST) {
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->value))) {
-					Z_ADDREF(generator->value);
-				}
-			} else if (IS_CONST == IS_TMP_VAR) {
-				ZVAL_COPY_VALUE(&generator->value, value);
-            } else if ((IS_CONST & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
-				ZVAL_COPY(&generator->value, Z_REFVAL_P(value));
-
-			} else {
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_CONST == IS_CV) {
-					if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-				}
-			}
-		}
-	} else {
-		/* If no value was specified yield null */
-		ZVAL_NULL(&generator->value);
-	}
-
-	/* Set the new yielded key */
-	if (IS_VAR != IS_UNUSED) {
+	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		zval *key = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-		if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_TYPE_P(key)) == IS_REFERENCE) {
+		if (((IS_TMP_VAR|IS_VAR) & (IS_CV|IS_VAR)) && UNEXPECTED(Z_TYPE_P(key)) == IS_REFERENCE) {
 			key = Z_REFVAL_P(key);
 		}
 		ZVAL_COPY(&generator->key, key);
@@ -18709,6 +18585,130 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_TMP_TMPVAR_HAN
 	}
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
+
+	SAVE_OPLINE();
+	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	}
+
+	/* Destroy the previously yielded value */
+	zval_ptr_dtor(&generator->value);
+
+	/* Destroy the previously yielded key */
+	zval_ptr_dtor(&generator->key);
+
+	/* Set the new yielded value */
+	if (IS_TMP_VAR != IS_UNUSED) {
+		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
+			/* Constants and temporary variables aren't yieldable by reference,
+			 * but we still allow them with a notice. */
+			if (IS_TMP_VAR & (IS_CONST|IS_TMP_VAR)) {
+				zval *value;
+
+				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+
+				value = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
+				ZVAL_COPY_VALUE(&generator->value, value);
+				if (IS_TMP_VAR == IS_CONST) {
+					if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->value))) {
+						Z_ADDREF(generator->value);
+					}
+				}
+			} else {
+				zval *value_ptr = NULL;
+
+				/* If a function call result is yielded and the function did
+				 * not return by reference we throw a notice. */
+				do {
+					if (IS_TMP_VAR == IS_VAR) {
+						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
+						if (opline->extended_value == ZEND_RETURNS_FUNCTION
+						 && !Z_ISREF_P(value_ptr)) {
+							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
+							ZVAL_COPY(&generator->value, value_ptr);
+							break;
+						}
+					}
+					if (Z_ISREF_P(value_ptr)) {
+						Z_ADDREF_P(value_ptr);
+					} else {
+						ZVAL_MAKE_REF_EX(value_ptr, 2);
+					}
+					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
+				} while (0);
+
+			}
+		} else {
+			zval *value = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
+
+			/* Consts, temporary variables and references need copying */
+			if (IS_TMP_VAR == IS_CONST) {
+				ZVAL_COPY_VALUE(&generator->value, value);
+				if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->value))) {
+					Z_ADDREF(generator->value);
+				}
+			} else if (IS_TMP_VAR == IS_TMP_VAR) {
+				ZVAL_COPY_VALUE(&generator->value, value);
+            } else if ((IS_TMP_VAR & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
+				ZVAL_COPY(&generator->value, Z_REFVAL_P(value));
+
+			} else {
+				ZVAL_COPY_VALUE(&generator->value, value);
+				if (IS_TMP_VAR == IS_CV) {
+					if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+				}
+			}
+		}
+	} else {
+		/* If no value was specified yield null */
+		ZVAL_NULL(&generator->value);
+	}
+
+	/* Set the new yielded key */
+	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
+		zval *key = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
+		if (((IS_TMP_VAR|IS_VAR) & (IS_CV|IS_VAR)) && UNEXPECTED(Z_TYPE_P(key)) == IS_REFERENCE) {
+			key = Z_REFVAL_P(key);
+		}
+		ZVAL_COPY(&generator->key, key);
+		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+
+		if (Z_TYPE(generator->key) == IS_LONG
+		    && Z_LVAL(generator->key) > generator->largest_used_integer_key
+		) {
+			generator->largest_used_integer_key = Z_LVAL(generator->key);
+		}
+	} else {
+		/* If no key was specified we use auto-increment keys */
+		generator->largest_used_integer_key++;
+		ZVAL_LONG(&generator->key, generator->largest_used_integer_key);
+	}
+
+	if (RETURN_VALUE_USED(opline)) {
+		/* If the return value of yield is used set the send
+		 * target and initialize it to NULL */
+		generator->send_target = EX_VAR(opline->result.var);
+		ZVAL_NULL(generator->send_target);
+	} else {
+		generator->send_target = NULL;
+	}
+
+	/* We increment to the next op, so we are at the correct position when the
+	 * generator is resumed. */
+	ZEND_VM_INC_OPCODE();
+
+	/* The GOTO VM uses a local opline variable. We need to set the opline
+	 * variable in execute_data so we don't resume at an old position. */
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -18737,254 +18737,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_TMP_TMP_
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 	ZEND_VM_SMART_BRANCH(result, 1);
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
-
-	SAVE_OPLINE();
-	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
-	}
-
-	/* Destroy the previously yielded value */
-	zval_ptr_dtor(&generator->value);
-
-	/* Destroy the previously yielded key */
-	zval_ptr_dtor(&generator->key);
-
-	/* Set the new yielded value */
-	if (IS_TMP_VAR != IS_UNUSED) {
-		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
-			/* Constants and temporary variables aren't yieldable by reference,
-			 * but we still allow them with a notice. */
-			if (IS_TMP_VAR & (IS_CONST|IS_TMP_VAR)) {
-				zval *value;
-
-				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-
-				value = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_TMP_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->value))) {
-						Z_ADDREF(generator->value);
-					}
-				}
-			} else {
-				zval *value_ptr = NULL;
-
-				/* If a function call result is yielded and the function did
-				 * not return by reference we throw a notice. */
-				do {
-					if (IS_TMP_VAR == IS_VAR) {
-						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
-						if (opline->extended_value == ZEND_RETURNS_FUNCTION
-						 && !Z_ISREF_P(value_ptr)) {
-							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-							ZVAL_COPY(&generator->value, value_ptr);
-							break;
-						}
-					}
-					if (Z_ISREF_P(value_ptr)) {
-						Z_ADDREF_P(value_ptr);
-					} else {
-						ZVAL_MAKE_REF_EX(value_ptr, 2);
-					}
-					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				} while (0);
-
-			}
-		} else {
-			zval *value = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
-
-			/* Consts, temporary variables and references need copying */
-			if (IS_TMP_VAR == IS_CONST) {
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->value))) {
-					Z_ADDREF(generator->value);
-				}
-			} else if (IS_TMP_VAR == IS_TMP_VAR) {
-				ZVAL_COPY_VALUE(&generator->value, value);
-            } else if ((IS_TMP_VAR & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
-				ZVAL_COPY(&generator->value, Z_REFVAL_P(value));
-
-			} else {
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_TMP_VAR == IS_CV) {
-					if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-				}
-			}
-		}
-	} else {
-		/* If no value was specified yield null */
-		ZVAL_NULL(&generator->value);
-	}
-
-	/* Set the new yielded key */
-	if (IS_TMP_VAR != IS_UNUSED) {
-		zval *key = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
-		if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_TYPE_P(key)) == IS_REFERENCE) {
-			key = Z_REFVAL_P(key);
-		}
-		ZVAL_COPY(&generator->key, key);
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-		if (Z_TYPE(generator->key) == IS_LONG
-		    && Z_LVAL(generator->key) > generator->largest_used_integer_key
-		) {
-			generator->largest_used_integer_key = Z_LVAL(generator->key);
-		}
-	} else {
-		/* If no key was specified we use auto-increment keys */
-		generator->largest_used_integer_key++;
-		ZVAL_LONG(&generator->key, generator->largest_used_integer_key);
-	}
-
-	if (RETURN_VALUE_USED(opline)) {
-		/* If the return value of yield is used set the send
-		 * target and initialize it to NULL */
-		generator->send_target = EX_VAR(opline->result.var);
-		ZVAL_NULL(generator->send_target);
-	} else {
-		generator->send_target = NULL;
-	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
-	/* The GOTO VM uses a local opline variable. We need to set the opline
-	 * variable in execute_data so we don't resume at an old position. */
-	SAVE_OPLINE();
-
-	ZEND_VM_RETURN();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
-
-	SAVE_OPLINE();
-	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
-	}
-
-	/* Destroy the previously yielded value */
-	zval_ptr_dtor(&generator->value);
-
-	/* Destroy the previously yielded key */
-	zval_ptr_dtor(&generator->key);
-
-	/* Set the new yielded value */
-	if (IS_TMP_VAR != IS_UNUSED) {
-		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
-			/* Constants and temporary variables aren't yieldable by reference,
-			 * but we still allow them with a notice. */
-			if (IS_TMP_VAR & (IS_CONST|IS_TMP_VAR)) {
-				zval *value;
-
-				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-
-				value = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_TMP_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->value))) {
-						Z_ADDREF(generator->value);
-					}
-				}
-			} else {
-				zval *value_ptr = NULL;
-
-				/* If a function call result is yielded and the function did
-				 * not return by reference we throw a notice. */
-				do {
-					if (IS_TMP_VAR == IS_VAR) {
-						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
-						if (opline->extended_value == ZEND_RETURNS_FUNCTION
-						 && !Z_ISREF_P(value_ptr)) {
-							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-							ZVAL_COPY(&generator->value, value_ptr);
-							break;
-						}
-					}
-					if (Z_ISREF_P(value_ptr)) {
-						Z_ADDREF_P(value_ptr);
-					} else {
-						ZVAL_MAKE_REF_EX(value_ptr, 2);
-					}
-					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				} while (0);
-
-			}
-		} else {
-			zval *value = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
-
-			/* Consts, temporary variables and references need copying */
-			if (IS_TMP_VAR == IS_CONST) {
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->value))) {
-					Z_ADDREF(generator->value);
-				}
-			} else if (IS_TMP_VAR == IS_TMP_VAR) {
-				ZVAL_COPY_VALUE(&generator->value, value);
-            } else if ((IS_TMP_VAR & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
-				ZVAL_COPY(&generator->value, Z_REFVAL_P(value));
-
-			} else {
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_TMP_VAR == IS_CV) {
-					if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-				}
-			}
-		}
-	} else {
-		/* If no value was specified yield null */
-		ZVAL_NULL(&generator->value);
-	}
-
-	/* Set the new yielded key */
-	if (IS_VAR != IS_UNUSED) {
-		zval *key = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-		if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_TYPE_P(key)) == IS_REFERENCE) {
-			key = Z_REFVAL_P(key);
-		}
-		ZVAL_COPY(&generator->key, key);
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-		if (Z_TYPE(generator->key) == IS_LONG
-		    && Z_LVAL(generator->key) > generator->largest_used_integer_key
-		) {
-			generator->largest_used_integer_key = Z_LVAL(generator->key);
-		}
-	} else {
-		/* If no key was specified we use auto-increment keys */
-		generator->largest_used_integer_key++;
-		ZVAL_LONG(&generator->key, generator->largest_used_integer_key);
-	}
-
-	if (RETURN_VALUE_USED(opline)) {
-		/* If the return value of yield is used set the send
-		 * target and initialize it to NULL */
-		generator->send_target = EX_VAR(opline->result.var);
-		ZVAL_NULL(generator->send_target);
-	} else {
-		generator->send_target = NULL;
-	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
-	/* The GOTO VM uses a local opline variable. We need to set the opline
-	 * variable in execute_data so we don't resume at an old position. */
-	SAVE_OPLINE();
-
-	ZEND_VM_RETURN();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -25533,77 +25285,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_OBJ_SPEC_VAR_TMPVAR_HAND
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *op1, *op2;
-	zend_bool result;
-
-	SAVE_OPLINE();
-	op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
-	op2 = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
-	result = fast_is_identical_function(op1, op2);
-	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	ZEND_VM_SMART_BRANCH(result, 1);
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *op1, *op2;
-	zend_bool result;
-
-	SAVE_OPLINE();
-	op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
-	op2 = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
-	result = fast_is_not_identical_function(op1, op2);
-	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	ZEND_VM_SMART_BRANCH(result, 1);
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *value;
-	zval *variable_ptr;
-
-	SAVE_OPLINE();
-	value = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
-	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
-
-	value = zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
-	if (UNEXPECTED(0)) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
-	}
-	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-	/* zend_assign_to_variable() always takes care of op2, never free it! */
-
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *value;
-	zval *variable_ptr;
-
-	SAVE_OPLINE();
-	value = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
-	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
-
-	value = zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
-	if (UNEXPECTED(1)) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
-	}
-	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-	/* zend_assign_to_variable() always takes care of op2, never free it! */
-
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
@@ -25689,9 +25371,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEN
 	}
 
 	/* Set the new yielded key */
-	if (IS_TMP_VAR != IS_UNUSED) {
-		zval *key = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
-		if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_TYPE_P(key)) == IS_REFERENCE) {
+	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
+		zval *key = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
+		if (((IS_TMP_VAR|IS_VAR) & (IS_CV|IS_VAR)) && UNEXPECTED(Z_TYPE_P(key)) == IS_REFERENCE) {
 			key = Z_REFVAL_P(key);
 		}
 		ZVAL_COPY(&generator->key, key);
@@ -25726,6 +25408,76 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEN
 	SAVE_OPLINE();
 
 	ZEND_VM_RETURN();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *op1, *op2;
+	zend_bool result;
+
+	SAVE_OPLINE();
+	op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
+	op2 = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
+	result = fast_is_identical_function(op1, op2);
+	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+	ZEND_VM_SMART_BRANCH(result, 1);
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *op1, *op2;
+	zend_bool result;
+
+	SAVE_OPLINE();
+	op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
+	op2 = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
+	result = fast_is_not_identical_function(op1, op2);
+	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+	ZEND_VM_SMART_BRANCH(result, 1);
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *value;
+	zval *variable_ptr;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
+	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
+
+	value = zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+	if (UNEXPECTED(0)) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
+	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	/* zend_assign_to_variable() always takes care of op2, never free it! */
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *value;
+	zval *variable_ptr;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
+	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
+
+	value = zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+	if (UNEXPECTED(1)) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
+	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	/* zend_assign_to_variable() always takes care of op2, never free it! */
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -25831,131 +25583,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLE
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
-
-	SAVE_OPLINE();
-	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
-	}
-
-	/* Destroy the previously yielded value */
-	zval_ptr_dtor(&generator->value);
-
-	/* Destroy the previously yielded key */
-	zval_ptr_dtor(&generator->key);
-
-	/* Set the new yielded value */
-	if (IS_VAR != IS_UNUSED) {
-		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
-			/* Constants and temporary variables aren't yieldable by reference,
-			 * but we still allow them with a notice. */
-			if (IS_VAR & (IS_CONST|IS_TMP_VAR)) {
-				zval *value;
-
-				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-
-				value = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_VAR == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->value))) {
-						Z_ADDREF(generator->value);
-					}
-				}
-			} else {
-				zval *value_ptr = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
-
-				/* If a function call result is yielded and the function did
-				 * not return by reference we throw a notice. */
-				do {
-					if (IS_VAR == IS_VAR) {
-						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
-						if (opline->extended_value == ZEND_RETURNS_FUNCTION
-						 && !Z_ISREF_P(value_ptr)) {
-							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-							ZVAL_COPY(&generator->value, value_ptr);
-							break;
-						}
-					}
-					if (Z_ISREF_P(value_ptr)) {
-						Z_ADDREF_P(value_ptr);
-					} else {
-						ZVAL_MAKE_REF_EX(value_ptr, 2);
-					}
-					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				} while (0);
-
-				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			}
-		} else {
-			zval *value = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
-
-			/* Consts, temporary variables and references need copying */
-			if (IS_VAR == IS_CONST) {
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->value))) {
-					Z_ADDREF(generator->value);
-				}
-			} else if (IS_VAR == IS_TMP_VAR) {
-				ZVAL_COPY_VALUE(&generator->value, value);
-            } else if ((IS_VAR & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
-				ZVAL_COPY(&generator->value, Z_REFVAL_P(value));
-				zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			} else {
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_VAR == IS_CV) {
-					if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-				}
-			}
-		}
-	} else {
-		/* If no value was specified yield null */
-		ZVAL_NULL(&generator->value);
-	}
-
-	/* Set the new yielded key */
-	if (IS_VAR != IS_UNUSED) {
-		zval *key = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-		if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_TYPE_P(key)) == IS_REFERENCE) {
-			key = Z_REFVAL_P(key);
-		}
-		ZVAL_COPY(&generator->key, key);
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-		if (Z_TYPE(generator->key) == IS_LONG
-		    && Z_LVAL(generator->key) > generator->largest_used_integer_key
-		) {
-			generator->largest_used_integer_key = Z_LVAL(generator->key);
-		}
-	} else {
-		/* If no key was specified we use auto-increment keys */
-		generator->largest_used_integer_key++;
-		ZVAL_LONG(&generator->key, generator->largest_used_integer_key);
-	}
-
-	if (RETURN_VALUE_USED(opline)) {
-		/* If the return value of yield is used set the send
-		 * target and initialize it to NULL */
-		generator->send_target = EX_VAR(opline->result.var);
-		ZVAL_NULL(generator->send_target);
-	} else {
-		generator->send_target = NULL;
-	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
-	/* The GOTO VM uses a local opline variable. We need to set the opline
-	 * variable in execute_data so we don't resume at an old position. */
-	SAVE_OPLINE();
-
-	ZEND_VM_RETURN();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_OP_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -33221,7 +32848,7 @@ isset_object_finish:
 	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
@@ -33306,133 +32933,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(
 	}
 
 	/* Set the new yielded key */
-	if (IS_TMP_VAR != IS_UNUSED) {
-		zval *key = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
-		if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_TYPE_P(key)) == IS_REFERENCE) {
-			key = Z_REFVAL_P(key);
-		}
-		ZVAL_COPY(&generator->key, key);
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-		if (Z_TYPE(generator->key) == IS_LONG
-		    && Z_LVAL(generator->key) > generator->largest_used_integer_key
-		) {
-			generator->largest_used_integer_key = Z_LVAL(generator->key);
-		}
-	} else {
-		/* If no key was specified we use auto-increment keys */
-		generator->largest_used_integer_key++;
-		ZVAL_LONG(&generator->key, generator->largest_used_integer_key);
-	}
-
-	if (RETURN_VALUE_USED(opline)) {
-		/* If the return value of yield is used set the send
-		 * target and initialize it to NULL */
-		generator->send_target = EX_VAR(opline->result.var);
-		ZVAL_NULL(generator->send_target);
-	} else {
-		generator->send_target = NULL;
-	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
-	/* The GOTO VM uses a local opline variable. We need to set the opline
-	 * variable in execute_data so we don't resume at an old position. */
-	SAVE_OPLINE();
-
-	ZEND_VM_RETURN();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
-
-	SAVE_OPLINE();
-	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
-	}
-
-	/* Destroy the previously yielded value */
-	zval_ptr_dtor(&generator->value);
-
-	/* Destroy the previously yielded key */
-	zval_ptr_dtor(&generator->key);
-
-	/* Set the new yielded value */
-	if (IS_UNUSED != IS_UNUSED) {
-		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
-			/* Constants and temporary variables aren't yieldable by reference,
-			 * but we still allow them with a notice. */
-			if (IS_UNUSED & (IS_CONST|IS_TMP_VAR)) {
-				zval *value;
-
-				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-
-				value = NULL;
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_UNUSED == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->value))) {
-						Z_ADDREF(generator->value);
-					}
-				}
-			} else {
-				zval *value_ptr = NULL;
-
-				/* If a function call result is yielded and the function did
-				 * not return by reference we throw a notice. */
-				do {
-					if (IS_UNUSED == IS_VAR) {
-						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
-						if (opline->extended_value == ZEND_RETURNS_FUNCTION
-						 && !Z_ISREF_P(value_ptr)) {
-							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-							ZVAL_COPY(&generator->value, value_ptr);
-							break;
-						}
-					}
-					if (Z_ISREF_P(value_ptr)) {
-						Z_ADDREF_P(value_ptr);
-					} else {
-						ZVAL_MAKE_REF_EX(value_ptr, 2);
-					}
-					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				} while (0);
-
-			}
-		} else {
-			zval *value = NULL;
-
-			/* Consts, temporary variables and references need copying */
-			if (IS_UNUSED == IS_CONST) {
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->value))) {
-					Z_ADDREF(generator->value);
-				}
-			} else if (IS_UNUSED == IS_TMP_VAR) {
-				ZVAL_COPY_VALUE(&generator->value, value);
-            } else if ((IS_UNUSED & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
-				ZVAL_COPY(&generator->value, Z_REFVAL_P(value));
-
-			} else {
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_UNUSED == IS_CV) {
-					if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-				}
-			}
-		}
-	} else {
-		/* If no value was specified yield null */
-		ZVAL_NULL(&generator->value);
-	}
-
-	/* Set the new yielded key */
-	if (IS_VAR != IS_UNUSED) {
+	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
 		zval *key = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-		if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_TYPE_P(key)) == IS_REFERENCE) {
+		if (((IS_TMP_VAR|IS_VAR) & (IS_CV|IS_VAR)) && UNEXPECTED(Z_TYPE_P(key)) == IS_REFERENCE) {
 			key = Z_REFVAL_P(key);
 		}
 		ZVAL_COPY(&generator->key, key);
@@ -44273,77 +43776,7 @@ array_key_exists_array:
 }
 
 /* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *op1, *op2;
-	zend_bool result;
-
-	SAVE_OPLINE();
-	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
-	op2 = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
-	result = fast_is_identical_function(op1, op2);
-
-	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	ZEND_VM_SMART_BRANCH(result, 1);
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *op1, *op2;
-	zend_bool result;
-
-	SAVE_OPLINE();
-	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
-	op2 = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
-	result = fast_is_not_identical_function(op1, op2);
-
-	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	ZEND_VM_SMART_BRANCH(result, 1);
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *value;
-	zval *variable_ptr;
-
-	SAVE_OPLINE();
-	value = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
-	variable_ptr = EX_VAR(opline->op1.var);
-
-	value = zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
-	if (UNEXPECTED(0)) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
-	}
-
-	/* zend_assign_to_variable() always takes care of op2, never free it! */
-
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *value;
-	zval *variable_ptr;
-
-	SAVE_OPLINE();
-	value = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
-	variable_ptr = EX_VAR(opline->op1.var);
-
-	value = zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
-	if (UNEXPECTED(1)) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
-	}
-
-	/* zend_assign_to_variable() always takes care of op2, never free it! */
-
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
@@ -44428,9 +43861,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND
 	}
 
 	/* Set the new yielded key */
-	if (IS_TMP_VAR != IS_UNUSED) {
-		zval *key = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
-		if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_TYPE_P(key)) == IS_REFERENCE) {
+	if ((IS_TMP_VAR|IS_VAR) != IS_UNUSED) {
+		zval *key = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
+		if (((IS_TMP_VAR|IS_VAR) & (IS_CV|IS_VAR)) && UNEXPECTED(Z_TYPE_P(key)) == IS_REFERENCE) {
 			key = Z_REFVAL_P(key);
 		}
 		ZVAL_COPY(&generator->key, key);
@@ -44465,6 +43898,76 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND
 	SAVE_OPLINE();
 
 	ZEND_VM_RETURN();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *op1, *op2;
+	zend_bool result;
+
+	SAVE_OPLINE();
+	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
+	op2 = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
+	result = fast_is_identical_function(op1, op2);
+
+	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+	ZEND_VM_SMART_BRANCH(result, 1);
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *op1, *op2;
+	zend_bool result;
+
+	SAVE_OPLINE();
+	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
+	op2 = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
+	result = fast_is_not_identical_function(op1, op2);
+
+	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+	ZEND_VM_SMART_BRANCH(result, 1);
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *value;
+	zval *variable_ptr;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
+	variable_ptr = EX_VAR(opline->op1.var);
+
+	value = zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+	if (UNEXPECTED(0)) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
+
+	/* zend_assign_to_variable() always takes care of op2, never free it! */
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *value;
+	zval *variable_ptr;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
+	variable_ptr = EX_VAR(opline->op1.var);
+
+	value = zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+	if (UNEXPECTED(1)) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
+
+	/* zend_assign_to_variable() always takes care of op2, never free it! */
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -44616,130 +44119,6 @@ try_instanceof:
 	}
 
 	ZEND_VM_SMART_BRANCH(result, 1);
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	zend_generator *generator = zend_get_running_generator(EXECUTE_DATA_C);
-
-	SAVE_OPLINE();
-	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
-	}
-
-	/* Destroy the previously yielded value */
-	zval_ptr_dtor(&generator->value);
-
-	/* Destroy the previously yielded key */
-	zval_ptr_dtor(&generator->key);
-
-	/* Set the new yielded value */
-	if (IS_CV != IS_UNUSED) {
-		if (UNEXPECTED(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
-			/* Constants and temporary variables aren't yieldable by reference,
-			 * but we still allow them with a notice. */
-			if (IS_CV & (IS_CONST|IS_TMP_VAR)) {
-				zval *value;
-
-				zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-
-				value = _get_zval_ptr_cv_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_CV == IS_CONST) {
-					if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->value))) {
-						Z_ADDREF(generator->value);
-					}
-				}
-			} else {
-				zval *value_ptr = _get_zval_ptr_cv_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
-
-				/* If a function call result is yielded and the function did
-				 * not return by reference we throw a notice. */
-				do {
-					if (IS_CV == IS_VAR) {
-						ZEND_ASSERT(value_ptr != &EG(uninitialized_zval));
-						if (opline->extended_value == ZEND_RETURNS_FUNCTION
-						 && !Z_ISREF_P(value_ptr)) {
-							zend_error(E_NOTICE, "Only variable references should be yielded by reference");
-							ZVAL_COPY(&generator->value, value_ptr);
-							break;
-						}
-					}
-					if (Z_ISREF_P(value_ptr)) {
-						Z_ADDREF_P(value_ptr);
-					} else {
-						ZVAL_MAKE_REF_EX(value_ptr, 2);
-					}
-					ZVAL_REF(&generator->value, Z_REF_P(value_ptr));
-				} while (0);
-
-			}
-		} else {
-			zval *value = _get_zval_ptr_cv_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
-
-			/* Consts, temporary variables and references need copying */
-			if (IS_CV == IS_CONST) {
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (UNEXPECTED(Z_OPT_REFCOUNTED(generator->value))) {
-					Z_ADDREF(generator->value);
-				}
-			} else if (IS_CV == IS_TMP_VAR) {
-				ZVAL_COPY_VALUE(&generator->value, value);
-            } else if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
-				ZVAL_COPY(&generator->value, Z_REFVAL_P(value));
-
-			} else {
-				ZVAL_COPY_VALUE(&generator->value, value);
-				if (IS_CV == IS_CV) {
-					if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-				}
-			}
-		}
-	} else {
-		/* If no value was specified yield null */
-		ZVAL_NULL(&generator->value);
-	}
-
-	/* Set the new yielded key */
-	if (IS_VAR != IS_UNUSED) {
-		zval *key = _get_zval_ptr_var(opline->op2.var EXECUTE_DATA_CC);
-		if ((IS_VAR & (IS_CV|IS_VAR)) && UNEXPECTED(Z_TYPE_P(key)) == IS_REFERENCE) {
-			key = Z_REFVAL_P(key);
-		}
-		ZVAL_COPY(&generator->key, key);
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-		if (Z_TYPE(generator->key) == IS_LONG
-		    && Z_LVAL(generator->key) > generator->largest_used_integer_key
-		) {
-			generator->largest_used_integer_key = Z_LVAL(generator->key);
-		}
-	} else {
-		/* If no key was specified we use auto-increment keys */
-		generator->largest_used_integer_key++;
-		ZVAL_LONG(&generator->key, generator->largest_used_integer_key);
-	}
-
-	if (RETURN_VALUE_USED(opline)) {
-		/* If the return value of yield is used set the send
-		 * target and initialize it to NULL */
-		generator->send_target = EX_VAR(opline->result.var);
-		ZVAL_NULL(generator->send_target);
-	} else {
-		generator->send_target = NULL;
-	}
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
-	/* The GOTO VM uses a local opline variable. We need to set the opline
-	 * variable in execute_data so we don't resume at an old position. */
-	SAVE_OPLINE();
-
-	ZEND_VM_RETURN();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_DIM_OP_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -51647,28 +51026,28 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_CALL_TRAMPOLINE_SPEC_LABEL,
 			(void*)&&ZEND_DISCARD_EXCEPTION_SPEC_LABEL,
 			(void*)&&ZEND_YIELD_SPEC_CONST_CONST_LABEL,
-			(void*)&&ZEND_YIELD_SPEC_CONST_TMP_LABEL,
-			(void*)&&ZEND_YIELD_SPEC_CONST_VAR_LABEL,
+			(void*)&&ZEND_YIELD_SPEC_CONST_TMPVAR_LABEL,
+			(void*)&&ZEND_YIELD_SPEC_CONST_TMPVAR_LABEL,
 			(void*)&&ZEND_YIELD_SPEC_CONST_UNUSED_LABEL,
 			(void*)&&ZEND_YIELD_SPEC_CONST_CV_LABEL,
 			(void*)&&ZEND_YIELD_SPEC_TMP_CONST_LABEL,
-			(void*)&&ZEND_YIELD_SPEC_TMP_TMP_LABEL,
-			(void*)&&ZEND_YIELD_SPEC_TMP_VAR_LABEL,
+			(void*)&&ZEND_YIELD_SPEC_TMP_TMPVAR_LABEL,
+			(void*)&&ZEND_YIELD_SPEC_TMP_TMPVAR_LABEL,
 			(void*)&&ZEND_YIELD_SPEC_TMP_UNUSED_LABEL,
 			(void*)&&ZEND_YIELD_SPEC_TMP_CV_LABEL,
 			(void*)&&ZEND_YIELD_SPEC_VAR_CONST_LABEL,
-			(void*)&&ZEND_YIELD_SPEC_VAR_TMP_LABEL,
-			(void*)&&ZEND_YIELD_SPEC_VAR_VAR_LABEL,
+			(void*)&&ZEND_YIELD_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_YIELD_SPEC_VAR_TMPVAR_LABEL,
 			(void*)&&ZEND_YIELD_SPEC_VAR_UNUSED_LABEL,
 			(void*)&&ZEND_YIELD_SPEC_VAR_CV_LABEL,
 			(void*)&&ZEND_YIELD_SPEC_UNUSED_CONST_LABEL,
-			(void*)&&ZEND_YIELD_SPEC_UNUSED_TMP_LABEL,
-			(void*)&&ZEND_YIELD_SPEC_UNUSED_VAR_LABEL,
+			(void*)&&ZEND_YIELD_SPEC_UNUSED_TMPVAR_LABEL,
+			(void*)&&ZEND_YIELD_SPEC_UNUSED_TMPVAR_LABEL,
 			(void*)&&ZEND_YIELD_SPEC_UNUSED_UNUSED_LABEL,
 			(void*)&&ZEND_YIELD_SPEC_UNUSED_CV_LABEL,
 			(void*)&&ZEND_YIELD_SPEC_CV_CONST_LABEL,
-			(void*)&&ZEND_YIELD_SPEC_CV_TMP_LABEL,
-			(void*)&&ZEND_YIELD_SPEC_CV_VAR_LABEL,
+			(void*)&&ZEND_YIELD_SPEC_CV_TMPVAR_LABEL,
+			(void*)&&ZEND_YIELD_SPEC_CV_TMPVAR_LABEL,
 			(void*)&&ZEND_YIELD_SPEC_CV_UNUSED_LABEL,
 			(void*)&&ZEND_YIELD_SPEC_CV_CV_LABEL,
 			(void*)&&ZEND_GENERATOR_RETURN_SPEC_CONST_LABEL,
@@ -53621,13 +53000,9 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_ARRAY_KEY_EXISTS_SPEC_CONST_TMPVAR)
 				ZEND_ARRAY_KEY_EXISTS_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_YIELD_SPEC_CONST_TMP):
-				VM_TRACE(ZEND_YIELD_SPEC_CONST_TMP)
-				ZEND_YIELD_SPEC_CONST_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_YIELD_SPEC_CONST_VAR):
-				VM_TRACE(ZEND_YIELD_SPEC_CONST_VAR)
-				ZEND_YIELD_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+			HYBRID_CASE(ZEND_YIELD_SPEC_CONST_TMPVAR):
+				VM_TRACE(ZEND_YIELD_SPEC_CONST_TMPVAR)
+				ZEND_YIELD_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_R_SPEC_CONST_UNUSED):
 				VM_TRACE(ZEND_FETCH_R_SPEC_CONST_UNUSED)
@@ -54750,6 +54125,10 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_INIT_ARRAY_SPEC_TMP_TMPVAR)
 				ZEND_INIT_ARRAY_SPEC_TMP_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_YIELD_SPEC_TMP_TMPVAR):
+				VM_TRACE(ZEND_YIELD_SPEC_TMP_TMPVAR)
+				ZEND_YIELD_SPEC_TMP_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_IDENTICAL_SPEC_TMP_TMP):
 				VM_TRACE(ZEND_IS_IDENTICAL_SPEC_TMP_TMP)
 				ZEND_IS_IDENTICAL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -54757,14 +54136,6 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_IS_NOT_IDENTICAL_SPEC_TMP_TMP):
 				VM_TRACE(ZEND_IS_NOT_IDENTICAL_SPEC_TMP_TMP)
 				ZEND_IS_NOT_IDENTICAL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_YIELD_SPEC_TMP_TMP):
-				VM_TRACE(ZEND_YIELD_SPEC_TMP_TMP)
-				ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_YIELD_SPEC_TMP_VAR):
-				VM_TRACE(ZEND_YIELD_SPEC_TMP_VAR)
-				ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_UNUSED):
 				VM_TRACE(ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_UNUSED)
@@ -55259,6 +54630,10 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_UNSET_OBJ_SPEC_VAR_TMPVAR)
 				ZEND_UNSET_OBJ_SPEC_VAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_YIELD_SPEC_VAR_TMPVAR):
+				VM_TRACE(ZEND_YIELD_SPEC_VAR_TMPVAR)
+				ZEND_YIELD_SPEC_VAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_IDENTICAL_SPEC_VAR_TMP):
 				VM_TRACE(ZEND_IS_IDENTICAL_SPEC_VAR_TMP)
 				ZEND_IS_IDENTICAL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -55274,10 +54649,6 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_USED):
 				VM_TRACE(ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_USED)
 				ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_YIELD_SPEC_VAR_TMP):
-				VM_TRACE(ZEND_YIELD_SPEC_VAR_TMP)
-				ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_IDENTICAL_SPEC_VAR_VAR):
 				VM_TRACE(ZEND_IS_IDENTICAL_SPEC_VAR_VAR)
@@ -55298,10 +54669,6 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_ASSIGN_REF_SPEC_VAR_VAR):
 				VM_TRACE(ZEND_ASSIGN_REF_SPEC_VAR_VAR)
 				ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_YIELD_SPEC_VAR_VAR):
-				VM_TRACE(ZEND_YIELD_SPEC_VAR_VAR)
-				ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSIGN_DIM_OP_SPEC_VAR_UNUSED):
 				VM_TRACE(ZEND_ASSIGN_DIM_OP_SPEC_VAR_UNUSED)
@@ -55715,13 +55082,9 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UNUSED_TMPVAR)
 				ZEND_ISSET_ISEMPTY_PROP_OBJ_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_YIELD_SPEC_UNUSED_TMP):
-				VM_TRACE(ZEND_YIELD_SPEC_UNUSED_TMP)
-				ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_YIELD_SPEC_UNUSED_VAR):
-				VM_TRACE(ZEND_YIELD_SPEC_UNUSED_VAR)
-				ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+			HYBRID_CASE(ZEND_YIELD_SPEC_UNUSED_TMPVAR):
+				VM_TRACE(ZEND_YIELD_SPEC_UNUSED_TMPVAR)
+				ZEND_YIELD_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_CLASS_SPEC_UNUSED_UNUSED):
 				VM_TRACE(ZEND_FETCH_CLASS_SPEC_UNUSED_UNUSED)
@@ -56540,6 +55903,10 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_ARRAY_KEY_EXISTS_SPEC_CV_TMPVAR)
 				ZEND_ARRAY_KEY_EXISTS_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_YIELD_SPEC_CV_TMPVAR):
+				VM_TRACE(ZEND_YIELD_SPEC_CV_TMPVAR)
+				ZEND_YIELD_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_IDENTICAL_SPEC_CV_TMP):
 				VM_TRACE(ZEND_IS_IDENTICAL_SPEC_CV_TMP)
 				ZEND_IS_IDENTICAL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -56555,10 +55922,6 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_USED):
 				VM_TRACE(ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_USED)
 				ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_USED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_YIELD_SPEC_CV_TMP):
-				VM_TRACE(ZEND_YIELD_SPEC_CV_TMP)
-				ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_IDENTICAL_SPEC_CV_VAR):
 				VM_TRACE(ZEND_IS_IDENTICAL_SPEC_CV_VAR)
@@ -56583,10 +55946,6 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_INSTANCEOF_SPEC_CV_VAR):
 				VM_TRACE(ZEND_INSTANCEOF_SPEC_CV_VAR)
 				ZEND_INSTANCEOF_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_YIELD_SPEC_CV_VAR):
-				VM_TRACE(ZEND_YIELD_SPEC_CV_VAR)
-				ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSIGN_DIM_OP_SPEC_CV_UNUSED):
 				VM_TRACE(ZEND_ASSIGN_DIM_OP_SPEC_CV_UNUSED)
@@ -59155,28 +58514,28 @@ void zend_vm_init(void)
 		ZEND_CALL_TRAMPOLINE_SPEC_HANDLER,
 		ZEND_DISCARD_EXCEPTION_SPEC_HANDLER,
 		ZEND_YIELD_SPEC_CONST_CONST_HANDLER,
-		ZEND_YIELD_SPEC_CONST_TMP_HANDLER,
-		ZEND_YIELD_SPEC_CONST_VAR_HANDLER,
+		ZEND_YIELD_SPEC_CONST_TMPVAR_HANDLER,
+		ZEND_YIELD_SPEC_CONST_TMPVAR_HANDLER,
 		ZEND_YIELD_SPEC_CONST_UNUSED_HANDLER,
 		ZEND_YIELD_SPEC_CONST_CV_HANDLER,
 		ZEND_YIELD_SPEC_TMP_CONST_HANDLER,
-		ZEND_YIELD_SPEC_TMP_TMP_HANDLER,
-		ZEND_YIELD_SPEC_TMP_VAR_HANDLER,
+		ZEND_YIELD_SPEC_TMP_TMPVAR_HANDLER,
+		ZEND_YIELD_SPEC_TMP_TMPVAR_HANDLER,
 		ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER,
 		ZEND_YIELD_SPEC_TMP_CV_HANDLER,
 		ZEND_YIELD_SPEC_VAR_CONST_HANDLER,
-		ZEND_YIELD_SPEC_VAR_TMP_HANDLER,
-		ZEND_YIELD_SPEC_VAR_VAR_HANDLER,
+		ZEND_YIELD_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_YIELD_SPEC_VAR_TMPVAR_HANDLER,
 		ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER,
 		ZEND_YIELD_SPEC_VAR_CV_HANDLER,
 		ZEND_YIELD_SPEC_UNUSED_CONST_HANDLER,
-		ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER,
-		ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER,
+		ZEND_YIELD_SPEC_UNUSED_TMPVAR_HANDLER,
+		ZEND_YIELD_SPEC_UNUSED_TMPVAR_HANDLER,
 		ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDLER,
 		ZEND_YIELD_SPEC_UNUSED_CV_HANDLER,
 		ZEND_YIELD_SPEC_CV_CONST_HANDLER,
-		ZEND_YIELD_SPEC_CV_TMP_HANDLER,
-		ZEND_YIELD_SPEC_CV_VAR_HANDLER,
+		ZEND_YIELD_SPEC_CV_TMPVAR_HANDLER,
+		ZEND_YIELD_SPEC_CV_TMPVAR_HANDLER,
 		ZEND_YIELD_SPEC_CV_UNUSED_HANDLER,
 		ZEND_YIELD_SPEC_CV_CV_HANDLER,
 		ZEND_GENERATOR_RETURN_SPEC_CONST_HANDLER,
