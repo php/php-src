@@ -1131,7 +1131,7 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 				break;
 			case E_PARSE:
 				error_type_str = "Parse error";
-				syslog_type_int = LOG_EMERG;
+				syslog_type_int = LOG_ERR;
 				break;
 			case E_NOTICE:
 			case E_USER_NOTICE:

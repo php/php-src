@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.25
 
+- Core:
+  . Fixed bug #78656 (Parse errors classified as highest log-level). (Erik
+    Lundin)
+
 - Iconv:
   . Fixed bug #78642 (Wrong libiconv version displayed). (gedas at martynas,
     cmb).
