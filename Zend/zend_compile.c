@@ -2000,14 +2000,20 @@ ZEND_API int zend_is_smart_branch(const zend_op *opline) /* {{{ */
 static inline uint32_t zend_emit_cond_jump(zend_uchar opcode, znode *cond, uint32_t opnum_target) /* {{{ */
 {
 	uint32_t opnum = get_next_op_number();
-	zend_op *opline;
+	zend_op *opline = CG(active_op_array)->opcodes + opnum - 1;
 
-	if ((cond->op_type & (IS_CV|IS_CONST))
-	 && opnum > 0
-	 && zend_is_smart_branch(CG(active_op_array)->opcodes + opnum - 1)) {
-		/* emit extra NOP to avoid incorrect SMART_BRANCH in very rare cases */
-		zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
-		opnum = get_next_op_number();
+	if (cond->op_type == IS_TMP_VAR && opnum > 0) {
+		opline = CG(active_op_array)->opcodes + opnum - 1;
+		if (opline->result_type == IS_TMP_VAR
+		 && opline->result.var == cond->u.op.var
+		 && zend_is_smart_branch(opline)) {
+			if (opcode == ZEND_JMPZ) {
+				opline->result_type = IS_TMP_VAR | IS_SMART_BRANCH_JMPZ;
+			} else {
+				ZEND_ASSERT(opcode == ZEND_JMPNZ);
+				opline->result_type = IS_TMP_VAR | IS_SMART_BRANCH_JMPNZ;
+			}
+		}
 	}
 	opline = zend_emit_op(NULL, opcode, cond, NULL);
 	opline->op2.opline_num = opnum_target;

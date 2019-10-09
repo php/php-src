@@ -702,6 +702,10 @@ struct _zend_execute_data {
 #define IS_VAR		(1<<2)
 #define IS_CV		(1<<3)	/* Compiled variable */
 
+/* Used for result.type of smart branch instructions */
+#define IS_SMART_BRANCH_JMPZ  (1<<4)
+#define IS_SMART_BRANCH_JMPNZ (1<<5)
+
 #define ZEND_EXTRA_VALUE 1
 
 #include "zend_globals.h"

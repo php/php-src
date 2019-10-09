@@ -4261,13 +4261,13 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 #define ZEND_VM_SMART_BRANCH(_result, _check) do { \
 		if ((_check) && UNEXPECTED(EG(exception))) { \
 			OPLINE = EX(opline); \
-		} else if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
+		} else if (EXPECTED(opline->result_type == (IS_SMART_BRANCH_JMPZ|IS_TMP_VAR))) { \
 			if (_result) { \
 				ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
 			} else { \
 				ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
 			} \
-		} else if (EXPECTED((opline+1)->opcode == ZEND_JMPNZ)) { \
+		} else if (EXPECTED(opline->result_type == (IS_SMART_BRANCH_JMPNZ|IS_TMP_VAR))) { \
 			if (!(_result)) { \
 				ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
 			} else { \
@@ -4305,9 +4305,9 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 		ZEND_VM_CONTINUE(); \
 	} while (0)
 #define ZEND_VM_SMART_BRANCH_TRUE() do { \
-		if (EXPECTED((opline+1)->opcode == ZEND_JMPNZ)) { \
+		if (EXPECTED(opline->result_type == (IS_SMART_BRANCH_JMPNZ|IS_TMP_VAR))) { \
 			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
-		} else if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
+		} else if (EXPECTED(opline->result_type == (IS_SMART_BRANCH_JMPZ|IS_TMP_VAR))) { \
 			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
 		} else { \
 			ZVAL_TRUE(EX_VAR(opline->result.var)); \
@@ -4328,9 +4328,9 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 		ZEND_VM_NEXT_OPCODE(); \
 	} while (0)
 #define ZEND_VM_SMART_BRANCH_FALSE() do { \
-		if (EXPECTED((opline+1)->opcode == ZEND_JMPNZ)) { \
+		if (EXPECTED(opline->result_type == (IS_SMART_BRANCH_JMPNZ|IS_TMP_VAR))) { \
 			ZEND_VM_SET_NEXT_OPCODE(opline + 2); \
-		} else if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
+		} else if (EXPECTED(opline->result_type == (IS_SMART_BRANCH_JMPZ|IS_TMP_VAR))) { \
 			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline + 1, (opline+1)->op2)); \
 		} else { \
 			ZVAL_FALSE(EX_VAR(opline->result.var)); \

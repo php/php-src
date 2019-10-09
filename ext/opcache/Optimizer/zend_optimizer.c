@@ -1055,6 +1055,8 @@ static void zend_revert_pass_two(zend_op_array *op_array)
 		if (opline->op2_type == IS_CONST) {
 			ZEND_PASS_TWO_UNDO_CONSTANT(op_array, opline, opline->op2);
 		}
+		/* reset smart branch flags IS_SMART_BRANCH_JMP[N]Z */
+		opline->result_type &= (IS_TMP_VAR|IS_VAR|IS_CV|IS_CONST);
 		opline++;
 	}
 #if !ZEND_USE_ABS_CONST_ADDR
@@ -1099,10 +1101,10 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 		if (opline->op2_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op2);
 		}
-#if ZEND_USE_ABS_JMP_ADDR && !ZEND_USE_ABS_CONST_ADDR
 		if (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) {
 			/* fix jumps to point to new array */
 			switch (opline->opcode) {
+#if ZEND_USE_ABS_JMP_ADDR && !ZEND_USE_ABS_CONST_ADDR
 				case ZEND_JMP:
 				case ZEND_FAST_CALL:
 					opline->op1.jmp_addr = &op_array->opcodes[opline->op1.jmp_addr - old_opcodes];
@@ -1132,9 +1134,41 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 				case ZEND_SWITCH_STRING:
 					/* relative extended_value don't have to be changed */
 					break;
+#endif
+				case ZEND_IS_IDENTICAL:
+				case ZEND_IS_NOT_IDENTICAL:
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_NOT_EQUAL:
+				case ZEND_IS_SMALLER:
+				case ZEND_IS_SMALLER_OR_EQUAL:
+				case ZEND_CASE:
+				case ZEND_ISSET_ISEMPTY_CV:
+				case ZEND_ISSET_ISEMPTY_VAR:
+				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+				case ZEND_ISSET_ISEMPTY_PROP_OBJ:
+				case ZEND_ISSET_ISEMPTY_STATIC_PROP:
+				case ZEND_INSTANCEOF:
+				case ZEND_TYPE_CHECK:
+				case ZEND_DEFINED:
+				case ZEND_IN_ARRAY:
+				case ZEND_ARRAY_KEY_EXISTS:
+					if (opline->result_type & IS_TMP_VAR) {
+						/* reinitialize result_type od smart branch instructions */
+						if (opline + 1 < end) {
+							if ((opline+1)->opcode == ZEND_JMPZ
+							 && (opline+1)->op1_type == IS_TMP_VAR
+							 && (opline+1)->op1.var == opline->result.var) {
+								opline->result_type = IS_SMART_BRANCH_JMPZ | IS_TMP_VAR;
+							} else if ((opline+1)->opcode == ZEND_JMPNZ
+							 && (opline+1)->op1_type == IS_TMP_VAR
+							 && (opline+1)->op1.var == opline->result.var) {
+								opline->result_type = IS_SMART_BRANCH_JMPNZ | IS_TMP_VAR;
+							}
+						}
+					}
+					break;
 			}
 		}
-#endif
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
 	}
@@ -1185,11 +1219,10 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op2);
 		}
 
-		zend_vm_set_opcode_handler_ex(opline, op1_info, op2_info, res_info);
-#if ZEND_USE_ABS_JMP_ADDR && !ZEND_USE_ABS_CONST_ADDR
 		if (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) {
 			/* fix jumps to point to new array */
 			switch (opline->opcode) {
+#if ZEND_USE_ABS_JMP_ADDR && !ZEND_USE_ABS_CONST_ADDR
 				case ZEND_JMP:
 				case ZEND_FAST_CALL:
 					opline->op1.jmp_addr = &op_array->opcodes[opline->op1.jmp_addr - old_opcodes];
@@ -1219,9 +1252,42 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 				case ZEND_SWITCH_STRING:
 					/* relative extended_value don't have to be changed */
 					break;
+#endif
+				case ZEND_IS_IDENTICAL:
+				case ZEND_IS_NOT_IDENTICAL:
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_NOT_EQUAL:
+				case ZEND_IS_SMALLER:
+				case ZEND_IS_SMALLER_OR_EQUAL:
+				case ZEND_CASE:
+				case ZEND_ISSET_ISEMPTY_CV:
+				case ZEND_ISSET_ISEMPTY_VAR:
+				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+				case ZEND_ISSET_ISEMPTY_PROP_OBJ:
+				case ZEND_ISSET_ISEMPTY_STATIC_PROP:
+				case ZEND_INSTANCEOF:
+				case ZEND_TYPE_CHECK:
+				case ZEND_DEFINED:
+				case ZEND_IN_ARRAY:
+				case ZEND_ARRAY_KEY_EXISTS:
+					if (opline->result_type & IS_TMP_VAR) {
+						/* reinitialize result_type od smart branch instructions */
+						if (opline + 1 < end) {
+							if ((opline+1)->opcode == ZEND_JMPZ
+							 && (opline+1)->op1_type == IS_TMP_VAR
+							 && (opline+1)->op1.var == opline->result.var) {
+								opline->result_type = IS_SMART_BRANCH_JMPZ | IS_TMP_VAR;
+							} else if ((opline+1)->opcode == ZEND_JMPNZ
+							 && (opline+1)->op1_type == IS_TMP_VAR
+							 && (opline+1)->op1.var == opline->result.var) {
+								opline->result_type = IS_SMART_BRANCH_JMPNZ | IS_TMP_VAR;
+							}
+						}
+					}
+					break;
 			}
 		}
-#endif
+		zend_vm_set_opcode_handler_ex(opline, op1_info, op2_info, res_info);
 		opline++;
 	}
 }

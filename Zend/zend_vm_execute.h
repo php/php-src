@@ -61000,9 +61000,9 @@ static const uint32_t ZEND_FASTCALL zend_vm_get_opcode_handler_idx(uint32_t spec
 			offset = offset * 2 + (op->extended_value & ZEND_ISEMPTY);
 		} else if (spec & SPEC_RULE_SMART_BRANCH) {
 			offset = offset * 3;
-			if ((op+1)->opcode == ZEND_JMPZ) {
+			if (op->result_type == (IS_SMART_BRANCH_JMPZ|IS_TMP_VAR)) {
 				offset += 1;
-			} else if ((op+1)->opcode == ZEND_JMPNZ) {
+			} else if (op->result_type == (IS_SMART_BRANCH_JMPNZ|IS_TMP_VAR)) {
 				offset += 2;
 			}
 		}

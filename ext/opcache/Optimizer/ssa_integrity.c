@@ -87,7 +87,7 @@ static inline zend_bool is_in_successors(zend_basic_block *block, int check) {
 }
 
 static inline zend_bool is_var_type(zend_uchar type) {
-	return type == IS_CV || type == IS_VAR || type == IS_TMP_VAR;
+	return (type & (IS_CV|IS_VAR|IS_TMP_VAR)) != 0;
 }
 
 #define FAIL(...) do { \

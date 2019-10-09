@@ -125,33 +125,6 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 	return SUCCESS;
 }
 
-static zend_bool is_smart_branch_inhibiting_nop(
-		zend_op_array *op_array, uint32_t target, uint32_t current,
-		zend_basic_block *b, zend_basic_block *blocks_end)
-{
-	uint32_t next;
-	/* Target points one past the last non-nop instruction. Make sure there is one. */
-	if (target == 0) {
-		return 0;
-	}
-
-	/* Find the next instruction, skipping unreachable or empty blocks. */
-	next = current + 1;
-	if (next >= b->start + b->len) {
-		do {
-			b++;
-			if (b == blocks_end) {
-				return 0;
-			}
-		} while (!(b->flags & ZEND_BB_REACHABLE) || b->len == 0);
-		next = b->start;
-	}
-
-	return (op_array->opcodes[next].opcode == ZEND_JMPZ ||
-		 op_array->opcodes[next].opcode == ZEND_JMPNZ) &&
-		zend_is_smart_branch(op_array->opcodes + target - 1);
-}
-
 static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_optimizer_ctx *ctx)
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
@@ -199,8 +172,7 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_op
 				old_end = b->start + b->len;
 				while (i < old_end) {
 					shiftlist[i] = i - target;
-					if (EXPECTED(op_array->opcodes[i].opcode != ZEND_NOP) ||
-						is_smart_branch_inhibiting_nop(op_array, target, i, b, blocks_end)) {
+					if (EXPECTED(op_array->opcodes[i].opcode != ZEND_NOP)) {
 						if (i != target) {
 							op_array->opcodes[target] = op_array->opcodes[i];
 							ssa->ops[target] = ssa->ops[i];
@@ -484,6 +456,24 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 						MAKE_NOP(send_array);
 						removed_ops++;
 
+						op_num = call_info->caller_call_opline - op_array->opcodes;
+						ssa_op = ssa->ops + op_num;
+						if (ssa_op->result_def >= 0) {
+							int var = ssa_op->result_def;
+							int use = ssa->vars[var].use_chain;
+
+							if (ssa->vars[var].phi_use_chain == NULL) {
+								if (ssa->ops[use].op1_use == var
+								 && ssa->ops[use].op1_use_chain == -1) {
+									call_info->caller_call_opline->result_type = IS_TMP_VAR;
+									op_array->opcodes[use].op1_type = IS_TMP_VAR;
+								} else if (ssa->ops[use].op2_use == var
+								 && ssa->ops[use].op2_use_chain == -1) {
+									call_info->caller_call_opline->result_type = IS_TMP_VAR;
+									op_array->opcodes[use].op2_type = IS_TMP_VAR;
+								}
+							}
+						}
 					}
 				}
 			}
@@ -533,8 +523,7 @@ static void compress_block(zend_op_array *op_array, zend_basic_block *block)
 	while (block->len > 0) {
 		zend_op *opline = &op_array->opcodes[block->start + block->len - 1];
 
-		if (opline->opcode == ZEND_NOP
-				&& (block->len == 1 || !zend_is_smart_branch(opline - 1))) {
+		if (opline->opcode == ZEND_NOP) {
 			block->len--;
 		} else {
 			break;
