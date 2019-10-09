@@ -32,8 +32,8 @@
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 #if HAVE_EXIF
-	char *filename;
-	int filedes;
+	php_stream *stream;
+	zval stream_zv;
 
 	if (Size > 256 * 1024) {
 		/* Large inputs have a large impact on fuzzer performance,
@@ -45,16 +45,15 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 		return 0;
 	}
 
-	/* put the data in a file */
-	filename = tmpnam(NULL);
-	filedes = open(filename, O_CREAT|O_RDWR, 0644);
-	write(filedes, Data, Size);
-	close(filedes);
+	stream = php_stream_fopen_tmpfile();
+	php_stream_write(stream, (const char *) Data, Size);
+	php_stream_to_zval(stream, &stream_zv);
 
-	fuzzer_call_php_func("exif_read_data", 1, &filename);
+	fuzzer_call_php_func_zval("exif_read_data", 1, &stream_zv);
+
+	zval_ptr_dtor(&stream_zv);
 
 	/* cleanup */
-	unlink(filename);
 	php_request_shutdown(NULL);
 
 	return 0;
