@@ -202,64 +202,55 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			}
 		}
 
-		if (opline->opcode == ZEND_ECHO) {
-			if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
-				src = VAR_SOURCE(opline->op1);
-				if (src &&
-				    src->opcode == ZEND_CAST &&
-				    src->extended_value == IS_STRING) {
-					/* T = CAST(X, String), ECHO(T) => NOP, ECHO(X) */
-					VAR_SOURCE(opline->op1) = NULL;
-					COPY_NODE(opline->op1, src->op1);
-					MAKE_NOP(src);
-					++(*opt_count);
-				}
-			}
-
-			if (opline->op1_type == IS_CONST) {
-				if (last_op && last_op->opcode == ZEND_ECHO &&
-				    last_op->op1_type == IS_CONST &&
-				    Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_DOUBLE &&
-				    Z_TYPE(ZEND_OP1_LITERAL(last_op)) != IS_DOUBLE) {
-					/* compress consecutive ECHO's.
-					 * Float to string conversion may be affected by current
-					 * locale setting.
-					 */
-					int l, old_len;
-
-					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_STRING) {
-						convert_to_string(&ZEND_OP1_LITERAL(opline));
-					}
-					if (Z_TYPE(ZEND_OP1_LITERAL(last_op)) != IS_STRING) {
-						convert_to_string(&ZEND_OP1_LITERAL(last_op));
-					}
-					old_len = Z_STRLEN(ZEND_OP1_LITERAL(last_op));
-					l = old_len + Z_STRLEN(ZEND_OP1_LITERAL(opline));
-					if (!Z_REFCOUNTED(ZEND_OP1_LITERAL(last_op))) {
-						zend_string *tmp = zend_string_alloc(l, 0);
-						memcpy(ZSTR_VAL(tmp), Z_STRVAL(ZEND_OP1_LITERAL(last_op)), old_len);
-						Z_STR(ZEND_OP1_LITERAL(last_op)) = tmp;
-					} else {
-						Z_STR(ZEND_OP1_LITERAL(last_op)) = zend_string_extend(Z_STR(ZEND_OP1_LITERAL(last_op)), l, 0);
-					}
-					Z_TYPE_INFO(ZEND_OP1_LITERAL(last_op)) = IS_STRING_EX;
-					memcpy(Z_STRVAL(ZEND_OP1_LITERAL(last_op)) + old_len, Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)));
-					Z_STRVAL(ZEND_OP1_LITERAL(last_op))[l] = '\0';
-					zval_ptr_dtor_nogc(&ZEND_OP1_LITERAL(opline));
-					ZVAL_STR(&ZEND_OP1_LITERAL(opline), zend_new_interned_string(Z_STR(ZEND_OP1_LITERAL(last_op))));
-					ZVAL_NULL(&ZEND_OP1_LITERAL(last_op));
-					MAKE_NOP(last_op);
-					++(*opt_count);
-				}
-				last_op = opline;
-			} else {
-				last_op = NULL;
-			}
-		} else {
-			last_op = NULL;
-		}
-
 		switch (opline->opcode) {
+			case ZEND_ECHO:
+				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+					src = VAR_SOURCE(opline->op1);
+					if (src &&
+					    src->opcode == ZEND_CAST &&
+					    src->extended_value == IS_STRING) {
+						/* T = CAST(X, String), ECHO(T) => NOP, ECHO(X) */
+						VAR_SOURCE(opline->op1) = NULL;
+						COPY_NODE(opline->op1, src->op1);
+						MAKE_NOP(src);
+						++(*opt_count);
+					}
+				} else if (opline->op1_type == IS_CONST &&
+				           Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_DOUBLE) {
+					if (last_op == opline - 1) {
+						/* compress consecutive ECHO's.
+						 * Float to string conversion may be affected by current
+						 * locale setting.
+						 */
+						int l, old_len;
+
+						if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_STRING) {
+							convert_to_string(&ZEND_OP1_LITERAL(opline));
+						}
+						if (Z_TYPE(ZEND_OP1_LITERAL(last_op)) != IS_STRING) {
+							convert_to_string(&ZEND_OP1_LITERAL(last_op));
+						}
+						old_len = Z_STRLEN(ZEND_OP1_LITERAL(last_op));
+						l = old_len + Z_STRLEN(ZEND_OP1_LITERAL(opline));
+						if (!Z_REFCOUNTED(ZEND_OP1_LITERAL(last_op))) {
+							zend_string *tmp = zend_string_alloc(l, 0);
+							memcpy(ZSTR_VAL(tmp), Z_STRVAL(ZEND_OP1_LITERAL(last_op)), old_len);
+							Z_STR(ZEND_OP1_LITERAL(last_op)) = tmp;
+						} else {
+							Z_STR(ZEND_OP1_LITERAL(last_op)) = zend_string_extend(Z_STR(ZEND_OP1_LITERAL(last_op)), l, 0);
+						}
+						Z_TYPE_INFO(ZEND_OP1_LITERAL(last_op)) = IS_STRING_EX;
+						memcpy(Z_STRVAL(ZEND_OP1_LITERAL(last_op)) + old_len, Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)));
+						Z_STRVAL(ZEND_OP1_LITERAL(last_op))[l] = '\0';
+						zval_ptr_dtor_nogc(&ZEND_OP1_LITERAL(opline));
+						ZVAL_STR(&ZEND_OP1_LITERAL(opline), zend_new_interned_string(Z_STR(ZEND_OP1_LITERAL(last_op))));
+						ZVAL_NULL(&ZEND_OP1_LITERAL(last_op));
+						MAKE_NOP(last_op);
+						++(*opt_count);
+					}
+					last_op = opline;
+				}
+				break;
 
 			case ZEND_FREE:
 				if (opline->op1_type == IS_TMP_VAR) {
