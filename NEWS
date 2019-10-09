@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #78658 (Memory corruption using Closure::bindTo). (Nikita)
+  . Fixed bug #78656 (Parse errors classified as highest log-level). (Erik
+    Lundin)
 
 - Iconv:
   . Fixed bug #78642 (Wrong libiconv version displayed). (gedas at martynas,
