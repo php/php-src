@@ -77,7 +77,7 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						target = ZEND_OP1_JMP_ADDR(target);
 						CHECK_LOOP(target);
 						ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target);
-					} else if (target->opcode == ZEND_JMP) {
+					} else if (target->opcode == ZEND_NOP) {
 						target = target + 1;
 						ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target);
 					} else {
@@ -126,7 +126,7 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						target = ZEND_OP1_JMP_ADDR(target);
 						CHECK_LOOP(target);
 						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
-					} else if (target->opcode == ZEND_JMP) {
+					} else if (target->opcode == ZEND_NOP) {
 						target = target + 1;
 						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else {
@@ -170,7 +170,7 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						}
 						CHECK_LOOP(target);
 						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
-					} else if (target->opcode == ZEND_JMP) {
+					} else if (target->opcode == ZEND_NOP) {
 						target = target + 1;
 						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else {
@@ -265,7 +265,7 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						opline->result.var = target->result.var;
 						target = target + 1;
 						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
-					} else if (target->opcode == ZEND_JMP) {
+					} else if (target->opcode == ZEND_NOP) {
 						target = target + 1;
 						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else {
@@ -305,7 +305,7 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						target = ZEND_OP1_JMP_ADDR(target);
 						CHECK_LOOP(target);
 						opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, target);
-					} else if (target->opcode == ZEND_JMP) {
+					} else if (target->opcode == ZEND_NOP) {
 						target = target + 1;
 						opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, target);
 					} else {
