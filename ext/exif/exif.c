@@ -1396,34 +1396,30 @@ static HashTable *exif_get_tag_ht(tag_info_type *tag_table)
 
 /* {{{ exif_get_tagname
 	Get headername for tag_num or NULL if not defined */
-static char * exif_get_tagname(int tag_num, char *ret, int len, tag_table_type tag_table)
+static char *exif_get_tagname(int tag_num, tag_table_type tag_table)
 {
-	char tmp[32];
-	char *desc = zend_hash_index_find_ptr(exif_get_tag_ht(tag_table), tag_num);
-	if (desc) {
-		if (ret && len)  {
-			strlcpy(ret, desc, abs(len));
-			if (len < 0) {
-				memset(ret + strlen(ret), ' ', -len - strlen(ret) - 1);
-				ret[-len - 1] = '\0';
-			}
-			return ret;
-		}
-		return desc;
-	}
-
-	if (ret && len) {
-		snprintf(tmp, sizeof(tmp), "UndefinedTag:0x%04X", tag_num);
-		strlcpy(ret, tmp, abs(len));
-		if (len < 0) {
-			memset(ret + strlen(ret), ' ', -len - strlen(ret) - 1);
-			ret[-len - 1] = '\0';
-		}
-		return ret;
-	}
-	return "";
+	return zend_hash_index_find_ptr(exif_get_tag_ht(tag_table), tag_num);
 }
 /* }}} */
+
+static char *exif_get_tagname_debug(int tag_num, tag_table_type tag_table)
+{
+	char *desc = zend_hash_index_find_ptr(exif_get_tag_ht(tag_table), tag_num);
+	if (desc) {
+		return desc;
+	}
+	return "UndefinedTag";
+}
+
+static char *exif_get_tagname_key(int tag_num, char *buf, size_t buf_size, tag_table_type tag_table)
+{
+	char *desc = zend_hash_index_find_ptr(exif_get_tag_ht(tag_table), tag_num);
+	if (desc) {
+		return desc;
+	}
+	snprintf(buf, buf_size, "UndefinedTag:0x%04X", tag_num);
+	return buf;
+}
 
 /* {{{ exif_char_dump
  * Do not use! This is a debug function... */
@@ -2416,7 +2412,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 				name = uname;
 			}
 #ifdef EXIF_DEBUG
-/*		php_error_docref(NULL, E_NOTICE, "Adding infos: tag(0x%04X,%12s,L=0x%04X): %s", info_tag, exif_get_tagname(info_tag, buffer, -12, exif_get_tag_table(section_index)), info_data->length, info_data->format==TAG_FMT_STRING?(info_value&&info_value->s?info_value->s:"<no data>"):exif_get_tagformat(info_data->format));*/
+/*		php_error_docref(NULL, E_NOTICE, "Adding infos: tag(0x%04X,%12s,L=0x%04X): %s", info_tag, exif_get_tagname_debug(info_tag, exif_get_tag_table(section_index)), info_data->length, info_data->format==TAG_FMT_STRING?(info_value&&info_value->s?info_value->s:"<no data>"):exif_get_tagformat(info_data->format));*/
 #endif
 			if (info_data->length==0) {
 				add_assoc_null(&tmpi, name);
@@ -2736,9 +2732,8 @@ PHP_FUNCTION(exif_tagname)
 		return;
 	}
 
-	szTemp = exif_get_tagname(tag, NULL, 0, tag_table_IFD);
-
-	if (tag < 0 || !szTemp || !szTemp[0]) {
+	szTemp = exif_get_tagname(tag, tag_table_IFD);
+	if (tag < 0 || !szTemp) {
 		RETURN_FALSE;
 	}
 
@@ -2879,7 +2874,7 @@ static void exif_thumbnail_build(image_info_type *ImageInfo) {
 				info_data  = &info_list->list[i];
 				byte_count = php_tiff_bytes_per_format[info_data->format] * info_data->length;
 #ifdef EXIF_DEBUG
-				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Thumbnail: process tag(x%04X=%s): %s%s (%d bytes)", info_data->tag, exif_get_tagname(info_data->tag, tagname, -12, tag_table_IFD), (info_data->length>1)&&info_data->format!=TAG_FMT_UNDEFINED&&info_data->format!=TAG_FMT_STRING?"ARRAY OF ":"", exif_get_tagformat(info_data->format), byte_count);
+				exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Thumbnail: process tag(x%04X=%s): %s%s (%d bytes)", info_data->tag, exif_get_tagname_debug(info_data->tag, tag_table_IFD), (info_data->length>1)&&info_data->format!=TAG_FMT_UNDEFINED&&info_data->format!=TAG_FMT_STRING?"ARRAY OF ":"", exif_get_tagformat(info_data->format), byte_count);
 #endif
 				if (info_data->tag==TAG_STRIP_OFFSETS || info_data->tag==TAG_JPEG_INTERCHANGE_FORMAT) {
 					php_ifd_set16u(new_data + 0, info_data->tag,    ImageInfo->motorola_intel);
@@ -3224,7 +3219,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 
 #define REQUIRE_NON_EMPTY() do { \
 	if (byte_count == 0) { \
-		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Cannot be empty", tag, exif_get_tagname(tag, tagname, -12, tag_table)); \
+		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Cannot be empty", tag, exif_get_tagname_debug(tag, tag_table)); \
 		return FALSE; \
 	} \
 } while (0)
@@ -3258,7 +3253,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 
 	if (!format || format > NUM_FORMATS) {
 		/* (-1) catches illegal zero case as unsigned underflows to positive large. */
-		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal format code 0x%04X, suppose BYTE", tag, exif_get_tagname(tag, tagname, -12, tag_table), format);
+		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal format code 0x%04X, suppose BYTE", tag, exif_get_tagname_debug(tag, tag_table), format);
 		format = TAG_FMT_BYTE;
 		/*return TRUE;*/
 	}
@@ -3266,7 +3261,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 	byte_count_signed = (int64_t)components * php_tiff_bytes_per_format[format];
 
 	if (byte_count_signed < 0 || (byte_count_signed > INT32_MAX)) {
-		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal byte_count", tag, exif_get_tagname(tag, tagname, -12, tag_table));
+		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal byte_count", tag, exif_get_tagname_debug(tag, tag_table));
 		return FALSE;
 	}
 
@@ -3289,11 +3284,11 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				if (value_ptr < dir_entry) {
 					/* we can read this if offset_val > 0 */
 					/* some files have their values in other parts of the file */
-					exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal pointer offset(x%04X < x%04X)", tag, exif_get_tagname(tag, tagname, -12, tag_table), offset_val, dir_entry);
+					exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal pointer offset(x%04X < x%04X)", tag, exif_get_tagname_debug(tag, tag_table), offset_val, dir_entry);
 				} else {
 					/* this is for sure not allowed */
 					/* exception are IFD pointers */
-					exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal pointer offset(x%04X + x%04X = x%04X > x%04X)", tag, exif_get_tagname(tag, tagname, -12, tag_table), offset_val, byte_count, offset_val+byte_count, IFDlength);
+					exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal pointer offset(x%04X + x%04X = x%04X > x%04X)", tag, exif_get_tagname_debug(tag, tag_table), offset_val, byte_count, offset_val+byte_count, IFDlength);
 				}
 				return FALSE;
 			}
@@ -3336,7 +3331,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 	ImageInfo->sections_found |= FOUND_ANY_TAG;
 #ifdef EXIF_DEBUG
 	dump_data = exif_dump_data(&dump_free, format, components, length, ImageInfo->motorola_intel, value_ptr);
-	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process tag(x%04X=%s,@x%04X + x%04X(=%d)): %s%s %s", tag, exif_get_tagname(tag, tagname, -12, tag_table), offset_val+displacement, byte_count, byte_count, (components>1)&&format!=TAG_FMT_UNDEFINED&&format!=TAG_FMT_STRING?"ARRAY OF ":"", exif_get_tagformat(format), dump_data);
+	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process tag(x%04X=%s,@x%04X + x%04X(=%d)): %s%s %s", tag, exif_get_tagname_debug(tag, tag_table), offset_val+displacement, byte_count, byte_count, (components>1)&&format!=TAG_FMT_UNDEFINED&&format!=TAG_FMT_STRING?"ARRAY OF ":"", exif_get_tagformat(format), dump_data);
 	if (dump_free) {
 		efree(dump_data);
 	}
@@ -3565,7 +3560,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				}
 		}
 	}
-	exif_iif_add_tag(ImageInfo, section_index, exif_get_tagname(tag, tagname, sizeof(tagname), tag_table), tag, format, components, value_ptr, byte_count);
+	exif_iif_add_tag(ImageInfo, section_index, exif_get_tagname_key(tag, tagname, sizeof(tagname), tag_table), tag, format, components, value_ptr, byte_count);
 	EFREE_IF(outside);
 	return TRUE;
 }
@@ -4003,7 +3998,6 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 {
 	int i, sn, num_entries, sub_section_index = 0;
 	unsigned char *dir_entry;
-	char tagname[64];
 	size_t ifd_size, dir_size, entry_offset, next_offset, entry_length, entry_value=0, fgot;
 	int entry_tag , entry_type;
 	tag_table_type tag_table = exif_get_tag_table(section_index);
@@ -4041,7 +4035,7 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 				entry_tag    = php_ifd_get16u(dir_entry+0, ImageInfo->motorola_intel);
 				entry_type   = php_ifd_get16u(dir_entry+2, ImageInfo->motorola_intel);
 				if (entry_type > NUM_FORMATS) {
-					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read from TIFF: tag(0x%04X,%12s): Illegal format code 0x%04X, switching to BYTE", entry_tag, exif_get_tagname(entry_tag, tagname, -12, tag_table), entry_type);
+					exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read from TIFF: tag(0x%04X,%12s): Illegal format code 0x%04X, switching to BYTE", entry_tag, exif_get_tagname_debug(entry_tag, tag_table), entry_type);
 					/* Since this is repeated in exif_process_IFD_TAG make it a notice here */
 					/* and make it a warning in the exif_process_IFD_TAG which is called    */
 					/* elsewhere. */
@@ -4599,7 +4593,7 @@ PHP_FUNCTION(exif_read_data)
 	exif_iif_add_str(&ImageInfo, SECTION_COMPUTED, "Copyright.Editor",       ImageInfo.CopyrightEditor);
 
 	for (i=0; i<ImageInfo.xp_fields.count; i++) {
-		exif_iif_add_str(&ImageInfo, SECTION_WINXP, exif_get_tagname(ImageInfo.xp_fields.list[i].tag, NULL, 0, exif_get_tag_table(SECTION_WINXP)), ImageInfo.xp_fields.list[i].value);
+		exif_iif_add_str(&ImageInfo, SECTION_WINXP, exif_get_tagname_debug(ImageInfo.xp_fields.list[i].tag, exif_get_tag_table(SECTION_WINXP)), ImageInfo.xp_fields.list[i].value);
 	}
 	if (ImageInfo.Thumbnail.size) {
 		if (read_thumbnail) {
