@@ -139,7 +139,7 @@ void zend_dump_var(const zend_op_array *op_array, zend_uchar var_type, int var_n
 		fprintf(stderr, "CV%d($%s)", var_num, op_array->vars[var_num]->val);
 	} else if (var_type == IS_VAR) {
 		fprintf(stderr, "V%d", var_num);
-	} else if (var_type == IS_TMP_VAR || !(var_type & (IS_VAR|IS_CV))) {
+	} else if ((var_type & (IS_VAR|IS_TMP_VAR)) == IS_TMP_VAR) {
 		fprintf(stderr, "T%d", var_num);
 	} else {
 		fprintf(stderr, "X%d", var_num);

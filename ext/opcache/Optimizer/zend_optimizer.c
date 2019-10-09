@@ -1153,7 +1153,7 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 				case ZEND_IN_ARRAY:
 				case ZEND_ARRAY_KEY_EXISTS:
 					if (opline->result_type & IS_TMP_VAR) {
-						/* reinitialize result_type od smart branch instructions */
+						/* reinitialize result_type of smart branch instructions */
 						if (opline + 1 < end) {
 							if ((opline+1)->opcode == ZEND_JMPZ
 							 && (opline+1)->op1_type == IS_TMP_VAR
@@ -1271,7 +1271,7 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 				case ZEND_IN_ARRAY:
 				case ZEND_ARRAY_KEY_EXISTS:
 					if (opline->result_type & IS_TMP_VAR) {
-						/* reinitialize result_type od smart branch instructions */
+						/* reinitialize result_type of smart branch instructions */
 						if (opline + 1 < end) {
 							if ((opline+1)->opcode == ZEND_JMPZ
 							 && (opline+1)->op1_type == IS_TMP_VAR

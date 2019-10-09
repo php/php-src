@@ -2000,7 +2000,7 @@ ZEND_API int zend_is_smart_branch(const zend_op *opline) /* {{{ */
 static inline uint32_t zend_emit_cond_jump(zend_uchar opcode, znode *cond, uint32_t opnum_target) /* {{{ */
 {
 	uint32_t opnum = get_next_op_number();
-	zend_op *opline = CG(active_op_array)->opcodes + opnum - 1;
+	zend_op *opline;
 
 	if (cond->op_type == IS_TMP_VAR && opnum > 0) {
 		opline = CG(active_op_array)->opcodes + opnum - 1;
