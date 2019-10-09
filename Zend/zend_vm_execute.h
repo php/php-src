@@ -3605,10 +3605,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_THROW_SPEC_CONST_
 	} while (0);
 
 	zend_exception_save();
-	if (IS_CONST != IS_TMP_VAR) {
-		Z_TRY_ADDREF_P(value);
-	}
-
+	Z_TRY_ADDREF_P(value);
 	zend_throw_exception_object(value);
 	zend_exception_restore();
 
@@ -13138,6 +13135,42 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FREE_SPEC_TMPVA
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_THROW_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *value;
+
+	SAVE_OPLINE();
+	value = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
+
+	do {
+		if ((IS_TMP_VAR|IS_VAR) == IS_CONST || UNEXPECTED(Z_TYPE_P(value) != IS_OBJECT)) {
+			if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
+				value = Z_REFVAL_P(value);
+				if (EXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
+					break;
+				}
+			}
+			if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+				ZVAL_UNDEFINED_OP1();
+				if (UNEXPECTED(EG(exception) != NULL)) {
+					HANDLE_EXCEPTION();
+				}
+			}
+			zend_throw_error(NULL, "Can only throw objects");
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			HANDLE_EXCEPTION();
+		}
+	} while (0);
+
+	zend_exception_save();
+	Z_TRY_ADDREF_P(value);
+	zend_throw_exception_object(value);
+	zend_exception_restore();
+	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	HANDLE_EXCEPTION();
+}
+
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -17508,45 +17541,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_TMP_HAND
 	ZEND_VM_RETURN();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_THROW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *value;
-
-	SAVE_OPLINE();
-	value = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
-
-	do {
-		if (IS_TMP_VAR == IS_CONST || UNEXPECTED(Z_TYPE_P(value) != IS_OBJECT)) {
-			if ((IS_TMP_VAR & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
-				value = Z_REFVAL_P(value);
-				if (EXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
-					break;
-				}
-			}
-			if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP1();
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					HANDLE_EXCEPTION();
-				}
-			}
-			zend_throw_error(NULL, "Can only throw objects");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			HANDLE_EXCEPTION();
-		}
-	} while (0);
-
-	zend_exception_save();
-	if (IS_TMP_VAR != IS_TMP_VAR) {
-		Z_TRY_ADDREF_P(value);
-	}
-
-	zend_throw_exception_object(value);
-	zend_exception_restore();
-
-	HANDLE_EXCEPTION();
-}
-
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -20252,45 +20246,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_VAR_HAND
 
 	/* Pass execution back to handling code */
 	ZEND_VM_RETURN();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_THROW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *value;
-
-	SAVE_OPLINE();
-	value = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
-
-	do {
-		if (IS_VAR == IS_CONST || UNEXPECTED(Z_TYPE_P(value) != IS_OBJECT)) {
-			if ((IS_VAR & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
-				value = Z_REFVAL_P(value);
-				if (EXPECTED(Z_TYPE_P(value) == IS_OBJECT)) {
-					break;
-				}
-			}
-			if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP1();
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					HANDLE_EXCEPTION();
-				}
-			}
-			zend_throw_error(NULL, "Can only throw objects");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			HANDLE_EXCEPTION();
-		}
-	} while (0);
-
-	zend_exception_save();
-	if (IS_VAR != IS_TMP_VAR) {
-		Z_TRY_ADDREF_P(value);
-	}
-
-	zend_throw_exception_object(value);
-	zend_exception_restore();
-	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-	HANDLE_EXCEPTION();
 }
 
 static zend_always_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_SPEC_VAR_INLINE_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -36997,10 +36952,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_THROW_SPEC_CV_HANDLER(ZEND_OPC
 	} while (0);
 
 	zend_exception_save();
-	if (IS_CV != IS_TMP_VAR) {
-		Z_TRY_ADDREF_P(value);
-	}
-
+	Z_TRY_ADDREF_P(value);
 	zend_throw_exception_object(value);
 	zend_exception_restore();
 
@@ -51833,8 +51785,8 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_SEND_VAR_NO_REF_SPEC_VAR_LABEL,
 			(void*)&&ZEND_CATCH_SPEC_CONST_LABEL,
 			(void*)&&ZEND_THROW_SPEC_CONST_LABEL,
-			(void*)&&ZEND_THROW_SPEC_TMP_LABEL,
-			(void*)&&ZEND_THROW_SPEC_VAR_LABEL,
+			(void*)&&ZEND_THROW_SPEC_TMPVAR_LABEL,
+			(void*)&&ZEND_THROW_SPEC_TMPVAR_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_THROW_SPEC_CV_LABEL,
 			(void*)&&ZEND_FETCH_CLASS_SPEC_UNUSED_CONST_LABEL,
@@ -54734,6 +54686,10 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_FE_FREE_SPEC_TMPVAR)
 				ZEND_FE_FREE_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_THROW_SPEC_TMPVAR):
+				VM_TRACE(ZEND_THROW_SPEC_TMPVAR)
+				ZEND_THROW_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SEND_VAL_SPEC_TMPVAR):
 				VM_TRACE(ZEND_SEND_VAL_SPEC_TMPVAR)
 				ZEND_SEND_VAL_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -55123,10 +55079,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_GENERATOR_RETURN_SPEC_TMP)
 				ZEND_GENERATOR_RETURN_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_THROW_SPEC_TMP):
-				VM_TRACE(ZEND_THROW_SPEC_TMP)
-				ZEND_THROW_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SEND_VAL_EX_SPEC_TMP):
 				VM_TRACE(ZEND_SEND_VAL_EX_SPEC_TMP)
 				ZEND_SEND_VAL_EX_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -55407,10 +55359,6 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_GENERATOR_RETURN_SPEC_VAR):
 				VM_TRACE(ZEND_GENERATOR_RETURN_SPEC_VAR)
 				ZEND_GENERATOR_RETURN_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_THROW_SPEC_VAR):
-				VM_TRACE(ZEND_THROW_SPEC_VAR)
-				ZEND_THROW_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SEND_VAR_SPEC_VAR):
 				VM_TRACE(ZEND_SEND_VAR_SPEC_VAR)
@@ -59349,8 +59297,8 @@ void zend_vm_init(void)
 		ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER,
 		ZEND_CATCH_SPEC_CONST_HANDLER,
 		ZEND_THROW_SPEC_CONST_HANDLER,
-		ZEND_THROW_SPEC_TMP_HANDLER,
-		ZEND_THROW_SPEC_VAR_HANDLER,
+		ZEND_THROW_SPEC_TMPVAR_HANDLER,
+		ZEND_THROW_SPEC_TMPVAR_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_THROW_SPEC_CV_HANDLER,
 		ZEND_FETCH_CLASS_SPEC_UNUSED_CONST_HANDLER,
