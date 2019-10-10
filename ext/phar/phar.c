@@ -1386,6 +1386,7 @@ int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int a
 	mydata = ecalloc(1, sizeof(phar_archive_data));
 	mydata->fname = expand_filepath(fname, NULL);
 	if (mydata->fname == NULL) {
+		efree(mydata);
 		return FAILURE;
 	}
 	fname_len = strlen(mydata->fname);
