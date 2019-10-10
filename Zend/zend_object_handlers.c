@@ -1024,7 +1024,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int typ
 	zobj = Z_OBJ_P(object);
 	name = zval_try_get_tmp_string(member, &tmp_name);
 	if (UNEXPECTED(!name)) {
-		return NULL;
+		return &EG(error_zval);
 	}
 
 #if DEBUG_OBJECT_HANDLERS
@@ -1072,6 +1072,8 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int typ
 				zend_error(E_NOTICE, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 			}
 		}
+	} else if (zobj->ce->__get == NULL) {
+		retval = &EG(error_zval);
 	}
 
 	zend_tmp_string_release(tmp_name);

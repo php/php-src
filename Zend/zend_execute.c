@@ -2822,6 +2822,9 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			}
 			return;
 		}
+	} else if (UNEXPECTED(Z_ISERROR_P(ptr))) {
+		ZVAL_ERROR(result);
+		return;
 	}
 
 	ZVAL_INDIRECT(result, ptr);
@@ -2858,7 +2861,7 @@ static zend_always_inline void zend_assign_to_property_reference(zval *container
 		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
-	if (UNEXPECTED(Z_ISERROR_P(variable_ptr) || EG(exception))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
