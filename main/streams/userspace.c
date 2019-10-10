@@ -700,12 +700,17 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 	/* since the user stream has no way of setting the eof flag directly, we need to ask it if we hit eof */
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_EOF, sizeof(USERSTREAM_EOF)-1);
-
 	call_result = call_user_function(NULL,
 			Z_ISUNDEF(us->object)? NULL : &us->object,
 			&func_name,
 			&retval,
 			0, NULL);
+	zval_ptr_dtor(&func_name);
+
+	if (EG(exception)) {
+		stream->eof = 1;
+		return -1;
+	}
 
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF && zval_is_true(&retval)) {
 		stream->eof = 1;
@@ -718,7 +723,6 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 	}
 
 	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&func_name);
 
 	return didread;
 }
