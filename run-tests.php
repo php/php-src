@@ -2135,7 +2135,7 @@ TEST $file
 
 			junit_start_timer($shortname);
 
-			$output = system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache -d display_errors=1 \"$test_skipif\"", $env);
+			$output = system_with_timeout("$extra $php $pass_options $extra_options -q $orig_ini_settings $no_file_cache -d display_errors=1 -d display_startup_errors=0 \"$test_skipif\"", $env);
 			$output = trim($output);
 
 			junit_finish_timer($shortname);
