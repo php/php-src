@@ -76,13 +76,12 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					if (target->opcode == ZEND_JMP) {
 						target = ZEND_OP1_JMP_ADDR(target);
 						CHECK_LOOP(target);
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target);
 					} else if (target->opcode == ZEND_NOP) {
 						target = target + 1;
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target);
 					} else {
 						break;
 					}
+					ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target);
 				}
 
 				/* convert L: JMP L+1 to NOP */
@@ -125,13 +124,12 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					if (target->opcode == ZEND_JMP) {
 						target = ZEND_OP1_JMP_ADDR(target);
 						CHECK_LOOP(target);
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else if (target->opcode == ZEND_NOP) {
 						target = target + 1;
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else {
 						break;
 					}
+					ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 				}
 				break;
 
@@ -146,36 +144,29 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						/* JMPZ(X,L1), L1: JMP(L2) => JMPZ(X,L2), L1: JMP(L2) */
 						target = ZEND_OP1_JMP_ADDR(target);
 						CHECK_LOOP(target);
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else if (target->opcode == opline->opcode &&
 					           SAME_VAR(opline->op1, target->op1)) {
 						/* same opcode and same var as this opcode */
 						/* JMPZ(X,L1), L1: JMPZ(X,L2) => JMPZ(X,L2), L1: JMPZ(X,L2) */
 						target = ZEND_OP2_JMP_ADDR(target);
 						CHECK_LOOP(target);
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else if (target->opcode == INV_COND(opline->opcode) &&
 					           SAME_VAR(opline->op1, target->op1)) {
 						/* convert JMPZ(X,L1), L1: JMPNZ(X,L2) to
 						   JMPZ(X,L1+1) */
 						target = target + 1;
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else if (target->opcode == ZEND_JMPZNZ &&
 					           SAME_VAR(opline->op1, target->op1)) {
-						if (opline->opcode == ZEND_JMPZ) {
-							target = ZEND_OP2_JMP_ADDR(target);
-						} else {
-							/* JMPNZ_EX */
-							target = ZEND_OFFSET_TO_OPLINE(target, target->extended_value);
-						}
+						target = (opline->opcode == ZEND_JMPZ) ?
+							ZEND_OP2_JMP_ADDR(target) :
+							ZEND_OFFSET_TO_OPLINE(target, target->extended_value);
 						CHECK_LOOP(target);
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else if (target->opcode == ZEND_NOP) {
 						target = target + 1;
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else {
 						break;
 					}
+					ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 				}
 
 				/* convert L: JMPZ L+1 to NOP */
@@ -203,7 +194,6 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						/* JMPZ_EX(X,L1), L1: JMP(L2) => JMPZ_EX(X,L2), L1: JMP(L2) */
 						target = ZEND_OP1_JMP_ADDR(target);
 						CHECK_LOOP(target);
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else if (target->opcode == opline->opcode-3 &&
 					           (SAME_VAR(target->op1, opline->result) ||
 					            SAME_VAR(target->op1, opline->op1))) {
@@ -211,7 +201,6 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						   JMPZ_EX(X,L2) */
 						target = ZEND_OP2_JMP_ADDR(target);
 						CHECK_LOOP(target);
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else if (target->opcode == opline->opcode &&
 					           (SAME_VAR(target->op1, opline->result) ||
 					            SAME_VAR(target->op1, opline->op1)) &&
@@ -220,25 +209,19 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						   JMPZ_EX(X,L2) */
 						target = ZEND_OP2_JMP_ADDR(target);
 						CHECK_LOOP(target);
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else if (target->opcode == ZEND_JMPZNZ &&
 							   SAME_VAR(target->op1, opline->result)) {
 						/* Check for JMPZNZ with same cond variable */
-						if (opline->opcode == ZEND_JMPZ_EX) {
-							target = ZEND_OP2_JMP_ADDR(target);
-						} else {
-							/* JMPNZ_EX */
-							target = ZEND_OFFSET_TO_OPLINE(target, target->extended_value);
-						}
+						target = (opline->opcode == ZEND_JMPZ_EX) ?
+							ZEND_OP2_JMP_ADDR(target) :
+							ZEND_OFFSET_TO_OPLINE(target, target->extended_value);
 						CHECK_LOOP(target);
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else if (target->opcode == INV_EX_COND(opline->opcode) &&
 					           (SAME_VAR(target->op1, opline->result) ||
 					            SAME_VAR(target->op1, opline->op1))) {
 					   /* convert T=JMPZ_EX(X,L1), L1: JMPNZ(T,L2) to
 						  JMPZ_EX(X,L1+1) */
 						target = target + 1;
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else if (target->opcode == INV_EX_COND_EX(opline->opcode) &&
 					           (SAME_VAR(target->op1, opline->result) ||
 					            SAME_VAR(target->op1, opline->op1)) &&
@@ -247,7 +230,6 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					   /* convert T=JMPZ_EX(X,L1), L1: T=JMPNZ_EX(T,L2) to
 						  JMPZ_EX(X,L1+1) */
 						target = target + 1;
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else if (target->opcode == ZEND_BOOL &&
 					           (SAME_VAR(target->op1, opline->result) ||
 					            SAME_VAR(target->op1, opline->op1))) {
@@ -264,13 +246,13 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						/*       sequences too early.                              */
 						opline->result.var = target->result.var;
 						target = target + 1;
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
+						CHECK_LOOP(target);
 					} else if (target->opcode == ZEND_NOP) {
 						target = target + 1;
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else {
 						break;
 					}
+					ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 				}
 
 				/* convert L: T = JMPZ_EX X,L+1 to T = BOOL(X) */
@@ -283,34 +265,56 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 			case ZEND_JMPZNZ:
 				jmp_hitlist_count = 0;
-
-				/* JMPZNZ(X,L1,L2), L1: JMP(L3) => JMPZNZ(X,L3,L2), L1: JMP(L3) */
 				target = ZEND_OP2_JMP_ADDR(opline);
 				while (1) {
 					if (target->opcode == ZEND_JMP) {
+						/* JMPZNZ(X,L1,L2), L1: JMP(L3) => JMPZNZ(X,L3,L2), L1: JMP(L3) */
 						target = ZEND_OP1_JMP_ADDR(target);
 						CHECK_LOOP(target);
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
+					} else if ((target->opcode == ZEND_JMPZ || target->opcode == ZEND_JMPZNZ) &&
+					           SAME_VAR(target->op1, opline->op1)) {
+						/* JMPZNZ(X, L1, L2), L1: JMPZ(X, L3) -> JMPZNZ(X, L3, L2) */
+						target = ZEND_OP2_JMP_ADDR(target);
+						CHECK_LOOP(target);
+					} else if (target->opcode == ZEND_JMPNZ &&
+					           SAME_VAR(target->op1, opline->op1)) {
+						/* JMPZNZ(X, L1, L2), L1: X = JMPNZ(X, L3) -> JMPZNZ(X, L1+1, L2) */
+						target = target + 1;
 					} else if (target->opcode == ZEND_NOP) {
 						target = target + 1;
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 					} else {
 						break;
 					}
+					ZEND_SET_OP_JMP_ADDR(opline, opline->op2, target);
 				}
 
+				jmp_hitlist_count = 0;
 				target = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
 				while (1) {
 					if (target->opcode == ZEND_JMP) {
+						/* JMPZNZ(X,L1,L2), L2: JMP(L3) => JMPZNZ(X,L1,L3), L2: JMP(L3) */
 						target = ZEND_OP1_JMP_ADDR(target);
 						CHECK_LOOP(target);
-						opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, target);
+					} else if (target->opcode == ZEND_JMPNZ &&
+					           SAME_VAR(target->op1, opline->op1)) {
+						/* JMPZNZ(X, L1, L2), L1: X = JMPNZ(X, L3) -> JMPZNZ(X, L1+1, L2) */
+						target = ZEND_OP2_JMP_ADDR(target);
+						CHECK_LOOP(target);
+					} else if (target->opcode == ZEND_JMPZ &&
+					           SAME_VAR(target->op1, opline->op1)) {
+						/* JMPZNZ(X, L1, L2), L1: JMPZ(X, L3) -> JMPZNZ(X, L3, L2) */
+						target = target + 1;
+					} else if (target->opcode == ZEND_JMPZNZ &&
+					           SAME_VAR(target->op1, opline->op1)) {
+						/* JMPZNZ(X, L1, L2), L1: JMPZ(X, L3) -> JMPZNZ(X, L3, L2) */
+						target = ZEND_OFFSET_TO_OPLINE(target, target->extended_value);
+						CHECK_LOOP(target);
 					} else if (target->opcode == ZEND_NOP) {
 						target = target + 1;
-						opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, target);
 					} else {
 						break;
 					}
+					opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, target);
 				}
 				break;
 		}
