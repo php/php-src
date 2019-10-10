@@ -2202,8 +2202,6 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 				decline = Z_TYPE(retval) == IS_FALSE;
 				zval_ptr_dtor(&retval);
 			}
-		} else {
-			decline = 1;
 		}
 	} zend_end_try();
 
