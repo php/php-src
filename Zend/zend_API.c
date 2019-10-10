@@ -1228,6 +1228,7 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 
 							ZVAL_COPY(&tmp, val);
 							if (UNEXPECTED(zval_update_constant_ex(&tmp, ce) != SUCCESS)) {
+								zval_ptr_dtor(&tmp);
 								return FAILURE;
 							}
 							/* property initializers must always be evaluated with strict types */;
