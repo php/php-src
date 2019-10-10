@@ -1100,7 +1100,7 @@ static zend_always_inline zend_basic_block *get_target_block(const zend_cfg *cfg
 			target_block = cfg->blocks + b;
 		} while (target_block->len == 0 && !(target_block->flags & ZEND_BB_PROTECTED));
 		block->successors[n] = b;
-		++(opt_count);
+		++(*opt_count);
 	}
 	return target_block;
 }
@@ -1116,7 +1116,7 @@ static zend_always_inline zend_basic_block *get_follow_block(const zend_cfg *cfg
 			target_block = cfg->blocks + b;
 		} while (target_block->len == 0 && !(target_block->flags & ZEND_BB_PROTECTED));
 		block->successors[n] = b;
-		++(opt_count);
+		++(*opt_count);
 	}
 	return target_block;
 }
@@ -1241,7 +1241,9 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 
 				if (target->opcode == ZEND_JMP) {
 					/* JMP_SET(X, L), L: JMP(L2) -> JMP_SET(X, L2) */
-					block->successors[0] = target_block->successors[0];
+					next = target_block->successors[0];
+					CHECK_LOOP(next);
+					block->successors[0] = next;
 					++(*opt_count);
 				} else {
 					break;
@@ -1351,7 +1353,6 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 
 		case ZEND_JMPNZ_EX:
 		case ZEND_JMPZ_EX:
-optimize_jmpznz:
 			jmp_hitlist_count = 0;
 
 			target_block = get_target_block(cfg, block, 0, opt_count);
@@ -1425,6 +1426,7 @@ optimize_jmpznz:
 			break;
 
 		case ZEND_JMPZNZ: {
+optimize_jmpznz:
 			jmp_hitlist_count = 0;
 			target_block = get_target_block(cfg, block, 0, opt_count);
 			while (target_block->len == 1) {
