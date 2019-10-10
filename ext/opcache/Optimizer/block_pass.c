@@ -892,7 +892,12 @@ optimize_const_unary_op:
 				           !zend_bitset_in(used_ext, VAR_NUM(opline->op1.var))) {
 					/* T1 = ..., T2 = QM_ASSIGN(T1) to T2 = ..., NOP */
 					src = VAR_SOURCE(opline->op1);
-					if (src) {
+					if (src &&
+						src->opcode != ZEND_COPY_TMP &&
+						src->opcode != ZEND_ADD_ARRAY_ELEMENT &&
+						src->opcode != ZEND_ADD_ARRAY_UNPACK &&
+						(src->opcode != ZEND_DECLARE_LAMBDA_FUNCTION ||
+						 src == opline -1)) {
 						src->result.var = opline->result.var;
 						VAR_SOURCE(opline->op1) = NULL;
 						VAR_SOURCE(opline->result) = src;
