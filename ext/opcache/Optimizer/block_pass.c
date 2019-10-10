@@ -1124,15 +1124,14 @@ static zend_always_inline zend_basic_block *get_follow_block(const zend_cfg *cfg
 static zend_always_inline zend_basic_block *get_next_block(const zend_cfg *cfg, zend_basic_block *block)
 {
 	zend_basic_block *next_block = block + 1;
-	int next = (block - cfg->blocks) + 1;
+	zend_basic_block *end = cfg->blocks + cfg->blocks_count;
 
 	while (1) {
-		if (next == cfg->blocks_count) {
+		if (next_block == end) {
 			return NULL;
 		} else if (next_block->flags & ZEND_BB_REACHABLE) {
 			break;
 		}
-		next++;
 		next_block++;
 	}
 	while (next_block->len == 0 && !(next_block->flags & ZEND_BB_PROTECTED)) {
