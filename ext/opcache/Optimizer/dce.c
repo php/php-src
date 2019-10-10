@@ -241,6 +241,8 @@ static inline zend_bool may_have_side_effects(
 				}
 			}
 			return 0;
+		case ZEND_CHECK_VAR:
+			return (OP1_INFO() & MAY_BE_UNDEF) != 0;
 		default:
 			/* For everything we didn't handle, assume a side-effect */
 			return 1;
