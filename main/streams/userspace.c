@@ -671,27 +671,28 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 		return -1;
 	}
 
-	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		if (Z_TYPE(retval) == IS_FALSE) {
-			return -1;
-		}
-
-		if (!try_convert_to_string(&retval)) {
-			return -1;
-		}
-
-		didread = Z_STRLEN(retval);
-		if (didread > count) {
-			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_READ " - read " ZEND_LONG_FMT " bytes more data than requested (" ZEND_LONG_FMT " read, " ZEND_LONG_FMT " max) - excess data will be lost",
-					us->wrapper->classname, (zend_long)(didread - count), (zend_long)didread, (zend_long)count);
-			didread = count;
-		}
-		if (didread > 0)
-			memcpy(buf, Z_STRVAL(retval), didread);
-	} else if (call_result == FAILURE) {
+	if (call_result == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_READ " is not implemented!",
 				us->wrapper->classname);
+		return -1;
 	}
+
+	if (Z_TYPE(retval) == IS_FALSE) {
+		return -1;
+	}
+
+	if (!try_convert_to_string(&retval)) {
+		return -1;
+	}
+
+	didread = Z_STRLEN(retval);
+	if (didread > count) {
+		php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_READ " - read " ZEND_LONG_FMT " bytes more data than requested (" ZEND_LONG_FMT " read, " ZEND_LONG_FMT " max) - excess data will be lost",
+				us->wrapper->classname, (zend_long)(didread - count), (zend_long)didread, (zend_long)count);
+		didread = count;
+	}
+	if (didread > 0)
+		memcpy(buf, Z_STRVAL(retval), didread);
 
 	zval_ptr_dtor(&retval);
 	ZVAL_UNDEF(&retval);

@@ -523,6 +523,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 		return FAILURE;
 	}
 
+	ZEND_ASSERT(!EG(exception) && "stream_fixup() should have failed");
 	zend_llist_add_element(&CG(open_files), file_handle);
 	if (file_handle->handle.stream.handle >= (void*)file_handle && file_handle->handle.stream.handle <= (void*)(file_handle+1)) {
 		zend_file_handle *fh = (zend_file_handle*)zend_llist_get_last(&CG(open_files));
