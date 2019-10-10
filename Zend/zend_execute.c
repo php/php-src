@@ -2584,7 +2584,7 @@ static zend_never_inline zend_bool zend_handle_fetch_obj_flags(
 				}
 				if (!check_type_array_assignable(prop_info->type)) {
 					zend_throw_auto_init_in_prop_error(prop_info, "array");
-					if (result) ZVAL_UNDEF(result);
+					if (result) ZVAL_ERROR(result);
 					return 0;
 				}
 			}
@@ -2600,7 +2600,7 @@ static zend_never_inline zend_bool zend_handle_fetch_obj_flags(
 				if (Z_TYPE_P(ptr) == IS_UNDEF) {
 					if (!ZEND_TYPE_ALLOW_NULL(prop_info->type)) {
 						zend_throw_access_uninit_prop_by_ref_error(prop_info);
-						if (result) ZVAL_UNDEF(result);
+						if (result) ZVAL_ERROR(result);
 						return 0;
 					}
 					ZVAL_NULL(ptr);
@@ -2641,7 +2641,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			}
 
 			zend_throw_non_object_error(container, prop_ptr OPLINE_CC EXECUTE_DATA_CC);
-			ZVAL_UNDEF(result);
+			ZVAL_ERROR(result);
 			return;
 		} while (0);
 	}
@@ -2692,6 +2692,9 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			}
 			return;
 		}
+	} else if (UNEXPECTED(Z_ISERROR_P(ptr))) {
+		ZVAL_ERROR(result);
+		return;
 	}
 
 	ZVAL_INDIRECT(result, ptr);
@@ -2728,7 +2731,7 @@ static zend_always_inline void zend_assign_to_property_reference(zval *container
 		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
-	if (UNEXPECTED(EG(exception))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");

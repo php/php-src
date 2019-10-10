@@ -1040,6 +1040,8 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 				zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 			}
 		}
+	} else if (zobj->ce->__get == NULL) {
+		retval = &EG(error_zval);
 	}
 
 	return retval;
