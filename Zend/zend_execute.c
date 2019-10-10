@@ -2733,6 +2733,7 @@ static zend_always_inline void zend_assign_to_property_reference(zval *container
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+		zval_ptr_dtor(&variable);
 		variable_ptr = &EG(uninitialized_zval);
 	} else if (/*OP_DATA_TYPE == IS_VAR &&*/
 	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
