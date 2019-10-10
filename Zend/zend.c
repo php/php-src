@@ -1246,7 +1246,7 @@ ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 	} while (0)
 
 static ZEND_COLD void zend_error_va_list(
-		int type, const char *error_filename, uint32_t error_lineno,
+		int orig_type, const char *error_filename, uint32_t error_lineno,
 		const char *format, va_list args)
 {
 	va_list usr_copy;
@@ -1258,6 +1258,7 @@ static ZEND_COLD void zend_error_va_list(
 	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
 	zend_class_entry *orig_fake_scope;
+	int type = orig_type & E_ALL;
 
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
@@ -1304,7 +1305,7 @@ static ZEND_COLD void zend_error_va_list(
 	if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF
 		|| !(EG(user_error_handler_error_reporting) & type)
 		|| EG(error_handling) != EH_NORMAL) {
-		zend_error_cb(type, error_filename, error_lineno, format, args);
+		zend_error_cb(orig_type, error_filename, error_lineno, format, args);
 	} else switch (type) {
 		case E_ERROR:
 		case E_PARSE:
@@ -1313,7 +1314,7 @@ static ZEND_COLD void zend_error_va_list(
 		case E_COMPILE_ERROR:
 		case E_COMPILE_WARNING:
 			/* The error may not be safe to handle in user-space */
-			zend_error_cb(type, error_filename, error_lineno, format, args);
+			zend_error_cb(orig_type, error_filename, error_lineno, format, args);
 			break;
 		default:
 			/* Handle the error in user space */
@@ -1354,13 +1355,13 @@ static ZEND_COLD void zend_error_va_list(
 			if (call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 4, params) == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					if (Z_TYPE(retval) == IS_FALSE) {
-						zend_error_cb(type, error_filename, error_lineno, format, args);
+						zend_error_cb(orig_type, error_filename, error_lineno, format, args);
 					}
 					zval_ptr_dtor(&retval);
 				}
 			} else if (!EG(exception)) {
 				/* The user error handler failed, use built-in error handler */
-				zend_error_cb(type, error_filename, error_lineno, format, args);
+				zend_error_cb(orig_type, error_filename, error_lineno, format, args);
 			}
 
 			EG(fake_scope) = orig_fake_scope;
@@ -1626,9 +1627,10 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /
 	int i;
 	zend_file_handle *file_handle;
 	zend_op_array *op_array;
+	int ret = SUCCESS;
 
 	va_start(files, file_count);
-	for (i = 0; i < file_count; i++) {
+	for (i = 0; i < file_count && ret != FAILURE; i++) {
 		file_handle = va_arg(files, zend_file_handle *);
 		if (!file_handle) {
 			continue;
@@ -1648,18 +1650,18 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /
 				}
 				if (EG(exception)) {
 					zend_exception_error(EG(exception), E_ERROR);
+					ret = FAILURE;
 				}
 			}
 			destroy_op_array(op_array);
 			efree_size(op_array, sizeof(zend_op_array));
 		} else if (type==ZEND_REQUIRE) {
-			va_end(files);
-			return FAILURE;
+			ret = FAILURE;
 		}
 	}
 	va_end(files);
 
-	return SUCCESS;
+	return ret;
 }
 /* }}} */
 

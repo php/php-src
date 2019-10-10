@@ -112,6 +112,8 @@ PHP 8.0 UPGRADE NOTES
   . Unexpected characters in source files (such as null bytes outside of
     strings) will now result in a ParseError exception instead of a compile
     warning.
+  . Uncaught exceptions now go through "clean shutdown", which means that
+    destructors will be called after an uncaught exception.
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
