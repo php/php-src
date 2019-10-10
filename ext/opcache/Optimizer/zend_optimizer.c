@@ -32,10 +32,6 @@
 #include "zend_inference.h"
 #include "zend_dump.h"
 
-#ifndef HAVE_DFA_PASS
-# define HAVE_DFA_PASS 1
-#endif
-
 static void zend_optimizer_zval_dtor_wrapper(zval *zvalue)
 {
 	zval_ptr_dtor_nogc(zvalue);
@@ -979,7 +975,6 @@ static void zend_optimize(zend_op_array      *op_array,
 		}
 	}
 
-#if HAVE_DFA_PASS
 	/* pass 6:
 	 * - DFA optimization
 	 */
@@ -990,7 +985,6 @@ static void zend_optimize(zend_op_array      *op_array,
 			zend_dump_op_array(op_array, 0, "after pass 6", NULL);
 		}
 	}
-#endif
 
 	/* pass 9:
 	 * - Optimize temp variables usage
@@ -1174,7 +1168,6 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 	}
 }
 
-#if HAVE_DFA_PASS
 static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 {
 	zend_op *opline, *end;
@@ -1291,7 +1284,6 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 		opline++;
 	}
 }
-#endif
 
 static void zend_optimize_op_array(zend_op_array      *op_array,
                                    zend_optimizer_ctx *ctx)
@@ -1306,12 +1298,10 @@ static void zend_optimize_op_array(zend_op_array      *op_array,
 	zend_redo_pass_two(op_array);
 
 	if (op_array->live_range) {
-#if HAVE_DFA_PASS
 		if ((ZEND_OPTIMIZER_PASS_6 & ctx->optimization_level) &&
 		    (ZEND_OPTIMIZER_PASS_7 & ctx->optimization_level)) {
 			return;
 		}
-#endif
 		zend_recalc_live_ranges(op_array, NULL);
 	}
 }
@@ -1336,7 +1326,6 @@ static void zend_adjust_fcall_stack_size(zend_op_array *op_array, zend_optimizer
 	}
 }
 
-#if HAVE_DFA_PASS
 static void zend_adjust_fcall_stack_size_graph(zend_op_array *op_array)
 {
 	zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
@@ -1364,7 +1353,6 @@ static zend_bool needs_live_range(zend_op_array *op_array, zend_op *def_opline) 
 	}
 	return 1;
 }
-#endif
 
 int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level)
 {
@@ -1373,9 +1361,7 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 	zend_op_array *op_array;
 	zend_string *name;
 	zend_optimizer_ctx ctx;
-#if HAVE_DFA_PASS
 	zend_call_graph call_graph;
-#endif
 
 	ctx.arena = zend_arena_create(64 * 1024);
 	ctx.script = script;
@@ -1402,7 +1388,6 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FOREACH_END();
 
-#if HAVE_DFA_PASS
 	if ((ZEND_OPTIMIZER_PASS_6 & optimization_level) &&
 	    (ZEND_OPTIMIZER_PASS_7 & optimization_level) &&
 	    zend_build_call_graph(&ctx.arena, script, ZEND_RT_CONSTANTS, &call_graph) == SUCCESS) {
@@ -1495,10 +1480,7 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 		}
 
 		zend_arena_release(&ctx.arena, checkpoint);
-	} else
-#endif
-
-	if (ZEND_OPTIMIZER_PASS_12 & optimization_level) {
+	} else if (ZEND_OPTIMIZER_PASS_12 & optimization_level) {
 		zend_adjust_fcall_stack_size(&script->main_op_array, &ctx);
 
 		ZEND_HASH_FOREACH_PTR(&script->function_table, op_array) {
