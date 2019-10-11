@@ -82,3 +82,7 @@ jobs:
             --enable-debug --enable-zts
             CFLAGS='-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC'
             LDFLAGS='-fsanitize=undefined,address'
+    - template: azure/coverage_job.yml
+      parameters:
+        configurationName: COVERAGE_DEBUG_ZTS
+        configurationParameters: '--enable-debug --disable-zts'

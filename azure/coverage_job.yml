@@ -11,9 +11,12 @@ jobs:
       vmImage: 'ubuntu-latest'
     steps:
     - template: apt.yml
+    - script: |
+        sudo -H pip install gcovr
+      displayName: 'Install gcovr'
     - template: configure.yml
       parameters:
-        configurationParameters: ${{ parameters.configurationParameters }}
+        configurationParameters: --enable-gcov ${{ parameters.configurationParameters }}
     - script: make -j$(/usr/bin/nproc) >/dev/null
       displayName: 'Make Build'
     - template: install.yml
@@ -26,18 +29,14 @@ jobs:
       parameters:
         configurationName: ${{ parameters.configurationName }}
         runTestsParameters: ${{ parameters.runTestsParameters }}
-    - template: test.yml
-      parameters:
-        configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'OpCache'
-        runTestsParameters: >-
-          ${{ parameters.runTestsParameters }}
-          -d zend_extension=opcache.so
-    - template: test.yml
-      parameters:
-        configurationName: ${{ parameters.configurationName }}
-        runTestsName: 'JIT'
-        runTestsParameters: >-
-          ${{ parameters.runTestsParameters }}
-          -d zend_extension=opcache.so
-          -d opcache.jit_buffer_size=16M
+    - script: |
+        make gcovr-xml
+        mv gcovr.xml coverage.xml
+      displayName: 'Generate ${{ parameters.configurationName }} Test Coverage'
+      condition: or(succeeded(), failed())
+    - task: PublishCodeCoverageResults@1
+      inputs:
+        codeCoverageTool: 'Cobertura'
+        summaryFileLocation: coverage.xml
+      displayName: 'Publish ${{ parameters.configurationName }} Test Coverage'
+      condition: or(succeeded(), failed())
