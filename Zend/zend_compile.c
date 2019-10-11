@@ -221,6 +221,19 @@ static const builtin_type_info builtin_types[] = {
 	{NULL, 0, IS_UNDEF}
 };
 
+typedef struct {
+	const char *name;
+	size_t name_len;
+	const char *correct_name;
+} confusable_type_info;
+
+static const confusable_type_info confusable_types[] = {
+	{ZEND_STRL("boolean"), "bool"},
+	{ZEND_STRL("integer"), "int"},
+	{ZEND_STRL("double"), "float"},
+	{ZEND_STRL("resource"), NULL},
+	{NULL, 0, NULL},
+};
 
 static zend_always_inline zend_uchar zend_lookup_builtin_type_by_name(const zend_string *name) /* {{{ */
 {
@@ -238,6 +251,43 @@ static zend_always_inline zend_uchar zend_lookup_builtin_type_by_name(const zend
 }
 /* }}} */
 
+static zend_always_inline zend_bool zend_is_confusable_type(const zend_string *name, const char **correct_name) /* {{{ */
+{
+	const confusable_type_info *info = confusable_types;
+
+	/* Intentionally using case-sensitive comparison here, because "integer" is likely intended
+	 * as a scalar type, while "Integer" is likely a class type. */
+	for (; info->name; ++info) {
+		if (ZSTR_LEN(name) == info->name_len
+			&& memcmp(ZSTR_VAL(name), info->name, info->name_len) == 0
+		) {
+			*correct_name = info->correct_name;
+			return 1;
+		}
+	}
+
+	return 0;
+}
+/* }}} */
+
+static void *zend_hash_find_ptr_lc(HashTable *ht, const char *str, size_t len) {
+	void *result;
+	zend_string *lcname;
+	ALLOCA_FLAG(use_heap);
+
+	ZSTR_ALLOCA_ALLOC(lcname, len, use_heap);
+	zend_str_tolower_copy(ZSTR_VAL(lcname), str, len);
+	result = zend_hash_find_ptr(ht, lcname);
+	ZSTR_ALLOCA_FREE(lcname, use_heap);
+
+	return result;
+}
+
+static zend_bool zend_is_not_imported(zend_string *name) {
+	/* Assuming "name" is unqualified here. */
+	return !FC(imports)
+		|| zend_hash_find_ptr_lc(FC(imports), ZSTR_VAL(name), ZSTR_LEN(name)) == NULL;
+}
 
 void zend_oparray_context_begin(zend_oparray_context *prev_context) /* {{{ */
 {
@@ -807,19 +857,6 @@ zend_string *zend_prefix_with_ns(zend_string *name) {
 	} else {
 		return zend_string_copy(name);
 	}
-}
-
-void *zend_hash_find_ptr_lc(HashTable *ht, const char *str, size_t len) {
-	void *result;
-	zend_string *lcname;
-	ALLOCA_FLAG(use_heap);
-
-	ZSTR_ALLOCA_ALLOC(lcname, len, use_heap);
-	zend_str_tolower_copy(ZSTR_VAL(lcname), str, len);
-	result = zend_hash_find_ptr(ht, lcname);
-	ZSTR_ALLOCA_FREE(lcname, use_heap);
-
-	return result;
 }
 
 zend_string *zend_resolve_non_class_name(
@@ -5361,6 +5398,8 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 			}
 			return ZEND_TYPE_ENCODE_CODE(type, allow_null);
 		} else {
+			const char *correct_name;
+			zend_string *orig_name = zend_ast_get_str(ast);
 			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
 			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
 				class_name = zend_resolve_class_name_ast(ast);
@@ -5368,6 +5407,25 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 			} else {
 				zend_ensure_valid_class_fetch_type(fetch_type);
 				zend_string_addref(class_name);
+			}
+
+			if (ast->attr == ZEND_NAME_NOT_FQ
+					&& zend_is_confusable_type(orig_name, &correct_name)
+					&& zend_is_not_imported(orig_name)) {
+				const char *extra =
+					FC(current_namespace) ? " or import the class with \"use\"" : "";
+				if (correct_name) {
+					zend_error(E_COMPILE_WARNING,
+						"\"%s\" will be interpreted as a class name. Did you mean \"%s\"? "
+						"Write \"\\%s\"%s to suppress this warning",
+						ZSTR_VAL(orig_name), correct_name, ZSTR_VAL(class_name), extra);
+				} else {
+					zend_error(E_COMPILE_WARNING,
+						"\"%s\" is not a supported builtin type "
+						"and will be interpreted as a class name. "
+						"Write \"\\%s\"%s to suppress this warning",
+						ZSTR_VAL(orig_name), ZSTR_VAL(class_name), extra);
+				}
 			}
 
 			return ZEND_TYPE_ENCODE_CLASS(class_name, allow_null);
