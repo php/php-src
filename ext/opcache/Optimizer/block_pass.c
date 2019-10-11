@@ -58,11 +58,6 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 	return 0;
 }
 
-/* CFG back references management */
-
-#define DEL_SOURCE(from, to)
-#define ADD_SOURCE(from, to)
-
 /* Data dependencies macros */
 
 #define VAR_SOURCE(op) Tsource[VAR_NUM(op.var)]
@@ -540,14 +535,12 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						    (opline->opcode == ZEND_JMPZ)) {
 
 							MAKE_NOP(opline);
-							DEL_SOURCE(block, block->successors[0]);
 							block->successors[0] = block->successors[1];
 							block->len--;
 							break;
 						} else {
 							opline->opcode = ZEND_JMP;
 							COPY_NODE(opline->op1, opline->op2);
-							DEL_SOURCE(block, block->successors[1]);
 							break;
 						}
 					} else if (opline->op1_type == IS_TMP_VAR &&
@@ -583,12 +576,10 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						if (zend_is_true(&ZEND_OP1_LITERAL(opline))) {
 							zend_op *target_opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
 							ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target_opline);
-							DEL_SOURCE(block, block->successors[0]);
 							block->successors[0] = block->successors[1];
 						} else {
 							zend_op *target_opline = ZEND_OP2_JMP_ADDR(opline);
 							ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target_opline);
-							DEL_SOURCE(block, block->successors[0]);
 						}
 						block->successors_count = 1;
 						opline->op1_type = IS_UNUSED;
@@ -637,7 +628,6 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 							zval_ptr_dtor_nogc(&ZEND_OP1_LITERAL(opline));
 							ZVAL_BOOL(&ZEND_OP1_LITERAL(opline), opline->opcode == ZEND_JMPZ_EX);
 							opline->op2.num = 0;
-							DEL_SOURCE(block, block->successors[0]);
 							block->successors_count = 1;
 							block->successors[0] = block->successors[1];
 							break;
@@ -1099,11 +1089,84 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 	}
 }
 
-static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_array, zend_cfg *cfg, uint32_t *opt_count)
+static zend_always_inline zend_basic_block *get_target_block(const zend_cfg *cfg, zend_basic_block *block, int n, uint32_t *opt_count)
+{
+	int b;
+	zend_basic_block *target_block = cfg->blocks + block->successors[n];
+
+	if (target_block->len == 0 && !(target_block->flags & ZEND_BB_PROTECTED)) {
+		do {
+			b = target_block->successors[0];
+			target_block = cfg->blocks + b;
+		} while (target_block->len == 0 && !(target_block->flags & ZEND_BB_PROTECTED));
+		block->successors[n] = b;
+		++(*opt_count);
+	}
+	return target_block;
+}
+
+static zend_always_inline zend_basic_block *get_follow_block(const zend_cfg *cfg, zend_basic_block *block, int n, uint32_t *opt_count)
+{
+	int b;
+	zend_basic_block *target_block = cfg->blocks + block->successors[n];
+
+	if (target_block->len == 0 && !(target_block->flags & ZEND_BB_PROTECTED)) {
+		do {
+			b = target_block->successors[0];
+			target_block = cfg->blocks + b;
+		} while (target_block->len == 0 && !(target_block->flags & ZEND_BB_PROTECTED));
+		block->successors[n] = b;
+		++(*opt_count);
+	}
+	return target_block;
+}
+
+static zend_always_inline zend_basic_block *get_next_block(const zend_cfg *cfg, zend_basic_block *block)
+{
+	zend_basic_block *next_block = block + 1;
+	zend_basic_block *end = cfg->blocks + cfg->blocks_count;
+
+	while (1) {
+		if (next_block == end) {
+			return NULL;
+		} else if (next_block->flags & ZEND_BB_REACHABLE) {
+			break;
+		}
+		next_block++;
+	}
+	while (next_block->len == 0 && !(next_block->flags & ZEND_BB_PROTECTED)) {
+		next_block = cfg->blocks + next_block->successors[0];
+	}
+	return next_block;
+}
+
+
+/* we use "jmp_hitlist" to avoid infinity loops during jmp optimization */
+static zend_always_inline int in_hitlist(int target, int *jmp_hitlist, int jmp_hitlist_count)
+{
+	int i;
+
+	for (i = 0; i < jmp_hitlist_count; i++) {
+		if (jmp_hitlist[i] == target) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
+#define CHECK_LOOP(target) \
+	if (EXPECTED(!in_hitlist(target, jmp_hitlist, jmp_hitlist_count))) { \
+		jmp_hitlist[jmp_hitlist_count++] = target;	\
+	} else { \
+		break; \
+	}
+
+static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_array, const zend_cfg *cfg, int *jmp_hitlist, uint32_t *opt_count)
 {
 	/* last_op is the last opcode of the current block */
-	zend_basic_block *blocks = cfg->blocks;
-	zend_op *last_op;
+	zend_basic_block *target_block, *follow_block, *next_block;
+	zend_op *last_op, *target;
+	int next, jmp_hitlist_count;
 
 	if (block->len == 0) {
 		return;
@@ -1112,35 +1175,32 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 	last_op = op_array->opcodes + block->start + block->len - 1;
 	switch (last_op->opcode) {
 		case ZEND_JMP:
-			{
-				zend_basic_block *target_block = blocks + block->successors[0];
-				zend_op *target = op_array->opcodes + target_block->start;
-				int next = (block - blocks) + 1;
+			jmp_hitlist_count = 0;
 
-				while (next < cfg->blocks_count && !(blocks[next].flags & ZEND_BB_REACHABLE)) {
-					/* find used one */
-					next++;
-				}
-
-				/* JMP(next) -> NOP */
-				if (block->successors[0] == next) {
-					MAKE_NOP(last_op);
-					++(*opt_count);
-					block->len--;
+			target_block = get_target_block(cfg, block, 0, opt_count);
+			while (target_block->len == 1) {
+				target = op_array->opcodes + target_block->start;
+				if (target->opcode == ZEND_JMP) {
+					/* JMP L, L: JMP L1 -> JMP L1 */
+					next = target_block->successors[0];
+				} else {
 					break;
 				}
+				CHECK_LOOP(next);
+				block->successors[0] = next;
+				++(*opt_count);
+				target_block = get_target_block(cfg, block, 0, opt_count);
+			}
 
-				if (target->opcode == ZEND_JMP &&
-					block->successors[0] != target_block->successors[0] &&
-					!(target_block->flags & ZEND_BB_PROTECTED)) {
-					/* JMP L, L: JMP L1 -> JMP L1 */
-					*last_op = *target;
-					DEL_SOURCE(block, block->successors[0]);
-					block->successors[0] = target_block->successors[0];
-					ADD_SOURCE(block, block->successors[0]);
-					++(*opt_count);
-				} else if (target->opcode == ZEND_JMPZNZ &&
-				           !(target_block->flags & ZEND_BB_PROTECTED)) {
+			next_block = get_next_block(cfg, block);
+			if (target_block == next_block) {
+				/* JMP(next) -> NOP */
+				MAKE_NOP(last_op);
+				++(*opt_count);
+				block->len--;
+			} else if (target_block->len == 1) {
+				target = op_array->opcodes + target_block->start;
+				if (target->opcode == ZEND_JMPZNZ) {
 					/* JMP L, L: JMPZNZ L1,L2 -> JMPZNZ L1,L2 */
 					*last_op = *target;
 					if (last_op->op1_type == IS_CONST) {
@@ -1148,15 +1208,14 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 						ZVAL_COPY(&zv, &ZEND_OP1_LITERAL(last_op));
 						last_op->op1.constant = zend_optimizer_add_literal(op_array, &zv);
 					}
-					DEL_SOURCE(block, block->successors[0]);
 					block->successors_count = 2;
 					block->successors[0] = target_block->successors[0];
 					block->successors[1] = target_block->successors[1];
-					ADD_SOURCE(block, block->successors[0]);
-					ADD_SOURCE(block, block->successors[1]);
 					++(*opt_count);
+					goto optimize_jmpznz;
 				} else if ((target->opcode == ZEND_RETURN ||
 				            target->opcode == ZEND_RETURN_BY_REF ||
+				            target->opcode == ZEND_GENERATOR_RETURN ||
 				            target->opcode == ZEND_EXIT) &&
 				           !(op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)) {
 					/* JMP L, L: RETURN to immediate RETURN */
@@ -1166,18 +1225,68 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 						ZVAL_COPY(&zv, &ZEND_OP1_LITERAL(last_op));
 						last_op->op1.constant = zend_optimizer_add_literal(op_array, &zv);
 					}
-					DEL_SOURCE(block, block->successors[0]);
 					block->successors_count = 0;
 					++(*opt_count);
 				}
 			}
 			break;
 
+		case ZEND_JMP_SET:
+		case ZEND_COALESCE:
+			jmp_hitlist_count = 0;
+
+			target_block = get_target_block(cfg, block, 0, opt_count);
+			while (target_block->len == 1) {
+				target = op_array->opcodes + target_block->start;
+
+				if (target->opcode == ZEND_JMP) {
+					/* JMP_SET(X, L), L: JMP(L2) -> JMP_SET(X, L2) */
+					next = target_block->successors[0];
+					CHECK_LOOP(next);
+					block->successors[0] = next;
+					++(*opt_count);
+				} else {
+					break;
+				}
+				target_block = get_target_block(cfg, block, 0, opt_count);
+			}
+			break;
+
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
-			if (block->successors[0] == block->successors[1]) {
-				/* L: JMP[N]Z(X, L+1) -> NOP or FREE(X) */
+			jmp_hitlist_count = 0;
 
+			target_block = get_target_block(cfg, block, 0, opt_count);
+			while (target_block->len == 1) {
+				target = op_array->opcodes + target_block->start;
+
+				if (target->opcode == ZEND_JMP) {
+					/* JMPZ(X, L), L: JMP(L2) -> JMPZ(X, L2) */
+					next = target_block->successors[0];
+				} else if (target->opcode == last_op->opcode &&
+				           SAME_VAR(target->op1, last_op->op1)) {
+					/* JMPZ(X, L), L: JMPZ(X, L2) -> JMPZ(X, L2) */
+					next = target_block->successors[0];
+				} else if (target->opcode == INV_COND(last_op->opcode) &&
+				           SAME_VAR(target->op1, last_op->op1)) {
+					/* JMPZ(X, L), L: JMPNZ(X, L2) -> JMPZ(X, L+1) */
+					next = target_block->successors[1];
+				} else if (target->opcode == ZEND_JMPZNZ &&
+				           SAME_VAR(target->op1, last_op->op1)) {
+					/* JMPZ(X, L), L: JMPZNZ(X, L2, L3) -> JMPZ(X, L2) */
+					next = target_block->successors[last_op->opcode == ZEND_JMPNZ];
+				} else {
+					break;
+				}
+				CHECK_LOOP(next);
+				block->successors[0] = next;
+				++(*opt_count);
+				target_block = get_target_block(cfg, block, 0, opt_count);
+			}
+
+			follow_block = get_follow_block(cfg, block, 1, opt_count);
+			if (target_block == follow_block) {
+				/* L: JMP[N]Z(X, L+1) -> NOP or FREE(X) */
 				if (last_op->op1_type == IS_CV) {
 					last_op->opcode = ZEND_CHECK_VAR;
 					last_op->op2.num = 0;
@@ -1186,146 +1295,55 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 					last_op->op2.num = 0;
 				} else {
 					MAKE_NOP(last_op);
+					block->len--;
 				}
 				block->successors_count = 1;
 				++(*opt_count);
-				break;
-			}
-
-			if (1) {
-				zend_uchar same_type = last_op->op1_type;
-				uint32_t same_var = last_op->op1.var;
-				zend_op *target;
-				zend_op *target_end;
-				zend_basic_block *target_block = blocks + block->successors[0];
-
-next_target:
-				target = op_array->opcodes + target_block->start;
-				target_end = target + target_block->len;
-				while (target < target_end && target->opcode == ZEND_NOP) {
-					target++;
-				}
-
-				/* next block is only NOP's */
-				if (target == target_end) {
-					target_block = blocks + target_block->successors[0];
-					++(*opt_count);
-					goto next_target;
-				} else if (target->opcode == INV_COND(last_op->opcode) &&
-				           same_var == target->op1.var &&
-				           same_type == target->op1_type &&
-				           !(target_block->flags & ZEND_BB_PROTECTED)) {
-					/* JMPZ(X, L), L: JMPNZ(X, L2) -> JMPZ(X, L+1) */
-					DEL_SOURCE(block, block->successors[0]);
-					block->successors[0] = target_block->successors[1];
-					ADD_SOURCE(block, block->successors[0]);
-					++(*opt_count);
-				} else if (target->opcode == INV_COND_EX(last_op->opcode) &&
-				           same_var == target->op1.var &&
-				           same_type == target->op1_type &&
-				           !(target_block->flags & ZEND_BB_PROTECTED)) {
-					/* JMPZ(X, L), L: T = JMPNZ_EX(X, L2) -> T = JMPZ_EX(X, L+1) */
-					last_op->opcode += 3;
-					COPY_NODE(last_op->result, target->result);
-					DEL_SOURCE(block, block->successors[0]);
-					block->successors[0] = target_block->successors[1];
-					ADD_SOURCE(block, block->successors[0]);
-					++(*opt_count);
-				} else if (target->opcode == last_op->opcode &&
-				           same_var == target->op1.var &&
-				           same_type == target->op1_type &&
-				           !(target_block->flags & ZEND_BB_PROTECTED)) {
-					/* JMPZ(X, L), L: JMPZ(X, L2) -> JMPZ(X, L2) */
-					DEL_SOURCE(block, block->successors[0]);
-					block->successors[0] = target_block->successors[0];
-					ADD_SOURCE(block, block->successors[0]);
-					++(*opt_count);
-				} else if (target->opcode == ZEND_JMP &&
-				           !(target_block->flags & ZEND_BB_PROTECTED)) {
-					/* JMPZ(X, L), L: JMP(L2) -> JMPZ(X, L2) */
-					DEL_SOURCE(block, block->successors[0]);
-					block->successors[0] = target_block->successors[0];
-					ADD_SOURCE(block, block->successors[0]);
-					++(*opt_count);
-				} else if (target->opcode == ZEND_JMPZNZ &&
-				           same_var == target->op1.var &&
-				           same_type == target->op1_type &&
-				           !(target_block->flags & ZEND_BB_PROTECTED)) {
-					/* JMPZ(X, L), L: JMPZNZ(X, L2, L3) -> JMPZ(X, L2) */
-					DEL_SOURCE(block, block->successors[0]);
-					if (last_op->opcode == ZEND_JMPZ) {
-						block->successors[0] = target_block->successors[0];
-					} else {
-						block->successors[0] = target_block->successors[1];
-					}
-					ADD_SOURCE(block, block->successors[0]);
-					++(*opt_count);
-				}
-			}
-
-			if (last_op->opcode == ZEND_JMPZ || last_op->opcode == ZEND_JMPNZ) {
-				zend_op *target;
-				zend_op *target_end;
-				zend_basic_block *target_block;
-
-				while (1) {
-					target_block = blocks + block->successors[1];
-					target = op_array->opcodes + target_block->start;
-					target_end = op_array->opcodes + target_block->start + 1;
-					while (target < target_end && target->opcode == ZEND_NOP) {
-						target++;
-					}
-
-					/* next block is only NOP's */
-					if (target == target_end && !(target_block->flags & ZEND_BB_PROTECTED)) {
-						DEL_SOURCE(block, block->successors[1]);
-						block->successors[1] = target_block->successors[0];
-						ADD_SOURCE(block, block->successors[1]);
-						++(*opt_count);
-					} else {
-						break;
-					}
-				}
-
-				if (target->opcode == ZEND_JMP &&
-					!(target_block->flags & ZEND_BB_PROTECTED)) {
-
-					if (!(target_block->flags & ZEND_BB_TARGET)) {
-						int next = (target_block - blocks) + 1;
-
-						while (next < cfg->blocks_count && !(blocks[next].flags & ZEND_BB_REACHABLE)) {
-							/* find used one */
-							next++;
+			} else if (follow_block->len == 1) {
+				target = op_array->opcodes + follow_block->start;
+				if (target->opcode == ZEND_JMP) {
+				    if (block->successors[0] == follow_block->successors[0]) {
+						/* JMPZ(X,L1), JMP(L1) -> NOP, JMP(L1) */
+						if (last_op->op1_type == IS_CV) {
+							last_op->opcode = ZEND_CHECK_VAR;
+							last_op->op2.num = 0;
+						} else if (last_op->op1_type & (IS_VAR|IS_TMP_VAR)) {
+							last_op->opcode = ZEND_FREE;
+							last_op->op2.num = 0;
+						} else {
+							MAKE_NOP(last_op);
+							block->len--;
 						}
-						if (next < cfg->blocks_count &&
-						    block->successors[0] == next) {
+						block->successors_count = 1;
+						++(*opt_count);
+						break;
+					} else if (!(follow_block->flags & (ZEND_BB_TARGET | ZEND_BB_PROTECTED))) {
+						next_block = get_next_block(cfg, follow_block);
+
+						if (target_block == next_block) {
 							/* JMPZ(X,L1) JMP(L2) L1: -> JMPNZ(X,L2) NOP*/
 
 							last_op->opcode = INV_COND(last_op->opcode);
 
-							DEL_SOURCE(block, block->successors[1]);
-							block->successors[0] = target_block->successors[0];
-							block->successors[1] = next;
-							ADD_SOURCE(block, block->successors[1]);
+							block->successors[0] = follow_block->successors[0];
+							block->successors[1] = next_block - cfg->blocks;
 
-							target_block->flags &= ~ZEND_BB_REACHABLE;
+							follow_block->flags &= ~ZEND_BB_REACHABLE;
 							MAKE_NOP(target);
+							follow_block->len = 0;
 
-							blocks[next].flags |= ZEND_BB_FOLLOW;
+							next_block->flags |= ZEND_BB_FOLLOW;
 
 							break;
 						}
 					}
 
 					/* JMPZ(X,L1), JMP(L2) -> JMPZNZ(X,L1,L2) */
-					DEL_SOURCE(block, block->successors[1]);
 					if (last_op->opcode == ZEND_JMPZ) {
-						block->successors[1] = target_block->successors[0];
-						ADD_SOURCE(block, block->successors[1]);
+						block->successors[1] = follow_block->successors[0];
 					} else {
 						block->successors[1] = block->successors[0];
-						block->successors[0] = target_block->successors[0];
-						ADD_SOURCE(block, block->successors[0]);
+						block->successors[0] = follow_block->successors[0];
 					}
 					last_op->opcode = ZEND_JMPZNZ;
 					++(*opt_count);
@@ -1335,185 +1353,153 @@ next_target:
 
 		case ZEND_JMPNZ_EX:
 		case ZEND_JMPZ_EX:
-			if (block->successors[0] == block->successors[1]) {
-				/* L: T = JMP[N]Z_EX(X, L+1) -> T = BOOL(X) */
+			jmp_hitlist_count = 0;
 
+			target_block = get_target_block(cfg, block, 0, opt_count);
+			while (target_block->len == 1) {
+				target = op_array->opcodes + target_block->start;
+
+				if (target->opcode == ZEND_JMP) {
+					/* T = JMPZ_EX(X, L), L: JMP(L2) -> T = JMPZ(X, L2) */
+					next = target_block->successors[0];
+				} else if (target->opcode == last_op->opcode-3 &&
+				           (SAME_VAR(target->op1, last_op->result) ||
+				            SAME_VAR(target->op1, last_op->op1))) {
+					/* T = JMPZ_EX(X, L1), L1: JMPZ({X|T}, L2) -> T = JMPZ_EX(X, L2) */
+					next = target_block->successors[0];
+				} else if (target->opcode == last_op->opcode &&
+				           target->result.var == last_op->result.var &&
+				           (SAME_VAR(target->op1, last_op->result) ||
+				            SAME_VAR(target->op1, last_op->op1))) {
+					/* T = JMPZ_EX(X, L1), L1: T = JMPZ_EX({X|T}, L2) -> T = JMPZ_EX(X, L2) */
+					next = target_block->successors[0];
+				} else if (target->opcode == ZEND_JMPZNZ &&
+				           (SAME_VAR(target->op1, last_op->result) ||
+				            SAME_VAR(target->op1, last_op->op1))) {
+					/* T = JMPZ_EX(X, L), L: JMPZNZ({X|T}, L2, L3) -> T = JMPZ_EX(X, L2) */
+					next = target_block->successors[last_op->opcode == ZEND_JMPNZ_EX];
+				} else if (target->opcode == INV_EX_COND(last_op->opcode) &&
+				           (SAME_VAR(target->op1, last_op->result) ||
+				            SAME_VAR(target->op1, last_op->op1))) {
+					/* T = JMPZ_EX(X, L1), L1: JMPNZ({X|T1}, L2) -> T = JMPZ_EX(X, L1+1) */
+					next = target_block->successors[1];
+				} else if (target->opcode == INV_EX_COND_EX(last_op->opcode) &&
+				           target->result.var == last_op->result.var &&
+				           (SAME_VAR(target->op1, last_op->result) ||
+				            SAME_VAR(target->op1, last_op->op1))) {
+					/* T = JMPZ_EX(X, L1), L1: T = JMPNZ_EX({X|T}, L2) -> T = JMPZ_EX(X, L1+1) */
+					next = target_block->successors[1];
+				} else if (target->opcode == ZEND_BOOL &&
+				           (SAME_VAR(target->op1, last_op->result) ||
+				            SAME_VAR(target->op1, last_op->op1))) {
+					/* convert Y = JMPZ_EX(X,L1), L1: Z = BOOL(Y) to
+					   Z = JMPZ_EX(X,L1+1) */
+
+					/* NOTE: This optimization pattern is not safe, but works, */
+					/*       because result of JMPZ_EX instruction             */
+					/*       is not used on the following path and             */
+					/*       should be used once on the branch path.           */
+					/*                                                         */
+					/*       The pattern works well only if jums processed in  */
+					/*       direct order, otherwise it breakes JMPZ_EX        */
+					/*       sequences too early.                              */
+					last_op->result.var = target->result.var;
+					next = target_block->successors[0];
+				} else {
+					break;
+				}
+				CHECK_LOOP(next);
+				block->successors[0] = next;
+				++(*opt_count);
+				target_block = get_target_block(cfg, block, 0, opt_count);
+			}
+
+			follow_block = get_follow_block(cfg, block, 1, opt_count);
+			if (target_block == follow_block) {
+				/* L: T = JMP[N]Z_EX(X, L+1) -> T = BOOL(X) */
 				last_op->opcode = ZEND_BOOL;
 				last_op->op2.num = 0;
 				block->successors_count = 1;
 				++(*opt_count);
 				break;
 			}
-
-			if (1) {
-				zend_op *target, *target_end;
-				zend_basic_block *target_block;
-				zend_uchar same_type = last_op->op1_type;
-				uint32_t same_var = last_op->op1.var;
-				uint32_t same_res_var = last_op->result.var;
-
-				target_block = blocks + block->successors[0];
-next_target_ex:
-				target = op_array->opcodes + target_block->start;
-				target_end = target + target_block->len;
-				while (target < target_end && target->opcode == ZEND_NOP) {
-					target++;
-				}
- 				/* next block is only NOP's */
-				if (target == target_end) {
-					target_block = blocks + target_block->successors[0];
-					++(*opt_count);
-					goto next_target_ex;
-				} else if (target->opcode == last_op->opcode-3 &&
-				           ((same_var == target->op1.var &&
-				             same_type == target->op1_type) ||
-				            (same_res_var  == target->op1.var &&
-				             target->op1_type == IS_TMP_VAR)) &&
-				           !(target_block->flags & ZEND_BB_PROTECTED)) {
-					/* T = JMPZ_EX(X, L1), L1: JMPZ({X|T}, L2) -> T = JMPZ_EX(X, L2) */
-					DEL_SOURCE(block, block->successors[0]);
-					block->successors[0] = target_block->successors[0];
-					ADD_SOURCE(block, block->successors[0]);
-					++(*opt_count);
-				} else if (target->opcode == INV_EX_COND(last_op->opcode) &&
-				           ((same_var == target->op1.var &&
-				             same_type == target->op1_type) ||
-				            (same_res_var == target->op1.var &&
-				             target->op1_type == IS_TMP_VAR)) &&
-				            !(target_block->flags & ZEND_BB_PROTECTED)) {
-					/* T = JMPZ_EX(X, L1), L1: JMPNZ({X|T1}, L2) -> T = JMPZ_EX(X, L1+1) */
-					DEL_SOURCE(block, block->successors[0]);
-					block->successors[0] = target_block->successors[1];
-					ADD_SOURCE(block, block->successors[0]);
-					++(*opt_count);
-				} else if (target->opcode == INV_EX_COND_EX(last_op->opcode) &&
-				           same_res_var == target->result.var &&
-				           ((same_var == target->op1.var &&
-				             same_type == target->op1_type) ||
-				            (same_res_var == target->op1.var &&
-				             target->op1_type == IS_TMP_VAR)) &&
-				           !(target_block->flags & ZEND_BB_PROTECTED)) {
-					/* T = JMPZ_EX(X, L1), L1: T = JMPNZ_EX({X|T}, L2) -> T = JMPZ_EX(X, L1+1) */
-					DEL_SOURCE(block, block->successors[0]);
-					block->successors[0] = target_block->successors[1];
-					ADD_SOURCE(block, block->successors[0]);
-					++(*opt_count);
-				} else if (target->opcode == last_op->opcode &&
-				           same_res_var == target->result.var &&
-				           ((same_var == target->op1.var &&
-				             same_type == target->op1_type) ||
-				            (same_res_var == target->op1.var &&
-				             target->op1_type == IS_TMP_VAR)) &&
-				           !(target_block->flags & ZEND_BB_PROTECTED)) {
-					/* T = JMPZ_EX(X, L1), L1: T = JMPZ_EX({X|T}, L2) -> T = JMPZ_EX(X, L2) */
-					DEL_SOURCE(block, block->successors[0]);
-					block->successors[0] = target_block->successors[0];
-					ADD_SOURCE(block, block->successors[0]);
-					++(*opt_count);
-				} else if (target->opcode == ZEND_JMP &&
-				           !(target_block->flags & ZEND_BB_PROTECTED)) {
-					/* T = JMPZ_EX(X, L), L: JMP(L2) -> T = JMPZ(X, L2) */
-					DEL_SOURCE(block, block->successors[0]);
-					block->successors[0] = target_block->successors[0];
-					ADD_SOURCE(block, block->successors[0]);
-					++(*opt_count);
-				} else if (target->opcode == ZEND_JMPZNZ &&
-				           ((same_var == target->op1.var &&
-				             same_type == target->op1_type) ||
-				            (same_res_var == target->op1.var &&
-				             target->op1_type == IS_TMP_VAR)) &&
-				           !(target_block->flags & ZEND_BB_PROTECTED)) {
-					/* T = JMPZ_EX(X, L), L: JMPZNZ({X|T}, L2, L3) -> T = JMPZ_EX(X, L2) */
-					DEL_SOURCE(block, block->successors[0]);
-					if (last_op->opcode == ZEND_JMPZ_EX) {
-						block->successors[0] = target_block->successors[0];
-					} else {
-						block->successors[0] = target_block->successors[1];
-					}
-					ADD_SOURCE(block, block->successors[0]);
-					++(*opt_count);
-				}
-			}
 			break;
 
 		case ZEND_JMPZNZ: {
-			int next = (block - blocks) + 1;
+optimize_jmpznz:
+			jmp_hitlist_count = 0;
+			target_block = get_target_block(cfg, block, 0, opt_count);
+			while (target_block->len == 1) {
+				target = op_array->opcodes + target_block->start;
 
-			while (next < cfg->blocks_count && !(blocks[next].flags & ZEND_BB_REACHABLE)) {
-				/* find first accessed one */
-				next++;
+				if (target->opcode == ZEND_JMP) {
+					/* JMPZNZ(X, L1, L2), L1: JMP(L3) -> JMPZNZ(X, L3, L2) */
+					next = target_block->successors[0];
+				} else if ((target->opcode == ZEND_JMPZ || target->opcode == ZEND_JMPZNZ) &&
+				           SAME_VAR(target->op1, last_op->op1)) {
+					/* JMPZNZ(X, L1, L2), L1: JMPZ(X, L3) -> JMPZNZ(X, L3, L2) */
+					next = target_block->successors[0];
+				} else if (target->opcode == ZEND_JMPNZ &&
+				           SAME_VAR(target->op1, last_op->op1)) {
+					/* JMPZNZ(X, L1, L2), L1: X = JMPNZ(X, L3) -> JMPZNZ(X, L1+1, L2) */
+					next = target_block->successors[1];
+				} else {
+					break;
+				}
+				CHECK_LOOP(next);
+				block->successors[0] = next;
+				++(*opt_count);
+				target_block = get_target_block(cfg, block, 0, opt_count);
 			}
 
-			if (block->successors[0] == block->successors[1]) {
-				/* both goto the same one - it's JMP */
-				if (!(last_op->op1_type & (IS_VAR|IS_TMP_VAR))) {
-					/* JMPZNZ(?,L,L) -> JMP(L) */
-					last_op->opcode = ZEND_JMP;
-					SET_UNUSED(last_op->op1);
-					SET_UNUSED(last_op->op2);
-					block->successors_count = 1;
-					++(*opt_count);
+			jmp_hitlist_count = 0;
+			follow_block = get_target_block(cfg, block, 1, opt_count);
+			while (follow_block->len == 1) {
+				target = op_array->opcodes + follow_block->start;
+
+				if (target->opcode == ZEND_JMP) {
+					/* JMPZNZ(X, L1, L2), L1: JMP(L3) -> JMPZNZ(X, L3, L2) */
+					next = follow_block->successors[0];
+				} else if (target->opcode == ZEND_JMPNZ &&
+				           SAME_VAR(target->op1, last_op->op1)) {
+					/* JMPZNZ(X, L1, L2), L1: X = JMPNZ(X, L3) -> JMPZNZ(X, L1+1, L2) */
+					next = follow_block->successors[0];
+				} else if ((target->opcode == ZEND_JMPZ || target->opcode == ZEND_JMPZNZ) &&
+				           SAME_VAR(target->op1, last_op->op1)) {
+					/* JMPZNZ(X, L1, L2), L1: JMPZ(X, L3) -> JMPZNZ(X, L3, L2) */
+					next = target_block->successors[1];
+				} else {
+					break;
 				}
-			} else if (block->successors[0] == next) {
-				/* jumping to next on Z - can follow to it and jump only on NZ */
-				/* JMPZNZ(X,L1,L2) L1: -> JMPNZ(X,L2) */
-				last_op->opcode = ZEND_JMPNZ;
-				block->successors[0] = block->successors[1];
+				CHECK_LOOP(next);
 				block->successors[1] = next;
 				++(*opt_count);
-				/* no need to add source */
-			} else if (block->successors[1] == next) {
+				follow_block = get_target_block(cfg, block, 1, opt_count);
+			}
+
+			next_block = get_next_block(cfg, block);
+			if (target_block == follow_block &&
+			    !(last_op->op1_type & (IS_VAR|IS_TMP_VAR))) {
+				/* JMPZNZ(?,L,L) -> JMP(L) */
+				last_op->opcode = ZEND_JMP;
+				SET_UNUSED(last_op->op1);
+				SET_UNUSED(last_op->op2);
+				last_op->extended_value = 0;
+				block->successors_count = 1;
+				++(*opt_count);
+			} else if (target_block == next_block) {
+				/* jumping to next on Z - can follow to it and jump only on NZ */
+				/* JMPZNZ(X,L1,L2) L1: -> JMPNZ(X,L2) */
+				int tmp = block->successors[0];
+				last_op->opcode = ZEND_JMPNZ;
+				block->successors[0] = block->successors[1];
+				block->successors[1] = tmp;
+				++(*opt_count);
+			} else if (follow_block == next_block) {
 				/* jumping to next on NZ - can follow to it and jump only on Z */
 				/* JMPZNZ(X,L1,L2) L2: -> JMPZ(X,L1) */
 				last_op->opcode = ZEND_JMPZ;
 				++(*opt_count);
-				/* no need to add source */
-			}
-
-			if (last_op->opcode == ZEND_JMPZNZ) {
-				zend_uchar same_type = last_op->op1_type;
-				zend_uchar same_var = last_op->op1.var;
-				zend_op *target;
-				zend_op *target_end;
-				zend_basic_block *target_block = blocks + block->successors[0];
-
-next_target_znz:
-				target = op_array->opcodes + target_block->start;
-				target_end = target + target_block->len;
-				while (target < target_end && target->opcode == ZEND_NOP) {
-					target++;
-				}
-				/* next block is only NOP's */
-				if (target == target_end) {
-					target_block = blocks + target_block->successors[0];
-					++(*opt_count);
-					goto next_target_znz;
-				} else if ((target->opcode == ZEND_JMPZ || target->opcode == ZEND_JMPZNZ) &&
-				           same_var == target->op1.var &&
-				           same_type == target->op1_type &&
-				           !(target_block->flags & ZEND_BB_PROTECTED)) {
-				    /* JMPZNZ(X, L1, L2), L1: JMPZ(X, L3) -> JMPZNZ(X, L3, L2) */
-					DEL_SOURCE(block, block->successors[0]);
-					block->successors[0] = target_block->successors[0];
-					ADD_SOURCE(block, block->successors[0]);
-					++(*opt_count);
-				} else if (target->opcode == ZEND_JMPNZ &&
-				           same_var == target->op1.var &&
-				           same_type == target->op1_type &&
-				           !(target_block->flags & ZEND_BB_PROTECTED)) {
-					/* JMPZNZ(X, L1, L2), L1: X = JMPNZ(X, L3) -> JMPZNZ(X, L1+1, L2) */
-					DEL_SOURCE(block, block->successors[0]);
-					block->successors[0] = target_block->successors[1];
-					ADD_SOURCE(block, block->successors[0]);
-					++(*opt_count);
-				} else if (target->opcode == ZEND_JMP &&
-					       !(target_block->flags & ZEND_BB_PROTECTED)) {
-					/* JMPZNZ(X, L1, L2), L1: JMP(L3) -> JMPZNZ(X, L3, L2) */
-					DEL_SOURCE(block, block->successors[0]);
-					block->successors[0] = target_block->successors[0];
-					ADD_SOURCE(block, block->successors[0]);
-					++(*opt_count);
-				}
 			}
 			break;
 		}
@@ -1816,6 +1802,7 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	void *checkpoint;
 	zend_op **Tsource;
 	uint32_t opt_count;
+	int *jmp_hitlist;
 
     /* Build CFG */
 	checkpoint = zend_arena_checkpoint(ctx->arena);
@@ -1836,6 +1823,7 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 	bitset_len = zend_bitset_len(op_array->last_var + op_array->T);
 	Tsource = zend_arena_calloc(&ctx->arena, op_array->last_var + op_array->T, sizeof(zend_op *));
 	usage = zend_arena_alloc(&ctx->arena, bitset_len * ZEND_BITSET_ELM_SIZE);
+	jmp_hitlist = zend_arena_alloc(&ctx->arena, cfg.blocks_count * sizeof(int));
 
 	blocks = cfg.blocks;
 	end = blocks + cfg.blocks_count;
@@ -1870,7 +1858,7 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		/* Jump optimization for each block */
 		for (b = blocks; b < end; b++) {
 			if (b->flags & ZEND_BB_REACHABLE) {
-				zend_jmp_optimization(b, op_array, &cfg, &opt_count);
+				zend_jmp_optimization(b, op_array, &cfg, jmp_hitlist, &opt_count);
 			}
 		}
 
