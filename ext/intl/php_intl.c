@@ -74,6 +74,7 @@
 
 #include "timezone/timezone_class.h"
 #include "timezone/timezone_methods.h"
+#include "timezone/timezone_arginfo.h"
 
 #include "calendar/calendar_class.h"
 #include "calendar/calendar_methods.h"
@@ -435,61 +436,6 @@ ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_error, 0, 0, 1 )
 	ZEND_ARG_OBJ_INFO( 0, trans, Transliterator, 0 )
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_idarg_static, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, zoneId )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_from_date_time_zone, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, dateTimeZone, DateTimeZone, 0 )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_create_enumeration, 0, 0, 0 )
-	ZEND_ARG_INFO( 0, countryOrRawOffset )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_create_time_zone_id_enumeration, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, zoneType )
-	ZEND_ARG_INFO( 0, region )
-	ZEND_ARG_INFO( 0, rawOffset )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_get_canonical_id, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, zoneId )
-	ZEND_ARG_INFO( 1, isSystemID )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_get_equivalent_id, 0, 0, 2 )
-	ZEND_ARG_INFO( 0, zoneId )
-	ZEND_ARG_INFO( 0, index )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_get_offset, 0, 0, 5 )
-	ZEND_ARG_OBJ_INFO( 0, timeZone, IntlTimeZone, 0 )
-	ZEND_ARG_INFO( 0, date )
-	ZEND_ARG_INFO( 0, local )
-	ZEND_ARG_INFO( 1, rawOffset )
-	ZEND_ARG_INFO( 1, dstOffset )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_has_same_rules, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, timeZone, IntlTimeZone, 0 )
-	ZEND_ARG_OBJ_INFO( 0, otherTimeZone, IntlTimeZone, 0 )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_get_display_name, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, timeZone, IntlTimeZone, 0 )
-	ZEND_ARG_INFO( 0, isDaylight )
-	ZEND_ARG_INFO( 0, style )
-	ZEND_ARG_INFO( 0, locale )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_only_tz, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, timeZone, IntlTimeZone, 0 )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_tz_void, 0, 0, 0 )
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_create_instance, 0, 0, 0 )
 	ZEND_ARG_INFO( 0, timeZone )
 	ZEND_ARG_INFO( 0, locale )
@@ -754,28 +700,28 @@ static const zend_function_entry intl_functions[] = {
 	PHP_FE( transliterator_get_error_message, arginfo_transliterator_error )
 
 	/* TimeZone functions */
-	PHP_FE( intltz_create_time_zone, arginfo_tz_idarg_static )
-	PHP_FE( intltz_from_date_time_zone, arginfo_tz_from_date_time_zone )
-	PHP_FE( intltz_create_default, arginfo_tz_void )
-	PHP_FE( intltz_get_id, arginfo_tz_only_tz )
-	PHP_FE( intltz_get_gmt, arginfo_tz_void )
-	PHP_FE( intltz_get_unknown, arginfo_tz_void )
-	PHP_FE( intltz_create_enumeration, arginfo_tz_create_enumeration )
-	PHP_FE( intltz_count_equivalent_ids, arginfo_tz_idarg_static )
-	PHP_FE( intltz_create_time_zone_id_enumeration, arginfo_tz_create_time_zone_id_enumeration )
-	PHP_FE( intltz_get_canonical_id, arginfo_tz_get_canonical_id )
-	PHP_FE( intltz_get_region, arginfo_tz_idarg_static )
-	PHP_FE( intltz_get_tz_data_version, arginfo_tz_void )
-	PHP_FE( intltz_get_equivalent_id, arginfo_tz_get_equivalent_id )
-	PHP_FE( intltz_use_daylight_time, arginfo_tz_only_tz )
-	PHP_FE( intltz_get_offset, arginfo_tz_get_offset )
-	PHP_FE( intltz_get_raw_offset, arginfo_tz_only_tz )
-	PHP_FE( intltz_has_same_rules, arginfo_tz_has_same_rules )
-	PHP_FE( intltz_get_display_name, arginfo_tz_get_display_name )
-	PHP_FE( intltz_get_dst_savings, arginfo_tz_only_tz )
-	PHP_FE( intltz_to_date_time_zone, arginfo_tz_only_tz )
-	PHP_FE( intltz_get_error_code, arginfo_tz_only_tz )
-	PHP_FE( intltz_get_error_message, arginfo_tz_only_tz )
+	PHP_FE( intltz_create_time_zone, arginfo_intltz_create_time_zone )
+	PHP_FE( intltz_from_date_time_zone, arginfo_intltz_from_date_time_zone )
+	PHP_FE( intltz_create_default, arginfo_intltz_create_default )
+	PHP_FE( intltz_get_id, arginfo_intltz_get_id )
+	PHP_FE( intltz_get_gmt, arginfo_intltz_get_gmt )
+	PHP_FE( intltz_get_unknown, arginfo_intltz_get_unknown )
+	PHP_FE( intltz_create_enumeration, arginfo_intltz_create_enumeration )
+	PHP_FE( intltz_count_equivalent_ids, arginfo_intltz_count_equivalent_ids )
+	PHP_FE( intltz_create_time_zone_id_enumeration, arginfo_intltz_create_time_zone_id_enumeration )
+	PHP_FE( intltz_get_canonical_id, arginfo_intltz_get_canonical_id )
+	PHP_FE( intltz_get_region, arginfo_intltz_get_region )
+	PHP_FE( intltz_get_tz_data_version, arginfo_intltz_get_tz_data_version )
+	PHP_FE( intltz_get_equivalent_id, arginfo_intltz_get_equivalent_id )
+	PHP_FE( intltz_use_daylight_time, arginfo_intltz_use_daylight_time )
+	PHP_FE( intltz_get_offset, arginfo_intltz_get_offset )
+	PHP_FE( intltz_get_raw_offset, arginfo_intltz_get_raw_offset )
+	PHP_FE( intltz_has_same_rules, arginfo_intltz_has_same_rules )
+	PHP_FE( intltz_get_display_name, arginfo_intltz_get_display_name )
+	PHP_FE( intltz_get_dst_savings, arginfo_intltz_get_dst_savings )
+	PHP_FE( intltz_to_date_time_zone, arginfo_intltz_to_date_time_zone )
+	PHP_FE( intltz_get_error_code, arginfo_intltz_get_error_code )
+	PHP_FE( intltz_get_error_message, arginfo_intltz_get_error_message )
 
 	PHP_FE( intlcal_create_instance, ainfo_cal_create_instance )
 	PHP_FE( intlcal_get_keyword_values_for_locale, ainfo_cal_get_keyword_values_for_locale )
