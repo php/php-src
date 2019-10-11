@@ -103,7 +103,7 @@ int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_f
 			case ZEND_INIT_STATIC_METHOD_CALL:
 				call_stack[call] = call_info;
 				func = zend_optimizer_get_called_func(
-					script, op_array, opline, (build_flags & ZEND_RT_CONSTANTS) != 0);
+					script, op_array, opline);
 				if (func) {
 					call_info = zend_arena_calloc(arena, 1, sizeof(zend_call_info) + (sizeof(zend_send_arg_info) * ((int)opline->extended_value - 1)));
 					call_info->caller_op_array = op_array;
@@ -267,12 +267,12 @@ int zend_build_call_graph(zend_arena **arena, zend_script *script, zend_call_gra
 }
 /* }}} */
 
-void zend_analyze_call_graph(zend_arena **arena, zend_script *script, uint32_t build_flags, zend_call_graph *call_graph) /* {{{ */
+void zend_analyze_call_graph(zend_arena **arena, zend_script *script, zend_call_graph *call_graph) /* {{{ */
 {
 	int i;
 
 	for (i = 0; i < call_graph->op_arrays_count; i++) {
-		zend_analyze_calls(arena, script, build_flags, call_graph->op_arrays[i], call_graph->func_infos + i);
+		zend_analyze_calls(arena, script, 0, call_graph->op_arrays[i], call_graph->func_infos + i);
 	}
 	zend_analyze_recursion(call_graph);
 	zend_sort_op_arrays(call_graph);

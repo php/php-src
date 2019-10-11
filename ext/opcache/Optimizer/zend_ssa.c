@@ -192,14 +192,14 @@ static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_f
 			}
 		} else if (op->opcode == ZEND_ADD) {
 			if (op->op1_type == IS_CV && op->op2_type == IS_CONST) {
-				zv = CRT_CONSTANT_EX(op_array, op, op->op2, (build_flags & ZEND_RT_CONSTANTS));
+				zv = CRT_CONSTANT_EX(op_array, op, op->op2);
 				if (Z_TYPE_P(zv) == IS_LONG
 				 && Z_LVAL_P(zv) != ZEND_LONG_MIN) {
 					*adjustment = -Z_LVAL_P(zv);
 					return EX_VAR_TO_NUM(op->op1.var);
 				}
 			} else if (op->op2_type == IS_CV && op->op1_type == IS_CONST) {
-				zv = CRT_CONSTANT_EX(op_array, op, op->op1, (build_flags & ZEND_RT_CONSTANTS));
+				zv = CRT_CONSTANT_EX(op_array, op, op->op1);
 				if (Z_TYPE_P(zv) == IS_LONG
 				 && Z_LVAL_P(zv) != ZEND_LONG_MIN) {
 					*adjustment = -Z_LVAL_P(zv);
@@ -208,7 +208,7 @@ static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_f
 			}
 		} else if (op->opcode == ZEND_SUB) {
 			if (op->op1_type == IS_CV && op->op2_type == IS_CONST) {
-				zv = CRT_CONSTANT_EX(op_array, op, op->op2, (build_flags & ZEND_RT_CONSTANTS));
+				zv = CRT_CONSTANT_EX(op_array, op, op->op2);
 				if (Z_TYPE_P(zv) == IS_LONG) {
 					*adjustment = Z_LVAL_P(zv);
 					return EX_VAR_TO_NUM(op->op1.var);
@@ -293,7 +293,7 @@ static void place_essa_pis(
 			} else if (var1 >= 0 && var2 < 0) {
 				zend_long add_val2 = 0;
 				if ((opline-1)->op2_type == IS_CONST) {
-					zval *zv = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op2, (build_flags & ZEND_RT_CONSTANTS));
+					zval *zv = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op2);
 
 					if (Z_TYPE_P(zv) == IS_LONG) {
 						add_val2 = Z_LVAL_P(zv);
@@ -315,9 +315,9 @@ static void place_essa_pis(
 			} else if (var1 < 0 && var2 >= 0) {
 				zend_long add_val1 = 0;
 				if ((opline-1)->op1_type == IS_CONST) {
-					zval *zv = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op1, (build_flags & ZEND_RT_CONSTANTS));
+					zval *zv = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op1);
 					if (Z_TYPE_P(zv) == IS_LONG) {
-						add_val1 = Z_LVAL_P(CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op1, (build_flags & ZEND_RT_CONSTANTS)));
+						add_val1 = Z_LVAL_P(CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op1));
 					} else if (Z_TYPE_P(zv) == IS_FALSE) {
 						add_val1 = 0;
 					} else if (Z_TYPE_P(zv) == IS_TRUE) {
@@ -463,10 +463,10 @@ static void place_essa_pis(
 			uint32_t type_mask;
 			if ((opline-1)->op1_type == IS_CV && (opline-1)->op2_type == IS_CONST) {
 				var = EX_VAR_TO_NUM((opline-1)->op1.var);
-				val = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op2, (build_flags & ZEND_RT_CONSTANTS));
+				val = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op2);
 			} else if ((opline-1)->op1_type == IS_CONST && (opline-1)->op2_type == IS_CV) {
 				var = EX_VAR_TO_NUM((opline-1)->op2.var);
-				val = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op1, (build_flags & ZEND_RT_CONSTANTS));
+				val = CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op1);
 			} else {
 				continue;
 			}
@@ -497,7 +497,7 @@ static void place_essa_pis(
 				   opline->op1.var == (opline-1)->result.var && (opline-1)->op1_type == IS_CV &&
 				   (opline-1)->op2_type == IS_CONST) {
 			int var = EX_VAR_TO_NUM((opline-1)->op1.var);
-			zend_string *lcname = Z_STR_P(CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op2, (build_flags & ZEND_RT_CONSTANTS)) + 1);
+			zend_string *lcname = Z_STR_P(CRT_CONSTANT_EX(op_array, (opline-1), (opline-1)->op2) + 1);
 			zend_class_entry *ce = script ? zend_hash_find_ptr(&script->class_table, lcname) : NULL;
 			if (!ce) {
 				ce = zend_hash_find_ptr(CG(class_table), lcname);
@@ -881,7 +881,6 @@ int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_
 		return FAILURE;
 	}
 
-	ssa->rt_constants = (build_flags & ZEND_RT_CONSTANTS);
 	ssa_blocks = zend_arena_calloc(arena, blocks_count, sizeof(zend_ssa_block));
 	ssa->blocks = ssa_blocks;
 

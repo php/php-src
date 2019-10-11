@@ -575,7 +575,7 @@ static int zend_jit_build_cfg(zend_op_array *op_array, zend_cfg *cfg)
 {
 	uint32_t flags;
 
-	flags = ZEND_CFG_STACKLESS | ZEND_RT_CONSTANTS | ZEND_CFG_NO_ENTRY_PREDECESSORS | ZEND_SSA_RC_INFERENCE_FLAG | ZEND_SSA_USE_CV_RESULTS | ZEND_CFG_RECV_ENTRY;
+	flags = ZEND_CFG_STACKLESS | ZEND_CFG_NO_ENTRY_PREDECESSORS | ZEND_SSA_RC_INFERENCE_FLAG | ZEND_SSA_USE_CV_RESULTS | ZEND_CFG_RECV_ENTRY;
 
 	if (zend_build_cfg(&CG(arena), op_array, flags, cfg) != SUCCESS) {
 		return FAILURE;
@@ -623,7 +623,7 @@ static int zend_jit_op_array_analyze1(zend_op_array *op_array, zend_script *scri
 	 && op_array->last_try_catch == 0
 	 && !(op_array->fn_flags & ZEND_ACC_GENERATOR)
 	 && !(ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
-		if (zend_build_ssa(&CG(arena), script, op_array, ZEND_RT_CONSTANTS | ZEND_SSA_RC_INFERENCE | ZEND_SSA_USE_CV_RESULTS, ssa) != SUCCESS) {
+		if (zend_build_ssa(&CG(arena), script, op_array, ZEND_SSA_RC_INFERENCE | ZEND_SSA_USE_CV_RESULTS, ssa) != SUCCESS) {
 			return FAILURE;
 		}
 
@@ -638,8 +638,6 @@ static int zend_jit_op_array_analyze1(zend_op_array *op_array, zend_script *scri
 		if (zend_ssa_find_sccs(op_array, ssa) != SUCCESS){
 			return FAILURE;
 		}
-	} else {
-		ssa->rt_constants = 1;
 	}
 
 	return SUCCESS;
@@ -2567,7 +2565,7 @@ static int zend_jit_collect_calls(zend_op_array *op_array, zend_script *script)
 	ZEND_SET_FUNC_INFO(op_array, func_info);
 	func_info->num_args = -1;
 	func_info->return_value_used = -1;
-	return zend_analyze_calls(&CG(arena), script, ZEND_RT_CONSTANTS | ZEND_CALL_TREE, op_array, func_info);
+	return zend_analyze_calls(&CG(arena), script, ZEND_CALL_TREE, op_array, func_info);
 }
 
 static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, const zend_op *rt_opline)
@@ -2593,7 +2591,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, cons
 	}
 
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_SSA) {
-		zend_dump_op_array(op_array, ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA|ZEND_DUMP_RT_CONSTANTS, "JIT", &ssa);
+		zend_dump_op_array(op_array, ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA, "JIT", &ssa);
 	}
 
 	if (zend_jit_level >= ZEND_JIT_LEVEL_OPT_FUNCS) {
@@ -2832,7 +2830,7 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 		goto jit_failure;
 	}
 
-	zend_analyze_call_graph(&CG(arena), script, ZEND_RT_CONSTANTS, &call_graph);
+	zend_analyze_call_graph(&CG(arena), script, &call_graph);
 
 	if (zend_jit_trigger == ZEND_JIT_ON_FIRST_EXEC ||
 	    zend_jit_trigger == ZEND_JIT_ON_PROF_REQUEST ||
@@ -2900,7 +2898,7 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 				}
 				info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 				if (info) {
-					zend_dump_op_array(call_graph.op_arrays[i], ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA|ZEND_DUMP_RT_CONSTANTS, "JIT", &info->ssa);
+					zend_dump_op_array(call_graph.op_arrays[i], ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA, "JIT", &info->ssa);
 				}
 			}
 		}

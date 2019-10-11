@@ -92,7 +92,6 @@ typedef struct _zend_cfg {
 } zend_cfg;
 
 /* Build Flags */
-#define ZEND_RT_CONSTANTS              (1U<<31)
 #define ZEND_CFG_STACKLESS             (1<<30)
 #define ZEND_SSA_DEBUG_LIVENESS        (1<<29)
 #define ZEND_SSA_DEBUG_PHI_PLACEMENT   (1<<28)
@@ -102,15 +101,15 @@ typedef struct _zend_cfg {
 #define ZEND_CALL_TREE                 (1<<23)
 #define ZEND_SSA_USE_CV_RESULTS        (1<<22)
 
-#define CRT_CONSTANT_EX(op_array, opline, node, rt_constants) \
-	((rt_constants) ? \
+#define CRT_CONSTANT_EX(op_array, opline, node) \
+	(((op_array)->fn_flags & ZEND_ACC_DONE_PASS_TWO) ? \
 		RT_CONSTANT(opline, (node)) \
 	: \
 		CT_CONSTANT_EX(op_array, (node).constant) \
 	)
 
 #define CRT_CONSTANT(node) \
-	CRT_CONSTANT_EX(op_array, opline, node, (build_flags & ZEND_RT_CONSTANTS))
+	CRT_CONSTANT_EX(op_array, opline, node)
 
 #define RETURN_VALUE_USED(opline) \
 	((opline)->result_type != IS_UNUSED)

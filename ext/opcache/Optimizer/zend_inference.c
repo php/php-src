@@ -2314,7 +2314,7 @@ static zend_property_info *zend_fetch_prop_info(const zend_op_array *op_array, z
 		}
 		if (ce) {
 			prop_info = lookup_prop_info(ce,
-				Z_STR_P(CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants)),
+				Z_STR_P(CRT_CONSTANT(opline->op2)),
 				op_array->scope);
 			if (prop_info && (prop_info->flags & ZEND_ACC_STATIC)) {
 				prop_info = NULL;
@@ -2345,12 +2345,12 @@ static zend_property_info *zend_fetch_static_prop_info(const zend_script *script
 					break;
 			}
 		} else if (opline->op2_type == IS_CONST) {
-			zval *zv = CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants);
+			zval *zv = CRT_CONSTANT(opline->op2);
 			ce = get_class_entry(script, Z_STR_P(zv + 1));
 		}
 
 		if (ce) {
-			zval *zv = CRT_CONSTANT_EX(op_array, opline, opline->op1, ssa->rt_constants);
+			zval *zv = CRT_CONSTANT(opline->op1);
 			prop_info = lookup_prop_info(ce, Z_STR_P(zv), op_array->scope);
 			if (prop_info && !(prop_info->flags & ZEND_ACC_STATIC)) {
 				prop_info = NULL;
@@ -3136,7 +3136,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 		}
 		case ZEND_DECLARE_ANON_CLASS:
 			UPDATE_SSA_TYPE(MAY_BE_CLASS, ssa_ops[i].result_def);
-			if (script && (ce = zend_hash_find_ptr(&script->class_table, Z_STR_P(CRT_CONSTANT_EX(op_array, opline, opline->op1, ssa->rt_constants)))) != NULL) {
+			if (script && (ce = zend_hash_find_ptr(&script->class_table, Z_STR_P(CRT_CONSTANT(opline->op1)))) != NULL) {
 				UPDATE_SSA_OBJ_TYPE(ce, 0, ssa_ops[i].result_def);
 			}
 			break;
@@ -3164,7 +3164,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						break;
 				}
 			} else if (opline->op2_type == IS_CONST) {
-				zval *zv = CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants);
+				zval *zv = CRT_CONSTANT(opline->op2);
 				if (Z_TYPE_P(zv) == IS_STRING) {
 					ce = get_class_entry(script, Z_STR_P(zv+1));
 					UPDATE_SSA_OBJ_TYPE(ce, 0, ssa_ops[i].result_def);
@@ -3178,7 +3178,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_NEW:
 			tmp = MAY_BE_RC1|MAY_BE_RCN|MAY_BE_OBJECT;
 			if (opline->op1_type == IS_CONST &&
-			    (ce = get_class_entry(script, Z_STR_P(CRT_CONSTANT_EX(op_array, opline, opline->op1, ssa->rt_constants)+1))) != NULL) {
+			    (ce = get_class_entry(script, Z_STR_P(CRT_CONSTANT(opline->op1)+1))) != NULL) {
 				UPDATE_SSA_OBJ_TYPE(ce, 0, ssa_ops[i].result_def);
 			} else if ((t1 & MAY_BE_CLASS) && ssa_ops[i].op1_use >= 0 && ssa_var_info[ssa_ops[i].op1_use].ce) {
 				UPDATE_SSA_OBJ_TYPE(ssa_var_info[ssa_ops[i].op1_use].ce, ssa_var_info[ssa_ops[i].op1_use].is_instanceof, ssa_ops[i].result_def);
@@ -3845,7 +3845,7 @@ static zend_bool can_convert_to_double(
 				ZVAL_COPY_VALUE(&orig_op1, value);
 				ZVAL_DOUBLE(&dval_op1, (double) Z_LVAL_P(value));
 			} else if (opline->op1_type == IS_CONST) {
-				zval *zv = CRT_CONSTANT_EX(op_array, opline, opline->op1, ssa->rt_constants);
+				zval *zv = CRT_CONSTANT(opline->op1);
 				if (Z_TYPE_P(zv) == IS_LONG || Z_TYPE_P(zv) == IS_DOUBLE) {
 					ZVAL_COPY_VALUE(&orig_op1, zv);
 					ZVAL_COPY_VALUE(&dval_op1, zv);
@@ -3858,7 +3858,7 @@ static zend_bool can_convert_to_double(
 				ZVAL_COPY_VALUE(&orig_op2, value);
 				ZVAL_DOUBLE(&dval_op2, (double) Z_LVAL_P(value));
 			} else if (opline->op2_type == IS_CONST) {
-				zval *zv = CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants);
+				zval *zv = CRT_CONSTANT(opline->op2);
 				if (Z_TYPE_P(zv) == IS_LONG || Z_TYPE_P(zv) == IS_DOUBLE) {
 					ZVAL_COPY_VALUE(&orig_op2, zv);
 					ZVAL_COPY_VALUE(&dval_op2, zv);
@@ -3946,7 +3946,7 @@ static int zend_type_narrowing(const zend_op_array *op_array, const zend_script 
 		 * doubles instead, in the hope that we'll narrow long|double to double. */
 		if (opline->opcode == ZEND_ASSIGN && opline->result_type == IS_UNUSED &&
 				opline->op1_type == IS_CV && opline->op2_type == IS_CONST) {
-			zval *value = CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants);
+			zval *value = CRT_CONSTANT(opline->op2);
 
 			zend_bitset_clear(visited, bitset_len);
 			if (can_convert_to_double(op_array, ssa, v, value, visited)) {
@@ -4098,7 +4098,7 @@ void zend_func_return_info(const zend_op_array   *op_array,
 				}
 
 				if (opline->op1_type == IS_CONST) {
-					zval *zv = CRT_CONSTANT_EX(op_array, opline, opline->op1, info->ssa.rt_constants);
+					zval *zv = CRT_CONSTANT(opline->op1);
 
 					if (Z_TYPE_P(zv) == IS_NULL) {
 						if (tmp_has_range < 0) {
@@ -4577,7 +4577,7 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 
 					if (opline->op2_type == IS_CONST) {
 						prop_info = zend_hash_find_ptr(&ce->properties_info,
-							Z_STR_P(CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants)));
+							Z_STR_P(CRT_CONSTANT(opline->op2)));
 						if (prop_info && !(prop_info->flags & ZEND_ACC_PUBLIC)) {
 							return 1;
 						}
@@ -4607,7 +4607,7 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 		case ZEND_COUNT:
 			return (t1 & MAY_BE_ANY) != MAY_BE_ARRAY;
 		case ZEND_RECV_INIT:
-			if (Z_TYPE_P(CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants)) == IS_CONSTANT_AST) {
+			if (Z_TYPE_P(CRT_CONSTANT(opline->op2)) == IS_CONSTANT_AST) {
 				return 1;
 			}
 			if (op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
