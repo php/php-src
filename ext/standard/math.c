@@ -129,8 +129,12 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 	double tmp_value;
 	int precision_places;
 
-	if (!zend_finite(value) || value == 0.0) {
+	if (!zend_finite(value)) {
 		return value;
+	}
+	/* converting -0.0 to 0.0 */
+	if (value == 0.0) {
+		return 0.0;
 	}
 
 	places = places < INT_MIN+1 ? INT_MIN+1 : places;
