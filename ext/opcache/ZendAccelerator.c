@@ -4416,6 +4416,7 @@ static int accel_preload(const char *config)
 #else
 		init_op_array(&script->script.main_op_array, ZEND_USER_FUNCTION, 2);
 #endif
+		script->script.main_op_array.fn_flags |= ZEND_ACC_DONE_PASS_TWO;
 		script->script.main_op_array.last = 1;
 		script->script.main_op_array.last_literal = 1;
 #if ZEND_USE_ABS_CONST_ADDR
