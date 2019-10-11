@@ -30,23 +30,13 @@ jobs:
         configurationName: ${{ parameters.configurationName }}
         runTestsParameters: ${{ parameters.runTestsParameters }}
     - script: |
-        rm -f coverage.xml | true
-        gcovr -sr . -o coverage.xml --xml \
-          --exclude-directories 'ext/date/lib$$' \
-          -e 'ext/bcmath/libbcmath/.*' \
-          -e 'ext/date/lib/.*' \
-          -e 'ext/fileinfo/libmagic/.*' \
-          -e 'ext/gd/libgd/.*' \
-          -e 'ext/hash/sha3/.*' \
-          -e 'ext/mbstring/libmbfl/.*' \
-          -e 'ext/opcache/jit/libudis86/.*' \
-          -e 'ext/pcre/pcre2lib/.*' \
-          -e 'ext/xmlrpc/libxmlrpc/.*'
-      displayName: 'Generate ${{ parameters.configurationName }} ${{ parameters.runTestsName }} Test Coverage'
+        make gcovr-xml
+        mv gcovr.xml coverage.xml
+      displayName: 'Generate ${{ parameters.configurationName }} Test Coverage'
       condition: or(succeeded(), failed())
     - task: PublishCodeCoverageResults@1
       inputs:
         codeCoverageTool: 'Cobertura'
         summaryFileLocation: coverage.xml
-      displayName: 'Publish ${{ parameters.configurationName }} ${{ parameters.runTestsName }} Test Coverage'
+      displayName: 'Publish ${{ parameters.configurationName }} Test Coverage'
       condition: or(succeeded(), failed())
