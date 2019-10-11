@@ -11,8 +11,6 @@ jobs:
       vmImage: 'ubuntu-latest'
     steps:
     - template: apt.yml
-      parameters:
-        packages: lcov
     - script: |
         sudo -H pip install gcovr
       displayName: 'Install gcovr'
