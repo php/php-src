@@ -1215,6 +1215,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 					goto optimize_jmpznz;
 				} else if ((target->opcode == ZEND_RETURN ||
 				            target->opcode == ZEND_RETURN_BY_REF ||
+				            target->opcode == ZEND_GENERATOR_RETURN ||
 				            target->opcode == ZEND_EXIT) &&
 				           !(op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK)) {
 					/* JMP L, L: RETURN to immediate RETURN */
