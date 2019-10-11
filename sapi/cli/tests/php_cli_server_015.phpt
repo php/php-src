@@ -39,7 +39,7 @@ echo $output;
 fclose($fp);
 ?>
 --EXPECTF--
-HTTP/1.1 200 OK
+HTTP/1.0 500 Internal Server Error
 Host: %s
 Date: %s
 Connection: close
