@@ -2,6 +2,9 @@
 # LCOV
 #
 
+LTP = lcov
+LTP_GENHTML = genhtml
+
 lcov: lcov-html
 
 lcov-test: lcov-clean-data test

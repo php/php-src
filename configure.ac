@@ -781,7 +781,7 @@ PHP_HELP_SEPARATOR([General settings:])
 PHP_ARG_ENABLE([gcov],
   [whether to include gcov symbols],
   [AS_HELP_STRING([--enable-gcov],
-    [Enable GCOV code coverage (requires LTP) - FOR DEVELOPERS ONLY!!])],
+    [Enable GCOV code coverage - FOR DEVELOPERS ONLY!!])],
   [no],
   [no])
 
@@ -799,54 +799,6 @@ if test "$PHP_GCOV" = "yes"; then
 
   if test "$gcc_ccache" = "yes" && (test -z "$CCACHE_DISABLE" || test "$CCACHE_DISABLE" != "1"); then
     AC_MSG_ERROR([ccache must be disabled when --enable-gcov option is used. You can disable ccache by setting environment variable CCACHE_DISABLE=1.])
-  fi
-
-  dnl Min: 1.5 (i.e. 105, major * 100 + minor for easier comparison).
-  ltp_version_min="105"
-  dnl Non-working versions, e.g. "1.8 1.18";
-  dnl Remove "none" when introducing the first incompatible LTP version and
-  dnl separate any following additions by spaces.
-  ltp_version_exclude="1.8"
-
-  AC_CHECK_PROG(LTP, lcov, lcov)
-  AC_CHECK_PROG(LTP_GENHTML, genhtml, genhtml)
-  PHP_SUBST(LTP)
-  PHP_SUBST(LTP_GENHTML)
-
-  if test "$LTP"; then
-    AC_CACHE_CHECK([for ltp version], php_cv_ltp_version, [
-      php_cv_ltp_version=invalid
-      ltp_version_vars=`$LTP -v 2>/dev/null | $SED -e 's/^.* //' -e 's/\./ /g' | tr -d a-z`
-      if test -n "$ltp_version_vars"; then
-        set $ltp_version_vars
-        ltp_version="${1}.${2}"
-        ltp_version_num="`expr ${1} \* 100 + ${2}`"
-        if test $ltp_version_num -ge $ltp_version_min; then
-          php_cv_ltp_version="$ltp_version (ok)"
-          for ltp_check_version in $ltp_version_exclude; do
-            if test "$ltp_version" = "$ltp_check_version"; then
-              php_cv_ltp_version=invalid
-              break
-            fi
-          done
-        fi
-      fi
-    ])
-  else
-    ltp_msg="To enable code coverage reporting you must have LTP installed"
-    AC_MSG_ERROR([$ltp_msg])
-  fi
-
-  case $php_cv_ltp_version in
-    ""|invalid[)]
-      ltp_msg="This LTP version is not supported (found: $ltp_version, min: $ltp_version_min, excluded: $ltp_version_exclude)."
-      AC_MSG_ERROR([$ltp_msg])
-      LTP="exit 0;"
-      ;;
-  esac
-
-  if test -z "$LTP_GENHTML"; then
-    AC_MSG_ERROR([Could not find genhtml from the LTP package])
   fi
 
   AC_DEFINE(HAVE_GCOV, 1, [Whether you have gcov])
