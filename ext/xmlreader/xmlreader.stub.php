@@ -2,56 +2,77 @@
 
 class XMLReader
 {
-    function close(): bool {}
+    /** @return bool */
+    function close() {}
 
     /** @return string|null|false */
     function getAttribute(string $name) {}
 
-    function getAttributeNo(int $index): ?string {}
+    /** @return ?string */
+    function getAttributeNo(int $index) {}
 
     /** @return string|null|false */
     function getAttributeNs(string $name, string $namespaceURI) {}
 
-    function getParserProperty(int $property): bool {}
+    /** @return bool */
+    function getParserProperty(int $property) {}
 
-    function isValid(): bool {}
+    /** @return bool */
+    function isValid() {}
 
     /** @return string|null|false */
     function lookupNamespace(string $prefix) {}
 
-    function moveToAttribute(string $name): bool {}
+    /** @return bool */
+    function moveToAttribute(string $name) {}
 
-    function moveToAttributeNo(int $index): bool {}
+    /** @return bool */
+    function moveToAttributeNo(int $index) {}
 
-    function moveToAttributeNs(string $name, string $namespaceURI): bool {}
+    /** @return bool */
+    function moveToAttributeNs(string $name, string $namespaceURI) {}
 
-    function moveToElement(): bool {}
+    /** @return bool */
+    function moveToElement() {}
 
-    function moveToFirstAttribute(): bool {}
+    /** @return bool */
+    function moveToFirstAttribute() {}
 
-    function moveToNextAttribute(): bool {}
+    /** @return bool */
+    function moveToNextAttribute() {}
 
-    function read(): bool {}
+    /** @return bool */
+    function read() {}
 
-    function next(string $localname = UNKNOWN): bool {}
+    /** @return bool */
+    function next(string $localname = UNKNOWN) {}
 
-    function open(string $URI, ?string $encoding = null, int $options = 0): bool {}
+    /** @return bool|XMLReader */
+    function open(string $URI, ?string $encoding = null, int $options = 0) {}
 
-    function readInnerXml(): string {}
+    /** @return string */
+    function readInnerXml() {}
 
-    function readOuterXml(): string {}
+    /** @return string */
+    function readOuterXml() {}
 
-    function readString(): string {}
+    /** @return string */
+    function readString() {}
 
+    /** @return bool */
     function setSchema(?string $filename) {}
 
-    function setParserProperty(int $property, bool $value): bool {}
+    /** @return bool */
+    function setParserProperty(int $property, bool $value) {}
 
-    function setRelaxNGSchema(?string $filename): bool {}
+    /** @return bool */
+    function setRelaxNGSchema(?string $filename) {}
 
-    function setRelaxNGSchemaSource(?string $source): bool {}
+    /** @return bool */
+    function setRelaxNGSchemaSource(?string $source) {}
 
-    function XML(string $source, ?string $encoding = null, int $options = 0): bool {}
+    /** @return bool|XMLReader */
+    function XML(string $source, ?string $encoding = null, int $options = 0) {}
 
     /** @return DOMNode|bool */
     function expand(?DOMNode $basenode = null) {}
