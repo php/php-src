@@ -153,6 +153,7 @@ PHP 7.4 UPGRADE NOTES
     considered failures.
   . fread() and fwrite() on plain files will now throw a notice on failure,
     such as when trying to write to a read-only file resource.
+  . round(-0.0) will now return -0.0 rather than +0.0.
 
 - Tokenizer:
   . token_get_all() will now emit a T_BAD_CHARACTER token for unexpected
