@@ -126,7 +126,7 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 				i = fcall->extended_value;
 
 				do {
-					if (Z_TYPE_P(RT_CONSTANT(&func->op_array.opcodes[i], func->op_array.opcodes[i].op2)) == IS_CONSTANT_AST) {
+					if (Z_TYPE_P(CRT_CONSTANT_EX(&func->op_array, &func->op_array.opcodes[i], func->op_array.opcodes[i].op2)) == IS_CONSTANT_AST) {
 						return;
 					}
 					i++;
@@ -136,7 +136,7 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 			if (RETURN_VALUE_USED(opline)) {
 				zval zv;
 
-				ZVAL_COPY(&zv, RT_CONSTANT(ret_opline, ret_opline->op1));
+				ZVAL_COPY(&zv, CRT_CONSTANT_EX(&func->op_array, ret_opline, ret_opline->op1));
 				opline->opcode = ZEND_QM_ASSIGN;
 				opline->op1_type = IS_CONST;
 				opline->op1.constant = zend_optimizer_add_literal(op_array, &zv);
@@ -173,7 +173,7 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_INIT_FCALL:
 			case ZEND_NEW:
 				call_stack[call].func = zend_optimizer_get_called_func(
-					ctx->script, op_array, opline, 0);
+					ctx->script, op_array, opline);
 				call_stack[call].try_inline = opline->opcode != ZEND_NEW;
 				/* break missing intentionally */
 			case ZEND_INIT_DYNAMIC_CALL:

@@ -773,9 +773,9 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 }
 
 static zend_class_entry *get_class_entry_from_op1(
-		zend_script *script, zend_op_array *op_array, zend_op *opline, zend_bool rt_constants) {
+		zend_script *script, zend_op_array *op_array, zend_op *opline) {
 	if (opline->op1_type == IS_CONST) {
-		zval *op1 = CRT_CONSTANT_EX(op_array, opline, opline->op1, rt_constants);
+		zval *op1 = CRT_CONSTANT(opline->op1);
 		if (Z_TYPE_P(op1) == IS_STRING) {
 			zend_string *class_name = Z_STR_P(op1 + 1);
 			zend_class_entry *ce;
@@ -800,13 +800,12 @@ static zend_class_entry *get_class_entry_from_op1(
 }
 
 zend_function *zend_optimizer_get_called_func(
-		zend_script *script, zend_op_array *op_array, zend_op *opline, zend_bool rt_constants)
+		zend_script *script, zend_op_array *op_array, zend_op *opline)
 {
-#define GET_OP(op) CRT_CONSTANT_EX(op_array, opline, opline->op, rt_constants)
 	switch (opline->opcode) {
 		case ZEND_INIT_FCALL:
 		{
-			zend_string *function_name = Z_STR_P(GET_OP(op2));
+			zend_string *function_name = Z_STR_P(CRT_CONSTANT(opline->op2));
 			zend_function *func;
 			if (script && (func = zend_hash_find_ptr(&script->function_table, function_name)) != NULL) {
 				return func;
@@ -823,8 +822,8 @@ zend_function *zend_optimizer_get_called_func(
 		}
 		case ZEND_INIT_FCALL_BY_NAME:
 		case ZEND_INIT_NS_FCALL_BY_NAME:
-			if (opline->op2_type == IS_CONST && Z_TYPE_P(GET_OP(op2)) == IS_STRING) {
-				zval *function_name = GET_OP(op2) + 1;
+			if (opline->op2_type == IS_CONST && Z_TYPE_P(CRT_CONSTANT(opline->op2)) == IS_STRING) {
+				zval *function_name = CRT_CONSTANT(opline->op2) + 1;
 				zend_function *func;
 				if (script && (func = zend_hash_find_ptr(&script->function_table, Z_STR_P(function_name)))) {
 					return func;
@@ -840,11 +839,11 @@ zend_function *zend_optimizer_get_called_func(
 			}
 			break;
 		case ZEND_INIT_STATIC_METHOD_CALL:
-			if (opline->op2_type == IS_CONST && Z_TYPE_P(GET_OP(op2)) == IS_STRING) {
+			if (opline->op2_type == IS_CONST && Z_TYPE_P(CRT_CONSTANT(opline->op2)) == IS_STRING) {
 				zend_class_entry *ce = get_class_entry_from_op1(
-					script, op_array, opline, rt_constants);
+					script, op_array, opline);
 				if (ce) {
-					zend_string *func_name = Z_STR_P(GET_OP(op2) + 1);
+					zend_string *func_name = Z_STR_P(CRT_CONSTANT(opline->op2) + 1);
 					zend_function *fbc = zend_hash_find_ptr(&ce->function_table, func_name);
 					if (fbc) {
 						zend_bool is_public = (fbc->common.fn_flags & ZEND_ACC_PUBLIC) != 0;
@@ -858,9 +857,9 @@ zend_function *zend_optimizer_get_called_func(
 			break;
 		case ZEND_INIT_METHOD_CALL:
 			if (opline->op1_type == IS_UNUSED
-					&& opline->op2_type == IS_CONST && Z_TYPE_P(GET_OP(op2)) == IS_STRING
+					&& opline->op2_type == IS_CONST && Z_TYPE_P(CRT_CONSTANT(opline->op2)) == IS_STRING
 					&& op_array->scope && !(op_array->scope->ce_flags & ZEND_ACC_TRAIT)) {
-				zend_string *method_name = Z_STR_P(GET_OP(op2) + 1);
+				zend_string *method_name = Z_STR_P(CRT_CONSTANT(opline->op2) + 1);
 				zend_function *fbc = zend_hash_find_ptr(
 					&op_array->scope->function_table, method_name);
 				if (fbc) {
@@ -877,7 +876,7 @@ zend_function *zend_optimizer_get_called_func(
 		case ZEND_NEW:
 		{
 			zend_class_entry *ce = get_class_entry_from_op1(
-				script, op_array, opline, rt_constants);
+				script, op_array, opline);
 			if (ce && ce->type == ZEND_USER_CLASS) {
 				return ce->constructor;
 			}
@@ -885,7 +884,6 @@ zend_function *zend_optimizer_get_called_func(
 		}
 	}
 	return NULL;
-#undef GET_OP
 }
 
 uint32_t zend_optimizer_classify_function(zend_string *name, uint32_t num_args) {
@@ -1040,6 +1038,8 @@ static void zend_revert_pass_two(zend_op_array *op_array)
 {
 	zend_op *opline, *end;
 
+	ZEND_ASSERT((op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) != 0);
+
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
@@ -1060,6 +1060,8 @@ static void zend_revert_pass_two(zend_op_array *op_array)
 		op_array->literals = literals;
 	}
 #endif
+
+	op_array->fn_flags &= ~ZEND_ACC_DONE_PASS_TWO;
 }
 
 static void zend_redo_pass_two(zend_op_array *op_array)
@@ -1068,6 +1070,8 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 #if ZEND_USE_ABS_JMP_ADDR && !ZEND_USE_ABS_CONST_ADDR
 	zend_op *old_opcodes = op_array->opcodes;
 #endif
+
+	ZEND_ASSERT((op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) == 0);
 
 #if !ZEND_USE_ABS_CONST_ADDR
 	if (op_array->last_literal) {
@@ -1095,77 +1099,77 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 		if (opline->op2_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op2);
 		}
-		if (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) {
-			/* fix jumps to point to new array */
-			switch (opline->opcode) {
+		/* fix jumps to point to new array */
+		switch (opline->opcode) {
 #if ZEND_USE_ABS_JMP_ADDR && !ZEND_USE_ABS_CONST_ADDR
-				case ZEND_JMP:
-				case ZEND_FAST_CALL:
-					opline->op1.jmp_addr = &op_array->opcodes[opline->op1.jmp_addr - old_opcodes];
-					break;
-				case ZEND_JMPZNZ:
-					/* relative extended_value don't have to be changed */
-					/* break omitted intentionally */
-				case ZEND_JMPZ:
-				case ZEND_JMPNZ:
-				case ZEND_JMPZ_EX:
-				case ZEND_JMPNZ_EX:
-				case ZEND_JMP_SET:
-				case ZEND_COALESCE:
-				case ZEND_FE_RESET_R:
-				case ZEND_FE_RESET_RW:
-				case ZEND_ASSERT_CHECK:
+			case ZEND_JMP:
+			case ZEND_FAST_CALL:
+				opline->op1.jmp_addr = &op_array->opcodes[opline->op1.jmp_addr - old_opcodes];
+				break;
+			case ZEND_JMPZNZ:
+				/* relative extended_value don't have to be changed */
+				/* break omitted intentionally */
+			case ZEND_JMPZ:
+			case ZEND_JMPNZ:
+			case ZEND_JMPZ_EX:
+			case ZEND_JMPNZ_EX:
+			case ZEND_JMP_SET:
+			case ZEND_COALESCE:
+			case ZEND_FE_RESET_R:
+			case ZEND_FE_RESET_RW:
+			case ZEND_ASSERT_CHECK:
+				opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
+				break;
+			case ZEND_CATCH:
+				if (!(opline->extended_value & ZEND_LAST_CATCH)) {
 					opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
-					break;
-				case ZEND_CATCH:
-					if (!(opline->extended_value & ZEND_LAST_CATCH)) {
-						opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
-					}
-					break;
-				case ZEND_FE_FETCH_R:
-				case ZEND_FE_FETCH_RW:
-				case ZEND_SWITCH_LONG:
-				case ZEND_SWITCH_STRING:
-					/* relative extended_value don't have to be changed */
-					break;
+				}
+				break;
+			case ZEND_FE_FETCH_R:
+			case ZEND_FE_FETCH_RW:
+			case ZEND_SWITCH_LONG:
+			case ZEND_SWITCH_STRING:
+				/* relative extended_value don't have to be changed */
+				break;
 #endif
-				case ZEND_IS_IDENTICAL:
-				case ZEND_IS_NOT_IDENTICAL:
-				case ZEND_IS_EQUAL:
-				case ZEND_IS_NOT_EQUAL:
-				case ZEND_IS_SMALLER:
-				case ZEND_IS_SMALLER_OR_EQUAL:
-				case ZEND_CASE:
-				case ZEND_ISSET_ISEMPTY_CV:
-				case ZEND_ISSET_ISEMPTY_VAR:
-				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
-				case ZEND_ISSET_ISEMPTY_PROP_OBJ:
-				case ZEND_ISSET_ISEMPTY_STATIC_PROP:
-				case ZEND_INSTANCEOF:
-				case ZEND_TYPE_CHECK:
-				case ZEND_DEFINED:
-				case ZEND_IN_ARRAY:
-				case ZEND_ARRAY_KEY_EXISTS:
-					if (opline->result_type & IS_TMP_VAR) {
-						/* reinitialize result_type of smart branch instructions */
-						if (opline + 1 < end) {
-							if ((opline+1)->opcode == ZEND_JMPZ
-							 && (opline+1)->op1_type == IS_TMP_VAR
-							 && (opline+1)->op1.var == opline->result.var) {
-								opline->result_type = IS_SMART_BRANCH_JMPZ | IS_TMP_VAR;
-							} else if ((opline+1)->opcode == ZEND_JMPNZ
-							 && (opline+1)->op1_type == IS_TMP_VAR
-							 && (opline+1)->op1.var == opline->result.var) {
-								opline->result_type = IS_SMART_BRANCH_JMPNZ | IS_TMP_VAR;
-							}
+			case ZEND_IS_IDENTICAL:
+			case ZEND_IS_NOT_IDENTICAL:
+			case ZEND_IS_EQUAL:
+			case ZEND_IS_NOT_EQUAL:
+			case ZEND_IS_SMALLER:
+			case ZEND_IS_SMALLER_OR_EQUAL:
+			case ZEND_CASE:
+			case ZEND_ISSET_ISEMPTY_CV:
+			case ZEND_ISSET_ISEMPTY_VAR:
+			case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+			case ZEND_ISSET_ISEMPTY_PROP_OBJ:
+			case ZEND_ISSET_ISEMPTY_STATIC_PROP:
+			case ZEND_INSTANCEOF:
+			case ZEND_TYPE_CHECK:
+			case ZEND_DEFINED:
+			case ZEND_IN_ARRAY:
+			case ZEND_ARRAY_KEY_EXISTS:
+				if (opline->result_type & IS_TMP_VAR) {
+					/* reinitialize result_type of smart branch instructions */
+					if (opline + 1 < end) {
+						if ((opline+1)->opcode == ZEND_JMPZ
+						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op1.var == opline->result.var) {
+							opline->result_type = IS_SMART_BRANCH_JMPZ | IS_TMP_VAR;
+						} else if ((opline+1)->opcode == ZEND_JMPNZ
+						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op1.var == opline->result.var) {
+							opline->result_type = IS_SMART_BRANCH_JMPNZ | IS_TMP_VAR;
 						}
 					}
-					break;
-			}
+				}
+				break;
 		}
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
 	}
+
+	op_array->fn_flags |= ZEND_ACC_DONE_PASS_TWO;
 }
 
 static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
@@ -1174,6 +1178,8 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 #if ZEND_USE_ABS_JMP_ADDR && !ZEND_USE_ABS_CONST_ADDR
 	zend_op *old_opcodes = op_array->opcodes;
 #endif
+
+	ZEND_ASSERT((op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) == 0);
 
 #if !ZEND_USE_ABS_CONST_ADDR
 	if (op_array->last_literal) {
@@ -1212,77 +1218,77 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op2);
 		}
 
-		if (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) {
-			/* fix jumps to point to new array */
-			switch (opline->opcode) {
+		/* fix jumps to point to new array */
+		switch (opline->opcode) {
 #if ZEND_USE_ABS_JMP_ADDR && !ZEND_USE_ABS_CONST_ADDR
-				case ZEND_JMP:
-				case ZEND_FAST_CALL:
-					opline->op1.jmp_addr = &op_array->opcodes[opline->op1.jmp_addr - old_opcodes];
-					break;
-				case ZEND_JMPZNZ:
-					/* relative extended_value don't have to be changed */
-					/* break omitted intentionally */
-				case ZEND_JMPZ:
-				case ZEND_JMPNZ:
-				case ZEND_JMPZ_EX:
-				case ZEND_JMPNZ_EX:
-				case ZEND_JMP_SET:
-				case ZEND_COALESCE:
-				case ZEND_FE_RESET_R:
-				case ZEND_FE_RESET_RW:
-				case ZEND_ASSERT_CHECK:
+			case ZEND_JMP:
+			case ZEND_FAST_CALL:
+				opline->op1.jmp_addr = &op_array->opcodes[opline->op1.jmp_addr - old_opcodes];
+				break;
+			case ZEND_JMPZNZ:
+				/* relative extended_value don't have to be changed */
+				/* break omitted intentionally */
+			case ZEND_JMPZ:
+			case ZEND_JMPNZ:
+			case ZEND_JMPZ_EX:
+			case ZEND_JMPNZ_EX:
+			case ZEND_JMP_SET:
+			case ZEND_COALESCE:
+			case ZEND_FE_RESET_R:
+			case ZEND_FE_RESET_RW:
+			case ZEND_ASSERT_CHECK:
+				opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
+				break;
+			case ZEND_CATCH:
+				if (!(opline->extended_value & ZEND_LAST_CATCH)) {
 					opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
-					break;
-				case ZEND_CATCH:
-					if (!(opline->extended_value & ZEND_LAST_CATCH)) {
-						opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
-					}
-					break;
-				case ZEND_FE_FETCH_R:
-				case ZEND_FE_FETCH_RW:
-				case ZEND_SWITCH_LONG:
-				case ZEND_SWITCH_STRING:
-					/* relative extended_value don't have to be changed */
-					break;
+				}
+				break;
+			case ZEND_FE_FETCH_R:
+			case ZEND_FE_FETCH_RW:
+			case ZEND_SWITCH_LONG:
+			case ZEND_SWITCH_STRING:
+				/* relative extended_value don't have to be changed */
+				break;
 #endif
-				case ZEND_IS_IDENTICAL:
-				case ZEND_IS_NOT_IDENTICAL:
-				case ZEND_IS_EQUAL:
-				case ZEND_IS_NOT_EQUAL:
-				case ZEND_IS_SMALLER:
-				case ZEND_IS_SMALLER_OR_EQUAL:
-				case ZEND_CASE:
-				case ZEND_ISSET_ISEMPTY_CV:
-				case ZEND_ISSET_ISEMPTY_VAR:
-				case ZEND_ISSET_ISEMPTY_DIM_OBJ:
-				case ZEND_ISSET_ISEMPTY_PROP_OBJ:
-				case ZEND_ISSET_ISEMPTY_STATIC_PROP:
-				case ZEND_INSTANCEOF:
-				case ZEND_TYPE_CHECK:
-				case ZEND_DEFINED:
-				case ZEND_IN_ARRAY:
-				case ZEND_ARRAY_KEY_EXISTS:
-					if (opline->result_type & IS_TMP_VAR) {
-						/* reinitialize result_type of smart branch instructions */
-						if (opline + 1 < end) {
-							if ((opline+1)->opcode == ZEND_JMPZ
-							 && (opline+1)->op1_type == IS_TMP_VAR
-							 && (opline+1)->op1.var == opline->result.var) {
-								opline->result_type = IS_SMART_BRANCH_JMPZ | IS_TMP_VAR;
-							} else if ((opline+1)->opcode == ZEND_JMPNZ
-							 && (opline+1)->op1_type == IS_TMP_VAR
-							 && (opline+1)->op1.var == opline->result.var) {
-								opline->result_type = IS_SMART_BRANCH_JMPNZ | IS_TMP_VAR;
-							}
+			case ZEND_IS_IDENTICAL:
+			case ZEND_IS_NOT_IDENTICAL:
+			case ZEND_IS_EQUAL:
+			case ZEND_IS_NOT_EQUAL:
+			case ZEND_IS_SMALLER:
+			case ZEND_IS_SMALLER_OR_EQUAL:
+			case ZEND_CASE:
+			case ZEND_ISSET_ISEMPTY_CV:
+			case ZEND_ISSET_ISEMPTY_VAR:
+			case ZEND_ISSET_ISEMPTY_DIM_OBJ:
+			case ZEND_ISSET_ISEMPTY_PROP_OBJ:
+			case ZEND_ISSET_ISEMPTY_STATIC_PROP:
+			case ZEND_INSTANCEOF:
+			case ZEND_TYPE_CHECK:
+			case ZEND_DEFINED:
+			case ZEND_IN_ARRAY:
+			case ZEND_ARRAY_KEY_EXISTS:
+				if (opline->result_type & IS_TMP_VAR) {
+					/* reinitialize result_type of smart branch instructions */
+					if (opline + 1 < end) {
+						if ((opline+1)->opcode == ZEND_JMPZ
+						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op1.var == opline->result.var) {
+							opline->result_type = IS_SMART_BRANCH_JMPZ | IS_TMP_VAR;
+						} else if ((opline+1)->opcode == ZEND_JMPNZ
+						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op1.var == opline->result.var) {
+							opline->result_type = IS_SMART_BRANCH_JMPNZ | IS_TMP_VAR;
 						}
 					}
-					break;
-			}
+				}
+				break;
 		}
 		zend_vm_set_opcode_handler_ex(opline, op1_info, op2_info, res_info);
 		opline++;
 	}
+
+	op_array->fn_flags |= ZEND_ACC_DONE_PASS_TWO;
 }
 
 static void zend_optimize_op_array(zend_op_array      *op_array,
@@ -1378,7 +1384,7 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 			zend_optimize(call_graph.op_arrays[i], &ctx);
 		}
 
-	    zend_analyze_call_graph(&ctx.arena, script, 0, &call_graph);
+	    zend_analyze_call_graph(&ctx.arena, script, &call_graph);
 
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
@@ -1529,11 +1535,11 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 	if ((debug_level & ZEND_DUMP_AFTER_OPTIMIZER) &&
 	    (ZEND_OPTIMIZER_PASS_7 & optimization_level)) {
 		zend_dump_op_array(&script->main_op_array,
-			ZEND_DUMP_RT_CONSTANTS | ZEND_DUMP_LIVE_RANGES, "after optimizer", NULL);
+			ZEND_DUMP_LIVE_RANGES, "after optimizer", NULL);
 
 		ZEND_HASH_FOREACH_PTR(&script->function_table, op_array) {
 			zend_dump_op_array(op_array,
-				ZEND_DUMP_RT_CONSTANTS | ZEND_DUMP_LIVE_RANGES, "after optimizer", NULL);
+				ZEND_DUMP_LIVE_RANGES, "after optimizer", NULL);
 		} ZEND_HASH_FOREACH_END();
 
 		ZEND_HASH_FOREACH_PTR(&script->class_table, ce) {
@@ -1542,7 +1548,7 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 				 && op_array->type == ZEND_USER_FUNCTION
 				 && !(op_array->fn_flags & ZEND_ACC_TRAIT_CLONE)) {
 					zend_dump_op_array(op_array,
-						ZEND_DUMP_RT_CONSTANTS | ZEND_DUMP_LIVE_RANGES, "after optimizer", NULL);
+						ZEND_DUMP_LIVE_RANGES, "after optimizer", NULL);
 				}
 			} ZEND_HASH_FOREACH_END();
 		} ZEND_HASH_FOREACH_END();
