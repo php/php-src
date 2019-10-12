@@ -694,7 +694,7 @@ static int php_sock_array_to_fd_set(zval *sock_array, fd_set *fds, PHP_SOCKET *m
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(sock_array), element) {
 		ZVAL_DEREF(element);
 		php_sock = (php_socket*) zend_fetch_resource_ex(element, le_socket_name, le_socket);
-		if (!php_sock) continue; /* If element is not a resource, skip it */
+		if (!php_sock) return -1; /* If element is not a resource, bail out */
 
 		PHP_SAFE_FD_SET(php_sock->bsd_socket, fds);
 		if (php_sock->bsd_socket > *max_fd) {
@@ -723,7 +723,7 @@ static int php_sock_array_from_fd_set(zval *sock_array, fd_set *fds) /* {{{ */
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(sock_array), num_key, key, element) {
 		ZVAL_DEREF(element);
 		php_sock = (php_socket*) zend_fetch_resource_ex(element, le_socket_name, le_socket);
-		if (!php_sock) continue; /* If element is not a resource, skip it */
+		ZEND_ASSERT(php_sock); /* element is supposed to be resource */
 
 		if (PHP_SAFE_FD_ISSET(php_sock->bsd_socket, fds)) {
 			/* Add fd to new array */
@@ -769,9 +769,24 @@ PHP_FUNCTION(socket_select)
 	FD_ZERO(&wfds);
 	FD_ZERO(&efds);
 
-	if (r_array != NULL) sets += php_sock_array_to_fd_set(r_array, &rfds, &max_fd);
-	if (w_array != NULL) sets += php_sock_array_to_fd_set(w_array, &wfds, &max_fd);
-	if (e_array != NULL) sets += php_sock_array_to_fd_set(e_array, &efds, &max_fd);
+	if (r_array != NULL) {
+		sets += retval = php_sock_array_to_fd_set(r_array, &rfds, &max_fd);
+		if (retval == -1) {
+			return;
+		}
+	}
+	if (w_array != NULL) {
+		sets += retval = php_sock_array_to_fd_set(w_array, &wfds, &max_fd);
+		if (retval == -1) {
+			return;
+		}
+	}
+	if (e_array != NULL) {
+		sets += retval = php_sock_array_to_fd_set(e_array, &efds, &max_fd);
+		if (retval == -1) {
+			return;
+		}
+	}
 
 	if (!sets) {
 		php_error_docref(NULL, E_WARNING, "no resource arrays were passed to select");
