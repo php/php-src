@@ -657,7 +657,7 @@ char *sockets_strerror(int error) /* {{{ */
 			}
 
 			SOCKETS_G(strerror_buf) = estrdup(tmp);
-			LocalFree(tmp);
+			free(tmp);
 
 			buf = SOCKETS_G(strerror_buf);
 		}
