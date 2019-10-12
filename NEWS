@@ -38,6 +38,9 @@ PHP                                                                        NEWS
   . Fixed bug #75245 (Don't set content of elements with only whitespaces). 
     (eriklundin)
 
+- Sockets:
+  . Fixed bug #78665 (Multicasting may leak memory). (cmb)
+
 - Standard:
   . Fixed bug #76859 (stream_get_line skips data if used with data-generating 
     filter). (kkopachev)
