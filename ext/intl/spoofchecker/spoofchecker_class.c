@@ -15,6 +15,7 @@
 #include "spoofchecker_class.h"
 #include "spoofchecker_main.h"
 #include "spoofchecker_create.h"
+#include "spoofchecker_arginfo.h"
 #include "php_intl.h"
 #include "intl_error.h"
 
@@ -58,49 +59,18 @@ zend_object *Spoofchecker_object_create(zend_class_entry *ce)
  * 'Spoofchecker' class registration structures & functions
  */
 
-/* {{{ Spoofchecker methods arguments info */
-ZEND_BEGIN_ARG_INFO_EX(spoofchecker_0_args, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(spoofchecker_set_checks, 0, 0, 1)
-	ZEND_ARG_INFO(0, checks)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(spoofchecker_set_allowed_locales, 0, 0, 1)
-	ZEND_ARG_INFO(0, locale_list)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(spoofchecker_is_suspicous, 0, 0, 1)
-	ZEND_ARG_INFO(0, text)
-	ZEND_ARG_INFO(1, error)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(spoofchecker_are_confusable, 0, 0, 2)
-	ZEND_ARG_INFO(0, s1)
-	ZEND_ARG_INFO(0, s2)
-	ZEND_ARG_INFO(1, error)
-ZEND_END_ARG_INFO()
-
-#if U_ICU_VERSION_MAJOR_NUM >= 58
-ZEND_BEGIN_ARG_INFO_EX(spoofchecker_set_restriction_level, 0, 0, 1)
-	ZEND_ARG_INFO(0, level)
-ZEND_END_ARG_INFO()
-#endif
-
-/* }}} */
-
 /* {{{ Spoofchecker_class_functions
  * Every 'Spoofchecker' class method has an entry in this table
  */
 
 static const zend_function_entry Spoofchecker_class_functions[] = {
-	PHP_ME(Spoofchecker, __construct, spoofchecker_0_args, ZEND_ACC_PUBLIC)
-	PHP_ME(Spoofchecker, isSuspicious, spoofchecker_is_suspicous, ZEND_ACC_PUBLIC)
-	PHP_ME(Spoofchecker, areConfusable, spoofchecker_are_confusable, ZEND_ACC_PUBLIC)
-	PHP_ME(Spoofchecker, setAllowedLocales, spoofchecker_set_allowed_locales, ZEND_ACC_PUBLIC)
-	PHP_ME(Spoofchecker, setChecks, spoofchecker_set_checks, ZEND_ACC_PUBLIC)
+	PHP_ME(Spoofchecker, __construct, arginfo_class_Spoofchecker___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(Spoofchecker, isSuspicious, arginfo_class_Spoofchecker_isSuspicious, ZEND_ACC_PUBLIC)
+	PHP_ME(Spoofchecker, areConfusable, arginfo_class_Spoofchecker_areConfusable, ZEND_ACC_PUBLIC)
+	PHP_ME(Spoofchecker, setAllowedLocales, arginfo_class_Spoofchecker_setAllowedLocales, ZEND_ACC_PUBLIC)
+	PHP_ME(Spoofchecker, setChecks, arginfo_class_Spoofchecker_setChecks, ZEND_ACC_PUBLIC)
 #if U_ICU_VERSION_MAJOR_NUM >= 58
-	PHP_ME(Spoofchecker, setRestrictionLevel, spoofchecker_set_restriction_level, ZEND_ACC_PUBLIC)
+	PHP_ME(Spoofchecker, setRestrictionLevel, arginfo_class_Spoofchecker_setRestrictionLevel, ZEND_ACC_PUBLIC)
 #endif
 	PHP_FE_END
 };
