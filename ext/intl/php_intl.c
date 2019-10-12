@@ -85,6 +85,7 @@
 #include "breakiterator/breakiterator_iterators.h"
 
 #include "idn/idn.h"
+#include "idn/idn_arginfo.h"
 #include "uchar/uchar.h"
 
 # include "spoofchecker/spoofchecker_class.h"
@@ -347,13 +348,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_create, 0, 0, 3)
 	ZEND_ARG_INFO(0, timezone_str)
 	ZEND_ARG_INFO(0, calendar)
 	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_idn_to_ascii, 0, 0, 1)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, option)
-	ZEND_ARG_INFO(0, variant)
-	ZEND_ARG_INFO(1, idn_info)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_create_proc, 0, 0, 2 )
@@ -656,7 +650,7 @@ static const zend_function_entry intl_functions[] = {
 
 	/* IDN functions */
 	PHP_FE( idn_to_ascii, arginfo_idn_to_ascii)
-	PHP_FE( idn_to_utf8, arginfo_idn_to_ascii)
+	PHP_FE( idn_to_utf8, arginfo_idn_to_utf8)
 
 	/* ResourceBundle functions */
 	PHP_FE( resourcebundle_create, arginfo_resourcebundle_create_proc )
