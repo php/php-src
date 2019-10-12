@@ -28,6 +28,7 @@
 #include "resourcebundle/resourcebundle.h"
 #include "resourcebundle/resourcebundle_iterator.h"
 #include "resourcebundle/resourcebundle_class.h"
+#include "resourcebundle/resourcebundle_arginfo.h"
 
 zend_class_entry *ResourceBundle_ce_ptr = NULL;
 
@@ -131,14 +132,6 @@ static int resourcebundle_ctor(INTERNAL_FUNCTION_PARAMETERS)
 }
 /* }}} */
 
-/* {{{ arginfo_resourcebundle__construct */
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle___construct, 0, 0, 2 )
-	ZEND_ARG_INFO( 0, locale )
-	ZEND_ARG_INFO( 0, bundlename )
-	ZEND_ARG_INFO( 0, fallback )
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ proto ResourceBundle::__construct( string $locale [, string $bundlename [, bool $fallback = true ]] )
  * ResourceBundle object constructor
  */
@@ -236,13 +229,6 @@ zval *resourcebundle_array_get(zend_object *object, zval *offset, int type, zval
 }
 /* }}} */
 
-/* {{{ arginfo_resourcebundle_get */
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, index )
-	ZEND_ARG_INFO( 0, fallback )
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ proto mixed ResourceBundle::get( int|string $resindex [, bool $fallback = true ] )
  * proto mixed resourcebundle_get( ResourceBundle $rb, int|string $resindex [, bool $fallback = true ] )
  * Get resource identified by numerical index or key name.
@@ -278,11 +264,6 @@ int resourcebundle_array_count(zend_object *object, zend_long *count)
 }
 /* }}} */
 
-/* {{{ arginfo_resourcebundle_count */
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_count, 0, 0, 0 )
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ proto int ResourceBundle::count()
  * proto int resourcebundle_count( ResourceBundle $bundle )
  * Get resources count
@@ -301,12 +282,6 @@ PHP_FUNCTION( resourcebundle_count )
 	len = ures_getSize( rb->me );
 	RETURN_LONG( len );
 }
-
-/* {{{ arginfo_resourcebundle_getlocales */
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_getlocales, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, bundlename )
-ZEND_END_ARG_INFO()
-/* }}} */
 
 /* {{{ proto array ResourceBundle::getLocales( string $bundlename )
  * proto array resourcebundle_locales( string $bundlename )
@@ -352,11 +327,6 @@ PHP_FUNCTION( resourcebundle_locales )
 }
 /* }}} */
 
-/* {{{ arginfo_resourcebundle_get_error_code */
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get_error_code, 0, 0, 0 )
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ proto string ResourceBundle::getErrorCode( )
  * proto string resourcebundle_get_error_code( ResourceBundle $bundle )
  * Get text description for ResourceBundle's last error code.
@@ -375,11 +345,6 @@ PHP_FUNCTION( resourcebundle_get_error_code )
 
 	RETURN_LONG(INTL_DATA_ERROR_CODE(rb));
 }
-/* }}} */
-
-/* {{{ arginfo_resourcebundle_get_error_message */
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get_error_message, 0, 0, 0 )
-ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ proto string ResourceBundle::getErrorMessage( )
@@ -407,13 +372,13 @@ PHP_FUNCTION( resourcebundle_get_error_message )
  * Every 'ResourceBundle' class method has an entry in this table
  */
 static const zend_function_entry ResourceBundle_class_functions[] = {
-	PHP_ME( ResourceBundle, __construct, arginfo_resourcebundle___construct, ZEND_ACC_PUBLIC )
-	ZEND_NAMED_ME( create, ZEND_FN( resourcebundle_create ), arginfo_resourcebundle___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
-	ZEND_NAMED_ME( get, ZEND_FN(resourcebundle_get), arginfo_resourcebundle_get, ZEND_ACC_PUBLIC )
-	ZEND_NAMED_ME( count, ZEND_FN(resourcebundle_count), arginfo_resourcebundle_count, ZEND_ACC_PUBLIC )
-	ZEND_NAMED_ME( getLocales, ZEND_FN(resourcebundle_locales), arginfo_resourcebundle_getlocales, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC )
-	ZEND_NAMED_ME( getErrorCode, ZEND_FN(resourcebundle_get_error_code), arginfo_resourcebundle_get_error_code, ZEND_ACC_PUBLIC )
-	ZEND_NAMED_ME( getErrorMessage, ZEND_FN(resourcebundle_get_error_message), arginfo_resourcebundle_get_error_message, ZEND_ACC_PUBLIC )
+	PHP_ME( ResourceBundle, __construct, arginfo_class_ResourceBundle___construct, ZEND_ACC_PUBLIC )
+	ZEND_NAMED_ME( create, ZEND_FN( resourcebundle_create ), arginfo_class_ResourceBundle_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
+	ZEND_NAMED_ME( get, ZEND_FN(resourcebundle_get), arginfo_class_ResourceBundle_get, ZEND_ACC_PUBLIC )
+	ZEND_NAMED_ME( count, ZEND_FN(resourcebundle_count), arginfo_class_ResourceBundle_count, ZEND_ACC_PUBLIC )
+	ZEND_NAMED_ME( getLocales, ZEND_FN(resourcebundle_locales), arginfo_class_ResourceBundle_getLocales, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC )
+	ZEND_NAMED_ME( getErrorCode, ZEND_FN(resourcebundle_get_error_code), arginfo_class_ResourceBundle_getErrorCode, ZEND_ACC_PUBLIC )
+	ZEND_NAMED_ME( getErrorMessage, ZEND_FN(resourcebundle_get_error_message), arginfo_class_ResourceBundle_getErrorMessage, ZEND_ACC_PUBLIC )
 	PHP_FE_END
 };
 /* }}} */

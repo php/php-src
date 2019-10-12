@@ -1,0 +1,48 @@
+<?php
+
+class ResourceBundle implements Traversable
+{
+    public function __construct(?string $locale, ?string $bundlename, bool $fallback = true) {}
+
+    /** @return ResourceBundle|false|null */
+    public static function create(?string $locale, ?string $bundlename, bool $fallback = true) {}
+
+    /**
+     * @param string|int $index
+     * @return mixed
+     */
+    public function get($index, bool $fallback = true) {}
+
+    /** @return int */
+    public function count() {}
+
+    /** @return array|false */
+    public static function getLocales(string $bundlename) {}
+
+    /** @return int */
+    public function getErrorCode() {}
+
+    /** @return string */
+    public function getErrorMessage() {}
+}
+
+/** @return ResourceBundle|false|null */
+function resourcebundle_create(?string $locale, ?string $bundlename, bool $fallback = true) {}
+
+/**
+ * @param string|int $index
+ * @return ResourceBundle|false|null
+ */
+function resourcebundle_get(ResourceBundle $bundle, $index) {}
+
+/** @return int */
+function resourcebundle_count(ResourceBundle $bundle) {}
+
+/** @return array|false */
+function resourcebundle_locales(string $bundlename) {}
+
+/** @return int */
+function resourcebundle_get_error_code(ResourceBundle $bundle) {}
+
+/** @return string */
+function resourcebundle_get_error_message(ResourceBundle $bundle) {}
