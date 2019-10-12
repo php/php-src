@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #78642 (Wrong libiconv version displayed). (gedas at martynas,
     cmb).
 
+- Sockets:
+  . Fixed bug #78665 (Multicasting may leak memory). (cmb)
+
 24 Oct 2019, PHP 7.3.11
 
 - Core:
