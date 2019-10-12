@@ -53,6 +53,7 @@
 #include "normalizer/normalizer.h"
 #include "normalizer/normalizer_class.h"
 #include "normalizer/normalizer_normalize.h"
+#include "normalizer/normalizer_arginfo.h"
 
 #include "locale/locale.h"
 #include "locale/locale_class.h"
@@ -174,17 +175,6 @@ ZEND_END_ARG_INFO()
 
 #define intl_0_args collator_static_0_args
 #define intl_1_arg collator_static_1_arg
-
-ZEND_BEGIN_ARG_INFO_EX(normalizer_args, 0, 0, 1)
-	ZEND_ARG_INFO(0, input)
-	ZEND_ARG_INFO(0, form)
-ZEND_END_ARG_INFO()
-
-#if U_ICU_VERSION_MAJOR_NUM >= 56
-ZEND_BEGIN_ARG_INFO_EX(decomposition_args, 0, 0, 1)
-	ZEND_ARG_INFO(0, input)
-ZEND_END_ARG_INFO();
-#endif
 
 ZEND_BEGIN_ARG_INFO_EX(datefmt_parse_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, formatter)
@@ -548,10 +538,10 @@ static const zend_function_entry intl_functions[] = {
 	PHP_FE( numfmt_get_error_message, arginfo_numfmt_get_error_code )
 
 	/* normalizer functions */
-	PHP_FE( normalizer_normalize, normalizer_args )
-	PHP_FE( normalizer_is_normalized, normalizer_args )
+	PHP_FE( normalizer_normalize, arginfo_normalizer_normalize )
+	PHP_FE( normalizer_is_normalized, arginfo_normalizer_is_normalized )
 #if U_ICU_VERSION_MAJOR_NUM >= 56
-	PHP_FE( normalizer_get_raw_decomposition, decomposition_args )
+	PHP_FE( normalizer_get_raw_decomposition, arginfo_normalizer_get_raw_decomposition )
 #endif
 
 	/* Locale functions */
