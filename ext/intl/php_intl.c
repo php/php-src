@@ -56,6 +56,7 @@
 #include "locale/locale.h"
 #include "locale/locale_class.h"
 #include "locale/locale_methods.h"
+#include "locale/locale_arginfo.h"
 
 #include "dateformat/dateformat.h"
 #include "dateformat/dateformat_class.h"
@@ -167,31 +168,6 @@ ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_currency_arginfo, 0, 0, 3)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(1, currency)
 	ZEND_ARG_INFO(1, position)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( locale_get_loc_in_loc_args, 0, ZEND_RETURN_VALUE, 1 )
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, in_locale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( locale_filter_matches_args, 0, ZEND_RETURN_VALUE, 2 )
-	ZEND_ARG_INFO(0, langtag)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, canonicalize)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( locale_lookup_args, 0, ZEND_RETURN_VALUE, 2 )
-	ZEND_ARG_INFO(0, langtag)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, canonicalize)
-	ZEND_ARG_INFO(0, def)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(locale_0_args, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(locale_1_arg, 0, 0, 1)
-	ZEND_ARG_INFO(0, arg1)
 ZEND_END_ARG_INFO()
 
 #define intl_0_args collator_static_0_args
@@ -614,24 +590,24 @@ static const zend_function_entry intl_functions[] = {
 #endif
 
 	/* Locale functions */
-	PHP_NAMED_FE( locale_get_default, zif_locale_get_default, locale_0_args )
-	PHP_NAMED_FE( locale_set_default, zif_locale_set_default, locale_1_arg )
-	PHP_FE( locale_get_primary_language, locale_1_arg )
-	PHP_FE( locale_get_script, locale_1_arg )
-	PHP_FE( locale_get_region, locale_1_arg )
-	PHP_FE( locale_get_keywords, locale_1_arg )
-	PHP_FE( locale_get_display_script, locale_get_loc_in_loc_args )
-	PHP_FE( locale_get_display_region, locale_get_loc_in_loc_args )
-	PHP_FE( locale_get_display_name, locale_get_loc_in_loc_args )
-	PHP_FE( locale_get_display_language, locale_get_loc_in_loc_args)
-	PHP_FE( locale_get_display_variant, locale_get_loc_in_loc_args )
-	PHP_FE( locale_compose, locale_1_arg )
-	PHP_FE( locale_parse, locale_1_arg )
-	PHP_FE( locale_get_all_variants, locale_1_arg )
-	PHP_FE( locale_filter_matches, locale_filter_matches_args )
-	PHP_FE( locale_canonicalize, locale_1_arg )
-	PHP_FE( locale_lookup, locale_lookup_args )
-	PHP_FE( locale_accept_from_http, locale_1_arg )
+	PHP_NAMED_FE( locale_get_default, zif_locale_get_default, arginfo_locale_get_default )
+	PHP_NAMED_FE( locale_set_default, zif_locale_set_default, arginfo_locale_set_default )
+	PHP_FE( locale_get_primary_language, arginfo_locale_get_primary_language )
+	PHP_FE( locale_get_script, arginfo_locale_get_script )
+	PHP_FE( locale_get_region, arginfo_locale_get_region )
+	PHP_FE( locale_get_keywords, arginfo_locale_get_keywords )
+	PHP_FE( locale_get_display_script, arginfo_locale_get_display_script )
+	PHP_FE( locale_get_display_region, arginfo_locale_get_display_region )
+	PHP_FE( locale_get_display_name, arginfo_locale_get_display_name )
+	PHP_FE( locale_get_display_language, arginfo_locale_get_display_language)
+	PHP_FE( locale_get_display_variant, arginfo_locale_get_display_variant )
+	PHP_FE( locale_compose, arginfo_locale_compose )
+	PHP_FE( locale_parse, arginfo_locale_parse )
+	PHP_FE( locale_get_all_variants, arginfo_locale_get_all_variants )
+	PHP_FE( locale_filter_matches, arginfo_locale_filter_matches )
+	PHP_FE( locale_canonicalize, arginfo_locale_canonicalize )
+	PHP_FE( locale_lookup, arginfo_locale_lookup )
+	PHP_FE( locale_accept_from_http, arginfo_locale_accept_from_http )
 
 	/* MessageFormatter functions */
 	PHP_FE( msgfmt_create, arginfo_msgfmt_create )

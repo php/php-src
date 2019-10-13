@@ -1549,11 +1549,11 @@ PHP_FUNCTION(locale_lookup)
 /* }}} */
 
 /* {{{ proto string Locale::acceptFromHttp(string $http_accept)
-* Tries to find out best available locale based on HTTP �Accept-Language� header
+* Tries to find out best available locale based on HTTP "Accept-Language" header
 */
 /* }}} */
 /* {{{ proto string locale_accept_from_http(string $http_accept)
-* Tries to find out best available locale based on HTTP �Accept-Language� header
+* Tries to find out best available locale based on HTTP "Accept-Language" header
 */
 PHP_FUNCTION(locale_accept_from_http)
 {
