@@ -37,6 +37,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_resourcebundle_locales arginfo_class_ResourceBundle_getLocales
 
-#define arginfo_resourcebundle_get_error_code arginfo_resourcebundle_count
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_resourcebundle_get_error_code, 0, 1, IS_LONG, 0)
+	ZEND_ARG_OBJ_INFO(0, bundle, ResourceBundle, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_resourcebundle_get_error_message arginfo_resourcebundle_count
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_resourcebundle_get_error_message, 0, 1, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, bundle, ResourceBundle, 0)
+ZEND_END_ARG_INFO()

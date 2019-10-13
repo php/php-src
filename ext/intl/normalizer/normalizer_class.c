@@ -26,21 +26,6 @@ zend_class_entry *Normalizer_ce_ptr = NULL;
  * 'Normalizer' class registration structures & functions
  */
 
-/* {{{ Normalizer methods arguments info */
-
-ZEND_BEGIN_ARG_INFO_EX( normalizer_args, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, input )
-	ZEND_ARG_INFO( 0, form )
-ZEND_END_ARG_INFO()
-
-#if U_ICU_VERSION_MAJOR_NUM >= 56
-ZEND_BEGIN_ARG_INFO_EX( decomposition_args, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, input )
-ZEND_END_ARG_INFO();
-#endif
-
-/* }}} */
-
 /* {{{ Normalizer_class_functions
  * Every 'Normalizer' class method has an entry in this table
  */

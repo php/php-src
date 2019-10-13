@@ -22,6 +22,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker_setChecks, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, checks, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+#if U_ICU_VERSION_MAJOR_NUM >= 58
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker_setRestrictionLevel, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, level, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#endif

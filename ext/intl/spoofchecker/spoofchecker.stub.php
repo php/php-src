@@ -10,12 +10,14 @@ class Spoofchecker
     /** @return bool */
     public function areConfusable(string $s1, string $s2, &$error = null) {}
 
-    /** @return void */
+    /** @return null|false */
     public function setAllowedLocales(string $locale_list) {}
 
-    /** @return void */
+    /** @return null|false */
     public function setChecks(int $checks) {}
 
-    /** @return void */
+#if U_ICU_VERSION_MAJOR_NUM >= 58
+    /** @return null|false */
     public function setRestrictionLevel(int $level) {}
+#endif
 }
