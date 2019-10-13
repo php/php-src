@@ -25,7 +25,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> $argument ]
-        Parameter #1 [ <optional> $return ]
+        Parameter #1 [ <optional> bool $return ]
       }
     }
   }
@@ -123,49 +123,49 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Method [ <internal:Reflection> public method hasMethod ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> $name ]
+        Parameter #0 [ <required> string $name ]
       }
     }
 
     Method [ <internal:Reflection> public method getMethod ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> $name ]
+        Parameter #0 [ <required> string $name ]
       }
     }
 
     Method [ <internal:Reflection> public method getMethods ] {
 
       - Parameters [1] {
-        Parameter #0 [ <optional> $filter ]
+        Parameter #0 [ <optional> ?int $filter ]
       }
     }
 
     Method [ <internal:Reflection> public method hasProperty ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> $name ]
+        Parameter #0 [ <required> string $name ]
       }
     }
 
     Method [ <internal:Reflection> public method getProperty ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> $name ]
+        Parameter #0 [ <required> string $name ]
       }
     }
 
     Method [ <internal:Reflection> public method getProperties ] {
 
       - Parameters [1] {
-        Parameter #0 [ <optional> $filter ]
+        Parameter #0 [ <optional> ?int $filter ]
       }
     }
 
     Method [ <internal:Reflection> public method hasConstant ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> $name ]
+        Parameter #0 [ <required> string $name ]
       }
     }
 
@@ -184,14 +184,14 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Method [ <internal:Reflection> public method getConstant ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> $name ]
+        Parameter #0 [ <required> string $name ]
       }
     }
 
     Method [ <internal:Reflection> public method getReflectionConstant ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> $name ]
+        Parameter #0 [ <required> string $name ]
       }
     }
 
@@ -258,7 +258,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Method [ <internal:Reflection> public method isInstance ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> $object ]
+        Parameter #0 [ <required> object $object ]
       }
     }
 
@@ -304,7 +304,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Method [ <internal:Reflection> public method getStaticPropertyValue ] {
 
       - Parameters [2] {
-        Parameter #0 [ <required> $name ]
+        Parameter #0 [ <required> string $name ]
         Parameter #1 [ <optional> $default ]
       }
     }
@@ -312,7 +312,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Method [ <internal:Reflection> public method setStaticPropertyValue ] {
 
       - Parameters [2] {
-        Parameter #0 [ <required> $name ]
+        Parameter #0 [ <required> string $name ]
         Parameter #1 [ <required> $value ]
       }
     }
