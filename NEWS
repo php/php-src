@@ -15,6 +15,7 @@ PHP                                                                        NEWS
 - FFI:
   . Fixed bug #78716 (Function name mangling is wrong for some parameter 
     types). (cmb)
+  . Implement FR #78270 (Support __vectorcall convention with FFI). (cmb)
 
 - FPM:
   . Fixed bug #78599 (env_path_info underflow in fpm_main.c can lead to RCE).

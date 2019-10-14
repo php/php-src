@@ -776,7 +776,7 @@ again:
 }
 /* }}} */
 
-#if defined(ZEND_WIN32) && (defined(HAVE_FFI_FASTCALL) || defined(HAVE_FFI_STDCALL))
+#if defined(ZEND_WIN32) && (defined(HAVE_FFI_FASTCALL) || defined(HAVE_FFI_STDCALL) || defined(HAVE_FFI_VECTORCALL_PARTIAL))
 static size_t zend_ffi_arg_size(zend_ffi_type *type) /* {{{ */
 {
 	zend_ffi_type *arg_type;
@@ -801,6 +801,10 @@ static zend_always_inline zend_string *zend_ffi_mangled_func_name(zend_string *n
 # ifdef HAVE_FFI_STDCALL
 		case FFI_STDCALL:
 			return strpprintf(0, "_%s@%zu", ZSTR_VAL(name), zend_ffi_arg_size(type));
+# endif
+# ifdef HAVE_FFI_VECTORCALL_PARTIAL
+		case FFI_VECTORCALL_PARTIAL:
+			return strpprintf(0, "%s@@%zu", ZSTR_VAL(name), zend_ffi_arg_size(type));
 # endif
 	}
 #endif
@@ -6008,6 +6012,29 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *n
 		}
 	}
 
+#ifdef HAVE_FFI_VECTORCALL_PARTIAL
+	if (dcl->abi == ZEND_FFI_ABI_VECTORCALL && args) {
+		zend_ulong i;
+		zend_ffi_type *arg_type;
+
+		ZEND_HASH_FOREACH_NUM_KEY_PTR(args, i, arg_type) {
+			arg_type = ZEND_FFI_TYPE(arg_type);
+# ifdef _WIN64
+			if (i >= 4 && i <= 5 && (arg_type->kind == ZEND_FFI_TYPE_FLOAT || arg_type->kind == ZEND_FFI_TYPE_DOUBLE)) {
+# else
+			if (i < 6 && (arg_type->kind == ZEND_FFI_TYPE_FLOAT || arg_type->kind == ZEND_FFI_TYPE_DOUBLE)) {
+# endif
+				zend_ffi_cleanup_dcl(nested_dcl);
+				zend_ffi_cleanup_dcl(dcl);
+				zend_hash_destroy(args);
+				pefree(args, FFI_G(persistent));
+				zend_ffi_parser_error("'float'/'double' type not allowed at position " ZEND_ULONG_FMT " with __vectorcall at line %d", i+1, FFI_G(line));
+				return;
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+#endif
+
 	if (zend_ffi_validate_func_ret_type(ret_type) != SUCCESS) {
 		zend_ffi_cleanup_dcl(nested_dcl);
 		zend_ffi_cleanup_dcl(dcl);
@@ -6062,6 +6089,11 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *n
 #ifdef HAVE_FFI_SYSV
 		case ZEND_FFI_ABI_SYSV:
 			type->func.abi = FFI_SYSV;
+			break;
+#endif
+#ifdef HAVE_FFI_VECTORCALL_PARTIAL
+		case ZEND_FFI_ABI_VECTORCALL:
+			type->func.abi = FFI_VECTORCALL_PARTIAL;
 			break;
 #endif
 		default:
@@ -6316,6 +6348,7 @@ void zend_ffi_set_abi(zend_ffi_dcl *dcl, uint16_t abi) /* {{{ */
 	_(stdcall) \
 	_(ms_abi) \
 	_(sysv_abi) \
+	_(vectorcall) \
 	_(aligned) \
 	_(packed) \
 	_(ms_struct) \
@@ -6380,6 +6413,9 @@ void zend_ffi_add_attribute(zend_ffi_dcl *dcl, const char *name, size_t name_len
 			break;
 		case attr_sysv_abi:
 			zend_ffi_set_abi(dcl, ZEND_FFI_ABI_SYSV);
+			break;
+		case attr_vectorcall:
+			zend_ffi_set_abi(dcl, ZEND_FFI_ABI_VECTORCALL);
 			break;
 		case attr_aligned:
 			dcl->align = __BIGGEST_ALIGNMENT__;
