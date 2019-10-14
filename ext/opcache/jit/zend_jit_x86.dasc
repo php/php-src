@@ -5106,7 +5106,8 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, const zend_op *opline, int b
 	if (((opline+1)->opcode == ZEND_JMPZ_EX ||
 	     (opline+1)->opcode == ZEND_JMPNZ_EX) &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var) {
+	    (opline+1)->op1.var == opline->result.var &&
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		zend_jit_addr res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
 
 		switch (opline->opcode) {
@@ -5143,7 +5144,8 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, const zend_op *opline, int b
 	if (((opline+1)->opcode == ZEND_JMPZ ||
 	     (opline+1)->opcode == ZEND_JMPZ_EX) &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var) {
+	    (opline+1)->op1.var == opline->result.var &&
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		target_label = ssa->cfg.blocks[b].successors[0];
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
@@ -5175,7 +5177,8 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, const zend_op *opline, int b
 	} else if (((opline+1)->opcode == ZEND_JMPNZ ||
 	            (opline+1)->opcode == ZEND_JMPNZ_EX) &&
 	           (opline+1)->op1_type == IS_TMP_VAR &&
-	           (opline+1)->op1.var == opline->result.var) {
+	           (opline+1)->op1.var == opline->result.var &&
+	           ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		target_label = ssa->cfg.blocks[b].successors[0];
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
@@ -5206,7 +5209,8 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, const zend_op *opline, int b
 		}
 	} else if ((opline+1)->opcode == ZEND_JMPZNZ &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var) {
+	    (opline+1)->op1.var == opline->result.var &&
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		target_label = ssa->cfg.blocks[b].successors[0];
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
@@ -5281,7 +5285,8 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 
 	if ((opline+1)->opcode == ZEND_JMPZ &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var) {
+	    (opline+1)->op1.var == opline->result.var &&
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		target_label = ssa->cfg.blocks[b].successors[0];
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
@@ -5317,7 +5322,8 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 		}
 	} else if ((opline+1)->opcode == ZEND_JMPNZ &&
 	           (opline+1)->op1_type == IS_TMP_VAR &&
-	           (opline+1)->op1.var == opline->result.var) {
+	           (opline+1)->op1.var == opline->result.var &&
+	           ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		target_label = ssa->cfg.blocks[b].successors[0];
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
@@ -5355,7 +5361,8 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 		}
 	} else if ((opline+1)->opcode == ZEND_JMPZNZ &&
 	           (opline+1)->op1_type == IS_TMP_VAR &&
-	           (opline+1)->op1.var == opline->result.var) {
+	           (opline+1)->op1.var == opline->result.var &&
+	           ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		unsigned int target_label2 = ssa->cfg.blocks[b].successors[1];
 
 		target_label = ssa->cfg.blocks[b].successors[0];
@@ -5393,7 +5400,8 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 		| jmp => target_label2
 	} else if ((opline+1)->opcode == ZEND_JMPZ_EX &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var) {
+	    (opline+1)->op1.var == opline->result.var &&
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		zend_jit_addr res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
 
 		target_label = ssa->cfg.blocks[b].successors[0];
@@ -5443,7 +5451,8 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 		}
 	} else if ((opline+1)->opcode == ZEND_JMPNZ_EX &&
 	           (opline+1)->op1_type == IS_TMP_VAR &&
-	           (opline+1)->op1.var == opline->result.var) {
+	           (opline+1)->op1.var == opline->result.var &&
+	           ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		zend_jit_addr res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
 
 		target_label = ssa->cfg.blocks[b].successors[0];
@@ -5605,7 +5614,8 @@ static int zend_jit_cmp_slow(dasm_State **Dst, const zend_op *opline, int b, zen
 	if (((opline+1)->opcode == ZEND_JMPZ_EX ||
 	     (opline+1)->opcode == ZEND_JMPNZ_EX) &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var) {
+	    (opline+1)->op1.var == opline->result.var &&
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
 			case ZEND_CASE:
@@ -5630,7 +5640,8 @@ static int zend_jit_cmp_slow(dasm_State **Dst, const zend_op *opline, int b, zen
 	if (((opline+1)->opcode == ZEND_JMPZ ||
 	     (opline+1)->opcode == ZEND_JMPZ_EX) &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var) {
+	    (opline+1)->op1.var == opline->result.var &&
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		target_label = ssa->cfg.blocks[b].successors[0];
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
@@ -5652,7 +5663,8 @@ static int zend_jit_cmp_slow(dasm_State **Dst, const zend_op *opline, int b, zen
 	} else if (((opline+1)->opcode == ZEND_JMPNZ ||
 	            (opline+1)->opcode == ZEND_JMPNZ_EX) &&
 	           (opline+1)->op1_type == IS_TMP_VAR &&
-	           (opline+1)->op1.var == opline->result.var) {
+	           (opline+1)->op1.var == opline->result.var &&
+	           ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		target_label = ssa->cfg.blocks[b].successors[0];
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
@@ -5673,7 +5685,8 @@ static int zend_jit_cmp_slow(dasm_State **Dst, const zend_op *opline, int b, zen
 		}
 	} else if ((opline+1)->opcode == ZEND_JMPZNZ &&
 	           (opline+1)->op1_type == IS_TMP_VAR &&
-	           (opline+1)->op1.var == opline->result.var) {
+	           (opline+1)->op1.var == opline->result.var &&
+	           ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		target_label = ssa->cfg.blocks[b].successors[0];
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
@@ -5954,7 +5967,8 @@ static int zend_jit_cmp(dasm_State **Dst, const zend_op *opline, int b, int *opn
 	     (opline+1)->opcode == ZEND_JMPNZ_EX ||
 	     (opline+1)->opcode == ZEND_JMPZNZ) &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var) {
+	    (opline+1)->op1.var == opline->result.var &&
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		(*opnum)++;
 	}
 
@@ -5977,7 +5991,8 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, int b, in
 	     (opline+1)->opcode == ZEND_JMPNZ ||
 	     (opline+1)->opcode == ZEND_JMPZNZ) &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var) {
+	    (opline+1)->op1.var == opline->result.var &&
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		(*opnum)++;
 		smart_branch = 1;
 	}
@@ -7836,7 +7851,8 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, int b, int 
 	     (opline+1)->opcode == ZEND_JMPNZ ||
 	     (opline+1)->opcode == ZEND_JMPZNZ) &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var) {
+	    (opline+1)->op1.var == opline->result.var &&
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		(*opnum)++;
 		smart_branch = 1;
 	}
@@ -7929,7 +7945,8 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, int b, i
 	     (opline+1)->opcode == ZEND_JMPNZ ||
 	     (opline+1)->opcode == ZEND_JMPZNZ) &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var) {
+	    (opline+1)->op1.var == opline->result.var &&
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		(*opnum)++;
 		smart_branch = 1;
 	}
@@ -8691,13 +8708,16 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, i
 		}
 	}
 	if (!(opline->extended_value & ZEND_ISEMPTY)) {
-		if ((opline+1)->opcode == ZEND_JMPZ) {
+		if ((opline+1)->opcode == ZEND_JMPZ
+		 && ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 			unsigned int target_label = ssa->cfg.blocks[b].successors[1];
 			|	jmp =>target_label
-		} else if ((opline+1)->opcode == ZEND_JMPNZ) {
+		} else if ((opline+1)->opcode == ZEND_JMPNZ
+		           && ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 			unsigned int target_label = ssa->cfg.blocks[b].successors[0];
 			|	jmp =>target_label
-		} else if ((opline+1)->opcode == ZEND_JMPZNZ) {
+		} else if ((opline+1)->opcode == ZEND_JMPZNZ
+		           && ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 			unsigned int target_label = ssa->cfg.blocks[b].successors[1];
 			|	jmp =>target_label
 		} else {
@@ -8718,11 +8738,14 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, i
 		}
 	}
 	if (!(opline->extended_value & ZEND_ISEMPTY)) {
-		if ((opline+1)->opcode == ZEND_JMPZ) {
+		if ((opline+1)->opcode == ZEND_JMPZ
+		 && ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 			unsigned int target_label = ssa->cfg.blocks[b].successors[0];
 			|	jmp =>target_label
-		} else if ((opline+1)->opcode == ZEND_JMPNZ) {
-		} else if ((opline+1)->opcode == ZEND_JMPZNZ) {
+		} else if ((opline+1)->opcode == ZEND_JMPNZ
+		           && ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
+		} else if ((opline+1)->opcode == ZEND_JMPZNZ
+		           && ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 			unsigned int target_label = ssa->cfg.blocks[b].successors[0];
 			|	jmp =>target_label
 		} else {
@@ -8739,7 +8762,8 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, i
 	     (opline+1)->opcode == ZEND_JMPNZ ||
 	     (opline+1)->opcode == ZEND_JMPZNZ) &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var) {
+	    (opline+1)->op1.var == opline->result.var &&
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		(*opnum)++;
 	}
 

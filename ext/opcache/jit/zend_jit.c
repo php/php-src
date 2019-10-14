@@ -2319,7 +2319,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 						goto done;
 					case ZEND_JMPZ:
 					case ZEND_JMPNZ:
-						if (opline > op_array->opcodes &&
+						if (opline > op_array->opcodes + ssa->cfg.blocks[b].start &&
 						    ((opline-1)->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0) {
 							/* smart branch */
 							if (!zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
