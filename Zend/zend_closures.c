@@ -26,6 +26,7 @@
 #include "zend_objects.h"
 #include "zend_objects_API.h"
 #include "zend_globals.h"
+#include "zend_closures_arginfo.h"
 
 #define ZEND_CLOSURE_PRINT_NAME "Closure object"
 
@@ -591,32 +592,12 @@ ZEND_COLD ZEND_METHOD(Closure, __construct)
 }
 /* }}} */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_bindto, 0, 0, 1)
-	ZEND_ARG_INFO(0, newthis)
-	ZEND_ARG_INFO(0, newscope)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_bind, 0, 0, 2)
-	ZEND_ARG_INFO(0, closure)
-	ZEND_ARG_INFO(0, newthis)
-	ZEND_ARG_INFO(0, newscope)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_call, 0, 0, 1)
-	ZEND_ARG_INFO(0, newthis)
-	ZEND_ARG_VARIADIC_INFO(0, parameters)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_fromcallable, 0, 0, 1)
-	ZEND_ARG_INFO(0, callable)
-ZEND_END_ARG_INFO()
-
 static const zend_function_entry closure_functions[] = {
-	ZEND_ME(Closure, __construct, NULL, ZEND_ACC_PRIVATE)
-	ZEND_ME(Closure, bind, arginfo_closure_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_MALIAS(Closure, bindTo, bind, arginfo_closure_bindto, ZEND_ACC_PUBLIC)
-	ZEND_ME(Closure, call, arginfo_closure_call, ZEND_ACC_PUBLIC)
-	ZEND_ME(Closure, fromCallable, arginfo_closure_fromcallable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(Closure, __construct, arginfo_class_Closure___construct, ZEND_ACC_PRIVATE)
+	ZEND_ME(Closure, bind, arginfo_class_Closure_bind, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_MALIAS(Closure, bindTo, bind, arginfo_class_Closure_bindTo, ZEND_ACC_PUBLIC)
+	ZEND_ME(Closure, call, arginfo_class_Closure_call, ZEND_ACC_PUBLIC)
+	ZEND_ME(Closure, fromCallable, arginfo_class_Closure_fromCallable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_FE_END
 };
 
