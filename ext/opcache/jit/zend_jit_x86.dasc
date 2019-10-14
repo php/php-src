@@ -3505,7 +3505,8 @@ static int zend_jit_math(dasm_State **Dst, const zend_op *opline, int *opnum, ze
 	if (opline->result_type == IS_TMP_VAR &&
 	    (opline+1)->opcode == ZEND_SEND_VAL &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var) {
+	    (opline+1)->op1.var == opline->result.var &&
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		/* Eliminate the following SEND_VAL */
 		(*opnum)++;
 		if (!reuse_ip) {
@@ -3839,7 +3840,8 @@ static int zend_jit_long_math(dasm_State **Dst, const zend_op *opline, int *opnu
 	if (opline->result_type == IS_TMP_VAR &&
 	    (opline+1)->opcode == ZEND_SEND_VAL &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var) {
+	    (opline+1)->op1.var == opline->result.var &&
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		/* Eliminate the following SEND_VAL */
 		(*opnum)++;
 		if (!reuse_ip) {
@@ -3980,7 +3982,8 @@ static int zend_jit_concat(dasm_State **Dst, const zend_op *opline, int *opnum, 
 	if (opline->result_type == IS_TMP_VAR &&
 	    (opline+1)->opcode == ZEND_SEND_VAL &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var) {
+	    (opline+1)->op1.var == opline->result.var &&
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
 		/* Eliminate the following SEND_VAL */
 		(*opnum)++;
 		if (!reuse_ip) {
