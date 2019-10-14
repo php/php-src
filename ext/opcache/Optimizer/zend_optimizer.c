@@ -1375,7 +1375,6 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 	    (ZEND_OPTIMIZER_PASS_7 & optimization_level) &&
 	    zend_build_call_graph(&ctx.arena, script, &call_graph) == SUCCESS) {
 		/* Optimize using call-graph */
-		void *checkpoint = zend_arena_checkpoint(ctx.arena);
 		int i;
 		zend_func_info *func_info;
 
@@ -1464,8 +1463,6 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
 		}
-
-		zend_arena_release(&ctx.arena, checkpoint);
 	} else {
 		zend_optimize_op_array(&script->main_op_array, &ctx);
 
