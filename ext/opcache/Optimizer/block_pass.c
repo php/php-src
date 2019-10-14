@@ -537,8 +537,15 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 							MAKE_NOP(opline);
 							block->successors[0] = block->successors[1];
 							block->len--;
+							cfg->blocks[block->successors[0]].flags |= ZEND_BB_FOLLOW;
 							break;
 						} else {
+							zend_basic_block *next = cfg->blocks + block->successors[1];
+
+							next->flags &= ~ZEND_BB_FOLLOW;
+							if (!(next->flags & (ZEND_BB_TARGET|ZEND_BB_PROTECTED))) {
+								next->flags &= ~ZEND_BB_REACHABLE;
+							}
 							opline->opcode = ZEND_JMP;
 							COPY_NODE(opline->op1, opline->op2);
 							break;
@@ -630,6 +637,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 							opline->op2.num = 0;
 							block->successors_count = 1;
 							block->successors[0] = block->successors[1];
+							cfg->blocks[block->successors[0]].flags |= ZEND_BB_FOLLOW;
 							break;
 						}
 					} else if (opline->op1_type == IS_TMP_VAR &&
@@ -1855,6 +1863,8 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			}
 		}
 
+		opt_count = 0;
+
 		/* Jump optimization for each block */
 		for (b = blocks; b < end; b++) {
 			if (b->flags & ZEND_BB_REACHABLE) {
@@ -1873,8 +1883,6 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 		}
 	}
 
-	zend_bitset_clear(usage, bitset_len);
-	zend_t_usage(&cfg, op_array, usage, ctx);
 	assemble_code_blocks(&cfg, op_array, ctx);
 
 	if (ctx->debug_level & ZEND_DUMP_AFTER_BLOCK_PASS) {
