@@ -1820,25 +1820,32 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	zend_bool is_octal = lnum[0] == '0';
 	zend_bool contains_underscores = (memchr(lnum, '_', len) != NULL);
 
+	if (contains_underscores) {
+		lnum = estrndup(lnum, len);
+		strip_underscores(lnum, &len);
+	}
+
 	/* Digits 8 and 9 are illegal in octal literals. */
 	if (is_octal) {
 		size_t i;
 		for (i = 0; i < len; i++) {
 			if (lnum[i] == '8' || lnum[i] == '9') {
 				zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
-				ZVAL_UNDEF(zendlval);
 				if (PARSER_MODE()) {
+					if (contains_underscores) {
+						efree(lnum);
+					}
+					ZVAL_UNDEF(zendlval);
 					RETURN_TOKEN(T_ERROR);
 				}
-				RETURN_TOKEN_WITH_VAL(T_LNUMBER);
+
+				/* Continue in order to determine if this is T_LNUMBER or T_DNUMBER. */
+				len = i;
+				break;
 			}
 		}
 	}
 
-	if (contains_underscores) {
-		lnum = estrndup(lnum, len);
-		strip_underscores(lnum, &len);
-	}
 
 	if (len < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
 		errno = 0;
@@ -1850,7 +1857,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		ZVAL_LONG(zendlval, ZEND_STRTOL(lnum, &end, 0));
 		if (errno == ERANGE) { /* Overflow */
 			errno = 0;
-			if (lnum[0] == '0') { /* octal overflow */
+			if (is_octal) { /* octal overflow */
 				ZVAL_DOUBLE(zendlval, zend_oct_strtod(lnum, (const char **)&end));
 			} else {
 				ZVAL_DOUBLE(zendlval, zend_strtod(lnum, (const char **)&end));
