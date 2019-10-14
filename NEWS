@@ -40,6 +40,10 @@ PHP                                                                        NEWS
 - mysqlnd:
   . Fixed #60594 (mysqlnd exposes 160 lines of stats in phpinfo). (PeeHaa)
 
+- OpCache:
+  . Fixed bug #78654 (Incorrectly computed opcache checksum on files with 
+    non-ascii characters). (mhagstrand)
+
 - PCRE:
   . Don't ignore invalid escape sequences. (sjon)
 
