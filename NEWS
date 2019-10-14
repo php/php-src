@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug #78642 (Wrong libiconv version displayed). (gedas at martynas,
     cmb).
 
+- OpCache:
+  . Fixed bug #78654 (Incorrectly computed opcache checksum on files with 
+    non-ascii characters). (mhagstrand)
+
 - Sockets:
   . Fixed bug #78665 (Multicasting may leak memory). (cmb)
 
