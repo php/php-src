@@ -31,6 +31,7 @@
 #include "collator/collator_locale.h"
 #include "collator/collator_create.h"
 #include "collator/collator_error.h"
+#include "collator/collator_arginfo.h"
 
 #include "converter/converter.h"
 
@@ -76,6 +77,7 @@
 #include "transliterator/transliterator.h"
 #include "transliterator/transliterator_class.h"
 #include "transliterator/transliterator_methods.h"
+#include "transliterator/transliterator_arginfo.h"
 
 #include "timezone/timezone_class.h"
 #include "timezone/timezone_methods.h"
@@ -102,6 +104,7 @@
 #include "msgformat/msgformat_arginfo.h"
 #include "common/common_error.h"
 #include "common/common_enum.h"
+#include "common/common_arginfo.h"
 
 #include <unicode/uloc.h>
 #include <unicode/uclean.h>
@@ -129,40 +132,6 @@ const char *intl_locale_get_default( void )
 	return INTL_G(default_locale);
 }
 
-/* {{{ Arguments info */
-ZEND_BEGIN_ARG_INFO_EX(collator_static_0_args, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(collator_static_1_arg, 0, 0, 1)
-	ZEND_ARG_INFO(0, arg1)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(collator_0_args, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(collator_1_arg, 0, 0, 2)
-	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
-	ZEND_ARG_INFO(0, arg1)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(collator_2_args, 0, 0, 3)
-	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
-	ZEND_ARG_INFO(0, arg1)
-	ZEND_ARG_INFO(0, arg2)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(collator_sort_args, 0, 0, 2)
-	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
-	ZEND_ARG_ARRAY_INFO(1, arr, 0)
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(collator_sort_with_sort_keys_args, 0, 0, 2)
-	ZEND_ARG_OBJ_INFO(0, coll, Collator, 0)
-	ZEND_ARG_ARRAY_INFO(1, arr, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_arginfo, 0, 0, 2)
 	ZEND_ARG_INFO(0, formatter)
 	ZEND_ARG_INFO(0, string)
@@ -176,9 +145,6 @@ ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_currency_arginfo, 0, 0, 3)
 	ZEND_ARG_INFO(1, currency)
 	ZEND_ARG_INFO(1, position)
 ZEND_END_ARG_INFO()
-
-#define intl_0_args collator_static_0_args
-#define intl_1_arg collator_static_1_arg
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_create, 0, 0, 2)
 	ZEND_ARG_INFO(0, locale)
@@ -229,34 +195,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_get_locale, 0, 0, 1)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_void, 0, 0, 0 )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_create, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, id )
-	ZEND_ARG_INFO( 0, direction )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_create_from_rules, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, rules )
-	ZEND_ARG_INFO( 0, direction )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_create_inverse, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, orig_trans, Transliterator, 0 )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_transliterate, 0, 0, 2 )
-	ZEND_ARG_INFO( 0, trans )
-	ZEND_ARG_INFO( 0, subject )
-	ZEND_ARG_INFO( 0, start )
-	ZEND_ARG_INFO( 0, end )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_error, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, trans, Transliterator, 0 )
-ZEND_END_ARG_INFO()
-
 /* }}} */
 
 /* {{{ intl_functions
@@ -266,19 +204,19 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry intl_functions[] = {
 
 	/* collator functions */
-	PHP_FE( collator_create, collator_static_1_arg )
-	PHP_FE( collator_compare, collator_2_args )
-	PHP_FE( collator_get_attribute, collator_1_arg )
-	PHP_FE( collator_set_attribute, collator_2_args )
-	PHP_FE( collator_get_strength, collator_0_args )
-	PHP_FE( collator_set_strength, collator_1_arg )
-	PHP_FE( collator_sort, collator_sort_args )
-	PHP_FE( collator_sort_with_sort_keys, collator_sort_with_sort_keys_args )
-	PHP_FE( collator_asort, collator_sort_args )
-	PHP_FE( collator_get_locale, collator_1_arg )
-	PHP_FE( collator_get_error_code, collator_0_args )
-	PHP_FE( collator_get_error_message, collator_0_args )
-	PHP_FE( collator_get_sort_key, collator_1_arg )
+	PHP_FE( collator_create, arginfo_collator_create )
+	PHP_FE( collator_compare, arginfo_collator_compare )
+	PHP_FE( collator_get_attribute, arginfo_collator_get_attribute )
+	PHP_FE( collator_set_attribute, arginfo_collator_set_attribute )
+	PHP_FE( collator_get_strength, arginfo_collator_get_strength )
+	PHP_FE( collator_set_strength, arginfo_collator_set_strength )
+	PHP_FE( collator_sort, arginfo_collator_sort )
+	PHP_FE( collator_sort_with_sort_keys, arginfo_collator_sort_with_sort_keys )
+	PHP_FE( collator_asort, arginfo_collator_asort )
+	PHP_FE( collator_get_locale, arginfo_collator_get_locale )
+	PHP_FE( collator_get_error_code, arginfo_collator_get_error_code )
+	PHP_FE( collator_get_error_message, arginfo_collator_get_error_message )
+	PHP_FE( collator_get_sort_key, arginfo_collator_get_sort_key )
 
 	/* formatter functions */
 	PHP_FE( numfmt_create, arginfo_numfmt_create )
@@ -385,11 +323,11 @@ static const zend_function_entry intl_functions[] = {
 	/* Transliterator functions */
 	PHP_FE( transliterator_create, arginfo_transliterator_create )
 	PHP_FE( transliterator_create_from_rules, arginfo_transliterator_create_from_rules )
-	PHP_FE( transliterator_list_ids, arginfo_transliterator_void )
+	PHP_FE( transliterator_list_ids, arginfo_transliterator_list_ids )
 	PHP_FE( transliterator_create_inverse, arginfo_transliterator_create_inverse)
 	PHP_FE( transliterator_transliterate, arginfo_transliterator_transliterate )
-	PHP_FE( transliterator_get_error_code, arginfo_transliterator_error )
-	PHP_FE( transliterator_get_error_message, arginfo_transliterator_error )
+	PHP_FE( transliterator_get_error_code, arginfo_transliterator_get_error_code )
+	PHP_FE( transliterator_get_error_message, arginfo_transliterator_get_error_message )
 
 	/* TimeZone functions */
 	PHP_FE( intltz_create_time_zone, arginfo_intltz_create_time_zone )
@@ -467,10 +405,10 @@ static const zend_function_entry intl_functions[] = {
 	PHP_FE( intlgregcal_is_leap_year, arginfo_intlgregcal_is_leap_year )
 
 	/* common functions */
-	PHP_FE( intl_get_error_code, intl_0_args )
-	PHP_FE( intl_get_error_message, intl_0_args )
-	PHP_FE( intl_is_failure, intl_1_arg )
-	PHP_FE( intl_error_name, intl_1_arg )
+	PHP_FE( intl_get_error_code, arginfo_intl_get_error_code )
+	PHP_FE( intl_get_error_message, arginfo_intl_get_error_message )
+	PHP_FE( intl_is_failure, arginfo_intl_is_failure )
+	PHP_FE( intl_error_name, arginfo_intl_error_name )
 
 	PHP_FE_END
 };
