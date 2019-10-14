@@ -30,6 +30,10 @@ PHP                                                                        NEWS
   . Fixed bug #76809 (SSL settings aren't respected when persistent connections 
     are used). (fabiomsouto)
 
+- OpCache:
+  . Fixed bug #78654 (Incorrectly computed opcache checksum on files with 
+    non-ascii characters). (mhagstrand)
+
 - PDO_MySQL:
   . Fixed bug #78623 (Regression caused by "SP call yields additional empty
     result set"). (cmb)
