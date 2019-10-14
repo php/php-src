@@ -373,6 +373,8 @@ AC_DEFUN([PHP_EVAL_LIBLINE],[
         $2="[$]$2 -pthread"
       else
         PHP_RUN_ONCE(EXTRA_LDFLAGS, [$ac_i], [EXTRA_LDFLAGS="$EXTRA_LDFLAGS $ac_i"])
+        PHP_RUN_ONCE(EXTRA_LDFLAGS_PROGRAM, [$ac_i],
+            [EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $ac_i"])
       fi
     ;;
     -l*[)]
