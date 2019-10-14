@@ -41,6 +41,7 @@
 #include "formatter/formatter_format.h"
 #include "formatter/formatter_main.h"
 #include "formatter/formatter_parse.h"
+#include "formatter/formatter_arginfo.h"
 
 #include "grapheme/grapheme.h"
 #include "grapheme/grapheme_arginfo.h"
@@ -132,71 +133,6 @@ const char *intl_locale_get_default( void )
 	return INTL_G(default_locale);
 }
 
-ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_arginfo, 0, 0, 2)
-	ZEND_ARG_INFO(0, formatter)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, type)
-	ZEND_ARG_INFO(1, position)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_currency_arginfo, 0, 0, 3)
-	ZEND_ARG_INFO(0, formatter)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(1, currency)
-	ZEND_ARG_INFO(1, position)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_create, 0, 0, 2)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, style)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_get_error_code, 0, 0, 1)
-	ZEND_ARG_INFO(0, nf)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_format, 0, 0, 2)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, num)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_format_currency, 0, 0, 3)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, num)
-	ZEND_ARG_INFO(0, currency)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_get_attribute, 0, 0, 2)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, attr)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_set_attribute, 0, 0, 3)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, attr)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_set_symbol, 0, 0, 3)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, attr)
-	ZEND_ARG_INFO(0, symbol)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_set_pattern, 0, 0, 2)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_get_locale, 0, 0, 1)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
-/* }}} */
-
 /* {{{ intl_functions
  *
  * Every user visible function must have an entry in intl_functions[].
@@ -221,20 +157,20 @@ static const zend_function_entry intl_functions[] = {
 	/* formatter functions */
 	PHP_FE( numfmt_create, arginfo_numfmt_create )
 	PHP_FE( numfmt_format, arginfo_numfmt_format )
-	PHP_FE( numfmt_parse, numfmt_parse_arginfo )
+	PHP_FE( numfmt_parse, arginfo_numfmt_parse )
 	PHP_FE( numfmt_format_currency, arginfo_numfmt_format_currency )
-	PHP_FE( numfmt_parse_currency, numfmt_parse_currency_arginfo )
+	PHP_FE( numfmt_parse_currency, arginfo_numfmt_parse_currency )
 	PHP_FE( numfmt_set_attribute, arginfo_numfmt_set_attribute )
 	PHP_FE( numfmt_get_attribute, arginfo_numfmt_get_attribute )
-	PHP_FE( numfmt_set_text_attribute, arginfo_numfmt_set_attribute )
-	PHP_FE( numfmt_get_text_attribute, arginfo_numfmt_get_attribute )
+	PHP_FE( numfmt_set_text_attribute, arginfo_numfmt_set_text_attribute )
+	PHP_FE( numfmt_get_text_attribute, arginfo_numfmt_get_text_attribute )
 	PHP_FE( numfmt_set_symbol, arginfo_numfmt_set_symbol )
-	PHP_FE( numfmt_get_symbol, arginfo_numfmt_get_attribute )
+	PHP_FE( numfmt_get_symbol, arginfo_numfmt_get_symbol )
 	PHP_FE( numfmt_set_pattern, arginfo_numfmt_set_pattern )
-	PHP_FE( numfmt_get_pattern, arginfo_numfmt_get_error_code )
+	PHP_FE( numfmt_get_pattern, arginfo_numfmt_get_pattern )
 	PHP_FE( numfmt_get_locale, arginfo_numfmt_get_locale )
 	PHP_FE( numfmt_get_error_code, arginfo_numfmt_get_error_code )
-	PHP_FE( numfmt_get_error_message, arginfo_numfmt_get_error_code )
+	PHP_FE( numfmt_get_error_message, arginfo_numfmt_get_error_message )
 
 	/* normalizer functions */
 	PHP_FE( normalizer_normalize, arginfo_normalizer_normalize )
