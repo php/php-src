@@ -4320,7 +4320,7 @@ void zend_inference_check_recursive_dependencies(zend_op_array *op_array)
 	free_alloca(worklist, use_heap);
 }
 
-int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+int zend_may_throw(const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t t1 = OP1_INFO();
 	uint32_t t2 = OP2_INFO();

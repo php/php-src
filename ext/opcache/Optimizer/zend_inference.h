@@ -274,7 +274,7 @@ void zend_func_return_info(const zend_op_array   *op_array,
                            int                    widening,
                            zend_ssa_var_info     *ret);
 
-int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
+int zend_may_throw(const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa);
 
 END_EXTERN_C()
 
