@@ -116,6 +116,10 @@ PHP 8.0 UPGRADE NOTES
     warning.
   . Uncaught exceptions now go through "clean shutdown", which means that
     destructors will be called after an uncaught exception.
+  . Directly accessing a static property or calling a static method on a trait
+    will now result in an Error exception. Trait members can only be used as
+    part of a class in which the trait is used, but direct access was previously
+    permitted due to an implementation oversight.
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
