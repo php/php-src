@@ -1408,7 +1408,7 @@ static void zend_ensure_valid_class_fetch_type(uint32_t fetch_type) /* {{{ */
 				fetch_type == ZEND_FETCH_CLASS_SELF ? "self" :
 				fetch_type == ZEND_FETCH_CLASS_PARENT ? "parent" : "static");
 		} else if (fetch_type == ZEND_FETCH_CLASS_PARENT && !ce->parent_name) {
-			zend_error(E_DEPRECATED,
+			zend_error_noreturn(E_COMPILE_ERROR,
 				"Cannot use \"parent\" when current class scope has no parent");
 		}
 	}
