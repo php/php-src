@@ -867,7 +867,14 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 
 	if (Z_TYPE_P(value) != IS_STRING) {
 		/* Convert to string, just the time to pick the 1st byte */
-		zend_string *tmp = zval_get_string(value);
+		zend_string *tmp = zval_try_get_string_func(value);
+
+		if (UNEXPECTED(!tmp)) {
+			if (result) {
+				ZVAL_UNDEF(result);
+			}
+			return;
+		}
 
 		string_len = ZSTR_LEN(tmp);
 		c = (zend_uchar)ZSTR_VAL(tmp)[0];
@@ -920,12 +927,19 @@ static void ZEND_FASTCALL zend_jit_assign_dim_helper(zval *object_ptr, zval *dim
 	if (EXPECTED(Z_TYPE_P(object_ptr) == IS_OBJECT)) {
 		ZVAL_DEREF(value);
 		Z_OBJ_HT_P(object_ptr)->write_dimension(Z_OBJ_P(object_ptr), dim, value);
-		if (result && EXPECTED(!EG(exception))) {
-			ZVAL_COPY(result, value);
+		if (result) {
+			if (EXPECTED(!EG(exception))) {
+				ZVAL_COPY(result, value);
+			} else {
+				ZVAL_UNDEF(result);
+			}
 		}
 	} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 		if (!dim) {
 			zend_throw_error(NULL, "[] operator not supported for strings");
+			if (result) {
+				ZVAL_UNDEF(result);
+			}
 		} else {
 			zend_assign_to_string_offset(object_ptr, dim, value, result);
 		}
