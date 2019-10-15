@@ -563,7 +563,7 @@ class PharCommand extends CLICommand
 		$hashbang = $this->args['b']['val'];
 		$archive  = $this->args['f']['val'];
 		$hash     = $this->args['h']['val'];
-		$privkey  = $this->args['y']['val'];
+		$privkey  = $this->args['y']['val'] ?? null;
 		$regex    = $this->args['i']['val'];
 		$level    = $this->args['l']['val'];
 		$loader   = $this->args['p']['val'];
