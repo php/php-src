@@ -23,6 +23,7 @@
 #include "zend_exceptions.h"
 #include "zend_generators.h"
 #include "zend_closures.h"
+#include "zend_generators_arginfo.h"
 
 ZEND_API zend_class_entry *zend_ce_generator;
 ZEND_API zend_class_entry *zend_ce_ClosedGeneratorException;
@@ -1007,7 +1008,7 @@ ZEND_METHOD(Generator, throw)
 	zend_generator *generator;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(exception)
+		Z_PARAM_OBJECT_OF_CLASS(exception, zend_ce_throwable);
 	ZEND_PARSE_PARAMETERS_END();
 
 	Z_TRY_ADDREF_P(exception);
@@ -1172,26 +1173,15 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 }
 /* }}} */
 
-ZEND_BEGIN_ARG_INFO(arginfo_generator_void, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_generator_send, 0, 0, 1)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_generator_throw, 0, 0, 1)
-	ZEND_ARG_INFO(0, exception)
-ZEND_END_ARG_INFO()
-
 static const zend_function_entry generator_functions[] = {
-	ZEND_ME(Generator, rewind,   arginfo_generator_void, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, valid,    arginfo_generator_void, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, current,  arginfo_generator_void, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, key,      arginfo_generator_void, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, next,     arginfo_generator_void, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, send,     arginfo_generator_send, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, throw,    arginfo_generator_throw, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, getReturn,arginfo_generator_void, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, rewind,   arginfo_class_Generator_rewind, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, valid,    arginfo_class_Generator_valid, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, current,  arginfo_class_Generator_current, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, key,      arginfo_class_Generator_key, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, next,     arginfo_class_Generator_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, send,     arginfo_class_Generator_send, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, throw,    arginfo_class_Generator_throw, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, getReturn,arginfo_class_Generator_getReturn, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

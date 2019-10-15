@@ -20,6 +20,7 @@
 #include "zend_API.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
+#include "zend_interfaces_arginfo.h"
 
 ZEND_API zend_class_entry *zend_ce_traversable;
 ZEND_API zend_class_entry *zend_ce_aggregate;
@@ -533,57 +534,37 @@ static int zend_implement_countable(zend_class_entry *interface, zend_class_entr
 
 /* {{{ function tables */
 static const zend_function_entry zend_funcs_aggregate[] = {
-	ZEND_ABSTRACT_ME(iterator, getIterator, NULL)
+	ZEND_ABSTRACT_ME(iterator, getIterator, arginfo_class_IteratorAggregate_getIterator)
 	ZEND_FE_END
 };
 
 static const zend_function_entry zend_funcs_iterator[] = {
-	ZEND_ABSTRACT_ME(iterator, current,  NULL)
-	ZEND_ABSTRACT_ME(iterator, next,     NULL)
-	ZEND_ABSTRACT_ME(iterator, key,      NULL)
-	ZEND_ABSTRACT_ME(iterator, valid,    NULL)
-	ZEND_ABSTRACT_ME(iterator, rewind,   NULL)
+	ZEND_ABSTRACT_ME(iterator, current,  arginfo_class_Iterator_current)
+	ZEND_ABSTRACT_ME(iterator, next,     arginfo_class_Iterator_next)
+	ZEND_ABSTRACT_ME(iterator, key,      arginfo_class_Iterator_key)
+	ZEND_ABSTRACT_ME(iterator, valid,    arginfo_class_Iterator_valid)
+	ZEND_ABSTRACT_ME(iterator, rewind,   arginfo_class_Iterator_rewind)
 	ZEND_FE_END
 };
 
 static const zend_function_entry *zend_funcs_traversable = NULL;
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset, 0, 0, 1)
-	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset_get, 0, 0, 1) /* actually this should be return by ref but atm cannot be */
-	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset_value, 0, 0, 2)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
 static const zend_function_entry zend_funcs_arrayaccess[] = {
-	ZEND_ABSTRACT_ME(arrayaccess, offsetExists, arginfo_arrayaccess_offset)
-	ZEND_ABSTRACT_ME(arrayaccess, offsetGet,    arginfo_arrayaccess_offset_get)
-	ZEND_ABSTRACT_ME(arrayaccess, offsetSet,    arginfo_arrayaccess_offset_value)
-	ZEND_ABSTRACT_ME(arrayaccess, offsetUnset,  arginfo_arrayaccess_offset)
+	ZEND_ABSTRACT_ME(arrayaccess, offsetExists, arginfo_class_ArrayAccess_offsetExists)
+	ZEND_ABSTRACT_ME(arrayaccess, offsetGet,    arginfo_class_ArrayAccess_offsetGet)
+	ZEND_ABSTRACT_ME(arrayaccess, offsetSet,    arginfo_class_ArrayAccess_offsetSet)
+	ZEND_ABSTRACT_ME(arrayaccess, offsetUnset,  arginfo_class_ArrayAccess_offsetUnset)
 	ZEND_FE_END
 };
-
-ZEND_BEGIN_ARG_INFO(arginfo_serializable_serialize, 0)
-	ZEND_ARG_INFO(0, serialized)
-ZEND_END_ARG_INFO()
 
 static const zend_function_entry zend_funcs_serializable[] = {
-	ZEND_ABSTRACT_ME(serializable, serialize,   NULL)
-	ZEND_FENTRY(unserialize, NULL, arginfo_serializable_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME(serializable, serialize, arginfo_class_Serializable_serialize)
+	ZEND_FENTRY(unserialize, NULL, arginfo_class_Serializable_unserialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };
 
-ZEND_BEGIN_ARG_INFO(arginfo_countable_count, 0)
-ZEND_END_ARG_INFO()
-
 static const zend_function_entry zend_funcs_countable[] = {
-	ZEND_ABSTRACT_ME(Countable, count, arginfo_countable_count)
+	ZEND_ABSTRACT_ME(Countable, count, arginfo_class_Countable_count)
 	ZEND_FE_END
 };
 /* }}} */
