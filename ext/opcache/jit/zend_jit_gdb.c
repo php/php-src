@@ -456,7 +456,7 @@ static void zend_gdbjit_buildobj(zend_gdbjit_ctx *ctx)
 }
 
 static int zend_jit_gdb_register(const char    *name,
-                                 zend_op_array *op_array,
+                                 const zend_op_array *op_array,
                                  const void    *start,
                                  size_t         size)
 {

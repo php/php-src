@@ -249,7 +249,7 @@ static int zend_jit_cmp_labels(Bucket *b1, Bucket *b2)
 
 static int zend_jit_disasm(const char    *name,
                            const char    *filename,
-                           zend_op_array *op_array,
+                           const zend_op_array *op_array,
                            zend_cfg      *cfg,
                            const void    *start,
                            size_t         size)

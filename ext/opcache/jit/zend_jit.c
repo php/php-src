@@ -99,10 +99,10 @@ static const void *zend_jit_profile_jit_handler = NULL;
 static const void *zend_jit_func_counter_handler = NULL;
 static const void *zend_jit_loop_counter_handler = NULL;
 
-static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa);
+static int zend_may_overflow(const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa);
 static void ZEND_FASTCALL zend_runtime_jit(void);
 
-static zend_bool zend_ssa_is_last_use(zend_op_array *op_array, const zend_ssa *ssa, int var, int use)
+static zend_bool zend_ssa_is_last_use(const zend_op_array *op_array, const zend_ssa *ssa, int var, int use)
 {
 	if (ssa->vars[var].phi_use_chain) {
 		zend_ssa_phi *phi = ssa->vars[var].phi_use_chain;
@@ -175,7 +175,7 @@ ZEND_EXT_API void zend_jit_status(zval *ret)
 	add_assoc_zval(ret, "jit", &stats);
 }
 
-static zend_string *zend_jit_func_name(zend_op_array *op_array)
+static zend_string *zend_jit_func_name(const zend_op_array *op_array)
 {
 	smart_str buf = {0};
 
@@ -204,7 +204,7 @@ static zend_string *zend_jit_func_name(zend_op_array *op_array)
 }
 
 static void *dasm_link_and_encode(dasm_State             **dasm_state,
-                                  zend_op_array           *op_array,
+                                  const zend_op_array     *op_array,
                                   zend_ssa                *ssa,
                                   const zend_op           *rt_opline,
                                   zend_lifetime_interval **ra,
@@ -399,7 +399,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 	return entry;
 }
 
-static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_may_overflow(const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t num;
 	int res;
@@ -571,7 +571,7 @@ static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zen
 	}
 }
 
-static int zend_jit_build_cfg(zend_op_array *op_array, zend_cfg *cfg)
+static int zend_jit_build_cfg(const zend_op_array *op_array, zend_cfg *cfg)
 {
 	uint32_t flags;
 
@@ -605,7 +605,7 @@ static int zend_jit_build_cfg(zend_op_array *op_array, zend_cfg *cfg)
 	return SUCCESS;
 }
 
-static int zend_jit_op_array_analyze1(zend_op_array *op_array, zend_script *script, zend_ssa *ssa)
+static int zend_jit_op_array_analyze1(const zend_op_array *op_array, zend_script *script, zend_ssa *ssa)
 {
 	if (zend_jit_build_cfg(op_array, &ssa->cfg) != SUCCESS) {
 		return FAILURE;
@@ -643,7 +643,7 @@ static int zend_jit_op_array_analyze1(zend_op_array *op_array, zend_script *scri
 	return SUCCESS;
 }
 
-static int zend_jit_op_array_analyze2(zend_op_array *op_array, zend_script *script, zend_ssa *ssa)
+static int zend_jit_op_array_analyze2(const zend_op_array *op_array, zend_script *script, zend_ssa *ssa)
 {
 	if ((zend_jit_level >= ZEND_JIT_LEVEL_OPT_FUNC)
 	 && ssa->cfg.blocks
@@ -993,7 +993,7 @@ static void zend_jit_add_hint(zend_lifetime_interval **intervals, int dst, int s
 
 /* See "Linear Scan Register Allocation on SSA Form", Christian Wimmer and
    Michael Franz, CGO'10 (2010), Figure 4. */
-static int zend_jit_compute_liveness(zend_op_array *op_array, zend_ssa *ssa, zend_bitset candidates, zend_lifetime_interval **list)
+static int zend_jit_compute_liveness(const zend_op_array *op_array, zend_ssa *ssa, zend_bitset candidates, zend_lifetime_interval **list)
 {
 	int set_size, i, j, k, l;
 	uint32_t n;
@@ -1338,7 +1338,7 @@ static uint32_t zend_interval_intersection(zend_lifetime_interval *ival1, zend_l
 
 /* See "Optimized Interval Splitting in a Linear Scan Register Allocator",
    Christian Wimmer VEE'05 (2005), Figure 4. Allocation without spilling */
-static int zend_jit_try_allocate_free_reg(zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval *current, zend_regset available, zend_regset *hints, zend_lifetime_interval *active, zend_lifetime_interval *inactive, zend_lifetime_interval **list, zend_lifetime_interval **free)
+static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval *current, zend_regset available, zend_regset *hints, zend_lifetime_interval *active, zend_lifetime_interval *inactive, zend_lifetime_interval **list, zend_lifetime_interval **free)
 {
 	zend_lifetime_interval *it;
 	uint32_t freeUntilPos[ZREG_NUM];
@@ -1557,7 +1557,7 @@ static int zend_jit_allocate_blocked_reg(void)
 
 /* See "Optimized Interval Splitting in a Linear Scan Register Allocator",
    Christian Wimmer VEE'10 (2005), Figure 2. */
-static zend_lifetime_interval* zend_jit_linear_scan(zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval *list)
+static zend_lifetime_interval* zend_jit_linear_scan(const zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval *list)
 {
 	zend_lifetime_interval *unhandled, *active, *inactive, *handled, *free;
 	zend_lifetime_interval *current, **p, *q;
@@ -1646,7 +1646,7 @@ static zend_lifetime_interval* zend_jit_linear_scan(zend_op_array *op_array, zen
 	return handled;
 }
 
-static zend_lifetime_interval** zend_jit_allocate_registers(zend_op_array *op_array, zend_ssa *ssa)
+static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array *op_array, zend_ssa *ssa)
 {
 	void *checkpoint;
 	int set_size, candidates_count, i;
@@ -1899,7 +1899,7 @@ failure:
 	return NULL;
 }
 
-static void zend_calc_checked_this_r(zend_bitset checked_this, zend_op_array *op_array, zend_cfg *cfg, int b, int checked)
+static void zend_calc_checked_this_r(zend_bitset checked_this, const zend_op_array *op_array, zend_cfg *cfg, int b, int checked)
 {
 	zend_op *opline = &op_array->opcodes[cfg->blocks[b].start];
 	zend_op *end = opline + cfg->blocks[b].len;
@@ -1949,7 +1949,7 @@ static void zend_calc_checked_this_r(zend_bitset checked_this, zend_op_array *op
 	}
 }
 
-static zend_bitset zend_calc_checked_this(zend_arena **arena, zend_op_array *op_array, zend_cfg *cfg)
+static zend_bitset zend_calc_checked_this(zend_arena **arena, const zend_op_array *op_array, zend_cfg *cfg)
 {
 	uint32_t bitset_len = zend_bitset_len(op_array->last);
 	zend_bitset checked_this = zend_arena_calloc(arena, bitset_len, ZEND_BITSET_ELM_SIZE);
@@ -1959,7 +1959,7 @@ static zend_bitset zend_calc_checked_this(zend_arena **arena, zend_op_array *op_
 	return checked_this;
 }
 
-static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_opline)
+static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_opline)
 {
 	int b, i, end;
 	zend_op *opline;
@@ -3225,7 +3225,7 @@ ZEND_EXT_API void zend_jit_deactivate(void)
 
 #else /* HAVE_JIT */
 
-ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
+ZEND_EXT_API int zend_jit_op_array(const zend_op_array *op_array, zend_script *script)
 {
 	return FAILURE;
 }

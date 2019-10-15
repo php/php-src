@@ -18,7 +18,7 @@
 
 #include "Zend/zend_API.h"
 
-static zend_never_inline zend_function* ZEND_FASTCALL _zend_jit_init_func_run_time_cache(zend_op_array *op_array) /* {{{ */
+static zend_never_inline zend_function* ZEND_FASTCALL _zend_jit_init_func_run_time_cache(const zend_op_array *op_array) /* {{{ */
 {
 	void **run_time_cache;
 
@@ -1111,7 +1111,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execu
 	return value;
 }
 
-static void ZEND_FASTCALL zend_jit_verify_arg_object(zval *arg, zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot)
+static void ZEND_FASTCALL zend_jit_verify_arg_object(zval *arg, const zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot)
 {
 	zend_class_entry *ce;
 	if (EXPECTED(*cache_slot)) {
@@ -1129,7 +1129,7 @@ static void ZEND_FASTCALL zend_jit_verify_arg_object(zval *arg, zend_op_array *o
 	}
 }
 
-static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot)
+static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot)
 {
 	zend_class_entry *ce = NULL;
 	uint32_t type_mask;
