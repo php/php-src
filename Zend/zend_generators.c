@@ -1008,7 +1008,7 @@ ZEND_METHOD(Generator, throw)
 	zend_generator *generator;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(exception)
+		Z_PARAM_OBJECT_OF_CLASS(exception, zend_ce_throwable);
 	ZEND_PARSE_PARAMETERS_END();
 
 	Z_TRY_ADDREF_P(exception);
