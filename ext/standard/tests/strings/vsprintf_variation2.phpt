@@ -84,7 +84,11 @@ $values = array(
 $counter = 1;
 foreach($values as $value) {
   echo "\n-- Iteration $counter --\n";
-  var_dump( vsprintf($format,$value) );
+  try {
+    var_dump( vsprintf($format,$value) );
+  } catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+  }
   $counter++;
 };
 
@@ -124,14 +128,10 @@ string(13) "1.07654321E-9"
 string(3) "0.5"
 
 -- Iteration 10 --
-
-Warning: vsprintf(): Too few arguments in %s on line %d
-bool(false)
+Too few arguments
 
 -- Iteration 11 --
-
-Warning: vsprintf(): Too few arguments in %s on line %d
-bool(false)
+Too few arguments
 
 -- Iteration 12 --
 string(1) "1"
@@ -158,19 +158,13 @@ string(6) "string"
 string(6) "string"
 
 -- Iteration 20 --
-
-Warning: vsprintf(): Too few arguments in %s on line %d
-bool(false)
+Too few arguments
 
 -- Iteration 21 --
-
-Warning: vsprintf(): Too few arguments in %s on line %d
-bool(false)
+Too few arguments
 
 -- Iteration 22 --
-
-Warning: vsprintf(): Too few arguments in %s on line %d
-bool(false)
+Too few arguments
 
 -- Iteration 23 --
 string(%d) "Resource id #%d"

@@ -90,7 +90,11 @@ fprintf($fp, "\n*** Testing vprintf() with unexpected values for args argument *
 $counter = 1;
 foreach( $values as $value ) {
   fprintf($fp, "\n-- Iteration %d --\n",$counter);
-  vfprintf($fp, $format, $value);
+  try {
+  	vfprintf($fp, $format, $value);
+  } catch (\Error $e) {
+	fwrite($fp, $e->getMessage() . "\n");
+  }
   $counter++;
 }
 
@@ -105,16 +109,6 @@ unlink($data_file);
 ===DONE===
 --EXPECTF--
 *** Testing vfprintf() : with unexpected values for args argument ***
-
-Warning: vfprintf(): Too few arguments in %s on line %d
-
-Warning: vfprintf(): Too few arguments in %s on line %d
-
-Warning: vfprintf(): Too few arguments in %s on line %d
-
-Warning: vfprintf(): Too few arguments in %s on line %d
-
-Warning: vfprintf(): Too few arguments in %s on line %d
 
 *** Testing vprintf() with unexpected values for args argument ***
 
@@ -137,8 +131,10 @@ Warning: vfprintf(): Too few arguments in %s on line %d
 -- Iteration 9 --
 0.5
 -- Iteration 10 --
+Too few arguments
 
 -- Iteration 11 --
+Too few arguments
 
 -- Iteration 12 --
 1
@@ -157,10 +153,13 @@ string
 -- Iteration 19 --
 string
 -- Iteration 20 --
+Too few arguments
 
 -- Iteration 21 --
+Too few arguments
 
 -- Iteration 22 --
+Too few arguments
 
 -- Iteration 23 --
 Resource id #%d
