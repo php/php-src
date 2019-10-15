@@ -13,5 +13,5 @@ Class Closure
     function call(object $newthis, ...$parameters) {}
 
     /** @return Closure */
-    function fromCallable($callable) {}
+    function fromCallable(callable $callable) {}
 }

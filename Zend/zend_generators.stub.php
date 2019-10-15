@@ -2,19 +2,15 @@
 
 final class Generator implements Iterator
 {
-    /** @return void */
-    function rewind() {}
+    function rewind(): void {}
 
-    /** @return bool */
-    function valid() {}
+    function valid(): bool {}
 
     function current() {}
 
-    /** @return int|string */
     function key() {}
 
-    /** @return void */
-    function next() {}
+    function next(): void {}
 
     function send($value) {}
 
