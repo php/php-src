@@ -1480,6 +1480,14 @@ undeclared_property:
 		}
 	}
 
+	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_TRAIT)) {
+		zend_throw_error(NULL,
+			"Cannot access static property %s::$%s on a trait, "
+			"it may only be used as part of a class",
+			ZSTR_VAL(property_info->ce->name), zend_get_unmangled_property_name(property_name));
+		return NULL;
+	}
+
 	ret = CE_STATIC_MEMBERS(ce) + property_info->offset;
 	ZVAL_DEINDIRECT(ret);
 
