@@ -84,9 +84,13 @@ $values = array(
 $counter = 1;
 foreach($values as $value) {
   echo "\n-- Iteration $counter --\n";
-  $result = vprintf($format,$value);
-  echo "\n";
-  var_dump($result);
+  try {
+	$result = vprintf($format,$value);
+	echo "\n";
+	var_dump($result);
+  } catch (\ValueError $e) {
+	echo $e->getMessage(), "\n";
+  }
   $counter++;
 };
 
@@ -135,16 +139,10 @@ int(13)
 int(3)
 
 -- Iteration 10 --
-
-Warning: vprintf(): Too few arguments in %s on line %d
-
-bool(false)
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 11 --
-
-Warning: vprintf(): Too few arguments in %s on line %d
-
-bool(false)
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 12 --
 1
@@ -179,22 +177,13 @@ string
 int(6)
 
 -- Iteration 20 --
-
-Warning: vprintf(): Too few arguments in %s on line %d
-
-bool(false)
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 21 --
-
-Warning: vprintf(): Too few arguments in %s on line %d
-
-bool(false)
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 22 --
-
-Warning: vprintf(): Too few arguments in %s on line %d
-
-bool(false)
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 23 --
 Resource id #%d
