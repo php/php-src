@@ -1392,9 +1392,17 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 		}
 	}
 
-	if (fbc && UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
-		zend_abstract_method_call(fbc);
-		fbc = NULL;
+	if (fbc) {
+		if (UNEXPECTED(fbc->common.fn_flags & ZEND_ACC_ABSTRACT)) {
+			zend_abstract_method_call(fbc);
+			fbc = NULL;
+		} else if (UNEXPECTED(fbc->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
+			zend_throw_error(NULL,
+				"Cannot call static method %s::%s() on a trait, "
+				"it may only be used as part of a class",
+				ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			fbc = NULL;
+		}
 	}
 
 	if (UNEXPECTED(!key)) {
