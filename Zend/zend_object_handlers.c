@@ -1512,6 +1512,15 @@ undeclared_property:
 	ret = CE_STATIC_MEMBERS(ce) + property_info->offset;
 	ZVAL_DEINDIRECT(ret);
 
+	/* TODO: Always make this an error, not just for typed properties. */
+	if (UNEXPECTED((ce->ce_flags & ZEND_ACC_TRAIT) && ZEND_TYPE_IS_SET(property_info->type))) {
+		zend_throw_error(NULL,
+			"Cannot access typed static property %s::$%s on a trait, "
+			"it may only be used as part of a class",
+			ZSTR_VAL(property_info->ce->name), zend_get_unmangled_property_name(property_name));
+		return NULL;
+	}
+
 	if (UNEXPECTED((type == BP_VAR_R || type == BP_VAR_RW)
 				&& Z_TYPE_P(ret) == IS_UNDEF && property_info->type != 0)) {
 		zend_throw_error(NULL, "Typed static property %s::$%s must not be accessed before initialization",

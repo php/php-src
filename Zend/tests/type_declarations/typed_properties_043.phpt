@@ -25,9 +25,6 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-Test::$selfNullProp = null;
-var_dump(Test::$selfNullProp);
-
 class Foo {}
 class Bar extends Foo {
     use Test;
@@ -41,10 +38,9 @@ var_dump(Bar::$selfProp, Bar::$selfNullProp, Bar::$parentProp);
 
 ?>
 --EXPECT--
-Cannot write a value to a 'self' typed static property of a trait
-Cannot write a non-null value to a 'self' typed static property of a trait
-Cannot access parent:: when current class scope has no parent
-NULL
+Cannot access typed static property Test::$selfProp on a trait, it may only be used as part of a class
+Cannot access typed static property Test::$selfNullProp on a trait, it may only be used as part of a class
+Cannot access typed static property Test::$parentProp on a trait, it may only be used as part of a class
 object(Bar)#3 (0) {
 }
 object(Bar)#2 (0) {

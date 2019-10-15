@@ -927,14 +927,10 @@ static zend_bool zend_resolve_class_type(zend_type *type, zend_class_entry *self
 	zend_class_entry *ce;
 	zend_string *name = ZEND_TYPE_NAME(*type);
 	if (zend_string_equals_literal_ci(name, "self")) {
-		/* We need to explicitly check for this here, to avoid updating the type in the trait and
-		 * later using the wrong "self" when the trait is used in a class. */
-		if (UNEXPECTED((self_ce->ce_flags & ZEND_ACC_TRAIT) != 0)) {
-			zend_throw_error(NULL, "Cannot write a%s value to a 'self' typed static property of a trait", ZEND_TYPE_ALLOW_NULL(*type) ? " non-null" : "");
-			return 0;
-		}
+		ZEND_ASSERT(!(self_ce->ce_flags & ZEND_ACC_TRAIT));
 		ce = self_ce;
 	} else if (zend_string_equals_literal_ci(name, "parent")) {
+		ZEND_ASSERT(!(self_ce->ce_flags & ZEND_ACC_TRAIT));
 		if (UNEXPECTED(!self_ce->parent)) {
 			zend_throw_error(NULL, "Cannot access parent:: when current class scope has no parent");
 			return 0;
