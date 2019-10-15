@@ -25,16 +25,40 @@ $arg1 = 'one';
 $arg2 = 'two';
 
 // with one argument less than expected
-var_dump( sprintf($format1) );
-var_dump( sprintf($format2,$arg1) );
-var_dump( sprintf($format3,$arg1,$arg2) );
+try {
+    var_dump( sprintf($format1) );
+} catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump( sprintf($format2,$arg1) );
+} catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump( sprintf($format3,$arg1,$arg2) );
+} catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 // with two argument less than expected
-var_dump( sprintf($format2) );
-var_dump( sprintf($format3,$arg1) );
+try {
+    var_dump( sprintf($format2) );
+} catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump( sprintf($format3,$arg1) );
+} catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 // with three argument less than expected
-var_dump( sprintf($format3) );
+try {
+    var_dump( sprintf($format3) );
+} catch (\Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done";
 ?>
@@ -45,22 +69,10 @@ echo "Done";
 sprintf() expects at least %d parameter, %d given
 
 -- Testing sprintf() function with less than expected no. of arguments --
-
-Warning: sprintf(): Too few arguments in %s on line %d
-bool(false)
-
-Warning: sprintf(): Too few arguments in %s on line %d
-bool(false)
-
-Warning: sprintf(): Too few arguments in %s on line %d
-bool(false)
-
-Warning: sprintf(): Too few arguments in %s on line %d
-bool(false)
-
-Warning: sprintf(): Too few arguments in %s on line %d
-bool(false)
-
-Warning: sprintf(): Too few arguments in %s on line %d
-bool(false)
+Too few arguments
+Too few arguments
+Too few arguments
+Too few arguments
+Too few arguments
+Too few arguments
 Done
