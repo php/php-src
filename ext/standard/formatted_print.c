@@ -450,7 +450,7 @@ php_formatted_print(zval *z_format, zval *args, int argc)
 
 					if (argnum <= 0) {
 						zend_string_efree(result);
-						php_error_docref(NULL, E_WARNING, "Argument number must be greater than zero");
+						zend_throw_error(NULL, "Argument number must be greater than zero");
 						return NULL;
 					}
 					argnum--;
@@ -491,7 +491,7 @@ php_formatted_print(zval *z_format, zval *args, int argc)
 					PRINTF_DEBUG(("sprintf: getting width\n"));
 					if ((width = php_sprintf_getnumber(&format, &format_len)) < 0) {
 						efree(result);
-						php_error_docref(NULL, E_WARNING, "Width must be greater than zero and less than %d", INT_MAX);
+						zend_throw_error(NULL, "Width must be greater than zero and less than %d", INT_MAX);
 						return NULL;
 					}
 					adjusting |= ADJ_WIDTH;
@@ -508,7 +508,7 @@ php_formatted_print(zval *z_format, zval *args, int argc)
 					if (isdigit((int)*format)) {
 						if ((precision = php_sprintf_getnumber(&format, &format_len)) < 0) {
 							efree(result);
-							php_error_docref(NULL, E_WARNING, "Precision must be greater than zero and less than %d", INT_MAX);
+							zend_throw_error(NULL, "Precision must be greater than zero and less than %d", INT_MAX);
 							return NULL;
 						}
 						adjusting |= ADJ_PRECISION;
@@ -524,7 +524,7 @@ php_formatted_print(zval *z_format, zval *args, int argc)
 
 			if (argnum >= argc) {
 				efree(result);
-				php_error_docref(NULL, E_WARNING, "Too few arguments");
+				zend_throw_error(NULL, "Too few arguments");
 				return NULL;
 			}
 

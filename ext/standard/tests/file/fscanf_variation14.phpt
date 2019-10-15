@@ -76,8 +76,11 @@ $counter = 1;
 
 // writing to the file
 foreach($valid_strings as $string) {
-  @fprintf($file_handle, $string);
-  @fprintf($file_handle, "\n");
+    try {
+        fprintf($file_handle, $string);
+    } catch (\Error $e) {
+    }
+  fprintf($file_handle, "\n");
 }
 // closing the file
 fclose($file_handle);
