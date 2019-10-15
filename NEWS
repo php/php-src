@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.0RC4
+17 Oct 2019, PHP 7.4.0RC4
 
 - Core:
   . Fixed bug #78614 (Does not compile with DTRACE anymore).
