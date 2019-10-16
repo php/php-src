@@ -5073,7 +5073,7 @@ fallback:
 	return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
 }
 
-static int zend_jit_cmp_long_long(dasm_State **Dst, const zend_op *opline, int b, const zend_op_array *op_array, zend_ssa *ssa, zend_jit_addr op1_addr, zend_jit_addr op2_addr)
+static int zend_jit_cmp_long_long(dasm_State **Dst, const zend_op *opline, int b, const zend_op_array *op_array, zend_ssa *ssa, zend_jit_addr op1_addr, zend_jit_addr op2_addr, zend_bool smart_branch)
 {
 	unsigned int target_label;
 	zend_bool swap = 0;
@@ -5104,144 +5104,137 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, const zend_op *opline, int b
 			|	LONG_OP cmp, ZREG_R0, op2_addr
 		}
 	}
-	if (((opline+1)->opcode == ZEND_JMPZ_EX ||
-	     (opline+1)->opcode == ZEND_JMPNZ_EX) &&
-	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var &&
-	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-		zend_jit_addr res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
 
-		switch (opline->opcode) {
-			case ZEND_IS_EQUAL:
-			case ZEND_IS_IDENTICAL:
-			case ZEND_CASE:
-				|	sete al
-				break;
-			case ZEND_IS_NOT_EQUAL:
-			case ZEND_IS_NOT_IDENTICAL:
-				|	setne al
-				break;
-			case ZEND_IS_SMALLER:
-				if (swap) {
-					|	setg al
-				} else {
-					|	setl al
-				}
-				break;
-			case ZEND_IS_SMALLER_OR_EQUAL:
-				if (swap) {
-					|	setge al
-				} else {
-					|	setle al
-				}
-				break;
-			default:
-				ZEND_ASSERT(0);
+	if (smart_branch) {
+		if ((opline+1)->opcode == ZEND_JMPZ_EX ||
+		    (opline+1)->opcode == ZEND_JMPNZ_EX) {
+			zend_jit_addr res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
+
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_IDENTICAL:
+				case ZEND_CASE:
+					|	sete al
+					break;
+				case ZEND_IS_NOT_EQUAL:
+				case ZEND_IS_NOT_IDENTICAL:
+					|	setne al
+					break;
+				case ZEND_IS_SMALLER:
+					if (swap) {
+						|	setg al
+					} else {
+						|	setl al
+					}
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					if (swap) {
+						|	setge al
+					} else {
+						|	setle al
+					}
+					break;
+				default:
+					ZEND_ASSERT(0);
+			}
+			|	movzx eax, al
+			|	lea eax, [eax + 2]
+			|	SET_ZVAL_TYPE_INFO res_addr, eax
 		}
-		|	movzx eax, al
-		|	lea eax, [eax + 2]
-		|	SET_ZVAL_TYPE_INFO res_addr, eax
-	}
-	if (((opline+1)->opcode == ZEND_JMPZ ||
-	     (opline+1)->opcode == ZEND_JMPZ_EX) &&
-	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var &&
-	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-		target_label = ssa->cfg.blocks[b].successors[0];
-		switch (opline->opcode) {
-			case ZEND_IS_EQUAL:
-			case ZEND_IS_IDENTICAL:
-			case ZEND_CASE:
-				| jne => target_label
-				break;
-			case ZEND_IS_NOT_EQUAL:
-			case ZEND_IS_NOT_IDENTICAL:
-				| je => target_label
-				break;
-			case ZEND_IS_SMALLER:
-				if (swap) {
-					| jle => target_label
-				} else {
-					| jge => target_label
-				}
-				break;
-			case ZEND_IS_SMALLER_OR_EQUAL:
-				if (swap) {
-					| jl => target_label
-				} else {
-					| jg => target_label
-				}
-				break;
-			default:
-				ZEND_ASSERT(0);
+		if ((opline+1)->opcode == ZEND_JMPZ ||
+		    (opline+1)->opcode == ZEND_JMPZ_EX) {
+			target_label = ssa->cfg.blocks[b].successors[0];
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_IDENTICAL:
+				case ZEND_CASE:
+					| jne => target_label
+					break;
+				case ZEND_IS_NOT_EQUAL:
+				case ZEND_IS_NOT_IDENTICAL:
+					| je => target_label
+					break;
+				case ZEND_IS_SMALLER:
+					if (swap) {
+						| jle => target_label
+					} else {
+						| jge => target_label
+					}
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					if (swap) {
+						| jl => target_label
+					} else {
+						| jg => target_label
+					}
+					break;
+				default:
+					ZEND_ASSERT(0);
+			}
+		} else if ((opline+1)->opcode == ZEND_JMPNZ ||
+		            (opline+1)->opcode == ZEND_JMPNZ_EX) {
+			target_label = ssa->cfg.blocks[b].successors[0];
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_IDENTICAL:
+				case ZEND_CASE:
+					| je => target_label
+					break;
+				case ZEND_IS_NOT_EQUAL:
+				case ZEND_IS_NOT_IDENTICAL:
+					| jne => target_label
+					break;
+				case ZEND_IS_SMALLER:
+					if (swap) {
+						| jg => target_label
+					} else {
+						| jl => target_label
+					}
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					if (swap) {
+						| jge => target_label
+					} else {
+						| jle => target_label
+					}
+					break;
+				default:
+					ZEND_ASSERT(0);
+			}
+		} else if ((opline+1)->opcode == ZEND_JMPZNZ) {
+			target_label = ssa->cfg.blocks[b].successors[0];
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_IDENTICAL:
+				case ZEND_CASE:
+					| jne => target_label
+					break;
+				case ZEND_IS_NOT_EQUAL:
+				case ZEND_IS_NOT_IDENTICAL:
+					| je => target_label
+					break;
+				case ZEND_IS_SMALLER:
+				    if (swap) {
+						| jle => target_label
+				    } else {
+						| jge => target_label
+					}
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					if (swap) {
+						| jl => target_label
+					} else {
+						| jg => target_label
+					}
+					break;
+				default:
+					ZEND_ASSERT(0);
+			}
+			target_label = ssa->cfg.blocks[b].successors[1];
+			| jmp => target_label
+		} else {
+			ZEND_ASSERT(0);
 		}
-	} else if (((opline+1)->opcode == ZEND_JMPNZ ||
-	            (opline+1)->opcode == ZEND_JMPNZ_EX) &&
-	           (opline+1)->op1_type == IS_TMP_VAR &&
-	           (opline+1)->op1.var == opline->result.var &&
-	           ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-		target_label = ssa->cfg.blocks[b].successors[0];
-		switch (opline->opcode) {
-			case ZEND_IS_EQUAL:
-			case ZEND_IS_IDENTICAL:
-			case ZEND_CASE:
-				| je => target_label
-				break;
-			case ZEND_IS_NOT_EQUAL:
-			case ZEND_IS_NOT_IDENTICAL:
-				| jne => target_label
-				break;
-			case ZEND_IS_SMALLER:
-				if (swap) {
-					| jg => target_label
-				} else {
-					| jl => target_label
-				}
-				break;
-			case ZEND_IS_SMALLER_OR_EQUAL:
-				if (swap) {
-					| jge => target_label
-				} else {
-					| jle => target_label
-				}
-				break;
-			default:
-				ZEND_ASSERT(0);
-		}
-	} else if ((opline+1)->opcode == ZEND_JMPZNZ &&
-	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var &&
-	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-		target_label = ssa->cfg.blocks[b].successors[0];
-		switch (opline->opcode) {
-			case ZEND_IS_EQUAL:
-			case ZEND_IS_IDENTICAL:
-			case ZEND_CASE:
-				| jne => target_label
-				break;
-			case ZEND_IS_NOT_EQUAL:
-			case ZEND_IS_NOT_IDENTICAL:
-				| je => target_label
-				break;
-			case ZEND_IS_SMALLER:
-			    if (swap) {
-					| jle => target_label
-			    } else {
-					| jge => target_label
-				}
-				break;
-			case ZEND_IS_SMALLER_OR_EQUAL:
-				if (swap) {
-					| jl => target_label
-				} else {
-					| jg => target_label
-				}
-				break;
-			default:
-				ZEND_ASSERT(0);
-		}
-		target_label = ssa->cfg.blocks[b].successors[1];
-		| jmp => target_label
 	} else {
 		zend_jit_addr res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
 
@@ -5280,232 +5273,221 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, const zend_op *opline, int b
 	return 1;
 }
 
-static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, int b, const zend_op_array *op_array, zend_ssa *ssa, zend_bool swap)
+static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, int b, const zend_op_array *op_array, zend_ssa *ssa, zend_bool swap, zend_bool smart_branch)
 {
 	unsigned int target_label;
 
-	if ((opline+1)->opcode == ZEND_JMPZ &&
-	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var &&
-	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-		target_label = ssa->cfg.blocks[b].successors[0];
-		switch (opline->opcode) {
-			case ZEND_IS_EQUAL:
-			case ZEND_IS_IDENTICAL:
-			case ZEND_CASE:
-				| jne => target_label
-				| jp => target_label
-				break;
-			case ZEND_IS_NOT_EQUAL:
-			case ZEND_IS_NOT_IDENTICAL:
-				| jp >1
-				| je => target_label
-				|1:
-				break;
-			case ZEND_IS_SMALLER:
-				if (swap) {
-					| jbe => target_label
-				} else {
-					| jae => target_label
+	if (smart_branch) {
+		if ((opline+1)->opcode == ZEND_JMPZ) {
+			target_label = ssa->cfg.blocks[b].successors[0];
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_IDENTICAL:
+				case ZEND_CASE:
+					| jne => target_label
 					| jp => target_label
-				}
-				break;
-			case ZEND_IS_SMALLER_OR_EQUAL:
-				if (swap) {
-					| jb => target_label
-				} else {
-					| ja => target_label
-					| jp => target_label
-				}
-				break;
-			default:
-				ZEND_ASSERT(0);
-		}
-	} else if ((opline+1)->opcode == ZEND_JMPNZ &&
-	           (opline+1)->op1_type == IS_TMP_VAR &&
-	           (opline+1)->op1.var == opline->result.var &&
-	           ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-		target_label = ssa->cfg.blocks[b].successors[0];
-		switch (opline->opcode) {
-			case ZEND_IS_EQUAL:
-			case ZEND_IS_IDENTICAL:
-			case ZEND_CASE:
-				| jp >1
-				| je => target_label
-				|1:
-				break;
-			case ZEND_IS_NOT_EQUAL:
-			case ZEND_IS_NOT_IDENTICAL:
-				| jne => target_label
-				| jp => target_label
-				break;
-			case ZEND_IS_SMALLER:
-				if (swap) {
-					| ja => target_label
-				} else {
+					break;
+				case ZEND_IS_NOT_EQUAL:
+				case ZEND_IS_NOT_IDENTICAL:
 					| jp >1
-					| jb => target_label
-                    |1:
-				}
-				break;
-			case ZEND_IS_SMALLER_OR_EQUAL:
-				if (swap) {
-					| jae => target_label
-				} else {
-					| jp >1
-					| jbe => target_label
+					| je => target_label
 					|1:
-				}
-				break;
-			default:
-				ZEND_ASSERT(0);
-		}
-	} else if ((opline+1)->opcode == ZEND_JMPZNZ &&
-	           (opline+1)->op1_type == IS_TMP_VAR &&
-	           (opline+1)->op1.var == opline->result.var &&
-	           ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-		unsigned int target_label2 = ssa->cfg.blocks[b].successors[1];
-
-		target_label = ssa->cfg.blocks[b].successors[0];
-		switch (opline->opcode) {
-			case ZEND_IS_EQUAL:
-			case ZEND_IS_IDENTICAL:
-			case ZEND_CASE:
-				| jne => target_label
-				| jp => target_label
-				break;
-			case ZEND_IS_NOT_EQUAL:
-			case ZEND_IS_NOT_IDENTICAL:
-				| jp => target_label2
-				| je => target_label
-				break;
-			case ZEND_IS_SMALLER:
-				if (swap) {
-					| jbe => target_label
-				} else {
-					| jae => target_label
+					break;
+				case ZEND_IS_SMALLER:
+					if (swap) {
+						| jbe => target_label
+					} else {
+						| jae => target_label
+						| jp => target_label
+					}
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					if (swap) {
+						| jb => target_label
+					} else {
+						| ja => target_label
+						| jp => target_label
+					}
+					break;
+				default:
+					ZEND_ASSERT(0);
+			}
+		} else if ((opline+1)->opcode == ZEND_JMPNZ) {
+			target_label = ssa->cfg.blocks[b].successors[0];
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_IDENTICAL:
+				case ZEND_CASE:
+					| jp >1
+					| je => target_label
+					|1:
+					break;
+				case ZEND_IS_NOT_EQUAL:
+				case ZEND_IS_NOT_IDENTICAL:
+					| jne => target_label
 					| jp => target_label
-				}
-				break;
-			case ZEND_IS_SMALLER_OR_EQUAL:
-				if (swap) {
-					| jb => target_label
-				} else {
-					| ja => target_label
-					| jp => target_label
-				}
-				break;
-			default:
-				ZEND_ASSERT(0);
-		}
-		| jmp => target_label2
-	} else if ((opline+1)->opcode == ZEND_JMPZ_EX &&
-	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var &&
-	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-		zend_jit_addr res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
+					break;
+				case ZEND_IS_SMALLER:
+					if (swap) {
+						| ja => target_label
+					} else {
+						| jp >1
+						| jb => target_label
+						|1:
+					}
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					if (swap) {
+						| jae => target_label
+					} else {
+						| jp >1
+						| jbe => target_label
+						|1:
+					}
+					break;
+				default:
+					ZEND_ASSERT(0);
+			}
+		} else if ((opline+1)->opcode == ZEND_JMPZNZ) {
+			unsigned int target_label2 = ssa->cfg.blocks[b].successors[1];
 
-		target_label = ssa->cfg.blocks[b].successors[0];
-		switch (opline->opcode) {
-			case ZEND_IS_EQUAL:
-			case ZEND_IS_IDENTICAL:
-			case ZEND_CASE:
-				|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
-				|	jne => target_label
-				|	jp => target_label
-				|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
-				break;
-			case ZEND_IS_NOT_EQUAL:
-			case ZEND_IS_NOT_IDENTICAL:
-				|	jp >1
-				|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
-				|	je => target_label
-				|1:
-				|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
-				break;
-			case ZEND_IS_SMALLER:
-				if (swap) {
+			target_label = ssa->cfg.blocks[b].successors[0];
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_IDENTICAL:
+				case ZEND_CASE:
+					| jne => target_label
+					| jp => target_label
+					break;
+				case ZEND_IS_NOT_EQUAL:
+				case ZEND_IS_NOT_IDENTICAL:
+					| jp => target_label2
+					| je => target_label
+					break;
+				case ZEND_IS_SMALLER:
+					if (swap) {
+						| jbe => target_label
+					} else {
+						| jae => target_label
+						| jp => target_label
+					}
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					if (swap) {
+						| jb => target_label
+					} else {
+						| ja => target_label
+						| jp => target_label
+					}
+					break;
+				default:
+					ZEND_ASSERT(0);
+			}
+			| jmp => target_label2
+		} else if ((opline+1)->opcode == ZEND_JMPZ_EX) {
+			zend_jit_addr res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
+
+			target_label = ssa->cfg.blocks[b].successors[0];
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_IDENTICAL:
+				case ZEND_CASE:
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
-					|	jbe => target_label
-					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
-				} else {
-					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
-					|	jae => target_label
+					|	jne => target_label
 					|	jp => target_label
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
-				}
-				break;
-			case ZEND_IS_SMALLER_OR_EQUAL:
-				if (swap) {
-					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
-					|	jb => target_label
+					break;
+				case ZEND_IS_NOT_EQUAL:
+				case ZEND_IS_NOT_IDENTICAL:
+					|	jp >1
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
-				} else {
+					|	je => target_label
+					|1:
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
-					|	ja => target_label
-					|	jp => target_label
-					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
-				}
-				break;
-			default:
-				ZEND_ASSERT(0);
-		}
-	} else if ((opline+1)->opcode == ZEND_JMPNZ_EX &&
-	           (opline+1)->op1_type == IS_TMP_VAR &&
-	           (opline+1)->op1.var == opline->result.var &&
-	           ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-		zend_jit_addr res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
+					break;
+				case ZEND_IS_SMALLER:
+					if (swap) {
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
+						|	jbe => target_label
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
+					} else {
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
+						|	jae => target_label
+						|	jp => target_label
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
+					}
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					if (swap) {
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
+						|	jb => target_label
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
+					} else {
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
+						|	ja => target_label
+						|	jp => target_label
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
+					}
+					break;
+				default:
+					ZEND_ASSERT(0);
+			}
+		} else if ((opline+1)->opcode == ZEND_JMPNZ_EX) {
+			zend_jit_addr res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
 
-		target_label = ssa->cfg.blocks[b].successors[0];
-		switch (opline->opcode) {
-			case ZEND_IS_EQUAL:
-			case ZEND_IS_IDENTICAL:
-			case ZEND_CASE:
-				|	jp >1
-				|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
-				|	je => target_label
-				|1:
-				|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
-				break;
-			case ZEND_IS_NOT_EQUAL:
-			case ZEND_IS_NOT_IDENTICAL:
-				|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
-				|	jne => target_label
-				|	jp => target_label
-				|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
-				break;
-			case ZEND_IS_SMALLER:
-				if (swap) {
-					|	seta al
-					|	movzx eax, al
-					|	lea eax, [eax + 2]
-					|	SET_ZVAL_TYPE_INFO res_addr, eax
-					|	ja => target_label
-				} else {
+			target_label = ssa->cfg.blocks[b].successors[0];
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+				case ZEND_IS_IDENTICAL:
+				case ZEND_CASE:
 					|	jp >1
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
-					|	jb => target_label
+					|	je => target_label
 					|1:
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
-				}
-				break;
-			case ZEND_IS_SMALLER_OR_EQUAL:
-				if (swap) {
-					|	setae al
-					|	movzx eax, al
-					|	lea eax, [eax + 2]
-					|	SET_ZVAL_TYPE_INFO res_addr, eax
-					|	jae => target_label
-				} else {
-					|	jp >1
+					break;
+				case ZEND_IS_NOT_EQUAL:
+				case ZEND_IS_NOT_IDENTICAL:
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
-					|	jbe => target_label
-					|1:
+					|	jne => target_label
+					|	jp => target_label
 					|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
-				}
-				break;
-			default:
-				ZEND_ASSERT(0);
+					break;
+				case ZEND_IS_SMALLER:
+					if (swap) {
+						|	seta al
+						|	movzx eax, al
+						|	lea eax, [eax + 2]
+						|	SET_ZVAL_TYPE_INFO res_addr, eax
+						|	ja => target_label
+					} else {
+						|	jp >1
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
+						|	jb => target_label
+						|1:
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
+					}
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					if (swap) {
+						|	setae al
+						|	movzx eax, al
+						|	lea eax, [eax + 2]
+						|	SET_ZVAL_TYPE_INFO res_addr, eax
+						|	jae => target_label
+					} else {
+						|	jp >1
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
+						|	jbe => target_label
+						|1:
+						|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
+					}
+					break;
+				default:
+					ZEND_ASSERT(0);
+			}
+		} else {
+			ZEND_ASSERT(0);
 		}
 	} else {
 		zend_jit_addr res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
@@ -5567,27 +5549,27 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, i
 	return 1;
 }
 
-static int zend_jit_cmp_long_double(dasm_State **Dst, const zend_op *opline, int b, const zend_op_array *op_array, zend_ssa *ssa, zend_jit_addr op1_addr, zend_jit_addr op2_addr)
+static int zend_jit_cmp_long_double(dasm_State **Dst, const zend_op *opline, int b, const zend_op_array *op_array, zend_ssa *ssa, zend_jit_addr op1_addr, zend_jit_addr op2_addr, zend_bool smart_branch)
 {
 	zend_reg tmp_reg = ZREG_XMM0;
 
 	|	SSE_GET_ZVAL_LVAL tmp_reg, op1_addr
 	|	SSE_AVX_OP ucomisd, vucomisd, tmp_reg, op2_addr
 
-	return zend_jit_cmp_double_common(Dst, opline, b, op_array, ssa, 0);
+	return zend_jit_cmp_double_common(Dst, opline, b, op_array, ssa, 0, smart_branch);
 }
 
-static int zend_jit_cmp_double_long(dasm_State **Dst, const zend_op *opline, int b, const zend_op_array *op_array, zend_ssa *ssa, zend_jit_addr op1_addr, zend_jit_addr op2_addr)
+static int zend_jit_cmp_double_long(dasm_State **Dst, const zend_op *opline, int b, const zend_op_array *op_array, zend_ssa *ssa, zend_jit_addr op1_addr, zend_jit_addr op2_addr, zend_bool smart_branch)
 {
 	zend_reg tmp_reg = ZREG_XMM0;
 
 	|	SSE_GET_ZVAL_LVAL tmp_reg, op2_addr
 	|	SSE_AVX_OP ucomisd, vucomisd, tmp_reg, op1_addr
 
-	return zend_jit_cmp_double_common(Dst, opline, b, op_array, ssa, /* swap */ 1);
+	return zend_jit_cmp_double_common(Dst, opline, b, op_array, ssa, /* swap */ 1, smart_branch);
 }
 
-static int zend_jit_cmp_double_double(dasm_State **Dst, const zend_op *opline, int b, const zend_op_array *op_array, zend_ssa *ssa, zend_jit_addr op1_addr, zend_jit_addr op2_addr)
+static int zend_jit_cmp_double_double(dasm_State **Dst, const zend_op *opline, int b, const zend_op_array *op_array, zend_ssa *ssa, zend_jit_addr op1_addr, zend_jit_addr op2_addr, zend_bool smart_branch)
 {
 	zend_bool swap = 0;
 
@@ -5603,111 +5585,103 @@ static int zend_jit_cmp_double_double(dasm_State **Dst, const zend_op *opline, i
 		|	SSE_AVX_OP ucomisd, vucomisd, tmp_reg, op2_addr
 	}
 
-	return zend_jit_cmp_double_common(Dst, opline, b, op_array, ssa, swap);
+	return zend_jit_cmp_double_common(Dst, opline, b, op_array, ssa, swap, smart_branch);
 }
 
-static int zend_jit_cmp_slow(dasm_State **Dst, const zend_op *opline, int b, const zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_cmp_slow(dasm_State **Dst, const zend_op *opline, int b, const zend_op_array *op_array, zend_ssa *ssa, zend_bool smart_branch)
 {
 	unsigned int target_label;
 	zend_jit_addr res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
 
 	|	LONG_OP_WITH_CONST cmp, res_addr, Z_L(0)
-	if (((opline+1)->opcode == ZEND_JMPZ_EX ||
-	     (opline+1)->opcode == ZEND_JMPNZ_EX) &&
-	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var &&
-	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-		switch (opline->opcode) {
-			case ZEND_IS_EQUAL:
-			case ZEND_CASE:
-				|	sete al
-				break;
-			case ZEND_IS_NOT_EQUAL:
-				|	setne al
-				break;
-			case ZEND_IS_SMALLER:
-				|	setl al
-				break;
-			case ZEND_IS_SMALLER_OR_EQUAL:
-				|	setle al
-				break;
-			default:
-				ZEND_ASSERT(0);
+	if (smart_branch) {
+		if ((opline+1)->opcode == ZEND_JMPZ_EX ||
+		    (opline+1)->opcode == ZEND_JMPNZ_EX) {
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+				case ZEND_CASE:
+					|	sete al
+					break;
+				case ZEND_IS_NOT_EQUAL:
+					|	setne al
+					break;
+				case ZEND_IS_SMALLER:
+					|	setl al
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					|	setle al
+					break;
+				default:
+					ZEND_ASSERT(0);
+			}
+			|	movzx eax, al
+			|	lea eax, [eax + 2]
+			|	SET_ZVAL_TYPE_INFO res_addr, eax
 		}
-		|	movzx eax, al
-		|	lea eax, [eax + 2]
-		|	SET_ZVAL_TYPE_INFO res_addr, eax
-	}
-	if (((opline+1)->opcode == ZEND_JMPZ ||
-	     (opline+1)->opcode == ZEND_JMPZ_EX) &&
-	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var &&
-	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-		target_label = ssa->cfg.blocks[b].successors[0];
-		switch (opline->opcode) {
-			case ZEND_IS_EQUAL:
-			case ZEND_CASE:
-				| jne => target_label
-				break;
-			case ZEND_IS_NOT_EQUAL:
-				| je => target_label
-				break;
-			case ZEND_IS_SMALLER:
-				| jge => target_label
-				break;
-			case ZEND_IS_SMALLER_OR_EQUAL:
-				| jg => target_label
-				break;
-			default:
-				ZEND_ASSERT(0);
+		if ((opline+1)->opcode == ZEND_JMPZ ||
+		    (opline+1)->opcode == ZEND_JMPZ_EX) {
+			target_label = ssa->cfg.blocks[b].successors[0];
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+				case ZEND_CASE:
+					| jne => target_label
+					break;
+				case ZEND_IS_NOT_EQUAL:
+					| je => target_label
+					break;
+				case ZEND_IS_SMALLER:
+					| jge => target_label
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					| jg => target_label
+					break;
+				default:
+					ZEND_ASSERT(0);
+			}
+		} else if ((opline+1)->opcode == ZEND_JMPNZ ||
+		           (opline+1)->opcode == ZEND_JMPNZ_EX) {
+			target_label = ssa->cfg.blocks[b].successors[0];
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+				case ZEND_CASE:
+					| je => target_label
+					break;
+				case ZEND_IS_NOT_EQUAL:
+					| jne => target_label
+					break;
+				case ZEND_IS_SMALLER:
+					| jl => target_label
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					| jle => target_label
+					break;
+				default:
+					ZEND_ASSERT(0);
+			}
+		} else if ((opline+1)->opcode == ZEND_JMPZNZ) {
+			target_label = ssa->cfg.blocks[b].successors[0];
+			switch (opline->opcode) {
+				case ZEND_IS_EQUAL:
+				case ZEND_CASE:
+					| jne => target_label
+					break;
+				case ZEND_IS_NOT_EQUAL:
+					| je => target_label
+					break;
+				case ZEND_IS_SMALLER:
+					| jge => target_label
+					break;
+				case ZEND_IS_SMALLER_OR_EQUAL:
+					| jg => target_label
+					break;
+				default:
+					ZEND_ASSERT(0);
+			}
+			target_label = ssa->cfg.blocks[b].successors[1];
+			| jmp => target_label
+		} else {
+			ZEND_ASSERT(0);
 		}
-	} else if (((opline+1)->opcode == ZEND_JMPNZ ||
-	            (opline+1)->opcode == ZEND_JMPNZ_EX) &&
-	           (opline+1)->op1_type == IS_TMP_VAR &&
-	           (opline+1)->op1.var == opline->result.var &&
-	           ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-		target_label = ssa->cfg.blocks[b].successors[0];
-		switch (opline->opcode) {
-			case ZEND_IS_EQUAL:
-			case ZEND_CASE:
-				| je => target_label
-				break;
-			case ZEND_IS_NOT_EQUAL:
-				| jne => target_label
-				break;
-			case ZEND_IS_SMALLER:
-				| jl => target_label
-				break;
-			case ZEND_IS_SMALLER_OR_EQUAL:
-				| jle => target_label
-				break;
-			default:
-				ZEND_ASSERT(0);
-		}
-	} else if ((opline+1)->opcode == ZEND_JMPZNZ &&
-	           (opline+1)->op1_type == IS_TMP_VAR &&
-	           (opline+1)->op1.var == opline->result.var &&
-	           ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-		target_label = ssa->cfg.blocks[b].successors[0];
-		switch (opline->opcode) {
-			case ZEND_IS_EQUAL:
-			case ZEND_CASE:
-				| jne => target_label
-				break;
-			case ZEND_IS_NOT_EQUAL:
-				| je => target_label
-				break;
-			case ZEND_IS_SMALLER:
-				| jge => target_label
-				break;
-			case ZEND_IS_SMALLER_OR_EQUAL:
-				| jg => target_label
-				break;
-			default:
-				ZEND_ASSERT(0);
-		}
-		target_label = ssa->cfg.blocks[b].successors[1];
-		| jmp => target_label
 	} else {
 		switch (opline->opcode) {
 			case ZEND_IS_EQUAL:
@@ -5736,6 +5710,7 @@ static int zend_jit_cmp_slow(dasm_State **Dst, const zend_op *opline, int b, con
 
 static int zend_jit_cmp(dasm_State **Dst, const zend_op *opline, int b, int *opnum, const zend_op_array *op_array, zend_ssa *ssa, zend_lifetime_interval **ra)
 {
+	zend_bool smart_branch = 0;
 	uint32_t op1_info, op2_info;
 	zend_bool same_ops = (opline->op1_type == opline->op2_type) && (opline->op1.var == opline->op2.var);
 	zend_bool has_slow;
@@ -5745,6 +5720,17 @@ static int zend_jit_cmp(dasm_State **Dst, const zend_op *opline, int b, int *opn
 
 	op1_info = OP1_INFO();
 	op2_info = OP2_INFO();
+	if (((opline+1)->opcode == ZEND_JMPZ ||
+	     (opline+1)->opcode == ZEND_JMPNZ ||
+	     (opline+1)->opcode == ZEND_JMPZ_EX ||
+	     (opline+1)->opcode == ZEND_JMPNZ_EX ||
+	     (opline+1)->opcode == ZEND_JMPZNZ) &&
+	    (opline+1)->op1_type == IS_TMP_VAR &&
+	    (opline+1)->op1.var == opline->result.var &&
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == b) {
+		(*opnum)++;
+		smart_branch = 1;
+	}
 
 	has_slow =
 		(op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) &&
@@ -5768,7 +5754,7 @@ static int zend_jit_cmp(dasm_State **Dst, const zend_op *opline, int b, int *opn
 				if (op2_info & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
 					|	IF_NOT_ZVAL_TYPE op2_addr, IS_DOUBLE, >9
 				}
-				if (!zend_jit_cmp_long_double(Dst, opline, b, op_array, ssa, op1_addr, op2_addr)) {
+				if (!zend_jit_cmp_long_double(Dst, opline, b, op_array, ssa, op1_addr, op2_addr, smart_branch)) {
 					return 0;
 				}
 				|	jmp >6
@@ -5777,7 +5763,7 @@ static int zend_jit_cmp(dasm_State **Dst, const zend_op *opline, int b, int *opn
 				|	IF_NOT_ZVAL_TYPE op2_addr, IS_LONG, >9
 			}
 		}
-		if (!zend_jit_cmp_long_long(Dst, opline, b, op_array, ssa, op1_addr, op2_addr)) {
+		if (!zend_jit_cmp_long_long(Dst, opline, b, op_array, ssa, op1_addr, op2_addr, smart_branch)) {
 			return 0;
 		}
 		if (op1_info & MAY_BE_DOUBLE) {
@@ -5794,7 +5780,7 @@ static int zend_jit_cmp(dasm_State **Dst, const zend_op *opline, int b, int *opn
 						|	IF_NOT_ZVAL_TYPE op2_addr, IS_DOUBLE, >9
 					}
 				}
-				if (!zend_jit_cmp_double_double(Dst, opline, b, op_array, ssa, op1_addr, op2_addr)) {
+				if (!zend_jit_cmp_double_double(Dst, opline, b, op_array, ssa, op1_addr, op2_addr, smart_branch)) {
 					return 0;
 				}
 				|	jmp >6
@@ -5804,7 +5790,7 @@ static int zend_jit_cmp(dasm_State **Dst, const zend_op *opline, int b, int *opn
 				if (op2_info & (MAY_BE_ANY-(MAY_BE_LONG|MAY_BE_DOUBLE))) {
 					|	IF_NOT_ZVAL_TYPE op2_addr, IS_LONG, >9
 				}
-				if (!zend_jit_cmp_double_long(Dst, opline, b, op_array, ssa, op1_addr, op2_addr)) {
+				if (!zend_jit_cmp_double_long(Dst, opline, b, op_array, ssa, op1_addr, op2_addr, smart_branch)) {
 					return 0;
 				}
 				|	jmp >6
@@ -5825,7 +5811,7 @@ static int zend_jit_cmp(dasm_State **Dst, const zend_op *opline, int b, int *opn
 					|	IF_NOT_ZVAL_TYPE op2_addr, IS_DOUBLE, >9
 				}
 			}
-			if (!zend_jit_cmp_double_double(Dst, opline, b, op_array, ssa, op1_addr, op2_addr)) {
+			if (!zend_jit_cmp_double_double(Dst, opline, b, op_array, ssa, op1_addr, op2_addr, smart_branch)) {
 				return 0;
 			}
 		}
@@ -5837,7 +5823,7 @@ static int zend_jit_cmp(dasm_State **Dst, const zend_op *opline, int b, int *opn
 			if (op2_info & (MAY_BE_ANY-(MAY_BE_DOUBLE|MAY_BE_LONG))) {
 				|	IF_NOT_ZVAL_TYPE op2_addr, IS_LONG, >9
 			}
-			if (!zend_jit_cmp_double_long(Dst, opline, b, op_array, ssa, op1_addr, op2_addr)) {
+			if (!zend_jit_cmp_double_long(Dst, opline, b, op_array, ssa, op1_addr, op2_addr, smart_branch)) {
 				return 0;
 			}
 			if (op2_info & MAY_BE_DOUBLE) {
@@ -5859,7 +5845,7 @@ static int zend_jit_cmp(dasm_State **Dst, const zend_op *opline, int b, int *opn
 					|	IF_NOT_ZVAL_TYPE op1_addr, IS_DOUBLE, >9
 				}
 			}
-			if (!zend_jit_cmp_double_double(Dst, opline, b, op_array, ssa, op1_addr, op2_addr)) {
+			if (!zend_jit_cmp_double_double(Dst, opline, b, op_array, ssa, op1_addr, op2_addr, smart_branch)) {
 				return 0;
 			}
 		}
@@ -5871,7 +5857,7 @@ static int zend_jit_cmp(dasm_State **Dst, const zend_op *opline, int b, int *opn
 			if (op1_info & (MAY_BE_ANY-(MAY_BE_DOUBLE|MAY_BE_LONG))) {
 				|	IF_NOT_ZVAL_TYPE op1_addr, IS_LONG, >9
 			}
-			if (!zend_jit_cmp_long_double(Dst, opline, b, op_array, ssa, op1_addr, op2_addr)) {
+			if (!zend_jit_cmp_long_double(Dst, opline, b, op_array, ssa, op1_addr, op2_addr, smart_branch)) {
 				return 0;
 			}
 			if (op1_info & MAY_BE_DOUBLE) {
@@ -5952,7 +5938,7 @@ static int zend_jit_cmp(dasm_State **Dst, const zend_op *opline, int b, int *opn
 		if (zend_may_throw(opline, op_array, ssa)) {
 			zend_jit_check_exception_undef_result(Dst, opline);
 		}
-		if (!zend_jit_cmp_slow(Dst, opline, b, op_array, ssa)) {
+		if (!zend_jit_cmp_slow(Dst, opline, b, op_array, ssa, smart_branch)) {
 			return 0;
 		}
 		if (has_slow) {
@@ -5962,16 +5948,6 @@ static int zend_jit_cmp(dasm_State **Dst, const zend_op *opline, int b, int *opn
 	}
 
 	|6:
-	if (((opline+1)->opcode == ZEND_JMPZ ||
-	     (opline+1)->opcode == ZEND_JMPNZ ||
-	     (opline+1)->opcode == ZEND_JMPZ_EX ||
-	     (opline+1)->opcode == ZEND_JMPNZ_EX ||
-	     (opline+1)->opcode == ZEND_JMPZNZ) &&
-	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var &&
-	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-		(*opnum)++;
-	}
 
 	return 1;
 }
@@ -5993,7 +5969,7 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, int b, in
 	     (opline+1)->opcode == ZEND_JMPZNZ) &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
 	    (opline+1)->op1.var == opline->result.var &&
-	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == b) {
 		(*opnum)++;
 		smart_branch = 1;
 	}
@@ -6259,12 +6235,12 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, int b, in
 		}
 	} else if ((op1_info & MAY_BE_ANY) == MAY_BE_LONG &&
 	           (op2_info & MAY_BE_ANY) == MAY_BE_LONG) {
-		if (!zend_jit_cmp_long_long(Dst, opline, b, op_array, ssa, op1_addr, op2_addr)) {
+		if (!zend_jit_cmp_long_long(Dst, opline, b, op_array, ssa, op1_addr, op2_addr, smart_branch)) {
 			return 0;
 		}
 	} else if ((op1_info & MAY_BE_ANY) == MAY_BE_DOUBLE &&
 	           (op2_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-		if (!zend_jit_cmp_double_double(Dst, opline, b, op_array, ssa, op1_addr, op2_addr)) {
+		if (!zend_jit_cmp_double_double(Dst, opline, b, op_array, ssa, op1_addr, op2_addr, smart_branch)) {
 			return 0;
 		}
 	} else {
@@ -7853,7 +7829,7 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, int b, int 
 	     (opline+1)->opcode == ZEND_JMPZNZ) &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
 	    (opline+1)->op1.var == opline->result.var &&
-	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == b) {
 		(*opnum)++;
 		smart_branch = 1;
 	}
@@ -7947,7 +7923,7 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, int b, i
 	     (opline+1)->opcode == ZEND_JMPZNZ) &&
 	    (opline+1)->op1_type == IS_TMP_VAR &&
 	    (opline+1)->op1.var == opline->result.var &&
-	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == b) {
 		(*opnum)++;
 		smart_branch = 1;
 	}
@@ -8636,6 +8612,7 @@ fallback:
 
 static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, int b, int *opnum, const zend_op_array *op_array, zend_ssa *ssa)
 {
+	zend_bool smart_branch = 0;
 	uint32_t op1_info, op2_info;
 	zend_jit_addr op1_addr, op2_addr, res_addr;
 
@@ -8646,6 +8623,15 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, i
 
 	op1_info = OP1_INFO();
 	op2_info = OP2_INFO();
+	if (((opline+1)->opcode == ZEND_JMPZ ||
+	     (opline+1)->opcode == ZEND_JMPNZ ||
+	     (opline+1)->opcode == ZEND_JMPZNZ) &&
+	    (opline+1)->op1_type == IS_TMP_VAR &&
+	    (opline+1)->op1.var == opline->result.var &&
+	    ssa->cfg.map[(opline+1) - op_array->opcodes] == b) {
+		(*opnum)++;
+		smart_branch = 1;
+	}
 
 	op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, NULL, -1);
 	op2_addr = zend_jit_decode_op(op_array, opline->op2_type, opline->op2, opline, NULL, -1);
@@ -8709,18 +8695,19 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, i
 		}
 	}
 	if (!(opline->extended_value & ZEND_ISEMPTY)) {
-		if ((opline+1)->opcode == ZEND_JMPZ
-		 && ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-			unsigned int target_label = ssa->cfg.blocks[b].successors[1];
-			|	jmp =>target_label
-		} else if ((opline+1)->opcode == ZEND_JMPNZ
-		           && ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-			unsigned int target_label = ssa->cfg.blocks[b].successors[0];
-			|	jmp =>target_label
-		} else if ((opline+1)->opcode == ZEND_JMPZNZ
-		           && ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-			unsigned int target_label = ssa->cfg.blocks[b].successors[1];
-			|	jmp =>target_label
+		if (smart_branch) {
+			if ((opline+1)->opcode == ZEND_JMPZ) {
+				unsigned int target_label = ssa->cfg.blocks[b].successors[1];
+				|	jmp =>target_label
+			} else if ((opline+1)->opcode == ZEND_JMPNZ) {
+				unsigned int target_label = ssa->cfg.blocks[b].successors[0];
+				|	jmp =>target_label
+			} else if ((opline+1)->opcode == ZEND_JMPZNZ) {
+				unsigned int target_label = ssa->cfg.blocks[b].successors[1];
+				|	jmp =>target_label
+			} else {
+				ZEND_ASSERT(0);
+			}
 		} else {
 			|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
 			|	jmp >8
@@ -8739,16 +8726,17 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, i
 		}
 	}
 	if (!(opline->extended_value & ZEND_ISEMPTY)) {
-		if ((opline+1)->opcode == ZEND_JMPZ
-		 && ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-			unsigned int target_label = ssa->cfg.blocks[b].successors[0];
-			|	jmp =>target_label
-		} else if ((opline+1)->opcode == ZEND_JMPNZ
-		           && ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-		} else if ((opline+1)->opcode == ZEND_JMPZNZ
-		           && ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-			unsigned int target_label = ssa->cfg.blocks[b].successors[0];
-			|	jmp =>target_label
+		if (smart_branch) {
+			if ((opline+1)->opcode == ZEND_JMPZ) {
+				unsigned int target_label = ssa->cfg.blocks[b].successors[0];
+				|	jmp =>target_label
+			} else if ((opline+1)->opcode == ZEND_JMPNZ) {
+			} else if ((opline+1)->opcode == ZEND_JMPZNZ) {
+				unsigned int target_label = ssa->cfg.blocks[b].successors[0];
+				|	jmp =>target_label
+			} else {
+				ZEND_ASSERT(0);
+			}
 		} else {
 			|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
 		}
@@ -8758,15 +8746,6 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, i
 	}
 
 	|8:
-
-	if (((opline+1)->opcode == ZEND_JMPZ ||
-	     (opline+1)->opcode == ZEND_JMPNZ ||
-	     (opline+1)->opcode == ZEND_JMPZNZ) &&
-	    (opline+1)->op1_type == IS_TMP_VAR &&
-	    (opline+1)->op1.var == opline->result.var &&
-	    ssa->cfg.map[(opline+1) - op_array->opcodes] == ssa->cfg.map[opline - op_array->opcodes]) {
-		(*opnum)++;
-	}
 
 	return 1;
 
