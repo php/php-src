@@ -7064,12 +7064,14 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 	if (!func) {
 		/* resolve function ar run time */
 	} else if (func->type == ZEND_USER_FUNCTION) {
+		ZEND_ASSERT(opline->opcode != ZEND_DO_ICALL);
 		if (call_info->num_args > func->op_array.num_args ||
 		    (opline-1)->opcode == ZEND_SEND_UNPACK ||
 		    (opline-1)->opcode == ZEND_SEND_ARRAY) {
 			goto fallback;
 		}
 	} else if (func->type == ZEND_INTERNAL_FUNCTION) {
+		ZEND_ASSERT(opline->opcode != ZEND_DO_UCALL);
 #if ZEND_DEBUG
 		if (func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			goto fallback;
@@ -7139,12 +7141,15 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		}
 	}
 
-	if (!func) {
+	if (!func
+	 && opline->opcode != ZEND_DO_UCALL
+	 && opline->opcode != ZEND_DO_ICALL) {
 		|	cmp byte [r0 + offsetof(zend_function, type)], ZEND_USER_FUNCTION
 		|	jne >8
 	}
 
-	if (!func || func->type == ZEND_USER_FUNCTION) {
+	if ((!func || func->type == ZEND_USER_FUNCTION)
+	 && opline->opcode != ZEND_DO_ICALL) {
 		|	// EX(call) = NULL;
 		|	mov aword EX:RX->call, 0
 
@@ -7298,7 +7303,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 
 #ifdef CONTEXT_THREADED_JIT
 		|	call ->context_threaded_call
-		if (!func) {
+		if (!func && (opline->opcode != ZEND_DO_UCALL)) {
 			|	jmp >9
 		}
 #else
@@ -7318,8 +7323,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 #endif
 	}
 
-	if (!func || func->type == ZEND_INTERNAL_FUNCTION) {
-		if (!func) {
+	if ((!func || func->type == ZEND_INTERNAL_FUNCTION)
+	 && (opline->opcode != ZEND_DO_UCALL)) {
+		if (!func && (opline->opcode != ZEND_DO_ICALL)) {
 			|8:
 		}
 		if (opline->opcode == ZEND_DO_FCALL_BY_NAME) {
