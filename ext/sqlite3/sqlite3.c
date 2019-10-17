@@ -2321,6 +2321,11 @@ static void php_sqlite3_object_free_storage(zend_object *object) /* {{{ */
 		return;
 	}
 
+	/* Release function_name from authorizer */
+	if (intern->authorizer_fci.size > 0) {
+		zval_ptr_dtor(&intern->authorizer_fci.function_name);
+	}
+
 	while (intern->funcs) {
 		func = intern->funcs;
 		intern->funcs = func->next;
