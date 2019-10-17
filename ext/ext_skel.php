@@ -172,7 +172,7 @@ function process_args($argv, $argc) {
 	{
 		$val = $argv[$i];
 
-		if($val{0} != '-' || $val{1} != '-')
+		if($val[0] != '-' || $val[1] != '-')
 		{
 			continue;
 		}
@@ -201,7 +201,7 @@ function process_args($argv, $argc) {
 			case 'ext':
 			case 'dir':
 			case 'author': {
-				if (!isset($argv[$i + 1]) || ($argv[$i + 1]{0} == '-' && $argv[$i + 1]{1} == '-')) {
+				if (!isset($argv[$i + 1]) || ($argv[$i + 1][0] == '-' && $argv[$i + 1][1] == '-')) {
 					error('Argument "' . $val . '" expects a value, none passed');
 				} else if ($opt == 'dir' && empty($argv[$i + 1])) {
 					continue 2;
