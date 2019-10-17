@@ -63,7 +63,7 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error_type(zend_property_info *prop1
 ZEND_API zend_bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, zend_bool strict, zend_bool is_internal_arg);
 ZEND_API ZEND_COLD void zend_verify_arg_error(
 		const zend_function *zf, const zend_arg_info *arg_info,
-		int arg_num, const zend_class_entry *ce, zval *value);
+		int arg_num, void **cache_slot, zval *value);
 
 #define ZEND_REF_TYPE_SOURCES(ref) \
 	(ref)->sources

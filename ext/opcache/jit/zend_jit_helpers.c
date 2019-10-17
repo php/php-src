@@ -1133,22 +1133,22 @@ static void ZEND_FASTCALL zend_jit_verify_arg_object(zval *arg, const zend_op_ar
 	} else {
 		ce = zend_fetch_class(ZEND_TYPE_NAME(arg_info->type), (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 		if (UNEXPECTED(!ce)) {
-			zend_verify_arg_error((zend_function*)op_array, arg_info, arg_num, NULL, arg);
+			zend_verify_arg_error((zend_function*)op_array, arg_info, arg_num, cache_slot, arg);
 			return;
 		}
 		*cache_slot = (void *)ce;
 	}
 	if (UNEXPECTED(!instanceof_function(Z_OBJCE_P(arg), ce))) {
-		zend_verify_arg_error((zend_function*)op_array, arg_info, arg_num, ce, arg);
+		zend_verify_arg_error((zend_function*)op_array, arg_info, arg_num, cache_slot, arg);
 	}
 }
 
 static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot)
 {
-	zend_class_entry *ce = NULL;
 	uint32_t type_mask;
 
 	if (UNEXPECTED(ZEND_TYPE_IS_CLASS(arg_info->type))) {
+		zend_class_entry *ce;
 		if (Z_TYPE_P(arg) == IS_NULL && ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
 			/* Null passed to nullable type */
 			return;
@@ -1183,7 +1183,7 @@ static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_arra
 	}
 	return;
 err:
-	zend_verify_arg_error((zend_function*)op_array, arg_info, arg_num, ce, arg);
+	zend_verify_arg_error((zend_function*)op_array, arg_info, arg_num, cache_slot, arg);
 }
 
 static void ZEND_FASTCALL zend_jit_zval_copy_deref_helper(zval *dst, zval *src)
