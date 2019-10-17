@@ -7866,7 +7866,7 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, int b, int 
 	|.cold_code
 	|4:
 	|	MEM_OP2_2_ZTS mov, FCARG1a, aword, executor_globals, zend_constants, FCARG1a
-	|	shl	r0, 1
+	|	shr	r0, 1
 	|	cmp dword [FCARG1a + offsetof(HashTable, nNumOfElements)], eax
 	if (smart_branch) {
 		if (undefined_label != (uint32_t)-1) {
