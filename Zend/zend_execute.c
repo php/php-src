@@ -662,6 +662,10 @@ static ZEND_COLD void zend_verify_type_error_common(
 	// TODO: This code is broken for now.
 	if (ZEND_TYPE_HAS_CLASS(arg_info->type)) {
 		zend_class_entry *ce = *cache_slot;
+		if (!ce) {
+			ce = zend_fetch_class(ZEND_TYPE_NAME(arg_info->type),
+				(ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
+		}
 		if (ce) {
 			if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 				*need_msg = "implement interface ";
@@ -1279,18 +1283,6 @@ static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *
 static ZEND_COLD int zend_verify_missing_return_type(const zend_function *zf, void **cache_slot)
 {
 	/* VERIFY_RETURN_TYPE is not emitted for "void" functions, so this is always an error. */
-	zend_arg_info *ret_info = zf->common.arg_info - 1;
-
-	// TODO: Generalize this loading
-	zend_class_entry *ce;
-	if (ZEND_TYPE_HAS_NAME(ret_info->type)) {
-		if (!*cache_slot) {
-			ce = zend_fetch_class(ZEND_TYPE_NAME(ret_info->type), (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
-			if (ce) {
-				*cache_slot = (void *) ce;
-			}
-		}
-	}
 	zend_verify_return_error(zf, cache_slot, NULL);
 	return 0;
 }
