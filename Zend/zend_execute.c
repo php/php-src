@@ -39,6 +39,7 @@
 #include "zend_dtrace.h"
 #include "zend_inheritance.h"
 #include "zend_type_info.h"
+#include "zend_smart_str.h"
 
 /* Virtual current working directory support */
 #include "zend_virtual_cwd.h"
@@ -646,9 +647,9 @@ static ZEND_COLD void zend_verify_type_error_common(
 		const zend_function *zf, const zend_arg_info *arg_info,
 		void **cache_slot, zval *value,
 		const char **fname, const char **fsep, const char **fclass,
-		const char **need_msg, const char **need_kind, const char **need_or_null,
-		const char **given_msg, const char **given_kind)
+		zend_string **need_msg, const char **given_msg, const char **given_kind)
 {
+	smart_str str = {0};
 	zend_bool is_interface = 0;
 	*fname = ZSTR_VAL(zf->common.function_name);
 	if (zf->common.scope) {
@@ -668,51 +669,47 @@ static ZEND_COLD void zend_verify_type_error_common(
 		}
 		if (ce) {
 			if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-				*need_msg = "implement interface ";
+				smart_str_appends(&str, "implement interface ");
 				is_interface = 1;
 			} else {
-				*need_msg = "be an instance of ";
+				smart_str_appends(&str, "be an instance of ");
 			}
-			*need_kind = ZSTR_VAL(ce->name);
+			smart_str_append(&str, ce->name);
 		} else {
 			/* We don't know whether it's a class or interface, assume it's a class */
-
-			*need_msg = "be an instance of ";
-			*need_kind = ZSTR_VAL(ZEND_TYPE_NAME(arg_info->type));
+			smart_str_appends(&str, "be an instance of ");
+			smart_str_append(&str, ZEND_TYPE_NAME(arg_info->type));
 		}
 	} else {
 		uint32_t type_mask = ZEND_TYPE_PURE_MASK_WITHOUT_NULL(arg_info->type);
 		switch (type_mask) {
 			case MAY_BE_OBJECT:
-				*need_msg = "be an ";
-				*need_kind = "object";
+				smart_str_appends(&str, "be an object");
 				break;
 			case MAY_BE_CALLABLE:
-				*need_msg = "be callable";
-				*need_kind = "";
+				smart_str_appends(&str, "be callable");
 				break;
 			case MAY_BE_ITERABLE:
-				*need_msg = "be iterable";
-				*need_kind = "";
+				smart_str_appends(&str, "be iterable");
 				break;
 			default:
 			{
-				/* TODO: The zend_type_to_string() result is guaranteed interned here.
-				 * It would be beter to switch all this code to use zend_string though. */
 				zend_type type = arg_info->type;
 				ZEND_TYPE_FULL_MASK(type) &= ~MAY_BE_NULL;
-				*need_msg = "be of the type ";
-				*need_kind = ZSTR_VAL(zend_type_to_string(type));
+				zend_string *type_str = zend_type_to_string(type);
+				smart_str_appends(&str, "be of the type ");
+				smart_str_append(&str, type_str);
+				zend_string_release(type_str);
 				break;
 			}
 		}
 	}
 
 	if (ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
-		*need_or_null = is_interface ? " or be null" : " or null";
-	} else {
-		*need_or_null = "";
+		smart_str_appends(&str, is_interface ? " or be null" : " or null");
 	}
+
+	*need_msg = smart_str_extract(&str);
 
 	if (value) {
 		if (ZEND_TYPE_HAS_CLASS(arg_info->type) && Z_TYPE_P(value) == IS_OBJECT) {
@@ -734,7 +731,8 @@ ZEND_API ZEND_COLD void zend_verify_arg_error(
 {
 	zend_execute_data *ptr = EG(current_execute_data)->prev_execute_data;
 	const char *fname, *fsep, *fclass;
-	const char *need_msg, *need_kind, *need_or_null, *given_msg, *given_kind;
+	zend_string *need_msg;
+	const char *given_msg, *given_kind;
 
 	if (EG(exception)) {
 		/* The type verification itself might have already thrown an exception
@@ -745,19 +743,21 @@ ZEND_API ZEND_COLD void zend_verify_arg_error(
 	if (value) {
 		zend_verify_type_error_common(
 			zf, arg_info, cache_slot, value,
-			&fname, &fsep, &fclass, &need_msg, &need_kind, &need_or_null, &given_msg, &given_kind);
+			&fname, &fsep, &fclass, &need_msg, &given_msg, &given_kind);
 
 		if (zf->common.type == ZEND_USER_FUNCTION) {
 			if (ptr && ptr->func && ZEND_USER_CODE(ptr->func->common.type)) {
-				zend_type_error("Argument %d passed to %s%s%s() must %s%s%s, %s%s given, called in %s on line %d",
-						arg_num, fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind,
+				zend_type_error("Argument %d passed to %s%s%s() must %s, %s%s given, called in %s on line %d",
+						arg_num, fclass, fsep, fname, ZSTR_VAL(need_msg), given_msg, given_kind,
 						ZSTR_VAL(ptr->func->op_array.filename), ptr->opline->lineno);
 			} else {
-				zend_type_error("Argument %d passed to %s%s%s() must %s%s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind);
+				zend_type_error("Argument %d passed to %s%s%s() must %s, %s%s given", arg_num, fclass, fsep, fname, ZSTR_VAL(need_msg), given_msg, given_kind);
 			}
 		} else {
-			zend_type_error("Argument %d passed to %s%s%s() must %s%s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind);
+			zend_type_error("Argument %d passed to %s%s%s() must %s, %s%s given", arg_num, fclass, fsep, fname, ZSTR_VAL(need_msg), given_msg, given_kind);
 		}
+
+		zend_string_release(need_msg);
 	} else {
 		zend_missing_arg_error(ptr);
 	}
@@ -1205,14 +1205,17 @@ static ZEND_COLD void zend_verify_return_error(
 {
 	const zend_arg_info *arg_info = &zf->common.arg_info[-1];
 	const char *fname, *fsep, *fclass;
-	const char *need_msg, *need_kind, *need_or_null, *given_msg, *given_kind;
+	zend_string *need_msg;
+	const char *given_msg, *given_kind;
 
 	zend_verify_type_error_common(
 		zf, arg_info, cache_slot, value,
-		&fname, &fsep, &fclass, &need_msg, &need_kind, &need_or_null, &given_msg, &given_kind);
+		&fname, &fsep, &fclass, &need_msg, &given_msg, &given_kind);
 
-	zend_type_error("Return value of %s%s%s() must %s%s%s, %s%s returned",
-		fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind);
+	zend_type_error("Return value of %s%s%s() must %s, %s%s returned",
+		fclass, fsep, fname, ZSTR_VAL(need_msg), given_msg, given_kind);
+
+	zend_string_release(need_msg);
 }
 
 #if ZEND_DEBUG
@@ -1221,14 +1224,15 @@ static ZEND_COLD void zend_verify_internal_return_error(
 {
 	const zend_arg_info *arg_info = &zf->common.arg_info[-1];
 	const char *fname, *fsep, *fclass;
-	const char *need_msg, *need_kind, *need_or_null, *given_msg, *given_kind;
+	zend_string *need_msg;
+	const char *given_msg, *given_kind;
 
 	zend_verify_type_error_common(
 		zf, arg_info, cache_slot, value,
-		&fname, &fsep, &fclass, &need_msg, &need_kind, &need_or_null, &given_msg, &given_kind);
+		&fname, &fsep, &fclass, &need_msg, &given_msg, &given_kind);
 
-	zend_error_noreturn(E_CORE_ERROR, "Return value of %s%s%s() must %s%s%s, %s%s returned",
-		fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind);
+	zend_error_noreturn(E_CORE_ERROR, "Return value of %s%s%s() must %s, %s%s returned",
+		fclass, fsep, fname, ZSTR_VAL(need_msg), given_msg, given_kind);
 }
 
 static ZEND_COLD void zend_verify_void_return_error(const zend_function *zf, const char *returned_msg, const char *returned_kind)
