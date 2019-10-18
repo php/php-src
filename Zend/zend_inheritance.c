@@ -413,7 +413,6 @@ static inheritance_status zend_perform_covariant_class_type_check(
 }
 
 static inheritance_status zend_perform_covariant_type_check(
-		zend_string **unresolved_class,
 		const zend_function *fe, zend_arg_info *fe_arg_info,
 		const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
@@ -440,8 +439,6 @@ static inheritance_status zend_perform_covariant_type_check(
 	}
 
 	if (ZEND_TYPE_HAS_NAME(fe_type)) {
-		*unresolved_class = NULL; // TODO
-
 		zend_string *fe_class_name = resolve_class_name(fe->common.scope, ZEND_TYPE_NAME(fe_type));
 		inheritance_status status = zend_perform_covariant_class_type_check(
 			fe, fe_class_name, proto, proto_type, /* register_unresolved */ 0);
@@ -455,8 +452,6 @@ static inheritance_status zend_perform_covariant_type_check(
 	}
 
 	if (ZEND_TYPE_HAS_LIST(fe_type)) {
-		*unresolved_class = NULL; // TODO
-
 		void *entry;
 		zend_bool all_success = 1;
 
@@ -497,7 +492,6 @@ static inheritance_status zend_perform_covariant_type_check(
 /* }}} */
 
 static inheritance_status zend_do_perform_arg_type_hint_check(
-		zend_string **unresolved_class,
 		const zend_function *fe, zend_arg_info *fe_arg_info,
 		const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
@@ -513,13 +507,12 @@ static inheritance_status zend_do_perform_arg_type_hint_check(
 
 	/* Contravariant type check is performed as a covariant type check with swapped
 	 * argument order. */
-	return zend_perform_covariant_type_check(
-		unresolved_class, proto, proto_arg_info, fe, fe_arg_info);
+	return zend_perform_covariant_type_check(proto, proto_arg_info, fe, fe_arg_info);
 }
 /* }}} */
 
 static inheritance_status zend_do_perform_implementation_check(
-		zend_string **unresolved_class, const zend_function *fe, const zend_function *proto) /* {{{ */
+		const zend_function *fe, const zend_function *proto) /* {{{ */
 {
 	uint32_t i, num_args;
 	inheritance_status status, local_status;
@@ -585,8 +578,7 @@ static inheritance_status zend_do_perform_implementation_check(
 			proto_arg_info = &proto->common.arg_info[proto->common.num_args];
 		}
 
-		local_status = zend_do_perform_arg_type_hint_check(
-			unresolved_class, fe, fe_arg_info, proto, proto_arg_info);
+		local_status = zend_do_perform_arg_type_hint_check(fe, fe_arg_info, proto, proto_arg_info);
 
 		if (UNEXPECTED(local_status != INHERITANCE_SUCCESS)) {
 			if (UNEXPECTED(local_status == INHERITANCE_ERROR)) {
@@ -611,7 +603,7 @@ static inheritance_status zend_do_perform_implementation_check(
 		}
 
 		local_status = zend_perform_covariant_type_check(
-			unresolved_class, fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1);
+			fe, fe->common.arg_info - 1, proto, proto->common.arg_info - 1);
 
 		if (UNEXPECTED(local_status != INHERITANCE_SUCCESS)) {
 			if (UNEXPECTED(local_status == INHERITANCE_ERROR)) {
@@ -770,10 +762,17 @@ static zend_always_inline uint32_t func_lineno(const zend_function *fn) {
 
 static void ZEND_COLD emit_incompatible_method_error(
 		const zend_function *child, const zend_function *parent,
-		inheritance_status status, zend_string *unresolved_class) {
+		inheritance_status status) {
 	zend_string *parent_prototype = zend_get_function_declaration(parent);
 	zend_string *child_prototype = zend_get_function_declaration(child);
 	if (status == INHERITANCE_UNRESOLVED) {
+		/* Fetch the first unresolved class from registered autoloads */
+		zend_string *unresolved_class = NULL;
+		ZEND_HASH_FOREACH_STR_KEY(CG(delayed_autoloads), unresolved_class) {
+			break;
+		} ZEND_HASH_FOREACH_END();
+		ZEND_ASSERT(unresolved_class);
+
 		zend_error_at(E_COMPILE_ERROR, NULL, func_lineno(child),
 			"Could not check compatibility between %s and %s, because class %s is not available",
 			ZSTR_VAL(child_prototype), ZSTR_VAL(parent_prototype), ZSTR_VAL(unresolved_class));
@@ -790,17 +789,13 @@ static void perform_delayable_implementation_check(
 		zend_class_entry *ce, const zend_function *fe,
 		const zend_function *proto)
 {
-	zend_string *unresolved_class;
-	inheritance_status status = zend_do_perform_implementation_check(
-		&unresolved_class, fe, proto);
-
+	inheritance_status status = zend_do_perform_implementation_check(fe, proto);
 	if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
 		if (EXPECTED(status == INHERITANCE_UNRESOLVED)) {
 			add_compatibility_obligation(ce, fe, proto);
 		} else {
 			ZEND_ASSERT(status == INHERITANCE_ERROR);
-			emit_incompatible_method_error(
-				fe, proto, status, unresolved_class);
+			emit_incompatible_method_error(fe, proto, status);
 		}
 	}
 }
@@ -899,10 +894,7 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(z
 
 	if (!checked) {
 		if (check_only) {
-			zend_string *unresolved_class;
-
-			return zend_do_perform_implementation_check(
-				&unresolved_class, child, parent);
+			return zend_do_perform_implementation_check(child, parent);
 		}
 		perform_delayable_implementation_check(ce, child, parent);
 	}
@@ -2331,16 +2323,14 @@ static int check_variance_obligation(zval *zv) {
 			return ZEND_HASH_APPLY_KEEP;
 		}
 	} else if (obligation->type == OBLIGATION_COMPATIBILITY) {
-		zend_string *unresolved_class;
 		inheritance_status status = zend_do_perform_implementation_check(
-			&unresolved_class, obligation->child_fn, obligation->parent_fn);
+			obligation->child_fn, obligation->parent_fn);
 		if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
 			if (EXPECTED(status == INHERITANCE_UNRESOLVED)) {
 				return ZEND_HASH_APPLY_KEEP;
 			}
 			ZEND_ASSERT(status == INHERITANCE_ERROR);
-			emit_incompatible_method_error(
-				obligation->child_fn, obligation->parent_fn, status, unresolved_class);
+			emit_incompatible_method_error(obligation->child_fn, obligation->parent_fn, status);
 		}
 		/* Either the compatibility check was successful or only threw a warning. */
 	} else {
@@ -2403,16 +2393,14 @@ static void report_variance_errors(zend_class_entry *ce) {
 	ZEND_ASSERT(obligations != NULL);
 
 	ZEND_HASH_FOREACH_PTR(obligations, obligation) {
-		inheritance_status status;
-		zend_string *unresolved_class;
-
 		if (obligation->type == OBLIGATION_COMPATIBILITY) {
-			/* Just used to fetch the unresolved_class in this case. */
-			status = zend_do_perform_implementation_check(
-				&unresolved_class, obligation->child_fn, obligation->parent_fn);
+			/* Just used to populate the delayed_autoloads table,
+			 * which will be used when printing the "unresolved" error. */
+			inheritance_status status = zend_do_perform_implementation_check(
+				obligation->child_fn, obligation->parent_fn);
 			ZEND_ASSERT(status == INHERITANCE_UNRESOLVED);
 			emit_incompatible_method_error(
-				obligation->child_fn, obligation->parent_fn, status, unresolved_class);
+				obligation->child_fn, obligation->parent_fn, status);
 		} else if (obligation->type == OBLIGATION_PROPERTY_COMPATIBILITY) {
 			emit_incompatible_property_error(obligation->child_prop, obligation->parent_prop);
 		} else {
