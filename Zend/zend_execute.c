@@ -3057,8 +3057,9 @@ ZEND_API zend_bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference 
 
 	/* The value must satisfy each property type, and coerce to the same value for each property
 	 * type. Remember the first coerced type and value we've seen for this purpose. */
-	zend_property_info *seen_prop = NULL;
-	zval seen_value;
+	zend_property_info *first_prop = NULL;
+	zval coerced_value;
+	ZVAL_UNDEF(&coerced_value);
 
 	ZEND_ASSERT(Z_TYPE_P(zv) != IS_REFERENCE);
 	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
@@ -3069,28 +3070,52 @@ ZEND_API zend_bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference 
 		}
 
 		if (result < 0) {
-			zval tmp;
-			ZVAL_COPY(&tmp, zv);
-			if (!zend_verify_weak_scalar_type_hint(ZEND_TYPE_FULL_MASK(prop->type), &tmp)) {
-				zend_throw_ref_type_error_zval(prop, zv);
-				zval_ptr_dtor(&tmp);
-				return 0;
-			}
-			if (seen_prop) {
-				if (!zend_is_identical(&tmp, &seen_value)) {
-					zend_throw_conflicting_coercion_error(seen_prop, prop, zv);
+			if (!first_prop) {
+				first_prop = prop;
+				ZVAL_COPY(&coerced_value, zv);
+				if (!zend_verify_weak_scalar_type_hint(
+						ZEND_TYPE_FULL_MASK(prop->type), &coerced_value)) {
+					zend_throw_ref_type_error_zval(prop, zv);
+					zval_ptr_dtor(&coerced_value);
 					return 0;
 				}
+			} else if (Z_ISUNDEF(coerced_value)) {
+				/* A previous property did not require coercion, but this one does,
+				 * so they are incompatible. */
+				zend_throw_conflicting_coercion_error(first_prop, prop, zv);
+				return 0;
 			} else {
-				seen_prop = prop;
-				ZVAL_COPY_VALUE(&seen_value, &tmp);
+				zval tmp;
+				ZVAL_COPY(&tmp, zv);
+				if (!zend_verify_weak_scalar_type_hint(ZEND_TYPE_FULL_MASK(prop->type), &tmp)) {
+					zend_throw_ref_type_error_zval(prop, zv);
+					zval_ptr_dtor(&tmp);
+					zval_ptr_dtor(&coerced_value);
+					return 0;
+				}
+				if (!zend_is_identical(&coerced_value, &tmp)) {
+					zend_throw_conflicting_coercion_error(first_prop, prop, zv);
+					zval_ptr_dtor(&tmp);
+					zval_ptr_dtor(&coerced_value);
+					return 0;
+				}
+			}
+		} else {
+			if (!first_prop) {
+				first_prop = prop;
+			} else if (!Z_ISUNDEF(coerced_value)) {
+				/* A previous property required coercion, but this one doesn't,
+				 * so they are incompatible. */
+				zend_throw_conflicting_coercion_error(first_prop, prop, zv);
+				zval_ptr_dtor(&coerced_value);
+				return 0;
 			}
 		}
 	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
 
-	if (seen_prop) {
+	if (!Z_ISUNDEF(coerced_value)) {
 		zval_ptr_dtor(zv);
-		ZVAL_COPY_VALUE(zv, &seen_value);
+		ZVAL_COPY_VALUE(zv, &coerced_value);
 	}
 
 	return 1;
