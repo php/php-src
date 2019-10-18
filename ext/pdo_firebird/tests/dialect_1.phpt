@@ -18,7 +18,7 @@ if (strpos(getenv('PDO_FIREBIRD_TEST_DSN'), 'dialect=1')===false) {
 	  1 as N, 
 	  2.0 as F, 
 	  cast(0.76 as numeric(15, 2)) as K,
-      cast(\'2019-06-12\' as date) as DT	  
+	  cast(\'2019-06-12\' as date) as DT	  
 	FROM RDB$DATABASE';
 	$query = $dbh->prepare($sql);
 	$query->execute();
@@ -29,6 +29,21 @@ if (strpos(getenv('PDO_FIREBIRD_TEST_DSN'), 'dialect=1')===false) {
 	var_dump($row->DT);
 
 	unset($query);
+	
+	$dbh->exec('RECREATE TABLE test_d1(K numeric(15, 2), DT date)');
+	$sql='INSERT INTO test_d1(K, DT) values(?, ?)';
+	$query = $dbh->prepare($sql);
+	$query->execute([0.76, '2019-06-12']);
+	unset($query);
+	
+	$sql='SELECT * FROM test_d1';
+	$query = $dbh->prepare($sql);
+	$query->execute();
+	$row = $query->fetch(\PDO::FETCH_OBJ);
+	var_dump($row->K);
+	var_dump($row->DT);
+	
+	unset($query);
 	unset($dbh);
 	echo "done\n";
 
@@ -36,6 +51,8 @@ if (strpos(getenv('PDO_FIREBIRD_TEST_DSN'), 'dialect=1')===false) {
 --EXPECT--
 int(1)
 string(8) "2.000000"
+string(3) "0.76"
+string(19) "2019-06-12 00:00:00"
 string(3) "0.76"
 string(19) "2019-06-12 00:00:00"
 done
