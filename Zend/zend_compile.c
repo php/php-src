@@ -5567,31 +5567,38 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 		ZEND_TYPE_FULL_MASK(type) |= MAY_BE_NULL;
 	}
 
-	if ((ZEND_TYPE_FULL_MASK(type) & (MAY_BE_ARRAY|MAY_BE_ITERABLE))
-			== (MAY_BE_ARRAY|MAY_BE_ITERABLE)) {
+	uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
+	if ((type_mask & (MAY_BE_ARRAY|MAY_BE_ITERABLE)) == (MAY_BE_ARRAY|MAY_BE_ITERABLE)) {
 		zend_string *type_str = zend_type_to_string(type);
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Type %s contains both iterable and array, which is redundant", ZSTR_VAL(type_str));
 	}
 
-	if ((ZEND_TYPE_FULL_MASK(type) & MAY_BE_ITERABLE)
-			&& zend_type_contains_traversable(type)) {
+	if ((type_mask & MAY_BE_ITERABLE) && zend_type_contains_traversable(type)) {
 		zend_string *type_str = zend_type_to_string(type);
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Type %s contains both iterable and Traversable, which is redundant",
 			ZSTR_VAL(type_str));
 	}
 
-	if ((ZEND_TYPE_FULL_MASK(type) & MAY_BE_OBJECT) && ZEND_TYPE_HAS_CLASS(type)) {
+	if ((type_mask & MAY_BE_OBJECT) && ZEND_TYPE_HAS_CLASS(type)) {
 		zend_string *type_str = zend_type_to_string(type);
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Type %s contains both object and a class type, which is redundant",
 			ZSTR_VAL(type_str));
 	}
 
-	if ((ZEND_TYPE_FULL_MASK(type) & MAY_BE_VOID) &&
-			(ZEND_TYPE_HAS_CLASS(type) || ZEND_TYPE_PURE_MASK(type) != MAY_BE_VOID)) {
+	if ((type_mask & MAY_BE_VOID) && (ZEND_TYPE_HAS_CLASS(type) || type_mask != MAY_BE_VOID)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Void can only be used as a standalone type");
+	}
+
+	if ((type_mask & (MAY_BE_NULL|MAY_BE_FALSE))
+			&& !ZEND_TYPE_HAS_CLASS(type) && !(type_mask & ~(MAY_BE_NULL|MAY_BE_FALSE))) {
+		if (type_mask == MAY_BE_NULL) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Null can not be used as a standalone type");
+		} else {
+			zend_error_noreturn(E_COMPILE_ERROR, "False can not be used as a standalone type");
+		}
 	}
 
 	return type;

@@ -11,7 +11,18 @@ class Test {
     public float|string $e = "5";
 }
 
+function test(
+    int|float $a = 1,
+    int|float $b = 2.0,
+    float|string $c = 3, // Strict typing exception
+    float|string $d = 4.0,
+    float|string $e = "5"
+) {
+    var_dump($a, $b, $c, $d, $e);
+}
+
 var_dump(new Test);
+test();
 
 ?>
 --EXPECT--
@@ -27,3 +38,8 @@ object(Test)#1 (5) {
   ["e"]=>
   string(1) "5"
 }
+int(1)
+float(2)
+float(3)
+float(4)
+string(1) "5"
