@@ -3030,6 +3030,7 @@ static zend_always_inline int i_zend_verify_type_assignable_zval(
 	}
 
 	type_mask = ZEND_TYPE_FULL_MASK(type);
+	ZEND_ASSERT(!(type_mask & MAY_BE_CALLABLE));
 	if (type_mask & MAY_BE_ITERABLE) {
 		return zend_is_iterable(zv);
 	}
@@ -3042,13 +3043,14 @@ static zend_always_inline int i_zend_verify_type_assignable_zval(
 		return 0;
 	}
 
-	/* No weak conversions for arrays and objects */
-	if (type_mask & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
+	/* NULL may be accepted only by nullable hints (this is already checked) */
+	if (zv_type == IS_NULL) {
 		return 0;
 	}
 
-	/* NULL may be accepted only by nullable hints (this is already checked) */
-	if (zv_type == IS_NULL) {
+	/* Does not contain any type to which a coercion is possible */
+	if (!(type_mask & (MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING))
+			&& (type_mask & (MAY_BE_TRUE|MAY_BE_FALSE)) != (MAY_BE_TRUE|MAY_BE_FALSE)) {
 		return 0;
 	}
 
