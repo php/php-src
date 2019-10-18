@@ -653,7 +653,7 @@ static zend_bool is_union_type(zend_type type) {
 	if (ZEND_TYPE_HAS_CLASS(type)) {
 		return type_mask_without_null != 0;
 	}
-	if (type_mask_without_null == (MAY_BE_TRUE|MAY_BE_FALSE)) {
+	if (type_mask_without_null == MAY_BE_BOOL) {
 		return 0;
 	}
 	/* Check that only one bit is set. */
@@ -3059,7 +3059,7 @@ static zend_always_inline int i_zend_verify_type_assignable_zval(
 
 	/* Does not contain any type to which a coercion is possible */
 	if (!(type_mask & (MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING))
-			&& (type_mask & (MAY_BE_TRUE|MAY_BE_FALSE)) != (MAY_BE_TRUE|MAY_BE_FALSE)) {
+			&& (type_mask & MAY_BE_BOOL) != MAY_BE_BOOL) {
 		return 0;
 	}
 

@@ -257,7 +257,7 @@ typedef struct {
 	{ NULL, (_type_mask) }
 
 #define ZEND_TYPE_INIT_CODE(code, allow_null, extra_flags) \
-	ZEND_TYPE_INIT_MASK(((code) == _IS_BOOL ? (MAY_BE_FALSE|MAY_BE_TRUE) : (1 << (code))) \
+	ZEND_TYPE_INIT_MASK(((code) == _IS_BOOL ? MAY_BE_BOOL : (1 << (code))) \
 		| ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags))
 
 #define ZEND_TYPE_INIT_CE(_ce, allow_null, extra_flags) \

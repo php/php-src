@@ -1192,7 +1192,7 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 	if (type_mask & MAY_BE_DOUBLE) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_FLOAT));
 	}
-	if ((type_mask & (MAY_BE_FALSE|MAY_BE_TRUE)) == (MAY_BE_FALSE|MAY_BE_TRUE)) {
+	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_BOOL));
 	} else if (type_mask & MAY_BE_FALSE) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_FALSE));
