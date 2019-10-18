@@ -5500,7 +5500,8 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 		for (uint32_t i = 0; i < list->children; i++) {
 			zend_ast *type_ast = list->child[i];
 			zend_type single_type = zend_compile_single_typename(type_ast);
-			uint32_t type_mask_overlap = ZEND_TYPE_PURE_MASK(type) & ZEND_TYPE_PURE_MASK(type);
+			uint32_t type_mask_overlap =
+				ZEND_TYPE_PURE_MASK(type) & ZEND_TYPE_PURE_MASK(single_type);
 			if (type_mask_overlap) {
 				// TODO: Iterable requires special handling
 				zend_type overlap_type = ZEND_TYPE_INIT_MASK(type_mask_overlap);
