@@ -1314,6 +1314,23 @@ static ZEND_COLD void zend_ast_export_class_no_header(smart_str *str, zend_ast_d
 	smart_str_appends(str, "}");
 }
 
+static ZEND_COLD void zend_ast_export_type(smart_str *str, zend_ast *ast, int indent) {
+	if (ast->kind == ZEND_AST_TYPE_UNION) {
+		zend_ast_list *list = zend_ast_get_list(ast);
+		for (uint32_t i = 0; i < list->children; i++) {
+			if (i != 0) {
+				smart_str_appendc(str, '|');
+			}
+			zend_ast_export_type(str, list->child[i], indent);
+		}
+		return;
+	}
+	if (ast->attr & ZEND_TYPE_NULLABLE) {
+		smart_str_appendc(str, '?');
+	}
+	zend_ast_export_ns_name(str, ast, 0, indent);
+}
+
 #define BINARY_OP(_op, _p, _pl, _pr) do { \
 		op = _op; \
 		p = _p; \
@@ -1423,10 +1440,7 @@ tail_call:
 			zend_ast_export_ex(str, decl->child[1], 0, indent);
 			if (decl->child[3]) {
 				smart_str_appends(str, ": ");
-				if (decl->child[3]->attr & ZEND_TYPE_NULLABLE) {
-					smart_str_appendc(str, '?');
-				}
-				zend_ast_export_ns_name(str, decl->child[3], 0, indent);
+				zend_ast_export_type(str, decl->child[3], indent);
 			}
 			if (decl->child[2]) {
 				if (decl->kind == ZEND_AST_ARROW_FUNC) {
@@ -1516,11 +1530,7 @@ simple_list:
 			}
 
 			if (type_ast) {
-				if (type_ast->attr & ZEND_TYPE_NULLABLE) {
-					smart_str_appendc(str, '?');
-				}
-				zend_ast_export_ns_name(
-					str, type_ast, 0, indent);
+				zend_ast_export_type(str, type_ast, indent);
 				smart_str_appendc(str, ' ');
 			}
 
@@ -1990,10 +2000,7 @@ simple_list:
 			break;
 		case ZEND_AST_PARAM:
 			if (ast->child[0]) {
-				if (ast->child[0]->attr & ZEND_TYPE_NULLABLE) {
-					smart_str_appendc(str, '?');
-				}
-				zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+				zend_ast_export_type(str, ast->child[0], indent);
 				smart_str_appendc(str, ' ');
 			}
 			if (ast->attr & ZEND_PARAM_REF) {
