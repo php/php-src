@@ -8,4 +8,4 @@ function test(): Foo|int|FOO {
 
 ?>
 --EXPECTF--
-Fatal error: Type FOO is redundant in %s on line %d
+Fatal error: Duplicate type FOO is redundant in %s on line %d

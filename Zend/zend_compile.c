@@ -1135,7 +1135,7 @@ static zend_string *add_type_string(zend_string *type, zend_string *new_type) {
 	result = zend_string_alloc(ZSTR_LEN(type) + ZSTR_LEN(new_type) + 1, 0);
 	memcpy(ZSTR_VAL(result), ZSTR_VAL(type), ZSTR_LEN(type));
 	ZSTR_VAL(result)[ZSTR_LEN(type)] = '|';
-	memcpy(ZSTR_VAL(result) + ZSTR_LEN(type), ZSTR_VAL(new_type), ZSTR_LEN(new_type));
+	memcpy(ZSTR_VAL(result) + ZSTR_LEN(type) + 1, ZSTR_VAL(new_type), ZSTR_LEN(new_type));
 	ZSTR_VAL(result)[ZSTR_LEN(type) + ZSTR_LEN(new_type) + 1] = '\0';
 	zend_string_release(type);
 	return result;
@@ -5503,11 +5503,10 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 			uint32_t type_mask_overlap =
 				ZEND_TYPE_PURE_MASK(type) & ZEND_TYPE_PURE_MASK(single_type);
 			if (type_mask_overlap) {
-				// TODO: Iterable requires special handling
 				zend_type overlap_type = ZEND_TYPE_INIT_MASK(type_mask_overlap);
 				zend_string *overlap_type_str = zend_type_to_string(overlap_type);
 				zend_error_noreturn(E_COMPILE_ERROR,
-					"Type %s is redundant", ZSTR_VAL(overlap_type_str));
+					"Duplicate type %s is redundant", ZSTR_VAL(overlap_type_str));
 			}
 			ZEND_TYPE_FULL_MASK(type) |= ZEND_TYPE_PURE_MASK(single_type);
 
@@ -5539,7 +5538,7 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 								ZEND_TYPE_NAME(single_type))) {
 							zend_string *single_type_str = zend_type_to_string(single_type);
 							zend_error_noreturn(E_COMPILE_ERROR,
-								"Type %s is redundant", ZSTR_VAL(single_type_str));
+								"Duplicate type %s is redundant", ZSTR_VAL(single_type_str));
 						}
 					}
 				}
@@ -5551,6 +5550,13 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 
 	if (allow_null) {
 		ZEND_TYPE_FULL_MASK(type) |= MAY_BE_NULL;
+	}
+
+	if ((ZEND_TYPE_FULL_MASK(type) & (MAY_BE_ARRAY|MAY_BE_ITERABLE))
+			== (MAY_BE_ARRAY|MAY_BE_ITERABLE)) {
+		zend_string *type_str = zend_type_to_string(type);
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Type %s contains both iterable and array, which is redundant", ZSTR_VAL(type_str));
 	}
 
 	if ((ZEND_TYPE_FULL_MASK(type) & MAY_BE_OBJECT) && ZEND_TYPE_HAS_CLASS(type)) {

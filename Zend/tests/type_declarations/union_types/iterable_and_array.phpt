@@ -7,5 +7,5 @@ function test(): iterable|array {
 }
 
 ?>
---EXPECT--
-TODO
+--EXPECTF--
+Fatal error: Type iterable|array contains both iterable and array, which is redundant in %s on line %d

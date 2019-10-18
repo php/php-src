@@ -8,4 +8,4 @@ function test(): bool|false {
 
 ?>
 --EXPECTF--
-Fatal error: Type bool is redundant in %s on line %d
+Fatal error: Duplicate type false is redundant in %s on line %d
