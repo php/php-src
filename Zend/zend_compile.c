@@ -5484,6 +5484,21 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 	}
 }
 
+static zend_bool zend_type_contains_traversable(zend_type type) {
+	if (ZEND_TYPE_HAS_LIST(type)) {
+		void *entry;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), entry) {
+			ZEND_ASSERT(ZEND_TYPE_LIST_IS_NAME(entry));
+			if (zend_string_equals_literal_ci(ZEND_TYPE_LIST_GET_NAME(entry), "Traversable")) {
+				return 1;
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+	} else if (ZEND_TYPE_HAS_NAME(type)) {
+		return zend_string_equals_literal_ci(ZEND_TYPE_NAME(type), "Traversable");
+	}
+	return 0;
+}
+
 // TODO: Ideally we'd canonicalize "iterable" into "array|Traversable" and essentially
 // treat it as a built-in type alias.
 static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null) /* {{{ */
@@ -5557,6 +5572,14 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 		zend_string *type_str = zend_type_to_string(type);
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Type %s contains both iterable and array, which is redundant", ZSTR_VAL(type_str));
+	}
+
+	if ((ZEND_TYPE_FULL_MASK(type) & MAY_BE_ITERABLE)
+			&& zend_type_contains_traversable(type)) {
+		zend_string *type_str = zend_type_to_string(type);
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Type %s contains both iterable and Traversable, which is redundant",
+			ZSTR_VAL(type_str));
 	}
 
 	if ((ZEND_TYPE_FULL_MASK(type) & MAY_BE_OBJECT) && ZEND_TYPE_HAS_CLASS(type)) {
