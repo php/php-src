@@ -791,58 +791,45 @@ ZEND_API ZEND_COLD void zend_verify_arg_error(
 
 static zend_bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg)
 {
+	zend_long lval;
+	double dval;
+	zend_string *str;
+	zend_bool bval;
+
 	/* Type preference order: int -> float -> string -> bool */
 	if (type_mask & MAY_BE_LONG) {
-		zend_long dest;
-
 		/* For a int|float union type and string value,
-		 * determine type to choose by is_numeric_string() semantics. */
+		 * determine chosen type by is_numeric_string() semantics. */
 		if ((type_mask & MAY_BE_DOUBLE) && Z_TYPE_P(arg) == IS_STRING) {
-			zend_long lval;
-			double dval;
 			zend_uchar type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, -1);
 			if (type == IS_LONG) {
+				zend_string_release(Z_STR_P(arg));
 				ZVAL_LONG(arg, lval);
 				return 1;
 			}
 			if (type == IS_DOUBLE) {
+				zend_string_release(Z_STR_P(arg));
 				ZVAL_DOUBLE(arg, dval);
 				return 1;
 			}
-			return 0;
+		} else if (zend_parse_arg_long_weak(arg, &lval)) {
+			zval_ptr_dtor(arg);
+			ZVAL_LONG(arg, lval);
+			return 1;
 		}
-
-		if (!zend_parse_arg_long_weak(arg, &dest)) {
-			return 0;
-		}
+	}
+	if ((type_mask & MAY_BE_DOUBLE) && zend_parse_arg_double_weak(arg, &dval)) {
 		zval_ptr_dtor(arg);
-		ZVAL_LONG(arg, dest);
+		ZVAL_DOUBLE(arg, dval);
 		return 1;
 	}
-	if (type_mask & MAY_BE_DOUBLE) {
-		double dest;
-
-		if (!zend_parse_arg_double_weak(arg, &dest)) {
-			return 0;
-		}
-		zval_ptr_dtor(arg);
-		ZVAL_DOUBLE(arg, dest);
-		return 1;
-	}
-	if (type_mask & MAY_BE_STRING) {
-		zend_string *dest;
-
+	if ((type_mask & MAY_BE_STRING) && zend_parse_arg_str_weak(arg, &str)) {
 		/* on success "arg" is converted to IS_STRING */
-		return zend_parse_arg_str_weak(arg, &dest);
+		return 1;
 	}
-	if ((type_mask & (MAY_BE_TRUE|MAY_BE_FALSE)) == (MAY_BE_TRUE|MAY_BE_FALSE)) {
-		zend_bool dest;
-
-		if (!zend_parse_arg_bool_weak(arg, &dest)) {
-			return 0;
-		}
+	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, &bval)) {
 		zval_ptr_dtor(arg);
-		ZVAL_BOOL(arg, dest);
+		ZVAL_BOOL(arg, bval);
 		return 1;
 	}
 	return 0;
@@ -852,41 +839,48 @@ static zend_bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg
 /* Used to sanity-check internal arginfo types without performing any actual type conversions. */
 static zend_bool zend_verify_weak_scalar_type_hint_no_sideeffect(uint32_t type_mask, zval *arg)
 {
+	zend_long lval;
+	double dval;
+	zend_bool bval;
+
 	if (type_mask & MAY_BE_LONG) {
-		zend_long dest;
 		if (Z_TYPE_P(arg) == IS_STRING) {
 			/* Handle this case separately to avoid the "non well-formed" warning */
-			double dval;
 			zend_uchar type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, &dval, 1);
 			if (type == IS_LONG) {
 				return 1;
 			}
 			if (type == IS_DOUBLE) {
-				return (type_mask & MAY_BE_DOUBLE)
-					|| (!zend_isnan(dval) && ZEND_DOUBLE_FITS_LONG(dval));
+				if ((type_mask & MAY_BE_DOUBLE)
+						|| (!zend_isnan(dval) && ZEND_DOUBLE_FITS_LONG(dval))) {
+					return 1;
+				}
 
 			}
-			return 0;
 		}
-		return zend_parse_arg_long_weak(arg, &dest);
+		if (zend_parse_arg_long_weak(arg, &lval)) {
+			return 1;
+		}
 	}
 	if (type_mask & MAY_BE_DOUBLE) {
-		double dest;
 		if (Z_TYPE_P(arg) == IS_STRING) {
 			/* Handle this case separately to avoid the "non well-formed" warning */
-			return is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, NULL, 1) != 0;
+			if (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), NULL, NULL, 1) != 0) {
+				return 1;
+			}
 		}
-		return zend_parse_arg_double_weak(arg, &dest);
+		if (zend_parse_arg_double_weak(arg, &dval)) {
+			return 1;
+		}
 	}
-	if (type_mask & MAY_BE_STRING) {
-		/* We don't call cast_object here, because this check must be side-effect free. As this
-		 * is only used for a sanity check of arginfo/zpp consistency, it's okay if we accept
-		 * more than actually allowed here. */
-		return Z_TYPE_P(arg) < IS_STRING || Z_TYPE_P(arg) == IS_OBJECT;
+	/* We don't call cast_object here, because this check must be side-effect free. As this
+	 * is only used for a sanity check of arginfo/zpp consistency, it's okay if we accept
+	 * more than actually allowed here. */
+	if ((type_mask & MAY_BE_STRING) && (Z_TYPE_P(arg) < IS_STRING || Z_TYPE_P(arg) == IS_OBJECT)) {
+		return 1;
 	}
-	if ((type_mask & (MAY_BE_TRUE|MAY_BE_FALSE)) == (MAY_BE_TRUE|MAY_BE_FALSE)) {
-		zend_bool dest;
-		return zend_parse_arg_bool_weak(arg, &dest);
+	if ((type_mask & MAY_BE_BOOL) == MAY_BE_BOOL && zend_parse_arg_bool_weak(arg, &bval)) {
+		return 1;
 	}
 	return 0;
 }

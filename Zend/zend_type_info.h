@@ -25,6 +25,7 @@
 #define MAY_BE_NULL		            (1 << IS_NULL)
 #define MAY_BE_FALSE	            (1 << IS_FALSE)
 #define MAY_BE_TRUE		            (1 << IS_TRUE)
+#define MAY_BE_BOOL                 (MAY_BE_FALSE|MAY_BE_TRUE)
 #define MAY_BE_LONG		            (1 << IS_LONG)
 #define MAY_BE_DOUBLE	            (1 << IS_DOUBLE)
 #define MAY_BE_STRING	            (1 << IS_STRING)
