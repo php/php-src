@@ -903,20 +903,13 @@ ZEND_COLD zend_never_inline void zend_verify_property_type_error(zend_property_i
 
 static zend_class_entry *resolve_single_class_type(zend_string *name, zend_class_entry *self_ce) {
 	if (zend_string_equals_literal_ci(name, "self")) {
-		// TODO: Eliminate this exception!
 		/* We need to explicitly check for this here, to avoid updating the type in the trait and
 		 * later using the wrong "self" when the trait is used in a class. */
 		if (UNEXPECTED((self_ce->ce_flags & ZEND_ACC_TRAIT) != 0)) {
-			zend_throw_error(NULL, "Cannot write a value to a 'self' typed static property of a trait");
 			return NULL;
 		}
 		return self_ce;
 	} else if (zend_string_equals_literal_ci(name, "parent")) {
-		// TODO: Eliminate this exception!
-		if (UNEXPECTED(!self_ce->parent)) {
-			zend_throw_error(NULL, "Cannot access parent:: when current class scope has no parent");
-			return NULL;
-		}
 		return self_ce->parent;
 	} else {
 		return zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
