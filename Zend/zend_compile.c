@@ -1213,7 +1213,7 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 			return nullable_str;
 		}
 
-		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_NULL));
+		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_NULL_LOWERCASE));
 	}
 	return str;
 }
