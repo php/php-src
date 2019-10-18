@@ -643,6 +643,23 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_throw_non_object_erro
 	}
 }
 
+/* Test used to preserve old error messages for non-union types.
+ * We might want to canonicalize all type errors instead. */
+static zend_bool is_union_type(zend_type type) {
+	if (ZEND_TYPE_HAS_LIST(type)) {
+		return 1;
+	}
+	uint32_t type_mask_without_null = ZEND_TYPE_PURE_MASK_WITHOUT_NULL(type);
+	if (ZEND_TYPE_HAS_CLASS(type)) {
+		return type_mask_without_null != 0;
+	}
+	if (type_mask_without_null == (MAY_BE_TRUE|MAY_BE_FALSE)) {
+		return 0;
+	}
+	/* Check that only one bit is set. */
+	return (type_mask_without_null & (type_mask_without_null - 1)) != 0;
+}
+
 static ZEND_COLD void zend_verify_type_error_common(
 		const zend_function *zf, const zend_arg_info *arg_info,
 		void **cache_slot, zval *value,
@@ -650,7 +667,6 @@ static ZEND_COLD void zend_verify_type_error_common(
 		zend_string **need_msg, const char **given_msg, const char **given_kind)
 {
 	smart_str str = {0};
-	zend_bool is_interface = 0;
 	*fname = ZSTR_VAL(zf->common.function_name);
 	if (zf->common.scope) {
 		*fsep =  "::";
@@ -660,8 +676,13 @@ static ZEND_COLD void zend_verify_type_error_common(
 		*fclass = "";
 	}
 
-	// TODO: This code is broken for now.
-	if (ZEND_TYPE_HAS_CLASS(arg_info->type)) {
+	if (is_union_type(arg_info->type)) {
+		zend_string *type_str = zend_type_to_string(arg_info->type);
+		smart_str_appends(&str, "be of type ");
+		smart_str_append(&str, type_str);
+		zend_string_release(type_str);
+	} else if (ZEND_TYPE_HAS_CLASS(arg_info->type)) {
+		zend_bool is_interface = 0;
 		zend_class_entry *ce = *cache_slot;
 		if (!ce) {
 			ce = zend_fetch_class(ZEND_TYPE_NAME(arg_info->type),
@@ -680,6 +701,10 @@ static ZEND_COLD void zend_verify_type_error_common(
 			smart_str_appends(&str, "be an instance of ");
 			smart_str_append(&str, ZEND_TYPE_NAME(arg_info->type));
 		}
+
+		if (ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
+			smart_str_appends(&str, is_interface ? " or be null" : " or null");
+		}
 	} else {
 		uint32_t type_mask = ZEND_TYPE_PURE_MASK_WITHOUT_NULL(arg_info->type);
 		switch (type_mask) {
@@ -694,6 +719,7 @@ static ZEND_COLD void zend_verify_type_error_common(
 				break;
 			default:
 			{
+				/* Hack to print the type without null */
 				zend_type type = arg_info->type;
 				ZEND_TYPE_FULL_MASK(type) &= ~MAY_BE_NULL;
 				zend_string *type_str = zend_type_to_string(type);
@@ -703,10 +729,10 @@ static ZEND_COLD void zend_verify_type_error_common(
 				break;
 			}
 		}
-	}
 
-	if (ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
-		smart_str_appends(&str, is_interface ? " or be null" : " or null");
+		if (ZEND_TYPE_ALLOW_NULL(arg_info->type)) {
+			smart_str_appends(&str, " or null");
+		}
 	}
 
 	*need_msg = smart_str_extract(&str);
