@@ -67,14 +67,14 @@ try {
 ?>
 --EXPECTF--
 Does A implement A? 
-   - Using object argument: Interface A is a Class
-   - Using string argument: Interface A is a Class
+   - Using object argument: A is not an interface
+   - Using string argument: A is not an interface
 Does A implement B? 
-   - Using object argument: Interface B is a Class
-   - Using string argument: Interface B is a Class
+   - Using object argument: B is not an interface
+   - Using string argument: B is not an interface
 Does A implement C? 
-   - Using object argument: Interface C is a Class
-   - Using string argument: Interface C is a Class
+   - Using object argument: C is not an interface
+   - Using string argument: C is not an interface
 Does A implement I1? 
    - Using object argument: bool(true)
    - Using string argument: bool(true)
@@ -82,14 +82,14 @@ Does A implement I2?
    - Using object argument: bool(false)
    - Using string argument: bool(false)
 Does B implement A? 
-   - Using object argument: Interface A is a Class
-   - Using string argument: Interface A is a Class
+   - Using object argument: A is not an interface
+   - Using string argument: A is not an interface
 Does B implement B? 
-   - Using object argument: Interface B is a Class
-   - Using string argument: Interface B is a Class
+   - Using object argument: B is not an interface
+   - Using string argument: B is not an interface
 Does B implement C? 
-   - Using object argument: Interface C is a Class
-   - Using string argument: Interface C is a Class
+   - Using object argument: C is not an interface
+   - Using string argument: C is not an interface
 Does B implement I1? 
    - Using object argument: bool(true)
    - Using string argument: bool(true)
@@ -97,14 +97,14 @@ Does B implement I2?
    - Using object argument: bool(false)
    - Using string argument: bool(false)
 Does C implement A? 
-   - Using object argument: Interface A is a Class
-   - Using string argument: Interface A is a Class
+   - Using object argument: A is not an interface
+   - Using string argument: A is not an interface
 Does C implement B? 
-   - Using object argument: Interface B is a Class
-   - Using string argument: Interface B is a Class
+   - Using object argument: B is not an interface
+   - Using string argument: B is not an interface
 Does C implement C? 
-   - Using object argument: Interface C is a Class
-   - Using string argument: Interface C is a Class
+   - Using object argument: C is not an interface
+   - Using string argument: C is not an interface
 Does C implement I1? 
    - Using object argument: bool(true)
    - Using string argument: bool(true)
@@ -112,14 +112,14 @@ Does C implement I2?
    - Using object argument: bool(true)
    - Using string argument: bool(true)
 Does I1 implement A? 
-   - Using object argument: Interface A is a Class
-   - Using string argument: Interface A is a Class
+   - Using object argument: A is not an interface
+   - Using string argument: A is not an interface
 Does I1 implement B? 
-   - Using object argument: Interface B is a Class
-   - Using string argument: Interface B is a Class
+   - Using object argument: B is not an interface
+   - Using string argument: B is not an interface
 Does I1 implement C? 
-   - Using object argument: Interface C is a Class
-   - Using string argument: Interface C is a Class
+   - Using object argument: C is not an interface
+   - Using string argument: C is not an interface
 Does I1 implement I1? 
    - Using object argument: bool(true)
    - Using string argument: bool(true)
@@ -127,14 +127,14 @@ Does I1 implement I2?
    - Using object argument: bool(false)
    - Using string argument: bool(false)
 Does I2 implement A? 
-   - Using object argument: Interface A is a Class
-   - Using string argument: Interface A is a Class
+   - Using object argument: A is not an interface
+   - Using string argument: A is not an interface
 Does I2 implement B? 
-   - Using object argument: Interface B is a Class
-   - Using string argument: Interface B is a Class
+   - Using object argument: B is not an interface
+   - Using string argument: B is not an interface
 Does I2 implement C? 
-   - Using object argument: Interface C is a Class
-   - Using string argument: Interface C is a Class
+   - Using object argument: C is not an interface
+   - Using string argument: C is not an interface
 Does I2 implement I1? 
    - Using object argument: bool(true)
    - Using string argument: bool(true)

@@ -5140,7 +5140,7 @@ ZEND_METHOD(reflection_class, implementsInterface)
 
 	if (!(interface_ce->ce_flags & ZEND_ACC_INTERFACE)) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Interface %s is a Class", ZSTR_VAL(interface_ce->name));
+				"%s is not an interface", ZSTR_VAL(interface_ce->name));
 		return;
 	}
 	RETURN_BOOL(instanceof_function(ce, interface_ce));
