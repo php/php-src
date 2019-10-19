@@ -122,6 +122,11 @@ static void com_write_dimension(zend_object *object, zval *offset, zval *value)
 
 	obj = (php_com_dotnet_object*) object;
 
+	if (offset == NULL) {
+		php_com_throw_exception(DISP_E_BADINDEX, "appending to variants is not supported");
+		return;
+	}
+
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		ZVAL_COPY_VALUE(&args[0], offset);
 		ZVAL_COPY_VALUE(&args[1], value);
