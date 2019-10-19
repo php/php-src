@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0RC5
 
+- COM:
+  . Fixed bug #78694 (Appending to a variant array causes segfault). (cmb)
+
 - Date:
   . Fixed bug #70153 (\DateInterval incorrectly unserialized). (Maksim Iakunin)
 
