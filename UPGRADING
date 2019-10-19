@@ -673,7 +673,7 @@ PHP 7.4 UPGRADE NOTES
     generated for exceptions.
 
 - opcache.preload_user
-  . New INI directive to specifiy the user account under which preloading code
+  . New INI directive to specify the user account under which preloading code
     is executed, if it was to be run as root otherwise (which is not allowed
     for security reasons).
 
@@ -702,7 +702,7 @@ PHP 7.4 UPGRADE NOTES
 
 - The OpenSSL default config path has been changed to 
   "C:\Program Files\Common Files\SSL\openssl.cnf" and
-  "C:\Program Files (x86)\Common Files\SSL\openssl.cnf", repectively.
+  "C:\Program Files (x86)\Common Files\SSL\openssl.cnf", respectively.
 
 ========================================
 13. Migration to pkg-config
