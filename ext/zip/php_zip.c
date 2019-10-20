@@ -110,6 +110,10 @@ static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 		return path + 1;
 	}
 
+	if (path_len < 1 && path[0] == '.' && IS_SLASH(path[1])) {
+		return path + 2;
+	}
+
 	i = path_len;
 
 	while (1) {
@@ -121,8 +125,8 @@ static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 			return path;
 		}
 
-		if (i >= 2 && (path[i -1] == '.' || path[i -1] == ':')) {
-			/* i is the position of . or :, add 1 for / */
+		if ( (i >= 2 && path[i -1] == '.') || (i == 2 && path[i -1] == ':') ) {
+			/* i is the position of . or : (in Windows absolute paths), add 1 for / */
 			path_begin = path + i + 1;
 			break;
 		}
