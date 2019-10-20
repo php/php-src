@@ -74,22 +74,22 @@ function sodium_crypto_kx_client_session_keys(string $client_keypair, string $se
 
 function sodium_crypto_kx_server_session_keys(string $server_keypair, string $client_key): array {}
 
-function sodium_crypto_generichash(string $string, string $key = UNKNOWN, int $length = UNKOWN): string {}
+function sodium_crypto_generichash(string $string, string $key = "", int $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
 
 function sodium_crypto_generichash_keygen(): string {}
 
-function sodium_crypto_generichash_init(string $key = UNKNOWN, int $length = UNKNOWN): string {}
+function sodium_crypto_generichash_init(string $key = "", int $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
 
 function sodium_crypto_generichash_update(string &$state, string $string): bool {}
 
-function sodium_crypto_generichash_final(string &$state, $length = UNKNOWN): string {}
+function sodium_crypto_generichash_final(string &$state, $length = SODIUM_CRYPTO_GENERICHASH_BYTES): string {}
 
 function sodium_crypto_kdf_derive_from_key(int $subkey_len, int $subkey_id, string $context, string $key): string {}
 
 function sodium_crypto_kdf_keygen(): string {}
 
 #ifdef crypto_pwhash_SALTBYTES
-function sodium_crypto_pwhash(int $length, string $password, string $salt, int $opslimit, int $memlimit, int $alg = UNKNOWN): string {}
+function sodium_crypto_pwhash(int $length, string $password, string $salt, int $opslimit, int $memlimit, int $alg = SODIUM_CRYPTO_PWHASH_ALG_DEFAULT): string {}
 
 function sodium_crypto_pwhash_str(string $password, int $opslimit, int $memlimit): string {}
 
@@ -122,12 +122,12 @@ function sodium_crypto_secretstream_xchacha20poly1305_keygen(): string {}
 
 function sodium_crypto_secretstream_xchacha20poly1305_init_push(string $key): array {}
 
-function sodium_crypto_secretstream_xchacha20poly1305_push(string &$state, string $string_1, string $string_2 = UNKNOWN, int $long = UNKNOWN): string {}
+function sodium_crypto_secretstream_xchacha20poly1305_push(string &$state, string $msg, string $ad  = "", int $tag  = SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_MESSAGE): string {}
 
 function sodium_crypto_secretstream_xchacha20poly1305_init_pull(string $string, string $key): string {}
 
 /** @return array|false */
-function sodium_crypto_secretstream_xchacha20poly1305_pull(string &$state, string $string_1, string $string_2 = UNKNOWN) {}
+function sodium_crypto_secretstream_xchacha20poly1305_pull(string &$state, string $c, string $ad  = "") {}
 
 function sodium_crypto_secretstream_xchacha20poly1305_rekey(string &$state): void {}
 #endif
@@ -183,12 +183,12 @@ function sodium_unpad(string $string, int $length): string {}
 
 function sodium_bin2hex(string $string): string {}
 
-function sodium_hex2bin(string $string_1, $string_2 = UNKNOWN): string {}
+function sodium_hex2bin(string $string, $ignore  = ""): string {}
 
 #ifdef sodium_base64_VARIANT_ORIGINAL
 function sodium_bin2base64(string $string, int $id): string {}
 
-function sodium_base642bin(string $string_1, int $id, string $string_2 = UNKNOWN): string {}
+function sodium_base642bin(string $string, int $id, string $ignore  = ""): string {}
 #endif
 
 function sodium_crypto_scalarmult_base(string $key): string {}
