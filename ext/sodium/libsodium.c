@@ -32,189 +32,12 @@
 
 static zend_class_entry *sodium_exception_ce;
 
-ZEND_BEGIN_ARG_INFO_EX(AI_None, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_FirstArgByReference, 0, 0, 1)
-	ZEND_ARG_INFO(1, reference)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_String, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_StringRef, 0, 0, 1)
-	ZEND_ARG_INFO(1, string)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_TwoStrings, 0, 0, 2)
-	ZEND_ARG_INFO(0, string_1)
-	ZEND_ARG_INFO(0, string_2)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_StringAndMaybeString, 0, 0, 1)
-	ZEND_ARG_INFO(0, string_1)
-	/* optional */
-	ZEND_ARG_INFO(0, string_2)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_StringAndIdAndMaybeString, 0, 0, 2)
-	ZEND_ARG_INFO(0, string_1)
-	ZEND_ARG_INFO(0, id)
-	/* optional */
-	ZEND_ARG_INFO(0, string_2)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_StringRefAndString, 0, 0, 2)
-	ZEND_ARG_INFO(1, string_1)
-	ZEND_ARG_INFO(0, string_2)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_StringAndKey, 0, 0, 2)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_StringAndLength, 0, 0, 2)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_StringAndId, 0, 0, 2)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, id)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_StringAndKeyPair, 0, 0, 2)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, keypair)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_SignatureAndStringAndKey, 0, 0, 3)
-	ZEND_ARG_INFO(0, signature)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_Key, 0, 0, 1)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_SecretKeyAndPublicKey, 0, 0, 2)
-	ZEND_ARG_INFO(0, secret_key)
-	ZEND_ARG_INFO(0, public_key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_LengthAndNonceAndKey, 0, 0, 3)
-	ZEND_ARG_INFO(0, length)
-	ZEND_ARG_INFO(0, nonce)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_StringAndNonceAndKey, 0, 0, 3)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, nonce)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_StringAndNonceAndKeyPair, 0, 0, 3)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, nonce)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_StringAndMaybeKeyAndLength, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	/* optional */
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_LengthAndPasswordAndSaltAndOpsLimitAndMemLimit, 0, 0, 5)
-	ZEND_ARG_INFO(0, length)
-	ZEND_ARG_INFO(0, password)
-	ZEND_ARG_INFO(0, salt)
-	ZEND_ARG_INFO(0, opslimit)
-	ZEND_ARG_INFO(0, memlimit)
-	/* optional */
-	ZEND_ARG_INFO(0, alg)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_PasswordAndOpsLimitAndMemLimit, 0, 0, 3)
-	ZEND_ARG_INFO(0, password)
-	ZEND_ARG_INFO(0, opslimit)
-	ZEND_ARG_INFO(0, memlimit)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_HashAndPassword, 0, 0, 2)
-	ZEND_ARG_INFO(0, hash)
-	ZEND_ARG_INFO(0, password)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_StringAndADAndNonceAndKey, 0, 0, 4)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, ad)
-	ZEND_ARG_INFO(0, nonce)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_StateByReference, 0, 0, 1)
-	ZEND_ARG_INFO(1, state)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_StateByReferenceAndStringAndMaybeStringAndLong, 0, 0, 2)
-	ZEND_ARG_INFO(1, state)
-	ZEND_ARG_INFO(0, string)
-	/* optional */
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, long)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_StateByReferenceAndStringAndMaybeString, 0, 0, 2)
-	ZEND_ARG_INFO(1, state)
-	ZEND_ARG_INFO(0, string)
-	/* optional */
-	ZEND_ARG_INFO(0, string)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_StateByReferenceAndMaybeLength, 0, 0, 1)
-	ZEND_ARG_INFO(1, state)
-	/* optional */
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_StateByReferenceAndString, 0, 0, 2)
-	ZEND_ARG_INFO(1, state)
-	ZEND_ARG_INFO(0, string)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_MaybeKeyAndLength, 0, 0, 0)
-	/* optional */
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_KXClientSession, 0, 0, 2)
-	ZEND_ARG_INFO(0, client_keypair)
-	ZEND_ARG_INFO(0, server_key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_KXServerSession, 0, 0, 2)
-	ZEND_ARG_INFO(0, server_keypair)
-	ZEND_ARG_INFO(0, client_key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(AI_KDF, 0, 0, 4)
-	ZEND_ARG_INFO(0, subkey_len)
-	ZEND_ARG_INFO(0, subkey_id)
-	ZEND_ARG_INFO(0, context)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
 #if (defined(__amd64) || defined(__amd64__) || defined(__x86_64__) || defined(__i386__) || \
 	 defined(_M_AMD64) || defined(_M_IX86))
 # define HAVE_AESGCM 1
 #endif
+
+#include "libsodium_arginfo.h"
 
 #ifndef crypto_aead_chacha20poly1305_IETF_KEYBYTES
 # define crypto_aead_chacha20poly1305_IETF_KEYBYTES crypto_aead_chacha20poly1305_KEYBYTES
@@ -244,114 +67,114 @@ ZEND_END_ARG_INFO()
 #endif
 
 static const zend_function_entry sodium_functions[] = {
-	PHP_FE(sodium_crypto_aead_aes256gcm_is_available, AI_None)
+	PHP_FE(sodium_crypto_aead_aes256gcm_is_available, arginfo_sodium_crypto_aead_aes256gcm_is_available)
 #ifdef HAVE_AESGCM
-	PHP_FE(sodium_crypto_aead_aes256gcm_decrypt, AI_StringAndADAndNonceAndKey)
-	PHP_FE(sodium_crypto_aead_aes256gcm_encrypt, AI_StringAndADAndNonceAndKey)
-	PHP_FE(sodium_crypto_aead_aes256gcm_keygen, AI_None)
+	PHP_FE(sodium_crypto_aead_aes256gcm_decrypt, arginfo_sodium_crypto_aead_aes256gcm_decrypt)
+	PHP_FE(sodium_crypto_aead_aes256gcm_encrypt, arginfo_sodium_crypto_aead_aes256gcm_encrypt)
+	PHP_FE(sodium_crypto_aead_aes256gcm_keygen, arginfo_sodium_crypto_aead_aes256gcm_keygen)
 #endif
-	PHP_FE(sodium_crypto_aead_chacha20poly1305_decrypt, AI_StringAndADAndNonceAndKey)
-	PHP_FE(sodium_crypto_aead_chacha20poly1305_encrypt, AI_StringAndADAndNonceAndKey)
-	PHP_FE(sodium_crypto_aead_chacha20poly1305_keygen, AI_None)
-	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_decrypt, AI_StringAndADAndNonceAndKey)
-	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_encrypt, AI_StringAndADAndNonceAndKey)
-	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_keygen, AI_None)
+	PHP_FE(sodium_crypto_aead_chacha20poly1305_decrypt, arginfo_sodium_crypto_aead_chacha20poly1305_decrypt)
+	PHP_FE(sodium_crypto_aead_chacha20poly1305_encrypt, arginfo_sodium_crypto_aead_chacha20poly1305_encrypt)
+	PHP_FE(sodium_crypto_aead_chacha20poly1305_keygen, arginfo_sodium_crypto_aead_chacha20poly1305_keygen)
+	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_decrypt, arginfo_sodium_crypto_aead_chacha20poly1305_ietf_decrypt)
+	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_encrypt, arginfo_sodium_crypto_aead_chacha20poly1305_ietf_encrypt)
+	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_keygen, arginfo_sodium_crypto_aead_chacha20poly1305_ietf_keygen)
 #ifdef crypto_aead_xchacha20poly1305_IETF_NPUBBYTES
-	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_decrypt, AI_StringAndADAndNonceAndKey)
-	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_keygen, AI_None)
-	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_encrypt, AI_StringAndADAndNonceAndKey)
+	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_decrypt, arginfo_sodium_crypto_aead_xchacha20poly1305_ietf_decrypt)
+	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_keygen, arginfo_sodium_crypto_aead_xchacha20poly1305_ietf_keygen)
+	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_encrypt, arginfo_sodium_crypto_aead_xchacha20poly1305_ietf_encrypt)
 #endif
-	PHP_FE(sodium_crypto_auth, AI_StringAndKey)
-	PHP_FE(sodium_crypto_auth_keygen, AI_None)
-	PHP_FE(sodium_crypto_auth_verify, AI_SignatureAndStringAndKey)
-	PHP_FE(sodium_crypto_box, AI_StringAndNonceAndKeyPair)
-	PHP_FE(sodium_crypto_box_keypair, AI_None)
-	PHP_FE(sodium_crypto_box_seed_keypair, AI_Key)
-	PHP_FE(sodium_crypto_box_keypair_from_secretkey_and_publickey, AI_SecretKeyAndPublicKey)
-	PHP_FE(sodium_crypto_box_open, AI_StringAndNonceAndKey)
-	PHP_FE(sodium_crypto_box_publickey, AI_Key)
-	PHP_FE(sodium_crypto_box_publickey_from_secretkey, AI_Key)
-	PHP_FE(sodium_crypto_box_seal, AI_StringAndKey)
-	PHP_FE(sodium_crypto_box_seal_open, AI_StringAndKey)
-	PHP_FE(sodium_crypto_box_secretkey, AI_Key)
-	PHP_FE(sodium_crypto_kx_keypair, AI_None)
-	PHP_FE(sodium_crypto_kx_publickey, AI_Key)
-	PHP_FE(sodium_crypto_kx_secretkey, AI_Key)
-	PHP_FE(sodium_crypto_kx_seed_keypair, AI_String)
-	PHP_FE(sodium_crypto_kx_client_session_keys, AI_KXClientSession)
-	PHP_FE(sodium_crypto_kx_server_session_keys, AI_KXServerSession)
-	PHP_FE(sodium_crypto_generichash, AI_StringAndMaybeKeyAndLength)
-	PHP_FE(sodium_crypto_generichash_keygen, AI_None)
-	PHP_FE(sodium_crypto_generichash_init, AI_MaybeKeyAndLength)
-	PHP_FE(sodium_crypto_generichash_update, AI_StateByReferenceAndString)
-	PHP_FE(sodium_crypto_generichash_final, AI_StateByReferenceAndMaybeLength)
-	PHP_FE(sodium_crypto_kdf_derive_from_key, AI_KDF)
-	PHP_FE(sodium_crypto_kdf_keygen, AI_None)
+	PHP_FE(sodium_crypto_auth, arginfo_sodium_crypto_auth)
+	PHP_FE(sodium_crypto_auth_keygen, arginfo_sodium_crypto_auth_keygen)
+	PHP_FE(sodium_crypto_auth_verify, arginfo_sodium_crypto_auth_verify)
+	PHP_FE(sodium_crypto_box, arginfo_sodium_crypto_box)
+	PHP_FE(sodium_crypto_box_keypair, arginfo_sodium_crypto_box_keypair)
+	PHP_FE(sodium_crypto_box_seed_keypair, arginfo_sodium_crypto_box_seed_keypair)
+	PHP_FE(sodium_crypto_box_keypair_from_secretkey_and_publickey, arginfo_sodium_crypto_box_keypair_from_secretkey_and_publickey)
+	PHP_FE(sodium_crypto_box_open, arginfo_sodium_crypto_box_open)
+	PHP_FE(sodium_crypto_box_publickey, arginfo_sodium_crypto_box_publickey)
+	PHP_FE(sodium_crypto_box_publickey_from_secretkey, arginfo_sodium_crypto_box_publickey_from_secretkey)
+	PHP_FE(sodium_crypto_box_seal, arginfo_sodium_crypto_box_seal)
+	PHP_FE(sodium_crypto_box_seal_open, arginfo_sodium_crypto_box_seal_open)
+	PHP_FE(sodium_crypto_box_secretkey, arginfo_sodium_crypto_box_secretkey)
+	PHP_FE(sodium_crypto_kx_keypair, arginfo_sodium_crypto_kx_keypair)
+	PHP_FE(sodium_crypto_kx_publickey, arginfo_sodium_crypto_kx_publickey)
+	PHP_FE(sodium_crypto_kx_secretkey, arginfo_sodium_crypto_kx_secretkey)
+	PHP_FE(sodium_crypto_kx_seed_keypair, arginfo_sodium_crypto_kx_seed_keypair)
+	PHP_FE(sodium_crypto_kx_client_session_keys, arginfo_sodium_crypto_kx_client_session_keys)
+	PHP_FE(sodium_crypto_kx_server_session_keys, arginfo_sodium_crypto_kx_server_session_keys)
+	PHP_FE(sodium_crypto_generichash, arginfo_sodium_crypto_generichash)
+	PHP_FE(sodium_crypto_generichash_keygen, arginfo_sodium_crypto_generichash_keygen)
+	PHP_FE(sodium_crypto_generichash_init, arginfo_sodium_crypto_generichash_init)
+	PHP_FE(sodium_crypto_generichash_update, arginfo_sodium_crypto_generichash_update)
+	PHP_FE(sodium_crypto_generichash_final, arginfo_sodium_crypto_generichash_final)
+	PHP_FE(sodium_crypto_kdf_derive_from_key, arginfo_sodium_crypto_kdf_derive_from_key)
+	PHP_FE(sodium_crypto_kdf_keygen, arginfo_sodium_crypto_kdf_keygen)
 #ifdef crypto_pwhash_SALTBYTES
-	PHP_FE(sodium_crypto_pwhash, AI_LengthAndPasswordAndSaltAndOpsLimitAndMemLimit)
-	PHP_FE(sodium_crypto_pwhash_str, AI_PasswordAndOpsLimitAndMemLimit)
-	PHP_FE(sodium_crypto_pwhash_str_verify, AI_HashAndPassword)
+	PHP_FE(sodium_crypto_pwhash, arginfo_sodium_crypto_pwhash)
+	PHP_FE(sodium_crypto_pwhash_str, arginfo_sodium_crypto_pwhash_str)
+	PHP_FE(sodium_crypto_pwhash_str_verify, arginfo_sodium_crypto_pwhash_str_verify)
 #endif
 #if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
-	PHP_FE(sodium_crypto_pwhash_str_needs_rehash, AI_PasswordAndOpsLimitAndMemLimit)
+	PHP_FE(sodium_crypto_pwhash_str_needs_rehash, arginfo_sodium_crypto_pwhash_str_needs_rehash)
 #endif
 #ifdef crypto_pwhash_scryptsalsa208sha256_SALTBYTES
-	PHP_FE(sodium_crypto_pwhash_scryptsalsa208sha256, AI_LengthAndPasswordAndSaltAndOpsLimitAndMemLimit)
-	PHP_FE(sodium_crypto_pwhash_scryptsalsa208sha256_str, AI_PasswordAndOpsLimitAndMemLimit)
-	PHP_FE(sodium_crypto_pwhash_scryptsalsa208sha256_str_verify, AI_HashAndPassword)
+	PHP_FE(sodium_crypto_pwhash_scryptsalsa208sha256, arginfo_sodium_crypto_pwhash_scryptsalsa208sha256)
+	PHP_FE(sodium_crypto_pwhash_scryptsalsa208sha256_str, arginfo_sodium_crypto_pwhash_scryptsalsa208sha256_str)
+	PHP_FE(sodium_crypto_pwhash_scryptsalsa208sha256_str_verify, arginfo_sodium_crypto_pwhash_scryptsalsa208sha256_str_verify)
 #endif
-	PHP_FE(sodium_crypto_scalarmult, AI_TwoStrings)
-	PHP_FE(sodium_crypto_secretbox, AI_StringAndNonceAndKey)
-	PHP_FE(sodium_crypto_secretbox_keygen, AI_None)
-	PHP_FE(sodium_crypto_secretbox_open, AI_StringAndNonceAndKey)
+	PHP_FE(sodium_crypto_scalarmult, arginfo_sodium_crypto_scalarmult)
+	PHP_FE(sodium_crypto_secretbox, arginfo_sodium_crypto_secretbox)
+	PHP_FE(sodium_crypto_secretbox_keygen, arginfo_sodium_crypto_secretbox_keygen)
+	PHP_FE(sodium_crypto_secretbox_open, arginfo_sodium_crypto_secretbox_open)
 #ifdef crypto_secretstream_xchacha20poly1305_ABYTES
-	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_keygen, AI_None)
-	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_init_push, AI_Key)
-	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_push, AI_StateByReferenceAndStringAndMaybeStringAndLong)
-	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_init_pull, AI_StringAndKey)
-	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_pull, AI_StateByReferenceAndStringAndMaybeString)
-	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_rekey, AI_StateByReference)
+	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_keygen, arginfo_sodium_crypto_secretstream_xchacha20poly1305_keygen)
+	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_init_push, arginfo_sodium_crypto_secretstream_xchacha20poly1305_init_push)
+	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_push, arginfo_sodium_crypto_secretstream_xchacha20poly1305_push)
+	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_init_pull, arginfo_sodium_crypto_secretstream_xchacha20poly1305_init_pull)
+	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_pull, arginfo_sodium_crypto_secretstream_xchacha20poly1305_pull)
+	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_rekey, arginfo_sodium_crypto_secretstream_xchacha20poly1305_rekey)
 #endif
-	PHP_FE(sodium_crypto_shorthash, AI_StringAndKey)
-	PHP_FE(sodium_crypto_shorthash_keygen, AI_None)
-	PHP_FE(sodium_crypto_sign, AI_StringAndKeyPair)
-	PHP_FE(sodium_crypto_sign_detached, AI_StringAndKeyPair)
-	PHP_FE(sodium_crypto_sign_ed25519_pk_to_curve25519, AI_Key)
-	PHP_FE(sodium_crypto_sign_ed25519_sk_to_curve25519, AI_Key)
-	PHP_FE(sodium_crypto_sign_keypair, AI_None)
-	PHP_FE(sodium_crypto_sign_keypair_from_secretkey_and_publickey, AI_SecretKeyAndPublicKey)
-	PHP_FE(sodium_crypto_sign_open, AI_StringAndKeyPair)
-	PHP_FE(sodium_crypto_sign_publickey, AI_Key)
-	PHP_FE(sodium_crypto_sign_secretkey, AI_Key)
-	PHP_FE(sodium_crypto_sign_publickey_from_secretkey, AI_Key)
-	PHP_FE(sodium_crypto_sign_seed_keypair, AI_Key)
-	PHP_FE(sodium_crypto_sign_verify_detached, AI_SignatureAndStringAndKey)
-	PHP_FE(sodium_crypto_stream, AI_LengthAndNonceAndKey)
-	PHP_FE(sodium_crypto_stream_keygen, AI_None)
-	PHP_FE(sodium_crypto_stream_xor, AI_StringAndNonceAndKey)
+	PHP_FE(sodium_crypto_shorthash, arginfo_sodium_crypto_shorthash)
+	PHP_FE(sodium_crypto_shorthash_keygen, arginfo_sodium_crypto_shorthash_keygen)
+	PHP_FE(sodium_crypto_sign, arginfo_sodium_crypto_sign)
+	PHP_FE(sodium_crypto_sign_detached, arginfo_sodium_crypto_sign_detached)
+	PHP_FE(sodium_crypto_sign_ed25519_pk_to_curve25519, arginfo_sodium_crypto_sign_ed25519_pk_to_curve25519)
+	PHP_FE(sodium_crypto_sign_ed25519_sk_to_curve25519, arginfo_sodium_crypto_sign_ed25519_sk_to_curve25519)
+	PHP_FE(sodium_crypto_sign_keypair, arginfo_sodium_crypto_sign_keypair)
+	PHP_FE(sodium_crypto_sign_keypair_from_secretkey_and_publickey, arginfo_sodium_crypto_sign_keypair_from_secretkey_and_publickey)
+	PHP_FE(sodium_crypto_sign_open, arginfo_sodium_crypto_sign_open)
+	PHP_FE(sodium_crypto_sign_publickey, arginfo_sodium_crypto_sign_publickey)
+	PHP_FE(sodium_crypto_sign_secretkey, arginfo_sodium_crypto_sign_secretkey)
+	PHP_FE(sodium_crypto_sign_publickey_from_secretkey, arginfo_sodium_crypto_sign_publickey_from_secretkey)
+	PHP_FE(sodium_crypto_sign_seed_keypair, arginfo_sodium_crypto_sign_seed_keypair)
+	PHP_FE(sodium_crypto_sign_verify_detached, arginfo_sodium_crypto_sign_verify_detached)
+	PHP_FE(sodium_crypto_stream, arginfo_sodium_crypto_stream)
+	PHP_FE(sodium_crypto_stream_keygen, arginfo_sodium_crypto_stream_keygen)
+	PHP_FE(sodium_crypto_stream_xor, arginfo_sodium_crypto_stream_xor)
 
 	/* helpers */
 
-	PHP_FE(sodium_add, AI_StringRefAndString)
-	PHP_FE(sodium_compare, AI_TwoStrings)
-	PHP_FE(sodium_increment, AI_StringRef)
-	PHP_FE(sodium_memcmp, AI_TwoStrings)
-	PHP_FE(sodium_memzero, AI_FirstArgByReference)
-	PHP_FE(sodium_pad, AI_StringAndLength)
-	PHP_FE(sodium_unpad, AI_StringAndLength)
+	PHP_FE(sodium_add, arginfo_sodium_add)
+	PHP_FE(sodium_compare, arginfo_sodium_compare)
+	PHP_FE(sodium_increment, arginfo_sodium_increment)
+	PHP_FE(sodium_memcmp, arginfo_sodium_memcmp)
+	PHP_FE(sodium_memzero, arginfo_sodium_memzero)
+	PHP_FE(sodium_pad, arginfo_sodium_pad)
+	PHP_FE(sodium_unpad, arginfo_sodium_unpad)
 
 	/* codecs */
 
-	PHP_FE(sodium_bin2hex, AI_String)
-	PHP_FE(sodium_hex2bin, AI_StringAndMaybeString)
+	PHP_FE(sodium_bin2hex, arginfo_sodium_bin2hex)
+	PHP_FE(sodium_hex2bin, arginfo_sodium_hex2bin)
 #ifdef sodium_base64_VARIANT_ORIGINAL
-	PHP_FE(sodium_bin2base64, AI_StringAndId)
-	PHP_FE(sodium_base642bin, AI_StringAndIdAndMaybeString)
+	PHP_FE(sodium_bin2base64, arginfo_sodium_bin2base64)
+	PHP_FE(sodium_base642bin, arginfo_sodium_base642bin)
 #endif
 
 	/* aliases */
 
-	PHP_FALIAS(sodium_crypto_scalarmult_base, sodium_crypto_box_publickey_from_secretkey, AI_TwoStrings)
+	PHP_FALIAS(sodium_crypto_scalarmult_base, sodium_crypto_box_publickey_from_secretkey, arginfo_sodium_crypto_scalarmult_base)
 
 	PHP_FE_END
 };
