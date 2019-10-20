@@ -13,7 +13,10 @@ set_time_limit($t);
 
 function hello ($t) {
 	echo "call", PHP_EOL;
+	$startTime = microtime(true);
 	busy_wait($t*2);
+	$diff = microtime(true) - $startTime;
+	echo "time spent waiting: $diff\n";
 }
 
 eval('hello($t);');

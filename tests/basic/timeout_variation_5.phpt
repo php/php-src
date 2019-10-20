@@ -13,8 +13,10 @@ set_time_limit($t);
 
 function f($t) {
 	echo "call";
+	$startTime = microtime(true);
 	busy_wait($t*2);
-	throw new Exception("never reached here");
+	$diff = microtime(true) - $startTime;
+	throw new Exception("never reached here (time spent waiting: $diff)");
 }
 
 f($t);
