@@ -14,7 +14,10 @@ set_time_limit($t);
 function f()
 {
 	echo "call";
+	$startTime = microtime(true);
 	busy_wait(5);
+	$diff = microtime(true) - $startTime;
+	echo "\ntime spent waiting: $diff\n";
 }
 
 register_shutdown_function("f");
