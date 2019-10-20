@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #70153 (\DateInterval incorrectly unserialized). (Maksim Iakunin)
 
+- FPM:
+  . Fixed bug #74083 (master PHP-fpm is stopped on multiple reloads).
+    (Maksim Nikulin)
+
 - Testing:
   . Fixed bug #78684 (PCRE bug72463_2 test is sending emails on Linux). (cmb)
 
