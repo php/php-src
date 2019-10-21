@@ -6098,7 +6098,7 @@ PHP_FUNCTION(substr_compare)
 		Z_PARAM_STR(s2)
 		Z_PARAM_LONG(offset)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_EX(len, len_is_default, 1, 0)
+		Z_PARAM_LONG_OR_NULL(len, len_is_default)
 		Z_PARAM_BOOL(cs)
 	ZEND_PARSE_PARAMETERS_END();
 
