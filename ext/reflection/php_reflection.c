@@ -2818,7 +2818,7 @@ ZEND_METHOD(reflection_type, __toString)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETURN_STR(zend_type_to_string(ZEND_TYPE_WITHOUT_NULL(param->type)));
+	RETURN_STR(zend_type_to_string(param->type));
 }
 /* }}} */
 
@@ -6621,7 +6621,7 @@ static const zend_function_entry reflection_parameter_functions[] = {
 static const zend_function_entry reflection_type_functions[] = {
 	ZEND_ME(reflection, __clone, arginfo_reflection__void, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
 	ZEND_ME(reflection_type, allowsNull, arginfo_reflection__void, 0)
-	ZEND_ME(reflection_type, __toString, arginfo_reflection__void, ZEND_ACC_DEPRECATED)
+	ZEND_ME(reflection_type, __toString, arginfo_reflection__void, 0)
 	PHP_FE_END
 };
 

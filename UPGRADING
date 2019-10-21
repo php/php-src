@@ -241,6 +241,11 @@ PHP 8.0 UPGRADE NOTES
         ReflectionFunction::invoke($arg = null, ...$args)
         ReflectionMethod::invoke($object, $arg = null, ...$args)
 
+  . The ReflectionType::__toString() method will now return a complete debug
+    representation of the type, and is no longer deprecated. In particular the
+    result will include a nullability indicator for nullable types. The format
+    of the return value is not stable and may change between PHP versions.
+
 - Socket:
   . The deprecated AI_IDN_ALLOW_UNASSIGNED and AI_IDN_USE_STD3_ASCII_RULES
     flags for socket_addrinfo_lookup() have been removed.

@@ -187,10 +187,20 @@ static zend_function *zend_test_class_static_method_get(zend_class_entry *ce, ze
 }
 /* }}} */
 
+static ZEND_METHOD(_ZendTestClass, __toString) /* {{{ */ {
+	RETURN_EMPTY_STRING();
+}
+/* }}} */
+
 static ZEND_METHOD(_ZendTestTrait, testMethod) /* {{{ */ {
 	RETURN_TRUE;
 }
 /* }}} */
+
+static const zend_function_entry zend_test_class_methods[] = {
+	ZEND_ME(_ZendTestClass, __toString, NULL, ZEND_ACC_DEPRECATED)
+	ZEND_FE_END
+};
 
 static const zend_function_entry zend_test_trait_methods[] = {
     ZEND_ME(_ZendTestTrait, testMethod, NULL, ZEND_ACC_PUBLIC)
@@ -204,8 +214,8 @@ PHP_MINIT_FUNCTION(zend_test)
 	INIT_CLASS_ENTRY(class_entry, "_ZendTestInterface", NULL);
 	zend_test_interface = zend_register_internal_interface(&class_entry);
 	zend_declare_class_constant_long(zend_test_interface, ZEND_STRL("DUMMY"), 0);
-	INIT_CLASS_ENTRY(class_entry, "_ZendTestClass", NULL);
-	zend_test_class = zend_register_internal_class_ex(&class_entry, NULL);
+	INIT_CLASS_ENTRY(class_entry, "_ZendTestClass", zend_test_class_methods);
+	zend_test_class = zend_register_internal_class(&class_entry);
 	zend_class_implements(zend_test_class, 1, zend_test_interface);
 	zend_test_class->create_object = zend_test_class_new;
 	zend_test_class->get_static_method = zend_test_class_static_method_get;
