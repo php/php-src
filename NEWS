@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #74083 (master PHP-fpm is stopped on multiple reloads).
     (Maksim Nikulin)
 
+- Reflection:
+  . Fixed bug #78697 (ReflectionClass::implementsInterface - inaccurate error 
+    message with traits). (villfa)
+
 - Testing:
   . Fixed bug #78684 (PCRE bug72463_2 test is sending emails on Linux). (cmb)
 
