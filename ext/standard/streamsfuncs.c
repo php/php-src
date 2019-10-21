@@ -753,7 +753,7 @@ PHP_FUNCTION(stream_select)
 		Z_PARAM_ARRAY_EX2(r_array, 1, 1, 0)
 		Z_PARAM_ARRAY_EX2(w_array, 1, 1, 0)
 		Z_PARAM_ARRAY_EX2(e_array, 1, 1, 0)
-		Z_PARAM_LONG_EX(sec, secnull, 1, 0)
+		Z_PARAM_LONG_OR_NULL(sec, secnull)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(usec)
 	ZEND_PARSE_PARAMETERS_END();
@@ -1493,7 +1493,7 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 		Z_PARAM_RESOURCE(zstream)
 		Z_PARAM_BOOL(enable)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_EX(cryptokind, cryptokindnull, 1, 0)
+		Z_PARAM_LONG_OR_NULL(cryptokind, cryptokindnull)
 		Z_PARAM_RESOURCE(zsessstream)
 	ZEND_PARSE_PARAMETERS_END();
 

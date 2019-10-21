@@ -3473,7 +3473,7 @@ PHP_FUNCTION(array_slice)
 		Z_PARAM_ARRAY(input)
 		Z_PARAM_LONG(offset)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_EX(length, length_is_null, 1, 0)
+		Z_PARAM_LONG_OR_NULL(length, length_is_null)
 		Z_PARAM_BOOL(preserve_keys)
 	ZEND_PARSE_PARAMETERS_END();
 
