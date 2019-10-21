@@ -110,6 +110,7 @@ static void zend_always_inline zend_type_release(zend_type *type) {
 				zend_string_release(ZEND_TYPE_LIST_GET_NAME(entry));
 			}
 		} ZEND_TYPE_LIST_FOREACH_END();
+		efree(ZEND_TYPE_LIST(*type));
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {
 		zend_string_release(ZEND_TYPE_NAME(*type));
 	}
