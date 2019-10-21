@@ -4620,6 +4620,11 @@ static int accel_finish_startup(void)
 					zend_accel_error(ACCEL_LOG_FATAL, "Preloading failed to waitpid(%d)", pid);
 					return FAILURE;
 				}
+
+				if (ZCSG(preload_script)) {
+					preload_load();
+				}
+
 				zend_shared_alloc_unlock();
 				if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
 					return SUCCESS;
