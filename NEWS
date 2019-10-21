@@ -21,6 +21,10 @@ PHP                                                                        NEWS
   . Fixed bug #78654 (Incorrectly computed opcache checksum on files with 
     non-ascii characters). (mhagstrand)
 
+- Reflection:
+  . Fixed bug #78697 (ReflectionClass::ImplementsInterface - inaccurate error 
+    message with traits). (villfa)
+
 - Sockets:
   . Fixed bug #78665 (Multicasting may leak memory). (cmb)
 
