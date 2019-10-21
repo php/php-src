@@ -152,22 +152,42 @@ ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 		zval *static_members = CE_STATIC_MEMBERS(ce);
 		zval *p = static_members;
 		zval *end = p + ce->default_static_members_count;
-
-		ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
-		while (p != end) {
-			if (UNEXPECTED(Z_ISREF_P(p))) {
-				zend_property_info *prop_info;
-				ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(p), prop_info) {
-					if (prop_info->ce == ce && p - static_members == prop_info->offset) {
-						ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
-						break; /* stop iteration here, the array might be realloc()'ed */
-					}
-				} ZEND_REF_FOREACH_TYPE_SOURCES_END();
+		if (UNEXPECTED(ZEND_MAP_PTR(ce->static_members_table) == &ce->default_static_members_table)) {
+			/* Special case: If this is a static property on a dl'ed internal class, then the
+			 * static property table and the default property table are the same. In this case we
+			 * destroy the values here, but leave behind valid UNDEF zvals and don't free the
+			 * table itself. */
+			while (p != end) {
+				if (UNEXPECTED(Z_ISREF_P(p))) {
+					zend_property_info *prop_info;
+					ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(p), prop_info) {
+						if (prop_info->ce == ce && p - static_members == prop_info->offset) {
+							ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
+							break; /* stop iteration here, the array might be realloc()'ed */
+						}
+					} ZEND_REF_FOREACH_TYPE_SOURCES_END();
+				}
+				i_zval_ptr_dtor(p);
+				ZVAL_UNDEF(p);
+				p++;
 			}
-			i_zval_ptr_dtor(p);
-			p++;
+		} else {
+			ZEND_MAP_PTR_SET(ce->static_members_table, NULL);
+			while (p != end) {
+				if (UNEXPECTED(Z_ISREF_P(p))) {
+					zend_property_info *prop_info;
+					ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(p), prop_info) {
+						if (prop_info->ce == ce && p - static_members == prop_info->offset) {
+							ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
+							break; /* stop iteration here, the array might be realloc()'ed */
+						}
+					} ZEND_REF_FOREACH_TYPE_SOURCES_END();
+				}
+				i_zval_ptr_dtor(p);
+				p++;
+			}
+			efree(static_members);
 		}
-		efree(static_members);
 	}
 }
 
