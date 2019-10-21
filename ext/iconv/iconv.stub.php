@@ -4,7 +4,7 @@
 function iconv_strlen(string $str, string $charset = UNKNOWN) {}
 
 /** @return string|false */
-function iconv_substr(string $str, int $offset, int $length = UNKNOWN, string $charset = UNKNOWN) {}
+function iconv_substr(string $str, int $offset, ?int $length = null, string $charset = UNKNOWN) {}
 
 /** @return int|false */
 function iconv_strpos(string $haystack, string $needle, int $offset = 0, string $charset = UNKNOWN) {}

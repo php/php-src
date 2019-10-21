@@ -2028,13 +2028,14 @@ PHP_FUNCTION(iconv_substr)
 	size_t charset_len = 0;
 	zend_string *str;
 	zend_long offset, length = 0;
+	zend_bool len_is_null = 1;
 
 	php_iconv_err_t err;
 
 	smart_str retval = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sl|ls",
-		&str, &offset, &length,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sl|l!s",
+		&str, &offset, &length, &len_is_null,
 		&charset, &charset_len) == FAILURE) {
 		return;
 	}
@@ -2044,7 +2045,7 @@ PHP_FUNCTION(iconv_substr)
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() < 3) {
+	if (len_is_null) {
 		length = ZSTR_LEN(str);
 	}
 
