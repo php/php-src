@@ -27,17 +27,17 @@ $arg2 = 'two';
 echo "\n-- Call printf with one argument less than expected --\n";
 try {
     var_dump( printf($format1) );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
     var_dump( printf($format2,$arg1) );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
     var_dump( printf($format3,$arg1,$arg2) );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -49,14 +49,14 @@ try {
 }
 try {
     var_dump( printf($format3,$arg1) );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 echo "\n-- Call printf with three argument less than expected --\n";
 try {
     var_dump( printf($format3) );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 

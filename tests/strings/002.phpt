@@ -41,7 +41,7 @@ printf("printf test 28:%2\$02d %1\$2d\n", 1, 2);
 printf("printf test 29:%2\$-2d %1\$2d\n", 1, 2);
 try {
     print("printf test 30:"); printf("%0\$s", 1); print("x\n");
-} catch(\Error $e) {
+} catch(\ValueError $e) {
     print('Error found: '.$e->getMessage()."\n");
 }
 vprintf("vprintf test 1:%2\$-2d %1\$2d\n", array(1, 2));

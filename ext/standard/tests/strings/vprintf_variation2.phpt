@@ -88,7 +88,7 @@ foreach($values as $value) {
 	$result = vprintf($format,$value);
 	echo "\n";
 	var_dump($result);
-  } catch (\Error $e) {
+  } catch (\ValueError $e) {
 	echo $e->getMessage(), "\n";
   }
   $counter++;

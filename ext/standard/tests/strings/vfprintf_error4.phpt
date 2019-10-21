@@ -24,7 +24,7 @@ try {
 }
 try {
     var_dump( vfprintf( $fp, 'Foo %$c-0202Sd', array( 2 ) ) );
-} catch(\Error $e) {
+} catch(\ValueError $e) {
     print('Error found: '.$e->getMessage().".\n");
 }
 // Close handle

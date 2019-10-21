@@ -32,31 +32,31 @@ try {
 }
 try {
     var_dump( sprintf($format2,$arg1) );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
     var_dump( sprintf($format3,$arg1,$arg2) );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 // with two argument less than expected
 try {
     var_dump( sprintf($format2) );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
     var_dump( sprintf($format3,$arg1) );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 // with three argument less than expected
 try {
     var_dump( sprintf($format3) );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 

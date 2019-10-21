@@ -41,7 +41,7 @@ $nbr = 5;
 $name = "voudras";
 try {
     printf("%d $string %s", $nbr, $name);
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     print('Error found: '.$e->getMessage());
 }
 

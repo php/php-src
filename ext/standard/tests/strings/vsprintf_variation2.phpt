@@ -86,7 +86,7 @@ foreach($values as $value) {
   echo "\n-- Iteration $counter --\n";
   try {
     var_dump( vsprintf($format,$value) );
-  } catch (\Error $e) {
+  } catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
   }
   $counter++;

@@ -92,7 +92,7 @@ foreach( $values as $value ) {
   fprintf($fp, "\n-- Iteration %d --\n",$counter);
   try {
   	vfprintf($fp, $format, $value);
-  } catch (\Error $e) {
+  } catch (\ValueError $e) {
 	fwrite($fp, $e->getMessage() . "\n");
   }
   $counter++;

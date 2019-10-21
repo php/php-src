@@ -78,7 +78,7 @@ $counter = 1;
 foreach($valid_strings as $string) {
     try {
         fprintf($file_handle, $string);
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
     }
   fprintf($file_handle, "\n");
 }
