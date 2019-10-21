@@ -1,7 +1,9 @@
 --TEST--
-Basic checks for union type behavior
+Behavior of union type checks (strict)
 --FILE--
 <?php
+
+declare(strict_types=1);
 
 function dump($value) {
     if (is_object($value)) {
@@ -64,13 +66,13 @@ Type int|float:
 42               => 42
 42.0             => 42.0
 INF              => INF
-"42"             => 42
-"42.0"           => 42.0
-"42x"            => 42 (A non well formed numeric value encountered)
+"42"             => Argument ... must be of type int|float, string given
+"42.0"           => Argument ... must be of type int|float, string given
+"42x"            => Argument ... must be of type int|float, string given
 "x"              => Argument ... must be of type int|float, string given
 ""               => Argument ... must be of type int|float, string given
-true             => 1
-false            => 0
+true             => Argument ... must be of type int|float, bool given
+false            => Argument ... must be of type int|float, bool given
 null             => Argument ... must be of type int|float, null given
 []               => Argument ... must be of type int|float, array given
 new stdClass     => Argument ... must be of type int|float, object given
@@ -80,12 +82,12 @@ Type int|float|false:
 42               => 42
 42.0             => 42.0
 INF              => INF
-"42"             => 42
-"42.0"           => 42.0
-"42x"            => 42 (A non well formed numeric value encountered)
+"42"             => Argument ... must be of type int|float|false, string given
+"42.0"           => Argument ... must be of type int|float|false, string given
+"42x"            => Argument ... must be of type int|float|false, string given
 "x"              => Argument ... must be of type int|float|false, string given
 ""               => Argument ... must be of type int|float|false, string given
-true             => 1
+true             => Argument ... must be of type int|float|false, bool given
 false            => false
 null             => Argument ... must be of type int|float|false, null given
 []               => Argument ... must be of type int|float|false, array given
@@ -96,11 +98,11 @@ Type int|float|bool:
 42               => 42
 42.0             => 42.0
 INF              => INF
-"42"             => 42
-"42.0"           => 42.0
-"42x"            => 42 (A non well formed numeric value encountered)
-"x"              => true
-""               => false
+"42"             => Argument ... must be of type int|float|bool, string given
+"42.0"           => Argument ... must be of type int|float|bool, string given
+"42x"            => Argument ... must be of type int|float|bool, string given
+"x"              => Argument ... must be of type int|float|bool, string given
+""               => Argument ... must be of type int|float|bool, string given
 true             => true
 false            => false
 null             => Argument ... must be of type int|float|bool, null given
@@ -110,13 +112,13 @@ new WithToString => Argument ... must be of type int|float|bool, object given
 
 Type int|bool:
 42               => 42
-42.0             => 42
-INF              => true
-"42"             => 42
-"42.0"           => 42
-"42x"            => 42 (A non well formed numeric value encountered)
-"x"              => true
-""               => false
+42.0             => Argument ... must be of type int|bool, float given
+INF              => Argument ... must be of type int|bool, float given
+"42"             => Argument ... must be of type int|bool, string given
+"42.0"           => Argument ... must be of type int|bool, string given
+"42x"            => Argument ... must be of type int|bool, string given
+"x"              => Argument ... must be of type int|bool, string given
+""               => Argument ... must be of type int|bool, string given
 true             => true
 false            => false
 null             => Argument ... must be of type int|bool, null given
@@ -126,24 +128,24 @@ new WithToString => Argument ... must be of type int|bool, object given
 
 Type int|string|null:
 42               => 42
-42.0             => 42
-INF              => "INF"
+42.0             => Argument ... must be of type string|int|null, float given
+INF              => Argument ... must be of type string|int|null, float given
 "42"             => "42"
 "42.0"           => "42.0"
 "42x"            => "42x"
 "x"              => "x"
 ""               => ""
-true             => 1
-false            => 0
+true             => Argument ... must be of type string|int|null, bool given
+false            => Argument ... must be of type string|int|null, bool given
 null             => null
 []               => Argument ... must be of type string|int|null, array given
 new stdClass     => Argument ... must be of type string|int|null, object given
-new WithToString => "__toString()"
+new WithToString => Argument ... must be of type string|int|null, object given
 
 Type string|bool:
-42               => "42"
-42.0             => "42"
-INF              => "INF"
+42               => Argument ... must be of type string|bool, int given
+42.0             => Argument ... must be of type string|bool, float given
+INF              => Argument ... must be of type string|bool, float given
 "42"             => "42"
 "42.0"           => "42.0"
 "42x"            => "42x"
@@ -154,49 +156,49 @@ false            => false
 null             => Argument ... must be of type string|bool, null given
 []               => Argument ... must be of type string|bool, array given
 new stdClass     => Argument ... must be of type string|bool, object given
-new WithToString => "__toString()"
+new WithToString => Argument ... must be of type string|bool, object given
 
 Type float|array:
 42               => 42.0
 42.0             => 42.0
 INF              => INF
-"42"             => 42.0
-"42.0"           => 42.0
-"42x"            => 42.0 (A non well formed numeric value encountered)
+"42"             => Argument ... must be of type array|float, string given
+"42.0"           => Argument ... must be of type array|float, string given
+"42x"            => Argument ... must be of type array|float, string given
 "x"              => Argument ... must be of type array|float, string given
 ""               => Argument ... must be of type array|float, string given
-true             => 1.0
-false            => 0.0
+true             => Argument ... must be of type array|float, bool given
+false            => Argument ... must be of type array|float, bool given
 null             => Argument ... must be of type array|float, null given
 []               => []
 new stdClass     => Argument ... must be of type array|float, object given
 new WithToString => Argument ... must be of type array|float, object given
 
 Type string|array:
-42               => "42"
-42.0             => "42"
-INF              => "INF"
+42               => Argument ... must be of type array|string, int given
+42.0             => Argument ... must be of type array|string, float given
+INF              => Argument ... must be of type array|string, float given
 "42"             => "42"
 "42.0"           => "42.0"
 "42x"            => "42x"
 "x"              => "x"
 ""               => ""
-true             => "1"
-false            => ""
+true             => Argument ... must be of type array|string, bool given
+false            => Argument ... must be of type array|string, bool given
 null             => Argument ... must be of type array|string, null given
 []               => []
 new stdClass     => Argument ... must be of type array|string, object given
-new WithToString => "__toString()"
+new WithToString => Argument ... must be of type array|string, object given
 
 Type bool|array:
-42               => true
-42.0             => true
-INF              => true
-"42"             => true
-"42.0"           => true
-"42x"            => true
-"x"              => true
-""               => false
+42               => Argument ... must be of type array|bool, int given
+42.0             => Argument ... must be of type array|bool, float given
+INF              => Argument ... must be of type array|bool, float given
+"42"             => Argument ... must be of type array|bool, string given
+"42.0"           => Argument ... must be of type array|bool, string given
+"42x"            => Argument ... must be of type array|bool, string given
+"x"              => Argument ... must be of type array|bool, string given
+""               => Argument ... must be of type array|bool, string given
 true             => true
 false            => false
 null             => Argument ... must be of type array|bool, null given
