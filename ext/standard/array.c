@@ -3401,19 +3401,20 @@ PHP_FUNCTION(array_splice)
 	HashTable  *rem_hash = NULL;
 	zend_long offset,
 			length = 0;
+	zend_bool length_is_null = 1;
 	int		num_in;				/* Number of elements in the input array */
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 		Z_PARAM_LONG(offset)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(length)
+		Z_PARAM_LONG_OR_NULL(length, length_is_null)
 		Z_PARAM_ZVAL(repl_array)
 	ZEND_PARSE_PARAMETERS_END();
 
 	num_in = zend_hash_num_elements(Z_ARRVAL_P(array));
 
-	if (ZEND_NUM_ARGS() < 3) {
+	if (length_is_null) {
 		length = num_in;
 	}
 

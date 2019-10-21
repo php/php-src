@@ -163,7 +163,7 @@ function array_shift(array &$stack) {}
 
 function array_unshift(array &$stack, ...$vars): int {}
 
-function array_splice(array &$arg, int $offset, int $length = UNKNOWN, $replacement = []): array {}
+function array_splice(array &$arg, int $offset, ?int $length = null, $replacement = []): array {}
 
 function array_slice(array $arg, int $offset, ?int $length = null, bool $preserve_keys = false): array {}
 
