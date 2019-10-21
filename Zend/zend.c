@@ -592,7 +592,18 @@ static void function_copy_ctor(zval *zv) /* {{{ */
 		new_arg_info = pemalloc(sizeof(zend_arg_info) * num_args, 1);
 		memcpy(new_arg_info, arg_info, sizeof(zend_arg_info) * num_args);
 		for (i = 0 ; i < num_args; i++) {
-			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
+			if (ZEND_TYPE_HAS_LIST(arg_info[i].type)) {
+				zend_type_list *old_list = ZEND_TYPE_LIST(arg_info[i].type);
+				zend_type_list *new_list = pemalloc(ZEND_TYPE_LIST_SIZE(old_list->num_types), 1);
+				memcpy(new_list, old_list, ZEND_TYPE_LIST_SIZE(old_list->num_types));
+				ZEND_TYPE_SET_PTR(new_arg_info[i].type, new_list);
+
+				void **entry;
+				ZEND_TYPE_LIST_FOREACH_PTR(new_list, entry) {
+					zend_string *name = zend_string_dup(ZEND_TYPE_LIST_GET_NAME(*entry), 1);
+					*entry = ZEND_TYPE_LIST_ENCODE_NAME(name);
+				} ZEND_TYPE_LIST_FOREACH_END();
+			} else if (ZEND_TYPE_HAS_NAME(arg_info[i].type)) {
 				zend_string *name = zend_string_dup(ZEND_TYPE_NAME(arg_info[i].type), 1);
 				ZEND_TYPE_SET_PTR(new_arg_info[i].type, name);
 			}
