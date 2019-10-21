@@ -474,7 +474,7 @@ function strrchr(string $haystack, string $needle) {}
 function chunk_split(string $str, int $chunklen = 76, string $ending = "\r\n"): string {}
 
 /** @return string|false */
-function substr(string $str, int $start, int $length = UNKNOWN) {}
+function substr(string $str, int $start, ?int $length = null) {}
 
 /**
  * @param mixed $str
@@ -566,7 +566,7 @@ function localeconv(): array {}
 function strnatcasecmp(string $s1, string $s2): int {}
 
 /** @return int|false */
-function substr_count(string $haystack, string $needle, int $offset = 0, int $length = UNKNOWN) {}
+function substr_count(string $haystack, string $needle, int $offset = 0, ?int $length = null) {}
 
 function str_pad(string $input, int $pad_length, string $pad_string = " ", int $pad_type = STR_PAD_RIGHT): string {}
 
@@ -591,7 +591,7 @@ function str_split(string $str, int $split_length = 1): array {}
 function strpbrk(string $haystack, string $char_list) {}
 
 /** @return int|false */
-function substr_compare(string $main_str, string $str, int $offset, int $length = UNKNOWN, bool $case_insensitivity = false) {}
+function substr_compare(string $main_str, string $str, int $offset, ?int $length = null, bool $case_insensitivity = false) {}
 
 function utf8_encode(string $data): string {}
 

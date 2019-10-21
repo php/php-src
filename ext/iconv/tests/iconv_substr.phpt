@@ -34,6 +34,7 @@ foo("あいうえおかきくけこさしす", 5, 7, "EUC-JP");
 bar("This is a test", 100000);
 bar("This is a test", 0, 100000);
 bar("This is a test", -3);
+bar("This is a test", -3, null);
 bar("This is a test", 0, -9);
 bar("This is a test", 0, -100000);
 bar("This is a test", -9, -100000);
@@ -48,6 +49,8 @@ bool(false)
 bool(false)
 string(14) "This is a test"
 string(14) "This is a test"
+string(3) "est"
+string(3) "est"
 string(3) "est"
 string(3) "est"
 string(5) "This "

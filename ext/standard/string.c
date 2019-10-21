@@ -2184,13 +2184,13 @@ PHP_FUNCTION(substr)
 {
 	zend_string *str;
 	zend_long l = 0, f;
-	int argc = ZEND_NUM_ARGS();
+	zend_bool len_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(str)
 		Z_PARAM_LONG(f)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(l)
+		Z_PARAM_LONG_OR_NULL(l, len_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (f > (zend_long)ZSTR_LEN(str)) {
@@ -2204,7 +2204,7 @@ PHP_FUNCTION(substr)
 		} else {
 			f = (zend_long)ZSTR_LEN(str) + f;
 		}
-		if (argc > 2) {
+		if (!len_is_null) {
 			if (l < 0) {
 				/* if "length" position is negative, set it to the length
 				 * needed to stop that many chars from the end of the string
@@ -2224,7 +2224,7 @@ PHP_FUNCTION(substr)
 		} else {
 			goto truncate_len;
 		}
-	} else if (argc > 2) {
+	} else if (!len_is_null) {
 		if (l < 0) {
 			/* if "length" position is negative, set it to the length
 			 * needed to stop that many chars from the end of the string
@@ -5553,7 +5553,7 @@ PHP_FUNCTION(substr_count)
 {
 	char *haystack, *needle;
 	zend_long offset = 0, length = 0;
-	int ac = ZEND_NUM_ARGS();
+	zend_bool length_is_null = 1;
 	zend_long count = 0;
 	size_t haystack_len, needle_len;
 	const char *p, *endp;
@@ -5564,7 +5564,7 @@ PHP_FUNCTION(substr_count)
 		Z_PARAM_STRING(needle, needle_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
-		Z_PARAM_LONG(length)
+		Z_PARAM_LONG_OR_NULL(length, length_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (needle_len == 0) {
@@ -5584,7 +5584,7 @@ PHP_FUNCTION(substr_count)
 	}
 	p += offset;
 
-	if (ac == 4) {
+	if (!length_is_null) {
 
 		if (length < 0) {
 			length += (haystack_len - offset);

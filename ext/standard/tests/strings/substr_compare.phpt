@@ -4,6 +4,7 @@ substr_compare()
 <?php
 
 var_dump(substr_compare("abcde", "df", -2) < 0);
+var_dump(substr_compare("abcde", "df", -2, null) < 0);
 var_dump(substr_compare("abcde", "bc", 1, 2));
 var_dump(substr_compare("abcde", "bcg", 1, 2));
 var_dump(substr_compare("abcde", "BC", 1, 2, true));
@@ -24,6 +25,7 @@ var_dump(substr_compare("abcde", "abc", -1, NULL, -5) > 0);
 echo "Done\n";
 ?>
 --EXPECTF--
+bool(true)
 bool(true)
 int(0)
 int(0)
