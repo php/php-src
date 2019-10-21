@@ -1201,9 +1201,8 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_VOID));
 	}
 
-	ZEND_ASSERT(str && "There should be at least one type!");
 	if (type_mask & MAY_BE_NULL) {
-		zend_bool is_union = memchr(ZSTR_VAL(str), '|', ZSTR_LEN(str)) != NULL;
+		zend_bool is_union = !str || memchr(ZSTR_VAL(str), '|', ZSTR_LEN(str)) != NULL;
 		if (!is_union) {
 			zend_string *nullable_str = zend_string_alloc(ZSTR_LEN(str) + 1, 0);
 			ZSTR_VAL(nullable_str)[0] = '?';
