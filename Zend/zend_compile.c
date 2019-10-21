@@ -2648,7 +2648,8 @@ static void zend_compile_list_assign(
 	zend_bool has_elems = 0;
 	zend_bool has_spread_operator = 0;
 	zend_bool is_keyed =
-		list->children > 0 && list->child[0] != NULL && list->child[0]->child[1] != NULL;
+		list->children > 0 && list->child[0] != NULL && list->child[0]->kind != ZEND_AST_UNPACK 
+		&& list->child[0]->child[1] != NULL;
 
 	if (list->children && expr_node->op_type == IS_CONST && Z_TYPE(expr_node->u.constant) == IS_STRING) {
 		zval_make_interned_string(&expr_node->u.constant);
