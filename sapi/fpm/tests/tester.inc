@@ -509,7 +509,7 @@ class Tester
             return new Response(null, true);
         }
         if (is_null($uri)) {
-            $uri = $this->makeFile('src.php', $this->code);
+            $uri = $this->makeSourceFile();
         }
 
         $params = array_merge(
@@ -534,7 +534,6 @@ class Tester
             ],
             $headers
         );
-
         try {
             $this->response = new Response(
                 $this->getClient($address, $connKeepAlive)->request_data($params, false)
@@ -938,6 +937,14 @@ class Tester
         file_put_contents($filePath, $content);
 
         return $filePath;
+    }
+
+    /**
+     * @return string
+     */
+    public function makeSourceFile()
+    {
+        return $this->makeFile('src.php', $this->code);
     }
 
     /**
