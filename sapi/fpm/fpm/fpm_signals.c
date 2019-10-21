@@ -20,6 +20,7 @@
 
 static int sp[2];
 static sigset_t block_sigset;
+static sigset_t child_block_sigset;
 
 const char *fpm_signal_names[NSIG + 1] = {
 #ifdef SIGHUP
@@ -167,7 +168,8 @@ static void sig_handler(int signo) /* {{{ */
 
 	if (fpm_globals.parent_pid != getpid()) {
 		/* prevent a signal race condition when child process
-			have not set up it's own signal handler yet */
+			do not set up it's own sigprocmask for some reason,
+			leads to #76601 in such cases */
 		return;
 	}
 
@@ -247,6 +249,10 @@ int fpm_signals_init_child() /* {{{ */
 	}
 
 	zend_signal_init();
+
+	if (0 > fpm_signals_unblock()) {
+		return -1;
+	}
 	return 0;
 }
 /* }}} */
@@ -276,6 +282,12 @@ int fpm_signals_init_mask(int *signum_array, size_t size) /* {{{ */
 			return -1;
 		}
 	}
+	memcpy(&child_block_sigset, &block_sigset, sizeof(block_sigset));
+	if (0 > sigaddset(&child_block_sigset, SIGTERM) ||
+	    0 > sigaddset(&child_block_sigset, SIGQUIT)) {
+		zlog(ZLOG_SYSERROR, "failed to prepare child signal block mask: sigaddset()");
+		return -1;
+	}
 	return 0;
 }
 /* }}} */
@@ -284,6 +296,16 @@ int fpm_signals_block() /* {{{ */
 {
 	if (0 > sigprocmask(SIG_BLOCK, &block_sigset, NULL)) {
 		zlog(ZLOG_SYSERROR, "failed to block signals");
+		return -1;
+	}
+	return 0;
+}
+/* }}} */
+
+int fpm_signals_child_block() /* {{{ */
+{
+	if (0 > sigprocmask(SIG_BLOCK, &child_block_sigset, NULL)) {
+		zlog(ZLOG_SYSERROR, "failed to block child signals");
 		return -1;
 	}
 	return 0;
