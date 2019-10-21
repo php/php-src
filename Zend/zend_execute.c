@@ -3192,16 +3192,17 @@ ZEND_API zend_bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_propert
 		}
 
 		if (result < 0) {
-			zend_property_info *ref_prop = ZEND_REF_FIRST_SOURCE(Z_REF_P(orig_val));
-			if (ZEND_TYPE_PURE_MASK_WITHOUT_NULL(prop_info->type)
-					!= ZEND_TYPE_PURE_MASK_WITHOUT_NULL(ref_prop->type)) {
-				/* Invalid due to conflicting coercion */
+			/* This is definitely an error, but we still need to determined why: Either because
+			 * the value is simply illegal for the type, or because or a conflicting coercion. */
+			zval tmp;
+			ZVAL_COPY(&tmp, val);
+			if (zend_verify_weak_scalar_type_hint(ZEND_TYPE_FULL_MASK(prop_info->type), &tmp)) {
+				zend_property_info *ref_prop = ZEND_REF_FIRST_SOURCE(Z_REF_P(orig_val));
 				zend_throw_ref_type_error_type(ref_prop, prop_info, val);
+				zval_ptr_dtor(&tmp);
 				return 0;
 			}
-			if (zend_verify_weak_scalar_type_hint(ZEND_TYPE_FULL_MASK(prop_info->type), val)) {
-				return 1;
-			}
+			zval_ptr_dtor(&tmp);
 		}
 	} else {
 		ZVAL_DEREF(val);
