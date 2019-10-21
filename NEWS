@@ -12,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed bug #74083 (master PHP-fpm is stopped on multiple reloads).
     (Maksim Nikulin)
 
+-Opcache:
+  . Fixed bug #78512 (Cannot make preload work). (Dmitry)
+
 - Reflection:
   . Fixed bug #78697 (ReflectionClass::implementsInterface - inaccurate error 
     message with traits). (villfa)
