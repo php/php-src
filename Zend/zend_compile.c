@@ -5708,11 +5708,8 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		if (type_ast) {
 			uint32_t default_type = default_ast ? Z_TYPE(default_node.u.constant) : IS_UNDEF;
 
-			zend_bool has_class;
-
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 			arg_info->type = zend_compile_typename(type_ast, default_type == IS_NULL);
-			has_class = ZEND_TYPE_HAS_CLASS(arg_info->type);
 
 			if (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_VOID) {
 				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
