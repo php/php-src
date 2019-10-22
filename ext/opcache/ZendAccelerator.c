@@ -4140,7 +4140,11 @@ static void preload_load(void)
 	if (EG(class_table)) {
 		EG(persistent_classes_count)   = EG(class_table)->nNumUsed;
 	}
-	CG(map_ptr_last) = ZCSG(map_ptr_last);
+	if (CG(map_ptr_last) != ZCSG(map_ptr_last)) {
+		CG(map_ptr_last) = ZCSG(map_ptr_last);
+		CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(CG(map_ptr_last) + 1, 4096);
+		CG(map_ptr_base) = perealloc(CG(map_ptr_base), CG(map_ptr_size) * sizeof(void*), 1);
+	}
 }
 
 static int accel_preload(const char *config)
