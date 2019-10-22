@@ -3083,15 +3083,13 @@ static zend_ffi_type *zend_ffi_remember_type(zend_ffi_type *type) /* {{{ */
 }
 /* }}} */
 
-ZEND_METHOD(FFI, load) /* {{{ */
+static zend_ffi *zend_ffi_load(const char *filename, zend_bool preload) /* {{{ */
 {
-	zend_string *fn;
 	struct stat buf;
 	int fd;
-	char *filename, *code, *code_pos, *scope_name, *lib;
+	char *code, *code_pos, *scope_name, *lib;
 	size_t code_size, scope_name_len;
 	zend_ffi *ffi;
-	zend_bool preload = (CG(compiler_options) & ZEND_COMPILE_PRELOAD) != 0;
 	DL_HANDLE handle = NULL;
 	zend_ffi_scope *scope = NULL;
 	zend_string *name;
@@ -3099,19 +3097,13 @@ ZEND_METHOD(FFI, load) /* {{{ */
 	zend_ffi_tag *tag;
 	void *addr;
 
-	ZEND_FFI_VALIDATE_API_RESTRICTION();
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(fn)
-	ZEND_PARSE_PARAMETERS_END();
-
-	filename = ZSTR_VAL(fn);
 	if (stat(filename, &buf) != 0) {
 		if (preload) {
 			zend_error(E_WARNING, "FFI: failed pre-loading '%s', file doesn't exist", filename);
 		} else {
 			zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s', file doesn't exist", filename);
 		}
-		return;
+		return NULL;
 	}
 
 	if ((buf.st_mode & S_IFMT) != S_IFREG) {
@@ -3120,7 +3112,7 @@ ZEND_METHOD(FFI, load) /* {{{ */
 		} else {
 			zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s', not a regular file", filename);
 		}
-		return;
+		return NULL;
 	}
 
 	code_size = buf.st_size;
@@ -3134,7 +3126,7 @@ ZEND_METHOD(FFI, load) /* {{{ */
 		}
 		efree(code);
 		close(fd);
-		return;
+		return NULL;
 	}
 	close(fd);
 	code[code_size] = 0;
@@ -3153,7 +3145,7 @@ ZEND_METHOD(FFI, load) /* {{{ */
 	if (!code_pos) {
 		efree(code);
 		FFI_G(persistent) = 0;
-		return;
+		return NULL;
 	}
 	code_size -= code_pos - code;
 
@@ -3318,7 +3310,11 @@ ZEND_METHOD(FFI, load) /* {{{ */
 			}
 		}
 
-		ffi = (zend_ffi*)zend_ffi_new(zend_ffi_ce);
+		if (EG(objects_store).object_buckets) {
+			ffi = (zend_ffi*)zend_ffi_new(zend_ffi_ce);
+		} else {
+			ffi = ecalloc(1, sizeof(zend_ffi));
+		}
 		ffi->symbols = scope->symbols;
 		ffi->tags = scope->tags;
 		ffi->persistent = 1;
@@ -3333,7 +3329,7 @@ ZEND_METHOD(FFI, load) /* {{{ */
 	FFI_G(symbols) = NULL;
 	FFI_G(tags) = NULL;
 
-	RETURN_OBJ(&ffi->std);
+	return ffi;
 
 cleanup:
 	efree(code);
@@ -3348,6 +3344,30 @@ cleanup:
 		FFI_G(tags) = NULL;
 	}
 	FFI_G(persistent) = 0;
+	return NULL;
+}
+/* }}} */
+
+ZEND_METHOD(FFI, load) /* {{{ */
+{
+	zend_string *fn;
+	zend_ffi *ffi;
+
+	ZEND_FFI_VALIDATE_API_RESTRICTION();
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(fn)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (CG(compiler_options) & ZEND_COMPILE_PRELOAD_IN_CHILD) {
+		zend_throw_error(zend_ffi_exception_ce, "FFI::load() doesn't work in conjunction with \"opcache.pelaod_user\". Use \"ffi.preload\" instead.");
+		return;
+	}
+
+	ffi = zend_ffi_load(ZSTR_VAL(fn), (CG(compiler_options) & ZEND_COMPILE_PRELOAD) != 0);
+
+	if (ffi) {
+		RETURN_OBJ(&ffi->std);
+	}
 }
 /* }}} */
 
@@ -4813,7 +4833,50 @@ static ZEND_INI_DISP(zend_ffi_enable_displayer_cb) /* {{{ */
 
 ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY3_EX("ffi.enable", "preload", ZEND_INI_SYSTEM, OnUpdateFFIEnable, NULL, NULL, NULL, zend_ffi_enable_displayer_cb)
+	STD_ZEND_INI_ENTRY("ffi.preload", NULL, ZEND_INI_SYSTEM, OnUpdateString, preload, zend_ffi_globals, ffi_globals)
 ZEND_INI_END()
+
+static int zend_ffi_preload(char *preload) /* {{{ */
+{
+	zend_ffi *ffi;
+	char *s = NULL, *e, *filename;
+
+	e = preload;
+	while (*e) {
+		switch (*e) {
+			case ZEND_PATHS_SEPARATOR:
+				if (s) {
+					filename = estrndup(s, e-s);
+					ffi = zend_ffi_load(filename, 1);
+					efree(filename);
+					if (!ffi) {
+						return FAILURE;
+					}
+					efree(ffi);
+					s = NULL;
+				}
+				break;
+			default:
+				if (!s) {
+					s = e;
+				}
+				break;
+		}
+		e++;
+	}
+	if (s) {
+		filename = estrndup(s, e-s);
+		ffi = zend_ffi_load(filename, 1);
+		efree(filename);
+		if (!ffi) {
+			return FAILURE;
+		}
+		efree(ffi);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
 
 /* {{{ ZEND_MINIT_FUNCTION
  */
@@ -4975,6 +5038,12 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_ctype_handlers.get_closure          = NULL;
 	zend_ffi_ctype_handlers.get_properties       = zend_fake_get_properties;
 	zend_ffi_ctype_handlers.get_gc               = zend_fake_get_gc;
+
+	if (FFI_G(preload)) {
+		if (zend_ffi_preload(FFI_G(preload)) != SUCCESS) {
+			return FAILURE;
+		}
+	}
 
 	return SUCCESS;
 }
