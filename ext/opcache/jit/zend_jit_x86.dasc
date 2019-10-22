@@ -4898,7 +4898,30 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, const
 			|8:
 			|	mov FCARG1a, r0
 			if (op1_info & (MAY_BE_ARRAY_OF_REF)) {
-				|	ZVAL_DEREF FCARG1a, MAY_BE_REF
+				binary_op_type binary_op = get_binary_op(opline->extended_value);
+				|	IF_NOT_Z_TYPE, FCARG1a, IS_REFERENCE, >1
+				|	GET_Z_PTR FCARG1a, FCARG1a
+				|	cmp aword [FCARG1a + offsetof(zend_reference, sources.ptr)], 0
+				|	jnz >2
+				|	add FCARG1a, offsetof(zend_reference, val)
+				|.cold_code
+				|2:
+				|	LOAD_ZVAL_ADDR FCARG2a, op3_addr
+				|.if X64
+					|	LOAD_ADDR CARG3, binary_op
+				|.else
+					|	sub r4, 12
+					|	PUSH_ADDR binary_op, r0
+				|.endif
+				|	SAVE_VALID_OPLINE opline
+				|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+				|.if not(X64)
+				|	add r4, 12
+				|.endif
+				zend_jit_check_exception(Dst);
+				|	jmp >9
+				|.code
+				|1:
 			}
 		}
 
