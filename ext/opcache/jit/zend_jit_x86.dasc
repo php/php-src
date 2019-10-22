@@ -4965,6 +4965,9 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, const
 		|.if not(X64)
 		|	add r4, 8
 		|.endif
+		if (!zend_jit_check_exception(Dst)) {
+			return 0;
+		}
 
 		if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
 			|	jmp >9 // END
