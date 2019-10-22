@@ -3358,6 +3358,11 @@ ZEND_METHOD(FFI, load) /* {{{ */
 		Z_PARAM_STR(fn)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (CG(compiler_options) & ZEND_COMPILE_PRELOAD_IN_CHILD) {
+		zend_throw_error(zend_ffi_exception_ce, "FFI::load() doesn't work in conjunction with \"opcache.pelaod_user\". Use \"ffi.preload\" instead.");
+		return;
+	}
+
 	ffi = zend_ffi_load(ZSTR_VAL(fn), (CG(compiler_options) & ZEND_COMPILE_PRELOAD) != 0);
 
 	if (ffi) {
