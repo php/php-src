@@ -132,6 +132,13 @@ static size_t tsrm_tls_index;
 static size_t tsrm_tls_offset;
 #endif
 
+/* By default avoid JITing inline handlers if it does not seem profitable due to lack of
+ * type information. Disabling this option allows testing some JIT handlers in the
+ * presence of try/catch blocks, which prevent SSA construction. */
+#ifndef PROFITABILITY_CHECKS
+# define PROFITABILITY_CHECKS 1
+#endif
+
 |.type EX, zend_execute_data, FP
 |.type OP, zend_op
 |.type ZVAL, zval
@@ -3482,7 +3489,7 @@ static int zend_jit_math(dasm_State **Dst, const zend_op *opline, int *opnum, co
 	uint32_t op1_info, op2_info, res_use_info;
 	zend_jit_addr op1_addr, op2_addr, res_addr;
 
-	if (!ssa->ops || !ssa->var_info) {
+	if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
 		goto fallback;
 	}
 
@@ -3815,12 +3822,16 @@ static int zend_jit_long_math(dasm_State **Dst, const zend_op *opline, int *opnu
 	zend_jit_addr op1_addr, op2_addr, res_addr;
 	int op1_ssa_var, op2_ssa_var;
 
-	if (!ssa->ops || !ssa->var_info) {
+	if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
 		goto fallback;
 	}
 
-	op1_ssa_var = ssa->ops[opline - op_array->opcodes].op1_use;
-	op2_ssa_var = ssa->ops[opline - op_array->opcodes].op2_use;
+	if (ssa->ops) {
+		op1_ssa_var = ssa->ops[opline - op_array->opcodes].op1_use;
+		op2_ssa_var = ssa->ops[opline - op_array->opcodes].op2_use;
+	} else {
+		op1_ssa_var = op2_ssa_var = -1;
+	}
 	op1_info = OP1_INFO();
 	op2_info = OP2_INFO();
 	res_use_info = RES_USE_INFO();
@@ -3852,7 +3863,7 @@ static int zend_jit_long_math(dasm_State **Dst, const zend_op *opline, int *opnu
 		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, (opline+1)->result.var);
 		res_use_info = -1;
 	} else {
-		res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, ra, ssa->ops[opline - op_array->opcodes].result_def);
+		res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, ra, ra ? ssa->ops[opline - op_array->opcodes].result_def : -1);
 	}
 
 	if (!zend_jit_long_math_helper(Dst, opline, opline->opcode, op_array, ssa, opline->op1_type, opline->op1, op1_addr, op1_info, op1_ssa_var, opline->op2_type, opline->op2, op2_addr, op2_info, op2_ssa_var, opline->result.var, res_addr, RES_INFO(), res_use_info)) {
@@ -3960,7 +3971,7 @@ static int zend_jit_concat(dasm_State **Dst, const zend_op *opline, int *opnum, 
 	uint32_t op1_info, op2_info;
 	zend_jit_addr op1_addr, op2_addr, res_addr;
 
-	if (!ssa->ops || !ssa->var_info) {
+	if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
 		goto fallback;
 	}
 
@@ -4591,7 +4602,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, const ze
 		goto fallback;
 	}
 
-	if (!ssa->ops || !ssa->var_info) {
+	if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
 		goto fallback;
 	}
 
@@ -4807,11 +4818,11 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, const
 		goto fallback;
 	}
 
-	if (!ssa->ops || !ssa->var_info) {
+	if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
 		goto fallback;
 	}
 
-	op3_ssa_var = ssa->ops[opline - op_array->opcodes + 1].op1_use;
+	op3_ssa_var = ssa->ops ? ssa->ops[opline - op_array->opcodes + 1].op1_use : -1;
 	op1_info = OP1_INFO();
 	op2_info = OP2_INFO();
 
@@ -5022,12 +5033,16 @@ static int zend_jit_assign_op(dasm_State **Dst, const zend_op *opline, const zen
 		goto fallback;
 	}
 
-	if (!ssa->ops || !ssa->var_info) {
+	if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
 		goto fallback;
 	}
 
-	op1_ssa_var = ssa->ops[opline - op_array->opcodes].op1_use;
-	op2_ssa_var = ssa->ops[opline - op_array->opcodes].op2_use;
+	if (ssa->ops) {
+		op1_ssa_var = ssa->ops[opline - op_array->opcodes].op1_use;
+		op2_ssa_var = ssa->ops[opline - op_array->opcodes].op2_use;
+	} else {
+		op1_ssa_var = op2_ssa_var = -1;
+	}
 	op1_info = OP1_INFO();
 	op2_info = OP2_INFO();
 
@@ -6742,7 +6757,11 @@ static int zend_jit_assign(dasm_State **Dst, const zend_op *opline, const zend_o
 	uint32_t op1_info, op2_info;
 	zend_jit_addr op1_addr, op2_addr, res_addr;
 
-	if (opline->op1_type != IS_CV || !ssa->ops || !ssa->var_info) {
+	if (opline->op1_type != IS_CV) {
+		goto fallback;
+	}
+
+	if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
 		goto fallback;
 	}
 
@@ -8353,8 +8372,12 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 	uint32_t op1_info;
 	zend_jit_addr op1_addr, ret_addr;
 
-	if (op_array->type == ZEND_EVAL_CODE || !op_array->function_name || !ssa->ops || !ssa->var_info) {
+	if (op_array->type == ZEND_EVAL_CODE || !op_array->function_name) {
 		// TODO: support for top-level code
+		return zend_jit_tail_handler(Dst, opline);
+	}
+
+	if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
 		return zend_jit_tail_handler(Dst, opline);
 	}
 
@@ -8481,7 +8504,7 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, cons
 	uint32_t op1_info, op2_info, res_info;
 	zend_jit_addr op1_addr, orig_op1_addr, op2_addr, res_addr;
 
-	if (!ssa->ops || !ssa->var_info) {
+	if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
 		goto fallback;
 	}
 
@@ -8672,8 +8695,12 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, i
 	uint32_t op1_info, op2_info;
 	zend_jit_addr op1_addr, op2_addr, res_addr;
 
-	if (!ssa->ops || !ssa->var_info || (opline->extended_value & ZEND_ISEMPTY)) {
+	if ((opline->extended_value & ZEND_ISEMPTY)) {
 		// TODO: support for empty() ???
+		goto fallback;
+	}
+
+	if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
 		goto fallback;
 	}
 
