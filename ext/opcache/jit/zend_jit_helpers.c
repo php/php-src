@@ -1340,6 +1340,7 @@ static void ZEND_FASTCALL zend_jit_assign_cv_to_typed_ref(zend_reference *ref, z
 	zend_jit_assign_to_typed_ref(ref, value, IS_CV);
 }
 
+
 static zend_property_info *zend_jit_get_prop_not_accepting_double(zend_reference *ref)
 {
 	zend_property_info *prop;
@@ -1437,6 +1438,19 @@ static void ZEND_FASTCALL zend_jit_post_dec_typed_ref(zval *var_ptr, zend_refere
 	} else if (UNEXPECTED(!zend_verify_ref_assignable_zval(ref, var_ptr, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
 		zval_ptr_dtor(var_ptr);
 		ZVAL_COPY_VALUE(var_ptr, ret);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_assign_op_to_typed_ref(zend_reference *ref, zval *val, binary_op_type binary_op)
+{
+	zval z_copy;
+
+	binary_op(&z_copy, &ref->val, val);
+	if (EXPECTED(zend_verify_ref_assignable_zval(ref, &z_copy, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
+		zval_ptr_dtor(&ref->val);
+		ZVAL_COPY_VALUE(&ref->val, &z_copy);
+	} else {
+		zval_ptr_dtor(&z_copy);
 	}
 }
 

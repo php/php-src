@@ -5047,29 +5047,58 @@ static int zend_jit_assign_op(dasm_State **Dst, const zend_op *opline, const zen
 	}
 
 	if (op1_info & MAY_BE_REF) {
+		binary_op_type binary_op = get_binary_op(opline->extended_value);
 		|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
-		|	ZVAL_DEREF FCARG1a, op1_info
+		|	IF_NOT_Z_TYPE, FCARG1a, IS_REFERENCE, >1
+		|	GET_Z_PTR FCARG1a, FCARG1a
+		|	cmp aword [FCARG1a + offsetof(zend_reference, sources.ptr)], 0
+		|	jnz >2
+		|	add FCARG1a, offsetof(zend_reference, val)
+		|.cold_code
+		|2:
+		|	LOAD_ZVAL_ADDR FCARG2a, op2_addr
+		|.if X64
+			|	LOAD_ADDR CARG3, binary_op
+		|.else
+			|	sub r4, 12
+			|	PUSH_ADDR binary_op, r0
+		|.endif
+		|	SAVE_VALID_OPLINE opline
+		|	EXT_CALL zend_jit_assign_op_to_typed_ref, r0
+		|.if not(X64)
+		|	add r4, 12
+		|.endif
+		zend_jit_check_exception(Dst);
+		|	jmp >9
+		|.code
+		|1:
 		op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
 	}
 
+	int result;
 	switch (opline->extended_value) {
 		case ZEND_ADD:
 		case ZEND_SUB:
 		case ZEND_MUL:
 		case ZEND_DIV:
-			return zend_jit_math_helper(Dst, opline, opline->extended_value, op_array, ssa, opline->op1_type, opline->op1, op1_addr, op1_info, opline->op2_type, opline->op2, op2_addr, op2_info, opline->op1.var, op1_addr, OP1_DEF_INFO(), op1_info);
+			result = zend_jit_math_helper(Dst, opline, opline->extended_value, op_array, ssa, opline->op1_type, opline->op1, op1_addr, op1_info, opline->op2_type, opline->op2, op2_addr, op2_info, opline->op1.var, op1_addr, OP1_DEF_INFO(), op1_info);
+			break;
 		case ZEND_BW_OR:
 		case ZEND_BW_AND:
 		case ZEND_BW_XOR:
 		case ZEND_SL:
 		case ZEND_SR:
 		case ZEND_MOD:
-			return zend_jit_long_math_helper(Dst, opline, opline->extended_value, op_array, ssa, opline->op1_type, opline->op1, op1_addr, op1_info, op1_ssa_var, opline->op2_type, opline->op2, op2_addr, op2_info, op2_ssa_var, opline->op1.var, op1_addr, OP1_DEF_INFO(), op1_info);
+			result = zend_jit_long_math_helper(Dst, opline, opline->extended_value, op_array, ssa, opline->op1_type, opline->op1, op1_addr, op1_info, op1_ssa_var, opline->op2_type, opline->op2, op2_addr, op2_info, op2_ssa_var, opline->op1.var, op1_addr, OP1_DEF_INFO(), op1_info);
+			break;
 		case ZEND_CONCAT:
-			return zend_jit_concat_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, op1_addr, op1_info, opline->op2_type, opline->op2, op2_addr, op2_info, op1_addr, OP1_DEF_INFO());
+			result = zend_jit_concat_helper(Dst, opline, op_array, ssa, opline->op1_type, opline->op1, op1_addr, op1_info, opline->op2_type, opline->op2, op2_addr, op2_info, op1_addr, OP1_DEF_INFO());
+			break;
 		default:
 			ZEND_ASSERT(0);
 	}
+	|9:
+	return result;
 
 fallback:
 	/* fallback to subroutine threading */
