@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.1.33
+24 Oct 2019, PHP 7.1.33
 
 - FPM:
   . Fixed bug #78599 (env_path_info underflow in fpm_main.c can lead to RCE).
