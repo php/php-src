@@ -234,6 +234,11 @@ static void zend_hash_clone_prop_info(HashTable *ht)
 			}
 
 			if (ZEND_TYPE_HAS_LIST(prop_info->type)) {
+				zend_type_list *list = ZEND_TYPE_LIST(prop_info->type);
+				ZEND_ASSERT(IN_ARENA(list));
+				list = ARENA_REALLOC(list);
+				ZEND_TYPE_SET_PTR(prop_info->type, list);
+
 				void **entry;
 				ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(prop_info->type), entry) {
 					if (ZEND_TYPE_LIST_IS_CE(*entry)) {

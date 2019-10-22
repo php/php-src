@@ -139,10 +139,12 @@ typedef struct {
 #define _ZEND_TYPE_MASK ((1u << 24) - 1)
 #define _ZEND_TYPE_MAY_BE_MASK ((1u << (IS_VOID+1)) - 1)
 /* Only one of these bits may be set. */
-#define _ZEND_TYPE_LIST_BIT (1u << 21)
-#define _ZEND_TYPE_CE_BIT   (1u << 22)
 #define _ZEND_TYPE_NAME_BIT (1u << 23)
+#define _ZEND_TYPE_CE_BIT   (1u << 22)
+#define _ZEND_TYPE_LIST_BIT (1u << 21)
 #define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_CE_BIT|_ZEND_TYPE_NAME_BIT)
+/* Whether the type list is arena allocated */
+#define _ZEND_TYPE_ARENA_BIT (1u << 20)
 /* Must have same value as MAY_BE_NULL */
 #define _ZEND_TYPE_NULLABLE_BIT 0x2
 
@@ -160,6 +162,9 @@ typedef struct {
 
 #define ZEND_TYPE_HAS_LIST(t) \
 	((((t).type_mask) & _ZEND_TYPE_LIST_BIT) != 0)
+
+#define ZEND_TYPE_USES_ARENA(t) \
+	((((t).type_mask) & _ZEND_TYPE_ARENA_BIT) != 0)
 
 #define ZEND_TYPE_IS_ONLY_MASK(t) \
 	(ZEND_TYPE_IS_SET(t) && (t).ptr == NULL)

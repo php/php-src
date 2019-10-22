@@ -110,7 +110,9 @@ static void zend_always_inline zend_type_release(zend_type *type) {
 				zend_string_release(ZEND_TYPE_LIST_GET_NAME(entry));
 			}
 		} ZEND_TYPE_LIST_FOREACH_END();
-		efree(ZEND_TYPE_LIST(*type));
+		if (!ZEND_TYPE_USES_ARENA(*type)) {
+			efree(ZEND_TYPE_LIST(*type));
+		}
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {
 		zend_string_release(ZEND_TYPE_NAME(*type));
 	}
@@ -140,8 +142,8 @@ ZEND_API void zend_function_dtor(zval *zv)
 
 	if (function->type == ZEND_USER_FUNCTION) {
 		ZEND_ASSERT(function->common.function_name);
-		destroy_op_array(&function->op_array);
-		/* op_arrays are allocated on arena, so we don't have to free them */
+	destroy_op_array(&function->op_array);
+	/* op_arrays are allocated on arena, so we don't have to free them */
 	} else {
 		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
 		ZEND_ASSERT(function->common.function_name);

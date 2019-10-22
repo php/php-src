@@ -152,7 +152,11 @@ static void zend_persist_type_calc(zend_type *type)
 {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		void **entry;
-		ADD_SIZE(ZEND_TYPE_LIST_SIZE(ZEND_TYPE_LIST(*type)->num_types));
+		if (ZEND_TYPE_USES_ARENA(*type) && !ZCG(is_immutable_class)) {
+			ADD_ARENA_SIZE(ZEND_TYPE_LIST_SIZE(ZEND_TYPE_LIST(*type)->num_types));
+		} else {
+			ADD_SIZE(ZEND_TYPE_LIST_SIZE(ZEND_TYPE_LIST(*type)->num_types));
+		}
 		ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(*type), entry) {
 			zend_string *type_name = ZEND_TYPE_LIST_GET_NAME(*entry);
 			ADD_INTERNED_STRING(type_name);

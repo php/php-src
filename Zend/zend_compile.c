@@ -5500,7 +5500,8 @@ static zend_bool zend_type_contains_traversable(zend_type type) {
 
 // TODO: Ideally we'd canonicalize "iterable" into "array|Traversable" and essentially
 // treat it as a built-in type alias.
-static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null) /* {{{ */
+static zend_type zend_compile_typename(
+		zend_ast *ast, zend_bool force_allow_null, zend_bool use_arena) /* {{{ */
 {
 	zend_bool allow_null = force_allow_null;
 	zend_type type = ZEND_TYPE_INIT_NONE(0);
@@ -5534,16 +5535,27 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 					if (ZEND_TYPE_HAS_LIST(type)) {
 						/* Add name to existing name list. */
 						zend_type_list *old_list = ZEND_TYPE_LIST(type);
-						list = erealloc(old_list, ZEND_TYPE_LIST_SIZE(old_list->num_types + 1));
+						if (use_arena) {
+							// TODO: Add a zend_arena_realloc API?
+							list = zend_arena_alloc(
+								&CG(arena), ZEND_TYPE_LIST_SIZE(old_list->num_types + 1));
+							memcpy(list, old_list, ZEND_TYPE_LIST_SIZE(old_list->num_types));
+						} else {
+							list = erealloc(old_list, ZEND_TYPE_LIST_SIZE(old_list->num_types + 1));
+						}
 						list->types[list->num_types++] = ZEND_TYPE_NAME(single_type);
 					} else {
 						/* Switch from single name to name list. */
-						list = emalloc(ZEND_TYPE_LIST_SIZE(2));
+						size_t size = ZEND_TYPE_LIST_SIZE(2);
+						list = use_arena ? zend_arena_alloc(&CG(arena), size) : emalloc(size);
 						list->num_types = 2;
 						list->types[0] = ZEND_TYPE_NAME(type);
 						list->types[1] = ZEND_TYPE_NAME(single_type);
 					}
 					ZEND_TYPE_SET_LIST(type, list);
+					if (use_arena) {
+						ZEND_TYPE_FULL_MASK(type) |= _ZEND_TYPE_ARENA_BIT;
+					}
 
 					/* Check for trivially redundant class types */
 					for (size_t i = 0; i < list->num_types - 1; i++) {
@@ -5633,7 +5645,8 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		/* Use op_array->arg_info[-1] for return type */
 		arg_infos = safe_emalloc(sizeof(zend_arg_info), list->children + 1, 0);
 		arg_infos->name = NULL;
-		arg_infos->type = zend_compile_typename(return_type_ast, 0);
+		arg_infos->type = zend_compile_typename(
+			return_type_ast, /* force_allow_null */ 0, /* use_arena */ 0);
 		ZEND_TYPE_FULL_MASK(arg_infos->type) |= _ZEND_ARG_INFO_FLAGS(
 			(op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0, /* is_variadic */ 0);
 		arg_infos++;
@@ -5709,7 +5722,8 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 			uint32_t default_type = default_ast ? Z_TYPE(default_node.u.constant) : IS_UNDEF;
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
-			arg_info->type = zend_compile_typename(type_ast, default_type == IS_NULL);
+			arg_info->type = zend_compile_typename(
+				type_ast, default_type == IS_NULL, /* use_arena */ 0);
 
 			if (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_VOID) {
 				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
@@ -6238,7 +6252,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags) /
 		zend_type type = ZEND_TYPE_INIT_NONE(0);
 
 		if (type_ast) {
-			type = zend_compile_typename(type_ast, 0);
+			type = zend_compile_typename(type_ast, /* force_allow_null */ 0, /* use_arena */ 1);
 
 			if (ZEND_TYPE_FULL_MASK(type) & (MAY_BE_VOID|MAY_BE_CALLABLE)) {
 				zend_string *str = zend_type_to_string(type);

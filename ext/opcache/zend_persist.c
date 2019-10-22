@@ -262,7 +262,17 @@ static void zend_persist_type(zend_type *type) {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		void **entry;
 		zend_type_list *list = ZEND_TYPE_LIST(*type);
-		list = zend_shared_memdup_put_free(list, ZEND_TYPE_LIST_SIZE(list->num_types));
+		if (ZEND_TYPE_USES_ARENA(*type)) {
+			if (!ZCG(is_immutable_class)) {
+				list = zend_shared_memdup_arena_put(list, ZEND_TYPE_LIST_SIZE(list->num_types));
+			} else {
+				/* Moved from arena to SHM because type list was fully resolved. */
+				list = zend_shared_memdup_put(list, ZEND_TYPE_LIST_SIZE(list->num_types));
+				ZEND_TYPE_FULL_MASK(*type) &= ~_ZEND_TYPE_ARENA_BIT;
+			}
+		} else {
+			list = zend_shared_memdup_put_free(list, ZEND_TYPE_LIST_SIZE(list->num_types));
+		}
 		ZEND_TYPE_SET_PTR(*type, list);
 
 		ZEND_TYPE_LIST_FOREACH_PTR(list, entry) {
