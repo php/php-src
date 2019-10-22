@@ -131,10 +131,10 @@ unlink($data_file);
 -- Iteration 9 --
 0.5
 -- Iteration 10 --
-Too few arguments
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 11 --
-Too few arguments
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 12 --
 1
@@ -153,13 +153,13 @@ string
 -- Iteration 19 --
 string
 -- Iteration 20 --
-Too few arguments
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 21 --
-Too few arguments
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 22 --
-Too few arguments
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 23 --
 Resource id #%d

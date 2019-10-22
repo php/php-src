@@ -27,36 +27,36 @@ $arg2 = 'two';
 echo "\n-- Call printf with one argument less than expected --\n";
 try {
     var_dump( printf($format1) );
-} catch (\ValueError $e) {
+} catch (\ArgumentCountError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
     var_dump( printf($format2,$arg1) );
-} catch (\ValueError $e) {
+} catch (\ArgumentCountError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
     var_dump( printf($format3,$arg1,$arg2) );
-} catch (\ValueError $e) {
+} catch (\ArgumentCountError $e) {
     echo $e->getMessage(), "\n";
 }
 
 echo "\n-- Call printf with two argument less than expected --\n";
 try {
     var_dump( printf($format2) );
-} catch (\Error $e) {
+} catch (\ArgumentCountError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
     var_dump( printf($format3,$arg1) );
-} catch (\ValueError $e) {
+} catch (\ArgumentCountError $e) {
     echo $e->getMessage(), "\n";
 }
 
 echo "\n-- Call printf with three argument less than expected --\n";
 try {
     var_dump( printf($format3) );
-} catch (\ValueError $e) {
+} catch (\ArgumentCountError $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -71,14 +71,14 @@ printf() expects at least 1 parameter, 0 given
 -- Testing printf() function with less than expected no. of arguments --
 
 -- Call printf with one argument less than expected --
-Too few arguments
-Too few arguments
-Too few arguments
+2 parameters are required, 1 given
+3 parameters are required, 2 given
+4 parameters are required, 3 given
 
 -- Call printf with two argument less than expected --
-Too few arguments
-Too few arguments
+3 parameters are required, 1 given
+4 parameters are required, 2 given
 
 -- Call printf with three argument less than expected --
-Too few arguments
+4 parameters are required, 1 given
 ===DONE===

@@ -139,10 +139,10 @@ int(13)
 int(3)
 
 -- Iteration 10 --
-Too few arguments
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 11 --
-Too few arguments
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 12 --
 1
@@ -177,13 +177,13 @@ string
 int(6)
 
 -- Iteration 20 --
-Too few arguments
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 21 --
-Too few arguments
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 22 --
-Too few arguments
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 23 --
 Resource id #%d

@@ -79,6 +79,7 @@ foreach($valid_strings as $string) {
     try {
         fprintf($file_handle, $string);
     } catch (\ValueError $e) {
+    } catch (\ArgumentCountError $e) {
     }
   fprintf($file_handle, "\n");
 }

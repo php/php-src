@@ -128,10 +128,10 @@ string(13) "1.07654321E-9"
 string(3) "0.5"
 
 -- Iteration 10 --
-Too few arguments
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 11 --
-Too few arguments
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 12 --
 string(1) "1"
@@ -158,13 +158,13 @@ string(6) "string"
 string(6) "string"
 
 -- Iteration 20 --
-Too few arguments
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 21 --
-Too few arguments
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 22 --
-Too few arguments
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 23 --
 string(%d) "Resource id #%d"

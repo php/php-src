@@ -41,7 +41,7 @@ $nbr = 5;
 $name = "voudras";
 try {
     printf("%d $string %s", $nbr, $name);
-} catch (\ValueError $e) {
+} catch (\ArgumentCountError $e) {
     print('Error found: '.$e->getMessage());
 }
 
@@ -237,7 +237,7 @@ printf("%d", $tempstring);
 printf() expects at least 1 parameter, 0 given
 
 *** Output for insufficient number of arguments ***
-Error found: Too few arguments
+Error found: 5 parameters are required, 3 given
 *** Output for scalar argument ***
 3
 *** Output for NULL as argument ***
