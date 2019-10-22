@@ -18,6 +18,15 @@
 
 #include "Zend/zend_API.h"
 
+static ZEND_COLD void undef_result_after_exception() {
+	const zend_op *opline = EG(opline_before_exception);
+	ZEND_ASSERT(EG(exception));
+	if (opline->result_type & (IS_VAR | IS_TMP_VAR)) {
+		zend_execute_data *execute_data = EG(current_execute_data);
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+	}
+}
+
 static zend_never_inline zend_function* ZEND_FASTCALL _zend_jit_init_func_run_time_cache(const zend_op_array *op_array) /* {{{ */
 {
 	void **run_time_cache;
@@ -469,6 +478,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_rw_helper(zend_array *ht, zval *di
 			goto num_index;
 		default:
 			zend_type_error("Illegal offset type");
+			undef_result_after_exception();
 			return NULL;
 	}
 
@@ -537,6 +547,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_dim_w_helper(zend_array *ht, zval *dim
 			goto num_index;
 		default:
 			zend_type_error("Illegal offset type");
+			undef_result_after_exception();
 			return NULL;
 	}
 
