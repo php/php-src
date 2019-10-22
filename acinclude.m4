@@ -2219,7 +2219,8 @@ AC_DEFUN([PHP_SETUP_ICU],[
 
       ICU_LIBS=`$PKG_CONFIG --libs icu-uc icu-io icu-i18n`
       ICU_INCS=`$PKG_CONFIG --cflags-only-I icu-uc icu-io icu-i18n`
-      ICU_CXXFLAGS="-DU_USING_ICU_NAMESPACE=1"
+      ICU_CXXFLAGS=`$PKG_CONFIG --variable=CXXFLAGS icu-uc icu-io icu-i18n`
+      ICU_CXXFLAGS="$ICU_CXXFLAGS -DU_USING_ICU_NAMESPACE=1"
 
       AC_MSG_RESULT([found $ICU_VERSION])
 
