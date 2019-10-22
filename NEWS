@@ -38,6 +38,10 @@ PHP                                                                        NEWS
   . Fixed bug #78442 ('Illegal component' on exif_read_data since PHP7)
 	(Kalle)
 
+- FPM:
+  . Fixed bug #78599 (env_path_info underflow in fpm_main.c can lead to RCE).
+    (CVE-2019-11043) (Jakub Zelenka)
+
 - MBString:
   . Fixed bug #78579 (mb_decode_numericentity: args number inconsistency).
     (cmb)
