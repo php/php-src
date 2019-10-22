@@ -86,3 +86,4 @@ jobs:
       parameters:
         configurationName: COVERAGE_DEBUG_ZTS
         configurationParameters: '--enable-debug --disable-zts'
+        timeoutInMinutes: 90
