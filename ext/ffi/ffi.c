@@ -3331,7 +3331,7 @@ ZEND_METHOD(FFI, load) /* {{{ */
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (CG(compiler_options) & ZEND_COMPILE_PRELOAD_IN_CHILD) {
-		zend_throw_error(zend_ffi_exception_ce, "FFI::load() doesn't work in conjunction with \"opcache.pelaod_user\". Use \"ffi.preload\" instead.");
+		zend_throw_error(zend_ffi_exception_ce, "FFI::load() doesn't work in conjunction with \"opcache.preload_user\". Use \"ffi.preload\" instead.");
 		return;
 	}
 
