@@ -4839,8 +4839,7 @@ static int zend_ffi_preload(char *preload) /* {{{ */
 	e = preload;
 	while (*e) {
 		switch (*e) {
-			case ' ':
-			case ',':
+			case ZEND_PATHS_SEPARATOR:
 				if (s) {
 					filename = estrndup(s, e-s);
 					ffi = zend_ffi_load(filename, 1);
