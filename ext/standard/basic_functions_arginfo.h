@@ -805,3 +805,135 @@ ZEND_END_ARG_INFO()
 #define arginfo_utf8_encode arginfo_bin2hex
 
 #define arginfo_utf8_decode arginfo_bin2hex
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Directory_close, 0, 0, 0)
+	ZEND_ARG_INFO(0, dir_handle)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_Directory_rewind arginfo_class_Directory_close
+
+#define arginfo_class_Directory_read arginfo_class_Directory_close
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_opendir, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+	ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO()
+
+#define arginfo_dir arginfo_opendir
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_closedir, 0, 0, IS_VOID, 0)
+	ZEND_ARG_INFO(0, dir_handle)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chdir, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chroot, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#define arginfo_getcwd arginfo_ob_get_flush
+
+#define arginfo_rewinddir arginfo_closedir
+
+#define arginfo_readdir arginfo_class_Directory_close
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_scandir, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, sorting_order, IS_LONG, 0)
+	ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO()
+
+#if defined(HAVE_GLOB)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_glob, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fileatime, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_filectime arginfo_fileatime
+
+#define arginfo_filegroup arginfo_fileatime
+
+#define arginfo_fileinode arginfo_fileatime
+
+#define arginfo_filemtime arginfo_fileatime
+
+#define arginfo_fileowner arginfo_fileatime
+
+#define arginfo_fileperms arginfo_fileatime
+
+#define arginfo_filesize arginfo_fileatime
+
+#define arginfo_filetype arginfo_fileatime
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_file_exists, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_is_writable arginfo_file_exists
+
+#define arginfo_is_writeable arginfo_file_exists
+
+#define arginfo_is_readable arginfo_file_exists
+
+#define arginfo_is_executable arginfo_file_exists
+
+#define arginfo_is_file arginfo_file_exists
+
+#define arginfo_is_dir arginfo_file_exists
+
+#define arginfo_is_link arginfo_file_exists
+
+#define arginfo_stat arginfo_fileatime
+
+#define arginfo_lstat arginfo_fileatime
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chown, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_INFO(0, user)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chgrp, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_INFO(0, group)
+ZEND_END_ARG_INFO()
+
+#define arginfo_lchown arginfo_chown
+
+#define arginfo_lchgrp arginfo_chgrp
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chmod, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_touch, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, time, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, atime, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_clearstatcache, 0, 0, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, clear_realpath_cache, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_disk_total_space, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, directory, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_disk_free_space arginfo_disk_total_space
+
+#define arginfo_diskfreespace arginfo_disk_total_space
+
+#define arginfo_realpath_cache_get arginfo_ob_list_handlers
+
+#define arginfo_realpath_cache_size arginfo_ob_get_level

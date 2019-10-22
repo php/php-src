@@ -596,3 +596,145 @@ function substr_compare(string $main_str, string $str, int $offset, ?int $length
 function utf8_encode(string $data): string {}
 
 function utf8_decode(string $data): string {}
+
+/* dir.c */
+
+class Directory
+{
+    /**
+     * @param resource $dir_handle
+     * @return void
+     */
+    public function close($dir_handle = UNKNOWN) {}
+
+    /**
+     * @param resource $dir_handle
+     * @return void
+     */
+    public function rewind($dir_handle = UNKNOWN) {}
+
+    /**
+     * @param resource $dir_handle
+     * @return string|false
+     */
+    public function read($dir_handle = UNKNOWN) { }
+}
+
+/**
+ * @param resource $context
+ * @return resource|false
+ */
+function opendir(string $path, $context = UNKNOWN) {}
+
+/**
+ * @param resource $context
+ * @return Directory|false
+ */
+function dir(string $path, $context = UNKNOWN) {}
+
+/** @param resource $dir_handle */
+function closedir($dir_handle = UNKNOWN): void {}
+
+function chdir(string $directory): bool {}
+
+#if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
+function chroot(string $directory): bool {}
+#endif
+
+/** @return string|false */
+function getcwd() {}
+
+/** @param resource $dir_handle */
+function rewinddir($dir_handle = UNKNOWN): void {}
+
+/** @return string|false */
+function readdir($dir_handle = null) {}
+
+/**
+ * @param resource $context
+ * @return array|false
+ */
+function scandir(string $directory, int $sorting_order = 0, $context = UNKNOWN) {}
+
+#ifdef HAVE_GLOB
+/** @return array|false */
+function glob(string $pattern, int $flags = 0) {}
+#endif
+
+/* filestat.c */
+
+/** @return int|false */
+function fileatime(string $filename) {}
+
+/** @return int|false */
+function filectime(string $filename) {}
+
+/** @return int|false */
+function filegroup(string $filename) {}
+
+/** @return int|false */
+function fileinode(string $filename) {}
+
+/** @return int|false */
+function filemtime(string $filename) {}
+
+/** @return int|false */
+function fileowner(string $filename) {}
+
+/** @return int|false */
+function fileperms(string $filename) {}
+
+/** @return int|false */
+function filesize(string $filename) {}
+
+/** @return string|false */
+function filetype(string $filename) {}
+
+function file_exists(string $filename): bool {}
+
+function is_writable(string $filename): bool {}
+
+function is_writeable(string $filename): bool {}
+
+function is_readable(string $filename): bool {}
+
+function is_executable(string $filename): bool {}
+
+function is_file(string $filename): bool {}
+
+function is_dir(string $filename): bool {}
+
+function is_link(string $filename): bool {}
+
+/** @return array|false */
+function stat(string $filename) {}
+
+/** @return array|false */
+function lstat(string $filename) {}
+
+function chown(string $filename, $user): bool {}
+
+function chgrp(string $filename, $group): bool {}
+
+function lchown(string $filename, $user): bool {}
+
+function lchgrp(string $filename, $group): bool {}
+
+function chmod(string $filename, int $mode): bool {}
+
+function touch(string $filename, int $time = 0, int $atime = 0): bool {}
+
+function clearstatcache(bool $clear_realpath_cache = false, string $filename = ""): void {}
+
+/** @return float|false */
+function disk_total_space(string $directory) {}
+
+/** @return float|false */
+function disk_free_space(string $directory) {}
+
+/** @return float|false */
+function diskfreespace(string $directory) {}
+
+function realpath_cache_get(): array {}
+
+function realpath_cache_size(): int {}
