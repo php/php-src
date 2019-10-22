@@ -4590,9 +4590,11 @@ static int accel_finish_startup(void)
 		sapi_module.ub_write = preload_ub_write;
 		sapi_module.flush = preload_flush;
 
+#ifndef ZEND_WIN32
 		if (in_child) {
 			CG(compiler_options) |= ZEND_COMPILE_PRELOAD_IN_CHILD;
 		}
+#endif
 		CG(compiler_options) |= ZEND_COMPILE_PRELOAD;
 		CG(compiler_options) |= ZEND_COMPILE_HANDLE_OP_ARRAY;
 		CG(compiler_options) |= ZEND_COMPILE_IGNORE_INTERNAL_CLASSES;
