@@ -774,7 +774,7 @@ static size_t zend_ffi_arg_size(zend_ffi_type *type) /* {{{ */
 	size_t arg_size = 0;
 
 	ZEND_HASH_FOREACH_PTR(type->func.args, arg_type) {
-		arg_size += ZEND_FFI_TYPE(arg_type)->size;
+		arg_size += MAX(ZEND_FFI_TYPE(arg_type)->size, sizeof(size_t));
 	} ZEND_HASH_FOREACH_END();
 	return arg_size;
 }
