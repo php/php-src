@@ -271,6 +271,10 @@ PHP 8.0 UPGRADE NOTES
     point. An explicit call to chr() can be used to restore the previous
     behavior.
   . The needle argument for strpos(), strrpos(), stripos(), strripos(), strstr() and stristr() can now be empty.
+  . The length argument for substr(), substr_count(), substr_compare(), and
+    iconv_substr() can now be null. Null values will behave as if no length
+    argument was provided and will therefore return the remainder of the string
+    instead of an empty string.
   . The 'salt' option of password_hash() is no longer supported. If the 'salt'
     option is used a warning is generated, the provided salt is ignored, and a
     generated salt is used instead.
