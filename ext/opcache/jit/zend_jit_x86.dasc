@@ -4621,7 +4621,21 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, const ze
 
 	if (op1_info & MAY_BE_REF) {
 		|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
-		|	ZVAL_DEREF FCARG1a, op1_info
+		|	IF_NOT_Z_TYPE FCARG1a, IS_REFERENCE, >1
+		|	GET_Z_PTR FCARG2a, FCARG1a
+		|	IF_NOT_TYPE byte [FCARG2a + offsetof(zend_reference, val) + offsetof(zval, u1.v.type)], IS_ARRAY, >2
+		|	lea FCARG1a, [FCARG2a + offsetof(zend_reference, val)]
+		|	jmp >3
+		|.cold_code
+		|2:
+		|	SAVE_VALID_OPLINE opline
+		|	EXT_CALL zend_jit_prepare_assign_dim_ref, r0
+		|	test r0, r0
+		|	jz ->exception_handler_undef
+		|	mov FCARG1a, r0
+		|	jmp >1
+		|.code
+		|1:
 		op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
 	}
 
@@ -4629,6 +4643,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, const ze
 		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_ARRAY)) {
 			|	IF_NOT_ZVAL_TYPE op1_addr, IS_ARRAY, >7
 		}
+		|3:
 		|	SEPARATE_ARRAY op1_addr, op1_info, 1
 	} else if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
 		if (op1_info & (MAY_BE_ANY-(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY))) {
@@ -4832,7 +4847,21 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, const
 
 	if (op1_info & MAY_BE_REF) {
 		|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
-		|	ZVAL_DEREF FCARG1a, op1_info
+		|	IF_NOT_Z_TYPE FCARG1a, IS_REFERENCE, >1
+		|	GET_Z_PTR FCARG2a, FCARG1a
+		|	IF_NOT_TYPE byte [FCARG2a + offsetof(zend_reference, val) + offsetof(zval, u1.v.type)], IS_ARRAY, >2
+		|	lea FCARG1a, [FCARG2a + offsetof(zend_reference, val)]
+		|	jmp >3
+		|.cold_code
+		|2:
+		|	SAVE_VALID_OPLINE opline
+		|	EXT_CALL zend_jit_prepare_assign_dim_ref, r0
+		|	test r0, r0
+		|	jz ->exception_handler_undef
+		|	mov FCARG1a, r0
+		|	jmp >1
+		|.code
+		|1:
 		op1_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
 	}
 
@@ -4840,6 +4869,7 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, const
 		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - MAY_BE_ARRAY)) {
 			|	IF_NOT_ZVAL_TYPE op1_addr, IS_ARRAY, >7
 		}
+		|3:
 		|	SEPARATE_ARRAY op1_addr, op1_info, 1
 	}
 	if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
