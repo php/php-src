@@ -35,6 +35,15 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#ifdef HAVE_GLOB
+#ifdef PHP_WIN32
+#include "win32/glob.h"
+#else
+#include <glob.h>
+#endif
+#endif
+
+
 ZEND_DECLARE_MODULE_GLOBALS(ffi)
 
 typedef enum _zend_ffi_tag_kind {
@@ -4836,9 +4845,51 @@ ZEND_INI_BEGIN()
 	STD_ZEND_INI_ENTRY("ffi.preload", NULL, ZEND_INI_SYSTEM, OnUpdateString, preload, zend_ffi_globals, ffi_globals)
 ZEND_INI_END()
 
-static int zend_ffi_preload(char *preload) /* {{{ */
+static int zend_ffi_preload_glob(char *filename) /* {{{ */
 {
 	zend_ffi *ffi;
+
+#ifdef HAVE_GLOB
+	/* filename is a glob, no match is not a failure */
+	if (strrchr(filename, '*') || strrchr(filename, '?') || strrchr(filename, '[')) {
+		glob_t globbuf;
+		int    ret;
+		unsigned int i;
+
+		memset(&globbuf, 0, sizeof(glob_t));
+		ret = glob(filename, 0, NULL, &globbuf);
+#ifdef GLOB_NOMATCH
+		if (ret != GLOB_NOMATCH && globbuf.gl_pathc) {
+#else
+		if (globbuf.gl_pathc) {
+#endif
+			for(i=0 ; i<globbuf.gl_pathc; i++) {
+				ffi = zend_ffi_load(globbuf.gl_pathv[i], 1);
+				if (!ffi) {
+					globfree(&globbuf);
+					return FAILURE;
+				}
+				efree(ffi);
+			}
+			globfree(&globbuf);
+		}
+	} else
+#endif
+	{
+		/* single file, not found is a failure */
+		ffi = zend_ffi_load(filename, 1);
+		if (!ffi) {
+			return FAILURE;
+		}
+		efree(ffi);
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
+static int zend_ffi_preload(char *preload) /* {{{ */
+{
 	char *s = NULL, *e, *filename;
 
 	e = preload;
@@ -4847,12 +4898,11 @@ static int zend_ffi_preload(char *preload) /* {{{ */
 			case ZEND_PATHS_SEPARATOR:
 				if (s) {
 					filename = estrndup(s, e-s);
-					ffi = zend_ffi_load(filename, 1);
-					efree(filename);
-					if (!ffi) {
+					if (zend_ffi_preload_glob(filename) == FAILURE) {
+						efree(filename);
 						return FAILURE;
 					}
-					efree(ffi);
+					efree(filename);
 					s = NULL;
 				}
 				break;
@@ -4866,12 +4916,11 @@ static int zend_ffi_preload(char *preload) /* {{{ */
 	}
 	if (s) {
 		filename = estrndup(s, e-s);
-		ffi = zend_ffi_load(filename, 1);
-		efree(filename);
-		if (!ffi) {
+		if (zend_ffi_preload_glob(filename) == FAILURE) {
+			efree(filename);
 			return FAILURE;
 		}
-		efree(ffi);
+		efree(filename);
 	}
 
 	return SUCCESS;
