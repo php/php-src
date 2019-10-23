@@ -43,7 +43,9 @@ static void overridden_ptr_dtor(zval *zv) /* {{{ */
 static void zend_type_copy_ctor(zend_type *type) {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		zend_type_list *old_list = ZEND_TYPE_LIST(*type);
-		zend_type_list *new_list = emalloc(ZEND_TYPE_LIST_SIZE(old_list->num_types));
+		size_t size = ZEND_TYPE_LIST_SIZE(old_list->num_types);
+		zend_type_list *new_list = ZEND_TYPE_USES_ARENA(*type)
+			? zend_arena_alloc(&CG(arena), size) : emalloc(size);
 		memcpy(new_list, old_list, ZEND_TYPE_LIST_SIZE(old_list->num_types));
 		ZEND_TYPE_SET_PTR(*type, new_list);
 
