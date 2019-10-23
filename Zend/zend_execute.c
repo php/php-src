@@ -897,7 +897,7 @@ static zend_bool zend_resolve_class_type(zend_type *type, zend_class_entry *self
 		}
 		ce = self_ce->parent;
 	} else {
-		ce = zend_lookup_class(name);
+		ce = zend_lookup_class_ex(name, NULL, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 		if (UNEXPECTED(!ce)) {
 			return 0;
 		}
