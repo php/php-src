@@ -28,6 +28,8 @@ $zip->unchangeIndex(0);
 var_dump($zip->getNameIndex(0));
 var_dump($zip->getCommentIndex(0));
 
+$zip->close();
+
 var_dump(md5_file($file));
 ?>
 --CLEAN--
