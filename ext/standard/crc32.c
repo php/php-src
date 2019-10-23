@@ -86,13 +86,13 @@ PHP_NAMED_FUNCTION(php_if_crc32)
 #if defined(__aarch64__)
 	if (has_crc32_insn()) {
 		crc = crc32_aarch64(crc, p, nr);
-		RETVAL_LONG(crc^0xFFFFFFFF);
+		RETURN_LONG(crc^0xFFFFFFFF);
 	}
 #endif
 
 	for (; nr--; ++p) {
 		crc = ((crc >> 8) & 0x00FFFFFF) ^ crc32tab[(crc ^ (*p)) & 0xFF ];
 	}
-	RETVAL_LONG(crc^0xFFFFFFFF);
+	RETURN_LONG(crc^0xFFFFFFFF);
 }
 /* }}} */
