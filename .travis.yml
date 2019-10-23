@@ -83,8 +83,8 @@ before_script:
     # Compile PHP
     - travis_wait ./travis/compile.sh
     # Setup Extensions
-    - ./travis/setup-mysql.sh
-    - ./travis/setup-pgsql.sh
+    #- ./travis/setup-mysql.sh
+    #- ./travis/setup-pgsql.sh
 
 # Run PHPs run-tests.php
 script:
