@@ -195,6 +195,11 @@ typedef struct  _zend_mm_free_slot zend_mm_free_slot;
 typedef struct  _zend_mm_chunk     zend_mm_chunk;
 typedef struct  _zend_mm_huge_list zend_mm_huge_list;
 
+/*
+ * 0 means disabled
+ * 1 means huge pages
+ * 2 means transparent huge pages
+ */
 int zend_mm_use_huge_pages = 0;
 
 /*
@@ -228,6 +233,13 @@ int zend_mm_use_huge_pages = 0;
  *              (5 bits) bin number (e.g. 0 for sizes 0-2, 1 for 3-4,
  *               2 for 5-8, 3 for 9-16 etc) see zend_alloc_sizes.h
  */
+
+/*
+ * For environments where mmap is expensive it can be
+ * worthwhile to avoid mmap/munmap churn by raising
+ * the minimum number of chunks in emalloc
+ */
+int zend_mm_min_chunks = 0;
 
 struct _zend_mm_heap {
 #if ZEND_MM_CUSTOM
@@ -462,7 +474,7 @@ static void *zend_mm_mmap(size_t size)
 	void *ptr;
 
 #ifdef MAP_HUGETLB
-	if (zend_mm_use_huge_pages && size == ZEND_MM_CHUNK_SIZE) {
+	if (zend_mm_use_huge_pages == 1 && size == ZEND_MM_CHUNK_SIZE) {
 		ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON | MAP_HUGETLB, -1, 0);
 		if (ptr != MAP_FAILED) {
 			return ptr;
@@ -669,7 +681,7 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 		return NULL;
 	} else if (ZEND_MM_ALIGNED_OFFSET(ptr, alignment) == 0) {
 #ifdef MADV_HUGEPAGE
-		if (zend_mm_use_huge_pages) {
+		if (zend_mm_use_huge_pages == 2) {
 			madvise(ptr, size, MADV_HUGEPAGE);
 		}
 #endif
@@ -702,7 +714,7 @@ static void *zend_mm_chunk_alloc_int(size_t size, size_t alignment)
 			zend_mm_munmap((char*)ptr + size, alignment - REAL_PAGE_SIZE);
 		}
 # ifdef MADV_HUGEPAGE
-		if (zend_mm_use_huge_pages) {
+		if (zend_mm_use_huge_pages == 2) {
 			madvise(ptr, size, MADV_HUGEPAGE);
 		}
 # endif
@@ -2270,7 +2282,7 @@ void zend_mm_shutdown(zend_mm_heap *heap, int full, int silent)
 		zend_mm_chunk_free(heap, heap->main_chunk, ZEND_MM_CHUNK_SIZE);
 	} else {
 		/* free some cached chunks to keep average count */
-		heap->avg_chunks_count = (heap->avg_chunks_count + (double)heap->peak_chunks_count) / 2.0;
+		heap->avg_chunks_count = MAX((heap->avg_chunks_count + (double)heap->peak_chunks_count) / 2.0, zend_mm_min_chunks);
 		while ((double)heap->cached_chunks_count + 0.9 > heap->avg_chunks_count &&
 		       heap->cached_chunks) {
 			p = heap->cached_chunks;
@@ -2278,6 +2290,7 @@ void zend_mm_shutdown(zend_mm_heap *heap, int full, int silent)
 			zend_mm_chunk_free(heap, p, ZEND_MM_CHUNK_SIZE);
 			heap->cached_chunks_count--;
 		}
+
 		/* clear cached chunks */
 		p = heap->cached_chunks;
 		while (p != NULL) {
@@ -2759,8 +2772,16 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 #endif
 
 	tmp = getenv("USE_ZEND_ALLOC_HUGE_PAGES");
-	if (tmp && zend_atoi(tmp, 0)) {
-		zend_mm_use_huge_pages = 1;
+    if (tmp) {
+		zend_mm_use_huge_pages = zend_atoi(tmp, 0);
+		if (zend_mm_use_huge_pages > 2) {
+			zend_mm_use_huge_pages = 1;
+		}
+	}
+
+	tmp = getenv("USE_ZEND_MIN_CHUNKS");
+	if (tmp) {
+		zend_mm_min_chunks = zend_atoi(tmp, 0);
 	}
 	alloc_globals->mm_heap = zend_mm_init();
 }
