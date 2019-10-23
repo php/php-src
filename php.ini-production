@@ -1947,3 +1947,6 @@ ldap.max_links = -1
 ; "false"   - always disabled
 ; "true"    - always enabled
 ;ffi.enable=preload
+
+; List of headers files to preload
+;ffi.preload=
