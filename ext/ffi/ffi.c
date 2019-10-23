@@ -925,7 +925,7 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ *
 			n++;
 		} ZEND_HASH_FOREACH_END();
 	}
-	callback_data->ret_type = zend_ffi_get_type(type->func.ret_type);
+	callback_data->ret_type = zend_ffi_get_type(ZEND_FFI_TYPE(type->func.ret_type));
 	if (!callback_data->ret_type) {
 		zend_ffi_return_unsupported(type->func.ret_type);
 		efree(callback_data);
