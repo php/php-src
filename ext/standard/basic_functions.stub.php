@@ -596,3 +596,231 @@ function substr_compare(string $main_str, string $str, int $offset, ?int $length
 function utf8_encode(string $data): string {}
 
 function utf8_decode(string $data): string {}
+
+/* info.c */
+
+function phpinfo(int $what = INFO_ALL): bool {}
+
+/** @return string|false */
+function phpversion(string $extension = UNKNOWN) {}
+
+function phpcredits(int $flag = CREDITS_ALL): bool {}
+
+/** @return string|false */
+function php_sapi_name() {}
+
+function php_uname(string $mode = "a"): string {}
+
+/** @return string|false */
+function php_ini_scanned_files() {}
+
+/** @return string|false */
+function php_ini_loaded_file() {}
+
+/* iptc.c */
+
+/** @return string|bool */
+function iptcembed(string $iptcdata, string $jpeg_file_name, int $spool = 0) {}
+
+/** @return array|false */
+function iptcparse(string $iptcblock) {}
+
+/* levenshtein.c */
+
+function levenshtein(string $str1, string $str2, $cost_ins = UNKNOWN, int $cost_rep = UNKNOWN, int $cost_del = UNKNOWN): int {}
+
+/* link.c */
+
+#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+/** @return string|false */
+function readlink(string $path) {}
+
+/** @return int|false */
+function linkinfo(string $path) {}
+
+function symlink(string $target, string $link): bool {}
+
+function link(string $target, string $link): bool {}
+#endif
+
+/* mail.c */
+
+function ezmlm_hash(string $str): int {}
+
+/** @param string|array $additional_headers */
+function mail(string $to, string $subject, string $message, $additional_headers = UNKNOWN, $additional_parameters = ""): bool {}
+
+/* math.c */
+
+/**
+ * @param int|float $number
+ * @return int|float
+ */
+function abs($number) {}
+
+function ceil(float $number): float {}
+
+function floor(float $number): float {}
+
+/** @return float|false */
+function round($number, int $precision = 0, int $mode = PHP_ROUND_HALF_UP) {}
+
+function sin(float $number): float {}
+
+function cos(float $number): float {}
+
+function tan(float $number): float {}
+
+function asin(float $number): float {}
+
+function acos(float $number): float {}
+
+function atan(float $number): float {}
+
+function atanh(float $number): float {}
+
+function atan2(float $y, float $x): float {}
+
+function sinh(float $number): float {}
+
+function cosh(float $number): float {}
+
+function tanh(float $number): float {}
+
+function asinh(float $number): float {}
+
+function acosh(float $number): float {}
+
+function expm1(float $number): float {}
+
+function log1p(float $number): float {}
+
+function pi(): float {}
+
+function is_finite(float $number): bool {}
+
+function is_nan(float $number): bool {}
+
+function intdiv(int $dividend, int $divisor): int {}
+
+function is_infinite(float $number): bool {}
+
+/** @return int|float */
+function pow($base, $exp) {}
+
+function exp(float $number): float {}
+
+/** @return float|false */
+function log(float $number, float $base = UNKNOWN) {}
+
+function log10(float $number): float {}
+
+function sqrt(float $number): float {}
+
+function hypot(float $x, float $y): float {}
+
+function deg2rad(float $number): float {}
+
+function rad2deg(float $number): float {}
+
+/** @return int|float */
+function bindec(string $binary_string) {}
+
+/** @return int|float */
+function hexdec(string $hex_string) {}
+
+/** @return int|float */
+function octdec(string $octal_string) {}
+
+function decbin($number): string {}
+
+function decoct($number): string {}
+
+function dechex($number): string {}
+
+/** @return string|false */
+function base_convert($number, int $frombase, int $tobase) {}
+
+function number_format(float $number, int $decimals = 0, string $decimal_point = "." , string $thousands_separator = ","): string {}
+
+function fmod(float $x, float $y): float {}
+
+function fdiv(float $dividend, float $divisor): float {}
+
+/* microtime.c */
+
+#ifdef HAVE_GETTIMEOFDAY
+/** @return string|float */
+function microtime(bool $get_as_float = false) {}
+
+/** @return array|float */
+function gettimeofday(bool $return_float = false) {}
+#endif
+
+#ifdef HAVE_GETRUSAGE
+/** @return array|false */
+function getrusage(int $who = 0) {}
+#endif
+
+/* pack.c */
+
+/** @return string|false */
+function pack(string $format, ...$args) {}
+
+/** @return array|false */
+function unpack(string $format, string $data, int $offset = 0) {}
+
+/* password.c */
+
+function password_get_info(string $hash): ?array {}
+
+/** @return string|false */
+function password_hash(string $password, $algo, $options = UNKNOWN) {}
+
+function password_needs_rehash(string $hash, $algo, $options = UNKNOWN): bool {}
+
+function password_verify(string $password, string $hash): bool {}
+
+function password_algos(): array {}
+
+/* proc_open.c */
+
+#ifdef PHP_CAN_SUPPORT_PROC_OPEN
+/** @return resource|false */
+function proc_open($cmd, array $descriptorspec, &$pipes, ?string $cwd = null, ?array $env = null, ?array $other_options = null) {}
+
+/**
+ * @param resource $process
+ * @return int|false
+ */
+function proc_close($process) {}
+
+function proc_terminate($process, $signal = SIGTERM): bool {}
+
+/**
+ * @param resource $process
+ * @return array|false
+ */
+function proc_get_status($process) {}
+#endif
+
+/* quot_print.c */
+
+function quoted_printable_decode(string $str): string {}
+
+function quoted_printable_encode(string $str): string {}
+
+/* mt_rand.c */
+
+function mt_srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
+
+/** @return int|false */
+function mt_rand(int $min = 0, int $max = UNKNOWN) {}
+
+function mt_getrandmax(): int {}
+
+/* random.c */
+
+function random_bytes(int $length): string {}
+
+function random_int(int $min, int $max): int {}
