@@ -35,6 +35,14 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#ifdef HAVE_GLOB
+#ifdef PHP_WIN32
+#include "win32/glob.h"
+#else
+#include <glob.h>
+#endif
+#endif
+
 ZEND_DECLARE_MODULE_GLOBALS(ffi)
 
 typedef enum _zend_ffi_tag_kind {
@@ -4836,10 +4844,50 @@ ZEND_INI_BEGIN()
 	STD_ZEND_INI_ENTRY("ffi.preload", NULL, ZEND_INI_SYSTEM, OnUpdateString, preload, zend_ffi_globals, ffi_globals)
 ZEND_INI_END()
 
+static int zend_ffi_preload_glob(const char *filename) /* {{{ */
+{
+#ifdef HAVE_GLOB
+	glob_t globbuf;
+	int    ret;
+	unsigned int i;
+
+	memset(&globbuf, 0, sizeof(glob_t));
+
+	ret = glob(filename, 0, NULL, &globbuf);
+#ifdef GLOB_NOMATCH
+	if (ret == GLOB_NOMATCH || !globbuf.gl_pathc) {
+#else
+	if (!globbuf.gl_pathc) {
+#endif
+		/* pass */
+	} else {
+		for(i=0 ; i<globbuf.gl_pathc; i++) {
+			zend_ffi *ffi = zend_ffi_load(globbuf.gl_pathv[i], 1);
+			if (!ffi) {
+				globfree(&globbuf);
+				return FAILURE;
+			}
+			efree(ffi);
+		}
+		globfree(&globbuf);
+	}
+#else
+	zend_ffi *ffi = zend_ffi_load(filename, 1);
+	if (!ffi) {
+		return FAILURE;
+	}
+	efree(ffi);
+#endif
+
+	return SUCCESS;
+}
+/* }}} */
+
 static int zend_ffi_preload(char *preload) /* {{{ */
 {
 	zend_ffi *ffi;
 	char *s = NULL, *e, *filename;
+	zend_bool is_glob = 0;
 
 	e = preload;
 	while (*e) {
@@ -4847,14 +4895,29 @@ static int zend_ffi_preload(char *preload) /* {{{ */
 			case ZEND_PATHS_SEPARATOR:
 				if (s) {
 					filename = estrndup(s, e-s);
-					ffi = zend_ffi_load(filename, 1);
-					efree(filename);
-					if (!ffi) {
-						return FAILURE;
-					}
-					efree(ffi);
 					s = NULL;
+					if (!is_glob) {
+						ffi = zend_ffi_load(filename, 1);
+						efree(filename);
+						if (!ffi) {
+							return FAILURE;
+						}
+						efree(ffi);
+					} else {
+						int ret = zend_ffi_preload_glob(filename);
+
+						efree(filename);
+						if (ret != SUCCESS) {
+							return FAILURE;
+						}
+						is_glob = 0;
+					}
 				}
+				break;
+			case '*':
+			case '?':
+			case '[':
+				is_glob = 1;
 				break;
 			default:
 				if (!s) {
@@ -4866,12 +4929,20 @@ static int zend_ffi_preload(char *preload) /* {{{ */
 	}
 	if (s) {
 		filename = estrndup(s, e-s);
-		ffi = zend_ffi_load(filename, 1);
-		efree(filename);
-		if (!ffi) {
-			return FAILURE;
+		if (!is_glob) {
+			ffi = zend_ffi_load(filename, 1);
+			efree(filename);
+			if (!ffi) {
+				return FAILURE;
+			}
+			efree(ffi);
+		} else {
+			int ret = zend_ffi_preload_glob(filename);
+			efree(filename);
+			if (ret != SUCCESS) {
+				return FAILURE;
+			}
 		}
-		efree(ffi);
 	}
 
 	return SUCCESS;
