@@ -64,6 +64,7 @@ ZEND_API zend_bool zend_verify_scalar_type_hint(uint32_t type_mask, zval *arg, z
 ZEND_API ZEND_COLD void zend_verify_arg_error(
 		const zend_function *zf, const zend_arg_info *arg_info,
 		int arg_num, void **cache_slot, zval *value);
+ZEND_API zend_bool zend_verify_ref_array_assignable(zend_reference *ref);
 
 #define ZEND_REF_TYPE_SOURCES(ref) \
 	(ref)->sources

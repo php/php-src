@@ -612,8 +612,6 @@ static zend_never_inline ZEND_COLD void zend_throw_access_uninit_prop_by_ref_err
 		zend_get_unmangled_property_name(prop->name));
 }
 
-static zend_never_inline zend_bool zend_verify_ref_array_assignable(zend_reference *ref);
-
 /* this should modify object only if it's empty */
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_throw_non_object_error(zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
 {
@@ -2531,9 +2529,8 @@ static zend_always_inline zend_bool check_type_array_assignable(zend_type type) 
 	return ZEND_TYPE_IS_MASK(type) && (ZEND_TYPE_MASK(type) & (MAY_BE_ITERABLE|MAY_BE_ARRAY));
 }
 
-/* Checks whether an array can be assigned to the reference. Returns conflicting property if
- * assignment is not possible, NULL otherwise. */
-static zend_never_inline zend_bool zend_verify_ref_array_assignable(zend_reference *ref) {
+/* Checks whether an array can be assigned to the reference. Throws error if not assignable. */
+ZEND_API zend_bool zend_verify_ref_array_assignable(zend_reference *ref) {
 	zend_property_info *prop;
 	ZEND_ASSERT(ZEND_REF_HAS_TYPE_SOURCES(ref));
 	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {

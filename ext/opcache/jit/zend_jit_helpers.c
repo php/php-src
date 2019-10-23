@@ -1465,3 +1465,15 @@ static void ZEND_FASTCALL zend_jit_invalid_array_access(zval *container)
 	const char *type = Z_ISUNDEF_P(container) ? "null" : zend_zval_type_name(container);
 	zend_error(E_WARNING, "Trying to access array offset on value of type %s", type);
 }
+
+static zval * ZEND_FASTCALL zend_jit_prepare_assign_dim_ref(zval *ref) {
+	zval *val = Z_REFVAL_P(ref);
+	if (Z_TYPE_P(val) <= IS_FALSE) {
+		if (ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(ref))
+				&& !zend_verify_ref_array_assignable(Z_REF_P(ref))) {
+			return NULL;
+		}
+		ZVAL_ARR(val, zend_new_array(8));
+	}
+	return val;
+}
