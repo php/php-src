@@ -53,9 +53,15 @@ env:
       - PDO_MYSQL_TEST_HOST=127.0.0.1
       - PDO_PGSQL_TEST_DSN="pgsql:host=localhost port=5432 dbname=test user=postgres password="
       - REPORT_EXIT_STATUS=1
-    matrix:
-      - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0
-      - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
+
+jobs:
+    include:
+        #- env: ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0
+        #  arch: amd64
+        #- env: ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
+        #  arch: amd64
+        - env: ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
+          arch: arm64
 
 before_script:
     - ccache --version
