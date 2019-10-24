@@ -270,7 +270,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		end = src + ce->default_properties_count;
 		ce->default_properties_table = dst;
 		for (; src != end; src++, dst++) {
-			ZVAL_COPY_VALUE(dst, src);
+			*dst = *src;
 		}
 	}
 

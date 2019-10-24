@@ -1264,12 +1264,14 @@ static zend_always_inline void _object_properties_init(zend_object *object, zend
 		if (UNEXPECTED(class_type->type == ZEND_INTERNAL_CLASS)) {
 			do {
 				ZVAL_COPY_OR_DUP(dst, src);
+				Z_EXTRA_P(dst) = Z_EXTRA_P(src);
 				src++;
 				dst++;
 			} while (src != end);
 		} else {
 			do {
 				ZVAL_COPY(dst, src);
+				Z_EXTRA_P(dst) = Z_EXTRA_P(src);
 				src++;
 				dst++;
 			} while (src != end);
@@ -3683,6 +3685,7 @@ static zend_always_inline zend_bool is_persistent_class(zend_class_entry *ce) {
 ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name, zval *property, int access_type, zend_string *doc_comment, zend_type type) /* {{{ */
 {
 	zend_property_info *property_info, *property_info_ptr;
+	zval *property_default_ptr;
 
 	if (ZEND_TYPE_IS_SET(type)) {
 		ce->ce_flags |= ZEND_ACC_HAS_TYPE_HINTS;
@@ -3714,7 +3717,7 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 			property_info->offset = ce->default_static_members_count++;
 			ce->default_static_members_table = perealloc(ce->default_static_members_table, sizeof(zval) * ce->default_static_members_count, ce->type == ZEND_INTERNAL_CLASS);
 		}
-		ZVAL_COPY_VALUE(&ce->default_static_members_table[property_info->offset], property);
+		property_default_ptr = &ce->default_static_members_table[property_info->offset];
 		if (!ZEND_MAP_PTR(ce->static_members_table)) {
 			ZEND_ASSERT(ce->type == ZEND_INTERNAL_CLASS);
 			if (!EG(current_execute_data)) {
@@ -3745,7 +3748,7 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 				ce->properties_info_table[ce->default_properties_count - 1] = property_info;
 			}
 		}
-		ZVAL_COPY_VALUE(&ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)], property);
+		property_default_ptr = &ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
 	}
 	if (ce->type & ZEND_INTERNAL_CLASS) {
 		switch(Z_TYPE_P(property)) {
@@ -3761,6 +3764,9 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 		/* Must be interned to avoid ZTS data races */
 		name = zend_new_interned_string(zend_string_copy(name));
 	}
+
+	ZVAL_COPY_VALUE(property_default_ptr, property);
+	Z_EXTRA_P(property_default_ptr) = Z_ISUNDEF_P(property) ? IS_PROP_UNINIT : 0;
 
 	if (access_type & ZEND_ACC_PUBLIC) {
 		property_info->name = zend_string_copy(name);

@@ -593,6 +593,9 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 
 #define OBJ_FLAGS(obj)              GC_FLAGS(obj)
 
+/* Property flag stores in Z_EXTRA */
+#define IS_PROP_UNINIT				1
+
 /* Recursion protection macros must be used only for arrays and objects */
 #define GC_IS_RECURSIVE(p) \
 	(GC_FLAGS(p) & GC_PROTECTED)
