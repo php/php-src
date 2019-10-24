@@ -71,7 +71,7 @@ jobs:
         #  arch: amd64
         #- env: ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
         #  arch: amd64
-        - env: ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
+        - env: ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1 SKIP_IO_CAPTURE_TESTS=1
           arch: arm64
 
 before_script:
