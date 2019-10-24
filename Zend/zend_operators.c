@@ -2311,12 +2311,12 @@ ZEND_API int ZEND_FASTCALL is_smaller_or_equal_function(zval *result, zval *op1,
 
 static zend_always_inline zend_bool instanceof_class(const zend_class_entry *instance_ce, const zend_class_entry *ce) /* {{{ */
 {
-	while (instance_ce) {
+	do {
 		if (instance_ce == ce) {
 			return 1;
 		}
 		instance_ce = instance_ce->parent;
-	}
+	} while (instance_ce);
 	return 0;
 }
 /* }}} */
@@ -2333,7 +2333,7 @@ static zend_bool ZEND_FASTCALL instanceof_interface(const zend_class_entry *inst
 			}
 		}
 	}
-	return instanceof_class(instance_ce, ce);
+	return instance_ce == ce;
 }
 /* }}} */
 
