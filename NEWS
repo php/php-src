@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0RC5
 
+- Core:
+  . Fixed bug #78226 (Unexpected __set behavior with typed properties). (Nikita)
+
 - COM:
   . Fixed bug #78694 (Appending to a variant array causes segfault). (cmb)
 

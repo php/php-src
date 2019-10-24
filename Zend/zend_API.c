@@ -1263,13 +1263,13 @@ static zend_always_inline void _object_properties_init(zend_object *object, zend
 
 		if (UNEXPECTED(class_type->type == ZEND_INTERNAL_CLASS)) {
 			do {
-				ZVAL_COPY_OR_DUP(dst, src);
+				ZVAL_COPY_OR_DUP_PROP(dst, src);
 				src++;
 				dst++;
 			} while (src != end);
 		} else {
 			do {
-				ZVAL_COPY(dst, src);
+				ZVAL_COPY_PROP(dst, src);
 				src++;
 				dst++;
 			} while (src != end);
@@ -3725,6 +3725,7 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 			}
 		}
 	} else {
+		zval *property_default_ptr;
 		if ((property_info_ptr = zend_hash_find_ptr(&ce->properties_info, name)) != NULL &&
 		    (property_info_ptr->flags & ZEND_ACC_STATIC) == 0) {
 			property_info->offset = property_info_ptr->offset;
@@ -3745,7 +3746,9 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 				ce->properties_info_table[ce->default_properties_count - 1] = property_info;
 			}
 		}
-		ZVAL_COPY_VALUE(&ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)], property);
+		property_default_ptr = &ce->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
+		ZVAL_COPY_VALUE(property_default_ptr, property);
+		Z_PROP_FLAG_P(property_default_ptr) = Z_ISUNDEF_P(property) ? IS_PROP_UNINIT : 0;
 	}
 	if (ce->type & ZEND_INTERNAL_CLASS) {
 		switch(Z_TYPE_P(property)) {
