@@ -4,6 +4,12 @@ IntlTimeZone::getOffset(): errors
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
+
+/* INF being an invalid offset depends on UB in float->int cast behavior. */
+$arch = php_uname('m');
+if ($arch != 'x86_64' && $arch != 'i386')
+    die('skip requires x86');
+?>
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
