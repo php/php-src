@@ -1918,5 +1918,5 @@ ldap.max_links = -1
 ; "true"    - always enabled
 ;ffi.enable=preload
 
-; List of headers files to preload
+; List of headers files to preload, wilcards allowed.
 ;ffi.preload=
