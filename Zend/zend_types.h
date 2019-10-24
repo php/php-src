@@ -556,8 +556,9 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 /* zval.u1.v.type_flags */
 #define IS_TYPE_REFCOUNTED			(1<<0)
 #define IS_TYPE_COLLECTABLE			(1<<1)
+#define IS_TYPE_UNINIT_PROP			(1<<2)
 
-#if 1
+#if 0
 /* This optimized version assumes that we have a single "type_flag" */
 /* IS_TYPE_COLLECTABLE may be used only with IS_TYPE_REFCOUNTED */
 # define Z_TYPE_INFO_REFCOUNTED(t)	(((t) & Z_TYPE_FLAGS_MASK) != 0)
@@ -575,6 +576,8 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_REFERENCE_EX				(IS_REFERENCE      | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
 
 #define IS_CONSTANT_AST_EX			(IS_CONSTANT_AST   | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
+
+#define IS_UNINIT_PROP_EX			(IS_UNDEF | (IS_TYPE_UNINIT_PROP << Z_TYPE_FLAGS_SHIFT))
 
 /* string flags (zval.value->gc.u.flags) */
 #define IS_STR_INTERNED				GC_IMMUTABLE  /* interned string */
@@ -624,7 +627,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_CONSTANT(zval)			(Z_TYPE(zval) == IS_CONSTANT_AST)
 #define Z_CONSTANT_P(zval_p)		Z_CONSTANT(*(zval_p))
 
-#if 1
+#if 0
 /* This optimized version assumes that we have a single "type_flag" */
 /* IS_TYPE_COLLECTABLE may be used only with IS_TYPE_REFCOUNTED */
 #define Z_REFCOUNTED(zval)			(Z_TYPE_FLAGS(zval) != 0)

@@ -6135,7 +6135,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags) /
 		} else if (!ZEND_TYPE_IS_SET(type)) {
 			ZVAL_NULL(&value_zv);
 		} else {
-			ZVAL_UNDEF(&value_zv);
+			Z_TYPE_INFO_P(&value_zv) = IS_UNINIT_PROP_EX;
 		}
 
 		zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, type);

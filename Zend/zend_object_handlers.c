@@ -836,6 +836,10 @@ found:
 			zend_assign_to_variable(variable_ptr, value, IS_TMP_VAR, EG(current_execute_data) && ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
 			goto exit;
 		}
+		if (Z_TYPE_INFO_P(variable_ptr) == IS_UNINIT_PROP_EX) {
+			/* Writes to uninitialized typed properties bypass __set() */
+			goto write_std_property;
+		}
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))) {
 		if (EXPECTED(zobj->properties != NULL)) {
 			if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
@@ -1112,6 +1116,10 @@ ZEND_API void zend_std_unset_property(zval *object, zval *member, void **cache_s
 				HT_FLAGS(zobj->properties) |= HASH_FLAG_HAS_EMPTY_IND;
 			}
 			goto exit;
+		}
+		if (Z_TYPE_INFO_P(slot) == IS_UNINIT_PROP_EX) {
+			/* Mark property as fully unset, so that __set() will be called from this point on. */
+			ZVAL_UNDEF(slot);
 		}
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))
 	 && EXPECTED(zobj->properties != NULL)) {

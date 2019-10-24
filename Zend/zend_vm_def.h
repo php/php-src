@@ -6448,11 +6448,11 @@ ZEND_VM_C_LABEL(fe_fetch_r_exit):
 			}
 			value = &p->val;
 			value_type = Z_TYPE_INFO_P(value);
-			if (EXPECTED(value_type != IS_UNDEF)) {
+			if (EXPECTED((value_type & Z_TYPE_MASK) != IS_UNDEF)) {
 				if (UNEXPECTED(value_type == IS_INDIRECT)) {
 					value = Z_INDIRECT_P(value);
 					value_type = Z_TYPE_INFO_P(value);
-					if (EXPECTED(value_type != IS_UNDEF)) {
+					if (EXPECTED((value_type & Z_TYPE_MASK) != IS_UNDEF)) {
 						break;
 					}
 				} else {
@@ -6488,11 +6488,11 @@ ZEND_VM_C_LABEL(fe_fetch_r_exit):
 
 				value = &p->val;
 				value_type = Z_TYPE_INFO_P(value);
-				if (EXPECTED(value_type != IS_UNDEF)) {
+				if (EXPECTED((value_type & Z_TYPE_MASK) != IS_UNDEF)) {
 					if (UNEXPECTED(value_type == IS_INDIRECT)) {
 						value = Z_INDIRECT_P(value);
 						value_type = Z_TYPE_INFO_P(value);
-						if (EXPECTED(value_type != IS_UNDEF)
+						if (EXPECTED((value_type & Z_TYPE_MASK) != IS_UNDEF)
 						 && EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key, 0) == SUCCESS)) {
 							break;
 						}
@@ -6601,11 +6601,11 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 			}
 			value = &p->val;
 			value_type = Z_TYPE_INFO_P(value);
-			if (EXPECTED(value_type != IS_UNDEF)) {
+			if (EXPECTED((value_type & Z_TYPE_MASK) != IS_UNDEF)) {
 				if (UNEXPECTED(value_type == IS_INDIRECT)) {
 					value = Z_INDIRECT_P(value);
 					value_type = Z_TYPE_INFO_P(value);
-					if (EXPECTED(value_type != IS_UNDEF)) {
+					if (EXPECTED((value_type & Z_TYPE_MASK) != IS_UNDEF)) {
 						break;
 					}
 				} else {
@@ -6640,11 +6640,11 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 
 				value = &p->val;
 				value_type = Z_TYPE_INFO_P(value);
-				if (EXPECTED(value_type != IS_UNDEF)) {
+				if (EXPECTED((value_type & Z_TYPE_MASK) != IS_UNDEF)) {
 					if (UNEXPECTED(value_type == IS_INDIRECT)) {
 						value = Z_INDIRECT_P(value);
 						value_type = Z_TYPE_INFO_P(value);
-						if (EXPECTED(value_type != IS_UNDEF)
+						if (EXPECTED((value_type & Z_TYPE_MASK) != IS_UNDEF)
 						 && EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key, 0) == SUCCESS)) {
 							if ((value_type & Z_TYPE_MASK) != IS_REFERENCE) {
 								zend_property_info *prop_info =
