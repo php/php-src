@@ -1211,24 +1211,20 @@ static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *
 
 static ZEND_COLD int zend_verify_missing_return_type(const zend_function *zf, void **cache_slot)
 {
+	/* VERIFY_RETURN_TYPE is not emitted for "void" functions, so this is always an error. */
 	zend_arg_info *ret_info = zf->common.arg_info - 1;
 
-	if (ZEND_TYPE_IS_SET(ret_info->type)
-			&& (!ZEND_TYPE_IS_MASK(ret_info->type)
-				|| !(ZEND_TYPE_MASK(ret_info->type) & MAY_BE_VOID))) {
-		// TODO: Eliminate this!
-		if (ZEND_TYPE_IS_CLASS(ret_info->type)) {
-			if (UNEXPECTED(!*cache_slot)) {
-				zend_class_entry *ce = zend_fetch_class(ZEND_TYPE_NAME(ret_info->type), (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
-				if (ce) {
-					*cache_slot = (void *) ce;
-				}
+	// TODO: Eliminate this!
+	if (ZEND_TYPE_IS_CLASS(ret_info->type)) {
+		if (UNEXPECTED(!*cache_slot)) {
+			zend_class_entry *ce = zend_fetch_class(ZEND_TYPE_NAME(ret_info->type), (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
+			if (ce) {
+				*cache_slot = (void *) ce;
 			}
 		}
-		zend_verify_return_error(zf, cache_slot, NULL);
-		return 0;
 	}
-	return 1;
+	zend_verify_return_error(zf, cache_slot, NULL);
+	return 0;
 }
 
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_object_as_array(void)
