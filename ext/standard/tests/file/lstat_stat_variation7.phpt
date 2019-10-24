@@ -36,7 +36,7 @@ $new_stat = stat($file_name);
 var_dump( compare_self_stat($old_stat) );
 var_dump( compare_self_stat($new_stat) );
 // compare the stats
-$comp_arr = array(7, 12, 'size', 'blocks');
+$comp_arr = array(7, 'size');
 var_dump(compare_stats($old_stat, $new_stat, $comp_arr, "<"));
 clearstatcache();
 
