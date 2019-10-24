@@ -970,10 +970,7 @@ static zend_always_inline zend_bool zend_check_type(
 {
 	zend_reference *ref = NULL;
 	uint32_t type_mask;
-
-	if (!ZEND_TYPE_IS_SET(type)) {
-		return 1;
-	}
+	ZEND_ASSERT(ZEND_TYPE_IS_SET(type));
 
 	if (UNEXPECTED(Z_ISREF_P(arg))) {
 		ref = Z_REF_P(arg);
@@ -1023,12 +1020,13 @@ static zend_always_inline zend_bool zend_check_type(
 
 static zend_always_inline int zend_verify_recv_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, void **cache_slot)
 {
-	zend_arg_info *cur_arg_info = &zf->common.arg_info[arg_num-1];
+	zend_arg_info *cur_arg_info;
 
 	ZEND_ASSERT(arg_num <= zf->common.num_args);
 	cur_arg_info = &zf->common.arg_info[arg_num-1];
 
-	if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, cache_slot, zf->common.scope, 0, 0))) {
+	if (ZEND_TYPE_IS_SET(cur_arg_info->type)
+			&& UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, cache_slot, zf->common.scope, 0, 0))) {
 		zend_verify_arg_error(zf, cur_arg_info, arg_num, cache_slot, arg);
 		return 0;
 	}
@@ -1070,7 +1068,8 @@ static zend_never_inline ZEND_ATTRIBUTE_UNUSED int zend_verify_internal_arg_type
 			break;
 		}
 
-		if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &dummy_cache_slot, fbc->common.scope, 0, /* is_internal */ 1))) {
+		if (ZEND_TYPE_IS_SET(cur_arg_info->type)
+				&& UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &dummy_cache_slot, fbc->common.scope, 0, /* is_internal */ 1))) {
 			return 0;
 		}
 		arg++;
