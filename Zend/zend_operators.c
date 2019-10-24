@@ -2175,22 +2175,6 @@ ZEND_API int ZEND_FASTCALL is_smaller_or_equal_function(zval *result, zval *op1,
 }
 /* }}} */
 
-static zend_bool ZEND_FASTCALL instanceof_interface_only(const zend_class_entry *instance_ce, const zend_class_entry *ce) /* {{{ */
-{
-	uint32_t i;
-
-	if (instance_ce->num_interfaces) {
-		ZEND_ASSERT(instance_ce->ce_flags & ZEND_ACC_RESOLVED_INTERFACES);
-		for (i = 0; i < instance_ce->num_interfaces; i++) {
-			if (instanceof_interface_only(instance_ce->interfaces[i], ce)) {
-				return 1;
-			}
-		}
-	}
-	return 0;
-}
-/* }}} */
-
 static zend_always_inline zend_bool instanceof_class(const zend_class_entry *instance_ce, const zend_class_entry *ce) /* {{{ */
 {
 	while (instance_ce) {
@@ -2219,21 +2203,16 @@ static zend_bool ZEND_FASTCALL instanceof_interface(const zend_class_entry *inst
 }
 /* }}} */
 
-ZEND_API zend_bool ZEND_FASTCALL instanceof_function_ex(const zend_class_entry *instance_ce, const zend_class_entry *ce, zend_bool interfaces_only) /* {{{ */
+// TODO: It would make more sense to expose instanceof_class + instanceof_interface instead
+ZEND_API zend_bool ZEND_FASTCALL instanceof_function_ex(const zend_class_entry *instance_ce, const zend_class_entry *ce, zend_bool is_interface) /* {{{ */
 {
-	if (ce->ce_flags & ZEND_ACC_INTERFACE) {
-		if (!interfaces_only) {
-			if (instanceof_interface_only(instance_ce, ce)) {
-				return 1;
-			}
-		} else {
-			return instanceof_interface(instance_ce, ce);
-		}
-	}
-	if (!interfaces_only) {
+	if (is_interface) {
+		ZEND_ASSERT(ce->ce_flags & ZEND_ACC_INTERFACE);
+		return instanceof_interface(instance_ce, ce);
+	} else {
+		ZEND_ASSERT(!(ce->ce_flags & ZEND_ACC_INTERFACE));
 		return instanceof_class(instance_ce, ce);
 	}
-	return 0;
 }
 /* }}} */
 
