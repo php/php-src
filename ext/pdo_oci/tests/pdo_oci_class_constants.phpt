@@ -16,6 +16,7 @@ $expected = [
 	'OCI_ATTR_ACTION'             => true,
 	'OCI_ATTR_CLIENT_IDENTIFIER'  => true,
 	'OCI_ATTR_MODULE'             => true,
+	'OCI_ATTR_CALL_TIMEOUT'       => true,
 ];
 
 $ref = new ReflectionClass('PDO');

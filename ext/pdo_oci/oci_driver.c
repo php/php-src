@@ -541,6 +541,29 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 			return 0;
 #endif
 		}
+		case PDO_OCI_ATTR_CALL_TIMEOUT:
+		{
+#if (OCI_MAJOR_VERSION >= 18)
+			if (lval < 0) {
+				return 1;
+			} else if (lval > UB4MAXVAL) {
+				return 1;
+			}
+			ub4 timeout = (ub4) lval;
+
+			H->last_err = OCIAttrSet(H->svc, OCI_HTYPE_SVCCTX,
+				(dvoid *) &timeout, (ub4) 0,
+				OCI_ATTR_CALL_TIMEOUT, H->err);
+			if (H->last_err) {
+				oci_drv_error("OCIAttrSet: OCI_ATTR_CALL_TIMEOUT");
+				return 0;
+			}
+			return 1;
+#else
+			oci_drv_error("Unsupported attribute type");
+			return 0;
+#endif
+		}
 		default:
 			return 0;
 	}
@@ -608,6 +631,26 @@ static int oci_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return
 		case PDO_ATTR_PREFETCH:
 			ZVAL_LONG(return_value, H->prefetch);
 			return TRUE;
+		case PDO_OCI_ATTR_CALL_TIMEOUT:
+		{
+#if (OCI_MAJOR_VERSION >= 18)
+			ub4 timeout;
+
+			H->last_err = OCIAttrGet(H->svc, OCI_HTYPE_SVCCTX,
+				(dvoid *) &timeout, NULL,
+				OCI_ATTR_CALL_TIMEOUT, H->err);
+			if (H->last_err) {
+				oci_drv_error("OCIAttrGet: OCI_ATTR_CALL_TIMEOUT");
+				return FALSE;
+			}
+
+			ZVAL_LONG(return_value, (zend_long) timeout);
+			return TRUE;
+#else
+			oci_drv_error("Unsupported attribute type");
+			return FALSE;
+#endif
+		}
 		default:
 			return FALSE;
 
