@@ -1224,8 +1224,8 @@ uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa
 		zval *zv;
 		zend_string *lcname = Z_STR_P(CRT_CONSTANT_EX(call_info->caller_op_array, call_info->caller_init_opline, call_info->caller_init_opline->op2));
 
-		zv = zend_hash_find_ex(&func_info, lcname, 1);
-		if (zv) {
+		if (!call_info->callee_func->common.scope
+				&& (zv = zend_hash_find_ex(&func_info, lcname, 1))) {
 			func_info_t *info = Z_PTR_P(zv);
 			if (UNEXPECTED(zend_optimizer_is_disabled_func(info->name, info->name_len))) {
 				ret = MAY_BE_NULL;
