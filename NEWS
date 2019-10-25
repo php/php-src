@@ -51,6 +51,10 @@ PHP                                                                        NEWS
   . Fixed bug #77849 (Disable cloning of PDO handle/connection objects).
     (camporter)
 
+- PDO_OCI:
+  . Added support for setting and getting the oracle OCI 18c call timeout.
+    (camporter)
+
 - phpdbg:
   . Fixed bug #76596 (phpdbg support for display_errors=stderr). (kabel)
   . Fixed bug #76801 (too many open files). (alekitto)
