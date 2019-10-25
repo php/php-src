@@ -51,8 +51,8 @@ if (strpos(getenv('PDO_FIREBIRD_TEST_DSN'), 'dialect=1')===false) {
 --EXPECT--
 int(1)
 string(8) "2.000000"
-string(3) "0.76"
+string(4) "0.76"
 string(19) "2019-06-12 00:00:00"
-string(3) "0.76"
+string(4) "0.76"
 string(19) "2019-06-12 00:00:00"
 done
