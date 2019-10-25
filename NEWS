@@ -20,6 +20,7 @@ PHP                                                                        NEWS
 - OpCache:
   . Fixed bug #78654 (Incorrectly computed opcache checksum on files with 
     non-ascii characters). (mhagstrand)
+  . Fixed bug #78747 (OpCache corrupts custom extension result). (Nikita)
 
 - Reflection:
   . Fixed bug #78697 (ReflectionClass::ImplementsInterface - inaccurate error 
