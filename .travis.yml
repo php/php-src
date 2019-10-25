@@ -51,6 +51,7 @@ env:
       - PDO_MYSQL_TEST_USER=travis
       - PDO_MYSQL_TEST_PASS=
       - PDO_MYSQL_TEST_HOST=127.0.0.1
+      - PDO_PGSQL_TEST_DSN="pgsql:host=localhost port=5432 dbname=test user=postgres password="
       - REPORT_EXIT_STATUS=1
     matrix:
       - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0
@@ -65,11 +66,8 @@ before_script:
     # Compile PHP
     - travis_wait ./travis/compile.sh
     # Setup Extensions
-    - . ./travis/ext/mysql/setup.sh
-    - . ./travis/ext/mysqli/setup.sh
-    - . ./travis/ext/pdo_mysql/setup.sh
-    - . ./travis/ext/pgsql/setup.sh
-    - . ./travis/ext/pdo_pgsql/setup.sh
+    - ./travis/setup-mysql.sh
+    - ./travis/setup-pgsql.sh
 
 # Run PHPs run-tests.php
 script:
