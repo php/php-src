@@ -1042,7 +1042,8 @@ static zend_always_inline int zend_verify_variadic_arg_type(zend_function *zf, u
 	ZEND_ASSERT(zf->common.fn_flags & ZEND_ACC_VARIADIC);
 	cur_arg_info = &zf->common.arg_info[zf->common.num_args];
 
-	if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, cache_slot, zf->common.scope, 0, 0))) {
+	if (ZEND_TYPE_IS_SET(cur_arg_info->type)
+			&& UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, cache_slot, zf->common.scope, 0, 0))) {
 		zend_verify_arg_error(zf, cur_arg_info, arg_num, cache_slot, arg);
 		return 0;
 	}
