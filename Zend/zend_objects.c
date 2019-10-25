@@ -209,7 +209,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 
 		do {
 			i_zval_ptr_dtor(dst);
-			*dst = *src; /* Copy Z_EXTRA as well */
+			ZVAL_COPY_VALUE_PROP(dst, src);
 			zval_add_ref(dst);
 			if (UNEXPECTED(Z_ISREF_P(dst)) &&
 					(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(dst)))) {
