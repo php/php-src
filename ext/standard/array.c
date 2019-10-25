@@ -3455,6 +3455,32 @@ PHP_FUNCTION(array_splice)
 }
 /* }}} */
 
+/* {{{ find_bucket_at_offset(HashTable* ht, zend_long offset)
+   Finds the bucket at the given valid offset */
+static inline Bucket* find_bucket_at_offset(HashTable* ht, zend_long offset)
+{
+	zend_long pos;
+	Bucket *bucket;
+	ZEND_ASSERT(offset >= 0 && offset <= ht->nNumOfElements);
+	if (HT_IS_WITHOUT_HOLES(ht)) {
+		/* There's no need to iterate over the array to filter out holes if there are no holes */
+		/* This properly handles both packed and unpacked arrays. */
+		return ht->arData + offset;
+	}
+	/* Otherwise, this code has to iterate over the HashTable and skip holes in the array. */
+	pos = 0;
+	ZEND_HASH_FOREACH_BUCKET(ht, bucket) {
+		if (pos >= offset) {
+			/* This is the bucket of the array element at the requested offset */
+			return bucket;
+		}
+		++pos;
+	} ZEND_HASH_FOREACH_END();
+
+	/* Return a pointer to the end of the bucket array. */
+	return ht->arData + ht->nNumUsed;
+}
+
 /* {{{ proto array array_slice(array input, int offset [, int length [, bool preserve_keys]])
    Returns elements specified by offset and length */
 PHP_FUNCTION(array_slice)
@@ -3466,7 +3492,6 @@ PHP_FUNCTION(array_slice)
 	zend_bool length_is_null = 1; /* Whether an explicit length has been omitted */
 	zend_bool preserve_keys = 0;  /* Whether to preserve keys while copying to the new array */
 	uint32_t num_in;              /* Number of elements in the input array */
-	uint32_t pos;                 /* Current position in the array */
 	zend_string *string_key;
 	zend_ulong num_key;
 
@@ -3507,50 +3532,61 @@ PHP_FUNCTION(array_slice)
 	/* Initialize returned array */
 	array_init_size(return_value, (uint32_t)length);
 
-	/* Start at the beginning and go until we hit offset */
-	pos = 0;
-	if (HT_IS_PACKED(Z_ARRVAL_P(input)) &&
-	    (!preserve_keys ||
-	     (offset == 0 && HT_IS_WITHOUT_HOLES(Z_ARRVAL_P(input))))) {
-		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
-		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
-				pos++;
-				if (pos <= offset) {
+	// Contains modified variants of ZEND_HASH_FOREACH_VAL
+	{
+		HashTable *ht = Z_ARRVAL_P(input);
+		Bucket *p = find_bucket_at_offset(ht, offset);
+		Bucket *end = ht->arData + ht->nNumUsed;
+
+		/* Start at the beginning and go until we hit offset */
+		if (HT_IS_PACKED(Z_ARRVAL_P(input)) &&
+			(!preserve_keys ||
+			 (offset == 0 && HT_IS_WITHOUT_HOLES(Z_ARRVAL_P(input))))) {
+
+			zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+				for (; p != end; p++) {
+					if (__fill_idx >= length) {
+						break;
+					}
+					entry = &p->val;
+					if (UNEXPECTED(Z_TYPE_P(entry) == IS_UNDEF)) {
+						continue;
+					}
+					if (UNEXPECTED(Z_ISREF_P(entry)) &&
+						UNEXPECTED(Z_REFCOUNT_P(entry) == 1)) {
+						entry = Z_REFVAL_P(entry);
+					}
+					Z_TRY_ADDREF_P(entry);
+					ZEND_HASH_FILL_ADD(entry);
+				}
+			} ZEND_HASH_FILL_END();
+		} else {
+			zend_long n = 0;  /* Current number of elements */
+			for (; p != end; p++) {
+				entry = &p->val;
+				if (UNEXPECTED(Z_TYPE_P(entry) == IS_UNDEF)) {
 					continue;
 				}
-				if (pos > offset + length) {
+				if (n >= length) {
 					break;
 				}
-				if (UNEXPECTED(Z_ISREF_P(entry)) &&
-					UNEXPECTED(Z_REFCOUNT_P(entry) == 1)) {
-					entry = Z_REFVAL_P(entry);
-				}
-				Z_TRY_ADDREF_P(entry);
-				ZEND_HASH_FILL_ADD(entry);
-			} ZEND_HASH_FOREACH_END();
-		} ZEND_HASH_FILL_END();
-	} else {
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, string_key, entry) {
-			pos++;
-			if (pos <= offset) {
-				continue;
-			}
-			if (pos > offset + length) {
-				break;
-			}
+				n++;
+				num_key = p->h;
+				string_key = p->key;
 
-			if (string_key) {
-				entry = zend_hash_add_new(Z_ARRVAL_P(return_value), string_key, entry);
-			} else {
-				if (preserve_keys) {
-					entry = zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, entry);
+				if (string_key) {
+					entry = zend_hash_add_new(Z_ARRVAL_P(return_value), string_key, entry);
 				} else {
-					entry = zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), entry);
+					if (preserve_keys) {
+						entry = zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, entry);
+					} else {
+						entry = zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), entry);
+					}
 				}
+				zval_add_ref(entry);
 			}
-			zval_add_ref(entry);
-		} ZEND_HASH_FOREACH_END();
+		}
 	}
 }
 /* }}} */
