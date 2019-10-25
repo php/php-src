@@ -257,7 +257,7 @@ static zend_bool unlinked_instanceof(zend_class_entry *ce1, zend_class_entry *ce
 		return 1;
 	}
 
-	if (ce1->ce_flags & (ZEND_ACC_LINKED|ZEND_ACC_RESOLVED_INTERFACES)) {
+	if (ce1->ce_flags & ZEND_ACC_LINKED) {
 		return instanceof_function(ce1, ce2);
 	}
 
@@ -279,13 +279,22 @@ static zend_bool unlinked_instanceof(zend_class_entry *ce1, zend_class_entry *ce
 
 	if (ce1->num_interfaces) {
 		uint32_t i;
-		ZEND_ASSERT(!(ce1->ce_flags & ZEND_ACC_RESOLVED_INTERFACES));
-		for (i = 0; i < ce1->num_interfaces; i++) {
-			ce = zend_lookup_class_ex(
-				ce1->interface_names[i].name, ce1->interface_names[i].lc_name,
-				ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD);
-			if (ce && unlinked_instanceof(ce, ce2)) {
-				return 1;
+		if (ce1->ce_flags & ZEND_ACC_RESOLVED_INTERFACES) {
+			/* Unlike the normal instanceof_function(), we have to perform a recursive
+			 * check here, as the parent interfaces might not have been fully copied yet. */
+			for (i = 0; i < ce1->num_interfaces; i++) {
+				if (unlinked_instanceof(ce1->interfaces[i], ce2)) {
+					return 1;
+				}
+			}
+		} else {
+			for (i = 0; i < ce1->num_interfaces; i++) {
+				ce = zend_lookup_class_ex(
+					ce1->interface_names[i].name, ce1->interface_names[i].lc_name,
+					ZEND_FETCH_CLASS_ALLOW_UNLINKED | ZEND_FETCH_CLASS_NO_AUTOLOAD);
+				if (ce && unlinked_instanceof(ce, ce2)) {
+					return 1;
+				}
 			}
 		}
 	}
