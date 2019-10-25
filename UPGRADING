@@ -591,6 +591,9 @@ PHP 7.4 UPGRADE NOTES
     exists "?" operator. For more details see the RFC:
     https://wiki.php.net/rfc/pdo_escape_placeholders
 
+- PDO_Firebird:
+  . The extension now also support dialect 1 in addition to dialect 3.
+
 - Reflection:
   . Numeric value of class, property, function and constant modifiers was
     changed. Don't filter methods and properties through

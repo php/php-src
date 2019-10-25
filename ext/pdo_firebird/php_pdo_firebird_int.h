@@ -86,10 +86,12 @@ typedef struct {
 	char *time_format;
 	char *timestamp_format;
 
+	unsigned sql_dialect:2;
+
 	/* prepend table names on column names in fetch */
 	unsigned fetch_table_names:1;
 
-	unsigned _reserved:31;
+	unsigned _reserved:29;
 
 } pdo_firebird_db_handle;
 

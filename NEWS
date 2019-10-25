@@ -25,6 +25,10 @@ PHP                                                                        NEWS
 -Opcache:
   . Fixed bug #78512 (Cannot make preload work). (Dmitry)
 
+- PDO_Firebird:
+  . Implemented FR #65690 (PDO_Firebird should also support dialect 1).
+    (Simonov Denis)
+
 - Reflection:
   . Fixed bug #78697 (ReflectionClass::implementsInterface - inaccurate error 
     message with traits). (villfa)
