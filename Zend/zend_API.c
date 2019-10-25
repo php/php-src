@@ -4282,7 +4282,7 @@ ZEND_API zend_bool zend_is_iterable(zval *iterable) /* {{{ */
 		case IS_ARRAY:
 			return 1;
 		case IS_OBJECT:
-			return instanceof_function(Z_OBJCE_P(iterable), zend_ce_traversable);
+			return zend_class_implements_interface(Z_OBJCE_P(iterable), zend_ce_traversable);
 		default:
 			return 0;
 	}
@@ -4299,7 +4299,7 @@ ZEND_API zend_bool zend_is_countable(zval *countable) /* {{{ */
 				return 1;
 			}
 
-			return instanceof_function(Z_OBJCE_P(countable), zend_ce_countable);
+			return zend_class_implements_interface(Z_OBJCE_P(countable), zend_ce_countable);
 		default:
 			return 0;
 	}
