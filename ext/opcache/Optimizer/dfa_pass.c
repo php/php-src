@@ -1120,6 +1120,34 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 					 && !(OP2_INFO() & MAY_BE_OBJECT)) {
 						opline->opcode = ZEND_FAST_CONCAT;
 					}
+				} else if (opline->opcode == ZEND_VERIFY_RETURN_TYPE
+				 && opline->op1_type != IS_CONST
+				 && ssa->ops[op_1].op1_def == v
+				 && ssa->ops[op_1].op1_use >= 0
+				 && ssa->ops[op_1].op1_use_chain == -1
+				 && ssa->vars[v].use_chain >= 0
+				 && can_elide_return_type_check(op_array, ssa, &ssa->ops[op_1])) {
+
+// op_1: VERIFY_RETURN_TYPE #orig_var.? [T] -> #v.? [T] => NOP
+
+					int orig_var = ssa->ops[op_1].op1_use;
+					if (zend_ssa_unlink_use_chain(ssa, op_1, orig_var)) {
+
+						int ret = ssa->vars[v].use_chain;
+
+						ssa->ops[ret].op1_use = orig_var;
+						ssa->ops[ret].op1_use_chain = ssa->vars[orig_var].use_chain;
+						ssa->vars[orig_var].use_chain = ret;
+
+						ssa->vars[v].definition = -1;
+						ssa->vars[v].use_chain = -1;
+
+						ssa->ops[op_1].op1_def = -1;
+						ssa->ops[op_1].op1_use = -1;
+
+						MAKE_NOP(opline);
+						remove_nops = 1;
+					}
 				}
 			}
 
@@ -1241,34 +1269,6 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 				opline->opcode = ZEND_PRE_DEC;
 				opline->extended_value = 0;
 				SET_UNUSED(opline->op2);
-
-			} else if (opline->opcode == ZEND_VERIFY_RETURN_TYPE
-			 && ssa->ops[op_1].op1_def == v
-			 && ssa->ops[op_1].op1_use >= 0
-			 && ssa->ops[op_1].op1_use_chain == -1
-			 && ssa->vars[v].use_chain >= 0
-			 && can_elide_return_type_check(op_array, ssa, &ssa->ops[op_1])) {
-
-// op_1: VERIFY_RETURN_TYPE #orig_var.CV [T] -> #v.CV [T] => NOP
-
-				int orig_var = ssa->ops[op_1].op1_use;
-				if (zend_ssa_unlink_use_chain(ssa, op_1, orig_var)) {
-
-					int ret = ssa->vars[v].use_chain;
-
-					ssa->ops[ret].op1_use = orig_var;
-					ssa->ops[ret].op1_use_chain = ssa->vars[orig_var].use_chain;
-					ssa->vars[orig_var].use_chain = ret;
-
-					ssa->vars[v].definition = -1;
-					ssa->vars[v].use_chain = -1;
-
-					ssa->ops[op_1].op1_def = -1;
-					ssa->ops[op_1].op1_use = -1;
-
-					MAKE_NOP(opline);
-					remove_nops = 1;
-				}
 
 			} else if (ssa->ops[op_1].op1_def == v
 			 && !RETURN_VALUE_USED(opline)
