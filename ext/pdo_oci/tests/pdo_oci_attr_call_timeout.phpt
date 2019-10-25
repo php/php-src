@@ -61,6 +61,6 @@ $r = mysleep($dbh, 8); // seconds
 Test 1
 call timeout:
 int(4000)
-Execute error was OCIStmtExecute: ORA-03136: %s
+Execute error was OCIStmtExecute: ORA-%r(03136|03156)%r: %s
  (%s:%d)
 ===DONE===

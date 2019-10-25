@@ -544,11 +544,6 @@ static int oci_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *val) /
 		case PDO_OCI_ATTR_CALL_TIMEOUT:
 		{
 #if (OCI_MAJOR_VERSION >= 18)
-			if (lval < 0) {
-				return 1;
-			} else if (lval > UB4MAXVAL) {
-				return 1;
-			}
 			ub4 timeout = (ub4) lval;
 
 			H->last_err = OCIAttrSet(H->svc, OCI_HTYPE_SVCCTX,
