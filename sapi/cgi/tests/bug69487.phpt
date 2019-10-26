@@ -14,7 +14,5 @@ var_dump(strlen(file_get_contents('php://input')));
 Warning: Unknown: Unable to create temporary file, Check permissions in temporary files directory. in Unknown on line 0
 
 Warning: Unknown: POST data can't be buffered; all data discarded in Unknown on line 0
-
-Warning: Cannot modify header information - headers already sent in Unknown on line 0
 bool(false)
 int(0)
