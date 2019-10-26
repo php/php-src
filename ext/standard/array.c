@@ -3463,21 +3463,21 @@ static inline Bucket* find_bucket_at_offset(HashTable* ht, zend_long offset)
 	Bucket *bucket;
 	ZEND_ASSERT(offset >= 0 && offset <= ht->nNumOfElements);
 	if (HT_IS_WITHOUT_HOLES(ht)) {
-		/** There's no need to iterate over the array to filter out holes if there are no holes */
-		/** This properly handles both packed and unpacked arrays. */
+		/* There's no need to iterate over the array to filter out holes if there are no holes */
+		/* This properly handles both packed and unpacked arrays. */
 		return ht->arData + offset;
 	}
 	/* Otherwise, this code has to iterate over the HashTable and skip holes in the array. */
 	pos = 0;
 	ZEND_HASH_FOREACH_BUCKET(ht, bucket) {
 		if (pos >= offset) {
-			/** This is the bucket of the array element at the requested offset */
+			/* This is the bucket of the array element at the requested offset */
 			return bucket;
 		}
 		++pos;
 	} ZEND_HASH_FOREACH_END();
 
-	/** Return a pointer to the end of the bucket array. */
+	/* Return a pointer to the end of the bucket array. */
 	return ht->arData + ht->nNumUsed;
 }
 
