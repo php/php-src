@@ -52,17 +52,17 @@ session_destroy();
 @unlink(__DIR__ . DIRECTORY_SEPARATOR . "rfc1867_sid_invalid.post.txt");
 ?>
 --EXPECTF--
-Warning: Unknown: Session ID is too long or contains illegal characters. Only the A-Z, a-z, 0-9, "-", and "," characters are allowed in Unknown on line 0
+Warning: PHP Request Startup: Session ID is too long or contains illegal characters. Only the A-Z, a-z, 0-9, "-", and "," characters are allowed in Unknown on line 0
 
-Warning: Unknown: Failed to read session data: files (path: ) in Unknown on line 0
+Warning: PHP Request Startup: Failed to read session data: files (path: ) in Unknown on line 0
 
-Warning: Unknown: Failed to write session data (files). Please verify that the current setting of session.save_path is correct () in Unknown on line 0
+Warning: PHP Request Startup: Failed to write session data (files). Please verify that the current setting of session.save_path is correct () in Unknown on line 0
 
-Warning: Unknown: Session ID is too long or contains illegal characters. Only the A-Z, a-z, 0-9, "-", and "," characters are allowed in Unknown on line 0
+Warning: PHP Request Startup: Session ID is too long or contains illegal characters. Only the A-Z, a-z, 0-9, "-", and "," characters are allowed in Unknown on line 0
 
-Warning: Unknown: Failed to read session data: files (path: ) in Unknown on line 0
+Warning: PHP Request Startup: Failed to read session data: files (path: ) in Unknown on line 0
 
-Warning: Unknown: Failed to write session data (files). Please verify that the current setting of session.save_path is correct () in Unknown on line 0
+Warning: PHP Request Startup: Failed to write session data (files). Please verify that the current setting of session.save_path is correct () in Unknown on line 0
 string(%d) ""
 bool(true)
 array(2) {
