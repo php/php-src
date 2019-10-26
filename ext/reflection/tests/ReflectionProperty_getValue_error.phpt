@@ -24,9 +24,6 @@ $propInfo = new ReflectionProperty('TestClass', 'stat');
 echo "\nStatic property / too many args:\n";
 var_dump($propInfo->getValue($instance, true));
 
-echo "\nStatic property / wrong type of arg:\n";
-var_dump($propInfo->getValue(true));
-
 echo "\nProtected property:\n";
 try {
     $propInfo = new ReflectionProperty('TestClass', 'prot');
@@ -45,9 +42,6 @@ var_dump($propInfo->getValue($invalidInstance));
 Instance without property:
 
 Static property / too many args:
-string(15) "static property"
-
-Static property / wrong type of arg:
 string(15) "static property"
 
 Protected property:
