@@ -6,7 +6,7 @@ class ReflectionException extends Exception
 
 class Reflection
 {
-    /** @return array */
+    /** @return string[] */
     public static function getModifierNames(int $modifiers) {}
 
     public static function export(Reflector $reflector, bool $return = false) {}
@@ -43,7 +43,7 @@ abstract class ReflectionFunctionAbstract implements Reflector
     /** @return bool */
     public function isVariadic() {}
 
-    /** @return ?Closure */
+    /** @return ?object */
     public function getClosureThis() {}
 
     /** @return ?ReflectionClass */
@@ -76,7 +76,7 @@ abstract class ReflectionFunctionAbstract implements Reflector
     /** @return int */
     public function getNumberOfRequiredParameters() {}
 
-    /** @return array */
+    /** @return ReflectionParameter[] */
     public function getParameters() {}
 
     /** @return string|false */
@@ -247,7 +247,7 @@ class ReflectionClass implements Reflector
     /** @return ReflectionMethod */
     public function getMethod(string $name) {}
 
-    /** @return array */
+    /** @return ReflectionMethod[] */
     public function getMethods(?int $filter = null) {}
 
     /** @return bool */
@@ -256,7 +256,7 @@ class ReflectionClass implements Reflector
     /** @return ReflectionProperty */
     public function getProperty(string $name) {}
 
-    /** @return array */
+    /** @return ReflectionProperty[] */
     public function getProperties(?int $filter = null) {}
         
     /** @return bool */
@@ -265,7 +265,7 @@ class ReflectionClass implements Reflector
     /** @return ?array */
     public function getConstants() {}
 
-    /** @return array */
+    /** @return ReflectionClassConstant[] */
     public function getReflectionConstants() {}
 
     public function getConstant(string $name) {}
@@ -273,22 +273,22 @@ class ReflectionClass implements Reflector
     /** @return ReflectionClassConstant|false */
     public function getReflectionConstant(string $name) {}
 
-    /** @return array */
+    /** @return ReflectionClass[] */
     public function getInterfaces() {}
 
-    /** @return array */
+    /** @return string[] */
     public function getInterfaceNames() {}
 
     /** @return bool */
     public function isInterface() {}
 
-    /** @return array */
+    /** @return ReflectionClass[] */
     public function getTraits() {}
 
-    /** @return array */
+    /** @return string[] */
     public function getTraitNames() {}
 
-    /** @return array */
+    /** @return string[] */
     public function getTraitAliases() {}
 
     /** @return bool */
@@ -569,7 +569,7 @@ class ReflectionExtension implements Reflector
     /** @return ?string */
     public function getVersion() {}
 
-    /** @return array */
+    /** @return ReflectionFunction[] */
     public function getFunctions() {}
 
     /** @return array */
@@ -578,10 +578,10 @@ class ReflectionExtension implements Reflector
     /** @return array */
     public function getINIEntries() {}
 
-    /** @return array */
+    /** @return ReflectionClass[] */
     public function getClasses() {}
 
-    /** @return array */
+    /** @return string[] */
     public function getClassNames() {}
 
     /** @return array */
