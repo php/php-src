@@ -109,7 +109,7 @@ function curl_reset($handle): void {}
 
 /**
  * @param resource $handle
- * @param array<int, mixed> $options
+ * @param array $options
  */
 function curl_setopt_array($handle, array $options): bool {}
 

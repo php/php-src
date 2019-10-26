@@ -3,7 +3,7 @@
 /** @return int|false */
 function cal_days_in_month(int $calendar, int $month, int $year) {}
 
-/** @return array<string, array<int, string>&int&string>|false */
+/** @return array|false */
 function cal_from_jd(int $jd, int $calendar) {}
 
 /** @return array|false */
