@@ -1274,6 +1274,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_EXIT);
 }
 
+<ST_IN_SCRIPTING>"__debug" {
+	RETURN_TOKEN(T_DEBUG);
+}
+
 <ST_IN_SCRIPTING>"fn" {
 	RETURN_TOKEN(T_FN);
 }
