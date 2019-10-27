@@ -260,7 +260,7 @@ struct _zend_mm_heap {
 	int                peak_chunks_count;		/* peak number of allocated chunks for current request */
 	int                cached_chunks_count;		/* number of cached chunks */
 	double             avg_chunks_count;		/* average number of chunks allocated per request */
-	int                last_chunks_delete_boundary; /* numer of chunks after last deletion */
+	int                last_chunks_delete_boundary; /* number of chunks after last deletion */
 	int                last_chunks_delete_count;    /* number of deletion over the last boundary */
 #if ZEND_MM_CUSTOM
 	union {

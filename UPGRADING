@@ -209,7 +209,7 @@ PHP 8.0 UPGRADE NOTES
     mb_decode_numericentity().
 
 - PCRE:
-  . When passing invalid escape sequences they are no longer intepreted as
+  . When passing invalid escape sequences they are no longer interpreted as
     literals. This behaviour previously required the X modifier - which is
     now ignored.
 
@@ -333,7 +333,7 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 
 - Standard:
-  . Added fdiv() method, which performs a floating-point devision under
+  . Added fdiv() method, which performs a floating-point division under
     IEEE 754 semantics. Division by zero is considered well-defined and
     will return one of Inf, -Inf or NaN.
 

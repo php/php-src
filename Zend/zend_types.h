@@ -1277,7 +1277,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		}												\
 	} while (0)
 
-/* Properties store a flag distinguishing unset and unintialized properties
+/* Properties store a flag distinguishing unset and uninitialized properties
  * (both use IS_UNDEF type) in the Z_EXTRA space. As such we also need to copy
  * the Z_EXTRA space when copying property default values etc. We define separate
  * macros for this purpose, so this workaround is easier to remove in the future. */
