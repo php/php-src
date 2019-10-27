@@ -1649,6 +1649,11 @@ ZEND_METHOD(reflection_function, isDisabled)
 	zend_function *fptr;
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETURN_BOOL(fptr->type == ZEND_INTERNAL_FUNCTION && fptr->internal_function.handler == zif_display_disabled_function);
 }
 /* }}} */
@@ -1890,6 +1895,10 @@ ZEND_METHOD(reflection_function, returnsReference)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETURN_BOOL((fptr->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0);
 }
 /* }}} */
@@ -1903,6 +1912,10 @@ ZEND_METHOD(reflection_function, getNumberOfParameters)
 	uint32_t num_args;
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	num_args = fptr->common.num_args;
 	if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
@@ -1922,6 +1935,10 @@ ZEND_METHOD(reflection_function, getNumberOfRequiredParameters)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETURN_LONG(fptr->common.required_num_args);
 }
 /* }}} */
@@ -1936,6 +1953,10 @@ ZEND_METHOD(reflection_function, getParameters)
 	struct _zend_arg_info *arg_info;
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	arg_info= fptr->common.arg_info;
 	num_args = fptr->common.num_args;
@@ -1976,6 +1997,10 @@ ZEND_METHOD(reflection_function, getExtension)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (fptr->type != ZEND_INTERNAL_FUNCTION) {
 		RETURN_NULL();
 	}
@@ -1998,6 +2023,10 @@ ZEND_METHOD(reflection_function, getExtensionName)
 	zend_internal_function *internal;
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	if (fptr->type != ZEND_INTERNAL_FUNCTION) {
 		RETURN_FALSE;
@@ -4642,6 +4671,10 @@ ZEND_METHOD(reflection_class, newInstanceWithoutConstructor)
 	zend_class_entry *ce;
 
 	GET_REFLECTION_OBJECT_PTR(ce);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	if (ce->type == ZEND_INTERNAL_CLASS
 			&& ce->create_object != NULL && (ce->ce_flags & ZEND_ACC_FINAL)) {
