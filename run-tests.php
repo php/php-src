@@ -57,6 +57,8 @@ function main()
 	// Parallel testing
 	global $workers, $workerID;
 
+	define('IS_WINDOWS', substr(PHP_OS, 0, 3) == "WIN");
+
 	$workerID = 0;
 	if (getenv("TEST_PHP_WORKER")) {
 		$workerID = intval(getenv("TEST_PHP_WORKER"));
@@ -135,7 +137,7 @@ NO_PROC_OPEN_ERROR;
 		}
 	}
 	//
-	if ((substr(PHP_OS, 0, 3) == "WIN") && empty($environment["SystemRoot"])) {
+	if (IS_WINDOWS && empty($environment["SystemRoot"])) {
 		$environment["SystemRoot"] = getenv("SystemRoot");
 	}
 
@@ -175,7 +177,7 @@ NO_PROC_OPEN_ERROR;
 	}
 
 	if (!getenv('TEST_PHPDBG_EXECUTABLE')) {
-		if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) . "/phpdbg.exe")) {
+		if (IS_WINDOWS && file_exists(dirname($php) . "/phpdbg.exe")) {
 			$phpdbg = realpath(dirname($php) . "/phpdbg.exe");
 		} elseif (file_exists(dirname($php) . "/../../sapi/phpdbg/phpdbg")) {
 			$phpdbg = realpath(dirname($php) . "/../../sapi/phpdbg/phpdbg");
@@ -659,7 +661,7 @@ HELP;
 		}
 
 		if (strlen($conf_passed)) {
-			if (substr(PHP_OS, 0, 3) == "WIN") {
+			if (IS_WINDOWS) {
 				$pass_options .= " -c " . escapeshellarg($conf_passed);
 			} else {
 				$pass_options .= " -c '" . realpath($conf_passed) . "'";
@@ -977,7 +979,7 @@ function save_or_mail_results()
 			$failed_tests_data .= "OS:\n" . PHP_OS . " - " . php_uname() . "\n\n";
 			$ldd = $autoconf = $sys_libtool = $libtool = $compiler = 'N/A';
 
-			if (substr(PHP_OS, 0, 3) != "WIN") {
+			if (!IS_WINDOWS) {
 				/* If PHP_AUTOCONF is set, use it; otherwise, use 'autoconf'. */
 				if (getenv('PHP_AUTOCONF')) {
 					$autoconf = shell_exec(getenv('PHP_AUTOCONF') . ' --version');
@@ -1930,7 +1932,7 @@ TEST $file
 	if (array_key_exists('CGI', $section_text) || !empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['GZIP_POST']) || !empty($section_text['DEFLATE_POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['PUT']) || !empty($section_text['COOKIE']) || !empty($section_text['EXPECTHEADERS'])) {
 		if (isset($php_cgi)) {
 			$php = $php_cgi . ' -C ';
-		} else if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) . "/php-cgi.exe")) {
+		} else if (IS_WINDOWS && file_exists(dirname($php) . "/php-cgi.exe")) {
 			$php = realpath(dirname($php) . "/php-cgi.exe") . ' -C ';
 		} else {
 			if (file_exists(dirname($php) . "/../../sapi/cgi/php-cgi")) {
@@ -2086,7 +2088,7 @@ TEST $file
 		$ext_dir = `$php $pass_options $extra_options $ext_params -d display_errors=0 -r "echo ini_get('extension_dir');"`;
 		$extensions = preg_split("/[\n\r]+/", trim($section_text['EXTENSIONS']));
 		$loaded = explode(",", `$php $pass_options $extra_options $ext_params -d display_errors=0 -r "echo implode(',', get_loaded_extensions());"`);
-		$ext_prefix = substr(PHP_OS, 0, 3) === "WIN" ? "php_" : "";
+		$ext_prefix = IS_WINDOWS ? "php_" : "";
 		foreach ($extensions as $req_ext) {
 			if (!in_array($req_ext, $loaded)) {
 				if ($req_ext == 'opcache') {
@@ -2125,7 +2127,7 @@ TEST $file
 		if (trim($section_text['SKIPIF'])) {
 			show_file_block('skip', $section_text['SKIPIF']);
 			save_text($test_skipif, $section_text['SKIPIF'], $temp_skipif);
-			$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
+			$extra = !IS_WINDOWS ?
 				"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
 
 			if ($valgrind) {
@@ -2480,7 +2482,7 @@ COMMAND $cmd
 				$clean_params = array();
 				settings2array($ini_overwrites, $clean_params);
 				$clean_params = settings2params($clean_params);
-				$extra = substr(PHP_OS, 0, 3) !== "WIN" ?
+				$extra = !IS_WINDOWS ?
 					"unset REQUEST_METHOD; unset QUERY_STRING; unset PATH_TRANSLATED; unset SCRIPT_FILENAME; unset REQUEST_METHOD;" : "";
 				system_with_timeout("$extra $php $pass_options $extra_options -q $clean_params $no_file_cache \"$test_clean\"", $env);
 			}
@@ -2951,7 +2953,7 @@ function settings2params($ini_settings)
 				$settings .= " -d \"$name=$val\"";
 			}
 		} else {
-			if (substr(PHP_OS, 0, 3) == "WIN" && !empty($value) && $value[0] == '"') {
+			if (IS_WINDOWS && !empty($value) && $value[0] == '"') {
 				$len = strlen($value);
 
 				if ($value[$len - 1] == '"') {
