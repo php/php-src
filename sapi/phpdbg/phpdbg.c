@@ -28,6 +28,7 @@
 #include "phpdbg_eol.h"
 #include "phpdbg_print.h"
 #include "phpdbg_help.h"
+#include "phpdbg_arginfo.h"
 
 #include "ext/standard/basic_functions.h"
 
@@ -713,62 +714,18 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 	}
 }
 
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_next_arginfo, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_file_arginfo, 0, 0, 2)
-	ZEND_ARG_INFO(0, file)
-	ZEND_ARG_INFO(0, line)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_method_arginfo, 0, 0, 2)
-	ZEND_ARG_INFO(0, class)
-	ZEND_ARG_INFO(0, method)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_function_arginfo, 0, 0, 1)
-	ZEND_ARG_INFO(0, function)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_color_arginfo, 0, 0, 2)
-	ZEND_ARG_INFO(0, element)
-	ZEND_ARG_INFO(0, color)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_prompt_arginfo, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_exec_arginfo, 0, 0, 1)
-	ZEND_ARG_INFO(0, context)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_clear_arginfo, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_start_oplog_arginfo, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_end_oplog_arginfo, 0, 0, 0)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_get_executable_arginfo, 0, 0, 0)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
 static const zend_function_entry phpdbg_user_functions[] = {
-	PHP_FE(phpdbg_clear, phpdbg_clear_arginfo)
-	PHP_FE(phpdbg_break_next, phpdbg_break_next_arginfo)
-	PHP_FE(phpdbg_break_file, phpdbg_break_file_arginfo)
-	PHP_FE(phpdbg_break_method, phpdbg_break_method_arginfo)
-	PHP_FE(phpdbg_break_function, phpdbg_break_function_arginfo)
-	PHP_FE(phpdbg_exec,  phpdbg_exec_arginfo)
-	PHP_FE(phpdbg_color, phpdbg_color_arginfo)
-	PHP_FE(phpdbg_prompt, phpdbg_prompt_arginfo)
-	PHP_FE(phpdbg_start_oplog, phpdbg_start_oplog_arginfo)
-	PHP_FE(phpdbg_end_oplog, phpdbg_end_oplog_arginfo)
-	PHP_FE(phpdbg_get_executable, phpdbg_get_executable_arginfo)
+	PHP_FE(phpdbg_clear, arginfo_phpdbg_clear)
+	PHP_FE(phpdbg_break_next, arginfo_phpdbg_break_next)
+	PHP_FE(phpdbg_break_file, arginfo_phpdbg_break_file)
+	PHP_FE(phpdbg_break_method, arginfo_phpdbg_break_method)
+	PHP_FE(phpdbg_break_function, arginfo_phpdbg_break_function)
+	PHP_FE(phpdbg_exec, arginfo_phpdbg_exec)
+	PHP_FE(phpdbg_color, arginfo_phpdbg_color)
+	PHP_FE(phpdbg_prompt, arginfo_phpdbg_prompt)
+	PHP_FE(phpdbg_start_oplog, arginfo_phpdbg_start_oplog)
+	PHP_FE(phpdbg_end_oplog, arginfo_phpdbg_end_oplog)
+	PHP_FE(phpdbg_get_executable, arginfo_phpdbg_get_executable)
 #ifdef  PHP_FE_END
 	PHP_FE_END
 #else
