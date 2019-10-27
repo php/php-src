@@ -1649,6 +1649,11 @@ ZEND_METHOD(reflection_function, isDisabled)
 	zend_function *fptr;
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETURN_BOOL(fptr->type == ZEND_INTERNAL_FUNCTION && fptr->internal_function.handler == zif_display_disabled_function);
 }
 /* }}} */
@@ -1890,6 +1895,10 @@ ZEND_METHOD(reflection_function, returnsReference)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETURN_BOOL((fptr->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE) != 0);
 }
 /* }}} */
@@ -1903,6 +1912,10 @@ ZEND_METHOD(reflection_function, getNumberOfParameters)
 	uint32_t num_args;
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	num_args = fptr->common.num_args;
 	if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
@@ -1922,6 +1935,10 @@ ZEND_METHOD(reflection_function, getNumberOfRequiredParameters)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETURN_LONG(fptr->common.required_num_args);
 }
 /* }}} */
@@ -1936,6 +1953,10 @@ ZEND_METHOD(reflection_function, getParameters)
 	struct _zend_arg_info *arg_info;
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	arg_info= fptr->common.arg_info;
 	num_args = fptr->common.num_args;
@@ -1976,6 +1997,10 @@ ZEND_METHOD(reflection_function, getExtension)
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (fptr->type != ZEND_INTERNAL_FUNCTION) {
 		RETURN_NULL();
 	}
@@ -1998,6 +2023,10 @@ ZEND_METHOD(reflection_function, getExtensionName)
 	zend_internal_function *internal;
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	if (fptr->type != ZEND_INTERNAL_FUNCTION) {
 		RETURN_FALSE;
@@ -2984,6 +3013,10 @@ ZEND_METHOD(reflection_method, getClosure)
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
 	if (mptr->common.fn_flags & ZEND_ACC_STATIC)  {
+		if (zend_parse_parameters_none() == FAILURE) {
+			return;
+		}
+
 		zend_create_fake_closure(return_value, mptr, mptr->common.scope, mptr->common.scope, NULL);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &obj) == FAILURE) {
@@ -4643,6 +4676,10 @@ ZEND_METHOD(reflection_class, newInstanceWithoutConstructor)
 
 	GET_REFLECTION_OBJECT_PTR(ce);
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (ce->type == ZEND_INTERNAL_CLASS
 			&& ce->create_object != NULL && (ce->ce_flags & ZEND_ACC_FINAL)) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class %s is an internal class marked as final that cannot be instantiated without invoking its constructor", ZSTR_VAL(ce->name));
@@ -5378,6 +5415,10 @@ ZEND_METHOD(reflection_property, getValue)
 	}
 
 	if (ref->prop.flags & ZEND_ACC_STATIC) {
+		if (zend_parse_parameters_none() == FAILURE) {
+			return;
+		}
+
 		member_p = zend_read_static_property_ex(intern->ce, ref->unmangled_name, 0);
 		if (member_p) {
 			ZVAL_COPY_DEREF(return_value, member_p);
@@ -5463,6 +5504,10 @@ ZEND_METHOD(reflection_property, isInitialized)
 	}
 
 	if (ref->prop.flags & ZEND_ACC_STATIC) {
+		if (zend_parse_parameters_none() == FAILURE) {
+			return;
+		}
+
 		member_p = zend_read_static_property_ex(intern->ce, ref->unmangled_name, 1);
 		if (member_p) {
 			RETURN_BOOL(!Z_ISUNDEF_P(member_p));
