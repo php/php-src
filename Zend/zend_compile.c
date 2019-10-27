@@ -7783,10 +7783,6 @@ void zend_compile_shell_exec(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-void zend_ast_create_inline_try(znode* result, zend_ast *ast) {
-
-}
-
 void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *list = zend_ast_get_list(ast);
