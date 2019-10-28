@@ -89,8 +89,8 @@ static zend_bool zend_valid_closure_binding(
 		return 0;
 	} else if (!is_fake_closure && !Z_ISUNDEF(closure->this_ptr)
 			&& (func->common.fn_flags & ZEND_ACC_USES_THIS)) {
-		// TODO: Only deprecate if it had $this *originally*?
-		zend_error(E_DEPRECATED, "Unbinding $this of closure is deprecated");
+		zend_error(E_WARNING, "Cannot unbind $this of closure using $this");
+		return 0;
 	}
 
 	if (scope && scope != func->common.scope && scope->type == ZEND_INTERNAL_CLASS) {

@@ -48,9 +48,7 @@ echo "After binding, no instance", "\n";
 $d = $staticUnscoped->bindTo(null); $d(); echo "\n";
 $d = $nonstaticUnscoped->bindTo(null); $d(); echo "\n";
 $d = $staticScoped->bindTo(null); $d(); echo "\n";
-$d = $nonstaticScoped->bindTo(null); $d(); echo "\n";
-// $d is still non-static
-$d->bindTo($d);
+$d = $nonstaticScoped->bindTo(null); var_dump($d); echo "\n";
 
 echo "After binding, with same-class instance for the bound ones", "\n";
 $d = $staticUnscoped->bindTo(new A);
@@ -81,9 +79,9 @@ bound: no
 scoped to A: bool(true)
 bound: no
 
-Deprecated: Unbinding $this of closure is deprecated in %s on line %d
-scoped to A: bool(true)
-bound: no
+Warning: Cannot unbind $this of closure using $this in %s on line %d
+NULL
+
 After binding, with same-class instance for the bound ones
 
 Warning: Cannot bind an instance to a static closure in %s on line %d
