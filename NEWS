@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #78656 (Parse errors classified as highest log-level). (Erik
     Lundin)
+  . Fixed bug #78752 (Segfault if GC triggered while generator stack frame is
+    being destroyed). (Nikita)
 
 - COM:
   . Fixed bug #78694 (Appending to a variant array causes segfault). (cmb)

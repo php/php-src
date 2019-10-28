@@ -97,16 +97,18 @@ ZEND_API zend_execute_data* zend_generator_freeze_call_stack(zend_execute_data *
 /* }}} */
 
 static void zend_generator_cleanup_unfinished_execution(
-		zend_generator *generator, uint32_t catch_op_num) /* {{{ */
+		zend_generator *generator, zend_execute_data *execute_data, uint32_t catch_op_num) /* {{{ */
 {
-	zend_execute_data *execute_data = generator->execute_data;
-
 	if (execute_data->opline != execute_data->func->op_array.opcodes) {
 		/* -1 required because we want the last run opcode, not the next to-be-run one. */
 		uint32_t op_num = execute_data->opline - execute_data->func->op_array.opcodes - 1;
 
 		if (UNEXPECTED(generator->frozen_call_stack)) {
+			/* Temporarily restore generator->execute_data if it has been NULLed out already. */
+			zend_execute_data *save_ex = generator->execute_data;
+			generator->execute_data = execute_data;
 			zend_generator_restore_call_stack(generator);
+			generator->execute_data = save_ex;
 		}
 		zend_cleanup_unfinished_execution(execute_data, op_num, catch_op_num);
 	}
@@ -117,6 +119,9 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 {
 	if (EXPECTED(generator->execute_data)) {
 		zend_execute_data *execute_data = generator->execute_data;
+		/* Null out execute_data early, to prevent double frees if GC runs while we're
+		 * already cleaning up execute_data. */
+		generator->execute_data = NULL;
 
 		if (EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE) {
 			zend_clean_and_cache_symbol_table(execute_data->symbol_table);
@@ -135,12 +140,12 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			return;
 		}
 
-		zend_vm_stack_free_extra_args(generator->execute_data);
+		zend_vm_stack_free_extra_args(execute_data);
 
 		/* Some cleanups are only necessary if the generator was closed
 		 * before it could finish execution (reach a return statement). */
 		if (UNEXPECTED(!finished_execution)) {
-			zend_generator_cleanup_unfinished_execution(generator, 0);
+			zend_generator_cleanup_unfinished_execution(generator, execute_data, 0);
 		}
 
 		/* Free closure object */
@@ -154,8 +159,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			generator->gc_buffer = NULL;
 		}
 
-		efree(generator->execute_data);
-		generator->execute_data = NULL;
+		efree(execute_data);
 	}
 }
 /* }}} */
@@ -216,7 +220,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 	if (finally_op_num) {
 		zval *fast_call;
 
-		zend_generator_cleanup_unfinished_execution(generator, finally_op_num);
+		zend_generator_cleanup_unfinished_execution(generator, ex, finally_op_num);
 
 		fast_call = ZEND_CALL_VAR(ex, ex->func->op_array.opcodes[finally_op_end].op1.var);
 		Z_OBJ_P(fast_call) = EG(exception);
