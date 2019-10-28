@@ -648,7 +648,7 @@ function getcwd() {}
 function rewinddir($dir_handle = UNKNOWN): void {}
 
 /** @return string|false */
-function readdir($dir_handle = null) {}
+function readdir($dir_handle = UNKNOWN) {}
 
 /**
  * @param resource $context
@@ -716,13 +716,17 @@ function chown(string $filename, $user): bool {}
 
 function chgrp(string $filename, $group): bool {}
 
+#if HAVE_LCHOWN
 function lchown(string $filename, $user): bool {}
 
 function lchgrp(string $filename, $group): bool {}
+#endif
 
 function chmod(string $filename, int $mode): bool {}
 
+#if HAVE_UTIME
 function touch(string $filename, int $time = 0, int $atime = 0): bool {}
+#endif
 
 function clearstatcache(bool $clear_realpath_cache = false, string $filename = ""): void {}
 
