@@ -23,6 +23,7 @@
 #include "php_string.h"
 #include "php_scandir.h"
 #include "basic_functions.h"
+#include "basic_functions_arginfo.h"
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -84,16 +85,10 @@ static zend_class_entry *dir_class_entry_ptr;
 		} \
 	}
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dir, 0, 0, 0)
-	ZEND_ARG_INFO(0, dir_handle)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 static const zend_function_entry php_dir_class_functions[] = {
-	PHP_FALIAS(close,	closedir,		arginfo_dir)
-	PHP_FALIAS(rewind,	rewinddir,		arginfo_dir)
-	PHP_NAMED_FE(read,  php_if_readdir, arginfo_dir)
+	PHP_FALIAS(close,	closedir,		arginfo_class_Directory_close)
+	PHP_FALIAS(rewind,	rewinddir,		arginfo_class_Directory_rewind)
+	PHP_NAMED_FE(read,  php_if_readdir, arginfo_class_Directory_read)
 	PHP_FE_END
 };
 
