@@ -2003,24 +2003,6 @@ static int zend_jit_cannot_add_element_stub(dasm_State **Dst)
 	return 1;
 }
 
-static int zend_jit_not_obj_stub(dasm_State **Dst)
-{
-	|->not_obj:
-	|.if X64
-		|	xor CARG1, CARG1
-		|	LOAD_ADDR CARG2, "Using $this when not in object context"
-		|	EXT_CALL zend_throw_error, r0
-	|.else
-		|	sub r4, 8
-		|	push "Using $this when not in object context"
-		|	push 0
-		|	EXT_CALL zend_throw_error, r0
-		|	add r4, 16
-	|.endif
-	|	jmp ->exception_handler
-	return 1;
-}
-
 static int zend_jit_undefined_function_stub(dasm_State **Dst)
 {
 	|->undefined_function:
@@ -2283,7 +2265,6 @@ static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(undefined_offset_ex),
 	JIT_STUB(undefined_index_ex),
 	JIT_STUB(cannot_add_element_ex),
-	JIT_STUB(not_obj),
 	JIT_STUB(undefined_function),
 	JIT_STUB(negative_shift),
 	JIT_STUB(mod_by_zero),
@@ -9383,7 +9364,7 @@ static zend_bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string 
 	return 0;
 }
 
-static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa, zend_bitset checked_this)
+static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info;
 	zend_class_entry *ce = NULL;
@@ -9427,14 +9408,6 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, const zend
 	offset = zend_get_known_property_offset(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
 
 	if (opline->op1_type == IS_UNUSED) {
-		if (!checked_this || !zend_bitset_in(checked_this, (opline - op_array->opcodes))) {
-			|	IF_ZVAL_TYPE this_addr, IS_UNDEF, >1
-			|.cold_code
-			|1:
-			|	SAVE_VALID_OPLINE opline
-			|	jmp ->not_obj
-			|.code
-		}
 		|	GET_ZVAL_PTR FCARG1a, this_addr
 	} else {
 		if (op1_info & MAY_BE_REF) {

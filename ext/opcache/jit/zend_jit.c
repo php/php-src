@@ -1899,66 +1899,6 @@ failure:
 	return NULL;
 }
 
-static void zend_calc_checked_this_r(zend_bitset checked_this, const zend_op_array *op_array, zend_cfg *cfg, int b, int checked)
-{
-	zend_op *opline = &op_array->opcodes[cfg->blocks[b].start];
-	zend_op *end = opline + cfg->blocks[b].len;
-	int old_checked = checked;
-	int i;
-
-	for (; opline < end; opline++) {
-		switch (opline->opcode) {
-			case ZEND_ASSIGN_OBJ_OP:
-			case ZEND_PRE_INC_OBJ:
-			case ZEND_PRE_DEC_OBJ:
-			case ZEND_POST_INC_OBJ:
-			case ZEND_POST_DEC_OBJ:
-			case ZEND_FETCH_OBJ_R:
-			case ZEND_FETCH_OBJ_W:
-			case ZEND_FETCH_OBJ_RW:
-			case ZEND_FETCH_OBJ_IS:
-			case ZEND_FETCH_OBJ_FUNC_ARG:
-			case ZEND_FETCH_OBJ_UNSET:
-			case ZEND_ASSIGN_OBJ:
-			case ZEND_ASSIGN_OBJ_REF:
-			case ZEND_INIT_METHOD_CALL:
-			case ZEND_CLONE:
-			case ZEND_UNSET_OBJ:
-			case ZEND_ISSET_ISEMPTY_PROP_OBJ:
-				if (opline->op1_type != IS_UNUSED) {
-					break;
-				}
-			case ZEND_FETCH_THIS:
-				if (checked) {
-					zend_bitset_incl(checked_this, (opline - op_array->opcodes));
-				}  else {
-					checked = 1;
-				}
-				break;
-			default:
-				break;
-		}
-	}
-
-	if (cfg->blocks[b].flags & ZEND_BB_TRY) {
-		checked = old_checked;
-	}
-
-	for (i = cfg->blocks[b].children; i >= 0; i = cfg->blocks[i].next_child) {
-		zend_calc_checked_this_r(checked_this, op_array, cfg, i, checked);
-	}
-}
-
-static zend_bitset zend_calc_checked_this(zend_arena **arena, const zend_op_array *op_array, zend_cfg *cfg)
-{
-	uint32_t bitset_len = zend_bitset_len(op_array->last);
-	zend_bitset checked_this = zend_arena_calloc(arena, bitset_len, ZEND_BITSET_ELM_SIZE);
-
-	zend_calc_checked_this_r(checked_this, op_array, cfg, 0, 0);
-
-	return checked_this;
-}
-
 static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_opline)
 {
 	int b, i, end;
@@ -1968,7 +1908,6 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 	int call_level = 0;
 	void *checkpoint = NULL;
 	zend_lifetime_interval **ra = NULL;
-	zend_bitset checked_this = NULL;
 	zend_bool is_terminated = 1; /* previous basic block is terminated by jump */
 	zend_bool recv_emitted = 0;   /* emitted at least one RECV opcode */
 
@@ -2348,10 +2287,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						goto done;
 					case ZEND_FETCH_OBJ_R:
 					case ZEND_FETCH_OBJ_IS:
-						if (opline->op1_type == IS_UNUSED && !checked_this) {
-							checked_this = zend_calc_checked_this(&CG(arena), op_array, &ssa->cfg);
-						}
-						if (!zend_jit_fetch_obj_read(&dasm_state, opline, op_array, ssa, checked_this)) {
+						if (!zend_jit_fetch_obj_read(&dasm_state, opline, op_array, ssa)) {
 							goto jit_failure;
 						}
 						goto done;
