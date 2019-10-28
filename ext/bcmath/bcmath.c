@@ -284,7 +284,7 @@ PHP_FUNCTION(bcdiv)
 			RETVAL_STR(bc_num2str_ex(result, scale));
 			break;
 		case -1: /* division by zero */
-			php_error_docref(NULL, E_WARNING, "Division by zero");
+			zend_value_error("Division by zero");
 			break;
 	}
 
@@ -326,7 +326,7 @@ PHP_FUNCTION(bcmod)
 			RETVAL_STR(bc_num2str_ex(result, scale));
 			break;
 		case -1:
-			php_error_docref(NULL, E_WARNING, "Division by zero");
+			zend_value_error("Division by zero");
 			break;
 	}
 
@@ -438,7 +438,7 @@ PHP_FUNCTION(bcsqrt)
 	if (bc_sqrt (&result, scale) != 0) {
 		RETVAL_STR(bc_num2str_ex(result, scale));
 	} else {
-		php_error_docref(NULL, E_WARNING, "Square root of negative number");
+		zend_value_error("Square root of negative number");
 	}
 
 	bc_free_num(&result);
