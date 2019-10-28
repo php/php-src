@@ -679,6 +679,10 @@ ZEND_API zval *zend_std_read_property(zval *object, zval *member, int type, void
 		if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
 			goto exit;
 		}
+		if (UNEXPECTED(Z_PROP_FLAG_P(retval) == IS_PROP_UNINIT)) {
+			/* Skip __get() for uninitialized typed properties */
+			goto uninit_error;
+		}
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))) {
 		if (EXPECTED(zobj->properties != NULL)) {
 			if (!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(property_offset)) {
@@ -782,6 +786,7 @@ call_getter:
 		}
 	}
 
+uninit_error:
 	if (type != BP_VAR_IS) {
 		if (UNEXPECTED(prop_info)) {
 			zend_throw_error(NULL, "Typed property %s::$%s must not be accessed before initialization",
@@ -1126,8 +1131,11 @@ ZEND_API void zend_std_unset_property(zval *object, zval *member, void **cache_s
 			}
 			goto exit;
 		}
-		/* Reset the IS_PROP_UNINIT flag, if it exists. */
-		Z_PROP_FLAG_P(slot) = 0;
+		if (UNEXPECTED(Z_PROP_FLAG_P(slot) == IS_PROP_UNINIT)) {
+			/* Reset the IS_PROP_UNINIT flag, if it exists and bypass __unset(). */
+			Z_PROP_FLAG_P(slot) = 0;
+			goto exit;
+		}
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))
 	 && EXPECTED(zobj->properties != NULL)) {
 		if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
@@ -1685,6 +1693,11 @@ ZEND_API int zend_std_has_property(zval *object, zval *member, int has_set_exist
 		value = OBJ_PROP(zobj, property_offset);
 		if (Z_TYPE_P(value) != IS_UNDEF) {
 			goto found;
+		}
+		if (UNEXPECTED(Z_PROP_FLAG_P(value) == IS_PROP_UNINIT)) {
+			/* Skip __isset() for uninitialized typed properties */
+			result = 0;
+			goto exit;
 		}
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))) {
 		if (EXPECTED(zobj->properties != NULL)) {

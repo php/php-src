@@ -14,12 +14,13 @@ class Foo {
 
 $foo = new Foo();
 
+unset($foo->bar);
 var_dump($foo->bar);
 ?>
 --EXPECTF--
 string(3) "bar"
 
-Fatal error: Uncaught TypeError: Typed property Foo::$bar must be int, null used in %s:14
+Fatal error: Uncaught TypeError: Typed property Foo::$bar must be int, null used in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line 14
+  thrown in %s on line %d
