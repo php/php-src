@@ -10,6 +10,7 @@ PHP                                                                        NEWS
 
 - Date:
   . Fixed bug #70153 (\DateInterval incorrectly unserialized). (Maksim Iakunin)
+  . Fixed bug #78751 (Serialising DatePeriod converts DateTimeImmutable). (cmb)
 
 - FFI:
   . Fixed bug #78716 (Function name mangling is wrong for some parameter 
