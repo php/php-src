@@ -10,13 +10,17 @@ date.timezone=UTC
 <?php
 putenv('TZ=UTC');
 
-var_dump(unixtojd(-1)) . PHP_EOL;
+try {
+    unixtojd(-1);
+} catch (ValueError $ex) {
+    echo $ex->getMessage(), PHP_EOL;
+}
 var_dump(unixtojd(false)) . PHP_EOL;
 var_dump(unixtojd(null)) . PHP_EOL;
 var_dump(unixtojd(time())) . PHP_EOL;
 ?>
 --EXPECTF--
-bool(false)
+timestamp must not be negative
 int(%d)
 int(%d)
 int(%d)

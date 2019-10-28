@@ -1,19 +1,14 @@
 <?php
 
-/** @return int|false */
-function cal_days_in_month(int $calendar, int $month, int $year) {}
+function cal_days_in_month(int $calendar, int $month, int $year): int {}
 
-/** @return array|false */
-function cal_from_jd(int $jd, int $calendar) {}
+function cal_from_jd(int $jd, int $calendar): array {}
 
-/** @return array|false */
-function cal_info(?int $calendar = UNKNOWN) {}
+function cal_info(?int $calendar = UNKNOWN): array {}
 
-/** @return int|false */
-function cal_to_jd(int $calendar, int $month, int $day, int $year) {}
+function cal_to_jd(int $calendar, int $month, int $day, int $year): int {}
 
-/** @return int|false */
-function easter_date(int $year = UNKNOWN, int $method = CAL_EASTER_DEFAULT) {}
+function easter_date(int $year = UNKNOWN, int $method = CAL_EASTER_DEFAULT): int {}
 
 function easter_days(int $year = UNKNOWN, int $method = CAL_EASTER_DEFAULT): int {}
 
@@ -30,13 +25,11 @@ function jdtofrench(int $juliandaycount): string {}
 
 function jdtogregorian(int $juliandaycount): string {}
 
-/** @return string|false */
-function jdtojewish(int $juliandaycount, bool $hebrew = false, int $fl = 0) {}
+function jdtojewish(int $juliandaycount, bool $hebrew = false, int $fl = 0): string {}
 
 function jdtojulian(int $juliandaycount): string {}
 
-/** @return int|false */
-function jdtounix(int $jday) {}
+function jdtounix(int $jday): int {}
 
 function jewishtojd(int $month, int $day, int $year): int {}
 
