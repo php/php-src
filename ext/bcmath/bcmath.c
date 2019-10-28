@@ -23,6 +23,7 @@
 #if HAVE_BCMATH
 
 #include "php_ini.h"
+#include "zend_exceptions.h"
 #include "bcmath_arginfo.h"
 #include "ext/standard/info.h"
 #include "php_bcmath.h"
@@ -284,7 +285,7 @@ PHP_FUNCTION(bcdiv)
 			RETVAL_STR(bc_num2str_ex(result, scale));
 			break;
 		case -1: /* division by zero */
-			zend_value_error("Division by zero");
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
 			break;
 	}
 
@@ -326,7 +327,7 @@ PHP_FUNCTION(bcmod)
 			RETVAL_STR(bc_num2str_ex(result, scale));
 			break;
 		case -1:
-			zend_value_error("Division by zero");
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
 			break;
 	}
 

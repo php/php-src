@@ -8,9 +8,9 @@ bcmath.scale=0
 <?php
 try {
     bcmod("10", "0");
-} catch (ValueError $ex) {
+} catch (DivisionByZeroError $ex) {
     echo $ex->getMessage(), PHP_EOL;
 }
 ?>
 --EXPECT--
-Division by zero
+Modulo by zero

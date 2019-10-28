@@ -10,7 +10,7 @@ antoni@solucionsinternet.com
 <?php
 try {
     bcdiv('10.99', '0');
-} catch (ValueError $ex) {
+} catch (DivisionByZeroError $ex) {
     echo $ex->getMessage(), PHP_EOL;
 }
 ?>
