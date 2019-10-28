@@ -23,6 +23,7 @@
 #if HAVE_BCMATH
 
 #include "php_ini.h"
+#include "zend_exceptions.h"
 #include "bcmath_arginfo.h"
 #include "ext/standard/info.h"
 #include "php_bcmath.h"
@@ -284,7 +285,7 @@ PHP_FUNCTION(bcdiv)
 			RETVAL_STR(bc_num2str_ex(result, scale));
 			break;
 		case -1: /* division by zero */
-			php_error_docref(NULL, E_WARNING, "Division by zero");
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
 			break;
 	}
 
@@ -326,7 +327,7 @@ PHP_FUNCTION(bcmod)
 			RETVAL_STR(bc_num2str_ex(result, scale));
 			break;
 		case -1:
-			php_error_docref(NULL, E_WARNING, "Division by zero");
+			zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
 			break;
 	}
 
@@ -438,7 +439,7 @@ PHP_FUNCTION(bcsqrt)
 	if (bc_sqrt (&result, scale) != 0) {
 		RETVAL_STR(bc_num2str_ex(result, scale));
 	} else {
-		php_error_docref(NULL, E_WARNING, "Square root of negative number");
+		zend_value_error("Square root of negative number");
 	}
 
 	bc_free_num(&result);
