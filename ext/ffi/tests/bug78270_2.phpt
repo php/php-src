@@ -3,7 +3,7 @@ FR #78270 (Usage of __vectorcall convention with FFI)
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-$dll = 'php7' . (PHP_ZTS ? 'ts' : '') . (PHP_DEBUG ? '_debug' : '') . '.dll';
+$dll = 'php8' . (PHP_ZTS ? 'ts' : '') . (PHP_DEBUG ? '_debug' : '') . '.dll';
 try {
     FFI::cdef(<<<EOC
         __vectorcall int zend_atoi(const char *str, size_t str_len);
