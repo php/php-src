@@ -332,13 +332,18 @@ static PHP_FUNCTION(phpdbg_exec)
     instructs phpdbg to insert a breakpoint at the next opcode */
 static PHP_FUNCTION(phpdbg_break_next)
 {
-	zend_execute_data *ex = EG(current_execute_data);
+	zend_execute_data *ex;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	ex = EG(current_execute_data);
 	while (ex && ex->func && !ZEND_USER_CODE(ex->func->type)) {
 		ex = ex->prev_execute_data;
 	}
 
-	if (zend_parse_parameters_none() == FAILURE || !ex) {
+	if (!ex) {
 		return;
 	}
 
@@ -362,8 +367,8 @@ static PHP_FUNCTION(phpdbg_break_file)
 /* {{{ proto void phpdbg_break_method(string class, string method) */
 static PHP_FUNCTION(phpdbg_break_method)
 {
-	char *class = NULL, *method = NULL;
-	size_t clen = 0, mlen = 0;
+	char *class, *method;
+	size_t clen, mlen;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &class, &clen, &method, &mlen) == FAILURE) {
 		return;
@@ -375,7 +380,7 @@ static PHP_FUNCTION(phpdbg_break_method)
 /* {{{ proto void phpdbg_break_function(string function) */
 static PHP_FUNCTION(phpdbg_break_function)
 {
-	char    *function = NULL;
+	char    *function;
 	size_t   function_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &function, &function_len) == FAILURE) {
@@ -389,6 +394,10 @@ static PHP_FUNCTION(phpdbg_break_function)
    instructs phpdbg to clear breakpoints */
 static PHP_FUNCTION(phpdbg_clear)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]);
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING]);
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]);
@@ -418,7 +427,8 @@ static PHP_FUNCTION(phpdbg_color)
 			phpdbg_set_color_ex(element, color, color_len);
 		break;
 
-		default: zend_error(E_ERROR, "phpdbg detected an incorrect color constant");
+		default:
+			zend_value_error("phpdbg detected an incorrect color constant");
 	}
 } /* }}} */
 
