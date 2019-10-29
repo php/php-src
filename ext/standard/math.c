@@ -281,7 +281,7 @@ static double php_expm1(double x)
 }
 /* }}}*/
 
-/* {{{ proto int|float abs(int number)
+/* {{{ proto int|float abs(int|float number)
    Return the absolute value of the number */
 PHP_FUNCTION(abs)
 {
@@ -345,7 +345,7 @@ PHP_FUNCTION(floor)
 }
 /* }}} */
 
-/* {{{ proto float|false round(float number [, int precision [, int mode]])
+/* {{{ proto float round(float number [, int precision [, int mode]])
    Returns the number rounded to specified precision */
 PHP_FUNCTION(round)
 {
@@ -356,7 +356,7 @@ PHP_FUNCTION(round)
 	double return_val;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_ZVAL(value)
+		Z_PARAM_NUMBER(value)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(precision)
 		Z_PARAM_LONG(mode)
@@ -373,7 +373,6 @@ PHP_FUNCTION(round)
 		places = precision;
 #endif
 	}
-	convert_scalar_to_number_ex(value);
 
 	switch (Z_TYPE_P(value)) {
 		case IS_LONG:
@@ -389,9 +388,7 @@ PHP_FUNCTION(round)
 			RETURN_DOUBLE(return_val);
 			break;
 
-		default:
-			RETURN_FALSE;
-			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
 /* }}} */
