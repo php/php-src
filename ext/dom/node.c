@@ -1820,7 +1820,7 @@ PHP_METHOD(domnode, C14NFile)
 }
 /* }}} */
 
-/* {{{ proto int DOMNode::getNodePath()
+/* {{{ proto string|null DOMNode::getNodePath()
    Gets an xpath for a node */
 PHP_METHOD(domnode, getNodePath)
 {

@@ -1270,7 +1270,7 @@ PHP_METHOD(domdocument, __construct)
 
 	if (!docp) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		RETURN_FALSE;
+		return;
 	}
 
 	if (encoding_len > 0) {
@@ -2258,7 +2258,6 @@ PHP_METHOD(domdocument, registerNodeClass)
 	}
 
 	zend_throw_error(NULL, "Class %s is not derived from %s.", ZSTR_VAL(ce->name), ZSTR_VAL(basece->name));
-	RETURN_FALSE;
 }
 /* }}} */
 

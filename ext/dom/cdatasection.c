@@ -58,7 +58,7 @@ PHP_METHOD(domcdatasection, __construct)
 
 	if (!nodep) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		RETURN_FALSE;
+		return;
 	}
 
 	intern = Z_DOMOBJ_P(ZEND_THIS);
