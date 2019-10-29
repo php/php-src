@@ -9228,17 +9228,20 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zen
 				|	mov CARG3, arg_num
 				|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
 				|	mov aword A5, r0
+				|	SAVE_VALID_OPLINE opline
 				|	EXT_CALL zend_jit_verify_arg_object, r0
 			|.elif X64
 				|	mov CARG3, arg_num
 				|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
 				|	mov CARG5, r0
+				|	SAVE_VALID_OPLINE opline
 				|	EXT_CALL zend_jit_verify_arg_object, r0
 			|.else
 				|	sub r4, 4
 				|	push r0
 				|	push (ptrdiff_t)arg_info
 				|	push arg_num
+				|	SAVE_VALID_OPLINE opline
 				|	EXT_CALL zend_jit_verify_arg_object, r0
 				|	add r4, 4
 			|.endif
@@ -9279,17 +9282,20 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zen
 		|	mov CARG3, arg_num
 		|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
 		|	mov aword A5, r0
+		|	SAVE_VALID_OPLINE opline
 		|	EXT_CALL zend_jit_verify_arg_slow, r0
 	|.elif X64
 		|	mov CARG3, arg_num
 		|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
 		|	mov CARG5, r0
+		|	SAVE_VALID_OPLINE opline
 		|	EXT_CALL zend_jit_verify_arg_slow, r0
 	|.else
 		|	sub r4, 4
 		|	push r0
 		|	push (ptrdiff_t)arg_info
 		|	push arg_num
+		|	SAVE_VALID_OPLINE opline
 		|	EXT_CALL zend_jit_verify_arg_slow, r0
 		|	add r4, 4
 	|.endif
