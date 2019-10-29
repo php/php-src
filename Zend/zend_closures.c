@@ -268,8 +268,15 @@ static int zend_create_closure_from_callable(zval *return_value, zval *callable,
 
 	mptr = fcc.function_handler;
 	if (mptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-		memset(&call, 0, sizeof(zend_internal_function));
+		/* For Closure::fromCallable([$closure, "__invoke"]) return $closure. */
+		if (fcc.object && fcc.object->ce == zend_ce_closure
+				&& zend_string_equals_literal(mptr->common.function_name, "__invoke")) {
+			ZVAL_OBJ(return_value, fcc.object);
+			zend_free_trampoline(mptr);
+			return SUCCESS;
+		}
 
+		memset(&call, 0, sizeof(zend_internal_function));
 		call.type = ZEND_INTERNAL_FUNCTION;
 		call.handler = zend_closure_call_magic;
 		call.function_name = mptr->common.function_name;
