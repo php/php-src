@@ -36,7 +36,7 @@ static int collator_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s",
 		&locale, &locale_len ) == FAILURE )
 	{
-		return FAILURE;
+		return;
 	}
 
 	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);

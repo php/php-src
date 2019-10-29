@@ -79,7 +79,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|zs!",
 			&object, &format, &locale_str, &locale_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!locale_str) {

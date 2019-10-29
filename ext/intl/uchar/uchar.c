@@ -251,7 +251,7 @@ IC_METHOD(charName) {
 
 	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &zcp, &nameChoice) == FAILURE) ||
 	    (convert_cp(&cp, zcp) == FAILURE)) {
-		RETURN_NULL();
+		return;
 	}
 
 	buffer_len = u_charName(cp, (UCharNameChoice)nameChoice, NULL, 0, &error);
@@ -279,7 +279,7 @@ IC_METHOD(charFromName) {
 	UErrorCode error = U_ZERO_ERROR;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &name, &name_len, &nameChoice) == FAILURE) {
-		RETURN_NULL();
+		return;
 	}
 
 	ret = u_charFromName((UCharNameChoice)nameChoice, name, &error);

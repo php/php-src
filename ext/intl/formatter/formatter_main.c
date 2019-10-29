@@ -37,7 +37,7 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "sl|s",
 		&locale, &locale_len, &style, &pattern, &pattern_len ) == FAILURE )
 	{
-		return FAILURE;
+		return;
 	}
 
 	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
@@ -112,7 +112,7 @@ PHP_FUNCTION( numfmt_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, NumberFormatter_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	nfo = Z_INTL_NUMBERFORMATTER_P(object);
@@ -136,7 +136,7 @@ PHP_FUNCTION( numfmt_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, NumberFormatter_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	nfo = Z_INTL_NUMBERFORMATTER_P(object);

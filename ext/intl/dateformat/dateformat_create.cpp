@@ -70,7 +70,7 @@ static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!ll|zzs",
 			&locale_str, &locale_len, &date_type, &time_type, &timezone_zv,
 			&calendar_zv, &pattern_str, &pattern_str_len) == FAILURE) {
-		return FAILURE;
+		return;
 	}
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT_NO_CHECK;

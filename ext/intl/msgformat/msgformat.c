@@ -41,7 +41,7 @@ static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "ss",
 		&locale, &locale_len, &pattern, &pattern_len ) == FAILURE )
 	{
-		return FAILURE;
+		return;
 	}
 
 	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
@@ -132,7 +132,7 @@ PHP_FUNCTION( msgfmt_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	mfo = Z_INTL_MESSAGEFORMATTER_P( object );
@@ -157,7 +157,7 @@ PHP_FUNCTION( msgfmt_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	mfo = Z_INTL_MESSAGEFORMATTER_P( object );

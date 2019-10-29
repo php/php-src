@@ -52,7 +52,7 @@ PHP_FUNCTION( intl_is_failure )
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "l",
 		&err_code ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_BOOL( U_FAILURE( err_code ) );
@@ -71,7 +71,7 @@ PHP_FUNCTION( intl_error_name )
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "l",
 		&err_code ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_STRING( (char*)u_errorName( err_code ) );

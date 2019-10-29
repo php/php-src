@@ -31,7 +31,7 @@ U_CFUNC PHP_FUNCTION(cpbi_get_last_code_point)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;

@@ -63,7 +63,7 @@ PHP_FUNCTION( msgfmt_format )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oa",
 		&object, MessageFormatter_ce_ptr,  &args ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	/* Fetch the object. */
@@ -94,7 +94,7 @@ PHP_FUNCTION( msgfmt_format_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "ssa",
 		  &slocale, &slocale_len, &pattern, &pattern_len, &args ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	INTL_CHECK_LOCALE_LEN(slocale_len);
