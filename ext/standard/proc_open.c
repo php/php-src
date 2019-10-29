@@ -245,7 +245,7 @@ PHP_FUNCTION(proc_terminate)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 #ifdef PHP_WIN32
@@ -276,7 +276,7 @@ PHP_FUNCTION(proc_close)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	FG(pclose_wait) = 1;
@@ -306,7 +306,7 @@ PHP_FUNCTION(proc_get_status)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	array_init(return_value);
