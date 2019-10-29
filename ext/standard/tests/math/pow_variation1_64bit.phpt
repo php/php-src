@@ -84,9 +84,13 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of pow()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(pow($input, 3));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(pow($input, 3));
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 ?>
@@ -153,7 +157,7 @@ Warning: A non-numeric value encountered in %s on line %d
 int(0)
 
 -- Iteration 19 --
-int(0)
+Unsupported operand types
 
 -- Iteration 20 --
 
