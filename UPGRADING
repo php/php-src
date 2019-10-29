@@ -371,6 +371,6 @@ PHP 8.0 UPGRADE NOTES
 14. Performance Improvements
 ========================================
 
-- array_slice() on a packed array will no longer scan the whole array to find
+- array_slice() on an array without gaps will no longer scan the whole array to find
   the start offset. This may significantly reduce the runtime of the function
   with large offsets and small lengths.

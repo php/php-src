@@ -3480,6 +3480,7 @@ static inline Bucket* find_bucket_at_offset(HashTable* ht, zend_long offset)
 	/* Return a pointer to the end of the bucket array. */
 	return ht->arData + ht->nNumUsed;
 }
+/* }}} */
 
 /* {{{ proto array array_slice(array input, int offset [, int length [, bool preserve_keys]])
    Returns elements specified by offset and length */
