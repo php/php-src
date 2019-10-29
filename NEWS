@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.0RC5
+31 Oct 2019, PHP 7.4.0RC5
 
 - Core:
   . Fixed bug #78226 (Unexpected __set behavior with typed properties). (Nikita)
