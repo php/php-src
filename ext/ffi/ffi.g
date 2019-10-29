@@ -131,6 +131,8 @@ declaration_specifiers(zend_ffi_dcl *dcl):
 			{zend_ffi_set_abi(dcl, ZEND_FFI_ABI_FASTCALL);}
 		|	"__thiscall"
 			{zend_ffi_set_abi(dcl, ZEND_FFI_ABI_THISCALL);}
+		|	"__vectorcall"
+			{zend_ffi_set_abi(dcl, ZEND_FFI_ABI_VECTORCALL);}
 		|	"_Alignas"
 			"("
 			(	&type_name_start

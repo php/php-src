@@ -130,6 +130,7 @@ ZEND_EXTERN_MODULE_GLOBALS(ffi)
 #define	ZEND_FFI_ABI_REGISTER       6  // FFI_REGISTER
 #define	ZEND_FFI_ABI_MS             7  // FFI_MS_CDECL
 #define	ZEND_FFI_ABI_SYSV           8  // FFI_SYSV
+#define ZEND_FFI_ABI_VECTORCALL     9  // FFI_VECTORCALL
 
 #define ZEND_FFI_ATTR_CONST             (1<<0)
 #define ZEND_FFI_ATTR_INCOMPLETE_TAG    (1<<1)
