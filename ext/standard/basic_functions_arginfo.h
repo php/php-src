@@ -874,7 +874,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mail, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 	ZEND_ARG_INFO(0, additional_headers)
-	ZEND_ARG_INFO(0, additional_parameters)
+	ZEND_ARG_TYPE_INFO(0, additional_parameters, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_abs, 0, 0, 1)
@@ -887,7 +887,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_floor arginfo_ceil
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_round, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_round, 0, 1, IS_DOUBLE, 0)
 	ZEND_ARG_INFO(0, number)
 	ZEND_ARG_TYPE_INFO(0, precision, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
@@ -986,7 +986,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_dechex arginfo_decbin
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_base_convert, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_base_convert, 0, 3, IS_STRING, 0)
 	ZEND_ARG_INFO(0, number)
 	ZEND_ARG_TYPE_INFO(0, frombase, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, tobase, IS_LONG, 0)
@@ -995,8 +995,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_number_format, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, number, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, decimals, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, decimal_point, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, thousands_separator, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, decimal_point, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, thousands_separator, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
 #define arginfo_fmod arginfo_hypot
@@ -1042,13 +1042,13 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_password_hash, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
 	ZEND_ARG_INFO(0, algo)
-	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_TYPE_INFO(0, options, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_password_needs_rehash, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, hash, IS_STRING, 0)
 	ZEND_ARG_INFO(0, algo)
-	ZEND_ARG_INFO(0, options)
+	ZEND_ARG_TYPE_INFO(0, options, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_password_verify, 0, 2, _IS_BOOL, 0)
@@ -1070,7 +1070,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(PHP_CAN_SUPPORT_PROC_OPEN)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_proc_close, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_proc_close, 0, 1, IS_LONG, 0)
 	ZEND_ARG_INFO(0, process)
 ZEND_END_ARG_INFO()
 #endif
@@ -1078,12 +1078,14 @@ ZEND_END_ARG_INFO()
 #if defined(PHP_CAN_SUPPORT_PROC_OPEN)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_proc_terminate, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, process)
-	ZEND_ARG_INFO(0, signal)
+	ZEND_ARG_TYPE_INFO(0, signal, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(PHP_CAN_SUPPORT_PROC_OPEN)
-#define arginfo_proc_get_status arginfo_proc_close
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_proc_get_status, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_INFO(0, process)
+ZEND_END_ARG_INFO()
 #endif
 
 #define arginfo_quoted_printable_decode arginfo_base64_encode

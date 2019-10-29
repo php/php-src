@@ -648,7 +648,7 @@ function link(string $target, string $link): bool {}
 function ezmlm_hash(string $str): int {}
 
 /** @param string|array $additional_headers */
-function mail(string $to, string $subject, string $message, $additional_headers = UNKNOWN, $additional_parameters = ""): bool {}
+function mail(string $to, string $subject, string $message, $additional_headers = UNKNOWN, string $additional_parameters = ""): bool {}
 
 /* math.c */
 
@@ -662,8 +662,7 @@ function ceil(float $number): float {}
 
 function floor(float $number): float {}
 
-/** @return float|false */
-function round($number, int $precision = 0, int $mode = PHP_ROUND_HALF_UP) {}
+function round($number, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): float {}
 
 function sin(float $number): float {}
 
@@ -705,13 +704,13 @@ function intdiv(int $dividend, int $divisor): int {}
 
 function is_infinite(float $number): bool {}
 
-/** @return int|float */
+/** @return mixed */
 function pow($base, $exp) {}
 
 function exp(float $number): float {}
 
 /** @return float|false */
-function log(float $number, float $base = UNKNOWN) {}
+function log(float $number, float $base = M_E) {}
 
 function log10(float $number): float {}
 
@@ -738,10 +737,9 @@ function decoct($number): string {}
 
 function dechex($number): string {}
 
-/** @return string|false */
-function base_convert($number, int $frombase, int $tobase) {}
+function base_convert($number, int $frombase, int $tobase): string {}
 
-function number_format(float $number, int $decimals = 0, string $decimal_point = "." , string $thousands_separator = ","): string {}
+function number_format(float $number, int $decimals = 0, ?string $decimal_point = "." , ?string $thousands_separator = ","): string {}
 
 function fmod(float $x, float $y): float {}
 
@@ -775,9 +773,9 @@ function unpack(string $format, string $data, int $offset = 0) {}
 function password_get_info(string $hash): ?array {}
 
 /** @return string|false */
-function password_hash(string $password, $algo, $options = UNKNOWN) {}
+function password_hash(string $password, $algo, array $options = []) {}
 
-function password_needs_rehash(string $hash, $algo, $options = UNKNOWN): bool {}
+function password_needs_rehash(string $hash, $algo, array $options = []): bool {}
 
 function password_verify(string $password, string $hash): bool {}
 
@@ -789,19 +787,13 @@ function password_algos(): array {}
 /** @return resource|false */
 function proc_open($cmd, array $descriptorspec, &$pipes, ?string $cwd = null, ?array $env = null, ?array $other_options = null) {}
 
-/**
- * @param resource $process
- * @return int|false
- */
-function proc_close($process) {}
+/** @param resource $process */
+function proc_close($process): int {}
 
-function proc_terminate($process, $signal = SIGTERM): bool {}
+function proc_terminate($process, int $signal = SIGTERM): bool {}
 
-/**
- * @param resource $process
- * @return array|false
- */
-function proc_get_status($process) {}
+/** @param resource $process */
+function proc_get_status($process): array {}
 #endif
 
 /* quot_print.c */
@@ -815,7 +807,7 @@ function quoted_printable_encode(string $str): string {}
 function mt_srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
 
 /** @return int|false */
-function mt_rand(int $min = 0, int $max = UNKNOWN) {}
+function mt_rand(int $min = 0, int $max = PHP_INT_MAX) {}
 
 function mt_getrandmax(): int {}
 
