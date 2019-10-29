@@ -70,7 +70,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_locale_get_region arginfo_locale_get_primary_language
 
-#define arginfo_locale_get_keywords arginfo_class_Locale_setDefault
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_get_keywords, 0, 1, IS_ARRAY, 1)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_locale_get_display_script arginfo_class_Locale_getDisplayScript
 
@@ -84,21 +86,15 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_locale_compose arginfo_class_Locale_composeLocale
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_parse, 0, 1, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_locale_parse arginfo_locale_get_keywords
 
-#define arginfo_locale_get_all_variants arginfo_locale_parse
+#define arginfo_locale_get_all_variants arginfo_locale_get_keywords
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_filter_matches, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, langtag, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, canonicalize, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_locale_filter_matches arginfo_class_Locale_filterMatches
 
 #define arginfo_locale_canonicalize arginfo_locale_get_primary_language
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_lookup, 0, 2, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_lookup, 0, 2, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, langtag, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, canonicalize, _IS_BOOL, 0)

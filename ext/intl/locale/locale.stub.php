@@ -17,7 +17,7 @@ class Locale
     /** @return string|null */
     public static function getRegion(string $locale) {}
 
-    /** @return array|false|null */
+    /** @return array|null */
     public static function getKeywords(string $locale) {}
 
     /** @return string|false */
@@ -38,16 +38,16 @@ class Locale
     /** @return string|false */
     public static function composeLocale(array $subtags) {}
 
-    /** @return array */
+    /** @return array|null */
     public static function parseLocale(string $locale) {}
 
-    /** @return array */
+    /** @return array|null */
     public static function getAllVariants(string $locale) {}
 
-    /** @return bool */
+    /** @return bool|null */
     public static function filterMatches(string $langtag, string $locale, bool $canonicalize = false) {}
 
-    /** @return string */
+    /** @return string|null */
     public static function lookup(array $langtag, string $locale, bool $canonicalize = false, ?string $def = null) {}
 
     /** @return string|null */
@@ -67,8 +67,7 @@ function locale_get_script(string $locale): ?string {}
 
 function locale_get_region(string $locale): ?string {}
 
-/** @return array|false|null */
-function locale_get_keywords(string $locale) {}
+function locale_get_keywords(string $locale): ?array {}
 
 /** @return string|false */
 function locale_get_display_script(string $locale, ?string $in_locale = null) {}
@@ -88,15 +87,16 @@ function locale_get_display_variant(string $locale, ?string $in_locale = null) {
 /** @return string|false */
 function locale_compose(array $subtags) {}
 
-function locale_parse(string $locale): array {}
+function locale_parse(string $locale): ?array {}
 
-function locale_get_all_variants(string $locale): array {}
+function locale_get_all_variants(string $locale): ?array {}
 
-function locale_filter_matches(string $langtag, string $locale, bool $canonicalize = false): bool {}
+/** @return bool|null */
+function locale_filter_matches(string $langtag, string $locale, bool $canonicalize = false) {}
 
 function locale_canonicalize(string $locale): ?string {}
 
-function locale_lookup(array $langtag, string $locale, bool $canonicalize = false, ?string $def = null): string {}
+function locale_lookup(array $langtag, string $locale, bool $canonicalize = false, ?string $def = null): ?string {}
 
 /** @return string|false */
 function locale_accept_from_http(string $header) {}

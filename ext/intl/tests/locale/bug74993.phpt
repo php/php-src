@@ -61,7 +61,6 @@ Function [ <internal:intl> function locale_filter_matches ] {
     Parameter #1 [ <required> string $locale ]
     Parameter #2 [ <optional> bool $canonicalize ]
   }
-  - Return [ bool ]
 }
 Function [ <internal:intl> function locale_lookup ] {
 
@@ -71,5 +70,5 @@ Function [ <internal:intl> function locale_lookup ] {
     Parameter #2 [ <optional> bool $canonicalize ]
     Parameter #3 [ <optional> ?string $def ]
   }
-  - Return [ string ]
+  - Return [ ?string ]
 }
