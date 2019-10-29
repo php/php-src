@@ -346,10 +346,12 @@ U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 	zend_long	index;
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl",
-			&str_id, &str_id_len, &index) == FAILURE ||
-			index < (zend_long)INT32_MIN || index > (zend_long)INT32_MAX) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl", &str_id, &str_id_len, &index) == FAILURE) {
 		return;
+	}
+
+	if (index < (zend_long)INT32_MIN || index > (zend_long)INT32_MAX) {
+		RETURN_FALSE;
 	}
 
 	UErrorCode status = UErrorCode();

@@ -387,7 +387,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 	CALENDAR_METHOD_INIT_VARS;
 
 	object = getThis();
-	
+
 	/* must come before zpp because zpp would convert the args in the stack to 0 */
 	if (ZEND_NUM_ARGS() > (object ? 6 : 7) ||
 				zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
@@ -875,7 +875,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set_first_day_of_week)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Ol", &object, Calendar_ce_ptr, &dow) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (dow < UCAL_SUNDAY || dow > UCAL_SATURDAY) {
@@ -964,7 +964,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_repeated_wall_time_option)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O", &object, Calendar_ce_ptr) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	CALENDAR_METHOD_FETCH_OBJECT;
@@ -1049,7 +1049,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|s!",
 			&zv_arg, &locale_str, &locale_str_len) == FAILURE) {
-		return();
+		return;
 	}
 
 	if (!(Z_TYPE_P(zv_arg) == IS_OBJECT && instanceof_function(

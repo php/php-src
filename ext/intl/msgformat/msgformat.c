@@ -41,7 +41,7 @@ static int msgfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "ss",
 		&locale, &locale_len, &pattern, &pattern_len ) == FAILURE )
 	{
-		return;
+		return FAILURE;
 	}
 
 	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);

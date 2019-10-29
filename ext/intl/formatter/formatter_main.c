@@ -37,7 +37,7 @@ static int numfmt_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "sl|s",
 		&locale, &locale_len, &style, &pattern, &pattern_len ) == FAILURE )
 	{
-		return;
+		return FAILURE;
 	}
 
 	INTL_CHECK_LOCALE_LEN_OR_FAILURE(locale_len);
