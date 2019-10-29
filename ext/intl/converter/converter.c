@@ -427,7 +427,7 @@ static void php_converter_do_set_encoding(UConverter **pcnv, INTERNAL_FUNCTION_P
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &enc, &enc_len) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "Bad arguments, "
 				"expected one string argument", 0);
-		RETURN_FALSE;
+		return;
 	}
 	intl_errors_reset(&objval->error);
 
@@ -457,7 +457,7 @@ static void php_converter_do_get_encoding(php_converter_object *objval, UConvert
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "Expected no arguments", 0);
-		RETURN_FALSE;
+		return;
 	}
 
 	intl_errors_reset(&objval->error);
@@ -498,7 +498,7 @@ static void php_converter_do_get_type(php_converter_object *objval, UConverter *
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "Expected no arguments", 0);
-		RETURN_FALSE;
+		return;
 	}
 	intl_errors_reset(&objval->error);
 
@@ -592,7 +592,7 @@ static PHP_METHOD(UConverter, setSubstChars) {
 	int ret = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &chars, &chars_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 	intl_errors_reset(&objval->error);
 
@@ -637,7 +637,7 @@ static PHP_METHOD(UConverter, getSubstChars) {
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"UConverter::getSubstChars(): expected no arguments", 0);
-		RETURN_FALSE;
+		return;
 	}
 	intl_errors_reset(&objval->error);
 
@@ -725,7 +725,7 @@ static PHP_METHOD(UConverter, reasonText) {
 	zend_long reason;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &reason) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 	intl_error_reset(NULL);
 
@@ -758,7 +758,7 @@ static PHP_METHOD(UConverter, convert) {
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b",
 	                          &str, &str_len, &reverse) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 	intl_errors_reset(&objval->error);
 
@@ -790,7 +790,7 @@ static PHP_METHOD(UConverter, transcode) {
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|a!",
 			&str, &str_len, &dest, &dest_len, &src, &src_len, &options) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 	intl_error_reset(NULL);
 
@@ -847,7 +847,7 @@ static PHP_METHOD(UConverter, getErrorCode) {
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"UConverter::getErrorCode(): expected no arguments", 0);
-		RETURN_FALSE;
+		return;
 	}
 
 	RETURN_LONG(intl_error_get_code(&(objval->error)));
@@ -864,7 +864,7 @@ static PHP_METHOD(UConverter, getErrorMessage) {
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"UConverter::getErrorMessage(): expected no arguments", 0);
-		RETURN_FALSE;
+		return;
 	}
 
 	if (message) {
@@ -885,7 +885,7 @@ static PHP_METHOD(UConverter, getAvailable) {
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"UConverter::getErrorMessage(): expected no arguments", 0);
-		RETURN_FALSE;
+		return;
 	}
 	intl_error_reset(NULL);
 
@@ -908,7 +908,7 @@ static PHP_METHOD(UConverter, getAliases) {
 	uint16_t i, count;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 	intl_error_reset(NULL);
 
@@ -943,7 +943,7 @@ static PHP_METHOD(UConverter, getStandards) {
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 			"UConverter::getStandards(): expected no arguments", 0);
-		RETURN_FALSE;
+		return;
 	}
 	intl_error_reset(NULL);
 

@@ -132,7 +132,7 @@ PHP_FUNCTION( msgfmt_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	mfo = Z_INTL_MESSAGEFORMATTER_P( object );
@@ -157,7 +157,7 @@ PHP_FUNCTION( msgfmt_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, MessageFormatter_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	mfo = Z_INTL_MESSAGEFORMATTER_P( object );

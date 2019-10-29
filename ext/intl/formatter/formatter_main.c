@@ -112,7 +112,7 @@ PHP_FUNCTION( numfmt_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, NumberFormatter_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	nfo = Z_INTL_NUMBERFORMATTER_P(object);
@@ -136,7 +136,7 @@ PHP_FUNCTION( numfmt_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, NumberFormatter_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	nfo = Z_INTL_NUMBERFORMATTER_P(object);

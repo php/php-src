@@ -301,7 +301,7 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oa/|l",
 		&object, Collator_ce_ptr, &array, &sort_flags ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	/* Fetch the object. */
@@ -392,7 +392,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oa",
 		&object, Collator_ce_ptr, &array ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	/* Fetch the object. */
@@ -555,7 +555,7 @@ PHP_FUNCTION( collator_get_sort_key )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os",
 		&object, Collator_ce_ptr, &str, &str_len ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	/* Fetch the object. */

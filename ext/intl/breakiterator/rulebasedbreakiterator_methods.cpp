@@ -101,7 +101,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;
@@ -126,7 +126,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;
@@ -140,7 +140,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;
@@ -178,7 +178,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;

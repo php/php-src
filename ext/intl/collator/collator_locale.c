@@ -40,7 +40,7 @@ PHP_FUNCTION( collator_get_locale )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, Collator_ce_ptr, &type ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	/* Fetch the object. */

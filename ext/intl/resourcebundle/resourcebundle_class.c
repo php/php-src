@@ -254,7 +254,7 @@ PHP_FUNCTION( resourcebundle_get )
 	zval *      object;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oz|b",	&object, ResourceBundle_ce_ptr, &offset, &fallback ) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	resourcebundle_array_fetch(Z_OBJ_P(object), offset, return_value, fallback);
@@ -293,7 +293,7 @@ PHP_FUNCTION( resourcebundle_count )
 	RESOURCEBUNDLE_METHOD_INIT_VARS;
 
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O", &object, ResourceBundle_ce_ptr ) == FAILURE ) {
-		RETURN_FALSE;
+		return;
 	}
 
 	RESOURCEBUNDLE_METHOD_FETCH_OBJECT;
@@ -325,7 +325,7 @@ PHP_FUNCTION( resourcebundle_locales )
 
 	if( zend_parse_parameters(ZEND_NUM_ARGS(), "s", &bundlename, &bundlename_len ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	if (bundlename_len >= MAXPATHLEN) {
@@ -368,7 +368,7 @@ PHP_FUNCTION( resourcebundle_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, ResourceBundle_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	rb = Z_INTL_RESOURCEBUNDLE_P( object );
@@ -394,7 +394,7 @@ PHP_FUNCTION( resourcebundle_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, ResourceBundle_ce_ptr ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	rb = Z_INTL_RESOURCEBUNDLE_P( object );
