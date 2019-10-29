@@ -29,7 +29,6 @@ test('fileobject_001b.txt');
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ===fileobject_001a.txt===
 int(0)

@@ -118,7 +118,6 @@ oci8_test_sql_execute($c, $stmtarray);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1 - oci_fetch_assoc
 array(2) {

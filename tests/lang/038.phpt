@@ -34,7 +34,6 @@ catch (Exception $e)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 string(15) "Error2Exception"
 string(5) "fopen"

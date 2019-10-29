@@ -17,7 +17,6 @@ foreach($obj as $ak=>&$av) {
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 0=>modify - 0=>modify
 0=>modify - 1=>1

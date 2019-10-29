@@ -39,7 +39,6 @@ foreach($it as $k => $v)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Error AppendIterator::append() expects parameter 1 to be Iterator, array given in %s on line %d
 object(ArrayIterator)#%d (1) {

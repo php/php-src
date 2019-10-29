@@ -62,7 +62,6 @@ var_dump($obj->getArrayCopy());
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 array(4) {
   [0]=>

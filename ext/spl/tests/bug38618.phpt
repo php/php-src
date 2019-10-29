@@ -85,9 +85,6 @@ test_array($array, 'Public Property New', RecursiveArrayIterator::CHILD_ARRAYS_O
 test_array($array, 'Protected Property New', RecursiveArrayIterator::CHILD_ARRAYS_ONLY);
 ?>
 ===DONE===
-<?php exit(0); ?>
-?>
-===DONE===
 --EXPECT--
 ===Default with array===
 1 => apple

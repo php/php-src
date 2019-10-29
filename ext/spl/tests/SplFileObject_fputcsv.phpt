@@ -52,7 +52,6 @@ echo '$list = ';var_export($res);echo ";\n";
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --CLEAN--
 <?php
 $file = __DIR__ . '/SplFileObject_fputcsv.csv';

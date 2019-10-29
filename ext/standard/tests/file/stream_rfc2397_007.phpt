@@ -80,7 +80,6 @@ foreach($streams as $stream)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ===data:,012345===
 int(0)

@@ -34,7 +34,6 @@ foreach($dll2 as $k=>$v) {
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 0=>2
 ->0=>2

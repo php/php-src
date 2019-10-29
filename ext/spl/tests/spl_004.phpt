@@ -60,7 +60,6 @@ try {
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 int(0)
 int(1)

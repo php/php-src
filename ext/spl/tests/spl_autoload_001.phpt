@@ -75,7 +75,6 @@ catch(Exception $e)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ===EMPTY===
 string(9) ".inc,.php"

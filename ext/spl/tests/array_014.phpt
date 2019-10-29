@@ -38,7 +38,6 @@ foreach($it as $v)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 int(11)
 int(5)

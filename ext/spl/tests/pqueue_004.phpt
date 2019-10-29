@@ -12,7 +12,6 @@ $pq->insert("d", -2);
 var_dump($pq);
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 object(SplPriorityQueue)#1 (3) {
   ["flags":"SplPriorityQueue":private]=>

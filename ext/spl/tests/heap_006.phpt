@@ -16,7 +16,6 @@ foreach ($h as $k => $o) {
 }
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 99 => 100
 98 => 99

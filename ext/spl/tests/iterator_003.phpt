@@ -88,7 +88,6 @@ foreach ($it as $student) {
 }
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 01234123, Joe
 00000014, Bob

@@ -16,7 +16,6 @@ iterator_apply($it, array(new Foo, "foobar"));
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Called foobar.
 Called foobar.

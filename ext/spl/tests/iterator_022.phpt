@@ -126,7 +126,6 @@ catch(UnexpectedValueException $e)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 RecursiveArrayIteratorIterator::rewind
 RecursiveArrayIteratorIterator::callHasChildren(0) = no/no

@@ -46,7 +46,6 @@ foreach($tests as $data)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ==========
 string(6) "String"

@@ -125,7 +125,6 @@ oci8_test_sql_execute($c, $stmtarray);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1 - can't get IRS fields from parent
 num fields : 0

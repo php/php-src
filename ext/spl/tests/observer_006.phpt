@@ -76,7 +76,6 @@ var_dump(unserialize(serialize($storage)));
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 int(2)
 int(1)

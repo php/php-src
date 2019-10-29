@@ -138,7 +138,6 @@ $sub->notify();
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 bool(false)
 $sub->SubjectImpl::attach($ob1);

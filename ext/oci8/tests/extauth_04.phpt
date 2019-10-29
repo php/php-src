@@ -39,7 +39,6 @@ var_dump($c);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1
 

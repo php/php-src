@@ -40,7 +40,6 @@ var_dump($it->count());
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ===Array===
 int(3)

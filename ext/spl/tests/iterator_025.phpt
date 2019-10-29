@@ -50,7 +50,6 @@ while($it->valid())
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 MyRecursiveIteratorIterator::beginIteration()
 1

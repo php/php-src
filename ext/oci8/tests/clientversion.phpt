@@ -11,7 +11,6 @@ echo oci_client_version(), "\n";
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 %d.%d.%d.%d.%d
 ===DONE===

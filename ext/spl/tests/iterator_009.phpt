@@ -38,7 +38,6 @@ foreach (new EmptyIteratorEx() as $v) {
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 EmptyIteratorEx::rewind
 EmptyIteratorEx::valid

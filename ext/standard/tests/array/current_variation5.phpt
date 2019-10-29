@@ -40,7 +40,6 @@ current_variation5($a);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 *** Testing current() : usage variations ***
 

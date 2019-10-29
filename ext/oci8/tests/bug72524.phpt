@@ -76,7 +76,6 @@ oci8_test_sql_execute($c, $stmtarray);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1 - P1 Value: NULL  P1 Length: Default  P1 Type: Default  P2 Value: NULL P2 Length: Default  P2 Type: Default
 bool(true)

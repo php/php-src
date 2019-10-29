@@ -33,7 +33,6 @@ var_dump($it->valid());
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 bool(false)
 bool(false)

@@ -18,7 +18,6 @@ $obj = new testclass;
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 %stestclass.inc
 %stestclass.class.inc

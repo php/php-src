@@ -36,7 +36,6 @@ test('sxe->elem22["attr22"]');
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ===sxe
 bool(true)

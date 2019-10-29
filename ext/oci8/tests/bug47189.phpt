@@ -30,7 +30,6 @@ var_dump($rs1);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1
 array(1) {

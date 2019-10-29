@@ -50,7 +50,6 @@ dq($c, 'select sql_text, dbop_name from v$sql_monitor where sql_text like \'%dbo
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
 array(1) {

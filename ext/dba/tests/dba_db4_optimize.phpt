@@ -26,7 +26,6 @@ if (($db_file=dba_open($db_filename, "n", $handler))!==FALSE) {
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --CLEAN--
 <?php
 require(__DIR__ .'/clean.inc');

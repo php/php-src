@@ -12,7 +12,6 @@ $h->insert(4);
 var_dump($h);
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 object(SplMaxHeap)#1 (3) {
   ["flags":"SplHeap":private]=>

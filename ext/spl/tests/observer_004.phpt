@@ -55,7 +55,6 @@ var_dump($storage2);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 int(2)
 int(1)

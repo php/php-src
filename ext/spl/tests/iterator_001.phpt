@@ -89,7 +89,6 @@ foreach($it as $v)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 NumericArrayIterator::__construct
 NumericArrayIterator::rewind

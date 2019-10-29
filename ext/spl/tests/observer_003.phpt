@@ -41,7 +41,6 @@ foreach($storage2 as $object)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 int(4)
 int(1)

@@ -25,7 +25,6 @@ foreach ($types as $t => $v) {
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test - SQLT_BDOUBLE
 

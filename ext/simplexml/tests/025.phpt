@@ -47,7 +47,6 @@ var_dump($sxe->getDocNamespaces());
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 array(1) {
   ["xhtml"]=>

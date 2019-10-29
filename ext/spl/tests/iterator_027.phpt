@@ -52,7 +52,6 @@ var_dump(isset($it[3])); // deleted
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 0=>1
 1=>2

@@ -23,7 +23,6 @@ foreach($streams as $stream)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 file_get_contents() expects parameter 1 to be a valid path, string given
 file_get_contents() expects parameter 1 to be a valid path, string given

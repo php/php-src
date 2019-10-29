@@ -44,7 +44,6 @@ foreach ($dir as $file) {
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 1
 21

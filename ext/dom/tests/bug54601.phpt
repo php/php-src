@@ -21,7 +21,6 @@ echo get_class($n), "\n";
 print $doc->saveXML();
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 DOMDocumentType
 <?xml version="1.0" encoding="utf-8"?>

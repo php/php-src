@@ -30,7 +30,6 @@ var_dump($sxe->Body->children('')->businessList);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 object(SimpleXMLElement)#%d (1) {
   ["Body"]=>

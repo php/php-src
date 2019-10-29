@@ -592,7 +592,6 @@ while (($row = oci_fetch_row($s)) != false) {
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
   1

@@ -128,7 +128,6 @@ echo "===AutoNA===\n";
 var_dump(unserialize('O:22:"autoload_not_available":0:{}'));
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ===O1===
 TestOld::__sleep()

@@ -43,7 +43,6 @@ var_dump($ar);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 bool(true)
 bool(true)

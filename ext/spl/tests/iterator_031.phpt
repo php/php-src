@@ -83,7 +83,6 @@ foreach($ap as $k=>$v)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 MyArrayIterator::rewind
 0=>1

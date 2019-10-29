@@ -269,7 +269,6 @@ oci_close($c);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 TEST86 insert all ORATYPE values
 

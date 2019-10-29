@@ -32,7 +32,6 @@ oci_execute($s);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1: Valid use of a null byte
 array(1) {

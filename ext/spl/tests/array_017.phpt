@@ -129,7 +129,6 @@ check($obj, 1);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ArrayObjectEx::__construct()
 ===CHECK===

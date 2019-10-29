@@ -28,7 +28,6 @@ foreach(new RecursiveIteratorIterator($it) as $v) echo "$v\n";
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 1
 2

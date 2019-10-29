@@ -33,7 +33,6 @@ foreach($streams as $stream)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 array(7) {
   ["base64"]=>

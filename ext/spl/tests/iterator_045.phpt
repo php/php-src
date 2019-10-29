@@ -89,7 +89,6 @@ $it->show();
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)

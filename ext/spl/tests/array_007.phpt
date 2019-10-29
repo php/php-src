@@ -39,7 +39,6 @@ foreach($test as $key => $val)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 test Object
 (

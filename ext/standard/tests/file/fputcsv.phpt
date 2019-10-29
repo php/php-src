@@ -56,7 +56,6 @@ echo '$list = ';var_export($res);echo ";\n";
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 $list = array (
   0 => 'aaa,bbb',

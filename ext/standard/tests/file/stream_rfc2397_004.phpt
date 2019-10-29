@@ -21,7 +21,6 @@ foreach($streams as $stream)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 string(5) ";test"
 string(4) "test"

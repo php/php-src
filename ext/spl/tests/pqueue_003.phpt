@@ -20,7 +20,6 @@ while ($h->valid()) {
 }
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 count($h) = 4
 $h->count() = 4

@@ -73,7 +73,6 @@ check_params(new ReflectionMethod('test::method'));
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 #####test()#####
 ===0===

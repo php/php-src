@@ -215,7 +215,6 @@ oci8_test_sql_execute($c, $stmtarray);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 TEST141 wrong bind type SQLT_INT
 array(1) {

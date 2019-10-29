@@ -61,7 +61,6 @@ oci8_test_sql_execute($c, $stmtarray);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 First Insert
 Could not execute: ORA-02290: %s (%s.COMMIT_002_TAB_CHECK_X) %s

@@ -37,7 +37,6 @@ var_dump($myArray['two']);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 myArray::offsetSet(one,one)
 myArray::offsetGet(one)

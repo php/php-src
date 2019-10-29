@@ -14,7 +14,6 @@ phar.readonly=0
 var_dump(Phar::getSupportedSignatures());
 ?>
 ===DONE===
-?>
 --EXPECT--
 array(4) {
   [0]=>

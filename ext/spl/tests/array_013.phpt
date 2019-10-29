@@ -61,7 +61,6 @@ var_dump($o->{0}); /* doesn't wotk anyway */
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ===Array===
 0=>zero

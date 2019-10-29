@@ -101,7 +101,6 @@ var_dump($b1, $b2);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
 bool(true)

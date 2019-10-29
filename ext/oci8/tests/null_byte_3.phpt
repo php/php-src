@@ -28,7 +28,6 @@ var_dump($res);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1: Invalid use of a null byte
 

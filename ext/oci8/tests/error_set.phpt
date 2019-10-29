@@ -52,7 +52,6 @@ var_dump($r);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
 bool(false)

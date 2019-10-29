@@ -45,7 +45,6 @@ foreach ($it as $v) {
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ArrayIteratorEx::rewind
 ArrayIteratorEx::valid

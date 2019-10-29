@@ -140,7 +140,6 @@ if (!$r) {
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1 - Parse
 array(4) {

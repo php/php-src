@@ -10,7 +10,6 @@ reflection::export(new reflectionclass('OCI-Collection'));
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Class [ <internal:oci8> class OCI-Lob ] {
 

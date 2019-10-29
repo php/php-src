@@ -62,7 +62,6 @@ $it->show();
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ===0===
 MyRecursiveArrayIterator::hasChildren()

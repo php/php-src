@@ -17,7 +17,6 @@ foreach($it as $k=>$v)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 0=>1
 hasNext: yes

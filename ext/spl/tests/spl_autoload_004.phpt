@@ -27,7 +27,6 @@ var_dump(class_exists("TestClass", true));
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 array(1) {
   [0]=>

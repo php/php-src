@@ -54,7 +54,6 @@ foreach($funcs as $idx => $func)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 string(22) "MyAutoLoader::notExist"
 Function 'MyAutoLoader::notExist' not found (class 'MyAutoLoader' does not have a method 'notExist')

@@ -134,7 +134,6 @@ oci8_test_sql_execute($c, $stmtarray);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 TEST241 bind SQLT_CHR
 array(1) {

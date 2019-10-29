@@ -54,7 +54,6 @@ try {
 }
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 inserted 1
 Exception: foo

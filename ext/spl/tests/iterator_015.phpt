@@ -38,7 +38,6 @@ foreach($rit as $k=>$v)
 }
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 <ul>
   0=>a

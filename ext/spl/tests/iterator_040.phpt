@@ -26,7 +26,6 @@ foreach($it as $k => $v)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ===
 int(0)

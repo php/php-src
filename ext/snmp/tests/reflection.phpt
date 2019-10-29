@@ -20,7 +20,6 @@ echo new reflectionmethod('snmp', 'getError');
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Method [ <internal:snmp, ctor> public method __construct ] {
 

@@ -22,7 +22,6 @@ foreach($it as $key=>$val)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ===Current===
 0=>A

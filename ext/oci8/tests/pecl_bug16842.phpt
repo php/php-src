@@ -34,7 +34,6 @@ oci_close($c);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1
 Raises NO_DATA_FOUND

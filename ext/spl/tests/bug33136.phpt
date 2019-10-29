@@ -47,7 +47,6 @@ var_dump(count($arrayObj));
 
 ?>
 ===DONE===
-<?php //exit(0); ?>
 --EXPECT--
 Initiate Obj
 Assign values

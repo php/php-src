@@ -20,7 +20,6 @@ $ar = new ArrayIteratorEx(array(5)); foreach($ar as &$v) var_dump($v);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 int(1)
 int(2)

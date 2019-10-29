@@ -47,7 +47,6 @@ test(__DIR__,       substr(__DIR__,-1), 'l');
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ===0===
 object(SplFileInfo)#%d (2) {

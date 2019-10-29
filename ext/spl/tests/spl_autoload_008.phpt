@@ -64,7 +64,6 @@ foreach($funcs as $idx => $func)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ====0====
 string(10) "MyAutoLoad"

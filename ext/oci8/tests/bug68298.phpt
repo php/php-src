@@ -37,7 +37,6 @@ $stmtarray = array("DROP TABLE BUG68298");
 oci8_test_sql_execute($c, $stmtarray);
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 array(1) {
   ["COL1"]=>

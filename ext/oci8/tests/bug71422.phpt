@@ -48,7 +48,6 @@ oci8_test_sql_execute($c, $stmtarray);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 array(1) {
   ["RAW_QUERY"]=>

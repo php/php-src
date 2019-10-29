@@ -67,7 +67,6 @@ foreach(new NoRewindIterator($it) as $k => $v)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 NumericArrayIterator::__construct
 NumericArrayIterator::rewind

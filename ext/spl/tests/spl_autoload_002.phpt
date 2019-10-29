@@ -40,7 +40,6 @@ var_dump(spl_autoload_functions());
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 bool(false)
 array(1) {

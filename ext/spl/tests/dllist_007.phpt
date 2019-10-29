@@ -13,7 +13,6 @@ while ($a->valid()) {
 }
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 int(1)
 NULL

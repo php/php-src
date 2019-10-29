@@ -26,7 +26,6 @@ var_dump($ar);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 int(1)
 array(3) {

@@ -54,7 +54,6 @@ echo 'oci8.old_oci_close_semantics = ' . ini_get('oci8.old_oci_close_semantics')
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1 - check initialization
 oci8.privileged_connect = 1

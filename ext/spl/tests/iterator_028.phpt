@@ -51,7 +51,6 @@ catch(Exception $e)
 var_dump($it->getMaxDepth());
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ===?===
 bool(false)

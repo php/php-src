@@ -9,7 +9,6 @@ var_dump($ar->getArrayCopy());
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 object(ArrayIterator)#%d (1) {
   ["storage":"ArrayIterator":private]=>

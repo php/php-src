@@ -19,7 +19,6 @@ EOF
 var_dump($sxe->children());
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 object(SimpleXMLElement)#%d (3) {
   ["@attributes"]=>

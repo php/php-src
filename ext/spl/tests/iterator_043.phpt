@@ -11,7 +11,6 @@ var_dump($it->getChildren());
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 NULL
 NULL

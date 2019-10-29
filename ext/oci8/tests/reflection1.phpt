@@ -130,7 +130,6 @@ reflection::export(new reflectionfunction('oci_get_implicit_resultset'));
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Function [ <internal%s> function oci_define_by_name ] {
 

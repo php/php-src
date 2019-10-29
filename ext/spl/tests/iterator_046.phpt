@@ -41,7 +41,6 @@ $it->show();
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 MyCachingIterator::fill()
 MyCachingIterator::show()

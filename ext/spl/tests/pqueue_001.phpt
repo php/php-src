@@ -60,7 +60,6 @@ foreach ($pq3 as $k=>$v) {
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Exception: Can't extract from an empty heap
 2=>b

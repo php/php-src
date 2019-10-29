@@ -118,7 +118,6 @@ var_dump($it->current() == "a");
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 RecursiveArrayIteratorIterator::rewind() - BEGIN
 MyRecursiveArrayIterator::rewind()

@@ -28,7 +28,6 @@ foreach ($h as $out) {
 }
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 10
 9

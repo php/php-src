@@ -44,7 +44,6 @@ $r = mysleep($c, 8);             // seconds
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1
 Execute error was ORA-03136: %s

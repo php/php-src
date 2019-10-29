@@ -107,7 +107,6 @@ foreach(new RecursiveArrayIteratorIterator(new MyRecursiveArrayIterator(array("a
 }
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 RecursiveArrayIteratorIterator::rewind
 RecursiveArrayIteratorIterator::callHasChildren(0) = no/no

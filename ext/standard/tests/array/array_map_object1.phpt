@@ -125,7 +125,6 @@ test(array('InterClass', 'square'), array(1, 2));
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 *** Testing array_map() : object functionality ***
 -- simple class with public variable and method --

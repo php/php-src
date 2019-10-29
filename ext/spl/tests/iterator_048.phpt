@@ -22,7 +22,6 @@ $it->show();
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 int(0)
 string(3) "Bar"

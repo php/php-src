@@ -21,7 +21,6 @@ foreach(new RecursiveIteratorIterator($it, 1) as $k=>$v)
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ==SECOND==
 int(1)

@@ -37,7 +37,6 @@ var_dump($it->valid());
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 1=>2
 int(1)

@@ -42,7 +42,6 @@ dq($c, 'select dbop_name from v$sql_monitor where dbop_name is not null order by
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
 array(1) {

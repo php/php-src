@@ -51,7 +51,6 @@ foreach($rit as $k=>$v)
 }
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Menu::getIterator
 <ul>
