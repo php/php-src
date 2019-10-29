@@ -518,9 +518,9 @@ PHP_FUNCTION(proc_open)
 		Z_PARAM_ARRAY(descriptorspec)
 		Z_PARAM_ZVAL(pipes)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_EX(cwd, cwd_len, 1, 0)
-		Z_PARAM_ARRAY_EX(environment, 1, 0)
-		Z_PARAM_ARRAY_EX(other_options, 1, 0)
+		Z_PARAM_STRING_OR_NULL(cwd, cwd_len)
+		Z_PARAM_ARRAY_OR_NULL(environment)
+		Z_PARAM_ARRAY_OR_NULL(other_options)
 	ZEND_PARSE_PARAMETERS_END();
 
 	memset(&env, 0, sizeof(env));

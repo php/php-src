@@ -1251,8 +1251,8 @@ PHP_FUNCTION(number_format)
 		Z_PARAM_DOUBLE(num)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(dec)
-		Z_PARAM_STRING_EX(dec_point, dec_point_len, 1, 0)
-		Z_PARAM_STRING_EX(thousand_sep, thousand_sep_len, 1, 0)
+		Z_PARAM_STRING_OR_NULL(dec_point, dec_point_len)
+		Z_PARAM_STRING_OR_NULL(thousand_sep, thousand_sep_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	switch(ZEND_NUM_ARGS()) {

@@ -1226,6 +1226,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 #define Z_PARAM_ARRAY(dest) \
 	Z_PARAM_ARRAY_EX(dest, 0, 0)
 
+#define Z_PARAM_ARRAY_OR_NULL(dest) \
+	Z_PARAM_ARRAY_EX(dest, 1, 0)
+
 /* old "A" */
 #define Z_PARAM_ARRAY_OR_OBJECT_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
@@ -1462,6 +1465,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 
 #define Z_PARAM_STRING(dest, dest_len) \
 	Z_PARAM_STRING_EX(dest, dest_len, 0, 0)
+
+#define Z_PARAM_STRING_OR_NULL(dest, dest_len) \
+	Z_PARAM_STRING_EX(dest, dest_len, 1, 0)
 
 /* old "S" */
 #define Z_PARAM_STR_EX2(dest, check_null, deref, separate) \

@@ -4444,7 +4444,7 @@ PHP_FUNCTION(timezone_identifiers_list)
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(what)
-		Z_PARAM_STRING_EX(option, option_len, 1, 0)
+		Z_PARAM_STRING_OR_NULL(option, option_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Extra validation */

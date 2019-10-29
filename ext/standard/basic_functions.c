@@ -4413,7 +4413,7 @@ PHP_FUNCTION(ini_get_all)
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_EX(extname, extname_len, 1, 0)
+		Z_PARAM_STRING_OR_NULL(extname, extname_len)
 		Z_PARAM_BOOL(details)
 	ZEND_PARSE_PARAMETERS_END();
 

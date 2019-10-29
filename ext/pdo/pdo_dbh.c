@@ -210,9 +210,9 @@ static PHP_METHOD(PDO, dbh_constructor)
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STRING(data_source, data_source_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_EX(username, usernamelen, 1, 0)
-		Z_PARAM_STRING_EX(password, passwordlen, 1, 0)
-		Z_PARAM_ARRAY_EX(options, 1, 0)
+		Z_PARAM_STRING_OR_NULL(username, usernamelen)
+		Z_PARAM_STRING_OR_NULL(password, passwordlen)
+		Z_PARAM_ARRAY_OR_NULL(options)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* parse the data source name */
@@ -938,7 +938,7 @@ static PHP_METHOD(PDO, lastInsertId)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_EX(name, namelen, 1, 0)
+		Z_PARAM_STRING_OR_NULL(name, namelen)
 	ZEND_PARSE_PARAMETERS_END();
 
 	PDO_DBH_CLEAR_ERR();

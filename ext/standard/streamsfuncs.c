@@ -1128,8 +1128,8 @@ PHP_FUNCTION(stream_context_create)
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_EX(options, 1, 0)
-		Z_PARAM_ARRAY_EX(params, 1, 0)
+		Z_PARAM_ARRAY_OR_NULL(options)
+		Z_PARAM_ARRAY_OR_NULL(params)
 	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_alloc();
