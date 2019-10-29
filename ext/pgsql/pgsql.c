@@ -2944,7 +2944,7 @@ PHP_FUNCTION(pg_fetch_all_columns)
 	size_t num_fields;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &result, &colno) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {

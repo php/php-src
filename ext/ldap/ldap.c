@@ -3420,7 +3420,7 @@ PHP_FUNCTION(ldap_parse_exop)
 	int rc, myargcount = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(myargcount, "rr|zz", &link, &result, &retdata, &retoid) != SUCCESS) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
@@ -4316,7 +4316,7 @@ PHP_FUNCTION(ldap_exop_whoami)
 	int rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &link) == FAILURE) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
@@ -4354,7 +4354,7 @@ PHP_FUNCTION(ldap_exop_refresh)
 	int rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz", &link, &ldn.bv_val, &ldn.bv_len, &ttl) != SUCCESS) {
-		WRONG_PARAM_COUNT;
+		return;
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {

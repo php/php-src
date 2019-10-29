@@ -792,7 +792,7 @@ PHP_FUNCTION(com_message_pump)
 	DWORD result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &timeoutms) == FAILURE)
-		RETURN_FALSE;
+		return;
 
 	php_com_initialize();
 	result = MsgWaitForMultipleObjects(0, NULL, FALSE, (DWORD)timeoutms, QS_ALLINPUT);

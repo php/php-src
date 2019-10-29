@@ -181,7 +181,7 @@ PHP_FUNCTION(sem_get)
 	sysvsem_sem *sem_ptr;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l|lll", &key, &max_acquire, &perm, &auto_release)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* Get/create the semaphore.  Note that we rely on the semaphores

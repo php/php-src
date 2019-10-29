@@ -4908,7 +4908,7 @@ PHP_FUNCTION(openssl_pkey_derive)
 	zend_string *result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz|l", &peer_pub_key, &priv_key, &key_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 	if (key_len < 0) {
 		php_error_docref(NULL, E_WARNING, "keylen < 0, assuming NULL");

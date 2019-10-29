@@ -956,7 +956,7 @@ static PHP_METHOD(PDO, pgsqlLOBOpen)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s",
 				&oidstr, &oidstrlen, &modestr, &modestrlen)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	oid = (Oid)strtoul(oidstr, &end_ptr, 10);
@@ -1003,7 +1003,7 @@ static PHP_METHOD(PDO, pgsqlLOBUnlink)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 				&oidstr, &oidlen)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	oid = (Oid)strtoul(oidstr, &end_ptr, 10);
@@ -1039,7 +1039,7 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|ll",
 				&result_type, &ms_timeout)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);

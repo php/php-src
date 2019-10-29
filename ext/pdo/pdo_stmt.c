@@ -1578,7 +1578,7 @@ static PHP_METHOD(PDOStatement, bindValue)
 			"lz|l", &param.paramno, &parameter, &param_type)) {
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|l", &param.name,
 				&parameter, &param_type)) {
-			RETURN_FALSE;
+			return;
 		}
 	}
 

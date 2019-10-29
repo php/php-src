@@ -1424,9 +1424,7 @@ PHP_FUNCTION(gmstrftime)
    Return current UNIX timestamp */
 PHP_FUNCTION(time)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG((zend_long)php_time());
 }
@@ -4321,9 +4319,7 @@ PHP_METHOD(DatePeriod, getStartDate)
 	php_period_obj   *dpobj;
 	php_date_obj     *dateobj;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	dpobj = Z_PHPPERIOD_P(ZEND_THIS);
 
@@ -4348,9 +4344,7 @@ PHP_METHOD(DatePeriod, getEndDate)
         php_period_obj   *dpobj;
         php_date_obj     *dateobj;
 
-        if (zend_parse_parameters_none() == FAILURE) {
-                return;
-        }
+        ZEND_PARSE_PARAMETERS_NONE();
 
         dpobj = Z_PHPPERIOD_P(ZEND_THIS);
 
@@ -4379,9 +4373,7 @@ PHP_METHOD(DatePeriod, getDateInterval)
 	php_period_obj   *dpobj;
 	php_interval_obj *diobj;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	dpobj = Z_PHPPERIOD_P(ZEND_THIS);
 
@@ -4399,9 +4391,7 @@ PHP_METHOD(DatePeriod, getRecurrences)
 {
 	php_period_obj   *dpobj;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	dpobj = Z_PHPPERIOD_P(ZEND_THIS);
 
@@ -4546,9 +4536,7 @@ PHP_FUNCTION(date_default_timezone_set)
 PHP_FUNCTION(date_default_timezone_get)
 {
 	timelib_tzinfo *default_tz;
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	default_tz = get_timezone_info();
 	RETVAL_STRING(default_tz->name);

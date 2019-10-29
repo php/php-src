@@ -1952,7 +1952,7 @@ static PHP_FUNCTION(session_set_save_handler)
 		zend_bool register_shutdown = 1;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &obj, php_session_iface_entry, &register_shutdown) == FAILURE) {
-			RETURN_FALSE;
+			return;
 		}
 
 		/* For compatibility reason, implemented interface is not checked */
@@ -2452,7 +2452,7 @@ static PHP_FUNCTION(session_start)
 	zend_long read_and_close = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|a", &options) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (PS(session_status) == php_session_active) {

@@ -1048,7 +1048,7 @@ PHP_FUNCTION(dba_key_split)
 		}
 	}
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &key, &key_len) == FAILURE) {
-		RETURN_BOOL(0);
+		return;
 	}
 	array_init(return_value);
 	if (key[0] == '[' && (name = strchr(key, ']')) != NULL) {
@@ -1204,7 +1204,7 @@ PHP_FUNCTION(dba_handlers)
 	zend_bool full_info = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &full_info) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	array_init(return_value);
@@ -1231,7 +1231,7 @@ PHP_FUNCTION(dba_list)
 	dba_info *info;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	array_init(return_value);
