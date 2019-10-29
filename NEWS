@@ -8,6 +8,8 @@ PHP                                                                        NEWS
     Lundin)
   . Fixed bug #78752 (Segfault if GC triggered while generator stack frame is
     being destroyed). (Nikita)
+  . Fixed bug #78689 (Closure::fromCallable() doesn't handle
+    [Closure, '__invoke']). (Nikita)
 
 - COM:
   . Fixed bug #78694 (Appending to a variant array causes segfault). (cmb)
