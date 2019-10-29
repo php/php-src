@@ -1098,12 +1098,12 @@ PHP_FUNCTION(base_convert)
 	}
 
 	if (frombase < 2 || frombase > 36) {
-		php_error_docref(NULL, E_WARNING, "Invalid `from base' (" ZEND_LONG_FMT ")", frombase);
-		RETURN_FALSE;
+		zend_value_error("Invalid `from base' (" ZEND_LONG_FMT ")", frombase);
+		return;
 	}
 	if (tobase < 2 || tobase > 36) {
-		php_error_docref(NULL, E_WARNING, "Invalid `to base' (" ZEND_LONG_FMT ")", tobase);
-		RETURN_FALSE;
+		zend_value_error("Invalid `to base' (" ZEND_LONG_FMT ")", tobase);
+		return;
 	}
 
 	_php_math_basetozval(Z_STR_P(number), (int)frombase, &temp);
