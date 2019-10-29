@@ -2119,7 +2119,7 @@ PHP_FUNCTION(imap_savebody)
 	zend_long msgno, flags = 0;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rzl|Sl", &stream, &out, &msgno, &section, &flags)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if ((imap_ptr = (pils *)zend_fetch_resource(Z_RES_P(stream), "imap", le_imap)) == NULL) {
@@ -4420,7 +4420,7 @@ PHP_FUNCTION(imap_timeout)
 	int timeout_type;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &ttype, &timeout) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (timeout == -1) {

@@ -353,7 +353,7 @@ PHP_FUNCTION(hash_init)
 	php_hashcontext_object *hash;
 
 	if (zend_parse_parameters(argc, "S|lS", &algo, &options, &key) == FAILURE) {
-		RETURN_NULL();
+		return;
 	}
 
 	ops = php_hash_fetch_ops(ZSTR_VAL(algo), ZSTR_LEN(algo));

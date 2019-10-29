@@ -717,7 +717,7 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	zval directives, version, blacklist;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!validate_api_restriction()) {
@@ -809,7 +809,7 @@ static ZEND_FUNCTION(opcache_get_configuration)
 static ZEND_FUNCTION(opcache_reset)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!validate_api_restriction()) {

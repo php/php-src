@@ -1051,12 +1051,12 @@ static PHP_METHOD(PDO, query)
 	/* Return a meaningful error when no parameters were passed */
 	if (!ZEND_NUM_ARGS()) {
 		zend_parse_parameters(0, "z|z", NULL, NULL);
-		RETURN_FALSE;
+		return;
 	}
 
 	if (FAILURE == zend_parse_parameters(1, "s", &statement,
 			&statement_len)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	PDO_DBH_CLEAR_ERR();

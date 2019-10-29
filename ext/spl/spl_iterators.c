@@ -3526,7 +3526,7 @@ PHP_FUNCTION(iterator_to_array)
 	zend_bool use_keys = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &obj, zend_ce_traversable, &use_keys) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	array_init(return_value);
@@ -3548,7 +3548,7 @@ PHP_FUNCTION(iterator_count)
 	zend_long  count = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &obj, zend_ce_traversable) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (spl_iterator_apply(obj, spl_iterator_count_apply, (void*)&count) == FAILURE) {

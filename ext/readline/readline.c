@@ -160,7 +160,7 @@ PHP_FUNCTION(readline)
 	char *result;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|s!", &prompt, &prompt_len)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	result = readline(prompt);
@@ -522,7 +522,7 @@ PHP_FUNCTION(readline_completion_function)
 	zval *arg;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!zend_is_callable(arg, 0, NULL)) {

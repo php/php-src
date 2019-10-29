@@ -1279,7 +1279,7 @@ PHP_FUNCTION(pcntl_setpriority)
 	zend_long pri;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|ll", &pri, &pid, &who) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (setpriority(who, pid, pri)) {

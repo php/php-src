@@ -531,7 +531,7 @@ PHP_FUNCTION(filter_has_var)
 	zval        *array_ptr = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lS", &arg, &var) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	array_ptr = php_filter_get_storage(arg);
