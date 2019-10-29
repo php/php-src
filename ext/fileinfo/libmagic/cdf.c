@@ -989,8 +989,9 @@ cdf_read_property_info(const cdf_stream_t *sst, const cdf_header_t *h,
 				goto out;
 			}
 			nelements = CDF_GETUINT32(q, 1);
-			if (nelements == 0) {
-				DPRINTF(("CDF_VECTOR with nelements == 0\n"));
+			if (nelements > CDF_ELEMENT_LIMIT || nelements == 0) {
+				DPRINTF(("CDF_VECTOR with nelements == %"
+				    SIZE_T_FORMAT "u\n", nelements));
 				goto out;
 			}
 			slen = 2;
@@ -1032,8 +1033,6 @@ cdf_read_property_info(const cdf_stream_t *sst, const cdf_header_t *h,
 					goto out;
 				inp += nelem;
 			}
-			DPRINTF(("nelements = %" SIZE_T_FORMAT "u\n",
-			    nelements));
 			for (j = 0; j < nelements && i < sh.sh_properties;
 			    j++, i++)
 			{
