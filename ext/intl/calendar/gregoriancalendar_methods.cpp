@@ -59,25 +59,15 @@ static void _php_intlgregcal_constructor_body(
 	// parameter number validation / variant determination
 	if (ZEND_NUM_ARGS() > 6 ||
 			zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlgregcal_create_instance: too many arguments", 0);
-		if (!is_constructor) {
-			zval_ptr_dtor(return_value);
-			RETVAL_NULL();
-		}
+		zend_argument_count_error("Too many arguments");
 		return;
 	}
+
 	for (variant = ZEND_NUM_ARGS();
 		variant > 0 && Z_TYPE(args[variant - 1]) == IS_NULL;
 		variant--) {}
 	if (variant == 4) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlgregcal_create_instance: no variant with 4 arguments "
-			"(excluding trailing NULLs)", 0);
-		if (!is_constructor) {
-			zval_ptr_dtor(return_value);
-			RETVAL_NULL();
-		}
+		zend_argument_count_error("No variant with 4 arguments (excluding trailing NULLs)");
 		return;
 	}
 
@@ -85,20 +75,12 @@ static void _php_intlgregcal_constructor_body(
 	if (variant <= 2) {
 		if (zend_parse_parameters(MIN(ZEND_NUM_ARGS(), 2),
 				"|z!s!", &tz_object, &locale, &locale_len) == FAILURE) {
-			if (!is_constructor) {
-				zval_ptr_dtor(return_value);
-				RETVAL_NULL();
-			}
 			return;
 		}
 	}
 	if (variant > 2 && zend_parse_parameters(ZEND_NUM_ARGS(),
 			"lll|lll", &largs[0], &largs[1], &largs[2], &largs[3], &largs[4],
 			&largs[5]) == FAILURE) {
-		if (!is_constructor) {
-			zval_ptr_dtor(return_value);
-			RETVAL_NULL();
-		}
 		return;
 	}
 
