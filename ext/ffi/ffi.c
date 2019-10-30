@@ -3312,6 +3312,7 @@ static zend_ffi *zend_ffi_load(const char *filename, zend_bool preload) /* {{{ *
 	efree(code);
 	FFI_G(symbols) = NULL;
 	FFI_G(tags) = NULL;
+	FFI_G(persistent) = 0;
 
 	return ffi;
 
