@@ -2190,8 +2190,11 @@ inline_char_handler:
 
 	if (YYCURSOR < YYLIMIT) {
 		YYCURSOR++;
-	} else if (!SCNG(heredoc_scan_ahead)) {
-		zend_error(E_COMPILE_WARNING, "Unterminated comment starting line %d", CG(zend_lineno));
+	} else {
+		zend_throw_exception_ex(zend_ce_parse_error, 0, "Unterminated comment starting line %d", CG(zend_lineno));
+		if (PARSER_MODE()) {
+			RETURN_TOKEN(T_ERROR);
+		}
 	}
 
 	yyleng = YYCURSOR - SCNG(yy_text);
