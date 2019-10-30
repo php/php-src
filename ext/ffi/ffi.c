@@ -3882,6 +3882,7 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 		cdata->ptr = &cdata->ptr_holder;
 		cdata->ptr_holder = old_cdata->ptr;
 	} else if (type->size > old_type->size) {
+		zend_object_release(&cdata->std);
 		zend_throw_error(zend_ffi_exception_ce, "attempt to cast to larger type");
 		return;
 	} else if (ptr != &old_cdata->ptr_holder) {
