@@ -284,6 +284,7 @@ static int zend_create_closure_from_callable(zval *return_value, zval *callable,
 		if (fcc.object && fcc.object->ce == zend_ce_closure
 				&& zend_string_equals_literal(mptr->common.function_name, "__invoke")) {
 			ZVAL_OBJ(return_value, fcc.object);
+			GC_ADDREF(fcc.object);
 			zend_free_trampoline(mptr);
 			return SUCCESS;
 		}
