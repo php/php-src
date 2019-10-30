@@ -74,6 +74,8 @@ int json_yydebug = 1;
 %code {
 static int php_json_yylex(union YYSTYPE *value, php_json_parser *parser);
 static void php_json_yyerror(php_json_parser *parser, char const *msg);
+static int php_json_parser_array_create(php_json_parser *parser, zval *array);
+static int php_json_parser_object_create(php_json_parser *parser, zval *array);
 
 }
 
@@ -118,7 +120,11 @@ object_end:
 members:
 		/* empty */
 			{
-				parser->methods.object_create(parser, &$$);
+				if ((parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) && parser->methods.object_create == php_json_parser_object_create) {
+					ZVAL_EMPTY_ARRAY(&$$);
+				} else {
+					parser->methods.object_create(parser, &$$);
+				}
 			}
 	|	member
 ;
@@ -178,7 +184,11 @@ array_end:
 elements:
 		/* empty */
 			{
-				parser->methods.array_create(parser, &$$);
+				if (parser->methods.array_create == php_json_parser_array_create) {
+					ZVAL_EMPTY_ARRAY(&$$);
+				} else {
+					parser->methods.array_create(parser, &$$);
+				}
 			}
 	|	element
 ;
