@@ -153,6 +153,9 @@ PHP 7.4 UPGRADE NOTES
     considered failures.
   . fread() and fwrite() on plain files will now throw a notice on failure,
     such as when trying to write to a read-only file resource.
+  . The stream_read() and stream_write() methods on stream wrappers now
+    interpret "false" as a failure return values. If no data is available, but
+    no error occurred, an empty string should be returned instead.
   . round(-0.0) will now return -0.0 rather than +0.0.
 
 - Tokenizer:
