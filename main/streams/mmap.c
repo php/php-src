@@ -29,12 +29,6 @@ PHPAPI char *_php_stream_mmap_range(php_stream *stream, size_t offset, size_t le
 	range.mode = mode;
 	range.mapped = NULL;
 
-	/* For now, we impose an arbitrary limit to avoid
-	 * runaway swapping when large files are passed through. */
-	if (length > 4 * 1024 * 1024) {
-		return NULL;
-	}
-
 	if (PHP_STREAM_OPTION_RETURN_OK == php_stream_set_option(stream, PHP_STREAM_OPTION_MMAP_API, PHP_STREAM_MMAP_MAP_RANGE, &range)) {
 		if (mapped_len) {
 			*mapped_len = range.length;

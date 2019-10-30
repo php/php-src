@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0RC6
 
+- Standard:
+  . Fixed bug #77930 (stream_copy_to_stream should use mmap more often).
+    (Nikita)
 
 31 Oct 2019, PHP 7.4.0RC5
 
