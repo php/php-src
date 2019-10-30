@@ -19,6 +19,8 @@ PHP                                                                        NEWS
   . Fixed bug #78716 (Function name mangling is wrong for some parameter 
     types). (cmb)
   . Fixed bug #78762 (Failing FFI::cast() may leak memory). (cmb)
+  . Fixed bug #78761 (Zend memory heap corruption with preload and casting).
+    (cmb)
   . Implement FR #78270 (Support __vectorcall convention with FFI). (cmb)
 
 - FPM:
