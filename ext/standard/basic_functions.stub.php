@@ -953,8 +953,7 @@ function quoted_printable_encode(string $str): string {}
 
 function mt_srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
 
-/** @return int|false */
-function mt_rand(int $min = 0, int $max = PHP_INT_MAX) {}
+function mt_rand(int $min = 0, int $max = PHP_INT_MAX): int {}
 
 function mt_getrandmax(): int {}
 
