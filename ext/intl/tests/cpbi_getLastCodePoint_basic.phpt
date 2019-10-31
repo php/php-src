@@ -43,7 +43,6 @@ while ($p != IntlBreakIterator::DONE) {
 
 
 ?>
-==DONE==
 --EXPECT--
 int(-1)
 int(-1)
@@ -79,4 +78,3 @@ string(6) "U+0E2D"
 string(6) "U+0E27"
 string(6) "U+0E31"
 string(6) "U+0E15"
-==DONE==

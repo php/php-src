@@ -73,8 +73,6 @@ if (strpos($headers, 'Content-Type: application/soap+xml; charset=utf-8; action=
 else
   printf("Content-Type Default OK" . PHP_EOL);
 ?>
-==DONE==
 --EXPECT--
 Content-Type OK
 Content-Type Default OK
-==DONE==

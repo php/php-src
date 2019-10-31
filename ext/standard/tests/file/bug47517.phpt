@@ -15,7 +15,5 @@ if (!$status) {
 /* This has to behave same way on both 64- and 32-bits. */
 file_put_contents('C:\Program Files\myfile.txt', 'hello');
 ?>
-==DONE==
 --EXPECTF--
 Warning: file_put_contents(C:\Program Files\myfile.txt): failed to open stream: Permission denied in %sbug47517.php on line %d
-==DONE==

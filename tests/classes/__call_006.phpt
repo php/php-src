@@ -50,7 +50,6 @@ try {
 	echo "Exception caught OK; continuing.\n";
 }
 ?>
-==DONE==
 --EXPECTF--
 ---> Invoke __call via simple method call.
 object(A)#%d (0) {
@@ -74,4 +73,3 @@ Exception caught OK; continuing.
 object(B)#%d (0) {
 }
 Exception caught OK; continuing.
-==DONE==

@@ -14,9 +14,7 @@ echo "This call will obtain the content:\n";
 $str = ob_get_contents();
 var_dump($str);
 ?>
-==DONE==
 --EXPECT--
 [callback:1]This call will obtain the content:
 string(35) "This call will obtain the content:
 "
-==DONE==

@@ -57,8 +57,6 @@ do {
 } while (__DIR__ != $dir);*/
 
 ?>
-==DONE==
 --EXPECTF--
 string(%d) "%shello.txt"
 bool(false)
-==DONE==

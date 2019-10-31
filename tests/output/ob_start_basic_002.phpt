@@ -35,7 +35,6 @@ foreach ($callbacks as $callback) {
 }
 
 ?>
-==DONE==
 --EXPECT--
 --> Use callback 'return_empty_string':
 
@@ -52,4 +51,3 @@ I stole your output.
 --> Use callback 'return_zero':
 0
 
-==DONE==

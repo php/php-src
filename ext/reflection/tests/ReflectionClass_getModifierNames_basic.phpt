@@ -49,7 +49,6 @@ dump_methodModifierNames('x');
 dump_methodModifierNames('y');
 
 ?>
-==DONE==
 --EXPECT--
 string(1) "a"
 array(0) {
@@ -136,4 +135,3 @@ array(2) {
   [1]=>
   string(9) "protected"
 }
-==DONE==

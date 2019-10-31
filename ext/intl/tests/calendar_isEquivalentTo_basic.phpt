@@ -27,7 +27,6 @@ var_dump(
 );
 
 ?>
-==DONE==
 --EXPECT--
 string(5) "1 - 1"
 bool(true)
@@ -36,5 +35,4 @@ bool(false)
 string(5) "1 - 3"
 bool(false)
 string(5) "1 - 4"
-bool(true)
-==DONE==
+bool(true)

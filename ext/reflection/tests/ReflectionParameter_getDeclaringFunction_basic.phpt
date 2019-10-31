@@ -14,7 +14,6 @@ foreach($params as $key => $value) {
 	echo $value->getDeclaringFunction() . "\n";
 }
 ?>
-==DONE==
 --EXPECTF--
 Function [ <user> function ReflectionParameterTest ] {
   @@ %s.php %d - %d
@@ -34,4 +33,3 @@ Function [ <user> function ReflectionParameterTest ] {
   }
 }
 
-==DONE==

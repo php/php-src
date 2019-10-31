@@ -39,7 +39,6 @@ var_dump($mf->format(array(
 )));
 
 ?>
-==DONE==
 --EXPECTF--
 string(%d) "
 	none			1336317965.5 str
@@ -53,4 +52,3 @@ string(%d) "
 	ordinal			1,336,317,966th
 	duration		371,199:26:06
 	"
-==DONE==

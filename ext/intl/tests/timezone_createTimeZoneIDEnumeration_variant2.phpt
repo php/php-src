@@ -37,7 +37,6 @@ array('Etc/GMT+1', 'Atlantic/Azores'))
 
 
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 bool(true)
@@ -47,4 +46,3 @@ Array
     [0] => Atlantic/Azores
     [1] => Etc/GMT+1
 )
-==DONE==

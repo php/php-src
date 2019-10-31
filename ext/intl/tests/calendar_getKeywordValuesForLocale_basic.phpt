@@ -22,7 +22,6 @@ var_dump(count($var) > 8);
 var_dump(in_array('japanese', $var));
 
 ?>
-==DONE==
 --EXPECT--
 Array
 (
@@ -31,4 +30,3 @@ Array
 
 bool(true)
 bool(true)
-==DONE==

@@ -14,10 +14,8 @@ var_dump(
     mb_substr('bar', 0x100000000, 1)
 );
 ?>
-==DONE==
 --EXPECT--
 string(3) "bar"
 string(3) "bar"
 string(0) ""
 string(0) ""
-==DONE==

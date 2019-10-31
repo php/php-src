@@ -19,7 +19,6 @@ var_dump($http_response_header);
 
 http_server_kill($pid);
 ?>
-==DONE==
 --EXPECT--
 string(0) ""
 array(2) {
@@ -28,4 +27,3 @@ array(2) {
   [1]=>
   string(14) "Content-Length"
 }
-==DONE==

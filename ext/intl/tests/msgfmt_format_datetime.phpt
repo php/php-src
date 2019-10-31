@@ -24,8 +24,6 @@ var_dump($mf->format(array($dt)));
 var_dump($mf->format(array($dti)));
 
 ?>
-==DONE==
 --EXPECTF--
 string(%s) "May %d, 2012 %d:%d:42 %s"
 string(%s) "May %d, 2012 %d:%d:42 %s"
-==DONE==

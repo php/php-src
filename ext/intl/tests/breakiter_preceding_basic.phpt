@@ -18,9 +18,7 @@ var_dump($bi->preceding(5));
 var_dump($bi->preceding(50));
 var_dump($bi->preceding(-1));
 ?>
-==DONE==
 --EXPECT--
 int(4)
 int(21)
 int(0)
-==DONE==

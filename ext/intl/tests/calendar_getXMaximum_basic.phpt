@@ -23,12 +23,10 @@ var_dump(
 );
 
 ?>
-==DONE==
 --EXPECT--
 int(28)
 int(28)
 int(29)
 int(29)
 int(31)
-int(31)
-==DONE==
+int(31)

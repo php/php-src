@@ -19,7 +19,6 @@ $enum = intltz_create_time_zone_id_enumeration(
 	-3600000);
 print_r(iterator_to_array($enum));
 ?>
-==DONE==
 --EXPECT--
 Array
 (
@@ -29,4 +28,3 @@ Array
 (
     [0] => Atlantic/Azores
 )
-==DONE==

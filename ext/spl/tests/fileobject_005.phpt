@@ -22,7 +22,6 @@ $fo->rewind();
 $fo->fwrite("blahlubba");
 
 ?>
-==DONE==
 --CLEAN--
 <?php
 $path = __DIR__.DIRECTORY_SEPARATOR.'fileobject_005.txt';
@@ -31,4 +30,3 @@ unlink($path);
 --EXPECTF--
 bool(true)
 string(4) "blah"
-==DONE==

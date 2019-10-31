@@ -32,7 +32,6 @@ var_dump(
 );
 
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 int(0)
@@ -42,4 +41,3 @@ bool(true)
 int(1)
 int(1351384200)
 int(1351384200)
-==DONE==

@@ -22,9 +22,7 @@ $values2 = iterator_to_array($enum);
 var_dump($values2 == $values);
 
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 bool(true)
 bool(true)
-==DONE==

@@ -28,7 +28,6 @@ var_dump(
 		intlcal_get_error_message($intlcal)
 );
 ?>
-==DONE==
 --EXPECTF--
 int(0)
 int(0)
@@ -40,4 +39,3 @@ int(1)
 int(1)
 string(81) "intlcal_field_difference: Call to ICU method has failed: U_ILLEGAL_ARGUMENT_ERROR"
 string(81) "intlcal_field_difference: Call to ICU method has failed: U_ILLEGAL_ARGUMENT_ERROR"
-==DONE==

@@ -31,8 +31,6 @@ while ($row = $result->fetch_assoc()) {
 }
 
 ?>
-==DONE==
 --EXPECT--
 string(1) "0"
 string(4) "1365"
-==DONE==

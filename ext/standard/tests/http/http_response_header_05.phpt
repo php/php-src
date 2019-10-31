@@ -23,7 +23,6 @@ test();
 
 http_server_kill($pid);
 ?>
-==DONE==
 --EXPECT--
 string(4) "Body"
 array(2) {
@@ -32,4 +31,3 @@ array(2) {
   [1]=>
   string(0) ""
 }
-==DONE==

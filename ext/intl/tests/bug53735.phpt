@@ -22,11 +22,9 @@ $f = new NumberFormatter('hu_HU', NumberFormatter::PERCENT, '#,##0%');
 var_dump($f->format(0.26));
 
 ?>
-==DONE==
 --EXPECTF--
 string(%d) "5,50 kr%A"
 string(%d) "5,50 kr%A"
 string(%d) "5,00 kr%A"
 string(5) "23,25"
 string(3) "26%"
-==DONE==

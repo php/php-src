@@ -45,7 +45,6 @@ $heap->insert( 1, 2 );
 testForException( $heap );
 
 ?>
-==DONE==
 --EXPECT--
 An iterator cannot be used with foreach by reference
 An iterator cannot be used with foreach by reference
@@ -53,4 +52,3 @@ An iterator cannot be used with foreach by reference
 An iterator cannot be used with foreach by reference
 An iterator cannot be used with foreach by reference
 An iterator cannot be used with foreach by reference
-==DONE==

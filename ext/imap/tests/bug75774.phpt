@@ -20,9 +20,7 @@ fclose($var1);
 unlink($fn);
 
 ?>
-==DONE==
 --EXPECTF--
 Warning: imap_append(): internal date not correctly formatted in %s on line %d
 
 Exception: imap_append(): supplied resource is not a valid imap resource
-==DONE==

@@ -22,7 +22,6 @@ var_dump($tz == $tz2);
 }
 
 ?>
-==DONE==
 --EXPECT--
 object(A)#1 (1) {
   ["valid"]=>
@@ -39,5 +38,4 @@ object(IntlTimeZone)#2 (4) {
   int(0)
 }
 string(9) "Exception"
-string(63) "Comparison with at least one unconstructed IntlTimeZone operand"
-==DONE==
+string(63) "Comparison with at least one unconstructed IntlTimeZone operand"

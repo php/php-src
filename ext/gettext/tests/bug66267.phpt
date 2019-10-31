@@ -41,7 +41,6 @@ foreach ($loc as $l) {
 }
 
 ?>
-==DONE==
 --EXPECT--
 LC_ALL=de_DE
 hello=hallo
@@ -52,4 +51,3 @@ hello=salut
 LC_ALL=en_US
 hello=hello
 
-==DONE==

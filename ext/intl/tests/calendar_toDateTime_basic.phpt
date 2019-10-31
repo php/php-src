@@ -16,8 +16,6 @@ $dt = $cal->toDateTime();
 
 var_dump($dt->format("c"), $dt->getTimeZone()->getName());
 ?>
-==DONE==
 --EXPECT--
 string(25) "2012-05-17T17:35:36+01:00"
 string(13) "Europe/Lisbon"
-==DONE==

@@ -25,9 +25,7 @@ try {
 
 
 ?>
-==DONE==
 --EXPECTF--
 Ok - ReflectionExtension::__construct() expects exactly %d parameter, %d given
 Ok - ReflectionExtension::__construct() expects exactly %d parameter, %d given
 Ok - ReflectionExtension::__construct() expects parameter 1 to be string, array given
-==DONE==

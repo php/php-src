@@ -30,8 +30,6 @@ ini_set("assert.callback", "b");
 assert($a != 0);
 
 ?>
-==DONE==
 --EXPECT--
 assertion failed - a - 18,"assert($a != 0)"
 assertion failed - b - 22,"assert($a != 0)"
-==DONE==

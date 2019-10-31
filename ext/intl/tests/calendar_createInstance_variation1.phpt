@@ -37,7 +37,6 @@ print_R($cal->getLocale(Locale::ACTUAL_LOCALE));
 echo "\n";
 
 ?>
-==DONE==
 --EXPECTF--
 IntlTimeZone Object
 (
@@ -79,4 +78,3 @@ IntlTimeZone Object
     [currentOffset] => %d
 )
 pt
-==DONE==

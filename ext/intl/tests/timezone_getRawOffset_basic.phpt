@@ -14,8 +14,6 @@ $lsb = IntlTimeZone::createTimeZone('Europe/Lisbon');
 var_dump(intltz_get_raw_offset($lsb));
 
 ?>
-==DONE==
 --EXPECT--
 int(3600000)
-int(0)
-==DONE==
+int(0)

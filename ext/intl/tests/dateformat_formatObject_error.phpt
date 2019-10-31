@@ -30,7 +30,6 @@ var_dump(IntlDateFormatter::formatObject($cal, array(1, -2)));
 var_dump(IntlDateFormatter::formatObject($cal, ""));
 
 ?>
-==DONE==
 --EXPECTF--
 Warning: IntlDateFormatter::formatObject(): datefmt_format_object: the passed object must be an instance of either IntlCalendar or DateTime in %s on line %d
 bool(false)
@@ -58,4 +57,3 @@ bool(false)
 
 Warning: IntlDateFormatter::formatObject(): datefmt_format_object: the format is empty in %s on line %d
 bool(false)
-==DONE==

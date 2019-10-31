@@ -46,10 +46,8 @@ if (is_resource($p)) {
 	echo "no process\n";
 }
 ?>
-==DONE==
 --EXPECTF--
 Warning: Array to string conversion in %s on line %d
 int(%d)
 int(0)
 bool(true)
-==DONE==

@@ -32,7 +32,6 @@ do {
 } while ($rbbi->next() != IntlBreakIterator::DONE);
 
 ?>
-==DONE==
 --EXPECT--
 int(0)
 array(1) {
@@ -56,4 +55,3 @@ array(1) {
   [0]=>
   int(4)
 }
-==DONE==
