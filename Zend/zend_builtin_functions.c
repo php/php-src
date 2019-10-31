@@ -1621,11 +1621,12 @@ ZEND_FUNCTION(get_defined_functions)
 ZEND_FUNCTION(get_defined_vars)
 {
 	zend_array *symbol_table;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	if (zend_forbid_dynamic_call("get_defined_vars()") == FAILURE) {
 		return;
 	}
-
-	ZEND_PARSE_PARAMETERS_NONE();
 
 	symbol_table = zend_rebuild_symbol_table();
 	if (UNEXPECTED(symbol_table == NULL)) {
