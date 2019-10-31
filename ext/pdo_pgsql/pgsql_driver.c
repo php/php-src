@@ -920,6 +920,8 @@ static PHP_METHOD(PDO, pgsqlLOBCreate)
 	pdo_pgsql_db_handle *H;
 	Oid lfd;
 
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 	PDO_DBH_CLEAR_ERR();
@@ -1106,6 +1108,8 @@ static PHP_METHOD(PDO, pgsqlGetPid)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
+
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;

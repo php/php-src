@@ -26,6 +26,10 @@
  */
 PHP_FUNCTION( intl_get_error_code )
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETURN_LONG( intl_error_get_code( NULL ) );
 }
 /* }}} */
@@ -35,6 +39,10 @@ PHP_FUNCTION( intl_get_error_code )
  */
 PHP_FUNCTION( intl_get_error_message )
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETURN_STR(intl_error_get_message( NULL ));
 }
 /* }}} */

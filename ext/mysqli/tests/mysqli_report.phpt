@@ -267,7 +267,12 @@ require_once('skipifconnectfailure.inc');
 			!mysqli_query($link, 'DELETE FROM test WHERE id > 50', MYSQLI_USE_RESULT))
 		printf("[033] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	$tmp = mysqli_thread_safe($link);
+	try {
+	    mysqli_thread_safe($link);
+	} catch (ArgumentCountError $exception) {
+	    print($exception->getMessage() . "\n");
+	}
+
 	$tmp = mysqli_thread_id($link);
 
 	mysqli_close($link);
@@ -293,4 +298,5 @@ Warning: mysqli_kill(): processid should have positive value in %s on line %d
 Warning: mysqli_stmt_prepare(): (%d/%d): You have an error in your SQL syntax; check the manual that corresponds to your %s server version for the right syntax to use near 'FOO' at line 1 in %s on line %d
 [013] Access denied for user '%s'@'%s' (using password: YES)
 [016] Access denied for user '%s'@'%s' (using password: YES)
+mysqli_thread_safe() expects exactly 0 parameters, 1 given
 done!

@@ -6294,6 +6294,10 @@ PHP_FUNCTION(openssl_get_curve_names)
 	size_t i;
 	size_t len = EC_get_builtin_curves(NULL, 0);
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	curves = emalloc(sizeof(EC_builtin_curve) * len);
 	if (!EC_get_builtin_curves(curves, len)) {
 		RETURN_FALSE;

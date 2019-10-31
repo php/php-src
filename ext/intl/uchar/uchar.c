@@ -559,6 +559,9 @@ IC_METHOD(getUnicodeVersion) {
 	UVersionInfo version;
 	int i;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	u_getUnicodeVersion(version);
 	array_init(return_value);

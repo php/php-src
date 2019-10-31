@@ -1625,6 +1625,8 @@ ZEND_FUNCTION(get_defined_vars)
 		return;
 	}
 
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	symbol_table = zend_rebuild_symbol_table();
 	if (UNEXPECTED(symbol_table == NULL)) {
 		return;
@@ -1637,6 +1639,8 @@ ZEND_FUNCTION(get_defined_vars)
 #if ZEND_DEBUG && defined(ZTS)
 ZEND_FUNCTION(zend_thread_id)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	RETURN_LONG((zend_long)tsrm_thread_id());
 }
 #endif
