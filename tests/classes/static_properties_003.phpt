@@ -25,7 +25,6 @@ var_dump(isset($c->y));
 //$c->y = 1;		// Fatal error, tested in static_properties_003_error3.phpt
 //$c->y =& $ref;	// Fatal error, tested in static_properties_003_error4.phpt
 ?>
-==Done==
 --EXPECTF--
 --> Access visible static prop like instance prop:
 bool(false)
@@ -46,4 +45,3 @@ string(5) "C::$x"
 
 --> Access non-visible static prop like instance prop:
 bool(false)
-==Done==

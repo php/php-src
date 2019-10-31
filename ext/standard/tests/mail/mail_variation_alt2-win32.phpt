@@ -83,7 +83,7 @@ if (!$found) {
 
 imap_close($imap_stream, CL_EXPUNGE);
 ?>
-===Done===
+===DONE===
 --EXPECTF--
 *** Testing mail() : basic functionality ***
 

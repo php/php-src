@@ -15,8 +15,6 @@ $str = '<xml><c>asdf</c><c>ghjk</c></xml>';
 $sxe = new SXE($str);
 var_dump(count($sxe));
 ?>
-==Done==
 --EXPECT--
 Called Count!
 int(2)
-==Done==
