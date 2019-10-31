@@ -33,10 +33,8 @@ if ($f) {
 remove_data("file_kartuli");
 
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (stream)
 string(37) "reading file wihh multibyte filename
 "
 bool(true)
-===DONE===

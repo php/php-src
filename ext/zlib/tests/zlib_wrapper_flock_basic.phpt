@@ -13,7 +13,5 @@ $h = gzopen($f,'r');
 var_dump(flock($h, LOCK_SH));
 gzclose($h);
 ?>
-===DONE===
 --EXPECT--
 bool(false)
-===DONE===

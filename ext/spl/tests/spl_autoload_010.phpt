@@ -21,9 +21,7 @@ spl_autoload_register('autoloadC');
 
 new C;
 ?>
-===DONE===
 --EXPECT--
 B -> C
 A -> C
 C -> C
-===DONE===

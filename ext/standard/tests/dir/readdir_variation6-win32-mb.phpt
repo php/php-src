@@ -61,7 +61,6 @@ delete_files($dir_path, 3, "私はガラスを食べられますreaddir_variatio
 closedir($dir_handle1);
 closedir();
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path = __DIR__ . "/私はガラスを食べられますreaddir_variation6";
@@ -83,4 +82,3 @@ string(2) ".."
 string(59) "私はガラスを食べられますreaddir_variation61.tmp"
 string(59) "私はガラスを食べられますreaddir_variation62.tmp"
 string(59) "私はガラスを食べられますreaddir_variation63.tmp"
-===DONE===

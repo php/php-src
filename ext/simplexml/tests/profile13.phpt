@@ -29,7 +29,6 @@ var_dump($sxe->Body->children(''));
 var_dump($sxe->Body->children('')->businessList);
 
 ?>
-===DONE===
 --EXPECTF--
 object(SimpleXMLElement)#%d (1) {
   ["Body"]=>
@@ -71,4 +70,3 @@ object(SimpleXMLElement)#%d (2) {
     }
   }
 }
-===DONE===

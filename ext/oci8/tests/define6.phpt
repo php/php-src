@@ -119,7 +119,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECTF--
 Test 1 - define last
 NULL
@@ -134,4 +133,3 @@ string(1) "1"
 Test 6 - fetch on wrong handle
 
 Warning: oci_fetch_row(): ORA-24374: %s in %sdefine6.php on line %d
-===DONE===

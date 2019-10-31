@@ -63,7 +63,6 @@ if (count($vars) == 0) {
 f1();
 
 ?>
-===DONE===
 --EXPECT--
 Simple testcase for get_defined_vars() function
 
@@ -149,4 +148,3 @@ array(9) {
   ["b1"]=>
   bool(true)
 }
-===DONE===

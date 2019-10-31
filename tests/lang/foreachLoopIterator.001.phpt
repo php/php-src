@@ -65,7 +65,6 @@ foreach ($f as $k=>$v) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 object(MealIterator)#%d (2) {
   ["pos":"MealIterator":private]=>
@@ -131,4 +130,3 @@ meal 0 => breakfast
 
 Notice: Undefined offset: 3 in %s on line %d
  --> MealIterator::valid (4)
-===DONE===

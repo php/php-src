@@ -26,9 +26,7 @@ var_dump($a->count());
 $a->removeAll($b);
 var_dump($a->count());
 ?>
-===DONE===
 --EXPECT--
 int(3)
 int(2)
 int(1)
-===DONE===

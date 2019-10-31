@@ -33,7 +33,6 @@ echo "\n-- Testing gmmktime() function with five optional argument --\n";
 var_dump( gmmktime($hour, $min, $sec, $mon, $day) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmmktime() : usage variation ***
 
@@ -51,4 +50,3 @@ int(%d)
 
 -- Testing gmmktime() function with five optional argument --
 int(%d)
-===DONE===

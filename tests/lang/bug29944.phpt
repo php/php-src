@@ -14,7 +14,5 @@ switch ($a) {
 }
 ?>
 
-===DONE===
 --EXPECT--
 1
-===DONE===

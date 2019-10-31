@@ -55,7 +55,6 @@ delete_files($dir_path, 3, "readdir_variation6");
 closedir($dir_handle1);
 closedir();
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path = __DIR__ . "/readdir_variation6";
@@ -77,4 +76,3 @@ string(2) ".."
 string(23) "readdir_variation61.tmp"
 string(23) "readdir_variation62.tmp"
 string(23) "readdir_variation63.tmp"
-===DONE===

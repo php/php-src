@@ -13,7 +13,6 @@ var_dump(getimagesize(__DIR__ . "/75x50.xbm", $arr));
 var_dump($arr);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing getimagesize() : xbm format ***
 array(5) {
@@ -30,4 +29,3 @@ array(5) {
 }
 array(0) {
 }
-===DONE===

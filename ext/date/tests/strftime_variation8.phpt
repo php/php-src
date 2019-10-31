@@ -21,11 +21,9 @@ var_dump( strftime($format) );
 var_dump( strftime($format, $timestamp) );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing strftime() : usage variation ***
 
 -- Testing strftime() function with a literal % character to format --
 string(1) "%"
 string(1) "%"
-===DONE===

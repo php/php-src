@@ -16,8 +16,6 @@ $dll->next();
 echo $dll->current()."\n";
 
 ?>
-===DONE===
 --EXPECT--
 1
 3
-===DONE===

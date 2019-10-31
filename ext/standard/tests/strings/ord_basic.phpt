@@ -30,7 +30,6 @@ for ($i = 0; $i < 255; $i++) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing ord() : basic functionality ***
 int(97)
@@ -44,4 +43,3 @@ int(10)
 int(10)
 int(255)
 int(72)
-===DONE===

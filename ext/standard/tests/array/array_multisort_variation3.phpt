@@ -105,7 +105,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_multisort() : usage variation ***
 
@@ -183,4 +182,3 @@ Argument #3 is expected to be an array or a sort flag
 
 --unset var--
 Argument #3 is expected to be an array or a sort flag
-===DONE===

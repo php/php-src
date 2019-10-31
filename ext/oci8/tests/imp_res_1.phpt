@@ -117,7 +117,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECTF--
 Test 1 - oci_fetch_assoc
 array(2) {
@@ -626,4 +625,3 @@ array(4) {
   ["C2"]=>
   string(5) "klmno"
 }
-===DONE===

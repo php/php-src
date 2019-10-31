@@ -26,7 +26,6 @@ echo "*** Testing money_format() : error conditions ***\n";
 echo "\n-- Testing money_format() function with more than one token --\n";
 var_dump( money_format($string . $string, $value) );
 ?>
-===DONE===
 --EXPECTF--
 *** Testing money_format() : error conditions ***
 
@@ -36,4 +35,3 @@ Deprecated: Function money_format() is deprecated in %s on line %d
 
 Warning: money_format(): Only a single %ci or %cn token can be used in %s on line %d
 bool(false)
-===DONE===

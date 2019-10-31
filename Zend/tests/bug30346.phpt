@@ -18,7 +18,5 @@ echo $post[$id.'_show'];
 echo "\n";
 
 ?>
-===DONE===
 --EXPECT--
 page_show
-===DONE===

@@ -8,7 +8,5 @@ if (!extension_loaded('exif')) die('skip exif extension not available');
 <?php
 exif_read_data('.');
 ?>
-===DONE===
 --EXPECTF--
 Warning: exif_read_data(): %s in %s on line %d
-===DONE===

@@ -19,7 +19,6 @@ var_dump(dba_key_split("[key1]name1[key2]name2"));
 var_dump(dba_key_split("[key1]name1"));
 
 ?>
-===DONE===
 --EXPECTF--
 array(2) {
   [0]=>
@@ -76,4 +75,3 @@ array(2) {
   [1]=>
   string(5) "name1"
 }
-===DONE===

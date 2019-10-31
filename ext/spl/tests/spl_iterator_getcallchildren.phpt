@@ -23,7 +23,6 @@ var_dump($output);
 
 
 ?>
-===DONE===
 --EXPECT--
   array(3) {
   [0]=>
@@ -36,4 +35,3 @@ var_dump($output);
 int(7)
 invalid argument exception
 NULL
-===DONE===

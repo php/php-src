@@ -19,7 +19,6 @@ var_dump(ltrim($hello, "z..a"));
 var_dump(ltrim($hello, "a..b..c"));
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing ltrim() : error conditions ***
 
@@ -40,4 +39,3 @@ string(14) "  Hello World
 Warning: ltrim(): Invalid '..'-range in %s on line %d
 string(14) "  Hello World
 "
-===DONE===

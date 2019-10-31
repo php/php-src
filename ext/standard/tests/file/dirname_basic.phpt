@@ -57,7 +57,6 @@ foreach ($paths as $path) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing dirname() : basic functionality ***
 string(0) ""
@@ -90,4 +89,3 @@ string(1) "."
 string(1) "."
 string(1) "/"
 string(1) "/"
-===DONE===

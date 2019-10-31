@@ -9,7 +9,6 @@ reflection::export(new reflectionclass('OCI-Lob'));
 reflection::export(new reflectionclass('OCI-Collection'));
 
 ?>
-===DONE===
 --EXPECTF--
 Class [ <internal:oci8> class OCI-Lob ] {
 
@@ -254,4 +253,3 @@ Class [ <internal%s> class OCI-Collection ] {
   }
 }
 
-===DONE===

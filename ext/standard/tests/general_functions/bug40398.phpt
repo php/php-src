@@ -73,7 +73,6 @@ new Derived_5('5');
 new Derived_6('6');
 
 ?>
-===DONE===
 --EXPECT--
 Base::__construct(1)
 Base::__construct(2)
@@ -81,4 +80,3 @@ Base::__construct(3)
 Base::__construct(4)
 Base::__construct(5)
 Base::__construct(6)
-===DONE===

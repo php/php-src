@@ -81,7 +81,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1 - prefetch 0
 bool(true)
@@ -181,4 +180,3 @@ array(1) {
   [0]=>
   string(1) "v"
 }
-===DONE===

@@ -36,7 +36,6 @@ $h2 = clone $h;
 echo $h->extract()."\n";
 echo $h2->extract()."\n";
 ?>
-===DONE===
 --EXPECT--
 Exception: Can't extract from an empty heap
 5
@@ -49,4 +48,3 @@ Exception: Can't extract from an empty heap
 --
 4
 4
-===DONE===

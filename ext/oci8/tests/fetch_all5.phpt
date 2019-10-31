@@ -56,7 +56,6 @@ oci8_test_sql_execute($c, $stmtarray);
 oci_close($c);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1
 int(3)
@@ -106,4 +105,3 @@ Test 3
 int(0)
 array(0) {
 }
-===DONE===

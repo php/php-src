@@ -30,7 +30,6 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing finfo_open() : error functionality ***
 
@@ -45,4 +44,3 @@ Notice: finfo_open(): Warning: using regular magic file `%smagic' in %sfinfo_ope
 resource(6) of type (file_info)
 finfo_open() expects parameter 1 to be int, string given
 finfo::__construct() expects parameter 1 to be int, string given
-===DONE===

@@ -72,7 +72,6 @@ while ($reader->read()) {
 $reader->close();
 unlink($filename);
 ?>
-===DONE===
 --EXPECT--
 num: 1
 idx: 2
@@ -80,4 +79,3 @@ num: 1
 idx: 2
 num: 1
 idx: 2
-===DONE===

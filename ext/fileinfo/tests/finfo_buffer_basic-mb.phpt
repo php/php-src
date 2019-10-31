@@ -37,7 +37,6 @@ foreach( $options as $option ) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing finfo_buffer() : basic functionality ***
 string(36) "ASCII text, with no line terminators"
@@ -52,4 +51,3 @@ string(40) "application/octet-stream; charset=binary"
 string(28) "text/plain; charset=us-ascii"
 string(28) "text/plain; charset=us-ascii"
 string(25) "text/plain; charset=utf-8"
-===DONE===

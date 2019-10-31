@@ -27,7 +27,6 @@ foreach($input_arrays as $key =>$value) {
       var_dump( array_intersect_key($value,$input_array ) );
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_intersect_key() : usage variation ***
 
@@ -60,4 +59,3 @@ array(1) {
   [""]=>
   string(5) "unset"
 }
-===DONE===

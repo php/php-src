@@ -28,7 +28,6 @@ var_dump(
 	ldap_get_entries($link, $result)['count']
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -45,4 +44,3 @@ string(22) "1.2.840.113556.1.4.319"
 int(%d)
 string(%d) "%s"
 int(1)
-===DONE===

@@ -9,8 +9,6 @@ if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
 var_dump(mb_detect_order('Foo, UTF-8'));
 var_dump(mb_detect_order(['Foo', 'UTF-8']))
 ?>
-===DONE===
 --EXPECT--
 bool(false)
 bool(false)
-===DONE===

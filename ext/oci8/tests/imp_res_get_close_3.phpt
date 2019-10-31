@@ -52,7 +52,6 @@ while (($s1 = oci_get_implicit_resultset($s))) {
 oci_free_statement($s);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1
   1
@@ -61,4 +60,3 @@ Test 1
   4
   5
   6
-===DONE===

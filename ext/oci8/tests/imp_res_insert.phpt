@@ -103,7 +103,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1 - No commit in procedure, OCI_COMMIT_ON_SUCCESS mode
 111
@@ -148,4 +147,3 @@ array(4) {
   [3]=>
   string(3) "444"
 }
-===DONE===

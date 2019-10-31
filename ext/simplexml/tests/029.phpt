@@ -26,7 +26,6 @@ foreach($people as $person)
 }
 
 ?>
-===DONE===
 --EXPECT--
 string(3) "Joe"
 int(3)
@@ -37,4 +36,3 @@ int(1)
 string(4) "Jane"
 int(3)
 int(0)
-===DONE===

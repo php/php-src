@@ -30,7 +30,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strftime() : usage variation ***
 
@@ -45,4 +44,3 @@ string(6) "August"
 --Month as decimal--
 string(%d) "%d"
 string(2) "08"
-===DONE===

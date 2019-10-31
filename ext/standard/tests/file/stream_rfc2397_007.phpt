@@ -79,7 +79,6 @@ foreach($streams as $stream)
 }
 
 ?>
-===DONE===
 --EXPECT--
 ===data:,012345===
 int(0)
@@ -141,4 +140,3 @@ bool(false)
 int(-1)
 bool(false)
 bool(false)
-===DONE===

@@ -11,7 +11,5 @@ foreach(new LimitIterator(new EmptyIterator(), 0, 3) as $key => $val)
 }
 
 ?>
-===DONE===
 --EXPECT--
 ===EmptyIterator===
-===DONE===

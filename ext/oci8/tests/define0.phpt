@@ -51,10 +51,8 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECTF--
 Test 1
 string(%d) "some"
 Test 2
 string(%d) "some"
-===DONE===

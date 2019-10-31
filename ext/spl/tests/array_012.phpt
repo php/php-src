@@ -39,7 +39,6 @@ foreach($it as $key => $val)
 var_dump($it->count());
 
 ?>
-===DONE===
 --EXPECT--
 ===Array===
 int(3)
@@ -59,4 +58,3 @@ int(3)
 two=>2
 int(3)
 int(3)
-===DONE===

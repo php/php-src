@@ -26,7 +26,6 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing chr() : error conditions ***
 
@@ -35,4 +34,3 @@ chr() expects exactly 1 parameter, 0 given
 
 -- Testing chr() function with more than expected no. of arguments --
 chr() expects exactly 1 parameter, 2 given
-===DONE===

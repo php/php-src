@@ -43,7 +43,6 @@ foreach($options as $option) {
 	$iterator++;
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 require_once(__DIR__.'/clean.inc');
@@ -74,4 +73,3 @@ FT_UID not valid
 
 Warning: imap_fetchheader(): invalid value for the options parameter in %s on line %d
 FT_UID not valid
-===DONE===

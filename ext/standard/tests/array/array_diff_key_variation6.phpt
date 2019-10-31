@@ -18,7 +18,6 @@ echo "\n-- Testing array_diff_key() function with boolean indexed array --\n";
 var_dump( array_diff_key($input_array, $boolean_indx_array) );
 var_dump( array_diff_key($boolean_indx_array, $input_array) );
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_key() : usage variation ***
 
@@ -33,4 +32,3 @@ array(3) {
 }
 array(0) {
 }
-===DONE===

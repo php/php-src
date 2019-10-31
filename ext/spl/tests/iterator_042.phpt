@@ -38,7 +38,6 @@ foreach($it as $k => $v)
 }
 
 ?>
-===DONE===
 --EXPECTF--
 Error AppendIterator::append() expects parameter 1 to be Iterator, array given in %s on line %d
 object(ArrayIterator)#%d (1) {
@@ -123,4 +122,3 @@ int(32)
 int(2)
 int(2)
 int(33)
-===DONE===

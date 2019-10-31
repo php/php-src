@@ -33,7 +33,6 @@ fopen("../oops", "r");
 ');
 include $pname . '/foo/hi';
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php rmdir(__DIR__ . '/poo'); ?>
@@ -44,4 +43,3 @@ blah
 test
 
 Warning: fopen(phar://%sfopen_edgecases2.phar.php/oops): failed to open stream: phar error: path "oops" is a directory in phar://%sfopen_edgecases2.phar.php/foo/hi on line %d
-===DONE===

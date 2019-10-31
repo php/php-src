@@ -39,7 +39,6 @@ while($row = xi_fetch_array($res)) {
 pg_close($dbh);
 
 ?>
-===DONE===
 --EXPECT--
 Array
 (
@@ -57,4 +56,3 @@ Array
 (
     [id] => 3
 )
-===DONE===

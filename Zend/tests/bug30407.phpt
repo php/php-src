@@ -11,8 +11,6 @@ function haricow($a = 'one') {
 haricow();
 haricow();
 ?>
-===DONE===
 --EXPECT--
 string(3) "one"
 string(3) "one"
-===DONE===

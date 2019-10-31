@@ -38,8 +38,6 @@ while (($s1 = oci_get_implicit_resultset($s))) {
 var_dump($s1);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1
 bool(false)
-===DONE===

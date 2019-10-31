@@ -80,7 +80,6 @@ for($i = 1; $i < 4; $i++)
 }
 
 ?>
-===DONE===
 --EXPECT--
 NumericArrayIterator::__construct
 NumericArrayIterator::rewind
@@ -138,4 +137,3 @@ NumericArrayIterator::valid(true)
 NumericArrayIterator::current
 NumericArrayIterator::key
 4
-===DONE===

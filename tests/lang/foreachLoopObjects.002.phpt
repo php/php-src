@@ -166,7 +166,6 @@ foreach ($myE as $k=>&$v) {
 }
 var_dump($myE);
 ?>
-===DONE===
 --EXPECTF--
 Iterate over various generations from within overridden methods:
 
@@ -584,4 +583,3 @@ object(E)#%d (8) {
   ["e":"C":private]=>
   string(10) "Original e"
 }
-===DONE===

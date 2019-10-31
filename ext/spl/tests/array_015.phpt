@@ -38,7 +38,6 @@ foreach($it as $k => $v)
 var_dump($ar);
 
 ?>
-===DONE===
 --EXPECTF--
 object(ArrayObject)#%d (1) {
   %s"storage"%s"ArrayObject":private]=>
@@ -88,4 +87,3 @@ object(ArrayObject)#%d (1) {
     int(4)
   }
 }
-===DONE===

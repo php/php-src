@@ -18,10 +18,8 @@ var_dump(in_array("cos", $result));
 var_dump(get_extension_funcs("foo"));
 
 ?>
-===DONE===
 --EXPECT--
 Simple testcase for get_extension_funcs() function
 string(5) "array"
 bool(true)
 bool(false)
-===DONE===

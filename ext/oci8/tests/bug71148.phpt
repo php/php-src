@@ -157,7 +157,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1: Bind input parameter in a local function
 array(2) {
@@ -187,4 +186,3 @@ Test 6: Bind IN OUT parameter within the same scope of execute
 string(4) "STR1"
 string(4) "STR2"
 string(9) "STR1 STR2"
-===DONE===

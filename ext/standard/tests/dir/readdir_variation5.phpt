@@ -65,7 +65,6 @@ foreach($permission_values as $perm) {
 	$iterator++;
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path = __DIR__ . "/readdir_variation5";
@@ -133,4 +132,3 @@ bool(true)
 resource(%d) of type (stream)
 -- Calling readdir() --
 string(%d) "%s"
-===DONE===

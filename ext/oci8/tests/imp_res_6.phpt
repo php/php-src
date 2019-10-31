@@ -71,7 +71,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECTF--
 Test 1
 array(2) {
@@ -114,4 +113,3 @@ array(2) {
   ["C2"]=>
   string(1) "f"
 }
-===DONE===

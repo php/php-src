@@ -32,7 +32,6 @@ $r = $lob->export("/tmp/abc\0def");
 var_dump($r);
 
 ?>
-===DONE===
 --EXPECTF--
 Test 1: Import
 
@@ -42,4 +41,3 @@ Test 2: Export
 
 Warning: OCI-Lob::export() expects parameter 1 to be a valid path, string given in %snull_byte_1.php on line %d
 NULL
-===DONE===

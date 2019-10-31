@@ -33,7 +33,6 @@ for( $x = 20; $x < $count; $x++) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing get_browser() : variation functionality: extra browser names ***
 array(35) {
@@ -1396,4 +1395,3 @@ array(35) {
   ["aolversion"]=>
   string(1) "0"
 }
-===DONE===

@@ -18,10 +18,8 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (curl_multi)
 NULL
 resource(%d) of type (Unknown)
 curl_multi_close(): supplied resource is not a valid cURL Multi Handle resource
-===DONE===

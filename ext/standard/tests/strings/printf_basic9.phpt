@@ -55,7 +55,6 @@ echo "\n";
 var_dump($result);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing printf() : basic functionality - using hexadecimal format ***
 
@@ -80,4 +79,3 @@ b 84 b1
 int(7)
 B 84 B1
 int(7)
-===DONE===

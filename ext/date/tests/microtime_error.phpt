@@ -26,7 +26,6 @@ foreach ($bad_args as $bad_arg) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 -- Bad Arg types --
 
@@ -56,4 +55,3 @@ microtime() expects parameter 1 to be bool, object given
 
 --> bad arg: int(1)
 float(%s)
-===DONE===

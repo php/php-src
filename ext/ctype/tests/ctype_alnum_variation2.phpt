@@ -26,7 +26,6 @@ for ($i = 0; $i < 256; $i++) {
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_alnum() : usage variations ***
 character code 48 is alpha numeric
@@ -91,4 +90,3 @@ character code 119 is alpha numeric
 character code 120 is alpha numeric
 character code 121 is alpha numeric
 character code 122 is alpha numeric
-===DONE===

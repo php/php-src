@@ -24,7 +24,6 @@ var_dump(
 	$errcode, $dn, $errmsg, $refs
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -43,4 +42,3 @@ array(1) {
   [0]=>
   string(%d) "cn=userA,%s"
 }
-===DONE===

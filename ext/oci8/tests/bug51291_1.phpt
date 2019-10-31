@@ -139,7 +139,6 @@ if (!$r) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 Test 1 - Parse
 array(4) {
@@ -390,4 +389,3 @@ array(4) {
   ["sqltext"]=>
   string(30) "select reallynothere from dual"
 }
-===DONE===

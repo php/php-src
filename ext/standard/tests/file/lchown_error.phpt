@@ -28,7 +28,6 @@ var_dump( lchown( 'foobar_lchown.txt', $uid ) );
 var_dump( lchown( $filename, -5 ) );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -44,4 +43,3 @@ bool(false)
 
 Warning: lchown(): %r(Operation not permitted|Invalid argument)%r in %s on line %d
 bool(false)
-===DONE===

@@ -30,7 +30,6 @@ $array2 = array (
 var_dump( array_intersect_key($array1, $array2) );
 var_dump( array_intersect_key($array2,$array1 ) );
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_intersect_key() : usage variation ***
 array(2) {
@@ -61,4 +60,3 @@ array(2) {
     int(8)
   }
 }
-===DONE===

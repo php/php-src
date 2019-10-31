@@ -23,7 +23,6 @@ foreach([
 	var_dump($optionval);
 }
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 int(512)
@@ -35,4 +34,3 @@ bool(true)
 int(770)
 bool(true)
 int(771)
-===DONE===

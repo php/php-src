@@ -30,8 +30,6 @@ foo::$method();
 
 
 ?>
-===DONE===
 --EXPECT--
 global_func
 foo::foo_func
-===DONE===

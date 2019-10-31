@@ -49,7 +49,6 @@ foreach($values as $key => $value) {
     );
 };
 ?>
-===DONE===
 --EXPECT--
 *** Testing imagecolorallocate() : usage variations ***
 
@@ -92,4 +91,3 @@ int(657930)
 int(16714250)
 int(720650)
 int(658175)
-===DONE===

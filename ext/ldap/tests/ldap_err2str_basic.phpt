@@ -9,7 +9,5 @@ Patrick Allaert <patrickallaert@php.net>
 <?php
 var_dump(ldap_err2str(2));
 ?>
-===DONE===
 --EXPECT--
 string(14) "Protocol error"
-===DONE===

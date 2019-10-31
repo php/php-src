@@ -82,7 +82,6 @@ foreach($ap as $k=>$v)
 }
 
 ?>
-===DONE===
 --EXPECT--
 MyArrayIterator::rewind
 0=>1
@@ -112,4 +111,3 @@ MyAppendIterator::valid
 MyAppendIterator::valid
 1=>2
 MyAppendIterator::valid
-===DONE===

@@ -30,7 +30,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strftime() : usage variation ***
 
@@ -49,4 +48,3 @@ string(2) "31"
 --Week number of the year in decimal number--
 string(%d) "%d"
 string(2) "31"
-===DONE===

@@ -35,7 +35,6 @@ echo "-- Tests with invalid offsets --\n";
 var_dump( timezone_name_from_abbr("", 5400) ); // offset = 1.5 hrs
 var_dump( timezone_name_from_abbr("", 62400) ); // offset = 24 hrs
 ?>
-===DONE===
 --EXPECT--
 *** Testing timezone_name_from_abbr() : basic functionality ***
 -- Tests with special cases first - no lookup needed --
@@ -55,4 +54,3 @@ string(15) "America/Halifax"
 -- Tests with invalid offsets --
 bool(false)
 bool(false)
-===DONE===

@@ -19,7 +19,5 @@ imagedashedline($im, 800, 400, 800, 800, $color);
 include_once __DIR__ . '/func.inc';
 test_image_equals_file(__DIR__ . '/bug52070.png', $im);
 ?>
-===DONE===
 --EXPECT--
 The images are equal.
-===DONE===

@@ -30,8 +30,6 @@ var_dump($bar->baz);
 var_dump($foo->bar->baz);
 
 ?>
-===DONE===
 --EXPECT--
 string(5) "Check"
 string(5) "Check"
-===DONE===

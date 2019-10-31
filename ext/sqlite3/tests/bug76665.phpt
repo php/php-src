@@ -13,7 +13,5 @@ $stmt->bindValue(':bar', 17, SQLITE3_FLOAT);
 $stmt->execute();
 var_dump($db->querySingle("SELECT bar FROM foo LIMIT 1"));
 ?>
-===DONE===
 --EXPECT--
 float(17)
-===DONE===

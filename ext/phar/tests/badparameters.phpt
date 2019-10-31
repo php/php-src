@@ -227,7 +227,6 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 Phar::mungServer() expects parameter 1 to be array, string given
 Phar::createDefaultStub() expects parameter 1 to be a valid path, array given
@@ -267,4 +266,3 @@ Phar::addFromString() expects exactly 2 parameters, 1 given
 Write operations disabled by the php.ini setting phar.readonly
 Phar::setMetadata() expects exactly 1 parameter, 2 given
 Write operations disabled by the php.ini setting phar.readonly
-===DONE===

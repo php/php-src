@@ -18,9 +18,7 @@ PHP Testfest Berlin 2009-05-10
     var_dump(posix_ttyname(STDERR));
     var_dump(posix_ttyname(STDOUT));
 ?>
-===DONE===
 --EXPECT--
 bool(false)
 bool(false)
 bool(false)
-===DONE===

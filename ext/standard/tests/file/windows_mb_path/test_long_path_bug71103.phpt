@@ -44,7 +44,6 @@ do {
 } while ($p != $base);
 
 ?>
-===DONE===
 --EXPECTF--
 string(%d) "%s\dev\http\tproj\app\cache\dev_old\annotations\72\5b53796d666f6e795c42756e646c655c5477696742756e646c655c436f6e74726f6c6c65725c457863657074696f6e436f6e74726f6c6c657223676574416e64436c65616e4f7574707574427566666572696e67405b416e6e6f745d5d5b.doctrinecache.data"
 bool(true)
@@ -62,4 +61,3 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-===DONE===

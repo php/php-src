@@ -62,7 +62,6 @@ foreach($values as $value) {
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_cntrl() : usage variations ***
 
@@ -155,4 +154,3 @@ bool(false)
 
 -- Iteration 30 --
 bool(true)
-===DONE===

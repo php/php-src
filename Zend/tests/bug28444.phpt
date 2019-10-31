@@ -52,7 +52,6 @@ var_dump($t->x = 5);
 var_dump($y->z->x = 6);
 
 ?>
-===DONE===
 --EXPECT--
 object(ObjectOne)#2 (1) {
   ["x"]=>
@@ -75,4 +74,3 @@ Overloaded::__get(z)
 int(5)
 Overloaded::__get(z)
 int(6)
-===DONE===

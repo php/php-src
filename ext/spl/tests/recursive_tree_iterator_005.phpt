@@ -39,7 +39,6 @@ foreach($it as $k => $v) {
 	var_dump($it->key(), $it->getEntry(), $it->current());
 }
 ?>
-===DONE===
 --EXPECT--
 string(7) "|-Array"
 string(10) "| |-binary"
@@ -113,4 +112,3 @@ string(7) "    |-4"
 string(7) "    \-1"
 string(1) "c"
 string(7) "    \-c"
-===DONE===

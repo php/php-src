@@ -38,7 +38,6 @@ foreach($test as $key => $val)
 }
 
 ?>
-===DONE===
 --EXPECT--
 test Object
 (
@@ -67,4 +66,3 @@ ArrayIterator Object
 pub => public
 imp => implicit
 dyn => dynamic
-===DONE===

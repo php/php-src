@@ -33,10 +33,8 @@ gzclose($h);
 echo "\n";
 unlink($file);
 ?>
-===DONE===
 --EXPECT--
 *** Testing gzopen() : variation ***
 Here is some plain
 text to be read
 and displayed.
-===DONE===

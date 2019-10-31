@@ -45,10 +45,8 @@ catch(Exception $e)
 }
 
 ?>
-===DONE===
 --EXPECT--
 Exception: Passed array specifies a non static method but no object (non-static method MyAutoLoader::autoLoad() cannot be called statically)
 MyAutoLoader::autoLoad(TestClass)
 MyAutoLoader::autoThrow(TestClass)
 Exception: Unavailable
-===DONE===

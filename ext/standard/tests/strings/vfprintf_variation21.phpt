@@ -106,7 +106,6 @@ unlink($data_file);
 
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing vfprintf() : with unexpected values for args argument ***
 
@@ -163,4 +162,3 @@ The arguments array must contain 1 items, 0 given
 
 -- Iteration 23 --
 Resource id #%d
-===DONE===

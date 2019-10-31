@@ -25,7 +25,6 @@ if (($db_file=dba_open($db_filename, "n", $handler))!==FALSE) {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 require(__DIR__ .'/clean.inc');
@@ -34,4 +33,3 @@ require(__DIR__ .'/clean.inc');
 database handler: db4
 YY
 bool(true)
-===DONE===

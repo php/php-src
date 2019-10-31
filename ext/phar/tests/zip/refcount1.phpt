@@ -42,7 +42,6 @@ var_dump(fread($b, 20));
 include $alias . '/b/c.php';
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
 --EXPECTF--
@@ -65,4 +64,3 @@ object(PharFileInfo)#%d (2) {
 }
 string(5) "extra"
 extra
-===DONE===

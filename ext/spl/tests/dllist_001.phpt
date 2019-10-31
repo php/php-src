@@ -46,7 +46,6 @@ $dll_clone = clone $dll;
 $dll_clone->pop();
 echo count($dll)."\n";
 ?>
-===DONE===
 --EXPECT--
 Exception: Can't pop from an empty datastructure
 Exception: Can't shift from an empty datastructure
@@ -59,4 +58,3 @@ Exception: Can't shift from an empty datastructure
 NULL
 NULL
 1
-===DONE===

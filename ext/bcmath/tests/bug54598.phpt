@@ -9,8 +9,6 @@ if (!extension_loaded('bcmath')) die('skip bcmath extension is not available');
 var_dump(bcpowmod(5, 0, 1));
 var_dump(bcpowmod(5, 0, 1, 3));
 ?>
-===DONE===
 --EXPECT--
 string(1) "0"
 string(5) "0.000"
-===DONE===

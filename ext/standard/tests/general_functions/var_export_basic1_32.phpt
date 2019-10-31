@@ -49,7 +49,6 @@ foreach($valid_ints as $key => $int_value) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing var_export() with integer values ***
 
@@ -144,4 +143,3 @@ string(13) "-2147483647-1"
 2147483647
 2147483647
 string(10) "2147483647"
-===DONE===

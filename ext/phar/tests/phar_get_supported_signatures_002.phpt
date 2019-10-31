@@ -13,7 +13,6 @@ phar.readonly=0
 <?php
 var_dump(Phar::getSupportedSignatures());
 ?>
-===DONE===
 --EXPECT--
 array(4) {
   [0]=>
@@ -25,4 +24,3 @@ array(4) {
   [3]=>
   string(7) "SHA-512"
 }
-===DONE===

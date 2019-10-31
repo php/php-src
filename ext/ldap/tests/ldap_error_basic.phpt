@@ -24,7 +24,5 @@ var_dump(
 	ldap_error($link)
 );
 ?>
-===DONE===
 --EXPECT--
 string(17) "Invalid DN syntax"
-===DONE===

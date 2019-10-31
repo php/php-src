@@ -43,7 +43,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECTF--
 Test 1
 COL4
@@ -53,4 +52,3 @@ C1
 Test 2
 
 Warning: oci_fetch_array(): ORA-%r(24338|01002)%r: %sbug36403.php on line %d
-===DONE===

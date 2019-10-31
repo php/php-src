@@ -89,7 +89,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1
 string(4) "data"
@@ -99,4 +98,3 @@ string(9) "long data"
 string(4) "data"
 Test 3 - bind with SQLT_CLOB (an alias for OCI_B_CLOB)
 string(10) "more stuff"
-===DONE===

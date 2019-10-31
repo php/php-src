@@ -56,7 +56,6 @@ echo "opendir edge cases\n";
 var_dump(opendir("phar://"));
 var_dump(opendir("phar://foo.phar/hi"));
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
@@ -93,4 +92,3 @@ bool(false)
 Warning: opendir(phar://foo.phar/hi): failed to open dir: phar error: invalid url or non-existent phar "phar://foo.phar/hi"
 phar url "phar://foo.phar/hi" is unknown in %s027.php on line %d
 bool(false)
-===DONE===

@@ -67,7 +67,6 @@ foreach($args_array as $args) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing vsprintf() : string formats and non-string values ***
 
@@ -134,4 +133,3 @@ string(79) "1 1
             1            0001 0000
    #0 1 $1 _0
     1 1 1"
-===DONE===

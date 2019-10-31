@@ -36,7 +36,6 @@ include $alias . '/b/new.php';
 
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
@@ -48,4 +47,3 @@ Warning: include(phar://%sopen_for_write_newfile_b.phar.tar/b/new.php): failed t
 
 Warning: include(): Failed opening 'phar://%sopen_for_write_newfile_b.phar.tar/b/new.php' for inclusion (include_path='%s') in %sopen_for_write_newfile_b.php on line %d
 
-===DONE===

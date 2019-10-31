@@ -75,7 +75,6 @@ echo "===UNSERIALIZE4===\n";
 var_dump(unserialize(serialize($storage)));
 
 ?>
-===DONE===
 --EXPECTF--
 int(2)
 int(1)
@@ -306,4 +305,3 @@ object(MyStorage)#%d (2) {
     }
   }
 }
-===DONE===

@@ -55,7 +55,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECTF--
 Test 1
 
@@ -63,4 +62,3 @@ Warning: oci_execute(): ORA-29478: %s
 ORA-06512: %s
 ORA-06512: %s
 ORA-06512: %s
-===DONE===

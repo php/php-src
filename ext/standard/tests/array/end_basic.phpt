@@ -28,7 +28,6 @@ echo "\n-- Add a new element to array --\n";
 $array[2] = 'foo';
 var_dump(end($array));
 ?>
-===DONE===
 --EXPECT--
 *** Testing end() : basic functionality ***
 
@@ -43,4 +42,3 @@ string(3) "two"
 
 -- Add a new element to array --
 string(3) "foo"
-===DONE===

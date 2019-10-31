@@ -45,7 +45,6 @@ try {
     echo "Exception: ".$e->getMessage()."\n";
 }
 ?>
-===DONE===
 --EXPECT--
 int(1)
 int(2)
@@ -58,4 +57,3 @@ int(2)
 Exception: Offset invalid or out of range
 int(1)
 Exception: Offset invalid or out of range
-===DONE===

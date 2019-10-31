@@ -38,7 +38,6 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
@@ -53,4 +52,3 @@ bool(true)
 bool(true)
 bool(false)
 bool(true)
-===DONE===

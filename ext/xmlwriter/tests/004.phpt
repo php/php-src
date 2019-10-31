@@ -29,7 +29,5 @@ if ($md5_out != $md5_res) {
 	echo "ok.\n";
 }
 ?>
-===DONE===
 --EXPECT--
 ok.
-===DONE===

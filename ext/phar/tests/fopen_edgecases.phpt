@@ -66,7 +66,6 @@ $a = fopen("./notfound.php", "r");
 include $pname . '/test.php';
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
@@ -121,4 +120,3 @@ Warning: rename(): phar error: cannot rename "phar://%sfopen_edgecases.phar.php/
 
 Warning: fopen(./notfound.php): failed to open stream: No such file or directory in phar://%sfopen_edgecases.phar.php/test.php on line %d
 
-===DONE===

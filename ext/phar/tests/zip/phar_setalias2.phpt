@@ -36,7 +36,6 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
@@ -46,4 +45,3 @@ __HALT_COMPILER();
 hio
 test
 alias "test" is already used for archive "%sphar_setalias2.phar.zip" and cannot be used for other archives
-===DONE===

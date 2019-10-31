@@ -32,7 +32,6 @@ $year = 0x7D8;
 echo "\n-- Testing gmmktime() function with supplying hexa decimal values to arguments --\n";
 var_dump( gmmktime($hour, $min, $sec, $mon, $day, $year) );
 ?>
-===DONE===
 --EXPECT--
 *** Testing gmmktime() : usage variation ***
 
@@ -41,4 +40,3 @@ int(1218182888)
 
 -- Testing gmmktime() function with supplying hexa decimal values to arguments --
 int(1218182888)
-===DONE===

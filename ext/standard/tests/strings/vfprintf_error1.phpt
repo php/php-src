@@ -35,7 +35,6 @@ try {
 fclose($fp);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -47,4 +46,3 @@ unlink( $file );
 -- Testing vfprintf() function with more than expected no. of arguments --
 Wrong parameter count for vfprintf()
 Wrong parameter count for vfprintf()
-===DONE===

@@ -27,7 +27,6 @@ foreach(new RecursiveIteratorIterator($it) as $v) echo "$v\n";
 
 
 ?>
-===DONE===
 --EXPECT--
 1
 2
@@ -45,4 +44,3 @@ string(22) "RecursiveArrayIterator"
 32
 331
 4
-===DONE===

@@ -36,11 +36,9 @@ $a->whee5();
 TestClass::whee5();
 
 ?>
-===DONE===
 --EXPECT--
 TestClass::test()
 TestClass::test()
 TestClass::test()
 TestClass::test()
 TestClass::test()
-===DONE===

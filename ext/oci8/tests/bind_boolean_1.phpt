@@ -100,7 +100,6 @@ oci_execute($s);
 var_dump($b1, $b2);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1
 bool(true)
@@ -134,4 +133,3 @@ bool(true)
 bool(false)
 bool(false)
 bool(true)
-===DONE===

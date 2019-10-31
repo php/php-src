@@ -115,7 +115,6 @@ foreach($inputs as $key => $input) {
 
 fclose($fp);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing current() : usage variations ***
 
@@ -152,4 +151,3 @@ NULL
 
 -- Iteration 11 : resource data --
 resource(%d) of type (stream)
-===DONE===

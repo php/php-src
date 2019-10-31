@@ -55,7 +55,6 @@ echo '$list = ';var_export($res);echo ";\n";
 @unlink($file);
 
 ?>
-===DONE===
 --EXPECT--
 $list = array (
   0 => 'aaa,bbb',
@@ -101,4 +100,3 @@ $list = array (
   18 => '"\\"","aaa"',
   19 => '"\\""",aaa',
 );
-===DONE===

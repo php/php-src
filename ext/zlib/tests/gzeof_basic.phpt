@@ -36,7 +36,6 @@ gzclose($h);
 
 
 ?>
-===DONE===
 --EXPECT--
 -- test 1 --
 bool(false)
@@ -55,4 +54,3 @@ reading 250 characters. eof should be true
 bool(true)
 reading 20 characters. eof should be true still
 bool(true)
-===DONE===

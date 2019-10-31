@@ -69,7 +69,6 @@ foreach($args_array as $args) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing vprintf() : string formats and non-string values ***
 
@@ -140,4 +139,3 @@ int(131)
    #0 1 $1 _0
     1 1 1
 int(81)
-===DONE===

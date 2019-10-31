@@ -60,7 +60,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECTF--
 First Insert
 Could not execute: ORA-02290: %s (%s.COMMIT_002_TAB_CHECK_X) %s
@@ -70,4 +69,3 @@ Warning: oci_commit(): ORA-02091: %s
 ORA-02290: %s (%s.COMMIT_002_TAB_CHECK_Y) %s in %scommit_002.php on line %d
 Could not commit: ORA-02091: %s
 ORA-02290: %s (%s.COMMIT_002_TAB_CHECK_Y) %s
-===DONE===

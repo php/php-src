@@ -24,7 +24,6 @@ foreach ($types as $t => $v) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 Test - SQLT_BDOUBLE
 
@@ -32,4 +31,3 @@ Warning: oci_bind_by_name(): Unknown or unsupported datatype given: 22 in %sbind
 Test - SQLT_BFLOAT
 
 Warning: oci_bind_by_name(): Unknown or unsupported datatype given: 21 in %sbind_unsupported_2.php on line %d
-===DONE===

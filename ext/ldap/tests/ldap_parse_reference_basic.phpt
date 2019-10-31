@@ -25,7 +25,6 @@ var_dump(
 	$refs
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -42,4 +41,3 @@ array(1) {
   [0]=>
   string(%d) "cn=userA,%s"
 }
-===DONE===

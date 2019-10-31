@@ -30,7 +30,6 @@ var_dump(isset($atts[0]));
 var_dump(isset($atts[TRUE]));
 
 ?>
-===DONE===
 --EXPECT--
 test
 test 2
@@ -41,4 +40,3 @@ bool(false)
 bool(true)
 bool(false)
 bool(false)
-===DONE===

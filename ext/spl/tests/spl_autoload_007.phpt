@@ -53,7 +53,6 @@ foreach($funcs as $idx => $func)
 }
 
 ?>
-===DONE===
 --EXPECTF--
 string(22) "MyAutoLoader::notExist"
 Function 'MyAutoLoader::notExist' not found (class 'MyAutoLoader' does not have a method 'notExist')
@@ -134,4 +133,3 @@ array(2) {
   string(8) "dynaLoad"
 }
 ok
-===DONE===

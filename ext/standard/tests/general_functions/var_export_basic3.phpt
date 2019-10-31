@@ -47,7 +47,6 @@ foreach($valid_floats as $key => $float_value) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing var_export() with valid float values ***
 
@@ -172,4 +171,3 @@ string(22) "5.0000000000000001E+42"
 3.4000000000000001E-33
 string(22) "3.4000000000000001E-33"
 
-===DONE===

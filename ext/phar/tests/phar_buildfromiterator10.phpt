@@ -22,7 +22,6 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/buildfromiterator10.phar');
@@ -99,4 +98,3 @@ array(34) {
   ["zip/corrupt_010.phpt"]=>
   string(%d) "%szip%ccorrupt_010.phpt"
 }
-===DONE===

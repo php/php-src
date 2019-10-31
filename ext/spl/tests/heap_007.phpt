@@ -20,7 +20,6 @@ while ($h->valid()) {
     $h->next();
 }
 ?>
-===DONE===
 --EXPECT--
 count($h) = 4
 $h->count() = 4
@@ -28,4 +27,3 @@ $h->count() = 4
 2=>4
 1=>1
 0=>0
-===DONE===

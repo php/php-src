@@ -90,7 +90,6 @@ MyArrayIterator::test('iterator_to_array');
 MyArrayIterator::test('iterator_count', array(3 => 6));
 
 ?>
-===DONE===
 --EXPECT--
 ===iterator_to_array===
 State 7: __destruct()
@@ -103,4 +102,3 @@ array(2) {
 ===iterator_count===
 State 7: __destruct()
 int(2)
-===DONE===

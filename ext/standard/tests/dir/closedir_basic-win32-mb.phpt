@@ -40,7 +40,6 @@ var_dump(closedir($dh2));
 echo "-- Check Directory Handle: --\n";
 var_dump($dh2);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $base_dir = __DIR__;
@@ -59,4 +58,3 @@ resource(%d) of type (Unknown)
 NULL
 -- Check Directory Handle: --
 resource(%d) of type (Unknown)
-===DONE===

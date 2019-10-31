@@ -32,7 +32,6 @@ for( $x = 0; $x < 20; $x++) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing get_browser() : basic functionality ***
 array(35) {
@@ -1465,4 +1464,3 @@ array(35) {
   ["aolversion"]=>
   string(1) "0"
 }
-===DONE===

@@ -10,7 +10,5 @@ if (!extension_loaded('oci8')) die("skip no oci8 extension");
 echo oci_client_version(), "\n";
 
 ?>
-===DONE===
 --EXPECTF--
 %d.%d.%d.%d.%d
-===DONE===

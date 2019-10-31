@@ -23,7 +23,6 @@ var_dump($ao2);
 var_dump($ao2->ksort(SORT_STRING));
 var_dump($ao2);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing ArrayObject::ksort() : basic functionality ***
 bool(true)
@@ -66,4 +65,3 @@ object(ArrayObject)#%d (1) {
     int(3)
   }
 }
-===DONE===

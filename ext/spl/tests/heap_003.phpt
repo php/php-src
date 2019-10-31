@@ -27,7 +27,6 @@ foreach ($h as $out) {
     echo $out."\n";
 }
 ?>
-===DONE===
 --EXPECT--
 10
 9
@@ -40,4 +39,3 @@ foreach ($h as $out) {
 2
 1
 0
-===DONE===

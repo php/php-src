@@ -41,10 +41,8 @@ function runtest() {
    }
 }
 ?>
-===DONE===
 --EXPECT--
 File written in working directory
 File written in working directory
 File written in working directory
 File written in working directory
-===DONE===

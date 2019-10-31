@@ -55,7 +55,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECTF--
 array(4) {
   [0]=>
@@ -95,4 +94,3 @@ int(12)
 int(0)
 int(0)
 int(7)
-===DONE===

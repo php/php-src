@@ -32,7 +32,6 @@ while($t->x < 5)
 	$t->x++;
 }
 ?>
-===DONE===
 --EXPECT--
 Caught in Test::rewind()
 Caught in Test::current()
@@ -40,4 +39,3 @@ Caught in Test::key()
 Current
 Caught in Test::next()
 Caught in Test::valid()
-===DONE===

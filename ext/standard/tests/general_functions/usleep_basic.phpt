@@ -35,8 +35,6 @@ if ($time >= $sleeplow) {
 	echo "TEST FAILED: $summary";
 }
 ?>
-===DONE===
 --EXPECTF--
 *** Testing usleep() : basic functionality ***
 TEST PASSED: Thread slept for %f micro-seconds
-===DONE===

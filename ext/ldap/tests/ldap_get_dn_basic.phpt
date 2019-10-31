@@ -18,7 +18,6 @@ var_dump(
 	ldap_get_dn($link, $entry)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -28,4 +27,3 @@ remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
 string(%d) "%s"
-===DONE===

@@ -26,7 +26,6 @@ var_dump(spl_autoload_functions());
 var_dump(class_exists("TestClass", true));
 
 ?>
-===DONE===
 --EXPECT--
 array(1) {
   [0]=>
@@ -39,4 +38,3 @@ array(1) {
 }
 MyAutoLoader::autoLoad(TestClass)
 bool(false)
-===DONE===

@@ -16,7 +16,6 @@ if ($curl_version['version_number'] > 0x071201) {
   $info = curl_getinfo($ch);
   var_dump($info);
 ?>
-===DONE===
 --EXPECTF--
 array(2%d) {
   ["url"]=>
@@ -60,4 +59,3 @@ array(2%d) {
   ["redirect_time"]=>
   float(0)
 }
-===DONE===

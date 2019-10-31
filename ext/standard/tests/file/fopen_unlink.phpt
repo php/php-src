@@ -18,7 +18,6 @@ var_dump(
 );
 
 ?>
-===DONE===
 --EXPECTF--
 string(%d) "%stututu"
 resource(%s) of type (Unknown)
@@ -31,4 +30,3 @@ int(5)
 int(0)
 string(10) "helloworld"
 bool(true)
-===DONE===

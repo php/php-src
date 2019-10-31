@@ -13,11 +13,9 @@ echo "Get loaded extensions\n";
 var_dump(get_loaded_extensions());
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing get_loaded_extensions() : basic functionality ***
 Get loaded extensions
 array(%d) {
 %a
 }
-===DONE===

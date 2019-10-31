@@ -59,7 +59,6 @@ foreach ($pq3 as $k=>$v) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 Exception: Can't extract from an empty heap
 2=>b
@@ -92,4 +91,3 @@ EXTR_PRIORITY
 2=>2
 1=>1
 0=>0
-===DONE===

@@ -12,9 +12,7 @@ var_dump(microtime(true));
 var_dump(microtime(false));
 
 ?>
-===DONE===
 --EXPECTF--
 string(%d) "%s %s"
 float(%s)
 string(%d) "%s %s"
-===DONE===

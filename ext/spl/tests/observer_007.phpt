@@ -12,10 +12,8 @@ var_dump($a == $b);
 $a[$b] = 3;
 var_dump($a == $b);
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(false)
 bool(true)
 bool(false)
-===DONE===

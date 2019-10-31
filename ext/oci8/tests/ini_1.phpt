@@ -53,7 +53,6 @@ var_dump(ini_set('oci8.old_oci_close_semantics', 'Off'));
 echo 'oci8.old_oci_close_semantics = ' . ini_get('oci8.old_oci_close_semantics') . "\n";
 
 ?>
-===DONE===
 --EXPECT--
 Test 1 - check initialization
 oci8.privileged_connect = 1
@@ -84,4 +83,3 @@ bool(false)
 oci8.default_prefetch = 555
 bool(false)
 oci8.old_oci_close_semantics = 1
-===DONE===

@@ -51,7 +51,6 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -6088,4 +6087,3 @@ array(2999) {
   ["f2999"]=>
   string(22) "*bug45218_SLOWTEST.txt"
 }
-===DONE===

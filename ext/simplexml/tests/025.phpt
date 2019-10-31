@@ -46,7 +46,6 @@ var_dump($sxe->getNamespaces());
 var_dump($sxe->getDocNamespaces());
 
 ?>
-===DONE===
 --EXPECT--
 array(1) {
   ["xhtml"]=>
@@ -88,4 +87,3 @@ array(0) {
 }
 array(0) {
 }
-===DONE===

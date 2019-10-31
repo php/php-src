@@ -13,7 +13,5 @@ function load_file() {
 	require __DIR__ . '/bug74454.inc';
 }
 ?>
-===DONE===
 --EXPECT--
 ParseError: syntax error, unexpected 'if' (T_IF), expecting function (T_FUNCTION) or const (T_CONST)
-===DONE===

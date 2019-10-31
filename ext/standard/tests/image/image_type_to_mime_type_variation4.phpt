@@ -21,9 +21,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 var_dump( image_type_to_mime_type(IMAGETYPE_ICO) );
 var_dump( image_type_to_mime_type(IMAGETYPE_SWC) );
 ?>
-===DONE===
 --EXPECT--
 *** Testing image_type_to_mime_type() : usage variations ***
 string(24) "image/vnd.microsoft.icon"
 string(29) "application/x-shockwave-flash"
-===DONE===

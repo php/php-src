@@ -35,7 +35,6 @@ foreach($inputs as $key =>$value) {
 	  var_dump( gmmktime($hour, $min, $sec, $mon, $value, $value) );
 }
 ?>
-===DONE===
 --EXPECTREGEX--
 \*\*\* Testing gmmktime\(\) : usage variation \*\*\*
 
@@ -59,4 +58,3 @@ int\(1218181808\)
 int\(1218182870\)
 int\(1170922088\)
 (bool|int)\((false|-62465356312)\)
-===DONE===

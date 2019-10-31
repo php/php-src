@@ -43,7 +43,6 @@ $sxe->addChild('s:test5', 'myval');
 
 echo $sxe->asXML();
 ?>
-===DONE===
 --EXPECTF--
 Warning: SimpleXMLElement::addAttribute(): Attribute already exists in %s031.php on line %d
 
@@ -54,4 +53,3 @@ Warning: SimpleXMLElement::addChild(): Cannot add element to attributes in %s031
    <child1>test 2</child1>
    <s:child3/>
 <s:test1>myval</s:test1><m:test2 xmlns:m="urn::testnew">myval</m:test2><test3 xmlns="urn::testnew">myval</test3><test4>myval</test4><test5>myval</test5></root>
-===DONE===

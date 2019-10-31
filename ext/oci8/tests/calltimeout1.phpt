@@ -43,8 +43,6 @@ oci_set_call_timeout($c, 4000);  // milliseconds
 $r = mysleep($c, 8);             // seconds
 
 ?>
-===DONE===
 --EXPECTF--
 Test 1
 Execute error was ORA-03136: %s
-===DONE===

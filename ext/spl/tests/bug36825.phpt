@@ -24,8 +24,6 @@ catch (Exception $e)
 }
 
 ?>
-===DONE===
 --EXPECT--
 foo::offsetGet(bar)
 got exception
-===DONE===

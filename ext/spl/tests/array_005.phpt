@@ -83,8 +83,6 @@ foreach ($students as $student) {
 	echo $student, "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 01234123, Joe
 00000014, Bob
-===DONE===

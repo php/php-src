@@ -19,7 +19,6 @@ var_dump(trim($hello, "z..a"));
 var_dump(trim($hello, "a..b..c"));
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing trim() : error conditions ***
 
@@ -40,4 +39,3 @@ string(14) "  Hello World
 Warning: trim(): Invalid '..'-range in %s on line %d
 string(14) "  Hello World
 "
-===DONE===

@@ -46,9 +46,7 @@ while (($s1 = oci_get_implicit_resultset($s))) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 Test 1
   1
   3
-===DONE===

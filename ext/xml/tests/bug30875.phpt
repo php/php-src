@@ -19,7 +19,6 @@ xml_parse_into_struct($parser, $xml, $vals);
 xml_parser_free($parser);
 var_dump($vals);
 ?>
-===DONE===
 --EXPECT--
 array(1) {
   [0]=>
@@ -39,4 +38,3 @@ array(1) {
     string(4) "aent"
   }
 }
-===DONE===

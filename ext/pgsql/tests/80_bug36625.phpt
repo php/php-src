@@ -40,7 +40,6 @@ var_dump(file_exists($tracefile));
 @unlink($tracefile);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -54,4 +53,3 @@ bool(false)
 resource(%d) of type (pgsql result)
 bool(true)
 bool(true)
-===DONE===

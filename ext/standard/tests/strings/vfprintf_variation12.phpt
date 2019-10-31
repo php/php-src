@@ -88,7 +88,6 @@ echo "\n";
 unlink($data_file);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : octal formats and non-octal values ***
 
@@ -122,4 +121,3 @@ unlink($data_file);
                           
    #0 1 $1 _0
    0 1 1 1
-===DONE===

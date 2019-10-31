@@ -36,7 +36,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmdate() : usage variation ***
 
@@ -79,4 +78,3 @@ string(%d) "%s"
 --DATE_W3C Constant--
 string(25) "2008-08-08T08:08:08+00:00"
 string(%d) "%s"
-===DONE===

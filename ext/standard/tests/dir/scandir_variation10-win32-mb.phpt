@@ -46,7 +46,6 @@ var_dump(in_array('私はガラスを食べられますfile2.tmp', $files));
 
 delete_files($dir, 2, "私はガラスを食べられますfile");
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir = __DIR__ . '/私はガラスを食べられますscandir_variation10';
@@ -82,4 +81,3 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-===DONE===

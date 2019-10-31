@@ -23,7 +23,6 @@ echo "\n-- Invoke __toString --\n";
 echo $d . "\n";
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing basic DateTimeZone inheritance() ***
 
@@ -31,4 +30,3 @@ echo $d . "\n";
 
 -- Invoke __toString --
 America/Los_Angeles
-===DONE===

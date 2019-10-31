@@ -31,7 +31,6 @@ try {
 fclose( $fp );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -43,4 +42,3 @@ unlink( $file );
 -- Testing vfprintf() function with other strangeties  --
 vfprintf() expects parameter 1 to be resource, string given
 Error found: Argument number must be greater than zero.
-===DONE===

@@ -37,8 +37,6 @@ foreach (new EmptyIteratorEx() as $v) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 EmptyIteratorEx::rewind
 EmptyIteratorEx::valid
-===DONE===

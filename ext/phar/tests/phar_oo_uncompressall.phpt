@@ -49,7 +49,6 @@ var_dump(file_get_contents($pname . '/c'));
 var_dump($phar['a']->isCompressed());
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
@@ -77,4 +76,3 @@ string(1) "b"
 bool(false)
 string(1) "c"
 bool(false)
-===DONE===

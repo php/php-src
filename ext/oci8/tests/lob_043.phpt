@@ -78,10 +78,8 @@ oci8_test_sql_execute($c, $stmtarray);
 oci_close($c);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1
 f1 ended
 Test 2
 f2 ended
-===DONE===

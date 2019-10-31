@@ -78,7 +78,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1
 Executing SELECT statament...
@@ -92,4 +91,3 @@ Fetching data by rows...
 2 Records Found
 0|1|9
 1|11|19
-===DONE===

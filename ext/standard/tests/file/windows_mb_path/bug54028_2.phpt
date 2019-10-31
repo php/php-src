@@ -40,7 +40,6 @@ foreach ($dirs as $d) {
 rmdir($prefix);
 
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 string(%d) "%sa"
@@ -63,4 +62,3 @@ bool(true)
 bool(true)
 string(%d) "%s汚れて掘る"
 bool(true)
-===DONE===

@@ -156,7 +156,6 @@ function get_atime($path) {
 
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing touch() : variation ***
 
@@ -238,4 +237,3 @@ PASSED: touchVar5.tmp\\aSubDirOrFile - touched
 PASSED: %s\\touchVar5.tmp\\aSubDirOrFile - touched
 --- testing /%s/touchVar5.tmp/aSubDirOrFile ---
 PASSED: /%s/touchVar5.tmp/aSubDirOrFile - touched
-===DONE===

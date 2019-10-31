@@ -25,7 +25,6 @@ var_dump( date_format($date, 'H:m:s \m \i\s\ \m\o\n\t\h') );
 var_dump( date_format($date, "H:i:s") );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing date_format() : basic functionality ***
 string(23) "July 14, 2005, 10:30 pm"
@@ -37,4 +36,3 @@ string(19) "it is the 14th day."
 string(28) "Thu Jul 14 22:30:41 BST 2005"
 string(19) "22:07:41 m is month"
 string(8) "22:30:41"
-===DONE===

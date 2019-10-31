@@ -35,7 +35,6 @@ var_dump( strripos("Hello, World", "O", -1) );
 var_dump( strripos("Hello, World", "O", -5) );
 var_dump( strripos("Hello, World", "O",  -9) );
 ?>
-===DONE===
 --EXPECT--
 *** Testing strripos() function: basic functionality ***
 
@@ -61,4 +60,3 @@ bool(false)
 int(8)
 int(4)
 bool(false)
-===DONE===

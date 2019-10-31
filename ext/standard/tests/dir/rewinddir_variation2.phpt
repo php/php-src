@@ -29,7 +29,6 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path = __DIR__ . '/rewinddir_variation2';
@@ -44,4 +43,3 @@ string(%d) "%s"
 
 -- Call to rewinddir() --
 rewinddir(): supplied resource is not a valid Directory resource
-===DONE===

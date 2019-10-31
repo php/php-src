@@ -117,7 +117,6 @@ var_dump($it->valid());
 var_dump($it->current() == "a");
 
 ?>
-===DONE===
 --EXPECT--
 RecursiveArrayIteratorIterator::rewind() - BEGIN
 MyRecursiveArrayIterator::rewind()
@@ -184,4 +183,3 @@ RecursiveArrayIteratorIterator::valid()
 bool(true)
 RecursiveArrayIteratorIterator::current()
 bool(true)
-===DONE===

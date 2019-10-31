@@ -32,7 +32,6 @@ var_dump(
     !isset($row->missing)
 );
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(true)
@@ -42,4 +41,3 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-===DONE===

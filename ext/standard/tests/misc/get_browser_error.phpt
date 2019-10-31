@@ -34,7 +34,6 @@ var_dump( get_browser( 'foobar', true ) );
 var_dump( get_browser( null, 'foobar' ) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing get_browser() : error functionality ***
 array(34) {
@@ -110,4 +109,3 @@ array(34) {
 
 Warning: get_browser(): HTTP_USER_AGENT variable is not set, cannot determine user agent name in %s on line %d
 bool(false)
-===DONE===

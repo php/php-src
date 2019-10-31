@@ -28,7 +28,6 @@ if ($n2 == $n1 + 1 && array_key_exists("USER_CONSTANT", $arr2)) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing get_defined_constants() : basic functionality ***
 string(5) "array"
@@ -36,4 +35,3 @@ string(5) "array"
 array(0) {
 }
 TEST PASSED
-===DONE===

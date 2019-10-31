@@ -12,7 +12,6 @@ $inputFileName = __DIR__."/004.txt.gz";
 $srcFile = "compress.zlib://$inputFileName";
 readfile($srcFile);
 ?>
-===DONE===
 --EXPECT--
 When you're taught through feelings
 Destiny flying high above
@@ -20,4 +19,3 @@ all I know is that you can realize it
 Destiny who cares
 as it turns around
 and I know that it descends down on me
-===DONE===

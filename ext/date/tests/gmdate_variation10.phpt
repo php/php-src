@@ -39,7 +39,6 @@ var_dump( gmdate('T') );
 var_dump( gmdate('T', $timestamp) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmdate() : usage variation ***
 
@@ -66,4 +65,3 @@ string(3) "GMT"
 -- Testing gmdate() function with timezone offset format --
 string(3) "GMT"
 string(3) "GMT"
-===DONE===

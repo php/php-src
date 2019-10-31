@@ -39,7 +39,6 @@ $entry2["weirdAttribute"] = "weirdVal";
 
 var_dump(ldap_modify($link, "dc=my-domain,$base", $entry2));
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -60,4 +59,3 @@ bool(false)
 
 Warning: ldap_modify(): Modify: Undefined attribute type in %s on line %d
 bool(false)
-===DONE===

@@ -63,7 +63,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECTF--
 Test 1
 object(stdClass)#%d (3) {
@@ -109,4 +108,3 @@ Test 2
 789
 3rd row col2 string
 3 more text
-===DONE===

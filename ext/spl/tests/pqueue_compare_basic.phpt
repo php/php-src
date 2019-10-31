@@ -10,9 +10,7 @@ var_dump($h->compare(4, 5) < 0);
 var_dump($h->compare(5, 5) == 0);
 var_dump($h->compare(5, 4) > 0);
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(true)
 bool(true)
-===DONE===

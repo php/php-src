@@ -33,7 +33,6 @@ foreach($inputs as $key =>$value) {
       var_dump( idate($value) );
 };
 ?>
-===DONE===
 --EXPECTF--
 *** Testing idate() : usage variation ***
 
@@ -63,4 +62,3 @@ int(%d)
 
 --Day of the year--
 int(%d)
-===DONE===

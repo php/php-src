@@ -40,7 +40,6 @@ echo "\n-- Testing chdir() with relative paths: --\n";
 var_dump(chdir($level_two_dir_name));
 var_dump(getcwd());
 ?>
-===DONE===
 --CLEAN--
 <?php
 $base_dir_path = __DIR__ . '/chdir_basic-win32-mb';
@@ -59,4 +58,3 @@ string(%d) "%s私はガラスを食べられますlevel_one"
 -- Testing chdir() with relative paths: --
 bool(true)
 string(%d) "%s私はガラスを食べられますlevel_one%e私はガラスを食べられますlevel_two"
-===DONE===

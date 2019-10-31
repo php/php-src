@@ -35,7 +35,6 @@ echo "\n-- Testing imap_fetchbody() function with less than expected no. of argu
 
 var_dump( imap_fetchbody($stream_id, $msg_no) );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require_once(__DIR__.'/clean.inc');
@@ -54,4 +53,3 @@ NULL
 
 Warning: imap_fetchbody() expects at least 3 parameters, 2 given in %s on line %d
 NULL
-===DONE===

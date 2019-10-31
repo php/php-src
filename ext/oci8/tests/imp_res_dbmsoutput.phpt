@@ -103,7 +103,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1
 array(2) {
@@ -132,4 +131,3 @@ array(2) {
   [1]=>
   string(18) "dbms_output Line 2"
 }
-===DONE===

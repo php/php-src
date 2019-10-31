@@ -53,7 +53,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECTF--
 object(OCI-Lob)#%d (1) {
   ["descriptor"]=>
@@ -71,4 +70,3 @@ Warning: OCI-Lob::seek() expects parameter 1 to be int%s string given in %slob_0
 NULL
 bool(false)
 int(40004)
-===DONE===

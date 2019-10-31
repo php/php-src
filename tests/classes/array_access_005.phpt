@@ -52,7 +52,6 @@ $people[0]['name'] = 'JoeFooBar';
 var_dump($people[0]['name']);
 
 ?>
-===DONE===
 --EXPECTF--
 string(3) "Joe"
 string(6) "JoeFoo"
@@ -74,4 +73,3 @@ string(6) "JoeFoo"
 
 Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_005.php on line 48
 string(6) "JoeFoo"
-===DONE===

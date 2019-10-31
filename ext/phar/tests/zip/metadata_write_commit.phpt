@@ -53,7 +53,6 @@ foreach($files as $name => $cont) {
 }
 var_dump($phar->getMetadata());
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php'); ?>
 --EXPECT--
@@ -84,4 +83,3 @@ array(2) {
 }
 bool(true)
 string(2) "hi"
-===DONE===

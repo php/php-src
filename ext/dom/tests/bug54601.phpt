@@ -20,9 +20,7 @@ $doc->removeChild($n);
 echo get_class($n), "\n";
 print $doc->saveXML();
 ?>
-===DONE===
 --EXPECT--
 DOMDocumentType
 <?xml version="1.0" encoding="utf-8"?>
 <set><foo>footext</foo><bar>bartext</bar></set>
-===DONE===

@@ -43,7 +43,6 @@ unlink($magic_file_copy);
 unlink($magic_file_copy2);
 rmdir($dir);
 ?>
-===DONE===
 --EXPECTF--
 bool(false)%A
 resource(%d) of type (file_info)
@@ -61,4 +60,3 @@ Notice: finfo_open(): Warning: offset `b' invalid in %sbug61964-mb.php on line %
 
 Warning: finfo_open(): Failed to load magic database at '%sbug61964-mb'. in %sbug61964-mb.php on line %d
 DONE: testing dir with files
-===DONE===

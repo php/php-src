@@ -93,7 +93,6 @@ while (($row = oci_fetch_row($s)) != false) { // parent
 oci_free_statement($s);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1
   3
@@ -120,4 +119,3 @@ Test 3 - fetch part of IRS explicitly
 Test 4 - skip IRSs
   5
   6
-===DONE===

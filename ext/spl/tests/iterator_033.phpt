@@ -20,7 +20,6 @@ foreach(new RecursiveIteratorIterator($it, 1) as $k=>$v)
 }
 
 ?>
-===DONE===
 --EXPECT--
 ==SECOND==
 int(1)
@@ -40,4 +39,3 @@ array(1) {
   [0]=>
   int(231)
 }
-===DONE===

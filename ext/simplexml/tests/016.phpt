@@ -27,7 +27,6 @@ $people->person[0]['name'] .= 'Bar';
 var_dump($people->person[0]['name']);
 
 ?>
-===DONE===
 --EXPECTF--
 object(SimpleXMLElement)#%d (1) {
   [0]=>
@@ -54,4 +53,3 @@ object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(9) "JoeFooBar"
 }
-===DONE===

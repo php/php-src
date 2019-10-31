@@ -40,7 +40,6 @@ echo file_get_contents($outFile);
 unlink($outFile);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing mail() : basic functionality ***
 -- All Mail Content Parameters --
@@ -57,4 +56,3 @@ To: user@example.com
 Subject: Test Subject
 
 A Message
-===DONE===

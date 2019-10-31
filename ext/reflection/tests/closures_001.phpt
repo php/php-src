@@ -47,7 +47,6 @@ $rp = new ReflectionParameter($closure, 'b');
 var_dump($rp->isOptional());
 
 ?>
-===DONE===
 --EXPECT--
 int(2)
 int(1)
@@ -67,4 +66,3 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-===DONE===

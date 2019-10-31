@@ -19,7 +19,6 @@ var_dump(class_uses('bar'));
 
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing class_uses() : basic ***
 array(1) {
@@ -30,4 +29,3 @@ array(1) {
   ["foo"]=>
   string(3) "foo"
 }
-===DONE===

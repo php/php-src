@@ -30,7 +30,6 @@ if (($db_file=dba_open($db_filename, "n", $handler))!==FALSE) {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 	require(__DIR__ .'/clean.inc');
@@ -39,4 +38,3 @@ if (($db_file=dba_open($db_filename, "n", $handler))!==FALSE) {
 database handler: flatfile
 2YY
 bool(true)
-===DONE===

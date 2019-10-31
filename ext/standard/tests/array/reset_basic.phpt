@@ -27,7 +27,6 @@ echo key($array) . " => " . current($array) . "\n";
 echo "\n-- Call to reset() --\n";
 var_dump(reset($array));
 ?>
-===DONE===
 --EXPECT--
 *** Testing reset() : basic functionality ***
 
@@ -42,4 +41,3 @@ string(3) "one"
 
 -- Call to reset() --
 string(4) "zero"
-===DONE===

@@ -30,7 +30,6 @@ echo "\n";
 var_dump($result);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : basic functionality - using string format ***
 one
@@ -39,4 +38,3 @@ one two
 int(7)
 one two three
 int(13)
-===DONE===

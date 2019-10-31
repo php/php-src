@@ -15,9 +15,7 @@ $command = "$php $iniopt -d com.autoregister_typelib=1 -r \"new COM('WbemScripti
 exec($command, $output, $status);
 var_dump($output, $status);
 ?>
-===DONE===
 --EXPECT--
 array(0) {
 }
 int(0)
-===DONE===

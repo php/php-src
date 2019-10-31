@@ -8,7 +8,5 @@ opcache.preload={PWD}/preload_const_autoload.inc
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
-===DONE===
 --EXPECTF--
 Warning: Can't preload class Test with unresolved initializer for constant C in %s on line %d
-===DONE===

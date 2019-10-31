@@ -57,7 +57,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1 - OCI_ASSOC
 array(3) {
@@ -98,4 +97,3 @@ array(7) {
   [3]=>
   string(5) "jones"
 }
-===DONE===

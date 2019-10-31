@@ -29,7 +29,6 @@ foreach ($coordinates as $coordinate) {
     printf("%3d, %3d: %x\n", $x, $y, imagecolorat($dst, $x, $y));
 }
 ?>
-===DONE===
 --EXPECT--
 truecolor source
   0,   0: ffffff
@@ -42,4 +41,3 @@ palette source
   0, 199: ffffff
 199, 199: ffffff
 199,   0: ffffff
-===DONE===

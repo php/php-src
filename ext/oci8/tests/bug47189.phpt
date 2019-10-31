@@ -29,7 +29,6 @@ oci_fetch_all($s, $rs1, 0, 1, OCI_FETCHSTATEMENT_BY_ROW);
 var_dump($rs1);
 
 ?>
-===DONE===
 --EXPECTF--
 Test 1
 array(1) {
@@ -53,4 +52,3 @@ array(1) {
 Warning: oci_fetch_all(): ORA-01002: %s in %s on line %d
 array(0) {
 }
-===DONE===

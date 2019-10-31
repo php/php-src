@@ -49,7 +49,6 @@ foreach($formats as $format) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : unsigned formats and unsigned values ***
 
@@ -72,4 +71,3 @@ int(10)
 -- Iteration 5 --
 1 2 3 4
 int(7)
-===DONE===

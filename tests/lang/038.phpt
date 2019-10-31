@@ -33,8 +33,6 @@ catch (Exception $e)
 }
 
 ?>
-===DONE===
 --EXPECT--
 string(15) "Error2Exception"
 string(5) "fopen"
-===DONE===

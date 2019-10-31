@@ -55,7 +55,6 @@ chmod($parent_dir_path, 0666); // restricting parent directory
 echo "\n-- After restricting parent directory --\n";
 var_dump(scandir($child_dir_path));
 ?>
-===DONE===
 --CLEAN--
 <?php
 $parent_dir_path = __DIR__ . "/scandir_variation5";
@@ -87,4 +86,3 @@ Warning: scandir(%s/scandir_variation5/sub_dir/child_dir): failed to open dir: %
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
-===DONE===

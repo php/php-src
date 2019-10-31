@@ -23,7 +23,6 @@ foreach($phar as $name => $ent)
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/files/phar_oo_003.phar.php');
@@ -41,4 +40,3 @@ This is b.php
 string(5) "e.php"
 string(32) "<?php echo "This is e.php\n"; ?>"
 This is e.php
-===DONE===

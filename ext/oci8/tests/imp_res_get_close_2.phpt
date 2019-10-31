@@ -51,7 +51,6 @@ while (($s1 = oci_get_implicit_resultset($s))) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 Test 1
   1
@@ -59,4 +58,3 @@ Test 1
 Warning: oci_fetch_array(): OCI_INVALID_HANDLE in %s on line %d
 
 Warning: oci_get_implicit_resultset(): supplied resource is not a valid oci8 statement resource in %s on line %d
-===DONE===

@@ -14,10 +14,8 @@ echo "*** Testing closelog() : basic functionality ***\n";
 echo "\n-- Testing closelog() function with Zero arguments --\n";
 var_dump( closelog() );
 ?>
-===DONE===
 --EXPECT--
 *** Testing closelog() : basic functionality ***
 
 -- Testing closelog() function with Zero arguments --
 bool(true)
-===DONE===

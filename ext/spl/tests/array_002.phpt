@@ -17,7 +17,6 @@ $arrayObject[] = 'five';
 var_dump($arrayObject);
 
 ?>
-===DONE===
 --EXPECTF--
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
@@ -37,4 +36,3 @@ object(ArrayObject)#%d (1) {
     }
   }
 }
-===DONE===

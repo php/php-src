@@ -32,8 +32,6 @@ function TestXML($file) {
 	return;
 }
 ?>
-===DONE===
 --EXPECTF--
 %sXMLReaderGood_bug71805.xml : Good!
 %sXMLReaderBad_bug71805.xml : Good!
-===DONE===

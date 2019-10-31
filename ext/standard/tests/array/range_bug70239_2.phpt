@@ -8,7 +8,5 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 The supplied range exceeds the maximum array size: start=0 end=%d
-===DONE===

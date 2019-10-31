@@ -94,7 +94,6 @@ echo "\n===E===\n";
 var_dump($x->doSomethingStatic(1));
 
 ?>
-===DONE===
 --EXPECT--
 ===A===
 TestB::doSomething(1)
@@ -120,4 +119,3 @@ int(1)
 TestB::doSomethingStatic(1)
 TestA::doSomethingStatic(2)
 int(1)
-===DONE===

@@ -50,7 +50,6 @@ foreach($rit as $k=>$v)
 	echo str_repeat('  ',$rit->getDepth()+1)."$k=>$v\n";
 }
 ?>
-===DONE===
 --EXPECT--
 Menu::getIterator
 <ul>
@@ -72,4 +71,3 @@ Menu::getIterator
   </ul>
   3=>d
 <ul>
-===DONE===

@@ -34,7 +34,6 @@ echo $phar['b/c.php']->getFilename() . "\n";
 echo $phar['b.php']->getFilename() . "\n";
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/files/phar_oo_006.phar.php');
@@ -48,4 +47,3 @@ MyFile::__construct(phar://%s/b/c.php)
 c.php
 MyFile::__construct(phar://%s/b.php)
 b.php
-===DONE===

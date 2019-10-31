@@ -72,7 +72,6 @@ check_params(new ReflectionFunction('test'));
 check_params(new ReflectionMethod('test::method'));
 
 ?>
-===DONE===
 --EXPECT--
 #####test()#####
 ===0===
@@ -206,4 +205,3 @@ allowsNull: bool(true)
 isOptional: bool(true)
 isDefaultValueAvailable: bool(true)
 getDefaultValue: string(6) "FooBar"
-===DONE===

@@ -23,7 +23,6 @@ unset($phar['f.php']);
 var_dump(isset($phar['f.php']));
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/files/phar_oo_012.phar.php');
@@ -33,4 +32,3 @@ __halt_compiler();
 bool(true)
 hi
 bool(false)
-===DONE===

@@ -57,7 +57,6 @@ while (($s1 = oci_get_implicit_resultset($s))) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 Test 1
 array(1) {
@@ -116,4 +115,3 @@ array(1) {
     string(1) "6"
   }
 }
-===DONE===

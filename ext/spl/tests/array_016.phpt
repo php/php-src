@@ -18,7 +18,6 @@ foreach(new IteratorIterator($it) as $v)
 }
 
 ?>
-===DONE===
 --EXPECT--
 int(0)
 int(1)
@@ -28,4 +27,3 @@ int(0)
 int(1)
 int(2)
 int(3)
-===DONE===

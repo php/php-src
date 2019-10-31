@@ -43,7 +43,6 @@ foreach($valid_strings as $key => $str) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing var_export() with valid strings ***
 
@@ -144,4 +143,3 @@ string(7) "'\\060'"
 '8'
 string(3) "'8'"
 
-===DONE===

@@ -18,7 +18,6 @@ var_dump(
 	ldap_get_attributes($link, $entry)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -51,4 +50,3 @@ array(5) {
   ["count"]=>
   int(2)
 }
-===DONE===

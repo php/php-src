@@ -30,7 +30,6 @@ test(array(1,array(21,22),3), array(1,array(21,"22"),3), false);
 test(array(1,array(21,22),3), array(1,array(21,"22"),3), true);
 
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(false)
@@ -42,4 +41,3 @@ bool(true)
 bool(false)
 bool(true)
 bool(false)
-===DONE===

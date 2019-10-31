@@ -128,7 +128,6 @@ check($obj, 0);
 check($obj, 1);
 
 ?>
-===DONE===
 --EXPECTF--
 ArrayObjectEx::__construct()
 ===CHECK===
@@ -835,4 +834,3 @@ bool(false)
 ArrayIteratorEx::setFlags(3)
 int(1)
 bool(true)
-===DONE===

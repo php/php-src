@@ -80,7 +80,6 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 phar error: unsupported compression method (Shrunk) used in this zip in zip-based phar "%scompress_unsup1.zip"
 phar error: unsupported compression method (Reduce) used in this zip in zip-based phar "%scompress_unsup2.zip"
@@ -97,4 +96,3 @@ phar error: unsupported compression method (IBM LZ77) used in this zip in zip-ba
 phar error: unsupported compression method (WavPack) used in this zip in zip-based phar "%scompress_unsup97.zip"
 phar error: unsupported compression method (PPMd) used in this zip in zip-based phar "%scompress_unsup98.zip"
 phar error: unsupported compression method (unknown) used in this zip in zip-based phar "%scompress_unsupunknown.zip"
-===DONE===

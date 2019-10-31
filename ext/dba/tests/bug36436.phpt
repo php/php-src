@@ -24,7 +24,6 @@ var_dump(dba_nextkey($db));
 dba_close($db);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 	require(__DIR__ .'/clean.inc');
@@ -34,4 +33,3 @@ resource(%d) of type (dba persistent)
 string(3) "XYZ"
 string(1) "X"
 string(1) "Y"
-===DONE===

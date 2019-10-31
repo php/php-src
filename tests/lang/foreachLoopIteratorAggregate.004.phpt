@@ -65,7 +65,6 @@ foreach($t as $k => $v) {
 unset($t);
 
 ?>
-===DONE===
 --EXPECT--
 c::getIterator
 c_iter::__construct
@@ -101,4 +100,3 @@ c_iter::current
 double:2:0
 c_iter::next
 c_iter::valid = false
-===DONE===

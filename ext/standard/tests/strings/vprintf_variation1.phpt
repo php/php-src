@@ -99,7 +99,6 @@ foreach($values as $value) {
 fclose($file_handle);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing vprintf() : with unexpected values for format argument ***
 
@@ -216,4 +215,3 @@ int(0)
  -- Iteration 26 --
 Resource id #%d
 int(%d)
-===DONE===

@@ -15,8 +15,6 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 phar error: corrupt zip archive, conflicting file count in end of central directory record in zip-based phar "%scount1.zip"
 phar error: corrupt zip archive, conflicting file count in end of central directory record in zip-based phar "%scount2.zip"
-===DONE===

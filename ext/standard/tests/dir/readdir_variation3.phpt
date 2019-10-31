@@ -43,7 +43,6 @@ delete_files($path_sub, 2);
 
 closedir($dir_handle);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $path_top = __DIR__ . '/readdir_variation3';
@@ -65,4 +64,3 @@ array(5) {
   [4]=>
   string(10) "sub_folder"
 }
-===DONE===

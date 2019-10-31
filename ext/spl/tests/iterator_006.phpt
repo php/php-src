@@ -16,8 +16,6 @@ foreach (new IteratorIterator($root->child) as $child) {
 	echo $child."\n";
 }
 ?>
-===DONE===
 --EXPECT--
 Hello
 World
-===DONE===

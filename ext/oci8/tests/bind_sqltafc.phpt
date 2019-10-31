@@ -87,7 +87,6 @@ oci8_test_sql_execute($c, $stmtarray);
 oci_close($c);
 
 ?>
-===DONE===
 --EXPECT--
 Test 0 - base table creation without binds
 array(5) {
@@ -204,4 +203,3 @@ array(5) {
     NULL
   }
 }
-===DONE===

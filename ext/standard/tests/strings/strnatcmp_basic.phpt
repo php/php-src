@@ -49,7 +49,6 @@ var_dump(strnatcmp($d1, $a2));
 var_dump(strnatcmp($c1, $b2));
 var_dump(strnatcmp($c1, $d2));
 ?>
-===DONE===
 --EXPECT--
 *** Testing strnatcmp() : basic functionality ***
 Less than tests
@@ -77,4 +76,3 @@ int(1)
 int(1)
 int(1)
 int(1)
-===DONE===

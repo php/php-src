@@ -13,8 +13,6 @@ $res = fopen(__FILE__, "r");
 var_dump(get_resource_type($res));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing get_resource_type() : basic functionality ***
 string(6) "stream"
-===DONE===

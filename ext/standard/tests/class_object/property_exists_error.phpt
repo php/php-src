@@ -15,7 +15,6 @@ $property_name = 'string_val';
 var_dump( property_exists(10, $property_name) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing property_exists() : error conditions ***
 
@@ -23,4 +22,3 @@ var_dump( property_exists(10, $property_name) );
 
 Warning: First parameter must either be an object or the name of an existing class in %sproperty_exists_error.php on line %d
 NULL
-===DONE===

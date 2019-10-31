@@ -18,7 +18,6 @@ EOF
 );
 var_dump($sxe->children());
 ?>
-===DONE===
 --EXPECTF--
 object(SimpleXMLElement)#%d (3) {
   ["@attributes"]=>
@@ -31,4 +30,3 @@ object(SimpleXMLElement)#%d (3) {
   ["elem11"]=>
   string(10) "Bla bla 2."
 }
-===DONE===

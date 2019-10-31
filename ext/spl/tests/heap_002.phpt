@@ -34,7 +34,6 @@ $b = 5;
 
 echo $h->extract()."\n";
 ?>
-===DONE===
 --EXPECT--
 Exception: Can't extract from an empty heap
 5
@@ -46,4 +45,3 @@ Exception: Can't extract from an empty heap
 0
 --
 4
-===DONE===

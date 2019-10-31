@@ -111,7 +111,6 @@ foreach($inputs as $key =>$value) {
 fclose($res);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing class_implements() : variation ***
 
@@ -218,4 +217,3 @@ bool(false)
 --resource--
 Error: 2 - class_implements(): object or string expected, %s(%d)
 bool(false)
-===DONE===

@@ -61,7 +61,6 @@ $it = new MyRecursiveCachingIterator($it);
 $it->show();
 
 ?>
-===DONE===
 --EXPECTF--
 ===0===
 MyRecursiveArrayIterator::hasChildren()
@@ -121,4 +120,3 @@ int(30)
 MyRecursiveArrayIterator::hasChildren()
 int(4)
 int(4)
-===DONE===

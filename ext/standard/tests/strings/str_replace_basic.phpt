@@ -33,7 +33,6 @@ var_dump( $fp_copy );
 fclose($fp);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing str_replace() on basic operations ***
 string(0) ""
@@ -46,4 +45,3 @@ string(0) ""
 int(0)
 string(%d) "Resource id #%d"
 int(1)
-===DONE===

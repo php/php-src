@@ -72,7 +72,6 @@ foreach($storage2 as $object)
 var_dump($storage2);
 
 ?>
-===DONE===
 --EXPECTF--
 int(2)
 object(TestClass)#%d (4) {
@@ -208,4 +207,3 @@ object(MyStorage)#%d (5) {
     }
   }
 }
-===DONE===

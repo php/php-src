@@ -9,7 +9,5 @@ $var_1->offsetSet(100,new DateTime('2000-01-01'));
 	print $e->getMessage()."\n";
 }
 ?>
-===DONE===
 --EXPECT--
 Offset invalid or out of range
-===DONE===

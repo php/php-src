@@ -37,7 +37,5 @@ class MyObject
 MyObject::test();
 
 ?>
-===DONE===
 --EXPECT--
 Caught
-===DONE===

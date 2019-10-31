@@ -76,7 +76,6 @@ function clean_dh($dh){
 	unset($dh);
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 $base_dir_path = __DIR__ . '/opendir_variation4-win32-mb';
@@ -112,4 +111,3 @@ resource(%d) of type (stream)
 -- $path = '../../'私はガラスを食べられますlevel_one': --
 bool(true)
 resource(%d) of type (stream)
-===DONE===

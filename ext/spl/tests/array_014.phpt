@@ -37,7 +37,6 @@ foreach($it as $v)
 }
 
 ?>
-===DONE===
 --EXPECT--
 int(11)
 int(5)
@@ -55,4 +54,3 @@ int(7)
 int(8)
 int(9)
 int(10)
-===DONE===

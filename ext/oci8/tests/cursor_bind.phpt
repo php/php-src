@@ -54,7 +54,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECT--
 array(2) {
   [0]=>
@@ -75,4 +74,3 @@ array(2) {
   string(1) "1"
 }
 bool(false)
-===DONE===

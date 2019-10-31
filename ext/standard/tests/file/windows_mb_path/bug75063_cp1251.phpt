@@ -67,7 +67,6 @@ foreach ($obj as $file) {
 rmdir($d0);
 rmdir($prefix);
 ?>
-===DONE===
 --EXPECTF--
 string(4) "тест"
 bool(true)
@@ -75,4 +74,3 @@ string(%d) "%sbug75063-cp1251%eтест"
 string(8) "code.php"
 string(8) "test.txt"
 string(8) "таст.txt"
-===DONE===

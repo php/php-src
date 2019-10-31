@@ -21,9 +21,7 @@ var_dump(ctype_space($c2));
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_space() : basic functionality ***
 bool(true)
 bool(false)
-===DONE===

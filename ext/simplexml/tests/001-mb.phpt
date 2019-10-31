@@ -8,7 +8,6 @@ SimpleXML: Simple document
 var_dump(simplexml_load_file(__DIR__.'/sxe私はガラスを食べられます.xml'));
 
 ?>
-===DONE===
 --EXPECTF--
 object(SimpleXMLElement)#%d (2) {
   ["@attributes"]=>
@@ -40,4 +39,3 @@ object(SimpleXMLElement)#%d (2) {
     }
   }
 }
-===DONE===

@@ -20,10 +20,8 @@ for ($i = 0; $i < 999; $i++) {
 
 var_dump( array_product($array) );
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_product() : variations ***
 
 -- Testing array_product() function with a very large array --
 float(INF)
-===DONE===

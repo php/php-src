@@ -52,7 +52,6 @@ foreach($a as $file) {
 delete_files($path, 3);
 closedir($dh);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $path = __DIR__ . '/私はガラスを食べられますreaddir_basic';
@@ -76,4 +75,3 @@ string(2) ".."
 string(9) "file1.tmp"
 string(9) "file2.tmp"
 string(9) "file3.tmp"
-===DONE===

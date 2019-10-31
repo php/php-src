@@ -23,8 +23,6 @@ Bug #40872 (inconsistency in offsetSet, offsetExists treatment of string enclose
 	var_dump($projects->offsetExists(1));
 	var_dump($projects->offsetExists('2'));
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(true)
-===DONE===

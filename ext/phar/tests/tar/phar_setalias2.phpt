@@ -39,7 +39,6 @@ try {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
@@ -50,4 +49,3 @@ __HALT_COMPILER();
 hio
 test
 alias "test" is already used for archive "%sphar_setalias2.phar.tar" and cannot be used for other archives
-===DONE===

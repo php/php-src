@@ -17,9 +17,7 @@ spl_autoload_register("my_autoload");
 $obj = new testclass;
 
 ?>
-===DONE===
 --EXPECTF--
 %stestclass.inc
 %stestclass.class.inc
 bool(true)
-===DONE===

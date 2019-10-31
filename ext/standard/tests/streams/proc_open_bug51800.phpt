@@ -74,7 +74,6 @@ var_dump(array(
 ), strlen($stdout), strlen($stderr));
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 $callee = __DIR__ . "/process_proc_open_bug51800.php";
@@ -91,4 +90,3 @@ array(3) {
 }
 int(10000)
 int(10000)
-===DONE===

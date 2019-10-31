@@ -60,7 +60,6 @@ $mods = array(
 
 var_dump(ldap_modify_batch($link, "dc=my-domain,$base", $mods));
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -81,4 +80,3 @@ bool(false)
 
 Warning: ldap_modify_batch(): Batch Modify: Undefined attribute type in %s on line %d
 bool(false)
-===DONE===

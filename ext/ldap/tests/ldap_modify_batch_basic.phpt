@@ -37,7 +37,6 @@ var_dump(
 	ldap_get_entries($link, ldap_search($link, "$base", "(sn=Brown-Smith)"))
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -106,4 +105,3 @@ array(2) {
     string(%d) "cn=userA,%s"
   }
 }
-===DONE===

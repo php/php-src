@@ -32,7 +32,6 @@ foreach($valid_bool as $key => $bool_value) {
 	echo "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing var_export() with valid boolean values ***
 
@@ -73,4 +72,3 @@ false
 false
 string(5) "false"
 
-===DONE===

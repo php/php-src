@@ -11,7 +11,6 @@ $pq->insert("d", -2);
 
 var_dump($pq);
 ?>
-===DONE===
 --EXPECT--
 object(SplPriorityQueue)#1 (3) {
   ["flags":"SplPriorityQueue":private]=>
@@ -50,4 +49,3 @@ object(SplPriorityQueue)#1 (3) {
     }
   }
 }
-===DONE===

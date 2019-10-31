@@ -45,7 +45,6 @@ foreach ($otherVals as $otherVal) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 --- testing: 9223372036854775807 >> 0 ---
 int(9223372036854775807)
@@ -587,4 +586,3 @@ Exception: Bit shift by negative number
 Exception: Bit shift by negative number
 --- testing: 9223372036854775807 >> -9.2233720368548E+18 ---
 Exception: Bit shift by negative number
-===DONE===

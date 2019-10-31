@@ -35,7 +35,6 @@ try {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/tar_nostub.phar.tar');
@@ -45,4 +44,3 @@ try {
 RecursiveDirectoryIterator::__construct(phar://%star_nostub.phar.tar/): failed to open dir: '%star_nostub.phar.tar' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive
 phar url "phar://%star_nostub.phar.tar/" is unknown
 string(0) ""
-===DONE===

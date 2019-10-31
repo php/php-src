@@ -25,7 +25,6 @@ var_dump( lchown( $filename, $uid ) );
 var_dump( fileowner( $symlink ) === $uid );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -41,4 +40,3 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-===DONE===

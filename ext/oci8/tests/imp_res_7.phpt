@@ -591,7 +591,6 @@ while (($row = oci_fetch_row($s)) != false) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 Test 1
   1
@@ -869,4 +868,3 @@ Test 1
   273
   274
   275
-===DONE===

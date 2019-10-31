@@ -28,10 +28,8 @@ foreach($streams as $original => $stream)
 }
 
 ?>
-===DONE===
 --EXPECT--
 string(12) "A brief note"
 string(40) "select_vcount,fcol_from_fieldtable/local"
 string(13) "foobar foobar"
 bool(true)
-===DONE===

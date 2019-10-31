@@ -16,7 +16,5 @@ internal_encoding=iso-8859-1
 ﻿<?php
 print "Hello World\n";
 ?>
-===DONE===
 --EXPECT--
 Hello World
-===DONE===

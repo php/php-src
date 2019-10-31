@@ -23,10 +23,8 @@ $encoding = 'unknown-encoding';
 
 var_dump( mb_strtolower($sourcestring, $encoding) );
 ?>
-===DONE===
 --EXPECTF--
 *** Testing mb_strtolower() : error conditions***
 
 Warning: mb_strtolower(): Unknown encoding "unknown-encoding" in %s on line %d
 bool(false)
-===DONE===

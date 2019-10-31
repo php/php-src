@@ -96,7 +96,6 @@ echo $fn(" OK".PHP_EOL);
 
 
 ?>
-===DONE===
 --EXPECT--
 Access public static function OK
 Access public static function with different case OK
@@ -118,4 +117,3 @@ Access public instance method of parent object through "self::" to parent method
 Access proteced instance method of parent object through "self::" to parent method OK
 MagicCall __call instance method __call,nonExistentMethod, OK
 MagicCall __callStatic static method __callStatic,nonExistentMethod, OK
-===DONE===

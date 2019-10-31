@@ -54,7 +54,6 @@ echo "\n";
 var_dump($result);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing printf() : basic functionality - using float format ***
 
@@ -79,4 +78,3 @@ int(19)
 int(29)
 11.110000 22.220000 33.330000
 int(29)
-===DONE===

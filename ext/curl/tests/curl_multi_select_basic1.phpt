@@ -21,7 +21,5 @@ echo curl_multi_select($mh)."\n";
 
 curl_multi_close($mh);
 ?>
-===DONE===
 --EXPECTF--
 %r(0|-1)%r
-===DONE===

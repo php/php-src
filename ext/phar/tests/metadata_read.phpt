@@ -34,7 +34,6 @@ foreach($files as $name => $cont) {
 	var_dump(file_get_contents($pname.'/'.$name));
 }
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
@@ -60,4 +59,3 @@ string(1) "a"
 string(1) "b"
 string(1) "c"
 string(1) "d"
-===DONE===

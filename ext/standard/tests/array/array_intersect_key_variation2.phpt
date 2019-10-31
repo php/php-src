@@ -109,7 +109,6 @@ foreach($inputs as $key =>$value) {
 
 fclose($fp);
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_intersect_key() : usage variation ***
 
@@ -216,4 +215,3 @@ Expected parameter 2 to be an array, null given
 --resource var--
 Expected parameter 2 to be an array, resource given
 Expected parameter 2 to be an array, resource given
-===DONE===

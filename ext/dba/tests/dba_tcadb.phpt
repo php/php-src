@@ -13,7 +13,6 @@ DBA TCADB handler test
     @unlink($db_filename.'.lck');
 	require_once __DIR__ .'/dba_handler.inc';
 ?>
-===DONE===
 --CLEAN--
 <?php
 $db_filename = $db_file = __DIR__ .'/test0.tch';
@@ -55,4 +54,3 @@ array(3) {
   ["key5"]=>
   string(23) "The last content string"
 }
-===DONE===

@@ -33,7 +33,6 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
 
   var_dump( $curl_content );
 ?>
-===DONE===
 --EXPECT--
 *** Testing curl sending through GET an POST ***
 string(208) "array(2) {
@@ -51,4 +50,3 @@ array(3) {
   string(8) "John Doe"
 }
 "
-===DONE===

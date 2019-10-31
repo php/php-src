@@ -56,7 +56,6 @@ $overview = imap_fetch_overview($stream_id, 1);
 echo "Seen Flag: ";
 var_dump( $overview[0]->seen );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require_once(__DIR__.'/clean.inc');
@@ -78,4 +77,3 @@ string(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
 -- Mandatory arguments --
 string(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
 Seen Flag: int(%d)
-===DONE===

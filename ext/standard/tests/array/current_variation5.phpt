@@ -39,7 +39,6 @@ var_dump(next($a));
 current_variation5($a);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing current() : usage variations ***
 
@@ -54,4 +53,3 @@ string(3) "yes"
 string(5) "maybe"
 string(5) "maybe"
 string(2) "no"
-===DONE===

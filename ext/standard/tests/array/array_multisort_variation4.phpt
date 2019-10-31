@@ -21,7 +21,6 @@ var_dump($arr2);
 var_dump($arr3);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_multisort() : Testing  with multiple array arguments ***
 bool(true)
@@ -55,4 +54,3 @@ array(4) {
   [3]=>
   int(9)
 }
-===DONE===

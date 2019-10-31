@@ -65,7 +65,6 @@ echo "\n";
 
 unlink($data_file);
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : with  white spaces in format strings ***
 
@@ -91,4 +90,3 @@ A  B  C
 11  FFFFFFDE  33
 -- Iteration 11 --
 2.000000E+1  2.000000E-1  -2.000000E+1
-===DONE===

@@ -41,7 +41,6 @@ dq($c, 'select /*+ MONITOR */ * from dual');
 dq($c, 'select dbop_name from v$sql_monitor where dbop_name is not null order by dbop_exec_id desc');
 
 ?>
-===DONE===
 --EXPECT--
 Test 1
 array(1) {
@@ -52,4 +51,3 @@ array(1) {
   ["DBOP_NAME"]=>
   string(7) "db_op_1"
 }
-===DONE===

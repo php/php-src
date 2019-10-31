@@ -59,7 +59,6 @@ var_dump($reader->getAttribute('baz'));
 $reader->close();
 
 ?>
-===DONE===
 --EXPECT--
 string(0) ""
 NULL
@@ -71,4 +70,3 @@ string(0) ""
 NULL
 string(0) ""
 string(0) ""
-===DONE===

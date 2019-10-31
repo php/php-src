@@ -30,7 +30,6 @@ foreach($inputs as $key =>$value) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing strftime() : usage variation ***
 
@@ -43,4 +42,3 @@ string(1) "
 --Tab character--
 string(1) "	"
 string(1) "	"
-===DONE===

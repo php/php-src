@@ -98,7 +98,6 @@ foreach($values as $value) {
 fclose($file_handle);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing vprintf() : with unexpected values for args argument ***
 
@@ -188,4 +187,3 @@ The arguments array must contain 1 items, 0 given
 -- Iteration 23 --
 Resource id #%d
 int(%d)
-===DONE===

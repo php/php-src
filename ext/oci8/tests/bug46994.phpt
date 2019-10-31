@@ -69,7 +69,6 @@ oci8_test_sql_execute($c, $stmtarray);
 oci_close($c);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1
 string(26) "This should be the output."
@@ -79,4 +78,3 @@ Test 3
 string(26) "This should be the output."
 Test 4
 string(26) "This should be the output."
-===DONE===

@@ -83,7 +83,6 @@ foreach($rit as $data) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 SXETest::rewind
 SXETest::valid
@@ -142,4 +141,3 @@ SXETest::valid
 SXETest::next
 SXETest::valid
 SXETest::valid
-===DONE===

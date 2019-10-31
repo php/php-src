@@ -42,7 +42,6 @@ fclose($fp);
 closedir($dfp);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing sprintf() : hexa formats with resource values ***
 
@@ -75,4 +74,3 @@ string(4) "%a"
 string(30) "%a"
 string(10) "0-9A-Fa-f]"
 string(1) "x"
-===DONE===

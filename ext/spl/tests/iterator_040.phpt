@@ -25,7 +25,6 @@ foreach($it as $k => $v)
 }
 
 ?>
-===DONE===
 --EXPECT--
 ===
 int(0)
@@ -43,4 +42,3 @@ int(22)
 int(0)
 int(2)
 int(3)
-===DONE===

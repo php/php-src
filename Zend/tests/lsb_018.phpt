@@ -54,7 +54,6 @@ $x->identify();
 $y->identify();
 $z->identify();
 ?>
-===DONE===
 --EXPECTF--
 object(Foo)#%d (1) {
   ["instanceId":"Singleton":private]=>
@@ -92,4 +91,3 @@ object(Baz)#%d (1) {
   ["instanceId":"Singleton":private]=>
   int(2)
 }
-===DONE===

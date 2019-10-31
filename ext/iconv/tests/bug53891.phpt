@@ -15,7 +15,5 @@ $preferences = array(
 );
 var_dump(iconv_mime_encode('subject', "d obeybiubrsfqllpdtpge…", $preferences));
 ?>
-===DONE===
 --EXPECT--
 string(54) "subject: =?utf-8?Q?d=20obeybiubrsfqllpdtpge=E2=80=A6?="
-===DONE===

@@ -33,7 +33,6 @@ var_dump(oci_error($s));
 oci_close($c);
 
 ?>
-===DONE===
 --EXPECTF--
 Test 1
 Raises NO_DATA_FOUND
@@ -69,4 +68,3 @@ ORA-06512: at line 1"
   ["sqltext"]=>
   string(29) "begin raise ZERO_DIVIDE; end;"
 }
-===DONE===

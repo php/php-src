@@ -31,7 +31,6 @@ foreach ($types as $t => $v) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 Test - SQLT_AVC
 
@@ -54,4 +53,3 @@ Warning: oci_bind_by_name(): Unknown or unsupported datatype given: 68 in %sbind
 Test - SQLT_ODT
 
 Warning: oci_bind_by_name(): Unknown or unsupported datatype given: 156 in %sbind_unsupported_1.php on line %d
-===DONE===

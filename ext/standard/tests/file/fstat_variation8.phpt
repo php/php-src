@@ -27,7 +27,5 @@ if ($failed !== true) {
 
 
 ?>
-===DONE===
 --EXPECT--
 PASSED: all elements are the same
-===DONE===

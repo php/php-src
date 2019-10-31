@@ -78,7 +78,6 @@ foreach($values as $key => $value) {
 };
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing getimagesize() : usage variations ***
 Error: 2 - Undefined variable: undefined_var
@@ -158,4 +157,3 @@ string(28) "4a46494600010201006000600000"
 
 -- Arg value unset_var --
 string(28) "4a46494600010201006000600000"
-===DONE===

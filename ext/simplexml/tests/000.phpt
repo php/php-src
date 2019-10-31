@@ -35,7 +35,6 @@ test('sxe->elem22->attr22');
 test('sxe->elem22["attr22"]');
 
 ?>
-===DONE===
 --EXPECTF--
 ===sxe
 bool(true)
@@ -243,4 +242,3 @@ NULL
 bool(false)
 bool(false)
 NULL
-===DONE===

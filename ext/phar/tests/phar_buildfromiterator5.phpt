@@ -44,7 +44,6 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/buildfromiterator5.phar');
@@ -56,4 +55,3 @@ valid
 current
 %s(24) "UnexpectedValueException"
 Iterator myIterator returned an invalid value (must return a string)
-===DONE===

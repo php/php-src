@@ -30,7 +30,6 @@ if ($h) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 When you're taught through feelings
 Destiny flying high above
@@ -40,4 +39,3 @@ as it turns around
 and I know that it descends down on me
 
 characters counted=176
-===DONE===

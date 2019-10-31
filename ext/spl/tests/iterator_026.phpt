@@ -16,7 +16,6 @@ foreach($it as $k=>$v)
 }
 
 ?>
-===DONE===
 --EXPECTF--
 0=>1
 hasNext: yes
@@ -34,4 +33,3 @@ Warning: Array to string conversion in %s on line %d
 hasNext: no
 3=>4
 hasNext: no
-===DONE===

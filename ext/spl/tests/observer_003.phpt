@@ -40,7 +40,6 @@ foreach($storage2 as $object)
 }
 
 ?>
-===DONE===
 --EXPECTF--
 int(4)
 int(1)
@@ -54,4 +53,3 @@ int(1)
 string(1) "2"
 string(3) "foo"
 bool(true)
-===DONE===

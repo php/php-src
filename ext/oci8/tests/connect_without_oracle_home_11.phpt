@@ -33,11 +33,9 @@ else {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 Warning: oci_connect(): OCIEnvNlsCreate() failed. There is something wrong with your system - please check that ORACLE_HOME and %s are set and point to the right directories in %s on line %d
 
 Warning: oci_connect(): Error while trying to retrieve text for error ORA-01804
  in %s on line %d
 bool(false)
-===DONE===

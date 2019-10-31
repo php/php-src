@@ -35,9 +35,7 @@ catch(Exception $e)
 }
 
 ?>
-===DONE===
 --EXPECT--
 TestFunc1(TestClass)
 TestFunc2(TestClass)
 Exception: Class TestClass missing
-===DONE===

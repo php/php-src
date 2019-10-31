@@ -31,7 +31,6 @@ foreach($ints as $sorting_order) {
 
 delete_files($dir, 2);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir = __DIR__ . '/scandir_variation9';
@@ -69,4 +68,3 @@ array(4) {
   [3]=>
   string(9) "file2.tmp"
 }
-===DONE===

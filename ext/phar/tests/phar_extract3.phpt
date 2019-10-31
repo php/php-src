@@ -31,7 +31,6 @@ try {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir = __DIR__ . '/test-extract3/';
@@ -43,4 +42,3 @@ $dir = __DIR__ . '/test-extract3/';
 Invalid argument, %sfiles/bogus.zip cannot be found
 phar://%sfiles/notbogus.zip%cnonsense.txt
 phar://%sfiles/notbogus.zip%cstuff.txt
-===DONE===

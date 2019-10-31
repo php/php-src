@@ -46,9 +46,7 @@ oci_free_statement($s);
 
 
 ?>
-===DONE===
 --EXPECT--
 Test 1
   1
   2
-===DONE===

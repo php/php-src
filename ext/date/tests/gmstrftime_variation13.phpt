@@ -32,7 +32,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmstrftime() : usage variation ***
 
@@ -51,4 +50,3 @@ string(4) "2008"
 --Year without century--
 string(2) "%d"
 string(2) "08"
-===DONE===

@@ -26,8 +26,6 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 bool(false)
 posix_ttyname(): supplied resource is not a valid stream resource
-===DONE===

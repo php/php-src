@@ -53,7 +53,6 @@ try {
     echo "Exception: ".$e->getMessage()."\n";
 }
 ?>
-===DONE===
 --EXPECT--
 inserted 1
 Exception: foo
@@ -63,4 +62,3 @@ Exception: Heap is corrupted, heap properties are no longer ensured.
 Recovering..
 int(1)
 int(2)
-===DONE===

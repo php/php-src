@@ -55,7 +55,6 @@ var_dump(
 	test_bind($host, $port, "cn=userA,$base", $genpw, $protocol_version)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -79,4 +78,3 @@ bool(true)
 string(%d) "%s"
 string(0) ""
 bool(true)
-===DONE===

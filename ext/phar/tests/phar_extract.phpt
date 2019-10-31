@@ -103,7 +103,6 @@ try {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 @rmdir(__DIR__ . '/whatever');
@@ -152,4 +151,3 @@ string(5) "first"
 string(2) "hi"
 Cannot extract to "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...", destination directory is too long for filesystem
 Extraction from phar "%stempmanifest1.phar.php" failed: Cannot extract "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..." to "%s...", extracted filename is too long for filesystem
-===DONE===

@@ -82,7 +82,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1
  1 aaaaa a
@@ -97,4 +96,3 @@ Test 1
 
 Test 2 - don't fetch all rows
  1 aaaaa a
-===DONE===

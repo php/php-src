@@ -23,8 +23,6 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 Function expects exactly one argument
 Function expects exactly one argument
-===DONE===

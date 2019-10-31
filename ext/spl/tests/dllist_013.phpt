@@ -30,7 +30,6 @@ echo $dll->pop()."\n";
 echo $dll->pop()."\n";
 echo $dll->pop()."\n";
 ?>
-===DONE===
 --EXPECT--
 Exception: Offset invalid or out of range
 7
@@ -41,4 +40,3 @@ Exception: Offset invalid or out of range
 3
 2
 1
-===DONE===

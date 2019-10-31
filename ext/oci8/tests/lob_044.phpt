@@ -57,7 +57,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1 - truncate on insert
 int(72)
@@ -69,4 +68,3 @@ string(0) ""
 
 Test 2 - read it back
 string(0) ""
-===DONE===

@@ -10,8 +10,6 @@ $it->rewind();
 var_dump($it->getChildren());
 
 ?>
-===DONE===
 --EXPECT--
 NULL
 NULL
-===DONE===

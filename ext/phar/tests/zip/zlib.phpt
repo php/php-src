@@ -12,7 +12,5 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 string(175) "hitheresuperlongzipistoostupidtodowhatIsaysoIhavetousethisridiculouslylongaliasbecauseitisstupiddidImentionthatalreadythemadnessdoesnotstopIhateinfozipIhateinfozipIhateinfozip"
-===DONE===

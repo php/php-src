@@ -68,7 +68,6 @@ foreach($args_array as $args) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : float formats and non-float values ***
 
@@ -103,4 +102,3 @@ int(179)
    0.000000 1.000000 1.000000 0.000000
    0.000000 1.000000 1.000000 1.000000
 int(179)
-===DONE===

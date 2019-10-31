@@ -30,10 +30,8 @@ spl_autoload_register($c);
 spl_autoload_register($c2);
 $c = new foo;
 ?>
-===DONE===
 --EXPECT--
 a called
 a2 called
 b called
 foo
-===DONE===

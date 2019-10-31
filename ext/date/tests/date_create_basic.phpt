@@ -20,7 +20,6 @@ var_dump( date_create("2005-07-14 22:30:41") );
 var_dump( date_create("2005-07-14 22:30:41 GMT") );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing date_create() : basic functionality ***
 object(DateTime)#%d (3) {
@@ -55,4 +54,3 @@ object(DateTime)#%d (3) {
   ["timezone"]=>
   string(3) "GMT"
 }
-===DONE===

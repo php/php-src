@@ -41,9 +41,7 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1 - PL/SQL IN and OUT variables
 string(22) "Cat got your keyboard?"
 string(22) "CAT GOT YOUR KEYBOARD?"
-===DONE===

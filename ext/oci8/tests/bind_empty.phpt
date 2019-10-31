@@ -89,7 +89,6 @@ $statement = oci_parse($c, $drop);
 @oci_execute($statement);
 
 ?>
-===DONE===
 --EXPECT--
 Test 1
 bool(true)
@@ -123,4 +122,3 @@ NULL
 Test 6
 NULL
 NULL
-===DONE===

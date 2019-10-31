@@ -15,8 +15,6 @@ $typelib = $root.'\activeds.tlb';
 var_dump(com_load_typelib($typelib));
 var_dump(com_load_typelib($typelib));
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(true)
-===DONE===

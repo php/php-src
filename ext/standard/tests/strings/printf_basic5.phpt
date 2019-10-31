@@ -39,7 +39,6 @@ $result = printf($format3, $arg1, $arg2, $arg3);
 echo "\n";
 var_dump($result);
 ?>
-===DONE===
 --EXPECT--
 *** Testing printf() : basic functionality - using char format ***
 
@@ -58,4 +57,3 @@ int(3)
 -- Calling printf() with three arguments --
 A B C
 int(5)
-===DONE===

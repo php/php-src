@@ -25,7 +25,6 @@ foreach($inputs as $key => $value) {
       var_dump( getdate($value) );
 };
 ?>
-===DONE===
 --EXPECT--
 *** Testing getdate() : usage variation ***
 
@@ -106,4 +105,3 @@ array(11) {
   [0]=>
   int(-10)
 }
-===DONE===

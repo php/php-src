@@ -19,7 +19,6 @@ var_dump(gzpassthru($h));
 gzclose($h);
 
 ?>
-===DONE===
 --EXPECT--
 When you're taught through feelings
 Destiny flying high above
@@ -29,4 +28,3 @@ as it turns around
 and I know that it descends down on me
 int(176)
 int(0)
-===DONE===

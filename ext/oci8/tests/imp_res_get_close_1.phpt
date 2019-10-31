@@ -52,7 +52,6 @@ while (($s1 = oci_get_implicit_resultset($s))) {
 oci_free_statement($s);
 
 ?>
-===DONE===
 --EXPECTF--
 Test 1
   1
@@ -64,4 +63,3 @@ Warning: oci_fetch_array(): supplied resource is not a valid oci8 statement reso
   5
 
 Warning: oci_fetch_array(): supplied resource is not a valid oci8 statement resource in %s on line %d
-===DONE===

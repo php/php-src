@@ -26,11 +26,9 @@ else {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 Warning: ocilogon(): OCIEnvNlsCreate() failed. There is something wrong with your system - please check that ORACLE_HOME and %s are set and point to the right directories in %s on line %d
 
 Warning: ocilogon(): %s ORA-01804
  in %s on line %d
 bool(false)
-===DONE===

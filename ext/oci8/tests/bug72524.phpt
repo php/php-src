@@ -75,7 +75,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECTF--
 Test 1 - P1 Value: NULL  P1 Length: Default  P1 Type: Default  P2 Value: NULL P2 Length: Default  P2 Type: Default
 bool(true)
@@ -91,4 +90,3 @@ Test 5 - P1 Value: NULL  P1 Length: 0        P1 Type: SQLT_LNG P2 Value: NULL P2
 
 Warning: oci_execute(): ORA-24816: %s in %s on line %d
 bool(false)
-===DONE===

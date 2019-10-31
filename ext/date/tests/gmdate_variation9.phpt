@@ -35,7 +35,6 @@ foreach($time_formats as $key =>$value) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmdate() : usage variation ***
 
@@ -78,4 +77,3 @@ string(2) "08"
 --Milliseconds--
 string(%d) "%d"
 string(6) "000000"
-===DONE===

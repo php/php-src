@@ -89,7 +89,6 @@ foreach($values as $value) {
       $iterator++;
 };
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strval() : usage variations ***
 
@@ -189,4 +188,3 @@ string(0) ""
 
 -- Iteration 31 --
 string(0) ""
-===DONE===

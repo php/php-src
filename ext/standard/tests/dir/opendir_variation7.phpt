@@ -67,7 +67,6 @@ foreach ($permission_values as $perm) {
 	$iterator++;
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 // deleting temporary directory
@@ -116,4 +115,3 @@ resource(%d) of type (stream)
 -- Iteration 10 --
 bool(true)
 resource(%d) of type (stream)
-===DONE===

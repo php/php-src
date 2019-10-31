@@ -22,9 +22,7 @@ var_dump(ctype_punct($c2));
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_punct() : basic functionality ***
 bool(true)
 bool(false)
-===DONE===

@@ -49,7 +49,6 @@ var_dump(get_class($sxe));
 var_dump(trim($sxe->elem1));
 
 ?>
-===DONE===
 --EXPECT--
 string(5) "elem1"
 string(17) "SimpleXMLIterator"
@@ -72,4 +71,3 @@ string(7) "Foo Bar"
 ===DUMP===
 string(17) "SimpleXMLIterator"
 string(10) "Bla bla 1."
-===DONE===

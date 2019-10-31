@@ -13,8 +13,6 @@ echo "*** Testing array_multisort() : Testing with empty array ***\n";
 var_dump(array_multisort(array()));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_multisort() : Testing with empty array ***
 bool(true)
-===DONE===

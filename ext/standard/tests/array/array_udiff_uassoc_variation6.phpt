@@ -36,7 +36,6 @@ function too_few_parameters ($val1) {
 var_dump(array_udiff_uassoc($arr1, $arr2, 'too_few_parameters', 'too_few_parameters'));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_udiff_uassoc() : usage variation - differing comparison functions***
 
@@ -54,4 +53,3 @@ array(1) {
   [0]=>
   int(1)
 }
-===DONE===

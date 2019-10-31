@@ -29,7 +29,6 @@ foreach ($phar as $entry) {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/broken.dirname/dotted_path.phar');
@@ -38,4 +37,3 @@ rmdir(__DIR__ . '/broken.dirname');
 --EXPECT--
 this is a
 this is b
-===DONE===

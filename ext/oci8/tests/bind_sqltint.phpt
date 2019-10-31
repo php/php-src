@@ -214,7 +214,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
 --EXPECT--
 TEST141 wrong bind type SQLT_INT
 array(1) {
@@ -332,4 +331,3 @@ int(4444)
 
 TEST159
 int(5555)
-===DONE===

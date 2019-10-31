@@ -36,7 +36,6 @@ function s_var_dump($arr) {
    var_dump($arr);
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing class_implements() : basic ***
 array(2) {
@@ -71,4 +70,3 @@ array(1) {
   ["foo"]=>
   string(3) "foo"
 }
-===DONE===

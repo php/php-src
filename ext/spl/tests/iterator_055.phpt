@@ -23,7 +23,6 @@ $it->show();
 var_dump($ar);
 
 ?>
-===DONE===
 --EXPECTF--
 string(3) "1,2"
 array(2) {
@@ -58,4 +57,3 @@ object(ArrayIterator)#%d (1) {
     int(6)
   }
 }
-===DONE===

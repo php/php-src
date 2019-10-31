@@ -46,7 +46,6 @@ var_dump($dh1);
 closedir($dh2);
 var_dump($dh2);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $base_dir_path = __DIR__ . '/opendir_basic-win32-mb';
@@ -67,4 +66,3 @@ resource(%d) of type (stream)
 -- Close directory handles: --
 resource(%d) of type (Unknown)
 resource(%d) of type (Unknown)
-===DONE===

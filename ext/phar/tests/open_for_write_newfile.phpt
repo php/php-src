@@ -24,10 +24,8 @@ include $pname . '/b/c.php';
 include $pname . '/b/new.php';
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
 This is b/c
 extra
-===DONE===

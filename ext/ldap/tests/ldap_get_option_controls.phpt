@@ -58,7 +58,6 @@ var_dump(
 	ldap_get_option($link, LDAP_OPT_SERVER_CONTROLS, $controls_get)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -109,4 +108,3 @@ resource(%d) of type (ldap result)
 int(1)
 bool(true)
 bool(false)
-===DONE===

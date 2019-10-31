@@ -15,10 +15,8 @@ $sxe->addChild('bar');
 $sxe->bar = '';
 echo $sxe->asXML();
 ?>
-===DONE===
 --EXPECT--
 <?xml version="1.0"?>
 <foo><bar/></foo>
 <?xml version="1.0"?>
 <foo><bar/></foo>
-===DONE===

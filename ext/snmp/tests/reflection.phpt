@@ -19,7 +19,6 @@ echo new reflectionmethod('snmp', 'getError');
 
 
 ?>
-===DONE===
 --EXPECT--
 Method [ <internal:snmp, ctor> public method __construct ] {
 
@@ -88,4 +87,3 @@ Method [ <internal:snmp> public method getError ] {
   - Parameters [0] {
   }
 }
-===DONE===

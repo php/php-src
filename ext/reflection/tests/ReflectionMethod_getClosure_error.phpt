@@ -43,10 +43,8 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing ReflectionMethod::getClosure() : error conditions ***
 
 -- Testing ReflectionMethod::getClosure() function with invalid object --
 string(72) "Given object is not an instance of the class this method was declared in"
-===DONE===

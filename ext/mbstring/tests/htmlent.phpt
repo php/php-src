@@ -31,11 +31,9 @@ filter.default=unsafe_raw
 <?php mb_parse_str("test=&#38;&#64;&#65;&#66;&#128;&#129;&#130;&auml;&ouml;&uuml;&euro;&lang;&rang;", $test);
 print_r($test);
 ?>
-===DONE===
 --EXPECT--
 HTML-ENTITIES>UTF-8>HTML-ENTITIES
 Array
 (
     [test] => &@AB&#128;&#129;&#130;&auml;&ouml;&uuml;&euro;&lang;&rang;
 )
-===DONE===

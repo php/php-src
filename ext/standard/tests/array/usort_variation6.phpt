@@ -53,7 +53,6 @@ var_dump( usort($array_args[5], 'cmp_function') );
 echo "-- Array after call to usort() --\n";
 var_dump($array_args[5]);
 ?>
-===DONE===
 --EXPECT--
 *** Testing usort() : usage variation ***
 
@@ -136,4 +135,3 @@ array(5) {
   [4]=>
   int(54)
 }
-===DONE===

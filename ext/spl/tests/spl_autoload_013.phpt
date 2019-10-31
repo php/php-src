@@ -26,7 +26,6 @@ spl_autoload_register($al2);
 var_dump(spl_autoload_functions());
 
 ?>
-===DONE===
 --EXPECTF--
 array(3) {
   [0]=>
@@ -48,4 +47,3 @@ array(3) {
     string(2) "d2"
   }
 }
-===DONE===

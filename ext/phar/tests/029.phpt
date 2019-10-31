@@ -37,7 +37,6 @@ catch (Exception $e)
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php');
@@ -47,4 +46,3 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php');
 bool(true)
 bool(true)
 alias "copy" is already used for archive "%s029.1.phar.php" cannot be overloaded with "%s029.2.phar.php"
-===DONE===

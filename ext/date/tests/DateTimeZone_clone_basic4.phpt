@@ -20,9 +20,7 @@ $d1_clone = clone $d1;
 var_dump( $d1_clone->getName() );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing clone of objects derived from DateTimeZone class with __clone magic method***
 -- DateTimeExt1 __clone magic method called --
 string(16) "America/New_York"
-===DONE===

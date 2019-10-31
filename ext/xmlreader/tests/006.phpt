@@ -29,7 +29,5 @@ if ($reader->nodeType != XMLREADER::END_ELEMENT) {
 
 $reader->close();
 ?>
-===DONE===
 --EXPECT--
 ok
-===DONE===

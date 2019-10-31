@@ -30,7 +30,6 @@ foreach($inputs as $key =>$value) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing localtime() : usage variation ***
 
@@ -159,4 +158,3 @@ array(9) {
   ["tm_isdst"]=>
   int(0)
 }
-===DONE===

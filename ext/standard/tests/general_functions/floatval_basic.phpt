@@ -50,7 +50,6 @@ foreach ($valid_floats as $key => $value ) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing floatval() with valid float values ***
 
@@ -169,4 +168,3 @@ float(5000000)
 
 -- Iteration : -.5e+7 -- 
 float(-5000000)
-===DONE===

@@ -40,7 +40,6 @@ while ($tmp > $base) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 string(%d) "%s/_test/documents/projects/myproject/vendor/name/library/classpath"
 bool(true)
@@ -50,4 +49,3 @@ string(%d) "%s/_test/documents/projects/myproject/vendor/name/library/classpath/
 bool(true)
 string(%d) "%s\_test\documents\projects\myproject\vendor\name\library\classpath"
 string(%d) "%s/_test/documents/projects/myproject/vendor/name/library"
-===DONE===

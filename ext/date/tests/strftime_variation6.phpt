@@ -34,7 +34,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strftime() : usage variation ***
 
@@ -57,4 +56,3 @@ string(2) "PM"
 --Second as decimal number--
 string(%d) "%d"
 string(2) "08"
-===DONE===

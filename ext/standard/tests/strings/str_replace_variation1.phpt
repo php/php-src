@@ -27,7 +27,6 @@ foreach( $search_arr as $value ) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing str_replace() with various search values ***
 -- Iteration 0 --
@@ -389,4 +388,3 @@ array(12) {
   string(0) ""
 }
 int(0)
-===DONE===

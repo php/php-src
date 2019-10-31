@@ -47,7 +47,5 @@ else {
 unlink($inputFileName);
 unlink($outputFileName);
 ?>
-===DONE===
 --EXPECT--
 OK: Copy identical
-===DONE===

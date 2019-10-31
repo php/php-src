@@ -32,7 +32,6 @@ foreach($inputs as $key =>$value) {
       var_dump( idate($value) );
 };
 ?>
-===DONE===
 --EXPECTF--
 *** Testing idate() : usage variation ***
 
@@ -59,4 +58,3 @@ int(%d)
 
 --Time zone offset--
 int(%d)
-===DONE===

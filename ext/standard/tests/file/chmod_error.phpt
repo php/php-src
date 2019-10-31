@@ -15,10 +15,8 @@ $filename = "___nonExisitingFile___";
 var_dump(chmod($filename, 0777));
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing chmod() : error conditions ***
 
 Warning: chmod(): No such file or directory in %s on line %d
 bool(false)
-===DONE===

@@ -19,8 +19,6 @@ $message = 'A test syslog call invocation';
 var_dump( syslog($priority, $message) );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing syslog() : basic functionality ***
 bool(true)
-===DONE===

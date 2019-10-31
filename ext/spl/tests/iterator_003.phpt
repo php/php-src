@@ -87,8 +87,6 @@ foreach ($it as $student) {
 	echo $it->__toString(), "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 01234123, Joe
 00000014, Bob
-===DONE===

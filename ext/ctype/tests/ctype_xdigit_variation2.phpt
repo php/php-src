@@ -26,7 +26,6 @@ for($c = 1; $c < 256; $c++) {
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_xdigit() : usage variations ***
 character code 48 is a hexadecimal 'digit'
@@ -51,4 +50,3 @@ character code 99 is a hexadecimal 'digit'
 character code 100 is a hexadecimal 'digit'
 character code 101 is a hexadecimal 'digit'
 character code 102 is a hexadecimal 'digit'
-===DONE===

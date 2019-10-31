@@ -42,10 +42,8 @@ print_r(file_get_contents($data_file));
 unlink($data_file);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : basic functionality - using integer format ***
 111
 111 222
 111 222 333
-===DONE===

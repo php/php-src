@@ -48,7 +48,6 @@ rmdir($prefix);
 set_active_cp($old_cp);
 
 ?>
-===DONE===
 --EXPECTF--
 Active code page: 65001
 filetype()[dir ] == is_dir()[dir ] -> OK: .
@@ -60,4 +59,3 @@ filetype()[dir ] == is_dir()[dir ] -> OK: ゾ
 filetype()[dir ] == is_dir()[dir ] -> OK: 多国語
 filetype()[dir ] == is_dir()[dir ] -> OK: 表
 Active code page: %d
-===DONE===

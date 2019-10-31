@@ -24,8 +24,6 @@ echo shell_exec("$php -n -f $fn");
 unlink($fn);
 
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 string(3) "啊"
-===DONE===

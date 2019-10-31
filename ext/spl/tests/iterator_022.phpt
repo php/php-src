@@ -125,7 +125,6 @@ catch(UnexpectedValueException $e)
 }
 
 ?>
-===DONE===
 --EXPECT--
 RecursiveArrayIteratorIterator::rewind
 RecursiveArrayIteratorIterator::callHasChildren(0) = no/no
@@ -182,4 +181,3 @@ RecursiveArrayIteratorIterator::endChildren(1)
 RecursiveArrayIteratorIterator::callHasChildren(0) = yes/yes
 RecursiveArrayIteratorIterator::callGetChildren(skip)
 Objects returned by RecursiveIterator::getChildren() must implement RecursiveIterator
-===DONE===

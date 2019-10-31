@@ -20,7 +20,6 @@ var_dump(explode('||', $str, -1));
 echo "\n-- negative limit (since PHP 5.1) with null string -- \n";
 var_dump(explode('||', "", -1));
 ?>
-===DONE===
 --EXPECT--
 *** Testing explode() function: positive and negative limits ***
 
@@ -45,4 +44,3 @@ array(3) {
 -- negative limit (since PHP 5.1) with null string -- 
 array(0) {
 }
-===DONE===

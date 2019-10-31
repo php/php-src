@@ -31,7 +31,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmstrftime() : usage variation ***
 
@@ -46,4 +45,3 @@ string(3) "221"
 --Day of the week as a decimal number--
 string(%d) "%d"
 string(1) "5"
-===DONE===

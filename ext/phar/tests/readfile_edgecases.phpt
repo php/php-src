@@ -28,7 +28,6 @@ readfile("../oops");
 ');
 include $pname . '/foo/hi';
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php rmdir(__DIR__ . '/poo'); ?>
@@ -57,4 +56,3 @@ readfile("../oops");
 ?>
 
 Warning: readfile(phar://%sreadfile_edgecases.phar.php/oops): failed to open stream: phar error: path "oops" is a directory in phar://%sreadfile_edgecases.phar.php/foo/hi on line %d
-===DONE===

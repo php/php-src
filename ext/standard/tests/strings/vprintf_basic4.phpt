@@ -31,7 +31,6 @@ echo "\n";
 var_dump($result);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : basic functionality - using bool format ***
 1
@@ -40,4 +39,3 @@ int(1)
 int(3)
 1 0 1
 int(5)
-===DONE===

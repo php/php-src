@@ -34,7 +34,6 @@ for ($i = 0; $i < count($prefix); $i++) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing uniqid() : basic functionality ***
 
@@ -69,4 +68,3 @@ string(13) "%s"
 string(23) "%s.%s"
 string(13) "%s"
 
-===DONE===

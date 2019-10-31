@@ -21,9 +21,7 @@ var_dump(ctype_alpha($c2));
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_alpha() : basic functionality ***
 bool(true)
 bool(false)
-===DONE===

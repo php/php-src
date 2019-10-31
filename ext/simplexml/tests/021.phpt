@@ -19,7 +19,5 @@ if ($ok) {
          print "Error\n";
 }
 ?>
-===DONE===
 --EXPECT--
 Works
-===DONE===

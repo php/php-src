@@ -4,7 +4,5 @@ Bug #45166 (substr() )
 <?php
 	echo substr('cd', -3) . "\n";
 ?>
-===DONE===
 --EXPECT--
 cd
-===DONE===

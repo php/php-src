@@ -10,7 +10,5 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 phar error: end of central directory not found in zip-based phar "%snozipend.zip"
-===DONE===
