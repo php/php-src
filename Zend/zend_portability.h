@@ -494,21 +494,21 @@ extern "C++" {
 #endif
 
 #if (defined(__i386__) || defined(__x86_64__))
-# if PHP_HAVE_SSSE3_INSTRUCTIONS && defined(HAVE_TMMINTRIN_H)
-# define PHP_HAVE_SSSE3
+# if defined(HAVE_TMMINTRIN_H)
+#  define PHP_HAVE_SSSE3
 # endif
 
-# if PHP_HAVE_SSE4_2_INSTRUCTIONS && defined(HAVE_NMMINTRIN_H)
-# define PHP_HAVE_SSE4_2
+# if defined(HAVE_NMMINTRIN_H)
+#  define PHP_HAVE_SSE4_2
 # endif
 
 /*
  * AVX2 support was added in gcc 4.7, but AVX2 intrinsics don't work in
  * __attribute__((target("avx2"))) functions until gcc 4.9.
  */
-# if PHP_HAVE_AVX2_INSTRUCTIONS && defined(HAVE_IMMINTRIN_H) && \
+# if defined(HAVE_IMMINTRIN_H) && \
   (defined(__llvm__) || defined(__clang__) || (defined(__GNUC__) && ZEND_GCC_VERSION >= 4009))
-# define PHP_HAVE_AVX2
+#  define PHP_HAVE_AVX2
 # endif
 #endif
 
