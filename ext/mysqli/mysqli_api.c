@@ -1374,6 +1374,10 @@ PHP_FUNCTION(mysqli_free_result)
    Get MySQL client info */
 PHP_FUNCTION(mysqli_get_client_info)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	const char * info = mysql_get_client_info();
 	if (info) {
 		RETURN_STRING(info);
@@ -1385,6 +1389,10 @@ PHP_FUNCTION(mysqli_get_client_info)
    Get MySQL client info */
 PHP_FUNCTION(mysqli_get_client_version)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETURN_LONG((zend_long)mysql_get_client_version());
 }
 /* }}} */
@@ -1484,6 +1492,10 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_method)
 {
 	MYSQLI_RESOURCE *mysqli_resource;
 	MY_MYSQL *mysql;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	if (is_method && (Z_MYSQLI_P(getThis()))->ptr) {
 		return;
@@ -2619,6 +2631,10 @@ PHP_FUNCTION(mysqli_thread_id)
    Return whether thread safety is given or not */
 PHP_FUNCTION(mysqli_thread_safe)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETURN_BOOL(mysql_thread_safe());
 }
 /* }}} */

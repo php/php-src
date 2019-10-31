@@ -1829,6 +1829,10 @@ PHP_METHOD(domnode, getNodePath)
 	dom_object *intern;
 	char *value;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 
 	value = (char *) xmlGetNodePath(nodep);

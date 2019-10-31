@@ -2645,6 +2645,8 @@ static PHP_FUNCTION(session_register_shutdown)
 {
 	php_shutdown_function_entry shutdown_function_entry;
 
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	/* This function is registered itself as a shutdown function by
 	 * session_set_save_handler($obj). The reason we now register another
 	 * shutdown function is in case the user registered their own shutdown

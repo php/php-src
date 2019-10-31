@@ -2667,6 +2667,8 @@ PHP_METHOD(DateTime, __wakeup)
 	php_date_obj     *dateobj;
 	HashTable        *myht;
 
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	dateobj = Z_PHPDATE_P(object);
 
 	myht = Z_OBJPROP_P(object);
@@ -2703,6 +2705,8 @@ static void zval_from_error_container(zval *z, timelib_error_container *error) /
 */
 PHP_FUNCTION(date_get_last_errors)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	if (DATEG(last_errors)) {
 		array_init(return_value);
 		zval_from_error_container(return_value, DATEG(last_errors));
@@ -3581,6 +3585,8 @@ PHP_METHOD(DateTimeZone, __wakeup)
 	php_timezone_obj *tzobj;
 	HashTable        *myht;
 
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	tzobj = Z_PHPTIMEZONE_P(object);
 
 	myht = Z_OBJPROP_P(object);
@@ -4064,6 +4070,8 @@ PHP_METHOD(DateInterval, __wakeup)
 	php_interval_obj *intobj;
 	HashTable        *myht;
 
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	intobj = Z_PHPINTERVAL_P(object);
 
 	myht = Z_OBJPROP_P(object);
@@ -4294,7 +4302,7 @@ PHP_METHOD(DatePeriod, __construct)
 			dpobj->end = clone;
 		}
 	}
- 
+
 	if (dpobj->end == NULL && recurrences < 1) {
 		php_error_docref(NULL, E_WARNING, "The recurrence count '%d' is invalid. Needs to be > 0", (int) recurrences);
 	}
@@ -4467,6 +4475,8 @@ PHP_FUNCTION(timezone_version_get)
 {
 	const timelib_tzdb *tzdb;
 
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	tzdb = DATE_TIMEZONEDB;
 	RETURN_STRING(tzdb->version);
 }
@@ -4479,6 +4489,8 @@ PHP_FUNCTION(timezone_abbreviations_list)
 {
 	const timelib_tz_lookup_table *table, *entry;
 	zval                          element, *abbr_array_p, abbr_array;
+
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	table = timelib_timezone_abbreviations_list();
 	array_init(return_value);
@@ -4939,6 +4951,8 @@ PHP_METHOD(DatePeriod, __wakeup)
 	zval             *object = ZEND_THIS;
 	php_period_obj   *period_obj;
 	HashTable        *myht;
+
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	period_obj = Z_PHPPERIOD_P(object);
 

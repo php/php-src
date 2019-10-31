@@ -14,8 +14,11 @@ require_once('skipifconnectfailure.inc');
 	$link   = NULL;
 
 	// too many parameter
-	if (0 !== ($tmp = @mysqli_connect_errno($link)))
-		printf("[001] Expecting integer/0, got %s/%s\n", gettype($tmp), $tmp);
+	try {
+		mysqli_connect_errno($link);
+	} catch (ArgumentCountError $exception) {
+		print($exception->getMessage() . "\n");
+	}
 
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[002] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -37,4 +40,5 @@ require_once('skipifconnectfailure.inc');
 	print "done!";
 ?>
 --EXPECT--
+mysqli_connect_errno() expects exactly 0 parameters, 1 given
 done!

@@ -267,7 +267,6 @@ require_once('skipifconnectfailure.inc');
 			!mysqli_query($link, 'DELETE FROM test WHERE id > 50', MYSQLI_USE_RESULT))
 		printf("[033] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	$tmp = mysqli_thread_safe($link);
 	$tmp = mysqli_thread_id($link);
 
 	mysqli_close($link);

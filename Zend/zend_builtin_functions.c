@@ -1621,6 +1621,9 @@ ZEND_FUNCTION(get_defined_functions)
 ZEND_FUNCTION(get_defined_vars)
 {
 	zend_array *symbol_table;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	if (zend_forbid_dynamic_call("get_defined_vars()") == FAILURE) {
 		return;
 	}
@@ -1637,6 +1640,8 @@ ZEND_FUNCTION(get_defined_vars)
 #if ZEND_DEBUG && defined(ZTS)
 ZEND_FUNCTION(zend_thread_id)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	RETURN_LONG((zend_long)tsrm_thread_id());
 }
 #endif

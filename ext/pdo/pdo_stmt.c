@@ -1627,6 +1627,8 @@ static PHP_METHOD(PDOStatement, rowCount)
 {
 	PHP_STMT_GET_OBJ;
 
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	RETURN_LONG(stmt->row_count);
 }
 /* }}} */
@@ -2036,6 +2038,8 @@ static PHP_METHOD(PDOStatement, nextRowset)
 {
 	PHP_STMT_GET_OBJ;
 
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	if (!stmt->methods->next_rowset) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "IM001", "driver does not support multiple rowsets");
 		RETURN_FALSE;
@@ -2057,6 +2061,8 @@ static PHP_METHOD(PDOStatement, nextRowset)
 static PHP_METHOD(PDOStatement, closeCursor)
 {
 	PHP_STMT_GET_OBJ;
+
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!stmt->methods->cursor_closer) {
 		/* emulate it by fetching and discarding rows */
@@ -2091,6 +2097,8 @@ static PHP_METHOD(PDOStatement, closeCursor)
    A utility for internals hackers to debug parameter internals */
 static PHP_METHOD(PDOStatement, debugDumpParams)
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	php_stream *out = php_stream_open_wrapper("php://output", "w", 0, NULL);
 	struct pdo_bound_param_data *param;
 	PHP_STMT_GET_OBJ;

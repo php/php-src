@@ -390,6 +390,10 @@ PHP_FUNCTION(mysqli_link_construct)
    Returns the numerical value of the error message from last connect command */
 PHP_FUNCTION(mysqli_connect_errno)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETURN_LONG(MyG(error_no));
 }
 /* }}} */
@@ -398,6 +402,10 @@ PHP_FUNCTION(mysqli_connect_errno)
    Returns the text of the error message from previous MySQL operation */
 PHP_FUNCTION(mysqli_connect_error)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (MyG(error_msg)) {
 		RETURN_STRING(MyG(error_msg));
 	} else {
@@ -1268,10 +1276,10 @@ PHP_FUNCTION(mysqli_release_savepoint)
    Returns information about open and cached links */
 PHP_FUNCTION(mysqli_get_links_stats)
 {
-	if (ZEND_NUM_ARGS()) {
-		php_error_docref(NULL, E_WARNING, "no parameters expected");
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
+
 	array_init(return_value);
 	add_assoc_long_ex(return_value, "total", sizeof("total") - 1, MyG(num_links));
 	add_assoc_long_ex(return_value, "active_plinks", sizeof("active_plinks") - 1, MyG(num_active_persistent));
