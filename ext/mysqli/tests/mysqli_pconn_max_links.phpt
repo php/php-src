@@ -59,7 +59,11 @@ mysqli.rollback_on_cached_plink=1
 			mysqli_errno($plink), mysqli_error($plink));
 	}
 
-	var_dump(mysqli_get_links_stats(1));
+	try {
+	    mysqli_get_links_stats(1);
+	} catch (ArgumentCountError $exception) {
+	    echo $exception->getMessage() . "\n";
+	}
 
 	echo "Before pconnect:";
 	var_dump(mysqli_get_links_stats());
@@ -201,9 +205,8 @@ mysqli_query($link, 'DROP USER pcontest');
 
 mysqli_close($link);
 ?>
---EXPECTF--
-Warning: mysqli_get_links_stats(): no parameters expected in %s on line %d
-NULL
+--EXPECT--
+mysqli_get_links_stats() expects exactly 0 parameters, 1 given
 Before pconnect:array(3) {
   ["total"]=>
   int(1)
