@@ -86,7 +86,6 @@ foreach($inputs as $input) {
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing hexdec() : usage variations ***
 
@@ -183,4 +182,3 @@ int(0)
 
 -- Iteration 26 --
 hexdec() expects parameter 1 to be string, resource given
-===Done===

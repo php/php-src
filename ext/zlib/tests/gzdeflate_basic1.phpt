@@ -50,7 +50,6 @@ echo "\n-- Testing with no specified compression level --\n";
 var_dump( bin2hex(gzdeflate($smallstring) ));
 
 ?>
-===Done===
 --EXPECT--
 *** Testing gzdeflate() : basic functionality ***
 -- Compression level -1 --
@@ -122,4 +121,3 @@ int(0)
 
 -- Testing with no specified compression level --
 string(58) "735428ce4dccc951282e29cacc4b5728c95748cecf2d284a2d2ee60200"
-===Done===

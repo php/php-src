@@ -46,7 +46,6 @@ foreach($bases as $base) {
 	echo "\n\n";
 }
 ?>
-===Done===
 --EXPECT--
 Base = 23
 ..... Exponent = 0 Result = 1
@@ -267,4 +266,3 @@ Base = -9223372036854775808
 ..... Exponent = 2147483647 Result = -INF
 ..... Exponent = -2147483648 Result = 0
 
-===Done===

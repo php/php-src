@@ -14,7 +14,6 @@ echo "\n-- Testing hash() function with invalid hash algorithm --\n";
 var_dump(hash('foo', ''));
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing hash() : error conditions ***
 
@@ -22,4 +21,3 @@ var_dump(hash('foo', ''));
 
 Warning: hash(): Unknown hashing algorithm: foo in %s on line %d
 bool(false)
-===Done===

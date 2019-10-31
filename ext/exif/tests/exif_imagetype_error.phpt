@@ -17,7 +17,6 @@ var_dump( exif_imagetype(__DIR__.'/foo.jpg') );
 
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing exif_imagetype() : error conditions ***
 
@@ -25,4 +24,3 @@ var_dump( exif_imagetype(__DIR__.'/foo.jpg') );
 
 Warning: exif_imagetype(%s/foo.jpg): failed to open stream: No such file or directory in %s on line %d
 bool(false)
-===Done===

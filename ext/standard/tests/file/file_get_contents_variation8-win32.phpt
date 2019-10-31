@@ -48,7 +48,6 @@ foreach($names_arr as $key =>$value) {
 }
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing file_get_contents() : variation ***
 
@@ -97,4 +96,3 @@ bool(false)
 
 Warning: file_get_contents(php/php): failed to open stream: No such file or directory in %s on line %d
 bool(false)
-===Done===

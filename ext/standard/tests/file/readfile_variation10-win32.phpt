@@ -45,7 +45,6 @@ foreach($names_arr as $key => $value) {
 };
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing readfile() : variation ***
 
@@ -86,4 +85,3 @@ Warning: readfile(/no/such/file/dir): failed to open stream: No such file or dir
 -- Filename: php/php --
 
 Warning: readfile(php/php): failed to open stream: No such file or directory in %s on line %d
-===Done===

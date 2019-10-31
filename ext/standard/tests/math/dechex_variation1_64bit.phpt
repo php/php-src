@@ -90,7 +90,6 @@ foreach($inputs as $input) {
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing dechex() : usage variations ***
 
@@ -176,4 +175,3 @@ string(1) "0"
 
 -- Iteration 27 --
 string(%d) "%s"
-===Done===

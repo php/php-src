@@ -76,7 +76,6 @@ foreach($inputs as $input) {
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECT--
 *** Testing floor() : usage variations ***
 
@@ -127,4 +126,3 @@ float(0)
 
 -- Iteration 16 --
 floor() expects parameter 1 to be int or float, resource given
-===Done===

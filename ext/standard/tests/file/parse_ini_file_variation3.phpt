@@ -52,7 +52,6 @@ file_put_contents($output_file, $iniContent);
 var_dump(parse_ini_file($iniFile));
 
 ?>
-===Done===
 --CLEAN--
 <?php
 
@@ -98,4 +97,3 @@ array(10) {
   ["docref_ext"]=>
   string(5) ".html"
 }
-===Done===

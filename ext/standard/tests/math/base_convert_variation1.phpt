@@ -76,7 +76,6 @@ foreach($inputs as $input) {
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing base_convert() : usage variations ***
 
@@ -178,4 +177,3 @@ string(1) "0"
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(1) "5"
-===Done===

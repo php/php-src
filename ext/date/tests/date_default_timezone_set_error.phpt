@@ -13,7 +13,6 @@ echo "\n-- Testing date_default_timezone_set() function with invalid timezone id
 var_dump( date_default_timezone_set("foo") );
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing date_default_timezone_set() : error variations ***
 
@@ -21,4 +20,3 @@ var_dump( date_default_timezone_set("foo") );
 
 Notice: date_default_timezone_set(): Timezone ID 'foo' is invalid in %s on line %d
 bool(false)
-===Done===

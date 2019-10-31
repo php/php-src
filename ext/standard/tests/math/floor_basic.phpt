@@ -38,7 +38,6 @@ foreach($values as $value) {
 };
 
 ?>
-===Done===
 --EXPECT--
 *** Testing floor() : basic functionality ***
 
@@ -101,4 +100,3 @@ float(0)
 
 -- floor  --
 float(0)
-===Done===

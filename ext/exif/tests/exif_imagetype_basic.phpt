@@ -16,8 +16,6 @@ echo "*** Testing exif_imagetype() : basic functionality ***\n";
 
 var_dump(exif_imagetype(__DIR__.'/test2.jpg'));
 ?>
-===Done===
 --EXPECT--
 *** Testing exif_imagetype() : basic functionality ***
 int(2)
-===Done===

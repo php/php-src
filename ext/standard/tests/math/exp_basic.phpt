@@ -26,7 +26,6 @@ foreach($values as $value) {
 };
 
 ?>
-===Done===
 --EXPECT--
 -- Iteration 1 --
 float(22026.465794807)
@@ -63,4 +62,3 @@ float(1)
 
 -- Iteration 12 --
 float(1)
-===Done===

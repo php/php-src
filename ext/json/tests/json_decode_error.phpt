@@ -10,7 +10,6 @@ echo "\n-- Testing json_decode() function with depth below 0 --\n";
 var_dump(json_decode('"abc"', true, -1));
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing json_decode() : error conditions ***
 
@@ -18,4 +17,3 @@ var_dump(json_decode('"abc"', true, -1));
 
 Warning: json_decode(): Depth must be greater than zero in %s on line %d
 NULL
-===Done===

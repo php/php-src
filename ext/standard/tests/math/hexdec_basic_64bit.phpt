@@ -33,7 +33,6 @@ foreach($values as $value) {
 };
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing hexdec() : basic functionality ***
 
@@ -94,4 +93,3 @@ int(0)
 
 -- hexdec  --
 int(0)
-===Done===

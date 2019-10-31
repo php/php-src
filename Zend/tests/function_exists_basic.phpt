@@ -28,7 +28,6 @@ Class C {
 }
 var_dump(function_exists('C::f'));
 ?>
-===Done===
 --EXPECT--
 *** Testing function_exists() : basic functionality ***
 Internal function: bool(true)
@@ -36,4 +35,3 @@ User defined function: bool(true)
 Case sensitivity: bool(true)
 Non existent function: bool(false)
 Method: bool(false)
-===Done===

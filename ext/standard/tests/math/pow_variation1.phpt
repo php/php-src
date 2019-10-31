@@ -94,7 +94,6 @@ foreach($inputs as $input) {
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing pow() : usage variations ***
 
@@ -187,4 +186,3 @@ int(0)
 
 -- Iteration 26 --
 %s
-===Done===

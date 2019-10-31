@@ -81,11 +81,9 @@ if (!$found) {
 
 imap_close($imap_stream, CL_EXPUNGE);
 ?>
-===Done===
 --EXPECTF--
 *** Testing mail() : basic functionality ***
 Msg sent OK
 Id of msg just sent is %d
 .. delete it
 TEST PASSED: Msgs sent and deleted OK
-===Done===
