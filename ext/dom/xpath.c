@@ -256,7 +256,7 @@ PHP_METHOD(domxpath, __construct)
 	dom_xpath_object *intern;
 	xmlXPathContextPtr ctx, oldctx;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "O|b", &doc, dom_document_class_entry, &register_node_ns) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &doc, dom_document_class_entry, &register_node_ns) == FAILURE) {
 		return;
 	}
 
