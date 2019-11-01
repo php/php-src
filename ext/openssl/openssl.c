@@ -1507,13 +1507,12 @@ PHP_FUNCTION(openssl_spki_new)
 	const char *spkac = "SPKAC=";
 	zend_long algo = OPENSSL_ALGO_MD5;
 
-	zval *method = NULL;
 	zval * zpkey = NULL;
 	EVP_PKEY * pkey = NULL;
 	NETSCAPE_SPKI *spki=NULL;
 	const EVP_MD *mdtype;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|z", &zpkey, &challenge, &challenge_len, &method) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &zpkey, &challenge, &challenge_len, &algo) == FAILURE) {
 		return;
 	}
 	RETVAL_FALSE;
@@ -1528,14 +1527,6 @@ PHP_FUNCTION(openssl_spki_new)
 		goto cleanup;
 	}
 
-	if (method != NULL) {
-		if (Z_TYPE_P(method) == IS_LONG) {
-			algo = Z_LVAL_P(method);
-		} else {
-			php_error_docref(NULL, E_WARNING, "Algorithm must be of supported type");
-			goto cleanup;
-		}
-	}
 	mdtype = php_openssl_get_evp_md_from_algo(algo);
 
 	if (!mdtype) {
