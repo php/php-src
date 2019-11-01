@@ -397,16 +397,14 @@ struct _zend_resource {
 	void             *ptr;
 };
 
-typedef struct _zend_property_info zend_property_info;
-
 typedef struct {
 	size_t num;
 	size_t num_allocated;
-	zend_property_info *ptr[1];
+	struct _zend_property_info *ptr[1];
 } zend_property_info_list;
 
 typedef union {
-	zend_property_info *ptr;
+	struct _zend_property_info *ptr;
 	uintptr_t list;
 } zend_property_info_source_list;
 
