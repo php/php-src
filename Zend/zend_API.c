@@ -3053,7 +3053,7 @@ static zend_always_inline int zend_is_callable_check_func(int check_flags, zval 
 		if (ce_org) {
 			scope = ce_org;
 		} else {
-			scope = zend_get_executed_scope();
+			scope = zend_get_executed_user_scope();
 		}
 
 		cname = zend_string_init(Z_STRVAL_P(callable), clen, 0);
@@ -3096,7 +3096,7 @@ static zend_always_inline int zend_is_callable_check_func(int check_flags, zval 
 		retval = 1;
 		if ((fcc->function_handler->op_array.fn_flags & ZEND_ACC_CHANGED) &&
 		    !strict_class) {
-			scope = zend_get_executed_scope();
+			scope = zend_get_executed_user_scope();
 			if (scope &&
 			    instanceof_function(fcc->function_handler->common.scope, scope)) {
 
@@ -3116,7 +3116,7 @@ static zend_always_inline int zend_is_callable_check_func(int check_flags, zval 
 		    (fcc->calling_scope &&
 		     ((fcc->object && fcc->calling_scope->__call) ||
 		      (!fcc->object && fcc->calling_scope->__callstatic)))) {
-			scope = zend_get_executed_scope();
+			scope = zend_get_executed_user_scope();
 			if (fcc->function_handler->common.scope != scope
 			 || !zend_check_protected(zend_get_function_root_class(fcc->function_handler), scope)) {
 				retval = 0;
@@ -3207,7 +3207,7 @@ get_function_via_handler:
 			if (retval
 			 && !(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC)
 			 && !(check_flags & IS_CALLABLE_CHECK_NO_ACCESS)) {
-				scope = zend_get_executed_scope();
+				scope = zend_get_executed_user_scope();
 				if (fcc->function_handler->common.scope != scope) {
 					if ((fcc->function_handler->common.fn_flags & ZEND_ACC_PRIVATE)
 					 || (!zend_check_protected(zend_get_function_root_class(fcc->function_handler), scope))) {
@@ -3382,7 +3382,7 @@ check_func:
 							return 1;
 						}
 
-						if (!zend_is_callable_check_class(Z_STR_P(obj), zend_get_executed_scope(), fcc, &strict_class, error)) {
+						if (!zend_is_callable_check_class(Z_STR_P(obj), zend_get_executed_user_scope(), fcc, &strict_class, error)) {
 							return 0;
 						}
 

@@ -553,6 +553,21 @@ ZEND_API zend_class_entry *zend_get_executed_scope(void) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zend_class_entry *zend_get_executed_user_scope(void) /* {{{ */
+{
+	zend_execute_data *ex = EG(current_execute_data);
+
+	while (1) {
+		if (!ex) {
+			return NULL;
+		} else if (ex->func && ZEND_USER_CODE(ex->func->type)) {
+			return ex->func->common.scope;
+		}
+		ex = ex->prev_execute_data;
+	}
+}
+/* }}} */
+
 ZEND_API zend_bool zend_is_executing(void) /* {{{ */
 {
 	return EG(current_execute_data) != 0;
