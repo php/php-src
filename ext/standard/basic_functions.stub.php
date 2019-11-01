@@ -275,6 +275,167 @@ function base64_encode(string $str): string {}
 /** @return string|false */
 function base64_decode(string $str, bool $strict = false) {}
 
+/* basic_functions.c */
+
+/** @return mixed */
+function constant(string $name) {}
+
+/** @return int|false */
+function ip2long(string $ip_address) {}
+
+/** @return string|false */
+function long2ip(int $proper_address) {}
+
+/** @return string|array|false */
+function getenv(string $variable = UNKNOWN, bool $local_only = false) {}
+
+#ifdef HAVE_PUTENV
+function putenv(string $setting): bool {}
+#endif
+
+/** @return array|false */
+function getopt(string $options, array $longopts = UNKNOWN, &$optind = NULL) {}
+
+function flush(): void {}
+
+function sleep(int $seconds): ?int {}
+
+function usleep(int $microseconds): void {}
+
+#if HAVE_NANOSLEEP
+/** @return array|bool */
+function nanosleep(int $seconds, int $nanoseconds) {}
+
+function time_sleep_until(float $timestamp): bool {}
+#endif
+
+function get_current_user(): string {}
+
+/** @return string|array|false */
+function get_cfg_var(string $option_name) {}
+
+function get_magic_quotes_runtime(): bool {}
+
+function get_magic_quotes_gpc(): bool {}
+
+function error_log(string $message, int $message_type = 0, string $destination = UNKNOWN, string $extra_headers = UNKNOWN): bool {}
+
+function error_get_last(): ?array {}
+
+function error_clear_last(): void {}
+
+/**
+ * @param mixed ...$args
+ * @return mixed
+ */
+function call_user_func(callable $function, ...$args) {}
+
+/** @return mixed */
+function call_user_func_array(callable $function, array $args) {}
+
+/**
+ * @param mixed ...$args
+ * @return mixed
+ */
+function forward_static_call(callable $function, ...$args) {}
+
+/** @return mixed */
+function forward_static_call_array(callable $function, array $args) {}
+
+/**
+ * @param callable $function
+ * @return false|null
+ */
+function register_shutdown_function($function) {}
+
+/** @return string|bool|null */
+function highlight_file(string $filename, bool $return = false) {}
+
+function php_strip_whitespace(string $filename): string {}
+
+/** @return string|bool|null */
+function highlight_string(string $string, bool $return = false) {}
+
+/** @return string|false */
+function ini_get(string $varname) {}
+
+/** @return array|false */
+function ini_get_all(?string $extension = null, bool $details = true) {}
+
+/** @return string|false */
+function ini_set(string $varname, string $value) {}
+
+function ini_restore(string $varname): void {}
+
+/** @return string|false */
+function set_include_path(string $include_path) {}
+
+/** @return string|false */
+function get_include_path() {}
+
+function restore_include_path(): void {}
+
+/**
+ * @param mixed $var
+ * @return string|bool
+ */
+function print_r($var, bool $return = false) {}
+
+function connection_aborted(): int {}
+
+function connection_status(): int {}
+
+function ignore_user_abort(bool $value = false): int {}
+
+#if HAVE_GETSERVBYNAME
+/** @return int|false */
+function getservbyname(string $service, string $protocol) {}
+#endif
+
+#if HAVE_GETSERVBYPORT
+/** @return string|false */
+function getservbyport(int $port, string $protocol) {}
+#endif
+
+#if HAVE_GETPROTOBYNAME
+/** @return int|false */
+function getprotobyname(string $name) {}
+#endif
+
+#if HAVE_GETPROTOBYNUMBER
+/** @return string|false */
+function getprotobynumber(int $protocol) {}
+#endif
+
+/** @param mixed $args */
+function register_tick_function(callable $function, ...$args): bool {}
+
+function unregister_tick_function(callable $function): void {}
+
+function is_uploaded_file(string $path): bool {}
+
+function move_uploaded_file(string $path, string $new_path): bool {}
+
+/** @return array|false */
+function parse_ini_file(string $filename, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL) {}
+
+/** @return array|false */
+function parse_ini_string(string $ini_string, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL) {}
+
+#if ZEND_DEBUG
+function config_get_hash(string $ini_string, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array {}
+#endif
+
+#ifdef HAVE_GETLOADAVG
+/** @return array|false */
+function sys_getloadavg() {}
+#endif
+
+/* browscap.c */
+
+/** @return object|array|false */
+function get_browser(?string $browser_name = null, bool $return_array = false) {}
+
 /* crc32.c */
 
 function crc32(string $str): int {}
@@ -282,6 +443,46 @@ function crc32(string $str): int {}
 /* crypt.c */
 
 function crypt(string $str, string $salt = UNKNOWN): string {}
+
+/* cyr_convert.c */
+
+function convert_cyr_string(string $str, string $from, string $to): string {}
+
+/* datetime.c */
+
+#if HAVE_STRPTIME
+/** @return array|false */
+function strptime(string $timestamp, string $format) {}
+#endif
+
+/* dns.c */
+
+#ifdef HAVE_GETHOSTNAME
+/** @return string|false */
+function gethostname() {}
+#endif
+
+/** @return string|false */
+function gethostbyaddr(string $ip_address) {}
+
+function gethostbyname(string $hostname): string {}
+
+/** @return array|false */
+function gethostbynamel(string $hostname) {}
+
+#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+function dns_check_record(string $hostname, string $type = "MX"): bool {}
+
+/** @return array|false */
+function dns_get_record(string $hostname, int $type = DNS_ANY, &$authns = null, &$addtl = null, bool $raw = false) {}
+
+function dns_get_mx(string $hostname, &$mxhosts, &$weight = null): bool {}
+#endif
+
+/* net.c */
+
+/** @return array|false */
+function net_get_interfaces() {}
 
 /* ftok.c */
 
