@@ -2567,8 +2567,10 @@ static void ZEND_FASTCALL zend_runtime_jit(void)
 		zend_jit_unprotect();
 
 		/* restore original opcode handlers */
-		while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-			opline++;
+		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+				opline++;
+			}
 		}
 		opline->handler = ZEND_FUNC_INFO(op_array);
 		ZEND_SET_FUNC_INFO(op_array, NULL);
@@ -2597,8 +2599,10 @@ void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
 		}
 		op_array = &func->op_array;
 		opline = op_array->opcodes;
-		while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-			opline++;
+		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+				opline++;
+			}
 		}
 		if (opline->handler == zend_jit_profile_jit_handler) {
 			if (!RUN_TIME_CACHE(op_array)) {
@@ -2667,8 +2671,10 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 	}
 	ZEND_SET_FUNC_INFO(op_array, (void*)jit_extension);
 
-	while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-		opline++;
+	if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+		while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+			opline++;
+		}
 	}
 
 	opline->handler = (const void*)zend_jit_func_counter_handler;
@@ -2713,8 +2719,10 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 
 		/* Set run-time JIT handler */
 		ZEND_ASSERT(zend_jit_runtime_jit_handler != NULL);
-		while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-			opline++;
+		if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+				opline++;
+			}
 		}
 		ZEND_SET_FUNC_INFO(op_array, (void*)opline->handler);
 		opline->handler = (const void*)zend_jit_runtime_jit_handler;
@@ -2725,8 +2733,10 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 
 		ZEND_ASSERT(zend_jit_profile_jit_handler != NULL);
 		if (op_array->function_name) {
-			while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
-				opline++;
+			if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
+				while (opline->opcode == ZEND_RECV || opline->opcode == ZEND_RECV_INIT) {
+					opline++;
+				}
 			}
 			ZEND_SET_FUNC_INFO(op_array, (void*)opline->handler);
 			opline->handler = (const void*)zend_jit_profile_jit_handler;
