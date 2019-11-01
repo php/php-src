@@ -158,7 +158,7 @@ PHP_METHOD(domelement, __construct)
 	int name_valid;
 	xmlNsPtr nsptr = NULL;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|s!s", &name, &name_len, &value, &value_len, &uri, &uri_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!s", &name, &name_len, &value, &value_len, &uri, &uri_len) == FAILURE) {
 		return;
 	}
 

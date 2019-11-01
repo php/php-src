@@ -2277,7 +2277,7 @@ SXE_METHOD(__construct)
 	zend_long            options = 0;
 	zend_bool       is_url = 0, isprefix = 0;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|lbsb", &data, &data_len, &options, &is_url, &ns, &ns_len, &isprefix) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lbsb", &data, &data_len, &options, &is_url, &ns, &ns_len, &isprefix) == FAILURE) {
 		return;
 	}
 

@@ -258,7 +258,8 @@ ZEND_API int zend_copy_parameters_array(int param_count, zval *argument_array);
 #define ZEND_PARSE_PARAMS_QUIET (1<<1)
 ZEND_API int zend_parse_parameters(int num_args, const char *type_spec, ...);
 ZEND_API int zend_parse_parameters_ex(int flags, int num_args, const char *type_spec, ...);
-ZEND_API int zend_parse_parameters_throw(int num_args, const char *type_spec, ...);
+#define zend_parse_parameters_throw(num_args, type_spec, ...) \
+	zend_parse_parameters(num_args, type_spec, __VA_ARGS__)
 ZEND_API const char *zend_zval_type_name(const zval *arg);
 ZEND_API zend_string *zend_zval_get_type(const zval *arg);
 

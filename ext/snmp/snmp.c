@@ -1530,7 +1530,7 @@ PHP_METHOD(snmp, __construct)
 
 	snmp_object = Z_SNMP_P(object);
 
-	if (zend_parse_parameters_throw(argc, "lss|ll", &version, &a1, &a1_len, &a2, &a2_len, &timeout, &retries) == FAILURE) {
+	if (zend_parse_parameters(argc, "lss|ll", &version, &a1, &a1_len, &a2, &a2_len, &timeout, &retries) == FAILURE) {
 		return;
 	}
 

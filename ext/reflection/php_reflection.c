@@ -1470,7 +1470,7 @@ ZEND_METHOD(reflection_function, __construct)
 	} else {
 		ALLOCA_FLAG(use_heap)
 
-		if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "S", &fname) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &fname) == FAILURE) {
 			return;
 		}
 
@@ -2051,7 +2051,7 @@ ZEND_METHOD(reflection_generator, __construct)
 	object = ZEND_THIS;
 	intern = Z_REFLECTION_P(object);
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "O", &generator, zend_ce_generator) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &generator, zend_ce_generator) == FAILURE) {
 		return;
 	}
 
@@ -2231,7 +2231,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 	zend_class_entry *ce = NULL;
 	zend_bool is_closure = 0;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zz", &reference, &parameter) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &reference, &parameter) == FAILURE) {
 		return;
 	}
 
@@ -2907,7 +2907,7 @@ ZEND_METHOD(reflection_method, __construct)
 	zval ztmp;
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "zs", &classname, &name_str, &name_len) == FAILURE) {
-		if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
 			return;
 		}
 
@@ -3471,7 +3471,7 @@ ZEND_METHOD(reflection_class_constant, __construct)
 	zend_class_entry *ce;
 	zend_class_constant *constant = NULL;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zS", &classname, &constname) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zS", &classname, &constname) == FAILURE) {
 		return;
 	}
 
@@ -5207,7 +5207,7 @@ ZEND_METHOD(reflection_property, __construct)
 	zend_property_info *property_info = NULL;
 	property_reference *reference;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zS", &classname, &name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zS", &classname, &name) == FAILURE) {
 		return;
 	}
 
@@ -5649,7 +5649,7 @@ ZEND_METHOD(reflection_extension, __construct)
 	size_t name_len;
 	ALLOCA_FLAG(use_heap)
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -6002,7 +6002,7 @@ ZEND_METHOD(reflection_zend_extension, __construct)
 	char *name_str;
 	size_t name_len;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
 		return;
 	}
 
@@ -6164,7 +6164,7 @@ ZEND_METHOD(reflection_reference, fromArrayElement)
 	zval *key, *item;
 	reflection_object *intern;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "hz", &ht, &key) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "hz", &ht, &key) == FAILURE) {
 		return;
 	}
 

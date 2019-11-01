@@ -1262,7 +1262,7 @@ PHP_METHOD(domdocument, __construct)
 	size_t encoding_len = 0, version_len = 0;
 	int refcount;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "|ss", &version, &version_len, &encoding, &encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ss", &version, &version_len, &encoding, &encoding_len) == FAILURE) {
 		return;
 	}
 

@@ -57,7 +57,7 @@ PHP_METHOD(domattr, __construct)
 	char *name, *value = NULL;
 	size_t name_len, value_len, name_valid;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
 

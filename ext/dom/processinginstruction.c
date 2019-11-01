@@ -52,7 +52,7 @@ PHP_METHOD(domprocessinginstruction, __construct)
 	size_t name_len, value_len;
 	int name_valid;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
 		return;
 	}
 
