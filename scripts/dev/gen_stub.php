@@ -15,12 +15,23 @@ try {
 }
 
 if ($argc >= 2) {
-    // Generate single file.
-    processStubFile($argv[1]);
+    if (is_file($argv[1])) {
+        // Generate single file.
+        processStubFile($argv[1]);
+    } else if (is_dir($argv[1])) {
+        processDirectory($argv[1]);
+    } else {
+        echo "$argv[1] is neither a file nor a directory.\n";
+        exit(1);
+    }
 } else {
     // Regenerate all stub files we can find.
+    processDirectory('.');
+}
+
+function processDirectory(string $dir) {
     $it = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator('.'),
+        new RecursiveDirectoryIterator($dir),
         RecursiveIteratorIterator::LEAVES_ONLY
     );
     foreach ($it as $file) {
