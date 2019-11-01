@@ -33,7 +33,6 @@
 #define PHP_GDIMG_TYPE_WBM      4
 #define PHP_GDIMG_TYPE_XBM      5
 #define PHP_GDIMG_TYPE_XPM      6
-#define PHP_GDIMG_CONVERT_WBM   7
 #define PHP_GDIMG_TYPE_GD       8
 #define PHP_GDIMG_TYPE_GD2      9
 #define PHP_GDIMG_TYPE_GD2PART  10
