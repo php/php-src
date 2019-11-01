@@ -364,6 +364,228 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_base64_decode, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, strict, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_constant, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ip2long, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, ip_address, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_long2ip, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, proper_address, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_getenv, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, variable, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, local_only, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+#if defined(HAVE_PUTENV)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_putenv, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, setting, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_getopt, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, options, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, longopts, IS_ARRAY, 0)
+	ZEND_ARG_INFO(1, optind)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_flush, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sleep, 0, 1, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_usleep, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, microseconds, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#if HAVE_NANOSLEEP
+ZEND_BEGIN_ARG_INFO_EX(arginfo_nanosleep, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, nanoseconds, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if HAVE_NANOSLEEP
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_time_sleep_until, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, timestamp, IS_DOUBLE, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_current_user, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_cfg_var, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, option_name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_get_magic_quotes_runtime arginfo_ob_flush
+
+#define arginfo_get_magic_quotes_gpc arginfo_ob_flush
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_error_log, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, message_type, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, destination, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, extra_headers, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_error_get_last, 0, 0, IS_ARRAY, 1)
+ZEND_END_ARG_INFO()
+
+#define arginfo_error_clear_last arginfo_flush
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_call_user_func, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, function, IS_CALLABLE, 0)
+	ZEND_ARG_VARIADIC_INFO(0, args)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_call_user_func_array, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, function, IS_CALLABLE, 0)
+	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_forward_static_call arginfo_call_user_func
+
+#define arginfo_forward_static_call_array arginfo_call_user_func_array
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_register_shutdown_function, 0, 0, 1)
+	ZEND_ARG_INFO(0, function)
+	ZEND_ARG_VARIADIC_INFO(0, args)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_highlight_file, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, return, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_php_strip_whitespace, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_highlight_string, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, return, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ini_get, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, varname, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ini_get_all, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, extension, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, details, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ini_set, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, varname, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ini_restore, 0, 1, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, varname, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_set_include_path, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, include_path, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_get_include_path arginfo_ob_get_flush
+
+#define arginfo_restore_include_path arginfo_flush
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_print_r, 0, 0, 1)
+	ZEND_ARG_INFO(0, var)
+	ZEND_ARG_TYPE_INFO(0, return, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_connection_aborted arginfo_ob_get_level
+
+#define arginfo_connection_status arginfo_ob_get_level
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ignore_user_abort, 0, 0, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, value, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+#if HAVE_GETSERVBYNAME
+ZEND_BEGIN_ARG_INFO_EX(arginfo_getservbyname, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, service, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, protocol, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if HAVE_GETSERVBYPORT
+ZEND_BEGIN_ARG_INFO_EX(arginfo_getservbyport, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, port, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, protocol, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if HAVE_GETPROTOBYNAME
+ZEND_BEGIN_ARG_INFO_EX(arginfo_getprotobyname, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if HAVE_GETPROTOBYNUMBER
+ZEND_BEGIN_ARG_INFO_EX(arginfo_getprotobynumber, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, protocol, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_register_tick_function, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, function, IS_CALLABLE, 0)
+	ZEND_ARG_VARIADIC_INFO(0, args)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_unregister_tick_function, 0, 1, IS_VOID, 0)
+	ZEND_ARG_INFO(0, function)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_uploaded_file, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_move_uploaded_file, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, new_path, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_parse_ini_file, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, process_sections, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, scanner_mode, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_parse_ini_string, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, ini_string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, process_sections, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, scanner_mode, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#if ZEND_DEBUG
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_config_get_hash, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, ini_string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, process_sections, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, scanner_mode, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_GETLOADAVG)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sys_getloadavg, 0, 0, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_browser, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, browser_name, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, return_array, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_crc32, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -372,6 +594,61 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_crypt, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, salt, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_convert_cyr_string, 0, 3, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, from, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, to, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#if HAVE_STRPTIME
+ZEND_BEGIN_ARG_INFO_EX(arginfo_strptime, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, timestamp, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_GETHOSTNAME)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gethostname, 0, 0, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#define arginfo_gethostbyaddr arginfo_ip2long
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gethostbyname, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gethostbynamel, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dns_check_record, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, type, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_get_record, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
+	ZEND_ARG_INFO(1, authns)
+	ZEND_ARG_INFO(1, addtl)
+	ZEND_ARG_TYPE_INFO(0, raw, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dns_get_mx, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
+	ZEND_ARG_INFO(1, mxhosts)
+	ZEND_ARG_INFO(1, weight)
+ZEND_END_ARG_INFO()
+#endif
+
+#define arginfo_net_get_interfaces arginfo_ob_get_flush
 
 #if HAVE_FTOK
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftok, 0, 2, IS_LONG, 0)
