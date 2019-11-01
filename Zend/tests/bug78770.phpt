@@ -10,6 +10,7 @@ if (!extension_loaded("intl") die("skip requires intl");
 class Test {
     public function method() {
         IntlChar::enumCharTypes([$this, 'privateMethod']);
+        IntlChar::enumCharTypes('self::privateMethod');
     }
 
     private function privateMethod($start, $end, $name) {

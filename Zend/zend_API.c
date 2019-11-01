@@ -2906,10 +2906,10 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 		if (!scope) {
 			if (error) *error = estrdup("cannot access self:: when no class scope is active");
 		} else {
-			fcc->called_scope = zend_get_called_scope(EG(current_execute_data));
+			fcc->called_scope = zend_get_called_user_scope(EG(current_execute_data));
 			fcc->calling_scope = scope;
 			if (!fcc->object) {
-				fcc->object = zend_get_this_object(EG(current_execute_data));
+				fcc->object = zend_get_user_this_object(EG(current_execute_data));
 			}
 			ret = 1;
 		}
@@ -2919,16 +2919,16 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 		} else if (!scope->parent) {
 			if (error) *error = estrdup("cannot access parent:: when current class scope has no parent");
 		} else {
-			fcc->called_scope = zend_get_called_scope(EG(current_execute_data));
+			fcc->called_scope = zend_get_called_user_scope(EG(current_execute_data));
 			fcc->calling_scope = scope->parent;
 			if (!fcc->object) {
-				fcc->object = zend_get_this_object(EG(current_execute_data));
+				fcc->object = zend_get_user_this_object(EG(current_execute_data));
 			}
 			*strict_class = 1;
 			ret = 1;
 		}
 	} else if (zend_string_equals_literal(lcname, "static")) {
-		zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
+		zend_class_entry *called_scope = zend_get_called_user_scope(EG(current_execute_data));
 
 		if (!called_scope) {
 			if (error) *error = estrdup("cannot access static:: when no class scope is active");
@@ -2936,7 +2936,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 			fcc->called_scope = called_scope;
 			fcc->calling_scope = called_scope;
 			if (!fcc->object) {
-				fcc->object = zend_get_this_object(EG(current_execute_data));
+				fcc->object = zend_get_user_this_object(EG(current_execute_data));
 			}
 			*strict_class = 1;
 			ret = 1;
@@ -2951,7 +2951,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 		scope = ex ? ex->func->common.scope : NULL;
 		fcc->calling_scope = ce;
 		if (scope && !fcc->object) {
-			zend_object *object = zend_get_this_object(EG(current_execute_data));
+			zend_object *object = zend_get_user_this_object(EG(current_execute_data));
 
 			if (object &&
 			    instanceof_function(object->ce, scope) &&
@@ -3160,7 +3160,7 @@ get_function_via_handler:
 				retval = 1;
 				call_via_handler = (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;
 				if (call_via_handler && !fcc->object) {
-					zend_object *object = zend_get_this_object(EG(current_execute_data));
+					zend_object *object = zend_get_user_this_object(EG(current_execute_data));
 					if (object &&
 					    instanceof_function(object->ce, fcc->calling_scope)) {
 						fcc->object = object;

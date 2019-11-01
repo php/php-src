@@ -1045,6 +1045,25 @@ ZEND_API zend_class_entry *zend_get_called_scope(zend_execute_data *ex) /* {{{ *
 }
 /* }}} */
 
+ZEND_API zend_class_entry *zend_get_called_user_scope(zend_execute_data *ex) /* {{{ */
+{
+	while (ex) {
+		if (ex->func) {
+			if (ex->func->type != ZEND_INTERNAL_FUNCTION) {
+				if (Z_TYPE(ex->This) == IS_OBJECT) {
+					return Z_OBJCE(ex->This);
+				} else if (Z_CE(ex->This)) {
+					return Z_CE(ex->This);
+				}
+				return NULL;
+			}
+		}
+		ex = ex->prev_execute_data;
+	}
+	return NULL;
+}
+/* }}} */
+
 ZEND_API zend_object *zend_get_this_object(zend_execute_data *ex) /* {{{ */
 {
 	while (ex) {
@@ -1052,6 +1071,23 @@ ZEND_API zend_object *zend_get_this_object(zend_execute_data *ex) /* {{{ */
 			return Z_OBJ(ex->This);
 		} else if (ex->func) {
 			if (ex->func->type != ZEND_INTERNAL_FUNCTION || ex->func->common.scope) {
+				return NULL;
+			}
+		}
+		ex = ex->prev_execute_data;
+	}
+	return NULL;
+}
+/* }}} */
+
+ZEND_API zend_object *zend_get_user_this_object(zend_execute_data *ex) /* {{{ */
+{
+	while (ex) {
+		if (ex->func) {
+			if (ex->func->type != ZEND_INTERNAL_FUNCTION) {
+				if (Z_TYPE(ex->This) == IS_OBJECT) {
+					return Z_OBJ(ex->This);
+				}
 				return NULL;
 			}
 		}
