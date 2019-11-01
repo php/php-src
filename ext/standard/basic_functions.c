@@ -28,6 +28,7 @@
 #include "php_getopt.h"
 #include "ext/standard/info.h"
 #include "ext/session/php_session.h"
+#include "zend_exceptions.h"
 #include "zend_operators.h"
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
@@ -2599,8 +2600,8 @@ PHP_FUNCTION(putenv)
 	ZEND_PARSE_PARAMETERS_END();
 
     if(setting_len == 0 || setting[0] == '=') {
-    	php_error_docref(NULL, E_WARNING, "Invalid parameter syntax");
-    	RETURN_FALSE;
+    	zend_value_error("Invalid parameter syntax");
+    	return;
     }
 
 	pe.putenv_string = estrndup(setting, setting_len);
@@ -2982,8 +2983,8 @@ PHP_FUNCTION(sleep)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (num < 0) {
-		php_error_docref(NULL, E_WARNING, "Number of seconds must be greater than or equal to 0");
-		RETURN_FALSE;
+		zend_value_error("Number of seconds must be greater than or equal to 0");
+		return;
 	}
 #ifdef PHP_SLEEP_NON_VOID
 	RETURN_LONG(php_sleep((unsigned int)num));
@@ -3006,8 +3007,8 @@ PHP_FUNCTION(usleep)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (num < 0) {
-		php_error_docref(NULL, E_WARNING, "Number of microseconds must be greater than or equal to 0");
-		RETURN_FALSE;
+		zend_value_error("Number of microseconds must be greater than or equal to 0");
+		return;
 	}
 	if (usleep((unsigned int)num) < 0) {
 #if ZEND_DEBUG
@@ -3033,12 +3034,12 @@ PHP_FUNCTION(time_nanosleep)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (tv_sec < 0) {
-		php_error_docref(NULL, E_WARNING, "The seconds value must be greater than 0");
-		RETURN_FALSE;
+		zend_value_error("The seconds value must be greater than 0");
+		return;
 	}
 	if (tv_nsec < 0) {
-		php_error_docref(NULL, E_WARNING, "The nanoseconds value must be greater than 0");
-		RETURN_FALSE;
+		zend_value_error("The nanoseconds value must be greater than 0");
+		return;
 	}
 
 	php_req.tv_sec = (time_t) tv_sec;
@@ -3051,7 +3052,8 @@ PHP_FUNCTION(time_nanosleep)
 		add_assoc_long_ex(return_value, "nanoseconds", sizeof("nanoseconds")-1, php_rem.tv_nsec);
 		return;
 	} else if (errno == EINVAL) {
-		php_error_docref(NULL, E_WARNING, "nanoseconds was not in the range 0 to 999 999 999 or seconds was negative");
+		zend_value_error("Nanoseconds was not in the range 0 to 999 999 999 or seconds was negative");
+		return;
 	}
 
 	RETURN_FALSE;
@@ -4348,7 +4350,7 @@ PHP_FUNCTION(is_uploaded_file)
 	}
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(path, path_len)
+		Z_PARAM_PATH(path, path_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_hash_str_exists(SG(rfc1867_uploaded_files), path, path_len)) {
@@ -4583,6 +4585,8 @@ PHP_FUNCTION(parse_ini_string)
  *  is not the same as ini_get_all() which returns only registered ini options. Only useful for devs to debug php.ini scanner/parser! */
 PHP_FUNCTION(config_get_hash) /* {{{ */
 {
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	HashTable *hash = php_ini_get_configuration_hash();
 
 	array_init(return_value);
