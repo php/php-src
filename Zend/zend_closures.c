@@ -344,11 +344,7 @@ ZEND_METHOD(Closure, fromCallable)
 		RETURN_ZVAL(callable, 1, 0);
 	}
 
-	/* create closure as if it were called from parent scope */
-	EG(current_execute_data) = EX(prev_execute_data);
 	success = zend_create_closure_from_callable(return_value, callable, &error);
-	EG(current_execute_data) = execute_data;
-
 	if (success == FAILURE || error) {
 		if (error) {
 			zend_type_error("Failed to create closure from callable: %s", error);
