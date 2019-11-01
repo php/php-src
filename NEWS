@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.0RC6
 
+- Core:
+  . Fixed bug #78768 (redefinition of typedef zend_property_info). (Nikita)
+
 - Standard:
   . Fixed bug #77930 (stream_copy_to_stream should use mmap more often).
     (Nikita)
