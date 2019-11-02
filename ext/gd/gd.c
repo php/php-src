@@ -2745,13 +2745,8 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 	col = COL;
 
 	nelem = zend_hash_num_elements(Z_ARRVAL_P(POINTS));
-	if (nelem < 6) {
-		zend_value_error("You must have at least 3 points in your array");
-		return;
-	}
-
-	if (npoints <= 0) {
-		zend_value_error("You must give a positive number of points");
+	if (npoints < 3) {
+		zend_value_error("Polygon must have at least 3 points");
 		return;
 	}
 

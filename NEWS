@@ -17,6 +17,7 @@ PHP                                                                        NEWS
     that allow global flag to configure query() or evaluate() calls.
 
 - GD:
+  . Fixed bug #55005 (imagepolygon num_points requirement). (cmb)
   . Replaced gd resources with objects. (Mark Randall)
   . Removed deprecated image2wbmp(). (cmb)
   . Removed deprecated png2wbmp() and jpeg2wbmp(). (cmb)
