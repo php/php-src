@@ -35,7 +35,7 @@ $old_filename = "$file_path/stat_variation1.tmp";
 $new_filename = "$file_path/stat_variation1a.tmp";
 $old_stat = stat($old_filename);
 clearstatcache();
-sleep(2);
+sleep(1);
 var_dump( rename($old_filename, $new_filename) );
 $new_stat = stat($new_filename);
 

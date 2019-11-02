@@ -28,7 +28,7 @@ fclose($fp);
 // checking stat() on file after changing its permission
 echo "*** Testing lstat() on a file after changing its access permission ***\n";
 $old_stat = stat($filename);
-sleep(2);
+sleep(1);
 var_dump( chmod($filename, 0777) );
 // clear the stat
 clearstatcache();

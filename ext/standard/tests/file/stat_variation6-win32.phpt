@@ -32,11 +32,12 @@ fclose($file_handle);
 
 // checking stat() on file
 echo "\n*** Testing stat() on file with miscellaneous file permission and content ***\n";
+clearstatcache();
 $old_stat = stat($filename);
+sleep(1);
 var_dump( chmod($filename, 0777) );
 // clear the stat
 clearstatcache();
-sleep(2);
 $new_stat = stat($filename);
 // compare self stats
 var_dump( compare_self_stat($old_stat) );
@@ -50,10 +51,10 @@ clearstatcache();  // clear statement cache
 // checking stat() on directory
 echo "\n*** Testing stat() on directory with miscellaneous file permission ***\n";
 $old_stat = stat($dirname);
+sleep(1);
 var_dump( chmod($dirname, 0777) );
 // clear the stat
 clearstatcache();
-sleep(2);
 $new_stat = stat($dirname);
 // compare self stats
 var_dump( compare_self_stat($old_stat) );

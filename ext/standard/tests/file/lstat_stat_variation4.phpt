@@ -33,7 +33,7 @@ echo "*** Testing stat() for file after using touch() on the file ***\n";
 $old_stat = stat($file_name);
 // clear the cache
 clearstatcache();
-sleep(2);
+sleep(1);
 var_dump( touch($file_name) );
 $new_stat = stat($file_name);
 

@@ -35,7 +35,7 @@ $old_filename = "$file_path/stat_variation1_私はガラスを食べられます
 $new_filename = "$file_path/stat_variation1a_私はガラスを食べられます.tmp";
 $old_stat = stat($old_filename);
 clearstatcache();
-sleep(2);
+sleep(1);
 var_dump( rename($old_filename, $new_filename) );
 $new_stat = stat($new_filename);
 
