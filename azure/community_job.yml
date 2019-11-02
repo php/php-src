@@ -16,7 +16,7 @@ jobs:
   - job: ${{ parameters.configurationName }}
     timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-16.04'
     variables:
       ubsan_options: 'print_stacktrace=1'
     steps:
