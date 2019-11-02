@@ -34,9 +34,9 @@ const char HARDCODED_INI[] =
 	"implicit_flush=1\n"
 	"output_buffering=0\n"
 	"error_reporting=0\n"
-	/* Reduce oniguruma limits by a factor of 10 to speed up fuzzing */
+	/* Reduce oniguruma limits to speed up fuzzing */
 	"mbstring.regex_stack_limit=10000\n"
-	"mbstring.regex_retry_limit=100000";
+	"mbstring.regex_retry_limit=10000";
 
 static int startup(sapi_module_struct *sapi_module)
 {
