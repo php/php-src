@@ -33,7 +33,6 @@ imagepolygon($image, array (
         100, 200,
         300, 200
     ),
-    3,
     $col_poly);
 
 // output the picture to a file

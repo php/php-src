@@ -16,6 +16,9 @@ trycatch_dump(
     fn () => imagepolygon($g, array(200,10, 200,100, 280,100), 2, $fgnd)
 );
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: imagefilledpolygon(): the $num_points parameter is deprecated in %s on line %d
 !! [ValueError] Polygon must have at least 3 points
+
+Deprecated: imagepolygon(): the $num_points parameter is deprecated in %s on line %d
 !! [ValueError] Polygon must have at least 3 points

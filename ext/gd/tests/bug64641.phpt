@@ -18,14 +18,14 @@ $points = array(
 	100, 200,
 	100, 300
 );
-imagefilledpolygon($im, $points, 3, 0xFFFF00);
+imagefilledpolygon($im, $points, 0xFFFF00);
 
 $points = array(
 	300, 200,
 	400, 200,
 	500, 200
 );
-imagefilledpolygon($im, $points, 3, 0xFFFF00);
+imagefilledpolygon($im, $points, 0xFFFF00);
 
 $ex = imagecreatefrompng(__DIR__ . '/bug64641.png');
 if (($diss = calc_image_dissimilarity($ex, $im)) < 1e-5) {
