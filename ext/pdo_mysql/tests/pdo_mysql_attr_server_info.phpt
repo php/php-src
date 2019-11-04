@@ -40,8 +40,11 @@ $db = MySQLPDOTest::factory();
 	if (!preg_match('/Uptime/i', $info))
 		printf("[006] Can't find uptime in server info '%s'\n", $info);
 
-	if (isset($uptime) && !preg_match(sprintf('/Uptime: %d/i', $uptime), $info))
-		printf("[007] SHOW STATUS and server info have reported a different uptime, please check. Server info: '%s', SHOW STATUS: '%s'\n", $info, $uptime);
+	if (isset($uptime)) {
+		if (!preg_match('/Uptime: (\d+)/i', $info, $matches) || $uptime - $matches[1] > 1) {
+			printf("[007] SHOW STATUS and server info have reported a different uptime, please check. Server info: '%s', SHOW STATUS: '%s'\n", $info, $uptime);
+		}
+	}
 
 	print "done!";
 --EXPECT--
