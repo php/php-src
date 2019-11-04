@@ -199,11 +199,11 @@ function imagecolortransparent(GdImage $im, int $col = UNKNOWN): ?int {}
 
 function imageinterlace(GdImage $im, int $interlace = UNKNOWN): ?int {}
 
-function imagepolygon(GdImage $im, array $points, int $num_points, int $col = UNKNOWN): bool {}
+function imagepolygon(GdImage $im, array $points, int $num_points_or_col, int $col = UNKNOWN): bool {}
 
-function imageopenpolygon(GdImage $im, array $points, int $num_points, int $col = UNKNOWN): bool {}
+function imageopenpolygon(GdImage $im, array $points, int $num_points_or_col, int $col = UNKNOWN): bool {}
 
-function imagefilledpolygon(GdImage $im, array $points, int $num_points, int $col = UNKNOWN): bool {}
+function imagefilledpolygon(GdImage $im, array $points, int $num_points_or_col, int $col = UNKNOWN): bool {}
 
 function imagefontwidth(int $font): int {}
 
