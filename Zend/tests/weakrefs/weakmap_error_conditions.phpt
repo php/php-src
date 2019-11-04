@@ -77,11 +77,6 @@ try {
 } catch (Exception $e) {
     echo $e->getMessage(), "\n";
 }
-try {
-    clone $map;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
 
 ?>
 --EXPECT--
@@ -99,4 +94,3 @@ WeakMap objects do not support properties
 WeakMap objects do not support properties
 Serialization of 'WeakMap' is not allowed
 Unserialization of 'WeakMap' is not allowed
-Trying to clone an uncloneable object of class WeakMap

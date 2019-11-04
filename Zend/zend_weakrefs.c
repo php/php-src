@@ -460,6 +460,23 @@ static HashTable *zend_weakmap_get_gc(zend_object *object, zval **table, int *n)
 	return &wm->ht;
 }
 
+static zend_object *zend_weakmap_clone_obj(zend_object *old_object)
+{
+	zend_object *new_object = zend_weakmap_create_object(zend_ce_weakmap);
+	zend_weakmap *old_wm = zend_weakmap_from(old_object);
+	zend_weakmap *new_wm = zend_weakmap_from(new_object);
+	zend_hash_copy(&new_wm->ht, &old_wm->ht, NULL);
+
+	zend_ulong obj_addr;
+	zval *val;
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(&new_wm->ht, obj_addr, val) {
+		zend_weakref_register(
+			(zend_object *) obj_addr, ZEND_WEAKREF_ENCODE(new_wm, ZEND_WEAKREF_TAG_MAP));
+		zval_add_ref(val);
+	} ZEND_HASH_FOREACH_END();
+	return new_object;
+}
+
 static HashPosition *zend_weakmap_iterator_get_pos_ptr(zend_weakmap_iterator *iter) {
 	ZEND_ASSERT(iter->ht_iter != (uint32_t) -1);
 	return &EG(ht_iterators)[iter->ht_iter].pos;
@@ -658,12 +675,12 @@ void zend_register_weakref_ce(void) /* {{{ */
 	zend_weakmap_handlers.count_elements = zend_weakmap_count_elements;
 	zend_weakmap_handlers.get_properties_for = zend_weakmap_get_properties_for;
 	zend_weakmap_handlers.get_gc = zend_weakmap_get_gc;
+	zend_weakmap_handlers.clone_obj = zend_weakmap_clone_obj;
 	zend_weakmap_handlers.read_property = zend_weakref_no_read;
 	zend_weakmap_handlers.write_property = zend_weakref_no_write;
 	zend_weakmap_handlers.has_property = zend_weakref_no_isset;
 	zend_weakmap_handlers.unset_property = zend_weakref_no_unset;
 	zend_weakmap_handlers.get_property_ptr_ptr = zend_weakref_no_read_ptr;
-	zend_weakmap_handlers.clone_obj = NULL;
 }
 /* }}} */
 
