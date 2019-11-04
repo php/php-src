@@ -223,8 +223,14 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 			efree(intern->ptr);
 			break;
 		case REF_TYPE_TYPE:
-			efree(intern->ptr);
+		{
+			type_reference *type_ref = intern->ptr;
+			if (ZEND_TYPE_IS_NAME(type_ref->type)) {
+				zend_string_release(ZEND_TYPE_NAME(type_ref->type));
+			}
+			efree(type_ref);
 			break;
+		}
 		case REF_TYPE_FUNCTION:
 			_free_function(intern->ptr);
 			break;
@@ -1137,6 +1143,12 @@ static void reflection_type_factory(zend_type type, zval *object)
 	reference->type = type;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_TYPE;
+
+	/* Property types may be resolved during the lifetime of the ReflectionType,
+	 * so we need to make sure that the strings we reference are not released. */
+	if (ZEND_TYPE_IS_NAME(type)) {
+		zend_string_addref(ZEND_TYPE_NAME(type));
+	}
 }
 /* }}} */
 
