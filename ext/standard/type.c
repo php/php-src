@@ -289,6 +289,43 @@ PHP_FUNCTION(is_array)
 }
 /* }}} */
 
+/* {{{ proto bool is_list(mixed var)
+   Returns true if variable is an array whose keys are all numeric, sequential,
+   and start at 0 */
+PHP_FUNCTION(is_list)
+{
+	zval *arg;
+	zend_array *arrval;
+	zend_ulong num_idx, expected_idx = 0;
+	zend_string *str_idx;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_TYPE_P(arg) != IS_ARRAY)
+		RETURN_FALSE;
+
+	arrval = Z_ARRVAL_P(arg);
+
+	/* Empty arrays are lists */
+	if (zend_hash_num_elements(arrval) == 0)
+		RETURN_TRUE;
+
+	/* Packed arrays are lists */
+	if (HT_IS_PACKED(arrval) && HT_IS_WITHOUT_HOLES(arrval))
+		RETURN_TRUE;
+
+	/* Check if the list could theoretically be repacked */
+	ZEND_HASH_FOREACH_KEY(arrval, num_idx, str_idx) {
+		if (str_idx != NULL || num_idx != expected_idx++)
+			RETURN_FALSE;
+	} ZEND_HASH_FOREACH_END();
+
+	RETURN_TRUE;
+}
+/* }}} */
+
 /* {{{ proto bool is_object(mixed var)
    Returns true if variable is an object
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */

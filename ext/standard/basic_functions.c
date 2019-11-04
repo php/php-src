@@ -982,6 +982,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_array, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_list, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, var)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_is_object, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
@@ -1539,6 +1543,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(is_numeric,														arginfo_is_numeric)
 	PHP_FE(is_string,														arginfo_is_string)
 	PHP_FE(is_array,														arginfo_is_array)
+	PHP_FE(is_list,															arginfo_is_list)
 	PHP_FE(is_object,														arginfo_is_object)
 	PHP_FE(is_scalar,														arginfo_is_scalar)
 	PHP_FE(is_callable,														arginfo_is_callable)
