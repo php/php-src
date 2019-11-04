@@ -2675,6 +2675,30 @@ AC_DEFUN([PHP_CHECK_BUILTIN_CPU_SUPPORTS], [
 ])
 
 dnl
+dnl PHP_CHECK_CPU_SUPPORTS
+dnl
+AC_DEFUN([PHP_CHECK_CPU_SUPPORTS], [
+  AC_REQUIRE([PHP_CHECK_BUILTIN_CPU_INIT])
+  AC_REQUIRE([PHP_CHECK_BUILTIN_CPU_SUPPORTS])
+  have_ext_instructions=0
+  if test $have_builtin_cpu_supports = 1; then
+    AC_MSG_CHECKING([for $1 instructions supports])
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[
+int main() {
+	return __builtin_cpu_supports("$1")? 0 : 1;
+}
+    ]])], [
+      have_ext_instructions=1
+      AC_MSG_RESULT([yes])
+    ], [
+      AC_MSG_RESULT([no])
+    ], [AC_MSG_RESULT([no])])
+  fi
+  AC_DEFINE_UNQUOTED(AS_TR_CPP([PHP_HAVE_$1_INSTRUCTIONS]),
+   [$have_ext_instructions], [Whether the compiler supports $1 instructions])
+])
+
+dnl
 dnl PHP_PATCH_CONFIG_HEADERS([FILE])
 dnl
 dnl PACKAGE_* symbols are automatically defined by Autoconf. When including
