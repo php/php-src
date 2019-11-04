@@ -2458,7 +2458,7 @@ str_offset:
 	}
 }
 
-static zend_never_inline uint32_t ZEND_FASTCALL zend_array_key_exists_fast(HashTable *ht, zval *key OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline zend_bool ZEND_FASTCALL zend_array_key_exists_fast(HashTable *ht, zval *key OPLINE_DC EXECUTE_DATA_DC)
 {
 	zend_string *str;
 	zend_ulong hval;
@@ -2470,11 +2470,11 @@ try_again:
 			goto num_key;
 		}
 str_key:
-		return zend_hash_find_ind(ht, str) != NULL ? IS_TRUE : IS_FALSE;
+		return zend_hash_find_ind(ht, str) != NULL;
 	} else if (EXPECTED(Z_TYPE_P(key) == IS_LONG)) {
 		hval = Z_LVAL_P(key);
 num_key:
-		return zend_hash_index_find(ht, hval) != NULL ? IS_TRUE : IS_FALSE;
+		return zend_hash_index_find(ht, hval) != NULL;
 	} else if (EXPECTED(Z_ISREF_P(key))) {
 		key = Z_REFVAL_P(key);
 		goto try_again;
@@ -2486,30 +2486,22 @@ num_key:
 		goto str_key;
 	} else {
 		zend_error(E_WARNING, "array_key_exists(): The first argument should be either a string or an integer");
-		return IS_FALSE;
+		return 0;
 	}
 }
 
-static zend_never_inline uint32_t ZEND_FASTCALL zend_array_key_exists_slow(zval *subject, zval *key OPLINE_DC EXECUTE_DATA_DC)
+static ZEND_COLD void ZEND_FASTCALL zend_array_key_exists_error(
+		zval *subject, zval *key OPLINE_DC EXECUTE_DATA_DC)
 {
-	if (EXPECTED(Z_TYPE_P(subject) == IS_OBJECT)) {
-		zend_error(E_DEPRECATED, "array_key_exists(): "
-			"Using array_key_exists() on objects is deprecated. "
-			"Use isset() or property_exists() instead");
-
-		HashTable *ht = zend_get_properties_for(subject, ZEND_PROP_PURPOSE_ARRAY_CAST);
-		uint32_t result = zend_array_key_exists_fast(ht, key OPLINE_CC EXECUTE_DATA_CC);
-		zend_release_properties(ht);
-		return result;
-	} else {
-		if (UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP1();
-		}
-		if (UNEXPECTED(Z_TYPE_INFO_P(subject) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP2();
-		}
-		zend_type_error("array_key_exists() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(subject)));
-		return IS_NULL;
+	if (Z_TYPE_P(key) == IS_UNDEF) {
+		ZVAL_UNDEFINED_OP1();
+	}
+	if (Z_TYPE_P(subject) == IS_UNDEF) {
+		ZVAL_UNDEFINED_OP2();
+	}
+	if (!EG(exception)) {
+		zend_type_error("array_key_exists() expects parameter 2 to be array, %s given",
+			zend_get_type_by_const(Z_TYPE_P(subject)));
 	}
 }
 

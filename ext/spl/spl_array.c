@@ -804,7 +804,6 @@ static HashTable *spl_array_get_properties_for(zend_object *object, zend_prop_pu
 			break;
 		case ZEND_PROP_PURPOSE_VAR_EXPORT:
 		case ZEND_PROP_PURPOSE_JSON:
-		case _ZEND_PROP_PURPOSE_ARRAY_KEY_EXISTS:
 			dup = 0;
 			break;
 		default:

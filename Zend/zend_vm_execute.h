@@ -6180,7 +6180,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CONST_CO
 
 	zval *key, *subject;
 	HashTable *ht;
-	uint32_t result;
+	zend_bool result;
 
 	SAVE_OPLINE();
 
@@ -6198,11 +6198,12 @@ array_key_exists_array:
 				goto array_key_exists_array;
 			}
 		}
-		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		zend_array_key_exists_error(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		result = 0;
 	}
 
 
-	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
@@ -8281,7 +8282,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CONST_TM
 
 	zval *key, *subject;
 	HashTable *ht;
-	uint32_t result;
+	zend_bool result;
 
 	SAVE_OPLINE();
 
@@ -8299,12 +8300,13 @@ array_key_exists_array:
 				goto array_key_exists_array;
 			}
 		}
-		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		zend_array_key_exists_error(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		result = 0;
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 
-	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
@@ -10525,7 +10527,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CONST_CV
 
 	zval *key, *subject;
 	HashTable *ht;
-	uint32_t result;
+	zend_bool result;
 
 	SAVE_OPLINE();
 
@@ -10543,11 +10545,12 @@ array_key_exists_array:
 				goto array_key_exists_array;
 			}
 		}
-		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		zend_array_key_exists_error(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		result = 0;
 	}
 
 
-	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
@@ -14483,7 +14486,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_TMPVAR_C
 
 	zval *key, *subject;
 	HashTable *ht;
-	uint32_t result;
+	zend_bool result;
 
 	SAVE_OPLINE();
 
@@ -14501,11 +14504,12 @@ array_key_exists_array:
 				goto array_key_exists_array;
 			}
 		}
-		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		zend_array_key_exists_error(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		result = 0;
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
@@ -15863,7 +15867,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_TMPVAR_T
 
 	zval *key, *subject;
 	HashTable *ht;
-	uint32_t result;
+	zend_bool result;
 
 	SAVE_OPLINE();
 
@@ -15881,12 +15885,13 @@ array_key_exists_array:
 				goto array_key_exists_array;
 			}
 		}
-		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		zend_array_key_exists_error(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		result = 0;
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
@@ -17137,7 +17142,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_TMPVAR_C
 
 	zval *key, *subject;
 	HashTable *ht;
-	uint32_t result;
+	zend_bool result;
 
 	SAVE_OPLINE();
 
@@ -17155,11 +17160,12 @@ array_key_exists_array:
 				goto array_key_exists_array;
 			}
 		}
-		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		zend_array_key_exists_error(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		result = 0;
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
@@ -39657,7 +39663,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CV_CONST
 
 	zval *key, *subject;
 	HashTable *ht;
-	uint32_t result;
+	zend_bool result;
 
 	SAVE_OPLINE();
 
@@ -39675,11 +39681,12 @@ array_key_exists_array:
 				goto array_key_exists_array;
 			}
 		}
-		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		zend_array_key_exists_error(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		result = 0;
 	}
 
 
-	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
@@ -43043,7 +43050,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CV_TMPVA
 
 	zval *key, *subject;
 	HashTable *ht;
-	uint32_t result;
+	zend_bool result;
 
 	SAVE_OPLINE();
 
@@ -43061,12 +43068,13 @@ array_key_exists_array:
 				goto array_key_exists_array;
 			}
 		}
-		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		zend_array_key_exists_error(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		result = 0;
 	}
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 
-	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
@@ -47888,7 +47896,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ARRAY_KEY_EXISTS_SPEC_CV_CV_HA
 
 	zval *key, *subject;
 	HashTable *ht;
-	uint32_t result;
+	zend_bool result;
 
 	SAVE_OPLINE();
 
@@ -47906,11 +47914,12 @@ array_key_exists_array:
 				goto array_key_exists_array;
 			}
 		}
-		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		zend_array_key_exists_error(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		result = 0;
 	}
 
 
-	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */

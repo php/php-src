@@ -1841,7 +1841,6 @@ ZEND_API HashTable *zend_std_get_properties_for(zend_object *obj, zend_prop_purp
 		case ZEND_PROP_PURPOSE_SERIALIZE:
 		case ZEND_PROP_PURPOSE_VAR_EXPORT:
 		case ZEND_PROP_PURPOSE_JSON:
-		case _ZEND_PROP_PURPOSE_ARRAY_KEY_EXISTS:
 			ht = obj->handlers->get_properties(obj);
 			if (ht && !(GC_FLAGS(ht) & GC_IMMUTABLE)) {
 				GC_ADDREF(ht);

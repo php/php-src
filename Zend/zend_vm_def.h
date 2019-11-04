@@ -6771,7 +6771,7 @@ ZEND_VM_HANDLER(194, ZEND_ARRAY_KEY_EXISTS, CV|TMPVAR|CONST, CV|TMPVAR|CONST)
 
 	zval *key, *subject;
 	HashTable *ht;
-	uint32_t result;
+	zend_bool result;
 
 	SAVE_OPLINE();
 
@@ -6789,12 +6789,13 @@ ZEND_VM_C_LABEL(array_key_exists_array):
 				ZEND_VM_C_GOTO(array_key_exists_array);
 			}
 		}
-		result = zend_array_key_exists_slow(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		zend_array_key_exists_error(subject, key OPLINE_CC EXECUTE_DATA_CC);
+		result = 0;
 	}
 
 	FREE_OP2();
 	FREE_OP1();
-	ZEND_VM_SMART_BRANCH(result == IS_TRUE, 1);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 /* No specialization for op_types (CONST|TMPVAR|UNUSED|CV, ANY) */
