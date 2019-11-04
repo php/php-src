@@ -321,6 +321,19 @@ PHP_FUNCTION(is_array)
 }
 /* }}} */
 
+/* {{{ Returns true if $array is an array whose keys are all numeric, sequential, and start at 0 */
+PHP_FUNCTION(array_is_list)
+{
+	HashTable *array;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_HT(array)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(zend_array_is_list(array));
+}
+/* }}} */
+
 /* {{{ Returns true if variable is an object
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(is_object)

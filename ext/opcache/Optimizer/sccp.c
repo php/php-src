@@ -788,6 +788,7 @@ static bool can_ct_eval_func_call(zend_string *name, uint32_t num_args, zval **a
 		|| zend_string_equals_literal(name, "array_diff")
 		|| zend_string_equals_literal(name, "array_diff_assoc")
 		|| zend_string_equals_literal(name, "array_diff_key")
+		|| zend_string_equals_literal(name, "array_is_list")
 		|| zend_string_equals_literal(name, "array_key_exists")
 		|| zend_string_equals_literal(name, "array_keys")
 		|| zend_string_equals_literal(name, "array_merge")
