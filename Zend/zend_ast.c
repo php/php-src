@@ -436,7 +436,7 @@ static int zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 			zend_hash_index_update(Z_ARRVAL_P(result), zend_dval_to_lval(Z_DVAL_P(offset)), expr);
 			break;
 		case IS_RESOURCE:
-			zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
+			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
 			zend_hash_index_update(Z_ARRVAL_P(result), Z_RES_HANDLE_P(offset), expr);
 			break;
 		default:
@@ -451,7 +451,7 @@ static int zend_ast_add_unpacked_element(zval *result, zval *expr) {
 		HashTable *ht = Z_ARRVAL_P(expr);
 		zval *val;
 		zend_string *key;
-		
+
 		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
 			if (key) {
 				zend_throw_error(NULL, "Cannot unpack array with string keys");

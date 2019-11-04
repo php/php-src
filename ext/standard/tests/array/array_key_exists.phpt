@@ -70,9 +70,11 @@ foreach ($search_arrays_v as $search_array) {
 
 echo "\n*** Testing error conditions ***\n";
 // first args as array
-var_dump( array_key_exists(array(), array()) );
-// first argument as floating point value
-var_dump( array_key_exists(17.5, array(1,23) ) ) ;
+try {
+    array_key_exists(array(), array());
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "\n*** Testing operation on objects ***\n";
 class key_check
@@ -219,12 +221,7 @@ bool(false)
 bool(true)
 
 *** Testing error conditions ***
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+Illegal offset type
 
 *** Testing operation on objects ***
 array_key_exists() expects parameter 2 to be array, object given

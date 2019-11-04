@@ -40,6 +40,7 @@
 #include "php_math.h"
 #include "zend_smart_str.h"
 #include "zend_bitset.h"
+#include "zend_exceptions.h"
 #include "ext/spl/spl_array.h"
 
 /* {{{ defines */
@@ -765,6 +766,7 @@ PHP_FUNCTION(count)
 
 	switch (Z_TYPE_P(array)) {
 		case IS_NULL:
+			/* Intentionally not converted to an exception */
 			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
 			RETURN_LONG(0);
 			break;
@@ -799,11 +801,13 @@ PHP_FUNCTION(count)
 			}
 
 			/* If There's no handler and it doesn't implement Countable then add a warning */
+			/* Intentionally not converted to an exception */
 			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
 			RETURN_LONG(1);
 			break;
 		}
 		default:
+			/* Intentionally not converted to an exception */
 			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
 			RETURN_LONG(1);
 			break;
@@ -5212,7 +5216,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			param_spec = "+f";
 			diff_data_compare_func = php_array_user_compare;
 		} else {
-			php_error_docref(NULL, E_WARNING, "data_compare_type is %d. This should never happen. Please report as a bug", data_compare_type);
+			ZEND_ASSERT(0 && "Invalid data_compare_type");
 			return;
 		}
 
@@ -6349,9 +6353,22 @@ PHP_FUNCTION(array_key_exists)
 		case IS_NULL:
 			RETVAL_BOOL(zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC()));
 			break;
+		case IS_DOUBLE:
+			RETVAL_BOOL(zend_hash_index_exists(ht, zend_dval_to_lval(Z_DVAL_P(key))));
+			break;
+		case IS_FALSE:
+			RETVAL_BOOL(zend_hash_index_exists(ht, 0));
+			break;
+		case IS_TRUE:
+			RETVAL_BOOL(zend_hash_index_exists(ht, 1));
+			break;
+		case IS_RESOURCE:
+			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(key), Z_RES_HANDLE_P(key));
+			RETVAL_BOOL(zend_hash_index_exists(ht, Z_RES_HANDLE_P(key)));
+			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "The first argument should be either a string or an integer");
-			RETVAL_FALSE;
+			zend_type_error("Illegal offset type");
+			break;
 	}
 }
 /* }}} */

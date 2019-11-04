@@ -348,7 +348,7 @@ fetch_dim_string:
 		}
 		return retval;
 	case IS_RESOURCE:
-		zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_P(offset)->handle, Z_RES_P(offset)->handle);
+		zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_P(offset)->handle, Z_RES_P(offset)->handle);
 		index = Z_RES_P(offset)->handle;
 		goto num_index;
 	case IS_DOUBLE:
