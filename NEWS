@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #77930 (stream_copy_to_stream should use mmap more often).
     (Nikita)
 
+- Reflection:
+  . Fixed bug #78774 (ReflectionNamedType on Typed Properties Crash). (Nikita)
+
 31 Oct 2019, PHP 7.4.0RC5
 
 - Core:
