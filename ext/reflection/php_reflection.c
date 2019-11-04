@@ -1196,23 +1196,6 @@ static void reflection_property_factory(zend_class_entry *ce, zend_string *name,
 	reflection_object *intern;
 	property_reference *reference;
 
-	if (!prop || !(prop->flags & ZEND_ACC_PRIVATE)) {
-		/* we have to search the class hierarchy for this (implicit) public or protected property */
-		zend_class_entry *tmp_ce = ce, *store_ce = ce;
-		zend_property_info *tmp_info = NULL;
-
-		while (tmp_ce && (tmp_info = zend_hash_find_ptr(&tmp_ce->properties_info, name)) == NULL) {
-			ce = tmp_ce;
-			tmp_ce = tmp_ce->parent;
-		}
-
-		if (tmp_info && (!(tmp_info->flags & ZEND_ACC_PRIVATE) || tmp_info->ce == tmp_ce)) { /* found something and it's not a parent's private */
-			prop = tmp_info;
-		} else { /* not found, use initial value */
-			ce = store_ce;
-		}
-	}
-
 	reflection_instantiate(reflection_property_ptr, object);
 	intern = Z_REFLECTION_P(object);
 	reference = (property_reference*) emalloc(sizeof(property_reference));
@@ -5244,18 +5227,6 @@ ZEND_METHOD(reflection_property, __construct)
 		if (dynam_prop == 0) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0, "Property %s::$%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 			return;
-		}
-	}
-
-	if (dynam_prop == 0 && (property_info->flags & ZEND_ACC_PRIVATE) == 0) {
-		/* we have to search the class hierarchy for this (implicit) public or protected property */
-		zend_class_entry *tmp_ce = ce;
-		zend_property_info *tmp_info;
-
-		while (tmp_ce && (tmp_info = zend_hash_find_ptr(&tmp_ce->properties_info, name)) == NULL) {
-			ce = tmp_ce;
-			property_info = tmp_info;
-			tmp_ce = tmp_ce->parent;
 		}
 	}
 
