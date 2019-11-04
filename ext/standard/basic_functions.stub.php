@@ -248,6 +248,8 @@ function array_chunk(array $array, int $length, bool $preserve_keys = false): ar
 
 function array_combine(array $keys, array $values): array {}
 
+function array_is_list(array $array): bool {}
+
 /* base64.c */
 
 function base64_encode(string $string): string {}

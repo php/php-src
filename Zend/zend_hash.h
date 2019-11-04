@@ -1188,6 +1188,33 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		ZEND_HASH_FILL_FINISH(); \
 	} while (0)
 
+/* Check if an array is a list */
+static zend_always_inline zend_bool zend_array_is_list(zend_array *array)
+{
+	zend_long expected_idx = 0;
+	zend_long num_idx;
+	zend_string* str_idx;
+	/* Empty arrays are lists */
+	if (zend_hash_num_elements(array) == 0) {
+		return 1;
+	}
+
+	/* Packed arrays are lists */
+	if (HT_IS_PACKED(array) && HT_IS_WITHOUT_HOLES(array)) {
+		return 1;
+	}
+
+	/* Check if the list could theoretically be repacked */
+	ZEND_HASH_FOREACH_KEY(array, num_idx, str_idx) {
+		if (str_idx != NULL || num_idx != expected_idx++) {
+			return 0;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return 1;
+}
+
+
 static zend_always_inline zval *_zend_hash_append_ex(HashTable *ht, zend_string *key, zval *zv, bool interned)
 {
 	uint32_t idx = ht->nNumUsed++;
