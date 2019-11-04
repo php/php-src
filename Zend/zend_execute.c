@@ -2369,6 +2369,7 @@ str_idx:
 		hval = 1;
 		goto num_idx;
 	} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+		zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
 		hval = Z_RES_HANDLE_P(offset);
 		goto num_idx;
 	} else if (/*OP2_TYPE == IS_CV &&*/ Z_TYPE_P(offset) == IS_UNDEF) {
@@ -2478,6 +2479,19 @@ num_key:
 	} else if (EXPECTED(Z_ISREF_P(key))) {
 		key = Z_REFVAL_P(key);
 		goto try_again;
+	} else if (Z_TYPE_P(key) == IS_DOUBLE) {
+		hval = zend_dval_to_lval(Z_DVAL_P(key));
+		goto num_key;
+	} else if (Z_TYPE_P(key) == IS_FALSE) {
+		hval = 0;
+		goto num_key;
+	} else if (Z_TYPE_P(key) == IS_TRUE) {
+		hval = 1;
+		goto num_key;
+	} else if (Z_TYPE_P(key) == IS_RESOURCE) {
+		zend_use_resource_as_offset(key);
+		hval = Z_RES_HANDLE_P(key);
+		goto num_key;
 	} else if (Z_TYPE_P(key) <= IS_NULL) {
 		if (UNEXPECTED(Z_TYPE_P(key) == IS_UNDEF)) {
 			ZVAL_UNDEFINED_OP1();
@@ -2485,7 +2499,7 @@ num_key:
 		str = ZSTR_EMPTY_ALLOC();
 		goto str_key;
 	} else {
-		zend_error(E_WARNING, "array_key_exists(): The first argument should be either a string or an integer");
+		zend_type_error("Illegal offset type");
 		return 0;
 	}
 }

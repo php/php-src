@@ -63,7 +63,7 @@ function krsort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
 
 function ksort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
 
-/** @param array|Countable $array */
+/** @param array|Countable $var */
 function count($var, int $mode = COUNT_NORAML): int {}
 
 function natsort(array &$arg): bool {}
@@ -258,11 +258,8 @@ function array_filter(array $arg, callable $callback = UNKNOWN, int $use_keys = 
 
 function array_map(?callable $callback, array $arr1, array ...$arrays): array {}
 
-/**
- * @param int|string $key
- * @param array|object $search
- */
-function array_key_exists($key, $search): bool {}
+/** @param mixed $key */
+function array_key_exists($key, array $search): bool {}
 
 function array_chunk(array $arg, int $size, bool $preserve_keys = false): array {}
 
