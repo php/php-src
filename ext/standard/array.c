@@ -5216,7 +5216,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			param_spec = "+f";
 			diff_data_compare_func = php_array_user_compare;
 		} else {
-			zend_value_error("data_compare_type is %d. This should never happen. Please report as a bug", data_compare_type);
+			ZEND_ASSERT(0 && "Invalid data_compare_type");
 			return;
 		}
 
@@ -6365,9 +6365,6 @@ PHP_FUNCTION(array_key_exists)
 		case IS_RESOURCE:
 			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(key), Z_RES_HANDLE_P(key));
 			RETVAL_BOOL(zend_hash_index_exists(ht, Z_RES_HANDLE_P(key)));
-			break;
-		case IS_UNDEF:
-			RETVAL_BOOL(zend_symtable_exists_ind(ht, ZSTR_EMPTY_ALLOC()));
 			break;
 		default:
 			zend_type_error("Illegal offset type");

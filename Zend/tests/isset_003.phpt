@@ -1,5 +1,5 @@
 --TEST--
-Testing isset accessing undefined array itens and properties
+Testing isset accessing undefined array items and properties
 --FILE--
 <?php
 

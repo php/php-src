@@ -2369,7 +2369,7 @@ str_idx:
 		hval = 1;
 		goto num_idx;
 	} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
-		zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
+		zend_use_resource_as_offset(offset);
 		hval = Z_RES_HANDLE_P(offset);
 		goto num_idx;
 	} else if (/*OP2_TYPE == IS_CV &&*/ Z_TYPE_P(offset) == IS_UNDEF) {

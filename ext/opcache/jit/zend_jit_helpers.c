@@ -400,7 +400,7 @@ static int ZEND_FASTCALL zend_jit_fetch_dim_isset_helper(zend_array *ht, zval *d
 			hval = zend_dval_to_lval(Z_DVAL_P(dim));
 			goto num_index;
 		case IS_RESOURCE:
-			//zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
+			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
 			hval = Z_RES_HANDLE_P(dim);
 			goto num_index;
 		case IS_FALSE:
