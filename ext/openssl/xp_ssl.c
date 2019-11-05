@@ -1965,6 +1965,7 @@ static int php_openssl_enable_crypto(php_stream *stream,
 		do {
 			struct timeval cur_time, elapsed_time;
 
+			ERR_clear_error();
 			if (sslsock->is_client) {
 				n = SSL_connect(sslsock->ssl_handle);
 			} else {
@@ -2137,6 +2138,7 @@ static ssize_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, si
 			}
 
 			/* Now, do the IO operation. Don't block if we can't complete... */
+			ERR_clear_error();
 			if (read) {
 				nr_bytes = SSL_read(sslsock->ssl_handle, buf, (int)count);
 
