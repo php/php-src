@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.12
+07 Nov 2019, PHP 7.3.12RC1
 
 - Core:
   . Fixed bug #78658 (Memory corruption using Closure::bindTo). (Nikita)
