@@ -1595,10 +1595,14 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 			/* next: check for conflicts with current class */
 			if ((coliding_prop = zend_hash_find_ptr(&ce->properties_info, prop_name)) != NULL) {
 				if (coliding_prop->flags & ZEND_ACC_SHADOW) {
-					zend_string_release_ex(coliding_prop->name, 0);
-					if (coliding_prop->doc_comment) {
-						zend_string_release_ex(coliding_prop->doc_comment, 0);
-                    }
+					/* Only free if shadow is coming from direct parent,
+					 * otherwise these weren't copied in the first place. */
+					if (coliding_prop->ce == ce->parent) {
+						zend_string_release_ex(coliding_prop->name, 0);
+						if (coliding_prop->doc_comment) {
+							zend_string_release_ex(coliding_prop->doc_comment, 0);
+						}
+					}
 					zend_hash_del(&ce->properties_info, prop_name);
 					flags |= ZEND_ACC_CHANGED;
 				} else {
