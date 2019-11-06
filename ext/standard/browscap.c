@@ -686,6 +686,12 @@ PHP_FUNCTION(get_browser)
 	browscap_entry *found_entry = NULL;
 	HashTable *agent_ht;
 
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_EX(agent_name, 1, 0)
+		Z_PARAM_BOOL(return_array)
+	ZEND_PARSE_PARAMETERS_END();
+
 	if (BROWSCAP_G(activation_bdata).filename[0] != '\0') {
 		bdata = &BROWSCAP_G(activation_bdata);
 		if (bdata->htab == NULL) { /* not initialized yet */
@@ -700,12 +706,6 @@ PHP_FUNCTION(get_browser)
 		}
 		bdata = &global_bdata;
 	}
-
-	ZEND_PARSE_PARAMETERS_START(0, 2)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STR_EX(agent_name, 1, 0)
-		Z_PARAM_BOOL(return_array)
-	ZEND_PARSE_PARAMETERS_END();
 
 	if (agent_name == NULL) {
 		zval *http_user_agent = NULL;
