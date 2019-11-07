@@ -231,7 +231,14 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 		case REF_TYPE_TYPE:
 		{
 			type_reference *type_ref = intern->ptr;
-			if (ZEND_TYPE_IS_NAME(type_ref->type)) {
+			if (ZEND_TYPE_HAS_LIST(type_ref->type)) {
+				void *entry;
+				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type_ref->type), entry) {
+					if (ZEND_TYPE_LIST_IS_NAME(entry)) {
+						zend_string_release(ZEND_TYPE_LIST_GET_NAME(entry));
+					}
+				} ZEND_TYPE_LIST_FOREACH_END();
+			} else if (ZEND_TYPE_HAS_NAME(type_ref->type)) {
 				zend_string_release(ZEND_TYPE_NAME(type_ref->type));
 			}
 			efree(type_ref);
@@ -1169,7 +1176,14 @@ static void reflection_type_factory(zend_type type, zval *object, zend_bool lega
 
 	/* Property types may be resolved during the lifetime of the ReflectionType,
 	 * so we need to make sure that the strings we reference are not released. */
-	if (ZEND_TYPE_IS_NAME(type)) {
+	if (ZEND_TYPE_HAS_LIST(type)) {
+		void *entry;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), entry) {
+			if (ZEND_TYPE_LIST_IS_NAME(entry)) {
+				zend_string_addref(ZEND_TYPE_LIST_GET_NAME(entry));
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+	} else if (ZEND_TYPE_HAS_NAME(type)) {
 		zend_string_addref(ZEND_TYPE_NAME(type));
 	}
 }
@@ -6535,7 +6549,7 @@ static const zend_function_entry reflection_named_type_functions[] = {
 };
 
 static const zend_function_entry reflection_union_type_functions[] = {
-	ZEND_ME(reflection_union_type, getTypes, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_union_type, getTypes, arginfo_class_ReflectionUnionType_getTypes, 0)
 	PHP_FE_END
 };
 

@@ -552,6 +552,11 @@ class ReflectionNamedType extends ReflectionType
     public function isBuiltin() {}
 }
 
+class ReflectionUnionType extends ReflectionType
+{
+    public function getTypes(): array {}
+}
+
 class ReflectionExtension implements Reflector
 {
     final private function __clone() {}
