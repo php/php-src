@@ -294,7 +294,6 @@ END_EXTERN_C()
 
 /* global variables */
 #if !defined(PHP_WIN32)
-#define PHP_SLEEP_NON_VOID
 #define php_sleep sleep
 extern char **environ;
 #endif	/* !defined(PHP_WIN32) */
