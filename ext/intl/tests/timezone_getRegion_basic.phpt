@@ -12,8 +12,6 @@ echo "\n";
 print_R(intltz_get_region('Europe/Amsterdam'));
 echo "\n";
 ?>
-==DONE==
 --EXPECT--
 NL
 NL
-==DONE==

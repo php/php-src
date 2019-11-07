@@ -10,7 +10,5 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 phar error: split archives spanning multiple zips cannot be processed in zip-based phar "%sdisknumber.zip"
-===DONE===

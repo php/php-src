@@ -27,10 +27,8 @@ class B extends A
 $b = new B();
 $b->A();
 ?>
-===DONE===
 --EXPECT--
 B::__construct
 A::__construct
 B::A
 A::A
-===DONE===

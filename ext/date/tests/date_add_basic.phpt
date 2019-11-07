@@ -32,7 +32,6 @@ foreach($intervals as $interval) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing date_add() : basic functionality ***
 string(19) "2008-01-01 12:25:00"
@@ -40,4 +39,3 @@ string(19) "2011-07-06 00:55:05"
 string(19) "2011-07-06 00:55:05"
 string(19) "2011-07-08 00:56:05"
 string(19) "2012-09-09 00:41:35"
-===DONE===

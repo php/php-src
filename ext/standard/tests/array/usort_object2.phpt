@@ -95,7 +95,6 @@ $array_arg = array(
 var_dump( usort($array_arg, 'cmp_function') );
 var_dump($array_arg);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing usort() : object functionality ***
 -- Testing usort() with StaticClass objects --
@@ -162,4 +161,3 @@ array(4) {
     NULL
   }
 }
-===DONE===

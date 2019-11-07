@@ -36,7 +36,6 @@ class test extends bar {
 new test;
 
 ?>
-===DONE===
 --EXPECTF--
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -71,4 +70,3 @@ array(2) {
     string(4) "test"
   }
 }
-===DONE===

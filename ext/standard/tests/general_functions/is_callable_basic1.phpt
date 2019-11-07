@@ -60,7 +60,6 @@ $defined_functions = array (
 check_iscallable($defined_functions);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing is_callable() on defined functions ***
 -- Iteration  1 --
@@ -103,4 +102,3 @@ Hello_World
 bool(true)
 bool(true)
 Hello_World
-===DONE===

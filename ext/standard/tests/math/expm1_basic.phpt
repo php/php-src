@@ -33,7 +33,6 @@ foreach($values as $value) {
 	$iterator++;
 };
 ?>
-===Done===
 --EXPECT--
 *** Testing expm1() : basic functionality ***
 
@@ -72,4 +71,3 @@ float(0)
 
 -- Iteration 12 --
 float(0)
-===Done===

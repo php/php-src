@@ -17,7 +17,6 @@ $entry = ldap_first_entry($link, $result);
 
 var_dump(ldap_get_values_len($link, $entry, "inexistentAttribute"));
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -28,4 +27,3 @@ remove_dummy_data($link, $base);
 --EXPECTF--
 Warning: ldap_get_values_len(): Cannot get the value(s) of attribute %s in %s on line %d
 bool(false)
-===DONE===

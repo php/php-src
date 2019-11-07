@@ -137,8 +137,6 @@ var_dump($sub->count());
 $sub->notify();
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 bool(false)
 $sub->SubjectImpl::attach($ob1);
@@ -196,4 +194,3 @@ MyObjectStorage::key(0)
 $ob3->ObserverImpl::update($sub);
 MyObjectStorage::next()
 MyObjectStorage::valid(0)
-===DONE===

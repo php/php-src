@@ -32,7 +32,6 @@ var_dump(
 	ldap_get_values($link, $entry, "telephoneNumber")
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -52,4 +51,3 @@ array(3) {
   ["count"]=>
   int(2)
 }
-===DONE===

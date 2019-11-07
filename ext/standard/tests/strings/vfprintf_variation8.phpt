@@ -78,7 +78,6 @@ echo "\n";
 unlink($data_file);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing vfprintf() : string formats and non-string values ***
 
@@ -142,4 +141,3 @@ Array Array Array
             1            0001 0000
    #0 1 $1 _0
     1 1 1
-===DONE===

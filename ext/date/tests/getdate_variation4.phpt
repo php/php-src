@@ -31,7 +31,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing getdate() : usage variation ***
 
@@ -138,4 +137,3 @@ array(11) {
   [0]=>
   int(94694400)
 }
-===DONE===

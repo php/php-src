@@ -47,7 +47,6 @@ foreach($formats as $format) {
 }
 
 ?>
-===Done===
 --EXPECT--
 *** Testing vsprintf() : unsigned formats and unsigned values ***
 
@@ -65,4 +64,3 @@ string(10) "#1 0 $0 10"
 
 -- Iteration 5 --
 string(7) "1 2 3 4"
-===Done===

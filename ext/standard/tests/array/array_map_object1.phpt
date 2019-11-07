@@ -124,8 +124,6 @@ class InterClass implements myInterface
 test(array('InterClass', 'square'), array(1, 2));
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 *** Testing array_map() : object functionality ***
 -- simple class with public variable and method --
@@ -191,4 +189,3 @@ array(2) {
   [1]=>
   int(4)
 }
-===DONE===

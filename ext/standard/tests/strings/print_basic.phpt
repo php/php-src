@@ -58,7 +58,6 @@ that the here document terminator must appear on a
 line with just a semicolon no extra whitespace!\n
 END;
 ?>
-===DONE===
 --EXPECT--
 *** Testing print() : basic functionality ***
 
@@ -89,4 +88,3 @@ This uses the "here document" syntax to output
 multiple lines with VARIABLE interpolation. Note
 that the here document terminator must appear on a
 line with just a semicolon no extra whitespace!
-===DONE===

@@ -47,7 +47,6 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_uassoc() : error conditions ***
 
@@ -57,4 +56,3 @@ array_diff_uassoc() expects parameter 6 to be a valid callback, array must have 
 
 -- Testing array_diff_uassoc() function with less than expected no. of arguments --
 At least 3 parameters are required, 2 given
-===DONE===

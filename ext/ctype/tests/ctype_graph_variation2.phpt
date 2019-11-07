@@ -26,7 +26,6 @@ for ($i = 0; $i < 256; $i++) {
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_graph() : usage variations ***
 character code 33 is a printable character
@@ -123,4 +122,3 @@ character code 123 is a printable character
 character code 124 is a printable character
 character code 125 is a printable character
 character code 126 is a printable character
-===DONE===

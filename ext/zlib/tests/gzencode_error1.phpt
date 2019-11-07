@@ -33,7 +33,6 @@ $bad_mode = 99;
 var_dump(gzencode($data, $level, $bad_mode));
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing gzencode() : error conditions ***
 
@@ -46,4 +45,3 @@ bool(false)
 
 Warning: gzencode(): encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE in %s on line %d
 bool(false)
-===Done===

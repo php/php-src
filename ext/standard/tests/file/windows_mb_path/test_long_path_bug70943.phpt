@@ -24,8 +24,6 @@ if ($fp = fopen($testFile, "r")) {
 unlink($testFile);
 
 ?>
-===DONE===
 --EXPECT--
 Generating a file with a path length of 259 characters...
 Opening file... OK
-===DONE===

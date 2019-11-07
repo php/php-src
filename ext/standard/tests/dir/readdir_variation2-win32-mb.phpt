@@ -39,7 +39,6 @@ foreach($entries as $entry) {
 	var_dump($entry);
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 $path = __DIR__ . '/私はガラスを食べられますreaddir_variation2';
@@ -51,4 +50,3 @@ rmdir($path);
 -- Pass an empty directory to readdir() --
 string(1) "."
 string(2) ".."
-===DONE===

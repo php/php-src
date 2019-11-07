@@ -73,7 +73,6 @@ echo "\n-- Sorting Heredoc String values --\n";
 var_dump( usort($heredoc_values, 'cmp_function') );
 var_dump($heredoc_values);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing usort() : usage variation ***
 
@@ -140,4 +139,3 @@ array(4) {
   string(%d) "heredoc string	with!@# and 123
 Test this!!!"
 }
-===DONE===

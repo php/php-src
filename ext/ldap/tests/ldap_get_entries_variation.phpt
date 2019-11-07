@@ -20,7 +20,6 @@ var_dump(
 	)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -33,4 +32,3 @@ array(1) {
   ["count"]=>
   int(0)
 }
-===DONE===

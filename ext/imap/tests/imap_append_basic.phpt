@@ -47,7 +47,6 @@ var_dump(imap_headers($imap_stream));
 
 imap_close($imap_stream);
 ?>
-===Done===
 --CLEAN--
 <?php
 require_once('clean.inc');
@@ -68,4 +67,3 @@ array(2) {
   [1]=>
   string(%d) "%w%s       2)%s webmaster@something. Another test (%d chars)"
 }
-===Done===

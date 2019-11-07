@@ -39,7 +39,6 @@ var_dump( imagecolorstotal( $img ) );
 imagedestroy( $img );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing imagecolorstotal() : basic functionality ***
 int(0)
@@ -47,4 +46,3 @@ int(1)
 int(3)
 int(0)
 int(0)
-===DONE===

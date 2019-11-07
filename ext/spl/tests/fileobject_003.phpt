@@ -46,8 +46,6 @@ test(__DIR__ . '/', substr(__DIR__,-1), 'l');
 test(__DIR__,       substr(__DIR__,-1), 'l');
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ===0===
 object(SplFileInfo)#%d (2) {
@@ -111,4 +109,3 @@ bool(true)
 bool(true)
 LogicException: Cannot use SplFileObject with directories
 LogicException: Cannot use SplFileObject with directories
-===DONE===

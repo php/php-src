@@ -17,10 +17,8 @@ var_dump(
 		$intlcal->getMinimalDaysInFirstWeek()
 );
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 int(6)
 bool(true)
 int(5)
-==DONE==

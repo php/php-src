@@ -47,7 +47,6 @@ else {
 
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing mb_strstr() : variation ***
 -- Ascii data --
@@ -56,4 +55,3 @@ string(2) "61"
 -- mb data in utf-8 --
 string(88) "e8aa9ee38386e382ade382b9e383883334efbc95efbc96e697a5e69cace8aa9ee38386e382ade382b9e38388"
 string(12) "e697a5e69cac"
-===DONE===

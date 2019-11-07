@@ -104,7 +104,6 @@ echo "\n";
 unlink($data_file);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing vfprintf() : with unexpected values for format argument ***
 
@@ -172,4 +171,3 @@ object
 
 -- Iteration 26 --
 Resource id #%d
-===DONE===

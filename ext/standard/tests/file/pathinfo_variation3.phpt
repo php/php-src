@@ -32,7 +32,6 @@ var_dump(pathinfo($testfile, PATHINFO_DIRNAME|PATHINFO_BASENAME));
 
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing pathinfo() : usage variation ***
 array(4) {
@@ -77,4 +76,3 @@ string(17) "/usr/include/arpa"
 string(6) "inet.h"
 string(17) "/usr/include/arpa"
 string(17) "/usr/include/arpa"
-===DONE===

@@ -82,7 +82,6 @@ foreach($inputs as $input) {
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing bindec() : usage variations ***
 
@@ -177,4 +176,3 @@ int(0)
 
 -- Iteration 24 --
 bindec() expects parameter 1 to be string, resource given
-===Done===

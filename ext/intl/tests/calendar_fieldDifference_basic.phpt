@@ -27,9 +27,7 @@ var_dump(
 				strtotime('2012-02-29 06:07:08 +0000') * 1000,
 				IntlCalendar::FIELD_MINUTE));
 ?>
-==DONE==
 --EXPECT--
 int(3601)
 int(6)
-int(61)
-==DONE==
+int(61)

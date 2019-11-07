@@ -37,7 +37,6 @@ var_dump( opendir($dir_path . "/sub_dir?") );
 var_dump( opendir($dir_path . "/sub?dir1") );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path = __DIR__ . "/opendir_variation6";
@@ -64,4 +63,3 @@ bool(false)
 
 Warning: opendir(%s/opendir_variation6/sub?dir1): failed to open dir: %s in %s on line %d
 bool(false)
-===DONE===

@@ -24,8 +24,6 @@ curl_exec($ch);
 var_dump(CURL_HTTP_VERSION_1_1 === curl_getinfo($ch, CURLINFO_HTTP_VERSION));
 curl_close($ch);
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(true)
-===DONE===

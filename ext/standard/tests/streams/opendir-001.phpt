@@ -14,9 +14,7 @@ $path="ftp://localhost:" . $port."/bogusdir";
 
 var_dump(opendir($path));
 ?>
-==DONE==
 --EXPECTF--
 Warning: opendir(ftp://localhost:%d/bogusdir): failed to open dir: FTP server reports 250 /bogusdir: No such file or directory
  in %s on line %d
 bool(false)
-==DONE==

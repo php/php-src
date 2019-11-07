@@ -33,7 +33,6 @@ foreach($inputs as $timezone => $value) {
 	 var_dump( date_sunset($time, SUNFUNCS_RET_STRING, $value["Latitude"], $value["Longitude"], 90, $value["GMT"]) );
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing date_sunset() : usage variation ***
 
@@ -72,4 +71,3 @@ string(5) "17:21"
 --Pacific/Wallis--
 string(5) "17:36"
 string(5) "17:36"
-===DONE===

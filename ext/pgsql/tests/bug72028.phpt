@@ -35,7 +35,6 @@ while (false !== ($i = pg_fetch_assoc($r))) {
 pg_query("DROP TABLE $table");
 
 ?>
-==DONE==
 --EXPECT--
 array(2) {
   ["value"]=>
@@ -49,4 +48,3 @@ array(2) {
   ["details"]=>
   string(37) "insert after looping with a reference"
 }
-==DONE==

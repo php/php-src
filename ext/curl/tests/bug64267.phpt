@@ -29,10 +29,8 @@ var_dump(curl_setopt_array($c, [
 curl_exec($c);
 var_dump(curl_getinfo($c, CURLINFO_RESPONSE_CODE));
 ?>
-===DONE===
 --EXPECTF--
 TEST
 bool(true)
 bool(true)
 int(30%d)
-===DONE===

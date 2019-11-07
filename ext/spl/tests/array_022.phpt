@@ -43,7 +43,6 @@ var_dump($a);
 var_dump($b);
 
 ?>
-===DONE===
 --EXPECTF--
 ==ArrayObject===
 object(MyArrayObject)#%d (1) {
@@ -67,4 +66,3 @@ object(MyArrayIterator)#%d (2) {
   ["baz"]=>
   string(3) "Foo"
 }
-===DONE===

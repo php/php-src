@@ -35,7 +35,6 @@ rewind( $fp );
 fclose( $fp );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -51,4 +50,3 @@ int(5)
 string(5) "Array"
 int(9)
 string(9) "Foo  fake"
-===DONE===

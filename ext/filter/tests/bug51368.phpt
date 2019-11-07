@@ -14,11 +14,9 @@ var_dump(
 $options = ['flags' => FILTER_FLAG_ALLOW_THOUSAND, 'options' => ['thousand' => '']];
 var_dump(filter_var('12345', FILTER_VALIDATE_FLOAT, $options));
 ?>
-===DONE===
 --EXPECTF--
 float(1000)
 float(1234.567)
 
 Warning: filter_var(): thousand separator must be at least one char in %s on line %d
 bool(false)
-===DONE===

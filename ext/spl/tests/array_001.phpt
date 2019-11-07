@@ -33,8 +33,6 @@ $ar[] = 4;
 var_dump($ar);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
@@ -110,4 +108,3 @@ object(ArrayObject)#%d (1) {
     int(4)
   }
 }
-===DONE===

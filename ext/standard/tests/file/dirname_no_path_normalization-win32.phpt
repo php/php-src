@@ -21,7 +21,5 @@ if (strlen($s) >= 10000) {
 	var_dump(strlen($s));
 }
 ?>
-===DONE===
 --EXPECT--
 OK
-===DONE===

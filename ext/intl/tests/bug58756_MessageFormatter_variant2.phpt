@@ -30,8 +30,6 @@ echo "msgf2: ", $msgf->format(array($time, 'date')), " ",
 */
 
 ?>
-==DONE==
 --EXPECT--
 date:  Tuesday, July 7, 2009 8:41:13 PM EDT
 msgf:  Tuesday, July 7, 2009 8:41:13 PM usnyc
-==DONE==

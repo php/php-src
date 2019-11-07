@@ -22,7 +22,6 @@ var_dump(
 	ldap_next_attribute($link, $entry)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -35,4 +34,3 @@ string(%d) "%s"
 string(%d) "%s"
 string(%d) "%s"
 bool(false)
-===DONE===

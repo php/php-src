@@ -38,10 +38,8 @@ if (imap_base64($base64) == $hex) {
 }
 
 ?>
-===Done===
 --EXPECT--
 *** Testing imap_base64() : basic functionality ***
 TEST PASSED
 TEST PASSED
 TEST PASSED
-===Done===

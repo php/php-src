@@ -48,7 +48,6 @@ for ($i = 0; $i < count($valuesy); $i++) {
 	}
 }
 ?>
-===Done===
 --EXPECTF--
 *** Testing hypot() : basic functionality ***
 
@@ -441,4 +440,3 @@ Y: X: float(0)
 Y: X:1 float(1)
 
 Y: X: float(0)
-===Done===

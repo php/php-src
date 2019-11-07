@@ -77,7 +77,6 @@ echo "\n";
 unlink($data_file);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : float formats and non-float values ***
 
@@ -105,4 +104,3 @@ unlink($data_file);
        1.0000 0.0000     1.000000 0.0000
    0.000000 1.000000 1.000000 0.000000
    0.000000 1.000000 1.000000 1.000000
-===DONE===

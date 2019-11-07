@@ -20,7 +20,5 @@ ldap_get_option($link, LDAP_OPT_HOST_NAME, $host);
 var_dump($host);
 unlink($conf);
 ?>
-===DONE===
 --EXPECT--
 string(16) "example.com:3141"
-===DONE===

@@ -32,7 +32,6 @@ echo file_get_contents($outFile);
 unlink($outFile);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing mail() : basic functionality ***
 bool(true)
@@ -40,4 +39,3 @@ bool(true)
 %w2%wSubject: Test Subject
 %w3%w
 %w4%wA Message
-===DONE===

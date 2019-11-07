@@ -24,8 +24,6 @@ class Foo
 $foo = new Foo;
 $foo->testBAR();
 ?>
-===DONE===
 --EXPECT--
 string(7) "testBAR"
 string(7) "testBAR"
-===DONE===

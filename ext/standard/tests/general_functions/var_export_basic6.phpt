@@ -101,7 +101,6 @@ foreach($valid_objects as $key => $obj) {
 	echo "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing var_export() with valid objects ***
 
@@ -307,4 +306,3 @@ concreteClass::__set_state(array(
 string(36) "concreteClass::__set_state(array(
 ))"
 
-===DONE===

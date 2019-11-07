@@ -31,7 +31,6 @@ var_dump(imap_mail_move($stream_id, ''));
 
 imap_close($stream_id);
 ?>
-===Done===
 --EXPECTF--
 Checking with no parameters
 
@@ -51,4 +50,3 @@ NULL
 
 Warning: imap_mail_move() expects at least 3 parameters, 2 given in %s on line %d
 NULL
-===Done===

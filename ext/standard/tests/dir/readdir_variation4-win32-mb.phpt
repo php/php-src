@@ -81,7 +81,6 @@ var_dump($contents);
 
 closedir($dir_handle);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path = __DIR__ . "/私はガラスを食べられますreaddir_variation4/";
@@ -181,4 +180,3 @@ array(16) {
   [15]=>
   string(51) "私はガラスを食べられますsingle_file.tmp"
 }
-===DONE===

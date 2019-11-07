@@ -33,7 +33,6 @@ var_dump($intlcal->getLocale(1));
 
 var_dump($intlcal->getType());
 ?>
-==DONE==
 --EXPECT--
 string(16) "Europe/Amsterdam"
 string(5) "nl_NL"
@@ -46,4 +45,3 @@ string(5) "pt_PT"
 string(12) "Europe/Paris"
 string(5) "fr_CA"
 string(9) "gregorian"
-==DONE==

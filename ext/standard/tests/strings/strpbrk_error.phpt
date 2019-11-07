@@ -16,7 +16,6 @@ echo "\n-- Testing strpbrk() function with empty second argument --\n";
 var_dump( strpbrk($haystack, '') );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strpbrk() : error conditions ***
 
@@ -24,4 +23,3 @@ var_dump( strpbrk($haystack, '') );
 
 Warning: strpbrk(): The character list cannot be empty in %s on line %d
 bool(false)
-===DONE===

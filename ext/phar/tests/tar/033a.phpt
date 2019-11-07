@@ -34,7 +34,6 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
@@ -42,4 +41,3 @@ unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
 --EXPECTF--
 bool(false)
 Cannot modify permissions for file "a.php" in phar "%s033a.phar.tar", write operations are prohibited
-===DONE===

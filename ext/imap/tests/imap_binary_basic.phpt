@@ -34,7 +34,6 @@ $base64 = imap_binary($hex);
 var_dump(bin2hex($base64));
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing imap_binary() : basic functionality ***
 Encode as short string
@@ -45,4 +44,3 @@ Encode a string with special characters
 string(60) "5879737450587464573130374f30422b497a3876506934384c413d3d0d0a"
 Encode some hexadecimal data
 string(144) "65444177584867774d5678344d444a636544417a584867774e4678344d445663654441325848684751567834526b4a6365455a4458486847524678340d0a526b566365455a470d0a"
-===Done===

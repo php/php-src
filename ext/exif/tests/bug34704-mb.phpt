@@ -10,7 +10,6 @@ zlib.output_compression=0
 $infile = __DIR__.'/bug34704私はガラスを食べられます.jpg';
 var_dump(exif_read_data($infile));
 ?>
-===DONE===
 --EXPECTF--
 array(7) {
   ["FileName"]=>
@@ -39,4 +38,3 @@ array(7) {
     int(0)
   }
 }
-===DONE===

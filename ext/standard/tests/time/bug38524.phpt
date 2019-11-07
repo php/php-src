@@ -6,7 +6,6 @@ Bug #38524 (strptime() does not initialize the internal date storage structure)
 <?php
 	var_dump(strptime('2006-08-20', '%Y-%m-%d'));
 ?>
-===DONE===
 --EXPECTF--
 array(9) {
   ["tm_sec"]=>
@@ -28,4 +27,3 @@ array(9) {
   ["unparsed"]=>
   string(0) ""
 }
-===DONE===

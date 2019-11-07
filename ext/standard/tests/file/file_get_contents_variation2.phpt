@@ -44,8 +44,6 @@ function runtest() {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing file_get_contents() : variation ***
 File in script location
-===DONE===

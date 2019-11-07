@@ -35,7 +35,6 @@ var_dump( gmdate('y') );
 var_dump( gmdate('y', $timestamp) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmdate() : usage variation ***
 
@@ -57,4 +56,3 @@ string(4) "2008"
 -- Testing gmdate() function with 2 digit representation year format --
 string(2) "%d"
 string(2) "08"
-===DONE===

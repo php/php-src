@@ -41,11 +41,9 @@ while($reader->read() && $reader->nodeType != XMLReader::ELEMENT);
 $reader->close();
 
 ?>
-===DONE===
 --EXPECTF--
 string(3) "123"
 string(3) "456"
 ===FAIL===
 
 Warning: XMLReader::read(): Element 'foo': %s
-===DONE===

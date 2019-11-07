@@ -71,7 +71,6 @@ foreach($args_array as $args) {
   $counter++;
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : unsigned formats and signed & other types of values ***
 
@@ -106,4 +105,3 @@ int(76)
    #0 1 $1 _0
    0 1 1 1
 int(76)
-===DONE===

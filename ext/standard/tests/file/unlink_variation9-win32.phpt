@@ -78,7 +78,6 @@ foreach($files as $fileToUnlink) {
 
 rmdir($workDir);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing unlink() : variation ***
 -- removing unlinkVar9.tmp\file.tmp --
@@ -114,4 +113,3 @@ file removed
 file removed
 -- removing /%s/unlinkVar9.tmp/file.tmp --
 file removed
-===DONE===

@@ -29,10 +29,8 @@ date_isodate_set($datetime, 2008, 30, 3);
 echo "..same day last year was \"" . date_format($datetime, "D M j") . "\"\n";
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing date_isodate_set() : basic functionality ***
 Week 40 of 2009 is in "September"
 Week 30 day 3 of 2009 is "Wed Jul 22"
 ..same day last year was "Wed Jul 23"
-===DONE===

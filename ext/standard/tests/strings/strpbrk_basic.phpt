@@ -27,7 +27,6 @@ var_dump( strpbrk(5, 5) );
 var_dump( strpbrk(5, "5") );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing strpbrk() : basic functionality ***
 string(20) "is is a Simple text."
@@ -38,4 +37,3 @@ bool(false)
 string(12) "  aaa aaaSLR"
 string(1) "5"
 string(1) "5"
-===DONE===

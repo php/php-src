@@ -22,7 +22,6 @@ foreach ($sizes as $size) {
 gzclose($h);
 unlink($f);
 ?>
-===DONE===
 --EXPECT--
 int(0)
 bytes written=7
@@ -39,4 +38,3 @@ bytes written=15
 tell=142
 bytes written=1000
 tell=1142
-===DONE===

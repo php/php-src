@@ -30,7 +30,6 @@ foreach($input_arrays as $key =>$value) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_uassoc() : usage variation ***
 
@@ -57,4 +56,3 @@ array(1) {
 }
 array(0) {
 }
-===DONE===

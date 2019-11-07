@@ -33,7 +33,6 @@ foreach($valid_nulls as $key => $null_value) {
 	echo "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing var_export() with valid null values ***
 
@@ -56,4 +55,3 @@ NULL
 NULL
 string(4) "NULL"
 
-===DONE===

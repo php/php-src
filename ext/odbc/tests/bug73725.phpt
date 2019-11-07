@@ -23,7 +23,6 @@ $r = odbc_fetch_array($rc);
 var_dump($r);
 
 ?>
-==DONE==
 --EXPECT--
 array(3) {
   ["i"]=>
@@ -41,7 +40,6 @@ array(3) {
   ["k"]=>
   string(2) "34"
 }
-==DONE==
 --CLEAN--
 <?php
 include 'config.inc';

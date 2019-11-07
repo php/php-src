@@ -18,8 +18,6 @@ var_dump(
 	$option
 );
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 int(3)
-===DONE===

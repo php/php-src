@@ -47,9 +47,7 @@ function runtest() {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing file_put_contents() : variation ***
 File in include path. This was appended
 File in include path. This was appended
-===DONE===

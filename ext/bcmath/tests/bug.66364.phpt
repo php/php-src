@@ -8,7 +8,5 @@ if (!extension_loaded('bcmath')) die('skip bcmath extension not available');
 <?php
 var_dump(bcmul('0.3', '0.2', 4));
 ?>
-===DONE===
 --EXPECT--
 string(6) "0.0600"
-===DONE===

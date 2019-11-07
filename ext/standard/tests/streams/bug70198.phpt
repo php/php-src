@@ -56,7 +56,5 @@ if (!$fp) {
 proc_close($srv_proc);
 unlink($srv_fl);
 ?>
-==DONE==
 --EXPECT--
 int(0)
-==DONE==

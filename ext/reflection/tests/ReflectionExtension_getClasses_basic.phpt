@@ -7,7 +7,6 @@ Thijs Lensselink <tl@lenss.nl>
 $ext = new ReflectionExtension('reflection');
 var_dump($ext->getClasses());
 ?>
-==DONE==
 --EXPECT--
 array(17) {
   ["ReflectionException"]=>
@@ -96,4 +95,3 @@ array(17) {
     string(19) "ReflectionReference"
   }
 }
-==DONE==

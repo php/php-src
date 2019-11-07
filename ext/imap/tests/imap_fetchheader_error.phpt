@@ -33,7 +33,6 @@ var_dump( imap_fetchheader($stream_id) );
 
 imap_close($stream_id);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing imap_fetchheader() : error conditions ***
 
@@ -46,4 +45,3 @@ NULL
 
 Warning: imap_fetchheader() expects at least 2 parameters, 1 given in %s on line %d
 NULL
-===DONE===

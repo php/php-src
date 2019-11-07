@@ -26,7 +26,6 @@ if ($clone != $orig) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing clone on DateTime objects ***
 object(DateTimeZone)#%d (2) {
@@ -42,4 +41,3 @@ object(DateTimeZone)#%d (2) {
   string(3) "GMT"
 }
 TEST PASSED : Objects equal but not indetical
-===DONE===

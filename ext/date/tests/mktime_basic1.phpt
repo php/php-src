@@ -28,7 +28,6 @@ var_dump( mktime($hour, $minute, $sec, $month, $day) );
 var_dump( mktime($hour, $minute, $sec, $month, $day, $year) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing DateTime::modify() : basic functionality ***
 int(%i)
@@ -37,4 +36,3 @@ int(%i)
 int(%i)
 int(%i)
 int(%i)
-===DONE===

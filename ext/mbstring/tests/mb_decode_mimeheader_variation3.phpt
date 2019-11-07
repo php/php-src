@@ -22,8 +22,6 @@ var_dump(bin2hex(mb_decode_mimeheader($encoded_word)));
 
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing mb_decode_mimeheader() : variation ***
 string(48) "e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f3f4f5f6f7f8f9"
-===DONE===

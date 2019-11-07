@@ -21,7 +21,5 @@ preg_replace_callback(
 );
 echo '3', "\n";
 ?>
-===DONE===
 --EXPECT--
 123
-===DONE===

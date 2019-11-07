@@ -35,7 +35,6 @@ array_multisort($b, SORT_STRING, $a);
 var_dump($a, $b);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_multisort() : case-sensitive
 array(7) {
@@ -70,4 +69,3 @@ array(7) {
   [6]=>
   string(3) "3 e"
 }
-===DONE===

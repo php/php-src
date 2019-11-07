@@ -45,7 +45,6 @@ echo "\n";
 var_dump($result);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing printf() : basic functionality - using octal format ***
 
@@ -64,4 +63,3 @@ int(14)
 -- Calling printf() with three arguments --
 21 37777777431 567
 int(18)
-===DONE===

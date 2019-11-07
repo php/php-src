@@ -37,7 +37,6 @@ get_basename_with_cp($fn, 65001);
 remove_data("dir_cp1253");
 
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (stream)
 int(25)
@@ -49,4 +48,3 @@ string(33) "διαδρομή δοκιμής33"
 bool(true)
 string(%d) "%s\διαδρομή δοκιμής33"
 Active code page: %d
-===DONE===

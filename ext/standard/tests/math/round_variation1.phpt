@@ -91,7 +91,6 @@ foreach($inputs as $input) {
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECT--
 *** Testing round() : usage variations ***
 
@@ -172,4 +171,3 @@ float(0)
 
 -- Iteration 26 --
 round() expects parameter 1 to be int or float, resource given
-===Done===

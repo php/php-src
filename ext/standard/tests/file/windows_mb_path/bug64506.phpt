@@ -35,7 +35,6 @@ get_basename_with_cp($fnw, 65001);
 var_dump(unlink($fnw));
 
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (stream)
 int(25)
@@ -48,4 +47,3 @@ bool(true)
 string(%d) "%s\š.txt"
 Active code page: %d
 bool(true)
-===DONE===

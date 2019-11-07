@@ -28,7 +28,5 @@ ldap_set_rebind_proc($link, "rebind_proc");
 
 var_dump(ldap_unbind($link));
 ?>
-===DONE===
 --EXPECT--
 bool(true)
-===DONE===

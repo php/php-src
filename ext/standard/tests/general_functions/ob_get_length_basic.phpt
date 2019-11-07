@@ -32,7 +32,6 @@ dump_string_length( '' );
 dump_string_length( null );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing ob_get_length() : basic functionality ***
 bool(false)
@@ -42,4 +41,3 @@ int(1)
 int(15)
 int(0)
 int(0)
-===DONE===

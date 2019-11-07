@@ -52,7 +52,6 @@ echo $childClass2->testStaticVar() . "\n";
 echo $childClass2->testClassConst() . "\n";
 echo $childClass2->testStaticFunction() . "\n";
 ?>
-==DONE==
 --EXPECT--
 TestClassStatic
 TestClassConst
@@ -63,4 +62,3 @@ ChildClassFunction
 TestClassStatic
 TestClassConst
 TestClassFunction
-==DONE==

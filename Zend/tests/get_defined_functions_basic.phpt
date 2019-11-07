@@ -52,8 +52,6 @@ if (count($user) == 2 && in_array("foo", $user) && in_array("helloworld", $user)
 }
 
 ?>
-===Done===
 --EXPECT--
 *** Testing get_defined_functions() : basic functionality ***
 TEST PASSED
-===Done===

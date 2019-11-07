@@ -32,8 +32,6 @@ foreach($it as $val=>$key)
 }
 
 ?>
-===DONE===
-<?php exit(0);
 --EXPECT--
 ===EmptyIterator===
 ===InfiniteIterator===
@@ -48,4 +46,3 @@ foreach($it as $val=>$key)
 1=>B
 2=>C
 1=>B
-===DONE===

@@ -24,7 +24,6 @@ include $pname . '/b/c.php';
 include $pname . '/b/new.php';
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
@@ -36,4 +35,3 @@ Warning: include(phar://%sopen_for_write_newfile_b.phar.php/b/new.php): failed t
 
 Warning: include(): Failed opening 'phar://%sopen_for_write_newfile_b.phar.php/b/new.php' for inclusion (include_path='%s') in %sopen_for_write_newfile_b.php on line %d
 
-===DONE===

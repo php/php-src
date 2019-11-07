@@ -67,7 +67,6 @@ $p2->copy('.phar/stub.php', 'd');
 echo $e->getMessage(),"\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.phar.php'); ?>
@@ -80,4 +79,3 @@ file "a" cannot be copied to file "b", file must not already exist in phar %spha
 hi
 file "d" cannot be copied to file ".phar/stub.php", cannot copy to Phar meta-file in %sphar_copy2.phar.php
 file ".phar/stub.php" cannot be copied to file "d", cannot copy Phar meta-file in %sphar_copy2.phar.php
-===DONE===

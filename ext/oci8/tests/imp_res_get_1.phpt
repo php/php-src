@@ -88,8 +88,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
   1  abcde
@@ -106,4 +104,3 @@ Test 2 - with execute
   t
   u
   X
-===DONE===

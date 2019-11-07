@@ -9,10 +9,8 @@ Bug #73329 (Float)"Nano" == NAN
 		(float)"infusorian"
 	);
 ?>
-==DONE==
 --EXPECT--
 float(0)
 float(0)
 float(0)
 float(0)
-==DONE==

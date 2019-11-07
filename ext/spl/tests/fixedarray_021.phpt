@@ -60,7 +60,6 @@ var_dump(isset($a["0"], $a[-1]), $a["1"]);
 var_dump(empty($a["3"]));
 
 ?>
-==DONE==
 --EXPECTF--
 int(0)
 int(0)
@@ -75,4 +74,3 @@ string(52) "An iterator cannot be used with foreach by reference"
 bool(false)
 string(3) "foo"
 bool(true)
-==DONE==

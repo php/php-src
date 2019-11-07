@@ -49,7 +49,6 @@ trycatch_dump(
     fn() => hash_hkdf('sha1', $ikm, 20 * 255 + 1) // Length can't be more than 255 times the hash digest size
 )
 ?>
-===Done===
 --EXPECT--
 *** Testing hash_hkdf(): error conditions ***
 
@@ -70,4 +69,3 @@ trycatch_dump(
 [Error] Input keying material cannot be empty
 [Error] Length must be greater than or equal to 0: -1
 [Error] Length must be less than or equal to 5100: 5101
-===Done===

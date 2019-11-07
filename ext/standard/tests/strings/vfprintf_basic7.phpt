@@ -42,10 +42,8 @@ print_r(file_get_contents($data_file));
 unlink($data_file);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : basic functionality - using unsigned format ***
 4294966185
 4294966185 4293732729
 4294966185 4293732729 4292621864
-===DONE===

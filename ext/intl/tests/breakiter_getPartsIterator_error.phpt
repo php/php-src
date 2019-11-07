@@ -13,8 +13,6 @@ $it = IntlBreakIterator::createWordInstance(NULL);
 var_dump($it->getPartsIterator(-1));
 
 ?>
-==DONE==
 --EXPECTF--
 Warning: IntlBreakIterator::getPartsIterator(): breakiter_get_parts_iterator: bad key type in %s on line %d
 bool(false)
-==DONE==

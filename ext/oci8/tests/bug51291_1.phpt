@@ -139,8 +139,6 @@ if (!$r) {
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1 - Parse
 array(4) {
@@ -391,4 +389,3 @@ array(4) {
   ["sqltext"]=>
   string(30) "select reallynothere from dual"
 }
-===DONE===

@@ -108,7 +108,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing intval() : usage variation ***
 
@@ -200,4 +199,3 @@ int(0)
 
 --unset var--
 int(0)
-===DONE===

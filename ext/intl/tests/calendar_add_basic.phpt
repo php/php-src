@@ -26,8 +26,6 @@ var_dump(
 	$intlcal->getTime());
 
 ?>
-==DONE==
 --EXPECT--
 float(1330578367000)
-float(1330578367000)
-==DONE==
+float(1330578367000)

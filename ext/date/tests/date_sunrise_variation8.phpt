@@ -35,7 +35,6 @@ foreach( $time_date as $date => $time ){
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing date_sunrise() : usage variation ***
 
@@ -70,4 +69,3 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-===DONE===

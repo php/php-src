@@ -27,7 +27,6 @@ echo "delete:";
 var_dump(dba_delete("a", $dba));
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "clean.inc";
@@ -40,4 +39,3 @@ exists:bool(true)
 delete:bool(true)
 exists:bool(false)
 delete:bool(false)
-===DONE===

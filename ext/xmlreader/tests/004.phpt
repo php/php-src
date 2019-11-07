@@ -31,7 +31,6 @@ while ($reader->read()) {
 $reader->close();
 unlink($filename);
 ?>
-===DONE===
 --EXPECT--
 books
 book
@@ -40,4 +39,3 @@ book
    Attribute Name: idx
    Attribute Value: 2
 #text
-===DONE===

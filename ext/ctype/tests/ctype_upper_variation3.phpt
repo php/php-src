@@ -55,7 +55,6 @@ foreach($values as $value) {
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_upper() : usage variations ***
 
@@ -136,4 +135,3 @@ bool(false)
 
 -- Iteration 26 --
 bool(false)
-===DONE===

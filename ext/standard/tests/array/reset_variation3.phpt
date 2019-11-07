@@ -38,7 +38,6 @@ var_dump(current($array1));
 echo "\$array2: ";
 var_dump(current($array2));
 ?>
-===DONE===
 --EXPECT--
 *** Testing reset() : usage variations ***
 
@@ -53,4 +52,3 @@ $array2: string(3) "one"
 string(4) "zero"
 $array1: string(4) "zero"
 $array2: string(4) "zero"
-===DONE===

@@ -27,8 +27,6 @@ foreach ($types as $t => $v) {
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test - SQLT_CLOB
 
@@ -42,4 +40,3 @@ Warning: oci_bind_by_name(): Unable to find descriptor property in %sbind_unsupp
 Test - OCI_B_BLOB
 
 Warning: oci_bind_by_name(): Unable to find descriptor property in %sbind_unsupported_3.php on line %d
-===DONE===

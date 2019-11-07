@@ -39,8 +39,6 @@ spl_autoload_unregister('spl_autoload');
 var_dump(spl_autoload_functions());
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 bool(false)
 array(1) {
@@ -67,4 +65,3 @@ array(1) {
   string(12) "spl_autoload"
 }
 bool(false)
-===DONE===

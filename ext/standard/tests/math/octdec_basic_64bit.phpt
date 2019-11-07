@@ -32,7 +32,6 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);
 }
 ?>
-===Done===
 --EXPECTF--
 *** Testing octdec() : basic functionality ***
 
@@ -64,4 +63,3 @@ int(823384)
 int(1)
 int(0)
 int(0)
-===Done===

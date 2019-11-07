@@ -35,7 +35,6 @@ $df->setCalendar($cal);
 d($df);
 
 ?>
-==DONE==
 --EXPECT--
 dimanche 1 janvier 2012 ap. J.-C. à 03:00:00 heure de Kaliningrad
 int(1)
@@ -52,4 +51,3 @@ bool(false)
 string(9) "gregorian"
 string(3) "UTC"
 
-==DONE==

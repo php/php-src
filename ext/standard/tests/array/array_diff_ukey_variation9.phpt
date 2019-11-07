@@ -29,7 +29,6 @@ foreach($input_arrays as $key =>$value) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_ukey() : usage variation ***
 
@@ -56,4 +55,3 @@ array(1) {
   [10]=>
   string(2) "10"
 }
-===DONE===

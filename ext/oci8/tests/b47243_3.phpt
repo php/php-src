@@ -22,6 +22,5 @@ oci_close($c);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ===DONE===

@@ -53,7 +53,6 @@ try {
 var_dump($phar->getStub());
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
@@ -77,4 +76,3 @@ __HALT_COMPILER();"
 Warning: Phar::setDefaultStub(): method accepts no arguments for a tar- or zip-based phar stub, 2 given in %sphar_setdefaultstub.php on line %d
 string(60) "<?php // tar-based phar archive stub file
 __HALT_COMPILER();"
-===DONE===

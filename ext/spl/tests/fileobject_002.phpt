@@ -28,8 +28,6 @@ test('fileobject_001a.txt');
 test('fileobject_001b.txt');
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ===fileobject_001a.txt===
 int(0)
@@ -123,4 +121,3 @@ bool(false)
 bool(true)
 int(5)
 bool(true)
-===DONE===

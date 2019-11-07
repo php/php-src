@@ -47,7 +47,6 @@ echo ChildClass2::testStaticVar() . "\n";
 echo ChildClass2::testClassConst() . "\n";
 echo ChildClass2::testStaticFunction() . "\n";
 ?>
-==DONE==
 --EXPECT--
 TestClassStatic
 TestClassConst
@@ -58,4 +57,3 @@ ChildClassFunction
 TestClassStatic
 TestClassConst
 TestClassFunction
-==DONE==

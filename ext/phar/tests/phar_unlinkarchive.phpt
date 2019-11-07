@@ -80,7 +80,6 @@ $phar['another.php'] = "hi\n";
 unset($phar);
 include $pname . '/evil.php';
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
@@ -108,4 +107,3 @@ int(0)
 phar archive "%sphar_unlinkarchive.phar" cannot be unlinked from within itself
 string(%d) "%sphar_unlinkarchive.phar"
 hi
-===DONE===

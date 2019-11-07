@@ -24,10 +24,8 @@ $tz3 = new DateTimeZone("America/Los_Angeles");
 var_dump( $tz3->getOffset($date) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing DateTimeZone::getOffset() : basic functionality ***
 %rint\(0\)|int\(3600\)%r
 %rint\(-18000\)|int\(-14400\)%r
 %rint\(-28800\)|int\(-25200\)%r
-===DONE===

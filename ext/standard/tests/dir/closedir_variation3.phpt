@@ -30,7 +30,6 @@ if(is_resource($fp)) {
 	fclose($fp);
 }
 ?>
-===DONE===
 --EXPECTF--
 *** Testing closedir() : usage variations ***
 
@@ -42,4 +41,3 @@ resource(%d) of type (stream)
 
 -- Check file pointer: --
 resource(%d) of type (stream)
-===DONE===

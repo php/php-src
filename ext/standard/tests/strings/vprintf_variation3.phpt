@@ -53,7 +53,6 @@ foreach($formats as $format) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : int formats with int values ***
 
@@ -88,4 +87,3 @@ int(8)
 -- Iteration 8 --
 1 2 3 4
 int(7)
-===DONE===

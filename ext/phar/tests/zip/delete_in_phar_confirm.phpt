@@ -35,7 +35,6 @@ include 'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip/b.ph
 include 'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip/b/c.php';
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
 --EXPECTF--
@@ -50,4 +49,3 @@ Warning: include(%sdelete_in_phar_confirm.phar.zip/b/c.php): failed to open stre
 
 Warning: include(): Failed opening 'phar://%sdelete_in_phar_confirm.phar.zip/b/c.php' for inclusion (include_path='%s') in %sdelete_in_phar_confirm.php on line %d
 
-===DONE===

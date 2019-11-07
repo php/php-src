@@ -14,8 +14,6 @@ foreach($params as $key => $value) {
 	var_dump($value->getPosition());
 }
 ?>
-==DONE==
 --EXPECT--
 int(0)
 int(1)
-==DONE==

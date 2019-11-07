@@ -66,7 +66,6 @@ echo "\n-- Sorting empty array --\n";
 var_dump( usort($empty_array, 'cmp_function') );
 var_dump($empty_array);
 ?>
-===DONE===
 --EXPECT--
 *** Testing usort() : usage variation ***
 
@@ -152,4 +151,3 @@ array(7) {
 bool(true)
 array(0) {
 }
-===DONE===

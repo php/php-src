@@ -43,8 +43,6 @@ function runtest() {
 }
 
 ?>
-===DONE===
 --EXPECT--
 File in include path
 File in include path
-===DONE===

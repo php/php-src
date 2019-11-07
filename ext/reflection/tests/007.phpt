@@ -88,8 +88,6 @@ Class WithCtorWithArgs
 test('WithCtorWithArgs');
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ====>Class_does_not_exist
 {closure}(Class_does_not_exist)
@@ -151,4 +149,3 @@ array(2) {
 object(WithCtorWithArgs)#%d (0) {
 }
 
-===DONE===

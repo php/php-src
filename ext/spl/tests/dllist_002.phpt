@@ -33,8 +33,6 @@ foreach($dll2 as $k=>$v) {
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 0=>2
 ->0=>2
@@ -57,4 +55,3 @@ foreach($dll2 as $k=>$v) {
 popped 4
 1=>3
 popped 3
-===DONE===

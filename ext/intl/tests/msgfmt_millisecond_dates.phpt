@@ -19,11 +19,9 @@ $p = 'On 2012-05-06 AD at 15:22:49.123 GMT+02:00 something odd happened';
 var_dump($mf->parse($p));
 
 ?>
-==DONE==
 --EXPECTF--
 string(%d) "On 2012-05-0%d AD at %d:%d:49.123 %s something odd happened"
 array(1) {
   [0]=>
   float(1336310569.123)
 }
-==DONE==

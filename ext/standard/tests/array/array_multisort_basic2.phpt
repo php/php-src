@@ -19,7 +19,6 @@ var_dump( array_multisort($ar1, SORT_ASC, SORT_REGULAR, $ar2, SORT_ASC, SORT_NUM
 var_dump($ar1, $ar2);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_multisort() : basic functionality - renumbering of numeric keys ***
 
@@ -41,4 +40,3 @@ array(3) {
   [2]=>
   int(2)
 }
-===DONE===

@@ -43,7 +43,6 @@ foreach($valid_arrays as $key => $arr) {
 	echo "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing var_export() with valid arrays ***
 
@@ -276,4 +275,3 @@ string(41) "array (
   1 => 'test',
 )"
 
-===DONE===

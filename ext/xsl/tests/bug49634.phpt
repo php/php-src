@@ -50,7 +50,6 @@ for ($i = 0; $i < 10; $i++)
 	}
 }
 ?>
-===DONE===
 --EXPECTF--
 Exception: Test exception. in %s:%d
 Stack trace:
@@ -102,4 +101,3 @@ Stack trace:
 #0 [internal function]: testFunction(Array)
 #1 %s(%d): XSLTProcessor->transformToDoc(Object(DOMDocument))
 #2 {main}
-===DONE===

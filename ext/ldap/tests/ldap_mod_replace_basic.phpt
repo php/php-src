@@ -25,7 +25,6 @@ var_dump(
 	)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -56,4 +55,3 @@ array(2) {
     string(%d) "cn=userA,%s"
   }
 }
-===DONE===

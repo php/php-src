@@ -68,7 +68,6 @@ if (is_resource($res)) {
 
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing is_resource() : basic functionality ***
 
@@ -89,4 +88,3 @@ Resource type..after file open  is_resource() returns TRUE
 Resource type..var_dump after file close returns
 resource(%d) of type (Unknown)
 Resource type..after file close is_resource() returns FALSE
-===DONE===

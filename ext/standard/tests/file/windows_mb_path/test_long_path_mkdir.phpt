@@ -54,7 +54,6 @@ if ($newstart) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 string(251) "%s"
 string(1884) "%s"
@@ -62,4 +61,3 @@ bool(true)
 bool(true)
 int(5)
 string(5) "hello"
-===DONE===

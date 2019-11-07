@@ -27,7 +27,6 @@ echo "\n-- Pass a non-existent relative path: --\n";
 chdir(__DIR__);
 var_dump(opendir('idonotexist'));
 ?>
-===DONE===
 --EXPECTF--
 *** Testing opendir() : error conditions ***
 
@@ -40,4 +39,3 @@ bool(false)
 
 Warning: opendir(idonotexist): failed to open dir: %s in %s on line %d
 bool(false)
-===DONE===

@@ -26,7 +26,6 @@ foreach($sxe->content->file as $file)
 }
 
 ?>
-===DONE===
 --EXPECTF--
 ===CONTENT===
 object(SimpleXMLElement)#%d (1) {
@@ -59,4 +58,3 @@ object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(11) "slide_*.xml"
 }
-===DONE===

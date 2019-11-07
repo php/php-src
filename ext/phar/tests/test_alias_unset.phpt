@@ -33,7 +33,6 @@ var_dump($phar2->getAlias());
 
 $a = file_get_contents($pname . '/file1.txt'); // this fails because $fname2 ref exists
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>
@@ -42,4 +41,3 @@ Cannot open archive "%stest_alias_unset.2.phar.php", alias is already in use by 
 string(5) "first"
 
 Warning: file_get_contents(phar://%sfile1.txt): failed to open stream: Cannot open archive "%stest_alias_unset.phar.php", alias is already in use by existing archive in %stest_alias_unset.php on line %d
-===DONE===

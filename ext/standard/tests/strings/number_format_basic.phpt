@@ -47,7 +47,6 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing number_format() : basic functionality ***
 
@@ -106,4 +105,3 @@ string(6) "123,46"
 string(4) "0,00"
 string(4) "1,00"
 string(4) "0,00"
-===DONE===

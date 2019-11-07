@@ -34,7 +34,6 @@ foreach(new RecursiveIteratorIterator($phar) as $path) {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/zfapp.tgz');
@@ -47,4 +46,3 @@ phar://%szfapp.phar.tar.gz/application/default/views/scripts/error/error.phtml
 phar://%szfapp.phar.tar.gz/application/default/views/scripts/index/index.phtml
 phar://%szfapp.phar.tar.gz/html/.htaccess
 phar://%szfapp.phar.tar.gz/html/index.php
-===DONE===

@@ -52,7 +52,6 @@ foreach($names_arr as $key =>$value) {
 };
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing file_put_contents() : usage variation ***
 
@@ -97,4 +96,3 @@ Failed to write data to: /no/such/file/dir
 
 Warning: file_put_contents(php/php): failed to open stream: %s in %s on line %d
 Failed to write data to: php/php
-===Done===

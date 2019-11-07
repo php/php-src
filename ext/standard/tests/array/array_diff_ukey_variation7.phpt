@@ -24,7 +24,6 @@ var_dump( array_diff_ukey($float_indx_array, $input_array, 'key_compare_func') )
 var_dump( array_diff_ukey($input_array, $float_indx_array, 'key_compare_func') );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_ukey() : usage variation ***
 
@@ -39,4 +38,3 @@ array(2) {
   [20]=>
   string(2) "20"
 }
-===DONE===

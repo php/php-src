@@ -40,7 +40,6 @@ get_basename_with_cp($fn, 932);
 remove_data("dir_cp932");
 
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (stream)
 int(25)
@@ -52,4 +51,3 @@ string(%d) "テストマルチバイト・パス33"
 bool(true)
 string(%d) "%s\テストマルチバイト・パス33"
 Active code page: %d
-===DONE===

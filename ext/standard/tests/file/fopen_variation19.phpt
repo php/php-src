@@ -92,7 +92,6 @@ function writeFile($file) {
 
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing fopen() : variation ***
 *** testing reading of links ***
@@ -107,4 +106,3 @@ link of link:Hello World again! again! again!
 soft link:Goodbye World
 hard link:Goodbye World
 link of link:Goodbye World
-===DONE===

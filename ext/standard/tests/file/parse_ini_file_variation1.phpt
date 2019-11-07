@@ -30,7 +30,6 @@ var_dump($a);
 
 unlink($output_file);
 ?>
-===DONE===
 --EXPECT--
 *** Testing parse_ini_file() : variation ***
 array(2) {
@@ -65,4 +64,3 @@ array(2) {
     string(9) "different"
   }
 }
-===DONE===

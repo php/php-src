@@ -53,7 +53,6 @@ catch (\Error $e) {
 }
 
 ?>
-===Done===
 --EXPECT--
 *** Testing hash_pbkdf2() : error conditions ***
 
@@ -69,4 +68,3 @@ Iterations must be a positive integer: -1
 
 -- Testing hash_pbkdf2() function with invalid length --
 Length must be greater than or equal to 0: -1
-===Done===

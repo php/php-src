@@ -33,7 +33,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmstrftime() : usage variation ***
 
@@ -56,4 +55,3 @@ string(2) "AM"
 --Second as decimal number--
 string(%d) "%d"
 string(2) "08"
-===DONE===

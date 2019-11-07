@@ -68,7 +68,6 @@ function isValid($param)
 return $result;
 }
 ?>
-===Done===
 --CLEAN--
 <?php
 require_once('clean.inc');
@@ -90,4 +89,3 @@ parameters is an array
 
 Try to get part 4!
 bool(false)
-===Done===

@@ -90,8 +90,6 @@ MyArrayIterator::test('iterator_to_array');
 MyArrayIterator::test('iterator_count', array(3 => 6));
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ===iterator_to_array===
 State 0: __construct()
@@ -114,4 +112,3 @@ State 2: rewind()
 State 3: valid()
 State 6: next()
 int(2)
-===DONE===

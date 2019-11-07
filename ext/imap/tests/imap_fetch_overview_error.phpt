@@ -32,7 +32,6 @@ var_dump( imap_fetch_overview($stream_id, $msg_no, $options, $extra_arg) );
 echo "\n-- Testing imap_fetch_overview() function with less than expected no. of arguments --\n";
 var_dump( imap_fetch_overview($stream_id) );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require_once(__DIR__.'/clean.inc');
@@ -51,4 +50,3 @@ NULL
 
 Warning: imap_fetch_overview() expects at least 2 parameters, 1 given in %s on line %d
 NULL
-===DONE===

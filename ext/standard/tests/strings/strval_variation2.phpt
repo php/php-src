@@ -60,7 +60,6 @@ echo bin2hex(strval($sf));
 echo "\n";
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing strval() : usage variations  - Pass all valid char codes ***
 000102030405060708090a0b0c0d0e0f
@@ -79,4 +78,3 @@ c0c1c2c3c4c5c6c7c8c9cacbcccdcecf
 d0d1d2d3d4d5d6d7d8d9dadbdcdddedf
 e0e1e2e3e4e5e6e7e8e9eaebecedeeef
 f0f1f2f3f4f5f6f7f8f9fafbfcfdfeff
-===DONE===

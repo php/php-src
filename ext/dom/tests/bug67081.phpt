@@ -26,7 +26,6 @@ require_once('skipif.inc');
 	$domDocument->load(__DIR__ . DIRECTORY_SEPARATOR . "dom.xml");
 	var_dump($domDocument->doctype->internalSubset);
 ?>
-===DONE===
 --EXPECT--
 string(19) "<!ELEMENT a EMPTY>
 "
@@ -44,4 +43,3 @@ string(277) "<!ENTITY % incent SYSTEM "dom.ent">
 <!ELEMENT root (foo)+>
 <!ATTLIST th title CDATA #IMPLIED>
 "
-===DONE===

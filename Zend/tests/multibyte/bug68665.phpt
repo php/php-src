@@ -17,7 +17,5 @@ internal_encoding=big5
 echo '\'hello';
 ?>
 
-===DONE===
 --EXPECT--
 'hello
-===DONE===

@@ -152,7 +152,6 @@ echo $t->test('if_d');
 echo $t->test('if_e');
 
 ?>
-===DONE===
 --EXPECT--
 class_a
 is_a(class_a, if_a) yes
@@ -196,4 +195,3 @@ is_a(class_g, if_b) yes
 is_a(class_g, if_c) yes
 is_a(class_g, if_d) yes
 is_a(class_g, if_e) no
-===DONE===

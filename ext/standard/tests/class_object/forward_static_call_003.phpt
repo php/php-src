@@ -38,7 +38,6 @@ echo "-\n";
 C::test();
 
 ?>
-===DONE===
 --EXPECT--
 A
 -
@@ -48,4 +47,3 @@ B
 C
 B
 B
-===DONE===

@@ -29,7 +29,6 @@ var_dump( new finfo( FILEINFO_MIME, $magicFile ) );
 var_dump( new finfo() );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing finfo_open() : basic functionality ***
 resource(%d) of type (file_info)
@@ -43,4 +42,3 @@ object(finfo)#%d (%d) {
 }
 object(finfo)#%d (%d) {
 }
-===DONE===

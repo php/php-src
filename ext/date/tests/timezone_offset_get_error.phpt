@@ -61,7 +61,6 @@ try {
 	echo "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing timezone_offset_get() : error conditions ***
 
@@ -80,4 +79,3 @@ string(76) "timezone_offset_get() expects parameter 2 to be DateTimeInterface, i
 
 string(77) "timezone_offset_get() expects parameter 2 to be DateTimeInterface, null given"
 
-===DONE===

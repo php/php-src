@@ -33,10 +33,8 @@ include $alias . '/b/c.php';
 include $alias . '/b/new.php';
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
 --EXPECT--
 This is b/c
 extra
-===DONE===

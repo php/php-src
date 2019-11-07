@@ -42,7 +42,6 @@ $needle2 = base64_decode('44GT44KT44Gr44Gh44Gv44CB5LiW55WM');
 var_dump(mb_strstr($string_mb, $needle2));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing mb_strstr() : basic functionality ***
 
@@ -61,4 +60,3 @@ string(0) ""
 
 -- Multibyte string: needle doesn't exist --
 bool(false)
-===DONE===

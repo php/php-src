@@ -22,7 +22,6 @@ echo "\n-- Testing idate() function for 2 digit year having zero as starting num
 $timestamp = mktime(8, 8, 8, 8, 8, 2001);
 var_dump( idate($format, $timestamp) );
 ?>
-===DONE===
 --EXPECT--
 *** Testing idate() : usage variation ***
 
@@ -31,4 +30,3 @@ int(70)
 
 -- Testing idate() function for 2 digit year having zero as starting number --
 int(1)
-===DONE===

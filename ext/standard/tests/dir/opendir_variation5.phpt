@@ -63,7 +63,6 @@ if (is_resource($dir_handle2)) {
 	closedir($dir_handle2);
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 $parent_dir_path = __DIR__ . "/opendir_variation5";
@@ -91,4 +90,3 @@ bool(false)
 
 Warning: opendir(%s/opendir_variation5/sub_dir/child_dir): failed to open dir: %s in %s on line %d
 bool(false)
-===DONE===

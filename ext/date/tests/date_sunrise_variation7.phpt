@@ -33,7 +33,6 @@ foreach($inputs as $timezone => $value) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing date_sunrise() : usage variation ***
 string(5) "06:42"
@@ -54,4 +53,3 @@ string(5) "06:23"
 string(5) "06:22"
 string(5) "06:03"
 string(5) "06:02"
-===DONE===

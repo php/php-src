@@ -55,7 +55,6 @@ foreach(new RecursiveTreeIterator($it, 0, CachingIterator::CATCH_GET_CHILD) as $
 }
 
 ?>
-===DONE===
 --EXPECTF--
 -- flags = BYPASS_KEY --
 [0] => |-Array
@@ -119,4 +118,3 @@ Warning: Array to string conversion in %s on line %d
 [  \-3] =>   \-Array
 [    |-0] =>     |-4
 [    \-1] =>     \-c
-===DONE===

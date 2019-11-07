@@ -44,8 +44,6 @@ function testme() {
 	}
 }
 ?>
-===DONE===
 --EXPECT--
 created in working dir
 Not created in script dir
-===DONE===

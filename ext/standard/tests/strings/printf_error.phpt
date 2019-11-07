@@ -61,7 +61,6 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing printf() : error conditions ***
 
@@ -81,4 +80,3 @@ printf() expects at least 1 parameter, 0 given
 
 -- Call printf with three argument less than expected --
 4 parameters are required, 1 given
-===DONE===

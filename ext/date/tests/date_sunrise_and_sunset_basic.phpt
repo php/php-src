@@ -18,9 +18,7 @@ echo date("D M d Y") . ', sunrise time : ' . date_sunrise(time(), SUNFUNCS_RET_S
 echo date("D M d Y") . ', sunset time : ' . date_sunset(time(), SUNFUNCS_RET_STRING, 38.4, -9, 90, 1) . "\n";
 
 ?>
-===Done===
 --EXPECTF--
 Basic test for date_sunrise() and date_sunset()
 %s %s %d %d, sunrise time : %d:%d
 %s %s %d %d, sunset time : %d:%d
-===Done===

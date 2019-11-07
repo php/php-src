@@ -22,8 +22,6 @@ Description: Returns the type of the file. Possible values are fifo, char,
 echo "-- Checking for char --\n";
 print( filetype("/dev/null") )."\n";
 ?>
-===DONE===
 --EXPECT--
 -- Checking for char --
 char
-===DONE===

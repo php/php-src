@@ -23,7 +23,6 @@ var_dump(pg_fetch_assoc(pg_query("SELECT * FROM php_test")));
 pg_query($dbh, "DROP TABLE php_test");
 pg_close($dbh);
 ?>
-===DONE===
 --EXPECTF--
 array(2) {
   ["id"]=>
@@ -31,4 +30,3 @@ array(2) {
   ["time"]=>
   string(%d) "%s"
 }
-===DONE===

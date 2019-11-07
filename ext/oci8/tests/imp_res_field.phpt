@@ -124,8 +124,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1 - can't get IRS fields from parent
 num fields : 0
@@ -224,4 +222,3 @@ array(1) {
 }
 num fields : 1
 C4_NUMBER52	: is_null T, precision 5, scale 2, size 22, typeraw 2, type NUMBER
-===DONE===

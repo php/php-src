@@ -10,7 +10,5 @@ $original = "=?UTF-8?Q?=E3=80=8E=E3=80=90=E5=A4=96=E8=B3=87=E7=B3=BB=E6=88=A6=E7
 $decoded = iconv_mime_decode($original, ICONV_MIME_DECODE_STRICT, 'utf-8');
 var_dump($decoded);
 ?>
-===DONE===
 --EXPECT--
 string(183) "『【外資系戦略コンサルが集結】トップコンサルタントと話せるコンサル業界研究セミナー』へのエントリーありがとうございました。"
-===DONE===

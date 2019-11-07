@@ -80,7 +80,6 @@ function test_link($linkedDir, $toLinkTo, $tounlink, $softlink) {
 
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing unlink() : variation ***
 -- unlinking soft link unlinkVar10.tmp/subDir.tmp --
@@ -103,4 +102,3 @@ directory unlinked
 --- try to unlink a directory ---
 
 Warning: unlink(unlinkVar10.tmp/linkme.tmp): %s in %s on line %d
-===DONE===

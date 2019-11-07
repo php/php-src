@@ -24,7 +24,6 @@ try {
 var_dump(file_exists(__DIR__ . '/buildfromdirectory6.phar'));
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/buildfromdirectory6.phar');
@@ -37,4 +36,3 @@ rmdir(__DIR__ . '/testdir6');
 array(0) {
 }
 bool(false)
-===DONE===

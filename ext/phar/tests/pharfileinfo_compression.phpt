@@ -70,7 +70,6 @@ var_dump($b->decompress());
 var_dump($b->decompress());
 
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar'); ?>
@@ -89,4 +88,3 @@ Phar is readonly, cannot decompress
 Phar entry is a directory, cannot set compression
 bool(true)
 bool(true)
-===DONE===

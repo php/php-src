@@ -10,10 +10,8 @@ Test gethostbynamel() function : basic functionality
 echo "*** Testing gethostbynamel() : basic functionality ***\n";
 var_dump(gethostbynamel("localhost"));
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gethostbynamel() : basic functionality ***
 array(%d) {
   %a
 }
-===DONE===

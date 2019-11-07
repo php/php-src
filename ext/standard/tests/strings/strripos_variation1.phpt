@@ -73,7 +73,6 @@ foreach ($needles as $needle) {
   $count++;
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing strripos() function: with double quoted strings ***
 -- Iteration 1 --
@@ -251,4 +250,3 @@ int(0)
 bool(false)
 bool(false)
 int(0)
-===DONE===

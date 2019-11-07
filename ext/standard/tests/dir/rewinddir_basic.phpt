@@ -57,7 +57,6 @@ closedir($dh2);
 delete_files($dir_path1, 1);
 delete_files($dir_path2, 1, 'file', 2);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path1 = __DIR__ . "/rewinddir_basic_dir1";
@@ -93,4 +92,3 @@ array(3) {
 }
 NULL
 bool(true)
-===DONE===

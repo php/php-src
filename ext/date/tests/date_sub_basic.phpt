@@ -32,7 +32,6 @@ foreach($intervals as $interval) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing date_sub() : basic functionality ***
 string(19) "2008-01-01 12:25:00"
@@ -40,4 +39,3 @@ string(19) "2004-06-26 23:54:55"
 string(19) "2004-06-26 23:54:55"
 string(19) "2004-06-24 23:53:55"
 string(19) "2003-04-24 00:08:25"
-===DONE===

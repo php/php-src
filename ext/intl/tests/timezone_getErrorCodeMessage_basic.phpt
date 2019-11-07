@@ -24,7 +24,6 @@ var_dump($lsb->getErrorCode());
 var_dump($lsb->getErrorMessage());
 
 ?>
-==DONE==
 --EXPECTF--
 int(0)
 string(12) "U_ZERO_ERROR"
@@ -33,4 +32,3 @@ Warning: IntlTimeZone::getOffset(): intltz_get_offset: error obtaining offset in
 bool(false)
 int(1)
 string(67) "intltz_get_offset: error obtaining offset: U_ILLEGAL_ARGUMENT_ERROR"
-==DONE==

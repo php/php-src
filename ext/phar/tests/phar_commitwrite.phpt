@@ -21,7 +21,6 @@ __HALT_COMPILER();
 ?>");
 var_dump($p->getStub());
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/phar_commitwrite.phar');
@@ -37,4 +36,3 @@ Phar::mapPhar('phar_commitwrite.phar');
 include 'phar://phar_commitwrite.phar/startup.php';
 __HALT_COMPILER(); ?>
 "
-===DONE===

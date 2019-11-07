@@ -39,7 +39,6 @@ foreach ($paths as $d) {
 rmdir($prefix);
 
 ?>
-===DONE===
 --EXPECT--
 testBug54977
 windows_mb_path
@@ -49,4 +48,3 @@ windows_mb_path
 汚れて掘る.test
 王
 王.test
-===DONE===

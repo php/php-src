@@ -44,7 +44,6 @@ echo file_get_contents("./hi", 0, $context, 0, 0);
 include $pname . '/foo/hi';
 
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php rmdir(__DIR__ . '/poo'); ?>
@@ -99,4 +98,3 @@ echo file_get_contents("./hi", 0, $context, 50000);
 echo file_get_contents("./hi");
 echo file_get_contents("./hi", 0, $context, 0, 0);
 ?>
-===DONE===

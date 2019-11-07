@@ -32,7 +32,6 @@ $encoding = 99;
 var_dump(gzcompress($data, $level, $encoding));
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing gzcompress() : error conditions ***
 
@@ -45,4 +44,3 @@ bool(false)
 
 Warning: gzcompress(): encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE in %s on line %d
 bool(false)
-===Done===

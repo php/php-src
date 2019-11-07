@@ -37,7 +37,6 @@ get_basename_with_cp($fn, 65001);
 remove_data("dir_cp1256");
 
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (stream)
 int(25)
@@ -49,4 +48,3 @@ string(47) "مسار متعدد البايت اختبار33"
 bool(true)
 string(%d) "%s\مسار متعدد البايت اختبار33"
 Active code page: %s
-===DONE===

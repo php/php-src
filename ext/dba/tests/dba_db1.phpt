@@ -11,7 +11,6 @@ DBA DB1 handler test
 	require_once __DIR__ .'/test.inc';
 	require_once __DIR__ .'/dba_handler.inc';
 ?>
-===DONE===
 --EXPECT--
 database handler: db1
 3NYNYY
@@ -47,4 +46,3 @@ array(3) {
   ["key5"]=>
   string(23) "The last content string"
 }
-===DONE===

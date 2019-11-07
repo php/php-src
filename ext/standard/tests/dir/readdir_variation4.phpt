@@ -75,7 +75,6 @@ var_dump($contents);
 
 closedir($dir_handle);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path = __DIR__ . "/readdir_variation4/";
@@ -175,4 +174,3 @@ array(16) {
   [15]=>
   string(15) "single_file.tmp"
 }
-===DONE===

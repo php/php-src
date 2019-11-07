@@ -28,9 +28,7 @@ echo "-- failure --\n";
 
 var_dump( mail($to, $subject, $message) );
 ?>
-===DONE===
 --EXPECT--
 *** Testing mail() : basic functionality ***
 -- failure --
 bool(false)
-===DONE===

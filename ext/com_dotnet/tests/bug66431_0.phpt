@@ -27,7 +27,6 @@ if (!$result) {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -39,4 +38,3 @@ if (file_exists($fpath)) {
 ?>
 --EXPECT--
 bool(true)
-===DONE===

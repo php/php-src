@@ -32,9 +32,7 @@ try {
 }
 
 ?>
-==DONE==
 --EXPECT--
 string(26) "IntlRuleBasedBreakIterator"
 int(1)
 string(93) "rbbi_create_instance: unable to create instance from compiled rules: U_ILLEGAL_ARGUMENT_ERROR"
-==DONE==

@@ -27,7 +27,6 @@ echo "\n-- Testing with incorrect arguments --\n";
 var_dump(gzuncompress(123));
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gzuncompress() : error conditions ***
 
@@ -40,4 +39,3 @@ bool(false)
 
 Warning: gzuncompress(): data error in %s on line %d
 bool(false)
-===DONE===

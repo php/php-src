@@ -24,7 +24,5 @@ var_dump(
 	ldap_errno($link)
 );
 ?>
-===DONE===
 --EXPECT--
 int(34)
-===DONE===

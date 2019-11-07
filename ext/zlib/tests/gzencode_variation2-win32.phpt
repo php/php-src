@@ -34,7 +34,6 @@ var_dump(bin2hex(gzencode($data, -1, FORCE_GZIP)));
 var_dump(bin2hex(gzencode($data, -1, FORCE_DEFLATE)));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing gzencode() : variation ***
 
@@ -42,4 +41,3 @@ var_dump(bin2hex(gzencode($data, -1, FORCE_DEFLATE)));
 string(90) "1f8b080000000000000a735428ce4dccc951282e29cacc4b5728c95748cd4bce4f49e50200d7739de519000000"
 string(90) "1f8b080000000000000a735428ce4dccc951282e29cacc4b5728c95748cd4bce4f49e50200d7739de519000000"
 string(66) "789c735428ce4dccc951282e29cacc4b5728c95748cd4bce4f49e50200735808cd"
-===DONE===

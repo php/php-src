@@ -75,7 +75,6 @@ if (fread($fp, strlen('booya')) == 'booya') {
 fclose($fp);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -89,4 +88,3 @@ __HALT_COMPILER();
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>booya
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
 <?php echo "third stub\n"; __HALT_COMPILER(); ?>
-===DONE===

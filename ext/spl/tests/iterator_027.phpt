@@ -51,8 +51,6 @@ var_dump(isset($it[2])); // unset
 var_dump(isset($it[3])); // deleted
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 0=>1
 1=>2
@@ -80,4 +78,3 @@ bool(true)
 bool(false)
 bool(false)
 bool(false)
-===DONE===

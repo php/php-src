@@ -54,7 +54,6 @@ foreach($formats as $format) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : with  white spaces in format strings ***
 
@@ -101,4 +100,3 @@ int(24)
 -- Iteration 11 --
 2.000000E+1  2.000000E-1  -2.000000E+1
 int(38)
-===DONE===

@@ -28,7 +28,6 @@ var_dump( array_diff_uassoc($arr_default_int, $arr_float, "key_compare_func") );
 var_dump( array_diff_uassoc($arr_float, $arr_default_int, "key_compare_func") );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_uassoc() : usage variation ***
 
@@ -37,4 +36,3 @@ array(0) {
 }
 array(0) {
 }
-===DONE===

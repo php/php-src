@@ -43,7 +43,6 @@ foreach ($classes as $class => $flags) {
 	}
 }
 ?>
-===DONE===
 --EXPECTF--
 ===DirectoryIterator===
 DirectoryIterator
@@ -74,4 +73,3 @@ int(16)
 GlobIterator
 int(32)
 bool(true)
-===DONE===

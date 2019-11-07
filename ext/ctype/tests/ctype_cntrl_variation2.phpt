@@ -26,7 +26,6 @@ for ($i = 0; $i < 256; $i++) {
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_cntrl() : usage variations ***
 character code 0 is control character
@@ -62,4 +61,3 @@ character code 29 is control character
 character code 30 is control character
 character code 31 is control character
 character code 127 is control character
-===DONE===

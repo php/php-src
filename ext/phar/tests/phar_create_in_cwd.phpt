@@ -25,7 +25,6 @@ __HALT_COMPILER();
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/phar_create_in_cwd.phar');
@@ -40,4 +39,3 @@ Phar::mapPhar('phar_create_in_cwd.phar');
 include 'phar://phar_create_in_cwd.phar/startup.php';
 __HALT_COMPILER(); ?>
 "
-===DONE===

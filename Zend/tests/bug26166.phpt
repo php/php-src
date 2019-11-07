@@ -61,11 +61,9 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECT--
 Hello World!
 ===NONE===
 Method NoneTest::__toString() must return a string value
 ===THROW===
 This is an error!
-===DONE===

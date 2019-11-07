@@ -34,7 +34,6 @@ var_dump(
 	$option
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -212,4 +211,3 @@ bool(true)
 int(33)
 bool(true)
 int(44)
-===DONE===

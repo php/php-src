@@ -81,7 +81,6 @@ foreach($inputs as $input) {
 fclose($file_handle);  //closing the file handle
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing print() function: with unexpected inputs for 'arg' argument ***
 -- Iteration 1 --
@@ -153,4 +152,3 @@ int(1)
 -- Iteration 21 --
 
 int(1)
-===DONE===

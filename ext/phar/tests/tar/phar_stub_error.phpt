@@ -35,7 +35,6 @@ var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
@@ -52,4 +51,3 @@ bool(true)
 string(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
 "
 bool(true)
-===DONE===

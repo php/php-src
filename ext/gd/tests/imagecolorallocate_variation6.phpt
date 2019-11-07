@@ -47,7 +47,6 @@ foreach($values as $key => $value) {
       );
 };
 ?>
-===DONE===
 --EXPECT--
 *** Testing imagecolorallocate() : usage variations ***
 
@@ -74,4 +73,3 @@ foreach($values as $key => $value) {
 !! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
 !! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
 !! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
-===DONE===

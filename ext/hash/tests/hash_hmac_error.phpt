@@ -29,7 +29,6 @@ catch (\Error $e) {
 }
 
 ?>
-===Done===
 --EXPECT--
 *** Testing hash_hmac() : error conditions ***
 
@@ -38,4 +37,3 @@ Unknown hashing algorithm: foo
 
 -- Testing hash_hmac() function with non-cryptographic hash algorithm --
 Non-cryptographic hashing algorithm: crc32
-===Done===

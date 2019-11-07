@@ -45,7 +45,6 @@ $a = new PharFileInfo(__FILE__);
 echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
 --EXPECTF--
@@ -54,4 +53,3 @@ PharFileInfo::__construct() expects parameter 1 to be a valid path, array given
 Cannot access phar file entry '%s' in archive '%s'
 Cannot call constructor twice
 '%s' is not a valid phar archive URL (must have at least phar://filename.phar)
-===DONE===

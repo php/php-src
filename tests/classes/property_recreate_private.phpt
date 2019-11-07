@@ -49,7 +49,7 @@ $c->unsetPrivate();
 $c->p = 'this will fail';
 var_dump($c);
 ?>
-==Done==
+===DONE===
 --EXPECTF--
 Unset and recreate a superclass's private property:
 object(D)#%d (1) {

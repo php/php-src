@@ -125,7 +125,6 @@ echo file_get_contents($outFile);
 unlink($outFile);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing mail() : basic functionality ***
 
@@ -215,4 +214,3 @@ foo5|: bar1
 foo9: %&$#!
 
 A Message
-===DONE===

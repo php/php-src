@@ -22,7 +22,6 @@ echo "\n-- Format a sample entry --\n";
 var_dump( $abbr["acst"] );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing DateTimeZone::listAbbreviations() : basic functionality ***
 string(5) "array"
@@ -85,4 +84,3 @@ array(6) {
     string(20) "Australia/Yancowinna"
   }
 }
-===DONE===

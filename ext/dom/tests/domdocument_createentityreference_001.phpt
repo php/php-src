@@ -11,8 +11,6 @@ Clint Priest @ PhpTek09
 	$objRef = $objDoc->createEntityReference('Test');
 	echo $objRef->nodeName . "\n";
 ?>
-===DONE===
 --EXPECT--
 Test
-===DONE===
 	

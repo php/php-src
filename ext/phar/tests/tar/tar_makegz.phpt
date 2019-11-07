@@ -25,7 +25,6 @@ var_dump($phar2->isFileFormat(Phar::TAR));
 var_dump($phar2->isCompressed() == Phar::GZ);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/tar_makegz.phar.gz');
@@ -37,4 +36,3 @@ var_dump($phar2->isCompressed() == Phar::GZ);
 bool(true)
 bool(true)
 bool(true)
-===DONE===

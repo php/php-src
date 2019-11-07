@@ -31,7 +31,5 @@ catch(Exception $e)
 	echo "Caught: " . $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 Caught: Error
-===DONE===

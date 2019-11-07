@@ -12,7 +12,6 @@ preg_match("/M(.*)/", $string, $matches);
 
 var_dump($matches);
 ?>
-===Done===
 --EXPECT--
 array(2) {
   [0]=>
@@ -20,4 +19,3 @@ array(2) {
   [1]=>
   string(1) "y"
 }
-===Done===

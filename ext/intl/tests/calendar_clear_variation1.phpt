@@ -23,11 +23,9 @@ var_dump(
 	strtotime('2012-01-29 05:06:07 +0000') * 1000.
 );
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 bool(true)
 bool(false)
 float(1327813567000)
-float(1327813567000)
-==DONE==
+float(1327813567000)

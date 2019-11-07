@@ -30,10 +30,8 @@ if (is_resource($proc)) {
 
 unlink($fl);
 ?>
-==DONE==
 --EXPECTF--
 X-Powered-By: PHP/%s
 Content-type: text/html; charset=UTF-8
 
 hello
-==DONE==

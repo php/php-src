@@ -15,8 +15,6 @@ $intlcal = IntlCalendar::createInstance();
 var_dump($intlcal->getWeekendTransition(IntlCalendar::DOW_SUNDAY));
 var_dump(intlcal_get_weekend_transition($intlcal, IntlCalendar::DOW_SUNDAY));
 ?>
-==DONE==
 --EXPECT--
 int(86400000)
 int(86400000)
-==DONE==

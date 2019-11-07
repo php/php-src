@@ -17,7 +17,6 @@ if (isset($a['notempty/hi.txt'])) {
 	echo $a['notempty/hi.txt']->getPathName() . "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 dir phar://%s/zip.zip%cempty
 phar://%s/zip.zip%chi.txt
@@ -25,4 +24,3 @@ hi there
 
 dir phar://%s/zip.zip%cnotempty
 phar://%s/zip.zip/notempty%chi.txt
-===DONE===

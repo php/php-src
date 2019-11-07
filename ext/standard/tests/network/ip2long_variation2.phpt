@@ -27,7 +27,6 @@ foreach($ips as $ip) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 bool(false)
 int(2130706433)
@@ -37,4 +36,3 @@ bool(false)
 int(-1062731776)
 bool(false)
 bool(false)
-===DONE===

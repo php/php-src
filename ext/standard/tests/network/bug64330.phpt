@@ -14,8 +14,6 @@ if ($client) {
 	echo "ok\n";
 }
 ?>
-===DONE===
 --EXPECT--
 Test
 ok
-===DONE===

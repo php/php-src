@@ -35,10 +35,7 @@ catch(Exception $e)
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 TestFunc1(TestClass)
 TestFunc2(TestClass)
 Exception: Class TestClass missing
-===DONE===

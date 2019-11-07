@@ -65,9 +65,7 @@ $p->callOne();
 $p->callTwo();
 $p->callThree();
 ?>
-===DONE===
 --EXPECT--
 Caught: NONE
 Caught: NONE
 Caught: NONE
-===DONE===

@@ -27,7 +27,6 @@ var_dump(getcwd());
 chdir($directory);
 var_dump(getcwd());
 ?>
-===DONE===
 --CLEAN--
 <?php
 $directory = __DIR__ . "/私はガラスを食べられますgetcwd_basic";
@@ -37,4 +36,3 @@ rmdir($directory);
 *** Testing getcwd() : basic functionality ***
 string(%d) "%s"
 string(%d) "%s%e私はガラスを食べられますgetcwd_basic"
-===DONE===

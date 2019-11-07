@@ -32,7 +32,6 @@ var_dump(get_object_vars(new Base));
 var_dump(get_object_vars(new Child));
 
 ?>
-===DONE===
 --EXPECT--
 Base::__construct
 array(3) {
@@ -69,4 +68,3 @@ array(1) {
   ["Foo"]=>
   int(1)
 }
-===DONE===

@@ -28,11 +28,9 @@ catch (Exception $e) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 int(2)
 int(1)
 bool(false)
 bool(true)
 string(54) "The parameter specified by its name could not be found"
-===DONE===

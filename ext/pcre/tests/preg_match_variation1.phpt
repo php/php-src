@@ -13,10 +13,8 @@ $string = "-1";
 preg_match('/[\-\+]?[0-9\.]*/', $string, $string);
 var_dump($string);
 ?>
-===Done===
 --EXPECT--
 array(1) {
   [0]=>
   string(2) "-1"
 }
-===Done===

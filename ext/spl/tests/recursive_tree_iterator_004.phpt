@@ -29,7 +29,6 @@ foreach($it as $k => $v) {
 	echo '[' . $it->key() . '] => ' . $it->getPrefix() . $it->getEntry() . $it->getPostfix() . "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 [0] => |-Array
 [0] => | |-a
@@ -40,4 +39,3 @@ foreach($it as $k => $v) {
 [3] =>   \-Array
 [0] =>     |-4
 [1] =>     \-c
-===DONE===

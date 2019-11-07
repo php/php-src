@@ -32,7 +32,6 @@ foreach($file_types_array as $key => $filename) {
       var_dump( $info );
 };
 ?>
-===DONE===
 --EXPECTF--
 *** Testing getimagesize() : variation ***
 
@@ -67,4 +66,3 @@ Notice: getimagesize(): Error reading from %s! in %s on line %d
 bool(false)
 array(0) {
 }
-===DONE===

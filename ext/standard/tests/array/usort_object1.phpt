@@ -82,7 +82,6 @@ $array_arg = array(
 var_dump( usort($array_arg, 'multiple_cmp') );
 var_dump($array_arg);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing usort() : object functionality ***
 bool(true)
@@ -138,4 +137,3 @@ array(3) {
     string(5) "apple"
   }
 }
-===DONE===

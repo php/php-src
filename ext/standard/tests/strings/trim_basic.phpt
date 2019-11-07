@@ -27,7 +27,6 @@ echo "\n-- Trim the ASCII control characters at the beginning of a string --\n";
 var_dump(trim($binary, "\x00..\x1F"));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing trim() : basic functionality ***
 
@@ -42,4 +41,3 @@ string(19) "!===Hello World===!"
 
 -- Trim the ASCII control characters at the beginning of a string --
 string(14) "Example string"
-===DONE===

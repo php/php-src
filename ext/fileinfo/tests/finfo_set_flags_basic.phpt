@@ -25,10 +25,8 @@ $finfo = new finfo( FILEINFO_NONE, $magicFile );
 var_dump( $finfo->set_flags( FILEINFO_MIME ) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing finfo_set_flags() : basic functionality ***
 bool(true)
 bool(true)
 bool(true)
-===DONE===

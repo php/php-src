@@ -67,7 +67,6 @@ else
 	echo "Can't start external command\n";
 }
 ?>
-===DONE===
 --EXPECT--
 Test
 External command executed
@@ -75,4 +74,3 @@ External command exit: 0
 STDOUT: testtext
 
 STDERR: 
-===DONE===

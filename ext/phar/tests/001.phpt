@@ -6,7 +6,5 @@ Phar::apiVersion
 <?php
 var_dump(Phar::apiVersion());
 ?>
-===DONE===
 --EXPECT--
 string(5) "1.1.1"
-===DONE===

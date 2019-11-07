@@ -17,7 +17,6 @@ echo "..and get names of all its class constants\n";
 $constants = $class->getConstants();
 var_dump($constants);
 ?>
-===DONE===
 --EXPECTF--
 *** Verify DateTimeZone class ***
 Verify DateTimeZone class registered OK
@@ -122,4 +121,3 @@ array(14) {
   ["PER_COUNTRY"]=>
   int(4096)
 }
-===DONE===

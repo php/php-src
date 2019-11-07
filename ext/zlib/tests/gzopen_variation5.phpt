@@ -60,11 +60,9 @@ function runtest() {
 	}
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing gzopen() : variation ***
 created in working dir
 Not created in dir1
 created in working dir
 Not created in dir1
-===DONE===

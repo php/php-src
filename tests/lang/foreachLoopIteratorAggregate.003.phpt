@@ -72,7 +72,6 @@ foreach (new A3 as $k=>$v) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 -----( A1: )-----
 --> EnglishMealIterator::rewind (0)
@@ -130,4 +129,3 @@ meal 1 => dinner
 meal 2 => tea
 --> EnglishMealIterator::next (2)
 --> EnglishMealIterator::valid (3)
-===DONE===

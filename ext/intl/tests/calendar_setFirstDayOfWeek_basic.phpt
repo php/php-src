@@ -18,11 +18,9 @@ var_dump(
 		$intlcal->getFirstDayOfWeek()
 );
 ?>
-==DONE==
 --EXPECT--
 int(3)
 bool(true)
 int(3)
 bool(true)
-int(4)
-==DONE==
+int(4)

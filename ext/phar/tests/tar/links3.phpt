@@ -14,8 +14,6 @@ try {
 echo $p['file.txt']->getContent();
 echo $p['my/file']->getContent();
 ?>
-===DONE===
 --EXPECT--
 my file
 my file
-===DONE===

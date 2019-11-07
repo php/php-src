@@ -20,7 +20,6 @@ var_dump(
 	ldap_get_entries($link, $result)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -61,4 +60,3 @@ array(2) {
     string(%d) "o=test,%s"
   }
 }
-===DONE===

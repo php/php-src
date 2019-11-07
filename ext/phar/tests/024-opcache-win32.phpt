@@ -51,11 +51,9 @@ if (is_dir($cache_dir)) {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
 This is a
 This is b
 This is b/c
-===DONE===

@@ -14,10 +14,8 @@ var_dump(quotemeta("Hello how are you ?"));
 var_dump(quotemeta("(100 + 50) * 10"));
 var_dump(quotemeta("\+*?[^]($)"));
 ?>
-===DONE===
 --EXPECT--
 *** Testing quotemeta() : basic functionality ***
 string(20) "Hello how are you \?"
 string(19) "\(100 \+ 50\) \* 10"
 string(20) "\\\+\*\?\[\^\]\(\$\)"
-===DONE===

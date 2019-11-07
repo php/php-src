@@ -36,8 +36,6 @@ var_dump($r);
 $stmtarray = array("DROP TABLE BUG68298");
 oci8_test_sql_execute($c, $stmtarray);
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 array(1) {
   ["COL1"]=>
@@ -48,4 +46,3 @@ array(1) {
     string(20) "-1152921504606846975"
   }
 }
-===DONE===

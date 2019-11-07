@@ -59,7 +59,5 @@ if ($failed == false) {
    echo "Test Passed\n";
 }
 ?>
-===DONE===
 --EXPECT--
 Test Passed
-===DONE===

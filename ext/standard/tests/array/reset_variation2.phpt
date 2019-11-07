@@ -22,7 +22,6 @@ echo "\n-- Unset First element in array and check reset() --\n";
 unset($array[0]);
 var_dump(reset($array));
 ?>
-===DONE===
 --EXPECT--
 *** Testing reset() : usage variations ***
 
@@ -31,4 +30,3 @@ a => 0
 
 -- Unset First element in array and check reset() --
 string(1) "b"
-===DONE===

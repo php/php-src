@@ -23,8 +23,6 @@ $subject = 'Test Subject';
 $message = 'A Message';
 var_dump( mail($to, $subject, $message) );
 ?>
-===DONE===
 --EXPECT--
 *** Testing mail() : variation ***
 bool(false)
-===DONE===

@@ -27,7 +27,6 @@ var_dump(
 	)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -80,4 +79,3 @@ array(2) {
     string(%d) "dc=my-domain,%s"
   }
 }
-===DONE===

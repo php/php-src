@@ -31,7 +31,6 @@ echo "\n-- Calling gzuncompress() with max length of $length --\n";
 echo "Result length is ".  strlen(gzuncompress($compressed, $length)) .  "\n";
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing gzuncompress() : basic functionality ***
 
@@ -40,4 +39,3 @@ int(0)
 
 -- Calling gzuncompress() with max length of 3547 --
 Result length is 3547
-===DONE===

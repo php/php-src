@@ -9,7 +9,5 @@ Bug #71273 A wrong ext directory setup in php.ini leads to crash
 
 	var_dump(preg_match(",.+a[\\/].+[\\/]w.php_kartoffelbrei.dll.+,s", $out));
 ?>
-==DONE==
 --EXPECT--
 int(1)
-==DONE==

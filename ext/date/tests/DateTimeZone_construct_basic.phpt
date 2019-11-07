@@ -18,7 +18,6 @@ var_dump( new DateTimeZone("Europe/London") );
 var_dump( new DateTimeZone("America/Los_Angeles") );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing new DateTimeZone() : basic functionality ***
 object(DateTimeZone)#%d (2) {
@@ -39,4 +38,3 @@ object(DateTimeZone)#%d (2) {
   ["timezone"]=>
   string(19) "America/Los_Angeles"
 }
-===DONE===

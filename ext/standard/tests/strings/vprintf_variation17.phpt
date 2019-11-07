@@ -45,7 +45,6 @@ foreach($formats as $format) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : scientific formats and scientific values ***
 
@@ -68,4 +67,3 @@ int(74)
 -- Iteration 5 --
 1.000000e+3 2.000000e+3 3.000000e+3 4.000000e+3
 int(47)
-===DONE===

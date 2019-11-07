@@ -90,8 +90,6 @@ var_dump(property_exists(new A, '123'));
 var_dump(property_exists(new A, 'init'));
 var_dump(property_exists(new A, 'empty'));
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ===A===
 obj(A)::$a
@@ -219,4 +217,3 @@ bool(false)
 bool(false)
 bool(true)
 bool(true)
-===DONE===

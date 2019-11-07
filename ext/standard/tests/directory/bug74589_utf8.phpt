@@ -32,12 +32,10 @@ $php = getenv('TEST_PHP_EXECUTABLE');
 echo shell_exec("$php -n $test_file");
 
 ?>
-===DONE===
 --EXPECTF--
 string(%d) "%sbug74589_新建文件夹"
 string(%d) "%sbug74589_新建文件夹%etest.php"
 bool(true)
-===DONE===
 --CLEAN--
 <?php
 	$item = "bug74589_新建文件夹"; // utf-8 string

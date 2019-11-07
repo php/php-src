@@ -29,11 +29,9 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing gmstrftime() : usage variation ***
 
 --A literal % character--
 string(1) "%"
 string(1) "%"
-===DONE===

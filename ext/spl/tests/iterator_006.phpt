@@ -16,9 +16,6 @@ foreach (new IteratorIterator($root->child) as $child) {
 	echo $child."\n";
 }
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Hello
 World
-===DONE===

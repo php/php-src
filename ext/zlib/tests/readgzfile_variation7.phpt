@@ -27,7 +27,6 @@ foreach ( $variation_array as $var ) {
   var_dump(readgzfile( $var ,  $use_include_path ) );
 }
 ?>
-===DONE===
 --EXPECTF--
 Warning: readgzfile(string): failed to open stream: No such file or directory in %s on line %d
 bool(false)
@@ -40,4 +39,3 @@ bool(false)
 
 Warning: readgzfile(hello world): failed to open stream: No such file or directory in %s on line %d
 bool(false)
-===DONE===

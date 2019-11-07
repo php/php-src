@@ -56,7 +56,6 @@ foreach($values as $value) {
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_space() : usage variations ***
 
@@ -137,4 +136,3 @@ bool(true)
 
 -- Iteration 26 --
 bool(true)
-===DONE===

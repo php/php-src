@@ -18,7 +18,6 @@ var_dump(ldap_error($link));
 var_dump(ldap_errno($link));
 var_dump(test_bind($host, $port, "cn=userA,$base", "newPassword", $protocol_version));
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -37,4 +36,3 @@ int(53)
 
 Warning: ldap_bind(): Unable to bind to server: Invalid credentials in %s on line %d
 bool(false)
-===DONE===

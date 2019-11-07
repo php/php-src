@@ -141,7 +141,6 @@ fclose($resource1);
 closedir($resource2);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing Miscelleneous input data ***
 string(3) "qqq"
@@ -224,4 +223,3 @@ Warning: Undefined variable: strS in %s on line %d
 string(0) ""
 string(5) "FOUND"
 string(5) "FOUND"
-===DONE===

@@ -45,7 +45,6 @@ foreach($imagetype_filenames as $key => $filename) {
       var_dump( $info );
 };
 ?>
-===DONE===
 --EXPECTF--
 *** Testing getimagesize() : basic functionality ***
 
@@ -216,4 +215,3 @@ array(6) {
 }
 array(0) {
 }
-===DONE===

@@ -46,7 +46,6 @@ foreach($values as $value) {
       $iterator++;
 };
 ?>
-===DONE===
 --EXPECT--
 *** Testing strval() : basic variations ***
 
@@ -74,4 +73,3 @@ string(5) "0xABC"
 
 -- Iteration 7 --
 string(21) "Simple HEREDOC string"
-===DONE===

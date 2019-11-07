@@ -50,7 +50,6 @@ var_dump(
 	ldap_get_entries($link, $result)[0]['l']
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -159,4 +158,3 @@ array(3) {
   [1]=>
   string(5) "there"
 }
-===DONE===

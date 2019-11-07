@@ -24,7 +24,6 @@ var_dump($ao2);
 var_dump($ao2->asort(SORT_NUMERIC));
 var_dump($ao2);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing ArrayObject::asort() : basic functionality ***
 bool(true)
@@ -63,4 +62,3 @@ object(ArrayObject)#%d (1) {
     int(4)
   }
 }
-===DONE===

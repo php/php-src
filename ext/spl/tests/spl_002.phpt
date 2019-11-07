@@ -16,7 +16,5 @@ $a = new Test;
 var_dump(count($a));
 
 ?>
-===DONE===
 --EXPECT--
 int(4)
-===DONE===

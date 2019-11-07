@@ -36,7 +36,6 @@ foreach($sequences as $msg_no) {
 	}
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 require_once(__DIR__.'/clean.inc');
@@ -67,4 +66,3 @@ string(%d) "1: this is a test message, please ignore%a"
 
 Notice: A non well formed numeric value encountered in %s on line %d
 string(%d) "1: this is a test message, please ignore%a"
-===DONE===

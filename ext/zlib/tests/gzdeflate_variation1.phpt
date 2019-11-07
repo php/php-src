@@ -26,11 +26,9 @@ var_dump( md5($output));
 var_dump(md5(gzdeflate($output)));
 
 ?>
-===Done===
 --EXPECT--
 *** Testing gzdeflate() : variation ***
 
 -- Testing multiple compression --
 string(32) "078554fe65e06f6ff01eab51cfc7ae9b"
 string(32) "86b9f895ef1377da5269ec3cb2729f71"
-===Done===

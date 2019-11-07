@@ -28,7 +28,6 @@ var_dump($obj);
 
 
 ?>
-===DONE===
 --EXPECTF--
 Removing the current element from an iterated object.
 string(10) "Original a"
@@ -52,4 +51,3 @@ object(C)#%d (4) {
   ["e"]=>
   string(10) "Original e"
 }
-===DONE===

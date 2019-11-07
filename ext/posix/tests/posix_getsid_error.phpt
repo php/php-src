@@ -15,7 +15,5 @@ PHP Testfest Berlin 2009-05-10
 <?php
 var_dump( posix_getsid(-1) );
 ?>
-===DONE===
 --EXPECTF--
 bool(false)
-===DONE===

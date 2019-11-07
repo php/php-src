@@ -24,7 +24,6 @@ var_dump(end($array_arg));
 echo "\n-- Pass a sub-array as \$array_arg --\n";
 var_dump(end($array_arg[0]));
 ?>
-===DONE===
 --EXPECT--
 *** Testing end() : usage variations ***
 
@@ -40,4 +39,3 @@ array(3) {
 
 -- Pass a sub-array as $array_arg --
 int(7)
-===DONE===

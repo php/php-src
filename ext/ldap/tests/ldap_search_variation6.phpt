@@ -35,7 +35,6 @@ var_dump(
 	ldap_get_entries($link, $result[1])
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -239,4 +238,3 @@ array(1) {
   ["count"]=>
   int(0)
 }
-===DONE===

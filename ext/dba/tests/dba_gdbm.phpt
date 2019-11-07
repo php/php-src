@@ -14,7 +14,6 @@ DBA GDBM handler test
 
 	// Read during write is system dependent. Important is that there is no deadlock
 ?>
-===DONE===
 --EXPECTF--
 database handler: gdbm
 3NYNYY
@@ -33,4 +32,3 @@ array(3) {
   ["key5"]=>
   string(23) "The last content string"
 }
-===DONE===

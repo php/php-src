@@ -32,7 +32,6 @@ str_dump('pIc 6', 'pic   7');
 str_dump(0xFFF, 0Xfff);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing strnatcasecmp() : basic functionality ***
 int(0)
@@ -48,4 +47,3 @@ int(-1)
 int(0)
 int(-1)
 int(0)
-===DONE===

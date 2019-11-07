@@ -34,7 +34,6 @@ foreach($sxe->children() as $name=>$val) {
 	var_dump(trim($val));
 }
 ?>
-===DONE===
 --EXPECT--
 string(5) "elem1"
 string(16) "SimpleXMLElement"
@@ -42,4 +41,3 @@ string(10) "Bla bla 1."
 string(6) "elem11"
 string(16) "SimpleXMLElement"
 string(10) "Bla bla 2."
-===DONE===

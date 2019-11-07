@@ -47,8 +47,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 array(1) {
   ["RAW_QUERY"]=>
@@ -62,4 +60,3 @@ array(1) {
   ["STRING_BIND_PARAMETER"]=>
   string(3) "Foo"
 }
-===DONE===

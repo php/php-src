@@ -60,7 +60,6 @@ foreach ($permission_values as $perm) {
 	$iterator++;
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path = __DIR__ . "/scandir_variation7";
@@ -158,4 +157,3 @@ array(2) {
   [1]=>
   string(2) ".."
 }
-===DONE===

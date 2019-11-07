@@ -40,12 +40,9 @@ $it->fill();
 $it->show();
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 MyCachingIterator::fill()
 MyCachingIterator::show()
 string(1) "0"
 string(3) "foo"
 string(3) "bar"
-===DONE===

@@ -18,9 +18,7 @@ $mf->setPattern("{0,ordinal} -- {1,number}");
 var_dump($mf->format(array(1.3, 1.3)));
 
 ?>
-==DONE==
 --EXPECT--
 string(10) "1.3 -- 1st"
 string(10) "1.3 -- 1st"
 string(10) "1st -- 1.3"
-==DONE==

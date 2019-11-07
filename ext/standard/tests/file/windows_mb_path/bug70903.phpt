@@ -37,7 +37,6 @@ rmdir($d0);
 rmdir($prefix);
 
 ?>
-===DONE===
 --EXPECTF--
 Active code page: 65001
 getting basename of %s\ı
@@ -46,4 +45,3 @@ bool(true)
 string(%d) "%s\ı"
 Active code page: %d
 bool(true)
-===DONE===

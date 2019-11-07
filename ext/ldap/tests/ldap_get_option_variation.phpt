@@ -48,7 +48,6 @@ var_dump(
 	$option
 );
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 int(0)
@@ -106,4 +105,3 @@ array(2) {
     string(5) "magic"
   }
 }
-===DONE===

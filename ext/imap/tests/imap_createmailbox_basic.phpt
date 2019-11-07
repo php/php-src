@@ -54,7 +54,6 @@ if (imap_createmailbox($imap_stream, $newbox)) {
 imap_close($imap_stream);
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing imap_createmailbox() : basic functionality ***
 Newname will be 'phpnewbox'
@@ -66,4 +65,3 @@ Unseen:      2
 UIDnext:     %d
 UIDvalidity: %d
 Mailbox 'phpnewbox' removed to restore initial state
-===Done===

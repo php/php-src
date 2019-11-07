@@ -25,9 +25,7 @@ intlcal_set_time($intlcal,$time * 1000);
 var_dump(intlcal_get_time($intlcal));
 
 ?>
-==DONE==
 --EXPECT--
 float(1330473600000)
 float(1330473600000)
-float(1330473600000)
-==DONE==
+float(1330473600000)

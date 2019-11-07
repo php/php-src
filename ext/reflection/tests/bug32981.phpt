@@ -21,7 +21,6 @@ foreach ($class->getMethods() as $method)
 var_dump($arr_static_vars);
 
 ?>
-===DONE===
 --EXPECT--
 string(4) "test"
 array(1) {
@@ -31,4 +30,3 @@ array(1) {
     bool(true)
   }
 }
-===DONE===

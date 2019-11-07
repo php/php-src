@@ -74,8 +74,6 @@ catch(Exception $e)
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ===EMPTY===
 string(9) ".inc,.php"
@@ -106,4 +104,3 @@ TestFunc2(TestClass)
 bool(true)
 ===NOFUNCTION===
 Exception: Function 'unavailable_autoload_function' not found (function 'unavailable_autoload_function' not found or invalid function name)
-===DONE===

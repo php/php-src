@@ -38,7 +38,6 @@ $result = printf($format3, $arg1, $arg2, $arg3);
 echo "\n";
 var_dump($result);
 ?>
-===DONE===
 --EXPECT--
 *** Testing printf() : basic functionality - using exponential format ***
 
@@ -57,4 +56,3 @@ int(23)
 -- Calling printf() with three arguments --
 1.000000e+3 2.000000E+3 3.000000e+3
 int(35)
-===DONE===

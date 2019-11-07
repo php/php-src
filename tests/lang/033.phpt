@@ -38,10 +38,8 @@ switch ($a):
 endswitch;
 ?>
 
-===DONE===
 --EXPECT--
 If: 11
 While: 12346789
 For: 0123401234
 Switch: 1
-===DONE===

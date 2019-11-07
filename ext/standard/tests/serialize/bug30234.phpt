@@ -25,7 +25,6 @@ var_dump(interface_exists('autoload_interface', false));
 var_dump(class_exists('autoload_implements', false));
 
 ?>
-===DONE===
 --EXPECTF--
 bool(false)
 bool(false)
@@ -36,4 +35,3 @@ object(autoload_implements)#%d (0) {
 bool(true)
 bool(true)
 bool(true)
-===DONE===

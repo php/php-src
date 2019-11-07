@@ -105,7 +105,6 @@ foreach($inputs as $key =>$value) {
 
 fclose($fp);
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_key() : usage variation ***
 
@@ -212,4 +211,3 @@ Expected parameter 2 to be an array, null given
 --resource--
 Expected parameter 2 to be an array, resource given
 Expected parameter 2 to be an array, resource given
-===DONE===

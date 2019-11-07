@@ -42,7 +42,6 @@ var_dump($obj4 == $obj3);
 var_dump($obj5 == $obj3);
 
 ?>
-===DONE===
 --EXPECT--
 Simple test for standard compare object handler
 
@@ -56,4 +55,3 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-===DONE===

@@ -19,8 +19,6 @@ while (($row = $res->fetchArray(SQLITE3_NUM)) !== false) {
     echo gettype($row[0]), PHP_EOL;
 }
 ?>
-===DONE===
 --EXPECT--
 integer
 integer
-===DONE===

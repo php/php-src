@@ -45,8 +45,6 @@ if (is_resource($p)) {
 	echo "no process\n";
 }
 ?>
-==DONE==
 --EXPECTF--
 int(%d)
 int(0)
-==DONE==

@@ -31,9 +31,7 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
 
   var_dump( $curl_content );
 ?>
-===DONE===
 --EXPECT--
 *** Testing curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); ***
 string(25) "Hello World!
 Hello World!"
-===DONE===

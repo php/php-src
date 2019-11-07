@@ -107,7 +107,6 @@ function test_link($linkedfile, $toLinkTo, $tounlink, $softlink) {
 
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing unlink() : variation ***
 -- removing unlinkVar8.tmp/file.tmp --
@@ -203,4 +202,3 @@ file removed
 file unlinked
 -- unlinking hard link /%s//unlinkVar8.tmp//file.tmp --
 file unlinked
-===DONE===

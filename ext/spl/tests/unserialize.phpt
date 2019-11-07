@@ -18,7 +18,6 @@ foreach ($types as $type) {
 	var_dump($exp === $out);
 }
 ?>
-===DONE===
 --EXPECTF--
 object(SplDoublyLinkedList)#%d (2) {
   ["flags":"SplDoublyLinkedList":private]=>
@@ -40,4 +39,3 @@ object(ArrayObject)#%d (1) {
   }
 }
 bool(true)
-===DONE===

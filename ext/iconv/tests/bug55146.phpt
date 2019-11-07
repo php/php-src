@@ -19,7 +19,6 @@ X-Header-Two: XtLePq6GTMn8G68F0
 HEADERS;
 var_dump(iconv_mime_decode_headers($headers, ICONV_MIME_DECODE_STRICT));
 ?>
-===DONE===
 --EXPECT--
 array(2) {
   ["X-Header-One"]=>
@@ -33,4 +32,3 @@ array(2) {
   ["X-Header-Two"]=>
   string(17) "XtLePq6GTMn8G68F0"
 }
-===DONE===

@@ -33,7 +33,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmdate() : usage variation ***
 
@@ -56,4 +55,3 @@ string(1) "5"
 --Day of the year--
 string(%d) "%d"
 string(3) "220"
-===DONE===

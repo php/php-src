@@ -12,7 +12,5 @@ if (count($gchild) > 0) {
     echo $gchild[0]."\n";
 }
 ?>
-===DONE===
 --EXPECT--
 hello
-===DONE===

@@ -25,7 +25,6 @@ test();
 
 http_server_kill($pid);
 ?>
-==DONE==
 --EXPECTF--
 Warning: file_get_contents(http://127.0.0.1:22348/): failed to open stream: HTTP request failed! HTTP/1.0 404 Not Found%a
 bool(false)
@@ -41,4 +40,3 @@ array(5) {
   [4]=>
   string(12) "Some: Header"
 }
-==DONE==

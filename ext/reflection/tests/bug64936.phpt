@@ -28,8 +28,6 @@ $rb = new ReflectionClass('B');
 var_dump(strip_doc_comment($rb->getDocComment()));
 
 ?>
-===DONE===
 --EXPECT--
 bool(false)
 bool(false)
-===DONE===

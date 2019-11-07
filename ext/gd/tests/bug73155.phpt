@@ -19,10 +19,8 @@ printf("x chunk count: %d\n", $header['x_count']);
 printf("y chunk count: %d\n", $header['y_count']);
 printf("file size: %d\n", strlen($buffer));
 ?>
-===DONE===
 --EXPECT--
 chunk size: 64
 x chunk count: 1
 y chunk count: 1
 file size: 5145
-===DONE===

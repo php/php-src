@@ -26,8 +26,6 @@ xmlwriter_end_document($xw);
 // Force to write and empty the buffer
 echo xmlwriter_flush($xw, true);
 ?>
-===DONE===
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
 <tag1 attr1="attr1_value" att2="att2_value">Test text for tag1<tag2/></tag1>
-===DONE===

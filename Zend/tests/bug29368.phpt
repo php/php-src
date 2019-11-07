@@ -27,8 +27,6 @@ try
 unset($bar);
 
 ?>
-===DONE===
 --EXPECT--
 Foo::__construct
 Caught exception!
-===DONE===

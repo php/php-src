@@ -13,8 +13,6 @@ $im = imagecreate(2**28, 1);
 imagescale($im, 1, 1, IMG_TRIANGLE);
 
 ?>
-===DONE===
 --EXPECTF--
 Warning: imagescale():%S product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
  in %s on line %d
-===DONE===

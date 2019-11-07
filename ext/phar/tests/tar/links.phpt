@@ -19,7 +19,6 @@ var_dump($p['testit/file']->getContent());
 $p['testit/link'] = 'overwriting';
 var_dump($p['testit/link']->getContent());
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
@@ -32,4 +31,3 @@ string(3) "hi
 string(3) "hi
 "
 string(11) "overwriting"
-===DONE===

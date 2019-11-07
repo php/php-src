@@ -26,7 +26,6 @@ try {
 var_dump(file_exists(__DIR__ . '/buildfromdirectory5.phar'));
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/buildfromdirectory5.phar');
@@ -47,4 +46,3 @@ array(4) {
   string(%d) "%stestdir5%cfile4.txt"
 }
 bool(true)
-===DONE===

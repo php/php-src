@@ -13,7 +13,6 @@ var_dump(ezmlm_hash("webmaster@somewhere.com"));
 var_dump(ezmlm_hash("foo@somewhere.com"));
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing ezmlm_hash() : basic functionality ***
 
@@ -22,4 +21,3 @@ int(1)
 
 Deprecated: Function ezmlm_hash() is deprecated in %s on line %d
 int(7)
-===Done===

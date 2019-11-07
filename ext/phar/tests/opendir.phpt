@@ -30,7 +30,6 @@ echo "\n";
 opendir('phar://');
 opendir('phar://hi.phar');
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
@@ -41,4 +40,3 @@ phar url "phar://" is unknown in %sopendir.php on line %d
 
 Warning: opendir(phar://hi.phar): failed to open dir: phar error: invalid url or non-existent phar "phar://hi.phar"
 phar url "phar://hi.phar" is unknown in %sopendir.php on line %d
-===DONE===

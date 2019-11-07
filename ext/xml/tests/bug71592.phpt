@@ -26,7 +26,5 @@ xml_set_external_entity_ref_handler($parser, function () {
 xml_parse($parser, $xml);
 var_dump(xml_get_error_code($parser) === XML_ERROR_EXTERNAL_ENTITY_HANDLING);
 ?>
-===DONE===
 --EXPECT--
 bool(true)
-===DONE===

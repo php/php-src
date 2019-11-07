@@ -15,7 +15,6 @@ END;
 
 var_dump(parse_ini_string($ini, false, INI_SCANNER_RAW));
 ?>
-===DONE===
 --EXPECT--
 array(7) {
   [1]=>
@@ -33,4 +32,3 @@ array(7) {
   [7]=>
   string(7) "foo"bar"
 }
-===DONE===

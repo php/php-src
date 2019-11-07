@@ -25,7 +25,6 @@ var_dump(
 	@ldap_search($link, "dc=my-domain,$base", "(o=my-domain)")
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -37,4 +36,3 @@ ldap_delete($link, "dc=my-domain,$base");
 --EXPECT--
 bool(true)
 bool(false)
-===DONE===

@@ -42,7 +42,6 @@ fclose($fp);
 closedir($dfp);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing sprintf() : char formats with resource values ***
 
@@ -75,4 +74,3 @@ string(1) "%a"
 string(1) "%a"
 string(11) "a-bA-B@#$&]"
 string(1) "c"
-===DONE===

@@ -27,9 +27,7 @@ $b = mb_decode_mimeheader($a);
 var_dump(bin2hex($b));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing mb_decode_mimeheader() : basic functionality ***
 string(60) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e38082"
 string(60) "e697a5e69cace8aa9ee38386e382ade382b9e38388e381a7e38199e38082"
-===DONE===

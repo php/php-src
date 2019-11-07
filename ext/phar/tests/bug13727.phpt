@@ -22,7 +22,6 @@ for ($i = 0; $i < 4*1024; $i++){
 }
 echo("\n Written Files($i)\n");
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dirName = __DIR__;
@@ -4133,4 +4132,3 @@ __HALT_COMPILER();
 4095
 
  Written Files(4096)
-===DONE===

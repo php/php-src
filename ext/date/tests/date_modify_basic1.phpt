@@ -29,11 +29,9 @@ date_modify($datetime, "last Sunday");
 echo "After modification 4: " . date_format($datetime, "D, d M Y") . "\n";
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing date_modify() : basic functionality ***
 After modification 1: Sun, 01 Feb 2009
 After modification 2: Tue, 10 Feb 2009 18:28:43
 After modification 3: Thu, 12 Feb 2009
 After modification 4: Sun, 08 Feb 2009
-===DONE===

@@ -360,7 +360,6 @@ var_dump($global_var);
 //Note: No error conditions relating to passing arguments can be tested
 // because these are not functions but statements, it will result in syntax error.
 ?>
-===DONE===
 --EXPECTF--
 *** Testing unset(), empty() & isset() with scalar variables ***
 -- Iteration 1 --
@@ -1330,4 +1329,3 @@ bool(false)
 bool(false)
 bool(true)
 int(10)
-===DONE===

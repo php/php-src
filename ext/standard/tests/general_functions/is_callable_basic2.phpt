@@ -124,7 +124,6 @@ foreach($objects as $object) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing is_callable() on objects ***
 
@@ -781,4 +780,3 @@ bool(true)
 object_class::foo1
 bool(false)
 object_class::foo1
-===DONE===

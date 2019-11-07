@@ -44,7 +44,6 @@ str_dump("\x0", "\0");
 str_dump($a, $b);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing strnatcasecmp() : variation ***
 int(1)
@@ -53,4 +52,3 @@ int(-1)
 int(-1)
 int(0)
 int(0)
-===DONE===

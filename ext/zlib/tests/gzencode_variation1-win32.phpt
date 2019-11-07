@@ -37,10 +37,8 @@ $output = gzencode(gzencode($data));
 $back = gzdecode(gzdecode($output));
 var_dump($data === $back);
 ?>
-===Done===
 --EXPECT--
 *** Testing gzencode() : variation ***
 
 -- Testing multiple compression --
 bool(true)
-===Done===

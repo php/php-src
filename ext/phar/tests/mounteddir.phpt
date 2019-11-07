@@ -82,7 +82,6 @@ Phar::mount($pname . '/testit/extfile.php', __DIR__);
 echo $e->getMessage(), "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/tempmanifest1.phar.php');
@@ -116,4 +115,3 @@ Mounting of /testit to another\..\mistake within phar %stempmanifest1.phar.php f
 Mounting of /notfound to %stests/this/does/not/exist within phar %stempmanifest1.phar.php failed
 Mounting of /testit to %stests within phar %stests/tempmanifest1.phar.php failed
 Mounting of /testit/extfile.php to %stests within phar %stests/tempmanifest1.phar.php failed
-===DONE===

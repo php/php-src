@@ -24,7 +24,6 @@ require_once('skipifconnectfailure.inc');
 
     $link->close();
 ?>
-=== DONE ===
 --CLEAN--
 <?php
 	require_once("clean_table.inc");
@@ -56,4 +55,3 @@ object(mysqli_result)#3 (5) {
   ["type"]=>
   int(1)
 }
-=== DONE ===

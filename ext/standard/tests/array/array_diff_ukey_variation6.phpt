@@ -29,7 +29,6 @@ foreach($input_arrays as $key =>$value) {
       var_dump( array_diff_ukey($input_array, $value, 'key_compare_func') );
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_ukey() : usage variation ***
 
@@ -62,4 +61,3 @@ array(1) {
   [10]=>
   string(3) "0xA"
 }
-===DONE===

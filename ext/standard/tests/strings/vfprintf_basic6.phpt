@@ -39,10 +39,8 @@ print_r(file_get_contents($data_file));
 unlink($data_file);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : basic functionality - using exponential format ***
 1.000000e+3
 1.000000e+3 2.000000e+3
 1.000000e+3 2.000000e+3 3.000000e+3
-===DONE===

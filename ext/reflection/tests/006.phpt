@@ -82,8 +82,6 @@ Test::testing();
 TestDerived::testing();
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 string(3) "pub"
 string(3) "pub"
@@ -100,4 +98,3 @@ string(7) "updated"
 string(7) "updated"
 EXCEPTION
 EXCEPTION
-===DONE===

@@ -53,7 +53,6 @@ foreach($hex_values2 as $c) {
 }
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_xdigit() : usage variations ***
 
@@ -80,4 +79,3 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-===DONE===

@@ -31,7 +31,6 @@ fpassthru( $fp );
 fclose( $fp );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -44,4 +43,3 @@ unlink( $file );
 bool(true)
 Grfgvat gur ebg13 svygre juvpu fuvsgf fbzr guvatf nebhaq.
 add some more un-filtered foobar
-===DONE===

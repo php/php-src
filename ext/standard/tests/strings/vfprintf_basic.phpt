@@ -42,7 +42,6 @@ writeAndDump( $fp, "Testing %b %d %f %s %x %X", array( 9, 6, 2.5502, "foobar", 1
 fclose( $fp );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -68,4 +67,3 @@ string(2) "50"
 int(2)
 string(35) "Testing 1001 6 2.550200 foobar f 41"
 int(35)
-===DONE===

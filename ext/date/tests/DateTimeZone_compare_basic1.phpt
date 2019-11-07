@@ -37,7 +37,6 @@ var_dump($obj2 == $obj4);
 var_dump($obj3 == $obj4);
 
 ?>
-===DONE===
 --EXPECT--
 Simple test for DateTimeZone compare object handler
 
@@ -51,4 +50,3 @@ bool(false)
 bool(false)
 bool(false)
 bool(false)
-===DONE===

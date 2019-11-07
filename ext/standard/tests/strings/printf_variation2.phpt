@@ -105,7 +105,6 @@ foreach($values as $value) {
 fclose($file_handle);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing printf() : with different types of values passed for arg1 argument ***
 
@@ -296,4 +295,3 @@ Resource id #%d
 int(%d)
 Resource id #%d
 int(%d)
-===DONE===

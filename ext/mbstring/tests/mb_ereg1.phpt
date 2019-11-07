@@ -22,7 +22,6 @@ foreach ($a as $args) {
 	var_dump($args);
 }
 ?>
-===DONE===
 --EXPECTF--
 bool(false)
 array(3) {
@@ -76,4 +75,3 @@ array(3) {
   array(0) {
   }
 }
-===DONE===

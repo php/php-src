@@ -31,7 +31,6 @@ var_dump(imap_mail_copy($imap_stream, '1', 'INBOX.'.$mailbox_prefix));
 
 imap_close($imap_stream);
 ?>
-===Done===
 --CLEAN--
 <?php
 require_once('clean.inc');
@@ -43,4 +42,3 @@ Create a temporary mailbox and add 1 msgs
 .. mailbox '%s' created
 Msg Count in new mailbox: 1
 bool(true)
-===Done===

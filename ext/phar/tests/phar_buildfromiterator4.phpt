@@ -51,7 +51,6 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/buildfromiterator4.phar');
@@ -80,4 +79,3 @@ array(1) {
   ["a"]=>
   string(%d) "%sphar_buildfromiterator4.phpt"
 }
-===DONE===

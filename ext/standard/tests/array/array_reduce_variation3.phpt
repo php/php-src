@@ -24,7 +24,6 @@ echo "\n--- Instance method callback ---\n";
 var_dump(array_reduce($array, array(new A(), "adder2")));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_reduce() : variation - object callbacks ***
 
@@ -33,4 +32,3 @@ int(1)
 
 --- Instance method callback ---
 int(1)
-===DONE===

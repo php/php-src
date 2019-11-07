@@ -42,7 +42,6 @@ fclose($fp);
 closedir($dfp);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing sprintf() : scientific formats with resource values ***
 
@@ -75,4 +74,3 @@ string(%d) "%f"
 string(30) "%s%f"
 string(%d) "0-1]"
 string(1) "e"
-===DONE===

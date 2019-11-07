@@ -43,7 +43,6 @@ foreach ($dirs as $d) {
 rmdir($prefix);
 
 ?>
-===DONE===
 --EXPECT--
 Returned (a)
 Encoding: ASCII
@@ -66,4 +65,3 @@ Encoding: UTF-8
 Returned (王)
 Encoding: UTF-8
 
-===DONE===

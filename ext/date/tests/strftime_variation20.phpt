@@ -36,7 +36,6 @@ foreach($inputs as $key =>$value) {
 }
 
 ?>
-===DONE===
 --EXPECTREGEX--
 \*\*\* Testing strftime\(\) : usage variation \*\*\*
 
@@ -49,4 +48,3 @@ string\(1\) "
 --Tab character--
 string\(1\) "\s"
 string\(1\) "\s"
-===DONE===

@@ -19,9 +19,7 @@ var_dump(gzwrite( $h, $str, $length ) );
 gzclose($h);
 
 ?>
-===DONE===
 --EXPECT--
 int(0)
 string(10) "When you'r"
 int(0)
-===DONE===

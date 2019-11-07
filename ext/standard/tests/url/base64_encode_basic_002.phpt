@@ -41,7 +41,6 @@ foreach($values as $str) {
 }
 
 ?>
-===Done===
 --EXPECT--
 *** Testing base64_encode() : basic functionality ***
 
@@ -56,4 +55,3 @@ TEST PASSED
 TEST PASSED
 -- Iteration 5 --
 TEST PASSED
-===Done===

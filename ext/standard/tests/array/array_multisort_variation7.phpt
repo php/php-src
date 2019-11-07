@@ -36,7 +36,6 @@ var_dump(array_multisort($inputs));
 var_dump($inputs);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_multisort() : usage variation  - test sort order of all types***
 bool(true)
@@ -65,4 +64,3 @@ array(10) {
   object(classWithoutToString)#2 (0) {
   }
 }
-===DONE===

@@ -109,7 +109,6 @@ foreach($inputs as $key =>$value) {
 unlink($filename);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing file_put_contents() : usage variation ***
 
@@ -164,4 +163,3 @@ Class A object
 --undefined var--
 
 --unset var--
-===DONE===

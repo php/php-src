@@ -27,7 +27,6 @@ var_dump(parse_str($s1, $res3_array));
 var_dump($res3_array);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing parse_str() : basic functionality ***
 
@@ -63,4 +62,3 @@ array(3) {
   ["third"]=>
   string(4) "val3"
 }
-===DONE===

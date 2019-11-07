@@ -37,10 +37,8 @@ if ($time >= $sleeplow) {
 	echo "TEST FAILED - time is ${time} secs and sleep was ${sleeptime} secs\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 *** Testing sleep() : basic functionality ***
 Thread slept for %f seconds
 Return value: 0
 TEST PASSED
-===DONE===

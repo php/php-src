@@ -15,8 +15,6 @@ var_dump(
     count($intlGregorianCalendarRef->getConstants()) === count($intlCalendarRef->getConstants())
 );
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(true)
-===DONE===

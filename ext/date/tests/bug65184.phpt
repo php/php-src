@@ -21,8 +21,6 @@ date.timezone = UTC
 
 	echo strlen(strftime('%A')), "\n";
 ?>
-===DONE===
 --EXPECT--
 90 85 97 6a 93 fa 
 6
-===DONE===

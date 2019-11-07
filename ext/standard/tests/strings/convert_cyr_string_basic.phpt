@@ -25,7 +25,6 @@ for ($i = 128; $i < 256; $i++) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing convert_cyr_string() : basic functionality ***
 
@@ -166,4 +165,3 @@ string(102) "436f6e766572742066726f6d206f6e6520437972696c6c696320636861726163746
 253: dc
 254: c0
 255: d1
-===DONE===

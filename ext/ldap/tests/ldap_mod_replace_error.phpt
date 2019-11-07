@@ -21,7 +21,6 @@ var_dump(ldap_mod_replace($link, "weirdAttribute=val", array()));
 // Invalid attributes
 var_dump(ldap_mod_replace($link, "$base", array('dc')));
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -37,4 +36,3 @@ bool(false)
 
 Warning: ldap_mod_replace(): Unknown attribute in the data in %s on line %d
 bool(false)
-===DONE===

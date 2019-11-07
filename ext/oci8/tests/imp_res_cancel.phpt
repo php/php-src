@@ -55,8 +55,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 Test 1
   1
@@ -65,4 +63,3 @@ bool(true)
 bool(true)
   3
 bool(true)
-===DONE===

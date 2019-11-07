@@ -41,7 +41,6 @@ var_dump(array_multisort($inputs, SORT_STRING));
 var_dump($inputs);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_multisort() : usage variation  - test sort order of all types***
 bool(true)
@@ -67,4 +66,3 @@ array(9) {
   ["string DQ"]=>
   string(6) "string"
 }
-===DONE===

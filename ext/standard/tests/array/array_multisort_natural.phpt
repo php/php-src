@@ -31,7 +31,6 @@ array_multisort($b, SORT_NATURAL, $a);
 var_dump($a, $b);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_multisort() : natural sorting
 array(5) {
@@ -58,4 +57,3 @@ array(5) {
   [4]=>
   string(4) "20 c"
 }
-===DONE===

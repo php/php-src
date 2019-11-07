@@ -36,8 +36,6 @@ $it->next();
 var_dump($it->valid());
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 1=>2
 int(1)
@@ -47,4 +45,3 @@ Cannot seek to 0 which is below the offset 1
 int(3)
 Cannot seek to 3 which is behind offset 1 plus count 2
 bool(false)
-===DONE===

@@ -24,7 +24,6 @@ var_dump(class_implements('non_existent'));
 var_dump(class_implements('non_existent2', false));
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing class_implements() : variation ***
 --- testing no interfaces ---
@@ -41,4 +40,3 @@ bool(false)
 
 Warning: class_implements(): Class non_existent2 does not exist in %s on line %d
 bool(false)
-===DONE===

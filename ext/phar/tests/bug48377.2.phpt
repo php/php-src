@@ -17,9 +17,7 @@ try {
 	echo $e->getMessage(),"\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.zip');?>
 --EXPECTF--
 data phar "%sbug48377.2.phar.zip" has invalid extension phar.zip
-===DONE===

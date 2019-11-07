@@ -61,7 +61,6 @@ var_dump(
 ldap_get_option($link, LDAP_OPT_MATCHED_DN, $option);
 var_dump($option);
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(true)
@@ -119,4 +118,3 @@ array(2) {
 }
 bool(true)
 string(14) "dc=test,dc=com"
-===DONE===

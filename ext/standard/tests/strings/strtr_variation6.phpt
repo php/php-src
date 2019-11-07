@@ -86,7 +86,6 @@ for($index = 0; $index < count($from_arr); $index++) {
 
 fclose($file_handle);  //closing the file handle
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strtr() function: with unexpected inputs for 'from' ***
 -- Iteration 1 --
@@ -133,4 +132,3 @@ string(6) "012atm"
 string(6) "012atm"
 -- Iteration 19 --
 string(6) "012atm"
-===DONE===

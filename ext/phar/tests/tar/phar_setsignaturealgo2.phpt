@@ -42,7 +42,6 @@ var_dump($p->getSignature());
 echo $e->getMessage();
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
@@ -84,4 +83,3 @@ array(2) {
   ["hash_type"]=>
   string(7) "OpenSSL"
 }
-===DONE===

@@ -18,7 +18,5 @@ $add = $xml->addChild('Host');
 $add->Host->addAttribute('enable', 'true');
 
 ?>
-===DONE===
 --EXPECTF--
 Warning: SimpleXMLElement::addAttribute(): Unable to locate parent Element in %s on line %d
-===DONE===

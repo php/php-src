@@ -20,7 +20,6 @@ var_dump($df,
 	$df->days);
 
 ?>
-==DONE==
 --EXPECTF--
 object(DateInterval)#%d (16) {
   ["y"]=>
@@ -65,4 +64,3 @@ int(0)
 float(0)
 int(0)
 int(2)
-==DONE==

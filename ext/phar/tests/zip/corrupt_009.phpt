@@ -10,7 +10,5 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 phar error: Unable to process extra field header for file in central directory in zip-based phar "%sextralen_toolong.zip"
-===DONE===

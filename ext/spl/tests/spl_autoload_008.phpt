@@ -63,8 +63,6 @@ foreach($funcs as $idx => $func)
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ====0====
 string(10) "MyAutoLoad"
@@ -126,4 +124,3 @@ registered
 MyAutoLoader::dynaLoad(NoExistingTestClass)
 Exception: Bla
 int(0)
-===DONE===

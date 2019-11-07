@@ -122,7 +122,6 @@ $people[0]['name'] = 'BlaBla';
 var_dump($people[0]['name']);
 
 ?>
-===DONE===
 --EXPECTF--
 string(3) "Foo"
 string(6) "FooBar"
@@ -187,4 +186,3 @@ ArrayProxy::offsetSet(0, name, BlaBla)
 ArrayProxy::__construct(0)
 ArrayProxy::offsetGet(0, name)
 string(6) "BlaBla"
-===DONE===

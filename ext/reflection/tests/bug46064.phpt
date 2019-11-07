@@ -45,7 +45,6 @@ class bar extends test {
 new bar;
 
 ?>
-===DONE===
 --EXPECTF--
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -73,4 +72,3 @@ object(ReflectionProperty)#%d (2) {
 int(2)
 bool(false)
 bool(true)
-===DONE===

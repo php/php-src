@@ -37,7 +37,6 @@ var_dump(array_uintersect($arr1, $arr2, 'too_few_parameters'));
 
 ?>
 
-===DONE===
 --EXPECT--
 *** Testing array_uintersect() : usage variation - differing comparison functions***
 
@@ -52,4 +51,3 @@ Exception: Too few arguments to function too_many_parameters(), 2 passed and exa
 array(0) {
 }
 
-===DONE===

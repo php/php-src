@@ -83,7 +83,6 @@ rmdir('c:\\'.$rootdir);
 
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing fopen() : variation ***
 
@@ -145,4 +144,3 @@ Warning: fopen(/sortout\fopen_variation10.tmp): failed to open stream: No such f
 file not opened for read
 
 Warning: fclose() expects parameter 1 to be resource, bool given in %s on line %d
-===DONE===

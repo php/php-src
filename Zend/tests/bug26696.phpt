@@ -16,7 +16,5 @@ for ($i = 0; $i < $len; $i++) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 a-s-d-d-/-?+
-===DONE===

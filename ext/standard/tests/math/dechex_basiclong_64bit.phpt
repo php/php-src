@@ -25,7 +25,6 @@ foreach ($longVals as $longVal) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 --- testing: 9223372036854775807 ---
 string(16) "7fffffffffffffff"
@@ -57,4 +56,3 @@ string(16) "8000000000000000"
 string(16) "8000000000000001"
 --- testing: -9.2233720368548E+18 ---
 string(16) "8000000000000000"
-===DONE===

@@ -35,7 +35,6 @@ include $alias . '/b/c.php';
 
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
@@ -43,4 +42,3 @@ Warning: fopen(phar://%sopen_for_write_existing_c.phar.tar/b/c.php): failed to o
 bool(false)
 This is b/c
 
-===DONE===

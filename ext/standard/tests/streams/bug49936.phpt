@@ -14,8 +14,6 @@ var_dump(@opendir($dir));
 var_dump(@opendir($dir));
 
 ?>
-===DONE===
 --EXPECT--
 bool(false)
 bool(false)
-===DONE===

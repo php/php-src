@@ -35,7 +35,6 @@ foreach($inputs as $timezone) {
       var_dump( getdate(0) );
 };
 ?>
-===DONE===
 --EXPECT--
 *** Testing getdate() : usage variation ***
 
@@ -220,4 +219,3 @@ array(11) {
   [0]=>
   int(0)
 }
-===DONE===

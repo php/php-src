@@ -19,7 +19,6 @@ $result = ldap_search($link, "$base", "(cn=userA)", array("cn", "sn"));
 $result = ldap_search($link, "$base", "(cn=userZ)", array("cn", "sn"));
 var_dump(ldap_get_entries($link, $result));
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -59,4 +58,3 @@ array(2) {
     string(%d) "cn=userZ,%s"
   }
 }
-===DONE===

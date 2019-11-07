@@ -15,7 +15,6 @@ $path = "ftp://localhost:" . $port."/one/two/three/";
 mkdir($path, 0755, true);
 
 ?>
-==DONE==
 --EXPECTF--
 string(20) "CWD /one/two/three
 "
@@ -33,4 +32,3 @@ string(14) "MKD /one/two
 "
 string(20) "MKD /one/two/three
 "
-==DONE==

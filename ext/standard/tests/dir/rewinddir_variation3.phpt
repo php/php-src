@@ -33,7 +33,6 @@ if ($result1 === $result2) {
 	echo "rewinddir() does not work on file pointers\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 *** Testing rewinddir() : usage variations ***
 
@@ -43,4 +42,3 @@ resource(%d) of type (stream)
 
 -- Check if rewinddir() has repositioned the file pointer --
 rewinddir() does not work on file pointers
-===DONE===

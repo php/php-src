@@ -100,7 +100,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_uintersect_assoc() : usage variation ***
 
@@ -178,4 +177,3 @@ Expected parameter 1 to be an array, null given
 
 --unset var--
 Expected parameter 1 to be an array, null given
-===DONE===

@@ -106,8 +106,6 @@ foreach(new RecursiveArrayIteratorIterator(new MyRecursiveArrayIterator(array("a
 	echo "$k=>$v\n";
 }
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 RecursiveArrayIteratorIterator::rewind
 RecursiveArrayIteratorIterator::callHasChildren(0) = no/no
@@ -177,4 +175,3 @@ RecursiveArrayIteratorIterator::next
 MyRecursiveArrayIterator::valid = false
 RecursiveArrayIteratorIterator::valid
 MyRecursiveArrayIterator::valid = false
-===DONE===

@@ -15,7 +15,6 @@ foreach ($strVals as $strVal) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 --- testing: '0' ---
 int(0)
@@ -61,4 +60,3 @@ float(-3.4)
 
 Warning: A non-numeric value encountered in %s on line %d
 int(0)
-===DONE===

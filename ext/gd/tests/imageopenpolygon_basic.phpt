@@ -23,7 +23,5 @@ imageopenpolygon($im, [10,50, 25,10, 40,89, 55,10, 80,89, 90,50], 6, $blue);
 
 test_image_equals_file(__DIR__ . DIRECTORY_SEPARATOR . 'imageopenpolygon.png', $im);
 ?>
-===DONE===
 --EXPECT--
 The images are equal.
-===DONE===

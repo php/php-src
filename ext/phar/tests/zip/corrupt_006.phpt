@@ -10,7 +10,5 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 phar error: Cannot process zips created from stdin (zero-length filename) in zip-based phar "%sstdin.zip"
-===DONE===

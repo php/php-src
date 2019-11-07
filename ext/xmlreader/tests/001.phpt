@@ -19,10 +19,8 @@ $xmlstring = '';
 $reader = new XMLReader();
 $reader->XML($xmlstring);
 ?>
-===DONE===
 --EXPECTF--
 books
 books
 
 Warning: XMLReader::XML(): Empty string supplied as input in %s on line %d
-===DONE===

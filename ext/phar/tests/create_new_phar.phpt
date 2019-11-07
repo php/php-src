@@ -18,10 +18,8 @@ file_put_contents('phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.pha
 include 'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php/$fileName.php';
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
 brand new!
 Text in utf8 file.
-===DONE===

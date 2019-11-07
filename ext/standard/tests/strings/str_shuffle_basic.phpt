@@ -51,9 +51,7 @@ if ($combinations != 24) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing str_shuffle() : basic functionality ***
 string(47) "%s"
 TEST PASSED
-===DONE===
