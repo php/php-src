@@ -42,6 +42,9 @@ PHP 7.4 UPGRADE NOTES
     with the STREAM_OPTION_READ_BUFFER option. Custom stream wrapper
     implementations may need to implement the stream_set_option() method to
     avoid a warning (always returning false is a sufficient implementation).
+  . The "creating default object from empty value" warning is now consistently
+    thrown if a falsy value is promoted into an stdClass object. Previously some
+    cases like `$null->prop[0] = $val` missed this warning.
 
 - BCMath:
   . BCMath functions will now warn if a non well-formed number is passed, such
