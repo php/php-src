@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #78787 (Segfault with trait overriding inherited private shadow
     property). (Nikita)
 
+- Standard:
+  . Fixed bug #78759 (array_search in $GLOBALS). (Nikita)
+
 21 Nov 2019, PHP 7.3.12
 
 - Core:
