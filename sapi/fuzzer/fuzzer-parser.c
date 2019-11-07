@@ -27,7 +27,7 @@
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 	char *s;
-	if (Size > 64 * 1024) {
+	if (Size > 32 * 1024) {
 		/* Large inputs have a large impact on fuzzer performance,
 		 * but are unlikely to be necessary to reach new codepaths. */
 		return 0;
