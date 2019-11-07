@@ -20,8 +20,6 @@
 #ifndef HRTIME_H
 #define HRTIME_H
 
-#include <Zend/zend_portability.h>
-
 #define PHP_HRTIME_PLATFORM_POSIX   0
 #define PHP_HRTIME_PLATFORM_WINDOWS 0
 #define PHP_HRTIME_PLATFORM_APPLE   0

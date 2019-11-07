@@ -19,8 +19,6 @@
 #ifndef PHP_RANDOM_H
 #define PHP_RANDOM_H
 
-#include <Zend/zend_portability.h>
-
 BEGIN_EXTERN_C()
 
 PHP_FUNCTION(random_bytes);
