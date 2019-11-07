@@ -19,6 +19,8 @@
 #ifndef PHP_RANDOM_H
 #define PHP_RANDOM_H
 
+BEGIN_EXTERN_C()
+
 PHP_FUNCTION(random_bytes);
 PHP_FUNCTION(random_int);
 
@@ -47,6 +49,8 @@ extern PHPAPI int random_globals_id;
 # define RANDOM_G(v) random_globals.v
 extern PHPAPI php_random_globals random_globals;
 #endif
+
+END_EXTERN_C()
 
 #endif
 
