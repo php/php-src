@@ -1760,6 +1760,7 @@ typedef struct {
 
 typedef struct {
 	int                 count;
+	int                 alloc_count;
 	image_info_data 	*list;
 } image_info_list;
 /* }}} */
@@ -1880,6 +1881,7 @@ typedef struct {
 
 typedef struct {
 	int             count;
+	int             alloc_count;
 	file_section    *list;
 } file_section_list;
 
@@ -2004,11 +2006,14 @@ typedef struct {
 */
 static int exif_file_sections_add(image_info_type *ImageInfo, int type, size_t size, uchar *data)
 {
-	file_section    *tmp;
-	int             count = ImageInfo->file.count;
+	int count = ImageInfo->file.count;
+	if (count == ImageInfo->file.alloc_count) {
+		int new_alloc_count = ImageInfo->file.alloc_count ? ImageInfo->file.alloc_count * 2 : 1;
+		ImageInfo->file.list = safe_erealloc(
+			ImageInfo->file.list, new_alloc_count, sizeof(file_section), 0);
+		ImageInfo->file.alloc_count = new_alloc_count;
+	}
 
-	tmp = safe_erealloc(ImageInfo->file.list, (count+1), sizeof(file_section), 0);
-	ImageInfo->file.list = tmp;
 	ImageInfo->file.list[count].type = 0xFFFF;
 	ImageInfo->file.list[count].data = NULL;
 	ImageInfo->file.list[count].size = 0;
@@ -2064,6 +2069,16 @@ static int exif_file_sections_free(image_info_type *ImageInfo)
 }
 /* }}} */
 
+static image_info_data *exif_alloc_image_info_data(image_info_list *info_list) {
+	if (info_list->count == info_list->alloc_count) {
+		int new_alloc_count = info_list->alloc_count ? info_list->alloc_count * 2 : 1;
+		info_list->list = safe_erealloc(
+			info_list->list, new_alloc_count, sizeof(image_info_data), 0);
+		info_list->alloc_count = new_alloc_count;
+	}
+	return &info_list->list[info_list->count++];
+}
+
 /* {{{ exif_iif_add_value
  Add a value to image_info
 */
@@ -2073,16 +2088,12 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 	void *vptr, *vptr_end;
 	image_info_value *info_value;
 	image_info_data  *info_data;
-	image_info_data  *list;
 
 	if (length < 0) {
 		return;
 	}
 
-	list = safe_erealloc(image_info->info_list[section_index].list, (image_info->info_list[section_index].count+1), sizeof(image_info_data), 0);
-	image_info->info_list[section_index].list = list;
-
-	info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
+	info_data = exif_alloc_image_info_data(&image_info->info_list[section_index]);
 	memset(info_data, 0, sizeof(image_info_data));
 	info_data->tag    = tag;
 	info_data->format = format;
@@ -2205,7 +2216,6 @@ static void exif_iif_add_value(image_info_type *image_info, int section_index, c
 			}
 	}
 	image_info->sections_found |= 1<<section_index;
-	image_info->info_list[section_index].count++;
 }
 /* }}} */
 
@@ -2223,20 +2233,13 @@ static void exif_iif_add_tag(image_info_type *image_info, int section_index, cha
 */
 static void exif_iif_add_int(image_info_type *image_info, int section_index, char *name, int value)
 {
-	image_info_data  *info_data;
-	image_info_data  *list;
-
-	list = safe_erealloc(image_info->info_list[section_index].list, (image_info->info_list[section_index].count+1), sizeof(image_info_data), 0);
-	image_info->info_list[section_index].list = list;
-
-	info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
+	image_info_data *info_data = exif_alloc_image_info_data(&image_info->info_list[section_index]);
 	info_data->tag    = TAG_NONE;
 	info_data->format = TAG_FMT_SLONG;
 	info_data->length = 1;
 	info_data->name   = estrdup(name);
 	info_data->value.i = value;
 	image_info->sections_found |= 1<<section_index;
-	image_info->info_list[section_index].count++;
 }
 /* }}} */
 
@@ -2245,20 +2248,15 @@ static void exif_iif_add_int(image_info_type *image_info, int section_index, cha
 */
 static void exif_iif_add_str(image_info_type *image_info, int section_index, char *name, char *value)
 {
-	image_info_data  *info_data;
-	image_info_data  *list;
-
 	if (value) {
-		list = safe_erealloc(image_info->info_list[section_index].list, (image_info->info_list[section_index].count+1), sizeof(image_info_data), 0);
-		image_info->info_list[section_index].list = list;
-		info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
+		image_info_data *info_data =
+			exif_alloc_image_info_data(&image_info->info_list[section_index]);
 		info_data->tag    = TAG_NONE;
 		info_data->format = TAG_FMT_STRING;
 		info_data->length = 1;
 		info_data->name   = estrdup(name);
 		info_data->value.s = estrdup(value);
 		image_info->sections_found |= 1<<section_index;
-		image_info->info_list[section_index].count++;
 	}
 }
 /* }}} */
@@ -2286,13 +2284,9 @@ static void exif_iif_add_fmt(image_info_type *image_info, int section_index, cha
 */
 static void exif_iif_add_buffer(image_info_type *image_info, int section_index, char *name, int length, char *value)
 {
-	image_info_data  *info_data;
-	image_info_data  *list;
-
 	if (value) {
-		list = safe_erealloc(image_info->info_list[section_index].list, (image_info->info_list[section_index].count+1), sizeof(image_info_data), 0);
-		image_info->info_list[section_index].list = list;
-		info_data  = &image_info->info_list[section_index].list[image_info->info_list[section_index].count];
+		image_info_data *info_data =
+			exif_alloc_image_info_data(&image_info->info_list[section_index]);
 		info_data->tag    = TAG_NONE;
 		info_data->format = TAG_FMT_UNDEFINED;
 		info_data->length = length;
@@ -2301,7 +2295,6 @@ static void exif_iif_add_buffer(image_info_type *image_info, int section_index, 
 		memcpy(info_data->value.s, value, length);
 		info_data->value.s[length] = 0;
 		image_info->sections_found |= 1<<section_index;
-		image_info->info_list[section_index].count++;
 	}
 }
 /* }}} */
