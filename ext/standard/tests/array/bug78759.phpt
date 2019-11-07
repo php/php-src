@@ -4,9 +4,9 @@ Bug #78759: array_search in $GLOBALS
 <?php
 
 $a = 22;
-var_dump($GLOBALS["a"]); // int 22
-var_dump(array_search(22, $GLOBALS)); // false
-var_dump(array_search(22, $GLOBALS, true)); // false
+var_dump($GLOBALS["a"]);
+var_dump(array_search(22, $GLOBALS));
+var_dump(array_search(22, $GLOBALS, true));
 
 ?>
 --EXPECT--
