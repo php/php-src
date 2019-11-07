@@ -4278,9 +4278,9 @@ PHP_FUNCTION(register_tick_function)
 
 	if (!zend_is_callable(&tick_fe.arguments[0], 0, &function_name)) {
 		efree(tick_fe.arguments);
-		php_error_docref(NULL, E_WARNING, "Invalid tick callback '%s' passed", ZSTR_VAL(function_name));
+		zend_type_error("Invalid tick callback '%s' passed", ZSTR_VAL(function_name));
 		zend_string_release_ex(function_name, 0);
-		RETURN_FALSE;
+		return;
 	} else if (function_name) {
 		zend_string_release_ex(function_name, 0);
 	}
