@@ -294,11 +294,11 @@ function putenv(string $setting): bool {}
 #endif
 
 /** @return array|false */
-function getopt(string $options, array $longopts = UNKNOWN, &$optind = NULL) {}
+function getopt(string $options, array $longopts = [], &$optind = null) {}
 
 function flush(): void {}
 
-function sleep(int $seconds): ?int {}
+function sleep(int $seconds): int {}
 
 function usleep(int $microseconds): void {}
 
@@ -344,9 +344,10 @@ function forward_static_call_array(callable $function, array $args) {}
 
 /**
  * @param callable $function
+ * @param mixed ...$args
  * @return false|null
  */
-function register_shutdown_function($function) {}
+function register_shutdown_function($function, ...$args) {}
 
 /** @return string|bool|null */
 function highlight_file(string $filename, bool $return = false) {}
@@ -385,7 +386,7 @@ function connection_aborted(): int {}
 
 function connection_status(): int {}
 
-function ignore_user_abort(bool $value = false): int {}
+function ignore_user_abort(bool $value = UNKNOWN): int {}
 
 #if HAVE_GETSERVBYNAME
 /** @return int|false */
@@ -410,7 +411,7 @@ function getprotobynumber(int $protocol) {}
 /** @param mixed $args */
 function register_tick_function(callable $function, ...$args): bool {}
 
-function unregister_tick_function(callable $function): void {}
+function unregister_tick_function($function): void {}
 
 function is_uploaded_file(string $path): bool {}
 
