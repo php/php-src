@@ -2677,7 +2677,7 @@ PHP_FUNCTION(flush)
 }
 /* }}} */
 
-/* {{{ proto void sleep(int seconds)
+/* {{{ proto int sleep(int seconds)
    Delay for a given number of seconds */
 PHP_FUNCTION(sleep)
 {
@@ -2691,12 +2691,8 @@ PHP_FUNCTION(sleep)
 		zend_value_error("Number of seconds must be greater than or equal to 0");
 		return;
 	}
-#ifdef PHP_SLEEP_NON_VOID
-	RETURN_LONG(php_sleep((unsigned int)num));
-#else
-	php_sleep((unsigned int)num);
-#endif
 
+	RETURN_LONG(php_sleep((unsigned int)num));
 }
 /* }}} */
 
