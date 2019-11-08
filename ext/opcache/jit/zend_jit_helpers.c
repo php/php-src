@@ -1151,6 +1151,7 @@ static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_arra
 					ce = zend_fetch_class(ZEND_TYPE_LIST_GET_NAME(entry),
 						(ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 					if (!ce) {
+						cache_slot++;
 						continue;
 					}
 					*cache_slot = ce;
