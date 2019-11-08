@@ -982,9 +982,11 @@ static void zend_resolve_property_types(void) /* {{{ */
 				if (ZEND_TYPE_HAS_LIST(prop_info->type)) {
 					void **entry;
 					ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(prop_info->type), entry) {
-						zend_string *type_name = ZEND_TYPE_LIST_GET_NAME(*entry);
-						*entry = ZEND_TYPE_LIST_ENCODE_CE(resolve_type_name(type_name));
-						zend_string_release(type_name);
+						if (ZEND_TYPE_LIST_IS_NAME(*entry)) {
+							zend_string *type_name = ZEND_TYPE_LIST_GET_NAME(*entry);
+							*entry = ZEND_TYPE_LIST_ENCODE_CE(resolve_type_name(type_name));
+							zend_string_release(type_name);
+						}
 					} ZEND_TYPE_LIST_FOREACH_END();
 				} else if (ZEND_TYPE_HAS_NAME(prop_info->type)) {
 					zend_string *type_name = ZEND_TYPE_NAME(prop_info->type);

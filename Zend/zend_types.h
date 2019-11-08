@@ -265,17 +265,18 @@ typedef struct {
 	ZEND_TYPE_INIT_MASK(((code) == _IS_BOOL ? MAY_BE_BOOL : (1 << (code))) \
 		| ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags))
 
+#define ZEND_TYPE_INIT_PTR(ptr, type_kind, allow_null, extra_flags) \
+	{ (void *) (ptr), \
+		(type_kind) | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags) }
+
 #define ZEND_TYPE_INIT_CE(_ce, allow_null, extra_flags) \
-	{ (void *) (_ce), \
-		_ZEND_TYPE_CE_BIT | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags) }
+	ZEND_TYPE_INIT_PTR(_ce, _ZEND_TYPE_CE_BIT, allow_null, extra_flags)
 
 #define ZEND_TYPE_INIT_CLASS(class_name, allow_null, extra_flags) \
-	{ (void *) (class_name), \
-		_ZEND_TYPE_NAME_BIT | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags) }
+	ZEND_TYPE_INIT_PTR(class_name, _ZEND_TYPE_NAME_BIT, allow_null, extra_flags)
 
 #define ZEND_TYPE_INIT_CLASS_CONST(class_name, allow_null, extra_flags) \
-	{ (void *) (class_name), \
-		_ZEND_TYPE_NAME_BIT | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags) }
+	ZEND_TYPE_INIT_PTR(class_name, _ZEND_TYPE_NAME_BIT, allow_null, extra_flags)
 
 typedef union _zend_value {
 	zend_long         lval;				/* long value */

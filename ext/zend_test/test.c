@@ -254,6 +254,21 @@ PHP_MINIT_FUNCTION(zend_test)
 	}
 
 	{
+		zend_string *name = zend_string_init("classUnionProp", sizeof("classUnionProp") - 1, 1);
+		zend_string *class_name1 = zend_string_init("stdClass", sizeof("stdClass") - 1, 1);
+		zend_string *class_name2 = zend_string_init("Iterator", sizeof("Iterator") - 1, 1);
+		zend_type_list *type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
+		type_list->num_types = 2;
+		type_list->types[0] = ZEND_TYPE_LIST_ENCODE_NAME(class_name1);
+		type_list->types[1] = ZEND_TYPE_LIST_ENCODE_NAME(class_name2);
+		zend_type type = ZEND_TYPE_INIT_PTR(type_list, _ZEND_TYPE_LIST_BIT, 1, 0);
+		zval val;
+		ZVAL_NULL(&val);
+		zend_declare_typed_property(zend_test_class, name, &val, ZEND_ACC_PUBLIC, NULL, type);
+		zend_string_release(name);
+	}
+
+	{
 		zend_string *name = zend_string_init("staticIntProp", sizeof("staticIntProp") - 1, 1);
 		zval val;
 		ZVAL_LONG(&val, 123);

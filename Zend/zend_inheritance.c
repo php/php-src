@@ -40,12 +40,12 @@ static void overridden_ptr_dtor(zval *zv) /* {{{ */
 }
 /* }}} */
 
-static void zend_type_copy_ctor(zend_type *type) {
+static void zend_type_copy_ctor(zend_type *type, zend_bool persistent) {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
 		zend_type_list *old_list = ZEND_TYPE_LIST(*type);
 		size_t size = ZEND_TYPE_LIST_SIZE(old_list->num_types);
 		zend_type_list *new_list = ZEND_TYPE_USES_ARENA(*type)
-			? zend_arena_alloc(&CG(arena), size) : emalloc(size);
+			? zend_arena_alloc(&CG(arena), size) : pemalloc(size, persistent);
 		memcpy(new_list, old_list, ZEND_TYPE_LIST_SIZE(old_list->num_types));
 		ZEND_TYPE_SET_PTR(*type, new_list);
 
@@ -64,7 +64,7 @@ static zend_property_info *zend_duplicate_property_info_internal(zend_property_i
 	zend_property_info* new_property_info = pemalloc(sizeof(zend_property_info), 1);
 	memcpy(new_property_info, property_info, sizeof(zend_property_info));
 	zend_string_addref(new_property_info->name);
-	zend_type_copy_ctor(&new_property_info->type);
+	zend_type_copy_ctor(&new_property_info->type, /* persistent */ 1);
 
 	return new_property_info;
 }
@@ -2048,7 +2048,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 
 			Z_TRY_ADDREF_P(prop_value);
 			doc_comment = property_info->doc_comment ? zend_string_copy(property_info->doc_comment) : NULL;
-			zend_type_copy_ctor(&property_info->type);
+			zend_type_copy_ctor(&property_info->type, /* persistent */ 0);
 			zend_declare_typed_property(ce, prop_name, prop_value, flags, doc_comment, property_info->type);
 			zend_string_release_ex(prop_name, 0);
 		} ZEND_HASH_FOREACH_END();
