@@ -599,8 +599,8 @@ static void zend_file_cache_serialize_prop_info(zval                     *zv,
 			if (prop->doc_comment) {
 				SERIALIZE_STR(prop->doc_comment);
 			}
+			zend_file_cache_serialize_type(&prop->type, script, info, buf);
 		}
-		zend_file_cache_serialize_type(&prop->type, script, info, buf);
 	}
 }
 
@@ -1315,8 +1315,8 @@ static void zend_file_cache_unserialize_prop_info(zval                    *zv,
 			if (prop->doc_comment) {
 				UNSERIALIZE_STR(prop->doc_comment);
 			}
+			zend_file_cache_unserialize_type(&prop->type, script, buf);
 		}
-		zend_file_cache_unserialize_type(&prop->type, script, buf);
 	}
 }
 
