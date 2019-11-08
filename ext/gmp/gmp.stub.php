@@ -9,11 +9,8 @@ function gmp_init($number, int $base = 0) {}
 /** @return GMP|false */
 function gmp_import(string $data, int $word_size = 1, int $options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN) {}
 
-/**
- * @param GMP|int|bool|string $gmpnumber
- * @return string|false
- */
-function gmp_export($gmpnumber, int $word_size = 1, int $options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN) {}
+/** @param GMP|int|bool|string $gmpnumber */
+function gmp_export($gmpnumber, int $word_size = 1, int $options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN): string|false {}
 
 /** @param GMP|int|bool|string $gmpnumber */
 function gmp_intval($gmpnumber): int {}
@@ -48,9 +45,8 @@ function gmp_mul($a, $b) {}
 /**
  * @param GMP|int|bool|string $a
  * @param GMP|int|bool|string $b
- * @return array|false
  */
-function gmp_div_qr($a, $b, int $round = GMP_ROUND_ZERO) {}
+function gmp_div_qr($a, $b, int $round = GMP_ROUND_ZERO): array|false {}
 
 /**
  * @param GMP|int|bool|string $a
@@ -111,11 +107,8 @@ function gmp_fact($a) {}
  */
 function gmp_sqrt($a) {}
 
-/**
- * @param GMP|int|bool|string $a
- * @return array|false
- */
-function gmp_sqrtrem($a) {}
+/** @param GMP|int|bool|string $a */
+function gmp_sqrtrem($a): array|false {}
 
 /**
  * @param GMP|int|bool|string $a
@@ -123,11 +116,8 @@ function gmp_sqrtrem($a) {}
  **/
 function gmp_root($a, int $nth) {}
 
-/**
- * @param GMP|int|bool|string $a
- * @return array|false
- **/
-function gmp_rootrem($a, int $nth) {}
+/** @param GMP|int|bool|string $a **/
+function gmp_rootrem($a, int $nth): array|false {}
 
 /**
  * @param GMP|int|bool|string $base
@@ -149,11 +139,8 @@ function gmp_perfect_square($a): bool {}
 /** @param GMP|int|bool|string $a **/
 function gmp_perfect_power($a): bool {}
 
-/**
- * @param GMP|int|bool|string $a
- * @return int|false
- */
-function gmp_prob_prime($a, int $reps = 10) {}
+/** @param GMP|int|bool|string $a */
+function gmp_prob_prime($a, int $reps = 10): int|false {}
 
 /**
  * @param GMP|int|bool|string $a
@@ -186,42 +173,32 @@ function gmp_invert($a, $b) {}
 /**
  * @param GMP|int|bool|string $a
  * @param GMP|int|bool|string $b
- * @return int|false
  */
-function gmp_jacobi($a, $b) {}
+function gmp_jacobi($a, $b): int|false {}
 
 /**
  * @param GMP|int|bool|string $a
  * @param GMP|int|bool|string $b
- * @return int|false
  */
-function gmp_legendre($a, $b) {}
+function gmp_legendre($a, $b): int|false {}
 
 /**
  * @param GMP|int|bool|string $a
  * @param GMP|int|bool|string $b
- * @return int|false
  */
-function gmp_kronecker($a, $b) {}
+function gmp_kronecker($a, $b): int|false {}
 
 /**
  * @param GMP|int|bool|string $a
  * @param GMP|int|bool|string $b
- * @return int|false
  */
-function gmp_cmp($a, $b) {}
+function gmp_cmp($a, $b): int|false {}
 
-/**
- * @param GMP|int|bool|string $a
- * @return int|false
- */
-function gmp_sign($a) {}
+/** @param GMP|int|bool|string $a */
+function gmp_sign($a): int|false {}
 
-/**
- * @param GMP|int|bool|string $seed
- * @return null|false
- */
-function gmp_random_seed($seed) {}
+/** @param GMP|int|bool|string $seed */
+function gmp_random_seed($seed): ?bool {}
 
 /** @return GMP|false */
 function gmp_random_bits(int $bits) {}
@@ -260,39 +237,27 @@ function gmp_com($a) {}
  */
 function gmp_xor($a, $b) {}
 
-/** @return null|false */
-function gmp_setbit(GMP $a, int $index, bool $set_clear = true) {}
+function gmp_setbit(GMP $a, int $index, bool $set_clear = true): ?bool {}
 
-/** @return null|false */
-function gmp_clrbit(GMP $a, int $index) {}
+function gmp_clrbit(GMP $a, int $index): ?bool {}
 
 /** @param GMP|int|bool|string $a */
 function gmp_testbit($a, int $index): bool {}
 
-/**
- * @param GMP|int|bool|string $a
- * @return int|false
- */
-function gmp_scan0($a, int $start) {}
+/** @param GMP|int|bool|string $a */
+function gmp_scan0($a, int $start): int|false {}
 
-/**
- * @param GMP|int|bool|string $a
- * @return int|false
- */
-function gmp_scan1($a, int $start) {}
+/** @param GMP|int|bool|string $a */
+function gmp_scan1($a, int $start): int|false {}
 
-/**
- * @param GMP|int|bool|string $a
- * @return int|false
- */
-function gmp_popcount($a) {}
+/** @param GMP|int|bool|string $a */
+function gmp_popcount($a): int|false {}
 
 /**
  * @param GMP|int|bool|string $a
  * @param GMP|int|bool|string $b
- * @return int|false
  */
-function gmp_hamdist($a, $b) {}
+function gmp_hamdist($a, $b): int|false {}
 
 /**
  * @param GMP|int|bool|string $a

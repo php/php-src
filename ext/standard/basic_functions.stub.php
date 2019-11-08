@@ -110,11 +110,8 @@ function reset(&$arg) {}
  */
 function current($arg) {}
 
-/**
- * @param array|object $arg
- * @return int|string|null
- */
-function key($arg) {}
+/** @param array|object $arg */
+function key($arg): int|string|null {}
 
 /** @return mixed */
 function min($arg, ...$args) {}
@@ -130,8 +127,7 @@ function array_walk_recursive(&$input, callable $funcname, $userdata = null): bo
 
 function in_array($needle, array $haystack, bool $strict = false): bool {}
 
-/** @return int|string|false */
-function array_search($needle, array $haystack, bool $strict = false) {}
+function array_search($needle, array $haystack, bool $strict = false): int|string|false {}
 
 /** @prefer-ref $arg */
 function extract(array &$arg, int $extract_type = EXTR_OVERWRITE, string $prefix = ""): int {}
@@ -173,11 +169,9 @@ function array_replace_recursive(array $arr1, array ...$arrays): array {}
 
 function array_keys(array $arg, $search_value = UNKNOWN, bool $strict = false): array {}
 
-/** @return int|string|null */
-function array_key_first(array $arg) {}
+function array_key_first(array $arg): int|string|null {}
 
-/** @return int|string|null */
-function array_key_last(array $arg) {}
+function array_key_last(array $arg): int|string|null {}
 
 function array_values(array $arg): array {}
 
@@ -239,14 +233,11 @@ function array_udiff_uassoc(array $arr1, array $arr2, ...$rest): array {}
  */
 function array_multisort(&$arr1, $sort_order = SORT_ASC, $sort_flags = SORT_REGULAR, &...$arr2): bool {}
 
-/** @return int|string|array */
-function array_rand(array $arg, int $num_req = 1) {}
+function array_rand(array $arg, int $num_req = 1): int|string|array {}
 
-/** @return int|float */
-function array_sum(array $arg) {}
+function array_sum(array $arg): int|float {}
 
-/** @return int|float */
-function array_product(array $arg) {}
+function array_product(array $arg): int|float {}
 
 function array_reduce(array $arg, callable $callback, $initial = null) {}
 
@@ -265,29 +256,24 @@ function array_combine(array $keys, array $values): array {}
 
 function base64_encode(string $str): string {}
 
-/** @return string|false */
-function base64_decode(string $str, bool $strict = false) {}
+function base64_decode(string $str, bool $strict = false): string|false {}
 
 /* basic_functions.c */
 
 /** @return mixed */
 function constant(string $name) {}
 
-/** @return int|false */
-function ip2long(string $ip_address) {}
+function ip2long(string $ip_address): int|false {}
 
-/** @return string|false */
-function long2ip(int $proper_address) {}
+function long2ip(int $proper_address): string|false {}
 
-/** @return string|array|false */
-function getenv(string $variable = UNKNOWN, bool $local_only = false) {}
+function getenv(string $variable = UNKNOWN, bool $local_only = false): string|array|false {}
 
 #ifdef HAVE_PUTENV
 function putenv(string $setting): bool {}
 #endif
 
-/** @return array|false */
-function getopt(string $options, array $longopts = [], &$optind = null) {}
+function getopt(string $options, array $longopts = [], &$optind = null): array|false {}
 
 function flush(): void {}
 
@@ -296,16 +282,14 @@ function sleep(int $seconds): int {}
 function usleep(int $microseconds): void {}
 
 #if HAVE_NANOSLEEP
-/** @return array|bool */
-function nanosleep(int $seconds, int $nanoseconds) {}
+function nanosleep(int $seconds, int $nanoseconds): array|bool {}
 
 function time_sleep_until(float $timestamp): bool {}
 #endif
 
 function get_current_user(): string {}
 
-/** @return string|array|false */
-function get_cfg_var(string $option_name) {}
+function get_cfg_var(string $option_name): string|array|false {}
 
 function get_magic_quotes_runtime(): bool {}
 
@@ -338,42 +322,31 @@ function forward_static_call_array(callable $function, array $args) {}
 /**
  * @param callable $function
  * @param mixed ...$args
- * @return false|null
  */
-function register_shutdown_function($function, ...$args) {}
+function register_shutdown_function($function, ...$args): ?bool {}
 
-/** @return string|bool|null */
-function highlight_file(string $filename, bool $return = false) {}
+function highlight_file(string $filename, bool $return = false): string|bool|null {}
 
 function php_strip_whitespace(string $filename): string {}
 
-/** @return string|bool|null */
-function highlight_string(string $string, bool $return = false) {}
+function highlight_string(string $string, bool $return = false): string|bool|null {}
 
-/** @return string|false */
-function ini_get(string $varname) {}
+function ini_get(string $varname): string|false {}
 
-/** @return array|false */
-function ini_get_all(?string $extension = null, bool $details = true) {}
+function ini_get_all(?string $extension = null, bool $details = true): array|false {}
 
-/** @return string|false */
-function ini_set(string $varname, string $value) {}
+function ini_set(string $varname, string $value): string|false {}
 
 function ini_restore(string $varname): void {}
 
-/** @return string|false */
-function set_include_path(string $include_path) {}
+function set_include_path(string $include_path): string|false {}
 
-/** @return string|false */
-function get_include_path() {}
+function get_include_path(): string|false {}
 
 function restore_include_path(): void {}
 
-/**
- * @param mixed $var
- * @return string|bool
- */
-function print_r($var, bool $return = false) {}
+/** @param mixed $var */
+function print_r($var, bool $return = false): string|bool {}
 
 function connection_aborted(): int {}
 
@@ -382,23 +355,19 @@ function connection_status(): int {}
 function ignore_user_abort(bool $value = UNKNOWN): int {}
 
 #if HAVE_GETSERVBYNAME
-/** @return int|false */
-function getservbyname(string $service, string $protocol) {}
+function getservbyname(string $service, string $protocol): int|false {}
 #endif
 
 #if HAVE_GETSERVBYPORT
-/** @return string|false */
-function getservbyport(int $port, string $protocol) {}
+function getservbyport(int $port, string $protocol): string|false {}
 #endif
 
 #if HAVE_GETPROTOBYNAME
-/** @return int|false */
-function getprotobyname(string $name) {}
+function getprotobyname(string $name): int|false {}
 #endif
 
 #if HAVE_GETPROTOBYNUMBER
-/** @return string|false */
-function getprotobynumber(int $protocol) {}
+function getprotobynumber(int $protocol): string|false {}
 #endif
 
 /** @param mixed $args */
@@ -410,25 +379,21 @@ function is_uploaded_file(string $path): bool {}
 
 function move_uploaded_file(string $path, string $new_path): bool {}
 
-/** @return array|false */
-function parse_ini_file(string $filename, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL) {}
+function parse_ini_file(string $filename, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array|false {}
 
-/** @return array|false */
-function parse_ini_string(string $ini_string, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL) {}
+function parse_ini_string(string $ini_string, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array|false {}
 
 #if ZEND_DEBUG
 function config_get_hash(string $ini_string, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array {}
 #endif
 
 #ifdef HAVE_GETLOADAVG
-/** @return array|false */
-function sys_getloadavg() {}
+function sys_getloadavg(): array|false {}
 #endif
 
 /* browscap.c */
 
-/** @return object|array|false */
-function get_browser(?string $browser_name = null, bool $return_array = false) {}
+function get_browser(?string $browser_name = null, bool $return_array = false): object|array|false {}
 
 /* crc32.c */
 
@@ -445,38 +410,32 @@ function convert_cyr_string(string $str, string $from, string $to): string {}
 /* datetime.c */
 
 #if HAVE_STRPTIME
-/** @return array|false */
-function strptime(string $timestamp, string $format) {}
+function strptime(string $timestamp, string $format): array|false {}
 #endif
 
 /* dns.c */
 
 #ifdef HAVE_GETHOSTNAME
-/** @return string|false */
-function gethostname() {}
+function gethostname(): string|false {}
 #endif
 
-/** @return string|false */
-function gethostbyaddr(string $ip_address) {}
+function gethostbyaddr(string $ip_address): string|false {}
 
 function gethostbyname(string $hostname): string {}
 
-/** @return array|false */
-function gethostbynamel(string $hostname) {}
+function gethostbynamel(string $hostname): array|false {}
 
 #if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 function dns_check_record(string $hostname, string $type = "MX"): bool {}
 
-/** @return array|false */
-function dns_get_record(string $hostname, int $type = DNS_ANY, &$authns = null, &$addtl = null, bool $raw = false) {}
+function dns_get_record(string $hostname, int $type = DNS_ANY, &$authns = null, &$addtl = null, bool $raw = false): array|false {}
 
 function dns_get_mx(string $hostname, &$mxhosts, &$weight = null): bool {}
 #endif
 
 /* net.c */
 
-/** @return array|false */
-function net_get_interfaces() {}
+function net_get_interfaces(): array|false {}
 
 /* ftok.c */
 
@@ -486,8 +445,7 @@ function ftok(string $pathname, string $proj): int {}
 
 /* hrtime.c */
 
-/** @return array|int|float|false */
-function hrtime(bool $get_as_number = false) {}
+function hrtime(bool $get_as_number = false): array|int|float|false {}
 
 /* lcg.c */
 
@@ -497,22 +455,17 @@ function lcg_value(): float {}
 
 function md5(string $str, bool $raw_output = false): string {}
 
-/** @return string|false */
-function md5_file(string $filename, bool $raw_output = false) {}
+function md5_file(string $filename, bool $raw_output = false): string|false {}
 
 /* pageinfo.c */
 
-/** @return int|false */
-function getmyuid() {}
+function getmyuid(): int|false {}
 
-/** @return int|false */
-function getmygid() {}
+function getmygid(): int|false {}
 
-/** @return int|false */
-function getmypid() {}
+function getmypid(): int|false {}
 
-/** @return int|false */
-function getmyinode() {}
+function getmyinode(): int|false {}
 
 function getlastmod(): int {}
 
@@ -520,33 +473,29 @@ function getlastmod(): int {}
 
 function sha1(string $str, bool $raw_output = false): string {}
 
-/** @return string|false */
-function sha1_file(string $filename, bool $raw_output = false) {}
+function sha1_file(string $filename, bool $raw_output = false): string|false {}
 
 /* syslog.c */
 
 #ifdef HAVE_SYSLOG_H
-function openlog (string $ident, int $option, int $facility): bool {}
+function openlog(string $ident, int $option, int $facility): bool {}
 
-function closelog (): bool {}
+function closelog(): bool {}
 
-function syslog (int $priority, string $message): bool {}
+function syslog(int $priority, string $message): bool {}
 #endif
 
 #ifdef HAVE_INET_NTOP
-/** @return string|false */
-function inet_ntop (string $in_addr) {}
+function inet_ntop(string $in_addr): string|false {}
 #endif
 
 #ifdef HAVE_INET_PTON
-/** @return string|false */
-function inet_pton (string $ip_address) {}
+function inet_pton(string $ip_address): string|false {}
 #endif
 
 /* metaphone.c */
 
-/** @return string|false */
-function metaphone(string $text, int $phones = 0) {}
+function metaphone(string $text, int $phones = 0): string|false {}
 
 /* {{{ head.c */
 function header(string $string, bool $replace = true, int $http_response_code = 0): void { }
@@ -556,12 +505,10 @@ function header_remove(string $name = UNKNOWN): void { }
 /** @param int|array $expires_or_options */
 function setrawcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
 
-
 /** @param int|array $expires_or_options */
 function setcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
 
-/** @return int|bool */
-function http_response_code(int $response_code = 0) {}
+function http_response_code(int $response_code = 0): int|bool {}
 
 function headers_sent(&$file = null, &$line = null): bool {}
 
@@ -571,11 +518,9 @@ function headers_list(): array { }
 
 function htmlspecialchars(string $string, int $quote_style = ENT_COMPAT, ?string $encoding = null, bool $double_encode = true): string {}
 
-/** @return string|false */
-function htmlspecialchars_decode(string $string, int $quote_style = ENT_COMPAT) {}
+function htmlspecialchars_decode(string $string, int $quote_style = ENT_COMPAT): string|false {}
 
-/** @return string|false */
-function html_entity_decode(string $string, int $quote_style = ENT_COMPAT, string $encoding = UNKNOWN) {}
+function html_entity_decode(string $string, int $quote_style = ENT_COMPAT, string $encoding = UNKNOWN): string|false {}
 
 function htmlentities(string $string, int $quote_style = ENT_COMPAT, ?string $encoding = null, bool $double_encode = true): string {}
 
@@ -588,25 +533,20 @@ function get_html_translation_table(int $table = HTML_SPECIALCHARS, int $quote_s
 /** @param mixed $assertion */
 function assert($assertion, $description = null): bool {}
 
-/** @return int|string|bool|null */
-function assert_options(int $what, $value = UNKNOWN) {}
+function assert_options(int $what, $value = UNKNOWN): array|int|string|bool|null {}
 
 /* string.c */
 
 function bin2hex(string $data): string {}
 
-/** @return string|false */
-function hex2bin(string $data) {}
+function hex2bin(string $data): string|false {}
 
-/** @return int|false */
-function strspn(string $str, string $mask, int $start = 0, int $len = UNKNOWN) {}
+function strspn(string $str, string $mask, int $start = 0, int $len = UNKNOWN): int|false {}
 
-/** @return int|false */
-function strcspn(string $str, string $mask, int $start = 0, int $len = UNKNOWN) {}
+function strcspn(string $str, string $mask, int $start = 0, int $len = UNKNOWN): int|false {}
 
 #if HAVE_NL_LANGINFO
-/** @return string|false */
-function nl_langinfo(int $item) {}
+function nl_langinfo(int $item): string|false {}
 #endif
 
 function strcoll(string $str1, string $str2): int {}
@@ -630,9 +570,8 @@ function implode($glue, $pieces = UNKNOWN): string {}
 /**
  * @param string $str Optional - defaults to previous string
  * @param string $token
- * @return string|false
  */
-function strtok(string $str, string $token = UNKNOWN) {}
+function strtok(string $str, string $token = UNKNOWN): string|false {}
 
 function strtoupper(string $str): string {}
 
@@ -642,8 +581,7 @@ function basename(string $path, string $suffix = ""): string {}
 
 function dirname(string $path, int $levels = 1): string {}
 
-/** @return array|string */
-function pathinfo(string $path, int $options = UNKNOWN) {}
+function pathinfo(string $path, int $options = UNKNOWN): array|string {}
 
 function stristr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
@@ -661,17 +599,15 @@ function strrchr(string $haystack, string $needle): string|false {}
 
 function chunk_split(string $str, int $chunklen = 76, string $ending = "\r\n"): string {}
 
-/** @return string|false */
-function substr(string $str, int $start, ?int $length = null) {}
+function substr(string $str, int $start, ?int $length = null): string|false {}
 
 /**
  * @param mixed $str
  * @param mixed $replace
  * @param mixed $start
  * @param mixed $length
- * @return string|array|false
  */
-function substr_replace($str, $replace, $start, $length = UNKNOWN) {}
+function substr_replace($str, $replace, $start, $length = UNKNOWN): string|array|false {}
 
 function quotemeta(string $str): string {}
 
@@ -708,18 +644,16 @@ function stripslashes(string $str): string {}
  * @param string|array $replace
  * @param string|array $subject
  * @param int $replace_count
- * @return string|array
  */
-function str_replace($search, $replace, $subject, &$replace_count = UNKNOWN) {}
+function str_replace($search, $replace, $subject, &$replace_count = UNKNOWN): string|array {}
 
 /**
  * @param string|array $search
  * @param string|array $replace
  * @param string|array $subject
  * @param int $replace_count
- * @return string|array
  */
-function str_ireplace($search, $replace, $subject, &$replace_count = UNKNOWN) {}
+function str_ireplace($search, $replace, $subject, &$replace_count = UNKNOWN): string|array {}
 
 function hebrev(string $str, int $max_chars_per_line = 0): string {}
 
@@ -732,9 +666,8 @@ function strip_tags(string $str, $allowable_tags = UNKNOWN): string {}
 
 /**
  * @param string|array $locales
- * @return string|false
  */
-function setlocale(int $category, $locales, ...$rest) {}
+function setlocale(int $category, $locales, ...$rest): string|false {}
 
 /** @param array $result */
 function parse_str(string $encoded_string, &$result): void {}
@@ -743,8 +676,7 @@ function str_getcsv(string $string, string $delimiter = ',', string $enclosure =
 
 function str_repeat(string $input, int $mult): string {}
 
-/** @return array|string */
-function count_chars(string $input, int $mode = 0) {}
+function count_chars(string $input, int $mode = 0): array|string {}
 
 function strnatcmp(string $s1, string $s2): int {}
 
@@ -752,33 +684,27 @@ function localeconv(): array {}
 
 function strnatcasecmp(string $s1, string $s2): int {}
 
-/** @return int|false */
-function substr_count(string $haystack, string $needle, int $offset = 0, ?int $length = null) {}
+function substr_count(string $haystack, string $needle, int $offset = 0, ?int $length = null): int|false {}
 
 function str_pad(string $input, int $pad_length, string $pad_string = " ", int $pad_type = STR_PAD_RIGHT): string {}
 
-/** @return array|int|null */
-function sscanf(string $str, string $format, &...$vars) {}
+function sscanf(string $str, string $format, &...$vars): array|int|null {}
 
 function str_rot13(string $str): string {}
 
 function str_shuffle(string $str): string {}
 
-/** @return array|int */
-function str_word_count(string $str, int $format = 0, string $charlist = UNKNOWN) {}
+function str_word_count(string $str, int $format = 0, string $charlist = UNKNOWN): array|int {}
 
 #ifdef HAVE_STRFMON
-/** @return string|false */
-function money_format(string $format, float $value) {}
+function money_format(string $format, float $value): string|false {}
 #endif
 
 function str_split(string $str, int $split_length = 1): array {}
 
-/** @return string|false */
-function strpbrk(string $haystack, string $char_list) {}
+function strpbrk(string $haystack, string $char_list): string|false {}
 
-/** @return int|false */
-function substr_compare(string $main_str, string $str, int $offset, ?int $length = null, bool $case_insensitivity = false) {}
+function substr_compare(string $main_str, string $str, int $offset, ?int $length = null, bool $case_insensitivity = false): int|false {}
 
 function utf8_encode(string $data): string {}
 
@@ -828,54 +754,39 @@ function chdir(string $directory): bool {}
 function chroot(string $directory): bool {}
 #endif
 
-/** @return string|false */
-function getcwd() {}
+function getcwd(): string|false {}
 
 /** @param resource $dir_handle */
 function rewinddir($dir_handle = UNKNOWN): void {}
 
-/** @return string|false */
-function readdir($dir_handle = UNKNOWN) {}
+function readdir($dir_handle = UNKNOWN): string|false {}
 
-/**
- * @param resource $context
- * @return array|false
- */
-function scandir(string $directory, int $sorting_order = 0, $context = UNKNOWN) {}
+/** @param resource $context */
+function scandir(string $directory, int $sorting_order = 0, $context = UNKNOWN): array|false {}
 
 #ifdef HAVE_GLOB
-/** @return array|false */
-function glob(string $pattern, int $flags = 0) {}
+function glob(string $pattern, int $flags = 0): array|false {}
 #endif
 
 /* filestat.c */
 
-/** @return int|false */
-function fileatime(string $filename) {}
+function fileatime(string $filename): int|false {}
 
-/** @return int|false */
-function filectime(string $filename) {}
+function filectime(string $filename): int|false {}
 
-/** @return int|false */
-function filegroup(string $filename) {}
+function filegroup(string $filename): int|false {}
 
-/** @return int|false */
-function fileinode(string $filename) {}
+function fileinode(string $filename): int|false {}
 
-/** @return int|false */
-function filemtime(string $filename) {}
+function filemtime(string $filename): int|false {}
 
-/** @return int|false */
-function fileowner(string $filename) {}
+function fileowner(string $filename): int|false {}
 
-/** @return int|false */
-function fileperms(string $filename) {}
+function fileperms(string $filename): int|false {}
 
-/** @return int|false */
-function filesize(string $filename) {}
+function filesize(string $filename): int|false  {}
 
-/** @return string|false */
-function filetype(string $filename) {}
+function filetype(string $filename): string|false  {}
 
 function file_exists(string $filename): bool {}
 
@@ -893,11 +804,9 @@ function is_dir(string $filename): bool {}
 
 function is_link(string $filename): bool {}
 
-/** @return array|false */
-function stat(string $filename) {}
+function stat(string $filename): array|false {}
 
-/** @return array|false */
-function lstat(string $filename) {}
+function lstat(string $filename): array|false {}
 
 function chown(string $filename, $user): bool {}
 
@@ -917,14 +826,11 @@ function touch(string $filename, int $time = 0, int $atime = 0): bool {}
 
 function clearstatcache(bool $clear_realpath_cache = false, string $filename = ""): void {}
 
-/** @return float|false */
-function disk_total_space(string $directory) {}
+function disk_total_space(string $directory): float|false {}
 
-/** @return float|false */
-function disk_free_space(string $directory) {}
+function disk_free_space(string $directory): float|false {}
 
-/** @return float|false */
-function diskfreespace(string $directory) {}
+function diskfreespace(string $directory): float|false {}
 
 function realpath_cache_get(): array {}
 
@@ -934,29 +840,23 @@ function realpath_cache_size(): int {}
 
 function phpinfo(int $what = INFO_ALL): bool {}
 
-/** @return string|false */
-function phpversion(string $extension = UNKNOWN) {}
+function phpversion(string $extension = UNKNOWN): string|false {}
 
 function phpcredits(int $flag = CREDITS_ALL): bool {}
 
-/** @return string|false */
-function php_sapi_name() {}
+function php_sapi_name(): string|false {}
 
 function php_uname(string $mode = "a"): string {}
 
-/** @return string|false */
-function php_ini_scanned_files() {}
+function php_ini_scanned_files(): string|false {}
 
-/** @return string|false */
-function php_ini_loaded_file() {}
+function php_ini_loaded_file(): string|false {}
 
 /* iptc.c */
 
-/** @return string|bool */
-function iptcembed(string $iptcdata, string $jpeg_file_name, int $spool = 0) {}
+function iptcembed(string $iptcdata, string $jpeg_file_name, int $spool = 0): string|bool {}
 
-/** @return array|false */
-function iptcparse(string $iptcblock) {}
+function iptcparse(string $iptcblock): array|false {}
 
 /* levenshtein.c */
 
@@ -965,11 +865,9 @@ function levenshtein(string $str1, string $str2, $cost_ins = UNKNOWN, int $cost_
 /* link.c */
 
 #if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
-/** @return string|false */
-function readlink(string $path) {}
+function readlink(string $path): string|false {}
 
-/** @return int|false */
-function linkinfo(string $path) {}
+function linkinfo(string $path): int|false {}
 
 function symlink(string $target, string $link): bool {}
 
@@ -985,11 +883,8 @@ function mail(string $to, string $subject, string $message, $additional_headers 
 
 /* math.c */
 
-/**
- * @param int|float $number
- * @return int|float
- */
-function abs($number) {}
+/** @param int|float $number */
+function abs($number): int|float {}
 
 function ceil(float $number): float {}
 
@@ -1042,8 +937,7 @@ function pow($base, $exp) {}
 
 function exp(float $number): float {}
 
-/** @return float|false */
-function log(float $number, float $base = M_E) {}
+function log(float $number, float $base = M_E): float|false {}
 
 function log10(float $number): float {}
 
@@ -1055,14 +949,11 @@ function deg2rad(float $number): float {}
 
 function rad2deg(float $number): float {}
 
-/** @return int|float */
-function bindec(string $binary_string) {}
+function bindec(string $binary_string): int|float {}
 
-/** @return int|float */
-function hexdec(string $hex_string) {}
+function hexdec(string $hex_string): int|float {}
 
-/** @return int|float */
-function octdec(string $octal_string) {}
+function octdec(string $octal_string): int|float {}
 
 function decbin($number): string {}
 
@@ -1081,32 +972,26 @@ function fdiv(float $dividend, float $divisor): float {}
 /* microtime.c */
 
 #ifdef HAVE_GETTIMEOFDAY
-/** @return string|float */
-function microtime(bool $get_as_float = false) {}
+function microtime(bool $get_as_float = false): string|float {}
 
-/** @return array|float */
-function gettimeofday(bool $return_float = false) {}
+function gettimeofday(bool $return_float = false): array|float {}
 #endif
 
 #ifdef HAVE_GETRUSAGE
-/** @return array|false */
-function getrusage(int $who = 0) {}
+function getrusage(int $who = 0): array|false {}
 #endif
 
 /* pack.c */
 
-/** @return string|false */
-function pack(string $format, ...$args) {}
+function pack(string $format, ...$args): string|false {}
 
-/** @return array|false */
-function unpack(string $format, string $data, int $offset = 0) {}
+function unpack(string $format, string $data, int $offset = 0): array|false {}
 
 /* password.c */
 
 function password_get_info(string $hash): ?array {}
 
-/** @return string|false */
-function password_hash(string $password, $algo, array $options = []) {}
+function password_hash(string $password, $algo, array $options = []): string|false|null {}
 
 function password_needs_rehash(string $hash, $algo, array $options = []): bool {}
 

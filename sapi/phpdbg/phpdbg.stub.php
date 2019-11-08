@@ -12,8 +12,7 @@ function phpdbg_color(int $element, string $color): void {}
 
 function phpdbg_prompt(string $string): void {}
 
-/** @return string|bool */
-function phpdbg_exec(string $context) {}
+function phpdbg_exec(string $context): string|bool {}
 
 function phpdbg_clear(): void {}
 

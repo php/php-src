@@ -18,11 +18,8 @@ function msg_receive($queue, int $desiredmsgtype, &$msgtype, int $maxsize, &$mes
  */
 function msg_remove_queue($queue): bool {}
 
-/**
- * @param resource $queue
- * @return array|false
- */
-function msg_stat_queue($queue) {}
+/** @param resource $queue */
+function msg_stat_queue($queue): array|false {}
 
 /**
  * @param resource $queue

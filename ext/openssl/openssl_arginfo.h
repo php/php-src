@@ -12,7 +12,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_export, 0, 2, _IS_B
 	ZEND_ARG_TYPE_INFO(0, notext, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_fingerprint, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_x509_fingerprint, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, x509)
 	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, raw_output, _IS_BOOL, 0)
@@ -28,12 +28,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_verify, 0, 2, IS_LO
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_parse, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_x509_parse, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, x509)
 	ZEND_ARG_TYPE_INFO(0, shortname, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_checkpurpose, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_x509_checkpurpose, 0, 2, MAY_BE_BOOL|MAY_BE_LONG)
 	ZEND_ARG_INFO(0, x509cert)
 	ZEND_ARG_TYPE_INFO(0, purpose, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, cainfo, IS_ARRAY, 1)
@@ -44,7 +44,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_read, 0, 0, 1)
 	ZEND_ARG_INFO(0, cert)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_free, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_x509_free, 0, 1, _IS_BOOL, 1)
 	ZEND_ARG_INFO(0, x509)
 ZEND_END_ARG_INFO()
 
@@ -98,12 +98,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_new, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, extraattribs, IS_ARRAY, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_get_subject, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_csr_get_subject, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, csr)
 	ZEND_ARG_TYPE_INFO(0, use_shortnames, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_openssl_csr_get_public_key arginfo_openssl_csr_get_subject
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_get_public_key, 0, 0, 1)
+	ZEND_ARG_INFO(0, csr)
+	ZEND_ARG_TYPE_INFO(0, use_shortnames, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_new, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, configargs, IS_ARRAY, 1)
@@ -134,11 +137,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_get_private, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, passphrase, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_get_details, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_pkey_get_details, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pbkdf2, 0, 0, 4)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_pbkdf2, 0, 4, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, salt, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, key_length, IS_LONG, 0)
@@ -146,7 +149,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pbkdf2, 0, 0, 4)
 	ZEND_ARG_TYPE_INFO(0, digest_algorithm, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_verify, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_pkcs7_verify, 0, 2, MAY_BE_BOOL|MAY_BE_LONG)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, signerscerts, IS_STRING, 0)
@@ -200,7 +203,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_openssl_public_decrypt arginfo_openssl_private_encrypt
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_error_string, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_error_string, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_sign, 0, 3, _IS_BOOL, 0)
@@ -210,14 +213,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_sign, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, method)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_verify, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_verify, 0, 3, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, signature, IS_STRING, 0)
 	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_INFO(0, method)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_seal, 0, 0, 4)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_seal, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_INFO(1, sealdata)
 	ZEND_ARG_INFO(1, ekeys)
@@ -242,17 +245,17 @@ ZEND_END_ARG_INFO()
 #define arginfo_openssl_get_cipher_methods arginfo_openssl_get_md_methods
 
 #if defined(HAVE_EVP_PKEY_EC)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_get_curve_names, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_get_curve_names, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_digest, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_digest, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, raw_output, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_encrypt, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_encrypt, 0, 3, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
@@ -263,7 +266,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_encrypt, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, tag_length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_decrypt, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_decrypt, 0, 3, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
@@ -273,16 +276,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_decrypt, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, aad, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_cipher_iv_length, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_cipher_iv_length, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, method, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_dh_compute_key, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_dh_compute_key, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, pub_key, IS_STRING, 0)
 	ZEND_ARG_INFO(0, dh_key)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_derive, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_pkey_derive, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, peer_pub_key)
 	ZEND_ARG_INFO(0, priv_key)
 	ZEND_ARG_TYPE_INFO(0, keylen, IS_LONG, 0)
@@ -293,7 +296,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_random_pseudo_bytes, 0, 
 	ZEND_ARG_INFO(1, result_is_strong)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_spki_new, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_spki_new, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, privkey)
 	ZEND_ARG_TYPE_INFO(0, challenge, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, algo, IS_LONG, 0)
@@ -303,7 +306,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_spki_verify, 0, 1, _IS_B
 	ZEND_ARG_TYPE_INFO(0, spki, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_spki_export, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_spki_export, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, spki, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 

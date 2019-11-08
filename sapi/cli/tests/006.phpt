@@ -74,6 +74,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
         Parameter #3 [ <optional> int $flags ]
         Parameter #4 [ <optional> int $offset ]
       }
+      - Return [ int|false ]
     }
     Function [ <internal:pcre> function preg_match_all ] {
 
@@ -84,6 +85,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
         Parameter #3 [ <optional> int $flags ]
         Parameter #4 [ <optional> int $offset ]
       }
+      - Return [ int|false|null ]
     }
     Function [ <internal:pcre> function preg_replace ] {
 
@@ -94,6 +96,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
         Parameter #3 [ <optional> int $limit ]
         Parameter #4 [ <optional> &$count ]
       }
+      - Return [ array|string|null ]
     }
     Function [ <internal:pcre> function preg_replace_callback ] {
 
@@ -105,6 +108,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
         Parameter #4 [ <optional> &$count ]
         Parameter #5 [ <optional> int $flags ]
       }
+      - Return [ array|string|null ]
     }
     Function [ <internal:pcre> function preg_replace_callback_array ] {
 
@@ -115,6 +119,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
         Parameter #3 [ <optional> &$count ]
         Parameter #4 [ <optional> int $flags ]
       }
+      - Return [ array|string|null ]
     }
     Function [ <internal:pcre> function preg_filter ] {
 
@@ -125,6 +130,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
         Parameter #3 [ <optional> int $limit ]
         Parameter #4 [ <optional> &$count ]
       }
+      - Return [ array|string|null ]
     }
     Function [ <internal:pcre> function preg_split ] {
 
@@ -134,6 +140,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
         Parameter #2 [ <optional> int $limit ]
         Parameter #3 [ <optional> int $flags ]
       }
+      - Return [ array|false ]
     }
     Function [ <internal:pcre> function preg_quote ] {
 
@@ -150,6 +157,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
         Parameter #1 [ <required> array $input ]
         Parameter #2 [ <optional> int $flags ]
       }
+      - Return [ array|false ]
     }
     Function [ <internal:pcre> function preg_last_error ] {
 

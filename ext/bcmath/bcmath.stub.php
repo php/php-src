@@ -10,8 +10,7 @@ function bcdiv(string $dividend, string $divisor, int $scale = UNKNOWN) : string
 
 function bcmod(string $dividend, string $divisor, int $scale = UNKNOWN) : string {}
 
-/** @return string|false */
-function bcpowmod(string $base, string $exponent, string $modulus, int $scale = UNKNOWN) {}
+function bcpowmod(string $base, string $exponent, string $modulus, int $scale = UNKNOWN): string|false {}
 
 function bcpow(string $base, string $exponent, int $scale = UNKNOWN) : string {}
 

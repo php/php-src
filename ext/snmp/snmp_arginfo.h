@@ -1,6 +1,6 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpget, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_snmpget, 0, 3, MAY_BE_ARRAY|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, host, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, community, IS_STRING, 0)
 	ZEND_ARG_INFO(0, object_id)
@@ -16,7 +16,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_snmpwalkoid arginfo_snmpget
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmpset, 0, 0, 5)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_snmpset, 0, 5, MAY_BE_ARRAY|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, host, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, community, IS_STRING, 0)
 	ZEND_ARG_INFO(0, object_id)
@@ -53,7 +53,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_snmp2_set arginfo_snmpset
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_get, 0, 0, 8)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_snmp3_get, 0, 8, MAY_BE_ARRAY|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, host, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, sec_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, sec_level, IS_STRING, 0)
@@ -72,7 +72,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_snmp3_real_walk arginfo_snmp3_get
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_snmp3_set, 0, 0, 10)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_snmp3_set, 0, 10, MAY_BE_ARRAY|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, host, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, sec_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, sec_level, IS_STRING, 0)

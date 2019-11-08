@@ -108,6 +108,8 @@ class SimpleType {
     public function toTypeMask() {
         assert($this->isBuiltin);
         switch (strtolower($this->name)) {
+        case "null":
+            return "MAY_BE_NULL";
         case "false":
             return "MAY_BE_FALSE";
         case "bool":

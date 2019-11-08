@@ -3,33 +3,27 @@
 /* TODO: Convert "uninitialized" into an exception. This will remove many
  * possibilities for false return values in here. */
 
-/** @return int|false */
-function strtotime(string $time, int $now = UNKNOWN) {}
+function strtotime(string $time, int $now = UNKNOWN): int|false {}
 
 function date(string $format, int $timestamp = UNKNOWN): string {}
 
-/** @return int|false */
-function idate(string $format, int $timestamp = UNKNOWN) {}
+function idate(string $format, int $timestamp = UNKNOWN): int|false {}
 
 function gmdate(string $format, int $timestamp = UNKNOWN): string {}
 
-/** @return int|false */
 function mktime(
     int $hour, int $min = UNKNOWN, int $sec = UNKNOWN,
-    int $mon = UNKNOWN, int $day = UNKNOWN, int $year = UNKNOWN) {}
+    int $mon = UNKNOWN, int $day = UNKNOWN, int $year = UNKNOWN): int|false {}
 
-/** @return int|false */
 function gmmktime(
     int $hour, int $min = UNKNOWN, int $sec = UNKNOWN,
-    int $mon = UNKNOWN, int $day = UNKNOWN, int $year = UNKNOWN) {}
+    int $mon = UNKNOWN, int $day = UNKNOWN, int $year = UNKNOWN): int|false {}
 
 function checkdate(int $m, int $d, int $y): bool {}
 
-/** @return string|false */
-function strftime(string $format, int $timestamp = UNKNOWN) {}
+function strftime(string $format, int $timestamp = UNKNOWN): string|false {}
 
-/** @return string|false */
-function gmstrftime(string $format, int $timestamp = UNKNOWN) {}
+function gmstrftime(string $format, int $timestamp = UNKNOWN): string|false {}
 
 function time(): int {}
 
@@ -54,8 +48,7 @@ function date_parse(string $date): array {}
 
 function date_parse_from_format(string $format, string $date): array {}
 
-/** @return array|false */
-function date_get_last_errors() {}
+function date_get_last_errors(): array|false {}
 
 function date_format(DateTimeInterface $object, string $format): string {}
 
@@ -85,28 +78,23 @@ function date_isodate_set(DateTime $object, int $year, int $week, int $day = 1):
 
 function date_timestamp_set(DateTime $object, int $timestamp): DateTime {}
 
-/** @return int|false */
-function date_timestamp_get(DateTimeInterface $object) {}
+function date_timestamp_get(DateTimeInterface $object): int|false {}
 
 /** @return DateTimeZone|false */
 function timezone_open(string $timezone) {}
 
 function timezone_name_get(DateTimeZone $object): string {}
 
-/** @return string|false */
-function timezone_name_from_abbr(string $abbr, int $gmtoffset = -1, int $isdst = -1) {}
+function timezone_name_from_abbr(string $abbr, int $gmtoffset = -1, int $isdst = -1): string|false {}
 
 function timezone_offset_get(DateTimeZone $object, DateTimeInterface $datetime): int {}
 
-/** @return array|false */
 function timezone_transitions_get(
-    DateTimeZone $object, int $timestamp_begin = PHP_INT_MIN, int $timestamp_end = PHP_INT_MAX) {}
+    DateTimeZone $object, int $timestamp_begin = PHP_INT_MIN, int $timestamp_end = PHP_INT_MAX): array|false {}
 
-/** @return array|false */
-function timezone_location_get(DateTimeZone $object) {}
+function timezone_location_get(DateTimeZone $object): array|false {}
 
-/** @return array|false */
-function timezone_identifiers_list(int $what = DateTimeZone::ALL, ?string $country = null) {}
+function timezone_identifiers_list(int $what = DateTimeZone::ALL, ?string $country = null): array|false {}
 
 function timezone_abbreviations_list(): array {}
 
@@ -121,17 +109,15 @@ function date_default_timezone_set(string $timezone_identifier): bool {}
 
 function date_default_timezone_get(): string {}
 
-/** @return string|int|float|false */
 function date_sunrise(
     int $time, int $retformat = SUNFUNCS_RET_STRING,
     float $latitude = UNKNOWN, float $longitude = UNKNOWN, float $zenith = UNKNOWN,
-    float $gmt_offset = 0) {}
+    float $gmt_offset = 0): string|int|float|false {}
 
-/** @return string|int|float|false */
 function date_sunset(
     int $time, int $retformat = SUNFUNCS_RET_STRING,
     float $latitude = UNKNOWN, float $longitude = UNKNOWN, float $zenith = UNKNOWN,
-    float $gmt_offset = 0) {}
+    float $gmt_offset = 0): string|int|float|false {}
 
 function date_sun_info(int $time, float $latitude, float $longitude): array {}
 

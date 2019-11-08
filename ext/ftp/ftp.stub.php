@@ -11,17 +11,14 @@ function ftp_ssl_connect(string $host, int $port = 21, int $timeout = 90) {}
 /** @param resource $ftp */
 function ftp_login($ftp, string $username, string $password): bool {}
 
-/**
- * @param resource $ftp
- * @return string|false
- */
-function ftp_pwd($ftp) {}
+/** @param resource $ftp */
+function ftp_pwd($ftp): string|false {}
 
 /** @param resource $ftp */
 function ftp_cdup($ftp): bool {}
 
 /** @param resource $ftp */
-function ftp_chdir($ftp, string $directory): bool {} 
+function ftp_chdir($ftp, string $directory): bool {}
 
 /** @param resource $ftp */
 function ftp_exec($ftp, string $command): bool {}
@@ -29,47 +26,29 @@ function ftp_exec($ftp, string $command): bool {}
 /** @param resource $ftp */
 function ftp_raw($ftp, string $command): array {}
 
-/**
- * @param resource $ftp
- * @return string|false
- */
-function ftp_mkdir($ftp, string $directory) {}
+/** @param resource $ftp */
+function ftp_mkdir($ftp, string $directory): string|false {}
 
 /** @param resource $ftp */
 function ftp_rmdir($ftp, string $directory): bool {}
 
-/**
- * @param resource $ftp
- * @return int|false
- */
-function ftp_chmod($ftp, int $mode, string $filename) {}
+/** @param resource $ftp */
+function ftp_chmod($ftp, int $mode, string $filename): int|false {}
 
 /** @param resource $ftp */
 function ftp_alloc($ftp, int $size, &$response = UNKNOWN): bool {}
 
-/**
- * @param resource $ftp
- * @return array|false
- */
-function ftp_nlist($ftp, string $directory) {}
+/** @param resource $ftp */
+function ftp_nlist($ftp, string $directory): array|false {}
 
-/**
- * @param resource $ftp
- * @return array|false
- */
-function ftp_rawlist($ftp, string $directory, bool $recurse = false) {}
+/** @param resource $ftp */
+function ftp_rawlist($ftp, string $directory, bool $recurse = false): array|false {}
 
-/**
- * @param resource $ftp
- * @return array|false
- */
-function ftp_mlsd($ftp, string $directory) {}
+/** @param resource $ftp */
+function ftp_mlsd($ftp, string $directory): array|false {}
 
-/**
- * @param resource $ftp
- * @return string|false
- */
-function ftp_systype($ftp) {}
+/** @param resource $ftp */
+function ftp_systype($ftp): string|false {}
 
 /**
  * @param resource $ftp
@@ -80,9 +59,8 @@ function ftp_fget($ftp, $fp, string $remote_file, int $mode = FTP_BINARY, int $r
 /**
  * @param resource $ftp
  * @param resource $fp
- * @return int|false
  */
-function ftp_nb_fget($ftp, $fp, string $remote_file, int $mode = FTP_BINARY, int $resumpos = 0) {}
+function ftp_nb_fget($ftp, $fp, string $remote_file, int $mode = FTP_BINARY, int $resumpos = 0): int|false {}
 
 /** @param resource $ftp */
 function ftp_pasv($ftp, bool $pasv): bool {}
@@ -105,9 +83,8 @@ function ftp_fput($ftp, string $remote_file, $fp, int $mode = FTP_BINARY, int $s
 /**
  * @param resource $ftp
  * @param resource $fp
- * @return int|false
  */
-function ftp_nb_fput($ftp, string $remote_file, $fp, $mode = FTP_BINARY, $startpos = 0) {}
+function ftp_nb_fput($ftp, string $remote_file, $fp, $mode = FTP_BINARY, $startpos = 0): int|false {}
 
 /** @param resource $ftp */
 function ftp_put($ftp, string $remote_file, string $local_file, int $mode = FTP_BINARY, int $startpos = 0): bool {}
@@ -115,11 +92,8 @@ function ftp_put($ftp, string $remote_file, string $local_file, int $mode = FTP_
 /** @param resource $ftp */
 function ftp_append($ftp, string $remove_file, string $local_file, int $mode = FTP_BINARY): bool {}
 
-/**
- * @param resource $ftp
- * @return int|false
- */
-function ftp_nb_put($ftp, string $remote_file, string $local_file, int $mode = FTP_BINARY, int $startpos = 0) {}
+/** @param resource $ftp */
+function ftp_nb_put($ftp, string $remote_file, string $local_file, int $mode = FTP_BINARY, int $startpos = 0): int|false {}
 
 /** @param resource $ftp */
 function ftp_size($ftp, string $filename): int {}
@@ -142,8 +116,5 @@ function ftp_close($ftp): bool {}
 /** @param resource $ftp */
 function ftp_set_option($ftp, int $option, $value): bool {}
 
-/**
- * @param resource $ftp
- * @return int|bool
- */
-function ftp_get_option($ftp, int $option) {}
+/** @param resource $ftp */
+function ftp_get_option($ftp, int $option): int|bool {}
