@@ -22,19 +22,15 @@ function ob_end_flush(): bool {}
 
 function ob_end_clean(): bool {}
 
-/** @return string|false */
-function ob_get_flush() {}
+function ob_get_flush(): string|false {}
 
-/** @return string|false */
-function ob_get_clean() {}
+function ob_get_clean(): string|false {}
 
-/** @return string|false */
-function ob_get_contents() {}
+function ob_get_contents(): string|false {}
 
 function ob_get_level(): int {}
 
-/** @return int|false */
-function ob_get_length() {}
+function ob_get_length(): int|false {}
 
 function ob_list_handlers(): array {}
 
@@ -649,26 +645,19 @@ function dirname(string $path, int $levels = 1): string {}
 /** @return array|string */
 function pathinfo(string $path, int $options = UNKNOWN) {}
 
-/** @return string|false */
-function stristr(string $haystack, string $needle, bool $before_needle = false) {}
+function stristr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
-/** @return string|false */
-function strstr(string $haystack, string $needle, bool $before_needle = false) {}
+function strstr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
-/** @return int|false */
-function strpos(string $haystack, string $needle, int $offset = 0) {}
+function strpos(string $haystack, string $needle, int $offset = 0): int|false {}
 
-/** @return int|false */
-function stripos(string $haystack, string $needle, int $offset = 0) {}
+function stripos(string $haystack, string $needle, int $offset = 0): int|false {}
 
-/** @return int|false */
-function strrpos(string $haystack, string $needle, int $offset = 0) {}
+function strrpos(string $haystack, string $needle, int $offset = 0): int|false {}
 
-/** @return int|false */
-function strripos(string $haystack, string $needle, int $offset = 0) {}
+function strripos(string $haystack, string $needle, int $offset = 0): int|false {}
 
-/** @return string|false */
-function strrchr(string $haystack, string $needle) {}
+function strrchr(string $haystack, string $needle): string|false {}
 
 function chunk_split(string $str, int $chunklen = 76, string $ending = "\r\n"): string {}
 
