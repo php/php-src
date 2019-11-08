@@ -3085,7 +3085,9 @@ ZEND_API zend_bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference 
 	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
 		int result = i_zend_verify_type_assignable_zval(prop, zv, strict);
 		if (result == 0) {
+type_error:
 			zend_throw_ref_type_error_zval(prop, zv);
+			zval_ptr_dtor(&coerced_value);
 			return 0;
 		}
 
@@ -3095,29 +3097,22 @@ ZEND_API zend_bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference 
 				ZVAL_COPY(&coerced_value, zv);
 				if (!zend_verify_weak_scalar_type_hint(
 						ZEND_TYPE_FULL_MASK(prop->type), &coerced_value)) {
-					zend_throw_ref_type_error_zval(prop, zv);
-					zval_ptr_dtor(&coerced_value);
-					return 0;
+					goto type_error;
 				}
 			} else if (Z_ISUNDEF(coerced_value)) {
 				/* A previous property did not require coercion, but this one does,
 				 * so they are incompatible. */
-				zend_throw_conflicting_coercion_error(first_prop, prop, zv);
-				return 0;
+				goto conflicting_coercion_error;
 			} else {
 				zval tmp;
 				ZVAL_COPY(&tmp, zv);
 				if (!zend_verify_weak_scalar_type_hint(ZEND_TYPE_FULL_MASK(prop->type), &tmp)) {
-					zend_throw_ref_type_error_zval(prop, zv);
 					zval_ptr_dtor(&tmp);
-					zval_ptr_dtor(&coerced_value);
-					return 0;
+					goto type_error;
 				}
 				if (!zend_is_identical(&coerced_value, &tmp)) {
-					zend_throw_conflicting_coercion_error(first_prop, prop, zv);
 					zval_ptr_dtor(&tmp);
-					zval_ptr_dtor(&coerced_value);
-					return 0;
+					goto conflicting_coercion_error;
 				}
 			}
 		} else {
@@ -3126,6 +3121,7 @@ ZEND_API zend_bool ZEND_FASTCALL zend_verify_ref_assignable_zval(zend_reference 
 			} else if (!Z_ISUNDEF(coerced_value)) {
 				/* A previous property required coercion, but this one doesn't,
 				 * so they are incompatible. */
+conflicting_coercion_error:
 				zend_throw_conflicting_coercion_error(first_prop, prop, zv);
 				zval_ptr_dtor(&coerced_value);
 				return 0;
