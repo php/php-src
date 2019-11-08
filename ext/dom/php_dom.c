@@ -24,6 +24,7 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "ext/standard/php_rand.h"
 #include "php_dom.h"
+#include "dom_arginfo.h"
 #include "dom_properties.h"
 #include "zend_interfaces.h"
 
@@ -515,12 +516,6 @@ static void dom_dtor_prop_handler(zval *zv) /* {{{ */
 {
 	free(Z_PTR_P(zv));
 }
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_import_simplexml, 0, 0, 1)
-	ZEND_ARG_INFO(0, node)
-ZEND_END_ARG_INFO()
-/* }}} */
 
 static const zend_function_entry dom_functions[] = {
 	PHP_FE(dom_import_simplexml, arginfo_dom_import_simplexml)

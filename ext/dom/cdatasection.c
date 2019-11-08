@@ -22,13 +22,7 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_cdatasection_construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO();
-/* }}} */
+#include "dom_arginfo.h"
 
 /*
 * class DOMCdataSection extends DOMText
@@ -38,7 +32,7 @@ ZEND_END_ARG_INFO();
 */
 
 const zend_function_entry php_dom_cdatasection_class_functions[] = {
-	PHP_ME(domcdatasection, __construct, arginfo_dom_cdatasection_construct, ZEND_ACC_PUBLIC)
+	PHP_ME(domcdatasection, __construct, arginfo_class_DOMCdataSection___construct, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
