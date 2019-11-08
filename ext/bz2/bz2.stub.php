@@ -6,49 +6,37 @@
  */
  function bzopen($file, string $mode) {}
 
-/**
- * @param resource $bz
- * @return string|false
- */
-function bzread ($bz, int $length = 1024) {}
+/** @param resource $bz */
+function bzread($bz, int $length = 1024): string|false {}
 
-/**
- * @param resource $bz
- * @return int|false
- */
-function bzwrite ($bz, string $str, int $length = UNKNOWN) {}
+/** @param resource $bz */
+function bzwrite($bz, string $str, int $length = UNKNOWN): int|false {}
 
 /**
  * @param resource $bz
  */
-function bzflush ($bz): bool {}
+function bzflush($bz): bool {}
 
 /**
  * @param resource $bz
  */
-function bzclose ($bz): bool {}
+function bzclose($bz): bool {}
 
 /**
  * @param resource $bz
  */
-function bzerrno ($bz): int {}
+function bzerrno($bz): int {}
 
 /**
  * @param resource $bz
  */
-function bzerrstr ($bz): string {}
+function bzerrstr($bz): string {}
 
 /**
  * @param resource $bz
  */
-function bzerror ($bz): array {}
+function bzerror($bz): array {}
 
-/**
- * @return string|int
- */
-function bzcompress (string $source, int $blocksize = 4, int $workfactor = 0) {}
+function bzcompress(string $source, int $blocksize = 4, int $workfactor = 0): string|int {}
 
-/**
- * @return string|int
- */
-function bzdecompress (string $source, int $small = 0) {}
+function bzdecompress(string $source, int $small = 0): string|int|false {}

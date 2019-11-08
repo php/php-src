@@ -79,9 +79,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_ldap_next_entry arginfo_ldap_first_entry
 
-#define arginfo_ldap_get_entries arginfo_ldap_first_entry
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_get_entries, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, result_identifier)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_first_attribute, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_first_attribute, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, result_entry_identifier)
 	ZEND_ARG_TYPE_INFO(0, dummy_ber, IS_LONG, 0)
@@ -94,7 +97,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_get_attributes, 0, 2, IS_AR
 	ZEND_ARG_INFO(0, result_entry_identifier)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_get_values, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_get_values, 0, 3, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, result_entry_identifier)
 	ZEND_ARG_TYPE_INFO(0, attribute, IS_STRING, 0)
@@ -102,17 +105,17 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_ldap_get_values_len arginfo_ldap_get_values
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_get_dn, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_get_dn, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, result_entry_identifier)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_explode_dn, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_explode_dn, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, dn, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, with_attrib, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_dn2ufn, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_dn2ufn, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, dn, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -175,7 +178,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_err2str, 0, 1, IS_STRING, 0
 	ZEND_ARG_TYPE_INFO(0, errno, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_compare, 0, 0, 4)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_compare, 0, 4, MAY_BE_BOOL|MAY_BE_LONG)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_TYPE_INFO(0, dn, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, attribute, IS_STRING, 0)
@@ -293,7 +296,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_escape, 0, 1, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #if defined(STR_TRANSLATION)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_t61_to_8859, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_t61_to_8859, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
@@ -314,7 +317,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_LDAP_PASSWD)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop_passwd, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_exop_passwd, 0, 1, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_TYPE_INFO(0, user, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, oldpw, IS_STRING, 0)
@@ -324,13 +327,13 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_LDAP_WHOAMI_S)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop_whoami, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_exop_whoami, 0, 1, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_INFO(0, link)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_LDAP_REFRESH_S)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop_refresh, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_exop_refresh, 0, 3, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_TYPE_INFO(0, dn, IS_STRING, 0)
 	ZEND_ARG_INFO(0, ttl)

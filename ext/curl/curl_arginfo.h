@@ -16,12 +16,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_error, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, handle)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_escape, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_curl_escape, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, handle)
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_curl_exec arginfo_curl_copy_handle
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_curl_exec, 0, 1, MAY_BE_STRING|MAY_BE_BOOL)
+	ZEND_ARG_INFO(0, handle)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_curl_file_create, 0, 1, CURLFile, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
@@ -60,7 +62,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_curl_multi_getcontent, 0, 1, IS_
 	ZEND_ARG_INFO(0, multi_handle)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_multi_info_read, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_curl_multi_info_read, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, multi_handle)
 	ZEND_ARG_INFO(1, msgs_in_queue)
 ZEND_END_ARG_INFO()
@@ -127,6 +129,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_curl_unescape arginfo_curl_escape
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_curl_version, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_curl_version, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, age, IS_LONG, 0)
 ZEND_END_ARG_INFO()

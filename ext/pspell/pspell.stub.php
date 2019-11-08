@@ -1,18 +1,14 @@
 <?php
 
-/** @return int|false */
-function pspell_new(string $language, string $spelling = UNKNOWN, string $jargon = UNKNOWN, string $encoding = UNKNOWN, int $mode = 0) {}
+function pspell_new(string $language, string $spelling = UNKNOWN, string $jargon = UNKNOWN, string $encoding = UNKNOWN, int $mode = 0): int|false {}
 
-/** @return int|false */
-function pspell_new_personal(string $personal, string $language, string $spelling = UNKNOWN, string $jargon = UNKNOWN, string $encoding = UNKNOWN, $mode = 0) {}
+function pspell_new_personal(string $personal, string $language, string $spelling = UNKNOWN, string $jargon = UNKNOWN, string $encoding = UNKNOWN, $mode = 0): int|false {}
 
-/** @return int|false */
-function pspell_new_config(int $config) {}
+function pspell_new_config(int $config): int|false {}
 
 function pspell_check(int $pspell, string $word): bool {}
 
-/** @return array|false */
-function pspell_suggest(int $pspell, string $word) {}
+function pspell_suggest(int $pspell, string $word): array|false {}
 
 function pspell_store_replacement(int $pspell, string $misspell, string $correct): bool {}
 

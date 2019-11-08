@@ -84,8 +84,7 @@ function xmlwriter_write_dtd_entity(XMLWriter $xmlwriter, string $name, string $
 
 function xmlwriter_output_memory(XMLWriter $xmlwriter, bool $flush = true): string {}
 
-/** @return string|int */
-function xmlwriter_flush(XMLWriter $xmlwriter, bool $empty = true) {}
+function xmlwriter_flush(XMLWriter $xmlwriter, bool $empty = true): string|int {}
 
 class XMLWriter
 {

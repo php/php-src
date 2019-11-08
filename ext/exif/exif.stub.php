@@ -1,13 +1,9 @@
 <?php
 
-/** @return string|false */
-function exif_tagname(int $index) {}
+function exif_tagname(int $index): string|false {}
 
-/** @return array|false */
-function exif_read_data($filename, ?string $sections_needed = null, bool $sub_arrays = false, bool $read_thumbnail = false) {}
+function exif_read_data($filename, ?string $sections_needed = null, bool $sub_arrays = false, bool $read_thumbnail = false): array|false {}
 
-/** @return string|false */
-function exif_thumbnail($filename, &$width = null, &$height = null, &$imagetype = null) {}
+function exif_thumbnail($filename, &$width = null, &$height = null, &$imagetype = null): string|false {}
 
-/** @return int|false */
-function exif_imagetype(string $filename) {}
+function exif_imagetype(string $filename): int|false {}

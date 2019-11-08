@@ -1,6 +1,6 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pspell_new, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, language, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, spelling, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, jargon, IS_STRING, 0)
@@ -8,7 +8,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new_personal, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pspell_new_personal, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, personal, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, language, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, spelling, IS_STRING, 0)
@@ -17,7 +17,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new_personal, 0, 0, 2)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new_config, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pspell_new_config, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, config, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -26,7 +26,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_pspell_check, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, word, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_suggest, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pspell_suggest, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, pspell, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, word, IS_STRING, 0)
 ZEND_END_ARG_INFO()

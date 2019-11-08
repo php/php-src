@@ -81,8 +81,7 @@ class IntlTimeZone
     public function useDaylightTime() {}
 }
 
-/** @return int|false */
-function intltz_count_equivalent_ids(string $zoneId) {}
+function intltz_count_equivalent_ids(string $zoneId): int|false {}
 
 function intltz_create_default(): IntlTimeZone {}
 
@@ -99,48 +98,36 @@ function intltz_create_time_zone_id_enumeration(int $zoneType, ?string $region =
 
 function intltz_from_date_time_zone(DateTimeZone $zone): ?IntlTimeZone {}
 
-/** @return string|false */
-function intltz_get_canonical_id(string $zoneId, &$isSystemID = null) {}
+function intltz_get_canonical_id(string $zoneId, &$isSystemID = null): string|false {}
 
-/** @return string|false */
-function intltz_get_display_name(IntlTimeZone $tz, bool $isDaylight = false, int $style = IntlTimeZone::DISPLAY_LONG, ?string $locale = null) {}
+function intltz_get_display_name(IntlTimeZone $tz, bool $isDaylight = false, int $style = IntlTimeZone::DISPLAY_LONG, ?string $locale = null): string|false {}
 
-/** @return int|false */
-function intltz_get_dst_savings(IntlTimeZone $tz) {}
+function intltz_get_dst_savings(IntlTimeZone $tz): int|false {}
 
-/** @return string|false */
-function intltz_get_equivalent_id(string $zoneId, int $index) {}
+function intltz_get_equivalent_id(string $zoneId, int $index): string|false {}
 
-/** @return int|false */
-function intltz_get_error_code(IntlTimeZone $tz) {}
+function intltz_get_error_code(IntlTimeZone $tz): int|false {}
 
-/** @return string|false */
-function intltz_get_error_message(IntlTimeZone $tz) {}
+function intltz_get_error_message(IntlTimeZone $tz): string|false {}
 
 function intltz_get_gmt(): IntlTimeZone {}
 
-/** @return string|false */
-function intltz_get_id(IntlTimeZone $tz) {}
+function intltz_get_id(IntlTimeZone $tz): string|false {}
 
 function intltz_get_offset(IntlTimeZone $tz, float $date, bool $local, &$rawOffset, &$dstOffset): bool {}
 
-/** @return int|false */
-function intltz_get_raw_offset(IntlTimeZone $tz) {}
+function intltz_get_raw_offset(IntlTimeZone $tz): int|false {}
 
-/** @return string|false */
-function intltz_get_region(string $zoneId) {}
+function intltz_get_region(string $zoneId): string|false {}
 
-/** @return string|false */
-function intltz_get_tz_data_version() {}
+function intltz_get_tz_data_version(): string|false {}
 
 function intltz_get_unknown(): IntlTimeZone {}
 
 #if U_ICU_VERSION_MAJOR_NUM >= 52
-/** @return string|false */
-function intltz_get_windows_id(string $timezone) {}
+function intltz_get_windows_id(string $timezone): string|false {}
 
-/** @return string|false */
-function intltz_get_id_for_windows_id(string $timezone, string $region = UNKNOWN) {}
+function intltz_get_id_for_windows_id(string $timezone, string $region = UNKNOWN): string|false {}
 #endif
 
 function intltz_has_same_rules(IntlTimeZone $tz, IntlTimeZone $otherTimeZone): bool {}

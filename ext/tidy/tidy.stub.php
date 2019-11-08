@@ -6,8 +6,7 @@
  */
 function tidy_parse_string(string $input, $config_options = UNKNOWN, string $encoding = UNKNOWN) {}
 
-/** @return string|false */
-function tidy_get_error_buffer(tidy $object) {}
+function tidy_get_error_buffer(tidy $object): string|false {}
 
 function tidy_get_output(tidy $object): string {}
 
@@ -19,25 +18,18 @@ function tidy_parse_file(string $file, $config_options = UNKNOWN, string $encodi
 
 function tidy_clean_repair(tidy $object): bool {}
 
-/**
- * @param array|string $config_options
- * @return string|false
- */
-function tidy_repair_string(string $data, $config_file = UNKNOWN, string $encoding = UNKNOWN) {}
+/** @param array|string $config_options */
+function tidy_repair_string(string $data, $config_file = UNKNOWN, string $encoding = UNKNOWN): string|false {}
 
-/**
- * @param array|string $config_options
- * @return string|false
- */
-function tidy_repair_file(string $filename, $config_file = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false) {}
+/** @param array|string $config_options */
+function tidy_repair_file(string $filename, $config_file = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false): string|false {}
 
 function tidy_diagnose(tidy $object): bool {}
 
 function tidy_get_release(): string {}
 
 #if HAVE_TIDYOPTGETDOC
-/** @return string|false */
-function tidy_get_opt_doc(tidy $object, string $optname) {}
+function tidy_get_opt_doc(tidy $object, string $optname): string|false {}
 #endif
 
 function tidy_get_config(tidy $object): array {}
@@ -58,8 +50,7 @@ function tidy_access_count(tidy $object): int {}
 
 function tidy_config_count(tidy $object): int {}
 
-/** @return string|int|bool */
-function tidy_getopt(tidy $object, string $option) {}
+function tidy_getopt(tidy $object, string $option): string|int|bool {}
 
 function tidy_get_root(tidy $object): ?tidyNode {}
 

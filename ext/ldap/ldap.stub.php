@@ -91,23 +91,20 @@ function ldap_next_entry($link_identifier, $result_identifier) {}
 /**
  * @param resource $link_identifier
  * @param resource $result_identifier
- * @return array|false
  */
-function ldap_get_entries($link_identifier, $result_identifier) {}
+function ldap_get_entries($link_identifier, $result_identifier): array|false {}
 
 /**
  * @param resource $link_identifier
  * @param resource $result_entry_identifier
- * @return string|false
  */
-function ldap_first_attribute($link_identifier, $result_entry_identifier, int $dummy_ber = UNKNOWN) {}
+function ldap_first_attribute($link_identifier, $result_entry_identifier, int $dummy_ber = UNKNOWN): string|false {}
 
 /**
  * @param resource $link_identifier
  * @param resource $result_entry_identifier
- * @return string|false
  */
-function ldap_next_attribute($link_identifier, $result_entry_identifier, int $dummy_ber = UNKNOWN) {}
+function ldap_next_attribute($link_identifier, $result_entry_identifier, int $dummy_ber = UNKNOWN): string|false {}
 
 /**
  * @param resource $link_identifier
@@ -118,37 +115,26 @@ function ldap_get_attributes($link_identifier, $result_entry_identifier): array 
 /**
  * @param resource $link_identifier
  * @param resource $result_entry_identifier
- * @return array|false
  */
-function ldap_get_values($link_identifier, $result_entry_identifier, string $attribute) {}
+function ldap_get_values($link_identifier, $result_entry_identifier, string $attribute): array|false {}
 
 /**
  * @param resource $link_identifier
  * @param resource $result_entry_identifier
- * @return array|false
  */
-function ldap_get_values_len($link_identifier, $result_entry_identifier, string $attribute) {}
+function ldap_get_values_len($link_identifier, $result_entry_identifier, string $attribute): array|false {}
 
 /**
  * @param resource $link_identifier
  * @param resource $result_entry_identifier
- * @return string|false
  */
-function ldap_get_dn($link_identifier, $result_entry_identifier) {}
+function ldap_get_dn($link_identifier, $result_entry_identifier): string|false {}
 
-/**
- * @return array|false
- */
-function ldap_explode_dn(string $dn, int $with_attrib) {}
+function ldap_explode_dn(string $dn, int $with_attrib): array|false {}
 
-/**
- * @return string|false
- */
-function ldap_dn2ufn(string $dn) {}
+function ldap_dn2ufn(string $dn): string|false {}
 
-/**
- * @param resource $link_identifier
- */
+/** @param resource $link_identifier */
 function ldap_add($link_identifier, string $dn, array $entry, array $servercontrols = []): bool {}
 
 /**
@@ -157,9 +143,7 @@ function ldap_add($link_identifier, string $dn, array $entry, array $servercontr
  */
 function ldap_add_ext($link_identifier, string $dn, array $entry, array $servercontrols = []) {}
 
-/**
- * @param resource $link_identifier
- */
+/** @param resource $link_identifier */
 function ldap_delete($link_identifier, string $dn, array $servercontrols = []): bool {}
 
 /**
@@ -224,11 +208,8 @@ function ldap_error($link): string {}
 
 function ldap_err2str(int $errno): string {}
 
-/**
- * @param resource $link_identifier
- * @return bool|int
- */
-function ldap_compare($link_identifier, string $dn, string $attribute, string $value, array $servercontrols = []) {}
+/** @param resource $link_identifier */
+function ldap_compare($link_identifier, string $dn, string $attribute, string $value, array $servercontrols = []): bool|int {}
 
 
 #ifdef LDAP_CONTROL_PAGEDRESULTS
@@ -313,15 +294,9 @@ function ldap_start_tls($link_identifier): bool {}
 function ldap_escape(string $value, string $ignore = '', int $flags = 0): string {}
 
 #ifdef STR_TRANSLATION
-/**
- * @return string|false
- */
-function ldap_t61_to_8859(string $value) {}
+function ldap_t61_to_8859(string $value): string|false {}
 
-/**
- * @return string|false
- */
-function ldap_8859_to_t61(string $value) {}
+function ldap_8859_to_t61(string $value): string|false {}
 #endif
 
 
@@ -334,29 +309,20 @@ function ldap_exop($link, string $reqoid, ?string $reqdata = null, ?array $serve
 #endif
 
 #ifdef HAVE_LDAP_PASSWD
-/**
- * @param resource $link
- * @return string|bool
- */
-function ldap_exop_passwd($link, string $user = '', string $oldpw = '', string $newpw = '', &$serverctrls = null) {}
+/** @param resource $link */
+function ldap_exop_passwd($link, string $user = '', string $oldpw = '', string $newpw = '', &$serverctrls = null): string|bool {}
 #endif
 
 
 #ifdef HAVE_LDAP_WHOAMI_S
-/**
- * @param resource $link
- * @return string|bool
- */
-function ldap_exop_whoami($link) {}
+/** @param resource $link */
+function ldap_exop_whoami($link): string|bool {}
 #endif
 
 
 #ifdef HAVE_LDAP_REFRESH_S
-/**
- * @param resource $link
- * @return int|false
- */
-function ldap_exop_refresh($link, string $dn, $ttl) {}
+/** @param resource $link */
+function ldap_exop_refresh($link, string $dn, $ttl): int|false {}
 #endif
 
 
@@ -367,4 +333,3 @@ function ldap_exop_refresh($link, string $dn, $ttl) {}
  */
 function ldap_parse_exop($link, $result, &$retdata = null, &$retoid = null): bool {}
 #endif
-

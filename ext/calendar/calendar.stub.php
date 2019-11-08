@@ -16,8 +16,7 @@ function frenchtojd(int $month, int $day, int $year): int {}
 
 function gregoriantojd(int $month, int $day, int $year): int {}
 
-/** @return int|string */
-function jddayofweek(int $juliandaycount, int $mode = CAL_DOW_DAYNO) {}
+function jddayofweek(int $juliandaycount, int $mode = CAL_DOW_DAYNO): int|string {}
 
 function jdmonthname(int $juliandaycount, int $mode): string {}
 
@@ -35,5 +34,4 @@ function jewishtojd(int $month, int $day, int $year): int {}
 
 function juliantojd(int $month, int $day, int $year): int {}
 
-/** @return int|false */
-function unixtojd(int $timestamp = UNKNOWN) {}
+function unixtojd(int $timestamp = UNKNOWN): int|false {}

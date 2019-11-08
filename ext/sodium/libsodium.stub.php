@@ -3,31 +3,27 @@
 function sodium_crypto_aead_aes256gcm_is_available(): bool {}
 
 #ifdef HAVE_AESGCM
-/** @return string|false */
-function sodium_crypto_aead_aes256gcm_decrypt(string $string, string $ad, string $nonce, string $key) {}
+function sodium_crypto_aead_aes256gcm_decrypt(string $string, string $ad, string $nonce, string $key): string|false {}
 
 function sodium_crypto_aead_aes256gcm_encrypt(string $string, string $ad, string $nonce, string $key): string {}
 
 function sodium_crypto_aead_aes256gcm_keygen(): string {}
 #endif
 
-/** @return string|false */
-function sodium_crypto_aead_chacha20poly1305_decrypt(string $string, string $ad, string $nonce, string $key) {}
+function sodium_crypto_aead_chacha20poly1305_decrypt(string $string, string $ad, string $nonce, string $key): string|false {}
 
 function sodium_crypto_aead_chacha20poly1305_encrypt(string $string, string $ad, string $nonce, string $key): string {}
 
 function sodium_crypto_aead_chacha20poly1305_keygen(): string {}
 
-/** @return string|false */
-function sodium_crypto_aead_chacha20poly1305_ietf_decrypt(string $string, string $ad, string $nonce, string $key) {}
+function sodium_crypto_aead_chacha20poly1305_ietf_decrypt(string $string, string $ad, string $nonce, string $key): string|false {}
 
 function sodium_crypto_aead_chacha20poly1305_ietf_encrypt(string $string, string $ad, string $nonce, string $key): string {}
 
 function sodium_crypto_aead_chacha20poly1305_ietf_keygen(): string {}
 
 #ifdef crypto_aead_xchacha20poly1305_IETF_NPUBBYTES
-/** @return string|false */
-function sodium_crypto_aead_xchacha20poly1305_ietf_decrypt(string $string, string $ad, string $nonce, string $key) {}
+function sodium_crypto_aead_xchacha20poly1305_ietf_decrypt(string $string, string $ad, string $nonce, string $key): string|false {}
 
 function sodium_crypto_aead_xchacha20poly1305_ietf_keygen(): string {}
 
@@ -48,8 +44,7 @@ function sodium_crypto_box_seed_keypair(string $key): string {}
 
 function sodium_crypto_box_keypair_from_secretkey_and_publickey(string $secret_key, string $public_key): string {}
 
-/** @return string|false */
-function sodium_crypto_box_open(string $string, string $nonce, string $key) {}
+function sodium_crypto_box_open(string $string, string $nonce, string $key): string|false {}
 
 function sodium_crypto_box_publickey(string $key): string {}
 
@@ -57,8 +52,7 @@ function sodium_crypto_box_publickey_from_secretkey(string $key): string {}
 
 function sodium_crypto_box_seal(string $string, string $key): string {}
 
-/** @return string|false */
-function sodium_crypto_box_seal_open(string $string, string $key) {}
+function sodium_crypto_box_seal_open(string $string, string $key): string|false {}
 
 function sodium_crypto_box_secretkey(string $key): string {}
 
@@ -114,8 +108,7 @@ function sodium_crypto_secretbox(string $string, string $nonce, string $key): st
 
 function sodium_crypto_secretbox_keygen(): string {}
 
-/** @return string|false */
-function sodium_crypto_secretbox_open(string $string, string $nonce, string $key) {}
+function sodium_crypto_secretbox_open(string $string, string $nonce, string $key): string|false {}
 
 #ifdef crypto_secretstream_xchacha20poly1305_ABYTES
 function sodium_crypto_secretstream_xchacha20poly1305_keygen(): string {}
@@ -126,8 +119,7 @@ function sodium_crypto_secretstream_xchacha20poly1305_push(string &$state, strin
 
 function sodium_crypto_secretstream_xchacha20poly1305_init_pull(string $string, string $key): string {}
 
-/** @return array|false */
-function sodium_crypto_secretstream_xchacha20poly1305_pull(string &$state, string $c, string $ad  = "") {}
+function sodium_crypto_secretstream_xchacha20poly1305_pull(string &$state, string $c, string $ad  = ""): array|false {}
 
 function sodium_crypto_secretstream_xchacha20poly1305_rekey(string &$state): void {}
 #endif
@@ -148,8 +140,7 @@ function sodium_crypto_sign_keypair(): string {}
 
 function sodium_crypto_sign_keypair_from_secretkey_and_publickey(string $secret_key, string $public_key): string {}
 
-/** @return string|false */
-function sodium_crypto_sign_open(string $string, string $keypair) {}
+function sodium_crypto_sign_open(string $string, string $keypair): string|false {}
 
 function sodium_crypto_sign_publickey(string $key): string {}
 

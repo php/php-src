@@ -1,7 +1,6 @@
 <?php
 
-/** @return string|false */
-function json_encode($value, int $options = 0, int $depth = 512) {}
+function json_encode($value, int $options = 0, int $depth = 512): string|false {}
 
 /** @return mixed */
 function json_decode(string $json, ?bool $assoc = null, int $depth = 512, int $options = 0) {}
