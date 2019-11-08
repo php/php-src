@@ -21,6 +21,7 @@
 #include "php_rand.h"
 #include "php_string.h"
 #include "php_variables.h"
+#include "basic_functions_zpp.h"
 #include <locale.h>
 #ifdef HAVE_LANGINFO_H
 # include <langinfo.h>
@@ -5972,10 +5973,7 @@ PHP_FUNCTION(money_format)
 	zend_string *str;
 	ssize_t res_len;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STRING(format, format_len)
-		Z_PARAM_DOUBLE(value)
-	ZEND_PARSE_PARAMETERS_END();
+	PARSE_PARAMETERS_MONEY_FORMAT(format, format_len, value);
 
 	p = format;
 	e = p + format_len;

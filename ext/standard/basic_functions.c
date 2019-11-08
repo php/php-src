@@ -26,6 +26,7 @@
 #include "php_http.h"
 #include "php_incomplete_class.h"
 #include "php_getopt.h"
+#include "basic_functions_zpp.h"
 #include "ext/standard/info.h"
 #include "ext/session/php_session.h"
 #include "zend_exceptions.h"
@@ -2729,10 +2730,7 @@ PHP_FUNCTION(time_nanosleep)
 	zend_long tv_sec, tv_nsec;
 	struct timespec php_req, php_rem;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_LONG(tv_sec)
-		Z_PARAM_LONG(tv_nsec)
-	ZEND_PARSE_PARAMETERS_END();
+	PARSE_PARAMETERS_NANOSLEEP(tv_sec, tv_nsec);
 
 	if (tv_sec < 0) {
 		zend_value_error("The seconds value must be greater than 0");

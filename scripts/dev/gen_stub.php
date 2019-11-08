@@ -44,11 +44,17 @@ function processDirectory(string $dir) {
 
 function processStubFile(string $stubFile) {
     $arginfoFile = str_replace('.stub.php', '', $stubFile) . '_arginfo.h';
+    $zppFile = str_replace('.stub.php', '', $stubFile) . '_zpp.h';
 
     try {
         $funcInfos = parseStubFile($stubFile);
         $arginfoCode = generateArgInfoCode($funcInfos);
         file_put_contents($arginfoFile, $arginfoCode);
+
+        $zppCode = generateZppCode($funcInfos);
+        if ($zppCode !== "") {
+            file_put_contents($zppFile, $zppCode);
+        }
     } catch (Exception $e) {
         echo "In $stubFile:\n{$e->getMessage()}\n";
         exit(1);
@@ -82,6 +88,31 @@ class Type {
             return new Type($node->toString(), true);
         }
         throw new Exception("Unexpected node type");
+    }
+
+    public function getFastZpp($argName) {
+        if ($this->isBuiltin) {
+            switch (strtolower($this->name)) {
+                case "bool":
+                    return sprintf("Z_PARAM_BOOL%s(%s)", $this->isNullable ? "_OR_NULL" : "", $argName);
+                case "int":
+                    return sprintf("Z_PARAM_LONG%s(%s)", $this->isNullable ? "_OR_NULL" : "", $argName);
+                case "float":
+                    return sprintf("Z_PARAM_DOUBLE%s(%s)", $this->isNullable ? "_OR_NULL" : "", $argName);
+                case "string":
+                    return sprintf("Z_PARAM_STRING%s(%s, %s)", $this->isNullable ? "_OR_NULL" : "", $argName, $argName . "_length");
+                case "array":
+                    return sprintf("Z_PARAM_ARRAY%s(%s)", $this->isNullable ? "_OR_NULL" : "", $argName);
+                case "object":
+                    return sprintf("Z_PARAM_OBJECT%s(%s)", $this->isNullable ? "_OR_NULL" : "", $argName);
+                case "callable":
+                    return sprintf("Z_PARAM_FUNCT%s(%s)", $this->isNullable ? "_OR_NULL" : "", $argName);
+                default:
+                    throw new Exception("Not implemented: $this->name");
+            }
+        } else {
+            return sprintf("Z_PARAM_OBJECT_OF_CLASS%s", $this->isNullable ? "_OR_NULL" : "");
+        }
     }
 
     public function toTypeCode() {
@@ -204,15 +235,31 @@ class FuncInfo {
             return false;
         }
 
+        if ($this->equalsParameters($other) === false) {
+            return false;
+        }
+
+        return $this->return->equals($other->return) && $this->cond === $other->cond;
+    }
+
+    public function equalsParameters(FuncInfo $other): bool {
         for ($i = 0; $i < count($this->args); $i++) {
-            if (!$this->args[$i]->equals($other->args[$i])) {
+            if (isset($other->args[$i]) === false || !$this->args[$i]->equals($other->args[$i])) {
                 return false;
             }
         }
 
-        return $this->return->equals($other->return)
-            && $this->numRequiredArgs === $other->numRequiredArgs
-            && $this->cond === $other->cond;
+        return $this->numRequiredArgs === $other->numRequiredArgs;
+    }
+
+    public function hasCompleteParameterListTypeInfo(): bool {
+        foreach ($this->args as $arg) {
+           if ($arg->type === null || $arg->isVariadic || $arg->sendBy !== ArgInfo::SEND_BY_VAL) {
+               return false;
+           }
+        }
+
+        return true;
     }
 }
 
@@ -417,9 +464,56 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
     return $code;
 }
 
-function findEquivalentFuncInfo(array $generatedFuncInfos, $funcInfo): ?FuncInfo {
+function funcInfoToFastZpp(FuncInfo $funcInfo): string {
+    $parameterNames = [];
+    foreach ($funcInfo->args as $arg) {
+        $parameterNames[] = $arg->name;
+        if ($arg->type !== null && strtolower($arg->type->name) === "string") {
+            $parameterNames[] = $arg->name . "_length";
+        }
+    }
+
+    $code = sprintf("#define PARSE_PARAMETERS_%s(%s) \\\n", strtoupper($funcInfo->name), implode(", ", $parameterNames));
+
+    if (empty($funcInfo->args)) {
+        $code .= "\tZEND_PARSE_PARAMETERS_NONE();";
+    } else {
+        $code .= sprintf("\tZEND_PARSE_PARAMETERS_START(%d, %d) \\\n", $funcInfo->numRequiredArgs, count($funcInfo->args));
+
+        foreach ($funcInfo->args as $i => $arg) {
+            if ($i === $funcInfo->numRequiredArgs) {
+                $code .= "\t\tZ_PARAM_OPTIONAL \\\n";
+            }
+
+            if ($arg->type) {
+                $code .= sprintf("\t\t%s \\\n", $arg->type->getFastZpp($arg->name));
+            }
+        }
+
+        $code .= "\tZEND_PARSE_PARAMETERS_END();";
+    }
+
+    return $code;
+}
+
+/**
+ * @param FuncInfo[] $generatedFuncInfos
+ */
+function findEquivalentFuncInfo(array $generatedFuncInfos, FuncInfo $funcInfo): ?FuncInfo {
     foreach ($generatedFuncInfos as $generatedFuncInfo) {
         if ($generatedFuncInfo->equalsApartFromName($funcInfo)) {
+            return $generatedFuncInfo;
+        }
+    }
+    return null;
+}
+
+/**
+ * @param FuncInfo[] $generatedFuncInfos
+ */
+function findEquivalentFuncInfoByParameters(array $generatedFuncInfos, FuncInfo $funcInfo): ?FuncInfo {
+    foreach ($generatedFuncInfos as $generatedFuncInfo) {
+        if ($generatedFuncInfo->equalsParameters($funcInfo)) {
             return $generatedFuncInfo;
         }
     }
@@ -452,6 +546,44 @@ function generateArginfoCode(array $funcInfos): string {
 
         $generatedFuncInfos[] = $funcInfo;
     }
+    return $code . "\n";
+}
+
+/** @param FuncInfo[] $funcInfos */
+function generateZppCode(array $funcInfos): string {
+    $code = "/* This is a generated file, edit the .stub.php file instead. */";
+    $generatedZppFuncInfo = [];
+    foreach ($funcInfos as $funcInfo) {
+        if ($funcInfo->hasCompleteParameterListTypeInfo() === false) {
+            continue;
+        }
+
+        $code .= "\n\n";
+        if ($funcInfo->cond) {
+            $code .= "#if {$funcInfo->cond}\n";
+        }
+
+        /* If there already is an equivalent ZPP macro, only emit a #define */
+        if (false && $generatedFuncInfo = findEquivalentFuncInfoByParameters($generatedZppFuncInfo, $funcInfo)) {
+            $code .= sprintf(
+                "#define PARSE_PARAMETERS_%s PARSE_PARAMETERS_%s",
+                strtoupper($funcInfo->name), strtoupper($generatedFuncInfo->name)
+            );
+        } else {
+            $code .= funcInfoToFastZpp($funcInfo);
+        }
+
+        if ($funcInfo->cond) {
+            $code .= "\n#endif";
+        }
+
+        $generatedZppFuncInfo[] = $funcInfo;
+    }
+
+    if (empty($generatedZppFuncInfo)) {
+           return "";
+    }
+
     return $code . "\n";
 }
 

@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include "basic_functions.h"
 #include "php_ext_syslog.h"
+#include "basic_functions_zpp.h"
 
 /* {{{ PHP_MINIT_FUNCTION
  */
@@ -183,10 +184,7 @@ PHP_FUNCTION(syslog)
 	char *message;
 	size_t message_len;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_LONG(priority)
-		Z_PARAM_STRING(message, message_len)
-	ZEND_PARSE_PARAMETERS_END();
+	PARSE_PARAMETERS_SYSLOG(priority, message, message_len);
 
 	php_syslog(priority, "%s", message);
 	RETURN_TRUE;
