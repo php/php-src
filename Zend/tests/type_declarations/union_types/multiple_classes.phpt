@@ -53,6 +53,14 @@ $test->prop = new Z;
 var_dump($test->prop);
 var_dump($test->method(new Z));
 
+if (true) {
+    class Y {}
+}
+
+$test->prop = new Y;
+var_dump($test->prop);
+var_dump($test->method(new Y));
+
 ?>
 --EXPECTF--
 int(42)
@@ -68,4 +76,8 @@ object(X)#6 (0) {
 object(Z)#6 (0) {
 }
 object(Z)#4 (0) {
+}
+object(Y)#4 (0) {
+}
+object(Y)#6 (0) {
 }

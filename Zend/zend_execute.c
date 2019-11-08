@@ -798,7 +798,7 @@ static zend_bool zend_verify_weak_scalar_type_hint(uint32_t type_mask, zval *arg
 
 	/* Type preference order: int -> float -> string -> bool */
 	if (type_mask & MAY_BE_LONG) {
-		/* For a int|float union type and string value,
+		/* For an int|float union type and string value,
 		 * determine chosen type by is_numeric_string() semantics. */
 		if ((type_mask & MAY_BE_DOUBLE) && Z_TYPE_P(arg) == IS_STRING) {
 			zend_uchar type = is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, -1);
@@ -1056,6 +1056,7 @@ static zend_always_inline zend_bool zend_check_type(
 					ce = zend_fetch_class(ZEND_TYPE_LIST_GET_NAME(entry),
 						(ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 					if (!ce) {
+						cache_slot++;
 						continue;
 					}
 					*cache_slot = ce;
