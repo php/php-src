@@ -1,5 +1,9 @@
 --TEST--
 Behavior of union type checks (weak)
+--SKIPIF--
+<?php
+if (!extension_loaded('json')) die('skip requires json');
+?>
 --FILE--
 <?php
 
