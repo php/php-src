@@ -23,7 +23,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_ob_end_clean arginfo_ob_flush
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ob_get_flush, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ob_get_flush, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
 #define arginfo_ob_get_clean arginfo_ob_get_flush
@@ -33,7 +33,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ob_get_level, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_ob_get_length arginfo_ob_get_flush
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ob_get_length, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ob_list_handlers, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
@@ -495,7 +496,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_set_include_path, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, include_path, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_get_include_path arginfo_ob_get_flush
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_include_path, 0, 0, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_restore_include_path arginfo_flush
 
@@ -648,7 +650,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dns_get_mx, 0, 2, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#define arginfo_net_get_interfaces arginfo_ob_get_flush
+#define arginfo_net_get_interfaces arginfo_get_include_path
 
 #if HAVE_FTOK
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftok, 0, 2, IS_LONG, 0)
@@ -674,13 +676,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_md5_file, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, raw_output, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_getmyuid arginfo_ob_get_flush
+#define arginfo_getmyuid arginfo_get_include_path
 
-#define arginfo_getmygid arginfo_ob_get_flush
+#define arginfo_getmygid arginfo_get_include_path
 
-#define arginfo_getmypid arginfo_ob_get_flush
+#define arginfo_getmypid arginfo_get_include_path
 
-#define arginfo_getmyinode arginfo_ob_get_flush
+#define arginfo_getmyinode arginfo_get_include_path
 
 #define arginfo_getlastmod arginfo_ob_get_level
 
@@ -873,7 +875,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pathinfo, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, options, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_stristr, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stristr, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, before_needle, _IS_BOOL, 0)
@@ -881,7 +883,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_strstr arginfo_stristr
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_strpos, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strpos, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
@@ -893,7 +895,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_strripos arginfo_strpos
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_strrchr, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strrchr, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -1112,7 +1114,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_chroot, 0, 1, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#define arginfo_getcwd arginfo_ob_get_flush
+#define arginfo_getcwd arginfo_get_include_path
 
 #define arginfo_rewinddir arginfo_closedir
 
@@ -1239,15 +1241,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpcredits, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, flag, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_php_sapi_name arginfo_ob_get_flush
+#define arginfo_php_sapi_name arginfo_get_include_path
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_php_uname, 0, 0, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_php_ini_scanned_files arginfo_ob_get_flush
+#define arginfo_php_ini_scanned_files arginfo_get_include_path
 
-#define arginfo_php_ini_loaded_file arginfo_ob_get_flush
+#define arginfo_php_ini_loaded_file arginfo_get_include_path
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_iptcembed, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, iptcdata, IS_STRING, 0)
