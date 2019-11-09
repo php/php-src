@@ -168,32 +168,3 @@ function delete_dir($path) {
 		return;
 	}
 }
-if (0) {
-$path = __DIR__ . '/a.txt';
-create_file($path, PHPT_ACL_NONE);
-if (!is_writable($path)) {
-	echo "PHPT_ACL_NONE success!!\n";
-} else {
-	echo "PHPT_ACL_NONE failed!!\n";
-}
-delete_file($path);
-
-$path = __DIR__ . '/a.txt';
-create_file($path, PHPT_ACL_READ);
-if (!is_writable($path)) {
-	echo "PHPT_ACL_READ success!!\n";
-} else {
-	echo "PHPT_ACL_READ failed!!\n";
-}
-delete_file($path);
-
-$path = __DIR__ . '/adir';
-create_dir($path, PHPT_ACL_READ);
-if (!is_writable($path)) {
-	echo "PHPT_ACL_READ dir success!!\n";
-} else {
-	echo "PHPT_ACL_READ dir failed!!\n";
-}
-delete_dir($path);
-
-}
