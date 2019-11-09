@@ -24,6 +24,7 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "ext/standard/php_rand.h"
 #include "php_dom.h"
+#include "dom_arginfo.h"
 #include "dom_properties.h"
 #include "zend_interfaces.h"
 
@@ -519,12 +520,6 @@ static void dom_dtor_prop_handler(zval *zv) /* {{{ */
 	free(Z_PTR_P(zv));
 }
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_import_simplexml, 0, 0, 1)
-	ZEND_ARG_INFO(0, node)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 static const zend_function_entry dom_functions[] = {
 	PHP_FE(dom_import_simplexml, arginfo_dom_import_simplexml)
 	PHP_FE_END
@@ -593,34 +588,12 @@ PHP_MINIT_FUNCTION(dom)
 	dom_domexception_class_entry->ce_flags |= ZEND_ACC_FINAL;
 	zend_declare_property_long(dom_domexception_class_entry, "code", sizeof("code")-1, 0, ZEND_ACC_PUBLIC);
 
-<<<<<<< HEAD
-	REGISTER_DOM_CLASS(ce, "DOMStringList", NULL, php_dom_domstringlist_class_functions, dom_domstringlist_class_entry);
-
-	zend_hash_init(&dom_domstringlist_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
-	dom_register_prop_handler(&dom_domstringlist_prop_handlers, "length", sizeof("length")-1, dom_domstringlist_length_read, NULL);
-	zend_hash_add_ptr(&classes, ce.name, &dom_domstringlist_prop_handlers);
-
-	REGISTER_DOM_CLASS(ce, "DOMNameList", NULL, php_dom_namelist_class_functions, dom_namelist_class_entry);
-
-	zend_hash_init(&dom_namelist_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
-	dom_register_prop_handler(&dom_namelist_prop_handlers, "length", sizeof("length")-1, dom_namelist_length_read, NULL);
-	zend_hash_add_ptr(&classes, ce.name, &dom_namelist_prop_handlers);
-
 	INIT_CLASS_ENTRY(ce, "DOMParentNode", php_dom_parent_node_class_functions);
 	dom_parentnode_class_entry = zend_register_internal_interface(&ce);
 
 	INIT_CLASS_ENTRY(ce, "DOMChildNode", php_dom_child_node_class_functions);
 	dom_childnode_class_entry = zend_register_internal_interface(&ce);
 
-	REGISTER_DOM_CLASS(ce, "DOMImplementationList", NULL, php_dom_domimplementationlist_class_functions, dom_domimplementationlist_class_entry);
-
-	zend_hash_init(&dom_domimplementationlist_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
-	dom_register_prop_handler(&dom_domimplementationlist_prop_handlers, "length", sizeof("length")-1, dom_domimplementationlist_length_read, NULL);
-	zend_hash_add_ptr(&classes, ce.name, &dom_domimplementationlist_prop_handlers);
-
-	REGISTER_DOM_CLASS(ce, "DOMImplementationSource", NULL, php_dom_domimplementationsource_class_functions, dom_domimplementationsource_class_entry);
-=======
->>>>>>> origin/master
 	REGISTER_DOM_CLASS(ce, "DOMImplementation", NULL, php_dom_domimplementation_class_functions, dom_domimplementation_class_entry);
 
 	REGISTER_DOM_CLASS(ce, "DOMNode", NULL, php_dom_node_class_functions, dom_node_class_entry);

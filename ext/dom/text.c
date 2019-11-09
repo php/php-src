@@ -23,19 +23,7 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 #include "dom_ce.h"
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_text_split_text, 0, 0, 1)
-	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_text_is_whitespace_in_element_content, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_text_construct, 0, 0, 0)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO();
-/* }}} */
+#include "dom_arginfo.h"
 
 /*
 * class DOMText extends DOMCharacterData
@@ -45,10 +33,10 @@ ZEND_END_ARG_INFO();
 */
 
 const zend_function_entry php_dom_text_class_functions[] = {
-	PHP_FALIAS(splitText, dom_text_split_text, arginfo_dom_text_split_text)
-	PHP_FALIAS(isWhitespaceInElementContent, dom_text_is_whitespace_in_element_content, arginfo_dom_text_is_whitespace_in_element_content)
-	PHP_FALIAS(isElementContentWhitespace, dom_text_is_whitespace_in_element_content, arginfo_dom_text_is_whitespace_in_element_content)
-	PHP_ME(domtext, __construct, arginfo_dom_text_construct, ZEND_ACC_PUBLIC)
+	PHP_FALIAS(splitText, dom_text_split_text, arginfo_class_DOMText_splitText)
+	PHP_FALIAS(isWhitespaceInElementContent, dom_text_is_whitespace_in_element_content, arginfo_class_DOMText_isWhitespaceInElementContent)
+	PHP_FALIAS(isElementContentWhitespace, dom_text_is_whitespace_in_element_content, arginfo_class_DOMText_isElementContentWhitespace)
+	PHP_ME(domtext, __construct, arginfo_class_DOMText___construct, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 

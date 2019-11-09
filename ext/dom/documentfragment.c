@@ -22,21 +22,13 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_documentfragement_construct, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_documentfragement_appendXML, 0, 0, 1)
-	ZEND_ARG_INFO(0, data)
-ZEND_END_ARG_INFO();
+#include "dom_arginfo.h"
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_documentfragment_append, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_documentfragment_prepend, 0, 0, 0)
 ZEND_END_ARG_INFO();
-/* }}} */
 
 /*
 * class DOMDocumentFragment extends DOMNode
@@ -46,8 +38,8 @@ ZEND_END_ARG_INFO();
 */
 
 const zend_function_entry php_dom_documentfragment_class_functions[] = {
-	PHP_ME(domdocumentfragment, __construct, arginfo_dom_documentfragement_construct, ZEND_ACC_PUBLIC)
-	PHP_ME(domdocumentfragment, appendXML, arginfo_dom_documentfragement_appendXML, ZEND_ACC_PUBLIC)
+	PHP_ME(domdocumentfragment, __construct, arginfo_class_DOMDocumentFragment___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(domdocumentfragment, appendXML, arginfo_class_DOMDocumentFragment_appendXML, ZEND_ACC_PUBLIC)
 	PHP_ME(domdocumentfragment, append, arginfo_dom_documentfragment_append, ZEND_ACC_PUBLIC)
 	PHP_ME(domdocumentfragment, prepend, arginfo_dom_documentfragment_prepend, ZEND_ACC_PUBLIC)
 	PHP_FE_END

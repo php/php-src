@@ -22,33 +22,7 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_substring_data, 0, 0, 2)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, count)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_append_data, 0, 0, 1)
-	ZEND_ARG_INFO(0, arg)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_insert_data, 0, 0, 2)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, arg)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_delete_data, 0, 0, 2)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, count)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_replace_data, 0, 0, 3)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_INFO(0, count)
-	ZEND_ARG_INFO(0, arg)
-ZEND_END_ARG_INFO();
+#include "dom_arginfo.h"
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_remove, 0, 0, 0)
 ZEND_END_ARG_INFO();
@@ -61,7 +35,6 @@ ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_replace_with, 0, 0, 0)
 ZEND_END_ARG_INFO();
-/* }}} */
 
 /*
 * class DOMCharacterData extends DOMNode
@@ -71,11 +44,11 @@ ZEND_END_ARG_INFO();
 */
 
 const zend_function_entry php_dom_characterdata_class_functions[] = {
-	PHP_FALIAS(substringData, dom_characterdata_substring_data, arginfo_dom_characterdata_substring_data)
-	PHP_FALIAS(appendData, dom_characterdata_append_data, arginfo_dom_characterdata_append_data)
-	PHP_FALIAS(insertData, dom_characterdata_insert_data, arginfo_dom_characterdata_insert_data)
-	PHP_FALIAS(deleteData, dom_characterdata_delete_data, arginfo_dom_characterdata_delete_data)
-	PHP_FALIAS(replaceData, dom_characterdata_replace_data, arginfo_dom_characterdata_replace_data)
+	PHP_FALIAS(substringData, dom_characterdata_substring_data, arginfo_class_DOMCharacterData_substringData)
+	PHP_FALIAS(appendData, dom_characterdata_append_data, arginfo_class_DOMCharacterData_appendData)
+	PHP_FALIAS(insertData, dom_characterdata_insert_data, arginfo_class_DOMCharacterData_insertData)
+	PHP_FALIAS(deleteData, dom_characterdata_delete_data, arginfo_class_DOMCharacterData_deleteData)
+	PHP_FALIAS(replaceData, dom_characterdata_replace_data, arginfo_class_DOMCharacterData_replaceData)
 	PHP_ME(domcharacterdata, remove, arginfo_dom_characterdata_remove, ZEND_ACC_PUBLIC)
 	PHP_ME(domcharacterdata, after, arginfo_dom_characterdata_after, ZEND_ACC_PUBLIC)
 	PHP_ME(domcharacterdata, before, arginfo_dom_characterdata_before, ZEND_ACC_PUBLIC)

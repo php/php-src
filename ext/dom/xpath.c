@@ -22,6 +22,7 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
+#include "dom_arginfo.h"
 
 #define PHP_DOM_XPATH_QUERY 0
 #define PHP_DOM_XPATH_EVALUATE 1
@@ -32,39 +33,12 @@
 
 #if defined(LIBXML_XPATH_ENABLED)
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_xpath_construct, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, doc, DOMDocument, 0)
-	ZEND_ARG_INFO(0, registerNodeNS)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_xpath_register_ns, 0, 0, 2)
-	ZEND_ARG_INFO(0, prefix)
-	ZEND_ARG_INFO(0, uri)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_xpath_query, 0, 0, 1)
-	ZEND_ARG_INFO(0, expr)
-	ZEND_ARG_OBJ_INFO(0, context, DOMNode, 1)
-	ZEND_ARG_INFO(0, registerNodeNS)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_xpath_evaluate, 0, 0, 1)
-	ZEND_ARG_INFO(0, expr)
-	ZEND_ARG_OBJ_INFO(0, context, DOMNode, 1)
-	ZEND_ARG_INFO(0, registerNodeNS)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_xpath_register_php_functions, 0, 0, 0)
-ZEND_END_ARG_INFO();
-/* }}} */
-
 const zend_function_entry php_dom_xpath_class_functions[] = {
-	PHP_ME(domxpath, __construct, arginfo_dom_xpath_construct, ZEND_ACC_PUBLIC)
-	PHP_FALIAS(registerNamespace, dom_xpath_register_ns, arginfo_dom_xpath_register_ns)
-	PHP_FALIAS(query, dom_xpath_query, arginfo_dom_xpath_query)
-	PHP_FALIAS(evaluate, dom_xpath_evaluate, arginfo_dom_xpath_evaluate)
-	PHP_FALIAS(registerPhpFunctions, dom_xpath_register_php_functions, arginfo_dom_xpath_register_php_functions)
+	PHP_ME(domxpath, __construct, arginfo_class_DOMXPath___construct, ZEND_ACC_PUBLIC)
+	PHP_FALIAS(registerNamespace, dom_xpath_register_ns, arginfo_class_DOMXPath_registerNamespace)
+	PHP_FALIAS(query, dom_xpath_query, arginfo_class_DOMXPath_query)
+	PHP_FALIAS(evaluate, dom_xpath_evaluate, arginfo_class_DOMXPath_evaluate)
+	PHP_FALIAS(registerPhpFunctions, dom_xpath_register_php_functions, arginfo_class_DOMXPath_registerPhpFunctions)
 	PHP_FE_END
 };
 
