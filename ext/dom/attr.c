@@ -34,7 +34,7 @@
 */
 
 const zend_function_entry php_dom_attr_class_functions[] = {
-	PHP_FALIAS(isId, dom_attr_is_id, arginfo_class_DOMAttr_isId)
+	PHP_ME(domattr, isId, arginfo_class_DOMAttr_isId, ZEND_ACC_PUBLIC)
 	PHP_ME(domattr, __construct, arginfo_class_DOMAttr___construct, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
@@ -209,11 +209,11 @@ int dom_attr_schema_type_info_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ proto bool dom_attr_is_id()
+/* {{{ proto bool domattr::isId()
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-isId
 Since: DOM Level 3
 */
-PHP_FUNCTION(dom_attr_is_id)
+PHP_METHOD(domattr, isId)
 {
 	zval *id;
 	dom_object *intern;

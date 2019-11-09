@@ -77,121 +77,111 @@ PHP_METHOD(domdocumentfragment, __construct);
 PHP_METHOD(domdocumentfragment, appendXML);
 
 /* domdocument methods */
-PHP_FUNCTION(dom_document_create_element);
-PHP_FUNCTION(dom_document_create_document_fragment);
-PHP_FUNCTION(dom_document_create_text_node);
-PHP_FUNCTION(dom_document_create_comment);
-PHP_FUNCTION(dom_document_create_cdatasection);
-PHP_FUNCTION(dom_document_create_processing_instruction);
-PHP_FUNCTION(dom_document_create_attribute);
-PHP_FUNCTION(dom_document_create_entity_reference);
-PHP_FUNCTION(dom_document_get_elements_by_tag_name);
-PHP_FUNCTION(dom_document_import_node);
-PHP_FUNCTION(dom_document_create_element_ns);
-PHP_FUNCTION(dom_document_create_attribute_ns);
-PHP_FUNCTION(dom_document_get_elements_by_tag_name_ns);
-PHP_FUNCTION(dom_document_get_element_by_id);
-PHP_FUNCTION(dom_document_adopt_node);
-PHP_FUNCTION(dom_document_normalize_document);
-PHP_FUNCTION(dom_document_rename_node);
+PHP_METHOD(domdocument, createElement);
+PHP_METHOD(domdocument, createDocumentFragment);
+PHP_METHOD(domdocument, createTextNode);
+PHP_METHOD(domdocument, createComment);
+PHP_METHOD(domdocument, createCDATASection);
+PHP_METHOD(domdocument, createProcessingInstruction);
+PHP_METHOD(domdocument, createAttribute);
+PHP_METHOD(domdocument, createEntityReference);
+PHP_METHOD(domdocument, getElementsByTagName);
+PHP_METHOD(domdocument, importNode);
+PHP_METHOD(domdocument, createElementNS);
+PHP_METHOD(domdocument, createAttributeNS);
+PHP_METHOD(domdocument, getElementsByTagNameNS);
+PHP_METHOD(domdocument, getElementById);
+PHP_METHOD(domdocument, adoptNode);
+PHP_METHOD(domdocument, normalizeDocument);
 PHP_METHOD(domdocument, __construct);
 	/* convienience methods */
 PHP_METHOD(domdocument, load);
-PHP_FUNCTION(dom_document_save);
+PHP_METHOD(domdocument, save);
 PHP_METHOD(domdocument, loadXML);
-PHP_FUNCTION(dom_document_savexml);
-PHP_FUNCTION(dom_document_validate);
-PHP_FUNCTION(dom_document_xinclude);
+PHP_METHOD(domdocument, saveXML);
+PHP_METHOD(domdocument, validate);
+PHP_METHOD(domdocument, xinclude);
 PHP_METHOD(domdocument, registerNodeClass);
 
 #if defined(LIBXML_HTML_ENABLED)
 PHP_METHOD(domdocument, loadHTML);
 PHP_METHOD(domdocument, loadHTMLFile);
-PHP_FUNCTION(dom_document_save_html);
-PHP_FUNCTION(dom_document_save_html_file);
+PHP_METHOD(domdocument, saveHTML);
+PHP_METHOD(domdocument, saveHTMLFile);
 #endif  /* defined(LIBXML_HTML_ENABLED) */
 
 #if defined(LIBXML_SCHEMAS_ENABLED)
-PHP_FUNCTION(dom_document_schema_validate_file);
-PHP_FUNCTION(dom_document_schema_validate_xml);
-PHP_FUNCTION(dom_document_relaxNG_validate_file);
-PHP_FUNCTION(dom_document_relaxNG_validate_xml);
+PHP_METHOD(domdocument, schemaValidate);
+PHP_METHOD(domdocument, schemaValidateSource);
+PHP_METHOD(domdocument, relaxNGValidate);
+PHP_METHOD(domdocument, relaxNGValidateSource);
 #endif
 
 /* domnode methods */
-PHP_FUNCTION(dom_node_insert_before);
-PHP_FUNCTION(dom_node_replace_child);
-PHP_FUNCTION(dom_node_remove_child);
-PHP_FUNCTION(dom_node_append_child);
-PHP_FUNCTION(dom_node_has_child_nodes);
-PHP_FUNCTION(dom_node_clone_node);
-PHP_FUNCTION(dom_node_normalize);
-PHP_FUNCTION(dom_node_is_supported);
-PHP_FUNCTION(dom_node_has_attributes);
-PHP_FUNCTION(dom_node_compare_document_position);
-PHP_FUNCTION(dom_node_is_same_node);
-PHP_FUNCTION(dom_node_lookup_prefix);
-PHP_FUNCTION(dom_node_is_default_namespace);
-PHP_FUNCTION(dom_node_lookup_namespace_uri);
-PHP_FUNCTION(dom_node_is_equal_node);
-PHP_FUNCTION(dom_node_get_feature);
-PHP_FUNCTION(dom_node_set_user_data);
-PHP_FUNCTION(dom_node_get_user_data);
+PHP_METHOD(domnode, insertBefore);
+PHP_METHOD(domnode, replaceChild);
+PHP_METHOD(domnode, removeChild);
+PHP_METHOD(domnode, appendChild);
+PHP_METHOD(domnode, hasChildNodes);
+PHP_METHOD(domnode, cloneNode);
+PHP_METHOD(domnode, normalize);
+PHP_METHOD(domnode, isSupported);
+PHP_METHOD(domnode, hasAttributes);
+PHP_METHOD(domnode, isSameNode);
+PHP_METHOD(domnode, lookupPrefix);
+PHP_METHOD(domnode, isDefaultNamespace);
+PHP_METHOD(domnode, lookupNamespaceURI);
 PHP_METHOD(domnode, C14N);
 PHP_METHOD(domnode, C14NFile);
 PHP_METHOD(domnode, getNodePath);
 PHP_METHOD(domnode, getLineNo);
 
 /* domnodelist methods */
-PHP_FUNCTION(dom_nodelist_item);
-PHP_FUNCTION(dom_nodelist_count);
+PHP_METHOD(domnodelist, item);
+PHP_METHOD(domnodelist, count);
 
 /* domnamednodemap methods */
-PHP_FUNCTION(dom_namednodemap_get_named_item);
-PHP_FUNCTION(dom_namednodemap_set_named_item);
-PHP_FUNCTION(dom_namednodemap_remove_named_item);
-PHP_FUNCTION(dom_namednodemap_item);
-PHP_FUNCTION(dom_namednodemap_get_named_item_ns);
-PHP_FUNCTION(dom_namednodemap_set_named_item_ns);
-PHP_FUNCTION(dom_namednodemap_remove_named_item_ns);
-PHP_FUNCTION(dom_namednodemap_count);
+PHP_METHOD(domnamednodemap, getNamedItem);
+PHP_METHOD(domnamednodemap, item);
+PHP_METHOD(domnamednodemap, getNamedItemNS);
+PHP_METHOD(domnamednodemap, count);
 
 /* domcharacterdata methods */
-PHP_FUNCTION(dom_characterdata_substring_data);
-PHP_FUNCTION(dom_characterdata_append_data);
-PHP_FUNCTION(dom_characterdata_insert_data);
-PHP_FUNCTION(dom_characterdata_delete_data);
-PHP_FUNCTION(dom_characterdata_replace_data);
+PHP_METHOD(domcharacterdata, substringData);
+PHP_METHOD(domcharacterdata, appendData);
+PHP_METHOD(domcharacterdata, insertData);
+PHP_METHOD(domcharacterdata, deleteData);
+PHP_METHOD(domcharacterdata, replaceData);
 
 /* domattr methods */
-PHP_FUNCTION(dom_attr_is_id);
+PHP_METHOD(domattr, isId);
 PHP_METHOD(domattr, __construct);
 
 /* domelement methods */
-PHP_FUNCTION(dom_element_get_attribute);
-PHP_FUNCTION(dom_element_set_attribute);
-PHP_FUNCTION(dom_element_remove_attribute);
-PHP_FUNCTION(dom_element_get_attribute_node);
-PHP_FUNCTION(dom_element_set_attribute_node);
-PHP_FUNCTION(dom_element_remove_attribute_node);
-PHP_FUNCTION(dom_element_get_elements_by_tag_name);
-PHP_FUNCTION(dom_element_get_attribute_ns);
-PHP_FUNCTION(dom_element_set_attribute_ns);
-PHP_FUNCTION(dom_element_remove_attribute_ns);
-PHP_FUNCTION(dom_element_get_attribute_node_ns);
-PHP_FUNCTION(dom_element_set_attribute_node_ns);
-PHP_FUNCTION(dom_element_get_elements_by_tag_name_ns);
-PHP_FUNCTION(dom_element_has_attribute);
-PHP_FUNCTION(dom_element_has_attribute_ns);
-PHP_FUNCTION(dom_element_set_id_attribute);
-PHP_FUNCTION(dom_element_set_id_attribute_ns);
-PHP_FUNCTION(dom_element_set_id_attribute_node);
+PHP_METHOD(domelement, getAttribute);
+PHP_METHOD(domelement, setAttribute);
+PHP_METHOD(domelement, removeAttribute);
+PHP_METHOD(domelement, getAttributeNode);
+PHP_METHOD(domelement, setAttributeNode);
+PHP_METHOD(domelement, removeAttributeNode);
+PHP_METHOD(domelement, getElementsByTagName);
+PHP_METHOD(domelement, getAttributeNS);
+PHP_METHOD(domelement, setAttributeNS);
+PHP_METHOD(domelement, removeAttributeNS);
+PHP_METHOD(domelement, getAttributeNodeNS);
+PHP_METHOD(domelement, setAttributeNodeNS);
+PHP_METHOD(domelement, getElementsByTagNameNS);
+PHP_METHOD(domelement, hasAttribute);
+PHP_METHOD(domelement, hasAttributeNS);
+PHP_METHOD(domelement, setIdAttribute);
+PHP_METHOD(domelement, setIdAttributeNS);
+PHP_METHOD(domelement, setIdAttributeNode);
 PHP_METHOD(domelement, __construct);
 
 /* domtext methods */
-PHP_FUNCTION(dom_text_split_text);
-PHP_FUNCTION(dom_text_is_whitespace_in_element_content);
-PHP_FUNCTION(dom_text_replace_whole_text);
+PHP_METHOD(domtext, splitText);
+PHP_METHOD(domtext, isWhitespaceInElementContent);
+PHP_METHOD(domtext, replaceWholeText);
 PHP_METHOD(domtext, __construct);
 
 /* domcomment methods */
@@ -215,10 +205,10 @@ PHP_METHOD(domprocessinginstruction, __construct);
 #if defined(LIBXML_XPATH_ENABLED)
 /* xpath methods */
 PHP_METHOD(domxpath, __construct);
-PHP_FUNCTION(dom_xpath_register_ns);
-PHP_FUNCTION(dom_xpath_query);
-PHP_FUNCTION(dom_xpath_evaluate);
-PHP_FUNCTION(dom_xpath_register_php_functions);
+PHP_METHOD(domxpath, registerNamespace);
+PHP_METHOD(domxpath, query);
+PHP_METHOD(domxpath, evaluate);
+PHP_METHOD(domxpath, registerPhpFunctions);
 #endif
 
 #endif /* DOM_FE_H */

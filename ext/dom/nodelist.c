@@ -32,8 +32,8 @@
 */
 
 const zend_function_entry php_dom_nodelist_class_functions[] = {
-	PHP_FALIAS(item, dom_nodelist_item, arginfo_class_DOMNodeList_item)
-	PHP_FALIAS(count, dom_nodelist_count, arginfo_class_DOMNodeList_count)
+	PHP_ME(domnodelist, item, arginfo_class_DOMNodeList_item, ZEND_ACC_PUBLIC)
+	PHP_ME(domnodelist, count, arginfo_class_DOMNodeList_count, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
@@ -91,7 +91,7 @@ int dom_nodelist_length_read(dom_object *obj, zval *retval)
 
 /* {{{ proto int|bool dom_nodelist_count();
 */
-PHP_FUNCTION(dom_nodelist_count)
+PHP_METHOD(domnodelist, count)
 {
 	zval *id;
 	dom_object *intern;
@@ -114,7 +114,7 @@ PHP_FUNCTION(dom_nodelist_count)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-844377136
 Since:
 */
-PHP_FUNCTION(dom_nodelist_item)
+PHP_METHOD(domnodelist, item)
 {
 	zval *id;
 	zend_long index;

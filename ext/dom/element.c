@@ -32,24 +32,24 @@
 */
 
 const zend_function_entry php_dom_element_class_functions[] = { /* {{{ */
-	PHP_FALIAS(getAttribute, dom_element_get_attribute, arginfo_class_DOMElement_getAttribute)
-	PHP_FALIAS(setAttribute, dom_element_set_attribute, arginfo_class_DOMElement_setAttribute)
-	PHP_FALIAS(removeAttribute, dom_element_remove_attribute, arginfo_class_DOMElement_removeAttribute)
-	PHP_FALIAS(getAttributeNode, dom_element_get_attribute_node, arginfo_class_DOMElement_getAttributeNode)
-	PHP_FALIAS(setAttributeNode, dom_element_set_attribute_node, arginfo_class_DOMElement_setAttributeNode)
-	PHP_FALIAS(removeAttributeNode, dom_element_remove_attribute_node, arginfo_class_DOMElement_removeAttributeNode)
-	PHP_FALIAS(getElementsByTagName, dom_element_get_elements_by_tag_name, arginfo_class_DOMElement_getElementsByTagName)
-	PHP_FALIAS(getAttributeNS, dom_element_get_attribute_ns, arginfo_class_DOMElement_getAttributeNS)
-	PHP_FALIAS(setAttributeNS, dom_element_set_attribute_ns, arginfo_class_DOMElement_setAttributeNS)
-	PHP_FALIAS(removeAttributeNS, dom_element_remove_attribute_ns, arginfo_class_DOMElement_removeAttributeNS)
-	PHP_FALIAS(getAttributeNodeNS, dom_element_get_attribute_node_ns, arginfo_class_DOMElement_getAttributeNodeNS)
-	PHP_FALIAS(setAttributeNodeNS, dom_element_set_attribute_node_ns, arginfo_class_DOMElement_setAttributeNodeNS)
-	PHP_FALIAS(getElementsByTagNameNS, dom_element_get_elements_by_tag_name_ns, arginfo_class_DOMElement_getElementsByTagNameNS)
-	PHP_FALIAS(hasAttribute, dom_element_has_attribute, arginfo_class_DOMElement_hasAttribute)
-	PHP_FALIAS(hasAttributeNS, dom_element_has_attribute_ns, arginfo_class_DOMElement_hasAttributeNS)
-	PHP_FALIAS(setIdAttribute, dom_element_set_id_attribute, arginfo_class_DOMElement_setIdAttribute)
-	PHP_FALIAS(setIdAttributeNS, dom_element_set_id_attribute_ns, arginfo_class_DOMElement_setIdAttributeNS)
-	PHP_FALIAS(setIdAttributeNode, dom_element_set_id_attribute_node, arginfo_class_DOMElement_setIdAttributeNode)
+	PHP_ME(domelement, getAttribute, arginfo_class_DOMElement_getAttribute, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, setAttribute, arginfo_class_DOMElement_setAttribute, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, removeAttribute, arginfo_class_DOMElement_removeAttribute, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, getAttributeNode, arginfo_class_DOMElement_getAttributeNode, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, setAttributeNode, arginfo_class_DOMElement_setAttributeNode, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, removeAttributeNode, arginfo_class_DOMElement_removeAttributeNode, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, getElementsByTagName, arginfo_class_DOMElement_getElementsByTagName, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, getAttributeNS, arginfo_class_DOMElement_getAttributeNS, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, setAttributeNS, arginfo_class_DOMElement_setAttributeNS, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, removeAttributeNS, arginfo_class_DOMElement_removeAttributeNS, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, getAttributeNodeNS, arginfo_class_DOMElement_getAttributeNodeNS, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, setAttributeNodeNS, arginfo_class_DOMElement_setAttributeNodeNS, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, getElementsByTagNameNS, arginfo_class_DOMElement_getElementsByTagNameNS, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, hasAttribute, arginfo_class_DOMElement_hasAttribute, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, hasAttributeNS, arginfo_class_DOMElement_hasAttributeNS, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, setIdAttribute, arginfo_class_DOMElement_setIdAttribute, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, setIdAttributeNS, arginfo_class_DOMElement_setIdAttributeNS, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, setIdAttributeNode, arginfo_class_DOMElement_setIdAttributeNode, ZEND_ACC_PUBLIC)
 	PHP_ME(domelement, __construct, arginfo_class_DOMElement___construct, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
@@ -222,7 +222,7 @@ static xmlNodePtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) /* {{{ 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-666EE0F9
 Since:
 */
-PHP_FUNCTION(dom_element_get_attribute)
+PHP_METHOD(domelement, getAttribute)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -266,7 +266,7 @@ PHP_FUNCTION(dom_element_get_attribute)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68F082
 Since:
 */
-PHP_FUNCTION(dom_element_set_attribute)
+PHP_METHOD(domelement, setAttribute)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -334,7 +334,7 @@ PHP_FUNCTION(dom_element_set_attribute)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6D6AC0F9
 Since:
 */
-PHP_FUNCTION(dom_element_remove_attribute)
+PHP_METHOD(domelement, removeAttribute)
 {
 	zval *id;
 	xmlNodePtr nodep, attrp;
@@ -383,7 +383,7 @@ PHP_FUNCTION(dom_element_remove_attribute)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-217A91B8
 Since:
 */
-PHP_FUNCTION(dom_element_get_attribute_node)
+PHP_METHOD(domelement, getAttributeNode)
 {
 	zval *id;
 	xmlNodePtr nodep, attrp;
@@ -431,7 +431,7 @@ PHP_FUNCTION(dom_element_get_attribute_node)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-887236154
 Since:
 */
-PHP_FUNCTION(dom_element_set_attribute_node)
+PHP_METHOD(domelement, setAttributeNode)
 {
 	zval *id, *node;
 	xmlNode *nodep;
@@ -498,7 +498,7 @@ PHP_FUNCTION(dom_element_set_attribute_node)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D589198
 Since:
 */
-PHP_FUNCTION(dom_element_remove_attribute_node)
+PHP_METHOD(domelement, removeAttributeNode)
 {
 	zval *id, *node;
 	xmlNode *nodep;
@@ -536,7 +536,7 @@ PHP_FUNCTION(dom_element_remove_attribute_node)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1938918D
 Since:
 */
-PHP_FUNCTION(dom_element_get_elements_by_tag_name)
+PHP_METHOD(domelement, getElementsByTagName)
 {
 	zval *id;
 	xmlNodePtr elemp;
@@ -563,7 +563,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElGetAttrNS
 Since: DOM Level 2
 */
-PHP_FUNCTION(dom_element_get_attribute_ns)
+PHP_METHOD(domelement, getAttributeNS)
 {
 	zval *id;
 	xmlNodePtr elemp;
@@ -644,7 +644,7 @@ static xmlNsPtr _dom_new_reconNs(xmlDocPtr doc, xmlNodePtr tree, xmlNsPtr ns) /*
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetAttrNS
 Since: DOM Level 2
 */
-PHP_FUNCTION(dom_element_set_attribute_ns)
+PHP_METHOD(domelement, setAttributeNS)
 {
 	zval *id;
 	xmlNodePtr elemp, nodep = NULL;
@@ -773,7 +773,7 @@ PHP_FUNCTION(dom_element_set_attribute_ns)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElRemAtNS
 Since: DOM Level 2
 */
-PHP_FUNCTION(dom_element_remove_attribute_ns)
+PHP_METHOD(domelement, removeAttributeNS)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -831,7 +831,7 @@ PHP_FUNCTION(dom_element_remove_attribute_ns)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElGetAtNodeNS
 Since: DOM Level 2
 */
-PHP_FUNCTION(dom_element_get_attribute_node_ns)
+PHP_METHOD(domelement, getAttributeNodeNS)
 {
 	zval *id;
 	xmlNodePtr elemp, fakeAttrp;
@@ -887,7 +887,7 @@ PHP_FUNCTION(dom_element_get_attribute_node_ns)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetAtNodeNS
 Since: DOM Level 2
 */
-PHP_FUNCTION(dom_element_set_attribute_node_ns)
+PHP_METHOD(domelement, setAttributeNodeNS)
 {
 	zval *id, *node;
 	xmlNode *nodep;
@@ -961,7 +961,7 @@ PHP_FUNCTION(dom_element_set_attribute_node_ns)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-A6C90942
 Since: DOM Level 2
 */
-PHP_FUNCTION(dom_element_get_elements_by_tag_name_ns)
+PHP_METHOD(domelement, getElementsByTagNameNS)
 {
 	zval *id;
 	xmlNodePtr elemp;
@@ -990,7 +990,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name_ns)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElHasAttr
 Since: DOM Level 2
 */
-PHP_FUNCTION(dom_element_has_attribute)
+PHP_METHOD(domelement, hasAttribute)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -1019,7 +1019,7 @@ PHP_FUNCTION(dom_element_has_attribute)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElHasAttrNS
 Since: DOM Level 2
 */
-PHP_FUNCTION(dom_element_has_attribute_ns)
+PHP_METHOD(domelement, hasAttributeNS)
 {
 	zval *id;
 	xmlNodePtr elemp;
@@ -1077,7 +1077,7 @@ static void php_set_attribute_id(xmlAttrPtr attrp, zend_bool is_id) /* {{{ */
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttr
 Since: DOM Level 3
 */
-PHP_FUNCTION(dom_element_set_id_attribute)
+PHP_METHOD(domelement, setIdAttribute)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -1114,7 +1114,7 @@ PHP_FUNCTION(dom_element_set_id_attribute)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttrNS
 Since: DOM Level 3
 */
-PHP_FUNCTION(dom_element_set_id_attribute_ns)
+PHP_METHOD(domelement, setIdAttributeNS)
 {
 	zval *id;
 	xmlNodePtr elemp;
@@ -1151,7 +1151,7 @@ PHP_FUNCTION(dom_element_set_id_attribute_ns)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttrNode
 Since: DOM Level 3
 */
-PHP_FUNCTION(dom_element_set_id_attribute_node)
+PHP_METHOD(domelement, setIdAttributeNode)
 {
 	zval *id, *node;
 	xmlNode *nodep;
