@@ -1,5 +1,5 @@
 --TEST--
-DOMParentNode::append() with DOMNode from wrong document throws exception
+DOMChildNode::after(), before, replaceWith with DOMNode from wrong document throws exception
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
@@ -15,18 +15,26 @@ $dom2->loadXML('<test><foo /></test>');
 $element = $dom1->documentElement;
 
 try {
-    $element->append($dom2->documentElement->firstChild);
+    $element->after($dom2->documentElement->firstChild);
     echo "FAIL";
 } catch (DOMException $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
-    $element->prepend($dom2->documentElement->firstChild);
+    $element->before($dom2->documentElement->firstChild);
+    echo "FAIL";
+} catch (DOMException $e) {
+    echo $e->getMessage() . "\n";
+}
+
+try {
+    $element->replaceWith($dom2->documentElement->firstChild);
     echo "FAIL";
 } catch (DOMException $e) {
     echo $e->getMessage();
 }
 --EXPECT--
+Wrong Document Error
 Wrong Document Error
 Wrong Document Error
