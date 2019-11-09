@@ -29,7 +29,6 @@ echo "\n-- Past end of the array --\n";
 next($array);
 var_dump(key($array));
 ?>
-===DONE===
 --EXPECT--
 *** Testing key() : basic functionality ***
 
@@ -44,4 +43,3 @@ string(5) "three"
 
 -- Past end of the array --
 NULL
-===DONE===

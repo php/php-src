@@ -25,9 +25,7 @@ $tz = date_timezone_get($datetime);
 echo "New timezone: " . timezone_name_get($tz) . "\n";
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing date_timezone_set() : basic functionality ***
 Default timezone: Europe/London
 New timezone: America/Los_Angeles
-===DONE===

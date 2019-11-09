@@ -13,7 +13,6 @@ echo "*** Testing hash_algos() : basic functionality ***\n";
 var_dump(hash_algos());
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing hash_algos() : basic functionality ***
 array(53) {
@@ -124,4 +123,3 @@ array(53) {
   [%d]=>
   string(10) "haval256,5"
 }
-===Done===

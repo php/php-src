@@ -20,7 +20,7 @@ $return_value = disk_free_space($file_path);
 var_dump( is_float($return_value) );
 
 echo "\n*** Testing with different directory combinations ***";
-$dir = "/disk_free_space";
+$dir = "/disk_free_space_variation";
 mkdir($file_path.$dir);
 
 $dirs_arr = array(
@@ -66,7 +66,7 @@ echo"\n--- Done ---";
 --CLEAN--
 <?php
 $file_path = __DIR__;
-rmdir($file_path."/disk_free_space");
+rmdir($file_path."/disk_free_space_variation");
 ?>
 --EXPECTF--
 *** Testing with a directory ***

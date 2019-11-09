@@ -23,7 +23,7 @@ else
 	MAKE_QUIET=""
 fi
 
-MAKE_JOBS=${MAKE_JOBS:-2}
+MAKE_JOBS=${MAKE_JOBS:-$(nproc)}
 
 ./buildconf --force
 ./configure \
@@ -77,8 +77,7 @@ $TS \
 --with-ffi \
 --enable-zend-test=shared \
 --enable-werror \
---with-pear \
-> "$CONFIG_LOG_FILE"
+--with-pear
 
-make "-j${MAKE_JOBS}" $MAKE_QUIET > "$MAKE_LOG_FILE"
-make install >> "$MAKE_LOG_FILE"
+make "-j${MAKE_JOBS}" $MAKE_QUIET
+make install

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -630,7 +628,7 @@ static ssize_t php_userstreamop_write(php_stream *stream, const char *buf, size_
 	}
 
 	/* don't allow strange buffer overruns due to bogus return */
-	if (didwrite > count) {
+	if (didwrite > 0 && didwrite > count) {
 		php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_WRITE " wrote " ZEND_LONG_FMT " bytes more data than requested (" ZEND_LONG_FMT " written, " ZEND_LONG_FMT " max)",
 				us->wrapper->classname,
 				(zend_long)(didwrite - count), (zend_long)didwrite, (zend_long)count);
@@ -671,26 +669,28 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 		return -1;
 	}
 
-	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
-		if (Z_TYPE(retval) == IS_FALSE) {
-			return -1;
-		}
+	if (call_result == FAILURE) {
+		php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_READ " is not implemented!",
+				us->wrapper->classname);
+		return -1;
+	}
 
-		if (!try_convert_to_string(&retval)) {
-			return -1;
-		}
+	if (Z_TYPE(retval) == IS_FALSE) {
+		return -1;
+	}
 
-		didread = Z_STRLEN(retval);
+	if (!try_convert_to_string(&retval)) {
+		return -1;
+	}
+
+	didread = Z_STRLEN(retval);
+	if (didread > 0) {
 		if (didread > count) {
 			php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_READ " - read " ZEND_LONG_FMT " bytes more data than requested (" ZEND_LONG_FMT " read, " ZEND_LONG_FMT " max) - excess data will be lost",
 					us->wrapper->classname, (zend_long)(didread - count), (zend_long)didread, (zend_long)count);
 			didread = count;
 		}
-		if (didread > 0)
-			memcpy(buf, Z_STRVAL(retval), didread);
-	} else if (call_result == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "%s::" USERSTREAM_READ " is not implemented!",
-				us->wrapper->classname);
+		memcpy(buf, Z_STRVAL(retval), didread);
 	}
 
 	zval_ptr_dtor(&retval);
@@ -699,12 +699,17 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 	/* since the user stream has no way of setting the eof flag directly, we need to ask it if we hit eof */
 
 	ZVAL_STRINGL(&func_name, USERSTREAM_EOF, sizeof(USERSTREAM_EOF)-1);
-
 	call_result = call_user_function(NULL,
 			Z_ISUNDEF(us->object)? NULL : &us->object,
 			&func_name,
 			&retval,
 			0, NULL);
+	zval_ptr_dtor(&func_name);
+
+	if (EG(exception)) {
+		stream->eof = 1;
+		return -1;
+	}
 
 	if (call_result == SUCCESS && Z_TYPE(retval) != IS_UNDEF && zval_is_true(&retval)) {
 		stream->eof = 1;
@@ -717,7 +722,6 @@ static ssize_t php_userstreamop_read(php_stream *stream, char *buf, size_t count
 	}
 
 	zval_ptr_dtor(&retval);
-	zval_ptr_dtor(&func_name);
 
 	return didread;
 }

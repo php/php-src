@@ -35,7 +35,6 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -48,4 +47,3 @@ hio
 test
 alias "test" is already used for archive "%sphar_setalias2.phar.php" and cannot be used for other archives
 alias "test" is already used for archive "%sphar_setalias2.phar.php" cannot be overloaded with "%snope.phar"
-===DONE===

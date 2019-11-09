@@ -30,7 +30,6 @@ foreach ($controls as $control)
 
 var_dump(ldap_set_option($link, 999999, 999999));
 ?>
-===DONE===
 --EXPECTF--
 bool(false)
 
@@ -43,4 +42,3 @@ bool(false)
 Warning: ldap_set_option(): Expected array value for this option in %s on line %d
 bool(false)
 bool(false)
-===DONE===

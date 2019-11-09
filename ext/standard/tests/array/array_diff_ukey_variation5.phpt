@@ -32,7 +32,6 @@ echo "\n-- Testing array_diff_ukey() function with multi dimensional array --\n"
 var_dump( array_diff_ukey($array1, $array2, 'strcasecmp') );
 var_dump( array_diff_ukey($array2, $array1, 'strcasecmp') );
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_ukey() : usage variation ***
 
@@ -51,4 +50,3 @@ array(1) {
     string(3) "two"
   }
 }
-===DONE===

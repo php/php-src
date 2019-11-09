@@ -22,7 +22,6 @@ var_dump( getdate($timestamp) );
 var_dump( getdate() );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing getdate() : basic functionality ***
 array(11) {
@@ -73,4 +72,3 @@ array(11) {
   [0]=>
   int(%d)
 }
-===DONE===

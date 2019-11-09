@@ -139,7 +139,7 @@ void zend_dump_var(const zend_op_array *op_array, zend_uchar var_type, int var_n
 		fprintf(stderr, "CV%d($%s)", var_num, op_array->vars[var_num]->val);
 	} else if (var_type == IS_VAR) {
 		fprintf(stderr, "V%d", var_num);
-	} else if (var_type == IS_TMP_VAR) {
+	} else if ((var_type & (IS_VAR|IS_TMP_VAR)) == IS_TMP_VAR) {
 		fprintf(stderr, "T%d", var_num);
 	} else {
 		fprintf(stderr, "X%d", var_num);
@@ -310,10 +310,6 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 			if (first) first = 0; else fprintf(stderr, ", ");
 			fprintf(stderr, "resource");
 		}
-	}
-	if (info & MAY_BE_ERROR) {
-		if (first) first = 0; else fprintf(stderr, ", ");
-		fprintf(stderr, "error");
 	}
 //TODO: this is useful only for JIT???
 	if (info & MAY_BE_IN_REG) {
@@ -578,20 +574,18 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				fprintf(stderr, " (ref)");
 			}
 		}
-		if ((ZEND_VM_EXT_DIM_OBJ_WRITE|ZEND_VM_EXT_FETCH_REF) & flags) {
+		if ((ZEND_VM_EXT_DIM_WRITE|ZEND_VM_EXT_FETCH_REF) & flags) {
 			uint32_t obj_flags = opline->extended_value & ZEND_FETCH_OBJ_FLAGS;
 			if (obj_flags == ZEND_FETCH_REF) {
 				fprintf(stderr, " (ref)");
 			} else if (obj_flags == ZEND_FETCH_DIM_WRITE) {
 				fprintf(stderr, " (dim write)");
-			} else if (obj_flags == ZEND_FETCH_OBJ_WRITE) {
-				fprintf(stderr, " (obj write)");
 			}
 		}
 	}
 
 	if (opline->op1_type == IS_CONST) {
-		zend_dump_const(CRT_CONSTANT_EX(op_array, opline, opline->op1, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
+		zend_dump_const(CRT_CONSTANT(opline->op1));
 	} else if (opline->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 		if (ssa && ssa->ops) {
 			int ssa_var_num = ssa->ops[opline - op_array->opcodes].op1_use;
@@ -627,7 +621,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	}
 
 	if (opline->op2_type == IS_CONST) {
-		zval *op = CRT_CONSTANT_EX(op_array, opline, opline->op2, (dump_flags & ZEND_DUMP_RT_CONSTANTS));
+		zval *op = CRT_CONSTANT(opline->op2);
 		if (opline->opcode == ZEND_SWITCH_LONG || opline->opcode == ZEND_SWITCH_STRING) {
 			HashTable *jumptable = Z_ARRVAL_P(op);
 			zend_string *key;
@@ -693,7 +687,13 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 		}
 	}
 	if (opline->result_type == IS_CONST) {
-		zend_dump_const(CRT_CONSTANT_EX(op_array, opline, opline->result, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
+		zend_dump_const(CRT_CONSTANT(opline->result));
+#if 0
+	} else if (opline->result_type & IS_SMART_BRANCH_JMPZ) {
+		fprintf(stderr, " jmpz");
+	} else if (opline->result_type & IS_SMART_BRANCH_JMPNZ) {
+		fprintf(stderr, " jmpnz");
+#endif
 	} else if (ssa && ssa->ops && ssa->ops[opline - op_array->opcodes].result_use >= 0) {
 		if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 			if (ssa && ssa->ops) {

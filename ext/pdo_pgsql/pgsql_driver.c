@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -922,6 +920,8 @@ static PHP_METHOD(PDO, pgsqlLOBCreate)
 	pdo_pgsql_db_handle *H;
 	Oid lfd;
 
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;
 	PDO_DBH_CLEAR_ERR();
@@ -958,7 +958,7 @@ static PHP_METHOD(PDO, pgsqlLOBOpen)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s",
 				&oidstr, &oidstrlen, &modestr, &modestrlen)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	oid = (Oid)strtoul(oidstr, &end_ptr, 10);
@@ -1005,7 +1005,7 @@ static PHP_METHOD(PDO, pgsqlLOBUnlink)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 				&oidstr, &oidlen)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	oid = (Oid)strtoul(oidstr, &end_ptr, 10);
@@ -1041,7 +1041,7 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|ll",
 				&result_type, &ms_timeout)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
@@ -1108,6 +1108,8 @@ static PHP_METHOD(PDO, pgsqlGetPid)
 {
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
+
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
 	PDO_CONSTRUCT_CHECK;

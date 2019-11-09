@@ -20,10 +20,8 @@ $res = $db->query("SELECT a FROM test");
 var_dump($res->fetchAll(PDO::FETCH_FUNC, function($a) { return strtoupper($a); }));
 
 ?>
-===DONE===
 --EXPECT--
 array(1) {
   [0]=>
   string(3) "XYZ"
 }
-===DONE===

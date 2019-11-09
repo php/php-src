@@ -10,10 +10,8 @@ $rf = new ReflectionFunction('random_int');
 var_dump($rf->getNumberOfParameters());
 var_dump($rf->getNumberOfRequiredParameters());
 ?>
-===DONE===
 --EXPECT--
 int(1)
 int(1)
 int(2)
 int(2)
-===DONE===

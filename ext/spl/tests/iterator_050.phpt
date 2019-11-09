@@ -25,8 +25,6 @@ $it->show();
 var_dump($ar);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 int(1)
 array(3) {
@@ -91,4 +89,3 @@ object(ArrayIterator)#%d (1) {
     %s(2) ",,"
   }
 }
-===DONE===

@@ -24,5 +24,5 @@ var_dump(test2());
 --EXPECTF--
 string(4) "test"
 
-Notice: Array to string conversion in %sbug71300.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(9) "Arraytest"

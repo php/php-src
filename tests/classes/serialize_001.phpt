@@ -45,8 +45,6 @@ foreach($tests as $data)
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ==========
 string(6) "String"
@@ -76,4 +74,3 @@ bool(false)
 Test::__construct()
 Test::serialize()
 Exception: Test::serialize() must return a string or NULL
-===DONE===

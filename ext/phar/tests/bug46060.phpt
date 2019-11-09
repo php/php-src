@@ -19,7 +19,6 @@ $phar = new PharData($fname2);
 
 var_dump($phar['blah']->isDir(), $phar['test']->isDir());
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
@@ -29,4 +28,3 @@ __HALT_COMPILER();
 --EXPECT--
 bool(true)
 bool(false)
-===DONE===

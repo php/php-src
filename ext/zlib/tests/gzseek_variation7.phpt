@@ -32,7 +32,6 @@ gzclose($h);
 echo "\n";
 unlink($f);
 ?>
-===DONE===
 --EXPECTF--
 tell=int(23)
 move to the end of the file
@@ -44,4 +43,3 @@ tell=int(47)
 
 reading the output file
 This is the first line.This is the second line.
-===DONE===

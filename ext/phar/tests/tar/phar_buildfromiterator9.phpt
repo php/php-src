@@ -45,7 +45,6 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/buildfromiterator.phar.tar');
@@ -62,4 +61,3 @@ array(1) {
   ["a"]=>
   string(%d) "[stream]"
 }
-===DONE===

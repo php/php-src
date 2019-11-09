@@ -22,7 +22,7 @@ function gmp_intval($gmpnumber): int {}
  * @param GMP|int|bool|string $gmpnumber
  * @return GMP|false
  */
-function gmp_strval($gmpnumber, int $base) {}
+function gmp_strval($gmpnumber, int $base = 10) {}
 
     /**
  * @param GMP|int|bool|string $a

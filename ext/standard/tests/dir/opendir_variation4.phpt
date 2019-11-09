@@ -70,7 +70,6 @@ function clean_dh($dh){
 	unset($dh);
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 $base_dir_path = __DIR__ . '/opendir_variation4';
@@ -106,4 +105,3 @@ resource(%d) of type (stream)
 -- $path = '../../'level_one': --
 bool(true)
 resource(%d) of type (stream)
-===DONE===

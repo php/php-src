@@ -148,7 +148,6 @@ if($c === 0) {
 	echo "Failed: $f\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 $fl = __DIR__ . DIRECTORY_SEPARATOR . 'compare_binary_operands_temp.php';
@@ -156,4 +155,3 @@ $fl = __DIR__ . DIRECTORY_SEPARATOR . 'compare_binary_operands_temp.php';
 ?>
 --EXPECT--
 Failed: 0
-===DONE===

@@ -24,8 +24,10 @@ var_dump(substr_count($a, "bca"));
 $a = str_repeat("abcacbabca", 100);
 var_dump(substr_count($a, "bca"));
 var_dump(substr_count($a, "bca", 200));
+var_dump(substr_count($a, "bca", 200, null));
 var_dump(substr_count($a, "bca", 200, 50));
 var_dump(substr_count($a, "bca", -200));
+var_dump(substr_count($a, "bca", -200, null));
 var_dump(substr_count($a, "bca", -200, 50));
 var_dump(substr_count($a, "bca", -200, -50));
 
@@ -42,7 +44,9 @@ int(0)
 int(100)
 int(200)
 int(160)
+int(160)
 int(10)
+int(40)
 int(40)
 int(10)
 int(30)

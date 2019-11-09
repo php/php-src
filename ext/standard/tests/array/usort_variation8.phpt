@@ -31,7 +31,6 @@ var_dump( usort($temp_array2, 'strcmp') );
 var_dump($temp_array2);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing usort() : usage variation ***
 
@@ -64,4 +63,3 @@ array(5) {
   [4]=>
   string(6) "orange"
 }
-===DONE===

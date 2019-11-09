@@ -48,7 +48,6 @@ print_r(file_get_contents($data_file));
 
 unlink($data_file);
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf) : basic functionality - using hexadecimal format ***
 b
@@ -57,4 +56,3 @@ b 84
 B 84
 b 84 b1
 B 84 B1
-===DONE===

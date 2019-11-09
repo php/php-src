@@ -32,11 +32,9 @@ while ($reader->read()) {
 // clean up
 $reader->close();
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__.'/015-move-errors.xml');
 ?>
 --EXPECTF--
 Warning: XMLReader::moveToAttributeNs(): Attribute Name and Namespace URI cannot be empty in %s on line %d
-===DONE===

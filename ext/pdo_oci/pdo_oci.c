@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -94,6 +92,7 @@ PHP_MINIT_FUNCTION(pdo_oci)
 	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_CLIENT_INFO", (zend_long)PDO_OCI_ATTR_CLIENT_INFO);
 	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_CLIENT_IDENTIFIER", (zend_long)PDO_OCI_ATTR_CLIENT_IDENTIFIER);
 	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_MODULE", (zend_long)PDO_OCI_ATTR_MODULE);
+	REGISTER_PDO_CLASS_CONST_LONG("OCI_ATTR_CALL_TIMEOUT", (zend_long)PDO_OCI_ATTR_CALL_TIMEOUT);
 
 	php_pdo_register_driver(&pdo_oci_driver);
 

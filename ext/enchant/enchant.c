@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
@@ -450,7 +448,7 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 /* }}} */
 #endif
 
-/* {{{ proto string enchant_broker_list_dicts(resource broker)
+/* {{{ proto array enchant_broker_list_dicts(resource broker)
    Lists the dictionaries available for the given broker */
 PHP_FUNCTION(enchant_broker_list_dicts)
 {

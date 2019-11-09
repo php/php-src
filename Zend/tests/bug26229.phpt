@@ -23,7 +23,5 @@ catch(Exception $e)
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 Objects returned by array_iterator::getIterator() must be traversable or implement interface Iterator
-===DONE===

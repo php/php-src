@@ -41,7 +41,6 @@ foreach($inputs as $key =>$value) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing strftime() : usage variation ***
 
@@ -56,4 +55,3 @@ string(8) "08/08/08"
 --Preferred time representation--
 string(2) "%X"
 string(8) "08:08:08"
-===DONE===

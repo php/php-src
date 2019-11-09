@@ -30,7 +30,6 @@ var_dump($result);
 $result = ldap_search(array($link, $link), $dn, array($filter), array('top'));
 var_dump($result);
 ?>
-===DONE===
 --EXPECTF--
 Warning: ldap_search(): Search: No such object in %s on line %d
 bool(false)
@@ -46,4 +45,3 @@ bool(false)
 
 Warning: ldap_search(): Filter must either be a string, or an array with the same number of elements as the links array in %s on line %d
 bool(false)
-===DONE===

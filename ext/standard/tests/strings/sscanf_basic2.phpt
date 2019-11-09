@@ -27,7 +27,6 @@ $res = sscanf($str, $format, $part, $number, $stock);
 var_dump($res, $part, $number, $stock);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing sscanf() : basic functionality - using integer format ***
 
@@ -41,4 +40,3 @@ int(3)
 string(6) "Widget"
 int(1234789)
 int(25)
-===DONE===

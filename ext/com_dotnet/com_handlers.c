@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -124,6 +122,11 @@ static void com_write_dimension(zend_object *object, zval *offset, zval *value)
 
 	obj = (php_com_dotnet_object*) object;
 
+	if (offset == NULL) {
+		php_com_throw_exception(DISP_E_BADINDEX, "appending to variants is not supported");
+		return;
+	}
+
 	if (V_VT(&obj->v) == VT_DISPATCH) {
 		ZVAL_COPY_VALUE(&args[0], offset);
 		ZVAL_COPY_VALUE(&args[1], value);
@@ -172,6 +175,11 @@ static void com_write_dimension(zend_object *object, zval *offset, zval *value)
 	} else {
 		php_com_throw_exception(E_INVALIDARG, "this variant is not an array type");
 	}
+}
+
+static zval *com_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot)
+{
+	return NULL;
 }
 
 static int com_property_exists(zend_object *object, zend_string *member, int check_empty, void **cache_slot)
@@ -319,10 +327,8 @@ static zend_function *com_method_get(zend_object **object_ptr, zend_string *name
 							f.arg_info = ecalloc(bindptr.lpfuncdesc->cParams, sizeof(zend_arg_info));
 
 							for (i = 0; i < bindptr.lpfuncdesc->cParams; i++) {
-								f.arg_info[i].type = ZEND_TYPE_ENCODE(0,1);
-								if (bindptr.lpfuncdesc->lprgelemdescParam[i].paramdesc.wParamFlags & PARAMFLAG_FOUT) {
-									f.arg_info[i].pass_by_reference = ZEND_SEND_BY_REF;
-								}
+								zend_bool by_ref = (bindptr.lpfuncdesc->lprgelemdescParam[i].paramdesc.wParamFlags & PARAMFLAG_FOUT) != 0;
+								f.arg_info[i].type = (zend_type) ZEND_TYPE_INIT_NONE(_ZEND_ARG_INFO_FLAGS(by_ref, 0));
 							}
 
 							f.num_args = bindptr.lpfuncdesc->cParams;
@@ -423,6 +429,8 @@ static int com_objects_compare(zval *object1, zval *object2)
 	 * and my VC6 won't link unless the code uses the version with 4 parameters.
 	 * So, we have this declaration here to fix it */
 	STDAPI VarCmp(LPVARIANT pvarLeft, LPVARIANT pvarRight, LCID lcid, DWORD flags);
+
+	ZEND_COMPARE_OBJECTS_FALLBACK(object1, object2);
 
 	obja = CDNO_FETCH(object1);
 	objb = CDNO_FETCH(object2);
@@ -531,7 +539,7 @@ zend_object_handlers php_com_object_handlers = {
 	com_property_write,
 	com_read_dimension,
 	com_write_dimension,
-	NULL,
+	com_get_property_ptr_ptr,
 	com_property_exists,
 	com_property_delete,
 	com_dimension_exists,
@@ -540,12 +548,14 @@ zend_object_handlers php_com_object_handlers = {
 	com_method_get,
 	com_constructor_get,
 	com_class_name_get,
-	com_objects_compare,
 	com_object_cast,
 	com_object_count,
 	NULL,									/* get_debug_info */
 	NULL,									/* get_closure */
 	zend_std_get_gc,						/* get_gc */
+	NULL,									/* do_operation */
+	com_objects_compare,					/* compare */
+	NULL,									/* get_properties_for */
 };
 
 void php_com_object_enable_event_sink(php_com_dotnet_object *obj, int enable)

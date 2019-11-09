@@ -55,9 +55,12 @@ IC_METHOD(chr) {
 	char buffer[5];
 	int buffer_len = 0;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) ||
-	    (convert_cp(&cp, zcp) == FAILURE)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) {
 		return;
+	}
+
+	if (convert_cp(&cp, zcp) == FAILURE) {
+		RETURN_NULL();
 	}
 
 	/* We can use unsafe because we know the codepoint is in valid range
@@ -80,9 +83,12 @@ IC_METHOD(ord) {
 	UChar32 cp;
 	zval *zcp;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) ||
-	    (convert_cp(&cp, zcp) == FAILURE)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) {
 		return;
+	}
+
+	if (convert_cp(&cp, zcp) == FAILURE) {
+		RETURN_NULL();
 	}
 
 	RETURN_LONG(cp);
@@ -99,9 +105,12 @@ IC_METHOD(hasBinaryProperty) {
 	zend_long prop;
 	zval *zcp;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &zcp, &prop) == FAILURE) ||
-	    (convert_cp(&cp, zcp) == FAILURE)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &zcp, &prop) == FAILURE) {
 		return;
+	}
+
+	if (convert_cp(&cp, zcp) == FAILURE) {
+		RETURN_NULL();
 	}
 
 	RETURN_BOOL(u_hasBinaryProperty(cp, (UProperty)prop));
@@ -118,9 +127,12 @@ IC_METHOD(getIntPropertyValue) {
 	zend_long prop;
 	zval *zcp;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &zcp, &prop) == FAILURE) ||
-	    (convert_cp(&cp, zcp) == FAILURE)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &zcp, &prop) == FAILURE) {
 		return;
+	}
+
+	if (convert_cp(&cp, zcp) == FAILURE) {
+		RETURN_NULL();
 	}
 
 	RETURN_LONG(u_getIntPropertyValue(cp, (UProperty)prop));
@@ -165,9 +177,12 @@ IC_METHOD(getNumericValue) {
 	UChar32 cp;
 	zval *zcp;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) ||
-	    (convert_cp(&cp, zcp) == FAILURE)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) {
 		return;
+	}
+
+	if (convert_cp(&cp, zcp) == FAILURE) {
+		RETURN_NULL();
 	}
 
 	RETURN_DOUBLE(u_getNumericValue(cp));
@@ -227,9 +242,12 @@ IC_METHOD(getBlockCode) {
 	UChar32 cp;
 	zval *zcp;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) ||
-	    (convert_cp(&cp, zcp) == FAILURE)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) {
 		return;
+	}
+
+	if (convert_cp(&cp, zcp) == FAILURE) {
+		RETURN_NULL();
 	}
 
 	RETURN_LONG(ublock_getCode(cp));
@@ -249,8 +267,11 @@ IC_METHOD(charName) {
 	zend_string *buffer = NULL;
 	int32_t buffer_len;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &zcp, &nameChoice) == FAILURE) ||
-	    (convert_cp(&cp, zcp) == FAILURE)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &zcp, &nameChoice) == FAILURE) {
+		return;
+	}
+
+	if (convert_cp(&cp, zcp) == FAILURE) {
 		RETURN_NULL();
 	}
 
@@ -279,7 +300,7 @@ IC_METHOD(charFromName) {
 	UErrorCode error = U_ZERO_ERROR;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &name, &name_len, &nameChoice) == FAILURE) {
-		RETURN_NULL();
+		return;
 	}
 
 	ret = u_charFromName((UCharNameChoice)nameChoice, name, &error);
@@ -332,10 +353,12 @@ IC_METHOD(enumCharNames) {
 	zend_long nameChoice = U_UNICODE_CHAR_NAME;
 	UErrorCode error = U_ZERO_ERROR;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "zzf|l", &zstart, &zlimit, &context.fci, &context.fci_cache, &nameChoice) == FAILURE) ||
-	    (convert_cp(&start, zstart) == FAILURE) ||
-	    (convert_cp(&limit, zlimit) == FAILURE)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzf|l", &zstart, &zlimit, &context.fci, &context.fci_cache, &nameChoice) == FAILURE) {
 		return;
+	}
+
+	if (convert_cp(&start, zstart) == FAILURE || convert_cp(&limit, zlimit) == FAILURE) {
+		RETURN_NULL();
 	}
 
 	u_enumCharNames(start, limit, (UEnumCharNamesFn*)enumCharNames_callback, &context, nameChoice, &error);
@@ -437,9 +460,12 @@ IC_METHOD(foldCase) {
 	zval *zcp;
 	zend_long options = U_FOLD_CASE_DEFAULT;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &zcp, &options) == FAILURE) ||
-	    (convert_cp(&cp, zcp) == FAILURE)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &zcp, &options) == FAILURE) {
 		return;
+	}
+
+	if (convert_cp(&cp, zcp) == FAILURE) {
+		RETURN_NULL();
 	}
 
 	ret = u_foldCase(cp, options);
@@ -466,9 +492,12 @@ IC_METHOD(digit) {
 	zend_long radix = 10;
 	int ret;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &zcp, &radix) == FAILURE) ||
-	    (convert_cp(&cp, zcp) == FAILURE)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &zcp, &radix) == FAILURE) {
 		return;
+	}
+
+	if (convert_cp(&cp, zcp) == FAILURE) {
+		RETURN_NULL();
 	}
 
 	ret = u_digit(cp, radix);
@@ -507,9 +536,12 @@ IC_METHOD(charAge) {
 	UVersionInfo version;
 	int i;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) ||
-	    (convert_cp(&cp, zcp) == FAILURE)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) {
 		return;
+	}
+
+	if (convert_cp(&cp, zcp) == FAILURE) {
+		RETURN_NULL();
 	}
 
 	u_charAge(cp, version);
@@ -527,6 +559,9 @@ IC_METHOD(getUnicodeVersion) {
 	UVersionInfo version;
 	int i;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 
 	u_getUnicodeVersion(version);
 	array_init(return_value);
@@ -548,9 +583,12 @@ IC_METHOD(getFC_NFKC_Closure) {
 	int32_t closure_len;
 	UErrorCode error = U_ZERO_ERROR;
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) ||
-	    (convert_cp(&cp, zcp) == FAILURE)) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) {
 		return;
+	}
+
+	if (convert_cp(&cp, zcp) == FAILURE) {
+		RETURN_NULL();
 	}
 
 	closure_len = u_getFC_NFKC_Closure(cp, NULL, 0, &error);

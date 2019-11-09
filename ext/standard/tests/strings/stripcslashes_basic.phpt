@@ -22,7 +22,6 @@ var_dump(bin2hex(stripcslashes('\\f')));
 var_dump(bin2hex(stripcslashes('\\t')));
 var_dump(bin2hex(stripcslashes('\\v')));
 ?>
-===DONE===
 --EXPECT--
 *** Testing stripcslashes() : basic functionality ***
 string(11) "Hello World"
@@ -36,4 +35,3 @@ string(2) "08"
 string(2) "0c"
 string(2) "09"
 string(2) "0b"
-===DONE===

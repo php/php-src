@@ -20,7 +20,6 @@ $extra_arg = 10;
 var_dump( imap_alerts($extra_arg) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing imap_alerts() : error conditions ***
 
@@ -28,4 +27,3 @@ var_dump( imap_alerts($extra_arg) );
 
 Warning: imap_alerts() expects exactly 0 parameters, 1 given in %s on line %d
 NULL
-===DONE===

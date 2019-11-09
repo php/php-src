@@ -45,7 +45,6 @@ foreach ($otherVals as $otherVal) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 --- testing: 9223372036854775807 % 0 ---
 Exception: Modulo by zero
@@ -587,4 +586,3 @@ int(9223372036854775807)
 int(0)
 --- testing: 9223372036854775807 % -9.2233720368548E+18 ---
 int(9223372036854775807)
-===DONE===

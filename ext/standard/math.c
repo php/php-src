@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -283,7 +281,7 @@ static double php_expm1(double x)
 }
 /* }}}*/
 
-/* {{{ proto int|float abs(int number)
+/* {{{ proto int|float abs(int|float number)
    Return the absolute value of the number */
 PHP_FUNCTION(abs)
 {
@@ -347,7 +345,7 @@ PHP_FUNCTION(floor)
 }
 /* }}} */
 
-/* {{{ proto float|false round(float number [, int precision [, int mode]])
+/* {{{ proto float round(float number [, int precision [, int mode]])
    Returns the number rounded to specified precision */
 PHP_FUNCTION(round)
 {
@@ -358,7 +356,7 @@ PHP_FUNCTION(round)
 	double return_val;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_ZVAL(value)
+		Z_PARAM_NUMBER(value)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(precision)
 		Z_PARAM_LONG(mode)
@@ -375,7 +373,6 @@ PHP_FUNCTION(round)
 		places = precision;
 #endif
 	}
-	convert_scalar_to_number_ex(value);
 
 	switch (Z_TYPE_P(value)) {
 		case IS_LONG:
@@ -391,9 +388,7 @@ PHP_FUNCTION(round)
 			RETURN_DOUBLE(return_val);
 			break;
 
-		default:
-			RETURN_FALSE;
-			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
 /* }}} */
@@ -572,6 +567,10 @@ PHP_FUNCTION(atanh)
    Returns an approximation of pi */
 PHP_FUNCTION(pi)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETURN_DOUBLE(M_PI);
 }
 /* }}} */
@@ -647,7 +646,7 @@ PHP_FUNCTION(exp)
 /* {{{ proto float expm1(float number)
    Returns exp(number) - 1, computed in a way that accurate even when the value of number is close to zero */
 /*
-   WARNING: this function is expermental: it could change its name or
+   WARNING: this function is experimental: it could change its name or
    disappear in the next version of PHP!
 */
 PHP_FUNCTION(expm1)
@@ -665,7 +664,7 @@ PHP_FUNCTION(expm1)
 /* {{{ proto float log1p(float number)
    Returns log(1 + number), computed in a way that accurate even when the value of number is close to zero */
 /*
-   WARNING: this function is expermental: it could change its name or
+   WARNING: this function is experimental: it could change its name or
    disappear in the next version of PHP!
 */
 PHP_FUNCTION(log1p)
@@ -1099,12 +1098,12 @@ PHP_FUNCTION(base_convert)
 	}
 
 	if (frombase < 2 || frombase > 36) {
-		php_error_docref(NULL, E_WARNING, "Invalid `from base' (" ZEND_LONG_FMT ")", frombase);
-		RETURN_FALSE;
+		zend_value_error("Invalid `from base' (" ZEND_LONG_FMT ")", frombase);
+		return;
 	}
 	if (tobase < 2 || tobase > 36) {
-		php_error_docref(NULL, E_WARNING, "Invalid `to base' (" ZEND_LONG_FMT ")", tobase);
-		RETURN_FALSE;
+		zend_value_error("Invalid `to base' (" ZEND_LONG_FMT ")", tobase);
+		return;
 	}
 
 	_php_math_basetozval(Z_STR_P(number), (int)frombase, &temp);
@@ -1252,8 +1251,8 @@ PHP_FUNCTION(number_format)
 		Z_PARAM_DOUBLE(num)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(dec)
-		Z_PARAM_STRING_EX(dec_point, dec_point_len, 1, 0)
-		Z_PARAM_STRING_EX(thousand_sep, thousand_sep_len, 1, 0)
+		Z_PARAM_STRING_OR_NULL(dec_point, dec_point_len)
+		Z_PARAM_STRING_OR_NULL(thousand_sep, thousand_sep_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	switch(ZEND_NUM_ARGS()) {
@@ -1295,6 +1294,25 @@ PHP_FUNCTION(fmod)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_DOUBLE(fmod(num1, num2));
+}
+/* }}} */
+
+/* {{{ proto float fdiv(float dividend, float divisor)
+   Perform floating-point division of dividend / divisor
+   with IEEE-754 semantics for division by zero. */
+#ifdef __clang__
+__attribute__((no_sanitize("float-divide-by-zero")))
+#endif
+PHP_FUNCTION(fdiv)
+{
+	double dividend, divisor;
+
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_DOUBLE(dividend)
+		Z_PARAM_DOUBLE(divisor)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_DOUBLE(dividend / divisor);
 }
 /* }}} */
 

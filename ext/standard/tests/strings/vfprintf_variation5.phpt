@@ -62,7 +62,6 @@ echo "\n";
 unlink($data_file);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : int formats with float values ***
 
@@ -82,4 +81,3 @@ unlink($data_file);
 %-5678.567800 f
 -- Iteration 8 --
 1.110000 2.220000 3.330000 4.440000
-===DONE===

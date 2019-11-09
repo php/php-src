@@ -15,11 +15,9 @@ spl_autoload_register(function ($class_name) {
 var_dump(get_class_methods('autoload_root'));
 
 ?>
-===DONE===
 --EXPECT--
 autoload(autoload_root)
 array(1) {
   [0]=>
   string(12) "testFunction"
 }
-===DONE===

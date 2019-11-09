@@ -19,6 +19,7 @@
 #include "zlog.h"
 
 static int sp[2];
+static sigset_t block_sigset;
 
 const char *fpm_signal_names[NSIG + 1] = {
 #ifdef SIGHUP
@@ -210,6 +211,11 @@ int fpm_signals_init_main() /* {{{ */
 		zlog(ZLOG_SYSERROR, "failed to init signals: sigaction()");
 		return -1;
 	}
+
+	zlog(ZLOG_DEBUG, "Unblocking all signals");
+	if (0 > fpm_signals_unblock()) {
+		return -1;
+	}
 	return 0;
 }
 /* }}} */
@@ -248,5 +254,52 @@ int fpm_signals_init_child() /* {{{ */
 int fpm_signals_get_fd() /* {{{ */
 {
 	return sp[0];
+}
+/* }}} */
+
+int fpm_signals_init_mask(int *signum_array, size_t size) /* {{{ */
+{
+	size_t i = 0;
+	if (0 > sigemptyset(&block_sigset)) {
+		zlog(ZLOG_SYSERROR, "failed to prepare signal block mask: sigemptyset()");
+		return -1;
+	}
+	for (i = 0; i < size; ++i) {
+		int sig_i = signum_array[i];
+		if (0 > sigaddset(&block_sigset, sig_i)) {
+			if (sig_i <= NSIG && fpm_signal_names[sig_i] != NULL) {
+				zlog(ZLOG_SYSERROR, "failed to prepare signal block mask: sigaddset(%s)",
+						fpm_signal_names[sig_i]);
+			} else {
+				zlog(ZLOG_SYSERROR, "failed to prepare signal block mask: sigaddset(%d)", sig_i);
+			}
+			return -1;
+		}
+	}
+	return 0;
+}
+/* }}} */
+
+int fpm_signals_block() /* {{{ */
+{
+	if (0 > sigprocmask(SIG_BLOCK, &block_sigset, NULL)) {
+		zlog(ZLOG_SYSERROR, "failed to block signals");
+		return -1;
+	}
+	return 0;
+}
+/* }}} */
+
+int fpm_signals_unblock() /* {{{ */
+{
+	/* Ensure that during reload after upgrade all signals are unblocked.
+		block_sigset could have different value before execve() */
+	sigset_t all_signals;
+	sigfillset(&all_signals);
+	if (0 > sigprocmask(SIG_UNBLOCK, &all_signals, NULL)) {
+		zlog(ZLOG_SYSERROR, "failed to unblock signals");
+		return -1;
+	}
+	return 0;
 }
 /* }}} */

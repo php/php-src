@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -41,7 +39,7 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 	UErrorCode	status		= U_ZERO_ERROR;
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|b",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b",
 			&rules, &rules_len, &compiled) == FAILURE) {
 		return;
 	}
@@ -103,7 +101,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;
@@ -128,7 +126,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;
@@ -142,7 +140,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;
@@ -180,7 +178,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;

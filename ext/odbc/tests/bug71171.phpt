@@ -22,13 +22,11 @@ if ($res) {
 
 odbc_close($conn);
 ?>
-==DONE==
 --EXPECT--
 array(1) {
   ["ID"]=>
   string(1) "1"
 }
-==DONE==
 --CLEAN--
 <?php
 include 'config.inc';

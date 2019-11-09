@@ -4,7 +4,10 @@ readline() function - without input
 Jonathan Stevens <info at jonathanstevens dot be>
 User Group: PHP-WVL & PHPGent #PHPTestFest
 --SKIPIF--
-<?php if (!extension_loaded("readline") || !function_exists('readline') || die("skip"); ?>
+<?php
+if (!extension_loaded("readline")) die("skip readline extension is not available");
+if (!function_exists('readline')) die("skip readline() not available");
+?>
 --FILE--
 <?php
 var_dump(readline());

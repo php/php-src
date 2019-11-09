@@ -36,7 +36,6 @@ if (strcmp($str, $decode) == 0) {
 	echo "Strings unequal : TEST FAILED\n";
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing str_rot13() : basic functionality ***
 
@@ -52,4 +51,3 @@ Strings unequal : TEST FAILED
 
 Ensure strings round trip
 Strings equal : TEST PASSED
-===DONE===

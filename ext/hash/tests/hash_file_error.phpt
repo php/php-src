@@ -25,7 +25,6 @@ echo "\n-- Testing hash_file() function with a non-existent file --\n";
 var_dump( hash_file( 'md5', 'nonexistent.txt' ) );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -45,4 +44,3 @@ bool(false)
 
 Warning: hash_file(%s): failed to open stream: No such file or directory in %s on line %d
 bool(false)
-===DONE===

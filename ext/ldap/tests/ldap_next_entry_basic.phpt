@@ -20,7 +20,6 @@ var_dump(
 	$entry = ldap_next_entry($link, $entry)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -37,4 +36,3 @@ array(2) {
   int(1)
 }
 bool(false)
-===DONE===

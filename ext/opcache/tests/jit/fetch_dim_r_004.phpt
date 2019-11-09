@@ -34,18 +34,18 @@ foo($x.$y);
 string(1) "A"
 string(1) "C"
 
-Notice: String offset cast occurred in %sfetch_dim_r_004.php on line 4
+Warning: String offset cast occurred in %s on line %d
 string(1) "B"
 string(1) "A"
 string(1) "C"
 
-Notice: String offset cast occurred in %sfetch_dim_r_004.php on line 4
+Warning: String offset cast occurred in %s on line %d
 string(1) "A"
 
-Notice: String offset cast occurred in %sfetch_dim_r_004.php on line 4
+Warning: String offset cast occurred in %s on line %d
 string(1) "B"
 
-Notice: String offset cast occurred in %sfetch_dim_r_004.php on line 4
+Warning: String offset cast occurred in %s on line %d
 string(1) "A"
 
 Warning: Illegal string offset 'ab' in %sfetch_dim_r_004.php on line 4

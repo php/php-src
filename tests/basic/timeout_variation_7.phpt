@@ -11,9 +11,14 @@ include __DIR__ . DIRECTORY_SEPARATOR . "timeout_config.inc";
 
 set_time_limit($t);
 
+$startTime = microtime(true);
+
 for ($i = 0; $i < 42; $i++) {
 	busy_wait(1);
 }
+
+$diff = microtime(true) - $startTime;
+echo "time spent waiting: $diff\n";
 
 ?>
 never reached here

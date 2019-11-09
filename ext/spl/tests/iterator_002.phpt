@@ -43,8 +43,6 @@ foreach ($dir as $file) {
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 1
 21
@@ -52,4 +50,3 @@ foreach ($dir as $file) {
 222
 231
 3
-===DONE===

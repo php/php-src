@@ -18,7 +18,6 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/buildfromiterator.phar.zip');
@@ -70,4 +69,3 @@ array(21) {
   string(%d) "%sfrontcontroller9.phar.phpt"
 }
 bool(true)
-===DONE===

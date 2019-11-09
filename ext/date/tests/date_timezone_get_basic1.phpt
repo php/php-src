@@ -26,10 +26,8 @@ $tz = date_timezone_get($object);
 var_dump( timezone_name_get($tz) );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing date_timezone_get() : basic functionality ***
 string(13) "Europe/London"
 string(16) "America/New_York"
 string(19) "America/Los_Angeles"
-===DONE===

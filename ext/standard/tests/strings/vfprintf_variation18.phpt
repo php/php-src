@@ -76,7 +76,6 @@ echo "\n";
 
 unlink($data_file);
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : scientific formats and non-scientific values ***
 
@@ -104,4 +103,3 @@ unlink($data_file);
     1.0000e+0 0.0000e+0  1.000000e+0 0.0000e+0
    0.000000e+0 1.000000e+0 1.000000e+0 0.000000e+0
    0.000000e+0 1.000000e+0 1.000000e+0 1.000000e+0
-===DONE===

@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -212,9 +210,9 @@ static PHP_METHOD(PDO, dbh_constructor)
 	ZEND_PARSE_PARAMETERS_START(1, 4)
 		Z_PARAM_STRING(data_source, data_source_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_EX(username, usernamelen, 1, 0)
-		Z_PARAM_STRING_EX(password, passwordlen, 1, 0)
-		Z_PARAM_ARRAY_EX(options, 1, 0)
+		Z_PARAM_STRING_OR_NULL(username, usernamelen)
+		Z_PARAM_STRING_OR_NULL(password, passwordlen)
+		Z_PARAM_ARRAY_OR_NULL(options)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* parse the data source name */
@@ -471,7 +469,7 @@ static PHP_METHOD(PDO, prepare)
 		Z_PARAM_STRING(statement, statement_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY(options)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -824,7 +822,7 @@ static PHP_METHOD(PDO, setAttribute)
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_LONG(attr)
 		Z_PARAM_ZVAL(value)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -845,7 +843,7 @@ static PHP_METHOD(PDO, getAttribute)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_LONG(attr)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -912,7 +910,7 @@ static PHP_METHOD(PDO, exec)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_STRING(statement, statement_len)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!statement_len) {
 		pdo_raise_impl_error(dbh, NULL, "HY000",  "trying to execute an empty query");
@@ -940,8 +938,8 @@ static PHP_METHOD(PDO, lastInsertId)
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_EX(name, namelen, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+		Z_PARAM_STRING_OR_NULL(name, namelen)
+	ZEND_PARSE_PARAMETERS_END();
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -1053,12 +1051,12 @@ static PHP_METHOD(PDO, query)
 	/* Return a meaningful error when no parameters were passed */
 	if (!ZEND_NUM_ARGS()) {
 		zend_parse_parameters(0, "z|z", NULL, NULL);
-		RETURN_FALSE;
+		return;
 	}
 
 	if (FAILURE == zend_parse_parameters(1, "s", &statement,
 			&statement_len)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	PDO_DBH_CLEAR_ERR();
@@ -1136,7 +1134,7 @@ static PHP_METHOD(PDO, quote)
 		Z_PARAM_STRING(str, str_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(paramtype)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PDO_DBH_CLEAR_ERR();
 	PDO_CONSTRUCT_CHECK;
@@ -1294,10 +1292,10 @@ int pdo_hash_methods(pdo_dbh_object_t *dbh_obj, int kind)
 			} else {
 				func.required_num_args = info->required_num_args;
 			}
-			if (info->return_reference) {
+			if (ZEND_ARG_SEND_MODE(info)) {
 				func.fn_flags |= ZEND_ACC_RETURN_REFERENCE;
 			}
-			if (funcs->arg_info[funcs->num_args].is_variadic) {
+			if (ZEND_ARG_IS_VARIADIC(&funcs->arg_info[funcs->num_args])) {
 				func.fn_flags |= ZEND_ACC_VARIADIC;
 				/* Don't count the variadic argument */
 				func.num_args--;
@@ -1377,7 +1375,7 @@ void pdo_dbh_init(void)
 	pdo_dbh_object_handlers.free_obj = pdo_dbh_free_storage;
 	pdo_dbh_object_handlers.clone_obj = NULL;
 	pdo_dbh_object_handlers.get_method = dbh_method_get;
-	pdo_dbh_object_handlers.compare_objects = dbh_compare;
+	pdo_dbh_object_handlers.compare = dbh_compare;
 	pdo_dbh_object_handlers.get_gc = dbh_get_gc;
 
 	REGISTER_PDO_CLASS_CONST_LONG("PARAM_BOOL", (zend_long)PDO_PARAM_BOOL);

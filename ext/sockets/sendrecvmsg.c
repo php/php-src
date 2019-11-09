@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -106,7 +104,7 @@ static void init_ancillary_registry(void)
 	entry.to_array		= to; \
 	key.cmsg_level		= level; \
 	key.cmsg_type		= type; \
-	zend_hash_str_update_mem(&ancillary_registry.ht, (char*)&key, sizeof(key) - 1, (void*)&entry, sizeof(entry))
+	zend_hash_str_update_mem(&ancillary_registry.ht, (char*)&key, sizeof(key), (void*)&entry, sizeof(entry))
 
 #if defined(IPV6_PKTINFO) && HAVE_IPV6
 	PUT_ENTRY(sizeof(struct in6_pktinfo), 0, 0, from_zval_write_in6_pktinfo,
@@ -156,7 +154,7 @@ ancillary_reg_entry *get_ancillary_reg_entry(int cmsg_level, int msg_type)
 	tsrm_mutex_unlock(ancillary_mutex);
 #endif
 
-	if ((entry = zend_hash_str_find_ptr(&ancillary_registry.ht, (char*)&key, sizeof(key) - 1)) != NULL) {
+	if ((entry = zend_hash_str_find_ptr(&ancillary_registry.ht, (char*)&key, sizeof(key))) != NULL) {
 		return entry;
 	} else {
 		return NULL;
@@ -183,7 +181,7 @@ PHP_FUNCTION(socket_sendmsg)
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(zsocket),
 					php_sockets_le_socket_name, php_sockets_le_socket())) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	msghdr = from_zval_run_conversions(zmsg, php_sock, from_zval_write_msghdr_send,
@@ -228,7 +226,7 @@ PHP_FUNCTION(socket_recvmsg)
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(zsocket),
 					php_sockets_le_socket_name, php_sockets_le_socket())) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	msghdr = from_zval_run_conversions(zmsg, php_sock, from_zval_write_msghdr_recv,

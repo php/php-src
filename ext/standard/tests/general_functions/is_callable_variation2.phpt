@@ -57,7 +57,6 @@ check_iscallable($variants);
 fclose($file_handle);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing is_callable() on invalid function names ***
 -- Iteration  1 --
@@ -148,4 +147,3 @@ Resource id #%d
 bool(false)
 bool(false)
 Resource id #%d
-===DONE===

@@ -40,7 +40,6 @@ get_basename_with_cp($fn, 1255);
 remove_data("dir_cp1255");
 
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (stream)
 int(25)
@@ -52,4 +51,3 @@ string(%d) "כללים מרובים33"
 bool(true)
 string(%d) "%s\כללים מרובים33"
 Active code page: %d
-===DONE===

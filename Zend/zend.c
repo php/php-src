@@ -592,12 +592,20 @@ static void function_copy_ctor(zval *zv) /* {{{ */
 		new_arg_info = pemalloc(sizeof(zend_arg_info) * num_args, 1);
 		memcpy(new_arg_info, arg_info, sizeof(zend_arg_info) * num_args);
 		for (i = 0 ; i < num_args; i++) {
-			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
-				zend_string *name = zend_string_dup(ZEND_TYPE_NAME(arg_info[i].type), 1);
+			if (ZEND_TYPE_HAS_LIST(arg_info[i].type)) {
+				zend_type_list *old_list = ZEND_TYPE_LIST(arg_info[i].type);
+				zend_type_list *new_list = pemalloc(ZEND_TYPE_LIST_SIZE(old_list->num_types), 1);
+				memcpy(new_list, old_list, ZEND_TYPE_LIST_SIZE(old_list->num_types));
+				ZEND_TYPE_SET_PTR(new_arg_info[i].type, new_list);
 
-				new_arg_info[i].type =
-					ZEND_TYPE_ENCODE_CLASS(
-						name, ZEND_TYPE_ALLOW_NULL(arg_info[i].type));
+				void **entry;
+				ZEND_TYPE_LIST_FOREACH_PTR(new_list, entry) {
+					zend_string *name = zend_string_dup(ZEND_TYPE_LIST_GET_NAME(*entry), 1);
+					*entry = ZEND_TYPE_LIST_ENCODE_NAME(name);
+				} ZEND_TYPE_LIST_FOREACH_END();
+			} else if (ZEND_TYPE_HAS_NAME(arg_info[i].type)) {
+				zend_string *name = zend_string_dup(ZEND_TYPE_NAME(arg_info[i].type), 1);
+				ZEND_TYPE_SET_PTR(new_arg_info[i].type, name);
 			}
 		}
 		func->common.arg_info = new_arg_info + 1;
@@ -950,6 +958,15 @@ void zend_register_standard_ini_entries(void) /* {{{ */
 }
 /* }}} */
 
+static zend_class_entry *resolve_type_name(zend_string *type_name) { 
+	zend_string *lc_type_name = zend_string_tolower(type_name);
+	zend_class_entry *ce = zend_hash_find_ptr(CG(class_table), lc_type_name);
+
+	ZEND_ASSERT(ce && ce->type == ZEND_INTERNAL_CLASS);
+	zend_string_release(lc_type_name);
+	return ce;
+}
+
 static void zend_resolve_property_types(void) /* {{{ */
 {
 	zend_class_entry *ce;
@@ -962,14 +979,18 @@ static void zend_resolve_property_types(void) /* {{{ */
 
 		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
-				if (ZEND_TYPE_IS_NAME(prop_info->type)) {
+				if (ZEND_TYPE_HAS_LIST(prop_info->type)) {
+					void **entry;
+					ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(prop_info->type), entry) {
+						if (ZEND_TYPE_LIST_IS_NAME(*entry)) {
+							zend_string *type_name = ZEND_TYPE_LIST_GET_NAME(*entry);
+							*entry = ZEND_TYPE_LIST_ENCODE_CE(resolve_type_name(type_name));
+							zend_string_release(type_name);
+						}
+					} ZEND_TYPE_LIST_FOREACH_END();
+				} else if (ZEND_TYPE_HAS_NAME(prop_info->type)) {
 					zend_string *type_name = ZEND_TYPE_NAME(prop_info->type);
-					zend_string *lc_type_name = zend_string_tolower(type_name);
-					zend_class_entry *prop_ce = zend_hash_find_ptr(CG(class_table), lc_type_name);
-
-					ZEND_ASSERT(prop_ce && prop_ce->type == ZEND_INTERNAL_CLASS);
-					prop_info->type = ZEND_TYPE_ENCODE_CE(prop_ce, ZEND_TYPE_ALLOW_NULL(prop_info->type));
-					zend_string_release(lc_type_name);
+					ZEND_TYPE_SET_CE(prop_info->type, resolve_type_name(type_name));
 					zend_string_release(type_name);
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -1246,7 +1267,7 @@ ZEND_API zval *zend_get_configuration_directive(zend_string *name) /* {{{ */
 	} while (0)
 
 static ZEND_COLD void zend_error_va_list(
-		int type, const char *error_filename, uint32_t error_lineno,
+		int orig_type, const char *error_filename, uint32_t error_lineno,
 		const char *format, va_list args)
 {
 	va_list usr_copy;
@@ -1258,6 +1279,7 @@ static ZEND_COLD void zend_error_va_list(
 	zend_stack loop_var_stack;
 	zend_stack delayed_oplines_stack;
 	zend_class_entry *orig_fake_scope;
+	int type = orig_type & E_ALL;
 
 	/* Report about uncaught exception in case of fatal errors */
 	if (EG(exception)) {
@@ -1304,7 +1326,7 @@ static ZEND_COLD void zend_error_va_list(
 	if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF
 		|| !(EG(user_error_handler_error_reporting) & type)
 		|| EG(error_handling) != EH_NORMAL) {
-		zend_error_cb(type, error_filename, error_lineno, format, args);
+		zend_error_cb(orig_type, error_filename, error_lineno, format, args);
 	} else switch (type) {
 		case E_ERROR:
 		case E_PARSE:
@@ -1313,7 +1335,7 @@ static ZEND_COLD void zend_error_va_list(
 		case E_COMPILE_ERROR:
 		case E_COMPILE_WARNING:
 			/* The error may not be safe to handle in user-space */
-			zend_error_cb(type, error_filename, error_lineno, format, args);
+			zend_error_cb(orig_type, error_filename, error_lineno, format, args);
 			break;
 		default:
 			/* Handle the error in user space */
@@ -1354,13 +1376,13 @@ static ZEND_COLD void zend_error_va_list(
 			if (call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 4, params) == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					if (Z_TYPE(retval) == IS_FALSE) {
-						zend_error_cb(type, error_filename, error_lineno, format, args);
+						zend_error_cb(orig_type, error_filename, error_lineno, format, args);
 					}
 					zval_ptr_dtor(&retval);
 				}
 			} else if (!EG(exception)) {
 				/* The user error handler failed, use built-in error handler */
-				zend_error_cb(type, error_filename, error_lineno, format, args);
+				zend_error_cb(orig_type, error_filename, error_lineno, format, args);
 			}
 
 			EG(fake_scope) = orig_fake_scope;
@@ -1626,9 +1648,10 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /
 	int i;
 	zend_file_handle *file_handle;
 	zend_op_array *op_array;
+	int ret = SUCCESS;
 
 	va_start(files, file_count);
-	for (i = 0; i < file_count; i++) {
+	for (i = 0; i < file_count && ret != FAILURE; i++) {
 		file_handle = va_arg(files, zend_file_handle *);
 		if (!file_handle) {
 			continue;
@@ -1648,18 +1671,18 @@ ZEND_API int zend_execute_scripts(int type, zval *retval, int file_count, ...) /
 				}
 				if (EG(exception)) {
 					zend_exception_error(EG(exception), E_ERROR);
+					ret = FAILURE;
 				}
 			}
 			destroy_op_array(op_array);
 			efree_size(op_array, sizeof(zend_op_array));
 		} else if (type==ZEND_REQUIRE) {
-			va_end(files);
-			return FAILURE;
+			ret = FAILURE;
 		}
 	}
 	va_end(files);
 
-	return SUCCESS;
+	return ret;
 }
 /* }}} */
 

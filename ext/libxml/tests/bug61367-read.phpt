@@ -1,10 +1,9 @@
 --TEST--
 Bug #61367: open_basedir bypass in libxml RSHUTDOWN: read test
 --SKIPIF--
-<?php if(!extension_loaded('dom')) echo 'skip'; ?>
+<?php if(!extension_loaded('dom')) echo 'skip dom extension not available'; ?>
 --INI--
 open_basedir=.
-error_reporting=E_ALL & ~E_NOTICE
 --FILE--
 <?php
 /*
@@ -58,3 +57,7 @@ Warning: DOMDocument::loadXML(): I/O warning : failed to load external entity "f
 Warning: DOMDocument::loadXML(): Failure to process entity file in Entity, line: 4 in %s on line %d
 
 Warning: DOMDocument::loadXML(): Entity 'file' not defined in Entity, line: 4 in %s on line %d
+
+Warning: Trying to get property 'firstChild' of non-object in %s on line %d
+
+Warning: Trying to get property 'nodeValue' of non-object in %s on line %d

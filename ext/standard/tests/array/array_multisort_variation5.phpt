@@ -23,7 +23,6 @@ var_dump($ar);
 
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_multisort() : Testing  all array sort specifiers ***
 array(3) {
@@ -50,4 +49,3 @@ array(3) {
   [2]=>
   int(2)
 }
-===DONE===

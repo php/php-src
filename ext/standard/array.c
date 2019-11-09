@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -42,6 +40,7 @@
 #include "php_math.h"
 #include "zend_smart_str.h"
 #include "zend_bitset.h"
+#include "zend_exceptions.h"
 #include "ext/spl/spl_array.h"
 
 /* {{{ defines */
@@ -365,7 +364,6 @@ static int php_array_data_compare(const void *a, const void *b) /* {{{ */
 {
 	Bucket *f;
 	Bucket *s;
-	zval result;
 	zval *first;
 	zval *second;
 
@@ -381,12 +379,7 @@ static int php_array_data_compare(const void *a, const void *b) /* {{{ */
 	if (UNEXPECTED(Z_TYPE_P(second) == IS_INDIRECT)) {
 		second = Z_INDIRECT_P(second);
 	}
-	if (compare_function(&result, first, second) == FAILURE) {
-		return 0;
-	}
-
-	ZEND_ASSERT(Z_TYPE(result) == IS_LONG);
-	return ZEND_NORMALIZE_BOOL(Z_LVAL(result));
+	return zend_compare(first, second);
 }
 /* }}} */
 
@@ -696,7 +689,7 @@ PHP_FUNCTION(krsort)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sort_type)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	cmp = php_get_key_compare_func(sort_type, 1);
 
@@ -718,7 +711,7 @@ PHP_FUNCTION(ksort)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sort_type)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	cmp = php_get_key_compare_func(sort_type, 0);
 
@@ -773,6 +766,7 @@ PHP_FUNCTION(count)
 
 	switch (Z_TYPE_P(array)) {
 		case IS_NULL:
+			/* Intentionally not converted to an exception */
 			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
 			RETURN_LONG(0);
 			break;
@@ -792,6 +786,9 @@ PHP_FUNCTION(count)
 				if (SUCCESS == Z_OBJ_HT(*array)->count_elements(Z_OBJ_P(array), &Z_LVAL_P(return_value))) {
 					return;
 				}
+				if (EG(exception)) {
+					return;
+				}
 			}
 			/* if not and the object implements Countable we call its count() method */
 			if (instanceof_function(Z_OBJCE_P(array), zend_ce_countable)) {
@@ -804,11 +801,13 @@ PHP_FUNCTION(count)
 			}
 
 			/* If There's no handler and it doesn't implement Countable then add a warning */
+			/* Intentionally not converted to an exception */
 			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
 			RETURN_LONG(1);
 			break;
 		}
 		default:
+			/* Intentionally not converted to an exception */
 			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
 			RETURN_LONG(1);
 			break;
@@ -862,7 +861,7 @@ PHP_FUNCTION(asort)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sort_type)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	cmp = php_get_data_compare_func(sort_type, 0);
 
@@ -884,7 +883,7 @@ PHP_FUNCTION(arsort)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sort_type)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	cmp = php_get_data_compare_func(sort_type, 1);
 
@@ -906,7 +905,7 @@ PHP_FUNCTION(sort)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sort_type)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	cmp = php_get_data_compare_func(sort_type, 0);
 
@@ -928,7 +927,7 @@ PHP_FUNCTION(rsort)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(sort_type)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	cmp = php_get_data_compare_func(sort_type, 1);
 
@@ -1548,7 +1547,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 
 	if (strict) {
 		if (Z_TYPE_P(value) == IS_LONG) {
-			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+			ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 				ZVAL_DEREF(entry);
 				if (Z_TYPE_P(entry) == IS_LONG && Z_LVAL_P(entry) == Z_LVAL_P(value)) {
 					if (behavior == 0) {
@@ -1564,7 +1563,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 				}
 			} ZEND_HASH_FOREACH_END();
 		} else {
-			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+			ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 				ZVAL_DEREF(entry);
 				if (fast_is_identical_function(value, entry)) {
 					if (behavior == 0) {
@@ -1582,7 +1581,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 		}
 	} else {
 		if (Z_TYPE_P(value) == IS_LONG) {
-			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+			ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 				if (fast_equal_check_long(value, entry)) {
 					if (behavior == 0) {
 						RETURN_TRUE;
@@ -1597,7 +1596,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 				}
 			} ZEND_HASH_FOREACH_END();
 		} else if (Z_TYPE_P(value) == IS_STRING) {
-			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+			ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 				if (fast_equal_check_string(value, entry)) {
 					if (behavior == 0) {
 						RETURN_TRUE;
@@ -1612,7 +1611,7 @@ static inline void php_search_array(INTERNAL_FUNCTION_PARAMETERS, int behavior) 
 				}
 			} ZEND_HASH_FOREACH_END();
 		} else {
-			ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
+			ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL_P(array), num_idx, str_idx, entry) {
 				if (fast_equal_check_function(value, entry)) {
 					if (behavior == 0) {
 						RETURN_TRUE;
@@ -2605,7 +2604,7 @@ PHP_FUNCTION(compact)
 }
 /* }}} */
 
-/* {{{ proto array|false array_fill(int start_key, int num, mixed val)
+/* {{{ proto array array_fill(int start_key, int num, mixed val)
    Create an array containing num elements starting with index start_key each initialized to val */
 PHP_FUNCTION(array_fill)
 {
@@ -2620,11 +2619,11 @@ PHP_FUNCTION(array_fill)
 
 	if (EXPECTED(num > 0)) {
 		if (sizeof(num) > 4 && UNEXPECTED(EXPECTED(num > 0x7fffffff))) {
-			php_error_docref(NULL, E_WARNING, "Too many elements");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Too many elements");
+			return;
 		} else if (UNEXPECTED(start_key > ZEND_LONG_MAX - num + 1)) {
-			php_error_docref(NULL, E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
+			return;
 		} else if (EXPECTED(start_key >= 0) && EXPECTED(start_key < num)) {
 			/* create packed array */
 			Bucket *p;
@@ -2669,8 +2668,8 @@ PHP_FUNCTION(array_fill)
 	} else if (EXPECTED(num == 0)) {
 		RETURN_EMPTY_ARRAY();
 	} else {
-		php_error_docref(NULL, E_WARNING, "Number of elements can't be negative");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Number of elements can't be negative");
+		return;
 	}
 }
 /* }}} */
@@ -3008,7 +3007,7 @@ PHP_FUNCTION(shuffle)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_array_data_shuffle(array);
 
@@ -3151,7 +3150,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 }
 /* }}} */
 
-/* {{{ proto int|false array_push(array stack, mixed var [, mixed ...])
+/* {{{ proto int array_push(array stack, mixed var [, mixed ...])
    Pushes elements onto the end of the array */
 PHP_FUNCTION(array_push)
 {
@@ -3173,8 +3172,8 @@ PHP_FUNCTION(array_push)
 
 		if (zend_hash_next_index_insert(Z_ARRVAL_P(stack), &new_var) == NULL) {
 			Z_TRY_DELREF(new_var);
-			php_error_docref(NULL, E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
+			return;
 		}
 	}
 
@@ -3406,19 +3405,20 @@ PHP_FUNCTION(array_splice)
 	HashTable  *rem_hash = NULL;
 	zend_long offset,
 			length = 0;
+	zend_bool length_is_null = 1;
 	int		num_in;				/* Number of elements in the input array */
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
 		Z_PARAM_LONG(offset)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(length)
+		Z_PARAM_LONG_OR_NULL(length, length_is_null)
 		Z_PARAM_ZVAL(repl_array)
 	ZEND_PARSE_PARAMETERS_END();
 
 	num_in = zend_hash_num_elements(Z_ARRVAL_P(array));
 
-	if (ZEND_NUM_ARGS() < 3) {
+	if (length_is_null) {
 		length = num_in;
 	}
 
@@ -3459,6 +3459,33 @@ PHP_FUNCTION(array_splice)
 }
 /* }}} */
 
+/* {{{ find_bucket_at_offset(HashTable* ht, zend_long offset)
+   Finds the bucket at the given valid offset */
+static inline Bucket* find_bucket_at_offset(HashTable* ht, zend_long offset)
+{
+	zend_long pos;
+	Bucket *bucket;
+	ZEND_ASSERT(offset >= 0 && offset <= ht->nNumOfElements);
+	if (HT_IS_WITHOUT_HOLES(ht)) {
+		/* There's no need to iterate over the array to filter out holes if there are no holes */
+		/* This properly handles both packed and unpacked arrays. */
+		return ht->arData + offset;
+	}
+	/* Otherwise, this code has to iterate over the HashTable and skip holes in the array. */
+	pos = 0;
+	ZEND_HASH_FOREACH_BUCKET(ht, bucket) {
+		if (pos >= offset) {
+			/* This is the bucket of the array element at the requested offset */
+			return bucket;
+		}
+		++pos;
+	} ZEND_HASH_FOREACH_END();
+
+	/* Return a pointer to the end of the bucket array. */
+	return ht->arData + ht->nNumUsed;
+}
+/* }}} */
+
 /* {{{ proto array array_slice(array input, int offset [, int length [, bool preserve_keys]])
    Returns elements specified by offset and length */
 PHP_FUNCTION(array_slice)
@@ -3470,7 +3497,6 @@ PHP_FUNCTION(array_slice)
 	zend_bool length_is_null = 1; /* Whether an explicit length has been omitted */
 	zend_bool preserve_keys = 0;  /* Whether to preserve keys while copying to the new array */
 	uint32_t num_in;              /* Number of elements in the input array */
-	uint32_t pos;                 /* Current position in the array */
 	zend_string *string_key;
 	zend_ulong num_key;
 
@@ -3478,7 +3504,7 @@ PHP_FUNCTION(array_slice)
 		Z_PARAM_ARRAY(input)
 		Z_PARAM_LONG(offset)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_EX(length, length_is_null, 1, 0)
+		Z_PARAM_LONG_OR_NULL(length, length_is_null)
 		Z_PARAM_BOOL(preserve_keys)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -3511,50 +3537,61 @@ PHP_FUNCTION(array_slice)
 	/* Initialize returned array */
 	array_init_size(return_value, (uint32_t)length);
 
-	/* Start at the beginning and go until we hit offset */
-	pos = 0;
-	if (HT_IS_PACKED(Z_ARRVAL_P(input)) &&
-	    (!preserve_keys ||
-	     (offset == 0 && HT_IS_WITHOUT_HOLES(Z_ARRVAL_P(input))))) {
-		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
-		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
-				pos++;
-				if (pos <= offset) {
+	// Contains modified variants of ZEND_HASH_FOREACH_VAL
+	{
+		HashTable *ht = Z_ARRVAL_P(input);
+		Bucket *p = find_bucket_at_offset(ht, offset);
+		Bucket *end = ht->arData + ht->nNumUsed;
+
+		/* Start at the beginning and go until we hit offset */
+		if (HT_IS_PACKED(Z_ARRVAL_P(input)) &&
+			(!preserve_keys ||
+			 (offset == 0 && HT_IS_WITHOUT_HOLES(Z_ARRVAL_P(input))))) {
+
+			zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+				for (; p != end; p++) {
+					if (__fill_idx >= length) {
+						break;
+					}
+					entry = &p->val;
+					if (UNEXPECTED(Z_TYPE_P(entry) == IS_UNDEF)) {
+						continue;
+					}
+					if (UNEXPECTED(Z_ISREF_P(entry)) &&
+						UNEXPECTED(Z_REFCOUNT_P(entry) == 1)) {
+						entry = Z_REFVAL_P(entry);
+					}
+					Z_TRY_ADDREF_P(entry);
+					ZEND_HASH_FILL_ADD(entry);
+				}
+			} ZEND_HASH_FILL_END();
+		} else {
+			zend_long n = 0;  /* Current number of elements */
+			for (; p != end; p++) {
+				entry = &p->val;
+				if (UNEXPECTED(Z_TYPE_P(entry) == IS_UNDEF)) {
 					continue;
 				}
-				if (pos > offset + length) {
+				if (n >= length) {
 					break;
 				}
-				if (UNEXPECTED(Z_ISREF_P(entry)) &&
-					UNEXPECTED(Z_REFCOUNT_P(entry) == 1)) {
-					entry = Z_REFVAL_P(entry);
-				}
-				Z_TRY_ADDREF_P(entry);
-				ZEND_HASH_FILL_ADD(entry);
-			} ZEND_HASH_FOREACH_END();
-		} ZEND_HASH_FILL_END();
-	} else {
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, string_key, entry) {
-			pos++;
-			if (pos <= offset) {
-				continue;
-			}
-			if (pos > offset + length) {
-				break;
-			}
+				n++;
+				num_key = p->h;
+				string_key = p->key;
 
-			if (string_key) {
-				entry = zend_hash_add_new(Z_ARRVAL_P(return_value), string_key, entry);
-			} else {
-				if (preserve_keys) {
-					entry = zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, entry);
+				if (string_key) {
+					entry = zend_hash_add_new(Z_ARRVAL_P(return_value), string_key, entry);
 				} else {
-					entry = zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), entry);
+					if (preserve_keys) {
+						entry = zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, entry);
+					} else {
+						entry = zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), entry);
+					}
 				}
+				zval_add_ref(entry);
 			}
-			zval_add_ref(entry);
-		} ZEND_HASH_FOREACH_END();
+		}
 	}
 }
 /* }}} */
@@ -4106,7 +4143,7 @@ PHP_FUNCTION(array_count_values)
 				Z_LVAL_P(tmp)++;
 			}
 		} else {
-			php_error_docref(NULL, E_WARNING, "Can only count STRING and INTEGER values!");
+			php_error_docref(NULL, E_WARNING, "Can only count string and integer values, entry skipped");
 		}
 	} ZEND_HASH_FOREACH_END();
 }
@@ -4449,7 +4486,7 @@ PHP_FUNCTION(array_flip)
 			}
 			zend_symtable_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Can only flip STRING and INTEGER values!");
+			php_error_docref(NULL, E_WARNING, "Can only flip string and integer values, entry skipped");
 		}
 	} ZEND_HASH_FOREACH_END();
 }
@@ -5179,7 +5216,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			param_spec = "+f";
 			diff_data_compare_func = php_array_user_compare;
 		} else {
-			php_error_docref(NULL, E_WARNING, "data_compare_type is %d. This should never happen. Please report as a bug", data_compare_type);
+			ZEND_ASSERT(0 && "Invalid data_compare_type");
 			return;
 		}
 
@@ -6043,7 +6080,7 @@ PHP_FUNCTION(array_reduce)
 }
 /* }}} */
 
-/* {{{ proto array array_filter(array input [, mixed callback])
+/* {{{ proto array array_filter(array input [, mixed callback [, int use_type]])
    Filters elements from the array via the callback. */
 PHP_FUNCTION(array_filter)
 {
@@ -6299,22 +6336,12 @@ PHP_FUNCTION(array_map)
 PHP_FUNCTION(array_key_exists)
 {
 	zval *key;
-	zval *array;
 	HashTable *ht;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_ZVAL(key)
-		Z_PARAM_ARRAY_OR_OBJECT(array)
+		Z_PARAM_ARRAY_HT(ht)
 	ZEND_PARSE_PARAMETERS_END();
-
-	if (EXPECTED(Z_TYPE_P(array) == IS_ARRAY)) {
-		ht = Z_ARRVAL_P(array);
-	} else {
-		ht = zend_get_properties_for(array, ZEND_PROP_PURPOSE_ARRAY_CAST);
-		php_error_docref(NULL, E_DEPRECATED,
-			"Using array_key_exists() on objects is deprecated. "
-			"Use isset() or property_exists() instead");
-	}
 
 	switch (Z_TYPE_P(key)) {
 		case IS_STRING:
@@ -6326,13 +6353,22 @@ PHP_FUNCTION(array_key_exists)
 		case IS_NULL:
 			RETVAL_BOOL(zend_hash_exists_ind(ht, ZSTR_EMPTY_ALLOC()));
 			break;
+		case IS_DOUBLE:
+			RETVAL_BOOL(zend_hash_index_exists(ht, zend_dval_to_lval(Z_DVAL_P(key))));
+			break;
+		case IS_FALSE:
+			RETVAL_BOOL(zend_hash_index_exists(ht, 0));
+			break;
+		case IS_TRUE:
+			RETVAL_BOOL(zend_hash_index_exists(ht, 1));
+			break;
+		case IS_RESOURCE:
+			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(key), Z_RES_HANDLE_P(key));
+			RETVAL_BOOL(zend_hash_index_exists(ht, Z_RES_HANDLE_P(key)));
+			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "The first argument should be either a string or an integer");
-			RETVAL_FALSE;
-	}
-
-	if (Z_TYPE_P(array) != IS_ARRAY) {
-		zend_release_properties(ht);
+			zend_type_error("Illegal offset type");
+			break;
 	}
 }
 /* }}} */

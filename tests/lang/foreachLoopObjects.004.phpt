@@ -28,19 +28,18 @@ var_dump($obj);
 
 
 ?>
-===DONE===
 --EXPECTF--
 Removing the current element from an iterated object.
 string(10) "Original a"
 string(10) "Original b"
 
-Notice: Undefined property: C::$b in %s on line %d
+Warning: Undefined property: C::$b in %s on line %d
 string(10) "Original c"
 
-Notice: Undefined property: C::$b in %s on line %d
+Warning: Undefined property: C::$b in %s on line %d
 string(10) "Original d"
 
-Notice: Undefined property: C::$b in %s on line %d
+Warning: Undefined property: C::$b in %s on line %d
 string(10) "Original e"
 object(C)#%d (4) {
   ["a"]=>
@@ -52,4 +51,3 @@ object(C)#%d (4) {
   ["e"]=>
   string(10) "Original e"
 }
-===DONE===

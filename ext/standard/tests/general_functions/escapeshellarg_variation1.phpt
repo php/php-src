@@ -74,7 +74,6 @@ foreach($inputs as $input) {
 	$iterator++;
 };
 ?>
-===Done===
 --EXPECT--
 *** Testing escapeshellarg() : usage variations ***
 
@@ -137,4 +136,3 @@ string(2) "''"
 
 -- Iteration 20 --
 string(2) "''"
-===Done===

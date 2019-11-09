@@ -27,7 +27,6 @@ var_dump(array_filter($array3, "even"));
 
 var_dump(array_filter(array()));
 
-echo '== DONE ==';
 ?>
 --EXPECTF--
 Odd :
@@ -78,4 +77,3 @@ array(2) {
 }
 array(0) {
 }
-== DONE ==

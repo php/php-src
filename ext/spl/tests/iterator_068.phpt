@@ -26,9 +26,7 @@ $obj->foo();
 unset($obj);
 
 ?>
-===DONE===
 --EXPECT--
 Test::foo()
 TestIteratorIterator::__destruct()
 Test::foo()
-===DONE===

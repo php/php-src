@@ -46,9 +46,7 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(true)
 bool(true)
-===DONE===

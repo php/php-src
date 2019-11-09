@@ -24,7 +24,6 @@ foreach([
 	var_dump($optionval);
 }
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 string(8) "/foo/bar"
@@ -38,4 +37,3 @@ bool(true)
 string(8) "/foo/bar"
 bool(true)
 string(8) "/foo/bar"
-===DONE===

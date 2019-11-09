@@ -33,10 +33,8 @@ if ($f) {
 remove_data("file_cp1252");
 
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (stream)
 string(%d) "hallo
 "
 bool(true)
-===DONE===

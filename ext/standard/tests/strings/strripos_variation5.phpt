@@ -23,7 +23,6 @@ var_dump( strripos($control_char_str, "\n", 12) );
 var_dump( strripos($control_char_str, "\t", 15) );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing strripos() function: with heredoc strings ***
 -- With heredoc string containing escape characters --
@@ -31,4 +30,3 @@ int(13)
 int(19)
 int(13)
 int(19)
-===DONE===

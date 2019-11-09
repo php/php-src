@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -185,7 +183,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|llz",
 			&domain, &option, &variant, &idna_info) == FAILURE) {
-		RETURN_NULL(); /* don't set FALSE because that's not the way it was before... */
+		return;
 	}
 
 	if (variant != INTL_IDN_VARIANT_UTS46) {

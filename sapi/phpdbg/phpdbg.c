@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -30,6 +28,7 @@
 #include "phpdbg_eol.h"
 #include "phpdbg_print.h"
 #include "phpdbg_help.h"
+#include "phpdbg_arginfo.h"
 
 #include "ext/standard/basic_functions.h"
 
@@ -334,13 +333,18 @@ static PHP_FUNCTION(phpdbg_exec)
     instructs phpdbg to insert a breakpoint at the next opcode */
 static PHP_FUNCTION(phpdbg_break_next)
 {
-	zend_execute_data *ex = EG(current_execute_data);
+	zend_execute_data *ex;
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	ex = EG(current_execute_data);
 	while (ex && ex->func && !ZEND_USER_CODE(ex->func->type)) {
 		ex = ex->prev_execute_data;
 	}
 
-	if (zend_parse_parameters_none() == FAILURE || !ex) {
+	if (!ex) {
 		return;
 	}
 
@@ -364,8 +368,8 @@ static PHP_FUNCTION(phpdbg_break_file)
 /* {{{ proto void phpdbg_break_method(string class, string method) */
 static PHP_FUNCTION(phpdbg_break_method)
 {
-	char *class = NULL, *method = NULL;
-	size_t clen = 0, mlen = 0;
+	char *class, *method;
+	size_t clen, mlen;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &class, &clen, &method, &mlen) == FAILURE) {
 		return;
@@ -377,7 +381,7 @@ static PHP_FUNCTION(phpdbg_break_method)
 /* {{{ proto void phpdbg_break_function(string function) */
 static PHP_FUNCTION(phpdbg_break_function)
 {
-	char    *function = NULL;
+	char    *function;
 	size_t   function_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &function, &function_len) == FAILURE) {
@@ -391,6 +395,10 @@ static PHP_FUNCTION(phpdbg_break_function)
    instructs phpdbg to clear breakpoints */
 static PHP_FUNCTION(phpdbg_clear)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]);
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE_PENDING]);
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_SYM]);
@@ -420,7 +428,8 @@ static PHP_FUNCTION(phpdbg_color)
 			phpdbg_set_color_ex(element, color, color_len);
 		break;
 
-		default: zend_error(E_ERROR, "phpdbg detected an incorrect color constant");
+		default:
+			zend_value_error("phpdbg detected an incorrect color constant");
 	}
 } /* }}} */
 
@@ -715,62 +724,18 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 	}
 }
 
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_next_arginfo, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_file_arginfo, 0, 0, 2)
-	ZEND_ARG_INFO(0, file)
-	ZEND_ARG_INFO(0, line)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_method_arginfo, 0, 0, 2)
-	ZEND_ARG_INFO(0, class)
-	ZEND_ARG_INFO(0, method)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_function_arginfo, 0, 0, 1)
-	ZEND_ARG_INFO(0, function)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_color_arginfo, 0, 0, 2)
-	ZEND_ARG_INFO(0, element)
-	ZEND_ARG_INFO(0, color)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_prompt_arginfo, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_exec_arginfo, 0, 0, 1)
-	ZEND_ARG_INFO(0, context)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_clear_arginfo, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_start_oplog_arginfo, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_end_oplog_arginfo, 0, 0, 0)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_get_executable_arginfo, 0, 0, 0)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO()
-
 static const zend_function_entry phpdbg_user_functions[] = {
-	PHP_FE(phpdbg_clear, phpdbg_clear_arginfo)
-	PHP_FE(phpdbg_break_next, phpdbg_break_next_arginfo)
-	PHP_FE(phpdbg_break_file, phpdbg_break_file_arginfo)
-	PHP_FE(phpdbg_break_method, phpdbg_break_method_arginfo)
-	PHP_FE(phpdbg_break_function, phpdbg_break_function_arginfo)
-	PHP_FE(phpdbg_exec,  phpdbg_exec_arginfo)
-	PHP_FE(phpdbg_color, phpdbg_color_arginfo)
-	PHP_FE(phpdbg_prompt, phpdbg_prompt_arginfo)
-	PHP_FE(phpdbg_start_oplog, phpdbg_start_oplog_arginfo)
-	PHP_FE(phpdbg_end_oplog, phpdbg_end_oplog_arginfo)
-	PHP_FE(phpdbg_get_executable, phpdbg_get_executable_arginfo)
+	PHP_FE(phpdbg_clear, arginfo_phpdbg_clear)
+	PHP_FE(phpdbg_break_next, arginfo_phpdbg_break_next)
+	PHP_FE(phpdbg_break_file, arginfo_phpdbg_break_file)
+	PHP_FE(phpdbg_break_method, arginfo_phpdbg_break_method)
+	PHP_FE(phpdbg_break_function, arginfo_phpdbg_break_function)
+	PHP_FE(phpdbg_exec, arginfo_phpdbg_exec)
+	PHP_FE(phpdbg_color, arginfo_phpdbg_color)
+	PHP_FE(phpdbg_prompt, arginfo_phpdbg_prompt)
+	PHP_FE(phpdbg_start_oplog, arginfo_phpdbg_start_oplog)
+	PHP_FE(phpdbg_end_oplog, arginfo_phpdbg_end_oplog)
+	PHP_FE(phpdbg_get_executable, arginfo_phpdbg_get_executable)
 #ifdef  PHP_FE_END
 	PHP_FE_END
 #else

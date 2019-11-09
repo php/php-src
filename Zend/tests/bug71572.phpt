@@ -10,7 +10,6 @@ var_dump($str[3] = "");
 var_dump($str[10] = "");
 var_dump($str);
 ?>
-==DONE==
 --EXPECTF--
 Warning: Cannot assign an empty string to a string offset in %s on line %d
 NULL
@@ -24,4 +23,3 @@ NULL
 Warning: Cannot assign an empty string to a string offset in %s on line %d
 NULL
 string(3) "abc"
-==DONE==

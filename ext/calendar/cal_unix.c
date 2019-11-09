@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -37,7 +35,8 @@ PHP_FUNCTION(unixtojd)
 	if (!ts) {
 		ts = time(NULL);
 	} else if (ts < 0) {
-		RETURN_FALSE;
+		zend_value_error("timestamp must not be negative");
+		return;
 	}
 
 	if (!(ta = php_localtime_r(&ts, &tmbuf))) {
@@ -59,8 +58,9 @@ PHP_FUNCTION(jdtounix)
 	}
 	uday -= 2440588 /* J.D. of 1.1.1970 */;
 
-	if (uday < 0 || uday > 24755) { /* before beginning of unix epoch or behind end of unix epoch */
-		RETURN_FALSE;
+	if (uday < 0 || uday > 24755) {
+		zend_value_error("jday must be within the Unix epoch");
+		return;
 	}
 
 	RETURN_LONG(uday * 24 * 3600);

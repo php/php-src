@@ -16,7 +16,6 @@ for($imagetype = 0; $imagetype <= IMAGETYPE_COUNT; ++$imagetype) {
   var_dump(image_type_to_mime_type($imagetype));
 }
 ?>
-===DONE===
 --EXPECTREGEX--
 \*\*\* Testing image_type_to_mime_type\(\) : usage variations \*\*\*
 
@@ -79,4 +78,3 @@ string\(10\) "image\/webp"
 
 -- Iteration 19 --
 string\(24\) "application\/octet-stream"
-===DONE===

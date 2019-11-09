@@ -411,9 +411,9 @@ static int zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 	switch (Z_TYPE_P(offset)) {
 		case IS_UNDEF:
 			if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), expr)) {
-				zend_error(E_WARNING,
+				zend_throw_error(NULL,
 					"Cannot add element to the array as the next element is already occupied");
-				zval_ptr_dtor_nogc(expr);
+				return FAILURE;
 			}
 			break;
 		case IS_STRING:
@@ -436,11 +436,11 @@ static int zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 			zend_hash_index_update(Z_ARRVAL_P(result), zend_dval_to_lval(Z_DVAL_P(offset)), expr);
 			break;
 		case IS_RESOURCE:
-			zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
+			zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(offset), Z_RES_HANDLE_P(offset));
 			zend_hash_index_update(Z_ARRVAL_P(result), Z_RES_HANDLE_P(offset), expr);
 			break;
 		default:
-			zend_throw_error(NULL, "Illegal offset type");
+			zend_type_error("Illegal offset type");
 			return FAILURE;
  	}
 	return SUCCESS;
@@ -451,15 +451,16 @@ static int zend_ast_add_unpacked_element(zval *result, zval *expr) {
 		HashTable *ht = Z_ARRVAL_P(expr);
 		zval *val;
 		zend_string *key;
-		
+
 		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
 			if (key) {
 				zend_throw_error(NULL, "Cannot unpack array with string keys");
 				return FAILURE;
 			} else {
 				if (!zend_hash_next_index_insert(Z_ARRVAL_P(result), val)) {
-					zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-					break;
+					zend_throw_error(NULL,
+						"Cannot add element to the array as the next element is already occupied");
+					return FAILURE;
 				}
 				Z_TRY_ADDREF_P(val);
 			}
@@ -1225,7 +1226,7 @@ tail_call:
 		} else {
 			zend_ast_export_indent(str, indent);
 			smart_str_appends(str, "} else ");
-			if (ast->child[1]->kind == ZEND_AST_IF) {
+			if (ast->child[1] && ast->child[1]->kind == ZEND_AST_IF) {
 				list = (zend_ast_list*)ast->child[1];
 				goto tail_call;
 			} else {
@@ -1311,6 +1312,23 @@ static ZEND_COLD void zend_ast_export_class_no_header(smart_str *str, zend_ast_d
 	zend_ast_export_stmt(str, decl->child[2], indent + 1);
 	zend_ast_export_indent(str, indent);
 	smart_str_appends(str, "}");
+}
+
+static ZEND_COLD void zend_ast_export_type(smart_str *str, zend_ast *ast, int indent) {
+	if (ast->kind == ZEND_AST_TYPE_UNION) {
+		zend_ast_list *list = zend_ast_get_list(ast);
+		for (uint32_t i = 0; i < list->children; i++) {
+			if (i != 0) {
+				smart_str_appendc(str, '|');
+			}
+			zend_ast_export_type(str, list->child[i], indent);
+		}
+		return;
+	}
+	if (ast->attr & ZEND_TYPE_NULLABLE) {
+		smart_str_appendc(str, '?');
+	}
+	zend_ast_export_ns_name(str, ast, 0, indent);
 }
 
 #define BINARY_OP(_op, _p, _pl, _pr) do { \
@@ -1422,10 +1440,7 @@ tail_call:
 			zend_ast_export_ex(str, decl->child[1], 0, indent);
 			if (decl->child[3]) {
 				smart_str_appends(str, ": ");
-				if (decl->child[3]->attr & ZEND_TYPE_NULLABLE) {
-					smart_str_appendc(str, '?');
-				}
-				zend_ast_export_ns_name(str, decl->child[3], 0, indent);
+				zend_ast_export_type(str, decl->child[3], indent);
 			}
 			if (decl->child[2]) {
 				if (decl->kind == ZEND_AST_ARROW_FUNC) {
@@ -1515,11 +1530,7 @@ simple_list:
 			}
 
 			if (type_ast) {
-				if (type_ast->attr & ZEND_TYPE_NULLABLE) {
-					smart_str_appendc(str, '?');
-				}
-				zend_ast_export_ns_name(
-					str, type_ast, 0, indent);
+				zend_ast_export_type(str, type_ast, indent);
 				smart_str_appendc(str, ' ');
 			}
 
@@ -1989,10 +2000,7 @@ simple_list:
 			break;
 		case ZEND_AST_PARAM:
 			if (ast->child[0]) {
-				if (ast->child[0]->attr & ZEND_TYPE_NULLABLE) {
-					smart_str_appendc(str, '?');
-				}
-				zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+				zend_ast_export_type(str, ast->child[0], indent);
 				smart_str_appendc(str, ' ');
 			}
 			if (ast->attr & ZEND_PARAM_REF) {

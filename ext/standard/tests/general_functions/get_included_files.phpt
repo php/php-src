@@ -23,7 +23,6 @@ echo "\n-- List included files atfter including inc2 which will include inc3 whi
 var_dump(get_included_files());
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing get_included_files()
 
@@ -52,4 +51,3 @@ array(4) {
   [3]=>
   string(%d) "%sget_included_files_inc3.inc"
 }
-===DONE===

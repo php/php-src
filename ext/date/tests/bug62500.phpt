@@ -23,6 +23,6 @@ try {
 NULL
 int(3)
 
-Notice: Undefined property: Crasher::$2 in %sbug62500.php on line %d
+Warning: Undefined property: Crasher::$2 in %s on line %d
 NULL
 string(%s) "DateInterval::__construct(): Unknown or bad format (blah)"

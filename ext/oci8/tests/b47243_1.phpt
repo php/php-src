@@ -20,6 +20,5 @@ oci_fetch_all($s, $r);
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ===DONE===

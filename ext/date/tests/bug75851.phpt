@@ -1,7 +1,7 @@
 --TEST--
 Test for bug #75851: Year component overflow with date formats "c", "o", "r" and "y"
 --SKIPIF--
-<?php echo PHP_INT_SIZE != 8 ? "skip 64-bit only" : "OK"; ?>
+<?php if (PHP_INT_SIZE != 8) die("skip 64-bit only"); ?>
 --INI--
 date.timezone = UTC
 --FILE--

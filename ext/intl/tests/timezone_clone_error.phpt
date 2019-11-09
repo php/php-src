@@ -21,12 +21,10 @@ var_dump(clone $tz);
 }
 
 ?>
-==DONE==
 --EXPECT--
 object(A)#1 (1) {
   ["valid"]=>
   bool(false)
 }
 string(9) "Exception"
-string(39) "Cannot clone unconstructed IntlTimeZone"
-==DONE==
+string(39) "Cannot clone unconstructed IntlTimeZone"

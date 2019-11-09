@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -83,8 +81,10 @@ ZEND_TLS zend_bool              mdata_used = 0;
 ZEND_TLS uint8_t pcre2_init_ok = 0;
 #if defined(ZTS) && defined(HAVE_PCRE_JIT_SUPPORT)
 static MUTEX_T pcre_mt = NULL;
-#define php_pcre_mutex_alloc() if (tsrm_is_main_thread() && !pcre_mt) pcre_mt = tsrm_mutex_alloc();
-#define php_pcre_mutex_free() if (tsrm_is_main_thread() && pcre_mt) tsrm_mutex_free(pcre_mt); pcre_mt = NULL;
+#define php_pcre_mutex_alloc() \
+	if (tsrm_is_main_thread() && !pcre_mt) pcre_mt = tsrm_mutex_alloc();
+#define php_pcre_mutex_free() \
+	if (tsrm_is_main_thread() && pcre_mt) { tsrm_mutex_free(pcre_mt); pcre_mt = NULL; }
 #define php_pcre_mutex_lock() tsrm_mutex_lock(pcre_mt);
 #define php_pcre_mutex_unlock() tsrm_mutex_unlock(pcre_mt);
 #else
@@ -558,7 +558,7 @@ static zend_always_inline size_t calculate_unit_length(pcre_cache_entry *pce, ch
 
 /* {{{ pcre_get_compiled_regex_cache
  */
-PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
+PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, int locale_aware)
 {
 	pcre2_code			*re = NULL;
 	uint32_t			 coptions = 0;
@@ -579,7 +579,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	zend_string 		*key;
 	pcre_cache_entry *ret;
 
-	if (BG(locale_string) &&
+	if (locale_aware && BG(locale_string) &&
 		(ZSTR_LEN(BG(locale_string)) != 1 && ZSTR_VAL(BG(locale_string))[0] != 'C')) {
 		key = zend_string_alloc(ZSTR_LEN(regex) + ZSTR_LEN(BG(locale_string)) + 1, 0);
 		memcpy(ZSTR_VAL(key), ZSTR_VAL(BG(locale_string)), ZSTR_LEN(BG(locale_string)) + 1);
@@ -783,6 +783,12 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 			if (!pcre2_pattern_info(re, PCRE2_INFO_JITSIZE, &jit_size) && jit_size > 0) {
 				poptions |= PREG_JIT;
 			}
+		} else if (rc == PCRE2_ERROR_NOMEMORY) {
+			php_error_docref(NULL, E_WARNING,
+				"Allocation of JIT memory failed, PCRE JIT will be disabled. "
+				"This is likely caused by security restrictions. "
+				"Either grant PHP permission to allocate executable memory, or set pcre.jit=0");
+			PCRE_G(jit) = 0;
 		} else {
 			pcre2_get_error_message(rc, error, sizeof(error));
 			php_error_docref(NULL, E_WARNING, "JIT compilation failed: %s", error);
@@ -851,6 +857,14 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	}
 
 	return ret;
+}
+/* }}} */
+
+/* {{{ pcre_get_compiled_regex_cache
+ */
+PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
+{
+	return pcre_get_compiled_regex_cache_ex(regex, 1);
 }
 /* }}} */
 
@@ -1081,7 +1095,7 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 		Z_PARAM_ZVAL(subpats)
 		Z_PARAM_LONG(flags)
 		Z_PARAM_LONG(start_offset)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* Compile regex or get it from cache. */
 	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {
@@ -2442,7 +2456,7 @@ static PHP_FUNCTION(preg_split)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(limit_val)
 		Z_PARAM_LONG(flags)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* Compile regex or get it from cache. */
 	if ((pce = pcre_get_compiled_regex_cache(regex)) == NULL) {

@@ -10,7 +10,5 @@ zlib.output_compression=0
 $infile = __DIR__.'/bug73115.jpg';
 var_dump(count(exif_read_data($infile)));
 ?>
-===DONE===
 --EXPECT--
 int(80)
-===DONE===

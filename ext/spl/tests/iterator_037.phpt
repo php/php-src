@@ -88,7 +88,6 @@ catch (Exception $e)
 }
 
 ?>
-===DONE===
 --EXPECT--
 ===1===
 int(1)
@@ -128,4 +127,3 @@ int(0)
 ===X===
 Exception: Unsetting flag CALL_TO_STRING is not possible
 Exception: Unsetting flag TOSTRING_USE_INNER is not possible
-===DONE===

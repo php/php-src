@@ -27,6 +27,7 @@
 #include "zend_vm.h"
 #include "zend_dtrace.h"
 #include "zend_smart_str.h"
+#include "zend_exceptions_arginfo.h"
 
 ZEND_API zend_class_entry *zend_ce_throwable;
 ZEND_API zend_class_entry *zend_ce_exception;
@@ -157,8 +158,9 @@ ZEND_API ZEND_COLD void zend_throw_exception_internal(zval *exception) /* {{{ */
 		if (exception && (Z_OBJCE_P(exception) == zend_ce_parse_error || Z_OBJCE_P(exception) == zend_ce_compile_error)) {
 			return;
 		}
-		if(EG(exception)) {
+		if (EG(exception)) {
 			zend_exception_error(EG(exception), E_ERROR);
+			zend_bailout();
 		}
 		zend_error_noreturn(E_CORE_ERROR, "Exception thrown without a stack frame");
 	}
@@ -630,7 +632,8 @@ ZEND_METHOD(exception, getTraceAsString)
 
 	trace = zend_read_property_ex(base_ce, object, ZSTR_KNOWN(ZEND_STR_TRACE), 1, &rv);
 	if (Z_TYPE_P(trace) != IS_ARRAY) {
-		RETURN_FALSE;
+		zend_type_error("trace is not an array");
+		return;
 	}
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(trace), index, frame) {
 		if (Z_TYPE_P(frame) != IS_ARRAY) {
@@ -758,14 +761,14 @@ ZEND_METHOD(exception, __toString)
 
 /** {{{ Throwable method definition */
 static const zend_function_entry zend_funcs_throwable[] = {
-	ZEND_ABSTRACT_ME(throwable, getMessage,       NULL)
-	ZEND_ABSTRACT_ME(throwable, getCode,          NULL)
-	ZEND_ABSTRACT_ME(throwable, getFile,          NULL)
-	ZEND_ABSTRACT_ME(throwable, getLine,          NULL)
-	ZEND_ABSTRACT_ME(throwable, getTrace,         NULL)
-	ZEND_ABSTRACT_ME(throwable, getPrevious,      NULL)
-	ZEND_ABSTRACT_ME(throwable, getTraceAsString, NULL)
-	ZEND_ABSTRACT_ME(throwable, __toString,       NULL)
+	ZEND_ABSTRACT_ME(throwable, getMessage,       arginfo_class_Throwable_getMessage)
+	ZEND_ABSTRACT_ME(throwable, getCode,          arginfo_class_Throwable_getCode)
+	ZEND_ABSTRACT_ME(throwable, getFile,          arginfo_class_Throwable_getFile)
+	ZEND_ABSTRACT_ME(throwable, getLine,          arginfo_class_Throwable_getLine)
+	ZEND_ABSTRACT_ME(throwable, getTrace,         arginfo_class_Throwable_getTrace)
+	ZEND_ABSTRACT_ME(throwable, getPrevious,      arginfo_class_Throwable_getPrevious)
+	ZEND_ABSTRACT_ME(throwable, getTraceAsString, arginfo_class_Throwable_getTraceAsString)
+	ZEND_ABSTRACT_ME(throwable, __toString,       arginfo_class_Throwable___toString)
 	ZEND_FE_END
 };
 /* }}} */
@@ -780,39 +783,24 @@ static const zend_function_entry zend_funcs_throwable[] = {
  * And never try to change the state of exceptions and never implement anything
  * that gives the user anything to accomplish this.
  */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_exception___construct, 0, 0, 0)
-	ZEND_ARG_INFO(0, message)
-	ZEND_ARG_INFO(0, code)
-	ZEND_ARG_INFO(0, previous)
-ZEND_END_ARG_INFO()
-
 static const zend_function_entry default_exception_functions[] = {
-	ZEND_ME(exception, __clone, NULL, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
-	ZEND_ME(exception, __construct, arginfo_exception___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME(exception, __wakeup, NULL, ZEND_ACC_PUBLIC)
-	ZEND_ME(exception, getMessage, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, getCode, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, getFile, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, getLine, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, getTrace, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, getPrevious, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, getTraceAsString, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	ZEND_ME(exception, __toString, NULL, 0)
+	ZEND_ME(exception, __clone, arginfo_class_Exception___clone, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
+	ZEND_ME(exception, __construct, arginfo_class_Exception___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(exception, __wakeup, arginfo_class_Exception___wakeup, ZEND_ACC_PUBLIC)
+	ZEND_ME(exception, getMessage, arginfo_class_Exception_getMessage, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, getCode, arginfo_class_Exception_getCode, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, getFile, arginfo_class_Exception_getFile, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, getLine, arginfo_class_Exception_getLine, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, getTrace, arginfo_class_Exception_getTrace, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, getPrevious, arginfo_class_Exception_getPrevious, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, getTraceAsString, arginfo_class_Exception_getTraceAsString, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(exception, __toString, arginfo_class_Exception___toString, 0)
 	ZEND_FE_END
 };
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_error_exception___construct, 0, 0, 0)
-	ZEND_ARG_INFO(0, message)
-	ZEND_ARG_INFO(0, code)
-	ZEND_ARG_INFO(0, severity)
-	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, lineno)
-	ZEND_ARG_INFO(0, previous)
-ZEND_END_ARG_INFO()
-
 static const zend_function_entry error_exception_functions[] = {
-	ZEND_ME(error_exception, __construct, arginfo_error_exception___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME(error_exception, getSeverity, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(error_exception, __construct, arginfo_class_ErrorException___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(error_exception, getSeverity, arginfo_class_ErrorException_getSeverity, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_FE_END
 };
 /* }}} */
@@ -984,20 +972,21 @@ ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {
 	zend_class_entry *ce_exception;
 
 	ZVAL_OBJ(&exception, ex);
-	ce_exception = Z_OBJCE(exception);
+	ce_exception = ex->ce;
 	EG(exception) = NULL;
 	if (ce_exception == zend_ce_parse_error || ce_exception == zend_ce_compile_error) {
 		zend_string *message = zval_get_string(GET_PROPERTY(&exception, ZEND_STR_MESSAGE));
 		zend_string *file = zval_get_string(GET_PROPERTY_SILENT(&exception, ZEND_STR_FILE));
 		zend_long line = zval_get_long(GET_PROPERTY_SILENT(&exception, ZEND_STR_LINE));
 
-		zend_error_helper(ce_exception == zend_ce_parse_error ? E_PARSE : E_COMPILE_ERROR,
+		zend_error_helper(
+			(ce_exception == zend_ce_parse_error ? E_PARSE : E_COMPILE_ERROR) | E_DONT_BAIL,
 			ZSTR_VAL(file), line, "%s", ZSTR_VAL(message));
 
 		zend_string_release_ex(file, 0);
 		zend_string_release_ex(message, 0);
 	} else if (instanceof_function(ce_exception, zend_ce_throwable)) {
-		zval tmp, rv;
+		zval tmp;
 		zend_string *str, *file = NULL;
 		zend_long line = 0;
 
@@ -1034,7 +1023,8 @@ ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {
 		file = zval_get_string(GET_PROPERTY_SILENT(&exception, ZEND_STR_FILE));
 		line = zval_get_long(GET_PROPERTY_SILENT(&exception, ZEND_STR_LINE));
 
-		zend_error_va(severity, (file && ZSTR_LEN(file) > 0) ? ZSTR_VAL(file) : NULL, line,
+		zend_error_va(severity | E_DONT_BAIL,
+			(file && ZSTR_LEN(file) > 0) ? ZSTR_VAL(file) : NULL, line,
 			"Uncaught %s\n  thrown", ZSTR_VAL(str));
 
 		zend_string_release_ex(str, 0);

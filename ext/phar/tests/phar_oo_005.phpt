@@ -26,7 +26,6 @@ foreach($it as $name => $ent)
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/files/phar_oo_005.phar.php');
@@ -58,4 +57,3 @@ string(14) "phar://*/e.php"
 string(0) ""
 string(5) "e.php"
 string(20) "phar_oo_005.phar.php"
-===DONE===

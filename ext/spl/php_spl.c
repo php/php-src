@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -90,7 +88,7 @@ PHP_FUNCTION(class_parents)
 	zend_bool autoload = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
@@ -124,7 +122,7 @@ PHP_FUNCTION(class_implements)
 	zend_class_entry *ce;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
 		php_error_docref(NULL, E_WARNING, "object or string expected");
@@ -153,7 +151,7 @@ PHP_FUNCTION(class_uses)
 	zend_class_entry *ce;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
 		php_error_docref(NULL, E_WARNING, "object or string expected");
@@ -314,7 +312,7 @@ PHP_FUNCTION(spl_autoload)
 	zend_string *class_name, *lc_name, *file_exts = SPL_G(autoload_extensions);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|S", &class_name, &file_exts) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (file_exts == NULL) { /* autoload_extensions is not initialized, set to defaults */

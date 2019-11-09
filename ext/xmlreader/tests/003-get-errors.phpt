@@ -57,7 +57,6 @@ while ($reader->read()) {
 // clean up
 $reader->close();
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__.'/003-get-errors.xml');
@@ -74,4 +73,3 @@ NULL
 num: 1
 NULL
 num: 1
-===DONE===

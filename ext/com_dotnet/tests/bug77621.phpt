@@ -12,7 +12,5 @@ define('ADSTYPE_INVALID', 0);
 $root = dirname(array_change_key_case($_SERVER, CASE_UPPER)['COMSPEC']);
 com_load_typelib("$root\activeds.tlb");
 ?>
-===DONE===
 --EXPECTF--
 Warning: com_load_typelib(): Type library constant ADSTYPE_INVALID is already defined in %s on line %d
-===DONE===

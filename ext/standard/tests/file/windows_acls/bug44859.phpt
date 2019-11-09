@@ -7,6 +7,7 @@ skipif();
 ?>
 --FILE--
 <?php
+$uniqueBasePath = substr(__FILE__, 0, strrpos(__FILE__, '.'));
 include_once __DIR__ . '/common.inc';
 fix_acls();
 
@@ -19,7 +20,7 @@ $iteration = array(
 
 echo "Testing file:\n";
 $i = 1;
-$path = __DIR__ . '/a.txt';
+$path = $uniqueBasePath . '_file.txt';
 foreach ($iteration as $perms => $exp) {
 	create_file($path, $perms);
 	clearstatcache(true, $path);
@@ -34,7 +35,7 @@ foreach ($iteration as $perms => $exp) {
 }
 
 echo "Testing directory:\n";
-$path = __DIR__ . '/adir';
+$path = $uniqueBasePath . '_dir';
 $i = 1;
 foreach ($iteration as $perms => $exp) {
 	create_dir($path, $perms);

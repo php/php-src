@@ -15,9 +15,7 @@ spl_autoload_register(function ($class_name) {
 var_dump(class_exists('autoload_derived'));
 
 ?>
-===DONE===
 --EXPECT--
 autoload(autoload_root)
 autoload(autoload_derived)
 bool(true)
-===DONE===

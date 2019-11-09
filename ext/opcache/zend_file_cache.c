@@ -371,6 +371,38 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 	}
 }
 
+static void zend_file_cache_serialize_type(
+		zend_type *type, zend_persistent_script *script, zend_file_cache_metainfo *info, void *buf)
+{
+	if (ZEND_TYPE_HAS_LIST(*type)) {
+		zend_type_list *list = ZEND_TYPE_LIST(*type);
+		SERIALIZE_PTR(list);
+		ZEND_TYPE_SET_PTR(*type, list);
+		UNSERIALIZE_PTR(list);
+
+		void **entry;
+		ZEND_TYPE_LIST_FOREACH_PTR(list, entry) {
+			if (ZEND_TYPE_LIST_IS_NAME(*entry)) {
+				zend_string *name = ZEND_TYPE_LIST_GET_NAME(*entry);
+				SERIALIZE_STR(name);
+				*entry = ZEND_TYPE_LIST_ENCODE_NAME(name);
+			} else {
+				zend_class_entry *ce = ZEND_TYPE_LIST_GET_CE(*entry);
+				SERIALIZE_PTR(ce);
+				*entry = ZEND_TYPE_LIST_ENCODE_CE(ce);
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+	} else if (ZEND_TYPE_HAS_NAME(*type)) {
+		zend_string *type_name = ZEND_TYPE_NAME(*type);
+		SERIALIZE_STR(type_name);
+		ZEND_TYPE_SET_PTR(*type, type_name);
+	} else if (ZEND_TYPE_HAS_CE(*type)) {
+		zend_class_entry *ce = ZEND_TYPE_CE(*type);
+		SERIALIZE_PTR(ce);
+		ZEND_TYPE_SET_PTR(*type, ce);
+	}
+}
+
 static void zend_file_cache_serialize_op_array(zend_op_array            *op_array,
                                                zend_persistent_script   *script,
                                                zend_file_cache_metainfo *info,
@@ -498,16 +530,7 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				if (!IS_SERIALIZED(p->name)) {
 					SERIALIZE_STR(p->name);
 				}
-				if (ZEND_TYPE_IS_CLASS(p->type)) {
-					zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(p->type);
-					zend_string *type_name = ZEND_TYPE_NAME(p->type);
-
-					SERIALIZE_STR(type_name);
-					p->type =
-						(Z_UL(1) << (sizeof(zend_type)*8-1)) | /* type is class */
-						(allow_null ? (Z_UL(1) << (sizeof(zend_type)*8-2)) : Z_UL(0)) | /* type allow null */
-						(zend_type)type_name;
-				}
+				zend_file_cache_serialize_type(&p->type, script, info, buf);
 				p++;
 			}
 		}
@@ -576,17 +599,7 @@ static void zend_file_cache_serialize_prop_info(zval                     *zv,
 			if (prop->doc_comment) {
 				SERIALIZE_STR(prop->doc_comment);
 			}
-		}
-		if (prop->type) {
-			if (ZEND_TYPE_IS_NAME(prop->type)) {
-				zend_string *name = ZEND_TYPE_NAME(prop->type);
-				SERIALIZE_STR(name);
-				prop->type = ZEND_TYPE_ENCODE_CLASS(name, ZEND_TYPE_ALLOW_NULL(prop->type));
-			} else if (ZEND_TYPE_IS_CE(prop->type)) {
-				zend_class_entry *ce = ZEND_TYPE_CE(prop->type);
-				SERIALIZE_PTR(ce);
-				prop->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(prop->type));
-			}
+			zend_file_cache_serialize_type(&prop->type, script, info, buf);
 		}
 	}
 }
@@ -936,7 +949,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	zend_shared_alloc_destroy_xlat_table();
 
 	info.checksum = zend_adler32(ADLER32_INIT, buf, script->size);
-	info.checksum = zend_adler32(info.checksum, (signed char*)ZSTR_VAL((zend_string*)ZCG(mem)), info.str_size);
+	info.checksum = zend_adler32(info.checksum, (unsigned char*)ZSTR_VAL((zend_string*)ZCG(mem)), info.str_size);
 
 #if __has_feature(memory_sanitizer)
 	/* The buffer may contain uninitialized regions. However, the uninitialized parts will not be
@@ -1087,6 +1100,37 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 	}
 }
 
+static void zend_file_cache_unserialize_type(
+		zend_type *type, zend_persistent_script *script, void *buf)
+{
+	if (ZEND_TYPE_HAS_LIST(*type)) {
+		zend_type_list *list = ZEND_TYPE_LIST(*type);
+		UNSERIALIZE_PTR(list);
+		ZEND_TYPE_SET_PTR(*type, list);
+
+		void **entry;
+		ZEND_TYPE_LIST_FOREACH_PTR(list, entry) {
+			if (ZEND_TYPE_LIST_IS_NAME(*entry)) {
+				zend_string *name = ZEND_TYPE_LIST_GET_NAME(*entry);
+				UNSERIALIZE_STR(name);
+				*entry = ZEND_TYPE_LIST_ENCODE_NAME(name);
+			} else {
+				zend_class_entry *ce = ZEND_TYPE_LIST_GET_CE(*entry);
+				UNSERIALIZE_PTR(ce);
+				*entry = ZEND_TYPE_LIST_ENCODE_CE(ce);
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+	} else if (ZEND_TYPE_HAS_NAME(*type)) {
+		zend_string *type_name = ZEND_TYPE_NAME(*type);
+		UNSERIALIZE_STR(type_name);
+		ZEND_TYPE_SET_PTR(*type, type_name);
+	} else if (ZEND_TYPE_HAS_CE(*type)) {
+		zend_class_entry *ce = ZEND_TYPE_CE(*type);
+		UNSERIALIZE_PTR(ce);
+		ZEND_TYPE_SET_PTR(*type, ce);
+	}
+}
+
 static void zend_file_cache_unserialize_op_array(zend_op_array           *op_array,
                                                  zend_persistent_script  *script,
                                                  void                    *buf)
@@ -1202,13 +1246,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				if (!IS_UNSERIALIZED(p->name)) {
 					UNSERIALIZE_STR(p->name);
 				}
-				if (p->type & (Z_UL(1) << (sizeof(zend_type)*8-1))) { /* type is class */
-					zend_bool allow_null = (p->type & (Z_UL(1) << (sizeof(zend_type)*8-2))) != 0; /* type allow null */
-					zend_string *type_name = (zend_string*)(p->type & ~(((Z_UL(1) << (sizeof(zend_type)*8-1))) | ((Z_UL(1) << (sizeof(zend_type)*8-2)))));
-
-					UNSERIALIZE_STR(type_name);
-					p->type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
-				}
+				zend_file_cache_unserialize_type(&p->type, script, buf);
 				p++;
 			}
 		}
@@ -1277,17 +1315,7 @@ static void zend_file_cache_unserialize_prop_info(zval                    *zv,
 			if (prop->doc_comment) {
 				UNSERIALIZE_STR(prop->doc_comment);
 			}
-		}
-		if (prop->type) {
-			if (ZEND_TYPE_IS_NAME(prop->type)) {
-				zend_string *name = ZEND_TYPE_NAME(prop->type);
-				UNSERIALIZE_STR(name);
-				prop->type = ZEND_TYPE_ENCODE_CLASS(name, ZEND_TYPE_ALLOW_NULL(prop->type));
-			} else if (ZEND_TYPE_IS_CE(prop->type)) {
-				zend_class_entry *ce = ZEND_TYPE_CE(prop->type);
-				UNSERIALIZE_PTR(ce);
-				prop->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(prop->type));
-			}
+			zend_file_cache_unserialize_type(&prop->type, script, buf);
 		}
 	}
 }
@@ -1511,6 +1539,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	zend_accel_hash_entry *bucket;
 	void *mem, *checkpoint, *buf;
 	int cache_it = 1;
+	unsigned int actual_checksum;
 	int ok;
 
 	if (!full_path) {
@@ -1594,8 +1623,8 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 
 	/* verify checksum */
 	if (ZCG(accel_directives).file_cache_consistency_checks &&
-	    zend_adler32(ADLER32_INIT, mem, info.mem_size + info.str_size) != info.checksum) {
-		zend_accel_error(ACCEL_LOG_WARNING, "corrupted file '%s'\n", filename);
+	    (actual_checksum = zend_adler32(ADLER32_INIT, mem, info.mem_size + info.str_size)) != info.checksum) {
+		zend_accel_error(ACCEL_LOG_WARNING, "corrupted file '%s' excepted checksum: 0x%08x actual checksum: 0x%08x\n", filename, info.checksum, actual_checksum);
 		zend_file_cache_unlink(filename);
 		zend_arena_release(&CG(arena), checkpoint);
 		efree(filename);
@@ -1683,6 +1712,8 @@ use_process_mem:
 		zend_accel_hash_update(&ZCSG(hash), ZSTR_VAL(script->script.filename), ZSTR_LEN(script->script.filename), 0, script);
 
 		zend_shared_alloc_unlock();
+		zend_accel_error(ACCEL_LOG_INFO, "File cached script loaded into memory '%s'", ZSTR_VAL(script->script.filename));
+
 		zend_arena_release(&CG(arena), checkpoint);
 	}
 	efree(filename);

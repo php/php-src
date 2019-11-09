@@ -24,10 +24,8 @@ $object->setTimeZone($la_time);
 var_dump( $object->getTimeZone()->getName() );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing DateTime::getTimezone() : basic functionality ***
 string(13) "Europe/London"
 string(16) "America/New_York"
 string(19) "America/Los_Angeles"
-===DONE===

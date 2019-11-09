@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -41,7 +39,7 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 #ifdef HAVE_STRUCT_SIGINFO_T
 	act.sa_flags |= SA_SIGINFO;
 #endif
-	if (signo == SIGALRM || (! restart)) {
+	if (!restart) {
 #ifdef SA_INTERRUPT
 		act.sa_flags |= SA_INTERRUPT; /* SunOS */
 #endif

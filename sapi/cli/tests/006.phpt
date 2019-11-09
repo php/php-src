@@ -139,7 +139,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> string $str ]
-        Parameter #1 [ <optional> string or NULL $delim_char ]
+        Parameter #1 [ <optional> ?string $delim_char ]
       }
       - Return [ string ]
     }

@@ -16,8 +16,6 @@ var_dump(preg_replace(array('/\da(.)/ui', '@(.)@'), '$1', array('x','a2aA', '1av
 var_dump(preg_replace(array('/[\w]+/'), array('$'), array('xyz', 'bdbd')));
 var_dump(preg_replace(array('/\s+/', '~[b-d]~'), array('$'), array('x y', 'bd bc')));
 
-echo "==done==\n";
-
 ?>
 --EXPECT--
 string(1) "c"
@@ -41,4 +39,3 @@ array(2) {
   [1]=>
   string(1) "$"
 }
-==done==

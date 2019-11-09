@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -38,6 +36,7 @@
 #include "rfc1867.h"
 #include "php_variables.h"
 #include "php_session.h"
+#include "session_arginfo.h"
 #include "ext/standard/php_random.h"
 #include "ext/standard/php_var.h"
 #include "ext/date/php_date.h"
@@ -244,11 +243,18 @@ static zend_string *php_session_encode(void) /* {{{ */
 
 static int php_session_decode(zend_string *data) /* {{{ */
 {
+	int res;
 	if (!PS(serializer)) {
 		php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to decode session object");
 		return FAILURE;
 	}
-	if (PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data)) == FAILURE) {
+	/* Make sure that any uses of unserialize() during session decoding do not share
+	 * state with any unserialize() that is already in progress (e.g. because we are
+	 * currently inside Serializable::unserialize(). */
+	BG(serialize_lock)++;
+	res = PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data));
+	BG(serialize_lock)--;
+	if (res == FAILURE) {
 		php_session_destroy();
 		php_session_track_init();
 		php_error_docref(NULL, E_WARNING, "Failed to decode session object. Session has been destroyed");
@@ -1946,7 +1952,7 @@ static PHP_FUNCTION(session_set_save_handler)
 		zend_bool register_shutdown = 1;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &obj, php_session_iface_entry, &register_shutdown) == FAILURE) {
-			RETURN_FALSE;
+			return;
 		}
 
 		/* For compatibility reason, implemented interface is not checked */
@@ -2446,7 +2452,7 @@ static PHP_FUNCTION(session_start)
 	zend_long read_and_close = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|a", &options) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (PS(session_status) == php_session_active) {
@@ -2639,6 +2645,8 @@ static PHP_FUNCTION(session_register_shutdown)
 {
 	php_shutdown_function_entry shutdown_function_entry;
 
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	/* This function is registered itself as a shutdown function by
 	 * session_set_save_handler($obj). The reason we now register another
 	 * shutdown function is in case the user registered their own shutdown
@@ -2667,108 +2675,6 @@ static PHP_FUNCTION(session_register_shutdown)
 }
 /* }}} */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_name, 0, 0, 0)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_module_name, 0, 0, 0)
-	ZEND_ARG_INFO(0, module)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_save_path, 0, 0, 0)
-	ZEND_ARG_INFO(0, path)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_id, 0, 0, 0)
-	ZEND_ARG_INFO(0, id)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_create_id, 0, 0, 0)
-	ZEND_ARG_INFO(0, prefix)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_regenerate_id, 0, 0, 0)
-	ZEND_ARG_INFO(0, delete_old_session)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_decode, 0, 0, 1)
-	ZEND_ARG_INFO(0, data)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_session_void, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_set_save_handler, 0, 0, 1)
-	ZEND_ARG_INFO(0, open)
-	ZEND_ARG_INFO(0, close)
-	ZEND_ARG_INFO(0, read)
-	ZEND_ARG_INFO(0, write)
-	ZEND_ARG_INFO(0, destroy)
-	ZEND_ARG_INFO(0, gc)
-	ZEND_ARG_INFO(0, create_sid)
-	ZEND_ARG_INFO(0, validate_sid)
-	ZEND_ARG_INFO(0, update_timestamp)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_cache_limiter, 0, 0, 0)
-	ZEND_ARG_INFO(0, cache_limiter)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_cache_expire, 0, 0, 0)
-	ZEND_ARG_INFO(0, new_cache_expire)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_set_cookie_params, 0, 0, 1)
-	ZEND_ARG_INFO(0, lifetime_or_options)
-	ZEND_ARG_INFO(0, path)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, secure)
-	ZEND_ARG_INFO(0, httponly)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_session_class_open, 0)
-	ZEND_ARG_INFO(0, save_path)
-	ZEND_ARG_INFO(0, session_name)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_session_class_close, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_session_class_read, 0)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_session_class_write, 0)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, val)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_session_class_destroy, 0)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_session_class_gc, 0)
-	ZEND_ARG_INFO(0, maxlifetime)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_session_class_create_sid, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_session_class_validateId, 0)
-	ZEND_ARG_INFO(0, key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_session_class_updateTimestamp, 0)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, val)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_start, 0, 0, 0)
-	ZEND_ARG_INFO(0, options) /* array */
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ session_functions[]
  */
 static const zend_function_entry session_functions[] = {
@@ -2779,22 +2685,22 @@ static const zend_function_entry session_functions[] = {
 	PHP_FE(session_create_id,         arginfo_session_create_id)
 	PHP_FE(session_regenerate_id,     arginfo_session_regenerate_id)
 	PHP_FE(session_decode,            arginfo_session_decode)
-	PHP_FE(session_encode,            arginfo_session_void)
+	PHP_FE(session_encode,            arginfo_session_encode)
 	PHP_FE(session_start,             arginfo_session_start)
-	PHP_FE(session_destroy,           arginfo_session_void)
-	PHP_FE(session_unset,             arginfo_session_void)
-	PHP_FE(session_gc,                arginfo_session_void)
+	PHP_FE(session_destroy,           arginfo_session_destroy)
+	PHP_FE(session_unset,             arginfo_session_unset)
+	PHP_FE(session_gc,                arginfo_session_gc)
 	PHP_FE(session_set_save_handler,  arginfo_session_set_save_handler)
 	PHP_FE(session_cache_limiter,     arginfo_session_cache_limiter)
 	PHP_FE(session_cache_expire,      arginfo_session_cache_expire)
 	PHP_FE(session_set_cookie_params, arginfo_session_set_cookie_params)
-	PHP_FE(session_get_cookie_params, arginfo_session_void)
-	PHP_FE(session_write_close,       arginfo_session_void)
-	PHP_FE(session_abort,             arginfo_session_void)
-	PHP_FE(session_reset,             arginfo_session_void)
-	PHP_FE(session_status,            arginfo_session_void)
-	PHP_FE(session_register_shutdown, arginfo_session_void)
-	PHP_FALIAS(session_commit, session_write_close, arginfo_session_void)
+	PHP_FE(session_get_cookie_params, arginfo_session_get_cookie_params)
+	PHP_FE(session_write_close,       arginfo_session_write_close)
+	PHP_FE(session_abort,             arginfo_session_abort)
+	PHP_FE(session_reset,             arginfo_session_reset)
+	PHP_FE(session_status,            arginfo_session_status)
+	PHP_FE(session_register_shutdown, arginfo_session_register_shutdown)
+	PHP_FALIAS(session_commit, session_write_close, arginfo_session_commit)
 	PHP_FE_END
 };
 /* }}} */
@@ -2802,12 +2708,12 @@ static const zend_function_entry session_functions[] = {
 /* {{{ SessionHandlerInterface functions[]
 */
 static const zend_function_entry php_session_iface_functions[] = {
-	PHP_ABSTRACT_ME(SessionHandlerInterface, open, arginfo_session_class_open)
-	PHP_ABSTRACT_ME(SessionHandlerInterface, close, arginfo_session_class_close)
-	PHP_ABSTRACT_ME(SessionHandlerInterface, read, arginfo_session_class_read)
-	PHP_ABSTRACT_ME(SessionHandlerInterface, write, arginfo_session_class_write)
-	PHP_ABSTRACT_ME(SessionHandlerInterface, destroy, arginfo_session_class_destroy)
-	PHP_ABSTRACT_ME(SessionHandlerInterface, gc, arginfo_session_class_gc)
+	PHP_ABSTRACT_ME(SessionHandlerInterface, open, arginfo_class_SessionHandlerInterface_open)
+	PHP_ABSTRACT_ME(SessionHandlerInterface, close, arginfo_class_SessionHandlerInterface_close)
+	PHP_ABSTRACT_ME(SessionHandlerInterface, read, arginfo_class_SessionHandlerInterface_read)
+	PHP_ABSTRACT_ME(SessionHandlerInterface, write, arginfo_class_SessionHandlerInterface_write)
+	PHP_ABSTRACT_ME(SessionHandlerInterface, destroy, arginfo_class_SessionHandlerInterface_destroy)
+	PHP_ABSTRACT_ME(SessionHandlerInterface, gc, arginfo_class_SessionHandlerInterface_gc)
 	PHP_FE_END
 };
 /* }}} */
@@ -2815,7 +2721,7 @@ static const zend_function_entry php_session_iface_functions[] = {
 /* {{{ SessionIdInterface functions[]
 */
 static const zend_function_entry php_session_id_iface_functions[] = {
-	PHP_ABSTRACT_ME(SessionIdInterface, create_sid, arginfo_session_class_create_sid)
+	PHP_ABSTRACT_ME(SessionIdInterface, create_sid, arginfo_class_SessionIdInterface_create_sid)
 	PHP_FE_END
 };
 /* }}} */
@@ -2823,8 +2729,8 @@ static const zend_function_entry php_session_id_iface_functions[] = {
 /* {{{ SessionUpdateTimestampHandler functions[]
  */
 static const zend_function_entry php_session_update_timestamp_iface_functions[] = {
-	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, validateId, arginfo_session_class_validateId)
-	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, updateTimestamp, arginfo_session_class_updateTimestamp)
+	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, validateId, arginfo_class_SessionUpdateTimestampHandlerInterface_validateId)
+	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, updateTimestamp, arginfo_class_SessionUpdateTimestampHandlerInterface_updateTimestamp)
 	PHP_FE_END
 };
 /* }}} */
@@ -2832,13 +2738,13 @@ static const zend_function_entry php_session_update_timestamp_iface_functions[] 
 /* {{{ SessionHandler functions[]
  */
 static const zend_function_entry php_session_class_functions[] = {
-	PHP_ME(SessionHandler, open, arginfo_session_class_open, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionHandler, close, arginfo_session_class_close, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionHandler, read, arginfo_session_class_read, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionHandler, write, arginfo_session_class_write, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionHandler, destroy, arginfo_session_class_destroy, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionHandler, gc, arginfo_session_class_gc, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionHandler, create_sid, arginfo_session_class_create_sid, ZEND_ACC_PUBLIC)
+	PHP_ME(SessionHandler, open, arginfo_class_SessionHandlerInterface_open, ZEND_ACC_PUBLIC)
+	PHP_ME(SessionHandler, close, arginfo_class_SessionHandlerInterface_close, ZEND_ACC_PUBLIC)
+	PHP_ME(SessionHandler, read, arginfo_class_SessionHandlerInterface_read, ZEND_ACC_PUBLIC)
+	PHP_ME(SessionHandler, write, arginfo_class_SessionHandlerInterface_write, ZEND_ACC_PUBLIC)
+	PHP_ME(SessionHandler, destroy, arginfo_class_SessionHandlerInterface_destroy, ZEND_ACC_PUBLIC)
+	PHP_ME(SessionHandler, gc, arginfo_class_SessionHandlerInterface_gc, ZEND_ACC_PUBLIC)
+	PHP_ME(SessionHandler, create_sid, arginfo_class_SessionIdInterface_create_sid, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */

@@ -21,7 +21,6 @@ gzclose($h);
 
 
 ?>
-===DONE===
 --EXPECTF--
 no wrapper
 array(7) {
@@ -62,4 +61,3 @@ array(9) {
   ["uri"]=>
   string(%d) "compress.zlib://%s/004.txt.gz"
 }
-===DONE===

@@ -12,8 +12,6 @@ echo "\n";
 print_R(intltz_get_equivalent_id('Europe/Lisbon', 1));
 echo "\n";
 ?>
-==DONE==
 --EXPECT--
 Portugal
-Portugal
-==DONE==
+Portugal

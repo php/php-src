@@ -98,8 +98,6 @@ typedef enum _zend_prop_purpose {
 	ZEND_PROP_PURPOSE_VAR_EXPORT,
 	/* Used for json_encode(). */
 	ZEND_PROP_PURPOSE_JSON,
-	/* array_key_exists(). Not intended for general use! */
-	_ZEND_PROP_PURPOSE_ARRAY_KEY_EXISTS,
 	/* Dummy member to ensure that "default" is specified. */
 	_ZEND_PROP_PURPOSE_NON_EXHAUSTIVE_ENUM
 } zend_prop_purpose;
@@ -124,7 +122,6 @@ typedef zend_object* (*zend_object_clone_obj_t)(zend_object *object);
 typedef zend_string *(*zend_object_get_class_name_t)(const zend_object *object);
 
 typedef int (*zend_object_compare_t)(zval *object1, zval *object2);
-typedef int (*zend_object_compare_zvals_t)(zval *result, zval *op1, zval *op2);
 
 /* Cast an object to some other type.
  * readobj and retval must point to distinct zvals.
@@ -135,7 +132,7 @@ typedef int (*zend_object_cast_t)(zend_object *readobj, zval *retval, int type);
  * Returns FAILURE if the object does not have any sense of overloaded dimensions */
 typedef int (*zend_object_count_elements_t)(zend_object *object, zend_long *count);
 
-typedef int (*zend_object_get_closure_t)(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr);
+typedef int (*zend_object_get_closure_t)(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, zend_bool check_only);
 
 typedef HashTable *(*zend_object_get_gc_t)(zend_object *object, zval **table, int *n);
 
@@ -161,14 +158,13 @@ struct _zend_object_handlers {
 	zend_object_get_method_t				get_method;           /* required */
 	zend_object_get_constructor_t			get_constructor;      /* required */
 	zend_object_get_class_name_t			get_class_name;       /* required */
-	zend_object_compare_t					compare_objects;      /* optional */
 	zend_object_cast_t						cast_object;          /* optional */
 	zend_object_count_elements_t			count_elements;       /* optional */
 	zend_object_get_debug_info_t			get_debug_info;       /* optional */
 	zend_object_get_closure_t				get_closure;          /* optional */
 	zend_object_get_gc_t					get_gc;               /* required */
 	zend_object_do_operation_t				do_operation;         /* optional */
-	zend_object_compare_zvals_t				compare;              /* optional */
+	zend_object_compare_t					compare;              /* required */
 	zend_object_get_properties_for_t		get_properties_for;   /* optional */
 };
 
@@ -208,7 +204,7 @@ ZEND_API void zend_std_unset_dimension(zend_object *object, zval *offset);
 ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *method_name, const zval *key);
 ZEND_API zend_string *zend_std_get_class_name(const zend_object *zobj);
 ZEND_API int zend_std_compare_objects(zval *o1, zval *o2);
-ZEND_API int zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr);
+ZEND_API int zend_std_get_closure(zend_object *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr, zend_bool check_only);
 ZEND_API void rebuild_object_properties(zend_object *zobj);
 
 ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope);
@@ -240,6 +236,16 @@ ZEND_API HashTable *zend_get_properties_for(zval *obj, zend_prop_purpose purpose
 			efree(func); \
 		} \
 	} while (0)
+
+/* Fallback to default comparison implementation if the arguments aren't both objects
+ * and have the same compare() handler. You'll likely want to use this unless you
+ * explicitly wish to support comparisons between objects and non-objects. */
+#define ZEND_COMPARE_OBJECTS_FALLBACK(op1, op2) \
+	if (Z_TYPE_P(op1) != IS_OBJECT || \
+			Z_TYPE_P(op2) != IS_OBJECT || \
+			Z_OBJ_HT_P(op1)->compare != Z_OBJ_HT_P(op2)->compare) { \
+		return zend_std_compare_objects(op1, op2); \
+	}
 
 END_EXTERN_C()
 

@@ -12,8 +12,6 @@ var_dump(exif_read_data($infile) !== false);
 $infile = __DIR__.'/bug50660-2.jpg';
 var_dump(exif_read_data($infile) !== false);
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 bool(true)
-===DONE===

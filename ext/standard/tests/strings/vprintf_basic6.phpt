@@ -31,7 +31,6 @@ echo "\n";
 var_dump($result);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : basic functionality - using exponential format ***
 1.000000e+3
@@ -40,4 +39,3 @@ int(11)
 int(23)
 1.000000e+3 2.000000e+3 3.000000e+3
 int(35)
-===DONE===

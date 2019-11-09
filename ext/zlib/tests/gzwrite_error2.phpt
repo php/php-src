@@ -22,9 +22,7 @@ gzclose($h);
 echo "\n";
 unlink($filename);
 ?>
-===DONE===
 --EXPECT--
 int(0)
 int(0)
 
-===DONE===

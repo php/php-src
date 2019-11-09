@@ -75,7 +75,6 @@ sort($props);
 var_dump($props);
 var_dump($r->name);
 ?>
-===DONE===
 --EXPECT--
 array(0) {
 }
@@ -86,4 +85,3 @@ array(2) {
   string(4) "name"
 }
 string(17) "ReflectionClassEx"
-===DONE===

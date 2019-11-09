@@ -33,7 +33,6 @@ echo "\n-- Invoke __toString again --\n";
 echo $d . "\n";
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing basic DateTime inheritance() ***
 
@@ -46,4 +45,3 @@ May 1, 1967, 10:30:41 pm
 
 -- Invoke __toString again --
 July 2, 1963, 10:45:30 am
-===DONE===

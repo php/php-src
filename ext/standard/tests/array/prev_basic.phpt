@@ -33,7 +33,6 @@ for ($i = $length; $i > 0; $i--) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing prev() : basic functionality ***
 2 => two
@@ -50,4 +49,3 @@ int(3)
 string(4) "help"
 string(3) "one"
 bool(false)
-===DONE===

@@ -50,7 +50,6 @@ try {
 	echo "Exception caught OK; continuing.\n";
 }
 ?>
-==DONE==
 --EXPECTF--
 Warning: The magic method __call() must have public visibility and cannot be static in %s on line 3
 ---> Invoke __call via simple method call.
@@ -75,4 +74,3 @@ Exception caught OK; continuing.
 object(B)#2 (0) {
 }
 Exception caught OK; continuing.
-==DONE==

@@ -26,7 +26,6 @@ intlcal_clear($intlcal2, null);
 var_dump($intlcal2->getTime());
 
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 int(1970)
@@ -36,5 +35,4 @@ int(0)
 int(0)
 int(0)
 int(0)
-float(-3600000)
-==DONE==
+float(-3600000)

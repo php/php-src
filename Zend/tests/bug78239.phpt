@@ -1,5 +1,7 @@
 --TEST--
 Bug #78239: Deprecation notice during string conversion converted to exception hangs
+--SKIPIF--
+<?php if (!extension_loaded("zend-test")) die("skip requires zend-test extension"); ?>
 --FILE--
 <?php
 function handleError($level, $message, $file = '', $line = 0, $context = [])
@@ -9,21 +11,12 @@ function handleError($level, $message, $file = '', $line = 0, $context = [])
 
 set_error_handler('handleError');
 
-class A
-{
-    
-    public function abc(): bool
-    {
-        return false;
-    }
-}
-
-$r = new ReflectionMethod("A", "abc");
-(string)$r->getReturnType() ?: "";
+$r = new _ZendTestClass;
+(string)$r ?: "";
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught ErrorException: Function ReflectionType::__toString() is deprecated in %s:%d
+Fatal error: Uncaught ErrorException: Function _ZendTestClass::__toString() is deprecated in %s:%d
 Stack trace:
 #0 %s(%d): handleError(%s)
 #1 {main}

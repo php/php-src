@@ -37,7 +37,6 @@ foreach ($otherVals as $otherVal) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 --- testing: 9223372036854775807 / 0 ---
 float(INF)
@@ -579,4 +578,3 @@ float(1)
 int(-1)
 --- testing: 9223372036854775807 / -9.2233720368548E+18 ---
 float(-1)
-===DONE===

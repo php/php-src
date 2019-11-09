@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -220,8 +218,8 @@ PHP_FUNCTION(cal_info)
 
 
 	if (cal != -1 && (cal < 0 || cal >= CAL_NUM_CALS)) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT, cal);
-		RETURN_FALSE;
+		zend_value_error("invalid calendar ID " ZEND_LONG_FMT, cal);
+		return;
 	}
 
 	_php_cal_info(cal, return_value);
@@ -242,8 +240,8 @@ PHP_FUNCTION(cal_days_in_month)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT, cal);
-		RETURN_FALSE;
+		zend_value_error("invalid calendar ID " ZEND_LONG_FMT, cal);
+		return;
 	}
 
 	calendar = &cal_conversion_table[cal];
@@ -251,8 +249,8 @@ PHP_FUNCTION(cal_days_in_month)
 	sdn_start = calendar->to_jd(year, month, 1);
 
 	if (sdn_start == 0) {
-		php_error_docref(NULL, E_WARNING, "invalid date");
-		RETURN_FALSE;
+		zend_value_error("invalid date");
+		return;
 	}
 
 	sdn_next = calendar->to_jd(year, 1 + month, 1);
@@ -288,8 +286,8 @@ PHP_FUNCTION(cal_to_jd)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT, cal);
-		RETURN_FALSE;
+		zend_value_error("invalid calendar ID " ZEND_LONG_FMT, cal);
+		return;
 	}
 
 	RETURN_LONG(cal_conversion_table[cal].to_jd(year, month, day));
@@ -309,8 +307,8 @@ PHP_FUNCTION(cal_from_jd)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT, cal);
-		RETURN_FALSE;
+		zend_value_error("invalid calendar ID " ZEND_LONG_FMT, cal);
+		return;
 	}
 	calendar = &cal_conversion_table[cal];
 
@@ -524,8 +522,8 @@ PHP_FUNCTION(jdtojewish)
 		RETURN_NEW_STR(zend_strpprintf(0, "%i/%i/%i", month, day, year));
 	} else {
 		if (year <= 0 || year > 9999) {
-			php_error_docref(NULL, E_WARNING, "Year out of range (0-9999)");
-			RETURN_FALSE;
+			zend_value_error("Year out of range (0-9999)");
+			return;
 		}
 
 		RETVAL_NEW_STR(zend_strpprintf(0, "%s %s %s", heb_number_to_chars(day, fl, &dayp), JEWISH_HEB_MONTH_NAME(year)[month], heb_number_to_chars(year, fl, &yearp)));

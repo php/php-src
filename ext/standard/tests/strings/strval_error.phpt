@@ -25,10 +25,8 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strval() : error conditions ***
 
 -- Testing strval() function with object which has not toString() method  --
 Object of class MyClass could not be converted to string
-===DONE===

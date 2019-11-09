@@ -15,7 +15,5 @@ var_dump(isset($c['session']['SID']));
 
 ob_end_flush();
 ?>
-==DONE==
 --EXPECT--
 bool(true)
-==DONE==

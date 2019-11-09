@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -61,6 +59,7 @@ PHP_FUNCTION(octdec);
 PHP_FUNCTION(base_convert);
 PHP_FUNCTION(number_format);
 PHP_FUNCTION(fmod);
+PHP_FUNCTION(fdiv);
 PHP_FUNCTION(deg2rad);
 PHP_FUNCTION(rad2deg);
 PHP_FUNCTION(intdiv);

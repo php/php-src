@@ -12,7 +12,5 @@ $a[] =& $a;
 var_export($a, true);
 
 ?>
-===DONE===
 --EXPECTF--
 Warning: var_export does not handle circular references in %s on line 9
-===DONE===

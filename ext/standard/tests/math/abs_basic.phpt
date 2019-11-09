@@ -31,7 +31,6 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);
 }
 ?>
-===Done===
 --EXPECT--
 *** Testing abs() : basic functionality ***
 int(23)
@@ -48,4 +47,3 @@ float(23.45)
 int(0)
 int(1)
 int(0)
-===Done===

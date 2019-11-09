@@ -81,7 +81,6 @@ echo "\n";
 unlink($data_file);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : unsigned formats and signed & other types of values ***
 
@@ -109,4 +108,3 @@ unlink($data_file);
             1 1          0 
    #0 1 $1 _0
    0 1 1 1
-===DONE===

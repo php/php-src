@@ -27,7 +27,6 @@ var_dump( strripos($special_chars_str, "$*", 10) );
 var_dump( strripos($special_chars_str, "(speCIal)") );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing strripos() function: with heredoc strings ***
 -- With heredoc string containing special chars --
@@ -38,4 +37,3 @@ int(39)
 int(55)
 int(55)
 int(57)
-===DONE===

@@ -176,7 +176,7 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 			case ZEND_NEW:
 			    /* objects with destructors should escape */
 				if (opline->op1_type == IS_CONST) {
-					zend_class_entry *ce = get_class_entry(script, Z_STR_P(CRT_CONSTANT_EX(op_array, opline, opline->op1, ssa->rt_constants)+1));
+					zend_class_entry *ce = get_class_entry(script, Z_STR_P(CRT_CONSTANT(opline->op1)+1));
 					uint32_t forbidden_flags = ZEND_ACC_INHERITED
 						/* These flags will always cause an exception */
 						| ZEND_ACC_IMPLICIT_ABSTRACT_CLASS | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS
@@ -191,7 +191,7 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 				break;
 			case ZEND_QM_ASSIGN:
 				if (opline->op1_type == IS_CONST
-				 && Z_TYPE_P(CRT_CONSTANT_EX(op_array, opline, opline->op1, ssa->rt_constants)) == IS_ARRAY) {
+				 && Z_TYPE_P(CRT_CONSTANT(opline->op1)) == IS_ARRAY) {
 					return 1;
 				}
 				if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_ARRAY)) {
@@ -208,7 +208,7 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 		switch (opline->opcode) {
 			case ZEND_ASSIGN:
 				if (opline->op2_type == IS_CONST
-				 && Z_TYPE_P(CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants)) == IS_ARRAY) {
+				 && Z_TYPE_P(CRT_CONSTANT(opline->op2)) == IS_ARRAY) {
 					return 1;
 				}
 				if (opline->op2_type == IS_CV && (OP2_INFO() & MAY_BE_ARRAY)) {
@@ -245,7 +245,7 @@ static int is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var
 			case ZEND_NEW:
 				/* objects with destructors should escape */
 				if (opline->op1_type == IS_CONST) {
-					zend_class_entry *ce = get_class_entry(script, Z_STR_P(CRT_CONSTANT_EX(op_array, opline, opline->op1, ssa->rt_constants)+1));
+					zend_class_entry *ce = get_class_entry(script, Z_STR_P(CRT_CONSTANT(opline->op1)+1));
 					if (ce && !ce->create_object && !ce->constructor &&
 					    !ce->destructor && !ce->__get && !ce->__set &&
 					    !(ce->ce_flags & ZEND_ACC_INHERITED)) {

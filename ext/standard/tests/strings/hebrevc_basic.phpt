@@ -16,7 +16,6 @@ var_dump(hebrevc($hebrew_text));
 var_dump(hebrevc($hebrew_text, 15));
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing hebrevc() : basic functionality ***
 
@@ -48,4 +47,3 @@ breaking words<br />
 tries to avoid<br />
 .The function<br />
 "
-===DONE===

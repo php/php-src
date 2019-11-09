@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -1300,6 +1298,11 @@ PHP_METHOD(sqlite3, openBlob)
 		return;
 	}
 
+	if (ZEND_NUM_ARGS() >= 4 && CHECK_NULL_PATH(dbname, dbname_len)) {
+		zend_value_error("dbname must not contain NUL bytes");
+		return;
+	}
+
 	sqlite_flags = (flags & SQLITE_OPEN_READWRITE) ? 1 : 0;
 
 	if (sqlite3_blob_open(db_obj->db, dbname, table, column, rowid, sqlite_flags, &blob) != SQLITE_OK) {
@@ -1365,6 +1368,13 @@ PHP_METHOD(sqlite3, backup)
 	SQLITE3_CHECK_INITIALIZED(source_obj, source_obj->initialised, SQLite3)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|ss", &destination_zval, php_sqlite3_sc_entry, &source_dbname, &source_dbname_length, &destination_dbname, &destination_dbname_length) == FAILURE) {
+		return;
+	}
+
+	if ((ZEND_NUM_ARGS() >= 2 && CHECK_NULL_PATH(source_dbname, source_dbname_length))
+		|| (ZEND_NUM_ARGS() >= 3 && CHECK_NULL_PATH(destination_dbname, destination_dbname_length))
+	) {
+		zend_value_error("dbname must not contain NUL bytes");
 		return;
 	}
 

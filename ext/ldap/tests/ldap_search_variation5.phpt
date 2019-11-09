@@ -31,7 +31,6 @@ var_dump(
 	ldap_get_entries($link, $result)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -102,4 +101,3 @@ array(2) {
     string(%d) "cn=userA,%s"
   }
 }
-===DONE===

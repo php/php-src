@@ -30,7 +30,5 @@ catch(Exception $e)
 }
 
 ?>
-===DONE===
 --EXPECT--
 Caught
-===DONE===

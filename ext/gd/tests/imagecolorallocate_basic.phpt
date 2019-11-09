@@ -25,11 +25,9 @@ var_dump( imagecolorallocate($im, 0, 255, 0) );
 var_dump( imagecolorallocate($im, 0, 0, 255) );
 var_dump( imagecolorallocate($im, 255, 255, 255) );
 ?>
-===DONE===
 --EXPECT--
 *** Testing imagecolorallocate() : basic functionality ***
 int(16711680)
 int(65280)
 int(255)
 int(16777215)
-===DONE===

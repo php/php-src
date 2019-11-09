@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -755,7 +753,7 @@ PHP_FUNCTION(stream_select)
 		Z_PARAM_ARRAY_EX2(r_array, 1, 1, 0)
 		Z_PARAM_ARRAY_EX2(w_array, 1, 1, 0)
 		Z_PARAM_ARRAY_EX2(e_array, 1, 1, 0)
-		Z_PARAM_LONG_EX(sec, secnull, 1, 0)
+		Z_PARAM_LONG_OR_NULL(sec, secnull)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(usec)
 	ZEND_PARSE_PARAMETERS_END();
@@ -968,7 +966,7 @@ PHP_FUNCTION(stream_context_get_options)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(zcontext)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	context = decode_context_param(zcontext);
 	if (!context) {
@@ -1084,7 +1082,7 @@ PHP_FUNCTION(stream_context_get_default)
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_ARRAY(params)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (FG(default_context) == NULL) {
 		FG(default_context) = php_stream_context_alloc();
@@ -1130,9 +1128,9 @@ PHP_FUNCTION(stream_context_create)
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_EX(options, 1, 0)
-		Z_PARAM_ARRAY_EX(params, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+		Z_PARAM_ARRAY_OR_NULL(options)
+		Z_PARAM_ARRAY_OR_NULL(params)
+	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_alloc();
 
@@ -1166,7 +1164,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(read_write)
 		Z_PARAM_ZVAL(filterparams)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, zstream);
 
@@ -1253,7 +1251,7 @@ PHP_FUNCTION(stream_filter_remove)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(zfilter)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	filter = zend_fetch_resource(Z_RES_P(zfilter), NULL, php_file_le_stream_filter());
 	if (!filter) {
@@ -1292,7 +1290,7 @@ PHP_FUNCTION(stream_get_line)
 		Z_PARAM_LONG(max_length)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(str, str_len)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (max_length < 0) {
 		php_error_docref(NULL, E_WARNING, "The maximum allowed length must be greater than or equal to zero");
@@ -1399,7 +1397,7 @@ PHP_FUNCTION(stream_set_write_buffer)
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(arg1)
 		Z_PARAM_LONG(arg2)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, arg1);
 
@@ -1428,7 +1426,7 @@ PHP_FUNCTION(stream_set_chunk_size)
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(zstream)
 		Z_PARAM_LONG(csize)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (csize <= 0) {
 		php_error_docref(NULL, E_WARNING, "The chunk size must be a positive integer, given " ZEND_LONG_FMT, csize);
@@ -1464,7 +1462,7 @@ PHP_FUNCTION(stream_set_read_buffer)
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(arg1)
 		Z_PARAM_LONG(arg2)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, arg1);
 
@@ -1495,9 +1493,9 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 		Z_PARAM_RESOURCE(zstream)
 		Z_PARAM_BOOL(enable)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_EX(cryptokind, cryptokindnull, 1, 0)
+		Z_PARAM_LONG_OR_NULL(cryptokind, cryptokindnull)
 		Z_PARAM_RESOURCE(zsessstream)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, zstream);
 
@@ -1567,7 +1565,7 @@ PHP_FUNCTION(stream_is_local)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(zstream)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(zstream) == IS_RESOURCE) {
 		php_stream_from_zval(stream, zstream);
@@ -1600,7 +1598,7 @@ PHP_FUNCTION(stream_supports_lock)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(zsrc)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, zsrc);
 
@@ -1622,7 +1620,7 @@ PHP_FUNCTION(stream_isatty)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(zsrc)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, zsrc);
 
@@ -1666,7 +1664,7 @@ PHP_FUNCTION(sapi_windows_vt100_support)
 		Z_PARAM_RESOURCE(zsrc)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(enable)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, zsrc);
 
@@ -1726,7 +1724,7 @@ PHP_FUNCTION(stream_socket_shutdown)
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(zstream)
 		Z_PARAM_LONG(how)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (how != STREAM_SHUT_RD &&
 	    how != STREAM_SHUT_WR &&

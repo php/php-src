@@ -63,8 +63,6 @@ if ($reader->isValid()) {
 	echo "string DTD: ok\n";
 }
 ?>
-===DONE===
 --EXPECT--
 file DTD: ok
 string DTD: ok
-===DONE===

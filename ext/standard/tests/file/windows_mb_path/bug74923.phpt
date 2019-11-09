@@ -19,8 +19,6 @@ $s = '\\\\hello.com' . str_repeat('\\', 260);
 var_dump($s, @stat($s));
 
 ?>
-===DONE===
 --EXPECTF--
 string(271) "%s"
 bool(false)
-===DONE===

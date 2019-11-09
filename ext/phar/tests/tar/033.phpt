@@ -34,7 +34,6 @@ try {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
@@ -47,4 +46,3 @@ test dir
 bool(true)
 bool(false)
 bool(true)
-===DONE===

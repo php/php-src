@@ -106,8 +106,6 @@ var_dump($c);
 
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1
 
@@ -195,4 +193,3 @@ array(4) {
   string(0) ""
 }
 bool(false)
-===DONE===

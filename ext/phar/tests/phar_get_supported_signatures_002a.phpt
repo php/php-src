@@ -13,7 +13,6 @@ phar.readonly=0
 <?php
 var_dump(Phar::getSupportedSignatures());
 ?>
-===DONE===
 --EXPECT--
 array(5) {
   [0]=>
@@ -27,4 +26,3 @@ array(5) {
   [4]=>
   string(7) "OpenSSL"
 }
-===DONE===

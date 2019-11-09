@@ -77,8 +77,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1
 object(stdClass)#1 (3) {
@@ -120,4 +118,3 @@ Test 3
 
 Notice: Undefined property: stdClass::$CASESENSITIVE in %sfetch_object.php on line %d
 
-===DONE===

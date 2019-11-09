@@ -71,8 +71,6 @@ foreach($it as $v); // read all into cache
 $it->test($checks);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
@@ -153,4 +151,3 @@ bool(false)
 
 Notice: Undefined index: 3 in %siterator_044.php on line %d
 NULL
-===DONE===

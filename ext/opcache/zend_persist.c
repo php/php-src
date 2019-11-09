@@ -258,6 +258,35 @@ static void zend_persist_zval(zval *z)
 	}
 }
 
+static void zend_persist_type(zend_type *type) {
+	if (ZEND_TYPE_HAS_LIST(*type)) {
+		void **entry;
+		zend_type_list *list = ZEND_TYPE_LIST(*type);
+		if (ZEND_TYPE_USES_ARENA(*type)) {
+			if (!ZCG(is_immutable_class)) {
+				list = zend_shared_memdup_arena_put(list, ZEND_TYPE_LIST_SIZE(list->num_types));
+			} else {
+				/* Moved from arena to SHM because type list was fully resolved. */
+				list = zend_shared_memdup_put(list, ZEND_TYPE_LIST_SIZE(list->num_types));
+				ZEND_TYPE_FULL_MASK(*type) &= ~_ZEND_TYPE_ARENA_BIT;
+			}
+		} else {
+			list = zend_shared_memdup_put_free(list, ZEND_TYPE_LIST_SIZE(list->num_types));
+		}
+		ZEND_TYPE_SET_PTR(*type, list);
+
+		ZEND_TYPE_LIST_FOREACH_PTR(list, entry) {
+			zend_string *type_name = ZEND_TYPE_LIST_GET_NAME(*entry);
+			zend_accel_store_interned_string(type_name);
+			*entry = ZEND_TYPE_LIST_ENCODE_NAME(type_name);
+		} ZEND_TYPE_LIST_FOREACH_END();
+	} else if (ZEND_TYPE_HAS_NAME(*type)) {
+		zend_string *type_name = ZEND_TYPE_NAME(*type);
+		zend_accel_store_interned_string(type_name);
+		ZEND_TYPE_SET_PTR(*type, type_name);
+	}
+}
+
 static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_script* main_persistent_script)
 {
 	zend_op *persist_ptr;
@@ -499,13 +528,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			if (arg_info[i].name) {
 				zend_accel_store_interned_string(arg_info[i].name);
 			}
-			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
-				zend_string *type_name = ZEND_TYPE_NAME(arg_info[i].type);
-				zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(arg_info[i].type);
-
-				zend_accel_store_interned_string(type_name);
-				arg_info[i].type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
-			}
+			zend_persist_type(&arg_info[i].type);
 		}
 		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			arg_info++;
@@ -660,12 +683,7 @@ static void zend_persist_property_info(zval *zv)
 			prop->doc_comment = NULL;
 		}
 	}
-
-	if (ZEND_TYPE_IS_NAME(prop->type)) {
-		zend_string *class_name = ZEND_TYPE_NAME(prop->type);
-		zend_accel_store_interned_string(class_name);
-		prop->type = ZEND_TYPE_ENCODE_CLASS(class_name, ZEND_TYPE_ALLOW_NULL(prop->type));
-	}
+	zend_persist_type(&prop->type);
 }
 
 static void zend_persist_class_constant(zval *zv)
@@ -923,10 +941,10 @@ static void zend_update_parent_ce(zend_class_entry *ce)
 
 		if (ce->iterator_funcs_ptr) {
 			memset(ce->iterator_funcs_ptr, 0, sizeof(zend_class_iterator_funcs));
-			if (instanceof_function_ex(ce, zend_ce_aggregate, 1)) {
+			if (zend_class_implements_interface(ce, zend_ce_aggregate)) {
 				ce->iterator_funcs_ptr->zf_new_iterator = zend_hash_str_find_ptr(&ce->function_table, "getiterator", sizeof("getiterator") - 1);
 			}
-			if (instanceof_function_ex(ce, zend_ce_iterator, 1)) {
+			if (zend_class_implements_interface(ce, zend_ce_iterator)) {
 				ce->iterator_funcs_ptr->zf_rewind = zend_hash_str_find_ptr(&ce->function_table, "rewind", sizeof("rewind") - 1);
 				ce->iterator_funcs_ptr->zf_valid = zend_hash_str_find_ptr(&ce->function_table, "valid", sizeof("valid") - 1);
 				ce->iterator_funcs_ptr->zf_key = zend_hash_str_find_ptr(&ce->function_table, "key", sizeof("key") - 1);
@@ -939,12 +957,25 @@ static void zend_update_parent_ce(zend_class_entry *ce)
 	if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
 		zend_property_info *prop;
 		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-			if (ZEND_TYPE_IS_CE(prop->type)) {
+			if (ZEND_TYPE_HAS_LIST(prop->type)) {
+				void **entry;
+				ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(prop->type), entry) {
+					if (ZEND_TYPE_LIST_IS_CE(*entry)) {
+						zend_class_entry *ce = ZEND_TYPE_LIST_GET_CE(*entry);
+						if (ce->type == ZEND_USER_CLASS) {
+							ce = zend_shared_alloc_get_xlat_entry(ce);
+							if (ce) {
+								*entry = ZEND_TYPE_LIST_ENCODE_CE(ce);
+							}
+						}
+					}
+				} ZEND_TYPE_LIST_FOREACH_END();
+			} else if (ZEND_TYPE_HAS_CE(prop->type)) {
 				zend_class_entry *ce = ZEND_TYPE_CE(prop->type);
 				if (ce->type == ZEND_USER_CLASS) {
 					ce = zend_shared_alloc_get_xlat_entry(ce);
 					if (ce) {
-						prop->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(prop->type));
+						ZEND_TYPE_SET_PTR(prop->type, ce);
 					}
 				}
 			}

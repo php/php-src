@@ -56,7 +56,6 @@ while ($reader->read()) {
 // clean up
 $reader->close();
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__.'/003-move-errors.xml');
@@ -73,4 +72,3 @@ bool(false)
 num: 1
 bool(false)
 book
-===DONE===

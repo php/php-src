@@ -39,9 +39,7 @@ echo "\n";
 unlink($absfile);
 unlink($relfile);
 ?>
-===DONE===
 --EXPECT--
 *** Testing gzopen() : variation ***
 This is an absolute file
 This is a relative file
-===DONE===

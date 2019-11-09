@@ -71,7 +71,6 @@ foreach ($content as $file_name) {
 	@unlink($dir_path . $file_name);
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path = __DIR__ . "/私はガラスを食べられますscandir_variation8";
@@ -157,4 +156,3 @@ array(16) {
   [15]=>
   string(51) "私はガラスを食べられますsingle_file.tmp"
 }
-===DONE===

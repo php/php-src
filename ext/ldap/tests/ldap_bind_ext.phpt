@@ -43,7 +43,6 @@ var_dump(
 	$ctrls
 );
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (ldap result)
 bool(true)
@@ -69,4 +68,3 @@ int(34)
 string(10) "invalid DN"
 array(0) {
 }
-===DONE===

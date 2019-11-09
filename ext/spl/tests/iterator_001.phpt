@@ -88,8 +88,6 @@ foreach($it as $v)
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 NumericArrayIterator::__construct
 NumericArrayIterator::rewind
@@ -168,4 +166,3 @@ NumericArrayIterator::next
 SeekableNumericArrayIterator::greaterThan(2)
 NumericArrayIterator::current
 4 is greater than 2
-===DONE===

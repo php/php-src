@@ -8,7 +8,5 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 Invalid range supplied: start=0 end=inf
-===DONE===

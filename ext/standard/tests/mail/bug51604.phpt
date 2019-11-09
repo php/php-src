@@ -24,7 +24,6 @@ echo file_get_contents($outFile);
 unlink($outFile);
 
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 To: user@example.com
@@ -32,4 +31,3 @@ Subject: Test Subject
 KHeaders
 
 A Message
-===DONE===

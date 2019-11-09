@@ -13,11 +13,11 @@ $document->appendChild($root);
 
 $cdata = $document->createCDATASection('test');
 $root->appendChild($cdata);
-$cdata->deleteData(5, 1);
+try {
+    $cdata->deleteData(5, 1);
+} catch (DOMException $e) {
+    echo $e->getMessage();
+}
 ?>
---EXPECTF--
-Fatal error: Uncaught DOMException: Index Size Error in %s:%d
-Stack trace:
-#0 %s(%d): DOMCharacterData->deleteData(5, 1)
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--
+Index Size Error

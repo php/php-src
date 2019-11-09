@@ -47,7 +47,6 @@ while (false !== ($v = readdir($tar))) {
 closedir($tar);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/tar_003.phar.tar');
@@ -67,4 +66,3 @@ dir
 internal
 file
 tar_003.phpt
-===DONE===

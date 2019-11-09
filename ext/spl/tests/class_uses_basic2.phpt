@@ -39,7 +39,6 @@ function s_var_dump($arr) {
    var_dump($arr);
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing class_uses() : basic ***
 array(2) {
@@ -66,4 +65,3 @@ array(0) {
 }
 array(0) {
 }
-===DONE===

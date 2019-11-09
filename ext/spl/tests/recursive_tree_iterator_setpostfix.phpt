@@ -54,7 +54,6 @@ foreach($it as $k => $v) {
 
 
 ?>
-===DONE===
 --EXPECT--
 ----
 
@@ -85,4 +84,3 @@ POSTFIX
 [3] =>   \-Array
 [0] =>     |-4
 [1] =>     \-c
-===DONE===

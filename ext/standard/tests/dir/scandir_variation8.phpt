@@ -65,7 +65,6 @@ foreach ($content as $file_name) {
 	@unlink($dir_path . $file_name);
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path = __DIR__ . "/scandir_variation8";
@@ -151,4 +150,3 @@ array(16) {
   [15]=>
   string(15) "single_file.tmp"
 }
-===DONE===

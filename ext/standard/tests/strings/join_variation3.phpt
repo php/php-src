@@ -62,9 +62,9 @@ string(6) "1], [2"
 string(10) "1.1], [2.2"
 -- Iteration 3 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(14) "Array], [Array"
 -- Iteration 4 --
 string(5) "], [1"

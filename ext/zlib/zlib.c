@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -491,7 +489,7 @@ static PHP_FUNCTION(ob_gzhandler)
 	 * - we have to mess around with php_output_context */
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "sl", &in_str, &in_len, &flags)) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!(encoding = php_zlib_output_encoding())) {
@@ -1030,7 +1028,7 @@ PHP_FUNCTION(inflate_get_status)
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res))
 	{
-		RETURN_NULL();
+		return;
 	}
 
 	if (!(ctx = zend_fetch_resource_ex(res, NULL, le_inflate))) {
@@ -1051,7 +1049,7 @@ PHP_FUNCTION(inflate_get_read_len)
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res))
 	{
-		RETURN_NULL();
+		return;
 	}
 
 	if (!(ctx = zend_fetch_resource_ex(res, NULL, le_inflate))) {

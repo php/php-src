@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -35,7 +33,6 @@
 #define PHP_GDIMG_TYPE_WBM      4
 #define PHP_GDIMG_TYPE_XBM      5
 #define PHP_GDIMG_TYPE_XPM      6
-#define PHP_GDIMG_CONVERT_WBM   7
 #define PHP_GDIMG_TYPE_GD       8
 #define PHP_GDIMG_TYPE_GD2      9
 #define PHP_GDIMG_TYPE_GD2PART  10

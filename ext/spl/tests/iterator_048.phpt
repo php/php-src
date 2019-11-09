@@ -21,11 +21,8 @@ $it = new MyRecursiveRegexIterator($ar, '/Bar/');
 $it->show();
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 int(0)
 string(3) "Bar"
 int(2)
 string(6) "FooBar"
-===DONE===

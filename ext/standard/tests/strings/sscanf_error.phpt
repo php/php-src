@@ -17,7 +17,6 @@ echo "\n-- Testing sscanf() function with more than expected no. of arguments --
 var_dump( sscanf($str, $format, $str1, $str2, $extra_str) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing sscanf() : error conditions ***
 
@@ -25,4 +24,3 @@ var_dump( sscanf($str, $format, $str1, $str2, $extra_str) );
 
 Warning: sscanf(): Variable is not assigned by any conversion specifiers in %s on line %d
 int(-1)
-===DONE===

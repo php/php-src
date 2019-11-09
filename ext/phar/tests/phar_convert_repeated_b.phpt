@@ -75,7 +75,6 @@ try {
 	echo $e->getMessage()."\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 echo __DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.gz' . "\n";
@@ -117,4 +116,3 @@ string(0) ""
 NULL
 ================= convertToPhar() ====================
 Cannot write out executable phar archive, phar is read-only
-===DONE===

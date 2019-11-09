@@ -33,7 +33,6 @@ foreach($f as $k => $v)
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/files/phar_oo_009.phar.php');
@@ -53,4 +52,3 @@ __halt_compiler();
 3=>4
 4=>5|5
 6=>7|777
-===DONE===

@@ -19,17 +19,9 @@ var_dump($clone->asXML());
 echo "Done\n";
 ?>
 --EXPECTF--
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(2) "
-
-"
+object(SimpleXMLElement)#%d (0) {
 }
-object(SimpleXMLElement)#%d (1) {
-  [0]=>
-  string(2) "
-
-"
+object(SimpleXMLElement)#%d (0) {
 }
 string(15) "<test>
 

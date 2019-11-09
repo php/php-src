@@ -37,7 +37,6 @@ echo "There are now " . imap_num_msg($stream_id) . " msgs in mailbox '$mailbox'\
 echo "\n-- Call to imap_close() with mandatory arguments --\n";
 var_dump( imap_close($stream_id) );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require_once(__DIR__.'/clean.inc');
@@ -53,4 +52,3 @@ There are now 0 msgs in mailbox '%sINBOX.phpttest'
 
 -- Call to imap_close() with mandatory arguments --
 bool(true)
-===DONE===

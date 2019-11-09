@@ -24,7 +24,6 @@ echo $phar['hi']->getContent(), "\n";
 echo $e->getMessage(), "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
@@ -35,4 +34,3 @@ file contents
 this works
 Phar error: Cannot retrieve contents, "a" in phar "%sphar_oo_getcontents.phar.php" is a directory
 Phar error: Cannot retrieve contents, "hi" in phar "%sphar_oo_getcontents.phar.php" is a directory
-===DONE===

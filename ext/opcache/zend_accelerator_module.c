@@ -717,7 +717,7 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	zval directives, version, blacklist;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!validate_api_restriction()) {
@@ -809,7 +809,7 @@ static ZEND_FUNCTION(opcache_get_configuration)
 static ZEND_FUNCTION(opcache_reset)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!validate_api_restriction()) {
@@ -865,6 +865,11 @@ static ZEND_FUNCTION(opcache_compile_file)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &script_name, &script_name_len) == FAILURE) {
 		return;
+	}
+
+	if (!accel_startup_ok) {
+		zend_error(E_NOTICE, ACCELERATOR_PRODUCT_NAME " has not been properly started, can't compile file");
+		RETURN_FALSE;
 	}
 
 	zend_stream_init_filename(&handle, script_name);

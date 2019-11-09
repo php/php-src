@@ -4,15 +4,7 @@ Test lchown() function : error functionality
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') die('skip no windows support');
 if (!function_exists("posix_getuid")) die("skip no posix_getuid()");
-// Skip if being run by root
-$filename = __DIR__."/is_readable_root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-        unlink ($filename);
-        die('skip cannot be run as root');
-}
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
@@ -36,7 +28,6 @@ var_dump( lchown( 'foobar_lchown.txt', $uid ) );
 var_dump( lchown( $filename, -5 ) );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -52,4 +43,3 @@ bool(false)
 
 Warning: lchown(): %r(Operation not permitted|Invalid argument)%r in %s on line %d
 bool(false)
-===DONE===

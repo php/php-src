@@ -131,12 +131,11 @@ typedef struct _zend_ssa_var_info {
 
 typedef struct _zend_ssa {
 	zend_cfg               cfg;            /* control flow graph             */
-	int                    rt_constants;   /* run-time or compile-time       */
 	int                    vars_count;     /* number of SSA variables        */
+	int                    sccs;           /* number of SCCs                 */
 	zend_ssa_block        *blocks;         /* array of SSA blocks            */
 	zend_ssa_op           *ops;            /* array of SSA instructions      */
 	zend_ssa_var          *vars;           /* use/def chain of SSA variables */
-	int                    sccs;           /* number of SCCs                 */
 	zend_ssa_var_info     *var_info;
 } zend_ssa;
 

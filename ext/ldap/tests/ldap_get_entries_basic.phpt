@@ -20,7 +20,6 @@ var_dump(
 	)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -60,4 +59,3 @@ array(2) {
     string(%d) "o=test,%s"
   }
 }
-===DONE===

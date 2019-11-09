@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -45,6 +43,8 @@
 
 #define HRTIME_AVAILABLE (PHP_HRTIME_PLATFORM_POSIX || PHP_HRTIME_PLATFORM_WINDOWS || PHP_HRTIME_PLATFORM_APPLE || PHP_HRTIME_PLATFORM_HPUX || PHP_HRTIME_PLATFORM_AIX)
 
+BEGIN_EXTERN_C()
+
 typedef uint64_t php_hrtime_t;
 
 PHPAPI php_hrtime_t php_hrtime_current(void);
@@ -52,5 +52,7 @@ PHPAPI php_hrtime_t php_hrtime_current(void);
 PHP_MINIT_FUNCTION(hrtime);
 
 PHP_FUNCTION(hrtime);
+
+END_EXTERN_C()
 
 #endif /* HRTIME_H */

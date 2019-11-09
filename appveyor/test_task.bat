@@ -49,12 +49,17 @@ set PDOTEST_DSN=odbc:%ODBC_TEST_DSN%
 rem prepare for ext/openssl
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\OpenSSL-Win32 >NUL 2>NUL
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\OpenSSL-Win64 >NUL 2>NUL
-mkdir c:\usr\local\ssl
+if "%PLATFORM%" == "x64" (
+	set OPENSSLDIR="C:\Program Files\Common Files\SSL"
+) else (
+	set OPENSSLDIR="C:\Program Files (x86)\Common Files\SSL"
+)
+mkdir %OPENSSLDIR%
 if %errorlevel% neq 0 exit /b 3
-copy %DEPS_DIR%\template\ssl\openssl.cnf c:\usr\local\ssl
+copy %DEPS_DIR%\template\ssl\openssl.cnf %OPENSSLDIR%
 if %errorlevel% neq 0 exit /b 3
-set OPENSSL_CONF=c:\usr\local\ssl\openssl.cnf
-rem set OPENSSL_CONF=
+rem set OPENSSL_CONF=%OPENSSLDIR%\openssl.cnf
+set OPENSSL_CONF=
 rem set SSLEAY_CONF=
 
 rem prepare for Opcache

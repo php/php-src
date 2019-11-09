@@ -109,7 +109,7 @@ extern "C++" {
 ])
 
 ac_IFS=$IFS; IFS="."
-set $(echo AC_PACKAGE_VERSION | $SED 's/\([[0-9\.]]*\)\(.*\)/\1\.\2/')
+set $(echo AC_PACKAGE_VERSION | "${SED}" 's/\([[0-9\.]]*\)\(.*\)/\1\.\2/')
 IFS=$ac_IFS
 PHP_MAJOR_VERSION=[$]1
 PHP_MINOR_VERSION=[$]2
@@ -324,9 +324,9 @@ dnl SAPI configuration.
 dnl ----------------------------------------------------------------------------
 
 dnl Paths to the targets are relative to the build directory.
-SAPI_SHARED=libs/libphp[]$PHP_MAJOR_VERSION[.]$SHLIB_DL_SUFFIX_NAME
-SAPI_STATIC=libs/libphp[]$PHP_MAJOR_VERSION[.a]
-SAPI_LIBTOOL=libphp[]$PHP_MAJOR_VERSION[.la]
+SAPI_SHARED=libs/libphp.[]$SHLIB_DL_SUFFIX_NAME
+SAPI_STATIC=libs/libphp.a
+SAPI_LIBTOOL=libphp.la
 
 PHP_CONFIGURE_PART(Configuring SAPI modules)
 
@@ -782,7 +782,7 @@ PHP_HELP_SEPARATOR([General settings:])
 PHP_ARG_ENABLE([gcov],
   [whether to include gcov symbols],
   [AS_HELP_STRING([--enable-gcov],
-    [Enable GCOV code coverage (requires LTP) - FOR DEVELOPERS ONLY!!])],
+    [Enable GCOV code coverage - FOR DEVELOPERS ONLY!!])],
   [no],
   [no])
 
@@ -802,61 +802,13 @@ if test "$PHP_GCOV" = "yes"; then
     AC_MSG_ERROR([ccache must be disabled when --enable-gcov option is used. You can disable ccache by setting environment variable CCACHE_DISABLE=1.])
   fi
 
-  dnl Min: 1.5 (i.e. 105, major * 100 + minor for easier comparison).
-  ltp_version_min="105"
-  dnl Non-working versions, e.g. "1.8 1.18";
-  dnl Remove "none" when introducing the first incompatible LTP version and
-  dnl separate any following additions by spaces.
-  ltp_version_exclude="1.8"
-
-  AC_CHECK_PROG(LTP, lcov, lcov)
-  AC_CHECK_PROG(LTP_GENHTML, genhtml, genhtml)
-  PHP_SUBST(LTP)
-  PHP_SUBST(LTP_GENHTML)
-
-  if test "$LTP"; then
-    AC_CACHE_CHECK([for ltp version], php_cv_ltp_version, [
-      php_cv_ltp_version=invalid
-      ltp_version_vars=`$LTP -v 2>/dev/null | $SED -e 's/^.* //' -e 's/\./ /g' | tr -d a-z`
-      if test -n "$ltp_version_vars"; then
-        set $ltp_version_vars
-        ltp_version="${1}.${2}"
-        ltp_version_num="`expr ${1} \* 100 + ${2}`"
-        if test $ltp_version_num -ge $ltp_version_min; then
-          php_cv_ltp_version="$ltp_version (ok)"
-          for ltp_check_version in $ltp_version_exclude; do
-            if test "$ltp_version" = "$ltp_check_version"; then
-              php_cv_ltp_version=invalid
-              break
-            fi
-          done
-        fi
-      fi
-    ])
-  else
-    ltp_msg="To enable code coverage reporting you must have LTP installed"
-    AC_MSG_ERROR([$ltp_msg])
-  fi
-
-  case $php_cv_ltp_version in
-    ""|invalid[)]
-      ltp_msg="This LTP version is not supported (found: $ltp_version, min: $ltp_version_min, excluded: $ltp_version_exclude)."
-      AC_MSG_ERROR([$ltp_msg])
-      LTP="exit 0;"
-      ;;
-  esac
-
-  if test -z "$LTP_GENHTML"; then
-    AC_MSG_ERROR([Could not find genhtml from the LTP package])
-  fi
-
   AC_DEFINE(HAVE_GCOV, 1, [Whether you have gcov])
   PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/build/Makefile.gcov, $abs_srcdir)
 
   dnl Remove all optimization flags from CFLAGS.
   changequote({,})
-  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O[0-9s]*//g'`
-  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O[0-9s]*//g'`
+  CFLAGS=`echo "$CFLAGS" | "${SED}" -e 's/-O[0-9s]*//g'`
+  CXXFLAGS=`echo "$CXXFLAGS" | "${SED}" -e 's/-O[0-9s]*//g'`
   changequote([,])
 
   dnl Add the special gcc flags.
@@ -875,8 +827,8 @@ if test "$PHP_DEBUG" = "yes"; then
   PHP_DEBUG=1
   ZEND_DEBUG=yes
   changequote({,})
-  CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O[0-9s]*//g'`
-  CXXFLAGS=`echo "$CXXFLAGS" | $SED -e 's/-O[0-9s]*//g'`
+  CFLAGS=`echo "$CFLAGS" | "${SED}" -e 's/-O[0-9s]*//g'`
+  CXXFLAGS=`echo "$CXXFLAGS" | "${SED}" -e 's/-O[0-9s]*//g'`
   changequote([,])
   dnl Add -O0 only if GCC or ICC is used.
   if test "$GCC" = "yes" || test "$ICC" = "yes"; then
@@ -895,6 +847,18 @@ if test "$PHP_DEBUG" = "yes"; then
 else
   PHP_DEBUG=0
   ZEND_DEBUG=no
+fi
+
+PHP_ARG_ENABLE([debug-assertions],
+  [whether to enable debug assertions in release mode],
+  [AS_HELP_STRING([--enable-debug-assertions],
+    [Compile with debug assertions even in release mode])],
+  [no],
+  [no])
+
+if test "$PHP_DEBUG_ASSERTIONS" = "yes"; then
+  PHP_DEBUG=1
+  ZEND_DEBUG=yes
 fi
 
 PHP_ARG_ENABLE([rtld-now],
@@ -1104,7 +1068,9 @@ enable_static=yes
 
 case $php_sapi_module in
   shared[)]
-    enable_static=no
+    if test "$PHP_CGI" = "no" && test "$PHP_CLI" = "no" && test "$PHP_FPM" = "no" && test "$PHP_LITESPEED" = "no" && test "$PHP_PHPDBG" = "no"; then
+      enable_static=no
+    fi
     case $with_pic in
       yes)
         standard_libtool_flag='-prefer-pic'
@@ -1259,7 +1225,7 @@ libdir=`eval echo $libdir`
 datadir=`eval eval echo $datadir`
 
 dnl Build extension directory path.
-ZEND_MODULE_API_NO=`$EGREP '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|$SED 's/#define ZEND_MODULE_API_NO //'`
+ZEND_MODULE_API_NO=`$EGREP '#define ZEND_MODULE_API_NO ' $srcdir/Zend/zend_modules.h|"${SED}" 's/#define ZEND_MODULE_API_NO //'`
 
 if test -z "$EXTENSION_DIR"; then
   extbasedir=$ZEND_MODULE_API_NO

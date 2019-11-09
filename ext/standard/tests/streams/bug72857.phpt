@@ -13,8 +13,6 @@ Bug #72857 stream_socket_recvfrom read access violation
 	fclose($fp0);
 	unlink($fname);
 ?>
-==DONE==
 --EXPECT--
 bool(false)
 NULL
-==DONE==

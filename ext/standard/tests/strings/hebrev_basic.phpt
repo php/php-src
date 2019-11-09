@@ -16,7 +16,6 @@ var_dump(hebrev($hebrew_text));
 var_dump(hebrev($hebrew_text, 15));
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing hebrev() : basic functionality ***
 string(109) ".The hebrev function converts logical Hebrew text to visual text
@@ -32,4 +31,3 @@ breaking words
 tries to avoid
 .The function
 "
-===DONE===

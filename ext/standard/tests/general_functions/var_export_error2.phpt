@@ -8,11 +8,10 @@ Test var_export() function : error conditions - recursive object
  * Alias to functions:
  */
 
-@$obj->p =& $obj;
+$obj = new stdClass;
+$obj->p =& $obj;
 var_export($obj, true);
 
 ?>
-===DONE===
 --EXPECTF--
-Warning: var_export does not handle circular references in %s on line 9
-===DONE===
+Warning: var_export does not handle circular references in %s on line 10

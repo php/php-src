@@ -10,7 +10,5 @@ $formatter = new IntlDateFormatter('en-US', IntlDateFormatter::FULL, IntlDateFor
 var_dump($formatter->format(new DateTimeImmutable('2017-03-27 00:00:00 UTC'))) . "\n";
 
 ?>
-==DONE==
 --EXPECTF--
 string(%s) "Monday, March %d, 2017"
-==DONE==

@@ -49,7 +49,6 @@ foreach ($a as $k => $v) {
     echo "$k => $v\n";
 }
 ?>
-===DONE===
 --EXPECT--
 ==Direct instance==
 0 => a
@@ -85,4 +84,3 @@ A::key
 4 => f
 A::next
 A::valid
-===DONE===

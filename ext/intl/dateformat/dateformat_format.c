@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -163,7 +161,7 @@ PHP_FUNCTION(datefmt_format)
 			&object, IntlDateFormatter_ce_ptr, &zarg) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_format: unable "
 				"to parse input params", 0 );
-		RETURN_FALSE;
+		return;
 	}
 
 	DATE_FORMAT_METHOD_FETCH_OBJECT;

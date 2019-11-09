@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -25,6 +23,7 @@
 #include "php_string.h"
 #include "php_scandir.h"
 #include "basic_functions.h"
+#include "basic_functions_arginfo.h"
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -86,16 +85,10 @@ static zend_class_entry *dir_class_entry_ptr;
 		} \
 	}
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dir, 0, 0, 0)
-	ZEND_ARG_INFO(0, dir_handle)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 static const zend_function_entry php_dir_class_functions[] = {
-	PHP_FALIAS(close,	closedir,		arginfo_dir)
-	PHP_FALIAS(rewind,	rewinddir,		arginfo_dir)
-	PHP_NAMED_FE(read,  php_if_readdir, arginfo_dir)
+	PHP_FALIAS(close,	closedir,		arginfo_class_Directory_close)
+	PHP_FALIAS(rewind,	rewinddir,		arginfo_class_Directory_rewind)
+	PHP_NAMED_FE(read,  php_if_readdir, arginfo_class_Directory_read)
 	PHP_FE_END
 };
 
@@ -290,7 +283,7 @@ PHP_FUNCTION(chroot)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH(str, str_len)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	ret = chroot(str);
 	if (ret != 0) {
@@ -322,7 +315,7 @@ PHP_FUNCTION(chdir)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH(str, str_len)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (php_check_open_basedir(str)) {
 		RETURN_FALSE;

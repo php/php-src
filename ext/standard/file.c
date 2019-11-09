@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -887,7 +885,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(use_include_path)
 		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
@@ -910,7 +908,7 @@ PHPAPI PHP_FUNCTION(fclose)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(res)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
@@ -981,7 +979,7 @@ PHP_FUNCTION(pclose)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(res)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
@@ -1001,7 +999,7 @@ PHPAPI PHP_FUNCTION(feof)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(res)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
@@ -1029,7 +1027,7 @@ PHPAPI PHP_FUNCTION(fgets)
 		Z_PARAM_RESOURCE(res)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(len)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
@@ -1076,7 +1074,7 @@ PHPAPI PHP_FUNCTION(fgetc)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(res)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
@@ -1152,7 +1150,7 @@ PHPAPI PHP_FUNCTION(fwrite)
 		Z_PARAM_STRING(input, inputlen)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(maxlen)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_NUM_ARGS() == 2) {
 		num_bytes = inputlen;
@@ -1187,7 +1185,7 @@ PHPAPI PHP_FUNCTION(fflush)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(res)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
@@ -1208,7 +1206,7 @@ PHPAPI PHP_FUNCTION(rewind)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(res)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
@@ -1229,7 +1227,7 @@ PHPAPI PHP_FUNCTION(ftell)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(res)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
@@ -1254,7 +1252,7 @@ PHPAPI PHP_FUNCTION(fseek)
 		Z_PARAM_LONG(offset)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(whence)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
@@ -1304,7 +1302,7 @@ PHP_FUNCTION(mkdir)
 		Z_PARAM_LONG(mode)
 		Z_PARAM_BOOL(recursive)
 		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
@@ -1325,7 +1323,7 @@ PHP_FUNCTION(rmdir)
 		Z_PARAM_PATH(dir, dir_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
@@ -1350,7 +1348,7 @@ PHP_FUNCTION(readfile)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(use_include_path)
 		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, 0);
 
@@ -1381,7 +1379,7 @@ PHP_FUNCTION(umask)
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(mask)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_NUM_ARGS() == 0) {
 		umask(oldumask);
@@ -1403,7 +1401,7 @@ PHPAPI PHP_FUNCTION(fpassthru)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(res)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 
@@ -1427,7 +1425,7 @@ PHP_FUNCTION(rename)
 		Z_PARAM_PATH(new_name, new_name_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	wrapper = php_stream_locate_url_wrapper(old_name, NULL, 0);
 
@@ -1496,7 +1494,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(fp)
 		Z_PARAM_LONG(size)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (size < 0) {
 		php_error_docref(NULL, E_WARNING, "Negative size is not supported");
@@ -1530,7 +1528,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(fp)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_TO_ZVAL(stream, fp);
 
@@ -1749,7 +1747,7 @@ PHPAPI PHP_FUNCTION(fread)
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_RESOURCE(res)
 		Z_PARAM_LONG(len)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_TO_ZVAL(stream, res);
 

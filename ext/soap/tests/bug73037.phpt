@@ -132,7 +132,6 @@ cleanup:
 }
 
 ?>
-==DONE==
 --CLEAN--
 <?php
 unlink(__DIR__ . DIRECTORY_SEPARATOR . "bug73037_server.php");
@@ -180,4 +179,3 @@ Function 'CATALOG' doesn't exist
 
 Function 'CATALOG' doesn't exist
 
-==DONE==

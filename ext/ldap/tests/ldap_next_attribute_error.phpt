@@ -18,7 +18,6 @@ var_dump(
 	ldap_next_attribute($link, $entry)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -29,4 +28,3 @@ remove_dummy_data($link, $base);
 --EXPECTF--
 Warning: ldap_next_attribute(): called before calling ldap_first_attribute() or no attributes found in result entry in %s on line %d
 bool(false)
-===DONE===

@@ -25,7 +25,5 @@ for ($i = 0, $width = imagesx($im); $i < $width; $i ++) {
     }
 }
 ?>
-===DONE===
 --EXPECT--
 bool(true)
-===DONE===

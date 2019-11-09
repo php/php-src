@@ -62,7 +62,6 @@ try {
 var_dump($phar->getAlias());
 
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
@@ -74,4 +73,3 @@ int(6643)
 Cannot set alias ".phar/alias.txt" directly in phar "%sphar_offset_check.phar.php", use setAlias
 string(5) "susan"
 string(5) "susan"
-===DONE===

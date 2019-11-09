@@ -80,13 +80,16 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of pow()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(pow(20.3, $input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(pow(20.3, $input));
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing pow() : usage variations ***
 
@@ -149,7 +152,7 @@ Warning: A non-numeric value encountered in %s on line %d
 float(1)
 
 -- Iteration 19 --
-int(1)
+Unsupported operand types
 
 -- Iteration 20 --
 
@@ -179,4 +182,3 @@ float(1)
 
 -- Iteration 26 --
 %s
-===Done===

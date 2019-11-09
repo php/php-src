@@ -32,7 +32,6 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_reduce() : variation ***
 
@@ -41,4 +40,3 @@ int(2)
 
 --- Testing with a callback with too many parameters ---
 Exception: Too few arguments to function threeArgs(), 2 passed and exactly 3 expected
-===DONE===

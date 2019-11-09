@@ -32,8 +32,6 @@ catch(BadMethodCallException $e)
 var_dump($it->valid());
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 bool(false)
 bool(false)
@@ -41,4 +39,3 @@ bool(false)
 Accessing the key of an EmptyIterator
 Accessing the value of an EmptyIterator
 bool(false)
-===DONE===

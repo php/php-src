@@ -212,6 +212,7 @@ int main() {
     msg=yes],[msg=no],[msg=no])
   AC_MSG_RESULT([$msg])
 
+  PHP_CHECK_FUNC_LIB(shm_open, rt)
   AC_MSG_CHECKING(for mmap() using shm_open() shared memory support)
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <sys/types.h>
@@ -278,8 +279,13 @@ int main() {
 }
 ]])],[dnl
     AC_DEFINE(HAVE_SHM_MMAP_POSIX, 1, [Define if you have POSIX mmap() SHM support])
-    msg=yes],[msg=no],[msg=no])
-  AC_MSG_RESULT([$msg])
+    AC_MSG_RESULT([yes])
+    PHP_CHECK_LIBRARY(rt, shm_unlink, [PHP_ADD_LIBRARY(rt,1,OPCACHE_SHARED_LIBADD)])
+  ],[
+    AC_MSG_RESULT([no])
+  ],[
+    AC_MSG_RESULT([no])
+  ])
 
   PHP_NEW_EXTENSION(opcache,
 	ZendAccelerator.c \
@@ -296,8 +302,7 @@ int main() {
 	shared_alloc_mmap.c \
 	shared_alloc_posix.c \
 	Optimizer/zend_optimizer.c \
-	Optimizer/pass1_5.c \
-	Optimizer/pass2.c \
+	Optimizer/pass1.c \
 	Optimizer/pass3.c \
 	Optimizer/optimize_func_calls.c \
 	Optimizer/block_pass.c \
@@ -327,4 +332,5 @@ int main() {
     PHP_ADD_BUILD_DIR([$ext_builddir/jit], 1)
     PHP_ADD_MAKEFILE_FRAGMENT($ext_srcdir/jit/Makefile.frag)
   fi
+  PHP_SUBST(OPCACHE_SHARED_LIBADD)
 fi

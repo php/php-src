@@ -48,7 +48,6 @@ $people[0]['name'] .= 'Baz';
 var_dump($people[0]['name']);
 
 ?>
-===DONE===
 --EXPECTF--
 string(3) "Foo"
 string(6) "FooBar"
@@ -64,4 +63,3 @@ string(3) "Foo"
 
 Notice: Indirect modification of overloaded element of Peoples has no effect in %sarray_access_008.php on line 44
 string(3) "Foo"
-===DONE===

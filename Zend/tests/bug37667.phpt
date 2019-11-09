@@ -26,7 +26,6 @@ $obj->property[] = 2;
 var_dump($obj);
 
 ?>
-===DONE===
 --EXPECTF--
 string(3) "bar"
 
@@ -50,4 +49,3 @@ object(Test)#%d (1) {
     string(3) "bar"
   }
 }
-===DONE===

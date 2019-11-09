@@ -36,10 +36,8 @@ try {
 
 
 ?>
-===DONE===
 --EXPECT--
 bool(true)
 gzread(): supplied resource is not a valid stream resource
 bool(true)
 gzread(): supplied resource is not a valid stream resource
-===DONE===

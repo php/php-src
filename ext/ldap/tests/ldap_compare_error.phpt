@@ -19,7 +19,6 @@ var_dump(
 	ldap_errno($link)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -32,4 +31,3 @@ Warning: ldap_compare(): Compare: No such object in %s on line %d
 int(-1)
 string(14) "No such object"
 int(32)
-===DONE===

@@ -12,8 +12,6 @@ Test vfprintf() function : usage variations - string formats with non-string val
  * the '$format' and '$args' arguments of the function
 */
 
-error_reporting(E_ALL & ~E_NOTICE);
-
 echo "*** Testing vfprintf() : string formats and non-string values ***\n";
 
 // defining array of string formats
@@ -80,9 +78,44 @@ echo "\n";
 unlink($data_file);
 
 ?>
-===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing vfprintf() : string formats and non-string values ***
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
 
 -- Iteration 1 --
 2.2 0.2 10.2 
@@ -108,4 +141,3 @@ Array Array Array
             1            0001 0000
    #0 1 $1 _0
     1 1 1
-===DONE===

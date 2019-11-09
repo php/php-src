@@ -26,10 +26,8 @@ $o=new BlaMore;
 $o->bla();
 
 ?>
-===DONE===
 --EXPECT--
 int(1)
 bool(false)
 bool(false)
 Hello
-===DONE===

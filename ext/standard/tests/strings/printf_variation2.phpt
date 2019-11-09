@@ -7,8 +7,6 @@ Test printf() function : usage variations - with all types of values for arg1 ar
  * Source code: ext/standard/formatted_print.c
  */
 
-error_reporting(E_ALL & ~E_NOTICE);
-
 echo "*** Testing printf() : with different types of values passed for arg1 argument ***\n";
 
 // initialing required variables
@@ -107,7 +105,6 @@ foreach($values as $value) {
 fclose($file_handle);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing printf() : with different types of values passed for arg1 argument ***
 
@@ -166,32 +163,52 @@ int(3)
 int(3)
 
 -- Iteration 10 --
+
+Warning: Array to string conversion in %s on line %d
 Array
 int(5)
+
+Warning: Array to string conversion in %s on line %d
 Array
 int(5)
 
 -- Iteration 11 --
+
+Warning: Array to string conversion in %s on line %d
 Array
 int(5)
+
+Warning: Array to string conversion in %s on line %d
 Array
 int(5)
 
 -- Iteration 12 --
+
+Warning: Array to string conversion in %s on line %d
 Array
 int(5)
+
+Warning: Array to string conversion in %s on line %d
 Array
 int(5)
 
 -- Iteration 13 --
+
+Warning: Array to string conversion in %s on line %d
 Array
 int(5)
+
+Warning: Array to string conversion in %s on line %d
 Array
 int(5)
 
 -- Iteration 14 --
+
+Warning: Array to string conversion in %s on line %d
 Array
 int(5)
+
+Warning: Array to string conversion in %s on line %d
 Array
 int(5)
 
@@ -278,4 +295,3 @@ Resource id #%d
 int(%d)
 Resource id #%d
 int(%d)
-===DONE===

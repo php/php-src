@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -33,6 +31,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_pcntl.h"
+#include "pcntl_arginfo.h"
 #include "php_signal.h"
 #include "php_ticks.h"
 
@@ -58,132 +57,13 @@
 ZEND_DECLARE_MODULE_GLOBALS(pcntl)
 static PHP_GINIT_FUNCTION(pcntl);
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_pcntl_void, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_waitpid, 0, 0, 2)
-	ZEND_ARG_INFO(0, pid)
-	ZEND_ARG_INFO(1, status)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(1, rusage)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wait, 0, 0, 1)
-	ZEND_ARG_INFO(1, status)
-	ZEND_ARG_INFO(0, options)
-	ZEND_ARG_INFO(1, rusage)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_signal, 0, 0, 2)
-	ZEND_ARG_INFO(0, signo)
-	ZEND_ARG_INFO(0, handler)
-	ZEND_ARG_INFO(0, restart_syscalls)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_signal_get_handler, 0, 0, 1)
-	ZEND_ARG_INFO(0, signo)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigprocmask, 0, 0, 2)
-	ZEND_ARG_INFO(0, how)
-	ZEND_ARG_INFO(0, set)
-	ZEND_ARG_INFO(1, oldset)
-ZEND_END_ARG_INFO()
-
-#ifdef HAVE_STRUCT_SIGINFO_T
-# if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigwaitinfo, 0, 0, 1)
-	ZEND_ARG_INFO(0, set)
-	ZEND_ARG_INFO(1, info)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_sigtimedwait, 0, 0, 1)
-	ZEND_ARG_INFO(0, set)
-	ZEND_ARG_INFO(1, info)
-	ZEND_ARG_INFO(0, seconds)
-	ZEND_ARG_INFO(0, nanoseconds)
-ZEND_END_ARG_INFO()
-# endif
-#endif
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifexited, 0, 0, 1)
-	ZEND_ARG_INFO(0, status)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifstopped, 0, 0, 1)
-	ZEND_ARG_INFO(0, status)
-ZEND_END_ARG_INFO()
-
-#ifdef HAVE_WCONTINUED
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifcontinued, 0, 0, 1)
-	ZEND_ARG_INFO(0, status)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifsignaled, 0, 0, 1)
-	ZEND_ARG_INFO(0, status)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wifexitstatus, 0, 0, 1)
-	ZEND_ARG_INFO(0, status)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wtermsig, 0, 0, 1)
-	ZEND_ARG_INFO(0, status)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_wstopsig, 0, 0, 1)
-	ZEND_ARG_INFO(0, status)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_exec, 0, 0, 1)
-	ZEND_ARG_INFO(0, path)
-	ZEND_ARG_INFO(0, args)
-	ZEND_ARG_INFO(0, envs)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_alarm, 0, 0, 1)
-	ZEND_ARG_INFO(0, seconds)
-ZEND_END_ARG_INFO()
-
-#ifdef HAVE_GETPRIORITY
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_getpriority, 0, 0, 0)
-	ZEND_ARG_INFO(0, pid)
-	ZEND_ARG_INFO(0, process_identifier)
-ZEND_END_ARG_INFO()
-#endif
-
-#ifdef HAVE_SETPRIORITY
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_setpriority, 0, 0, 1)
-	ZEND_ARG_INFO(0, priority)
-	ZEND_ARG_INFO(0, pid)
-	ZEND_ARG_INFO(0, process_identifier)
-ZEND_END_ARG_INFO()
-#endif
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_strerror, 0, 0, 1)
-        ZEND_ARG_INFO(0, errno)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_async_signals, 0, 0, 1)
-        ZEND_ARG_INFO(0, on)
-ZEND_END_ARG_INFO()
-
-#ifdef HAVE_UNSHARE
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_unshare, 0, 0, 1)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-#endif
-/* }}} */
-
 static const zend_function_entry pcntl_functions[] = {
-	PHP_FE(pcntl_fork,			arginfo_pcntl_void)
+	PHP_FE(pcntl_fork,			arginfo_pcntl_fork)
 	PHP_FE(pcntl_waitpid,		arginfo_pcntl_waitpid)
 	PHP_FE(pcntl_wait,			arginfo_pcntl_wait)
 	PHP_FE(pcntl_signal,		arginfo_pcntl_signal)
 	PHP_FE(pcntl_signal_get_handler,		arginfo_pcntl_signal_get_handler)
-	PHP_FE(pcntl_signal_dispatch,	arginfo_pcntl_void)
+	PHP_FE(pcntl_signal_dispatch,	arginfo_pcntl_signal_dispatch)
 	PHP_FE(pcntl_wifexited,		arginfo_pcntl_wifexited)
 	PHP_FE(pcntl_wifstopped,	arginfo_pcntl_wifstopped)
 	PHP_FE(pcntl_wifsignaled,	arginfo_pcntl_wifsignaled)
@@ -192,8 +72,8 @@ static const zend_function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_wstopsig,		arginfo_pcntl_wstopsig)
 	PHP_FE(pcntl_exec,			arginfo_pcntl_exec)
 	PHP_FE(pcntl_alarm,			arginfo_pcntl_alarm)
-	PHP_FE(pcntl_get_last_error,	arginfo_pcntl_void)
-	PHP_FALIAS(pcntl_errno, pcntl_get_last_error,	NULL)
+	PHP_FE(pcntl_get_last_error,	arginfo_pcntl_get_last_error)
+	PHP_FALIAS(pcntl_errno, pcntl_get_last_error,	arginfo_pcntl_get_last_error)
 	PHP_FE(pcntl_strerror,		arginfo_pcntl_strerror)
 #ifdef HAVE_GETPRIORITY
 	PHP_FE(pcntl_getpriority,	arginfo_pcntl_getpriority)
@@ -1061,8 +941,9 @@ PHP_FUNCTION(pcntl_signal)
 	zval *handle;
 	zend_long signo;
 	zend_bool restart_syscalls = 1;
+	zend_bool restart_syscalls_is_null = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz|b", &signo, &handle, &restart_syscalls) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lz|b!", &signo, &handle, &restart_syscalls, &restart_syscalls_is_null) == FAILURE) {
 		return;
 	}
 
@@ -1082,6 +963,13 @@ PHP_FUNCTION(pcntl_signal)
 			psig->next = PCNTL_G(spares);
 			PCNTL_G(spares) = psig;
 		}
+	}
+
+	/* If restart_syscalls was not explicitly specified and the signal is SIGALRM, then default
+	 * restart_syscalls to false. PHP used to enforce that restart_syscalls is false for SIGALRM,
+	 * so we keep this differing default to reduce the degree of BC breakage. */
+	if (restart_syscalls_is_null && signo == SIGALRM) {
+		restart_syscalls = 0;
 	}
 
 	/* Special long value case for SIG_DFL and SIG_IGN */
@@ -1391,7 +1279,7 @@ PHP_FUNCTION(pcntl_setpriority)
 	zend_long pri;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|ll", &pri, &pid, &who) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (setpriority(who, pid, pri)) {

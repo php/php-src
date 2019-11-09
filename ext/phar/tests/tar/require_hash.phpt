@@ -38,7 +38,6 @@ try {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/require_hash.phar.tar');
@@ -53,4 +52,3 @@ array(2) {
   ["hash_type"]=>
   string(3) "MD5"
 }
-===DONE===

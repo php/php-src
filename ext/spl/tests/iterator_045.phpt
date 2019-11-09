@@ -88,8 +88,6 @@ $it->testUnset($unsets);
 $it->show();
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
 Exception: MyCachingIterator does not use a full cache (see CachingIterator::__construct)
@@ -153,4 +151,3 @@ array(2) {
   [3]=>
   string(6) "FooBar"
 }
-===DONE===

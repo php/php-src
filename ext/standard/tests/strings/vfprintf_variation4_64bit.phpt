@@ -82,7 +82,6 @@ echo "\n";
 unlink($data_file);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : int formats and non-integer values ***
 
@@ -110,4 +109,3 @@ unlink($data_file);
             1 0          1 0000
    #0 1 $1 _0
    0 1 1 1
-===DONE===

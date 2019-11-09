@@ -103,7 +103,6 @@ foreach($inputs as $key => $input) {
   $iterator++;
 };
 ?>
-===DONE===
 --EXPECT--
 *** Testing key() : usage variations ***
 
@@ -152,4 +151,3 @@ string(0) ""
 
 -- Iteration 12 : unset data --
 string(0) ""
-===DONE===

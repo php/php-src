@@ -63,7 +63,6 @@ echo "\n";
 unlink($data_file);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : int formats with int values ***
 
@@ -83,4 +82,3 @@ unlink($data_file);
 %-5678 d
 -- Iteration 8 --
 1 2 3 4
-===DONE===

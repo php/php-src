@@ -29,7 +29,6 @@ $tar->close();
 
 include $fname;
 ?>
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/tar_004.phar.tar');
@@ -37,4 +36,3 @@ include $fname;
 --EXPECTF--
 string(9) "it worked"
 string(%d) "phar://%star_004.phar.tar/tar_004.php"
-===DONE===

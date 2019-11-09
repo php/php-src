@@ -29,7 +29,6 @@ $o = new Test;
 unset($o);
 
 ?>
-===DONE===
 --EXPECTF--
 bool(false)
 bool(false)
@@ -40,4 +39,3 @@ autoload(autoload_root)
 autoload(autoload_derived)
 object(autoload_derived)#%d (0) {
 }
-===DONE===

@@ -15,7 +15,6 @@ $phar = new Phar(__DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php');
 
 var_dump($phar->getSignature());
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
@@ -25,4 +24,3 @@ array(2) {
   ["hash_type"]=>
   string(5) "SHA-1"
 }
-===DONE===

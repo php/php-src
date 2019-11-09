@@ -2,6 +2,7 @@
 grapheme()
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+<?php if (version_compare(INTL_ICU_VERSION, '65.0') >= 0) die('skip for ICU < 65.0'); ?>
 --FILE--
 <?php
 

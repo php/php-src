@@ -2,16 +2,6 @@
 Test get_browser() function : basic functionality
 --INI--
 browscap={PWD}/browscap.ini
---SKIPIF--
-<?php
-	/**
-	 * Basic test, it would be pretty much coincidence if there's
-	 * a browscap.ini on another place that isn't valid.
-	 */
-	if(! is_readable( ini_get( 'browscap' ) ) ) {
-		die( 'skip: browscap.ini file ' . ini_get('browscap') . " not readable" );
-	}
-?>
 --FILE--
 <?php
 /* Prototype  : mixed get_browser([string browser_name [, bool return_array]])
@@ -32,7 +22,6 @@ for( $x = 0; $x < 20; $x++) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing get_browser() : basic functionality ***
 array(35) {
@@ -1465,4 +1454,3 @@ array(35) {
   ["aolversion"]=>
   string(1) "0"
 }
-===DONE===

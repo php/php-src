@@ -40,8 +40,6 @@ catch (Exception $e)
 }
 
 ?>
-===DONE===
 --EXPECT--
 Test::offsetSet(-1, 123)
 CAUGHT
-===DONE===

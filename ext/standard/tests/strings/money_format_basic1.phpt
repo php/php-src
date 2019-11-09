@@ -55,7 +55,6 @@ echo gettype(money_format('%=*!14#8.2n', $value))."\n";
 echo gettype(money_format('%=*!14#8.2n', $negative_value))."\n";
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing money_format() : basic functionality***
 Format values with 14 positions, 8 digits to left, 2 to right using national format
@@ -100,4 +99,3 @@ string
 
 Deprecated: Function money_format() is deprecated in %s on line %d
 string
-===DONE===

@@ -9,8 +9,6 @@ Test strval() function : usage variations  - Pass different data types as strval
 
 echo "*** Testing strval() : usage variations ***\n";
 
-error_reporting(E_ALL ^ E_NOTICE);
-
 //get an unset variable
 $unset_var = 10;
 unset ($unset_var);
@@ -91,7 +89,6 @@ foreach($values as $value) {
       $iterator++;
 };
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strval() : usage variations ***
 
@@ -147,9 +144,13 @@ string(14) "1.007654321E-8"
 string(3) "0.5"
 
 -- Iteration 18 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 19 --
+
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 
 -- Iteration 20 --
@@ -187,4 +188,3 @@ string(0) ""
 
 -- Iteration 31 --
 string(0) ""
-===DONE===

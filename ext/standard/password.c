@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -616,7 +614,7 @@ PHP_FUNCTION(password_needs_rehash)
 		Z_PARAM_STR(hash)
 		Z_PARAM_ZVAL(znew_algo)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_OR_OBJECT_HT(options)
+		Z_PARAM_ARRAY_HT(options)
 	ZEND_PARSE_PARAMETERS_END();
 
 	new_algo = php_password_algo_find_zval(znew_algo);
@@ -665,7 +663,7 @@ PHP_FUNCTION(password_hash)
 		Z_PARAM_STR(password)
 		Z_PARAM_ZVAL(zalgo)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY_OR_OBJECT_HT(options)
+		Z_PARAM_ARRAY_HT(options)
 	ZEND_PARSE_PARAMETERS_END();
 
 	algo = php_password_algo_find_zval(zalgo);

@@ -31,7 +31,6 @@ foreach ($modes as $mode) {
     echo "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gzopen() : variation ***
 mode=r+
@@ -52,4 +51,3 @@ mode=e
 Warning: gzopen(%s/004.txt.gz): failed to open stream: %s in %s on line %d
 gzopen=bool(false)
 
-===DONE===

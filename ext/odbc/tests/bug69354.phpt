@@ -25,12 +25,10 @@ if ($res) {
 	}
 }
 ?>
-==DONE==
 --EXPECT--
 100
 a
 a
-==DONE==
 --CLEAN--
 <?php
 include 'config.inc';

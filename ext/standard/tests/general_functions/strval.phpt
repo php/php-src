@@ -277,19 +277,19 @@ string(14) "Resource id #%d"
 string(14) "Resource id #%d"
 -- Iteration 4 --
 
-Notice: Array to string conversion in %sstrval.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 -- Iteration 5 --
 
-Notice: Array to string conversion in %sstrval.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 -- Iteration 6 --
 
-Notice: Array to string conversion in %sstrval.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 -- Iteration 7 --
 
-Notice: Array to string conversion in %sstrval.php on line %d
+Warning: Array to string conversion in %s on line %d
 string(5) "Array"
 -- Iteration 8 --
 string(0) ""

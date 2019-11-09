@@ -92,7 +92,6 @@ echo "\n";
 
 
 ?>
-==DONE==
 --EXPECT--
 stream_open: yes
 url_stat: yes
@@ -102,4 +101,3 @@ mkdir: yes
 rename: yes
 unlink: yes
 touch: yes
-==DONE==

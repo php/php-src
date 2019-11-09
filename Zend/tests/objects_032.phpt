@@ -25,7 +25,6 @@ $a['foo']['bar'] = 2;
 var_dump($a);
 
 ?>
-==DONE==
 --EXPECT--
 object(A)#1 (1) {
   ["foo"]=>
@@ -37,4 +36,3 @@ object(A)#1 (1) {
     }
   }
 }
-==DONE==

@@ -19,7 +19,6 @@ foreach($it as $file)
 }
 
 ?>
-===DONE===
 --EXPECTF--
 First
 string(%d) "%s"
@@ -29,4 +28,3 @@ First
 string(%d) "%s"
 Second
 string(%d) "%s"
-===DONE===

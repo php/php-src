@@ -8,43 +8,43 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_open_memory, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_set_indent, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, indent, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_set_indent_string, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, indentString, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_start_comment, 0, 1, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_xmlwriter_end_comment arginfo_xmlwriter_start_comment
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_start_attribute, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_xmlwriter_end_attribute arginfo_xmlwriter_start_comment
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_write_attribute, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_start_attribute_ns, 0, 4, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, prefix, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_write_attribute_ns, 0, 5, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, prefix, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 1)
@@ -58,20 +58,20 @@ ZEND_END_ARG_INFO()
 #define arginfo_xmlwriter_full_end_element arginfo_xmlwriter_start_comment
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_start_element_ns, 0, 4, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, prefix, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_write_element, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, content, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_write_element_ns, 0, 4, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, prefix, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 1)
@@ -79,14 +79,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_write_element_ns, 0, 4
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_start_pi, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, target, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_xmlwriter_end_pi arginfo_xmlwriter_start_comment
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_write_pi, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, target, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, content, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -96,7 +96,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_xmlwriter_end_cdata arginfo_xmlwriter_start_comment
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_write_cdata, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, content, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -105,7 +105,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_xmlwriter_write_raw arginfo_xmlwriter_write_cdata
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_document, 0, 0, 1)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, version, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, standalone, IS_STRING, 1)
@@ -116,7 +116,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_xmlwriter_write_comment arginfo_xmlwriter_write_cdata
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_start_dtd, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, publicId, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, systemId, IS_STRING, 1)
@@ -125,7 +125,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_xmlwriter_end_dtd arginfo_xmlwriter_start_comment
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_write_dtd, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, publicId, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, systemId, IS_STRING, 1)
@@ -133,14 +133,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_write_dtd, 0, 2, _IS_B
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_start_dtd_element, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_xmlwriter_end_dtd_element arginfo_xmlwriter_start_comment
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_write_dtd_element, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, content, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -152,15 +152,15 @@ ZEND_END_ARG_INFO()
 #define arginfo_xmlwriter_write_dtd_attlist arginfo_xmlwriter_write_dtd_element
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_start_dtd_entity, 0, 3, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, isparam, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_xmlwriter_end_dtd_entity arginfo_xmlwriter_start_comment
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_write_dtd_entity, 0, 4, _IS_BOOL, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_write_dtd_entity, 0, 3, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, content, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, isparam, _IS_BOOL, 0)
@@ -170,12 +170,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_write_dtd_entity, 0, 4
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_output_memory, 0, 1, IS_STRING, 0)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, flush, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_flush, 0, 0, 1)
-	ZEND_ARG_INFO(0, xmlwriter)
+	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, empty, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 

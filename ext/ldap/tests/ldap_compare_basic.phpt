@@ -17,7 +17,6 @@ var_dump(
 	ldap_compare($link, "cn=userA,$base", "telephoneNumber", "yy-yy-yy-yy-yy")
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -28,4 +27,3 @@ remove_dummy_data($link, $base);
 --EXPECT--
 bool(true)
 bool(false)
-===DONE===

@@ -38,7 +38,6 @@ foreach($hex_values as $c) {
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_alpha() : usage variations ***
 
@@ -61,4 +60,3 @@ bool(true)
 bool(true)
 -- Iteration 4 --
 bool(true)
-===DONE===

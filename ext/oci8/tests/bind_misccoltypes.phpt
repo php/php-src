@@ -268,8 +268,6 @@ oci8_test_sql_execute($c, $stmtarray);
 oci_close($c);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 TEST86 insert all ORATYPE values
 
@@ -363,4 +361,3 @@ array(1) {
     string(9) "09-APR-10"
   }
 }
-===DONE===

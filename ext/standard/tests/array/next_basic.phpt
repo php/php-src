@@ -23,7 +23,6 @@ var_dump(next($array));
 echo key($array) . " => " . current($array) . "\n";
 var_dump(next($array));
 ?>
-===DONE===
 --EXPECT--
 *** Testing next() : basic functionality ***
 0 => zero
@@ -32,4 +31,3 @@ string(3) "one"
 string(3) "two"
 2 => two
 bool(false)
-===DONE===

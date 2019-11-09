@@ -6,7 +6,6 @@ Test preg_replace() function : error conditions - wrong arg types
 * proto string preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, count]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
-error_reporting(E_ALL&~E_NOTICE);
 /*
 * Testing how preg_replace reacts to being passed the wrong type of replacement argument
 */
@@ -15,7 +14,7 @@ $regex = '/[a-zA-Z]/';
 $replace = array('this is a string', array('this is', 'a subarray'),);
 $subject = 'test';
 foreach($replace as $value) {
-    print "\nArg value is: $value\n";
+    @print "\nArg value is: $value\n";
     try {
         var_dump(preg_replace($regex, $value, $subject));
     } catch (TypeError $e) {

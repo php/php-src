@@ -13,9 +13,7 @@ foreach($params as $key => $value) {
 	echo $value->__toString() . "\n";
 }
 ?>
-==DONE==
 --EXPECT--
 Parameter #0 [ <required> $test ]
 Parameter #1 [ <optional> $test2 = NULL ]
 Parameter #2 [ <optional> ...$test3 ]
-==DONE==

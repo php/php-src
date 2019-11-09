@@ -76,7 +76,6 @@ foreach($inputs as $input) {
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing base_convert() : usage variations ***
 
@@ -148,7 +147,7 @@ string(1) "0"
 
 -- Iteration 19 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(1) "0"
@@ -178,4 +177,3 @@ string(1) "0"
 
 Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
 string(1) "5"
-===Done===

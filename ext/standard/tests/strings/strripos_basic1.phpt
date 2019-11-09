@@ -29,7 +29,6 @@ var_dump( strripos($heredoc_str, 'HelLO') );
 var_dump( strripos($heredoc_str, $heredoc_str) );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing strripos() function: basic functionality ***
 
@@ -48,4 +47,3 @@ int(5)
 int(0)
 int(0)
 int(0)
-===DONE===

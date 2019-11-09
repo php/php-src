@@ -20,7 +20,5 @@ $obj = new Derived;
 unset($obj); // Derived::__destruct is being called not Base::__destruct
 
 ?>
-===DONE===
 --EXPECT--
 Derived::__destruct
-===DONE===

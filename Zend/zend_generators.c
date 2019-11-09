@@ -23,6 +23,7 @@
 #include "zend_exceptions.h"
 #include "zend_generators.h"
 #include "zend_closures.h"
+#include "zend_generators_arginfo.h"
 
 ZEND_API zend_class_entry *zend_ce_generator;
 ZEND_API zend_class_entry *zend_ce_ClosedGeneratorException;
@@ -93,16 +94,18 @@ ZEND_API zend_execute_data* zend_generator_freeze_call_stack(zend_execute_data *
 /* }}} */
 
 static void zend_generator_cleanup_unfinished_execution(
-		zend_generator *generator, uint32_t catch_op_num) /* {{{ */
+		zend_generator *generator, zend_execute_data *execute_data, uint32_t catch_op_num) /* {{{ */
 {
-	zend_execute_data *execute_data = generator->execute_data;
-
 	if (execute_data->opline != execute_data->func->op_array.opcodes) {
 		/* -1 required because we want the last run opcode, not the next to-be-run one. */
 		uint32_t op_num = execute_data->opline - execute_data->func->op_array.opcodes - 1;
 
 		if (UNEXPECTED(generator->frozen_call_stack)) {
+			/* Temporarily restore generator->execute_data if it has been NULLed out already. */
+			zend_execute_data *save_ex = generator->execute_data;
+			generator->execute_data = execute_data;
 			zend_generator_restore_call_stack(generator);
+			generator->execute_data = save_ex;
 		}
 		zend_cleanup_unfinished_execution(execute_data, op_num, catch_op_num);
 	}
@@ -113,6 +116,9 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 {
 	if (EXPECTED(generator->execute_data)) {
 		zend_execute_data *execute_data = generator->execute_data;
+		/* Null out execute_data early, to prevent double frees if GC runs while we're
+		 * already cleaning up execute_data. */
+		generator->execute_data = NULL;
 
 		if (EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE) {
 			zend_clean_and_cache_symbol_table(execute_data->symbol_table);
@@ -131,12 +137,12 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			return;
 		}
 
-		zend_vm_stack_free_extra_args(generator->execute_data);
+		zend_vm_stack_free_extra_args(execute_data);
 
 		/* Some cleanups are only necessary if the generator was closed
 		 * before it could finish execution (reach a return statement). */
 		if (UNEXPECTED(!finished_execution)) {
-			zend_generator_cleanup_unfinished_execution(generator, 0);
+			zend_generator_cleanup_unfinished_execution(generator, execute_data, 0);
 		}
 
 		/* Free closure object */
@@ -150,8 +156,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 			generator->gc_buffer = NULL;
 		}
 
-		efree(generator->execute_data);
-		generator->execute_data = NULL;
+		efree(execute_data);
 	}
 }
 /* }}} */
@@ -212,7 +217,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 	if (finally_op_num) {
 		zval *fast_call;
 
-		zend_generator_cleanup_unfinished_execution(generator, finally_op_num);
+		zend_generator_cleanup_unfinished_execution(generator, ex, finally_op_num);
 
 		fast_call = ZEND_CALL_VAR(ex, ex->func->op_array.opcodes[finally_op_end].op1.var);
 		Z_OBJ_P(fast_call) = EG(exception);
@@ -1007,7 +1012,7 @@ ZEND_METHOD(Generator, throw)
 	zend_generator *generator;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(exception)
+		Z_PARAM_OBJECT_OF_CLASS(exception, zend_ce_throwable);
 	ZEND_PARSE_PARAMETERS_END();
 
 	Z_TRY_ADDREF_P(exception);
@@ -1172,26 +1177,15 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 }
 /* }}} */
 
-ZEND_BEGIN_ARG_INFO(arginfo_generator_void, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_generator_send, 0, 0, 1)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_generator_throw, 0, 0, 1)
-	ZEND_ARG_INFO(0, exception)
-ZEND_END_ARG_INFO()
-
 static const zend_function_entry generator_functions[] = {
-	ZEND_ME(Generator, rewind,   arginfo_generator_void, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, valid,    arginfo_generator_void, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, current,  arginfo_generator_void, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, key,      arginfo_generator_void, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, next,     arginfo_generator_void, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, send,     arginfo_generator_send, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, throw,    arginfo_generator_throw, ZEND_ACC_PUBLIC)
-	ZEND_ME(Generator, getReturn,arginfo_generator_void, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, rewind,   arginfo_class_Generator_rewind, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, valid,    arginfo_class_Generator_valid, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, current,  arginfo_class_Generator_current, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, key,      arginfo_class_Generator_key, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, next,     arginfo_class_Generator_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, send,     arginfo_class_Generator_send, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, throw,    arginfo_class_Generator_throw, ZEND_ACC_PUBLIC)
+	ZEND_ME(Generator, getReturn,arginfo_class_Generator_getReturn, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

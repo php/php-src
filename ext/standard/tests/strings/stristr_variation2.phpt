@@ -83,7 +83,6 @@ foreach($inputs as $input) {
 fclose($file_handle);  //closing the file handle
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing stristr() function: with unexpected inputs for 'needle' argument ***
 -- Iteration 1 --
@@ -126,4 +125,3 @@ stristr() expects parameter 2 to be string, resource given
 string(11) "Hello World"
 -- Iteration 20 --
 string(11) "Hello World"
-===DONE===

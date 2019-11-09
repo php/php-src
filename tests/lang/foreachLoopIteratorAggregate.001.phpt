@@ -128,7 +128,6 @@ foreach ($f as $k=>$v) {
 
 
 ?>
-===DONE===
 --EXPECTF--
 object(EuropeanMeals)#%d (2) {
   ["storedEnglishMealIterator":"EuropeanMeals":private]=>
@@ -267,4 +266,3 @@ meal 1 => dinner
      --> EnglishMealIterator::valid (3)
  --> EnglishMealIterator::next (3)
  --> EnglishMealIterator::valid (4)
-===DONE===

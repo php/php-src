@@ -17,8 +17,6 @@ $format = 'Y';
 date_default_timezone_set("Asia/Calcutta");
 var_dump( idate($format) );
 ?>
-===DONE===
 --EXPECTF--
 *** Testing idate() : basic functionality ***
 int(%d)
-===DONE===

@@ -36,10 +36,8 @@ if ($f) {
 remove_data("file_cp936");
 
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (stream)
 string(%d) "reading file wihh multibyte filename
 "
 bool(true)
-===DONE===

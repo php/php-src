@@ -28,8 +28,10 @@ var_dump(imagecrop($img, array("x" => 0x7fffff00, "y" => 0, "width" => 10, "heig
 var_dump(imagecrop($img, array("x" => 0, "y" => 0, "width" => 65535, "height" => 65535)));
 ?>
 --EXPECTF--
-resource(%d) of type (gd)
-resource(%d) of type (gd)
+object(GdImage)#2 (0) {
+}
+object(GdImage)#2 (0) {
+}
 Array
 (
     [x] => a
@@ -39,11 +41,13 @@ Array
 )
 
 Warning: imagecrop(): one parameter to a memory allocation multiplication is negative or zero, failing operation gracefully
- in %sbug66356.php on line %d
+ in %s on line %d
 bool(false)
-resource(%d) of type (gd)
-resource(%d) of type (gd)
+object(GdImage)#2 (0) {
+}
+object(GdImage)#2 (0) {
+}
 
 Warning: imagecrop(): product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
- in %sbug66356.php on line %d
+ in %s on line %d
 bool(false)

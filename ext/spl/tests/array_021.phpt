@@ -24,8 +24,6 @@ catch (Exception $e)
 }
 
 ?>
-===DONE===
 --EXPECT--
 foo::seek(bar)
 got exception
-===DONE===

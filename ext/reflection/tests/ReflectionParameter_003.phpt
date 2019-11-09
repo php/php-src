@@ -56,7 +56,7 @@ foreach($refParameters as $parameter) {
 hello from test
 third is jack
 
-Notice: Undefined variable: theIncrement in %s on line 8
+Warning: Undefined variable: theIncrement in %s on line %d
 parameter names from staticMethod method:
 
 object(ReflectionParameter)#%d (1) {

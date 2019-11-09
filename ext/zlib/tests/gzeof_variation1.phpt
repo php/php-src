@@ -25,9 +25,7 @@ try {
 }
 unlink($filename);
 ?>
-===DONE===
 --EXPECT--
 bool(false)
 bool(false)
 gzeof(): supplied resource is not a valid stream resource
-===DONE===

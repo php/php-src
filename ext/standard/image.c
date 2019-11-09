@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -1235,7 +1233,7 @@ PHP_FUNCTION(image_type_to_extension)
 		Z_PARAM_LONG(image_type)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(inc_dot)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	switch (image_type) {
 		case IMAGE_FILETYPE_GIF:
@@ -1298,14 +1296,14 @@ PHP_FUNCTION(image_type_to_extension)
 
 /* {{{ php_imagetype
    detect filetype from first bytes */
-PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
+PHPAPI int php_getimagetype(php_stream * stream, char *input, char *filetype)
 {
 	char tmp[12];
     int twelve_bytes_read;
 
 	if ( !filetype) filetype = tmp;
 	if((php_stream_read(stream, filetype, 3)) != 3) {
-		php_error_docref(NULL, E_NOTICE, "Read error!");
+		php_error_docref(NULL, E_NOTICE, "Error reading from %s!", input);
 		return IMAGE_FILETYPE_UNKNOWN;
 	}
 
@@ -1316,7 +1314,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 		return IMAGE_FILETYPE_JPEG;
 	} else if (!memcmp(filetype, php_sig_png, 3)) {
 		if (php_stream_read(stream, filetype+3, 5) != 5) {
-			php_error_docref(NULL, E_NOTICE, "Read error!");
+			php_error_docref(NULL, E_NOTICE, "Error reading from %s!", input);
 			return IMAGE_FILETYPE_UNKNOWN;
 		}
 		if (!memcmp(filetype, php_sig_png, 8)) {
@@ -1337,7 +1335,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 		return IMAGE_FILETYPE_JPC;
 	} else if (!memcmp(filetype, php_sig_riff, 3)) {
 		if (php_stream_read(stream, filetype+3, 9) != 9) {
-			php_error_docref(NULL, E_NOTICE, "Read error!");
+			php_error_docref(NULL, E_NOTICE, "Error reading from %s!", input);
 			return IMAGE_FILETYPE_UNKNOWN;
 		}
 		if (!memcmp(filetype+8, php_sig_webp, 4)) {
@@ -1348,7 +1346,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 	}
 
 	if (php_stream_read(stream, filetype+3, 1) != 1) {
-		php_error_docref(NULL, E_NOTICE, "Read error!");
+		php_error_docref(NULL, E_NOTICE, "Error reading from %s!", input);
 		return IMAGE_FILETYPE_UNKNOWN;
 	}
 /* BYTES READ: 4 */
@@ -1375,7 +1373,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 		return IMAGE_FILETYPE_WBMP;
 	}
     if (!twelve_bytes_read) {
-		php_error_docref(NULL, E_NOTICE, "Read error!");
+		php_error_docref(NULL, E_NOTICE, "Error reading from %s!", input);
 		return IMAGE_FILETYPE_UNKNOWN;
     }
 	if (php_get_xbm(stream, NULL)) {
@@ -1385,7 +1383,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 }
 /* }}} */
 
-static void php_getimagesize_from_stream(php_stream *stream, zval *info, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
+static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *info, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
 	int itype = 0;
 	struct gfxinfo *result = NULL;
@@ -1394,7 +1392,7 @@ static void php_getimagesize_from_stream(php_stream *stream, zval *info, INTERNA
 		RETURN_FALSE;
 	}
 
-	itype = php_getimagetype(stream, NULL);
+	itype = php_getimagetype(stream, input, NULL);
 	switch( itype) {
 		case IMAGE_FILETYPE_GIF:
 			result = php_handle_gif(stream);
@@ -1513,7 +1511,7 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 		RETURN_FALSE;
 	}
 
-	php_getimagesize_from_stream(stream, info, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php_getimagesize_from_stream(stream, input, info, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	php_stream_close(stream);
 }
 /* }}} */

@@ -16,7 +16,5 @@ imageline($im, 0,0, 32767,0, $black);
 
 test_image_equals_file(__DIR__ . DIRECTORY_SEPARATOR . 'bug73213.png', $im);
 ?>
-===DONE===
 --EXPECT--
 The images are equal.
-===DONE===

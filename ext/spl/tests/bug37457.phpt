@@ -68,7 +68,6 @@ catch (Exception $e)
 }
 
 ?>
-===DONE===
 --EXPECT--
 Collection::__construct
 Collection::rewind
@@ -77,4 +76,3 @@ Collection::current
 Collection::key
 TestFilter::accept
 string(17) "Failure in Accept"
-===DONE===

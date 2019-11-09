@@ -30,7 +30,6 @@ var_dump($res, $arg1, $arg2, $arg3, $arg4);
 
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing sscanf() : basic functionality -using exponential format ***
 
@@ -55,4 +54,3 @@ float(10.12345)
 float(10123.45)
 float(10123.45)
 float(-101234.5)
-===DONE===

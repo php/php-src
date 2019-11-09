@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -81,7 +79,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|zs!",
 			&object, &format, &locale_str, &locale_len) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (!locale_str) {

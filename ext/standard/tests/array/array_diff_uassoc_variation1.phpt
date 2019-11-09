@@ -112,7 +112,6 @@ foreach($inputs as $key =>$value) {
 
 fclose($fp);
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_uassoc() : usage variation ***
 
@@ -193,4 +192,3 @@ Expected parameter 1 to be an array, null given
 
 --resource--
 Expected parameter 1 to be an array, resource given
-===DONE===

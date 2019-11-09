@@ -88,7 +88,6 @@ if ($result) odbc_free_result($result);
 odbc_close($link);
 
 ?>
-==DONE==
 --EXPECT--
 array(3) {
   ["PAR_ID"]=>
@@ -170,7 +169,6 @@ array(3) {
   ["PAR_CHR"]=>
   string(6) "test 7"
 }
-==DONE==
 --CLEAN--
 <?php
 include 'config.inc';

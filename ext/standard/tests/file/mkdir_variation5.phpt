@@ -63,7 +63,6 @@ foreach($dirs as $dir) {
 rmdir($workDir);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing mkdir() : variation ***
 -- creating mkdirVar5.tmp/aSubDir --
@@ -95,4 +94,3 @@ Directory created
 Directory created
 -- creating %s//mkdirVar5.tmp//aSubDir --
 Directory created
-===DONE===

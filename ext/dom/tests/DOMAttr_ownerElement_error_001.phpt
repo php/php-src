@@ -19,5 +19,5 @@ var_dump($attr->ownerElement);
 --EXPECTF--
 Warning: Couldn't fetch DOMAttr. Node no longer exists in %s on line %d
 
-Notice: Undefined property: DOMAttr::$ownerElement in %s on line %d
+Warning: Undefined property: DOMAttr::$ownerElement in %s on line %d
 NULL

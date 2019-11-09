@@ -20,11 +20,9 @@ try {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.tar');
 ?>
 --EXPECTF--
 phar error: "%sbadchecksum.tar" is a corrupted tar file (checksum mismatch of file "hithere")
-===DONE===

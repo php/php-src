@@ -20,11 +20,8 @@ foreach($obj as $ak=>$av) {
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ==Normal==
 0=>0 - 0=>0
 0=>0 - 1=>1
 0=>0 - 2=>2
-===DONE===

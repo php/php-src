@@ -10,7 +10,5 @@ try {
 	echo "InvalidArgumentException thrown\n";
 }
 ?>
-===DONE===
 --EXPECT--
 InvalidArgumentException thrown
-===DONE===

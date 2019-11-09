@@ -32,7 +32,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strftime() : usage variation ***
 
@@ -47,4 +46,3 @@ string(4) "2008"
 --Time zone offset--
 string(%d) "%s"
 string(%d) "%s"
-===DONE===

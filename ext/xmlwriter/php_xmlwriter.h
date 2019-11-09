@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -34,16 +32,10 @@ extern zend_module_entry xmlwriter_module_entry;
 #include <libxml/xmlwriter.h>
 #include <libxml/uri.h>
 
-/* Resource struct, not the object :) */
-typedef struct _xmlwriter_object {
-	xmlTextWriterPtr ptr;
-	xmlBufferPtr output;
-} xmlwriter_object;
-
-
 /* Extends zend object */
 typedef struct _ze_xmlwriter_object {
-	xmlwriter_object *xmlwriter_ptr;
+	xmlTextWriterPtr ptr;
+	xmlBufferPtr output;
 	zend_object std;
 } ze_xmlwriter_object;
 

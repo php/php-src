@@ -44,7 +44,6 @@ include $pname . '/a.php';
 include $pname . '/b.php';
 
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
@@ -54,4 +53,3 @@ string(40) "%s"
 bool(true)
 modified!
 another!
-===DONE===

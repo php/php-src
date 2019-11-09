@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -54,11 +52,13 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	MY_MYSQL			*mysql = NULL;
 	MYSQLI_RESOURCE		*mysqli_resource = NULL;
 	zval				*object = getThis();
-	char				*hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL;
-	size_t					hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
-	zend_bool			persistent = FALSE;
-	zend_long				port = 0, flags = 0;
-	zend_bool port_is_null = 1;
+	char				*hostname = NULL, *username=NULL, *passwd=NULL, *dbname=NULL, *socket=NULL,
+						*ssl_key = NULL, *ssl_cert = NULL, *ssl_ca = NULL, *ssl_capath = NULL,
+						*ssl_cipher = NULL;
+	size_t				hostname_len = 0, username_len = 0, passwd_len = 0, dbname_len = 0, socket_len = 0;
+	zend_bool			persistent = FALSE, ssl = FALSE;
+	zend_long			port = 0, flags = 0;
+	zend_bool           port_is_null = 1;
 	zend_string			*hash_key = NULL;
 	zend_bool			new_connection = FALSE;
 	zend_resource		*le;
@@ -188,6 +188,33 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 
 								goto end;
 							} else {
+#ifdef MYSQLI_USE_MYSQLND
+								if (mysql->mysql->data->vio->data->ssl) {
+									/* copy over pre-existing ssl settings so we can reuse them when reconnecting */
+									ssl = TRUE;
+
+									ssl_key = mysql->mysql->data->vio->data->options.ssl_key ? estrdup(mysql->mysql->data->vio->data->options.ssl_key) : NULL;
+									ssl_cert = mysql->mysql->data->vio->data->options.ssl_cert ? estrdup(mysql->mysql->data->vio->data->options.ssl_cert) : NULL;
+									ssl_ca = mysql->mysql->data->vio->data->options.ssl_ca ? estrdup(mysql->mysql->data->vio->data->options.ssl_ca) : NULL;
+									ssl_capath = mysql->mysql->data->vio->data->options.ssl_capath ? estrdup(mysql->mysql->data->vio->data->options.ssl_capath) : NULL;
+									ssl_cipher = mysql->mysql->data->vio->data->options.ssl_cipher ? estrdup(mysql->mysql->data->vio->data->options.ssl_cipher) : NULL;
+								}
+#else
+								if (mysql->mysql->options.ssl_key
+										|| mysql->mysql->options.ssl_cert
+										|| mysql->mysql->options.ssl_ca
+										|| mysql->mysql->options.ssl_capath
+										|| mysql->mysql->options.ssl_cipher) {
+									/* copy over pre-existing ssl settings so we can reuse them when reconnecting */
+									ssl = TRUE;
+
+									ssl_key = mysql->mysql->options.ssl_key ? estrdup(mysql->mysql->options.ssl_key) : NULL;
+									ssl_cert = mysql->mysql->options.ssl_cert ? estrdup(mysql->mysql->options.ssl_cert) : NULL;
+									ssl_ca = mysql->mysql->options.ssl_ca ? estrdup(mysql->mysql->options.ssl_ca) : NULL;
+									ssl_capath = mysql->mysql->options.ssl_capath ? estrdup(mysql->mysql->options.ssl_capath) : NULL;
+									ssl_cipher = mysql->mysql->options.ssl_cipher ? estrdup(mysql->mysql->options.ssl_cipher) : NULL;
+								}
+#endif
 								mysqli_close(mysql->mysql, MYSQLI_CLOSE_IMPLICIT);
 								mysql->mysql = NULL;
 							}
@@ -229,8 +256,56 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	/* BC for prior to bug fix #53425 */
 	flags |= CLIENT_MULTI_RESULTS;
 
+	if (ssl) {
+		/* if we're here, this means previous conn was ssl, repopulate settings */
+		mysql_ssl_set(mysql->mysql, ssl_key, ssl_cert, ssl_ca, ssl_capath, ssl_cipher);
+
+		if (ssl_key) {
+		    efree(ssl_key);
+		}
+
+		if (ssl_cert) {
+		    efree(ssl_cert);
+		}
+
+		if (ssl_ca) {
+		    efree(ssl_ca);
+		}
+
+		if (ssl_capath) {
+		    efree(ssl_capath);
+		}
+
+		if (ssl_cipher) {
+		    efree(ssl_cipher);
+		}
+	}
 	if (mysql_real_connect(mysql->mysql, hostname, username, passwd, dbname, port, socket, flags) == NULL)
 #else
+	if (ssl) {
+		/* if we're here, this means previous conn was ssl, repopulate settings */
+		mysql_ssl_set(mysql->mysql, ssl_key, ssl_cert, ssl_ca, ssl_capath, ssl_cipher);
+
+		if (ssl_key) {
+		    efree(ssl_key);
+		}
+
+		if (ssl_cert) {
+		    efree(ssl_cert);
+		}
+
+		if (ssl_ca) {
+		    efree(ssl_ca);
+		}
+
+		if (ssl_capath) {
+		    efree(ssl_capath);
+		}
+
+		if (ssl_cipher) {
+		    efree(ssl_cipher);
+		}
+	}
 	if (mysqlnd_connect(mysql->mysql, hostname, username, passwd, passwd_len, dbname, dbname_len,
 						port, socket, flags, MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA) == NULL)
 #endif
@@ -315,6 +390,10 @@ PHP_FUNCTION(mysqli_link_construct)
    Returns the numerical value of the error message from last connect command */
 PHP_FUNCTION(mysqli_connect_errno)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETURN_LONG(MyG(error_no));
 }
 /* }}} */
@@ -323,6 +402,10 @@ PHP_FUNCTION(mysqli_connect_errno)
    Returns the text of the error message from previous MySQL operation */
 PHP_FUNCTION(mysqli_connect_error)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	if (MyG(error_msg)) {
 		RETURN_STRING(MyG(error_msg));
 	} else {
@@ -1193,10 +1276,10 @@ PHP_FUNCTION(mysqli_release_savepoint)
    Returns information about open and cached links */
 PHP_FUNCTION(mysqli_get_links_stats)
 {
-	if (ZEND_NUM_ARGS()) {
-		php_error_docref(NULL, E_WARNING, "no parameters expected");
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
+
 	array_init(return_value);
 	add_assoc_long_ex(return_value, "total", sizeof("total") - 1, MyG(num_links));
 	add_assoc_long_ex(return_value, "active_plinks", sizeof("active_plinks") - 1, MyG(num_active_persistent));

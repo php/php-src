@@ -57,7 +57,6 @@ for ($sxe->rewind(); $sxe->valid(); $sxe->next()) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 Warning: Invalid argument supplied for foreach() in %ssxe_003.php on line %d
 ===RESET===
@@ -73,4 +72,3 @@ string(10) "Bla bla 2."
 string(7) "elem111"
 string(17) "SimpleXMLIterator"
 string(7) "Foo Bar"
-===DONE===

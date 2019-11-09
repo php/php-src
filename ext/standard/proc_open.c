@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -247,7 +245,7 @@ PHP_FUNCTION(proc_terminate)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 #ifdef PHP_WIN32
@@ -278,7 +276,7 @@ PHP_FUNCTION(proc_close)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	FG(pclose_wait) = 1;
@@ -308,7 +306,7 @@ PHP_FUNCTION(proc_get_status)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
-		RETURN_FALSE;
+		return;
 	}
 
 	array_init(return_value);
@@ -520,10 +518,10 @@ PHP_FUNCTION(proc_open)
 		Z_PARAM_ARRAY(descriptorspec)
 		Z_PARAM_ZVAL(pipes)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_STRING_EX(cwd, cwd_len, 1, 0)
-		Z_PARAM_ARRAY_EX(environment, 1, 0)
-		Z_PARAM_ARRAY_EX(other_options, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+		Z_PARAM_STRING_OR_NULL(cwd, cwd_len)
+		Z_PARAM_ARRAY_OR_NULL(environment)
+		Z_PARAM_ARRAY_OR_NULL(other_options)
+	ZEND_PARSE_PARAMETERS_END();
 
 	memset(&env, 0, sizeof(env));
 

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -498,7 +496,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 
 	if (f->arg_info) {
 		for (i = 0; i < nargs; i++) {
-			if (f->arg_info[nargs - i - 1].pass_by_reference) {
+			if (ZEND_ARG_SEND_MODE(&f->arg_info[nargs - i - 1])) {
 				byref_count++;
 			}
 		}
@@ -507,7 +505,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 	if (byref_count) {
 		byref_vals = (VARIANT*)safe_emalloc(sizeof(VARIANT), byref_count, 0);
 		for (j = 0, i = 0; i < nargs; i++) {
-			if (f->arg_info[nargs - i - 1].pass_by_reference) {
+			if (ZEND_ARG_SEND_MODE(&f->arg_info[nargs - i - 1])) {
 				/* put the value into byref_vals instead */
 				php_com_variant_from_zval(&byref_vals[j], &args[nargs - i - 1], obj->code_page);
 
@@ -554,7 +552,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 		if (f && f->arg_info) {
 			for (i = 0, j = 0; i < nargs; i++) {
 				/* if this was byref, update the zval */
-				if (f->arg_info[nargs - i - 1].pass_by_reference) {
+				if (ZEND_ARG_SEND_MODE(&f->arg_info[nargs - i - 1])) {
 					zval *arg = &args[nargs - i - 1];
 
 					ZVAL_DEREF(arg);
@@ -794,7 +792,7 @@ PHP_FUNCTION(com_message_pump)
 	DWORD result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &timeoutms) == FAILURE)
-		RETURN_FALSE;
+		return;
 
 	php_com_initialize();
 	result = MsgWaitForMultipleObjects(0, NULL, FALSE, (DWORD)timeoutms, QS_ALLINPUT);

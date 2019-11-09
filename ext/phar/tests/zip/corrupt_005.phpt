@@ -10,7 +10,5 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 phar error: Cannot process encrypted zip files in zip-based phar "%sencrypted.zip"
-===DONE===

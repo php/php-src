@@ -39,11 +39,9 @@ var_dump($b->getCRC32());
 echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>
 --EXPECTF--
 Phar entry is a directory, does not have a CRC
 Phar entry was not CRC checked
 int(%s)
-===DONE===

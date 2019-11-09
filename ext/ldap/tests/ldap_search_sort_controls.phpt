@@ -70,7 +70,6 @@ var_dump(
 	bin2hex($controls[LDAP_CONTROL_VLVRESPONSE]['value']['context'])
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -204,4 +203,3 @@ int(2)
 int(3)
 int(0)
 string(%d) "%s"
-===DONE===

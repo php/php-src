@@ -22,9 +22,7 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing readdir() : usage variations ***
 resource(%d) of type (stream)
 %d is not a valid Directory resource
-===DONE===

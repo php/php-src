@@ -47,8 +47,6 @@ foreach($strings as $string) {
 echo "TEST PASSED\n";
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing convert_uudecode() : basic functionality ***
 TEST PASSED
-===DONE===

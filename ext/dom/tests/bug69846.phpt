@@ -28,7 +28,6 @@ foreach ($dataNodes AS $node) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 int(3)
 object(DOMText)#%d (21) {
@@ -183,4 +182,3 @@ object(DOMText)#%d (21) {
   string(1) "
 "
 }
-===DONE===

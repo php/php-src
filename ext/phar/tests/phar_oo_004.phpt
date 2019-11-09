@@ -73,7 +73,6 @@ foreach($it as $name => $ent)
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/files/phar_oo_004.phar.php');
@@ -124,4 +123,3 @@ int(3)
 string(5) "e.php"
 MyDirectoryIterator::next
 MyDirectoryIterator::valid
-===DONE===

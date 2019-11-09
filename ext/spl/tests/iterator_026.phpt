@@ -16,23 +16,20 @@ foreach($it as $k=>$v)
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 0=>1
 hasNext: yes
 1=>2
 hasNext: yes
 
-Notice: Array to string conversion in %siterator_026.php on line %d
+Warning: Array to string conversion in %s on line %d
 0=>31
 hasNext: yes
 1=>32
 hasNext: yes
 
-Notice: Array to string conversion in %siterator_026.php on line %d
+Warning: Array to string conversion in %s on line %d
 0=>331
 hasNext: no
 3=>4
 hasNext: no
-===DONE===

@@ -30,7 +30,5 @@ if ($a && $b) {
 while ($reader->read());
 $reader->close();
 ?>
-===DONE===
 --EXPECT--
 ok
-===DONE===

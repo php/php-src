@@ -34,7 +34,6 @@ $result = vprintf($format3,$arg3);
 echo "\n";
 var_dump($result);
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : basic functionality - using unsigned format ***
 18446744073709550505
@@ -43,4 +42,3 @@ int(20)
 int(41)
 18446744073709550505 18446744073708317049 18446744073707206184
 int(62)
-===DONE===

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -51,8 +49,8 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
 	}
 
 	if (gm && (year<1970 || year>2037)) {				/* out of range for timestamps */
-		php_error_docref(NULL, E_WARNING, "This function is only valid for years between 1970 and 2037 inclusive");
-		RETURN_FALSE;
+		zend_value_error("This function is only valid for years between 1970 and 2037 inclusive");
+		return;
 	}
 
 	golden = (year % 19) + 1;					/* the Golden number */

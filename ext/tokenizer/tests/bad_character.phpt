@@ -19,27 +19,21 @@ foreach ($codes as $code) {
             echo $token, "\n";
         }
     }
+    echo "\n";
 }
 
 ?>
---EXPECTF--
-Warning: Unexpected character in input:  ' in %s on line %d
+--EXPECT--
 T_OPEN_TAG 6
 T_BAD_CHARACTER 1
 T_WHITESPACE 1
 T_STRING 3
 
-Warning: Unexpected character in input:  '%s' (ASCII=1) state=0 in %s on line %d
 T_OPEN_TAG 6
 T_BAD_CHARACTER 1
 T_WHITESPACE 1
 T_STRING 3
 
-Warning: Unexpected character in input:  '%s' (ASCII=1) state=0 in %s on line %d
-
-Warning: Unexpected character in input:  '%s' (ASCII=2) state=0 in %s on line %d
-
-Warning: Unexpected character in input:  '%s' (ASCII=3) state=0 in %s on line %d
 T_OPEN_TAG 6
 T_BAD_CHARACTER 1
 T_BAD_CHARACTER 1

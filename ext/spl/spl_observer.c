@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -345,20 +343,20 @@ static int spl_object_storage_compare_info(zval *e1, zval *e2) /* {{{ */
 {
 	spl_SplObjectStorageElement *s1 = (spl_SplObjectStorageElement*)Z_PTR_P(e1);
 	spl_SplObjectStorageElement *s2 = (spl_SplObjectStorageElement*)Z_PTR_P(e2);
-	zval result;
 
-	if (compare_function(&result, &s1->inf, &s2->inf) == FAILURE) {
-		return 1;
-	}
-
-	return ZEND_NORMALIZE_BOOL(Z_LVAL(result));
+	return zend_compare(&s1->inf, &s2->inf);
 }
 /* }}} */
 
 static int spl_object_storage_compare_objects(zval *o1, zval *o2) /* {{{ */
 {
-	zend_object *zo1 = (zend_object *)Z_OBJ_P(o1);
-	zend_object *zo2 = (zend_object *)Z_OBJ_P(o2);
+	zend_object *zo1;
+	zend_object *zo2;
+
+	ZEND_COMPARE_OBJECTS_FALLBACK(o1, o2);
+
+	zo1 = (zend_object *)Z_OBJ_P(o1);
+	zo2 = (zend_object *)Z_OBJ_P(o2);
 
 	if (zo1->ce != spl_ce_SplObjectStorage || zo2->ce != spl_ce_SplObjectStorage) {
 		return 1;
@@ -782,6 +780,9 @@ SPL_METHOD(SplObjectStorage, unserialize)
 
 	--p; /* for ';' */
 	count = Z_LVAL_P(pcount);
+	if (count < 0) {
+		goto outexcept;
+	}
 
 	ZVAL_UNDEF(&entry);
 	ZVAL_UNDEF(&inf);
@@ -799,12 +800,14 @@ SPL_METHOD(SplObjectStorage, unserialize)
 		}
 		/* store reference to allow cross-references between different elements */
 		if (!php_var_unserialize(&entry, &p, s + buf_len, &var_hash)) {
+			zval_ptr_dtor(&entry);
 			goto outexcept;
 		}
 		if (*p == ',') { /* new version has inf */
 			++p;
 			if (!php_var_unserialize(&inf, &p, s + buf_len, &var_hash)) {
 				zval_ptr_dtor(&entry);
+				zval_ptr_dtor(&inf);
 				goto outexcept;
 			}
 		}
@@ -903,7 +906,7 @@ SPL_METHOD(SplObjectStorage, __unserialize)
 	HashTable *data;
 	zval *storage_zv, *members_zv, *key, *val;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
 		return;
 	}
 
@@ -1015,7 +1018,7 @@ SPL_METHOD(MultipleIterator, __construct)
 	spl_SplObjectStorage   *intern;
 	zend_long               flags = MIT_NEED_ALL|MIT_KEYS_NUMERIC;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "|l", &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &flags) == FAILURE) {
 		return;
 	}
 
@@ -1322,7 +1325,7 @@ PHP_MINIT_FUNCTION(spl_observer)
 
 	spl_handler_SplObjectStorage.offset          = XtOffsetOf(spl_SplObjectStorage, std);
 	spl_handler_SplObjectStorage.get_debug_info  = spl_object_storage_debug_info;
-	spl_handler_SplObjectStorage.compare_objects = spl_object_storage_compare_objects;
+	spl_handler_SplObjectStorage.compare         = spl_object_storage_compare_objects;
 	spl_handler_SplObjectStorage.clone_obj       = spl_object_storage_clone;
 	spl_handler_SplObjectStorage.get_gc          = spl_object_storage_get_gc;
 	spl_handler_SplObjectStorage.dtor_obj        = zend_objects_destroy_object;

@@ -9,7 +9,5 @@ foreach(new FilesystemIterator(__DIR__) as $ent)
 }
 var_dump($count > 0);
 ?>
-===DONE===
 --EXPECT--
 bool(true)
-===DONE===

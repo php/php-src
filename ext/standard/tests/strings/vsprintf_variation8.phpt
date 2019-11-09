@@ -12,8 +12,6 @@ Test vsprintf() function : usage variations - string formats with non-string val
  * the '$format' and '$args' arguments of the function
 */
 
-error_reporting(E_ALL & ~E_NOTICE);
-
 echo "*** Testing vsprintf() : string formats and non-string values ***\n";
 
 // defining array of string formats
@@ -69,8 +67,7 @@ foreach($args_array as $args) {
 }
 
 ?>
-===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing vsprintf() : string formats and non-string values ***
 
 -- Iteration 1 --
@@ -88,6 +85,42 @@ string(130) "2 -2 2
    2 123456 2 -2"
 
 -- Iteration 3 --
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
+
+Warning: Array to string conversion in %s on line %d
 string(129) "Array Array Array 
    Array Array Array
          Arra Arra       Array Arra
@@ -100,4 +133,3 @@ string(79) "1 1
             1            0001 0000
    #0 1 $1 _0
     1 1 1"
-===DONE===

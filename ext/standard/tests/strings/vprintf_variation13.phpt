@@ -56,7 +56,6 @@ foreach($formats as $format) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : hexa formats with hexa values ***
 
@@ -91,4 +90,3 @@ int(5)
 -- Iteration 8 --
 1 2 3 4
 int(7)
-===DONE===

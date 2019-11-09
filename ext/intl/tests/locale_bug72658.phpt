@@ -11,8 +11,6 @@ var_dump(
 );
 
 ?>
-==DONE==
 --EXPECT--
 string(5) "de-DE"
 string(5) "de-DE"
-==DONE==

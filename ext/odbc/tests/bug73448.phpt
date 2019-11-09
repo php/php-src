@@ -37,7 +37,6 @@ foreach ($sqlCommandList as $exampleNumber => $sql) {
 
 odbc_close($conn);
 ?>
-==DONE==
 --EXPECTF--
 string(42) "/* non existent procedure xy */ execute xy"
 string(5) "37000"
@@ -47,4 +46,3 @@ string(58) "/* another erroneous query */ SELECT * FROM zwiebelfleisch"
 string(5) "S0002"
 string(%d) "[Microsoft][%s][SQL Server]Invalid object name 'zwiebelfleisch'."
 
-==DONE==

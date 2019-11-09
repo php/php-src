@@ -25,10 +25,8 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECT--
 a
 b
 c
 Parameter offset must be >= 0
-===DONE===

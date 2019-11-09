@@ -37,7 +37,6 @@ echo "\n-- Anonymous 'cmp_function' with parameters passed by reference --\n";
 var_dump( usort($array_arg, $cmp_function) );
 var_dump($array_arg);
 ?>
-===DONE===
 --EXPECT--
 *** Testing usort() : usage variation ***
 
@@ -68,4 +67,3 @@ array(4) {
   [3]=>
   string(9) "Pineapple"
 }
-===DONE===

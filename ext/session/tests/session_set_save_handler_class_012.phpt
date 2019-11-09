@@ -52,7 +52,7 @@ Open
 Warning: session_start(): Failed to initialize storage module: user (path: ) in %s on line %d
 SessionHandler::open() expects exactly 2 parameters, 0 given
 
-Notice: Undefined variable: _SESSION in %s on line %d
+Warning: Undefined variable: _SESSION in %s on line %d
 string(0) ""
 string(5) "files"
 string(4) "user"

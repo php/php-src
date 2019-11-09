@@ -27,7 +27,5 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECT--
 Object of class stdClass could not be converted to string
-===DONE===

@@ -30,7 +30,6 @@ $res = sscanf($str, $format, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
 var_dump($res, $arg1, $arg2, $arg3, $arg4, $arg5, $arg6);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing sscanf() : basic functionality - using unsigned format ***
 
@@ -50,4 +49,3 @@ int(11)
 string(10) "4294967285"
 NULL
 NULL
-===DONE===

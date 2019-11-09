@@ -30,7 +30,6 @@ include $alias . '/b.php';
 include $alias . '/b/c.php';
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
 --EXPECTF--
@@ -45,4 +44,3 @@ Warning: include(%sdelete_in_phar.phar.zip/b/c.php): failed to open stream: phar
 
 Warning: include(): Failed opening 'phar://%sdelete_in_phar.phar.zip/b/c.php' for inclusion (include_path='%s') in %sdelete_in_phar.php on line %d
 
-===DONE===

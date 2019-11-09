@@ -111,6 +111,15 @@ static size_t _real_page_size = ZEND_MM_PAGE_SIZE;
 # undef HAVE_MREMAP
 #endif
 
+#ifndef __APPLE__
+# define ZEND_MM_FD -1
+#else
+/* Mac allows to track anonymous page via vmmap per TAG id.
+ * user land applications are allowed to take from 240 to 255.
+ */
+# define ZEND_MM_FD (250<<24)
+#endif
+
 #ifndef ZEND_MM_STAT
 # define ZEND_MM_STAT 1    /* track current and peak memory usage            */
 #endif
@@ -251,7 +260,7 @@ struct _zend_mm_heap {
 	int                peak_chunks_count;		/* peak number of allocated chunks for current request */
 	int                cached_chunks_count;		/* number of cached chunks */
 	double             avg_chunks_count;		/* average number of chunks allocated per request */
-	int                last_chunks_delete_boundary; /* numer of chunks after last deletion */
+	int                last_chunks_delete_boundary; /* number of chunks after last deletion */
 	int                last_chunks_delete_count;    /* number of deletion over the last boundary */
 #if ZEND_MM_CUSTOM
 	union {
@@ -417,7 +426,7 @@ static void *zend_mm_mmap_fixed(void *addr, size_t size)
 	flags |= MAP_FIXED | MAP_EXCL;
 #endif
 	/* MAP_FIXED leads to discarding of the old mapping, so it can't be used. */
-	void *ptr = mmap(addr, size, PROT_READ | PROT_WRITE, flags /*| MAP_POPULATE | MAP_HUGETLB*/, -1, 0);
+	void *ptr = mmap(addr, size, PROT_READ | PROT_WRITE, flags /*| MAP_POPULATE | MAP_HUGETLB*/, ZEND_MM_FD, 0);
 
 	if (ptr == MAP_FAILED) {
 #if ZEND_MM_ERROR && !defined(MAP_EXCL)
@@ -461,7 +470,7 @@ static void *zend_mm_mmap(size_t size)
 	}
 #endif
 
-	ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+	ptr = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, ZEND_MM_FD, 0);
 
 	if (ptr == MAP_FAILED) {
 #if ZEND_MM_ERROR
@@ -1745,11 +1754,16 @@ static void *zend_mm_alloc_huge(zend_mm_heap *heap, size_t size ZEND_FILE_LINE_D
 	 * We allocate them with 2MB size granularity, to avoid many
 	 * reallocations when they are extended by small pieces
 	 */
-	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE));
+	size_t alignment = MAX(REAL_PAGE_SIZE, ZEND_MM_CHUNK_SIZE);
 #else
-	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, REAL_PAGE_SIZE);
+	size_t alignment = REAL_PAGE_SIZE;
 #endif
+	size_t new_size = ZEND_MM_ALIGNED_SIZE_EX(size, alignment);
 	void *ptr;
+
+	if (UNEXPECTED(new_size < size)) {
+		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%zu + %zu)", size, alignment);
+	}
 
 #if ZEND_MM_LIMIT
 	if (UNEXPECTED(new_size > heap->limit - heap->real_size)) {

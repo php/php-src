@@ -31,7 +31,6 @@ do {
 } while ($rbbi->next() != IntlBreakIterator::DONE);
 
 ?>
-==DONE==
 --EXPECT--
 pos        : 0
 rule status: 0
@@ -43,4 +42,3 @@ pos        : 17
 rule status: 0
 pos        : 19
 rule status: 42
-==DONE==

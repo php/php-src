@@ -23,9 +23,7 @@ gzclose($h);
 echo "\n";
 unlink($outputFileName);
 ?>
-===DONE===
 --EXPECT--
 Here is some plain
 text to be read
 and displayed.
-===DONE===

@@ -21,7 +21,6 @@ $res = $db->query("SELECT a FROM test");
 var_dump($res->fetchAll(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE, 'SimpleXMLElement', array('<root/>')));
 
 ?>
-===DONE===
 --EXPECTF--
 array(1) {
   [0]=>
@@ -30,4 +29,3 @@ array(1) {
     string(3) "xyz"
   }
 }
-===DONE===

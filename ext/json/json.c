@@ -1,7 +1,5 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
   | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
@@ -54,12 +52,8 @@ static const zend_function_entry json_functions[] = {
 /* }}} */
 
 /* {{{ JsonSerializable methods */
-ZEND_BEGIN_ARG_INFO(json_serialize_arginfo, 0)
-	/* No arguments */
-ZEND_END_ARG_INFO();
-
 static const zend_function_entry json_serializable_interface[] = {
-	PHP_ABSTRACT_ME(JsonSerializable, jsonSerialize, json_serialize_arginfo)
+	PHP_ABSTRACT_ME(JsonSerializable, jsonSerialize, arginfo_class_JsonSerializable_jsonSerialize)
 	PHP_FE_END
 };
 /* }}} */

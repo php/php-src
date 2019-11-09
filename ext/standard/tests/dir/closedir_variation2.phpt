@@ -34,7 +34,6 @@ try {
 echo "Directory Handle: ";
 var_dump($dh);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $directory = __DIR__ . "/closedir_variation2";
@@ -50,4 +49,3 @@ Directory Handle: resource(%d) of type (Unknown)
 -- Close directory handle second time: --
 closedir(): supplied resource is not a valid Directory resource
 Directory Handle: resource(%d) of type (Unknown)
-===DONE===

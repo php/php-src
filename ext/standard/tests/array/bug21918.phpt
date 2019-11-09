@@ -28,7 +28,6 @@ foreach($c as $k => $v) {
 	var_dump($v);
 }
 
-echo "==Done==\n";
 ?>
 --EXPECT--
 ==Mixed==
@@ -52,4 +51,3 @@ string(1) "a"
 ==Negative==
 int(-2)
 string(1) "a"
-==Done==

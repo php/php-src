@@ -65,7 +65,6 @@ while ($pipes || $writePipes) {
 var_dump($pipeEvents);
 
 ?>
-===DONE===
 --EXPECTF--
 array(2) {
   [%d]=>
@@ -83,4 +82,3 @@ array(2) {
     string(12) "Closing pipe"
   }
 }
-===DONE===

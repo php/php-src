@@ -38,7 +38,6 @@ foreach($values as $value) {
       $iterator++;
 };
 ?>
-===DONE===
 --EXPECT--
 *** Testing image_type_to_mime_type() : usage variations ***
 
@@ -77,4 +76,3 @@ string(24) "application/octet-stream"
 
 -- Iteration 12 --
 string(24) "application/octet-stream"
-===DONE===

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -726,7 +724,9 @@ finish:
 			ZVAL_STRINGL(&http_response, tmp_line, tmp_line_len);
 			zend_hash_next_index_insert(Z_ARRVAL_P(response_header), &http_response);
 		} else {
-			php_stream_wrapper_log_error(wrapper, options, "HTTP request failed, unexpected end of socket!");
+			php_stream_close(stream);
+			stream = NULL;
+			php_stream_wrapper_log_error(wrapper, options, "HTTP request failed!");
 			goto out;
 		}
 	}

@@ -8,7 +8,5 @@ try {
     echo $e->getMessage(), "\n";
 }
 ?>
-===DONE===
 --EXPECT--
 RecursiveCachingIterator::__construct() expects parameter 1 to be RecursiveIterator, object given
-===DONE===

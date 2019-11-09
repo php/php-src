@@ -15,7 +15,6 @@ var_dump( timezone_open("Europe/London") );
 var_dump( timezone_open("America/Los_Angeles") );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing timezone_open() : basic functionality ***
 object(DateTimeZone)#%d (2) {
@@ -36,4 +35,3 @@ object(DateTimeZone)#%d (2) {
   ["timezone"]=>
   string(19) "America/Los_Angeles"
 }
-===DONE===

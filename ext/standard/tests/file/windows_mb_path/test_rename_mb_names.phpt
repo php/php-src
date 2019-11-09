@@ -55,7 +55,6 @@ set_active_cp($old_cp);
 remove_data("file2_mb");
 
 ?>
-===DONE===
 --EXPECTF--
 Active code page: 65001
 bool(true)
@@ -66,4 +65,3 @@ string(27) "測試多字節路徑17.txt"
 bool(true)
 bool(true)
 Active code page: %d
-===DONE===

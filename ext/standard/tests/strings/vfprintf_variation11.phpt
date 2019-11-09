@@ -65,7 +65,6 @@ echo "\n";
 unlink($data_file);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : octal formats with octal values ***
 
@@ -85,4 +84,3 @@ unlink($data_file);
 % %o o
 -- Iteration 8 --
 1 2 3 4
-===DONE===

@@ -65,10 +65,8 @@ function runtest() {
     rmdir($extraDir);
 }
 ?>
-===DONE===
 --EXPECT--
 Not created in dir1
 found file - not in dir1
 Not created in dir1
 found file - not in dir1
-===DONE===

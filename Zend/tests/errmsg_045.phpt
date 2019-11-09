@@ -17,4 +17,4 @@ eval('class A { private function __invoke() { } }');
 string(76) "The magic method __invoke() must have public visibility and cannot be static"
 string(%d) "%s(%d) : eval()'d code"
 
-Notice: Undefined variable: undefined in %s on line %d
+Warning: Undefined variable: undefined in %s on line %d

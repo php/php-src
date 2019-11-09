@@ -35,7 +35,6 @@ proc_close($p);
 echo $out;
 
 ?>
-==DONE==
 --EXPECTF--
 array(4) {
   [0]=>
@@ -47,4 +46,3 @@ array(4) {
   [3]=>
   string(14) "карамба"
 }
-==DONE==

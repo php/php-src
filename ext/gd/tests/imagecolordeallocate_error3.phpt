@@ -9,14 +9,17 @@ Rafael Dohms <rdohms [at] gmail [dot] com>
 ?>
 --FILE--
 <?php
+require_once __DIR__ . '/func.inc';
+
 $image = imagecreate(180, 30);
 $white = imagecolorallocate($image, 255, 255, 255);
 
 $totalColors = imagecolorstotal($image);
 
-$result = imagecolordeallocate($image, $totalColors + 100);
-var_dump($result);
+trycatch_dump(
+    fn() => imagecolordeallocate($image, $totalColors + 100)
+);
+
 ?>
---EXPECTF--
-Warning: imagecolordeallocate(): Color index 101 out of range in %s on line %d
-bool(false)
+--EXPECT--
+!! [ValueError] Color index 101 out of range

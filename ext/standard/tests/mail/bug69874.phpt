@@ -31,7 +31,6 @@ echo file_get_contents($outFile);
 unlink($outFile);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing mail() : send email without additional headers ***
 bool(true)
@@ -39,4 +38,3 @@ To: user@company.com
 Subject: Test Subject
 
 A Message
-===DONE===

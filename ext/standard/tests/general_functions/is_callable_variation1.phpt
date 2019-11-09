@@ -59,7 +59,6 @@ $undef_functions = array (
 check_iscallable($undef_functions);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing is_callable() on undefined functions ***
 -- Iteration  1 --
@@ -206,4 +205,3 @@ bool(true)
 bool(false)
 bool(false)
 "echo()"
-===DONE===

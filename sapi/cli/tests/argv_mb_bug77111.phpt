@@ -28,7 +28,6 @@ file_put_contents($argv_fl, "<?php file_put_contents('$out_fl', implode(' ', arr
 var_dump(file_get_contents($out_fl));
 
 ?>
-==DONE==
 --CLEAN--
 <?php
 $out_fl = __DIR__ . "\\argv_bug77111.txt";
@@ -38,5 +37,4 @@ unlink($out_fl);
 ?>
 --EXPECTF--
 string(57) "Ästhetik Æstetik Esthétique Estética Эстетика"
-==DONE==
 

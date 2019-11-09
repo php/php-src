@@ -28,7 +28,6 @@ var_dump($d2);
 $d2_clone = clone $d2;
 var_dump($d2_clone);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing clone on objects whoose class derived from DateTime class ***
 object(DateTimeExt1)#%d (5) {
@@ -87,4 +86,3 @@ object(DateTimeExt2)#%d (7) {
   ["timezone"]=>
   string(3) "GMT"
 }
-===DONE===

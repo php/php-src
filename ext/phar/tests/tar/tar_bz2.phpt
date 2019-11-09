@@ -45,7 +45,6 @@ var_dump($phar2->isFileFormat(Phar::TAR));
 var_dump($phar2->isCompressed() == Phar::BZ2);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/tar_bz2.phar');
@@ -58,4 +57,3 @@ string(9) "it worked"
 string(%d) "phar://%star_bz2.phar/tar_004.php"
 bool(true)
 bool(true)
-===DONE===

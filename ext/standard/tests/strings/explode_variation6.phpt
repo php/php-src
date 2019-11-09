@@ -39,7 +39,6 @@ function test_explode($delim, $string, $limit)
 	}
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing explode() function: misc tests ***
 
@@ -67,4 +66,3 @@ string(6) "6f6e65"
 string(6) "74776f"
 string(10) "7468726565"
 string(8) "666f7572"
-===DONE===

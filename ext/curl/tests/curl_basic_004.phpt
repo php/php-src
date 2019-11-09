@@ -32,8 +32,6 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
 
   var_dump( $curl_content );
 ?>
-===DONE===
 --EXPECT--
 *** Testing curl setting referer ***
 string(19) "http://www.refer.er"
-===DONE===

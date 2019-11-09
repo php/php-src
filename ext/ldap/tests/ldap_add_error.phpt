@@ -79,7 +79,6 @@ var_dump(
 	*/
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -113,4 +112,3 @@ int(17)
 
 Warning: ldap_add(): Unknown attribute in the data in %s on line %d
 bool(false)
-===DONE===

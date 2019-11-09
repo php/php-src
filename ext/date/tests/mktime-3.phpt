@@ -1,7 +1,7 @@
 --TEST--
 mktime() [3] (32-bit)
 --SKIPIF--
-<?php echo PHP_INT_SIZE == 8 ? "skip 32-bit only" : "OK" ?>
+<?php if (PHP_INT_SIZE == 8) die("skip 32-bit only"); ?>
 --INI--
 error_reporting=2047
 --FILE--
@@ -24,7 +24,6 @@ foreach ($tzs as $tz) {
 	echo "\n";
 }
 ?>
-===Done===
 --EXPECT--
 America/Toronto
 Y:    0 - January 2000-01-01T01:01:01-0500
@@ -56,4 +55,3 @@ Y: 1999 - January 1999-01-01T01:01:01+0100
 Y: 2000 - January 2000-01-01T01:01:01+0100
 Y: 2001 - January 2001-01-01T01:01:01+0100
 
-===Done===

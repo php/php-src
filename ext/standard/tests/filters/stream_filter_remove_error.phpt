@@ -31,7 +31,6 @@ var_dump( stream_filter_remove( $filter ) );
 fclose( $fp );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
@@ -52,4 +51,3 @@ bool(true)
 
 Warning: stream_filter_remove(): Invalid resource given, not a stream filter in %s on line %d
 bool(false)
-===DONE===

@@ -83,7 +83,6 @@ foreach($inputs as $input) {
 
 fclose($fp);
 ?>
-===Done===
 --EXPECT--
 *** Testing abs() : usage variations ***
 
@@ -134,4 +133,3 @@ int(0)
 
 -- Iteration 16 --
 abs() expects parameter 1 to be int or float, resource given
-===Done===

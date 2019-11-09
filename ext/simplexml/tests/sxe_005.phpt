@@ -33,7 +33,6 @@ var_dump(count($sxe->elem1));
 var_dump(count($sxe->elem2));
 
 ?>
-===DONE===
 --EXPECT--
 SXETest::count
 int(3)
@@ -41,4 +40,3 @@ SXETest::count
 int(1)
 SXETest::count
 int(2)
-===DONE===

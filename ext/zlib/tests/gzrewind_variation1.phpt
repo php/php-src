@@ -21,8 +21,6 @@ gzclose($h);
 unlink($f);
 echo "\n";
 ?>
-===DONE===
 --EXPECT--
 bool(false)
 The first string.The second string.
-===DONE===

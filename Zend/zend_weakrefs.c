@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
@@ -20,6 +18,7 @@
 #include "zend_interfaces.h"
 #include "zend_objects_API.h"
 #include "zend_weakrefs.h"
+#include "zend_weakrefs_arginfo.h"
 
 typedef struct _zend_weakref {
 	zend_object *referent;
@@ -142,13 +141,6 @@ static ZEND_COLD void zend_weakref_no_unset(zend_object *object, zend_string *me
 	zend_weakref_unsupported("properties");
 }
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(zend_weakref_create_arginfo, 0, 1, WeakReference, 0)
-	ZEND_ARG_TYPE_INFO(0, referent, IS_OBJECT, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(zend_weakref_get_arginfo, 0, 0, IS_OBJECT, 1)
-ZEND_END_ARG_INFO()
-
 ZEND_COLD ZEND_METHOD(WeakReference, __construct)
 {
 	zend_throw_error(NULL,
@@ -160,7 +152,7 @@ ZEND_METHOD(WeakReference, create)
 {
 	zval *referent;
 
-	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 1,1)
+	ZEND_PARSE_PARAMETERS_START(1,1)
 		Z_PARAM_OBJECT(referent)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -173,16 +165,15 @@ ZEND_METHOD(WeakReference, create)
 
 ZEND_METHOD(WeakReference, get)
 {
-	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 0, 0)
-	ZEND_PARSE_PARAMETERS_END();
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zend_weakref_get(getThis(), return_value);
 }
 
 static const zend_function_entry zend_weakref_methods[] = {
-	ZEND_ME(WeakReference, __construct, NULL, ZEND_ACC_PUBLIC)
-	ZEND_ME(WeakReference, create,  zend_weakref_create_arginfo, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(WeakReference, get, zend_weakref_get_arginfo, ZEND_ACC_PUBLIC)
+	ZEND_ME(WeakReference, __construct, arginfo_class_WeakReference___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(WeakReference, create, arginfo_class_WeakReference_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(WeakReference, get, arginfo_class_WeakReference_get, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

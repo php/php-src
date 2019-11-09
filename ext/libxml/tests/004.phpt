@@ -1,7 +1,7 @@
 --TEST--
 libxml_set_streams_context()
 --SKIPIF--
-<?php if (!extension_loaded('dom')) die('skip'); ?>
+<?php if (!extension_loaded('dom')) die('skip dom extension not available'); ?>
 --FILE--
 <?php
 

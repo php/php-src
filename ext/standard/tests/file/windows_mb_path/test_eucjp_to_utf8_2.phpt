@@ -37,7 +37,6 @@ get_basename_with_cp($fn, 65001);
 remove_data("dir_eucjp");
 
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (stream)
 int(25)
@@ -49,4 +48,3 @@ string(38) "テストマルチバイト・パス33"
 bool(true)
 string(%d) "%s\テストマルチバイト・パス33"
 Active code page: %d
-===DONE===

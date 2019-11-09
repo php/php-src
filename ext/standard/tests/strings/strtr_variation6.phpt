@@ -86,7 +86,6 @@ for($index = 0; $index < count($from_arr); $index++) {
 
 fclose($file_handle);  //closing the file handle
 ?>
-===DONE===
 --EXPECTF--
 *** Testing strtr() function: with unexpected inputs for 'from' ***
 -- Iteration 1 --
@@ -103,15 +102,15 @@ string(6) "m1tatm"
 string(6) "tm0atm"
 -- Iteration 7 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(6) "0120tm"
 -- Iteration 8 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(6) "0120tm"
 -- Iteration 9 --
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(6) "0120tm"
 -- Iteration 10 --
 string(6) "0a2atm"
@@ -133,4 +132,3 @@ string(6) "012atm"
 string(6) "012atm"
 -- Iteration 19 --
 string(6) "012atm"
-===DONE===

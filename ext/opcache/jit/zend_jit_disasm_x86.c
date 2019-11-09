@@ -249,7 +249,7 @@ static int zend_jit_cmp_labels(Bucket *b1, Bucket *b2)
 
 static int zend_jit_disasm(const char    *name,
                            const char    *filename,
-                           zend_op_array *op_array,
+                           const zend_op_array *op_array,
                            zend_cfg      *cfg,
                            const void    *start,
                            size_t         size)
@@ -424,7 +424,6 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_zval_copy_deref_helper)
 	REGISTER_HELPER(zend_jit_new_ref_helper);
 	REGISTER_HELPER(zend_jit_fetch_global_helper);
-	REGISTER_HELPER(zend_jit_verify_arg_object);
 	REGISTER_HELPER(zend_jit_verify_arg_slow);
 	REGISTER_HELPER(zend_jit_fetch_obj_r_slow);
 	REGISTER_HELPER(zend_jit_fetch_obj_r_dynamic);
@@ -441,8 +440,10 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_pre_dec_typed_ref);
 	REGISTER_HELPER(zend_jit_post_inc_typed_ref);
 	REGISTER_HELPER(zend_jit_post_dec_typed_ref);
+	REGISTER_HELPER(zend_jit_assign_op_to_typed_ref);
 	REGISTER_HELPER(zend_jit_only_vars_by_reference);
 	REGISTER_HELPER(zend_jit_invalid_array_access);
+	REGISTER_HELPER(zend_jit_prepare_assign_dim_ref);
 	REGISTER_HELPER(zend_runtime_jit);
 	REGISTER_HELPER(zend_jit_hot_func);
 #undef  REGISTER_HELPER

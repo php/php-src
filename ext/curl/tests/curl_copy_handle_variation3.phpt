@@ -26,12 +26,10 @@ curl_close($ch1);
 var_dump(curl_exec($ch2));
 curl_close($ch2);
 ?>
-===DONE===
 --EXPECTF--
 bool(true)
 string(%d) "АБВ.txt|application/octet-stream"
 string(%d) "АБВ.txt|application/octet-stream"
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/АБВ.txt');

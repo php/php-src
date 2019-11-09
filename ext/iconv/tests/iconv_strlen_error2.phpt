@@ -25,10 +25,8 @@ $encoding = 'unknown-encoding';
 var_dump(iconv_strlen($string, $encoding));
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing iconv_strlen() : error ***
 
 Notice: iconv_strlen(): Wrong charset, conversion from `unknown-encoding' to `UCS-4LE' is not allowed in %s on line %d
 bool(false)
-===DONE===

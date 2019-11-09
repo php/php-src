@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -1959,7 +1957,7 @@ PHP_FUNCTION(strrpos)
 		Z_PARAM_STR(needle)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
@@ -2005,7 +2003,7 @@ PHP_FUNCTION(strripos)
 		Z_PARAM_STR(needle)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(needle) == 1) {
 		/* Single character search can shortcut memcmps
@@ -2186,13 +2184,13 @@ PHP_FUNCTION(substr)
 {
 	zend_string *str;
 	zend_long l = 0, f;
-	int argc = ZEND_NUM_ARGS();
+	zend_bool len_is_null = 1;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(str)
 		Z_PARAM_LONG(f)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(l)
+		Z_PARAM_LONG_OR_NULL(l, len_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (f > (zend_long)ZSTR_LEN(str)) {
@@ -2206,7 +2204,7 @@ PHP_FUNCTION(substr)
 		} else {
 			f = (zend_long)ZSTR_LEN(str) + f;
 		}
-		if (argc > 2) {
+		if (!len_is_null) {
 			if (l < 0) {
 				/* if "length" position is negative, set it to the length
 				 * needed to stop that many chars from the end of the string
@@ -2226,7 +2224,7 @@ PHP_FUNCTION(substr)
 		} else {
 			goto truncate_len;
 		}
-	} else if (argc > 2) {
+	} else if (!len_is_null) {
 		if (l < 0) {
 			/* if "length" position is negative, set it to the length
 			 * needed to stop that many chars from the end of the string
@@ -2821,8 +2819,8 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 		} else {
 			len = ZSTR_LEN(str_key);
 			if (UNEXPECTED(len < 1)) {
-				efree(num_bitset);
-				RETURN_FALSE;
+				php_error_docref(NULL, E_WARNING, "Ignoring replacement of empty string");
+				continue;
 			} else if (UNEXPECTED(len > slen)) {
 				/* skip long patterns */
 				continue;
@@ -2849,6 +2847,7 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 				len = ZSTR_LEN(key_used);
 				if (UNEXPECTED(len > slen)) {
 					/* skip long patterns */
+					zend_string_release(key_used);
 					continue;
 				}
 				if (len > maxlen) {
@@ -3251,7 +3250,7 @@ PHPAPI zend_string *php_str_to_str(const char *haystack, size_t length, const ch
 }
 /* }}} */
 
-/* {{{ proto string strtr(string str, string from[, string to])
+/* {{{ proto string|false strtr(string str, string from[, string to])
    Translates characters in str using given translation tables */
 PHP_FUNCTION(strtr)
 {
@@ -3295,6 +3294,7 @@ PHP_FUNCTION(strtr)
 				}
 				replace = zval_get_tmp_string(entry, &tmp_replace);
 				if (ZSTR_LEN(str_key) < 1) {
+					php_error_docref(NULL, E_WARNING, "Ignoring replacement of empty string");
 					RETVAL_STR_COPY(str);
 				} else if (ZSTR_LEN(str_key) == 1) {
 					RETVAL_STR(php_char_to_str_ex(str,
@@ -4712,7 +4712,7 @@ PHP_FUNCTION(strip_tags)
 }
 /* }}} */
 
-/* {{{ proto string|false setlocale(mixed category, string locale [, string ...])
+/* {{{ proto string|false setlocale(int category, string locale [, string ...])
    Set locale information */
 PHP_FUNCTION(setlocale)
 {
@@ -5360,7 +5360,7 @@ PHP_FUNCTION(str_repeat)
 }
 /* }}} */
 
-/* {{{ proto array|string|false count_chars(string input [, int mode])
+/* {{{ proto array|string count_chars(string input [, int mode])
    Returns info about what characters are used in input */
 PHP_FUNCTION(count_chars)
 {
@@ -5380,8 +5380,8 @@ PHP_FUNCTION(count_chars)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mymode < 0 || mymode > 4) {
-		php_error_docref(NULL, E_WARNING, "Unknown mode");
-		RETURN_FALSE;
+		zend_value_error("Unknown mode");
+		return;
 	}
 
 	buf = (const unsigned char *) ZSTR_VAL(input);
@@ -5554,7 +5554,7 @@ PHP_FUNCTION(substr_count)
 {
 	char *haystack, *needle;
 	zend_long offset = 0, length = 0;
-	int ac = ZEND_NUM_ARGS();
+	zend_bool length_is_null = 1;
 	zend_long count = 0;
 	size_t haystack_len, needle_len;
 	const char *p, *endp;
@@ -5565,7 +5565,7 @@ PHP_FUNCTION(substr_count)
 		Z_PARAM_STRING(needle, needle_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(offset)
-		Z_PARAM_LONG(length)
+		Z_PARAM_LONG_OR_NULL(length, length_is_null)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (needle_len == 0) {
@@ -5585,7 +5585,7 @@ PHP_FUNCTION(substr_count)
 	}
 	p += offset;
 
-	if (ac == 4) {
+	if (!length_is_null) {
 
 		if (length < 0) {
 			length += (haystack_len - offset);
@@ -5695,7 +5695,7 @@ PHP_FUNCTION(str_pad)
 }
 /* }}} */
 
-/* {{{ proto mixed sscanf(string str, string format [, string ...])
+/* {{{ proto array|int|null sscanf(string str, string format [, string ...])
    Implements an ANSI C compatible sscanf */
 PHP_FUNCTION(sscanf)
 {
@@ -6065,7 +6065,7 @@ PHP_FUNCTION(strpbrk)
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR(haystack)
 		Z_PARAM_STR(char_list)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ZSTR_LEN(char_list)) {
 		php_error_docref(NULL, E_WARNING, "The character list cannot be empty");
@@ -6099,9 +6099,9 @@ PHP_FUNCTION(substr_compare)
 		Z_PARAM_STR(s2)
 		Z_PARAM_LONG(offset)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG_EX(len, len_is_default, 1, 0)
+		Z_PARAM_LONG_OR_NULL(len, len_is_default)
 		Z_PARAM_BOOL(cs)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!len_is_default && len <= 0) {
 		if (len == 0) {

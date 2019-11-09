@@ -49,8 +49,6 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1
 
@@ -58,4 +56,3 @@ Warning: oci_execute(): ORA-29478: %s
 ORA-06512: at "SYS.DBMS_SQL", line %d
 ORA-06512: at "SYS.DBMS_SQL", line %d
 ORA-06512: at "%s.IMP_RES_CALL_ERR_PROC", line %d in %simp_res_call_error.php on line %d
-===DONE===

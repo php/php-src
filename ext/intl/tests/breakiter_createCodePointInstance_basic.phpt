@@ -18,7 +18,6 @@ $codepoint_it->setText($text);
 print_r(iterator_to_array($codepoint_it));
 
 ?>
-==DONE==
 --EXPECT--
 string(26) "IntlCodePointBreakIterator"
 Array
@@ -40,4 +39,3 @@ Array
     [14] => 42
     [15] => 45
 )
-==DONE==

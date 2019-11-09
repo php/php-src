@@ -2,7 +2,7 @@
 Bug #69521	Segfault in gc_collect_cycles()
 --FILE--
 <?php
-$serverUri = "tcp://127.0.0.1:64321";
+$serverUri = "tcp://127.0.0.1:74321";
 $sock = stream_socket_server($serverUri, $errno, $errstr, STREAM_SERVER_BIND | STREAM_SERVER_LISTEN);
 
 $fp = stream_socket_client($serverUri, $errNumber, $errString, 5, STREAM_CLIENT_CONNECT);

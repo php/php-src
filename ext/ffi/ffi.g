@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -31,8 +29,6 @@ php llk.php ffi.g
 
 %{
 /*
-   +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
@@ -135,6 +131,8 @@ declaration_specifiers(zend_ffi_dcl *dcl):
 			{zend_ffi_set_abi(dcl, ZEND_FFI_ABI_FASTCALL);}
 		|	"__thiscall"
 			{zend_ffi_set_abi(dcl, ZEND_FFI_ABI_THISCALL);}
+		|	"__vectorcall"
+			{zend_ffi_set_abi(dcl, ZEND_FFI_ABI_VECTORCALL);}
 		|	"_Alignas"
 			"("
 			(	&type_name_start

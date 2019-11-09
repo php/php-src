@@ -13,8 +13,6 @@ var_dump(imagesx($im));
 var_dump(imagesy($im));
 
 ?>
-===DONE===
 --EXPECT--
 int(10)
 int(10)
-===DONE===

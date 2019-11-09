@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -75,9 +73,7 @@ static void curlfile_get_property(char *name, size_t name_len, INTERNAL_FUNCTION
 {
 	zval *res, rv;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 	res = zend_read_property(curl_CURLFile_class, ZEND_THIS, name, name_len, 1, &rv);
 	ZVAL_COPY_DEREF(return_value, res);
 }

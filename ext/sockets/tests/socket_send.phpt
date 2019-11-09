@@ -23,11 +23,11 @@ if(socket_send($socket, $stringSocket, $stringSocketLength, MSG_OOB)===$stringSo
   print("okey\n");
 }
 
-if(socket_send($socket, $stringSocket, $stringSocketLength, MSG_EOR)===$stringSocketLength){
+if(!defined('MSG_EOR') || socket_send($socket, $stringSocket, $stringSocketLength, MSG_EOR)===$stringSocketLength){
   print("okey\n");
 }
 
-if(socket_send($socket, $stringSocket, $stringSocketLength, MSG_EOF)===$stringSocketLength){
+if(!defined('MSG_EOF') || socket_send($socket, $stringSocket, $stringSocketLength, MSG_EOF)===$stringSocketLength){
   print("okey\n");
 }
 

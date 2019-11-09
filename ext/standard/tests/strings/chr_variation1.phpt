@@ -66,7 +66,6 @@ foreach($inputs as $input) {
 fclose($file_handle);  //closing the file handle
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing chr() function: with unexpected inputs for 'ascii' argument ***
 -- Iteration 1 --
@@ -99,4 +98,3 @@ string(2) "00"
 string(2) "00"
 -- Iteration 15 --
 string(2) "00"
-===DONE===

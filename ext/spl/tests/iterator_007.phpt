@@ -95,8 +95,6 @@ foreach ($it as $v) {
 	var_dump($v);
 }
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 ===0===
 ArrayIteratorEx::rewind
@@ -163,4 +161,3 @@ ArrayIteratorEx::valid
 NoRewindIteratorEx::rewind
 NoRewindIteratorEx::valid
 ArrayIteratorEx::valid
-===DONE===

@@ -24,7 +24,6 @@ $part = true;
 var_dump( mb_strrchr($haystack, $needle, $part, $encoding) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing mb_strrchr() : error conditions ***
 
@@ -32,4 +31,3 @@ var_dump( mb_strrchr($haystack, $needle, $part, $encoding) );
 
 Warning: mb_strrchr(): Unknown encoding "unknown-encoding" in %s on line %d
 bool(false)
-===DONE===

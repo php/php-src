@@ -38,7 +38,6 @@ var_dump(unlink($fn));
 remove_data("dir2_cp1252");
 
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (stream)
 int(25)
@@ -51,4 +50,3 @@ bool(true)
 string(%d) "%s\Voláçao7"
 Active code page: %d
 bool(true)
-===DONE===

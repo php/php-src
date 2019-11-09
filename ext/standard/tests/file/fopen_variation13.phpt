@@ -47,9 +47,7 @@ function runtest() {
 
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing fopen() : variation ***
 Created in correct location
 Created in correct location
-===DONE===

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -30,28 +28,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namednodemap_get_named_item, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namednodemap_set_named_item, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, arg, DOMNode, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namednodemap_remove_named_item, 0, 0, 0)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO();
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namednodemap_item, 0, 0, 0)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namednodemap_get_named_item_ns, 0, 0, 0)
-	ZEND_ARG_INFO(0, namespaceURI)
-	ZEND_ARG_INFO(0, localName)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namednodemap_set_named_item_ns, 0, 0, 0)
-	ZEND_ARG_OBJ_INFO(0, arg, DOMNode, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namednodemap_remove_named_item_ns, 0, 0, 0)
 	ZEND_ARG_INFO(0, namespaceURI)
 	ZEND_ARG_INFO(0, localName)
 ZEND_END_ARG_INFO();
@@ -69,12 +50,8 @@ ZEND_END_ARG_INFO();
 
 const zend_function_entry php_dom_namednodemap_class_functions[] = { /* {{{ */
 	PHP_FALIAS(getNamedItem, dom_namednodemap_get_named_item, arginfo_dom_namednodemap_get_named_item)
-	PHP_FALIAS(setNamedItem, dom_namednodemap_set_named_item, arginfo_dom_namednodemap_set_named_item)
-	PHP_FALIAS(removeNamedItem, dom_namednodemap_remove_named_item, arginfo_dom_namednodemap_remove_named_item)
 	PHP_FALIAS(item, dom_namednodemap_item, arginfo_dom_namednodemap_item)
 	PHP_FALIAS(getNamedItemNS, dom_namednodemap_get_named_item_ns, arginfo_dom_namednodemap_get_named_item_ns)
-	PHP_FALIAS(setNamedItemNS, dom_namednodemap_set_named_item_ns, arginfo_dom_namednodemap_set_named_item_ns)
-	PHP_FALIAS(removeNamedItemNS, dom_namednodemap_remove_named_item_ns, arginfo_dom_namednodemap_remove_named_item_ns)
 	PHP_FALIAS(count, dom_namednodemap_count, arginfo_dom_namednodemap_count)
 	PHP_FE_END
 };
@@ -176,26 +153,6 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 	}
 }
 /* }}} end dom_namednodemap_get_named_item */
-
-/* {{{ proto DOMNode dom_namednodemap_set_named_item(DOMNode arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1025163788
-Since:
-*/
-PHP_FUNCTION(dom_namednodemap_set_named_item)
-{
- DOM_NOT_IMPLEMENTED();
-}
-/* }}} end dom_namednodemap_set_named_item */
-
-/* {{{ proto DOMNode dom_namednodemap_remove_named_item(string name);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D58B193
-Since:
-*/
-PHP_FUNCTION(dom_namednodemap_remove_named_item)
-{
- DOM_NOT_IMPLEMENTED();
-}
-/* }}} end dom_namednodemap_remove_named_item */
 
 /* {{{ proto DOMNode dom_namednodemap_item(int index);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-349467F9
@@ -316,26 +273,6 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 	}
 }
 /* }}} end dom_namednodemap_get_named_item_ns */
-
-/* {{{ proto DOMNode dom_namednodemap_set_named_item_ns(DOMNode arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-setNamedItemNS
-Since: DOM Level 2
-*/
-PHP_FUNCTION(dom_namednodemap_set_named_item_ns)
-{
- DOM_NOT_IMPLEMENTED();
-}
-/* }}} end dom_namednodemap_set_named_item_ns */
-
-/* {{{ proto DOMNode dom_namednodemap_remove_named_item_ns(string namespaceURI, string localName);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-removeNamedItemNS
-Since: DOM Level 2
-*/
-PHP_FUNCTION(dom_namednodemap_remove_named_item_ns)
-{
- DOM_NOT_IMPLEMENTED();
-}
-/* }}} end dom_namednodemap_remove_named_item_ns */
 
 /* {{{ proto int|bool dom_namednodemap_count();
 */

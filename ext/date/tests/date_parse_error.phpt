@@ -17,7 +17,6 @@ $invalid_date = "2OO9-02--27 10:00?00.5";
 var_dump( date_parse($invalid_date) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing date_parse() : error conditions ***
 
@@ -68,4 +67,3 @@ array(13) {
   ["zone_type"]=>
   int(0)
 }
-===DONE===

@@ -13,7 +13,6 @@ $intlcal = IntlCalendar::createInstance('GMT+00:01');
 print_r($intlcal->getTimeZone());
 print_r(intlcal_get_time_zone($intlcal));
 ?>
-==DONE==
 --EXPECT--
 IntlTimeZone Object
 (
@@ -29,4 +28,3 @@ IntlTimeZone Object
     [rawOffset] => 60000
     [currentOffset] => 60000
 )
-==DONE==

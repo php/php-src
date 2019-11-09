@@ -27,7 +27,6 @@ var_dump($intlcal->getTime(),
 		strtotime('2012-02-29 23:58:31 +0000') * 1000.);
 
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 float(1330473600000)
@@ -37,5 +36,4 @@ float(1330559880000)
 float(1330559880000)
 bool(true)
 float(1330559911000)
-float(1330559911000)
-==DONE==
+float(1330559911000)

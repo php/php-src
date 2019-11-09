@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -350,7 +348,7 @@ fetch_dim_string:
 		}
 		return retval;
 	case IS_RESOURCE:
-		zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_P(offset)->handle, Z_RES_P(offset)->handle);
+		zend_error(E_WARNING, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_P(offset)->handle, Z_RES_P(offset)->handle);
 		index = Z_RES_P(offset)->handle;
 		goto num_index;
 	case IS_DOUBLE:
@@ -806,7 +804,6 @@ static HashTable *spl_array_get_properties_for(zend_object *object, zend_prop_pu
 			break;
 		case ZEND_PROP_PURPOSE_VAR_EXPORT:
 		case ZEND_PROP_PURPOSE_JSON:
-		case _ZEND_PROP_PURPOSE_ARRAY_KEY_EXISTS:
 			dup = 0;
 			break;
 		default:
@@ -945,6 +942,8 @@ static int spl_array_compare_objects(zval *o1, zval *o2) /* {{{ */
 	spl_array_object	*intern1,
 						*intern2;
 	int					result	= 0;
+
+	ZEND_COMPARE_OBJECTS_FALLBACK(o1, o2);
 
 	intern1	= Z_SPLARRAY_P(o1);
 	intern2	= Z_SPLARRAY_P(o2);
@@ -1197,7 +1196,7 @@ SPL_METHOD(Array, __construct)
 		return; /* nothing to do */
 	}
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "z|lC", &array, &ar_flags, &ce_get_iterator) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|lC", &array, &ar_flags, &ce_get_iterator) == FAILURE) {
 		return;
 	}
 
@@ -1226,7 +1225,7 @@ SPL_METHOD(ArrayIterator, __construct)
 		return; /* nothing to do */
 	}
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "z|l", &array, &ar_flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &array, &ar_flags) == FAILURE) {
 		return;
 	}
 
@@ -1864,7 +1863,7 @@ SPL_METHOD(Array, __unserialize)
 	zval *flags_zv, *storage_zv, *members_zv;
 	zend_long flags;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
 		return;
 	}
 
@@ -2041,7 +2040,7 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_handler_ArrayObject.has_property = spl_array_has_property;
 	spl_handler_ArrayObject.unset_property = spl_array_unset_property;
 
-	spl_handler_ArrayObject.compare_objects = spl_array_compare_objects;
+	spl_handler_ArrayObject.compare = spl_array_compare_objects;
 	spl_handler_ArrayObject.dtor_obj = zend_objects_destroy_object;
 	spl_handler_ArrayObject.free_obj = spl_array_object_free_storage;
 

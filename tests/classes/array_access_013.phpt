@@ -49,10 +49,8 @@ catch(Exception $e)
     echo "Caught in " . $e->getMessage() . "()\n";
 }
 ?>
-===DONE===
 --EXPECT--
 Caught in Test::offsetExists()
 Caught in Test::offsetGet()
 Caught in Test::offsetSet()
 Caught in Test::offsetUnset()
-===DONE===

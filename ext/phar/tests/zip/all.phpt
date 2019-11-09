@@ -42,7 +42,6 @@ var_dump($phar->getAlias());
 var_dump($phar->getMetadata());
 var_dump($phar['a']->getMetadata());
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php'); ?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.zip.php'); ?>
@@ -61,4 +60,3 @@ string(32) "<?php ok __HALT_COMPILER(); ?>
 string(4) "hime"
 string(8) "hi there"
 string(6) "a meta"
-===DONE===

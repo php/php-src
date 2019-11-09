@@ -26,7 +26,6 @@ for ($i = 0; $i < 256; $i++) {
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_digit() : usage variations ***
 character code 48 is a numeric digit
@@ -39,4 +38,3 @@ character code 54 is a numeric digit
 character code 55 is a numeric digit
 character code 56 is a numeric digit
 character code 57 is a numeric digit
-===DONE===

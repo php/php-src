@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -60,7 +58,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_cdatasection, 0, 0, 1)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_processing_instruction, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_create_processing_instruction, 0, 0, 1)
 	ZEND_ARG_INFO(0, target)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO();
@@ -77,7 +75,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_get_elements_by_tag_name, 0, 0, 1)
 	ZEND_ARG_INFO(0, tagName)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_import_node, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_import_node, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, importedNode, DOMNode, 0)
 	ZEND_ARG_INFO(0, deep)
 ZEND_END_ARG_INFO();
@@ -107,12 +105,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_adopt_node, 0, 0, 1)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_normalize_document, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_rename_node, 0, 0, 3)
-	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 0)
-	ZEND_ARG_INFO(0, namespaceURI)
-	ZEND_ARG_INFO(0, qualifiedName)
 ZEND_END_ARG_INFO();
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_load, 0, 0, 1)
@@ -215,7 +207,6 @@ const zend_function_entry php_dom_document_class_functions[] = { /* {{{ */
 	PHP_FALIAS(getElementById, dom_document_get_element_by_id, arginfo_dom_document_get_element_by_id)
 	PHP_FALIAS(adoptNode, dom_document_adopt_node, arginfo_dom_document_adopt_node)
 	PHP_FALIAS(normalizeDocument, dom_document_normalize_document, arginfo_dom_document_normalize_document)
-	PHP_FALIAS(renameNode, dom_document_rename_node, arginfo_dom_document_rename_node)
 	PHP_ME(domdocument, load, arginfo_dom_document_load, ZEND_ACC_PUBLIC)
 	PHP_FALIAS(save, dom_document_save, arginfo_dom_document_save)
 	PHP_ME(domdocument, loadXML, arginfo_dom_document_loadxml, ZEND_ACC_PUBLIC)
@@ -1270,16 +1261,6 @@ PHP_FUNCTION(dom_document_normalize_document)
 }
 /* }}} end dom_document_normalize_document */
 
-/* {{{ proto DOMNode dom_document_rename_node(node n, string namespaceURI, string qualifiedName)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Document3-renameNode
-Since: DOM Level 3
-*/
-PHP_FUNCTION(dom_document_rename_node)
-{
- DOM_NOT_IMPLEMENTED();
-}
-/* }}} end dom_document_rename_node */
-
 /* {{{ proto DOMDocument::__construct([string version], [string encoding]); */
 PHP_METHOD(domdocument, __construct)
 {
@@ -1289,7 +1270,7 @@ PHP_METHOD(domdocument, __construct)
 	size_t encoding_len = 0, version_len = 0;
 	int refcount;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "|ss", &version, &version_len, &encoding, &encoding_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ss", &version, &version_len, &encoding, &encoding_len) == FAILURE) {
 		return;
 	}
 
@@ -1297,7 +1278,7 @@ PHP_METHOD(domdocument, __construct)
 
 	if (!docp) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		RETURN_FALSE;
+		return;
 	}
 
 	if (encoding_len > 0) {
@@ -2285,7 +2266,6 @@ PHP_METHOD(domdocument, registerNodeClass)
 	}
 
 	zend_throw_error(NULL, "Class %s is not derived from %s.", ZSTR_VAL(ce->name), ZSTR_VAL(basece->name));
-	RETURN_FALSE;
 }
 /* }}} */
 

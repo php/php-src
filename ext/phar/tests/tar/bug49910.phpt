@@ -13,7 +13,6 @@ foreach (new RecursiveIteratorIterator($tar) as $file) {
 }
 print_r($files);
 ?>
-===DONE===
 --EXPECT--
 Array
 (
@@ -47,4 +46,3 @@ Array
     [27] => phar://*/Structures_Graph-1.0.3/tests/testCase/BasicGraph.php
     [28] => phar://*/package.xml
 )
-===DONE===

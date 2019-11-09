@@ -11,10 +11,8 @@ $rm = new ReflectionMethod(Normalizer::class, 'normalize');
 var_dump($rm->getNumberOfParameters());
 var_dump($rm->getNumberOfRequiredParameters());
 ?>
-===DONE===
 --EXPECT--
 int(2)
 int(1)
 int(2)
 int(1)
-===DONE===

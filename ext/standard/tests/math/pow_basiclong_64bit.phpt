@@ -29,7 +29,6 @@ foreach ($longVals as $longVal) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 --- testing: 9223372036854775807, 0 ---
 int(1)
@@ -361,4 +360,3 @@ float(0)
 float(INF)
 --- testing: -9.2233720368548E+18, -9223372036854775808 ---
 float(0)
-===DONE===

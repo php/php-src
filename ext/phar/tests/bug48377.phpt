@@ -20,10 +20,8 @@ try {
 	echo $e->getMessage(),"\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.zip');?>
 --EXPECTF--
 phar "%sbug48377.zip" exists and must be unlinked prior to conversion
-===DONE===

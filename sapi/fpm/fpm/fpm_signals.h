@@ -8,6 +8,9 @@
 int fpm_signals_init_main();
 int fpm_signals_init_child();
 int fpm_signals_get_fd();
+int fpm_signals_init_mask(int *signum_array, size_t size);
+int fpm_signals_block();
+int fpm_signals_unblock();
 
 extern const char *fpm_signal_names[NSIG + 1];
 

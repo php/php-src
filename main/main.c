@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -1194,10 +1192,11 @@ PHPAPI void php_html_puts(const char *str, size_t size)
 
 /* {{{ php_error_cb
  extended error handling function */
-static ZEND_COLD void php_error_cb(int type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args)
+static ZEND_COLD void php_error_cb(int orig_type, const char *error_filename, const uint32_t error_lineno, const char *format, va_list args)
 {
 	char *buffer;
 	int buffer_len, display;
+	int type = orig_type & E_ALL;
 
 	buffer_len = (int)vspprintf(&buffer, PG(log_errors_max_len), format, args);
 
@@ -1296,7 +1295,7 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 				break;
 			case E_PARSE:
 				error_type_str = "Parse error";
-				syslog_type_int = LOG_EMERG;
+				syslog_type_int = LOG_ERR;
 				break;
 			case E_NOTICE:
 			case E_USER_NOTICE:
@@ -1405,7 +1404,7 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 					sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 				}
 				/* the parser would return 1 (failure), we can bail out nicely */
-				if (type != E_PARSE) {
+				if (!(orig_type & E_DONT_BAIL)) {
 					/* restore memory limit */
 					zend_set_memory_limit(PG(memory_limit));
 					efree(buffer);

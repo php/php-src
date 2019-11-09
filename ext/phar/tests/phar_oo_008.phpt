@@ -79,7 +79,6 @@ foreach($v as $k => $d)
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/files/phar_oo_008.phar.php');
@@ -115,4 +114,3 @@ MyCSVFile2::getCurrentLine
 3=>2|a|b
 MyCSVFile2::getCurrentLine
 5=>3|c|'e'
-===DONE===

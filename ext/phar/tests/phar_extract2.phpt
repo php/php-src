@@ -34,7 +34,6 @@ foreach ($extracted as $out) {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/tempmanifest2.phar.php');
@@ -57,4 +56,3 @@ $dir = __DIR__ . '/extract1/';
 %sextract2%csubdir
 %sextract2%csubdir%cectory
 %sextract2%csubdir%cectory%cfile.txt
-===DONE===

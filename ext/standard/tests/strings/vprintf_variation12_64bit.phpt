@@ -79,7 +79,6 @@ foreach($args_array as $args) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : octal formats and non-octal values ***
 
@@ -122,4 +121,3 @@ int(75)
    #0 1 $1 _0
    0 1 1 1
 int(75)
-===DONE===

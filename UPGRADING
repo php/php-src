@@ -39,12 +39,18 @@ PHP 8.0 UPGRADE NOTES
   . Removed each(). foreach or ArrayIterator should be used instead.
   . Removed ability to unbind $this from closures that were created from a
     method, using Closure::fromCallable() or ReflectionMethod::getClosure().
+  . Also removed ability to unbind $this from proper closures that contain uses
+    of $this.
+  . Removed ability to use array_key_exists() with objects. Use one of isset()
+    or property_exists() instead.
   . Any array that has a number n as its first numeric key will use n+1 for
     its next implicit key. Even if n is negative.
     RFC: https://wiki.php.net/rfc/negative_array_index
   . The default error_reporting level is now E_ALL. Previously it excluded
     E_NOTICE and E_DEPRECATED.
   . display_startup_errors is now enabled by default.
+  . Using "parent" inside a class that has no parent will now result in a
+    fatal compile-time error.
   . The @ operator will no longer silence fatal errors (E_ERROR, E_CORE_ERROR,
     E_COMPILE_ERROR, E_USER_ERROR, E_RECOVERABLE_ERROR, E_PARSE). Error handlers
     that expect error_reporting to be 0 when @ is used, should be adjusted to
@@ -76,6 +82,44 @@ PHP 8.0 UPGRADE NOTES
   . The precedence of the concatenation operator has changed relative to
     bitshifts and addition as well as subtraction.
     RFC: https://wiki.php.net/rfc/concatenation_precedence
+  . Arguments with a default-value that resolves to null at run-time will no
+    longer implicitly mark the argument type as nullable. Either use an explicit
+    nullable type, or an explicit null default value instead.
+
+        // Replace
+        function test(int $arg = CONST_RESOLVING_TO_NULL) {}
+        // With
+        function test(?int $arg = CONST_RESOLVING_TO_NULL) {}
+        // Or
+        function test(int $arg = null) {}
+  . A number of warnings have been converted into Error exceptions:
+
+    * Attempting to write to a property of a non-object. Previously this
+      implicitly created an stdClass object for null, false and empty strings.
+    * Attempting to append an element to an array for which the PHP_INT_MAX key
+      is already used.
+    * Attempting to use an invalid type (array or object) as an array key or
+      string offset.
+    * Attempting to write to an array index of a scalar value.
+    * Attempting to unpack a non-array/Traversable.
+
+    A number of notices have been converted into warnings:
+
+    * Attempting to read an undefined variable.
+    * Attempting to read an undefined property.
+    * Attempting to read a property of a non-object.
+    * Attempting to access an array index of a non-array.
+    * Attempting to convert an array to string.
+    * Attempting to use a resource as an array key.
+    * Attempting to use null, a boolean or a float as a string offset.
+    * Attempting to read an out-of-bounds string offset.
+
+    RFC: https://wiki.php.net/rfc/engine_warnings
+  . Unexpected characters in source files (such as null bytes outside of
+    strings) will now result in a ParseError exception instead of a compile
+    warning.
+  . Uncaught exceptions now go through "clean shutdown", which means that
+    destructors will be called after an uncaught exception.
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
@@ -86,6 +130,21 @@ PHP 8.0 UPGRADE NOTES
 - Date:
   . mktime() and gmmktime() now require at least one argument. time() can be
     used to get the current timestamp.
+
+- dom:
+  . Remove unimplemented classes from ext/dom that had no behavior and contained
+    test data. These classes have also been removed in the latest version of DOM
+	standard:
+
+     * DOMNameList
+     * DomImplementationList
+     * DOMConfiguration
+     * DomError
+     * DomErrorHandler
+     * DOMImplementationSource
+     * DOMLocator
+     * DOMUserDataHandler
+     * DOMTypeInfo
 
 - Exif:
   . Removed read_exif_data(). exif_read_data() should be used instead.
@@ -99,6 +158,9 @@ PHP 8.0 UPGRADE NOTES
     warning.
 
 - GD:
+  . The GD extension now uses objects as the underlying data structure for
+    images, rather than resources. These objects are completely opaque, i.e.
+    they don't have any methods.
   . The deprecated function image2wbmp() has been removed.
     RFC: https://wiki.php.net/rfc/image2wbmp
   . The deprecated functions png2wbmp() and jpeg2wbmp() have been removed.
@@ -147,16 +209,18 @@ PHP 8.0 UPGRADE NOTES
   . A non-string pattern argument to mb_ereg_replace() will now be interpreted
     as a string instead of an ASCII codepoint. The previous behavior may be
     restored with an explicit call to chr().
+  . The $is_hex parameter, which was not used internally, has been removed from
+    mb_decode_numericentity().
 
 - PCRE:
-  . When passing invalid escape sequences they are no longer intepreted as
+  . When passing invalid escape sequences they are no longer interpreted as
     literals. This behaviour previously required the X modifier - which is
     now ignored.
 
 - PDO:
   . The method PDOStatement::setFetchMode() now accepts the following signature:
 
-        PDOStatement::setFetchMode($mode, $classname, $params) 
+        PDOStatement::setFetchMode($mode, $classname, $params)
 
 - PDO_ODBC:
   . The php.ini directive pdo_odbc.db2_instance_name has been removed
@@ -180,6 +244,11 @@ PHP 8.0 UPGRADE NOTES
         ReflectionClass::newInstance($arg = null, ...$args)
         ReflectionFunction::invoke($arg = null, ...$args)
         ReflectionMethod::invoke($object, $arg = null, ...$args)
+
+  . The ReflectionType::__toString() method will now return a complete debug
+    representation of the type, and is no longer deprecated. In particular the
+    result will include a nullability indicator for nullable types. The format
+    of the return value is not stable and may change between PHP versions.
 
 - Socket:
   . The deprecated AI_IDN_ALLOW_UNASSIGNED and AI_IDN_USE_STD3_ASCII_RULES
@@ -206,11 +275,22 @@ PHP 8.0 UPGRADE NOTES
     point. An explicit call to chr() can be used to restore the previous
     behavior.
   . The needle argument for strpos(), strrpos(), stripos(), strripos(), strstr() and stristr() can now be empty.
+  . The length argument for substr(), substr_count(), substr_compare(), and
+    iconv_substr() can now be null. Null values will behave as if no length
+    argument was provided and will therefore return the remainder of the string
+    instead of an empty string.
+  . The length argument for array_splice() can now be null. Null values will
+    behave identically to omitting the argument, thus removing everything from
+    the 'offset' to the end of the array.
   . The 'salt' option of password_hash() is no longer supported. If the 'salt'
     option is used a warning is generated, the provided salt is ignored, and a
     generated salt is used instead.
   . The quotemeta() function will now return an empty string if an empty string
     was passed. Previously false was returned.
+
+- tidy:
+  . The $use_include_path parameter, which was not used internally, has been
+    removed from tidy_repair_string().
 
 - XML:
   . xml_parser_create(_ns) will now return an XmlParser object rather than a
@@ -218,6 +298,17 @@ PHP 8.0 UPGRADE NOTES
     checks for `false`. The xml_parser_free() function no longer has an effect,
     instead the XmlParser instance is automatically destroyed if it is no longer
     referenced.
+
+- XMLWriter:
+  . The XMLWriter functions now accept and return, respectively, XMLWriter
+    objects instead of resources.
+
+- Zip:
+  . The remove_path option of ZipArchive::addGlob() and ::addPattern() is now
+    treated as arbitrary string prefix (for consistency with the add_path
+    option), whereas formerly it was treated as directory name. This means that
+    if no trailing directory separator is given, the following character is
+    no longer stripped from the filename.
 
 - Zlib:
   . gzgetss() has been removed.
@@ -227,6 +318,8 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 
 - Core:
+  . Added support for union types.
+    RFC: https://wiki.php.net/rfc/union_types_v2
   . Added ValueError class.
 
 ========================================
@@ -244,6 +337,11 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 6. New Functions
 ========================================
+
+- Standard:
+  . Added fdiv() method, which performs a floating-point division under
+    IEEE 754 semantics. Division by zero is considered well-defined and
+    will return one of Inf, -Inf or NaN.
 
 ========================================
 7. New Classes and Interfaces
@@ -277,3 +375,6 @@ PHP 8.0 UPGRADE NOTES
 14. Performance Improvements
 ========================================
 
+- array_slice() on an array without gaps will no longer scan the whole array to find
+  the start offset. This may significantly reduce the runtime of the function
+  with large offsets and small lengths.

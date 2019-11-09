@@ -26,7 +26,6 @@ var_dump(
 	ldap_errno($link)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -43,4 +42,3 @@ Warning: ldap_delete(): Delete: No such object in %s on line %d
 bool(false)
 string(14) "No such object"
 int(32)
-===DONE===

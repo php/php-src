@@ -148,6 +148,27 @@ static void zend_persist_zval_calc(zval *z)
 	}
 }
 
+static void zend_persist_type_calc(zend_type *type)
+{
+	if (ZEND_TYPE_HAS_LIST(*type)) {
+		void **entry;
+		if (ZEND_TYPE_USES_ARENA(*type) && !ZCG(is_immutable_class)) {
+			ADD_ARENA_SIZE(ZEND_TYPE_LIST_SIZE(ZEND_TYPE_LIST(*type)->num_types));
+		} else {
+			ADD_SIZE(ZEND_TYPE_LIST_SIZE(ZEND_TYPE_LIST(*type)->num_types));
+		}
+		ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(*type), entry) {
+			zend_string *type_name = ZEND_TYPE_LIST_GET_NAME(*entry);
+			ADD_INTERNED_STRING(type_name);
+			*entry = ZEND_TYPE_LIST_ENCODE_NAME(type_name);
+		} ZEND_TYPE_LIST_FOREACH_END();
+	} else if (ZEND_TYPE_HAS_NAME(*type)) {
+		zend_string *type_name = ZEND_TYPE_NAME(*type);
+		ADD_INTERNED_STRING(type_name);
+		ZEND_TYPE_SET_PTR(*type, type_name);
+	}
+}
+
 static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 {
 	if (op_array->scope && zend_shared_alloc_get_xlat_entry(op_array->opcodes)) {
@@ -222,13 +243,7 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 			if (arg_info[i].name) {
 				ADD_INTERNED_STRING(arg_info[i].name);
 			}
-			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
-				zend_string *type_name = ZEND_TYPE_NAME(arg_info[i].type);
-				zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(arg_info[i].type);
-
-				ADD_INTERNED_STRING(type_name);
-				arg_info[i].type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
-			}
+			zend_persist_type_calc(&arg_info[i].type);
 		}
 	}
 
@@ -304,11 +319,7 @@ static void zend_persist_property_info_calc(zval *zv)
 		zend_shared_alloc_register_xlat_entry(prop, prop);
 		ADD_SIZE_EX(sizeof(zend_property_info));
 		ADD_INTERNED_STRING(prop->name);
-		if (ZEND_TYPE_IS_NAME(prop->type)) {
-			zend_string *class_name = ZEND_TYPE_NAME(prop->type);
-			ADD_INTERNED_STRING(class_name);
-			prop->type = ZEND_TYPE_ENCODE_CLASS(class_name, ZEND_TYPE_ALLOW_NULL(prop->type));
-		}
+		zend_persist_type_calc(&prop->type);
 		if (ZCG(accel_directives).save_comments && prop->doc_comment) {
 			ADD_STRING(prop->doc_comment);
 		}
@@ -338,7 +349,14 @@ static void check_property_type_resolution(zend_class_entry *ce) {
 
 	if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
 		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-			if (ZEND_TYPE_IS_NAME(prop->type)) {
+			if (ZEND_TYPE_HAS_LIST(prop->type)) {
+				void *entry;
+				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(prop->type), entry) {
+					if (ZEND_TYPE_LIST_IS_NAME(entry)) {
+						return;
+					}
+				} ZEND_TYPE_LIST_FOREACH_END();
+			} else if (ZEND_TYPE_HAS_NAME(prop->type)) {
 				return;
 			}
 		} ZEND_HASH_FOREACH_END();

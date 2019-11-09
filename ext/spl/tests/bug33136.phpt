@@ -46,8 +46,6 @@ print_r($arrayObj);
 var_dump(count($arrayObj));
 
 ?>
-===DONE===
-<?php //exit(0); ?>
 --EXPECT--
 Initiate Obj
 Assign values
@@ -77,4 +75,3 @@ Collection Object
 
 )
 int(3)
-===DONE===

@@ -53,7 +53,5 @@ if (pg_options($db))
 pg_close($db);
 
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (pgsql link%s)
-===DONE===

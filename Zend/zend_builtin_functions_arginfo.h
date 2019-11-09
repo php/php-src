@@ -48,7 +48,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_get_called_class arginfo_func_get_args
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_get_parent_class, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_parent_class, 0, 0, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 

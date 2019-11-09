@@ -25,7 +25,5 @@ echo "msgf2: ", $msgf->format(array($time, 'date')), " ",
 */
 
 ?>
-==DONE==
 --EXPECT--
 quinta-feira, 17 de Maio de 2012 5:35:36 da tarde ptlis
-==DONE==

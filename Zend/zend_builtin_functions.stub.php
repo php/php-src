@@ -30,7 +30,7 @@ function get_class(object $object = UNKNOWN) {}
 function get_called_class() {}
 
 /** @return string|false */
-function get_parent_class($object) {}
+function get_parent_class($object = UNKNOWN) {}
 
 function is_subclass_of($object, string $class_name, bool $allow_string = true): bool {}
 

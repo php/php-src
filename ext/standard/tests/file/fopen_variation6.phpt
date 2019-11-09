@@ -36,9 +36,7 @@ echo "\n";
 unlink($absfile);
 unlink($relfile);
 ?>
-===DONE===
 --EXPECT--
 *** Testing fopen() : variation ***
 This is an absolute file
 This is a relative file
-===DONE===

@@ -7,6 +7,8 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if(substr(PHP_OS, 0, 3) != "WIN")
   die("skip Only run on Windows");
 ?>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /* Prototype  : int file_put_contents(string file, mixed data [, int flags [, resource context]])
@@ -50,7 +52,6 @@ foreach($names_arr as $key =>$value) {
 };
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing file_put_contents() : usage variation ***
 
@@ -95,4 +96,3 @@ Failed to write data to: /no/such/file/dir
 
 Warning: file_put_contents(php/php): failed to open stream: %s in %s on line %d
 Failed to write data to: php/php
-===Done===

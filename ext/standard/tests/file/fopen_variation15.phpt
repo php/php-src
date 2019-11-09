@@ -94,7 +94,6 @@ function runtest($fileURIs) {
 
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing fopen() : variation ***
 --- READ: file://fopen15.tmpDir/fopen_variation15.tmp ---
@@ -135,4 +134,3 @@ Warning: fopen(file://../fopen15.tmpDir/fopen_variation15.tmp): failed to open s
 test passed
 --- WRITE: file:///%s/fopen15.tmpDir/fopen_variation15.tmp ---
 test passed
-===DONE===

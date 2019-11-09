@@ -5,15 +5,7 @@ Test opendir() function : usage variations - directories with restricted permiss
 if( substr(PHP_OS, 0, 3) == 'WIN') {
 	die('skip Not for Windows');
 }
-// Skip if being run by root (files are always readable, writeable and executable)
-$filename = __DIR__."/dir_root_check.tmp";
-$fp = fopen($filename, 'w');
-fclose($fp);
-if(fileowner($filename) == 0) {
-	unlink ($filename);
-	die('skip...cannot be run as root\n');
-}
-unlink($filename);
+require __DIR__ . '/../skipif_root.inc';
 ?>
 --FILE--
 <?php
@@ -71,7 +63,6 @@ if (is_resource($dir_handle2)) {
 	closedir($dir_handle2);
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 $parent_dir_path = __DIR__ . "/opendir_variation5";
@@ -99,4 +90,3 @@ bool(false)
 
 Warning: opendir(%s/opendir_variation5/sub_dir/child_dir): failed to open dir: %s in %s on line %d
 bool(false)
-===DONE===

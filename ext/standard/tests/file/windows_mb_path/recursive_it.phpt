@@ -6,7 +6,7 @@ include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 
-if (strlen(__DIR__) > 259) die("Unsuitable starting path length");
+if (strlen(__DIR__) > 259) die("skip Unsuitable starting path length");
 ?>
 --FILE--
 <?php
@@ -57,8 +57,6 @@ do {
 } while (__DIR__ != $dir);*/
 
 ?>
-==DONE==
 --EXPECTF--
 string(%d) "%shello.txt"
 bool(false)
-==DONE==

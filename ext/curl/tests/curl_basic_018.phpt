@@ -63,11 +63,9 @@ TestFest 2009 - AFUP - Thomas Rabaix <thomas.rabaix@gmail.com>
   var_dump( $curl_content );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing curl_exec() : basic functionality ***
 string(75) "Hello World!
 Hello World!Hello World!
 Hello World!Hello World!
 Hello World!"
-===DONE===

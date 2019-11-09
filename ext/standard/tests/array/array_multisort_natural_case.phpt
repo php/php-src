@@ -35,7 +35,6 @@ array_multisort($b, SORT_NATURAL, $a);
 var_dump($a, $b);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_multisort() : natural sorting case-sensitive
 array(7) {
@@ -70,4 +69,3 @@ array(7) {
   [6]=>
   string(4) "20 c"
 }
-===DONE===

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -55,7 +53,7 @@ static void _breakiter_factory(const char *func_name,
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!",
 			&locale_str, &dummy) == FAILURE) {
-		RETURN_NULL();
+		return;
 	}
 
 	if (locale_str == NULL) {
@@ -115,7 +113,7 @@ U_CFUNC PHP_FUNCTION(breakiter_create_code_point_instance)
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_NULL();
+		return;
 	}
 
 	CodePointBreakIterator *cpbi = new CodePointBreakIterator();
@@ -128,7 +126,7 @@ U_CFUNC PHP_FUNCTION(breakiter_get_text)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;
@@ -148,7 +146,7 @@ U_CFUNC PHP_FUNCTION(breakiter_set_text)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &text) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;
@@ -180,7 +178,7 @@ static void _breakiter_no_args_ret_int32(
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;
@@ -201,7 +199,7 @@ static void _breakiter_int32_ret_int32(
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &arg) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;
@@ -275,7 +273,7 @@ U_CFUNC PHP_FUNCTION(breakiter_current)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	BREAKITER_METHOD_FETCH_OBJECT;
@@ -307,7 +305,7 @@ U_CFUNC PHP_FUNCTION(breakiter_is_boundary)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l",
 			&offset) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (offset < INT32_MIN || offset > INT32_MAX) {
@@ -331,7 +329,7 @@ U_CFUNC PHP_FUNCTION(breakiter_get_locale)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &locale_type) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (locale_type != ULOC_ACTUAL_LOCALE && locale_type != ULOC_VALID_LOCALE) {
@@ -357,7 +355,7 @@ U_CFUNC PHP_FUNCTION(breakiter_get_parts_iterator)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &key_type) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if (key_type != PARTS_ITERATOR_KEY_SEQUENTIAL
@@ -380,7 +378,7 @@ U_CFUNC PHP_FUNCTION(breakiter_get_error_code)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	/* Fetch the object (without resetting its last error code ). */
@@ -398,7 +396,7 @@ U_CFUNC PHP_FUNCTION(breakiter_get_error_message)
 	object = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 

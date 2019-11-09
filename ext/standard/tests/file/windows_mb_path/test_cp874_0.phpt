@@ -46,7 +46,6 @@ foreach ($names as $name) {
 }
 
 ?>
-===DONE===
 --EXPECTF--
 Active code page: %d
 getting basename of %sเป็นแฟ้มที่ทดสอบ1.txt
@@ -111,4 +110,3 @@ bool(true)
 string(%d) "%sเป็นแฟ้มที่ทดสอบ8 10.txt"
 Active code page: %d
 string(6) "hello8"
-===DONE===

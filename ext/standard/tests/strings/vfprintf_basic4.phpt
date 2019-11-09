@@ -37,10 +37,8 @@ print_r(file_get_contents($data_file));
 
 unlink($data_file);
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : basic functionality - using bool format ***
 1
 1 0
 1 0 1
-===DONE===

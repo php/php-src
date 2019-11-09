@@ -118,7 +118,6 @@ foreach($inputs as $key =>$value) {
 fclose($fp);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing mb_substitute_character() : usage variation ***
 
@@ -227,4 +226,3 @@ bool(false)
 --unset var--
 Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
-===DONE===

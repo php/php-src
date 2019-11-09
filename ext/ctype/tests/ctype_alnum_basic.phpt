@@ -21,9 +21,7 @@ var_dump(ctype_alnum($c2));
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ctype_alnum() : basic functionality ***
 bool(true)
 bool(false)
-===DONE===

@@ -22,7 +22,6 @@ imagejpeg($exp, $filename);
 $act = imagecreatefromjpeg($filename);
 var_dump(imageresolution($act));
 ?>
-===DONE===
 --EXPECT--
 array(2) {
   [0]=>
@@ -36,7 +35,6 @@ array(2) {
   [1]=>
   int(299)
 }
-===DONE===
 --CLEAN--
 <?php
 @unlink(__DIR__ . DIRECTORY_SEPARATOR . 'imageresolution_jpeg.jpeg');

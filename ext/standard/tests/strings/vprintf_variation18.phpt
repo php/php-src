@@ -68,7 +68,6 @@ foreach($args_array as $args) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : scientific formats and non-scientific values ***
 
@@ -103,4 +102,3 @@ int(227)
    0.000000e+0 1.000000e+0 1.000000e+0 0.000000e+0
    0.000000e+0 1.000000e+0 1.000000e+0 1.000000e+0
 int(227)
-===DONE===

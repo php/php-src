@@ -27,7 +27,6 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_multisort() : error conditions ***
 
@@ -36,4 +35,3 @@ Argument #3 is expected to be an array or sorting flag that has not already been
 
 -- Testing array_multisort() function with repeated flags --
 Argument #3 is expected to be an array or sorting flag that has not already been specified
-===DONE===

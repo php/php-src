@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -221,7 +219,7 @@ PHP_MINIT_FUNCTION(miconv)
 	{
 		static char buf[16];
 		snprintf(buf, sizeof(buf), "%d.%d",
-		    ((_libiconv_version >> 8) & 0x0f), (_libiconv_version & 0x0f));
+			_libiconv_version >> 8, _libiconv_version & 0xff);
 		version = buf;
 	}
 #elif HAVE_GLIBC_ICONV
@@ -2030,13 +2028,14 @@ PHP_FUNCTION(iconv_substr)
 	size_t charset_len = 0;
 	zend_string *str;
 	zend_long offset, length = 0;
+	zend_bool len_is_null = 1;
 
 	php_iconv_err_t err;
 
 	smart_str retval = {0};
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sl|ls",
-		&str, &offset, &length,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sl|l!s",
+		&str, &offset, &length, &len_is_null,
 		&charset, &charset_len) == FAILURE) {
 		return;
 	}
@@ -2046,7 +2045,7 @@ PHP_FUNCTION(iconv_substr)
 		RETURN_FALSE;
 	}
 
-	if (ZEND_NUM_ARGS() < 3) {
+	if (len_is_null) {
 		length = ZSTR_LEN(str);
 	}
 

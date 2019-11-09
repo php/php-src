@@ -37,7 +37,6 @@ if ($dh1 !== $dh2) {
 closedir($dh1);
 closedir($dh2);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $path = __DIR__ . "/私はガラスを食べられますopendir_variation3";
@@ -53,4 +52,3 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 
 New resource created
-===DONE===

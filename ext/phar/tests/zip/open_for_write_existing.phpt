@@ -31,9 +31,7 @@ fclose($fp);
 include $alias . '/b/c.php';
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
 --EXPECT--
 extra
-===DONE===

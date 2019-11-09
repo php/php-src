@@ -50,7 +50,6 @@ foreach ($not_float_types as $key => $type ) {
    var_dump( doubleval($type) );
 }
 ?>
-===DONE===
 --EXPECTF--
 Notice: A non well formed numeric value encountered in %s on line %d
 
@@ -155,4 +154,3 @@ float(0)
 
 -- Iteration : null --
 float(0)
-===DONE===

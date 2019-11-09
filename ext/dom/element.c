@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -184,14 +182,14 @@ PHP_METHOD(domelement, __construct)
 	int name_valid;
 	xmlNsPtr nsptr = NULL;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s|s!s", &name, &name_len, &value, &value_len, &uri, &uri_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!s", &name, &name_len, &value, &value_len, &uri, &uri_len) == FAILURE) {
 		return;
 	}
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);
 	if (name_valid != 0) {
 		php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
-		RETURN_FALSE;
+		return;
 	}
 
 	/* Namespace logic is separate and only when uri passed in to insure no BC breakage */
@@ -213,7 +211,7 @@ PHP_METHOD(domelement, __construct)
 				xmlFreeNode(nodep);
 			}
 			php_dom_throw_error(errorcode, 1);
-			RETURN_FALSE;
+			return;
 		}
 	} else {
 	    /* If you don't pass a namespace uri, then you can't set a prefix */
@@ -222,14 +220,14 @@ PHP_METHOD(domelement, __construct)
 			xmlFree(localname);
 			xmlFree(prefix);
 	        php_dom_throw_error(NAMESPACE_ERR, 1);
-	        RETURN_FALSE;
+	        return;
 	    }
 		nodep = xmlNewNode(NULL, (xmlChar *) name);
 	}
 
 	if (!nodep) {
 		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		RETURN_FALSE;
+		return;
 	}
 
 	if (value_len > 0) {

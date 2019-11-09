@@ -17,8 +17,6 @@ Test posix_getgroups() function : basic functionality
   }
 
 ?>
-===DONE===
 --EXPECT--
 Basic test of POSIX getgroups
 TEST PASSED
-===DONE===

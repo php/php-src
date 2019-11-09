@@ -25,8 +25,6 @@ echo $e->getMessage() . "\n";
 }
 
 ?>
-===DONE===
 --EXPECTF--
 string(26) "file 0 in DataArchive.phar"
 unable to seek to start of file "0" while creating new phar "%sDataArchive.phar"
-===DONE===

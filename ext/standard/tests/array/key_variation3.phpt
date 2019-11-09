@@ -30,7 +30,6 @@ var_dump(key($array1));
 echo "\$array2: ";
 var_dump(key($array2));
 ?>
-===DONE===
 --EXPECT--
 *** Testing key() : usage variations ***
 
@@ -40,4 +39,3 @@ int(0)
 -- Position after calling next() --
 $array1: int(1)
 $array2: int(1)
-===DONE===

@@ -75,7 +75,6 @@ while ($reader->read()) {
 $reader->close();
 unlink($filename);
 ?>
-===DONE===
 --EXPECTF--
 num: 1
 idx: 2
@@ -88,4 +87,3 @@ bool(false)
 
 Warning: XMLReader::moveToAttribute(): Attribute Name is required in %s on line %d
 bool(false)
-===DONE===

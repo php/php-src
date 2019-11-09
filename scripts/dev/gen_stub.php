@@ -15,12 +15,23 @@ try {
 }
 
 if ($argc >= 2) {
-    // Generate single file.
-    processStubFile($argv[1]);
+    if (is_file($argv[1])) {
+        // Generate single file.
+        processStubFile($argv[1]);
+    } else if (is_dir($argv[1])) {
+        processDirectory($argv[1]);
+    } else {
+        echo "$argv[1] is neither a file nor a directory.\n";
+        exit(1);
+    }
 } else {
     // Regenerate all stub files we can find.
+    processDirectory('.');
+}
+
+function processDirectory(string $dir) {
     $it = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator('.'),
+        new RecursiveDirectoryIterator($dir),
         RecursiveIteratorIterator::LEAVES_ONLY
     );
     foreach ($it as $file) {
@@ -44,33 +55,30 @@ function processStubFile(string $stubFile) {
     }
 }
 
-class Type {
+class SimpleType {
     /** @var string */
     public $name;
     /** @var bool */
     public $isBuiltin;
-    /** @var bool */
-    public $isNullable;
 
-    public function __construct(string $name, bool $isBuiltin, bool $isNullable = false) {
+    public function __construct(string $name, bool $isBuiltin) {
         $this->name = $name;
         $this->isBuiltin = $isBuiltin;
-        $this->isNullable = $isNullable;
     }
 
     public static function fromNode(Node $node) {
-        if ($node instanceof Node\NullableType) {
-            $type = self::fromNode($node->type);
-            return new Type($type->name, $type->isBuiltin, true);
-        }
         if ($node instanceof Node\Name) {
             assert($node->isFullyQualified());
-            return new Type($node->toString(), false);
+            return new SimpleType($node->toString(), false);
         }
         if ($node instanceof Node\Identifier) {
-            return new Type($node->toString(), true);
+            return new SimpleType($node->toString(), true);
         }
         throw new Exception("Unexpected node type");
+    }
+
+    public function isNull() {
+        return $this->isBuiltin && $this->name === 'null';
     }
 
     public function toTypeCode() {
@@ -97,14 +105,111 @@ class Type {
         }
     }
 
+    public function toTypeMask() {
+        assert($this->isBuiltin);
+        switch (strtolower($this->name)) {
+        case "false":
+            return "MAY_BE_FALSE";
+        case "bool":
+            return "MAY_BE_BOOL";
+        case "int":
+            return "MAY_BE_LONG";
+        case "float":
+            return "MAY_BE_DOUBLE";
+        case "string":
+            return "MAY_BE_STRING";
+        case "array":
+            return "MAY_BE_ARRAY";
+        case "object":
+            return "MAY_BE_OBJECT";
+        case "callable":
+            return "MAY_BE_CALLABLE";
+        default:
+            throw new Exception("Not implemented: $this->name");
+        }
+    }
+
+    public function equals(SimpleType $other) {
+        return $this->name === $other->name
+            && $this->isBuiltin === $other->isBuiltin;
+    }
+}
+
+class Type {
+    /** @var SimpleType[] $types */
+    public $types;
+
+    public function __construct(array $types) {
+        $this->types = $types;
+    }
+
+    public static function fromNode(Node $node) {
+        if ($node instanceof Node\UnionType) {
+            return new Type(array_map(['SimpleType', 'fromNode'], $node->types));
+        }
+        if ($node instanceof Node\NullableType) {
+            return new Type([
+                SimpleType::fromNode($node->type),
+                new SimpleType('null', true),
+            ]);
+        }
+        return new Type([SimpleType::fromNode($node)]);
+    }
+
+    public function isNullable(): bool {
+        foreach ($this->types as $type) {
+            if ($type->isNull()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public function isBuiltinOnly(): bool {
+        foreach ($this->types as $type) {
+            if (!$type->isBuiltin) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public function getWithoutNull(): Type {
+        return new Type(array_filter($this->types, function(SimpleType $type) {
+            return !$type->isNull();
+        }));
+    }
+
+    public function tryToSimpleType(): ?SimpleType {
+        $withoutNull = $this->getWithoutNull();
+        if (count($withoutNull->types) === 1) {
+            return $withoutNull->types[0];
+        }
+        return null;
+    }
+
+    public function toTypeMask(): string {
+        return implode('|', array_map(function(SimpleType $type) {
+            return $type->toTypeMask();
+        }, $this->types));
+    }
+
     public static function equals(?Type $a, ?Type $b): bool {
         if ($a === null || $b === null) {
             return $a === $b;
         }
 
-        return $a->name === $b->name
-            && $a->isBuiltin === $b->isBuiltin
-            && $a->isNullable === $b->isNullable;
+        if (count($a->types) !== count($b->types)) {
+            return false;
+        }
+
+        for ($i = 0; $i < count($a->types); $i++) {
+            if (!$a->types[$i]->equals($b->types[$i])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
 
@@ -358,20 +463,31 @@ function parseStubFile(string $fileName) {
 
 function funcInfoToCode(FuncInfo $funcInfo): string {
     $code = '';
-    if ($funcInfo->return->type) {
-        $returnType = $funcInfo->return->type;
-        if ($returnType->isBuiltin) {
+    $returnType = $funcInfo->return->type;
+    if ($returnType !== null) {
+        $simpleReturnType = $returnType->tryToSimpleType();
+        if ($simpleReturnType !== null) {
+            if ($simpleReturnType->isBuiltin) {
+                $code .= sprintf(
+                    "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_%s, %d, %d, %s, %d)\n",
+                    $funcInfo->name, $funcInfo->return->byRef, $funcInfo->numRequiredArgs,
+                    $simpleReturnType->toTypeCode(), $returnType->isNullable()
+                );
+            } else {
+                $code .= sprintf(
+                    "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_%s, %d, %d, %s, %d)\n",
+                    $funcInfo->name, $funcInfo->return->byRef, $funcInfo->numRequiredArgs,
+                    str_replace('\\', '\\\\', $simpleReturnType->name), $returnType->isNullable()
+                );
+            }
+        } else if ($returnType->isBuiltinOnly()) {
             $code .= sprintf(
-                "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_%s, %d, %d, %s, %d)\n",
+                "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_%s, %d, %d, %s)\n",
                 $funcInfo->name, $funcInfo->return->byRef, $funcInfo->numRequiredArgs,
-                $returnType->toTypeCode(), $returnType->isNullable
+                $returnType->toTypeMask()
             );
         } else {
-            $code .= sprintf(
-                "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_%s, %d, %d, %s, %d)\n",
-                $funcInfo->name, $funcInfo->return->byRef, $funcInfo->numRequiredArgs,
-                str_replace('\\', '\\\\', $returnType->name), $returnType->isNullable
-            );
+            throw new Exception('Unimplemented');
         }
     } else {
         $code .= sprintf(
@@ -382,19 +498,25 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
 
     foreach ($funcInfo->args as $argInfo) {
         $argKind = $argInfo->isVariadic ? "ARG_VARIADIC" : "ARG";
-        if ($argInfo->type) {
-            if ($argInfo->type->isBuiltin) {
-                $code .= sprintf(
-                    "\tZEND_%s_TYPE_INFO(%s, %s, %s, %d)\n",
-                    $argKind, $argInfo->getSendByString(), $argInfo->name,
-                    $argInfo->type->toTypeCode(), $argInfo->type->isNullable
-                );
+        $argType = $argInfo->type;
+        if ($argType !== null) {
+            $simpleArgType = $argType->tryToSimpleType();
+            if ($simpleArgType !== null) {
+                if ($simpleArgType->isBuiltin) {
+                    $code .= sprintf(
+                        "\tZEND_%s_TYPE_INFO(%s, %s, %s, %d)\n",
+                        $argKind, $argInfo->getSendByString(), $argInfo->name,
+                        $simpleArgType->toTypeCode(), $argType->isNullable()
+                    );
+                } else {
+                    $code .= sprintf(
+                        "\tZEND_%s_OBJ_INFO(%s, %s, %s, %d)\n",
+                        $argKind, $argInfo->getSendByString(), $argInfo->name,
+                        str_replace('\\', '\\\\', $simpleArgType->name), $argType->isNullable()
+                    );
+                }
             } else {
-                $code .= sprintf(
-                    "\tZEND_%s_OBJ_INFO(%s, %s, %s, %d)\n",
-                    $argKind, $argInfo->getSendByString(), $argInfo->name,
-                    str_replace('\\', '\\\\', $argInfo->type->name), $argInfo->type->isNullable
-                );
+                throw new Exception('Unimplemented');
             }
         } else {
             $code .= sprintf(
@@ -445,7 +567,7 @@ function generateArginfoCode(array $funcInfos): string {
 }
 
 function initPhpParser() {
-    $version = "4.2.2";
+    $version = "4.3.0";
     $phpParserDir = __DIR__ . "/PHP-Parser-$version";
     if (!is_dir($phpParserDir)) {
         $cwd = getcwd();

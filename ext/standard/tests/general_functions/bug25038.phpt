@@ -25,8 +25,6 @@ catch (Exception $e)
 }
 
 ?>
-===DONE===
 --EXPECT--
 This is an exception from bar(first try).
 This is an exception from bar(second try).
-===DONE===

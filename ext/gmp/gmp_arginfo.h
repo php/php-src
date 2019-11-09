@@ -21,7 +21,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gmp_intval, 0, 1, IS_LONG, 0)
 	ZEND_ARG_INFO(0, gmpnumber)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_strval, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_strval, 0, 0, 1)
 	ZEND_ARG_INFO(0, gmpnumber)
 	ZEND_ARG_TYPE_INFO(0, base, IS_LONG, 0)
 ZEND_END_ARG_INFO()

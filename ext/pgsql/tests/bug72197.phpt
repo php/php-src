@@ -30,9 +30,7 @@ var_dump($oid);
 pg_query($conn, "ROLLBACK");
 pg_close($conn);
 ?>
-==DONE==
 --EXPECTF--
 pg_lo_create(): supplied resource is not a valid PostgreSQL link resource%w
 int(%d)
 int(%d)
-==DONE==

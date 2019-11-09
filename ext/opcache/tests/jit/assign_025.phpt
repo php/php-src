@@ -20,5 +20,5 @@ function foo() {
 foo();
 echo "ok\n";
 --EXPECTF--
-Notice: Undefined variable: ref in %s on line %d
+Warning: Undefined variable: ref in %s on line %d
 ok

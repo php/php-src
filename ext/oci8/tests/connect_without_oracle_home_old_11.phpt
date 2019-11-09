@@ -33,12 +33,9 @@ else {
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Warning: ocilogon(): OCIEnvNlsCreate() failed. There is something wrong with your system - please check that ORACLE_HOME and %s are set and point to the right directories in %s on line %d
 
 Warning: ocilogon(): Error while trying to retrieve text for error ORA-01804
  in %sconnect_without_oracle_home_old_11.php on line %d
 bool(false)
-===DONE===

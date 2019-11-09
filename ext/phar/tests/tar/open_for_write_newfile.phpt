@@ -35,10 +35,8 @@ include $alias . '/b/new.php';
 
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECT--
 This is b/c
 extra
-===DONE===

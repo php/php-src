@@ -106,7 +106,7 @@ Example:
 ```c
 U_CFUNC PHP_FUNCTION(breakiter_set_text)
 {
-    /* ... variable declations ... */
+    /* ... variable declarations ... */
     BREAKITER_METHOD_INIT_VARS; /* macro also resets global error */
     object = getThis();
 

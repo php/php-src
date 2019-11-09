@@ -18,7 +18,6 @@ var_dump((string)$root->children('reserved-ns')->child);
 var_dump((string)$root->children('special-ns')->child);
 var_dump($root->child);
 ?>
-===DONE===
 --EXPECTF--
 object(SimpleXMLElement)#%d (1) {
   [0]=>
@@ -32,4 +31,3 @@ string(5) "Hello"
 string(5) "World"
 object(SimpleXMLElement)#%d (0) {
 }
-===DONE=== 

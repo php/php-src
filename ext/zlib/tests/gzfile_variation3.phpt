@@ -28,7 +28,6 @@ foreach ( $variation as $var ) {
   var_dump(gzfile( $var ,  $use_include_path ) );
 }
 ?>
-===DONE===
 --EXPECTF--
 Warning: gzfile(): Filename cannot be empty in %s on line %d
 bool(false)
@@ -47,4 +46,3 @@ bool(false)
 
 Warning: gzfile(): Filename cannot be empty in %s on line %d
 bool(false)
-===DONE===

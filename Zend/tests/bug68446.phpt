@@ -9,7 +9,7 @@ function a(array $a = FOO) {
 	var_dump($a);
 }
 
-function b(array $b = BAR) {
+function b(?array $b = BAR) {
 	var_dump($b);
 }
 

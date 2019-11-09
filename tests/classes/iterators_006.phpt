@@ -68,7 +68,6 @@ foreach ($array as $property => $value) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 0: foo
 1: bar
@@ -81,4 +80,3 @@ foreach ($array as $property => $value) {
 0: foo
 1: bar
 2: baz
-===DONE===

@@ -1,7 +1,7 @@
 --TEST--
 Handling of large year values
 --SKIPIF--
-<?php echo PHP_INT_SIZE != 8 ? "skip 64-bit only" : "OK"; ?>
+<?php if (PHP_INT_SIZE != 8) die("skip 64-bit only"); ?>
 --FILE--
 <?php
 date_default_timezone_set("America/Toronto");

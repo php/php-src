@@ -17,7 +17,6 @@ foreach($ar as $v)
 }
 
 ?>
-===DONE===
 --EXPECT--
 int(4)
 Array
@@ -31,4 +30,3 @@ int(1)
 int(5)
 int(3)
 int(4)
-===DONE===

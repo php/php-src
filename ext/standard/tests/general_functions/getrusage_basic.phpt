@@ -22,9 +22,7 @@ if (!is_array($dat)) {
 echo "User time used (seconds) " . $dat["ru_utime.tv_sec"] . "\n";
 echo "User time used (microseconds) " . $dat["ru_utime.tv_usec"] . "\n";
 ?>
-===DONE===
 --EXPECTF--
 Simple testcase for getrusage() function
 User time used (seconds) %d
 User time used (microseconds) %d
-===DONE===

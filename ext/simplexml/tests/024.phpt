@@ -30,7 +30,6 @@ test('//@*');
 test('elem[2]/@attr2');
 
 ?>
-===DONE===
 --EXPECTF--
 ===elem/@attr2===
 array(3) {
@@ -172,4 +171,3 @@ array(1) {
     }
   }
 }
-===DONE===

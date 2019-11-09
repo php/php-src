@@ -81,7 +81,6 @@ foreach($inputs as $input) {
 fclose($file_handle);  //closing the file handle
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing print() function: with unexpected inputs for 'arg' argument ***
 -- Iteration 1 --
@@ -110,17 +109,17 @@ int(1)
 int(1)
 -- Iteration 9 --
 
-Notice: Array to string conversion in %sprint_variation1.php on line %d
+Warning: Array to string conversion in %s on line %d
 Array
 int(1)
 -- Iteration 10 --
 
-Notice: Array to string conversion in %sprint_variation1.php on line %d
+Warning: Array to string conversion in %s on line %d
 Array
 int(1)
 -- Iteration 11 --
 
-Notice: Array to string conversion in %sprint_variation1.php on line %d
+Warning: Array to string conversion in %s on line %d
 Array
 int(1)
 -- Iteration 12 --
@@ -153,4 +152,3 @@ int(1)
 -- Iteration 21 --
 
 int(1)
-===DONE===

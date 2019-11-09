@@ -48,7 +48,6 @@ foreach($files as $name => $cont) {
 	var_dump($phar[$name]->getMetadata());
 }
 ?>
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
@@ -78,4 +77,3 @@ array(2) {
   string(3) "bar"
 }
 bool(true)
-===DONE===

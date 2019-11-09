@@ -34,10 +34,8 @@ system("dir /b " . $fn);
 remove_data("file_cp932");
 
 ?>
-===DONE===
 --EXPECTF--
 string(%d) "%s\テストマルチバイト・パス77"
 bool(true)
 bool(true)
 テストマルチバイト・パス77
-===DONE===

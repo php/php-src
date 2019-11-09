@@ -32,7 +32,6 @@ $bad_encoding = 99;
 var_dump(gzdeflate($data, $level, $bad_encoding));
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing gzdeflate() : error conditions ***
 
@@ -45,4 +44,3 @@ bool(false)
 
 Warning: gzdeflate(): encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE in %s on line %d
 bool(false)
-===Done===

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -65,7 +63,7 @@ PHP_FUNCTION( msgfmt_format )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oa",
 		&object, MessageFormatter_ce_ptr,  &args ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	/* Fetch the object. */
@@ -96,7 +94,7 @@ PHP_FUNCTION( msgfmt_format_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "ssa",
 		  &slocale, &slocale_len, &pattern, &pattern_len, &args ) == FAILURE )
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	INTL_CHECK_LOCALE_LEN(slocale_len);

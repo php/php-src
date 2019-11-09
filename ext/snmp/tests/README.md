@@ -39,7 +39,7 @@ in `snmp_include.inc`.
   `/usr/local/etc/snmp/snmpd.conf` on FreeBSD) with `snmpd.conf` supplied.
 
 Before launching daemon make sure that there is no file
-`/var/net-snmp/snmpd.conf`. Delete it if exists. Ingoring to to so will fail
+`/var/net-snmp/snmpd.conf`. Delete it if exists. Forgetting to do so will fail
 SNMPv3 tests.
 
 * Place `ext/snmp/tests/bigtest` near `snmpd.conf`, tune path to it in

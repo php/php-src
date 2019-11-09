@@ -45,7 +45,6 @@ foreach(new RecursiveIteratorIterator($phar) as $name => $ent)
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/files/phar_oo_002.phar.php');
@@ -135,4 +134,3 @@ int(32)
 bool(false)
 NULL
 int(0)
-===DONE===

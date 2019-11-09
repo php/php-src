@@ -14,7 +14,6 @@ Test posix_getgrgid() function : basic functionality
   print_r($groupinfo);
 
 ?>
-===DONE===
 --EXPECTF--
 Basic test of POSIX getgid and getgrid fucntions
 Array
@@ -26,4 +25,3 @@ Array
 
     [gid] => %d
 )
-===DONE===

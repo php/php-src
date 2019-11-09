@@ -44,7 +44,6 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/buildfromiterator.phar.zip');
@@ -57,4 +56,3 @@ current
 key
 %s(24) "UnexpectedValueException"
 Iterator myIterator returned a file that could not be opened "phar_buildfromiterator7./oopsie/there.phpt"
-===DONE===

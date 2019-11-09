@@ -13,7 +13,6 @@ var_dump(getimagesize(__DIR__ . "/2x2mm.tiff", $arr));
 var_dump($arr);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing getimagesize() : tiff_mm format ***
 array(5) {
@@ -30,4 +29,3 @@ array(5) {
 }
 array(0) {
 }
-===DONE===

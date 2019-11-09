@@ -21,7 +21,6 @@ foreach ($intervals as $interval) {
 
 gzclose($h);
 ?>
-===DONE===
 --EXPECT--
 int(0)
 int(7)
@@ -31,4 +30,3 @@ int(100)
 int(127)
 int(142)
 int(176)
-===DONE===

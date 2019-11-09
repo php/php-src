@@ -33,19 +33,19 @@ echo "Done\n";
 --EXPECTF--
 *** Testing implode() : usage variations - sub arrays ***
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(27) "ArrayTESTArrayTESTPHPTEST50"
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 
 Deprecated: join(): Passing glue string after array is deprecated. Swap the parameters in %s on line %d
 string(19) "1Array2Array3Array4"
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 string(18) "Array2Array2PHP250"
 string(10) "1, 2, 3, 4"
 string(8) "one, two"

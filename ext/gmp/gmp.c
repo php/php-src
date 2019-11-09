@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -457,13 +455,15 @@ static int gmp_do_operation(zend_uchar opcode, zval *result, zval *op1, zval *op
 }
 /* }}} */
 
-static int gmp_compare(zval *result, zval *op1, zval *op2) /* {{{ */
+static int gmp_compare(zval *op1, zval *op2) /* {{{ */
 {
-	gmp_cmp(result, op1, op2);
-	if (Z_TYPE_P(result) == IS_FALSE) {
-		ZVAL_LONG(result, 1);
+	zval result;
+
+	gmp_cmp(&result, op1, op2);
+	if (Z_TYPE(result) == IS_FALSE) {
+		return 1;
 	}
-	return SUCCESS;
+	return Z_LVAL(result);
 }
 /* }}} */
 

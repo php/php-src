@@ -69,14 +69,14 @@ int(4)
 Cannot assign null to reference held by property Foo::$i of type int
 int(4)
 int(4)
-Typed property Foo::$i must be int, null used
+Cannot assign null to property Foo::$i of type int
 int(4)
 int(4)
 string(1) "5"
 string(1) "5"
 int(0)
 int(0)
-Typed property Foo::$i must be int, string used
+Cannot assign string to property Foo::$i of type int
 int(0)
 string(1) "x"
 Reference with value of type string held by property Foo::$s of type string is not compatible with property Foo::$i of type int

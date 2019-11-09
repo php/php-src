@@ -9,7 +9,6 @@ if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.5', '<=')) die('skip upstrea
 <?php
 var_dump(imagecreatefrombmp(__DIR__ . '/bug77391.bmp'));
 ?>
-===DONE===
---EXPECTF--
-resource(%d) of type (gd)
-===DONE===
+--EXPECT--
+object(GdImage)#1 (0) {
+}

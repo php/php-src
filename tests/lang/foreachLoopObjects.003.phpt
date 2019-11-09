@@ -83,7 +83,6 @@ foreach ($obj as &$v) {
 var_dump($obj);
 
 ?>
-===DONE===
 --EXPECTF--
 Directly changing object values.
 string(10) "Original a"
@@ -247,4 +246,3 @@ object(C)#%d (2) {
   ["e":"C":private]=>
   string(10) "Original e"
 }
-===DONE===

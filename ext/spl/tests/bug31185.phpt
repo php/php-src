@@ -42,7 +42,6 @@ catch (Exception $e)
 
 print_R($foo);
 ?>
-===DONE===
 --EXPECT--
 FooBar::offsetSet(0, 0)
 FooBar::offsetSet(1, 1)
@@ -58,4 +57,3 @@ FooBar Object
         )
 
 )
-===DONE===

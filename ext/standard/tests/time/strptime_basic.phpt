@@ -33,7 +33,6 @@ var_dump(strptime($str, '%A %B %e %R'));
 
 setlocale(LC_ALL, $orig);
 ?>
-===DONE===
 --EXPECT--
 *** Testing strptime() : basic functionality ***
 array(9) {
@@ -96,4 +95,3 @@ array(9) {
   ["unparsed"]=>
   string(0) ""
 }
-===DONE===

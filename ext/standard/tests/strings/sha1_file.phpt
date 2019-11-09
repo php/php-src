@@ -63,7 +63,6 @@ unlink("DataFileSHA1.txt");
 unlink("EmptyFileSHA1.txt");
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing sha1_file() : basic functionality ***
 
@@ -100,4 +99,3 @@ string(40) "d16a568ab98233deff7ec8b1668eb4b3d9e53fee"
 
 -- Raw Binary Output for a valid file with some contents --
 string(40) "d16a568ab98233deff7ec8b1668eb4b3d9e53fee"
-===DONE===

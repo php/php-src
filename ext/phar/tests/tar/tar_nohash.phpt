@@ -16,7 +16,5 @@ try {
 }
 
 ?>
-===DONE===
 --EXPECT--
 string(0) ""
-===DONE===

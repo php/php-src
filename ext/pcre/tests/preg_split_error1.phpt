@@ -6,7 +6,6 @@ Test preg_split() function : error conditions - bad regular expressions
 * proto array preg_split(string pattern, string subject [, int limit [, int flags]])
 * Function is implemented in ext/pcre/php_pcre.c
 */
-error_reporting(E_ALL&~E_NOTICE);
 /*
 * Testing how preg_split reacts to being passed the wrong type of regex argument
 */
@@ -19,7 +18,7 @@ $regex_array = array('abcdef', //Regex without delimiter
 );
 $subject = '1 2 a 3 4 b 5 6';
 foreach($regex_array as $regex_value) {
-    print "\nArg value is $regex_value\n";
+    @print "\nArg value is $regex_value\n";
     try {
         var_dump(preg_split($regex_value, $subject));
     } catch (TypeError $e) {

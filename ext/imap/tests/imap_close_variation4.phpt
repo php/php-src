@@ -58,7 +58,6 @@ foreach($inputs as $input) {
 
 };
 ?>
-===DONE===
 --CLEAN--
 <?php
 require_once(__DIR__.'/clean.inc');
@@ -90,4 +89,3 @@ bool(false)
 
 Warning: imap_close(): invalid value for the flags parameter in %s on line %d
 bool(false)
-===DONE===

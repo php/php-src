@@ -601,9 +601,15 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 				num_args++;
 			}
 			for (i = 0 ; i < num_args; i++) {
-				if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
-					zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(arg_info[i].type);
-					arg_info[i].type = ZEND_TYPE_ENCODE_CLASS(new_interned_string(ZEND_TYPE_NAME(arg_info[i].type)), allow_null);
+				if (ZEND_TYPE_HAS_LIST(arg_info[i].type)) {
+					void **entry;
+					ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(arg_info[i].type), entry) {
+						ZEND_ASSERT(ZEND_TYPE_LIST_IS_NAME(*entry));
+						*entry = zend_new_interned_string(ZEND_TYPE_LIST_GET_NAME(*entry));
+					} ZEND_TYPE_LIST_FOREACH_END();
+				} else if (ZEND_TYPE_HAS_NAME(arg_info[i].type)) {
+					ZEND_TYPE_SET_PTR(arg_info[i].type,
+						new_interned_string(ZEND_TYPE_NAME(arg_info[i].type)));
 				}
 			}
 		}
@@ -3539,6 +3545,32 @@ static zend_bool preload_try_resolve_constants(zend_class_entry *ce)
 	return ok;
 }
 
+static zend_class_entry *preload_fetch_resolved_ce(zend_string *name, zend_class_entry *self_ce) {
+	zend_string *lcname = zend_string_tolower(name);
+	zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), lcname);
+	zend_string_release(lcname);
+	if (!ce) {
+		return NULL;
+	}
+	if (ce == self_ce) {
+		/* Ignore the following requirements if this is the class referring to itself */
+		return ce;
+	}
+#ifdef ZEND_WIN32
+	/* On Windows we can't link with internal class, because of ASLR */
+	if (ce->type == ZEND_INTERNAL_CLASS) {
+		return NULL;
+	}
+#endif
+	if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
+		return NULL;
+	}
+	if (!(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
+		return NULL;
+	}
+	return ce;
+}
+
 static zend_bool preload_try_resolve_property_types(zend_class_entry *ce)
 {
 	zend_bool ok = 1;
@@ -3547,64 +3579,59 @@ static zend_bool preload_try_resolve_property_types(zend_class_entry *ce)
 
 	if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
 		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-			zend_string *name, *lcname;
-
-			if (!ZEND_TYPE_IS_NAME(prop->type)) {
-				continue;
-			}
-
-			name = ZEND_TYPE_NAME(prop->type);
-			lcname = zend_string_tolower(name);
-			p = zend_hash_find_ptr(EG(class_table), lcname);
-			zend_string_release(lcname);
-			if (!p) {
-				ok = 0;
-				continue;
-			}
-			if (p != ce) {
-#ifdef ZEND_WIN32
-				/* On Windows we can't link with internal class, because of ASLR */
-				if (p->type == ZEND_INTERNAL_CLASS) {
+			if (ZEND_TYPE_HAS_LIST(prop->type)) {
+				void **entry;
+				ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(prop->type), entry) {
+					if (ZEND_TYPE_LIST_IS_NAME(*entry)) {
+						p = preload_fetch_resolved_ce(ZEND_TYPE_LIST_GET_NAME(*entry), ce);
+						if (!p) {
+							ok = 0;
+							continue;
+						}
+						*entry = ZEND_TYPE_LIST_ENCODE_CE(p);
+					}
+				} ZEND_TYPE_LIST_FOREACH_END();
+			} else if (ZEND_TYPE_HAS_NAME(prop->type)) {
+				p = preload_fetch_resolved_ce(ZEND_TYPE_NAME(prop->type), ce);
+				if (!p) {
 					ok = 0;
 					continue;
 				}
-#endif
-				if (!(p->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-					ok = 0;
-					continue;
-				}
-				if (!(p->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
-					ok = 0;
-					continue;
-				}
+				ZEND_TYPE_SET_CE(prop->type, p);
 			}
-
-			zend_string_release(name);
-			prop->type = ZEND_TYPE_ENCODE_CE(p, ZEND_TYPE_ALLOW_NULL(prop->type));
 		} ZEND_HASH_FOREACH_END();
 	}
 
 	return ok;
 }
 
-static zend_bool preload_is_type_known(zend_class_entry *ce, zend_type type) {
-	zend_string *name, *lcname;
-	zend_bool known;
-	if (!ZEND_TYPE_IS_NAME(type)) {
-		return 1;
-	}
-
-	name = ZEND_TYPE_NAME(type);
+static zend_bool preload_is_class_type_known(zend_class_entry *ce, zend_string *name) {
 	if (zend_string_equals_literal_ci(name, "self") ||
 		zend_string_equals_literal_ci(name, "parent") ||
 		zend_string_equals_ci(name, ce->name)) {
 		return 1;
 	}
 
-	lcname = zend_string_tolower(name);
-	known = zend_hash_exists(EG(class_table), lcname);
+	zend_string *lcname = zend_string_tolower(name);
+	zend_bool known = zend_hash_exists(EG(class_table), lcname);
 	zend_string_release(lcname);
 	return known;
+}
+
+static zend_bool preload_is_type_known(zend_class_entry *ce, zend_type type) {
+	if (ZEND_TYPE_HAS_LIST(type)) {
+		void *entry;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), entry) {
+			if (ZEND_TYPE_LIST_IS_NAME(entry)
+					&& !preload_is_class_type_known(ce, ZEND_TYPE_LIST_GET_NAME(entry))) {
+				return 0;
+			}
+		} ZEND_TYPE_LIST_FOREACH_END();
+	}
+	if (ZEND_TYPE_HAS_NAME(type)) {
+		return preload_is_class_type_known(ce, ZEND_TYPE_NAME(type));
+	}
+	return 1;
 }
 
 static zend_bool preload_is_method_maybe_override(zend_class_entry *ce, zend_string *lcname) {
@@ -4194,14 +4221,17 @@ static void preload_load(void)
 	if (EG(class_table)) {
 		EG(persistent_classes_count)   = EG(class_table)->nNumUsed;
 	}
-	CG(map_ptr_last) = ZCSG(map_ptr_last);
+	if (CG(map_ptr_last) != ZCSG(map_ptr_last)) {
+		CG(map_ptr_last) = ZCSG(map_ptr_last);
+		CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(CG(map_ptr_last) + 1, 4096);
+		CG(map_ptr_base) = perealloc(CG(map_ptr_base), CG(map_ptr_size) * sizeof(void*), 1);
+	}
 }
 
 static int accel_preload(const char *config)
 {
 	zend_file_handle file_handle;
 	int ret;
-	uint32_t orig_compiler_options;
 	char *orig_open_basedir;
 	size_t orig_map_ptr_last;
 	zval *zv;
@@ -4212,14 +4242,6 @@ static int accel_preload(const char *config)
 	PG(open_basedir) = NULL;
 	preload_orig_compile_file = accelerator_orig_compile_file;
 	accelerator_orig_compile_file = preload_compile_file;
-
-	orig_compiler_options = CG(compiler_options);
-	CG(compiler_options) |= ZEND_COMPILE_PRELOAD;
-	CG(compiler_options) |= ZEND_COMPILE_HANDLE_OP_ARRAY;
-//	CG(compiler_options) |= ZEND_COMPILE_IGNORE_INTERNAL_CLASSES;
-	CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
-	CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
-//	CG(compiler_options) |= ZEND_COMPILE_IGNORE_OTHER_FILES;
 
 	orig_map_ptr_last = CG(map_ptr_last);
 
@@ -4261,7 +4283,6 @@ static int accel_preload(const char *config)
 		ret = FAILURE;
 	} zend_end_try();
 
-	CG(compiler_options) = orig_compiler_options;
 	PG(open_basedir) = orig_open_basedir;
 	accelerator_orig_compile_file = preload_orig_compile_file;
 	ZCG(enabled) = 1;
@@ -4416,6 +4437,7 @@ static int accel_preload(const char *config)
 #else
 		init_op_array(&script->script.main_op_array, ZEND_USER_FUNCTION, 2);
 #endif
+		script->script.main_op_array.fn_flags |= ZEND_ACC_DONE_PASS_TWO;
 		script->script.main_op_array.last = 1;
 		script->script.main_op_array.last_literal = 1;
 #if ZEND_USE_ABS_CONST_ADDR
@@ -4554,6 +4576,7 @@ static int accel_finish_startup(void)
 		char *(*orig_getenv)(char *name, size_t name_len) = sapi_module.getenv;
 		size_t (*orig_ub_write)(const char *str, size_t str_length) = sapi_module.ub_write;
 		void (*orig_flush)(void *server_context) = sapi_module.flush;
+		uint32_t orig_compiler_options = CG(compiler_options);
 #ifdef ZEND_SIGNALS
 		zend_bool old_reset_signals = SIGG(reset);
 #endif
@@ -4619,6 +4642,11 @@ static int accel_finish_startup(void)
 					zend_accel_error(ACCEL_LOG_FATAL, "Preloading failed to waitpid(%d)", pid);
 					return FAILURE;
 				}
+
+				if (ZCSG(preload_script)) {
+					preload_load();
+				}
+
 				zend_shared_alloc_unlock();
 				if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
 					return SUCCESS;
@@ -4643,6 +4671,18 @@ static int accel_finish_startup(void)
 		sapi_module.getenv = NULL;
 		sapi_module.ub_write = preload_ub_write;
 		sapi_module.flush = preload_flush;
+
+#ifndef ZEND_WIN32
+		if (in_child) {
+			CG(compiler_options) |= ZEND_COMPILE_PRELOAD_IN_CHILD;
+		}
+#endif
+		CG(compiler_options) |= ZEND_COMPILE_PRELOAD;
+		CG(compiler_options) |= ZEND_COMPILE_HANDLE_OP_ARRAY;
+		CG(compiler_options) |= ZEND_COMPILE_IGNORE_INTERNAL_CLASSES;
+		CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
+		CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
+		CG(compiler_options) |= ZEND_COMPILE_IGNORE_OTHER_FILES;
 
 		zend_interned_strings_switch_storage(1);
 
@@ -4696,6 +4736,8 @@ static int accel_finish_startup(void)
 #ifdef ZEND_SIGNALS
 		SIGG(reset) = old_reset_signals;
 #endif
+
+		CG(compiler_options) = orig_compiler_options;
 
 		sapi_module.activate = orig_activate;
 		sapi_module.deactivate = orig_deactivate;

@@ -32,7 +32,6 @@ foreach($file_types_array as $key => $filename) {
       var_dump( $info );
 };
 ?>
-===DONE===
 --EXPECTF--
 *** Testing getimagesize() : variation ***
 
@@ -60,11 +59,10 @@ array(0) {
 
 -- Empty File (blank_file.bmp) --
 
-Notice: getimagesize(): Read error! in %s on line %d
+Notice: getimagesize(): Error reading from %s! in %s on line %d
 bool(false)
 
-Notice: getimagesize(): Read error! in %s on line %d
+Notice: getimagesize(): Error reading from %s! in %s on line %d
 bool(false)
 array(0) {
 }
-===DONE===

@@ -127,8 +127,6 @@ var_dump(unserialize('O:19:"autoload_implements":0:{}'));
 echo "===AutoNA===\n";
 var_dump(unserialize('O:22:"autoload_not_available":0:{}'));
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ===O1===
 TestOld::__sleep()
@@ -182,4 +180,3 @@ object(__PHP_Incomplete_Class)#%d (1) {
   ["__PHP_Incomplete_Class_Name"]=>
   string(22) "autoload_not_available"
 }
-===DONE===

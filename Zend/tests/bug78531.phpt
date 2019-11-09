@@ -2,17 +2,36 @@
 Bug #78531 (Crash when using undefined variable as object)
 --FILE--
 <?php
-@$u1->a += 5;
-var_dump($u1->a);
-@$x = ++$u2->a;
-var_dump($u2->a);
-@$x = $u3->a++;
-var_dump($u3->a);
-@$u4->a->a += 5;
-var_dump($u4->a->a);
+try {
+    $u1->a += 5;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    $x = ++$u2->a;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    $x = $u3->a++;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    $u4->a->a += 5;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
---EXPECT--
-int(5)
-int(1)
-int(1)
-int(5)
+--EXPECTF--
+Warning: Undefined variable: u1 in %s on line %d
+Attempt to assign property 'a' of non-object
+
+Warning: Undefined variable: u2 in %s on line %d
+Attempt to increment/decrement property 'a' of non-object
+
+Warning: Undefined variable: u3 in %s on line %d
+Attempt to increment/decrement property 'a' of non-object
+
+Warning: Undefined variable: u4 in %s on line %d
+Attempt to modify property 'a' of non-object

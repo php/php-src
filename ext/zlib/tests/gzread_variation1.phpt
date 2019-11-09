@@ -25,10 +25,8 @@ gzclose($h);
 echo "\n";
 unlink($filename);
 ?>
-===DONE===
 --EXPECT--
 bool(false)
 bool(false)
 bool(false)
 Here is the string to be written. 
-===DONE===

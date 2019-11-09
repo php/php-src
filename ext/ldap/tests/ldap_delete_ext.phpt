@@ -34,7 +34,6 @@ var_dump(
 	@ldap_search($link, "dc=my-domain,$base", "(o=my-domain)")
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -68,4 +67,3 @@ array(2) {
   }
 }
 bool(false)
-===DONE===

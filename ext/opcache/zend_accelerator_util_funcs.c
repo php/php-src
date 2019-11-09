@@ -233,11 +233,28 @@ static void zend_hash_clone_prop_info(HashTable *ht)
 				prop_info->ce = ARENA_REALLOC(prop_info->ce);
 			}
 
-			if (ZEND_TYPE_IS_CE(prop_info->type)) {
+			if (ZEND_TYPE_HAS_LIST(prop_info->type)) {
+				zend_type_list *list = ZEND_TYPE_LIST(prop_info->type);
+				if (IN_ARENA(list)) {
+					list = ARENA_REALLOC(list);
+					ZEND_TYPE_SET_PTR(prop_info->type, list);
+
+					void **entry;
+					ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(prop_info->type), entry) {
+						if (ZEND_TYPE_LIST_IS_CE(*entry)) {
+							zend_class_entry *ce = ZEND_TYPE_LIST_GET_CE(*entry);
+							if (IN_ARENA(ce)) {
+								ce = ARENA_REALLOC(ce);
+								*entry = ZEND_TYPE_LIST_ENCODE_CE(ce);
+							}
+						}
+					} ZEND_TYPE_LIST_FOREACH_END();
+				}
+			} else if (ZEND_TYPE_HAS_CE(prop_info->type)) {
 				zend_class_entry *ce = ZEND_TYPE_CE(prop_info->type);
 				if (IN_ARENA(ce)) {
 					ce = ARENA_REALLOC(ce);
-					prop_info->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(prop_info->type));
+					ZEND_TYPE_SET_PTR(prop_info->type, ce);
 				}
 			}
 		}
@@ -270,7 +287,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		end = src + ce->default_properties_count;
 		ce->default_properties_table = dst;
 		for (; src != end; src++, dst++) {
-			ZVAL_COPY_VALUE(dst, src);
+			ZVAL_COPY_VALUE_PROP(dst, src);
 		}
 	}
 
@@ -834,11 +851,11 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 #define ADLER32_DO8(buf, i)     ADLER32_DO4(buf, i); ADLER32_DO4(buf, i + 4);
 #define ADLER32_DO16(buf)       ADLER32_DO8(buf, 0); ADLER32_DO8(buf, 8);
 
-unsigned int zend_adler32(unsigned int checksum, signed char *buf, uint32_t len)
+unsigned int zend_adler32(unsigned int checksum, unsigned char *buf, uint32_t len)
 {
 	unsigned int s1 = checksum & 0xffff;
 	unsigned int s2 = (checksum >> 16) & 0xffff;
-	signed char *end;
+	unsigned char *end;
 
 	while (len >= ADLER32_NMAX) {
 		len -= ADLER32_NMAX;
@@ -876,15 +893,15 @@ unsigned int zend_adler32(unsigned int checksum, signed char *buf, uint32_t len)
 
 unsigned int zend_accel_script_checksum(zend_persistent_script *persistent_script)
 {
-	signed char *mem = (signed char*)persistent_script->mem;
+	unsigned char *mem = (unsigned char*)persistent_script->mem;
 	size_t size = persistent_script->size;
 	size_t persistent_script_check_block_size = ((char *)&(persistent_script->dynamic_members)) - (char *)persistent_script;
 	unsigned int checksum = ADLER32_INIT;
 
-	if (mem < (signed char*)persistent_script) {
-		checksum = zend_adler32(checksum, mem, (signed char*)persistent_script - mem);
-		size -= (signed char*)persistent_script - mem;
-		mem  += (signed char*)persistent_script - mem;
+	if (mem < (unsigned char*)persistent_script) {
+		checksum = zend_adler32(checksum, mem, (unsigned char*)persistent_script - mem);
+		size -= (unsigned char*)persistent_script - mem;
+		mem  += (unsigned char*)persistent_script - mem;
 	}
 
 	zend_adler32(checksum, mem, persistent_script_check_block_size);

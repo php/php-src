@@ -36,9 +36,7 @@ if ($f) {
 remove_data("file_cp1251");
 
 ?>
-===DONE===
 --EXPECTF--
 resource(%d) of type (stream)
 string(35) "opened an utf8 filename for reading"
 bool(true)
-===DONE===

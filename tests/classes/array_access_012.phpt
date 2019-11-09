@@ -28,7 +28,6 @@ $data['element'] = &$test;
 
 ?>
 ===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Notice: Indirect modification of overloaded element of ArrayAccessImpl has no effect in %sarray_access_012.php on line 24
 

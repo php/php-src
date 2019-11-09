@@ -21,11 +21,9 @@ var_dump( gmstrftime($format) );
 var_dump( gmstrftime($format, $timestamp) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmstrftime() : usage variation ***
 
 -- Testing gmstrftime() function with Day of the month as decimal single digit format --
 string(2) "%A%d"
 string(2) " 8"
-===DONE===

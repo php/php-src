@@ -13742,7 +13742,7 @@ if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   sljit_free_compiler(compiler);
   SLJIT_FREE(common->optimized_cbracket, allocator_data);
   SLJIT_FREE(common->private_data_ptrs, allocator_data);
-  PRIV(jit_free_rodata)(common->read_only_data_head, compiler->allocator_data);
+  PRIV(jit_free_rodata)(common->read_only_data_head, allocator_data);
   return PCRE2_ERROR_NOMEMORY;
   }
 
@@ -13796,7 +13796,7 @@ if (SLJIT_UNLIKELY(sljit_get_compiler_error(compiler)))
   sljit_free_compiler(compiler);
   SLJIT_FREE(common->optimized_cbracket, allocator_data);
   SLJIT_FREE(common->private_data_ptrs, allocator_data);
-  PRIV(jit_free_rodata)(common->read_only_data_head, compiler->allocator_data);
+  PRIV(jit_free_rodata)(common->read_only_data_head, allocator_data);
   return PCRE2_ERROR_NOMEMORY;
   }
 
@@ -13885,7 +13885,7 @@ while (common->currententry != NULL)
     sljit_free_compiler(compiler);
     SLJIT_FREE(common->optimized_cbracket, allocator_data);
     SLJIT_FREE(common->private_data_ptrs, allocator_data);
-    PRIV(jit_free_rodata)(common->read_only_data_head, compiler->allocator_data);
+    PRIV(jit_free_rodata)(common->read_only_data_head, allocator_data);
     return PCRE2_ERROR_NOMEMORY;
     }
   flush_stubs(common);
@@ -14037,7 +14037,7 @@ while (label_addr != NULL)
 sljit_free_compiler(compiler);
 if (executable_func == NULL)
   {
-  PRIV(jit_free_rodata)(common->read_only_data_head, compiler->allocator_data);
+  PRIV(jit_free_rodata)(common->read_only_data_head, allocator_data);
   return PCRE2_ERROR_NOMEMORY;
   }
 
@@ -14052,7 +14052,7 @@ else
     /* This case is highly unlikely since we just recently
     freed a lot of memory. Not impossible though. */
     sljit_free_code(executable_func);
-    PRIV(jit_free_rodata)(common->read_only_data_head, compiler->allocator_data);
+    PRIV(jit_free_rodata)(common->read_only_data_head, allocator_data);
     return PCRE2_ERROR_NOMEMORY;
     }
   memset(functions, 0, sizeof(executable_functions));

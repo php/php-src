@@ -37,10 +37,8 @@ print_r(file_get_contents($data_file));
 
 unlink($data_file);
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : basic functionality - using octal format ***
 21
 21 347
 21 347 567
-===DONE===

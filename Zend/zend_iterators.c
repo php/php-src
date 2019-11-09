@@ -44,7 +44,6 @@ static const zend_object_handlers iterator_object_handlers = {
 	NULL, /* method get */
 	NULL, /* get ctor */
 	NULL, /* get class name */
-	NULL, /* compare */
 	NULL, /* cast */
 	NULL, /* count */
 	NULL, /* get_debug_info */

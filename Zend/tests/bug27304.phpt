@@ -16,8 +16,6 @@ Staticexample::test();
 $b->test();
 
 ?>
-===DONE===
 --EXPECT--
 bool(false)
 bool(false)
-===DONE===

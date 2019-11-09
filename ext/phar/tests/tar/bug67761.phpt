@@ -11,9 +11,7 @@ include __DIR__."/files/bug67761.tar/bug67761.phar";
 
 ?>
 
-===DONE===
 --EXPECT--
 Test
 #!/usr/bin/env php
 Test
-===DONE===

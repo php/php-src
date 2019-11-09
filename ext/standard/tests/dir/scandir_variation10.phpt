@@ -40,7 +40,6 @@ var_dump(in_array('file2.tmp', $files));
 
 delete_files($dir, 2);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir = __DIR__ . '/scandir_variation10';
@@ -76,4 +75,3 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-===DONE===

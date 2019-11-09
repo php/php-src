@@ -11,8 +11,6 @@ ReflectionExtension::export("reflection", false);
 $test = ob_get_clean();
 var_dump(empty($test));
 ?>
-==DONE==
 --EXPECTF--
 Deprecated: Function ReflectionExtension::export() is deprecated in %s on line %d
 bool(false)
-==DONE==

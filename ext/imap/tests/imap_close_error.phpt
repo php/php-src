@@ -29,7 +29,6 @@ $options = CL_EXPUNGE;
 $extra_arg = 10;
 var_dump( imap_close($stream_id, $options, $extra_arg) );
 ?>
-===DONE===
 --EXPECTF--
 *** Testing imap_close() : error conditions ***
 
@@ -42,4 +41,3 @@ NULL
 
 Warning: imap_close() expects at most 2 parameters, 3 given in %s on line %d
 NULL
-===DONE===

@@ -129,8 +129,6 @@ reflection::export(new reflectionfunction('oci_set_client_identifier'));
 reflection::export(new reflectionfunction('oci_get_implicit_resultset'));
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Function [ <internal%s> function oci_define_by_name ] {
 
@@ -1101,4 +1099,3 @@ Function [ <internal%s> function oci_get_implicit_resultset ] {
   }
 }
 
-===DONE===

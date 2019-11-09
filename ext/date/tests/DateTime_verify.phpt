@@ -23,7 +23,6 @@ var_dump($method->getParameters());
 var_dump($method->getParameters()[0]->isOptional());
 
 ?>
-===DONE===
 --EXPECTF--
 *** Verify DateTime class ***
 Verify DateTime class registered OK
@@ -205,4 +204,3 @@ array(1) {
   }
 }
 bool(false)
-===DONE===

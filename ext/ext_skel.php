@@ -2,8 +2,6 @@
 <?php
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -174,7 +172,7 @@ function process_args($argv, $argc) {
 	{
 		$val = $argv[$i];
 
-		if($val{0} != '-' || $val{1} != '-')
+		if($val[0] != '-' || $val[1] != '-')
 		{
 			continue;
 		}
@@ -203,7 +201,7 @@ function process_args($argv, $argc) {
 			case 'ext':
 			case 'dir':
 			case 'author': {
-				if (!isset($argv[$i + 1]) || ($argv[$i + 1]{0} == '-' && $argv[$i + 1]{1} == '-')) {
+				if (!isset($argv[$i + 1]) || ($argv[$i + 1][0] == '-' && $argv[$i + 1][1] == '-')) {
 					error('Argument "' . $val . '" expects a value, none passed');
 				} else if ($opt == 'dir' && empty($argv[$i + 1])) {
 					continue 2;
@@ -263,8 +261,6 @@ function process_source_tags($file, $short_name) {
 
 				$header = <<<"HEADER"
 /*
-   +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+

@@ -41,7 +41,6 @@ foreach ($params as $param) {
     }
 }
 ?>
-==DONE==
 --EXPECT--
 bool(false)
 bool(true)
@@ -50,4 +49,3 @@ string(10) "CASE_LOWER"
 string(9) "self::bar"
 string(9) "Foo2::bar"
 string(12) "CONST_TEST_1"
-==DONE==

@@ -63,7 +63,6 @@ closedir($dh2);
 delete_files($dir_path1, 1, "私はガラスを食べられますfile");
 delete_files($dir_path2, 1, "私はガラスを食べられますfile", 2);
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path1 = __DIR__ . "/私はガラスを食べられますrewinddir_basic_dir1";
@@ -99,4 +98,3 @@ array(3) {
 }
 NULL
 bool(true)
-===DONE===

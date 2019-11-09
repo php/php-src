@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -648,6 +646,7 @@ retry:
 		goto retry;
 	}
 	if (retval != NO_ERROR) {
+		efree(addr_table);
 		php_error_docref(NULL, E_WARNING,
 			"GetIpAddrTable failed with error %lu", retval);
 		return FAILURE;
@@ -656,9 +655,11 @@ retry:
 		MIB_IPADDRROW r = addr_table->table[i];
 		if (r.dwIndex == if_index) {
 			out_addr->s_addr = r.dwAddr;
+			efree(addr_table);
 			return SUCCESS;
 		}
 	}
+	efree(addr_table);
 	php_error_docref(NULL, E_WARNING,
 		"No interface with index %u was found", if_index);
 	return FAILURE;
@@ -688,6 +689,7 @@ retry:
 		goto retry;
 	}
 	if (retval != NO_ERROR) {
+		efree(addr_table);
 		php_error_docref(NULL, E_WARNING,
 			"GetIpAddrTable failed with error %lu", retval);
 		return FAILURE;
@@ -696,9 +698,11 @@ retry:
 		MIB_IPADDRROW r = addr_table->table[i];
 		if (r.dwAddr == addr->s_addr) {
 			*if_index = r.dwIndex;
+			efree(addr_table);
 			return SUCCESS;
 		}
 	}
+	efree(addr_table);
 
 	{
 		char addr_str[17] = {0};

@@ -10,12 +10,9 @@ memory_limit=2G
 --FILE--
 <?php
 $im = imagecreate(2**28, 1);
-if(is_resource($im)) {
-	imagescale($im, 1, 1, IMG_TRIANGLE);
-}
+imagescale($im, 1, 1, IMG_TRIANGLE);
+
 ?>
-===DONE===
 --EXPECTF--
 Warning: imagescale():%S product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
  in %s on line %d
-===DONE===

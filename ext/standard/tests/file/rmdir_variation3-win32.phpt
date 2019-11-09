@@ -71,7 +71,6 @@ foreach($dirs as $dir) {
 rmdir($workDir);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing rmdir() : variation ***
 -- removing rmdirVar3.tmp\aSubDir --
@@ -105,4 +104,3 @@ Directory removed
 Directory removed
 -- removing /%s/rmdirVar3.tmp/aSubDir --
 Directory removed
-===DONE===

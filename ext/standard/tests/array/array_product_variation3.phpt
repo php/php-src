@@ -27,7 +27,6 @@ var_dump( array_product(array(-99999999.9, 99999999.1)));
 
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_product() : variations - negative numbers***
 
@@ -45,4 +44,3 @@ float(-1.5)
 
 -- Testing array_product() function with negative floats --
 float(-9.9999999E+15)
-===DONE===

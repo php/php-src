@@ -31,7 +31,6 @@ foreach($inputs as $key =>$value) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmstrftime() : usage variation ***
 
@@ -46,4 +45,3 @@ string(8) "08/08/08"
 --Preferred time representation--
 string(%d) "%d:%d:%d"
 string(8) "08:08:08"
-===DONE===

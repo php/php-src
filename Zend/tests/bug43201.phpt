@@ -26,29 +26,29 @@ Notice: Indirect modification of overloaded property Foo::$arr has no effect in 
 
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 14
 
-Notice: Undefined variable: ref in %sbug43201.php on line 14
+Warning: Undefined variable: ref in %s on line %d
 
-Notice: Undefined variable: undef in %sbug43201.php on line 16
-
-Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
-
-Notice: Undefined variable: undef in %sbug43201.php on line 16
+Warning: Undefined variable: undef in %s on line %d
 
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
 
-Notice: Undefined variable: undef in %sbug43201.php on line 16
+Warning: Undefined variable: undef in %s on line %d
 
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
 
-Notice: Undefined variable: undef in %sbug43201.php on line 16
+Warning: Undefined variable: undef in %s on line %d
 
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
 
-Notice: Undefined variable: undef in %sbug43201.php on line 16
+Warning: Undefined variable: undef in %s on line %d
 
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
 
-Notice: Undefined variable: undef in %sbug43201.php on line 16
+Warning: Undefined variable: undef in %s on line %d
+
+Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
+
+Warning: Undefined variable: undef in %s on line %d
 
 Notice: Indirect modification of overloaded property Foo::$arr has no effect in %sbug43201.php on line 17
 ok

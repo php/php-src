@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -168,7 +166,6 @@ static void spl_pqueue_extract_helper(zval *result, spl_pqueue_elem *elem, int f
 
 static int spl_ptr_heap_zval_max_cmp(void *x, void *y, zval *object) { /* {{{ */
 	zval *a = x, *b = y;
-	zval result;
 
 	if (EG(exception)) {
 		return 0;
@@ -186,14 +183,12 @@ static int spl_ptr_heap_zval_max_cmp(void *x, void *y, zval *object) { /* {{{ */
 		}
 	}
 
-	compare_function(&result, a, b);
-	return (int)Z_LVAL(result);
+	return zend_compare(a, b);
 }
 /* }}} */
 
 static int spl_ptr_heap_zval_min_cmp(void *x, void *y, zval *object) { /* {{{ */
 	zval *a = x, *b = y;
-	zval result;
 
 	if (EG(exception)) {
 		return 0;
@@ -211,8 +206,7 @@ static int spl_ptr_heap_zval_min_cmp(void *x, void *y, zval *object) { /* {{{ */
 		}
 	}
 
-	compare_function(&result, b, a);
-	return (int)Z_LVAL(result);
+	return zend_compare(b, a);
 }
 /* }}} */
 
@@ -221,7 +215,6 @@ static int spl_ptr_pqueue_elem_cmp(void *x, void *y, zval *object) { /* {{{ */
 	spl_pqueue_elem *b = y;
 	zval *a_priority_p = &a->priority;
 	zval *b_priority_p = &b->priority;
-	zval result;
 
 	if (EG(exception)) {
 		return 0;
@@ -239,8 +232,7 @@ static int spl_ptr_pqueue_elem_cmp(void *x, void *y, zval *object) { /* {{{ */
 		}
 	}
 
-	compare_function(&result, a_priority_p, b_priority_p);
-	return (int)Z_LVAL(result);
+	return zend_compare(a_priority_p, b_priority_p);
 }
 /* }}} */
 

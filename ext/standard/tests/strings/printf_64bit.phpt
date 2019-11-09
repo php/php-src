@@ -39,7 +39,11 @@ echo "\n*** Output for insufficient number of arguments ***\n";
 $string = "dingy%sflem%dwombat";
 $nbr = 5;
 $name = "voudras";
-printf("%d $string %s", $nbr, $name);
+try {
+    printf("%d $string %s", $nbr, $name);
+} catch (\ArgumentCountError $e) {
+    print('Error found: '.$e->getMessage());
+}
 
 
 /* Scalar argument */
@@ -233,9 +237,7 @@ printf("%d", $tempstring);
 printf() expects at least 1 parameter, 0 given
 
 *** Output for insufficient number of arguments ***
-
-Warning: printf(): Too few arguments in %s on line %d
-
+Error found: 5 parameters are required, 3 given
 *** Output for scalar argument ***
 3
 *** Output for NULL as argument ***

@@ -38,7 +38,6 @@ var_dump( scandir($dir_path . "/sub_dir?") );
 var_dump( scandir($dir_path . "/sub?dir1") );
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_path = __DIR__ . "/scandir_variation6";
@@ -73,4 +72,3 @@ Warning: scandir(%s/scandir_variation6/sub?dir1): failed to open dir: %s in %s o
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
-===DONE===

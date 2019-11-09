@@ -25,7 +25,6 @@ foreach($input_arrays as $key =>$value) {
       var_dump( array_diff_key($value, $input_array) );
 }
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_key() : usage variation ***
 
@@ -58,4 +57,3 @@ array(1) {
   [18]=>
   string(4) "0x12"
 }
-===DONE===

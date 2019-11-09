@@ -76,7 +76,6 @@ pg_query($db, "DROP TABLE tmp_statistics");
 pg_close($db);
 
 ?>
-==DONE==
 --EXPECT--
 array(2) {
   [0]=>
@@ -193,4 +192,3 @@ array(2) {
   string(19) "2001:4f8:3:ba::/112"
 }
 7 errors catched
-==DONE==

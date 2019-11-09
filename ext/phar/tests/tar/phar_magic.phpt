@@ -19,7 +19,6 @@ include "phar://" . __FILE__ . "/a";
 __HALT_COMPILER();');
 include $fname;
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.php');
@@ -30,4 +29,3 @@ bool(true)
 in b
 <?php include "b/c.php";
 in d
-===DONE===

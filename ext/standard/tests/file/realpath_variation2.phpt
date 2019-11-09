@@ -35,7 +35,6 @@ foreach($paths as $path) {
 };
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing realpath() : variation ***
 
@@ -71,4 +70,3 @@ bool(false)
 
 --\tmp\--
 bool(false)
-===DONE===

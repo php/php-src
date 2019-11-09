@@ -929,7 +929,5 @@ if($count === false) {
 	var_dump("Done, $count matches.");
 }
 ?>
-==DONE==
 --EXPECT--
 string(16) "Done, 1 matches."
-==DONE==

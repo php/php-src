@@ -8,7 +8,7 @@ jobs:
   - job: ${{ parameters.configurationName }}
     timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
     pool:
-      vmImage: 'ubuntu-latest'
+      vmImage: 'ubuntu-18.04'
     steps:
     - template: apt.yml
     - template: configure.yml
@@ -16,15 +16,7 @@ jobs:
         configurationParameters: ${{ parameters.configurationParameters }}
     - script: make -j$(/usr/bin/nproc) >/dev/null
       displayName: 'Make Build'
-    - script: |
-        sudo make install
-        sudo mkdir     /etc/php.d
-        sudo chmod 777 /etc/php.d
-        echo mysqli.default_socket=/var/run/mysqld/mysqld.sock     > /etc/php.d/mysqli.ini
-        echo pdo_mysql.default_socket=/var/run/mysqld/mysqld.sock  > /etc/php.d/pdo_mysql.ini
-        echo opcache.enable_cli=1 >> /etc/php.d/opcache.ini
-        echo opcache.protect_memory=1 >> /etc/php.d/opcache.ini
-      displayName: 'Install Build'
+    - template: install.yml
     - script: |
         mysql -uroot -proot -e "CREATE DATABASE IF NOT EXISTS test"
         sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'postgres';"

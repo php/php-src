@@ -33,7 +33,6 @@ var_dump(
 	ldap_count_entries($link, ldap_search($link, "$base", "(cn=userZ)", array("cn")))
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 require "connect.inc";
@@ -77,4 +76,3 @@ array(2) {
 }
 int(0)
 int(1)
-===DONE===

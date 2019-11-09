@@ -8,6 +8,8 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
   die("skip Valid only on Windows");
 }
 ?>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /* Prototype  : string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset [, long maxlen]]]])
@@ -46,7 +48,6 @@ foreach($names_arr as $key =>$value) {
 }
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing file_get_contents() : variation ***
 
@@ -95,4 +96,3 @@ bool(false)
 
 Warning: file_get_contents(php/php): failed to open stream: No such file or directory in %s on line %d
 bool(false)
-===Done===

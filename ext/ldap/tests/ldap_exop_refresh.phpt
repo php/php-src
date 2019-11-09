@@ -29,7 +29,6 @@ var_dump(
 	ldap_exop_refresh($link, "cn=tmp,$base", 1234)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -40,4 +39,3 @@ remove_dummy_data($link, $base);
 ?>
 --EXPECT--
 int(1234)
-===DONE===

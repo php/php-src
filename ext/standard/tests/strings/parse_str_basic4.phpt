@@ -30,7 +30,6 @@ $str = "arr.test[1]=sid&arr test[4][two]=fred";
 var_dump(parse_str($str, $res));
 var_dump($res);
 ?>
-===DONE===
 --EXPECTF--
 Test string with badly formed strings
 NULL
@@ -89,4 +88,3 @@ array(1) {
     }
   }
 }
-===DONE===

@@ -26,7 +26,6 @@ $s->execute(array('a' => 9, 'b' => 10, 'c' => 11));
 
 var_dump($db->query("SELECT * FROM test")->fetchAll(PDO::FETCH_ASSOC));
 ?>
-===DONE===
 --EXPECT--
 array(2) {
   [0]=>
@@ -48,4 +47,3 @@ array(2) {
     string(2) "11"
   }
 }
-===DONE===

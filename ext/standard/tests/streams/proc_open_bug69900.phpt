@@ -49,7 +49,6 @@ fclose($pipes[1]);
 proc_close($process);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 $fl = __DIR__ . DIRECTORY_SEPARATOR . "test69900.php";
@@ -76,4 +75,3 @@ hello8
 fgets() took less than %d ms
 hello9
 fgets() took less than %d ms
-===DONE===

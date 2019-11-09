@@ -50,7 +50,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_getdate, 0, 0, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_create, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_date_create, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, time, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO(0, timezone, DateTimeZone, 1)
 ZEND_END_ARG_INFO()
@@ -279,7 +279,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_setISODate, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_setTimestamp, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, timestampt, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeImmutable___construct arginfo_date_create
@@ -304,9 +304,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeImmutable_setISODate arginfo_class_DateTime_setISODate
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeImmutable_setTimestamp, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_DateTimeImmutable_setTimestamp arginfo_class_DateTime_setTimestamp
 
 #define arginfo_class_DateTimeZone___construct arginfo_timezone_open
 

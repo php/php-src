@@ -50,7 +50,7 @@ $inputs = array (
        array("hello", $heredoc => "string", "string"),
 
        // array with object, unset variable and resource variable
-/*8*/ array(new classA() => 11, @$unset_var => "hello", $fp => 'resource', 11, "hello"),
+/*8*/ array(@$unset_var => "hello", $fp => 'resource', 11, "hello"),
 );
 
 // loop through each sub-array of $inputs to check the behavior of array_unique()
@@ -68,9 +68,7 @@ echo "Done";
 --EXPECTF--
 *** Testing array_unique() : assoc. array with diff. keys passed to $input argument ***
 
-Warning: Illegal offset type in %s on line %d
-
-Warning: Illegal offset type in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 -- Iteration 1 --
 array(1) {
   [0]=>
@@ -125,10 +123,12 @@ array(2) {
   string(6) "string"
 }
 -- Iteration 8 --
-array(2) {
+array(3) {
   [""]=>
   string(5) "hello"
-  [0]=>
+  [5]=>
+  string(8) "resource"
+  [6]=>
   int(11)
 }
 Done

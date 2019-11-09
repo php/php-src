@@ -18,7 +18,6 @@ var_dump($ao1);
 var_dump($ao2->natcasesort('blah'));
 var_dump($ao2);
 ?>
-===DONE===
 --EXPECT--
 *** Testing ArrayObject::natcasesort() : basic functionality ***
 bool(true)
@@ -53,4 +52,3 @@ object(ArrayObject)#2 (1) {
     string(5) "boo22"
   }
 }
-===DONE===

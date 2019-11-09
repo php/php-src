@@ -51,9 +51,7 @@ echo $obj->lucky();
 
 $db->exec("DROP TABLE test");
 ?>
-===DONE===
 --EXPECT--
 Calling object method 'foo'
 Calling object method 'bar'
 Calling object method 'lucky'
-===DONE===

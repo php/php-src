@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -227,7 +225,7 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 
 	if(zend_parse_parameters( ZEND_NUM_ARGS(),  "S", &locale_name) == FAILURE)
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	if (ZSTR_LEN(locale_name) == 0) {
@@ -394,7 +392,7 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 
 	if(zend_parse_parameters( ZEND_NUM_ARGS(), "s",
 	&loc_name ,&loc_name_len ) == FAILURE) {
-		RETURN_FALSE;
+		return;
     }
 
 	if(loc_name_len == 0) {
@@ -499,7 +497,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 		&loc_name, &loc_name_len ,
 		&disp_loc_name ,&disp_loc_name_len ) == FAILURE)
 	{
-		RETURN_FALSE;
+		return;
 	}
 
     if(loc_name_len > ULOC_FULLNAME_CAPACITY) {
@@ -688,7 +686,7 @@ PHP_FUNCTION( locale_get_keywords )
     if(zend_parse_parameters( ZEND_NUM_ARGS(), "s",
         &loc_name, &loc_name_len ) == FAILURE)
     {
-        RETURN_FALSE;
+        return;
     }
 
 	INTL_CHECK_LOCALE_LEN(strlen(loc_name));
@@ -907,7 +905,7 @@ PHP_FUNCTION(locale_compose)
 	if(zend_parse_parameters( ZEND_NUM_ARGS(), "a",
 		&arr) == FAILURE)
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	hash_arr = Z_ARRVAL_P( arr );
@@ -1093,7 +1091,7 @@ PHP_FUNCTION(locale_parse)
     if(zend_parse_parameters( ZEND_NUM_ARGS(), "s",
         &loc_name, &loc_name_len ) == FAILURE)
     {
-        RETURN_FALSE;
+        return;
     }
 
     INTL_CHECK_LOCALE_LEN(strlen(loc_name));
@@ -1140,7 +1138,7 @@ PHP_FUNCTION(locale_get_all_variants)
 	if(zend_parse_parameters( ZEND_NUM_ARGS(), "s",
 	&loc_name, &loc_name_len ) == FAILURE)
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	if(loc_name_len == 0) {
@@ -1243,7 +1241,7 @@ PHP_FUNCTION(locale_filter_matches)
 		&lang_tag, &lang_tag_len , &loc_range , &loc_range_len ,
 		&boolCanonical) == FAILURE)
 	{
-		RETURN_FALSE;
+		return;
 	}
 
 	if(loc_range_len == 0) {
@@ -1516,7 +1514,7 @@ PHP_FUNCTION(locale_lookup)
 
 	if(zend_parse_parameters( ZEND_NUM_ARGS(), "as|bS!", &arr, &loc_range, &loc_range_len,
 		&boolCanonical,	&fallback_loc_str) == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	if(loc_range_len == 0) {
@@ -1569,7 +1567,7 @@ PHP_FUNCTION(locale_accept_from_http)
 
 	if(zend_parse_parameters( ZEND_NUM_ARGS(), "s", &http_accept, &http_accept_len) == FAILURE)
 	{
-		RETURN_FALSE;
+		return;
 	}
 	if(http_accept_len > ULOC_FULLNAME_CAPACITY) {
 		/* check each fragment, if any bigger than capacity, can't do it due to bug #72533 */

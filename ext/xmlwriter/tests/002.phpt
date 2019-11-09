@@ -13,8 +13,6 @@ xmlwriter_end_document($xw);
 // Force to write and empty the buffer
 echo xmlwriter_flush($xw, true);
 ?>
-===DONE===
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
 <tag1/>
-===DONE===

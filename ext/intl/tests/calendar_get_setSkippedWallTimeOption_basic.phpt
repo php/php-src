@@ -44,7 +44,6 @@ var_dump(
 
 
 ?>
-==DONE==
 --EXPECT--
 int(0)
 Should be 3h30
@@ -60,4 +59,3 @@ int(2)
 Should be 3h00
 int(3)
 int(0)
-==DONE==

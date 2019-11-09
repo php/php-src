@@ -28,7 +28,6 @@ var_dump(ldap_sasl_bind($link, null, $passwd, 'DIGEST-MD5', "realm", "Manager", 
 // Invalid DN syntax
 var_dump(ldap_sasl_bind($link, "unexistingProperty=weirdValue,$user", $passwd));
 ?>
-===DONE===
 --EXPECTF--
 Warning: ldap_sasl_bind(): Unable to bind to server: Invalid DN syntax in %s on line %d
 bool(false)
@@ -44,4 +43,3 @@ bool(false)
 
 Warning: ldap_sasl_bind(): Unable to bind to server: Invalid DN syntax in %s on line %d
 bool(false)
-===DONE===

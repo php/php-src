@@ -52,7 +52,11 @@ var_dump($foo->a2);
 $foo->f3()[0] = 1;
 var_dump($foo->a3);
 
-$foo->f4()->a = 1;
+try {
+    $foo->f4()->a = 1;
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump($foo->o1);
 
 $foo->f5()->a = 1;
@@ -65,16 +69,15 @@ $foo->f1()[0]++;
 var_dump($foo->a1[0]);
 $foo->f6()[0]++;
 var_dump($foo->a1[0]);
---EXPECTF--
+--EXPECT--
 NULL
 array(0) {
 }
 array(0) {
 }
-
-Warning: Creating default object from empty value in %sbug52614.php on line 52
+Attempt to assign property 'a' of non-object
 NULL
-object(stdClass)#%d (1) {
+object(stdClass)#3 (1) {
   ["a"]=>
   int(1)
 }

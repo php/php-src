@@ -18,10 +18,8 @@ foreach ($filenames as $filename) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 string(9) "directory"
 string(9) "directory"
 string(28) "text/x-php; charset=us-ascii"
 string(28) "text/x-php; charset=us-ascii"
-===DONE===

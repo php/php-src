@@ -34,9 +34,7 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
     echo "curl_exec returned false";
   }
 ?>
-===DONE===
 --EXPECT--
 *** Testing curl_exec() : basic functionality ***
 string(25) "Hello World!
 Hello World!"
-===DONE===

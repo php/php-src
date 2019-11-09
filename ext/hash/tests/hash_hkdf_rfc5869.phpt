@@ -65,7 +65,6 @@ echo "Test case 7 (SHA-1 with zero-length info, salt not provided): ",
 		''
 	)), "\n";
 ?>
-===Done===
 --EXPECT--
 *** Testing hash_hkdf(): RFC 5869 test vectors ***
 Test case 1 (SHA-256): 3cb25f25faacd57a90434f64d0362f2a2d2d0a90cf1a5a4c5db02d56ecc4c5bf34007208d5b887185865
@@ -75,4 +74,3 @@ Test case 4 (SHA-1): 085a01ea1b10f36933068b56efa5ad81a4f14b822f5b091568a9cdd4f15
 Test case 5 (SHA-1 with longer inputs/outputs): 0bd770a74d1160f7c9f12cd5912a06ebff6adcae899d92191fe4305673ba2ffe8fa3f1a4e5ad79f3f334b3b202b2173c486ea37ce3d397ed034c7f9dfeb15c5e927336d0441f4c4300e2cff0d0900b52d3b4
 Test case 6 (SHA-1 with zero-length salt, info): 0ac1af7002b3d761d1e55298da9d0506b9ae52057220a306e07b6b87e8df21d0ea00033de03984d34918
 Test case 7 (SHA-1 with zero-length info, salt not provided): 2c91117204d745f3500d636a62f64f0ab3bae548aa53d423b0d1f27ebba6f5e5673a081d70cce7acfc48
-===Done===

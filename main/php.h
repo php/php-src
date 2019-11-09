@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
@@ -296,7 +294,6 @@ END_EXTERN_C()
 
 /* global variables */
 #if !defined(PHP_WIN32)
-#define PHP_SLEEP_NON_VOID
 #define php_sleep sleep
 extern char **environ;
 #endif	/* !defined(PHP_WIN32) */

@@ -28,7 +28,6 @@ $d2_clone = clone $d2;
 var_dump($d2_clone);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing clone on objects whoose class derived from DateTimeZone class ***
 object(DateTimeZoneExt1)#%d (4) {
@@ -79,4 +78,3 @@ object(DateTimeZoneExt2)#%d (6) {
   ["timezone"]=>
   string(13) "Europe/London"
 }
-===DONE===

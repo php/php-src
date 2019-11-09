@@ -20,7 +20,6 @@ try {
 	echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --EXPECTF--
 phar://%sodt.odt/Configurations2/accelerator%ccurrent.xml
 phar://%sodt.odt/META-INF%cmanifest.xml
@@ -31,4 +30,3 @@ phar://%sodt.odt%cmimetype
 phar://%sodt.odt%csettings.xml
 phar://%sodt.odt%cstyles.xml
 Cannot create phar '%sodt.odt', file extension (or combination) not recognised or the directory does not exist
-===DONE===

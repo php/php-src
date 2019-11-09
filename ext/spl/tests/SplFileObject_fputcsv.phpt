@@ -51,8 +51,6 @@ fclose($fp);
 echo '$list = ';var_export($res);echo ";\n";
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --CLEAN--
 <?php
 $file = __DIR__ . '/SplFileObject_fputcsv.csv';
@@ -103,4 +101,3 @@ $list = array (
   18 => '"\\"","aaa"',
   19 => '"\\""",aaa',
 );
-===DONE===

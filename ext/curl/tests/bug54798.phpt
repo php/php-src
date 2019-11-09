@@ -49,7 +49,6 @@ foreach($options_to_check as $option) {
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php @unlink(__DIR__ . '/bug54798.tmp'); ?>
 --EXPECTF--
@@ -61,4 +60,3 @@ foreach($options_to_check as $option) {
 Hello World!Ok for CURLOPT_FILE
 
 %AOk for CURLOPT_INFILE
-===DONE===

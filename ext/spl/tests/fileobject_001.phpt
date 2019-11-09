@@ -39,7 +39,6 @@ foreach($o as $n => $l)
 }
 
 ?>
-===DONE===
 --EXPECTF--
 int(0)
 string(%d) "0
@@ -85,4 +84,3 @@ int(4)
 string(1) "4"
 int(5)
 string(1) "5"
-===DONE===

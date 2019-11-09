@@ -13,7 +13,6 @@ file_put_contents('phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.pha
 include 'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar/a.php';
 ?>
 
-===DONE===
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
@@ -23,4 +22,3 @@ Warning: include(phar://%screate_new_phar_b.phar.tar/a.php): failed to open stre
 
 Warning: include(): Failed opening 'phar://%screate_new_phar_b.phar.tar/a.php' for inclusion (include_path='%s') in %screate_new_phar_b.php on line %d
 
-===DONE===

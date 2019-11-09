@@ -31,8 +31,6 @@ TestFest 2009 - AFUP - Xavier Gorse <xgorse@elao.com>
 
   var_dump( $curl_content );
 ?>
-===DONE===
 --EXPECT--
 *** Testing curl with cookie ***
 string(3) "bar"
-===DONE===

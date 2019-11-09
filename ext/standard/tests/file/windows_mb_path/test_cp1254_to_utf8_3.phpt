@@ -31,10 +31,8 @@ system("dir /b \"" . $fn . "\"");
 remove_data("file_cp1254");
 
 ?>
-===DONE===
 --EXPECTF--
 string(%d) "%s\çokbaytlı işleri"
 bool(true)
 bool(true)
 çokbaytlı işleri
-===DONE===

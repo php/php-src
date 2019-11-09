@@ -34,7 +34,6 @@ foreach($values as $value) {
 
 
 ?>
-===Done===
 --EXPECT--
 *** Testing log1p() : basic functionality ***
 
@@ -75,4 +74,3 @@ float(0.69314718055995)
 
 -- log1p  --
 float(0)
-===Done===

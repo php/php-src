@@ -32,8 +32,6 @@ foreach($streams as $stream)
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 array(7) {
   ["base64"]=>
@@ -167,4 +165,3 @@ array(10) {
   string(34) "data://text/plain;foo=bar;bar=baz,"
 }
 string(3) "bar"
-===DONE===

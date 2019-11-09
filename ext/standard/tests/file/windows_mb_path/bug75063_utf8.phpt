@@ -52,7 +52,6 @@ print(shell_exec(getenv('TEST_PHP_EXECUTABLE') . " -nf code.php"));
 chdir($old_cwd);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 $dir_basename = "тест";
@@ -76,4 +75,3 @@ string(%d) "%sbug75063-utf8%eтест"
 string(8) "code.php"
 string(8) "test.txt"
 string(12) "таст.txt"
-===DONE===

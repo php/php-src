@@ -23,7 +23,11 @@ $iterator = 1;
 foreach($keys as $key) {
 	echo "\n-- Iteration $iterator --\n";
 	echo "Pass float as \$key:\n";
-	var_dump(array_key_exists($key, $search));
+	try {
+		var_dump(array_key_exists($key, $search));
+	} catch (TypeError $exception) {
+		echo $exception->getMessage() . "\n";
+	}
 	echo "Cast float to int:\n";
 	var_dump(array_key_exists((int)$key, $search));
 }
@@ -35,25 +39,19 @@ echo "Done";
 
 -- Iteration 1 --
 Pass float as $key:
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+bool(true)
 Cast float to int:
 bool(true)
 
 -- Iteration 1 --
 Pass float as $key:
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+bool(true)
 Cast float to int:
 bool(true)
 
 -- Iteration 1 --
 Pass float as $key:
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+bool(true)
 Cast float to int:
 bool(true)
 Done

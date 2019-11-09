@@ -19,7 +19,6 @@ var_dump( array_diff_uassoc($input_array, $boolean_indx_array, "strcasecmp") );
 var_dump( array_diff_uassoc($boolean_indx_array, $input_array, "strcasecmp") );
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_diff_uassoc() : usage variation ***
 
@@ -42,4 +41,3 @@ array(2) {
   [0]=>
   string(5) "boolF"
 }
-===DONE===

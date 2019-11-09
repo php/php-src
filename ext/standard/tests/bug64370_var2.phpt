@@ -17,7 +17,5 @@ while(100000 > $i++) {
 }
 echo "ok\n";
 ?>
-===DONE===
 --EXPECT--
 ok
-===DONE===

@@ -29,13 +29,13 @@ echo "Done";
 --EXPECTF--
 *** Testing array_unique() : two dimensional array for $input argument ***
 
-Notice: Array to string conversion in %sarray_unique_variation8.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_unique_variation8.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_unique_variation8.php on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %sarray_unique_variation8.php on line %d
+Warning: Array to string conversion in %s on line %d
 array(1) {
   [0]=>
   array(4) {

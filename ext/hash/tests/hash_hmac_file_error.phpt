@@ -39,7 +39,6 @@ catch (\Error $e) {
 }
 
 ?>
-===Done===
 --EXPECT--
 *** Testing hash() : error conditions ***
 
@@ -51,4 +50,3 @@ Non-cryptographic hashing algorithm: crc32
 
 -- Testing hash_hmac_file() function with bad path --
 Invalid path
-===Done===

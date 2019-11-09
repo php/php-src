@@ -30,7 +30,6 @@ var_dump($sxe->Body->children(''));
 var_dump($sxe->Body->children('')->businessList);
 
 ?>
-===DONE===
 --EXPECTF--
 array(1) {
   ["soap"]=>
@@ -71,4 +70,3 @@ object(SimpleXMLElement)#%s (2) {
     }
   }
 }
-===DONE===

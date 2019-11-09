@@ -51,7 +51,7 @@ typedef struct _zend_op zend_op;
 
 /* On 64-bit systems less optimal, but more compact VM code leads to better
  * performance. So on 32-bit systems we use absolute addresses for jump
- * targets and constants, but on 64-bit systems realtive 32-bit offsets */
+ * targets and constants, but on 64-bit systems relative 32-bit offsets */
 #if SIZEOF_SIZE_T == 4
 # define ZEND_USE_ABS_JMP_ADDR      1
 # define ZEND_USE_ABS_CONST_ADDR    1
@@ -383,16 +383,12 @@ typedef struct _zend_class_constant {
 typedef struct _zend_internal_arg_info {
 	const char *name;
 	zend_type type;
-	zend_uchar pass_by_reference;
-	zend_bool is_variadic;
 } zend_internal_arg_info;
 
 /* arg_info for user functions */
 typedef struct _zend_arg_info {
 	zend_string *name;
 	zend_type type;
-	zend_uchar pass_by_reference;
-	zend_bool is_variadic;
 } zend_arg_info;
 
 /* the following structure repeats the layout of zend_internal_arg_info,
@@ -403,8 +399,6 @@ typedef struct _zend_arg_info {
 typedef struct _zend_internal_function_info {
 	zend_uintptr_t required_num_args;
 	zend_type type;
-	zend_bool return_reference;
-	zend_bool _is_variadic;
 } zend_internal_function_info;
 
 struct _zend_op_array {
@@ -702,6 +696,10 @@ struct _zend_execute_data {
 #define IS_VAR		(1<<2)
 #define IS_CV		(1<<3)	/* Compiled variable */
 
+/* Used for result.type of smart branch instructions */
+#define IS_SMART_BRANCH_JMPZ  (1<<4)
+#define IS_SMART_BRANCH_JMPNZ (1<<5)
+
 #define ZEND_EXTRA_VALUE 1
 
 #include "zend_globals.h"
@@ -785,6 +783,8 @@ ZEND_API void destroy_op_array(zend_op_array *op_array);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce);
 ZEND_API void zend_cleanup_internal_classes(void);
+ZEND_API void zend_type_release(zend_type type, zend_bool persistent);
+
 
 ZEND_API ZEND_COLD void zend_user_exception_handler(void);
 
@@ -826,7 +826,7 @@ ZEND_API char *zend_make_compiled_string_description(const char *name);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers);
 uint32_t zend_get_class_fetch_type(zend_string *name);
 ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc);
-ZEND_API int zend_is_smart_branch(zend_op *opline);
+ZEND_API int zend_is_smart_branch(const zend_op *opline);
 
 typedef zend_bool (*zend_auto_global_callback)(zend_string *name);
 typedef struct _zend_auto_global {
@@ -846,6 +846,9 @@ ZEND_API void zend_set_function_arg_flags(zend_function *func);
 int ZEND_FASTCALL zendlex(zend_parser_stack_elem *elem);
 
 void zend_assert_valid_class_name(const zend_string *const_name);
+
+zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scope);
+zend_string *zend_type_to_string(zend_type type);
 
 /* BEGIN: OPCODES */
 
@@ -914,7 +917,6 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 /* Only one of these can ever be in use */
 #define ZEND_FETCH_REF			1
 #define ZEND_FETCH_DIM_WRITE	2
-#define ZEND_FETCH_OBJ_WRITE	3
 #define ZEND_FETCH_OBJ_FLAGS	3
 
 #define ZEND_ISEMPTY			(1<<0)
@@ -927,6 +929,14 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_SEND_BY_VAL     0u
 #define ZEND_SEND_BY_REF     1u
 #define ZEND_SEND_PREFER_REF 2u
+
+/* The send mode and is_variadic flag are stored as part of zend_type */
+#define _ZEND_SEND_MODE_SHIFT _ZEND_TYPE_EXTRA_FLAGS_SHIFT
+#define _ZEND_IS_VARIADIC_BIT (1 << (_ZEND_TYPE_EXTRA_FLAGS_SHIFT + 2))
+#define ZEND_ARG_SEND_MODE(arg_info) \
+	((ZEND_TYPE_FULL_MASK((arg_info)->type) >> _ZEND_SEND_MODE_SHIFT) & 3)
+#define ZEND_ARG_IS_VARIADIC(arg_info) \
+	((ZEND_TYPE_FULL_MASK((arg_info)->type) & _ZEND_IS_VARIADIC_BIT) != 0)
 
 #define ZEND_DIM_IS					(1 << 0) /* isset fetch needed for null coalesce */
 #define ZEND_DIM_ALTERNATIVE_SYNTAX	(1 << 1) /* deprecated curly brace usage */
@@ -944,7 +954,7 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 		}
 		arg_num = zf->common.num_args;
 	}
-	return UNEXPECTED((zf->common.arg_info[arg_num].pass_by_reference & mask) != 0);
+	return UNEXPECTED((ZEND_ARG_SEND_MODE(&zf->common.arg_info[arg_num]) & mask) != 0);
 }
 
 #define ARG_MUST_BE_SENT_BY_REF(zf, arg_num) \
@@ -1082,6 +1092,9 @@ END_EXTERN_C()
 
 /* disable jumptable optimization for switch statements */
 #define ZEND_COMPILE_NO_JUMPTABLES				(1<<16)
+
+/* this flag is set when compiler invoked during preloading in separate process */
+#define ZEND_COMPILE_PRELOAD_IN_CHILD           (1<<17)
 
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY

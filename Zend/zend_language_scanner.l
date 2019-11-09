@@ -518,9 +518,12 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 	zend_string *compiled_filename;
 
 	if (zend_stream_fixup(file_handle, &buf, &size) == FAILURE) {
+		/* Still add it to open_files to make destroy_file_handle work */
+		zend_llist_add_element(&CG(open_files), file_handle);
 		return FAILURE;
 	}
 
+	ZEND_ASSERT(!EG(exception) && "stream_fixup() should have failed");
 	zend_llist_add_element(&CG(open_files), file_handle);
 	if (file_handle->handle.stream.handle >= (void*)file_handle && file_handle->handle.stream.handle <= (void*)(file_handle+1)) {
 		zend_file_handle *fh = (zend_file_handle*)zend_llist_get_last(&CG(open_files));
@@ -1817,25 +1820,32 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	zend_bool is_octal = lnum[0] == '0';
 	zend_bool contains_underscores = (memchr(lnum, '_', len) != NULL);
 
+	if (contains_underscores) {
+		lnum = estrndup(lnum, len);
+		strip_underscores(lnum, &len);
+	}
+
 	/* Digits 8 and 9 are illegal in octal literals. */
 	if (is_octal) {
 		size_t i;
 		for (i = 0; i < len; i++) {
 			if (lnum[i] == '8' || lnum[i] == '9') {
 				zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
-				ZVAL_UNDEF(zendlval);
 				if (PARSER_MODE()) {
+					if (contains_underscores) {
+						efree(lnum);
+					}
+					ZVAL_UNDEF(zendlval);
 					RETURN_TOKEN(T_ERROR);
 				}
-				RETURN_TOKEN_WITH_VAL(T_LNUMBER);
+
+				/* Continue in order to determine if this is T_LNUMBER or T_DNUMBER. */
+				len = i;
+				break;
 			}
 		}
 	}
 
-	if (contains_underscores) {
-		lnum = estrndup(lnum, len);
-		strip_underscores(lnum, &len);
-	}
 
 	if (len < MAX_LENGTH_OF_LONG - 1) { /* Won't overflow */
 		errno = 0;
@@ -1847,7 +1857,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		ZVAL_LONG(zendlval, ZEND_STRTOL(lnum, &end, 0));
 		if (errno == ERANGE) { /* Overflow */
 			errno = 0;
-			if (lnum[0] == '0') { /* octal overflow */
+			if (is_octal) { /* octal overflow */
 				ZVAL_DOUBLE(zendlval, zend_oct_strtod(lnum, (const char **)&end));
 			} else {
 				ZVAL_DOUBLE(zendlval, zend_strtod(lnum, (const char **)&end));
@@ -2057,7 +2067,8 @@ inline_char_handler:
 			if (CG(short_tags) /* <? */
 				|| (*(YYCURSOR + 1) == '=') /* <?= */
 				|| (!strncasecmp((char*)YYCURSOR + 1, "php", 3) && /* <?php[ \t\r\n] */
-					(YYCURSOR[4] == ' ' || YYCURSOR[4] == '\t' ||
+					(YYCURSOR + 4 == YYLIMIT ||
+					YYCURSOR[4] == ' ' || YYCURSOR[4] == '\t' ||
 					YYCURSOR[4] == '\n' || YYCURSOR[4] == '\r'))
 			) {
 				YYCURSOR--;
@@ -2180,7 +2191,10 @@ inline_char_handler:
 	if (YYCURSOR < YYLIMIT) {
 		YYCURSOR++;
 	} else {
-		zend_error(E_COMPILE_WARNING, "Unterminated comment starting line %d", CG(zend_lineno));
+		zend_throw_exception_ex(zend_ce_parse_error, 0, "Unterminated comment starting line %d", CG(zend_lineno));
+		if (PARSER_MODE()) {
+			RETURN_TOKEN(T_ERROR);
+		}
 	}
 
 	yyleng = YYCURSOR - SCNG(yy_text);
@@ -2404,6 +2418,9 @@ skip_escape_conversion:
 		if (!IS_LABEL_SUCCESSOR(YYCURSOR[heredoc_label->length])) {
 			if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
 				zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
+				if (PARSER_MODE()) {
+					RETURN_TOKEN(T_ERROR);
+				}
 			}
 
 			YYCURSOR = saved_cursor;
@@ -2420,6 +2437,7 @@ skip_escape_conversion:
 		zend_lex_state current_state;
 		int heredoc_nesting_level = 1;
 		int first_token = 0;
+		int error = 0;
 
 		zend_save_lexical_state(&current_state);
 
@@ -2467,6 +2485,7 @@ skip_escape_conversion:
 		     || first_token == T_CURLY_OPEN
 		    ) && SCNG(heredoc_indentation)) {
 			zend_throw_exception_ex(zend_ce_parse_error, 0, "Invalid body indentation level (expecting an indentation level of at least %d)", SCNG(heredoc_indentation));
+			error = 1;
 		}
 
 		heredoc_label->indentation = SCNG(heredoc_indentation);
@@ -2475,6 +2494,10 @@ skip_escape_conversion:
 		zend_restore_lexical_state(&current_state);
 		SCNG(heredoc_scan_ahead) = 0;
 		CG(increment_lineno) = 0;
+
+		if (PARSER_MODE() && error) {
+			RETURN_TOKEN(T_ERROR);
+		}
 	}
 
 	RETURN_TOKEN(T_START_HEREDOC);
@@ -2664,6 +2687,9 @@ double_quotes_scan_done:
 
 					if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
 						zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
+						if (PARSER_MODE()) {
+							RETURN_TOKEN(T_ERROR);
+						}
 					}
 
 					/* newline before label will be subtracted from returned text, but
@@ -2785,6 +2811,9 @@ heredoc_scan_done:
 
 					if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
 						zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
+						if (PARSER_MODE()) {
+							RETURN_TOKEN(T_ERROR);
+						}
 					}
 
 					/* newline before label will be subtracted from returned text, but
@@ -2833,12 +2862,7 @@ nowdoc_scan_done:
 		RETURN_TOKEN(END);
 	}
 
-	zend_error(E_COMPILE_WARNING, "Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);
-	if (PARSER_MODE()) {
-		goto restart;
-	} else {
-		RETURN_TOKEN(T_BAD_CHARACTER);
-	}
+	RETURN_TOKEN(T_BAD_CHARACTER);
 }
 
 */

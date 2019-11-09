@@ -17,7 +17,6 @@ echo "\n-- Testing array_intersect_key() function with boolean indexed array --\
 var_dump( array_intersect_key($input_array, $boolean_indx_array) );
 var_dump( array_intersect_key($boolean_indx_array,$input_array ) );
 ?>
-===DONE===
 --EXPECT--
 *** Testing array_intersect_key() : usage variation ***
 
@@ -34,4 +33,3 @@ array(2) {
   [0]=>
   string(5) "boolF"
 }
-===DONE===

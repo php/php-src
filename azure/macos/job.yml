@@ -64,6 +64,7 @@ jobs:
             --with-ffi \
             --enable-zend-test \
             --enable-intl \
+            --with-mhash \
             --enable-werror \
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d

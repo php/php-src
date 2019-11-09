@@ -20,8 +20,6 @@ foreach(new RegexIterator(new ArrayIterator($ar), "/2/", 0, RegexIterator::USE_K
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 1=>123
 2=>123
@@ -35,4 +33,3 @@ foreach(new RegexIterator(new ArrayIterator($ar), "/2/", 0, RegexIterator::USE_K
 24=>22
 a2d=>7
 25=>42
-===DONE===

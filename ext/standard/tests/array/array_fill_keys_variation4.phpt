@@ -83,7 +83,7 @@ array(1) {
 
 -- Testing array_fill_keys() function with unset var --
 
-Notice: Undefined variable: unset_var in %sarray_fill_keys_variation4.php on line %d
+Warning: Undefined variable: unset_var in %s on line %d
 array(1) {
   ["one"]=>
   NULL

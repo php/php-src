@@ -49,8 +49,6 @@ while($it->valid())
 }
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECT--
 MyRecursiveIteratorIterator::beginIteration()
 1
@@ -89,4 +87,3 @@ MyRecursiveIteratorIterator::beginIteration()
 331
 4
 MyRecursiveIteratorIterator::endIteration()
-===DONE===

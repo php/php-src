@@ -37,7 +37,6 @@ while ($reader->read()) {
 // clean up
 $reader->close();
 ?>
-===DONE===
 --CLEAN--
 <?php
 unlink(__DIR__.'/015-get-errors.xml');
@@ -46,4 +45,3 @@ unlink(__DIR__.'/015-get-errors.xml');
 Warning: XMLReader::getAttributeNs(): Attribute Name and Namespace URI cannot be empty in %s on line %d
 bool(false)
 ns1:num: 1
-===DONE===
