@@ -22,18 +22,7 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_nodelist_item, 0, 0, 1)
-	ZEND_ARG_INFO(0, index)
-ZEND_END_ARG_INFO();
-/* }}} */
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_nodelist_count, 0, 0, 0)
-ZEND_END_ARG_INFO();
-/* }}} */
+#include "dom_arginfo.h"
 
 /*
 * class DOMNodeList
@@ -43,8 +32,8 @@ ZEND_END_ARG_INFO();
 */
 
 const zend_function_entry php_dom_nodelist_class_functions[] = {
-	PHP_FALIAS(item, dom_nodelist_item, arginfo_dom_nodelist_item)
-	PHP_FALIAS(count, dom_nodelist_count, arginfo_dom_nodelist_count)
+	PHP_FALIAS(item, dom_nodelist_item, arginfo_class_DOMNodeList_item)
+	PHP_FALIAS(count, dom_nodelist_count, arginfo_class_DOMNodeList_count)
 	PHP_FE_END
 };
 

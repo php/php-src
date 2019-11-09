@@ -22,24 +22,7 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namednodemap_get_named_item, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namednodemap_item, 0, 0, 0)
-	ZEND_ARG_INFO(0, index)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namednodemap_get_named_item_ns, 0, 0, 0)
-	ZEND_ARG_INFO(0, namespaceURI)
-	ZEND_ARG_INFO(0, localName)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namednodemap_count, 0, 0, 0)
-ZEND_END_ARG_INFO();
-/* }}} */
+#include "dom_arginfo.h"
 
 /*
 * class DOMNamedNodeMap
@@ -49,10 +32,10 @@ ZEND_END_ARG_INFO();
 */
 
 const zend_function_entry php_dom_namednodemap_class_functions[] = { /* {{{ */
-	PHP_FALIAS(getNamedItem, dom_namednodemap_get_named_item, arginfo_dom_namednodemap_get_named_item)
-	PHP_FALIAS(item, dom_namednodemap_item, arginfo_dom_namednodemap_item)
-	PHP_FALIAS(getNamedItemNS, dom_namednodemap_get_named_item_ns, arginfo_dom_namednodemap_get_named_item_ns)
-	PHP_FALIAS(count, dom_namednodemap_count, arginfo_dom_namednodemap_count)
+	PHP_FALIAS(getNamedItem, dom_namednodemap_get_named_item, arginfo_class_DOMNamedNodeMap_getNamedItem)
+	PHP_FALIAS(item, dom_namednodemap_item, arginfo_class_DOMNamedNodeMap_item)
+	PHP_FALIAS(getNamedItemNS, dom_namednodemap_get_named_item_ns, arginfo_class_DOMNamedNodeMap_getNamedItemNS)
+	PHP_FALIAS(count, dom_namednodemap_count, arginfo_class_DOMNamedNodeMap_count)
 	PHP_FE_END
 };
 /* }}} */

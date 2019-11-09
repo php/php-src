@@ -22,85 +22,7 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_insert_before, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, newChild, DOMNode, 0)
-	ZEND_ARG_OBJ_INFO(0, refChild, DOMNode, 1)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_replace_child, 0, 0, 2)
-	ZEND_ARG_OBJ_INFO(0, newChild, DOMNode, 0)
-	ZEND_ARG_OBJ_INFO(0, oldChild, DOMNode, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_remove_child, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, oldChild, DOMNode, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_append_child, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, newChild, DOMNode, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_has_child_nodes, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_clone_node, 0, 0, 0)
-	ZEND_ARG_INFO(0, deep)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_normalize, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_is_supported, 0, 0, 2)
-	ZEND_ARG_INFO(0, feature)
-	ZEND_ARG_INFO(0, version)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_has_attributes, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_compare_document_position, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, other, DOMNode, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_is_same_node, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, other, DOMNode, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_lookup_prefix, 0, 0, 1)
-	ZEND_ARG_INFO(0, namespaceURI)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_is_default_namespace, 0, 0, 1)
-	ZEND_ARG_INFO(0, namespaceURI)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_lookup_namespace_uri, 0, 0, 1)
-	ZEND_ARG_INFO(0, prefix)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_getNodePath, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_getLineNo, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_C14N, 0, 0, 0)
-	ZEND_ARG_INFO(0, exclusive)
-	ZEND_ARG_INFO(0, with_comments)
-	ZEND_ARG_ARRAY_INFO(0, xpath, 1)
-	ZEND_ARG_ARRAY_INFO(0, ns_prefixes, 1)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_node_C14NFile, 0, 0, 1)
-	ZEND_ARG_INFO(0, uri)
-	ZEND_ARG_INFO(0, exclusive)
-	ZEND_ARG_INFO(0, with_comments)
-	ZEND_ARG_ARRAY_INFO(0, xpath, 1)
-	ZEND_ARG_ARRAY_INFO(0, ns_prefixes, 1)
-ZEND_END_ARG_INFO();
-/* }}} */
+#include "dom_arginfo.h"
 
 /*
 * class DOMNode
@@ -110,24 +32,23 @@ ZEND_END_ARG_INFO();
 */
 
 const zend_function_entry php_dom_node_class_functions[] = { /* {{{ */
-	PHP_FALIAS(insertBefore, dom_node_insert_before, arginfo_dom_node_insert_before)
-	PHP_FALIAS(replaceChild, dom_node_replace_child, arginfo_dom_node_replace_child)
-	PHP_FALIAS(removeChild, dom_node_remove_child, arginfo_dom_node_remove_child)
-	PHP_FALIAS(appendChild, dom_node_append_child, arginfo_dom_node_append_child)
-	PHP_FALIAS(hasChildNodes, dom_node_has_child_nodes, arginfo_dom_node_has_child_nodes)
-	PHP_FALIAS(cloneNode, dom_node_clone_node, arginfo_dom_node_clone_node)
-	PHP_FALIAS(normalize, dom_node_normalize, arginfo_dom_node_normalize)
-	PHP_FALIAS(isSupported, dom_node_is_supported, arginfo_dom_node_is_supported)
-	PHP_FALIAS(hasAttributes, dom_node_has_attributes, arginfo_dom_node_has_attributes)
-	PHP_FALIAS(compareDocumentPosition, dom_node_compare_document_position, arginfo_dom_node_compare_document_position)
-	PHP_FALIAS(isSameNode, dom_node_is_same_node, arginfo_dom_node_is_same_node)
-	PHP_FALIAS(lookupPrefix, dom_node_lookup_prefix, arginfo_dom_node_lookup_prefix)
-	PHP_FALIAS(isDefaultNamespace, dom_node_is_default_namespace, arginfo_dom_node_is_default_namespace)
-	PHP_FALIAS(lookupNamespaceUri, dom_node_lookup_namespace_uri, arginfo_dom_node_lookup_namespace_uri)
-	PHP_ME(domnode, getNodePath, arginfo_dom_node_getNodePath, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, getLineNo, arginfo_dom_node_getLineNo, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, C14N, arginfo_dom_node_C14N, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, C14NFile, arginfo_dom_node_C14NFile, ZEND_ACC_PUBLIC)
+	PHP_FALIAS(insertBefore, dom_node_insert_before, arginfo_class_DOMNode_insertBefore)
+	PHP_FALIAS(replaceChild, dom_node_replace_child, arginfo_class_DOMNode_replaceChild)
+	PHP_FALIAS(removeChild, dom_node_remove_child, arginfo_class_DOMNode_removeChild)
+	PHP_FALIAS(appendChild, dom_node_append_child, arginfo_class_DOMNode_appendChild)
+	PHP_FALIAS(hasChildNodes, dom_node_has_child_nodes, arginfo_class_DOMNode_hasChildNodes)
+	PHP_FALIAS(cloneNode, dom_node_clone_node, arginfo_class_DOMNode_cloneNode)
+	PHP_FALIAS(normalize, dom_node_normalize, arginfo_class_DOMNode_normalize)
+	PHP_FALIAS(isSupported, dom_node_is_supported, arginfo_class_DOMNode_isSupported)
+	PHP_FALIAS(hasAttributes, dom_node_has_attributes, arginfo_class_DOMNode_hasAttributes)
+	PHP_FALIAS(isSameNode, dom_node_is_same_node, arginfo_class_DOMNode_isSameNode)
+	PHP_FALIAS(lookupPrefix, dom_node_lookup_prefix, arginfo_class_DOMNode_lookupPrefix)
+	PHP_FALIAS(isDefaultNamespace, dom_node_is_default_namespace, arginfo_class_DOMNode_isDefaultNamespace)
+	PHP_FALIAS(lookupNamespaceUri, dom_node_lookup_namespace_uri, arginfo_class_DOMNode_lookupNamespaceUri)
+	PHP_ME(domnode, getNodePath, arginfo_class_DOMNode_getNodePath, ZEND_ACC_PUBLIC)
+	PHP_ME(domnode, getLineNo, arginfo_class_DOMNode_getLineNo, ZEND_ACC_PUBLIC)
+	PHP_ME(domnode, C14N, arginfo_class_DOMNode_C14N, ZEND_ACC_PUBLIC)
+	PHP_ME(domnode, C14NFile, arginfo_class_DOMNode_C14NFile, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -1470,16 +1391,6 @@ PHP_FUNCTION(dom_node_has_attributes)
 	}
 }
 /* }}} end dom_node_has_attributes */
-
-/* {{{ proto short dom_node_compare_document_position(DomNode other);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-compareDocumentPosition
-Since: DOM Level 3
-*/
-PHP_FUNCTION(dom_node_compare_document_position)
-{
- DOM_NOT_IMPLEMENTED();
-}
-/* }}} end dom_node_compare_document_position */
 
 /* {{{ proto bool dom_node_is_same_node(DomNode other);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isSameNode

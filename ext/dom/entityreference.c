@@ -22,12 +22,7 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_entityreference_construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO();
-/* }}} */
+#include "dom_arginfo.h"
 
 /*
 * class DOMEntityReference extends DOMNode
@@ -37,7 +32,7 @@ ZEND_END_ARG_INFO();
 */
 
 const zend_function_entry php_dom_entityreference_class_functions[] = {
-	PHP_ME(domentityreference, __construct, arginfo_dom_entityreference_construct, ZEND_ACC_PUBLIC)
+	PHP_ME(domentityreference, __construct, arginfo_class_DOMEntityReference___construct, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
