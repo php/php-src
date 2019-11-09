@@ -38,12 +38,6 @@ struct _idsIterator {
 #define DOM_LOAD_STRING 0
 #define DOM_LOAD_FILE 1
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_append, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_prepend, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
 /*
 * class DOMDocument extends DOMNode
 *
@@ -88,8 +82,8 @@ const zend_function_entry php_dom_document_class_functions[] = { /* {{{ */
 	PHP_FALIAS(relaxNGValidateSource, dom_document_relaxNG_validate_xml, arginfo_class_DOMDocument_relaxNGValidateSource)
 #endif
 	PHP_ME(domdocument, registerNodeClass, arginfo_class_DOMDocument_registerNodeClass, ZEND_ACC_PUBLIC)
-	PHP_ME(domdocument, append, arginfo_dom_document_append, ZEND_ACC_PUBLIC)
-	PHP_ME(domdocument, prepend, arginfo_dom_document_prepend, ZEND_ACC_PUBLIC)
+	PHP_ME(domdocument, append, arginfo_class_DOMParentNode_append, ZEND_ACC_PUBLIC)
+	PHP_ME(domdocument, prepend, arginfo_class_DOMParentNode_prepend, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */

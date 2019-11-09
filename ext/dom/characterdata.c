@@ -24,18 +24,6 @@
 #include "php_dom.h"
 #include "dom_arginfo.h"
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_remove, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_after, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_before, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_characterdata_replace_with, 0, 0, 0)
-ZEND_END_ARG_INFO();
-
 /*
 * class DOMCharacterData extends DOMNode
 *
@@ -49,10 +37,10 @@ const zend_function_entry php_dom_characterdata_class_functions[] = {
 	PHP_FALIAS(insertData, dom_characterdata_insert_data, arginfo_class_DOMCharacterData_insertData)
 	PHP_FALIAS(deleteData, dom_characterdata_delete_data, arginfo_class_DOMCharacterData_deleteData)
 	PHP_FALIAS(replaceData, dom_characterdata_replace_data, arginfo_class_DOMCharacterData_replaceData)
-	PHP_ME(domcharacterdata, remove, arginfo_dom_characterdata_remove, ZEND_ACC_PUBLIC)
-	PHP_ME(domcharacterdata, after, arginfo_dom_characterdata_after, ZEND_ACC_PUBLIC)
-	PHP_ME(domcharacterdata, before, arginfo_dom_characterdata_before, ZEND_ACC_PUBLIC)
-	PHP_ME(domcharacterdata, replaceWith, arginfo_dom_characterdata_replace_with, ZEND_ACC_PUBLIC)
+	PHP_ME(domcharacterdata, remove, arginfo_class_DOMChildNode_remove, ZEND_ACC_PUBLIC)
+	PHP_ME(domcharacterdata, after, arginfo_class_DOMChildNode_after, ZEND_ACC_PUBLIC)
+	PHP_ME(domcharacterdata, before, arginfo_class_DOMChildNode_before, ZEND_ACC_PUBLIC)
+	PHP_ME(domcharacterdata, replaceWith, arginfo_class_DOMChildNode_replaceWith, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
