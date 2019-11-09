@@ -9,6 +9,7 @@ skipif();
 ?>
 --FILE--
 <?php
+$uniqueBaseName = basename(substr(__FILE__, 0, strrpos(__FILE__, '.')));
 include_once __DIR__ . '/common.inc';
 fix_acls();
 
@@ -21,7 +22,7 @@ $iteration = array(
 
 echo "Testing file with relative path:\n";
 $i = 1;
-$path = './a.txt';
+$path = './' . $uniqueBaseName . '_file.txt';
 foreach ($iteration as $perms => $exp) {
 	create_file($path, $perms);
 	clearstatcache(true, $path);
@@ -36,7 +37,7 @@ foreach ($iteration as $perms => $exp) {
 }
 
 echo "Testing directory with relative path:\n";
-$path = 'adir';
+$path = $uniqueBaseName . '_dir';
 $i = 1;
 foreach ($iteration as $perms => $exp) {
 	create_dir($path, $perms);
