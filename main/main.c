@@ -1016,14 +1016,13 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 			default:
 				function = "Unknown";
 		}
+	} else if ((function = get_active_function_name()) && strlen(function)) {
+		is_function = 1;
+		class_name = get_active_class_name(&space);
+	} else if (EG(flags) & EG_FLAGS_IN_SHUTDOWN) {
+		function = "PHP Request Shutdown";
 	} else {
-		function = get_active_function_name();
-		if (!function || !strlen(function)) {
-			function = "Unknown";
-		} else {
-			is_function = 1;
-			class_name = get_active_class_name(&space);
-		}
+		function = "Unknown";
 	}
 
 	/* if we still have memory then format the origin */

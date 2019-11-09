@@ -44,4 +44,4 @@ Warning: imap_open(): Couldn't open stream  in %s on line %d
 
 Warning: imap_open(): Retries must be greater or equal to 0 in %s on line %d
 
-Notice: Unknown: Can't open mailbox : no such mailbox (errflg=2) in Unknown on line 0
+Notice: PHP Request Shutdown: Can't open mailbox : no such mailbox (errflg=2) in Unknown on line 0
