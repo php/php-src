@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.0RC6
+14 Nov 2019, PHP 7.4.0RC6
 
 - Core:
   . Fixed bug #78768 (redefinition of typedef zend_property_info). (Nikita)
