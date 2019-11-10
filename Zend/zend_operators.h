@@ -55,6 +55,7 @@ ZEND_API int ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *o
 ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2);
 
 ZEND_API zend_bool ZEND_FASTCALL zend_is_identical(zval *op1, zval *op2);
+ZEND_API zend_bool ZEND_FASTCALL zend_is_identical_array(HashTable *h1, HashTable *h2);
 
 ZEND_API int ZEND_FASTCALL is_equal_function(zval *result, zval *op1, zval *op2);
 ZEND_API int ZEND_FASTCALL is_identical_function(zval *result, zval *op1, zval *op2);

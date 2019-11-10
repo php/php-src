@@ -451,25 +451,102 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(16, ZEND_IS_IDENTICAL, CONST|TMP|VAR|CV, CONST|T
 	SAVE_OPLINE();
 	op1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
-	result = fast_is_identical_function(op1, op2);
+	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
+		/* They are not identical, return false. Note that this has to check for undefined variable errors when IS_NULL is possible. */
+		ZEND_VM_C_LABEL(is_different_nothrow):
+		FREE_OP1();
+		FREE_OP2();
+		ZEND_VM_SMART_BRANCH(0, 1);
+		return;
+	}
+	if (Z_TYPE_P(op1) <= IS_TRUE) {
+		/* They are identical, return true */
+		FREE_OP1();
+		FREE_OP2();
+		ZEND_VM_SMART_BRANCH(1, 1);
+		return;
+	}
+	switch (Z_TYPE_P(op1)) {
+		case IS_LONG:
+			result = (Z_LVAL_P(op1) == Z_LVAL_P(op2));
+			break;
+		case IS_RESOURCE:
+			result = (Z_RES_P(op1) == Z_RES_P(op2));
+			break;
+		case IS_DOUBLE:
+			result = (Z_DVAL_P(op1) == Z_DVAL_P(op2));
+			break;
+		case IS_STRING:
+			result = zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
+			break;
+		case IS_ARRAY:
+			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
+			/* XXX hash_zval_identical_function is not static */
+			result = zend_is_identical_array(Z_ARRVAL_P(op1), Z_ARRVAL_P(op2));
+			break;
+		case IS_OBJECT:
+			result = (Z_OBJ_P(op1) == Z_OBJ_P(op2));
+			break;
+		default:
+			ZEND_VM_C_GOTO(is_different_nothrow);
+	}
 	FREE_OP1();
 	FREE_OP2();
-	ZEND_VM_SMART_BRANCH(result, 1);
+	ZEND_VM_SMART_BRANCH(result, 0);
 }
 
 ZEND_VM_COLD_CONSTCONST_HANDLER(17, ZEND_IS_NOT_IDENTICAL, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV, SPEC(COMMUTATIVE))
 {
 	USE_OPLINE
-	zval *op1, *op2;
+		zval *op1, *op2;
 	zend_bool result;
 
 	SAVE_OPLINE();
 	op1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
-	result = fast_is_not_identical_function(op1, op2);
+
+	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
+		/* They are not identical, return true. Note that this has to check for undefined variable errors when IS_NULL is possible. */
+		ZEND_VM_C_LABEL(is_different_nothrow):
+			FREE_OP1();
+		FREE_OP2();
+		ZEND_VM_SMART_BRANCH(1, 1);
+		return;
+	}
+	if (Z_TYPE_P(op1) <= IS_TRUE) {
+		/* They are identical, return false */
+		FREE_OP1();
+		FREE_OP2();
+		ZEND_VM_SMART_BRANCH(0, 1);
+		return;
+	}
+	switch (Z_TYPE_P(op1)) {
+		case IS_LONG:
+			result = (Z_LVAL_P(op1) != Z_LVAL_P(op2));
+			break;
+		case IS_RESOURCE:
+			result = (Z_RES_P(op1) != Z_RES_P(op2));
+			break;
+		case IS_DOUBLE:
+			result = (Z_DVAL_P(op1) != Z_DVAL_P(op2));
+			break;
+		case IS_STRING:
+			result = !zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
+			break;
+		case IS_ARRAY:
+			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
+			/* XXX hash_zval_identical_function is not static */
+			result = !zend_is_identical_array(Z_ARRVAL_P(op1), Z_ARRVAL_P(op2));
+			break;
+		case IS_OBJECT:
+			result = (Z_OBJ_P(op1) != Z_OBJ_P(op2));
+			break;
+		default:
+			ZEND_VM_C_GOTO(is_different_nothrow);
+	}
 	FREE_OP1();
 	FREE_OP2();
-	ZEND_VM_SMART_BRANCH(result, 1);
+	ZEND_VM_SMART_BRANCH(result, 0);
 }
 
 ZEND_VM_HELPER(zend_is_equal_helper, ANY, ANY, zval *op_1, zval *op_2)
@@ -1496,7 +1573,7 @@ ZEND_VM_HELPER(zend_pre_dec_helper, VAR|CV, ANY)
 
 	SAVE_OPLINE();
 	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(var_ptr) == IS_UNDEF)) {
-		ZVAL_NULL(var_ptr);		
+		ZVAL_NULL(var_ptr);
 		ZVAL_UNDEFINED_OP1();
 	}
 
@@ -2234,7 +2311,7 @@ ZEND_VM_C_LABEL(fetch_obj_is_fast_copy):
 		}
 
 		retval = zobj->handlers->read_property(zobj, name, BP_VAR_IS, cache_slot, EX_VAR(opline->result.var));
- 
+
 		if (OP2_TYPE != IS_CONST) {
 			zend_tmp_string_release(tmp_name);
 		}
@@ -5528,10 +5605,10 @@ ZEND_VM_HANDLER(147, ZEND_ADD_ARRAY_UNPACK, ANY, ANY)
 {
 	USE_OPLINE
 	zval *op1;
-	
+
 	SAVE_OPLINE();
 	op1 = GET_OP1_ZVAL_PTR(BP_VAR_R);
-	
+
 ZEND_VM_C_LABEL(add_unpack_again):
 	if (EXPECTED(Z_TYPE_P(op1) == IS_ARRAY)) {
 		HashTable *ht = Z_ARRVAL_P(op1);
@@ -5572,11 +5649,11 @@ ZEND_VM_C_LABEL(add_unpack_again):
 				}
 				HANDLE_EXCEPTION();
 			}
-			
+
 			if (iter->funcs->rewind) {
 				iter->funcs->rewind(iter);
 			}
-			
+
 			for (; iter->funcs->valid(iter) == SUCCESS; ) {
 				zval *val;
 
@@ -5625,7 +5702,7 @@ ZEND_VM_C_LABEL(add_unpack_again):
 	} else {
 		zend_throw_error(NULL, "Only arrays and Traversables can be unpacked");
 	}
-	
+
 	FREE_OP1();
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }

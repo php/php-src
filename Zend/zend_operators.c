@@ -2118,6 +2118,12 @@ ZEND_API zend_bool ZEND_FASTCALL zend_is_identical(zval *op1, zval *op2) /* {{{ 
 }
 /* }}} */
 
+ZEND_API zend_bool ZEND_FASTCALL zend_is_identical_array(HashTable *h1, HashTable *h2) /* {{{ */
+{
+    return (h1 == h2 ||
+        zend_hash_compare(h1, h2, (compare_func_t) hash_zval_identical_function, 1) == 0);
+}
+
 ZEND_API int ZEND_FASTCALL is_identical_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	ZVAL_BOOL(result, zend_is_identical(op1, op2));
