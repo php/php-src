@@ -17,6 +17,8 @@ if (defined('MYSQLI_DEBUG_TRACE_ENABLED') && !MYSQLI_DEBUG_TRACE_ENABLED)
 
 if (!$IS_MYSQLND)
 	die("SKIP Libmysql feature not sufficiently spec'd in MySQL C API documentation");
+
+if (substr(PHP_OS, 0, 3) == 'WIN') die("skip this test is not for Windows platforms");
 ?>
 --FILE--
 <?php
