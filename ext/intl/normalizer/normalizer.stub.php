@@ -14,8 +14,7 @@ class Normalizer
 #endif
 }
 
-/** @return string|false */
-function normalizer_normalize(string $input, int $form = Normalizer::FORM_C) {}
+function normalizer_normalize(string $input, int $form = Normalizer::FORM_C): string|false {}
 
 function normalizer_is_normalized(string $input, int $form = Normalizer::FORM_C): bool {}
 

@@ -35,11 +35,9 @@ function resourcebundle_create(?string $locale, ?string $bundlename, bool $fallb
  */
 function resourcebundle_get(ResourceBundle $bundle, $index) {}
 
-/** @return int|false */
-function resourcebundle_count(ResourceBundle $bundle) {}
+function resourcebundle_count(ResourceBundle $bundle): int|false {}
 
-/** @return array|false */
-function resourcebundle_locales(string $bundlename) {}
+function resourcebundle_locales(string $bundlename): array|false {}
 
 function resourcebundle_get_error_code(ResourceBundle $bundle): int {}
 
