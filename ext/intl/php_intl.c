@@ -234,12 +234,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_get_locale, 0, 0, 1)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_parse_message, 0, 0, 3)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, source)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_idn_to_ascii, 0, 0, 1)
 	ZEND_ARG_INFO(0, domain)
 	ZEND_ARG_INFO(0, option)

@@ -37,8 +37,7 @@ class MessageFormatter
 
 function msgfmt_create(string $locale, string $pattern): ?MessageFormatter {}
 
-/** @return string|false */
-function msgfmt_format(MessageFormatter $fmt, array $args): string {}
+function msgfmt_format(MessageFormatter $fmt, array $args): string|false {}
 
 /** @return string|false */
 function msgfmt_format_message(string $locale, string $pattern, array $args) {}
