@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #78768 (redefinition of typedef zend_property_info). (Nikita)
   . Fixed bug #78788 (./configure generates invalid php_version.h). (max)
 
+- FFI:
+  . Fixed bug #78714 (funcs returning pointer can't use call convention spec).
+    (Dmitry)
+
 - Standard:
   . Fixed bug #77930 (stream_copy_to_stream should use mmap more often).
     (Nikita)

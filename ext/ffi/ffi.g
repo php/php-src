@@ -127,16 +127,6 @@ declaration_specifiers(zend_ffi_dcl *dcl):
 			{dcl->flags |= ZEND_FFI_DCL_INLINE;}
 		|	"_Noreturn"
 			{dcl->flags |= ZEND_FFI_DCL_NO_RETURN;}
-		|	"__cdecl"
-			{zend_ffi_set_abi(dcl, ZEND_FFI_ABI_CDECL);}
-		|	"__stdcall"
-			{zend_ffi_set_abi(dcl, ZEND_FFI_ABI_STDCALL);}
-		|	"__fastcall"
-			{zend_ffi_set_abi(dcl, ZEND_FFI_ABI_FASTCALL);}
-		|	"__thiscall"
-			{zend_ffi_set_abi(dcl, ZEND_FFI_ABI_THISCALL);}
-		|	"__vectorcall"
-			{zend_ffi_set_abi(dcl, ZEND_FFI_ABI_VECTORCALL);}
 		|	"_Alignas"
 			"("
 			(	&type_name_start
@@ -494,6 +484,16 @@ attributes(zend_ffi_dcl *dcl):
 				)?
 			)+
 		")"
+	|	"__cdecl"
+		{zend_ffi_set_abi(dcl, ZEND_FFI_ABI_CDECL);}
+	|	"__stdcall"
+		{zend_ffi_set_abi(dcl, ZEND_FFI_ABI_STDCALL);}
+	|	"__fastcall"
+		{zend_ffi_set_abi(dcl, ZEND_FFI_ABI_FASTCALL);}
+	|	"__thiscall"
+		{zend_ffi_set_abi(dcl, ZEND_FFI_ABI_THISCALL);}
+	|	"__vectorcall"
+		{zend_ffi_set_abi(dcl, ZEND_FFI_ABI_VECTORCALL);}
 	)++
 ;
 
