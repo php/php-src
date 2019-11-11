@@ -4764,8 +4764,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC
 	op1 = RT_CONSTANT(opline, opline->op1);
 	op2 = RT_CONSTANT(opline, opline->op2);
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return false. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
+		/* They are not identical, return false. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
 
 
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -4773,6 +4772,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
 		/* They are identical, return true */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 
 
 		ZEND_VM_SMART_BRANCH(1, 1);
@@ -4781,16 +4781,20 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) == Z_LVAL_P(op2));
+free_nothrow:
+
+
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) == Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) == Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -4800,11 +4804,12 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC
 			result = (Z_OBJ_P(op1) == Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 
 
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -4818,15 +4823,15 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_
 	op2 = RT_CONSTANT(opline, opline->op2);
 
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return true. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
+		/* They are not identical, return true. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
 
 
 		ZEND_VM_SMART_BRANCH(1, 1);
 		return;
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		/* They are identical, return false */
+		/* They are identical, return false. */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 
 
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -4835,16 +4840,20 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) != Z_LVAL_P(op2));
+free_nothrow:
+
+
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) != Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) != Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = !zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -4854,11 +4863,12 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_
 			result = (Z_OBJ_P(op1) != Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 
 
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -17877,8 +17887,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_TMP_CONST_HA
 	op1 = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 	op2 = RT_CONSTANT(opline, opline->op2);
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return false. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
+		/* They are not identical, return false. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -17886,6 +17895,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_TMP_CONST_HA
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
 		/* They are identical, return true */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 
 		ZEND_VM_SMART_BRANCH(1, 1);
@@ -17894,16 +17904,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_TMP_CONST_HA
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) == Z_LVAL_P(op2));
+free_nothrow:
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) == Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) == Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -17913,11 +17927,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_TMP_CONST_HA
 			result = (Z_OBJ_P(op1) == Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -17931,15 +17946,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_TMP_CONS
 	op2 = RT_CONSTANT(opline, opline->op2);
 
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return true. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+		/* They are not identical, return true. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 
 		ZEND_VM_SMART_BRANCH(1, 1);
 		return;
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		/* They are identical, return false */
+		/* They are identical, return false. */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -17948,16 +17963,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_TMP_CONS
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) != Z_LVAL_P(op2));
+free_nothrow:
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) != Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) != Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = !zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -17967,11 +17986,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_TMP_CONS
 			result = (Z_OBJ_P(op1) != Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -18755,8 +18775,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_TMP_TMP_HAND
 	op1 = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 	op2 = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return false. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
+		/* They are not identical, return false. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -18764,6 +18783,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_TMP_TMP_HAND
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
 		/* They are identical, return true */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(1, 1);
@@ -18772,16 +18792,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_TMP_TMP_HAND
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) == Z_LVAL_P(op2));
+free_nothrow:
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) == Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) == Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -18791,11 +18815,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_TMP_TMP_HAND
 			result = (Z_OBJ_P(op1) == Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_TMP_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -18809,15 +18834,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_TMP_TMP_
 	op2 = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
 
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return true. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+		/* They are not identical, return true. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(1, 1);
 		return;
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		/* They are identical, return false */
+		/* They are identical, return false. */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -18826,16 +18851,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_TMP_TMP_
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) != Z_LVAL_P(op2));
+free_nothrow:
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) != Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) != Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = !zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -18845,11 +18874,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_TMP_TMP_
 			result = (Z_OBJ_P(op1) != Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -21041,8 +21071,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_CONST_HA
 	op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
 	op2 = RT_CONSTANT(opline, opline->op2);
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return false. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
+		/* They are not identical, return false. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -21050,6 +21079,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_CONST_HA
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
 		/* They are identical, return true */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 
 		ZEND_VM_SMART_BRANCH(1, 1);
@@ -21058,16 +21088,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_CONST_HA
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) == Z_LVAL_P(op2));
+free_nothrow:
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) == Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) == Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -21077,11 +21111,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_CONST_HA
 			result = (Z_OBJ_P(op1) == Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -21095,15 +21130,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_VAR_CONS
 	op2 = RT_CONSTANT(opline, opline->op2);
 
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return true. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+		/* They are not identical, return true. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 
 		ZEND_VM_SMART_BRANCH(1, 1);
 		return;
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		/* They are identical, return false */
+		/* They are identical, return false. */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -21112,16 +21147,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_VAR_CONS
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) != Z_LVAL_P(op2));
+free_nothrow:
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) != Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) != Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = !zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -21131,11 +21170,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_VAR_CONS
 			result = (Z_OBJ_P(op1) != Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_OP_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -25489,8 +25529,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_TMP_HAND
 	op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
 	op2 = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return false. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
+		/* They are not identical, return false. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -25498,6 +25537,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_TMP_HAND
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
 		/* They are identical, return true */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(1, 1);
@@ -25506,16 +25546,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_TMP_HAND
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) == Z_LVAL_P(op2));
+free_nothrow:
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) == Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) == Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -25525,11 +25569,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_TMP_HAND
 			result = (Z_OBJ_P(op1) == Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_VAR_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -25543,15 +25588,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_VAR_TMP_
 	op2 = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
 
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return true. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+		/* They are not identical, return true. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(1, 1);
 		return;
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		/* They are identical, return false */
+		/* They are identical, return false. */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -25560,16 +25605,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_VAR_TMP_
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) != Z_LVAL_P(op2));
+free_nothrow:
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) != Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) != Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = !zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -25579,11 +25628,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_VAR_TMP_
 			result = (Z_OBJ_P(op1) != Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_TMP_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -25636,8 +25686,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_VAR_HAND
 	op1 = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
 	op2 = _get_zval_ptr_var_deref(opline->op2.var EXECUTE_DATA_CC);
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return false. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
+		/* They are not identical, return false. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -25645,6 +25694,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_VAR_HAND
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
 		/* They are identical, return true */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(1, 1);
@@ -25653,16 +25703,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_VAR_HAND
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) == Z_LVAL_P(op2));
+free_nothrow:
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) == Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) == Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -25672,11 +25726,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_VAR_VAR_HAND
 			result = (Z_OBJ_P(op1) == Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_VAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -25690,15 +25745,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_VAR_VAR_
 	op2 = _get_zval_ptr_var_deref(opline->op2.var EXECUTE_DATA_CC);
 
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return true. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+		/* They are not identical, return true. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(1, 1);
 		return;
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		/* They are identical, return false */
+		/* They are identical, return false. */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -25707,16 +25762,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_VAR_VAR_
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) != Z_LVAL_P(op2));
+free_nothrow:
+			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) != Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) != Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = !zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -25726,11 +25785,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_VAR_VAR_
 			result = (Z_OBJ_P(op1) != Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_VAR_VAR_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -37192,8 +37252,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_CONST_HAN
 	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
 	op2 = RT_CONSTANT(opline, opline->op2);
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return false. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
+		/* They are not identical, return false. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
 
 
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -37201,6 +37260,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_CONST_HAN
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
 		/* They are identical, return true */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 
 
 		ZEND_VM_SMART_BRANCH(1, 1);
@@ -37209,16 +37269,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_CONST_HAN
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) == Z_LVAL_P(op2));
+free_nothrow:
+
+
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) == Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) == Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -37228,11 +37292,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_CONST_HAN
 			result = (Z_OBJ_P(op1) == Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 
 
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -37246,15 +37311,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_CONST
 	op2 = RT_CONSTANT(opline, opline->op2);
 
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return true. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
+		/* They are not identical, return true. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
 
 
 		ZEND_VM_SMART_BRANCH(1, 1);
 		return;
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		/* They are identical, return false */
+		/* They are identical, return false. */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 
 
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -37263,16 +37328,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_CONST
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) != Z_LVAL_P(op2));
+free_nothrow:
+
+
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) != Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) != Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = !zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -37282,11 +37351,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_CONST
 			result = (Z_OBJ_P(op1) != Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 
 
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -43747,8 +43817,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_TMP_HANDL
 	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
 	op2 = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return false. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
+		/* They are not identical, return false. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
 
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -43756,6 +43825,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_TMP_HANDL
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
 		/* They are identical, return true */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(1, 1);
@@ -43764,16 +43834,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_TMP_HANDL
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) == Z_LVAL_P(op2));
+free_nothrow:
+
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) == Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) == Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -43783,11 +43857,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_TMP_HANDL
 			result = (Z_OBJ_P(op1) == Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -43801,15 +43876,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_TMP_H
 	op2 = _get_zval_ptr_tmp(opline->op2.var EXECUTE_DATA_CC);
 
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return true. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
+		/* They are not identical, return true. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
 
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(1, 1);
 		return;
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		/* They are identical, return false */
+		/* They are identical, return false. */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -43818,16 +43893,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_TMP_H
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) != Z_LVAL_P(op2));
+free_nothrow:
+
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) != Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) != Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = !zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -43837,11 +43916,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_TMP_H
 			result = (Z_OBJ_P(op1) != Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_TMP_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -43894,8 +43974,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_VAR_HANDL
 	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
 	op2 = _get_zval_ptr_var_deref(opline->op2.var EXECUTE_DATA_CC);
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return false. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
+		/* They are not identical, return false. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
 
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -43903,6 +43982,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_VAR_HANDL
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
 		/* They are identical, return true */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(1, 1);
@@ -43911,16 +43991,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_VAR_HANDL
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) == Z_LVAL_P(op2));
+free_nothrow:
+
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) == Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) == Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -43930,11 +44014,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_VAR_HANDL
 			result = (Z_OBJ_P(op1) == Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -43948,15 +44033,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_VAR_H
 	op2 = _get_zval_ptr_var_deref(opline->op2.var EXECUTE_DATA_CC);
 
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return true. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
+		/* They are not identical, return true. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
 
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(1, 1);
 		return;
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		/* They are identical, return false */
+		/* They are identical, return false. */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -43965,16 +44050,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_VAR_H
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) != Z_LVAL_P(op2));
+free_nothrow:
+
+			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) != Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) != Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = !zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -43984,11 +44073,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_VAR_H
 			result = (Z_OBJ_P(op1) != Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 
 	zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_SPEC_CV_VAR_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -45626,8 +45716,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_CV_HANDLE
 	op1 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
 	op2 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return false. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
+		/* They are not identical, return false. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
 
 
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -45635,6 +45724,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_CV_HANDLE
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
 		/* They are identical, return true */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 
 
 		ZEND_VM_SMART_BRANCH(1, 1);
@@ -45643,16 +45733,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_CV_HANDLE
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) == Z_LVAL_P(op2));
+free_nothrow:
+
+
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) == Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) == Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -45662,11 +45756,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CV_CV_HANDLE
 			result = (Z_OBJ_P(op1) == Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 
 
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -45680,15 +45775,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_CV_HA
 	op2 = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return true. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		is_different_nothrow:
+		/* They are not identical, return true. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
 
 
 		ZEND_VM_SMART_BRANCH(1, 1);
 		return;
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		/* They are identical, return false */
+		/* They are identical, return false. */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 
 
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -45697,16 +45792,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_CV_HA
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) != Z_LVAL_P(op2));
+free_nothrow:
+
+
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) != Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) != Z_DVAL_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_STRING:
 			result = !zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			goto free_nothrow;
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -45716,11 +45815,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_IDENTICAL_SPEC_CV_CV_HA
 			result = (Z_OBJ_P(op1) != Z_OBJ_P(op2));
 			break;
 		default:
-			goto is_different_nothrow;
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 
 
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)

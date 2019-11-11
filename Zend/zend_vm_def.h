@@ -452,8 +452,7 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(16, ZEND_IS_IDENTICAL, CONST|TMP|VAR|CV, CONST|T
 	op1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
 	op2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return false. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		ZEND_VM_C_LABEL(is_different_nothrow):
+		/* They are not identical, return false. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
 		FREE_OP1();
 		FREE_OP2();
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -461,6 +460,7 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(16, ZEND_IS_IDENTICAL, CONST|TMP|VAR|CV, CONST|T
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
 		/* They are identical, return true */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 		FREE_OP1();
 		FREE_OP2();
 		ZEND_VM_SMART_BRANCH(1, 1);
@@ -469,16 +469,20 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(16, ZEND_IS_IDENTICAL, CONST|TMP|VAR|CV, CONST|T
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) == Z_LVAL_P(op2));
+ZEND_VM_C_LABEL(free_nothrow):
+			FREE_OP1();
+			FREE_OP2();
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) == Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) == Z_DVAL_P(op2));
-			break;
+			ZEND_VM_C_GOTO(free_nothrow);
 		case IS_STRING:
 			result = zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			ZEND_VM_C_GOTO(free_nothrow);
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -488,11 +492,12 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(16, ZEND_IS_IDENTICAL, CONST|TMP|VAR|CV, CONST|T
 			result = (Z_OBJ_P(op1) == Z_OBJ_P(op2));
 			break;
 		default:
-			ZEND_VM_C_GOTO(is_different_nothrow);
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 	FREE_OP1();
 	FREE_OP2();
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 ZEND_VM_COLD_CONSTCONST_HANDLER(17, ZEND_IS_NOT_IDENTICAL, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV, SPEC(COMMUTATIVE))
@@ -506,15 +511,15 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(17, ZEND_IS_NOT_IDENTICAL, CONST|TMP|VAR|CV, CON
 	op2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
 
 	if (Z_TYPE_P(op1) != Z_TYPE_P(op2)) {
-		/* They are not identical, return true. Note that this has to check for undefined variable errors when IS_NULL is possible. */
-		ZEND_VM_C_LABEL(is_different_nothrow):
-			FREE_OP1();
+		/* They are not identical, return true. This has to check for __destruct errors (and undefined variable errors when IS_NULL is possible) */
+		FREE_OP1();
 		FREE_OP2();
 		ZEND_VM_SMART_BRANCH(1, 1);
 		return;
 	}
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		/* They are identical, return false */
+		/* They are identical, return false. */
+		/* This has to check for undefined variable errors when IS_NULL is possible. */
 		FREE_OP1();
 		FREE_OP2();
 		ZEND_VM_SMART_BRANCH(0, 1);
@@ -523,16 +528,20 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(17, ZEND_IS_NOT_IDENTICAL, CONST|TMP|VAR|CV, CON
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
 			result = (Z_LVAL_P(op1) != Z_LVAL_P(op2));
+ZEND_VM_C_LABEL(free_nothrow):
+			FREE_OP1();
+			FREE_OP2();
+			ZEND_VM_SMART_BRANCH(result, 0);
 			break;
 		case IS_RESOURCE:
 			result = (Z_RES_P(op1) != Z_RES_P(op2));
 			break;
 		case IS_DOUBLE:
 			result = (Z_DVAL_P(op1) != Z_DVAL_P(op2));
-			break;
+			ZEND_VM_C_GOTO(free_nothrow);
 		case IS_STRING:
 			result = !zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
-			break;
+			ZEND_VM_C_GOTO(free_nothrow);
 		case IS_ARRAY:
 			/* This may cause EG(exception) due to infinite nesting, but other zval types won't? */
 			/* XXX hash_zval_identical_function is not static */
@@ -542,11 +551,12 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(17, ZEND_IS_NOT_IDENTICAL, CONST|TMP|VAR|CV, CON
 			result = (Z_OBJ_P(op1) != Z_OBJ_P(op2));
 			break;
 		default:
-			ZEND_VM_C_GOTO(is_different_nothrow);
+			result = 1;
 	}
+	/* Check if freeing the operands (e.g. __destruct(), freeing resources (not sure about that), etc threw an exception before setting the result or branching */
 	FREE_OP1();
 	FREE_OP2();
-	ZEND_VM_SMART_BRANCH(result, 0);
+	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
 ZEND_VM_HELPER(zend_is_equal_helper, ANY, ANY, zval *op_1, zval *op_2)
