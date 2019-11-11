@@ -69,34 +69,26 @@ function locale_get_region(string $locale): ?string {}
 
 function locale_get_keywords(string $locale): ?array {}
 
-/** @return string|false */
-function locale_get_display_script(string $locale, ?string $in_locale = null) {}
+function locale_get_display_script(string $locale, ?string $in_locale = null): string|false {}
 
-/** @return string|false */
-function locale_get_display_region(string $locale, ?string $in_locale = null) {}
+function locale_get_display_region(string $locale, ?string $in_locale = null): string|false {}
 
-/** @return string|false */
-function locale_get_display_name(string $locale, ?string $in_locale = null) {}
+function locale_get_display_name(string $locale, ?string $in_locale = null): string|false {}
 
-/** @return string|false */
-function locale_get_display_language(string $locale, ?string $in_locale = null) {}
+function locale_get_display_language(string $locale, ?string $in_locale = null): string|false {}
 
-/** @return string|false */
-function locale_get_display_variant(string $locale, ?string $in_locale = null) {}
+function locale_get_display_variant(string $locale, ?string $in_locale = null): string|false {}
 
-/** @return string|false */
-function locale_compose(array $subtags) {}
+function locale_compose(array $subtags): string|false {}
 
 function locale_parse(string $locale): ?array {}
 
 function locale_get_all_variants(string $locale): ?array {}
 
-/** @return bool|null */
-function locale_filter_matches(string $langtag, string $locale, bool $canonicalize = false) {}
+function locale_filter_matches(string $langtag, string $locale, bool $canonicalize = false): ?bool {}
 
 function locale_canonicalize(string $locale): ?string {}
 
 function locale_lookup(array $langtag, string $locale, bool $canonicalize = false, ?string $def = null): ?string {}
 
-/** @return string|false */
-function locale_accept_from_http(string $header) {}
+function locale_accept_from_http(string $header): string|false {}

@@ -25,6 +25,7 @@ Function [ <internal:intl> function locale_get_display_language ] {
     Parameter #0 [ <required> string $locale ]
     Parameter #1 [ <optional> ?string $in_locale ]
   }
+  - Return [ string|false ]
 }
 Function [ <internal:intl> function locale_get_display_name ] {
 
@@ -32,6 +33,7 @@ Function [ <internal:intl> function locale_get_display_name ] {
     Parameter #0 [ <required> string $locale ]
     Parameter #1 [ <optional> ?string $in_locale ]
   }
+  - Return [ string|false ]
 }
 Function [ <internal:intl> function locale_get_display_region ] {
 
@@ -39,6 +41,7 @@ Function [ <internal:intl> function locale_get_display_region ] {
     Parameter #0 [ <required> string $locale ]
     Parameter #1 [ <optional> ?string $in_locale ]
   }
+  - Return [ string|false ]
 }
 Function [ <internal:intl> function locale_get_display_script ] {
 
@@ -46,6 +49,7 @@ Function [ <internal:intl> function locale_get_display_script ] {
     Parameter #0 [ <required> string $locale ]
     Parameter #1 [ <optional> ?string $in_locale ]
   }
+  - Return [ string|false ]
 }
 Function [ <internal:intl> function locale_get_display_variant ] {
 
@@ -53,6 +57,7 @@ Function [ <internal:intl> function locale_get_display_variant ] {
     Parameter #0 [ <required> string $locale ]
     Parameter #1 [ <optional> ?string $in_locale ]
   }
+  - Return [ string|false ]
 }
 Function [ <internal:intl> function locale_filter_matches ] {
 
@@ -61,6 +66,7 @@ Function [ <internal:intl> function locale_filter_matches ] {
     Parameter #1 [ <required> string $locale ]
     Parameter #2 [ <optional> bool $canonicalize ]
   }
+  - Return [ ?bool ]
 }
 Function [ <internal:intl> function locale_lookup ] {
 

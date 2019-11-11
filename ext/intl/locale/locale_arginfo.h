@@ -74,23 +74,32 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_get_keywords, 0, 1, IS_AR
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_locale_get_display_script arginfo_class_Locale_getDisplayScript
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_locale_get_display_script, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, in_locale, IS_STRING, 1)
+ZEND_END_ARG_INFO()
 
-#define arginfo_locale_get_display_region arginfo_class_Locale_getDisplayScript
+#define arginfo_locale_get_display_region arginfo_locale_get_display_script
 
-#define arginfo_locale_get_display_name arginfo_class_Locale_getDisplayScript
+#define arginfo_locale_get_display_name arginfo_locale_get_display_script
 
-#define arginfo_locale_get_display_language arginfo_class_Locale_getDisplayScript
+#define arginfo_locale_get_display_language arginfo_locale_get_display_script
 
-#define arginfo_locale_get_display_variant arginfo_class_Locale_getDisplayScript
+#define arginfo_locale_get_display_variant arginfo_locale_get_display_script
 
-#define arginfo_locale_compose arginfo_class_Locale_composeLocale
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_locale_compose, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, subtags, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_locale_parse arginfo_locale_get_keywords
 
 #define arginfo_locale_get_all_variants arginfo_locale_get_keywords
 
-#define arginfo_locale_filter_matches arginfo_class_Locale_filterMatches
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_filter_matches, 0, 2, _IS_BOOL, 1)
+	ZEND_ARG_TYPE_INFO(0, langtag, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, canonicalize, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_locale_canonicalize arginfo_locale_get_primary_language
 
@@ -101,4 +110,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_locale_lookup, 0, 2, IS_STRING, 
 	ZEND_ARG_TYPE_INFO(0, def, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
-#define arginfo_locale_accept_from_http arginfo_class_Locale_acceptFromHttp
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_locale_accept_from_http, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, header, IS_STRING, 0)
+ZEND_END_ARG_INFO()
