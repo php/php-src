@@ -1374,9 +1374,7 @@ PHP_FUNCTION(mysqli_free_result)
    Get MySQL client info */
 PHP_FUNCTION(mysqli_get_client_info)
 {
-	zval *mysql_link;
-
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
@@ -2633,9 +2631,7 @@ PHP_FUNCTION(mysqli_thread_id)
    Return whether thread safety is given or not */
 PHP_FUNCTION(mysqli_thread_safe)
 {
-	zval *mysql_link;
-
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
