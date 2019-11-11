@@ -1,6 +1,6 @@
 <?php
 
-function iconv_strlen(string $str, string $charset = UNKNOWN): string|int|false {}
+function iconv_strlen(string $str, string $charset = UNKNOWN): int|false {}
 
 function iconv_substr(string $str, int $offset, ?int $length = null, string $charset = UNKNOWN): string|false {}
 
