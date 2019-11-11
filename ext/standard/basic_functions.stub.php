@@ -728,6 +728,141 @@ function scandir(string $directory, int $sorting_order = 0, $context = UNKNOWN):
 function glob(string $pattern, int $flags = 0): array|false {}
 #endif
 
+/* exec.c */
+
+function exec(string $command, &$output = null, &$result_code = null): string|false {}
+
+function system(string $command, &$result_code = null): string|false {}
+
+function passthru(string $command, &$result_code = null): bool|null {}
+
+function escapeshellcmd(string $command): string {}
+
+function escapeshellarg(string $arg): string {}
+
+function shell_exec(string $command): string|false|null {}
+
+#ifdef HAVE_NICE
+function proc_nice(int $priority): bool {}
+#endif
+
+/* file.c */
+
+/** @param resource $handle */
+function flock($handle, int $operation, &$wouldblock = null): bool {}
+
+function get_meta_tags(string $filename, bool $use_include_path = false): array|false {}
+
+/** @param resource $handle */
+function pclose($handle): int {}
+
+/** @return resource|false */
+function popen(string $command, string $mode) {}
+
+/** @param resource|null $context */
+function readfile(string $filename, bool $use_include_path = false, $context = null): int|false {}
+
+/** @param resource $handle */
+function rewind($handle): bool {}
+
+/** @param resource|null $context */
+function rmdir(string $dirname, $context = null): bool {}
+
+function umask(int $mask = UNKNOWN): int {}
+
+/** @param resource $handle */
+function fclose($handle): bool {}
+
+/** @param resource $handle */
+function feof($handle): bool {}
+
+/** @param resource $handle */
+function fgetc($handle): string|false {}
+
+/** @param resource $handle */
+function fgets($handle, int $length = 1024): string|false {}
+
+/** @param resource $handle */
+function fread($handle, int $length): string|false {}
+
+/**
+ * @param resource|null $context
+ * @return resource|false
+ */
+function fopen(string $filename, string $mode, bool $use_include_path = false, $context = null) {}
+
+/**
+ * @param resource $stream
+ * @param mixed ...$args
+ */
+function fscanf($stream, string $format, &...$args): array|int|false|null {}
+
+/** @param resource $handle */
+function fpassthru($handle): int {}
+
+/** @param resource $handle */
+function ftruncate($handle, int $size): bool {}
+
+/** @param resource $handle */
+function fstat($handle): array|false {}
+
+/** @param resource $handle */
+function fseek($handle, int $offset, int $whence = SEEK_SET): int {}
+
+/** @param resource $handle */
+function ftell($handle): int|false {}
+
+/** @param resource $handle */
+function fflush($handle): bool {}
+
+/** @param resource $handle */
+function fwrite($handle, string $content, int $max_length = UNKNOWN): int|false {}
+
+/** @param resource|null $context */
+function mkdir(string $pathname, int $mode = 0777, bool $recursive = false, $context = null): bool {}
+
+/** @param resource|null $context */
+function rename(string $oldname, string $newname, $context = null): bool {}
+
+/** @param resource|null $context */
+function copy(string $source, string $dest, $context = null): bool {}
+
+function tempnam(string $dir, string $prefix): string|false {}
+
+/** @return resource|false */
+function tmpfile() {}
+
+/** @param resource|null $context */
+function file(string $filename, int $flags = 0, $context = null): array|false {}
+
+/** @param resource|null $context */
+function file_get_contents(string $filename, bool $use_include_path = false, $context = null, int $offset = 0, $maxlen = UNKNOWN): string|false {}
+
+/** @param resource|null $context */
+function unlink(string $filename, $context = null): bool {}
+
+/**
+ * @param mixed $content
+ * @param resource|null $context
+ */
+function file_put_contents(string $filename, $content, int $flags = 0, $context = null): int|false {}
+
+/** @param resource $handle */
+function fputcsv($handle, array $fields, string $delimiter = ",", string $enclosure = "\"", string $escape = "\\"): int|false {}
+
+/** @param resource $handle */
+function fgetcsv($handle, $length = UNKNOWN, string $delimiter = ",", string $enclosure = '"', string $escape = "\\"): array|false {}
+
+#if HAVE_REALPATH || defined(ZTS)
+function realpath(string $path): string|false {}
+#endif
+
+#ifdef HAVE_FNMATCH
+function fnmatch(string $pattern, string $filename, int $flags = 0): bool {}
+#endif
+
+function sys_get_temp_dir(): string {}
+
 /* filestat.c */
 
 function fileatime(string $filename): int|false {}
@@ -795,6 +930,54 @@ function diskfreespace(string $directory): float|false {}
 function realpath_cache_get(): array {}
 
 function realpath_cache_size(): int {}
+
+/* formatted_print.c */
+
+/** @param mixed ...$args */
+function sprintf(string $format, ...$args): string {}
+
+/** @param mixed ...$args */
+function printf(string $format, ...$args): int {}
+
+/** @param mixed $args */
+function vprintf(string $format, $args): int {}
+
+/** @param mixed $args */
+function vsprintf(string $format, $args): string {}
+
+/**
+ * @param resource $handle
+ * @param mixed ...$args
+ */
+function fprintf($handle, string $format, ...$args): int {}
+
+/**
+ * @param resource $handle
+ * @param mixed $args
+ */
+function vfprintf($handle, string $format, $args): int {}
+
+/* fsock.c */
+
+/** @return resource|false */
+function fsockopen(string $hostname, int $port = -1, &$errno = null, &$errstr = null, float $timeout = UNKNOWN) {}
+
+/** @return resource|false */
+function pfsockopen(string $hostname, int $port = -1, &$errno = null, &$errstr = null, float $timeout = UNKNOWN) {}
+
+/* http.c */
+
+function http_build_query(array|object $data, string $numeric_prefix = "", $arg_separator = UNKNOWN, int $enc_type = PHP_QUERY_RFC1738): string|false {}
+
+/* image.c */
+
+function image_type_to_mime_type(int $image_type): string {}
+
+function image_type_to_extension(int $image_type): string|false {}
+
+function getimagesize(string $image_path, &$image_info = null): array|false {}
+
+function getimagesizefromstring(string $image, &$image_info = null): array|false {}
 
 /* info.c */
 
@@ -991,3 +1174,23 @@ function mt_getrandmax(): int {}
 function random_bytes(int $length): string {}
 
 function random_int(int $min, int $max): int {}
+
+/* soundex.c */
+
+function soundex(string $string): string|false {}
+
+/* uniqid.c */
+
+#ifdef HAVE_GETTIMEOFDAY
+function uniqid(string $prefix = "", bool $more_entropy = false): string {}
+#endif
+
+/* uuencode.c */
+
+function convert_uuencode(string $data): string|false {}
+
+function convert_uudecode(string $data): string|false {}
+
+/* versioning.c */
+
+function version_compare(string $version1, string $version2, string $operator = UNKNOWN): int|bool {}
