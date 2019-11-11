@@ -24,6 +24,11 @@ try  {
 	undefined_function();
 } catch (Exception $e) {
 }
+try  {
+	$h !== $g; // ZEND_VM_NEXT_OPCODE
+	undefined_function();
+} catch (Exception $e) {
+}
 ?>
 okey
 --EXPECT--
