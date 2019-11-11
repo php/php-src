@@ -493,7 +493,7 @@ static void get_icu_disp_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAME
 
 	intl_error_reset( NULL );
 
-	if(zend_parse_parameters( ZEND_NUM_ARGS(), "s|s",
+	if(zend_parse_parameters( ZEND_NUM_ARGS(), "s|s!",
 		&loc_name, &loc_name_len ,
 		&disp_loc_name ,&disp_loc_name_len ) == FAILURE)
 	{
@@ -1549,11 +1549,11 @@ PHP_FUNCTION(locale_lookup)
 /* }}} */
 
 /* {{{ proto string Locale::acceptFromHttp(string $http_accept)
-* Tries to find out best available locale based on HTTP �Accept-Language� header
+* Tries to find out best available locale based on HTTP "Accept-Language" header
 */
 /* }}} */
 /* {{{ proto string locale_accept_from_http(string $http_accept)
-* Tries to find out best available locale based on HTTP �Accept-Language� header
+* Tries to find out best available locale based on HTTP "Accept-Language" header
 */
 PHP_FUNCTION(locale_accept_from_http)
 {
