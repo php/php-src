@@ -1285,7 +1285,7 @@ PHP_FUNCTION(locale_filter_matches)
 	if( boolCanonical ){
 		/* canonicalize loc_range */
 		can_loc_range=get_icu_value_internal( loc_range , LOC_CANONICALIZE_TAG , &result , 0);
-		if( result ==0) {
+		if( result <=0) {
 			intl_error_set( NULL, status,
 				"locale_filter_matches : unable to canonicalize loc_range" , 0 );
 			RETURN_FALSE;
@@ -1293,7 +1293,7 @@ PHP_FUNCTION(locale_filter_matches)
 
 		/* canonicalize lang_tag */
 		can_lang_tag = get_icu_value_internal( lang_tag , LOC_CANONICALIZE_TAG , &result ,  0);
-		if( result ==0) {
+		if( result <=0) {
 			intl_error_set( NULL, status,
 				"locale_filter_matches : unable to canonicalize lang_tag" , 0 );
 			RETURN_FALSE;
