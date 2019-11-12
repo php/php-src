@@ -516,7 +516,8 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				fprintf(stderr, " (bool)");
 				break;
 			default:
-				fprintf(stderr, " (\?\?\?)");
+				fprintf(stderr, " TYPE");
+				zend_dump_type_info(opline->extended_value, NULL, 0, dump_flags);
 				break;
 		}
 	} else if (ZEND_VM_EXT_EVAL == (flags & ZEND_VM_EXT_MASK)) {

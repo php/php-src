@@ -4436,7 +4436,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_C
 	value = RT_CONSTANT(opline, opline->op1);
 	if ((opline->extended_value >> (uint32_t)Z_TYPE_P(value)) & 1) {
 type_check_resource:
-		if (EXPECTED(Z_TYPE_P(value) != IS_RESOURCE)
+		if (opline->extended_value != MAY_BE_RESOURCE
 		 || EXPECTED(NULL != zend_rsrc_list_get_rsrc_type(Z_RES_P(value)))) {
 			result = 1;
 		}
@@ -13254,7 +13254,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_TM
 	value = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 	if ((opline->extended_value >> (uint32_t)Z_TYPE_P(value)) & 1) {
 type_check_resource:
-		if (EXPECTED(Z_TYPE_P(value) != IS_RESOURCE)
+		if (opline->extended_value != MAY_BE_RESOURCE
 		 || EXPECTED(NULL != zend_rsrc_list_get_rsrc_type(Z_RES_P(value)))) {
 			result = 1;
 		}
@@ -36407,7 +36407,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_CV
 	value = EX_VAR(opline->op1.var);
 	if ((opline->extended_value >> (uint32_t)Z_TYPE_P(value)) & 1) {
 type_check_resource:
-		if (EXPECTED(Z_TYPE_P(value) != IS_RESOURCE)
+		if (opline->extended_value != MAY_BE_RESOURCE
 		 || EXPECTED(NULL != zend_rsrc_list_get_rsrc_type(Z_RES_P(value)))) {
 			result = 1;
 		}

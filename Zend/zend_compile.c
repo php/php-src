@@ -7385,8 +7385,28 @@ void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 					break;
 				}
 			}
-		}
-		if (opcode == ZEND_CONCAT) {
+		} else if (opcode == ZEND_IS_IDENTICAL || opcode == ZEND_IS_NOT_IDENTICAL) {
+			/* convert $x === null to is_null($x) (i.e. ZEND_TYPE_CHECK opcode). Do the same thing for false/true. (covers IS_NULL, IS_FALSE, and IS_TRUE) */
+			if (left_node.op_type == IS_CONST) {
+				if (Z_TYPE(left_node.u.constant) <= IS_TRUE && Z_TYPE(left_node.u.constant) >= IS_NULL) {
+					zend_op *opline = zend_emit_op_tmp(result, ZEND_TYPE_CHECK, &right_node, NULL);
+					opline->extended_value =
+						(opcode == ZEND_IS_IDENTICAL) ?
+							(1 << Z_TYPE(left_node.u.constant)) :
+							(MAY_BE_ANY - (1 << Z_TYPE(left_node.u.constant)));
+					return;
+				}
+			} else if (right_node.op_type == IS_CONST) {
+				if (Z_TYPE(right_node.u.constant) <= IS_TRUE && Z_TYPE(right_node.u.constant) >= IS_NULL) {
+					zend_op *opline = zend_emit_op_tmp(result, ZEND_TYPE_CHECK, &left_node, NULL);
+					opline->extended_value =
+						(opcode == ZEND_IS_IDENTICAL) ?
+							(1 << Z_TYPE(right_node.u.constant)) :
+							(MAY_BE_ANY - (1 << Z_TYPE(right_node.u.constant)));
+					return;
+				}
+			}
+		} else if (opcode == ZEND_CONCAT) {
 			/* convert constant operands to strings at compile-time */
 			if (left_node.op_type == IS_CONST) {
 				if (Z_TYPE(left_node.u.constant) == IS_ARRAY) {

@@ -7848,7 +7848,7 @@ ZEND_VM_HOT_NOCONST_HANDLER(123, ZEND_TYPE_CHECK, CONST|TMPVAR|CV, ANY, TYPE_MAS
 	value = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	if ((opline->extended_value >> (uint32_t)Z_TYPE_P(value)) & 1) {
 ZEND_VM_C_LABEL(type_check_resource):
-		if (EXPECTED(Z_TYPE_P(value) != IS_RESOURCE)
+		if (opline->extended_value != MAY_BE_RESOURCE
 		 || EXPECTED(NULL != zend_rsrc_list_get_rsrc_type(Z_RES_P(value)))) {
 			result = 1;
 		}

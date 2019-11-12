@@ -8003,7 +8003,7 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, int b, i
 	zend_bool smart_branch = 0;
 	zend_jit_addr op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, NULL, -1);
 
-	if (opline->extended_value & MAY_BE_RESOURCE) {
+	if (opline->extended_value == MAY_BE_RESOURCE) {
 		// TODO: support for is_resource() ???
 		goto fallback;
 	}
