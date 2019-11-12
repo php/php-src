@@ -2622,7 +2622,7 @@ static void zend_compile_list_assign(
 				continue;
 			}
 		}
-		
+
 		if (elem_ast->kind == ZEND_AST_UNPACK) {
 			zend_error(E_COMPILE_ERROR,
 					"Spread operator is not supported in assignments");
@@ -5611,7 +5611,7 @@ static void find_implicit_binds(closure_info *info, zend_ast *params_ast, zend_a
 	zend_ast_list *param_list = zend_ast_get_list(params_ast);
 	uint32_t i;
 
-	zend_hash_init(&info->uses, param_list->children, NULL, NULL, 0); 
+	zend_hash_init(&info->uses, param_list->children, NULL, NULL, 0);
 
 	find_implicit_binds_recursively(info, stmt_ast);
 
@@ -7072,7 +7072,7 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 		if (elem_ast->kind != ZEND_AST_UNPACK) {
 			zend_eval_const_expr(&elem_ast->child[0]);
 			zend_eval_const_expr(&elem_ast->child[1]);
-			
+
 			if (elem_ast->attr /* by_ref */ || elem_ast->child[0]->kind != ZEND_AST_ZVAL
 				|| (elem_ast->child[1] && elem_ast->child[1]->kind != ZEND_AST_ZVAL)
 			) {
@@ -7080,7 +7080,7 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 			}
 		} else {
 			zend_eval_const_expr(&elem_ast->child[0]);
-			
+
 			if (elem_ast->child[0]->kind != ZEND_AST_ZVAL) {
 				is_constant = 0;
 			}
@@ -7121,13 +7121,13 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 					}
 					Z_TRY_ADDREF_P(val);
 				} ZEND_HASH_FOREACH_END();
-		
+
 				continue;
 			} else {
 				zend_error_noreturn(E_COMPILE_ERROR, "Only arrays and Traversables can be unpacked");
 			}
-		} 
-		
+		}
+
 		Z_TRY_ADDREF_P(value);
 
 		key_ast = elem_ast->child[1];
