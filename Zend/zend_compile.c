@@ -3394,6 +3394,21 @@ int zend_compile_func_typecheck(znode *result, zend_ast_list *args, uint32_t typ
 }
 /* }}} */
 
+static int zend_compile_func_is_scalar(znode *result, zend_ast_list *args) /* {{{ */
+{
+	znode arg_node;
+	zend_op *opline;
+
+	if (args->children != 1) {
+		return FAILURE;
+	}
+
+	zend_compile_expr(&arg_node, args->child[0]);
+	opline = zend_emit_op_tmp(result, ZEND_TYPE_CHECK, &arg_node, NULL);
+    opline->extended_value = (1 << IS_FALSE | 1 << IS_TRUE | 1 << IS_DOUBLE | 1 << IS_LONG | 1 << IS_STRING);
+	return SUCCESS;
+}
+
 int zend_compile_func_cast(znode *result, zend_ast_list *args, uint32_t type) /* {{{ */
 {
 	znode arg_node;
@@ -3912,6 +3927,8 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 		return zend_compile_func_typecheck(result, args, IS_OBJECT);
 	} else if (zend_string_equals_literal(lcname, "is_resource")) {
 		return zend_compile_func_typecheck(result, args, IS_RESOURCE);
+	} else if (zend_string_equals_literal(lcname, "is_scalar")) {
+		return zend_compile_func_is_scalar(result, args);
 	} else if (zend_string_equals_literal(lcname, "boolval")) {
 		return zend_compile_func_cast(result, args, _IS_BOOL);
 	} else if (zend_string_equals_literal(lcname, "intval")) {
