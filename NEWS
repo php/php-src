@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2019, PHP 7.2.26
 
+- Intl:
+  . Fixed bug #78804 (Segmentation fault in Locale::filterMatches). (Stas)
+
 - Standard:
   . Fixed bug #78759 (array_search in $GLOBALS). (Nikita)
 
@@ -27,7 +30,7 @@ PHP                                                                        NEWS
     cmb).
 
 - OpCache:
-  . Fixed bug #78654 (Incorrectly computed opcache checksum on files with 
+  . Fixed bug #78654 (Incorrectly computed opcache checksum on files with
     non-ascii characters). (mhagstrand)
   . Fixed bug #78747 (OpCache corrupts custom extension result). (Nikita)
 
@@ -36,7 +39,7 @@ PHP                                                                        NEWS
     connections). (Nikita)
 
 - Reflection:
-  . Fixed bug #78697 (ReflectionClass::ImplementsInterface - inaccurate error 
+  . Fixed bug #78697 (ReflectionClass::ImplementsInterface - inaccurate error
     message with traits). (villfa)
 
 - Sockets:
