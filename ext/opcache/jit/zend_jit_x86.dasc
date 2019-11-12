@@ -8028,6 +8028,7 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, int b, i
 		|	SAVE_VALID_OPLINE opline
 		|	mov FCARG1d, opline->op1.var
 		|	EXT_CALL zend_jit_undefined_op_helper, r0
+		zend_jit_check_exception_undef_result(Dst, opline);
 		if (opline->extended_value & MAY_BE_NULL) {
 			if (!zend_jit_smart_true(Dst, opline, b, op_array, ssa, (op1_info & (MAY_BE_ANY|MAY_BE_REF)) != 0, smart_branch)) {
 				return 0;
