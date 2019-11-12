@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #78787 (Segfault with trait overriding inherited private shadow
     property). (Nikita)
 
+- OPcache:
+  . Fixed potential ASLR related invalid opline handler issues. (cmb)
+
 - Standard:
   . Fixed bug #78759 (array_search in $GLOBALS). (Nikita)
 
