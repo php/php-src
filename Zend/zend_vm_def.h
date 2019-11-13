@@ -487,7 +487,7 @@ ZEND_VM_C_LABEL(compare_values_any_type):
 	}
 ZEND_VM_C_LABEL(compare_values):
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((OP1_TYPE & IS_CV) || (OP2_TYPE & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((OP1_TYPE & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((OP2_TYPE & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -588,7 +588,7 @@ ZEND_VM_C_LABEL(compare_values_any_type):
 	}
 ZEND_VM_C_LABEL(compare_values):
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((OP1_TYPE & IS_CV) || (OP2_TYPE & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((OP1_TYPE & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((OP2_TYPE & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();

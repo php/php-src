@@ -4799,7 +4799,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_CONST & IS_CV) || (IS_CONST & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_CONST & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_CONST & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -4900,7 +4900,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_CONST & IS_CV) || (IS_CONST & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_CONST & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_CONST & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -18007,7 +18007,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_TMP_VAR & IS_CV) || (IS_CONST & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_TMP_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_CONST & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -18108,7 +18108,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_TMP_VAR & IS_CV) || (IS_CONST & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_TMP_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_CONST & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -18980,7 +18980,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_TMP_VAR & IS_CV) || (IS_TMP_VAR & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_TMP_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_TMP_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -19081,7 +19081,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_TMP_VAR & IS_CV) || (IS_TMP_VAR & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_TMP_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_TMP_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -21361,7 +21361,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_VAR & IS_CV) || (IS_CONST & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_CONST & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -21462,7 +21462,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_VAR & IS_CV) || (IS_CONST & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_CONST & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -25904,7 +25904,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_VAR & IS_CV) || (IS_TMP_VAR & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_TMP_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -26005,7 +26005,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_VAR & IS_CV) || (IS_TMP_VAR & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_TMP_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -26146,7 +26146,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_VAR & IS_CV) || (IS_VAR & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -26247,7 +26247,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_VAR & IS_CV) || (IS_VAR & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -37797,7 +37797,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_CV & IS_CV) || (IS_CONST & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_CV & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_CONST & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -37898,7 +37898,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_CV & IS_CV) || (IS_CONST & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_CV & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_CONST & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -44447,7 +44447,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_CV & IS_CV) || (IS_TMP_VAR & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_CV & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_TMP_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -44548,7 +44548,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_CV & IS_CV) || (IS_TMP_VAR & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_CV & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_TMP_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -44689,7 +44689,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_CV & IS_CV) || (IS_VAR & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_CV & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -44790,7 +44790,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_CV & IS_CV) || (IS_VAR & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_CV & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_VAR & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -46516,7 +46516,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_CV & IS_CV) || (IS_CV & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_CV & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_CV & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
@@ -46617,7 +46617,7 @@ compare_values_any_type:
 	}
 compare_values:
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
-		if (((IS_CV & IS_CV) || (IS_CV & IS_CV)) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+		if (((IS_CV & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) || ((IS_CV & IS_CV) && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF))) {
 			/* They are both undefined - fetch them to emit the undefined variable warnings. */
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
