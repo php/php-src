@@ -2818,6 +2818,13 @@ function gen_vm($def, $skel) {
 				if (isset($dsc['type_spec'])) {
 					$orig_op = $dsc['op'];
 					out($f, "\t\tcase $orig_op:\n");
+					// XXX: Copy the specializations for LONG == LONG and DOUBLE != DOUBLE to work for ===/!== as well.
+					// (Those are currently the only specializations)
+					if ($orig_op === 'ZEND_IS_EQUAL') {
+						out($f, "\t\tcase ZEND_IS_IDENTICAL:\n");
+					} elseif ($orig_op === 'ZEND_IS_NOT_EQUAL') {
+						out($f, "\t\tcase ZEND_IS_NOT_IDENTICAL:\n");
+					}
 					if (isset($dsc["spec"]["COMMUTATIVE"])) {
 						out($f, "\t\t\tif (op->op1_type < op->op2_type) {\n");
 						out($f, "\t\t\t\tzend_swap_operands(op);\n");
@@ -2857,8 +2864,10 @@ function gen_vm($def, $skel) {
 				    !isset($dsc['type_spec']) &&
 				    isset($dsc["spec"]["COMMUTATIVE"])) {
 					$orig_op = $dsc['op'];
-					out($f, "\t\tcase $orig_op:\n");
-					$has_commutative = true;
+					if (!in_array($orig_op, ['ZEND_IS_IDENTICAL', 'ZEND_IS_NOT_IDENTICAL'])) {
+						out($f, "\t\tcase $orig_op:\n");
+						$has_commutative = true;
+					}
 				}
 			}
 			if ($has_commutative) {
