@@ -1003,7 +1003,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 					SET_RESULT(result, &zv);
 					return;
 				} else if (!(type & ((MAY_BE_ANY|MAY_BE_UNDEF) - expected_type_mask))
-						   && !(expected_type_mask & MAY_BE_RESOURCE)) {
+						   && !(type & expected_type_mask & MAY_BE_RESOURCE)) {
 					ZVAL_TRUE(&zv);
 					SET_RESULT(result, &zv);
 					return;
