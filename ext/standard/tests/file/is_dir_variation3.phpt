@@ -1,5 +1,7 @@
 --TEST--
 Test is_dir() function: usage variations - invalid arguments
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /* Prototype: bool is_dir ( string $dirname );
@@ -31,8 +33,6 @@ foreach($dirnames as $dirname) {
   var_dump( is_dir($dirname) );
 }
 closedir($dir_handle);
-
-echo "\n*** Done ***";
 ?>
 --EXPECTF--
 *** Testing is_dir() with Invalid arguments: expected bool(false) ***
@@ -46,5 +46,3 @@ Warning: is_dir() expects parameter 1 to be a valid path, resource given in %s o
 NULL
 bool(false)
 bool(false)
-
-*** Done ***
