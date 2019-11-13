@@ -2,6 +2,8 @@
 Test filegroup() function: usage variations - invalid filenames
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /* Prototype: int filegroup ( string $filename )
@@ -35,8 +37,6 @@ foreach( $filenames as $filename ) {
   clearstatcache();
 }
 fclose($file_handle);
-
-echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
@@ -66,5 +66,3 @@ bool(false)
 
 Warning: filegroup(): stat failed for 0 in %s on line %d
 bool(false)
-
-*** Done ***

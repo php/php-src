@@ -4,6 +4,8 @@ Test is_writable() and its alias is_writeable() function: usage variations - inv
 <?php
 require __DIR__ . '/../skipif_root.inc';
 ?>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /* Prototype: bool is_writable ( string $filename );
@@ -35,8 +37,6 @@ foreach( $misc_files as $misc_file ) {
   var_dump( is_writeable($misc_file) );
   clearstatcache();
 }
-
-echo "Done\n";
 ?>
 --EXPECTF--
 *** Testing is_writable(): usage variations ***
@@ -64,4 +64,3 @@ Warning: is_writeable() expects parameter 1 to be a valid path, array given in %
 NULL
 bool(false)
 bool(false)
-Done

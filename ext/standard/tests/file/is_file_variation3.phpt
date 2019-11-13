@@ -1,5 +1,7 @@
 --TEST--
 Test is_file() function: usage variations - invalid filenames
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /* Prototype: bool is_file ( string $filename );

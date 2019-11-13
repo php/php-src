@@ -1,5 +1,7 @@
 --TEST--
 Test flock() function: Error conditions
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /*
@@ -47,8 +49,6 @@ var_dump(flock($fp));
 
 /* No.of args greater than expected */
 var_dump(flock($fp, "", $var, ""));
-
-echo "\n*** Done ***\n";
 ?>
 --CLEAN--
 <?php
@@ -108,5 +108,3 @@ NULL
 
 Warning: flock() expects at most 3 parameters, 4 given in %s on line %d
 NULL
-
-*** Done ***

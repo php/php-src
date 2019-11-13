@@ -5,6 +5,8 @@ Test tempnam() function: usage variations - obscure prefixes
 if(substr(PHP_OS, 0, 3) == "WIN")
   die("skip Do not run on Windows");
 ?>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /* Prototype:  string tempnam ( string $dir, string $prefix );
@@ -71,7 +73,6 @@ for( $i=0; $i<count($names_arr); $i++ ) {
 }
 
 rmdir($file_path);
-echo "\n*** Done ***\n";
 ?>
 --EXPECTF--
 *** Testing tempnam() with obscure prefixes ***
@@ -119,5 +120,3 @@ File created in => directory specified
 File name is => %s/php%s
 File permissions are => 100600
 File created in => directory specified
-
-*** Done ***

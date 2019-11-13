@@ -7,6 +7,8 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if(substr(PHP_OS, 0, 3) != "WIN")
   die("skip run only on Windows");
 ?>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /* Prototype  : int readfile(string filename [, bool use_include_path[, resource context]])
@@ -41,7 +43,6 @@ foreach($names_arr as $key => $value) {
 };
 
 ?>
-===Done===
 --EXPECTF--
 *** Testing readfile() : variation ***
 
@@ -84,4 +85,3 @@ Warning: readfile(/no/such/file/dir): failed to open stream: No such file or dir
 -- Filename: php/php --
 
 Warning: readfile(php/php): failed to open stream: No such file or directory in %s on line %d
-===Done===
