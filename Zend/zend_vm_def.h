@@ -484,7 +484,6 @@ ZEND_VM_C_LABEL(compare_values_any_type):
 		FREE_OP1();
 		FREE_OP2();
 		ZEND_VM_SMART_BRANCH(0, 1);
-		return;
 	}
 ZEND_VM_C_LABEL(compare_values):
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
@@ -493,14 +492,12 @@ ZEND_VM_C_LABEL(compare_values):
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
 			ZEND_VM_SMART_BRANCH(1, 1);
-			return;
 		}
 		/* They are identical, return true */
 		/* This has to check for undefined variable errors when IS_UNDEF is possible. (only warns for IS_CV) */
 		FREE_OP1();
 		FREE_OP2();
 		ZEND_VM_SMART_BRANCH(1, 0);
-		return;
 	}
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
@@ -588,7 +585,6 @@ ZEND_VM_C_LABEL(compare_values_any_type):
 		FREE_OP1();
 		FREE_OP2();
 		ZEND_VM_SMART_BRANCH(1, 1);
-		return;
 	}
 ZEND_VM_C_LABEL(compare_values):
 	if (Z_TYPE_P(op1) <= IS_TRUE) {
@@ -597,14 +593,12 @@ ZEND_VM_C_LABEL(compare_values):
 			op1 = ZVAL_UNDEFINED_OP1();
 			op2 = ZVAL_UNDEFINED_OP2();
 			ZEND_VM_SMART_BRANCH(0, 1);
-			return;
 		}
 		/* They are identical, return false. */
 		/* This has to check for undefined variable errors when IS_UNDEF is possible. (only warns for IS_CV) */
 		FREE_OP1();
 		FREE_OP2();
 		ZEND_VM_SMART_BRANCH(0, 0);
-		return;
 	}
 	switch (Z_TYPE_P(op1)) {
 		case IS_LONG:
