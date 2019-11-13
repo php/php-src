@@ -59193,7 +59193,6 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				spec = 2512 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
-		case ZEND_IS_EQUAL:
 		case ZEND_IS_IDENTICAL:
 			if (op->op1_type < op->op2_type) {
 				zend_swap_operands(op);
@@ -59210,8 +59209,39 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 				spec = 2612 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
 			}
 			break;
-		case ZEND_IS_NOT_EQUAL:
 		case ZEND_IS_NOT_IDENTICAL:
+			if (op->op1_type < op->op2_type) {
+				zend_swap_operands(op);
+			}
+			if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
+				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
+					break;
+				}
+				spec = 2687 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
+				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
+					break;
+				}
+				spec = 2762 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+			}
+			break;
+		case ZEND_IS_EQUAL:
+			if (op->op1_type < op->op2_type) {
+				zend_swap_operands(op);
+			}
+			if (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG) {
+				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
+					break;
+				}
+				spec = 2537 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+			} else if (op1_info == MAY_BE_DOUBLE && op2_info == MAY_BE_DOUBLE) {
+				if (op->op1_type == IS_CONST && op->op2_type == IS_CONST) {
+					break;
+				}
+				spec = 2612 | SPEC_RULE_OP1 | SPEC_RULE_OP2 | SPEC_RULE_SMART_BRANCH | SPEC_RULE_COMMUTATIVE;
+			}
+			break;
+		case ZEND_IS_NOT_EQUAL:
 			if (op->op1_type < op->op2_type) {
 				zend_swap_operands(op);
 			}
