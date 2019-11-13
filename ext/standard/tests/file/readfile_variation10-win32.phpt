@@ -7,6 +7,8 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if(substr(PHP_OS, 0, 3) != "WIN")
   die("skip run only on Windows");
 ?>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /* Prototype  : int readfile(string filename [, bool use_include_path[, resource context]])
