@@ -19,6 +19,7 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #55005 (imagepolygon num_points requirement). (cmb)
   . Replaced gd resources with objects. (Mark Randall)
+  . Made the $num_points parameter of php_imagepolygon optional. (cmb)
   . Removed deprecated image2wbmp(). (cmb)
   . Removed deprecated png2wbmp() and jpeg2wbmp(). (cmb)
 

@@ -38,7 +38,7 @@ $cos_t = cos(deg2rad($delta_t));
 $sin_t = sin(deg2rad($delta_t));
 for ($angle = 0.0, $i = 0; $angle < 360.0; $angle += $delta_t, $i++) {
   $bbox = imagettftext($g, 24, $angle, 400+$x, 400+$y, $black, $font, 'ABCDEF');
-  imagepolygon($g, $bbox, 4, $red);
+  imagepolygon($g, $bbox, $red);
   printf("%2d: ", $i);
   for ($j = 0; $j < 8; $j++) {
 	if ($bbox[$j] >= $exp[$i][$j] - 1 && $bbox[$j] <= $exp[$i][$j] + 1) {

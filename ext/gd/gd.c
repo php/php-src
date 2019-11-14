@@ -2735,8 +2735,17 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 	gdPointPtr points;
 	int npoints, col, nelem, i;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oall", &IM, gd_image_ce, &POINTS, &NPOINTS, &COL) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oal|l", &IM, gd_image_ce, &POINTS, &NPOINTS, &COL) == FAILURE) {
 		return;
+	}
+	if (ZEND_NUM_ARGS() == 3) {
+		COL = NPOINTS;
+		NPOINTS = zend_hash_num_elements(Z_ARRVAL_P(POINTS));
+		if (NPOINTS % 2 != 0) {
+			zend_value_error("Points array must have an even number of elements");
+			return;
+		}
+		NPOINTS /= 2;
 	}
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
