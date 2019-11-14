@@ -17,8 +17,5 @@ trycatch_dump(
 );
 ?>
 --EXPECTF--
-Deprecated: imagefilledpolygon(): the $num_points parameter is deprecated in %s on line %d
 !! [ValueError] Polygon must have at least 3 points
-
-Deprecated: imagepolygon(): the $num_points parameter is deprecated in %s on line %d
 !! [ValueError] Polygon must have at least 3 points

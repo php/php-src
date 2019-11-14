@@ -2746,8 +2746,6 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 			return;
 		}
 		NPOINTS /= 2;
-	} else {
-		php_error_docref(NULL, E_DEPRECATED, "the $num_points parameter is deprecated");
 	}
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
