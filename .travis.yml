@@ -1,7 +1,7 @@
 git:
   quiet: true
 
-dist: xenial
+dist: bionic
 language: c
 sudo: required
 addons:
