@@ -503,7 +503,7 @@ static const func_info_t func_infos[] = {
 	FN("array_key_last",               MAY_BE_NULL | MAY_BE_LONG | MAY_BE_STRING),
 	F1("pos",                          UNKNOWN_INFO),
 	F1("assert_options",               MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_OBJECT | MAY_BE_OBJECT),
-	F0("version_compare",              MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_LONG),
+	F0("version_compare",              MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_LONG),
 	F1("str_rot13",                    MAY_BE_STRING),
 	F1("stream_get_filters",           MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
 	F0("stream_filter_register",       MAY_BE_FALSE | MAY_BE_TRUE),
