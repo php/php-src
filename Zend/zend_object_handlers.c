@@ -1013,8 +1013,16 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 			if (EXPECTED(!zobj->ce->__get) ||
 			    UNEXPECTED((*zend_get_property_guard(zobj, name)) & IN_GET)) {
 				if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
-					ZVAL_NULL(retval);
-					zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+					if (UNEXPECTED(prop_info)) {
+						zend_throw_error(NULL,
+							"Typed property %s::$%s must not be accessed before initialization",
+							ZSTR_VAL(prop_info->ce->name),
+							ZSTR_VAL(name));
+						retval = &EG(error_zval);
+					} else {
+						ZVAL_NULL(retval);
+						zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+					}
 				}
 			} else {
 				/* we do have getter - fail and let it try again with usual get/set */
