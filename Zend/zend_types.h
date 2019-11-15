@@ -269,6 +269,9 @@ typedef struct {
 	{ (void *) (ptr), \
 		(type_kind) | ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags) }
 
+#define ZEND_TYPE_INIT_PTR_MASK(ptr, type_mask) \
+	{ (void *) (ptr), (type_mask) }
+
 #define ZEND_TYPE_INIT_CE(_ce, allow_null, extra_flags) \
 	ZEND_TYPE_INIT_PTR(_ce, _ZEND_TYPE_CE_BIT, allow_null, extra_flags)
 
@@ -277,6 +280,9 @@ typedef struct {
 
 #define ZEND_TYPE_INIT_CLASS_CONST(class_name, allow_null, extra_flags) \
 	ZEND_TYPE_INIT_PTR(class_name, _ZEND_TYPE_NAME_BIT, allow_null, extra_flags)
+
+#define ZEND_TYPE_INIT_CLASS_CONST_MASK(class_name, type_mask) \
+	ZEND_TYPE_INIT_PTR_MASK(class_name, _ZEND_TYPE_NAME_BIT | (type_mask))
 
 typedef union _zend_value {
 	zend_long         lval;				/* long value */

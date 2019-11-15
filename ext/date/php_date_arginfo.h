@@ -53,20 +53,27 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_getdate, 0, 0, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_create, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_date_create, 0, 0, DateTime, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, time, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO(0, timezone, DateTimeZone, 1)
 ZEND_END_ARG_INFO()
 
-#define arginfo_date_create_immutable arginfo_date_create
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_date_create_immutable, 0, 0, DateTimeImmutable, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, time, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, timezone, DateTimeZone, 1)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_create_from_format, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_date_create_from_format, 0, 2, DateTime, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, time, IS_STRING, 0)
 	ZEND_ARG_OBJ_INFO(0, timezone, DateTimeZone, 1)
 ZEND_END_ARG_INFO()
 
-#define arginfo_date_create_immutable_from_format arginfo_date_create_from_format
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_date_create_immutable_from_format, 0, 2, DateTimeImmutable, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, time, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, timezone, DateTimeZone, 1)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_date_parse, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, date, IS_STRING, 0)
@@ -85,7 +92,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_date_format, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_modify, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_date_modify, 0, 2, DateTime, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, object, DateTime, 0)
 	ZEND_ARG_TYPE_INFO(0, modify, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -97,7 +104,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_date_sub arginfo_date_add
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_timezone_get, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_date_timezone_get, 0, 1, DateTimeZone, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, object, DateTimeInterface, 0)
 ZEND_END_ARG_INFO()
 
@@ -147,7 +154,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_date_timestamp_get, 0, 1, MAY_BE
 	ZEND_ARG_OBJ_INFO(0, object, DateTimeInterface, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_open, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_timezone_open, 0, 1, DateTimeZone, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timezone, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -187,7 +194,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_timezone_version_get, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_interval_create_from_date_string, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_date_interval_create_from_date_string, 0, 1, DateInterval, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, time, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -237,7 +244,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeInterface___wakeup arginfo_class_DateTimeInterface_getTimezone
 
-#define arginfo_class_DateTime___construct arginfo_date_create
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime___construct, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, time, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, timezone, DateTimeZone, 1)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime___set_state, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
@@ -247,7 +257,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_createFromImmutable, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, object, DateTimeImmutable, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DateTime_createFromFormat arginfo_date_create_from_format
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_createFromFormat, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, time, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, timezone, DateTimeZone, 1)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTime_getLastErrors arginfo_class_DateTimeInterface_getTimezone
 
@@ -288,7 +302,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_setTimestamp, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DateTimeImmutable___construct arginfo_date_create
+#define arginfo_class_DateTimeImmutable___construct arginfo_class_DateTime___construct
 
 #define arginfo_class_DateTimeImmutable___set_state arginfo_class_DateTime___set_state
 
@@ -296,7 +310,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeImmutable_createFromMutable, 0, 0, 
 	ZEND_ARG_OBJ_INFO(0, object, DateTime, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DateTimeImmutable_createFromFormat arginfo_date_create_from_format
+#define arginfo_class_DateTimeImmutable_createFromFormat arginfo_class_DateTime_createFromFormat
 
 #define arginfo_class_DateTimeImmutable_getLastErrors arginfo_class_DateTimeInterface_getTimezone
 
@@ -316,7 +330,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeImmutable_setTimestamp arginfo_class_DateTime_setTimestamp
 
-#define arginfo_class_DateTimeZone___construct arginfo_timezone_open
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeZone___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, timezone, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeZone_getName arginfo_class_DateTimeInterface_getTimezone
 
@@ -346,7 +362,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateInterval___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, interval_spec, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_DateInterval_createFromDateString arginfo_date_interval_create_from_date_string
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateInterval_createFromDateString, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, time, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateInterval_format arginfo_class_DateTimeInterface_format
 

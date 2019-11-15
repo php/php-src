@@ -31,18 +31,16 @@ function localtime(int $timestamp = UNKNOWN, bool $associative = false): array {
 
 function getdate(int $timestamp = UNKNOWN): array {}
 
-/** @return DateTime|false */
-function date_create(string $time = "now", ?DateTimeZone $timezone = null) {}
+function date_create(string $time = "now", ?DateTimeZone $timezone = null): DateTime|false {}
 
-/** @return DateTime|false */
-function date_create_immutable(string $time = "now", ?DateTimeZone $timezone = null) {}
+function date_create_immutable(
+    string $time = "now", ?DateTimeZone $timezone = null): DateTimeImmutable|false {}
 
-/** @return DateTime|false */
-function date_create_from_format(string $format, string $time, ?DateTimeZone $timezone = null) {}
+function date_create_from_format(
+    string $format, string $time, ?DateTimeZone $timezone = null): DateTime|false {}
 
-/** @return DateTimeImmutable|false */
 function date_create_immutable_from_format(
-    string $format, string $time, ?DateTimeZone $timezone = null) {}
+    string $format, string $time, ?DateTimeZone $timezone = null): DateTimeImmutable|false {}
 
 function date_parse(string $date): array {}
 
@@ -52,15 +50,13 @@ function date_get_last_errors(): array|false {}
 
 function date_format(DateTimeInterface $object, string $format): string {}
 
-/** @return DateTime|false */
-function date_modify(DateTime $object, string $modify) {}
+function date_modify(DateTime $object, string $modify): DateTime|false {}
 
 function date_add(DateTime $object, DateInterval $interval): DateTime {}
 
 function date_sub(DateTime $object, DateInterval $interval): DateTime {}
 
-/** @return DateTimeZone|false */
-function date_timezone_get(DateTimeInterface $object) {}
+function date_timezone_get(DateTimeInterface $object): DateTimeZone|false {}
 
 function date_timezone_set(DateTimeInterface $object, DateTimeZone $timezone): DateTime {}
 
@@ -80,8 +76,7 @@ function date_timestamp_set(DateTime $object, int $timestamp): DateTime {}
 
 function date_timestamp_get(DateTimeInterface $object): int|false {}
 
-/** @return DateTimeZone|false */
-function timezone_open(string $timezone) {}
+function timezone_open(string $timezone): DateTimeZone|false {}
 
 function timezone_name_get(DateTimeZone $object): string {}
 
@@ -100,8 +95,7 @@ function timezone_abbreviations_list(): array {}
 
 function timezone_version_get(): string {}
 
-/** @return DateInterval|false */
-function date_interval_create_from_date_string(string $time) {}
+function date_interval_create_from_date_string(string $time): DateInterval|false {}
 
 function date_interval_format(DateInterval $object, string $format): string {}
 

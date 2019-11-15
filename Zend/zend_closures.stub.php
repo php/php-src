@@ -12,6 +12,9 @@ Class Closure
 
     function call(object $newthis, ...$parameters) {}
 
-    /** @return Closure */
-    function fromCallable(callable $callable) {}
+    /**
+     * @param callable $callable Not a proper type annotation due to bug #78770
+     * @return Closure
+     */
+    function fromCallable($callable) {}
 }

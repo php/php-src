@@ -131,6 +131,10 @@ class SimpleType {
         }
     }
 
+    public function toEscapedName(): string {
+        return str_replace('\\', '\\\\', $this->name);
+    }
+
     public function equals(SimpleType $other) {
         return $this->name === $other->name
             && $this->isBuiltin === $other->isBuiltin;
@@ -167,15 +171,6 @@ class Type {
         return false;
     }
 
-    public function isBuiltinOnly(): bool {
-        foreach ($this->types as $type) {
-            if (!$type->isBuiltin) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public function getWithoutNull(): Type {
         return new Type(array_filter($this->types, function(SimpleType $type) {
             return !$type->isNull();
@@ -190,10 +185,20 @@ class Type {
         return null;
     }
 
-    public function toTypeMask(): string {
-        return implode('|', array_map(function(SimpleType $type) {
-            return $type->toTypeMask();
-        }, $this->types));
+    public function tryToRepresentableType(): ?RepresentableType {
+        $classType = null;
+        $builtinTypes = [];
+        foreach ($this->types as $type) {
+            if ($type->isBuiltin) {
+                $builtinTypes[] = $type;
+            } else if ($classType === null) {
+                $classType = $type;
+            } else {
+                // We can only represent a single class type.
+                return false;
+            }
+        }
+        return new RepresentableType($classType, $builtinTypes);
     }
 
     public static function equals(?Type $a, ?Type $b): bool {
@@ -212,6 +217,24 @@ class Type {
         }
 
         return true;
+    }
+}
+
+class RepresentableType {
+    /** @var ?SimpleType $classType */
+    public $classType;
+    /** @var SimpleType[] $builtinTypes */
+    public $builtinTypes;
+
+    public function __construct(?SimpleType $classType, array $builtinTypes) {
+        $this->classType = $classType;
+        $this->builtinTypes = $builtinTypes;
+    }
+
+    public function toTypeMask(): string {
+        return implode('|', array_map(function(SimpleType $type) {
+            return $type->toTypeMask();
+        }, $this->builtinTypes));
     }
 }
 
@@ -467,8 +490,7 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
     $code = '';
     $returnType = $funcInfo->return->type;
     if ($returnType !== null) {
-        $simpleReturnType = $returnType->tryToSimpleType();
-        if ($simpleReturnType !== null) {
+        if (null !== $simpleReturnType = $returnType->tryToSimpleType()) {
             if ($simpleReturnType->isBuiltin) {
                 $code .= sprintf(
                     "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_%s, %d, %d, %s, %d)\n",
@@ -479,15 +501,23 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
                 $code .= sprintf(
                     "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_%s, %d, %d, %s, %d)\n",
                     $funcInfo->name, $funcInfo->return->byRef, $funcInfo->numRequiredArgs,
-                    str_replace('\\', '\\\\', $simpleReturnType->name), $returnType->isNullable()
+                    $simpleReturnType->toEscapedName(), $returnType->isNullable()
                 );
             }
-        } else if ($returnType->isBuiltinOnly()) {
-            $code .= sprintf(
-                "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_%s, %d, %d, %s)\n",
-                $funcInfo->name, $funcInfo->return->byRef, $funcInfo->numRequiredArgs,
-                $returnType->toTypeMask()
-            );
+        } else if (null !== $representableType = $returnType->tryToRepresentableType()) {
+            if ($representableType->classType !== null) {
+                $code .= sprintf(
+                    "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_%s, %d, %d, %s, %s)\n",
+                    $funcInfo->name, $funcInfo->return->byRef, $funcInfo->numRequiredArgs,
+                    $representableType->classType->toEscapedName(), $representableType->toTypeMask()
+                );
+            } else {
+                $code .= sprintf(
+                    "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_%s, %d, %d, %s)\n",
+                    $funcInfo->name, $funcInfo->return->byRef, $funcInfo->numRequiredArgs,
+                    $representableType->toTypeMask()
+                );
+            }
         } else {
             throw new Exception('Unimplemented');
         }
@@ -514,7 +544,7 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
                     $code .= sprintf(
                         "\tZEND_%s_OBJ_INFO(%s, %s, %s, %d)\n",
                         $argKind, $argInfo->getSendByString(), $argInfo->name,
-                        str_replace('\\', '\\\\', $simpleArgType->name), $argType->isNullable()
+                        $simpleArgType->toEscapedName(), $argType->isNullable()
                     );
                 }
             } else {
