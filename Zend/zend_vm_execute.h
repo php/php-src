@@ -3181,22 +3181,21 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BOOL_NOT_SPEC_CON
 	zval *val;
 
 	val = RT_CONSTANT(opline, opline->op1);
-	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
-		ZVAL_FALSE(EX_VAR(opline->result.var));
-	} else if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
-		ZVAL_TRUE(EX_VAR(opline->result.var));
+	if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
 		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
+			ZVAL_TRUE(EX_VAR(opline->result.var));
 			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		}
+		ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_INFO_P(val) < IS_TRUE);
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		SAVE_OPLINE();
 		ZVAL_BOOL(EX_VAR(opline->result.var), !i_zend_is_true(val));
 
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
-	ZEND_VM_NEXT_OPCODE();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ECHO_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -3750,22 +3749,21 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BOOL_SPEC_CONST_H
 	zval *val;
 
 	val = RT_CONSTANT(opline, opline->op1);
-	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
-		ZVAL_TRUE(EX_VAR(opline->result.var));
-	} else if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
-		ZVAL_FALSE(EX_VAR(opline->result.var));
+	if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
 		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
+			ZVAL_FALSE(EX_VAR(opline->result.var));
 			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		}
+		ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_INFO_P(val) == IS_TRUE);
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		SAVE_OPLINE();
 		ZVAL_BOOL(EX_VAR(opline->result.var), i_zend_is_true(val));
 
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
-	ZEND_VM_NEXT_OPCODE();
 }
 
 static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -12641,22 +12639,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BOOL_NOT_SPEC_TMPVAR_HANDLER(Z
 	zval *val;
 
 	val = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
-	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
-		ZVAL_FALSE(EX_VAR(opline->result.var));
-	} else if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
-		ZVAL_TRUE(EX_VAR(opline->result.var));
+	if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
 		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
+			ZVAL_TRUE(EX_VAR(opline->result.var));
 			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		}
+		ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_INFO_P(val) < IS_TRUE);
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		SAVE_OPLINE();
 		ZVAL_BOOL(EX_VAR(opline->result.var), !i_zend_is_true(val));
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
-	ZEND_VM_NEXT_OPCODE();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ECHO_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -12943,22 +12940,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BOOL_SPEC_TMPVAR_HANDLER(ZEND_
 	zval *val;
 
 	val = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
-	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
-		ZVAL_TRUE(EX_VAR(opline->result.var));
-	} else if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
-		ZVAL_FALSE(EX_VAR(opline->result.var));
+	if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
 		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
+			ZVAL_FALSE(EX_VAR(opline->result.var));
 			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		}
+		ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_INFO_P(val) == IS_TRUE);
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		SAVE_OPLINE();
 		ZVAL_BOOL(EX_VAR(opline->result.var), i_zend_is_true(val));
 		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
-	ZEND_VM_NEXT_OPCODE();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -34894,22 +34890,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BOOL_NOT_SPEC_CV_HANDLER(ZEND_
 	zval *val;
 
 	val = EX_VAR(opline->op1.var);
-	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
-		ZVAL_FALSE(EX_VAR(opline->result.var));
-	} else if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
-		ZVAL_TRUE(EX_VAR(opline->result.var));
+	if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
 		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
+			ZVAL_TRUE(EX_VAR(opline->result.var));
 			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		}
+		ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_INFO_P(val) < IS_TRUE);
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		SAVE_OPLINE();
 		ZVAL_BOOL(EX_VAR(opline->result.var), !i_zend_is_true(val));
 
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
-	ZEND_VM_NEXT_OPCODE();
 }
 
 static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_inc_helper_SPEC_CV(ZEND_OPCODE_HANDLER_ARGS)
@@ -35730,22 +35725,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BOOL_SPEC_CV_HANDLER(ZEND_OPCO
 	zval *val;
 
 	val = EX_VAR(opline->op1.var);
-	if (Z_TYPE_INFO_P(val) == IS_TRUE) {
-		ZVAL_TRUE(EX_VAR(opline->result.var));
-	} else if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
-		ZVAL_FALSE(EX_VAR(opline->result.var));
+	if (EXPECTED(Z_TYPE_INFO_P(val) <= IS_TRUE)) {
 		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
+			ZVAL_FALSE(EX_VAR(opline->result.var));
 			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		}
+		ZVAL_BOOL(EX_VAR(opline->result.var), Z_TYPE_INFO_P(val) == IS_TRUE);
+		ZEND_VM_NEXT_OPCODE();
 	} else {
 		SAVE_OPLINE();
 		ZVAL_BOOL(EX_VAR(opline->result.var), i_zend_is_true(val));
 
 		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 	}
-	ZEND_VM_NEXT_OPCODE();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
