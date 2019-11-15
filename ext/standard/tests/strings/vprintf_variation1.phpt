@@ -88,12 +88,16 @@ $values = array(
 $counter = 1;
 foreach($values as $value) {
   echo "\n -- Iteration $counter --\n";
-  $result = vprintf($value,$args);
-  echo "\n";
-  var_dump($result);
-  $counter++;
+  try {
+    $result = vprintf($value, $args);
+    echo "\n";
+    var_dump($result);
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
 
-};
+  $counter++;
+}
 
 // closing the resource
 fclose($file_handle);
@@ -139,34 +143,19 @@ int(13)
 int(3)
 
  -- Iteration 10 --
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
+vprintf() expects parameter 1 to be string, array given
 
  -- Iteration 11 --
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
+vprintf() expects parameter 1 to be string, array given
 
  -- Iteration 12 --
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
+vprintf() expects parameter 1 to be string, array given
 
  -- Iteration 13 --
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
+vprintf() expects parameter 1 to be string, array given
 
  -- Iteration 14 --
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
+vprintf() expects parameter 1 to be string, array given
 
  -- Iteration 15 --
 
@@ -213,5 +202,4 @@ int(0)
 int(0)
 
  -- Iteration 26 --
-Resource id #%d
-int(%d)
+vprintf() expects parameter 1 to be string, resource given

@@ -89,19 +89,31 @@ foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
 
   // with default argument
-  $result = printf($value);
-  echo "\n";
-  var_dump($result);
+  try {
+    $result = printf($value);
+    echo "\n";
+    var_dump($result);
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
 
   // with two arguments
-  $result = printf($value, $arg1);
-  echo "\n";
-  var_dump($result);
+  try {
+    $result = printf($value, $arg1);
+    echo "\n";
+    var_dump($result);
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
 
   // with three arguments
-  $result = printf($value, $arg1, $arg2);
-  echo "\n";
-  var_dump($result);
+  try {
+    $result = printf($value, $arg1, $arg2);
+    echo "\n";
+    var_dump($result);
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
 
   $count++;
 };
@@ -186,74 +198,29 @@ int(3)
 int(3)
 
 -- Iteration 10 --
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
+printf() expects parameter 1 to be string, array given
+printf() expects parameter 1 to be string, array given
+printf() expects parameter 1 to be string, array given
 
 -- Iteration 11 --
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
+printf() expects parameter 1 to be string, array given
+printf() expects parameter 1 to be string, array given
+printf() expects parameter 1 to be string, array given
 
 -- Iteration 12 --
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
+printf() expects parameter 1 to be string, array given
+printf() expects parameter 1 to be string, array given
+printf() expects parameter 1 to be string, array given
 
 -- Iteration 13 --
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
+printf() expects parameter 1 to be string, array given
+printf() expects parameter 1 to be string, array given
+printf() expects parameter 1 to be string, array given
 
 -- Iteration 14 --
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
-
-Warning: Array to string conversion in %s on line %d
-Array
-int(5)
+printf() expects parameter 1 to be string, array given
+printf() expects parameter 1 to be string, array given
+printf() expects parameter 1 to be string, array given
 
 -- Iteration 15 --
 
@@ -344,9 +311,6 @@ int(0)
 int(0)
 
 -- Iteration 26 --
-Resource id #%d
-int(%d)
-Resource id #%d
-int(%d)
-Resource id #%d
-int(%d)
+printf() expects parameter 1 to be string, resource given
+printf() expects parameter 1 to be string, resource given
+printf() expects parameter 1 to be string, resource given

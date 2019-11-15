@@ -89,16 +89,28 @@ foreach($values as $value) {
   echo "\n-- Iteration $count --\n";
 
   // with default argument
-  var_dump( sprintf($value) );
+  try {
+    var_dump(sprintf($value));
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
 
   // with two arguments
-  var_dump( sprintf($value, $arg1) );
+  try {
+    var_dump(sprintf($value, $arg1));
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
 
   // with three arguments
-  var_dump( sprintf($value, $arg1, $arg2) );
+  try {
+    var_dump(sprintf($value, $arg1, $arg2));
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
 
   $count++;
-};
+}
 
 // close the resource
 fclose($file_handle);
@@ -154,59 +166,29 @@ string(3) "0.5"
 string(3) "0.5"
 
 -- Iteration 10 --
-
-Warning: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Warning: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Warning: Array to string conversion in %s on line %d
-string(5) "Array"
+sprintf() expects parameter 1 to be string, array given
+sprintf() expects parameter 1 to be string, array given
+sprintf() expects parameter 1 to be string, array given
 
 -- Iteration 11 --
-
-Warning: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Warning: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Warning: Array to string conversion in %s on line %d
-string(5) "Array"
+sprintf() expects parameter 1 to be string, array given
+sprintf() expects parameter 1 to be string, array given
+sprintf() expects parameter 1 to be string, array given
 
 -- Iteration 12 --
-
-Warning: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Warning: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Warning: Array to string conversion in %s on line %d
-string(5) "Array"
+sprintf() expects parameter 1 to be string, array given
+sprintf() expects parameter 1 to be string, array given
+sprintf() expects parameter 1 to be string, array given
 
 -- Iteration 13 --
-
-Warning: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Warning: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Warning: Array to string conversion in %s on line %d
-string(5) "Array"
+sprintf() expects parameter 1 to be string, array given
+sprintf() expects parameter 1 to be string, array given
+sprintf() expects parameter 1 to be string, array given
 
 -- Iteration 14 --
-
-Warning: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Warning: Array to string conversion in %s on line %d
-string(5) "Array"
-
-Warning: Array to string conversion in %s on line %d
-string(5) "Array"
+sprintf() expects parameter 1 to be string, array given
+sprintf() expects parameter 1 to be string, array given
+sprintf() expects parameter 1 to be string, array given
 
 -- Iteration 15 --
 string(0) ""
@@ -264,7 +246,7 @@ string(0) ""
 string(0) ""
 
 -- Iteration 26 --
-string(%d) "Resource id #%d"
-string(%d) "Resource id #%d"
-string(%d) "Resource id #%d"
+sprintf() expects parameter 1 to be string, resource given
+sprintf() expects parameter 1 to be string, resource given
+sprintf() expects parameter 1 to be string, resource given
 Done

@@ -53,7 +53,7 @@ try {
 --EXPECT--
 Object with no __toString():
 Try 1:
-Object of class stdClass could not be converted to string
+printf() expects parameter 1 to be string, object given
 
 
 Try 2:

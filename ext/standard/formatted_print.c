@@ -392,22 +392,15 @@ php_sprintf_getnumber(char **buffer, size_t *len)
  *  - 0 or more: ArgumentCountError is thrown
  */
 static zend_string *
-php_formatted_print(zval *z_format, zval *args, int argc, int nb_additional_parameters)
+php_formatted_print(char *format, size_t format_len, zval *args, int argc, int nb_additional_parameters)
 {
 	size_t size = 240, outpos = 0;
 	int alignment, currarg, adjusting, argnum, width, precision;
-	char *format, *temppos, padding;
+	char *temppos, padding;
 	zend_string *result;
 	int always_sign;
-	size_t format_len;
 	int bad_arg_number = 0;
 
-	if (!try_convert_to_string(z_format)) {
-		return NULL;
-	}
-
-	format = Z_STRVAL_P(z_format);
-	format_len = Z_STRLEN_P(z_format);
 	result = zend_string_alloc(size, 0);
 
 	currarg = 0;
@@ -680,15 +673,17 @@ php_formatted_print_get_array(zval *array, int *argc)
 PHP_FUNCTION(user_sprintf)
 {
 	zend_string *result;
-	zval *format, *args;
+	char *format;
+	size_t format_len;
+	zval *args;
 	int argc;
 
 	ZEND_PARSE_PARAMETERS_START(1, -1)
-		Z_PARAM_ZVAL(format)
+		Z_PARAM_STRING(format, format_len)
 		Z_PARAM_VARIADIC('*', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 
-	result = php_formatted_print(format, args, argc, 1);
+	result = php_formatted_print(format, format_len, args, argc, 1);
 	if (result == NULL) {
 		return;
 	}
@@ -701,17 +696,19 @@ PHP_FUNCTION(user_sprintf)
 PHP_FUNCTION(vsprintf)
 {
 	zend_string *result;
-	zval *format, *array, *args;
+	char *format;
+	size_t format_len;
+	zval *array, *args;
 	int argc;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ZVAL(format)
+		Z_PARAM_STRING(format, format_len)
 		Z_PARAM_ZVAL(array)
 	ZEND_PARSE_PARAMETERS_END();
 
 	args = php_formatted_print_get_array(array, &argc);
 
-	result = php_formatted_print(format, args, argc, -1);
+	result = php_formatted_print(format, format_len, args, argc, -1);
 	efree(args);
 	if (result == NULL) {
 		return;
@@ -726,15 +723,17 @@ PHP_FUNCTION(user_printf)
 {
 	zend_string *result;
 	size_t rlen;
-	zval *format, *args;
+	char *format;
+	size_t format_len;
+	zval *args;
 	int argc;
 
 	ZEND_PARSE_PARAMETERS_START(1, -1)
-		Z_PARAM_ZVAL(format)
+		Z_PARAM_STRING(format, format_len)
 		Z_PARAM_VARIADIC('*', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 
-	result = php_formatted_print(format, args, argc, 1);
+	result = php_formatted_print(format, format_len, args, argc, 1);
 	if (result == NULL) {
 		return;
 	}
@@ -750,17 +749,19 @@ PHP_FUNCTION(vprintf)
 {
 	zend_string *result;
 	size_t rlen;
-	zval *format, *array, *args;
+	char *format;
+	size_t format_len;
+	zval *array, *args;
 	int argc;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ZVAL(format)
+		Z_PARAM_STRING(format, format_len)
 		Z_PARAM_ZVAL(array)
 	ZEND_PARSE_PARAMETERS_END();
 
 	args = php_formatted_print_get_array(array, &argc);
 
-	result = php_formatted_print(format, args, argc, -1);
+	result = php_formatted_print(format, format_len, args, argc, -1);
 	efree(args);
 	if (result == NULL) {
 		return;
@@ -776,7 +777,9 @@ PHP_FUNCTION(vprintf)
 PHP_FUNCTION(fprintf)
 {
 	php_stream *stream;
-	zval *arg1, *format, *args;
+	char *format;
+	size_t format_len;
+	zval *arg1, *args;
 	int argc;
 	zend_string *result;
 
@@ -786,13 +789,13 @@ PHP_FUNCTION(fprintf)
 
 	ZEND_PARSE_PARAMETERS_START(2, -1)
 		Z_PARAM_RESOURCE(arg1)
-		Z_PARAM_ZVAL(format)
+		Z_PARAM_STRING(format, format_len)
 		Z_PARAM_VARIADIC('*', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, arg1);
 
-	result = php_formatted_print(format, args, argc, 2);
+	result = php_formatted_print(format, format_len, args, argc, 2);
 	if (result == NULL) {
 		return;
 	}
@@ -809,7 +812,9 @@ PHP_FUNCTION(fprintf)
 PHP_FUNCTION(vfprintf)
 {
 	php_stream *stream;
-	zval *arg1, *format, *array, *args;
+	char *format;
+	size_t format_len;
+	zval *arg1, *array, *args;
 	int argc;
 	zend_string *result;
 
@@ -819,7 +824,7 @@ PHP_FUNCTION(vfprintf)
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 		Z_PARAM_RESOURCE(arg1)
-		Z_PARAM_ZVAL(format)
+		Z_PARAM_STRING(format, format_len)
 		Z_PARAM_ZVAL(array)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -827,7 +832,7 @@ PHP_FUNCTION(vfprintf)
 
 	args = php_formatted_print_get_array(array, &argc);
 
-	result = php_formatted_print(format, args, argc, -1);
+	result = php_formatted_print(format, format_len, args, argc, -1);
 	efree(args);
 	if (result == NULL) {
 		return;

@@ -41,7 +41,7 @@ $counter = 1;
 
 // writing to the file
 foreach($resource_types as $value) {
-  @fprintf($file_handle, $value);
+  @fprintf($file_handle, "%s", $value);
   @fprintf($file_handle, "\n");
 }
 // closing the file
