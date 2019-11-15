@@ -17,12 +17,11 @@ $file = 'vfprintf_error3.txt';
 $fp = fopen( $file, "a+" );
 
 echo "\n-- Testing vfprintf() function with wrong variable types as argument --\n";
-var_dump( vfprintf( $fp, array( 'foo %d', 'bar %s' ), 3.55552 ) );
-
-rewind( $fp );
-var_dump( stream_get_contents( $fp ) );
-ftruncate( $fp, 0 );
-rewind( $fp );
+try {
+  vfprintf($fp, array( 'foo %d', 'bar %s' ), 3.55552);
+} catch (TypeError $exception) {
+  echo $exception->getMessage() . "\n";
+}
 
 var_dump( vfprintf( $fp, "Foo %y fake", "not available" ) );
 
@@ -42,11 +41,8 @@ $file = 'vfprintf_error3.txt';
 unlink( $file );
 
 ?>
---EXPECTF--
+--EXPECT--
 -- Testing vfprintf() function with wrong variable types as argument --
-
-Warning: Array to string conversion in %s on line %d
-int(5)
-string(5) "Array"
+vfprintf() expects parameter 2 to be string, array given
 int(9)
 string(9) "Foo  fake"
