@@ -33,6 +33,8 @@
 #include "zend_hash.h"
 #include "zend_interfaces.h"
 
+#include "pdo_arginfo.h"
+
 static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
 
 void pdo_raise_impl_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *sqlstate, const char *supp) /* {{{ */
@@ -989,7 +991,7 @@ static PHP_METHOD(PDO, errorCode)
 }
 /* }}} */
 
-/* {{{ proto int PDO::errorInfo()
+/* {{{ proto array PDO::errorInfo()
    Fetch extended error information associated with the last operation on the database handle */
 static PHP_METHOD(PDO, errorInfo)
 {
@@ -1171,61 +1173,24 @@ static PHP_METHOD(PDO, getAvailableDrivers)
 }
 /* }}} */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, dsn)
-	ZEND_ARG_INFO(0, username)
-	ZEND_ARG_INFO(0, passwd)
-	ZEND_ARG_INFO(0, options) /* array */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo_prepare, 0, 0, 1)
-	ZEND_ARG_INFO(0, statement)
-	ZEND_ARG_INFO(0, options) /* array */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_pdo_setattribute, 0)
-	ZEND_ARG_INFO(0, attribute)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_pdo_getattribute, 0)
-	ZEND_ARG_INFO(0, attribute)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_pdo_exec, 0)
-	ZEND_ARG_INFO(0, query)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo_lastinsertid, 0, 0, 0)
-	ZEND_ARG_INFO(0, seqname)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo_quote, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, paramtype)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_pdo__void, 0)
-ZEND_END_ARG_INFO()
 /* }}} */
 
 const zend_function_entry pdo_dbh_functions[] = /* {{{ */ {
-	ZEND_MALIAS(PDO, __construct, dbh_constructor,	arginfo_pdo___construct,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, prepare, 				arginfo_pdo_prepare,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, beginTransaction,       arginfo_pdo__void,         ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, commit,                 arginfo_pdo__void,         ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, rollBack,               arginfo_pdo__void,         ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, inTransaction,          arginfo_pdo__void,         ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, setAttribute,	arginfo_pdo_setattribute,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, exec,			arginfo_pdo_exec,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, query,			NULL,					ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, lastInsertId,	arginfo_pdo_lastinsertid,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, errorCode,              arginfo_pdo__void,         ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, errorInfo,              arginfo_pdo__void,         ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, getAttribute,	arginfo_pdo_getattribute,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, quote,			arginfo_pdo_quote,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, getAvailableDrivers,    arginfo_pdo__void,         ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_MALIAS(PDO, __construct, dbh_constructor, arginfo_class_PDO___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, prepare, 			arginfo_class_PDO_prepare, 			ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, beginTransaction, 	arginfo_class_PDO_beginTransaction, ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, commit, 			arginfo_class_PDO_commit, 			ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, rollBack, 			arginfo_class_PDO_rollBack, 		ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, inTransaction, 		arginfo_class_PDO_inTransaction, 	ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, setAttribute, 		arginfo_class_PDO_setAttribute, 	ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, exec, 				arginfo_class_PDO_exec, 			ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, query, 				arginfo_class_PDO_query, 			ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, lastInsertId, 		arginfo_class_PDO_lastInsertId, 	ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, errorCode, 			arginfo_class_PDO_errorCode, 		ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, errorInfo, 			arginfo_class_PDO_errorInfo, 		ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, getAttribute, 		arginfo_class_PDO_getAttribute, 	ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, quote, 				arginfo_class_PDO_quote, 			ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, getAvailableDrivers, arginfo_class_PDO_getAvailableDrivers, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_FE_END
 };
 /* }}} */
