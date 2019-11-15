@@ -167,9 +167,11 @@ static void sig_handler(int signo) /* {{{ */
 	int saved_errno;
 
 	if (fpm_globals.parent_pid != getpid()) {
-		/* prevent a signal race condition when child process
-			do not set up it's own sigprocmask for some reason,
-			leads to #76601 in such cases */
+		/* Avoid using of signal handlers from the master process in a worker
+			before the child sets up its own signal handlers.
+			Normally it is prevented by the sigprocmask() calls
+			around fork(). This execution branch is a last resort trap
+			that has no protection against #76601. */
 		return;
 	}
 
