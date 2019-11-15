@@ -197,6 +197,7 @@ done:
 	return pclose_return;
 err:
 	pclose_return = -1;
+	RETVAL_FALSE;
 	goto done;
 }
 /* }}} */
