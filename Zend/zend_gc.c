@@ -1537,11 +1537,11 @@ ZEND_API int zend_gc_collect_cycles(void)
 			}
 		}
 
-		/* Destroy zvals */
+		/* Destroy zvals. The root buffer may be reallocated. */
 		GC_TRACE("Destroying zvals");
-		current = GC_IDX2PTR(GC_FIRST_ROOT);
-		last = GC_IDX2PTR(GC_G(first_unused));
-		while (current != last) {
+		idx = GC_FIRST_ROOT;
+		while (idx != end) {
+			current = GC_IDX2PTR(idx);
 			if (GC_IS_GARBAGE(current->ref)) {
 				p = GC_GET_PTR(current->ref);
 				GC_TRACE_REF(p, "destroying");
@@ -1572,11 +1572,12 @@ ZEND_API int zend_gc_collect_cycles(void)
 					zend_hash_destroy(arr);
 				}
 			}
-			current++;
+			idx++;
 		}
 
 		/* Free objects */
 		current = GC_IDX2PTR(GC_FIRST_ROOT);
+		last = GC_IDX2PTR(end);
 		while (current != last) {
 			if (GC_IS_GARBAGE(current->ref)) {
 				p = GC_GET_PTR(current->ref);
