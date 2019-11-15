@@ -786,7 +786,7 @@ PHP_FUNCTION(mysqli_data_seek)
 }
 /* }}} */
 
-/* {{{ proto void mysqli_debug(string debug)
+/* {{{ proto bool mysqli_debug(string debug)
 */
 PHP_FUNCTION(mysqli_debug)
 {
