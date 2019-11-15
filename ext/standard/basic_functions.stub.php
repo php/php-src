@@ -80,38 +80,22 @@ function uasort(array &$arg, callable $cmp_function): bool {}
 
 function uksort(array &$arg, callable $cmp_function): bool {}
 
-/**
- * @param array|object $arg
- * @return mixed
- */
-function end(array &$arg) {}
+/** @return mixed */
+function end(array|object &$arg) {}
 
-/**
- * @param array|object $arg
- * @return mixed
- */
-function prev(&$arg) {}
+/** @return mixed */
+function prev(array|object &$arg) {}
 
-/**
- * @param array|object $arg
- * @return mixed
- */
-function next(&$arg) {}
+/** @return mixed */
+function next(array|object &$arg) {}
 
-/**
- * @param array|object $arg
- * @return mixed
- */
-function reset(&$arg) {}
+/** @return mixed */
+function reset(array|object &$arg) {}
 
-/**
- * @param array|object $arg
- * @return mixed
- */
-function current($arg) {}
+/** @return mixed */
+function current(array|object $arg) {}
 
-/** @param array|object $arg */
-function key($arg): int|string|null {}
+function key(array|object $arg): int|string|null {}
 
 /** @return mixed */
 function min($arg, ...$args) {}
@@ -119,11 +103,9 @@ function min($arg, ...$args) {}
 /** @return mixed */
 function max($arg, ...$args) {}
 
-/** @param array|object $input */
-function array_walk(&$input, callable $funcname, $userdata = null): bool {}
+function array_walk(array|object &$input, callable $funcname, $userdata = null): bool {}
 
-/** @param array|object $input */
-function array_walk_recursive(&$input, callable $funcname, $userdata = null): bool {}
+function array_walk_recursive(array|object &$input, callable $funcname, $userdata = null): bool {}
 
 function in_array($needle, array $haystack, bool $strict = false): bool {}
 

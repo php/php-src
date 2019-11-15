@@ -107,23 +107,21 @@ ZEND_END_ARG_INFO()
 #define arginfo_uksort arginfo_usort
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_end, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(1, arg, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_MASK(1, arg, MAY_BE_ARRAY|MAY_BE_OBJECT)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_prev, 0, 0, 1)
-	ZEND_ARG_INFO(1, arg)
-ZEND_END_ARG_INFO()
+#define arginfo_prev arginfo_end
 
-#define arginfo_next arginfo_prev
+#define arginfo_next arginfo_end
 
-#define arginfo_reset arginfo_prev
+#define arginfo_reset arginfo_end
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_current, 0, 0, 1)
-	ZEND_ARG_INFO(0, arg)
+	ZEND_ARG_TYPE_MASK(0, arg, MAY_BE_ARRAY|MAY_BE_OBJECT)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_key, 0, 1, MAY_BE_LONG|MAY_BE_STRING|MAY_BE_NULL)
-	ZEND_ARG_INFO(0, arg)
+	ZEND_ARG_TYPE_MASK(0, arg, MAY_BE_ARRAY|MAY_BE_OBJECT)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_min, 0, 0, 1)
@@ -134,7 +132,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_max arginfo_min
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_walk, 0, 2, _IS_BOOL, 0)
-	ZEND_ARG_INFO(1, input)
+	ZEND_ARG_TYPE_MASK(1, input, MAY_BE_ARRAY|MAY_BE_OBJECT)
 	ZEND_ARG_TYPE_INFO(0, funcname, IS_CALLABLE, 0)
 	ZEND_ARG_INFO(0, userdata)
 ZEND_END_ARG_INFO()

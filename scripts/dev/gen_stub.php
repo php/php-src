@@ -532,8 +532,7 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
         $argKind = $argInfo->isVariadic ? "ARG_VARIADIC" : "ARG";
         $argType = $argInfo->type;
         if ($argType !== null) {
-            $simpleArgType = $argType->tryToSimpleType();
-            if ($simpleArgType !== null) {
+            if (null !== $simpleArgType = $argType->tryToSimpleType()) {
                 if ($simpleArgType->isBuiltin) {
                     $code .= sprintf(
                         "\tZEND_%s_TYPE_INFO(%s, %s, %s, %d)\n",
@@ -547,6 +546,15 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
                         $simpleArgType->toEscapedName(), $argType->isNullable()
                     );
                 }
+            } else if (null !== $representableType = $argType->tryToRepresentableType()) {
+                if ($representableType->classType !== null) {
+                    throw new Exception('Unimplemented');
+                }
+                $code .= sprintf(
+                    "\tZEND_%s_TYPE_MASK(%s, %s, %s)\n",
+                    $argKind, $argInfo->getSendByString(), $argInfo->name,
+                    $representableType->toTypeMask()
+                );
             } else {
                 throw new Exception('Unimplemented');
             }
