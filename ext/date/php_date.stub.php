@@ -194,6 +194,13 @@ class DateTimeImmutable implements DateTimeInterface {
     public static function createFromMutable(DateTime $object);
 
     /** @return DateTimeImmutable|false */
+    public static function createFromFormat(
+        string $format, string $time, ?DateTimeZone $timezone = null);
+
+    /** @return array|false */
+    public static function getLastErrors();
+
+    /** @return DateTimeImmutable|false */
     public function modify(string $modify);
 
     /** @return DateTimeImmutable */

@@ -296,6 +296,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeImmutable_createFromMutable, 0, 0, 
 	ZEND_ARG_OBJ_INFO(0, object, DateTime, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_DateTimeImmutable_createFromFormat arginfo_date_create_from_format
+
+#define arginfo_class_DateTimeImmutable_getLastErrors arginfo_class_DateTimeInterface_getTimezone
+
 #define arginfo_class_DateTimeImmutable_modify arginfo_class_DateTime_modify
 
 #define arginfo_class_DateTimeImmutable_add arginfo_class_DateTime_add
