@@ -263,15 +263,20 @@ int fpm_signals_get_fd() /* {{{ */
 }
 /* }}} */
 
-int fpm_signals_init_mask(int *signum_array, size_t size) /* {{{ */
+int fpm_signals_init_mask() /* {{{ */
 {
+	/* Subset of signals from fpm_signals_init_main() and fpm_got_signal()
+		blocked to avoid unexpected death during early init
+		or during reload just after execvp() or fork */
+	int init_signal_array[] = { SIGUSR1, SIGUSR2, SIGCHLD };
+	size_t size = sizeof(init_signal_array)/sizeof(init_signal_array[0]);
 	size_t i = 0;
 	if (0 > sigemptyset(&block_sigset)) {
 		zlog(ZLOG_SYSERROR, "failed to prepare signal block mask: sigemptyset()");
 		return -1;
 	}
 	for (i = 0; i < size; ++i) {
-		int sig_i = signum_array[i];
+		int sig_i = init_signal_array[i];
 		if (0 > sigaddset(&block_sigset, sig_i)) {
 			if (sig_i <= NSIG && fpm_signal_names[sig_i] != NULL) {
 				zlog(ZLOG_SYSERROR, "failed to prepare signal block mask: sigaddset(%s)",
