@@ -271,13 +271,15 @@ int fpm_signals_init_mask() /* {{{ */
 	int init_signal_array[] = { SIGUSR1, SIGUSR2, SIGCHLD };
 	size_t size = sizeof(init_signal_array)/sizeof(init_signal_array[0]);
 	size_t i = 0;
-	if (0 > sigemptyset(&block_sigset)) {
+	if (0 > sigemptyset(&block_sigset) ||
+	    0 > sigemptyset(&child_block_sigset)) {
 		zlog(ZLOG_SYSERROR, "failed to prepare signal block mask: sigemptyset()");
 		return -1;
 	}
 	for (i = 0; i < size; ++i) {
 		int sig_i = init_signal_array[i];
-		if (0 > sigaddset(&block_sigset, sig_i)) {
+		if (0 > sigaddset(&block_sigset, sig_i) ||
+		    0 > sigaddset(&child_block_sigset, sig_i)) {
 			if (sig_i <= NSIG && fpm_signal_names[sig_i] != NULL) {
 				zlog(ZLOG_SYSERROR, "failed to prepare signal block mask: sigaddset(%s)",
 						fpm_signal_names[sig_i]);
@@ -287,7 +289,6 @@ int fpm_signals_init_mask() /* {{{ */
 			return -1;
 		}
 	}
-	memcpy(&child_block_sigset, &block_sigset, sizeof(block_sigset));
 	if (0 > sigaddset(&child_block_sigset, SIGTERM) ||
 	    0 > sigaddset(&child_block_sigset, SIGQUIT)) {
 		zlog(ZLOG_SYSERROR, "failed to prepare child signal block mask: sigaddset()");
