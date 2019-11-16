@@ -9397,9 +9397,6 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, const ze
 	zend_uchar type;
 	zend_jit_addr op1_addr = OP1_ADDR();
 
-	// TODO: support for is_resource() ???
-	ZEND_ASSERT(opline->extended_value != MAY_BE_RESOURCE);
-
 	if (op1_info & MAY_BE_UNDEF) {
 		if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
 			|	IF_ZVAL_TYPE op1_addr, IS_UNDEF, >1

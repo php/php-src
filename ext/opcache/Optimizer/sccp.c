@@ -1083,12 +1083,22 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 					ZVAL_FALSE(&zv);
 					SET_RESULT(result, &zv);
 					return;
-				} else if (!(type & ((MAY_BE_ANY|MAY_BE_UNDEF) - expected_type_mask))
-						   && !(expected_type_mask & MAY_BE_RESOURCE)) {
+				} else if (!(type & ((MAY_BE_ANY|MAY_BE_UNDEF) - expected_type_mask))) {
 					ZVAL_TRUE(&zv);
 					SET_RESULT(result, &zv);
 					return;
 				}
+			}
+			break;
+		case ZEND_IS_RESOURCE:
+			if (!value_known(op1)) {
+				uint32_t type = ctx->scdf.ssa->var_info[ssa_op->op1_use].type;
+				if (!(type & (MAY_BE_RESOURCE|MAY_BE_UNDEF))) {
+					ZVAL_FALSE(&zv);
+					SET_RESULT(result, &zv);
+					return;
+				}
+				/* is_resource() is true for open resources but false for closed resources */
 			}
 			break;
 		case ZEND_ASSIGN_DIM:
@@ -1789,6 +1799,13 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			SET_RESULT(result, &zv);
 			zval_ptr_dtor_nogc(&zv);
 			break;
+		case ZEND_IS_RESOURCE:
+			/* TODO: Should this always be false? */
+			SKIP_IF_TOP(op1);
+			ct_eval_type_check(&zv, MAY_BE_RESOURCE, op1);
+			SET_RESULT(result, &zv);
+			zval_ptr_dtor_nogc(&zv);
+			break;
 		case ZEND_INSTANCEOF:
 			SKIP_IF_TOP(op1);
 			ZVAL_FALSE(&zv);
@@ -2287,7 +2304,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 				zend_ssa_remove_result_def(ssa, ssa_op);
 				if (opline->opcode == ZEND_DO_ICALL) {
 					removed_ops = remove_call(ctx, opline, ssa_op);
-				} else if (opline->opcode == ZEND_TYPE_CHECK
+				} else if ((opline->opcode == ZEND_TYPE_CHECK || opline->opcode == ZEND_IS_RESOURCE)
 						&& opline->op1_type & (IS_VAR|IS_TMP_VAR)
 						&& !value_known(&ctx->values[ssa_op->op1_use])) {
 					/* For TYPE_CHECK we may compute the result value without knowing the

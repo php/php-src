@@ -2118,6 +2118,7 @@ ZEND_API int zend_is_smart_branch(const zend_op *opline) /* {{{ */
 		case ZEND_ISSET_ISEMPTY_STATIC_PROP:
 		case ZEND_INSTANCEOF:
 		case ZEND_TYPE_CHECK:
+		case ZEND_IS_RESOURCE:
 		case ZEND_DEFINED:
 		case ZEND_IN_ARRAY:
 		case ZEND_ARRAY_KEY_EXISTS:
@@ -3461,6 +3462,20 @@ static int zend_compile_func_is_scalar(znode *result, zend_ast_list *args) /* {{
 	return SUCCESS;
 }
 
+int zend_compile_func_is_resource(znode *result, zend_ast_list *args) /* {{{ */
+{
+	znode arg_node;
+
+	if (args->children != 1) {
+		return FAILURE;
+	}
+
+	zend_compile_expr(&arg_node, args->child[0]);
+	zend_emit_op_tmp(result, ZEND_IS_RESOURCE, &arg_node, NULL);
+	return SUCCESS;
+}
+/* }}} */
+
 int zend_compile_func_cast(znode *result, zend_ast_list *args, uint32_t type) /* {{{ */
 {
 	znode arg_node;
@@ -3974,7 +3989,7 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 	} else if (zend_string_equals_literal(lcname, "is_object")) {
 		return zend_compile_func_typecheck(result, args, IS_OBJECT);
 	} else if (zend_string_equals_literal(lcname, "is_resource")) {
-		return zend_compile_func_typecheck(result, args, IS_RESOURCE);
+		return zend_compile_func_is_resource(result, args);
 	} else if (zend_string_equals_literal(lcname, "is_scalar")) {
 		return zend_compile_func_is_scalar(result, args);
 	} else if (zend_string_equals_literal(lcname, "boolval")) {
