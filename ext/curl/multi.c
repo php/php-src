@@ -552,12 +552,8 @@ static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue,
 	CURLMcode error = CURLM_OK;
 
 	switch (option) {
-#if LIBCURL_VERSION_NUM >= 0x071000 /* 7.16.0 */
 		case CURLMOPT_PIPELINING:
-#endif
-#if LIBCURL_VERSION_NUM >= 0x071003 /* 7.16.3 */
 		case CURLMOPT_MAXCONNECTS:
-#endif
 #if LIBCURL_VERSION_NUM >= 0x071e00 /* 7.30.0 */
 		case CURLMOPT_CHUNK_LENGTH_PENALTY_SIZE:
 		case CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE:
