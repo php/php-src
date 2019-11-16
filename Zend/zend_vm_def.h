@@ -2890,7 +2890,7 @@ ZEND_VM_HOT_NOCONST_HANDLER(43, ZEND_JMPZ, CONST|TMPVAR|CV, JMP_ADDR)
 {
 	USE_OPLINE
 	zval *val;
-	zend_uchar op1_type;
+	int result;
 
 	val = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
@@ -2900,31 +2900,105 @@ ZEND_VM_HOT_NOCONST_HANDLER(43, ZEND_JMPZ, CONST|TMPVAR|CV, JMP_ADDR)
 		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
 			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
-			if (UNEXPECTED(EG(exception))) {
-				HANDLE_EXCEPTION();
-			}
+			ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
 		}
 		ZEND_VM_JMP_EX(OP_JMP_ADDR(opline, opline->op2), 0);
 	}
-
-	SAVE_OPLINE();
-	op1_type = OP1_TYPE;
-	if (i_zend_is_true(val)) {
-		opline++;
-	} else {
-		opline = OP_JMP_ADDR(opline, opline->op2);
+	switch (Z_TYPE_INFO_P(val)) {
+		case IS_LONG:
+			/* Jump to the opcode at op2 if the value was == false. Jump to the next opcode for == true. */
+			if (Z_LVAL_P(val) != 0) {
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+				ZEND_VM_JMP_EX(OP_JMP_ADDR(opline, opline->op2), 0);
+			}
+		case IS_STRING:
+			result = (Z_STRLEN_P(val) > 1 || (Z_STRLEN_P(val) && Z_STRVAL_P(val)[0] != '0'));
+			if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_nogc(val);
+			}
+			if (result) {
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+				ZEND_VM_JMP_EX(OP_JMP_ADDR(opline, opline->op2), 0);
+			}
+		case IS_DOUBLE:
+			if (Z_DVAL_P(val) != 0) {
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+				ZEND_VM_JMP_EX(OP_JMP_ADDR(opline, opline->op2), 0);
+			}
+		case IS_ARRAY:
+			/* only need to check for exceptions if the array had elements and was freed */
+			result = zend_hash_num_elements(Z_ARRVAL_P(val)) != 0;
+			if (result) {
+				if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+					if (Z_REFCOUNTED_P(val) && !Z_DELREF_P(val)) {
+						SAVE_OPLINE();
+						rc_dtor_func(Z_COUNTED_P(val));
+						ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+					}
+				}
+				ZEND_VM_NEXT_OPCODE_EX(OP1_TYPE & (IS_TMP_VAR|IS_VAR), 1);
+			} else {
+				if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+					zval_ptr_dtor_nogc(val);
+				}
+				ZEND_VM_JMP_EX(OP_JMP_ADDR(opline, opline->op2), 0);
+			}
+		case IS_OBJECT:
+			if (EXPECTED(Z_OBJ_HT_P(val)->cast_object == zend_std_cast_object_tostring)) {
+				result = 1;
+			} else {
+				SAVE_OPLINE();
+				result = zend_object_is_true(val);
+				if (UNEXPECTED(EG(exception))) {
+					HANDLE_EXCEPTION();
+				}
+			}
+ZEND_VM_C_LABEL(proceed_check_exception):
+			if (result) {
+				opline++;
+			} else {
+				opline = OP_JMP_ADDR(opline, opline->op2);
+			}
+			if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+				if (Z_REFCOUNTED_P(val) && !Z_DELREF_P(val)) {
+					/* This only needs to check for exceptions if the last reference to the value was deleted */
+					SAVE_OPLINE();
+					rc_dtor_func(Z_COUNTED_P(val));
+					ZEND_VM_JMP(opline);
+				}
+			}
+			ZEND_VM_JMP_EX(opline, 0);
+		case IS_RESOURCE:
+			result = Z_RES_HANDLE_P(val) != 0;
+			ZEND_VM_C_GOTO(proceed_check_exception);
+		case IS_REFERENCE:
+			val = Z_REFVAL_P(val);
+		default:
+			/* The rest of the implementation can be thought of as an optimized version of this case. */
+			/* If possible, the other cases avoid the unnecessary work of saving the opline, trying to decrement the reference count of the zval, */
+			/* or checking for exceptions, if it would be unnecessary (e.g. for longs, doubles) */
+			SAVE_OPLINE();
+			result = i_zend_is_true(val);
+			if (result) {
+				opline++;
+			} else {
+				opline = OP_JMP_ADDR(opline, opline->op2);
+			}
+			if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_nogc(val);
+			}
+			ZEND_VM_JMP(opline);
 	}
-	if (op1_type & (IS_TMP_VAR|IS_VAR)) {
-		zval_ptr_dtor_nogc(val);
-	}
-	ZEND_VM_JMP(opline);
 }
 
 ZEND_VM_HOT_NOCONST_HANDLER(44, ZEND_JMPNZ, CONST|TMPVAR|CV, JMP_ADDR)
 {
 	USE_OPLINE
 	zval *val;
-	zend_uchar op1_type;
+	int result;
 
 	val = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
@@ -2934,24 +3008,98 @@ ZEND_VM_HOT_NOCONST_HANDLER(44, ZEND_JMPNZ, CONST|TMPVAR|CV, JMP_ADDR)
 		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
 			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
-			if (UNEXPECTED(EG(exception))) {
-				HANDLE_EXCEPTION();
-			}
+			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
-
-	SAVE_OPLINE();
-	op1_type = OP1_TYPE;
-	if (i_zend_is_true(val)) {
-		opline = OP_JMP_ADDR(opline, opline->op2);
-	} else {
-		opline++;
+	switch (Z_TYPE_INFO_P(val)) {
+		case IS_LONG:
+			/* Jump to the opcode at op2 if the value was == true (!= false). Jump to the next opcode otherwise. */
+			if (Z_LVAL_P(val) == 0) {
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+				ZEND_VM_JMP_EX(OP_JMP_ADDR(opline, opline->op2), 0);
+			}
+		case IS_STRING:
+			result = (Z_STRLEN_P(val) > 1 || (Z_STRLEN_P(val) && Z_STRVAL_P(val)[0] != '0'));
+			if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_nogc(val);
+			}
+			if (result) {
+				ZEND_VM_JMP_EX(OP_JMP_ADDR(opline, opline->op2), 0);
+			} else {
+				ZEND_VM_NEXT_OPCODE();
+			}
+		case IS_DOUBLE:
+			if (Z_DVAL_P(val) == 0) {
+				ZEND_VM_NEXT_OPCODE();
+			} else {
+				ZEND_VM_JMP_EX(OP_JMP_ADDR(opline, opline->op2), 0);
+			}
+		case IS_ARRAY:
+			/* only need to check for exceptions if the array both had elements and was freed */
+			result = zend_hash_num_elements(Z_ARRVAL_P(val)) != 0;
+			if (result) {
+				if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+					if (Z_REFCOUNTED_P(val) && !Z_DELREF_P(val)) {
+						SAVE_OPLINE();
+						rc_dtor_func(Z_COUNTED_P(val));
+						ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
+					}
+				}
+				ZEND_VM_JMP_EX(OP_JMP_ADDR(opline, opline->op2), 0);
+			} else {
+				if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+					zval_ptr_dtor_nogc(val);
+				}
+				ZEND_VM_NEXT_OPCODE_EX(OP1_TYPE & (IS_TMP_VAR|IS_VAR), 1);
+			}
+		case IS_OBJECT:
+			if (EXPECTED(Z_OBJ_HT_P(val)->cast_object == zend_std_cast_object_tostring)) {
+				result = 1;
+			} else {
+				SAVE_OPLINE();
+				result = zend_object_is_true(val);
+				if (UNEXPECTED(EG(exception))) {
+					HANDLE_EXCEPTION();
+				}
+			}
+ZEND_VM_C_LABEL(proceed_check_exception):
+			if (result) {
+				opline = OP_JMP_ADDR(opline, opline->op2);
+			} else {
+				opline++;
+			}
+			if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+				if (Z_REFCOUNTED_P(val) && !Z_DELREF_P(val)) {
+					/* This only needs to check for exceptions if the last reference to the value was deleted */
+					SAVE_OPLINE();
+					rc_dtor_func(Z_COUNTED_P(val));
+					ZEND_VM_JMP(opline);
+				}
+			}
+			ZEND_VM_JMP_EX(opline, 0);
+		case IS_RESOURCE:
+			result = Z_RES_HANDLE_P(val) != 0;
+			ZEND_VM_C_GOTO(proceed_check_exception);
+		case IS_REFERENCE:
+			val = Z_REFVAL_P(val);
+		default:
+			/* The rest of the implementation can be thought of as an optimized version of this case. */
+			/* If possible, the other cases avoid the unnecessary work of saving the opline, trying to decrement the reference count of the zval, */
+			/* or checking for exceptions, if it would be unnecessary (e.g. for longs, doubles) */
+			SAVE_OPLINE();
+			result = i_zend_is_true(val);
+			if (result) {
+				opline = OP_JMP_ADDR(opline, opline->op2);
+			} else {
+				opline++;
+			}
+			if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+				zval_ptr_dtor_nogc(val);
+			}
+			ZEND_VM_JMP(opline);
 	}
-	if (op1_type & (IS_TMP_VAR|IS_VAR)) {
-		zval_ptr_dtor_nogc(val);
-	}
-	ZEND_VM_JMP(opline);
 }
 
 ZEND_VM_HANDLER(45, ZEND_JMPZNZ, CONST|TMPVAR|CV, JMP_ADDR, JMP_ADDR)
