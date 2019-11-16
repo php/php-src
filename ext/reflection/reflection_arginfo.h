@@ -479,12 +479,13 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionZendExtension_getCopyright arginfo_class_Reflector___toString
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionReference_fromArrayElement, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionReference_fromArrayElement, 0, 2, ReflectionReference, 1)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ReflectionReference_getId arginfo_class_Reflector___toString
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionReference_getId, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionReference___clone arginfo_class_Reflector___toString
 

@@ -38,11 +38,8 @@ function odbc_exec($connection_id, string $query, int $flags = UNKNOWN) {}
 function odbc_do($connection_id, string $query, int $flags = UNKNOWN) {}
 
 #ifdef PHP_ODBC_HAVE_FETCH_HASH
-/**
- * @param resource $result
- * @return stdClass|false
- */
-function odbc_fetch_object($result, int $rownumber = -1) {}
+/** @param resource $result */
+function odbc_fetch_object($result, int $rownumber = -1): stdClass|false {}
 
 /** @param resource $result */
 function odbc_fetch_array($result, int $rownumber = -1): array|false {}

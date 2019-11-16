@@ -59,8 +59,8 @@ function krsort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
 
 function ksort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
 
-/** @param array|Countable $var */
-function count($var, int $mode = COUNT_NORAML): int {}
+/** @param mixed $var */
+function count($var, int $mode = COUNT_NORMAL): int {}
 
 function natsort(array &$arg): bool {}
 
@@ -549,10 +549,6 @@ function explode(string $separator, string $str, int $limit = PHP_INT_MAX): arra
  */
 function implode($glue, $pieces = UNKNOWN): string {}
 
-/**
- * @param string $str Optional - defaults to previous string
- * @param string $token
- */
 function strtok(string $str, string $token = UNKNOWN): string|false {}
 
 function strtoupper(string $str): string {}
@@ -721,11 +717,8 @@ class Directory
  */
 function opendir(string $path, $context = UNKNOWN) {}
 
-/**
- * @param resource $context
- * @return Directory|false
- */
-function dir(string $path, $context = UNKNOWN) {}
+/** @param resource $context */
+function dir(string $path, $context = UNKNOWN): Directory|false {}
 
 /** @param resource $dir_handle */
 function closedir($dir_handle = UNKNOWN): void {}
@@ -865,8 +858,7 @@ function mail(string $to, string $subject, string $message, $additional_headers 
 
 /* math.c */
 
-/** @param int|float $number */
-function abs($number): int|float {}
+function abs(int|float $number): int|float {}
 
 function ceil(float $number): float {}
 

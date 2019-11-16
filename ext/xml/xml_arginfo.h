@@ -1,10 +1,10 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_parser_create, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_xml_parser_create, 0, 0, XmlParser, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_parser_create_ns, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_xml_parser_create_ns, 0, 0, XmlParser, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, sep, IS_STRING, 0)
 ZEND_END_ARG_INFO()

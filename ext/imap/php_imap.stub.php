@@ -24,11 +24,8 @@ function imap_num_recent($stream_id): int|false {}
 /** @param resource $stream_id */
 function imap_headers($stream_id): array|false {}
 
-/**
- * @param resource $stream_id
- * @return \stdClass|false
- */
-function imap_headerinfo($stream_id, int $msg_no, int $from_length = 0, int $subject_length = 0, string $default_host = UNKNOWN) {}
+/** @param resource $stream_id */
+function imap_headerinfo($stream_id, int $msg_no, int $from_length = 0, int $subject_length = 0, string $default_host = UNKNOWN): stdClass|false {}
 
 function imap_rfc822_parse_headers(string $headers, string $default_host = 'UNKNOWN'): \stdClass {}
 
@@ -60,11 +57,8 @@ function imap_savebody($stream_id, $file, int $msg_no, string $section = '', int
 /** @param resource $stream_id */
 function imap_fetchheader($stream_id, int $msg_no, int $options = 0): string|false {}
 
-/**
- * @param resource $stream_id
- * @return \stdClass|false
- */
-function imap_fetchstructure($stream_id, int $msg_no, int $options = 0) {}
+/** @param resource $stream_id */
+function imap_fetchstructure($stream_id, int $msg_no, int $options = 0): stdClass|false {}
 
 /**
  * @param resource $stream_id
@@ -86,11 +80,8 @@ function imap_delete($stream_id, string $msg_no, int $options = 0): bool {}
  */
 function imap_undelete($stream_id, string $msg_no, int $options = 0): bool {}
 
-/**
- * @param resource $stream_id
- * @return \stdClass|false
- */
-function imap_check($stream_id) {}
+/** @param resource $stream_id */
+function imap_check($stream_id): stdClass|false {}
 
 /** @param resource $stream_id */
 function imap_listscan($stream_id, string $ref, string $pattern, string $content): array|false {}

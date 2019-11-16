@@ -100,7 +100,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intltz_create_time_zone, 0, 1, In
 	ZEND_ARG_TYPE_INFO(0, zoneId, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_intltz_create_time_zone_id_enumeration arginfo_class_IntlTimeZone_createTimeZoneIDEnumeration
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_intltz_create_time_zone_id_enumeration, 0, 1, IntlIterator, MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, zoneType, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, region, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, rawOffset, IS_LONG, 1)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intltz_from_date_time_zone, 0, 1, IntlTimeZone, 1)
 	ZEND_ARG_OBJ_INFO(0, zone, DateTimeZone, 0)
@@ -174,7 +178,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intltz_has_same_rules, 0, 2, _IS
 	ZEND_ARG_OBJ_INFO(0, otherTimeZone, IntlTimeZone, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_intltz_to_date_time_zone, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_intltz_to_date_time_zone, 0, 1, DateTimeZone, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, tz, IntlTimeZone, 0)
 ZEND_END_ARG_INFO()
 
