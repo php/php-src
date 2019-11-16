@@ -43,7 +43,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_odbc_do arginfo_odbc_exec
 
 #if defined(PHP_ODBC_HAVE_FETCH_HASH)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_fetch_object, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_odbc_fetch_object, 0, 1, stdClass, MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_TYPE_INFO(0, rownumber, IS_LONG, 0)
 ZEND_END_ARG_INFO()

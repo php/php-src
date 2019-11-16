@@ -31,7 +31,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_headers, 0, 1, MAY_BE_ARRAY
 	ZEND_ARG_INFO(0, stream_id)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_headerinfo, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_headerinfo, 0, 2, stdClass, MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_TYPE_INFO(0, msg_no, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, from_length, IS_LONG, 0)
@@ -86,7 +86,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_imap_fetchheader arginfo_imap_body
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_fetchstructure, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_fetchstructure, 0, 2, stdClass, MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_TYPE_INFO(0, msg_no, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, options, IS_LONG, 0)
@@ -109,7 +109,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_imap_undelete arginfo_imap_delete
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_check, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_check, 0, 1, stdClass, MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, stream_id)
 ZEND_END_ARG_INFO()
 

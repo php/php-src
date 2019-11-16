@@ -93,8 +93,7 @@ function intltz_create_enumeration($countryOrRawOffset = null) {}
 
 function intltz_create_time_zone(string $zoneId): ?IntlTimeZone {}
 
-/** @return IntlIterator|false */
-function intltz_create_time_zone_id_enumeration(int $zoneType, ?string $region = null, ?int $rawOffset = null) {}
+function intltz_create_time_zone_id_enumeration(int $zoneType, ?string $region = null, ?int $rawOffset = null): IntlIterator|false {}
 
 function intltz_from_date_time_zone(DateTimeZone $zone): ?IntlTimeZone {}
 
@@ -132,7 +131,6 @@ function intltz_get_id_for_windows_id(string $timezone, string $region = UNKNOWN
 
 function intltz_has_same_rules(IntlTimeZone $tz, IntlTimeZone $otherTimeZone): bool {}
 
-/** @return DateTimeZone|false */
-function intltz_to_date_time_zone(IntlTimeZone $tz) {}
+function intltz_to_date_time_zone(IntlTimeZone $tz): DateTimeZone|false {}
 
 function intltz_use_daylight_time(IntlTimeZone $tz): bool {}

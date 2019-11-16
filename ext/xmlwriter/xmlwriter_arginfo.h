@@ -1,10 +1,10 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_open_uri, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_xmlwriter_open_uri, 0, 1, XMLWriter, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, uri, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_open_memory, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_xmlwriter_open_memory, 0, 0, XMLWriter, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_set_indent, 0, 2, _IS_BOOL, 0)
@@ -331,6 +331,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_XMLWriter_outputMemory, 0,
 	ZEND_ARG_TYPE_INFO(0, flush, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XMLWriter_flush, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_class_XMLWriter_flush, 0, 0, MAY_BE_STRING|MAY_BE_LONG)
 	ZEND_ARG_TYPE_INFO(0, empty, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()

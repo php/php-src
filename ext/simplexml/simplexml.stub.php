@@ -1,10 +1,8 @@
 <?php
 
-/** @return SimpleXMLElement|false */
-function simplexml_load_file(string $filename, ?string $class_name = SimpleXMLElement::class, int $options = 0, string $ns = '', bool $is_prefix = false) {}
+function simplexml_load_file(string $filename, ?string $class_name = SimpleXMLElement::class, int $options = 0, string $ns = '', bool $is_prefix = false): SimpleXMLElement|false {}
 
-/** @return SimpleXMLElement|false */
-function simplexml_load_string(string $data, ?string $class_name = SimpleXMLElement::class, int $options = 0, string $ns = '', bool $is_prefix = false) {}
+function simplexml_load_string(string $data, ?string $class_name = SimpleXMLElement::class, int $options = 0, string $ns = '', bool $is_prefix = false): SimpleXMLElement|false {}
 
 function simplexml_import_dom(DOMNode $node, ?string $class_name = SimpleXMLElement::class): ?SimpleXMLElement {}
 

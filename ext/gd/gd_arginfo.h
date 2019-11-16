@@ -12,7 +12,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagesetstyle, 0, 2, _IS_BOOL, 0
 	ZEND_ARG_TYPE_INFO(0, styles, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecreatetruecolor, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatetruecolor, 0, 2, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, x_size, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, y_size, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -103,18 +103,18 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagecopyresampled, 0, 10, _IS_B
 ZEND_END_ARG_INFO()
 
 #if defined(PHP_WIN32)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegrabwindow, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagegrabwindow, 0, 1, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, handle, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, client_area, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(PHP_WIN32)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegrabscreen, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagegrabscreen, 0, 0, GdImage, MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagerotate, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagerotate, 0, 3, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, angle, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, bgdcolor, IS_LONG, 0)
@@ -136,28 +136,28 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagetypes, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecreatefromstring, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromstring, 0, 1, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, image, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecreatefromgif, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromgif, 0, 1, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 #if defined(HAVE_GD_JPG)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecreatefromjpeg, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromjpeg, 0, 1, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_GD_PNG)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecreatefrompng, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefrompng, 0, 1, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_GD_WEBP)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecreatefromwebp, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromwebp, 0, 1, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
@@ -165,7 +165,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_imagecreatefromxbm arginfo_imagecreatefromgif
 
 #if defined(HAVE_GD_XPM)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecreatefromxpm, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromxpm, 0, 1, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
@@ -176,7 +176,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_imagecreatefromgd2 arginfo_imagecreatefromgif
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecreatefromgd2part, 0, 0, 5)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromgd2part, 0, 5, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, srcX, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, srcY, IS_LONG, 0)
@@ -185,13 +185,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecreatefromgd2part, 0, 0, 5)
 ZEND_END_ARG_INFO()
 
 #if defined(HAVE_GD_BMP)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecreatefrombmp, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefrombmp, 0, 1, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(HAVE_GD_TGA)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecreatefromtga, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecreatefromtga, 0, 1, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
@@ -521,26 +521,26 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imageantialias, 0, 2, _IS_BOOL, 
 	ZEND_ARG_TYPE_INFO(0, on, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecrop, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecrop, 0, 2, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, rect, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagecropauto, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagecropauto, 0, 1, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, threshold, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, color, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imagescale, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imagescale, 0, 2, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, new_width, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, new_height, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_imageaffine, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imageaffine, 0, 2, GdImage, MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, affine, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, clip, IS_ARRAY, 0)

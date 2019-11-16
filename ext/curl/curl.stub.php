@@ -88,12 +88,8 @@ function curl_pause($handle, int $bitmask): int {}
 /** @param resource $handle */
 function curl_reset($handle): void {}
 
-/**
- * @param resource $handle
- * @param array $options
- */
+/** @param resource $handle */
 function curl_setopt_array($handle, array $options): bool {}
-
 
 /**
  * @param resource $handle

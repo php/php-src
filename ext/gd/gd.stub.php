@@ -6,8 +6,7 @@ function imageloadfont(string $filename): int|false {}
 
 function imagesetstyle($im, array $styles): bool {}
 
-/** @return GdImage|false */
-function imagecreatetruecolor(int $x_size, int $y_size) {}
+function imagecreatetruecolor(int $x_size, int $y_size): GdImage|false {}
 
 function imageistruecolor(GdImage $im): bool {}
 
@@ -41,75 +40,58 @@ function imagecopyresampled(GdImage $dst_im, GdImage $src_im, int $dst_x, int $d
 
 #ifdef PHP_WIN32
 
-/** @return GdImage|false */
-function imagegrabwindow(int $handle, int $client_area = 0) {}
+function imagegrabwindow(int $handle, int $client_area = 0): GdImage|false {}
 
-/** @return GdImage|false */
-function imagegrabscreen() {}
+function imagegrabscreen(): GdImage|false {}
 
 #endif
 
-/** @return GdImage|false */
-function imagerotate(GdImage $im, float $angle, int $bgdcolor, int $ignoretransparent = 0) {}
+function imagerotate(GdImage $im, float $angle, int $bgdcolor, int $ignoretransparent = 0): GdImage|false {}
 
 function imagesettile(GdImage $im, $tile): bool {}
 
 function imagesetbrush(GdImage $im, $brush): bool {}
 
-/** @return GdImage|false */
-function imagecreate(int $x_size, int $y_size) {}
+function imagecreate(int $x_size, int $y_size): GdImage|false {}
 
 function imagetypes(): int {}
 
-/** @return GdImage|false */
-function imagecreatefromstring(string $image) {}
+function imagecreatefromstring(string $image): GdImage|false {}
 
-/** @return GdImage|false */
-function imagecreatefromgif(string $filename) {}
+function imagecreatefromgif(string $filename): GdImage|false {}
 
 #ifdef HAVE_GD_JPG
-/** @return GdImage|false */
-function imagecreatefromjpeg(string $filename) {}
+function imagecreatefromjpeg(string $filename): GdImage|false {}
 #endif
 
 #ifdef HAVE_GD_PNG
-/** @return GdImage|false */
-function imagecreatefrompng(string $filename) {}
+function imagecreatefrompng(string $filename): GdImage|false {}
 #endif
 
 #ifdef HAVE_GD_WEBP
-/** @return GdImage|false */
-function imagecreatefromwebp(string $filename) {}
+function imagecreatefromwebp(string $filename): GdImage|false {}
 #endif
 
-/** @return GdImage|false */
-function imagecreatefromxbm(string $filename) {}
+function imagecreatefromxbm(string $filename): GdImage|false {}
 
 #ifdef HAVE_GD_XPM
-/** @return GdImage|false */
-function imagecreatefromxpm(string $filename) {}
+function imagecreatefromxpm(string $filename): GdImage|false {}
 #endif
 
-/** @return GdImage|false */
-function imagecreatefromwbmp(string $filename) {}
+function imagecreatefromwbmp(string $filename): GdImage|false {}
 
-/** @return GdImage|false */
-function imagecreatefromgd(string $filename) {}
+function imagecreatefromgd(string $filename): GdImage|false {}
 
-/** @return GdImage|false */
-function imagecreatefromgd2(string $filename) {}
+function imagecreatefromgd2(string $filename): GdImage|false {}
 
-/** @return GdImage|false */
-function imagecreatefromgd2part(string $filename, int $srcX, int $srcY, int $width, int $height) {}
+function imagecreatefromgd2part(string $filename, int $srcX, int $srcY, int $width, int $height): GdImage|false {}
 
 #ifdef HAVE_GD_BMP
-/** @return GdImage|false */
-function imagecreatefrombmp(string $filename) {}
+function imagecreatefrombmp(string $filename): GdImage|false {}
 #endif
 
 #ifdef HAVE_GD_TGA
-/** @return GdImage|false */
-function imagecreatefromtga(string $filename) {}
+function imagecreatefromtga(string $filename): GdImage|false {}
 #endif
 
 function imagexbm(GdImage $im, ?string $filename, int $foreground = UNKNOWN): bool {}
@@ -238,17 +220,13 @@ function imageflip(GdImage $im, int $mode): bool {}
 
 function imageantialias(GdImage $im, bool $on): bool {}
 
-/** @return GdImage|false */
-function imagecrop(GdImage $im, array $rect) {}
+function imagecrop(GdImage $im, array $rect): GdImage|false {}
 
-/** @return GdImage|false */
-function imagecropauto(GdImage $im, int $mode = IMG_CROP_DEFAULT, float $threshold = 0.5, int $color = -1) {}
+function imagecropauto(GdImage $im, int $mode = IMG_CROP_DEFAULT, float $threshold = 0.5, int $color = -1): GdImage|false {}
 
-/** @return GdImage|false */
-function imagescale(GdImage $im, int $new_width, int $new_height = UNKNOWN, int $mode = IMG_BILINEAR_FIXED) {}
+function imagescale(GdImage $im, int $new_width, int $new_height = UNKNOWN, int $mode = IMG_BILINEAR_FIXED): GdImage|false {}
 
-/** @return GdImage|false */
-function imageaffine(GdImage $im, array $affine, array $clip = UNKNOWN) {}
+function imageaffine(GdImage $im, array $affine, array $clip = UNKNOWN): GdImage|false {}
 
 function imageaffinematrixget(int $type, $options = UNKNOWN): array|false {}
 
