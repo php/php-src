@@ -207,6 +207,10 @@ static zend_off_t getSingletonPos(const char* str)
    Get default locale */
 PHP_NAMED_FUNCTION(zif_locale_get_default)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
 	RETURN_STRING( intl_locale_get_default(  ) );
 }
 
