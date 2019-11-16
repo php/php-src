@@ -32,6 +32,399 @@
 static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const char*, size_t, XSQLDA*, isc_stmt_handle*,
 	HashTable*);
 
+const char CHR_LETTER = 1;
+const char CHR_DIGIT = 2;
+const char CHR_IDENT = 4;
+const char CHR_QUOTE = 8;
+const char CHR_WHITE = 16;
+const char CHR_HEX = 32;
+const char CHR_INTRODUCER = 64;
+
+static const char classes_array[] = {
+	/* 000     */ 0,
+	/* 001     */ 0,
+	/* 002     */ 0,
+	/* 003     */ 0,
+	/* 004     */ 0,
+	/* 005     */ 0,
+	/* 006     */ 0,
+	/* 007     */ 0,
+	/* 008     */ 0,
+	/* 009     */ 16, /* CHR_WHITE */
+	/* 010     */ 16, /* CHR_WHITE */
+	/* 011     */ 0,
+	/* 012     */ 0,
+	/* 013     */ 16, /* CHR_WHITE */
+	/* 014     */ 0,
+	/* 015     */ 0,
+	/* 016     */ 0,
+	/* 017     */ 0,
+	/* 018     */ 0,
+	/* 019     */ 0,
+	/* 020     */ 0,
+	/* 021     */ 0,
+	/* 022     */ 0,
+	/* 023     */ 0,
+	/* 024     */ 0,
+	/* 025     */ 0,
+	/* 026     */ 0,
+	/* 027     */ 0,
+	/* 028     */ 0,
+	/* 029     */ 0,
+	/* 030     */ 0,
+	/* 031     */ 0,
+	/* 032     */ 16, /* CHR_WHITE */
+	/* 033  !  */ 0,
+	/* 034  "  */ 8, /* CHR_QUOTE */
+	/* 035  #  */ 0,
+	/* 036  $  */ 4, /* CHR_IDENT */
+	/* 037  %  */ 0,
+	/* 038  &  */ 0,
+	/* 039  '  */ 8, /* CHR_QUOTE */
+	/* 040  (  */ 0,
+	/* 041  )  */ 0,
+	/* 042  *  */ 0,
+	/* 043  +  */ 0,
+	/* 044  ,  */ 0,
+	/* 045  -  */ 0,
+	/* 046  .  */ 0,
+	/* 047  /  */ 0,
+	/* 048  0  */ 38, /* CHR_DIGIT | CHR_IDENT | CHR_HEX */
+	/* 049  1  */ 38, /* CHR_DIGIT | CHR_IDENT | CHR_HEX */
+	/* 050  2  */ 38, /* CHR_DIGIT | CHR_IDENT | CHR_HEX */
+	/* 051  3  */ 38, /* CHR_DIGIT | CHR_IDENT | CHR_HEX */
+	/* 052  4  */ 38, /* CHR_DIGIT | CHR_IDENT | CHR_HEX */
+	/* 053  5  */ 38, /* CHR_DIGIT | CHR_IDENT | CHR_HEX */
+	/* 054  6  */ 38, /* CHR_DIGIT | CHR_IDENT | CHR_HEX */
+	/* 055  7  */ 38, /* CHR_DIGIT | CHR_IDENT | CHR_HEX */
+	/* 056  8  */ 38, /* CHR_DIGIT | CHR_IDENT | CHR_HEX */
+	/* 057  9  */ 38, /* CHR_DIGIT | CHR_IDENT | CHR_HEX */
+	/* 058  :  */ 0,
+	/* 059  ;  */ 0,
+	/* 060  <  */ 0,
+	/* 061  =  */ 0,
+	/* 062  >  */ 0,
+	/* 063  ?  */ 0,
+	/* 064  @  */ 0,
+	/* 065  A  */ 37, /* CHR_LETTER | CHR_IDENT | CHR_HEX */
+	/* 066  B  */ 37, /* CHR_LETTER | CHR_IDENT | CHR_HEX */
+	/* 067  C  */ 37, /* CHR_LETTER | CHR_IDENT | CHR_HEX */
+	/* 068  D  */ 37, /* CHR_LETTER | CHR_IDENT | CHR_HEX */
+	/* 069  E  */ 37, /* CHR_LETTER | CHR_IDENT | CHR_HEX */
+	/* 070  F  */ 37, /* CHR_LETTER | CHR_IDENT | CHR_HEX */
+	/* 071  G  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 072  H  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 073  I  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 074  J  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 075  K  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 076  L  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 077  M  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 078  N  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 079  O  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 080  P  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 081  Q  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 082  R  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 083  S  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 084  T  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 085  U  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 086  V  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 087  W  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 088  X  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 089  Y  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 090  Z  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 091  [  */ 0,
+	/* 092  \  */ 0,
+	/* 093  ]  */ 0,
+	/* 094  ^  */ 0,
+	/* 095  _  */ 65, /* CHR_IDENT | CHR_INTRODUCER */
+	/* 096  `  */ 0,
+	/* 097  a  */ 37, /* CHR_LETTER | CHR_IDENT | CHR_HEX */
+	/* 098  b  */ 37, /* CHR_LETTER | CHR_IDENT | CHR_HEX */
+	/* 099  c  */ 37, /* CHR_LETTER | CHR_IDENT | CHR_HEX */
+	/* 100  d  */ 37, /* CHR_LETTER | CHR_IDENT | CHR_HEX */
+	/* 101  e  */ 37, /* CHR_LETTER | CHR_IDENT | CHR_HEX */
+	/* 102  f  */ 37, /* CHR_LETTER | CHR_IDENT | CHR_HEX */
+	/* 103  g  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 104  h  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 105  i  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 106  j  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 107  k  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 108  l  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 109  m  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 110  n  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 111  o  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 112  p  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 113  q  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 114  r  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 115  s  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 116  t  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 117  u  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 118  v  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 119  w  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 120  x  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 121  y  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 122  z  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 123  {  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 124  |  */ 0,
+	/* 125  }  */ 5, /* CHR_LETTER | CHR_IDENT */
+	/* 126  ~  */ 0,
+	/* 127     */ 0
+};
+
+inline char classes(char idx)
+{
+	if (idx > 127) return 0;
+	return classes_array[idx];
+}
+
+typedef enum {
+	ttNone,
+	ttWhite,
+	ttComment,
+	ttBrokenComment,
+	ttString,
+	ttParamMark,
+	ttIdent,
+	ttOther
+} FbTokenType;
+
+static FbTokenType getToken(const char** begin, const char* end)
+{
+	FbTokenType ret = ttNone;
+	const char* p = *begin;
+
+	char c = *p++;
+	switch (c)
+	{
+	case ':':
+	case '?':
+		ret = ttParamMark;
+		break;
+
+	case '\'':
+	case '"':
+		while (p < end)
+		{
+			if (*p++ == c)
+			{
+				ret = ttString;
+				break;
+			}
+		}
+		break;
+
+	case '/':
+		if (p < end && *p == '*')
+		{
+			ret = ttBrokenComment;
+			p++;
+			while (p < end)
+			{
+				if (*p++ == '*' && p < end && *p == '/')
+				{
+					p++;
+					ret = ttComment;
+					break;
+				}
+			}
+		}
+		else {
+			ret = ttOther;
+		}
+		break;
+
+	case '-':
+		if (p < end && *p == '-')
+		{
+			while (++p < end)
+			{
+				if (*p == '\r')
+				{
+					p++;
+					if (p < end && *p == '\n')
+						p++;
+					break;
+				}
+				else if (*p == '\n')
+					break;
+			}
+
+			ret = ttComment;
+		}
+		else
+			ret = ttOther;
+		break;
+
+	default:
+		if (classes(c) & CHR_DIGIT)
+		{
+			while (p < end && (classes(*p) & CHR_DIGIT))
+				p++;
+			ret = ttOther;
+		}
+		else if (classes(c) & CHR_IDENT)
+		{
+			while (p < end && (classes(*p) & CHR_IDENT))
+				p++;
+			ret = ttIdent;
+		}
+		else if (classes(c) & CHR_WHITE)
+		{
+			while (p < end && (classes(*p) & CHR_WHITE))
+				p++;
+			ret = ttWhite;
+		}
+		else
+		{
+			while (p < end && !(classes(*p) & (CHR_DIGIT | CHR_IDENT | CHR_WHITE)) &&
+				(*p != '/') && (*p != '-') && (*p != ':') && (*p != '?') &&
+				(*p != '\'') && (*p != '"'))
+			{
+				p++;
+			}
+			ret = ttOther;
+		}
+	}
+
+	*begin = p;
+	return ret;
+}
+
+int preprocess(const char* sql, int sql_len, char* sql_out, HashTable* named_params)
+{
+	zend_bool passAsIs = 1, execBlock = 0;
+	zend_long pindex = -1;
+	char pname[254];
+	const char* p = sql, * end = sql + sql_len;
+	const char* start = p;
+	FbTokenType tok = getToken(&p, end);
+
+	const char* i = start;
+	while (p < end && (tok == ttComment || tok == ttWhite))
+	{
+		i = p;
+		tok = getToken(&p, end);
+	}
+
+	if (p >= end || tok != ttIdent)
+	{
+		/* Execute statement preprocess SQL error */
+		/* Statement expected */
+		return 0;
+	}
+	/* skip leading comments ?? */
+	start = i; 
+
+	if (!strncasecmp(i, "EXECUTE", 7)) 
+	{
+		const char* i2 = p;
+		tok = getToken(&p, end);
+		while (p < end && (tok == ttComment || tok == ttWhite))
+		{
+			i2 = p;
+			tok = getToken(&p, end);
+		}
+		if (p >= end || tok != ttIdent)
+		{
+			/* Execute statement preprocess SQL error */
+			/* Statement expected */
+			return 0;
+		}
+
+		execBlock = !strncasecmp(i2, "BLOCK", 5);
+		passAsIs = 0;
+	}
+	else
+	{
+		passAsIs = strncasecmp(i, "INSERT", 5) && strncasecmp(i, "UPDATE", 6) &&
+			strncasecmp(i, "DELETE", 6) && strncasecmp(i, "MERGE", 5) &&
+			strncasecmp(i, "SELECT", 6) && strncasecmp(i, "WITH", 4);
+	}
+
+	if (passAsIs)
+	{
+		strcpy(sql_out, sql);
+		return 1;
+	}
+
+	strncat(sql_out, start, p - start);
+
+	while (p < end)
+	{
+		start = p;
+		tok = getToken(&p, end);
+		switch (tok)
+		{
+		case ttParamMark:
+			tok = getToken(&p, end);
+			if (tok == ttIdent /*|| tok == ttString*/)
+			{
+				++pindex;
+				unsigned int l = p - start;
+				/* check the length of the identifier */
+			    /* in Firebird 4.0 it is 63 characters, in previous versions 31 bytes */
+				/* + symbol ":" */
+				if (l > 253) {
+					return 0;
+				}
+				strncpy(pname, start, l);
+				pname[l] = '\0';
+				
+				if (named_params) {
+					zval tmp;
+					ZVAL_LONG(&tmp, pindex);
+					zend_hash_str_update(named_params, pname, l, &tmp);
+				}
+
+				strcat(sql_out, "?");
+			}
+			else
+			{
+				if (strncmp(start, "?", 1)) {
+					/* Execute statement preprocess SQL error */
+					/* Parameter name expected */
+					return 0;
+				}
+				++pindex;
+				strncat(sql_out, start, p - start);
+			}
+			break;
+
+		case ttIdent:
+			if (execBlock)
+			{
+				if (!strncasecmp(start, "AS", 2))
+				{
+					strncat(sql_out, start, end - start);
+					return 1;
+				}
+			}
+
+		case ttWhite:
+		case ttComment:
+		case ttString:
+		case ttOther:
+			strncat(sql_out, start, p - start);
+			break;
+
+		case ttBrokenComment:
+		{
+			/* Execute statement preprocess SQL error */
+			/* Unclosed comment found near ''@1'' */
+			return 0;
+		}
+		break;
+
+
+		case ttNone:
+			/* Execute statement preprocess SQL error */
+			return 0;
+			break;
+		}
+	}
+	return 1;
+}
+
 /* map driver specific error message to PDO error */
 void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, zend_long line) /* {{{ */
 {
@@ -42,6 +435,8 @@ void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, zend_lo
 /* }}} */
 
 #define RECORD_ERROR(dbh) _firebird_error(dbh, NULL, __FILE__, __LINE__)
+
+
 
 /* called by PDO to close a db handle */
 static int firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
@@ -352,8 +747,7 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, size_t s
 	XSQLDA *out_sqlda, isc_stmt_handle *s, HashTable *named_params)
 {
 	pdo_firebird_db_handle *H = (pdo_firebird_db_handle *)dbh->driver_data;
-	char *c, *new_sql, in_quote, in_param, pname[64], *ppname;
-	zend_long l, pindex = -1;
+	char *new_sql;
 
 	/* Firebird allows SQL statements up to 64k, so bail if it doesn't fit */
 	if (sql_len > 65536) {
@@ -379,39 +773,12 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t *dbh, const char *sql, size_t s
 
 	/* in order to support named params, which Firebird itself doesn't,
 	   we need to replace :foo by ?, and store the name we just replaced */
-	new_sql = c = emalloc(sql_len+1);
-
-	for (l = in_quote = in_param = 0; l <= sql_len; ++l) {
-		if ( !(in_quote ^= (sql[l] == '\''))) {
-			if (!in_param) {
-				switch (sql[l]) {
-					case ':':
-						in_param = 1;
-						ppname = pname;
-						*ppname++ = sql[l];
-					case '?':
-						*c++ = '?';
-						++pindex;
-					continue;
-				}
-			} else {
-                                if ((in_param &= ((sql[l] >= 'A' && sql[l] <= 'Z') || (sql[l] >= 'a' && sql[l] <= 'z')
-                                        || (sql[l] >= '0' && sql[l] <= '9') || sql[l] == '_' || sql[l] == '-'))) {
-
-
-					*ppname++ = sql[l];
-					continue;
-				} else {
-					*ppname++ = 0;
-					if (named_params) {
-						zval tmp;
-						ZVAL_LONG(&tmp, pindex);
-						zend_hash_str_update(named_params, pname, (unsigned int)(ppname - pname - 1), &tmp);
-					}
-				}
-			}
-		}
-		*c++ = sql[l];
+	new_sql = emalloc(sql_len+1);
+	new_sql[0] = '\0';
+	if (!preprocess(sql, sql_len, new_sql, named_params)) {
+		strcpy(dbh->error_code, "07000");
+		efree(new_sql);			
+		return 0;
 	}
 
 	/* prepare the statement */
@@ -658,7 +1025,7 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 				buf_len -= dpb_len;
 			}
 		}
-
+		
 		H->sql_dialect = PDO_FB_DIALECT;
 		if (vars[3].optval) {
 			H->sql_dialect = atoi(vars[3].optval);
