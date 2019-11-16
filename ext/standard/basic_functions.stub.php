@@ -543,11 +543,8 @@ function wordwrap(string $str, int $width = 75, string $break = "\n", bool $cut 
 
 function explode(string $separator, string $str, int $limit = PHP_INT_MAX): array {}
 
-/**
- * @param string $glue Optional - defaults to empty string
- * @param array $pieces
- */
-function implode($glue, $pieces = UNKNOWN): string {}
+/** @param string|array $glue */
+function implode($glue, array $pieces = UNKNOWN): string {}
 
 /**
  * @param string $str Optional - defaults to previous string

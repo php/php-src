@@ -1264,16 +1264,16 @@ PHPAPI void php_implode(const zend_string *glue, zval *pieces, zval *return_valu
    Joins array elements placing glue string between items and return one string */
 PHP_FUNCTION(implode)
 {
-	zval *arg1, *arg2 = NULL, *pieces;
+	zval *arg1, *pieces = NULL;
 	zend_string *glue, *tmp_glue;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ZVAL(arg1)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL(arg2)
+		Z_PARAM_ARRAY(pieces)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (arg2 == NULL) {
+	if (pieces == NULL) {
 		if (Z_TYPE_P(arg1) != IS_ARRAY) {
 			zend_type_error("Argument must be an array");
 			return;
@@ -1283,16 +1283,10 @@ PHP_FUNCTION(implode)
 		tmp_glue = NULL;
 		pieces = arg1;
 	} else {
-		if (Z_TYPE_P(arg1) == IS_ARRAY) {
-			glue = zval_get_tmp_string(arg2, &tmp_glue);
-			pieces = arg1;
-			php_error_docref(NULL, E_DEPRECATED,
-				"Passing glue string after array is deprecated. Swap the parameters");
-		} else if (Z_TYPE_P(arg2) == IS_ARRAY) {
+		if (Z_TYPE_P(arg1) == IS_STRING) {
 			glue = zval_get_tmp_string(arg1, &tmp_glue);
-			pieces = arg2;
 		} else {
-			zend_type_error("Invalid arguments passed");
+			zend_type_error("The first argument must be string");
 			return;
 		}
 	}

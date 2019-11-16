@@ -91,9 +91,13 @@ for($index = 0; $index < count($values); $index ++) {
   echo "-- Iteration $counter --\n";
   $glue = $values [$index];
 
-  var_dump( join($glue, $pieces) );
+  try {
+    var_dump(join($glue, $pieces));
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
 
-  $counter ++;
+  $counter++;
 }
 
 echo "Done\n";
@@ -103,75 +107,55 @@ echo "Done\n";
 
 --- Testing join() by supplying different values for 'glue' argument ---
 -- Iteration 1 --
-string(17) "element10element2"
+The first argument must be string
 -- Iteration 2 --
-string(17) "element11element2"
+The first argument must be string
 -- Iteration 3 --
-string(21) "element112345element2"
+The first argument must be string
 -- Iteration 4 --
-string(21) "element1-2345element2"
+The first argument must be string
 -- Iteration 5 --
-string(20) "element110.5element2"
+The first argument must be string
 -- Iteration 6 --
-string(21) "element1-10.5element2"
+The first argument must be string
 -- Iteration 7 --
-string(28) "element1101234567000element2"
+The first argument must be string
 -- Iteration 8 --
-string(29) "element11.07654321E-9element2"
+The first argument must be string
 -- Iteration 9 --
-string(19) "element10.5element2"
+The first argument must be string
 -- Iteration 10 --
-
-Warning: Array to string conversion in %s on line %d
-
-Deprecated: join(): Passing glue string after array is deprecated. Swap the parameters in %s on line %d
-string(0) ""
+The first argument must be string
 -- Iteration 11 --
-
-Warning: Array to string conversion in %s on line %d
-
-Deprecated: join(): Passing glue string after array is deprecated. Swap the parameters in %s on line %d
-string(1) "0"
+The first argument must be string
 -- Iteration 12 --
-
-Warning: Array to string conversion in %s on line %d
-
-Deprecated: join(): Passing glue string after array is deprecated. Swap the parameters in %s on line %d
-string(1) "1"
+The first argument must be string
 -- Iteration 13 --
-
-Warning: Array to string conversion in %s on line %d
-
-Deprecated: join(): Passing glue string after array is deprecated. Swap the parameters in %s on line %d
-string(7) "1Array2"
+The first argument must be string
 -- Iteration 14 --
-
-Warning: Array to string conversion in %s on line %d
-
-Deprecated: join(): Passing glue string after array is deprecated. Swap the parameters in %s on line %d
-string(11) "redArraypen"
+The first argument must be string
 -- Iteration 15 --
-string(17) "element11element2"
+The first argument must be string
 -- Iteration 16 --
-string(16) "element1element2"
+The first argument must be string
 -- Iteration 17 --
-string(17) "element11element2"
+The first argument must be string
 -- Iteration 18 --
-string(16) "element1element2"
+The first argument must be string
 -- Iteration 19 --
-string(26) "element1testObjectelement2"
+The first argument must be string
 -- Iteration 20 --
 string(16) "element1element2"
 -- Iteration 21 --
 string(16) "element1element2"
 -- Iteration 22 --
-string(16) "element1element2"
+The first argument must be string
 -- Iteration 23 --
-string(16) "element1element2"
+The first argument must be string
 -- Iteration 24 --
-string(%d) "element1Resource id #%delement2"
+The first argument must be string
 -- Iteration 25 --
-string(16) "element1element2"
+The first argument must be string
 -- Iteration 26 --
-string(16) "element1element2"
+The first argument must be string
 Done
