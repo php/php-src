@@ -981,8 +981,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_hebrev, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, max_chars_per_line, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_hebrevc arginfo_hebrev
-
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_nl2br, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, is_xhtml, _IS_BOOL, 0)

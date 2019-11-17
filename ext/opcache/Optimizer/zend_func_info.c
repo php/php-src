@@ -151,7 +151,6 @@ static const func_info_t func_infos[] = {
 	FN("strtolower",                   MAY_BE_STRING),
 	F1("strrev",                       MAY_BE_STRING),
 	F1("hebrev",                       MAY_BE_STRING),
-	F1("hebrevc",                      MAY_BE_STRING),
 	FN("nl2br",                        MAY_BE_STRING),
 	F1("basename",                     MAY_BE_STRING),
 	F1("dirname",                      MAY_BE_STRING),
