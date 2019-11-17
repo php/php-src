@@ -4384,12 +4384,9 @@ PHP_FUNCTION(str_ireplace)
 }
 /* }}} */
 
-/* {{{ php_hebrev
- *
- * Converts Logical Hebrew text (Hebrew Windows style) to Visual text
- * Cheers/complaints/flames - Zeev Suraski <zeev@php.net>
- */
-static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
+/* {{{ proto string hebrev(string str [, int max_chars_per_line])
+   Converts logical Hebrew text to visual text */
+PHP_FUNCTION(hebrev)
 {
 	char *str, *heb_str, *target;
 	const char *tmp;
@@ -4549,28 +4546,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 	}
 	efree(heb_str);
 
-	if (convert_newlines) {
-		RETVAL_STR(php_char_to_str_ex(broken_str, '\n', "<br />\n", 7, 1, NULL));
-		zend_string_release_ex(broken_str, 0);
-	} else {
-		RETURN_NEW_STR(broken_str);
-	}
-}
-/* }}} */
-
-/* {{{ proto string hebrev(string str [, int max_chars_per_line])
-   Converts logical Hebrew text to visual text */
-PHP_FUNCTION(hebrev)
-{
-	php_hebrev(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
-}
-/* }}} */
-
-/* {{{ proto string hebrevc(string str [, int max_chars_per_line])
-   Converts logical Hebrew text to visual text with newline conversion */
-PHP_FUNCTION(hebrevc)
-{
-	php_hebrev(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
+	RETURN_NEW_STR(broken_str);
 }
 /* }}} */
 

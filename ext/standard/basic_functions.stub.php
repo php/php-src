@@ -636,8 +636,6 @@ function str_ireplace($search, $replace, $subject, &$replace_count = UNKNOWN): s
 
 function hebrev(string $str, int $max_chars_per_line = 0): string {}
 
-function hebrevc(string $str, int $max_chars_per_line = 0): string {}
-
 function nl2br(string $str, bool $is_xhtml = true): string {}
 
 /** @param mixed $allowable_tags */

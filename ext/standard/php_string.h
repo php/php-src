@@ -52,7 +52,6 @@ PHP_FUNCTION(ucwords);
 PHP_FUNCTION(strtr);
 PHP_FUNCTION(strrev);
 PHP_FUNCTION(hebrev);
-PHP_FUNCTION(hebrevc);
 PHP_FUNCTION(user_sprintf);
 PHP_FUNCTION(user_printf);
 PHP_FUNCTION(vprintf);
