@@ -845,8 +845,6 @@ function link(string $target, string $link): bool {}
 
 /* mail.c */
 
-function ezmlm_hash(string $str): int {}
-
 /** @param string|array $additional_headers */
 function mail(string $to, string $subject, string $message, $additional_headers = UNKNOWN, string $additional_parameters = ""): bool {}
 

@@ -532,7 +532,6 @@ static const func_info_t func_infos[] = {
 	F0("realpath_cache_size",          MAY_BE_LONG),
 	F1("realpath_cache_get",           MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	F0("mail",                         MAY_BE_FALSE | MAY_BE_TRUE),
-	F0("ezmlm_hash",                   MAY_BE_LONG),
 #ifdef HAVE_SYSLOG_H
 	F0("closelog",                     MAY_BE_TRUE),
 #endif
