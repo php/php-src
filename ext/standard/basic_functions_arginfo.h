@@ -427,10 +427,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_cfg_var, 0, 1, MAY_BE_STRING
 	ZEND_ARG_TYPE_INFO(0, option_name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_get_magic_quotes_runtime arginfo_ob_flush
-
-#define arginfo_get_magic_quotes_gpc arginfo_ob_flush
-
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_error_log, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, message_type, IS_LONG, 0)

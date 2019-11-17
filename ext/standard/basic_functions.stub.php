@@ -273,10 +273,6 @@ function get_current_user(): string {}
 
 function get_cfg_var(string $option_name): string|array|false {}
 
-function get_magic_quotes_runtime(): bool {}
-
-function get_magic_quotes_gpc(): bool {}
-
 function error_log(string $message, int $message_type = 0, string $destination = UNKNOWN, string $extra_headers = UNKNOWN): bool {}
 
 function error_get_last(): ?array {}

@@ -332,8 +332,6 @@ static const func_info_t func_infos[] = {
 	F1("quoted_printable_encode",      MAY_BE_STRING),
 	F1("get_current_user",             MAY_BE_STRING),
 	F1("get_cfg_var",                  MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
-	F0("get_magic_quotes_gpc",         MAY_BE_FALSE),
-	F0("get_magic_quotes_runtime",     MAY_BE_FALSE),
 	F0("error_log",                    MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("error_get_last",               MAY_BE_NULL | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 	FN("call_user_func",               UNKNOWN_INFO),

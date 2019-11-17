@@ -1136,9 +1136,6 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(header_register_callback,										arginfo_header_register_callback)
 	PHP_FE(get_cfg_var,														arginfo_get_cfg_var)
 
-	PHP_DEP_FE(get_magic_quotes_gpc,										arginfo_get_magic_quotes_gpc)
-	PHP_DEP_FE(get_magic_quotes_runtime,									arginfo_get_magic_quotes_runtime)
-
 	PHP_FE(error_log,														arginfo_error_log)
 	PHP_FE(error_get_last,													arginfo_error_get_last)
 	PHP_FE(error_clear_last,													arginfo_error_clear_last)
@@ -2878,28 +2875,6 @@ PHP_FUNCTION(get_cfg_var)
 	} else {
 		RETURN_FALSE;
 	}
-}
-/* }}} */
-
-/* {{{ proto false get_magic_quotes_runtime(void)
-   Get the current active configuration setting of magic_quotes_runtime */
-PHP_FUNCTION(get_magic_quotes_runtime)
-{
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-	RETURN_FALSE;
-}
-/* }}} */
-
-/* {{{ proto false get_magic_quotes_gpc(void)
-   Get the current active configuration setting of magic_quotes_gpc */
-PHP_FUNCTION(get_magic_quotes_gpc)
-{
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-	RETURN_FALSE;
 }
 /* }}} */
 
