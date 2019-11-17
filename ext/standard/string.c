@@ -4663,7 +4663,7 @@ int php_tag_find(char *tag, size_t len, const char *set) {
 					if (state == 0) {
 						state=1;
 					}
-					if (c != '/') {
+					if (c != '/' || (*(t-1) != '<' && *(t+1) != '>')) {
 						*(n++) = c;
 					}
 				} else {
