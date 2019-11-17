@@ -18,7 +18,6 @@
 #define PHP_MAIL_H
 
 PHP_FUNCTION(mail);
-PHP_FUNCTION(ezmlm_hash);
 
 PHP_MINFO_FUNCTION(mail);
 

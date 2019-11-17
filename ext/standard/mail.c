@@ -64,29 +64,6 @@
 
 extern zend_long php_getuid(void);
 
-/* {{{ proto int ezmlm_hash(string addr)
-   Calculate EZMLM list hash value. */
-PHP_FUNCTION(ezmlm_hash)
-{
-	char *str = NULL;
-	unsigned int h = 5381;
-	size_t j, str_len;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(str, str_len)
-	ZEND_PARSE_PARAMETERS_END();
-
-	for (j = 0; j < str_len; j++) {
-		h = (h + (h << 5)) ^ (zend_ulong) (unsigned char) tolower(str[j]);
-	}
-
-	h = (h % 53);
-
-	RETURN_LONG((zend_long) h);
-}
-/* }}} */
-
-
 static zend_bool php_mail_build_headers_check_field_value(zval *val)
 {
 	size_t len = 0;
