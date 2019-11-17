@@ -362,7 +362,7 @@ int preprocess(const char* sql, int sql_len, char* sql_out, HashTable* named_par
 				++pindex;
 				unsigned int l = p - start;
 				/* check the length of the identifier */
-			    /* in Firebird 4.0 it is 63 characters, in previous versions 31 bytes */
+				/* in Firebird 4.0 it is 63 characters, in previous versions 31 bytes */
 				/* + symbol ":" */
 				if (l > 253) {
 					return 0;
@@ -435,8 +435,6 @@ void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, zend_lo
 /* }}} */
 
 #define RECORD_ERROR(dbh) _firebird_error(dbh, NULL, __FILE__, __LINE__)
-
-
 
 /* called by PDO to close a db handle */
 static int firebird_handle_closer(pdo_dbh_t *dbh) /* {{{ */
