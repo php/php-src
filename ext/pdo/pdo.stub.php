@@ -112,7 +112,7 @@ class PDOStatement
 	 *
 	 * @return mixed
 	 */
-	public function fetch(int $how = PDO_FETCH_BOTH, int $orientation = 0, int $offset = 0);
+	public function fetch($how = PDO_FETCH_BOTH, $orientation = 0, $offset = 0);
 
     /**
 	 * @param int|string $paramno
