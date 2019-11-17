@@ -275,7 +275,6 @@ static const func_info_t func_infos[] = {
 #endif
 	F1("quoted_printable_decode",      MAY_BE_STRING),
 	F1("quoted_printable_encode",      MAY_BE_STRING),
-	F1("convert_cyr_string",           MAY_BE_STRING),
 	F1("get_current_user",             MAY_BE_STRING),
 	F1("get_cfg_var",                  MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	F0("get_magic_quotes_gpc",         MAY_BE_FALSE),

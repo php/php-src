@@ -385,10 +385,6 @@ function crc32(string $str): int {}
 
 function crypt(string $str, string $salt = UNKNOWN): string {}
 
-/* cyr_convert.c */
-
-function convert_cyr_string(string $str, string $from, string $to): string {}
-
 /* datetime.c */
 
 #if HAVE_STRPTIME

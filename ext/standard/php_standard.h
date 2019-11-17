@@ -35,7 +35,6 @@
 #include "microtime.h"
 #include "url.h"
 #include "pageinfo.h"
-#include "cyr_convert.h"
 #include "php_link.h"
 #include "fsock.h"
 #include "php_image.h"
