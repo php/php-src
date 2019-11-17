@@ -634,7 +634,6 @@ statfs \
 statvfs \
 std_syslog \
 strcasecmp \
-strfmon \
 strnlen \
 strptime \
 strtok_r \
