@@ -834,6 +834,8 @@ static inline int ct_eval_func_call(
 				|| zend_string_equals_literal(name, "rtrim")
 				|| zend_string_equals_literal(name, "ltrim")
 				|| zend_string_equals_literal(name, "str_split")
+				|| zend_string_equals_literal(name, "strtoupper")
+				|| zend_string_equals_literal(name, "strtolower")
 				|| zend_string_equals_literal(name, "preg_quote")
 				|| zend_string_equals_literal(name, "base64_encode")
 				|| zend_string_equals_literal(name, "base64_decode")
@@ -888,7 +890,8 @@ static inline int ct_eval_func_call(
 				return FAILURE;
 			}
 			/* pass */
-		} else if (zend_string_equals_literal(name, "strpos")) {
+		} else if (zend_string_equals_literal(name, "strpos")
+		        || zend_string_equals_literal(name, "stripos")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
 					|| Z_TYPE_P(args[1]) != IS_STRING
 					|| !Z_STRLEN_P(args[1])) {
