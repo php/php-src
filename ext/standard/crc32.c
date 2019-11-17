@@ -23,6 +23,9 @@
 # if defined(__linux__)
 #  include <sys/auxv.h>
 #  include <asm/hwcap.h>
+# elif defined(__FreeBSD__)
+#  include <sys/auxv.h>
+#  include <elf.h>
 # endif
 
 static inline int has_crc32_insn() {
@@ -30,12 +33,20 @@ static inline int has_crc32_insn() {
 	static int res = -1;
 	if (res != -1)
 		return res;
+# if defined(__linux__)
 # if defined(HWCAP_CRC32)
 	res = getauxval(AT_HWCAP) & HWCAP_CRC32;
 	return res;
 # elif defined(HWCAP2_CRC32)
 	res = getauxval(AT_HWCAP2) & HWCAP2_CRC32;
 	return res;
+# endif
+# elif defined(__FreeBSD__)
+# if defined(HWCAP_CRC32)
+	zend_long crc32 = 0;
+	if (elf_aux_info(AT_HWCAP, &crc32, sizeof(crc32)) == 0)
+		res = crc32 & HWCAP_CRC32;
+# endif
 # else
 	res = 0;
 	return res;
