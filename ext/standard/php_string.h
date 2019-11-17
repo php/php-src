@@ -89,9 +89,6 @@ PHP_FUNCTION(substr_compare);
 PHP_FUNCTION(utf8_encode);
 PHP_FUNCTION(utf8_decode);
 PHP_FUNCTION(strcoll);
-#if HAVE_STRFMON
-PHP_FUNCTION(money_format);
-#endif
 
 #if defined(ZTS)
 PHP_MINIT_FUNCTION(localeconv);

@@ -5925,58 +5925,6 @@ PHP_FUNCTION(str_word_count)
 
 /* }}} */
 
-#if HAVE_STRFMON
-/* {{{ proto string|false money_format(string format , float value)
-   Convert monetary value(s) to string */
-PHP_FUNCTION(money_format)
-{
-	size_t format_len = 0;
-	char *format, *p, *e;
-	double value;
-	zend_bool check = 0;
-	zend_string *str;
-	ssize_t res_len;
-
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STRING(format, format_len)
-		Z_PARAM_DOUBLE(value)
-	ZEND_PARSE_PARAMETERS_END();
-
-	p = format;
-	e = p + format_len;
-	while ((p = memchr(p, '%', (e - p)))) {
-		if (*(p + 1) == '%') {
-			p += 2;
-		} else if (!check) {
-			check = 1;
-			p++;
-		} else {
-			php_error_docref(NULL, E_WARNING, "Only a single %%i or %%n token can be used");
-			RETURN_FALSE;
-		}
-	}
-
-	str = zend_string_safe_alloc(format_len, 1, 1024, 0);
-	if ((res_len = strfmon(ZSTR_VAL(str), ZSTR_LEN(str), format, value)) < 0) {
-		zend_string_efree(str);
-		RETURN_FALSE;
-	}
-#ifdef _AIX
-	/*
-	On AIX strfmon seems to include the terminating \0 in the length returned by strfmon,
-	despite the documentation indicating it is not included.
-	*/
-	ZSTR_LEN(str) = strlen(ZSTR_VAL(str));
-#else
-	ZSTR_LEN(str) = (size_t)res_len;
-#endif
-	ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
-
-	RETURN_NEW_STR(zend_string_truncate(str, ZSTR_LEN(str), 0));
-}
-/* }}} */
-#endif
-
 /* {{{ proto array str_split(string str [, int split_length])
    Convert a string to an array. If split_length is specified, break the string down into chunks each split_length characters long. */
 PHP_FUNCTION(str_split)

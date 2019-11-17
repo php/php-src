@@ -667,10 +667,6 @@ function str_shuffle(string $str): string {}
 
 function str_word_count(string $str, int $format = 0, string $charlist = UNKNOWN): array|int {}
 
-#ifdef HAVE_STRFMON
-function money_format(string $format, float $value): string|false {}
-#endif
-
 function str_split(string $str, int $split_length = 1): array {}
 
 function strpbrk(string $haystack, string $char_list): string|false {}
