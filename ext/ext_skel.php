@@ -330,6 +330,7 @@ function copy_sources() {
 
 	$files = [
 			'skeleton.c'		=> $options['ext'] . '.c',
+			'skeleton.stub'		=> $options['ext'] . '.stub.php',
 			'php_skeleton.h'	=> 'php_' . $options['ext'] . '.h'
 			];
 
