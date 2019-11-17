@@ -696,6 +696,10 @@ static inline zend_result ct_eval_in_array(zval *result, uint32_t extended_value
 		return FAILURE;
 	}
 	ht = Z_ARRVAL_P(op2);
+	if (zend_hash_num_elements(ht) == 0) {
+		ZVAL_FALSE(result);
+		return SUCCESS;
+	}
 	if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 		res = zend_hash_exists(ht, Z_STR_P(op1));
 	} else if (extended_value) {
@@ -1210,6 +1214,20 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			opline++;
 			ssa_op++;
 			SET_RESULT_BOT(op1);
+			break;
+		case ZEND_ARRAY_KEY_EXISTS:
+			if (ctx->scdf.ssa->var_info[ssa_op->op1_use].type & ~(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_STRING)) {
+				/* Skip needles that could cause TypeError in array_key_exists */
+				break;
+			}
+			ZEND_FALLTHROUGH;
+		case ZEND_IN_ARRAY:
+			SKIP_IF_TOP(op2);
+			if (Z_TYPE_P(op2) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(op2)) == 0) {
+				ZVAL_FALSE(&zv);
+				SET_RESULT(result, &zv);
+				return;
+			}
 			break;
 	}
 
