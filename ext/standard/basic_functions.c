@@ -1135,7 +1135,6 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_FE(quoted_printable_decode,											arginfo_quoted_printable_decode)
 	PHP_FE(quoted_printable_encode,											arginfo_quoted_printable_encode)
-	PHP_DEP_FE(convert_cyr_string,												arginfo_convert_cyr_string)
 	PHP_FE(get_current_user,												arginfo_get_current_user)
 	PHP_FE(set_time_limit,													arginfo_set_time_limit)
 	PHP_FE(header_register_callback,										arginfo_header_register_callback)
