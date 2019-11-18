@@ -373,17 +373,3 @@ void php_filter_add_slashes(PHP_INPUT_FILTER_PARAM_DECL)
 	ZVAL_STR(value, buf);
 }
 /* }}} */
-
-/* {{{ php_filter_magic_quotes */
-void php_filter_magic_quotes(PHP_INPUT_FILTER_PARAM_DECL)
-{
-	zend_string *buf;
-	php_error_docref(NULL, E_DEPRECATED,
-		"FILTER_SANITIZE_MAGIC_QUOTES is deprecated, use FILTER_SANITIZE_ADD_SLASHES instead");
-
-	buf = php_addslashes(Z_STR_P(value));
-
-	zval_ptr_dtor(value);
-	ZVAL_STR(value, buf);
-}
-/* }}} */
