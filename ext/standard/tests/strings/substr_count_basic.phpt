@@ -6,12 +6,12 @@ Test substr_count() function (basic)
 echo "***Testing basic operations ***\n";
 try {
     substr_count("", "");
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 try {
     substr_count("a", "");
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 var_dump(substr_count("", "a"));
@@ -31,8 +31,6 @@ var_dump(substr_count($a, "bca", -200, null));
 var_dump(substr_count($a, "bca", -200, 50));
 var_dump(substr_count($a, "bca", -200, -50));
 
-echo "Done\n";
-
 ?>
 --EXPECT--
 ***Testing basic operations ***
@@ -50,4 +48,3 @@ int(40)
 int(40)
 int(10)
 int(30)
-Done

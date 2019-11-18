@@ -35,7 +35,7 @@ echo "\n";
 
 try {
     wordwrap(chr(0), 0, "");
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 --EXPECT--

@@ -34,34 +34,32 @@ var_dump( array_rand($input, 1) );  // with valid $num_req value
 echo"\n-- With num_req = 0 --\n";
 try {
     var_dump( array_rand($input, 0) );  // with $num_req=0
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 echo"\n-- With num_req = -1 --\n";
 try {
     var_dump( array_rand($input, -1) );  // with $num_req=-1
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 echo"\n-- With num_req = -2 --\n";
 try {
     var_dump( array_rand($input, -2) );  // with $num_req=-2
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 echo"\n-- With num_req more than number of members in 'input' array --\n";
 try {
     var_dump( array_rand($input, 13) );  // with $num_req=13
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 ?>
-
-DONE
 --EXPECTF--
 *** Testing array_rand() : with invalid values for 'req_num' ***
 
@@ -82,5 +80,3 @@ Second argument has to be between 1 and the number of elements in the array
 
 -- With num_req more than number of members in 'input' array --
 Second argument has to be between 1 and the number of elements in the array
-
-DONE

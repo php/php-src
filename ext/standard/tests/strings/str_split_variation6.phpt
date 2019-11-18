@@ -39,11 +39,10 @@ for($count = 0; $count < count($values); $count++) {
 
     try {
 	    var_dump( str_split($str, $values[$count]) );
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
 }
-echo "Done"
 ?>
 --EXPECT--
 *** Testing str_split() : different integer values for 'split_length' ***
@@ -157,4 +156,3 @@ array(1) {
 }
 -- Iteration 7 --
 The length of each segment must be greater than zero
-Done

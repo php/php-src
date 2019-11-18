@@ -10,47 +10,47 @@ echo "\n*** Testing error conditions ***\n";
 echo "\n-- Testing ( (low < high) && (step = 0) ) --\n";
 try {
     var_dump( range(1, 2, 0) );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
     var_dump( range("a", "b", 0) );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 echo "\n\n-- Testing ( (low > high) && (step = 0) ) --\n";
 try {
     var_dump( range(2, 1, 0) );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
     var_dump( range("b", "a", 0) );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 echo "\n\n-- Testing ( (low < high) && (high-low < step) ) --\n";
 try {
     var_dump( range(1.0, 7.0, 6.5) );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 echo "\n\n-- Testing ( (low > high) && (low-high < step) ) --\n";
 try {
     var_dump( range(7.0, 1.0, 6.5) );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 echo "\n-- Testing other conditions --\n";
 try {
     var_dump( range(-1, -2, 2) );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -58,19 +58,19 @@ try {
     var_dump( range("a", "j", "z") );
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
     var_dump( range(0, 1, "140962482048819216326.24") );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
     var_dump( range(0, 1, "140962482048819216326.24.") );
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -82,7 +82,7 @@ foreach( $step_arr as $step ) {
         var_dump( range( 1, 5, $step ) );
     } catch (\TypeError $e) {
         echo $e->getMessage(), "\n";
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage(), "\n";
     }
 }

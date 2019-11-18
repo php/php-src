@@ -13,7 +13,7 @@ try {
 
 try {
     var_dump(min(array()));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -31,7 +31,6 @@ var_dump(min(true, false, true));
 var_dump(min(1, true, false, true));
 var_dump(min(0, true, false, true));
 
-echo "Done\n";
 ?>
 --EXPECT--
 When only one parameter is given, it must be an array
@@ -44,4 +43,3 @@ bool(false)
 bool(false)
 bool(false)
 int(0)
-Done

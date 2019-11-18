@@ -29,23 +29,22 @@ foreach ($sizes as $size){
     echo "\n-- Testing array_chunk() when size = $size --\n";
     try {
         var_dump( array_chunk($input_array, $size) );
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
     try {
         var_dump( array_chunk($input_array, $size, true) );
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
     try {
         var_dump( array_chunk($input_array, $size, false) );
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
 }
 ?>
 
-DONE
 --EXPECT--
 *** Testing array_chunk() : usage variations ***
 
@@ -146,5 +145,3 @@ array(3) {
     int(3)
   }
 }
-
-DONE
