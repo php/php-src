@@ -1157,7 +1157,7 @@ static void pcntl_sigwaitinfo(INTERNAL_FUNCTION_PARAMETERS, int timedwait) /* {{
 }
 /* }}} */
 
-/* {{{ proto int pcnlt_sigwaitinfo(array set[, array &siginfo])
+/* {{{ proto int pcntl_sigwaitinfo(array set[, array &siginfo])
    Synchronously wait for queued signals */
 PHP_FUNCTION(pcntl_sigwaitinfo)
 {
