@@ -3072,7 +3072,7 @@ PHP_FUNCTION(call_user_func)
 }
 /* }}} */
 
-/* {{{ proto mixed call_user_func_array(string function_name, array parameters)
+/* {{{ proto mixed call_user_func_array(callable function, array parameters)
    Call a user function which is the first parameter with the arguments contained in array
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(call_user_func_array)
@@ -3136,8 +3136,8 @@ PHP_FUNCTION(forward_static_call)
 }
 /* }}} */
 
-/* {{{ proto mixed call_user_func_array(string function_name, array parameters) U
-   Call a user function which is the first parameter with the arguments contained in array */
+/* {{{ proto mixed forward_static_call_array(callable function, array parameters)
+   Call a static method which is the first parameter with the arguments contained in array */
 PHP_FUNCTION(forward_static_call_array)
 {
 	zval *params, retval;
