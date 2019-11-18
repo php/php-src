@@ -1,5 +1,5 @@
 --TEST--
-PDO_Firebird: support 1 sql dialect
+PDO_Firebird: ingnore parameter marks in comments
 --SKIPIF--
 <?php require('skipif.inc'); 	
 ?>
