@@ -15,13 +15,11 @@ var_dump(array_pad(array("", -1, 2.0), -4, array()));
 
 try {
     var_dump(array_pad(array("", -1, 2.0), 2000000, 0));
-} catch (Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 ?>
-
-DONE
 --EXPECT--
 array(1) {
   [0]=>
@@ -87,5 +85,3 @@ array(4) {
   float(2)
 }
 You may only pad up to 1048576 elements at a time
-
-DONE

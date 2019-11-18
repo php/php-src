@@ -11,25 +11,25 @@ var_dump(str_word_count($str));
 
 try {
     var_dump(str_word_count($str, 3));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
     var_dump(str_word_count($str, 123));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
     var_dump(str_word_count($str, -1));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
     var_dump(str_word_count($str, 999999999));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 

@@ -931,12 +931,12 @@ PHP_FUNCTION(wordwrap)
 	}
 
 	if (breakchar_len == 0) {
-		zend_throw_error(NULL, "Break string cannot be empty");
+		zend_value_error("Break string cannot be empty");
 		return;
 	}
 
 	if (linelength == 0 && docut) {
-		zend_throw_error(NULL, "Can't force cut when width is zero");
+		zend_value_error("Can't force cut when width is zero");
 		return;
 	}
 
@@ -1143,7 +1143,7 @@ PHP_FUNCTION(explode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(delim) == 0) {
-		zend_throw_error(NULL, "Empty delimiter");
+		zend_value_error("Empty delimiter");
 		return;
 	}
 
@@ -1642,7 +1642,7 @@ PHP_FUNCTION(dirname)
 		ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len);
 #endif
 	} else if (levels < 1) {
-		zend_throw_error(NULL, "Invalid argument, levels must be >= 1");
+		zend_value_error("Invalid argument, levels must be >= 1");
 		zend_string_efree(ret);
 		return;
 	} else {
@@ -2155,7 +2155,7 @@ PHP_FUNCTION(chunk_split)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (chunklen <= 0) {
-		zend_throw_error(NULL, "Chunk length should be greater than zero");
+		zend_value_error("Chunk length should be greater than zero");
 		return;
 	}
 
@@ -5287,7 +5287,7 @@ PHP_FUNCTION(str_repeat)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mult < 0) {
-		zend_throw_error(NULL, "Second argument has to be greater than or equal to 0");
+		zend_value_error("Second argument has to be greater than or equal to 0");
 		return;
 	}
 
@@ -5534,7 +5534,7 @@ PHP_FUNCTION(substr_count)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (needle_len == 0) {
-		zend_throw_error(NULL, "Empty substring");
+		zend_value_error("Empty substring");
 		return;
 	}
 
@@ -5611,12 +5611,12 @@ PHP_FUNCTION(str_pad)
 	}
 
 	if (pad_str_len == 0) {
-		zend_throw_error(NULL, "Padding string cannot be empty");
+		zend_value_error("Padding string cannot be empty");
 		return;
 	}
 
 	if (pad_type_val < STR_PAD_LEFT || pad_type_val > STR_PAD_BOTH) {
-		zend_throw_error(NULL, "Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH");
+		zend_value_error("Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH");
 		return;
 	}
 
@@ -5876,7 +5876,7 @@ PHP_FUNCTION(str_word_count)
 			/* nothing to be done */
 			break;
 		default:
-			zend_throw_error(NULL, "Invalid format value " ZEND_LONG_FMT, type);
+			zend_value_error("Invalid format value " ZEND_LONG_FMT, type);
 			return;
 	}
 
@@ -5941,7 +5941,7 @@ PHP_FUNCTION(str_split)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (split_length <= 0) {
-		zend_throw_error(NULL, "The length of each segment must be greater than zero");
+		zend_value_error("The length of each segment must be greater than zero");
 		return;
 	}
 
@@ -6020,7 +6020,7 @@ PHP_FUNCTION(substr_compare)
 		if (len == 0) {
 			RETURN_LONG(0L);
 		} else {
-			zend_throw_error(NULL, "The length must be greater than or equal to zero");
+			zend_value_error("The length must be greater than or equal to zero");
 			return;
 		}
 	}

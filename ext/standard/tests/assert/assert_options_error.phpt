@@ -5,7 +5,7 @@ assert_options() - unknown assert option.
 <?php
 try {
     assert_options(1000);
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage();
 }
 ?>

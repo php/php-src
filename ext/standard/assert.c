@@ -314,7 +314,7 @@ PHP_FUNCTION(assert_options)
 		break;
 
 	default:
-		zend_throw_error(NULL, "Unknown value " ZEND_LONG_FMT, what);
+		zend_value_error("Unknown value " ZEND_LONG_FMT, what);
 		break;
 	}
 

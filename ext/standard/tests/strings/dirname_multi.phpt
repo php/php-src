@@ -13,18 +13,16 @@ if((substr(PHP_OS, 0, 3) == "WIN"))
 for ($i=0 ; $i<5 ; $i++) {
     try {
 	    var_dump(dirname("/foo/bar/baz", $i));
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
 }
 var_dump(dirname("/foo/bar/baz", PHP_INT_MAX));
 ?>
-Done
---EXPECTF--
+--EXPECT--
 Invalid argument, levels must be >= 1
 string(8) "/foo/bar"
 string(4) "/foo"
 string(1) "/"
 string(1) "/"
 string(1) "/"
-Done

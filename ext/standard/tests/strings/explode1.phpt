@@ -36,22 +36,22 @@ foreach($delimiters as $delimiter) {
 
     try {
         var_dump( explode($delimiter, $string, -1) );
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
     try {
 	    var_dump( explode($delimiter, $string, 0) );
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
     try {
 	    var_dump( explode($delimiter, $string, 1) );
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
     try {
 	    var_dump( explode($delimiter, $string, 2) );
-    } catch (\Error $e) {
+    } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
     $counter++;
@@ -94,9 +94,8 @@ class string1 {
 $obj = new string1;
 var_dump( explode("b", $obj) );
 
-echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing explode() for basic operations ***
 -- Iteration 1 --
 Empty delimiter
@@ -486,4 +485,3 @@ array(2) {
   [1]=>
   string(4) "ject"
 }
-Done

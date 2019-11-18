@@ -22,7 +22,6 @@ try {
 }
 var_dump($array);
 
-echo "Done";
 ?>
 --EXPECTF--
 *** Testing array_push() : error conditions ***
@@ -31,4 +30,3 @@ array(1) {
   [%d]=>
   string(3) "max"
 }
-Done

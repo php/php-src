@@ -29,7 +29,7 @@ $cut = true;
 
 try {
     wordwrap($str, $width, $break, $cut);
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -44,10 +44,8 @@ echo "-- width = -10 & cut = true --\n";
 $width = -10;
 $cut = true;
 var_dump( wordwrap($str, $width, $break, $cut) );
-
-echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing wordwrap() : error conditions ***
 
 -- Testing wordwrap() function with negative/zero value for width argument --
@@ -59,4 +57,3 @@ Can't force cut when width is zero
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- width = -10 & cut = true --
 string(223) "<br />\nt<br />\ne<br />\ns<br />\nt<br />\ni<br />\nn<br />\ng<br />\n<br />\nw<br />\no<br />\nr<br />\nd<br />\nw<br />\nr<br />\na<br />\np<br />\n<br />\nf<br />\nu<br />\nn<br />\nc<br />\nt<br />\ni<br />\no<br />\nn"
-Done
