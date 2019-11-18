@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 
 - OPcache:
   . Fixed potential ASLR related invalid opline handler issues. (cmb)
+  . Fixed $x = (bool)$x; with opcache (should emit undeclared variable notice).
+    (Tyson Andre)
 
 - Standard:
   . Fixed bug #78759 (array_search in $GLOBALS). (Nikita)
