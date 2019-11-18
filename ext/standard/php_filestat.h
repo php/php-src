@@ -55,7 +55,6 @@ PHP_FUNCTION(chmod);
 #if HAVE_UTIME
 PHP_FUNCTION(touch);
 #endif
-PHP_FUNCTION(clearstatcache);
 
 #ifdef PHP_WIN32
 #define S_IRUSR S_IREAD
