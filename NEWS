@@ -14,6 +14,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #78759 (array_search in $GLOBALS). (Nikita)
+  . Fixed bug #78833 (Integer overflow in pack causes out-of-bound access).
+    (cmb)
 
 21 Nov 2019, PHP 7.2.25
 
