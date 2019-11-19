@@ -79,7 +79,7 @@ PHP_FUNCTION( msgfmt_parse )
 
 /* {{{ proto array MessageFormatter::formatMessage( string $locale, string $pattern, string $source )
  * Parse a message. }}} */
-/* {{{ proto array numfmt_parse_message( string $locale, string $pattern, string $source )
+/* {{{ proto array msgfmt_parse_message( string $locale, string $pattern, string $source )
  * Parse a message.
  */
 PHP_FUNCTION( msgfmt_parse_message )
