@@ -543,7 +543,7 @@ PHP_MINIT_FUNCTION(date)
  *   "Z" character MUST be present in the absence of a numeric time zone offset.
  */
 	REGISTER_STRING_CONSTANT("DATE_ATOM",    DATE_FORMAT_RFC3339, CONST_CS | CONST_PERSISTENT);
-	REGISTER_STRING_CONSTNAT("DATE_ATOM_FRACTION", DATE_FORMAT_RFC3339_FRACTION, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("DATE_ATOM_FRACTION", DATE_FORMAT_RFC3339_FRACTION, CONST_CS | CONST_PERSISTENT);
 /*
  * Preliminary specification: http://wp.netscape.com/newsref/std/cookie_spec.html
  *   "This is based on RFC 822, RFC 850,  RFC 1036, and  RFC 1123,
