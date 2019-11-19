@@ -2909,7 +2909,7 @@ long_str:
 	}
 err:
 	if (err) {
-		zend_value_error("step exceeds the specified range");
+		zend_value_error("Step exceeds the specified range");
 		return;
 	}
 }
