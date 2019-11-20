@@ -10,7 +10,11 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-var_dump(password_hash("foo", array()));
+try {
+    password_hash("foo", array());
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 try {
     var_dump(password_hash("foo", 19, new StdClass));
@@ -35,9 +39,7 @@ try {
 password_hash() expects at least 2 parameters, 1 given
 
 Warning: Array to string conversion in %s on line %d
-
-Warning: password_hash(): Unknown password hashing algorithm: Array in %s on line %d
-NULL
+Unknown password hashing algorithm: Array
 password_hash() expects parameter 3 to be array, object given
 password_hash() expects parameter 3 to be array, string given
 password_hash() expects parameter 1 to be string, array given

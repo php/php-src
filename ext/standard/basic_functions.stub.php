@@ -1131,7 +1131,7 @@ function unpack(string $format, string $data, int $offset = 0): array|false {}
 
 function password_get_info(string $hash): ?array {}
 
-function password_hash(string $password, $algo, array $options = []): ?string {}
+function password_hash(string $password, $algo, array $options = []): string {}
 
 function password_needs_rehash(string $hash, $algo, array $options = []): bool {}
 
