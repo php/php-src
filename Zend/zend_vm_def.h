@@ -2974,8 +2974,6 @@ ZEND_VM_C_LABEL(proceed_check_exception):
 		case IS_RESOURCE:
 			result = Z_RES_HANDLE_P(val) != 0;
 			ZEND_VM_C_GOTO(proceed_check_exception);
-		case IS_REFERENCE:
-			val = Z_REFVAL_P(val);
 		default:
 			/* The rest of the implementation can be thought of as an optimized version of this case. */
 			/* If possible, the other cases avoid the unnecessary work of saving the opline, trying to decrement the reference count of the zval, */
@@ -3082,8 +3080,6 @@ ZEND_VM_C_LABEL(proceed_check_exception):
 		case IS_RESOURCE:
 			result = Z_RES_HANDLE_P(val) != 0;
 			ZEND_VM_C_GOTO(proceed_check_exception);
-		case IS_REFERENCE:
-			val = Z_REFVAL_P(val);
 		default:
 			/* The rest of the implementation can be thought of as an optimized version of this case. */
 			/* If possible, the other cases avoid the unnecessary work of saving the opline, trying to decrement the reference count of the zval, */
