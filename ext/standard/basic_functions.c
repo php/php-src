@@ -3240,15 +3240,15 @@ static void user_tick_function_call(user_tick_function_entry *tick_fe) /* {{{ */
 			zval *obj, *method;
 
 			if (Z_TYPE_P(function) == IS_STRING) {
-				php_error_docref(NULL, E_WARNING, "Unable to call %s() - function does not exist", Z_STRVAL_P(function));
+				zend_value_error("Unable to call %s() - function does not exist", Z_STRVAL_P(function));
 			} else if (	Z_TYPE_P(function) == IS_ARRAY
 						&& (obj = zend_hash_index_find(Z_ARRVAL_P(function), 0)) != NULL
 						&& (method = zend_hash_index_find(Z_ARRVAL_P(function), 1)) != NULL
 						&& Z_TYPE_P(obj) == IS_OBJECT
 						&& Z_TYPE_P(method) == IS_STRING) {
-				php_error_docref(NULL, E_WARNING, "Unable to call %s::%s() - function does not exist", ZSTR_VAL(Z_OBJCE_P(obj)->name), Z_STRVAL_P(method));
+				zend_value_error("Unable to call %s::%s() - function does not exist", ZSTR_VAL(Z_OBJCE_P(obj)->name), Z_STRVAL_P(method));
 			} else {
-				php_error_docref(NULL, E_WARNING, "Unable to call tick function");
+				zend_value_error("Unable to call tick function");
 			}
 		}
 
