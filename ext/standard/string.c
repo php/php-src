@@ -6068,8 +6068,8 @@ PHP_FUNCTION(strpbrk)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ZSTR_LEN(char_list)) {
-		php_error_docref(NULL, E_WARNING, "The character list cannot be empty");
-		RETURN_FALSE;
+		zend_value_error("The character list cannot be empty");
+		return;
 	}
 
 	for (haystack_ptr = ZSTR_VAL(haystack); haystack_ptr < (ZSTR_VAL(haystack) + ZSTR_LEN(haystack)); ++haystack_ptr) {
