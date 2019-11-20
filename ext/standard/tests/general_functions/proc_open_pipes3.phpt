@@ -14,7 +14,11 @@ $spec[$i] = array('pi');
 proc_open("$php -n $callee", $spec, $pipes);
 
 $spec[$i] = 1;
-proc_open("$php -n $callee", $spec, $pipes);
+try {
+    proc_open("$php -n $callee", $spec, $pipes);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 $spec[$i] = array('pipe', "test");
 proc_open("$php -n $callee", $spec, $pipes);
@@ -28,8 +32,7 @@ echo "END\n";
 ?>
 --EXPECTF--
 Warning: proc_open(): pi is not a valid descriptor spec/mode in %s on line %d
-
-Warning: proc_open(): Descriptor item must be either an array or a File-Handle in %s on line %d
+Descriptor item must be either an array or a File-Handle
 array(4) {
   [3]=>
   resource(%d) of type (Unknown)

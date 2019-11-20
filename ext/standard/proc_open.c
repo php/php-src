@@ -529,8 +529,8 @@ PHP_FUNCTION(proc_open)
 		zval *arg_zv;
 		uint32_t num_elems = zend_hash_num_elements(Z_ARRVAL_P(command_zv));
 		if (num_elems == 0) {
-			php_error_docref(NULL, E_WARNING, "Command array must have at least one element");
-			RETURN_FALSE;
+			zend_value_error("Command array must have at least one element");
+			return;
 		}
 
 #ifdef PHP_WIN32
@@ -622,7 +622,7 @@ PHP_FUNCTION(proc_open)
 		zval *ztype;
 
 		if (str_index) {
-			php_error_docref(NULL, E_WARNING, "descriptor spec must be an integer indexed array");
+			zend_value_error("Descriptor spec must be an integer indexed array");
 			goto exit_fail;
 		}
 
@@ -655,7 +655,7 @@ PHP_FUNCTION(proc_open)
 			descriptors[ndesc].mode = DESC_FILE;
 
 		} else if (Z_TYPE_P(descitem) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "Descriptor item must be either an array or a File-Handle");
+			zend_value_error("Descriptor item must be either an array or a File-Handle");
 			goto exit_fail;
 		} else {
 
@@ -664,7 +664,7 @@ PHP_FUNCTION(proc_open)
 					goto exit_fail;
 				}
 			} else {
-				php_error_docref(NULL, E_WARNING, "Missing handle qualifier in array");
+				zend_value_error("Missing handle qualifier in array");
 				goto exit_fail;
 			}
 
@@ -677,7 +677,7 @@ PHP_FUNCTION(proc_open)
 						goto exit_fail;
 					}
 				} else {
-					php_error_docref(NULL, E_WARNING, "Missing mode parameter for 'pipe'");
+					zend_value_error("Missing mode parameter for 'pipe'");
 					goto exit_fail;
 				}
 
@@ -718,7 +718,7 @@ PHP_FUNCTION(proc_open)
 						goto exit_fail;
 					}
 				} else {
-					php_error_docref(NULL, E_WARNING, "Missing file name parameter for 'file'");
+					zend_value_error("Missing file name parameter for 'file'");
 					goto exit_fail;
 				}
 
@@ -727,7 +727,7 @@ PHP_FUNCTION(proc_open)
 						goto exit_fail;
 					}
 				} else {
-					php_error_docref(NULL, E_WARNING, "Missing mode parameter for 'file'");
+					zend_value_error("Missing mode parameter for 'file'");
 					goto exit_fail;
 				}
 
@@ -760,11 +760,11 @@ PHP_FUNCTION(proc_open)
 				php_file_descriptor_t childend;
 
 				if (!ztarget) {
-					php_error_docref(NULL, E_WARNING, "Missing redirection target");
+					zend_value_error("Missing redirection target");
 					goto exit_fail;
 				}
 				if (Z_TYPE_P(ztarget) != IS_LONG) {
-					php_error_docref(NULL, E_WARNING, "Redirection target must be an integer");
+					zend_value_error("Redirection target must be an integer");
 					goto exit_fail;
 				}
 
