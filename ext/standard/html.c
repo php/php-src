@@ -452,7 +452,7 @@ det_charset:
 			}
 		}
 		if (!found) {
-			php_error_docref(NULL, E_WARNING, "charset `%s' not supported, assuming utf-8",
+			php_error_docref(NULL, E_WARNING, "Charset `%s' not supported, assuming utf-8",
 					charset_hint);
 		}
 	}
