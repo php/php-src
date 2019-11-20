@@ -214,7 +214,7 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
-	
+
 	*space = FreeBytesAvailableToCaller.HighPart * (double) (1ULL << 32)  + FreeBytesAvailableToCaller.LowPart;
 
 	PHP_WIN32_IOUTIL_CLEANUP_W()
@@ -353,8 +353,8 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 				option = PHP_STREAM_META_GROUP_NAME;
 				value = Z_STRVAL_P(group);
 			} else {
-				php_error_docref(NULL, E_WARNING, "parameter 2 should be string or int, %s given", zend_zval_type_name(group));
-				RETURN_FALSE;
+				zend_type_error("Parameter 2 should be string or int, %s given", zend_zval_type_name(group));
+				return;
 			}
 			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL)) {
 				RETURN_TRUE;
@@ -382,8 +382,8 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 			RETURN_FALSE;
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "parameter 2 should be string or int, %s given", zend_zval_type_name(group));
-		RETURN_FALSE;
+		zend_type_error("Parameter 2 should be string or int, %s given", zend_zval_type_name(group));
+		return;
 	}
 
 	/* Check the basedir */
