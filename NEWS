@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-07 Nov 2019, PHP 7.2.25RC1
+21 Nov 2019, PHP 7.2.25
 
 - Core:
   . Fixed bug #78656 (Parse errors classified as highest log-level). (Erik
