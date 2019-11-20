@@ -7,10 +7,12 @@ Testfest Munich 2009
 --FILE--
 <?php
 define('::', true);
-var_dump(constant('::'));
+try {
+    constant('::');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 ?>
 --EXPECTF--
 Warning: Class constants cannot be defined or redefined in %s on line %d
-
-Warning: constant(): Couldn't find constant :: in %s on line %d
-NULL
+Couldn't find constant ::

@@ -3,10 +3,19 @@ constant() tests
 --FILE--
 <?php
 
-var_dump(constant(""));
 
 define("TEST_CONST", 1);
-var_dump(constant("TEST_CONST"));
+try {
+    var_dump(constant(""));
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    constant('::');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 define("TEST_CONST2", "test");
 var_dump(constant("TEST_CONST2"));
@@ -14,8 +23,7 @@ var_dump(constant("TEST_CONST2"));
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: constant(): Couldn't find constant  in %s on line %d
-NULL
-int(1)
+Couldn't find constant 
+Couldn't find constant ::
 string(4) "test"
 Done
