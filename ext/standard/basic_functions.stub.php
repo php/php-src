@@ -911,7 +911,7 @@ function pow($base, $exp) {}
 
 function exp(float $number): float {}
 
-function log(float $number, float $base = M_E): float|false {}
+function log(float $number, float $base = M_E): float {}
 
 function log10(float $number): float {}
 

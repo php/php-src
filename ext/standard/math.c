@@ -596,7 +596,7 @@ PHP_FUNCTION(log1p)
 }
 /* }}} */
 
-/* {{{ proto float|false log(float number, [float base])
+/* {{{ proto float log(float number, [float base])
    Returns the natural logarithm of the number, or the base log if base is specified */
 PHP_FUNCTION(log)
 {
@@ -625,8 +625,8 @@ PHP_FUNCTION(log)
 	}
 
 	if (base <= 0.0) {
-		php_error_docref(NULL, E_WARNING, "base must be greater than 0");
-		RETURN_FALSE;
+		zend_value_error("Base must be greater than 0");
+		return;
 	}
 
 	RETURN_DOUBLE(log(num) / log(base));
