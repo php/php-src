@@ -14,11 +14,14 @@ class A {
 
 A::staticConstDump();
 (new A())->constDump();
-constant('A::protectedConst');
+try {
+    constant('A::protectedConst');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 string(14) "protectedConst"
 string(14) "protectedConst"
-
-Warning: constant(): Couldn't find constant A::protectedConst in %s on line %d
+Couldn't find constant A::protectedConst

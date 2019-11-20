@@ -6,7 +6,10 @@ class Foo {
 	private const C1 = "a";
 }
 
-var_dump(constant('Foo::C1'));
---EXPECTF--
-Warning: constant(): Couldn't find constant Foo::C1 in %s on line %d
-NULL
+try {
+    constant('Foo::C1');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+--EXPECT--
+Couldn't find constant Foo::C1

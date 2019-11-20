@@ -14,11 +14,13 @@ class A {
 
 A::staticConstDump();
 (new A())->constDump();
-constant('A::privateConst');
-
+try {
+    constant('A::privateConst');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 ?>
---EXPECTF--
+--EXPECT--
 string(12) "privateConst"
 string(12) "privateConst"
-
-Warning: constant(): Couldn't find constant A::privateConst in %s on line %d
+Couldn't find constant A::privateConst
