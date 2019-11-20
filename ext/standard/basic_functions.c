@@ -3194,7 +3194,7 @@ PHP_FUNCTION(ini_get)
 }
 /* }}} */
 
-/* {{{ proto array|false ini_get_all([string extension[, bool details = true]])
+/* {{{ proto array ini_get_all([string extension[, bool details = true]])
    Get all configuration options */
 PHP_FUNCTION(ini_get_all)
 {
@@ -3204,7 +3204,6 @@ PHP_FUNCTION(ini_get_all)
 	zend_bool details = 1;
 	zend_string *key;
 	zend_ini_entry *ini_entry;
-
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
@@ -3216,8 +3215,8 @@ PHP_FUNCTION(ini_get_all)
 
 	if (extname) {
 		if ((module = zend_hash_str_find_ptr(&module_registry, extname, extname_len)) == NULL) {
-			php_error_docref(NULL, E_WARNING, "Unable to find extension '%s'", extname);
-			RETURN_FALSE;
+			zend_value_error("Unable to find extension '%s'", extname);
+			return;
 		}
 		module_number = module->module_number;
 	}

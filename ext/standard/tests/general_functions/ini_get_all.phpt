@@ -10,25 +10,32 @@ pcre.recursion_limit=100000
 <?php
 
 var_dump(gettype(ini_get_all()));
-var_dump(ini_get_all(""));
-var_dump(ini_get_all("nosuchextension"));
+try {
+    ini_get_all("");
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+try {
+    var_dump(ini_get_all("nosuchextension"));
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 var_dump(ini_get_all("reflection"));
 var_dump(ini_get_all("pcre"));
 var_dump(ini_get_all("pcre", false));
 var_dump(ini_get_all("reflection", false));
-
-var_dump(ini_get_all("", ""));
+try {
+    ini_get_all("", "");
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(5) "array"
-
-Warning: ini_get_all(): Unable to find extension '' in %s on line %d
-bool(false)
-
-Warning: ini_get_all(): Unable to find extension 'nosuchextension' in %s on line %d
-bool(false)
+Unable to find extension ''
+Unable to find extension 'nosuchextension'
 array(0) {
 }
 array(3) {
@@ -70,7 +77,5 @@ array(3) {
 }
 array(0) {
 }
-
-Warning: ini_get_all(): Unable to find extension '' in %sini_get_all.php on line %d
-bool(false)
+Unable to find extension ''
 Done
