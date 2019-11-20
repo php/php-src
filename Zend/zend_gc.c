@@ -1551,6 +1551,8 @@ ZEND_API int zend_gc_collect_cycles(void)
 					EG(objects_store).object_buckets[obj->handle] = SET_OBJ_INVALID(obj);
 					GC_TYPE_INFO(obj) = IS_NULL |
 						(GC_TYPE_INFO(obj) & ~GC_TYPE_MASK);
+					/* Modify current before calling free_obj (bug #78811: free_obj() can cause the root buffer (with current) to be reallocated.) */
+					current->ref = GC_MAKE_GARBAGE(((char*)obj) - obj->handlers->offset);
 					if (!(OBJ_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
 						GC_ADD_FLAGS(obj, IS_OBJ_FREE_CALLED);
 						GC_ADDREF(obj);
@@ -1559,7 +1561,6 @@ ZEND_API int zend_gc_collect_cycles(void)
 					}
 
 					ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(obj->handle);
-					current->ref = GC_MAKE_GARBAGE(((char*)obj) - obj->handlers->offset);
 				} else if (GC_TYPE(p) == IS_ARRAY) {
 					zend_array *arr = (zend_array*)p;
 
