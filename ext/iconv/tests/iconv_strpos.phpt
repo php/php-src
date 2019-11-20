@@ -6,17 +6,16 @@ iconv_strpos()
 iconv.internal_charset=ISO-8859-1
 --FILE--
 <?php
-function my_error_handler($errno, $errmsg, $filename, $linenum)
-{
-	echo "$errno: $errmsg\n";
-}
-set_error_handler('my_error_handler');
 function foo($haystk, $needle, $offset, $to_charset = false, $from_charset = false)
 {
 	if ($from_charset !== false) {
 		$haystk = iconv($from_charset, $to_charset, $haystk);
 	}
-	var_dump(strpos($haystk, $needle, $offset));
+	try {
+	    var_dump(strpos($haystk, $needle, $offset));
+	} catch (ValueError $exception) {
+	    echo $exception->getMessage() . "\n";
+	}
 	if ($to_charset !== false) {
 		var_dump(iconv_strpos($haystk, $needle, $offset, $to_charset));
 	} else {
@@ -42,8 +41,7 @@ bool(false)
 bool(false)
 int(5)
 int(5)
-2: %s
-bool(false)
+Offset not contained in string
 bool(false)
 int(7)
 int(7)

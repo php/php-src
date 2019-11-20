@@ -83,13 +83,14 @@ for($index = 0; $index < count($values); $index ++) {
   $haystack = $values[$index];
   try {
     var_dump( strrpos($values[$index], $values[$index]) );
-  } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+  } catch (Error $e) {
+    echo get_class($e) . ": " . $e->getMessage(), "\n";
   }
+
   try {
     var_dump( strrpos($values[$index], $values[$index], 1) );
-  } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+  } catch (Error $e) {
+    echo get_class($e) . ": " . $e->getMessage(), "\n";
   }
   $counter ++;
 }
@@ -126,70 +127,54 @@ bool(false)
 int(0)
 bool(false)
 -- Iteration 10 --
-strrpos() expects parameter 1 to be string, array given
-strrpos() expects parameter 1 to be string, array given
+TypeError: strrpos() expects parameter 1 to be string, array given
+TypeError: strrpos() expects parameter 1 to be string, array given
 -- Iteration 11 --
-strrpos() expects parameter 1 to be string, array given
-strrpos() expects parameter 1 to be string, array given
+TypeError: strrpos() expects parameter 1 to be string, array given
+TypeError: strrpos() expects parameter 1 to be string, array given
 -- Iteration 12 --
-strrpos() expects parameter 1 to be string, array given
-strrpos() expects parameter 1 to be string, array given
+TypeError: strrpos() expects parameter 1 to be string, array given
+TypeError: strrpos() expects parameter 1 to be string, array given
 -- Iteration 13 --
-strrpos() expects parameter 1 to be string, array given
-strrpos() expects parameter 1 to be string, array given
+TypeError: strrpos() expects parameter 1 to be string, array given
+TypeError: strrpos() expects parameter 1 to be string, array given
 -- Iteration 14 --
-strrpos() expects parameter 1 to be string, array given
-strrpos() expects parameter 1 to be string, array given
+TypeError: strrpos() expects parameter 1 to be string, array given
+TypeError: strrpos() expects parameter 1 to be string, array given
 -- Iteration 15 --
 int(0)
 bool(false)
 -- Iteration 16 --
 int(0)
-
-Warning: strrpos(): Offset not contained in string in %s on line %d
-bool(false)
+ValueError: Offset not contained in string
 -- Iteration 17 --
 int(0)
 bool(false)
 -- Iteration 18 --
 int(0)
-
-Warning: strrpos(): Offset not contained in string in %s on line %d
-bool(false)
+ValueError: Offset not contained in string
 -- Iteration 19 --
 int(0)
 bool(false)
 -- Iteration 20 --
 int(0)
-
-Warning: strrpos(): Offset not contained in string in %s on line %d
-bool(false)
+ValueError: Offset not contained in string
 -- Iteration 21 --
 int(0)
-
-Warning: strrpos(): Offset not contained in string in %s on line %d
-bool(false)
+ValueError: Offset not contained in string
 -- Iteration 22 --
 int(0)
-
-Warning: strrpos(): Offset not contained in string in %s on line %d
-bool(false)
+ValueError: Offset not contained in string
 -- Iteration 23 --
 int(0)
-
-Warning: strrpos(): Offset not contained in string in %s on line %d
-bool(false)
+ValueError: Offset not contained in string
 -- Iteration 24 --
-strrpos() expects parameter 1 to be string, resource given
-strrpos() expects parameter 1 to be string, resource given
+TypeError: strrpos() expects parameter 1 to be string, resource given
+TypeError: strrpos() expects parameter 1 to be string, resource given
 -- Iteration 25 --
 int(0)
-
-Warning: strrpos(): Offset not contained in string in %s on line %d
-bool(false)
+ValueError: Offset not contained in string
 -- Iteration 26 --
 int(0)
-
-Warning: strrpos(): Offset not contained in string in %s on line %d
-bool(false)
+ValueError: Offset not contained in string
 *** Done ***
