@@ -120,6 +120,9 @@ PHP 7.4 UPGRADE NOTES
      * ReflectionObject::getProperties()
      * reset(), current(), etc. Use Iterator methods instead.
      * Potentially others working on object properties as a list.
+     * Other internal functions that iterate over an array, but which
+       previously silently accepted an ArrayObject as well; eg curl_setopt()
+       when used with an option that expects an array.
 
     (array) casts are *not* affected. They will continue to return either the
     wrapped array, or the ArrayObject properties, depending on whether the
