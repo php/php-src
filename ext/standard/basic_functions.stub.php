@@ -357,7 +357,7 @@ function is_uploaded_file(string $path): bool {}
 
 function move_uploaded_file(string $path, string $new_path): bool {}
 
-function parse_ini_file(string $filename, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array {}
+function parse_ini_file(string $filename, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array|false {}
 
 function parse_ini_string(string $ini_string, bool $process_sections = false, int $scanner_mode = INI_SCANNER_NORMAL): array|false {}
 
