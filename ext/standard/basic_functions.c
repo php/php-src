@@ -3202,7 +3202,7 @@ static int user_shutdown_function_call(zval *zv) /* {{{ */
 	if (!zend_is_callable(&shutdown_function_entry->arguments[0], 0, NULL)) {
 		zend_string *function_name
 			= zend_get_callable_name(&shutdown_function_entry->arguments[0]);
-		php_error(E_WARNING, "(Registered shutdown functions) Unable to call %s() - function does not exist", ZSTR_VAL(function_name));
+		zend_value_error("(Registered shutdown functions) Unable to call %s() - function does not exist", ZSTR_VAL(function_name));
 		zend_string_release_ex(function_name, 0);
 		return 0;
 	}
