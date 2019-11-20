@@ -34,7 +34,11 @@ fclose($fp);
 $v = array();
 $v1 = array();
 $fp = fopen($filename, "rt");
-var_dump(fscanf($fp, "%.a", $v, $v1));
+try {
+    fscanf($fp, "%.a", $v, $v1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 var_dump($v);
 var_dump($v1);
 fclose($fp);
@@ -76,9 +80,7 @@ array(0) {
 }
 array(0) {
 }
-
-Warning: fscanf(): Bad scan conversion character "." in %s on line %d
-int(-1)
+Bad scan conversion character "."
 array(0) {
 }
 array(0) {

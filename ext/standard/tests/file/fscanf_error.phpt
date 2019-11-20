@@ -42,7 +42,11 @@ foreach($invalid_formats as $format)  {
   $file_handle = fopen($filename, 'r');
   if ($file_handle == false)
     exit("Error:failed to open file $filename");
-  var_dump( fscanf($file_handle, $format) );
+  try {
+    var_dump( fscanf($file_handle, $format) );
+  } catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
   fclose($file_handle);
 }
 
@@ -64,17 +68,9 @@ int(-1)
 Warning: Undefined variable: undefined_var in %s on line %d
 array(0) {
 }
-
-Warning: fscanf(): Bad scan conversion character " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character "." in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character "m" in %s on line %d
-NULL
+Bad scan conversion character "
+Bad scan conversion character "
+Bad scan conversion character "."
+Bad scan conversion character "m"
 
 *** Done ***

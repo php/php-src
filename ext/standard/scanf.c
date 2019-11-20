@@ -469,11 +469,11 @@ xpgCheckDone:
 				}
 				break;
 badSet:
-				php_error_docref(NULL, E_WARNING, "Unmatched [ in format string");
+				zend_value_error("Unmatched [ in format string");
 				goto error;
 
 			default: {
-				php_error_docref(NULL, E_WARNING, "Bad scan conversion character \"%c\"", *ch);
+				zend_value_error("Bad scan conversion character \"%c\"", *ch);
 				goto error;
 			}
 		}
@@ -618,7 +618,7 @@ PHPAPI int php_sscanf_internal( char *string, char *format,
 	if (numVars) {
 		for (i = varStart;i < argCount;i++){
 			if ( ! Z_ISREF(args[ i ] ) ) {
-				php_error_docref(NULL, E_WARNING, "Parameter %d must be passed by reference", i);
+				zend_value_error("Parameter %d must be passed by reference", i);
 				scan_set_error_return(numVars, return_value);
 				return SCAN_ERROR_VAR_PASSED_BYVAL;
 			}
