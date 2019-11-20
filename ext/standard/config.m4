@@ -304,14 +304,6 @@ if test "$ac_cv_attribute_aligned" = "yes"; then
 fi
 
 dnl
-dnl Check for available functions
-dnl
-dnl log2 could be used to improve the log function, however it requires C99. The
-dnl check for log2 should be turned on, as soon as we support C99.
-AC_CHECK_FUNCS(asinh acosh atanh log1p hypot)
-AC_FUNC_FNMATCH
-
-dnl
 dnl Check if there is a support means of creating a new process and defining
 dnl which handles it receives
 dnl
