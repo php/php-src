@@ -123,7 +123,7 @@ PHP_FUNCTION(levenshtein)
 	}
 
 	if (distance < 0 && /* TODO */ ZEND_NUM_ARGS() != 3) {
-		php_error_docref(NULL, E_WARNING, "Argument string(s) too long");
+		zend_value_error("Argument string(s) too long");
 	}
 
 	RETURN_LONG(distance);
