@@ -82,11 +82,11 @@ PHP_FUNCTION(settype)
 			zval_ptr_dtor(&tmp);
 		}
 		if (zend_string_equals_literal_ci(type, "resource")) {
-			php_error_docref(NULL, E_WARNING, "Cannot convert to resource type");
+			zend_value_error("Cannot convert to resource type");
 		} else {
-			php_error_docref(NULL, E_WARNING, "Invalid type");
+			zend_value_error("Invalid type");
 		}
-		RETURN_FALSE;
+		return;
 	}
 
 	if (ptr == &tmp) {
