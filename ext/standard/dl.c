@@ -50,13 +50,13 @@ PHPAPI PHP_FUNCTION(dl)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!PG(enable_dl)) {
-		php_error_docref(NULL, E_WARNING, "Dynamically loaded extensions aren't enabled");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "Dynamically loaded extensions aren't enabled");
+		return;
 	}
 
 	if (filename_len >= MAXPATHLEN) {
-		php_error_docref(NULL, E_WARNING, "File name exceeds the maximum allowed length of %d characters", MAXPATHLEN);
-		RETURN_FALSE;
+		zend_value_error("File name exceeds the maximum allowed length of %d characters", MAXPATHLEN);
+		return;
 	}
 
 	php_dl(filename, MODULE_TEMPORARY, return_value, 0);
@@ -265,7 +265,7 @@ PHP_MINFO_FUNCTION(dl)
 
 PHPAPI void php_dl(char *file, int type, zval *return_value, int start_now)
 {
-	php_error_docref(NULL, E_WARNING, "Cannot dynamically load %s - dynamic modules are not supported", file);
+	zend_throw_error(NULL, "Cannot dynamically load %s - dynamic modules are not supported", file);
 	RETVAL_FALSE;
 }
 

@@ -1,6 +1,6 @@
 --TEST--
 dl() returns false when disabled via INI settings
-+--CREDITS--
+--CREDITS--
 Tom Van Herreweghe <tom@theanalogguy.be>
 User Group: PHP-WVL & PHPGent #PHPTestFest
 --SKIPIF--
@@ -14,9 +14,11 @@ if (!in_array(php_sapi_name(), $enabled_sapi)) {
 enable_dl=0
 --FILE--
 <?php
-var_dump(dl('foo'));
+try {
+    dl('foo');
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
 ?>
---EXPECTF--
-
-Warning: dl(): Dynamically loaded extensions aren't enabled in %s on line %d
-bool(false)
+--EXPECT--
+Dynamically loaded extensions aren't enabled
