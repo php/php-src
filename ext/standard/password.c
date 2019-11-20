@@ -83,7 +83,7 @@ static zend_string* php_password_make_salt(size_t length) /* {{{ */
 	zend_string *ret, *buffer;
 
 	if (length > (INT_MAX / 3)) {
-		php_error_docref(NULL, E_WARNING, "Length is too large to safely generate");
+		zend_value_error("Length is too large to safely generate");
 		return NULL;
 	}
 
@@ -193,7 +193,7 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	}
 
 	if (cost < 4 || cost > 31) {
-		php_error_docref(NULL, E_WARNING, "Invalid bcrypt cost parameter specified: " ZEND_LONG_FMT, cost);
+		zend_value_error("Invalid bcrypt cost parameter specified: " ZEND_LONG_FMT, cost);
 		return NULL;
 	}
 
@@ -316,7 +316,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 	}
 
 	if (memory_cost > ARGON2_MAX_MEMORY || memory_cost < ARGON2_MIN_MEMORY) {
-		php_error_docref(NULL, E_WARNING, "Memory cost is outside of allowed memory range");
+		zend_value_error("Memory cost is outside of allowed memory range");
 		return NULL;
 	}
 
@@ -325,7 +325,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 	}
 
 	if (time_cost > ARGON2_MAX_TIME || time_cost < ARGON2_MIN_TIME) {
-		php_error_docref(NULL, E_WARNING, "Time cost is outside of allowed time range");
+		zend_value_error("Time cost is outside of allowed time range");
 		return NULL;
 	}
 
@@ -334,7 +334,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 	}
 
 	if (threads > ARGON2_MAX_LANES || threads == 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid number of threads");
+		zend_value_error("Invalid number of threads");
 		return NULL;
 	}
 
@@ -669,9 +669,9 @@ PHP_FUNCTION(password_hash)
 	algo = php_password_algo_find_zval(zalgo);
 	if (!algo) {
 		zend_string *algostr = zval_get_string(zalgo);
-		php_error_docref(NULL, E_WARNING, "Unknown password hashing algorithm: %s", ZSTR_VAL(algostr));
+		zend_value_error("Unknown password hashing algorithm: %s", ZSTR_VAL(algostr));
 		zend_string_release(algostr);
-		RETURN_NULL();
+		return;
 	}
 
 	digest = algo->hash(password, options);
