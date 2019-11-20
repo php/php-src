@@ -543,8 +543,8 @@ PHP_FUNCTION(file_get_contents)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_NUM_ARGS() == 5 && maxlen < 0) {
-		php_error_docref(NULL, E_WARNING, "length must be greater than or equal to zero");
-		RETURN_FALSE;
+		zend_value_error("Length must be greater than or equal to zero");
+		return;
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
