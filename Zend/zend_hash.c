@@ -134,7 +134,7 @@ static zend_always_inline void zend_hash_real_init_packed_ex(HashTable *ht)
 	}
 	HT_SET_DATA_ADDR(ht, data);
 	/* Don't overwrite iterator count. */
-	ht->u.v.flags = HASH_FLAG_PACKED | HASH_FLAG_STATIC_KEYS;
+	ht->u.v.flags = HASH_FLAG_PACKED | HASH_FLAG_STATIC_KEYS | HT_GET_ALLOW_COW_VIOLATION(ht);
 	HT_HASH_RESET_PACKED(ht);
 }
 
@@ -150,7 +150,7 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 		ht->nTableMask = HT_SIZE_TO_MASK(HT_MIN_SIZE);
 		HT_SET_DATA_ADDR(ht, data);
 		/* Don't overwrite iterator count. */
-		ht->u.v.flags = HASH_FLAG_STATIC_KEYS;
+		ht->u.v.flags = HASH_FLAG_STATIC_KEYS | HT_GET_ALLOW_COW_VIOLATION(ht);
 #ifdef __SSE2__
 		do {
 			__m128i xmm0 = _mm_setzero_si128();

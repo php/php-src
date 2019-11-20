@@ -67,6 +67,12 @@
 # define HT_ALLOW_COW_VIOLATION(ht)
 #endif
 
+#if ZEND_DEBUG
+# define HT_GET_ALLOW_COW_VIOLATION(ht) ((HT_FLAGS(ht) & HASH_FLAG_ALLOW_COW_VIOLATION) ? HASH_FLAG_ALLOW_COW_VIOLATION : 0)
+#else
+# define HT_GET_ALLOW_COW_VIOLATION(ht) 0
+#endif
+
 #define HT_ITERATORS_COUNT(ht) (ht)->u.v.nIteratorsCount
 #define HT_ITERATORS_OVERFLOW(ht) (HT_ITERATORS_COUNT(ht) == 0xff)
 #define HT_HAS_ITERATORS(ht) (HT_ITERATORS_COUNT(ht) != 0)
