@@ -383,8 +383,8 @@ PHP_FUNCTION(dns_check_record)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (hostname_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Host cannot be empty");
-		RETURN_FALSE;
+		zend_value_error("Host cannot be empty");
+		return;
 	}
 
 	if (rectype) {
