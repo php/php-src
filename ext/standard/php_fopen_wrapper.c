@@ -219,7 +219,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
 			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL, E_WARNING, "URL file-access is disabled in the server configuration");
+				zend_throw_error(NULL, "URL file-access is disabled in the server configuration");
 			}
 			return NULL;
 		}
@@ -238,7 +238,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 	if (!strcasecmp(path, "stdin")) {
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
 			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL, E_WARNING, "URL file-access is disabled in the server configuration");
+				zend_throw_error(NULL, "URL file-access is disabled in the server configuration");
 			}
 			return NULL;
 		}
@@ -297,14 +297,14 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 
 		if (strcmp(sapi_module.name, "cli")) {
 			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL, E_WARNING, "Direct access to file descriptors is only available from command-line PHP");
+				zend_throw_error(NULL, "Direct access to file descriptors is only available from command-line PHP");
 			}
 			return NULL;
 		}
 
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
 			if (options & REPORT_ERRORS) {
-				php_error_docref(NULL, E_WARNING, "URL file-access is disabled in the server configuration");
+				zend_throw_error(NULL, "URL file-access is disabled in the server configuration");
 			}
 			return NULL;
 		}

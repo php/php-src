@@ -1050,7 +1050,7 @@ static int php_stream_ftp_mkdir(php_stream_wrapper *wrapper, const char *url, in
 
 	if (resource->path == NULL) {
 		if (options & REPORT_ERRORS) {
-			php_error_docref(NULL, E_WARNING, "Invalid path provided in %s", url);
+			zend_value_error("Invalid path provided in %s", url);
 		}
 		goto mkdir_errexit;
 	}
@@ -1143,7 +1143,7 @@ static int php_stream_ftp_rmdir(php_stream_wrapper *wrapper, const char *url, in
 
 	if (resource->path == NULL) {
 		if (options & REPORT_ERRORS) {
-			php_error_docref(NULL, E_WARNING, "Invalid path provided in %s", url);
+			zend_value_error("Invalid path provided in %s", url);
 		}
 		goto rmdir_errexit;
 	}
