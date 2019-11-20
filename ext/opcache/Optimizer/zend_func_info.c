@@ -363,7 +363,7 @@ static const func_info_t func_infos[] = {
 	F1("highlight_string",             MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_STRING),
 	F1("php_strip_whitespace",         MAY_BE_STRING),
 	FN("ini_get",                      MAY_BE_FALSE | MAY_BE_STRING),
-	F1("ini_get_all",                  MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
+	F1("ini_get_all",                  MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_NULL | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	FN("ini_set",                      MAY_BE_FALSE | MAY_BE_STRING),
 	F1("ini_alter",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F0("ini_restore",                  MAY_BE_NULL),
