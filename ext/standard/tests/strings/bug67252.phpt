@@ -2,11 +2,11 @@
 Bug #67252 (convert_uudecode out-of-bounds read)
 --FILE--
 <?php
-
-$a = "M86%A86%A86%A86%A86%A86%A86%A86%A86%A86%A86%A86%A86%A86%A86%A"."\n"."a.";
-var_dump(convert_uudecode($a));
-
+try {
+    convert_uudecode("M86%A86%A86%A86%A86%A86%A86%A86%A86%A86%A86%A86%A86%A86%A86%A" . "\n" . "a.");
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 ?>
---EXPECTF--
-Warning: convert_uudecode(): The given parameter is not a valid uuencoded string in %s on line %d
-bool(false)
+--EXPECT--
+The given parameter is not a valid uuencoded string
