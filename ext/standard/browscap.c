@@ -701,8 +701,8 @@ PHP_FUNCTION(get_browser)
 		}
 	} else {
 		if (!global_bdata.htab) {
-			php_error_docref(NULL, E_WARNING, "browscap ini directive not set");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "Browscap ini directive not set");
+			return;
 		}
 		bdata = &global_bdata;
 	}
