@@ -10,7 +10,11 @@ function section($func, $haystack, $needle)
 	echo "\n------- $func -----------\n\n";
 	foreach(array(0, 3, 6, 9, 11, 12, -1, -3, -6, -20) as $offset) {
 		echo "> Offset: $offset\n";
-		var_dump($func($haystack,$needle,$offset));
+		try {
+		    var_dump($func($haystack,$needle,$offset));
+		} catch (ValueError $exception) {
+		    echo $exception->getMessage() . "\n";
+		}
 	}
 }
 
@@ -40,9 +44,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-
-Warning: strpos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 > Offset: -1
 bool(false)
 > Offset: -3
@@ -50,9 +52,7 @@ int(8)
 > Offset: -6
 int(8)
 > Offset: -20
-
-Warning: strpos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 
 ------- mb_strpos -----------
 
@@ -94,9 +94,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 > Offset: -1
 bool(false)
 > Offset: -3
@@ -104,9 +102,7 @@ int(8)
 > Offset: -6
 int(8)
 > Offset: -20
-
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 
 ------- mb_stripos -----------
 
@@ -148,9 +144,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-
-Warning: strrpos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 > Offset: -1
 int(8)
 > Offset: -3
@@ -158,9 +152,7 @@ int(8)
 > Offset: -6
 int(4)
 > Offset: -20
-
-Warning: strrpos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 
 ------- mb_strrpos -----------
 
@@ -202,9 +194,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-
-Warning: strripos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 > Offset: -1
 int(8)
 > Offset: -3
@@ -212,9 +202,7 @@ int(8)
 > Offset: -6
 int(4)
 > Offset: -20
-
-Warning: strripos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 
 ------- mb_strripos -----------
 

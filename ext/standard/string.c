@@ -1883,8 +1883,8 @@ PHP_FUNCTION(strpos)
 		offset += (zend_long)ZSTR_LEN(haystack);
 	}
 	if (offset < 0 || (size_t)offset > ZSTR_LEN(haystack)) {
-		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
-		RETURN_FALSE;
+		zend_value_error("Offset not contained in string");
+		return;
 	}
 
 	found = (char*)php_memnstr(ZSTR_VAL(haystack) + offset,
@@ -1919,8 +1919,8 @@ PHP_FUNCTION(stripos)
 		offset += (zend_long)ZSTR_LEN(haystack);
 	}
 	if (offset < 0 || (size_t)offset > ZSTR_LEN(haystack)) {
-		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
-		RETURN_FALSE;
+		zend_value_error("Offset not contained in string");
+		return;
 	}
 
 	if (ZSTR_LEN(needle) > ZSTR_LEN(haystack)) {
@@ -1961,15 +1961,15 @@ PHP_FUNCTION(strrpos)
 
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
-			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
-			RETURN_FALSE;
+			zend_value_error("Offset not contained in string");
+			return;
 		}
 		p = ZSTR_VAL(haystack) + (size_t)offset;
 		e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack);
 	} else {
 		if (offset < -INT_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
-			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
-			RETURN_FALSE;
+			zend_value_error("Offset not contained in string");
+			return;
 		}
 
 		p = ZSTR_VAL(haystack);
@@ -2011,16 +2011,16 @@ PHP_FUNCTION(strripos)
 		char lowered;
 		if (offset >= 0) {
 			if ((size_t)offset > ZSTR_LEN(haystack)) {
-				php_error_docref(NULL, E_WARNING, "Offset not contained in string");
-				RETURN_FALSE;
+				zend_value_error("Offset not contained in string");
+				return;
 			}
 			p = ZSTR_VAL(haystack) + (size_t)offset;
 			e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack) - 1;
 		} else {
 			p = ZSTR_VAL(haystack);
 			if (offset < -INT_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
-				php_error_docref(NULL, E_WARNING, "Offset not contained in string");
-				RETURN_FALSE;
+				zend_value_error("Offset not contained in string");
+				return;
 			}
 			e = ZSTR_VAL(haystack) + (ZSTR_LEN(haystack) + (size_t)offset);
 		}
@@ -2039,16 +2039,16 @@ PHP_FUNCTION(strripos)
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
 			zend_string_release_ex(haystack_dup, 0);
-			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
-			RETURN_FALSE;
+			zend_value_error("Offset not contained in string");
+			return;
 		}
 		p = ZSTR_VAL(haystack_dup) + offset;
 		e = ZSTR_VAL(haystack_dup) + ZSTR_LEN(haystack);
 	} else {
 		if (offset < -INT_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
 			zend_string_release_ex(haystack_dup, 0);
-			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
-			RETURN_FALSE;
+			zend_value_error("Offset not contained in string");
+			return;
 		}
 
 		p = ZSTR_VAL(haystack_dup);
@@ -5545,8 +5545,8 @@ PHP_FUNCTION(substr_count)
 		offset += (zend_long)haystack_len;
 	}
 	if ((offset < 0) || ((size_t)offset > haystack_len)) {
-		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
-		RETURN_FALSE;
+		zend_value_error("Offset not contained in string");
+		return;
 	}
 	p += offset;
 

@@ -83,13 +83,13 @@ for($index = 0; $index < count($values); $index ++) {
   $haystack = $values[$index];
   try {
     var_dump( stripos($values[$index], $values[$index]) );
-  } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+  } catch (Error $e) {
+    echo get_class($e) . ": " . $e->getMessage(), "\n";
   }
   try {
     var_dump( stripos($values[$index], $values[$index], 1) );
-  } catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+  } catch (Error $e) {
+    echo get_class($e) . ": " . $e->getMessage(), "\n";
   }
   $counter ++;
 }
@@ -126,70 +126,54 @@ bool(false)
 int(0)
 bool(false)
 -- Iteration 10 --
-stripos() expects parameter 1 to be string, array given
-stripos() expects parameter 1 to be string, array given
+TypeError: stripos() expects parameter 1 to be string, array given
+TypeError: stripos() expects parameter 1 to be string, array given
 -- Iteration 11 --
-stripos() expects parameter 1 to be string, array given
-stripos() expects parameter 1 to be string, array given
+TypeError: stripos() expects parameter 1 to be string, array given
+TypeError: stripos() expects parameter 1 to be string, array given
 -- Iteration 12 --
-stripos() expects parameter 1 to be string, array given
-stripos() expects parameter 1 to be string, array given
+TypeError: stripos() expects parameter 1 to be string, array given
+TypeError: stripos() expects parameter 1 to be string, array given
 -- Iteration 13 --
-stripos() expects parameter 1 to be string, array given
-stripos() expects parameter 1 to be string, array given
+TypeError: stripos() expects parameter 1 to be string, array given
+TypeError: stripos() expects parameter 1 to be string, array given
 -- Iteration 14 --
-stripos() expects parameter 1 to be string, array given
-stripos() expects parameter 1 to be string, array given
+TypeError: stripos() expects parameter 1 to be string, array given
+TypeError: stripos() expects parameter 1 to be string, array given
 -- Iteration 15 --
 int(0)
 bool(false)
 -- Iteration 16 --
 int(0)
-
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
+ValueError: Offset not contained in string
 -- Iteration 17 --
 int(0)
 bool(false)
 -- Iteration 18 --
 int(0)
-
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
+ValueError: Offset not contained in string
 -- Iteration 19 --
 int(0)
 bool(false)
 -- Iteration 20 --
 int(0)
-
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
+ValueError: Offset not contained in string
 -- Iteration 21 --
 int(0)
-
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
+ValueError: Offset not contained in string
 -- Iteration 22 --
 int(0)
-
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
+ValueError: Offset not contained in string
 -- Iteration 23 --
 int(0)
-
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
+ValueError: Offset not contained in string
 -- Iteration 24 --
-stripos() expects parameter 1 to be string, resource given
-stripos() expects parameter 1 to be string, resource given
+TypeError: stripos() expects parameter 1 to be string, resource given
+TypeError: stripos() expects parameter 1 to be string, resource given
 -- Iteration 25 --
 int(0)
-
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
+ValueError: Offset not contained in string
 -- Iteration 26 --
 int(0)
-
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
+ValueError: Offset not contained in string
 *** Done ***

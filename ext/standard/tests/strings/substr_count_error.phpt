@@ -7,10 +7,18 @@ echo "\n*** Testing error conditions ***\n";
 $str = 'abcdefghik';
 
 /* offset before start */
-var_dump(substr_count($str, "t", -20));
+try {
+    substr_count($str, "t", -20);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 /* offset > size of the string */
-var_dump(substr_count($str, "t", 25));
+try {
+    substr_count($str, "t", 25);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 /* Using offset and length to go beyond the size of the string:
    Warning message expected, as length+offset > length of string */
@@ -24,12 +32,8 @@ echo "Done\n";
 ?>
 --EXPECTF--
 *** Testing error conditions ***
-
-Warning: substr_count(): Offset not contained in string in %s on line %d
-bool(false)
-
-Warning: substr_count(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
+Offset not contained in string
 
 Warning: substr_count(): Invalid length value in %s on line %d
 bool(false)

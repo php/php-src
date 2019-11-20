@@ -16,19 +16,22 @@ echo "-- With empty heredoc string --\n";
 $empty_string = <<<EOD
 EOD;
 var_dump( stripos($empty_string, "") );
-var_dump( stripos($empty_string, "", 1) );
+
+try {
+    stripos($empty_string, "", 1);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 var_dump( stripos($empty_string, FALSE) );
 var_dump( stripos($empty_string, NULL) );
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stripos() function: with heredoc strings ***
 -- With empty heredoc string --
 int(0)
-
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 int(0)
 int(0)
 *** Done ***
