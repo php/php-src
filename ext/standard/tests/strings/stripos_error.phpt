@@ -9,22 +9,28 @@ Test stripos() function : error conditions
 
 echo "*** Testing stripos() function: error conditions ***\n";
 
-echo "\n-- Offset beyond the end of the string --";
-var_dump( stripos("Hello World", "o", 12) );
+echo "\n-- Offset beyond the end of the string --\n";
+try {
+    stripos("Hello World", "o", 12);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
-echo "\n-- Offset before the start of the string --";
-var_dump( stripos("Hello World", "o", -12) );
+echo "\n-- Offset before the start of the string --\n";
+try {
+    stripos("Hello World", "o", -12);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stripos() function: error conditions ***
 
 -- Offset beyond the end of the string --
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 
 -- Offset before the start of the string --
-Warning: stripos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 *** Done ***
