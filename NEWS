@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #78787 (Segfault with trait overriding inherited private shadow
     property). (Nikita)
 
+- GD:
+  . Fixed bug #78849 (GD build broken with -D SIGNED_COMPARE_SLOW). (cmb)
+
 - OPcache:
   . Fixed potential ASLR related invalid opline handler issues. (cmb)
   . Fixed $x = (bool)$x; with opcache (should emit undeclared variable notice).
