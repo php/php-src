@@ -603,7 +603,7 @@ static int sapi_lsapi_activate()
 static sapi_module_struct lsapi_sapi_module =
 {
     "litespeed",
-    "LiteSpeed V7.5",
+    "LiteSpeed V7.6",
 
     php_lsapi_startup,              /* startup */
     php_module_shutdown_wrapper,    /* shutdown */
@@ -680,6 +680,8 @@ static void lsapi_sigsegv( int signal )
     _exit(1);
 }
 
+static int do_clean_shutdown = 1;
+
 static int clean_onexit = 1;
 
 
@@ -755,18 +757,20 @@ static int lsapi_module_main(int show_source)
         return -1;
     }
 
-    sigemptyset(&act.sa_mask);
-    act.sa_flags = SA_NODEFER;
-    act.sa_handler = lsapi_sigterm;
-    sa_rc = sigaction( SIGINT, &act, NULL);
-    sa_rc = sigaction( SIGQUIT, &act, NULL);
-    sa_rc = sigaction( SIGILL, &act, NULL);
-    sa_rc = sigaction( SIGABRT, &act, NULL);
-    sa_rc = sigaction( SIGBUS, &act, NULL);
-    sa_rc = sigaction( SIGSEGV, &act, NULL);
-    sa_rc = sigaction( SIGTERM, &act, NULL);
+    if (do_clean_shutdown) {
+        sigemptyset(&act.sa_mask);
+        act.sa_flags = SA_NODEFER;
+        act.sa_handler = lsapi_sigterm;
+        sa_rc = sigaction( SIGINT, &act, NULL);
+        sa_rc = sigaction( SIGQUIT, &act, NULL);
+        sa_rc = sigaction( SIGILL, &act, NULL);
+        sa_rc = sigaction( SIGABRT, &act, NULL);
+        sa_rc = sigaction( SIGBUS, &act, NULL);
+        sa_rc = sigaction( SIGSEGV, &act, NULL);
+        sa_rc = sigaction( SIGTERM, &act, NULL);
 
-    clean_onexit = 0;
+        clean_onexit = 0;
+    }
 
     if (show_source) {
         zend_syntax_highlighter_ini syntax_highlighter_ini;
@@ -1569,7 +1573,8 @@ int main( int argc, char * argv[] )
 
     int result;
 
-    atexit(lsapi_atexit);
+    if (do_clean_shutdown)
+        atexit(lsapi_atexit);
 
     while( ( result = LSAPI_Prefork_Accept_r( &g_req )) >= 0 ) {
 #if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
@@ -1643,6 +1648,13 @@ static PHP_MINIT_FUNCTION(litespeed)
     if (p && 0 == strcasecmp(p, "on"))
         parse_user_ini = 1;
 
+    p = getenv("LSAPI_CLEAN_SHUTDOWN");
+    if (p) {
+        if (*p == '1' || 0 == strcasecmp(p, "on"))
+            do_clean_shutdown = 1;
+        else if (*p == '0' || 0 == strcasecmp(p, "off"))
+            do_clean_shutdown = 0;
+    }
     /*
      * mod_lsapi always sets this env var,
      * so we can detect mod_lsapi mode with its presense.
