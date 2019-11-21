@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . Fixed bug #78810 (RW fetches do not throw "uninitialized property"
     exception). (Nikita)
 
+- GD:
+  . Fixed bug #78849 (GD build broken with -D SIGNED_COMPARE_SLOW). (cmb)
+
 - FPM:
   . Fixed bug #76601 (Partially working php-fpm ater incomplete reload).
     (Maksim Nikulin)
