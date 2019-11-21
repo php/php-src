@@ -379,39 +379,23 @@ U_CFUNC PHP_FUNCTION(intlcal_before)
 
 U_CFUNC PHP_FUNCTION(intlcal_set)
 {
-	zend_long	arg1, arg2, arg3, arg4, arg5, arg6;
-	zval	args_a[7] = {0},
-			*args = args_a;
-	int		i;
-	int		variant; /* number of args of the set() overload */
+	zend_long args[6];
+
 	CALENDAR_METHOD_INIT_VARS;
 
 	object = getThis();
 
-	/* must come before zpp because zpp would convert the args in the stack to 0 */
-	if (ZEND_NUM_ARGS() > (object ? 6 : 7) ||
-				zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_set: too many arguments", 0);
-		RETURN_FALSE;
-	}
-	if (!object) {
-		args++;
-	}
-	variant = ZEND_NUM_ARGS() - (object ? 0 : 1);
-	while (variant > 2 && Z_TYPE(args[variant - 1]) == IS_NULL) {
-		variant--;
-	}
+	int arg_num = ZEND_NUM_ARGS() - (object ? 0 : 1);
 
-	if (variant == 4 ||
-			zend_parse_method_parameters(ZEND_NUM_ARGS(), object,
-			"Oll|llll",	&object, Calendar_ce_ptr, &arg1, &arg2, &arg3, &arg4,
-			&arg5, &arg6) == FAILURE) {
+	if (zend_parse_method_parameters(
+		ZEND_NUM_ARGS(), object, "Oll|llll",
+		&object, Calendar_ce_ptr, &args[0], &args[1], &args[2], &args[3], &args[4], &args[5]) == FAILURE
+	) {
 		RETURN_THROWS();
 	}
 
-	for (i = 0; i < variant; i++) {
-		if (Z_LVAL(args[i]) < INT32_MIN || Z_LVAL(args[i]) > INT32_MAX) {
+	for (int i = 0; i < arg_num; i++) {
+		if (args[i] < INT32_MIN || args[i] > INT32_MAX) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
 				"intlcal_set: at least one of the arguments has an absolute "
 				"value that is too large", 0);
@@ -419,22 +403,23 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 		}
 	}
 
-	if (variant == 2 && (arg1 < 0 || arg1 >= UCAL_FIELD_COUNT)) {
-		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intlcal_set: invalid field", 0);
-		RETURN_FALSE;
-	}
-
 	CALENDAR_METHOD_FETCH_OBJECT;
 
-	if (variant == 2) {
-		co->ucal->set((UCalendarDateFields)arg1, (int32_t)arg2);
-	} else if (variant == 3) {
-		co->ucal->set((int32_t)arg1, (int32_t)arg2, (int32_t)arg3);
-	} else if (variant == 5) {
-		co->ucal->set((int32_t)arg1, (int32_t)arg2, (int32_t)arg3, (int32_t)arg4, (int32_t)arg5);
-	} else if (variant == 6) {
-		co->ucal->set((int32_t)arg1, (int32_t)arg2, (int32_t)arg3, (int32_t)arg4, (int32_t)arg5, (int32_t)arg6);
+	if (arg_num == 2) {
+		if (args[0] < 0 || args[0] >= UCAL_FIELD_COUNT) {
+			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "intlcal_set: invalid field", 0);
+			RETURN_FALSE;
+		}
+		co->ucal->set((UCalendarDateFields)args[0], (int32_t)args[1]);
+	} else if (arg_num == 3) {
+		co->ucal->set((int32_t)args[0], (int32_t)args[1], (int32_t)args[2]);
+	} else if (arg_num == 4) {
+		zend_argument_count_error("No variant with 4 arguments");
+		return;
+	} else if (arg_num == 5) {
+		co->ucal->set((int32_t)args[0], (int32_t)args[1], (int32_t)args[2], (int32_t)args[3], (int32_t)args[4]);
+	} else {
+		co->ucal->set((int32_t)args[0], (int32_t)args[1], (int32_t)args[2], (int32_t)args[3], (int32_t)args[4], (int32_t)args[5]);
 	}
 
 	RETURN_TRUE;
