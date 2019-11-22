@@ -50,6 +50,7 @@
 #define PGSQL_ASSOC           1<<0
 #define PGSQL_NUM             1<<1
 #define PGSQL_BOTH            (PGSQL_ASSOC|PGSQL_NUM)
+#define PGSQL_TYPED           1<<2
 
 #define PGSQL_NOTICE_LAST     1  /* Get the last notice */
 #define PGSQL_NOTICE_ALL      2  /* Get all notices */
@@ -60,6 +61,17 @@
 
 #define PGSQL_MAX_LENGTH_OF_LONG   30
 #define PGSQL_MAX_LENGTH_OF_DOUBLE 60
+
+/* from postgresql/src/include/catalog/pg_type.h */
+#define BOOLOID     16
+#define BYTEAOID    17
+#define INT2OID     21
+#define INT4OID     23
+#define INT8OID     20
+#define TEXTOID     25
+#define OIDOID      26
+#define FLOAT4OID   700
+#define FLOAT8OID   701
 
 #if ZEND_LONG_MAX < UINT_MAX
 #define PGSQL_RETURN_OID(oid) do { \
@@ -478,6 +490,7 @@ PHP_MINIT_FUNCTION(pgsql)
 	REGISTER_LONG_CONSTANT("PGSQL_ASSOC", PGSQL_ASSOC, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_NUM", PGSQL_NUM, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_BOTH", PGSQL_BOTH, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PGSQL_TYPED", PGSQL_TYPED, CONST_CS | CONST_PERSISTENT);
 	/* For pg_last_notice() */
 	REGISTER_LONG_CONSTANT("PGSQL_NOTICE_LAST", PGSQL_NOTICE_LAST, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PGSQL_NOTICE_ALL", PGSQL_NOTICE_ALL, CONST_CS | CONST_PERSISTENT);
@@ -1846,6 +1859,72 @@ PHP_FUNCTION(pg_fetch_result)
 }
 /* }}} */
 
+/* {{{ void php_pgsql_get_field_value */
+static inline void php_pgsql_get_field_value(zval *value, PGresult *pgsql_result, zend_long result_type, int row, int column)
+{
+	if (PQgetisnull(pgsql_result, row, column)) {
+		ZVAL_NULL(value);
+	} else {
+		char *element = PQgetvalue(pgsql_result, row, column);
+		if (element) {
+			const size_t element_len = PQgetlength(pgsql_result, row, column);
+			Oid pgsql_type;
+			if (result_type & PGSQL_TYPED) {
+				pgsql_type = PQftype(pgsql_result, column);
+			} else {
+				pgsql_type = TEXTOID;
+			}
+
+			switch (pgsql_type) {
+				case BOOLOID:
+					ZVAL_BOOL(value, *element == 't');
+					break;
+				case FLOAT4OID:
+				case FLOAT8OID:
+					if (element_len == sizeof("Infinity") - 1 && strcmp(element, "Infinity") == 0) {
+						ZVAL_DOUBLE(value, ZEND_INFINITY);
+					} else if (element_len == sizeof("-Infinity") - 1 && strcmp(element, "-Infinity") == 0) {
+						ZVAL_DOUBLE(value, -ZEND_INFINITY);
+					} else if (element_len == sizeof("NaN") - 1 && strcmp(element, "NaN") == 0) {
+						ZVAL_DOUBLE(value, ZEND_NAN);
+					} else {
+						ZVAL_DOUBLE(value, zend_strtod(element, NULL));
+					}
+					break;
+				case OIDOID:
+				case INT2OID:
+				case INT4OID:
+#if SIZEOF_ZEND_LONG >= 8
+				case INT8OID:
+#endif
+				{
+					zend_long long_value = ZEND_ATOL(element);
+					ZVAL_LONG(value, long_value);
+					break;
+				}
+				case BYTEAOID:
+				{
+					size_t tmp_len;
+					char *tmp_ptr = (char *)PQunescapeBytea((unsigned char *)element, &tmp_len);
+					if (!tmp_ptr) {
+						/* PQunescapeBytea returned an error */
+						ZVAL_NULL(value);
+					} else {
+						ZVAL_STRINGL(value, tmp_ptr, tmp_len);
+						PQfreemem(tmp_ptr);
+					}
+					break;
+				}
+				default:
+					ZVAL_STRINGL(value, element, element_len);
+			}
+		} else {
+			ZVAL_NULL(value);
+		}
+	}
+}
+/* }}} */
+
 /* {{{ void php_pgsql_fetch_hash */
 static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_type, int into_object)
 {
@@ -1906,28 +1985,17 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 
 	array_init(return_value);
 	for (i = 0, num_fields = PQnfields(pgsql_result); i < num_fields; i++) {
-		if (PQgetisnull(pgsql_result, pgsql_row, i)) {
-			if (result_type & PGSQL_NUM) {
-				add_index_null(return_value, i);
-			}
-			if (result_type & PGSQL_ASSOC) {
-				field_name = PQfname(pgsql_result, i);
-				add_assoc_null(return_value, field_name);
-			}
-		} else {
-			char *element = PQgetvalue(pgsql_result, pgsql_row, i);
-			if (element) {
-				const size_t element_len = strlen(element);
+		if (result_type & PGSQL_NUM) {
+			zval value;
+			php_pgsql_get_field_value(&value, pgsql_result, result_type, pgsql_row, i);
+			add_index_zval(return_value, i, &value);
+		}
 
-				if (result_type & PGSQL_NUM) {
-					add_index_stringl(return_value, i, element, element_len);
-				}
-
-				if (result_type & PGSQL_ASSOC) {
-					field_name = PQfname(pgsql_result, i);
-					add_assoc_stringl(return_value, field_name, element, element_len);
-				}
-			}
+		if (result_type & PGSQL_ASSOC) {
+			zval value;
+			php_pgsql_get_field_value(&value, pgsql_result, result_type, pgsql_row, i);
+			field_name = PQfname(pgsql_result, i);
+			add_assoc_zval(return_value, field_name, &value);
 		}
 	}
 
@@ -5788,25 +5856,16 @@ PHP_PGSQL_API void php_pgsql_result2array(PGresult *pg_result, zval *ret_array, 
 	for (pg_row = 0; pg_row < pg_numrows; pg_row++) {
 		array_init(&row);
 		for (i = 0, num_fields = PQnfields(pg_result); i < num_fields; i++) {
-			field_name = PQfname(pg_result, i);
-			if (PQgetisnull(pg_result, pg_row, i)) {
-				if (result_type & PGSQL_ASSOC) {
-					add_assoc_null(&row, field_name);
-				}
-				if (result_type & PGSQL_NUM) {
-					add_next_index_null(&row);
-				}
-			} else {
-				char *element = PQgetvalue(pg_result, pg_row, i);
-				if (element) {
-					const size_t element_len = strlen(element);
-					if (result_type & PGSQL_ASSOC) {
-						add_assoc_stringl(&row, field_name, element, element_len);
-					}
-					if (result_type & PGSQL_NUM) {
-						add_next_index_stringl(&row, element, element_len);
-					}
-				}
+			if (result_type & PGSQL_ASSOC) {
+				zval value;
+				php_pgsql_get_field_value(&value, pg_result, result_type, pg_row, i);
+				field_name = PQfname(pg_result, i);
+				add_assoc_zval(&row, field_name, &value);
+			}
+			if (result_type & PGSQL_NUM) {
+				zval value;
+				php_pgsql_get_field_value(&value, pg_result, result_type, pg_row, i);
+				add_next_index_zval(&row, &value);
 			}
 		}
 		add_index_zval(ret_array, pg_row, &row);
