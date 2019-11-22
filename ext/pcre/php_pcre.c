@@ -1359,7 +1359,11 @@ matched:
 				count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset2,
 					PCRE2_NO_UTF_CHECK | PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED, match_data, mctx);
 				if (count >= 0) {
-					goto matched;
+					if (global) {
+						goto matched;
+					} else {
+						break;
+					}
 				} else if (count == PCRE2_ERROR_NOMATCH) {
 					/* If we previously set PCRE2_NOTEMPTY_ATSTART after a null match,
 					   this is not necessarily the end. We need to advance
