@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed $x = (bool)$x; with opcache (should emit undeclared variable notice).
     (Tyson Andre)
 
+- PCRE:
+  . Fixed bug #78853 (preg_match() may return integer > 1). (cmb)
+
 - Standard:
   . Fixed bug #78759 (array_search in $GLOBALS). (Nikita)
 
