@@ -150,7 +150,7 @@ int ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ext
 				return status;
 			}
 			if (!is_used_by_op(ssa, use, i)) {
-				fprintf(stderr, "var " VARFMT " not in uses of op %d\n", VAR(i), use);
+				FAIL("var " VARFMT " not in uses of op %d\n", VAR(i), use);
 			}
 		} FOREACH_USE_END();
 

@@ -748,6 +748,41 @@ optimize_jmpz:
 								opline->opcode = ZEND_FREE;
 								opline->op2.num = 0;
 							}
+							break;
+						}
+						/* Optimize `if (non_refcounted_expr) { return CONST1; } return CONST1;` -> `return CONST1;` */
+						/* and      `if (bool_expr) { return true; } return false;` -> `return bool_expr;` */
+						/* TODO (optional): Get rid of original ZEND_RETURN oplines after they stop being reachable. */
+						if (!(OP1_INFO() & ~(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE))) {
+							zend_op *next_opline = opline + 1;
+							if (next_opline->opcode == ZEND_RETURN && next_opline->op1_type == IS_CONST) {
+								zend_op *jump_opline = OP_JMP_ADDR(opline, opline->op2);
+								if (jump_opline->opcode == ZEND_RETURN && jump_opline->op1_type == IS_CONST) {
+									zval *v_next = CT_CONSTANT_EX(op_array, next_opline->op1.constant);
+									zval *v_jump = CT_CONSTANT_EX(op_array, jump_opline->op1.constant);
+									if (zend_is_identical(v_next, v_jump)) {
+										zend_ssa_remove_instr(ssa, opline, ssa_op);
+										removed_ops++;
+										take_successor_1(ssa, block_num, block);
+										goto optimize_nop;
+									}
+								}
+								if (!(OP1_INFO() & ~(MAY_BE_FALSE|MAY_BE_TRUE))) {
+									if (Z_TYPE_P(CT_CONSTANT_EX(op_array, next_opline->op1.constant)) == IS_TRUE) {
+										zend_op *jump_opline = OP_JMP_ADDR(opline, opline->op2);
+										if (jump_opline->opcode == ZEND_RETURN && jump_opline->op1_type == IS_CONST && Z_TYPE_P(CT_CONSTANT_EX(op_array, jump_opline->op1.constant)) == IS_FALSE) {
+											int i;
+											for (i = 0; i < block->successors_count; i++) {
+												zend_ssa_remove_predecessor(ssa, block_num, block->successors[i]);
+											}
+											block->successors_count = 0;
+											opline->opcode = ZEND_RETURN;
+											opline->op2_type = IS_UNUSED;
+											opline->op2.var = 0;
+										}
+									}
+								}
+							}
 						}
 					}
 					break;
@@ -778,6 +813,41 @@ optimize_jmpnz:
 							} else {
 								opline->opcode = ZEND_FREE;
 								opline->op2.num = 0;
+							}
+							break;
+						}
+						/* Optimize `if (!non_refcounted_expr) { return CONST1; } return CONST1;` -> `return CONST1;` */
+						/* and      `if (!bool_expr) { return false; } return true;` -> `return bool_expr;` */
+						/* TODO (optional): Get rid of original ZEND_RETURN oplines after they stop being reachable. */
+						if (!(OP1_INFO() & ~(MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE))) {
+							zend_op *next_opline = opline + 1;
+							if (next_opline->opcode == ZEND_RETURN && next_opline->op1_type == IS_CONST) {
+								zend_op *jump_opline = OP_JMP_ADDR(opline, opline->op2);
+								if (jump_opline->opcode == ZEND_RETURN && jump_opline->op1_type == IS_CONST) {
+									zval *v_next = CT_CONSTANT_EX(op_array, next_opline->op1.constant);
+									zval *v_jump = CT_CONSTANT_EX(op_array, jump_opline->op1.constant);
+									if (zend_is_identical(v_next, v_jump)) {
+										zend_ssa_remove_instr(ssa, opline, ssa_op);
+										removed_ops++;
+										take_successor_1(ssa, block_num, block);
+										goto optimize_nop;
+									}
+								}
+								if (!(OP1_INFO() & ~(MAY_BE_FALSE|MAY_BE_TRUE))) {
+									if (Z_TYPE_P(CT_CONSTANT_EX(op_array, next_opline->op1.constant)) == IS_FALSE) {
+										zend_op *jump_opline = OP_JMP_ADDR(opline, opline->op2);
+										if (jump_opline->opcode == ZEND_RETURN && jump_opline->op1_type == IS_CONST && Z_TYPE_P(CT_CONSTANT_EX(op_array, jump_opline->op1.constant)) == IS_TRUE) {
+											int i;
+											for (i = 0; i < block->successors_count; i++) {
+												zend_ssa_remove_predecessor(ssa, block_num, block->successors[i]);
+											}
+											block->successors_count = 0;
+											opline->opcode = ZEND_RETURN;
+											opline->op2_type = IS_UNUSED;
+											opline->op2.var = 0;
+										}
+									}
+								}
 							}
 						}
 					}
