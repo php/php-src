@@ -693,69 +693,68 @@ PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
    Count the number of elements in a variable (usually an array) */
 PHP_FUNCTION(count)
 {
-	zval *array;
+	HashTable *array = NULL;
 	zend_long mode = COUNT_NORMAL;
-	zend_long cnt;
+	zval *countable;
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_ZVAL(array)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_LONG(mode)
-	ZEND_PARSE_PARAMETERS_END();
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "h!|l", &array, &mode) == SUCCESS)  {
+		if (array == NULL) {
+			/* Intentionally not converted to an exception */
+			php_error_docref(NULL, E_DEPRECATED, "Passing null is deprecated");
+			RETURN_LONG(0);
+		}
 
 	if (mode != COUNT_NORMAL && mode != COUNT_RECURSIVE) {
 		zend_argument_value_error(2, "must be either COUNT_NORMAL or COUNT_RECURSIVE");
 		RETURN_THROWS();
+
+		zend_long count;
+
+		if (mode == COUNT_NORMAL) {
+			count = zend_array_count(array);
+		} else if (mode == COUNT_RECURSIVE) {
+			count = php_count_recursive(array);
+		} else {
+			zend_value_error("Mode value is invalid");
+			RETURN_THROWS();
+		}
+		RETURN_LONG(count);
+>>>>>>> d05a057cb3... Improve count() in regards to argument checks
 	}
 
-	switch (Z_TYPE_P(array)) {
-		case IS_NULL:
-			/* Intentionally not converted to an exception */
-			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
-			RETURN_LONG(0);
-			break;
-		case IS_ARRAY:
-			if (mode != COUNT_RECURSIVE) {
-				cnt = zend_array_count(Z_ARRVAL_P(array));
-			} else {
-				cnt = php_count_recursive(Z_ARRVAL_P(array));
-			}
-			RETURN_LONG(cnt);
-			break;
-		case IS_OBJECT: {
-			zval retval;
-			/* first, we check if the handler is defined */
-			if (Z_OBJ_HT_P(array)->count_elements) {
-				RETVAL_LONG(1);
-				if (SUCCESS == Z_OBJ_HT(*array)->count_elements(Z_OBJ_P(array), &Z_LVAL_P(return_value))) {
-					return;
-				}
-				if (EG(exception)) {
-					RETURN_THROWS();
-				}
-			}
-			/* if not and the object implements Countable we call its count() method */
-			if (instanceof_function(Z_OBJCE_P(array), zend_ce_countable)) {
-				zend_call_method_with_0_params(Z_OBJ_P(array), NULL, NULL, "count", &retval);
-				if (Z_TYPE(retval) != IS_UNDEF) {
-					RETVAL_LONG(zval_get_long(&retval));
-					zval_ptr_dtor(&retval);
-				}
+	/* Remove possibility to specify $mode when passing object? */
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "o|l",
+			&countable, &mode) == SUCCESS) {
+
+		if (mode != COUNT_NORMAL && mode != COUNT_RECURSIVE) {
+			zend_value_error("Mode value is invalid");
+			RETURN_THROWS();
+		}
+
+		/* First, check if the handler is defined as it is faster */
+		if (Z_OBJ_HT_P(countable)->count_elements) {
+			RETVAL_LONG(1);
+			if (SUCCESS == Z_OBJ_HT(*countable)->count_elements(Z_OBJ_P(countable), &Z_LVAL_P(return_value))) {
 				return;
 			}
-
-			/* If There's no handler and it doesn't implement Countable then add a warning */
-			/* Intentionally not converted to an exception */
-			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
-			RETURN_LONG(1);
-			break;
+			if (EG(exception)) {
+				return;
+			}
 		}
-		default:
-			/* Intentionally not converted to an exception */
-			php_error_docref(NULL, E_WARNING, "Parameter must be an array or an object that implements Countable");
-			RETURN_LONG(1);
-			break;
+
+		zval retval;
+		/* Otherwise check if the object implements Countable and call its count() method */
+		if (instanceof_function(Z_OBJCE_P(countable), zend_ce_countable)) {
+			zend_call_method_with_0_params(Z_OBJ_P(countable), NULL, NULL, "count", &retval);
+			if (Z_TYPE(retval) != IS_UNDEF) {
+				RETVAL_LONG(zval_get_long(&retval));
+				zval_ptr_dtor(&retval);
+			}
+			return;
+		}
 	}
+	zend_type_error("Parameter must be an array or an object that implements Countable");
+	return;
 }
 /* }}} */
 

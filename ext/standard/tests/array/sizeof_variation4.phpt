@@ -2,6 +2,13 @@
 Test sizeof() function : usage variations - all kinds of unset variables for 'var' argument
 --FILE--
 <?php
+/**
+ * Prototype  : int sizeof(array|Countable|null $var [, int $mode])
+ * Description: Count the number of elements in a variable (usually an array)
+ *  If Standard PHP library is installed, it will return the properties of an object.
+ * Source code: ext/standard/array.c
+ * Alias to functions: count()
+ */
 /* Prototype  : int sizeof($mixed var[, int $mode])
  * Description: Counts an elements in an array. If Standard PHP library is installed,
  * it will return the properties of an object.
@@ -59,412 +66,421 @@ $values = array (
 $counter = 1;
 foreach($values as $value)
 {
-  echo "-- Iteration $counter --\n";
+    echo "-- Iteration $counter --\n";
 
-  // unset the variable
-  unset($value);
+    // unset the variable
+    unset($value);
 
-  // now check the size of unset variable when different modes are given
-  echo "Default Mode: ";
-  var_dump( sizeof($value) );
-  echo "\n";
+    // now check the size of unset variable when different modes are given
+    echo "Default Mode:";
+    try {
+        var_dump( sizeof($value) );
+    } catch (\TypeError $e) {
+        echo $e->getMessage() . "\n";
+    }
+    echo "\n";
 
-  echo "COUNT_NORMAL Mode: ";
-  var_dump( sizeof($value, COUNT_NORMAL) );
-  echo "\n";
+    echo "COUNT_NORMAL Mode:";
+    try {
+        var_dump( sizeof($value, COUNT_NORMAL) );
+    } catch (\TypeError $e) {
+        echo $e->getMessage() . "\n";
+    }
+    echo "\n";
 
-  echo "COUNT_RECURSIVE Mode: ";
-  var_dump( sizeof($value, COUNT_RECURSIVE) );
-  echo "\n";
+    echo "COUNT_RECURSIVE Mode:";
+    try {
+        var_dump( sizeof($value, COUNT_RECURSIVE) );
+    } catch (\TypeError $e) {
+        echo $e->getMessage() . "\n";
+    }
+    echo "\n";
 
-  $counter++;
+    $counter++;
 }
 
 fclose($fp);
 
-echo "Done";
 ?>
 --EXPECTF--
 *** Testing sizeof() : usage variations ***
 --- Testing sizeof() for all kinds of unset variables in default, Normal and Recursive Modes ---
 -- Iteration 1 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 2 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 3 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 4 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 5 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 6 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 7 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 8 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 9 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 10 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 11 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 12 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 13 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 14 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 15 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 16 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 17 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 18 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 19 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
 -- Iteration 20 --
-Default Mode: 
-Warning: Undefined variable $value in %s on line %d
+Default Mode:
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Warning: Undefined variable $value in %s on line %d
 int(0)
 
-COUNT_NORMAL Mode: 
+COUNT_NORMAL Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
 
-COUNT_RECURSIVE Mode: 
+COUNT_RECURSIVE Mode:
 Warning: Undefined variable $value in %s on line %d
 
-Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: sizeof(): Passing null is deprecated in %s on line %d
 int(0)
-
-Done

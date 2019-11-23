@@ -9259,53 +9259,41 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CONST_
 {
 	USE_OPLINE
 	zval *op1;
-	zend_long count;
+	zend_long count = 1;
 
 	SAVE_OPLINE();
 	op1 = RT_CONSTANT(opline, opline->op1);
-	while (1) {
-		if (Z_TYPE_P(op1) == IS_ARRAY) {
-			count = zend_array_count(Z_ARRVAL_P(op1));
-			break;
-		} else if (Z_TYPE_P(op1) == IS_OBJECT) {
-			zend_object *zobj = Z_OBJ_P(op1);
 
-			/* first, we check if the handler is defined */
-			if (zobj->handlers->count_elements) {
-				if (SUCCESS == zobj->handlers->count_elements(zobj, &count)) {
-					break;
-				}
-				if (UNEXPECTED(EG(exception))) {
-					count = 0;
-					break;
-				}
-			}
+	if ((IS_CONST & (IS_VAR|IS_CV)) != 0 && Z_TYPE_P(op1) == IS_REFERENCE) {
+		op1 = Z_REFVAL_P(op1);
+	}
 
-			/* if not and the object implements Countable we call its count() method */
-			if (zend_class_implements_interface(zobj->ce, zend_ce_countable)) {
-				zval retval;
-
-				zend_call_method_with_0_params(zobj, NULL, NULL, "count", &retval);
-				count = zval_get_long(&retval);
-				zval_ptr_dtor(&retval);
-				break;
-			}
-
-			/* If There's no handler and it doesn't implement Countable then add a warning */
-			count = 1;
-		} else if ((IS_CONST & (IS_VAR|IS_CV)) != 0 && Z_TYPE_P(op1) == IS_REFERENCE) {
-			op1 = Z_REFVAL_P(op1);
-			continue;
-		} else if (Z_TYPE_P(op1) <= IS_NULL) {
-			if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP1();
-			}
-			count = 0;
-		} else {
-			count = 1;
+	if (Z_TYPE_P(op1) <= IS_NULL) {
+		/* Intentionally not converted to an exception */
+		zend_error(E_DEPRECATED, "%s(): Passing null is deprecated", opline->extended_value ? "sizeof" : "count");
+		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+			ZVAL_UNDEFINED_OP1();
 		}
-		zend_error(E_WARNING, "%s(): Parameter must be an array or an object that implements Countable", opline->extended_value ? "sizeof" : "count");
-		break;
+		count = 0;
+	} else if (Z_TYPE_P(op1) == IS_ARRAY) {
+		count = zend_array_count(Z_ARRVAL_P(op1));
+	} else if (Z_TYPE_P(op1) == IS_OBJECT) {
+		zend_object *zobj = Z_OBJ_P(op1);
+		/* First, check if the handler is defined as it is faster */
+		if (zobj->handlers->count_elements) {
+			zobj->handlers->count_elements(zobj, &count);
+		/* Otherwise check if the object implements Countable and call its count() method */
+		} else if (zend_class_implements_interface(zobj->ce, zend_ce_countable)) {
+			zval retval;
+
+			zend_call_method_with_0_params(zobj, NULL, NULL, "count", &retval);
+			count = zval_get_long(&retval);
+			zval_ptr_dtor(&retval);
+		} else {
+			zend_type_error("Parameter must be an array or an object that implements Countable");
+		}
+	} else {
+		zend_type_error("Parameter must be an array or an object that implements Countable");
 	}
 
 	ZVAL_LONG(EX_VAR(opline->result.var), count);
@@ -16338,53 +16326,41 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_TMPVAR_UNUSED_HANDL
 {
 	USE_OPLINE
 	zval *op1;
-	zend_long count;
+	zend_long count = 1;
 
 	SAVE_OPLINE();
 	op1 = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
-	while (1) {
-		if (Z_TYPE_P(op1) == IS_ARRAY) {
-			count = zend_array_count(Z_ARRVAL_P(op1));
-			break;
-		} else if (Z_TYPE_P(op1) == IS_OBJECT) {
-			zend_object *zobj = Z_OBJ_P(op1);
 
-			/* first, we check if the handler is defined */
-			if (zobj->handlers->count_elements) {
-				if (SUCCESS == zobj->handlers->count_elements(zobj, &count)) {
-					break;
-				}
-				if (UNEXPECTED(EG(exception))) {
-					count = 0;
-					break;
-				}
-			}
+	if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) != 0 && Z_TYPE_P(op1) == IS_REFERENCE) {
+		op1 = Z_REFVAL_P(op1);
+	}
 
-			/* if not and the object implements Countable we call its count() method */
-			if (zend_class_implements_interface(zobj->ce, zend_ce_countable)) {
-				zval retval;
-
-				zend_call_method_with_0_params(zobj, NULL, NULL, "count", &retval);
-				count = zval_get_long(&retval);
-				zval_ptr_dtor(&retval);
-				break;
-			}
-
-			/* If There's no handler and it doesn't implement Countable then add a warning */
-			count = 1;
-		} else if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) != 0 && Z_TYPE_P(op1) == IS_REFERENCE) {
-			op1 = Z_REFVAL_P(op1);
-			continue;
-		} else if (Z_TYPE_P(op1) <= IS_NULL) {
-			if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP1();
-			}
-			count = 0;
-		} else {
-			count = 1;
+	if (Z_TYPE_P(op1) <= IS_NULL) {
+		/* Intentionally not converted to an exception */
+		zend_error(E_DEPRECATED, "%s(): Passing null is deprecated", opline->extended_value ? "sizeof" : "count");
+		if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+			ZVAL_UNDEFINED_OP1();
 		}
-		zend_error(E_WARNING, "%s(): Parameter must be an array or an object that implements Countable", opline->extended_value ? "sizeof" : "count");
-		break;
+		count = 0;
+	} else if (Z_TYPE_P(op1) == IS_ARRAY) {
+		count = zend_array_count(Z_ARRVAL_P(op1));
+	} else if (Z_TYPE_P(op1) == IS_OBJECT) {
+		zend_object *zobj = Z_OBJ_P(op1);
+		/* First, check if the handler is defined as it is faster */
+		if (zobj->handlers->count_elements) {
+			zobj->handlers->count_elements(zobj, &count);
+		/* Otherwise check if the object implements Countable and call its count() method */
+		} else if (zend_class_implements_interface(zobj->ce, zend_ce_countable)) {
+			zval retval;
+
+			zend_call_method_with_0_params(zobj, NULL, NULL, "count", &retval);
+			count = zval_get_long(&retval);
+			zval_ptr_dtor(&retval);
+		} else {
+			zend_type_error("Parameter must be an array or an object that implements Countable");
+		}
+	} else {
+		zend_type_error("Parameter must be an array or an object that implements Countable");
 	}
 
 	ZVAL_LONG(EX_VAR(opline->result.var), count);
@@ -45185,53 +45161,41 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COUNT_SPEC_CV_UNUSED_HANDLER(Z
 {
 	USE_OPLINE
 	zval *op1;
-	zend_long count;
+	zend_long count = 1;
 
 	SAVE_OPLINE();
 	op1 = EX_VAR(opline->op1.var);
-	while (1) {
-		if (Z_TYPE_P(op1) == IS_ARRAY) {
-			count = zend_array_count(Z_ARRVAL_P(op1));
-			break;
-		} else if (Z_TYPE_P(op1) == IS_OBJECT) {
-			zend_object *zobj = Z_OBJ_P(op1);
 
-			/* first, we check if the handler is defined */
-			if (zobj->handlers->count_elements) {
-				if (SUCCESS == zobj->handlers->count_elements(zobj, &count)) {
-					break;
-				}
-				if (UNEXPECTED(EG(exception))) {
-					count = 0;
-					break;
-				}
-			}
+	if ((IS_CV & (IS_VAR|IS_CV)) != 0 && Z_TYPE_P(op1) == IS_REFERENCE) {
+		op1 = Z_REFVAL_P(op1);
+	}
 
-			/* if not and the object implements Countable we call its count() method */
-			if (zend_class_implements_interface(zobj->ce, zend_ce_countable)) {
-				zval retval;
-
-				zend_call_method_with_0_params(zobj, NULL, NULL, "count", &retval);
-				count = zval_get_long(&retval);
-				zval_ptr_dtor(&retval);
-				break;
-			}
-
-			/* If There's no handler and it doesn't implement Countable then add a warning */
-			count = 1;
-		} else if ((IS_CV & (IS_VAR|IS_CV)) != 0 && Z_TYPE_P(op1) == IS_REFERENCE) {
-			op1 = Z_REFVAL_P(op1);
-			continue;
-		} else if (Z_TYPE_P(op1) <= IS_NULL) {
-			if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
-				ZVAL_UNDEFINED_OP1();
-			}
-			count = 0;
-		} else {
-			count = 1;
+	if (Z_TYPE_P(op1) <= IS_NULL) {
+		/* Intentionally not converted to an exception */
+		zend_error(E_DEPRECATED, "%s(): Passing null is deprecated", opline->extended_value ? "sizeof" : "count");
+		if (IS_CV == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+			ZVAL_UNDEFINED_OP1();
 		}
-		zend_error(E_WARNING, "%s(): Parameter must be an array or an object that implements Countable", opline->extended_value ? "sizeof" : "count");
-		break;
+		count = 0;
+	} else if (Z_TYPE_P(op1) == IS_ARRAY) {
+		count = zend_array_count(Z_ARRVAL_P(op1));
+	} else if (Z_TYPE_P(op1) == IS_OBJECT) {
+		zend_object *zobj = Z_OBJ_P(op1);
+		/* First, check if the handler is defined as it is faster */
+		if (zobj->handlers->count_elements) {
+			zobj->handlers->count_elements(zobj, &count);
+		/* Otherwise check if the object implements Countable and call its count() method */
+		} else if (zend_class_implements_interface(zobj->ce, zend_ce_countable)) {
+			zval retval;
+
+			zend_call_method_with_0_params(zobj, NULL, NULL, "count", &retval);
+			count = zval_get_long(&retval);
+			zval_ptr_dtor(&retval);
+		} else {
+			zend_type_error("Parameter must be an array or an object that implements Countable");
+		}
+	} else {
+		zend_type_error("Parameter must be an array or an object that implements Countable");
 	}
 
 	ZVAL_LONG(EX_VAR(opline->result.var), count);

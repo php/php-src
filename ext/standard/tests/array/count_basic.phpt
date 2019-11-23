@@ -2,7 +2,8 @@
 Test count() function : basic functionality
 --FILE--
 <?php
-/* Prototype  : int count(mixed $var [, int $mode])
+/**
+ * Prototype  : int count(array|Countable|null $var [, int $mode])
  * Description: Count the number of elements in a variable (usually an array)
  * Source code: ext/standard/array.c
  */
@@ -29,7 +30,6 @@ var_dump(count($array_multi, COUNT_RECURSIVE));
 echo "\$mode = 1:               ";
 var_dump(count($array_multi, 1));
 
-echo "Done";
 ?>
 --EXPECT--
 *** Testing count() : basic functionality ***
@@ -42,4 +42,3 @@ $mode = COUNT_NORMAL:    int(3)
 $mode = 0:               int(3)
 $mode = COUNT_RECURSIVE: int(6)
 $mode = 1:               int(6)
-Done

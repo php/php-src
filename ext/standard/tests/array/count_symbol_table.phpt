@@ -2,6 +2,11 @@
 Test count() function : count on symbol table
 --FILE--
 <?php
+/**
+ * Prototype  : int count(array|Countable|null $var [, int $mode])
+ * Description: Count the number of elements in a variable (usually an array)
+ * Source code: ext/standard/array.c
+ */
 
 $c1 = 0;
 $c2 = 0;

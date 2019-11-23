@@ -2,10 +2,11 @@
 Test sizeof() function : object functionality - object with Countable interface
 --FILE--
 <?php
-/* Prototype  : int sizeof($mixed var[, int $mode])
- * Description: Counts an elements in an array. If Standard PHP library is installed,
- * it will return the properties of an object.
- * Source code: ext/standard/basic_functions.c
+/**
+ * Prototype  : int sizeof(array|Countable|null $var [, int $mode])
+ * Description: Count the number of elements in a variable (usually an array)
+ *  If Standard PHP library is installed, it will return the properties of an object.
+ * Source code: ext/standard/array.c
  * Alias to functions: count()
  */
 
@@ -33,7 +34,6 @@ var_dump( sizeof($obj, COUNT_NORMAL) );
 echo "-- Testing sizeof() in COUNT_RECURSIVE mode --\n";
 var_dump( sizeof($obj, COUNT_RECURSIVE) );
 
-echo "Done";
 ?>
 --EXPECT--
 *** Testing sizeof() : object functionality ***
@@ -44,4 +44,3 @@ int(3)
 int(3)
 -- Testing sizeof() in COUNT_RECURSIVE mode --
 int(3)
-Done

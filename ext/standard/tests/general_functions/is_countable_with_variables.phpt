@@ -16,7 +16,7 @@ if (is_countable($foo)) {
 
 $bar = null;
 if (!is_countable($bar)) {
-    count($bar);
+    var_dump(count($bar));
 }
 ?>
 --EXPECTF--
@@ -25,4 +25,5 @@ bool(true)
 bool(false)
 int(2)
 
-Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
+Deprecated: count(): Passing null is deprecated in %s on line %d
+int(0)
