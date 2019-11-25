@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #78810 (RW fetches do not throw "uninitialized property"
     exception). (Nikita)
+  . Fixed bug #78868 (Calling __autoload() with incorrect EG(fake_scope) value).
+    (Antony Dovgal, Dmitry)
 
 - GD:
   . Fixed bug #78849 (GD build broken with -D SIGNED_COMPARE_SLOW). (cmb)
