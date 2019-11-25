@@ -327,7 +327,6 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 				return -1;
 			}
 			memmove(_tmp, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
-			memmove(_tmp+PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, tmp, path_len * sizeof(wchar_t));
 			src = tmp;
 			dst = _tmp + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
 			while (src < tmp + path_len) {
