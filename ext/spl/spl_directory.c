@@ -708,10 +708,10 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 
 	if (SPL_HAS_FLAG(ctor_flags, DIT_CTOR_FLAGS)) {
 		flags = SPL_FILE_DIR_KEY_AS_PATHNAME|SPL_FILE_DIR_CURRENT_AS_FILEINFO;
-		parsed = zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &path, &len, &flags);
+		parsed = zend_parse_parameters(ZEND_NUM_ARGS(), "p|l", &path, &len, &flags);
 	} else {
 		flags = SPL_FILE_DIR_KEY_AS_PATHNAME|SPL_FILE_DIR_CURRENT_AS_SELF;
-		parsed = zend_parse_parameters(ZEND_NUM_ARGS(), "s", &path, &len);
+		parsed = zend_parse_parameters(ZEND_NUM_ARGS(), "p", &path, &len);
 	}
 	if (SPL_HAS_FLAG(ctor_flags, SPL_FILE_DIR_SKIPDOTS)) {
 		flags |= SPL_FILE_DIR_SKIPDOTS;
