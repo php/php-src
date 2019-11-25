@@ -21,6 +21,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #78759 (array_search in $GLOBALS). (Nikita)
+  . Fixed bug #77638 (var_export'ing certain class instances segfaults). (cmb)
 
 21 Nov 2019, PHP 7.3.12
 

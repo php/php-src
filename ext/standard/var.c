@@ -524,7 +524,7 @@ again:
 					zend_error(E_WARNING, "var_export does not handle circular references");
 					return;
 				} else {
-					GC_PROTECT_RECURSION(myht);
+					GC_TRY_PROTECT_RECURSION(myht);
 				}
 			}
 			if (level > 1) {
@@ -544,7 +544,7 @@ again:
 				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
 					php_object_element_export(val, index, key, level, buf);
 				} ZEND_HASH_FOREACH_END();
-				GC_UNPROTECT_RECURSION(myht);
+				GC_TRY_UNPROTECT_RECURSION(myht);
 			}
 			if (level > 1) {
 				buffer_append_spaces(buf, level - 1);
