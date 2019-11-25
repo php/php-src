@@ -4082,6 +4082,12 @@ ZEND_API int zend_update_static_property_ex(zend_class_entry *scope, zend_string
 	zval *property;
 	zend_class_entry *old_scope = EG(fake_scope);
 
+	if (UNEXPECTED(!(scope->ce_flags & ZEND_ACC_CONSTANTS_UPDATED))) {
+		if (UNEXPECTED(zend_update_class_constants(scope)) != SUCCESS) {
+			return FAILURE;
+		}
+	}
+
 	EG(fake_scope) = scope;
 	property = zend_std_get_static_property(scope, name, 0);
 	EG(fake_scope) = old_scope;
