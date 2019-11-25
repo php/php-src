@@ -23,6 +23,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #78853 (preg_match() may return integer > 1). (cmb)
 
+- Standard:
+  . Fixed bug #77638 (var_export'ing certain class instances segfaults). (cmb)
+
 28 Nov 2019, PHP 7.4.0
 
 - Core:
