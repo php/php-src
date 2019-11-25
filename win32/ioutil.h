@@ -215,8 +215,16 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 			memmove(ret, mb, mb_len * sizeof(wchar_t));
 			ret[mb_len] = L'\0';
 		} else {
+			wchar_t *src = mb, *dst = ret + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
 			memmove(ret, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
-			memmove(ret+PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, mb, mb_len * sizeof(wchar_t));
+			while (src < mb + mb_len) {
+				if (*src == PHP_WIN32_IOUTIL_FW_SLASHW) {
+					*dst++ = PHP_WIN32_IOUTIL_DEFAULT_SLASHW;
+					src++;
+				} else {
+					*dst++ = *src++;
+				}
+			}
 			ret[mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW] = L'\0';
 
 			mb_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
