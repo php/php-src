@@ -320,13 +320,23 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 
 		if (!PHP_WIN32_IOUTIL_IS_LONG_PATHW(tmp, path_len)) {
 			wchar_t *_tmp = (wchar_t *) malloc((path_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
+			wchar_t *src, *dst;
 			if (!_tmp) {
 				SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
 				free(tmp);
 				return -1;
 			}
 			memmove(_tmp, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
-			memmove(_tmp+PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, tmp, path_len * sizeof(wchar_t));
+			src = tmp;
+			dst = _tmp + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+			while (src < tmp + path_len) {
+				if (*src == PHP_WIN32_IOUTIL_FW_SLASHW) {
+					*dst++ = PHP_WIN32_IOUTIL_DEFAULT_SLASHW;
+					src++;
+				} else {
+					*dst++ = *src++;
+				}
+			}
 			path_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
 			_tmp[path_len] = L'\0';
 			free(tmp);
