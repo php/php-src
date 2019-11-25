@@ -21,6 +21,9 @@ PHP                                                                        NEWS
     (Maksim Nikulin)
   . Fixed bug #78889 (php-fpm service fails to start). (Jakub Zelenka)
 
+- Mysqlnd:
+  . Fixed bug #78823 (ZLIB_LIBS not added to EXTRA_LIBS). (Arjen de Korte)
+
 - OPcache:
   . Fixed $x = (bool)$x; with opcache (should emit undeclared variable notice).
     (Tyson Andre)
