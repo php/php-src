@@ -2900,7 +2900,9 @@ ZEND_VM_HOT_NOCONST_HANDLER(43, ZEND_JMPZ, CONST|TMPVAR|CV, JMP_ADDR)
 		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
 			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
-			ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
 		}
 		ZEND_VM_JMP_EX(OP_JMP_ADDR(opline, opline->op2), 0);
 	}
@@ -2936,10 +2938,12 @@ ZEND_VM_HOT_NOCONST_HANDLER(43, ZEND_JMPZ, CONST|TMPVAR|CV, JMP_ADDR)
 					if (Z_REFCOUNTED_P(val) && !Z_DELREF_P(val)) {
 						SAVE_OPLINE();
 						rc_dtor_func(Z_COUNTED_P(val));
-						ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+						if (UNEXPECTED(EG(exception))) {
+							HANDLE_EXCEPTION();
+						}
 					}
 				}
-				ZEND_VM_NEXT_OPCODE_EX(OP1_TYPE & (IS_TMP_VAR|IS_VAR), 1);
+				ZEND_VM_NEXT_OPCODE();
 			} else {
 				if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
 					zval_ptr_dtor_nogc(val);
@@ -2967,7 +2971,9 @@ ZEND_VM_C_LABEL(proceed_check_exception):
 					/* This only needs to check for exceptions if the last reference to the value was deleted */
 					SAVE_OPLINE();
 					rc_dtor_func(Z_COUNTED_P(val));
-					ZEND_VM_JMP(opline);
+					if (UNEXPECTED(EG(exception))) {
+						HANDLE_EXCEPTION();
+					}
 				}
 			}
 			ZEND_VM_JMP_EX(opline, 0);
@@ -3006,7 +3012,9 @@ ZEND_VM_HOT_NOCONST_HANDLER(44, ZEND_JMPNZ, CONST|TMPVAR|CV, JMP_ADDR)
 		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(val) == IS_UNDEF)) {
 			SAVE_OPLINE();
 			ZVAL_UNDEFINED_OP1();
-			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
 		}
 		ZEND_VM_NEXT_OPCODE();
 	}
@@ -3042,7 +3050,9 @@ ZEND_VM_HOT_NOCONST_HANDLER(44, ZEND_JMPNZ, CONST|TMPVAR|CV, JMP_ADDR)
 					if (Z_REFCOUNTED_P(val) && !Z_DELREF_P(val)) {
 						SAVE_OPLINE();
 						rc_dtor_func(Z_COUNTED_P(val));
-						ZEND_VM_JMP(OP_JMP_ADDR(opline, opline->op2));
+						if (UNEXPECTED(EG(exception))) {
+							HANDLE_EXCEPTION();
+						}
 					}
 				}
 				ZEND_VM_JMP_EX(OP_JMP_ADDR(opline, opline->op2), 0);
@@ -3050,7 +3060,7 @@ ZEND_VM_HOT_NOCONST_HANDLER(44, ZEND_JMPNZ, CONST|TMPVAR|CV, JMP_ADDR)
 				if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
 					zval_ptr_dtor_nogc(val);
 				}
-				ZEND_VM_NEXT_OPCODE_EX(OP1_TYPE & (IS_TMP_VAR|IS_VAR), 1);
+				ZEND_VM_NEXT_OPCODE();
 			}
 		case IS_OBJECT:
 			if (EXPECTED(Z_OBJ_HT_P(val)->cast_object == zend_std_cast_object_tostring)) {
@@ -3073,7 +3083,9 @@ ZEND_VM_C_LABEL(proceed_check_exception):
 					/* This only needs to check for exceptions if the last reference to the value was deleted */
 					SAVE_OPLINE();
 					rc_dtor_func(Z_COUNTED_P(val));
-					ZEND_VM_JMP(opline);
+					if (UNEXPECTED(EG(exception))) {
+						HANDLE_EXCEPTION();
+					}
 				}
 			}
 			ZEND_VM_JMP_EX(opline, 0);
