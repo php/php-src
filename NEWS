@@ -39,6 +39,9 @@ PHP                                                                        NEWS
   . Fixed bug #78982 (pdo_pgsql returns dead persistent connection). (SATŌ
     Kentarō)
 
+- Shmop:
+  . Fixed bug #78538 (shmop memory leak). (cmb)
+
 18 Dec 2019, PHP 7.3.13
 
 - Bcmath:
