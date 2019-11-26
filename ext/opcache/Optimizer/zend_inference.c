@@ -4391,6 +4391,7 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 		case ZEND_BEGIN_SILENCE:
 		case ZEND_END_SILENCE:
 		case ZEND_FREE:
+		case ZEND_FE_FREE:
 		case ZEND_SEPARATE:
 		case ZEND_TYPE_CHECK:
 		case ZEND_DEFINED:
