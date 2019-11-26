@@ -47,7 +47,7 @@ void zend_accel_error(int type, const char *format, ...)
 
 		fLog = stderr;
 	} else {
-		fLog = fopen(ZCG(accel_directives).error_log, "a+");
+		fLog = fopen(ZCG(accel_directives).error_log, "a");
 		if (!fLog) {
 			fLog = stderr;
 		}
