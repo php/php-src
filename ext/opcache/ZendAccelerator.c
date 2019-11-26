@@ -783,6 +783,8 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 					/* Process died before the signal was sent */
 					success = 1;
 					zend_accel_error(ACCEL_LOG_WARNING, "Process %d died before SIGKILL was sent", mem_usage_check->l_pid);
+				} else if (errno != 0) {
+					zend_accel_error(ACCEL_LOG_WARNING, "Failed to send SIGKILL to locker %d: %s", mem_usage_check->l_pid, strerror(errno));
 				}
 				break;
 			}
@@ -793,6 +795,8 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 					/* successfully killed locker, process no longer exists  */
 					success = 1;
 					zend_accel_error(ACCEL_LOG_WARNING, "Killed locker %d", mem_usage_check->l_pid);
+				} else if (errno != 0) {
+					zend_accel_error(ACCEL_LOG_WARNING, "Failed to check locker %d: %s", mem_usage_check->l_pid, strerror(errno));
 				}
 				break;
 			}
@@ -802,7 +806,7 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 			/* errno is not ESRCH or we ran out of tries to kill the locker */
 			ZCSG(force_restart_time) = time(NULL); /* restore forced restart request */
 			/* cannot kill the locker, bail out with error */
-			zend_accel_error(ACCEL_LOG_ERROR, "Cannot kill process %d: %s!", mem_usage_check->l_pid, strerror(errno));
+			zend_accel_error(ACCEL_LOG_ERROR, "Cannot kill process %d!", mem_usage_check->l_pid);
 		}
 
 		mem_usage_check->l_type = F_WRLCK;
