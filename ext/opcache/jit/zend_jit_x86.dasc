@@ -894,7 +894,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||		}
 ||	}
 ||	if (Z_MODE(dst_addr) == IS_MEM_ZVAL) {
-||		if (((dst_info & MAY_BE_ANY) != (1<<Z_TYPE_P(zv))) || (dst_info & (MAY_BE_STRING|MAY_BE_ARRAY)) != 0) {
+||		if (((dst_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1<<Z_TYPE_P(zv))) || (dst_info & (MAY_BE_STRING|MAY_BE_ARRAY)) != 0) {
 |			SET_ZVAL_TYPE_INFO dst_addr, Z_TYPE_INFO_P(zv)
 ||		}
 ||	}
@@ -968,7 +968,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||		}
 ||	}
 ||	if (Z_MODE(dst_addr) == IS_MEM_ZVAL) {
-||		if (((dst_info & MAY_BE_ANY) != (1<<Z_TYPE_P(zv))) || (dst_info & (MAY_BE_STRING|MAY_BE_ARRAY)) != 0) {
+||		if (((dst_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1<<Z_TYPE_P(zv))) || (dst_info & (MAY_BE_STRING|MAY_BE_ARRAY)) != 0) {
 |			SET_ZVAL_TYPE_INFO dst_addr, Z_TYPE_INFO_P(zv)
 ||		}
 ||	}
