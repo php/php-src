@@ -82,6 +82,7 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_IS_NOT_IDENTICAL:
 		case ZEND_QM_ASSIGN:
 		case ZEND_FREE:
+		case ZEND_FE_FREE:
 		case ZEND_TYPE_CHECK:
 		case ZEND_DEFINED:
 		case ZEND_ADD:
@@ -246,6 +247,11 @@ static inline zend_bool may_have_side_effects(
 			return 0;
 		case ZEND_CHECK_VAR:
 			return (OP1_INFO() & MAY_BE_UNDEF) != 0;
+		case ZEND_FE_RESET_R:
+		case ZEND_FE_RESET_RW:
+			/* Model as not having side-effects -- let the side-effect be introduced by
+			 * FE_FETCH if the array is not known to be non-empty. */
+			return (OP1_INFO() & MAY_BE_ANY) != MAY_BE_ARRAY;
 		default:
 			/* For everything we didn't handle, assume a side-effect */
 			return 1;
@@ -373,6 +379,21 @@ static zend_bool try_remove_var_def(context *ctx, int free_var, int use_chain, z
 	return 0;
 }
 
+static inline zend_bool is_free_of_live_var(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
+	switch (opline->opcode) {
+		case ZEND_FREE:
+			/* It is always safe to remove FREEs of non-refcounted values, even if they are live. */
+			if (!(ctx->ssa->var_info[ssa_op->op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+				return 0;
+			}
+			/* break missing intentionally */
+		case ZEND_FE_FREE:
+			return !is_var_dead(ctx, ssa_op->op1_use);
+		default:
+			return 0;
+	}
+}
+
 /* Returns whether the instruction has been DCEd */
 static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	zend_ssa *ssa = ctx->ssa;
@@ -384,9 +405,7 @@ static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	}
 
 	/* We mark FREEs as dead, but they're only really dead if the destroyed var is dead */
-	if (opline->opcode == ZEND_FREE
-			&& (ssa->var_info[ssa_op->op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))
-			&& !is_var_dead(ctx, ssa_op->op1_use)) {
+	if (is_free_of_live_var(ctx, opline, ssa_op)) {
 		return 0;
 	}
 
