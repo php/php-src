@@ -4559,7 +4559,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 				|	jnz >4
 			}
 			|	mov aword T1, r0 // save
-			if (!zend_jit_simple_assign(Dst, opline, op_array, ssa, var_addr, var_def_info, var_info, val_type, val, val_addr, val_info, res_addr, in_cold)) {
+			if (!zend_jit_simple_assign(Dst, opline, op_array, ssa, var_addr, var_info, var_def_info, val_type, val, val_addr, val_info, res_addr, in_cold)) {
 				return 0;
 			}
 			|	mov FCARG1a, aword T1 // restore
