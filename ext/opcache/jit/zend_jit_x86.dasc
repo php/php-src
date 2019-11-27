@@ -6835,6 +6835,14 @@ static int zend_jit_assign(dasm_State **Dst, const zend_op *opline, const zend_o
 	if (!zend_jit_assign_to_variable(Dst, opline, op_array, ssa, op1_addr, op1_info, op1_def_info, opline->op2_type, opline->op2, op2_addr, op2_info, res_addr)) {
 		return 0;
 	}
+	if (ra && !zend_jit_store_ssa_var_if_necessary(Dst, ssa, ra, op1_addr, ssa->ops[opline - op_array->opcodes].op1_def, ssa->ops[opline - op_array->opcodes].op1_use)) {
+		return 0;
+	}
+	if (opline->result_type != IS_UNUSED) {
+		if (ra && !zend_jit_store_ssa_var_if_necessary(Dst, ssa, ra, res_addr, ssa->ops[opline - op_array->opcodes].result_def, ssa->ops[opline - op_array->opcodes].result_use)) {
+			return 0;
+		}
+	}
 
 	if (zend_may_throw(opline, op_array, ssa)) {
 		zend_jit_check_exception(Dst);
