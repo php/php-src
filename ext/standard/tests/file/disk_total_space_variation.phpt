@@ -1,5 +1,7 @@
 --TEST--
 Testing disk_total_space() functions : Usage Variations.
+--CONFLICTS--
+disk_total_space
 --FILE--
 <?php
 /*
