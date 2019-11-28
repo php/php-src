@@ -10082,7 +10082,7 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op_array *op_array, ze
 		case ZEND_SUB:
 		case ZEND_MUL:
 			op1_info = OP1_INFO();
-			op2_info = OP1_INFO();
+			op2_info = OP2_INFO();
 			if (!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE)))) {
 
@@ -10132,7 +10132,7 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op_array *op_array, ze
 		case ZEND_BW_AND:
 		case ZEND_BW_XOR:
 			op1_info = OP1_INFO();
-			op2_info = OP1_INFO();
+			op2_info = OP2_INFO();
 			if (!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG)) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG))) {
 				regset = ZEND_REGSET_EMPTY;
@@ -10145,7 +10145,7 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op_array *op_array, ze
 		case ZEND_SL:
 		case ZEND_SR:
 			op1_info = OP1_INFO();
-			op2_info = OP1_INFO();
+			op2_info = OP2_INFO();
 			if (!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG)) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG))) {
 				regset = ZEND_REGSET_EMPTY;
@@ -10160,7 +10160,7 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op_array *op_array, ze
 			break;
 		case ZEND_MOD:
 			op1_info = OP1_INFO();
-			op2_info = OP1_INFO();
+			op2_info = OP2_INFO();
 			if (!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG)) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG))) {
 				regset = ZEND_REGSET_EMPTY;
@@ -10185,7 +10185,7 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op_array *op_array, ze
 		case ZEND_IS_NOT_IDENTICAL:
 		case ZEND_CASE:
 			op1_info = OP1_INFO();
-			op2_info = OP1_INFO();
+			op2_info = OP2_INFO();
 			if (!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE))) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-(MAY_BE_LONG|MAY_BE_DOUBLE)))) {
 				regset = ZEND_REGSET_EMPTY;
