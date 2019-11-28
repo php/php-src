@@ -6830,11 +6830,6 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 				new_name = zend_string_copy(old_name);
 
 				if (!current_ns) {
-					if (type == T_CLASS && zend_string_equals_literal(new_name, "strict")) {
-						zend_error_noreturn(E_COMPILE_ERROR,
-							"You seem to be trying to use a different language...");
-					}
-
 					zend_error(E_WARNING, "The use statement with non-compound name '%s' "
 						"has no effect", ZSTR_VAL(new_name));
 				}
