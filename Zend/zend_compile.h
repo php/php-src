@@ -113,6 +113,7 @@ typedef struct _zend_file_context {
 	HashTable *imports;
 	HashTable *imports_function;
 	HashTable *imports_const;
+	zend_bool function_and_const_lookup;
 
 	HashTable seen_symbols;
 } zend_file_context;
