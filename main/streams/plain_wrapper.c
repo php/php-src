@@ -254,6 +254,9 @@ static void detect_is_pipe(php_stdio_stream_data *self) {
 		DWORD file_type = GetFileType((HANDLE)handle);
 
 		self->is_pipe = file_type == FILE_TYPE_PIPE || file_type == FILE_TYPE_CHAR;
+		if (file_type == FILE_TYPE_CHAR) {
+			self->is_pipe_blocking = 1;
+		}
 	}
 #endif
 }
