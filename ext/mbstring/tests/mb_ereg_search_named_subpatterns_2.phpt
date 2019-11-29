@@ -4,6 +4,7 @@ Testing mb_ereg_search() named capture groups
 <?php
 if (!extension_loaded('mbstring')) die('skip mbstring not enabled');
 function_exists('mb_ereg_search') or die("skip mb_ereg_search() is not available in this build");
+version_compare(MB_ONIGURUMA_VERSION, '6.9.4', '>=') or die("skip requires oniguruma >= 6.9.4");
 ?>
 --FILE--
 <?php
@@ -22,10 +23,10 @@ array(7) {
   string(6) "中国"
   [3]=>
   string(3) "？"
-  ["punct"]=>
-  string(3) "？"
   ["wsp"]=>
   string(2) "  "
   ["word"]=>
   string(6) "中国"
+  ["punct"]=>
+  string(3) "？"
 }
