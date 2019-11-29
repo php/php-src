@@ -1,7 +1,11 @@
 --TEST--
 Test oniguruma stack limit
 --SKIPIF--
-<?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
+<?php
+extension_loaded('mbstring') or die('skip mbstring not available');
+extension_loaded('iconv') or die('skip iconv not available');
+if (!function_exists('mb_ereg_replace')) die('skip mb_ereg_replace not available');
+?>
 --FILE--
 <?php
 function mb_trim( $string, $chars = "", $chars_array = array() )
