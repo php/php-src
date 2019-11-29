@@ -207,6 +207,9 @@ typedef uintptr_t zend_jit_addr;
 #define _ZEND_ADDR_REG_SHIFT     2
 #define _ZEND_ADDR_REG_MASK      0x3f
 #define _ZEND_ADDR_OFFSET_SHIFT  8
+#define _ZEND_ADDR_REG_STORE_BIT 8
+#define _ZEND_ADDR_REG_LOAD_BIT  9
+#define _ZEND_ADDR_REG_LAST_USE_BIT  10
 
 #define ZEND_ADDR_CONST_ZVAL(zv) \
 	(((zend_jit_addr)(uintptr_t)(zv)) | IS_CONST_ZVAL)
@@ -222,8 +225,26 @@ typedef uintptr_t zend_jit_addr;
 #define Z_ZV(addr)       ((zval*)(addr))
 #define Z_OFFSET(addr)   ((uint32_t)((addr)>>_ZEND_ADDR_OFFSET_SHIFT))
 #define Z_REG(addr)      ((zend_reg)(((addr)>>_ZEND_ADDR_REG_SHIFT) & _ZEND_ADDR_REG_MASK))
+#define Z_STORE(addr)    ((zend_reg)(((addr)>>_ZEND_ADDR_REG_STORE_BIT) & 1))
+#define Z_LOAD(addr)     ((zend_reg)(((addr)>>_ZEND_ADDR_REG_LOAD_BIT) & 1))
+#define Z_LAST_USE(addr) ((zend_reg)(((addr)>>_ZEND_ADDR_REG_LAST_USE_BIT) & 1))
 
-static zend_always_inline zend_jit_addr zend_jit_decode_op(const zend_op_array *op_array, zend_uchar op_type, znode_op op, const zend_op *opline, zend_lifetime_interval **ra, int ssa_var)
+#define OP_REG_EX(reg, store, load, last_use) \
+	((reg) | \
+	 ((store) ? (1 << (_ZEND_ADDR_REG_STORE_BIT-_ZEND_ADDR_REG_SHIFT)) : 0) | \
+	 ((load) ? (1 << (_ZEND_ADDR_REG_LOAD_BIT-_ZEND_ADDR_REG_SHIFT)) : 0) | \
+	 ((last_use) ? (1 << (_ZEND_ADDR_REG_LAST_USE_BIT-_ZEND_ADDR_REG_SHIFT)) : 0) \
+	)
+
+#define OP_REG(line, op) \
+	(ra && ssa->ops[line].op >= 0 && ra[ssa->ops[line].op] ? \
+		OP_REG_EX(ra[ssa->ops[line].op]->reg, \
+			ra[ssa->ops[line].op]->store, \
+			ra[ssa->ops[line].op]->load, \
+			zend_ssa_is_last_use(op_array, ssa, ssa->ops[line].op, line) \
+		) : ZREG_NONE)
+
+static zend_always_inline zend_jit_addr _zend_jit_decode_op(zend_uchar op_type, znode_op op, const zend_op *opline, zend_reg reg)
 {
 	if (op_type == IS_CONST) {
 #if ZEND_USE_ABS_CONST_ADDR
@@ -232,25 +253,57 @@ static zend_always_inline zend_jit_addr zend_jit_decode_op(const zend_op_array *
 		return ZEND_ADDR_CONST_ZVAL(RT_CONSTANT(opline, op));
 #endif
 	} else {
-		if (ra && ssa_var >= 0 && ra[ssa_var]) {
-			zend_lifetime_interval *ival = ra[ssa_var];
-			zend_life_range *range = &ival->range;
-			uint32_t line = opline - op_array->opcodes;
-
-			do {
-				if (line >= range->start && line <= range->end) {
-					return ZEND_ADDR_REG(ival->reg);
-				}
-				range = range->next;
-			} while (range);
+		ZEND_ASSERT(op_type & (IS_CV|IS_TMP_VAR|IS_VAR));
+		if (reg != ZREG_NONE) {
+			return ZEND_ADDR_REG(reg);
+		} else {
+			return ZEND_ADDR_MEM_ZVAL(ZREG_FP, op.var);
 		}
-		return ZEND_ADDR_MEM_ZVAL(ZREG_FP, op.var);
 	}
 }
 
+#define OP_ADDR(opline, type, op) \
+	_zend_jit_decode_op((opline)->type, (opline)->op, opline, ZREG_NONE)
+
+#define OP1_ADDR() \
+	OP_ADDR(opline, op1_type, op1)
+#define OP2_ADDR() \
+	OP_ADDR(opline, op2_type, op2)
+#define RES_ADDR() \
+	OP_ADDR(opline, op2_type, op2)
+#define OP1_DATA_ADDR() \
+	OP_ADDR(opline + 1, op1_type, op1)
+
+#define OP_REG_ADDR(opline, type, op, ssa_op) \
+	_zend_jit_decode_op((opline)->type, (opline)->op, opline, \
+		OP_REG((opline) - op_array->opcodes, ssa_op))
+
+#define OP1_REG_ADDR() \
+	OP_REG_ADDR(opline, op1_type, op1, op1_use)
+#define OP2_REG_ADDR() \
+	OP_REG_ADDR(opline, op2_type, op2, op2_use)
+#define RES_REG_ADDR() \
+	OP_REG_ADDR(opline, result_type, result, result_def)
+#define OP1_DATA_REG_ADDR() \
+	OP_REG_ADDR(opline + 1, op1_type, op1, op1_use)
+
+#define OP1_DEF_REG_ADDR() \
+	OP_REG_ADDR(opline, op1_type, op1, op1_def)
+#define OP2_DEF_REG_ADDR() \
+	OP_REG_ADDR(opline, op2_type, op2, op2_def)
+#define RES_USE_REG_ADDR() \
+	OP_REG_ADDR(opline, result_type, result, result_use)
+#define OP1_DATA_DEF_REG_ADDR() \
+	OP_REG_ADDR(opline + 1, op1_type, op1, op1_def)
+
 static zend_always_inline zend_bool zend_jit_same_addr(zend_jit_addr addr1, zend_jit_addr addr2)
 {
-	return (addr1 == addr2);
+	if (addr1 == addr2) {
+		return 1;
+	} else if (Z_MODE(addr1) == IS_REG && Z_MODE(addr2) == IS_REG) {
+		return Z_REG(addr1) == Z_REG(addr2);
+	}
+	return 0;
 }
 
 #endif /* ZEND_JIT_X86_H */

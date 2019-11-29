@@ -133,6 +133,18 @@ static zend_bool zend_long_is_power_of_two(zend_long x)
 	return (x > 0) && !(x & (x - 1));
 }
 
+#define OP_RANGE(line, opN) \
+	(((opline->opN##_type & (IS_TMP_VAR|IS_VAR|IS_CV)) && \
+	  ssa->ops && \
+	  ssa->var_info && \
+	  ssa->ops[line].opN##_use >= 0 && \
+	  ssa->var_info[ssa->ops[line].opN##_use].has_range) ? \
+	 &ssa->var_info[ssa->ops[line].opN##_use].range : NULL)
+
+#define OP1_RANGE()      OP_RANGE(opline - op_array->opcodes, op1)
+#define OP2_RANGE()      OP_RANGE(opline - op_array->opcodes, op2)
+#define OP1_DATA_RANGE() OP_RANGE(opline - op_array->opcodes + 1, op1)
+
 #include "dynasm/dasm_x86.h"
 #include "jit/zend_jit_x86.h"
 #include "jit/zend_jit_helpers.c"
@@ -243,7 +255,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 						range = &ival->range;
 
 						if (pos >= range->start && pos <= range->end) {
-							if (!zend_jit_load_ssa_var(dasm_state, ssa, i, ival->reg)) {
+							if (!zend_jit_load_var(dasm_state, ssa->var_info[i].type, ssa->vars[i].var, ival->reg)) {
 								return NULL;
 							}
 							break;
@@ -1910,6 +1922,12 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 	zend_lifetime_interval **ra = NULL;
 	zend_bool is_terminated = 1; /* previous basic block is terminated by jump */
 	zend_bool recv_emitted = 0;   /* emitted at least one RECV opcode */
+	zend_uchar smart_branch_opcode;
+	uint32_t target_label, target_label2;
+	uint32_t op1_info, op1_def_info, op2_info, res_info, res_use_info;
+	zend_bool send_result;
+	zend_jit_addr op1_addr, op1_def_addr, op2_addr, op2_def_addr, res_addr;
+	zend_class_entry *ce;
 
 	if (ZCG(accel_directives).jit_bisect_limit) {
 		jit_bisect_pos++;
@@ -2096,13 +2114,13 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					if (ival->load) {
 						ZEND_ASSERT(ival->reg != ZREG_NONE);
 
-						if (!zend_jit_load_ssa_var(&dasm_state, ssa, phi->ssa_var, ival->reg)) {
+						if (!zend_jit_load_var(&dasm_state, ssa->var_info[phi->ssa_var].type, ssa->vars[phi->ssa_var].var, ival->reg)) {
 							goto jit_failure;
 						}
 					} else if (ival->store) {
 						ZEND_ASSERT(ival->reg != ZREG_NONE);
 
-						if (!zend_jit_store_ssa_var(&dasm_state, ssa, phi->ssa_var, ival->reg)) {
+						if (!zend_jit_store_var(&dasm_state, ssa->var_info[phi->ssa_var].type, ssa->vars[phi->ssa_var].var, ival->reg)) {
 							goto jit_failure;
 						}
 					}
@@ -2131,7 +2149,29 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					case ZEND_PRE_DEC:
 					case ZEND_POST_INC:
 					case ZEND_POST_DEC:
-						if (!zend_jit_inc_dec(&dasm_state, opline, op_array, ssa, ra)) {
+						if (opline->op1_type != IS_CV) {
+							break;
+						}
+						op1_info = OP1_INFO();
+						if (!(op1_info & MAY_BE_LONG)) {
+							break;
+						}
+						if (opline->result_type != IS_UNUSED) {
+							res_use_info = RES_USE_INFO();
+							res_info = RES_INFO();
+							res_addr = RES_REG_ADDR();
+						} else {
+							res_use_info = -1;
+							res_info = -1;
+							res_addr = 0;
+						}
+						op1_def_info = OP1_DEF_INFO();
+						if (!zend_jit_inc_dec(&dasm_state, opline, op_array,
+								op1_info, OP1_REG_ADDR(),
+								op1_def_info, OP1_DEF_REG_ADDR(),
+								res_use_info, res_info,
+								res_addr,
+								(op1_def_info & MAY_BE_LONG) && (op1_def_info & MAY_BE_DOUBLE) && zend_may_overflow(opline, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2141,7 +2181,38 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					case ZEND_SL:
 					case ZEND_SR:
 					case ZEND_MOD:
-						if (!zend_jit_long_math(&dasm_state, opline, &i, op_array, ssa, ra)) {
+						if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
+							break;
+						}
+						op1_info = OP1_INFO();
+						op2_info = OP2_INFO();
+						if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
+							break;
+						}
+						if (!(op1_info & MAY_BE_LONG)
+						 || !(op2_info & MAY_BE_LONG)) {
+							break;
+						}
+						if (opline->result_type == IS_TMP_VAR
+						 && (i + 1) <= end
+						 && (opline+1)->opcode == ZEND_SEND_VAL
+						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op1.var == opline->result.var) {
+							i++;
+							send_result = 1;
+							res_use_info = -1;
+							res_addr = 0; /* set inside backend */
+						} else {
+							send_result = 0;
+							res_use_info = RES_USE_INFO();
+							res_addr = RES_REG_ADDR();
+						}
+						if (!zend_jit_long_math(&dasm_state, opline, op_array,
+								op1_info, OP1_RANGE(), OP1_REG_ADDR(),
+								op2_info, OP2_RANGE(), OP2_REG_ADDR(),
+								res_use_info, RES_INFO(), res_addr,
+								send_result,
+								zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2149,39 +2220,198 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					case ZEND_SUB:
 					case ZEND_MUL:
 //					case ZEND_DIV: // TODO: check for division by zero ???
-						if (!zend_jit_math(&dasm_state, opline, &i, op_array, ssa, ra)) {
+						if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
+							break;
+						}
+						op1_info = OP1_INFO();
+						op2_info = OP2_INFO();
+						if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
+							break;
+						}
+						if (!(op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE)) ||
+						    !(op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+							break;
+						}
+						if (opline->result_type == IS_TMP_VAR
+						 && (i + 1) <= end
+						 && (opline+1)->opcode == ZEND_SEND_VAL
+						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op1.var == opline->result.var) {
+							i++;
+							send_result = 1;
+							res_use_info = -1;
+							res_addr = 0; /* set inside backend */
+						} else {
+							send_result = 0;
+							res_use_info = RES_USE_INFO();
+							res_addr = RES_REG_ADDR();
+						}
+						res_info = RES_INFO();
+						if (!zend_jit_math(&dasm_state, opline, op_array,
+								op1_info, OP1_REG_ADDR(),
+								op2_info, OP2_REG_ADDR(),
+								res_use_info, res_info, res_addr,
+								send_result,
+								(res_info & MAY_BE_LONG) && (res_info & MAY_BE_DOUBLE) && zend_may_overflow(opline, op_array, ssa),
+								zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_CONCAT:
 					case ZEND_FAST_CONCAT:
-						if (!zend_jit_concat(&dasm_state, opline, &i, op_array, ssa)) {
+						if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
+							break;
+						}
+						op1_info = OP1_INFO();
+						op2_info = OP2_INFO();
+						if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
+							break;
+						}
+						if (!(op1_info & MAY_BE_STRING) ||
+						    !(op2_info & MAY_BE_STRING)) {
+							break;
+						}
+						if (opline->result_type == IS_TMP_VAR
+						 && (i + 1) <= end
+						 && (opline+1)->opcode == ZEND_SEND_VAL
+						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op1.var == opline->result.var) {
+							i++;
+							send_result = 1;
+						} else {
+							send_result = 0;
+						}
+						if (!zend_jit_concat(&dasm_state, opline, op_array,
+								op1_info, op2_info, RES_INFO(), send_result,
+								zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_ASSIGN_OP:
-					case ZEND_ASSIGN_DIM_OP:
-						if (opline->extended_value != ZEND_POW
-						 && opline->extended_value != ZEND_DIV) {
+						if (opline->extended_value == ZEND_POW
+						 || opline->extended_value == ZEND_DIV) {
 							// TODO: check for division by zero ???
-							if (!zend_jit_assign_op(&dasm_state, opline, op_array, ssa)) {
-								goto jit_failure;
-							}
-							goto done;
+							break;
 						}
-						break;
+						if (opline->op1_type != IS_CV || opline->result_type != IS_UNUSED) {
+							break;
+						}
+						if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
+							break;
+						}
+						op1_info = OP1_INFO();
+						op2_info = OP2_INFO();
+						if ((op1_info & MAY_BE_UNDEF) || (op2_info & MAY_BE_UNDEF)) {
+							break;
+						}
+						if (opline->extended_value == ZEND_ADD
+						 || opline->extended_value == ZEND_SUB
+						 || opline->extended_value == ZEND_MUL
+						 || opline->extended_value == ZEND_DIV) {
+							if (!(op1_info & (MAY_BE_LONG|MAY_BE_DOUBLE))
+							 || !(op2_info & (MAY_BE_LONG|MAY_BE_DOUBLE))) {
+								break;
+							}
+						} else if (opline->extended_value == ZEND_BW_OR
+						 || opline->extended_value == ZEND_BW_AND
+						 || opline->extended_value == ZEND_BW_XOR
+						 || opline->extended_value == ZEND_SL
+						 || opline->extended_value == ZEND_SR
+						 || opline->extended_value == ZEND_MOD) {
+							if (!(op1_info & MAY_BE_LONG)
+							 || !(op2_info & MAY_BE_LONG)) {
+								break;
+							}
+						} else if (opline->extended_value == ZEND_CONCAT) {
+							if (!(op1_info & MAY_BE_STRING)
+							 || !(op2_info & MAY_BE_STRING)) {
+								break;
+							}
+						}
+						op1_def_info = OP1_DEF_INFO();
+						if (!zend_jit_assign_op(&dasm_state, opline, op_array,
+								op1_info, op1_def_info, OP1_RANGE(),
+								op2_info, OP2_RANGE(),
+								(op1_def_info & MAY_BE_LONG) && (op1_def_info & MAY_BE_DOUBLE) && zend_may_overflow(opline, op_array, ssa),
+								zend_may_throw(opline, op_array, ssa))) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_ASSIGN_DIM_OP:
+						if (opline->extended_value == ZEND_POW
+						 || opline->extended_value == ZEND_DIV) {
+							// TODO: check for division by zero ???
+							break;
+						}
+						if (opline->op1_type != IS_CV || opline->result_type != IS_UNUSED) {
+							break;
+						}
+						if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
+							break;
+						}
+						if (!zend_jit_assign_dim_op(&dasm_state, opline, op_array,
+								OP1_INFO(), OP1_DEF_INFO(), OP2_INFO(),
+								OP1_DATA_INFO(), OP1_DATA_RANGE(),
+								zend_may_throw(opline, op_array, ssa))) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_ASSIGN_DIM:
-						if (!zend_jit_assign_dim(&dasm_state, opline, op_array, ssa)) {
+						if (opline->op1_type != IS_CV) {
+							break;
+						}
+						if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
+							break;
+						}
+						if (!zend_jit_assign_dim(&dasm_state, opline, op_array,
+								OP1_INFO(), OP2_INFO(), OP1_DATA_INFO(),
+								zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_ASSIGN:
-						if (!zend_jit_assign(&dasm_state, opline, op_array, ssa, ra)) {
+						if (opline->op1_type != IS_CV) {
+							break;
+						}
+						if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
+							break;
+						}
+						if (opline->result_type == IS_UNUSED) {
+							res_addr = 0;
+							res_info = -1;
+						} else {
+							res_addr = RES_REG_ADDR();
+							res_info = RES_INFO();
+						}
+						op2_addr = OP2_REG_ADDR();
+						if (ra
+						 && ssa->ops[opline - op_array->opcodes].op2_def >= 0
+						 && !ssa->vars[ssa->ops[opline - op_array->opcodes].op2_def].no_val) {
+							op2_def_addr = OP2_DEF_REG_ADDR();
+						} else {
+							op2_def_addr = op2_addr;
+						}
+						if (!zend_jit_assign(&dasm_state, opline, op_array,
+								OP1_INFO(), OP1_REG_ADDR(),
+								OP1_DEF_INFO(), OP1_DEF_REG_ADDR(),
+								OP2_INFO(), op2_addr, op2_def_addr,
+								res_info, res_addr,
+								zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_QM_ASSIGN:
-						if (!zend_jit_qm_assign(&dasm_state, opline, op_array, ssa, ra)) {
+						op1_addr = OP1_REG_ADDR();
+						if (ra
+						 && ssa->ops[opline - op_array->opcodes].op1_def >= 0
+						 && !ssa->vars[ssa->ops[opline - op_array->opcodes].op1_def].no_val) {
+							op1_def_addr = OP1_DEF_REG_ADDR();
+						} else {
+							op1_def_addr = op1_addr;
+						}
+						if (!zend_jit_qm_assign(&dasm_state, opline, op_array,
+								OP1_INFO(), op1_addr, op1_def_addr,
+								RES_INFO(), RES_REG_ADDR())) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2193,12 +2423,18 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						goto done;
 					case ZEND_SEND_VAL:
 					case ZEND_SEND_VAL_EX:
-						if (!zend_jit_send_val(&dasm_state, opline, op_array, ssa, ra)) {
+						if (opline->opcode == ZEND_SEND_VAL_EX
+						 && opline->op2.num > MAX_ARG_FLAG_NUM) {
+							break;
+						}
+						if (!zend_jit_send_val(&dasm_state, opline, op_array,
+								OP1_INFO(), OP1_REG_ADDR())) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_SEND_REF:
-						if (!zend_jit_send_ref(&dasm_state, opline, op_array, ssa, 0)) {
+						if (!zend_jit_send_ref(&dasm_state, opline, op_array,
+								OP1_INFO(), 0)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2206,7 +2442,21 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					case ZEND_SEND_VAR_EX:
 					case ZEND_SEND_VAR_NO_REF:
 					case ZEND_SEND_VAR_NO_REF_EX:
-						if (!zend_jit_send_var(&dasm_state, opline, op_array, ssa, ra)) {
+						if ((opline->opcode == ZEND_SEND_VAR_EX
+						  || opline->opcode == ZEND_SEND_VAR_NO_REF_EX)
+						 && opline->op2.num > MAX_ARG_FLAG_NUM) {
+							break;
+						}
+						op1_addr = OP1_REG_ADDR();
+						if (ra
+						 && ssa->ops[opline - op_array->opcodes].op1_def >= 0
+						 && !ssa->vars[ssa->ops[opline - op_array->opcodes].op1_def].no_val) {
+							op1_def_addr = OP1_DEF_REG_ADDR();
+						} else {
+							op1_def_addr = op1_addr;
+						}
+						if (!zend_jit_send_var(&dasm_state, opline, op_array,
+								OP1_INFO(), op1_addr, op1_def_addr)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2225,34 +2475,124 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					case ZEND_IS_SMALLER:
 					case ZEND_IS_SMALLER_OR_EQUAL:
 					case ZEND_CASE:
-						if (!zend_jit_cmp(&dasm_state, opline, b, &i, op_array, ssa, ra)) {
+						if ((opline->result_type & IS_TMP_VAR)
+						 && (i + 1) <= end
+						 && ((opline+1)->opcode == ZEND_JMPZ
+						  || (opline+1)->opcode == ZEND_JMPNZ
+						  || (opline+1)->opcode == ZEND_JMPZ_EX
+						  || (opline+1)->opcode == ZEND_JMPNZ_EX
+						  || (opline+1)->opcode == ZEND_JMPZNZ)
+						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op1.var == opline->result.var) {
+							i++;
+							smart_branch_opcode = (opline+1)->opcode;
+							target_label = ssa->cfg.blocks[b].successors[0];
+							target_label2 = ssa->cfg.blocks[b].successors[1];
+						} else {
+							smart_branch_opcode = 0;
+							target_label = target_label2 = (uint32_t)-1;
+						}
+						if (!zend_jit_cmp(&dasm_state, opline, op_array,
+								OP1_INFO(), OP1_REG_ADDR(),
+								OP2_INFO(), OP2_REG_ADDR(),
+								RES_REG_ADDR(),
+								zend_may_throw(opline, op_array, ssa),
+								smart_branch_opcode, target_label, target_label2)) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_IS_IDENTICAL:
 					case ZEND_IS_NOT_IDENTICAL:
-						if (!zend_jit_identical(&dasm_state, opline, b, &i, op_array, ssa, ra)) {
+						if ((opline->result_type & IS_TMP_VAR)
+						 && (i + 1) <= end
+						 && ((opline+1)->opcode == ZEND_JMPZ
+						  || (opline+1)->opcode == ZEND_JMPNZ
+						  || (opline+1)->opcode == ZEND_JMPZNZ)
+						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op1.var == opline->result.var) {
+							i++;
+							smart_branch_opcode = (opline+1)->opcode;
+							target_label = ssa->cfg.blocks[b].successors[0];
+							target_label2 = ssa->cfg.blocks[b].successors[1];
+						} else {
+							smart_branch_opcode = 0;
+							target_label = target_label2 = (uint32_t)-1;
+						}
+						if (!zend_jit_identical(&dasm_state, opline, op_array,
+								OP1_INFO(), OP1_REG_ADDR(),
+								OP2_INFO(), OP2_REG_ADDR(),
+								RES_REG_ADDR(),
+								zend_may_throw(opline, op_array, ssa),
+								smart_branch_opcode, target_label, target_label2)) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_DEFINED:
-						if (!zend_jit_defined(&dasm_state, opline, b, &i, op_array, ssa)) {
+						if ((opline->result_type & IS_TMP_VAR)
+						 && (i + 1) <= end
+						 && ((opline+1)->opcode == ZEND_JMPZ
+						  || (opline+1)->opcode == ZEND_JMPNZ
+						  || (opline+1)->opcode == ZEND_JMPZNZ)
+						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op1.var == opline->result.var) {
+							i++;
+							smart_branch_opcode = (opline+1)->opcode;
+							target_label = ssa->cfg.blocks[b].successors[0];
+							target_label2 = ssa->cfg.blocks[b].successors[1];
+						} else {
+							smart_branch_opcode = 0;
+							target_label = target_label2 = (uint32_t)-1;
+						}
+						if (!zend_jit_defined(&dasm_state, opline, op_array, smart_branch_opcode, target_label, target_label2)) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_TYPE_CHECK:
-						if (!zend_jit_type_check(&dasm_state, opline, b, &i, op_array, ssa)) {
+						if (opline->extended_value == MAY_BE_RESOURCE) {
+							// TODO: support for is_resource() ???
+							break;
+						}
+						if ((opline->result_type & IS_TMP_VAR)
+						 && (i + 1) <= end
+						 && ((opline+1)->opcode == ZEND_JMPZ
+						  || (opline+1)->opcode == ZEND_JMPNZ
+						  || (opline+1)->opcode == ZEND_JMPZNZ)
+						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op1.var == opline->result.var) {
+							i++;
+							smart_branch_opcode = (opline+1)->opcode;
+							target_label = ssa->cfg.blocks[b].successors[0];
+							target_label2 = ssa->cfg.blocks[b].successors[1];
+						} else {
+							smart_branch_opcode = 0;
+							target_label = target_label2 = (uint32_t)-1;
+						}
+						if (!zend_jit_type_check(&dasm_state, opline, op_array, OP1_INFO(), smart_branch_opcode, target_label, target_label2)) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_RETURN:
-						if (!zend_jit_return(&dasm_state, opline, op_array, ssa, ra)) {
+						op1_info = OP1_INFO();
+						if ((PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info))
+						 || op_array->type == ZEND_EVAL_CODE
+						 // TODO: support for top-level code
+						 || !op_array->function_name
+						 // TODO: support for IS_UNDEF ???
+						 || (op1_info & MAY_BE_UNDEF)) {
+							if (!zend_jit_tail_handler(&dasm_state, opline)) {
+								goto jit_failure;
+							}
+						} else if (!zend_jit_return(&dasm_state, opline, op_array, ssa,
+								op1_info, OP1_REG_ADDR())) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_BOOL:
 					case ZEND_BOOL_NOT:
-						if (!zend_jit_bool_jmpznz(&dasm_state, opline, b, op_array, ssa, ra)) {
+						if (!zend_jit_bool_jmpznz(&dasm_state, opline, op_array,
+								OP1_INFO(), OP1_REG_ADDR(), RES_REG_ADDR(),
+								-1, -1,
+								zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2270,50 +2610,126 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					case ZEND_JMPZNZ:
 					case ZEND_JMPZ_EX:
 					case ZEND_JMPNZ_EX:
-						if (!zend_jit_bool_jmpznz(&dasm_state, opline, b, op_array, ssa, ra)) {
+						if (opline->result_type == IS_UNDEF) {
+							res_addr = 0;
+						} else {
+							res_addr = RES_REG_ADDR();
+						}
+						if (!zend_jit_bool_jmpznz(&dasm_state, opline, op_array,
+								OP1_INFO(), OP1_REG_ADDR(), res_addr,
+								ssa->cfg.blocks[b].successors[0], ssa->cfg.blocks[b].successors[1],
+								zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_FETCH_DIM_R:
 					case ZEND_FETCH_DIM_IS:
-						if (!zend_jit_fetch_dim_read(&dasm_state, opline, op_array, ssa)) {
+						if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
+							break;
+						}
+						if (!zend_jit_fetch_dim_read(&dasm_state, opline, op_array,
+								OP1_INFO(), OP2_INFO(), RES_INFO(),
+								zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_ISSET_ISEMPTY_DIM_OBJ:
-						if (!zend_jit_isset_isempty_dim(&dasm_state, opline, b, &i, op_array, ssa)) {
+						if ((opline->extended_value & ZEND_ISEMPTY)) {
+							// TODO: support for empty() ???
+							break;
+						}
+						if (PROFITABILITY_CHECKS && (!ssa->ops || !ssa->var_info)) {
+							break;
+						}
+						if ((opline->result_type & IS_TMP_VAR)
+						 && (i + 1) <= end
+						 && ((opline+1)->opcode == ZEND_JMPZ
+						  || (opline+1)->opcode == ZEND_JMPNZ
+						  || (opline+1)->opcode == ZEND_JMPZNZ)
+						 && (opline+1)->op1_type == IS_TMP_VAR
+						 && (opline+1)->op1.var == opline->result.var) {
+							i++;
+							smart_branch_opcode = (opline+1)->opcode;
+							target_label = ssa->cfg.blocks[b].successors[0];
+							target_label2 = ssa->cfg.blocks[b].successors[1];
+						} else {
+							smart_branch_opcode = 0;
+							target_label = target_label2 = (uint32_t)-1;
+						}
+						if (!zend_jit_isset_isempty_dim(&dasm_state, opline, op_array,
+								OP1_INFO(), OP2_INFO(),
+								zend_may_throw(opline, op_array, ssa),
+								smart_branch_opcode, target_label, target_label2)) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_FETCH_OBJ_R:
 					case ZEND_FETCH_OBJ_IS:
-						if (!zend_jit_fetch_obj_read(&dasm_state, opline, op_array, ssa)) {
+						if (opline->op2_type != IS_CONST
+						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) != IS_STRING
+						 || Z_STRVAL_P(RT_CONSTANT(opline, opline->op2))[0] == '\0') {
+							break;
+						}
+						ce = NULL;
+						if (opline->op1_type == IS_UNUSED) {
+							op1_info = MAY_BE_OBJECT|MAY_BE_RC1|MAY_BE_RCN;
+							ce = op_array->scope;
+						} else {
+							op1_info = OP1_INFO();
+							if (ssa->var_info && ssa->ops) {
+								zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
+								if (ssa_op->op1_use >= 0) {
+									zend_ssa_var_info *op1_ssa = ssa->var_info + ssa_op->op1_use;
+									if (op1_ssa->ce && !op1_ssa->is_instanceof && !op1_ssa->ce->create_object) {
+										ce = op1_ssa->ce;
+									}
+								}
+							}
+						}
+						if (!(op1_info & MAY_BE_OBJECT)) {
+							break;
+						}
+						if (!zend_jit_fetch_obj_read(&dasm_state, opline, op_array,
+								op1_info, ce,
+								zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_BIND_GLOBAL:
-						if (!zend_jit_bind_global(&dasm_state, opline, op_array, ssa)) {
+						if (!ssa->ops || !ssa->var_info) {
+							op1_info = MAY_BE_ANY|MAY_BE_REF;
+						} else {
+							op1_info = OP1_INFO();
+						}
+						if (!zend_jit_bind_global(&dasm_state, opline, op_array, op1_info)) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_RECV:
-						if (!zend_jit_recv(&dasm_state, opline, op_array, ssa)) {
+						if (!zend_jit_recv(&dasm_state, opline, op_array)) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_RECV_INIT:
-						if (!zend_jit_recv_init(&dasm_state, opline, op_array, (opline + 1)->opcode != ZEND_RECV_INIT, ssa)) {
+						if (!zend_jit_recv_init(&dasm_state, opline, op_array,
+								(opline + 1)->opcode != ZEND_RECV_INIT,
+								zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_FREE:
 					case ZEND_FE_FREE:
-						if (!zend_jit_free(&dasm_state, opline, op_array, ssa)) {
+						if (!zend_jit_free(&dasm_state, opline, op_array, OP1_INFO(),
+								zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_ECHO:
-						if (!zend_jit_echo(&dasm_state, opline, op_array, ssa)) {
+						if (opline->op1_type != IS_CONST
+						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op1)) != IS_STRING) {
+							break;
+						}
+						if (!zend_jit_echo(&dasm_state, opline, op_array)) {
 							goto jit_failure;
 						}
 						goto done;
