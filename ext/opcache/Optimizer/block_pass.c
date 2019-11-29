@@ -270,6 +270,13 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						src->result_type = IS_UNUSED;
 						MAKE_NOP(opline);
 						++(*opt_count);
+						if (src->opcode == ZEND_QM_ASSIGN) {
+							if (src->op1_type & (IS_VAR|IS_TMP_VAR)) {
+								src->opcode = ZEND_FREE;
+							} else {
+								MAKE_NOP(src);
+							}
+						}
 					}
 				}
 				break;
