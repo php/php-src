@@ -2,7 +2,7 @@
   regenc.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2019  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -182,7 +182,8 @@ onigenc_get_right_adjust_char_head_with_prev(OnigEncoding enc,
     p += enclen(enc, p);
   }
   else {
-    if (prev) *prev = (const UChar* )NULL; /* Sorry */
+    if (prev)
+      *prev = onigenc_get_prev_char_head(enc, start, p);
   }
   return p;
 }
@@ -207,20 +208,6 @@ onigenc_step_back(OnigEncoding enc, const UChar* start, const UChar* s, int n)
   }
   return (UChar* )s;
 }
-
-#if 0
-extern int
-onigenc_mbc_enc_len_end(OnigEncoding enc, const UChar* p, const UChar* end)
-{
-  int len;
-  int n;
-
-  len = ONIGENC_MBC_ENC_LEN(enc, p);
-  n = (int )(end - p);
-
-  return (n < len ? n : len);
-}
-#endif
 
 extern UChar*
 onigenc_step(OnigEncoding enc, const UChar* p, const UChar* end, int n)
@@ -705,18 +692,6 @@ onigenc_ascii_mbc_case_fold(OnigCaseFoldType flag ARG_UNUSED, const UChar** p,
   return 1; /* return byte length of converted char to lower */
 }
 
-#if 0
-extern int
-onigenc_ascii_is_mbc_ambiguous(OnigCaseFoldType flag,
-                               const UChar** pp, const UChar* end)
-{
-  const UChar* p = *pp;
-
-  (*pp)++;
-  return ONIGENC_IS_ASCII_CODE_CASE_AMBIG(*p);
-}
-#endif
-
 extern int
 onigenc_single_byte_mbc_enc_len(const UChar* p ARG_UNUSED)
 {
@@ -831,41 +806,6 @@ onigenc_mbn_mbc_case_fold(OnigEncoding enc, OnigCaseFoldType flag ARG_UNUSED,
     (*pp) += len;
     return len; /* return byte length of converted to lower char */
   }
-}
-
-#if 0
-extern int
-onigenc_mbn_is_mbc_ambiguous(OnigEncoding enc, OnigCaseFoldType flag,
-                             const UChar** pp, const UChar* end)
-{
-  const UChar* p = *pp;
-
-  if (ONIGENC_IS_MBC_ASCII(p)) {
-    (*pp)++;
-    return ONIGENC_IS_ASCII_CODE_CASE_AMBIG(*p);
-  }
-
-  (*pp) += enclen(enc, p);
-  return FALSE;
-}
-#endif
-
-extern int
-onigenc_mb2_code_to_mbclen(OnigCodePoint code)
-{
-  if ((code & (~0xffff)) != 0) return ONIGERR_INVALID_CODE_POINT_VALUE;
-
-  if ((code & 0xff00) != 0) return 2;
-  else return 1;
-}
-
-extern int
-onigenc_mb4_code_to_mbclen(OnigCodePoint code)
-{
-       if ((code & 0xff000000) != 0) return 4;
-  else if ((code & 0xff0000) != 0) return 3;
-  else if ((code & 0xff00) != 0) return 2;
-  else return 1;
 }
 
 extern int

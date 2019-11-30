@@ -1,4 +1,4 @@
-鬼車インターフェース Version 6.9.3   2019/07/06
+鬼車インターフェース Version 6.9.4   2019/09/30
 
 #include <oniguruma.h>
 
@@ -388,6 +388,138 @@
   5 option: 検索時オプション
   6 scan_callback: コールバック関数
   7 callback_arg:  コールバック関数に渡される付加引数値
+
+
+# int onig_regset_new(OnigRegSet** rset, int n, regex_t* regs[])
+
+  regsetオブジェクトを生成する。
+  全ての正規表現オブジェクトは、同じ文字エンコーディングでなければならない。
+  全ての正規表現オブジェクトは、ONIG_OPTION_FIND_LONGESTオプションでコンパイルされていてはならない。
+
+  引数
+  1 rset: regsetオブジェクトを返すためのアドレス
+  2 n:    正規表現の個数
+  3 regs: 正規表現オブジェクトの配列
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# int onig_regset_add(OnigRegSet* set, regex_t* reg)
+
+  regsetオブジェクトに正規表現を追加する。
+  正規表現オブジェクトは、regsetと同じ文字エンコーディングでなければならない。
+  正規表現オブジェクトは、ONIG_OPTION_FIND_LONGESTオプションでコンパイルされていてはならない。
+
+  引数
+  1 set: regsetオブジェクト
+  2 reg: 正規表現オブジェクト
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# int onig_regset_replace(OnigRegSet* set, int at, regex_t* reg)
+
+  regsetの中の一個の正規表現オブジェクトを別のものに変更する。
+  若しreg引数の値がNULLであれば、at番目の正規表現オブジェクトを外す。(そして、以降の正規表現オブジェクトのインデックスは変化する)
+
+  引数
+  1 set: regsetオブジェクト
+  2 at:  変更する場所のインデックス
+  2 reg: 正規表現オブジェクト
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# void onig_regset_free(OnigRegSet* set)
+
+  regsetオブジェクトとその中の正規表現オブジェクトの使用メモリを開放する。
+  若し、同一の正規表現オブジェクトを重複して登録していれば、破壊的な状況になる。
+
+  引数
+  1 set: regsetオブジェクト
+
+
+# int onig_regset_number_of_regex(OnigRegSet* set)
+
+  regsetの中の正規表現オブジェクトの個数を返す。
+
+  引数
+  1 set: regsetオブジェクト
+
+
+# regex_t* onig_regset_get_regex(OnigRegSet* set, int at)
+
+  regsetのat番目の正規表現を返す。
+
+  引数
+  1 set: regsetオブジェクト
+  2 at:  正規表現オブジェクトのインデックス (ゼロ開始)
+
+
+# OnigRegion* onig_regset_get_region(OnigRegSet* set, int at)
+
+  regsetのat番目の正規表現に対応する領域を返す。
+
+  引数
+  1 set: regsetオブジェクト
+  2 at:  正規表現オブジェクトのインデックス (ゼロ開始)
+
+
+# int onig_regset_search(OnigRegSet* set, const OnigUChar* str, const OnigUChar* end, const OnigUChar* start, const OnigUChar* range, OnigRegSetLead lead, OnigOptionType option, int* rmatch_pos)
+
+  regsetによる検索を実行する。
+
+  戻り値:
+    検索成功: マッチした正規表現オブジェクトのインデックス (ゼロ開始)
+    検索失敗: ONIG_MISMATCH (< 0)
+    エラー:   エラーコード   (< 0)
+
+  引数
+  1 set:    regsetオブジェクト
+  2 str:    検索対象文字列
+  3 end:    検索対象文字列の終端アドレス
+  4 start:  検索対象文字列の検索先頭位置アドレス
+  5 range:  検索対象文字列の検索終了位置アドレス
+            (start <= 探索される文字列 < range)
+  6 lead:   外側のループ要素
+    ONIG_REGSET_POSITION_LEAD   (最左位置でマッチした結果を返す)
+    ONIG_REGSET_REGEX_LEAD      (最左位置でマッチした結果を返す)
+    ONIG_REGSET_PRIORITY_TO_REGEX_ORDER (最初にマッチした正規表現の結果を返す)
+  7 option: 検索時オプション
+    ONIG_OPTION_NOTBOL        文字列の先頭(str)を行頭と看做さない
+    ONIG_OPTION_NOTEOL        文字列の終端(end)を行末と看做さない
+  8 rmatch_pos: マッチした位置を返すためのアドレス (match_address - str)
+
+  * ONIG_REGSET_POSITION_LEADとONIG_REGSET_REGEX_LEADは同じ結果を返す。
+    これらの違いは検索時間にしか現れない。
+    ほとんどの場合、ONIG_REGSET_POSITION_LEADのほうが速いと思われる。
+
+
+# int onig_regset_search_with_param(OnigRegSet* set, const OnigUChar* str, const OnigUChar* end, const OnigUChar* start, const OnigUChar* range,  OnigRegSetLead lead, OnigOptionType option, OnigMatchParam* mps[], int* rmatch_pos)
+
+  regsetとOnigMatchParamオブジェクトによる検索を実行する。
+
+  戻り値:
+    検索成功: マッチした正規表現オブジェクトのインデックス (ゼロ開始)
+    検索失敗: ONIG_MISMATCH (< 0)
+    エラー:   エラーコード   (< 0)
+
+  引数
+  1 set:    regsetオブジェクト
+  2 str:    検索対象文字列
+  3 end:    検索対象文字列の終端アドレス
+  4 start:  検索対象文字列の検索先頭位置アドレス
+  5 range:  検索対象文字列の検索終了位置アドレス
+            (start <= 探索される文字列 < range)
+  6 lead:   外側のループ要素
+    ONIG_REGSET_POSITION_LEAD   (最左位置でマッチした結果を返す)
+    ONIG_REGSET_REGEX_LEAD      (最左位置でマッチした結果を返す)
+    ONIG_REGSET_PRIORITY_TO_REGEX_ORDER (最初にマッチした正規表現の結果を返す)
+  7 option: 検索時オプション
+    ONIG_OPTION_NOTBOL        文字列の先頭(str)を行頭と看做さない
+    ONIG_OPTION_NOTEOL        文字列の終端(end)を行末と看做さない
+  8 mps:    OnigMatchParamオブジェクトの配列
+  9 rmatch_pos: マッチした位置を返すためのアドレス (match_address - str)
 
 
 # OnigRegion* onig_region_new(void)

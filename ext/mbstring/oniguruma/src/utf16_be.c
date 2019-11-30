@@ -2,7 +2,7 @@
   utf16_be.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2019  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -146,18 +146,16 @@ utf16be_is_mbc_newline(const UChar* p, const UChar* end)
 }
 
 static OnigCodePoint
-utf16be_mbc_to_code(const UChar* p, const UChar* end)
+utf16be_mbc_to_code(const UChar* p, const UChar* end ARG_UNUSED)
 {
   OnigCodePoint code;
 
   if (UTF16_IS_SURROGATE_FIRST(*p)) {
-    if (end - p < 4) return 0;
     code = ((((p[0] - 0xd8) << 2) + ((p[1] & 0xc0) >> 6) + 1) << 16)
          + ((((p[1] & 0x3f) << 2) + (p[2] - 0xdc)) << 8)
          + p[3];
   }
   else {
-    if (end - p < 2) return 0;
     code = p[0] * 256 + p[1];
   }
   return code;
@@ -228,39 +226,6 @@ utf16be_mbc_case_fold(OnigCaseFoldType flag,
     return onigenc_unicode_mbc_case_fold(ONIG_ENCODING_UTF16_BE, flag,
                                          pp, end, fold);
 }
-
-#if 0
-static int
-utf16be_is_mbc_ambiguous(OnigCaseFoldType flag, const UChar** pp, const UChar* end)
-{
-  const UChar* p = *pp;
-
-  (*pp) += EncLen_UTF16[*p];
-
-  if (*p == 0) {
-    int c, v;
-
-    p++;
-    if (*p == 0xdf && (flag & INTERNAL_ONIGENC_CASE_FOLD_MULTI_CHAR) != 0) {
-      return TRUE;
-    }
-
-    c = *p;
-    v = ONIGENC_IS_UNICODE_ISO_8859_1_BIT_CTYPE(c, (BIT_CTYPE_UPPER | BIT_CTYPE_LOWER));
-
-    if ((v | BIT_CTYPE_LOWER) != 0) {
-      /* 0xaa, 0xb5, 0xba are lower case letter, but can't convert. */
-      if (c >= 0xaa && c <= 0xba)
-        return FALSE;
-      else
-        return TRUE;
-    }
-    return (v != 0 ? TRUE : FALSE);
-  }
-
-  return FALSE;
-}
-#endif
 
 static UChar*
 utf16be_left_adjust_char_head(const UChar* start, const UChar* s)

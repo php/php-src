@@ -2,7 +2,7 @@
   utf32_be.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,6 @@ utf32be_is_mbc_newline(const UChar* p, const UChar* end)
 static OnigCodePoint
 utf32be_mbc_to_code(const UChar* p, const UChar* end ARG_UNUSED)
 {
-  if (end - p < 4) return 0;
   return (OnigCodePoint )(((p[0] * 256 + p[1]) * 256 + p[2]) * 256 + p[3]);
 }
 
@@ -119,39 +118,6 @@ utf32be_mbc_case_fold(OnigCaseFoldType flag,
     return onigenc_unicode_mbc_case_fold(ONIG_ENCODING_UTF32_BE, flag, pp, end,
                                          fold);
 }
-
-#if 0
-static int
-utf32be_is_mbc_ambiguous(OnigCaseFoldType flag, const UChar** pp, const UChar* end)
-{
-  const UChar* p = *pp;
-
-  (*pp) += 4;
-
-  if (*(p+2) == 0 && *(p+1) == 0 && *p == 0) {
-    int c, v;
-
-    p += 3;
-    if (*p == 0xdf && (flag & INTERNAL_ONIGENC_CASE_FOLD_MULTI_CHAR) != 0) {
-      return TRUE;
-    }
-
-    c = *p;
-    v = ONIGENC_IS_UNICODE_ISO_8859_1_BIT_CTYPE(c,
-                       (BIT_CTYPE_UPPER | BIT_CTYPE_LOWER));
-    if ((v | BIT_CTYPE_LOWER) != 0) {
-      /* 0xaa, 0xb5, 0xba are lower case letter, but can't convert. */
-      if (c >= 0xaa && c <= 0xba)
-        return FALSE;
-      else
-        return TRUE;
-    }
-    return (v != 0 ? TRUE : FALSE);
-  }
-
-  return FALSE;
-}
-#endif
 
 static UChar*
 utf32be_left_adjust_char_head(const UChar* start, const UChar* s)

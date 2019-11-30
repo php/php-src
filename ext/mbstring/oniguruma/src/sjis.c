@@ -2,7 +2,7 @@
   sjis.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -149,10 +149,6 @@ code_to_mbc(OnigCodePoint code, UChar *buf)
   if ((code & 0xff00) != 0) *p++ = (UChar )(((code >>  8) & 0xff));
   *p++ = (UChar )(code & 0xff);
 
-#if 0
-  if (enclen(ONIG_ENCODING_SJIS, buf) != (p - buf))
-    return REGERR_INVALID_CODE_POINT_VALUE;
-#endif
   return (int )(p - buf);
 }
 
@@ -178,31 +174,6 @@ mbc_case_fold(OnigCaseFoldType flag ARG_UNUSED,
     return len; /* return byte length of converted char to lower */
   }
 }
-
-#if 0
-static int
-is_mbc_ambiguous(OnigCaseFoldType flag, const UChar** pp, const UChar* end)
-{
-  return onigenc_mbn_is_mbc_ambiguous(ONIG_ENCODING_SJIS, flag, pp, end);
-
-}
-#endif
-
-#if 0
-static int
-is_code_ctype(OnigCodePoint code, unsigned int ctype)
-{
-  if (code < 128)
-    return ONIGENC_IS_ASCII_CODE_CTYPE(code, ctype);
-  else {
-    if (CTYPE_IS_WORD_GRAPH_PRINT(ctype)) {
-      return (code_to_mbclen(code) > 1 ? TRUE : FALSE);
-    }
-  }
-
-  return FALSE;
-}
-#endif
 
 static UChar*
 left_adjust_char_head(const UChar* start, const UChar* s)

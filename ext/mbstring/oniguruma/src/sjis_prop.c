@@ -1,5 +1,5 @@
 /* ANSI-C code produced by gperf version 3.1 */
-/* Command-line: /usr/local/bin/gperf -pt -T -L ANSI-C -N onigenc_sjis_lookup_property_name --output-file gperf2.tmp sjis_prop.gperf  */
+/* Command-line: gperf -pt -T -L ANSI-C -N onigenc_sjis_lookup_property_name --output-file gperf2.tmp sjis_prop.gperf  */
 /* Computed positions: -k'1,3' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \

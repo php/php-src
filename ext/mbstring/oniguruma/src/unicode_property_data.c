@@ -1,5 +1,5 @@
 /* ANSI-C code produced by gperf version 3.1 */
-/* Command-line: /usr/local/bin/gperf -T -C -c -t -j1 -L ANSI-C --ignore-case --pic -Q unicode_prop_name_pool -N unicode_lookup_property_name --output-file gperf1.tmp unicode_property_data.gperf  */
+/* Command-line: gperf -T -C -c -t -j1 -L ANSI-C --ignore-case --pic -Q unicode_prop_name_pool -N unicode_lookup_property_name --output-file gperf1.tmp unicode_property_data.gperf  */
 /* Computed positions: -k'1-3,5-6,12,16,$' */
 
 #if !((' ' == 32) && ('!' == 33) && ('"' == 34) && ('#' == 35) \
@@ -29580,7 +29580,8 @@ unicode_lookup_property_name (register const char *str, register size_t len)
 
 
 
-#define UNICODE_PROPERTY_VERSION  12_1_0
+#define UNICODE_PROPERTY_VERSION  120100
+#define UNICODE_EMOJI_VERSION     1201
 
 #define PROPERTY_NAME_MAX_SIZE  59
 #define CODE_RANGES_NUM         568

@@ -2,7 +2,7 @@
   euc_kr.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,16 @@ euckr_mbc_enc_len(const UChar* p)
 }
 
 static int
+euckr_code_to_mbclen(OnigCodePoint code)
+{
+  if ((code & (~0xffff)) != 0) return ONIGERR_INVALID_CODE_POINT_VALUE;
+  if ((code &    0xff00) != 0) return 2;
+  if (EncLen_EUCKR[(int )(code & 0xff)] == 1) return 1;
+
+  return ONIGERR_INVALID_CODE_POINT_VALUE;
+}
+
+static int
 is_valid_mbc_string(const UChar* p, const UChar* end)
 {
   while (p < end) {
@@ -98,15 +108,6 @@ euckr_mbc_case_fold(OnigCaseFoldType flag, const UChar** pp, const UChar* end,
                                    pp, end, lower);
 }
 
-#if 0
-static int
-euckr_is_mbc_ambiguous(OnigCaseFoldType flag,
-                       const UChar** pp, const UChar* end)
-{
-  return onigenc_mbn_is_mbc_ambiguous(ONIG_ENCODING_EUC_KR, flag, pp, end);
-}
-#endif
-
 static int
 euckr_is_code_ctype(OnigCodePoint code, unsigned int ctype)
 {
@@ -149,7 +150,7 @@ OnigEncodingType OnigEncodingEUC_KR = {
   1,          /* min enc length */
   onigenc_is_mbc_newline_0x0a,
   euckr_mbc_to_code,
-  onigenc_mb2_code_to_mbclen,
+  euckr_code_to_mbclen,
   euckr_code_to_mbc,
   euckr_mbc_case_fold,
   onigenc_ascii_apply_all_case_fold,
@@ -174,7 +175,7 @@ OnigEncodingType OnigEncodingEUC_CN = {
   1,          /* min enc length */
   onigenc_is_mbc_newline_0x0a,
   euckr_mbc_to_code,
-  onigenc_mb2_code_to_mbclen,
+  euckr_code_to_mbclen,
   euckr_code_to_mbc,
   euckr_mbc_case_fold,
   onigenc_ascii_apply_all_case_fold,

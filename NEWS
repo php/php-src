@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #78849 (GD build broken with -D SIGNED_COMPARE_SLOW). (cmb)
 
+- MBString:
+  . Upgraded bundled Oniguruma to 6.9.4. (cmb)
+
 - OPcache:
   . Fixed potential ASLR related invalid opline handler issues. (cmb)
   . Fixed $x = (bool)$x; with opcache (should emit undeclared variable notice).
