@@ -22,10 +22,10 @@ array(7) {
   string(6) "中国"
   [3]=>
   string(3) "？"
-  ["punct"]=>
-  string(3) "？"
   ["wsp"]=>
   string(2) "  "
   ["word"]=>
   string(6) "中国"
+  ["punct"]=>
+  string(3) "？"
 }

@@ -1,7 +1,7 @@
 
 # Oniguruma syntax (operator) configuration
 
-_Documented for Oniguruma 6.9.2 (2019/03/28)_
+_Documented for Oniguruma 6.9.3 (2019/08/08)_
 
 
 ----------
@@ -960,6 +960,12 @@ _Set in: Ruby, Oniguruma_
 If this flag is set, Oniguruma will warn about nested repeat operators those have no meaning, like `(?:a*)+`.
 If this flag is clear, Oniguruma will allow the nested repeat operators without warning about them.
 
+### 26. ONIG_SYN_ALLOW_INVALID_CODE_END_OF_RANGE_IN_CC (allow [a-\x{7fffffff}])
+
+_Set in: Oniguruma_
+
+If this flag is set, then invalid code points at the end of range in character class are allowed.
+
 ### 31. ONIG_SYN_CONTEXT_INDEP_ANCHORS
 
 _Set in: PosixExtended, GnuRegex, Java, Perl, Perl_NG, Ruby, Oniguruma_
@@ -1066,4 +1072,5 @@ These tables show which of the built-in syntaxes use which flags and options, fo
 | 23    | `ONIG_SYN_ALLOW_DOUBLE_RANGE_OP_IN_CC`        | -     | Yes   | -     | -     | Yes   | Yes   | Yes   | Yes   | Yes   | Yes   |
 | 24    | `ONIG_SYN_WARN_CC_OP_NOT_ESCAPED`             | -     | -     | -     | -     | -     | -     | -     | -     | Yes   | Yes   |
 | 25    | `ONIG_SYN_WARN_REDUNDANT_NESTED_REPEAT`       | -     | -     | -     | -     | -     | -     | -     | -     | Yes   | Yes   |
+| 26    | `ONIG_SYN_ALLOW_INVALID_CODE_END_OF_RANGE_IN_CC` | -     | -     | -     | -     | -     | -     | -     | -     | -     | Yes   |
 | 31    | `ONIG_SYN_CONTEXT_INDEP_ANCHORS`              | -     | Yes   | -     | -     | Yes   | Yes   | Yes   | Yes   | Yes   | Yes   |

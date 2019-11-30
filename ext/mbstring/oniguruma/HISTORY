@@ -1,8 +1,33 @@
 History
 
+2019/11/29: Version 6.9.4
+
+2019/11/22: Release Candidate 3 for Version 6.9.4
+
+2019/11/20: fix a problem found by libFuzzer test
+2019/11/14: Release Candidate 2 for Version 6.9.4
+2019/11/12: fix integer overflow by nested quantifier
+2019/11/11: fix CVE-2019-19012: Integer overflow related to reg->dmax in search_in_range()
+2019/11/07: fix CVE-2019-19203: heap-buffer-overflow in gb18030_mbc_enc_len()
+2019/11/06: fix CVE-2019-19204: heap-buffer-overflow in fetch_interval_quantifier()
+2019/11/06: add HAVE_INTTYPES_H into config.h.windows.in and config.h.win{32,64}
+2019/11/06: add HAVE_STDINT_H into config.h.win{32,64}
+2019/11/05: Release Candidate 1 for Version 6.9.4
+2019/10/31: Update Unicode Emoji version to 12.1 (Nothing data changed)
+2019/10/29: implement USE_REPEAT_AND_EMPTY_CHECK_LOCAL_VAR configuration
+2019/10/18: re-implement case fold conversion
+2019/10/04: fix #156: Heap buffer overflow in match_at() with case-insensitive match
+2019/09/30: NEW API: add onig_regset_replace()
+2019/09/30: change Unicode VERSION value format
+2019/09/20: NEW API: add regset functions
+2019/09/20: add data ensure check before peek string value in OP_PUSH_IF_PEEK_NEXT
+2019/09/20: fix loose code in encode-harness.c
+2019/08/13: fix heap-buffer-overflow
+2019/08/13: Add a macro to disable direct threading in the match engine (PR#149)
+
 2019/08/06: Version 6.9.3 (secirity fix release)
 
-2019/07/30: add ONIG_SYN_ALLOW_INVALID_CODE_END_OF_RANGE
+2019/07/30: add ONIG_SYN_ALLOW_INVALID_CODE_END_OF_RANGE_IN_CC
 2019/07/29: add STK_PREC_READ_START/END stack type
 2019/07/29: Fix #147: Stack Exhaustion Problem caused by some parsing functions
 2019/07/11: add a dictionary file for libfuzzer

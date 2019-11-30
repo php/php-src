@@ -4,7 +4,7 @@
   oniguruma.h - Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2019  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,9 +36,9 @@ extern "C" {
 #define ONIGURUMA
 #define ONIGURUMA_VERSION_MAJOR   6
 #define ONIGURUMA_VERSION_MINOR   9
-#define ONIGURUMA_VERSION_TEENY   3
+#define ONIGURUMA_VERSION_TEENY   4
 
-#define ONIGURUMA_VERSION_INT     60903
+#define ONIGURUMA_VERSION_INT     60904
 
 #ifndef P_
 #if defined(__STDC__) || defined(_WIN32)
@@ -687,6 +687,14 @@ typedef OnigRegexType*  OnigRegex;
   typedef OnigRegexType  regex_t;
 #endif
 
+struct OnigRegSetStruct;
+typedef struct OnigRegSetStruct OnigRegSet;
+
+typedef enum {
+  ONIG_REGSET_POSITION_LEAD = 0,
+  ONIG_REGSET_REGEX_LEAD    = 1,
+  ONIG_REGSET_PRIORITY_TO_REGEX_ORDER = 2
+} OnigRegSetLead;
 
 typedef struct {
   int             num_of_elements;
@@ -797,6 +805,26 @@ ONIG_EXTERN
 int onig_match P_((OnigRegex, const OnigUChar* str, const OnigUChar* end, const OnigUChar* at, OnigRegion* region, OnigOptionType option));
 ONIG_EXTERN
 int onig_match_with_param P_((OnigRegex, const OnigUChar* str, const OnigUChar* end, const OnigUChar* at, OnigRegion* region, OnigOptionType option, OnigMatchParam* mp));
+
+ONIG_EXTERN
+int onig_regset_new P_((OnigRegSet** rset, int n, regex_t* regs[]));
+ONIG_EXTERN
+int onig_regset_add P_((OnigRegSet* set, regex_t* reg));
+ONIG_EXTERN
+int onig_regset_replace P_((OnigRegSet* set, int at, regex_t* reg));
+ONIG_EXTERN
+void onig_regset_free P_((OnigRegSet* set));
+ONIG_EXTERN
+int onig_regset_number_of_regex P_((OnigRegSet* set));
+ONIG_EXTERN
+regex_t* onig_regset_get_regex P_((OnigRegSet* set, int at));
+ONIG_EXTERN
+OnigRegion* onig_regset_get_region P_((OnigRegSet* set, int at));
+ONIG_EXTERN
+int onig_regset_search P_((OnigRegSet* set, const OnigUChar* str, const OnigUChar* end, const OnigUChar* start, const OnigUChar* range, OnigRegSetLead lead, OnigOptionType option, int* rmatch_pos));
+ONIG_EXTERN
+int onig_regset_search_with_param P_((OnigRegSet* set, const OnigUChar* str, const OnigUChar* end, const OnigUChar* start, const OnigUChar* range,  OnigRegSetLead lead, OnigOptionType option, OnigMatchParam* mps[], int* rmatch_pos));
+
 ONIG_EXTERN
 OnigRegion* onig_region_new P_((void));
 ONIG_EXTERN

@@ -27,24 +27,33 @@ Supported character encodings:
 * doc/SYNTAX.md: contributed by seanofw
 
 
+Version 6.9.4
+-------------
+
+* NEW API: RegSet (set of regexes)
+* Fixed CVE-2019-19012
+* Fixed CVE-2019-19203 (Does not affect UTF-8, UTF-16 and UTF-32 encodings)
+* Fixed CVE-2019-19204 (Affects only PosixBasic, Emacs and Grep syntaxes)
+* Fixed CVE-2019-19246
+* Fixed some problems (found by libFuzzer test)
+
+
 Version 6.9.3 (security fix release)
 ------------------------------------
 
 * Fixed CVE-2019-13224
 * Fixed CVE-2019-13225
-* Fixed many problems (found by libfuzzer programs)
+* Fixed CVE-2019-16163
+* Fixed many problems (found by libFuzzer test)
 
 
 Version 6.9.2 (Reiwa)
 ---------------------
 
 * add doc/SYNTAX.md
+* Direct threaded code (for GCC and Clang)
 * Update Unicode version 12.1.0
 * NEW: Unicode Text Segment mode option (?y{g}) (?y{w})  (*original)
-
-  g: Extended Grapheme Cluster mode / w: Word mode
-
-  (Unicode Standard Annex #29 [http://unicode.org/reports/tr29/])
 
 
 Version 6.9.1
@@ -118,7 +127,7 @@ Version 6.5.0
 * NEW: \O (true anychar)
 * NEW: if-then-else   (?(...)...\|...)
 * NEW: Backreference validity checker (?(xxx)) (*original)
-* NEW: Absent repeater (?~absent)  \[is equal to (?\~\|absent|\O*)]
+* NEW: Absent repeater (?~absent)  \[is equal to (?\~\|(?:absent)|\O*)]
 * NEW: Absent expression   (?~|absent|expr)  (*original)
 * NEW: Absent stopper (?~|absent)     (*original)
 
@@ -244,15 +253,18 @@ Sample Programs
 
 |File                  |Description                               |
 |:---------------------|:-----------------------------------------|
+|sample/callout.c      |example of callouts                       |
+|sample/count.c        |example of built-in callout *COUNT        |
+|sample/echo.c         |example of user defined callouts of name  |
+|sample/encode.c       |example of some encodings                 |
+|sample/listcap.c      |example of the capture history            |
+|sample/names.c        |example of the named group callback       |
+|sample/posix.c        |POSIX API sample                          |
+|sample/regset.c       |example of using RegSet API               |
+|sample/scan.c         |example of using onig_scan()              |
 |sample/simple.c       |example of the minimum (Oniguruma API)    |
-|sample/names.c        |example of the named group callback.      |
-|sample/encode.c       |example of some encodings.                |
-|sample/listcap.c      |example of the capture history.           |
-|sample/posix.c        |POSIX API sample.                         |
-|sample/scan.c         |example of using onig_scan().             |
-|sample/sql.c          |example of the variable meta characters.  |
-|sample/user_property.c|example of user defined Unicode property. |
-|sample/callout.c      |example of callouts.                      |
+|sample/sql.c          |example of the variable meta characters   |
+|sample/user_property.c|example of user defined Unicode property  |
 
 
 Test Programs

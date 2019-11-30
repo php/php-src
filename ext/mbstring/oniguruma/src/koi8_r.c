@@ -2,7 +2,7 @@
   koi8_r.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,19 +113,6 @@ koi8_r_mbc_case_fold(OnigCaseFoldType flag ARG_UNUSED,
   (*pp)++;
   return 1;
 }
-
-#if 0
-static int
-koi8_r_is_mbc_ambiguous(OnigCaseFoldType flag, const UChar** pp, const UChar* end)
-{
-  int v;
-  const UChar* p = *pp;
-
-  (*pp)++;
-  v = (EncKOI8_R_CtypeTable[*p] & (BIT_CTYPE_UPPER | BIT_CTYPE_LOWER));
-  return (v != 0 ? TRUE : FALSE);
-}
-#endif
 
 static int
 koi8_r_is_code_ctype(OnigCodePoint code, unsigned int ctype)

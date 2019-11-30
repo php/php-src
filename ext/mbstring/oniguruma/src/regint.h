@@ -4,7 +4,7 @@
   regint.h -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2019  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2019  K.Kosako
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,15 +47,10 @@
 #endif
 #endif
 
-#if defined(__i386) || defined(__i386__) || defined(_M_IX86) || \
-    (defined(__ppc__) && defined(__APPLE__)) || \
-    defined(__x86_64) || defined(__x86_64__) || \
-    defined(__mc68020__)
-#define PLATFORM_UNALIGNED_WORD_ACCESS
-#endif
-
+#ifndef ONIG_DISABLE_DIRECT_THREADING
 #ifdef __GNUC__
 #define USE_GOTO_LABELS_AS_VALUES
+#endif
 #endif
 
 /* config */
@@ -82,6 +77,8 @@
 #define USE_VARIABLE_META_CHARS
 #define USE_POSIX_API_REGION_OPTION
 #define USE_FIND_LONGEST_SEARCH_ALL_OF_RANGE
+/* #define USE_REPEAT_AND_EMPTY_CHECK_LOCAL_VAR */
+
 
 #include "regenc.h"
 
@@ -197,49 +194,16 @@ typedef unsigned int  uintptr_t;
 #define CHAR_MAP_SIZE       256
 #define INFINITE_LEN        ONIG_INFINITE_DISTANCE
 
-#ifdef PLATFORM_UNALIGNED_WORD_ACCESS
-
-#define PLATFORM_GET_INC(val,p,type) do{\
-  val  = *(type* )p;\
-  (p) += sizeof(type);\
-} while(0)
-
-#else
-
-#define PLATFORM_GET_INC(val,p,type) do{\
-  xmemcpy(&val, (p), sizeof(type));\
-  (p) += sizeof(type);\
-} while(0)
-
-/* sizeof(OnigCodePoint) */
-#ifdef SIZEOF_SIZE_T
-# define WORD_ALIGNMENT_SIZE     SIZEOF_SIZE_T
-#else
-# define WORD_ALIGNMENT_SIZE     SIZEOF_LONG
-#endif
-
-#define GET_ALIGNMENT_PAD_SIZE(addr,pad_size) do {\
-  (pad_size) = WORD_ALIGNMENT_SIZE - ((uintptr_t )(addr) % WORD_ALIGNMENT_SIZE);\
-  if ((pad_size) == WORD_ALIGNMENT_SIZE) (pad_size) = 0;\
-} while (0)
-
-#define ALIGNMENT_RIGHT(addr) do {\
-  (addr) += (WORD_ALIGNMENT_SIZE - 1);\
-  (addr) -= ((uintptr_t )(addr) % WORD_ALIGNMENT_SIZE);\
-} while (0)
-
-#endif /* PLATFORM_UNALIGNED_WORD_ACCESS */
-
 
 #ifdef USE_CALLOUT
 
 typedef struct {
-  int           flag;
-  OnigCalloutOf of;
-  int           in;
-  int           name_id;
-  const UChar*  tag_start;
-  const UChar*  tag_end;
+  int             flag;
+  OnigCalloutOf   of;
+  int             in;
+  int             name_id;
+  const UChar*    tag_start;
+  const UChar*    tag_end;
   OnigCalloutType type;
   OnigCalloutFunc start_func;
   OnigCalloutFunc end_func;
@@ -272,7 +236,6 @@ enum OptimizeType {
   OPTIMIZE_STR,                   /* Slow Search */
   OPTIMIZE_STR_FAST,              /* Sunday quick search / BMH */
   OPTIMIZE_STR_FAST_STEP_FORWARD, /* Sunday quick search / BMH */
-  OPTIMIZE_STR_CASE_FOLD_FAST,    /* Sunday quick search / BMH (ignore case) */
   OPTIMIZE_STR_CASE_FOLD,         /* Slow Search (ignore case) */
   OPTIMIZE_MAP                    /* char map */
 };
@@ -288,6 +251,8 @@ typedef unsigned int  MemStatusType;
 #define MEM_STATUS_AT0(stats,n) \
   ((n) > 0 && (n) < (int )MEM_STATUS_BITS_NUM  ?  ((stats) & ((MemStatusType )1 << n)) : ((stats) & 1))
 
+#define MEM_STATUS_IS_ALL_ON(stats)  (((stats) & 1) != 0)
+
 #define MEM_STATUS_ON(stats,n) do {\
   if ((n) < (int )MEM_STATUS_BITS_NUM) {\
     if ((n) != 0)\
@@ -302,8 +267,14 @@ typedef unsigned int  MemStatusType;
     (stats) |= ((MemStatusType )1 << (n));\
 } while (0)
 
+#define MEM_STATUS_LIMIT_AT(stats,n) \
+  ((n) < (int )MEM_STATUS_BITS_NUM  ?  ((stats) & ((MemStatusType )1 << n)) : 0)
+#define MEM_STATUS_LIMIT_ON(stats,n) do {\
+  if ((n) < (int )MEM_STATUS_BITS_NUM && (n) != 0) {\
+    (stats) |= ((MemStatusType )1 << (n));\
+  }\
+} while (0)
 
-#define INT_MAX_LIMIT           ((1UL << (SIZEOF_INT * 8 - 1)) - 1)
 
 #define IS_CODE_WORD_ASCII(enc,code) \
   (ONIGENC_IS_CODE_ASCII(code) && ONIGENC_IS_CODE_WORD(enc,code))
@@ -354,16 +325,12 @@ typedef unsigned int  MemStatusType;
 /* bitset */
 #define BITS_PER_BYTE      8
 #define SINGLE_BYTE_SIZE   (1 << BITS_PER_BYTE)
-#define BITS_IN_ROOM       (sizeof(Bits) * BITS_PER_BYTE)
+#define BITS_IN_ROOM       32   /* 4 * BITS_PER_BYTE */
 #define BITSET_SIZE        (SINGLE_BYTE_SIZE / BITS_IN_ROOM)
 
-#ifdef PLATFORM_UNALIGNED_WORD_ACCESS
-typedef unsigned int   Bits;
-#else
-typedef unsigned char  Bits;
-#endif
-typedef Bits           BitSet[BITSET_SIZE];
-typedef Bits*          BitSetRef;
+typedef uint32_t  Bits;
+typedef Bits      BitSet[BITSET_SIZE];
+typedef Bits*     BitSetRef;
 
 #define SIZE_BITSET        sizeof(BitSet)
 
@@ -372,8 +339,8 @@ typedef Bits*          BitSetRef;
   for (i = 0; i < (int )BITSET_SIZE; i++) { (bs)[i] = 0; } \
 } while (0)
 
-#define BS_ROOM(bs,pos)            (bs)[pos / BITS_IN_ROOM]
-#define BS_BIT(pos)                (1 << (pos % BITS_IN_ROOM))
+#define BS_ROOM(bs,pos)            (bs)[(unsigned int )(pos) >> 5]
+#define BS_BIT(pos)                (1u << ((unsigned int )(pos) & 0x1f))
 
 #define BITSET_AT(bs, pos)         (BS_ROOM(bs,pos) & BS_BIT(pos))
 #define BITSET_SET_BIT(bs, pos)     BS_ROOM(bs,pos) |= BS_BIT(pos)
@@ -389,11 +356,13 @@ typedef struct _BBuf {
 
 #define BB_INIT(buf,size)    bbuf_init((BBuf* )(buf), (size))
 
+/*
 #define BB_SIZE_INC(buf,inc) do{\
   (buf)->alloc += (inc);\
   (buf)->p = (UChar* )xrealloc((buf)->p, (buf)->alloc);\
   if (IS_NULL((buf)->p)) return(ONIGERR_MEMORY);\
 } while (0)
+*/
 
 #define BB_EXPAND(buf,low) do{\
   do { (buf)->alloc *= 2; } while ((buf)->alloc < (unsigned int )low);\
@@ -491,39 +460,34 @@ typedef struct _BBuf {
 
 /* operation code */
 enum OpCode {
-  OP_FINISH = 0,        /* matching process terminator (no more alternative) */
-  OP_END    = 1,        /* pattern code terminator (success end) */
-
-  OP_EXACT1 = 2,        /* single byte, N = 1 */
-  OP_EXACT2,            /* single byte, N = 2 */
-  OP_EXACT3,            /* single byte, N = 3 */
-  OP_EXACT4,            /* single byte, N = 4 */
-  OP_EXACT5,            /* single byte, N = 5 */
-  OP_EXACTN,            /* single byte */
-  OP_EXACTMB2N1,        /* mb-length = 2 N = 1 */
-  OP_EXACTMB2N2,        /* mb-length = 2 N = 2 */
-  OP_EXACTMB2N3,        /* mb-length = 2 N = 3 */
-  OP_EXACTMB2N,         /* mb-length = 2 */
-  OP_EXACTMB3N,         /* mb-length = 3 */
-  OP_EXACTMBN,          /* other length */
-
-  OP_EXACT1_IC,         /* single byte, N = 1, ignore case */
-  OP_EXACTN_IC,         /* single byte,        ignore case */
-
+  OP_FINISH = 0,       /* matching process terminator (no more alternative) */
+  OP_END    = 1,       /* pattern code terminator (success end) */
+  OP_STR_1 = 2,        /* single byte, N = 1 */
+  OP_STR_2,            /* single byte, N = 2 */
+  OP_STR_3,            /* single byte, N = 3 */
+  OP_STR_4,            /* single byte, N = 4 */
+  OP_STR_5,            /* single byte, N = 5 */
+  OP_STR_N,            /* single byte */
+  OP_STR_MB2N1,        /* mb-length = 2 N = 1 */
+  OP_STR_MB2N2,        /* mb-length = 2 N = 2 */
+  OP_STR_MB2N3,        /* mb-length = 2 N = 3 */
+  OP_STR_MB2N,         /* mb-length = 2 */
+  OP_STR_MB3N,         /* mb-length = 3 */
+  OP_STR_MBN,          /* other length */
+  OP_STR_1_IC,         /* single byte, N = 1, ignore case */
+  OP_STR_N_IC,         /* single byte,        ignore case */
   OP_CCLASS,
   OP_CCLASS_MB,
   OP_CCLASS_MIX,
   OP_CCLASS_NOT,
   OP_CCLASS_MB_NOT,
   OP_CCLASS_MIX_NOT,
-
   OP_ANYCHAR,                 /* "."  */
   OP_ANYCHAR_ML,              /* "."  multi-line */
   OP_ANYCHAR_STAR,            /* ".*" */
   OP_ANYCHAR_ML_STAR,         /* ".*" multi-line */
   OP_ANYCHAR_STAR_PEEK_NEXT,
   OP_ANYCHAR_ML_STAR_PEEK_NEXT,
-
   OP_WORD,
   OP_WORD_ASCII,
   OP_NO_WORD,
@@ -532,16 +496,13 @@ enum OpCode {
   OP_NO_WORD_BOUNDARY,
   OP_WORD_BEGIN,
   OP_WORD_END,
-
   OP_TEXT_SEGMENT_BOUNDARY,
-
   OP_BEGIN_BUF,
   OP_END_BUF,
   OP_BEGIN_LINE,
   OP_END_LINE,
   OP_SEMI_END_BUF,
   OP_BEGIN_POSITION,
-
   OP_BACKREF1,
   OP_BACKREF2,
   OP_BACKREF_N,
@@ -552,34 +513,35 @@ enum OpCode {
   OP_BACKREF_WITH_LEVEL_IC,     /* \k<xxx+n>, \k<xxx-n> */
   OP_BACKREF_CHECK,             /* (?(n)), (?('name')) */
   OP_BACKREF_CHECK_WITH_LEVEL,  /* (?(n-level)), (?('name-level')) */
-
-  OP_MEMORY_START,
-  OP_MEMORY_START_PUSH,   /* push back-tracker to stack */
-  OP_MEMORY_END_PUSH,     /* push back-tracker to stack */
-  OP_MEMORY_END_PUSH_REC, /* push back-tracker to stack */
-  OP_MEMORY_END,
-  OP_MEMORY_END_REC,      /* push marker to stack */
-
+  OP_MEM_START,
+  OP_MEM_START_PUSH,     /* push back-tracker to stack */
+  OP_MEM_END_PUSH,       /* push back-tracker to stack */
+#ifdef USE_CALL
+  OP_MEM_END_PUSH_REC,   /* push back-tracker to stack */
+#endif
+  OP_MEM_END,
+#ifdef USE_CALL
+  OP_MEM_END_REC,        /* push marker to stack */
+#endif
   OP_FAIL,               /* pop stack and move */
   OP_JUMP,
   OP_PUSH,
   OP_PUSH_SUPER,
   OP_POP_OUT,
 #ifdef USE_OP_PUSH_OR_JUMP_EXACT
-  OP_PUSH_OR_JUMP_EXACT1,  /* if match exact then push, else jump. */
+  OP_PUSH_OR_JUMP_EXACT1,   /* if match exact then push, else jump. */
 #endif
-  OP_PUSH_IF_PEEK_NEXT,    /* if match exact then push, else none. */
-  OP_REPEAT,               /* {n,m} */
-  OP_REPEAT_NG,            /* {n,m}? (non greedy) */
+  OP_PUSH_IF_PEEK_NEXT,     /* if match exact then push, else none. */
+  OP_REPEAT,                /* {n,m} */
+  OP_REPEAT_NG,             /* {n,m}? (non greedy) */
   OP_REPEAT_INC,
-  OP_REPEAT_INC_NG,        /* non greedy */
-  OP_REPEAT_INC_SG,        /* search and get in stack */
-  OP_REPEAT_INC_NG_SG,     /* search and get in stack (non greedy) */
+  OP_REPEAT_INC_NG,         /* non greedy */
   OP_EMPTY_CHECK_START,     /* null loop checker start */
   OP_EMPTY_CHECK_END,       /* null loop checker end   */
   OP_EMPTY_CHECK_END_MEMST, /* null loop checker end (with capture status) */
+#ifdef USE_CALL
   OP_EMPTY_CHECK_END_MEMST_PUSH, /* with capture status and push check-end */
-
+#endif
   OP_PREC_READ_START,       /* (?=...)  start */
   OP_PREC_READ_END,         /* (?=...)  end   */
   OP_PREC_READ_NOT_START,   /* (?!...)  start */
@@ -589,11 +551,12 @@ enum OpCode {
   OP_LOOK_BEHIND,           /* (?<=...) start (no needs end opcode) */
   OP_LOOK_BEHIND_NOT_START, /* (?<!...) start */
   OP_LOOK_BEHIND_NOT_END,   /* (?<!...) end   */
-
-  OP_CALL,                  /* \g<name> */
-  OP_RETURN,
   OP_PUSH_SAVE_VAL,
   OP_UPDATE_VAR,
+#ifdef USE_CALL
+  OP_CALL,                  /* \g<name> */
+  OP_RETURN,
+#endif
 #ifdef USE_CALLOUT
   OP_CALLOUT_CONTENTS,      /* (?{...}) (?{{...}}) */
   OP_CALLOUT_NAME,          /* (*name) (*name[tag](args...)) */
@@ -601,8 +564,8 @@ enum OpCode {
 };
 
 enum SaveType {
-  SAVE_KEEP = 0, /* SAVE S */
-  SAVE_S = 1,
+  SAVE_KEEP        = 0, /* SAVE S */
+  SAVE_S           = 1,
   SAVE_RIGHT_RANGE = 2,
 };
 
@@ -642,116 +605,57 @@ typedef int ModeType;
 #define SIZE_UPDATE_VAR_TYPE  sizeof(UpdateVarType)
 #define SIZE_MODE             sizeof(ModeType)
 
-#define GET_RELADDR_INC(addr,p)    PLATFORM_GET_INC(addr,   p, RelAddrType)
-#define GET_ABSADDR_INC(addr,p)    PLATFORM_GET_INC(addr,   p, AbsAddrType)
-#define GET_LENGTH_INC(len,p)      PLATFORM_GET_INC(len,    p, LengthType)
-#define GET_MEMNUM_INC(num,p)      PLATFORM_GET_INC(num,    p, MemNumType)
-#define GET_REPEATNUM_INC(num,p)   PLATFORM_GET_INC(num,    p, RepeatNumType)
-#define GET_OPTION_INC(option,p)   PLATFORM_GET_INC(option, p, OnigOptionType)
-#define GET_POINTER_INC(ptr,p)     PLATFORM_GET_INC(ptr,    p, PointerType)
-#define GET_SAVE_TYPE_INC(type,p)       PLATFORM_GET_INC(type, p, SaveType)
-#define GET_UPDATE_VAR_TYPE_INC(type,p) PLATFORM_GET_INC(type, p, UpdateVarType)
-#define GET_MODE_INC(mode,p)            PLATFORM_GET_INC(mode, p, ModeType)
-
 /* code point's address must be aligned address. */
 #define GET_CODE_POINT(code,p)   code = *((OnigCodePoint* )(p))
-#define GET_BYTE_INC(byte,p) do{\
-  byte = *(p);\
-  (p)++;\
-} while(0)
 
 
 /* op-code + arg size */
-#if 0
-#define SIZE_OP_ANYCHAR_STAR            SIZE_OPCODE
-#define SIZE_OP_ANYCHAR_STAR_PEEK_NEXT (SIZE_OPCODE + 1)
-#define SIZE_OP_JUMP                   (SIZE_OPCODE + SIZE_RELADDR)
-#define SIZE_OP_PUSH                   (SIZE_OPCODE + SIZE_RELADDR)
-#define SIZE_OP_PUSH_SUPER             (SIZE_OPCODE + SIZE_RELADDR)
-#define SIZE_OP_POP_OUT                 SIZE_OPCODE
-#ifdef USE_OP_PUSH_OR_JUMP_EXACT
-#define SIZE_OP_PUSH_OR_JUMP_EXACT1    (SIZE_OPCODE + SIZE_RELADDR + 1)
-#endif
-#define SIZE_OP_PUSH_IF_PEEK_NEXT      (SIZE_OPCODE + SIZE_RELADDR + 1)
-#define SIZE_OP_REPEAT_INC             (SIZE_OPCODE + SIZE_MEMNUM)
-#define SIZE_OP_REPEAT_INC_NG          (SIZE_OPCODE + SIZE_MEMNUM)
-#define SIZE_OP_WORD_BOUNDARY          (SIZE_OPCODE + SIZE_MODE)
-#define SIZE_OP_PREC_READ_START         SIZE_OPCODE
-#define SIZE_OP_PREC_READ_NOT_START    (SIZE_OPCODE + SIZE_RELADDR)
-#define SIZE_OP_PREC_READ_END           SIZE_OPCODE
-#define SIZE_OP_PREC_READ_NOT_END       SIZE_OPCODE
-#define SIZE_OP_FAIL                    SIZE_OPCODE
-#define SIZE_OP_MEMORY_START           (SIZE_OPCODE + SIZE_MEMNUM)
-#define SIZE_OP_MEMORY_START_PUSH      (SIZE_OPCODE + SIZE_MEMNUM)
-#define SIZE_OP_MEMORY_END_PUSH        (SIZE_OPCODE + SIZE_MEMNUM)
-#define SIZE_OP_MEMORY_END_PUSH_REC    (SIZE_OPCODE + SIZE_MEMNUM)
-#define SIZE_OP_MEMORY_END             (SIZE_OPCODE + SIZE_MEMNUM)
-#define SIZE_OP_MEMORY_END_REC         (SIZE_OPCODE + SIZE_MEMNUM)
-#define SIZE_OP_ATOMIC_START            SIZE_OPCODE
-#define SIZE_OP_ATOMIC_END              SIZE_OPCODE
-#define SIZE_OP_EMPTY_CHECK_START       (SIZE_OPCODE + SIZE_MEMNUM)
-#define SIZE_OP_EMPTY_CHECK_END         (SIZE_OPCODE + SIZE_MEMNUM)
-#define SIZE_OP_LOOK_BEHIND            (SIZE_OPCODE + SIZE_LENGTH)
-#define SIZE_OP_LOOK_BEHIND_NOT_START  (SIZE_OPCODE + SIZE_RELADDR + SIZE_LENGTH)
-#define SIZE_OP_LOOK_BEHIND_NOT_END     SIZE_OPCODE
-#define SIZE_OP_CALL                   (SIZE_OPCODE + SIZE_ABSADDR)
-#define SIZE_OP_RETURN                  SIZE_OPCODE
-#define SIZE_OP_PUSH_SAVE_VAL          (SIZE_OPCODE + SIZE_SAVE_TYPE + SIZE_MEMNUM)
-#define SIZE_OP_UPDATE_VAR             (SIZE_OPCODE + SIZE_UPDATE_VAR_TYPE + SIZE_MEMNUM)
-
-#ifdef USE_CALLOUT
-#define SIZE_OP_CALLOUT_CONTENTS       (SIZE_OPCODE + SIZE_MEMNUM)
-#define SIZE_OP_CALLOUT_NAME           (SIZE_OPCODE + SIZE_MEMNUM + SIZE_MEMNUM)
-#endif
-
-#else  /* if 0 */
 
 /* for relative address increment to go next op. */
-#define SIZE_INC_OP                     1
+#define SIZE_INC                       1
 
-#define SIZE_OP_ANYCHAR_STAR            1
-#define SIZE_OP_ANYCHAR_STAR_PEEK_NEXT  1
-#define SIZE_OP_JUMP                    1
-#define SIZE_OP_PUSH                    1
-#define SIZE_OP_PUSH_SUPER              1
-#define SIZE_OP_POP_OUT                 1
+#define OPSIZE_ANYCHAR_STAR            1
+#define OPSIZE_ANYCHAR_STAR_PEEK_NEXT  1
+#define OPSIZE_JUMP                    1
+#define OPSIZE_PUSH                    1
+#define OPSIZE_PUSH_SUPER              1
+#define OPSIZE_POP_OUT                 1
 #ifdef USE_OP_PUSH_OR_JUMP_EXACT
-#define SIZE_OP_PUSH_OR_JUMP_EXACT1     1
+#define OPSIZE_PUSH_OR_JUMP_EXACT1     1
 #endif
-#define SIZE_OP_PUSH_IF_PEEK_NEXT       1
-#define SIZE_OP_REPEAT                  1
-#define SIZE_OP_REPEAT_INC              1
-#define SIZE_OP_REPEAT_INC_NG           1
-#define SIZE_OP_WORD_BOUNDARY           1
-#define SIZE_OP_PREC_READ_START         1
-#define SIZE_OP_PREC_READ_NOT_START     1
-#define SIZE_OP_PREC_READ_END           1
-#define SIZE_OP_PREC_READ_NOT_END       1
-#define SIZE_OP_BACKREF                 1
-#define SIZE_OP_FAIL                    1
-#define SIZE_OP_MEMORY_START            1
-#define SIZE_OP_MEMORY_START_PUSH       1
-#define SIZE_OP_MEMORY_END_PUSH         1
-#define SIZE_OP_MEMORY_END_PUSH_REC     1
-#define SIZE_OP_MEMORY_END              1
-#define SIZE_OP_MEMORY_END_REC          1
-#define SIZE_OP_ATOMIC_START            1
-#define SIZE_OP_ATOMIC_END              1
-#define SIZE_OP_EMPTY_CHECK_START       1
-#define SIZE_OP_EMPTY_CHECK_END         1
-#define SIZE_OP_LOOK_BEHIND             1
-#define SIZE_OP_LOOK_BEHIND_NOT_START   1
-#define SIZE_OP_LOOK_BEHIND_NOT_END     1
-#define SIZE_OP_CALL                    1
-#define SIZE_OP_RETURN                  1
-#define SIZE_OP_PUSH_SAVE_VAL           1
-#define SIZE_OP_UPDATE_VAR              1
+#define OPSIZE_PUSH_IF_PEEK_NEXT       1
+#define OPSIZE_REPEAT                  1
+#define OPSIZE_REPEAT_INC              1
+#define OPSIZE_REPEAT_INC_NG           1
+#define OPSIZE_WORD_BOUNDARY           1
+#define OPSIZE_PREC_READ_START         1
+#define OPSIZE_PREC_READ_NOT_START     1
+#define OPSIZE_PREC_READ_END           1
+#define OPSIZE_PREC_READ_NOT_END       1
+#define OPSIZE_BACKREF                 1
+#define OPSIZE_FAIL                    1
+#define OPSIZE_MEM_START               1
+#define OPSIZE_MEM_START_PUSH          1
+#define OPSIZE_MEM_END_PUSH            1
+#define OPSIZE_MEM_END_PUSH_REC        1
+#define OPSIZE_MEM_END                 1
+#define OPSIZE_MEM_END_REC             1
+#define OPSIZE_ATOMIC_START            1
+#define OPSIZE_ATOMIC_END              1
+#define OPSIZE_EMPTY_CHECK_START       1
+#define OPSIZE_EMPTY_CHECK_END         1
+#define OPSIZE_LOOK_BEHIND             1
+#define OPSIZE_LOOK_BEHIND_NOT_START   1
+#define OPSIZE_LOOK_BEHIND_NOT_END     1
+#define OPSIZE_CALL                    1
+#define OPSIZE_RETURN                  1
+#define OPSIZE_PUSH_SAVE_VAL           1
+#define OPSIZE_UPDATE_VAR              1
 
 #ifdef USE_CALLOUT
-#define SIZE_OP_CALLOUT_CONTENTS        1
-#define SIZE_OP_CALLOUT_NAME            1
+#define OPSIZE_CALLOUT_CONTENTS        1
+#define OPSIZE_CALLOUT_NAME            1
 #endif
-#endif /* if 0 */
 
 
 #define MC_ESC(syn)               (syn)->meta_char_table.esc
@@ -882,7 +786,7 @@ typedef struct {
     } repeat; /* REPEAT, REPEAT_NG */
     struct {
       MemNumType  id;
-    } repeat_inc; /* REPEAT_INC, REPEAT_INC_SG, REPEAT_INC_NG, REPEAT_INC_NG_SG */
+    } repeat_inc; /* REPEAT_INC, REPEAT_INC_NG */
     struct {
       MemNumType mem;
     } empty_check_start;
@@ -933,48 +837,58 @@ typedef struct {
 #endif
 } RegexExt;
 
+typedef struct {
+  int lower;
+  int upper;
+  union {
+    Operation* pcode; /* address of repeated body */
+    int offset;
+  } u;
+} RepeatRange;
+
 struct re_pattern_buffer {
   /* common members of BBuf(bytes-buffer) */
   Operation*   ops;
 #ifdef USE_DIRECT_THREADED_CODE
   enum OpCode* ocs;
 #endif
-  Operation*   ops_curr;
-  unsigned int ops_used;    /* used space for ops */
-  unsigned int ops_alloc;   /* allocated space for ops */
+  Operation*     ops_curr;
+  unsigned int   ops_used;    /* used space for ops */
+  unsigned int   ops_alloc;   /* allocated space for ops */
   unsigned char* string_pool;
   unsigned char* string_pool_end;
 
-  int num_mem;                   /* used memory(...) num counted from 1 */
-  int num_repeat;                /* OP_REPEAT/OP_REPEAT_NG id-counter */
-  int num_null_check;            /* OP_EMPTY_CHECK_START/END id counter */
-  int num_call;                  /* number of subexp call */
-  unsigned int capture_history;  /* (?@...) flag (1-31) */
-  unsigned int bt_mem_start;     /* need backtrack flag */
-  unsigned int bt_mem_end;       /* need backtrack flag */
-  int stack_pop_level;
-  int repeat_range_alloc;
-  OnigRepeatRange* repeat_range;
+  int            num_mem;          /* used memory(...) num counted from 1 */
+  int            num_repeat;       /* OP_REPEAT/OP_REPEAT_NG id-counter */
+  int            num_empty_check;  /* OP_EMPTY_CHECK_START/END id counter */
+  int            num_call;         /* number of subexp call */
+  MemStatusType  capture_history;  /* (?@...) flag (1-31) */
+  MemStatusType  push_mem_start;   /* need backtrack flag */
+  MemStatusType  push_mem_end;     /* need backtrack flag */
+  MemStatusType  empty_status_mem;
+  int            stack_pop_level;
+  int            repeat_range_alloc;
+  RepeatRange*   repeat_range;
 
-  OnigEncoding      enc;
-  OnigOptionType    options;
-  OnigSyntaxType*   syntax;
-  OnigCaseFoldType  case_fold_flag;
-  void*             name_table;
+  OnigEncoding     enc;
+  OnigOptionType   options;
+  OnigSyntaxType*  syntax;
+  OnigCaseFoldType case_fold_flag;
+  void*            name_table;
 
   /* optimization info (string search, char-map and anchors) */
   int            optimize;          /* optimize flag */
   int            threshold_len;     /* search str-length for apply optimize */
   int            anchor;            /* BEGIN_BUF, BEGIN_POS, (SEMI_)END_BUF */
-  OnigLen        anchor_dmin;       /* (SEMI_)END_BUF anchor distance */
-  OnigLen        anchor_dmax;       /* (SEMI_)END_BUF anchor distance */
+  OnigLen        anc_dist_min;      /* (SEMI_)END_BUF anchor distance */
+  OnigLen        anc_dist_max;      /* (SEMI_)END_BUF anchor distance */
   int            sub_anchor;        /* start-anchor for exact or map */
   unsigned char *exact;
   unsigned char *exact_end;
   unsigned char  map[CHAR_MAP_SIZE]; /* used as BMH skip or char-map */
   int            map_offset;
-  OnigLen        dmin;                      /* min-distance of exact or map */
-  OnigLen        dmax;                      /* max-distance of exact or map */
+  OnigLen        dist_min;           /* min-distance of exact or map */
+  OnigLen        dist_max;           /* max-distance of exact or map */
   RegexExt*      extp;
 };
 

@@ -1,4 +1,4 @@
-Oniguruma Regular Expressions Version 6.9.2    2019/03/29
+Oniguruma Regular Expressions Version 6.9.4    2019/10/31
 
 syntax: ONIG_SYNTAX_ONIGURUMA (default)
 
@@ -289,6 +289,11 @@ syntax: ONIG_SYNTAX_ONIGURUMA (default)
                      In negative look-behind, capturing group isn't allowed,
                      but non-capturing group (?:) is allowed.
 
+                     * In look-behind and negative look-behind, support for
+                       ignore-case option is limited. Only supports conversion
+                       between single characters. (Does not support conversion
+                       of multiple characters in Unicode)
+
   (?>subexp)         atomic group
                      no backtracks in subexp.
 
@@ -338,7 +343,7 @@ syntax: ONIG_SYNTAX_ONIGURUMA (default)
                      This works like .* (more precisely \O*), but it is
                      limited by the range that does not include the string
                      match with <absent>.
-                     This is a written abbreviation of (?~|absent|\O*).
+                     This is a written abbreviation of (?~|(?:absent)|\O*).
                      \O* is used as a repeater.
 
   (?~|absent|exp)    Absent expression  (* original)
