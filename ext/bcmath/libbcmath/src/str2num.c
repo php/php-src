@@ -57,9 +57,9 @@ bc_str2num (bc_num *num, char *str, int scale)
   zero_int = FALSE;
   if ( (*ptr == '+') || (*ptr == '-'))  ptr++;  /* Sign */
   while (*ptr == '0') ptr++;			/* Skip leading zeros. */
-  while (isdigit((int)*ptr)) ptr++, digits++;	/* digits */
+  while (*ptr >= '0' && *ptr <= '9') ptr++, digits++;	/* digits */
   if (*ptr == '.') ptr++;			/* decimal point */
-  while (isdigit((int)*ptr)) ptr++, strscale++;	/* digits */
+  while (*ptr >= '0' && *ptr <= '9') ptr++, strscale++;	/* digits */
   if ((*ptr != '\0') || (digits+strscale == 0))
     {
       *num = bc_copy_num (BCG(_zero_));
