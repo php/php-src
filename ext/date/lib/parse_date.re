@@ -238,8 +238,8 @@ static timelib_lookup_table const timelib_reltext_lookup[] = {
 	{ "tenth",    0, 10 },
 	{ "eleventh", 0, 11 },
 	{ "twelfth",  0, 12 },
-	{ "last",     0, -1 },
-	{ "previous", 0, -1 },
+	{ "last",     1, -1 },
+	{ "previous", 1, -1 },
 	{ "this",     1,  0 },
 	{ NULL,       1,  0 }
 };
@@ -909,6 +909,7 @@ year  = [0-9]{1,4};
 year2 = [0-9]{2};
 year4 = [0-9]{4};
 year4withsign = [+-]? [0-9]{4};
+yearx = [+-] [0-9]{5,19};
 
 dayofyear = "00"[1-9] | "0"[1-9][0-9] | [1-2][0-9][0-9] | "3"[0-5][0-9] | "36"[0-6];
 weekofyear = "0"[1-9] | [1-4][0-9] | "5"[0-3];
@@ -951,6 +952,7 @@ iso8601dateslash = year4 "/" monthlz "/" daylz "/"?;
 dateslash        = year4 "/" month "/" day;
 iso8601date4     = year4withsign "-" monthlz "-" daylz;
 iso8601date2     = year2 "-" monthlz "-" daylz;
+iso8601datex     = yearx "-" monthlz "-" daylz;
 gnudateshorter   = year4 "-" month;
 gnudateshort     = year "-" month "-" day;
 pointeddate4     = day [.\t-] month [.-] year4;
@@ -1350,6 +1352,18 @@ weekdayof        = (reltextnumber|reltexttext) space (dayfull|dayabbr) space 'of
 		s->time->m = timelib_get_nr((char **) &ptr, 2);
 		s->time->d = timelib_get_nr((char **) &ptr, 2);
 		TIMELIB_PROCESS_YEAR(s->time->y, length);
+		TIMELIB_DEINIT;
+		return TIMELIB_ISO_DATE;
+	}
+
+	iso8601datex
+	{
+		DEBUG_OUTPUT("iso8601datex");
+		TIMELIB_INIT;
+		TIMELIB_HAVE_DATE();
+		s->time->y = timelib_get_unsigned_nr((char **) &ptr, 19);
+		s->time->m = timelib_get_nr((char **) &ptr, 2);
+		s->time->d = timelib_get_nr((char **) &ptr, 2);
 		TIMELIB_DEINIT;
 		return TIMELIB_ISO_DATE;
 	}
@@ -2235,18 +2249,15 @@ timelib_time *timelib_parse_from_format_with_map(char *format, char *string, siz
 				break;
 			case TIMELIB_FORMAT_EPOCH_SECONDS: /* epoch seconds */
 				TIMELIB_CHECK_SIGNED_NUMBER;
-				TIMELIB_HAVE_RELATIVE();
 				tmp = timelib_get_unsigned_nr((char **) &ptr, 24);
-				s->time->y = 1970;
-				s->time->m = 1;
-				s->time->d = 1;
-				s->time->h = s->time->i = s->time->s = 0;
-				s->time->relative.s += tmp;
+				s->time->sse = tmp;
 				s->time->is_localtime = 1;
 				s->time->zone_type = TIMELIB_ZONETYPE_OFFSET;
 				s->time->z = 0;
 				s->time->dst = 0;
+				timelib_update_from_sse(s->time);
 				break;
+
 			case TIMELIB_FORMAT_ANY_SEPARATOR: /* separation symbol */
 				if (timelib_lookup_format(*ptr, format_map) == TIMELIB_FORMAT_SEPARATOR) {
 					++ptr;
