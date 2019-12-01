@@ -32,13 +32,6 @@ NoNewPrivileges=true
 # but no physical devices such as /dev/sda.
 PrivateDevices=true
 
-# Required for dropping privileges and running as a different user
-CapabilityBoundingSet=CAP_SETGID CAP_SETUID
-
-# Attempts to create memory mappings that are writable and executable at the same time,
-# or to change existing memory mappings to become executable are prohibited.
-MemoryDenyWriteExecute=true
-
 # Explicit module loading will be denied. This allows to turn off module load and unload
 # operations on modular kernels. It is recommended to turn this on for most services that
 # do not need special file systems or extra kernel modules to work.
