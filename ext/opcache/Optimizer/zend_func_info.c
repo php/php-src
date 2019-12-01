@@ -117,7 +117,7 @@ static const func_info_t func_infos[] = {
 
 	/* ext/standard */
 	FN("constant",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_LONG | MAY_BE_DOUBLE | MAY_BE_STRING | MAY_BE_RESOURCE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
-	F1("bin2hex",                      MAY_BE_FALSE | MAY_BE_STRING),
+	F1("bin2hex",                      MAY_BE_STRING),
 	F1("hex2bin",                      MAY_BE_FALSE | MAY_BE_STRING),
 	F0("sleep",                        MAY_BE_FALSE | MAY_BE_LONG),
 	F0("usleep",                       MAY_BE_NULL | MAY_BE_FALSE),
@@ -167,7 +167,7 @@ static const func_info_t func_infos[] = {
 	F1("hebrevc",                      MAY_BE_STRING),
 	FN("nl2br",                        MAY_BE_STRING),
 	F1("basename",                     MAY_BE_STRING),
-	F1("dirname",                      MAY_BE_NULL | MAY_BE_STRING),
+	F1("dirname",                      MAY_BE_STRING),
 	F1("pathinfo",                     MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING),
 	F1("stripslashes",                 MAY_BE_STRING),
 	F1("stripcslashes",                MAY_BE_STRING),
@@ -197,7 +197,7 @@ static const func_info_t func_infos[] = {
 	FN("str_ireplace",                 MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY | MAY_BE_ARRAY_OF_OBJECT),
 	F1("str_repeat",                   MAY_BE_NULL | MAY_BE_STRING),
 	F1("count_chars",                  MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
-	F1("chunk_split",                  MAY_BE_FALSE | MAY_BE_STRING),
+	F1("chunk_split",                  MAY_BE_STRING),
 	FN("trim",                         MAY_BE_STRING),
 	FN("ltrim",                        MAY_BE_STRING),
 	F1("strip_tags",                   MAY_BE_STRING),
@@ -303,7 +303,7 @@ static const func_info_t func_infos[] = {
 	F1("decbin",                       MAY_BE_STRING),
 	F1("decoct",                       MAY_BE_STRING),
 	F1("dechex",                       MAY_BE_STRING),
-	F1("base_convert",                 MAY_BE_FALSE | MAY_BE_STRING),
+	F1("base_convert",                 MAY_BE_STRING),
 	F1("number_format",                MAY_BE_STRING),
 	F0("fmod",                         MAY_BE_DOUBLE),
 #ifdef HAVE_INET_NTOP
@@ -493,7 +493,6 @@ static const func_info_t func_infos[] = {
 	F1("get_browser",                  MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_OBJECT | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
 	F1("crypt",                        MAY_BE_STRING),
 	FN("opendir",                      MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F0("closedir",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("chdir",                        MAY_BE_FALSE | MAY_BE_TRUE),
 #if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
 	F0("chroot",                       MAY_BE_FALSE | MAY_BE_TRUE),
@@ -556,9 +555,9 @@ static const func_info_t func_infos[] = {
 	FN("key",                          MAY_BE_NULL | MAY_BE_LONG | MAY_BE_STRING),
 	FN("min",                          UNKNOWN_INFO),
 	FN("max",                          UNKNOWN_INFO),
-	FN("array_search",                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG | MAY_BE_STRING),
+	FN("array_search",                 MAY_BE_FALSE | MAY_BE_LONG | MAY_BE_STRING),
 	F1("compact",                      MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
-	F1("array_fill",                   MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ANY),
+	F1("array_fill",                   MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ANY),
 	F1("array_fill_keys",              MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_ARRAY_OF_ANY),
 	FC("range",                        zend_range_info),
 	FN("array_pop",                    UNKNOWN_INFO),
@@ -896,17 +895,17 @@ static const func_info_t func_infos[] = {
 	F1("ob_gzhandler",                          MAY_BE_FALSE | MAY_BE_STRING),
 
 	/* ext/hash */
-	F1("hash",                                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
-	F1("hash_file",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
-	F1("hash_hmac",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("hash",                                  MAY_BE_FALSE | MAY_BE_STRING),
+	F1("hash_file",                             MAY_BE_FALSE | MAY_BE_STRING),
+	F1("hash_hmac",                             MAY_BE_FALSE | MAY_BE_STRING),
 	F1("hash_hmac_algos",                       MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
-	F1("hash_hmac_file",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
-	F1("hash_hkdf",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
-	F1("hash_init",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_OBJECT),
-	F1("hash_final",                            MAY_BE_NULL | MAY_BE_STRING),
+	F1("hash_hmac_file",                        MAY_BE_FALSE | MAY_BE_STRING),
+	F1("hash_hkdf",                             MAY_BE_STRING),
+	F1("hash_init",                             MAY_BE_OBJECT),
+	F1("hash_final",                            MAY_BE_STRING),
 	F1("hash_copy",                             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_OBJECT),
 	F1("hash_algos",                            MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
-	F1("hash_pbkdf2",                           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("hash_pbkdf2",                           MAY_BE_STRING),
 	F1("mhash_keygen_s2k",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F0("mhash_get_block_size",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 	F1("mhash_get_hash_name",                   MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
@@ -1097,17 +1096,16 @@ static const func_info_t func_infos[] = {
 	F1("bcadd",									MAY_BE_STRING),
 	F1("bcsub",									MAY_BE_STRING),
 	F1("bcmul",									MAY_BE_STRING),
-	F1("bcdiv",									MAY_BE_NULL | MAY_BE_STRING),
-	F1("bcmod",									MAY_BE_NULL | MAY_BE_STRING),
-	F1("bcpowmod",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("bcdiv",									MAY_BE_STRING),
+	F1("bcmod",									MAY_BE_STRING),
+	F1("bcpowmod",								MAY_BE_FALSE | MAY_BE_STRING),
 	F1("bcpow",									MAY_BE_STRING),
-	F1("bcsqrt",								MAY_BE_NULL | MAY_BE_STRING),
+	F1("bcsqrt",								MAY_BE_STRING),
 
 	/* ext/exif */
-	F1("exif_tagname",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
-	F1("exif_read_data",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
-	F1("exif_thumbnail",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
-	F0("exif_imagetype",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F1("exif_tagname",							MAY_BE_FALSE | MAY_BE_STRING),
+	F1("exif_read_data",						MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
+	F1("exif_thumbnail",						MAY_BE_FALSE | MAY_BE_STRING),
 
 	/* ext/filter */
 	F0("filter_has_var",						MAY_BE_FALSE | MAY_BE_TRUE),
@@ -1116,7 +1114,6 @@ static const func_info_t func_infos[] = {
 	F1("filter_input_array",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("filter_var_array",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY),
 	F1("filter_list",							MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING),
-	F0("filter_id",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 
 	/* ext/gettext */
 	F1("textdomain",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
@@ -1124,7 +1121,7 @@ static const func_info_t func_infos[] = {
 	F1("_",										MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("dgettext",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F1("dcgettext",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
-	F1("bindtextdomain",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("bindtextdomain",						MAY_BE_FALSE | MAY_BE_STRING),
 #if HAVE_NGETTEXT
 	F1("ngettext",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 #endif
@@ -1132,7 +1129,7 @@ static const func_info_t func_infos[] = {
 	F1("dcngettext",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 #endif
 #if HAVE_BIND_TEXTDOMAIN_CODESET
-	F1("bind_textdomain_codeset",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("bind_textdomain_codeset",				MAY_BE_FALSE | MAY_BE_STRING),
 #endif
 
 	/* ext/fileinfo */
