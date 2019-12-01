@@ -32,6 +32,9 @@ NoNewPrivileges=true
 # but no physical devices such as /dev/sda.
 PrivateDevices=true
 
+# Required for dropping privileges for running as a different user and changin owner and root.
+CapabilityBoundingSet=CAP_CHOWN CAP_SETGID CAP_SETUID CAP_SYS_CHROOT
+
 # Explicit module loading will be denied. This allows to turn off module load and unload
 # operations on modular kernels. It is recommended to turn this on for most services that
 # do not need special file systems or extra kernel modules to work.
