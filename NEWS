@@ -15,6 +15,7 @@ PHP                                                                        NEWS
 - FPM:
   . Fixed bug #76601 (Partially working php-fpm ater incomplete reload).
     (Maksim Nikulin)
+  . Fixed bug #78889 (php-fpm service fails to start). (Jakub Zelenka)
 
 - OPcache:
   . Fixed $x = (bool)$x; with opcache (should emit undeclared variable notice).
