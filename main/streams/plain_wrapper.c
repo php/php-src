@@ -125,11 +125,11 @@ typedef struct {
 	FILE *file;
 	int fd;					/* underlying file descriptor */
 	unsigned is_process_pipe:1;	/* use pclose instead of fclose */
-	unsigned is_seekable:1;		/* don't try and seek, if not set */
-	unsigned cached_fstat:1;	/* sb is valid */
 	unsigned is_pipe:1;		/* stream is an actual pipe, currently Windows only*/
+	unsigned cached_fstat:1;	/* sb is valid */
 	unsigned is_pipe_blocking:1; /* allow blocking read() on pipes, currently Windows only */
 	unsigned no_forced_fstat:1;  /* Use fstat cache even if forced */
+	unsigned is_seekable:1;		/* don't try and seek, if not set */
 	unsigned _reserved:26;
 
 	int lock_flag;			/* stores the lock state */
@@ -249,6 +249,7 @@ static void detect_is_seekable(php_stdio_stream_data *self) {
 #if defined(S_ISFIFO) && defined(S_ISCHR)
 	if (self->fd >= 0 && do_fstat(self, 0) == 0) {
 		self->is_seekable = !(S_ISFIFO(self->sb.st_mode) || S_ISCHR(self->sb.st_mode));
+		self->is_pipe = S_ISFIFO(self->sb.st_mode);
 	}
 #elif defined(PHP_WIN32)
 	zend_uintptr_t handle = _get_osfhandle(self->fd);
