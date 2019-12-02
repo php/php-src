@@ -342,10 +342,13 @@ PHP_FUNCTION(pack)
 				if (arg < 0) {
 					arg = num_args - currentarg;
 				}
-
+				if (currentarg > INT_MAX - arg) {
+					goto too_few_args;
+				}
 				currentarg += arg;
 
 				if (currentarg > num_args) {
+too_few_args:
 					efree(formatcodes);
 					efree(formatargs);
 					php_error_docref(NULL, E_WARNING, "Type %c: too few arguments", code);
