@@ -125,11 +125,12 @@ typedef struct {
 	FILE *file;
 	int fd;					/* underlying file descriptor */
 	unsigned is_process_pipe:1;	/* use pclose instead of fclose */
-	unsigned is_pipe:1;			/* don't try and seek */
+	unsigned is_pipe:1;		/* stream is an actual pipe, currently Windows only*/
 	unsigned cached_fstat:1;	/* sb is valid */
 	unsigned is_pipe_blocking:1; /* allow blocking read() on pipes, currently Windows only */
 	unsigned no_forced_fstat:1;  /* Use fstat cache even if forced */
-	unsigned _reserved:28;
+	unsigned is_seekable:1;		/* don't try and seek, if not set */
+	unsigned _reserved:26;
 
 	int lock_flag;			/* stores the lock state */
 	zend_string *temp_name;	/* if non-null, this is the path to a temporary file that
@@ -173,6 +174,7 @@ static php_stream *_php_stream_fopen_from_fd_int(int fd, const char *mode, const
 	self = pemalloc_rel_orig(sizeof(*self), persistent_id);
 	memset(self, 0, sizeof(*self));
 	self->file = NULL;
+	self->is_seekable = 1;
 	self->is_pipe = 0;
 	self->lock_flag = LOCK_UN;
 	self->is_process_pipe = 0;
@@ -192,6 +194,7 @@ static php_stream *_php_stream_fopen_from_file_int(FILE *file, const char *mode 
 	self = emalloc_rel_orig(sizeof(*self));
 	memset(self, 0, sizeof(*self));
 	self->file = file;
+	self->is_seekable = 1;
 	self->is_pipe = 0;
 	self->lock_flag = LOCK_UN;
 	self->is_process_pipe = 0;
@@ -242,10 +245,11 @@ PHPAPI php_stream *_php_stream_fopen_tmpfile(int dummy STREAMS_DC)
 	return php_stream_fopen_temporary_file(NULL, "php", NULL);
 }
 
-static void detect_is_pipe(php_stdio_stream_data *self) {
+static void detect_is_seekable(php_stdio_stream_data *self) {
 #if defined(S_ISFIFO) && defined(S_ISCHR)
 	if (self->fd >= 0 && do_fstat(self, 0) == 0) {
-		self->is_pipe = S_ISFIFO(self->sb.st_mode) || S_ISCHR(self->sb.st_mode);
+		self->is_seekable = !(S_ISFIFO(self->sb.st_mode) || S_ISCHR(self->sb.st_mode));
+		self->is_pipe = S_ISFIFO(self->sb.st_mode);
 	}
 #elif defined(PHP_WIN32)
 	zend_uintptr_t handle = _get_osfhandle(self->fd);
@@ -253,7 +257,8 @@ static void detect_is_pipe(php_stdio_stream_data *self) {
 	if (handle != (zend_uintptr_t)INVALID_HANDLE_VALUE) {
 		DWORD file_type = GetFileType((HANDLE)handle);
 
-		self->is_pipe = file_type == FILE_TYPE_PIPE || file_type == FILE_TYPE_CHAR;
+		self->is_seekable = !(file_type == FILE_TYPE_PIPE || file_type == FILE_TYPE_CHAR);
+		self->is_pipe = file_type == FILE_TYPE_PIPE;
 	}
 #endif
 }
@@ -265,8 +270,8 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 	if (stream) {
 		php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
 
-		detect_is_pipe(self);
-		if (self->is_pipe) {
+		detect_is_seekable(self);
+		if (!self->is_seekable) {
 			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
 			stream->position = -1;
 		} else {
@@ -275,7 +280,7 @@ PHPAPI php_stream *_php_stream_fopen_from_fd(int fd, const char *mode, const cha
 			/* FIXME: Is this code still needed? */
 			if (stream->position == (zend_off_t)-1 && errno == ESPIPE) {
 				stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
-				self->is_pipe = 1;
+				self->is_seekable = 0;
 			}
 #endif
 		}
@@ -291,8 +296,8 @@ PHPAPI php_stream *_php_stream_fopen_from_file(FILE *file, const char *mode STRE
 	if (stream) {
 		php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
 
-		detect_is_pipe(self);
-		if (self->is_pipe) {
+		detect_is_seekable(self);
+		if (!self->is_seekable) {
 			stream->flags |= PHP_STREAM_FLAG_NO_SEEK;
 			stream->position = -1;
 		} else {
@@ -311,6 +316,7 @@ PHPAPI php_stream *_php_stream_fopen_from_pipe(FILE *file, const char *mode STRE
 	self = emalloc_rel_orig(sizeof(*self));
 	memset(self, 0, sizeof(*self));
 	self->file = file;
+	self->is_seekable = 0;
 	self->is_pipe = 1;
 	self->lock_flag = LOCK_UN;
 	self->is_process_pipe = 1;
@@ -355,7 +361,7 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 	} else {
 
 #if HAVE_FLUSHIO
-		if (!data->is_pipe && data->last_op == 'r') {
+		if (data->is_seekable && data->last_op == 'r') {
 			zend_fseek(data->file, 0, SEEK_CUR);
 		}
 		data->last_op = 'w';
@@ -430,7 +436,7 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 
 	} else {
 #if HAVE_FLUSHIO
-		if (!data->is_pipe && data->last_op == 'w')
+		if (data->is_seekable && data->last_op == 'w')
 			zend_fseek(data->file, 0, SEEK_CUR);
 		data->last_op = 'r';
 #endif
@@ -531,8 +537,8 @@ static int php_stdiop_seek(php_stream *stream, zend_off_t offset, int whence, ze
 
 	assert(data != NULL);
 
-	if (data->is_pipe) {
-		php_error_docref(NULL, E_WARNING, "cannot seek on a pipe");
+	if (!data->is_seekable) {
+		php_error_docref(NULL, E_WARNING, "cannot seek on this stream");
 		return -1;
 	}
 
