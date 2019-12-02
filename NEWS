@@ -30,6 +30,8 @@ PHP                                                                        NEWS
   . Fixed bug #78840 (imploding $GLOBALS crashes). (cmb)
   . Fixed bug #78833 (Integer overflow in pack causes out-of-bound access).
     (cmb)
+  . Fixed bug #78814 (strip_tags allows / in tag name => whitelist bypass).
+    (cmb)
 
 28 Nov 2019, PHP 7.4.0
 
