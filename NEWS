@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2019, PHP 7.2.26
+05 Dec 2019, PHP 7.2.26RC1
 
 - GD:
   . Fixed bug #78849 (GD build broken with -D SIGNED_COMPARE_SLOW). (cmb)
