@@ -1,8 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.14
-
-19 Dec 2019, PHP 7.3.13
+05 Dec 2019, PHP 7.3.13RC1
 
 - Core:
   . Fixed bug #78787 (Segfault with trait overriding inherited private shadow
