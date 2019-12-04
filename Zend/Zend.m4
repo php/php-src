@@ -148,8 +148,6 @@ _LT_AC_TRY_DLOPEN_SELF([
 dnl Checks for library functions.
 AC_CHECK_FUNCS(getpid kill finite sigsetjmp)
 
-AC_CHECK_DECLS([isfinite, isnan, isinf], [], [], [[#include <math.h>]])
-
 ZEND_CHECK_FLOAT_PRECISION
 
 dnl Test whether double cast to long preserves least significant bits.

@@ -71,36 +71,9 @@ extern "C++" {
 #else
 #include <math.h>
 
-#ifndef zend_isnan
-#if HAVE_DECL_ISNAN
 #define zend_isnan(a) isnan(a)
-#elif defined(HAVE_FPCLASS)
-#define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
-#else
-#define zend_isnan(a) ((a) != (a))
-#endif
-#endif
-
-#if HAVE_DECL_ISINF
 #define zend_isinf(a) isinf(a)
-#elif defined(INFINITY)
-/* Might not work, but is required by ISO C99 */
-#define zend_isinf(a) (((a)==INFINITY || (a)==-INFINITY)?1:0)
-#elif defined(HAVE_FPCLASS)
-#define zend_isinf(a) ((fpclass(a) == FP_PINF) || (fpclass(a) == FP_NINF))
-#else
-#define zend_isinf(a) 0
-#endif
-
-#if HAVE_DECL_ISFINITE
 #define zend_finite(a) isfinite(a)
-#elif defined(HAVE_FINITE)
-#define zend_finite(a) finite(a)
-#elif defined(fpclassify)
-#define zend_finite(a) ((fpclassify((a))!=FP_INFINITE&&fpclassify((a))!=FP_NAN)?1:0)
-#else
-#define zend_finite(a) (zend_isnan(a) ? 0 : zend_isinf(a) ? 0 : 1)
-#endif
 
 #endif
 #endif /* ifndef ZEND_ACCONFIG_H_NO_C_PROTOS */
