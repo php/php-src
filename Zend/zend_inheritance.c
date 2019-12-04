@@ -966,7 +966,7 @@ inheritance_status property_types_compatible(
 	if (status1 == INHERITANCE_ERROR || status2 == INHERITANCE_ERROR) {
 		return INHERITANCE_ERROR;
 	}
-	ZEND_ASSERT(status1 == INHERITANCE_UNRESOLVED && status2 == INHERITANCE_UNRESOLVED);
+	ZEND_ASSERT(status1 == INHERITANCE_UNRESOLVED || status2 == INHERITANCE_UNRESOLVED);
 	return INHERITANCE_UNRESOLVED;
 }
 
