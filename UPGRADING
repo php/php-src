@@ -110,6 +110,11 @@ PHP 7.4 UPGRADE NOTES
     to serialize them. Serialization for reflection objects was never
     supported and resulted in corrupted reflection objects. It has been
     explicitly prohibited now.
+  . The signature of the ReflectionMethod::getClosure() method changed to
+    account for existing behavior with static methods:
+        Before: ReflectionMethod::getClosure($object)
+        After: ReflectionMethod::getClosure($object = null)
+    The new signature is also (LSP) compatible with older PHP versions.
 
 - SPL:
   . Calling get_object_vars() on an ArrayObject instance will now always return
