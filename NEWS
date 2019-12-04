@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     (Antony Dovgal, Dmitry)
   . Fixed bug #78296 (is_file fails to detect file). (cmb)
   . Fixed bug #78883 (fgets(STDIN) fails on Windows). (cmb)
+  . Fixed bug #78898 (call_user_func(['parent', ...]) fails while other
+    succeed). (Nikita)
 
 - GD:
   . Fixed bug #78849 (GD build broken with -D SIGNED_COMPARE_SLOW). (cmb)
