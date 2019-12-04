@@ -61,21 +61,6 @@ AH_BOTTOM([
 
 #include <string.h>
 
-#if defined(__cplusplus) && __cplusplus >= 201103L
-extern "C++" {
-#include <cmath>
-#define zend_isnan std::isnan
-#define zend_isinf std::isinf
-#define zend_finite std::isfinite
-}
-#else
-#include <math.h>
-
-#define zend_isnan(a) isnan(a)
-#define zend_isinf(a) isinf(a)
-#define zend_finite(a) isfinite(a)
-
-#endif
 #endif /* ifndef ZEND_ACCONFIG_H_NO_C_PROTOS */
 
 #endif /* PHP_CONFIG_H */
