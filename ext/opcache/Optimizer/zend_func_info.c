@@ -534,7 +534,7 @@ static const func_info_t func_infos[] = {
 	F0("var_dump",                     MAY_BE_NULL),
 	F1("var_export",                   MAY_BE_NULL | MAY_BE_STRING),
 	F0("debug_zval_dump",              MAY_BE_NULL),
-	F1("print_r",                      MAY_BE_FALSE | MAY_BE_STRING),
+	F1("print_r",                      MAY_BE_TRUE | MAY_BE_STRING),
 	F0("memory_get_usage",             MAY_BE_FALSE | MAY_BE_LONG),
 	F0("memory_get_peak_usage",        MAY_BE_FALSE | MAY_BE_LONG),
 	F0("register_shutdown_function",   MAY_BE_NULL | MAY_BE_FALSE),
