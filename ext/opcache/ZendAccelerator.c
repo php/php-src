@@ -3389,6 +3389,13 @@ static void get_unlinked_dependency(zend_class_entry *ce, const char **kind, con
 			*name = ZSTR_VAL(ce->parent_name);
 			return;
 		}
+#ifdef ZEND_WIN32
+		if (p->type == ZEND_INTERNAL_CLASS) {
+			*kind = "Internal parent (Windows only limitation)";
+			*name = ZSTR_VAL(ce->parent_name);
+			return;
+		}
+#endif
 		if (!(p->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 			*kind = "Parent with unresolved initializers ";
 			*name = ZSTR_VAL(ce->parent_name);
