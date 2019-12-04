@@ -2933,11 +2933,13 @@ static zend_always_inline int zend_is_callable_check_func(int check_flags, zval 
 		     ((fcc->object && fcc->calling_scope->__call) ||
 		      (!fcc->object && fcc->calling_scope->__callstatic)))) {
 			scope = zend_get_executed_scope();
-			if (fcc->function_handler->common.scope != scope
-			 || !zend_check_protected(zend_get_function_root_class(fcc->function_handler), scope)) {
-				retval = 0;
-				fcc->function_handler = NULL;
-				goto get_function_via_handler;
+			if (fcc->function_handler->common.scope != scope) {
+				if ((fcc->function_handler->common.fn_flags & ZEND_ACC_PRIVATE)
+				 || !zend_check_protected(zend_get_function_root_class(fcc->function_handler), scope)) {
+					retval = 0;
+					fcc->function_handler = NULL;
+					goto get_function_via_handler;
+				}
 			}
 		}
 	} else {
