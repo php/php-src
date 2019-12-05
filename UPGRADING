@@ -287,6 +287,12 @@ PHP 8.0 UPGRADE NOTES
     generated salt is used instead.
   . The quotemeta() function will now return an empty string if an empty string
     was passed. Previously false was returned.
+  . hebrevc() has been removed.
+  . convert_cyr_string() has been removed.
+  . money_format() has been removed.
+  . ezmlm_hash() has been removed.
+  . get_magic_quotes_gpc() and get_magic_quotes_gpc_runtime() has been removed.
+  . FILTER_SANITIZE_MAGIC_QUOTES has been removed.
 
 - tidy:
   . The $use_include_path parameter, which was not used internally, has been
