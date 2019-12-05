@@ -2164,11 +2164,6 @@ static zval *value_from_type_and_range(sccp_ctx *ctx, int var_num, zval *tmp) {
 	zend_ssa *ssa = ctx->scdf.ssa;
 	zend_ssa_var_info *info = &ssa->var_info[var_num];
 
-	if (ssa->vars[var_num].var >= ctx->scdf.op_array->last_var) {
-		// TODO Non-CVs may cause issues with FREEs
-		return NULL;
-	}
-
 	if (info->type & MAY_BE_UNDEF) {
 		return NULL;
 	}
