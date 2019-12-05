@@ -124,6 +124,7 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_IN_ARRAY:
 		case ZEND_FUNC_NUM_ARGS:
 		case ZEND_FUNC_GET_ARGS:
+		case ZEND_ARRAY_KEY_EXISTS:
 			/* No side effects */
 			return 0;
 		case ZEND_ROPE_END:

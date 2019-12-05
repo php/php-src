@@ -4634,6 +4634,14 @@ int zend_may_throw(const zend_op *opline, const zend_op_array *op_array, zend_ss
 				default:
 					return 1;
 			}
+		case ZEND_ARRAY_KEY_EXISTS:
+			if ((t2 & MAY_BE_ANY) != MAY_BE_ARRAY) {
+				return 1;
+			}
+			if ((t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+				return 1;
+			}
+			return 0;
 		default:
 			return 1;
 	}
