@@ -435,7 +435,6 @@ static const func_info_t func_infos[] = {
 	F1("filetype",                     MAY_BE_FALSE | MAY_BE_STRING),
 	F1("stat",                         MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
 	F1("lstat",                        MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_STRING),
-	F0("realpath_cache_size",          MAY_BE_LONG),
 	F1("realpath_cache_get",           MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ARRAY),
 #ifdef HAVE_SYSLOG_H
 	F0("syslog",                       MAY_BE_TRUE),
@@ -566,7 +565,6 @@ static const func_info_t func_infos[] = {
 	F1("date_sun_info",                         MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE | MAY_BE_ARRAY_OF_LONG),
 
 	/* ext/preg */
-	F0("preg_match_all",			            MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 	FN("preg_replace",			                MAY_BE_NULL | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING),
 	FN("preg_replace_callback",	                MAY_BE_NULL | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING),
 	F1("preg_filter",				            MAY_BE_NULL | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING),
@@ -736,10 +734,7 @@ static const func_info_t func_infos[] = {
 	/* ext/iconv */
 	F1("iconv",                                 MAY_BE_FALSE | MAY_BE_STRING),
 	F1("iconv_get_encoding",                    MAY_BE_FALSE | MAY_BE_STRING | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING),
-	F0("iconv_strlen",                          MAY_BE_FALSE | MAY_BE_LONG),
 	F1("iconv_substr",                          MAY_BE_FALSE | MAY_BE_STRING),
-	F0("iconv_strpos",                          MAY_BE_FALSE | MAY_BE_LONG),
-	F0("iconv_strrpos",                         MAY_BE_FALSE | MAY_BE_LONG),
 	F1("iconv_mime_encode",                     MAY_BE_FALSE | MAY_BE_STRING),
 	F1("iconv_mime_decode",                     MAY_BE_FALSE | MAY_BE_STRING),
 	F1("iconv_mime_decode_headers",             MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
@@ -1016,61 +1011,49 @@ static const func_info_t func_infos[] = {
 
 	/* ext/gd */
 	F1("gd_info",								MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE),
-	F0("imageloadfont",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
-	F1("imagecreatetruecolor",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F0("imagecolorallocatealpha",				MAY_BE_FALSE | MAY_BE_LONG),
-	F0("imagecolorresolvealpha",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
-	F0("imagecolorclosestalpha",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
-	F0("imagecolorexactalpha",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F1("imagecreatetruecolor",					MAY_BE_FALSE | MAY_BE_OBJECT),
 #ifdef PHP_WIN32
-	F1("imagegrabwindow",						MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F1("imagegrabscreen",						MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("imagegrabwindow",						MAY_BE_FALSE | MAY_BE_OBJECT),
+	F1("imagegrabscreen",						MAY_BE_FALSE | MAY_BE_OBJECT),
 #endif
-	F1("imagerotate",							MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F1("imagecreate",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F1("imagecreatefromstring",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F1("imagecreatefromgif",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("imagerotate",							MAY_BE_FALSE | MAY_BE_OBJECT),
+	F1("imagecreate",							MAY_BE_FALSE | MAY_BE_OBJECT),
+	F1("imagecreatefromstring",					MAY_BE_FALSE | MAY_BE_OBJECT),
+	F1("imagecreatefromgif",					MAY_BE_FALSE | MAY_BE_OBJECT),
 #ifdef HAVE_GD_JPG
-	F1("imagecreatefromjpeg",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("imagecreatefromjpeg",					MAY_BE_FALSE | MAY_BE_OBJECT),
 #endif
 #ifdef HAVE_GD_PNG
-	F1("imagecreatefrompng",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("imagecreatefrompng",					MAY_BE_FALSE | MAY_BE_OBJECT),
 #endif
 #ifdef HAVE_GD_WEBP
-	F1("imagecreatefromwebp",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F0("imagewebp",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F1("imagecreatefromwebp",					MAY_BE_FALSE | MAY_BE_OBJECT),
 #endif
-	F1("imagecreatefromxbm",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("imagecreatefromxbm",					MAY_BE_FALSE | MAY_BE_OBJECT),
 #if defined(HAVE_GD_XPM)
-	F1("imagecreatefromxpm",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("imagecreatefromxpm",					MAY_BE_FALSE | MAY_BE_OBJECT),
 #endif
-	F1("imagecreatefromwbmp",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F1("imagecreatefromgd",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F1("imagecreatefromgd2",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F1("imagecreatefromgd2part",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("imagecreatefromwbmp",					MAY_BE_FALSE | MAY_BE_OBJECT),
+	F1("imagecreatefromgd",						MAY_BE_FALSE | MAY_BE_OBJECT),
+	F1("imagecreatefromgd2",					MAY_BE_FALSE | MAY_BE_OBJECT),
+	F1("imagecreatefromgd2part",				MAY_BE_FALSE | MAY_BE_OBJECT),
 #if defined(HAVE_GD_BMP)
-	F1("imagecreatefrombmp",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("imagecreatefrombmp",					MAY_BE_FALSE | MAY_BE_OBJECT),
 #endif
-	F0("imagecolorallocate",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
-	F0("imagecolorat",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
-	F0("imagecolorclosest",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
-	F0("imagecolorclosesthwb",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
-	F0("imagecolorresolve",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
-	F0("imagecolorexact",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 	F0("imagecolorset",							MAY_BE_NULL | MAY_BE_FALSE),
-	F1("imagecolorsforindex",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY |  MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG),
+	F1("imagecolorsforindex",					MAY_BE_FALSE | MAY_BE_ARRAY |  MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG),
 	F1("imagegetclip",							MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
-	F1("imageftbbox",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
+	F1("imageftbbox",							MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
 	F1("imagefttext",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
 	F1("imagettfbbox",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
 	F1("imagettftext",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
-	F1("imagecrop",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F1("imagecropauto",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F1("imagescale",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F1("imageaffine",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F1("imageaffinematrixget",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_DOUBLE),
-	F1("imageaffinematrixconcat",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_DOUBLE),
-	F1("imageresolution",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
+	F1("imagecrop",								MAY_BE_FALSE | MAY_BE_OBJECT),
+	F1("imagecropauto",							MAY_BE_FALSE | MAY_BE_OBJECT),
+	F1("imagescale",							MAY_BE_FALSE | MAY_BE_OBJECT),
+	F1("imageaffine",							MAY_BE_FALSE | MAY_BE_OBJECT),
+	F1("imageaffinematrixget",					MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_DOUBLE),
+	F1("imageaffinematrixconcat",				MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_DOUBLE),
+	F1("imageresolution",						MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
 
 	/* ext/spl */
 	F1("class_implements",						MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING),
