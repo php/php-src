@@ -33,6 +33,7 @@
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
 #include "ext/standard/php_mt_rand.h"
+#include "basic_functions_arginfo.h"
 
 #ifdef PHP_WIN32
 #include "win32/php_win32_globals.h"
@@ -524,8 +525,6 @@ ZEND_END_ARG_INFO()
 #endif
 /* }}} */
 /* }}} */
-
-#include "basic_functions_arginfo.h"
 
 static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(constant,														arginfo_constant)
