@@ -422,9 +422,6 @@ static const func_info_t func_infos[] = {
 	F1("get_browser",                  MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_OBJECT | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
 	F1("crypt",                        MAY_BE_STRING),
 	FN("opendir",                      MAY_BE_FALSE | MAY_BE_RESOURCE),
-#if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
-	F0("chroot",                       MAY_BE_FALSE | MAY_BE_TRUE),
-#endif
 	F1("getcwd",                       MAY_BE_FALSE | MAY_BE_STRING),
 	F1("readdir",                      MAY_BE_FALSE | MAY_BE_STRING),
 	F1("dir",                          MAY_BE_FALSE | MAY_BE_OBJECT),
