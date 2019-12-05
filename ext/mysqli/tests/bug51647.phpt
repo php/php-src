@@ -12,6 +12,9 @@ if ($IS_MYSQLND && !extension_loaded("openssl"))
 if (!($link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
 	die(sprintf("skip Connect failed, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
+if (false === strpos($link->host_info, 'TCP/IP'))
+	die(sprintf("skip SSL only supported on TCP/IP"));
+
 $row = NULL;
 if ($res = $link->query('SHOW VARIABLES LIKE "have_ssl"')) {
 	$row = $res->fetch_row();
