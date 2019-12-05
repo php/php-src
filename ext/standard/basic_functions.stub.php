@@ -580,12 +580,11 @@ function chunk_split(string $str, int $chunklen = 76, string $ending = "\r\n"): 
 function substr(string $str, int $start, ?int $length = null): string|false {}
 
 /**
- * @param mixed $str
- * @param mixed $replace
  * @param mixed $start
  * @param mixed $length
  */
-function substr_replace($str, $replace, $start, $length = UNKNOWN): string|array|false {}
+function substr_replace(
+    string|array $str, string|array $replace, $start, $length = UNKNOWN): string|array|false {}
 
 function quotemeta(string $str): string {}
 
@@ -620,18 +619,18 @@ function stripslashes(string $str): string {}
 /**
  * @param string|array $search
  * @param string|array $replace
- * @param string|array $subject
  * @param int $replace_count
  */
-function str_replace($search, $replace, $subject, &$replace_count = UNKNOWN): string|array {}
+function str_replace(
+    $search, $replace, string|array $subject, &$replace_count = UNKNOWN): string|array {}
 
 /**
  * @param string|array $search
  * @param string|array $replace
- * @param string|array $subject
  * @param int $replace_count
  */
-function str_ireplace($search, $replace, $subject, &$replace_count = UNKNOWN): string|array {}
+function str_ireplace(
+    $search, $replace, string|array $subject, &$replace_count = UNKNOWN): string|array {}
 
 function hebrev(string $str, int $max_chars_per_line = 0): string {}
 

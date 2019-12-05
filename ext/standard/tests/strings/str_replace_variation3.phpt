@@ -95,10 +95,16 @@ var_dump($count);
 echo "\n-- Testing Resources --\n";
 $resource1 = fopen( __FILE__, "r" );
 $resource2 = opendir( "." );
-var_dump(str_replace("stream", "FOUND", $resource1, $count));
-var_dump($count);
-var_dump(str_replace("stream", "FOUND", $resource2, $count));
-var_dump($count);
+try {
+    var_dump(str_replace("stream", "FOUND", $resource1, $count));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump(str_replace("stream", "FOUND", $resource2, $count));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 
 echo "\n-- Testing a longer and heredoc string --\n";
@@ -194,10 +200,8 @@ array(2) {
 int(1)
 
 -- Testing Resources --
-string(%d) "Resource id #%d"
-int(0)
-string(%d) "Resource id #%d"
-int(0)
+str_replace() expects parameter 3 to be string or array, resource given
+str_replace() expects parameter 3 to be string or array, resource given
 
 -- Testing a longer and heredoc string --
 string(623) "FOUNDghijklmnopqrstuvwxyz0123456789FOUNDghijklmnopqrstuvwxyz0123456789
