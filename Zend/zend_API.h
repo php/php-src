@@ -1129,6 +1129,7 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_OBJECT,	"object") \
 	_(Z_EXPECTED_DOUBLE,	"float") \
 	_(Z_EXPECTED_NUMBER,	"int or float") \
+	_(Z_EXPECTED_STRING_OR_ARRAY, "string or array") \
 
 #define Z_EXPECTED_TYPE_ENUM(id, str) id,
 #define Z_EXPECTED_TYPE_STR(id, str)  str,
@@ -1535,6 +1536,14 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 #define Z_PARAM_VARIADIC(spec, dest, dest_num) \
 	Z_PARAM_VARIADIC_EX(spec, dest, dest_num, 0)
 
+#define Z_PARAM_STR_OR_ARRAY_HT(dest_str, dest_ht) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_str_or_array_ht(_arg, &dest_str, &dest_ht))) { \
+		_expected_type = Z_EXPECTED_STRING_OR_ARRAY; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
+
 /* End of new parameter parsing API */
 
 /* Inlined implementations shared by new and old parameter parsing APIs */
@@ -1751,6 +1760,22 @@ static zend_always_inline void zend_parse_arg_zval(zval *arg, zval **dest, int c
 static zend_always_inline void zend_parse_arg_zval_deref(zval *arg, zval **dest, int check_null)
 {
 	*dest = (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) ? NULL : arg;
+}
+
+static zend_always_inline int zend_parse_arg_str_or_array_ht(
+		zval *arg, zend_string **dest_str, HashTable **dest_ht)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
+		*dest_str = Z_STR_P(arg);
+		*dest_ht = NULL;
+	} else if (EXPECTED(Z_TYPE_P(arg) == IS_ARRAY)) {
+		*dest_ht = Z_ARRVAL_P(arg);
+		*dest_str = NULL;
+	} else {
+		*dest_ht = NULL;
+		return zend_parse_arg_str_slow(arg, dest_str);
+	}
+	return 1;
 }
 
 END_EXTERN_C()
