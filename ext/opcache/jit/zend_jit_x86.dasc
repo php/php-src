@@ -8647,7 +8647,9 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, const zend_op_
 				}
 
 				uint32_t type_mask = ZEND_TYPE_PURE_MASK(type);
-				if (is_power_of_two(type_mask)) {
+				if (type_mask == 0) {
+					|	jmp >8
+				} else if (is_power_of_two(type_mask)) {
 					uint32_t type_code = concrete_type(type_mask);
 					|	cmp byte [r0 + 8], type_code
 					|	jne >8
@@ -8765,7 +8767,9 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zen
 			|	ZVAL_DEREF r0, MAY_BE_REF
 
 			uint32_t type_mask = ZEND_TYPE_PURE_MASK(arg_info->type);
-			if (is_power_of_two(type_mask)) {
+			if (type_mask == 0) {
+				|	jmp >8
+			} else if (is_power_of_two(type_mask)) {
 				uint32_t type_code = concrete_type(type_mask);
 				|	cmp byte [r0 + 8], type_code
 				|	jne >8
@@ -9338,6 +9342,59 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 			ZEND_ASSERT(0);
 		}
 	}
+	return 1;
+}
+
+static zend_bool zend_jit_verify_return_type(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info)
+{
+	zend_arg_info *arg_info = &op_array->arg_info[-1];
+	ZEND_ASSERT(ZEND_TYPE_IS_SET(arg_info->type));
+	zend_jit_addr op1_addr = OP1_ADDR();
+
+	|	LOAD_ZVAL_ADDR r0, op1_addr
+
+	uint32_t type_mask = ZEND_TYPE_PURE_MASK(arg_info->type);
+	if (type_mask == 0) {
+		|	jmp >8
+	} else if (is_power_of_two(type_mask)) {
+		uint32_t type_code = concrete_type(type_mask);
+		|	cmp byte [r0 + 8], type_code
+		|	jne >8
+	} else {
+		|	mov edx, 1
+		|	mov cl, byte [r0 + 8]
+		|	shl edx, cl
+		|	test edx, type_mask
+		|	je >8
+	}
+	|.cold_code
+	|8:
+	|	mov FCARG1a, r0
+	|	mov r0,	EX->run_time_cache
+	|	add r0, opline->op2.num
+	|	LOAD_ADDR FCARG2a, (ptrdiff_t)op_array
+	|.if X64WIN
+		|	LOAD_ADDR CARG3, (ptrdiff_t)arg_info
+		|	mov aword A4, r0
+		|	SAVE_VALID_OPLINE opline
+		|	EXT_CALL zend_jit_verify_return_slow, r0
+	|.elif X64
+		|	LOAD_ADDR CARG3, (ptrdiff_t)arg_info
+		|	mov CARG4, r0
+		|	SAVE_VALID_OPLINE opline
+		|	EXT_CALL zend_jit_verify_return_slow, r0
+	|.else
+		|	push r0
+		|	push (ptrdiff_t)arg_info
+		|	SAVE_VALID_OPLINE opline
+		|	EXT_CALL zend_jit_verify_return_slow, r0
+	|.endif
+	if (!zend_jit_check_exception(Dst)) {
+		return 0;
+	}
+	|	jmp >9
+	|.code
+	|9:
 	return 1;
 }
 

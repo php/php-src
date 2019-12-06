@@ -1141,7 +1141,7 @@ static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execu
 	return value;
 }
 
-static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot)
+static zend_always_inline zend_bool zend_jit_verify_type_common(zval *arg, const zend_op_array *op_array, zend_arg_info *arg_info, void **cache_slot)
 {
 	uint32_t type_mask;
 
@@ -1162,7 +1162,7 @@ static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_arra
 					*cache_slot = ce;
 				}
 				if (instanceof_function(Z_OBJCE_P(arg), ce)) {
-					return;
+					return 1;
 				}
 				cache_slot++;
 			} ZEND_TYPE_LIST_FOREACH_END();
@@ -1177,7 +1177,7 @@ static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_arra
 				*cache_slot = (void *) ce;
 			}
 			if (instanceof_function(Z_OBJCE_P(arg), ce)) {
-				return;
+				return 1;
 			}
 		}
 	}
@@ -1185,16 +1185,29 @@ static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_arra
 builtin_types:
 	type_mask = ZEND_TYPE_FULL_MASK(arg_info->type);
 	if ((type_mask & MAY_BE_CALLABLE) && zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL)) {
-		return;
+		return 1;
 	}
 	if ((type_mask & MAY_BE_ITERABLE) && zend_is_iterable(arg)) {
-		return;
+		return 1;
 	}
 	if (zend_verify_scalar_type_hint(type_mask, arg, ZEND_ARG_USES_STRICT_TYPES(), /* is_internal */ 0)) {
-		return;
+		return 1;
 	}
+	return 0;
+}
 
-	zend_verify_arg_error((zend_function*)op_array, arg_info, arg_num, cache_slot, arg);
+static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot)
+{
+	if (UNEXPECTED(!zend_jit_verify_type_common(arg, op_array, arg_info, cache_slot))) {
+		zend_verify_arg_error((zend_function*)op_array, arg_info, arg_num, cache_slot, arg);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_array *op_array, zend_arg_info *arg_info, void **cache_slot)
+{
+	if (UNEXPECTED(!zend_jit_verify_type_common(arg, op_array, arg_info, cache_slot))) {
+		zend_verify_return_error((zend_function*)op_array, cache_slot, arg);
+	}
 }
 
 static void ZEND_FASTCALL zend_jit_zval_copy_deref_helper(zval *dst, zval *src)
