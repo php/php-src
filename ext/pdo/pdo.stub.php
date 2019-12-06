@@ -129,5 +129,5 @@ class PDOStatement implements Traversable {
     public function setAttribute(int $attribute, $value) {}
 
     /** @return bool */
-    public function setFetchMode(int $mode, ...$params) {}
+    public function setFetchMode(int $mode, $param1 = UNKNOWN, $param2 = UNKNOWN) {}
 }

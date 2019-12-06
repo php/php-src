@@ -125,5 +125,6 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_setFetchMode, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
-	ZEND_ARG_VARIADIC_INFO(0, params)
+	ZEND_ARG_INFO(0, param1)
+	ZEND_ARG_INFO(0, param2)
 ZEND_END_ARG_INFO()
