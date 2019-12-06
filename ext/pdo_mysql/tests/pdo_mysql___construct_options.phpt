@@ -76,9 +76,7 @@ MySQLPDOTest::skip();
 		if (!is_object($db = new PDO($dsn, $user, $pass, array())))
 			printf("[002] Expecting object got %s/%s¸\n", gettype($db), $db);
 
-		do {
-			$invalid = mt_rand(-1000, 1000);
-		} while (isset($valid_options[$invalid]));
+        $invalid = 999;
 		if (is_object($db = new PDO($dsn, $user, $pass, array($invalid => true))))
 			printf("[003] [TODO][CHANGEREQUEST] Please, lets not ignore invalid options and bail out!\n");
 
