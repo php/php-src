@@ -1302,15 +1302,6 @@ static int zend_verify_internal_return_type(zend_function *zf, zval *ret)
 }
 #endif
 
-static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *ret, void **cache_slot)
-{
-	zend_arg_info *ret_info = zf->common.arg_info - 1;
-
-	if (UNEXPECTED(!zend_check_type(ret_info->type, ret, cache_slot, NULL, 1, 0))) {
-		zend_verify_return_error(zf, cache_slot, ret);
-	}
-}
-
 static ZEND_COLD int zend_verify_missing_return_type(const zend_function *zf, void **cache_slot)
 {
 	/* VERIFY_RETURN_TYPE is not emitted for "void" functions, so this is always an error. */
