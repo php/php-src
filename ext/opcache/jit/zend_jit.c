@@ -2739,6 +2739,27 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_VERIFY_RETURN_TYPE:
+						if (opline->op1_type == IS_UNUSED) {
+							/* Always throws */
+							break;
+						}
+						if (opline->op1_type == IS_CONST) {
+							/* TODO Different instruction format, has return value */
+							break;
+						}
+						if (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
+							/* Not worth bothering with */
+							break;
+						}
+						if (OP1_INFO() & MAY_BE_REF) {
+							/* TODO May need reference unwrapping. */
+							break;
+						}
+						if (!zend_jit_verify_return_type(&dasm_state, opline, op_array, OP1_INFO())) {
+							goto jit_failure;
+						}
+						goto done;
 					default:
 						break;
 				}

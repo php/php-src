@@ -1224,7 +1224,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *
 	}
 }
 
-static ZEND_COLD void zend_verify_return_error(
+ZEND_API ZEND_COLD void zend_verify_return_error(
 		const zend_function *zf, void **cache_slot, zval *value)
 {
 	const zend_arg_info *arg_info = &zf->common.arg_info[-1];
