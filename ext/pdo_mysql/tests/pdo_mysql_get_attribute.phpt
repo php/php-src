@@ -15,13 +15,6 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 	$db = MySQLPDOTest::factory();
 	MySQLPDOTest::createTestTable($db, MySQLPDOTest::detect_transactional_mysql_engine($db));
 
-	function find_invalid_int($valid_options) {
-		do {
-			$invalid = mt_rand(-10000, 10000);
-		} while (in_array($invalid, $valid_options));
-		return $invalid;
-	}
-
 	function set_and_get($offset, $db, $attribute, $value) {
 
 		$value_type = gettype($value);
