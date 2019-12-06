@@ -27,6 +27,9 @@ PHP                                                                        NEWS
   . Fixed bug #78916 (php-fpm 7.4.0 don't send mail via mail()).
     (Jakub Zelenka)
 
+- Intl:
+  . Implemented FR #78912 (INTL Support for accounting format). (cmb)
+
 - Mysqlnd:
   . Fixed bug #78823 (ZLIB_LIBS not added to EXTRA_LIBS). (Arjen de Korte)
 
