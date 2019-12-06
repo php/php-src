@@ -1027,24 +1027,11 @@ static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *inf
 	return zend_assign_to_variable(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 }
 
-
-static zend_always_inline zend_bool zend_check_type(
-		zend_type type, zval *arg, void **cache_slot, zend_class_entry *scope,
+static zend_always_inline zend_bool zend_check_type_slow(
+		zend_type type, zval *arg, zend_reference *ref, void **cache_slot, zend_class_entry *scope,
 		zend_bool is_return_type, zend_bool is_internal)
 {
-	zend_reference *ref = NULL;
 	uint32_t type_mask;
-	ZEND_ASSERT(ZEND_TYPE_IS_SET(type));
-
-	if (UNEXPECTED(Z_ISREF_P(arg))) {
-		ref = Z_REF_P(arg);
-		arg = Z_REFVAL_P(arg);
-	}
-
-	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(type, Z_TYPE_P(arg)))) {
-		return 1;
-	}
-
 	if (ZEND_TYPE_HAS_CLASS(type) && Z_TYPE_P(arg) == IS_OBJECT) {
 		zend_class_entry *ce;
 		if (ZEND_TYPE_HAS_LIST(type)) {
@@ -1107,6 +1094,25 @@ builtin_types:
 
 	/* Special handling for IS_VOID is not necessary (for return types),
 	 * because this case is already checked at compile-time. */
+}
+
+static zend_always_inline zend_bool zend_check_type(
+		zend_type type, zval *arg, void **cache_slot, zend_class_entry *scope,
+		zend_bool is_return_type, zend_bool is_internal)
+{
+	zend_reference *ref = NULL;
+	ZEND_ASSERT(ZEND_TYPE_IS_SET(type));
+
+	if (UNEXPECTED(Z_ISREF_P(arg))) {
+		ref = Z_REF_P(arg);
+		arg = Z_REFVAL_P(arg);
+	}
+
+	if (EXPECTED(ZEND_TYPE_CONTAINS_CODE(type, Z_TYPE_P(arg)))) {
+		return 1;
+	}
+
+	return zend_check_type_slow(type, arg, ref, cache_slot, scope, is_return_type, is_internal);
 }
 
 static zend_always_inline int zend_verify_recv_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, void **cache_slot)
