@@ -371,6 +371,16 @@ static zend_always_inline int _zend_handle_numeric_str(const char *key, size_t l
 	return _zend_handle_numeric_str_ex(key, length, idx);
 }
 
+static zend_always_inline int zend_is_numeric_string_literal(const char *key, size_t length)
+{
+	zend_ulong idx;
+	return _zend_handle_numeric_str_ex(key, length, &idx);
+}
+
+static zend_always_inline int zend_is_numeric_string(const zend_string *str) {
+	return zend_is_numeric_string_literal(ZSTR_VAL(str), ZSTR_LEN(str));
+}
+
 #define ZEND_HANDLE_NUMERIC_STR(key, length, idx) \
 	_zend_handle_numeric_str(key, length, &idx)
 
