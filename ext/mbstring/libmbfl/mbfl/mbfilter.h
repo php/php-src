@@ -193,7 +193,7 @@ static inline int mbfl_is_error(size_t len) {
  * strlen
  */
 MBFLAPI extern size_t
-mbfl_strlen(mbfl_string *string);
+mbfl_strlen(const mbfl_string *string);
 
 /*
  * oddlen
