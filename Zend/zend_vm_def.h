@@ -8799,6 +8799,35 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_NOT_EQUAL|ZEND_IS_NOT_IDENTICAL, (op1_info
 	ZEND_VM_SMART_BRANCH(result, 0);
 }
 
+ZEND_VM_TYPE_SPEC_HANDLER(ZEND_IS_IDENTICAL, op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF)), ZEND_IS_IDENTICAL_NOTHROW, CV, CONST|CV, SPEC(COMMUTATIVE))
+{
+	/* This is declared below the specializations for MAY_BE_LONG/MAY_BE_DOUBLE so those will be used instead if possible. */
+	/* This optimizes $x === SOME_CONST_EXPR and $x === $y for non-refs and non-undef, which can't throw. */
+	/* (Infinite recursion when comparing arrays is an uncatchable fatal error) */
+	USE_OPLINE
+	zval *op1, *op2;
+	zend_bool result;
+
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+	result = fast_is_identical_function(op1, op2);
+	/* Free is a no-op for const/cv */
+	ZEND_VM_SMART_BRANCH(result, 0);
+}
+
+ZEND_VM_TYPE_SPEC_HANDLER(ZEND_IS_NOT_IDENTICAL, op->op1_type == IS_CV && (op->op2_type & (IS_CONST|IS_CV)) && !(op1_info & (MAY_BE_UNDEF|MAY_BE_REF)) && !(op2_info & (MAY_BE_UNDEF|MAY_BE_REF)), ZEND_IS_NOT_IDENTICAL_NOTHROW, CV, CONST|CV, SPEC(COMMUTATIVE))
+{
+	USE_OPLINE
+	zval *op1, *op2;
+	zend_bool result;
+
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
+	result = fast_is_identical_function(op1, op2);
+	/* Free is a no-op for const/cv */
+	ZEND_VM_SMART_BRANCH(!result, 0);
+}
+
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_IS_SMALLER, (op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG), ZEND_IS_SMALLER_LONG, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(SMART_BRANCH,NO_CONST_CONST))
 {
 	USE_OPLINE
