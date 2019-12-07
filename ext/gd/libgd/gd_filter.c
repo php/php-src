@@ -264,6 +264,7 @@ int gdImageConvolution(gdImagePtr src, float filter[3][3], float filter_div, flo
 	for ( y=0; y<src->sy; y++) {
 		for(x=0; x<src->sx; x++) {
 			new_r = new_g = new_b = 0;
+			pxl = f(srcback, x, y);
 			new_a = gdImageAlpha(srcback, pxl);
 
 			for (j=0; j<3; j++) {
