@@ -21,13 +21,16 @@ $haystack = 'Hello, world';
 $needle = 'world';
 $encoding = 'unknown-encoding';
 $part = true;
-var_dump( mb_strrchr($haystack, $needle, $part, $encoding) );
+
+try {
+    var_dump( mb_strrchr($haystack, $needle, $part, $encoding) );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_strrchr() : error conditions ***
 
 -- Testing mb_strrchr() with unknown encoding --
-
-Warning: mb_strrchr(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
+Unknown encoding "unknown-encoding"

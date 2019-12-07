@@ -10,7 +10,12 @@ $str = "Japanese UTF-8 text. 日本語のUTF-8テキスト";
 $arr = [1234, 12.34, TRUE, FALSE, NULL, $str, 'key'=>$str, $str=>'val'];
 $tmp = &$arr;
 $arr[] = $tmp;
-var_dump(mb_check_encoding($str), mb_check_encoding($arr));
+
+try {
+    var_dump(mb_check_encoding($str), mb_check_encoding($arr));
+} catch (\Error $e) {
+    echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+}
 
 // Invalid - Return false due to short circuit check
 $str = "Japanese UTF-8 text. 日本語\xFE\x01\x02のUTF-8テキスト";
@@ -22,10 +27,8 @@ $tmp = &$arr2;
 $arr2[] = $tmp;
 var_dump(mb_check_encoding($str), mb_check_encoding($arr1),  mb_check_encoding($arr2));
 ?>
---EXPECTF--
-Warning: mb_check_encoding(): Cannot not handle circular references in %s on line %d
-bool(true)
-bool(false)
+--EXPECT--
+Error: Cannot not handle circular references
 bool(false)
 bool(false)
 bool(false)

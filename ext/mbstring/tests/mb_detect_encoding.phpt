@@ -84,11 +84,17 @@ $s = mb_detect_encoding('', 'EUC-JP');
 print("EUC-JP: $s\n");  // SJIS
 
 $s = $euc_jp;
-$s = mb_detect_encoding($s, 'BAD');
+
+try {
+    $s = mb_detect_encoding($s, 'BAD');
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 print("BAD: $s\n"); // BAD
 
 ?>
---EXPECTF--
+--EXPECT--
 == BASIC TEST ==
 SJIS: SJIS
 JIS: JIS
@@ -105,6 +111,5 @@ SJIS: SJIS
 == INVALID PARAMETER ==
 INT: EUC-JP
 EUC-JP: EUC-JP
-
-Warning: mb_detect_encoding(): Illegal argument in %s on line %d
-BAD: EUC-JP
+Illegal argument
+BAD: 日本語テキストです。01234５６７８９。

@@ -6,41 +6,33 @@ mb_preferred_mime_name()
 <?php
 // TODO: Add more encoding names
 
-$str = mb_preferred_mime_name('sjis-win');
-echo "$str\n";
+$encodings = [
+    'sjis-win',
+    'SJIS',
+    'EUC-JP',
+    'UTF-8',
+    'ISO-2022-JP',
+    'JIS',
+    'ISO-8859-1',
+    'UCS2',
+    'UCS4',
+    // Invalid
+    'BAD_NAME',
+    // No preferred name
+    'pass',
+];
 
-$str = mb_preferred_mime_name('SJIS');
-echo "$str\n";
+foreach($encodings as $encoding) {
+    try {
+        $str = mb_preferred_mime_name($encoding);
+        echo $str . \PHP_EOL;
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+}
 
-$str = mb_preferred_mime_name('EUC-JP');
-echo "$str\n";
-
-$str = mb_preferred_mime_name('UTF-8');
-echo "$str\n";
-
-$str = mb_preferred_mime_name('ISO-2022-JP');
-echo "$str\n";
-
-$str = mb_preferred_mime_name('JIS');
-echo "$str\n";
-
-$str = mb_preferred_mime_name('ISO-8859-1');
-echo "$str\n";
-
-$str = mb_preferred_mime_name('UCS2');
-echo "$str\n";
-
-$str = mb_preferred_mime_name('UCS4');
-echo "$str\n";
-
-echo "== INVALID PARAMETER ==\n";
-// Invalid name
-var_dump(mb_preferred_mime_name('BAD_NAME'));
-
-// No preferred name
-var_dump(mb_preferred_mime_name('pass'));
 ?>
---EXPECTF--
+--EXPECT--
 Shift_JIS
 Shift_JIS
 EUC-JP
@@ -50,10 +42,5 @@ ISO-2022-JP
 ISO-8859-1
 UCS-2
 UCS-4
-== INVALID PARAMETER ==
-
-Warning: mb_preferred_mime_name(): Unknown encoding "BAD_NAME" in %s on line %d
-bool(false)
-
-Warning: mb_preferred_mime_name(): No MIME preferred name corresponding to "pass" in %s on line %d
-bool(false)
+Unknown encoding "BAD_NAME"
+No MIME preferred name corresponding to "pass"

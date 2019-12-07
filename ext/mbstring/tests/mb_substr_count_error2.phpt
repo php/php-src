@@ -23,15 +23,16 @@ $needle = 'Hello';
 $encoding = 'unknown-encoding';
 
 echo "\n-- Testing mb_substr_count() function with an unknown encoding --\n";
-var_dump(mb_substr_count($haystack, $needle, $encoding));
 
-echo "Done";
+try {
+    var_dump(mb_substr_count($haystack, $needle, $encoding));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_substr_count() : error conditions ***
 
 -- Testing mb_substr_count() function with an unknown encoding --
-
-Warning: mb_substr_count(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
-Done
+Unknown encoding "unknown-encoding"

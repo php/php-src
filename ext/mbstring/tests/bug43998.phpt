@@ -22,49 +22,37 @@ $sourcestring = 'Hello, World';
 $inputs = array(12345, 12.3456789000E-10, true, false, "");
 $iterator = 1;
 foreach($inputs as $input) {
-  echo "\n-- Iteration $iterator --\n";
-  var_dump( mb_strtolower($sourcestring, $input) );
-  var_dump( mb_strtoupper($sourcestring, $input) );
-  $iterator++;
+    echo "\n-- Iteration $iterator --\n";
+	try {
+        var_dump( mb_strtolower($sourcestring, $input) );
+	} catch (\ValueError $e) {
+	    echo $e->getMessage() . \PHP_EOL;
+	}
+    try {
+        var_dump( mb_strtoupper($sourcestring, $input) );
+	} catch (\ValueError $e) {
+	    echo $e->getMessage() . \PHP_EOL;
+	}
+    $iterator++;
 };
 ?>
---EXPECTF--
+--EXPECT--
 -- Iteration 1 --
-
-Warning: mb_strtolower(): Unknown encoding "12345" in %s on line %d
-bool(false)
-
-Warning: mb_strtoupper(): Unknown encoding "12345" in %s on line %d
-bool(false)
+Unknown encoding "12345"
+Unknown encoding "12345"
 
 -- Iteration 2 --
-
-Warning: mb_strtolower(): Unknown encoding "1.23456789E-9" in %s on line %d
-bool(false)
-
-Warning: mb_strtoupper(): Unknown encoding "1.23456789E-9" in %s on line %d
-bool(false)
+Unknown encoding "1.23456789E-9"
+Unknown encoding "1.23456789E-9"
 
 -- Iteration 3 --
-
-Warning: mb_strtolower(): Unknown encoding "1" in %s on line %d
-bool(false)
-
-Warning: mb_strtoupper(): Unknown encoding "1" in %s on line %d
-bool(false)
+Unknown encoding "1"
+Unknown encoding "1"
 
 -- Iteration 4 --
-
-Warning: mb_strtolower(): Unknown encoding "" in %s on line %d
-bool(false)
-
-Warning: mb_strtoupper(): Unknown encoding "" in %s on line %d
-bool(false)
+Unknown encoding ""
+Unknown encoding ""
 
 -- Iteration 5 --
-
-Warning: mb_strtolower(): Unknown encoding "" in %s on line %d
-bool(false)
-
-Warning: mb_strtoupper(): Unknown encoding "" in %s on line %d
-bool(false)
+Unknown encoding ""
+Unknown encoding ""

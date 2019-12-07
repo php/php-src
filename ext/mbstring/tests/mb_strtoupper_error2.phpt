@@ -21,13 +21,13 @@ echo "*** Testing mb_strtoupper() : error conditions ***\n";
 $sourcestring = 'hello, world';
 $encoding = 'unknown-encoding';
 
-var_dump( mb_strtoupper($sourcestring, $encoding) );
+try {
+    var_dump( mb_strtoupper($sourcestring, $encoding) );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_strtoupper() : error conditions ***
-
-Warning: mb_strtoupper(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
-Done
+Unknown encoding "unknown-encoding"

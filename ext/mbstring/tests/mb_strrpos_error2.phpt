@@ -23,13 +23,13 @@ $needle = '123';
 $offset = 5;
 $encoding = 'unknown-encoding';
 
-var_dump(mb_strrpos($haystack, $needle , $offset, $encoding));
+try {
+    var_dump(mb_strrpos($haystack, $needle , $offset, $encoding));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_strrpos() : error conditions ***
-
-Warning: mb_strrpos(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
-Done
+Unknown encoding "unknown-encoding"

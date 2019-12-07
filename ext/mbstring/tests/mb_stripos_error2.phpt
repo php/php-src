@@ -23,13 +23,13 @@ $needle = 'world';
 $offset = 2;
 $encoding = 'unknown-encoding';
 
-var_dump( mb_stripos($haystack, $needle, $offset, $encoding) );
+try {
+    var_dump( mb_stripos($haystack, $needle, $offset, $encoding) );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_stripos() : error conditions ***
-
-Warning: mb_stripos(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
-Done
+Unknown encoding "unknown-encoding"

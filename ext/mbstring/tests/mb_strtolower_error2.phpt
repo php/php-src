@@ -21,10 +21,13 @@ echo "*** Testing mb_strtolower() : error conditions***\n";
 $sourcestring = 'hello, world';
 $encoding = 'unknown-encoding';
 
-var_dump( mb_strtolower($sourcestring, $encoding) );
-?>
---EXPECTF--
-*** Testing mb_strtolower() : error conditions***
+try {
+    var_dump( mb_strtolower($sourcestring, $encoding) );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-Warning: mb_strtolower(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
+?>
+--EXPECT--
+*** Testing mb_strtolower() : error conditions***
+Unknown encoding "unknown-encoding"

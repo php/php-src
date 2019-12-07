@@ -9,9 +9,15 @@ sort($list);
 var_dump($list);
 var_dump(mb_encoding_aliases("7bit"));
 var_dump(mb_encoding_aliases("8bit"));
-var_dump(mb_encoding_aliases("BAD"));
+
+try {
+    var_dump(mb_encoding_aliases("BAD"));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 ?>
---EXPECTF--
+--EXPECT--
 array(11) {
   [0]=>
   string(14) "ANSI_X3.4-1968"
@@ -42,6 +48,4 @@ array(1) {
   [0]=>
   string(6) "binary"
 }
-
-Warning: mb_encoding_aliases(): Unknown encoding "BAD" in %s on line %d
-bool(false)
+Unknown encoding "BAD"

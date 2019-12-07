@@ -21,16 +21,32 @@ print  "5: ". mb_strimwidth($euc_jp, 38, 5,'...','EUC-JP') . "\n";
 print  "6: ". mb_strimwidth($euc_jp, 38, -25,'...','EUC-JP') . "\n";
 print  "7: ". mb_strimwidth($euc_jp, -30, -25,'...','EUC-JP') . "\n";
 
-$str = mb_strimwidth($euc_jp, 0, -100,'...','EUC-JP');
+try {
+    $str = mb_strimwidth($euc_jp, 0, -100,'...','EUC-JP');
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ($str === FALSE) ? print "10 OK\n" : print "NG: $str\n";
 
-$str = mb_strimwidth($euc_jp, 100, 10,'...','EUC-JP');
+try {
+    $str = mb_strimwidth($euc_jp, 100, 10,'...','EUC-JP');
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ($str === FALSE) ? print "11 OK\n" : print "NG: $str\n";
 
-$str = mb_strimwidth($euc_jp, -100, 10,'...','EUC-JP');
+try {
+    $str = mb_strimwidth($euc_jp, -100, 10,'...','EUC-JP');
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ($str === FALSE) ? print "12 OK\n" : print "NG: $str\n";
 
-$str = mb_strimwidth($euc_jp, -10, -12,'...','EUC-JP');
+try {
+    $str = mb_strimwidth($euc_jp, -10, -12,'...','EUC-JP');
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ($str === FALSE) ? print "13 OK\n" : print "NG: $str\n";
 
 ?>
@@ -43,15 +59,27 @@ String width: 68
 5: ¡£
 6: ¡£
 7: ¡£
+Width is out of range
 
-Warning: mb_strimwidth(): Width is out of range in %s on line %d
-10 OK
+Warning: Undefined variable: str in %s on line %d
 
-Warning: mb_strimwidth(): Start position is out of range in %s on line %d
-11 OK
+Warning: Undefined variable: str in %s on line %d
+NG: 
+Start position is out of range
 
-Warning: mb_strimwidth(): Start position is out of range in %s on line %d
-12 OK
+Warning: Undefined variable: str in %s on line %d
 
-Warning: mb_strimwidth(): Width is out of range in %s on line %d
-13 OK
+Warning: Undefined variable: str in %s on line %d
+NG: 
+Start position is out of range
+
+Warning: Undefined variable: str in %s on line %d
+
+Warning: Undefined variable: str in %s on line %d
+NG: 
+Width is out of range
+
+Warning: Undefined variable: str in %s on line %d
+
+Warning: Undefined variable: str in %s on line %d
+NG:

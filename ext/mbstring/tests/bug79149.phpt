@@ -6,20 +6,22 @@ if (!extension_loaded('mbstring')) die('skip mbstring extension not available');
 ?>
 --FILE--
 <?php
-var_dump(mb_convert_encoding("", "UTF-8", [0]));
-var_dump(mb_convert_encoding('foo', 'UTF-8', array(['bar'], ['baz'])));
-var_dump(mb_convert_encoding('foo', 'UTF-8', array("foo\0bar")));
+try {
+    var_dump(mb_convert_encoding("", "UTF-8", [0]));
+} catch (\Error $e) {
+    echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+}
+
+try {
+    var_dump(mb_convert_encoding('foo', 'UTF-8', array(['bar'], ['baz'])));
+} catch (\Error $e) {
+    echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+}
 ?>
 --EXPECTF--
-Warning: mb_convert_encoding(): Illegal character encoding specified in %s on line %d
-string(0) ""
+Error: Illegal character encoding specified
 
 Warning: Array to string conversion in %s on line %d
 
 Warning: Array to string conversion in %s on line %d
-
-Warning: mb_convert_encoding(): Illegal character encoding specified in %s on line %d
-string(3) "foo"
-
-Warning: mb_convert_encoding(): Illegal character encoding specified in %s on line %d
-string(3) "foo"
+Error: Illegal character encoding specified

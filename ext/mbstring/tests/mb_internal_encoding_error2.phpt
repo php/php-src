@@ -19,13 +19,13 @@ function_exists('mb_internal_encoding') or die("skip mb_internal_encoding() is n
 
 echo "*** Testing mb_internal_encoding() : error conditions ***\n";
 
-var_dump(mb_internal_encoding('unknown-encoding'));
+try {
+    var_dump(mb_internal_encoding('unknown-encoding'));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_internal_encoding() : error conditions ***
-
-Warning: mb_internal_encoding(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
-Done
+Unknown encoding "unknown-encoding"

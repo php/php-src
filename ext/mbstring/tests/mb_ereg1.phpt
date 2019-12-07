@@ -6,23 +6,23 @@ mb_ereg() and invalid arguments
 <?php
 
 $a = array(
-    array(1,2,3),
-    array("", "", ""),
-    array(array(), 1, ""),
-    array(1, array(), ""),
-    array(1, "", array()),
-    );
+	array(1,2,3),
+	array("", "", ""),
+	array(array(), 1, ""),
+	array(1, array(), ""),
+	array(1, "", array()),
+	);
 
 foreach ($a as $args) {
-    try {
-        var_dump(mb_ereg($args[0], $args[1], $args[2]));
-    } catch (TypeError $e) {
-        echo $e->getMessage(), "\n";
-    }
-    var_dump($args);
+	try {
+		var_dump(mb_ereg($args[0], $args[1], $args[2]));
+	} catch (\TypeError|\ValueError $e) {
+		echo get_class($e) . ': ' . $e->getMessage(), "\n";
+	}
+	var_dump($args);
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 array(3) {
   [0]=>
@@ -33,19 +33,17 @@ array(3) {
   array(0) {
   }
 }
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
+ValueError: Empty pattern
 array(3) {
   [0]=>
   string(0) ""
   [1]=>
   string(0) ""
   [2]=>
-  array(0) {
+  &array(0) {
   }
 }
-mb_ereg() expects argument #1 ($pattern) to be of type string, array given
+TypeError: mb_ereg() expects argument #1 ($pattern) to be of type string, array given
 array(3) {
   [0]=>
   array(0) {
@@ -55,7 +53,7 @@ array(3) {
   [2]=>
   &string(0) ""
 }
-mb_ereg() expects argument #2 ($string) to be of type string, array given
+TypeError: mb_ereg() expects argument #2 ($string) to be of type string, array given
 array(3) {
   [0]=>
   int(1)

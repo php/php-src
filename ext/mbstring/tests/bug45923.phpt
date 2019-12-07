@@ -1,5 +1,5 @@
 --TEST--
-Bug #45923 (mb_st[r]ripos() offset not handled correctly)
+Bug #45%d23 (mb_st[r]ripos() offset not handled correctly)
 --SKIPIF--
 <?php extension_loaded('mbstring') or die('skip mbstring not available'); ?>
 --FILE--

@@ -21,13 +21,16 @@ $haystack = 'Hello, world';
 $needle = 'world';
 $encoding = 'unknown-encoding';
 $part = true;
-var_dump( mb_stristr($haystack, $needle, $part, $encoding) );
+
+try {
+    var_dump( mb_stristr($haystack, $needle, $part, $encoding) );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_stristr() : error conditions ***
 
 -- Testing mb_stristr() with unknown encoding --
-
-Warning: mb_stristr(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
+Unknown encoding "unknown-encoding"

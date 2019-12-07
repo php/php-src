@@ -55,12 +55,15 @@ print  strlen($utf8) . "\n";
 echo "== WRONG PARAMETERS ==\n";
 // Wrong encoding
 mb_internal_encoding('EUC-JP');
-$r = mb_strlen($euc_jp, 'BAD_NAME');
-echo $r."\n";
 
+try {
+    var_dump(mb_strlen($euc_jp, 'BAD_NAME'));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 == ASCII ==
 40
 40
@@ -77,5 +80,4 @@ echo $r."\n";
 43
 101
 == WRONG PARAMETERS ==
-
-Warning: mb_strlen(): Unknown encoding "BAD_NAME" in %s on line %d
+Unknown encoding "BAD_NAME"

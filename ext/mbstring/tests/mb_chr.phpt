@@ -12,31 +12,30 @@ var_dump(
 );
 
 // Invalid
-var_dump(
-    mb_chr(0xd800, "typo"),
-    mb_chr(0xd800, "pass"),
-    mb_chr(0xd800, "jis"),
-    mb_chr(0xd800, "cp50222"),
-    mb_chr(0xd800, "utf-7")
-);
+$invalids = [
+    "typo",
+    "pass",
+    "jis",
+    "cp50222",
+    "utf-7"
+];
+
+foreach($invalids as $invalid) {
+    try {
+	    mb_chr(0xd800, $invalid);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+}
+
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)
 bool(true)
-
-Warning: mb_chr(): Unknown encoding "typo" in %s on line %d
-
-Warning: mb_chr(): Unsupported encoding "pass" in %s on line %d
-
-Warning: mb_chr(): Unsupported encoding "jis" in %s on line %d
-
-Warning: mb_chr(): Unsupported encoding "cp50222" in %s on line %d
-
-Warning: mb_chr(): Unsupported encoding "utf-7" in %s on line %d
-bool(false)
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+Unknown encoding "typo"
+Unsupported encoding "pass"
+Unsupported encoding "jis"
+Unsupported encoding "cp50222"
+Unsupported encoding "utf-7"

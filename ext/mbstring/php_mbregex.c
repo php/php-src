@@ -855,8 +855,8 @@ PHP_FUNCTION(mb_regex_encoding)
 		mbctype = _php_mb_regex_name2mbctype(encoding);
 
 		if (mbctype == ONIG_ENCODING_UNDEF) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", encoding);
-			RETURN_FALSE;
+			zend_value_error("Unknown encoding \"%s\"", encoding);
+			return;
 		}
 
 		MBREX(current_mbctype) = mbctype;
@@ -922,9 +922,8 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (arg_pattern_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty pattern");
-		RETVAL_FALSE;
-		goto out;
+		zend_value_error("Empty pattern");
+		return;
 	}
 
 	re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, options, MBREX(current_mbctype), MBREX(regex_default_syntax));
@@ -1429,13 +1428,13 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	}
 
 	if (MBREX(search_re) == NULL) {
-		php_error_docref(NULL, E_WARNING, "No regex given");
-		RETURN_FALSE;
+		zend_value_error("No regex given");
+		return;
 	}
 
 	if (str == NULL) {
-		php_error_docref(NULL, E_WARNING, "No string given");
-		RETURN_FALSE;
+		zend_value_error("No string given");
+		return;
 	}
 
 	MBREX(search_regs) = onig_region_new();
@@ -1539,8 +1538,8 @@ PHP_FUNCTION(mb_ereg_search_init)
 	}
 
 	if (argc > 1 && arg_pattern_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty pattern");
-		RETURN_FALSE;
+		zend_value_error("Empty pattern");
+		return;
 	}
 
 	option = MBREX(regex_default_options);
@@ -1654,9 +1653,8 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 	}
 
 	if (position < 0 || (!Z_ISUNDEF(MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING && (size_t)position > Z_STRLEN(MBREX(search_str)))) {
-		php_error_docref(NULL, E_WARNING, "Position is out of range");
-		MBREX(search_pos) = 0;
-		RETURN_FALSE;
+		zend_value_error("Position is out of range");
+		return;
 	}
 
 	MBREX(search_pos) = position;

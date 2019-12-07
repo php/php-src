@@ -24,10 +24,16 @@ var_dump( mb_substitute_character(1234) );
 var_dump( mb_substitute_character() );
 var_dump( mb_substitute_character("none") );
 var_dump( mb_substitute_character() );
-var_dump( mb_substitute_character("b") );
+
+try {
+    var_dump( mb_substitute_character("b") );
+} catch (\Error $e) {
+    echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+}
+
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_substitute_character() : basic functionality ***
 int(63)
 bool(true)
@@ -36,6 +42,4 @@ bool(true)
 int(1234)
 bool(true)
 string(4) "none"
-
-Warning: mb_substitute_character(): Unknown character in %s on line %d
-bool(false)
+Error: Unknown character

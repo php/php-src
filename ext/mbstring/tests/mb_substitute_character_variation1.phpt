@@ -111,8 +111,13 @@ $inputs = array(
 
 mb_internal_encoding('utf-8');
 foreach($inputs as $key =>$value) {
-      echo "\n--$key--\n";
-      var_dump( mb_substitute_character($value) );
+    echo "\n--$key--\n";
+
+    try {
+        var_dump( mb_substitute_character($value) );
+    } catch (\Error $e) {
+        echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
+    }
 };
 
 fclose($fp);
@@ -122,8 +127,7 @@ fclose($fp);
 *** Testing mb_substitute_character() : usage variation ***
 
 --int 0--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+Error: Unknown character
 
 --int 1--
 bool(true)
@@ -132,31 +136,25 @@ bool(true)
 bool(true)
 
 --int -12345--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+Error: Unknown character
 
 --float 10.5--
 bool(true)
 
 --float -10.5--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+Error: Unknown character
 
 --float 12.3456789000e10--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+Error: Unknown character
 
 --float -12.3456789000e10--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+Error: Unknown character
 
 --float .5--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+Error: Unknown character
 
 --empty array--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+Error: Unknown character
 
 --int indexed array--
 bool(true)
@@ -168,26 +166,22 @@ bool(true)
 bool(true)
 
 --uppercase NULL--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+Error: Unknown character
 
 --lowercase null--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+Error: Unknown character
 
 --lowercase true--
 bool(true)
 
 --lowercase false--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+Error: Unknown character
 
 --uppercase TRUE--
 bool(true)
 
 --uppercase FALSE--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+Error: Unknown character
 
 --empty string DQ--
 bool(true)
@@ -196,20 +190,16 @@ bool(true)
 bool(true)
 
 --string DQ--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+Error: Unknown character
 
 --string SQ--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+Error: Unknown character
 
 --mixed case string--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+Error: Unknown character
 
 --heredoc--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+Error: Unknown character
 
 --instance of classWithToString--
 Error: 8 - Object of class classWithToString could not be converted to int, %s(%d)
@@ -220,9 +210,7 @@ Error: 8 - Object of class classWithoutToString could not be converted to int, %
 bool(true)
 
 --undefined var--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+Error: Unknown character
 
 --unset var--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+Error: Unknown character
