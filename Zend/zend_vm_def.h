@@ -8286,7 +8286,9 @@ ZEND_VM_COLD_CONST_HANDLER(121, ZEND_STRLEN, CONST|TMPVAR|CV, ANY)
 	value = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	if (EXPECTED(Z_TYPE_P(value) == IS_STRING)) {
 		ZVAL_LONG(EX_VAR(opline->result.var), Z_STRLEN_P(value));
-		FREE_OP1();
+		if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+			zval_ptr_dtor_str(value);
+		}
 		ZEND_VM_NEXT_OPCODE();
 	} else {
 		bool strict;
@@ -8897,33 +8899,63 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(189, ZEND_IN_ARRAY, CONST|TMP|VAR|CV, CONST, NUM
 	HashTable *ht = Z_ARRVAL_P(RT_CONSTANT(opline, opline->op2));
 	zval *result;
 
-	SAVE_OPLINE();
-	op1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 	if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 		result = zend_hash_find_ex(ht, Z_STR_P(op1), OP1_TYPE == IS_CONST);
+		if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
+			zval_ptr_dtor_str(op1);
+		}
+		ZEND_VM_SMART_BRANCH(result, 0);
 	} else if (opline->extended_value) {
 		if (EXPECTED(Z_TYPE_P(op1) == IS_LONG)) {
 			result = zend_hash_index_find(ht, Z_LVAL_P(op1));
-		} else {
-			result = NULL;
+			ZEND_VM_SMART_BRANCH(result, 0);
 		}
-	} else if (Z_TYPE_P(op1) <= IS_FALSE) {
-		result = zend_hash_find_ex(ht, ZSTR_EMPTY_ALLOC(), 1);
-	} else {
-		zend_string *key;
-		zval key_tmp, *val;
-
-		result = NULL;
-		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
-			ZVAL_STR(&key_tmp, key);
-			if (zend_compare(op1, &key_tmp) == 0) {
-				result = val;
-				break;
+		if (OP1_TYPE & (IS_CV | IS_VAR)) {
+			SAVE_OPLINE();
+			if ((OP1_TYPE & IS_CV) && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+				ZVAL_UNDEFINED_OP1();
+				ZEND_VM_SMART_BRANCH(0, 1);
 			}
-		} ZEND_HASH_FOREACH_END();
+			result = NULL;
+			ZVAL_DEREF(op1);
+			if (Z_TYPE_P(op1) == IS_STRING) {
+				result = zend_hash_find_ex(ht, Z_STR_P(op1), OP1_TYPE == IS_CONST);
+			} else if (Z_TYPE_P(op1) == IS_LONG) {
+				result = zend_hash_index_find(ht, Z_LVAL_P(op1));
+			}
+			FREE_OP1();
+			ZEND_VM_SMART_BRANCH(result, OP1_TYPE & IS_VAR);
+		}
+		ZEND_VM_SMART_BRANCH(0, 0);
+	} else if (Z_TYPE_P(op1) <= IS_FALSE) {
+		if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
+			SAVE_OPLINE();
+			ZVAL_UNDEFINED_OP1();
+			result = zend_hash_find_ex(ht, ZSTR_EMPTY_ALLOC(), 1);
+			FREE_OP1();
+			ZEND_VM_SMART_BRANCH(result, 1);
+		}
+		result = zend_hash_find_ex(ht, ZSTR_EMPTY_ALLOC(), 1);
+		ZEND_VM_SMART_BRANCH(result, 0);
 	}
+	SAVE_OPLINE();
+	zend_string *key;
+	zval key_tmp, *val;
+	if (OP1_TYPE & (IS_CV | IS_VAR)) {
+		ZVAL_DEREF(op1);
+	}
+
+	result = NULL;
+	ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
+		ZVAL_STR(&key_tmp, key);
+		if (zend_compare(op1, &key_tmp) == 0) {
+			result = val;
+			break;
+		}
+	} ZEND_HASH_FOREACH_END();
 	FREE_OP1();
-	ZEND_VM_SMART_BRANCH(result, 1);
+	ZEND_VM_SMART_BRANCH(result, OP1_TYPE & (IS_TMP_VAR|IS_VAR));
 }
 
 ZEND_VM_COLD_CONST_HANDLER(190, ZEND_COUNT, CONST|TMPVAR|CV, UNUSED)
