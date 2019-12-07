@@ -7,7 +7,7 @@ function strtotime(string $time, int $now = UNKNOWN): int|false {}
 
 function date(string $format, int $timestamp = UNKNOWN): string {}
 
-function idate(string $format, int $timestamp = UNKNOWN): int|false {}
+function idate(string $format, int $timestamp = UNKNOWN): int {}
 
 function gmdate(string $format, int $timestamp = UNKNOWN): string {}
 

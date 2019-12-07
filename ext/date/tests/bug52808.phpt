@@ -17,12 +17,12 @@ foreach($intervals as $iv) {
     	$di = new DateInterval($iv);
     	var_dump($di);
     }
-    catch ( Exception $e )
+    catch ( \Error $e )
     {
     	echo $e->getMessage(), "\n";
     }
 }
-echo "==DONE==\n";
+
 ?>
 --EXPECTF--
 object(DateInterval)#%d (16) {
@@ -127,7 +127,6 @@ object(DateInterval)#%d (16) {
   ["have_special_relative"]=>
   int(0)
 }
-DateInterval::__construct(): Failed to parse interval (2007-05-11T15:30:00Z/)
-DateInterval::__construct(): Failed to parse interval (2007-05-11T15:30:00Z)
-DateInterval::__construct(): Unknown or bad format (2007-05-11T15:30:00Z/:00Z)
-==DONE==
+Failed to parse interval (2007-05-11T15:30:00Z/)
+Failed to parse interval (2007-05-11T15:30:00Z)
+Unknown or bad format (2007-05-11T15:30:00Z/:00Z)

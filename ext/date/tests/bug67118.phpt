@@ -13,7 +13,7 @@ class mydt extends datetime
 		}
 		try {
 			@parent::__construct($time, $tz);
-		} catch (Exception $e) {
+		} catch (\Error $e) {
 			echo "Bad date" . $this->format("Y") . "\n";
 		}
 	}

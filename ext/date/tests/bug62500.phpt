@@ -16,8 +16,8 @@ class Crasher extends DateInterval {
 }
 try {
     $c = new Crasher('blah');
-} catch (Exception $e) {
-    var_dump($e->getMessage());
+} catch (\Error $e) {
+    echo $e->getMessage();
 }
 --EXPECTF--
 NULL
@@ -25,4 +25,4 @@ int(3)
 
 Warning: Undefined property: Crasher::$2 in %s on line %d
 NULL
-string(%s) "DateInterval::__construct(): Unknown or bad format (blah)"
+Unknown or bad format (blah)

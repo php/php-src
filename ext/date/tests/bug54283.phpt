@@ -5,10 +5,10 @@ Bug #54283 (new DatePeriod(NULL) causes crash)
 
 try {
 	var_dump(new DatePeriod(NULL));
-} catch (Exception $e) {
+} catch (\Error $e) {
 	var_dump($e->getMessage());
 }
 
 ?>
 --EXPECT--
-string(51) "DatePeriod::__construct(): Unknown or bad format ()"
+string(49) "The ISO interval '' did not contain a start date."

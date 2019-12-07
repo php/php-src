@@ -24,7 +24,7 @@ try {
 
 try {
 	new DateTime("1am todax");
-} catch (Exception $e) {
+} catch (\Error $e) {
 	echo $e->getMessage(),"\n";
 }
 
@@ -34,23 +34,21 @@ var_dump($t->getName());
 try {
     $t = new _t;
     var_dump($t->getName());
-} catch (Error $e) {
+} catch (\Error $e) {
 	echo $e->getMessage(),"\n";
 }
 
 try {
 	new DateTimeZone("GottaFindThisOne");
-} catch (Exception $e) {
+} catch (\Error $e) {
 	echo $e->getMessage(),"\n";
 }
 
-echo "DONE\n";
 ?>
 --EXPECTF--
 string(19) "%d-%d-%d %d:%d:%d"
 The DateTime object has not been correctly initialized by its constructor
-DateTime::__construct(): Failed to parse time string (1am todax) at position 4 (t): The timezone could not be found in the database
+Failed to parse time string (1am todax) at position 4 (t): The timezone could not be found in the database
 string(3) "UTC"
 The DateTimeZone object has not been correctly initialized by its constructor
-DateTimeZone::__construct(): Unknown or bad timezone (GottaFindThisOne)
-DONE
+Unknown or bad timezone (GottaFindThisOne)

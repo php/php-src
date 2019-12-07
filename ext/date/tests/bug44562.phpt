@@ -8,7 +8,7 @@ try
 {
 	$dp = new DatePeriod('2D');
 }
-catch ( Exception $e )
+catch (\ValueError $e )
 {
 	echo $e->getMessage(), "\n";
 }
@@ -24,7 +24,7 @@ foreach ( $dp as $d )
 
 ?>
 --EXPECT--
-DatePeriod::__construct(): Unknown or bad format (2D)
+The ISO interval '2D' did not contain a start date.
 string(24) "2008-07-20T22:44:53+0200"
 string(24) "2008-07-21T22:44:53+0200"
 string(24) "2008-07-22T22:44:53+0200"

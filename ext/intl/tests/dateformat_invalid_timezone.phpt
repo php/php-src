@@ -11,8 +11,8 @@ extension_loaded('intl') || print 'skip';
 try {
   new \IntlDateFormatter('en_US', \IntlDateFormatter::FULL, \IntlDateFormatter::FULL);
   echo "Wat?";
-} catch (\IntlException $e) {
-  echo $e->getMessage();
+} catch (\Error $e) {
+    echo get_class($e) . ': ' . $e->getMessage();
 }
 --EXPECT--
-IntlDateFormatter::__construct(): Invalid date.timezone value 'Mars/Utopia_Planitia', we selected the timezone 'UTC' for now.
+ValueError: Invalid date.timezone value 'Mars/Utopia_Planitia'

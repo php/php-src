@@ -6,30 +6,43 @@ date_default_timezone_set('UTC');
 
 $t = mktime(0,0,0, 6, 27, 2006);
 
-var_dump(idate(1,1));
-var_dump(idate(""));
-var_dump(idate(0));
+try {
+    var_dump(idate(1,1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+try {
+    var_dump(idate(""));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+try {
+    var_dump(idate(0));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 var_dump(idate("B", $t));
-var_dump(idate("[", $t));
-var_dump(idate("'"));
 
-echo "Done\n";
+try {
+    var_dump(idate("[", $t));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+try {
+    var_dump(idate("'"));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 ?>
---EXPECTF--
-Warning: idate(): Unrecognized date format token. in %s on line %d
-bool(false)
-
-Warning: idate(): idate format is one char in %s on line %d
-bool(false)
-
-Warning: idate(): Unrecognized date format token. in %s on line %d
-bool(false)
+--EXPECT--
+Unrecognized date format token
+idate format is one char
+Unrecognized date format token
 int(41)
-
-Warning: idate(): Unrecognized date format token. in %s on line %d
-bool(false)
-
-Warning: idate(): Unrecognized date format token. in %s on line %d
-bool(false)
-Done
+Unrecognized date format token
+Unrecognized date format token

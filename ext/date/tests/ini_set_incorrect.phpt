@@ -3,8 +3,12 @@ Test invalid time zone passed to ini_set
 --FILE--
 <?php
 
-ini_set("date.timezone", "Incorrect/Zone");
+try {
+    ini_set("date.timezone", "Incorrect/Zone");
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Warning: ini_set(): Invalid date.timezone value 'Incorrect/Zone', we selected the timezone 'UTC' for now. in %sini_set_incorrect.php on line %d
+--EXPECT--
+Invalid date.timezone value 'Incorrect/Zone'

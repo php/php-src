@@ -650,7 +650,8 @@ static PHP_INI_MH(OnUpdate_date_timezone)
 	if (stage == PHP_INI_STAGE_RUNTIME) {
 		if (!timelib_timezone_id_is_valid(DATEG(default_timezone), DATE_TIMEZONEDB)) {
 			if (DATEG(default_timezone) && *DATEG(default_timezone)) {
-				php_error_docref(NULL, E_WARNING, "Invalid date.timezone value '%s', we selected the timezone 'UTC' for now.", DATEG(default_timezone));
+				zend_value_error("Invalid date.timezone value '%s'", DATEG(default_timezone));
+				return FAILURE;
 			}
 		} else {
 			DATEG(timezone_valid) = 1;
@@ -683,7 +684,7 @@ static char* guess_timezone(const timelib_tzdb *tzdb)
 		}
 
 		if (!timelib_timezone_id_is_valid(DATEG(default_timezone), tzdb)) {
-			php_error_docref(NULL, E_WARNING, "Invalid date.timezone value '%s', we selected the timezone 'UTC' for now.", DATEG(default_timezone));
+			zend_value_error("Invalid date.timezone value '%s'", DATEG(default_timezone));
 			return "UTC";
 		}
 
@@ -702,7 +703,7 @@ PHPAPI timelib_tzinfo *get_timezone_info(void)
 	tz = guess_timezone(DATE_TIMEZONEDB);
 	tzi = php_date_parse_tzfile(tz, DATE_TIMEZONEDB);
 	if (! tzi) {
-		php_error_docref(NULL, E_ERROR, "Timezone database is corrupt - this should *never* happen!");
+		zend_throw_error(NULL, "Timezone database is corrupt - this should *never* happen!");
 	}
 	return tzi;
 }
@@ -1099,8 +1100,8 @@ PHP_FUNCTION(idate)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(format) != 1) {
-		php_error_docref(NULL, E_WARNING, "idate format is one char");
-		RETURN_FALSE;
+		zend_value_error("idate format is one char");
+		return;
 	}
 
 	if (ZEND_NUM_ARGS() == 1) {
@@ -1109,8 +1110,8 @@ PHP_FUNCTION(idate)
 
 	ret = php_idate(ZSTR_VAL(format)[0], ts, 0);
 	if (ret == -1) {
-		php_error_docref(NULL, E_WARNING, "Unrecognized date format token.");
-		RETURN_FALSE;
+		zend_value_error("Unrecognized date format token");
+		return;
 	}
 	RETURN_LONG(ret);
 }
@@ -1897,7 +1898,7 @@ static int date_object_compare_date(zval *d1, zval *d2) /* {{{ */
 	o2 = Z_PHPDATE_P(d2);
 
 	if (!o1->time || !o2->time) {
-		php_error_docref(NULL, E_WARNING, "Trying to compare an incomplete DateTime or DateTimeImmutable object");
+		zend_throw_error(NULL, "Trying to compare an incomplete DateTime or DateTimeImmutable object");
 		return 1;
 	}
 	if (!o1->time->sse_uptodate) {
@@ -2324,7 +2325,7 @@ PHPAPI int php_date_initialize(php_date_obj *dateobj, /*const*/ char *time_str, 
 
 	if (ctor && err && err->error_count) {
 		/* spit out the first library error message, at least */
-		php_error_docref(NULL, E_WARNING, "Failed to parse time string (%s) at position %d (%c): %s", time_str,
+		zend_throw_error(NULL, "Failed to parse time string (%s) at position %d (%c): %s", time_str,
 			err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
 	}
 	if (err && err->error_count) {
@@ -2855,7 +2856,7 @@ static int php_date_modify(zval *object, char *modify, size_t modify_len) /* {{{
 	dateobj = Z_PHPDATE_P(object);
 
 	if (!(dateobj->time)) {
-		php_error_docref(NULL, E_WARNING, "The DateTime object has not been correctly initialized by its constructor");
+		zend_throw_error(NULL, "The DateTime object has not been correctly initialized by its constructor");
 		return 0;
 	}
 
@@ -2865,7 +2866,7 @@ static int php_date_modify(zval *object, char *modify, size_t modify_len) /* {{{
 	update_errors_warnings(err);
 	if (err && err->error_count) {
 		/* spit out the first library error message, at least */
-		php_error_docref(NULL, E_WARNING, "Failed to parse time string (%s) at position %d (%c): %s", modify,
+		zend_throw_error(NULL, "Failed to parse time string (%s) at position %d (%c): %s", modify,
 			err->error_messages[0].position, err->error_messages[0].character, err->error_messages[0].message);
 		timelib_time_dtor(tmp_time);
 		return 0;
@@ -3022,7 +3023,7 @@ static void php_date_sub(zval *object, zval *interval, zval *return_value) /* {{
 	DATE_CHECK_INITIALIZED(intobj->initialized, DateInterval);
 
 	if (intobj->diff->have_special_relative) {
-		php_error_docref(NULL, E_WARNING, "Only non-special relative time specifications are supported for subtraction");
+		zend_throw_error(NULL, "Only non-special relative time specifications are supported for subtraction");
 		return;
 	}
 
@@ -3474,14 +3475,14 @@ static int timezone_initialize(php_timezone_obj *tzobj, /*const*/ char *tz, size
 	char         *orig_tz = tz;
 
 	if (strlen(tz) != tz_len) {
-		php_error_docref(NULL, E_WARNING, "Timezone must not contain null bytes");
+		zend_value_error("Timezone must not contain null bytes");
 		efree(dummy_t);
 		return FAILURE;
 	}
 
 	dummy_t->z = timelib_parse_zone(&tz, &dst, dummy_t, &not_found, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 	if (not_found) {
-		php_error_docref(NULL, E_WARNING, "Unknown or bad timezone (%s)", orig_tz);
+		zend_value_error("Unknown or bad timezone (%s)", orig_tz);
 		efree(dummy_t);
 		return FAILURE;
 	} else {
@@ -3792,7 +3793,7 @@ static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *forma
 	timelib_strtointerval(format, format_length, &b, &e, &p, &r, &errors);
 
 	if (errors->error_count > 0) {
-		php_error_docref(NULL, E_WARNING, "Unknown or bad format (%s)", format);
+		zend_value_error("Unknown or bad format (%s)", format);
 		retval = FAILURE;
 	} else {
 		if(p) {
@@ -3805,7 +3806,7 @@ static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *forma
 				*rt = timelib_diff(b, e);
 				retval = SUCCESS;
 			} else {
-				php_error_docref(NULL, E_WARNING, "Failed to parse interval (%s)", format);
+				zend_throw_error(NULL, "Failed to parse interval (%s)", format);
 				retval = FAILURE;
 			}
 		}
@@ -4097,7 +4098,7 @@ PHP_FUNCTION(date_interval_create_from_date_string)
 	time = timelib_strtotime(ZSTR_VAL(time_str), ZSTR_LEN(time_str), &err, DATE_TIMEZONEDB, php_date_parse_tzfile_wrapper);
 
 	if (err->error_count > 0)  {
-		php_error_docref(NULL, E_WARNING, "Unknown or bad format (%s) at position %d (%c): %s", ZSTR_VAL(time_str),
+		zend_value_error("Unknown or bad format (%s) at position %d (%c): %s", ZSTR_VAL(time_str),
 			err->error_messages[0].position, err->error_messages[0].character ? err->error_messages[0].character : ' ', err->error_messages[0].message);
 		RETVAL_FALSE;
 		goto cleanup;
@@ -4215,7 +4216,7 @@ static int date_period_initialize(timelib_time **st, timelib_time **et, timelib_
 	timelib_strtointerval(format, format_length, &b, &e, &p, &r, &errors);
 
 	if (errors->error_count > 0) {
-		php_error_docref(NULL, E_WARNING, "Unknown or bad format (%s)", format);
+		zend_value_error("Unknown or bad format (%s)", format);
 		retval = FAILURE;
 	} else {
 		*st = b;
@@ -4246,7 +4247,7 @@ PHP_METHOD(DatePeriod, __construct)
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OOl|l", &start, date_ce_interface, &interval, date_ce_interval, &recurrences, &options) == FAILURE) {
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "OOO|l", &start, date_ce_interface, &interval, date_ce_interval, &end, date_ce_interface, &options) == FAILURE) {
 			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "s|l", &isostr, &isostr_len, &options) == FAILURE) {
-				php_error_docref(NULL, E_WARNING, "This constructor accepts either (DateTimeInterface, DateInterval, int) OR (DateTimeInterface, DateInterval, DateTime) OR (string) as arguments.");
+				zend_type_error("This constructor accepts either (DateTimeInterface, DateInterval, int) OR (DateTimeInterface, DateInterval, DateTime) OR (string) as arguments.");
 				zend_restore_error_handling(&error_handling);
 				return;
 			}
@@ -4259,13 +4260,16 @@ PHP_METHOD(DatePeriod, __construct)
 	if (isostr) {
 		date_period_initialize(&(dpobj->start), &(dpobj->end), &(dpobj->interval), &recurrences, isostr, isostr_len);
 		if (dpobj->start == NULL) {
-			php_error_docref(NULL, E_WARNING, "The ISO interval '%s' did not contain a start date.", isostr);
+			zend_value_error("The ISO interval '%s' did not contain a start date.", isostr);
+			return;
 		}
 		if (dpobj->interval == NULL) {
-			php_error_docref(NULL, E_WARNING, "The ISO interval '%s' did not contain an interval.", isostr);
+			zend_value_error("The ISO interval '%s' did not contain an interval.", isostr);
+			return;
 		}
 		if (dpobj->end == NULL && recurrences == 0) {
-			php_error_docref(NULL, E_WARNING, "The ISO interval '%s' did not contain an end date or a recurrence count.", isostr);
+			zend_value_error("The ISO interval '%s' did not contain an end date or a recurrence count.", isostr);
+			return;
 		}
 
 		if (dpobj->start) {
@@ -4304,7 +4308,8 @@ PHP_METHOD(DatePeriod, __construct)
 	}
 
 	if (dpobj->end == NULL && recurrences < 1) {
-		php_error_docref(NULL, E_WARNING, "The recurrence count '%d' is invalid. Needs to be > 0", (int) recurrences);
+		zend_value_error("The recurrence count '%d' is invalid. Needs to be > 0", (int) recurrences);
+		return;
 	}
 
 	/* options */
@@ -4447,6 +4452,7 @@ PHP_FUNCTION(timezone_identifiers_list)
 
 	/* Extra validation */
 	if (what == PHP_DATE_TIMEZONE_PER_COUNTRY && option_len != 2) {
+		/* Upgrade to warning/exception? */
 		php_error_docref(NULL, E_NOTICE, "A two-letter ISO 3166-1 compatible country code is expected");
 		RETURN_FALSE;
 	}
@@ -4596,16 +4602,15 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 		case 6:
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "invalid format");
-			RETURN_FALSE;
-			break;
+			zend_value_error("Invalid format");
+			return;
 	}
 	if (retformat != SUNFUNCS_RET_TIMESTAMP &&
 		retformat != SUNFUNCS_RET_STRING &&
 		retformat != SUNFUNCS_RET_DOUBLE)
 	{
-		php_error_docref(NULL, E_WARNING, "Wrong return format given, pick one of SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING or SUNFUNCS_RET_DOUBLE");
-		RETURN_FALSE;
+		zend_value_error("Wrong return format given, pick one of SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING or SUNFUNCS_RET_DOUBLE");
+		return;
 	}
 	altitude = 90 - zenith;
 

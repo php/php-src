@@ -11,7 +11,7 @@ class Foo extends DateTime {
             echo "First try\n";
             parent::__construct($time, $tz);
             return;
-        } catch (Exception $e) {
+        } catch (\Error $e) {
             echo "Second try\n";
             parent::__construct($time.'C', $tz);
         }
@@ -19,8 +19,8 @@ class Foo extends DateTime {
 }
 $date = '12 Sep 2007 15:49:12 UT';
 var_dump(new Foo($date));
+
 ?>
-Done
 --EXPECT--
 First try
 Second try
@@ -32,4 +32,3 @@ object(Foo)#1 (3) {
   ["timezone"]=>
   string(3) "UTC"
 }
-Done
