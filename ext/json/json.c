@@ -313,13 +313,13 @@ static PHP_FUNCTION(json_decode)
 	}
 
 	if (depth <= 0) {
-		php_error_docref(NULL, E_WARNING, "Depth must be greater than zero");
-		RETURN_NULL();
+		zend_value_error("Depth must be greater than zero");
+		return;
 	}
 
 	if (depth > INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "Depth must be lower than %d", INT_MAX);
-		RETURN_NULL();
+		zend_value_error("Depth must be lower than %d", INT_MAX);
+		return;
 	}
 
 	/* For BC reasons, the bool $assoc overrides the long $options bit for PHP_JSON_OBJECT_AS_ARRAY */
