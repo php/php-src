@@ -6,7 +6,7 @@ Objects with overloaded get_properties are incompatible with ArrayObject
 $ao = new ArrayObject([1, 2, 3]);
 try {
     $ao->exchangeArray(new SplFixedArray);
-} catch (Exception $e) {
+} catch (\TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 var_dump($ao);

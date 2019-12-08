@@ -25,7 +25,7 @@ try {
 
 try {
     unserialize('O:11:"ArrayObject":3:{i:0;i:0;i:1;i:0;i:2;a:0:{}}');
-} catch (Exception $e) {
+} catch (\TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -51,7 +51,7 @@ try {
 
 try {
     unserialize('O:13:"ArrayIterator":3:{i:0;i:0;i:1;i:0;i:2;a:0:{}}');
-} catch (Exception $e) {
+} catch (\TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 

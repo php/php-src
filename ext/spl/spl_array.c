@@ -1105,7 +1105,7 @@ static void spl_array_it_rewind(zend_object_iterator *iter) /* {{{ */
 /* {{{ spl_array_set_array */
 static void spl_array_set_array(zval *object, spl_array_object *intern, zval *array, zend_long ar_flags, int just_array) {
 	if (Z_TYPE_P(array) != IS_OBJECT && Z_TYPE_P(array) != IS_ARRAY) {
-		zend_throw_exception(spl_ce_InvalidArgumentException, "Passed variable is not an array or object", 0);
+		zend_type_error("Passed variable is not an array or object");
 		return;
 	}
 
@@ -1134,8 +1134,7 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 		} else {
 			zend_object_get_properties_t handler = Z_OBJ_HANDLER_P(array, get_properties);
 			if (handler != zend_std_get_properties) {
-				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
-					"Overloaded object of type %s is not compatible with %s",
+				zend_type_error("Overloaded object of type %s is not compatible with %s",
 					ZSTR_VAL(Z_OBJCE_P(array)->name), ZSTR_VAL(intern->std.ce->name));
 				return;
 			}
@@ -1380,7 +1379,7 @@ SPL_METHOD(Array, seek)
 			return; /* ok */
 		}
 	}
-	zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Seek position " ZEND_LONG_FMT " is out of range", opos);
+	zend_value_error("Seek position " ZEND_LONG_FMT " is out of range", opos);
 } /* }}} */
 
 static zend_long spl_array_object_count_elements_helper(spl_array_object *intern) /* {{{ */
@@ -1455,7 +1454,7 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 		intern->nApplyCount--;
 	} else if (use_arg == SPL_ARRAY_METHOD_MAY_USER_ARG) {
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "|z", &arg) == FAILURE) {
-			zend_throw_exception(spl_ce_BadMethodCallException, "Function expects one argument at most", 0);
+			zend_argument_count_error("Function expects one argument at most");
 			goto exit;
 		}
 		if (arg) {
@@ -1466,7 +1465,7 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 		intern->nApplyCount--;
 	} else {
 		if (ZEND_NUM_ARGS() != 1 || zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
-			zend_throw_exception(spl_ce_BadMethodCallException, "Function expects exactly one argument", 0);
+			zend_argument_count_error("Function expects exactly one argument");
 			goto exit;
 		}
 		ZVAL_COPY_VALUE(&params[1], arg);

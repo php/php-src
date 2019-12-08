@@ -14,13 +14,10 @@ var_dump($test->current());
 $test->next();
 var_dump($test->current());
 try {
-  $output = $test->callGetChildren();
-} catch (InvalidArgumentException $ilae){
-  $output = null;
-  print "invalid argument exception\n";
+    var_dump($test->callGetChildren());
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
 }
-var_dump($output);
-
 
 ?>
 --EXPECT--
@@ -33,5 +30,4 @@ var_dump($output);
   int(9)
 }
 int(7)
-invalid argument exception
-NULL
+Passed variable is not an array or object

@@ -12,15 +12,15 @@ Test ArrayObject::uasort() function : wrong arg count
 $ao = new ArrayObject();
 
 try {
-    $ao->uasort();
-} catch (BadMethodCallException $e) {
-    echo $e->getMessage() . "\n";
+	$ao->uasort();
+} catch (\ArgumentCountError $e) {
+	echo $e->getMessage() . "\n";
 }
 
 try {
-    $ao->uasort(1,2);
-} catch (BadMethodCallException $e) {
-    echo $e->getMessage() . "\n";
+	$ao->uasort(1,2);
+} catch (\ArgumentCountError $e) {
+	echo $e->getMessage() . "\n";
 }
 ?>
 --EXPECT--

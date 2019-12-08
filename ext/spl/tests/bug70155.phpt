@@ -4,14 +4,13 @@ SPL: Bug #70155 Use After Free Vulnerability in unserialize() with SPLArrayObjec
 <?php
 $inner = 'x:i:0;O:12:"DateInterval":1:{s:1:"y";i:3;};m:a:1:{i:0;R:2;}';
 $exploit = 'C:11:"ArrayObject":'.strlen($inner).':{'.$inner.'}';
-$data = unserialize($exploit);
 
-var_dump($data);
+try {
+    $data = unserialize($exploit);
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 ?>
---EXPECTF--
-Fatal error: Uncaught InvalidArgumentException: Overloaded object of type DateInterval is not compatible with ArrayObject in %s
-Stack trace:
-%s
-%s
-%s
-%s
+--EXPECT--
+Overloaded object of type DateInterval is not compatible with ArrayObject

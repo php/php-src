@@ -40,10 +40,10 @@ unset($original, $ao, $swapIn, $copy);
 $original = new C;
 $ao = new ArrayObject($original);
 try {
-    $copy = $ao->exchangeArray(null);
-    $copy['addedToCopy'] = 'added To Copy';
-} catch (Exception $e) {
-    echo "Exception:" . $e->getMessage() . "\n";
+	$copy = $ao->exchangeArray(null);
+	$copy['addedToCopy'] = 'added To Copy';
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
 }
 $original->addedToOriginal = 'added To Original';
 var_dump($ao, $original, $copy);
@@ -103,7 +103,7 @@ NULL
 
 
 --> exchangeArray() with bad arg type:
-Exception:Passed variable is not an array or object
+Passed variable is not an array or object
 
 Warning: Undefined variable $copy in %s on line %d
 object(ArrayObject)#3 (1) {
