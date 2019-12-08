@@ -496,30 +496,28 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 			break;
 		}
 
+		/* Process cookie val and var.
+		 * Value       characters defined in RFC6265.4.1.1
+		 * Name(token) characters defined in RFC6265.4.1.1. -> RFC2616.2.2
+		 * According to PHP documentation, name have additional restrictions.
+		 */
+		size_t val_len;
+		size_t new_val_len;
+
 		if (val) { /* have a value */
-			size_t val_len;
-			size_t new_val_len;
-
 			*val++ = '\0';
-			php_url_decode(var, strlen(var));
-			val_len = php_url_decode(val, strlen(val));
-			val = estrndup(val, val_len);
-			if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len)) {
-				php_register_variable_safe(var, val, new_val_len, &array);
-			}
-			efree(val);
+			val_len = php_raw_url_decode(val, strlen(val));
 		} else {
-			size_t val_len;
-			size_t new_val_len;
-
-			php_url_decode(var, strlen(var));
-			val_len = 0;
-			val = estrndup("", val_len);
-			if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len)) {
-				php_register_variable_safe(var, val, new_val_len, &array);
-			}
-			efree(val);
+			val     = "";
+			val_len =  0;
 		}
+
+		val = estrndup(val, val_len);
+		php_url_decode(var, strlen(var));
+		if (sapi_module.input_filter(arg, var, &val, val_len, &new_val_len)) {
+			php_register_variable_safe(var, val, new_val_len, &array);
+		}
+		efree(val);
 next_cookie:
 		var = php_strtok_r(NULL, separator, &strtok_buf);
 	}
