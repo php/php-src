@@ -92,8 +92,8 @@ PHP_FUNCTION(class_parents)
 	}
 
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
-		php_error_docref(NULL, E_WARNING, "object or string expected");
-		RETURN_FALSE;
+		zend_type_error("object or string expected");
+		return;
 	}
 
 	if (Z_TYPE_P(obj) == IS_STRING) {
@@ -125,8 +125,8 @@ PHP_FUNCTION(class_implements)
 		return;
 	}
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
-		php_error_docref(NULL, E_WARNING, "object or string expected");
-		RETURN_FALSE;
+		zend_type_error("object or string expected");
+		return;
 	}
 
 	if (Z_TYPE_P(obj) == IS_STRING) {
@@ -154,8 +154,8 @@ PHP_FUNCTION(class_uses)
 		return;
 	}
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
-		php_error_docref(NULL, E_WARNING, "object or string expected");
-		RETURN_FALSE;
+		zend_type_error("object or string expected");
+		return;
 	}
 
 	if (Z_TYPE_P(obj) == IS_STRING) {
