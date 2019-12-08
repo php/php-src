@@ -338,9 +338,9 @@ static PHP_FUNCTION(bzread)
 
 	php_stream_from_zval(stream, bz);
 
-	if ((len + 1) < 1) {
-		php_error_docref(NULL, E_WARNING, "length may not be negative");
-		RETURN_FALSE;
+	if (len  < 0) {
+		zend_value_error("Length cannot be negative");
+		RETURN_THROWS();
 	}
 
 	data = php_stream_read_to_str(stream, len);
@@ -367,8 +367,8 @@ static PHP_FUNCTION(bzopen)
 	}
 
 	if (mode_len != 1 || (mode[0] != 'r' && mode[0] != 'w')) {
-		php_error_docref(NULL, E_WARNING, "'%s' is not a valid mode for bzopen(). Only 'w' and 'r' are supported.", mode);
-		RETURN_FALSE;
+		zend_value_error("'%s' is not a valid mode for bzopen(). Only 'w' and 'r' are supported.", mode);
+		RETURN_THROWS();
 	}
 
 	/* If it's not a resource its a string containing the filename to open */
@@ -430,8 +430,8 @@ static PHP_FUNCTION(bzopen)
 
 		stream = php_stream_bz2open_from_BZFILE(bz, mode, stream);
 	} else {
-		php_error_docref(NULL, E_WARNING, "first parameter has to be string or file-resource");
-		RETURN_FALSE;
+		zend_type_error("First parameter has to be string or file-resource");
+		RETURN_THROWS();
 	}
 
 	if (stream) {
