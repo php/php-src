@@ -8,15 +8,23 @@ if (!extension_loaded("zlib")) {
 ?>
 --FILE--
 <?php
+
 $badResource = fopen("php://memory", "r+");
-var_dump(inflate_add($badResource, "test"));
+try {
+    var_dump(inflate_add($badResource, "test"));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 $resource = inflate_init(ZLIB_ENCODING_DEFLATE);
 $badFlushType = 6789;
-var_dump(inflate_add($resource, "test", $badFlushType));
-?>
---EXPECTF--
-Warning: inflate_add(): Invalid zlib.inflate resource in %s on line %d
-bool(false)
+try {
+    var_dump(inflate_add($resource, "test", $badFlushType));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-Warning: inflate_add(): flush mode must be ZLIB_NO_FLUSH, ZLIB_PARTIAL_FLUSH, ZLIB_SYNC_FLUSH, ZLIB_FULL_FLUSH, ZLIB_BLOCK or ZLIB_FINISH in %s on line %d
-bool(false)
+?>
+--EXPECT--
+inflate_add(): supplied resource is not a valid zlib inflate resource
+Flush mode must be ZLIB_NO_FLUSH, ZLIB_PARTIAL_FLUSH, ZLIB_SYNC_FLUSH, ZLIB_FULL_FLUSH, ZLIB_BLOCK or ZLIB_FINISH
