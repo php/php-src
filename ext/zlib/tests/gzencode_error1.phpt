@@ -26,22 +26,26 @@ $encoding_mode = FORCE_DEFLATE;
 
 echo "\n-- Testing with incorrect compression level --\n";
 $bad_level = 99;
-var_dump(gzencode($data, $bad_level));
+try {
+    var_dump(gzencode($data, $bad_level));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "\n-- Testing with incorrect encoding_mode --\n";
 $bad_mode = 99;
-var_dump(gzencode($data, $level, $bad_mode));
+try {
+    var_dump(gzencode($data, $level, $bad_mode));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing gzencode() : error conditions ***
 
 -- Testing with incorrect compression level --
-
-Warning: gzencode(): compression level (99) must be within -1..9 in %s on line %d
-bool(false)
+compression level (99) must be within -1..9
 
 -- Testing with incorrect encoding_mode --
-
-Warning: gzencode(): encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE in %s on line %d
-bool(false)
+encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE

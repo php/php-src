@@ -73,7 +73,7 @@ function inflate_init(int $encoding, array $options = []) {}
 function inflate_add($context, string $encoded_data, int $flush_mode = ZLIB_SYNC_FLUSH): string|false {}
 
 /** @param resource $resource */
-function inflate_get_status($resource): int|false {}
+function inflate_get_status($resource): int {};
 
 /** @param resource $resource */
-function inflate_get_read_len($resource): int|false {}
+function inflate_get_read_len($resource): int {};
