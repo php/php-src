@@ -13,7 +13,7 @@ while ($di->valid()) {
 
 try {
     $di->seek($cnt+1);
-} catch (OutOfBoundsException $ex) {
+} catch (\ValueError $ex) {
     echo $ex->getMessage() . PHP_EOL;
 }
 echo "Is valid? " . (int) $di->valid() . PHP_EOL;

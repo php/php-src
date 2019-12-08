@@ -34,7 +34,7 @@ try {
     $p = 0;
     $di->seek($o+1);
     $p = 1;
-} catch (\OutOfBoundsException $ex) {
+} catch (\ValueError $ex) {
     echo $ex->getMessage() . PHP_EOL;
 }
 

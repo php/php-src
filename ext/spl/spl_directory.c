@@ -718,7 +718,7 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 	}
 
 	if (!len) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Directory name must not be empty.");
+		zend_value_error("Directory name must not be empty");
 		return;
 	}
 
@@ -850,7 +850,7 @@ SPL_METHOD(DirectoryIterator, seek)
 		valid = zend_is_true(&retval);
 		zval_ptr_dtor(&retval);
 		if (!valid) {
-			zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Seek position " ZEND_LONG_FMT " is out of range", pos);
+			zend_value_error("Seek position " ZEND_LONG_FMT " is out of range", pos);
 			RETURN_THROWS();
 		}
 		zend_call_method_with_0_params(Z_OBJ_P(ZEND_THIS), Z_OBJCE_P(ZEND_THIS), &intern->u.dir.func_next, "next", NULL);
@@ -2460,7 +2460,7 @@ SPL_METHOD(SplFileObject, setMaxLineLen)
 	}
 
 	if (max_len < 0) {
-		zend_throw_exception_ex(spl_ce_DomainException, 0, "Maximum line length must be greater than or equal zero");
+		zend_value_error("Maximum line length must be greater than or equal zero");
 		RETURN_THROWS();
 	}
 
@@ -2925,7 +2925,7 @@ SPL_METHOD(SplFileObject, seek)
 	}
 
 	if (line_pos < 0) {
-		zend_throw_exception_ex(spl_ce_LogicException, 0, "Can't seek file %s to negative line " ZEND_LONG_FMT, intern->file_name, line_pos);
+		zend_value_error("Can't seek file %s to negative line", intern->file_name);
 		RETURN_THROWS();
 	}
 

@@ -8,10 +8,10 @@ $s = new SplFileObject( __FILE__ );
 try {
     $s->setMaxLineLen(-1);
 }
-catch (DomainException $e) {
-    echo 'DomainException thrown';
+catch (\ValueError $e) {
+	echo($e->getMessage());
 }
 
 ?>
 --EXPECT--
-DomainException thrown
+Maximum line length must be greater than or equal zero
