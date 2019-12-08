@@ -24,9 +24,6 @@ ProtectHome=true
 # Mounts the /usr, /boot, and /etc directories read-only for processes invoked by this unit.
 ProtectSystem=full
 
-# Ensures that the service process and all its children can never gain new privileges
-NoNewPrivileges=true
-
 # Sets up a new /dev namespace for the executed processes and only adds API pseudo devices
 # such as /dev/null, /dev/zero or /dev/random (as well as the pseudo TTY subsystem) to it,
 # but no physical devices such as /dev/sda.
@@ -55,7 +52,7 @@ RestrictRealtime=true
 
 # Restricts the set of socket address families accessible to the processes of this unit.
 # Protects against vulnerabilities such as CVE-2016-8655
-RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictAddressFamilies=AF_INET AF_INET6 AF_NETLINK AF_UNIX
 
 # Takes away the ability to create or manage any kind of namespace
 RestrictNamespaces=true
