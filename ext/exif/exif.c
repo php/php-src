@@ -1286,9 +1286,6 @@ typedef enum mn_byte_order_t {
 typedef enum mn_offset_mode_t {
 	MN_OFFSET_NORMAL,
 	MN_OFFSET_MAKER
-#ifdef KALLE_0
-	, MN_OFFSET_GUESS
-#endif
 } mn_offset_mode_t;
 
 typedef struct {
@@ -3050,9 +3047,6 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 	size_t i;
 	int de, section_index = SECTION_MAKERNOTE;
 	int NumDirEntries, old_motorola_intel;
-#ifdef KALLE_0
-	int offset_diff;
-#endif
 	const maker_note_type *maker_note;
 	char *dir_start;
 	int data_len;
@@ -3109,25 +3103,6 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 			offset_base = value_ptr;
 			data_len = value_len;
 			break;
-#ifdef KALLE_0
-		case MN_OFFSET_GUESS:
-			if (maker_note->offset + 10 + 4 >= value_len) {
-				/* Can not read dir_start+10 since it's beyond value end */
-				exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "IFD data too short: 0x%04X", value_len);
-				return FALSE;
-			}
-			offset_diff = 2 + NumDirEntries*12 + 4 - php_ifd_get32u(dir_start+10, ImageInfo->motorola_intel);
-#ifdef EXIF_DEBUG
-			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Using automatic offset correction: 0x%04X", ((int)dir_start-(int)offset_base+maker_note->offset+displacement) + offset_diff);
-#endif
-			if (offset_diff < 0 || offset_diff >= value_len ) {
-				exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "IFD data bad offset: 0x%04X length 0x%04X", offset_diff, value_len);
-				return FALSE;
-			}
-			offset_base = value_ptr + offset_diff;
-			data_len = value_len - offset_diff;
-			break;
-#endif
 		default:
 		case MN_OFFSET_NORMAL:
 			data_len = value_len;
