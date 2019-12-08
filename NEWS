@@ -22,6 +22,8 @@ PHP                                                                        NEWS
   . Fixed bug #76601 (Partially working php-fpm ater incomplete reload).
     (Maksim Nikulin)
   . Fixed bug #78889 (php-fpm service fails to start). (Jakub Zelenka)
+  . Fixed bug #78916 (php-fpm 7.4.0 don't send mail via mail()).
+    (Jakub Zelenka)
 
 - Mysqlnd:
   . Fixed bug #78823 (ZLIB_LIBS not added to EXTRA_LIBS). (Arjen de Korte)
