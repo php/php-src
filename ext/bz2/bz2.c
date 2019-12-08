@@ -379,7 +379,8 @@ static PHP_FUNCTION(bzopen)
 		}
 
 		if (CHECK_ZVAL_NULL_PATH(file)) {
-			RETURN_FALSE;
+			zend_type_error("filename must not contain null bytes");
+			return;
 		}
 
 		stream = php_stream_bz2open(NULL, Z_STRVAL_P(file), mode, REPORT_ERRORS, NULL);
