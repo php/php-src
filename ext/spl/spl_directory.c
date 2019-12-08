@@ -2575,8 +2575,8 @@ SPL_METHOD(SplFileObject, fgetcsv)
 		{
 		case 3:
 			if (esc_len > 1) {
-				php_error_docref(NULL, E_WARNING, "escape must be empty or a single character");
-				RETURN_FALSE;
+				zend_value_error("escape must be empty or a single character");
+				return;
 			}
 			if (esc_len == 0) {
 				escape = PHP_CSV_NO_ESCAPE;
@@ -2586,15 +2586,15 @@ SPL_METHOD(SplFileObject, fgetcsv)
 			/* no break */
 		case 2:
 			if (e_len != 1) {
-				php_error_docref(NULL, E_WARNING, "enclosure must be a character");
-				RETURN_FALSE;
+				zend_value_error("enclosure must be a character");
+				return;
 			}
 			enclosure = enclo[0];
 			/* no break */
 		case 1:
 			if (d_len != 1) {
-				php_error_docref(NULL, E_WARNING, "delimiter must be a character");
-				RETURN_FALSE;
+				zend_value_error("delimiter must be a character");
+				return;
 			}
 			delimiter = delim[0];
 			/* no break */
@@ -2630,21 +2630,21 @@ SPL_METHOD(SplFileObject, fputcsv)
 					escape = (unsigned char) esc[0];
 					break;
 				default:
-					php_error_docref(NULL, E_WARNING, "escape must be empty or a single character");
-					RETURN_FALSE;
+					zend_value_error("escape must be empty or a single character");
+					return;
 			}
 			/* no break */
 		case 3:
 			if (e_len != 1) {
-				php_error_docref(NULL, E_WARNING, "enclosure must be a character");
-				RETURN_FALSE;
+				zend_value_error("enclosure must be a character");
+				return;
 			}
 			enclosure = enclo[0];
 			/* no break */
 		case 2:
 			if (d_len != 1) {
-				php_error_docref(NULL, E_WARNING, "delimiter must be a character");
-				RETURN_FALSE;
+				zend_value_error("delimiter must be a character");
+				return;
 			}
 			delimiter = delim[0];
 			/* no break */
@@ -2680,21 +2680,21 @@ SPL_METHOD(SplFileObject, setCsvControl)
 					escape = (unsigned char) esc[0];
 					break;
 				default:
-					php_error_docref(NULL, E_WARNING, "escape must be empty or a single character");
-					RETURN_FALSE;
+					zend_value_error("escape must be empty or a single character");
+					return;
 			}
 			/* no break */
 		case 2:
 			if (e_len != 1) {
-				php_error_docref(NULL, E_WARNING, "enclosure must be a character");
-				RETURN_FALSE;
+				zend_value_error("enclosure must be a character");
+				return;
 			}
 			enclosure = enclo[0];
 			/* no break */
 		case 1:
 			if (d_len != 1) {
-				php_error_docref(NULL, E_WARNING, "delimiter must be a character");
-				RETURN_FALSE;
+				zend_value_error("delimiter must be a character");
+				return;
 			}
 			delimiter = delim[0];
 			/* no break */
@@ -2910,8 +2910,8 @@ SPL_METHOD(SplFileObject, fread)
 	}
 
 	if (length <= 0) {
-		php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
-		RETURN_FALSE;
+		zend_value_error("Length parameter must be greater than 0");
+		return;
 	}
 
 	str = php_stream_read_to_str(intern->u.file.stream, length);
