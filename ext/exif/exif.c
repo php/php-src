@@ -2357,9 +2357,6 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 	image_info_data  *info_data;
 	zval 			 tmpi, array;
 
-#ifdef EXIF_DEBUG
-/*		php_error_docref(NULL, E_NOTICE, "Adding %d infos from section %s", image_info->info_list[section_index].count, exif_get_sectionname(section_index));*/
-#endif
 	if (image_info->info_list[section_index].count) {
 		if (sub_array) {
 			array_init(&tmpi);
@@ -2377,9 +2374,7 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 				snprintf(uname, sizeof(uname), "%d", unknown++);
 				name = uname;
 			}
-#ifdef EXIF_DEBUG
-/*		php_error_docref(NULL, E_NOTICE, "Adding infos: tag(0x%04X,%12s,L=0x%04X): %s", info_tag, exif_get_tagname_debug(info_tag, exif_get_tag_table(section_index)), info_data->length, info_data->format==TAG_FMT_STRING?(info_value&&info_value->s?info_value->s:"<no data>"):exif_get_tagformat(info_data->format));*/
-#endif
+
 			if (info_data->length==0) {
 				add_assoc_null(&tmpi, name);
 			} else {
@@ -2413,8 +2408,6 @@ static void add_assoc_image_info(zval *value, int sub_array, image_info_type *im
 
 					case TAG_FMT_URATIONAL:
 					case TAG_FMT_SRATIONAL:
-					/*case TAG_FMT_BYTE:
-					case TAG_FMT_SBYTE:*/
 					case TAG_FMT_USHORT:
 					case TAG_FMT_SSHORT:
 					case TAG_FMT_SINGLE:
@@ -2604,28 +2597,11 @@ static void exif_process_COM (image_info_type *image_info, char *value, size_t l
  * Process a SOFn marker.  This is useful for the image dimensions */
 static void exif_process_SOFn (uchar *Data, int marker, jpeg_sof_info *result)
 {
-/* 0xFF SOSn SectLen(2) Bits(1) Height(2) Width(2) Channels(1)  3*Channels (1)  */
+	/* 0xFF SOSn SectLen(2) Bits(1) Height(2) Width(2) Channels(1)  3*Channels (1)  */
 	result->bits_per_sample = Data[2];
 	result->height          = php_jpg_get16(Data+3);
 	result->width           = php_jpg_get16(Data+5);
 	result->num_components  = Data[7];
-
-/*	switch (marker) {
-		case M_SOF0:  process = "Baseline";  break;
-		case M_SOF1:  process = "Extended sequential";  break;
-		case M_SOF2:  process = "Progressive";  break;
-		case M_SOF3:  process = "Lossless";  break;
-		case M_SOF5:  process = "Differential sequential";  break;
-		case M_SOF6:  process = "Differential progressive";  break;
-		case M_SOF7:  process = "Differential lossless";  break;
-		case M_SOF9:  process = "Extended sequential, arithmetic coding";  break;
-		case M_SOF10: process = "Progressive, arithmetic coding";  break;
-		case M_SOF11: process = "Lossless, arithmetic coding";  break;
-		case M_SOF13: process = "Differential sequential, arithmetic coding";  break;
-		case M_SOF14: process = "Differential progressive, arithmetic coding"; break;
-		case M_SOF15: process = "Differential lossless, arithmetic coding";  break;
-		default:      process = "Unknown";  break;
-	}*/
 }
 /* }}} */
 
@@ -3092,7 +3068,6 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 
 		maker_note = maker_note_array+i;
 
-		/*exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "check (%s)", maker_note->make?maker_note->make:"");*/
 		if (maker_note->make && (!ImageInfo->make || strcmp(maker_note->make, ImageInfo->make)))
 			continue;
 		if (maker_note->id_string && strncmp(maker_note->id_string, value_ptr, maker_note->id_string_len))
@@ -3221,7 +3196,6 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 		/* (-1) catches illegal zero case as unsigned underflows to positive large. */
 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal format code 0x%04X, suppose BYTE", tag, exif_get_tagname_debug(tag, tag_table), format);
 		format = TAG_FMT_BYTE;
-		/*return TRUE;*/
 	}
 
 	byte_count_signed = (int64_t)components * php_tiff_bytes_per_format[format];
@@ -3989,7 +3963,6 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 				return FALSE;
 			}
 			php_stream_read(ImageInfo->infile, (char*)(ImageInfo->file.list[sn].data+2), dir_size-2);
-			/*exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Dump: %s", exif_char_dump(ImageInfo->file.list[sn].data, dir_size, 0));*/
 			next_offset = php_ifd_get32u(ImageInfo->file.list[sn].data + dir_size - 4, ImageInfo->motorola_intel);
 #ifdef EXIF_DEBUG
 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Read from TIFF done, next offset x%04X", next_offset);
@@ -4328,7 +4301,6 @@ static int exif_read_from_impl(image_info_type *ImageInfo, php_stream *stream, i
 			/* Store file date/time. */
 			ImageInfo->FileDateTime = st.st_mtime;
 			ImageInfo->FileSize = st.st_size;
-			/*exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Opened stream is file: %d", ImageInfo->FileSize);*/
 		}
 	} else {
 		if (!ImageInfo->FileSize) {
