@@ -523,50 +523,76 @@ PHP_FUNCTION(spl_autoload_register)
 			if (Z_TYPE_P(zcallable) == IS_ARRAY) {
 				if (!obj_ptr && alfi.func_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
 					if (do_throw) {
-						zend_throw_exception_ex(spl_ce_LogicException, 0, "Passed array specifies a non static method but no object (%s)", error);
+						zend_type_error("Passed array specifies a non static method but no object (%s)", error);
 					}
 					if (error) {
 						efree(error);
 					}
 					zend_string_release_ex(func_name, 0);
-					RETURN_FALSE;
+
+					if (do_throw) {
+						RETURN_THROWS();
+					} else {
+						RETURN_FALSE;
+					}
 				} else if (do_throw) {
-					zend_throw_exception_ex(spl_ce_LogicException, 0, "Passed array does not specify %s %smethod (%s)", alfi.func_ptr ? "a callable" : "an existing", !obj_ptr ? "static " : "", error);
+					zend_type_error("Passed array does not specify %s %smethod (%s)",
+							alfi.func_ptr ? "a callable" : "an existing", !obj_ptr ? "static " : "", error);
 				}
 				if (error) {
 					efree(error);
 				}
 				zend_string_release_ex(func_name, 0);
-				RETURN_FALSE;
+
+				if (do_throw) {
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
 			} else if (Z_TYPE_P(zcallable) == IS_STRING) {
 				if (do_throw) {
-					zend_throw_exception_ex(spl_ce_LogicException, 0, "Function '%s' not %s (%s)", ZSTR_VAL(func_name), alfi.func_ptr ? "callable" : "found", error);
+					zend_type_error("Function '%s' not %s (%s)", ZSTR_VAL(func_name), alfi.func_ptr ? "callable" : "found", error);
 				}
 				if (error) {
 					efree(error);
 				}
 				zend_string_release_ex(func_name, 0);
-				RETURN_FALSE;
+
+				if (do_throw) {
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
 			} else {
 				if (do_throw) {
-					zend_throw_exception_ex(spl_ce_LogicException, 0, "Illegal value passed (%s)", error);
+					zend_type_error("Expected callable as first argument (%s)", error);
 				}
 				if (error) {
 					efree(error);
 				}
 				zend_string_release_ex(func_name, 0);
-				RETURN_FALSE;
+
+				if (do_throw) {
+					RETURN_THROWS();
+				} else {
+					RETURN_FALSE;
+				}
 			}
 		} else if (fcc.function_handler->type == ZEND_INTERNAL_FUNCTION &&
 				   fcc.function_handler->internal_function.handler == zif_spl_autoload_call) {
 			if (do_throw) {
-				zend_throw_exception_ex(spl_ce_LogicException, 0, "Function spl_autoload_call() cannot be registered");
+				zend_throw_error(NULL, "Function spl_autoload_call() cannot be registered");
 			}
 			if (error) {
 				efree(error);
 			}
 			zend_string_release_ex(func_name, 0);
-			RETURN_FALSE;
+
+			if (do_throw) {
+				RETURN_THROWS();
+			} else {
+				RETURN_FALSE;
+			}
 		}
 		alfi.ce = fcc.calling_scope;
 		alfi.func_ptr = fcc.function_handler;
@@ -688,14 +714,14 @@ PHP_FUNCTION(spl_autoload_unregister)
 	}
 
 	if (!zend_is_callable_ex(zcallable, NULL, IS_CALLABLE_CHECK_SYNTAX_ONLY, &func_name, &fcc, &error)) {
-		zend_throw_exception_ex(spl_ce_LogicException, 0, "Unable to unregister invalid function (%s)", error);
+		zend_throw_error(NULL, "Unable to unregister invalid function (%s)", error);
 		if (error) {
 			efree(error);
 		}
 		if (func_name) {
 			zend_string_release_ex(func_name, 0);
 		}
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	obj_ptr = fcc.object;
 	if (error) {

@@ -19,13 +19,10 @@ class MyAutoLoader {
         }
 }
 
-try
-{
-    spl_autoload_register(array('MyAutoLoader', 'autoLoad'), true);
-}
-catch(Exception $e)
-{
-    echo 'Exception: ' . $e->getMessage() . "\n";
+try {
+	spl_autoload_register(array('MyAutoLoader', 'autoLoad'), true);
+} catch (\TypeError $e) {
+    echo $e->getMessage() . PHP_EOL;
 }
 
 // and
@@ -46,7 +43,7 @@ catch(Exception $e)
 
 ?>
 --EXPECT--
-Exception: Passed array specifies a non static method but no object (non-static method MyAutoLoader::autoLoad() cannot be called statically)
+Passed array specifies a non static method but no object (non-static method MyAutoLoader::autoLoad() cannot be called statically)
 MyAutoLoader::autoLoad(TestClass)
 MyAutoLoader::autoThrow(TestClass)
 Exception: Unavailable

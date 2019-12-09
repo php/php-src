@@ -39,16 +39,13 @@ $funcs = array(
 
 foreach($funcs as $idx => $func)
 {
-    if ($idx) echo "\n";
-    try
-    {
+	if ($idx) echo "\n";
+    try {
         var_dump($func);
         spl_autoload_register($func);
         echo "ok\n";
-    }
-    catch (Exception $e)
-    {
-        echo $e->getMessage() . "\n";
+    } catch (\TypeError $e) {
+        echo $e->getMessage() . PHP_EOL;
     }
 }
 

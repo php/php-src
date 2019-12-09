@@ -42,20 +42,16 @@ foreach($funcs as $idx => $func)
 {
     echo "====$idx====\n";
 
-    try
-    {
-        var_dump($func);
-        spl_autoload_register($func);
-        if (count(spl_autoload_functions()))
-        {
-            echo "registered\n";
+    try {
+		var_dump($func);
+		spl_autoload_register($func);
+		if (count(spl_autoload_functions())) {
+			echo "registered\n";
 
-            var_dump(class_exists("NoExistingTestClass", true));
-        }
-    }
-    catch (Exception $e)
-    {
-        echo get_class($e) . ": " . $e->getMessage() . "\n";
+			var_dump(class_exists("NoExistingTestClass", true));
+		}
+    } catch (\TypeError|\Exception $e) {
+        echo get_class($e) . ': ' . $e->getMessage() . PHP_EOL;
     }
 
     spl_autoload_unregister($func);
@@ -78,7 +74,7 @@ Exception: Bla
 int(0)
 ====2====
 string(22) "MyAutoLoader::dynaLoad"
-LogicException: Function 'MyAutoLoader::dynaLoad' not callable (non-static method MyAutoLoader::dynaLoad() cannot be called statically)
+TypeError: Function 'MyAutoLoader::dynaLoad' not callable (non-static method MyAutoLoader::dynaLoad() cannot be called statically)
 int(0)
 ====3====
 array(2) {
@@ -98,7 +94,7 @@ array(2) {
   [1]=>
   string(8) "dynaLoad"
 }
-LogicException: Passed array specifies a non static method but no object (non-static method MyAutoLoader::dynaLoad() cannot be called statically)
+TypeError: Passed array specifies a non static method but no object (non-static method MyAutoLoader::dynaLoad() cannot be called statically)
 int(0)
 ====5====
 array(2) {
