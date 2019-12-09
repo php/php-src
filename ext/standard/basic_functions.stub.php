@@ -586,10 +586,7 @@ function lcfirst(string $str): string {}
 
 function ucwords(string $str, string $delimiters = " \t\r\n\f\v"): string {}
 
-/**
- * @param string|array $from
- */
-function strtr(string $str, $from, string $to = UNKNOWN): string {}
+function strtr(string $str, string|array $from, string $to = UNKNOWN): string {}
 
 function strrev(string $str): string {}
 
@@ -1015,8 +1012,7 @@ function link(string $target, string $link): bool {}
 
 /* mail.c */
 
-/** @param string|array $additional_headers */
-function mail(string $to, string $subject, string $message, $additional_headers = UNKNOWN, string $additional_parameters = ""): bool {}
+function mail(string $to, string $subject, string $message, string|array $additional_headers = UNKNOWN, string $additional_parameters = ""): bool {}
 
 /* math.c */
 

@@ -3236,21 +3236,24 @@ PHPAPI zend_string *php_str_to_str(const char *haystack, size_t length, const ch
    Translates characters in str using given translation tables */
 PHP_FUNCTION(strtr)
 {
-	zval *from;
-	zend_string *str;
+	zend_string *str, *from_str = NULL;
+	HashTable *from_ht = NULL;
 	char *to = NULL;
 	size_t to_len = 0;
 	int ac = ZEND_NUM_ARGS();
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(str)
-		Z_PARAM_ZVAL(from)
+		Z_PARAM_STR_OR_ARRAY_HT(from_str, from_ht)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STRING(to, to_len)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ac == 2 && Z_TYPE_P(from) != IS_ARRAY) {
-		zend_type_error("The second argument is not an array");
+	if (ac == 2 && from_ht == NULL) {
+		zend_type_error("If two arguments are passed, the second argument must be an array");
+		return;
+	} else if (ac != 2 && from_str == NULL) {
+		zend_type_error("If three arguments are passed, the second argument must be a string");
 		return;
 	}
 
@@ -3260,16 +3263,14 @@ PHP_FUNCTION(strtr)
 	}
 
 	if (ac == 2) {
-		HashTable *pats = Z_ARRVAL_P(from);
-
-		if (zend_hash_num_elements(pats) < 1) {
+		if (zend_hash_num_elements(from_ht) < 1) {
 			RETURN_STR_COPY(str);
-		} else if (zend_hash_num_elements(pats) == 1) {
+		} else if (zend_hash_num_elements(from_ht) == 1) {
 			zend_long num_key;
 			zend_string *str_key, *tmp_str, *replace, *tmp_replace;
 			zval *entry;
 
-			ZEND_HASH_FOREACH_KEY_VAL(pats, num_key, str_key, entry) {
+			ZEND_HASH_FOREACH_KEY_VAL(from_ht, num_key, str_key, entry) {
 				tmp_str = NULL;
 				if (UNEXPECTED(!str_key)) {
 					str_key = tmp_str = zend_long_to_str(num_key);
@@ -3296,17 +3297,13 @@ PHP_FUNCTION(strtr)
 				return;
 			} ZEND_HASH_FOREACH_END();
 		} else {
-			php_strtr_array(return_value, str, pats);
+			php_strtr_array(return_value, str, from_ht);
 		}
 	} else {
-		if (!try_convert_to_string(from)) {
-			return;
-		}
-
 		RETURN_STR(php_strtr_ex(str,
-				  Z_STRVAL_P(from),
+				  ZSTR_VAL(from_str),
 				  to,
-				  MIN(Z_STRLEN_P(from), to_len)));
+				  MIN(ZSTR_LEN(from_str), to_len)));
 	}
 }
 /* }}} */

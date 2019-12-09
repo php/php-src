@@ -3929,7 +3929,7 @@ PHP_FUNCTION(mb_send_mail)
 				zend_string_release_ex(tmp_headers, 0);
 				break;
 			case IS_ARRAY:
-				str_headers = php_mail_build_headers(headers);
+				str_headers = php_mail_build_headers(Z_ARRVAL_P(headers));
 				break;
 			default:
 				php_error_docref(NULL, E_WARNING, "headers parameter must be string or array");
