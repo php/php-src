@@ -45,6 +45,9 @@ PHP 7.4 UPGRADE NOTES
   . The "creating default object from empty value" warning is now consistently
     thrown if a falsy value is promoted into an stdClass object. Previously some
     cases like `$null->prop[0] = $val` missed this warning.
+  . Previously get_declared_classes() always returned parent classes before
+    child classes. This is no longer the case. No particular order is guaranteed
+    for the get_declared_classes() return value.
 
 - BCMath:
   . BCMath functions will now warn if a non well-formed number is passed, such
