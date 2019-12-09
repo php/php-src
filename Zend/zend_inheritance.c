@@ -936,7 +936,7 @@ static void emit_incompatible_property_error(
 	zend_error_noreturn(E_COMPILE_ERROR,
 		"Type of %s::$%s must be %s%s (as in class %s)",
 		ZSTR_VAL(child->ce->name),
-		ZSTR_VAL(child->name),
+		zend_get_unmangled_property_name(child->name),
 		ZEND_TYPE_ALLOW_NULL(parent->type) ? "?" : "",
 		ZEND_TYPE_IS_CLASS(parent->type)
 			? ZSTR_VAL(ZEND_TYPE_IS_CE(parent->type) ? ZEND_TYPE_CE(parent->type)->name : resolve_class_name(parent->ce, ZEND_TYPE_NAME(parent->type)))
