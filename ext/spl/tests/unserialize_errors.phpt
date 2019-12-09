@@ -85,31 +85,31 @@ echo "SplObjectStorage:\n";
 
 try {
     unserialize('O:16:"SplObjectStorage":0:{}');
-} catch (Exception $e) {
+} catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
     unserialize('O:16:"SplObjectStorage":2:{i:0;i:0;i:1;a:0:{}}');
-} catch (Exception $e) {
+} catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
     unserialize('O:16:"SplObjectStorage":2:{i:0;a:0:{}i:1;i:1;}');
-} catch (Exception $e) {
+} catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
     unserialize('O:16:"SplObjectStorage":2:{i:0;a:1:{i:0;i:0;}i:1;a:0:{}}');
-} catch (Exception $e) {
+} catch (ValueError $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
     unserialize('O:16:"SplObjectStorage":2:{i:0;a:2:{i:0;i:0;i:1;i:0;}i:1;a:0:{}}');
-} catch (Exception $e) {
+} catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
@@ -135,4 +135,4 @@ Incomplete or ill-typed serialization data
 Incomplete or ill-typed serialization data
 Incomplete or ill-typed serialization data
 Odd number of elements
-Non-object key
+Key must be an object

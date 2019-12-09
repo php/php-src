@@ -28,13 +28,13 @@ foreach($m as $key => $value) {
 }
 try {
     $m->current();
-} catch(RuntimeException $e) {
-    echo "RuntimeException thrown: " . $e->getMessage() . "\n";
+} catch(\Throwable $e) {
+    echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
 }
 try {
     $m->key();
-} catch(RuntimeException $e) {
-    echo "RuntimeException thrown: " . $e->getMessage() . "\n";
+} catch(\Throwable $e) {
+    echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
 }
 
 echo "-- Flags = MultipleIterator::MIT_NEED_ANY | MultipleIterator::MIT_KEYS_NUMERIC --\n";
@@ -61,8 +61,8 @@ $m->setFlags(MultipleIterator::MIT_NEED_ALL | MultipleIterator::MIT_KEYS_ASSOC);
 $m->rewind();
 try {
     $m->current();
-} catch(InvalidArgumentException $e) {
-    echo "InvalidArgumentException thrown: " . $e->getMessage() . "\n";
+} catch(\Throwable $e) {
+    echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
 }
 
 echo "-- Flags |= MultipleIterator::MIT_KEYS_ASSOC --\n";
@@ -78,17 +78,17 @@ foreach($m as $key => $value) {
 echo "-- Associate with invalid value --\n";
 
 try {
-    $m->attachIterator($iter3, new stdClass());
-} catch(InvalidArgumentException $e) {
-    echo "InvalidArgumentException thrown: " . $e->getMessage() . "\n";
+	$m->attachIterator($iter3, new stdClass());
+} catch (\TypeError $e) {
+    echo $e->getMessage() . PHP_EOL;
 }
 
 echo "-- Associate with duplicate value --\n";
 
 try {
     $m->attachIterator($iter3, "iter1");
-} catch(InvalidArgumentException $e) {
-    echo "InvalidArgumentException thrown: " . $e->getMessage() . "\n";
+} catch(\Throwable $e) {
+    echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
 }
 
 echo "-- Count, contains, detach, count, contains, iterate --\n";
@@ -103,7 +103,7 @@ foreach($m as $key => $value) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 -- Default flags, no iterators --
 bool(false)
 -- Default flags, MultipleIterator::MIT_NEED_ALL | MultipleIterator::MIT_KEYS_NUMERIC --
@@ -122,7 +122,7 @@ array(3) {
   [1]=>
   int(1)
   [2]=>
-  object(stdClass)#%d (0) {
+  object(stdClass)#4 (0) {
   }
 }
 array(3) {
@@ -141,8 +141,8 @@ array(3) {
   [2]=>
   string(6) "string"
 }
-RuntimeException thrown: Called current() with non valid sub iterator
-RuntimeException thrown: Called key() with non valid sub iterator
+Error: Called current() with non valid sub iterator
+Error: Called key() with non valid sub iterator
 -- Flags = MultipleIterator::MIT_NEED_ANY | MultipleIterator::MIT_KEYS_NUMERIC --
 bool(true)
 array(3) {
@@ -159,7 +159,7 @@ array(3) {
   [1]=>
   int(1)
   [2]=>
-  object(stdClass)#%d (0) {
+  object(stdClass)#4 (0) {
   }
 }
 array(3) {
@@ -209,7 +209,7 @@ array(3) {
   [1]=>
   int(1)
   [2]=>
-  object(stdClass)#%d (0) {
+  object(stdClass)#4 (0) {
   }
 }
 array(3) {
@@ -245,7 +245,7 @@ array(3) {
   int(3)
 }
 -- Flags |= MultipleIterator::MIT_KEYS_ASSOC, with iterator associated with NULL --
-InvalidArgumentException thrown: Sub-Iterator is associated with NULL
+Error: Sub-Iterator is associated with NULL
 -- Flags |= MultipleIterator::MIT_KEYS_ASSOC --
 array(3) {
   ["iter1"]=>
@@ -261,7 +261,7 @@ array(3) {
   ["iter2"]=>
   int(1)
   [3]=>
-  object(stdClass)#%d (0) {
+  object(stdClass)#4 (0) {
   }
 }
 array(3) {
@@ -297,9 +297,9 @@ array(3) {
   int(3)
 }
 -- Associate with invalid value --
-InvalidArgumentException thrown: Info must be NULL, integer or string
+MultipleIterator::attachIterator(): Argument #2 ($info) must be int|string|null, object given
 -- Associate with duplicate value --
-InvalidArgumentException thrown: Key duplication error
+InvalidArgumentException: Key duplication error
 -- Count, contains, detach, count, contains, iterate --
 int(3)
 bool(true)
@@ -316,7 +316,7 @@ array(2) {
   ["iter1"]=>
   int(1)
   [3]=>
-  object(stdClass)#%d (0) {
+  object(stdClass)#4 (0) {
   }
 }
 array(2) {

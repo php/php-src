@@ -6,7 +6,7 @@ $s = new SplObjectStorage();
 $o1 = new Stdclass;
 $o2 = new Stdclass;
 $s[$o1] = "some_value\n";
-echo $s->offsetGet($o1);
+var_dump($s->offsetGet($o1));
 
 class MySplObjectStorage extends SplObjectStorage {
     public function getHash($obj) {
@@ -17,8 +17,8 @@ class MySplObjectStorage extends SplObjectStorage {
 try {
     $s1 = new MySplObjectStorage;
     $s1[$o1] = "foo";
-} catch(Exception $e) {
-    echo "caught\n";
+} catch (\TypeError $e) {
+    echo $e->getMessage() . PHP_EOL;
 }
 
 class MySplObjectStorage2 extends SplObjectStorage {
@@ -31,8 +31,8 @@ class MySplObjectStorage2 extends SplObjectStorage {
 try {
     $s2 = new MySplObjectStorage2;
     $s2[$o2] = "foo";
-} catch(Exception $e) {
-    echo "caught\n";
+} catch (\Exception $e) {
+    echo $e->getMessage() . PHP_EOL;
 }
 
 class MySplObjectStorage3 extends SplObjectStorage {
@@ -49,10 +49,11 @@ $s3[$o2] = $o2;
 var_dump($s3[$o1] === $s3[$o2]);
 
 ?>
---EXPECT--
-some_value
-caught
-caught
-object(stdClass)#2 (0) {
+--EXPECTF--
+string(11) "some_value
+"
+Hash needs to be a string
+foo
+object(stdClass)#%d (0) {
 }
 bool(true)

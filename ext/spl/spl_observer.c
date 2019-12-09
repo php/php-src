@@ -109,7 +109,7 @@ static int spl_object_storage_get_hash(zend_hash_key *key, spl_SplObjectStorage 
 				key->key = Z_STR(rv);
 				return SUCCESS;
 			} else {
-				zend_throw_exception(spl_ce_RuntimeException, "Hash needs to be a string", 0);
+				zend_type_error("Hash needs to be a string");
 
 				zval_ptr_dtor(&rv);
 				return FAILURE;
@@ -439,6 +439,7 @@ SPL_METHOD(SplObjectStorage, offsetGet)
 	spl_object_storage_free_hash(intern, &key);
 
 	if (!element) {
+		/* Should be converted? */
 		zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Object not found");
 	} else {
 		zval *value = &element->inf;
@@ -891,15 +892,14 @@ SPL_METHOD(SplObjectStorage, __unserialize)
 
 	storage_zv = zend_hash_index_find(data, 0);
 	members_zv = zend_hash_index_find(data, 1);
-	if (!storage_zv || !members_zv ||
-			Z_TYPE_P(storage_zv) != IS_ARRAY || Z_TYPE_P(members_zv) != IS_ARRAY) {
-		zend_throw_exception(spl_ce_UnexpectedValueException,
-			"Incomplete or ill-typed serialization data", 0);
+	if (!storage_zv || !members_zv || Z_TYPE_P(storage_zv) != IS_ARRAY ||
+			Z_TYPE_P(members_zv) != IS_ARRAY) {
+		zend_throw_error(NULL, "Incomplete or ill-typed serialization data");
 		RETURN_THROWS();
 	}
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(storage_zv)) % 2 != 0) {
-		zend_throw_exception(spl_ce_UnexpectedValueException, "Odd number of elements", 0);
+		zend_value_error("Odd number of elements");
 		RETURN_THROWS();
 	}
 
@@ -907,7 +907,7 @@ SPL_METHOD(SplObjectStorage, __unserialize)
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(storage_zv), val) {
 		if (key) {
 			if (Z_TYPE_P(key) != IS_OBJECT) {
-				zend_throw_exception(spl_ce_UnexpectedValueException, "Non-object key", 0);
+				zend_type_error("Key must be an object");
 				RETURN_THROWS();
 			}
 
@@ -1033,7 +1033,7 @@ SPL_METHOD(MultipleIterator, attachIterator)
 		spl_SplObjectStorageElement *element;
 
 		if (Z_TYPE_P(info) != IS_LONG && Z_TYPE_P(info) != IS_STRING) {
-			zend_throw_exception(spl_ce_InvalidArgumentException, "Info must be NULL, integer or string", 0);
+			zend_argument_type_error(2, "must be int|string|null, %s given", zend_zval_type_name(info));
 			RETURN_THROWS();
 		}
 
@@ -1202,14 +1202,14 @@ static void spl_multiple_iterator_get_all(spl_SplObjectStorage *intern, int get_
 				zend_call_method_with_0_params(Z_OBJ_P(it), Z_OBJCE_P(it), &Z_OBJCE_P(it)->iterator_funcs_ptr->zf_key, "key", &retval);
 			}
 			if (Z_ISUNDEF(retval)) {
-				zend_throw_exception(spl_ce_RuntimeException, "Failed to call sub iterator method", 0);
+				zend_throw_error(NULL, "Failed to call sub iterator method");
 				return;
 			}
 		} else if (intern->flags & MIT_NEED_ALL) {
 			if (SPL_MULTIPLE_ITERATOR_GET_ALL_CURRENT == get_type) {
-				zend_throw_exception(spl_ce_RuntimeException, "Called current() with non valid sub iterator", 0);
+				zend_throw_error(NULL, "Called current() with non valid sub iterator");
 			} else {
-				zend_throw_exception(spl_ce_RuntimeException, "Called key() with non valid sub iterator", 0);
+				zend_throw_error(NULL, "Called key() with non valid sub iterator");
 			}
 			return;
 		} else {
@@ -1226,7 +1226,7 @@ static void spl_multiple_iterator_get_all(spl_SplObjectStorage *intern, int get_
 					break;
 				default:
 					zval_ptr_dtor(&retval);
-					zend_throw_exception(spl_ce_InvalidArgumentException, "Sub-Iterator is associated with NULL", 0);
+					zend_throw_error(NULL, "Sub-Iterator is associated with NULL");
 					return;
 			}
 		} else {
