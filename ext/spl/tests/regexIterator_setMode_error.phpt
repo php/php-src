@@ -11,14 +11,12 @@ $regexIterator = new RegexIterator(new ArrayIterator($array), "/f/");
 var_dump($regexIterator->getMode());
 
 try {
-    $regexIterator->setMode(7);
-} catch (InvalidArgumentException $e) {
-    var_dump($e->getMessage());
-    var_dump($e->getCode());
+	$regexIterator->setMode(7);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
-string(14) "Illegal mode 7"
-int(0)
+Illegal mode 7

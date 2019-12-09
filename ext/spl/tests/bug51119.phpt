@@ -20,8 +20,8 @@ try {
   foreach ($limitIterator as $item) {
     echo $item . "\n";
   }
-} catch (OutOfRangeException $e){
-  print $e->getMessage() . "\n";
+} catch (\ValueError $e){
+    echo $e->getMessage() . PHP_EOL;
 }
 
 ?>

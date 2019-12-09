@@ -5,30 +5,27 @@ SPL: CachingIterator and __toString
 
 function test($ar, $flags)
 {
-    echo "===$flags===\n";
-    $it = new CachingIterator($ar, 0);
-    try
-    {
-        $it->setFlags($flags);
+	echo "===$flags===\n";
+	$it = new CachingIterator($ar, 0);
+    try {
+		$it->setFlags($flags);
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . PHP_EOL;
+		var_dump($it->getFlags());
+		return;
     }
-    catch (Exception $e)
-    {
-        echo 'Exception: ' . $e->getMessage() . "\n";
-        var_dump($it->getFlags());
-        return;
-    }
-    var_dump($it->getFlags());
-    try
-    {
-        foreach($it as $v)
-        {
-            var_dump((string)$it);
-        }
-    }
-    catch (Exception $e)
-    {
-        echo 'Exception: ' . $e->getMessage() . "\n";
-    }
+	var_dump($it->getFlags());
+	try
+	{
+		foreach($it as $v)
+		{
+			var_dump((string)$it);
+		}
+	}
+	catch (Exception $e)
+	{
+		echo 'Exception: ' . $e->getMessage() . "\n";
+	}
 }
 
 class MyItem
@@ -110,19 +107,19 @@ string(3) "0:1"
 string(3) "1:2"
 string(3) "2:3"
 ===3===
-Exception: Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
+Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
 int(0)
 ===5===
-Exception: Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
+Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
 int(0)
 ===9===
-Exception: Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
+Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
 int(0)
 ===6===
-Exception: Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
+Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
 int(0)
 ===10===
-Exception: Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
+Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
 int(0)
 ===X===
 Exception: Unsetting flag CALL_TO_STRING is not possible

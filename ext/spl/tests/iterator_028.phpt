@@ -39,14 +39,12 @@ foreach($it as $v) echo $it->getDepth() . ": $v\n";
 echo "===-1===\n";
 $it->setMaxDepth(-1);
 var_dump($it->getMaxDepth());
-try
-{
-    $it->setMaxDepth(4);
-    $it->setMaxDepth(-2);
-}
-catch(Exception $e)
-{
-    var_dump($e->getMessage());
+
+try {
+	$it->setMaxDepth(4);
+	$it->setMaxDepth(-2);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
 }
 var_dump($it->getMaxDepth());
 ?>
@@ -105,5 +103,5 @@ int(0)
 0: 4
 ===-1===
 bool(false)
-string(33) "Parameter max_depth must be >= -1"
+Parameter max_depth must be greater or equal than -1
 int(4)

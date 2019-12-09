@@ -18,16 +18,17 @@ for($i = 0; $i < 6; ++$i) {
 foreach($it as $k => $v) {
     echo "[$k] => $v\n";
 }
+
 try {
-    $it->setPrefixPart(-1, "");
-    $it->setPrefixPart(6, "");
-} catch (OutOfRangeException $e) {
-    echo "OutOfRangeException thrown\n";
+	$it->setPrefixPart(-1, "");
+	$it->setPrefixPart(6, "");
+} catch (\ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
 }
 try {
-    $it->setPrefixPart(6, "");
-} catch (OutOfRangeException $e) {
-    echo "OutOfRangeException thrown\n";
+	$it->setPrefixPart(6, "");
+} catch (\ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
 }
 ?>
 --EXPECT--
@@ -35,5 +36,5 @@ try {
 [0] => 0145b
 [c] => 045Array
 [0] => 0245d
-OutOfRangeException thrown
-OutOfRangeException thrown
+Use RecursiveTreeIterator::PREFIX_* constant
+Use RecursiveTreeIterator::PREFIX_* constant

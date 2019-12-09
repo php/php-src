@@ -9,27 +9,22 @@ TestFest London May 2009
 $arrayIterator = new ArrayIterator($array);
 
 try {
-  $limitIterator = new LimitIterator($arrayIterator, -1);
-} catch (OutOfRangeException $e){
-  print $e->getMessage(). "\n";
-}
-
-
-try {
-  $limitIterator = new LimitIterator($arrayIterator, 0, -2);
-} catch (OutOfRangeException $e){
-  print $e->getMessage() . "\n";
+    var_dump(new LimitIterator($arrayIterator, -1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
 }
 
 try {
-  $limitIterator = new LimitIterator($arrayIterator, 0, -1);
-} catch (OutOfRangeException $e){
-  print $e->getMessage() . "\n";
+    var_dump(new LimitIterator($arrayIterator, 0, -2));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
 }
 
-
+var_dump(new LimitIterator($arrayIterator, 0, -1));
 
 ?>
---EXPECT--
+--EXPECTF--
 Parameter offset must be >= 0
 Parameter count must either be -1 or a value greater than or equal 0
+object(LimitIterator)#%d (%d) {
+}
