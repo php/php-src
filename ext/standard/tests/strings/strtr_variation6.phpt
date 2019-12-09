@@ -80,8 +80,12 @@ $count = 1;
 for($index = 0; $index < count($from_arr); $index++) {
   echo "-- Iteration $count --\n";
   $from = $from_arr[$index];
-  var_dump( strtr($str, $from, $to) );
-  $count ++;
+  try {
+    var_dump(strtr($str, $from, $to));
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
+  $count++;
 }
 
 fclose($file_handle);  //closing the file handle
@@ -101,17 +105,11 @@ string(6) "m1tatm"
 -- Iteration 6 --
 string(6) "tm0atm"
 -- Iteration 7 --
-
-Warning: Array to string conversion in %s on line %d
-string(6) "0120tm"
+If three arguments are passed, the second argument must be a string
 -- Iteration 8 --
-
-Warning: Array to string conversion in %s on line %d
-string(6) "0120tm"
+If three arguments are passed, the second argument must be a string
 -- Iteration 9 --
-
-Warning: Array to string conversion in %s on line %d
-string(6) "0120tm"
+If three arguments are passed, the second argument must be a string
 -- Iteration 10 --
 string(6) "0a2atm"
 -- Iteration 11 --
@@ -127,7 +125,7 @@ string(6) "012atm"
 -- Iteration 16 --
 string(6) "012ttm"
 -- Iteration 17 --
-string(6) "012atm"
+strtr() expects parameter 2 to be string or array, resource given
 -- Iteration 18 --
 string(6) "012atm"
 -- Iteration 19 --
