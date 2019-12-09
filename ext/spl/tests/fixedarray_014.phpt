@@ -1,13 +1,13 @@
 --TEST--
-SPL: FixedArray: Trying to access inexistent item
+SPL: FixedArray: Trying to access nonexistent item
 --FILE--
 <?php
 
 try {
-    $a = new SplFixedArray(NULL);
-    echo $a[0]++;
-} catch (Exception $e) {
-    echo $e->getMessage();
+	$a = new SplFixedArray(NULL);
+	echo $a[0]++;
+} catch (\ValueError $e) {
+	echo $e->getMessage();
 }
 
 ?>

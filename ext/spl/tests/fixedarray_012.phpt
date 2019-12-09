@@ -6,14 +6,11 @@ SPL: FixedArray: Assigning the object to another variable using []
 $a = new SplFixedArray(100);
 
 try {
-    $b = &$a[];
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+	$b = &$a[];
+} catch (\ValueError $e) {
+	echo $e->getMessage(), "\n";
 }
-
-print "ok\n";
 
 ?>
 --EXPECT--
 Index invalid or out of range
-ok

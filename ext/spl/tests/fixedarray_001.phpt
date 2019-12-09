@@ -6,19 +6,20 @@ $a = new SplFixedArray(0);
 // errors
 try {
     $a[0] = "value1";
-} catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+} catch (\ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
 }
 try {
     var_dump($a["asdf"]);
-} catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+} catch (\ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
 }
 try {
     unset($a[-1]);
-} catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+} catch (\ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
 }
+
 $a->setSize(10);
 
 
@@ -45,9 +46,9 @@ $a[0] = "valueNew";
 var_dump($b[0]);
 ?>
 --EXPECT--
-Exception: Index invalid or out of range
-Exception: Index invalid or out of range
-Exception: Index invalid or out of range
+Index invalid or out of range
+Index invalid or out of range
+Index invalid or out of range
 string(6) "value0"
 string(6) "value2"
 string(6) "value3"

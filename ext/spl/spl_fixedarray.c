@@ -314,7 +314,7 @@ static inline zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_o
 	/* we have to return NULL on error here to avoid memleak because of
 	 * ZE duplicating uninitialized_zval_ptr */
 	if (!offset) {
-		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
+		zend_value_error("Index invalid or out of range");
 		return NULL;
 	}
 
@@ -325,7 +325,7 @@ static inline zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_o
 	}
 
 	if (index < 0 || index >= intern->array.size) {
-		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
+		zend_value_error("Index invalid or out of range");
 		return NULL;
 	} else {
 		return &intern->array.elements[index];
@@ -371,7 +371,7 @@ static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_o
 
 	if (!offset) {
 		/* '$array[] = value' syntax is not supported */
-		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
+		zend_value_error("Index invalid or out of range");
 		return;
 	}
 
@@ -382,7 +382,7 @@ static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_o
 	}
 
 	if (index < 0 || index >= intern->array.size) {
-		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
+		zend_value_error("Index invalid or out of range");
 		return;
 	} else {
 		zval_ptr_dtor(&(intern->array.elements[index]));
@@ -427,7 +427,7 @@ static inline void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_o
 	}
 
 	if (index < 0 || index >= intern->array.size) {
-		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
+		zend_value_error("Index invalid or out of range");
 		return;
 	} else {
 		zval_ptr_dtor(&(intern->array.elements[index]));
@@ -534,7 +534,7 @@ SPL_METHOD(SplFixedArray, __construct)
 	}
 
 	if (size < 0) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "array size cannot be less than zero");
+		zend_value_error("array size cannot be less than zero");
 		RETURN_THROWS();
 	}
 
@@ -645,7 +645,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 
 		ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(data), num_index, str_index) {
 			if (str_index != NULL || (zend_long)num_index < 0) {
-				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "array must contain only positive integer keys");
+				zend_value_error("array must contain only positive integer keys");
 				RETURN_THROWS();
 			}
 
@@ -715,7 +715,7 @@ SPL_METHOD(SplFixedArray, setSize)
 	}
 
 	if (size < 0) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "array size cannot be less than zero");
+		zend_value_error("array size cannot be less than zero");
 		RETURN_THROWS();
 	}
 

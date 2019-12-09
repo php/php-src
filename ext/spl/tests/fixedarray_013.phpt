@@ -11,9 +11,9 @@ function test(SplFixedArray &$arr) {
 }
 
 try {
-    test($a[]);
-} catch (Exception $e) {
-    echo $e->getMessage(), "\n";
+	test($a[]);
+} catch (\ValueError $e) {
+	echo $e->getMessage(), "\n";
 }
 
 ?>

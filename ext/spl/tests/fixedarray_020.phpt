@@ -9,20 +9,18 @@ var_dump(count($fa), $fa->toArray() === array_values($a));
 $fa = SplFixedArray::fromArray($a, true);
 var_dump(count($fa), $fa->toArray() === $a, $fa->toArray() === (array)$fa);
 
+echo "From Array with string keys, no preserve\n";
+SplFixedArray::fromArray(array("foo"=>"bar"), false);
+echo "No exception\n";
+
+echo "From Array with string keys, preserve\n";
 try {
-    echo "From Array with string keys, no preserve\n";
-    SplFixedArray::fromArray(array("foo"=>"bar"), false);
-    echo "No exception\n";
-} catch (Exception $e) {
-    echo "Exception: ".$e->getMessage()."\n";
-}
-try {
-    echo "From Array with string keys, preserve\n";
     SplFixedArray::fromArray(array("foo"=>"bar"), true);
-    echo "No exception\n";
-} catch (Exception $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo "No exception" . PHP_EOL;
+} catch (\ValueError $e) {
+    echo $e->getMessage() . PHP_EOL;
 }
+
 ?>
 --EXPECT--
 int(3)
@@ -33,4 +31,4 @@ bool(true)
 From Array with string keys, no preserve
 No exception
 From Array with string keys, preserve
-Exception: array must contain only positive integer keys
+array must contain only positive integer keys
