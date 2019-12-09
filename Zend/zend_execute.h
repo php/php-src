@@ -311,6 +311,7 @@ ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zen
 
 ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name);
 ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_str(const char *name, size_t len);
+ZEND_API void ZEND_FASTCALL zend_init_func_run_time_cache(zend_op_array *op_array);
 
 ZEND_API void zend_fetch_dimension_const(zval *result, zval *container, zval *dim, int type);
 
