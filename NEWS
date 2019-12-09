@@ -37,6 +37,10 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #78853 (preg_match() may return integer > 1). (cmb)
 
+- Reflection:
+  . Fixed bug #78895 (Reflection detects abstract non-static class as abstract
+    static. IS_IMPLICIT_ABSTRACT is not longer used). (Dmitry)
+
 - Standard:
   . Fixed bug #77638 (var_export'ing certain class instances segfaults). (cmb)
   . Fixed bug #78840 (imploding $GLOBALS crashes). (cmb)
