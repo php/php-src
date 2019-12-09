@@ -29,6 +29,7 @@
 #include "zend_exceptions.h"
 #include "zend_closures.h"
 #include "zend_inheritance.h"
+#include "zend_ini.h"
 
 #include <stdarg.h>
 
