@@ -851,7 +851,7 @@ function file_put_contents(string $filename, $content, int $flags = 0, $context 
 function fputcsv($handle, array $fields, string $delimiter = ",", string $enclosure = "\"", string $escape = "\\"): int|false {}
 
 /** @param resource $handle */
-function fgetcsv($handle, $length = UNKNOWN, string $delimiter = ",", string $enclosure = '"', string $escape = "\\"): array|bool {}
+function fgetcsv($handle, $length = UNKNOWN, string $delimiter = ",", string $enclosure = '"', string $escape = "\\"): array|false {}
 
 #if HAVE_REALPATH || defined(ZTS)
 function realpath(string $path): string|false {}
