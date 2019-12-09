@@ -12,6 +12,7 @@ class Test {
 }
 
 $test = new Test;
+unset($test->val);
 var_dump($test);
 var_dump($test->val);
 

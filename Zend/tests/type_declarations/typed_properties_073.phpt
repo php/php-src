@@ -13,6 +13,7 @@ class Test {
 }
 
 $test = new Test;
+unset($test->val);
 var_dump($test);
 var_dump($val = &$test->val);
 var_dump($test);

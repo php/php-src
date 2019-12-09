@@ -14,6 +14,7 @@ class Foo {
 
 $foo = new Foo();
 
+unset($foo->bar);
 var_dump($foo->bar);
 ?>
 --EXPECTF--

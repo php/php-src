@@ -14,6 +14,7 @@ class Test {
 
 $test = new Test;
 $dummyRef = &$test->prop;
+unset($test->val);
 var_dump($test);
 try {
 	var_dump($test->val);
