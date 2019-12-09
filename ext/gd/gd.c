@@ -1235,6 +1235,7 @@ PHP_MSHUTDOWN_FUNCTION(gd)
 #if defined(HAVE_GD_FREETYPE) && defined(HAVE_GD_BUNDLED)
 	gdFontCacheMutexShutdown();
 #endif
+	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 /* }}} */

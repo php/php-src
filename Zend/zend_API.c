@@ -2562,6 +2562,12 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 		module->module_shutdown_func(module->type, module->module_number);
 	}
 
+	if (module->module_started
+	 && !module->module_shutdown_func
+	 && module->type == MODULE_TEMPORARY) {
+		zend_unregister_ini_entries(module->module_number);
+	}
+
 	/* Deinitilaise module globals */
 	if (module->globals_size) {
 #ifdef ZTS
