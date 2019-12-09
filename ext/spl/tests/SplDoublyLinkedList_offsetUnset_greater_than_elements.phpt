@@ -11,15 +11,12 @@ $ll->push('2');
 $ll->push('3');
 
 try {
-
-$ll->offsetUnset($ll->count() + 1);
-
-var_dump($ll);
-
-} catch(Exception $e) {
-echo $e->getMessage();
+    $ll->offsetUnset($ll->count() + 1);
+    var_dump($ll);
+} catch(\ValueError $e) {
+    echo $e->getMessage();
 }
 
 ?>
 --EXPECT--
-Offset out of range
+SplDoublyLinkedList::offsetUnset(): Argument #1 ($index) is out of range

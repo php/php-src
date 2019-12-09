@@ -12,12 +12,11 @@ PHPNW Testfest 2009 - Paul Court ( g@rgoyle.com )
     $dll->push(2);
     $dll->push(3);
 
-    try {
-        $dll->offsetUnset(3);
-    }
-    catch (Exception $e) {
-        echo $e->getMessage() . "\n";
-    }
+	try {
+		$dll->offsetUnset(3);
+	} catch (\ValueError $e) {
+		echo $e->getMessage() . "\n";
+	}
 ?>
 --EXPECT--
-Offset out of range
+SplDoublyLinkedList::offsetUnset(): Argument #1 ($index) is out of range

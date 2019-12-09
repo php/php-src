@@ -59,25 +59,25 @@ echo "SplDoublyLinkedList:\n";
 
 try {
     unserialize('O:19:"SplDoublyLinkedList":0:{}');
-} catch (Exception $e) {
+} catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
     unserialize('O:19:"SplDoublyLinkedList":3:{i:0;b:1;i:1;a:0:{}i:2;a:0:{}}');
-} catch (Exception $e) {
+} catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
     unserialize('O:19:"SplDoublyLinkedList":3:{i:0;i:0;i:1;a:0:{}i:2;i:0;}');
-} catch (Exception $e) {
+} catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 
 try {
     unserialize('O:19:"SplDoublyLinkedList":3:{i:0;i:0;i:1;i:0;i:2;a:0:{}}');
-} catch (Exception $e) {
+} catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 

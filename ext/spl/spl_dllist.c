@@ -770,6 +770,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetGet)
 	spl_dllist_object     *intern;
 	spl_ptr_llist_element *element;
 
+	/* TODO Change this to int? */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zindex) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -778,7 +779,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetGet)
 	index  = spl_offset_convert_to_long(zindex);
 
 	if (index < 0 || index >= intern->llist->count) {
-		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0);
+		zend_argument_value_error(1, "is out of range");
 		RETURN_THROWS();
 	}
 
@@ -789,7 +790,8 @@ SPL_METHOD(SplDoublyLinkedList, offsetGet)
 
 		ZVAL_COPY_DEREF(return_value, value);
 	} else {
-		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0);
+		zend_argument_value_error(1, "is invalid");
+		RETURN_THROWS();
 	}
 } /* }}} */
 
@@ -817,7 +819,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 		index = spl_offset_convert_to_long(zindex);
 
 		if (index < 0 || index >= intern->llist->count) {
-			zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0);
+			zend_argument_value_error(1, "is out of range");
 			RETURN_THROWS();
 		}
 
@@ -840,7 +842,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 			}
 		} else {
 			zval_ptr_dtor(value);
-			zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0);
+			zend_argument_value_error(1, "is invalid");
 			RETURN_THROWS();
 		}
 	}
@@ -865,7 +867,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 	llist  = intern->llist;
 
 	if (index < 0 || index >= intern->llist->count) {
-		zend_throw_exception(spl_ce_OutOfRangeException, "Offset out of range", 0);
+		zend_argument_value_error(1, "is out of range");
 		RETURN_THROWS();
 	}
 
@@ -906,7 +908,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 
 		SPL_LLIST_DELREF(element);
 	} else {
-		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0);
+		zend_argument_value_error(1, "is invalid");
 		RETURN_THROWS();
 	}
 } /* }}} */
@@ -1209,6 +1211,7 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 
 error:
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	/* TODO Convert to standard Error ? */
 	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Error at offset %zd of %zd bytes", ((char*)p - buf), buf_len);
 	RETURN_THROWS();
 
@@ -1262,8 +1265,7 @@ SPL_METHOD(SplDoublyLinkedList, __unserialize) {
 	if (!flags_zv || !storage_zv || !members_zv ||
 			Z_TYPE_P(flags_zv) != IS_LONG || Z_TYPE_P(storage_zv) != IS_ARRAY ||
 			Z_TYPE_P(members_zv) != IS_ARRAY) {
-		zend_throw_exception(spl_ce_UnexpectedValueException,
-			"Incomplete or ill-typed serialization data", 0);
+		zend_throw_error(NULL, "Incomplete or ill-typed serialization data");
 		RETURN_THROWS();
 	}
 
@@ -1293,7 +1295,7 @@ SPL_METHOD(SplDoublyLinkedList, add)
 	index  = spl_offset_convert_to_long(zindex);
 
 	if (index < 0 || index > intern->llist->count) {
-		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0);
+		zend_argument_value_error(1, "is out of range");
 		RETURN_THROWS();
 	}
 
@@ -1357,7 +1359,7 @@ zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object
 	spl_dllist_object *dllist_object = Z_SPLDLLIST_P(object);
 
 	if (by_ref) {
-		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0);
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
 		return NULL;
 	}
 

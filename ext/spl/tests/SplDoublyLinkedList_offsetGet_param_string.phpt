@@ -7,12 +7,12 @@ PHPNW Test Fest 2009 - Jordan Hatch
 
 $array = new SplDoublyLinkedList( );
 
-$get = $array->offsetGet( 'fail' );
+try {
+    $array->offsetGet( 'fail' );
+} catch(\ValueError $e) {
+    echo $e->getMessage();
+}
 
 ?>
---EXPECTF--
-Fatal error: Uncaught OutOfRangeException: Offset invalid or out of range in %s
-Stack trace:
-#0 %s
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--
+SplDoublyLinkedList::offsetGet(): Argument #1 ($index) is out of range
