@@ -12,5 +12,4 @@ opcache.preload={PWD}/preload_undef_const.inc
 var_dump(class_exists('Foo'));
 ?>
 --EXPECTF--
-Warning: Can't preload class Foo with unresolved initializer for constant A in %spreload_undef_const.inc on line 2
-bool(false)
+Fatal error: Undefined class constant 'self::DOES_NOT_EXIST' in Unknown on line 0
