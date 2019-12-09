@@ -13,6 +13,7 @@ PHP                                                                        NEWS
   . Fixed bug #78898 (call_user_func(['parent', ...]) fails while other
     succeed). (Nikita)
   . Fixed bug #78904 (Uninitialized property triggers __get()). (Nikita)
+  . Fixed bug #78926 (Segmentation fault on Symfony cache:clear). (Nikita)
 
 - GD:
   . Fixed bug #78849 (GD build broken with -D SIGNED_COMPARE_SLOW). (cmb)
