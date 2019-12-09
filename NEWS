@@ -36,6 +36,8 @@ PHP                                                                        NEWS
 - OPcache:
   . Fixed $x = (bool)$x; with opcache (should emit undeclared variable notice).
     (Tyson Andre)
+  . Fixed bug #78935 (Preloading removes classes that have dependencies).
+    (Nikita, Dmitry)
 
 - PCRE:
   . Fixed bug #78853 (preg_match() may return integer > 1). (cmb)
