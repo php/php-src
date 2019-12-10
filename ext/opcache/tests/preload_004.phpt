@@ -13,3 +13,5 @@ var_dump(class_exists('Foo'));
 ?>
 --EXPECTF--
 Fatal error: Undefined class constant 'self::DOES_NOT_EXIST' in Unknown on line 0
+
+Fatal error: Error generated while resolving initializers of class Foo during preloading in Unknown on line 0

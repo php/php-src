@@ -13,3 +13,5 @@ Unreachable
 Warning: Use of undefined constant UNDEF - assumed 'UNDEF' (this will throw an Error in a future version of PHP) in Unknown on line 0
 
 Fatal error: Class 'Foo' not found in Unknown on line 0
+
+Fatal error: Error generated while resolving initializers of class Test during preloading in Unknown on line 0
