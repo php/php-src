@@ -1,7 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-?? ??? ????, PHP 7.4.1
+?? ??? ????, PHP 7.4.2
+
+
+19 Dec 2019, PHP 7.4.1
 
 - Core:
   . Fixed bug #78810 (RW fetches do not throw "uninitialized property"
