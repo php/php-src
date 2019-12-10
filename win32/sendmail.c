@@ -208,9 +208,6 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		/* Create a lowercased header for all the searches so we're finally case
 		 * insensitive when searching for a pattern. */
 		headers_lc = zend_string_tolower(headers_trim);
-		if (headers_lc == headers_trim) {
-			zend_string_release_ex(headers_lc, 0);
-		}
 	}
 
 	/* Fall back to sendmail_from php.ini setting */
