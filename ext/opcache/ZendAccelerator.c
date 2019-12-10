@@ -3870,6 +3870,15 @@ static void preload_check_windows_restrictions(zend_class_entry *scope) {
 }
 #endif
 
+static inline int preload_update_class_constants(zend_class_entry *ce) {
+	/* This is a separate function to work around what appears to be a bug in GCC
+	 * maybe-uninitialized analysis. */
+	zend_try {
+		return zend_update_class_constants(ce);
+	} zend_end_try();
+	return FAILURE;
+}
+
 static zend_class_entry *preload_load_prop_type(zend_property_info *prop, zend_string *name) {
 	zend_class_entry *ce;
 	if (zend_string_equals_literal_ci(name, "self")) {
@@ -3915,18 +3924,7 @@ static void preload_ensure_classes_loadable() {
 #endif
 
 			if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-				int result = SUCCESS;
-				zend_try {
-					result = zend_update_class_constants(ce);
-				} zend_catch {
-					/* Provide some context for the generated error. */
-					zend_error_noreturn(E_ERROR,
-						"Error generated while resolving initializers of class %s during preloading",
-						ZSTR_VAL(ce->name));
-				} zend_end_try();
-				if (result == FAILURE) {
-					/* Just present to be safe: We generally always throw some
-					 * other fatal error as part of update_class_constants(). */
+				if (preload_update_class_constants(ce) == FAILURE) {
 					zend_error_noreturn(E_ERROR,
 						"Failed to resolve initializers of class %s during preloading",
 						ZSTR_VAL(ce->name));
