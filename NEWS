@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.4.2
 
 - Core:
+  . Preloading support on Windows has been disabled. (Nikita)
   . Fixed bug #79022 (class_exists returns True for classes that are not ready
     to be used). (Laruence)
   . Fixed bug #78929 (plus signs in cookie values are converted to spaces).

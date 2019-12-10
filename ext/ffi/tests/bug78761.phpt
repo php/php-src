@@ -1,7 +1,10 @@
 --TEST--
 Bug #78761 (Zend memory heap corruption with preload and casting)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php
+require_once('skipif.inc');
+if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows');
+?>
 --INI--
 opcache.enable_cli=1
 opcache.preload={PWD}/bug78761_preload.php
