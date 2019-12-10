@@ -348,6 +348,12 @@ PHP 8.0 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- SQLite3:
+  . Add SQLite3::setAuthorizer() and respective class constants to set a
+    userland callback that will be used to authorize or not an action on the
+    database.
+    PR: https://github.com/php/php-src/pull/4797
+
 - Standard:
   . Added fdiv() method, which performs a floating-point division under
     IEEE 754 semantics. Division by zero is considered well-defined and

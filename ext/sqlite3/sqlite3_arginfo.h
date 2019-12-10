@@ -91,6 +91,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3_enableExtendedResultCodes, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, enable, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3_setAuthorizer, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 1)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3Stmt___construct, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, sqlite3, SQLite3, 0)
 	ZEND_ARG_TYPE_INFO(0, sql, IS_STRING, 0)
