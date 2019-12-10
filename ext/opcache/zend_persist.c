@@ -700,6 +700,12 @@ static void zend_persist_class_entry(zval *zv)
 	zend_class_entry *ce = Z_PTR_P(zv);
 
 	if (ce->type == ZEND_USER_CLASS) {
+		/* The same zend_class_entry may be reused by class_alias */
+		zend_class_entry *new_ce = zend_shared_alloc_get_xlat_entry(ce);
+		if (new_ce) {
+			Z_PTR_P(zv) = new_ce;
+			return;
+		}
 		if ((ce->ce_flags & ZEND_ACC_LINKED)
 		 && (ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)
 		 && (ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)
