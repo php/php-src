@@ -72,7 +72,7 @@ class SQLite3
     function enableExtendedResultCodes(bool $enable = true) {}
 
     /** @return bool */
-    function setAuthorizer($callback) {}
+    function setAuthorizer(?callable $callback) {}
 }
 
 class SQLite3Stmt

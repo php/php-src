@@ -162,7 +162,7 @@ PHP_METHOD(sqlite3, open)
 	db_obj->authorizer_fci = empty_fcall_info;
 	db_obj->authorizer_fcc = empty_fcall_info_cache;
 
-	sqlite3_set_authorizer(db_obj->db, php_sqlite3_authorizer, (void*)db_obj);
+	sqlite3_set_authorizer(db_obj->db, php_sqlite3_authorizer, db_obj);
 
 #if SQLITE_VERSION_NUMBER >= 3026000
 	if (SQLITE3G(dbconfig_defensive)) {
@@ -1357,24 +1357,23 @@ PHP_METHOD(sqlite3, setAuthorizer)
 	php_sqlite3_db_object *db_obj;
 	zval *object = ZEND_THIS;
 	db_obj = Z_SQLITE3_DB_P(object);
-
-	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
-
 	zend_fcall_info			fci;
 	zend_fcall_info_cache	fcc;
+
+	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_FUNC_EX(fci, fcc, 1, 0)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Clear previously set callback */
-	if (db_obj->authorizer_fci.size > 0) {
+	if (ZEND_FCI_INITIALIZED(db_obj->authorizer_fci)) {
 		zval_ptr_dtor(&db_obj->authorizer_fci.function_name);
 		db_obj->authorizer_fci.size = 0;
 	}
 
 	/* Only enable userland authorizer if argument is not NULL */
-	if (fci.size > 0) {
+	if (ZEND_FCI_INITIALIZED(fci)) {
 		db_obj->authorizer_fci = fci;
 		Z_ADDREF(db_obj->authorizer_fci.function_name);
 		db_obj->authorizer_fcc = fcc;
@@ -2263,12 +2262,10 @@ static int php_sqlite3_authorizer(void *autharg, int action, const char *arg1, c
 
 	if (zend_call_function(fci, &db_obj->authorizer_fcc) != SUCCESS || Z_ISUNDEF(retval)) {
 		php_sqlite3_error(db_obj, "An error occurred while invoking the authorizer callback");
-	}
-	else {
+	} else {
 		if (Z_TYPE(retval) != IS_LONG) {
 			php_sqlite3_error(db_obj, "The authorizer callback returned an invalid type: expected int");
-		}
-		else {
+		} else {
 			authreturn = Z_LVAL(retval);
 
 			if (authreturn != SQLITE_OK && authreturn != SQLITE_IGNORE && authreturn != SQLITE_DENY) {
