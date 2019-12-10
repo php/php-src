@@ -363,8 +363,8 @@ PHP_FUNCTION(parse_url)
 				if (resource->fragment != NULL) RETVAL_STR_COPY(resource->fragment);
 				break;
 			default:
-				php_error_docref(NULL, E_WARNING, "Invalid URL component identifier " ZEND_LONG_FMT, key);
-				RETVAL_FALSE;
+				zend_value_error("Invalid URL component identifier: " ZEND_LONG_FMT, key);
+				break;
 		}
 		goto done;
 	}
