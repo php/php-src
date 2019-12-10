@@ -3873,10 +3873,13 @@ static void preload_check_windows_restrictions(zend_class_entry *scope) {
 static inline int preload_update_class_constants(zend_class_entry *ce) {
 	/* This is a separate function to work around what appears to be a bug in GCC
 	 * maybe-uninitialized analysis. */
+	int result;
 	zend_try {
-		return zend_update_class_constants(ce);
+		result = zend_update_class_constants(ce);
+	} zend_catch {
+		result = FAILURE;
 	} zend_end_try();
-	return FAILURE;
+	return result;
 }
 
 static zend_class_entry *preload_load_prop_type(zend_property_info *prop, zend_string *name) {
