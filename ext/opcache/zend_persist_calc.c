@@ -352,6 +352,12 @@ static void zend_persist_class_entry_calc(zval *zv)
 	Bucket *p;
 
 	if (ce->type == ZEND_USER_CLASS) {
+		/* The same zend_class_entry may be reused by class_alias */
+		if (zend_shared_alloc_get_xlat_entry(ce)) {
+			return;
+		}
+		zend_shared_alloc_register_xlat_entry(ce, ce);
+
 		check_property_type_resolution(ce);
 
 		ZCG(is_immutable_class) =
