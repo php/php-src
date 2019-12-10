@@ -8,7 +8,7 @@ opcache.preload={PWD}/preload_loadable_classes_4.inc
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-if (PHP_OS_FAMILY == 'Windows') die('skip Windows only');
+if (PHP_OS_FAMILY != 'Windows') die('skip Windows only');
 ?>
 --FILE--
 Unreachable
