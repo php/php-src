@@ -1,6 +1,5 @@
 <?php
 
-class Test extends Test2 {
+class Test {
     public Unknown $prop;
 }
-class Test2 {}

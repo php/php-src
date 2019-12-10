@@ -1,6 +1,5 @@
 <?php
 
-class Test extends Test2 {
+class Test {
     const C = Foo::BAR;
 }
-class Test2 {}
