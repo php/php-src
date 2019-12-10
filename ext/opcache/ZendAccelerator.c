@@ -3391,7 +3391,7 @@ static void get_unlinked_dependency(zend_class_entry *ce, const char **kind, con
 		}
 #ifdef ZEND_WIN32
 		if (p->type == ZEND_INTERNAL_CLASS) {
-			*kind = "Internal parent (Windows only limitation)";
+			*kind = "Windows can't link to internal parent ";
 			*name = ZSTR_VAL(ce->parent_name);
 			return;
 		}
