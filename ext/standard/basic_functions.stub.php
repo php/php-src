@@ -1179,11 +1179,103 @@ function random_int(int $min, int $max): int {}
 
 function soundex(string $string): string|false {}
 
+/* type.c */
+
+/** @param mixed $var */
+function gettype($var): string {}
+
+function settype(&$var, string $type): bool {}
+
+/** @param mixed $value */
+function intval($value, int $base = 10): int {}
+
+/** @param mixed $value */
+function floatval($value): float {}
+
+/** @param mixed $value */
+function boolval($value): bool {}
+
+/** @param mixed $value */
+function strval($value): float {}
+
+/** @param mixed $value */
+function is_null($value): bool {}
+
+/** @param mixed $value */
+function is_resource($value): bool {}
+
+/** @param mixed $value */
+function is_bool($value): bool {}
+
+/** @param mixed $value */
+function is_int($value): bool {}
+
+/** @param mixed $value */
+function is_float($value): bool {}
+
+/** @param mixed $value */
+function is_numeric($value): bool {}
+
+/** @param mixed $value */
+function is_string($value): bool {}
+
+/** @param mixed $value */
+function is_array($value): bool {}
+
+/** @param mixed $value */
+function is_object($value): bool {}
+
+/** @param mixed $value */
+function is_scalar($value): bool {}
+
+/** @param mixed $value */
+function is_callable($value, bool $syntax_only = false, &$callable_name = null) {}
+
+/** @param mixed $value */
+function is_iterable($value): bool {}
+
+/** @param mixed $value */
+function is_countable($value): bool {}
+
 /* uniqid.c */
 
 #ifdef HAVE_GETTIMEOFDAY
 function uniqid(string $prefix = "", bool $more_entropy = false): string {}
 #endif
+
+/* url.c */
+
+/** @return mixed */
+function parse_url(string $url, int $component = -1) {}
+
+function urlencode(string $string): string {}
+
+function urldecode(string $string): string {}
+
+function rawurlencode(string $string): string {}
+
+function rawurldecode(string $string): string {}
+
+/** @param resource $context */
+function get_headers(string $url, int $format = 0, $context = null): array|false {}
+
+/* user_filters.c */
+
+/** @param resource $brigade */
+function stream_bucket_make_writeable($brigade): ?object {}
+
+/** @param resource $brigade */
+function stream_bucket_prepend($brigade, object $bucket): void {}
+
+/** @param resource $brigade */
+function stream_bucket_append($brigade, object $bucket): void {}
+
+/** @param resource $stream */
+function stream_bucket_new($stream, string $buffer): object|false {}
+
+function stream_get_filters(): array {}
+
+function stream_filter_register(string $filtername, string $classname): bool {}
 
 /* uuencode.c */
 
@@ -1191,6 +1283,47 @@ function convert_uuencode(string $data): string|false {}
 
 function convert_uudecode(string $data): string|false {}
 
+/* var.c */
+
+/** @param mixed $value */
+function var_dump($value, ...$value): void {}
+
+/** @param mixed $value */
+function var_export($value, bool $return = false): ?string {}
+
+/** @param mixed $value */
+function debug_zval_dump($value, ...$value): void {}
+
+/** @param mixed $value */
+function serialize($value): ?string {}
+
+/** @return mixed */
+function unserialize(string $value, array $options = []) {}
+
+function memory_get_usage(bool $real_usage = false): int {}
+
+function memory_get_peak_usage(bool $real_usage = false): int {}
+
 /* versioning.c */
 
 function version_compare(string $version1, string $version2, string $operator = UNKNOWN): int|bool {}
+
+/* win32/codepage.c */
+
+function sapi_windows_cp_set(int $cp): bool {}
+
+function sapi_windows_cp_get(string $kind = UNKNOWN): int {}
+
+/**
+ * @param int|string $in_codepage
+ * @param int|string $out_codepage
+ */
+function sapi_windows_cp_conv($in_codepage, $out_codepage, string $subject) {}
+
+function sapi_windows_cp_is_utf8(): bool {}
+
+/** @param callable|null $handler */
+function sapi_windows_set_ctrl_handler($handler, bool $add = true): bool {}
+
+/** @param callable|null $handler */
+function sapi_windows_generate_ctrl_event(int $event, int $pid = 0): bool {}

@@ -1819,6 +1819,60 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_soundex, 0, 1, MAY_BE_STRING|MAY
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gettype, 0, 1, IS_STRING, 0)
+	ZEND_ARG_INFO(0, var)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_settype, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_INFO(1, var)
+	ZEND_ARG_TYPE_INFO(0, type, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intval, 0, 1, IS_LONG, 0)
+	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_INFO(0, base, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_floatval, 0, 1, IS_DOUBLE, 0)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_boolval, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+#define arginfo_strval arginfo_floatval
+
+#define arginfo_is_null arginfo_boolval
+
+#define arginfo_is_resource arginfo_boolval
+
+#define arginfo_is_bool arginfo_boolval
+
+#define arginfo_is_int arginfo_boolval
+
+#define arginfo_is_float arginfo_boolval
+
+#define arginfo_is_numeric arginfo_boolval
+
+#define arginfo_is_string arginfo_boolval
+
+#define arginfo_is_array arginfo_boolval
+
+#define arginfo_is_object arginfo_boolval
+
+#define arginfo_is_scalar arginfo_boolval
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_is_callable, 0, 0, 1)
+	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_INFO(0, syntax_only, _IS_BOOL, 0)
+	ZEND_ARG_INFO(1, callable_name)
+ZEND_END_ARG_INFO()
+
+#define arginfo_is_iterable arginfo_boolval
+
+#define arginfo_is_countable arginfo_boolval
+
 #if defined(HAVE_GETTIMEOFDAY)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_uniqid, 0, 0, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, prefix, IS_STRING, 0)
@@ -1826,12 +1880,109 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_uniqid, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_parse_url, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, url, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, component, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_urlencode, 0, 1, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_urldecode arginfo_urlencode
+
+#define arginfo_rawurlencode arginfo_urlencode
+
+#define arginfo_rawurldecode arginfo_urlencode
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_headers, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, url, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, format, IS_LONG, 0)
+	ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_bucket_make_writeable, 0, 1, IS_OBJECT, 1)
+	ZEND_ARG_INFO(0, brigade)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_bucket_prepend, 0, 2, IS_VOID, 0)
+	ZEND_ARG_INFO(0, brigade)
+	ZEND_ARG_TYPE_INFO(0, bucket, IS_OBJECT, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_stream_bucket_append arginfo_stream_bucket_prepend
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_bucket_new, 0, 2, MAY_BE_OBJECT|MAY_BE_FALSE)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_TYPE_INFO(0, buffer, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_stream_get_filters arginfo_ob_list_handlers
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_filter_register, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, filtername, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, classname, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_convert_uuencode arginfo_hex2bin
 
 #define arginfo_convert_uudecode arginfo_hex2bin
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_var_dump, 0, 1, IS_VOID, 0)
+	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_VARIADIC_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_var_export, 0, 1, IS_STRING, 1)
+	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_INFO(0, return, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_debug_zval_dump arginfo_var_dump
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_serialize, 0, 1, IS_STRING, 1)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_unserialize, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, options, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_memory_get_usage, 0, 0, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, real_usage, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_memory_get_peak_usage arginfo_memory_get_usage
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_version_compare, 0, 2, MAY_BE_LONG|MAY_BE_BOOL)
 	ZEND_ARG_TYPE_INFO(0, version1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, version2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, operator, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_cp_set, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, cp, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_cp_get, 0, 0, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, kind, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_conv, 0, 0, 3)
+	ZEND_ARG_INFO(0, in_codepage)
+	ZEND_ARG_INFO(0, out_codepage)
+	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_sapi_windows_cp_is_utf8 arginfo_ob_flush
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_set_ctrl_handler, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, handler)
+	ZEND_ARG_TYPE_INFO(0, add, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_generate_ctrl_event, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, event, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, pid, IS_LONG, 0)
 ZEND_END_ARG_INFO()

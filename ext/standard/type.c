@@ -170,31 +170,31 @@ PHP_FUNCTION(floatval)
 }
 /* }}} */
 
-/* {{{ proto bool boolval(mixed var)
+/* {{{ proto bool boolval(mixed value)
    Get the boolean value of a variable */
 PHP_FUNCTION(boolval)
 {
-	zval *val;
+	zval *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(val)
+		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_BOOL(zend_is_true(val));
+	RETURN_BOOL(zend_is_true(value));
 }
 /* }}} */
 
-/* {{{ proto string strval(mixed var)
+/* {{{ proto string strval(mixed value)
    Get the string value of a variable */
 PHP_FUNCTION(strval)
 {
-	zval *num;
+	zval *value;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL(num)
+		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETVAL_STR(zval_get_string(num));
+	RETVAL_STR(zval_get_string(value));
 }
 /* }}} */
 
