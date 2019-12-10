@@ -1003,7 +1003,7 @@ again:
 
 				if (ce != PHP_IC_ENTRY && zend_hash_str_exists(&ce->function_table, "__sleep", sizeof("__sleep")-1)) {
 					zval retval, tmp;
-					
+
 					Z_ADDREF_P(struc);
 					ZVAL_OBJ(&tmp, Z_OBJ_P(struc));
 
@@ -1138,7 +1138,7 @@ PHPAPI void php_var_serialize_destroy(php_serialize_data_t d) {
 	}
 }
 
-/* {{{ proto string serialize(mixed variable)
+/* {{{ proto string|null serialize(mixed variable)
    Returns a string representation of variable (which can later be unserialized) */
 PHP_FUNCTION(serialize)
 {
@@ -1156,7 +1156,7 @@ PHP_FUNCTION(serialize)
 
 	if (EG(exception)) {
 		smart_str_free(&buf);
-		RETURN_FALSE;
+		return;
 	}
 
 	if (buf.s) {
@@ -1231,13 +1231,11 @@ PHP_FUNCTION(unserialize)
 		max_depth = zend_hash_str_find_deref(Z_ARRVAL_P(options), "max_depth", sizeof("max_depth") - 1);
 		if (max_depth) {
 			if (Z_TYPE_P(max_depth) != IS_LONG) {
-				php_error_docref(NULL, E_WARNING, "max_depth should be int");
-				RETVAL_FALSE;
+				zend_type_error("max_depth should be int");
 				goto cleanup;
 			}
 			if (Z_LVAL_P(max_depth) < 0) {
-				php_error_docref(NULL, E_WARNING, "max_depth cannot be negative");
-				RETVAL_FALSE;
+				zend_value_error("max_depth cannot be negative");
 				goto cleanup;
 			}
 

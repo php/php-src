@@ -8,8 +8,17 @@ function create_nested_data($depth, $prefix, $suffix, $inner = 'i:0;') {
 }
 
 echo "Invalid max_depth:\n";
-var_dump(unserialize('i:0;', ['max_depth' => 'foo']));
-var_dump(unserialize('i:0;', ['max_depth' => -1]));
+try {
+    unserialize('i:0;', ['max_depth' => 'foo']);
+} catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
+    unserialize('i:0;', ['max_depth' => -1]);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 echo "Array:\n";
 var_dump(unserialize(
@@ -95,12 +104,8 @@ var_dump(is_array(unserialize(
 ?>
 --EXPECTF--
 Invalid max_depth:
-
-Warning: unserialize(): max_depth should be int in %s on line %d
-bool(false)
-
-Warning: unserialize(): max_depth cannot be negative in %s on line %d
-bool(false)
+max_depth should be int
+max_depth cannot be negative
 Array:
 bool(true)
 
