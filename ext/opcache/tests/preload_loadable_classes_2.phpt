@@ -12,4 +12,4 @@ Unreachable
 --EXPECTF--
 Fatal error: Undefined constant 'UNDEF' in Unknown on line 0
 
-Fatal error: Error generated while resolving initializers of class Test during preloading in Unknown on line 0
+Fatal error: Failed to resolve initializers of class Test during preloading in Unknown on line 0

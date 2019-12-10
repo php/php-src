@@ -15,4 +15,4 @@ var_dump(class_exists('Foo'));
 --EXPECTF--
 Fatal error: Undefined constant 'UNDEF' in Unknown on line 0
 
-Fatal error: Error generated while resolving initializers of class Foo during preloading in Unknown on line 0
+Fatal error: Failed to resolve initializers of class Foo during preloading in Unknown on line 0
