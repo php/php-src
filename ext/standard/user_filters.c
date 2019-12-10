@@ -389,7 +389,7 @@ static void filter_item_dtor(zval *zv)
 	efree(fdat);
 }
 
-/* {{{ proto object|false stream_bucket_make_writeable(resource brigade)
+/* {{{ proto object|null stream_bucket_make_writeable(resource brigade)
    Return a bucket object from the brigade for operating on */
 PHP_FUNCTION(stream_bucket_make_writeable)
 {
@@ -505,7 +505,6 @@ PHP_FUNCTION(stream_bucket_new)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, zstream);
-
 	pbuffer = pemalloc(buffer_len, php_stream_is_persistent(stream));
 
 	memcpy(pbuffer, buffer, buffer_len);
@@ -567,12 +566,12 @@ PHP_FUNCTION(stream_filter_register)
 	RETVAL_FALSE;
 
 	if (!ZSTR_LEN(filtername)) {
-		php_error_docref(NULL, E_WARNING, "Filter name cannot be empty");
+		zend_value_error("Filter name cannot be empty");
 		return;
 	}
 
 	if (!ZSTR_LEN(classname)) {
-		php_error_docref(NULL, E_WARNING, "Class name cannot be empty");
+		zend_value_error("Class name cannot be empty");
 		return;
 	}
 
