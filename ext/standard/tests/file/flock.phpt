@@ -32,16 +32,20 @@ var_dump(flock($fp, LOCK_UN, $would));
 var_dump($would);
 
 var_dump(flock($fp, -1));
-var_dump(flock($fp, 0));
 
-echo "Done\n";
+try {
+    var_dump(flock($fp, 0));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 ?>
 --CLEAN--
 <?php
 $file = __DIR__."/flock.dat";
 unlink($file);
 ?>
---EXPECTF--
+--EXPECT--
 flock(): supplied resource is not a valid stream resource
 bool(true)
 bool(true)
@@ -56,7 +60,4 @@ int(0)
 bool(true)
 int(0)
 bool(true)
-
-Warning: flock(): Illegal operation argument in %s on line %d
-bool(false)
-Done
+Illegal operation argument

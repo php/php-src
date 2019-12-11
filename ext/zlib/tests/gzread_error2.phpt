@@ -11,20 +11,24 @@ if (!extension_loaded("zlib")) {
 $f = __DIR__."/004.txt.gz";
 $h = gzopen($f, 'r');
 var_dump(gzread($h, 10));
-var_dump(gzread($h, 0));
+try {
+    var_dump(gzread($h, 0));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump(gzread($h, 5));
-var_dump(gzread($h, -1));
+try {
+    var_dump(gzread($h, -1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump(gzread($h, 8));
 gzclose($h);
 
 ?>
---EXPECTF--
+--EXPECT--
 string(10) "When you'r"
-
-Warning: gzread(): Length parameter must be greater than 0 in %s on line %d
-bool(false)
+Length parameter must be greater than 0
 string(5) "e tau"
-
-Warning: gzread(): Length parameter must be greater than 0 in %s on line %d
-bool(false)
+Length parameter must be greater than 0
 string(8) "ght thro"

@@ -30,13 +30,13 @@ $operations = array(
 
 $i = 0;
 foreach($operations as $operation) {
-  echo "\n--- Iteration $i ---";
-  try {
-    var_dump(flock($fp, $operation));
-  } catch (TypeError $e) {
-    echo "\n", $e->getMessage(), "\n";
-  }
-  $i++;
+    echo "--- Iteration $i ---" . \PHP_EOL;
+    try {
+        var_dump(flock($fp, $operation));
+    } catch (\TypeError|\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    $i++;
 }
 
 
@@ -54,37 +54,24 @@ try {
 $file = __DIR__."/flock_error.tmp";
 unlink($file);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing error conditions ***
-
 --- Iteration 0 ---
-Warning: flock(): Illegal operation argument in %s on line %d
-bool(false)
-
+Illegal operation argument
 --- Iteration 1 ---
-Warning: flock(): Illegal operation argument in %s on line %d
-bool(false)
-
+Illegal operation argument
 --- Iteration 2 ---
-Warning: flock(): Illegal operation argument in %s on line %d
-bool(false)
-
+Illegal operation argument
 --- Iteration 3 ---
-Warning: flock(): Illegal operation argument in %s on line %d
-bool(false)
-
+Illegal operation argument
 --- Iteration 4 ---
 flock() expects parameter 2 to be int, array given
-
 --- Iteration 5 ---
 flock() expects parameter 2 to be int, array given
-
 --- Iteration 6 ---
 flock() expects parameter 2 to be int, string given
-
 --- Iteration 7 ---
 flock() expects parameter 2 to be int, string given
-
 --- Iteration 8 ---
 flock() expects parameter 2 to be int, string given
 flock(): supplied resource is not a valid stream resource

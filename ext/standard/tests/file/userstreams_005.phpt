@@ -38,7 +38,11 @@ $fd3 = fopen("test3://foo","r");
 test("stream_truncate not implemented", $fd2, 0);
 test("stream_truncate size 0", $fd, 0);
 test("stream_truncate size 10", $fd, 10);
-test("stream_truncate negative size", $fd, -1);
+try {
+    test("stream_truncate negative size", $fd, -1);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 test("stream_truncate bad return", $fd3, 0);
 --EXPECTF--
 bool(true)
@@ -55,9 +59,7 @@ bool(true)
 truncation with new_size=10
 bool(true)
 ------ stream_truncate negative size: -------
-
-Warning: ftruncate(): Negative size is not supported in %s on line %d
-bool(false)
+Negative size is not supported
 ------ stream_truncate bad return: -------
 truncation with new_size=0
 
