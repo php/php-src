@@ -3323,7 +3323,7 @@ static void preload_move_user_classes(HashTable *src, HashTable *dst)
 				}
 			}
 			if (copy) {
-				_zend_hash_append_ptr(dst, p->key, ce);
+				_zend_hash_append(dst, p->key, &p->val);
 			} else {
 				orig_dtor(&p->val);
 			}
@@ -4332,7 +4332,7 @@ static void preload_load(void)
 		Bucket *end = p + ZCSG(preload_script)->script.class_table.nNumUsed;
 
 		for (; p != end; p++) {
-			_zend_hash_append_ptr_ex(CG(class_table), p->key, Z_PTR(p->val), 1);
+			_zend_hash_append_ex(CG(class_table), p->key, &p->val, 1);
 		}
 	}
 
