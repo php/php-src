@@ -1138,7 +1138,7 @@ PHPAPI void php_var_serialize_destroy(php_serialize_data_t d) {
 	}
 }
 
-/* {{{ proto string|null serialize(mixed variable)
+/* {{{ proto string serialize(mixed variable)
    Returns a string representation of variable (which can later be unserialized) */
 PHP_FUNCTION(serialize)
 {
@@ -1162,7 +1162,7 @@ PHP_FUNCTION(serialize)
 	if (buf.s) {
 		RETURN_NEW_STR(buf.s);
 	} else {
-		RETURN_NULL();
+		RETURN_EMPTY_STRING();
 	}
 }
 /* }}} */

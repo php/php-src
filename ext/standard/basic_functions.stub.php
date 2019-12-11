@@ -1295,7 +1295,7 @@ function var_export($value, bool $return = false): ?string {}
 function debug_zval_dump($value, ...$value): void {}
 
 /** @param mixed $value */
-function serialize($value): ?string {}
+function serialize($value): string {}
 
 /** @return mixed */
 function unserialize(string $value, array $options = []) {}
