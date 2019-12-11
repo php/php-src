@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 
 - OPcache:
   . Fixed bug #78950 (Preloading trait method with static variables). (Nikita)
+  . Fixed bug #78903 (Conflict in RTD key for closures results in crash).
+    (Nikita)
 
 19 Dec 2019, PHP 7.4.1
 
