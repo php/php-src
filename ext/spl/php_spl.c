@@ -510,7 +510,7 @@ PHP_FUNCTION(spl_autoload_register)
 	zend_object *obj_ptr;
 	zend_fcall_info_cache fcc;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "|zbb", &zcallable, &do_throw, &prepend) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zbb", &zcallable, &do_throw, &prepend) == FAILURE) {
 		return;
 	}
 
