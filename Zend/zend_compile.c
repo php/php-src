@@ -5874,7 +5874,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 }
 /* }}} */
 
-static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl, zend_bool toplevel) /* {{{ */
+static int zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl, zend_bool toplevel) /* {{{ */
 {
 	zend_ast *params_ast = decl->child[0];
 	zend_string *unqualified_name, *name, *lcname, *key;
@@ -5914,12 +5914,10 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 			do_bind_function_error(lcname, op_array, 1);
 		}
 		zend_string_release_ex(lcname, 0);
-		return;
+		return SUCCESS;
 	}
 
 	key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
-	zend_hash_update_ptr(CG(function_table), key, op_array);
-
 	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 		opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
 		opline->extended_value = zend_alloc_cache_slot();
@@ -5934,6 +5932,8 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 		zend_add_literal_string(&key);
 	}
 	zend_string_release_ex(lcname, 0);
+
+	return zend_hash_add_ptr(CG(function_table), key, op_array) != NULL ? SUCCESS : FAILURE;
 }
 /* }}} */
 
@@ -5979,7 +5979,13 @@ void zend_compile_func_decl(znode *result, zend_ast *ast, zend_bool toplevel) /*
 		zend_bool has_body = stmt_ast != NULL;
 		zend_begin_method_decl(op_array, decl->name, has_body);
 	} else {
-		zend_begin_func_decl(result, op_array, decl, toplevel);
+		if (zend_begin_func_decl(result, op_array, decl, toplevel) == FAILURE) {
+			/* A function with this RTD key is already registered.
+			 * Fail gracefully by reusing the existing function. */
+			destroy_op_array(op_array);
+			return;
+		}
+
 		if (decl->kind == ZEND_AST_ARROW_FUNC) {
 			find_implicit_binds(&info, params_ast, stmt_ast);
 			compile_implicit_lexical_binds(&info, result, op_array);

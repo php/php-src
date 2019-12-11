@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 
 ?? ??? ????, PHP 7.4.2
 
+- Core:
+  . Fixed bug #78903 (Conflict in RTD key for closures results in crash).
+    (Nikita)
 
 19 Dec 2019, PHP 7.4.1
 
