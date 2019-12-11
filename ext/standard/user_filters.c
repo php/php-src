@@ -434,8 +434,8 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (NULL == (pzbucket = zend_hash_str_find(Z_OBJPROP_P(zobject), "bucket", sizeof("bucket")-1))) {
-		php_error_docref(NULL, E_WARNING, "Object has no bucket property");
-		RETURN_FALSE;
+		zend_value_error("Object has no bucket property");
+		return;
 	}
 
 	if ((brigade = (php_stream_bucket_brigade*)zend_fetch_resource(
@@ -563,8 +563,6 @@ PHP_FUNCTION(stream_filter_register)
 		Z_PARAM_STR(classname)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETVAL_FALSE;
-
 	if (!ZSTR_LEN(filtername)) {
 		zend_value_error("Filter name cannot be empty");
 		return;
@@ -589,6 +587,7 @@ PHP_FUNCTION(stream_filter_register)
 	} else {
 		zend_string_release_ex(classname, 0);
 		efree(fdat);
+		RETVAL_FALSE;
 	}
 }
 /* }}} */
