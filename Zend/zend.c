@@ -524,6 +524,8 @@ static void zend_set_default_compile_time_values(void) /* {{{ */
 	/* default compile-time values */
 	CG(short_tags) = short_tags_default;
 	CG(compiler_options) = compiler_options_default;
+
+	CG(rtd_key_counter) = 0;
 }
 /* }}} */
 
