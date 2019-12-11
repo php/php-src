@@ -51,7 +51,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_iterator_apply, 0, 2, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
-	ZEND_ARG_INFO(0, function)
+	ZEND_ARG_TYPE_INFO(0, function, IS_CALLABLE, 0)
 	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 1)
 ZEND_END_ARG_INFO()
 
