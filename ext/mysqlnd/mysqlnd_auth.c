@@ -808,6 +808,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 			*auth_data_len = server_public_key_len;
 			ret = malloc(*auth_data_len);
 			RSA_public_encrypt(passwd_len + 1, (zend_uchar *) xor_str, ret, server_public_key, RSA_PKCS1_OAEP_PADDING);
+			RSA_free(server_public_key);
 		}
 	}
 
