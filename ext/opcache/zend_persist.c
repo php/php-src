@@ -1037,8 +1037,11 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 		zend_accel_store_interned_string(p->key);
 		zend_persist_class_entry(&p->val);
 	} ZEND_HASH_FOREACH_END();
-    ZEND_HASH_FOREACH_PTR(class_table, ce) {
-		zend_update_parent_ce(ce);
+    ZEND_HASH_FOREACH_BUCKET(class_table, p) {
+		if (EXPECTED(Z_TYPE(p->val) != IS_ALIAS_PTR)) {
+			ce = Z_PTR(p->val);
+			zend_update_parent_ce(ce);
+		}
 	} ZEND_HASH_FOREACH_END();
 }
 
