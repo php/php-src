@@ -1,0 +1,16 @@
+--TEST--
+Cookies test#3
+--INI--
+max_input_vars=1000
+filter.default=unsafe_raw
+--COOKIE--
+RFC6265=#$%&'()*+-./0123456789<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~!
+--FILE--
+<?php
+var_dump($_COOKIE);
+?>
+--EXPECT--
+array(3) {
+  ["RFC6265"]=>
+  string(89) "#$%&'()*+-./0123456789<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~!"
+}

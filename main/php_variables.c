@@ -505,8 +505,14 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 		size_t new_val_len;
 
 		if (val) { /* have a value */
+
 			*val++ = '\0';
-			val_len = php_raw_url_decode(val, strlen(val));
+
+			if (arg == PARSE_COOKIE) {
+				val_len = php_raw_url_decode(val, strlen(val));
+			} else {
+				val_len = php_url_decode(val, strlen(val));
+			}
 		} else {
 			val     = "";
 			val_len =  0;
