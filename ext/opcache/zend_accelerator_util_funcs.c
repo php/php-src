@@ -422,8 +422,16 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
-				/* Mangled key */
-				t = zend_hash_update(target, p->key, &p->val);
+				/* Runtime definition key. There are two circumstances under which the key can
+				 * already be defined:
+				 *  1. The file has been re-included without being changed in the meantime. In
+				 *     this case we can keep the old value, because we know that the definition
+				 *     hasn't changed.
+				 *  2. The file has been changed in the meantime, but the RTD key ends up colliding.
+				 *     This would be a bug.
+				 * As we can't distinguish these cases, we assume that it is 1. and keep the old
+				 * value. */
+				continue;
 			} else {
 				goto failure;
 			}
@@ -466,8 +474,8 @@ static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable 
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
-				/* Mangled key */
-				zend_hash_update_ptr(target, p->key, Z_PTR(p->val));
+				/* See comment in zend_accel_function_hash_copy(). */
+				continue;
 			} else {
 				goto failure;
 			}
@@ -509,7 +517,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
-				/* Mangled key - ignore and wait for runtime */
+				/* See comment in zend_accel_function_hash_copy(). */
 				continue;
 			} else if (UNEXPECTED(!ZCG(accel_directives).ignore_dups)) {
 				zend_class_entry *ce1 = Z_PTR(p->val);
@@ -546,7 +554,7 @@ static void zend_accel_class_hash_copy_from_shm(HashTable *target, HashTable *so
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
-				/* Mangled key - ignore and wait for runtime */
+				/* See comment in zend_accel_function_hash_copy(). */
 				continue;
 			} else if (UNEXPECTED(!ZCG(accel_directives).ignore_dups)) {
 				zend_class_entry *ce1 = Z_PTR(p->val);
