@@ -213,8 +213,8 @@ PHP 7.4 INTERNALS UPGRADE NOTES
      an exception. For instructions on how to gracefully handle this see
      https://wiki.php.net/rfc/tostring_exceptions#extension_guidelines.
 
-  u. The Windows typedefs uint and ulong are no longer available, and have to be
-     replaced with standard types.
+  u. The typedefs uint and ulong are no longer guaranteed to be available, and
+     have to be replaced with standard types.
 
   v. Compound assignment opcodes were changed. Instead of ZEND_ASSIGN_ADD (and
      others) with 0, ZEND_ASSIGN_DIM, ZEND_ASSIGN_OBJ or

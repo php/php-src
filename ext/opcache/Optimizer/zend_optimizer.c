@@ -918,8 +918,7 @@ uint32_t zend_optimizer_classify_function(zend_string *name, uint32_t num_args) 
 
 zend_op *zend_optimizer_get_loop_var_def(const zend_op_array *op_array, zend_op *free_opline) {
 	uint32_t var = free_opline->op1.var;
-	ZEND_ASSERT(free_opline->opcode == ZEND_FE_FREE ||
-		(free_opline->opcode == ZEND_FREE && free_opline->extended_value == ZEND_FREE_SWITCH));
+	ZEND_ASSERT(zend_optimizer_is_loop_var_free(free_opline));
 
 	while (--free_opline >= op_array->opcodes) {
 		if ((free_opline->result_type & (IS_TMP_VAR|IS_VAR)) && free_opline->result.var == var) {

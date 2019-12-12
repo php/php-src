@@ -3259,7 +3259,7 @@ static void preload_move_user_classes(HashTable *src, HashTable *dst)
 				}
 			}
 			if (copy) {
-				_zend_hash_append_ptr(dst, p->key, ce);
+				_zend_hash_append(dst, p->key, &p->val);
 			} else {
 				orig_dtor(&p->val);
 			}
@@ -3777,7 +3777,8 @@ static void preload_link(void)
 		}
 		if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
 			zend_string *key = zend_string_tolower(ce->name);
-			if (zend_hash_exists(EG(class_table), key)) {
+			if (!(ce->ce_flags & ZEND_ACC_ANON_CLASS)
+			 && zend_hash_exists(EG(class_table), key)) {
 				zend_error_at(
 					E_WARNING, ZSTR_VAL(ce->info.user.filename), ce->info.user.line_start,
 					"Can't preload already declared class %s", ZSTR_VAL(ce->name));
@@ -4237,7 +4238,7 @@ static void preload_load(void)
 		Bucket *end = p + ZCSG(preload_script)->script.class_table.nNumUsed;
 
 		for (; p != end; p++) {
-			_zend_hash_append_ptr_ex(CG(class_table), p->key, Z_PTR(p->val), 1);
+			_zend_hash_append_ex(CG(class_table), p->key, &p->val, 1);
 		}
 	}
 

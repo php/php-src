@@ -427,6 +427,7 @@ struct _zend_ast_ref {
 /* internal types */
 #define IS_INDIRECT             	13
 #define IS_PTR						14
+#define IS_ALIAS_PTR				15
 #define _IS_ERROR					15
 
 /* fake types used only for type hinting (Z_TYPE(zv) can not use them) */
@@ -962,6 +963,11 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define ZVAL_CE(z, c) do {										\
 		Z_CE_P(z) = (c);										\
 		Z_TYPE_INFO_P(z) = IS_PTR;								\
+	} while (0)
+
+#define ZVAL_ALIAS_PTR(z, p) do {								\
+		Z_PTR_P(z) = (p);										\
+		Z_TYPE_INFO_P(z) = IS_ALIAS_PTR;						\
 	} while (0)
 
 #define ZVAL_ERROR(z) do {				\
