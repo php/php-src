@@ -3,6 +3,10 @@ PHP                                                                        NEWS
 
 ?? ??? ????, PHP 7.4.2
 
+- Core:
+  . Fixed bug #78929 (plus signs in cookie values are converted to spaces).
+    (Alexey Kachalin)
+
 - OPcache:
   . Fixed bug #78950 (Preloading trait method with static variables). (Nikita)
 
