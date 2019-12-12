@@ -1,5 +1,5 @@
 --TEST--
-Cookies test#3
+Bug #78929: Fix a cookie parsing value.
 --INI--
 max_input_vars=1000
 filter.default=unsafe_raw
@@ -10,7 +10,7 @@ RFC6265=#$%&'()*+-./0123456789<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmn
 var_dump($_COOKIE);
 ?>
 --EXPECT--
-array(3) {
+array(1) {
   ["RFC6265"]=>
   string(89) "#$%&'()*+-./0123456789<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_`abcdefghijklmnopqrstuvwxyz{|}~!"
 }
