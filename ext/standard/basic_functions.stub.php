@@ -535,11 +535,7 @@ function wordwrap(string $str, int $width = 75, string $break = "\n", bool $cut 
 
 function explode(string $separator, string $str, int $limit = PHP_INT_MAX): array {}
 
-/**
- * @param string $glue Optional - defaults to empty string
- * @param array $pieces
- */
-function implode($glue, $pieces = UNKNOWN): string {}
+function implode(string|array $glue, array $pieces = UNKNOWN): string {}
 
 function strtok(string $str, string $token = UNKNOWN): string|false {}
 
