@@ -3538,7 +3538,7 @@ PHP_METHOD(Phar, copy)
 }
 /* }}} */
 
-/* {{{ proto int Phar::offsetExists(string entry)
+/* {{{ proto bool Phar::offsetExists(string entry)
  * determines whether a file exists in the phar
  */
 PHP_METHOD(Phar, offsetExists)
@@ -3575,7 +3575,7 @@ PHP_METHOD(Phar, offsetExists)
 }
 /* }}} */
 
-/* {{{ proto int Phar::offsetGet(string entry)
+/* {{{ proto PharFileInfo Phar::offsetGet(string entry)
  * get a PharFileInfo object for a specific file
  */
 PHP_METHOD(Phar, offsetGet)
@@ -3755,7 +3755,7 @@ static void phar_mkdir(phar_archive_data **pphar, char *dirname, size_t dirname_
 }
 /* }}} */
 
-/* {{{ proto int Phar::offsetSet(string entry, string value)
+/* {{{ proto void Phar::offsetSet(string entry, string value)
  * set the contents of an internal file to those of an external file
  */
 PHP_METHOD(Phar, offsetSet)
@@ -3793,7 +3793,7 @@ PHP_METHOD(Phar, offsetSet)
 }
 /* }}} */
 
-/* {{{ proto int Phar::offsetUnset(string entry)
+/* {{{ proto bool Phar::offsetUnset(string entry)
  * remove a file from a phar
  */
 PHP_METHOD(Phar, offsetUnset)
