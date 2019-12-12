@@ -195,8 +195,7 @@ static zend_bool kept_alive_by_loop_var_free(scdf_ctx *scdf, uint32_t block_idx)
 	}
 	for (i = block->start; i < block->start + block->len; i++) {
 		zend_op *opline = &op_array->opcodes[i];
-		if (opline->opcode == ZEND_FE_FREE ||
-				(opline->opcode == ZEND_FREE && opline->extended_value == ZEND_FREE_SWITCH)) {
+		if (zend_optimizer_is_loop_var_free(opline)) {
 			int ssa_var = scdf->ssa->ops[i].op1_use;
 			if (ssa_var >= 0) {
 				int op_num = scdf->ssa->vars[ssa_var].definition;

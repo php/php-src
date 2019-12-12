@@ -208,9 +208,7 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 
 			for (j = b->start; j < b->start + b->len; j++) {
 				zend_op *opline = &op_array->opcodes[j];
-				if (opline->opcode == ZEND_FE_FREE ||
-					(opline->opcode == ZEND_FREE && opline->extended_value == ZEND_FREE_SWITCH)
-				) {
+				if (zend_optimizer_is_loop_var_free(opline)) {
 					zend_op *def_opline = zend_optimizer_get_loop_var_def(op_array, opline);
 					if (def_opline) {
 						uint32_t def_block = block_map[def_opline - op_array->opcodes];
