@@ -1284,7 +1284,7 @@ PHP_FUNCTION(implode)
 		pieces = arg1_array;
 	} else {
 		if (arg1_str == NULL) {
-			zend_type_error("The first argument must be string");
+			zend_type_error("The first argument must be a string");
 			return;
 		}
 	}

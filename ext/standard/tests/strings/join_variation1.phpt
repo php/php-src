@@ -125,15 +125,15 @@ string(29) "element11.07654321E-9element2"
 -- Iteration 9 --
 string(19) "element10.5element2"
 -- Iteration 10 --
-The first argument must be string
+The first argument must be a string
 -- Iteration 11 --
-The first argument must be string
+The first argument must be a string
 -- Iteration 12 --
-The first argument must be string
+The first argument must be a string
 -- Iteration 13 --
-The first argument must be string
+The first argument must be a string
 -- Iteration 14 --
-The first argument must be string
+The first argument must be a string
 -- Iteration 15 --
 string(17) "element11element2"
 -- Iteration 16 --
