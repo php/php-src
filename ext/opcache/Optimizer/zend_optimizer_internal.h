@@ -71,6 +71,11 @@ typedef struct _zend_optimizer_ctx {
 		target = src; \
 	} while (0)
 
+static inline zend_bool zend_optimizer_is_loop_var_free(const zend_op *opline) {
+	return (opline->opcode == ZEND_FE_FREE && opline->extended_value != ZEND_FREE_ON_RETURN)
+		|| (opline->opcode == ZEND_FREE && opline->extended_value == ZEND_FREE_SWITCH);
+}
+
 int  zend_optimizer_add_literal(zend_op_array *op_array, zval *zv);
 int  zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy);
 void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* value);
