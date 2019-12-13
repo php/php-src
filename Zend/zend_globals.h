@@ -128,7 +128,7 @@ struct _zend_compiler_globals {
 	HashTable *delayed_variance_obligations;
 	HashTable *delayed_autoloads;
 
-	size_t rtd_key_counter;
+	uint32_t rtd_key_counter;
 };
 
 
