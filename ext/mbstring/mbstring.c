@@ -2146,43 +2146,10 @@ PHP_FUNCTION(mb_strrpos)
 {
 	mbfl_string haystack, needle;
 	zend_string *enc_name = NULL;
-	zval *zoffset = NULL;
 	zend_long offset = 0, n;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|zS", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &zoffset, &enc_name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|lS", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &offset, &enc_name) == FAILURE) {
 		return;
-	}
-
-	if (zoffset) {
-		if (Z_TYPE_P(zoffset) == IS_STRING) {
-			switch (Z_STRVAL_P(zoffset)[0]) {
-				case '0':
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-				case '9':
-				case ' ':
-				case '-':
-				case '.':
-					convert_to_long_ex(zoffset);
-					offset = Z_LVAL_P(zoffset);
-					break;
-				default :
-					enc_name = Z_STR_P(zoffset);
-					php_error_docref(NULL, E_DEPRECATED,
-						"Passing the encoding as third parameter is deprecated. "
-						"Use an explicit zero offset");
-					break;
-			}
-		} else {
-			convert_to_long_ex(zoffset);
-			offset = Z_LVAL_P(zoffset);
-		}
 	}
 
 	haystack.no_language = needle.no_language = MBSTRG(language);
