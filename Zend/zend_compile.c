@@ -132,16 +132,11 @@ static void zend_destroy_property_info_internal(zval *zv) /* {{{ */
 }
 /* }}} */
 
-static zend_string *zend_build_runtime_definition_key(zend_string *name, unsigned char *lex_pos) /* {{{ */
+static zend_string *zend_build_runtime_definition_key(zend_string *name, uint32_t start_lineno) /* {{{ */
 {
-	zend_string *result;
-	char char_pos_buf[32];
-	size_t char_pos_len = sprintf(char_pos_buf, "%p", lex_pos);
 	zend_string *filename = CG(active_op_array)->filename;
-
-	/* NULL, name length, filename length, last accepting char position length */
-	result = zend_string_alloc(1 + ZSTR_LEN(name) + ZSTR_LEN(filename) + char_pos_len, 0);
-	sprintf(ZSTR_VAL(result), "%c%s%s%s", '\0', ZSTR_VAL(name), ZSTR_VAL(filename), char_pos_buf);
+	zend_string *result = zend_strpprintf(0, "%c%s%s:%" PRIu32 "$%" PRIx32,
+		'\0', ZSTR_VAL(name), ZSTR_VAL(filename), start_lineno, CG(rtd_key_counter)++);
 	return zend_new_interned_string(result);
 }
 /* }}} */
@@ -6124,8 +6119,11 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 		return;
 	}
 
-	key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
-	zend_hash_update_ptr(CG(function_table), key, op_array);
+	key = zend_build_runtime_definition_key(lcname, decl->start_lineno);
+	if (!zend_hash_add_ptr(CG(function_table), key, op_array)) {
+		zend_error_noreturn(E_ERROR,
+			"Runtime definition key collision for function %s. This is a bug", ZSTR_VAL(name));
+	}
 
 	if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 		opline = zend_emit_op_tmp(result, ZEND_DECLARE_LAMBDA_FUNCTION, NULL, NULL);
@@ -6529,16 +6527,11 @@ void zend_compile_implements(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static zend_string *zend_generate_anon_class_name(unsigned char *lex_pos) /* {{{ */
+static zend_string *zend_generate_anon_class_name(uint32_t start_lineno) /* {{{ */
 {
-	zend_string *result;
-	char char_pos_buf[32];
-	size_t char_pos_len = sprintf(char_pos_buf, "%p", lex_pos);
 	zend_string *filename = CG(active_op_array)->filename;
-
-	/* NULL, name length, filename length, last accepting char position length */
-	result = zend_string_alloc(sizeof("class@anonymous") + ZSTR_LEN(filename) + char_pos_len, 0);
-	sprintf(ZSTR_VAL(result), "class@anonymous%c%s%s", '\0', ZSTR_VAL(filename), char_pos_buf);
+	zend_string *result = zend_strpprintf(0, "class@anonymous%c%s:%" PRIu32 "$%" PRIx32,
+		'\0', ZSTR_VAL(filename), start_lineno, CG(rtd_key_counter)++);
 	return zend_new_interned_string(result);
 }
 /* }}} */
@@ -6578,7 +6571,7 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 
 		zend_register_seen_symbol(lcname, ZEND_SYMBOL_CLASS);
 	} else {
-		name = zend_generate_anon_class_name(decl->lex_pos);
+		name = zend_generate_anon_class_name(decl->start_lineno);
 		lcname = zend_string_tolower(name);
 	}
 	lcname = zend_new_interned_string(lcname);
@@ -6728,20 +6721,19 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 		opline->extended_value = zend_alloc_cache_slot();
 		opline->result_type = IS_VAR;
 		opline->result.var = get_temporary_variable();
-
 		if (!zend_hash_add_ptr(CG(class_table), lcname, ce)) {
-			/* this anonymous class has been included */
-			zval zv;
-			ZVAL_PTR(&zv, ce);
-			destroy_zend_class(&zv);
-			return opline;
+			zend_error_noreturn(E_ERROR,
+				"Runtime definition key collision for %s. This is a bug", ZSTR_VAL(name));
 		}
 	} else {
-		zend_string *key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
+		zend_string *key = zend_build_runtime_definition_key(lcname, decl->start_lineno);
 
 		/* RTD key is placed after lcname literal in op1 */
 		zend_add_literal_string(&key);
-		zend_hash_update_ptr(CG(class_table), key, ce);
+		if (!zend_hash_add_ptr(CG(class_table), key, ce)) {
+			zend_error_noreturn(E_ERROR,
+				"Runtime definition key collision for class %s. This is a bug", ZSTR_VAL(name));
+		}
 
 		opline->opcode = ZEND_DECLARE_CLASS;
 		if (extends_ast && toplevel
