@@ -211,6 +211,8 @@ PHP 8.0 UPGRADE NOTES
     restored with an explicit call to chr().
   . The $is_hex parameter, which was not used internally, has been removed from
     mb_decode_numericentity().
+  . The legacy behaviour of passing the encoding as the third argument instead of an offset for the mb_strrpos
+    function has been removed, provide an explicit 0 offset with the encoding as the fourth argument.
 
 - PCRE:
   . When passing invalid escape sequences they are no longer interpreted as
