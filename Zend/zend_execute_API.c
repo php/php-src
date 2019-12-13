@@ -836,6 +836,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	zend_string *lc_name;
 	zend_fcall_info fcall_info;
 	zend_fcall_info_cache fcall_cache;
+	zend_class_entry *orig_fake_scope;
 
 	if (key) {
 		lc_name = Z_STR_P(key);
@@ -922,11 +923,14 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	fcall_cache.called_scope = NULL;
 	fcall_cache.object = NULL;
 
+	orig_fake_scope = EG(fake_scope);
+	EG(fake_scope) = NULL;
 	zend_exception_save();
 	if ((zend_call_function(&fcall_info, &fcall_cache) == SUCCESS) && !EG(exception)) {
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 	}
 	zend_exception_restore();
+	EG(fake_scope) = orig_fake_scope;
 
 	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor_str(&fcall_info.function_name);
