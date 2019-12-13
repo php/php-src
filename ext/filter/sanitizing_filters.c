@@ -72,17 +72,7 @@ static void php_filter_encode_url(zval *value, const unsigned char* chars, const
 	while (s < e) {
 		tmp[*s++] = '\0';
 	}
-/* XXX: This is not needed since these chars in the allowed list never include the high/low/null value
-	if (encode_nul) {
-		tmp[0] = 1;
-	}
-	if (high) {
-		memset(tmp + 127, 1, sizeof(tmp) - 127);
-	}
-	if (low) {
-		memset(tmp, 1, 32);
-	}
-*/
+
 	str = zend_string_safe_alloc(Z_STRLEN_P(value), 3, 0, 0);
 	p = (unsigned char *) ZSTR_VAL(str);
 	s = (unsigned char *) Z_STRVAL_P(value);
