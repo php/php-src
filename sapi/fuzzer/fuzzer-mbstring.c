@@ -69,7 +69,7 @@ int LLVMFuzzerInitialize(int *argc, char ***argv) {
 	fuzzer_init_php();
 
 	/* The default parse depth limit allows stack overflows under asan. */
-	onig_set_parse_depth_limit(1024);
+	onig_set_parse_depth_limit(512);
 
 	/* fuzzer_shutdown_php(); */
 	return 0;
