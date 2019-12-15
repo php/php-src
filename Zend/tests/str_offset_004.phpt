@@ -45,5 +45,5 @@ Warning: Illegal string offset:  -20 in %sstr_offset_004.php on line %d
 string(15) "abCZefghijPQmno"
 string(15) "AbCZefghijPQmno"
 string(21) "AbCZefghijPQmno     N"
-string(21) "AbCZefghijPQmno    UN"
-string(21) "AbCZefghijPQmno   nUN"
+string(23) "AbCZefghijPQmno    UFON"
+string(23) "AbCZefghijPQmno    U ON"

@@ -80,12 +80,12 @@ array(1) {
 Warning: Illegal string offset 'foo' in %s on line %d
 
 Warning: Array to string conversion in %s on line %d
-string(1) "A"
+string(5) "Array"
 
 Warning: Illegal string offset 'foo' in %s on line %d
 
 Warning: Array to string conversion in %s on line %d
-string(1) "A"
+string(5) "Array"
 Cannot use a scalar value as an array
 float(0.1)
 array(1) {

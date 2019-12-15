@@ -1569,7 +1569,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(c
 
 static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim, zval *value OPLINE_DC EXECUTE_DATA_DC)
 {
-	zend_uchar c;
+	char *string_value;
 	size_t string_len;
 	zend_long offset;
 
@@ -1593,33 +1593,56 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 			return;
 		}
 
+		string_value = ZSTR_VAL(tmp);
 		string_len = ZSTR_LEN(tmp);
-		c = (zend_uchar)ZSTR_VAL(tmp)[0];
 		zend_string_release_ex(tmp, 0);
 	} else {
+		string_value = Z_STRVAL_P(value);
 		string_len = Z_STRLEN_P(value);
-		c = (zend_uchar)Z_STRVAL_P(value)[0];
-	}
-
-	if (string_len == 0) {
-		/* Error on empty input string */
-		zend_error(E_WARNING, "Cannot assign an empty string to a string offset");
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
-		return;
 	}
 
 	if (offset < 0) { /* Handle negative offset */
 		offset += (zend_long)Z_STRLEN_P(str);
 	}
 
+	/* If it's a byte char replace byte directly */
+	if (string_len == 1) {
+		zend_uchar c = (zend_uchar) string_value[0];
+
+		if ((size_t)offset >= Z_STRLEN_P(str)) {
+			/* Extend string if needed */
+			zend_long old_len = Z_STRLEN_P(str);
+			ZVAL_NEW_STR(str, zend_string_extend(Z_STR_P(str), offset + 1, 0));
+			memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
+			Z_STRVAL_P(str)[offset+1] = 0;
+		} else if (!Z_REFCOUNTED_P(str)) {
+			ZVAL_NEW_STR(str, zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0));
+		} else if (Z_REFCOUNT_P(str) > 1) {
+			Z_DELREF_P(str);
+			ZVAL_NEW_STR(str, zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0));
+		} else {
+			zend_string_forget_hash_val(Z_STR_P(str));
+		}
+
+		Z_STRVAL_P(str)[offset] = c;
+
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			/* Return the new character */
+			ZVAL_INTERNED_STR(EX_VAR(opline->result.var), ZSTR_CHAR(c));
+		}
+		return;
+	}
+
 	if ((size_t)offset >= Z_STRLEN_P(str)) {
-		/* Extend string if needed */
+		/* Extend string */
 		zend_long old_len = Z_STRLEN_P(str);
-		ZVAL_NEW_STR(str, zend_string_extend(Z_STR_P(str), offset + 1, 0));
+		ZVAL_NEW_STR(str, zend_string_extend(Z_STR_P(str), offset + string_len, 0));
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
-		Z_STRVAL_P(str)[offset+1] = 0;
+		memcpy(Z_STRVAL_P(str) + offset, string_value, string_len);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_INTERNED_STR(EX_VAR(opline->result.var), zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0));
+		}
+		return;
 	} else if (!Z_REFCOUNTED_P(str)) {
 		ZVAL_NEW_STR(str, zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0));
 	} else if (Z_REFCOUNT_P(str) > 1) {
@@ -1629,12 +1652,42 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		zend_string_forget_hash_val(Z_STR_P(str));
 	}
 
-	Z_STRVAL_P(str)[offset] = c;
-
-	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		/* Return the new character */
-		ZVAL_INTERNED_STR(EX_VAR(opline->result.var), ZSTR_CHAR(c));
+	// Buffer offset
+	int k = 0;
+	// Source offset
+	int i = 0;
+	char *buffer = emalloc(Z_STRLEN_P(str) + string_len - 1); // -1 as we replace a byte
+	char *source = Z_STRVAL_P(str);
+	// Append bytes from the source string to the buffer until the offset is reached
+	while (i < offset) {
+		buffer[k] = source[i];
+		i++;
+		k++;
 	}
+	i++; // Skip byte being replaced
+	// If not an empty string then append all the bytes from the value to the buffer
+	if (string_len > 0) {
+		int j = 0;
+		while (string_value[j] != '\0') {
+			buffer[k] = string_value[j];
+			j++;
+			k++;
+		}
+	}
+	// Add remaining bytes from the source string.
+	while (source[i] != '\0') {
+		buffer[k] = source[i];
+		i++;
+		k++;
+	}
+	// Append NUL byte to make a valid C string. 
+	buffer[k] = '\0';
+	ZVAL_NEW_STR(str, zend_string_init(buffer, Z_STRLEN_P(str) + string_len - 1, 0));
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_INTERNED_STR(EX_VAR(opline->result.var), zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0));
+	}
+	
+	efree(buffer);
 }
 
 static zend_property_info *zend_get_prop_not_accepting_double(zend_reference *ref)
