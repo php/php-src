@@ -5047,6 +5047,47 @@ ZEND_VM_HOT_HANDLER(63, ZEND_RECV, NUM, UNUSED, CACHE_SLOT)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_RECV, op->op2.num == 0, ZEND_RECV_NOTYPE, NUM, NUM, CACHE_SLOT)
+{
+	USE_OPLINE
+	uint32_t arg_num = opline->op1.num;
+
+	if (UNEXPECTED(arg_num > EX_NUM_ARGS())) {
+		SAVE_OPLINE();
+		zend_missing_arg_error(execute_data);
+		HANDLE_EXCEPTION();
+	} else {
+		ZEND_ASSERT(arg_num <= EX(func)->common.num_args);
+	}
+
+	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_RECV, op->op2.num != 0 && !(op->op2.num & (_ZEND_TYPE_KIND_MASK|MAY_BE_REF)), ZEND_RECV_TYPE, NUM, NUM, CACHE_SLOT)
+{
+	USE_OPLINE
+	uint32_t arg_num = opline->op1.num;
+
+	if (UNEXPECTED(arg_num > EX_NUM_ARGS())) {
+		SAVE_OPLINE();
+		zend_missing_arg_error(execute_data);
+		HANDLE_EXCEPTION();
+	} else {
+		zval *param = EX_VAR(opline->result.var);
+		ZEND_ASSERT(arg_num <= EX(func)->common.num_args);
+		if (EXPECTED(opline->op2.num & (1u << Z_TYPE_P(param)))) {
+			ZEND_VM_NEXT_OPCODE();
+		}
+		/* Assume that TypeErrors and weak type conversions are rare. Avoid inlining this because the generated assembly will be larger and push/pop more registers in other branches. */
+		/* zend_verify_recv_arg_type*() will coerce scalars in param when strict_types is off, and still allow int->float when strict_types is on */
+		SAVE_OPLINE();
+		if (!zend_verify_recv_arg_type_noinline(EX(func), arg_num, param, CACHE_ADDR(opline->extended_value))) {
+			HANDLE_EXCEPTION();
+		}
+		ZEND_VM_NEXT_OPCODE();
+	}
+}
+
 ZEND_VM_HOT_HANDLER(64, ZEND_RECV_INIT, NUM, CONST, CACHE_SLOT)
 {
 	USE_OPLINE

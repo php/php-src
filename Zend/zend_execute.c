@@ -1131,6 +1131,10 @@ static zend_always_inline int zend_verify_recv_arg_type(zend_function *zf, uint3
 	return 1;
 }
 
+static zend_never_inline int zend_verify_recv_arg_type_noinline(zend_function *zf, uint32_t arg_num, zval *arg, void **cache_slot)  {
+	return zend_verify_recv_arg_type(zf, arg_num, arg, cache_slot);
+}
+
 static zend_always_inline int zend_verify_variadic_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, void **cache_slot)
 {
 	zend_arg_info *cur_arg_info;
