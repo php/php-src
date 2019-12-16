@@ -211,7 +211,7 @@ PHP_FUNCTION(link)
 
 	/*First argument to link function is the target and hence should go to frompath
 	  Second argument to link function is the link itself and hence should go to topath */
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &frompath, &frompath_len, &topath, &topath_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp", &frompath, &frompath_len, &topath, &topath_len) == FAILURE) {
 		return;
 	}
 
