@@ -13,5 +13,5 @@ test(new class {
 
 ?>
 --EXPECTF--
-#0  class@anonymous->__destruct() called at [%s:4]
-#1  test() called at [%s:5]
+#0  class@anonymous->__destruct() called at [%s:%d]
+#1  test() called at [%s:%d]
