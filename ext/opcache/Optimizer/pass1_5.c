@@ -515,6 +515,8 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				zend_optimizer_collect_constant(ctx, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline));
 			}
 			break;
+#if 0
+		/* see ext/opcache/tests/bug78961.phpt */
 //		case ZEND_FETCH_R:
 		case ZEND_FETCH_W:
 //		case ZEND_FETCH_RW:
@@ -558,6 +560,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				MAKE_NOP(opline);
 			}
 			break;
+#endif
 
 		case ZEND_RETURN:
 		case ZEND_RETURN_BY_REF:
