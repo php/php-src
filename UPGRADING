@@ -334,6 +334,10 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/weak_maps
   . Added ValueError class.
 
+- Date:
+  . Added DateTime::createFromInterface() and
+    DateTimeImmutable::createFromInterface().
+
 ========================================
 3. Changes in SAPI modules
 ========================================
