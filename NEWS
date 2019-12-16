@@ -2,11 +2,17 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.1
 
-
-
-12 Dec 2019, PHP 7.4.1RC1
+- Bcmath:
+  . Fixed bug #78878 (Buffer underflow in bc_shift_addsub). (CVE-2019-11046).
+    (cmb)
 
 - Core:
+  . Fixed bug #78862 (link() silently truncates after a null byte on Windows).
+    (CVE-2019-11044). (cmb)
+  . Fixed bug #78863 (DirectoryIterator class silently truncates after a null
+    byte). (CVE-2019-11045). (cmb)
+  . Fixed bug #78943 (mail() may release string with refcount==1 twice).
+    (CVE-2019-11049). (cmb)
   . Fixed bug #78810 (RW fetches do not throw "uninitialized property"
     exception). (Nikita)
   . Fixed bug #78868 (Calling __autoload() with incorrect EG(fake_scope) value).
@@ -22,6 +28,12 @@ PHP                                                                        NEWS
   . Fixed bug #78849 (GD build broken with -D SIGNED_COMPARE_SLOW). (cmb)
   . Fixed bug #78923 (Artifacts when convoluting image with transparency).
     (wilson chen)
+
+- EXIF:
+  . Fixed bug #78793 (Use-after-free in exif parsing under memory sanitizer).
+    (CVE-2019-11050). (Nikita)
+  . Fixed bug #78910 (Heap-buffer-overflow READ in exif). (CVE-2019-11047).
+    (Nikita)
 
 - FPM:
   . Fixed bug #76601 (Partially working php-fpm ater incomplete reload).
