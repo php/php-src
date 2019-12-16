@@ -1,5 +1,7 @@
 --TEST--
 Bug #78973: Destructor during CV freeing causes segfault if opline never saved
+--INI--
+opcache.optimization_level=0
 --FILE--
 <?php
 
