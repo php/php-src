@@ -153,6 +153,7 @@ static const zend_function_entry date_funcs_date[] = {
 	PHP_ME(DateTime,			__wakeup,			arginfo_class_DateTimeInterface___wakeup, ZEND_ACC_PUBLIC)
 	PHP_ME(DateTime,			__set_state,		arginfo_class_DateTime___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME(DateTime,			createFromImmutable,	arginfo_class_DateTime_createFromImmutable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME(DateTime,			createFromInterface,	arginfo_class_DateTime_createFromInterface, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(createFromFormat, date_create_from_format,	arginfo_class_DateTime_createFromFormat, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(getLastErrors, date_get_last_errors,	arginfo_class_DateTime_getLastErrors, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(format,		date_format,		arginfo_class_DateTimeInterface_format, 0)
@@ -191,6 +192,7 @@ static const zend_function_entry date_funcs_immutable[] = {
 	PHP_ME(DateTimeImmutable, setISODate,    arginfo_class_DateTimeImmutable_setISODate, 0)
 	PHP_ME(DateTimeImmutable, setTimestamp,  arginfo_class_DateTimeImmutable_setTimestamp, 0)
 	PHP_ME(DateTimeImmutable, createFromMutable, arginfo_class_DateTimeImmutable_createFromMutable, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME(DateTimeImmutable, createFromInterface, arginfo_class_DateTimeImmutable_createFromInterface, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_FE_END
 };
 
@@ -2545,6 +2547,27 @@ PHP_METHOD(DateTime, createFromImmutable)
 }
 /* }}} */
 
+/* {{{ proto DateTime::createFromInterface(DateTimeInterface object)
+   Creates new DateTime object from an existing DateTimeInterface object.
+*/
+PHP_METHOD(DateTime, createFromInterface)
+{
+    zval *datetimeinterface_object = NULL;
+    php_date_obj *new_obj = NULL;
+    php_date_obj *old_obj = NULL;
+
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+            Z_PARAM_OBJECT_OF_CLASS(datetimeinterface_object, date_ce_interface)
+    ZEND_PARSE_PARAMETERS_END();
+
+    php_date_instantiate(date_ce_date, return_value);
+    old_obj = Z_PHPDATE_P(datetimeinterface_object);
+    new_obj = Z_PHPDATE_P(return_value);
+
+    new_obj->time = timelib_time_clone(old_obj->time);
+}
+/* }}} */
+
 /* {{{ proto DateTimeImmutable::createFromMutable(DateTime object)
    Creates new DateTimeImmutable object from an existing mutable DateTime object.
 */
@@ -2563,6 +2586,27 @@ PHP_METHOD(DateTimeImmutable, createFromMutable)
 	new_obj = Z_PHPDATE_P(return_value);
 
 	new_obj->time = timelib_time_clone(old_obj->time);
+}
+/* }}} */
+
+/* {{{ proto DateTimeImmutable::createFromInterface(DateTimeInterface object)
+   Creates new DateTimeImmutable object from an existing DateTimeInterface object.
+*/
+PHP_METHOD(DateTimeImmutable, createFromInterface)
+{
+    zval *datetimeinterface_object = NULL;
+    php_date_obj *new_obj = NULL;
+    php_date_obj *old_obj = NULL;
+
+    ZEND_PARSE_PARAMETERS_START(1, 1)
+            Z_PARAM_OBJECT_OF_CLASS(datetimeinterface_object, date_ce_interface)
+    ZEND_PARSE_PARAMETERS_END();
+
+    php_date_instantiate(date_ce_immutable, return_value);
+    old_obj = Z_PHPDATE_P(datetimeinterface_object);
+    new_obj = Z_PHPDATE_P(return_value);
+
+    new_obj->time = timelib_time_clone(old_obj->time);
 }
 /* }}} */
 

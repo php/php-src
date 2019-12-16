@@ -257,6 +257,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_createFromImmutable, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, object, DateTimeImmutable, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_createFromInterface, 0, 0, 1)
+                ZEND_ARG_OBJ_INFO(0, object, DateTimeInterface, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTime_createFromFormat, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, time, IS_STRING, 0)
@@ -308,6 +312,10 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeImmutable_createFromMutable, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, object, DateTime, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateTimeImmutable_createFromInterface, 0, 0, 1)
+                ZEND_ARG_OBJ_INFO(0, object, DateTimeInterface, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeImmutable_createFromFormat arginfo_class_DateTime_createFromFormat

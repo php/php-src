@@ -46,6 +46,7 @@ PHP_METHOD(DateTime, __construct);
 PHP_METHOD(DateTime, __wakeup);
 PHP_METHOD(DateTime, __set_state);
 PHP_METHOD(DateTime, createFromImmutable);
+PHP_METHOD(DateTime, createFromInterface);
 PHP_FUNCTION(date_create);
 PHP_FUNCTION(date_create_immutable);
 PHP_FUNCTION(date_create_from_format);
@@ -79,6 +80,7 @@ PHP_METHOD(DateTimeImmutable, setDate);
 PHP_METHOD(DateTimeImmutable, setISODate);
 PHP_METHOD(DateTimeImmutable, setTimestamp);
 PHP_METHOD(DateTimeImmutable, createFromMutable);
+PHP_METHOD(DateTimeImmutable, createFromInterface);
 
 PHP_METHOD(DateTimeZone, __construct);
 PHP_METHOD(DateTimeZone, __wakeup);
