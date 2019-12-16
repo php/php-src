@@ -1640,7 +1640,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
 		memcpy(Z_STRVAL_P(str) + offset, string_value, string_len);
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_INTERNED_STR(EX_VAR(opline->result.var), zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0));
+			ZVAL_STR(EX_VAR(opline->result.var), zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0));
 		}
 		return;
 	} else if (!Z_REFCOUNTED_P(str)) {
@@ -1656,7 +1656,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	int k = 0;
 	// Source offset
 	int i = 0;
-	char *buffer = emalloc(Z_STRLEN_P(str) + string_len - 1); // -1 as we replace a byte
+	char *buffer = emalloc(Z_STRLEN_P(str) + string_len);
 	char *source = Z_STRVAL_P(str);
 	// Append bytes from the source string to the buffer until the offset is reached
 	while (i < offset) {
@@ -1684,7 +1684,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	buffer[k] = '\0';
 	ZVAL_NEW_STR(str, zend_string_init(buffer, Z_STRLEN_P(str) + string_len - 1, 0));
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_INTERNED_STR(EX_VAR(opline->result.var), zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0));
+		ZVAL_STR(EX_VAR(opline->result.var), zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0));
 	}
 	
 	efree(buffer);
