@@ -862,7 +862,6 @@ static zend_never_inline ZEND_COLD void zend_wrong_string_offset(void)
 static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim, zval *value, zval *result)
 {
 	zend_string *old_str;
-	zend_long old_len = Z_STRLEN_P(str);
 	zend_uchar c;
 	size_t string_len;
 	zend_long offset;
@@ -896,63 +895,27 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		c = (zend_uchar)Z_STRVAL_P(value)[0];
 	}
 
+	if (string_len == 0) {
+		/* Error on empty input string */
+		zend_error(E_WARNING, "Cannot assign an empty string to a string offset");
+		if (result) {
+			ZVAL_NULL(result);
+		}
+		return;
+	}
+
 	if (offset < 0) { /* Handle negative offset */
 		offset += (zend_long)Z_STRLEN_P(str);
 	}
 
-	/* If it's a byte char replace byte directly */
-	if (string_len == 1) {
-		if ((size_t) offset >= Z_STRLEN_P(str)) {
-			/* Extend string if needed */
-			Z_STR_P(str) = zend_string_extend(Z_STR_P(str), offset + 1, 0);
-			Z_TYPE_INFO_P(str) = IS_STRING_EX;
-			memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
-			Z_STRVAL_P(str)[offset + 1] = 0;
-		} else if (!Z_REFCOUNTED_P(str)) {
-			old_str = Z_STR_P(str);
-			Z_STR_P(str) = zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
-			Z_TYPE_INFO_P(str) = IS_STRING_EX;
-			zend_string_release(old_str);
-		} else {
-			SEPARATE_STRING(str);
-			zend_string_forget_hash_val(Z_STR_P(str));
-		}
-
-		Z_STRVAL_P(str)[offset] = c;
-
-		if (result) {
-			/* Return the new character */
-			ZVAL_INTERNED_STR(result, ZSTR_CHAR(c));
-		}
-		return;
-	}
-
-	/* -1 for the byte we are replacing */
-	zend_long new_len = old_len + string_len - 1;
 	if ((size_t)offset >= Z_STRLEN_P(str)) {
-		old_str = Z_STR_P(str);
-		/* Extend string */
-		ZVAL_NEW_STR(str, zend_string_extend(Z_STR_P(str), offset + string_len, 0));
+		/* Extend string if needed */
+		zend_long old_len = Z_STRLEN_P(str);
+		Z_STR_P(str) = zend_string_extend(Z_STR_P(str), offset + 1, 0);
+		Z_TYPE_INFO_P(str) = IS_STRING_EX;
 		memset(Z_STRVAL_P(str) + old_len, ' ', offset - old_len);
-		memcpy(Z_STRVAL_P(str) + offset, ZSTR_VAL(old_str), string_len);
-
-		zend_string_release(old_str);
-		if (result) {
-			ZVAL_STR(result, zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0));
-		}
-		return;
-	}
-
-	old_str = Z_STR_P(str);
-	zend_string *tmp = zend_string_init(Z_STRVAL_P(str), new_len, 0);
-	if (string_len > 0) {
-		memcpy(ZSTR_VAL(tmp) + offset, ZSTR_VAL(old_str), string_len);
-	}
-	/* Copy after the replacement string, from the position of the initial string after the offset,
-	 * for the remainder of the initial string (old length - offset) */
-	memcpy(ZSTR_VAL(tmp) + offset + string_len, Z_STRVAL_P(str) + offset + 1, old_len - offset);
-	
-	if (!Z_REFCOUNTED_P(str)) {
+		Z_STRVAL_P(str)[offset+1] = 0;
+	} else if (!Z_REFCOUNTED_P(str)) {
 		old_str = Z_STR_P(str);
 		Z_STR_P(str) = zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0);
 		Z_TYPE_INFO_P(str) = IS_STRING_EX;
@@ -962,11 +925,11 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		zend_string_forget_hash_val(Z_STR_P(str));
 	}
 
-	memcpy(Z_STRVAL_P(str), ZSTR_VAL(tmp), new_len);
-	zend_string_release_ex(tmp, 0);
+	Z_STRVAL_P(str)[offset] = c;
 
 	if (result) {
-		ZVAL_STR(result, zend_string_init(Z_STRVAL_P(str), Z_STRLEN_P(str), 0));
+		/* Return the new character */
+		ZVAL_INTERNED_STR(result, ZSTR_CHAR(c));
 	}
 }
 
