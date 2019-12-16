@@ -1819,6 +1819,193 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_soundex, 0, 1, MAY_BE_STRING|MAY
 	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_select, 0, 4, MAY_BE_LONG|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
+	ZEND_ARG_TYPE_INFO(1, write, IS_ARRAY, 1)
+	ZEND_ARG_TYPE_INFO(1, except, IS_ARRAY, 1)
+	ZEND_ARG_TYPE_INFO(0, tv_sec, IS_LONG, 1)
+	ZEND_ARG_TYPE_INFO(0, tv_usec, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_context_create, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, options, IS_ARRAY, 1)
+	ZEND_ARG_TYPE_INFO(0, params, IS_ARRAY, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_params, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, context)
+	ZEND_ARG_TYPE_INFO(0, params, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_get_params, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_set_option, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, context)
+	ZEND_ARG_INFO(0, param2)
+	ZEND_ARG_TYPE_INFO(0, option_name, IS_STRING, 0)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_context_get_options, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_INFO(0, stream_or_context)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_context_get_default, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, options, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_context_set_default, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, options, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_filter_prepend, 0, 0, 2)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_TYPE_INFO(0, filtername, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, read_write, IS_LONG, 0)
+	ZEND_ARG_INFO(0, params)
+ZEND_END_ARG_INFO()
+
+#define arginfo_stream_filter_append arginfo_stream_filter_prepend
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_filter_remove, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, stream_filter)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_socket_client, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, remote_socket, IS_STRING, 0)
+	ZEND_ARG_INFO(1, errno)
+	ZEND_ARG_INFO(1, errstr)
+	ZEND_ARG_TYPE_INFO(0, timeout, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+	ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_socket_server, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, local_socket, IS_STRING, 0)
+	ZEND_ARG_INFO(1, errno)
+	ZEND_ARG_INFO(1, errstr)
+	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+	ZEND_ARG_INFO(0, context)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_socket_accept, 0, 0, 1)
+	ZEND_ARG_INFO(0, server_socket)
+	ZEND_ARG_TYPE_INFO(0, timeout, IS_DOUBLE, 0)
+	ZEND_ARG_INFO(1, peername)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_get_name, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_INFO(0, handle)
+	ZEND_ARG_TYPE_INFO(0, want_peer, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_recvfrom, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+	ZEND_ARG_INFO(1, address)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_sendto, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, address, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_enable_crypto, 0, 2, MAY_BE_LONG|MAY_BE_BOOL)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_TYPE_INFO(0, enable, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, crypto_type, IS_LONG, 1)
+	ZEND_ARG_INFO(0, session_stream)
+ZEND_END_ARG_INFO()
+
+#if defined(HAVE_SHUTDOWN)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_socket_shutdown, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_TYPE_INFO(0, how, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if HAVE_SOCKETPAIR
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_socket_pair, 0, 3, MAY_BE_ARRAY|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, domain, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, protocol, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_copy_to_stream, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
+	ZEND_ARG_INFO(0, source)
+	ZEND_ARG_INFO(0, dest)
+	ZEND_ARG_TYPE_INFO(0, maxlength, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, position, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_get_contents, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_INFO(0, handle)
+	ZEND_ARG_TYPE_INFO(0, maxlength, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, position, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_supports_lock, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, stream)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_set_write_buffer, 0, 2, IS_LONG, 0)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_TYPE_INFO(0, buffer, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_stream_set_read_buffer arginfo_stream_set_write_buffer
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_set_blocking, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_TYPE_INFO(0, mode, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_get_meta_data, 0, 1, IS_ARRAY, 0)
+	ZEND_ARG_INFO(0, stream)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_get_line, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
+	ZEND_ARG_INFO(0, handle)
+	ZEND_ARG_TYPE_INFO(0, max_length, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, ending, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_stream_resolve_include_path arginfo_filetype
+
+#define arginfo_stream_get_wrappers arginfo_net_get_interfaces
+
+#define arginfo_stream_get_transports arginfo_net_get_interfaces
+
+#define arginfo_stream_is_local arginfo_stream_supports_lock
+
+#define arginfo_stream_isatty arginfo_stream_supports_lock
+
+#if defined(PHP_WIN32)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_vt100_support, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_TYPE_INFO(0, enable, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_set_chunk_size, 0, 2, IS_LONG, 0)
+	ZEND_ARG_INFO(0, stream)
+	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_set_timeout, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_TYPE_INFO(0, seconds, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, microseconds, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gettype, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
@@ -1900,6 +2087,17 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_headers, 0, 1, MAY_BE_ARRAY|
 	ZEND_ARG_TYPE_INFO(0, format, IS_LONG, 0)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_php_user_filter_filter, 0, 0, 4)
+	ZEND_ARG_INFO(0, in)
+	ZEND_ARG_INFO(0, out)
+	ZEND_ARG_INFO(1, consumed)
+	ZEND_ARG_INFO(0, closing)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_php_user_filter_onCreate arginfo_tmpfile
+
+#define arginfo_class_php_user_filter_onClose arginfo_tmpfile
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_bucket_make_writeable, 0, 1, IS_OBJECT, 1)
 	ZEND_ARG_INFO(0, brigade)
