@@ -146,6 +146,9 @@ class DateTime implements DateTimeInterface {
     /** @return DateTime */
     public static function createFromImmutable(DateTimeImmutable $object);
 
+    /** @return DateTime */
+    public static function createFromInterface(DateTimeInterface $object);
+
     /** @return DateTime|false */
     public static function createFromFormat(
         string $format, string $time, ?DateTimeZone $timezone = null);
@@ -186,6 +189,9 @@ class DateTimeImmutable implements DateTimeInterface {
 
     /** @return DateTimeImmutable */
     public static function createFromMutable(DateTime $object);
+
+    /** @return DateTimeImmutable */
+    public static function createFromInterface(DateTimeInterface $object);
 
     /** @return DateTimeImmutable|false */
     public static function createFromFormat(
