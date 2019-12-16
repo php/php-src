@@ -1,7 +1,5 @@
 --TEST--
 Bug #78902: Memory leak when using stream_filter_append
---XFAIL--
-This bug was introduced in PHP 7.3.11 an is still open
 --INI--
 memory_limit=512k
 --FILE--

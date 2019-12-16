@@ -29,6 +29,9 @@ PHP                                                                        NEWS
   . Fixed bug #79151 (heap use after free caused by
     spl_dllist_it_helper_move_forward). (Nikita)
 
+- Standard:
+  . Fixed bug #78902 (Memory leak when using stream_filter_append). (liudaixiao)
+
 23 Jan 2020, PHP 7.3.14
 
 - Core
