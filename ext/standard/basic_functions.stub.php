@@ -1171,6 +1171,147 @@ function random_int(int $min, int $max): int {}
 
 function soundex(string $string): string|false {}
 
+/* streamsfuncs.c */
+
+function stream_select(?array &$read, ?array &$write, ?array &$except, ?int $tv_sec, int $tv_usec = 0): int|false {}
+
+/** @return resource */
+function stream_context_create(?array $options = null, ?array $params = null) {}
+
+/** @param resource $context */
+function stream_context_set_params($context, array $params): bool {}
+
+/** @param resource $context */
+function stream_context_get_params($context): array {}
+
+/**
+ * @param resource $context
+ * @param array|string $param2
+ * @param mixed $value
+ */
+function stream_context_set_option($context, $param2, string $option_name = UNKNOWN, $value = UNKNOWN): bool {}
+
+/** @param resource $stream_or_context */
+function stream_context_get_options($stream_or_context): array {}
+
+/** @return resource */
+function stream_context_get_default(array $options = UNKNOWN) {}
+
+/** @return resource */
+function stream_context_set_default(array $options) {}
+
+/**
+ * @param resource $stream
+ * @param mixed $params
+ * @return resource|false
+ */
+function stream_filter_prepend($stream, string $filtername, int $read_write = 0, $params = UNKNOWN) {}
+
+/**
+ * @param resource $stream
+ * @param mixed $params
+ * @return resource|false
+ */
+function stream_filter_append($stream, string $filtername, int $read_write = 0, $params = UNKNOWN) {}
+
+/** @param resource $stream_filter */
+function stream_filter_remove($stream_filter): bool {}
+
+/**
+ * @param resource $context
+ * @return resource|false
+ */
+function stream_socket_client(string $remote_socket, &$errno = null, &$errstr = null, float $timeout = STREAM_CLIENT_CONNECT, int $flags = UNKNOWN, $context = null) {}
+
+/**
+ * @param resource $context
+ * @return resource|false
+ */
+function stream_socket_server(string $local_socket, &$errno = null, &$errstr = null, int $flags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context = null) {}
+
+/**
+ * @param resource $server_socket
+ * @param float $timeout
+ * @return resource|false
+ */
+function stream_socket_accept($server_socket, float $timeout = UNKNOWN, &$peername = null) {}
+
+/** @param resource $handle */
+function stream_socket_get_name($handle, bool $want_peer): string|false {}
+
+/** @param resource $socket */
+function stream_socket_recvfrom($socket, int $length, int $flags = 0, &$address = null): string|false {}
+
+/** @param resource $socket */
+function stream_socket_sendto($socket, string $data, int $flags = 0, string $address = ""): int|false {}
+
+/**
+ * @param resource $stream
+ * @param resource $session_stream
+ */
+function stream_socket_enable_crypto($stream, bool $enable, ?int $crypto_type = null, $session_stream = null): int|bool {}
+
+#ifdef HAVE_SHUTDOWN
+/** @param resource $stream */
+function stream_socket_shutdown($stream, int $how): bool {}
+#endif
+
+#if HAVE_SOCKETPAIR
+function stream_socket_pair(int $domain, int $type, int $protocol): array|false {}
+#endif
+
+/**
+ * @param resource $source
+ * @param resource $dest
+ */
+function stream_copy_to_stream($source, $dest, int $maxlength = UNKNOWN, int $position = 0): int|false {}
+
+/** @param resource $handle */
+function stream_get_contents($handle, int $maxlength = UNKNOWN, int $position = -1): string|false {}
+
+/** @param resource $stream */
+function stream_supports_lock($stream): bool {}
+
+/** @param resource $stream */
+function stream_set_write_buffer($stream, int $buffer): int {}
+
+/** @param resource $stream */
+function stream_set_read_buffer($stream, int $buffer): int {}
+
+/** @param resource $stream */
+function stream_set_blocking($stream, bool $mode): bool {}
+
+/** @param resource $stream */
+function stream_get_meta_data($stream): array {}
+
+/** @param resource $handle */
+function stream_get_line($handle, int $max_length, string $ending = ""): string|false {}
+
+function stream_resolve_include_path(string $filename): string|false {}
+
+function stream_get_wrappers(): array|false {}
+
+function stream_get_transports(): array|false {}
+
+/** @param mixed $stream */
+function stream_is_local($stream): bool {}
+
+/** @param resource $stream */
+function stream_isatty($stream): bool {}
+
+#ifdef PHP_WIN32
+/** @param resource $stream */
+function sapi_windows_vt100_support($stream, bool $enable): bool {}
+#endif
+
+/** @param resource $stream */
+function stream_set_chunk_size($stream, int $size): int {}
+
+#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+/** @param resource $socket */
+function stream_set_timeout($socket, int $seconds, int $microseconds = 0): bool {}
+#endif
+
 /* type.c */
 
 /** @param mixed $var */
@@ -1252,6 +1393,16 @@ function rawurldecode(string $string): string {}
 function get_headers(string $url, int $format = 0, $context = null): array|false {}
 
 /* user_filters.c */
+
+class php_user_filter {
+    public function filter($in, $out, &$consumed, $closing) {}
+
+    /** @return void */
+    public function onCreate() {}
+
+    /** @return void */
+    public function onClose() {}
+}
 
 /** @param resource $brigade */
 function stream_bucket_make_writeable($brigade): ?object {}
