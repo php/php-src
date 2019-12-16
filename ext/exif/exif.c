@@ -3204,8 +3204,9 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 	}
 
 	for (de=0;de<NumDirEntries;de++) {
-		if (!exif_process_IFD_TAG(ImageInfo, dir_start + 2 + 12 * de,
-								  offset_base, data_len, displacement, section_index, 0, maker_note->tag_table)) {
+		size_t offset = 2 + 12 * de;
+		if (!exif_process_IFD_TAG(ImageInfo, dir_start + offset,
+								  offset_base, data_len - offset, displacement, section_index, 0, maker_note->tag_table)) {
 			return FALSE;
 		}
 	}
