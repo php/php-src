@@ -383,8 +383,8 @@ PHP_FUNCTION(stream_socket_recvfrom)
 	}
 
 	if (to_read <= 0) {
-		php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
-		RETURN_FALSE;
+		zend_value_error("Length parameter must be greater than 0");
+		return;
 	}
 
 	read_buf = zend_string_alloc(to_read, 0);
@@ -493,7 +493,7 @@ PHP_FUNCTION(stream_copy_to_stream)
 }
 /* }}} */
 
-/* {{{ proto array|false stream_get_meta_data(resource fp)
+/* {{{ proto array stream_get_meta_data(resource fp)
     Retrieves header/meta data from streams/file pointers */
 PHP_FUNCTION(stream_get_meta_data)
 {
@@ -784,8 +784,8 @@ PHP_FUNCTION(stream_select)
 	}
 
 	if (!sets) {
-		php_error_docref(NULL, E_WARNING, "No stream arrays were passed");
-		RETURN_FALSE;
+		zend_value_error("No stream arrays were passed");
+		return;
 	}
 
 	PHP_SAFE_MAX_FD(max_fd, max_set_count);
@@ -793,11 +793,11 @@ PHP_FUNCTION(stream_select)
 	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
 	if (!secnull) {
 		if (sec < 0) {
-			php_error_docref(NULL, E_WARNING, "The seconds parameter must be greater than 0");
-			RETURN_FALSE;
+			zend_value_error("The seconds parameter must be greater than 0");
+			return;
 		} else if (usec < 0) {
-			php_error_docref(NULL, E_WARNING, "The microseconds parameter must be greater than 0");
-			RETURN_FALSE;
+			zend_value_error("The microseconds parameter must be greater than 0");
+			return;
 		}
 
 		/* Windows, Solaris and BSD do not like microsecond values which are >= 1 sec */
@@ -827,7 +827,7 @@ PHP_FUNCTION(stream_select)
 	retval = php_select(max_fd+1, &rfds, &wfds, &efds, tv_p);
 
 	if (retval == -1) {
-		php_error_docref(NULL, E_WARNING, "unable to select [%d]: %s (max_fd=%d)",
+		php_error_docref(NULL, E_WARNING, "Unable to select [%d]: %s (max_fd=%d)",
 				errno, strerror(errno), max_fd);
 		RETURN_FALSE;
 	}
@@ -892,7 +892,8 @@ static int parse_context_options(php_stream_context *context, zval *options)
 				}
 			} ZEND_HASH_FOREACH_END();
 		} else {
-			php_error_docref(NULL, E_WARNING, "options should have the form [\"wrappername\"][\"optionname\"] = $value");
+			zend_value_error("Options should have the form [\"wrappername\"][\"optionname\"] = $value");
+			return FAILURE;
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -918,9 +919,10 @@ static int parse_context_params(php_stream_context *context, zval *params)
 	}
 	if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(params), "options", sizeof("options")-1))) {
 		if (Z_TYPE_P(tmp) == IS_ARRAY) {
-			parse_context_options(context, tmp);
+			return parse_context_options(context, tmp);
 		} else {
-			php_error_docref(NULL, E_WARNING, "Invalid stream/context parameter");
+			zend_type_error("Invalid stream/context parameter");
+			return FAILURE;
 		}
 	}
 
@@ -957,7 +959,7 @@ static php_stream_context *decode_context_param(zval *contextresource)
 }
 /* }}} */
 
-/* {{{ proto array|false stream_context_get_options(resource context|resource stream)
+/* {{{ proto array stream_context_get_options(resource context|resource stream)
    Retrieve options for a stream/wrapper/context */
 PHP_FUNCTION(stream_context_get_options)
 {
@@ -970,8 +972,8 @@ PHP_FUNCTION(stream_context_get_options)
 
 	context = decode_context_param(zcontext);
 	if (!context) {
-		php_error_docref(NULL, E_WARNING, "Invalid stream/context parameter");
-		RETURN_FALSE;
+		zend_type_error("Invalid stream/context parameter");
+		return;
 	}
 
 	ZVAL_COPY(return_value, &context->options);
@@ -995,8 +997,8 @@ PHP_FUNCTION(stream_context_set_option)
 
 		/* figure out where the context is coming from exactly */
 		if (!(context = decode_context_param(zcontext))) {
-			php_error_docref(NULL, E_WARNING, "Invalid stream/context parameter");
-			RETURN_FALSE;
+			zend_type_error("Invalid stream/context parameter");
+			return;
 		}
 
 		RETURN_BOOL(parse_context_options(context, options) == SUCCESS);
@@ -1014,8 +1016,8 @@ PHP_FUNCTION(stream_context_set_option)
 
 		/* figure out where the context is coming from exactly */
 		if (!(context = decode_context_param(zcontext))) {
-			php_error_docref(NULL, E_WARNING, "Invalid stream/context parameter");
-			RETURN_FALSE;
+			zend_type_error("Invalid stream/context parameter");
+			return;
 		}
 
 		RETURN_BOOL(php_stream_context_set_option(context, wrappername, optionname, zvalue) == SUCCESS);
@@ -1037,15 +1039,15 @@ PHP_FUNCTION(stream_context_set_params)
 
 	context = decode_context_param(zcontext);
 	if (!context) {
-		php_error_docref(NULL, E_WARNING, "Invalid stream/context parameter");
-		RETURN_FALSE;
+		zend_type_error("Invalid stream/context parameter");
+		return;
 	}
 
 	RETVAL_BOOL(parse_context_params(context, params) == SUCCESS);
 }
 /* }}} */
 
-/* {{{ proto array|false stream_context_get_params(resource context|resource stream)
+/* {{{ proto array stream_context_get_params(resource context|resource stream)
    Get parameters of a file context */
 PHP_FUNCTION(stream_context_get_params)
 {
@@ -1058,8 +1060,8 @@ PHP_FUNCTION(stream_context_get_params)
 
 	context = decode_context_param(zcontext);
 	if (!context) {
-		php_error_docref(NULL, E_WARNING, "Invalid stream/context parameter");
-		RETURN_FALSE;
+		zend_type_error("Invalid stream/context parameter");
+		return;
 	}
 
 	array_init(return_value);
@@ -1090,7 +1092,9 @@ PHP_FUNCTION(stream_context_get_default)
 	context = FG(default_context);
 
 	if (params) {
-		parse_context_options(context, params);
+		if (parse_context_options(context, params) == FAILURE) {
+			return;
+		}
 	}
 
 	php_stream_context_to_zval(context, return_value);
@@ -1113,7 +1117,9 @@ PHP_FUNCTION(stream_context_set_default)
 	}
 	context = FG(default_context);
 
-	parse_context_options(context, options);
+	if (parse_context_options(context, options) == FAILURE) {
+		return;
+	}
 
 	php_stream_context_to_zval(context, return_value);
 }
@@ -1253,10 +1259,9 @@ PHP_FUNCTION(stream_filter_remove)
 		Z_PARAM_RESOURCE(zfilter)
 	ZEND_PARSE_PARAMETERS_END();
 
-	filter = zend_fetch_resource(Z_RES_P(zfilter), NULL, php_file_le_stream_filter());
+	filter = zend_fetch_resource(Z_RES_P(zfilter), "stream filter", php_file_le_stream_filter());
 	if (!filter) {
-		php_error_docref(NULL, E_WARNING, "Invalid resource given, not a stream filter");
-		RETURN_FALSE;
+		return;
 	}
 
 	if (php_stream_filter_flush(filter, 1) == FAILURE) {
@@ -1293,8 +1298,8 @@ PHP_FUNCTION(stream_get_line)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (max_length < 0) {
-		php_error_docref(NULL, E_WARNING, "The maximum allowed length must be greater than or equal to zero");
-		RETURN_FALSE;
+		zend_value_error("The maximum allowed length must be greater than or equal to zero");
+		return;
 	}
 	if (!max_length) {
 		max_length = PHP_SOCK_CHUNK_SIZE;
@@ -1429,16 +1434,16 @@ PHP_FUNCTION(stream_set_chunk_size)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (csize <= 0) {
-		php_error_docref(NULL, E_WARNING, "The chunk size must be a positive integer, given " ZEND_LONG_FMT, csize);
-		RETURN_FALSE;
+		zend_value_error("The chunk size must be a positive integer, " ZEND_LONG_FMT " given", csize);
+		return;
 	}
 	/* stream.chunk_size is actually a size_t, but php_stream_set_option
 	 * can only use an int to accept the new value and return the old one.
 	 * In any case, values larger than INT_MAX for a chunk size make no sense.
 	 */
 	if (csize > INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "The chunk size cannot be larger than %d", INT_MAX);
-		RETURN_FALSE;
+		zend_value_error("The chunk size cannot be larger than %d", INT_MAX);
+		return;
 	}
 
 	php_stream_from_zval(stream, zstream);
@@ -1504,8 +1509,8 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 			zval *val;
 
 			if (!GET_CTX_OPT(stream, "ssl", "crypto_method", val)) {
-				php_error_docref(NULL, E_WARNING, "When enabling encryption you must specify the crypto type");
-				RETURN_FALSE;
+				zend_value_error("When enabling encryption you must specify the crypto type");
+				return;
 			}
 
 			cryptokind = Z_LVAL_P(val);
@@ -1679,7 +1684,7 @@ PHP_FUNCTION(sapi_windows_vt100_support)
 			"%s() was not able to analyze the specified stream",
 			get_active_function_name()
 		);
-		RETURN_FALSE;
+		return;
 	}
 
 	/* Check if the file descriptor is a console */
