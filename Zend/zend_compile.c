@@ -5777,7 +5777,8 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 
 		ZEND_TYPE_FULL_MASK(arg_info->type) |= _ZEND_ARG_INFO_FLAGS(is_ref, is_variadic);
 		if (opcode == ZEND_RECV) {
-			opline->op2.num = ZEND_TYPE_FULL_MASK(arg_info->type);
+			opline->op2.num = type_ast ?
+				ZEND_TYPE_FULL_MASK(arg_info->type) : MAY_BE_ANY;
 		}
 	}
 

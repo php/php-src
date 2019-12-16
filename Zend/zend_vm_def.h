@@ -5029,7 +5029,7 @@ ZEND_VM_HANDLER(120, ZEND_SEND_USER, CONST|TMP|VAR|CV, NUM)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_COLD_HELPER(zend_missin_arg_helper, ANY, ANY)
+ZEND_VM_COLD_HELPER(zend_missing_arg_helper, ANY, ANY)
 {
 	USE_OPLINE
 
@@ -5050,14 +5050,14 @@ ZEND_VM_COLD_HELPER(zend_verify_recv_arg_type_helper, ANY, ANY, zval *op_1)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HOT_HANDLER(63, ZEND_RECV, NUM, NUM, CACHE_SLOT)
+ZEND_VM_HOT_HANDLER(63, ZEND_RECV, NUM, UNUSED, CACHE_SLOT)
 {
 	USE_OPLINE
 	uint32_t arg_num = opline->op1.num;
 	zval *param;
 
 	if (UNEXPECTED(arg_num > EX_NUM_ARGS())) {
-		ZEND_VM_DISPATCH_TO_HELPER(zend_missin_arg_helper);
+		ZEND_VM_DISPATCH_TO_HELPER(zend_missing_arg_helper);
 	}
 
 	param = EX_VAR(opline->result.var);
@@ -5075,7 +5075,7 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_RECV, op->op2.num == 0, ZEND_RECV_NOTYPE, NUM
 	uint32_t arg_num = opline->op1.num;
 
 	if (UNEXPECTED(arg_num > EX_NUM_ARGS())) {
-		ZEND_VM_DISPATCH_TO_HELPER(zend_missin_arg_helper);
+		ZEND_VM_DISPATCH_TO_HELPER(zend_missing_arg_helper);
 	}
 
 	ZEND_VM_NEXT_OPCODE();
