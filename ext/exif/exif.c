@@ -3165,7 +3165,8 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 			continue;
 		if (maker_note->model && (!ImageInfo->model || strcmp(maker_note->model, ImageInfo->model)))
 			continue;
-		if (maker_note->id_string && strncmp(maker_note->id_string, value_ptr, maker_note->id_string_len))
+		if (maker_note->id_string && value_len >= maker_note->id_string_len
+				&& strncmp(maker_note->id_string, value_ptr, maker_note->id_string_len))
 			continue;
 		break;
 	}
