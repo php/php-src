@@ -20,6 +20,7 @@
 #include "php_globals.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/file.h"
+#include "ext/standard/basic_functions_arginfo.h"
 
 #define PHP_STREAM_BRIGADE_RES_NAME	"userfilter.bucket brigade"
 #define PHP_STREAM_BUCKET_RES_NAME "userfilter.bucket"
@@ -41,23 +42,11 @@ static int le_bucket;
 PHP_FUNCTION(user_filter_nop)
 {
 }
-ZEND_BEGIN_ARG_INFO(arginfo_php_user_filter_filter, 0)
-	ZEND_ARG_INFO(0, in)
-	ZEND_ARG_INFO(0, out)
-	ZEND_ARG_INFO(1, consumed)
-	ZEND_ARG_INFO(0, closing)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_php_user_filter_onCreate, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_php_user_filter_onClose, 0)
-ZEND_END_ARG_INFO()
 
 static const zend_function_entry user_filter_class_funcs[] = {
-	PHP_NAMED_FE(filter,	PHP_FN(user_filter_nop),		arginfo_php_user_filter_filter)
-	PHP_NAMED_FE(onCreate,	PHP_FN(user_filter_nop),		arginfo_php_user_filter_onCreate)
-	PHP_NAMED_FE(onClose,	PHP_FN(user_filter_nop),		arginfo_php_user_filter_onClose)
+	PHP_NAMED_FE(filter,	PHP_FN(user_filter_nop),		arginfo_class_php_user_filter_filter)
+	PHP_NAMED_FE(onCreate,	PHP_FN(user_filter_nop),		arginfo_class_php_user_filter_onCreate)
+	PHP_NAMED_FE(onClose,	PHP_FN(user_filter_nop),		arginfo_class_php_user_filter_onClose)
 	PHP_FE_END
 };
 
