@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #78929 (plus signs in cookie values are converted to spaces).
     (Alexey Kachalin)
+  . Fixed bug #78973 (Destructor during CV freeing causes segfault if opline
+    never saved). (Nikita)
 
 - OPcache:
   . Fixed bug #78961 (erroneous optimization of re-assigned $GLOBALS). (Dmitry)
