@@ -381,6 +381,10 @@ PHP 8.0 UPGRADE NOTES
 10. New Global Constants
 ========================================
 
+- Filter:
+  . FILTER_VALIDATE_BOOL has been added as an alias for FILTER_VALIDATE_BOOLEAN.
+    The new name is preferred, as it uses the canonical type name.
+
 ========================================
 11. Changes to INI File Handling
 ========================================
