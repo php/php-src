@@ -2475,17 +2475,22 @@ ZEND_API void zend_post_deactivate_modules(void) /* {{{ */
 {
 	if (EG(full_tables_cleanup)) {
 		zend_module_entry *module;
+		zval *zv;
+		zend_string *key;
 
 		ZEND_HASH_FOREACH_PTR(&module_registry, module) {
 			if (module->post_deactivate_func) {
 				module->post_deactivate_func();
 			}
 		} ZEND_HASH_FOREACH_END();
-		ZEND_HASH_REVERSE_FOREACH_PTR(&module_registry, module) {
+		ZEND_HASH_REVERSE_FOREACH_STR_KEY_VAL(&module_registry, key, zv) {
+			module = Z_PTR_P(zv);
 			if (module->type != MODULE_TEMPORARY) {
 				break;
 			}
 			module_destructor(module);
+			free(module);
+			zend_string_release_ex(key, 0);
 		} ZEND_HASH_FOREACH_END_DEL();
 	} else {
 		zend_module_entry **p = module_post_deactivate_handlers;
