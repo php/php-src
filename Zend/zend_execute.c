@@ -2768,11 +2768,11 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			if (UNEXPECTED(Z_ISREF_P(ptr) && Z_REFCOUNT_P(ptr) == 1)) {
 				ZVAL_UNREF(ptr);
 			}
-			return;
+			goto end;
 		}
 	} else if (UNEXPECTED(Z_ISERROR_P(ptr))) {
 		ZVAL_ERROR(result);
-		return;
+		goto end;
 	}
 
 	ZVAL_INDIRECT(result, ptr);
@@ -2783,17 +2783,22 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			prop_info = CACHED_PTR_EX(cache_slot + 2);
 			if (prop_info) {
 				if (UNEXPECTED(!zend_handle_fetch_obj_flags(result, ptr, NULL, prop_info, flags))) {
-					return;
+					goto end;
 				}
 			}
 		} else {
 			if (UNEXPECTED(!zend_handle_fetch_obj_flags(result, ptr, Z_OBJ_P(container), NULL, flags))) {
-				return;
+				goto end;
 			}
 		}
 	}
 	if (init_undef && UNEXPECTED(Z_TYPE_P(ptr) == IS_UNDEF)) {
 		ZVAL_NULL(ptr);
+	}
+
+end:
+	if (prop_op_type != IS_CONST) {
+		zend_tmp_string_release(tmp_name);
 	}
 }
 
