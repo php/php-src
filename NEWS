@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed bug #78903 (Conflict in RTD key for closures results in crash).
     (Nikita)
 
+- Spl:
+  . Fixed bug #78976 (SplFileObject::fputcsv returns -1 on failure). (cmb)
+
 19 Dec 2019, PHP 7.4.1
 
 - Core:
