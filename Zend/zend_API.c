@@ -3779,7 +3779,9 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 		}
 
 		/* Must be interned to avoid ZTS data races */
-		name = zend_new_interned_string(zend_string_copy(name));
+		if (is_persistent_class(ce)) {
+			name = zend_new_interned_string(zend_string_copy(name));
+		}
 	}
 
 	if (access_type & ZEND_ACC_PUBLIC) {
