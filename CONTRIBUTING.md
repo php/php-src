@@ -331,7 +331,7 @@ Currently we have the following branches in use:
 | Branch    |           |
 | --------- | --------- |
 | master    | Active development branch for PHP 8.0, which is open for backwards incompatible changes and major internal API changes. |
-| PHP-7.4   | Active development branch for PHP 7.4, which is open for new features and minor internal API changes. |
+| PHP-7.4   | Is used to release the PHP 7.4.x series. This is a current stable version and is open for bugfixes only. |
 | PHP-7.3   | Is used to release the PHP 7.3.x series. This is a current stable version and is open for bugfixes only. |
 | PHP-7.2   | Is used to release the PHP 7.2.x series. This is an old stable version and is open for security fixes only. |
 | PHP-7.1   | This branch is closed. |
