@@ -26,6 +26,8 @@ PHP                                                                        NEWS
     Kentarō)
   . Fixed bug #78980 (pgsqlGetNotify() overlooks dead connection). (SATŌ
     Kentarō)
+  . Fixed bug #78982 (pdo_pgsql returns dead persistent connection). (SATŌ
+    Kentarō)
 
 18 Dec 2019, PHP 7.3.13
 
