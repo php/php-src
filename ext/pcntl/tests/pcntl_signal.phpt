@@ -42,6 +42,6 @@ bool(false)
 Warning: pcntl_signal(): Invalid signal %s
 bool(false)
 
-Warning: pcntl_signal(): not callable is not a callable function name error in %s
+Warning: pcntl_signal(): Specified handler "not callable" is not callable (%s) in %s
 bool(false)
 ok
