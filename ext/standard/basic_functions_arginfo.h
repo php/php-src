@@ -1841,7 +1841,9 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_boolval, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-#define arginfo_strval arginfo_floatval
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_strval, 0, 1, IS_STRING, 0)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
 
 #define arginfo_is_null arginfo_boolval
 
@@ -1940,9 +1942,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_debug_zval_dump arginfo_var_dump
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_serialize, 0, 1, IS_STRING, 0)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
+#define arginfo_serialize arginfo_strval
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_unserialize, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)

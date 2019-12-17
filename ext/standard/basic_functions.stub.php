@@ -1192,7 +1192,7 @@ function floatval($value): float {}
 function boolval($value): bool {}
 
 /** @param mixed $value */
-function strval($value): float {}
+function strval($value): string {}
 
 /** @param mixed $value */
 function is_null($value): bool {}
