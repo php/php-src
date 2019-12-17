@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.14
 
+- Core:
+  . Fixed bug #78943 (mail() may release string with refcount==1 twice).
+    (CVE-2019-11049). (cmb)
+
 - CURL:
   . Implemented FR #77711 (CURLFile should support UNICODE filenames). (cmb)
 
