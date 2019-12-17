@@ -4,7 +4,7 @@ ARG_WITH("pdo-pgsql", "PostgreSQL support for PDO", "no");
 
 if (PHP_PDO_PGSQL != "no") {
 	if (CHECK_LIB("libpq.lib", "pdo_pgsql", PHP_PDO_PGSQL) &&
-			CHECK_HEADER_ADD_INCLUDE("libpq-fe.h", "CFLAGS_PDO_PGSQL", PHP_PDO_PGSQL + ";" + PHP_PHP_BUILD + "\\include\\pgsql;" + PHP_PHP_BUILD + "\\include\\libpq;")) {
+			CHECK_HEADER_ADD_INCLUDE("libpq-fe.h", "CFLAGS_PDO_PGSQL", PHP_PDO_PGSQL + "\\include;" + PHP_PHP_BUILD + "\\include\\pgsql;" + PHP_PHP_BUILD + "\\include\\libpq;")) {
 		EXTENSION("pdo_pgsql", "pdo_pgsql.c pgsql_driver.c pgsql_statement.c");
 
 		if (CHECK_HEADER_ADD_INCLUDE("pg_config.h", "CFLAGS_PDO_PGSQL", PHP_PDO_PGSQL + ";" + PHP_PHP_BUILD + "\\include\\pgsql")) {
