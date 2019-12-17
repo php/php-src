@@ -1697,6 +1697,27 @@ static int exif_rewrite_tag_format_to_unsigned(int format)
 }
 /* }}} */
 
+/* Use saturation for out of bounds values to avoid UB */
+static size_t float_to_size_t(float x) {
+	if (x < 0.0f) {
+		return 0;
+	} else if (x > (float) SIZE_MAX) {
+		return SIZE_MAX;
+	} else {
+		return (size_t) x;
+	}
+}
+
+static size_t double_to_size_t(double x) {
+	if (x < 0.0) {
+		return 0;
+	} else if (x > (double) SIZE_MAX) {
+		return SIZE_MAX;
+	} else {
+		return (size_t) x;
+	}
+}
+
 /* {{{ exif_convert_any_to_int
  * Evaluate number, be it int, rational, or float from directory. */
 static size_t exif_convert_any_to_int(void *value, int format, int motorola_intel)
@@ -1735,12 +1756,12 @@ static size_t exif_convert_any_to_int(void *value, int format, int motorola_inte
 #ifdef EXIF_DEBUG
 			php_error_docref(NULL, E_NOTICE, "Found value of type single");
 #endif
-			return (size_t) php_ifd_get_float(value);
+			return float_to_size_t(php_ifd_get_float(value));
 		case TAG_FMT_DOUBLE:
 #ifdef EXIF_DEBUG
 			php_error_docref(NULL, E_NOTICE, "Found value of type double");
 #endif
-			return (size_t) php_ifd_get_double(value);
+			return double_to_size_t(php_ifd_get_double(value));
 	}
 	return 0;
 }
