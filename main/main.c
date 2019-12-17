@@ -1132,9 +1132,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	if (replace_buffer) {
 		zend_string_free(replace_buffer);
 	} else {
-		if (buffer_len > 0) {
-			efree(buffer);
-		}
+		efree(buffer);
 	}
 
 	php_error(type, "%s", message);
