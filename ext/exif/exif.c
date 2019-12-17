@@ -51,6 +51,10 @@
 /* needed for ssize_t definition */
 #include <sys/types.h>
 
+#ifdef __SANITIZE_ADDRESS__
+# include <sanitizer/asan_interface.h>
+#endif
+
 typedef unsigned char uchar;
 
 #ifndef TRUE
@@ -2046,6 +2050,65 @@ typedef struct {
 } jpeg_sof_info;
 /* }}} */
 
+/* Base address for offset references, together with valid memory range.
+ * The valid range does not necessarily include the offset base. */
+typedef struct {
+	char *offset_base;
+	char *valid_start; /* inclusive */
+	char *valid_end;   /* exclusive */
+} exif_offset_info;
+
+static zend_always_inline zend_bool size_add_overflows(size_t size1, size_t size2) {
+	return SIZE_MAX - size1 < size2;
+}
+
+static zend_always_inline zend_bool ptr_offset_overflows(char *ptr, size_t offset) {
+	return size_add_overflows((size_t) ptr, offset);
+}
+
+static inline void exif_offset_info_init(
+		exif_offset_info *info, char *offset_base, char *valid_start, size_t valid_length) {
+	ZEND_ASSERT(!ptr_offset_overflows(valid_start, valid_length));
+#ifdef __SANITIZE_ADDRESS__
+	ZEND_ASSERT(!__asan_region_is_poisoned(valid_start, valid_length));
+#endif
+	info->offset_base = offset_base;
+	info->valid_start = valid_start;
+	info->valid_end = valid_start + valid_length;
+}
+
+/* Try to get a pointer at offset_base+offset with length dereferenceable bytes. */
+static inline char *exif_offset_info_try_get(
+		const exif_offset_info *info, size_t offset, size_t length) {
+	char *start, *end;
+	if (ptr_offset_overflows(info->offset_base, offset)) {
+		return NULL;
+	}
+
+	start = info->offset_base + offset;
+	if (ptr_offset_overflows(start, length)) {
+		return NULL;
+	}
+
+	end = start + length;
+	if (start < info->valid_start || end > info->valid_end) {
+		return NULL;
+	}
+
+	return start;
+}
+
+static inline zend_bool exif_offset_info_contains(
+		const exif_offset_info *info, char *start, size_t length) {
+	char *end;
+	if (ptr_offset_overflows(start, length)) {
+		return 0;
+	}
+
+	end = start + length;
+	return start >= info->valid_start && end <= info->valid_end;
+}
+
 /* {{{ exif_file_sections_add
  Add a file_section to image_info
  returns the used block or -1. if size>0 and data == NULL buffer of size is allocated
@@ -2685,8 +2748,8 @@ static void exif_process_SOFn (uchar *Data, int marker, jpeg_sof_info *result)
 /* }}} */
 
 /* forward declarations */
-static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start, char *offset_base, size_t IFDlength, size_t displacement, int section_index, int tag);
-static int exif_process_IFD_TAG(    image_info_type *ImageInfo, char *dir_entry, char *offset_base, size_t IFDlength, size_t displacement, int section_index, int ReadNextIFD, tag_table_type tag_table);
+static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start, const exif_offset_info *info, size_t displacement, int section_index, int tag);
+static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, const exif_offset_info *info, size_t displacement, int section_index, int ReadNextIFD, tag_table_type tag_table);
 
 /* {{{ exif_get_markername
 	Get name of marker */
@@ -2932,7 +2995,7 @@ static void exif_thumbnail_build(image_info_type *ImageInfo) {
 
 /* {{{ exif_thumbnail_extract
  * Grab the thumbnail, corrected */
-static void exif_thumbnail_extract(image_info_type *ImageInfo, char *offset, size_t length) {
+static void exif_thumbnail_extract(image_info_type *ImageInfo, const exif_offset_info *info) {
 	if (ImageInfo->Thumbnail.data) {
 		exif_error_docref("exif_read_data#error_mult_thumb" EXIFERR_CC, ImageInfo, E_WARNING, "Multiple possible thumbnails");
 		return; /* Should not happen */
@@ -2949,14 +3012,13 @@ static void exif_thumbnail_extract(image_info_type *ImageInfo, char *offset, siz
 		return;
 	}
 	/* Check to make sure we are not going to go past the ExifLength */
-	if (ImageInfo->Thumbnail.size > length
-		|| (ImageInfo->Thumbnail.offset + ImageInfo->Thumbnail.size) > length
-		|| ImageInfo->Thumbnail.offset > length - ImageInfo->Thumbnail.size
-	) {
+	char *thumbnail = exif_offset_info_try_get(
+		info, ImageInfo->Thumbnail.offset, ImageInfo->Thumbnail.size);
+	if (!thumbnail) {
 		EXIF_ERRLOG_THUMBEOF(ImageInfo)
 		return;
 	}
-	ImageInfo->Thumbnail.data = estrndup(offset + ImageInfo->Thumbnail.offset, ImageInfo->Thumbnail.size);
+	ImageInfo->Thumbnail.data = estrndup(thumbnail, ImageInfo->Thumbnail.size);
 	exif_thumbnail_build(ImageInfo);
 }
 /* }}} */
@@ -3124,7 +3186,7 @@ static int exif_process_unicode(image_info_type *ImageInfo, xp_field_type *xp_fi
 
 /* {{{ exif_process_IFD_in_MAKERNOTE
  * Process nested IFDs directories in Maker Note. */
-static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * value_ptr, int value_len, char *offset_base, size_t IFDlength, size_t displacement)
+static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * value_ptr, int value_len, const exif_offset_info *info, size_t displacement)
 {
 	size_t i;
 	int de, section_index = SECTION_MAKERNOTE;
@@ -3134,7 +3196,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 #endif
 	const maker_note_type *maker_note;
 	char *dir_start;
-	int data_len;
+	exif_offset_info new_info;
 
 	for (i=0; i<=sizeof(maker_note_array)/sizeof(maker_note_type); i++) {
 		if (i==sizeof(maker_note_array)/sizeof(maker_note_type)) {
@@ -3187,8 +3249,8 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 
 	switch (maker_note->offset_mode) {
 		case MN_OFFSET_MAKER:
-			offset_base = value_ptr;
-			data_len = value_len;
+			exif_offset_info_init(&new_info, value_ptr, value_ptr, value_len);
+			info = &new_info;
 			break;
 #ifdef KALLE_0
 		case MN_OFFSET_GUESS:
@@ -3211,7 +3273,6 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 #endif
 		default:
 		case MN_OFFSET_NORMAL:
-			data_len = value_len;
 			break;
 	}
 
@@ -3225,9 +3286,8 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 	}
 
 	for (de=0;de<NumDirEntries;de++) {
-		size_t offset = 2 + 12 * de;
-		if (!exif_process_IFD_TAG(ImageInfo, dir_start + offset,
-								  offset_base, data_len - offset, displacement, section_index, 0, maker_note->tag_table)) {
+		if (!exif_process_IFD_TAG(ImageInfo, dir_start + 2 + 12 *de,
+								  info, displacement, section_index, 0, maker_note->tag_table)) {
 			return FALSE;
 		}
 	}
@@ -3250,7 +3310,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 
 /* {{{ exif_process_IFD_TAG
  * Process one of the nested IFDs directories. */
-static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, char *offset_base, size_t IFDlength, size_t displacement, int section_index, int ReadNextIFD, tag_table_type tag_table)
+static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, const exif_offset_info *info, size_t displacement, int section_index, int ReadNextIFD, tag_table_type tag_table)
 {
 	size_t length;
 	unsigned int tag, format, components;
@@ -3291,28 +3351,16 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 	byte_count = (size_t)byte_count_signed;
 
 	if (byte_count > 4) {
-		offset_val = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
 		/* If its bigger than 4 bytes, the dir entry contains an offset. */
-		value_ptr = offset_base+offset_val;
-        /*
-            dir_entry is ImageInfo->file.list[sn].data+2+i*12
-            offset_base is ImageInfo->file.list[sn].data-dir_offset
-            dir_entry - offset_base is dir_offset+2+i*12
-        */
-		if (byte_count > IFDlength || offset_val > IFDlength-byte_count || value_ptr < dir_entry || offset_val < (size_t)(dir_entry-offset_base) || dir_entry <= offset_base) {
+		offset_val = php_ifd_get32u(dir_entry+8, ImageInfo->motorola_intel);
+		value_ptr = exif_offset_info_try_get(info, offset_val, byte_count);
+		if (!value_ptr) {
 			/* It is important to check for IMAGE_FILETYPE_TIFF
 			 * JPEG does not use absolute pointers instead its pointers are
 			 * relative to the start of the TIFF header in APP1 section. */
+			// TODO: Shouldn't we also be taking "displacement" into account here?
 			if (byte_count > ImageInfo->FileSize || offset_val>ImageInfo->FileSize-byte_count || (ImageInfo->FileType!=IMAGE_FILETYPE_TIFF_II && ImageInfo->FileType!=IMAGE_FILETYPE_TIFF_MM && ImageInfo->FileType!=IMAGE_FILETYPE_JPEG)) {
-				if (value_ptr < dir_entry) {
-					/* we can read this if offset_val > 0 */
-					/* some files have their values in other parts of the file */
-					exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal pointer offset(x%04X < x%04X)", tag, exif_get_tagname_debug(tag, tag_table), offset_val, dir_entry);
-				} else {
-					/* this is for sure not allowed */
-					/* exception are IFD pointers */
-					exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal pointer offset(x%04X + x%04X = x%04X > x%04X)", tag, exif_get_tagname_debug(tag, tag_table), offset_val, byte_count, offset_val+byte_count, IFDlength);
-				}
+				exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Process tag(x%04X=%s): Illegal pointer offset(x%04X + x%04X = x%04X > x%04X)", tag, exif_get_tagname_debug(tag, tag_table), offset_val, byte_count, offset_val+byte_count, ImageInfo->FileSize);
 				return FALSE;
 			}
 			if (byte_count>sizeof(cbuf)) {
@@ -3348,7 +3396,8 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 	} else {
 		/* 4 bytes or less and value is in the dir entry itself */
 		value_ptr = dir_entry+8;
-		offset_val= value_ptr-offset_base;
+		// TODO: This is dubious, but the value is only used for debugging.
+		offset_val = value_ptr-info->offset_base;
 	}
 
 	ImageInfo->sections_found |= FOUND_ANY_TAG;
@@ -3531,7 +3580,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 				break;
 
 			case TAG_MAKER_NOTE:
-				if (!exif_process_IFD_in_MAKERNOTE(ImageInfo, value_ptr, byte_count, offset_base, IFDlength, displacement)) {
+				if (!exif_process_IFD_in_MAKERNOTE(ImageInfo, value_ptr, byte_count, info, displacement)) {
 					EFREE_IF(outside);
 					return FALSE;
 				}
@@ -3567,13 +3616,14 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 							sub_section_index = SECTION_INTEROP;
 							break;
 					}
-					Subdir_start = offset_base + php_ifd_get32u(value_ptr, ImageInfo->motorola_intel);
-					if (Subdir_start < offset_base || Subdir_start > offset_base+IFDlength) {
+					offset_val = php_ifd_get32u(value_ptr, ImageInfo->motorola_intel);
+					Subdir_start = exif_offset_info_try_get(info, offset_val, 0);
+					if (!Subdir_start) {
 						exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD Pointer");
 						EFREE_IF(outside);
 						return FALSE;
 					}
-					if (!exif_process_IFD_in_JPEG(ImageInfo, Subdir_start, offset_base, IFDlength, displacement, sub_section_index, tag)) {
+					if (!exif_process_IFD_in_JPEG(ImageInfo, Subdir_start, info, displacement, sub_section_index, tag)) {
 						EFREE_IF(outside);
 						return FALSE;
 					}
@@ -3591,7 +3641,7 @@ static int exif_process_IFD_TAG(image_info_type *ImageInfo, char *dir_entry, cha
 
 /* {{{ exif_process_IFD_in_JPEG
  * Process one of the nested IFDs directories. */
-static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start, char *offset_base, size_t IFDlength, size_t displacement, int section_index, int tag)
+static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start, const exif_offset_info *info, size_t displacement, int section_index, int tag)
 {
 	int de;
 	int NumDirEntries;
@@ -3603,21 +3653,21 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start,
 
 	ImageInfo->sections_found |= FOUND_IFD0;
 
-	if ((dir_start + 2) > (offset_base+IFDlength)) {
+	if (!exif_offset_info_contains(info, dir_start, 2)) {
 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size");
 		return FALSE;
 	}
 
 	NumDirEntries = php_ifd_get16u(dir_start, ImageInfo->motorola_intel);
 
-	if ((dir_start+2+NumDirEntries*12) > (offset_base+IFDlength)) {
-		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size: x%04X + 2 + x%04X*12 = x%04X > x%04X", (int)((size_t)dir_start+2-(size_t)offset_base), NumDirEntries, (int)((size_t)dir_start+2+NumDirEntries*12-(size_t)offset_base), IFDlength);
+	if (!exif_offset_info_contains(info, dir_start+2, NumDirEntries*12)) {
+		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size: x%04X + 2 + x%04X*12 = x%04X > x%04X", (int)((size_t)dir_start+2-(size_t)info->valid_start), NumDirEntries, (int)((size_t)dir_start+2+NumDirEntries*12-(size_t)info->valid_start), info->valid_end - info->valid_start);
 		return FALSE;
 	}
 
 	for (de=0;de<NumDirEntries;de++) {
 		if (!exif_process_IFD_TAG(ImageInfo, dir_start + 2 + 12 * de,
-								  offset_base, IFDlength, displacement, section_index, 1, exif_get_tag_table(section_index))) {
+								  info, displacement, section_index, 1, exif_get_tag_table(section_index))) {
 			return FALSE;
 		}
 	}
@@ -3631,7 +3681,7 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start,
 	 * Hack to make it process IDF1 I hope
 	 * There are 2 IDFs, the second one holds the keys (0x0201 and 0x0202) to the thumbnail
 	 */
-	if ((dir_start+2+12*de + 4) > (offset_base+IFDlength)) {
+	if (!exif_offset_info_contains(info, dir_start+2+NumDirEntries*12, 4)) {
 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD size");
 		return FALSE;
 	}
@@ -3641,8 +3691,8 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start,
 	}
 
 	if (NextDirOffset) {
-		/* the next line seems false but here IFDlength means length of all IFDs */
-		if (offset_base + NextDirOffset < offset_base || offset_base + NextDirOffset > offset_base+IFDlength) {
+		char *next_dir_start = exif_offset_info_try_get(info, NextDirOffset, 0);
+		if (!next_dir_start) {
 			exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "Illegal IFD offset");
 			return FALSE;
 		}
@@ -3650,7 +3700,7 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start,
 #ifdef EXIF_DEBUG
 		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Expect next IFD to be thumbnail");
 #endif
-		if (exif_process_IFD_in_JPEG(ImageInfo, offset_base + NextDirOffset, offset_base, IFDlength, displacement, SECTION_THUMBNAIL, 0)) {
+		if (exif_process_IFD_in_JPEG(ImageInfo, next_dir_start, info, displacement, SECTION_THUMBNAIL, 0)) {
 #ifdef EXIF_DEBUG
 			exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Thumbnail size: 0x%04X", ImageInfo->Thumbnail.size);
 #endif
@@ -3659,7 +3709,7 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start,
 			&&  ImageInfo->Thumbnail.offset
 			&&  ImageInfo->read_thumbnail
 			) {
-				exif_thumbnail_extract(ImageInfo, offset_base, IFDlength);
+				exif_thumbnail_extract(ImageInfo, info);
 			}
 			return TRUE;
 		} else {
@@ -3676,6 +3726,7 @@ static int exif_process_IFD_in_JPEG(image_info_type *ImageInfo, char *dir_start,
 static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf, size_t length, size_t displacement)
 {
 	unsigned exif_value_2a, offset_of_ifd;
+	exif_offset_info info;
 
 	/* set the thumbnail stuff to nothing so we can test to see if they get set up */
 	if (memcmp(CharBuf, "II", 2) == 0) {
@@ -3705,7 +3756,8 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf,
 
 	ImageInfo->sections_found |= FOUND_IFD0;
 	/* First directory starts at offset 8. Offsets starts at 0. */
-	exif_process_IFD_in_JPEG(ImageInfo, CharBuf+offset_of_ifd, CharBuf, length/*-14*/, displacement, SECTION_IFD0, 0);
+	exif_offset_info_init(&info, CharBuf, CharBuf, length/*-14*/);
+	exif_process_IFD_in_JPEG(ImageInfo, CharBuf+offset_of_ifd, &info, displacement, SECTION_IFD0, 0);
 
 #ifdef EXIF_DEBUG
 	exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Process TIFF in JPEG done");
@@ -4202,9 +4254,12 @@ static int exif_process_IFD_in_TIFF(image_info_type *ImageInfo, size_t dir_offse
 						exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "Next IFD: %s done", exif_get_sectionname(sub_section_index));
 #endif
 					} else {
-						if (!exif_process_IFD_TAG(ImageInfo, (char*)dir_entry,
-												  (char*)(ImageInfo->file.list[sn].data-dir_offset),
-												  ifd_size, 0, section_index, 0, tag_table)) {
+						exif_offset_info info;
+						exif_offset_info_init(&info,
+							(char *) (ImageInfo->file.list[sn].data - dir_offset),
+							(char *) ImageInfo->file.list[sn].data, ifd_size);
+						if (!exif_process_IFD_TAG(ImageInfo, (char*)dir_entry, &info,
+												  0, section_index, 0, tag_table)) {
 							return FALSE;
 						}
 					}
