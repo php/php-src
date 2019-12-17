@@ -24,6 +24,8 @@ PHP                                                                        NEWS
 - PDO_PgSQL:
   . Fixed bug #78983 (pdo_pgsql config.w32 cannot find libpq-fe.h). (SATŌ
     Kentarō)
+  . Fixed bug #78980 (pgsqlGetNotify() overlooks dead connection). (SATŌ
+    Kentarō)
 
 18 Dec 2019, PHP 7.3.13
 
