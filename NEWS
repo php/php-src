@@ -2,8 +2,21 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.26
 
+- Bcmath:
+  . Fixed bug #78878 (Buffer underflow in bc_shift_addsub). (CVE-2019-11046).
+    (cmb)
 
-05 Dec 2019, PHP 7.2.26RC1
+- Core:
+  . Fixed bug #78862 (link() silently truncates after a null byte on Windows).
+    (CVE-2019-11044). (cmb)
+  . Fixed bug #78863 (DirectoryIterator class silently truncates after a null
+    byte). (CVE-2019-11045). (cmb)
+
+- EXIF:
+  . Fixed bug #78793 (Use-after-free in exif parsing under memory sanitizer).
+    (CVE-2019-11050). (Nikita)
+  . Fixed bug #78910 (Heap-buffer-overflow READ in exif). (CVE-2019-11047).
+    (Nikita)
 
 - GD:
   . Fixed bug #78849 (GD build broken with -D SIGNED_COMPARE_SLOW). (cmb)
