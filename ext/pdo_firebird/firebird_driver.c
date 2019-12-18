@@ -294,7 +294,8 @@ int preprocess(const char* sql, int sql_len, char* sql_out, HashTable* named_par
 {
 	zend_bool passAsIs = 1, execBlock = 0;
 	zend_long pindex = -1;
-	char pname[254];
+	char pname[254], ident[253], ident2[253];
+	unsigned int l;
 	const char* p = sql, * end = sql + sql_len;
 	const char* start = p;
 	FbTokenType tok = getToken(&p, end);
@@ -313,10 +314,19 @@ int preprocess(const char* sql, int sql_len, char* sql_out, HashTable* named_par
 		return 0;
 	}
 	/* skip leading comments ?? */
-	start = i; 
-
-	if (!strncasecmp(i, "EXECUTE", 7)) 
+	start = i;
+	l = p - i;
+	/* check the length of the identifier */
+	/* in Firebird 4.0 it is 63 characters, in previous versions 31 bytes */
+	if (l > 252) {
+		return 0;
+	}
+	strncpy(ident, i, l);
+	ident[l] = '\0';
+	if (!strcasecmp(ident, "EXECUTE"))
 	{
+		/* For EXECUTE PROCEDURE and EXECUTE BLOCK statements, named parameters must be processed. */
+		/* However, in EXECUTE BLOCK this is done in a special way. */
 		const char* i2 = p;
 		tok = getToken(&p, end);
 		while (p < end && (tok == ttComment || tok == ttWhite))
@@ -330,15 +340,24 @@ int preprocess(const char* sql, int sql_len, char* sql_out, HashTable* named_par
 			/* Statement expected */
 			return 0;
 		}
-
-		execBlock = !strncasecmp(i2, "BLOCK", 5);
+		l = p - i2;
+		/* check the length of the identifier */
+		/* in Firebird 4.0 it is 63 characters, in previous versions 31 bytes */
+		if (l > 252) {
+			return 0;
+		}
+		strncpy(ident2, i2, l);
+		ident2[l] = '\0';
+		execBlock = !strcasecmp(ident2, "BLOCK");
 		passAsIs = 0;
 	}
 	else
 	{
-		passAsIs = strncasecmp(i, "INSERT", 5) && strncasecmp(i, "UPDATE", 6) &&
-			strncasecmp(i, "DELETE", 6) && strncasecmp(i, "MERGE", 5) &&
-			strncasecmp(i, "SELECT", 6) && strncasecmp(i, "WITH", 4);
+		/* Named parameters must be processed in the INSERT, UPDATE, DELETE, MERGE statements. */
+		/* If CTEs are present in the query, they begin with the WITH keyword. */
+		passAsIs = strcasecmp(ident, "INSERT") && strcasecmp(ident, "UPDATE") &&
+			strcasecmp(ident, "DELETE") && strcasecmp(ident, "MERGE") &&
+			strcasecmp(ident, "SELECT") && strcasecmp(ident, "WITH");
 	}
 
 	if (passAsIs)
@@ -360,7 +379,7 @@ int preprocess(const char* sql, int sql_len, char* sql_out, HashTable* named_par
 			if (tok == ttIdent /*|| tok == ttString*/)
 			{
 				++pindex;
-				unsigned int l = p - start;
+				l = p - start;
 				/* check the length of the identifier */
 				/* in Firebird 4.0 it is 63 characters, in previous versions 31 bytes */
 				/* + symbol ":" */
@@ -393,7 +412,17 @@ int preprocess(const char* sql, int sql_len, char* sql_out, HashTable* named_par
 		case ttIdent:
 			if (execBlock)
 			{
-				if (!strncasecmp(start, "AS", 2))
+				/* In the EXECUTE BLOCK statement, processing must be */
+				/* carried out up to the keyword AS. */
+				l = p - start;
+				/* check the length of the identifier */
+				/* in Firebird 4.0 it is 63 characters, in previous versions 31 bytes */
+				if (l > 252) {
+					return 0;
+				}
+				strncpy(ident, start, l);
+				ident[l] = '\0';
+				if (!strcasecmp(ident, "AS"))
 				{
 					strncat(sql_out, start, end - start);
 					return 1;
