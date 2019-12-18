@@ -865,7 +865,7 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(z
 		parent = proto;
 	}
 
-	if (!check_only && child_zv && child->common.prototype != proto) {
+	if (!check_only && child->common.prototype != proto) {
 		do {
 			if (child->common.scope != ce
 			 && child->type == ZEND_USER_FUNCTION
@@ -873,7 +873,7 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(z
 				if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 					/* Few parent interfaces contain the same method */
 					break;
-				} else {
+				} else if (child_zv) {
 					/* op_array wasn't duplicated yet */
 					zend_function *new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 					memcpy(new_function, child, sizeof(zend_op_array));
@@ -1606,15 +1606,13 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 			}
 			zend_hash_update_mem(*overridden, key, fn, sizeof(zend_function));
 			return;
-		} else if (existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT &&
-				(existing_fn->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0) {
-			/* Make sure the trait method is compatible with previosly declared abstract method */
-			perform_delayable_implementation_check(ce, fn, existing_fn);
-		} else if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
+		} else if ((fn->common.fn_flags & ZEND_ACC_ABSTRACT)
+				&& !(existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT)) {
 			/* Make sure the abstract declaration is compatible with previous declaration */
 			perform_delayable_implementation_check(ce, existing_fn, fn);
 			return;
-		} else if (UNEXPECTED(existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT)) {
+		} else if (UNEXPECTED((existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT)
+				&& !(existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT))) {
 			/* two traits can't define the same non-abstract method */
 #if 1
 			zend_error_noreturn(E_COMPILE_ERROR, "Trait method %s has not been applied, because there are collisions with other trait methods on %s",
