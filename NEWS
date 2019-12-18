@@ -9,7 +9,7 @@ PHP                                                                        NEWS
   . Fixed bug #78923 (Artifacts when convoluting image with transparency).
     (wilson chen)
 
-19 Dec 2019, PHP 7.3.13
+18 Dec 2019, PHP 7.3.13
 
 - Bcmath:
   . Fixed bug #78878 (Buffer underflow in bc_shift_addsub). (CVE-2019-11046).
