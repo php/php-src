@@ -4,9 +4,14 @@ PHP                                                                        NEWS
 
 - CLI:
   . Allow debug server binding to an ephemeral port via `-S localhost:0`. (Sara)
+
 - Core:
   . Fixed bug #80109 (Cannot skip arguments when extended debug is enabled).
     (Nikita)
+
+- PDO_Firebird:
+  . Fixed bug #64937 (Firebird PDO preprocessing sql). (Simonov Denis)
+
 - SPL:
   . SplFixedArray is now IteratorAggregate rather than Iterator. (alexdowad)
 
