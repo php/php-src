@@ -3187,7 +3187,9 @@ ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, zend_uc
 		Z_TRY_DELREF_P(value);
 	}
 	if (!ret) {
-		zval_ptr_dtor(value);
+		if (value_type & (IS_VAR|IS_TMP_VAR)) {
+			zval_ptr_dtor(value);
+		}
 		return Z_REFVAL_P(variable_ptr);
 	}
 
