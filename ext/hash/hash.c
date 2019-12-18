@@ -1329,7 +1329,7 @@ static const zend_function_entry hash_functions[] = {
 	PHP_FE(hash_copy,								arginfo_hash_copy)
 
 	PHP_FE(hash_algos,								arginfo_hash_algos)
-	PHP_FE(hash_hmac_algos,							arginfo_hash_algos)
+	PHP_FE(hash_hmac_algos,							arginfo_hash_hmac_algos)
 	PHP_FE(hash_pbkdf2,								arginfo_hash_pbkdf2)
 	PHP_FE(hash_equals,								arginfo_hash_equals)
 	PHP_FE(hash_hkdf,								arginfo_hash_hkdf)
