@@ -435,7 +435,7 @@ static ZEND_COLD zval *zend_closure_read_property(zval *object, zval *member, in
 static ZEND_COLD zval *zend_closure_write_property(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
-	return value;
+	return &EG(error_zval);
 }
 /* }}} */
 
