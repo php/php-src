@@ -824,9 +824,10 @@ try_again:
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (generator == orig_generator) {
 				zend_generator_close(generator, 0);
-				if (EG(current_execute_data) &&
-				    EG(current_execute_data)->func &&
-				    ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
+				if (!EG(current_execute_data)) {
+					zend_throw_exception_internal(NULL);
+				} else if (EG(current_execute_data)->func &&
+						ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
 					zend_rethrow_exception(EG(current_execute_data));
 				}
 			} else {
