@@ -24,13 +24,15 @@ function hash_copy(HashContext $context): HashContext {}
 
 function hash_algos(): array {}
 
+function hash_hmac_algos(): array {}
+
 function hash_pbkdf2(string $algo, string $password, string $salt, int $iterations, int $length = 0, bool $raw_output = false): string {}
 
 /**
  * @param $known_string no type juggling is performed
  * @param $user_string no type juggling is performed
  */
-function hash_equals(string $known_string, string $user_string) : bool {}
+function hash_equals(string $known_string, string $user_string): bool {}
 
 function hash_hkdf(string $algo, string $ikm, int $length = 0, string $info = '', string $salt = ''): string {}
 

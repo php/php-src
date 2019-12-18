@@ -129,7 +129,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(sleep,															arginfo_sleep)
 	PHP_FE(usleep,															arginfo_usleep)
 #if HAVE_NANOSLEEP
-	PHP_FE(time_nanosleep,													arginfo_nanosleep)
+	PHP_FE(time_nanosleep,													arginfo_time_nanosleep)
 	PHP_FE(time_sleep_until,												arginfo_time_sleep_until)
 #endif
 

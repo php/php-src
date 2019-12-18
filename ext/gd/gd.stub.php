@@ -205,9 +205,9 @@ function imagegetclip(GdImage $im): array {}
 #ifdef HAVE_GD_FREETYPE
 function imageftbbox(float $size, float $angle, string $font_file, string $text, array $extrainfo = UNKNOWN): array|false {}
 
-function imagefttext(GdImage $im, float $size, float $angle, int $x, int $y, int $col, string $font_file, string $text, array $extrainfo = UNKNOWN) {}
+function imagefttext(GdImage $im, float $size, float $angle, int $x, int $y, int $col, string $font_file, string $text, array $extrainfo = UNKNOWN): array|false {}
 
-function imagettfbbox(float $size, float $angle, string $font_file, string $text) {}
+function imagettfbbox(float $size, float $angle, string $font_file, string $text): array|false {}
 
 function imagettftext(GdImage $im, float $size, float $angle, int $x, int $y, int $col, string $font_file, string $text) {}
 #endif

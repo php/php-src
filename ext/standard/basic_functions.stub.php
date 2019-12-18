@@ -264,7 +264,7 @@ function sleep(int $seconds): int {}
 function usleep(int $microseconds): void {}
 
 #if HAVE_NANOSLEEP
-function nanosleep(int $seconds, int $nanoseconds): array|bool {}
+function time_nanosleep(int $seconds, int $nanoseconds): array|bool {}
 
 function time_sleep_until(float $timestamp): bool {}
 #endif
@@ -472,9 +472,9 @@ function inet_pton(string $ip_address): string|false {}
 function metaphone(string $text, int $phones = 0): string|false {}
 
 /* {{{ head.c */
-function header(string $string, bool $replace = true, int $http_response_code = 0): void { }
+function header(string $string, bool $replace = true, int $http_response_code = 0): void {}
 
-function header_remove(string $name = UNKNOWN): void { }
+function header_remove(string $name = UNKNOWN): void {}
 
 /** @param int|array $expires_or_options */
 function setrawcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
@@ -486,7 +486,7 @@ function http_response_code(int $response_code = 0): int|bool {}
 
 function headers_sent(&$file = null, &$line = null): bool {}
 
-function headers_list(): array { }
+function headers_list(): array {}
 
 /* {{{ html.c */
 
@@ -686,7 +686,7 @@ class Directory
      * @param resource $dir_handle
      * @return string|false
      */
-    public function read($dir_handle = UNKNOWN) { }
+    public function read($dir_handle = UNKNOWN) {}
 }
 
 /**
@@ -872,9 +872,9 @@ function fileowner(string $filename): int|false {}
 
 function fileperms(string $filename): int|false {}
 
-function filesize(string $filename): int|false  {}
+function filesize(string $filename): int|false {}
 
-function filetype(string $filename): string|false  {}
+function filetype(string $filename): string|false {}
 
 function file_exists(string $filename): bool {}
 
