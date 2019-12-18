@@ -246,7 +246,7 @@ static void zend_hash_clone_prop_info(HashTable *ht)
 
 #define zend_update_inherited_handler(handler) \
 { \
-	if (ce->handler != NULL) { \
+	if (ce->handler != NULL && IN_ARENA(ce->handler)) { \
 		ce->handler = ARENA_REALLOC(ce->handler); \
 	} \
 }

@@ -14,6 +14,8 @@ PHP                                                                        NEWS
   . Fixed bug #78950 (Preloading trait method with static variables). (Nikita)
   . Fixed bug #78903 (Conflict in RTD key for closures results in crash).
     (Nikita)
+  . Fixed bug #78986 (Opcache segfaults when inheriting ctor from immutable
+    into mutable class). (Nikita)
 
 - Spl:
   . Fixed bug #78976 (SplFileObject::fputcsv returns -1 on failure). (cmb)
