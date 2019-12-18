@@ -59475,7 +59475,7 @@ ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t 
 			}
 			break;
 		case ZEND_RECV:
-			if (op->op2.num == 0) {
+			if (op->op2.num == MAY_BE_ANY) {
 				spec = 2311;
 			}
 			break;
