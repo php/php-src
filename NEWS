@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2019, PHP 7.2.27
 
 
-19 Dec 2019, PHP 7.2.26
+18 Dec 2019, PHP 7.2.26
 
 - Bcmath:
   . Fixed bug #78878 (Buffer underflow in bc_shift_addsub). (CVE-2019-11046).
