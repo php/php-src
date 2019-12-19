@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     never saved). (Nikita)
   . Fixed bug #78776 (Abstract method implementation from trait does not check
     "static"). (Nikita)
+  . Fixed bug #78999 (Cycle leak when using function result as temporary).
+    (Dmitry)
 
 - OPcache:
   . Fixed bug #78961 (erroneous optimization of re-assigned $GLOBALS). (Dmitry)
