@@ -796,20 +796,37 @@ static void php_var_serialize_collect_names(HashTable *ht, HashTable *src) /* {{
 }
 /* }}} */
 
+static void rewrite_number(zend_string *s, size_t smart_str_offset, uint32_t original_num, uint32_t new_num) { /* }}} */
+	/* Replace a positive integer such as "100" with a smaller non-negative integer representation such as "009" in-place, with leading zeroes. */
+	ZEND_ASSERT(new_num < original_num);
+	char* data = &ZSTR_VAL(s)[smart_str_offset];
+	while (original_num > 0) {
+		*(data++) = '0';
+		original_num /= 10;
+	}
+	while (new_num > 0) {
+		*(--data) = '0' + (new_num % 10);
+		new_num /= 10;
+	}
+}
+/* }}} */
+
 static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, php_serialize_data_t var_hash) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(struc);
 	HashTable names, *propers;
-	zval nval;
 	zend_string *name;
+	uint32_t num_elements;
+	size_t smart_str_offset;
 
 	php_var_serialize_class_name(buf, struc);
 	php_var_serialize_collect_names(&names, HASH_OF(retval_ptr));
 
-	smart_str_append_unsigned(buf, zend_hash_num_elements(&names));
+	smart_str_offset = ZSTR_LEN(buf->s);  /* buf->s is definitely initialized to contain "O:" */
+	num_elements = zend_hash_num_elements(&names);
+	smart_str_append_unsigned(buf, num_elements);
 	smart_str_appendl(buf, ":{", 2);
 
-	ZVAL_NULL(&nval);
 	propers = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_SERIALIZE);
 
 	ZEND_HASH_FOREACH_STR_KEY(&names, name) {
@@ -818,8 +835,10 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		zval *val = zend_hash_find_ex(propers, name, 1);
 		if (val != NULL) {
 			if (Z_TYPE_P(val) == IS_INDIRECT) {
+				zval *old_val = val;
 				val = Z_INDIRECT_P(val);
 				if (Z_TYPE_P(val) == IS_UNDEF) {
+					val = old_val;
 					goto undef_prop;
 				}
 			}
@@ -834,8 +853,10 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		val = zend_hash_find(propers, priv_name);
 		if (val != NULL) {
 			if (Z_TYPE_P(val) == IS_INDIRECT) {
+				zval *old_val = val;
 				val = Z_INDIRECT_P(val);
 				if (Z_ISUNDEF_P(val)) {
+					val = old_val;
 					zend_string_free(priv_name);
 					goto undef_prop;
 				}
@@ -853,8 +874,10 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		val = zend_hash_find(propers, prot_name);
 		if (val != NULL) {
 			if (Z_TYPE_P(val) == IS_INDIRECT) {
+				zval *old_val = val;
 				val = Z_INDIRECT_P(val);
 				if (Z_TYPE_P(val) == IS_UNDEF) {
+					val = old_val;
 					zend_string_free(prot_name);
 					goto undef_prop;
 				}
@@ -868,12 +891,24 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		zend_string_free(prot_name);
 
 undef_prop:
-		php_var_serialize_string(buf, ZSTR_VAL(name), ZSTR_LEN(name));
-		php_var_serialize_intern(buf, &nval, var_hash);
 		php_error_docref(NULL, E_NOTICE,
 				"\"%s\" returned as member variable from __sleep() but does not exist", ZSTR_VAL(name));
+		if (val != NULL) {
+			ZEND_ASSERT(Z_TYPE_P(val) == IS_INDIRECT);
+			zend_property_info *info = zend_get_typed_property_info_for_slot(Z_OBJ_P(struc), Z_INDIRECT_P(val));
+			if (UNEXPECTED(info)) {
+				num_elements--;
+				continue;
+			}
+		}
+		php_var_serialize_string(buf, ZSTR_VAL(name), ZSTR_LEN(name));
+		smart_str_appendl(buf, "N;", 2);
 	} ZEND_HASH_FOREACH_END();
 	smart_str_appendc(buf, '}');
+
+	if (UNEXPECTED(num_elements != zend_hash_num_elements(&names))) {
+		rewrite_number(buf->s, smart_str_offset, zend_hash_num_elements(&names), num_elements);
+	}
 
 	zend_hash_destroy(&names);
 	zend_release_properties(propers);
@@ -1010,7 +1045,7 @@ again:
 
 				if (ce != PHP_IC_ENTRY && zend_hash_str_exists(&ce->function_table, "__sleep", sizeof("__sleep")-1)) {
 					zval retval, tmp;
-					
+
 					Z_ADDREF_P(struc);
 					ZVAL_OBJ(&tmp, Z_OBJ_P(struc));
 
