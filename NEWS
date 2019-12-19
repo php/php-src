@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.14
 
+- Core
+  . Fixed bug #78999 (Cycle leak when using function result as temporary).
+    (Dmitry)
+
 - CURL:
   . Implemented FR #77711 (CURLFile should support UNICODE filenames). (cmb)
 

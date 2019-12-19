@@ -3860,6 +3860,10 @@ ZEND_VM_HOT_HANDLER(62, ZEND_RETURN, CONST|TMP|VAR|CV, ANY)
 				if (EXPECTED(!Z_OPT_ISREF_P(retval_ptr))) {
 					ZVAL_COPY_VALUE(return_value, retval_ptr);
 					if (EXPECTED(!(EX_CALL_INFO() & ZEND_CALL_CODE))) {
+						zend_refcounted *ref = Z_COUNTED_P(retval_ptr);
+						if (GC_MAY_LEAK(ref)) {
+							gc_possible_root(ref);
+						}
 						ZVAL_NULL(retval_ptr);
 					} else {
 						Z_ADDREF_P(return_value);
