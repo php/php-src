@@ -295,6 +295,8 @@ PHP 8.0 UPGRADE NOTES
   . ezmlm_hash() has been removed.
   . get_magic_quotes_gpc() and get_magic_quotes_gpc_runtime() has been removed.
   . FILTER_SANITIZE_MAGIC_QUOTES has been removed.
+  . Calling implode() with parameters in a reverse order ($pieces, $glue) is no
+    longer supported.
 
 - tidy:
   . The $use_include_path parameter, which was not used internally, has been
