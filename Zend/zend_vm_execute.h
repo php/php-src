@@ -2057,9 +2057,11 @@ send_array:
 
 static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_missing_arg_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 {
+#ifdef ZEND_VM_IP_GLOBAL_REG
 	USE_OPLINE
 
 	SAVE_OPLINE();
+#endif
 	zend_missing_arg_error(execute_data);
 	HANDLE_EXCEPTION();
 }

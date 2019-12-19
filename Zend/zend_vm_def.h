@@ -5031,9 +5031,11 @@ ZEND_VM_HANDLER(120, ZEND_SEND_USER, CONST|TMP|VAR|CV, NUM)
 
 ZEND_VM_COLD_HELPER(zend_missing_arg_helper, ANY, ANY)
 {
+#ifdef ZEND_VM_IP_GLOBAL_REG
 	USE_OPLINE
 
 	SAVE_OPLINE();
+#endif
 	zend_missing_arg_error(execute_data);
 	HANDLE_EXCEPTION();
 }
