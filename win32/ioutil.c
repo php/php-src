@@ -867,16 +867,6 @@ static int php_win32_ioutil_fstat_int(HANDLE h, php_win32_ioutil_stat_t *buf, co
 
 	data = !dp ? &d : dp;
 
-	if (!pathw) {
-		pathw_len = GetFinalPathNameByHandleW(h, mypath, MAXPATHLEN, VOLUME_NAME_DOS);
-		if (pathw_len >= MAXPATHLEN || pathw_len == 0) {
-			pathw_len = 0;
-			pathw = NULL;
-		} else {
-			pathw = mypath;
-		}
-	}
-
 	if(!GetFileInformationByHandle(h, data)) {
 		if (INVALID_HANDLE_VALUE != h) {
 			/* Perhaps it's a fileless stream like stdio, reuse the normal stat info. */

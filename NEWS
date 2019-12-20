@@ -12,6 +12,8 @@ PHP                                                                        NEWS
     "static"). (Nikita)
   . Fixed bug #78999 (Cycle leak when using function result as temporary).
     (Dmitry)
+  . Fixed bug #79008 (General performance regression with PHP 7.4 on Windows).
+    (cmb)
 
 - Fileinfo:
   . Fixed bug #74170 (locale information change after mime_content_type).
