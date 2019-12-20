@@ -81,7 +81,7 @@ function get_declared_interfaces(): array {}
 
 function get_defined_functions(bool $exclude_disabled = false): array {}
 
-function get_defined_vars(): ?array {}
+function get_defined_vars(): array {}
 
 function get_resource_type($res): string {}
 
