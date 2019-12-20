@@ -401,8 +401,7 @@ static zend_string *get_valid_arg_string(zval *zv, int elem_num) {
 	}
 
 	if (strlen(ZSTR_VAL(str)) != ZSTR_LEN(str)) {
-		php_error_docref(NULL, E_WARNING,
-			"Command array element %d contains a null byte", elem_num);
+		zend_value_error("Command array element %d contains a null byte", elem_num);
 		zend_string_release(str);
 		return NULL;
 	}
