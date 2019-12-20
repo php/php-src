@@ -217,7 +217,7 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 		return FAILURE;
 	}
 	
-	*space = FreeBytesAvailableToCaller.HighPart * (double) ((zend_ulong)1 << 32)  + FreeBytesAvailableToCaller.LowPart;
+	*space = FreeBytesAvailableToCaller.HighPart * (double) (1UL << 32)  + FreeBytesAvailableToCaller.LowPart;
 
 	PHP_WIN32_IOUTIL_CLEANUP_W()
 
