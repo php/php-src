@@ -1068,13 +1068,21 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
-	PQconsumeInput(H->server);
+	if (!PQconsumeInput(H->server)) {
+		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
+		PDO_HANDLE_DBH_ERR();
+		RETURN_FALSE;
+	}
 	pgsql_notify = PQnotifies(H->server);
 
 	if (ms_timeout && !pgsql_notify) {
 		php_pollfd_for_ms(PQsocket(H->server), PHP_POLLREADABLE, (int)ms_timeout);
 
-		PQconsumeInput(H->server);
+		if (!PQconsumeInput(H->server)) {
+			pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
+			PDO_HANDLE_DBH_ERR();
+			RETURN_FALSE;
+		}
 		pgsql_notify = PQnotifies(H->server);
 	}
 

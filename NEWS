@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug #78999 (Cycle leak when using function result as temporary).
     (Dmitry)
 
+- Fileinfo:
+  . Fixed bug #74170 (locale information change after mime_content_type).
+    (Sergei Turchanov)
+
 - OPcache:
   . Fixed bug #78961 (erroneous optimization of re-assigned $GLOBALS). (Dmitry)
   . Fixed bug #78950 (Preloading trait method with static variables). (Nikita)
@@ -21,8 +25,14 @@ PHP                                                                        NEWS
   . Fixed bug #78986 (Opcache segfaults when inheriting ctor from immutable
     into mutable class). (Nikita)
 
+- Pcntl:
+  . Fixed bug #78402 (Converting null to string in error message is bad DX).
+    (SATŌ Kentarō)
+
 - PDO_PgSQL:
   . Fixed bug #78983 (pdo_pgsql config.w32 cannot find libpq-fe.h). (SATŌ
+    Kentarō)
+  . Fixed bug #78980 (pgsqlGetNotify() overlooks dead connection). (SATŌ
     Kentarō)
 
 - Spl:
