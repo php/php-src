@@ -25,6 +25,7 @@ $pipes = array();
 
 $process = proc_open(PHP_BINARY.' -n -f ' . $fl, $descriptorspec, $pipes, NULL, NULL, array("blocking_pipes" => true));
 
+$moreThanLimit = 0;
 for($i = 0; $i < 10; $i++){
 	fwrite($pipes[0], "hello$i\r\n");
 	fflush($pipes[0]);
@@ -37,9 +38,7 @@ for($i = 0; $i < 10; $i++){
 
 	$dt_ms = ($t1 - $t0)*1000;
 	if ($dt_ms > $max_ms) {
-		echo "fgets() took more than $max_ms ms ($dt_ms ms)\n";
-	} else {
-		echo "fgets() took less than $max_ms ms\n";
+        $moreThanLimit++;
 	}
 }
 
@@ -48,6 +47,12 @@ fclose($pipes[1]);
 
 proc_close($process);
 
+/* It is expected that the first call takes more than the limit.
+ * Allow one more to account for a possible process switch. */
+if ($moreThanLimit > 2) {
+    echo "fgets() took more than $max_ms ms $moreThanLimit times\n";
+}
+
 ?>
 ===DONE===
 --CLEAN--
@@ -55,25 +60,15 @@ proc_close($process);
 $fl = __DIR__ . DIRECTORY_SEPARATOR . "test69900.php";
 @unlink($fl);
 ?>
---EXPECTF--
+--EXPECT--
 hello0
-fgets() took %s
 hello1
-fgets() took less than %d ms
 hello2
-fgets() took less than %d ms
 hello3
-fgets() took less than %d ms
 hello4
-fgets() took less than %d ms
 hello5
-fgets() took less than %d ms
 hello6
-fgets() took less than %d ms
 hello7
-fgets() took less than %d ms
 hello8
-fgets() took less than %d ms
 hello9
-fgets() took less than %d ms
 ===DONE===
