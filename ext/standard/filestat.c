@@ -216,9 +216,8 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return FAILURE;
 	}
-
-	/* i know - this is ugly, but i works <thies@thieso.net> */
-	*space = FreeBytesAvailableToCaller.HighPart * (double) (((zend_ulong)1) << 31) * 2.0 + FreeBytesAvailableToCaller.LowPart;
+	
+	*space = FreeBytesAvailableToCaller.HighPart * (double) ((zend_ulong)1 << 32)  + FreeBytesAvailableToCaller.LowPart;
 
 	PHP_WIN32_IOUTIL_CLEANUP_W()
 
