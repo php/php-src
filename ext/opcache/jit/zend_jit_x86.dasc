@@ -8852,7 +8852,7 @@ static uint32_t zend_get_known_property_offset(zend_class_entry *ce, zend_string
 
 	if (ce->ce_flags & ZEND_ACC_INHERITED) {
 		if (!ce->parent) {
-			/* propery offests may be changed by inheritance */
+			/* property offests may be changed by inheritance */
 			return ZEND_WRONG_PROPERTY_OFFSET;
 		} else {
 			zend_class_entry *parent = ce->parent;

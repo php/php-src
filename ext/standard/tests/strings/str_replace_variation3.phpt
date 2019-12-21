@@ -12,7 +12,7 @@ precision=14
 */
 
 
-echo "\n*** Testing Miscelleneous input data ***\n";
+echo "\n*** Testing Miscellaneous input data ***\n";
 /*  If replace has fewer values than search, then an empty
     string is used for the rest of replacement values */
 var_dump( str_replace(array("a", "a", "b"),
@@ -148,7 +148,7 @@ closedir($resource2);
 
 ?>
 --EXPECTF--
-*** Testing Miscelleneous input data ***
+*** Testing Miscellaneous input data ***
 string(3) "qqq"
 int(5)
 array(3) {

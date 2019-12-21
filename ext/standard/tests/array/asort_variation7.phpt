@@ -10,7 +10,7 @@ Test asort() function : usage variations - sort bool values
 
 /*
  * testing asort() by providing bool value array for $array argument with following flag values.
- * flag value as defualt
+ * flag value as default
  * SORT_REGULAR - compare items normally
 */
 
@@ -19,7 +19,7 @@ echo "*** Testing asort() : usage variations ***\n";
 // bool value array
 $bool_values = array (1 => true, 2 => false, 3 => TRUE, 4 => FALSE);
 
-echo "\n-- Testing asort() by supplying bool value array, 'flag' value is defualt --\n";
+echo "\n-- Testing asort() by supplying bool value array, 'flag' value is default --\n";
 $temp_array = $bool_values;
 var_dump(asort($temp_array) );
 var_dump($temp_array);
@@ -44,7 +44,7 @@ echo "Done\n";
 --EXPECT--
 *** Testing asort() : usage variations ***
 
--- Testing asort() by supplying bool value array, 'flag' value is defualt --
+-- Testing asort() by supplying bool value array, 'flag' value is default --
 bool(true)
 array(4) {
   [2]=>

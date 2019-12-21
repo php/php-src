@@ -7,7 +7,7 @@ Test fgets() function : usage variations - read beyond filesize
  Description: Gets a line from file pointer
 */
 
-// include the file.inc for common test funcitons
+// include the file.inc for common test functions
 include ("file.inc");
 
 $file_modes = array("w+", "w+b", "w+t",
@@ -42,7 +42,7 @@ foreach($file_modes as $file_mode) {
     var_dump( ftell($file_handle) );
     var_dump( fgets($file_handle, 50 + 23) ); // expected: 50
     var_dump( ftell($file_handle) ); // ensure the file pointer position
-    var_dump( feof($file_handle) );  // enusre if eof set
+    var_dump( feof($file_handle) );  // ensure if eof set
 
     //close file
     fclose($file_handle);

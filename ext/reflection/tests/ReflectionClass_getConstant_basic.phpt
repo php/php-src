@@ -20,7 +20,7 @@ foreach($classes as $class) {
 	echo "Reflecting on class $class: \n";
 	$rc = new ReflectionClass($class);
 	var_dump($rc->getConstant('a'));
-	var_dump($rc->getConstant('doesntexist'));
+	var_dump($rc->getConstant('doesnotexist'));
 }
 ?>
 --EXPECT--

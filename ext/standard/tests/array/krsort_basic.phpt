@@ -10,7 +10,7 @@ Test krsort() function : basic functionality
 /*
  * Testing krsort() by providing array of integer/string values to check the basic functionality
  * with following flag values :
- *  1.flag value as defualt
+ *  1.flag value as default
  *  2.SORT_REGULAR - compare items normally
  *  3.SORT_NUMERIC - compare items numerically
  *  4.SORT_STRING - compare items as strings
@@ -28,12 +28,12 @@ $unsorted_strings = array(
 // an array containing unsorted numeric values with indices
 $unsorted_numerics =  array( 100 => 4, 33 => 3, 555 => 2, 22 => 1 );
 
-echo "\n-- Testing krsort() by supplying string array, 'flag' value is defualt --\n";
+echo "\n-- Testing krsort() by supplying string array, 'flag' value is default --\n";
 $temp_array = $unsorted_strings;
 var_dump( krsort($temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
 
-echo "\n-- Testing krsort() by supplying numeric array, 'flag' value is defualt --\n";
+echo "\n-- Testing krsort() by supplying numeric array, 'flag' value is default --\n";
 $temp_array = $unsorted_numerics;
 var_dump( krsort($temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
@@ -78,7 +78,7 @@ echo "Done\n";
 --EXPECT--
 *** Testing krsort() : basic functionality ***
 
--- Testing krsort() by supplying string array, 'flag' value is defualt --
+-- Testing krsort() by supplying string array, 'flag' value is default --
 bool(true)
 array(8) {
   ["o20"]=>
@@ -99,7 +99,7 @@ array(8) {
   string(6) "Orange"
 }
 
--- Testing krsort() by supplying numeric array, 'flag' value is defualt --
+-- Testing krsort() by supplying numeric array, 'flag' value is default --
 bool(true)
 array(4) {
   [555]=>

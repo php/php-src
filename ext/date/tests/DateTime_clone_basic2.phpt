@@ -1,5 +1,5 @@
 --TEST--
-Test clone of objects whoose class derived from DateTime class
+Test clone of objects whose class derived from DateTime class
 --FILE--
 <?php
 //Set the default time zone
@@ -16,7 +16,7 @@ class DateTimeExt2 extends DateTimeExt1 {
 	public $property4 = 10.5;
 }
 
-echo "*** Testing clone on objects whoose class derived from DateTime class ***\n";
+echo "*** Testing clone on objects whose class derived from DateTime class ***\n";
 
 $d1 = new DateTimeExt1("2009-02-03 12:34:41 GMT");
 var_dump($d1);
@@ -29,7 +29,7 @@ $d2_clone = clone $d2;
 var_dump($d2_clone);
 ?>
 --EXPECTF--
-*** Testing clone on objects whoose class derived from DateTime class ***
+*** Testing clone on objects whose class derived from DateTime class ***
 object(DateTimeExt1)#%d (5) {
   ["property1"]=>
   int(99)

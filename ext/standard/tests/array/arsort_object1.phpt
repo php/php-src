@@ -10,7 +10,7 @@ Test arsort() function : object functionality - sort objects
 
 /*
  * testing arsort() by providing integer/string object arrays with following flag values
- * 1. Defualt flag value
+ * 1. Default flag value
  * 2. SORT_REGULAR - compare items normally
 */
 
@@ -59,14 +59,14 @@ $unsorted_str_obj = array (
 );
 
 
-echo "\n-- Testing arsort() by supplying various object arrays, 'flag' value is defualt --\n";
+echo "\n-- Testing arsort() by supplying various object arrays, 'flag' value is default --\n";
 
-// testing arsort() function by supplying integer object array, flag value is defualt
+// testing arsort() function by supplying integer object array, flag value is default
 $temp_array = $unsorted_int_obj;
 var_dump(arsort($temp_array) );
 var_dump($temp_array);
 
-// testing arsort() function by supplying string object array, flag value is defualt
+// testing arsort() function by supplying string object array, flag value is default
 $temp_array = $unsorted_str_obj;
 var_dump(arsort($temp_array) );
 var_dump($temp_array);

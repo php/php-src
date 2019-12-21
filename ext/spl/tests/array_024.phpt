@@ -1,5 +1,5 @@
 --TEST--
-SPL: ArrayObject with overriden count()
+SPL: ArrayObject with overridden count()
 --FILE--
 <?php
 $obj = new ArrayObject(array(1,2));

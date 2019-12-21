@@ -16,7 +16,7 @@ echo "*** Testing rsort() : variation ***\n";
 // an array contains unsorted hexadecimal values
 $unsorted_hex_array = array(0x1AB, 0xFFF, 0xF, 0xFF, 0x2AA, 0xBB, 0x1ab, 0xff, -0xFF, 0, -0x2aa);
 
-echo "\n-- 'flag' value is defualt  --\n";
+echo "\n-- 'flag' value is default  --\n";
 $temp_array = $unsorted_hex_array;
 var_dump(rsort($temp_array) );
 var_dump($temp_array);
@@ -36,7 +36,7 @@ echo "Done";
 --EXPECT--
 *** Testing rsort() : variation ***
 
--- 'flag' value is defualt  --
+-- 'flag' value is default  --
 bool(true)
 array(11) {
   [0]=>

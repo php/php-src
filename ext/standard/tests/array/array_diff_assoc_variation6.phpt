@@ -51,7 +51,7 @@ $inputs = array (
 	          '1' => 1,
 	          '0' => 0),
 
-//defualt keys => float values
+//default keys => float values
 /*7*/	array(2.00000000000001, 1.00, 0.01E-9),
 
 //numeric keys => float values

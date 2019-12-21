@@ -37,8 +37,8 @@ foreach($classes as $class) {
 	var_dump($rc->hasMethod("s"));
 	echo "  --> Check for F(): ";
 	var_dump($rc->hasMethod("F"));
-	echo "  --> Check for doesntExist(): ";
-	var_dump($rc->hasMethod("doesntExist"));
+	echo "  --> Check for doesNotExist(): ";
+	var_dump($rc->hasMethod("doesNotExist"));
 }
 ?>
 --EXPECT--
@@ -46,30 +46,30 @@ Reflecting on class pubf:
   --> Check for f(): bool(true)
   --> Check for s(): bool(true)
   --> Check for F(): bool(true)
-  --> Check for doesntExist(): bool(false)
+  --> Check for doesNotExist(): bool(false)
 Reflecting on class subpubf: 
   --> Check for f(): bool(true)
   --> Check for s(): bool(true)
   --> Check for F(): bool(true)
-  --> Check for doesntExist(): bool(false)
+  --> Check for doesNotExist(): bool(false)
 Reflecting on class protf: 
   --> Check for f(): bool(true)
   --> Check for s(): bool(true)
   --> Check for F(): bool(true)
-  --> Check for doesntExist(): bool(false)
+  --> Check for doesNotExist(): bool(false)
 Reflecting on class subprotf: 
   --> Check for f(): bool(true)
   --> Check for s(): bool(true)
   --> Check for F(): bool(true)
-  --> Check for doesntExist(): bool(false)
+  --> Check for doesNotExist(): bool(false)
 Reflecting on class privf: 
   --> Check for f(): bool(true)
   --> Check for s(): bool(true)
   --> Check for F(): bool(true)
-  --> Check for doesntExist(): bool(false)
+  --> Check for doesNotExist(): bool(false)
 Reflecting on class subprivf: 
   --> Check for f(): bool(true)
   --> Check for s(): bool(true)
   --> Check for F(): bool(true)
-  --> Check for doesntExist(): bool(false)
+  --> Check for doesNotExist(): bool(false)
   

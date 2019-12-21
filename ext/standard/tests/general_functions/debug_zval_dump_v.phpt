@@ -85,7 +85,7 @@ debug_zval_dump($var_1);
 echo "\n-- Value of \$var_2: --\n";
 debug_zval_dump($var_2);
 
-echo "\n*** Testing debug_zval_dump() on miscelleneous input arguments ***\n";
+echo "\n*** Testing debug_zval_dump() on miscellaneous input arguments ***\n";
 /* unset a variable */
 $unset_var = 10.5;
 unset($unset_var);
@@ -183,7 +183,7 @@ NULL
 -- Value of $var_2: --
 int(10)
 
-*** Testing debug_zval_dump() on miscelleneous input arguments ***
+*** Testing debug_zval_dump() on miscellaneous input arguments ***
 -- Iteration 1 --
 NULL
 -- Iteration 2 --

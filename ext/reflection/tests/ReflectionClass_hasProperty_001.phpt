@@ -37,8 +37,8 @@ foreach($classes as $class) {
 	var_dump($rc->hasProperty("a"));
 	echo "  --> Check for A: ";
 	var_dump($rc->hasProperty("A"));
-	echo "  --> Check for doesntExist: ";
-	var_dump($rc->hasProperty("doesntExist"));
+	echo "  --> Check for doesNotExist: ";
+	var_dump($rc->hasProperty("doesNotExist"));
 }
 ?>
 --EXPECT--
@@ -46,29 +46,29 @@ Reflecting on class pubf:
   --> Check for s: bool(true)
   --> Check for a: bool(true)
   --> Check for A: bool(false)
-  --> Check for doesntExist: bool(false)
+  --> Check for doesNotExist: bool(false)
 Reflecting on class subpubf: 
   --> Check for s: bool(true)
   --> Check for a: bool(true)
   --> Check for A: bool(false)
-  --> Check for doesntExist: bool(false)
+  --> Check for doesNotExist: bool(false)
 Reflecting on class protf: 
   --> Check for s: bool(true)
   --> Check for a: bool(true)
   --> Check for A: bool(false)
-  --> Check for doesntExist: bool(false)
+  --> Check for doesNotExist: bool(false)
 Reflecting on class subprotf: 
   --> Check for s: bool(true)
   --> Check for a: bool(true)
   --> Check for A: bool(false)
-  --> Check for doesntExist: bool(false)
+  --> Check for doesNotExist: bool(false)
 Reflecting on class privf: 
   --> Check for s: bool(true)
   --> Check for a: bool(true)
   --> Check for A: bool(false)
-  --> Check for doesntExist: bool(false)
+  --> Check for doesNotExist: bool(false)
 Reflecting on class subprivf: 
   --> Check for s: bool(true)
   --> Check for a: bool(false)
   --> Check for A: bool(false)
-  --> Check for doesntExist: bool(false)
+  --> Check for doesNotExist: bool(false)

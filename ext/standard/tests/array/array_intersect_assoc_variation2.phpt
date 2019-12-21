@@ -90,7 +90,7 @@ $arrays = array(
 /*24*/ $fp
 );
 
-// loop through each sub-array within $arrrays to check the behavior of array_intersect_assoc()
+// loop through each sub-array within $arrays to check the behavior of array_intersect_assoc()
 $iterator = 1;
 foreach($arrays as $unexpected_value) {
     echo "\n-- Iteration $iterator --";

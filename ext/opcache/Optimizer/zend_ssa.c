@@ -54,7 +54,7 @@ static zend_bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa
 		return 0;
 	}
 
-	/* Make sure that both sucessors of the from block aren't the same. Pi nodes are associated
+	/* Make sure that both successors of the from block aren't the same. Pi nodes are associated
 	 * with predecessor blocks, so we can't distinguish which edge the pi belongs to. */
 	from_block = &ssa->cfg.blocks[from];
 	ZEND_ASSERT(from_block->successors_count == 2);

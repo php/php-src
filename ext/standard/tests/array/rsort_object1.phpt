@@ -58,12 +58,12 @@ $unsorted_str_obj = array (
 
 echo "\n-- Sort flag = default --\n";
 
-// testing rsort() function by supplying integer object array, flag value is defualt
+// testing rsort() function by supplying integer object array, flag value is default
 $temp_array = $unsorted_int_obj;
 var_dump(rsort($temp_array) );
 var_dump($temp_array);
 
-// testing rsort() function by supplying string object array, flag value is defualt
+// testing rsort() function by supplying string object array, flag value is default
 $temp_array = $unsorted_str_obj;
 var_dump(rsort($temp_array) );
 var_dump($temp_array);

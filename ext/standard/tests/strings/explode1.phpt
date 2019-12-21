@@ -57,7 +57,7 @@ foreach($delimiters as $delimiter) {
     $counter++;
 }
 
-echo "\n*** Testing explode() with miscelleneous input arguments ***\n";
+echo "\n*** Testing explode() with miscellaneous input arguments ***\n";
 
 echo "\n-- Passing positive values of Limit to explode() --\n";
 /* LIMIT=2 */
@@ -303,7 +303,7 @@ array(2) {
   string(8) "PHP%ZEND"
 }
 
-*** Testing explode() with miscelleneous input arguments ***
+*** Testing explode() with miscellaneous input arguments ***
 
 -- Passing positive values of Limit to explode() --
 array(2) {

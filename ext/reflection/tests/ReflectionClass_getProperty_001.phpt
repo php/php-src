@@ -50,8 +50,8 @@ foreach($classes as $class) {
 		echo $e->getMessage() . "\n";
 	}
 	try {
-		echo "  --> Check for doesntExist: ";
-		var_dump($rc->getProperty("doesntExist"));
+		echo "  --> Check for doesNotExist: ";
+		var_dump($rc->getProperty("doesNotExist"));
 	} catch (exception $e) {
 		echo $e->getMessage() . "\n";
 	}
@@ -73,7 +73,7 @@ Reflecting on class pubf:
   string(4) "pubf"
 }
   --> Check for A: Property A does not exist
-  --> Check for doesntExist: Property doesntExist does not exist
+  --> Check for doesNotExist: Property doesNotExist does not exist
 Reflecting on class subpubf: 
   --> Check for s: object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -88,7 +88,7 @@ Reflecting on class subpubf:
   string(4) "pubf"
 }
   --> Check for A: Property A does not exist
-  --> Check for doesntExist: Property doesntExist does not exist
+  --> Check for doesNotExist: Property doesNotExist does not exist
 Reflecting on class protf: 
   --> Check for s: object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -103,7 +103,7 @@ Reflecting on class protf:
   string(5) "protf"
 }
   --> Check for A: Property A does not exist
-  --> Check for doesntExist: Property doesntExist does not exist
+  --> Check for doesNotExist: Property doesNotExist does not exist
 Reflecting on class subprotf: 
   --> Check for s: object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -118,7 +118,7 @@ Reflecting on class subprotf:
   string(5) "protf"
 }
   --> Check for A: Property A does not exist
-  --> Check for doesntExist: Property doesntExist does not exist
+  --> Check for doesNotExist: Property doesNotExist does not exist
 Reflecting on class privf: 
   --> Check for s: object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -133,7 +133,7 @@ Reflecting on class privf:
   string(5) "privf"
 }
   --> Check for A: Property A does not exist
-  --> Check for doesntExist: Property doesntExist does not exist
+  --> Check for doesNotExist: Property doesNotExist does not exist
 Reflecting on class subprivf: 
   --> Check for s: object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -143,4 +143,4 @@ Reflecting on class subprivf:
 }
   --> Check for a: Property a does not exist
   --> Check for A: Property A does not exist
-  --> Check for doesntExist: Property doesntExist does not exist
+  --> Check for doesNotExist: Property doesNotExist does not exist

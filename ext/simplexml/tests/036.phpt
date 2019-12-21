@@ -1,5 +1,5 @@
 --TEST--
-SimpleXML: overriden count() method
+SimpleXML: overridden count() method
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--

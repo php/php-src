@@ -31,7 +31,7 @@ fclose($file_handle);
 
 
 // checking stat() on file
-echo "\n*** Testing stat() on file with miscelleneous file permission and content ***\n";
+echo "\n*** Testing stat() on file with miscellaneous file permission and content ***\n";
 $old_stat = stat($filename);
 var_dump( chmod($filename, 0777) );
 // clear the stat
@@ -48,7 +48,7 @@ var_dump( compare_stats($old_stat, $new_stat, $affected_members, "==") );
 clearstatcache();  // clear statement cache
 
 // checking stat() on directory
-echo "\n*** Testing stat() on directory with miscelleneous file permission ***\n";
+echo "\n*** Testing stat() on directory with miscellaneous file permission ***\n";
 $old_stat = stat($dirname);
 var_dump( chmod($dirname, 0777) );
 // clear the stat
@@ -74,13 +74,13 @@ unlink("$file_path/stat_variation6.tmp");
 rmdir("$file_path/stat_variation6");
 ?>
 --EXPECT--
-*** Testing stat() on file with miscelleneous file permission and content ***
+*** Testing stat() on file with miscellaneous file permission and content ***
 bool(true)
 bool(true)
 bool(true)
 bool(true)
 
-*** Testing stat() on directory with miscelleneous file permission ***
+*** Testing stat() on directory with miscellaneous file permission ***
 bool(true)
 bool(true)
 bool(true)

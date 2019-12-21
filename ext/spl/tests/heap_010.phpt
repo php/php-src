@@ -1,5 +1,5 @@
 --TEST--
-SPL: SplHeap with overriden count()
+SPL: SplHeap with overridden count()
 --FILE--
 <?php
 $obj = new SplMaxHeap();

@@ -1,5 +1,5 @@
 --TEST--
-Bug #70720 (strip_tags() doesnt handle "xml" correctly)
+Bug #70720 (strip_tags() doesn't handle "xml" correctly)
 --FILE--
 <?php
 var_dump(strip_tags('<?php $dom->test(); ?> this is a test'));

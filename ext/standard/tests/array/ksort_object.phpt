@@ -55,14 +55,14 @@ $unsorted_str_obj = array (
   "apple" => new StringObject("apple"), "Orange" => new StringObject("Orange"),
   "Lemon" => new StringObject("Lemon"), "aPPle" => new StringObject("aPPle")
 );
-echo "\n-- Testing ksort() by supplying various object arrays, 'flag' value is defualt --\n";
+echo "\n-- Testing ksort() by supplying various object arrays, 'flag' value is default --\n";
 
-// testing ksort() function by supplying integer object array, flag value is defualt
+// testing ksort() function by supplying integer object array, flag value is default
 $temp_array = $unsorted_int_obj;
 var_dump(ksort($temp_array) );
 var_dump($temp_array);
 
-// testing ksort() function by supplying string object array, flag value is defualt
+// testing ksort() function by supplying string object array, flag value is default
 $temp_array = $unsorted_str_obj;
 var_dump(ksort($temp_array) );
 var_dump($temp_array);
@@ -83,7 +83,7 @@ echo "Done\n";
 --EXPECTF--
 *** Testing ksort() : object functionality ***
 
--- Testing ksort() by supplying various object arrays, 'flag' value is defualt --
+-- Testing ksort() by supplying various object arrays, 'flag' value is default --
 bool(true)
 array(6) {
   [-5]=>
