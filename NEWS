@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Implemented FR #77711 (CURLFile should support UNICODE filenames). (cmb)
   . Fixed bug #79033 (Curl timeout error with specific url and post). (cmb)
 
+- Date:
+  . Fixed bug #79015 (undefined-behavior in php_date.c). (cmb)
+
 - Fileinfo:
   . Fixed bug #74170 (locale information change after mime_content_type).
     (Sergei Turchanov)
