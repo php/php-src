@@ -31,6 +31,7 @@
 #include "zend_accelerator_blacklist.h"
 #include "zend_list.h"
 #include "zend_execute.h"
+#include "zend_vm.h"
 #include "zend_inheritance.h"
 #include "zend_exceptions.h"
 #include "main/php_main.h"
@@ -4579,6 +4580,7 @@ static int accel_preload(const char *config)
 		script->script.main_op_array.opcodes[0].op1_type = IS_CONST;
 		script->script.main_op_array.opcodes[0].op1.constant = 0;
 		ZEND_PASS_TWO_UPDATE_CONSTANT(&script->script.main_op_array, script->script.main_op_array.opcodes, script->script.main_op_array.opcodes[0].op1);
+		zend_vm_set_opcode_handler(script->script.main_op_array.opcodes);
 
 		script->script.main_op_array.filename = filename;
 		script->script.filename = zend_string_copy(filename);
