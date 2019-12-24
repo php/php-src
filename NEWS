@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.4.2
 
 - Core:
+  . Fixed bug #79022 (class_exists returns True for classes that are not ready
+    to be used). (Laruence)
   . Fixed bug #78929 (plus signs in cookie values are converted to spaces).
     (Alexey Kachalin)
   . Fixed bug #78973 (Destructor during CV freeing causes segfault if opline

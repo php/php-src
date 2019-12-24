@@ -1487,7 +1487,7 @@ static inline void class_exists_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, in
    Checks if the class exists */
 ZEND_FUNCTION(class_exists)
 {
-	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT);
+	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_LINKED, ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT);
 }
 /* }}} */
 
