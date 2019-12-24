@@ -83,6 +83,7 @@ PHP                                                                        NEWS
   . Added SQLite3::setAuthorizer() and respective class constants. (bohwaz)
 
 - Standard:
+  . Implemented FR #78638 (__PHP_Incomplete_Class should be final). (Laruence)
   . Fixed bug #77204 (getimagesize(): Read error! should mention file path).
     (peter279k)
   . Fixed bug #76859 (stream_get_line skips data if used with data-generating
