@@ -1248,7 +1248,7 @@ static inline void class_exists_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, in
 	}
 
  	if (ce) {
-		RETURN_BOOL((flags == 0 || (ce->ce_flags & flags)) && !(ce->ce_flags & skip_flags));
+		RETURN_BOOL(((ce->ce_flags & flags) == flags) && !(ce->ce_flags & skip_flags));
 	} else {
 		RETURN_FALSE;
 	}
@@ -1259,7 +1259,7 @@ static inline void class_exists_impl(INTERNAL_FUNCTION_PARAMETERS, int flags, in
    Checks if the class exists */
 ZEND_FUNCTION(class_exists)
 {
-	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0, ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT);
+	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_LINKED, ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT);
 }
 /* }}} */
 
@@ -1267,7 +1267,7 @@ ZEND_FUNCTION(class_exists)
    Checks if the class exists */
 ZEND_FUNCTION(interface_exists)
 {
-	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_INTERFACE, 0);
+	class_exists_impl(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_LINKED|ZEND_ACC_INTERFACE, 0);
 }
 /* }}} */
 
