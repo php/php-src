@@ -2924,6 +2924,7 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, cons
 {
 	zend_ssa ssa;
 	void *checkpoint;
+	zend_func_info *func_info;
 
 	if (*dasm_ptr == dasm_end) {
 		return FAILURE;
@@ -2938,19 +2939,24 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, cons
 		goto jit_failure;
 	}
 
+	if (zend_jit_level >= ZEND_JIT_LEVEL_OPT_FUNCS) {
+		if (zend_jit_collect_calls(op_array, script) != SUCCESS) {
+			ZEND_SET_FUNC_INFO(op_array, NULL);
+			goto jit_failure;
+		}
+		func_info = ZEND_FUNC_INFO(op_array);
+		func_info->call_map = zend_build_call_map(&CG(arena), func_info, op_array);
+		if (op_array->fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
+			zend_init_func_return_info(op_array, script, &func_info->return_info);
+		}
+	}
+
 	if (zend_jit_op_array_analyze2(op_array, script, &ssa) != SUCCESS) {
 		goto jit_failure;
 	}
 
 	if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_SSA) {
 		zend_dump_op_array(op_array, ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA, "JIT", &ssa);
-	}
-
-	if (zend_jit_level >= ZEND_JIT_LEVEL_OPT_FUNCS) {
-		if (zend_jit_collect_calls(op_array, script) != SUCCESS) {
-			ZEND_SET_FUNC_INFO(op_array, NULL);
-			goto jit_failure;
-		}
 	}
 
 	if (zend_jit(op_array, &ssa, rt_opline) != SUCCESS) {
