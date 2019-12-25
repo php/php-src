@@ -17,6 +17,9 @@ PHP                                                                        NEWS
   . Fixed bug #78923 (Artifacts when convoluting image with transparency).
     (wilson chen)
 
+- Libxml:
+  . Fixed bug #79029 (Use After Free's in XMLReader / XMLWriter). (Laruence)
+
 - Pcntl:
   . Fixed bug #78402 (Converting null to string in error message is bad DX).
     (SATŌ Kentarō)

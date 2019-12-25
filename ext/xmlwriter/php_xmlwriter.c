@@ -91,13 +91,15 @@ typedef int (*xmlwriter_read_int_t)(xmlTextWriterPtr writer);
 static void xmlwriter_free_resource_ptr(xmlwriter_object *intern)
 {
 	if (intern) {
-		if (intern->ptr) {
-			xmlFreeTextWriter(intern->ptr);
-			intern->ptr = NULL;
-		}
-		if (intern->output) {
-			xmlBufferFree(intern->output);
-			intern->output = NULL;
+		if (EG(active)) {
+			if (intern->ptr) {
+				xmlFreeTextWriter(intern->ptr);
+				intern->ptr = NULL;
+			}
+			if (intern->output) {
+				xmlBufferFree(intern->output);
+				intern->output = NULL;
+			}
 		}
 		efree(intern);
 	}
