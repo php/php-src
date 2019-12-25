@@ -1,29 +1,31 @@
 --TEST--
 #79029 (Use After Free's in XMLReader / XMLWriter)
 --SKIPIF--
-<?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
+<?php 
+if (!extension_loaded("xmlwriter")) print "skip xmlwriter extension not available";
+if (!extension_loaded("xmlreader")) print "skip xmlreader extension not available";
+?>
 --FILE--
 <?php
 $x = array( new XMLWriter() );
-$x[0]->openUri("bug79029.txt");
+$x[0]->openUri("bug79029_1.txt");
 $x[0]->startComment();
-@unlink("bug79029.txt");
 
 $x = new XMLWriter();
-$x->openUri("bug79029.txt");
+$x->openUri("bug79029_2.txt");
 fclose(@end(get_resources()));
-@unlink("bug79029.txt");
 
-file_put_contents("bug79029.txt", "a");
+file_put_contents("bug79029_3.txt", "a");
 $x = new XMLReader();
-$x->open("bug79029.txt");
+$x->open("bug79029_3.txt");
 fclose(@end(get_resources()));
-@unlink("bug79029.txt");
 ?>
 okey
 --CLEAN--
 <?php
-@unlink("bug79029.txt");
+@unlink("bug79029_1.txt");
+@unlink("bug79029_2.txt");
+@unlink("bug79029_3.txt");
 ?>
 --EXPECTF--
 Warning: fclose(): %d is not a valid stream resource in %sbug79029.php on line %d
