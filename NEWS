@@ -48,9 +48,6 @@ PHP                                                                        NEWS
   . Fixed bug #79000 (Non-blocking socket stream reports EAGAIN as error).
     (Nikita)
 
-- Libxml:
-  . Fixed bug #79029 (Use After Free's in XMLReader / XMLWriter). (Laruence)
-
 18 Dec 2019, PHP 7.4.1
 
 - Core:
