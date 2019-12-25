@@ -21,6 +21,9 @@ PHP                                                                        NEWS
   . Fixed bug #74170 (locale information change after mime_content_type).
     (Sergei Turchanov)
 
+- Libxml:
+  . Fixed bug #79029 (Use After Free's in XMLReader / XMLWriter). (Laruence)
+
 - OPcache:
   . Fixed bug #78961 (erroneous optimization of re-assigned $GLOBALS). (Dmitry)
   . Fixed bug #78950 (Preloading trait method with static variables). (Nikita)
@@ -47,9 +50,6 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #79000 (Non-blocking socket stream reports EAGAIN as error).
     (Nikita)
-
-- Libxml:
-  . Fixed bug #79029 (Use After Free's in XMLReader / XMLWriter). (Laruence)
 
 18 Dec 2019, PHP 7.4.1
 
