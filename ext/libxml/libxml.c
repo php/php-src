@@ -327,6 +327,8 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 	context = php_stream_context_from_zval(Z_ISUNDEF(LIBXML(stream_context))? NULL : &LIBXML(stream_context), 0);
 
 	ret_val = php_stream_open_wrapper_ex(path_to_open, (char *)mode, REPORT_ERRORS, NULL, context);
+	/* Prevent from closing this by fclose() */
+	((php_stream*)ret_val)->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
 	if (isescaped) {
 		xmlFree(resolved_path);
 	}
