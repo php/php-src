@@ -4564,6 +4564,9 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, const ze
 	if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
 		|6:
 		if (opline->op2_type == IS_UNUSED) {
+			uint32_t var_info = MAY_BE_NULL;
+			zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
+
 			|	// var_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			|	LOAD_ADDR_ZTS FCARG2a, executor_globals, uninitialized_zval
 			|	EXT_CALL zend_hash_next_index_insert, r0
@@ -4578,28 +4581,20 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, const ze
 			|	jmp >9
 			|.code
 			|	mov FCARG1a, r0
-		} else {
-			if (!zend_jit_fetch_dimension_address_inner(Dst, opline, BP_VAR_W, op1_info, op2_info, 8, 8)) {
-				return 0;
-			}
 
-			|8:
-			|	mov FCARG1a, r0
-		}
-
-		if (opline->op2_type == IS_UNUSED) {
-			uint32_t var_info = zend_array_element_type(op1_info, 0, 0);
-			zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
-
-			if (op1_info & (MAY_BE_ARRAY_OF_REF|MAY_BE_OBJECT)) {
-				var_info |= MAY_BE_REF;
-			}
 			if (!zend_jit_simple_assign(Dst, opline, op_array, var_addr, var_info, -1, (opline+1)->op1_type, (opline+1)->op1, op3_addr, val_info, res_addr, 0)) {
 				return 0;
 			}
 		} else {
 			uint32_t var_info = zend_array_element_type(op1_info, 0, 0);
 			zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
+
+			if (!zend_jit_fetch_dimension_address_inner(Dst, opline, BP_VAR_W, op1_info, op2_info, 8, 8)) {
+				return 0;
+			}
+
+			|8:
+			|	mov FCARG1a, r0
 
 			if (op1_info & (MAY_BE_ARRAY_OF_REF|MAY_BE_OBJECT)) {
 				var_info |= MAY_BE_REF;
@@ -4789,14 +4784,13 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, const
 	}
 
 	if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
-		uint32_t var_info = zend_array_element_type(op1_info, 0, 0);
+		uint32_t var_info;
 		uint32_t var_def_info = zend_array_element_type(op1_def_info, 1, 0);
 
-		if (op1_info & (MAY_BE_ARRAY_OF_REF|MAY_BE_OBJECT)) {
-			var_info |= MAY_BE_REF;
-		}
 		|6:
 		if (opline->op2_type == IS_UNUSED) {
+			var_info = MAY_BE_NULL;
+
 			|	// var_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			|	LOAD_ADDR_ZTS FCARG2a, executor_globals, uninitialized_zval
 			|	EXT_CALL zend_hash_next_index_insert, r0
@@ -4812,6 +4806,11 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, const
 			|.code
 			|	mov FCARG1a, r0
 		} else {
+			var_info = zend_array_element_type(op1_info, 0, 0);
+			if (op1_info & (MAY_BE_ARRAY_OF_REF|MAY_BE_OBJECT)) {
+				var_info |= MAY_BE_REF;
+			}
+
 			if (!zend_jit_fetch_dimension_address_inner(Dst, opline, BP_VAR_RW, op1_info, op2_info, 8, 8)) {
 				return 0;
 			}
