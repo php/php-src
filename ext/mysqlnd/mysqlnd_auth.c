@@ -1073,6 +1073,13 @@ mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plu
 	}
 
 	switch (result_packet.response_code) {
+		case 0xFF:
+			if (result_packet.sqlstate[0]) {
+				strlcpy(conn->error_info->sqlstate, result_packet.sqlstate, sizeof(conn->error_info->sqlstate));
+				DBG_ERR_FMT("ERROR:%u [SQLSTATE:%s] %s", result_packet.error_no, result_packet.sqlstate, result_packet.error);
+			}
+			SET_CLIENT_ERROR(conn->error_info, result_packet.error_no, UNKNOWN_SQLSTATE, result_packet.error);
+			DBG_RETURN(FAIL);
 		case 0xFE:
 			DBG_INF("auth switch response");
 			*new_auth_protocol = result_packet.new_auth_protocol;

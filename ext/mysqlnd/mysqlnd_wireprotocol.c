@@ -2178,7 +2178,6 @@ php_mysqlnd_cached_sha2_result_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	zend_uchar buf[SHA256_PK_REQUEST_RESP_BUFFER_SIZE];
 	zend_uchar *p = buf;
 	const zend_uchar * const begin = buf;
-	uint8_t main_response_code;
 
 	DBG_ENTER("php_mysqlnd_cached_sha2_result_read");
 	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), pfc, vio, stats, error_info, connection_state, buf, sizeof(buf), "PROT_CACHED_SHA2_RESULT_PACKET", PROT_CACHED_SHA2_RESULT_PACKET)) {
@@ -2186,12 +2185,18 @@ php_mysqlnd_cached_sha2_result_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	}
 	BAIL_IF_NO_MORE_DATA;
 
-	main_response_code = uint1korr(p);
+	packet->response_code = uint1korr(p);
 	p++;
 	BAIL_IF_NO_MORE_DATA;
 
-	if (0xFE == main_response_code) {
-		packet->response_code = main_response_code;
+	if (ERROR_MARKER == packet->response_code) {
+		php_mysqlnd_read_error_from_line(p, packet->header.size - 1,
+										 packet->error, sizeof(packet->error),
+										 &packet->error_no, packet->sqlstate
+										);
+		DBG_RETURN(PASS);
+	}
+	if (0xFE == packet->response_code) {
 		/* Authentication Switch Response */
 		if (packet->header.size > (size_t) (p - buf)) {
 			packet->new_auth_protocol = mnd_pestrdup((char *)p, FALSE);
@@ -2209,10 +2214,11 @@ php_mysqlnd_cached_sha2_result_read(MYSQLND_CONN_DATA * conn, void * _packet)
 		DBG_RETURN(PASS);
 	}
 
-	if (0x1 != main_response_code) {
-		DBG_ERR_FMT("Unexpected response code %d", main_response_code);
+	if (0x1 != packet->response_code) {
+		DBG_ERR_FMT("Unexpected response code %d", packet->response_code);
 	}
 
+	/* This is not really the response code, but we reuse the field. */
 	packet->response_code = uint1korr(p);
 	p++;
 	BAIL_IF_NO_MORE_DATA;
