@@ -138,6 +138,7 @@ mysqlnd_run_authentication(
 				ret = mysqlnd_auth_change_user(conn, user, strlen(user), passwd, passwd_len, db, db_len, silent,
 											   first_call,
 											   requested_protocol,
+											   auth_plugin, plugin_data, plugin_data_len,
 											   scrambled_data, scrambled_data_len,
 											   &switch_to_auth_protocol, &switch_to_auth_protocol_len,
 											   &switch_to_auth_protocol_data, &switch_to_auth_protocol_data_len
@@ -377,6 +378,9 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 								const zend_bool silent,
 								const zend_bool use_full_blown_auth_packet,
 								const char * const auth_protocol,
+								struct st_mysqlnd_authentication_plugin * auth_plugin,
+								const zend_uchar * const orig_auth_plugin_data,
+								const size_t orig_auth_plugin_data_len,
 								const zend_uchar * const auth_plugin_data,
 								const size_t auth_plugin_data_len,
 								char ** switch_to_auth_protocol,
@@ -440,6 +444,15 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		}
 
 		PACKET_FREE(&auth_packet);
+	}
+
+	if (auth_plugin && auth_plugin->methods.handle_server_response) {
+		if (FAIL == auth_plugin->methods.handle_server_response(auth_plugin, conn,
+				orig_auth_plugin_data, orig_auth_plugin_data_len, passwd, passwd_len,
+				switch_to_auth_protocol, switch_to_auth_protocol_len,
+				switch_to_auth_protocol_data, switch_to_auth_protocol_data_len)) {
+			goto end;
+		}
 	}
 
 	ret = PACKET_READ(conn, &chg_user_resp);
