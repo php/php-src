@@ -1066,8 +1066,13 @@ mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plu
 {
 	DBG_ENTER("mysqlnd_caching_sha2_handle_server_response");
 	MYSQLND_PACKET_CACHED_SHA2_RESULT result_packet;
-	conn->payload_decoder_factory->m.init_cached_sha2_result_packet(&result_packet);
 
+	if (passwd_len == 0) {
+		DBG_INF("empty password fast path");
+		DBG_RETURN(PASS);
+	}
+
+	conn->payload_decoder_factory->m.init_cached_sha2_result_packet(&result_packet);
 	if (FAIL == PACKET_READ(conn, &result_packet)) {
 		DBG_RETURN(PASS);
 	}
