@@ -126,13 +126,14 @@ static void free_cols(pdo_stmt_t *stmt, pdo_odbc_stmt *S)
 	if (S->cols) {
 		int i;
 
-		for (i = 0; i < stmt->column_count; i++) {
+		for (i = 0; i < S->col_count; i++) {
 			if (S->cols[i].data) {
 				efree(S->cols[i].data);
 			}
 		}
 		efree(S->cols);
 		S->cols = NULL;
+		S->col_count = 0;
 	}
 }
 
@@ -262,14 +263,14 @@ static int odbc_stmt_execute(pdo_stmt_t *stmt)
 	SQLRowCount(S->stmt, &row_count);
 	stmt->row_count = row_count;
 
-	if (!stmt->executed) {
+	if (S->cols == NULL) {
 		/* do first-time-only definition of bind/mapping stuff */
 		SQLSMALLINT colcount;
 
 		/* how many columns do we have ? */
 		SQLNumResultCols(S->stmt, &colcount);
 
-		stmt->column_count = (int)colcount;
+		stmt->column_count = S->col_count = (int)colcount;
 		S->cols = ecalloc(colcount, sizeof(pdo_odbc_column));
 		S->going_long = 0;
 	}
@@ -847,10 +848,22 @@ static int odbc_stmt_next_rowset(pdo_stmt_t *stmt)
 	free_cols(stmt, S);
 	/* how many columns do we have ? */
 	SQLNumResultCols(S->stmt, &colcount);
-	stmt->column_count = (int)colcount;
+	stmt->column_count = S->col_count = (int)colcount;
 	S->cols = ecalloc(colcount, sizeof(pdo_odbc_column));
 	S->going_long = 0;
 
+	return 1;
+}
+
+static int odbc_stmt_close_cursor(pdo_stmt_t *stmt)
+{
+	SQLRETURN rc;
+	pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
+
+	rc = SQLCloseCursor(S->stmt);
+	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
+		return 0;
+	}
 	return 1;
 }
 
@@ -864,7 +877,8 @@ const struct pdo_stmt_methods odbc_stmt_methods = {
 	odbc_stmt_set_param,
 	odbc_stmt_get_attr, /* get attr */
 	NULL, /* get column meta */
-	odbc_stmt_next_rowset
+	odbc_stmt_next_rowset,
+	odbc_stmt_close_cursor
 };
 
 /*
