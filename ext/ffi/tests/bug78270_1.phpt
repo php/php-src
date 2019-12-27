@@ -5,6 +5,11 @@ FR #78270 (Usage of __vectorcall convention with FFI)
 require_once('skipif.inc');
 if (substr(PHP_OS, 0, 3) != 'WIN') die("skip this test is for Windows platforms only");
 
+ob_start();
+phpinfo(INFO_GENERAL);
+$info = ob_get_clean();
+if (preg_match('/Compiler => .*clang.*/', $info)) die("skip not for clang");
+
 $dll = 'php7' . (PHP_ZTS ? 'ts' : '') . (PHP_DEBUG ? '_debug' : '') . '.dll';
 try {
     FFI::cdef(<<<EOC
