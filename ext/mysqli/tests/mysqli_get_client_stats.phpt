@@ -666,7 +666,7 @@ mysqli.allow_local_infile=1
 	$info = $new_info;
 
 
-	// CREATE, ALTER, RENAME, DROP DATABASE
+	// CREATE, ALTER, DROP DATABASE
 	if (mysqli_query($link, "CREATE DATABASE mysqli_get_client_stats")) {
 
 		if (!is_array($new_info = mysqli_get_client_stats()) || empty($new_info))
@@ -685,25 +685,13 @@ mysqli.allow_local_infile=1
 		mysqli_get_client_stats_assert_eq('non_result_set_queries', $new_info, (string)($info['non_result_set_queries'] + 1), $test_counter, 'CREATE DATABASE');
 		$info = $new_info;
 
-		if (mysqli_get_server_version($link) > 51700) {
-			if (!mysqli_query($link, "RENAME DATABASE mysqli_get_client_stats TO mysqli_get_client_stats_"))
-				printf("[%03d] RENAME DATABASE failed, [%d] %s\n", ++$test_counter,
-					mysqli_errno($link), mysqli_error($link));
-
-			if (!is_array($new_info = mysqli_get_client_stats()) || empty($new_info))
-				printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
-					++$test_counter, gettype($new_info), $new_info);
-			mysqli_get_client_stats_assert_eq('non_result_set_queries', $new_info, (string)($info['non_result_set_queries'] + 1), $test_counter, 'CREATE DATABASE');
-			$info = $new_info;
-		} else {
-			if (!mysqli_query($link, "CREATE DATABASE mysqli_get_client_stats_"))
-				printf("[%03d] CREATE DATABASE failed, [%d] %s\n", ++$test_counter,
-					mysqli_errno($link), mysqli_error($link));
-			if (!is_array($new_info = mysqli_get_client_stats()) || empty($new_info))
-				printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
-					++$test_counter, gettype($new_info), $new_info);
-			$info = $new_info;
-		}
+		if (!mysqli_query($link, "CREATE DATABASE mysqli_get_client_stats_"))
+			printf("[%03d] CREATE DATABASE failed, [%d] %s\n", ++$test_counter,
+				mysqli_errno($link), mysqli_error($link));
+		if (!is_array($new_info = mysqli_get_client_stats()) || empty($new_info))
+			printf("[%03d] Expecting array/any_non_empty, got %s/%s\n",
+				++$test_counter, gettype($new_info), $new_info);
+		$info = $new_info;
 
 		if (!mysqli_query($link, "DROP DATABASE mysqli_get_client_stats_"))
 			printf("[%03d] DROP DATABASE failed, [%d] %s\n", ++$test_counter,
