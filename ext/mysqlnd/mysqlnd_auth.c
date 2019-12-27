@@ -1032,6 +1032,14 @@ mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
 }
 /* }}} */
 
+static int is_secure_transport(MYSQLND_CONN_DATA *conn) {
+	if (conn->vio->data->ssl) {
+		return 1;
+	}
+
+	return strcmp(conn->vio->data->stream->ops->label, "unix_socket") == 0;
+}
+
 /* {{{ mysqlnd_caching_sha2_handle_server_response */
 static enum_func_status
 mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plugin *self,
@@ -1063,13 +1071,13 @@ mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plu
 			DBG_INF("fast path succeeded");
 			DBG_RETURN(PASS);
 		case 4:
-			if (conn->vio->data->ssl || conn->unix_socket.s) {
-				DBG_INF("fast path failed, doing full auth via SSL");
+			if (is_secure_transport(conn)) {
+				DBG_INF("fast path failed, doing full auth via secure transport");
 				result_packet.password = (zend_uchar *)passwd;
 				result_packet.password_len = passwd_len + 1;
 				PACKET_WRITE(conn, &result_packet);
 			} else {
-				DBG_INF("fast path failed, doing full auth without SSL");
+				DBG_INF("fast path failed, doing full auth via insecure transport");
 				result_packet.password_len = mysqlnd_caching_sha2_get_and_use_key(conn, auth_plugin_data, auth_plugin_data_len, &result_packet.password, passwd, passwd_len);
 				PACKET_WRITE(conn, &result_packet);
 				efree(result_packet.password);
