@@ -3426,8 +3426,8 @@ function toolset_setup_build_mode()
 			ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
 		}
 		ADD_FLAG("CFLAGS", "/LD /MD /W3");
-		if (PHP_SANITIZER == "yes") {
-			ADD_FLAG("CFLAGS", "/Od /D NDebug /D NDEBUG /D ZEND_DEBUG=1");
+		if (PHP_SANITIZER == "yes" && CLANG_TOOLSET) {
+			ADD_FLAG("CFLAGS", "/Od /D NDebug /D NDEBUG /D ZEND_WIN32_NEVER_INLINE /D ZEND_DEBUG=0");
 		} else {
 			// Equivalent to Release_TSInline build -> best optimization
 			ADD_FLAG("CFLAGS", "/Ox /D NDebug /D NDEBUG /D ZEND_WIN32_FORCE_INLINE /GF /D ZEND_DEBUG=0");
