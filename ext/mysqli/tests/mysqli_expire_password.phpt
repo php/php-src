@@ -92,7 +92,7 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'%
 		printf("[007] Cannot connect [%d] %s\n",
 			mysqli_connect_errno(), mysqli_connect_error());
 	} else {
-		$link->query("SET PASSWORD=PASSWORD('expiretest')");
+		$link->query("SET PASSWORD='expiretest'");
 		printf("[008] Connect allowed, pw set, [%d] %s\n", $link->errno, $link->error);
 		if ($res = $link->query("SELECT id FROM test WHERE id = 1"))
 			var_dump($res->fetch_assoc());
