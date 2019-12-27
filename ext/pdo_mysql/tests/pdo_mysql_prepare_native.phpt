@@ -233,7 +233,7 @@ $db = MySQLPDOTest::factory();
 		prepex(44, $db, 'DELETE FROM test');
 		prepex(45, $db, 'INSERT INTO test(id, label) VALUES (1, ?), (2, ?)',
 			array('row', 'row'));
-		$stmt = prepex(46, $db, 'SELECT id, label FROM test');
+		$stmt = prepex(46, $db, 'SELECT id, label FROM test ORDER BY id');
 		$tmp = $stmt->fetchAll(PDO::FETCH_ASSOC);
 		$exp = array(
 			0 => array(
