@@ -2178,6 +2178,7 @@ php_mysqlnd_cached_sha2_result_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	zend_uchar buf[SHA256_PK_REQUEST_RESP_BUFFER_SIZE];
 	zend_uchar *p = buf;
 	const zend_uchar * const begin = buf;
+	uint8_t main_response_code;
 
 	DBG_ENTER("php_mysqlnd_cached_sha2_result_read");
 	if (FAIL == mysqlnd_read_packet_header_and_body(&(packet->header), pfc, vio, stats, error_info, connection_state, buf, sizeof(buf), "PROT_CACHED_SHA2_RESULT_PACKET", PROT_CACHED_SHA2_RESULT_PACKET)) {
@@ -2185,11 +2186,37 @@ php_mysqlnd_cached_sha2_result_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	}
 	BAIL_IF_NO_MORE_DATA;
 
+	main_response_code = uint1korr(p);
 	p++;
-	packet->response_code = uint1korr(p);
 	BAIL_IF_NO_MORE_DATA;
 
+	if (0xFE == main_response_code) {
+		packet->response_code = main_response_code;
+		/* Authentication Switch Response */
+		if (packet->header.size > (size_t) (p - buf)) {
+			packet->new_auth_protocol = mnd_pestrdup((char *)p, FALSE);
+			packet->new_auth_protocol_len = strlen(packet->new_auth_protocol);
+			p+= packet->new_auth_protocol_len + 1; /* +1 for the \0 */
+
+			packet->new_auth_protocol_data_len = packet->header.size - (size_t) (p - buf);
+			if (packet->new_auth_protocol_data_len) {
+				packet->new_auth_protocol_data = mnd_emalloc(packet->new_auth_protocol_data_len);
+				memcpy(packet->new_auth_protocol_data, p, packet->new_auth_protocol_data_len);
+			}
+			DBG_INF_FMT("The server requested switching auth plugin to : %s", packet->new_auth_protocol);
+			DBG_INF_FMT("Server salt : [%d][%.*s]", packet->new_auth_protocol_data_len, packet->new_auth_protocol_data_len, packet->new_auth_protocol_data);
+		}
+		DBG_RETURN(PASS);
+	}
+
+	if (0x1 != main_response_code) {
+		DBG_ERR_FMT("Unexpected response code %d", main_response_code);
+	}
+
+	packet->response_code = uint1korr(p);
 	p++;
+	BAIL_IF_NO_MORE_DATA;
+
 	packet->result = uint1korr(p);
 	BAIL_IF_NO_MORE_DATA;
 

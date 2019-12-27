@@ -288,6 +288,10 @@ typedef struct st_mysqlnd_packet_cached_sha2_result {
 	uint8_t 	request;
 	zend_uchar * password;
 	size_t password_len;
+	char		*new_auth_protocol;
+	size_t		new_auth_protocol_len;
+	zend_uchar	*new_auth_protocol_data;
+	size_t		new_auth_protocol_data_len;
 } MYSQLND_PACKET_CACHED_SHA2_RESULT;
 
 

@@ -320,8 +320,12 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 	}
 
 	if (auth_plugin && auth_plugin->methods.handle_server_response) {
-		auth_plugin->methods.handle_server_response(auth_plugin, conn,
-				orig_auth_plugin_data, orig_auth_plugin_data_len, passwd, passwd_len);
+		if (FAIL == auth_plugin->methods.handle_server_response(auth_plugin, conn,
+				orig_auth_plugin_data, orig_auth_plugin_data_len, passwd, passwd_len,
+				switch_to_auth_protocol, switch_to_auth_protocol_len,
+				switch_to_auth_protocol_data, switch_to_auth_protocol_data_len)) {
+			goto end;
+		}
 	}
 
 	if (FAIL == PACKET_READ(conn, &auth_resp_packet) || auth_resp_packet.response_code >= 0xFE) {
@@ -1028,26 +1032,36 @@ mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
 }
 /* }}} */
 
-/* {{{ mysqlnd_native_auth_get_auth_data */
-static void
+/* {{{ mysqlnd_caching_sha2_handle_server_response */
+static enum_func_status
 mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plugin *self,
 		MYSQLND_CONN_DATA * conn,
 		const zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
 		const char * const passwd,
-		const size_t passwd_len)
+		const size_t passwd_len,
+		char **new_auth_protocol, size_t *new_auth_protocol_len,
+		zend_uchar **new_auth_protocol_data, size_t *new_auth_protocol_data_len
+		)
 {
 	DBG_ENTER("mysqlnd_caching_sha2_handle_server_response");
 	MYSQLND_PACKET_CACHED_SHA2_RESULT result_packet;
 	conn->payload_decoder_factory->m.init_cached_sha2_result_packet(&result_packet);
 
 	if (FAIL == PACKET_READ(conn, &result_packet)) {
-		DBG_VOID_RETURN;
+		DBG_RETURN(PASS);
 	}
 
 	switch (result_packet.response_code) {
+		case 0xFE:
+			DBG_INF("auth switch response");
+			*new_auth_protocol = result_packet.new_auth_protocol;
+			*new_auth_protocol_len = result_packet.new_auth_protocol_len;
+			*new_auth_protocol_data = result_packet.new_auth_protocol_data;
+			*new_auth_protocol_data_len = result_packet.new_auth_protocol_data_len;
+			DBG_RETURN(FAIL);
 		case 3:
 			DBG_INF("fast path succeeded");
-			DBG_VOID_RETURN;
+			DBG_RETURN(PASS);
 		case 4:
 			if (conn->vio->data->ssl || conn->unix_socket.s) {
 				DBG_INF("fast path failed, doing full auth via SSL");
@@ -1060,7 +1074,7 @@ mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plu
 				PACKET_WRITE(conn, &result_packet);
 				efree(result_packet.password);
 			}
-			DBG_VOID_RETURN;
+			DBG_RETURN(PASS);
 		case 2:
 			// The server tried to send a key, which we didn't expect
 			// fall-through
@@ -1068,7 +1082,7 @@ mysqlnd_caching_sha2_handle_server_response(struct st_mysqlnd_authentication_plu
 			php_error_docref(NULL, E_WARNING, "Unexpected server response while doing caching_sha2 auth: %i", result_packet.response_code);
 	}
 
-	DBG_VOID_RETURN;
+	DBG_RETURN(PASS);
 }
 /* }}} */
 

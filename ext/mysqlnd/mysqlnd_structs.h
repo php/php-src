@@ -1383,11 +1383,14 @@ typedef zend_uchar * (*func_auth_plugin__get_auth_data)(struct st_mysqlnd_authen
 														const MYSQLND_PFC_DATA * const pfc_data, const zend_ulong mysql_flags
 														);
 
-typedef void (*func_auth_plugin__handle_server_response)(struct st_mysqlnd_authentication_plugin * self,
+typedef enum_func_status (*func_auth_plugin__handle_server_response)(struct st_mysqlnd_authentication_plugin * self,
 		MYSQLND_CONN_DATA * conn,
 		const zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
 		const char * const passwd,
-		const size_t passwd_len);
+		const size_t passwd_len,
+		char **new_auth_protocol, size_t *new_auth_protocol_len,
+		zend_uchar **new_auth_protocol_data, size_t *new_auth_protocol_data_len
+		);
 
 struct st_mysqlnd_authentication_plugin
 {
