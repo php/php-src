@@ -123,14 +123,15 @@ mysqli_stmt_get_result - geometry / spatial types
 		return true;
 	}
 
-	func_mysqli_stmt_get_result_geom($link, $engine, "GEOMETRY", "GeomFromText('POINT(2 2)')", 20);
-	func_mysqli_stmt_get_result_geom($link, $engine, "POINT", "GeomFromText('POINT(1 1)')", 40);
-	func_mysqli_stmt_get_result_geom($link, $engine, "LINESTRING", "GeomFromText('LINESTRING(0 0,1 1,2 2)')", 60);
-	func_mysqli_stmt_get_result_geom($link, $engine, "POLYGON", "GeomFromText('POLYGON((0 0,10 0,10 10,0 10,0 0),(5 5,7 5,7 7,5 7, 5 5))')", 80);
-	func_mysqli_stmt_get_result_geom($link, $engine, "MULTIPOINT", "GeomFromText('MULTIPOINT(1 1, 2 2)')", 100);
-	func_mysqli_stmt_get_result_geom($link, $engine, "MULTILINESTRING", "GeomFromText('MULTILINESTRING((0 0,1 1,2 2),(0 0,1 1,3 3))')", 120);
-	func_mysqli_stmt_get_result_geom($link, $engine, "MULTIPOLYGON", "GeomFromText('MULTIPOLYGON(((0 0,10 0,10 10,0 10,0 0),(5 5,7 5,7 7,5 7, 5 5)),((0 0,10 0,10 10,0 10,0 0),(5 5,7 5,7 7,5 7, 5 5)))')", 140);
-	func_mysqli_stmt_get_result_geom($link, $engine, "GEOMETRYCOLLECTION", "GeomFromText('GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(0 0,1 1,2 2,3 3,4 4))')", 160);
+	$geomFromText = $link->server_version >= 80000 ? "ST_GeomFromText" : "GeomFromText";
+	func_mysqli_stmt_get_result_geom($link, $engine, "GEOMETRY", "$geomFromText('POINT(2 2)')", 20);
+	func_mysqli_stmt_get_result_geom($link, $engine, "POINT", "$geomFromText('POINT(1 1)')", 40);
+	func_mysqli_stmt_get_result_geom($link, $engine, "LINESTRING", "$geomFromText('LINESTRING(0 0,1 1,2 2)')", 60);
+	func_mysqli_stmt_get_result_geom($link, $engine, "POLYGON", "$geomFromText('POLYGON((0 0,10 0,10 10,0 10,0 0),(5 5,7 5,7 7,5 7, 5 5))')", 80);
+	func_mysqli_stmt_get_result_geom($link, $engine, "MULTIPOINT", "$geomFromText('MULTIPOINT(1 1, 2 2)')", 100);
+	func_mysqli_stmt_get_result_geom($link, $engine, "MULTILINESTRING", "$geomFromText('MULTILINESTRING((0 0,1 1,2 2),(0 0,1 1,3 3))')", 120);
+	func_mysqli_stmt_get_result_geom($link, $engine, "MULTIPOLYGON", "$geomFromText('MULTIPOLYGON(((0 0,10 0,10 10,0 10,0 0),(5 5,7 5,7 7,5 7, 5 5)),((0 0,10 0,10 10,0 10,0 0),(5 5,7 5,7 7,5 7, 5 5)))')", 140);
+	func_mysqli_stmt_get_result_geom($link, $engine, "GEOMETRYCOLLECTION", "$geomFromText('GEOMETRYCOLLECTION(POINT(1 1),LINESTRING(0 0,1 1,2 2,3 3,4 4))')", 160);
 
 	mysqli_close($link);
 	print "done!";
