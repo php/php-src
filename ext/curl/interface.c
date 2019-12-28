@@ -2754,7 +2754,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 				zend_string *string_key;
 				zend_ulong  num_key;
 #if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
-				curl_mime *mime;
+				curl_mime *mime = NULL;
 				curl_mimepart *part;
 				CURLcode form_error;
 #else
@@ -2769,9 +2769,11 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 				}
 
 #if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
-				mime = curl_mime_init(ch->cp);
-				if (mime == NULL) {
-					return FAILURE;
+				if (zend_hash_num_elements(postfields) > 0) {
+					mime = curl_mime_init(ch->cp);
+					if (mime == NULL) {
+						return FAILURE;
+					}
 				}
 #endif
 

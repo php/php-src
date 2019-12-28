@@ -17,6 +17,9 @@ PHP                                                                        NEWS
   . Fixed bug #79008 (General performance regression with PHP 7.4 on Windows).
     (cmb)
 
+- CURL:
+  . Fixed bug #79033 (Curl timeout error with specific url and post). (cmb)
+
 - Fileinfo:
   . Fixed bug #74170 (locale information change after mime_content_type).
     (Sergei Turchanov)
