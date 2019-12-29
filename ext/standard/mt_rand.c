@@ -337,9 +337,7 @@ PHP_FUNCTION(mt_rand)
    Returns the maximum value a random number from Mersenne Twister can have */
 PHP_FUNCTION(mt_getrandmax)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	/*
 	 * Melo: it could be 2^^32 but we only use 2^^31 to maintain

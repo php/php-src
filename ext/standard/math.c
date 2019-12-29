@@ -490,9 +490,7 @@ PHP_FUNCTION(atanh)
    Returns an approximation of pi */
 PHP_FUNCTION(pi)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_DOUBLE(M_PI);
 }
