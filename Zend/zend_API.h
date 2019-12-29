@@ -674,6 +674,7 @@ END_EXTERN_C()
 #define RETURN_ZVAL(zv, copy, dtor)		do { RETVAL_ZVAL(zv, copy, dtor); return; } while (0)
 #define RETURN_FALSE  					do { RETVAL_FALSE; return; } while (0)
 #define RETURN_TRUE   					do { RETVAL_TRUE; return; } while (0)
+#define RETURN_THROWS()					do { ZEND_ASSERT(EG(exception)); (void) return_value; return; } while (0)
 
 #define HASH_OF(p) (Z_TYPE_P(p)==IS_ARRAY ? Z_ARRVAL_P(p) : ((Z_TYPE_P(p)==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties(Z_OBJ_P(p)) : NULL)))
 #define ZVAL_IS_NULL(z) (Z_TYPE_P(z) == IS_NULL)

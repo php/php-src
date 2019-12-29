@@ -326,7 +326,7 @@ PHP_FUNCTION(mt_rand)
 
 	if (UNEXPECTED(max < min)) {
 		zend_value_error("max (" ZEND_LONG_FMT ") is smaller than min (" ZEND_LONG_FMT ")", max, min);
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(php_mt_rand_common(min, max));

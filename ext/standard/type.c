@@ -86,7 +86,7 @@ PHP_FUNCTION(settype)
 		} else {
 			zend_value_error("Invalid type");
 		}
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ptr == &tmp) {

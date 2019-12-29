@@ -424,7 +424,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 
 	if (NULL == (pzbucket = zend_hash_str_find(Z_OBJPROP_P(zobject), "bucket", sizeof("bucket")-1))) {
 		zend_value_error("Object has no bucket property");
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((brigade = (php_stream_bucket_brigade*)zend_fetch_resource(
@@ -521,9 +521,7 @@ PHP_FUNCTION(stream_get_filters)
 	zend_string *filter_name;
 	HashTable *filters_hash;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -554,12 +552,12 @@ PHP_FUNCTION(stream_filter_register)
 
 	if (!ZSTR_LEN(filtername)) {
 		zend_value_error("Filter name cannot be empty");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!ZSTR_LEN(classname)) {
 		zend_value_error("Class name cannot be empty");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!BG(user_filter_map)) {

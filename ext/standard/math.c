@@ -626,7 +626,7 @@ PHP_FUNCTION(log)
 
 	if (base <= 0.0) {
 		zend_value_error("Base must be greater than 0");
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_DOUBLE(log(num) / log(base));
@@ -1008,11 +1008,11 @@ PHP_FUNCTION(base_convert)
 
 	if (frombase < 2 || frombase > 36) {
 		zend_value_error("Invalid `from base' (" ZEND_LONG_FMT ")", frombase);
-		return;
+		RETURN_THROWS();
 	}
 	if (tobase < 2 || tobase > 36) {
 		zend_value_error("Invalid `to base' (" ZEND_LONG_FMT ")", tobase);
-		return;
+		RETURN_THROWS();
 	}
 
 	_php_math_basetozval(Z_STR_P(number), (int)frombase, &temp);

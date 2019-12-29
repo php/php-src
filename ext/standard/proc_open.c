@@ -529,7 +529,7 @@ PHP_FUNCTION(proc_open)
 		uint32_t num_elems = zend_hash_num_elements(Z_ARRVAL_P(command_zv));
 		if (num_elems == 0) {
 			zend_value_error("Command array must have at least one element");
-			return;
+			RETURN_THROWS();
 		}
 
 #ifdef PHP_WIN32

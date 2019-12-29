@@ -671,7 +671,7 @@ PHP_FUNCTION(password_hash)
 		zend_string *algostr = zval_get_string(zalgo);
 		zend_value_error("Unknown password hashing algorithm: %s", ZSTR_VAL(algostr));
 		zend_string_release(algostr);
-		return;
+		RETURN_THROWS();
 	}
 
 	digest = algo->hash(password, options);
@@ -679,7 +679,7 @@ PHP_FUNCTION(password_hash)
 		if (!EG(exception)) {
 			zend_throw_error(NULL, "Password hashing failed for unknown reason");
 		}
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_NEW_STR(digest);

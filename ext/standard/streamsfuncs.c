@@ -384,7 +384,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 
 	if (to_read <= 0) {
 		zend_value_error("Length parameter must be greater than 0");
-		return;
+		RETURN_THROWS();
 	}
 
 	read_buf = zend_string_alloc(to_read, 0);
@@ -785,7 +785,7 @@ PHP_FUNCTION(stream_select)
 
 	if (!sets) {
 		zend_value_error("No stream arrays were passed");
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_SAFE_MAX_FD(max_fd, max_set_count);
@@ -794,10 +794,10 @@ PHP_FUNCTION(stream_select)
 	if (!secnull) {
 		if (sec < 0) {
 			zend_value_error("The seconds parameter must be greater than 0");
-			return;
+			RETURN_THROWS();
 		} else if (usec < 0) {
 			zend_value_error("The microseconds parameter must be greater than 0");
-			return;
+			RETURN_THROWS();
 		}
 
 		/* Windows, Solaris and BSD do not like microsecond values which are >= 1 sec */
@@ -1299,7 +1299,7 @@ PHP_FUNCTION(stream_get_line)
 
 	if (max_length < 0) {
 		zend_value_error("The maximum allowed length must be greater than or equal to zero");
-		return;
+		RETURN_THROWS();
 	}
 	if (!max_length) {
 		max_length = PHP_SOCK_CHUNK_SIZE;
@@ -1435,7 +1435,7 @@ PHP_FUNCTION(stream_set_chunk_size)
 
 	if (csize <= 0) {
 		zend_value_error("The chunk size must be a positive integer, " ZEND_LONG_FMT " given", csize);
-		return;
+		RETURN_THROWS();
 	}
 	/* stream.chunk_size is actually a size_t, but php_stream_set_option
 	 * can only use an int to accept the new value and return the old one.
@@ -1443,7 +1443,7 @@ PHP_FUNCTION(stream_set_chunk_size)
 	 */
 	if (csize > INT_MAX) {
 		zend_value_error("The chunk size cannot be larger than %d", INT_MAX);
-		return;
+		RETURN_THROWS();
 	}
 
 	php_stream_from_zval(stream, zstream);
@@ -1510,7 +1510,7 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 
 			if (!GET_CTX_OPT(stream, "ssl", "crypto_method", val)) {
 				zend_value_error("When enabling encryption you must specify the crypto type");
-				return;
+				RETURN_THROWS();
 			}
 
 			cryptokind = Z_LVAL_P(val);
