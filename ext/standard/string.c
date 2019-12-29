@@ -932,12 +932,12 @@ PHP_FUNCTION(wordwrap)
 
 	if (breakchar_len == 0) {
 		zend_value_error("Break string cannot be empty");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (linelength == 0 && docut) {
 		zend_value_error("Can't force cut when width is zero");
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Special case for a single-character break as it needs no
@@ -1144,7 +1144,7 @@ PHP_FUNCTION(explode)
 
 	if (ZSTR_LEN(delim) == 0) {
 		zend_value_error("Empty delimiter");
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -1635,7 +1635,7 @@ PHP_FUNCTION(dirname)
 	} else if (levels < 1) {
 		zend_value_error("Invalid argument, levels must be >= 1");
 		zend_string_efree(ret);
-		return;
+		RETURN_THROWS();
 	} else {
 		/* Some levels up */
 		do {
@@ -1875,7 +1875,7 @@ PHP_FUNCTION(strpos)
 	}
 	if (offset < 0 || (size_t)offset > ZSTR_LEN(haystack)) {
 		zend_value_error("Offset not contained in string");
-		return;
+		RETURN_THROWS();
 	}
 
 	found = (char*)php_memnstr(ZSTR_VAL(haystack) + offset,
@@ -1911,7 +1911,7 @@ PHP_FUNCTION(stripos)
 	}
 	if (offset < 0 || (size_t)offset > ZSTR_LEN(haystack)) {
 		zend_value_error("Offset not contained in string");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZSTR_LEN(needle) > ZSTR_LEN(haystack)) {
@@ -1953,14 +1953,14 @@ PHP_FUNCTION(strrpos)
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
 			zend_value_error("Offset not contained in string");
-			return;
+			RETURN_THROWS();
 		}
 		p = ZSTR_VAL(haystack) + (size_t)offset;
 		e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack);
 	} else {
 		if (offset < -ZEND_LONG_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
 			zend_value_error("Offset not contained in string");
-			return;
+			RETURN_THROWS();
 		}
 
 		p = ZSTR_VAL(haystack);
@@ -2003,7 +2003,7 @@ PHP_FUNCTION(strripos)
 		if (offset >= 0) {
 			if ((size_t)offset > ZSTR_LEN(haystack)) {
 				zend_value_error("Offset not contained in string");
-				return;
+				RETURN_THROWS();
 			}
 			p = ZSTR_VAL(haystack) + (size_t)offset;
 			e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack) - 1;
@@ -2011,7 +2011,7 @@ PHP_FUNCTION(strripos)
 			p = ZSTR_VAL(haystack);
 			if (offset < -ZEND_LONG_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
 				zend_value_error("Offset not contained in string");
-				return;
+				RETURN_THROWS();
 			}
 			e = ZSTR_VAL(haystack) + (ZSTR_LEN(haystack) + (size_t)offset);
 		}
@@ -2031,7 +2031,7 @@ PHP_FUNCTION(strripos)
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
 			zend_string_release_ex(haystack_dup, 0);
 			zend_value_error("Offset not contained in string");
-			return;
+			RETURN_THROWS();
 		}
 		p = ZSTR_VAL(haystack_dup) + offset;
 		e = ZSTR_VAL(haystack_dup) + ZSTR_LEN(haystack);
@@ -2039,7 +2039,7 @@ PHP_FUNCTION(strripos)
 		if (offset < -ZEND_LONG_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
 			zend_string_release_ex(haystack_dup, 0);
 			zend_value_error("Offset not contained in string");
-			return;
+			RETURN_THROWS();
 		}
 
 		p = ZSTR_VAL(haystack_dup);
@@ -2147,7 +2147,7 @@ PHP_FUNCTION(chunk_split)
 
 	if (chunklen <= 0) {
 		zend_value_error("Chunk length should be greater than zero");
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((size_t)chunklen > ZSTR_LEN(str)) {
@@ -5276,7 +5276,7 @@ PHP_FUNCTION(str_repeat)
 
 	if (mult < 0) {
 		zend_value_error("Second argument has to be greater than or equal to 0");
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Don't waste our time if it's empty */
@@ -5334,7 +5334,7 @@ PHP_FUNCTION(count_chars)
 
 	if (mymode < 0 || mymode > 4) {
 		zend_value_error("Unknown mode");
-		return;
+		RETURN_THROWS();
 	}
 
 	buf = (const unsigned char *) ZSTR_VAL(input);
@@ -5520,7 +5520,7 @@ PHP_FUNCTION(substr_count)
 
 	if (needle_len == 0) {
 		zend_value_error("Empty substring");
-		return;
+		RETURN_THROWS();
 	}
 
 	p = haystack;
@@ -5531,7 +5531,7 @@ PHP_FUNCTION(substr_count)
 	}
 	if ((offset < 0) || ((size_t)offset > haystack_len)) {
 		zend_value_error("Offset not contained in string");
-		return;
+		RETURN_THROWS();
 	}
 	p += offset;
 
@@ -5597,12 +5597,12 @@ PHP_FUNCTION(str_pad)
 
 	if (pad_str_len == 0) {
 		zend_value_error("Padding string cannot be empty");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (pad_type_val < STR_PAD_LEFT || pad_type_val > STR_PAD_BOTH) {
 		zend_value_error("Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH");
-		return;
+		RETURN_THROWS();
 	}
 
 	num_pad_chars = pad_length - ZSTR_LEN(input);
@@ -5862,7 +5862,7 @@ PHP_FUNCTION(str_word_count)
 			break;
 		default:
 			zend_value_error("Invalid format value " ZEND_LONG_FMT, type);
-			return;
+			RETURN_THROWS();
 	}
 
 	if (char_list) {
@@ -5927,7 +5927,7 @@ PHP_FUNCTION(str_split)
 
 	if (split_length <= 0) {
 		zend_value_error("The length of each segment must be greater than zero");
-		return;
+		RETURN_THROWS();
 	}
 
 
@@ -5967,7 +5967,7 @@ PHP_FUNCTION(strpbrk)
 
 	if (!ZSTR_LEN(char_list)) {
 		zend_value_error("The character list cannot be empty");
-		return;
+		RETURN_THROWS();
 	}
 
 	for (haystack_ptr = ZSTR_VAL(haystack); haystack_ptr < (ZSTR_VAL(haystack) + ZSTR_LEN(haystack)); ++haystack_ptr) {
@@ -6006,7 +6006,7 @@ PHP_FUNCTION(substr_compare)
 			RETURN_LONG(0L);
 		} else {
 			zend_value_error("The length must be greater than or equal to zero");
-			return;
+			RETURN_THROWS();
 		}
 	}
 

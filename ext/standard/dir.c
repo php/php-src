@@ -558,7 +558,7 @@ PHP_FUNCTION(scandir)
 
 	if (dirn_len < 1) {
 		zend_value_error("Directory name cannot be empty");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (zcontext) {

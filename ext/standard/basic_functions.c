@@ -1561,7 +1561,7 @@ PHP_FUNCTION(putenv)
 
 	if (setting_len == 0 || setting[0] == '=') {
 		zend_value_error("Invalid parameter syntax");
-		return;
+		RETURN_THROWS();
 	}
 
 	pe.putenv_string = estrndup(setting, setting_len);
@@ -1942,7 +1942,7 @@ PHP_FUNCTION(sleep)
 
 	if (num < 0) {
 		zend_value_error("Number of seconds must be greater than or equal to 0");
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(php_sleep((unsigned int)num));
@@ -1962,7 +1962,7 @@ PHP_FUNCTION(usleep)
 
 	if (num < 0) {
 		zend_value_error("Number of microseconds must be greater than or equal to 0");
-		return;
+		RETURN_THROWS();
 	}
 	if (usleep((unsigned int)num) < 0) {
 #if ZEND_DEBUG
@@ -1989,11 +1989,11 @@ PHP_FUNCTION(time_nanosleep)
 
 	if (tv_sec < 0) {
 		zend_value_error("The seconds value must be greater than 0");
-		return;
+		RETURN_THROWS();
 	}
 	if (tv_nsec < 0) {
 		zend_value_error("The nanoseconds value must be greater than 0");
-		return;
+		RETURN_THROWS();
 	}
 
 	php_req.tv_sec = (time_t) tv_sec;
@@ -2007,7 +2007,7 @@ PHP_FUNCTION(time_nanosleep)
 		return;
 	} else if (errno == EINVAL) {
 		zend_value_error("Nanoseconds was not in the range 0 to 999 999 999 or seconds was negative");
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_FALSE;

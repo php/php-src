@@ -544,7 +544,7 @@ PHP_FUNCTION(file_get_contents)
 
 	if (ZEND_NUM_ARGS() == 5 && maxlen < 0) {
 		zend_value_error("Length must be greater than or equal to zero");
-		return;
+		RETURN_THROWS();
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);

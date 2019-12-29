@@ -382,7 +382,7 @@ PHP_FUNCTION(dns_check_record)
 
 	if (hostname_len == 0) {
 		zend_value_error("Host cannot be empty");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (rectype) {
