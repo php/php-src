@@ -1374,8 +1374,16 @@ PHP_FUNCTION(mysqli_free_result)
    Get MySQL client info */
 PHP_FUNCTION(mysqli_get_client_info)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+	if (getThis()) {
+		if (zend_parse_parameters_none() == FAILURE) {
+			return;
+		}
+	} else {
+		zval *mysql_link;
+
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "|O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
+			return;
+		}
 	}
 
 	const char * info = mysql_get_client_info();
