@@ -20,6 +20,9 @@ PHP                                                                        NEWS
 - CURL:
   . Fixed bug #79033 (Curl timeout error with specific url and post). (cmb)
 
+- Exif:
+  . Fixed bug #79046 (NaN to int cast undefined behavior in exif). (Nikita)
+
 - Fileinfo:
   . Fixed bug #74170 (locale information change after mime_content_type).
     (Sergei Turchanov)

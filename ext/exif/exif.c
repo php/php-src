@@ -1699,7 +1699,7 @@ static int exif_rewrite_tag_format_to_unsigned(int format)
 
 /* Use saturation for out of bounds values to avoid UB */
 static size_t float_to_size_t(float x) {
-	if (x < 0.0f) {
+	if (x < 0.0f || zend_isnan(x)) {
 		return 0;
 	} else if (x > (float) SIZE_MAX) {
 		return SIZE_MAX;
@@ -1709,7 +1709,7 @@ static size_t float_to_size_t(float x) {
 }
 
 static size_t double_to_size_t(double x) {
-	if (x < 0.0) {
+	if (x < 0.0 || zend_isnan(x)) {
 		return 0;
 	} else if (x > (double) SIZE_MAX) {
 		return SIZE_MAX;
