@@ -2689,7 +2689,7 @@ PHP_FUNCTION(exif_tagname)
 	char *szTemp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &tag) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	szTemp = exif_get_tagname(tag, tag_table_IFD);
@@ -4672,7 +4672,7 @@ PHP_FUNCTION(exif_imagetype)
  	int itype = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &imagefile, &imagefile_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	stream = php_stream_open_wrapper(imagefile, "rb", IGNORE_PATH|REPORT_ERRORS, NULL);
