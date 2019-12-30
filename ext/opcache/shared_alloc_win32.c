@@ -23,6 +23,7 @@
 #include "zend_shared_alloc.h"
 #include "zend_accelerator_util_funcs.h"
 #include "zend_execute.h"
+#include "SAPI.h"
 #include "tsrm_win32.h"
 #include <winbase.h>
 #include <process.h>
@@ -78,14 +79,14 @@ static void zend_win_error_message(int type, char *msg, int err)
 
 static char *create_name_with_username(char *name)
 {
-	static char newname[MAXPATHLEN + UNLEN + 4 + 1 + 32];
+	static char newname[MAXPATHLEN + UNLEN + 4 + 1 + 32 + 21];
 	char *uname;
 
 	uname = php_win32_get_username();
 	if (!uname) {
 		return NULL;
 	}
-	snprintf(newname, sizeof(newname) - 1, "%s@%s@%.32s", name, uname, ZCG(system_id));
+	snprintf(newname, sizeof(newname) - 1, "%s@%s@%.20s@%.32s", name, uname, sapi_module.name, ZCG(system_id));
 
 	free(uname);
 
@@ -94,7 +95,7 @@ static char *create_name_with_username(char *name)
 
 static char *get_mmap_base_file(void)
 {
-	static char windir[MAXPATHLEN+UNLEN + 3 + sizeof("\\\\@") + 1 + 32];
+	static char windir[MAXPATHLEN+UNLEN + 3 + sizeof("\\\\@") + 1 + 32 + 21];
 	char *uname;
 	int l;
 
@@ -107,7 +108,7 @@ static char *get_mmap_base_file(void)
 	if ('\\' == windir[l-1]) {
 		l--;
 	}
-	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s@%.32s", ACCEL_FILEMAP_BASE, uname, ZCG(system_id));
+	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s@%.20s@%.32s", ACCEL_FILEMAP_BASE, uname, sapi_module.name, ZCG(system_id));
 
 	free(uname);
 
