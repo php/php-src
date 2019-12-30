@@ -215,10 +215,9 @@ static zend_always_inline zend_bool zend_ssa_is_no_val_use(const zend_op *opline
 	if (opline->opcode == ZEND_ASSIGN || opline->opcode == ZEND_UNSET_CV) {
 		return ssa_op->op1_use == var && ssa_op->op2_use != var;
 	}
-	// TODO: Reenable this after changing the SSA structure.
-	/*if (opline->opcode == ZEND_FE_FETCH_R) {
+	if (opline->opcode == ZEND_FE_FETCH_R || opline->opcode == ZEND_FE_FETCH_RW) {
 		return ssa_op->op2_use == var && ssa_op->op1_use != var;
-	}*/
+	}
 	if (ssa_op->result_use == var
 			&& opline->opcode != ZEND_ADD_ARRAY_ELEMENT
 			&& opline->opcode != ZEND_ADD_ARRAY_UNPACK) {

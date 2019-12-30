@@ -772,6 +772,10 @@ add_op1_def:
 		}
 	}
 
+	zend_ssa_op *fe_fetch_ssa_op = blocks[n].len != 0
+			&& ((end-1)->opcode == ZEND_FE_FETCH_R || (end-1)->opcode == ZEND_FE_FETCH_RW)
+			&& (end-1)->op2_type == IS_CV
+		? &ssa_ops[blocks[n].start + blocks[n].len - 1] : NULL;
 	for (i = 0; i < blocks[n].successors_count; i++) {
 		int succ = blocks[n].successors[i];
 		zend_ssa_phi *p;
@@ -801,6 +805,10 @@ add_op1_def:
 					}
 				ZEND_ASSERT(j < blocks[succ].predecessors_count);
 				p->sources[j] = var[p->var];
+				if (fe_fetch_ssa_op && i == 0 && p->sources[j] == fe_fetch_ssa_op->op2_def) {
+					/* On the exit edge of an FE_FETCH, use the pre-modification value instead. */
+					p->sources[j] = fe_fetch_ssa_op->op2_use;
+				}
 			}
 		}
 		for (p = ssa_blocks[succ].phis; p && (p->pi >= 0); p = p->next) {
