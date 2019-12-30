@@ -450,7 +450,7 @@ PHP_FUNCTION(com_variant_create_instance)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(),
 		"z!|ll", &zvalue, &vt, &codepage)) {
-			return;
+			RETURN_THROWS();
 	}
 
 	php_com_initialize();
@@ -511,7 +511,7 @@ PHP_FUNCTION(variant_set)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(),
 			"Oz!", &zobj, php_com_variant_class_entry, &zvalue)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	obj = CDNO_FETCH(zobj);
@@ -955,7 +955,7 @@ PHP_FUNCTION(variant_date_to_timestamp)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(),
 		"O", &zleft, php_com_variant_class_entry)) {
-		return;
+		RETURN_THROWS();
 	}
 	obj = CDNO_FETCH(zleft);
 
@@ -994,7 +994,7 @@ PHP_FUNCTION(variant_date_from_timestamp)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l",
 			&timestamp)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (timestamp < 0) {
@@ -1040,7 +1040,7 @@ PHP_FUNCTION(variant_get_type)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(),
 		"O", &zobj, php_com_variant_class_entry)) {
-		return;
+		RETURN_THROWS();
 	}
 	obj = CDNO_FETCH(zobj);
 
@@ -1059,7 +1059,7 @@ PHP_FUNCTION(variant_set_type)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(),
 		"Ol", &zobj, php_com_variant_class_entry, &vt)) {
-		return;
+		RETURN_THROWS();
 	}
 	obj = CDNO_FETCH(zobj);
 
@@ -1095,7 +1095,7 @@ PHP_FUNCTION(variant_cast)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(),
 		"Ol", &zobj, php_com_variant_class_entry, &vt)) {
-		return;
+		RETURN_THROWS();
 	}
 	obj = CDNO_FETCH(zobj);
 

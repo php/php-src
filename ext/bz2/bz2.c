@@ -333,7 +333,7 @@ static PHP_FUNCTION(bzread)
 	zend_string *data;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &bz, &len)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_stream_from_zval(stream, bz);
@@ -363,7 +363,7 @@ static PHP_FUNCTION(bzopen)
 	php_stream *stream = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs", &file, &mode, &mode_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (mode_len != 1 || (mode[0] != 'r' && mode[0] != 'w')) {
@@ -482,7 +482,7 @@ static PHP_FUNCTION(bzcompress)
 	unsigned int      dest_len;        /* Length of the destination buffer */
 
 	if (zend_parse_parameters(argc, "s|ll", &source, &source_len, &zblock_size, &zwork_factor) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Assign them to easy to use variables, dest_len is initially the length of the data
@@ -534,7 +534,7 @@ static PHP_FUNCTION(bzdecompress)
 	bz_stream bzs;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &small)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	bzs.bzalloc = NULL;
@@ -601,7 +601,7 @@ static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	struct php_bz2_stream_data_t *self;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &bzp) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_stream_from_zval(stream, bzp);

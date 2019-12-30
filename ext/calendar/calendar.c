@@ -198,9 +198,8 @@ PHP_FUNCTION(cal_info)
 {
 	zend_long cal = -1;
 
-
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &cal) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (cal == -1) {
@@ -236,7 +235,7 @@ PHP_FUNCTION(cal_days_in_month)
 	zend_long sdn_start, sdn_next;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &cal, &month, &year) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
@@ -282,7 +281,7 @@ PHP_FUNCTION(cal_to_jd)
 	zend_long cal, month, day, year;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "llll", &cal, &month, &day, &year) != SUCCESS) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
@@ -303,7 +302,7 @@ PHP_FUNCTION(cal_from_jd)
 	const struct cal_entry_t *calendar;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &jd, &cal) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
@@ -354,7 +353,7 @@ PHP_FUNCTION(jdtogregorian)
 	int year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &julday) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SdnToGregorian(julday, &year, &month, &day);
@@ -370,7 +369,7 @@ PHP_FUNCTION(gregoriantojd)
 	zend_long year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &month, &day, &year) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(GregorianToSdn(year, month, day));
@@ -385,7 +384,7 @@ PHP_FUNCTION(jdtojulian)
 	int year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &julday) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SdnToJulian(julday, &year, &month, &day);
@@ -401,7 +400,7 @@ PHP_FUNCTION(juliantojd)
 	zend_long year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &month, &day, &year) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(JulianToSdn(year, month, day));
@@ -514,7 +513,7 @@ PHP_FUNCTION(jdtojewish)
 	char *dayp, *yearp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|bl", &julday, &heb, &fl) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SdnToJewish(julday, &year, &month, &day);
@@ -545,7 +544,7 @@ PHP_FUNCTION(jewishtojd)
 	zend_long year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &month, &day, &year) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(JewishToSdn(year, month, day));
@@ -560,7 +559,7 @@ PHP_FUNCTION(jdtofrench)
 	int year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &julday) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SdnToFrench(julday, &year, &month, &day);
@@ -576,7 +575,7 @@ PHP_FUNCTION(frenchtojd)
 	zend_long year, month, day;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &month, &day, &year) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(FrenchToSdn(year, month, day));
@@ -592,7 +591,7 @@ PHP_FUNCTION(jddayofweek)
 	const char *daynamel, *daynames;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &julday, &mode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	day = DayOfWeek(julday);
@@ -623,7 +622,7 @@ PHP_FUNCTION(jdmonthname)
 	int month, day, year;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &julday, &mode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	switch (mode) {

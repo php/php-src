@@ -241,7 +241,7 @@ PHP_FUNCTION(com_dotnet_create_instance)
 			&assembly_name, &assembly_name_len,
 			&datatype_name, &datatype_name_len,
 			&cp)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	cp_it = php_win32_cp_get_by_id((DWORD)cp);

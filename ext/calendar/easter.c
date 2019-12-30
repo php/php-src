@@ -45,7 +45,7 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
 		"|ll", &year, &method) == FAILURE) {
-			return;
+			RETURN_THROWS();
 	}
 
 	if (gm && (year<1970 || year>2037)) {				/* out of range for timestamps */

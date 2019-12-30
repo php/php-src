@@ -380,7 +380,7 @@ CPH_METHOD(SaveToFile)
 	if (helper->ipf) {
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "p!|b",
 					&filename, &filename_len, &remember)) {
-			return;
+			RETURN_THROWS();
 		}
 
 		if (filename) {
@@ -443,7 +443,7 @@ CPH_METHOD(LoadFromFile)
 
 		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "p|l",
 					&filename, &filename_len, &flags)) {
-			return;
+			RETURN_THROWS();
 		}
 
 		if (!(fullpath = expand_filepath(filename, NULL))) {
@@ -538,7 +538,7 @@ CPH_METHOD(LoadFromStream)
 	CPH_FETCH();
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zstm)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_stream_from_zval_no_verify(stream, zstm);
@@ -599,7 +599,7 @@ CPH_METHOD(SaveToStream)
 	CPH_NO_OBJ();
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zstm)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_stream_from_zval_no_verify(stream, zstm);
@@ -646,7 +646,7 @@ CPH_METHOD(__construct)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|O!",
 				&zobj, php_com_variant_class_entry)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!zobj) {
