@@ -243,18 +243,11 @@ static zend_string *php_session_encode(void) /* {{{ */
 
 static int php_session_decode(zend_string *data) /* {{{ */
 {
-	int res;
 	if (!PS(serializer)) {
 		php_error_docref(NULL, E_WARNING, "Unknown session.serialize_handler. Failed to decode session object");
 		return FAILURE;
 	}
-	/* Make sure that any uses of unserialize() during session decoding do not share
-	 * state with any unserialize() that is already in progress (e.g. because we are
-	 * currently inside Serializable::unserialize(). */
-	BG(serialize_lock)++;
-	res = PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data));
-	BG(serialize_lock)--;
-	if (res == FAILURE) {
+	if (PS(serializer)->decode(ZSTR_VAL(data), ZSTR_LEN(data)) == FAILURE) {
 		php_session_destroy();
 		php_session_track_init();
 		php_error_docref(NULL, E_WARNING, "Failed to decode session object. Session has been destroyed");
