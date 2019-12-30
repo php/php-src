@@ -21,6 +21,9 @@ PHP                                                                        NEWS
 - Libxml:
   . Fixed bug #79029 (Use After Free's in XMLReader / XMLWriter). (Laruence)
 
+- OPcache:
+  . Fixed bug #79040 (Warning Opcode handlers are unusable due to ASLR). (cmb)
+
 - Pcntl:
   . Fixed bug #78402 (Converting null to string in error message is bad DX).
     (SATŌ Kentarō)
