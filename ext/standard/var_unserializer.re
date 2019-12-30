@@ -54,8 +54,8 @@ struct php_unserialize_data {
 
 PHPAPI php_unserialize_data_t php_var_unserialize_init() {
 	php_unserialize_data_t d;
-	/* fprintf(stderr, "UNSERIALIZE_INIT    == lock: %u, level: %u\n", BG(serialize_lock), BG(unserialize).level); */
-	if (BG(serialize_lock) || !BG(unserialize).level) {
+	/* fprintf(stderr, "UNSERIALIZE_INIT    == lock: %u, level: %u\n", BG(unserialize).lock_level, BG(unserialize).level); */
+	if (BG(unserialize).lock_level == BG(unserialize).level) {
 		d = emalloc(sizeof(struct php_unserialize_data));
 		d->last = &d->entries;
 		d->first_dtor = d->last_dtor = NULL;
@@ -65,24 +65,23 @@ PHPAPI php_unserialize_data_t php_var_unserialize_init() {
 		d->max_depth = BG(unserialize_max_depth);
 		d->entries.used_slots = 0;
 		d->entries.next = NULL;
-		if (!BG(serialize_lock)) {
-			BG(unserialize).data = d;
-			BG(unserialize).level = 1;
-		}
+		BG(unserialize).data = d;
 	} else {
 		d = BG(unserialize).data;
-		++BG(unserialize).level;
+		ZEND_ASSERT(d);
 	}
+	++BG(unserialize).level;
 	return d;
 }
 
 PHPAPI void php_var_unserialize_destroy(php_unserialize_data_t d) {
-	/* fprintf(stderr, "UNSERIALIZE_DESTROY == lock: %u, level: %u\n", BG(serialize_lock), BG(unserialize).level); */
-	if (BG(serialize_lock) || BG(unserialize).level == 1) {
+	/* fprintf(stderr, "UNSERIALIZE_DESTROY == lock: %u, level: %u\n", BG(unserialize).lock_level, BG(unserialize).level); */
+	ZEND_ASSERT(BG(unserialize).level > 0);
+	ZEND_ASSERT(BG(unserialize).lock_level < BG(unserialize).level);
+	--BG(unserialize).level;
+	if (BG(unserialize).lock_level == BG(unserialize).level) {
 		var_destroy(&d);
 		efree(d);
-	}
-	if (!BG(serialize_lock) && !--BG(unserialize).level) {
 		BG(unserialize).data = NULL;
 	}
 }
@@ -218,6 +217,8 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 	var_entries *var_hash = (*var_hashx)->entries.next;
 	var_dtor_entries *var_dtor_hash = (*var_hashx)->first_dtor;
 	zend_bool delayed_call_failed = 0;
+	struct php_unserialize_data *prev_data;
+	unsigned prev_lock_level;
 	zval wakeup_name, unserialize_name;
 	ZVAL_UNDEF(&wakeup_name);
 	ZVAL_UNDEF(&unserialize_name);
@@ -247,12 +248,12 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 						ZVAL_STRINGL(&wakeup_name, "__wakeup", sizeof("__wakeup") - 1);
 					}
 
-					BG(serialize_lock)++;
+					PHP_VAR_UNSERIALIZE_LOCK(prev_data, prev_lock_level);
 					if (call_user_function(NULL, zv, &wakeup_name, &retval, 0, 0) == FAILURE || Z_ISUNDEF(retval)) {
 						delayed_call_failed = 1;
 						GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
 					}
-					BG(serialize_lock)--;
+					PHP_VAR_UNSERIALIZE_UNLOCK(prev_data, prev_lock_level);
 
 					zval_ptr_dtor(&retval);
 				} else {
@@ -268,12 +269,12 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 						ZVAL_STRINGL(&unserialize_name, "__unserialize", sizeof("__unserialize") - 1);
 					}
 
-					BG(serialize_lock)++;
+					PHP_VAR_UNSERIALIZE_LOCK(prev_data, prev_lock_level);
 					if (call_user_function(CG(function_table), zv, &unserialize_name, &retval, 1, &param) == FAILURE || Z_ISUNDEF(retval)) {
 						delayed_call_failed = 1;
 						GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
 					}
-					BG(serialize_lock)--;
+					PHP_VAR_UNSERIALIZE_UNLOCK(prev_data, prev_lock_level);
 
 					zval_ptr_dtor(&param);
 					zval_ptr_dtor(&retval);
@@ -1028,6 +1029,8 @@ object ":" uiv ":" ["]	{
 	zend_bool incomplete_class = 0;
 	zend_bool custom_object = 0;
 	zend_bool has_unserialize = 0;
+	struct php_unserialize_data *prev_data;
+	unsigned prev_lock_level;
 
 	zval user_func;
 	zval retval;
@@ -1075,17 +1078,17 @@ object ":" uiv ":" ["]	{
 		}
 
 		/* Try to find class directly */
-		BG(serialize_lock)++;
+		PHP_VAR_UNSERIALIZE_LOCK(prev_data, prev_lock_level);
 		ce = zend_lookup_class(class_name);
 		if (ce) {
-			BG(serialize_lock)--;
+			PHP_VAR_UNSERIALIZE_UNLOCK(prev_data, prev_lock_level);
 			if (EG(exception)) {
 				zend_string_release_ex(class_name, 0);
 				return 0;
 			}
 			break;
 		}
-		BG(serialize_lock)--;
+		PHP_VAR_UNSERIALIZE_UNLOCK(prev_data, prev_lock_level);
 
 		if (EG(exception)) {
 			zend_string_release_ex(class_name, 0);
@@ -1103,9 +1106,9 @@ object ":" uiv ":" ["]	{
 		ZVAL_STRING(&user_func, PG(unserialize_callback_func));
 
 		ZVAL_STR_COPY(&args[0], class_name);
-		BG(serialize_lock)++;
+		PHP_VAR_UNSERIALIZE_LOCK(prev_data, prev_lock_level);
 		if (call_user_function_ex(NULL, NULL, &user_func, &retval, 1, args, 0, NULL) != SUCCESS) {
-			BG(serialize_lock)--;
+			PHP_VAR_UNSERIALIZE_UNLOCK(prev_data, prev_lock_level);
 			if (EG(exception)) {
 				zend_string_release_ex(class_name, 0);
 				zval_ptr_dtor(&user_func);
@@ -1119,7 +1122,7 @@ object ":" uiv ":" ["]	{
 			zval_ptr_dtor(&args[0]);
 			break;
 		}
-		BG(serialize_lock)--;
+		PHP_VAR_UNSERIALIZE_UNLOCK(prev_data, prev_lock_level);
 		zval_ptr_dtor(&retval);
 		if (EG(exception)) {
 			zend_string_release_ex(class_name, 0);
@@ -1129,13 +1132,13 @@ object ":" uiv ":" ["]	{
 		}
 
 		/* The callback function may have defined the class */
-		BG(serialize_lock)++;
+		PHP_VAR_UNSERIALIZE_LOCK(prev_data, prev_lock_level);
 		if ((ce = zend_lookup_class(class_name)) == NULL) {
 			php_error_docref(NULL, E_WARNING, "Function %s() hasn't defined the class it was called for", Z_STRVAL(user_func));
 			incomplete_class = 1;
 			ce = PHP_IC_ENTRY;
 		}
-		BG(serialize_lock)--;
+		PHP_VAR_UNSERIALIZE_UNLOCK(prev_data, prev_lock_level);
 
 		zval_ptr_dtor(&user_func);
 		zval_ptr_dtor(&args[0]);

@@ -716,11 +716,12 @@ static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
 {
 	zval fname;
 	int res;
-
+	struct php_serialize_data *prev_data;
+	unsigned prev_lock_level;
 	ZVAL_STRINGL(&fname, "__sleep", sizeof("__sleep") - 1);
-	BG(serialize_lock)++;
+	PHP_VAR_SERIALIZE_LOCK(prev_data, prev_lock_level);
 	res = call_user_function(NULL, struc, &fname, retval, 0, 0);
-	BG(serialize_lock)--;
+	PHP_VAR_SERIALIZE_UNLOCK(prev_data, prev_lock_level);
 	zval_ptr_dtor_str(&fname);
 
 	if (res == FAILURE || Z_ISUNDEF_P(retval)) {
@@ -742,11 +743,13 @@ static int php_var_serialize_call_magic_serialize(zval *retval, zval *obj) /* {{
 {
 	zval fname;
 	int res;
+	struct php_serialize_data *prev_data;
+	unsigned prev_lock_level;
 
 	ZVAL_STRINGL(&fname, "__serialize", sizeof("__serialize") - 1);
-	BG(serialize_lock)++;
+	PHP_VAR_SERIALIZE_LOCK(prev_data, prev_lock_level);
 	res = call_user_function(CG(function_table), obj, &fname, retval, 0, 0);
-	BG(serialize_lock)--;
+	PHP_VAR_SERIALIZE_UNLOCK(prev_data, prev_lock_level);
 	zval_ptr_dtor_str(&fname);
 
 	if (res == FAILURE || Z_ISUNDEF_P(retval)) {
@@ -1111,29 +1114,28 @@ PHPAPI void php_var_serialize(smart_str *buf, zval *struc, php_serialize_data_t 
 
 PHPAPI php_serialize_data_t php_var_serialize_init() {
 	struct php_serialize_data *d;
-	/* fprintf(stderr, "SERIALIZE_INIT      == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */
-	if (BG(serialize_lock) || !BG(serialize).level) {
+	/* fprintf(stderr, "SERIALIZE_INIT      == lock_level: %u, level: %u\n", BG(serialize).lock_level, BG(serialize).level); */
+	if (BG(serialize).lock_level == BG(serialize).level) {
 		d = emalloc(sizeof(struct php_serialize_data));
 		zend_hash_init(&d->ht, 16, NULL, ZVAL_PTR_DTOR, 0);
 		d->n = 0;
-		if (!BG(serialize_lock)) {
-			BG(serialize).data = d;
-			BG(serialize).level = 1;
-		}
+		BG(serialize).data = d;
 	} else {
 		d = BG(serialize).data;
-		++BG(serialize).level;
+		ZEND_ASSERT(d);
 	}
+	++BG(serialize).level;
 	return d;
 }
 
 PHPAPI void php_var_serialize_destroy(php_serialize_data_t d) {
-	/* fprintf(stderr, "SERIALIZE_DESTROY   == lock: %u, level: %u\n", BG(serialize_lock), BG(serialize).level); */
-	if (BG(serialize_lock) || BG(serialize).level == 1) {
+	/* fprintf(stderr, "SERIALIZE_DESTROY   == lock: %u, level: %u\n", BG(serialize).lock_level, BG(serialize).level); */
+	ZEND_ASSERT(BG(serialize).level > 0);
+	ZEND_ASSERT(BG(serialize).lock_level < BG(serialize).level);
+	--BG(serialize).level;
+	if (BG(serialize).lock_level == BG(serialize).level) {
 		zend_hash_destroy(&d->ht);
 		efree(d);
-	}
-	if (!BG(serialize_lock) && !--BG(serialize).level) {
 		BG(serialize).data = NULL;
 	}
 }

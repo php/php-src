@@ -202,14 +202,15 @@ typedef struct _php_basic_globals {
 
 	/* var.c */
 	zend_class_entry *incomplete_class;
-	unsigned serialize_lock; /* whether to use the locally supplied var_hash instead (__sleep/__wakeup) */
 	struct {
 		struct php_serialize_data *data;
 		unsigned level;
+		unsigned lock_level;
 	} serialize;
 	struct {
 		struct php_unserialize_data *data;
 		unsigned level;
+		unsigned lock_level;
 	} unserialize;
 
 	/* url_scanner_ex.re */

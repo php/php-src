@@ -66,6 +66,26 @@ PHPAPI zend_long php_var_unserialize_get_cur_depth(php_unserialize_data_t d);
 #define PHP_VAR_UNSERIALIZE_DESTROY(d) \
 	php_var_unserialize_destroy(d)
 
+#define PHP_VAR_SERIALIZE_LOCK(prev_data, prev_lock_level) \
+	prev_data = BG(serialize).data; \
+	prev_lock_level = BG(serialize).lock_level; \
+	BG(serialize).data = NULL; \
+	BG(serialize).lock_level = BG(serialize).level;
+
+#define PHP_VAR_SERIALIZE_UNLOCK(prev_data, prev_lock_level) \
+	BG(serialize).data = prev_data; \
+	BG(serialize).lock_level = prev_lock_level;
+
+#define PHP_VAR_UNSERIALIZE_LOCK(prev_data, prev_lock_level) \
+	prev_data = BG(unserialize).data; \
+	prev_lock_level = BG(unserialize).lock_level; \
+	BG(unserialize).data = NULL; \
+	BG(unserialize).lock_level = BG(unserialize).level;
+
+#define PHP_VAR_UNSERIALIZE_UNLOCK(prev_data, prev_lock_level) \
+	BG(unserialize).data = prev_data; \
+	BG(unserialize).lock_level = prev_lock_level;
+
 PHPAPI void var_replace(php_unserialize_data_t *var_hash, zval *ozval, zval *nzval);
 PHPAPI void var_push_dtor(php_unserialize_data_t *var_hash, zval *val);
 PHPAPI zval *var_tmp_var(php_unserialize_data_t *var_hashx);
