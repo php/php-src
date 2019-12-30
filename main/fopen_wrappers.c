@@ -558,7 +558,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 				if (wrapper->wops->url_stat) {
 					php_stream_statbuf ssb;
 
-					if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, 0, &ssb, NULL)) {
+					if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, PHP_STREAM_URL_STAT_QUIET, &ssb, NULL)) {
 						return zend_string_init(trypath, strlen(trypath), 0);
 					}
 					if (EG(exception)) {
@@ -598,7 +598,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 					if (wrapper->wops->url_stat) {
 						php_stream_statbuf ssb;
 
-						if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, 0, &ssb, NULL)) {
+						if (SUCCESS == wrapper->wops->url_stat(wrapper, trypath, PHP_STREAM_URL_STAT_QUIET, &ssb, NULL)) {
 							return zend_string_init(trypath, strlen(trypath), 0);
 						}
 						if (EG(exception)) {
