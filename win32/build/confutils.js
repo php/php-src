@@ -3649,7 +3649,7 @@ function get_clang_lib_dir()
 	if (COMPILER_NAME_LONG.match(/clang version ([\d\.]+) \((.*)\)/)) {
 		ver = RegExp.$1;
 	} else {
-		ERROR("Faled to determine clang lib path");
+		ERROR("Failed to determine clang lib path");
 	}
 
 	if (X64) {
@@ -3682,7 +3682,7 @@ function add_asan_opts(cflags_name, libs_name, ldflags_name)
 	if (COMPILER_NAME_LONG.match(/clang version ([\d\.]+) \((.*)\)/)) {
 		ver = RegExp.$1;
 	} else {
-		ERROR("Faled to determine clang lib path");
+		ERROR("Failed to determine clang lib path");
 	}
 
 	if (!!cflags_name) {
