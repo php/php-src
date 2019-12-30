@@ -563,7 +563,7 @@ PHP_METHOD(domdocument, createElement)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -596,7 +596,7 @@ PHP_METHOD(domdocument, createDocumentFragment)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -626,7 +626,7 @@ PHP_METHOD(domdocument, createTextNode)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -656,7 +656,7 @@ PHP_METHOD(domdocument, createComment)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -686,7 +686,7 @@ PHP_METHOD(domdocument, createCDATASection)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -716,7 +716,7 @@ PHP_METHOD(domdocument, createProcessingInstruction)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -753,7 +753,7 @@ PHP_METHOD(domdocument, createAttribute)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -789,7 +789,7 @@ PHP_METHOD(domdocument, createEntityReference)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -823,7 +823,7 @@ PHP_METHOD(domdocument, getElementsByTagName)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -850,7 +850,7 @@ PHP_METHOD(domdocument, importNode)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &node, dom_node_class_entry, &recursive) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -910,7 +910,7 @@ PHP_METHOD(domdocument, createElementNS)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s|s", &uri, &uri_len, &name, &name_len, &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -975,7 +975,7 @@ PHP_METHOD(domdocument, createAttributeNS)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &uri_len, &name, &name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -1038,7 +1038,7 @@ PHP_METHOD(domdocument, getElementsByTagNameNS)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &uri, &uri_len, &name, &name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -1067,7 +1067,7 @@ PHP_METHOD(domdocument, getElementById)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &idname, &idname_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -1092,7 +1092,7 @@ PHP_METHOD(domdocument, adoptNode)
 	zval *nodep = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &nodep, dom_node_class_entry) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_NOT_IMPLEMENTED();
@@ -1111,7 +1111,7 @@ PHP_METHOD(domdocument, normalizeDocument)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -1130,7 +1130,7 @@ PHP_METHOD(domdocument, __construct)
 	int refcount;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ss", &version, &version_len, &encoding, &encoding_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	docp = xmlNewDoc((xmlChar *) version);
@@ -1354,7 +1354,7 @@ static void dom_parse_document(INTERNAL_FUNCTION_PARAMETERS, int mode) {
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &options) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!source_len) {
@@ -1441,7 +1441,7 @@ PHP_METHOD(domdocument, save)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|l", &file, &file_len, &options) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (file_len == 0) {
@@ -1488,7 +1488,7 @@ PHP_METHOD(domdocument, saveXML)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|O!l", &nodep, dom_node_class_entry, &options) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -1596,7 +1596,7 @@ PHP_METHOD(domdocument, xinclude)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZEND_LONG_EXCEEDS_INT(flags)) {
@@ -1641,7 +1641,7 @@ PHP_METHOD(domdocument, validate)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -1681,7 +1681,7 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (source_len == 0) {
@@ -1780,7 +1780,7 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &source, &source_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (source_len == 0) {
@@ -1878,7 +1878,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	id = getThis();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &options) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!source_len) {
@@ -1991,7 +1991,7 @@ PHP_METHOD(domdocument, saveHTMLFile)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &file, &file_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (file_len == 0) {
@@ -2034,7 +2034,7 @@ PHP_METHOD(domdocument, saveHTML)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
 		"|O!", &nodep, dom_node_class_entry)
 		== FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
@@ -2115,7 +2115,7 @@ PHP_METHOD(domdocument, registerNodeClass)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "CC!", &basece, &ce) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ce == NULL || instanceof_function(ce, basece)) {

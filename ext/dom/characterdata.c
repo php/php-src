@@ -134,7 +134,7 @@ PHP_METHOD(domcharacterdata, substringData)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset, &count) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
@@ -182,7 +182,7 @@ PHP_METHOD(domcharacterdata, appendData)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
@@ -208,7 +208,7 @@ PHP_METHOD(domcharacterdata, insertData)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &offset, &arg, &arg_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
@@ -256,7 +256,7 @@ PHP_METHOD(domcharacterdata, deleteData)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset, &count) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
@@ -314,7 +314,7 @@ PHP_METHOD(domcharacterdata, replaceData)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lls", &offset, &count, &arg, &arg_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);

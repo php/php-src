@@ -98,7 +98,7 @@ PHP_METHOD(domnodelist, count)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_DOMOBJ_P(id);
@@ -128,7 +128,7 @@ PHP_METHOD(domnodelist, item)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (index >= 0) {

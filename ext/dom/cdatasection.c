@@ -45,7 +45,7 @@ PHP_METHOD(domcdatasection, __construct)
 	size_t value_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	nodep = xmlNewCDataBlock(NULL, (xmlChar *) value, value_len);

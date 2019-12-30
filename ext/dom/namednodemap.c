@@ -100,7 +100,7 @@ PHP_METHOD(domnamednodemap, getNamedItem)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &named, &namedlen) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_DOMOBJ_P(id);
@@ -155,7 +155,7 @@ PHP_METHOD(domnamednodemap, item)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (index >= 0) {
 		if (ZEND_LONG_INT_OVFL(index)) {
@@ -220,7 +220,7 @@ PHP_METHOD(domnamednodemap, getNamedItemNS)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &urilen, &named, &namedlen) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_DOMOBJ_P(id);
@@ -266,7 +266,7 @@ PHP_METHOD(domnamednodemap, count)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_DOMOBJ_P(id);

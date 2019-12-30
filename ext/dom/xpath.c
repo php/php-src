@@ -231,7 +231,7 @@ PHP_METHOD(domxpath, __construct)
 	xmlXPathContextPtr ctx, oldctx;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &doc, dom_document_class_entry, &register_node_ns) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, doc, xmlDocPtr, docobj);
@@ -312,7 +312,7 @@ PHP_METHOD(domxpath, registerNamespace)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &prefix, &prefix_len, &ns_uri, &ns_uri_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_XPATHOBJ_P(id);
@@ -358,7 +358,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	register_node_ns = intern->register_node_ns;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|O!b", &expr, &expr_len, &context, dom_node_class_entry, &register_node_ns) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ctxp = (xmlXPathContextPtr) intern->dom.ptr;

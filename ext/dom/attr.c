@@ -49,7 +49,7 @@ PHP_METHOD(domattr, __construct)
 	size_t name_len, value_len, name_valid;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_DOMOBJ_P(ZEND_THIS);
@@ -221,7 +221,7 @@ PHP_METHOD(domattr, isId)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(attrp, id, xmlAttrPtr, intern);

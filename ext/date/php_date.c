@@ -2946,7 +2946,7 @@ PHP_METHOD(DateTimeImmutable, modify)
 
 	object = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &modify, &modify_len) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	date_clone_immutable(object, &new_object);
@@ -3000,7 +3000,7 @@ PHP_METHOD(DateTimeImmutable, add)
 
 	object = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &interval, date_ce_interval) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	date_clone_immutable(object, &new_object);
@@ -3057,7 +3057,7 @@ PHP_METHOD(DateTimeImmutable, sub)
 
 	object = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &interval, date_ce_interval) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	date_clone_immutable(object, &new_object);
@@ -3162,7 +3162,7 @@ PHP_METHOD(DateTimeImmutable, setTimezone)
 
 	object = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &timezone_object, date_ce_timezone) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	date_clone_immutable(object, &new_object);
@@ -3248,7 +3248,7 @@ PHP_METHOD(DateTimeImmutable, setTime)
 
 	object = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|ll", &h, &i, &s, &ms) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	date_clone_immutable(object, &new_object);
@@ -3298,7 +3298,7 @@ PHP_METHOD(DateTimeImmutable, setDate)
 
 	object = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &y, &m, &d) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	date_clone_immutable(object, &new_object);
@@ -3352,7 +3352,7 @@ PHP_METHOD(DateTimeImmutable, setISODate)
 
 	object = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|l", &y, &w, &d) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	date_clone_immutable(object, &new_object);
@@ -3401,7 +3401,7 @@ PHP_METHOD(DateTimeImmutable, setTimestamp)
 
 	object = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &timestamp) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	date_clone_immutable(object, &new_object);

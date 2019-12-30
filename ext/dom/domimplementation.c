@@ -49,7 +49,7 @@ PHP_METHOD(domimplementation, hasFeature)
 	char *feature, *version;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &feature, &feature_len, &version, &version_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (dom_has_feature(feature, version)) {
@@ -74,7 +74,7 @@ PHP_METHOD(domimplementation, createDocumentType)
 	xmlURIPtr uri;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ss", &name, &name_len, &publicid, &publicid_len, &systemid, &systemid_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (name_len == 0) {
@@ -140,7 +140,7 @@ PHP_METHOD(domimplementation, createDocument)
 	dom_object *doctobj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ssO!", &uri, &uri_len, &name, &name_len, &node, dom_documenttype_class_entry) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (node != NULL) {
@@ -237,7 +237,7 @@ PHP_METHOD(domimplementation, getFeature)
 	char *feature, *version;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &feature, &feature_len, &version, &version_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_NOT_IMPLEMENTED();

@@ -46,7 +46,7 @@ PHP_METHOD(domprocessinginstruction, __construct)
 	int name_valid;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);

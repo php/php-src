@@ -43,8 +43,8 @@ PHP_METHOD(domdocumentfragment, __construct)
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 
-	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	nodep = xmlNewDocFragment(NULL);
@@ -110,7 +110,7 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &data, &data_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);

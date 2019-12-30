@@ -49,7 +49,7 @@ PHP_METHOD(domtext, __construct)
 	size_t value_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	nodep = xmlNewText((xmlChar *) value);
@@ -128,7 +128,7 @@ PHP_METHOD(domtext, splitText)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &offset) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
@@ -184,7 +184,7 @@ PHP_METHOD(domtext, isWhitespaceInElementContent)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
