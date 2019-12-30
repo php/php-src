@@ -569,10 +569,6 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 			}
 
 			switch (opline->opcode) {
-				case ZEND_ADD_ARRAY_UNPACK:
-				case ZEND_ADD_ARRAY_ELEMENT:
-					ssa_ops[k].result_use = var[EX_VAR_TO_NUM(opline->result.var)];
-					break;
 				case ZEND_ASSIGN:
 					if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op2_type == IS_CV) {
 						ssa_ops[k].op2_def = ssa_vars_count;
@@ -718,6 +714,12 @@ add_op1_def:
 						goto add_op1_def;
 					}
 					break;
+				case ZEND_ADD_ARRAY_UNPACK:
+					ssa_ops[k].result_use = var[EX_VAR_TO_NUM(opline->result.var)];
+					break;
+				case ZEND_ADD_ARRAY_ELEMENT:
+					ssa_ops[k].result_use = var[EX_VAR_TO_NUM(opline->result.var)];
+					/* break missing intentionally */
 				case ZEND_INIT_ARRAY:
 					if (((build_flags & ZEND_SSA_RC_INFERENCE)
 								|| (opline->extended_value & ZEND_ARRAY_ELEMENT_REF))
