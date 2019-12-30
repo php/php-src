@@ -74,6 +74,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_only_link, 0, 0, 1)
 	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_optional_link, 0, 0, 0)
+	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mysqli_autocommit, 0, 0, 2)
 	MYSQLI_ZEND_ARG_OBJ_INFO_LINK()
 	ZEND_ARG_INFO(0, mode)
@@ -445,7 +449,7 @@ const zend_function_entry mysqli_functions[] = {
 #ifdef HAVE_MYSQLI_GET_CHARSET
 	PHP_FE(mysqli_get_charset,							arginfo_mysqli_only_link)
 #endif
-	PHP_FE(mysqli_get_client_info,						arginfo_mysqli_no_options)
+	PHP_FE(mysqli_get_client_info,						arginfo_mysqli_optional_link)
 	PHP_FE(mysqli_get_client_version,					arginfo_mysqli_no_options)
 	PHP_FE(mysqli_get_links_stats,						arginfo_mysqli_no_options)
 	PHP_FE(mysqli_get_host_info,						arginfo_mysqli_only_link)
