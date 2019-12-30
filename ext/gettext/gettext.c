@@ -102,7 +102,7 @@ PHP_NAMED_FUNCTION(zif_textdomain)
 	size_t domain_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!", &domain, &domain_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(domain_len)
@@ -149,7 +149,7 @@ PHP_NAMED_FUNCTION(zif_dgettext)
 	zend_string *domain, *msgid;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &domain, &msgid) == FAILURE)	{
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(ZSTR_LEN(domain))
@@ -174,7 +174,7 @@ PHP_NAMED_FUNCTION(zif_dcgettext)
 	zend_long category;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SSl", &domain, &msgid, &category) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(ZSTR_LEN(domain))
@@ -199,7 +199,7 @@ PHP_NAMED_FUNCTION(zif_bindtextdomain)
 	char *retval, dir_name[MAXPATHLEN];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &domain, &domain_len, &dir, &dir_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(domain_len)
@@ -233,7 +233,7 @@ PHP_NAMED_FUNCTION(zif_ngettext)
 	zend_long count;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssl", &msgid1, &msgid1_len, &msgid2, &msgid2_len, &count) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_GETTEXT_LENGTH_CHECK("msgid1", msgid1_len)
@@ -258,7 +258,7 @@ PHP_NAMED_FUNCTION(zif_dngettext)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sssl", &domain, &domain_len,
 		&msgid1, &msgid1_len, &msgid2, &msgid2_len, &count) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(domain_len)
@@ -286,7 +286,7 @@ PHP_NAMED_FUNCTION(zif_dcngettext)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sssll", &domain, &domain_len,
 		&msgid1, &msgid1_len, &msgid2, &msgid2_len, &count, &category) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(domain_len)
@@ -311,7 +311,7 @@ PHP_NAMED_FUNCTION(zif_bind_textdomain_codeset)
 	size_t domain_len, codeset_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &domain, &domain_len, &codeset, &codeset_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK(domain_len)

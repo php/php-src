@@ -124,7 +124,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 	php_stream *stream = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|b", &algo, &algo_len, &data, &data_len, &raw_output) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ops = php_hash_fetch_ops(algo, algo_len);
@@ -247,7 +247,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|b", &algo, &algo_len, &data, &data_len,
 																  &key, &key_len, &raw_output) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ops = php_hash_fetch_ops(algo, algo_len);
@@ -353,7 +353,7 @@ PHP_FUNCTION(hash_init)
 	php_hashcontext_object *hash;
 
 	if (zend_parse_parameters(argc, "S|lS", &algo, &options, &key) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ops = php_hash_fetch_ops(ZSTR_VAL(algo), ZSTR_LEN(algo));
@@ -428,7 +428,7 @@ PHP_FUNCTION(hash_update)
 	zend_string *data;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS", &zhash, php_hashcontext_ce, &data) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
@@ -449,7 +449,7 @@ PHP_FUNCTION(hash_update_stream)
 	zend_long length = -1, didread = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Or|l", &zhash, php_hashcontext_ce, &zstream, &length) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
@@ -490,7 +490,7 @@ PHP_FUNCTION(hash_update_file)
 	ssize_t n;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OP|r", &zhash, php_hashcontext_ce, &filename, &zcontext) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
@@ -523,7 +523,7 @@ PHP_FUNCTION(hash_final)
 	size_t digest_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &zhash, php_hashcontext_ce, &raw_output) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
@@ -578,7 +578,7 @@ PHP_FUNCTION(hash_copy)
 	zval *zhash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &zhash, php_hashcontext_ce) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETVAL_OBJ(Z_OBJ_HANDLER_P(zhash, clone_obj)(Z_OBJ_P(zhash)));
@@ -599,7 +599,7 @@ PHP_FUNCTION(hash_algos)
 	zend_string *str;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -617,7 +617,7 @@ PHP_FUNCTION(hash_hmac_algos)
 	const php_hash_ops *ops;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -642,7 +642,7 @@ PHP_FUNCTION(hash_hkdf)
 	void *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|lSS", &algo, &ikm, &length, &info, &salt) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ops = php_hash_fetch_ops(ZSTR_VAL(algo), ZSTR_LEN(algo));
@@ -742,7 +742,7 @@ PHP_FUNCTION(hash_pbkdf2)
 	void *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sssl|lb", &algo, &algo_len, &pass, &pass_len, &salt, &salt_len, &iterations, &length, &raw_output) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ops = php_hash_fetch_ops(algo, algo_len);
@@ -867,7 +867,7 @@ PHP_FUNCTION(hash_equals)
 	size_t j;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &known_zval, &user_zval) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* We only allow comparing string to prevent unexpected results. */
@@ -967,7 +967,7 @@ PHP_FUNCTION(mhash)
 	zend_long algorithm;
 
 	if (zend_parse_parameters(1, "z", &z_algorithm) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	algorithm = zval_get_long(z_algorithm);
@@ -997,7 +997,7 @@ PHP_FUNCTION(mhash_get_hash_name)
 	zend_long algorithm;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &algorithm) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (algorithm >= 0 && algorithm  < MHASH_NUM_ALGOS) {
@@ -1015,7 +1015,7 @@ PHP_FUNCTION(mhash_get_hash_name)
 PHP_FUNCTION(mhash_count)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	RETURN_LONG(MHASH_NUM_ALGOS - 1);
 }
@@ -1028,7 +1028,7 @@ PHP_FUNCTION(mhash_get_block_size)
 	zend_long algorithm;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &algorithm) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	RETVAL_FALSE;
 
@@ -1057,7 +1057,7 @@ PHP_FUNCTION(mhash_keygen_s2k)
 	char padded_salt[SALT_SIZE];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lssl", &algorithm, &password, &password_len, &salt, &salt_len, &l_bytes) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	bytes = (int)l_bytes;

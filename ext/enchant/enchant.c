@@ -527,7 +527,7 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 	int pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rp", &broker, &pwl, &pwllen) == FAILURE) {
-		RETURN_THROWS()
+		RETURN_THROWS();
 	}
 
 	if (php_check_open_basedir(pwl)) {
