@@ -2074,6 +2074,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 			options |= STREAM_ASSUME_REALPATH;
 			options &= ~USE_PATH;
 		}
+		if (EG(exception)) {
+			return NULL;
+		}
 	}
 
 	path_to_open = path;
