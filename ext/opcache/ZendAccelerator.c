@@ -1677,11 +1677,13 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
     if (file_handle->type == ZEND_HANDLE_FILENAME) {
         if (accelerator_orig_zend_stream_open_function(file_handle->filename, file_handle) != SUCCESS) {
 			*op_array_p = NULL;
-			if (type == ZEND_REQUIRE) {
-				zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
-				zend_bailout();
-			} else {
-				zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+			if (!EG(exception)) {
+				if (type == ZEND_REQUIRE) {
+					zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
+					zend_bailout();
+				} else {
+					zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+				}
 			}
 			return NULL;
     	}
@@ -1825,11 +1827,13 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 	if (!file_handle->opened_path) {
 		if (file_handle->type == ZEND_HANDLE_FILENAME &&
 		    accelerator_orig_zend_stream_open_function(file_handle->filename, file_handle) == FAILURE) {
-			if (type == ZEND_REQUIRE) {
-				zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
-				zend_bailout();
-			} else {
-				zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+			if (!EG(exception)) {
+				if (type == ZEND_REQUIRE) {
+					zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
+					zend_bailout();
+				} else {
+					zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+				}
 			}
 			return NULL;
 	    }
@@ -1979,11 +1983,13 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 			/* open file to resolve the path */
 		    if (file_handle->type == ZEND_HANDLE_FILENAME &&
         		accelerator_orig_zend_stream_open_function(file_handle->filename, file_handle) == FAILURE) {
-				if (type == ZEND_REQUIRE) {
-					zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
-					zend_bailout();
-				} else {
-					zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+				if (!EG(exception)) {
+					if (type == ZEND_REQUIRE) {
+						zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
+						zend_bailout();
+					} else {
+						zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+					}
 				}
 				return NULL;
 		    }
@@ -2035,11 +2041,13 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 	    UNEXPECTED(ZCG(accel_directives).validate_permission) &&
 	    file_handle->type == ZEND_HANDLE_FILENAME &&
 	    UNEXPECTED(check_persistent_script_access(persistent_script))) {
-		if (type == ZEND_REQUIRE) {
-			zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
-			zend_bailout();
-		} else {
-			zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+		if (!EG(exception)) {
+			if (type == ZEND_REQUIRE) {
+				zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, file_handle->filename);
+				zend_bailout();
+			} else {
+				zend_message_dispatcher(ZMSG_FAILED_INCLUDE_FOPEN, file_handle->filename);
+			}
 		}
 		return NULL;
 	}
