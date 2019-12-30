@@ -3882,12 +3882,6 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CONST_H
 	expr = RT_CONSTANT(opline, opline->op1);
 
 	switch (opline->extended_value) {
-		case IS_NULL:
-			ZVAL_NULL(result);
-			break;
-		case _IS_BOOL:
-			ZVAL_BOOL(result, zend_is_true(expr));
-			break;
 		case IS_LONG:
 			ZVAL_LONG(result, zval_get_long(expr));
 			break;
@@ -3898,6 +3892,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CONST_H
 			ZVAL_STR(result, zval_get_string(expr));
 			break;
 		default:
+			ZEND_ASSERT(opline->extended_value != _IS_BOOL && "Must use ZEND_BOOL instead");
 			if (IS_CONST & (IS_VAR|IS_CV)) {
 				ZVAL_DEREF(expr);
 			}
@@ -3940,6 +3935,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CONST_H
 					}
 				}
 			} else {
+				ZEND_ASSERT(opline->extended_value == IS_OBJECT);
 				ZVAL_OBJ(result, zend_objects_new(zend_standard_class_def));
 				if (Z_TYPE_P(expr) == IS_ARRAY) {
 					ht = zend_symtable_to_proptable(Z_ARR_P(expr));
@@ -17489,12 +17485,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPC
 	expr = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
 
 	switch (opline->extended_value) {
-		case IS_NULL:
-			ZVAL_NULL(result);
-			break;
-		case _IS_BOOL:
-			ZVAL_BOOL(result, zend_is_true(expr));
-			break;
 		case IS_LONG:
 			ZVAL_LONG(result, zval_get_long(expr));
 			break;
@@ -17505,6 +17495,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPC
 			ZVAL_STR(result, zval_get_string(expr));
 			break;
 		default:
+			ZEND_ASSERT(opline->extended_value != _IS_BOOL && "Must use ZEND_BOOL instead");
 			if (IS_TMP_VAR & (IS_VAR|IS_CV)) {
 				ZVAL_DEREF(expr);
 			}
@@ -17547,6 +17538,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPC
 					}
 				}
 			} else {
+				ZEND_ASSERT(opline->extended_value == IS_OBJECT);
 				ZVAL_OBJ(result, zend_objects_new(zend_standard_class_def));
 				if (Z_TYPE_P(expr) == IS_ARRAY) {
 					ht = zend_symtable_to_proptable(Z_ARR_P(expr));
@@ -20150,12 +20142,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPC
 	expr = _get_zval_ptr_var(opline->op1.var EXECUTE_DATA_CC);
 
 	switch (opline->extended_value) {
-		case IS_NULL:
-			ZVAL_NULL(result);
-			break;
-		case _IS_BOOL:
-			ZVAL_BOOL(result, zend_is_true(expr));
-			break;
 		case IS_LONG:
 			ZVAL_LONG(result, zval_get_long(expr));
 			break;
@@ -20166,6 +20152,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPC
 			ZVAL_STR(result, zval_get_string(expr));
 			break;
 		default:
+			ZEND_ASSERT(opline->extended_value != _IS_BOOL && "Must use ZEND_BOOL instead");
 			if (IS_VAR & (IS_VAR|IS_CV)) {
 				ZVAL_DEREF(expr);
 			}
@@ -20209,6 +20196,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPC
 					}
 				}
 			} else {
+				ZEND_ASSERT(opline->extended_value == IS_OBJECT);
 				ZVAL_OBJ(result, zend_objects_new(zend_standard_class_def));
 				if (Z_TYPE_P(expr) == IS_ARRAY) {
 					ht = zend_symtable_to_proptable(Z_ARR_P(expr));
@@ -36083,12 +36071,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCO
 	expr = _get_zval_ptr_cv_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
 
 	switch (opline->extended_value) {
-		case IS_NULL:
-			ZVAL_NULL(result);
-			break;
-		case _IS_BOOL:
-			ZVAL_BOOL(result, zend_is_true(expr));
-			break;
 		case IS_LONG:
 			ZVAL_LONG(result, zval_get_long(expr));
 			break;
@@ -36099,6 +36081,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCO
 			ZVAL_STR(result, zval_get_string(expr));
 			break;
 		default:
+			ZEND_ASSERT(opline->extended_value != _IS_BOOL && "Must use ZEND_BOOL instead");
 			if (IS_CV & (IS_VAR|IS_CV)) {
 				ZVAL_DEREF(expr);
 			}
@@ -36141,6 +36124,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCO
 					}
 				}
 			} else {
+				ZEND_ASSERT(opline->extended_value == IS_OBJECT);
 				ZVAL_OBJ(result, zend_objects_new(zend_standard_class_def));
 				if (Z_TYPE_P(expr) == IS_ARRAY) {
 					ht = zend_symtable_to_proptable(Z_ARR_P(expr));
