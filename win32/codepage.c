@@ -108,7 +108,7 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 #if PHP_DEBUG
 	size_t save_in_len = in_len;
 #endif
- 
+
 	assert(in && in_len ? in[in_len] == '\0' : 1);
 
 	if (!in) {
@@ -563,7 +563,7 @@ PHP_FUNCTION(sapi_windows_cp_set)
 	const struct php_win32_cp *cp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &id) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZEND_LONG_UINT_OVFL(id)) {
@@ -593,7 +593,7 @@ PHP_FUNCTION(sapi_windows_cp_get)
 	size_t kind_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &kind, &kind_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (kind_len == sizeof("ansi")-1 && !strncasecmp(kind, "ansi", kind_len)) {
@@ -613,7 +613,7 @@ PHP_FUNCTION(sapi_windows_cp_get)
 PHP_FUNCTION(sapi_windows_cp_is_utf8)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(php_win32_cp_use_unicode());
@@ -631,7 +631,7 @@ PHP_FUNCTION(sapi_windows_cp_conv)
 	zval *z_in_cp, *z_out_cp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzs", &z_in_cp, &z_out_cp, &subj, &subj_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZEND_SIZE_T_INT_OVFL(subj_len)) {

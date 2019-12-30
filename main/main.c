@@ -1497,7 +1497,7 @@ PHP_FUNCTION(set_time_limit)
 	zend_string *key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &new_timeout) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	new_timeout_strlen = (int)zend_spprintf(&new_timeout_str, 0, ZEND_LONG_FMT, new_timeout);

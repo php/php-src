@@ -896,7 +896,7 @@ ZEND_METHOD(Generator, rewind)
 	zend_generator *generator;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
@@ -912,7 +912,7 @@ ZEND_METHOD(Generator, valid)
 	zend_generator *generator;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
@@ -932,7 +932,7 @@ ZEND_METHOD(Generator, current)
 	zend_generator *generator, *root;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
@@ -955,7 +955,7 @@ ZEND_METHOD(Generator, key)
 	zend_generator *generator, *root;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
@@ -978,7 +978,7 @@ ZEND_METHOD(Generator, next)
 	zend_generator *generator;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);
@@ -1071,7 +1071,7 @@ ZEND_METHOD(Generator, getReturn)
 	zend_generator *generator;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	generator = (zend_generator *) Z_OBJ_P(ZEND_THIS);

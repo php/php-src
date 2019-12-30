@@ -191,7 +191,7 @@ int zend_startup_builtin_functions(void) /* {{{ */
 ZEND_FUNCTION(zend_version)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_STRINGL(ZEND_VERSION, sizeof(ZEND_VERSION)-1);
@@ -204,7 +204,7 @@ ZEND_FUNCTION(zend_version)
 ZEND_FUNCTION(gc_mem_caches)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(zend_mm_gc(zend_mm_get_heap()));
@@ -217,7 +217,7 @@ ZEND_FUNCTION(gc_mem_caches)
 ZEND_FUNCTION(gc_collect_cycles)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(gc_collect_cycles());
@@ -229,7 +229,7 @@ ZEND_FUNCTION(gc_collect_cycles)
 ZEND_FUNCTION(gc_enabled)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(gc_enabled());
@@ -243,7 +243,7 @@ ZEND_FUNCTION(gc_enable)
 	zend_string *key;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	key = zend_string_init("zend.enable_gc", sizeof("zend.enable_gc")-1, 0);
@@ -259,7 +259,7 @@ ZEND_FUNCTION(gc_disable)
 	zend_string *key;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	key = zend_string_init("zend.enable_gc", sizeof("zend.enable_gc")-1, 0);
@@ -275,7 +275,7 @@ ZEND_FUNCTION(gc_status)
 	zend_gc_status status;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_gc_get_status(&status);
@@ -296,7 +296,7 @@ ZEND_FUNCTION(func_num_args)
 	zend_execute_data *ex = EX(prev_execute_data);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
@@ -322,7 +322,7 @@ ZEND_FUNCTION(func_get_arg)
 	zend_execute_data *ex;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &requested_offset) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (requested_offset < 0) {
@@ -735,7 +735,7 @@ ZEND_FUNCTION(get_class)
 	zval *obj = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|o", &obj) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!obj) {
@@ -760,7 +760,7 @@ ZEND_FUNCTION(get_called_class)
 	zend_class_entry *called_scope;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	called_scope = zend_get_called_scope(execute_data);
@@ -784,7 +784,7 @@ ZEND_FUNCTION(get_parent_class)
 	zend_class_entry *ce = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!ZEND_NUM_ARGS()) {
@@ -933,7 +933,7 @@ ZEND_FUNCTION(get_class_vars)
 	zend_class_entry *ce, *scope;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &class_name) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ce = zend_lookup_class(class_name);
@@ -1079,7 +1079,7 @@ ZEND_FUNCTION(get_class_methods)
 	zend_string *key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &klass) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(klass) == IS_OBJECT) {
@@ -1185,7 +1185,7 @@ ZEND_FUNCTION(property_exists)
 	zend_property_info *property_info;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zS", &object, &property) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (property == NULL) {
@@ -1322,7 +1322,7 @@ ZEND_FUNCTION(class_alias)
 	zend_bool autoload = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ss|b", &class_name, &alias_name, &alias_name_len, &autoload) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ce = zend_lookup_class_ex(class_name, NULL, !autoload ? ZEND_FETCH_CLASS_NO_AUTOLOAD : 0);
@@ -1353,7 +1353,7 @@ ZEND_FUNCTION(get_included_files)
 	zend_string *entry;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -1374,7 +1374,7 @@ ZEND_FUNCTION(trigger_error)
 	size_t message_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &message, &message_len, &error_type) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	switch (error_type) {
@@ -1402,7 +1402,7 @@ ZEND_FUNCTION(set_error_handler)
 	zend_long error_type = E_ALL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &error_handler, &error_type) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(error_handler) != IS_NULL) { /* NULL == unset */
@@ -1437,7 +1437,7 @@ ZEND_FUNCTION(set_error_handler)
 ZEND_FUNCTION(restore_error_handler)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
@@ -1469,7 +1469,7 @@ ZEND_FUNCTION(set_exception_handler)
 	zval *exception_handler;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &exception_handler) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(exception_handler) != IS_NULL) { /* NULL == unset */
@@ -1502,7 +1502,7 @@ ZEND_FUNCTION(set_exception_handler)
 ZEND_FUNCTION(restore_exception_handler)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
@@ -1535,7 +1535,7 @@ static inline void get_declared_class_impl(INTERNAL_FUNCTION_PARAMETERS, int fla
 	zend_class_entry *ce;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -1585,7 +1585,7 @@ ZEND_FUNCTION(get_defined_functions)
 	char *disable_functions = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &exclude_disabled) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(&internal);
@@ -1654,7 +1654,7 @@ ZEND_FUNCTION(get_resource_type)
 	zval *z_resource_type;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &z_resource_type) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	resource_type = zend_rsrc_list_get_rsrc_type(Z_RES_P(z_resource_type));
@@ -1676,7 +1676,7 @@ ZEND_FUNCTION(get_resources)
 	zval *val;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &type) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!type) {
@@ -1729,7 +1729,7 @@ ZEND_FUNCTION(get_loaded_extensions)
 	zend_bool zendext = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &zendext) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -1753,7 +1753,7 @@ ZEND_FUNCTION(get_defined_constants)
 	zend_bool categorize = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &categorize) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -1939,7 +1939,7 @@ ZEND_FUNCTION(debug_print_backtrace)
 	zend_long limit = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &options, &limit) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_UNDEF(&arg_array);
@@ -2327,7 +2327,7 @@ ZEND_FUNCTION(debug_backtrace)
 	zend_long limit = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ll", &options, &limit) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_fetch_debug_backtrace(return_value, 1, options, limit);
@@ -2342,7 +2342,7 @@ ZEND_FUNCTION(extension_loaded)
 	zend_string *lcname;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &extension_name) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	lcname = zend_string_tolower(extension_name);
@@ -2366,7 +2366,7 @@ ZEND_FUNCTION(get_extension_funcs)
 	zend_function *zif;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &extension_name) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (strncasecmp(ZSTR_VAL(extension_name), "zend", sizeof("zend"))) {
 		lcname = zend_string_tolower(extension_name);

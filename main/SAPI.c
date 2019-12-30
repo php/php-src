@@ -116,7 +116,7 @@ PHP_FUNCTION(header_register_callback)
 	zval *callback_func;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callback_func) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!zend_is_callable(callback_func, 0, NULL)) {

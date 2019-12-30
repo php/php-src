@@ -1465,7 +1465,7 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!fcgi_is_closed(request)) {
@@ -1487,7 +1487,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 	fcgi_request *request;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -1501,7 +1501,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 PHP_FUNCTION(fpm_get_status) /* {{{ */
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (fpm_status_export_to_zval(return_value)) {

@@ -1299,7 +1299,7 @@ PHP_FUNCTION(ob_start)
 	zend_long flags = PHP_OUTPUT_HANDLER_STDFLAGS;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zll", &output_handler, &chunk_size, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (chunk_size < 0) {
@@ -1319,7 +1319,7 @@ PHP_FUNCTION(ob_start)
 PHP_FUNCTION(ob_flush)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!OG(active)) {
@@ -1340,7 +1340,7 @@ PHP_FUNCTION(ob_flush)
 PHP_FUNCTION(ob_clean)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!OG(active)) {
@@ -1361,7 +1361,7 @@ PHP_FUNCTION(ob_clean)
 PHP_FUNCTION(ob_end_flush)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!OG(active)) {
@@ -1378,7 +1378,7 @@ PHP_FUNCTION(ob_end_flush)
 PHP_FUNCTION(ob_end_clean)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!OG(active)) {
@@ -1395,7 +1395,7 @@ PHP_FUNCTION(ob_end_clean)
 PHP_FUNCTION(ob_get_flush)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (php_output_get_contents(return_value) == FAILURE) {
@@ -1414,7 +1414,7 @@ PHP_FUNCTION(ob_get_flush)
 PHP_FUNCTION(ob_get_clean)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if(!OG(active)) {
@@ -1437,7 +1437,7 @@ PHP_FUNCTION(ob_get_clean)
 PHP_FUNCTION(ob_get_contents)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (php_output_get_contents(return_value) == FAILURE) {
@@ -1451,7 +1451,7 @@ PHP_FUNCTION(ob_get_contents)
 PHP_FUNCTION(ob_get_level)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(php_output_get_level());
@@ -1463,7 +1463,7 @@ PHP_FUNCTION(ob_get_level)
 PHP_FUNCTION(ob_get_length)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (php_output_get_length(return_value) == FAILURE) {
@@ -1477,7 +1477,7 @@ PHP_FUNCTION(ob_get_length)
 PHP_FUNCTION(ob_list_handlers)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -1497,7 +1497,7 @@ PHP_FUNCTION(ob_get_status)
 	zend_bool full_status = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &full_status) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!OG(active)) {
@@ -1521,7 +1521,7 @@ PHP_FUNCTION(ob_implicit_flush)
 	zend_long flag = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &flag) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_output_set_implicit_flush(flag);
@@ -1533,7 +1533,7 @@ PHP_FUNCTION(ob_implicit_flush)
 PHP_FUNCTION(output_reset_rewrite_vars)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (php_url_scanner_reset_vars() == SUCCESS) {
@@ -1552,7 +1552,7 @@ PHP_FUNCTION(output_add_rewrite_var)
 	size_t name_len, value_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &name, &name_len, &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (php_url_scanner_add_var(name, name_len, value, value_len, 1) == SUCCESS) {

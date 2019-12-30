@@ -73,7 +73,7 @@ PHP_FUNCTION(virtual)
 	request_rec *rr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(rr = php_apache_lookup_uri(filename))) {
@@ -119,7 +119,7 @@ PHP_FUNCTION(apache_lookup_uri)
 	size_t filename_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(rr = php_apache_lookup_uri(filename))) {
@@ -174,7 +174,7 @@ PHP_FUNCTION(apache_request_headers)
 	char *key, *val;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -198,7 +198,7 @@ PHP_FUNCTION(apache_response_headers)
 	char *key, *val;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -223,7 +223,7 @@ PHP_FUNCTION(apache_note)
 	char *old_note_val=NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &note_name, &note_name_len, &note_val, &note_val_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ctx = SG(server_context);
@@ -257,7 +257,7 @@ PHP_FUNCTION(apache_setenv)
 	request_rec *r;
 
 	if (zend_parse_parameters(arg_count, "ss|b", &variable, &variable_len, &string_val, &string_val_len, &walk_to_top) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ctx = SG(server_context);
@@ -293,7 +293,7 @@ PHP_FUNCTION(apache_getenv)
 	request_rec *r;
 
 	if (zend_parse_parameters(arg_count, "s|b", &variable, &variable_len, &walk_to_top) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ctx = SG(server_context);

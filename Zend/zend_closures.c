@@ -124,7 +124,7 @@ ZEND_METHOD(Closure, call)
 	fci.params = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o*", &newthis, &fci.params, &fci.param_count) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	closure = (zend_closure *) Z_OBJ_P(ZEND_THIS);
@@ -333,7 +333,7 @@ ZEND_METHOD(Closure, fromCallable)
 	char *error = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callable) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(callable) == IS_OBJECT && instanceof_function(Z_OBJCE_P(callable), zend_ce_closure)) {

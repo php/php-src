@@ -92,7 +92,7 @@ PHP_FUNCTION(sapi_windows_set_ctrl_handler)
 	zend_bool add = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &handler, &add) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 #if ZTS
@@ -143,7 +143,7 @@ PHP_FUNCTION(sapi_windows_generate_ctrl_event)
 	zend_bool ret = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &evt, &pid) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!php_win32_console_is_cli_sapi()) {
