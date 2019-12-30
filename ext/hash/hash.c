@@ -123,9 +123,12 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 	void *context;
 	php_stream *stream = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ss|b", &algo, &data, &data_len, &raw_output) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(algo)
+		Z_PARAM_STRING(data, data_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(raw_output)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ops = php_hash_fetch_ops(algo);
 	if (!ops) {
