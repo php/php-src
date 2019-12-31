@@ -108,7 +108,7 @@ PHP_METHOD(sqlite3, open)
 	db_obj = Z_SQLITE3_DB_P(object);
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "p|ls", &filename, &filename_len, &flags, &encryption_key, &encryption_key_len)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (db_obj->initialised) {
@@ -186,7 +186,7 @@ PHP_METHOD(sqlite3, close)
 	db_obj = Z_SQLITE3_DB_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (db_obj->initialised) {
@@ -218,7 +218,7 @@ PHP_METHOD(sqlite3, exec)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "S", &sql)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (sqlite3_exec(db_obj->db, ZSTR_VAL(sql), NULL, NULL, &errtext) != SQLITE_OK) {
@@ -236,7 +236,7 @@ PHP_METHOD(sqlite3, exec)
 PHP_METHOD(sqlite3, version)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -259,7 +259,7 @@ PHP_METHOD(sqlite3, lastInsertRowID)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG((zend_long) sqlite3_last_insert_rowid(db_obj->db));
@@ -277,7 +277,7 @@ PHP_METHOD(sqlite3, lastErrorCode)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->db, SQLite3)
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (db_obj->initialised) {
@@ -299,7 +299,7 @@ PHP_METHOD(sqlite3, lastExtendedErrorCode)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->db, SQLite3)
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (db_obj->initialised) {
@@ -323,7 +323,7 @@ PHP_METHOD(sqlite3, enableExtendedResultCodes)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->db, SQLite3)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &enable) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (db_obj->initialised) {
@@ -349,7 +349,7 @@ PHP_METHOD(sqlite3, lastErrorMsg)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->db, SQLite3)
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (db_obj->initialised) {
@@ -375,7 +375,7 @@ PHP_METHOD(sqlite3, busyTimeout)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l", &ms)) {
-		return;
+		RETURN_THROWS();
 	}
 
 #ifdef SQLITE_ENABLE_API_ARMOR
@@ -408,7 +408,7 @@ PHP_METHOD(sqlite3, loadExtension)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s", &extension, &extension_len)) {
-		return;
+		RETURN_THROWS();
 	}
 
 #ifdef ZTS
@@ -478,7 +478,7 @@ PHP_METHOD(sqlite3, changes)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(sqlite3_changes(db_obj->db));
@@ -493,7 +493,7 @@ PHP_METHOD(sqlite3, escapeString)
 	char *ret;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "S", &sql)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZSTR_LEN(sql)) {
@@ -524,7 +524,7 @@ PHP_METHOD(sqlite3, prepare)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "S", &sql)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!ZSTR_LEN(sql)) {
@@ -571,7 +571,7 @@ PHP_METHOD(sqlite3, query)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "S", &sql)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!ZSTR_LEN(sql)) {
@@ -687,7 +687,7 @@ PHP_METHOD(sqlite3, querySingle)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "S|b", &sql, &entire_row)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!ZSTR_LEN(sql)) {
@@ -981,7 +981,7 @@ PHP_METHOD(sqlite3, createFunction)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz|ll", &sql_func, &sql_func_len, &callback_func, &sql_func_num_args, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!sql_func_len) {
@@ -1030,7 +1030,7 @@ PHP_METHOD(sqlite3, createAggregate)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szz|l", &sql_func, &sql_func_len, &step_callback, &fini_callback, &sql_func_num_args) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!sql_func_len) {
@@ -1086,7 +1086,7 @@ PHP_METHOD(sqlite3, createCollation)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz", &collation_name, &collation_name_len, &callback_func) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!collation_name_len) {
@@ -1295,7 +1295,7 @@ PHP_METHOD(sqlite3, openBlob)
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->initialised, SQLite3)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssl|sl", &table, &table_len, &column, &column_len, &rowid, &dbname, &dbname_len, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZEND_NUM_ARGS() >= 4 && CHECK_NULL_PATH(dbname, dbname_len)) {
@@ -1341,7 +1341,7 @@ PHP_METHOD(sqlite3, enableExceptions)
 	db_obj = Z_SQLITE3_DB_P(object);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &enableExceptions) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETVAL_BOOL(db_obj->exception);
@@ -1402,7 +1402,7 @@ PHP_METHOD(sqlite3, backup)
 	SQLITE3_CHECK_INITIALIZED(source_obj, source_obj->initialised, SQLite3)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|ss", &destination_zval, php_sqlite3_sc_entry, &source_dbname, &source_dbname_length, &destination_dbname, &destination_dbname_length) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((ZEND_NUM_ARGS() >= 2 && CHECK_NULL_PATH(source_dbname, source_dbname_length))
@@ -1457,7 +1457,7 @@ PHP_METHOD(sqlite3stmt, paramCount)
 	stmt_obj = Z_SQLITE3_STMT_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
@@ -1476,7 +1476,7 @@ PHP_METHOD(sqlite3stmt, close)
 	stmt_obj = Z_SQLITE3_STMT_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
@@ -1498,7 +1498,7 @@ PHP_METHOD(sqlite3stmt, reset)
 	stmt_obj = Z_SQLITE3_STMT_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
@@ -1521,7 +1521,7 @@ PHP_METHOD(sqlite3stmt, clear)
 	stmt_obj = Z_SQLITE3_STMT_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
@@ -1551,7 +1551,7 @@ PHP_METHOD(sqlite3stmt, readOnly)
 	stmt_obj = Z_SQLITE3_STMT_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
@@ -1683,7 +1683,7 @@ PHP_METHOD(sqlite3stmt, getSQL)
 	int bind_rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &expanded) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
@@ -1793,7 +1793,7 @@ static void sqlite3stmt_bind(INTERNAL_FUNCTION_PARAMETERS)
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "lz|l", &param.param_number, &parameter, &param.type) == FAILURE) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|l", &param.name, &parameter, &param.type) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -1848,7 +1848,7 @@ PHP_METHOD(sqlite3stmt, execute)
 	stmt_obj = Z_SQLITE3_STMT_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SQLITE3_CHECK_INITIALIZED(stmt_obj->db_obj, stmt_obj->initialised, SQLite3);
@@ -1912,7 +1912,7 @@ PHP_METHOD(sqlite3stmt, __construct)
 	stmt_obj = Z_SQLITE3_STMT_P(object);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "OS", &db_zval, php_sqlite3_sc_entry, &sql) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	db_obj = Z_SQLITE3_DB_P(db_zval);
@@ -1957,7 +1957,7 @@ PHP_METHOD(sqlite3result, numColumns)
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(sqlite3_column_count(result_obj->stmt_obj->stmt));
@@ -1977,7 +1977,7 @@ PHP_METHOD(sqlite3result, columnName)
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &column) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	column_name = (char*) sqlite3_column_name(result_obj->stmt_obj->stmt, column);
 
@@ -2001,7 +2001,7 @@ PHP_METHOD(sqlite3result, columnType)
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &column) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (result_obj->complete) {
@@ -2025,7 +2025,7 @@ PHP_METHOD(sqlite3result, fetchArray)
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &mode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ret = sqlite3_step(result_obj->stmt_obj->stmt);
@@ -2080,7 +2080,7 @@ PHP_METHOD(sqlite3result, reset)
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (sqlite3_reset(result_obj->stmt_obj->stmt) != SQLITE_OK) {
@@ -2104,7 +2104,7 @@ PHP_METHOD(sqlite3result, finalize)
 	SQLITE3_CHECK_INITIALIZED(result_obj->db_obj, result_obj->stmt_obj->initialised, SQLite3Result)
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* We need to finalize an internal statement */

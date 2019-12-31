@@ -268,7 +268,7 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(posix)
 #endif
 
-#define PHP_POSIX_NO_ARGS	if (zend_parse_parameters_none() == FAILURE) return;
+#define PHP_POSIX_NO_ARGS	if (zend_parse_parameters_none() == FAILURE) RETURN_THROWS();
 
 #define PHP_POSIX_RETURN_LONG_FUNC(func_name)	\
 	PHP_POSIX_NO_ARGS	\

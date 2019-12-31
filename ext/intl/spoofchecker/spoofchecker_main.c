@@ -31,7 +31,7 @@ PHP_METHOD(Spoofchecker, isSuspicious)
 	SPOOFCHECKER_METHOD_INIT_VARS;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|z", &text, &text_len, &error_code)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
@@ -64,7 +64,7 @@ PHP_METHOD(Spoofchecker, areConfusable)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "ss|z", &s1, &s1_len,
 										 &s2, &s2_len, &error_code)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
@@ -96,7 +96,7 @@ PHP_METHOD(Spoofchecker, setAllowedLocales)
 	SPOOFCHECKER_METHOD_INIT_VARS;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s", &locales, &locales_len)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
@@ -119,7 +119,7 @@ PHP_METHOD(Spoofchecker, setChecks)
 	SPOOFCHECKER_METHOD_INIT_VARS;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l", &checks)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
@@ -142,7 +142,7 @@ PHP_METHOD(Spoofchecker, setRestrictionLevel)
 	SPOOFCHECKER_METHOD_INIT_VARS;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l", &level)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;

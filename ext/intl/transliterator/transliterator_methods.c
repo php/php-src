@@ -113,7 +113,7 @@ PHP_FUNCTION( transliterator_create )
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|l",
 		&str_id, &str_id_len, &direction ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	object = return_value;
@@ -145,7 +145,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|l",
 		&str_rules, &str_rules_len, &direction ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	if( ( direction != TRANSLITERATOR_FORWARD ) && (direction != TRANSLITERATOR_REVERSE ) )
@@ -242,7 +242,7 @@ PHP_FUNCTION( transliterator_list_ids )
 
 	if( zend_parse_parameters_none() == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	en = utrans_openIDs( &status );
@@ -304,7 +304,7 @@ PHP_FUNCTION( transliterator_transliterate )
 		if( zend_parse_parameters( ZEND_NUM_ARGS(), "zs|ll",
 			&arg1, &str, &str_len, &start, &limit ) == FAILURE )
 		{
-			return;
+			RETURN_THROWS();
 		}
 
 		if( Z_TYPE_P( arg1 ) == IS_OBJECT &&
@@ -336,7 +336,7 @@ PHP_FUNCTION( transliterator_transliterate )
 	else if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|ll",
 		&str, &str_len, &start, &limit ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	if( limit < -1 )

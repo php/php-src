@@ -99,7 +99,7 @@ PHP_FUNCTION( msgfmt_parse_message )
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "sss",
 		  &slocale, &slocale_len, &pattern, &pattern_len, &source, &src_len ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	INTL_CHECK_LOCALE_LEN(slocale_len);

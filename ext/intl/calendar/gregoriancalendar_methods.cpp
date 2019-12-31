@@ -75,13 +75,13 @@ static void _php_intlgregcal_constructor_body(
 	if (variant <= 2) {
 		if (zend_parse_parameters(MIN(ZEND_NUM_ARGS(), 2),
 				"|z!s!", &tz_object, &locale, &locale_len) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 	if (variant > 2 && zend_parse_parameters(ZEND_NUM_ARGS(),
 			"lll|lll", &largs[0], &largs[1], &largs[2], &largs[3], &largs[4],
 			&largs[5]) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	// instantion of ICU object

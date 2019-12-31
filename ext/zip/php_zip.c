@@ -1062,7 +1062,7 @@ static PHP_NAMED_FUNCTION(zif_zip_open)
 	zend_string *filename;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &filename) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZSTR_LEN(filename) == 0) {
@@ -1101,7 +1101,7 @@ static PHP_NAMED_FUNCTION(zif_zip_close)
 	zip_rsrc *z_rsrc = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zip) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((z_rsrc = (zip_rsrc *)zend_fetch_resource(Z_RES_P(zip), le_zip_dir_name, le_zip_dir)) == NULL) {
@@ -1123,7 +1123,7 @@ static PHP_NAMED_FUNCTION(zif_zip_read)
 	zip_rsrc *rsrc_int;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zip_dp) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((rsrc_int = (zip_rsrc *)zend_fetch_resource(Z_RES_P(zip_dp), le_zip_dir_name, le_zip_dir)) == NULL) {
@@ -1172,7 +1172,7 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_open)
 	zip_rsrc *z_rsrc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr|s", &zip, &zip_entry, &mode, &mode_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((zr_rsrc = (zip_read_rsrc *)zend_fetch_resource(Z_RES_P(zip_entry), le_zip_entry_name, le_zip_entry)) == NULL) {
@@ -1199,7 +1199,7 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_close)
 	zip_read_rsrc * zr_rsrc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zip_entry) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((zr_rsrc = (zip_read_rsrc *)zend_fetch_resource(Z_RES_P(zip_entry), le_zip_entry_name, le_zip_entry)) == NULL) {
@@ -1221,7 +1221,7 @@ static PHP_NAMED_FUNCTION(zif_zip_entry_read)
 	int n = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &zip_entry, &len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((zr_rsrc = (zip_read_rsrc *)zend_fetch_resource(Z_RES_P(zip_entry), le_zip_entry_name, le_zip_entry)) == NULL) {
@@ -1255,7 +1255,7 @@ static void php_zip_entry_get_info(INTERNAL_FUNCTION_PARAMETERS, int opt) /* {{{
 	zip_read_rsrc * zr_rsrc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zip_entry) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((zr_rsrc = (zip_read_rsrc *)zend_fetch_resource(Z_RES_P(zip_entry), le_zip_entry_name, le_zip_entry)) == NULL) {
@@ -1349,7 +1349,7 @@ static ZIPARCHIVE_METHOD(open)
 	ze_zip_object *ze_obj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|l", &filename, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* We do not use ZIP_FROM_OBJECT, zip init function here */
@@ -1406,7 +1406,7 @@ static ZIPARCHIVE_METHOD(setPassword)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &password, &password_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (password_len < 1) {
@@ -1432,7 +1432,7 @@ static ZIPARCHIVE_METHOD(close)
 	int err;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
@@ -1470,7 +1470,7 @@ static ZIPARCHIVE_METHOD(count)
 	zip_int64_t num;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
@@ -1494,7 +1494,7 @@ static ZIPARCHIVE_METHOD(getStatusString)
 #endif
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
@@ -1528,7 +1528,7 @@ static ZIPARCHIVE_METHOD(addEmptyDir)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 				&dirname, &dirname_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (dirname_len<1) {
@@ -1580,12 +1580,12 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 	if (type == 1) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|la",
 					&pattern, &flags, &options) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|sa",
 					&pattern, &path, &path_len, &options) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -1700,7 +1700,7 @@ static ZIPARCHIVE_METHOD(addFile)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|sll",
 			&filename, &entry_name, &entry_name_len, &offset_start, &offset_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZSTR_LEN(filename) == 0) {
@@ -1739,7 +1739,7 @@ static ZIPARCHIVE_METHOD(addFromString)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sS",
 			&name, &name_len, &buffer) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ze_obj = Z_ZIP_P(self);
@@ -1792,7 +1792,7 @@ static ZIPARCHIVE_METHOD(statName)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|l", &name, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ZIP_STAT_PATH(intern, ZSTR_VAL(name), ZSTR_LEN(name), flags, sb);
@@ -1815,7 +1815,7 @@ static ZIPARCHIVE_METHOD(statIndex)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l",
 			&index, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (zip_stat_index(intern, index, flags, &sb) != 0) {
@@ -1838,7 +1838,7 @@ static ZIPARCHIVE_METHOD(locateName)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|l", &name, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZSTR_LEN(name) < 1) {
@@ -1868,7 +1868,7 @@ static ZIPARCHIVE_METHOD(getNameIndex)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l",
 			&index, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	name = zip_get_name(intern, (int) index, flags);
@@ -1893,7 +1893,7 @@ static ZIPARCHIVE_METHOD(setArchiveComment)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &comment, &comment_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (comment_len > 0xffff) {
@@ -1922,7 +1922,7 @@ static ZIPARCHIVE_METHOD(getArchiveComment)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	comment = zip_get_archive_comment(intern, &comment_len, (int)flags);
@@ -1947,7 +1947,7 @@ static ZIPARCHIVE_METHOD(setCommentName)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
 			&name, &name_len, &comment, &comment_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (name_len < 1) {
@@ -1982,7 +1982,7 @@ static ZIPARCHIVE_METHOD(setCommentIndex)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls",
 			&index, &comment, &comment_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (comment_len > 0xffff) {
@@ -2013,7 +2013,7 @@ static ZIPARCHIVE_METHOD(setExternalAttributesName)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sll|l",
 			&name, &name_len, &opsys, &attr, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (name_len < 1) {
@@ -2045,7 +2045,7 @@ static ZIPARCHIVE_METHOD(setExternalAttributesIndex)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll|l",
 			&index, &opsys, &attr, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ZIP_STAT_INDEX(intern, index, 0, sb);
@@ -2074,7 +2074,7 @@ static ZIPARCHIVE_METHOD(getExternalAttributesName)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "szz|l",
 			&name, &name_len, &z_opsys, &z_attr, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (name_len < 1) {
@@ -2110,7 +2110,7 @@ static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lzz|l",
 			&index, &z_opsys, &z_attr, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ZIP_STAT_INDEX(intern, index, 0, sb);
@@ -2141,7 +2141,7 @@ static ZIPARCHIVE_METHOD(setEncryptionName)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|s",
 			&name, &name_len, &method, &password, &password_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (name_len < 1) {
@@ -2174,7 +2174,7 @@ static ZIPARCHIVE_METHOD(setEncryptionIndex)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|s",
 			&index, &method, &password, &password_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (zip_file_set_encryption(intern, index, (zip_uint16_t)method, password)) {
@@ -2202,7 +2202,7 @@ static ZIPARCHIVE_METHOD(getCommentName)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l",
 			&name, &name_len, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (name_len < 1) {
 		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
@@ -2234,7 +2234,7 @@ static ZIPARCHIVE_METHOD(getCommentIndex)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l",
 				&index, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ZIP_STAT_INDEX(intern, index, 0, sb);
@@ -2258,7 +2258,7 @@ static ZIPARCHIVE_METHOD(setCompressionName)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l",
 			&name, &name_len, &comp_method, &comp_flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (name_len < 1) {
@@ -2291,7 +2291,7 @@ static ZIPARCHIVE_METHOD(setCompressionIndex)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|l",
 			&index, &comp_method, &comp_flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (zip_set_file_compression(intern, (zip_uint64_t)index,
@@ -2313,7 +2313,7 @@ static ZIPARCHIVE_METHOD(deleteIndex)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (index < 0) {
@@ -2341,7 +2341,7 @@ static ZIPARCHIVE_METHOD(deleteName)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (name_len < 1) {
 		RETURN_FALSE;
@@ -2369,7 +2369,7 @@ static ZIPARCHIVE_METHOD(renameIndex)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &index, &new_name, &new_name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (index < 0) {
@@ -2400,7 +2400,7 @@ static ZIPARCHIVE_METHOD(renameName)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &name, &name_len, &new_name, &new_name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (new_name_len < 1) {
@@ -2428,7 +2428,7 @@ static ZIPARCHIVE_METHOD(unchangeIndex)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (index < 0) {
@@ -2456,7 +2456,7 @@ static ZIPARCHIVE_METHOD(unchangeName)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (name_len < 1) {
@@ -2481,7 +2481,7 @@ static ZIPARCHIVE_METHOD(unchangeAll)
 	zval *self = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
@@ -2502,7 +2502,7 @@ static ZIPARCHIVE_METHOD(unchangeArchive)
 	zval *self = ZEND_THIS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZIP_FROM_OBJECT(intern, self);
@@ -2535,7 +2535,7 @@ static ZIPARCHIVE_METHOD(extractTo)
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|z", &pathto, &pathto_len, &zval_files) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (pathto_len < 1) {
@@ -2624,12 +2624,12 @@ static void php_zip_get_from(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 
 	if (type == 1) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "P|ll", &filename, &len, &flags) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		PHP_ZIP_STAT_PATH(intern, ZSTR_VAL(filename), ZSTR_LEN(filename), flags, sb);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|ll", &index, &len, &flags) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		PHP_ZIP_STAT_INDEX(intern, index, 0, sb);
 	}
@@ -2696,7 +2696,7 @@ static ZIPARCHIVE_METHOD(getStream)
 	ZIP_FROM_OBJECT(intern, self);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "P", &filename) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (zip_stat(intern, ZSTR_VAL(filename), 0, &sb) != 0) {

@@ -762,7 +762,7 @@ PHP_FUNCTION(socket_select)
 	zend_bool		sec_is_null = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a!a!a!l!|l", &r_array, &w_array, &e_array, &sec, &sec_is_null, &usec) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	FD_ZERO(&rfds);
@@ -833,7 +833,7 @@ PHP_FUNCTION(socket_create_listen)
 	zend_long		port, backlog = 128;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &port, &backlog) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!php_open_listen_sock(&php_sock, port, backlog)) {
@@ -857,7 +857,7 @@ PHP_FUNCTION(socket_accept)
 	socklen_t			 php_sa_len = sizeof(sa);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &arg1) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
@@ -880,7 +880,7 @@ PHP_FUNCTION(socket_set_nonblock)
 	php_socket	*php_sock;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &arg1) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
@@ -918,7 +918,7 @@ PHP_FUNCTION(socket_set_block)
 	php_socket	*php_sock;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &arg1) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
@@ -959,7 +959,7 @@ PHP_FUNCTION(socket_listen)
 	zend_long		backlog = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &arg1, &backlog) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
@@ -982,7 +982,7 @@ PHP_FUNCTION(socket_close)
 	php_socket	*php_sock;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &arg1) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
@@ -1016,7 +1016,7 @@ PHP_FUNCTION(socket_write)
 	char		*str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &arg1, &str, &str_len, &length) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (length < 0) {
@@ -1058,7 +1058,7 @@ PHP_FUNCTION(socket_read)
 	zend_long		length, type = PHP_BINARY_READ;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|l", &arg1, &length, &type) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* overflow check */
@@ -1125,7 +1125,7 @@ PHP_FUNCTION(socket_getsockname)
 	socklen_t				salen = sizeof(php_sockaddr_storage);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz|z", &arg1, &addr, &port) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
@@ -1199,7 +1199,7 @@ PHP_FUNCTION(socket_getpeername)
 	socklen_t				salen = sizeof(php_sockaddr_storage);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz|z", &arg1, &arg2, &arg3) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
@@ -1267,7 +1267,7 @@ PHP_FUNCTION(socket_create)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &arg1, &arg2, &arg3) == FAILURE) {
 		efree(php_sock);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (arg1 != AF_UNIX
@@ -1314,7 +1314,7 @@ PHP_FUNCTION(socket_connect)
 	int					argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc, "rs|l", &arg1, &addr, &addr_len, &port) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
@@ -1399,7 +1399,7 @@ PHP_FUNCTION(socket_strerror)
 	zend_long	arg1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &arg1) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_STRING(sockets_strerror(arg1));
@@ -1420,7 +1420,7 @@ PHP_FUNCTION(socket_bind)
 	zend_long					retval = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &arg1, &addr, &addr_len, &port) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
@@ -1502,7 +1502,7 @@ PHP_FUNCTION(socket_recv)
 	zend_long		len, flags;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rzll", &php_sock_res, &buf, &len, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(php_sock_res), le_socket_name, le_socket)) == NULL) {
@@ -1545,7 +1545,7 @@ PHP_FUNCTION(socket_send)
 	char		*buf;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsll", &arg1, &buf, &buf_len, &len, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (len < 0) {
@@ -1587,7 +1587,7 @@ PHP_FUNCTION(socket_recvfrom)
 	zend_string			*recv_buf;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rzllz|z", &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
@@ -1703,7 +1703,7 @@ PHP_FUNCTION(socket_sendto)
 	int					argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc, "rslls|l", &arg1, &buf, &buf_len, &len, &flags, &addr, &addr_len, &port) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (len < 0) {
@@ -1786,7 +1786,7 @@ PHP_FUNCTION(socket_get_option)
 	zend_long			level, optname;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rll", &arg1, &level, &optname) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
@@ -1901,7 +1901,7 @@ PHP_FUNCTION(socket_set_option)
 
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rllz", &arg1, &level, &optname, &arg4) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
@@ -2036,7 +2036,7 @@ PHP_FUNCTION(socket_create_pair)
 	zend_long		domain, type, protocol;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lllz", &domain, &type, &protocol, &fds_array_zval) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_sock[0] = php_create_socket();
@@ -2101,7 +2101,7 @@ PHP_FUNCTION(socket_shutdown)
 	php_socket	*php_sock;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &arg1, &how_shutdown) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
@@ -2126,7 +2126,7 @@ PHP_FUNCTION(socket_last_error)
 	php_socket	*php_sock;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &arg1) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (arg1) {
@@ -2148,7 +2148,7 @@ PHP_FUNCTION(socket_clear_error)
 	php_socket	*php_sock;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &arg1) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (arg1) {
@@ -2221,7 +2221,7 @@ PHP_FUNCTION(socket_import_stream)
 	PHP_SOCKET			 socket; /* fd */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zstream) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	php_stream_from_zval(stream, zstream);
 
@@ -2269,7 +2269,7 @@ PHP_FUNCTION(socket_export_stream)
 	size_t protocollen = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zsocket) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if ((socket = (php_socket *) zend_fetch_resource(Z_RES_P(zsocket), le_socket_name, le_socket)) == NULL) {
 		return;
@@ -2368,7 +2368,7 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 	memset(&hints, 0, sizeof(hints));
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|sa", &hostname, &service, &service_len, &zhints) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (zhints) {
@@ -2425,7 +2425,7 @@ PHP_FUNCTION(socket_addrinfo_bind)
 	php_socket		*php_sock;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &arg1) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((ai = (struct addrinfo *) zend_fetch_resource(Z_RES_P(arg1), le_addrinfo_name, le_addrinfo)) == NULL) {
@@ -2491,7 +2491,7 @@ PHP_FUNCTION(socket_addrinfo_connect)
 	php_socket		*php_sock;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &arg1) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((ai = (struct addrinfo *) zend_fetch_resource(Z_RES_P(arg1), le_addrinfo_name, le_addrinfo)) == NULL) {
@@ -2555,7 +2555,7 @@ PHP_FUNCTION(socket_addrinfo_explain)
 	struct addrinfo	*ai;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &arg1) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((ai = (struct addrinfo *) zend_fetch_resource(Z_RES_P(arg1), le_addrinfo_name, le_addrinfo)) == NULL) {
@@ -2616,7 +2616,7 @@ PHP_FUNCTION(socket_wsaprotocol_info_export)
 	HANDLE map;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &zsocket, &target_pid) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if ((socket = (php_socket *) zend_fetch_resource(Z_RES_P(zsocket), le_socket_name, le_socket)) == NULL) {
 		return;
@@ -2672,7 +2672,7 @@ PHP_FUNCTION(socket_wsaprotocol_info_import)
 	HANDLE map;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &id, &id_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	map = OpenFileMapping(FILE_MAP_READ, FALSE, id);
@@ -2727,7 +2727,7 @@ PHP_FUNCTION(socket_wsaprotocol_info_release)
 	size_t id_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &id, &id_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(SUCCESS == zend_hash_str_del(&(SOCKETS_G(wsa_info)), id, id_len));

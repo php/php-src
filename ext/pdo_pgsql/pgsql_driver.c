@@ -546,7 +546,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa|sss",
 					&table_name, &table_name_len, &pg_rows,
 					&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!zend_hash_num_elements(Z_ARRVAL_P(pg_rows))) {
@@ -658,7 +658,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromFile)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sp|sss",
 				&table_name, &table_name_len, &filename, &filename_len,
 				&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Obtain db Handler */
@@ -759,7 +759,7 @@ static PHP_METHOD(PDO, pgsqlCopyToFile)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sp|sss",
 					&table_name, &table_name_len, &filename, &filename_len,
 					&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
@@ -852,7 +852,7 @@ static PHP_METHOD(PDO, pgsqlCopyToArray)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|sss",
 		&table_name, &table_name_len,
 		&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
@@ -958,7 +958,7 @@ static PHP_METHOD(PDO, pgsqlLOBOpen)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s",
 				&oidstr, &oidstrlen, &modestr, &modestrlen)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	oid = (Oid)strtoul(oidstr, &end_ptr, 10);
@@ -1005,7 +1005,7 @@ static PHP_METHOD(PDO, pgsqlLOBUnlink)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 				&oidstr, &oidlen)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	oid = (Oid)strtoul(oidstr, &end_ptr, 10);
@@ -1041,7 +1041,7 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|ll",
 				&result_type, &ms_timeout)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);

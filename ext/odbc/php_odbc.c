@@ -661,7 +661,7 @@ void php_odbc_fetch_attribs(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	zend_long flag;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &pv_res, &flag) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {
@@ -799,7 +799,7 @@ void odbc_transact(INTERNAL_FUNCTION_PARAMETERS, int type)
 	zval *pv_conn;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pv_conn) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_conn), "ODBC-Link", le_conn, le_pconn))) {
@@ -846,7 +846,7 @@ void odbc_column_lengths(INTERNAL_FUNCTION_PARAMETERS, int type)
 	zend_long pv_num;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &pv_res, &pv_num) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {
@@ -883,7 +883,7 @@ PHP_FUNCTION(odbc_close_all)
 	zend_resource *p;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Loop through list and close all statements */
@@ -941,7 +941,7 @@ PHP_FUNCTION(odbc_prepare)
 #endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &pv_conn, &query, &query_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_conn), "ODBC-Link", le_conn, le_pconn))) {
@@ -1048,7 +1048,7 @@ PHP_FUNCTION(odbc_execute)
 	RETCODE rc;
 
 	if (zend_parse_parameters(numArgs, "r|a", &pv_res, &pv_param_arr) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {
@@ -1254,7 +1254,7 @@ PHP_FUNCTION(odbc_cursor)
 	RETCODE rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pv_res) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {
@@ -1313,7 +1313,7 @@ PHP_FUNCTION(odbc_data_source)
 	SQLSMALLINT len1=0, len2=0, fetch_type;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &zv_conn, &zv_fetch_type) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	fetch_type = (SQLSMALLINT) zv_fetch_type;
@@ -1378,7 +1378,7 @@ PHP_FUNCTION(odbc_exec)
 #endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &pv_conn, &query, &query_len, &pv_flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_conn), "ODBC-Link", le_conn, le_pconn))) {
@@ -1465,7 +1465,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	zend_long pv_row = -1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &pv_res, &pv_row) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	rownum = pv_row;
@@ -1473,7 +1473,7 @@ static void php_odbc_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, int result_type)
 	zval *pv_res, tmp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pv_res) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 #endif
 
@@ -1619,13 +1619,13 @@ PHP_FUNCTION(odbc_fetch_into)
 
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz|l", &pv_res, &pv_res_arr, &pv_row) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	rownum = pv_row;
 #else
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz", &pv_res, &pv_res_arr) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 #endif /* HAVE_SQL_EXTENDED_FETCH */
 
@@ -1732,7 +1732,7 @@ PHP_FUNCTION(solid_fetch_prev)
 	zval *pv_res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pv_res) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {
@@ -1772,7 +1772,7 @@ PHP_FUNCTION(odbc_fetch_row)
 #endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &pv_res, &pv_row) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	rownum = pv_row;
@@ -1833,7 +1833,7 @@ PHP_FUNCTION(odbc_result)
 	field = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz", &pv_res, &pv_field) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(pv_field) == IS_STRING) {
@@ -2019,7 +2019,7 @@ PHP_FUNCTION(odbc_result_all)
 #endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s", &pv_res, &pv_format, &pv_format_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {
@@ -2136,7 +2136,7 @@ PHP_FUNCTION(odbc_free_result)
 	int i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pv_res) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {
@@ -2282,7 +2282,7 @@ void odbc_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	 *  defaulting to the cursors default
 	 */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|l", &db, &db_len, &uid, &uid_len, &pwd, &pwd_len, &pv_opt) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	cur_opt = pv_opt;
@@ -2435,7 +2435,7 @@ PHP_FUNCTION(odbc_close)
 	int is_pconn = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pv_conn) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_conn), "ODBC-Link", le_conn, le_pconn))) {
@@ -2472,7 +2472,7 @@ PHP_FUNCTION(odbc_num_rows)
 	zval *pv_res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pv_res) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {
@@ -2494,7 +2494,7 @@ PHP_FUNCTION(odbc_next_result)
 	int rc, i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pv_res) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {
@@ -2545,7 +2545,7 @@ PHP_FUNCTION(odbc_num_fields)
 	zval *pv_res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pv_res) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {
@@ -2565,7 +2565,7 @@ PHP_FUNCTION(odbc_field_name)
 	zend_long pv_num;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &pv_res, &pv_num) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {
@@ -2602,7 +2602,7 @@ PHP_FUNCTION(odbc_field_type)
 	zend_long		pv_num;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &pv_res, &pv_num) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {
@@ -2655,7 +2655,7 @@ PHP_FUNCTION(odbc_field_num)
 	zval *pv_res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &pv_res, &fname, &fname_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((result = (odbc_result *)zend_fetch_resource(Z_RES_P(pv_res), "ODBC result", le_result)) == NULL) {
@@ -2692,7 +2692,7 @@ PHP_FUNCTION(odbc_autocommit)
 	zend_long pv_onoff = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &pv_conn, &pv_onoff) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_conn), "ODBC-Link", le_conn, le_pconn))) {
@@ -2743,7 +2743,7 @@ static void php_odbc_lasterror(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	char *ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &pv_handle) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZEND_NUM_ARGS() == 1) {
@@ -2800,7 +2800,7 @@ PHP_FUNCTION(odbc_setoption)
 	zend_long pv_which, pv_opt, pv_val;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlll", &pv_handle, &pv_which, &pv_opt, &pv_val) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	switch (pv_which) {
@@ -2858,7 +2858,7 @@ PHP_FUNCTION(odbc_tables)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!sss", &pv_conn, &cat, &cat_len, &schema, &schema_len,
 		&table, &table_len, &type, &type_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_conn), "ODBC-Link", le_conn, le_pconn))) {
@@ -2927,7 +2927,7 @@ PHP_FUNCTION(odbc_columns)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!sss", &pv_conn, &cat, &cat_len, &schema, &schema_len,
 		&table, &table_len, &column, &column_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_conn), "ODBC-Link", le_conn, le_pconn))) {
@@ -2999,7 +2999,7 @@ PHP_FUNCTION(odbc_columnprivileges)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs!sss", &pv_conn, &cat, &cat_len, &schema, &schema_len,
 		&table, &table_len, &column, &column_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_conn), "ODBC-Link", le_conn, le_pconn))) {
@@ -3065,7 +3065,7 @@ PHP_FUNCTION(odbc_foreignkeys)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs!sssss", &pv_conn, &pcat, &pcat_len, &pschema, &pschema_len,
 		&ptable, &ptable_len, &fcat, &fcat_len, &fschema, &fschema_len, &ftable, &ftable_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 #if defined(HAVE_DBMAKER) || defined(HAVE_IBMDB2)
@@ -3143,7 +3143,7 @@ PHP_FUNCTION(odbc_gettypeinfo)
 	SQLSMALLINT data_type;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &pv_conn, &pv_data_type) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	data_type = (SQLSMALLINT) pv_data_type;
@@ -3204,7 +3204,7 @@ PHP_FUNCTION(odbc_primarykeys)
 	RETCODE rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs!ss", &pv_conn, &cat, &cat_len, &schema, &schema_len, &table, &table_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_conn), "ODBC-Link", le_conn, le_pconn))) {
@@ -3272,7 +3272,7 @@ PHP_FUNCTION(odbc_procedurecolumns)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!sss", &pv_conn, &cat, &cat_len, &schema, &schema_len,
 		&proc, &proc_len, &col, &col_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_conn), "ODBC-Link", le_conn, le_pconn))) {
@@ -3341,7 +3341,7 @@ PHP_FUNCTION(odbc_procedures)
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|s!ss", &pv_conn, &cat, &cat_len, &schema, &schema_len, &proc, &proc_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_conn), "ODBC-Link", le_conn, le_pconn))) {
@@ -3407,7 +3407,7 @@ PHP_FUNCTION(odbc_specialcolumns)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rls!ssl", &pv_conn, &vtype, &cat, &cat_len, &schema, &schema_len,
 		&name, &name_len, &vscope, &vnullable) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	type = (SQLUSMALLINT) vtype;
@@ -3479,7 +3479,7 @@ PHP_FUNCTION(odbc_statistics)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs!ssll", &pv_conn, &cat, &cat_len, &schema, &schema_len,
 		&name, &name_len, &vunique, &vreserved) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	unique = (SQLUSMALLINT) vunique;
@@ -3547,7 +3547,7 @@ PHP_FUNCTION(odbc_tableprivileges)
 	RETCODE rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs!ss", &pv_conn, &cat, &cat_len, &schema, &schema_len, &table, &table_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(conn = (odbc_connection *)zend_fetch_resource2(Z_RES_P(pv_conn), "ODBC-Link", le_conn, le_pconn))) {

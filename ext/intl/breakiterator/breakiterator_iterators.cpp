@@ -276,7 +276,7 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;

@@ -794,7 +794,7 @@ PHP_FUNCTION(mysqli_debug)
 	size_t		debug_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &debug, &debug_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	mysql_debug(debug);
@@ -1376,13 +1376,13 @@ PHP_FUNCTION(mysqli_get_client_info)
 {
 	if (getThis()) {
 		if (zend_parse_parameters_none() == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 	} else {
 		zval *mysql_link;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "|O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -1398,7 +1398,7 @@ PHP_FUNCTION(mysqli_get_client_info)
 PHP_FUNCTION(mysqli_get_client_version)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG((zend_long)mysql_get_client_version());
@@ -1502,7 +1502,7 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_method)
 	MY_MYSQL *mysql;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (is_method && (Z_MYSQLI_P(getThis()))->ptr) {
@@ -2640,7 +2640,7 @@ PHP_FUNCTION(mysqli_thread_id)
 PHP_FUNCTION(mysqli_thread_safe)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(mysql_thread_safe());

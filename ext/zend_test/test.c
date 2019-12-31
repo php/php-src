@@ -95,7 +95,7 @@ ZEND_FUNCTION(zend_create_unterminated_string)
 	zend_string *str, *res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	res = zend_string_alloc(ZSTR_LEN(str), 0);
@@ -111,7 +111,7 @@ ZEND_FUNCTION(zend_terminate_string)
 	zend_string *str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
@@ -124,7 +124,7 @@ ZEND_FUNCTION(zend_leak_bytes)
 	zend_long leakbytes = 3;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &leakbytes) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	emalloc(leakbytes);
@@ -138,7 +138,7 @@ ZEND_FUNCTION(zend_leak_variable)
 	zval *zv;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zv) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!Z_REFCOUNTED_P(zv)) {

@@ -255,7 +255,7 @@ PHP_METHOD(mysqli_warning, __construct)
 	MYSQLI_RESOURCE *mysqli_resource;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &z) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	obj = Z_MYSQLI_P(z);
 

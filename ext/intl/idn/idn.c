@@ -183,7 +183,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|llz",
 			&domain, &option, &variant, &idna_info) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (variant != INTL_IDN_VARIANT_UTS46) {

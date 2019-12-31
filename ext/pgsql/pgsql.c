@@ -1549,7 +1549,7 @@ PHP_FUNCTION(pg_connect_poll)
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pgsql_link) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -1578,7 +1578,7 @@ PHP_FUNCTION(pg_close)
 	zend_resource *link;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &pgsql_link) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!pgsql_link) {
@@ -1624,7 +1624,7 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 	char *result;
 
 	if (zend_parse_parameters(argc, "|r", &pgsql_link) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (argc == 0) {
@@ -1844,13 +1844,13 @@ PHP_FUNCTION(pg_query)
 
 	if (argc == 1) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &query, &query_len) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &pgsql_link, &query, &query_len) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		link = Z_RES_P(pgsql_link);
 	}
@@ -1947,13 +1947,13 @@ PHP_FUNCTION(pg_query_params)
 
 	if (argc == 2) {
 		if (zend_parse_parameters(argc, "sa", &query, &query_len, &pv_param_arr) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
 		if (zend_parse_parameters(argc, "rsa", &pgsql_link, &query, &query_len, &pv_param_arr) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		link = Z_RES_P(pgsql_link);
 	}
@@ -2063,13 +2063,13 @@ PHP_FUNCTION(pg_prepare)
 
 	if (argc == 2) {
 		if (zend_parse_parameters(argc, "ss", &stmtname, &stmtname_len, &query, &query_len) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
 		if (zend_parse_parameters(argc, "rss", &pgsql_link, &stmtname, &stmtname_len, &query, &query_len) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		link = Z_RES_P(pgsql_link);
 	}
@@ -2150,13 +2150,13 @@ PHP_FUNCTION(pg_execute)
 
 	if (argc == 2) {
 		if (zend_parse_parameters(argc, "sa", &stmtname, &stmtname_len, &pv_param_arr)==FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
 		if (zend_parse_parameters(argc, "rsa", &pgsql_link, &stmtname, &stmtname_len, &pv_param_arr) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		link = Z_RES_P(pgsql_link);
 	}
@@ -2255,7 +2255,7 @@ static void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_ty
 	pgsql_result_handle *pg_result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &result) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
@@ -2321,7 +2321,7 @@ PHP_FUNCTION(pg_last_notice)
 	zend_long option = PGSQL_NOTICE_LAST;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &pgsql_link, &option) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Just to check if user passed valid resoruce */
@@ -2440,7 +2440,7 @@ PHP_FUNCTION(pg_field_table)
 	zend_resource *field_table;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl|b", &result, &fnum, &return_oid) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
@@ -2533,7 +2533,7 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 	Oid oid;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &result, &field) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
@@ -2625,7 +2625,7 @@ PHP_FUNCTION(pg_field_num)
 	pgsql_result_handle *pg_result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &result, &field, &field_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
@@ -2650,11 +2650,11 @@ PHP_FUNCTION(pg_fetch_result)
 
 	if (argc == 2) {
 		if (zend_parse_parameters(argc, "rz", &result, &field) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 	} else {
 		if (zend_parse_parameters(argc, "rlz", &result, &row, &field) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -2723,7 +2723,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 		zend_string *class_name = NULL;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z!Sz", &result, &zrow, &class_name, &ctor_params) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		if (!class_name) {
 			ce = zend_standard_class_def;
@@ -2737,7 +2737,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 		result_type = PGSQL_ASSOC;
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z!l", &result, &zrow, &result_type) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 	if (zrow == NULL) {
@@ -2911,7 +2911,7 @@ PHP_FUNCTION(pg_fetch_all)
 	pgsql_result_handle *pg_result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &result, &result_type) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(result_type & PGSQL_BOTH)) {
@@ -2944,7 +2944,7 @@ PHP_FUNCTION(pg_fetch_all_columns)
 	size_t num_fields;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &result, &colno) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
@@ -2984,7 +2984,7 @@ PHP_FUNCTION(pg_result_seek)
 	pgsql_result_handle *pg_result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &result, &row) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
@@ -3016,11 +3016,11 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 
 	if (argc == 2) {
 		if (zend_parse_parameters(argc, "rz", &result, &field) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 	} else {
 		if (zend_parse_parameters(argc, "rlz", &result, &row, &field) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -3099,7 +3099,7 @@ PHP_FUNCTION(pg_free_result)
 	pgsql_result_handle *pg_result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &result) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
@@ -3123,7 +3123,7 @@ PHP_FUNCTION(pg_last_oid)
 #endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &result) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
@@ -3161,7 +3161,7 @@ PHP_FUNCTION(pg_trace)
 	zend_resource *link;
 
 	if (zend_parse_parameters(argc, "p|sr", &z_filename, &z_filename_len, &mode, &mode_len, &pgsql_link) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (argc < 3) {
@@ -3201,7 +3201,7 @@ PHP_FUNCTION(pg_untrace)
 	zend_resource *link;
 
 	if (zend_parse_parameters(argc, "|r", &pgsql_link) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (argc == 0) {
@@ -3231,7 +3231,7 @@ PHP_FUNCTION(pg_lo_create)
 	zend_resource *link;
 
 	if (zend_parse_parameters(argc, "|zz", &pgsql_link, &oid) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((argc == 1) && (Z_TYPE_P(pgsql_link) != IS_RESOURCE)) {
@@ -3498,7 +3498,7 @@ PHP_FUNCTION(pg_lo_close)
 	pgLofp *pgsql;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pgsql_lofp) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (pgLofp *)zend_fetch_resource(Z_RES_P(pgsql_lofp), "PostgreSQL large object", le_lofp)) == NULL) {
@@ -3531,7 +3531,7 @@ PHP_FUNCTION(pg_lo_read)
 	pgLofp *pgsql;
 
 	if (zend_parse_parameters(argc, "r|l", &pgsql_id, &len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (pgLofp *)zend_fetch_resource(Z_RES_P(pgsql_id), "PostgreSQL large object", le_lofp)) == NULL) {
@@ -3567,7 +3567,7 @@ PHP_FUNCTION(pg_lo_write)
 	int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc, "rs|l", &pgsql_id, &str, &str_len, &z_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (argc > 2) {
@@ -3608,7 +3608,7 @@ PHP_FUNCTION(pg_lo_read_all)
 	pgLofp *pgsql;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pgsql_id) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (pgLofp *)zend_fetch_resource(Z_RES_P(pgsql_id), "PostgreSQL large object", le_lofp)) == NULL) {
@@ -3816,7 +3816,7 @@ PHP_FUNCTION(pg_lo_seek)
 	int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc, "rl|l", &pgsql_id, &offset, &whence) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (whence != SEEK_SET && whence != SEEK_CUR && whence != SEEK_END) {
 		php_error_docref(NULL, E_WARNING, "Invalid whence parameter");
@@ -3854,7 +3854,7 @@ PHP_FUNCTION(pg_lo_tell)
 	int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc, "r", &pgsql_id) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (pgLofp *)zend_fetch_resource(Z_RES_P(pgsql_id), "PostgreSQL large object", le_lofp)) == NULL) {
@@ -3886,7 +3886,7 @@ PHP_FUNCTION(pg_lo_truncate)
 	int result;
 
 	if (zend_parse_parameters(argc, "rl", &pgsql_id, &size) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (pgLofp *)zend_fetch_resource(Z_RES_P(pgsql_id), "PostgreSQL large object", le_lofp)) == NULL) {
@@ -3924,13 +3924,13 @@ PHP_FUNCTION(pg_set_error_verbosity)
 
 	if (argc == 1) {
 		if (zend_parse_parameters(argc, "l", &verbosity) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
 		if (zend_parse_parameters(argc, "rl", &pgsql_link, &verbosity) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		link = Z_RES_P(pgsql_link);
 	}
@@ -3962,13 +3962,13 @@ PHP_FUNCTION(pg_set_client_encoding)
 
 	if (argc == 1) {
 		if (zend_parse_parameters(argc, "s", &encoding, &encoding_len) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
 		if (zend_parse_parameters(argc, "rs", &pgsql_link, &encoding, &encoding_len) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		link = Z_RES_P(pgsql_link);
 	}
@@ -3991,7 +3991,7 @@ PHP_FUNCTION(pg_client_encoding)
 	zend_resource *link;
 
 	if (zend_parse_parameters(argc, "|r", &pgsql_link) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (argc == 0) {
@@ -4027,7 +4027,7 @@ PHP_FUNCTION(pg_end_copy)
 	zend_resource *link;
 
 	if (zend_parse_parameters(argc, "|r", &pgsql_link) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (argc == 0) {
@@ -4064,13 +4064,13 @@ PHP_FUNCTION(pg_put_line)
 
 	if (argc == 1) {
 		if (zend_parse_parameters(argc, "s", &query, &query_len) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
 		if (zend_parse_parameters(argc, "rs", &pgsql_link, &query, &query_len) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		link = Z_RES_P(pgsql_link);
 	}
@@ -4105,7 +4105,7 @@ PHP_FUNCTION(pg_copy_to)
 	if (zend_parse_parameters(argc, "rs|ss",
 							  &pgsql_link, &table_name, &table_name_len,
 							  &pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -4243,7 +4243,7 @@ PHP_FUNCTION(pg_copy_from)
 	if (zend_parse_parameters(argc, "rsa|ss",
 							  &pgsql_link, &table_name, &table_name_len, &pg_rows,
 							  &pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -4375,13 +4375,13 @@ PHP_FUNCTION(pg_escape_string)
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &from) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			link = FETCH_DEFAULT_LINK();
 			break;
 		default:
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "rS", &pgsql_link, &from) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			link = Z_RES_P(pgsql_link);
 			break;
@@ -4421,13 +4421,13 @@ PHP_FUNCTION(pg_escape_bytea)
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &from, &from_len) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			link = FETCH_DEFAULT_LINK();
 			break;
 		default:
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &pgsql_link, &from, &from_len) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			link = Z_RES_P(pgsql_link);
 			break;
@@ -4564,7 +4564,7 @@ PHP_FUNCTION(pg_unescape_bytea)
 	size_t from_len;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 							  &from, &from_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 #if HAVE_PQUNESCAPEBYTEA
@@ -4596,7 +4596,7 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &from, &from_len) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			link = FETCH_DEFAULT_LINK();
 			CHECK_DEFAULT_LINK(link);
@@ -4604,7 +4604,7 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 
 		default:
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &pgsql_link, &from, &from_len) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			link = Z_RES_P(pgsql_link);
 			break;
@@ -4898,7 +4898,7 @@ PHP_FUNCTION(pg_send_query)
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &pgsql_link, &query, &len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -4971,7 +4971,7 @@ PHP_FUNCTION(pg_send_query_params)
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa", &pgsql_link, &query, &query_len, &pv_param_arr) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -5067,7 +5067,7 @@ PHP_FUNCTION(pg_send_prepare)
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rss", &pgsql_link, &stmtname, &stmtname_len, &query, &query_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -5142,7 +5142,7 @@ PHP_FUNCTION(pg_send_execute)
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa", &pgsql_link, &stmtname, &stmtname_len, &pv_param_arr) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -5438,7 +5438,7 @@ PHP_FUNCTION(pg_socket)
 	PGconn *pgsql;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pgsql_link) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -5464,7 +5464,7 @@ PHP_FUNCTION(pg_consume_input)
 	PGconn *pgsql;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pgsql_link) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -5485,7 +5485,7 @@ PHP_FUNCTION(pg_flush)
 	int is_non_blocking;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pgsql_link) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -5639,7 +5639,7 @@ PHP_FUNCTION(pg_meta_data)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|b",
 							  &pgsql_link, &table_name, &table_name_len, &extended) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
@@ -6510,7 +6510,7 @@ PHP_FUNCTION(pg_convert)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
 							  "rsa|l", &pgsql_link, &table_name, &table_name_len, &values, &option) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (option & ~PGSQL_CONV_OPTS) {
 		php_error_docref(NULL, E_WARNING, "Invalid option is specified");
@@ -6723,7 +6723,7 @@ PHP_FUNCTION(pg_insert)
 
 	if (zend_parse_parameters(argc, "rsa|l",
 							  &pgsql_link, &table, &table_len, &values, &option) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (option & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_ASYNC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
 		php_error_docref(NULL, E_WARNING, "Invalid option is specified");
@@ -6935,7 +6935,7 @@ PHP_FUNCTION(pg_update)
 
 	if (zend_parse_parameters(argc, "rsaa|l",
 							  &pgsql_link, &table, &table_len, &values, &ids, &option) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (option & ~(PGSQL_CONV_OPTS|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
 		php_error_docref(NULL, E_WARNING, "Invalid option is specified");
@@ -7027,7 +7027,7 @@ PHP_FUNCTION(pg_delete)
 
 	if (zend_parse_parameters(argc, "rsa|l",
 							  &pgsql_link, &table, &table_len, &ids, &option) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (option & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
 		php_error_docref(NULL, E_WARNING, "Invalid option is specified");
@@ -7168,7 +7168,7 @@ PHP_FUNCTION(pg_select)
 
 	if (zend_parse_parameters(argc, "rsa|l",
 							  &pgsql_link, &table, &table_len, &ids, &option, &result_type) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (option & ~(PGSQL_CONV_FORCE_NULL|PGSQL_DML_NO_CONV|PGSQL_DML_EXEC|PGSQL_DML_ASYNC|PGSQL_DML_STRING|PGSQL_DML_ESCAPE)) {
 		php_error_docref(NULL, E_WARNING, "Invalid option is specified");

@@ -33,7 +33,7 @@ PHP_METHOD(Spoofchecker, __construct)
 	SPOOFCHECKER_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_replace_error_handling(EH_THROW, IntlException_ce_ptr, &error_handling);

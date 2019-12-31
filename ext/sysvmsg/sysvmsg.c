@@ -138,7 +138,7 @@ PHP_FUNCTION(msg_set_queue)
 	RETVAL_FALSE;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra", &queue, &data) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((mq = (sysvmsg_queue_t *)zend_fetch_resource(Z_RES_P(queue), "sysvmsg queue", le_sysvmsg)) == NULL) {
@@ -179,7 +179,7 @@ PHP_FUNCTION(msg_stat_queue)
 	RETVAL_FALSE;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &queue) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((mq = (sysvmsg_queue_t *)zend_fetch_resource(Z_RES_P(queue), "sysvmsg queue", le_sysvmsg)) == NULL) {
@@ -210,7 +210,7 @@ PHP_FUNCTION(msg_queue_exists)
 	zend_long key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &key) == FAILURE)	{
-		return;
+		RETURN_THROWS();
 	}
 
 	if (msgget(key, 0) < 0) {
@@ -230,7 +230,7 @@ PHP_FUNCTION(msg_get_queue)
 	sysvmsg_queue_t *mq;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &key, &perms) == FAILURE)	{
-		return;
+		RETURN_THROWS();
 	}
 
 	mq = (sysvmsg_queue_t *) emalloc(sizeof(sysvmsg_queue_t));
@@ -258,7 +258,7 @@ PHP_FUNCTION(msg_remove_queue)
 	sysvmsg_queue_t *mq = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &queue) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((mq = (sysvmsg_queue_t *)zend_fetch_resource(Z_RES_P(queue), "sysvmsg queue", le_sysvmsg)) == NULL) {
@@ -290,7 +290,7 @@ PHP_FUNCTION(msg_receive)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlzlz|blz",
 				&queue, &desiredmsgtype, &out_msgtype, &maxsize,
 				&out_message, &do_unserialize, &flags, &zerrcode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (maxsize <= 0) {
@@ -375,7 +375,7 @@ PHP_FUNCTION(msg_send)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rlz|bbz",
 				&queue, &msgtype, &message, &do_serialize, &blocking, &zerror) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((mq = (sysvmsg_queue_t *)zend_fetch_resource(Z_RES_P(queue), "sysvmsg queue", le_sysvmsg)) == NULL) {

@@ -1011,7 +1011,7 @@ PHP_FUNCTION(mysqli_stmt_construct)
 	{
 		case 1:  /* mysql_stmt_init */
 			if (zend_parse_parameters(1, "O", &mysql_link, mysqli_link_class_entry)==FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
@@ -1021,7 +1021,7 @@ PHP_FUNCTION(mysqli_stmt_construct)
 		break;
 		case 2:
 			if (zend_parse_parameters(2, "Os", &mysql_link, mysqli_link_class_entry, &statement, &statement_len)==FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
@@ -1068,12 +1068,12 @@ PHP_FUNCTION(mysqli_result_construct)
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_parse_parameters(1, "O", &mysql_link, mysqli_link_class_entry)==FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			break;
 		case 2:
 			if (zend_parse_parameters(2, "Ol", &mysql_link, mysqli_link_class_entry, &resmode)==FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			break;
 		default:

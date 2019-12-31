@@ -1828,7 +1828,7 @@ cleanup:
 static PHP_FUNCTION(session_get_cookie_params)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -1850,7 +1850,7 @@ static PHP_FUNCTION(session_name)
 	zend_string *ini_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &name) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (name && PS(session_status) == php_session_active) {
@@ -1881,7 +1881,7 @@ static PHP_FUNCTION(session_module_name)
 	zend_string *ini_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &name) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (name && PS(session_status) == php_session_active) {
@@ -1945,7 +1945,7 @@ static PHP_FUNCTION(session_set_save_handler)
 		zend_bool register_shutdown = 1;
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &obj, php_session_iface_entry, &register_shutdown) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 
 		/* For compatibility reason, implemented interface is not checked */
@@ -2047,7 +2047,7 @@ static PHP_FUNCTION(session_set_save_handler)
 	}
 
 	if (zend_parse_parameters(argc, "+", &args, &num_args) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* remove shutdown function */
@@ -2092,7 +2092,7 @@ static PHP_FUNCTION(session_save_path)
 	zend_string *ini_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &name) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (name && PS(session_status) == php_session_active) {
@@ -2128,7 +2128,7 @@ static PHP_FUNCTION(session_id)
 	int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc, "|S", &name) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (name && PS(use_cookies) && SG(headers_sent)) {
@@ -2171,7 +2171,7 @@ static PHP_FUNCTION(session_regenerate_id)
 	zend_string *data;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &del_ses) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (PS(session_status) != php_session_active) {
@@ -2272,7 +2272,7 @@ static PHP_FUNCTION(session_create_id)
 	smart_str id = {0};
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &prefix) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (prefix && ZSTR_LEN(prefix)) {
@@ -2325,7 +2325,7 @@ static PHP_FUNCTION(session_cache_limiter)
 	zend_string *ini_name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &limiter) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (limiter && PS(session_status) == php_session_active) {
@@ -2356,7 +2356,7 @@ static PHP_FUNCTION(session_cache_expire)
 	zend_bool expires_is_null = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l!", &expires, &expires_is_null) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!expires_is_null && PS(session_status) == php_session_active) {
@@ -2388,7 +2388,7 @@ static PHP_FUNCTION(session_encode)
 	zend_string *enc;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	enc = php_session_encode();
@@ -2407,7 +2407,7 @@ static PHP_FUNCTION(session_decode)
 	zend_string *str = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (PS(session_status) != php_session_active) {
@@ -2445,7 +2445,7 @@ static PHP_FUNCTION(session_start)
 	zend_long read_and_close = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|a", &options) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (PS(session_status) == php_session_active) {
@@ -2517,7 +2517,7 @@ static PHP_FUNCTION(session_start)
 static PHP_FUNCTION(session_destroy)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(php_session_destroy() == SUCCESS);
@@ -2529,7 +2529,7 @@ static PHP_FUNCTION(session_destroy)
 static PHP_FUNCTION(session_unset)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (PS(session_status) != php_session_active) {
@@ -2554,7 +2554,7 @@ static PHP_FUNCTION(session_gc)
 	zend_long num;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (PS(session_status) != php_session_active) {
@@ -2577,7 +2577,7 @@ static PHP_FUNCTION(session_gc)
 static PHP_FUNCTION(session_write_close)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (PS(session_status) != php_session_active) {
@@ -2593,7 +2593,7 @@ static PHP_FUNCTION(session_write_close)
 static PHP_FUNCTION(session_abort)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (PS(session_status) != php_session_active) {
@@ -2609,7 +2609,7 @@ static PHP_FUNCTION(session_abort)
 static PHP_FUNCTION(session_reset)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (PS(session_status) != php_session_active) {
@@ -2625,7 +2625,7 @@ static PHP_FUNCTION(session_reset)
 static PHP_FUNCTION(session_status)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(PS(session_status));

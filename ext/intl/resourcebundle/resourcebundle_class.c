@@ -325,7 +325,7 @@ PHP_FUNCTION( resourcebundle_locales )
 
 	if( zend_parse_parameters(ZEND_NUM_ARGS(), "s", &bundlename, &bundlename_len ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	if (bundlename_len >= MAXPATHLEN) {

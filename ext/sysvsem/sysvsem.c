@@ -181,7 +181,7 @@ PHP_FUNCTION(sem_get)
 	sysvsem_sem *sem_ptr;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l|lll", &key, &max_acquire, &perm, &auto_release)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Get/create the semaphore.  Note that we rely on the semaphores
@@ -292,11 +292,11 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 
 	if (acquire) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|b", &arg_id, &nowait) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &arg_id) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -361,7 +361,7 @@ PHP_FUNCTION(sem_remove)
 #endif
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &arg_id) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((sem_ptr = (sysvsem_sem *)zend_fetch_resource(Z_RES_P(arg_id), "SysV semaphore", php_sysvsem_module.le_sem)) == NULL) {

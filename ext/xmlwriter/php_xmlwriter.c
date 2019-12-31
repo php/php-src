@@ -1058,7 +1058,7 @@ static PHP_FUNCTION(xmlwriter_open_uri)
 	ze_xmlwriter_object *ze_obj = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &source, &source_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (self) {
@@ -1112,7 +1112,7 @@ static PHP_FUNCTION(xmlwriter_open_memory)
 	ze_xmlwriter_object *ze_obj = NULL;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (self) {

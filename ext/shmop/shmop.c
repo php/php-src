@@ -121,7 +121,7 @@ PHP_FUNCTION(shmop_open)
 	size_t flags_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lsll", &key, &flags, &flags_len, &mode, &size) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (flags_len != 1) {
@@ -203,7 +203,7 @@ PHP_FUNCTION(shmop_read)
 	zend_string *return_string;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rll", &shmid, &start, &count) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
@@ -237,7 +237,7 @@ PHP_FUNCTION(shmop_close)
 	struct php_shmop *shmop;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shmid) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 
@@ -257,7 +257,7 @@ PHP_FUNCTION(shmop_size)
 	struct php_shmop *shmop;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shmid) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
@@ -279,7 +279,7 @@ PHP_FUNCTION(shmop_write)
 	zval *shmid;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSl", &shmid, &data, &offset) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {
@@ -311,7 +311,7 @@ PHP_FUNCTION(shmop_delete)
 	struct php_shmop *shmop;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shmid) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((shmop = (struct php_shmop *)zend_fetch_resource(Z_RES_P(shmid), "shmop", shm_type)) == NULL) {

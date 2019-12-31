@@ -174,7 +174,7 @@ static PHP_FUNCTION(pspell_new)
 
 	if (zend_parse_parameters(argc, "s|sssl", &language, &language_len, &spelling, &spelling_len,
 		&jargon, &jargon_len, &encoding, &encoding_len, &mode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	config = new_pspell_config();
@@ -271,7 +271,7 @@ static PHP_FUNCTION(pspell_new_personal)
 
 	if (zend_parse_parameters(argc, "ps|sssl", &personal, &personal_len, &language, &language_len,
 		&spelling, &spelling_len, &jargon, &jargon_len, &encoding, &encoding_len, &mode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	config = new_pspell_config();
@@ -363,7 +363,7 @@ static PHP_FUNCTION(pspell_new_config)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &conf) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -392,7 +392,7 @@ static PHP_FUNCTION(pspell_check)
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &scin, &word, &word_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -417,7 +417,7 @@ static PHP_FUNCTION(pspell_suggest)
 	const char *sug;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &scin, &word, &word_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -448,7 +448,7 @@ static PHP_FUNCTION(pspell_store_replacement)
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lss", &scin, &miss, &miss_len, &corr, &corr_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -473,7 +473,7 @@ static PHP_FUNCTION(pspell_add_to_personal)
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &scin, &word, &word_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -503,7 +503,7 @@ static PHP_FUNCTION(pspell_add_to_session)
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &scin, &word, &word_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -531,7 +531,7 @@ static PHP_FUNCTION(pspell_clear_session)
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &scin) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -554,7 +554,7 @@ static PHP_FUNCTION(pspell_save_wordlist)
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &scin) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -590,7 +590,7 @@ static PHP_FUNCTION(pspell_config_create)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|sss", &language, &language_len, &spelling, &spelling_len,
 		&jargon, &jargon_len, &encoding, &encoding_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	config = new_pspell_config();
@@ -648,7 +648,7 @@ static PHP_FUNCTION(pspell_config_runtogether)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lb", &conf, &runtogether) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -667,7 +667,7 @@ static PHP_FUNCTION(pspell_config_mode)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &conf, &mode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -694,7 +694,7 @@ static PHP_FUNCTION(pspell_config_ignore)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &conf, &ignore) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -714,7 +714,7 @@ static void pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lp", &conf, &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -762,7 +762,7 @@ static PHP_FUNCTION(pspell_config_repl)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lp", &conf, &repl, &repl_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -788,7 +788,7 @@ static PHP_FUNCTION(pspell_config_save_repl)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lb", &conf, &save) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;

@@ -53,7 +53,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone)
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str_id, &str_id_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	UErrorCode status = UErrorCode();
@@ -78,7 +78,7 @@ U_CFUNC PHP_FUNCTION(intltz_from_date_time_zone)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O",
 			&zv_timezone, php_date_get_timezone_ce()) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	tzobj = Z_PHPTIMEZONE_P(zv_timezone);
@@ -115,7 +115,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_gmt)
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	timezone_object_construct(TimeZone::getGMT(), return_value, 0);
@@ -126,7 +126,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_unknown)
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	timezone_object_construct(&TimeZone::getUnknown(), return_value, 0);
@@ -141,7 +141,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_enumeration)
 	/* double indirection to have the zend engine destroy the new zval that
 	 * results from separation */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (arg == NULL || Z_TYPE_P(arg) == IS_NULL) {
@@ -201,7 +201,7 @@ U_CFUNC PHP_FUNCTION(intltz_count_equivalent_ids)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 			&str_id, &str_id_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	UErrorCode status = UErrorCode();
@@ -230,7 +230,7 @@ U_CFUNC PHP_FUNCTION(intltz_create_time_zone_id_enumeration)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|s!l!",
 			&zoneType, &region, &region_len, &offset_arg, &arg3isnull) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (zoneType != UCAL_ZONE_TYPE_ANY && zoneType != UCAL_ZONE_TYPE_CANONICAL
@@ -269,7 +269,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_canonical_id)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z",
 			&str_id, &str_id_len, &is_systemid) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	UErrorCode status = UErrorCode();
@@ -306,7 +306,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_region)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 			&str_id, &str_id_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	UErrorCode status = UErrorCode();
@@ -328,7 +328,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_tz_data_version)
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	UErrorCode status = UErrorCode();
@@ -347,7 +347,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_equivalent_id)
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl", &str_id, &str_id_len, &index) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (index < (zend_long)INT32_MIN || index > (zend_long)INT32_MAX) {
@@ -611,7 +611,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_windows_id)
 	UErrorCode error;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &id) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	error = U_ZERO_ERROR;
@@ -649,7 +649,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_id_for_windows_id)
 	UErrorCode error;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|S", &winID, &region) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	error = U_ZERO_ERROR;

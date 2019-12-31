@@ -61,7 +61,7 @@ U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zs!",
 			&zv_timezone, &locale_str, &dummy) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	timeZone = timezone_process_timezone_argument(zv_timezone, NULL,
@@ -150,7 +150,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_keyword_values_for_locale)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssb",
 			&key, &key_len, &locale, &locale_len, &commonly_used) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	//does not work; see ICU bug 9194
@@ -184,7 +184,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_now)
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_DOUBLE((double)Calendar::getNow());
@@ -195,7 +195,7 @@ U_CFUNC PHP_FUNCTION(intlcal_get_available_locales)
 	intl_error_reset(NULL);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	int32_t count;
@@ -1049,7 +1049,7 @@ U_CFUNC PHP_FUNCTION(intlcal_from_date_time)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|s!",
 			&zv_arg, &locale_str, &locale_str_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(Z_TYPE_P(zv_arg) == IS_OBJECT && instanceof_function(

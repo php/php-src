@@ -174,7 +174,7 @@ PHP_FUNCTION(socket_sendmsg)
 
 	/* zmsg should be passed by ref */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra|l", &zsocket, &zmsg, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	LONG_CHECK_VALID_INT(flags);
@@ -219,7 +219,7 @@ PHP_FUNCTION(socket_recvmsg)
 	//ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags);
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra|l",
 			&zsocket, &zmsg, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	LONG_CHECK_VALID_INT(flags);
@@ -282,7 +282,7 @@ PHP_FUNCTION(socket_cmsg_space)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|l",
 			&level, &type, &n) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	LONG_CHECK_VALID_INT(level);

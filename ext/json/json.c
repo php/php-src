@@ -340,7 +340,7 @@ static PHP_FUNCTION(json_decode)
 static PHP_FUNCTION(json_last_error)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(JSON_G(error_code));
@@ -352,7 +352,7 @@ static PHP_FUNCTION(json_last_error)
 static PHP_FUNCTION(json_last_error_msg)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_STRING(php_json_get_error_msg(JSON_G(error_code)));

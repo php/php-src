@@ -489,7 +489,7 @@ static PHP_FUNCTION(ob_gzhandler)
 	 * - we have to mess around with php_output_context */
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "sl", &in_str, &in_len, &flags)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(encoding = php_zlib_output_encoding())) {
@@ -542,7 +542,7 @@ static PHP_FUNCTION(ob_gzhandler)
 static PHP_FUNCTION(zlib_get_coding_type)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	switch (ZLIBG(compression_coding)) {
 		case PHP_ZLIB_ENCODING_GZIP:
@@ -568,7 +568,7 @@ static PHP_FUNCTION(gzfile)
 	php_stream *stream;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "p|l", &filename, &filename_len, &use_include_path)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (use_include_path) {
@@ -608,7 +608,7 @@ static PHP_FUNCTION(gzopen)
 	zend_long use_include_path = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ps|l", &filename, &filename_len, &mode, &mode_len, &use_include_path) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (use_include_path) {
@@ -636,7 +636,7 @@ static PHP_FUNCTION(readgzfile)
 	zend_long use_include_path = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|l", &filename, &filename_len, &use_include_path) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (use_include_path) {
@@ -662,11 +662,11 @@ static PHP_FUNCTION(name) \
 	zend_long encoding = default_encoding; \
 	if (default_encoding) { \
 		if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "S|ll", &in, &level, &encoding)) { \
-			return; \
+			RETURN_THROWS(); \
 		} \
 	} else { \
 		if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "Sl|l", &in, &encoding, &level)) { \
-			return; \
+			RETURN_THROWS(); \
 		} \
 	} \
 	if (level < -1 || level > 9) { \
@@ -696,7 +696,7 @@ static PHP_FUNCTION(name) \
 	size_t out_len; \
 	zend_long max_len = 0; \
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &in_buf, &in_len, &max_len)) { \
-		return; \
+		RETURN_THROWS(); \
 	} \
 	if (max_len < 0) { \
 		php_error_docref(NULL, E_WARNING, "length (" ZEND_LONG_FMT ") must be greater or equal zero", max_len); \
@@ -837,7 +837,7 @@ PHP_FUNCTION(inflate_init)
 	zval *option_buffer;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|H", &encoding, &options)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("window"))) != NULL) {
@@ -913,7 +913,7 @@ PHP_FUNCTION(inflate_add)
 	int status;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &res, &in_buf, &in_len, &flush_type)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(ctx = zend_fetch_resource_ex(res, NULL, le_inflate))) {
@@ -1028,7 +1028,7 @@ PHP_FUNCTION(inflate_get_status)
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res))
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(ctx = zend_fetch_resource_ex(res, NULL, le_inflate))) {
@@ -1049,7 +1049,7 @@ PHP_FUNCTION(inflate_get_read_len)
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res))
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(ctx = zend_fetch_resource_ex(res, NULL, le_inflate))) {
@@ -1073,7 +1073,7 @@ PHP_FUNCTION(deflate_init)
 	zval *option_buffer;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|H", &encoding, &options)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("level"))) != NULL) {
@@ -1169,7 +1169,7 @@ PHP_FUNCTION(deflate_add)
 	int status;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &res, &in_buf, &in_len, &flush_type)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(ctx = zend_fetch_resource_ex(res, NULL, le_deflate))) {

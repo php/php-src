@@ -83,7 +83,7 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 	if (!is_real_connect) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!s!s!s!l!s!", &hostname, &hostname_len, &username, &username_len,
 				&passwd, &passwd_len, &dbname, &dbname_len, &port, &port_is_null, &socket, &socket_len) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 
 		if (object && instanceof_function(Z_OBJCE_P(object), mysqli_link_class_entry)) {
@@ -391,7 +391,7 @@ PHP_FUNCTION(mysqli_link_construct)
 PHP_FUNCTION(mysqli_connect_errno)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(MyG(error_no));
@@ -403,7 +403,7 @@ PHP_FUNCTION(mysqli_connect_errno)
 PHP_FUNCTION(mysqli_connect_error)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (MyG(error_msg)) {
@@ -459,7 +459,7 @@ PHP_FUNCTION(mysqli_fetch_all)
 PHP_FUNCTION(mysqli_get_client_stats)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	mysqlnd_get_client_stats(return_value);
 }
@@ -846,7 +846,7 @@ PHP_FUNCTION(mysqli_poll)
 	int 			desc_num;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a!a!al|l", &r_array, &e_array, &dont_poll_array, &sec, &usec) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (sec < 0 || usec < 0) {
 		php_error_docref(NULL, E_WARNING, "Negative values passed for sec and/or usec");
@@ -1277,7 +1277,7 @@ PHP_FUNCTION(mysqli_release_savepoint)
 PHP_FUNCTION(mysqli_get_links_stats)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);

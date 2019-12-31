@@ -585,7 +585,7 @@ static ZEND_FUNCTION(opcache_get_status)
 	zend_bool fetch_scripts = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &fetch_scripts) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!validate_api_restriction()) {
@@ -717,7 +717,7 @@ static ZEND_FUNCTION(opcache_get_configuration)
 	zval directives, version, blacklist;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!validate_api_restriction()) {
@@ -809,7 +809,7 @@ static ZEND_FUNCTION(opcache_get_configuration)
 static ZEND_FUNCTION(opcache_reset)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!validate_api_restriction()) {
@@ -840,7 +840,7 @@ static ZEND_FUNCTION(opcache_invalidate)
 	zend_bool force = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &script_name, &script_name_len, &force) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!validate_api_restriction()) {
@@ -864,7 +864,7 @@ static ZEND_FUNCTION(opcache_compile_file)
 	uint32_t orig_compiler_options;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &script_name, &script_name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!accel_startup_ok) {
@@ -919,7 +919,7 @@ static ZEND_FUNCTION(opcache_is_script_cached)
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &script_name) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(filename_is_in_cache(script_name));

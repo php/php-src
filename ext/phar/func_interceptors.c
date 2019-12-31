@@ -37,7 +37,7 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|z", &filename, &filename_len, &zcontext) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!IS_ABSOLUTE_PATH(filename, filename_len) && !strstr(filename, "://")) {
@@ -765,7 +765,7 @@ ZEND_NAMED_FUNCTION(fname) { \
 		size_t filename_len; \
 		\
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) { \
-			return; \
+			RETURN_THROWS(); \
 		} \
 		\
 		phar_file_stat(filename, filename_len, funcnum, PHAR_G(orig), INTERNAL_FUNCTION_PARAM_PASSTHRU); \

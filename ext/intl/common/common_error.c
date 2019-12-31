@@ -27,7 +27,7 @@
 PHP_FUNCTION( intl_get_error_code )
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG( intl_error_get_code( NULL ) );
@@ -40,7 +40,7 @@ PHP_FUNCTION( intl_get_error_code )
 PHP_FUNCTION( intl_get_error_message )
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_STR(intl_error_get_message( NULL ));
@@ -60,7 +60,7 @@ PHP_FUNCTION( intl_is_failure )
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "l",
 		&err_code ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL( U_FAILURE( err_code ) );
@@ -79,7 +79,7 @@ PHP_FUNCTION( intl_error_name )
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "l",
 		&err_code ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_STRING( (char*)u_errorName( err_code ) );

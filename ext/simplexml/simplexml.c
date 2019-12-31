@@ -1320,7 +1320,7 @@ SXE_METHOD(xpath)
 	xmlNodePtr		   nodeptr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &query, &query_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -1405,7 +1405,7 @@ SXE_METHOD(registerXPathNamespace)
 	char *prefix, *ns_uri;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &prefix, &prefix_len, &ns_uri, &ns_uri_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -1434,7 +1434,7 @@ SXE_METHOD(asXML)
 	size_t                 filename_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|p", &filename, &filename_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -1556,7 +1556,7 @@ SXE_METHOD(getNamespaces)
 	xmlNodePtr          node;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &recursive) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -1605,7 +1605,7 @@ SXE_METHOD(getDocNamespaces)
 	xmlNodePtr          node;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|bb", &recursive, &from_root) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -1635,7 +1635,7 @@ SXE_METHOD(children)
 	zend_bool       isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!b", &nsprefix, &nsprefix_len, &isprefix) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -1661,7 +1661,7 @@ SXE_METHOD(getName)
 	int             namelen;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -1688,7 +1688,7 @@ SXE_METHOD(attributes)
 	zend_bool       isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!b", &nsprefix, &nsprefix_len, &isprefix) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	sxe = Z_SXEOBJ_P(ZEND_THIS);
@@ -1717,7 +1717,7 @@ SXE_METHOD(addChild)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!s!",
 		&qname, &qname_len, &value, &value_len, &nsuri, &nsuri_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (qname_len == 0) {
@@ -1783,7 +1783,7 @@ SXE_METHOD(addAttribute)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|s!",
 		&qname, &qname_len, &value, &value_len, &nsuri, &nsuri_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (qname_len == 0) {
@@ -1944,7 +1944,7 @@ static int sxe_object_cast(zend_object *readobj, zval *writeobj, int type)
 SXE_METHOD(__toString)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (sxe_object_cast_ex(Z_OBJ_P(ZEND_THIS), return_value, IS_STRING) != SUCCESS) {
@@ -2007,7 +2007,7 @@ SXE_METHOD(count)
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_sxe_count_elements_helper(sxe, &count);
@@ -2182,7 +2182,7 @@ PHP_FUNCTION(simplexml_load_file)
 	zend_bool       isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|C!lsb", &filename, &filename_len, &ce, &options, &ns, &ns_len, &isprefix) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZEND_LONG_EXCEEDS_INT(options)) {
@@ -2228,7 +2228,7 @@ PHP_FUNCTION(simplexml_load_string)
 	zend_bool       isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|C!lsb", &data, &data_len, &ce, &options, &ns, &ns_len, &isprefix) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZEND_SIZE_T_INT_OVFL(data_len)) {
@@ -2278,7 +2278,7 @@ SXE_METHOD(__construct)
 	zend_bool       is_url = 0, isprefix = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lbsb", &data, &data_len, &options, &is_url, &ns, &ns_len, &isprefix) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZEND_SIZE_T_INT_OVFL(data_len)) {
@@ -2531,7 +2531,7 @@ PHP_FUNCTION(simplexml_import_dom)
 	zend_function    *fptr_count;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|C!", &node, &ce) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	object = Z_LIBXML_NODE_P(node);
