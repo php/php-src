@@ -3541,8 +3541,8 @@ PHP_FUNCTION(ldap_parse_reference)
 	ldap_resultentry *resultentry;
 	char **lreferrals, **refp;
 
-	if (RETURN_THROWS()(ZEND_NUM_ARGS(), "rrz", &link, &result_entry, &referrals) != SUCCESS) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrz", &link, &result_entry, &referrals) != SUCCESS) {
+		RETURN_THROWS();
 	}
 
 	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
