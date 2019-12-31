@@ -89,7 +89,7 @@ PHP_FUNCTION(class_parents)
 	zend_bool autoload = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
@@ -123,7 +123,7 @@ PHP_FUNCTION(class_implements)
 	zend_class_entry *ce;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
 		zend_type_error("object or string expected");
@@ -152,7 +152,7 @@ PHP_FUNCTION(class_uses)
 	zend_class_entry *ce;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &obj, &autoload) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (Z_TYPE_P(obj) != IS_OBJECT && Z_TYPE_P(obj) != IS_STRING) {
 		zend_type_error("object or string expected");
@@ -237,7 +237,7 @@ PHP_FUNCTION(class_uses)
 PHP_FUNCTION(spl_classes)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -313,7 +313,7 @@ PHP_FUNCTION(spl_autoload)
 	zend_string *class_name, *lc_name, *file_exts = SPL_G(autoload_extensions);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|S", &class_name, &file_exts) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (file_exts == NULL) { /* autoload_extensions is not initialized, set to defaults */
@@ -348,7 +348,7 @@ PHP_FUNCTION(spl_autoload_extensions)
 	zend_string *file_exts = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &file_exts) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (file_exts) {
 		if (SPL_G(autoload_extensions)) {
@@ -398,7 +398,7 @@ PHP_FUNCTION(spl_autoload_call)
 	autoload_func_info *alfi;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &class_name) == FAILURE || Z_TYPE_P(class_name) != IS_STRING) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (SPL_G(autoload_functions)) {
@@ -512,7 +512,7 @@ PHP_FUNCTION(spl_autoload_register)
 	zend_fcall_info_cache fcc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zbb", &zcallable, &do_throw, &prepend) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZEND_NUM_ARGS()) {
@@ -684,7 +684,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 	zend_fcall_info_cache fcc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcallable) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!zend_is_callable_ex(zcallable, NULL, IS_CALLABLE_CHECK_SYNTAX_ONLY, &func_name, &fcc, &error)) {
@@ -762,7 +762,7 @@ PHP_FUNCTION(spl_autoload_functions)
 	autoload_func_info *alfi;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!EG(autoload_func)) {
@@ -812,7 +812,7 @@ PHP_FUNCTION(spl_object_hash)
 	zval *obj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &obj) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_NEW_STR(php_spl_object_hash(obj));

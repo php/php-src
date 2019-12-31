@@ -399,7 +399,7 @@ SPL_METHOD(SplObjectStorage, attach)
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|z!", &obj, &inf) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	spl_object_storage_attach(intern, obj, inf);
 } /* }}} */
@@ -412,7 +412,7 @@ SPL_METHOD(SplObjectStorage, detach)
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &obj) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	spl_object_storage_detach(intern, obj);
 
@@ -427,7 +427,7 @@ SPL_METHOD(SplObjectStorage, getHash)
 	zval *obj;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &obj) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_NEW_STR(php_spl_object_hash(obj));
@@ -444,7 +444,7 @@ SPL_METHOD(SplObjectStorage, offsetGet)
 	zend_hash_key key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &obj) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (spl_object_storage_get_hash(&key, intern, obj) == FAILURE) {
@@ -472,7 +472,7 @@ SPL_METHOD(SplObjectStorage, addAll)
 	spl_SplObjectStorage *other;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &obj, spl_ce_SplObjectStorage) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	other = Z_SPLOBJSTORAGE_P(obj);
@@ -492,7 +492,7 @@ SPL_METHOD(SplObjectStorage, removeAll)
 	spl_SplObjectStorageElement *element;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &obj, spl_ce_SplObjectStorage) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	other = Z_SPLOBJSTORAGE_P(obj);
@@ -520,7 +520,7 @@ SPL_METHOD(SplObjectStorage, removeAllExcept)
 	spl_SplObjectStorageElement *element;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &obj, spl_ce_SplObjectStorage) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	other = Z_SPLOBJSTORAGE_P(obj);
@@ -546,7 +546,7 @@ SPL_METHOD(SplObjectStorage, contains)
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &obj) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	RETURN_BOOL(spl_object_storage_contains(intern, obj));
 } /* }}} */
@@ -559,7 +559,7 @@ SPL_METHOD(SplObjectStorage, count)
 	zend_long mode = COUNT_NORMAL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &mode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (mode == COUNT_RECURSIVE) {
@@ -585,7 +585,7 @@ SPL_METHOD(SplObjectStorage, rewind)
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
@@ -599,7 +599,7 @@ SPL_METHOD(SplObjectStorage, valid)
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(zend_hash_has_more_elements_ex(&intern->storage, &intern->pos) == SUCCESS);
@@ -612,7 +612,7 @@ SPL_METHOD(SplObjectStorage, key)
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(intern->index);
@@ -626,7 +626,7 @@ SPL_METHOD(SplObjectStorage, current)
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) == NULL) {
@@ -643,7 +643,7 @@ SPL_METHOD(SplObjectStorage, getInfo)
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) == NULL) {
@@ -661,7 +661,7 @@ SPL_METHOD(SplObjectStorage, setInfo)
 	zval *inf;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &inf) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) == NULL) {
@@ -678,7 +678,7 @@ SPL_METHOD(SplObjectStorage, next)
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_hash_move_forward_ex(&intern->storage, &intern->pos);
@@ -698,7 +698,7 @@ SPL_METHOD(SplObjectStorage, serialize)
 	smart_str buf = {0};
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
@@ -757,7 +757,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 	zend_long count;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &buf, &buf_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (buf_len == 0) {
@@ -878,7 +878,7 @@ SPL_METHOD(SplObjectStorage, __serialize)
 	zval tmp;
 
 	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -907,7 +907,7 @@ SPL_METHOD(SplObjectStorage, __unserialize)
 	zval *storage_zv, *members_zv, *key, *val;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	storage_zv = zend_hash_index_find(data, 0);
@@ -1019,7 +1019,7 @@ SPL_METHOD(MultipleIterator, __construct)
 	zend_long               flags = MIT_NEED_ALL|MIT_KEYS_NUMERIC;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
@@ -1034,7 +1034,7 @@ SPL_METHOD(MultipleIterator, getFlags)
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	RETURN_LONG(intern->flags);
 }
@@ -1048,7 +1048,7 @@ SPL_METHOD(MultipleIterator, setFlags)
 	intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &intern->flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -1061,7 +1061,7 @@ SPL_METHOD(MultipleIterator, attachIterator)
 	zval                        *iterator = NULL, *info = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|z!", &iterator, zend_ce_iterator, &info) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
@@ -1099,7 +1099,7 @@ SPL_METHOD(MultipleIterator, rewind)
 	intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
@@ -1122,7 +1122,7 @@ SPL_METHOD(MultipleIterator, next)
 	intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
@@ -1146,7 +1146,7 @@ SPL_METHOD(MultipleIterator, valid)
 	intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!zend_hash_num_elements(&intern->storage)) {
@@ -1254,7 +1254,7 @@ SPL_METHOD(MultipleIterator, current)
 	intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_multiple_iterator_get_all(intern, SPL_MULTIPLE_ITERATOR_GET_ALL_CURRENT, return_value);
@@ -1269,7 +1269,7 @@ SPL_METHOD(MultipleIterator, key)
 	intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_multiple_iterator_get_all(intern, SPL_MULTIPLE_ITERATOR_GET_ALL_KEY, return_value);

@@ -558,7 +558,7 @@ SPL_METHOD(SplDoublyLinkedList, push)
 	spl_dllist_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
@@ -576,7 +576,7 @@ SPL_METHOD(SplDoublyLinkedList, unshift)
 	spl_dllist_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
@@ -593,7 +593,7 @@ SPL_METHOD(SplDoublyLinkedList, pop)
 	spl_dllist_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
@@ -613,7 +613,7 @@ SPL_METHOD(SplDoublyLinkedList, shift)
 	spl_dllist_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
@@ -634,7 +634,7 @@ SPL_METHOD(SplDoublyLinkedList, top)
 	spl_dllist_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
@@ -657,7 +657,7 @@ SPL_METHOD(SplDoublyLinkedList, bottom)
 	spl_dllist_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
@@ -680,7 +680,7 @@ SPL_METHOD(SplDoublyLinkedList, count)
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	count = spl_ptr_llist_count(intern->llist);
@@ -695,7 +695,7 @@ SPL_METHOD(SplDoublyLinkedList, isEmpty)
 	zend_long count;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_dllist_object_count_elements(Z_OBJ_P(ZEND_THIS), &count);
@@ -711,7 +711,7 @@ SPL_METHOD(SplDoublyLinkedList, setIteratorMode)
 	spl_dllist_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
@@ -735,7 +735,7 @@ SPL_METHOD(SplDoublyLinkedList, getIteratorMode)
 	spl_dllist_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
@@ -753,7 +753,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetExists)
 	zend_long               index;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zindex) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
@@ -772,7 +772,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetGet)
 	spl_ptr_llist_element *element;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zindex) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
@@ -802,7 +802,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 	spl_dllist_object     *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &zindex, &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
@@ -858,7 +858,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 	spl_ptr_llist         *llist;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zindex) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
@@ -1031,7 +1031,7 @@ SPL_METHOD(SplDoublyLinkedList, key)
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(intern->traverse_position);
@@ -1045,7 +1045,7 @@ SPL_METHOD(SplDoublyLinkedList, prev)
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_dllist_it_helper_move_forward(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags ^ SPL_DLLIST_IT_LIFO);
@@ -1059,7 +1059,7 @@ SPL_METHOD(SplDoublyLinkedList, next)
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_dllist_it_helper_move_forward(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags);
@@ -1073,7 +1073,7 @@ SPL_METHOD(SplDoublyLinkedList, valid)
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(intern->traverse_pointer != NULL);
@@ -1087,7 +1087,7 @@ SPL_METHOD(SplDoublyLinkedList, rewind)
 	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_dllist_it_helper_rewind(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags);
@@ -1102,7 +1102,7 @@ SPL_METHOD(SplDoublyLinkedList, current)
 	spl_ptr_llist_element *element = intern->traverse_pointer;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (element == NULL || Z_ISUNDEF(element->data)) {
@@ -1126,7 +1126,7 @@ SPL_METHOD(SplDoublyLinkedList, serialize)
 	php_serialize_data_t   var_hash;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
@@ -1170,7 +1170,7 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 	php_unserialize_data_t var_hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &buf, &buf_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (buf_len == 0) {
@@ -1222,7 +1222,7 @@ SPL_METHOD(SplDoublyLinkedList, __serialize)
 	zval tmp;
 
 	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -1253,7 +1253,7 @@ SPL_METHOD(SplDoublyLinkedList, __unserialize) {
 	zval *flags_zv, *storage_zv, *members_zv, *elem;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	flags_zv = zend_hash_index_find(data, 0);
@@ -1286,7 +1286,7 @@ SPL_METHOD(SplDoublyLinkedList, add)
 	zend_long                  index;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &zindex, &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);

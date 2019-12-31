@@ -703,7 +703,7 @@ SPL_METHOD(Array, offsetExists)
 {
 	zval *index;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &index) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	RETURN_BOOL(spl_array_has_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, 2));
 } /* }}} */
@@ -715,7 +715,7 @@ SPL_METHOD(Array, offsetGet)
 {
 	zval *value, *index;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &index) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	value = spl_array_read_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, BP_VAR_R, return_value);
 	if (value != return_value) {
@@ -730,7 +730,7 @@ SPL_METHOD(Array, offsetSet)
 {
 	zval *index, *value;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &index, &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	spl_array_write_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, value);
 } /* }}} */
@@ -755,7 +755,7 @@ SPL_METHOD(Array, append)
 	zval *value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	spl_array_iterator_append(ZEND_THIS, value);
 } /* }}} */
@@ -767,7 +767,7 @@ SPL_METHOD(Array, offsetUnset)
 {
 	zval *index;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &index) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	spl_array_unset_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index);
 } /* }}} */
@@ -1197,7 +1197,7 @@ SPL_METHOD(Array, __construct)
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|lC", &array, &ar_flags, &ce_get_iterator) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLARRAY_P(object);
@@ -1226,7 +1226,7 @@ SPL_METHOD(ArrayIterator, __construct)
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &array, &ar_flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLARRAY_P(object);
@@ -1261,7 +1261,7 @@ SPL_METHOD(Array, getIteratorClass)
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_string_addref(intern->ce_get_iterator->name);
@@ -1277,7 +1277,7 @@ SPL_METHOD(Array, getFlags)
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(intern->ar_flags & ~SPL_ARRAY_INT_MASK);
@@ -1293,7 +1293,7 @@ SPL_METHOD(Array, setFlags)
 	zend_long ar_flags = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &ar_flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern->ar_flags = (intern->ar_flags & SPL_ARRAY_INT_MASK) | (ar_flags & ~SPL_ARRAY_INT_MASK);
@@ -1308,7 +1308,7 @@ SPL_METHOD(Array, exchangeArray)
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &array) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (intern->nApplyCount > 0) {
@@ -1329,7 +1329,7 @@ SPL_METHOD(Array, getIterator)
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_OBJ(return_value, spl_array_object_new_ex(intern->ce_get_iterator, Z_OBJ_P(object), 0));
@@ -1344,7 +1344,7 @@ SPL_METHOD(Array, rewind)
 	spl_array_object *intern = Z_SPLARRAY_P(object);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_array_rewind(intern);
@@ -1362,7 +1362,7 @@ SPL_METHOD(Array, seek)
 	int result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &position) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	opos = position;
@@ -1428,7 +1428,7 @@ SPL_METHOD(Array, count)
 	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(spl_array_object_count_elements_helper(intern));
@@ -1532,7 +1532,7 @@ SPL_METHOD(Array, current)
 	HashTable *aht = spl_array_get_hash_table(intern);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((entry = zend_hash_get_current_data_ex(aht, spl_array_get_pos_ptr(aht, intern))) == NULL) {
@@ -1553,7 +1553,7 @@ SPL_METHOD(Array, current)
 SPL_METHOD(Array, key)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_array_iterator_key(ZEND_THIS, return_value);
@@ -1577,7 +1577,7 @@ SPL_METHOD(Array, next)
 	HashTable *aht = spl_array_get_hash_table(intern);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_array_next_ex(intern, aht);
@@ -1593,7 +1593,7 @@ SPL_METHOD(Array, valid)
 	HashTable *aht = spl_array_get_hash_table(intern);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(zend_hash_has_more_elements_ex(aht, spl_array_get_pos_ptr(aht, intern)) == SUCCESS);
@@ -1609,7 +1609,7 @@ SPL_METHOD(Array, hasChildren)
 	HashTable *aht = spl_array_get_hash_table(intern);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((entry = zend_hash_get_current_data_ex(aht, spl_array_get_pos_ptr(aht, intern))) == NULL) {
@@ -1634,7 +1634,7 @@ SPL_METHOD(Array, getChildren)
 	HashTable *aht = spl_array_get_hash_table(intern);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((entry = zend_hash_get_current_data_ex(aht, spl_array_get_pos_ptr(aht, intern))) == NULL) {
@@ -1725,7 +1725,7 @@ SPL_METHOD(Array, unserialize)
 	zend_long flags;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &buf, &buf_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (buf_len == 0) {
@@ -1830,7 +1830,7 @@ SPL_METHOD(Array, __serialize)
 	zval tmp;
 
 	if (zend_parse_parameters_none_throw() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -1864,7 +1864,7 @@ SPL_METHOD(Array, __unserialize)
 	zend_long flags;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	flags_zv = zend_hash_index_find(data, 0);

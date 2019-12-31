@@ -579,7 +579,7 @@ SPL_METHOD(SplHeap, count)
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	count = spl_ptr_heap_count(intern->heap);
@@ -594,7 +594,7 @@ SPL_METHOD(SplHeap, isEmpty)
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(spl_ptr_heap_count(intern->heap) == 0);
@@ -609,7 +609,7 @@ SPL_METHOD(SplHeap, insert)
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -633,7 +633,7 @@ SPL_METHOD(SplHeap, extract)
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -659,7 +659,7 @@ SPL_METHOD(SplPriorityQueue, insert)
 	spl_pqueue_elem elem;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &data, &priority) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -686,7 +686,7 @@ SPL_METHOD(SplPriorityQueue, extract)
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -714,7 +714,7 @@ SPL_METHOD(SplPriorityQueue, top)
 	spl_pqueue_elem *elem;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -744,7 +744,7 @@ SPL_METHOD(SplPriorityQueue, setExtractFlags)
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	value &= SPL_PQUEUE_EXTR_MASK;
@@ -766,7 +766,7 @@ SPL_METHOD(SplPriorityQueue, getExtractFlags)
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -782,7 +782,7 @@ SPL_METHOD(SplHeap, recoverFromCorruption)
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -800,7 +800,7 @@ SPL_METHOD(SplHeap, isCorrupted)
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -816,7 +816,7 @@ SPL_METHOD(SplPriorityQueue, compare)
 	zval *a, *b;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a, &b) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(spl_ptr_heap_zval_max_cmp(a, b, NULL));
@@ -831,7 +831,7 @@ SPL_METHOD(SplHeap, top)
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -859,7 +859,7 @@ SPL_METHOD(SplMinHeap, compare)
 	zval *a, *b;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a, &b) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(spl_ptr_heap_zval_min_cmp(a, b, NULL));
@@ -873,7 +873,7 @@ SPL_METHOD(SplMaxHeap, compare)
 	zval *a, *b;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a, &b) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(spl_ptr_heap_zval_max_cmp(a, b, NULL));
@@ -969,7 +969,7 @@ SPL_METHOD(SplHeap, key)
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(intern->heap->count - 1);
@@ -983,7 +983,7 @@ SPL_METHOD(SplHeap, next)
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_ptr_heap_delete_top(intern->heap, NULL, ZEND_THIS);
@@ -997,7 +997,7 @@ SPL_METHOD(SplHeap, valid)
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(intern->heap->count != 0);
@@ -1009,7 +1009,7 @@ SPL_METHOD(SplHeap, valid)
 SPL_METHOD(SplHeap, rewind)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	/* do nothing, the iterator always points to the top element */
 }
@@ -1022,7 +1022,7 @@ SPL_METHOD(SplHeap, current)
 	spl_heap_object *intern  = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!intern->heap->count) {
@@ -1041,7 +1041,7 @@ SPL_METHOD(SplPriorityQueue, current)
 	spl_heap_object  *intern  = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!intern->heap->count) {
