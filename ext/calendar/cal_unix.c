@@ -36,7 +36,7 @@ PHP_FUNCTION(unixtojd)
 		ts = time(NULL);
 	} else if (ts < 0) {
 		zend_value_error("timestamp must not be negative");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(ta = php_localtime_r(&ts, &tmbuf))) {
@@ -60,7 +60,7 @@ PHP_FUNCTION(jdtounix)
 
 	if (uday < 0 || uday > 24755) {
 		zend_value_error("jday must be within the Unix epoch");
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(uday * 24 * 3600);

@@ -373,7 +373,7 @@ static int php_zip_parse_options(zval *options, zend_long *remove_all_path, char
 		intern = obj->za; \
 		if (!intern) { \
 			zend_value_error("Invalid or uninitialized Zip object"); \
-			return; \
+			RETURN_THROWS(); \
 		} \
 	}
 /* }}} */

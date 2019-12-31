@@ -6385,7 +6385,7 @@ PHP_FUNCTION(array_chunk)
 	/* Do bounds checking for size parameter. */
 	if (size < 1) {
 		zend_value_error("Size parameter expected to be greater than 0");
-		return;
+		RETURN_THROWS();
 	}
 
 	num_in = zend_hash_num_elements(Z_ARRVAL_P(input));
@@ -6454,7 +6454,7 @@ PHP_FUNCTION(array_combine)
 
 	if (num_keys != num_values) {
 		zend_value_error("Both parameters should have an equal number of elements");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!num_keys) {

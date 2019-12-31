@@ -314,12 +314,12 @@ static PHP_FUNCTION(json_decode)
 
 	if (depth <= 0) {
 		zend_value_error("Depth must be greater than zero");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (depth > INT_MAX) {
 		zend_value_error("Depth must be lower than %d", INT_MAX);
-		return;
+		RETURN_THROWS();
 	}
 
 	/* For BC reasons, the bool $assoc overrides the long $options bit for PHP_JSON_OBJECT_AS_ARRAY */

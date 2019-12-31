@@ -886,7 +886,7 @@ PHP_FUNCTION(imagesetstyle)
 	num_styles = zend_hash_num_elements(Z_ARRVAL_P(styles));
 	if (num_styles == 0) {
 		zend_value_error("Styles array must not be empty");
-		return;
+		RETURN_THROWS();
 	}
 
 	/* copy the style values in the stylearr */
@@ -917,12 +917,12 @@ PHP_FUNCTION(imagecreatetruecolor)
 
 	if (x_size <= 0 || x_size >= INT_MAX) {
 		zend_value_error("Invalid width (x_size)");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (y_size <= 0 || y_size >= INT_MAX) {
 		zend_value_error("Invalid height (y_size)");
-		return;
+		RETURN_THROWS();
 	}
 
 	im = gdImageCreateTrueColor(x_size, y_size);
@@ -969,7 +969,7 @@ PHP_FUNCTION(imagetruecolortopalette)
 
 	if (ncolors <= 0 || ZEND_LONG_INT_OVFL(ncolors)) {
 		zend_value_error("Number of colors has to be greater than zero and no more than %d", INT_MAX);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (gdImageTrueColorToPalette(im, dither, (int)ncolors)) {
@@ -1174,7 +1174,7 @@ PHP_FUNCTION(imagelayereffect)
 #define CHECK_RGBA_RANGE(component, name) \
 	if (component < 0 || component > gd##name##Max) { \
 		zend_value_error(#name " component is out of range, must be between 0 and %d (inclusive)", gd##name##Max); \
-		return; \
+		RETURN_THROWS(); \
 	}
 
 /* {{{ proto int imagecolorallocatealpha(resource im, int red, int green, int blue, int alpha)
@@ -1512,12 +1512,12 @@ PHP_FUNCTION(imagecreate)
 
 	if (x_size <= 0 || x_size >= INT_MAX) {
 		zend_value_error("Invalid width (x_size)");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (y_size <= 0 || y_size >= INT_MAX) {
 		zend_value_error("Invalid height (y_size)");
-		return;
+		RETURN_THROWS();
 	}
 
 	im = gdImageCreate(x_size, y_size);
@@ -1751,12 +1751,12 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 
 		if (width < 1) {
 			zend_value_error("Width must be at least 1");
-			return;
+			RETURN_THROWS();
 		}
 
 		if (height < 1) {
 			zend_value_error("Height must be at least 1");
-			return;
+			RETURN_THROWS();
 		}
 
 	} else {
@@ -2307,7 +2307,7 @@ PHP_FUNCTION(imagecolordeallocate)
 		RETURN_TRUE;
 	} else {
 		zend_value_error("Color index %d out of range", col);
-		return;
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -2435,7 +2435,7 @@ PHP_FUNCTION(imagegammacorrect)
 
 	if ( input <= 0.0 || output <= 0.0 ) {
 		zend_value_error("Gamma values must be positive");
-		return;
+		RETURN_THROWS();
 	}
 
 	gamma = input / output;
@@ -2744,7 +2744,7 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 		NPOINTS = zend_hash_num_elements(Z_ARRVAL_P(POINTS));
 		if (NPOINTS % 2 != 0) {
 			zend_value_error("Points array must have an even number of elements");
-			return;
+			RETURN_THROWS();
 		}
 		NPOINTS /= 2;
 	}
@@ -2757,12 +2757,12 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 	nelem = zend_hash_num_elements(Z_ARRVAL_P(POINTS));
 	if (npoints < 3) {
 		zend_value_error("Polygon must have at least 3 points");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (nelem < npoints * 2) {
 		zend_value_error("Trying to use %d points in array with only %d points", npoints, nelem/2);
-		return;
+		RETURN_THROWS();
 	}
 
 	points = (gdPointPtr) safe_emalloc(npoints, sizeof(gdPoint), 0);
@@ -3134,7 +3134,7 @@ PHP_FUNCTION(imagecopyresized)
 
 	if (dstW <= 0 || dstH <= 0 || srcW <= 0 || srcH <= 0) {
 		zend_value_error("Invalid image dimensions");
-		return;
+		RETURN_THROWS();
 	}
 
 	gdImageCopyResized(im_dst, im_src, dstX, dstY, srcX, srcY, dstW, dstH, srcW, srcH);
@@ -3616,14 +3616,14 @@ PHP_FUNCTION(imageconvolution)
 	nelem = zend_hash_num_elements(Z_ARRVAL_P(hash_matrix));
 	if (nelem != 3) {
 		zend_value_error("Convolution matrix must be a 3x3 array");
-		return;
+		RETURN_THROWS();
 	}
 
 	for (i=0; i<3; i++) {
 		if ((var = zend_hash_index_find(Z_ARRVAL_P(hash_matrix), (i))) != NULL && Z_TYPE_P(var) == IS_ARRAY) {
 			if (zend_hash_num_elements(Z_ARRVAL_P(var)) != 3 ) {
 				zend_value_error("Convolution matrix must be a 3x3 array, matrix[%d] only has %d elements", i, zend_hash_num_elements(Z_ARRVAL_P(var)));
-				return;
+				RETURN_THROWS();
 			}
 
 			for (j=0; j<3; j++) {
@@ -3631,7 +3631,7 @@ PHP_FUNCTION(imageconvolution)
 					matrix[i][j] = (float) zval_get_double(var2);
 				} else {
 					zend_value_error("Convolution matrix must be a 3x3 array, matrix[%d][%d] cannot be found (missing integer key)", i, j);
-					return;
+					RETURN_THROWS();
 				}
 			}
 		}
@@ -3676,7 +3676,7 @@ PHP_FUNCTION(imageflip)
 
 		default:
 			zend_value_error("Unknown flip mode");
-			return;
+			RETURN_THROWS();
 	}
 
 	RETURN_TRUE;
@@ -3725,28 +3725,28 @@ PHP_FUNCTION(imagecrop)
 		rect.x = zval_get_long(tmp);
 	} else {
 		zend_value_error("Cropping rectangle is missing x position");
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
 		rect.y = zval_get_long(tmp);
 	} else {
 		zend_value_error("Cropping rectangle is missing y position");
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
 		rect.width = zval_get_long(tmp);
 	} else {
 		zend_value_error("Cropping rectangle is missing width");
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
 		rect.height = zval_get_long(tmp);
 	} else {
 		zend_value_error("Cropping rectangle is missing height");
-		return;
+		RETURN_THROWS();
 	}
 
 	im_crop = gdImageCrop(im, &rect);
@@ -3788,14 +3788,14 @@ PHP_FUNCTION(imagecropauto)
 		case GD_CROP_THRESHOLD:
 			if (color < 0 || (!gdImageTrueColor(im) && color >= gdImageColorsTotal(im))) {
 				zend_value_error("Color argument missing with threshold mode");
-				return;
+				RETURN_THROWS();
 			}
 			im_crop = gdImageCropThreshold(im, color, (float) threshold);
 			break;
 
 		default:
 			zend_value_error("Unknown crop mode");
-			return;
+			RETURN_THROWS();
 	}
 
 	if (im_crop == NULL) {
@@ -3885,7 +3885,7 @@ PHP_FUNCTION(imageaffine)
 
 	if ((nelems = zend_hash_num_elements(Z_ARRVAL_P(z_affine))) != 6) {
 		zend_value_error("Affine array must have six elements");
-		return;
+		RETURN_THROWS();
 	}
 
 	for (i = 0; i < nelems; i++) {
@@ -3912,28 +3912,28 @@ PHP_FUNCTION(imageaffine)
 			rect.x = zval_get_long(tmp);
 		} else {
 			zend_value_error("Clip array is missing x position");
-			return;
+			RETURN_THROWS();
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
 			rect.y = zval_get_long(tmp);
 		} else {
 			zend_value_error("Clip array is missing y position");
-			return;
+			RETURN_THROWS();
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
 			rect.width = zval_get_long(tmp);
 		} else {
 			zend_value_error("Clip array is missing width");
-			return;
+			RETURN_THROWS();
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
 			rect.height = zval_get_long(tmp);
 		} else {
 			zend_value_error("Clip array is missing height");
-			return;
+			RETURN_THROWS();
 		}
 		pRect = &rect;
 	} else {
@@ -3983,14 +3983,14 @@ PHP_FUNCTION(imageaffinematrixget)
 				x = zval_get_double(tmp);
 			} else {
 				zend_value_error("Options array is missing x position");
-				return;
+				RETURN_THROWS();
 			}
 
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "y", sizeof("y") - 1)) != NULL) {
 				y = zval_get_double(tmp);
 			} else {
 				zend_value_error("Options array is missing y position");
-				return;
+				RETURN_THROWS();
 			}
 
 			if (type == GD_AFFINE_TRANSLATE) {
@@ -4025,7 +4025,7 @@ PHP_FUNCTION(imageaffinematrixget)
 
 		default:
 			zend_value_error("Invalid type for element " ZEND_LONG_FMT, type);
-			return;
+			RETURN_THROWS();
 	}
 
 	if (res == GD_FALSE) {
@@ -4057,7 +4057,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 
 	if (((nelems = zend_hash_num_elements(Z_ARRVAL_P(z_m1))) != 6) || (nelems = zend_hash_num_elements(Z_ARRVAL_P(z_m2))) != 6) {
 		zend_value_error("Affine arrays must have six elements");
-		return;
+		RETURN_THROWS();
 	}
 
 	for (i = 0; i < 6; i++) {
