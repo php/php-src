@@ -3702,7 +3702,6 @@ function add_asan_opts(cflags_name, libs_name, ldflags_name)
 
 	if (!!cflags_name) {
 		ADD_FLAG(cflags_name, "-fsanitize=address");
-		ADD_FLAG(cflags_name, "-fsanitize-address-use-after-scope");
 	}
 	if (!!libs_name) {
 		if (X64) {
