@@ -59,7 +59,7 @@ PHP_FUNCTION( collator_compare )
 			"Object not initialized", 0 );
 		zend_throw_error(NULL, "Object not initialized");
 
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/*

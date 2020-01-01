@@ -404,7 +404,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 			"Object not initialized", 0 );
 		zend_throw_error(NULL, "Object not initialized");
 
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/*
@@ -567,7 +567,7 @@ PHP_FUNCTION( collator_get_sort_key )
 			"Object not initialized", 0 );
 		zend_throw_error(NULL, "Object not initialized");
 
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/*

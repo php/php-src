@@ -2341,7 +2341,7 @@ PHP_FUNCTION(forward_static_call)
 
 	if (!EX(prev_execute_data)->func->common.scope) {
 		zend_throw_error(NULL, "Cannot call forward_static_call() when no class scope is active");
-		return;
+		RETURN_THROWS();
 	}
 
 	fci.retval = &retval;

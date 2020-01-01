@@ -253,17 +253,17 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
 		zend_throw_error(NULL, "Unknown hashing algorithm: %s", algo);
-		return;
+		RETURN_THROWS();
 	}
 	else if (!ops->is_crypto) {
 		zend_throw_error(NULL, "Non-cryptographic hashing algorithm: %s", algo);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (isfilename) {
 		if (CHECK_NULL_PATH(data, data_len)) {
 			zend_throw_error(NULL, "Invalid path");
-			return;
+			RETURN_THROWS();
 		}
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
 		if (!stream) {
@@ -359,18 +359,18 @@ PHP_FUNCTION(hash_init)
 	ops = php_hash_fetch_ops(ZSTR_VAL(algo), ZSTR_LEN(algo));
 	if (!ops) {
 		zend_throw_error(NULL, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
-		return;
+		RETURN_THROWS();
 	}
 
 	if (options & PHP_HASH_HMAC) {
 		if (!ops->is_crypto) {
 			zend_throw_error(NULL, "HMAC requested with a non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
-			return;
+			RETURN_THROWS();
 		}
 		if (!key || (ZSTR_LEN(key) == 0)) {
 			/* Note: a zero length key is no key at all */
 			zend_throw_error(NULL, "HMAC requested without a key");
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -415,7 +415,7 @@ PHP_FUNCTION(hash_init)
 #define PHP_HASHCONTEXT_VERIFY(func, hash) { \
 	if (!hash->context) { \
 		zend_throw_error(NULL, "%s(): supplied resource is not a valid Hash Context resource", func); \
-		return; \
+		RETURN_THROWS(); \
 	} \
 }
 
@@ -587,7 +587,7 @@ PHP_FUNCTION(hash_copy)
 		zval_ptr_dtor(return_value);
 
 		zend_throw_error(NULL, "Cannot copy hash");
-		return;
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -648,27 +648,27 @@ PHP_FUNCTION(hash_hkdf)
 	ops = php_hash_fetch_ops(ZSTR_VAL(algo), ZSTR_LEN(algo));
 	if (!ops) {
 		zend_throw_error(NULL, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!ops->is_crypto) {
 		zend_throw_error(NULL, "Non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZSTR_LEN(ikm) == 0) {
 		zend_throw_error(NULL, "Input keying material cannot be empty");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (length < 0) {
 		zend_throw_error(NULL, "Length must be greater than or equal to 0: " ZEND_LONG_FMT, length);
-		return;
+		RETURN_THROWS();
 	} else if (length == 0) {
 		length = ops->digest_size;
 	} else if (length > (zend_long) (ops->digest_size * 255)) {
 		zend_throw_error(NULL, "Length must be less than or equal to %zd: " ZEND_LONG_FMT, ops->digest_size * 255, length);
-		return;
+		RETURN_THROWS();
 	}
 
 	context = emalloc(ops->context_size);
@@ -748,26 +748,26 @@ PHP_FUNCTION(hash_pbkdf2)
 	ops = php_hash_fetch_ops(algo, algo_len);
 	if (!ops) {
 		zend_throw_error(NULL, "Unknown hashing algorithm: %s", algo);
-		return;
+		RETURN_THROWS();
 	}
 	else if (!ops->is_crypto) {
 		zend_throw_error(NULL, "Non-cryptographic hashing algorithm: %s", algo);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (iterations <= 0) {
 		zend_throw_error(NULL, "Iterations must be a positive integer: " ZEND_LONG_FMT, iterations);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (length < 0) {
 		zend_throw_error(NULL, "Length must be greater than or equal to 0: " ZEND_LONG_FMT, length);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (salt_len > INT_MAX - 4) {
 		zend_throw_error(NULL, "Supplied salt is too long, max of INT_MAX - 4 bytes: %zd supplied", salt_len);
-		return;
+		RETURN_THROWS();
 	}
 
 	context = emalloc(ops->context_size);

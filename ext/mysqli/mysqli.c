@@ -1209,19 +1209,19 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		}
 		if (UNEXPECTED(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
 			zend_throw_error(NULL, "Class '%s' cannot be instantiated", ZSTR_VAL(ce->name));
-			return;
+			RETURN_THROWS();
 		}
 		fetchtype = MYSQLI_ASSOC;
 	} else {
 		if (override_flags) {
 			if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			fetchtype = override_flags;
 		} else {
 			fetchtype = MYSQLI_BOTH;
 			if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &fetchtype) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 		}
 	}

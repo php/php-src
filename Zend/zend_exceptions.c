@@ -289,7 +289,7 @@ ZEND_METHOD(exception, __construct)
 			ce = base_ce;
 		}
 		zend_throw_error(NULL, "Wrong parameters for %s([string $message [, long $code [, Throwable $previous = NULL]]])", ZSTR_VAL(ce->name));
-		return;
+		RETURN_THROWS();
 	}
 
 	if (message) {
@@ -355,7 +355,7 @@ ZEND_METHOD(error_exception, __construct)
 			ce = zend_ce_error_exception;
 		}
 		zend_throw_error(NULL, "Wrong parameters for %s([string $message [, long $code, [ long $severity, [ string $filename, [ long $lineno  [, Throwable $previous = NULL]]]]]])", ZSTR_VAL(ce->name));
-		return;
+		RETURN_THROWS();
 	}
 
 	object = ZEND_THIS;

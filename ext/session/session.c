@@ -2221,14 +2221,14 @@ static PHP_FUNCTION(session_regenerate_id)
 	if (PS(mod)->s_open(&PS(mod_data), PS(save_path), PS(session_name)) == FAILURE) {
 		PS(session_status) = php_session_none;
 		zend_throw_error(NULL, "Failed to open session: %s (path: %s)", PS(mod)->s_name, PS(save_path));
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 	if (!PS(id)) {
 		PS(session_status) = php_session_none;
 		zend_throw_error(NULL, "Failed to create new session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	if (PS(use_strict_mode) && PS(mod)->s_validate_sid &&
 		PS(mod)->s_validate_sid(&PS(mod_data), PS(id)) == FAILURE) {
@@ -2238,7 +2238,7 @@ static PHP_FUNCTION(session_regenerate_id)
 			PS(mod)->s_close(&PS(mod_data));
 			PS(session_status) = php_session_none;
 			zend_throw_error(NULL, "Failed to create session ID by collision: %s (path: %s)", PS(mod)->s_name, PS(save_path));
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 	}
 	/* Read is required to make new session data at this point. */
@@ -2246,7 +2246,7 @@ static PHP_FUNCTION(session_regenerate_id)
 		PS(mod)->s_close(&PS(mod_data));
 		PS(session_status) = php_session_none;
 		zend_throw_error(NULL, "Failed to create(read) session ID: %s (path: %s)", PS(mod)->s_name, PS(save_path));
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	if (data) {
 		zend_string_release_ex(data, 0);

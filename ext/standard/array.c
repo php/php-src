@@ -3173,7 +3173,7 @@ PHP_FUNCTION(array_push)
 		if (zend_hash_next_index_insert(Z_ARRVAL_P(stack), &new_var) == NULL) {
 			Z_TRY_DELREF(new_var);
 			zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
-			return;
+			RETURN_THROWS();
 		}
 	}
 

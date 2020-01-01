@@ -302,7 +302,7 @@ static zend_object_handlers date_object_handlers_period;
 #define DATE_CHECK_INITIALIZED(member, class_name) \
 	if (!(member)) { \
 		zend_throw_error(NULL, "The " #class_name " object has not been correctly initialized by its constructor"); \
-		return; \
+		RETURN_THROWS(); \
 	}
 
 static void date_object_free_storage_date(zend_object *object);

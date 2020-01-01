@@ -96,7 +96,7 @@ PHPAPI zend_class_entry *reflection_reference_ptr;
 			return; \
 		} \
 		zend_throw_error(NULL, "Internal error: Failed to retrieve the reflection object"); \
-		return; \
+		RETURN_THROWS(); \
 	} \
 } while (0)
 

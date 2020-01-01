@@ -1730,7 +1730,7 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 	if (!vptr) {
 		xmlSchemaFree(sptr);
 		zend_throw_error(NULL, "Invalid Schema Validation Context");
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (flags & XML_SCHEMA_VAL_VC_I_CREATE) {
@@ -1829,7 +1829,7 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 	if (!vptr) {
 		xmlRelaxNGFree(sptr);
 		zend_throw_error(NULL, "Invalid RelaxNG Validation Context");
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	xmlRelaxNGSetValidErrors(vptr, php_libxml_error_handler, php_libxml_error_handler, vptr);

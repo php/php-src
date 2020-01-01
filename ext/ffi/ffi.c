@@ -2819,7 +2819,7 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 		handle = DL_LOAD(ZSTR_VAL(lib));
 		if (!handle) {
 			zend_throw_error(zend_ffi_exception_ce, "Failed loading '%s'", ZSTR_VAL(lib));
-			return;
+			RETURN_THROWS();
 		}
 #ifdef RTLD_DEFAULT
 	} else if (1) {
@@ -3345,7 +3345,7 @@ ZEND_METHOD(FFI, load) /* {{{ */
 
 	if (CG(compiler_options) & ZEND_COMPILE_PRELOAD_IN_CHILD) {
 		zend_throw_error(zend_ffi_exception_ce, "FFI::load() doesn't work in conjunction with \"opcache.preload_user\". Use \"ffi.preload\" instead.");
-		return;
+		RETURN_THROWS();
 	}
 
 	ffi = zend_ffi_load(ZSTR_VAL(fn), (CG(compiler_options) & ZEND_COMPILE_PRELOAD) != 0);
@@ -3373,7 +3373,7 @@ ZEND_METHOD(FFI, scope) /* {{{ */
 
 	if (!scope) {
 		zend_throw_error(zend_ffi_exception_ce, "Failed loading scope '%s'", ZSTR_VAL(scope_name));
-		return;
+		RETURN_THROWS();
 	}
 
 	ffi = (zend_ffi*)zend_ffi_new(zend_ffi_ce);
@@ -3687,7 +3687,7 @@ ZEND_METHOD(FFI, free) /* {{{ */
 	if (ZEND_FFI_TYPE(cdata->type)->kind == ZEND_FFI_TYPE_POINTER) {
 		if (!cdata->ptr) {
 			zend_throw_error(zend_ffi_exception_ce, "NULL pointer dereference");
-			return;
+			RETURN_THROWS();
 		}
 		if (cdata->ptr != (void*)&cdata->ptr_holder) {
 			pefree(*(void**)cdata->ptr, cdata->flags & ZEND_FFI_FLAG_PERSISTENT);
@@ -3857,7 +3857,7 @@ ZEND_METHOD(FFI, cast) /* {{{ */
 	} else if (type->size > old_type->size) {
 		zend_object_release(&cdata->std);
 		zend_throw_error(zend_ffi_exception_ce, "attempt to cast to larger type");
-		return;
+		RETURN_THROWS();
 	} else if (ptr != &old_cdata->ptr_holder) {
 		cdata->ptr = ptr;
 	} else {
@@ -4001,16 +4001,16 @@ ZEND_METHOD(FFI, arrayType) /* {{{ */
 
 	if (type->kind == ZEND_FFI_TYPE_FUNC) {
 		zend_throw_error(zend_ffi_exception_ce, "array of functions is not allowed");
-		return;
+		RETURN_THROWS();
 	} else if (type->kind == ZEND_FFI_TYPE_ARRAY && (type->attr & ZEND_FFI_ATTR_INCOMPLETE_ARRAY)) {
 		zend_throw_error(zend_ffi_exception_ce, "only the leftmost array can be undimensioned");
-		return;
+		RETURN_THROWS();
 	} else if (type->kind == ZEND_FFI_TYPE_VOID) {
 		zend_throw_error(zend_ffi_exception_ce, "array of 'void' is not allowed");
-		return;
+		RETURN_THROWS();
 	} else if (type->attr & ZEND_FFI_ATTR_INCOMPLETE_TAG) {
 		zend_throw_error(zend_ffi_exception_ce, "array of incomplete type is not allowed");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZEND_FFI_TYPE_IS_OWNED(ctype->type)) {
@@ -4032,11 +4032,11 @@ ZEND_METHOD(FFI, arrayType) /* {{{ */
 		if (n < 0) {
 			zend_throw_error(zend_ffi_exception_ce, "negative array index");
 			zend_ffi_type_dtor(type);
-			return;
+			RETURN_THROWS();
 		} else if (ZEND_FFI_TYPE(type)->kind == ZEND_FFI_TYPE_ARRAY && (ZEND_FFI_TYPE(type)->attr & ZEND_FFI_ATTR_INCOMPLETE_ARRAY)) {
 			zend_throw_error(zend_ffi_exception_ce, "only the leftmost array can be undimensioned");
 			zend_ffi_type_dtor(type);
-			return;
+			RETURN_THROWS();
 		}
 
 		new_type = emalloc(sizeof(zend_ffi_type));
@@ -4187,7 +4187,7 @@ ZEND_METHOD(FFI, memcpy) /* {{{ */
 		ptr1 = cdata1->ptr;
 		if (type1->kind != ZEND_FFI_TYPE_POINTER && size > type1->size) {
 			zend_throw_error(zend_ffi_exception_ce, "attempt to write over data boundary");
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -4196,7 +4196,7 @@ ZEND_METHOD(FFI, memcpy) /* {{{ */
 		ptr2 = Z_STRVAL_P(zv2);
 		if (size > Z_STRLEN_P(zv2)) {
 			zend_throw_error(zend_ffi_exception_ce, "attempt to read over string boundary");
-			return;
+			RETURN_THROWS();
 		}
 	} else if (Z_TYPE_P(zv2) == IS_OBJECT && Z_OBJCE_P(zv2) == zend_ffi_cdata_ce) {
 		cdata2 = (zend_ffi_cdata*)Z_OBJ_P(zv2);
@@ -4207,7 +4207,7 @@ ZEND_METHOD(FFI, memcpy) /* {{{ */
 			ptr2 = cdata2->ptr;
 			if (type2->kind != ZEND_FFI_TYPE_POINTER && size > type2->size) {
 				zend_throw_error(zend_ffi_exception_ce, "attempt to read over data boundary");
-				return;
+				RETURN_THROWS();
 			}
 		}
 	} else {
@@ -4240,7 +4240,7 @@ ZEND_METHOD(FFI, memcmp) /* {{{ */
 		ptr1 = Z_STRVAL_P(zv1);
 		if (size > Z_STRLEN_P(zv1)) {
 			zend_throw_error(zend_ffi_exception_ce, "attempt to read over string boundary");
-			return;
+			RETURN_THROWS();
 		}
 	} else if (Z_TYPE_P(zv1) == IS_OBJECT && Z_OBJCE_P(zv1) == zend_ffi_cdata_ce) {
 		cdata1 = (zend_ffi_cdata*)Z_OBJ_P(zv1);
@@ -4251,7 +4251,7 @@ ZEND_METHOD(FFI, memcmp) /* {{{ */
 			ptr1 = cdata1->ptr;
 			if (type1->kind != ZEND_FFI_TYPE_POINTER && size > type1->size) {
 				zend_throw_error(zend_ffi_exception_ce, "attempt to read over data boundary");
-				return;
+				RETURN_THROWS();
 			}
 		}
 	} else {
@@ -4264,7 +4264,7 @@ ZEND_METHOD(FFI, memcmp) /* {{{ */
 		ptr2 = Z_STRVAL_P(zv2);
 		if (size > Z_STRLEN_P(zv2)) {
 			zend_throw_error(zend_ffi_exception_ce, "attempt to read over string boundary");
-			return;
+			RETURN_THROWS();
 		}
 	} else if (Z_TYPE_P(zv2) == IS_OBJECT && Z_OBJCE_P(zv2) == zend_ffi_cdata_ce) {
 		cdata2 = (zend_ffi_cdata*)Z_OBJ_P(zv2);
@@ -4275,7 +4275,7 @@ ZEND_METHOD(FFI, memcmp) /* {{{ */
 			ptr2 = cdata2->ptr;
 			if (type2->kind != ZEND_FFI_TYPE_POINTER && size > type2->size) {
 				zend_throw_error(zend_ffi_exception_ce, "attempt to read over data boundary");
-				return;
+				RETURN_THROWS();
 			}
 		}
 	} else {
@@ -4317,7 +4317,7 @@ ZEND_METHOD(FFI, memset) /* {{{ */
 		ptr = cdata->ptr;
 		if (type->kind != ZEND_FFI_TYPE_POINTER && size > type->size) {
 			zend_throw_error(zend_ffi_exception_ce, "attempt to write over data boundary");
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -4349,7 +4349,7 @@ ZEND_METHOD(FFI, string) /* {{{ */
 			ptr = cdata->ptr;
 			if (type->kind != ZEND_FFI_TYPE_POINTER && size > type->size) {
 				zend_throw_error(zend_ffi_exception_ce, "attempt to read over data boundary");
-				return;
+				RETURN_THROWS();
 			}
 		}
 		RETURN_STRINGL((char*)ptr, size);
@@ -4360,7 +4360,7 @@ ZEND_METHOD(FFI, string) /* {{{ */
 			ptr = cdata->ptr;
 		} else {
 			zend_throw_error(zend_ffi_exception_ce, "FFI\\Cdata is not a C string");
-			return;
+			RETURN_THROWS();
 		}
 		RETURN_STRING((char*)ptr);
 	}
@@ -4389,7 +4389,7 @@ ZEND_METHOD(FFI, isNull) /* {{{ */
 
 	if (type->kind != ZEND_FFI_TYPE_POINTER){
 		zend_throw_error(zend_ffi_exception_ce, "FFI\\Cdata is not a pointer");
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(*(void**)cdata->ptr == NULL);

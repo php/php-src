@@ -68,7 +68,7 @@ static zend_class_entry *dir_class_entry_ptr;
 		if (myself) { \
 			if ((tmp = zend_hash_str_find(Z_OBJPROP_P(myself), "handle", sizeof("handle")-1)) == NULL) { \
 				zend_throw_error(NULL, "Unable to find my handle property"); \
-				return; \
+				RETURN_THROWS(); \
 			} \
 			if ((dirp = (php_stream *)zend_fetch_resource_ex(tmp, "Directory", php_file_le_stream())) == NULL) { \
 				return; \
