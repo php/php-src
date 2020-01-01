@@ -3902,7 +3902,7 @@ PHP_FUNCTION(imageaffine)
 					break;
 				default:
 					zend_type_error("Invalid type for element %i", i);
-					return;
+					RETURN_THROWS();
 			}
 		}
 	}
@@ -3976,7 +3976,7 @@ PHP_FUNCTION(imageaffinematrixget)
 			double x, y;
 			if (!options || Z_TYPE_P(options) != IS_ARRAY) {
 				zend_type_error("Array expected as options when using translate or scale");
-				return;
+				RETURN_THROWS();
 			}
 
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "x", sizeof("x") - 1)) != NULL) {
@@ -4008,7 +4008,7 @@ PHP_FUNCTION(imageaffinematrixget)
 
 			if (!options) {
 				zend_type_error("Number is expected as option when using rotate or shear");
-				return;
+				RETURN_THROWS();
 			}
 
 			angle = zval_get_double(options);
@@ -4074,7 +4074,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 					break;
 				default:
 					zend_type_error("Matrix 1 contains invalid type for element %i", i);
-					return;
+					RETURN_THROWS();
 			}
 		}
 
@@ -4091,7 +4091,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 					break;
 				default:
 					zend_type_error("Matrix 2 contains invalid type for element %i", i);
-					return;
+					RETURN_THROWS();
 			}
 		}
 	}
@@ -4285,7 +4285,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		} else if (Z_TYPE_P(to_zval) == IS_STRING) {
 			if (CHECK_ZVAL_NULL_PATH(to_zval)) {
 				zend_type_error("Invalid 2nd parameter, filename must not contain null bytes");
-				return;
+				RETURN_THROWS();
 			}
 
 			stream = php_stream_open_wrapper(Z_STRVAL_P(to_zval), "wb", REPORT_ERRORS|IGNORE_PATH|IGNORE_URL_WIN, NULL);

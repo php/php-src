@@ -485,7 +485,7 @@ PHP_FUNCTION(escapeshellcmd)
 	if (command_len) {
 		if (command_len != strlen(command)) {
 			zend_type_error("Input string contains NULL bytes");
-			return;
+			RETURN_THROWS();
 		}
 		RETVAL_STR(php_escape_shell_cmd(command));
 	} else {
@@ -507,7 +507,7 @@ PHP_FUNCTION(escapeshellarg)
 
 	if (argument_len != strlen(argument)) {
 		zend_type_error("Input string contains NULL bytes");
-		return;
+		RETURN_THROWS();
 	}
 
 	RETVAL_STR(php_escape_shell_arg(argument));

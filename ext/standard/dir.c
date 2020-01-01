@@ -260,7 +260,7 @@ PHP_FUNCTION(closedir)
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
 		zend_type_error("%d is not a valid Directory resource", dirp->res->handle);
-		return;
+		RETURN_THROWS();
 	}
 
 	res = dirp->res;
@@ -374,7 +374,7 @@ PHP_FUNCTION(rewinddir)
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
 		zend_type_error("%d is not a valid Directory resource", dirp->res->handle);
-		return;
+		RETURN_THROWS();
 	}
 
 	php_stream_rewinddir(dirp);
@@ -393,7 +393,7 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
 		zend_type_error("%d is not a valid Directory resource", dirp->res->handle);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (php_stream_readdir(dirp, &entry)) {

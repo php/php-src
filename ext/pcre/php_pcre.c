@@ -2259,7 +2259,7 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, int is_filter)
 	} else {
 		if (Z_TYPE_P(regex) != IS_ARRAY) {
 			zend_type_error("Parameter mismatch, pattern is a string while replacement is an array");
-			return;
+			RETURN_THROWS();
 		}
 	}
 

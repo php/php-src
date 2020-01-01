@@ -1258,7 +1258,7 @@ PHP_FUNCTION(min)
 
 		if (Z_TYPE(args[0]) != IS_ARRAY) {
 			zend_type_error("When only one parameter is given, it must be an array");
-			return;
+			RETURN_THROWS();
 		} else {
 			if ((result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare, 0)) != NULL) {
 				ZVAL_COPY_DEREF(return_value, result);
@@ -1305,7 +1305,7 @@ PHP_FUNCTION(max)
 
 		if (Z_TYPE(args[0]) != IS_ARRAY) {
 			zend_type_error("When only one parameter is given, it must be an array");
-			return;
+			RETURN_THROWS();
 		} else {
 			if ((result = zend_hash_minmax(Z_ARRVAL(args[0]), php_array_data_compare, 1)) != NULL) {
 				ZVAL_COPY_DEREF(return_value, result);
@@ -3785,7 +3785,7 @@ static zend_always_inline void php_array_replace_wrapper(INTERNAL_FUNCTION_PARAM
 
 		if (Z_TYPE_P(arg) != IS_ARRAY) {
 			zend_type_error("Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(arg));
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -3829,7 +3829,7 @@ static zend_always_inline void php_array_merge_wrapper(INTERNAL_FUNCTION_PARAMET
 
 		if (Z_TYPE_P(arg) != IS_ARRAY) {
 			zend_type_error("Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(arg));
-			return;
+			RETURN_THROWS();
 		}
 		count += zend_hash_num_elements(Z_ARRVAL_P(arg));
 	}
@@ -4721,7 +4721,7 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) != IS_ARRAY) {
 			zend_type_error("Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(&args[i]));
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -5126,7 +5126,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 	for (i = 0; i < argc; i++) {
 		if (Z_TYPE(args[i]) != IS_ARRAY) {
 			zend_type_error("Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(&args[i]));
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -5468,7 +5468,7 @@ PHP_FUNCTION(array_diff)
 
 	if (Z_TYPE(args[0]) != IS_ARRAY) {
 		zend_type_error("Expected parameter 1 to be an array, %s given", zend_zval_type_name(&args[0]));
-		return;
+		RETURN_THROWS();
 	}
 
 	num = zend_hash_num_elements(Z_ARRVAL(args[0]));
@@ -5476,7 +5476,7 @@ PHP_FUNCTION(array_diff)
 		for (i = 1; i < argc; i++) {
 			if (Z_TYPE(args[i]) != IS_ARRAY) {
 				zend_type_error("Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(&args[i]));
-				return;
+				RETURN_THROWS();
 			}
 		}
 		RETURN_EMPTY_ARRAY();
@@ -5493,7 +5493,7 @@ PHP_FUNCTION(array_diff)
 			for (i = 1; i < argc; i++) {
 				if (Z_TYPE(args[i]) != IS_ARRAY) {
 					zend_type_error("Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(&args[i]));
-					return;
+					RETURN_THROWS();
 				}
 			}
 			RETURN_EMPTY_ARRAY();
@@ -5504,7 +5504,7 @@ PHP_FUNCTION(array_diff)
 		for (i = 1; i < argc; i++) {
 			if (Z_TYPE(args[i]) != IS_ARRAY) {
 				zend_type_error("Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(&args[i]));
-				return;
+				RETURN_THROWS();
 			}
 			if (!found) {
 				ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL(args[i]), value) {
@@ -5534,7 +5534,7 @@ PHP_FUNCTION(array_diff)
 	for (i = 1; i < argc; i++) {
 		if (Z_TYPE(args[i]) != IS_ARRAY) {
 			zend_type_error("Expected parameter %d to be an array, %s given", i + 1, zend_zval_type_name(&args[i]));
-			return;
+			RETURN_THROWS();
 		}
 		num += zend_hash_num_elements(Z_ARRVAL(args[i]));
 	}
@@ -6186,7 +6186,7 @@ PHP_FUNCTION(array_map)
 
 		if (Z_TYPE(arrays[0]) != IS_ARRAY) {
 			zend_type_error("Expected parameter 2 to be an array, %s given", zend_zval_type_name(&arrays[0]));
-			return;
+			RETURN_THROWS();
 		}
 		maxlen = zend_hash_num_elements(Z_ARRVAL(arrays[0]));
 
@@ -6228,7 +6228,7 @@ PHP_FUNCTION(array_map)
 			if (Z_TYPE(arrays[i]) != IS_ARRAY) {
 				zend_type_error("Expected parameter %d to be an array, %s given", i + 2, zend_zval_type_name(&arrays[i]));
 				efree(array_pos);
-				return;
+				RETURN_THROWS();
 			}
 			if (zend_hash_num_elements(Z_ARRVAL(arrays[i])) > maxlen) {
 				maxlen = zend_hash_num_elements(Z_ARRVAL(arrays[i]));

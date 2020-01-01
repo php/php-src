@@ -6260,7 +6260,7 @@ ZEND_METHOD(reflection_reference, fromArrayElement)
 		item = zend_symtable_find(ht, Z_STR_P(key));
 	} else {
 		zend_type_error("Key must be array or string");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!item) {

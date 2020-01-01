@@ -1277,7 +1277,7 @@ PHP_FUNCTION(implode)
 	if (pieces == NULL) {
 		if (arg1_array == NULL) {
 			zend_type_error("Argument must be an array");
-			return;
+			RETURN_THROWS();
 		}
 
 		arg1_str = ZSTR_EMPTY_ALLOC();
@@ -1285,7 +1285,7 @@ PHP_FUNCTION(implode)
 	} else {
 		if (arg1_str == NULL) {
 			zend_type_error("The first argument must be a string");
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -3251,10 +3251,10 @@ PHP_FUNCTION(strtr)
 
 	if (ac == 2 && from_ht == NULL) {
 		zend_type_error("If two arguments are passed, the second argument must be an array");
-		return;
+		RETURN_THROWS();
 	} else if (ac != 2 && from_str == NULL) {
 		zend_type_error("If three arguments are passed, the second argument must be a string");
-		return;
+		RETURN_THROWS();
 	}
 
 	/* shortcut for empty string */

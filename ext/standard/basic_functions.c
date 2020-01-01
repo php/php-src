@@ -3203,7 +3203,7 @@ PHP_FUNCTION(register_tick_function)
 		efree(tick_fe.arguments);
 		zend_type_error("Invalid tick callback '%s' passed", ZSTR_VAL(function_name));
 		zend_string_release_ex(function_name, 0);
-		return;
+		RETURN_THROWS();
 	} else if (function_name) {
 		zend_string_release_ex(function_name, 0);
 	}

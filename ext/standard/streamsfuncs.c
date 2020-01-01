@@ -969,7 +969,7 @@ PHP_FUNCTION(stream_context_get_options)
 	context = decode_context_param(zcontext);
 	if (!context) {
 		zend_type_error("Invalid stream/context parameter");
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_COPY(return_value, &context->options);
@@ -994,7 +994,7 @@ PHP_FUNCTION(stream_context_set_option)
 		/* figure out where the context is coming from exactly */
 		if (!(context = decode_context_param(zcontext))) {
 			zend_type_error("Invalid stream/context parameter");
-			return;
+			RETURN_THROWS();
 		}
 
 		RETURN_BOOL(parse_context_options(context, options) == SUCCESS);
@@ -1013,7 +1013,7 @@ PHP_FUNCTION(stream_context_set_option)
 		/* figure out where the context is coming from exactly */
 		if (!(context = decode_context_param(zcontext))) {
 			zend_type_error("Invalid stream/context parameter");
-			return;
+			RETURN_THROWS();
 		}
 
 		RETURN_BOOL(php_stream_context_set_option(context, wrappername, optionname, zvalue) == SUCCESS);
@@ -1036,7 +1036,7 @@ PHP_FUNCTION(stream_context_set_params)
 	context = decode_context_param(zcontext);
 	if (!context) {
 		zend_type_error("Invalid stream/context parameter");
-		return;
+		RETURN_THROWS();
 	}
 
 	RETVAL_BOOL(parse_context_params(context, params) == SUCCESS);
@@ -1057,7 +1057,7 @@ PHP_FUNCTION(stream_context_get_params)
 	context = decode_context_param(zcontext);
 	if (!context) {
 		zend_type_error("Invalid stream/context parameter");
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -1680,7 +1680,7 @@ PHP_FUNCTION(sapi_windows_vt100_support)
 			"%s() was not able to analyze the specified stream",
 			get_active_function_name()
 		);
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Check if the file descriptor is a console */

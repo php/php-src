@@ -354,7 +354,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 				value = Z_STRVAL_P(group);
 			} else {
 				zend_type_error("Parameter 2 should be string or int, %s given", zend_zval_type_name(group));
-				return;
+				RETURN_THROWS();
 			}
 			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL)) {
 				RETURN_TRUE;
@@ -383,7 +383,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		}
 	} else {
 		zend_type_error("Parameter 2 should be string or int, %s given", zend_zval_type_name(group));
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Check the basedir */
