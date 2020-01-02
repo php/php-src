@@ -778,6 +778,7 @@ static void php_var_serialize_collect_names(HashTable *ht, HashTable *src) /* {{
 
 	zend_hash_init(ht, zend_hash_num_elements(src), NULL, NULL, 0);
 	ZEND_HASH_FOREACH_VAL(src, val) {
+		ZVAL_DEREF(val);
 		if (Z_TYPE_P(val) != IS_STRING) {
 			php_error_docref(NULL, E_NOTICE,
 					"__sleep should return an array only containing the names of instance-variables to serialize.");
