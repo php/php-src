@@ -1237,7 +1237,15 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 			ZEND_MAP_PTR_NEW(op_array->run_time_cache);
 		} else {
 			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
-			UNSERIALIZE_PTR(ZEND_MAP_PTR(op_array->run_time_cache));
+			if (ZEND_MAP_PTR(op_array->run_time_cache)) {
+				if (script->corrupted) {
+					/* Not in SHM: Use serialized arena pointer. */
+					UNSERIALIZE_PTR(ZEND_MAP_PTR(op_array->run_time_cache));
+				} else {
+					/* In SHM: Allocate new pointer. */
+					ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+				}
+			}
 		}
 	}
 }
