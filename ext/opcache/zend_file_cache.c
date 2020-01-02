@@ -371,6 +371,21 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 	}
 }
 
+static void zend_file_cache_serialize_type(
+		zend_type *type, zend_persistent_script *script, zend_file_cache_metainfo *info, void *buf)
+{
+	if (ZEND_TYPE_IS_CLASS(*type)) {
+		zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(*type);
+		zend_string *type_name = ZEND_TYPE_NAME(*type);
+
+		SERIALIZE_STR(type_name);
+		*type =
+			(Z_UL(1) << (sizeof(zend_type)*8-1)) | /* type is class */
+			(allow_null ? (Z_UL(1) << (sizeof(zend_type)*8-2)) : Z_UL(0)) | /* type allow null */
+			(zend_type)type_name;
+	}
+}
+
 static void zend_file_cache_serialize_op_array(zend_op_array            *op_array,
                                                zend_persistent_script   *script,
                                                zend_file_cache_metainfo *info,
@@ -498,16 +513,7 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				if (!IS_SERIALIZED(p->name)) {
 					SERIALIZE_STR(p->name);
 				}
-				if (ZEND_TYPE_IS_CLASS(p->type)) {
-					zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(p->type);
-					zend_string *type_name = ZEND_TYPE_NAME(p->type);
-
-					SERIALIZE_STR(type_name);
-					p->type =
-						(Z_UL(1) << (sizeof(zend_type)*8-1)) | /* type is class */
-						(allow_null ? (Z_UL(1) << (sizeof(zend_type)*8-2)) : Z_UL(0)) | /* type allow null */
-						(zend_type)type_name;
-				}
+				zend_file_cache_serialize_type(&p->type, script, info, buf);
 				p++;
 			}
 		}
@@ -1080,6 +1086,18 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 	}
 }
 
+static void zend_file_cache_unserialize_type(
+		zend_type *type, zend_persistent_script *script, void *buf)
+{
+	if (*type & (Z_UL(1) << (sizeof(zend_type)*8-1))) { /* type is class */
+		zend_bool allow_null = (*type & (Z_UL(1) << (sizeof(zend_type)*8-2))) != 0; /* type allow null */
+		zend_string *type_name = (zend_string*)(*type & ~(((Z_UL(1) << (sizeof(zend_type)*8-1))) | ((Z_UL(1) << (sizeof(zend_type)*8-2)))));
+
+		UNSERIALIZE_STR(type_name);
+		*type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
+	}
+}
+
 static void zend_file_cache_unserialize_op_array(zend_op_array           *op_array,
                                                  zend_persistent_script  *script,
                                                  void                    *buf)
@@ -1195,13 +1213,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				if (!IS_UNSERIALIZED(p->name)) {
 					UNSERIALIZE_STR(p->name);
 				}
-				if (p->type & (Z_UL(1) << (sizeof(zend_type)*8-1))) { /* type is class */
-					zend_bool allow_null = (p->type & (Z_UL(1) << (sizeof(zend_type)*8-2))) != 0; /* type allow null */
-					zend_string *type_name = (zend_string*)(p->type & ~(((Z_UL(1) << (sizeof(zend_type)*8-1))) | ((Z_UL(1) << (sizeof(zend_type)*8-2)))));
-
-					UNSERIALIZE_STR(type_name);
-					p->type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
-				}
+				zend_file_cache_unserialize_type(&p->type, script, buf);
 				p++;
 			}
 		}
