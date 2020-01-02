@@ -38,6 +38,8 @@ PHP                                                                        NEWS
   . Fixed bug #78986 (Opcache segfaults when inheriting ctor from immutable
     into mutable class). (Nikita)
   . Fixed bug #79040 (Warning Opcode handlers are unusable due to ASLR). (cmb)
+  . Fixed bug #79055 (Typed property become unknown with OPcache file cache).
+    (Nikita)
 
 - Pcntl:
   . Fixed bug #78402 (Converting null to string in error message is bad DX).
