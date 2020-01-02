@@ -880,6 +880,55 @@ undef_prop:
 }
 /* }}} */
 
+static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable *ht, uint32_t count, zend_bool incomplete_class, php_serialize_data_t var_hash) /* {{{ */
+{
+	smart_str_append_unsigned(buf, count);
+	smart_str_appendl(buf, ":{", 2);
+	if (count > 0) {
+		zend_string *key;
+		zval *data;
+		zend_ulong index;
+
+		ZEND_HASH_FOREACH_KEY_VAL_IND(ht, index, key, data) {
+			if (incomplete_class && strcmp(ZSTR_VAL(key), MAGIC_MEMBER) == 0) {
+				continue;
+			}
+
+			if (!key) {
+				php_var_serialize_long(buf, index);
+			} else {
+				php_var_serialize_string(buf, ZSTR_VAL(key), ZSTR_LEN(key));
+			}
+
+			if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
+				data = Z_REFVAL_P(data);
+			}
+
+			/* we should still add element even if it's not OK,
+			 * since we already wrote the length of the array before */
+			if (Z_TYPE_P(data) == IS_ARRAY) {
+				if (UNEXPECTED(Z_IS_RECURSIVE_P(data))
+					|| UNEXPECTED(Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc))) {
+					php_add_var_hash(var_hash, struc);
+					smart_str_appendl(buf, "N;", 2);
+				} else {
+					if (Z_REFCOUNTED_P(data)) {
+						Z_PROTECT_RECURSION_P(data);
+					}
+					php_var_serialize_intern(buf, data, var_hash);
+					if (Z_REFCOUNTED_P(data)) {
+						Z_UNPROTECT_RECURSION_P(data);
+					}
+				}
+			} else {
+				php_var_serialize_intern(buf, data, var_hash);
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+	smart_str_appendc(buf, '}');
+}
+/* }}} */
+
 static void php_var_serialize_intern(smart_str *buf, zval *struc, php_serialize_data_t var_hash) /* {{{ */
 {
 	zend_long var_already;
@@ -940,6 +989,8 @@ again:
 
 		case IS_OBJECT: {
 				zend_class_entry *ce = Z_OBJCE_P(struc);
+				zend_bool incomplete_class;
+				uint32_t count;
 
 				if (zend_hash_str_exists(&ce->function_table, "__serialize", sizeof("__serialize")-1)) {
 					zval retval, obj;
@@ -1030,75 +1081,24 @@ again:
 					return;
 				}
 
-				/* fall-through */
-			}
-		case IS_ARRAY: {
-			uint32_t i;
-			zend_bool incomplete_class = 0;
-			if (Z_TYPE_P(struc) == IS_ARRAY) {
-				smart_str_appendl(buf, "a:", 2);
-				myht = Z_ARRVAL_P(struc);
-				i = zend_array_count(myht);
-			} else {
 				incomplete_class = php_var_serialize_class_name(buf, struc);
 				myht = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_SERIALIZE);
 				/* count after serializing name, since php_var_serialize_class_name
 				 * changes the count if the variable is incomplete class */
-				i = zend_array_count(myht);
-				if (i > 0 && incomplete_class) {
-					--i;
+				count = zend_array_count(myht);
+				if (count > 0 && incomplete_class) {
+					--count;
 				}
-			}
-			smart_str_append_unsigned(buf, i);
-			smart_str_appendl(buf, ":{", 2);
-			if (i > 0) {
-				zend_string *key;
-				zval *data;
-				zend_ulong index;
-
-				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, data) {
-
-					if (incomplete_class && strcmp(ZSTR_VAL(key), MAGIC_MEMBER) == 0) {
-						continue;
-					}
-
-					if (!key) {
-						php_var_serialize_long(buf, index);
-					} else {
-						php_var_serialize_string(buf, ZSTR_VAL(key), ZSTR_LEN(key));
-					}
-
-					if (Z_ISREF_P(data) && Z_REFCOUNT_P(data) == 1) {
-						data = Z_REFVAL_P(data);
-					}
-
-					/* we should still add element even if it's not OK,
-					 * since we already wrote the length of the array before */
-					if (Z_TYPE_P(data) == IS_ARRAY) {
-						if (UNEXPECTED(Z_IS_RECURSIVE_P(data))
-							|| UNEXPECTED(Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc))) {
-							php_add_var_hash(var_hash, struc);
-							smart_str_appendl(buf, "N;", 2);
-						} else {
-							if (Z_REFCOUNTED_P(data)) {
-								Z_PROTECT_RECURSION_P(data);
-							}
-							php_var_serialize_intern(buf, data, var_hash);
-							if (Z_REFCOUNTED_P(data)) {
-								Z_UNPROTECT_RECURSION_P(data);
-							}
-						}
-					} else {
-						php_var_serialize_intern(buf, data, var_hash);
-					}
-				} ZEND_HASH_FOREACH_END();
-			}
-			smart_str_appendc(buf, '}');
-			if (Z_TYPE_P(struc) == IS_OBJECT) {
+				php_var_serialize_nested_data(buf, struc, myht, count, incomplete_class, var_hash);
 				zend_release_properties(myht);
+				return;
 			}
+		case IS_ARRAY:
+			smart_str_appendl(buf, "a:", 2);
+			myht = Z_ARRVAL_P(struc);
+			php_var_serialize_nested_data(
+				buf, struc, myht, zend_array_count(myht), /* incomplete_class */ 0, var_hash);
 			return;
-		}
 		case IS_REFERENCE:
 			struc = Z_REFVAL_P(struc);
 			goto again;
