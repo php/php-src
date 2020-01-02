@@ -771,113 +771,80 @@ static int php_var_serialize_call_magic_serialize(zval *retval, zval *obj) /* {{
 }
 /* }}} */
 
-static void php_var_serialize_collect_names(HashTable *ht, HashTable *src) /* {{{ */
+static int php_var_serialize_try_add_sleep_prop(
+		HashTable *ht, HashTable *props, zend_string *name, zend_string *error_name) /* {{{ */
 {
-	zval *val;
-	zend_string *name, *tmp_name;
+	zval *val = zend_hash_find(props, name);
+	if (val == NULL) {
+		return FAILURE;
+	}
 
-	zend_hash_init(ht, zend_hash_num_elements(src), NULL, NULL, 0);
-	ZEND_HASH_FOREACH_VAL(src, val) {
-		ZVAL_DEREF(val);
-		if (Z_TYPE_P(val) != IS_STRING) {
+	if (Z_TYPE_P(val) == IS_INDIRECT) {
+		val = Z_INDIRECT_P(val);
+		if (Z_TYPE_P(val) == IS_UNDEF) {
+			return FAILURE;
+		}
+	}
+
+	if (!zend_hash_add(ht, name, val)) {
+		php_error_docref(NULL, E_NOTICE,
+			"\"%s\" is returned from __sleep multiple times", ZSTR_VAL(error_name));
+		return SUCCESS;
+	}
+
+	Z_TRY_ADDREF_P(val);
+	return SUCCESS;
+}
+/* }}} */
+
+static void php_var_serialize_get_sleep_props(
+		HashTable *ht, zval *struc, HashTable *sleep_retval) /* {{{ */
+{
+	zend_class_entry *ce = Z_OBJCE_P(struc);
+	HashTable *props = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_SERIALIZE);
+	zval *name_val;
+
+	zend_hash_init(ht, zend_hash_num_elements(sleep_retval), NULL, ZVAL_PTR_DTOR, 0);
+	ZEND_HASH_FOREACH_VAL(sleep_retval, name_val) {
+		zend_string *name, *tmp_name, *priv_name, *prot_name;
+
+		ZVAL_DEREF(name_val);
+		if (Z_TYPE_P(name_val) != IS_STRING) {
 			php_error_docref(NULL, E_NOTICE,
 					"__sleep should return an array only containing the names of instance-variables to serialize.");
 		}
 
-		name = zval_get_tmp_string(val, &tmp_name);
-		if (zend_hash_exists(ht, name)) {
-			php_error_docref(NULL, E_NOTICE,
-					"\"%s\" is returned from __sleep multiple times", ZSTR_VAL(name));
+		name = zval_get_tmp_string(name_val, &tmp_name);
+		if (php_var_serialize_try_add_sleep_prop(ht, props, name, name) == SUCCESS) {
 			zend_tmp_string_release(tmp_name);
-			continue;
-		}
-		zend_hash_add_empty_element(ht, name);
-		zend_tmp_string_release(tmp_name);
-	} ZEND_HASH_FOREACH_END();
-}
-/* }}} */
-
-static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, php_serialize_data_t var_hash) /* {{{ */
-{
-	zend_class_entry *ce = Z_OBJCE_P(struc);
-	HashTable names, *propers;
-	zval nval;
-	zend_string *name;
-
-	php_var_serialize_class_name(buf, struc);
-	php_var_serialize_collect_names(&names, HASH_OF(retval_ptr));
-
-	smart_str_append_unsigned(buf, zend_hash_num_elements(&names));
-	smart_str_appendl(buf, ":{", 2);
-
-	ZVAL_NULL(&nval);
-	propers = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_SERIALIZE);
-
-	ZEND_HASH_FOREACH_STR_KEY(&names, name) {
-		zend_string *prot_name, *priv_name;
-
-		zval *val = zend_hash_find_ex(propers, name, 1);
-		if (val != NULL) {
-			if (Z_TYPE_P(val) == IS_INDIRECT) {
-				val = Z_INDIRECT_P(val);
-				if (Z_TYPE_P(val) == IS_UNDEF) {
-					goto undef_prop;
-				}
-			}
-
-			php_var_serialize_string(buf, ZSTR_VAL(name), ZSTR_LEN(name));
-			php_var_serialize_intern(buf, val, var_hash);
 			continue;
 		}
 
 		priv_name = zend_mangle_property_name(
-				ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), ZSTR_VAL(name), ZSTR_LEN(name), 0);
-		val = zend_hash_find(propers, priv_name);
-		if (val != NULL) {
-			if (Z_TYPE_P(val) == IS_INDIRECT) {
-				val = Z_INDIRECT_P(val);
-				if (Z_ISUNDEF_P(val)) {
-					zend_string_free(priv_name);
-					goto undef_prop;
-				}
-			}
-
-			php_var_serialize_string(buf, ZSTR_VAL(priv_name), ZSTR_LEN(priv_name));
-			zend_string_free(priv_name);
-			php_var_serialize_intern(buf, val, var_hash);
+			ZSTR_VAL(ce->name), ZSTR_LEN(ce->name),
+			ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+		if (php_var_serialize_try_add_sleep_prop(ht, props, priv_name, name) == SUCCESS) {
+			zend_tmp_string_release(tmp_name);
+			zend_string_release(priv_name);
 			continue;
 		}
-		zend_string_free(priv_name);
+		zend_string_release(priv_name);
 
 		prot_name = zend_mangle_property_name(
-				"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), 0);
-		val = zend_hash_find(propers, prot_name);
-		if (val != NULL) {
-			if (Z_TYPE_P(val) == IS_INDIRECT) {
-				val = Z_INDIRECT_P(val);
-				if (Z_TYPE_P(val) == IS_UNDEF) {
-					zend_string_free(prot_name);
-					goto undef_prop;
-				}
-			}
-
-			php_var_serialize_string(buf, ZSTR_VAL(prot_name), ZSTR_LEN(prot_name));
-			zend_string_free(prot_name);
-			php_var_serialize_intern(buf, val, var_hash);
+			"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+		if (php_var_serialize_try_add_sleep_prop(ht, props, prot_name, name) == SUCCESS) {
+			zend_tmp_string_release(tmp_name);
+			zend_string_release(prot_name);
 			continue;
 		}
-		zend_string_free(prot_name);
+		zend_string_release(prot_name);
 
-undef_prop:
-		php_var_serialize_string(buf, ZSTR_VAL(name), ZSTR_LEN(name));
-		php_var_serialize_intern(buf, &nval, var_hash);
 		php_error_docref(NULL, E_NOTICE,
-				"\"%s\" returned as member variable from __sleep() but does not exist", ZSTR_VAL(name));
+			"\"%s\" returned as member variable from __sleep() but does not exist", ZSTR_VAL(name));
+		zend_hash_add(ht, name, &EG(uninitialized_zval));
+		zend_tmp_string_release(tmp_name);
 	} ZEND_HASH_FOREACH_END();
-	smart_str_appendc(buf, '}');
-
-	zend_hash_destroy(&names);
-	zend_release_properties(propers);
+	zend_release_properties(props);
 }
 /* }}} */
 
@@ -927,6 +894,17 @@ static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable
 		} ZEND_HASH_FOREACH_END();
 	}
 	smart_str_appendc(buf, '}');
+}
+/* }}} */
+
+static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, php_serialize_data_t var_hash) /* {{{ */
+{
+	HashTable props;
+	php_var_serialize_get_sleep_props(&props, struc, HASH_OF(retval_ptr));
+	php_var_serialize_class_name(buf, struc);
+	php_var_serialize_nested_data(
+		buf, struc, &props, zend_hash_num_elements(&props), /* incomplete_class */ 0, var_hash);
+	zend_hash_destroy(&props);
 }
 /* }}} */
 
