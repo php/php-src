@@ -601,7 +601,7 @@ SPL_METHOD(SplDoublyLinkedList, pop)
 
 	if (Z_ISUNDEF_P(return_value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't pop from an empty datastructure", 0);
-		RETURN_NULL();
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -621,7 +621,7 @@ SPL_METHOD(SplDoublyLinkedList, shift)
 
 	if (Z_ISUNDEF_P(return_value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't shift from an empty datastructure", 0);
-		RETURN_NULL();
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -642,7 +642,7 @@ SPL_METHOD(SplDoublyLinkedList, top)
 
 	if (value == NULL || Z_ISUNDEF_P(value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't peek at an empty datastructure", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_COPY_DEREF(return_value, value);
@@ -665,7 +665,7 @@ SPL_METHOD(SplDoublyLinkedList, bottom)
 
 	if (value == NULL || Z_ISUNDEF_P(value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't peek at an empty datastructure", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_COPY_DEREF(return_value, value);
@@ -719,7 +719,7 @@ SPL_METHOD(SplDoublyLinkedList, setIteratorMode)
 	if (intern->flags & SPL_DLLIST_IT_FIX
 		&& (intern->flags & SPL_DLLIST_IT_LIFO) != (value & SPL_DLLIST_IT_LIFO)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Iterators' LIFO/FIFO modes for SplStack/SplQueue objects are frozen", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	intern->flags = (value & SPL_DLLIST_IT_MASK) | (intern->flags & SPL_DLLIST_IT_FIX);
@@ -780,7 +780,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetGet)
 
 	if (index < 0 || index >= intern->llist->count) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
@@ -819,7 +819,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 
 		if (index < 0 || index >= intern->llist->count) {
 			zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0);
-			return;
+			RETURN_THROWS();
 		}
 
 		element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
@@ -842,7 +842,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 		} else {
 			zval_ptr_dtor(value);
 			zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0);
-			return;
+			RETURN_THROWS();
 		}
 	}
 } /* }}} */
@@ -867,7 +867,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 
 	if (index < 0 || index >= intern->llist->count) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset out of range", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
@@ -908,7 +908,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 		SPL_LLIST_DELREF(element);
 	} else {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0);
-		return;
+		RETURN_THROWS();
 	}
 } /* }}} */
 
@@ -1210,7 +1210,7 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 error:
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Error at offset %zd of %zd bytes", ((char*)p - buf), buf_len);
-	return;
+	RETURN_THROWS();
 
 } /* }}} */
 
@@ -1264,7 +1264,7 @@ SPL_METHOD(SplDoublyLinkedList, __unserialize) {
 			Z_TYPE_P(members_zv) != IS_ARRAY) {
 		zend_throw_exception(spl_ce_UnexpectedValueException,
 			"Incomplete or ill-typed serialization data", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	intern->flags = (int) Z_LVAL_P(flags_zv);
@@ -1294,7 +1294,7 @@ SPL_METHOD(SplDoublyLinkedList, add)
 
 	if (index < 0 || index > intern->llist->count) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	Z_TRY_ADDREF_P(value);

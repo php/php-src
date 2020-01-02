@@ -551,7 +551,7 @@ SPL_METHOD(SplFixedArray, __construct)
 
 	if (size < 0) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "array size cannot be less than zero");
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLFIXEDARRAY_P(object);
@@ -666,7 +666,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 		ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(data), num_index, str_index) {
 			if (str_index != NULL || (zend_long)num_index < 0) {
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "array must contain only positive integer keys");
-				return;
+				RETURN_THROWS();
 			}
 
 			if (num_index > max_index) {
@@ -677,7 +677,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 		tmp = max_index + 1;
 		if (tmp <= 0) {
 			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "integer overflow detected");
-			return;
+			RETURN_THROWS();
 		}
 		spl_fixedarray_init(&array, tmp);
 
@@ -736,7 +736,7 @@ SPL_METHOD(SplFixedArray, setSize)
 
 	if (size < 0) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "array size cannot be less than zero");
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLFIXEDARRAY_P(object);

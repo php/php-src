@@ -135,7 +135,7 @@ static inline spl_recursive_it_object *spl_recursive_it_from_obj(zend_object *ob
 		if (it->dit_type == DIT_Unknown) { 														\
 			zend_throw_exception_ex(spl_ce_LogicException, 0, 						\
 				"The object is in an invalid state as the parent constructor was not called"); 	\
-			return; 																			\
+			RETURN_THROWS(); 																			\
 		} 																						\
 		(var) = it; 																			\
 	} while (0)
@@ -155,7 +155,7 @@ static inline spl_recursive_it_object *spl_recursive_it_from_obj(zend_object *ob
 		if(!(object)->iterators) { \
 			zend_throw_exception_ex(spl_ce_LogicException, 0, \
 				"The object is in an invalid state as the parent constructor was not called"); \
-			return; \
+			RETURN_THROWS(); \
 		} \
 		(var) = &(object)->iterators[(object)->level].element; \
 	} while (0)
@@ -717,7 +717,7 @@ SPL_METHOD(RecursiveIteratorIterator, getSubIterator)
 	if(!object->iterators) {
 		zend_throw_exception_ex(spl_ce_LogicException, 0,
 			"The object is in an invalid state as the parent constructor was not called");
-		return;
+		RETURN_THROWS();
 	}
 
 	value = &object->iterators[level].zobject;
@@ -856,7 +856,7 @@ SPL_METHOD(RecursiveIteratorIterator, setMaxDepth)
 	}
 	if (max_depth < -1) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Parameter max_depth must be >= -1", 0);
-		return;
+		RETURN_THROWS();
 	} else if (max_depth > INT_MAX) {
 		max_depth = INT_MAX;
 	}
@@ -1106,7 +1106,7 @@ SPL_METHOD(RecursiveTreeIterator, setPrefixPart)
 
 	if (0 > part || part > 5) {
 		zend_throw_exception_ex(spl_ce_OutOfRangeException, 0, "Use RecursiveTreeIterator::PREFIX_* constant");
-		return;
+		RETURN_THROWS();
 	}
 
 	smart_str_free(&object->prefix[part]);
@@ -1126,7 +1126,7 @@ SPL_METHOD(RecursiveTreeIterator, getPrefix)
 	if(!object->iterators) {
 		zend_throw_exception_ex(spl_ce_LogicException, 0,
 			"The object is in an invalid state as the parent constructor was not called");
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_recursive_tree_iterator_get_prefix(object, return_value);
@@ -1161,7 +1161,7 @@ SPL_METHOD(RecursiveTreeIterator, getEntry)
 	if(!object->iterators) {
 		zend_throw_exception_ex(spl_ce_LogicException, 0,
 			"The object is in an invalid state as the parent constructor was not called");
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_recursive_tree_iterator_get_entry(object, return_value);
@@ -1180,7 +1180,7 @@ SPL_METHOD(RecursiveTreeIterator, getPostfix)
 	if(!object->iterators) {
 		zend_throw_exception_ex(spl_ce_LogicException, 0,
 			"The object is in an invalid state as the parent constructor was not called");
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_recursive_tree_iterator_get_postfix(object, return_value);
@@ -1202,7 +1202,7 @@ SPL_METHOD(RecursiveTreeIterator, current)
 	if(!object->iterators) {
 		zend_throw_exception_ex(spl_ce_LogicException, 0,
 			"The object is in an invalid state as the parent constructor was not called");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (object->flags & RTIT_BYPASS_CURRENT) {
@@ -1365,7 +1365,7 @@ static zend_function *spl_dual_it_get_method(zend_object **object, zend_string *
 	if (intern->dit_type == DIT_Unknown) { \
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Classes derived from %s must call %s::__construct()", \
 				ZSTR_VAL((spl_ce_##classname)->name), ZSTR_VAL((spl_ce_##classname)->name)); \
-		return; \
+		RETURN_THROWS(); \
 	}
 
 #define APPENDIT_CHECK_CTOR(intern) SPL_CHECK_CTOR(intern, AppendIterator)
@@ -2087,7 +2087,7 @@ SPL_METHOD(RegexIterator, setMode)
 
 	if (mode < 0 || mode >= REGIT_MODE_MAX) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Illegal mode " ZEND_LONG_FMT, mode);
-		return;/* NULL */
+		RETURN_THROWS();
 	}
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
@@ -2718,7 +2718,7 @@ SPL_METHOD(CachingIterator, __toString)
 
 	if (!(intern->u.caching.flags & (CIT_CALL_TOSTRING|CIT_TOSTRING_USE_KEY|CIT_TOSTRING_USE_CURRENT|CIT_TOSTRING_USE_INNER)))	{
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not fetch string value (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
-		return;
+		RETURN_THROWS();
 	}
 	if (intern->u.caching.flags & CIT_TOSTRING_USE_KEY) {
 		ZVAL_COPY(return_value, &intern->current.key);
@@ -2748,7 +2748,7 @@ SPL_METHOD(CachingIterator, offsetSet)
 
 	if (!(intern->u.caching.flags & CIT_FULL_CACHE))	{
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
-		return;
+		RETURN_THROWS();
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz", &key, &value) == FAILURE) {
@@ -2772,7 +2772,7 @@ SPL_METHOD(CachingIterator, offsetGet)
 
 	if (!(intern->u.caching.flags & CIT_FULL_CACHE))	{
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
-		return;
+		RETURN_THROWS();
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &key) == FAILURE) {
@@ -2799,7 +2799,7 @@ SPL_METHOD(CachingIterator, offsetUnset)
 
 	if (!(intern->u.caching.flags & CIT_FULL_CACHE))	{
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
-		return;
+		RETURN_THROWS();
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &key) == FAILURE) {
@@ -2821,7 +2821,7 @@ SPL_METHOD(CachingIterator, offsetExists)
 
 	if (!(intern->u.caching.flags & CIT_FULL_CACHE))	{
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
-		return;
+		RETURN_THROWS();
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &key) == FAILURE) {
@@ -2846,7 +2846,7 @@ SPL_METHOD(CachingIterator, getCache)
 
 	if (!(intern->u.caching.flags & CIT_FULL_CACHE))	{
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_COPY(return_value, &intern->u.caching.zcache);
@@ -2884,15 +2884,15 @@ SPL_METHOD(CachingIterator, setFlags)
 
 	if (spl_cit_check_flags(flags) != SUCCESS) {
 		zend_throw_exception(spl_ce_InvalidArgumentException , "Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER", 0);
-		return;
+		RETURN_THROWS();
 	}
 	if ((intern->u.caching.flags & CIT_CALL_TOSTRING) != 0 && (flags & CIT_CALL_TOSTRING) == 0) {
 		zend_throw_exception(spl_ce_InvalidArgumentException, "Unsetting flag CALL_TO_STRING is not possible", 0);
-		return;
+		RETURN_THROWS();
 	}
 	if ((intern->u.caching.flags & CIT_TOSTRING_USE_INNER) != 0 && (flags & CIT_TOSTRING_USE_INNER) == 0) {
 		zend_throw_exception(spl_ce_InvalidArgumentException, "Unsetting flag TOSTRING_USE_INNER is not possible", 0);
-		return;
+		RETURN_THROWS();
 	}
 	if ((flags & CIT_FULL_CACHE) != 0 && (intern->u.caching.flags & CIT_FULL_CACHE) == 0) {
 		/* clear on (re)enable */
@@ -2916,7 +2916,7 @@ SPL_METHOD(CachingIterator, count)
 
 	if (!(intern->u.caching.flags & CIT_FULL_CACHE))	{
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "%s does not use a full cache (see CachingIterator::__construct)", ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(zend_hash_num_elements(Z_ARRVAL(intern->u.caching.zcache)));

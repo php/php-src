@@ -1236,12 +1236,12 @@ PHP_FUNCTION(intdiv)
 
 	if (divisor == 0) {
 		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
-		return;
+		RETURN_THROWS();
 	} else if (divisor == -1 && dividend == ZEND_LONG_MIN) {
 		/* Prevent overflow error/crash ... really should not happen:
 		   We don't return a float here as that violates function contract */
 		zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Division of PHP_INT_MIN by -1 is not an integer");
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(dividend / divisor);

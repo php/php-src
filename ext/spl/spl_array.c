@@ -1819,7 +1819,7 @@ SPL_METHOD(Array, unserialize)
 outexcept:
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Error at offset " ZEND_LONG_FMT " of %zd bytes", (zend_long)((char*)p - buf), buf_len);
-	return;
+	RETURN_THROWS();
 
 } /* }}} */
 
@@ -1874,7 +1874,7 @@ SPL_METHOD(Array, __unserialize)
 			Z_TYPE_P(flags_zv) != IS_LONG || Z_TYPE_P(members_zv) != IS_ARRAY) {
 		zend_throw_exception(spl_ce_UnexpectedValueException,
 			"Incomplete or ill-typed serialization data", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	flags = Z_LVAL_P(flags_zv);

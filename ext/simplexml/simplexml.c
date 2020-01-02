@@ -2283,15 +2283,15 @@ SXE_METHOD(__construct)
 
 	if (ZEND_SIZE_T_INT_OVFL(data_len)) {
 		zend_throw_exception(zend_ce_exception, "Data is too long", 0);
-		return;
+		RETURN_THROWS();
 	}
 	if (ZEND_SIZE_T_INT_OVFL(ns_len)) {
 		zend_throw_exception(zend_ce_exception, "Namespace is too long", 0);
-		return;
+		RETURN_THROWS();
 	}
 	if (ZEND_LONG_EXCEEDS_INT(options)) {
 		zend_throw_exception(zend_ce_exception, "Invalid options", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	docp = is_url ? xmlReadFile(data, NULL, (int)options) : xmlReadMemory(data, (int)data_len, NULL, NULL, (int)options);
@@ -2299,7 +2299,7 @@ SXE_METHOD(__construct)
 	if (!docp) {
 		((php_libxml_node_object *)sxe)->document = NULL;
 		zend_throw_exception(zend_ce_exception, "String could not be parsed as XML", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	sxe->iter.nsprefix = ns_len ? (xmlChar*)estrdup(ns) : NULL;

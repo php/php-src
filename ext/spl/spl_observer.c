@@ -866,7 +866,7 @@ SPL_METHOD(SplObjectStorage, unserialize)
 outexcept:
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Error at offset %zd of %zd bytes", ((char*)p - buf), buf_len);
-	return;
+	RETURN_THROWS();
 
 } /* }}} */
 
@@ -916,12 +916,12 @@ SPL_METHOD(SplObjectStorage, __unserialize)
 			Z_TYPE_P(storage_zv) != IS_ARRAY || Z_TYPE_P(members_zv) != IS_ARRAY) {
 		zend_throw_exception(spl_ce_UnexpectedValueException,
 			"Incomplete or ill-typed serialization data", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (zend_hash_num_elements(Z_ARRVAL_P(storage_zv)) % 2 != 0) {
 		zend_throw_exception(spl_ce_UnexpectedValueException, "Odd number of elements", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	key = NULL;
@@ -929,7 +929,7 @@ SPL_METHOD(SplObjectStorage, __unserialize)
 		if (key) {
 			if (Z_TYPE_P(key) != IS_OBJECT) {
 				zend_throw_exception(spl_ce_UnexpectedValueException, "Non-object key", 0);
-				return;
+				RETURN_THROWS();
 			}
 
 			spl_object_storage_attach(intern, key, val);
@@ -1071,14 +1071,14 @@ SPL_METHOD(MultipleIterator, attachIterator)
 
 		if (Z_TYPE_P(info) != IS_LONG && Z_TYPE_P(info) != IS_STRING) {
 			zend_throw_exception(spl_ce_InvalidArgumentException, "Info must be NULL, integer or string", 0);
-			return;
+			RETURN_THROWS();
 		}
 
 		zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
 		while ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &intern->pos)) != NULL) {
 			if (fast_is_identical_function(info, &element->inf)) {
 				zend_throw_exception(spl_ce_InvalidArgumentException, "Key duplication error", 0);
-				return;
+				RETURN_THROWS();
 			}
 			zend_hash_move_forward_ex(&intern->storage, &intern->pos);
 		}

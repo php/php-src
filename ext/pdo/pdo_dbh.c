@@ -226,7 +226,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		snprintf(alt_dsn, sizeof(alt_dsn), "pdo.dsn.%s", data_source);
 		if (FAILURE == cfg_get_string(alt_dsn, &ini_dsn)) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name");
-			return;
+			RETURN_THROWS();
 		}
 
 		data_source = ini_dsn;
@@ -234,7 +234,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 		if (!colon) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name (via INI: %s)", alt_dsn);
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -243,12 +243,12 @@ static PHP_METHOD(PDO, dbh_constructor)
 		data_source = dsn_from_uri(data_source + sizeof("uri:")-1, alt_dsn, sizeof(alt_dsn));
 		if (!data_source) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source URI");
-			return;
+			RETURN_THROWS();
 		}
 		colon = strchr(data_source, ':');
 		if (!colon) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name (via URI)");
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -258,7 +258,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		/* NB: don't want to include the data_source in the error message as
 		 * it might contain a password */
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "could not find driver");
-		return;
+		RETURN_THROWS();
 	}
 
 	dbh = Z_PDO_DBH_P(object);
@@ -567,14 +567,14 @@ static PHP_METHOD(PDO, beginTransaction)
 
 	if (dbh->in_txn) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is already an active transaction");
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (!dbh->methods->begin) {
 		/* TODO: this should be an exception; see the auto-commit mode
 		 * comments below */
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "This driver doesn't support transactions");
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (dbh->methods->begin(dbh)) {
@@ -600,7 +600,7 @@ static PHP_METHOD(PDO, commit)
 
 	if (!dbh->in_txn) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is no active transaction");
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (dbh->methods->commit(dbh)) {
@@ -626,7 +626,7 @@ static PHP_METHOD(PDO, rollBack)
 
 	if (!dbh->in_txn) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is no active transaction");
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (dbh->methods->rollback(dbh)) {

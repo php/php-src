@@ -1541,7 +1541,7 @@ PHP_METHOD(snmp, __construct)
 			break;
 		default:
 			zend_throw_exception(zend_ce_exception, "Unknown SNMP protocol version", 0);
-			return;
+			RETURN_THROWS();
 	}
 
 	/* handle re-open of snmp session */

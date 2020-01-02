@@ -4711,7 +4711,7 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 
 	if (argc < req_args) {
 		zend_argument_count_error("At least %d parameters are required, %d given", req_args, argc);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), param_spec, &args, &argc, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
@@ -4805,7 +4805,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 
 		if (ZEND_NUM_ARGS() < req_args) {
 			zend_argument_count_error("At least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
-			return;
+			RETURN_THROWS();
 		}
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), param_spec, &args, &arr_argc, &fci1, &fci1_cache) == FAILURE) {
@@ -4857,7 +4857,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 
 		if (ZEND_NUM_ARGS() < req_args) {
 			zend_argument_count_error("At least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
-			return;
+			RETURN_THROWS();
 		}
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), param_spec, &args, &arr_argc, &fci1, &fci1_cache, &fci2, &fci2_cache) == FAILURE) {
@@ -5104,7 +5104,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 	if (data_compare_type == DIFF_COMP_DATA_USER) {
 		if (argc < 3) {
 			zend_argument_count_error("At least 3 parameters are required, %d given", ZEND_NUM_ARGS());
-			return;
+			RETURN_THROWS();
 		}
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "+f", &args, &argc, &BG(user_compare_fci), &BG(user_compare_fci_cache)) == FAILURE) {
 			RETURN_THROWS();
@@ -5113,7 +5113,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 	} else {
 		if (argc < 2) {
 			zend_argument_count_error("At least 2 parameters are required, %d given", ZEND_NUM_ARGS());
-			return;
+			RETURN_THROWS();
 		}
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
 			RETURN_THROWS();
@@ -5210,7 +5210,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 
 		if (ZEND_NUM_ARGS() < req_args) {
 			zend_argument_count_error("At least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
-			return;
+			RETURN_THROWS();
 		}
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), param_spec, &args, &arr_argc, &fci1, &fci1_cache) == FAILURE) {
@@ -5262,7 +5262,7 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 
 		if (ZEND_NUM_ARGS() < req_args) {
 			zend_argument_count_error("At least %d parameters are required, %d given", req_args, ZEND_NUM_ARGS());
-			return;
+			RETURN_THROWS();
 		}
 
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), param_spec, &args, &arr_argc, &fci1, &fci1_cache, &fci2, &fci2_cache) == FAILURE) {
@@ -5459,7 +5459,7 @@ PHP_FUNCTION(array_diff)
 
 	if (ZEND_NUM_ARGS() < 2) {
 		zend_argument_count_error("At least 2 parameters are required, %d given", ZEND_NUM_ARGS());
-		return;
+		RETURN_THROWS();
 	}
 
 	ZEND_PARSE_PARAMETERS_START(1, -1)

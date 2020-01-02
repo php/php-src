@@ -616,7 +616,7 @@ SPL_METHOD(SplHeap, insert)
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	Z_TRY_ADDREF_P(value);
@@ -640,12 +640,12 @@ SPL_METHOD(SplHeap, extract)
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (spl_ptr_heap_delete_top(intern->heap, return_value, ZEND_THIS) == FAILURE) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't extract from an empty heap", 0);
-		return;
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -666,7 +666,7 @@ SPL_METHOD(SplPriorityQueue, insert)
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_COPY(&elem.data, data);
@@ -693,12 +693,12 @@ SPL_METHOD(SplPriorityQueue, extract)
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (spl_ptr_heap_delete_top(intern->heap, &elem, ZEND_THIS) == FAILURE) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't extract from an empty heap", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_pqueue_extract_helper(return_value, &elem, intern->flags);
@@ -721,14 +721,14 @@ SPL_METHOD(SplPriorityQueue, top)
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	elem = spl_ptr_heap_top(intern->heap);
 
 	if (!elem) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't peek at an empty heap", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_pqueue_extract_helper(return_value, elem, intern->flags);
@@ -750,7 +750,7 @@ SPL_METHOD(SplPriorityQueue, setExtractFlags)
 	value &= SPL_PQUEUE_EXTR_MASK;
 	if (!value) {
 		zend_throw_exception(spl_ce_RuntimeException, "Must specify at least one extract flag", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -838,14 +838,14 @@ SPL_METHOD(SplHeap, top)
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	value = spl_ptr_heap_top(intern->heap);
 
 	if (!value) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't peek at an empty heap", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_COPY_DEREF(return_value, value);

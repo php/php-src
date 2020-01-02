@@ -113,20 +113,20 @@ PHP_METHOD(sqlite3, open)
 
 	if (db_obj->initialised) {
 		zend_throw_exception(zend_ce_exception, "Already initialised DB Object", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (filename_len != 0 && (filename_len != sizeof(":memory:")-1 ||
 			memcmp(filename, ":memory:", sizeof(":memory:")-1) != 0)) {
 		if (!(fullpath = expand_filepath(filename, NULL))) {
 			zend_throw_exception(zend_ce_exception, "Unable to expand filepath", 0);
-			return;
+			RETURN_THROWS();
 		}
 
 		if (php_check_open_basedir(fullpath)) {
 			zend_throw_exception_ex(zend_ce_exception, 0, "open_basedir prohibits opening %s", fullpath);
 			efree(fullpath);
-			return;
+			RETURN_THROWS();
 		}
 	} else {
 		/* filename equals "" or ":memory:" */
@@ -153,7 +153,7 @@ PHP_METHOD(sqlite3, open)
 		if (sqlite3_key(db_obj->db, encryption_key, encryption_key_len) != SQLITE_OK) {
 			sqlite3_close(db_obj->db);
 			zend_throw_exception_ex(zend_ce_exception, 0, "Unable to open database: %s", sqlite3_errmsg(db_obj->db));
-			return;
+			RETURN_THROWS();
 		}
 	}
 #endif

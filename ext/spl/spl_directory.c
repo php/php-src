@@ -853,7 +853,7 @@ SPL_METHOD(DirectoryIterator, seek)
 		zval_ptr_dtor(&retval);
 		if (!valid) {
 			zend_throw_exception_ex(spl_ce_OutOfBoundsException, 0, "Seek position " ZEND_LONG_FMT " is out of range", pos);
-			return;
+			RETURN_THROWS();
 		}
 		zend_call_method_with_0_params(Z_OBJ_P(ZEND_THIS), Z_OBJCE_P(ZEND_THIS), &intern->u.dir.func_next, "next", NULL);
 	}
@@ -2357,7 +2357,7 @@ SPL_METHOD(SplFileObject, eof)
 
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(php_stream_eof(intern->u.file.stream));
@@ -2395,7 +2395,7 @@ SPL_METHOD(SplFileObject, fgets)
 
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (spl_filesystem_file_read(intern, 0) == FAILURE) {
@@ -2416,7 +2416,7 @@ SPL_METHOD(SplFileObject, current)
 
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!intern->u.file.current_line && Z_ISUNDEF(intern->u.file.current_zval)) {
@@ -2505,7 +2505,7 @@ SPL_METHOD(SplFileObject, setMaxLineLen)
 
 	if (max_len < 0) {
 		zend_throw_exception_ex(spl_ce_DomainException, 0, "Maximum line length must be greater than or equal zero");
-		return;
+		RETURN_THROWS();
 	}
 
 	intern->u.file.max_line_len = max_len;
@@ -2568,7 +2568,7 @@ SPL_METHOD(SplFileObject, fgetcsv)
 
 		if(!intern->u.file.stream) {
 			zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-			return;
+			RETURN_THROWS();
 		}
 
 		switch(ZEND_NUM_ARGS())
@@ -2750,7 +2750,7 @@ SPL_METHOD(SplFileObject, fflush)
 
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(!php_stream_flush(intern->u.file.stream));
@@ -2765,7 +2765,7 @@ SPL_METHOD(SplFileObject, ftell)
 
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		return;
+		RETURN_THROWS();
 	}
 
 	ret = php_stream_tell(intern->u.file.stream);
@@ -2790,7 +2790,7 @@ SPL_METHOD(SplFileObject, fseek)
 
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_filesystem_file_free_line(intern);
@@ -2807,7 +2807,7 @@ SPL_METHOD(SplFileObject, fgetc)
 
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_filesystem_file_free_line(intern);
@@ -2835,7 +2835,7 @@ SPL_METHOD(SplFileObject, fpassthru)
 
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(php_stream_passthru(intern->u.file.stream));
@@ -2849,7 +2849,7 @@ SPL_METHOD(SplFileObject, fscanf)
 
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_filesystem_file_free_line(intern);
@@ -2875,7 +2875,7 @@ SPL_METHOD(SplFileObject, fwrite)
 
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZEND_NUM_ARGS() > 1) {
@@ -2909,7 +2909,7 @@ SPL_METHOD(SplFileObject, fread)
 
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (length <= 0) {
@@ -2942,12 +2942,12 @@ SPL_METHOD(SplFileObject, ftruncate)
 
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!php_stream_truncate_supported(intern->u.file.stream)) {
 		zend_throw_exception_ex(spl_ce_LogicException, 0, "Can't truncate file %s", intern->file_name);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(0 == php_stream_truncate_set_size(intern->u.file.stream, size));
@@ -2965,12 +2965,12 @@ SPL_METHOD(SplFileObject, seek)
 	}
 	if(!intern->u.file.stream) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (line_pos < 0) {
 		zend_throw_exception_ex(spl_ce_LogicException, 0, "Can't seek file %s to negative line " ZEND_LONG_FMT, intern->file_name, line_pos);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	spl_filesystem_file_rewind(ZEND_THIS, intern);
