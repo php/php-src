@@ -1138,7 +1138,9 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	} ZEND_HASH_FOREACH_END();
 	zend_persist_op_array_ex(&script->script.main_op_array, script);
 
-	ZCSG(map_ptr_last) = CG(map_ptr_last);
+	if (for_shm) {
+		ZCSG(map_ptr_last) = CG(map_ptr_last);
+	}
 
 #ifdef HAVE_JIT
 	if (ZCG(jit_enabled) && for_shm) {
