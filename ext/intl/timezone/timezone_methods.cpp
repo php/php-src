@@ -377,7 +377,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_id)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, TimeZone_ce_ptr) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	TIMEZONE_METHOD_FETCH_OBJECT;
@@ -400,7 +400,7 @@ U_CFUNC PHP_FUNCTION(intltz_use_daylight_time)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, TimeZone_ce_ptr) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	TIMEZONE_METHOD_FETCH_OBJECT;
@@ -421,7 +421,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_offset)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Odbz/z/", &object, TimeZone_ce_ptr, &date, &local, &rawOffsetArg,
 			&dstOffsetArg) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	TIMEZONE_METHOD_FETCH_OBJECT;
@@ -445,7 +445,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_raw_offset)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O", &object, TimeZone_ce_ptr) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	TIMEZONE_METHOD_FETCH_OBJECT;
@@ -462,7 +462,7 @@ U_CFUNC PHP_FUNCTION(intltz_has_same_rules)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"OO", &object, TimeZone_ce_ptr, &other_object, TimeZone_ce_ptr)
 			== FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	TIMEZONE_METHOD_FETCH_OBJECT;
 	other_to = Z_INTL_TIMEZONE_P(other_object);
@@ -493,7 +493,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_display_name)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O|bls!", &object, TimeZone_ce_ptr, &daylight, &display_type,
 			&locale_str, &dummy) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	bool found = false;
@@ -530,7 +530,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_dst_savings)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O", &object, TimeZone_ce_ptr) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	TIMEZONE_METHOD_FETCH_OBJECT;
@@ -545,7 +545,7 @@ U_CFUNC PHP_FUNCTION(intltz_to_date_time_zone)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O", &object, TimeZone_ce_ptr) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	TIMEZONE_METHOD_FETCH_OBJECT;
@@ -566,7 +566,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_error_code)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, TimeZone_ce_ptr) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object (without resetting its last error code ). */
@@ -584,7 +584,7 @@ U_CFUNC PHP_FUNCTION(intltz_get_error_message)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 			&object, TimeZone_ce_ptr) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 

@@ -196,7 +196,7 @@ ZEND_METHOD(Closure, bind)
 	zend_class_entry *ce, *called_scope;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oo!|z", &zclosure, zend_ce_closure, &newthis, &scope_arg) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	closure = (zend_closure *)Z_OBJ_P(zclosure);

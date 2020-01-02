@@ -42,7 +42,7 @@ PHP_FUNCTION( numfmt_format )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oz|l",
 		&object, NumberFormatter_ce_ptr,  &number, &type ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -145,7 +145,7 @@ PHP_FUNCTION( numfmt_format_currency )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ods",
 		&object, NumberFormatter_ce_ptr,  &number, &currency, &currency_len ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */

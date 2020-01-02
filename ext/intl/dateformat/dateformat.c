@@ -75,7 +75,7 @@ PHP_FUNCTION( datefmt_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	dfo = Z_INTL_DATEFORMATTER_P( object );
@@ -99,7 +99,7 @@ PHP_FUNCTION( datefmt_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, IntlDateFormatter_ce_ptr ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	dfo = Z_INTL_DATEFORMATTER_P( object );

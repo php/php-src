@@ -107,7 +107,7 @@ PHP_FUNCTION( normalizer_normalize )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "s|l",
 				&input, &input_len, &form ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	expansion_factor = 1;
@@ -244,7 +244,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "s|l",
 				&input, &input_len, &form) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	switch(form) {

@@ -67,7 +67,7 @@ PHP_FUNCTION( msgfmt_parse )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os",
 		&object, MessageFormatter_ce_ptr,  &source, &source_len ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */

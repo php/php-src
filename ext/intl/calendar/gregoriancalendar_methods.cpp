@@ -207,7 +207,7 @@ U_CFUNC PHP_FUNCTION(intlgregcal_set_gregorian_change)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Od", &object, GregorianCalendar_ce_ptr, &date) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	CALENDAR_METHOD_FETCH_OBJECT;
@@ -225,7 +225,7 @@ U_CFUNC PHP_FUNCTION(intlgregcal_get_gregorian_change)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"O", &object, GregorianCalendar_ce_ptr) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	CALENDAR_METHOD_FETCH_OBJECT;
@@ -240,7 +240,7 @@ U_CFUNC PHP_FUNCTION(intlgregcal_is_leap_year)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(),
 			"Ol", &object, GregorianCalendar_ce_ptr, &year) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (year < INT32_MIN || year > INT32_MAX) {

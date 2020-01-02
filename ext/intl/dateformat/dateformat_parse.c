@@ -135,7 +135,7 @@ PHP_FUNCTION(datefmt_parse)
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|z!",
 		&object, IntlDateFormatter_ce_ptr, &text_to_parse, &text_len, &z_parse_pos ) == FAILURE ){
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -179,7 +179,7 @@ PHP_FUNCTION(datefmt_localtime)
 	/* Parse parameters. */
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|z!",
 		&object, IntlDateFormatter_ce_ptr, &text_to_parse, &text_len, &z_parse_pos ) == FAILURE ){
-		return;
+		RETURN_THROWS();
 	}
 
     /* Fetch the object. */

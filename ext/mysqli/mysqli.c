@@ -1196,7 +1196,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		zend_string *class_name = NULL;
 
 		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|Sa", &mysql_result, mysqli_result_class_entry, &class_name, &ctor_params) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		if (class_name == NULL) {
 			ce = zend_standard_class_def;

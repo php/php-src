@@ -52,7 +52,7 @@ PHP_FUNCTION( numfmt_parse )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|lz!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &type, &zposition ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	if(zposition) {
@@ -134,7 +134,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Osz/|z!",
 		&object, NumberFormatter_ce_ptr,  &str, &str_len, &zcurrency, &zposition ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */

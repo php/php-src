@@ -39,7 +39,7 @@ PHP_FUNCTION( collator_get_attribute )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, Collator_ce_ptr, &attribute ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -67,7 +67,7 @@ PHP_FUNCTION( collator_set_attribute )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oll",
 		&object, Collator_ce_ptr, &attribute, &value ) == FAILURE)
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -94,7 +94,7 @@ PHP_FUNCTION( collator_get_strength )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Collator_ce_ptr ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -120,7 +120,7 @@ PHP_FUNCTION( collator_set_strength )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, Collator_ce_ptr, &strength ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */

@@ -181,7 +181,7 @@ PHP_METHOD(mysqli_warning, next)
 	if (obj->ptr) {
 		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 										 &mysqli_warning, mysqli_warning_class_entry) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 
 		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, mysqli_warning, "mysqli_warning", MYSQLI_STATUS_VALID);

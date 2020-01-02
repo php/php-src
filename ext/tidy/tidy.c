@@ -1273,7 +1273,7 @@ static PHP_FUNCTION(tidy_get_opt_doc)
 	zval *object;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &object, tidy_ce_doc, &optname, &optname_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	obj = Z_TIDY_P(object);
@@ -1427,7 +1427,7 @@ static PHP_FUNCTION(tidy_getopt)
 	zval *object;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &object, tidy_ce_doc, &optname, &optname_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	obj = Z_TIDY_P(object);
