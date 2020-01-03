@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.15
 
+- Core:
+  . Fixed bug #71876 (Memory corruption htmlspecialchars(): charset `*' not
+    supported). (Nikita)
+
 - CURL:
   . Fixed bug #79078 (Hypothetical use-after-free in curl_multi_add_handle()).
     (cmb)
