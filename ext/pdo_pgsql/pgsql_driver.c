@@ -133,6 +133,15 @@ static int pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 }
 /* }}} */
 
+static void pdo_pgsql_cleanup_notice_callback(pdo_pgsql_db_handle *H) /* {{{ */
+{
+	if (H->notice_callback) {
+		efree(H->notice_callback);
+		H->notice_callback = NULL;
+	}
+}
+/* }}} */
+
 /* {{{ pdo_pgsql_create_lob_stream */
 static ssize_t pgsql_lob_write(php_stream *stream, const char *buf, size_t count)
 {
@@ -1161,10 +1170,7 @@ static PHP_METHOD(PDO, pgsqlSetNoticeCallback)
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
 	if (Z_TYPE_P(callback) == IS_NULL) {
-		if (H->notice_callback) {
-			efree(H->notice_callback);
-			H->notice_callback = NULL;
-		}
+		pdo_pgsql_cleanup_notice_callback(H);
 		RETURN_TRUE;
 	} else {
 		if (!(fc = H->notice_callback)) {
