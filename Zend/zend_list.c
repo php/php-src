@@ -328,6 +328,18 @@ const char *zend_rsrc_list_get_rsrc_type(zend_resource *res)
 	}
 }
 
+const char *zend_rsrc_list_get_rsrc_type_from_id(int resource_type)
+{
+	zend_rsrc_list_dtors_entry *lde;
+
+	lde = zend_hash_index_find_ptr(&list_destructors, resource_type);
+	if (lde) {
+		return lde->type_name;
+	} else {
+		return NULL;
+	}
+}
+
 ZEND_API zend_resource* zend_register_persistent_resource_ex(zend_string *key, void *rsrc_pointer, int rsrc_type)
 {
 	zval *zv;

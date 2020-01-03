@@ -223,6 +223,30 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, z
 }
 /* }}} */
 
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_resource_error(int num, int resource_type, zval *arg) /* {{{ */
+{
+	const char *space;
+	const char *class_name, *function_name;
+
+	if (EG(exception)) {
+		return;
+	}
+	class_name = get_active_class_name(&space);
+	function_name = get_active_function_name();
+	if (Z_TYPE_P(arg) != IS_RESOURCE) {
+		zend_type_error("%s%s%s() expects parameter %d to be resource, %s given",
+			class_name, space, function_name, num, zend_zval_type_name(arg));
+	} else {
+		const char *expected_type = zend_rsrc_list_get_rsrc_type_from_id(resource_type);
+		const char *given_type = zend_rsrc_list_get_rsrc_type(Z_RES_P(arg));
+		zend_type_error("%s%s%s() expects parameter %d to be %s resource, %s resource given",
+			class_name, space, function_name, num,
+			expected_type ? expected_type : "UNKNOWN",
+			given_type ? given_type : "closed");
+	}
+}
+/* }}} */
+
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, const char *name, zval *arg) /* {{{ */
 {
 	const char *space;

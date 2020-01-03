@@ -1955,7 +1955,7 @@ PHP_FUNCTION(curl_copy_handle)
 	php_curl	*ch, *dupch;
 
 	ZEND_PARSE_PARAMETERS_START(1,1)
-		Z_PARAM_RESOURCE_TYPE(zid, le_curl)
+		Z_PARAM_RESOURCE(zid)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((ch = (php_curl*)zend_fetch_resource(Z_RES_P(zid), le_curl_name, le_curl)) == NULL) {
@@ -2916,19 +2916,15 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
    Set an option for a cURL transfer */
 PHP_FUNCTION(curl_setopt)
 {
-	zval       *zid, *zvalue;
-	zend_long        options;
+	zval       *zvalue;
+	zend_long   options;
 	php_curl   *ch;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
-		Z_PARAM_RESOURCE(zid)
+		Z_PARAM_RESOURCE_TYPE(ch, le_curl)
 		Z_PARAM_LONG(options)
 		Z_PARAM_ZVAL(zvalue)
 	ZEND_PARSE_PARAMETERS_END();
-
-	if ((ch = (php_curl*)zend_fetch_resource(Z_RES_P(zid), le_curl_name, le_curl)) == NULL) {
-		return;
-	}
 
 	if (options <= 0 && options != CURLOPT_SAFE_UPLOAD) {
 		php_error_docref(NULL, E_WARNING, "Invalid curl configuration option");

@@ -1145,13 +1145,14 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(int min_
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, zend_expected_type expected_type, zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, const char *name, zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *error);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_resource_error(int num, int type, zval *arg);
 
 #define ZPP_ERROR_OK             0
 #define ZPP_ERROR_FAILURE        1
 #define ZPP_ERROR_WRONG_CALLBACK 2
 #define ZPP_ERROR_WRONG_CLASS    3
 #define ZPP_ERROR_WRONG_ARG      4
-#define ZPP_ERROR_WRONG_COUNT    5
+#define ZPP_ERROR_WRONG_RESOURCE 5
 
 #define ZEND_PARSE_PARAMETERS_START_EX(flags, min_num_args, max_num_args) do { \
 		const int _flags = (flags); \
@@ -1205,6 +1206,8 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 					zend_wrong_parameter_class_error(_i, _error, _arg); \
 				} else if (_error_code == ZPP_ERROR_WRONG_ARG) { \
 					zend_wrong_parameter_type_error(_i, _expected_type, _arg); \
+				} else if (_error_code == ZPP_ERROR_WRONG_RESOURCE) { \
+					zend_wrong_parameter_resource_error(_i, (int) (intptr_t) _error, _arg); \
 				} \
 			} \
 			failure; \
@@ -1479,8 +1482,8 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 #define Z_PARAM_RESOURCE_TYPE(dest, type) \
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!zend_parse_arg_resource_type(_arg, (void **) &dest, type))) { \
-		_expected_type = Z_EXPECTED_RESOURCE; \
-		_error_code = ZPP_ERROR_WRONG_ARG; \
+		_error = (char *) (intptr_t) type; \
+		_error_code = ZPP_ERROR_WRONG_RESOURCE; \
 		break; \
 	}
 
@@ -1744,6 +1747,18 @@ static zend_always_inline int zend_parse_arg_resource(zval *arg, zval **dest, in
 		return 0;
 	}
 	return 1;
+}
+
+static zend_always_inline int zend_parse_arg_resource_type(zval *arg, void **dest, int type)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_RESOURCE)) {
+		zend_resource *res = Z_RES_P(arg);
+		if (res->type == type) {
+			*dest = res->ptr;
+			return 1;
+		}
+	}
+	return 0;
 }
 
 static zend_always_inline int zend_parse_arg_func(zval *arg, zend_fcall_info *dest_fci, zend_fcall_info_cache *dest_fcc, int check_null, char **error)
