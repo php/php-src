@@ -391,11 +391,6 @@ ZEND_METHOD(error_exception, __construct)
 }
 /* }}} */
 
-#define DEFAULT_0_PARAMS \
-	if (zend_parse_parameters_none() == FAILURE) { \
-		return; \
-	}
-
 #define GET_PROPERTY(object, id) \
 	zend_read_property_ex(i_get_exception_base(object), (object), ZSTR_KNOWN(id), 0, &rv)
 #define GET_PROPERTY_SILENT(object, id) \
@@ -407,7 +402,7 @@ ZEND_METHOD(exception, getFile)
 {
 	zval *prop, rv;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_FILE);
 	ZVAL_DEREF(prop);
@@ -421,7 +416,7 @@ ZEND_METHOD(exception, getLine)
 {
 	zval *prop, rv;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_LINE);
 	ZVAL_DEREF(prop);
@@ -435,7 +430,7 @@ ZEND_METHOD(exception, getMessage)
 {
 	zval *prop, rv;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_MESSAGE);
 	ZVAL_DEREF(prop);
@@ -449,7 +444,7 @@ ZEND_METHOD(exception, getCode)
 {
 	zval *prop, rv;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_CODE);
 	ZVAL_DEREF(prop);
@@ -463,7 +458,7 @@ ZEND_METHOD(exception, getTrace)
 {
 	zval *prop, rv;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_TRACE);
 	ZVAL_DEREF(prop);
@@ -477,7 +472,7 @@ ZEND_METHOD(error_exception, getSeverity)
 {
 	zval *prop, rv;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_SEVERITY);
 	ZVAL_DEREF(prop);
@@ -625,7 +620,7 @@ ZEND_METHOD(exception, getTraceAsString)
 	smart_str str = {0};
 	uint32_t num = 0;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	object = ZEND_THIS;
 	base_ce = i_get_exception_base(object);
@@ -659,7 +654,7 @@ ZEND_METHOD(exception, getPrevious)
 {
 	zval rv;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	ZVAL_COPY(return_value, GET_PROPERTY_SILENT(ZEND_THIS, ZEND_STR_PREVIOUS));
 } /* }}} */
@@ -675,7 +670,7 @@ ZEND_METHOD(exception, __toString)
 	zval rv, tmp;
 	zend_string *fname;
 
-	DEFAULT_0_PARAMS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	str = ZSTR_EMPTY_ALLOC();
 

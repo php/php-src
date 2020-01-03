@@ -85,9 +85,7 @@ PHP_FUNCTION(pdo_drivers)
 {
 	pdo_driver_t *pdriver;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
