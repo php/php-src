@@ -772,7 +772,7 @@ static int php_var_serialize_call_magic_serialize(zval *retval, zval *obj) /* {{
 /* }}} */
 
 static int php_var_serialize_try_add_sleep_prop(
-		HashTable *ht, HashTable *props, zend_string *name, zend_string *error_name) /* {{{ */
+		HashTable *ht, HashTable *props, zend_string *name, zend_string *error_name, zval *struc) /* {{{ */
 {
 	zval *val = zend_hash_find(props, name);
 	if (val == NULL) {
@@ -782,6 +782,12 @@ static int php_var_serialize_try_add_sleep_prop(
 	if (Z_TYPE_P(val) == IS_INDIRECT) {
 		val = Z_INDIRECT_P(val);
 		if (Z_TYPE_P(val) == IS_UNDEF) {
+			zend_property_info *info = zend_get_typed_property_info_for_slot(Z_OBJ_P(struc), val);
+			if (info) {
+				zend_throw_error(NULL,
+					"Typed property %s::$%s must not be accessed before initialization (in __sleep)",
+					ZSTR_VAL(Z_OBJCE_P(struc)->name), ZSTR_VAL(error_name));
+			}
 			return FAILURE;
 		}
 	}
@@ -797,14 +803,17 @@ static int php_var_serialize_try_add_sleep_prop(
 }
 /* }}} */
 
-static void php_var_serialize_get_sleep_props(
+static int php_var_serialize_get_sleep_props(
 		HashTable *ht, zval *struc, HashTable *sleep_retval) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(struc);
 	HashTable *props = zend_get_properties_for(struc, ZEND_PROP_PURPOSE_SERIALIZE);
 	zval *name_val;
+	int retval = SUCCESS;
 
 	zend_hash_init(ht, zend_hash_num_elements(sleep_retval), NULL, ZVAL_PTR_DTOR, 0);
+	/* TODO: Rewrite this by fetching the property info instead of trying out different
+	 * name manglings? */
 	ZEND_HASH_FOREACH_VAL(sleep_retval, name_val) {
 		zend_string *name, *tmp_name, *priv_name, *prot_name;
 
@@ -815,36 +824,57 @@ static void php_var_serialize_get_sleep_props(
 		}
 
 		name = zval_get_tmp_string(name_val, &tmp_name);
-		if (php_var_serialize_try_add_sleep_prop(ht, props, name, name) == SUCCESS) {
+		if (php_var_serialize_try_add_sleep_prop(ht, props, name, name, struc) == SUCCESS) {
 			zend_tmp_string_release(tmp_name);
 			continue;
+		}
+
+		if (EG(exception)) {
+			zend_tmp_string_release(tmp_name);
+			retval = FAILURE;
+			goto exit;
 		}
 
 		priv_name = zend_mangle_property_name(
 			ZSTR_VAL(ce->name), ZSTR_LEN(ce->name),
 			ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
-		if (php_var_serialize_try_add_sleep_prop(ht, props, priv_name, name) == SUCCESS) {
+		if (php_var_serialize_try_add_sleep_prop(ht, props, priv_name, name, struc) == SUCCESS) {
 			zend_tmp_string_release(tmp_name);
 			zend_string_release(priv_name);
 			continue;
 		}
 		zend_string_release(priv_name);
 
+		if (EG(exception)) {
+			zend_tmp_string_release(tmp_name);
+			retval = FAILURE;
+			goto exit;
+		}
+
 		prot_name = zend_mangle_property_name(
 			"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
-		if (php_var_serialize_try_add_sleep_prop(ht, props, prot_name, name) == SUCCESS) {
+		if (php_var_serialize_try_add_sleep_prop(ht, props, prot_name, name, struc) == SUCCESS) {
 			zend_tmp_string_release(tmp_name);
 			zend_string_release(prot_name);
 			continue;
 		}
 		zend_string_release(prot_name);
 
+		if (EG(exception)) {
+			zend_tmp_string_release(tmp_name);
+			retval = FAILURE;
+			goto exit;
+		}
+
 		php_error_docref(NULL, E_NOTICE,
 			"\"%s\" returned as member variable from __sleep() but does not exist", ZSTR_VAL(name));
 		zend_hash_add(ht, name, &EG(uninitialized_zval));
 		zend_tmp_string_release(tmp_name);
 	} ZEND_HASH_FOREACH_END();
+
+exit:
 	zend_release_properties(props);
+	return retval;
 }
 /* }}} */
 
@@ -900,10 +930,11 @@ static void php_var_serialize_nested_data(smart_str *buf, zval *struc, HashTable
 static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_ptr, php_serialize_data_t var_hash) /* {{{ */
 {
 	HashTable props;
-	php_var_serialize_get_sleep_props(&props, struc, HASH_OF(retval_ptr));
-	php_var_serialize_class_name(buf, struc);
-	php_var_serialize_nested_data(
-		buf, struc, &props, zend_hash_num_elements(&props), /* incomplete_class */ 0, var_hash);
+	if (php_var_serialize_get_sleep_props(&props, struc, HASH_OF(retval_ptr)) == SUCCESS) {
+		php_var_serialize_class_name(buf, struc);
+		php_var_serialize_nested_data(
+			buf, struc, &props, zend_hash_num_elements(&props), /* incomplete_class */ 0, var_hash);
+	}
 	zend_hash_destroy(&props);
 }
 /* }}} */
