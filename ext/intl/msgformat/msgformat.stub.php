@@ -25,7 +25,7 @@ class MessageFormatter
     /** @return string|false */
     public function getPattern() {}
 
-    /** @return string|false */
+    /** @return string */
     public function getLocale() {}
 
     /** @return int */
@@ -39,22 +39,17 @@ function msgfmt_create(string $locale, string $pattern): ?MessageFormatter {}
 
 function msgfmt_format(MessageFormatter $fmt, array $args): string|false {}
 
-/** @return string|false */
-function msgfmt_format_message(string $locale, string $pattern, array $args) {}
+function msgfmt_format_message(string $locale, string $pattern, array $args): string|false {}
 
-/** @return array|false */
-function msgfmt_parse(MessageFormatter $fmt, string $value) {}
+function msgfmt_parse(MessageFormatter $fmt, string $value): array|false {}
 
-/** @return array|false */
-function msgfmt_parse_message(string $locale, string $pattern, string $source) {}
+function msgfmt_parse_message(string $locale, string $pattern, string $source): array|false {}
 
 function msgfmt_set_pattern(MessageFormatter $fmt, string $pattern): bool {}
 
-/** @return string|false */
-function msgfmt_get_pattern(MessageFormatter $fmt) {}
+function msgfmt_get_pattern(MessageFormatter $fmt): string|false {}
 
-/** @return string|false */
-function msgfmt_get_locale(MessageFormatter $fmt) {}
+function msgfmt_get_locale(MessageFormatter $fmt): string {}
 
 function msgfmt_get_error_code(MessageFormatter $fmt): int {}
 

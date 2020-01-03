@@ -30,7 +30,7 @@ class IntlDateFormatter
      */
     public function setCalendar($which) {}
 
-    /** @return string */
+    /** @return string|false */
     public function getTimeZoneId() {}
 
     /** @return IntlCalendar|null|false */
@@ -54,7 +54,7 @@ class IntlDateFormatter
     /** @return string|false */
     public function getLocale(int $which = UNKNOWN) {}
 
-    /** @return null|bool */
+    /** @return void */
     public function setLenient(bool $lenient) {}
 
     /** @return bool */
@@ -73,11 +73,11 @@ class IntlDateFormatter
      */
     public static function formatObject($object, $format = null, ?string $locale = null) {}
 
-    /** @return int|false */
-    public function parse(string $value, ?int &$position = null) {}
+    /** @return int|float|false */
+    public function parse(string $value, &$position = null) {}
 
     /** @return array|false */
-    public function localtime(string $value, ?int &$position = null) {}
+    public function localtime(string $value, &$position = null) {}
 
     /** @return int */
     public function getErrorCode() {}
@@ -101,13 +101,11 @@ function datefmt_get_calendar(IntlDateFormatter $df): int|false {}
 /** @param IntlCalendar|int|null $which */
 function datefmt_set_calendar(IntlDateFormatter $df, $which): bool {}
 
-function datefmt_get_timezone_id(IntlDateFormatter $df): string {}
+function datefmt_get_timezone_id(IntlDateFormatter $df): string|false {}
 
-/** @return IntlCalendar|null|false */
-function datefmt_get_calendar_object(IntlDateFormatter $df) {}
+function datefmt_get_calendar_object(IntlDateFormatter $df): IntlCalendar|false|null {}
 
-/** @return IntlTimeZone|false */
-function datefmt_get_timezone(IntlDateFormatter $df) {}
+function datefmt_get_timezone(IntlDateFormatter $df): IntlTimeZone|false {}
 
 /** @param IntlTimeZone|DateTimeZone|string|null $zone */
 function datefmt_set_timezone(IntlDateFormatter $df, $zone): ?bool {}
@@ -118,7 +116,7 @@ function datefmt_get_pattern(IntlDateFormatter $df): string|false {}
 
 function datefmt_get_locale(IntlDateFormatter $df, int $which = UNKNOWN): string|false {}
 
-function datefmt_set_lenient(IntlDateFormatter $df, bool $lenient): null|bool {}
+function datefmt_set_lenient(IntlDateFormatter $df, bool $lenient): void {}
 
 function datefmt_is_lenient(IntlDateFormatter $df): bool {}
 
@@ -131,9 +129,9 @@ function datefmt_format(IntlDateFormatter $df, $value): string|false {}
  */
 function datefmt_format_object($object, $format = null, ?string $locale = null): string|false {}
 
-function datefmt_parse(IntlDateFormatter $df, string $value, ?int &$position = null): int|false {}
+function datefmt_parse(IntlDateFormatter $df, string $value, &$position = null): int|float|false {}
 
-function datefmt_localtime(IntlDateFormatter $df, string $value, ?int &$position = null): array|false {}
+function datefmt_localtime(IntlDateFormatter $df, string $value, &$position = null): array|false {}
 
 function datefmt_get_error_code(IntlDateFormatter $df): int {}
 

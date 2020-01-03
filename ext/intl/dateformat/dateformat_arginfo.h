@@ -60,7 +60,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDateFormatter_parse, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(1, position, IS_LONG, 1)
+	ZEND_ARG_INFO(1, position)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlDateFormatter_localtime arginfo_class_IntlDateFormatter_parse
@@ -91,15 +91,17 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_datefmt_set_calendar, 0, 2, _IS_
 	ZEND_ARG_INFO(0, which)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_datefmt_get_timezone_id, 0, 1, IS_STRING, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_datefmt_get_timezone_id, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, df, IntlDateFormatter, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_get_calendar_object, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_datefmt_get_calendar_object, 0, 1, IntlCalendar, MAY_BE_FALSE|MAY_BE_NULL)
 	ZEND_ARG_OBJ_INFO(0, df, IntlDateFormatter, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_datefmt_get_timezone arginfo_datefmt_get_calendar_object
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_datefmt_get_timezone, 0, 1, IntlTimeZone, MAY_BE_FALSE)
+	ZEND_ARG_OBJ_INFO(0, df, IntlDateFormatter, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_datefmt_set_timezone, 0, 2, _IS_BOOL, 1)
 	ZEND_ARG_OBJ_INFO(0, df, IntlDateFormatter, 0)
@@ -111,16 +113,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_datefmt_set_pattern, 0, 2, _IS_B
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_datefmt_get_pattern, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
-	ZEND_ARG_OBJ_INFO(0, df, IntlDateFormatter, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_datefmt_get_pattern arginfo_datefmt_get_timezone_id
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_datefmt_get_locale, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, df, IntlDateFormatter, 0)
 	ZEND_ARG_TYPE_INFO(0, which, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_datefmt_set_lenient, 0, 2, MAY_BE_NULL|MAY_BE_BOOL)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_datefmt_set_lenient, 0, 2, IS_VOID, 0)
 	ZEND_ARG_OBJ_INFO(0, df, IntlDateFormatter, 0)
 	ZEND_ARG_TYPE_INFO(0, lenient, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -140,20 +140,22 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_datefmt_format_object, 0, 1, MAY
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_datefmt_parse, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_datefmt_parse, 0, 2, MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, df, IntlDateFormatter, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(1, position, IS_LONG, 1)
+	ZEND_ARG_INFO(1, position)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_datefmt_localtime, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, df, IntlDateFormatter, 0)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(1, position, IS_LONG, 1)
+	ZEND_ARG_INFO(1, position)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_datefmt_get_error_code, 0, 1, IS_LONG, 0)
 	ZEND_ARG_OBJ_INFO(0, df, IntlDateFormatter, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_datefmt_get_error_message arginfo_datefmt_get_timezone_id
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_datefmt_get_error_message, 0, 1, IS_STRING, 0)
+	ZEND_ARG_OBJ_INFO(0, df, IntlDateFormatter, 0)
+ZEND_END_ARG_INFO()
