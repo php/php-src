@@ -4,7 +4,7 @@ class ResourceBundle implements Traversable
 {
     public function __construct(?string $locale, ?string $bundlename, bool $fallback = true) {}
 
-    /** @return ResourceBundle|false|null */
+    /** @return ResourceBundle|null */
     public static function create(?string $locale, ?string $bundlename, bool $fallback = true) {}
 
     /**
@@ -26,8 +26,7 @@ class ResourceBundle implements Traversable
     public function getErrorMessage() {}
 }
 
-/** @return ResourceBundle|false|null */
-function resourcebundle_create(?string $locale, ?string $bundlename, bool $fallback = true) {}
+function resourcebundle_create(?string $locale, ?string $bundlename, bool $fallback = true): ?ResourceBundle {}
 
 /**
  * @param string|int $index
