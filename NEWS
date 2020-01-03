@@ -56,6 +56,10 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #79031 (Session unserialization problem). (Nikita)
 
+- Sqlite3:
+  . Fixed bug #79056 (sqlite does not respect PKG_CONFIG_PATH during
+    compilation). (Nikita)
+
 - Spl:
   . Fixed bug #78976 (SplFileObject::fputcsv returns -1 on failure). (cmb)
 
