@@ -832,7 +832,7 @@ static int php_var_serialize_get_sleep_props(
 		if (EG(exception)) {
 			zend_tmp_string_release(tmp_name);
 			retval = FAILURE;
-			goto exit;
+			break;
 		}
 
 		priv_name = zend_mangle_property_name(
@@ -848,7 +848,7 @@ static int php_var_serialize_get_sleep_props(
 		if (EG(exception)) {
 			zend_tmp_string_release(tmp_name);
 			retval = FAILURE;
-			goto exit;
+			break;
 		}
 
 		prot_name = zend_mangle_property_name(
@@ -863,7 +863,7 @@ static int php_var_serialize_get_sleep_props(
 		if (EG(exception)) {
 			zend_tmp_string_release(tmp_name);
 			retval = FAILURE;
-			goto exit;
+			break;
 		}
 
 		php_error_docref(NULL, E_NOTICE,
@@ -872,7 +872,6 @@ static int php_var_serialize_get_sleep_props(
 		zend_tmp_string_release(tmp_name);
 	} ZEND_HASH_FOREACH_END();
 
-exit:
 	zend_release_properties(props);
 	return retval;
 }
