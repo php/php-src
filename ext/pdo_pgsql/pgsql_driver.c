@@ -136,6 +136,7 @@ static int pdo_pgsql_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval *in
 static void pdo_pgsql_cleanup_notice_callback(pdo_pgsql_db_handle *H) /* {{{ */
 {
 	if (H->notice_callback) {
+		zval_ptr_dtor(&H->notice_callback->fci.function_name);
 		efree(H->notice_callback);
 		H->notice_callback = NULL;
 	}
@@ -1176,6 +1177,7 @@ static PHP_METHOD(PDO, pgsqlSetNoticeCallback)
 		if (!(fc = H->notice_callback)) {
 			fc = (pdo_pgsql_fci*)ecalloc(1, sizeof(pdo_pgsql_fci));
 		} else {
+			zval_ptr_dtor(&fc->fci.function_name);
 			memcpy(&fc->fcc, &empty_fcall_info_cache, sizeof(fc->fcc));
 		}
 
@@ -1186,6 +1188,7 @@ static PHP_METHOD(PDO, pgsqlSetNoticeCallback)
 			H->notice_callback = NULL;
 			RETURN_FALSE;
 		}
+		Z_ADDREF_P(&fc->fci.function_name);
 		zend_string_release_ex(cbname, 0);
 
 		H->notice_callback = fc;
