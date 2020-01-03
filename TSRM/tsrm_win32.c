@@ -720,6 +720,7 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 TSRM_API int shmdt(const void *shmaddr)
 {/*{{{*/
 	shm_pair *shm = shm_get(0, (void*)shmaddr);
+	int ret;
 
 	if (!shm->segment) {
 		return -1;
@@ -729,7 +730,12 @@ TSRM_API int shmdt(const void *shmaddr)
 	shm->descriptor->shm_lpid  = getpid();
 	shm->descriptor->shm_nattch--;
 
-	return UnmapViewOfFile(shm->addr) ? 0 : -1;
+	ret = UnmapViewOfFile(shm->addr) ? 0 : -1;
+	if (!ret  && shm->descriptor->shm_nattch <= 0) {
+		ret = UnmapViewOfFile(shm->descriptor) ? 0 : -1;
+		shm->descriptor = NULL;
+	}
+	return ret;
 }/*}}}*/
 
 TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)

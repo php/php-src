@@ -59,6 +59,9 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #79031 (Session unserialization problem). (Nikita)
 
+- Shmop:
+  . Fixed bug #78538 (shmop memory leak). (cmb)
+
 - Sqlite3:
   . Fixed bug #79056 (sqlite does not respect PKG_CONFIG_PATH during
     compilation). (Nikita)
