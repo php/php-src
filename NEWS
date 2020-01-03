@@ -16,6 +16,8 @@ PHP                                                                        NEWS
     (Dmitry)
   . Fixed bug #79008 (General performance regression with PHP 7.4 on Windows).
     (cmb)
+  . Fixed bug #79002 (Serializing uninitialized typed properties with __sleep
+    makes unserialize throw). (Nikita)
 
 - CURL:
   . Fixed bug #79033 (Curl timeout error with specific url and post). (cmb)
