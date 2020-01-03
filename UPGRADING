@@ -563,6 +563,12 @@ PHP 7.4 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+ DBA:
+   . As of PHP 7.4.2, dba_open() accepts a fifth optional parameter for lmdb
+     databases which allows to specify the mapsize. The parameter defaults to
+     zero, in which case the compiled in default mapsize (usually 1048576) will
+     be used. The mapsize should be a multiple of the page size of the OS.
+
 - GD:
   . The behavior of imagecropauto() in the bundled libgd has been synced with
     that of system libgd:
