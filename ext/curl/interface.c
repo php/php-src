@@ -1955,7 +1955,7 @@ PHP_FUNCTION(curl_copy_handle)
 	php_curl	*ch, *dupch;
 
 	ZEND_PARSE_PARAMETERS_START(1,1)
-		Z_PARAM_RESOURCE(zid)
+		Z_PARAM_RESOURCE_TYPE(zid, le_curl)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((ch = (php_curl*)zend_fetch_resource(Z_RES_P(zid), le_curl_name, le_curl)) == NULL) {

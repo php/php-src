@@ -1476,6 +1476,14 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 #define Z_PARAM_RESOURCE(dest) \
 	Z_PARAM_RESOURCE_EX(dest, 0, 0)
 
+#define Z_PARAM_RESOURCE_TYPE(dest, type) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_resource_type(_arg, (void **) &dest, type))) { \
+		_expected_type = Z_EXPECTED_RESOURCE; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
+
 /* old "s" */
 #define Z_PARAM_STRING_EX2(dest, dest_len, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
