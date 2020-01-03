@@ -20,6 +20,9 @@ PHP                                                                        NEWS
 - CURL:
   . Fixed bug #79033 (Curl timeout error with specific url and post). (cmb)
 
+- Date:
+  . Fixed bug #79015 (undefined-behavior in php_date.c). (cmb)
+
 - Exif:
   . Fixed bug #79046 (NaN to int cast undefined behavior in exif). (Nikita)
 
