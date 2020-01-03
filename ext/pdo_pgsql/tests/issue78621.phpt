@@ -10,14 +10,16 @@ PDOTest::skip();
 --FILE--
 <?php
 function disp($message) { echo trim($message)."\n"; }
-function attach($db)
+function dispRe($message) { echo "Re".trim($message)."\n"; }
+function attach($db, $prefix = '')
 {
-    $db->pgsqlSetNoticeCallback('disp');
+    $db->pgsqlSetNoticeCallback('disp'.$prefix);
 }
 require dirname(__FILE__) . '/issue78621.inc';
 ?>
 --EXPECT--
 NOTICE:  I tampered your data, did you know?
+ReNOTICE:  I tampered your data, did you know?
 array(1) {
   [0]=>
   array(1) {

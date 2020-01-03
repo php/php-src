@@ -10,9 +10,9 @@ PDOTest::skip();
 --FILE--
 <?php
 function disp($message) { echo trim($message)."\n"; }
-function attach($db)
+function attach($db, $prefix = '')
 {
-    $db->pgsqlSetNoticeCallback(function($message) { echo trim($message)."\n"; });
+    $db->pgsqlSetNoticeCallback(function($message) use($prefix) { echo $prefix.trim($message)."\n"; });
     // https://github.com/php/php-src/pull/4823#pullrequestreview-335623806
     $eraseCallbackMemoryHere = (object)[1];
 }
@@ -20,6 +20,7 @@ require dirname(__FILE__) . '/issue78621.inc';
 ?>
 --EXPECT--
 NOTICE:  I tampered your data, did you know?
+ReNOTICE:  I tampered your data, did you know?
 array(1) {
   [0]=>
   array(1) {
