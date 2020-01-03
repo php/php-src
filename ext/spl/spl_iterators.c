@@ -1942,7 +1942,7 @@ SPL_METHOD(CallbackFilterIterator, accept)
 	}
 
 	if (EG(exception)) {
-		RETURN_NULL();
+		RETURN_THROWS();
 	}
 
 	/* zend_call_function may change args to IS_REF */
@@ -1984,7 +1984,7 @@ SPL_METHOD(RegexIterator, accept)
 
 	/* Exception during string conversion. */
 	if (EG(exception)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	switch (intern->u.regex.mode)

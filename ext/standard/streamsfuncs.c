@@ -1089,7 +1089,7 @@ PHP_FUNCTION(stream_context_get_default)
 
 	if (params) {
 		if (parse_context_options(context, params) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -1114,7 +1114,7 @@ PHP_FUNCTION(stream_context_set_default)
 	context = FG(default_context);
 
 	if (parse_context_options(context, options) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_stream_context_to_zval(context, return_value);

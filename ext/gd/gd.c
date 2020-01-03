@@ -3342,7 +3342,7 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 	zval *SIM;	\
 	gdImagePtr im_src;	\
 	if (zend_parse_parameters(1, "O", &SIM, gd_image_ce) == FAILURE) {	\
-		return;	\
+		RETURN_THROWS();	\
 	}	\
 	im_src = php_gd_libgdimageptr_from_zval_p(SIM);
 

@@ -1352,13 +1352,13 @@ PHP_FUNCTION(xml_parse_into_struct)
 	if (info) {
 		info = zend_try_array_init(info);
 		if (!info) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
 	xdata = zend_try_array_init(xdata);
 	if (!xdata) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_COPY_VALUE(&parser->data, xdata);

@@ -181,7 +181,7 @@ PHP_FUNCTION(socket_sendmsg)
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(zsocket),
 					php_sockets_le_socket_name, php_sockets_le_socket())) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	msghdr = from_zval_run_conversions(zmsg, php_sock, from_zval_write_msghdr_send,

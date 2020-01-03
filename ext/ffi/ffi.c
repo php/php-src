@@ -2796,7 +2796,7 @@ static zend_always_inline int zend_ffi_validate_api_restriction(zend_execute_dat
 
 #define ZEND_FFI_VALIDATE_API_RESTRICTION() do { \
 		if (UNEXPECTED(!zend_ffi_validate_api_restriction(execute_data))) { \
-			return; \
+			RETURN_THROWS(); \
 		} \
 	} while (0)
 

@@ -236,7 +236,7 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		} else {
 			ret_array = zend_try_array_init(ret_array);
 			if (!ret_array) {
-				return;
+				RETURN_THROWS();
 			}
 		}
 

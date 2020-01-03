@@ -213,7 +213,7 @@ PHP_FUNCTION(random_bytes)
 
 	if (php_random_bytes_throw(ZSTR_VAL(bytes), size) == FAILURE) {
 		zend_string_release_ex(bytes, 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	ZSTR_VAL(bytes)[size] = '\0';

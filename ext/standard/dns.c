@@ -833,13 +833,13 @@ PHP_FUNCTION(dns_get_record)
 	if (authns) {
 		authns = zend_try_array_init(authns);
 		if (!authns) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 	if (addtl) {
 		addtl = zend_try_array_init(addtl);
 		if (!addtl) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -1069,13 +1069,13 @@ PHP_FUNCTION(dns_get_mx)
 
 	mx_list = zend_try_array_init(mx_list);
 	if (!mx_list) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (weight_list) {
 		weight_list = zend_try_array_init(weight_list);
 		if (!weight_list) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 

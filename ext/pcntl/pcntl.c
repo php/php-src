@@ -605,7 +605,7 @@ PHP_FUNCTION(pcntl_waitpid)
 	if (z_rusage) {
 		z_rusage = zend_try_array_init(z_rusage);
 		if (!z_rusage) {
-			return;
+			RETURN_THROWS();
 		}
 
 		memset(&rusage, 0, sizeof(struct rusage));
@@ -654,7 +654,7 @@ PHP_FUNCTION(pcntl_wait)
 	if (z_rusage) {
 		z_rusage = zend_try_array_init(z_rusage);
 		if (!z_rusage) {
-			return;
+			RETURN_THROWS();
 		}
 
 		memset(&rusage, 0, sizeof(struct rusage));
@@ -1084,7 +1084,7 @@ PHP_FUNCTION(pcntl_sigprocmask)
 	if (user_oldset != NULL) {
 		user_oldset = zend_try_array_init(user_oldset);
 		if (!user_oldset) {
-			return;
+			RETURN_THROWS();
 		}
 
 		for (signo = 1; signo < NSIG; ++signo) {

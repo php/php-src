@@ -622,7 +622,7 @@ static void _php_ldap_controls_to_array(LDAP *ld, LDAPControl** ctrls, zval* arr
 
 	array = zend_try_array_init(array);
 	if (!array) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ctrls == NULL) {
@@ -3277,7 +3277,7 @@ PHP_FUNCTION(ldap_set_option)
 			zend_string *val;
 			val = zval_get_string(newval);
 			if (EG(exception)) {
-				return;
+				RETURN_THROWS();
 			}
 			if (ldap_set_option(ldap, option, ZSTR_VAL(val))) {
 				zend_string_release(val);
@@ -3376,7 +3376,7 @@ PHP_FUNCTION(ldap_parse_result)
 		case 6:
 			referrals = zend_try_array_init(referrals);
 			if (!referrals) {
-				return;
+				RETURN_THROWS();
 			}
 			if (lreferrals != NULL) {
 				refp = lreferrals;
@@ -3559,7 +3559,7 @@ PHP_FUNCTION(ldap_parse_reference)
 
 	referrals = zend_try_array_init(referrals);
 	if (!referrals) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (lreferrals != NULL) {

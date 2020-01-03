@@ -2438,8 +2438,9 @@ PHP_FUNCTION(iconv_set_encoding)
 	size_t type_len, retval;
 	zend_string *name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sS", &type, &type_len, &charset) == FAILURE)
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sS", &type, &type_len, &charset) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	if (ZSTR_LEN(charset) >= ICONV_CSNMAXLEN) {
 		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);

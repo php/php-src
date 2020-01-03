@@ -2271,7 +2271,7 @@ PHP_FUNCTION(substr_replace)
 	if (Z_TYPE_P(from) != IS_ARRAY) {
 		convert_to_long_ex(from);
 		if (EG(exception)) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -4316,7 +4316,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 	}
 
 	if (EG(exception)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* if subject is an array */
@@ -4794,7 +4794,7 @@ PHP_FUNCTION(parse_str)
 
 	arrayArg = zend_try_array_init(arrayArg);
 	if (!arrayArg) {
-		return;
+		RETURN_THROWS();
 	}
 
 	res = estrndup(arg, arglen);

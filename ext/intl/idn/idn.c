@@ -204,7 +204,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	if (idna_info != NULL) {
 		idna_info = zend_try_array_init(idna_info);
 		if (!idna_info) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 

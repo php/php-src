@@ -1135,7 +1135,7 @@ PHP_FUNCTION(serialize)
 
 	if (EG(exception)) {
 		smart_str_free(&buf);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (buf.s) {

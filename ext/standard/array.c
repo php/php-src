@@ -787,7 +787,7 @@ PHP_FUNCTION(count)
 					return;
 				}
 				if (EG(exception)) {
-					return;
+					RETURN_THROWS();
 				}
 			}
 			/* if not and the object implements Countable we call its count() method */

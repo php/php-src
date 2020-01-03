@@ -589,7 +589,7 @@ static void variant_binary_operation(enum variant_binary_opcode op, INTERNAL_FUN
 		php_com_variant_from_zval(vright, zright, codepage);
 
 	} else {
-		return;
+		RETURN_THROWS();
 	}
 
 	switch (op) {
@@ -775,7 +775,7 @@ static void variant_unary_operation(enum variant_unary_opcode op, INTERNAL_FUNCT
 		vleft = &left_val;
 		php_com_variant_from_zval(vleft, zleft, codepage);
 	} else {
-		return;
+		RETURN_THROWS();
 	}
 
 	switch (op) {
@@ -873,7 +873,7 @@ PHP_FUNCTION(variant_round)
 		vleft = &left_val;
 		php_com_variant_from_zval(vleft, zleft, codepage);
 	} else {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (SUCCEEDED(VarRound(vleft, (int)decimals, &vres))) {
@@ -933,7 +933,7 @@ PHP_FUNCTION(variant_cmp)
 		php_com_variant_from_zval(vright, zright, codepage);
 
 	} else {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_LONG(return_value, VarCmp(vleft, vright, (LCID)lcid, (ULONG)flags));

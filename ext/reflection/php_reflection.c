@@ -1352,7 +1352,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 
 	if (EG(exception)) {
 		zval_ptr_dtor(&reflector);
-		return;
+		RETURN_THROWS();
 	}
 	if (result == FAILURE) {
 		zval_ptr_dtor(&reflector);
@@ -5185,7 +5185,7 @@ ZEND_METHOD(reflection_class, getExtensionName)
 	zend_class_entry *ce;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ce);
@@ -6300,7 +6300,7 @@ ZEND_METHOD(reflection_reference, getId)
 
 	if (!REFLECTION_G(key_initialized)) {
 		if (php_random_bytes_throw(&REFLECTION_G(key_initialized), 16) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 
 		REFLECTION_G(key_initialized) = 1;

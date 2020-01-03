@@ -2068,7 +2068,7 @@ PHP_FUNCTION(socket_create_pair)
 	if (!fds_array_zval) {
 		efree(php_sock[0]);
 		efree(php_sock[1]);
-		return;
+		RETURN_THROWS();
 	}
 
 	php_sock[0]->bsd_socket = fds_array[0];

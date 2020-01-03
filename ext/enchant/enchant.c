@@ -660,7 +660,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 	if (sugg) {
 		sugg = zend_try_array_init(sugg);
 		if (!sugg) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 

@@ -289,7 +289,7 @@ PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream)
 
 #define CPH_FETCH()				php_com_persist_helper *helper = (php_com_persist_helper*)Z_OBJ_P(getThis());
 
-#define CPH_NO_OBJ()			if (helper->unk == NULL) { php_com_throw_exception(E_INVALIDARG, "No COM object is associated with this helper instance"); return; }
+#define CPH_NO_OBJ()			if (helper->unk == NULL) { php_com_throw_exception(E_INVALIDARG, "No COM object is associated with this helper instance"); RETURN_THROWS(); }
 
 typedef struct {
 	zend_object			std;
@@ -490,7 +490,7 @@ CPH_METHOD(GetMaxStreamSize)
 			res = IPersistStream_GetSizeMax(helper->ips, &size);
 		} else {
 			php_com_throw_exception(res, NULL);
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -545,13 +545,13 @@ CPH_METHOD(LoadFromStream)
 
 	if (stream == NULL) {
 		php_com_throw_exception(E_INVALIDARG, "expected a stream");
-		return;
+		RETURN_THROWS();
 	}
 
 	stm = php_com_wrapper_export_stream(stream);
 	if (stm == NULL) {
 		php_com_throw_exception(E_UNEXPECTED, "failed to wrap stream");
-		return;
+		RETURN_THROWS();
 	}
 
 	res = S_OK;
@@ -581,7 +581,7 @@ CPH_METHOD(LoadFromStream)
 
 	if (FAILED(res)) {
 		php_com_throw_exception(res, NULL);
-		RETURN_NULL();
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -606,13 +606,13 @@ CPH_METHOD(SaveToStream)
 
 	if (stream == NULL) {
 		php_com_throw_exception(E_INVALIDARG, "expected a stream");
-		return;
+		RETURN_THROWS();
 	}
 
 	stm = php_com_wrapper_export_stream(stream);
 	if (stm == NULL) {
 		php_com_throw_exception(E_UNEXPECTED, "failed to wrap stream");
-		return;
+		RETURN_THROWS();
 	}
 
 	res = get_persist_stream_init(helper);
@@ -629,7 +629,7 @@ CPH_METHOD(SaveToStream)
 
 	if (FAILED(res)) {
 		php_com_throw_exception(res, NULL);
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_TRUE;
@@ -657,7 +657,7 @@ CPH_METHOD(__construct)
 
 	if (V_VT(&obj->v) != VT_DISPATCH || V_DISPATCH(&obj->v) == NULL) {
 		php_com_throw_exception(E_INVALIDARG, "parameter must represent an IDispatch COM object");
-		return;
+		RETURN_THROWS();
 	}
 
 	/* it is always safe to cast an interface to IUnknown */

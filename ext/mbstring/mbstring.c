@@ -1750,7 +1750,7 @@ PHP_FUNCTION(mb_parse_str)
 
 	track_vars_array = zend_try_array_init(track_vars_array);
 	if (!track_vars_array) {
-		return;
+		RETURN_THROWS();
 	}
 
 	encstr = estrndup(encstr, encstr_len);

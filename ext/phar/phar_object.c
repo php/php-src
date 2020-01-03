@@ -1759,7 +1759,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 	zval_ptr_dtor(&arg);
 	if (EG(exception)) {
 		zval_ptr_dtor(&iter);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (SUCCESS != object_init_ex(&iteriter, spl_ce_RecursiveIteratorIterator)) {
@@ -1775,7 +1775,7 @@ PHP_METHOD(Phar, buildFromDirectory)
 	if (EG(exception)) {
 		zval_ptr_dtor(&iter);
 		zval_ptr_dtor(&iteriter);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	zval_ptr_dtor(&iter);

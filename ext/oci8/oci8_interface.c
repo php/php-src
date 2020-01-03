@@ -1491,7 +1491,7 @@ PHP_FUNCTION(oci_fetch_all)
 		/* Fetch by Row: array will contain one sub-array per query row */
 		array = zend_try_array_init(array);
 		if (!array) {
-			return;
+			RETURN_THROWS();
 		}
 
 		columns = safe_emalloc(statement->ncolumns, sizeof(php_oci_out_column *), 0);
@@ -1535,7 +1535,7 @@ PHP_FUNCTION(oci_fetch_all)
 		/* Fetch by columns: array will contain one sub-array per query column */
 		array = zend_try_array_init_size(array, statement->ncolumns);
 		if (!array) {
-			return;
+			RETURN_THROWS();
 		}
 
 		columns = safe_emalloc(statement->ncolumns, sizeof(php_oci_out_column *), 0);

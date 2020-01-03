@@ -62,13 +62,13 @@ PHP_FUNCTION(com_create_instance)
 			ZEND_NUM_ARGS(), "sa|ls",
 			&module_name, &module_name_len, &server_params, &cp,
 			&typelib_name, &typelib_name_len)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	cp_it = php_win32_cp_get_by_id((DWORD)cp);
 	if (!cp_it) {
 		php_com_throw_exception(E_INVALIDARG, "Could not create COM object - invalid codepage!");
-		return;
+		RETURN_THROWS();
 	}
 	obj->code_page = (int)cp;
 
@@ -116,7 +116,7 @@ PHP_FUNCTION(com_create_instance)
 
 	if (server_name && !COMG(allow_dcom)) {
 		php_com_throw_exception(E_ERROR, "DCOM has been disabled by your administrator [com.allow_dcom=0]");
-		return;
+		RETURN_THROWS();
 	}
 
 	moniker = php_com_string_to_olestring(module_name, module_name_len, obj->code_page);
@@ -231,7 +231,7 @@ PHP_FUNCTION(com_create_instance)
 
 		php_com_throw_exception(res, msg);
 		efree(msg);
-		return;
+		RETURN_THROWS();
 	}
 
 	/* we got the object and it lives ! */

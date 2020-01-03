@@ -1640,7 +1640,7 @@ PHP_FUNCTION(odbc_fetch_into)
 
 	pv_res_arr = zend_try_array_init(pv_res_arr);
 	if (!pv_res_arr) {
-		return;
+		RETURN_THROWS();
 	}
 
 #ifdef HAVE_SQL_EXTENDED_FETCH
