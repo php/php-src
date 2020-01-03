@@ -1221,7 +1221,7 @@ SPL_METHOD(SplDoublyLinkedList, __serialize)
 	spl_ptr_llist_element *current = intern->llist->head;
 	zval tmp;
 
-	if (zend_parse_parameters_none_throw() == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 

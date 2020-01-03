@@ -877,7 +877,7 @@ SPL_METHOD(SplObjectStorage, __serialize)
 	spl_SplObjectStorageElement *elem;
 	zval tmp;
 
-	if (zend_parse_parameters_none_throw() == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 

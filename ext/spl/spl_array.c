@@ -1829,7 +1829,7 @@ SPL_METHOD(Array, __serialize)
 	spl_array_object *intern = Z_SPLARRAY_P(ZEND_THIS);
 	zval tmp;
 
-	if (zend_parse_parameters_none_throw() == FAILURE) {
+	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
