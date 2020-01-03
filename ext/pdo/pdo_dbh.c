@@ -560,9 +560,8 @@ static PHP_METHOD(PDO, beginTransaction)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	PDO_CONSTRUCT_CHECK;
 
 	if (dbh->in_txn) {
@@ -593,9 +592,8 @@ static PHP_METHOD(PDO, commit)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	PDO_CONSTRUCT_CHECK;
 
 	if (!dbh->in_txn) {
@@ -619,9 +617,8 @@ static PHP_METHOD(PDO, rollBack)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	PDO_CONSTRUCT_CHECK;
 
 	if (!dbh->in_txn) {
@@ -645,9 +642,8 @@ static PHP_METHOD(PDO, inTransaction)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	PDO_CONSTRUCT_CHECK;
 
 	if (!dbh->methods->in_transaction) {
@@ -969,9 +965,8 @@ static PHP_METHOD(PDO, errorCode)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	PDO_CONSTRUCT_CHECK;
 
 	if (dbh->query_stmt) {
@@ -1000,9 +995,7 @@ static PHP_METHOD(PDO, errorInfo)
 
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	PDO_CONSTRUCT_CHECK;
 
@@ -1160,9 +1153,7 @@ static PHP_METHOD(PDO, getAvailableDrivers)
 {
 	pdo_driver_t *pdriver;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
