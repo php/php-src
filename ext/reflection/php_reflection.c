@@ -93,7 +93,7 @@ PHPAPI zend_class_entry *reflection_reference_ptr;
 	intern = Z_REFLECTION_P(ZEND_THIS); \
 	if (intern->ptr == NULL) { \
 		if (EG(exception) && EG(exception)->ce == reflection_exception_ptr) { \
-			return; \
+			RETURN_THROWS(); \
 		} \
 		zend_throw_error(NULL, "Internal error: Failed to retrieve the reflection object"); \
 		RETURN_THROWS(); \
@@ -1283,7 +1283,7 @@ static void reflection_export_impl(zval *return_value, zval *object, zend_bool r
 
 	if (result == FAILURE) {
 		_DO_THROW("Invocation of method __toString() failed");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE(retval) == IS_UNDEF) {
@@ -1329,7 +1329,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	/* Create object */
 	if (object_init_ex(&reflector, ce_ptr) == FAILURE) {
 		_DO_THROW("Could not create reflector");
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Call __construct() */
@@ -1357,7 +1357,7 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	if (result == FAILURE) {
 		zval_ptr_dtor(&reflector);
 		_DO_THROW("Could not create reflector");
-		return;
+		RETURN_THROWS();
 	}
 
 	reflection_export_impl(return_value, &reflector, return_output);
@@ -1520,7 +1520,7 @@ ZEND_METHOD(reflection_function, __construct)
 		if (fptr == NULL) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Function %s() does not exist", ZSTR_VAL(fname));
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -1837,7 +1837,7 @@ ZEND_METHOD(reflection_function, invoke)
 	if (result == FAILURE) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Invocation of function %s() failed", ZSTR_VAL(fptr->common.function_name));
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
@@ -1905,7 +1905,7 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	if (result == FAILURE) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Invocation of function %s() failed", ZSTR_VAL(fptr->common.function_name));
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
@@ -2089,7 +2089,7 @@ ZEND_METHOD(reflection_generator, __construct)
 	ex = ((zend_generator *) Z_OBJ_P(generator))->execute_data;
 	if (!ex) {
 		_DO_THROW("Cannot create ReflectionGenerator based on a terminated Generator");
-		return;
+		RETURN_THROWS();
 	}
 
 	intern->ref_type = REF_TYPE_GENERATOR;
@@ -2102,7 +2102,7 @@ ZEND_METHOD(reflection_generator, __construct)
 #define REFLECTION_CHECK_VALID_GENERATOR(ex) \
 	if (!ex) { \
 		_DO_THROW("Cannot fetch information from a terminated Generator"); \
-		return; \
+		RETURN_THROWS(); \
 	}
 
 /* {{{ proto public array ReflectionGenerator::getTrace($options = DEBUG_BACKTRACE_PROVIDE_OBJECT) */
@@ -2279,7 +2279,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 				if (!fptr) {
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Function %s() does not exist", Z_STRVAL_P(reference));
-					return;
+					RETURN_THROWS();
 				}
 				ce = fptr->common.scope;
 			}
@@ -2294,7 +2294,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 					|| ((method = zend_hash_index_find(Z_ARRVAL_P(reference), 1)) == NULL))
 				{
 					_DO_THROW("Expected array($object, $method) or array($classname, $method)");
-					return;
+					RETURN_THROWS();
 				}
 
 				if (Z_TYPE_P(classref) == IS_OBJECT) {
@@ -2308,7 +2308,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 						zend_throw_exception_ex(reflection_exception_ptr, 0,
 								"Class %s does not exist", ZSTR_VAL(name));
 						zend_string_release(name);
-						return;
+						RETURN_THROWS();
 					}
 					zend_string_release(name);
 				}
@@ -2329,7 +2329,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 					zend_string_release(lcname);
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Method %s::%s() does not exist", ZSTR_VAL(ce->name), Z_STRVAL_P(method));
-					return;
+					RETURN_THROWS();
 				}
 				zend_string_release(name);
 				zend_string_release(lcname);
@@ -2346,14 +2346,14 @@ ZEND_METHOD(reflection_parameter, __construct)
 				} else if ((fptr = zend_hash_find_ptr(&ce->function_table, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE))) == NULL) {
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Method %s::%s() does not exist", ZSTR_VAL(ce->name), ZEND_INVOKE_FUNC_NAME);
-					return;
+					RETURN_THROWS();
 				}
 			}
 			break;
 
 		default:
 			_DO_THROW("The parameter class is expected to be either a string, an array(class, method) or a callable object");
-			return;
+			RETURN_THROWS();
 	}
 
 	/* Now, search for the parameter */
@@ -2542,19 +2542,19 @@ ZEND_METHOD(reflection_parameter, getClass)
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Parameter uses 'self' as type hint but function is not a class member!");
-				return;
+				RETURN_THROWS();
 			}
 		} else if (0 == zend_binary_strcasecmp(ZSTR_VAL(class_name), ZSTR_LEN(class_name), "parent", sizeof("parent")- 1)) {
 			ce = param->fptr->common.scope;
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Parameter uses 'parent' as type hint but function is not a class member!");
-				return;
+				RETURN_THROWS();
 			}
 			if (!ce->parent) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Parameter uses 'parent' as type hint although class does not have a parent!");
-				return;
+				RETURN_THROWS();
 			}
 			ce = ce->parent;
 		} else {
@@ -2562,7 +2562,7 @@ ZEND_METHOD(reflection_parameter, getClass)
 			if (!ce) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Class %s does not exist", ZSTR_VAL(class_name));
-				return;
+				RETURN_THROWS();
 			}
 		}
 		zend_reflection_class_factory(ce, return_value);
@@ -3031,7 +3031,7 @@ ZEND_METHOD(reflection_method, __construct)
 		if ((tmp = strstr(name_str, "::")) == NULL) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Invalid method name %s", name_str);
-			return;
+			RETURN_THROWS();
 		}
 		classname = &ztmp;
 		tmp_len = tmp - name_str;
@@ -3059,7 +3059,7 @@ ZEND_METHOD(reflection_method, __construct)
 				if (classname == &ztmp) {
 					zval_ptr_dtor_str(&ztmp);
 				}
-				return;
+				RETURN_THROWS();
 			}
 			break;
 
@@ -3072,7 +3072,7 @@ ZEND_METHOD(reflection_method, __construct)
 				zval_ptr_dtor_str(&ztmp);
 			}
 			_DO_THROW("The parameter class is expected to be either a string or an object");
-			return;
+			RETURN_THROWS();
 	}
 
 	if (classname == &ztmp) {
@@ -3090,7 +3090,7 @@ ZEND_METHOD(reflection_method, __construct)
 		efree(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Method %s::%s() does not exist", ZSTR_VAL(ce->name), name_str);
-		return;
+		RETURN_THROWS();
 	}
 	efree(lcname);
 
@@ -3138,7 +3138,7 @@ ZEND_METHOD(reflection_method, getClosure)
 
 		if (!instanceof_function(Z_OBJCE_P(obj), mptr->common.scope)) {
 			_DO_THROW("Given object is not an instance of the class this method was declared in");
-			return;
+			RETURN_THROWS();
 		}
 
 		/* This is an original closure object and __invoke is to be called. */
@@ -3173,7 +3173,7 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Trying to invoke abstract method %s::%s()",
 			ZSTR_VAL(mptr->common.scope->name), ZSTR_VAL(mptr->common.function_name));
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!(mptr->common.fn_flags & ZEND_ACC_PUBLIC) && intern->ignore_visibility == 0) {
@@ -3182,7 +3182,7 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 			mptr->common.fn_flags & ZEND_ACC_PROTECTED ? "protected" : "private",
 			ZSTR_VAL(mptr->common.scope->name), ZSTR_VAL(mptr->common.function_name),
 			ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
-		return;
+		RETURN_THROWS();
 	}
 
 	if (variadic) {
@@ -3218,7 +3218,7 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Trying to invoke non static method %s::%s() without an object",
 				ZSTR_VAL(mptr->common.scope->name), ZSTR_VAL(mptr->common.function_name));
-			return;
+			RETURN_THROWS();
 		}
 
 		obj_ce = Z_OBJCE_P(object);
@@ -3228,7 +3228,7 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 				efree(params);
 			}
 			_DO_THROW("Given object is not an instance of the class this method was declared in");
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -3263,7 +3263,7 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 	if (result == FAILURE) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Invocation of method %s::%s() failed", ZSTR_VAL(mptr->common.scope->name), ZSTR_VAL(mptr->common.function_name));
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
@@ -3554,7 +3554,7 @@ ZEND_METHOD(reflection_method, getPrototype)
 	if (!mptr->common.prototype) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Method %s::%s does not have a prototype", ZSTR_VAL(intern->ce->name), ZSTR_VAL(mptr->common.function_name));
-		return;
+		RETURN_THROWS();
 	}
 
 	reflection_method_factory(mptr->common.prototype->common.scope, mptr->common.prototype, NULL, return_value);
@@ -3601,7 +3601,7 @@ ZEND_METHOD(reflection_class_constant, __construct)
 			if ((ce = zend_lookup_class(Z_STR_P(classname))) == NULL) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Class %s does not exist", Z_STRVAL_P(classname));
-				return;
+				RETURN_THROWS();
 			}
 			break;
 
@@ -3611,12 +3611,12 @@ ZEND_METHOD(reflection_class_constant, __construct)
 
 		default:
 			_DO_THROW("The parameter class is expected to be either a string or an object");
-			return;
+			RETURN_THROWS();
 	}
 
 	if ((constant = zend_hash_find_ptr(&ce->constants_table, constname)) == NULL) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class Constant %s::%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(constname));
-		return;
+		RETURN_THROWS();
 	}
 
 	intern->ptr = constant;
@@ -3809,7 +3809,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 			if (!EG(exception)) {
 				zend_throw_exception_ex(reflection_exception_ptr, -1, "Class %s does not exist", Z_STRVAL_P(argument));
 			}
-			return;
+			RETURN_THROWS();
 		}
 
 		ZVAL_STR_COPY(reflection_prop_name(object), ce->name);
@@ -3948,7 +3948,7 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 		zend_clear_exception();
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Class %s does not have a property named %s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_ISREF_P(variable_ptr)) {
@@ -4342,13 +4342,13 @@ ZEND_METHOD(reflection_class, getProperty)
 				zend_throw_exception_ex(reflection_exception_ptr, -1, "Class %s does not exist", ZSTR_VAL(classname));
 			}
 			zend_string_release_ex(classname, 0);
-			return;
+			RETURN_THROWS();
 		}
 		zend_string_release_ex(classname, 0);
 
 		if (!instanceof_function(ce, ce2)) {
 			zend_throw_exception_ex(reflection_exception_ptr, -1, "Fully qualified property name %s::%s does not specify a base class of %s", ZSTR_VAL(ce2->name), str_name, ZSTR_VAL(ce->name));
-			return;
+			RETURN_THROWS();
 		}
 		ce = ce2;
 
@@ -4784,7 +4784,7 @@ ZEND_METHOD(reflection_class, newInstanceWithoutConstructor)
 	if (ce->type == ZEND_INTERNAL_CLASS
 			&& ce->create_object != NULL && (ce->ce_flags & ZEND_ACC_FINAL)) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0, "Class %s is an internal class marked as final that cannot be instantiated without invoking its constructor", ZSTR_VAL(ce->name));
-		return;
+		RETURN_THROWS();
 	}
 
 	object_init_ex(return_value, ce);
@@ -5064,7 +5064,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 			if ((class_ce = zend_lookup_class(Z_STR_P(class_name))) == NULL) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Class %s does not exist", Z_STRVAL_P(class_name));
-				return;
+				RETURN_THROWS();
 			}
 			break;
 		case IS_OBJECT:
@@ -5072,7 +5072,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 				argument = Z_REFLECTION_P(class_name);
 				if (argument->ptr == NULL) {
 					zend_throw_error(NULL, "Internal error: Failed to retrieve the argument's reflection object");
-					return;
+					RETURN_THROWS();
 				}
 				class_ce = argument->ptr;
 				break;
@@ -5081,7 +5081,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 		default:
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Parameter one must either be a string or a ReflectionClass object");
-			return;
+			RETURN_THROWS();
 	}
 
 	RETURN_BOOL((ce != class_ce && instanceof_function(ce, class_ce)));
@@ -5107,7 +5107,7 @@ ZEND_METHOD(reflection_class, implementsInterface)
 			if ((interface_ce = zend_lookup_class(Z_STR_P(interface))) == NULL) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Interface %s does not exist", Z_STRVAL_P(interface));
-				return;
+				RETURN_THROWS();
 			}
 			break;
 		case IS_OBJECT:
@@ -5115,7 +5115,7 @@ ZEND_METHOD(reflection_class, implementsInterface)
 				argument = Z_REFLECTION_P(interface);
 				if (argument->ptr == NULL) {
 					zend_throw_error(NULL, "Internal error: Failed to retrieve the argument's reflection object");
-					return;
+					RETURN_THROWS();
 				}
 				interface_ce = argument->ptr;
 				break;
@@ -5124,13 +5124,13 @@ ZEND_METHOD(reflection_class, implementsInterface)
 		default:
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
 					"Parameter one must either be a string or a ReflectionClass object");
-			return;
+			RETURN_THROWS();
 	}
 
 	if (!(interface_ce->ce_flags & ZEND_ACC_INTERFACE)) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"%s is not an interface", ZSTR_VAL(interface_ce->name));
-		return;
+		RETURN_THROWS();
 	}
 	RETURN_BOOL(instanceof_function(ce, interface_ce));
 }
@@ -5325,7 +5325,7 @@ ZEND_METHOD(reflection_property, __construct)
 			if ((ce = zend_lookup_class(Z_STR_P(classname))) == NULL) {
 				zend_throw_exception_ex(reflection_exception_ptr, 0,
 						"Class %s does not exist", Z_STRVAL_P(classname));
-				return;
+				RETURN_THROWS();
 			}
 			break;
 
@@ -5335,7 +5335,7 @@ ZEND_METHOD(reflection_property, __construct)
 
 		default:
 			_DO_THROW("The parameter class is expected to be either a string or an object");
-			return;
+			RETURN_THROWS();
 	}
 
 	property_info = zend_hash_find_ptr(&ce->properties_info, name);
@@ -5350,7 +5350,7 @@ ZEND_METHOD(reflection_property, __construct)
 		}
 		if (dynam_prop == 0) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0, "Property %s::$%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -5491,7 +5491,7 @@ ZEND_METHOD(reflection_property, getValue)
 		name = _default_load_name(ZEND_THIS);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Cannot access non-public member %s::$%s", ZSTR_VAL(intern->ce->name), Z_STRVAL_P(name));
-		return;
+		RETURN_THROWS();
 	}
 
 	if (prop_get_flags(ref) & ZEND_ACC_STATIC) {
@@ -5509,7 +5509,7 @@ ZEND_METHOD(reflection_property, getValue)
 		/* TODO: Should this always use intern->ce? */
 		if (!instanceof_function(Z_OBJCE_P(object), ref->prop ? ref->prop->ce : intern->ce)) {
 			_DO_THROW("Given object is not an instance of the class this property was declared in");
-			return;
+			RETURN_THROWS();
 		}
 
 		member_p = zend_read_property_ex(intern->ce, object, ref->unmangled_name, 0, &rv);
@@ -5541,7 +5541,7 @@ ZEND_METHOD(reflection_property, setValue)
 		name = _default_load_name(ZEND_THIS);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Cannot access non-public member %s::$%s", ZSTR_VAL(intern->ce->name), Z_STRVAL_P(name));
-		return;
+		RETURN_THROWS();
 	}
 
 	if (prop_get_flags(ref) & ZEND_ACC_STATIC) {
@@ -5577,7 +5577,7 @@ ZEND_METHOD(reflection_property, isInitialized)
 		name = _default_load_name(getThis());
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Cannot access non-public member %s::$%s", ZSTR_VAL(intern->ce->name), Z_STRVAL_P(name));
-		return;
+		RETURN_THROWS();
 	}
 
 	if (prop_get_flags(ref) & ZEND_ACC_STATIC) {
@@ -5597,7 +5597,7 @@ ZEND_METHOD(reflection_property, isInitialized)
 		/* TODO: Should this always use intern->ce? */
 		if (!instanceof_function(Z_OBJCE_P(object), ref->prop ? ref->prop->ce : intern->ce)) {
 			_DO_THROW("Given object is not an instance of the class this property was declared in");
-			return;
+			RETURN_THROWS();
 		}
 
 		old_scope = EG(fake_scope);
@@ -5747,7 +5747,7 @@ ZEND_METHOD(reflection_extension, __construct)
 		free_alloca(lcname, use_heap);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Extension %s does not exist", name_str);
-		return;
+		RETURN_THROWS();
 	}
 	free_alloca(lcname, use_heap);
 	ZVAL_STRING(reflection_prop_name(object), module->name);
@@ -6099,7 +6099,7 @@ ZEND_METHOD(reflection_zend_extension, __construct)
 	if (!extension) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Zend Extension %s does not exist", name_str);
-		return;
+		RETURN_THROWS();
 	}
 	ZVAL_STRING(reflection_prop_name(object), extension->name);
 	intern->ptr = extension;
@@ -6265,7 +6265,7 @@ ZEND_METHOD(reflection_reference, fromArrayElement)
 
 	if (!item) {
 		_DO_THROW("Array key not found");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(item) != IS_REFERENCE || is_ignorable_reference(ht, item)) {
@@ -6295,7 +6295,7 @@ ZEND_METHOD(reflection_reference, getId)
 	intern = Z_REFLECTION_P(getThis());
 	if (Z_TYPE(intern->obj) != IS_REFERENCE) {
 		_DO_THROW("Corrupted ReflectionReference object");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!REFLECTION_G(key_initialized)) {
