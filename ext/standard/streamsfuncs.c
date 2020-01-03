@@ -1257,7 +1257,7 @@ PHP_FUNCTION(stream_filter_remove)
 
 	filter = zend_fetch_resource(Z_RES_P(zfilter), "stream filter", php_file_le_stream_filter());
 	if (!filter) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (php_stream_filter_flush(filter, 1) == FAILURE) {

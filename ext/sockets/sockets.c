@@ -861,7 +861,7 @@ PHP_FUNCTION(socket_accept)
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!php_accept_connect(php_sock, &new_sock, (struct sockaddr*)&sa, &php_sa_len)) {
@@ -884,7 +884,7 @@ PHP_FUNCTION(socket_set_nonblock)
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!Z_ISUNDEF(php_sock->zstream)) {
@@ -922,7 +922,7 @@ PHP_FUNCTION(socket_set_block)
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* if socket was created from a stream, give the stream a chance to take
@@ -963,7 +963,7 @@ PHP_FUNCTION(socket_listen)
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (listen(php_sock->bsd_socket, backlog) != 0) {
@@ -986,7 +986,7 @@ PHP_FUNCTION(socket_close)
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!Z_ISUNDEF(php_sock->zstream)) {
@@ -1025,7 +1025,7 @@ PHP_FUNCTION(socket_write)
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZEND_NUM_ARGS() < 3) {
@@ -1069,7 +1069,7 @@ PHP_FUNCTION(socket_read)
 	tmpbuf = zend_string_alloc(length, 0);
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (type == PHP_NORMAL_READ) {
@@ -1129,7 +1129,7 @@ PHP_FUNCTION(socket_getsockname)
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	sa = (struct sockaddr *) &sa_storage;
@@ -1203,7 +1203,7 @@ PHP_FUNCTION(socket_getpeername)
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	sa = (struct sockaddr *) &sa_storage;
@@ -1318,7 +1318,7 @@ PHP_FUNCTION(socket_connect)
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	switch(php_sock->type) {
@@ -1424,7 +1424,7 @@ PHP_FUNCTION(socket_bind)
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	switch(php_sock->type) {
@@ -1506,7 +1506,7 @@ PHP_FUNCTION(socket_recv)
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(php_sock_res), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* overflow check */
@@ -1554,7 +1554,7 @@ PHP_FUNCTION(socket_send)
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	retval = send(php_sock->bsd_socket, buf, (buf_len < (size_t)len ? buf_len : (size_t)len), flags);
@@ -1591,7 +1591,7 @@ PHP_FUNCTION(socket_recvfrom)
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* overflow check */
@@ -1712,7 +1712,7 @@ PHP_FUNCTION(socket_sendto)
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	switch (php_sock->type) {
@@ -1790,7 +1790,7 @@ PHP_FUNCTION(socket_get_option)
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (level == IPPROTO_IP) {
@@ -1905,7 +1905,7 @@ PHP_FUNCTION(socket_set_option)
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	set_errno(0);
@@ -2105,7 +2105,7 @@ PHP_FUNCTION(socket_shutdown)
 	}
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (shutdown(php_sock->bsd_socket, how_shutdown) != 0) {
@@ -2131,7 +2131,7 @@ PHP_FUNCTION(socket_last_error)
 
 	if (arg1) {
 		if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-			return;
+			RETURN_THROWS();
 		}
 		RETVAL_LONG(php_sock->error);
 	} else {
@@ -2153,7 +2153,7 @@ PHP_FUNCTION(socket_clear_error)
 
 	if (arg1) {
 		if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(arg1), le_socket_name, le_socket)) == NULL) {
-			return;
+			RETURN_THROWS();
 		}
 		php_sock->error = 0;
 	} else {
@@ -2272,7 +2272,7 @@ PHP_FUNCTION(socket_export_stream)
 		RETURN_THROWS();
 	}
 	if ((socket = (php_socket *) zend_fetch_resource(Z_RES_P(zsocket), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Either we already exported a stream or the socket came from an import,
@@ -2429,7 +2429,7 @@ PHP_FUNCTION(socket_addrinfo_bind)
 	}
 
 	if ((ai = (struct addrinfo *) zend_fetch_resource(Z_RES_P(arg1), le_addrinfo_name, le_addrinfo)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_sock = php_create_socket();
@@ -2495,7 +2495,7 @@ PHP_FUNCTION(socket_addrinfo_connect)
 	}
 
 	if ((ai = (struct addrinfo *) zend_fetch_resource(Z_RES_P(arg1), le_addrinfo_name, le_addrinfo)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_sock = php_create_socket();
@@ -2559,7 +2559,7 @@ PHP_FUNCTION(socket_addrinfo_explain)
 	}
 
 	if ((ai = (struct addrinfo *) zend_fetch_resource(Z_RES_P(arg1), le_addrinfo_name, le_addrinfo)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -2619,7 +2619,7 @@ PHP_FUNCTION(socket_wsaprotocol_info_export)
 		RETURN_THROWS();
 	}
 	if ((socket = (php_socket *) zend_fetch_resource(Z_RES_P(zsocket), le_socket_name, le_socket)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (SOCKET_ERROR == WSADuplicateSocket(socket->bsd_socket, (DWORD)target_pid, &wi)) {

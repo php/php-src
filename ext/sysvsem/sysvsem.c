@@ -301,7 +301,7 @@ static void php_sysvsem_semop(INTERNAL_FUNCTION_PARAMETERS, int acquire)
 	}
 
 	if ((sem_ptr = (sysvsem_sem *)zend_fetch_resource(Z_RES_P(arg_id), "SysV semaphore", php_sysvsem_module.le_sem)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (!acquire && sem_ptr->count == 0) {
@@ -365,7 +365,7 @@ PHP_FUNCTION(sem_remove)
 	}
 
 	if ((sem_ptr = (sysvsem_sem *)zend_fetch_resource(Z_RES_P(arg_id), "SysV semaphore", php_sysvsem_module.le_sem)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 #if HAVE_SEMUN

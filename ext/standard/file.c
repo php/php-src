@@ -1113,7 +1113,7 @@ PHP_FUNCTION(fscanf)
 	 * with a leak if we have an invalid filehandle. This needs changing
 	 * if the code behind ZEND_VERIFY_RESOURCE changed. - cc */
 	if (!what) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	buf = php_stream_get_line((php_stream *) what, NULL, 0, &len);

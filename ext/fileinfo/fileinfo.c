@@ -334,7 +334,7 @@ PHP_FUNCTION(finfo_close)
 	}
 
 	if ((finfo = (php_fileinfo *)zend_fetch_resource(Z_RES_P(zfinfo), "file_info", le_fileinfo)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_list_close(Z_RES_P(zfinfo));
@@ -362,7 +362,7 @@ PHP_FUNCTION(finfo_set_flags)
 			RETURN_THROWS();
 		}
 		if ((finfo = (php_fileinfo *)zend_fetch_resource(Z_RES_P(zfinfo), "file_info", le_fileinfo)) == NULL) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -429,7 +429,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 			RETURN_THROWS();
 		}
 		if ((finfo = (php_fileinfo *)zend_fetch_resource(Z_RES_P(zfinfo), "file_info", le_fileinfo)) == NULL) {
-			return;
+			RETURN_THROWS();
 		}
 		magic = finfo->magic;
 	}

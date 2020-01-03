@@ -2422,7 +2422,7 @@ PHP_FUNCTION(openssl_x509_free)
 		RETURN_THROWS();
 	}
 	if ((cert = (X509 *)zend_fetch_resource(Z_RES_P(x509), "OpenSSL X.509", le_x509)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	zend_list_close(Z_RES_P(x509));
 }
@@ -4460,7 +4460,7 @@ PHP_FUNCTION(openssl_pkey_free)
 		RETURN_THROWS();
 	}
 	if ((pkey = (EVP_PKEY *)zend_fetch_resource(Z_RES_P(key), "OpenSSL key", le_key)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	zend_list_close(Z_RES_P(key));
 }
@@ -4507,7 +4507,7 @@ PHP_FUNCTION(openssl_pkey_get_details)
 		RETURN_THROWS();
 	}
 	if ((pkey = (EVP_PKEY *)zend_fetch_resource(Z_RES_P(key), "OpenSSL key", le_key)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	out = BIO_new(BIO_s_mem());
 	if (!PEM_write_bio_PUBKEY(out, pkey)) {
@@ -4683,7 +4683,7 @@ PHP_FUNCTION(openssl_dh_compute_key)
 		RETURN_THROWS();
 	}
 	if ((pkey = (EVP_PKEY *)zend_fetch_resource(Z_RES_P(key), "OpenSSL key", le_key)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 	if (EVP_PKEY_base_id(pkey) != EVP_PKEY_DH) {
 		RETURN_FALSE;

@@ -392,7 +392,7 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 
 	if ((brigade = (php_stream_bucket_brigade*)zend_fetch_resource(
 					Z_RES_P(zbrigade), PHP_STREAM_BRIGADE_RES_NAME, le_bucket_brigade)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_NULL(return_value);
@@ -429,7 +429,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 
 	if ((brigade = (php_stream_bucket_brigade*)zend_fetch_resource(
 					Z_RES_P(zbrigade), PHP_STREAM_BRIGADE_RES_NAME, le_bucket_brigade)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((bucket = (php_stream_bucket *)zend_fetch_resource_ex(pzbucket, PHP_STREAM_BUCKET_RES_NAME, le_bucket)) == NULL) {

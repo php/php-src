@@ -790,7 +790,7 @@ PHP_FUNCTION(xmlrpc_server_destroy)
 	}
 
 	if ((server = (xmlrpc_server_data *)zend_fetch_resource(Z_RES_P(arg1), "xmlrpc server", le_xmlrpc_server)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	bSuccess = zend_list_close(Z_RES_P(arg1));
@@ -913,7 +913,7 @@ PHP_FUNCTION(xmlrpc_server_register_method)
 	}
 
 	if ((server = (xmlrpc_server_data *)zend_fetch_resource(Z_RES_P(handle), "xmlrpc server", le_xmlrpc_server)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* register with C engine. every method just calls our standard callback,
@@ -943,7 +943,7 @@ PHP_FUNCTION(xmlrpc_server_register_introspection_callback)
 	}
 
 	if ((server = (xmlrpc_server_data *)zend_fetch_resource(Z_RES_P(handle), "xmlrpc server", le_xmlrpc_server)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	Z_TRY_ADDREF_P(method_name);
@@ -981,7 +981,7 @@ PHP_FUNCTION(xmlrpc_server_call_method)
 	}
 
 	if ((server = (xmlrpc_server_data *)zend_fetch_resource(Z_RES_P(handle), "xmlrpc server", le_xmlrpc_server)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* HACK: use output encoding for now */
@@ -1077,7 +1077,7 @@ PHP_FUNCTION(xmlrpc_server_add_introspection_data)
 	}
 
 	if ((server = (xmlrpc_server_data *)zend_fetch_resource(Z_RES_P(handle), "xmlrpc server", le_xmlrpc_server)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	xDesc = PHP_to_XMLRPC(desc);

@@ -75,7 +75,7 @@ ZEND_GET_MODULE(sysvshm)
 
 #define SHM_FETCH_RESOURCE(shm_ptr, z_ptr) do { \
 	if ((shm_ptr = (sysvshm_shm *)zend_fetch_resource(Z_RES_P(z_ptr), PHP_SHM_RSRC_NAME, php_sysvshm.le_shm)) == NULL) { \
-		RETURN_FALSE; \
+		RETURN_THROWS(); \
 	} \
 } while (0)
 
@@ -235,7 +235,7 @@ PHP_FUNCTION(shm_put_var)
 	shm_list_ptr = zend_fetch_resource(Z_RES_P(shm_id), PHP_SHM_RSRC_NAME, php_sysvshm.le_shm);
 	if (!shm_list_ptr) {
 		smart_str_free(&shm_var);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* insert serialized variable into shared memory */

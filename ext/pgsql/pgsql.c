@@ -1553,7 +1553,7 @@ PHP_FUNCTION(pg_connect_poll)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	ret = PQconnectPoll(pgsql);
@@ -1591,7 +1591,7 @@ PHP_FUNCTION(pg_close)
 
 	link = Z_RES_P(pgsql_link);
 	if (zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (link == PGG(default_link)) {
@@ -1635,7 +1635,7 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	switch(entry_type) {
@@ -1778,7 +1778,7 @@ PHP_FUNCTION(pg_parameter_status)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	param = (char*)PQparameterStatus(pgsql, param);
@@ -1808,7 +1808,7 @@ PHP_FUNCTION(pg_ping)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* ping connection */
@@ -1856,7 +1856,7 @@ PHP_FUNCTION(pg_query)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (PQ_SETNONBLOCKING(pgsql, 0)) {
@@ -1959,7 +1959,7 @@ PHP_FUNCTION(pg_query_params)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (PQ_SETNONBLOCKING(pgsql, 0)) {
@@ -2075,7 +2075,7 @@ PHP_FUNCTION(pg_prepare)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (PQ_SETNONBLOCKING(pgsql, 0)) {
@@ -2162,7 +2162,7 @@ PHP_FUNCTION(pg_execute)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (PQ_SETNONBLOCKING(pgsql, 0)) {
@@ -2259,7 +2259,7 @@ static void php_pgsql_get_result_info(INTERNAL_FUNCTION_PARAMETERS, int entry_ty
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	pgsql_result = pg_result->result;
@@ -2326,7 +2326,7 @@ PHP_FUNCTION(pg_last_notice)
 
 	/* Just to check if user passed valid resoruce */
 	if ((pg_link = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	notices = zend_hash_index_find(&PGG(notices), (zend_ulong)Z_RES_HANDLE_P(pgsql_link));
@@ -2444,7 +2444,7 @@ PHP_FUNCTION(pg_field_table)
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (fnum < 0 || fnum >= PQnfields(pg_result->result)) {
@@ -2537,7 +2537,7 @@ static void php_pgsql_get_field_info(INTERNAL_FUNCTION_PARAMETERS, int entry_typ
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 
@@ -2629,7 +2629,7 @@ PHP_FUNCTION(pg_field_num)
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	pgsql_result = pg_result->result;
@@ -2659,7 +2659,7 @@ PHP_FUNCTION(pg_fetch_result)
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	pgsql_result = pg_result->result;
@@ -2758,7 +2758,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	pgsql_result = pg_result->result;
@@ -2920,7 +2920,7 @@ PHP_FUNCTION(pg_fetch_all)
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	pgsql_result = pg_result->result;
@@ -2948,7 +2948,7 @@ PHP_FUNCTION(pg_fetch_all_columns)
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	pgsql_result = pg_result->result;
@@ -2988,7 +2988,7 @@ PHP_FUNCTION(pg_result_seek)
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (row < 0 || row >= PQntuples(pg_result->result)) {
@@ -3025,7 +3025,7 @@ static void php_pgsql_data_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	pgsql_result = pg_result->result;
@@ -3103,7 +3103,7 @@ PHP_FUNCTION(pg_free_result)
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	zend_list_close(Z_RES_P(result));
@@ -3127,7 +3127,7 @@ PHP_FUNCTION(pg_last_oid)
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	pgsql_result = pg_result->result;
@@ -3172,7 +3172,7 @@ PHP_FUNCTION(pg_trace)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	stream = php_stream_open_wrapper(z_filename, mode, REPORT_ERRORS, NULL);
@@ -3212,7 +3212,7 @@ PHP_FUNCTION(pg_untrace)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	PQuntrace(pgsql);
@@ -3249,7 +3249,7 @@ PHP_FUNCTION(pg_lo_create)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (oid) {
@@ -3357,7 +3357,7 @@ PHP_FUNCTION(pg_lo_unlink)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (lo_unlink(pgsql, oid) == -1) {
@@ -3431,7 +3431,7 @@ PHP_FUNCTION(pg_lo_open)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* r/w/+ is little bit more PHP-like than INV_READ/INV_WRITE and a lot of
@@ -3502,7 +3502,7 @@ PHP_FUNCTION(pg_lo_close)
 	}
 
 	if ((pgsql = (pgLofp *)zend_fetch_resource(Z_RES_P(pgsql_lofp), "PostgreSQL large object", le_lofp)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (lo_close((PGconn *)pgsql->conn, pgsql->lofd) < 0) {
@@ -3535,7 +3535,7 @@ PHP_FUNCTION(pg_lo_read)
 	}
 
 	if ((pgsql = (pgLofp *)zend_fetch_resource(Z_RES_P(pgsql_id), "PostgreSQL large object", le_lofp)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (argc > 1) {
@@ -3586,7 +3586,7 @@ PHP_FUNCTION(pg_lo_write)
 	}
 
 	if ((pgsql = (pgLofp *)zend_fetch_resource(Z_RES_P(pgsql_id), "PostgreSQL large object", le_lofp)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if ((nbytes = lo_write((PGconn *)pgsql->conn, pgsql->lofd, str, len)) == (size_t)-1) {
@@ -3612,7 +3612,7 @@ PHP_FUNCTION(pg_lo_read_all)
 	}
 
 	if ((pgsql = (pgLofp *)zend_fetch_resource(Z_RES_P(pgsql_id), "PostgreSQL large object", le_lofp)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	tbytes = 0;
@@ -3660,7 +3660,7 @@ PHP_FUNCTION(pg_lo_import)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (oid) {
@@ -3796,7 +3796,7 @@ PHP_FUNCTION(pg_lo_export)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (lo_export(pgsql, oid, file_out) == -1) {
@@ -3824,7 +3824,7 @@ PHP_FUNCTION(pg_lo_seek)
 	}
 
 	if ((pgsql = (pgLofp *)zend_fetch_resource(Z_RES_P(pgsql_id), "PostgreSQL large object", le_lofp)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 #if HAVE_PG_LO64
@@ -3858,7 +3858,7 @@ PHP_FUNCTION(pg_lo_tell)
 	}
 
 	if ((pgsql = (pgLofp *)zend_fetch_resource(Z_RES_P(pgsql_id), "PostgreSQL large object", le_lofp)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 #if HAVE_PG_LO64
@@ -3890,7 +3890,7 @@ PHP_FUNCTION(pg_lo_truncate)
 	}
 
 	if ((pgsql = (pgLofp *)zend_fetch_resource(Z_RES_P(pgsql_id), "PostgreSQL large object", le_lofp)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 #if HAVE_PG_LO64
@@ -3936,7 +3936,7 @@ PHP_FUNCTION(pg_set_error_verbosity)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (verbosity & (PQERRORS_TERSE|PQERRORS_DEFAULT|PQERRORS_VERBOSE)) {
@@ -3974,7 +3974,7 @@ PHP_FUNCTION(pg_set_client_encoding)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(PQsetClientEncoding(pgsql, encoding));
@@ -4002,7 +4002,7 @@ PHP_FUNCTION(pg_client_encoding)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Just do the same as found in PostgreSQL sources... */
@@ -4038,7 +4038,7 @@ PHP_FUNCTION(pg_end_copy)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	result = PQendcopy(pgsql);
@@ -4076,7 +4076,7 @@ PHP_FUNCTION(pg_put_line)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	result = PQputline(pgsql, query);
@@ -4109,7 +4109,7 @@ PHP_FUNCTION(pg_copy_to)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (!pg_delim) {
@@ -4247,7 +4247,7 @@ PHP_FUNCTION(pg_copy_from)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (!pg_delim) {
@@ -4391,7 +4391,7 @@ PHP_FUNCTION(pg_escape_string)
 #ifdef HAVE_PQESCAPE_CONN
 	if (link) {
 		if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 		ZSTR_LEN(to) = PQescapeStringConn(pgsql, ZSTR_VAL(to), ZSTR_VAL(from), ZSTR_LEN(from), NULL);
 	} else
@@ -4436,7 +4436,7 @@ PHP_FUNCTION(pg_escape_bytea)
 #ifdef HAVE_PQESCAPE_BYTEA_CONN
 	if (link) {
 		if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 		to = (char *)PQescapeByteaConn(pgsql, (unsigned char *)from, (size_t)from_len, &to_len);
 	} else
@@ -4611,7 +4611,7 @@ static void php_pgsql_escape_internal(INTERNAL_FUNCTION_PARAMETERS, int escape_l
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (pgsql == NULL) {
@@ -4666,7 +4666,7 @@ PHP_FUNCTION(pg_result_error)
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	pgsql_result = pg_result->result;
@@ -4695,7 +4695,7 @@ PHP_FUNCTION(pg_result_error_field)
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	pgsql_result = pg_result->result;
@@ -4738,7 +4738,7 @@ PHP_FUNCTION(pg_connection_status)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(PQstatus(pgsql));
@@ -4760,7 +4760,7 @@ PHP_FUNCTION(pg_transaction_status)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(PQtransactionStatus(pgsql));
@@ -4782,7 +4782,7 @@ PHP_FUNCTION(pg_connection_reset)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	PQreset(pgsql);
@@ -4830,7 +4830,7 @@ static void php_pgsql_do_async(INTERNAL_FUNCTION_PARAMETERS, int entry_type)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (PQ_SETNONBLOCKING(pgsql, 1)) {
@@ -4902,7 +4902,7 @@ PHP_FUNCTION(pg_send_query)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	is_non_blocking = PQisnonblocking(pgsql);
@@ -4975,7 +4975,7 @@ PHP_FUNCTION(pg_send_query_params)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	is_non_blocking = PQisnonblocking(pgsql);
@@ -5071,7 +5071,7 @@ PHP_FUNCTION(pg_send_prepare)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	is_non_blocking = PQisnonblocking(pgsql);
@@ -5146,7 +5146,7 @@ PHP_FUNCTION(pg_send_execute)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	is_non_blocking = PQisnonblocking(pgsql);
@@ -5240,7 +5240,7 @@ PHP_FUNCTION(pg_get_result)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	pgsql_result = PQgetResult(pgsql);
@@ -5272,7 +5272,7 @@ PHP_FUNCTION(pg_result_status)
 	}
 
 	if ((pg_result = (pgsql_result_handle *)zend_fetch_resource(Z_RES_P(result), "PostgreSQL result", le_result)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	pgsql_result = pg_result->result;
@@ -5305,7 +5305,7 @@ PHP_FUNCTION(pg_get_notify)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (!(result_type & PGSQL_BOTH)) {
@@ -5363,7 +5363,7 @@ PHP_FUNCTION(pg_get_pid)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(PQbackendPID(pgsql));
@@ -5442,7 +5442,7 @@ PHP_FUNCTION(pg_socket)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	stream = php_stream_alloc(&php_stream_pgsql_fd_ops, pgsql, NULL, "r");
@@ -5468,7 +5468,7 @@ PHP_FUNCTION(pg_consume_input)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(PQconsumeInput(pgsql));
@@ -5489,7 +5489,7 @@ PHP_FUNCTION(pg_flush)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	is_non_blocking = PQisnonblocking(pgsql);
@@ -5643,7 +5643,7 @@ PHP_FUNCTION(pg_meta_data)
 	}
 
 	if ((pgsql = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -6522,7 +6522,7 @@ PHP_FUNCTION(pg_convert)
 	}
 
 	if ((pg_link = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (php_pgsql_flush_query(pg_link)) {
@@ -6731,7 +6731,7 @@ PHP_FUNCTION(pg_insert)
 	}
 
 	if ((pg_link = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (php_pgsql_flush_query(pg_link)) {
@@ -6943,7 +6943,7 @@ PHP_FUNCTION(pg_update)
 	}
 
 	if ((pg_link = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (php_pgsql_flush_query(pg_link)) {
@@ -7035,7 +7035,7 @@ PHP_FUNCTION(pg_delete)
 	}
 
 	if ((pg_link = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (php_pgsql_flush_query(pg_link)) {
@@ -7180,7 +7180,7 @@ PHP_FUNCTION(pg_select)
 	}
 
 	if ((pg_link = (PGconn *)zend_fetch_resource2(Z_RES_P(pgsql_link), "PostgreSQL link", le_link, le_plink)) == NULL) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (php_pgsql_flush_query(pg_link)) {
