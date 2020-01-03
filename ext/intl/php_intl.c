@@ -179,12 +179,6 @@ ZEND_END_ARG_INFO()
 #define intl_0_args collator_static_0_args
 #define intl_1_arg collator_static_1_arg
 
-ZEND_BEGIN_ARG_INFO_EX(datefmt_parse_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, formatter)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(1, position)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_create, 0, 0, 2)
 	ZEND_ARG_INFO(0, locale)
 	ZEND_ARG_INFO(0, style)
@@ -232,41 +226,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_get_locale, 0, 0, 1)
 	ZEND_ARG_INFO(0, nf)
 	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_idn_to_ascii, 0, 0, 1)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, option)
-	ZEND_ARG_INFO(0, variant)
-	ZEND_ARG_INFO(1, idn_info)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_create_proc, 0, 0, 2 )
-	ZEND_ARG_INFO( 0, locale )
-	ZEND_ARG_INFO( 0, bundlename )
-	ZEND_ARG_INFO( 0, fallback )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get_proc, 0, 0, 2 )
-    ZEND_ARG_INFO( 0, bundle )
-	ZEND_ARG_INFO( 0, index )
-	ZEND_ARG_INFO( 0, fallback )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_count_proc, 0, 0, 1 )
-  ZEND_ARG_INFO( 0, bundle )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_locales_proc, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, bundlename )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get_error_code_proc, 0, 0, 1 )
-  ZEND_ARG_INFO( 0, bundle )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get_error_message_proc, 0, 0, 1 )
-  ZEND_ARG_INFO( 0, bundle )
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_void, 0, 0, 0 )
