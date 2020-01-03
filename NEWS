@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core
   . Fixed bug #78999 (Cycle leak when using function result as temporary).
     (Dmitry)
+  . Fixed bug #71876 (Memory corruption htmlspecialchars(): charset `*' not
+    supported). (Nikita)
 
 - CURL:
   . Implemented FR #77711 (CURLFile should support UNICODE filenames). (cmb)

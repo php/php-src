@@ -588,8 +588,8 @@ static PHP_INI_DISP(display_errors_mode)
  */
 static PHP_INI_MH(OnUpdateDefaultCharset)
 {
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	if (new_value) {
-		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 #ifdef PHP_WIN32
 		php_win32_cp_do_update(ZSTR_VAL(new_value));
 #endif
@@ -602,8 +602,8 @@ static PHP_INI_MH(OnUpdateDefaultCharset)
  */
 static PHP_INI_MH(OnUpdateInternalEncoding)
 {
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	if (new_value) {
-		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 #ifdef PHP_WIN32
 		php_win32_cp_do_update(ZSTR_VAL(new_value));
 #endif
@@ -616,8 +616,8 @@ static PHP_INI_MH(OnUpdateInternalEncoding)
  */
 static PHP_INI_MH(OnUpdateInputEncoding)
 {
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	if (new_value) {
-		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 #ifdef PHP_WIN32
 		php_win32_cp_do_update(NULL);
 #endif
@@ -630,8 +630,8 @@ static PHP_INI_MH(OnUpdateInputEncoding)
  */
 static PHP_INI_MH(OnUpdateOutputEncoding)
 {
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 	if (new_value) {
-		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 #ifdef PHP_WIN32
 		php_win32_cp_do_update(NULL);
 #endif
