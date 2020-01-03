@@ -1095,7 +1095,7 @@ PHP_FUNCTION(odbc_execute)
 					}
 				}
 				efree(params);
-				RETURN_FALSE;
+				RETURN_THROWS();
 			}
 
 			params[i-1].vallen = Z_STRLEN_P(tmp);

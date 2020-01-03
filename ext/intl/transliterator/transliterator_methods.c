@@ -316,7 +316,7 @@ PHP_FUNCTION( transliterator_transliterate )
 		{ /* not a transliterator object as first argument */
 			int res;
 			if( !try_convert_to_string( arg1 ) ) {
-				return;
+				RETURN_THROWS();
 			}
 			object = &tmp_object;
 			res = create_transliterator( Z_STRVAL_P( arg1 ), Z_STRLEN_P( arg1 ),

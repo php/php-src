@@ -1514,7 +1514,7 @@ PHP_FUNCTION(xml_parser_set_option)
 		case PHP_XML_OPTION_TARGET_ENCODING: {
 			const xml_encoding *enc;
 			if (!try_convert_to_string(val)) {
-				return;
+				RETURN_THROWS();
 			}
 
 			enc = xml_get_encoding((XML_Char*)Z_STRVAL_P(val));

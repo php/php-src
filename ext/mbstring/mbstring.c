@@ -1600,7 +1600,7 @@ PHP_FUNCTION(mb_detect_order)
 				break;
 			default:
 				if (!try_convert_to_string(arg1)) {
-					return;
+					RETURN_THROWS();
 				}
 				if (FAILURE == php_mb_parse_encoding_list(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), &list, &size, 0)) {
 					if (list) {
@@ -2878,7 +2878,7 @@ PHP_FUNCTION(mb_convert_encoding)
 
 	if (Z_TYPE_P(input) != IS_STRING && Z_TYPE_P(input) != IS_ARRAY) {
 		if (!try_convert_to_string(input)) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -2917,7 +2917,7 @@ PHP_FUNCTION(mb_convert_encoding)
 				break;
 			default:
 				if (!try_convert_to_string(arg_old)) {
-					return;
+					RETURN_THROWS();
 				}
 
 				_from_encodings = Z_STRVAL_P(arg_old);
@@ -3096,7 +3096,7 @@ PHP_FUNCTION(mb_detect_encoding)
 			break;
 		default:
 			if (!try_convert_to_string(encoding_list)) {
-				return;
+				RETURN_THROWS();
 			}
 			if (FAILURE == php_mb_parse_encoding_list(Z_STRVAL_P(encoding_list), Z_STRLEN_P(encoding_list), &list, &size, 0)) {
 				if (list) {
@@ -3507,7 +3507,7 @@ PHP_FUNCTION(mb_convert_variables)
 			break;
 		default:
 			if (!try_convert_to_string(zfrom_enc)) {
-				return;
+				RETURN_THROWS();
 			}
 			php_mb_parse_encoding_list(Z_STRVAL_P(zfrom_enc), Z_STRLEN_P(zfrom_enc), &elist, &elistsz, 0);
 			break;
@@ -4464,7 +4464,7 @@ PHP_FUNCTION(mb_check_encoding)
 		}
 	} else {
 		if (!try_convert_to_string(input)) {
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 		if (!php_mb_check_encoding(Z_STRVAL_P(input), Z_STRLEN_P(input), enc ? ZSTR_VAL(enc): NULL)) {
 			RETURN_FALSE;

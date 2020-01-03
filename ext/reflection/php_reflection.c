@@ -3802,7 +3802,7 @@ static void reflection_class_object_ctor(INTERNAL_FUNCTION_PARAMETERS, int is_ob
 		}
 	} else {
 		if (!try_convert_to_string(argument)) {
-			return;
+			RETURN_THROWS();
 		}
 
 		if ((ce = zend_lookup_class(Z_STR_P(argument))) == NULL) {

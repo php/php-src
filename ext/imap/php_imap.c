@@ -1693,7 +1693,7 @@ PHP_FUNCTION(imap_delete)
 	}
 
 	if (!try_convert_to_string(sequence)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	mail_setflag_full(imap_le_struct->imap_stream, Z_STRVAL_P(sequence), "\\DELETED", (argc == 3 ? flags : NIL));
@@ -1719,7 +1719,7 @@ PHP_FUNCTION(imap_undelete)
 	}
 
 	if (!try_convert_to_string(sequence)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	mail_clearflag_full(imap_le_struct->imap_stream, Z_STRVAL_P(sequence), "\\DELETED", (argc == 3 ? flags : NIL));
@@ -2140,7 +2140,7 @@ PHP_FUNCTION(imap_savebody)
 
 		default:
 			if (!try_convert_to_string(out)) {
-				return;
+				RETURN_THROWS();
 			}
 			writer = php_stream_open_wrapper(Z_STRVAL_P(out), "wb", REPORT_ERRORS, NULL);
 		break;

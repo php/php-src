@@ -898,7 +898,7 @@ PHP_FUNCTION(mysqli_stmt_execute)
 				switch (stmt->stmt->params[i].buffer_type) {
 					case MYSQL_TYPE_VAR_STRING:
 						if (!try_convert_to_string(param)) {
-							return;
+							RETURN_THROWS();
 						}
 
 						stmt->stmt->params[i].buffer = Z_STRVAL_P(param);
@@ -1791,7 +1791,7 @@ PHP_FUNCTION(mysqli_options)
 		switch (expected_type) {
 			case IS_STRING:
 				if (!try_convert_to_string(mysql_value)) {
-					return;
+					RETURN_THROWS();
 				}
 				break;
 			case IS_LONG:

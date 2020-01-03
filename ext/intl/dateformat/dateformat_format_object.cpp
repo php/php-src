@@ -141,7 +141,7 @@ U_CFUNC PHP_FUNCTION(datefmt_format_object)
 		dateStyle = timeStyle = (DateFormat::EStyle)Z_LVAL_P(format);
 	} else {
 		if (!try_convert_to_string(format)) {
-			return;
+			RETURN_THROWS();
 		}
 		if (Z_STRLEN_P(format) == 0) {
 			intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,

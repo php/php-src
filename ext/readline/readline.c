@@ -223,7 +223,7 @@ PHP_FUNCTION(readline_info)
 			if (value) {
 				/* XXX if (rl_line_buffer) free(rl_line_buffer); */
 				if (!try_convert_to_string(value)) {
-					return;
+					RETURN_THROWS();
 				}
 				rl_line_buffer = strdup(Z_STRVAL_P(value));
 			}
@@ -248,7 +248,7 @@ PHP_FUNCTION(readline_info)
 			oldval = rl_pending_input;
 			if (value) {
 				if (!try_convert_to_string(value)) {
-					return;
+					RETURN_THROWS();
 				}
 				rl_pending_input = Z_STRVAL_P(value)[0];
 			}
@@ -267,7 +267,7 @@ PHP_FUNCTION(readline_info)
 			oldval = rl_completion_append_character;
 			if (value) {
 				if (!try_convert_to_string(value)) {
-					return;
+					RETURN_THROWS();
 				}
 				rl_completion_append_character = (int)Z_STRVAL_P(value)[0];
 			}
@@ -292,7 +292,7 @@ PHP_FUNCTION(readline_info)
 			if (value) {
 				/* XXX if (rl_readline_name) free(rl_readline_name); */
 				if (!try_convert_to_string(value)) {
-					return;
+					RETURN_THROWS();
 				}
 				rl_readline_name = strdup(Z_STRVAL_P(value));
 			}

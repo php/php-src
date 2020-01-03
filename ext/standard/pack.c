@@ -298,7 +298,7 @@ PHP_FUNCTION(pack)
 					if (!try_convert_to_string(&argv[currentarg])) {
 						efree(formatcodes);
 						efree(formatargs);
-						return;
+						RETURN_THROWS();
 					}
 
 					arg = Z_STRLEN(argv[currentarg]);

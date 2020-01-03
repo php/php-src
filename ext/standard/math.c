@@ -1001,7 +1001,7 @@ PHP_FUNCTION(base_convert)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!try_convert_to_string(number)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (frombase < 2 || frombase > 36) {

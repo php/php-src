@@ -1576,7 +1576,7 @@ PHP_FUNCTION(stream_is_local)
 		wrapper = stream->wrapper;
 	} else {
 		if (!try_convert_to_string(zstream)) {
-			return;
+			RETURN_THROWS();
 		}
 
 		wrapper = php_stream_locate_url_wrapper(Z_STRVAL_P(zstream), NULL, 0);

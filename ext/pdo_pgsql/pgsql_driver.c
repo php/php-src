@@ -592,7 +592,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 			size_t query_len;
 			if (!try_convert_to_string(tmp)) {
 				efree(query);
-				return;
+				RETURN_THROWS();
 			}
 
 			if (buffer_len < Z_STRLEN_P(tmp)) {

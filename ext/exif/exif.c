@@ -4434,7 +4434,7 @@ PHP_FUNCTION(exif_read_data)
 		ret = exif_read_from_stream(&ImageInfo, p_stream, read_thumbnail, read_all);
 	} else {
 		if (!try_convert_to_string(stream)) {
-			return;
+			RETURN_THROWS();
 		}
 
 		if (!Z_STRLEN_P(stream)) {
@@ -4607,7 +4607,7 @@ PHP_FUNCTION(exif_thumbnail)
 		ret = exif_read_from_stream(&ImageInfo, p_stream, 1, 0);
 	} else {
 		if (!try_convert_to_string(stream)) {
-			return;
+			RETURN_THROWS();
 		}
 
 		if (!Z_STRLEN_P(stream)) {

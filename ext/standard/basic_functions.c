@@ -2717,7 +2717,7 @@ PHP_FUNCTION(highlight_string)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!try_convert_to_string(expr)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (i) {

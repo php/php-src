@@ -164,7 +164,7 @@ double_offset:
 		zend_long lval;
 		double dval;
 		if (!try_convert_to_string(arg)) {
-			return;
+			RETURN_THROWS();
 		}
 		switch (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, 0)) {
 		case IS_DOUBLE:

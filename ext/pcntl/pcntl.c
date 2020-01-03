@@ -862,7 +862,7 @@ PHP_FUNCTION(pcntl_exec)
 			if (argi >= argc) break;
 			if (!try_convert_to_string(element)) {
 				efree(argv);
-				return;
+				RETURN_THROWS();
 			}
 
 			*current_arg = Z_STRVAL_P(element);
@@ -895,7 +895,7 @@ PHP_FUNCTION(pcntl_exec)
 				zend_string_release(key);
 				efree(argv);
 				efree(envp);
-				return;
+				RETURN_THROWS();
 			}
 
 			/* Length of element + equal sign + length of key + null */
