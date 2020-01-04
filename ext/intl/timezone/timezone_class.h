@@ -60,8 +60,8 @@ static inline TimeZone_object *php_intl_timezone_fetch_object(zend_object *obj) 
 #define TIMEZONE_METHOD_FETCH_OBJECT\
 	TIMEZONE_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (to->utimezone == NULL) { \
-		intl_errors_set(&to->err, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed IntlTimeZone", 0); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, "Found unconstructed IntlTimeZone"); \
+		RETURN_THROWS(); \
 	}
 
 zval *timezone_convert_to_datetimezone(const TimeZone *timeZone, intl_error *outside_error, const char *func, zval *ret);

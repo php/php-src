@@ -13,7 +13,7 @@ class ResourceBundle implements Traversable
      */
     public function get($index, bool $fallback = true) {}
 
-    /** @return int|false */
+    /** @return int */
     public function count() {}
 
     /** @return array|false */
@@ -34,7 +34,7 @@ function resourcebundle_create(?string $locale, ?string $bundlename, bool $fallb
  */
 function resourcebundle_get(ResourceBundle $bundle, $index) {}
 
-function resourcebundle_count(ResourceBundle $bundle): int|false {}
+function resourcebundle_count(ResourceBundle $bundle): int {}
 
 function resourcebundle_locales(string $bundlename): array|false {}
 

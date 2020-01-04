@@ -55,8 +55,8 @@ static inline Calendar_object *php_intl_calendar_fetch_object(zend_object *obj) 
 	CALENDAR_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (co->ucal == NULL) \
 	{ \
-		intl_errors_set(&co->err, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed IntlCalendar", 0); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, "Found unconstructed IntlCalendar"); \
+		RETURN_THROWS(); \
 	}
 
 void calendar_object_create(zval *object, Calendar *calendar);

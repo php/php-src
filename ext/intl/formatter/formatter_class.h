@@ -44,9 +44,8 @@ extern zend_class_entry *NumberFormatter_ce_ptr;
 	FORMATTER_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (FORMATTER_OBJECT(nfo) == NULL) \
 	{ \
-		intl_errors_set(&nfo->nf_data.error, U_ILLEGAL_ARGUMENT_ERROR, \
-				"Found unconstructed NumberFormatter", 0); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, "Found unconstructed NumberFormatter"); \
+		RETURN_THROWS(); \
 	}
 
 
