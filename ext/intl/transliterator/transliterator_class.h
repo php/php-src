@@ -52,8 +52,8 @@ static inline Transliterator_object *php_intl_transliterator_fetch_object(zend_o
 	TRANSLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if( to->utrans == NULL ) \
 	{ \
-		intl_errors_set( &to->err, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed transliterator", 0 ); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, "Found unconstructed transliterator"); \
+		RETURN_THROWS(); \
 	}
 
 int transliterator_object_construct( zval *object,
