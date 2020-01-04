@@ -2585,7 +2585,9 @@ PHP_MINIT_FUNCTION(sqlite3)
 	zend_declare_class_constant_long(php_sqlite3_sc_entry, "FUNCTION", sizeof("FUNCTION") - 1, SQLITE_FUNCTION);
 	zend_declare_class_constant_long(php_sqlite3_sc_entry, "SAVEPOINT", sizeof("SAVEPOINT") - 1, SQLITE_SAVEPOINT);
 	zend_declare_class_constant_long(php_sqlite3_sc_entry, "COPY", sizeof("COPY") - 1, SQLITE_COPY);
+#ifdef SQLITE_RECURSIVE
 	zend_declare_class_constant_long(php_sqlite3_sc_entry, "RECURSIVE", sizeof("RECURSIVE") - 1, SQLITE_RECURSIVE);
+#endif
 
 #ifdef SQLITE_DETERMINISTIC
 	REGISTER_LONG_CONSTANT("SQLITE3_DETERMINISTIC", SQLITE_DETERMINISTIC, CONST_CS | CONST_PERSISTENT);
