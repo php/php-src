@@ -413,6 +413,10 @@ PHP 8.0 UPGRADE NOTES
 12. Windows Support
 ========================================
 
+- php-test-pack:
+  . The test runner has been renamed from run-test.php to run-tests.php, to
+    match its name in php-src.
+
 ========================================
 13. Other Changes
 ========================================
