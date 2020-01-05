@@ -213,8 +213,6 @@ php
 /main/config.w32.h
 /win32/build/deplister.exe
 /win32/build/deplister.obj
-/win32/build/fakemail.exe
-/win32/build/fakemail.obj
 /win32/*.aps
 /win32/*.positions
 /win32/*.suo

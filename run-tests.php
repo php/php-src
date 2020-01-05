@@ -2110,7 +2110,7 @@ TEST $file
 		$section_text['INI'] = str_replace('{PWD}', dirname($file), $section_text['INI']);
 		$section_text['INI'] = str_replace('{TMP}', sys_get_temp_dir(), $section_text['INI']);
 		if (PHP_OS_FAMILY === 'Windows') {
-			$replacement = 'fakemail $1';
+			$replacement = '"' . PHP_BINARY . ' -r \"while ($in = fgets(STDIN)) echo $in;\" > $1"';
 		} else {
 			$replacement = 'tee $1 >/dev/null';
 		}
