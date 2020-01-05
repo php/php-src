@@ -6,12 +6,8 @@ only function besides mb_send_mail() which allows to call php_escape_shell_cmd()
 with an empty string. Therefore we don't check the resulting email, but only
 verify that the call succeeds.
 --INI--
-sendmail_path=cat >/dev/null
+sendmail_path={MAIL:bug73203.eml}
 mail.add_x_header = Off
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) === 'WIN') die('skip won\'t run on Windows');
-?>
 --FILE--
 <?php
 var_dump(
@@ -20,3 +16,7 @@ var_dump(
 ?>
 --EXPECT--
 bool(true)
+--CLEAN--
+<?php
+unlink('bug73203.eml');
+?>
