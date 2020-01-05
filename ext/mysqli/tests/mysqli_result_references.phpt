@@ -59,6 +59,7 @@ require_once('skipifconnectfailure.inc');
 
 	$references[$idx++] = &$res;
 	mysqli_free_result($res);
+
 	debug_zval_dump($references);
 
 	if (!(mysqli_real_query($link, "SELECT id, label FROM test ORDER BY id ASC LIMIT 1")) ||

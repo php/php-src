@@ -81,12 +81,21 @@ Interface of the class mysqli_stmt
 
 printf("\nMagic, magic properties:\n");
 
-assert(mysqli_stmt_affected_rows($stmt) === $stmt->affected_rows);
-printf("stmt->affected_rows = '%s'\n", $stmt->affected_rows);
+try {
+    mysqli_stmt_affected_rows($stmt);
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
-if (!$stmt->prepare("INSERT INTO test(id, label) VALUES (100, 'z')") ||
-!$stmt->execute())
-printf("[001] [%d] %s\n", $stmt->errno, $stmt->error);
+try {
+    $stmt->affected_rows;
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+if (!$stmt->prepare("INSERT INTO test(id, label) VALUES (100, 'z')") || !$stmt->execute()) {
+    printf("[001] [%d] %s\n", $stmt->errno, $stmt->error);
+}
 
 assert(mysqli_stmt_affected_rows($stmt) === $stmt->affected_rows);
 printf("stmt->affected_rows = '%s'\n", $stmt->affected_rows);
@@ -157,14 +166,8 @@ sqlstate
 id
 
 Magic, magic properties:
-
-Warning: mysqli_stmt_affected_rows(): invalid object or resource mysqli_stmt
- in %s on line %d
-
-Warning: main(): Property access is not allowed yet in %s on line %d
-
-Warning: main(): Property access is not allowed yet in %s on line %d
-stmt->affected_rows = ''
+mysqli_stmt object is not fully initialized
+Property access is not allowed yet
 stmt->affected_rows = '1'
 stmt->errno = '0'
 stmt->error = ''

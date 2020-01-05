@@ -15,8 +15,11 @@ require_once('skipifconnectfailure.inc');
 	if (!$stmt = mysqli_stmt_init($link))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (false !== ($tmp = mysqli_stmt_data_seek($stmt, 1)))
-		printf("[004] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_data_seek($stmt, 1);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id FROM test ORDER BY id"))
 		printf("[005] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -66,8 +69,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_stmt_close($stmt);
 
-	if (false !== ($tmp = mysqli_stmt_data_seek($stmt, 0)))
-		printf("[017] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_data_seek($stmt, 0);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 	print "done!";
@@ -77,14 +83,12 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_stmt_data_seek(): invalid object or resource mysqli_stmt
- in %s on line %d
+mysqli_stmt object is not fully initialized
 int(3)
 int(1)
 int(1)
 
 Warning: mysqli_stmt_data_seek(): Offset must be positive in %s on line %d
 int(1)
-
-Warning: mysqli_stmt_data_seek(): Couldn't fetch mysqli_stmt in %s on line %d
+mysqli_stmt object is already closed
 done!

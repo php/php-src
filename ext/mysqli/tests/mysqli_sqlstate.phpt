@@ -20,7 +20,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	var_dump(mysqli_sqlstate($link));
+    try {
+        mysqli_sqlstate($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -32,7 +36,5 @@ require_once('skipifconnectfailure.inc');
 %s(5) "00000"
 %s(5) "42S22"
 %s(5) "00000"
-
-Warning: mysqli_sqlstate(): Couldn't fetch mysqli in %s on line %d
-bool(false)
+mysqli object is already closed
 done!

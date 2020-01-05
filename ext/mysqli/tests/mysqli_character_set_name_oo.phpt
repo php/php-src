@@ -54,14 +54,20 @@ mysqli_chararcter_set_name(), mysql_client_encoding() [alias]
 
 	$mysqli->close();
 
-	if (false !== ($tmp = @$mysqli->character_set_name()))
-		printf("[013] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+	try {
+        $mysqli->character_set_name();
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	/* Make sure that the function alias exists */
-	if (false !== ($tmp = @$mysqli->character_set_name()))
-		printf("[014] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        $mysqli->character_set_name();
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
-?>
 --EXPECT--
+my_mysqli object is already closed
+my_mysqli object is already closed
 done!

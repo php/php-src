@@ -34,7 +34,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_free_result($res);
 
-	var_dump(mysqli_field_tell($res));
+    try {
+        mysqli_field_tell($res);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 
@@ -87,7 +91,5 @@ bool(false)
 int(1)
 bool(true)
 int(0)
-
-Warning: mysqli_field_tell(): Couldn't fetch mysqli_result in %s on line %d
-bool(false)
+mysqli_result object is already closed
 done!

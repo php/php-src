@@ -30,14 +30,16 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	var_dump(mysqli_errno($link));
+    try {
+        mysqli_errno($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
 --EXPECTF--
 int(0)
 int(%d)
-
-Warning: mysqli_errno(): Couldn't fetch mysqli in %s on line %d
-bool(false)
+mysqli object is already closed
 done!

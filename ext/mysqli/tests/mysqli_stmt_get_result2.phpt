@@ -132,18 +132,19 @@ if (!function_exists('mysqli_stmt_get_result'))
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
 
-	if (false !== ($res = mysqli_stmt_get_result($stmt))) {
-		printf("[026] Expecting false got %s/%s\n",
-			gettype($res), $res);
-	}
+    try {
+        mysqli_stmt_get_result($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-		print "done!";
+	print "done!";
 ?>
 --CLEAN--
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   ["id"]=>
   int(1)
@@ -159,6 +160,5 @@ array(2) {
 }
 NULL
 [017] [2014] Commands out of sync; you can't run this command now
-
-Warning: mysqli_stmt_get_result(): Couldn't fetch mysqli_stmt in %s on line %d
+mysqli_stmt object is already closed
 done!

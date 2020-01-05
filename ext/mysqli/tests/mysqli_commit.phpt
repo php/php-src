@@ -52,8 +52,11 @@ if (!have_innodb($link))
 
 	mysqli_close($link);
 
-	if (false !== ($tmp = @mysqli_commit($link)))
-		printf("[014] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_commit($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -62,4 +65,5 @@ if (!have_innodb($link))
 	require_once("clean_table.inc");
 ?>
 --EXPECT--
+mysqli object is already closed
 done!

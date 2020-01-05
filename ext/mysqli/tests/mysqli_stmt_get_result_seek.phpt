@@ -94,19 +94,31 @@ if (!function_exists('mysqli_stmt_get_result'))
 
 	mysqli_free_result($res);
 
-	if (false !== ($tmp = mysqli_data_seek($res, 0)))
-		printf("[017] Expecting false got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_data_seek($res, 0);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	if (false !== ($row = $res->fetch_array(MYSQLI_NUM)))
-		printf("[018] Expecting false got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        $res->fetch_array(MYSQLI_NUM);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 
-	if (false !== ($tmp = mysqli_data_seek($res, 0)))
-		printf("[019] Expecting false got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_data_seek($res, 0);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	if (false !== ($row = $res->fetch_array(MYSQLI_NUM)))
-		printf("[020] Expecting false got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        $res->fetch_array(MYSQLI_NUM);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -114,12 +126,9 @@ if (!function_exists('mysqli_stmt_get_result'))
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
-Warning: mysqli_data_seek(): Couldn't fetch mysqli_result in %s on line %d
-
-Warning: mysqli_result::fetch_array(): Couldn't fetch mysqli_result in %s on line %d
-
-Warning: mysqli_data_seek(): Couldn't fetch mysqli_result in %s on line %d
-
-Warning: mysqli_result::fetch_array(): Couldn't fetch mysqli_result in %s on line %d
+--EXPECT--
+mysqli_result object is already closed
+mysqli_result object is already closed
+mysqli_result object is already closed
+mysqli_result object is already closed
 done!

@@ -50,8 +50,11 @@ require_once('skipifconnectfailure.inc');
 	mysqli_free_result($res);
 
 	// Read http://bugs.php.net/bug.php?id=42344 on defaults!
-	if (false !== ($tmp = mysqli_fetch_field($res)))
-		printf("[006] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_fetch_field($res);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
 		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -136,8 +139,7 @@ object(stdClass)#%d (13) {
   int(0)
 }
 bool(false)
-
-Warning: mysqli_fetch_field(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
 array(1) {
   ["_default_test"]=>
   string(1) "2"

@@ -100,13 +100,9 @@ Warning: mysqli_warning::mysqli_warning() expects parameter 1 to be object, null
 
 Warning: Wrong parameter count for mysqli_warning::mysqli_warning() in %s on line %d
 
-Warning: mysqli_warning::mysqli_warning(): Couldn't fetch mysqli in %s on line %d
-
-Warning: mysqli_warning::mysqli_warning(): invalid object or resource mysqli_stmt
- in %s on line %d
-
-Warning: mysqli_warning::mysqli_warning(): invalid object or resource mysqli_stmt
- in %s on line %d
+Warning: mysqli_warning::mysqli_warning(): mysqli object is already closed in %s on line %d
+mysqli_stmt object is not fully initialized
+mysqli_stmt object is not fully initialized
 
 Warning: mysqli_warning::mysqli_warning(): Invalid class argument in /home/nixnutz/php6_mysqlnd/ext/mysqli/tests/mysqli_class_mysqli_warning.php on line 19
 

@@ -19,7 +19,11 @@ require_once('skipifconnectfailure.inc');
 
 	/* Failed connection to invalid host */
 	$mysql_2 = @new mysqli(' !!! invalid !!! ', $user, $passwd, $db);
-	@$mysql_2->close();
+	try {
+	    $mysql_2->close();
+	} catch (Error $exception) {
+	    echo $exception->getMessage() . "\n";
+	}
 
 	/* Re-use persistent connection */
 	$mysql_3 = new mysqli('p:'.$host, $user, $passwd, $db);
@@ -38,4 +42,5 @@ require_once('skipifconnectfailure.inc');
 	print "done!";
 ?>
 --EXPECT--
+mysqli object is already closed
 done!

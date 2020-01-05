@@ -89,8 +89,11 @@ if (!function_exists('mysqli_get_charset'))
 
 	mysqli_close($link);
 
-	if (false !== ($tmp = mysqli_get_charset($link)))
-		printf("[023] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+	try {
+        mysqli_get_charset($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -98,6 +101,6 @@ if (!function_exists('mysqli_get_charset'))
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
-Warning: mysqli_get_charset(): Couldn't fetch mysqli in %s on line %d
+--EXPECT--
+mysqli object is already closed
 done!

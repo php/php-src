@@ -21,8 +21,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (false !== ($tmp = mysqli_thread_id($link)))
-		printf("[005] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_thread_id($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -30,6 +33,6 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
-Warning: mysqli_thread_id(): Couldn't fetch mysqli in %s on line %d
+--EXPECT--
+mysqli object is already closed
 done!

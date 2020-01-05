@@ -24,7 +24,11 @@ require_once('skipifconnectfailure.inc');
 	var_dump($res->lengths);
 
 	$res->free_result();
-	var_dump($res->lengths);
+	try {
+	    $res->lengths;
+	} catch (Error $exception) {
+	    echo $exception->getMessage() . "\n";
+	}
 	$mysqli->close();
 	print "done!";
 ?>
@@ -35,7 +39,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 NULL
 array(2) {
   [0]=>
@@ -44,7 +48,5 @@ array(2) {
   int(1)
 }
 NULL
-
-Warning: main(): Property access is not allowed yet in %s on line %d
-bool(false)
+Property access is not allowed yet
 done!

@@ -62,8 +62,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (false !== ($tmp = mysqli_real_escape_string($link, 'foo')))
-		printf("[018] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_real_escape_string($link, 'foo');
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -71,6 +74,6 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
-Warning: mysqli_real_escape_string(): Couldn't fetch mysqli in %s on line %d
+--EXPECT--
+mysqli object is already closed
 done!

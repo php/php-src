@@ -16,18 +16,25 @@ require_once('skipifconnectfailure.inc');
 	}
 
 	print "a\n";
-	var_dump(mysqli_free_result($res));
-	print "b\n";
-	var_dump(mysqli_free_result($res));
+    var_dump(mysqli_free_result($res));
 
-	if (!$res = mysqli_query($link, "SELECT id FROM test ORDER BY id LIMIT 1")) {
-		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	}
+	print "b\n";
+    try {
+        mysqli_free_result($res);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
+
+    if (!$res = mysqli_query($link, "SELECT id FROM test ORDER BY id LIMIT 1")) {
+        printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+
 	print "c\n";
 	var_dump(mysqli_store_result($link));
 	var_dump(mysqli_error($link));
 	print "[005]\n";
-	var_dump(mysqli_free_result($res));
+
+    mysqli_free_result($res);
 
 	if (!$res = mysqli_query($link, "SELECT id FROM test ORDER BY id LIMIT 1")) {
 		printf("[006] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -49,14 +56,11 @@ require_once('skipifconnectfailure.inc');
 a
 NULL
 b
-
-Warning: mysqli_free_result(): Couldn't fetch mysqli_result in %s on line %d
-bool(false)
+mysqli_result object is already closed
 c
 bool(false)
 string(0) ""
 [005]
-NULL
 d
 bool(false)
 string(0) ""

@@ -50,10 +50,13 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (false !== ($tmp = @mysqli_character_set_name($link)))
-		printf("[013] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+	try {
+        mysqli_character_set_name($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
-?>
 --EXPECT--
+mysqli object is already closed
 done!

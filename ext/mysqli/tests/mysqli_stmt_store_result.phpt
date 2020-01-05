@@ -16,8 +16,11 @@ require_once('skipifconnectfailure.inc');
 		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	// stmt object status test
-	if (false !== ($tmp = @mysqli_stmt_store_result($stmt)))
-		printf("[005] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_store_result($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	if (!mysqli_stmt_prepare($stmt, "INSERT INTO test(id, label) VALUES (100, 'z')") ||
 		!mysqli_stmt_execute($stmt))
@@ -63,8 +66,11 @@ require_once('skipifconnectfailure.inc');
 	mysqli_stmt_close($stmt);
 	mysqli_stmt_close($stmt_buf);
 
-	if (false !== ($tmp = @mysqli_stmt_store_result($stmt)))
-		printf("[017] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_store_result($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 	mysqli_close($link_buf);
@@ -75,4 +81,6 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECT--
+mysqli_stmt object is not fully initialized
+mysqli_stmt object is already closed
 done!

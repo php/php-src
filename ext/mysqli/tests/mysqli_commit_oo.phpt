@@ -21,9 +21,11 @@ if (!have_innodb($link))
 	$link   = NULL;
 
 	$mysqli = new mysqli();
-	if (false !== ($tmp = @$mysqli->commit())) {
-		printf("[013] Expecting false got %s/%s\n", gettype($tmp), $tmp);
-	}
+    try {
+        $mysqli->commit();
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -90,20 +92,24 @@ if (!have_innodb($link))
 
 	$mysqli->close();
 
-	if (false !== ($tmp = @$mysqli->commit())) {
-		printf("[017] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
-	}
+    try {
+        $mysqli->commit();
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
-?>
 --CLEAN--
 <?php
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli::commit(): Transaction name truncated. Must be only [0-9A-Za-z\-_=]+ in %s on line %d
+mysqli object is not fully initialized
 
 Warning: mysqli::commit(): Transaction name truncated. Must be only [0-9A-Za-z\-_=]+ in %s on line %d
 
 Warning: mysqli::commit(): Transaction name truncated. Must be only [0-9A-Za-z\-_=]+ in %s on line %d
+
+Warning: mysqli::commit(): Transaction name truncated. Must be only [0-9A-Za-z\-_=]+ in %s on line %d
+my_mysqli object is already closed
 done!

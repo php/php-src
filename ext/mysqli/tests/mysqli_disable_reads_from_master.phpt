@@ -43,5 +43,5 @@ if (!function_exists('mysqli_disable_reads_from_master')) {
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_disable_reads_from_master(): Couldn't fetch mysqli in %s on line %d
+Warning: mysqli_disable_reads_from_master(): mysqli object is already closed in %s on line %d
 done!

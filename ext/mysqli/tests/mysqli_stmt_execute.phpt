@@ -22,15 +22,21 @@ if (mysqli_get_server_version($link) <= 40100) {
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	// stmt object status test
-	if (false !== ($tmp = mysqli_stmt_execute($stmt)))
-		printf("[004] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_execute($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	if (mysqli_stmt_prepare($stmt, "SELECT i_do_not_exist_believe_me FROM test ORDER BY id"))
 		printf("[005] Statement should have failed!\n");
 
 	// stmt object status test
-	if (false !== ($tmp = mysqli_stmt_execute($stmt)))
-		printf("[006] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_execute($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id FROM test ORDER BY id LIMIT 1"))
 		printf("[007] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -117,8 +123,11 @@ if (mysqli_get_server_version($link) <= 40100) {
 
 	mysqli_stmt_close($stmt);
 
-	if (false !== ($tmp = mysqli_stmt_execute($stmt)))
-		printf("[028] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_execute($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 	print "done!";
@@ -127,15 +136,11 @@ if (mysqli_get_server_version($link) <= 40100) {
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
-Warning: mysqli_stmt_execute(): invalid object or resource mysqli_stmt
- in %s on line %d
-
-Warning: mysqli_stmt_execute(): invalid object or resource mysqli_stmt
- in %s on line %d
+--EXPECT--
+mysqli_stmt object is not fully initialized
+mysqli_stmt object is not fully initialized
 bool(true)
 bool(true)
 [027] Expecting boolean/false, got boolean/1
-
-Warning: mysqli_stmt_execute(): Couldn't fetch mysqli_stmt in %s on line %d
+mysqli_stmt object is already closed
 done!

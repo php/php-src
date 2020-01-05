@@ -27,8 +27,11 @@ require_once('skipifconnectfailure.inc');
 
 			mysqli_free_result($res);
 
-			if ($test_free && (false !== ($tmp = mysqli_num_rows($res))))
-				printf("[%03d] Expecting false, got %s/%s\n", $offset + 2, gettype($tmp), $tmp);
+			try {
+                mysqli_num_rows($res);
+            } catch (Error $exception) {
+                echo $exception->getMessage() . "\n";
+            }
 		}
 	}
 
@@ -57,7 +60,6 @@ require_once('skipifconnectfailure.inc');
 			printf("[031] Expecting int/0, got %s/%d\n", gettype($tmp), $tmp);
 
 		mysqli_free_result($res);
-
 	} else {
 		printf("[032] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}
@@ -70,7 +72,10 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_num_rows(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
+mysqli_result object is already closed
+mysqli_result object is already closed
+mysqli_result object is already closed
 run_tests.php don't fool me with your 'ungreedy' expression '.+?'!
 
 Warning: mysqli_num_rows(): Function cannot be used with MYSQL_USE_RESULT in %s on line %d

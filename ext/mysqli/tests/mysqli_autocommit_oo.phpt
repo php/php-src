@@ -124,8 +124,11 @@ mysqli->autocommit()
 
 	$mysqli->close();
 
-	if (false !== ($tmp = @$mysqli->autocommit( false)))
-		printf("[030] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+	try {
+        $mysqli->autocommit(false);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -134,4 +137,5 @@ mysqli->autocommit()
 	require_once("clean_table.inc");
 ?>
 --EXPECT--
+my_mysqli object is already closed
 done!

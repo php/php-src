@@ -29,8 +29,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_stmt_close($stmt);
 
-	if (false !== ($tmp = mysqli_stmt_prepare($stmt, "SELECT id FROM test")))
-		printf("[007] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_prepare($stmt, "SELECT id FROM test");
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 	print "done!";
@@ -39,6 +42,6 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
-Warning: mysqli_stmt_prepare(): Couldn't fetch mysqli_stmt in %s on line %d
+--EXPECT--
+mysqli_stmt object is already closed
 done!

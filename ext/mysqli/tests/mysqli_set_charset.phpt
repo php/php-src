@@ -104,8 +104,11 @@ if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STOR
 
 	mysqli_close($link);
 
-	if (false !== ($tmp = mysqli_set_charset($link, $new_charset)))
-		printf("[019] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_set_charset($link, $new_charset);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -113,6 +116,6 @@ if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STOR
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
-Warning: mysqli_set_charset(): Couldn't fetch mysqli in %s on line %d
+--EXPECT--
+mysqli object is already closed
 done!

@@ -15,9 +15,11 @@ require_once('skipifconnectfailure.inc');
 
 	// Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
 	$mysqli = new mysqli();
-	$res = @new mysqli_result($mysqli);
-	if (false !== ($tmp = @$res->fetch_assoc()))
-		printf("[001] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+	try {
+        new mysqli_result($mysqli);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	require('table.inc');
 	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
@@ -44,8 +46,11 @@ require_once('skipifconnectfailure.inc');
 
 	$res->free_result();
 
-	if (false !== ($tmp = $res->fetch_assoc()))
-		printf("[008] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        $res->fetch_assoc();
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 
@@ -55,7 +60,8 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
+mysqli object is not fully initialized
 [005]
 array(2) {
   ["id"]=>
@@ -78,6 +84,5 @@ array(5) {
   ["e"]=>
   string(1) "1"
 }
-
-Warning: mysqli_result::fetch_assoc(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
 done!

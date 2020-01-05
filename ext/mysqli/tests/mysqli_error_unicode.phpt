@@ -28,13 +28,14 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	var_dump(mysqli_error($link));
+    try {
+        mysqli_error($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
-?>
 --EXPECTF--
 string(%d) "Table 'няма_такава_таблица' doesn't exist"
-
-Warning: mysqli_error(): Couldn't fetch mysqli in %s on line %d
-bool(false)
+mysqli object is already closed
 done!

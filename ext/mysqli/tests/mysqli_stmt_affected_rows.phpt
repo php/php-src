@@ -225,8 +225,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_stmt_close($stmt);
 
-	if (false !== ($tmp = mysqli_stmt_affected_rows($stmt)))
-		printf("[047] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_affected_rows($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 
@@ -238,6 +241,5 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 [009] [%d] (error message varies with the MySQL Server version, check the error code)
-
-Warning: mysqli_stmt_affected_rows(): Couldn't fetch mysqli_stmt in %s on line %d
+mysqli_stmt object is already closed
 done!

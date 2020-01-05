@@ -12,9 +12,11 @@ require_once('skipifconnectfailure.inc');
 	set_error_handler('handle_catchable_fatal');
 
 	$mysqli = new mysqli();
-	$res = @new mysqli_result($mysqli);
-	if (false !== ($tmp = @$res->fetch_object()))
-		printf("[001] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        new mysqli_result($mysqli);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	require('table.inc');
 	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
@@ -110,7 +112,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_free_result($res);
 
-	var_dump(mysqli_fetch_object($res));
+	try {
+        mysqli_fetch_object($res);
+	} catch (Error $exception) {
+	    echo $exception->getMessage() . "\n";
+	}
 
 	// Fatal error, script execution will end
 	var_dump($res->fetch_object('this_class_does_not_exist'));
@@ -123,16 +129,13 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-[E_WARNING] mysqli_result::__construct(): invalid object or resource mysqli
- in %s on line %d
-[E_WARNING] mysqli_result::fetch_object(): Couldn't fetch mysqli_result in %s on line %d
+mysqli object is not fully initialized
 [0] mysqli_result::fetch_object() expects parameter 1 to be string, object given in %s on line %d
 [0] mysqli_result::fetch_object() expects at most 2 parameters, 3 given in %s on line %d
 [0] mysqli_result::fetch_object() expects parameter 2 to be array, null given in %s on line %d
 Exception: Too few arguments to function mysqli_fetch_object_construct::__construct(), 1 passed and exactly 2 expected
 NULL
 NULL
-[E_WARNING] mysqli_fetch_object(): Couldn't fetch mysqli_result in %s on line %d
-bool(false)
+mysqli_result object is already closed
 
 Fatal error: Class 'this_class_does_not_exist' not found in %s on line %d

@@ -25,14 +25,16 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (false !== ($tmp = mysqli_ping($link)))
-		printf("[005] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+	try {
+        mysqli_ping($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
-
-Warning: mysqli_ping(): Couldn't fetch mysqli in %s on line %d
+mysqli object is already closed
 done!

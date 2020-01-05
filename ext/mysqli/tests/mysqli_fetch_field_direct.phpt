@@ -22,8 +22,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_free_result($res);
 
-	if (false !== ($tmp = mysqli_fetch_field_direct($res, 0)))
-		printf("[005] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_fetch_field_direct($res, 0);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 	print "done!";
@@ -66,6 +69,5 @@ object(stdClass)#%d (13) {
 
 Warning: mysqli_fetch_field_direct(): Field offset is invalid for resultset in %s on line %d
 bool(false)
-
-Warning: mysqli_fetch_field_direct(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
 done!

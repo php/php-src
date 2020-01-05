@@ -88,13 +88,16 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (false !== ($tmp = mysqli_select_db($link, $db)))
-		printf("[019] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_select_db($link, $db);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!\n";
 ?>
 --CLEAN--
 <?php require_once("clean_table.inc"); ?>
---EXPECTF--
-Warning: mysqli_select_db(): Couldn't fetch mysqli in %s on line %d
+--EXPECT--
+mysqli object is already closed
 done!

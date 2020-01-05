@@ -140,8 +140,11 @@ mysqli.allow_local_infile=1
 		@mysqli_close($link);
 	}
 
-	if (false !== ($tmp = mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)))
-		printf("[026] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+	try {
+        mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -159,6 +162,5 @@ object(mysqli)#%d (%d) {
   ["connect_error"]=>
   NULL
 }
-
-Warning: mysqli_real_connect(): Couldn't fetch mysqli in %s on line %d
+mysqli object is already closed
 done!

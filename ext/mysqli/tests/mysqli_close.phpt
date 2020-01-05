@@ -18,10 +18,13 @@ require_once('skipifconnectfailure.inc');
 	if (true !== $tmp)
 		printf("[005] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (false !== ($tmp = @mysqli_query($link, "SELECT 1")))
-		printf("[006] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+	try {
+        mysqli_query($link, "SELECT 1");
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
-?>
 --EXPECT--
+mysqli object is already closed
 done!

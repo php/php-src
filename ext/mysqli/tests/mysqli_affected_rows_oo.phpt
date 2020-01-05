@@ -11,8 +11,11 @@ mysqli->affected_rows
 	require_once("connect.inc");
 
 	$mysqli = new mysqli();
-	if (false !== ($tmp = @$mysqli->affected_rows))
-		printf("[000a] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+	try {
+	    $mysqli->affected_rows;
+	} catch (Error $exception) {
+	    echo $exception->getMessage() . "\n";
+	}
 
 	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket)) {
 		printf("[001] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
@@ -101,8 +104,11 @@ mysqli->affected_rows
 
 	$mysqli->close();
 
-	if (false !== ($tmp = @$mysqli->affected_rows))
-		printf("[026] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+	try {
+        $mysqli->affected_rows;
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -111,4 +117,6 @@ mysqli->affected_rows
 	require_once("clean_table.inc");
 ?>
 --EXPECT--
+Property access is not allowed yet
+Property access is not allowed yet
 done!

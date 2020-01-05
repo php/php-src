@@ -31,7 +31,11 @@ if (!function_exists('mysqli_enable_reads_from_master')) {
 	if (!is_bool($tmp = mysqli_enable_reads_from_master($link)))
 		printf("[004] Expecting boolean/[true|false] value, got %s/%s\n", gettype($tmp), $tmp);
 
-	mysqli_close($link);
+	try {
+	    mysqli_close($link);
+	} catch (Error $exception) {
+	    echo $exception->getMessage() . "\n";
+	}
 
 	if (NULL !== ($tmp = mysqli_enable_reads_from_master($link)))
 		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
@@ -39,5 +43,5 @@ if (!function_exists('mysqli_enable_reads_from_master')) {
 	print "done!";
 ?>
 --EXPECTF--
-Warning: mysqli_enable_reads_from_master(): Couldn't fetch mysqli in %s on line %d
+mysqli object is already closed
 done!

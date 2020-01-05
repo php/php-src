@@ -26,8 +26,11 @@ require_once("connect.inc");
 
 
 	$stmt = mysqli_stmt_init($link);
-	if (false !== ($tmp = @mysqli_stmt_attr_set($stmt, 0, 0)))
-		printf("[005] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_attr_set($stmt, 0, 0);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	$stmt->prepare("SELECT * FROM test");
 
@@ -259,4 +262,5 @@ require_once("connect.inc");
 	require_once("clean_table.inc");
 ?>
 --EXPECT--
+mysqli_stmt object is not fully initialized
 done!

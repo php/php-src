@@ -40,11 +40,13 @@ if (!$TEST_EXPERIMENTAL)
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = mysqli_send_query($link, 'SELECT 1')))
-		printf("[006] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
+	try {
+	    mysqli_send_query($link, 'SELECT 1');
+	} catch (Error $exception) {
+	    echo $exception->getMessage() . "\n";
+	}
 	print "done!";
 ?>
 --EXPECTF--
-Warning: mysqli_send_query(): Couldn't fetch mysqli in %s on line %d
+mysqli object is already closed
 done!

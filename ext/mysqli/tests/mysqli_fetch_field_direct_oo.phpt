@@ -11,7 +11,11 @@ require_once('skipifconnectfailure.inc');
 	require_once("connect.inc");
 
 	$mysqli = new mysqli();
-	$res = @new mysqli_result($mysqli);
+    try {
+        new mysqli_result($mysqli);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	require('table.inc');
 
@@ -29,8 +33,11 @@ require_once('skipifconnectfailure.inc');
 
 	$res->free_result();
 
-	if (false !== ($tmp = $res->fetch_field_direct(0)))
-		printf("[007] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        $res->fetch_field_direct(0);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	$mysqli->close();
 	print "done!";
@@ -40,6 +47,8 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
+mysqli object is not fully initialized
+
 Warning: mysqli_result::fetch_field_direct(): Field offset is invalid for resultset in %s on line %d
 bool(false)
 object(stdClass)#%d (13) {
@@ -73,6 +82,5 @@ object(stdClass)#%d (13) {
 
 Warning: mysqli_result::fetch_field_direct(): Field offset is invalid for resultset in %s on line %d
 bool(false)
-
-Warning: mysqli_result::fetch_field_direct(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
 done!

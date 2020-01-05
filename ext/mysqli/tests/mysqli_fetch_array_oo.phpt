@@ -271,8 +271,11 @@ require_once('skipifconnectfailure.inc');
 
 	$mysqli->close();
 
-	if (false !== ($tmp = $res->fetch_array(MYSQLI_ASSOC)))
-		printf("[015] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        $res->fetch_array(MYSQLI_ASSOC);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -357,6 +360,5 @@ array(11) {
 Warning: mysqli_result::fetch_array(): The result type should be either MYSQLI_NUM, MYSQLI_ASSOC or MYSQLI_BOTH in %s on line %d
 
 Warning: mysqli_result::fetch_array(): The result type should be either MYSQLI_NUM, MYSQLI_ASSOC or MYSQLI_BOTH in %s on line %d
-
-Warning: mysqli_result::fetch_array(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
 done!

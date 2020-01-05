@@ -56,13 +56,14 @@ require_once('skipifconnectfailure.inc');
 		printf("[012] Failed to create mysqli object\n");
 	} else {
 		// There shall be NO connection! Using new mysqli(void) shall not use defaults for a connection!
-			// We had long discussions on this and found that the ext/mysqli API as
-			// such is broken. As we can't fix it, we document how it has behaved from
-			// the first day on. And that's: no connection.
-			if (false !== ($tmp = @$mysqli->query('SELECT 1'))) {
-				printf("[013] There shall be no connection!\n");
-				$mysqli->close();
-			}
+		// We had long discussions on this and found that the ext/mysqli API as
+		// such is broken. As we can't fix it, we document how it has behaved from
+		// the first day on. And that's: no connection.
+        try {
+            $mysqli->query('SELECT 1');
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 	}
 
 	if ($IS_MYSQLND) {
@@ -75,9 +76,10 @@ require_once('skipifconnectfailure.inc');
 			// We had long discussions on this and found that the ext/mysqli API as
 			// such is broken. As we can't fix it, we document how it has behaved from
 			// the first day on. And that's: no connection.
-			if (false !== ($tmp = @$mysqli->query('SELECT 1'))) {
-				printf("[011] There shall be no connection!\n");
-				$mysqli->close();
+			try {
+			    $mysqli->query('SELECT 1');
+			} catch (Error $exception) {
+			    echo $exception->getMessage() . "\n";
 			}
 		}
 	}
@@ -148,6 +150,8 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 Warning: mysqli::__construct(): (%s/%d): Access denied for user '%sunknown%s'@'%s' (using password: %s) in %s on line %d
+mysqli object is not fully initialized
+mysqli object is not fully initialized
 ... and now Exceptions
 Access denied for user '%s'@'%s' (using password: %s)
 done!

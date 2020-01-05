@@ -23,7 +23,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_free_result($res);
 
-	var_dump(mysqli_fetch_row($res));
+    try {
+        mysqli_fetch_row($res);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 	print "done!";
@@ -32,7 +36,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 [004]
 array(3) {
   [0]=>
@@ -44,7 +48,5 @@ array(3) {
 }
 [005]
 NULL
-
-Warning: mysqli_fetch_row(): Couldn't fetch mysqli_result in %s on line %d
-bool(false)
+mysqli_result object is already closed
 done!
