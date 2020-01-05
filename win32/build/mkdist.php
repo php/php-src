@@ -497,6 +497,7 @@ foreach ($dirs as $dir) {
 	copy_test_dir($dir, $test_dir);
 }
 copy('run-tests.php', $test_dir . '/run-test.php');
+copy($build_dir . '/fakemail.exe', $test_dir . '/fakemail.exe');
 
 /* change this next line to true to use good-old
  * hand-assembled go-pear-bundle from the snapshot template */

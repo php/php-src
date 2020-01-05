@@ -203,7 +203,7 @@ build-snap: set-tmp-env generated_files
 	-for %T in ($(EXT_TARGETS)) do $(MAKE) /I /nologo "%T"
 	-for %T in ($(PECL_TARGETS)) do $(MAKE) /I /nologo "%T"
 
-build-dist: $(BUILD_DIR)\deplister.exe
+build-dist: $(BUILD_DIR)\deplister.exe $(BUILD_DIR)\fakemail.exe
 	-rd /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 	-rd /s /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)
 	-del /f /q $(BUILD_DIR)\$(DIST_ZIP_SNAP)
@@ -226,6 +226,9 @@ snap: build-snap build-devel build-dist
 
 $(BUILD_DIR)\deplister.exe:	win32\build\deplister.c
 	$(CC) /nologo /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
+
+$(BUILD_DIR)\fakemail.exe:	win32\build\fakemail.c
+	$(CC) /nologo /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\fakemail.exe win32\build\fakemail.c
 
 install: really-install install-sdk
 
