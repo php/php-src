@@ -1,13 +1,8 @@
 --TEST--
 Bug #51604 (newline in end of header is shown in start of message)
 --INI--
-sendmail_path=tee mail_bug51604.out >/dev/null
+sendmail_path={MAIL:mail_bug51604.out}
 mail.add_x_header = Off
---SKIPIF--
-<?php
-if(substr(PHP_OS, 0, 3) == "WIN")
-  die("skip Won't run on Windows");
-?>
 --FILE--
 <?php
 // Initialise all required variables
