@@ -49,6 +49,10 @@ PHP                                                                        NEWS
 - Shmop:
   . Fixed bug #78538 (shmop memory leak). (cmb)
 
+- Standard:
+  . Fixed bug #54298 (Using empty additional_headers adding extraneous CRLF).
+    (cmb)
+
 18 Dec 2019, PHP 7.3.13
 
 - Bcmath:
