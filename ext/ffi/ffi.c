@@ -899,7 +899,7 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value, uint32_t
 
 	if (!zend_is_callable_ex(value, NULL, 0, NULL, &fcc, &error)) {
 		if(n >= 1000) {
-            zend_throw_error(zend_ffi_exception_ce, "Attempt to assign invalid callback, %s", n, error);
+            zend_throw_error(zend_ffi_exception_ce, "Attempt to assign invalid callback, %s", error);
         } else {
 		    zend_throw_error(zend_ffi_exception_ce, "Attempt to assign parameter %d to be invalid callback, %s", n, error);
         }
