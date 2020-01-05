@@ -34,21 +34,22 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	var_dump(mysqli_field_count($link));
+    try {
+        mysqli_field_count($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
-?>
 --CLEAN--
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
 int(2)
 int(0)
 int(0)
 int(3)
-
-Warning: mysqli_field_count(): Couldn't fetch mysqli in %s on line %d
-bool(false)
+mysqli object is already closed
 done!

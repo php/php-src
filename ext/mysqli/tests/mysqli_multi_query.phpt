@@ -102,7 +102,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	var_dump(mysqli_multi_query($link, "SELECT id, label FROM test"));
+    try {
+        mysqli_multi_query($link, "SELECT id, label FROM test");
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -115,7 +119,5 @@ require_once('skipifconnectfailure.inc');
 [008] 0
 [009] [2014] Commands out of sync; you can't run this command now
 [010] 7
-
-Warning: mysqli_multi_query(): Couldn't fetch mysqli in %s on line %d
-bool(false)
+mysqli object is already closed
 done!

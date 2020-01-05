@@ -18,11 +18,14 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (false !== ($tmp = mysqli_stat($link)))
-		printf("[005] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stat($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
---EXPECTF--
-Warning: mysqli_stat(): Couldn't fetch mysqli in %s on line %d
+--EXPECT--
+mysqli object is already closed
 done!

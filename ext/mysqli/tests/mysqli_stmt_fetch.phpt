@@ -21,8 +21,11 @@ require_once('skipifconnectfailure.inc');
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	// stmt object status test
-	if (false !== ($tmp = mysqli_stmt_fetch($stmt)))
-		printf("[004] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_fetch($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 2"))
 		printf("[005] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -64,8 +67,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_stmt_close($stmt);
 
-	if (false !== ($tmp = mysqli_stmt_fetch($stmt)))
-		printf("[016] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_fetch($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 
@@ -76,9 +82,7 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_stmt_fetch(): invalid object or resource mysqli_stmt
- in %s on line %d
+mysqli_stmt object is not fully initialized
 [014] [%d] Commands out of sync; you can't run this command now
-
-Warning: mysqli_stmt_fetch(): Couldn't fetch mysqli_stmt in %s on line %d
+mysqli_stmt object is already closed
 done!

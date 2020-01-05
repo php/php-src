@@ -75,8 +75,11 @@ mysqli_close($link);
 
 	mysqli_close($link);
 
-	if (false !== ($tmp = mysqli_query($link, "SELECT id FROM test")))
-		printf("[014] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+	try {
+        mysqli_query($link, "SELECT id FROM test");
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -85,6 +88,5 @@ array(1) {
   ["правилен"]=>
   string(%d) "това ескюел, но с точка и запетая"
 }
-
-Warning: mysqli_query(): Couldn't fetch mysqli in %s on line %d
+mysqli object is already closed
 done!

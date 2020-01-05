@@ -117,7 +117,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	var_dump(mysqli_insert_id($link));
+    try {
+        mysqli_insert_id($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -125,7 +129,6 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
-Warning: mysqli_insert_id(): Couldn't fetch mysqli in %s on line %d
-bool(false)
+--EXPECT--
+mysqli object is already closed
 done!

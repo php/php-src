@@ -55,7 +55,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	var_dump(mysqli_next_result($link));
+    try {
+        mysqli_next_result($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -64,7 +68,5 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-
-Warning: mysqli_next_result(): Couldn't fetch mysqli in %s on line %d
-bool(false)
+mysqli object is already closed
 done!

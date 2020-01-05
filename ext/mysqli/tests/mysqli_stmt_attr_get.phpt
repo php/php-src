@@ -25,8 +25,12 @@ require_once('skipifconnectfailure.inc');
 
 	$stmt = mysqli_stmt_init($link);
 	mysqli_stmt_prepare($stmt, 'SELECT * FROM test');
-	if (false !== ($tmp = @mysqli_stmt_attr_get($stmt, $invalid_attr)))
-		printf("[005] Expecting boolean/false, got %s/%s\n", gettype($tmp), $tmp);
+
+    try {
+        mysqli_stmt_attr_get($stmt, $invalid_attr);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	foreach ($valid_attr as $k => $attr) {
 		if (false === ($tmp = mysqli_stmt_attr_get($stmt, $attr))) {
@@ -38,10 +42,11 @@ require_once('skipifconnectfailure.inc');
 	$stmt->close();
 
 	foreach ($valid_attr as $k => $attr) {
-		if (false !== ($tmp = @mysqli_stmt_attr_get($stmt, $attr))) {
-			printf("[007] Expecting false, got %s/%s for attribute %s/%s\n",
-				gettype($tmp), $tmp, $k, $attr);
-		}
+        try {
+            mysqli_stmt_attr_get($stmt, $attr);
+        } catch (Error $exception) {
+            echo $exception->getMessage() . "\n";
+        }
 	}
 
 	mysqli_close($link);
@@ -52,4 +57,7 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECT--
+mysqli_stmt object is already closed
+mysqli_stmt object is already closed
+mysqli_stmt object is already closed
 done!

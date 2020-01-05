@@ -47,8 +47,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_free_result($res);
 
-	if (false !== ($tmp = mysqli_fetch_fields($res)))
-		printf("[006] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_fetch_fields($res);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 	print "done!";
@@ -114,6 +117,5 @@ object(stdClass)#%d (13) {
   ["decimals"]=>
   int(0)
 }
-
-Warning: mysqli_fetch_fields(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
 done!

@@ -12,7 +12,12 @@ require_once('skipifconnectfailure.inc');
 
 	// Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
 	$mysqli = new mysqli();
-	$res = @new mysqli_result($mysqli);
+	$res = false;
+    try {
+        new mysqli_result($mysqli);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	require('table.inc');
 	if (!$mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket))
@@ -51,8 +56,11 @@ require_once('skipifconnectfailure.inc');
 
 	$res->free_result();
 
-	if (false !== ($tmp = $res->fetch_field()))
-		printf("[007] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        $res->fetch_field();
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	$mysqli->close();
 	print "done!";
@@ -62,6 +70,7 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
+mysqli object is not fully initialized
 object(stdClass)#%d (13) {
   ["name"]=>
   string(2) "ID"
@@ -119,6 +128,5 @@ object(stdClass)#%d (13) {
   int(0)
 }
 bool(false)
-
-Warning: mysqli_result::fetch_field(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
 done!

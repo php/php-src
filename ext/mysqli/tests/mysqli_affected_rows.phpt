@@ -110,8 +110,11 @@ mysqli_affected_rows()
 
 	mysqli_close($link);
 
-	if (false !== ($tmp = @mysqli_affected_rows($link)))
-		printf("[033] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+	try {
+	    mysqli_affected_rows($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -120,4 +123,5 @@ mysqli_affected_rows()
 	require_once("clean_table.inc");
 ?>
 --EXPECT--
+mysqli object is already closed
 done!

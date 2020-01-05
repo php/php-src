@@ -51,8 +51,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_free_result($res);
 
-	if (false !== ($tmp = mysqli_fetch_assoc($res)))
-		printf("[008] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_fetch_assoc($res);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 
@@ -62,7 +65,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 [005]
 array(2) {
   ["id"]=>
@@ -105,6 +108,5 @@ array(15) {
   ["-02"]=>
   string(1) "f"
 }
-
-Warning: mysqli_fetch_assoc(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
 done!

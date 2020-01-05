@@ -86,7 +86,11 @@ require_once('skipifconnectfailure.inc');
 	}
 
 	mysqli_free_result($res);
-	var_dump(mysqli_fetch_object($res));
+	try {
+        mysqli_fetch_object($res);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 5"))
 			printf("[010] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -140,8 +144,7 @@ Exception: Too few arguments to function mysqli_fetch_object_construct::__constr
 Exception: Too few arguments to function mysqli_fetch_object_construct::__construct(), 1 passed and exactly 2 expected
 NULL
 NULL
-[E_WARNING] mysqli_fetch_object(): Couldn't fetch mysqli_result in %s on line %d
-bool(false)
+mysqli_result object is already closed
 [0] mysqli_fetch_object() expects parameter 3 to be array, string given in %s on line %d
 
 Fatal error: Class 'this_class_does_not_exist' not found in %s on line %d

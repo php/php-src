@@ -15,8 +15,11 @@ require_once('skipifconnectfailure.inc');
 	if (!$stmt = mysqli_stmt_init($link))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (false !== ($tmp = mysqli_stmt_result_metadata($stmt)))
-		printf("[004] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_result_metadata($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test"))
 		printf("[005] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -73,8 +76,11 @@ require_once('skipifconnectfailure.inc');
 	mysqli_free_result($res);
 	mysqli_stmt_close($stmt);
 
-	if (false !== ($tmp = mysqli_stmt_result_metadata($stmt)))
-		printf("[017] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	try {
+        mysqli_stmt_result_metadata($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 	print "done!";
@@ -84,9 +90,8 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_stmt_result_metadata(): invalid object or resource mysqli_stmt
- in %s on line %d
-object(stdClass)#5 (13) {
+mysqli_stmt object is not fully initialized
+object(stdClass)#%d (13) {
   ["name"]=>
   string(2) "id"
   ["orgname"]=>
@@ -114,6 +119,5 @@ object(stdClass)#5 (13) {
   ["decimals"]=>
   int(0)
 }
-
-Warning: mysqli_stmt_result_metadata(): Couldn't fetch mysqli_stmt in %s on line %d
+mysqli_stmt object is already closed
 done!

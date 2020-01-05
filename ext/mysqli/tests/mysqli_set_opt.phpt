@@ -28,11 +28,15 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	var_dump(mysqli_set_opt($link, MYSQLI_INIT_COMMAND, 'SET AUTOCOMMIT=1'));
+	try {
+        mysqli_set_opt($link, MYSQLI_INIT_COMMAND, 'SET AUTOCOMMIT=1');
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)
@@ -45,7 +49,5 @@ bool(true)
 bool(true)
 bool(true)
 bool(false)
-
-Warning: mysqli_set_opt(): Couldn't fetch mysqli in %s on line %d
-bool(false)
+mysqli object is already closed
 done!

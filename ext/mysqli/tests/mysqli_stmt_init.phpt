@@ -23,12 +23,19 @@ require_once('skipifconnectfailure.inc');
 	if (!is_object($stmt2 = @mysqli_stmt_init($link)))
 		printf("[003a] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	mysqli_stmt_close($stmt);
+	try {
+        mysqli_stmt_close($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 
-	if (false !== ($tmp = mysqli_stmt_init($link)))
-		printf("[005] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_init($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -36,9 +43,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
-Warning: mysqli_stmt_close(): invalid object or resource mysqli_stmt
- in %s on line %d
-
-Warning: mysqli_stmt_init(): Couldn't fetch mysqli in %s on line %d
+--EXPECT--
+mysqli_stmt object is not fully initialized
+mysqli object is already closed
 done!

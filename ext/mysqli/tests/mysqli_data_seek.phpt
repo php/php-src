@@ -44,8 +44,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_free_result($res);
 
-	if (false !== ($tmp = mysqli_data_seek($res, 1)))
-		printf("[013] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_data_seek($res, 1);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 
@@ -57,6 +60,5 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 Warning: mysqli_data_seek(): Function cannot be used with MYSQL_USE_RESULT in %s on line %d
-
-Warning: mysqli_data_seek(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
 done!

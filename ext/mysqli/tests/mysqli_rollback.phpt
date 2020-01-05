@@ -49,8 +49,11 @@ mysqli_rollback()
 
 	mysqli_close($link);
 
-	if (false !== ($tmp = mysqli_rollback($link)))
-		printf("[014] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_rollback($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!\n";
 ?>
@@ -58,6 +61,6 @@ mysqli_rollback()
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
-Warning: mysqli_rollback(): Couldn't fetch mysqli in %s on line %d
+--EXPECT--
+mysqli object is already closed
 done!

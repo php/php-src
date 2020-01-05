@@ -90,8 +90,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (false !== ($tmp = mysqli_query($link, "SELECT id FROM test")))
-		printf("[011] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_query($link, "SELECT id FROM test");
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -109,7 +112,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   ["valid"]=>
   string(30) "this is sql but with semicolon"
@@ -119,6 +122,5 @@ array(1) {
   string(1) "a"
 }
 string(1) "a"
-
-Warning: mysqli_query(): Couldn't fetch mysqli in %s on line %d
+mysqli object is already closed
 done!

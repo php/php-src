@@ -24,8 +24,11 @@ if (!function_exists('mysqli_stmt_get_result'))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	// stmt object status test
-	if (false !== ($tmp = mysqli_stmt_fetch($stmt)))
-		printf("[004] Expecting false, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
+    try {
+        mysqli_stmt_fetch($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 2"))
 		printf("[005] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -49,8 +52,11 @@ if (!function_exists('mysqli_stmt_get_result'))
 		printf("[010] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	// stmt object status test
-	if (false !== ($tmp = mysqli_stmt_fetch($stmt)))
-		printf("[011] Expecting false, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
+    try {
+        mysqli_stmt_fetch($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 2"))
 		printf("[012] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -72,8 +78,11 @@ if (!function_exists('mysqli_stmt_get_result'))
 		printf("[017] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	// stmt object status test
-	if (false !== ($tmp = mysqli_stmt_get_result($stmt)))
-		printf("[018] Expecting false, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
+    try {
+        mysqli_stmt_get_result($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 2"))
 		printf("[019] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -139,8 +148,11 @@ if (!function_exists('mysqli_stmt_get_result'))
 
 	mysqli_stmt_close($stmt);
 
-	if (false !== ($tmp = mysqli_stmt_fetch($stmt)))
-		printf("[042] Expecting false, got %s/%s\n", gettype($tmp), var_export($tmp, 1));
+	try {
+        mysqli_stmt_fetch($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 
@@ -151,14 +163,9 @@ if (!function_exists('mysqli_stmt_get_result'))
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_stmt_fetch(): invalid object or resource mysqli_stmt
- in %s on line %d
-
-Warning: mysqli_stmt_fetch(): invalid object or resource mysqli_stmt
- in %s on line %d
-
-Warning: mysqli_stmt_get_result(): invalid object or resource mysqli_stmt
- in %s on line %d
+mysqli_stmt object is not fully initialized
+mysqli_stmt object is not fully initialized
+mysqli_stmt object is not fully initialized
 [038] [2014] [Commands out of sync; you can't run this command now]
 [039] [0] []
 array(2) {
@@ -173,6 +180,5 @@ array(2) {
   ["label"]=>
   %s(1) "b"
 }
-
-Warning: mysqli_stmt_fetch(): Couldn't fetch mysqli_stmt in %s on line %d
+mysqli_stmt object is already closed
 done!

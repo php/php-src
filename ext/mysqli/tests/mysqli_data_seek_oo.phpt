@@ -16,8 +16,12 @@ require_once('skipifconnectfailure.inc');
 		$host, $user, $db, $port, $socket);
 
 	$res = new mysqli_result($mysqli);
-	if (false !== ($tmp = @$res->data_seek(0)))
-		printf("[002] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+
+    try {
+        $res->data_seek(0);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	if (!$res = $mysqli->query('SELECT * FROM test ORDER BY id LIMIT 4', MYSQLI_STORE_RESULT))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -52,19 +56,22 @@ require_once('skipifconnectfailure.inc');
 
 	$res->free_result();
 
-	if (false !== ($tmp = $res->data_seek(1)))
-		printf("[015] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        $res->data_seek(1);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	$mysqli->close();
 
 	print "done!";
-?>
 --CLEAN--
 <?php
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_result::data_seek(): Function cannot be used with MYSQL_USE_RESULT in %s on line %d
+mysqli_result object is already closed
 
-Warning: mysqli_result::data_seek(): Couldn't fetch mysqli_result in %s on line %d
+Warning: mysqli_result::data_seek(): Function cannot be used with MYSQL_USE_RESULT in %s on line %d
+mysqli_result object is already closed
 done!

@@ -23,13 +23,13 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (false !== ($tmp = mysqli_dump_debug_info($link)))
-		printf("[005] Expecting NULL, got %s/%s, [%d] %s\n",
-			gettype($tmp), $tmp,
-			mysqli_errno($link), mysqli_error($link));
+    try {
+        mysqli_dump_debug_info($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
-?>
---EXPECTF--
-Warning: mysqli_dump_debug_info(): Couldn't fetch mysqli in %s on line %d
+--EXPECT--
+mysqli object is already closed
 done!

@@ -13,8 +13,12 @@ require_once('skipifconnectfailure.inc');
 	require('table.inc');
 
 	$stmt = mysqli_stmt_init($link);
-	if (false !== ($tmp = @mysqli_stmt_insert_id($stmt)))
-		printf("[003] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+
+    try {
+        mysqli_stmt_insert_id($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 1") ||
 		!mysqli_stmt_execute($stmt)) {
@@ -53,7 +57,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	var_dump(mysqli_stmt_insert_id($stmt));
+	try {
+        mysqli_stmt_insert_id($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -61,7 +69,7 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
-Warning: mysqli_stmt_insert_id(): Couldn't fetch mysqli_stmt in %s on line %d
-bool(false)
+--EXPECT--
+mysqli_stmt object is not fully initialized
+mysqli_stmt object is already closed
 done!

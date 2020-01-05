@@ -22,8 +22,11 @@ require_once('skipifconnectfailure.inc');
 	$label = null;
 	$foo = null;
 
-	if (false !== ($tmp = mysqli_stmt_bind_result($stmt, $id)))
-		printf("[003] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_bind_result($stmt, $id);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 1"))
 		printf("[004] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -300,8 +303,7 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_stmt_bind_result(): invalid object or resource mysqli_stmt
- in %s on line %d
+mysqli_stmt object is not fully initialized
 
 Warning: mysqli_stmt_bind_result(): Number of bind variables doesn't match number of fields in prepared statement in %s on line %d
 

@@ -50,7 +50,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	var_dump(mysqli_more_results($link));
+    try {
+        mysqli_more_results($link);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -67,7 +71,5 @@ bool(false)
 [010]
 1
 2
-
-Warning: mysqli_more_results(): Couldn't fetch mysqli in %s on line %d
-bool(false)
+mysqli object is already closed
 done!

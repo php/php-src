@@ -88,8 +88,13 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	echo "Link closed";
-	var_dump("MYSQLI_INIT_COMMAND", mysqli_options($link, MYSQLI_INIT_COMMAND, 'SET AUTOCOMMIT=1'));
+	echo "Link closed\n";
+	try {
+        mysqli_options($link, MYSQLI_INIT_COMMAND, 'SET AUTOCOMMIT=1');
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
+
 	print "done!";
 ?>
 --EXPECTF--
@@ -118,7 +123,5 @@ bool(true)
 %s(17) "MYSQLI_CLIENT_SSL"
 bool(false)
 Link closed
-Warning: mysqli_options(): Couldn't fetch mysqli in %s line %d
-%s(19) "MYSQLI_INIT_COMMAND"
-bool(false)
+mysqli object is already closed
 done!

@@ -15,8 +15,11 @@ require_once('skipifconnectfailure.inc');
 	if (!$stmt = mysqli_stmt_init($link))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (false !== ($tmp = mysqli_stmt_param_count($stmt)))
-		printf("[004] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_param_count($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	function func_test_mysqli_stmt_param_count($stmt, $query, $expected, $offset) {
 
@@ -39,8 +42,11 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_stmt_close($stmt);
 
-	if (false !== ($tmp = mysqli_stmt_param_count($stmt)))
-		printf("[40] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_param_count($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 
@@ -51,8 +57,6 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_stmt_param_count(): invalid object or resource mysqli_stmt
- in %s on line %d
-
-Warning: mysqli_stmt_param_count(): Couldn't fetch mysqli_stmt in %s on line %d
+mysqli_stmt object is not fully initialized
+mysqli_stmt object is already closed
 done!

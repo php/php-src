@@ -113,8 +113,11 @@ require_once('skipifconnectfailure.inc');
 	if (!is_object($res = new mysqli_result($link)))
 		printf("[001] Expecting object/mysqli_result got %s/%s\n", gettye($res), $res);
 
-	if (null !== ($tmp = @$res->num_rows))
-		printf("[002] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
+	try {
+        $res->num_rows;
+	} catch (Error $exception) {
+	    echo $exception->getMessage() . "\n";
+	}
 
 	if (!mysqli_query($link, "SELECT id FROM test ORDER BY id"))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -177,4 +180,5 @@ Access to undefined properties:
 mysqli_result->unknown = ''
 
 Constructor:
+mysqli_result object is already closed
 done!

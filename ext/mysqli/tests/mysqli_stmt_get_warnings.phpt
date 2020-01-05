@@ -31,8 +31,11 @@ mysqli_query($link, "DROP TABLE IF EXISTS test");
 	if (!$stmt = mysqli_stmt_init($link))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (false !== ($tmp = mysqli_stmt_get_warnings($stmt)))
-		printf("[004] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+	try {
+        mysqli_stmt_get_warnings($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	if (!mysqli_stmt_prepare($stmt, "SET sql_mode=''") || !mysqli_stmt_execute($stmt))
 		printf("[005] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -83,8 +86,11 @@ mysqli_query($link, "DROP TABLE IF EXISTS test");
 
 	mysqli_stmt_close($stmt);
 
-	if (false !== ($tmp = mysqli_stmt_get_warnings($stmt)))
-		printf("[018] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_stmt_get_warnings($stmt);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 	print "done!";
@@ -93,9 +99,7 @@ mysqli_query($link, "DROP TABLE IF EXISTS test");
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
-Warning: mysqli_stmt_get_warnings(): invalid object or resource mysqli_stmt
- in %s on line %d
-
-Warning: mysqli_stmt_get_warnings(): Couldn't fetch mysqli_stmt in %s on line %d
+--EXPECT--
+mysqli_stmt object is not fully initialized
+mysqli_stmt object is already closed
 done!

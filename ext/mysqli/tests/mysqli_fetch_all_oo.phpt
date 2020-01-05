@@ -298,8 +298,11 @@ if (!function_exists('mysqli_fetch_all'))
 
 	mysqli_close($link);
 
-	if (false !== ($tmp = $res->fetch_array(MYSQLI_ASSOC)))
-		printf("[015] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        $res->fetch_array(MYSQLI_ASSOC);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -435,6 +438,5 @@ array(1) {
 }
 
 Warning: mysqli_result::fetch_all(): Mode can be only MYSQLI_FETCH_NUM, MYSQLI_FETCH_ASSOC or MYSQLI_FETCH_BOTH in %s on line %d
-
-Warning: mysqli_result::fetch_array(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
 done!

@@ -193,15 +193,27 @@ if (!function_exists('mysqli_stmt_get_result'))
 	$res->free_result();
 	mysqli_free_result($res_meta);
 
-	var_dump(mysqli_fetch_field($res));
+	try {
+        mysqli_fetch_field($res);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_stmt_close($stmt);
 
-	var_dump(mysqli_fetch_field($res));
+	try {
+        mysqli_fetch_field($res);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	mysqli_close($link);
 
-	var_dump(mysqli_fetch_field($res));
+	try {
+        mysqli_fetch_field($res);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
 	print "done!";
 ?>
@@ -225,13 +237,7 @@ _id
 _label
 _null
 _label_concat
-
-Warning: mysqli_fetch_field(): Couldn't fetch mysqli_result in %s on line %d
-bool(false)
-
-Warning: mysqli_fetch_field(): Couldn't fetch mysqli_result in %s on line %d
-bool(false)
-
-Warning: mysqli_fetch_field(): Couldn't fetch mysqli_result in %s on line %d
-bool(false)
+mysqli_result object is already closed
+mysqli_result object is already closed
+mysqli_result object is already closed
 done!
