@@ -211,7 +211,7 @@ static ZEND_COLD void zend_ffi_pass_unsupported(zend_ffi_type *type);
 static ZEND_COLD void zend_ffi_assign_incompatible(zval *arg, zend_ffi_type *type);
 
 #if FFI_CLOSURES
-static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value);
+static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value, uint32_t n);
 #endif
 
 static zend_always_inline void zend_ffi_type_dtor(zend_ffi_type *type) /* {{{ */
@@ -745,7 +745,7 @@ again:
 				}
 #if FFI_CLOSURES
 			} else if (ZEND_FFI_TYPE(type->pointer.type)->kind == ZEND_FFI_TYPE_FUNC) {
-				void *callback = zend_ffi_create_callback(ZEND_FFI_TYPE(type->pointer.type), value);
+				void *callback = zend_ffi_create_callback(ZEND_FFI_TYPE(type->pointer.type), value, 1000);
 
 				if (callback) {
 					*(void**)ptr = callback;
@@ -883,7 +883,7 @@ static void zend_ffi_callback_trampoline(ffi_cif* cif, void* ret, void** args, v
 }
 /* }}} */
 
-static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ */
+static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value, uint32_t n) /* {{{ */
 {
 	zend_fcall_info_cache fcc;
 	char *error = NULL;
@@ -898,7 +898,11 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value) /* {{{ *
 	}
 
 	if (!zend_is_callable_ex(value, NULL, 0, NULL, &fcc, &error)) {
-		zend_throw_error(zend_ffi_exception_ce, "Attempt to assign an invalid callback, %s", error);
+		if(n >= 1000) {
+            zend_throw_error(zend_ffi_exception_ce, "Attempt to assign invalid callback, %s", n, error);
+        } else {
+		    zend_throw_error(zend_ffi_exception_ce, "Attempt to assign parameter %d to be invalid callback, %s", n, error);
+        }
 		return NULL;
 	}
 
@@ -2474,7 +2478,7 @@ again:
 				}
 #if FFI_CLOSURES
 			} else if (ZEND_FFI_TYPE(type->pointer.type)->kind == ZEND_FFI_TYPE_FUNC) {
-				void *callback = zend_ffi_create_callback(ZEND_FFI_TYPE(type->pointer.type), arg);
+				void *callback = zend_ffi_create_callback(ZEND_FFI_TYPE(type->pointer.type), arg, n);
 
 				if (callback) {
 					*(void**)arg_values[n] = callback;
