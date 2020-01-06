@@ -24,6 +24,7 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #78923 (Artifacts when convoluting image with transparency).
     (wilson chen)
+  . Fixed bug #79067 (gdTransformAffineCopy() may use unitialized values). (cmb)
 
 - Libxml:
   . Fixed bug #79029 (Use After Free's in XMLReader / XMLWriter). (Laruence)
