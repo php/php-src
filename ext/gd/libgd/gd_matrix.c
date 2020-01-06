@@ -55,7 +55,7 @@ int gdAffineApplyToPointF (gdPointFPtr dst, const gdPointFPtr src,
  *  <gdAffineIdentity>
  *
  * Returns:
- *  GD_TRUE if the affine is rectilinear or GD_FALSE
+ *  GD_TRUE on success or GD_FALSE on failure
  */
 int gdAffineInvert (double dst[6], const double src[6])
 {
