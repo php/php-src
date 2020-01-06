@@ -7,7 +7,6 @@ PHP                                                                        NEWS
     (Dmitry)
 
 - CURL:
-  . Implemented FR #77711 (CURLFile should support UNICODE filenames). (cmb)
   . Fixed bug #79033 (Curl timeout error with specific url and post). (cmb)
 
 - Date:
