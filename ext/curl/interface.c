@@ -41,22 +41,17 @@
 #endif
 
 /* {{{ cruft for thread safe SSL crypto locks */
-#if defined(ZTS) && defined(HAVE_CURL_SSL)
-# ifdef PHP_WIN32
+#if defined(ZTS) && defined(HAVE_CURL_OPENSSL)
+# if defined(HAVE_OPENSSL_CRYPTO_H)
 #  define PHP_CURL_NEED_OPENSSL_TSL
 #  include <openssl/crypto.h>
-# elif defined(HAVE_CURL_OPENSSL)
-#  if defined(HAVE_OPENSSL_CRYPTO_H)
-#   define PHP_CURL_NEED_OPENSSL_TSL
-#   include <openssl/crypto.h>
-#  else
-#   warning \
+# else
+#  warning \
 	"libcurl was compiled with OpenSSL support, but configure could not find " \
 	"openssl/crypto.h; thus no SSL crypto locking callbacks will be set, which may " \
 	"cause random crashes on SSL requests"
-#  endif
-# endif /* HAVE_CURL_OPENSSL */
-#endif /* ZTS && HAVE_CURL_SSL */
+# endif
+#endif /* ZTS && HAVE_CURL_OPENSSL */
 /* }}} */
 
 #define SMART_STR_PREALLOC 4096
