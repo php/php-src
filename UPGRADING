@@ -394,6 +394,8 @@ PHP 8.0 UPGRADE NOTES
     imagefilledpolygon() is now optional, i.e. these functions may be called
     with either 3 or 4 arguments. If the arguments is omitted, it is calculated
     as count($points)/2.
+  . The function imagegetinterpolation() to get the current interpolation method
+    has been added.
 
 ========================================
 10. New Global Constants

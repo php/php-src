@@ -556,6 +556,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imageaffinematrixconcat, 0, 2, M
 	ZEND_ARG_TYPE_INFO(0, m2, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_imagegetinterpolation arginfo_imagecolorstotal
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imagesetinterpolation, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, im, GdImage, 0)
 	ZEND_ARG_TYPE_INFO(0, method, IS_LONG, 0)
