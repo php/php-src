@@ -3936,12 +3936,6 @@ PHP_FUNCTION(imageaffine)
 			RETURN_THROWS();
 		}
 		pRect = &rect;
-	} else {
-		rect.x = -1;
-		rect.y = -1;
-		rect.width = gdImageSX(src);
-		rect.height = gdImageSY(src);
-		pRect = NULL;
 	}
 
 	if (gdTransformAffineGetImage(&dst, src, pRect, affine) != GD_TRUE) {
