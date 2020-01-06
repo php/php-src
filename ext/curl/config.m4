@@ -23,8 +23,6 @@ if test "$PHP_CURL" != "no"; then
   esac
 
   if test "$CURL_SSL" = yes; then
-    AC_DEFINE([HAVE_CURL_SSL], [1], [Have cURL with  SSL support])
-
     save_CFLAGS="$CFLAGS"
     CFLAGS="$CFLAGS $CURL_CFLAGS"
     save_LDFLAGS="$LDFLAGS"
