@@ -3462,13 +3462,6 @@ static void get_unlinked_dependency(zend_class_entry *ce, const char **kind, con
 			*name = ZSTR_VAL(ce->parent_name);
 			return;
 		}
-#ifdef ZEND_WIN32
-		if (p->type == ZEND_INTERNAL_CLASS) {
-			*kind = "Windows can't link to internal parent ";
-			*name = ZSTR_VAL(ce->parent_name);
-			return;
-		}
-#endif
 		if (!(p->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 			*kind = "Parent with unresolved initializers ";
 			*name = ZSTR_VAL(ce->parent_name);
@@ -3576,12 +3569,6 @@ static zend_class_entry *preload_fetch_resolved_ce(zend_string *name, zend_class
 		/* Ignore the following requirements if this is the class referring to itself */
 		return ce;
 	}
-#ifdef ZEND_WIN32
-	/* On Windows we can't link with internal class, because of ASLR */
-	if (ce->type == ZEND_INTERNAL_CLASS) {
-		return NULL;
-	}
-#endif
 	if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 		return NULL;
 	}
@@ -3752,10 +3739,6 @@ static void preload_link(void)
 					parent = zend_hash_find_ptr(EG(class_table), key);
 					zend_string_release(key);
 					if (!parent) continue;
-#ifdef ZEND_WIN32
-					/* On Windows we can't link with internal class, because of ASLR */
-					if (parent->type == ZEND_INTERNAL_CLASS) continue;
-#endif
 					if (!(parent->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 						continue;
 					}
@@ -3772,13 +3755,6 @@ static void preload_link(void)
 							found = 0;
 							break;
 						}
-#ifdef ZEND_WIN32
-						/* On Windows we can't link with internal class, because of ASLR */
-						if (p->type == ZEND_INTERNAL_CLASS) {
-							found = 0;
-							break;
-						}
-#endif
 						if (!(p->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 							found = 0;
 							break;
@@ -3795,13 +3771,6 @@ static void preload_link(void)
 							found = 0;
 							break;
 						}
-#ifdef ZEND_WIN32
-						/* On Windows we can't link with internal class, because of ASLR */
-						if (p->type == ZEND_INTERNAL_CLASS) {
-							found = 0;
-							break;
-						}
-#endif
 					}
 					if (!found) continue;
 				}
@@ -3945,26 +3914,6 @@ static void preload_link(void)
 	} ZEND_HASH_FOREACH_END();
 }
 
-#ifdef ZEND_WIN32
-static void preload_check_windows_restriction(zend_class_entry *scope, zend_class_entry *ce) {
-	if (ce && ce->type == ZEND_INTERNAL_CLASS) {
-		zend_error_noreturn(E_ERROR,
-			"Class %s uses internal class %s during preloading, which is not supported on Windows",
-			ZSTR_VAL(scope->name), ZSTR_VAL(ce->name));
-	}
-}
-
-static void preload_check_windows_restrictions(zend_class_entry *scope) {
-	uint32_t i;
-
-	preload_check_windows_restriction(scope, scope->parent);
-
-	for (i = 0; i < scope->num_interfaces; i++) {
-		preload_check_windows_restriction(scope, scope->interfaces[i]);
-	}
-}
-#endif
-
 static inline int preload_update_class_constants(zend_class_entry *ce) {
 	/* This is a separate function to work around what appears to be a bug in GCC
 	 * maybe-uninitialized analysis. */
@@ -4016,10 +3965,6 @@ static void preload_ensure_classes_loadable() {
 				 * things when linking additional classes. */
 				continue;
 			}
-
-#ifdef ZEND_WIN32
-			preload_check_windows_restrictions(ce);
-#endif
 
 			if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 				if (preload_update_class_constants(ce) == FAILURE) {
@@ -4698,9 +4643,11 @@ static int accel_finish_startup(void)
 	}
 
 	if (ZCG(accel_directives).preload && *ZCG(accel_directives).preload) {
-#ifndef ZEND_WIN32
+#ifdef ZEND_WIN32
+		zend_accel_error(ACCEL_LOG_ERROR, "Preloading is not supported on Windows");
+		return FAILURE;
+#else
 		int in_child = 0;
-#endif
 		int ret = SUCCESS;
 		int rc;
 		int orig_error_reporting;
@@ -4734,7 +4681,6 @@ static int accel_finish_startup(void)
 			return SUCCESS;
 		}
 
-#ifndef ZEND_WIN32
 		if (geteuid() == 0) {
 			pid_t pid;
 			struct passwd *pw;
@@ -4798,7 +4744,6 @@ static int accel_finish_startup(void)
 				zend_accel_error(ACCEL_LOG_WARNING, "\"opcache.preload_user\" is ignored");
 			}
 		}
-#endif
 
 		sapi_module.activate = NULL;
 		sapi_module.deactivate = NULL;
@@ -4810,11 +4755,9 @@ static int accel_finish_startup(void)
 		sapi_module.ub_write = preload_ub_write;
 		sapi_module.flush = preload_flush;
 
-#ifndef ZEND_WIN32
 		if (in_child) {
 			CG(compiler_options) |= ZEND_COMPILE_PRELOAD_IN_CHILD;
 		}
-#endif
 		CG(compiler_options) |= ZEND_COMPILE_PRELOAD;
 		CG(compiler_options) |= ZEND_COMPILE_HANDLE_OP_ARRAY;
 		CG(compiler_options) |= ZEND_COMPILE_IGNORE_INTERNAL_CLASSES;
@@ -4889,7 +4832,6 @@ static int accel_finish_startup(void)
 
 		sapi_activate();
 
-#ifndef ZEND_WIN32
 		if (in_child) {
 			if (ret == SUCCESS) {
 				exit(0);
@@ -4897,9 +4839,9 @@ static int accel_finish_startup(void)
 				exit(2);
 			}
 		}
-#endif
 
 		return ret;
+#endif
 	}
 
 	return SUCCESS;
