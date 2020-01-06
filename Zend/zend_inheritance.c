@@ -495,8 +495,9 @@ static inheritance_status zend_do_perform_arg_type_hint_check(
 static inheritance_status zend_do_perform_implementation_check(
 		const zend_function *fe, const zend_function *proto) /* {{{ */
 {
-	uint32_t i, num_args;
+	uint32_t i, num_args, proto_num_args, fe_num_args;
 	inheritance_status status, local_status;
+	zend_bool proto_is_variadic, fe_is_variadic;
 
 	/* If it's a user function then arg_info == NULL means we don't have any parameters but
 	 * we still need to do the arg number checks.  We are only willing to ignore this for internal
@@ -516,9 +517,8 @@ static inheritance_status zend_do_perform_implementation_check(
 	/* If the prototype method is private do not enforce a signature */
 	ZEND_ASSERT(!(proto->common.fn_flags & ZEND_ACC_PRIVATE));
 
-	/* check number of arguments */
-	if (proto->common.required_num_args < fe->common.required_num_args
-		|| proto->common.num_args > fe->common.num_args) {
+	/* The number of required arguments cannot increase. */
+	if (proto->common.required_num_args < fe->common.required_num_args) {
 		return INHERITANCE_ERROR;
 	}
 
@@ -528,35 +528,36 @@ static inheritance_status zend_do_perform_implementation_check(
 		return INHERITANCE_ERROR;
 	}
 
-	if ((proto->common.fn_flags & ZEND_ACC_VARIADIC)
-		&& !(fe->common.fn_flags & ZEND_ACC_VARIADIC)) {
+	proto_is_variadic = (proto->common.fn_flags & ZEND_ACC_VARIADIC) != 0;
+	fe_is_variadic = (fe->common.fn_flags & ZEND_ACC_VARIADIC) != 0;
+
+	/* A variadic function cannot become non-variadic */
+	if (proto_is_variadic && !fe_is_variadic) {
 		return INHERITANCE_ERROR;
 	}
 
-	/* For variadic functions any additional (optional) arguments that were added must be
-	 * checked against the signature of the variadic argument, so in this case we have to
-	 * go through all the parameters of the function and not just those present in the
-	 * prototype. */
-	num_args = proto->common.num_args;
-	if (proto->common.fn_flags & ZEND_ACC_VARIADIC) {
-		num_args++;
-        if (fe->common.num_args >= proto->common.num_args) {
-			num_args = fe->common.num_args;
-			if (fe->common.fn_flags & ZEND_ACC_VARIADIC) {
-				num_args++;
-			}
-		}
-	}
+	/* The variadic argument is not included in the stored argument count. */
+	proto_num_args = proto->common.num_args + proto_is_variadic;
+	fe_num_args = fe->common.num_args + fe_is_variadic;
+	num_args = MAX(proto_num_args, fe_num_args);
 
 	status = INHERITANCE_SUCCESS;
 	for (i = 0; i < num_args; i++) {
-		zend_arg_info *fe_arg_info = &fe->common.arg_info[i];
-
-		zend_arg_info *proto_arg_info;
-		if (i < proto->common.num_args) {
-			proto_arg_info = &proto->common.arg_info[i];
-		} else {
-			proto_arg_info = &proto->common.arg_info[proto->common.num_args];
+		zend_arg_info *proto_arg_info =
+			i < proto_num_args ? &proto->common.arg_info[i] :
+			proto_is_variadic ? &proto->common.arg_info[proto_num_args - 1] : NULL;
+		zend_arg_info *fe_arg_info =
+			i < fe_num_args ? &fe->common.arg_info[i] :
+			fe_is_variadic ? &fe->common.arg_info[fe_num_args - 1] : NULL;
+		if (!proto_arg_info) {
+			/* A new (optional) argument has been added, which is fine. */
+			continue;
+		}
+		if (!fe_arg_info) {
+			/* An argument has been removed. This is considered illegal, because arity checks
+			 * work based on a model where passing more than the declared number of parameters
+			 * to a function is an error. */
+			return INHERITANCE_ERROR;
 		}
 
 		local_status = zend_do_perform_arg_type_hint_check(fe, fe_arg_info, proto, proto_arg_info);

@@ -351,6 +351,17 @@ PHP 8.0 UPGRADE NOTES
   . Added WeakMap.
     RFC: https://wiki.php.net/rfc/weak_maps
   . Added ValueError class.
+  . Any number of function parameters may not be replaced by a variadic
+    argument, as long as the types are compatible. For example, the following
+    code is now allowed:
+
+        class A {
+            public function method(int $many, string $parameters, $here) {}
+        }
+        class B extends A {
+            public function method(...$everything) {}
+        }
+
 
 - Date:
   . Added DateTime::createFromInterface() and
