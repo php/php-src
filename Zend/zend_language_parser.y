@@ -1150,12 +1150,12 @@ fully_dereferencable:
 		variable				{ $$ = $1; }
 	|	'(' expr ')'			{ $$ = $2; }
 	|	dereferencable_scalar	{ $$ = $1; }
+	|	class_constant			{ $$ = $1; }
 ;
 
 array_object_dereferencable:
 		fully_dereferencable	{ $$ = $1; }
 	|	constant				{ $$ = $1; }
-	|	class_constant			{ $$ = $1; }
 ;
 
 callable_expr:
