@@ -34,6 +34,9 @@ PHP                                                                        NEWS
   . Fixed bug #74170 (locale information change after mime_content_type).
     (Sergei Turchanov)
 
+- GD:
+  . Fixed bug #79067 (gdTransformAffineCopy() may use unitialized values). (cmb)
+
 - Libxml:
   . Fixed bug #79029 (Use After Free's in XMLReader / XMLWriter). (Laruence)
 
