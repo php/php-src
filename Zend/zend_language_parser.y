@@ -242,7 +242,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> internal_functions_in_yacc
 %type <ast> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
 %type <ast> variable_class_name dereferencable_scalar constant class_constant
-%type <ast> fully_dereferencable array_dereferencable
+%type <ast> fully_dereferencable array_object_dereferencable
 %type <ast> callable_expr callable_variable static_member new_variable
 %type <ast> encaps_var encaps_var_offset isset_variables
 %type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
@@ -1152,7 +1152,7 @@ fully_dereferencable:
 	|	dereferencable_scalar	{ $$ = $1; }
 ;
 
-array_dereferencable:
+array_object_dereferencable:
 		fully_dereferencable	{ $$ = $1; }
 	|	constant				{ $$ = $1; }
 	|	class_constant			{ $$ = $1; }
@@ -1167,11 +1167,11 @@ callable_expr:
 callable_variable:
 		simple_variable
 			{ $$ = zend_ast_create(ZEND_AST_VAR, $1); }
-	|	array_dereferencable '[' optional_expr ']'
+	|	array_object_dereferencable '[' optional_expr ']'
 			{ $$ = zend_ast_create(ZEND_AST_DIM, $1, $3); }
-	|	array_dereferencable '{' expr '}'
+	|	array_object_dereferencable '{' expr '}'
 			{ $$ = zend_ast_create_ex(ZEND_AST_DIM, ZEND_DIM_ALTERNATIVE_SYNTAX, $1, $3); }
-	|	fully_dereferencable T_OBJECT_OPERATOR property_name argument_list
+	|	array_object_dereferencable T_OBJECT_OPERATOR property_name argument_list
 			{ $$ = zend_ast_create(ZEND_AST_METHOD_CALL, $1, $3, $4); }
 	|	function_call { $$ = $1; }
 ;
@@ -1181,7 +1181,7 @@ variable:
 			{ $$ = $1; }
 	|	static_member
 			{ $$ = $1; }
-	|	fully_dereferencable T_OBJECT_OPERATOR property_name
+	|	array_object_dereferencable T_OBJECT_OPERATOR property_name
 			{ $$ = zend_ast_create(ZEND_AST_PROP, $1, $3); }
 ;
 
