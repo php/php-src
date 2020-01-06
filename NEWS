@@ -37,6 +37,8 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #79067 (gdTransformAffineCopy() may use unitialized values). (cmb)
+  . Fixed bug #79068 (gdTransformAffineCopy() changes interpolation method).
+    (cmb)
 
 - Libxml:
   . Fixed bug #79029 (Use After Free's in XMLReader / XMLWriter). (Laruence)
