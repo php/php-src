@@ -19,6 +19,7 @@ PHP                                                                        NEWS
 
 - CURL:
   . Fixed bug #79033 (Curl timeout error with specific url and post). (cmb)
+  . Fixed bug #79063 (curl openssl does not respect PKG_CONFIG_PATH). (Nikita)
 
 - Date:
   . Fixed bug #79015 (undefined-behavior in php_date.c). (cmb)

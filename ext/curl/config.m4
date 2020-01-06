@@ -23,8 +23,6 @@ if test "$PHP_CURL" != "no"; then
   esac
 
   if test "$CURL_SSL" = yes; then
-    save_CFLAGS="$CFLAGS"
-    CFLAGS="$CFLAGS $CURL_CFLAGS"
     save_LDFLAGS="$LDFLAGS"
     LDFLAGS="$LDFLAGS $CURL_LIBS"
 
@@ -48,14 +46,17 @@ int main(int argc, char *argv[])
     ]])],[
       AC_MSG_RESULT([yes])
       AC_DEFINE([HAVE_CURL_OPENSSL], [1], [Have cURL with OpenSSL support])
-      AC_CHECK_HEADERS([openssl/crypto.h])
+      PKG_CHECK_MODULES([OPENSSL], [openssl], [
+        PHP_EVAL_LIBLINE($OPENSSL_LIBS, CURL_SHARED_LIBADD)
+        PHP_EVAL_INCLINE($OPENSSL_CFLAGS)
+        AC_CHECK_HEADERS([openssl/crypto.h])
+      ], [])
     ], [
       AC_MSG_RESULT([no])
     ], [
       AC_MSG_RESULT([no])
     ])
 
-    CFLAGS="$save_CFLAGS"
     LDFLAGS="$save_LDFLAGS"
   else
     AC_MSG_RESULT([no])
