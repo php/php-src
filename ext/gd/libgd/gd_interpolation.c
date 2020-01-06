@@ -2524,6 +2524,29 @@ int gdImageSetInterpolationMethod(gdImagePtr im, gdInterpolationMethod id)
 	return 1;
 }
 
+/**
+ * Function: gdImageGetInterpolationMethod
+ *
+ * Get the current interpolation method
+ *
+ * This is here so that the value can be read via a language or VM with an FFI
+ * but no (portable) way to extract the value from the struct.
+ *
+ * Parameters:
+ *   im - The image.
+ *
+ * Returns:
+ *   The current interpolation method.
+ *
+ * See also:
+ *   - <gdInterpolationMethod>
+ *   - <gdImageSetInterpolationMethod>
+ */
+gdInterpolationMethod gdImageGetInterpolationMethod(gdImagePtr im)
+{
+    return im->interpolation_id;
+}
+
 #ifdef _MSC_VER
 # pragma optimize("", on)
 #endif

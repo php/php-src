@@ -134,6 +134,7 @@ PHP_FUNCTION(imagescale);
 PHP_FUNCTION(imageaffine);
 PHP_FUNCTION(imageaffinematrixget);
 PHP_FUNCTION(imageaffinematrixconcat);
+PHP_FUNCTION(imagegetinterpolation);
 PHP_FUNCTION(imagesetinterpolation);
 
 PHP_FUNCTION(imagesetthickness);
