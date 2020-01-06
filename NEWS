@@ -82,6 +82,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #79000 (Non-blocking socket stream reports EAGAIN as error).
     (Nikita)
+  . Fixed bug #54298 (Using empty additional_headers adding extraneous CRLF).
+    (cmb)
 
 18 Dec 2019, PHP 7.4.1
 
