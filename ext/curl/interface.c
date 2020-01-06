@@ -41,7 +41,7 @@
 #endif
 
 /* {{{ cruft for thread safe SSL crypto locks */
-#if defined(ZTS) && defined(HAVE_CURL_OPENSSL)
+#if defined(ZTS) && defined(HAVE_CURL_OLD_OPENSSL)
 # if defined(HAVE_OPENSSL_CRYPTO_H)
 #  define PHP_CURL_NEED_OPENSSL_TSL
 #  include <openssl/crypto.h>
@@ -51,7 +51,7 @@
 	"openssl/crypto.h; thus no SSL crypto locking callbacks will be set, which may " \
 	"cause random crashes on SSL requests"
 # endif
-#endif /* ZTS && HAVE_CURL_OPENSSL */
+#endif /* ZTS && HAVE_CURL_OLD_OPENSSL */
 /* }}} */
 
 #define SMART_STR_PREALLOC 4096
