@@ -2351,7 +2351,7 @@ int gdTransformAffineCopy(gdImagePtr dst,
 	gdPointF pt, src_pt;
 	gdRect bbox;
 	int end_x, end_y;
-	gdInterpolationMethod interpolation_id_bak = GD_DEFAULT;
+	gdInterpolationMethod interpolation_id_bak = src->interpolation_id;
 	interpolation_method interpolation_bak;
 
 	/* These methods use special implementations */
