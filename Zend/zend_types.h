@@ -137,7 +137,6 @@ typedef struct {
 
 #define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 24
 #define _ZEND_TYPE_MASK ((1u << 24) - 1)
-#define _ZEND_TYPE_MAY_BE_MASK ((1u << (IS_VOID+1)) - 1)
 /* Only one of these bits may be set. */
 #define _ZEND_TYPE_NAME_BIT (1u << 23)
 #define _ZEND_TYPE_CE_BIT   (1u << 22)
@@ -145,6 +144,8 @@ typedef struct {
 #define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_CE_BIT|_ZEND_TYPE_NAME_BIT)
 /* Whether the type list is arena allocated */
 #define _ZEND_TYPE_ARENA_BIT (1u << 20)
+/* Type mask excluding the flags above. */
+#define _ZEND_TYPE_MAY_BE_MASK ((1u << 20) - 1)
 /* Must have same value as MAY_BE_NULL */
 #define _ZEND_TYPE_NULLABLE_BIT 0x2
 
@@ -533,20 +534,21 @@ struct _zend_ast_ref {
 #define IS_REFERENCE				10
 #define IS_CONSTANT_AST				11 /* Constant expressions */
 
-/* Fake types used only for type hinting. IS_VOID should be the last. */
+/* Fake types used only for type hinting.
+ * These are allowed to overlap with the types below. */
 #define IS_CALLABLE					12
 #define IS_ITERABLE					13
 #define IS_VOID						14
 
 /* internal types */
-#define IS_INDIRECT             	15
-#define IS_PTR						16
-#define IS_ALIAS_PTR				17
-#define _IS_ERROR					17
+#define IS_INDIRECT             	12
+#define IS_PTR						13
+#define IS_ALIAS_PTR				14
+#define _IS_ERROR					15
 
 /* used for casts */
-#define _IS_BOOL					18
-#define _IS_NUMBER					19
+#define _IS_BOOL					16
+#define _IS_NUMBER					17
 
 static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
