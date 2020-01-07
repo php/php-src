@@ -352,7 +352,7 @@ PHP_FUNCTION(flock)
 	act = operation & 3;
 	if (act < 1 || act > 3) {
 		zend_value_error("Illegal operation argument");
-		return;
+		RETURN_THROWS();
 	}
 
 	if (wouldblock) {
@@ -746,7 +746,7 @@ PHP_FUNCTION(file)
 
 	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT)) {
 		zend_value_error("'" ZEND_LONG_FMT "' flag is not supported", flags);
-		return;
+		RETURN_THROWS();
 	}
 
 	use_include_path = flags & PHP_FILE_USE_INCLUDE_PATH;
@@ -1041,7 +1041,7 @@ PHPAPI PHP_FUNCTION(fgets)
 	} else if (argc > 1) {
 		if (len <= 0) {
 			zend_value_error("Length parameter must be greater than 0");
-			return;
+			RETURN_THROWS();
 		}
 
 		str = zend_string_alloc(len, 0);
@@ -1496,7 +1496,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 
 	if (size < 0) {
 		zend_value_error("Negative size is not supported");
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, fp);
@@ -1751,7 +1751,7 @@ PHPAPI PHP_FUNCTION(fread)
 
 	if (len <= 0) {
 		zend_value_error("Length parameter must be greater than 0");
-		return;
+		RETURN_THROWS();
 	}
 
 	str = php_stream_read_to_str(stream, len);
@@ -1830,7 +1830,7 @@ PHP_FUNCTION(fputcsv)
 		/* Make sure that there is at least one character in string */
 		if (delimiter_str_len < 1) {
 			zend_value_error("delimiter must be a character");
-			return;
+			RETURN_THROWS();
 		} else if (delimiter_str_len > 1) {
 			php_error_docref(NULL, E_NOTICE, "delimiter must be a single character");
 		}
@@ -1842,7 +1842,7 @@ PHP_FUNCTION(fputcsv)
 	if (enclosure_str != NULL) {
 		if (enclosure_str_len < 1) {
 			zend_value_error("enclosure must be a character");
-			return;
+			RETURN_THROWS();
 		} else if (enclosure_str_len > 1) {
 			php_error_docref(NULL, E_NOTICE, "enclosure must be a single character");
 		}
@@ -1968,7 +1968,7 @@ PHP_FUNCTION(fgetcsv)
 			/* Make sure that there is at least one character in string */
 			if (delimiter_str_len < 1) {
 				zend_value_error("delimiter must be a character");
-				return;
+				RETURN_THROWS();
 			} else if (delimiter_str_len > 1) {
 				php_error_docref(NULL, E_NOTICE, "delimiter must be a single character");
 			}
@@ -1980,7 +1980,7 @@ PHP_FUNCTION(fgetcsv)
 		if (enclosure_str != NULL) {
 			if (enclosure_str_len < 1) {
 				zend_value_error("enclosure must be a character");
-				return;
+				RETURN_THROWS();
 			} else if (enclosure_str_len > 1) {
 				php_error_docref(NULL, E_NOTICE, "enclosure must be a single character");
 			}
@@ -2005,7 +2005,7 @@ PHP_FUNCTION(fgetcsv)
 			len = zval_get_long(len_zv);
 			if (len < 0) {
 				zend_value_error("Length parameter may not be negative");
-				return;
+				RETURN_THROWS();
 			} else if (len == 0) {
 				len = -1;
 			}
