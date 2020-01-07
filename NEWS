@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-?? ??? ????, PHP 7.4.2
+09 Jan 2020, PHP 7.4.2RC1
 
 - Core:
   . Preloading support on Windows has been disabled. (Nikita)
