@@ -235,7 +235,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> unprefixed_use_declarations const_decl inner_statement
 %type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
-%type <ast> extends_from parameter optional_type argument global_var
+%type <ast> extends_from parameter optional_type_without_static argument global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
 %type <ast> absolute_trait_method_reference trait_method_reference property echo_expr
 %type <ast> new_expr anonymous_class class_name class_name_reference simple_variable
@@ -254,8 +254,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
 %type <ast> lexical_var_list encaps_list
 %type <ast> array_pair non_empty_array_pair_list array_pair_list possible_array_pair
-%type <ast> isset_variable type return_type type_expr
-%type <ast> identifier
+%type <ast> isset_variable type return_type type_expr type_without_static
+%type <ast> identifier type_expr_without_static union_type_without_static
 %type <ast> inline_function union_type
 
 %type <num> returns_ref function fn is_reference is_variadic variable_modifiers
@@ -646,33 +646,54 @@ non_empty_parameter_list:
 ;
 
 parameter:
-		optional_type is_reference is_variadic T_VARIABLE
+		optional_type_without_static is_reference is_variadic T_VARIABLE
 			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2 | $3, $1, $4, NULL); }
-	|	optional_type is_reference is_variadic T_VARIABLE '=' expr
+	|	optional_type_without_static is_reference is_variadic T_VARIABLE '=' expr
 			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2 | $3, $1, $4, $6); }
 ;
 
 
-optional_type:
+optional_type_without_static:
 		%empty	{ $$ = NULL; }
-	|	type_expr	{ $$ = $1; }
+	|	type_expr_without_static	{ $$ = $1; }
 ;
 
 type_expr:
-		type		{ $$ = $1; }
-	|	'?' type	{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
-	|	union_type	{ $$ = $1; }
+		type				{ $$ = $1; }
+	|	'?' type			{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
+	|	union_type			{ $$ = $1; }
 ;
 
 type:
-		T_ARRAY		{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
-	|	T_CALLABLE	{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_CALLABLE); }
-	|	name		{ $$ = $1; }
+		type_without_static	{ $$ = $1; }
+	|	T_STATIC			{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_STATIC); }
 ;
 
 union_type:
 		type '|' type       { $$ = zend_ast_create_list(2, ZEND_AST_TYPE_UNION, $1, $3); }
 	|	union_type '|' type { $$ = zend_ast_list_add($1, $3); }
+;
+
+/* Duplicate the type rules without "static",
+ * to avoid conflicts with "static" modifier for properties. */
+
+type_expr_without_static:
+		type_without_static			{ $$ = $1; }
+	|	'?' type_without_static		{ $$ = $2; $$->attr |= ZEND_TYPE_NULLABLE; }
+	|	union_type_without_static	{ $$ = $1; }
+;
+
+type_without_static:
+		T_ARRAY		{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_ARRAY); }
+	|	T_CALLABLE	{ $$ = zend_ast_create_ex(ZEND_AST_TYPE, IS_CALLABLE); }
+	|	name		{ $$ = $1; }
+;
+
+union_type_without_static:
+		type_without_static '|' type_without_static
+			{ $$ = zend_ast_create_list(2, ZEND_AST_TYPE_UNION, $1, $3); }
+	|	union_type_without_static '|' type_without_static
+			{ $$ = zend_ast_list_add($1, $3); }
 ;
 
 return_type:
@@ -728,7 +749,7 @@ class_statement_list:
 
 
 class_statement:
-		variable_modifiers optional_type property_list ';'
+		variable_modifiers optional_type_without_static property_list ';'
 			{ $$ = zend_ast_create(ZEND_AST_PROP_GROUP, $2, $3);
 			  $$->attr = $1; }
 	|	method_modifiers T_CONST class_const_list ';'

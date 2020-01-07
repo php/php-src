@@ -67,6 +67,8 @@ ZEND_API ZEND_COLD void zend_verify_arg_error(
 ZEND_API ZEND_COLD void zend_verify_return_error(
 		const zend_function *zf, void **cache_slot, zval *value);
 ZEND_API zend_bool zend_verify_ref_array_assignable(zend_reference *ref);
+ZEND_API zend_bool zend_value_instanceof_static(zval *zv);
+
 
 #define ZEND_REF_TYPE_SOURCES(ref) \
 	(ref)->sources

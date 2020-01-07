@@ -1190,6 +1190,9 @@ builtin_types:
 	if ((type_mask & MAY_BE_ITERABLE) && zend_is_iterable(arg)) {
 		return 1;
 	}
+	if ((type_mask & MAY_BE_STATIC) && zend_value_instanceof_static(arg)) {
+		return 1;
+	}
 	if (zend_verify_scalar_type_hint(type_mask, arg, ZEND_ARG_USES_STRICT_TYPES(), /* is_internal */ 0)) {
 		return 1;
 	}

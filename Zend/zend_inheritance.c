@@ -333,6 +333,28 @@ static zend_bool zend_type_contains_traversable(zend_type type) {
 	return 0;
 }
 
+static zend_bool zend_type_permits_self(
+		zend_type type, zend_class_entry *scope, zend_class_entry *self) {
+	if (ZEND_TYPE_FULL_MASK(type) & MAY_BE_OBJECT) {
+		return 1;
+	}
+
+	/* Any types that may satisfy self must have already been loaded at this point
+	 * (as a parent or interface), so we never need to register delayed variance obligations
+	 * for this case. */
+	zend_type *single_type;
+	ZEND_TYPE_FOREACH(type, single_type) {
+		if (ZEND_TYPE_HAS_NAME(*single_type)) {
+			zend_string *name = resolve_class_name(scope, ZEND_TYPE_NAME(*single_type));
+			zend_class_entry *ce = lookup_class(self, name, /* register_unresolved */ 0);
+			if (ce && unlinked_instanceof(self, ce)) {
+				return 1;
+			}
+		}
+	} ZEND_TYPE_FOREACH_END();
+	return 0;
+}
+
 /* Unresolved means that class declarations that are currently not available are needed to
  * determine whether the inheritance is valid or not. At runtime UNRESOLVED should be treated
  * as an ERROR. */
@@ -406,13 +428,22 @@ static inheritance_status zend_perform_covariant_type_check(
 	if (added_types) {
 		// TODO: Make "iterable" an alias of "array|Traversable" instead,
 		// so these special cases will be handled automatically.
-		if (added_types == MAY_BE_ITERABLE
+		if ((added_types & MAY_BE_ITERABLE)
 				&& (proto_type_mask & MAY_BE_ARRAY)
 				&& zend_type_contains_traversable(proto_type)) {
 			/* Replacing array|Traversable with iterable is okay */
-		} else if (added_types == MAY_BE_ARRAY && (proto_type_mask & MAY_BE_ITERABLE)) {
+			added_types &= ~MAY_BE_ITERABLE;
+		}
+		if ((added_types & MAY_BE_ARRAY) && (proto_type_mask & MAY_BE_ITERABLE)) {
 			/* Replacing iterable with array is okay */
-		} else {
+			added_types &= ~MAY_BE_ARRAY;
+		}
+		if ((added_types & MAY_BE_STATIC)
+				&& zend_type_permits_self(proto_type, proto_scope, fe_scope)) {
+			/* Replacing type that accepts self with static is okay */
+			added_types &= ~MAY_BE_STATIC;
+		}
+		if (added_types) {
 			/* Otherwise adding new types is illegal */
 			return INHERITANCE_ERROR;
 		}

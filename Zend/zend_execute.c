@@ -674,7 +674,7 @@ static ZEND_COLD void zend_verify_type_error_common(
 	}
 
 	if (is_union_type(arg_info->type)) {
-		zend_string *type_str = zend_type_to_string(arg_info->type);
+		zend_string *type_str = zend_type_to_string_resolved(arg_info->type, zf->common.scope);
 		smart_str_appends(&str, "be of type ");
 		smart_str_append(&str, type_str);
 		zend_string_release(type_str);
@@ -714,6 +714,16 @@ static ZEND_COLD void zend_verify_type_error_common(
 			case MAY_BE_ITERABLE:
 				smart_str_appends(&str, "be iterable");
 				break;
+			case MAY_BE_STATIC: {
+				zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
+				smart_str_appends(&str, "be an instance of ");
+				if (called_scope) {
+					smart_str_append(&str, called_scope->name);
+				} else {
+					smart_str_appends(&str, "static");
+				}
+				break;
+			}
 			default:
 			{
 				/* Hack to print the type without null */
@@ -735,7 +745,9 @@ static ZEND_COLD void zend_verify_type_error_common(
 	*need_msg = smart_str_extract(&str);
 
 	if (value) {
-		if (ZEND_TYPE_HAS_CLASS(arg_info->type) && Z_TYPE_P(value) == IS_OBJECT) {
+		zend_bool has_class = ZEND_TYPE_HAS_CLASS(arg_info->type)
+			|| (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_STATIC);
+		if (has_class && Z_TYPE_P(value) == IS_OBJECT) {
 			*given_msg = "instance of ";
 			*given_kind = ZSTR_VAL(Z_OBJCE_P(value)->name);
 		} else {
@@ -988,11 +1000,12 @@ static zend_always_inline zend_bool i_zend_check_property_type(zend_property_inf
 		return 1;
 	}
 
-	ZEND_ASSERT(!(ZEND_TYPE_FULL_MASK(info->type) & MAY_BE_CALLABLE));
-	if ((ZEND_TYPE_FULL_MASK(info->type) & MAY_BE_ITERABLE) && zend_is_iterable(property)) {
+	uint32_t type_mask = ZEND_TYPE_FULL_MASK(info->type);
+	ZEND_ASSERT(!(type_mask & (MAY_BE_CALLABLE|MAY_BE_STATIC)));
+	if ((type_mask & MAY_BE_ITERABLE) && zend_is_iterable(property)) {
 		return 1;
 	}
-	return zend_verify_scalar_type_hint(ZEND_TYPE_FULL_MASK(info->type), property, strict, 0);
+	return zend_verify_scalar_type_hint(type_mask, property, strict, 0);
 }
 
 static zend_always_inline zend_bool i_zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict)
@@ -1023,6 +1036,19 @@ static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *inf
 
 	return zend_assign_to_variable(property_val, &tmp, IS_TMP_VAR, EX_USES_STRICT_TYPES());
 }
+
+ZEND_API zend_bool zend_value_instanceof_static(zval *zv) {
+	if (Z_TYPE_P(zv) != IS_OBJECT) {
+		return 0;
+	}
+
+	zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
+	if (!called_scope) {
+		return 0;
+	}
+	return instanceof_function(Z_OBJCE_P(zv), called_scope);
+}
+
 
 static zend_always_inline zend_bool zend_check_type_slow(
 		zend_type type, zval *arg, zend_reference *ref, void **cache_slot, zend_class_entry *scope,
@@ -1072,6 +1098,9 @@ builtin_types:
 		return 1;
 	}
 	if ((type_mask & MAY_BE_ITERABLE) && zend_is_iterable(arg)) {
+		return 1;
+	}
+	if ((type_mask & MAY_BE_STATIC) && zend_value_instanceof_static(arg)) {
 		return 1;
 	}
 	if (ref && ZEND_REF_HAS_TYPE_SOURCES(ref)) {
@@ -3046,7 +3075,7 @@ static zend_always_inline int i_zend_verify_type_assignable_zval(
 	}
 
 	type_mask = ZEND_TYPE_FULL_MASK(type);
-	ZEND_ASSERT(!(type_mask & MAY_BE_CALLABLE));
+	ZEND_ASSERT(!(type_mask & (MAY_BE_CALLABLE|MAY_BE_STATIC)));
 	if (type_mask & MAY_BE_ITERABLE) {
 		return zend_is_iterable(zv);
 	}

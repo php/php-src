@@ -2909,7 +2909,9 @@ ZEND_METHOD(reflection_named_type, isBuiltin)
 	}
 	GET_REFLECTION_OBJECT_PTR(param);
 
-	RETVAL_BOOL(ZEND_TYPE_IS_ONLY_MASK(param->type));
+	/* Treat "static" as a class type for the purposes of reflection. */
+	RETVAL_BOOL(ZEND_TYPE_IS_ONLY_MASK(param->type)
+		&& !(ZEND_TYPE_FULL_MASK(param->type) & MAY_BE_STATIC));
 }
 /* }}} */
 
