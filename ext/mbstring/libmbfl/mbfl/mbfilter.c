@@ -817,7 +817,6 @@ mbfl_strpos(
     int reverse)
 {
 	size_t result;
-	size_t haystack_length;
 	mbfl_string _haystack_u8, _needle_u8;
 	const mbfl_string *haystack_u8, *needle_u8 = NULL;
 	const unsigned char *u8_tbl;
@@ -856,27 +855,27 @@ mbfl_strpos(
 		needle_u8 = needle;
 	}
 
-	/* Check if offset is out of bound */
-	haystack_length = mbfl_strlen(haystack_u8);
-	if (
-		(offset > 0 && offset > haystack_length)
-		|| (offset < 0 && -offset > haystack_length)
-	) {
-		result = -16;
-		goto out;
-	}
-
 	result = (size_t) -1;
 	if (haystack_u8->len < needle_u8->len) {
 		goto out;
 	}
 
 	if (needle_u8->len == 0) {
+		size_t haystack_length = mbfl_strlen(haystack_u8);
+		/* Check if offset is out of bound */
+		if (
+			(offset > 0 && offset > haystack_length)
+			|| (offset < 0 && -offset > haystack_length)
+		) {
+			result = -16;
+			goto out;
+		}
+
 		if (reverse) {
 			if (offset < 0) {
-				result = (size_t) -offset;
+				result = haystack_length + offset;
 			} else {
-				result = haystack_length - offset;;
+				result = haystack_length;
 			}
 		} else {
 			if (offset < 0) {

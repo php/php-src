@@ -51,10 +51,10 @@ var_dump(mb_strripos($string_mb, '', -150));
 int(7)
 
 -- ASCII string with in range positive offset --
-int(5)
+int(7)
 
 -- ASCII string with in range negative offset --
-int(2)
+int(5)
 
 -- ASCII string with out of bound positive offset --
 
@@ -70,10 +70,10 @@ bool(false)
 int(21)
 
 -- Multi-byte string with in range positive offset --
-int(19)
+int(21)
 
 -- Multi-byte string with in range negative offset --
-int(2)
+int(19)
 
 -- Multi-byte string with out of bound positive offset --
 
