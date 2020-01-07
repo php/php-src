@@ -26,6 +26,10 @@ class B extends A {
 
 class C extends B {}
 
+function test(): static {
+    return new stdClass;
+}
+
 $a = new A;
 $b = new B;
 
@@ -52,6 +56,13 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+echo "\n";
+try {
+    var_dump(test());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+
 ?>
 --EXPECT--
 object(A)#3 (0) {
@@ -71,3 +82,5 @@ object(C)#3 (0) {
 object(A)#3 (0) {
 }
 Return value of A::test4() must be of type static|array, instance of A returned
+
+Return value of test() must be an instance of static, instance of stdClass returned
