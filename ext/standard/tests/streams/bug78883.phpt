@@ -17,7 +17,7 @@ $cmd = 'cmd.exe "/c START ^"^" /WAIT ' . PHP_BINARY . ' -r ^"var_dump(fgets(STDI
 $proc = proc_open($cmd, $descriptorspec, $pipes);
 var_dump(is_resource($proc));
 $pid = proc_get_status($proc)['pid'];
-sleep(2);
+sleep(3);
 $bug_is_present = !proc_get_status($proc)['running'];
 if (!$bug_is_present) {
 	// if the bug is not present, it will hang waiting for stdin,
