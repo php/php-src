@@ -26,12 +26,20 @@ $needle = base64_decode('44CC');
 foreach($offsets as $i) {
 	echo "\n-- Offset is $i --\n";
 	echo "--Multibyte String:--\n";
-	var_dump( mb_strpos($string_mb, $needle, $i, 'UTF-8') );
+	try {
+	    var_dump( mb_strpos($string_mb, $needle, $i, 'UTF-8') );
+	} catch (\ValueError $e) {
+	    echo $e->getMessage() . \PHP_EOL;
+	}
 	echo"--ASCII String:--\n";
-	var_dump(mb_strpos('This is na English ta', 'a', $i));
+	try {
+	    var_dump(mb_strpos('This is na English ta', 'a', $i));
+	} catch (\ValueError $e) {
+	    echo $e->getMessage() . \PHP_EOL;
+	}
 }
 ?>
---EXPECTF--
+--EXPECT--
 -- Offset is 20 --
 --Multibyte String:--
 int(20)
@@ -46,30 +54,18 @@ bool(false)
 
 -- Offset is 22 --
 --Multibyte String:--
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 --ASCII String:--
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 
 -- Offset is 53 --
 --Multibyte String:--
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 --ASCII String:--
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 
 -- Offset is 54 --
 --Multibyte String:--
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 --ASCII String:--
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string

@@ -2084,13 +2084,13 @@ static void handle_strpos_error(size_t error) {
 	case MBFL_ERROR_NOT_FOUND:
 		break;
 	case MBFL_ERROR_ENCODING:
-		php_error_docref(NULL, E_WARNING, "Unknown encoding or conversion error");
+		php_error_docref(NULL, E_WARNING, "Conversion error");
 		break;
 	case MBFL_ERROR_OFFSET:
-		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
+		zend_value_error("Offset not contained in string");
 		break;
 	default:
-		php_error_docref(NULL, E_WARNING, "Unknown error in mb_strpos");
+		zend_value_error("Unknown error in mb_strpos");
 		break;
 	}
 }
