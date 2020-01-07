@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.14
+?? ??? ????, PHP 7.3.15
+
+23 Jan 2020, PHP 7.3.14
 
 - Core
   . Fixed bug #78999 (Cycle leak when using function result as temporary).
