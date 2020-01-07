@@ -27,5 +27,5 @@ echo "Ok\n";
 Warning: curl_exec(): CURLOPT_STDERR resource has gone away, resetting to stderr in %s on line %d
 %A
 Hello World!
-Hello World!* Closing connection 0
+Hello World!%A
 Ok
