@@ -1196,6 +1196,9 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 	}
 
 	uint32_t type_mask = ZEND_TYPE_FULL_MASK(type);
+	if (type_mask & MAY_BE_STATIC) {
+		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_STATIC));
+	}
 	if (type_mask & MAY_BE_CALLABLE) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_CALLABLE));
 	}
@@ -5657,7 +5660,7 @@ static zend_type zend_compile_typename(
 			ZSTR_VAL(type_str));
 	}
 
-	if ((type_mask & MAY_BE_OBJECT) && ZEND_TYPE_HAS_CLASS(type)) {
+	if ((type_mask & MAY_BE_OBJECT) && (ZEND_TYPE_HAS_CLASS(type) || (type_mask & MAY_BE_STATIC))) {
 		zend_string *type_str = zend_type_to_string(type);
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Type %s contains both object and a class type, which is redundant",
