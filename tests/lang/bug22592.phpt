@@ -39,9 +39,11 @@ var_dump($result);
 string(5) "* *-*"
 string(7) "* *-* *"
 string(7) "*4*-* *"
+[Only the first byte will be assigned to the string offset]
 string(7) "*4*s* *"
 string(8) "*4*s* *0"
 string(8) "*-*-* *0"
+[Only the first byte will be assigned to the string offset]
 string(8) "*-*s*s*0"
 string(8) "4-4s4s*0"
 string(9) "4-4s4s505"
