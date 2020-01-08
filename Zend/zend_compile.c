@@ -1551,7 +1551,7 @@ static zend_bool zend_try_compile_const_expr_resolve_class_name(zval *zv, zend_a
 	zval *class_name;
 
 	if (class_ast->kind != ZEND_AST_ZVAL) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use ::class with dynamic class name");
+		return 0;
 	}
 
 	class_name = zend_ast_get_zval(class_ast);
@@ -8246,15 +8246,27 @@ void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 void zend_compile_class_name(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *class_ast = ast->child[0];
-	zend_op *opline;
 
 	if (zend_try_compile_const_expr_resolve_class_name(&result->u.constant, class_ast)) {
 		result->op_type = IS_CONST;
 		return;
 	}
 
-	opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
-	opline->op1.num = zend_get_class_fetch_type(zend_ast_get_str(class_ast));
+	if (class_ast->kind == ZEND_AST_ZVAL) {
+		zend_op *opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
+		opline->op1.num = zend_get_class_fetch_type(zend_ast_get_str(class_ast));
+	} else {
+		znode expr_node;
+		zend_compile_expr(&expr_node, class_ast);
+		if (expr_node.op_type == IS_CONST) {
+			/* Unlikely case that happen if class_ast is constant folded.
+			 * Handle it here, to avoid needing a CONST specialization in the VM. */
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use ::class on value of type %s",
+				zend_get_type_by_const(Z_TYPE(expr_node.u.constant)));
+		}
+
+		zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, &expr_node, NULL);
+	}
 }
 /* }}} */
 
@@ -8491,6 +8503,11 @@ void zend_compile_const_expr_class_name(zend_ast **ast_ptr) /* {{{ */
 {
 	zend_ast *ast = *ast_ptr;
 	zend_ast *class_ast = ast->child[0];
+	if (class_ast->kind != ZEND_AST_ZVAL) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"(expression)::class cannot be used in constant expressions");
+	}
+
 	zend_string *class_name = zend_ast_get_str(class_ast);
 	uint32_t fetch_type = zend_get_class_fetch_type(class_name);
 

@@ -367,6 +367,9 @@ PHP 8.0 UPGRADE NOTES
         class B extends A {
             public function method(...$everything) {}
         }
+  . It is now possible to fetch the class name of an object using
+    `$object::class`. The result is the same as `get_class($object)`.
+    RFC: https://wiki.php.net/rfc/class_name_literal_on_object
 
 
 - Date:
