@@ -745,7 +745,7 @@ again:
 				}
 #if FFI_CLOSURES
 			} else if (ZEND_FFI_TYPE(type->pointer.type)->kind == ZEND_FFI_TYPE_FUNC) {
-				void *callback = zend_ffi_create_callback(ZEND_FFI_TYPE(type->pointer.type), value, 1000);
+				void *callback = zend_ffi_create_callback(ZEND_FFI_TYPE(type->pointer.type), value, (uint32_t)-1);
 
 				if (callback) {
 					*(void**)ptr = callback;
@@ -898,11 +898,11 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value, uint32_t
 	}
 
 	if (!zend_is_callable_ex(value, NULL, 0, NULL, &fcc, &error)) {
-		if(n >= 1000) {
-            zend_throw_error(zend_ffi_exception_ce, "Attempt to assign invalid callback, %s", error);
-        } else {
-		    zend_throw_error(zend_ffi_exception_ce, "Attempt to assign parameter %d to be invalid callback, %s", n + 1, error);
-        }
+		if(n < ((uint32_t)-1)) {
+			zend_throw_error(zend_ffi_exception_ce, "Attempt to assign parameter %d to be invalid callback, %s", n + 1, error);
+		} else {
+			zend_throw_error(zend_ffi_exception_ce, "Attempt to assign an invalid callback, %s", error);
+		}
 		return NULL;
 	}
 
