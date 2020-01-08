@@ -92,6 +92,8 @@ PHP_FUNCTION(curl_multi_add_handle)
 		RETURN_FALSE;
 	}
 
+	_php_curl_verify_handlers(ch, 1);
+
 	_php_curl_cleanup_handle(ch);
 
 	GC_ADDREF(Z_RES_P(z_ch));

@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.3
 
+- CURL:
+  . Fixed bug #79078 (Hypothetical use-after-free in curl_multi_add_handle()).
+    (cmb)
+
 23 Jan 2020, PHP 7.4.2
 
 - Core:
