@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Removed the pdo_odbc.db2_instance_name php.ini directive. (Kalle)
   . Fixed bug #77619 (Wrong reflection on MultipleIterator::__construct).
     (Fabien Villepinte)
+  . Fixed bug #65274 (Enhance undefined class constant error with class name).
+    (Nikita)
 
 - Date:
   . Fixed bug #65547 (Default value for sunrise/sunset zenith still wrong).
