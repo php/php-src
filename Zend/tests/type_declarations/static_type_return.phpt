@@ -26,10 +26,6 @@ class B extends A {
 
 class C extends B {}
 
-function test(): static {
-    return new stdClass;
-}
-
 $a = new A;
 $b = new B;
 
@@ -57,11 +53,18 @@ try {
 }
 
 echo "\n";
+$test = function($x): static {
+    return $x;
+};
+
 try {
-    var_dump(test());
+    var_dump($test(new stdClass));
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
+
+$test = $test->bindTo($a);
+var_dump($test($a));
 
 ?>
 --EXPECT--
@@ -83,4 +86,6 @@ object(A)#3 (0) {
 }
 Return value of A::test4() must be of type static|array, instance of A returned
 
-Return value of test() must be an instance of static, instance of stdClass returned
+Return value of {closure}() must be an instance of static, instance of stdClass returned
+object(A)#1 (0) {
+}

@@ -5505,6 +5505,10 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 {
 	ZEND_ASSERT(!(ast->attr & ZEND_TYPE_NULLABLE));
 	if (ast->kind == ZEND_AST_TYPE) {
+		if (ast->attr == IS_STATIC && !CG(active_class_entry) && zend_is_scope_known()) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Cannot use \"static\" when no class scope is active");
+		}
 		return (zend_type) ZEND_TYPE_INIT_CODE(ast->attr, 0, 0);
 	} else {
 		zend_string *class_name = zend_ast_get_str(ast);
