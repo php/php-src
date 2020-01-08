@@ -622,9 +622,11 @@ class Tester
         $read = [$this->outDesc];
         $write = null;
         $except = null;
-        if (stream_select($read, $write, $except, 3)) {
+        $timeout = 3;
+        if (stream_select($read, $write, $except, $timeout)) {
             return fgets($this->outDesc);
         } else {
+            $this->error("Select timeout ($timeout seconds)");
             return null;
         }
     }
