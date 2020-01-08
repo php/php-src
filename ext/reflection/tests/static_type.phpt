@@ -11,13 +11,12 @@ class A {
 
 $rm = new ReflectionMethod(A::class, 'test');
 $rt = $rm->getReturnType();
-// TODO: Should it be considered a builtin or not?
 var_dump($rt->isBuiltin());
 var_dump($rt->getName());
 var_dump((string) $rt);
 
 ?>
 --EXPECT--
-bool(true)
+bool(false)
 string(6) "static"
 string(6) "static"
