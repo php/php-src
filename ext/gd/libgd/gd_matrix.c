@@ -29,8 +29,6 @@ int gdAffineApplyToPointF (gdPointFPtr dst, const gdPointFPtr src,
 {
 	double x = src->x;
 	double y = src->y;
-	x = src->x;
-	y = src->y;
 	dst->x = x * affine[0] + y * affine[2] + affine[4];
 	dst->y = x * affine[1] + y * affine[3] + affine[5];
 	return GD_TRUE;
