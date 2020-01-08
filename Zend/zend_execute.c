@@ -4036,7 +4036,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zend_o
 			object_or_called_scope = object;
 		}
 	} else {
-		zend_throw_error(NULL, "Function name must be a string");
+		zend_throw_error(NULL, "Object of type %s is not callable", ZSTR_VAL(function->ce->name));
 		return NULL;
 	}
 
@@ -4121,7 +4121,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 			}
 		}
 	} else {
-		zend_throw_error(NULL, "Function name must be a string");
+		zend_throw_error(NULL, "Array callback must have exactly two elements");
 		return NULL;
 	}
 

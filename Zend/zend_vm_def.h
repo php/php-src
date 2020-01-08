@@ -3686,12 +3686,13 @@ ZEND_VM_C_LABEL(try_function_name):
 		ZEND_VM_C_GOTO(try_function_name);
 	} else {
 		if (OP2_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(function_name) == IS_UNDEF)) {
-			ZVAL_UNDEFINED_OP2();
+			function_name = ZVAL_UNDEFINED_OP2();
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
-		zend_throw_error(NULL, "Function name must be a string");
+		zend_throw_error(NULL, "Value of type %s is not callable",
+			zend_get_type_by_const(Z_TYPE_P(function_name)));
 		call = NULL;
 	}
 
