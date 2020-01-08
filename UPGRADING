@@ -113,8 +113,10 @@ PHP 8.0 UPGRADE NOTES
     * Attempting to use a resource as an array key.
     * Attempting to use null, a boolean or a float as a string offset.
     * Attempting to read an out-of-bounds string offset.
+    * Attempting to assign an empty string to a string offset.
 
     RFC: https://wiki.php.net/rfc/engine_warnings
+  . Attempting to assign multiple bytes to a string offset will now emit a warning.
   . Unexpected characters in source files (such as null bytes outside of
     strings) will now result in a ParseError exception instead of a compile
     warning.
@@ -209,6 +211,8 @@ PHP 8.0 UPGRADE NOTES
   . A non-string pattern argument to mb_ereg_replace() will now be interpreted
     as a string instead of an ASCII codepoint. The previous behavior may be
     restored with an explicit call to chr().
+  . The needle argument for mb_strpos(), mb_strrpos(), mb_stripos(), mb_strripos(), mb_strstr() and mb_stristr()
+    can now be empty.
   . The $is_hex parameter, which was not used internally, has been removed from
     mb_decode_numericentity().
   . The legacy behaviour of passing the encoding as the third argument instead of an offset for the mb_strrpos
