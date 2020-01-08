@@ -67,25 +67,25 @@ foreach($options_to_check as $option) {
 --CLEAN--
 <?php @unlink(dirname(__FILE__) . '/bug48203.tmp'); ?>
 --EXPECTF--
-Warning: curl_multi_exec(): CURLOPT_STDERR resource has gone away, resetting to stderr in %s on line %d
-
-Warning: curl_multi_exec(): CURLOPT_STDERR resource has gone away, resetting to stderr in %s on line %d
+Warning: curl_multi_add_handle(): CURLOPT_STDERR resource has gone away, resetting to stderr in %s on line %d
+%A
+Warning: curl_multi_add_handle(): CURLOPT_STDERR resource has gone away, resetting to stderr in %s on line %d
 %A
 Ok for CURLOPT_STDERR
 
-Warning: curl_multi_exec(): CURLOPT_WRITEHEADER resource has gone away, resetting to default in %s on line %d
+Warning: curl_multi_add_handle(): CURLOPT_WRITEHEADER resource has gone away, resetting to default in %s on line %d
 
-Warning: curl_multi_exec(): CURLOPT_WRITEHEADER resource has gone away, resetting to default in %s on line %d
+Warning: curl_multi_add_handle(): CURLOPT_WRITEHEADER resource has gone away, resetting to default in %s on line %d
 Ok for CURLOPT_WRITEHEADER
 
-Warning: curl_multi_exec(): CURLOPT_FILE resource has gone away, resetting to default in %s on line %d
+Warning: curl_multi_add_handle(): CURLOPT_FILE resource has gone away, resetting to default in %s on line %d
 
-Warning: curl_multi_exec(): CURLOPT_FILE resource has gone away, resetting to default in %s on line %d
+Warning: curl_multi_add_handle(): CURLOPT_FILE resource has gone away, resetting to default in %s on line %d
 Hello World!
 Hello World!Hello World!
 Hello World!Ok for CURLOPT_FILE
 
-Warning: curl_multi_exec(): CURLOPT_INFILE resource has gone away, resetting to default in %s on line %d
+Warning: curl_multi_add_handle(): CURLOPT_INFILE resource has gone away, resetting to default in %s on line %d
 
-Warning: curl_multi_exec(): CURLOPT_INFILE resource has gone away, resetting to default in %s on line %d
+Warning: curl_multi_add_handle(): CURLOPT_INFILE resource has gone away, resetting to default in %s on line %d
 Ok for CURLOPT_INFILE
