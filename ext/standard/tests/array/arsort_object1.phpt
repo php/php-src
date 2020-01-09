@@ -87,7 +87,7 @@ echo "Done\n";
 --EXPECT--
 *** Testing arsort() : object functionality ***
 
--- Testing arsort() by supplying various object arrays, 'flag' value is defualt --
+-- Testing arsort() by supplying various object arrays, 'flag' value is default --
 bool(true)
 array(6) {
   [2]=>
