@@ -5679,6 +5679,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 	uint32_t i;
 	zend_op_array *op_array = CG(active_op_array);
 	zend_arg_info *arg_infos;
+	zend_bool have_optional_param = 0;
 
 	if (return_type_ast) {
 		/* Use op_array->arg_info[-1] for return type */
@@ -5747,10 +5748,15 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 			default_node.op_type = IS_CONST;
 			zend_const_expr_to_zval(&default_node.u.constant, default_ast);
 			CG(compiler_options) = cops;
+			have_optional_param = 1;
 		} else {
 			opcode = ZEND_RECV;
 			default_node.op_type = IS_UNUSED;
 			op_array->required_num_args = i + 1;
+			if (have_optional_param) {
+				zend_error(E_DEPRECATED, "Required parameter $%s follows optional parameter",
+					ZSTR_VAL(name));
+			}
 		}
 
 		arg_info = &arg_infos[i];
