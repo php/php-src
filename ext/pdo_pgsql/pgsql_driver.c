@@ -1193,7 +1193,7 @@ static PHP_METHOD(PDO, pgsqlSetNoticeCallback)
 			H->notice_callback = NULL;
 			RETURN_FALSE;
 		}
-		Z_ADDREF_P(&fc->fci.function_name);
+		Z_TRY_ADDREF_P(&fc->fci.function_name);
 		zend_string_release_ex(cbname, 0);
 
 		H->notice_callback = fc;
