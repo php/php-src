@@ -343,6 +343,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionProperty_hasType arginfo_class_Reflector___toString
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionProperty_hasDefaultValue, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_ReflectionProperty_getDefaultValue arginfo_class_Reflector___toString
+
 #define arginfo_class_ReflectionClassConstant___clone arginfo_class_Reflector___toString
 
 #define arginfo_class_ReflectionClassConstant_export arginfo_class_ReflectionMethod_export
