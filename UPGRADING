@@ -163,6 +163,21 @@ PHP 8.0 UPGRADE NOTES
     accepted, and func as assumed to refer to T1::func. Now it will generate a
     fatal error instead, and either T1::func or T2::func needs to be written
     explicitly.
+  . The signature of abstract methods defined in traits is now checked against
+    the implementing class method:
+
+        trait MyTrait {
+            abstract private function neededByTrait(): string;
+        }
+
+        class MyClass {
+            use MyTrait;
+
+            // Error, because of return type mismatch.
+            private function neededByTrait(): int { return 42; }
+        }
+
+    RFC: https://wiki.php.net/rfc/abstract_trait_method_validation
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
@@ -428,8 +443,10 @@ PHP 8.0 UPGRADE NOTES
   . Some consistency fixes to variable syntax have been applied, for example
     writing `Foo::BAR::$baz` is now allowed.
     RFC: https://wiki.php.net/rfc/variable_syntax_tweaks
-  . Added Stringable.
+  . Added Stringable interface, which is automatically implemented if a class
+    defines a __toString() method.
     RFC: https://wiki.php.net/rfc/stringable
+  . Traits can now define abstract private methods.
 
 - Date:
   . Added DateTime::createFromInterface() and
