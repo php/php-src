@@ -5715,6 +5715,90 @@ ZEND_METHOD(reflection_property, hasType)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionProperty::hasDefaultValue()
+   Returns whether property has a default value */
+ZEND_METHOD(reflection_property, hasDefaultValue)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zend_property_info *prop_info;
+	zval *prop;
+	zend_class_entry *ce;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	prop_info = ref->prop;
+
+	if (prop_info == NULL) {
+		RETURN_FALSE;
+	}
+
+	ce = prop_info->ce;
+
+	if ((prop_info->flags & ZEND_ACC_STATIC) != 0) {
+		prop = &ce->default_static_members_table[prop_info->offset];
+		ZVAL_DEINDIRECT(prop);
+	} else {
+		prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
+	}
+
+	RETURN_BOOL(!Z_ISUNDEF_P(prop));
+}
+/* }}} */
+
+/* {{{ proto public mixed ReflectionProperty::getDefaultValue()
+   Returns the default value of a property */
+ZEND_METHOD(reflection_property, getDefaultValue)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zend_property_info *prop_info;
+	zval *prop;
+	zend_class_entry *ce;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	prop_info = ref->prop;
+
+	if (prop_info == NULL) {
+		return; // throw exception?
+	}
+
+	ce = prop_info->ce;
+
+	if ((prop_info->flags & ZEND_ACC_STATIC) != 0) {
+		prop = &ce->default_static_members_table[prop_info->offset];
+		ZVAL_DEINDIRECT(prop);
+	} else {
+		prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
+	}
+
+	if (Z_ISUNDEF_P(prop)) {
+		return;
+	}
+
+	/* copy: enforce read only access */
+	ZVAL_DEREF(prop);
+	ZVAL_COPY_OR_DUP(return_value, prop);
+
+	/* this is necessary to make it able to work with default array
+	* properties, returned to user */
+	if (Z_TYPE_P(return_value) == IS_CONSTANT_AST) {
+		if (UNEXPECTED(zval_update_constant_ex(return_value, ce) != SUCCESS)) {
+			RETURN_THROWS();
+		}
+	}
+}
+/* }}} */
+
 /* {{{ proto public static mixed ReflectionExtension::export(string name [, bool return]) throws ReflectionException
    Exports a reflection object. Returns the output if TRUE is specified for return, printing it otherwise. */
 ZEND_METHOD(reflection_extension, export)
@@ -6490,6 +6574,8 @@ static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, setAccessible, arginfo_class_ReflectionProperty_setAccessible, 0)
 	ZEND_ME(reflection_property, getType, arginfo_class_ReflectionProperty_getType, 0)
 	ZEND_ME(reflection_property, hasType, arginfo_class_ReflectionProperty_hasType, 0)
+	ZEND_ME(reflection_property, hasDefaultValue, arginfo_class_ReflectionProperty_hasDefaultValue, 0)
+	ZEND_ME(reflection_property, getDefaultValue, arginfo_class_ReflectionProperty_getDefaultValue, 0)
 	PHP_FE_END
 };
 

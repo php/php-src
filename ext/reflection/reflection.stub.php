@@ -425,6 +425,11 @@ class ReflectionProperty implements Reflector
 
     /** @return bool */
     public function hasType() {}
+
+    public function hasDefaultValue(): bool {}
+
+    /** @return mixed */
+    public function getDefaultValue() {}
 }
 
 class ReflectionClassConstant implements Reflector
