@@ -3,7 +3,7 @@
 class FFI
 {
     /** @return ?FFI */
-    static function cdef(string $code = UNKNOWN, string $lib = UNKNOWN, FFI $ctx_ffi = UNKNOWN) {}
+    static function cdef(string $code = UNKNOWN, string $lib = UNKNOWN) {}
 
     /** @return ?FFI */
     static function load(string $filename) {}
