@@ -112,7 +112,9 @@ static void _pdo_pgsql_notice(pdo_dbh_t *dbh, const char *message) /* {{{ */
 		fc->fci.param_count = 1;
 		fc->fci.params = &zarg;
 		fc->fci.retval = &retval;
-		if ((ret = zend_call_function(&fc->fci, &fc->fcc TSRMLS_CC)) == FAILURE) {
+		ret = zend_call_function(&fc->fci, &fc->fcc TSRMLS_CC);
+		zval_ptr_dtor(&zarg);
+		if (ret == FAILURE) {
 			pdo_raise_impl_error(dbh, NULL, "HY000", "could not call user-supplied function" TSRMLS_CC);
 		}
 	}
