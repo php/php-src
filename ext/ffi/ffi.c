@@ -264,6 +264,11 @@ static int zend_ffi_is_compatible_type(zend_ffi_type *dst_type, zend_ffi_type *s
 				if (dst_type->kind == ZEND_FFI_TYPE_VOID ||
 				    src_type->kind == ZEND_FFI_TYPE_VOID) {
 				    return 1;
+				} else if(dst_type->kind == ZEND_FFI_TYPE_STRUCT && 
+					src_type->kind == ZEND_FFI_TYPE_STRUCT) {
+					if(strcmp(ZSTR_VAL(dst_type->record.tag_name), ZSTR_VAL(src_type->record.tag_name)) == 0) {
+						return 1;
+					}
 				}
 			} else if (dst_type->kind == ZEND_FFI_TYPE_ARRAY &&
 			           (dst_type->array.length == src_type->array.length ||
@@ -2463,7 +2468,6 @@ again:
 				return SUCCESS;
 			} else if (Z_TYPE_P(arg) == IS_OBJECT && Z_OBJCE_P(arg) == zend_ffi_cdata_ce) {
 				zend_ffi_cdata *cdata = (zend_ffi_cdata*)Z_OBJ_P(arg);
-
 				if (zend_ffi_is_compatible_type(type, ZEND_FFI_TYPE(cdata->type))) {
 					if (ZEND_FFI_TYPE(cdata->type)->kind == ZEND_FFI_TYPE_POINTER) {
 						if (!cdata->ptr) {
@@ -2809,14 +2813,16 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 	zend_string *code = NULL;
 	zend_string *lib = NULL;
 	zend_ffi *ffi = NULL;
+	zval *ctx_ffi;
 	DL_HANDLE handle = NULL;
 	void *addr;
 
 	ZEND_FFI_VALIDATE_API_RESTRICTION();
-	ZEND_PARSE_PARAMETERS_START(0, 2)
+	ZEND_PARSE_PARAMETERS_START(0, 3)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(code)
 		Z_PARAM_STR(lib)
+		Z_PARAM_OBJECT(ctx_ffi)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (lib) {
@@ -2832,8 +2838,14 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 #endif
 	}
 
-	FFI_G(symbols) = NULL;
-	FFI_G(tags) = NULL;
+	if(ctx_ffi && Z_TYPE_P(ctx_ffi) == IS_OBJECT) {
+		zend_ffi *ffi_ctx = (zend_ffi*)Z_OBJ_P(ctx_ffi);
+		FFI_G(symbols) = ffi_ctx->symbols;
+		FFI_G(tags) = ffi_ctx->tags;
+	} else {
+		FFI_G(symbols) = NULL;
+		FFI_G(tags) = NULL;
+	}
 
 	if (code) {
 		/* Parse C definitions */
@@ -2858,13 +2870,13 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 			zend_ffi_symbol *sym;
 
 			ZEND_HASH_FOREACH_STR_KEY_PTR(FFI_G(symbols), name, sym) {
-				if (sym->kind == ZEND_FFI_SYM_VAR) {
+				if (sym->kind == ZEND_FFI_SYM_VAR && !sym->addr) {
 					addr = DL_FETCH_SYMBOL(handle, ZSTR_VAL(name));
 					if (!addr) {
 						zend_throw_error(zend_ffi_exception_ce, "Failed resolving C variable '%s'", ZSTR_VAL(name));
 					}
 					sym->addr = addr;
-				} else if (sym->kind == ZEND_FFI_SYM_FUNC) {
+				} else if (sym->kind == ZEND_FFI_SYM_FUNC && !sym->addr) {
 					zend_string *mangled_name = zend_ffi_mangled_func_name(name, ZEND_FFI_TYPE(sym->type));
 
 					addr = DL_FETCH_SYMBOL(handle, ZSTR_VAL(mangled_name));
@@ -2885,7 +2897,6 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 
 	FFI_G(symbols) = NULL;
 	FFI_G(tags) = NULL;
-
 	RETURN_OBJ(&ffi->std);
 }
 /* }}} */
