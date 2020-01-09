@@ -2822,7 +2822,6 @@ ZEND_METHOD(FFI, cdef) /* {{{ */
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(code)
 		Z_PARAM_STR(lib)
-		Z_PARAM_OBJECT(ctx_ffi)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (lib) {
