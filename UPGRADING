@@ -142,6 +142,13 @@ PHP 8.0 UPGRADE NOTES
 
     The name shown above is still followed by a null byte and and a unique
     suffix.
+  . Declaring a required parameter after an optional one is deprecated. As an
+    exception, declaring a parameter of the form "Type $param = null" before
+    a required one continues to be allowed, because this pattern was sometimes
+    used to achieve nullable types in older PHP versions.
+
+        function test($a = [], $b) {}       // Deprecated
+        function test(Foo $a = null, $b) {} // Allowed
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
