@@ -402,6 +402,7 @@ failure:
 	}
 
 	/* non-class constant */
+	zval *value;
 	if ((colon = zend_memrchr(name, '\\', name_len)) != NULL) {
 		/* compound constant name */
 		int prefix_len = colon - name;
@@ -426,19 +427,24 @@ failure:
 			return &c->value;
 		}
 
-		if (!(flags & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE)) {
-			return NULL;
+		if (flags & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE) {
+			/* name requires runtime resolution, need to check non-namespaced name */
+			value = zend_get_constant_str(constant_name, const_name_len);
+		} else {
+			value = NULL;
 		}
-
-		/* name requires runtime resolution, need to check non-namespaced name */
-		return zend_get_constant_str(constant_name, const_name_len);
 	} else {
 		if (cname) {
-			return zend_get_constant(cname);
+			value = zend_get_constant(cname);
 		} else {
-			return zend_get_constant_str(name, name_len);
+			value = zend_get_constant_str(name, name_len);
 		}
 	}
+
+	if (!value && !(flags & ZEND_FETCH_CLASS_SILENT)) {
+		zend_throw_error(NULL, "Undefined constant '%s'", name);
+	}
+	return value;
 }
 
 static void* zend_hash_add_constant(HashTable *ht, zend_string *key, zend_constant *c)

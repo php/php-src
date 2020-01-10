@@ -557,22 +557,6 @@ ZEND_API zend_bool zend_is_executing(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API ZEND_COLD int zend_use_undefined_constant(zend_string *name, zend_ast_attr attr, zval *result) /* {{{ */
-{
-	char *colon;
-
-	if (UNEXPECTED(EG(exception))) {
-		return FAILURE;
-	} else if ((colon = (char*)zend_memrchr(ZSTR_VAL(name), ':', ZSTR_LEN(name)))) {
-		zend_throw_error(NULL, "Undefined class constant '%s'", ZSTR_VAL(name));
-		return FAILURE;
-	} else {
-		zend_throw_error(NULL, "Undefined constant '%s'", ZSTR_VAL(name));
-		return FAILURE;
-	}
-}
-/* }}} */
-
 ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 {
 	if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
@@ -581,10 +565,10 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 		if (ast->kind == ZEND_AST_CONSTANT) {
 			zend_string *name = zend_ast_get_constant_name(ast);
 			zval *zv = zend_get_constant_ex(name, scope, ast->attr);
-
 			if (UNEXPECTED(zv == NULL)) {
-				return zend_use_undefined_constant(name, ast->attr, p);
+				return FAILURE;
 			}
+
 			zval_ptr_dtor_nogc(p);
 			ZVAL_COPY_OR_DUP(p, zv);
 		} else {
