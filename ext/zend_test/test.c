@@ -301,6 +301,8 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_declare_property_null(zend_test_trait, "testProp", sizeof("testProp")-1, ZEND_ACC_PUBLIC);
 
 	zend_register_class_alias("_ZendTestClassAlias", zend_test_class);
+
+	REGISTER_LONG_CONSTANT("ZEND_TEST_DEPRECATED", 42, CONST_PERSISTENT | CONST_DEPRECATED);
 	return SUCCESS;
 }
 

@@ -33,10 +33,10 @@
 /* Checks if a constant (like "true") may be replaced by its value */
 int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int copy)
 {
-	zval *zv;
 	zend_constant *c = zend_hash_find_ptr(EG(zend_constants), name);
 	if (c) {
 		if ((ZEND_CONSTANT_FLAGS(c) & CONST_PERSISTENT)
+		 && !(ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED)
 		 && (!(ZEND_CONSTANT_FLAGS(c) & CONST_NO_FILE_CACHE)
 		  || !(CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE))) {
 			ZVAL_COPY_VALUE(result, &c->value);
@@ -50,9 +50,9 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 	}
 
 	/* Special constants null/true/false can always be substituted. */
-	zv = zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name));
-	if (zv) {
-		ZVAL_COPY_VALUE(result, zv);
+	c = zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name));
+	if (c) {
+		ZVAL_COPY_VALUE(result, &c->value);
 		return 1;
 	}
 	return 0;
