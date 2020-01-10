@@ -1163,7 +1163,6 @@ static PHP_METHOD(PDO, pgsqlSetNoticeCallback)
 	zend_string *cbname;
 	pdo_dbh_t *dbh;
 	pdo_pgsql_db_handle *H;
-	int ret;
 	pdo_pgsql_fci *fc;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callback)) {
