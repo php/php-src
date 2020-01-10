@@ -1827,7 +1827,7 @@ TEST $file
 				'CAPTURE_STDIO', 'STDIN', 'CGI', 'PHPDBG',
 				'INI', 'ENV', 'EXTENSIONS',
 				'SKIPIF', 'XFAIL', 'XLEAK', 'CLEAN',
-				'CREDITS', 'DESCRIPTION', 'CONFLICTS',
+				'CREDITS', 'DESCRIPTION', 'CONFLICTS', 'WHITESPACE_SENSITIVE',
 			))) {
 				$bork_info = 'Unknown section "' . $section . '"';
 			}
