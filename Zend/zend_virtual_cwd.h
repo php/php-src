@@ -79,10 +79,12 @@ typedef unsigned short mode_t;
 /* COPY_WHEN_ABSOLUTE is 2 under Win32 because by chance both regular absolute paths
    in the file system and UNC paths need copying of two characters */
 #define COPY_WHEN_ABSOLUTE(path) 2
+#define IS_ABSOLUTE_WIN32_LOCAL_PATH(path, len) \
+	(len >= 3 && isalpha(path[0]) && path[1] == ':' && IS_SLASH(path[2]))
 #define IS_UNC_PATH(path, len) \
 	(len >= 2 && IS_SLASH(path[0]) && IS_SLASH(path[1]))
 #define IS_ABSOLUTE_PATH(path, len) \
-	(len >= 2 && (/* is local */isalpha(path[0]) && path[1] == ':' || /* is UNC */IS_SLASH(path[0]) && IS_SLASH(path[1])))
+	(IS_ABSOLUTE_WIN32_LOCAL_PATH(path, len) || IS_UNC_PATH(path, len))
 
 #else
 #ifdef HAVE_DIRENT_H

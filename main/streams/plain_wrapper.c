@@ -1315,7 +1315,11 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 		}
 		else {
 			/* find a top level directory we need to create */
-			while ( (p = strrchr(buf + offset, DEFAULT_SLASH)) || (offset != 1 && (p = strrchr(buf, DEFAULT_SLASH))) ) {
+			while ( (p = strrchr(buf + offset, DEFAULT_SLASH)) || (!(offset == 1
+#ifdef PHP_WIN32
+			 || (offset == 3 && IS_ABSOLUTE_WIN32_LOCAL_PATH(buf, offset))
+#endif
+			) && (p = strrchr(buf, DEFAULT_SLASH))) ) {
 				int n = 0;
 
 				*p = '\0';

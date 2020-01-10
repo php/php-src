@@ -1008,6 +1008,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			memcpy(resolved_path , path, path_length + 1);
 		} else {
 			size_t state_cwd_length = state->cwd_length;
+			memcpy(resolved_path, state->cwd, state_cwd_length);
 
 #ifdef ZEND_WIN32
 			if (IS_SLASH(path[0])) {
@@ -1032,12 +1033,24 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 						state_cwd_length++;
 					}
 				}
+			} else if (path_length >= 3 && path[1] == ':') {
+				/* Relative path with drive name */
+				if (state->cwd[1] == ':') {
+					if (toupper(path[0]) == toupper(state->cwd[0])) {
+						/* Same drive name, append path */
+					} else {
+						/* Different drive name, change cwd to the target drive root */
+						state_cwd_length = 2;
+						resolved_path[0] = path[0];
+					}
+					path += 2;
+					path_length -= 2;
+				}
 			}
 #endif
 			if (path_length + state_cwd_length + 1 >= MAXPATHLEN-1) {
 				return 1;
 			}
-			memcpy(resolved_path, state->cwd, state_cwd_length);
 			if (resolved_path[state_cwd_length-1] == DEFAULT_SLASH) {
 				memcpy(resolved_path + state_cwd_length, path, path_length + 1);
 				path_length += state_cwd_length;
@@ -1048,15 +1061,6 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			}
 		}
 	} else {
-#ifdef ZEND_WIN32
-		if (path_length > 2 && path[1] == ':' && !IS_SLASH(path[2])) {
-			resolved_path[0] = path[0];
-			resolved_path[1] = ':';
-			resolved_path[2] = DEFAULT_SLASH;
-			memcpy(resolved_path + 3, path + 2, path_length - 1);
-			path_length++;
-		} else
-#endif
 		memcpy(resolved_path, path, path_length + 1);
 	}
 
