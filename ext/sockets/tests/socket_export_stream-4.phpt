@@ -98,7 +98,7 @@ socket_set_block
 Warning: socket_set_block(): unable to set blocking mode [%d]: %s in %s on line %d
 
 socket_get_option 
-Warning: socket_get_option(): unable to retrieve socket option [%d]: %s in %s on line %d
+Warning: socket_get_option(): Unable to retrieve socket option [%d]: %s in %s on line %d
 
 
 

@@ -87,14 +87,11 @@ static int php_get_if_index_from_zval(zval *val, unsigned *out)
 
 	if (Z_TYPE_P(val) == IS_LONG) {
 		if (Z_LVAL_P(val) < 0 || (zend_ulong)Z_LVAL_P(val) > UINT_MAX) {
-			php_error_docref(NULL, E_WARNING,
-				"The interface index cannot be negative or larger than %u;"
-				" given " ZEND_LONG_FMT, UINT_MAX, Z_LVAL_P(val));
-			ret = FAILURE;
-		} else {
-			*out = Z_LVAL_P(val);
-			ret = SUCCESS;
+			zend_value_error("Index must be between 0 and %u", UINT_MAX);
+			return FAILURE;
 		}
+		*out = Z_LVAL_P(val);
+		ret = SUCCESS;
 	} else {
 		zend_string *tmp_str;
 		zend_string *str = zval_get_tmp_string(val, &tmp_str);
@@ -127,7 +124,7 @@ static int php_get_address_from_array(const HashTable *ht, const char *key,
 	zend_string *str, *tmp_str;
 
 	if ((val = zend_hash_str_find(ht, key, strlen(key))) == NULL) {
-		php_error_docref(NULL, E_WARNING, "No key \"%s\" passed in optval", key);
+		zend_value_error("No key \"%s\" passed in optval", key);
 		return FAILURE;
 	}
 	str = zval_get_tmp_string(val, &tmp_str);
@@ -282,8 +279,7 @@ int php_do_setsockopt_ip_mcast(php_socket *php_sock,
 	case IP_MULTICAST_TTL:
 		convert_to_long_ex(arg4);
 		if (Z_LVAL_P(arg4) < 0L || Z_LVAL_P(arg4) > 255L) {
-			php_error_docref(NULL, E_WARNING,
-					"Expected a value between 0 and 255");
+			zend_argument_value_error(4, "must be between 0 and 255");
 			return FAILURE;
 		}
 		ipv4_mcast_ttl_lback = (unsigned char) Z_LVAL_P(arg4);
@@ -347,8 +343,7 @@ int php_do_setsockopt_ipv6_mcast(php_socket *php_sock,
 	case IPV6_MULTICAST_HOPS:
 		convert_to_long_ex(arg4);
 		if (Z_LVAL_P(arg4) < -1L || Z_LVAL_P(arg4) > 255L) {
-			php_error_docref(NULL, E_WARNING,
-					"Expected a value between -1 and 255");
+			zend_argument_value_error(4, "must be between -1 and 255");
 			return FAILURE;
 		}
 		ov = (int) Z_LVAL_P(arg4);
@@ -496,8 +491,7 @@ static int _php_mcast_join_leave(
 	}
 #endif
 	else {
-		php_error_docref(NULL, E_WARNING,
-			"Option %s is inapplicable to this socket type",
+		zend_value_error("Option %s is inapplicable to this socket type",
 			join ? "MCAST_JOIN_GROUP" : "MCAST_LEAVE_GROUP");
 		return -2;
 	}

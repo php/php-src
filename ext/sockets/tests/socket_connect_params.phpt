@@ -18,10 +18,14 @@ socket_getsockname($s_c, $addr, $port);
 // wrong parameter count
 try {
     $s_w = socket_connect($s_c);
-} catch (TypeError $e) {
-    echo $e->getMessage(), "\n";
+} catch (\ArgumentCountError $e) {
+    echo $e->getMessage() . \PHP_EOL;
 }
-$s_w = socket_connect($s_c, '0.0.0.0');
+try {
+    $s_w = socket_connect($s_c, '0.0.0.0');
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 $s_w = socket_connect($s_c, '0.0.0.0', $port);
 
 socket_close($s_c);
@@ -29,7 +33,6 @@ socket_close($s_c);
 ?>
 --EXPECTF--
 socket_connect() expects at least 2 parameters, 1 given
-
-Warning: socket_connect(): Socket of type AF_INET requires 3 arguments in %s on line %d
+socket_connect(): Argument #3 ($port) must be specified for the AF_INET socket type
 
 Warning: socket_connect(): unable to connect [%i]: %a in %s on line %d
