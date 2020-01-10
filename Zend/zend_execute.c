@@ -4301,6 +4301,10 @@ static zend_always_inline int _zend_quick_get_constant(
 
 	if (!check_defined_only) {
 		ZVAL_COPY_OR_DUP(EX_VAR(opline->result.var), &c->value);
+		if (ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED) {
+			zend_error(E_DEPRECATED, "Constant %s is deprecated", ZSTR_VAL(c->name));
+			return SUCCESS;
+		}
 	}
 
 	CACHE_PTR(opline->extended_value, c);
