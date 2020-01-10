@@ -112,12 +112,12 @@ static void _pdo_pgsql_notice(pdo_dbh_t *dbh, const char *message) /* {{{ */
 		fc->fci.param_count = 1;
 		fc->fci.params = &zarg;
 		fc->fci.retval = &retval;
-		if ((ret = zend_call_function(&fc->fci, &fc->fcc TSRMLS_CC)) != FAILURE) {
+		if ((ret = zend_call_function(&fc->fci, &fc->fcc)) != FAILURE) {
 			zval_ptr_dtor(&retval);
 		}
 		zval_ptr_dtor(&zarg);
 		if (ret == FAILURE) {
-			pdo_raise_impl_error(dbh, NULL, "HY000", "could not call user-supplied function" TSRMLS_CC);
+			pdo_raise_impl_error(dbh, NULL, "HY000", "could not call user-supplied function");
 		}
 	}
 }
@@ -1166,7 +1166,7 @@ static PHP_METHOD(PDO, pgsqlSetNoticeCallback)
 	int ret;
 	pdo_pgsql_fci *fc;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "z", &callback)) {
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callback)) {
 		RETURN_FALSE;
 	}
 
@@ -1186,8 +1186,8 @@ static PHP_METHOD(PDO, pgsqlSetNoticeCallback)
 			memcpy(&fc->fcc, &empty_fcall_info_cache, sizeof(fc->fcc));
 		}
 
-		if (FAILURE == zend_fcall_info_init(callback, 0, &fc->fci, &fc->fcc, &cbname, NULL TSRMLS_CC)) {
-			php_error_docref(NULL TSRMLS_CC, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
+		if (FAILURE == zend_fcall_info_init(callback, 0, &fc->fci, &fc->fcc, &cbname, NULL)) {
+			php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
 			zend_string_release_ex(cbname, 0);
 			efree(fc);
 			H->notice_callback = NULL;
