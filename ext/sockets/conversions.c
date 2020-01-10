@@ -26,6 +26,17 @@
 
 #ifdef PHP_WIN32
 typedef unsigned short sa_family_t;
+# define msghdr			_WSAMSG
+/*
+struct _WSAMSG {
+    LPSOCKADDR       name;				//void *msg_name
+    INT              namelen;			//socklen_t msg_namelen
+    LPWSABUF         lpBuffers;			//struct iovec *msg_iov
+    ULONG            dwBufferCount;		//size_t msg_iovlen
+    WSABUF           Control;			//void *msg_control, size_t msg_controllen
+    DWORD            dwFlags;			//int msg_flags
+}
+*/
 # define msg_name		name
 # define msg_namelen	namelen
 # define msg_iov		lpBuffers
