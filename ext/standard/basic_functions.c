@@ -1285,19 +1285,16 @@ PHP_FUNCTION(constant)
 	ZEND_PARSE_PARAMETERS_END();
 
 	scope = zend_get_executed_scope();
-	c = zend_get_constant_ex(const_name, scope, ZEND_FETCH_CLASS_SILENT);
-	if (c) {
-		ZVAL_COPY_OR_DUP(return_value, c);
-		if (Z_TYPE_P(return_value) == IS_CONSTANT_AST) {
-			if (UNEXPECTED(zval_update_constant_ex(return_value, scope) != SUCCESS)) {
-				return;
-			}
+	c = zend_get_constant_ex(const_name, scope, 0);
+	if (!c) {
+		RETURN_THROWS();
+	}
+
+	ZVAL_COPY_OR_DUP(return_value, c);
+	if (Z_TYPE_P(return_value) == IS_CONSTANT_AST) {
+		if (UNEXPECTED(zval_update_constant_ex(return_value, scope) != SUCCESS)) {
+			RETURN_THROWS();
 		}
-	} else {
-		if (!EG(exception)) {
-			php_error_docref(NULL, E_WARNING, "Couldn't find constant %s", ZSTR_VAL(const_name));
-		}
-		RETURN_NULL();
 	}
 }
 /* }}} */
