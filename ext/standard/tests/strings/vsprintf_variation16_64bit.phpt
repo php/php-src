@@ -20,7 +20,7 @@ echo "*** Testing vsprintf() : unsigned formats and signed & other types of valu
 
 // defining array of unsigned formats
 $formats =
-  '%u %+u %-u 
+  '%u %+u %-u
    %lu %Lu %4u %-4u
    %10.4u %-10.4u %.4u 
    %\'#2u %\'2u %\'$2u %\'_2u
@@ -75,28 +75,28 @@ echo "Done";
 *** Testing vsprintf() : unsigned formats and signed & other types of values ***
 
 -- Iteration 1 --
-string(143) "2 0 10 
+string(142) "2 0 10
    123456 u 1234 20000000000
    2000000000000 22000000000000 12345 
    12 18446744073709551604 18446744073709428160 _3
    10 123456 2 0"
 
 -- Iteration 2 --
-string(98) "0 0 0 
+string(97) "0 0 0
    123 u 18446744073709551493 123 
             0 0          0 
    1234 0 $0 _0
    0 123 0 0"
 
 -- Iteration 3 --
-string(76) "1 1 1 
+string(75) "1 1 1
    1 u    1 1   
             1 1          1 
    #1 1 $1 _1
    1 1 1 1"
 
 -- Iteration 4 --
-string(76) "1 1 0 
+string(75) "1 1 0
    1 u    0 1   
             1 1          0 
    #0 1 $1 _0

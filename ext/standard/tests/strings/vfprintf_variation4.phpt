@@ -20,7 +20,7 @@ echo "*** Testing vfprintf() : int formats and non-integer values ***\n";
 
 // defining array of int formats
 $formats =
-  '%d %+d %-d 
+  '%d %+d %-d
    %ld %Ld %4d %-4d
    %10.4d %-10.4d %.4d %04.4d
    %\'#2d %\'2d %\'$2d %\'_2d
