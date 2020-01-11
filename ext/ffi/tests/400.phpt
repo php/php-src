@@ -3,6 +3,11 @@ FFI 400: Call each other type struct of multiple FFI instance
 --SKIPIF--
 <?php
 require_once('skipif.inc');
+try {
+	$libc = FFI::cdef("", "libc.so.6");
+} catch (Throwable $_) {
+	die('skip libc.so.6 not available');
+}
 ?>
 --INI--
 ffi.enable=1

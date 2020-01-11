@@ -894,8 +894,8 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value, uint32_t
 {
 	zend_fcall_info_cache fcc;
 	char *error = NULL;
-	char invalid_error[26] = "an";
-	char unsupport_error[26];
+	char invalid_error[255] = "an";
+	char unsupport_error[255];
 	uint32_t arg_count;
 	void *code;
 	void *callback;
