@@ -92,12 +92,14 @@ mysqli.rollback_on_cached_plink=1
 	var_dump($row);
 
 	// change the password for the second DB user and kill the persistent connection
-	if (!mysqli_query($link, 'SET PASSWORD FOR pcontest = "newpass"') ||
+	if ((!mysqli_query($link, 'SET PASSWORD FOR pcontest = "newpass"') &&
+			!mysqli_query($link, 'SET PASSWORD FOR pcontest = PASSWORD("newpass")'))||
 			!mysqli_query($link, 'FLUSH PRIVILEGES'))
 		printf("[005] Cannot change PW of second DB user, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
         // change the password for the second DB user and kill the persistent connection
-	if (!mysqli_query($link, 'SET PASSWORD FOR pcontest@localhost = "newpass"') ||
+	if ((!mysqli_query($link, 'SET PASSWORD FOR pcontest@localhost = "newpass"') &&
+		!mysqli_query($link, 'SET PASSWORD FOR pcontest@localhost = PASSWORD("newpass")')) ||
 			!mysqli_query($link, 'FLUSH PRIVILEGES'))
 		printf("[006] Cannot change PW of second DB user, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
