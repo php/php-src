@@ -1029,7 +1029,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 
 	if (FAILURE == php_stream_parse_fopen_modes(mode, &open_flags)) {
 		if (options & REPORT_ERRORS) {
-			php_error_docref(NULL, E_WARNING, "`%s' is not a valid mode for fopen", mode);
+			zend_value_error("`%s' is not a valid mode for fopen", mode);
 		}
 		return NULL;
 	}
@@ -1464,7 +1464,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 			ret = VCWD_CHMOD(url, mode);
 			break;
 		default:
-			php_error_docref1(NULL, url, E_WARNING, "Unknown option %d for stream_metadata", option);
+			zend_value_error("Unknown option %d for stream_metadata", option);
 			return 0;
 	}
 	if (ret == -1) {
@@ -1561,6 +1561,7 @@ not_relative_path:
 		*(cwd+3) = '\0';
 
 		if (snprintf(trypath, MAXPATHLEN, "%s%s", cwd, filename) >= MAXPATHLEN) {
+			/* Raise to warning? */
 			php_error_docref(NULL, E_NOTICE, "%s/%s path was truncated to %d", cwd, filename, MAXPATHLEN);
 		}
 
@@ -1616,6 +1617,7 @@ not_relative_path:
 			goto stream_skip;
 		}
 		if (snprintf(trypath, MAXPATHLEN, "%s/%s", ptr, filename) >= MAXPATHLEN) {
+			/* Raise to warning? */
 			php_error_docref(NULL, E_NOTICE, "%s/%s path was truncated to %d", ptr, filename, MAXPATHLEN);
 		}
 
