@@ -301,6 +301,8 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 		if (p < e) {
 			ret->query = zend_string_init(p, (e - p), 0);
 			php_replace_controlchars_ex(ZSTR_VAL(ret->query), ZSTR_LEN(ret->query));
+		} else {
+			ret->query = ZSTR_EMPTY_ALLOC();
 		}
 		e = p-1;
 	}
