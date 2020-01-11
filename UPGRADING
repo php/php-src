@@ -301,6 +301,14 @@ PHP 8.0 UPGRADE NOTES
   . FILTER_SANITIZE_MAGIC_QUOTES has been removed.
   . Calling implode() with parameters in a reverse order ($pieces, $glue) is no
     longer supported.
+  . parse_url() will now distinguish absent and empty queries and fragments:
+
+        http://example.com/foo   => query = null, fragment = null
+        http://example.com/foo?  => query = "",   fragment = null
+        http://example.com/foo#  => query = null, fragment = ""
+        http://example.com/foo?# => query = "",   fragment = ""
+
+    Previously all cases resulted in query and fragment being null.
 
 - tidy:
   . The $use_include_path parameter, which was not used internally, has been

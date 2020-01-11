@@ -92,6 +92,8 @@ PHP                                                                        NEWS
     (peter279k)
   . Fixed bug #76859 (stream_get_line skips data if used with data-generating
     filter). (kkopachev)
+  . Fixed bug #78385 (parse_url() does not include 'query' when question mark
+    is the last char). (Islam Israfilov)
 
 - tidy:
   . Removed the unused $use_include_path parameter from tidy_repair_string().
