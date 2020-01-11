@@ -170,6 +170,8 @@ typedef struct _zend_ffi {
 #define ZEND_FFI_SIZEOF_ARG \
 	MAX(FFI_SIZEOF_ARG, sizeof(double))
 
+#define ZEND_FFI_NO_ARG_OFFSET  ((uint32_t)-1)
+
 typedef struct _zend_ffi_cdata {
 	zend_object            std;
 	zend_ffi_type         *type;
@@ -750,7 +752,7 @@ again:
 				}
 #if FFI_CLOSURES
 			} else if (ZEND_FFI_TYPE(type->pointer.type)->kind == ZEND_FFI_TYPE_FUNC) {
-				void *callback = zend_ffi_create_callback(ZEND_FFI_TYPE(type->pointer.type), value, (uint32_t)-1);
+				void *callback = zend_ffi_create_callback(ZEND_FFI_TYPE(type->pointer.type), value, ZEND_FFI_NO_ARG_OFFSET);
 
 				if (callback) {
 					*(void**)ptr = callback;
@@ -892,34 +894,36 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value, uint32_t
 {
 	zend_fcall_info_cache fcc;
 	char *error = NULL;
+	char invalid_error[26] = "an";
+	char unsupport_error[26];
 	uint32_t arg_count;
 	void *code;
 	void *callback;
 	zend_ffi_callback_data *callback_data;
 
+	if(n != ZEND_FFI_NO_ARG_OFFSET) {
+		sprintf(unsupport_error, ", parameter %u occur", n + 1);
+		sprintf(invalid_error, "parameter %u to be", n + 1);
+	}
 	if (type->attr & ZEND_FFI_ATTR_VARIADIC) {
-		zend_throw_error(zend_ffi_exception_ce, "Variadic function closures are not supported");
+		zend_throw_error(zend_ffi_exception_ce, "Variadic function closures are not supported%s", unsupport_error);
 		return NULL;
 	}
 
 	if (!zend_is_callable_ex(value, NULL, 0, NULL, &fcc, &error)) {
-		if(n < ((uint32_t)-1)) {
-			zend_throw_error(zend_ffi_exception_ce, "Attempt to assign parameter %d to be invalid callback, %s", n + 1, error);
-		} else {
-			zend_throw_error(zend_ffi_exception_ce, "Attempt to assign an invalid callback, %s", error);
-		}
+		zend_throw_error(zend_ffi_exception_ce, "Attempt to assign %s invalid callback, %s", invalid_error, error);
 		return NULL;
 	}
 
 	arg_count = type->func.args ? zend_hash_num_elements(type->func.args) : 0;
 	if (arg_count < fcc.function_handler->common.required_num_args) {
-		zend_throw_error(zend_ffi_exception_ce, "Attempt to assign an invalid callback, insufficient number of arguments");
+		zend_throw_error(zend_ffi_exception_ce, "Attempt to assign %s invalid callback, insufficient number of arguments", invalid_error);
 		return NULL;
 	}
 
 	callback = ffi_closure_alloc(sizeof(ffi_closure), &code);
 	if (!callback) {
-		zend_throw_error(zend_ffi_exception_ce, "Cannot allocate callback");
+		zend_throw_error(zend_ffi_exception_ce, "Cannot allocate callback%s", unsupport_error);
 		return NULL;
 	}
 
