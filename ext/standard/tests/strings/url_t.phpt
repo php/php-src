@@ -393,7 +393,7 @@ $sample_urls = array (
   string(3) "foo"
 }
 
---> http://www.php.net:80/?#: array(5) {
+--> http://www.php.net:80/?#: array(6) {
   ["scheme"]=>
   string(4) "http"
   ["host"]=>
@@ -403,6 +403,8 @@ $sample_urls = array (
   ["path"]=>
   string(1) "/"
   ["query"]=>
+  string(0) ""
+  ["fragment"]=>
   string(0) ""
 }
 
