@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #79078 (Hypothetical use-after-free in curl_multi_add_handle()).
     (cmb)
 
+- FFI:
+  . Fixed bug #79096 (FFI Struct Segfault). (cmb)
+
 - MySQLnd:
   . Fixed bug #79084 (mysqlnd may fetch wrong column indexes with MYSQLI_BOTH).
     (cmb)
