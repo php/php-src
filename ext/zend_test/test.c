@@ -319,3 +319,12 @@ ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(zend_test)
 #endif
+
+struct bug79096 bug79096(void)
+{
+  struct bug79096 b;
+
+  b.a = 1;
+  b.b = 1;
+  return b;
+}

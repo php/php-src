@@ -32,4 +32,11 @@ extern zend_module_entry zend_test_module_entry;
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
+struct bug79096 {
+	uint64_t a;
+	uint64_t b;
+};
+
+ZEND_API struct bug79096 bug79096(void);
+
 #endif
