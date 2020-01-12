@@ -843,7 +843,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 
 					if (flags & MYSQLND_FETCH_NUM) {
 						Z_TRY_ADDREF_P(data);
-						zend_hash_next_index_insert(row_ht, data);
+						zend_hash_index_add(row_ht, i, data);
 					}
 					if (flags & MYSQLND_FETCH_ASSOC) {
 						/* zend_hash_quick_update needs length + trailing zero */
@@ -1100,7 +1100,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 
 			if (flags & MYSQLND_FETCH_NUM) {
 				Z_TRY_ADDREF_P(data);
-				zend_hash_next_index_insert(Z_ARRVAL_P(row), data);
+				zend_hash_index_add(Z_ARRVAL_P(row), i, data);
 			}
 			if (flags & MYSQLND_FETCH_ASSOC) {
 				/* zend_hash_quick_update needs length + trailing zero */
@@ -1196,7 +1196,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 
 			if (flags & MYSQLND_FETCH_NUM) {
 				Z_TRY_ADDREF_P(data);
-				zend_hash_next_index_insert(Z_ARRVAL_P(row), data);
+				zend_hash_index_add(Z_ARRVAL_P(row), i, data);
 			}
 			if (flags & MYSQLND_FETCH_ASSOC) {
 				/* zend_hash_quick_update needs length + trailing zero */
