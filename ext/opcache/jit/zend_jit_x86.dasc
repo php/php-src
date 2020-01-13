@@ -2160,13 +2160,11 @@ static int zend_jit_hybrid_profile_jit_stub(dasm_State **Dst)
 #if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
 	|	mov r2, aword [r2]
 #elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
-	|	xor r1, r1
 	|	test r2, 1
 	|	jz >1
-	|	MEM_OP2_2_ZTS mov, r1, aword, compiler_globals, map_ptr_base, r1
-	|	sub r1, 1
+	|	MEM_OP2_2_ZTS add, r2, aword, compiler_globals, map_ptr_base, r1
 	|1:
-	|	mov	r2, aword [r1 + r2]
+	|	mov	r2, aword [r2]
 #else
 # error "Unknown ZEND_MAP_PTR_KIND"
 #endif
@@ -7010,13 +7008,11 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 #if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
 				|	mov r2, aword [r2]
 #elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
-				|	xor r1, r1
 				|	test r2, 1
 				|	jz >1
-				|	MEM_OP2_2_ZTS mov, r1, aword, compiler_globals, map_ptr_base, r1
-				|	sub r1, 1
+				|	MEM_OP2_2_ZTS add, r2, aword, compiler_globals, map_ptr_base, r1
 				|1:
-				|	mov	r2, aword [r1 + r2]
+				|	mov	r2, aword [r2]
 #else
 # error "Unknown ZEND_MAP_PTR_KIND"
 #endif
