@@ -6,7 +6,7 @@ function simplexml_load_string(string $data, ?string $class_name = SimpleXMLElem
 
 function simplexml_import_dom(DOMNode $node, ?string $class_name = SimpleXMLElement::class): ?SimpleXMLElement {}
 
-class SimpleXMLElement
+class SimpleXMLElement implements Stringable
 {
     /** @return array|false */
     public function xpath(string $path) {}
@@ -43,8 +43,7 @@ class SimpleXMLElement
     /** @return string */
     public function getName() {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 
     /** @return int */
     public function count() {}

@@ -19,7 +19,7 @@ $functions = [
     'bool' => function (bool $b) { return $b; }
 ];
 
-class Stringable {
+class StringCapable implements Stringable {
     public function __toString() {
         return "foobar";
     }
@@ -40,7 +40,7 @@ $values = [
     NULL,
     [],
     new StdClass,
-    new Stringable,
+    new StringCapable,
     fopen("data:text/plain,foobar", "r")
 ];
 
@@ -106,7 +106,7 @@ int(0)
 }
 *** Caught {closure}(): Argument #1 ($i) must be of type int, object given, called in %s on line %d
 
-*** Trying object(Stringable)#%s (0) {
+*** Trying object(StringCapable)#%s (0) {
 }
 *** Caught {closure}(): Argument #1 ($i) must be of type int, object given, called in %s on line %d
 
@@ -160,7 +160,7 @@ float(0)
 }
 *** Caught {closure}(): Argument #1 ($f) must be of type float, object given, called in %s on line %d
 
-*** Trying object(Stringable)#%s (0) {
+*** Trying object(StringCapable)#%s (0) {
 }
 *** Caught {closure}(): Argument #1 ($f) must be of type float, object given, called in %s on line %d
 
@@ -213,7 +213,7 @@ string(0) ""
 }
 *** Caught {closure}(): Argument #1 ($s) must be of type string, object given, called in %s on line %d
 
-*** Trying object(Stringable)#%s (0) {
+*** Trying object(StringCapable)#%s (0) {
 }
 string(6) "foobar"
 
@@ -266,7 +266,7 @@ bool(false)
 }
 *** Caught {closure}(): Argument #1 ($b) must be of type bool, object given, called in %s on line %d
 
-*** Trying object(Stringable)#%s (0) {
+*** Trying object(StringCapable)#%s (0) {
 }
 *** Caught {closure}(): Argument #1 ($b) must be of type bool, object given, called in %s on line %d
 

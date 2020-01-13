@@ -6214,7 +6214,6 @@ static const zend_function_entry reflection_functions[] = {
 };
 
 static const zend_function_entry reflector_functions[] = {
-	ZEND_ABSTRACT_ME(reflector, __toString, arginfo_class_Reflector___toString)
 	PHP_FE_END
 };
 
@@ -6522,6 +6521,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 
 	INIT_CLASS_ENTRY(_reflection_entry, "Reflector", reflector_functions);
 	reflector_ptr = zend_register_internal_interface(&_reflection_entry);
+	zend_class_implements(reflector_ptr, 1, zend_ce_stringable);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionFunctionAbstract", reflection_function_abstract_functions);
 	reflection_init_class_handlers(&_reflection_entry);
@@ -6550,6 +6550,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	reflection_init_class_handlers(&_reflection_entry);
 	reflection_type_ptr = zend_register_internal_class(&_reflection_entry);
 	reflection_type_ptr->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
+	zend_class_implements(reflection_type_ptr, 1, zend_ce_stringable);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionNamedType", reflection_named_type_functions);
 	reflection_init_class_handlers(&_reflection_entry);

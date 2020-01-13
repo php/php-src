@@ -763,7 +763,6 @@ static const zend_function_entry zend_funcs_throwable[] = {
 	ZEND_ABSTRACT_ME(throwable, getTrace,         arginfo_class_Throwable_getTrace)
 	ZEND_ABSTRACT_ME(throwable, getPrevious,      arginfo_class_Throwable_getPrevious)
 	ZEND_ABSTRACT_ME(throwable, getTraceAsString, arginfo_class_Throwable_getTraceAsString)
-	ZEND_ABSTRACT_ME(throwable, __toString,       arginfo_class_Throwable___toString)
 	ZEND_FE_END
 };
 /* }}} */
@@ -805,6 +804,7 @@ void zend_register_default_exception(void) /* {{{ */
 	zend_class_entry ce;
 
 	REGISTER_MAGIC_INTERFACE(throwable, Throwable);
+	zend_class_implements(zend_ce_throwable, 1, zend_ce_stringable);
 
 	memcpy(&default_exception_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	default_exception_handlers.clone_obj = NULL;

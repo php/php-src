@@ -33,3 +33,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Serializable_unserialize, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Countable_count arginfo_class_IteratorAggregate_getIterator
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Stringable___toString, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()

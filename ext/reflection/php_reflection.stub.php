@@ -10,10 +10,8 @@ class Reflection
     public static function getModifierNames(int $modifiers) {}
 }
 
-interface Reflector
+interface Reflector extends Stringable
 {
-    /** @return string */
-    public function __toString();
 }
 
 abstract class ReflectionFunctionAbstract implements Reflector
@@ -101,8 +99,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract
     /** @param string|Closure $name */
     public function __construct($name) {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 
     /** @return bool */
     public function isDisabled() {}
@@ -143,8 +140,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     /** @param object|string $class_or_method */
     public function __construct($class_or_method, string $name = UNKNOWN) {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 
     /** @return bool */
     public function isPublic() {}
@@ -197,8 +193,7 @@ class ReflectionClass implements Reflector
     /** @param object|string $argument */
     public function __construct($argument) {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 
     /** @return string|false */
     public function getName() {}
@@ -367,8 +362,7 @@ class ReflectionProperty implements Reflector
     /** @param string|object $class */
     public function __construct($class, string $name) {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 
     /** @return string|false */
     public function getName() {}
@@ -427,8 +421,7 @@ class ReflectionClassConstant implements Reflector
     /** @return string|object */
     public function __construct($class, string $name) {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 
     /** @return string|false */
     public function getName() {}
@@ -464,8 +457,7 @@ class ReflectionParameter implements Reflector
      */
     public function __construct($function,  $parameter) {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 
     /** @return string|false */
     public function getName() {}
@@ -521,15 +513,14 @@ class ReflectionParameter implements Reflector
     public function isVariadic() {}
 }
 
-abstract class ReflectionType
+abstract class ReflectionType implements Stringable
 {
     final private function __clone() {}
 
     /** @return bool */
     public function allowsNull() {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 }
 
 class ReflectionNamedType extends ReflectionType
@@ -552,8 +543,7 @@ class ReflectionExtension implements Reflector
 
     public function __construct(string $name) {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 
     /** @return string|false */
     public function getName() {}
@@ -595,8 +585,7 @@ class ReflectionZendExtension implements Reflector
 
     public function __construct(string $name) {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 
     /** @return string */
     public function getName() {}

@@ -2,7 +2,7 @@
 
 // Observer objects for the Zend/tests/list_keyed_evaluation_order.* tests
 
-class Stringable
+class StringCapable
 {
     private $name;
     public function __construct(string $name) {
