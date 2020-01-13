@@ -47,7 +47,7 @@ print "done!";
 array(2) {
   [1]=>
   int(1)
-  [2]=>
+  [0]=>
   int(1)
 }
 done!
