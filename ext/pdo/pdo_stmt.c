@@ -1031,7 +1031,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 					if (Z_REFCOUNTED(val)) {
 						Z_ADDREF(val);
 					}
-					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &val);
+					zend_hash_index_add(Z_ARRVAL_P(return_value), i, &val);
 					break;
 
 				case PDO_FETCH_NAMED:
