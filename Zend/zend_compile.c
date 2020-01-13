@@ -6474,23 +6474,15 @@ void zend_compile_use_trait(zend_ast *ast) /* {{{ */
 
 	for (i = 0; i < traits->children; ++i) {
 		zend_ast *trait_ast = traits->child[i];
-		zend_string *name = zend_ast_get_str(trait_ast);
 
 		if (ce->ce_flags & ZEND_ACC_INTERFACE) {
+			zend_string *name = zend_ast_get_str(trait_ast);
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot use traits inside of interfaces. "
 				"%s is used in %s", ZSTR_VAL(name), ZSTR_VAL(ce->name));
 		}
 
-		switch (zend_get_class_fetch_type(name)) {
-			case ZEND_FETCH_CLASS_SELF:
-			case ZEND_FETCH_CLASS_PARENT:
-			case ZEND_FETCH_CLASS_STATIC:
-				zend_error_noreturn(E_COMPILE_ERROR, "Cannot use '%s' as trait name "
-					"as it is reserved", ZSTR_VAL(name));
-				break;
-		}
-
-		ce->trait_names[ce->num_traits].name = zend_resolve_class_name_ast(trait_ast);
+		ce->trait_names[ce->num_traits].name =
+			zend_resolve_const_class_name_reference(trait_ast, "trait name");
 		ce->trait_names[ce->num_traits].lc_name = zend_string_tolower(ce->trait_names[ce->num_traits].name);
 		ce->num_traits++;
 	}
