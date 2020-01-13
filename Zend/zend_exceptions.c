@@ -754,6 +754,20 @@ ZEND_METHOD(exception, __toString)
 }
 /* }}} */
 
+/* {{{ proto string Exception|Error::toString()
+   Obtain the string representation of the Exception object */
+ZEND_METHOD(exception, toString)
+{
+	zval rv;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_call_method_with_0_params(Z_OBJ_P(ZEND_THIS), NULL, NULL, "__tostring", &rv);
+
+	ZVAL_COPY_VALUE(return_value, &rv);
+}
+/* }}} */
+
 /** {{{ Throwable method definition */
 static const zend_function_entry zend_funcs_throwable[] = {
 	ZEND_ABSTRACT_ME(throwable, getMessage,       arginfo_class_Throwable_getMessage)
@@ -790,6 +804,7 @@ static const zend_function_entry default_exception_functions[] = {
 	ZEND_ME(exception, getPrevious, arginfo_class_Exception_getPrevious, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, getTraceAsString, arginfo_class_Exception_getTraceAsString, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_ME(exception, __toString, arginfo_class_Exception___toString, 0)
+	ZEND_ME(exception, toString, arginfo_class_Exception_toString, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	ZEND_FE_END
 };
 
@@ -812,7 +827,7 @@ void zend_register_default_exception(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "Exception", default_exception_functions);
 	zend_ce_exception = zend_register_internal_class_ex(&ce, NULL);
 	zend_ce_exception->create_object = zend_default_exception_new;
-	zend_class_implements(zend_ce_exception, 1, zend_ce_throwable);
+	zend_class_implements(zend_ce_exception, 2, zend_ce_throwable, zend_ce_stringable);
 
 	zend_declare_property_string(zend_ce_exception, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED);
 	zend_declare_property_string(zend_ce_exception, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE);
@@ -830,7 +845,7 @@ void zend_register_default_exception(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "Error", default_exception_functions);
 	zend_ce_error = zend_register_internal_class_ex(&ce, NULL);
 	zend_ce_error->create_object = zend_default_exception_new;
-	zend_class_implements(zend_ce_error, 1, zend_ce_throwable);
+	zend_class_implements(zend_ce_error, 2, zend_ce_throwable, zend_ce_stringable);
 
 	zend_declare_property_string(zend_ce_error, "message", sizeof("message")-1, "", ZEND_ACC_PROTECTED);
 	zend_declare_property_string(zend_ce_error, "string", sizeof("string")-1, "", ZEND_ACC_PRIVATE);

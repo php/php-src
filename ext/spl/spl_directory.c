@@ -1415,6 +1415,20 @@ SPL_METHOD(SplFileInfo, _bad_state_ex)
 }
 /* }}} */
 
+/* {{{ proto string SplFileInfo::toString()
+   Return the string representation of the object */
+SPL_METHOD(SplFileInfo, toString)
+{
+	zval rv;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_call_method_with_0_params(Z_OBJ_P(ZEND_THIS), NULL, NULL, "__tostring", &rv);
+
+	ZVAL_COPY_VALUE(return_value, &rv);
+}
+/* }}} */
+
 /* {{{ proto FilesystemIterator::__construct(string path [, int flags])
  Cronstructs a new dir iterator from a path. */
 SPL_METHOD(FilesystemIterator, __construct)
@@ -1854,7 +1868,7 @@ static int spl_filesystem_object_cast(zend_object *readobj, zval *writeobj, int 
 	spl_filesystem_object *intern = spl_filesystem_from_obj(readobj);
 
 	if (type == IS_STRING) {
-		if (readobj->ce->__tostring) {
+		if (zend_class_implements_interface(readobj->ce, zend_ce_stringable) || readobj->ce->__tostring) {
 			return zend_std_cast_object_tostring(readobj, writeobj, type);
 		}
 
@@ -1899,6 +1913,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_splfileinfo_void, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_splfileinfo_toString, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 /* the method table */
 /* each method can have its own parameters and visibility */
 static const zend_function_entry spl_SplFileInfo_functions[] = {
@@ -1934,6 +1951,7 @@ static const zend_function_entry spl_SplFileInfo_functions[] = {
 	SPL_ME(SplFileInfo,       setInfoClass,  arginfo_info_optinalFileClass, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       _bad_state_ex, NULL,							ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	SPL_MA(SplFileInfo,       __toString, SplFileInfo, getPathname, arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
+	SPL_ME(SplFileInfo,       toString,      arginfo_splfileinfo_toString,  ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	PHP_FE_END
 };
 
@@ -3104,6 +3122,7 @@ PHP_MINIT_FUNCTION(spl_directory)
 	spl_filesystem_object_handlers.free_obj = spl_filesystem_object_free_storage;
 	spl_ce_SplFileInfo->serialize = zend_class_serialize_deny;
 	spl_ce_SplFileInfo->unserialize = zend_class_unserialize_deny;
+	REGISTER_SPL_IMPLEMENTS(SplFileInfo, Stringable);
 
 
 	REGISTER_SPL_SUB_CLASS_EX(DirectoryIterator, SplFileInfo, spl_filesystem_object_new, spl_DirectoryIterator_functions);

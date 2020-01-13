@@ -18,7 +18,7 @@ interface Reflector
     public function __toString();
 }
 
-abstract class ReflectionFunctionAbstract implements Reflector
+abstract class ReflectionFunctionAbstract implements Reflector, Stringable
 {
     final private function __clone() {}
 
@@ -106,6 +106,8 @@ class ReflectionFunction extends ReflectionFunctionAbstract
     /** @return string */
     public function __toString() {}
 
+    final public function toString(): string {}
+
     public static function export($name, bool $return = false) {}
 
     /** @return bool */
@@ -149,6 +151,8 @@ class ReflectionMethod extends ReflectionFunctionAbstract
 
     /** @return string */
     public function __toString() {}
+
+    final public function toString(): string {}
 
     public static function export($class, $name, bool $return = false) {}
 
@@ -196,7 +200,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     public function setAccessible(bool $visible) {}
 }
 
-class ReflectionClass implements Reflector
+class ReflectionClass implements Reflector, Stringable
 {
     final private function __clone() {}
 
@@ -207,6 +211,8 @@ class ReflectionClass implements Reflector
 
     /** @return string */
     public function __toString() {}
+
+    final public function toString(): string {}
 
     /** @return string|false */
     public function getName() {}
@@ -370,7 +376,7 @@ class ReflectionObject extends ReflectionClass
     public static function export($argument, bool $return = false) {}
 }
 
-class ReflectionProperty implements Reflector
+class ReflectionProperty implements Reflector, Stringable
 {
     final private function __clone() {}
 
@@ -381,6 +387,8 @@ class ReflectionProperty implements Reflector
 
     /** @return string */
     public function __toString() {}
+
+    final public function toString(): string {}
 
     /** @return string|false */
     public function getName() {}
@@ -427,7 +435,7 @@ class ReflectionProperty implements Reflector
     public function hasType() {}
 }
 
-class ReflectionClassConstant implements Reflector
+class ReflectionClassConstant implements Reflector, Stringable
 {
     final private function __clone() {}
 
@@ -438,6 +446,8 @@ class ReflectionClassConstant implements Reflector
 
     /** @return string */
     public function __toString() {}
+
+    final public function toString(): string {}
 
     /** @return string|false */
     public function getName() {}
@@ -463,7 +473,7 @@ class ReflectionClassConstant implements Reflector
     public function getDocComment() {}
 }
 
-class ReflectionParameter implements Reflector
+class ReflectionParameter implements Reflector, Stringable
 {
     final private function __clone() {}
 
@@ -477,6 +487,8 @@ class ReflectionParameter implements Reflector
 
     /** @return string */
     public function __toString() {}
+
+    final public function toString(): string {}
 
     /** @return string|false */
     public function getName() {}
@@ -532,7 +544,7 @@ class ReflectionParameter implements Reflector
     public function isVariadic() {}
 }
 
-abstract class ReflectionType
+abstract class ReflectionType implements Stringable
 {
     final private function __clone() {}
 
@@ -541,6 +553,8 @@ abstract class ReflectionType
 
     /** @return string */
     public function __toString() {}
+
+    final public function toString(): string {}
 }
 
 class ReflectionNamedType extends ReflectionType
@@ -557,7 +571,7 @@ class ReflectionUnionType extends ReflectionType
     public function getTypes(): array {}
 }
 
-class ReflectionExtension implements Reflector
+class ReflectionExtension implements Reflector, Stringable
 {
     final private function __clone() {}
 
@@ -567,6 +581,8 @@ class ReflectionExtension implements Reflector
 
     /** @return string */
     public function __toString() {}
+
+    final public function toString(): string {}
 
     /** @return string|false */
     public function getName() {}
@@ -602,7 +618,7 @@ class ReflectionExtension implements Reflector
     public function isTemporary() {}
 }
 
-class ReflectionZendExtension implements Reflector
+class ReflectionZendExtension implements Reflector, Stringable
 {
     final private function __clone() {}
 
@@ -612,6 +628,8 @@ class ReflectionZendExtension implements Reflector
 
     /** @return string */
     public function __toString() {}
+
+    final public function toString(): string {}
 
     /** @return string */
     public function getName() {}

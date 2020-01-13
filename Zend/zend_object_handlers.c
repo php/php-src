@@ -1794,6 +1794,11 @@ ZEND_API int zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj,
 					zend_throw_error(NULL, "Method %s::__toString() must return a string value", ZSTR_VAL(ce->name));
 				}
 			}
+			if (zend_class_implements_interface(ce, zend_ce_stringable)) {
+				zend_call_method_with_0_params(readobj, NULL, NULL, "tostring", &retval);
+				ZVAL_COPY_VALUE(writeobj, &retval);
+				return SUCCESS;
+			}
 			return FAILURE;
 		case _IS_BOOL:
 			ZVAL_TRUE(writeobj);

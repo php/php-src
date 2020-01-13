@@ -345,7 +345,7 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 		zend_class_entry *ce;
 
 		ce = Z_OBJCE_P(value);
-		if (!ce->__tostring) {
+		if (!ce->__tostring && !zend_class_implements_interface(ce, zend_ce_stringable)) {
 			zval_ptr_dtor(value);
 			/* #67167: doesn't return null on failure for objects */
 			if (flags & FILTER_NULL_ON_FAILURE) {

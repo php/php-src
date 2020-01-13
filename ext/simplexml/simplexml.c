@@ -1954,6 +1954,20 @@ SXE_METHOD(__toString)
 }
 /* }}} */
 
+/* {{{ proto object SimpleXMLElement::toString()
+   Returns the string content */
+SXE_METHOD(toString)
+{
+	zval rv;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_call_method_with_0_params(Z_OBJ_P(ZEND_THIS), NULL, NULL, "__tostring", &rv);
+
+	ZVAL_COPY_VALUE(return_value, &rv);
+}
+/* }}} */
+
 static int php_sxe_count_elements_helper(php_sxe_object *sxe, zend_long *count) /* {{{ */
 {
 	xmlNodePtr      node;
@@ -2618,6 +2632,7 @@ static const zend_function_entry sxe_functions[] = { /* {{{ */
 	SXE_ME(addChild,               arginfo_class_SimpleXMLElement_addChild, ZEND_ACC_PUBLIC)
 	SXE_ME(addAttribute,           arginfo_class_SimpleXMLElement_addAttribute, ZEND_ACC_PUBLIC)
 	SXE_ME(__toString,             arginfo_class_SimpleXMLElement___toString, ZEND_ACC_PUBLIC)
+	SXE_ME(toString,               arginfo_class_SimpleXMLElement_toString, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	SXE_ME(count,                  arginfo_class_SimpleXMLElement_count, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
@@ -2633,7 +2648,7 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe.create_object = sxe_object_new;
 	sxe_class_entry = zend_register_internal_class(&sxe);
 	sxe_class_entry->get_iterator = php_sxe_get_iterator;
-	zend_class_implements(sxe_class_entry, 2, zend_ce_traversable, zend_ce_countable);
+	zend_class_implements(sxe_class_entry, 3, zend_ce_traversable, zend_ce_countable, zend_ce_stringable);
 
 	memcpy(&sxe_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sxe_object_handlers.offset = XtOffsetOf(php_sxe_object, zo);

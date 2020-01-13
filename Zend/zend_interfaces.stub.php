@@ -49,3 +49,8 @@ interface Countable
     /** @return int */
     function count();
 }
+
+interface Stringable
+{
+    function toString(): string;
+}

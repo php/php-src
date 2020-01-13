@@ -37,7 +37,7 @@ string(183) "Class [ <internal:Core> class stdClass ] {
 }
 
 "
-string(1969) "Class [ <internal:Core> class Exception implements Throwable ] {
+string(2132) "Class [ <internal:Core> class Exception implements Throwable, Stringable ] {
 
   - Constants [0] {
   }
@@ -58,7 +58,7 @@ string(1969) "Class [ <internal:Core> class Exception implements Throwable ] {
     Property [ <default> private $previous ]
   }
 
-  - Methods [11] {
+  - Methods [12] {
     Method [ <internal:Core> final private method __clone ] {
 
       - Parameters [0] {
@@ -126,6 +126,13 @@ string(1969) "Class [ <internal:Core> class Exception implements Throwable ] {
 
       - Parameters [0] {
       }
+    }
+
+    Method [ <internal:Core, prototype Stringable> final public method toString ] {
+
+      - Parameters [0] {
+      }
+      - Return [ string ]
     }
   }
 }

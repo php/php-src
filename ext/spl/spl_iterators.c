@@ -61,6 +61,9 @@ PHPAPI zend_class_entry *spl_ce_RecursiveTreeIterator;
 ZEND_BEGIN_ARG_INFO(arginfo_recursive_it_void, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_caching_it_toString, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 static const zend_function_entry spl_funcs_RecursiveIterator[] = {
 	SPL_ABSTRACT_ME(RecursiveIterator, hasChildren,  arginfo_recursive_it_void)
 	SPL_ABSTRACT_ME(RecursiveIterator, getChildren,  arginfo_recursive_it_void)
@@ -2736,8 +2739,19 @@ SPL_METHOD(CachingIterator, __toString)
 	}
 } /* }}} */
 
-/* {{{ proto void CachingIterator::offsetSet(mixed index, mixed newval)
-   Set given index in cache */
+/* {{{ proto string CachingIterator::toString()
+   Return the string representation of the current element */
+SPL_METHOD(CachingIterator, toString)
+{
+	zval rv;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_call_method_with_0_params(Z_OBJ_P(ZEND_THIS), NULL, NULL, "__tostring", &rv);
+
+	ZVAL_COPY_VALUE(return_value, &rv);
+} /* }}} */
+
 SPL_METHOD(CachingIterator, offsetSet)
 {
 	spl_dual_it_object   *intern;
@@ -2950,6 +2964,7 @@ static const zend_function_entry spl_funcs_CachingIterator[] = {
 	SPL_ME(CachingIterator, next,             arginfo_recursive_it_void,      ZEND_ACC_PUBLIC)
 	SPL_ME(CachingIterator, hasNext,          arginfo_recursive_it_void,      ZEND_ACC_PUBLIC)
 	SPL_ME(CachingIterator, __toString,       arginfo_recursive_it_void,      ZEND_ACC_PUBLIC)
+	SPL_ME(CachingIterator, toString,         arginfo_caching_it_toString,    ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	SPL_ME(dual_it,         getInnerIterator, arginfo_recursive_it_void,      ZEND_ACC_PUBLIC)
 	SPL_ME(CachingIterator, getFlags,         arginfo_recursive_it_void,      ZEND_ACC_PUBLIC)
 	SPL_ME(CachingIterator, setFlags,         arginfo_caching_it_setFlags,    ZEND_ACC_PUBLIC)
@@ -3669,6 +3684,7 @@ PHP_MINIT_FUNCTION(spl_iterators)
 	REGISTER_SPL_SUB_CLASS_EX(CachingIterator, IteratorIterator, spl_dual_it_new, spl_funcs_CachingIterator);
 	REGISTER_SPL_IMPLEMENTS(CachingIterator, ArrayAccess);
 	REGISTER_SPL_IMPLEMENTS(CachingIterator, Countable);
+	REGISTER_SPL_IMPLEMENTS(CachingIterator, Stringable);
 
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "CALL_TOSTRING",        CIT_CALL_TOSTRING);
 	REGISTER_SPL_CLASS_CONST_LONG(CachingIterator, "CATCH_GET_CHILD",      CIT_CATCH_GET_CHILD);

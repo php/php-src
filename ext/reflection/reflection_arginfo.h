@@ -70,6 +70,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionFunction___toString arginfo_class_Reflector___toString
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionFunction_toString, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionFunction_export, 0, 0, 1)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_TYPE_INFO(0, return, _IS_BOOL, 0)
@@ -111,6 +114,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod___construct, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionMethod___toString arginfo_class_Reflector___toString
+
+#define arginfo_class_ReflectionMethod_toString arginfo_class_ReflectionFunction_toString
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod_export, 0, 0, 2)
 	ZEND_ARG_INFO(0, class)
@@ -170,6 +175,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass___construct, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClass___toString arginfo_class_Reflector___toString
+
+#define arginfo_class_ReflectionClass_toString arginfo_class_ReflectionFunction_toString
 
 #define arginfo_class_ReflectionClass_getName arginfo_class_Reflector___toString
 
@@ -306,6 +313,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionProperty___toString arginfo_class_Reflector___toString
 
+#define arginfo_class_ReflectionProperty_toString arginfo_class_ReflectionFunction_toString
+
 #define arginfo_class_ReflectionProperty_getName arginfo_class_Reflector___toString
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionProperty_getValue, 0, 0, 0)
@@ -351,6 +360,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClassConstant___toString arginfo_class_Reflector___toString
 
+#define arginfo_class_ReflectionClassConstant_toString arginfo_class_ReflectionFunction_toString
+
 #define arginfo_class_ReflectionClassConstant_getName arginfo_class_Reflector___toString
 
 #define arginfo_class_ReflectionClassConstant_getValue arginfo_class_Reflector___toString
@@ -381,6 +392,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionParameter___construct, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionParameter___toString arginfo_class_Reflector___toString
+
+#define arginfo_class_ReflectionParameter_toString arginfo_class_ReflectionFunction_toString
 
 #define arginfo_class_ReflectionParameter_getName arginfo_class_Reflector___toString
 
@@ -424,6 +437,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionType___toString arginfo_class_Reflector___toString
 
+#define arginfo_class_ReflectionType_toString arginfo_class_ReflectionFunction_toString
+
 #define arginfo_class_ReflectionNamedType_getName arginfo_class_Reflector___toString
 
 #define arginfo_class_ReflectionNamedType_isBuiltin arginfo_class_Reflector___toString
@@ -438,6 +453,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionExtension___construct arginfo_class_ReflectionClass_hasMethod
 
 #define arginfo_class_ReflectionExtension___toString arginfo_class_Reflector___toString
+
+#define arginfo_class_ReflectionExtension_toString arginfo_class_ReflectionFunction_toString
 
 #define arginfo_class_ReflectionExtension_getName arginfo_class_Reflector___toString
 
@@ -468,6 +485,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionZendExtension___construct arginfo_class_ReflectionClass_hasMethod
 
 #define arginfo_class_ReflectionZendExtension___toString arginfo_class_Reflector___toString
+
+#define arginfo_class_ReflectionZendExtension_toString arginfo_class_ReflectionFunction_toString
 
 #define arginfo_class_ReflectionZendExtension_getName arginfo_class_Reflector___toString
 

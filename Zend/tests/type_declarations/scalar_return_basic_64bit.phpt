@@ -21,7 +21,7 @@ $functions = [
     'bool' => function ($b): bool { return $b; }
 ];
 
-class Stringable {
+class StringCapable {
     public function __toString() {
         return "foobar";
     }
@@ -42,7 +42,7 @@ $values = [
     NULL,
     [],
     new StdClass,
-    new Stringable,
+    new StringCapable,
     fopen("data:text/plain,foobar", "r")
 ];
 
@@ -94,7 +94,7 @@ int(0)
 *** Trying object(stdClass)#6 (0) {
 }
 *** Caught Return value of {closure}() must be of the type int, object returned in %s on line %d
-*** Trying object(Stringable)#7 (0) {
+*** Trying object(StringCapable)#7 (0) {
 }
 *** Caught Return value of {closure}() must be of the type int, object returned in %s on line %d
 *** Trying resource(5) of type (stream)
@@ -132,7 +132,7 @@ float(0)
 *** Trying object(stdClass)#6 (0) {
 }
 *** Caught Return value of {closure}() must be of the type float, object returned in %s on line %d
-*** Trying object(Stringable)#7 (0) {
+*** Trying object(StringCapable)#7 (0) {
 }
 *** Caught Return value of {closure}() must be of the type float, object returned in %s on line %d
 *** Trying resource(5) of type (stream)
@@ -169,7 +169,7 @@ string(0) ""
 *** Trying object(stdClass)#6 (0) {
 }
 *** Caught Return value of {closure}() must be of the type string, object returned in %s on line %d
-*** Trying object(Stringable)#7 (0) {
+*** Trying object(StringCapable)#7 (0) {
 }
 string(6) "foobar"
 *** Trying resource(5) of type (stream)
@@ -206,7 +206,7 @@ bool(false)
 *** Trying object(stdClass)#6 (0) {
 }
 *** Caught Return value of {closure}() must be of the type bool, object returned in %s on line %d
-*** Trying object(Stringable)#7 (0) {
+*** Trying object(StringCapable)#7 (0) {
 }
 *** Caught Return value of {closure}() must be of the type bool, object returned in %s on line %d
 *** Trying resource(5) of type (stream)

@@ -73,4 +73,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SimpleXMLElement___toString arginfo_class_SimpleXMLElement_getName
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SimpleXMLElement_toString, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 #define arginfo_class_SimpleXMLElement_count arginfo_class_SimpleXMLElement_getName

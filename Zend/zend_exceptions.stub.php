@@ -1,6 +1,6 @@
 <?php
 
-interface Throwable
+interface Throwable extends Stringable
 {
     /** @return string */
     function getMessage();
@@ -55,6 +55,8 @@ class Exception implements Throwable
 
     /** @return string */
     final function getTraceAsString() {}
+
+    final function toString(): string {}
 
     /** @return string */
     function __toString() {}
