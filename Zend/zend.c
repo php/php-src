@@ -655,9 +655,10 @@ static void compiler_globals_ctor(zend_compiler_globals *compiler_globals) /* {{
 	compiler_globals->map_ptr_last = global_map_ptr_last;
 	if (compiler_globals->map_ptr_last) {
 		/* Allocate map_ptr table */
+		void *base;
 		compiler_globals->map_ptr_size = ZEND_MM_ALIGNED_SIZE_EX(compiler_globals->map_ptr_last, 4096);
 		base = pemalloc(compiler_globals->map_ptr_size * sizeof(void*), 1);
-		ZEND_MAP_PTR_SET_BASE(base);
+		ZEND_MAP_PTR_SET_REAL_BASE(compiler_globals->map_ptr_base, base);
 		memset(base, 0, compiler_globals->map_ptr_last * sizeof(void*));
 	}
 #else
@@ -914,7 +915,7 @@ int zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 		 */
 		CG(map_ptr_size) = 1024 * 1024; // TODO: initial size ???
 		CG(map_ptr_last) = 0;
-		ZEND_MAP_PTR_SET_BASE(pemalloc(CG(map_ptr_size) * sizeof(void*), 1));
+		ZEND_MAP_PTR_SET_REAL_BASE(CG(map_ptr_base), pemalloc(CG(map_ptr_size) * sizeof(void*), 1));
 # elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
 		/* Map region is going to be created and resized at run-time. */
 		ZEND_MAP_PTR_SET_REAL_BASE(CG(map_ptr_base), NULL);
