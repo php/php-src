@@ -1498,6 +1498,17 @@ static uint32_t zend_get_class_fetch_type_ast(zend_ast *name_ast) /* {{{ */
 }
 /* }}} */
 
+static zend_string *zend_resolve_const_class_name_reference(zend_ast *ast, const char *type)
+{
+	zend_string *class_name = zend_ast_get_str(ast);
+	if (ZEND_FETCH_CLASS_DEFAULT != zend_get_class_fetch_type_ast(ast)) {
+		zend_error_noreturn(E_COMPILE_ERROR,
+			"Cannot use '%s' as %s, as it is reserved",
+			ZSTR_VAL(class_name), type);
+	}
+	return zend_resolve_class_name(class_name, ast->attr);
+}
+
 static void zend_ensure_valid_class_fetch_type(uint32_t fetch_type) /* {{{ */
 {
 	if (fetch_type != ZEND_FETCH_CLASS_DEFAULT && zend_is_scope_known()) {
@@ -6399,7 +6410,7 @@ static void zend_compile_method_ref(zend_ast *ast, zend_trait_method_reference *
 	method_ref->method_name = zend_string_copy(zend_ast_get_str(method_ast));
 
 	if (class_ast) {
-		method_ref->class_name = zend_resolve_class_name_ast(class_ast);
+		method_ref->class_name = zend_resolve_const_class_name_reference(class_ast, "trait name");
 	} else {
 		method_ref->class_name = NULL;
 	}
@@ -6419,7 +6430,8 @@ static void zend_compile_trait_precedence(zend_ast *ast) /* {{{ */
 
 	for (i = 0; i < insteadof_list->children; ++i) {
 		zend_ast *name_ast = insteadof_list->child[i];
-		precedence->exclude_class_names[i] = zend_resolve_class_name_ast(name_ast);
+		precedence->exclude_class_names[i] =
+			zend_resolve_const_class_name_reference(name_ast, "trait name");
 	}
 
 	zend_add_to_list(&CG(active_class_entry)->trait_precedences, precedence);
@@ -6513,15 +6525,8 @@ void zend_compile_implements(zend_ast *ast) /* {{{ */
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *class_ast = list->child[i];
-		zend_string *name = zend_ast_get_str(class_ast);
-
-		if (!zend_is_const_default_class_ref(class_ast)) {
-			efree(interface_names);
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot use '%s' as interface name as it is reserved", ZSTR_VAL(name));
-		}
-
-		interface_names[i].name = zend_resolve_class_name_ast(class_ast);
+		interface_names[i].name =
+			zend_resolve_const_class_name_reference(class_ast, "interface name");
 		interface_names[i].lc_name = zend_string_tolower(interface_names[i].name);
 	}
 
@@ -6605,23 +6610,8 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 	}
 
 	if (extends_ast) {
-		znode extends_node;
-		zend_string *extends_name;
-
-		if (!zend_is_const_default_class_ref(extends_ast)) {
-			extends_name = zend_ast_get_str(extends_ast);
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot use '%s' as class name as it is reserved", ZSTR_VAL(extends_name));
-		}
-
-		zend_compile_expr(&extends_node, extends_ast);
-		if (extends_node.op_type != IS_CONST || Z_TYPE(extends_node.u.constant) != IS_STRING) {
-			zend_error_noreturn(E_COMPILE_ERROR, "Illegal class name");
-		}
-		extends_name = Z_STR(extends_node.u.constant);
-		ce->parent_name = zend_resolve_class_name(extends_name,
-					extends_ast->kind == ZEND_AST_ZVAL ? extends_ast->attr : ZEND_NAME_FQ);
-		zend_string_release_ex(extends_name, 0);
+		ce->parent_name =
+			zend_resolve_const_class_name_reference(extends_ast, "class name");
 		ce->ce_flags |= ZEND_ACC_INHERITED;
 	}
 
