@@ -4302,7 +4302,7 @@ static void preload_load(void)
 	if (CG(map_ptr_last) != ZCSG(map_ptr_last)) {
 		CG(map_ptr_last) = ZCSG(map_ptr_last);
 		CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(CG(map_ptr_last) + 1, 4096);
-		ZEND_MAP_PTR_SET_REAL_BASE(CG(map_ptr_size), perealloc(ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_size)), CG(map_ptr_size) * sizeof(void*), 1));
+		ZEND_MAP_PTR_SET_REAL_BASE(CG(map_ptr_base), perealloc(ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_size)), CG(map_ptr_size) * sizeof(void*), 1));
 	}
 }
 
