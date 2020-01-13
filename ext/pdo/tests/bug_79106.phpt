@@ -6,7 +6,14 @@ if (!extension_loaded('pdo')) die('skip pdo extension not available');
 $dir = getenv('REDIR_TEST_DIR');
 if (!$dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';
-PDOTest::skip();
+try {
+    $db = PDOTest::factory();
+} catch (PDOException $e) {
+    die('skip ' . $e->getMessage());
+}
+if ($db->query('SELECT 1 as "1"') === false) {
+    die('skip driver does not support quoted numeric identifiers');
+}
 ?>
 --FILE--
 <?php
@@ -14,7 +21,7 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR=' . dirname(__FIL
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$stmt = $db->query("SELECT 0 as `2007`, 0 as `2008`, 0 as `2020`");
+$stmt = $db->query('SELECT 0 as "2007", 0 as "2008", 0 as "2020"');
 var_dump($stmt->fetchAll());
 ?>
 --EXPECT--
