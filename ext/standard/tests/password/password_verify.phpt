@@ -14,11 +14,11 @@ var_dump(password_verify('rasmuslerdorf', '$2a$07$usesomesillystringfore2uDLvp1I
 
 var_dump(password_verify("foo", null));
 
+/* Insecure DES */
 var_dump(password_verify("rasmuslerdorf", "rl.3StKT.4T8M"));
 
 var_dump(password_verify("foo", "$1"));
 
-echo "OK!";
 ?>
 --EXPECT--
 bool(false)
@@ -26,6 +26,5 @@ bool(false)
 bool(false)
 bool(true)
 bool(false)
-bool(true)
 bool(false)
-OK!
+bool(false)

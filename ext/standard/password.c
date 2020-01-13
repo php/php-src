@@ -158,7 +158,7 @@ static zend_bool php_password_bcrypt_needs_rehash(const zend_string *hash, zend_
 static zend_bool php_password_bcrypt_verify(const zend_string *password, const zend_string *hash) {
 	size_t i;
 	int status = 0;
-	zend_string *ret = php_crypt(ZSTR_VAL(password), (int)ZSTR_LEN(password), ZSTR_VAL(hash), (int)ZSTR_LEN(hash), 1);
+	zend_string *ret = php_crypt(ZSTR_VAL(password), (int)ZSTR_LEN(password), ZSTR_VAL(hash), (int)ZSTR_LEN(hash));
 
 	if (!ret) {
 		return 0;
@@ -210,7 +210,7 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	zend_string_release_ex(salt, 0);
 
 	/* This cast is safe, since both values are defined here in code and cannot overflow */
-	result = php_crypt(ZSTR_VAL(password), (int)ZSTR_LEN(password), ZSTR_VAL(hash), (int)ZSTR_LEN(hash), 1);
+	result = php_crypt(ZSTR_VAL(password), (int)ZSTR_LEN(password), ZSTR_VAL(hash), (int)ZSTR_LEN(hash));
 	zend_string_release_ex(hash, 0);
 
 	if (!result) {
