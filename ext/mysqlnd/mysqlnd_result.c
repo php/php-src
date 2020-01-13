@@ -842,8 +842,9 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 					const size_t len = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
 
 					if (flags & MYSQLND_FETCH_NUM) {
-						Z_TRY_ADDREF_P(data);
-						zend_hash_next_index_insert(row_ht, data);
+						if (zend_hash_index_add(row_ht, i, data) != NULL) {
+							Z_TRY_ADDREF_P(data);
+						}
 					}
 					if (flags & MYSQLND_FETCH_ASSOC) {
 						/* zend_hash_quick_update needs length + trailing zero */
@@ -1099,8 +1100,9 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 			set->lengths[i] = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
 
 			if (flags & MYSQLND_FETCH_NUM) {
-				Z_TRY_ADDREF_P(data);
-				zend_hash_next_index_insert(Z_ARRVAL_P(row), data);
+				if (zend_hash_index_add(Z_ARRVAL_P(row), i, data) != NULL) {
+					Z_TRY_ADDREF_P(data);
+				}
 			}
 			if (flags & MYSQLND_FETCH_ASSOC) {
 				/* zend_hash_quick_update needs length + trailing zero */
@@ -1195,8 +1197,9 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 			set->lengths[i] = (Z_TYPE_P(data) == IS_STRING)? Z_STRLEN_P(data) : 0;
 
 			if (flags & MYSQLND_FETCH_NUM) {
-				Z_TRY_ADDREF_P(data);
-				zend_hash_next_index_insert(Z_ARRVAL_P(row), data);
+				if (zend_hash_index_add(Z_ARRVAL_P(row), i, data)) {
+					Z_TRY_ADDREF_P(data);
+				}
 			}
 			if (flags & MYSQLND_FETCH_ASSOC) {
 				/* zend_hash_quick_update needs length + trailing zero */
