@@ -59,30 +59,4 @@ $db = MySQLPDOTest::factory();
 	print "done!";
 ?>
 --EXPECT--
-[002] Suspicious FETCH_BOTH result, dumping
-array(2) {
-  [0]=>
-  string(1) "1"
-  [1]=>
-  string(1) "1"
-}
-array(2) {
-  [1]=>
-  string(1) "1"
-  [2]=>
-  string(1) "1"
-}
-[002] Expected differes from returned data, dumping
-array(2) {
-  [0]=>
-  string(1) "1"
-  [1]=>
-  string(1) "1"
-}
-array(2) {
-  [1]=>
-  string(1) "1"
-  [2]=>
-  string(1) "1"
-}
 done!
