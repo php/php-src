@@ -4,11 +4,7 @@ or Blowfish is not available.
 --FILE--
 <?php
 $crypt = crypt('U*U', '$2a$CCCCCCCCCCCCCCCCCCCCC.E5YPO9kmyuRGyh0XouQYb4YMJKvyOeW');
-if ($crypt==='*0') {
-    echo "OK\n";
-} else {
-    echo "Not OK\n";
-}
+var_dump($crypt === '*0');
 ?>
 --EXPECT--
-OK
+bool(true)

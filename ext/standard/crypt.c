@@ -95,9 +95,21 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 	a CryptoApi md5_crypt implementation */
 #if PHP_USE_PHP_CRYPT_R
 	{
-		struct php_crypt_extended_data;
+		/* DES */
+		if (salt[0] != '$') {
+			struct php_crypt_extended_data buffer;
 
-		if (salt[0]=='$' && salt[1]=='1' && salt[2]=='$') {
+			memset(&buffer, 0, sizeof(buffer));
+			_crypt_extended_init_r();
+
+			crypt_res = _crypt_extended_r((const unsigned char *) password, salt, &buffer);
+			if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
+				return NULL;
+			} else {
+				result = zend_string_init(crypt_res, strlen(crypt_res), 0);
+				return result;
+			}
+		} else if (salt[0]=='$' && salt[1]=='1' && salt[2]=='$') {
 			char output[MD5_HASH_MAX_LEN], *out;
 
 			out = php_md5_crypt_r(password, salt, output);

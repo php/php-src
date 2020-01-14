@@ -7,7 +7,7 @@ var_dump(crypt("À9234abcd", "99"));
 var_dump(crypt("À1234abcd", "_01234567"));
 var_dump(crypt("À9234abcd", "_01234567"));
 --EXPECT--
-string(2) "*0"
-string(2) "*0"
-string(2) "*0"
-string(2) "*0"
+string(13) "99PxawtsTfX56"
+string(13) "99jcVcGxUZOWk"
+string(20) "_01234567IBjxKliXXRQ"
+string(20) "_012345678OSGpGQRVHA"
