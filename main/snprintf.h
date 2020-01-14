@@ -76,7 +76,6 @@ typedef enum {
 BEGIN_EXTERN_C()
 PHPAPI int ap_php_slprintf(char *buf, size_t len, const char *format,...) ZEND_ATTRIBUTE_FORMAT(printf, 3, 4);
 PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list ap);
-PHPAPI int ap_php_snprintf(char *, size_t, const char *, ...) ZEND_ATTRIBUTE_FORMAT(printf, 3, 4);
 PHPAPI int ap_php_vsnprintf(char *, size_t, const char *, va_list ap);
 PHPAPI int ap_php_vasprintf(char **buf, const char *format, va_list ap);
 PHPAPI int ap_php_asprintf(char **buf, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
@@ -96,11 +95,6 @@ END_EXTERN_C()
 #undef vslprintf
 #endif
 #define vslprintf ap_php_vslprintf
-
-#ifdef snprintf
-#undef snprintf
-#endif
-#define snprintf ap_php_snprintf
 
 #ifdef vsnprintf
 #undef vsnprintf

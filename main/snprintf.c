@@ -1273,18 +1273,6 @@ PHPAPI int ap_php_vslprintf(char *buf, size_t len, const char *format, va_list a
 }
 /* }}} */
 
-PHPAPI int ap_php_snprintf(char *buf, size_t len, const char *format,...) /* {{{ */
-{
-	int cc;
-	va_list ap;
-
-	va_start(ap, format);
-	strx_printv(&cc, buf, len, format, ap);
-	va_end(ap);
-	return (cc);
-}
-/* }}} */
-
 PHPAPI int ap_php_vsnprintf(char *buf, size_t len, const char *format, va_list ap) /* {{{ */
 {
 	int cc;
