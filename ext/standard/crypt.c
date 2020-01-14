@@ -103,12 +103,10 @@ PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const ch
 			_crypt_extended_init_r();
 
 			crypt_res = _crypt_extended_r((const unsigned char *) password, salt, &buffer);
-			if (!crypt_res || (salt[0] == '*' && salt[1] == '0')) {
-				return NULL;
-			} else {
-				result = zend_string_init(crypt_res, strlen(crypt_res), 0);
-				return result;
+			if (crypt_res) {
+				return zend_string_init(crypt_res, strlen(crypt_res), 0);;
 			}
+			return NULL;
 		} else if (salt[0]=='$' && salt[1]=='1' && salt[2]=='$') {
 			char output[MD5_HASH_MAX_LEN], *out;
 
@@ -223,13 +221,13 @@ PHP_FUNCTION(crypt)
 
 	salt[salt_in_len] = '\0';
 
+	/* Invalid salt */
+	if (salt[0] == '*' && salt[1] == '0') {
+		RETURN_STRING("*1");
+	}
+
 	if ((result = php_crypt(str, (int)str_len, salt, (int)salt_in_len)) == NULL) {
-		/* TODO Does this need changing? */
-		if (salt[0] == '*' && salt[1] == '0') {
-			RETURN_STRING("*1");
-		} else {
-			RETURN_STRING("*0");
-		}
+		RETURN_STRING("*0");
 	}
 	RETURN_STR(result);
 }
