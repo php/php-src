@@ -1719,7 +1719,7 @@ PHP_FUNCTION(socket_sendto)
 		case AF_UNIX:
 			memset(&s_un, 0, sizeof(s_un));
 			s_un.sun_family = AF_UNIX;
-			snprintf(s_un.sun_path, 108, "%s", addr);
+			snprintf(s_un.sun_path, sizeof(s_un.sun_path), "%s", addr);
 
 			retval = sendto(php_sock->bsd_socket, buf, ((size_t)len > buf_len) ? buf_len : (size_t)len,	flags, (struct sockaddr *) &s_un, SUN_LEN(&s_un));
 			break;
