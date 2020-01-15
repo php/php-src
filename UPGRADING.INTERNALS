@@ -80,6 +80,11 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   j. compare_objects() handler was removed. Extensions should use compare() object
      handler instead and check if both arguments are objects and have the same
      compare handler, using ZEND_COMPARE_OBJECTS_FALLBACK() macro.
+     
+  k. The 'I' length modifier, used to denote 32 and 64bit integer from the custom
+     snprintf implementation has been removed.
+     Use the ZEND_LONG_FMT, ZEND_ULONG_FMT and ZEND_XLONG_FMT macros defined in
+     php-src/Zend/zend_long.h
 
 ========================
 2. Build system changes
