@@ -1160,6 +1160,9 @@ int main(int argc, char *argv[])
 	wchar_t **argv_wide;
 	char **argv_save = argv;
 	BOOL using_wide_argv = 0;
+# if defined(_DEBUG) && defined(PHP_WIN32_DEBUG_HEAP)
+	int unclean_shutdown;
+# endif
 #endif
 
 	int c;
@@ -1197,7 +1200,6 @@ int main(int argc, char *argv[])
 		_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
 		tmp_flag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
 		tmp_flag |= _CRTDBG_DELAY_FREE_MEM_DF;
-		tmp_flag |= _CRTDBG_LEAK_CHECK_DF;
 
 		_CrtSetDbgFlag(tmp_flag);
 	}
@@ -1369,6 +1371,9 @@ out:
 	if (sapi_started) {
 		sapi_shutdown();
 	}
+#if defined(PHP_WIN32) && defined(_DEBUG) && defined(PHP_WIN32_DEBUG_HEAP)
+	unclean_shutdown = CG(unclean_shutdown);
+#endif
 #ifdef ZTS
 	tsrm_shutdown();
 #endif
@@ -1387,6 +1392,11 @@ out:
 	 * exiting.
 	 */
 	cleanup_ps_args(argv);
+#if defined(PHP_WIN32) && defined(_DEBUG) && defined(PHP_WIN32_DEBUG_HEAP)
+	if (!unclean_shutdown) {
+		_CrtDumpMemoryLeaks();
+	}
+#endif
 	exit(exit_status);
 }
 /* }}} */

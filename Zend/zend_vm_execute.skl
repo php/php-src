@@ -79,9 +79,11 @@ static void init_opcode_serialiser(void)
 	int i;
 	zval tmp;
 
+	ZEND_IGNORE_LEAKS_BEGIN();
 	zend_handlers_table = malloc(sizeof(HashTable));
 	zend_hash_init_ex(zend_handlers_table, zend_handlers_count, NULL, NULL, 1, 0);
 	zend_hash_real_init(zend_handlers_table, 0);
+	ZEND_IGNORE_LEAKS_END();
 	Z_TYPE_INFO(tmp) = IS_LONG;
 	for (i = 0; i < zend_handlers_count; i++) {
 		Z_LVAL(tmp) = i;
