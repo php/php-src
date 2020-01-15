@@ -728,7 +728,7 @@ PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
 
 	if (!(GC_FLAGS(ht) & GC_IMMUTABLE)) {
 		if (GC_IS_RECURSIVE(ht)) {
-			php_error_docref(NULL, E_WARNING, "recursion detected");
+			php_error_docref(NULL, E_WARNING, "Recursion detected");
 			return 0;
 		}
 		GC_PROTECT_RECURSION(ht);

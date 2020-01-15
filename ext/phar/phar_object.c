@@ -2992,7 +2992,7 @@ PHP_METHOD(Phar, setDefaultStub)
 	}
 
 	if (ZEND_NUM_ARGS() > 0 && (phar_obj->archive->is_tar || phar_obj->archive->is_zip)) {
-		php_error_docref(NULL, E_WARNING, "method accepts no arguments for a tar- or zip-based phar stub, %d given", ZEND_NUM_ARGS());
+		php_error_docref(NULL, E_WARNING, "Method accepts no arguments for a tar- or zip-based phar stub, %d given", ZEND_NUM_ARGS());
 		RETURN_FALSE;
 	}
 
@@ -4438,7 +4438,7 @@ PHP_METHOD(Phar, extractTo)
 							RETURN_THROWS();
 						case 0:
 							zend_throw_exception_ex(phar_ce_PharException, 0,
-								"Phar Error: attempted to extract non-existent file or directory \"%s\" from phar \"%s\"",
+								"phar error: attempted to extract non-existent file or directory \"%s\" from phar \"%s\"",
 								ZSTR_VAL(Z_STR_P(zval_file)), phar_obj->archive->fname);
 							RETURN_THROWS();
 					}
@@ -4460,7 +4460,7 @@ PHP_METHOD(Phar, extractTo)
 		efree(error);
 	} else if (0 == ret && NULL != filename) {
 		zend_throw_exception_ex(phar_ce_PharException, 0,
-			"Phar Error: attempted to extract non-existent file or directory \"%s\" from phar \"%s\"",
+			"phar error: attempted to extract non-existent file or directory \"%s\" from phar \"%s\"",
 			ZSTR_VAL(filename), phar_obj->archive->fname);
 	} else {
 		RETURN_TRUE;
@@ -4891,7 +4891,7 @@ PHP_METHOD(PharFileInfo, getContent)
 
 	if (entry_obj->entry->is_dir) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
-			"Phar error: Cannot retrieve contents, \"%s\" in phar \"%s\" is a directory", entry_obj->entry->filename, entry_obj->entry->phar->fname);
+			"phar error: Cannot retrieve contents, \"%s\" in phar \"%s\" is a directory", entry_obj->entry->filename, entry_obj->entry->phar->fname);
 		RETURN_THROWS();
 	}
 
@@ -4903,14 +4903,14 @@ PHP_METHOD(PharFileInfo, getContent)
 
 	if (SUCCESS != phar_open_entry_fp(link, &error, 0)) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
-			"Phar error: Cannot retrieve contents, \"%s\" in phar \"%s\": %s", entry_obj->entry->filename, entry_obj->entry->phar->fname, error);
+			"phar error: Cannot retrieve contents, \"%s\" in phar \"%s\": %s", entry_obj->entry->filename, entry_obj->entry->phar->fname, error);
 		efree(error);
 		RETURN_THROWS();
 	}
 
 	if (!(fp = phar_get_efp(link, 0))) {
 		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
-			"Phar error: Cannot retrieve contents of \"%s\" in phar \"%s\"", entry_obj->entry->filename, entry_obj->entry->phar->fname);
+			"phar error: Cannot retrieve contents of \"%s\" in phar \"%s\"", entry_obj->entry->filename, entry_obj->entry->phar->fname);
 		RETURN_THROWS();
 	}
 
@@ -4987,7 +4987,7 @@ PHP_METHOD(PharFileInfo, compress)
 				/* decompress this file indirectly */
 				if (SUCCESS != phar_open_entry_fp(entry_obj->entry, &error, 1)) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
-						"Phar error: Cannot decompress bzip2-compressed file \"%s\" in phar \"%s\" in order to compress with gzip: %s", entry_obj->entry->filename, entry_obj->entry->phar->fname, error);
+						"phar error: Cannot decompress bzip2-compressed file \"%s\" in phar \"%s\" in order to compress with gzip: %s", entry_obj->entry->filename, entry_obj->entry->phar->fname, error);
 					efree(error);
 					RETURN_THROWS();
 				}
@@ -5018,7 +5018,7 @@ PHP_METHOD(PharFileInfo, compress)
 				/* decompress this file indirectly */
 				if (SUCCESS != phar_open_entry_fp(entry_obj->entry, &error, 1)) {
 					zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
-						"Phar error: Cannot decompress gzip-compressed file \"%s\" in phar \"%s\" in order to compress with bzip2: %s", entry_obj->entry->filename, entry_obj->entry->phar->fname, error);
+						"phar error: Cannot decompress gzip-compressed file \"%s\" in phar \"%s\" in order to compress with bzip2: %s", entry_obj->entry->filename, entry_obj->entry->phar->fname, error);
 					efree(error);
 					RETURN_THROWS();
 				}

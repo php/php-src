@@ -780,7 +780,7 @@ static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len
 		return 1;
 	} else {
 		/* it was truncated */
-		php_error_docref(NULL, E_WARNING, "column %d data was too large for buffer and was truncated to fit it", colno);
+		php_error_docref(NULL, E_WARNING, "Column %d data was too large for buffer and was truncated to fit it", colno);
 
 		*ptr = C->data;
 		*len = (size_t) C->fetched_len;

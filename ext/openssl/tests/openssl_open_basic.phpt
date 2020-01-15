@@ -22,7 +22,7 @@ var_dump($output4);
 --EXPECTF--
 string(19) "openssl_open() test"
 
-Warning: openssl_open(): unable to coerce parameter 4 into a private key in %s on line %d
+Warning: openssl_open(): Unable to coerce parameter 4 into a private key in %s on line %d
 NULL
 string(19) "openssl_open() test"
 NULL

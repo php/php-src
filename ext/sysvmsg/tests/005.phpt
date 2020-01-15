@@ -43,7 +43,7 @@ bool(false)
 bool(false)
 bool(true)
 
-Warning: msg_receive(): maximum size of the message has to be greater than zero in %s on line %d
+Warning: msg_receive(): Maximum size of the message has to be greater than zero in %s on line %d
 bool(false)
 
 Warning: msg_send(): msgsnd failed: Invalid argument in %s on line %d
@@ -55,7 +55,7 @@ bool(false)
 bool(false)
 bool(true)
 
-Warning: msg_receive(): maximum size of the message has to be greater than zero in %s on line %d
+Warning: msg_receive(): Maximum size of the message has to be greater than zero in %s on line %d
 bool(false)
 
 Warning: msg_send(): msgsnd failed: Invalid argument in %s on line %d

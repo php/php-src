@@ -343,7 +343,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 	dbh->auto_commit = pdo_attr_lval(options, PDO_ATTR_AUTOCOMMIT, 1);
 
 	if (!dbh->data_source || (username && !dbh->username) || (password && !dbh->password)) {
-		php_error_docref(NULL, E_ERROR, "out of memory");
+		php_error_docref(NULL, E_ERROR, "Out of memory");
 	}
 
 	zend_replace_error_handling(EH_THROW, pdo_exception_ce, &zeh);

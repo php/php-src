@@ -66,10 +66,10 @@ FT_UID valid
 
 -- Iteration 5 --
 
-Warning: imap_fetchheader(): invalid value for the options parameter in %s on line %d
+Warning: imap_fetchheader(): Invalid value for the options parameter in %s on line %d
 FT_UID not valid
 
 -- Iteration 6 --
 
-Warning: imap_fetchheader(): invalid value for the options parameter in %s on line %d
+Warning: imap_fetchheader(): Invalid value for the options parameter in %s on line %d
 FT_UID not valid

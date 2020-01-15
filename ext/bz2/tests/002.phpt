@@ -85,47 +85,47 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 
-Warning: bzopen(): cannot read from a stream opened in write only mode in %s on line %d
+Warning: bzopen(): Cannot read from a stream opened in write only mode in %s on line %d
 bool(false)
 resource(%d) of type (stream)
 resource(%d) of type (stream)
 
-Warning: fopen(bz_open_002.txt): failed to open stream: Bad file %s in %s on line %d
+Warning: fopen(bz_open_002.txt): Failed to open stream: Bad file %s in %s on line %d
 First parameter has to be string or file-resource
 
-Warning: fopen(bz_open_002.txt): failed to open stream: Bad file %s in %s on line %d
+Warning: fopen(bz_open_002.txt): Failed to open stream: Bad file %s in %s on line %d
 First parameter has to be string or file-resource
 
 Warning: bzopen(): cannot write to a stream opened in read only mode in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot read from a stream opened in write only mode in %s on line %d
+Warning: bzopen(): Cannot read from a stream opened in write only mode in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot use stream opened in mode 'rw' in %s on line %d
+Warning: bzopen(): Cannot use stream opened in mode 'rw' in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot use stream opened in mode 'rw' in %s on line %d
+Warning: bzopen(): Cannot use stream opened in mode 'rw' in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot use stream opened in mode 'wr' in %s on line %d
+Warning: bzopen(): Cannot use stream opened in mode 'wr' in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot use stream opened in mode 'wr' in %s on line %d
+Warning: bzopen(): Cannot use stream opened in mode 'wr' in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot use stream opened in mode 'r+' in %s on line %d
+Warning: bzopen(): Cannot use stream opened in mode 'r+' in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot use stream opened in mode 'r+' in %s on line %d
+Warning: bzopen(): Cannot use stream opened in mode 'r+' in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot use stream opened in mode 'w+' in %s on line %d
+Warning: bzopen(): Cannot use stream opened in mode 'w+' in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot use stream opened in mode 'w+' in %s on line %d
+Warning: bzopen(): Cannot use stream opened in mode 'w+' in %s on line %d
 bool(false)
 
-Warning: bzopen(): cannot read from a stream opened in write only mode in %s on line %d
+Warning: bzopen(): Cannot read from a stream opened in write only mode in %s on line %d
 bool(false)
 resource(%d) of type (stream)

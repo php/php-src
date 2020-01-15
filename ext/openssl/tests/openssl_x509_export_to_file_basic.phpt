@@ -32,11 +32,11 @@ if (file_exists($outfilename)) {
 bool(true)
 bool(true)
 
-Warning: openssl_x509_export_to_file(): cannot get cert from parameter 1 in %s on line %d
+Warning: openssl_x509_export_to_file(): Cannot get cert from parameter 1 in %s on line %d
 bool(false)
 bool(true)
 
-Warning: openssl_x509_export_to_file(): cannot get cert from parameter 1 in %s on line %d
+Warning: openssl_x509_export_to_file(): Cannot get cert from parameter 1 in %s on line %d
 bool(false)
 ---
 bool(true)

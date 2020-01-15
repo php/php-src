@@ -1084,7 +1084,7 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 		} else if (strcasecmp(encoding_param, "US-ASCII") == 0) {
 			encoding = (XML_Char*)"US-ASCII";
 		} else {
-			php_error_docref(NULL, E_WARNING, "unsupported source encoding \"%s\"", encoding_param);
+			php_error_docref(NULL, E_WARNING, "Unsupported source encoding \"%s\"", encoding_param);
 			RETURN_FALSE;
 		}
 	} else {

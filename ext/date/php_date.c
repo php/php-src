@@ -4642,7 +4642,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 		case 6:
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "invalid format");
+			php_error_docref(NULL, E_WARNING, "Invalid format");
 			RETURN_FALSE;
 			break;
 	}

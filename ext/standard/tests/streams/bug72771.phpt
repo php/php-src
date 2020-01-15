@@ -17,5 +17,5 @@ $ds=opendir($path, $context);
 var_dump($ds);
 ?>
 --EXPECTF--
-Warning: opendir(ftps://127.0.0.1:%d/): failed to open dir: Server doesn't support FTPS. in %s on line %d
+Warning: opendir(ftps://127.0.0.1:%d/): Failed to open directory: Server doesn't support FTPS. in %s on line %d
 bool(false)

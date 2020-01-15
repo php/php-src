@@ -76,12 +76,12 @@ string(%d) "contents read"
 
 -- Iteration 5 --
 
-Warning: file_get_contents(%sfileGetContentsVar7.dir/fileGetContentsVar7Sub/..///fileGetContentsVar7Sub//..//../fileGetContentsVar7Sub/FileGetContentsVar7.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(%sfileGetContentsVar7.dir/fileGetContentsVar7Sub/..///fileGetContentsVar7Sub//..//../fileGetContentsVar7Sub/FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: file_get_contents(%sfileGetContentsVar7.dir/fileGetContentsVar7Sub/BADDIR/FileGetContentsVar7.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(%sfileGetContentsVar7.dir/fileGetContentsVar7Sub/BADDIR/FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -98,7 +98,7 @@ string(%d) "contents read"
 
 -- Iteration 11 --
 
-Warning: file_get_contents(BADDIR/FileGetContentsVar7.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(BADDIR/FileGetContentsVar7.tmp): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 *** Done ***

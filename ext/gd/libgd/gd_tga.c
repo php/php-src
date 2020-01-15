@@ -149,7 +149,7 @@ int read_header_tga(gdIOCtx *ctx, oTga *tga)
 	unsigned char header[18];
 
 	if (gdGetBuf(header, sizeof(header), ctx) < 18) {
-		gd_error("fail to read header");
+		gd_error("Fail to read header");
 		return -1;
 	}
 

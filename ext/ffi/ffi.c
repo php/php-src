@@ -1009,7 +1009,7 @@ static zval *zend_ffi_cdata_set(zend_object *obj, zend_string *member, zval *val
 #endif
 
 	if (UNEXPECTED(!zend_string_equals_literal(member, "cdata"))) {
-		zend_throw_error(zend_ffi_exception_ce, "only 'cdata' property may be set");
+		zend_throw_error(zend_ffi_exception_ce, "Only 'cdata' property may be set");
 		return &EG(uninitialized_zval);;
 	}
 
@@ -3437,11 +3437,11 @@ static int zend_ffi_validate_incomplete_type(zend_ffi_type *type, zend_bool allo
 			ZEND_HASH_FOREACH_STR_KEY_PTR(FFI_G(tags), key, tag) {
 				if (ZEND_FFI_TYPE(tag->type) == type) {
 					if (type->kind == ZEND_FFI_TYPE_ENUM) {
-						zend_ffi_throw_parser_error("incomplete 'enum %s' at line %d", ZSTR_VAL(key), FFI_G(line));
+						zend_ffi_throw_parser_error("Incomplete 'enum %s' at line %d", ZSTR_VAL(key), FFI_G(line));
 					} else if (type->attr & ZEND_FFI_ATTR_UNION) {
-						zend_ffi_throw_parser_error("incomplete 'union %s' at line %d", ZSTR_VAL(key), FFI_G(line));
+						zend_ffi_throw_parser_error("Incomplete 'union %s' at line %d", ZSTR_VAL(key), FFI_G(line));
 					} else {
-						zend_ffi_throw_parser_error("incomplete 'struct %s' at line %d", ZSTR_VAL(key), FFI_G(line));
+						zend_ffi_throw_parser_error("Incomplete 'struct %s' at line %d", ZSTR_VAL(key), FFI_G(line));
 					}
 					return FAILURE;
 				}
@@ -3453,12 +3453,12 @@ static int zend_ffi_validate_incomplete_type(zend_ffi_type *type, zend_bool allo
 
 			ZEND_HASH_FOREACH_STR_KEY_PTR(FFI_G(symbols), key, sym) {
 				if (type == ZEND_FFI_TYPE(sym->type)) {
-					zend_ffi_throw_parser_error("incomplete C type '%s' at line %d", ZSTR_VAL(key), FFI_G(line));
+					zend_ffi_throw_parser_error("Incomplete C type '%s' at line %d", ZSTR_VAL(key), FFI_G(line));
 					return FAILURE;
 				}
 			} ZEND_HASH_FOREACH_END();
 		}
-		zend_ffi_throw_parser_error("incomplete type at line %d", FFI_G(line));
+		zend_ffi_throw_parser_error("Incomplete type at line %d", FFI_G(line));
 		return FAILURE;
 	} else if (!allow_incomplete_array && type->attr & ZEND_FFI_ATTR_INCOMPLETE_ARRAY) {
 		zend_ffi_throw_parser_error("'[]' not allowed at line %d", FFI_G(line));
@@ -4003,16 +4003,16 @@ ZEND_METHOD(FFI, arrayType) /* {{{ */
 	type = ZEND_FFI_TYPE(ctype->type);
 
 	if (type->kind == ZEND_FFI_TYPE_FUNC) {
-		zend_throw_error(zend_ffi_exception_ce, "array of functions is not allowed");
+		zend_throw_error(zend_ffi_exception_ce, "Array of functions is not allowed");
 		RETURN_THROWS();
 	} else if (type->kind == ZEND_FFI_TYPE_ARRAY && (type->attr & ZEND_FFI_ATTR_INCOMPLETE_ARRAY)) {
-		zend_throw_error(zend_ffi_exception_ce, "only the leftmost array can be undimensioned");
+		zend_throw_error(zend_ffi_exception_ce, "Only the leftmost array can be undimensioned");
 		RETURN_THROWS();
 	} else if (type->kind == ZEND_FFI_TYPE_VOID) {
-		zend_throw_error(zend_ffi_exception_ce, "array of 'void' is not allowed");
+		zend_throw_error(zend_ffi_exception_ce, "Array of 'void' is not allowed");
 		RETURN_THROWS();
 	} else if (type->attr & ZEND_FFI_ATTR_INCOMPLETE_TAG) {
-		zend_throw_error(zend_ffi_exception_ce, "array of incomplete type is not allowed");
+		zend_throw_error(zend_ffi_exception_ce, "Array of incomplete type is not allowed");
 		RETURN_THROWS();
 	}
 
@@ -4189,7 +4189,7 @@ ZEND_METHOD(FFI, memcpy) /* {{{ */
 	} else {
 		ptr1 = cdata1->ptr;
 		if (type1->kind != ZEND_FFI_TYPE_POINTER && size > type1->size) {
-			zend_throw_error(zend_ffi_exception_ce, "attempt to write over data boundary");
+			zend_throw_error(zend_ffi_exception_ce, "Attempt to write over data boundary");
 			RETURN_THROWS();
 		}
 	}
@@ -4198,7 +4198,7 @@ ZEND_METHOD(FFI, memcpy) /* {{{ */
 	if (Z_TYPE_P(zv2) == IS_STRING) {
 		ptr2 = Z_STRVAL_P(zv2);
 		if (size > Z_STRLEN_P(zv2)) {
-			zend_throw_error(zend_ffi_exception_ce, "attempt to read over string boundary");
+			zend_throw_error(zend_ffi_exception_ce, "Attempt to read over string boundary");
 			RETURN_THROWS();
 		}
 	} else if (Z_TYPE_P(zv2) == IS_OBJECT && Z_OBJCE_P(zv2) == zend_ffi_cdata_ce) {
@@ -4209,7 +4209,7 @@ ZEND_METHOD(FFI, memcpy) /* {{{ */
 		} else {
 			ptr2 = cdata2->ptr;
 			if (type2->kind != ZEND_FFI_TYPE_POINTER && size > type2->size) {
-				zend_throw_error(zend_ffi_exception_ce, "attempt to read over data boundary");
+				zend_throw_error(zend_ffi_exception_ce, "Attempt to read over data boundary");
 				RETURN_THROWS();
 			}
 		}
@@ -4266,7 +4266,7 @@ ZEND_METHOD(FFI, memcmp) /* {{{ */
 	if (Z_TYPE_P(zv2) == IS_STRING) {
 		ptr2 = Z_STRVAL_P(zv2);
 		if (size > Z_STRLEN_P(zv2)) {
-			zend_throw_error(zend_ffi_exception_ce, "attempt to read over string boundary");
+			zend_throw_error(zend_ffi_exception_ce, "Attempt to read over string boundary");
 			RETURN_THROWS();
 		}
 	} else if (Z_TYPE_P(zv2) == IS_OBJECT && Z_OBJCE_P(zv2) == zend_ffi_cdata_ce) {
@@ -4277,7 +4277,7 @@ ZEND_METHOD(FFI, memcmp) /* {{{ */
 		} else {
 			ptr2 = cdata2->ptr;
 			if (type2->kind != ZEND_FFI_TYPE_POINTER && size > type2->size) {
-				zend_throw_error(zend_ffi_exception_ce, "attempt to read over data boundary");
+				zend_throw_error(zend_ffi_exception_ce, "Attempt to read over data boundary");
 				RETURN_THROWS();
 			}
 		}
@@ -5512,7 +5512,7 @@ static int zend_ffi_validate_prev_field_type(zend_ffi_type *struct_type) /* {{{ 
 			break;
 		} ZEND_HASH_FOREACH_END();
 		if (ZEND_FFI_TYPE(field->type)->attr & ZEND_FFI_ATTR_INCOMPLETE_ARRAY) {
-			zend_ffi_throw_parser_error("flexible array member not at end of struct at line %d", FFI_G(line));
+			zend_ffi_throw_parser_error("Flexible array member not at end of struct at line %d", FFI_G(line));
 			return FAILURE;
 		}
 	}
@@ -5523,13 +5523,13 @@ static int zend_ffi_validate_prev_field_type(zend_ffi_type *struct_type) /* {{{ 
 static int zend_ffi_validate_field_type(zend_ffi_type *type, zend_ffi_type *struct_type) /* {{{ */
 {
 	if (type == struct_type) {
-		zend_ffi_throw_parser_error("struct/union can't contain an instance of itself at line %d", FFI_G(line));
+		zend_ffi_throw_parser_error("Struct/union can't contain an instance of itself at line %d", FFI_G(line));
 		return FAILURE;
 	} else if (zend_ffi_validate_var_type(type, 1) != SUCCESS) {
 		return FAILURE;
 	} else if (struct_type->attr & ZEND_FFI_ATTR_UNION) {
 		if (type->attr & ZEND_FFI_ATTR_INCOMPLETE_ARRAY) {
-			zend_ffi_throw_parser_error("flexible array member in union at line %d", FFI_G(line));
+			zend_ffi_throw_parser_error("Flexible array member in union at line %d", FFI_G(line));
 			return FAILURE;
 		}
 	}
@@ -5789,10 +5789,10 @@ void zend_ffi_make_pointer_type(zend_ffi_dcl *dcl) /* {{{ */
 static int zend_ffi_validate_array_element_type(zend_ffi_type *type) /* {{{ */
 {
 	if (type->kind == ZEND_FFI_TYPE_FUNC) {
-		zend_ffi_throw_parser_error("array of functions is not allowed at line %d", FFI_G(line));
+		zend_ffi_throw_parser_error("Array of functions is not allowed at line %d", FFI_G(line));
 		return FAILURE;
 	} else if (type->kind == ZEND_FFI_TYPE_ARRAY && (type->attr & ZEND_FFI_ATTR_INCOMPLETE_ARRAY)) {
-		zend_ffi_throw_parser_error("only the leftmost array can be undimensioned at line %d", FFI_G(line));
+		zend_ffi_throw_parser_error("Only the leftmost array can be undimensioned at line %d", FFI_G(line));
 		return FAILURE;
 	}
 	return zend_ffi_validate_type(type, 0, 1);
@@ -5849,10 +5849,10 @@ void zend_ffi_make_array_type(zend_ffi_dcl *dcl, zend_ffi_val *len) /* {{{ */
 static int zend_ffi_validate_func_ret_type(zend_ffi_type *type) /* {{{ */
 {
 	if (type->kind == ZEND_FFI_TYPE_FUNC) {
-		zend_ffi_throw_parser_error("function returning function is not allowed at line %d", FFI_G(line));
+		zend_ffi_throw_parser_error("Function returning function is not allowed at line %d", FFI_G(line));
 		return FAILURE;
 	 } else if (type->kind == ZEND_FFI_TYPE_ARRAY) {
-		zend_ffi_throw_parser_error("function returning array is not allowed at line %d", FFI_G(line));
+		zend_ffi_throw_parser_error("Function returning array is not allowed at line %d", FFI_G(line));
 		return FAILURE;
 	}
 	return zend_ffi_validate_incomplete_type(type, 1, 0);
@@ -5986,7 +5986,7 @@ void zend_ffi_make_func_type(zend_ffi_dcl *dcl, HashTable *args, zend_ffi_dcl *n
 			}
 			type->func.args = NULL;
 			_zend_ffi_type_dtor(type);
-			zend_ffi_parser_error("unsupported calling convention line %d", FFI_G(line));
+			zend_ffi_parser_error("Unsupported calling convention line %d", FFI_G(line));
 			break;
 	}
 	type->func.args = args;

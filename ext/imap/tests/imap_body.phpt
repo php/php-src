@@ -42,7 +42,7 @@ Warning: imap_body() expects at least 2 parameters, 1 given in %s on line %d
 
 Warning: imap_body(): Bad message number in %s on line %d
 
-Warning: imap_body(): invalid value for the options parameter in %s on line %d
+Warning: imap_body(): Invalid value for the options parameter in %s on line %d
 
 Warning: imap_body(): Bad message number in %s on line %d
 bool(false)

@@ -51,7 +51,7 @@ int datefmt_process_calendar_arg(zval* calendar_zv,
 
 		zend_long v = Z_LVAL_P(calendar_zv);
 		if (v != (zend_long)UCAL_TRADITIONAL && v != (zend_long)UCAL_GREGORIAN) {
-			spprintf(&msg, 0, "%s: invalid value for calendar type; it must be "
+			spprintf(&msg, 0, "%s: Invalid value for calendar type; it must be "
 					"one of IntlDateFormatter::TRADITIONAL (locale's default "
 					"calendar) or IntlDateFormatter::GREGORIAN. "
 					"Alternatively, it can be an IntlCalendar object",

@@ -288,7 +288,7 @@ PHP_METHOD(mysqli_warning, __construct)
 			RETURN_FALSE;
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "invalid class argument");
+		php_error_docref(NULL, E_WARNING, "Invalid class argument");
 		RETURN_FALSE;
 	}
 

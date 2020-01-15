@@ -24,5 +24,5 @@ try {
 @unlink(__DIR__ . '/tar_001.phar.tar');
 ?>
 --EXPECTF--
-Warning: fopen(phar://%star_001.phar.tar/tar_001.phpt): failed to open stream: phar error: "%star_001.phar.tar" is a corrupted tar file (truncated) in %star_001.php on line 9
+Warning: fopen(phar://%star_001.phar.tar/tar_001.phpt): Failed to open stream: phar error: "%star_001.phar.tar" is a corrupted tar file (truncated) in %star_001.php on line 9
 phar error: "%star_001.phar.tar" is a corrupted tar file (truncated)

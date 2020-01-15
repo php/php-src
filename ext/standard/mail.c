@@ -128,7 +128,7 @@ static void php_mail_build_headers_elem(smart_str *s, zend_string *key, zval *va
 			php_mail_build_headers_elems(s, key, val);
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "headers array elements must be string or array (%s)", ZSTR_VAL(key));
+			php_error_docref(NULL, E_WARNING, "Headers array elements must be string or array (%s)", ZSTR_VAL(key));
 	}
 }
 

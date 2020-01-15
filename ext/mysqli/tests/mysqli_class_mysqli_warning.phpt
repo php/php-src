@@ -108,7 +108,7 @@ Warning: mysqli_warning::mysqli_warning(): invalid object or resource mysqli_stm
 Warning: mysqli_warning::mysqli_warning(): invalid object or resource mysqli_stmt
  in %s on line %d
 
-Warning: mysqli_warning::mysqli_warning(): invalid class argument in /home/nixnutz/php6_mysqlnd/ext/mysqli/tests/mysqli_class_mysqli_warning.php on line 19
+Warning: mysqli_warning::mysqli_warning(): Invalid class argument in /home/nixnutz/php6_mysqlnd/ext/mysqli/tests/mysqli_class_mysqli_warning.php on line 19
 
 Warning: mysqli_warning::mysqli_warning(): No warnings found in %s on line %d
 Parent class:

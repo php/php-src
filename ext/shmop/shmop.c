@@ -155,7 +155,7 @@ PHP_FUNCTION(shmop_open)
 			*/
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "invalid access mode");
+			php_error_docref(NULL, E_WARNING, "Invalid access mode");
 			goto err;
 	}
 
@@ -166,19 +166,19 @@ PHP_FUNCTION(shmop_open)
 
 	shmop->shmid = shmget(shmop->key, shmop->size, shmop->shmflg);
 	if (shmop->shmid == -1) {
-		php_error_docref(NULL, E_WARNING, "unable to attach or create shared memory segment '%s'", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Unable to attach or create shared memory segment '%s'", strerror(errno));
 		goto err;
 	}
 
 	if (shmctl(shmop->shmid, IPC_STAT, &shm)) {
 		/* please do not add coverage here: the segment would be leaked and impossible to delete via php */
-		php_error_docref(NULL, E_WARNING, "unable to get shared memory segment information '%s'", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Unable to get shared memory segment information '%s'", strerror(errno));
 		goto err;
 	}
 
 	shmop->addr = shmat(shmop->shmid, 0, shmop->shmatflg);
 	if (shmop->addr == (char*) -1) {
-		php_error_docref(NULL, E_WARNING, "unable to attach to shared memory segment '%s'", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Unable to attach to shared memory segment '%s'", strerror(errno));
 		goto err;
 	}
 
@@ -211,12 +211,12 @@ PHP_FUNCTION(shmop_read)
 	}
 
 	if (start < 0 || start > shmop->size) {
-		php_error_docref(NULL, E_WARNING, "start is out of range");
+		php_error_docref(NULL, E_WARNING, "Start is out of range");
 		RETURN_FALSE;
 	}
 
 	if (count < 0 || start > (INT_MAX - count) || start + count > shmop->size) {
-		php_error_docref(NULL, E_WARNING, "count is out of range");
+		php_error_docref(NULL, E_WARNING, "Count is out of range");
 		RETURN_FALSE;
 	}
 
@@ -287,12 +287,12 @@ PHP_FUNCTION(shmop_write)
 	}
 
 	if ((shmop->shmatflg & SHM_RDONLY) == SHM_RDONLY) {
-		php_error_docref(NULL, E_WARNING, "trying to write to a read only segment");
+		php_error_docref(NULL, E_WARNING, "Trying to write to a read only segment");
 		RETURN_FALSE;
 	}
 
 	if (offset < 0 || offset > shmop->size) {
-		php_error_docref(NULL, E_WARNING, "offset out of range");
+		php_error_docref(NULL, E_WARNING, "Offset out of range");
 		RETURN_FALSE;
 	}
 
@@ -319,7 +319,7 @@ PHP_FUNCTION(shmop_delete)
 	}
 
 	if (shmctl(shmop->shmid, IPC_RMID, NULL)) {
-		php_error_docref(NULL, E_WARNING, "can't mark segment for deletion (are you the owner?)");
+		php_error_docref(NULL, E_WARNING, "Can't mark segment for deletion (are you the owner?)");
 		RETURN_FALSE;
 	}
 

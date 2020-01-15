@@ -56,5 +56,5 @@ int(37)
 bool(true)
 string(7) "Unknown"
 
-Warning: fopen(%s): failed to open stream: File exists in %s on line %d
+Warning: fopen(%s): Failed to open stream: File exists in %s on line %d
 *** Done ***

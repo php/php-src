@@ -216,4 +216,4 @@ Array
     [calname] => Julian
     [calsymbol] => CAL_JULIAN
 )
-invalid calendar ID 99999
+Invalid calendar ID: 99999

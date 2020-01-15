@@ -18,6 +18,6 @@ if (!msg_remove_queue($queue)) {
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: msg_receive(): message corrupted in %s002.php on line %d
+Warning: msg_receive(): Message corrupted in %s002.php on line %d
 bool(false)
 Done

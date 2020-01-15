@@ -53,6 +53,6 @@ bool(false)
 float(1.234)
 float(1.234)
 
-Warning: filter_var(): decimal separator must be one char in %s on line %d
+Warning: filter_var(): Decimal separator must be one char in %s on line %d
 bool(false)
 bool(false)

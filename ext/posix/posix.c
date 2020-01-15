@@ -606,7 +606,7 @@ static int php_posix_stream_get_fd(zval *zfp, int *fd) /* {{{ */
 	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
 		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)fd, 0);
 	} else {
-		php_error_docref(NULL, E_WARNING, "could not use stream of type '%s'",
+		php_error_docref(NULL, E_WARNING, "Could not use stream of type '%s'",
 				stream->ops->label);
 		return 0;
 	}
@@ -941,7 +941,7 @@ try_again:
 
 	if (!php_posix_group_to_array(g, return_value)) {
 		zend_array_destroy(Z_ARR_P(return_value));
-		php_error_docref(NULL, E_WARNING, "unable to convert posix group to array");
+		php_error_docref(NULL, E_WARNING, "Unable to convert posix group to array");
 		RETVAL_FALSE;
 	}
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
@@ -994,7 +994,7 @@ PHP_FUNCTION(posix_getgrgid)
 
 	if (!php_posix_group_to_array(g, return_value)) {
 		zend_array_destroy(Z_ARR_P(return_value));
-		php_error_docref(NULL, E_WARNING, "unable to convert posix group struct to array");
+		php_error_docref(NULL, E_WARNING, "Unable to convert posix group struct to array");
 		RETVAL_FALSE;
 	}
 #if defined(ZTS) && defined(HAVE_GETGRGID_R) && defined(_SC_GETGR_R_SIZE_MAX)
@@ -1061,7 +1061,7 @@ PHP_FUNCTION(posix_getpwnam)
 
 	if (!php_posix_passwd_to_array(pw, return_value)) {
 		zend_array_destroy(Z_ARR_P(return_value));
-		php_error_docref(NULL, E_WARNING, "unable to convert posix passwd struct to array");
+		php_error_docref(NULL, E_WARNING, "Unable to convert posix passwd struct to array");
 		RETVAL_FALSE;
 	}
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
@@ -1112,7 +1112,7 @@ PHP_FUNCTION(posix_getpwuid)
 
 	if (!php_posix_passwd_to_array(pw, return_value)) {
 		zend_array_destroy(Z_ARR_P(return_value));
-		php_error_docref(NULL, E_WARNING, "unable to convert posix passwd struct to array");
+		php_error_docref(NULL, E_WARNING, "Unable to convert posix passwd struct to array");
 		RETVAL_FALSE;
 	}
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWUID_R)

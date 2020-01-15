@@ -81,504 +81,504 @@ echo "Done\n";
 
 -- Testing fgetcsv() with file opened using w mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using wb mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using wt mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using ab mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using at mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using xb mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using xt mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using wb mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using wt mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using ab mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using at mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using xb mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using xt mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using wb mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using wt mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using ab mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using at mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using xb mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using xt mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using wb mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using wt mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using ab mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using at mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using xb mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using xt mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using wb mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using wt mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using ab mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using at mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using xb mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using xt mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using wb mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using wt mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using ab mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using at mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using xb mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using xt mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using wb mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using wt mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using ab mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using at mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using xb mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using xt mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using w mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using wb mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using wt mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using a mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using ab mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using at mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using x mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using xb mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)
 
 -- Testing fgetcsv() with file opened using xt mode --
 
-Notice: fgetcsv(): read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fgetcsv(): Read of 8192 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 int(0)
 bool(false)

@@ -1065,7 +1065,7 @@ PHP_FUNCTION(mhash_keygen_s2k)
 
 	bytes = (int)l_bytes;
 	if (bytes <= 0){
-		php_error_docref(NULL, E_WARNING, "the byte parameter must be greater than 0");
+		php_error_docref(NULL, E_WARNING, "The byte parameter must be greater than 0");
 		RETURN_FALSE;
 	}
 

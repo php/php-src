@@ -13,7 +13,7 @@ $except  = null;
 $time    = 0;
 var_dump(socket_select($sockets, $write, $except, $time));
 --EXPECTF--
-Warning: socket_select(): no resource arrays were passed to select in %s on line %d
+Warning: socket_select(): No resource arrays were passed to select in %s on line %d
 bool(false)
 --CREDITS--
 Till Klampaeckel, till@php.net

@@ -63,7 +63,7 @@ PHP_FUNCTION(stream_socket_pair)
 
 	if (0 != socketpair((int)domain, (int)type, (int)protocol, pair)) {
 		char errbuf[256];
-		php_error_docref(NULL, E_WARNING, "failed to create sockets: [%d]: %s",
+		php_error_docref(NULL, E_WARNING, "Failed to create sockets: [%d]: %s",
 			php_socket_errno(), php_socket_strerror(php_socket_errno(), errbuf, sizeof(errbuf)));
 		RETURN_FALSE;
 	}
@@ -144,7 +144,7 @@ PHP_FUNCTION(stream_socket_client)
 		/* host might contain binary characters */
 		zend_string *quoted_host = php_addslashes(host);
 
-		php_error_docref(NULL, E_WARNING, "unable to connect to %s (%s)", ZSTR_VAL(quoted_host), errstr == NULL ? "Unknown error" : ZSTR_VAL(errstr));
+		php_error_docref(NULL, E_WARNING, "Unable to connect to %s (%s)", ZSTR_VAL(quoted_host), errstr == NULL ? "Unknown error" : ZSTR_VAL(errstr));
 		zend_string_release_ex(quoted_host, 0);
 	}
 
@@ -215,7 +215,7 @@ PHP_FUNCTION(stream_socket_server)
 			NULL, NULL, context, &errstr, &err);
 
 	if (stream == NULL) {
-		php_error_docref(NULL, E_WARNING, "unable to connect to %s (%s)", host, errstr == NULL ? "Unknown error" : ZSTR_VAL(errstr));
+		php_error_docref(NULL, E_WARNING, "Unable to connect to %s (%s)", host, errstr == NULL ? "Unknown error" : ZSTR_VAL(errstr));
 	}
 
 	if (stream == NULL) {
@@ -281,7 +281,7 @@ PHP_FUNCTION(stream_socket_accept)
 		}
 		php_stream_to_zval(clistream, return_value);
 	} else {
-		php_error_docref(NULL, E_WARNING, "accept failed: %s", errstr ? ZSTR_VAL(errstr) : "Unknown error");
+		php_error_docref(NULL, E_WARNING, "Accept failed: %s", errstr ? ZSTR_VAL(errstr) : "Unknown error");
 		RETVAL_FALSE;
 	}
 
@@ -857,7 +857,7 @@ static void user_space_stream_notifier(php_stream_context *context, int notifyco
 	ZVAL_LONG(&zvs[5], bytes_max);
 
 	if (FAILURE == call_user_function_ex(NULL, NULL, callback, &retval, 6, zvs, 0, NULL)) {
-		php_error_docref(NULL, E_WARNING, "failed to call user notifier");
+		php_error_docref(NULL, E_WARNING, "Failed to call user notifier");
 	}
 	for (i = 0; i < 6; i++) {
 		zval_ptr_dtor(&zvs[i]);

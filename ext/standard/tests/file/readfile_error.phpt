@@ -38,6 +38,6 @@ bool(false)
 
 -- Testing readfile() with non-existent file --
 
-Warning: readfile(%s/non_existent_file.tmp): failed to open stream: %s in %s on line %d
+Warning: readfile(%s/non_existent_file.tmp): Failed to open stream: %s in %s on line %d
 bool(false)
 Done

@@ -52,22 +52,22 @@ rmdir($dir_path);
 
 Warning: opendir(%s/opendir_var*,%s/opendir_var*): %s in %s on line %d
 
-Warning: opendir(%s/opendir_var*): failed to open dir: %s in %s on line %d
+Warning: opendir(%s/opendir_var*): Failed to open directory: %s in %s on line %d
 bool(false)
 
 Warning: opendir(%s/*,%s/*): %s in %s on line %d
 
-Warning: opendir(%s/*): failed to open dir: %s in %s on line %d
+Warning: opendir(%s/*): Failed to open directory: %s in %s on line %d
 bool(false)
 
 -- Wildcard = '?' --
 
 Warning: opendir(%s/opendir_variation6/sub_dir?,%s/opendir_variation6/sub_dir?): %s in %s on line %d
 
-Warning: opendir(%s/opendir_variation6/sub_dir?): failed to open dir: %s in %s on line %d
+Warning: opendir(%s/opendir_variation6/sub_dir?): Failed to open directory: %s in %s on line %d
 bool(false)
 
 Warning: opendir(%s/opendir_variation6/sub?dir1,%s/opendir_variation6/sub?dir1): %s in %s on line %d
 
-Warning: opendir(%s/opendir_variation6/sub?dir1): failed to open dir: %s in %s on line %d
+Warning: opendir(%s/opendir_variation6/sub?dir1): Failed to open directory: %s in %s on line %d
 bool(false)

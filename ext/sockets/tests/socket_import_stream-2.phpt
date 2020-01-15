@@ -26,7 +26,7 @@ try {
 echo "Done.";
 ?>
 --EXPECTF--
-Warning: socket_import_stream(): cannot represent a stream of type STDIO as a Socket Descriptor in %s on line %d
+Warning: socket_import_stream(): Cannot represent a stream of type STDIO as a Socket Descriptor in %s on line %d
 bool(false)
 socket_import_stream(): supplied resource is not a valid stream resource
 resource(%d) of type (stream)

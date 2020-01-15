@@ -29,11 +29,11 @@ include $pname . '/foo/hi';
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.php'); ?>
 --EXPECTF--
-Warning: readfile(foo/hi): failed to open stream: No such file or directory in phar://%sphar_gobyebye.phar.php/foo/hi on line %d
+Warning: readfile(foo/hi): Failed to open stream: No such file or directory in phar://%sphar_gobyebye.phar.php/foo/hi on line %d
 
-Warning: fopen(foo/hi): failed to open stream: No such file or directory in phar://%sphar_gobyebye.phar.php/foo/hi on line %d
+Warning: fopen(foo/hi): Failed to open stream: No such file or directory in phar://%sphar_gobyebye.phar.php/foo/hi on line %d
 
-Warning: file_get_contents(foo/hi): failed to open stream: No such file or directory in phar://%sphar_gobyebye.phar.php/foo/hi on line %d
+Warning: file_get_contents(foo/hi): Failed to open stream: No such file or directory in phar://%sphar_gobyebye.phar.php/foo/hi on line %d
 
 Warning: stat(): stat failed for foo/hi in phar://%sphar_gobyebye.phar.php/foo/hi on line %d
 bool(false)
@@ -42,4 +42,4 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: opendir(foo/hi): failed to open dir: No such file or directory in phar://%sphar_gobyebye.phar.php/foo/hi on line %d
+Warning: opendir(foo/hi): Failed to open directory: No such file or directory in phar://%sphar_gobyebye.phar.php/foo/hi on line %d

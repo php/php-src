@@ -44,7 +44,7 @@ array(4) {
   resource(%d) of type (Unknown)
 }
 
-Warning: proc_open(test): failed to open stream: %s in %s on line %d
+Warning: proc_open(test): Failed to open stream: %s in %s on line %d
 array(4) {
   [3]=>
   resource(%d) of type (Unknown)

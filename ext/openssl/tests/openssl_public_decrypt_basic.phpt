@@ -33,13 +33,13 @@ NULL
 bool(false)
 NULL
 
-Warning: openssl_public_decrypt(): key array must be of the form array(0 => key, 1 => phrase) in %s on line %d
+Warning: openssl_public_decrypt(): Key array must be of the form array(0 => key, 1 => phrase) in %s on line %d
 
 Warning: openssl_public_decrypt(): key parameter is not a valid public key in %s on line %d
 bool(false)
 NULL
 
-Warning: openssl_public_decrypt(): key array must be of the form array(0 => key, 1 => phrase) in %s on line %d
+Warning: openssl_public_decrypt(): Key array must be of the form array(0 => key, 1 => phrase) in %s on line %d
 
 Warning: openssl_public_decrypt(): key parameter is not a valid public key in %s on line %d
 bool(false)
