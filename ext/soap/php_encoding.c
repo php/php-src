@@ -2837,7 +2837,7 @@ static xmlNodePtr to_xml_datetime_ex(encodeTypePtr type, zval *data, char *forma
 	int max_reallocs = 5;
 	size_t buf_len=64, real_len;
 	char *buf;
-	char tzbuf[8];
+	char tzbuf[21];
 
 	xmlNodePtr xmlParam;
 
