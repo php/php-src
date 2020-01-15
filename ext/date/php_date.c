@@ -798,7 +798,8 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 			offset->abbr = timelib_malloc(9); /* GMT±xxxx\0 */
 			snprintf(offset->abbr, 9, "GMT%c%02d%02d",
 			                          (offset->offset < 0) ? '-' : '+',
-			                          abs(offset->offset / 3600),
+			                          /* Module 100 000 as 24 * 3600 = 86400 */
+			                          abs((offset->offset % 100000) / 3600),
 			                          abs((offset->offset % 3600) / 60));
 		} else {
 			offset = timelib_get_time_zone_info(t->sse, t->tz_info);
@@ -1010,7 +1011,8 @@ PHPAPI int php_idate(char format, time_t ts, int localtime)
 			offset->abbr = timelib_malloc(9); /* GMT±xxxx\0 */
 			snprintf(offset->abbr, 9, "GMT%c%02d%02d",
 			                          (offset->offset < 0) ? '-' : '+',
-			                          abs(offset->offset / 3600),
+			                          /* Module 100 000 as 24 * 3600 = 86400 */
+			                          abs((offset->offset % 100000) / 3600),
 			                          abs((offset->offset % 3600) / 60));
 		} else {
 			offset = timelib_get_time_zone_info(t->sse, t->tz_info);
