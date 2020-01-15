@@ -270,7 +270,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		/* 128 is safe here, the specifier in snprintf isn't longer than that */
 		*error_message = ecalloc(1, HOST_NAME_LEN + 128);
 		snprintf(*error_message, HOST_NAME_LEN + 128,
-			"Failed to connect to mailserver at \"%s\" port %d, verify your \"SMTP\" "
+			"Failed to connect to mailserver at \"%s\" port " ZEND_ULONG_FMT ", verify your \"SMTP\" "
 			"and \"smtp_port\" setting in php.ini or use ini_set()",
 			PW32G(mail_host), !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
 		return FAILURE;
