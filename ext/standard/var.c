@@ -1210,7 +1210,7 @@ PHP_FUNCTION(unserialize)
 
 		classes = zend_hash_str_find_deref(Z_ARRVAL_P(options), "allowed_classes", sizeof("allowed_classes")-1);
 		if (classes && Z_TYPE_P(classes) != IS_ARRAY && Z_TYPE_P(classes) != IS_TRUE && Z_TYPE_P(classes) != IS_FALSE) {
-			php_error_docref(NULL, E_WARNING, "allowed_classes option should be array or boolean");
+			php_error_docref(NULL, E_WARNING, "The allowed_classes option should be array or boolean");
 			RETVAL_FALSE;
 			goto cleanup;
 		}

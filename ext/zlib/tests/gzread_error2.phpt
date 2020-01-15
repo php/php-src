@@ -21,10 +21,10 @@ gzclose($h);
 --EXPECTF--
 string(10) "When you'r"
 
-Warning: gzread(): Length parameter must be greater than 0 in %s on line %d
+Warning: gzread(): length parameter must be greater than 0 in %s on line %d
 bool(false)
 string(5) "e tau"
 
-Warning: gzread(): Length parameter must be greater than 0 in %s on line %d
+Warning: gzread(): length parameter must be greater than 0 in %s on line %d
 bool(false)
 string(8) "ght thro"

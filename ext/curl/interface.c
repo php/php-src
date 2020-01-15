@@ -1671,7 +1671,7 @@ PHP_FUNCTION(curl_version)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (uversion == CURLVERSION_NOW) {
-		php_error_docref(NULL, E_DEPRECATED, "the $version parameter is deprecated");
+		php_error_docref(NULL, E_DEPRECATED, "The $version parameter is deprecated");
 	} else if (ZEND_NUM_ARGS() > 0) {
 		php_error_docref(NULL, E_WARNING, "$version argument ignored");
 	}
@@ -2576,7 +2576,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 						ch->handlers->write->method = PHP_CURL_FILE;
 						ZVAL_COPY(&ch->handlers->write->stream, zvalue);
 					} else {
-						php_error_docref(NULL, E_WARNING, "the provided file handle is not writable");
+						php_error_docref(NULL, E_WARNING, "The provided file handle is not writable");
 						return FAILURE;
 					}
 					break;
@@ -2594,7 +2594,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 						ch->handlers->write_header->method = PHP_CURL_FILE;
 						ZVAL_COPY(&ch->handlers->write_header->stream, zvalue);
 					} else {
-						php_error_docref(NULL, E_WARNING, "the provided file handle is not writable");
+						php_error_docref(NULL, E_WARNING, "The provided file handle is not writable");
 						return FAILURE;
 					}
 					break;
@@ -2623,7 +2623,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 						zval_ptr_dtor(&ch->handlers->std_err);
 						ZVAL_COPY(&ch->handlers->std_err, zvalue);
 					} else {
-						php_error_docref(NULL, E_WARNING, "the provided file handle is not writable");
+						php_error_docref(NULL, E_WARNING, "The provided file handle is not writable");
 						return FAILURE;
 					}
 					/* break omitted intentionally */

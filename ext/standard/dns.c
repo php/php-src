@@ -127,7 +127,7 @@ PHP_FUNCTION(gethostname)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (gethostname(buf, sizeof(buf))) {
-		php_error_docref(NULL, E_WARNING, "unable to fetch host [%d]: %s", errno, strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Unable to fetch host [%d]: %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}
 

@@ -197,7 +197,7 @@ php_stream_filter_status_t userfilter_filter(
 		convert_to_long(&retval);
 		ret = (int)Z_LVAL(retval);
 	} else if (call_result == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "failed to call filter function");
+		php_error_docref(NULL, E_WARNING, "Failed to call filter function");
 	}
 
 	if (bytes_consumed) {
@@ -257,7 +257,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	/* some sanity checks */
 	if (persistent) {
 		php_error_docref(NULL, E_WARNING,
-				"cannot use a user-space filter with a persistent stream");
+				"Cannot use a user-space filter with a persistent stream");
 		return NULL;
 	}
 
@@ -302,7 +302,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	if (fdat->ce == NULL) {
 		if (NULL == (fdat->ce = zend_lookup_class(fdat->classname))) {
 			php_error_docref(NULL, E_WARNING,
-					"user-filter \"%s\" requires class \"%s\", but that class is not defined",
+					"User-filter \"%s\" requires class \"%s\", but that class is not defined",
 					filtername, ZSTR_VAL(fdat->classname));
 			return NULL;
 		}

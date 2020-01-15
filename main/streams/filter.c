@@ -253,9 +253,9 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 	if (filter == NULL) {
 		/* TODO: these need correct docrefs */
 		if (factory == NULL)
-			php_error_docref(NULL, E_WARNING, "unable to locate filter \"%s\"", filtername);
+			php_error_docref(NULL, E_WARNING, "Unable to locate filter \"%s\"", filtername);
 		else
-			php_error_docref(NULL, E_WARNING, "unable to create or locate filter \"%s\"", filtername);
+			php_error_docref(NULL, E_WARNING, "Unable to create or locate filter \"%s\"", filtername);
 	}
 
 	return filter;

@@ -57,7 +57,7 @@ PHP_FUNCTION(oci_register_taf_callback)
 #if PHP_MAJOR_VERSION > 7 || (PHP_MAJOR_VERSION == 7 && PHP_MINOR_VERSION >= 2)
 		if (!zend_is_callable(callback, 0, 0)) {
 			callback_name = zend_get_callable_name(callback);
-			php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(callback_name));
+			php_error_docref(NULL, E_WARNING, "Function '%s' is not callable", ZSTR_VAL(callback_name));
 #if PHP_VERSION_ID < 70300
 			zend_string_release(callback_name);
 #else
@@ -67,7 +67,7 @@ PHP_FUNCTION(oci_register_taf_callback)
 		}
 #else
 		if (!zend_is_callable(callback, 0, &callback_name)) {
-			php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(callback_name));
+			php_error_docref(NULL, E_WARNING, "Function '%s' is not callable", ZSTR_VAL(callback_name));
 #if PHP_VERSION_ID < 70300
 			zend_string_release(callback_name);
 #else
@@ -424,7 +424,7 @@ PHP_FUNCTION(oci_lob_read)
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
 	if (length <= 0) {
-		php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
+		php_error_docref(NULL, E_WARNING, "length parameter must be greater than 0");
 		RETURN_FALSE;
 	}
 
@@ -911,7 +911,7 @@ PHP_FUNCTION(oci_lob_copy)
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp_from, descriptor_from);
 
 	if (ZEND_NUM_ARGS() == 3 && length < 0) {
-		php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
+		php_error_docref(NULL, E_WARNING, "length parameter must be greater than 0");
 		RETURN_FALSE;
 	}
 
@@ -986,7 +986,7 @@ PHP_FUNCTION(oci_lob_export)
 			RETURN_FALSE;
 		}
 		if (ZEND_NUM_ARGS() > 2 && length < 0) {
-			php_error_docref(NULL, E_WARNING, "Length parameter must be greater than or equal to 0");
+			php_error_docref(NULL, E_WARNING, "length parameter must be greater than or equal to 0");
 			RETURN_FALSE;
 		}
 	}
@@ -1000,7 +1000,7 @@ PHP_FUNCTION(oci_lob_export)
 			RETURN_FALSE;
 		}
 		if (ZEND_NUM_ARGS() > 3 && length < 0) {
-			php_error_docref(NULL, E_WARNING, "Length parameter must be greater than or equal to 0");
+			php_error_docref(NULL, E_WARNING, "length parameter must be greater than or equal to 0");
 			RETURN_FALSE;
 		}
 	}
@@ -1758,7 +1758,7 @@ go_out:
 	}
 
 	if (!errh) {
-		php_error_docref(NULL, E_WARNING, "Oci_error: unable to find error handle");
+		php_error_docref(NULL, E_WARNING, "oci_error: unable to find error handle");
 		RETURN_FALSE;
 	}
 
@@ -2105,15 +2105,15 @@ PHP_FUNCTION(oci_password_change)
 		PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
 
 		if (!user_len) {
-			php_error_docref(NULL, E_WARNING, "username cannot be empty");
+			php_error_docref(NULL, E_WARNING, "Username cannot be empty");
 			RETURN_FALSE;
 		}
 		if (!pass_old_len) {
-			php_error_docref(NULL, E_WARNING, "old password cannot be empty");
+			php_error_docref(NULL, E_WARNING, "Old password cannot be empty");
 			RETURN_FALSE;
 		}
 		if (!pass_new_len) {
-			php_error_docref(NULL, E_WARNING, "new password cannot be empty");
+			php_error_docref(NULL, E_WARNING, "New password cannot be empty");
 			RETURN_FALSE;
 		}
 
@@ -2124,15 +2124,15 @@ PHP_FUNCTION(oci_password_change)
 	} else if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "ssss", &dbname, &dbname_len, &user, &user_len, &pass_old, &pass_old_len, &pass_new, &pass_new_len) == SUCCESS) {
 
 		if (!user_len) {
-			php_error_docref(NULL, E_WARNING, "username cannot be empty");
+			php_error_docref(NULL, E_WARNING, "Username cannot be empty");
 			RETURN_FALSE;
 		}
 		if (!pass_old_len) {
-			php_error_docref(NULL, E_WARNING, "old password cannot be empty");
+			php_error_docref(NULL, E_WARNING, "Old password cannot be empty");
 			RETURN_FALSE;
 		}
 		if (!pass_new_len) {
-			php_error_docref(NULL, E_WARNING, "new password cannot be empty");
+			php_error_docref(NULL, E_WARNING, "New password cannot be empty");
 			RETURN_FALSE;
 		}
 

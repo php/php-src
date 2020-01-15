@@ -374,12 +374,12 @@ static PHP_FUNCTION(bzopen)
 	/* If it's not a resource its a string containing the filename to open */
 	if (Z_TYPE_P(file) == IS_STRING) {
 		if (Z_STRLEN_P(file) == 0) {
-			php_error_docref(NULL, E_WARNING, "filename cannot be empty");
+			php_error_docref(NULL, E_WARNING, "Filename cannot be empty");
 			RETURN_FALSE;
 		}
 
 		if (CHECK_ZVAL_NULL_PATH(file)) {
-			zend_type_error("filename must not contain null bytes");
+			zend_type_error("Filename must not contain null bytes");
 			RETURN_THROWS();
 		}
 
@@ -393,10 +393,10 @@ static PHP_FUNCTION(bzopen)
 		stream_mode_len = strlen(stream->mode);
 
 		if (stream_mode_len != 1 && !(stream_mode_len == 2 && memchr(stream->mode, 'b', 2))) {
-			php_error_docref(NULL, E_WARNING, "cannot use stream opened in mode '%s'", stream->mode);
+			php_error_docref(NULL, E_WARNING, "Cannot use stream opened in mode '%s'", stream->mode);
 			RETURN_FALSE;
 		} else if (stream_mode_len == 1 && stream->mode[0] != 'r' && stream->mode[0] != 'w' && stream->mode[0] != 'a' && stream->mode[0] != 'x') {
-			php_error_docref(NULL, E_WARNING, "cannot use stream opened in mode '%s'", stream->mode);
+			php_error_docref(NULL, E_WARNING, "Cannot use stream opened in mode '%s'", stream->mode);
 			RETURN_FALSE;
 		}
 
@@ -404,7 +404,7 @@ static PHP_FUNCTION(bzopen)
 			case 'r':
 				/* only "r" and "rb" are supported */
 				if (stream->mode[0] != mode[0] && !(stream_mode_len == 2 && stream->mode[1] != mode[0])) {
-					php_error_docref(NULL, E_WARNING, "cannot read from a stream opened in write only mode");
+					php_error_docref(NULL, E_WARNING, "Cannot read from a stream opened in write only mode");
 					RETURN_FALSE;
 				}
 				break;

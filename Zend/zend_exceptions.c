@@ -627,7 +627,7 @@ ZEND_METHOD(exception, getTraceAsString)
 
 	trace = zend_read_property_ex(base_ce, object, ZSTR_KNOWN(ZEND_STR_TRACE), 1, &rv);
 	if (Z_TYPE_P(trace) != IS_ARRAY) {
-		zend_type_error("trace is not an array");
+		zend_type_error("Trace is not an array");
 		return;
 	}
 	ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(trace), index, frame) {

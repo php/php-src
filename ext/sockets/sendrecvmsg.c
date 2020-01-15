@@ -265,7 +265,7 @@ PHP_FUNCTION(socket_recvmsg)
 		}
 	} else {
 		SOCKETS_G(last_error) = errno;
-		php_error_docref(NULL, E_WARNING, "error in recvmsg [%d]: %s",
+		php_error_docref(NULL, E_WARNING, "Error in recvmsg [%d]: %s",
 				errno, sockets_strerror(errno));
 		RETURN_FALSE;
 	}

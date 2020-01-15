@@ -873,7 +873,7 @@ php_socket_t php_network_connect_socket_to_host(const char *host, unsigned short
 #endif
 
 				if (!local_address || bind(sock, local_address, local_address_len)) {
-					php_error_docref(NULL, E_WARNING, "failed to bind to '%s:%d', system said: %s", bindto, bindport, strerror(errno));
+					php_error_docref(NULL, E_WARNING, "Failed to bind to '%s:%d', system said: %s", bindto, bindport, strerror(errno));
 				}
 skip_bind:
 				if (local_address) {

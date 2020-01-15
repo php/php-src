@@ -17,6 +17,6 @@ var_dump(strlen($data) === filesize(__FILE__) - 5);
 --EXPECTF--
 string(5) "<?php"
 
-Warning: SplFileObject::fread(): Length parameter must be greater than 0 in %s on line %d
+Warning: SplFileObject::fread(): length parameter must be greater than 0 in %s on line %d
 bool(false)
 bool(true)

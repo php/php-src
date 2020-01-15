@@ -59,6 +59,8 @@ rmdir($dir_name);
 ?>
 --EXPECTF--
 *** Testing filegroup() with different notations of file names ***
+
+Warning: mkdir(): File exists in %s on line %d
 - Iteration 1 -
 int(%d)
 - Iteration 2 -

@@ -269,9 +269,9 @@ static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 
 	if (n != ZSTR_LEN(val)) {
 		if (n == (size_t)-1) {
-			php_error_docref(NULL, E_WARNING, "write failed: %s (%d)", strerror(errno), errno);
+			php_error_docref(NULL, E_WARNING, "Write failed: %s (%d)", strerror(errno), errno);
 		} else {
-			php_error_docref(NULL, E_WARNING, "write wrote less bytes than requested");
+			php_error_docref(NULL, E_WARNING, "Write wrote less bytes than requested");
 		}
 		return FAILURE;
 	}
@@ -521,9 +521,9 @@ PS_READ_FUNC(files)
 
 	if (n != (zend_long)sbuf.st_size) {
 		if (n == -1) {
-			php_error_docref(NULL, E_WARNING, "read failed: %s (%d)", strerror(errno), errno);
+			php_error_docref(NULL, E_WARNING, "Read failed: %s (%d)", strerror(errno), errno);
 		} else {
-			php_error_docref(NULL, E_WARNING, "read returned less bytes than requested");
+			php_error_docref(NULL, E_WARNING, "Read returned less bytes than requested");
 		}
 		zend_string_release_ex(*val, 0);
 		*val =  ZSTR_EMPTY_ALLOC();

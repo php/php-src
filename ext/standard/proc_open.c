@@ -641,13 +641,13 @@ PHP_FUNCTION(proc_open)
 #ifdef PHP_WIN32
 			descriptors[ndesc].childend = dup_fd_as_handle((int)fd);
 			if (descriptors[ndesc].childend == NULL) {
-				php_error_docref(NULL, E_WARNING, "unable to dup File-Handle for descriptor %d", nindex);
+				php_error_docref(NULL, E_WARNING, "Unable to dup File-Handle for descriptor %d", nindex);
 				goto exit_fail;
 			}
 #else
 			descriptors[ndesc].childend = dup(fd);
 			if (descriptors[ndesc].childend < 0) {
-				php_error_docref(NULL, E_WARNING, "unable to dup File-Handle for descriptor " ZEND_ULONG_FMT " - %s", nindex, strerror(errno));
+				php_error_docref(NULL, E_WARNING, "Unable to dup File-Handle for descriptor " ZEND_ULONG_FMT " - %s", nindex, strerror(errno));
 				goto exit_fail;
 			}
 #endif
@@ -683,7 +683,7 @@ PHP_FUNCTION(proc_open)
 				descriptors[ndesc].mode = DESC_PIPE;
 
 				if (0 != pipe(newpipe)) {
-					php_error_docref(NULL, E_WARNING, "unable to create pipe %s", strerror(errno));
+					php_error_docref(NULL, E_WARNING, "Unable to create pipe %s", strerror(errno));
 					goto exit_fail;
 				}
 
@@ -837,7 +837,7 @@ PHP_FUNCTION(proc_open)
 					/* open things up */
 					dev_ptmx = open("/dev/ptmx", O_RDWR);
 					if (dev_ptmx == -1) {
-						php_error_docref(NULL, E_WARNING, "failed to open /dev/ptmx, errno %d", errno);
+						php_error_docref(NULL, E_WARNING, "Failed to open /dev/ptmx, errno %d", errno);
 						goto exit_fail;
 					}
 					grantpt(dev_ptmx);
@@ -845,7 +845,7 @@ PHP_FUNCTION(proc_open)
 					slave_pty = open(ptsname(dev_ptmx), O_RDWR);
 
 					if (slave_pty == -1) {
-						php_error_docref(NULL, E_WARNING, "failed to open slave pty, errno %d", errno);
+						php_error_docref(NULL, E_WARNING, "Failed to open slave pty, errno %d", errno);
 						goto exit_fail;
 					}
 				}
@@ -854,7 +854,7 @@ PHP_FUNCTION(proc_open)
 				descriptors[ndesc].parentend = dup(dev_ptmx);
 				descriptors[ndesc].mode_flags = O_RDWR;
 #else
-				php_error_docref(NULL, E_WARNING, "pty pseudo terminal not supported on this system");
+				php_error_docref(NULL, E_WARNING, "PTY pseudo terminal not supported on this system");
 				goto exit_fail;
 #endif
 			} else {
@@ -1062,7 +1062,7 @@ PHP_FUNCTION(proc_open)
 				close(descriptors[i].parentend);
 		}
 
-		php_error_docref(NULL, E_WARNING, "fork failed - %s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Fork failed - %s", strerror(errno));
 
 		goto exit_fail;
 

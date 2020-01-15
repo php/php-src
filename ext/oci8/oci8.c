@@ -1538,7 +1538,7 @@ sb4 php_oci_error(OCIError *err_p, sword errstatus)
 			if (errcode) {
 				php_error_docref(NULL, E_WARNING, "%s", errbuf);
 			} else {
-				php_error_docref(NULL, E_WARNING, "failed to fetch error message");
+				php_error_docref(NULL, E_WARNING, "Failed to fetch error message");
 			}
 			break;
 		case OCI_INVALID_HANDLE:

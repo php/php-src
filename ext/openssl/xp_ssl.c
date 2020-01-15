@@ -1262,7 +1262,7 @@ static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /*
 	bio = BIO_new_file(Z_STRVAL_P(zdhpath), PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 
 	if (bio == NULL) {
-		php_error_docref(NULL, E_WARNING, "invalid dh_param");
+		php_error_docref(NULL, E_WARNING, "Invalid dh_param");
 		return FAILURE;
 	}
 
@@ -1270,12 +1270,12 @@ static int php_openssl_set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /*
 	BIO_free(bio);
 
 	if (dh == NULL) {
-		php_error_docref(NULL, E_WARNING, "failed reading DH params");
+		php_error_docref(NULL, E_WARNING, "Failed reading DH params");
 		return FAILURE;
 	}
 
 	if (SSL_CTX_set_tmp_dh(ctx, dh) < 0) {
-		php_error_docref(NULL, E_WARNING, "failed assigning DH params");
+		php_error_docref(NULL, E_WARNING, "Failed assigning DH params");
 		DH_free(dh);
 		return FAILURE;
 	}
@@ -1308,14 +1308,14 @@ static int php_openssl_set_server_ecdh_curve(php_stream *stream, SSL_CTX *ctx) /
 
 		curve_nid = OBJ_sn2nid(Z_STRVAL_P(zvcurve));
 		if (curve_nid == NID_undef) {
-			php_error_docref(NULL, E_WARNING, "invalid ecdh_curve specified");
+			php_error_docref(NULL, E_WARNING, "Invalid ecdh_curve specified");
 			return FAILURE;
 		}
 	}
 
 	ecdh = EC_KEY_new_by_curve_name(curve_nid);
 	if (ecdh == NULL) {
-		php_error_docref(NULL, E_WARNING, "failed generating ECDH curve");
+		php_error_docref(NULL, E_WARNING, "Failed generating ECDH curve");
 		return FAILURE;
 	}
 
@@ -1403,7 +1403,7 @@ static SSL_CTX *php_openssl_create_sni_server_ctx(char *cert_path, char *key_pat
 
 	if (SSL_CTX_use_certificate_chain_file(ctx, cert_path) != 1) {
 		php_error_docref(NULL, E_WARNING,
-			"failed setting local cert chain file `%s'; " \
+			"Failed setting local cert chain file `%s'; " \
 			"check that your cafile/capath settings include " \
 			"details of your certificate and its issuer",
 			cert_path
@@ -1412,7 +1412,7 @@ static SSL_CTX *php_openssl_create_sni_server_ctx(char *cert_path, char *key_pat
 		return NULL;
 	} else if (SSL_CTX_use_PrivateKey_file(ctx, key_path, SSL_FILETYPE_PEM) != 1) {
 		php_error_docref(NULL, E_WARNING,
-			"failed setting private key from file `%s'",
+			"Failed setting private key from file `%s'",
 			key_path
 		);
 		SSL_CTX_free(ctx);
@@ -1492,7 +1492,7 @@ static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstre
 			}
 			if (!VCWD_REALPATH(ZSTR_VAL(local_cert_str), resolved_cert_path_buff)) {
 				php_error_docref(NULL, E_WARNING,
-					"failed setting local cert chain file `%s'; file not found",
+					"Failed setting local cert chain file `%s'; file not found",
 					ZSTR_VAL(local_cert_str)
 				);
 				zend_string_release(local_cert_str);
@@ -1514,7 +1514,7 @@ static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstre
 			}
 			if (!VCWD_REALPATH(ZSTR_VAL(local_pk_str), resolved_pk_path_buff)) {
 				php_error_docref(NULL, E_WARNING,
-					"failed setting local private key file `%s'; file not found",
+					"Failed setting local private key file `%s'; file not found",
 					ZSTR_VAL(local_pk_str)
 				);
 				zend_string_release(local_pk_str);
@@ -1528,7 +1528,7 @@ static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstre
 			ctx = php_openssl_create_sni_server_ctx(resolved_path_buff, resolved_path_buff);
 		} else {
 			php_error_docref(NULL, E_WARNING,
-				"failed setting local cert chain file `%s'; file not found",
+				"Failed setting local cert chain file `%s'; file not found",
 				Z_STRVAL_P(current)
 			);
 			return FAILURE;
@@ -1808,9 +1808,9 @@ int php_openssl_setup_crypto(php_stream *stream,
 
 	if (cparam->inputs.session) {
 		if (cparam->inputs.session->ops != &php_openssl_socket_ops) {
-			php_error_docref(NULL, E_WARNING, "supplied session stream must be an SSL enabled stream");
+			php_error_docref(NULL, E_WARNING, "Supplied session stream must be an SSL enabled stream");
 		} else if (((php_openssl_netstream_data_t*)cparam->inputs.session->abstract)->ssl_handle == NULL) {
-			php_error_docref(NULL, E_WARNING, "supplied SSL session stream is not initialized");
+			php_error_docref(NULL, E_WARNING, "Supplied SSL session stream is not initialized");
 		} else {
 			SSL_copy_session_id(sslsock->ssl_handle, ((php_openssl_netstream_data_t*)cparam->inputs.session->abstract)->ssl_handle);
 		}

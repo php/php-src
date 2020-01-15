@@ -1009,7 +1009,7 @@ static zval *zend_ffi_cdata_set(zend_object *obj, zend_string *member, zval *val
 #endif
 
 	if (UNEXPECTED(!zend_string_equals_literal(member, "cdata"))) {
-		zend_throw_error(zend_ffi_exception_ce, "only 'cdata' property may be set");
+		zend_throw_error(zend_ffi_exception_ce, "Only 'cdata' property may be set");
 		return &EG(uninitialized_zval);;
 	}
 
@@ -4003,16 +4003,16 @@ ZEND_METHOD(FFI, arrayType) /* {{{ */
 	type = ZEND_FFI_TYPE(ctype->type);
 
 	if (type->kind == ZEND_FFI_TYPE_FUNC) {
-		zend_throw_error(zend_ffi_exception_ce, "array of functions is not allowed");
+		zend_throw_error(zend_ffi_exception_ce, "Array of functions is not allowed");
 		RETURN_THROWS();
 	} else if (type->kind == ZEND_FFI_TYPE_ARRAY && (type->attr & ZEND_FFI_ATTR_INCOMPLETE_ARRAY)) {
-		zend_throw_error(zend_ffi_exception_ce, "only the leftmost array can be undimensioned");
+		zend_throw_error(zend_ffi_exception_ce, "Only the leftmost array can be undimensioned");
 		RETURN_THROWS();
 	} else if (type->kind == ZEND_FFI_TYPE_VOID) {
-		zend_throw_error(zend_ffi_exception_ce, "array of 'void' is not allowed");
+		zend_throw_error(zend_ffi_exception_ce, "Array of 'void' is not allowed");
 		RETURN_THROWS();
 	} else if (type->attr & ZEND_FFI_ATTR_INCOMPLETE_TAG) {
-		zend_throw_error(zend_ffi_exception_ce, "array of incomplete type is not allowed");
+		zend_throw_error(zend_ffi_exception_ce, "Array of incomplete type is not allowed");
 		RETURN_THROWS();
 	}
 
@@ -4189,7 +4189,7 @@ ZEND_METHOD(FFI, memcpy) /* {{{ */
 	} else {
 		ptr1 = cdata1->ptr;
 		if (type1->kind != ZEND_FFI_TYPE_POINTER && size > type1->size) {
-			zend_throw_error(zend_ffi_exception_ce, "attempt to write over data boundary");
+			zend_throw_error(zend_ffi_exception_ce, "Attempt to write over data boundary");
 			RETURN_THROWS();
 		}
 	}
@@ -4198,7 +4198,7 @@ ZEND_METHOD(FFI, memcpy) /* {{{ */
 	if (Z_TYPE_P(zv2) == IS_STRING) {
 		ptr2 = Z_STRVAL_P(zv2);
 		if (size > Z_STRLEN_P(zv2)) {
-			zend_throw_error(zend_ffi_exception_ce, "attempt to read over string boundary");
+			zend_throw_error(zend_ffi_exception_ce, "Attempt to read over string boundary");
 			RETURN_THROWS();
 		}
 	} else if (Z_TYPE_P(zv2) == IS_OBJECT && Z_OBJCE_P(zv2) == zend_ffi_cdata_ce) {
@@ -4209,7 +4209,7 @@ ZEND_METHOD(FFI, memcpy) /* {{{ */
 		} else {
 			ptr2 = cdata2->ptr;
 			if (type2->kind != ZEND_FFI_TYPE_POINTER && size > type2->size) {
-				zend_throw_error(zend_ffi_exception_ce, "attempt to read over data boundary");
+				zend_throw_error(zend_ffi_exception_ce, "Attempt to read over data boundary");
 				RETURN_THROWS();
 			}
 		}
@@ -4266,7 +4266,7 @@ ZEND_METHOD(FFI, memcmp) /* {{{ */
 	if (Z_TYPE_P(zv2) == IS_STRING) {
 		ptr2 = Z_STRVAL_P(zv2);
 		if (size > Z_STRLEN_P(zv2)) {
-			zend_throw_error(zend_ffi_exception_ce, "attempt to read over string boundary");
+			zend_throw_error(zend_ffi_exception_ce, "Attempt to read over string boundary");
 			RETURN_THROWS();
 		}
 	} else if (Z_TYPE_P(zv2) == IS_OBJECT && Z_OBJCE_P(zv2) == zend_ffi_cdata_ce) {
@@ -4277,7 +4277,7 @@ ZEND_METHOD(FFI, memcmp) /* {{{ */
 		} else {
 			ptr2 = cdata2->ptr;
 			if (type2->kind != ZEND_FFI_TYPE_POINTER && size > type2->size) {
-				zend_throw_error(zend_ffi_exception_ce, "attempt to read over data boundary");
+				zend_throw_error(zend_ffi_exception_ce, "Attempt to read over data boundary");
 				RETURN_THROWS();
 			}
 		}

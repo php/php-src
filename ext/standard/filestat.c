@@ -489,7 +489,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 				option = PHP_STREAM_META_OWNER_NAME;
 				value = Z_STRVAL_P(user);
 			} else {
-				php_error_docref(NULL, E_WARNING, "parameter 2 should be string or int, %s given", zend_zval_type_name(user));
+				php_error_docref(NULL, E_WARNING, "Parameter 2 should be string or int, %s given", zend_zval_type_name(user));
 				RETURN_FALSE;
 			}
 			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL)) {
@@ -519,7 +519,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 			RETURN_FALSE;
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "parameter 2 should be string or int, %s given", zend_zval_type_name(user));
+		php_error_docref(NULL, E_WARNING, "Parameter 2 should be string or int, %s given", zend_zval_type_name(user));
 		RETURN_FALSE;
 	}
 

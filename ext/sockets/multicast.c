@@ -67,7 +67,7 @@ int php_string_to_if_index(const char *val, unsigned *out)
 	ind = if_nametoindex(val);
 	if (ind == 0) {
 		php_error_docref(NULL, E_WARNING,
-			"no interface with name \"%s\" could be found", val);
+			"No interface with name \"%s\" could be found", val);
 		return FAILURE;
 	} else {
 		*out = ind;
@@ -75,7 +75,7 @@ int php_string_to_if_index(const char *val, unsigned *out)
 	}
 #else
 	php_error_docref(NULL, E_WARNING,
-			"this platform does not support looking up an interface by "
+			"This platform does not support looking up an interface by "
 			"name, an integer interface index must be supplied instead");
 	return FAILURE;
 #endif
@@ -88,7 +88,7 @@ static int php_get_if_index_from_zval(zval *val, unsigned *out)
 	if (Z_TYPE_P(val) == IS_LONG) {
 		if (Z_LVAL_P(val) < 0 || (zend_ulong)Z_LVAL_P(val) > UINT_MAX) {
 			php_error_docref(NULL, E_WARNING,
-				"the interface index cannot be negative or larger than %u;"
+				"The interface index cannot be negative or larger than %u;"
 				" given " ZEND_LONG_FMT, UINT_MAX, Z_LVAL_P(val));
 			ret = FAILURE;
 		} else {
@@ -127,7 +127,7 @@ static int php_get_address_from_array(const HashTable *ht, const char *key,
 	zend_string *str, *tmp_str;
 
 	if ((val = zend_hash_str_find(ht, key, strlen(key))) == NULL) {
-		php_error_docref(NULL, E_WARNING, "no key \"%s\" passed in optval", key);
+		php_error_docref(NULL, E_WARNING, "No key \"%s\" passed in optval", key);
 		return FAILURE;
 	}
 	str = zval_get_tmp_string(val, &tmp_str);
@@ -221,7 +221,7 @@ mcast_req_fun:
 #endif
 	default:
 		php_error_docref(NULL, E_WARNING,
-			"unexpected option in php_do_mcast_opt (level %d, option %d). "
+			"Unexpected option in php_do_mcast_opt (level %d, option %d). "
 			"This is a bug.", level, optname);
 		return FAILURE;
 	}

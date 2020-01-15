@@ -1030,7 +1030,7 @@ PHP_FUNCTION(ldap_connect)
 
 			if (port <= 0 || port > 65535) {
 				efree(ld);
-				php_error_docref(NULL, E_WARNING, "invalid port number: " ZEND_LONG_FMT, port);
+				php_error_docref(NULL, E_WARNING, "Invalid port number: " ZEND_LONG_FMT, port);
 				RETURN_FALSE;
 			}
 
@@ -1963,12 +1963,12 @@ PHP_FUNCTION(ldap_next_attribute)
 		RETURN_THROWS();
 	}
 
-	if ((resultentry = (ldap_resultentry *)zend_fetch_resource(Z_RES_P(result_entry), "ldap result entry", le_result_entry)) == NULL) {
+	if ((resultentry = (ldap_resultentry *)zend_fetch_resource(Z_RES_P(result_entry), "LDAP result entry", le_result_entry)) == NULL) {
 		RETURN_THROWS();
 	}
 
 	if (resultentry->ber == NULL) {
-		php_error_docref(NULL, E_WARNING, "called before calling ldap_first_attribute() or no attributes found in result entry");
+		php_error_docref(NULL, E_WARNING, "Called before calling ldap_first_attribute() or no attributes found in result entry");
 		RETURN_FALSE;
 	}
 
@@ -3894,7 +3894,7 @@ static void php_ldap_do_translate(INTERNAL_FUNCTION_PARAMETERS, int way)
 		RETVAL_STRINGL(value, value_len);
 		free(value);
 	} else {
-		php_error_docref(NULL, E_WARNING, "Conversion from iso-8859-1 to t61 failed: %s", ldap_err2string(result));
+		php_error_docref(NULL, E_WARNING, "Conversion from ISO-8859-1 to t61 failed: %s", ldap_err2string(result));
 		RETVAL_FALSE;
 	}
 }

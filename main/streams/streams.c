@@ -1353,7 +1353,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 		return 0;
 	}
 
-	php_error_docref(NULL, E_WARNING, "stream does not support seeking");
+	php_error_docref(NULL, E_WARNING, "Stream does not support seeking");
 
 	return -1;
 }
@@ -1842,7 +1842,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 			if (localhost == 0 && path[n+3] != '\0' && path[n+3] != '/') {
 #endif
 				if (options & REPORT_ERRORS) {
-					php_error_docref(NULL, E_WARNING, "remote host file access not supported, %s", path);
+					php_error_docref(NULL, E_WARNING, "Remote host file access not supported, %s", path);
 				}
 				return NULL;
 			}

@@ -398,7 +398,7 @@ static unsigned int php_next_marker(php_stream * stream, int last_marker, int ff
 			extraneous++;
 	}
 		if (extraneous) {
-			php_error_docref(NULL, E_WARNING, "corrupt JPEG data: %zu extraneous bytes before marker", extraneous);
+			php_error_docref(NULL, E_WARNING, "Corrupt JPEG data: %zu extraneous bytes before marker", extraneous);
 		}
 	}
 	a = 1;

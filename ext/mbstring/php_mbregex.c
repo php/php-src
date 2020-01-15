@@ -921,7 +921,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (arg_pattern_len == 0) {
-		php_error_docref(NULL, E_WARNING, "empty pattern");
+		php_error_docref(NULL, E_WARNING, "Empty pattern");
 		RETVAL_FALSE;
 		goto out;
 	}

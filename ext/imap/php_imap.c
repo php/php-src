@@ -992,7 +992,7 @@ PHP_FUNCTION(imap_append)
 			0, Z_L(0), Z_L(0));
 
 		if (!Z_LVAL_P(return_value)) {
-			php_error_docref(NULL, E_WARNING, "internal date not correctly formatted");
+			php_error_docref(NULL, E_WARNING, "Internal date not correctly formatted");
 			internal_date = NULL;
 		}
 	}
@@ -1091,7 +1091,7 @@ PHP_FUNCTION(imap_get_quota)
 	/* set the callback for the GET_QUOTA function */
 	mail_parameters(NIL, SET_QUOTA, (void *) mail_getquota);
 	if (!imap_getquota(imap_le_struct->imap_stream, ZSTR_VAL(qroot))) {
-		php_error_docref(NULL, E_WARNING, "c-client imap_getquota failed");
+		php_error_docref(NULL, E_WARNING, "C-client imap_getquota failed");
 		zend_array_destroy(Z_ARR_P(return_value));
 		RETURN_FALSE;
 	}
@@ -1120,7 +1120,7 @@ PHP_FUNCTION(imap_get_quotaroot)
 	/* set the callback for the GET_QUOTAROOT function */
 	mail_parameters(NIL, SET_QUOTA, (void *) mail_getquota);
 	if (!imap_getquotaroot(imap_le_struct->imap_stream, ZSTR_VAL(mbox))) {
-		php_error_docref(NULL, E_WARNING, "c-client imap_getquotaroot failed");
+		php_error_docref(NULL, E_WARNING, "C-client imap_getquotaroot failed");
 		zend_array_destroy(Z_ARR_P(return_value));
 		RETURN_FALSE;
 	}
@@ -1241,7 +1241,7 @@ PHP_FUNCTION(imap_gc)
 	}
 
 	if (flags && ((flags & ~(GC_TEXTS | GC_ELT | GC_ENV)) != 0)) {
-		php_error_docref(NULL, E_WARNING, "invalid value for the flags parameter");
+		php_error_docref(NULL, E_WARNING, "Invalid value for the flags parameter");
 		RETURN_FALSE;
 	}
 
@@ -1277,7 +1277,7 @@ PHP_FUNCTION(imap_close)
 
 		/* Check that flags is exactly equal to PHP_EXPUNGE or zero */
 		if (flags && ((flags & ~PHP_EXPUNGE) != 0)) {
-			php_error_docref(NULL, E_WARNING, "invalid value for the flags parameter");
+			php_error_docref(NULL, E_WARNING, "Invalid value for the flags parameter");
 			RETURN_FALSE;
 		}
 
@@ -1363,7 +1363,7 @@ PHP_FUNCTION(imap_body)
 	}
 
 	if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
-		php_error_docref(NULL, E_WARNING, "invalid value for the options parameter");
+		php_error_docref(NULL, E_WARNING, "Invalid value for the options parameter");
 		RETURN_FALSE;
 	}
 
@@ -1989,7 +1989,7 @@ PHP_FUNCTION(imap_fetchstructure)
 	}
 
 	if (flags && ((flags & ~FT_UID) != 0)) {
-		php_error_docref(NULL, E_WARNING, "invalid value for the options parameter");
+		php_error_docref(NULL, E_WARNING, "Invalid value for the options parameter");
 		RETURN_FALSE;
 	}
 
@@ -2041,7 +2041,7 @@ PHP_FUNCTION(imap_fetchbody)
 	}
 
 	if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
-		php_error_docref(NULL, E_WARNING, "invalid value for the options parameter");
+		php_error_docref(NULL, E_WARNING, "Invalid value for the options parameter");
 		RETURN_FALSE;
 	}
 
@@ -2083,7 +2083,7 @@ PHP_FUNCTION(imap_fetchmime)
 	}
 
 	if (flags && ((flags & ~(FT_UID|FT_PEEK|FT_INTERNAL)) != 0)) {
-		php_error_docref(NULL, E_WARNING, "invalid value for the options parameter");
+		php_error_docref(NULL, E_WARNING, "Invalid value for the options parameter");
 		RETURN_FALSE;
 	}
 
@@ -2860,7 +2860,7 @@ PHP_FUNCTION(imap_fetchheader)
 	}
 
 	if (flags && ((flags & ~(FT_UID|FT_INTERNAL|FT_PREFETCHTEXT)) != 0)) {
-		php_error_docref(NULL, E_WARNING, "invalid value for the options parameter");
+		php_error_docref(NULL, E_WARNING, "Invalid value for the options parameter");
 		RETURN_FALSE;
 	}
 
@@ -3102,7 +3102,7 @@ PHP_FUNCTION(imap_fetch_overview)
 	}
 
 	if (flags && ((flags & ~FT_UID) != 0)) {
-		php_error_docref(NULL, E_WARNING, "invalid value for the options parameter");
+		php_error_docref(NULL, E_WARNING, "Invalid value for the options parameter");
 		RETURN_FALSE;
 	}
 
@@ -3460,7 +3460,7 @@ PHP_FUNCTION(imap_mail_compose)
 	}
 
 	if (bod && bod->type == TYPEMULTIPART && (!bod->nested.part || !bod->nested.part->next)) {
-		php_error_docref(NULL, E_WARNING, "cannot generate multipart e-mail without components.");
+		php_error_docref(NULL, E_WARNING, "Cannot generate multipart e-mail without components.");
 		RETVAL_FALSE;
 		goto done;
 	}

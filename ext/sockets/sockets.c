@@ -789,7 +789,7 @@ PHP_FUNCTION(socket_select)
 	}
 
 	if (!sets) {
-		php_error_docref(NULL, E_WARNING, "no resource arrays were passed to select");
+		php_error_docref(NULL, E_WARNING, "No resource arrays were passed to select");
 		RETURN_FALSE;
 	}
 
@@ -813,7 +813,7 @@ PHP_FUNCTION(socket_select)
 
 	if (retval == -1) {
 		SOCKETS_G(last_error) = errno;
-		php_error_docref(NULL, E_WARNING, "unable to select [%d]: %s", errno, sockets_strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Unable to select [%d]: %s", errno, sockets_strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -1275,12 +1275,12 @@ PHP_FUNCTION(socket_create)
 		&& arg1 != AF_INET6
 #endif
 		&& arg1 != AF_INET) {
-		php_error_docref(NULL, E_WARNING, "invalid socket domain [" ZEND_LONG_FMT "] specified for argument 1, assuming AF_INET", arg1);
+		php_error_docref(NULL, E_WARNING, "Invalid socket domain [" ZEND_LONG_FMT "] specified for argument 1, assuming AF_INET", arg1);
 		arg1 = AF_INET;
 	}
 
 	if (arg2 > 10) {
-		php_error_docref(NULL, E_WARNING, "invalid socket type [" ZEND_LONG_FMT "] specified for argument 2, assuming SOCK_STREAM", arg2);
+		php_error_docref(NULL, E_WARNING, "Invalid socket type [" ZEND_LONG_FMT "] specified for argument 2, assuming SOCK_STREAM", arg2);
 		arg2 = SOCK_STREAM;
 	}
 
@@ -1478,7 +1478,7 @@ PHP_FUNCTION(socket_bind)
 			}
 #endif
 		default:
-			php_error_docref(NULL, E_WARNING, "unsupported socket type '%d', must be AF_UNIX, AF_INET, or AF_INET6", php_sock->type);
+			php_error_docref(NULL, E_WARNING, "Unsupported socket type '%d', must be AF_UNIX, AF_INET, or AF_INET6", php_sock->type);
 			RETURN_FALSE;
 	}
 
@@ -1942,11 +1942,11 @@ PHP_FUNCTION(socket_set_option)
 			opt_ht = Z_ARRVAL_P(arg4);
 
 			if ((l_onoff = zend_hash_str_find(opt_ht, l_onoff_key, sizeof(l_onoff_key) - 1)) == NULL) {
-				php_error_docref(NULL, E_WARNING, "no key \"%s\" passed in optval", l_onoff_key);
+				php_error_docref(NULL, E_WARNING, "No key \"%s\" passed in optval", l_onoff_key);
 				RETURN_FALSE;
 			}
 			if ((l_linger = zend_hash_str_find(opt_ht, l_linger_key, sizeof(l_linger_key) - 1)) == NULL) {
-				php_error_docref(NULL, E_WARNING, "no key \"%s\" passed in optval", l_linger_key);
+				php_error_docref(NULL, E_WARNING, "No key \"%s\" passed in optval", l_linger_key);
 				RETURN_FALSE;
 			}
 
@@ -1970,11 +1970,11 @@ PHP_FUNCTION(socket_set_option)
 			opt_ht = Z_ARRVAL_P(arg4);
 
 			if ((sec = zend_hash_str_find(opt_ht, sec_key, sizeof(sec_key) - 1)) == NULL) {
-				php_error_docref(NULL, E_WARNING, "no key \"%s\" passed in optval", sec_key);
+				php_error_docref(NULL, E_WARNING, "No key \"%s\" passed in optval", sec_key);
 				RETURN_FALSE;
 			}
 			if ((usec = zend_hash_str_find(opt_ht, usec_key, sizeof(usec_key) - 1)) == NULL) {
-				php_error_docref(NULL, E_WARNING, "no key \"%s\" passed in optval", usec_key);
+				php_error_docref(NULL, E_WARNING, "No key \"%s\" passed in optval", usec_key);
 				RETURN_FALSE;
 			}
 
@@ -2047,18 +2047,18 @@ PHP_FUNCTION(socket_create_pair)
 		&& domain != AF_INET6
 #endif
 		&& domain != AF_UNIX) {
-		php_error_docref(NULL, E_WARNING, "invalid socket domain [" ZEND_LONG_FMT "] specified for argument 1, assuming AF_INET", domain);
+		php_error_docref(NULL, E_WARNING, "Invalid socket domain [" ZEND_LONG_FMT "] specified for argument 1, assuming AF_INET", domain);
 		domain = AF_INET;
 	}
 
 	if (type > 10) {
-		php_error_docref(NULL, E_WARNING, "invalid socket type [" ZEND_LONG_FMT "] specified for argument 2, assuming SOCK_STREAM", type);
+		php_error_docref(NULL, E_WARNING, "Invalid socket type [" ZEND_LONG_FMT "] specified for argument 2, assuming SOCK_STREAM", type);
 		type = SOCK_STREAM;
 	}
 
 	if (socketpair(domain, type, protocol, fds_array) != 0) {
 		SOCKETS_G(last_error) = errno;
-		php_error_docref(NULL, E_WARNING, "unable to create socket pair [%d]: %s", errno, sockets_strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Unable to create socket pair [%d]: %s", errno, sockets_strerror(errno));
 		efree(php_sock[0]);
 		efree(php_sock[1]);
 		RETURN_FALSE;
@@ -2337,7 +2337,7 @@ PHP_FUNCTION(socket_export_stream)
 		stream = php_stream_sock_open_from_socket(socket->bsd_socket, 0);
 
 		if (stream == NULL) {
-			php_error_docref(NULL, E_WARNING, "failed to create stream");
+			php_error_docref(NULL, E_WARNING, "Failed to create stream");
 			RETURN_FALSE;
 		}
 	}
@@ -2464,14 +2464,14 @@ PHP_FUNCTION(socket_addrinfo_bind)
 				break;
 			}
 		default:
-			php_error_docref(NULL, E_WARNING, "unsupported socket type '%d', must be AF_UNIX, AF_INET, or AF_INET6", php_sock->type);
+			php_error_docref(NULL, E_WARNING, "Unsupported socket type '%d', must be AF_UNIX, AF_INET, or AF_INET6", php_sock->type);
 			close(php_sock->bsd_socket);
 			efree(php_sock);
 			RETURN_FALSE;
 	}
 
 	if (retval != 0) {
-		PHP_SOCKET_ERROR(php_sock, "unable to bind address", errno);
+		PHP_SOCKET_ERROR(php_sock, "Unable to bind address", errno);
 		close(php_sock->bsd_socket);
 		efree(php_sock);
 		RETURN_FALSE;
@@ -2530,14 +2530,14 @@ PHP_FUNCTION(socket_addrinfo_connect)
 				break;
 			}
 		default:
-			php_error_docref(NULL, E_WARNING, "unsupported socket type '%d', must be AF_UNIX, AF_INET, or AF_INET6", php_sock->type);
+			php_error_docref(NULL, E_WARNING, "Unsupported socket type '%d', must be AF_UNIX, AF_INET, or AF_INET6", php_sock->type);
 			close(php_sock->bsd_socket);
 			efree(php_sock);
 			RETURN_FALSE;
 	}
 
 	if (retval != 0) {
-		PHP_SOCKET_ERROR(php_sock, "unable to connect address", errno);
+		PHP_SOCKET_ERROR(php_sock, "Unable to connect address", errno);
 		close(php_sock->bsd_socket);
 		efree(php_sock);
 		RETURN_FALSE;

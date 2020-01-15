@@ -77,7 +77,7 @@ ZEND_GET_MODULE(php_gettext)
 
 #define PHP_GETTEXT_DOMAIN_LENGTH_CHECK(domain_len) \
 	if (UNEXPECTED(domain_len > PHP_GETTEXT_MAX_DOMAIN_LENGTH)) { \
-		php_error_docref(NULL, E_WARNING, "domain passed too long"); \
+		php_error_docref(NULL, E_WARNING, "Domain passed too long"); \
 		RETURN_FALSE; \
 	}
 

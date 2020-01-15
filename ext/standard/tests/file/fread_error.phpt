@@ -26,9 +26,9 @@ echo "Done\n";
 *** Testing error conditions ***
 -- Testing fread() with invalid length arguments --
 
-Warning: fread(): Length parameter must be greater than 0 in %s on line %d
+Warning: fread(): length parameter must be greater than 0 in %s on line %d
 bool(false)
 
-Warning: fread(): Length parameter must be greater than 0 in %s on line %d
+Warning: fread(): length parameter must be greater than 0 in %s on line %d
 bool(false)
 Done
