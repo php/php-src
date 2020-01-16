@@ -275,7 +275,7 @@ pm.max_spare_servers = 3
 ;      - %{micro}d
 ;  %e: an environment variable (same as $_ENV or $_SERVER)
 ;      it must be associated with embraces to specify the name of the env
-;      variable. Some exemples:
+;      variable. Some examples:
 ;      - server specifics like: %{REQUEST_METHOD}e or %{SERVER_PROTOCOL}e
 ;      - HTTP headers like: %{HTTP_HOST}e or %{HTTP_USER_AGENT}e
 ;  %f: script filename

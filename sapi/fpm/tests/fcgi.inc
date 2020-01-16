@@ -485,7 +485,7 @@ class Client
     }
 
     /**
-     * Execute a request to the FastCGI application asyncronously
+     * Execute a request to the FastCGI application asynchronously
      *
      * This sends request to application and returns the assigned ID for that request.
      *

@@ -284,7 +284,7 @@ Build: $build_dir
 
 EOT
 );
-/* list build-in extensions */
+/* list built-in extensions */
 $exts = get_loaded_extensions();
 fprintf($fp, "\r\nBuilt-in Extensions\r\n");
 fwrite($fp, "===========================\r\n");

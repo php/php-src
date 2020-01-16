@@ -114,7 +114,7 @@ static char *ErrorMessages[] =
 
 /* This function is meant to unify the headers passed to to mail()
  * This means, use PCRE to transform single occurrences of \n or \r in \r\n
- * As a second step we also eleminate all \r\n occurrences which are:
+ * As a second step we also eliminate all \r\n occurrences which are:
  * 1) At the start of the header
  * 2) At the end of the header
  * 3) Two or more occurrences in the header are removed so only one is left
@@ -887,7 +887,7 @@ again:
 	/* Check for newline */
 	Index += rlen;
 
-	/* SMPT RFC says \r\n is the only valid line ending, who are we to argue ;)
+	/* SMTP RFC says \r\n is the only valid line ending, who are we to argue ;)
 	 * The response code must contain at least 5 characters ex. 220\r\n */
 	if (Received < 5 || buf[Received - 1] != '\n' || buf[Received - 2] != '\r') {
 		goto again;
@@ -958,7 +958,7 @@ static unsigned long GetAddr(LPSTR szHost)
 // Name:  int FormatEmailAddress
 // Input:
 // Output:
-// Description: Formats the email address to remove any content ouside
+// Description: Formats the email address to remove any content outside
 //   of the angle brackets < > as per RFC 2821.
 //
 //   Returns the invalidly formatted mail address if the < > are

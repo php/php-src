@@ -2327,7 +2327,7 @@ function generate_phpize()
 	MF.WriteLine("var PHP_MINOR_VERSION=" + PHP_MINOR_VERSION);
 	MF.WriteLine("var PHP_RELEASE_VERSION=" + PHP_RELEASE_VERSION);
 	MF.WriteBlankLines(1);
-	MF.WriteLine("/* Genereted extensions list with mode (static/shared) */");
+	MF.WriteLine("/* Generated extensions list with mode (static/shared) */");
 
 	var count = extensions_enabled.length;
 	for (i in extensions_enabled) {
@@ -2338,7 +2338,7 @@ function generate_phpize()
 	}
 
 	MF.WriteBlankLines(2);
-	MF.WriteLine("/* Genereted win32/build/phpize.js.in */");
+	MF.WriteLine("/* Generated win32/build/phpize.js.in */");
 	MF.WriteBlankLines(1);
 	MF.Write(file_get_contents("win32/build/phpize.js.in"));
 	MF.Close();
@@ -3088,8 +3088,8 @@ function toolset_get_compiler_name(short)
 			return name;
 		} if (version >= 1920) {
 			/* NOTE - VS is intentional. Due to changes in recent Visual Studio
-						versioning scheme refering to the exact VC++ version is
-						hardly predictable. From this version on, it refers to 
+						versioning scheme referring to the exact VC++ version is
+						hardly predictable. From this version on, it refers to
 						Visual Studio version and implies the default toolset.
 						When new versions are introduced, adapt also checks in
 						php_win32_image_compatible(), if needed. */

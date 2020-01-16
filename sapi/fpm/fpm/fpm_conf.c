@@ -899,7 +899,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 			for (i = 0; i < strlen(ping); i++) {
 				if (!isalnum(ping[i]) && ping[i] != '/' && ping[i] != '-' && ping[i] != '_' && ping[i] != '.' && ping[i] != '~') {
-					zlog(ZLOG_ERROR, "[pool %s] the ping path '%s' must containt only the following characters '[alphanum]/_-.~'", wp->config->name, ping);
+					zlog(ZLOG_ERROR, "[pool %s] the ping path '%s' must contain only the following characters '[alphanum]/_-.~'", wp->config->name, ping);
 					return -1;
 				}
 			}
