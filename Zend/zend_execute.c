@@ -941,18 +941,18 @@ static zend_bool zend_check_and_resolve_property_class_type(
 		zend_property_info *info, zend_class_entry *object_ce) {
 	zend_class_entry *ce;
 	if (ZEND_TYPE_HAS_LIST(info->type)) {
-		void **entry;
-		ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(info->type), entry) {
-			if (ZEND_TYPE_LIST_IS_NAME(*entry)) {
-				zend_string *name = ZEND_TYPE_LIST_GET_NAME(*entry);
+		zend_type *list_type;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(info->type), list_type) {
+			if (ZEND_TYPE_HAS_NAME(*list_type)) {
+				zend_string *name = ZEND_TYPE_NAME(*list_type);
 				ce = resolve_single_class_type(name, info->ce);
 				if (!ce) {
 					continue;
 				}
 				zend_string_release(name);
-				*entry = ZEND_TYPE_LIST_ENCODE_CE(ce);
+				ZEND_TYPE_SET_CE(*list_type, ce);
 			} else {
-				ce = ZEND_TYPE_LIST_GET_CE(*entry);
+				ce = ZEND_TYPE_CE(*list_type);
 			}
 			if (instanceof_function(object_ce, ce)) {
 				return 1;
@@ -1032,12 +1032,12 @@ static zend_always_inline zend_bool zend_check_type_slow(
 	if (ZEND_TYPE_HAS_CLASS(type) && Z_TYPE_P(arg) == IS_OBJECT) {
 		zend_class_entry *ce;
 		if (ZEND_TYPE_HAS_LIST(type)) {
-			void *entry;
-			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), entry) {
+			zend_type *list_type;
+			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
 				if (*cache_slot) {
 					ce = *cache_slot;
 				} else {
-					ce = zend_fetch_class(ZEND_TYPE_LIST_GET_NAME(entry),
+					ce = zend_fetch_class(ZEND_TYPE_NAME(*list_type),
 						(ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 					if (!ce) {
 						cache_slot++;

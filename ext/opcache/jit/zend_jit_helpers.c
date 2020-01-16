@@ -1148,12 +1148,12 @@ static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_arra
 	if (ZEND_TYPE_HAS_CLASS(arg_info->type) && Z_TYPE_P(arg) == IS_OBJECT) {
 		zend_class_entry *ce;
 		if (ZEND_TYPE_HAS_LIST(arg_info->type)) {
-			void *entry;
-			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(arg_info->type), entry) {
+			zend_type *list_type;
+			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(arg_info->type), list_type) {
 				if (*cache_slot) {
 					ce = *cache_slot;
 				} else {
-					ce = zend_fetch_class(ZEND_TYPE_LIST_GET_NAME(entry),
+					ce = zend_fetch_class(ZEND_TYPE_NAME(*list_type),
 						(ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 					if (!ce) {
 						cache_slot++;

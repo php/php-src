@@ -104,10 +104,10 @@ ZEND_API void destroy_zend_function(zend_function *function)
 
 ZEND_API void zend_type_release(zend_type type, zend_bool persistent) {
 	if (ZEND_TYPE_HAS_LIST(type)) {
-		void *entry;
-		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), entry) {
-			if (ZEND_TYPE_LIST_IS_NAME(entry)) {
-				zend_string_release(ZEND_TYPE_LIST_GET_NAME(entry));
+		zend_type *list_type;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
+			if (ZEND_TYPE_HAS_NAME(*list_type)) {
+				zend_string_release(ZEND_TYPE_NAME(*list_type));
 			}
 		} ZEND_TYPE_LIST_FOREACH_END();
 		if (!ZEND_TYPE_USES_ARENA(type)) {

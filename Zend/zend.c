@@ -983,20 +983,14 @@ static void zend_resolve_property_types(void) /* {{{ */
 
 		if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(ce))) {
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
-				if (ZEND_TYPE_HAS_LIST(prop_info->type)) {
-					void **entry;
-					ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(prop_info->type), entry) {
-						if (ZEND_TYPE_LIST_IS_NAME(*entry)) {
-							zend_string *type_name = ZEND_TYPE_LIST_GET_NAME(*entry);
-							*entry = ZEND_TYPE_LIST_ENCODE_CE(resolve_type_name(type_name));
-							zend_string_release(type_name);
-						}
-					} ZEND_TYPE_LIST_FOREACH_END();
-				} else if (ZEND_TYPE_HAS_NAME(prop_info->type)) {
-					zend_string *type_name = ZEND_TYPE_NAME(prop_info->type);
-					ZEND_TYPE_SET_CE(prop_info->type, resolve_type_name(type_name));
-					zend_string_release(type_name);
-				}
+				zend_type *single_type;
+				ZEND_TYPE_FOREACH(prop_info->type, single_type) {
+					if (ZEND_TYPE_HAS_NAME(*single_type)) {
+						zend_string *type_name = ZEND_TYPE_NAME(*single_type);
+						ZEND_TYPE_SET_CE(*single_type, resolve_type_name(type_name));
+						zend_string_release(type_name);
+					}
+				} ZEND_TYPE_FOREACH_END();
 			} ZEND_HASH_FOREACH_END();
 		}
 		ce->ce_flags |= ZEND_ACC_PROPERTY_TYPES_RESOLVED;

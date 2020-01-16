@@ -2938,15 +2938,9 @@ ZEND_METHOD(reflection_union_type, getTypes)
 
 	array_init(return_value);
 	if (ZEND_TYPE_HAS_LIST(param->type)) {
-		void *entry;
-		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(param->type), entry) {
-			if (ZEND_TYPE_LIST_IS_NAME(entry)) {
-				append_type(return_value,
-					(zend_type) ZEND_TYPE_INIT_CLASS(ZEND_TYPE_LIST_GET_NAME(entry), 0, 0));
-			} else {
-				append_type(return_value,
-					(zend_type) ZEND_TYPE_INIT_CE(ZEND_TYPE_LIST_GET_CE(entry), 0, 0));
-			}
+		zend_type *list_type;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(param->type), list_type) {
+			append_type(return_value, *list_type);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(param->type)) {
 		append_type(return_value,
