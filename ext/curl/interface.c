@@ -2445,10 +2445,6 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 
 		case CURLOPT_FOLLOWLOCATION:
 			lval = zend_is_true(zvalue);
-			if (lval && PG(open_basedir) && *PG(open_basedir)) {
-				php_error_docref(NULL, E_WARNING, "CURLOPT_FOLLOWLOCATION cannot be activated when an open_basedir is set");
-				return FAILURE;
-			}
 			error = curl_easy_setopt(ch->cp, option, lval);
 			break;
 
