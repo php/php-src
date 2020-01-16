@@ -8643,18 +8643,46 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, const zend_op_
 				if (is_power_of_two(type_mask)) {
 					uint32_t type_code = concrete_type(type_mask);
 					|	cmp byte [r0 + 8], type_code
-					|	jne >8
+					|	jne >7
 				} else {
 					|	mov edx, 1
 					|	mov cl, byte [r0 + 8]
 					|	shl edx, cl
 					|	test edx, type_mask
-					|	je >8
+					|	je >7
 				}
+				|	jmp >1
+
+				|7:
+
+				if (ZEND_TYPE_HAS_CLASS(type)) {
+					uint8_t *tcc_row = tcc_get_row(&type);
+					|	// Make sure that argument is an object.
+					|	IF_NOT_Z_TYPE r0, IS_OBJECT, >8
+					|	// Find the class entry of the value.
+					|	mov r0, [r0 + offsetof(zval, value.obj)]
+					|	mov r0, [r0 + offsetof(zend_object, ce)]
+					|	// Load the TCC column index. This is a 32-bit int value
+					|	// which we load into the a 32-bit register.
+					|	mov eax, [r0 + offsetof(zend_class_entry, tcc_column_index)]
+					|	// Load pointer to TCC row from run_time_cache
+					|	LOAD_ADDR r2, tcc_row
+					|	// When cache entry equals one, we have a hit and we're done.
+					|	// Else, we don't know and we will continue to do a full check.
+					|	cmp byte [r2 + eax], 1
+					|	je >1
+				}
+
+				|	jmp >8 // Jump into cold_code segment
 
 				|.cold_code
 				|8:
 				|	SAVE_VALID_OPLINE opline
+				|	LOAD_ZVAL_ADDR r0, res_addr
+				if (ZEND_ARG_SEND_MODE(arg_info)) {
+					|	GET_Z_PTR r0, r0
+					|	add r0, offsetof(zend_reference, val)
+				}
 				|	mov FCARG1a, r0
 				|	mov r0,	EX->run_time_cache
 				|	add r0, opline->extended_value
