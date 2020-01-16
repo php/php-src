@@ -1,5 +1,5 @@
 --TEST--
-serialization: arrays with references amonst elements
+serialization: arrays with references amongst elements
 --FILE--
 <?php
 /* Prototype  : proto string serialize(mixed variable)

@@ -94,7 +94,7 @@ PHP_METHOD(domdocument, getElementById);
 PHP_METHOD(domdocument, adoptNode);
 PHP_METHOD(domdocument, normalizeDocument);
 PHP_METHOD(domdocument, __construct);
-	/* convienience methods */
+	/* convenience methods */
 PHP_METHOD(domdocument, load);
 PHP_METHOD(domdocument, save);
 PHP_METHOD(domdocument, loadXML);

@@ -3133,7 +3133,7 @@ void accel_shutdown(void)
 #endif
 
 	if (!_file_cache_only) {
-		/* Delay SHM dettach */
+		/* Delay SHM detach */
 		orig_post_shutdown_cb = zend_post_shutdown_cb;
 		zend_post_shutdown_cb = accel_post_shutdown;
 	}

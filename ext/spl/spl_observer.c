@@ -539,7 +539,7 @@ SPL_METHOD(SplObjectStorage, removeAllExcept)
 /* }}} */
 
 /* {{{ proto bool SplObjectStorage::contains(object obj)
- Determine whethe an object is contained in the storage */
+ Determine whether an object is contained in the storage */
 SPL_METHOD(SplObjectStorage, contains)
 {
 	zval *obj;

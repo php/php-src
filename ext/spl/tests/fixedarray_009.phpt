@@ -1,5 +1,5 @@
 --TEST--
-SPL: FixedArray: Trying to instantiate passing string to construtor parameter
+SPL: FixedArray: Trying to instantiate passing string to constructor parameter
 --FILE--
 <?php
 

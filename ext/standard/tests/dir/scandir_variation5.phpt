@@ -42,14 +42,14 @@ chmod($sub_dir_path, 0777);
 $child_dir_path = $sub_dir_path."/child_dir";
 mkdir($child_dir_path);
 
-// remove the write and execute permisson from sub parent
+// remove the write and execute permission from sub parent
 chmod($sub_dir_path, 0444);
 
 echo "\n-- After restricting 1st level parent directory --\n";
 var_dump(scandir($child_dir_path));
 
-// remove the execute permisson from parent dir, allowing all permission for sub dir
-chmod($sub_dir_path, 0777); // all permisson to sub dir
+// remove the execute permission from parent dir, allowing all permission for sub dir
+chmod($sub_dir_path, 0777); // all permission to sub dir
 chmod($parent_dir_path, 0666); // restricting parent directory
 
 echo "\n-- After restricting parent directory --\n";

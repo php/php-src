@@ -106,7 +106,7 @@ static int php_lsapi_startup(sapi_module_struct *sapi_module)
 
 /* {{{ sapi_lsapi_ini_defaults */
 
-/* overwriteable ini defaults must be set in sapi_cli_ini_defaults() */
+/* overwritable ini defaults must be set in sapi_cli_ini_defaults() */
 #define INI_DEFAULT(name,value)\
     ZVAL_STRING(tmp, value, 0);\
     zend_hash_update(configuration_hash, name, sizeof(name), tmp, sizeof(zval), (void**)&entry);\
@@ -804,7 +804,7 @@ static int alter_ini( const char * pKey, int keyLen, const char * pValue, int va
               Use ACTIVATE stage in legacy mode only.
 
               RUNTIME stage should be used here,
-              as with ACTIVATE it's impossible to change the option from script with ini_set 
+              as with ACTIVATE it's impossible to change the option from script with ini_set
             */
             if(!mod_lsapi_mode)
             {
@@ -1655,7 +1655,7 @@ static PHP_MINIT_FUNCTION(litespeed)
     }
     /*
      * mod_lsapi always sets this env var,
-     * so we can detect mod_lsapi mode with its presense.
+     * so we can detect mod_lsapi mode with its presence.
      */
     mod_lsapi_mode = ( getenv("LSAPI_DISABLE_CPAN_BEHAV") != NULL );
 

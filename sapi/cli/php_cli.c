@@ -411,7 +411,7 @@ static int php_cli_startup(sapi_module_struct *sapi_module) /* {{{ */
 
 /* {{{ sapi_cli_ini_defaults */
 
-/* overwriteable ini defaults must be set in sapi_cli_ini_defaults() */
+/* overwritable ini defaults must be set in sapi_cli_ini_defaults() */
 #define INI_DEFAULT(name,value)\
 	ZVAL_NEW_STR(&tmp, zend_string_init(value, sizeof(value)-1, 1));\
 	zend_hash_str_update(configuration_hash, name, sizeof(name)-1, &tmp);\
@@ -906,7 +906,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 		} else {
 			/* We could handle PHP_MODE_PROCESS_STDIN in a different manner  */
 			/* here but this would make things only more complicated. And it */
-			/* is consitent with the way -R works where the stdin file handle*/
+			/* is consistent with the way -R works where the stdin file handle*/
 			/* is also accessible. */
 			zend_stream_init_fp(&file_handle, stdin, "Standard input code");
 		}

@@ -31,14 +31,14 @@ EOT;
 /*
  * If a child miss SIGQUIT then reload process should stuck
  * for at least process_control_timeout that is set greater
- * than timout in log reading functions.
+ * than timeout in log reading functions.
  *
  * Alternative way is to set log_level=debug and filter result of
  * $tester->getLogLines(2000) for lines containing SIGKILL
- * 
+ *
  *     [22-Oct-2019 03:28:19.532703] DEBUG: pid 21315, fpm_pctl_kill_all(), line 161: [pool unconfined] sending signal 9 SIGKILL to child 21337
  *     [22-Oct-2019 03:28:19.533471] DEBUG: pid 21315, fpm_children_bury(), line 259: [pool unconfined] child 21337 exited on signal 9 (SIGKILL) after 1.003055 seconds from start
- * 
+ *
  * but it has less probability of failure detection. Additionally it requires more
  * $tester->expectLogNotice() around last reload due to presence of debug messages.
  */

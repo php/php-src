@@ -114,7 +114,7 @@ static SLJIT_INLINE int get_map_jit_flag()
 
 	/* The following code is thread safe because multiple initialization
 	   sets map_jit_flag to the same value and the code has no side-effects.
-	   Changing the kernel version witout system restart is (very) unlikely. */
+	   Changing the kernel version without system restart is (very) unlikely. */
 	if (map_jit_flag == -1) {
 		struct utsname name;
 
@@ -358,7 +358,7 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_free_unused_memory_exec(void)
 	free_block = free_blocks;
 	while (free_block) {
 		next_free_block = free_block->next;
-		if (!free_block->header.prev_size && 
+		if (!free_block->header.prev_size &&
 				AS_BLOCK_HEADER(free_block, free_block->size)->size == 1) {
 			total_size -= free_block->size;
 			sljit_remove_free_block(free_block);

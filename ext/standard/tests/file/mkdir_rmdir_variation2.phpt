@@ -37,7 +37,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-echo "\n*** Testing mkdir() with miscelleneous input ***\n";
+echo "\n*** Testing mkdir() with miscellaneous input ***\n";
 /* changing mode of mkdir to prevent creating sub-directory under it */
 var_dump( chmod("$file_path/mkdir_variation2/", 0000) );
 /* creating sub-directory test1 under mkdir, expected: false */
@@ -66,7 +66,7 @@ bool(false)
 mkdir() expects parameter 1 to be a valid path, string given
 rmdir() expects parameter 1 to be a valid path, string given
 
-*** Testing mkdir() with miscelleneous input ***
+*** Testing mkdir() with miscellaneous input ***
 bool(true)
 
 Warning: mkdir(): Permission denied in %s on line %d

@@ -1,5 +1,5 @@
 --TEST--
-SCCP 019: Array assignemnt
+SCCP 019: Array assignment
 --INI--
 opcache.enable=1
 opcache.enable_cli=1

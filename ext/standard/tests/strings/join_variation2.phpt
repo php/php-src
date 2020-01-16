@@ -20,7 +20,7 @@ $glue = '::';
 $unset_var = array(1, 2);
 unset($unset_var);
 
-// get a resouce variable
+// get a resource variable
 $fp = fopen(__FILE__, "r");
 
 // define a class

@@ -1,5 +1,5 @@
 --TEST--
-Implementating abstracting methods and optional parameters
+Implementing abstracting methods and optional parameters
 --FILE--
 <?php
 

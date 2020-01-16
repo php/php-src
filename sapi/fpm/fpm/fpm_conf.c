@@ -1538,7 +1538,7 @@ int fpm_conf_load_ini_file(char *filename) /* {{{ */
 	}
 
 	if (ini_recursion++ > 4) {
-		zlog(ZLOG_ERROR, "failed to include more than 5 files recusively");
+		zlog(ZLOG_ERROR, "failed to include more than 5 files recursively");
 		close(fd);
 		return -1;
 	}

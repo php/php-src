@@ -93,7 +93,7 @@ static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_bloc
 				b = succ;
 				break;
 			} else {
-				/* Recusively check reachability */
+				/* Recursively check reachability */
 				if (!(succ->flags & ZEND_BB_REACHABLE)) {
 					zend_mark_reachable(opcodes, cfg, succ);
 				}

@@ -854,7 +854,7 @@ int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_
 	ALLOCA_FLAG(var_use_heap)
 
 	if ((blocks_count * (op_array->last_var + op_array->T)) > 4 * 1024 * 1024) {
-	    /* Don't buld SSA for very big functions */
+	    /* Don't build SSA for very big functions */
 		return FAILURE;
 	}
 

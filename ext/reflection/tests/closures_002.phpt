@@ -1,5 +1,5 @@
 --TEST--
-Reflection on invokable objects
+Reflection on invocable objects
 --FILE--
 <?php
 

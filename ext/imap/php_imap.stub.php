@@ -50,7 +50,7 @@ function imap_fetchmime($stream_id, int $msg_no, string $section, int $options =
 
 /**
  * @param resource $stream_id
- * @todo: should $file be `resouce|string`? it looks like it tries to accept anything?
+ * @todo: should $file be `resource|string`? it looks like it tries to accept anything?
  */
 function imap_savebody($stream_id, $file, int $msg_no, string $section = '', int $options = 0): bool {}
 

@@ -59,7 +59,7 @@ $db = MySQLPDOTest::factory();
 			$stmt->closeCursor();
 
 			if ($label != $value) {
-				printf("[%03d/%s + 6] Got %s expecting %s - plase check manually\n",
+				printf("[%03d/%s + 6] Got %s expecting %s - please check manually\n",
 					$offset, ($native) ? 'native' : 'emulated',
 					var_export($label, true), var_export($value, true));
 				// fall through
@@ -74,14 +74,14 @@ $db = MySQLPDOTest::factory();
 			}
 
 			if ($row['label'] != $value) {
-				printf("[%03d/%s + 8] Got %s expecting %s - plase check manually\n",
+				printf("[%03d/%s + 8] Got %s expecting %s - please check manually\n",
 					$offset, ($native) ? 'native' : 'emulated',
 					var_export($row['label'], true), var_export($value, true));
 				return false;
 			}
 
 			if ($row['label'] != $label) {
-				printf("[%03d/%s + 9] Got %s from FETCH_ASSOC and %s from FETCH_BOUND- plase check manually\n",
+				printf("[%03d/%s + 9] Got %s from FETCH_ASSOC and %s from FETCH_BOUND- please check manually\n",
 					$offset, ($native) ? 'native' : 'emulated',
 					var_export($row['label'], true), var_export($value, true));
 				return false;

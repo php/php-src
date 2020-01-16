@@ -60,7 +60,7 @@ clearstatcache();
 
 echo "-- writing data after hole and checking the size --\n";
 $file_handle = fopen($filename, "a");
-fwrite($file_handle, "Hello\0");  //wrting 6 bytes of data
+fwrite($file_handle, "Hello\0");  //writing 6 bytes of data
 fclose($file_handle);
 var_dump( filesize($filename) );  //226 bytes
 clearstatcache();

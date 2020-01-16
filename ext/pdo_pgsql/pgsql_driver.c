@@ -1030,7 +1030,7 @@ static PHP_METHOD(PDO, pgsqlLOBUnlink)
 /* }}} */
 
 /* {{{ proto mixed PDO::pgsqlGetNotify([ int $result_type = PDO::FETCH_USE_DEFAULT] [, int $ms_timeout = 0 ]])
-   Get asyncronous notification */
+   Get asynchronous notification */
 static PHP_METHOD(PDO, pgsqlGetNotify)
 {
 	pdo_dbh_t *dbh;

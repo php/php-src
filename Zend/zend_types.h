@@ -658,7 +658,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 /* zval_gc_flags(zval.value->gc.u.type_info) (common flags) */
 #define GC_COLLECTABLE				(1<<4)
 #define GC_PROTECTED                (1<<5) /* used for recursion detection */
-#define GC_IMMUTABLE                (1<<6) /* can't be canged in place */
+#define GC_IMMUTABLE                (1<<6) /* can't be changed in place */
 #define GC_PERSISTENT               (1<<7) /* allocated using malloc */
 #define GC_PERSISTENT_LOCAL         (1<<8) /* persistent, but thread-local */
 

@@ -87,7 +87,7 @@ ZEND_FUNCTION(zend_test_deprecated)
 	zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg1);
 }
 
-/* Create a string without terminating null byte. Must be termined with
+/* Create a string without terminating null byte. Must be terminated with
  * zend_terminate_string() before destruction, otherwise a warning is issued
  * in debug builds. */
 ZEND_FUNCTION(zend_create_unterminated_string)

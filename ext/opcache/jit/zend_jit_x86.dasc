@@ -6870,7 +6870,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		/* Reuse reserved arguments stack */
 		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R4, 0x20);
 #else
-		/* CPU stack alocated temorary zval */
+		/* CPU stack alocated temporary zval */
 		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R4, 8);
 #endif
 	}

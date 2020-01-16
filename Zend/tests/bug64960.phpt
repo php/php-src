@@ -16,7 +16,7 @@ class ExceptionHandler {
 // this must be a class, closure does not trigger segfault
 set_exception_handler(new ExceptionHandler());
 
-// exception must be throwed from error handler.
+// exception must be thrown from error handler.
 set_error_handler(function()
 {
 	$e = new Exception;

@@ -32,7 +32,7 @@ $db = MySQLPDOTest::factory();
 			}
 
 			if (!is_null($expect) && ($expect != $both)) {
-				printf("[%03d] Expected differes from returned data, dumping\n", $offset);
+				printf("[%03d] Expected differs from returned data, dumping\n", $offset);
 				var_dump($expect);
 				var_dump($both);
 			}

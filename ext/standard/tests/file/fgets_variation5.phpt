@@ -35,7 +35,7 @@ foreach($file_modes as $file_mode) {
       exit();
     }
 
-    /* read with length beyong file size */
+    /* read with length beyond file size */
     echo "-- fgets() with length > filesize --\n";
     rewind($file_handle);
 
