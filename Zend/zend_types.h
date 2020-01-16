@@ -131,8 +131,8 @@ typedef struct {
 } zend_type;
 
 typedef struct {
-	size_t num_types;
-	void *types[1];
+	uint32_t num_types;
+	zend_type types[1];
 } zend_type_list;
 
 #define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 24
@@ -182,43 +182,37 @@ typedef struct {
 #define ZEND_TYPE_LIST(t) \
 	((zend_type_list *) (t).ptr)
 
-/* Type lists use the low bit to distinguish NAME and CE entries,
- * both of which may exist in the same list. */
-#define ZEND_TYPE_LIST_IS_CE(entry) \
-	(((uintptr_t) (entry)) & 1)
-
-#define ZEND_TYPE_LIST_IS_NAME(entry) \
-	!ZEND_TYPE_LIST_IS_CE(entry)
-
-#define ZEND_TYPE_LIST_GET_NAME(entry) \
-	((zend_string *) (entry))
-
-#define ZEND_TYPE_LIST_GET_CE(entry) \
-	((zend_class_entry *) ((uintptr_t) (entry) & ~1))
-
-#define ZEND_TYPE_LIST_ENCODE_NAME(name) \
-	((void *) (name))
-
-#define ZEND_TYPE_LIST_ENCODE_CE(ce) \
-	((void *) (((uintptr_t) ce) | 1))
-
 #define ZEND_TYPE_LIST_SIZE(num_types) \
-	(sizeof(zend_type_list) + ((num_types) - 1) * sizeof(void *))
+	(sizeof(zend_type_list) + ((num_types) - 1) * sizeof(zend_type))
 
-#define ZEND_TYPE_LIST_FOREACH_PTR(list, entry_ptr) do { \
-	void **_list = (list)->types; \
-	void **_end = _list + (list)->num_types; \
+/* This iterates over a zend_type_list. */
+#define ZEND_TYPE_LIST_FOREACH(list, type_ptr) do { \
+	zend_type *_list = (list)->types; \
+	zend_type *_end = _list + (list)->num_types; \
 	for (; _list < _end; _list++) { \
-		entry_ptr = _list;
-
-#define ZEND_TYPE_LIST_FOREACH(list, entry) do { \
-	void **_list = (list)->types; \
-	void **_end = _list + (list)->num_types; \
-	for (; _list < _end; _list++) { \
-		entry = *_list;
+		type_ptr = _list;
 
 #define ZEND_TYPE_LIST_FOREACH_END() \
 	} \
+} while (0)
+
+/* This iterates over any zend_type. If it's a type list, all list elements will
+ * be visited. If it's a single type, only the single type is visited. */
+#define ZEND_TYPE_FOREACH(type, type_ptr) do { \
+	zend_type *_cur, *_end; \
+	if (ZEND_TYPE_HAS_LIST(type)) { \
+		zend_type_list *_list = ZEND_TYPE_LIST(type); \
+		_cur = _list->types; \
+		_end = _cur + _list->num_types; \
+	} else { \
+		_cur = &(type); \
+		_end = _cur + 1; \
+	} \
+	do { \
+		type_ptr = _cur;
+
+#define ZEND_TYPE_FOREACH_END() \
+	} while (++_cur < _end); \
 } while (0)
 
 #define ZEND_TYPE_SET_PTR(t, _ptr) \

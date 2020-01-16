@@ -270,8 +270,8 @@ PHP_MINIT_FUNCTION(zend_test)
 		zend_string *class_name2 = zend_string_init("Iterator", sizeof("Iterator") - 1, 1);
 		zend_type_list *type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
 		type_list->num_types = 2;
-		type_list->types[0] = ZEND_TYPE_LIST_ENCODE_NAME(class_name1);
-		type_list->types[1] = ZEND_TYPE_LIST_ENCODE_NAME(class_name2);
+		type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(class_name1, 0, 0);
+		type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(class_name2, 0, 0);
 		zend_type type = ZEND_TYPE_INIT_PTR(type_list, _ZEND_TYPE_LIST_BIT, 1, 0);
 		zval val;
 		ZVAL_NULL(&val);
