@@ -26,6 +26,7 @@
 #include "zend_extensions.h"
 #include "zend_API.h"
 #include "zend_sort.h"
+#include "zend_type_check_cache.h"
 
 #include "zend_vm.h"
 
@@ -1038,6 +1039,9 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
 	}
+
+	// TODO: Should we re-assign CE columns in opcache after loading them from cache?
+	tcc_assign_ce_columns();
 
 	zend_calc_live_ranges(op_array, NULL);
 

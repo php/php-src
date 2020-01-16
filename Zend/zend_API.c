@@ -1075,7 +1075,7 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 								return FAILURE;
 							}
 							/* property initializers must always be evaluated with strict types */;
-							if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, /* strict */ 1))) {
+							if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, /* strict */ 1, NULL))) {
 								zval_ptr_dtor(&tmp);
 								return FAILURE;
 							}
@@ -1147,7 +1147,7 @@ ZEND_API void object_properties_init_ex(zend_object *object, HashTable *properti
 					zval tmp;
 
 					ZVAL_COPY_VALUE(&tmp, prop);
-					if (UNEXPECTED(!zend_verify_property_type(property_info, &tmp, 0))) {
+					if (UNEXPECTED(!zend_verify_property_type(property_info, &tmp, 0, NULL))) {
 						continue;
 					}
 					ZVAL_COPY_VALUE(slot, &tmp);
@@ -4032,7 +4032,7 @@ ZEND_API int zend_update_static_property_ex(zend_class_entry *scope, zend_string
 	Z_TRY_ADDREF_P(value);
 	if (ZEND_TYPE_IS_SET(prop_info->type)) {
 		ZVAL_COPY_VALUE(&tmp, value);
-		if (!zend_verify_property_type(prop_info, &tmp, /* strict */ 0)) {
+		if (!zend_verify_property_type(prop_info, &tmp, /* strict */ 0, NULL)) {
 			Z_TRY_DELREF_P(value);
 			return FAILURE;
 		}

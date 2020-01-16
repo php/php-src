@@ -1781,6 +1781,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 	zend_bool persistent_hashes = ce->type == ZEND_INTERNAL_CLASS;
 
 	ce->refcount = 1;
+	ce->tcc_column_index = 0;
 	ce->ce_flags = ZEND_ACC_CONSTANTS_UPDATED;
 
 	if (CG(compiler_options) & ZEND_COMPILE_GUARDS) {
@@ -2299,7 +2300,11 @@ static void zend_emit_return_type_check(
 			opline->result.var = expr->u.op.var = get_temporary_variable();
 		}
 
-		opline->op2.num = zend_alloc_cache_slots(zend_type_get_num_classes(return_info->type));
+		/* Allocate cache slot to speed-up run-time class resolution and type checking. We
+		 * use one slot to store a pointer to the row in the type checking cache that corresponds
+		 * to the argument type and one for each of the classes contained in the argument type.
+		 */
+		opline->op2.num = zend_alloc_cache_slots(1 + zend_type_get_num_classes(return_info->type));
 	}
 }
 /* }}} */
@@ -2673,8 +2678,13 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 
 	opline = zend_delayed_emit_op(result, ZEND_FETCH_OBJ_R, &obj_node, &prop_node);
 	if (opline->op2_type == IS_CONST) {
+		// Allocate cache slots for the offset of the property
+		// in the object and other property details. We can only
+		// cache that information when the property that is referenced
+		// by the opcode is constant. When the property is written we
+		// also allocate a slot for the type check cache.
 		convert_to_string(CT_CONSTANT(opline->op2));
-		opline->extended_value = zend_alloc_cache_slots(3);
+		opline->extended_value = zend_alloc_cache_slots((type == BP_VAR_W) ? 4 : 3);
 	}
 
 	zend_adjust_for_fetch_type(opline, result, type);
@@ -2712,14 +2722,14 @@ zend_op *zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t type, i
 	}
 	if (opline->op1_type == IS_CONST) {
 		convert_to_string(CT_CONSTANT(opline->op1));
-		opline->extended_value = zend_alloc_cache_slots(3);
+		opline->extended_value = zend_alloc_cache_slots(4);
 	}
 	if (class_node.op_type == IS_CONST) {
 		opline->op2_type = IS_CONST;
 		opline->op2.constant = zend_add_class_name_literal(
 			Z_STR(class_node.u.constant));
 		if (opline->op1_type != IS_CONST) {
-			opline->extended_value = zend_alloc_cache_slot();
+			opline->extended_value = zend_alloc_cache_slots(4);
 		}
 	} else {
 		SET_NODE(opline->op2, &class_node);
@@ -5781,9 +5791,12 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		opline->op1.num = i + 1;
 
 		if (type_ast) {
-			/* Allocate cache slot to speed-up run-time class resolution */
+			/* Allocate cache slot to speed-up run-time class resolution and type checking. We
+			 * use one slot to store a pointer to the row in the type checking cache that corresponds
+			 * to the argument type and one for each of the classes contained in the argument type.
+			 */
 			opline->extended_value =
-				zend_alloc_cache_slots(zend_type_get_num_classes(arg_info->type));
+				zend_alloc_cache_slots(1 + zend_type_get_num_classes(arg_info->type));
 		}
 
 		ZEND_TYPE_FULL_MASK(arg_info->type) |= _ZEND_ARG_INFO_FLAGS(is_ref, is_variadic);
