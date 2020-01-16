@@ -1515,7 +1515,7 @@ void php_mysqli_init(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_method)
 	if (!(mysql->mysql = mysql_init(NULL)))
 #else
 	/*
-	  We create always persistent, as if the user want to connecto
+	  We create always persistent, as if the user want to connect
 	  to p:somehost, we can't convert the handle then
 	*/
 	if (!(mysql->mysql = mysqlnd_init(MYSQLND_CLIENT_KNOWS_RSET_COPY_DATA, TRUE)))

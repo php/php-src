@@ -91,7 +91,7 @@ static char *ErrorMessages[] =
 };
 
 /* This pattern converts all single occurrences of \n (Unix)
- * withour a leading \r to \r\n and all occurrences of \r (Mac)
+ * without a leading \r to \r\n and all occurrences of \r (Mac)
  * without a trailing \n to \r\n
  * Thx to Nibbler from ircnet/#linuxger
  */

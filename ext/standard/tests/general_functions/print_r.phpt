@@ -261,14 +261,14 @@ $variations = array (
    non-scalar variables using print_r() */
 check_printr($variations);
 
-echo "\n*** Testing print_r() on miscelleneous input arguments ***\n";
+echo "\n*** Testing print_r() on miscellaneous input arguments ***\n";
 $misc_values = array (
   @$unset_var,
   NULL,  // NULL argument
   @$undef_variable,  //undefined variable
   null
 );
-/* calling check_printr() to display miscelleneous data using print_r() */
+/* calling check_printr() to display miscellaneous data using print_r() */
 check_printr($misc_values);
 
 /* closing resource handle used */
@@ -1679,7 +1679,7 @@ Array
     [3] => /00\7
 )
 
-*** Testing print_r() on miscelleneous input arguments ***
+*** Testing print_r() on miscellaneous input arguments ***
 
 -- Iteration 1 --
 

@@ -17,20 +17,20 @@ function testForException( $heap )
     }
 }
 
-// 1. SplMinHeap emtpy
+// 1. SplMinHeap empty
 $heap = new SplMinHeap;
 testForException( $heap );
 
-// 2. SplMinHeap non-emtpy
+// 2. SplMinHeap non-empty
 $heap = new SplMinHeap;
 $heap->insert( 1 );
 testForException( $heap );
 
-// 3. SplMaxHeap emtpy
+// 3. SplMaxHeap empty
 $heap = new SplMaxHeap;
 testForException( $heap );
 
-// 4. SplMaxHeap non-emtpy
+// 4. SplMaxHeap non-empty
 $heap = new SplMaxHeap;
 $heap->insert( 1 );
 testForException( $heap );

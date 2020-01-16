@@ -1,5 +1,5 @@
 --TEST--
-Test array_diff() function : usage variations - associative arrays contianing different data types
+Test array_diff() function : usage variations - associative arrays containing different data types
 --FILE--
 <?php
 /* Prototype  : array array_diff(array $arr1, array $arr2 [, array ...])

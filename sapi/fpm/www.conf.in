@@ -139,7 +139,7 @@ pm.max_spare_servers = 3
 ;pm.max_requests = 500
 
 ; The URI to view the FPM status page. If this value is not set, no URI will be
-; recognized as a status page. It shows the following informations:
+; recognized as a status page. It shows the following information:
 ;   pool                 - the name of the pool;
 ;   process manager      - static, dynamic or ondemand;
 ;   start time           - the date and time FPM has started;

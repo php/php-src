@@ -1,5 +1,5 @@
 --TEST--
-Testing imagecolordeallocate() of GD library with Out of range intergers (Below)
+Testing imagecolordeallocate() of GD library with Out of range integers (Below)
 --CREDITS--
 Rafael Dohms <rdohms [at] gmail [dot] com>
 #testfest PHPSP on 2009-06-20

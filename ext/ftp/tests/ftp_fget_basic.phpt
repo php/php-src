@@ -21,10 +21,10 @@ var_dump(ftp_fget($ftp, $fp ,'a story.txt', FTP_ASCII));
 fseek($fp, 0);
 echo fgets($fp);
 
-$postition = ftell($fp);
+$position = ftell($fp);
 //test binary data transfer
 var_dump(ftp_fget($ftp, $fp, 'binary data.bin', FTP_BINARY));
-fseek($fp, $postition);
+fseek($fp, $position);
 var_dump(urlencode(fgets($fp)));
 
 //test non-existent file request

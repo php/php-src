@@ -1,5 +1,5 @@
 --TEST--
-SCCP 022: Invailid types
+SCCP 022: Invalid types
 --INI--
 opcache.enable=1
 opcache.enable_cli=1

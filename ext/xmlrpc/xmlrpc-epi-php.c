@@ -396,7 +396,7 @@ static void set_output_options(php_output_options* options, zval* output_opts)
 /* php arrays have no distinction between array and struct types.
  * they even allow mixed.  Thus, we determine the type by iterating
  * through the entire array and figuring out each element.
- * room for some optimation here if we stop after a specific # of elements.
+ * room for some optimisation here if we stop after a specific # of elements.
  */
 static XMLRPC_VECTOR_TYPE determine_vector_type (HashTable *ht)
 {

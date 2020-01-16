@@ -22,7 +22,7 @@ $db->exec('INSERT INTO test VALUES(1)');
 
 // Comment without quotes or placeholders
 $stmt = $db->prepare("
-	SELECT -- Thats all folks!
+	SELECT -- That's all folks!
 		'\"abc\":8000'
 	FROM test
 ");

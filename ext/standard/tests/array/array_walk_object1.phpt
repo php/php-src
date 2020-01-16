@@ -8,7 +8,7 @@ Test array_walk() function : object functionality
 */
 
 /*
-* Pasing object in place of 'input' argument to test object functionatlity
+* Passing object in place of 'input' argument to test object functionality
 */
 
 echo "*** Testing array_walk() : object functionality ***\n";

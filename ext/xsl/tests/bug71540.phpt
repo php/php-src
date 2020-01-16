@@ -52,9 +52,9 @@ Warning: XSLTProcessor::transformToXml(): xmlXPathCompOpEval: function test not 
 
 Warning: XSLTProcessor::transformToXml(): Unregistered function in %sbug71540.php on line %d
 
-Warning: XSLTProcessor::transformToXml(): Stack usage errror in %sbug71540.php on line %d
+Warning: XSLTProcessor::transformToXml(): Stack usage error in %sbug71540.php on line %d
 
-Warning: XSLTProcessor::transformToXml(): Stack usage errror in %sbug71540.php on line %d
+Warning: XSLTProcessor::transformToXml(): Stack usage error in %sbug71540.php on line %d
 
 Warning: XSLTProcessor::transformToXml(): Handler name must be a string in %sbug71540.php on line %d
 

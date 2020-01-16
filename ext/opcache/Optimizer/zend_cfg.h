@@ -22,7 +22,7 @@
 /* zend_basic_bloc.flags */
 #define ZEND_BB_START            (1<<0)  /* fist block             */
 #define ZEND_BB_FOLLOW           (1<<1)  /* follows the next block */
-#define ZEND_BB_TARGET           (1<<2)  /* jump taget             */
+#define ZEND_BB_TARGET           (1<<2)  /* jump target            */
 #define ZEND_BB_EXIT             (1<<3)  /* without successors     */
 #define ZEND_BB_ENTRY            (1<<4)  /* stackless entry        */
 #define ZEND_BB_TRY              (1<<5)  /* start of try block     */
