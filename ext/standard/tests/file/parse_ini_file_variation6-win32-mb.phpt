@@ -97,12 +97,12 @@ array(1) {
 
 -- Iteration 5 --
 
-Warning: parse_ini_file(%sparseIniFileVar私はガラスを食べられます.dir\parseIniFileVar私はガラスを食べられますSub\..\\\parseIniFileVar私はガラスを食べられますSub\\..\\..\parseIniFileVar私はガラスを食べられますSub\parseIniFileVar私はガラスを食べられます.ini): failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(%sparseIniFileVar私はガラスを食べられます.dir\parseIniFileVar私はガラスを食べられますSub\..\\\parseIniFileVar私はガラスを食べられますSub\\..\\..\parseIniFileVar私はガラスを食べられますSub\parseIniFileVar私はガラスを食べられます.ini): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 6 --
 
-Warning: parse_ini_file(%sparseIniFileVar私はガラスを食べられます.dir\parseIniFileVar私はガラスを食べられますSub\BADDIR\parseIniFileVar私はガラスを食べられます.ini): failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(%sparseIniFileVar私はガラスを食べられます.dir\parseIniFileVar私はガラスを食べられますSub\BADDIR\parseIniFileVar私はガラスを食べられます.ini): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 7 --
@@ -131,7 +131,7 @@ array(1) {
 
 -- Iteration 11 --
 
-Warning: parse_ini_file(BADDIR\parseIniFileVar私はガラスを食べられます.ini): failed to open stream: No such file or directory in %s on line %d
+Warning: parse_ini_file(BADDIR\parseIniFileVar私はガラスを食べられます.ini): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Iteration 12 --

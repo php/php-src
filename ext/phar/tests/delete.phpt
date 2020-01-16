@@ -28,4 +28,4 @@ echo file_get_contents($pname . '/a') . "\n";
 --EXPECTF--
 a
 
-Warning: file_get_contents(phar://%sdelete.phar.php/a): failed to open stream: phar error: "a" is not a file in phar "%sdelete.phar.php" in %sdelete.php on line 16
+Warning: file_get_contents(phar://%sdelete.phar.php/a): Failed to open stream: phar error: "a" is not a file in phar "%sdelete.phar.php" in %sdelete.php on line 16

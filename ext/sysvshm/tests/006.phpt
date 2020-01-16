@@ -27,17 +27,17 @@ shm_remove($s);
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: shm_remove_var(): variable key -10 doesn't exist in %s006.php on line %d
+Warning: shm_remove_var(): Variable key -10 doesn't exist in %s006.php on line %d
 bool(false)
 string(11) "test string"
 bool(true)
 
-Warning: shm_get_var(): variable key 1 doesn't exist in %s006.php on line %d
+Warning: shm_get_var(): Variable key 1 doesn't exist in %s006.php on line %d
 bool(false)
 
-Warning: shm_remove_var(): variable key 1 doesn't exist in %s006.php on line %d
+Warning: shm_remove_var(): Variable key 1 doesn't exist in %s006.php on line %d
 bool(false)
 
-Warning: shm_get_var(): variable key 1 doesn't exist in %s006.php on line %d
+Warning: shm_get_var(): Variable key 1 doesn't exist in %s006.php on line %d
 bool(false)
 Done

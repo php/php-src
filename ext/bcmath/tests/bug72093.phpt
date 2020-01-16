@@ -12,5 +12,5 @@ var_dump(bcpowmod(1, 1.2, 1, 1));
 --EXPECTF--
 string(1) "1"
 
-Warning: bcpowmod(): non-zero scale in exponent in %s on line %d
+Warning: bcpowmod(): Non-zero scale in exponent in %s on line %d
 string(3) "0.0"

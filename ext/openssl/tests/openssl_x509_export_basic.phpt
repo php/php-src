@@ -32,11 +32,11 @@ var_dump(strcmp($output, $output5)); // different
 bool(true)
 bool(true)
 
-Warning: openssl_x509_export(): cannot get cert from parameter 1 in %s on line %d
+Warning: openssl_x509_export(): Cannot get cert from parameter 1 in %s on line %d
 bool(false)
 bool(true)
 
-Warning: openssl_x509_export(): cannot get cert from parameter 1 in %s on line %d
+Warning: openssl_x509_export(): Cannot get cert from parameter 1 in %s on line %d
 bool(false)
 int(0)
 int(0)

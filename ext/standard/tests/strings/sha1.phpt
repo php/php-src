@@ -47,5 +47,5 @@ bool(true)
 string(20) "%a"
 string(20) "%a"
 
-Warning: sha1_file(%ssha1.dat): failed to open stream: No such file or directory in %s on line %d
+Warning: sha1_file(%ssha1.dat): Failed to open stream: No such file or directory in %s on line %d
 Done

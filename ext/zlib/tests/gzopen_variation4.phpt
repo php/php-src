@@ -124,15 +124,15 @@ This is a file in script dir
 
 ** testing with mode=r+ **
 
-Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
+Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
 
-Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
+Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
 
-Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
+Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
 
-Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
+Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
 
-Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
+Warning: gzopen(): Cannot open a zlib stream for reading and writing at the same time! in %s on line %d
 
 ** testing with mode=rt **
 This is a file in dir2

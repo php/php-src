@@ -181,7 +181,7 @@ Warning: mysqli::real_connect(): (HY000/1045): %s in %s on line %d
 Warning: mysqli::real_connect(): (HY000/1045): %s in %s on line %d
 [300 + 002] [1045] %s
 
-Warning: mysqli::real_connect(%sest_sha256_wrong_%d): failed to open stream: No such file or directory in %s on line %d
+Warning: mysqli::real_connect(%sest_sha256_wrong_%d): Failed to open stream: No such file or directory in %s on line %d
 
 Warning: mysqli::real_connect(): (HY000/1045): %s in %s on line %d
 [400 + 002] [1045] %s

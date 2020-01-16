@@ -1,5 +1,5 @@
 --TEST--
-Testing dynamic call with invalid value for method name
+Testing dynamic call with Invalid value for method name
 --FILE--
 <?php
 

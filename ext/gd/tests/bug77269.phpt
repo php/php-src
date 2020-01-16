@@ -14,5 +14,5 @@ imagescale($im, 1, 1, IMG_TRIANGLE);
 
 ?>
 --EXPECTF--
-Warning: imagescale():%S product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
+Warning: imagescale():%S Product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
  in %s on line %d

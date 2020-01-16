@@ -10,16 +10,16 @@ function callback($string) {
 
 ob_start('callback', 0, false);
 
-echo "Attempt to flush unerasable buffer - should fail... ";
+echo "Attempt to flush unerasable buffer - should fail...";
 var_dump(ob_flush());
 // Check content of buffer after flush - if flush failed it should still contain the string above.
 var_dump(ob_get_contents());
 ?>
 --EXPECTF--
-[callback:1]Attempt to flush unerasable buffer - should fail... 
-Notice: ob_flush(): failed to flush buffer of callback (0) in %s on line 11
+[callback:1]Attempt to flush unerasable buffer - should fail...
+Notice: ob_flush(): Failed to flush buffer of callback (0) in %s on line 11
 bool(false)
-string(%d) "Attempt to flush unerasable buffer - should fail... 
-Notice: ob_flush(): failed to flush buffer of callback (0) in %s on line 11
+string(%d) "Attempt to flush unerasable buffer - should fail...
+Notice: ob_flush(): Failed to flush buffer of callback (0) in %s on line 11
 bool(false)
 "

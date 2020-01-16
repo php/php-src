@@ -39,14 +39,14 @@ var_dump(bzopen($fp, "r"));
 --EXPECTF--
 '' is not a valid mode for bzopen(). Only 'w' and 'r' are supported.
 
-Warning: bzopen(): filename cannot be empty in %s on line %d
+Warning: bzopen(): Filename cannot be empty in %s on line %d
 bool(false)
 
-Warning: bzopen(): filename cannot be empty in %s on line %d
+Warning: bzopen(): Filename cannot be empty in %s on line %d
 bool(false)
 'x' is not a valid mode for bzopen(). Only 'w' and 'r' are supported.
 'rw' is not a valid mode for bzopen(). Only 'w' and 'r' are supported.
 
-Warning: bzopen(no_such_file): failed to open stream: No such file or directory in %s on line %d
+Warning: bzopen(no_such_file): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 resource(%d) of type (stream)

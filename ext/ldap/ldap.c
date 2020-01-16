@@ -1963,7 +1963,7 @@ PHP_FUNCTION(ldap_next_attribute)
 		RETURN_THROWS();
 	}
 
-	if ((resultentry = (ldap_resultentry *)zend_fetch_resource(Z_RES_P(result_entry), "LDAP result entry", le_result_entry)) == NULL) {
+	if ((resultentry = (ldap_resultentry *)zend_fetch_resource(Z_RES_P(result_entry), "ldap result entry", le_result_entry)) == NULL) {
 		RETURN_THROWS();
 	}
 

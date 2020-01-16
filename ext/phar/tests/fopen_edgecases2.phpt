@@ -42,4 +42,4 @@ fopen() expects parameter 1 to be a valid path, array given
 blah
 test
 
-Warning: fopen(phar://%sfopen_edgecases2.phar.php/oops): failed to open stream: phar error: path "oops" is a directory in phar://%sfopen_edgecases2.phar.php/foo/hi on line %d
+Warning: fopen(phar://%sfopen_edgecases2.phar.php/oops): Failed to open stream: phar error: path "oops" is a directory in phar://%sfopen_edgecases2.phar.php/foo/hi on line %d

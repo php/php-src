@@ -48,7 +48,7 @@ if(file_exists($file_path."/file_put_contents1.tmp")) {
 
 -- Testing with  Non-existing file --
 
-Warning: file_get_contents(/no/such/file/or/dir): failed to open stream: No such file or directory in %s on line %d
+Warning: file_get_contents(/no/such/file/or/dir): Failed to open stream: No such file or directory in %s on line %d
 
 -- Testing for invalid negative maxlen values --
 Length must be greater than or equal to zero

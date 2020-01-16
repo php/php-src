@@ -42,5 +42,5 @@ bool(false)
 
 -- Testing hash_file() function with a non-existent file --
 
-Warning: hash_file(%s): failed to open stream: No such file or directory in %s on line %d
+Warning: hash_file(%s): Failed to open stream: No such file or directory in %s on line %d
 bool(false)

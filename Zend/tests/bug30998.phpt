@@ -14,6 +14,6 @@ set_error_handler('my_error');
 $f = fopen("/tmp/blah", "r");
 ?>
 --EXPECTF--
-fopen(/tmp/blah): failed to open stream: %s (2) in %s:%d
+fopen(/tmp/blah): Failed to open stream: %s (2) in %s:%d
 
-Warning: fopen(/tmp/blah): failed to open stream: %s in %s on line %d
+Warning: fopen(/tmp/blah): Failed to open stream: %s in %s on line %d

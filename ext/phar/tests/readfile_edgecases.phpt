@@ -55,4 +55,4 @@ readfile("./hi", 0, $context);
 readfile("../oops");
 ?>
 
-Warning: readfile(phar://%sreadfile_edgecases.phar.php/oops): failed to open stream: phar error: path "oops" is a directory in phar://%sreadfile_edgecases.phar.php/foo/hi on line %d
+Warning: readfile(phar://%sreadfile_edgecases.phar.php/oops): Failed to open stream: phar error: path "oops" is a directory in phar://%sreadfile_edgecases.phar.php/foo/hi on line %d

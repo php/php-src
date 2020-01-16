@@ -92,7 +92,7 @@ Warning: oci_lob_copy(): OCI_INVALID_HANDLE in %s on line %d
 bool(false)
 bool(false)
 
-Warning: oci_lob_copy(): length parameter must be greater than 0 in %s on line %d
+Warning: oci_lob_copy(): Length parameter must be greater than 0 in %s on line %d
 bool(false)
 bool(true)
 
