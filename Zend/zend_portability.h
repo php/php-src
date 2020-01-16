@@ -289,7 +289,7 @@ char *alloca();
 	(_default)
 #endif
 
-#if ZEND_DEBUG
+#if ZEND_DEBUG || defined(ZEND_WIN32_NEVER_INLINE)
 # define zend_always_inline inline
 # define zend_never_inline
 #else
