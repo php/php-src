@@ -383,7 +383,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 	}
 
 	if (to_read <= 0) {
-		zend_value_error("length parameter must be greater than 0");
+		zend_value_error("Length parameter must be greater than 0");
 		RETURN_THROWS();
 	}
 

@@ -2250,7 +2250,7 @@ static int check_cert(X509_STORE *ctx, X509 *x, STACK_OF(X509) *untrustedchain, 
 	}
 	if (!X509_STORE_CTX_init(csc, ctx, x, untrustedchain)) {
 		php_openssl_store_errors();
-		php_error_docref(NULL, E_WARNING, "Cert store initialization failed");
+		php_error_docref(NULL, E_WARNING, "Certificate store initialization failed");
 		return 0;
 	}
 	if (purpose >= 0 && !X509_STORE_CTX_set_purpose(csc, purpose)) {

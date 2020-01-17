@@ -26,10 +26,10 @@ echo "Done\n";
 *** Testing error conditions ***
 -- Testing fgets() with invalid length arguments --
 
-Warning: fgets(): length parameter must be greater than 0 in %s on line %d
+Warning: fgets(): Length parameter must be greater than 0 in %s on line %d
 bool(false)
 
-Warning: fgets(): length parameter must be greater than 0 in %s on line %d
+Warning: fgets(): Length parameter must be greater than 0 in %s on line %d
 bool(false)
 bool(false)
 Done

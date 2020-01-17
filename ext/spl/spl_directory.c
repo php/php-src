@@ -2913,7 +2913,7 @@ SPL_METHOD(SplFileObject, fread)
 	}
 
 	if (length <= 0) {
-		php_error_docref(NULL, E_WARNING, "length parameter must be greater than 0");
+		php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
 		RETURN_FALSE;
 	}
 

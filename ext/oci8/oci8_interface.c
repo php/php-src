@@ -424,7 +424,7 @@ PHP_FUNCTION(oci_lob_read)
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp, descriptor);
 
 	if (length <= 0) {
-		php_error_docref(NULL, E_WARNING, "length parameter must be greater than 0");
+		php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
 		RETURN_FALSE;
 	}
 
@@ -911,7 +911,7 @@ PHP_FUNCTION(oci_lob_copy)
 	PHP_OCI_ZVAL_TO_DESCRIPTOR(tmp_from, descriptor_from);
 
 	if (ZEND_NUM_ARGS() == 3 && length < 0) {
-		php_error_docref(NULL, E_WARNING, "length parameter must be greater than 0");
+		php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
 		RETURN_FALSE;
 	}
 

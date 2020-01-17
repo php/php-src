@@ -1040,7 +1040,7 @@ PHPAPI PHP_FUNCTION(fgets)
 		efree(buf);
 	} else if (argc > 1) {
 		if (len <= 0) {
-			php_error_docref(NULL, E_WARNING, "length parameter must be greater than 0");
+			php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
 			RETURN_FALSE;
 		}
 
@@ -1750,7 +1750,7 @@ PHPAPI PHP_FUNCTION(fread)
 	PHP_STREAM_TO_ZVAL(stream, res);
 
 	if (len <= 0) {
-		php_error_docref(NULL, E_WARNING, "length parameter must be greater than 0");
+		php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
 		RETURN_FALSE;
 	}
 
