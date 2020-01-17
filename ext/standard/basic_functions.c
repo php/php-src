@@ -4478,7 +4478,7 @@ PHP_FUNCTION(getopt)
 
 	while ((o = php_getopt(argc, argv, opts, &php_optarg, &php_optind, 0, 1)) != -1) {
 		/* Skip unknown arguments. */
-		if (o == '?') {
+		if (o == PHP_GETOPT_INVALID_ARG) {
 			continue;
 		}
 

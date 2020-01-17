@@ -35,6 +35,9 @@ extern PHPAPI int php_optidx;
 PHPAPI int php_getopt(int argc, char* const *argv, const opt_struct opts[], char **optarg, int *optind, int show_err, int arg_start);
 END_EXTERN_C()
 
+/* php_getopt will return this value if there is an error in arguments */
+#define PHP_GETOPT_INVALID_ARG (-2)
+
 #endif
 
 /*

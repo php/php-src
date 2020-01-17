@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #71876 (Memory corruption htmlspecialchars(): charset `*' not
     supported). (Nikita)
   . Fixed bug ##79146 (cscript can fail to run on some systems). (clarodeus)
+  . Fixed bug #78323 (Code 0 is returned on invalid options). (Ivan Mikheykin)
 
 - CURL:
   . Fixed bug #79078 (Hypothetical use-after-free in curl_multi_add_handle()).
