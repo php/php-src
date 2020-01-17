@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug #79084 (mysqlnd may fetch wrong column indexes with MYSQLI_BOTH).
     (cmb)
 
+- Reflection:
+  . Fixed bug #79115 (ReflectionClass::isCloneable call reflected class
+    __destruct). (Nikita)
+
 23 Jan 2020, PHP 7.4.2
 
 - Core:
