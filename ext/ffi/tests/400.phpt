@@ -4,6 +4,13 @@ FFI 400: Call each other type struct of multiple FFI instance
 <?php
 require_once('skipif.inc');
 ?>
+<?php
+try {
+	FFI::cdef("extern void *zend_printf;");
+} catch (Throwable $e) {
+	die('skip PHP symbols not available');
+}
+?>
 --INI--
 ffi.enable=1
 --FILE--
@@ -33,7 +40,7 @@ try {
     $ffi2->zend_stream_init_filename(FFI::addr($c1), __FILE__);
     echo 'Success';
 } catch (FFI\Exception $e) {
-    echo 'incompatible';
+    echo $e;
 }
 
 ?>
