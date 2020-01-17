@@ -34,7 +34,7 @@ if test "$PHP_MYSQLND" != "no" || test "$PHP_MYSQLND_ENABLED" = "yes"; then
 
   test -z "$PHP_OPENSSL" && PHP_OPENSSL=no
 
-  if test "$PHP_OPENSSL" != "no"; then
+  if test "$PHP_OPENSSL" != "no" || test "$PHP_OPENSSL_DIR" != "no"; then
     PHP_SETUP_OPENSSL(MYSQLND_SHARED_LIBADD, [AC_DEFINE(MYSQLND_HAVE_SSL,1,[Enable mysqlnd code that uses OpenSSL directly])])
   fi
 
