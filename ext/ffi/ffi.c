@@ -935,7 +935,7 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value, uint32_t
 
 	callback = ffi_closure_alloc(sizeof(ffi_closure), &code);
 	if (!callback) {
-		zend_throw_error(zend_ffi_exception_ce, "Cannot allocate callback, parameter %u occur", occur_error);
+		zend_throw_error(zend_ffi_exception_ce, "Cannot allocate callback%s", occur_error);
 		return NULL;
 	}
 
