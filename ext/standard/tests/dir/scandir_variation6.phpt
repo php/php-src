@@ -51,24 +51,24 @@ rmdir($dir_path);
 
 -- Wildcard = '*' --
 
-Warning: scandir(%s/scandir_var*): failed to open dir: %s in %s on line %d
+Warning: scandir(%s/scandir_var*): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
 
-Warning: scandir(%s/*): failed to open dir: %s in %s on line %d
+Warning: scandir(%s/*): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
 
 -- Wildcard = '?' --
 
-Warning: scandir(%s/scandir_variation6/sub_dir?): failed to open dir: %s in %s on line %d
+Warning: scandir(%s/scandir_variation6/sub_dir?): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)
 
-Warning: scandir(%s/scandir_variation6/sub?dir1): failed to open dir: %s in %s on line %d
+Warning: scandir(%s/scandir_variation6/sub?dir1): Failed to open directory: %s in %s on line %d
 
 Warning: scandir(): (errno %d): %s in %s on line %d
 bool(false)

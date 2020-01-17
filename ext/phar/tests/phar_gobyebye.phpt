@@ -42,4 +42,4 @@ bool(false)
 bool(false)
 bool(false)
 
-Warning: opendir(foo/hi): failed to open dir: No such file or directory in phar://%sphar_gobyebye.phar.php/foo/hi on line %d
+Warning: opendir(foo/hi): Failed to open directory: No such file or directory in phar://%sphar_gobyebye.phar.php/foo/hi on line %d

@@ -41,6 +41,6 @@ try {
 @unlink(__DIR__ . '/tar_nostub.tar');
 ?>
 --EXPECTF--
-RecursiveDirectoryIterator::__construct(phar://%star_nostub.phar.tar/): failed to open dir: '%star_nostub.phar.tar' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive
+RecursiveDirectoryIterator::__construct(phar://%star_nostub.phar.tar/): Failed to open directory: '%star_nostub.phar.tar' is not a phar archive. Use PharData::__construct() for a standard zip or tar archive
 phar url "phar://%star_nostub.phar.tar/" is unknown
 string(0) ""
