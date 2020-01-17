@@ -3,13 +3,6 @@ PHP_ARG_WITH([snmp],
   [AS_HELP_STRING([[--with-snmp[=DIR]]],
     [Include SNMP support])])
 
-PHP_ARG_WITH([openssl-dir],
-  [OpenSSL dir for SNMP],
-  [AS_HELP_STRING([[--with-openssl-dir[=DIR]]],
-    [SNMP: openssl install prefix])],
-  [no],
-  [no])
-
 if test "$PHP_SNMP" != "no"; then
 
   if test "$PHP_SNMP" = "yes"; then

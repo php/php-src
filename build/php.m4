@@ -1917,13 +1917,7 @@ dnl
 AC_DEFUN([PHP_SETUP_OPENSSL],[
   found_openssl=no
 
-  dnl Empty variable means 'no'.
-  test -z "$PHP_OPENSSL" && PHP_OPENSSL=no
-  test -z "$PHP_IMAP_SSL" && PHP_IMAP_SSL=no
-
-  if test "$PHP_OPENSSL" != "no"; then
-    PKG_CHECK_MODULES([OPENSSL], [openssl >= 1.0.1], [found_openssl=yes])
-  fi
+  PKG_CHECK_MODULES([OPENSSL], [openssl >= 1.0.1], [found_openssl=yes])
 
   if test "$found_openssl" = "yes"; then
     PHP_EVAL_LIBLINE($OPENSSL_LIBS, $1)
