@@ -25,6 +25,7 @@
 #define CONST_CS				0					/* No longer used -- always case sensitive */
 #define CONST_PERSISTENT		(1<<0)				/* Persistent */
 #define CONST_NO_FILE_CACHE		(1<<1)				/* Can't be saved in file cache */
+#define CONST_DEPRECATED		(1<<2)				/* Deprecated */
 
 #define	PHP_USER_CONSTANT   0x7fffff /* a constant defined in user space */
 
@@ -86,9 +87,10 @@ ZEND_API int zend_register_constant(zend_constant *c);
 void zend_copy_constants(HashTable *target, HashTable *sourc);
 #endif
 
-ZEND_API zval *_zend_get_special_const(const char *name, size_t name_len);
+ZEND_API zend_constant *_zend_get_special_const(const char *name, size_t name_len);
 
-static zend_always_inline zval *zend_get_special_const(const char *name, size_t name_len) {
+static zend_always_inline zend_constant *zend_get_special_const(
+		const char *name, size_t name_len) {
 	if (name_len == 4 || name_len == 5) {
 		return _zend_get_special_const(name, name_len);
 	}

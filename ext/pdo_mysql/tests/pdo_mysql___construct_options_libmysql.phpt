@@ -21,7 +21,7 @@ if (MySQLPDOTest::isPDOMySQLnd())
 		try {
 			$db = new PDO($dsn, $user, $pass, array($option => $value));
 			if (!is_object($db) || (!$ignore_diff && ($value !== ($tmp = @$db->getAttribute($option)))))
-				printf("[%03d] Execting '%s'/%s got '%s'/%s' for options '%s'\n",
+				printf("[%03d] Expecting '%s'/%s got '%s'/%s' for options '%s'\n",
 					$offset,
 					$value, gettype($value),
 					$tmp, gettype($tmp),
@@ -79,5 +79,5 @@ if (MySQLPDOTest::isPDOMySQLnd())
 ?>
 --EXPECT--
 [001] Expecting default value for 'PDO::MYSQL_ATTR_INIT_COMMAND' of ''/string, getAttribute() reports setting ''/boolean
-[026] Execting '1'/boolean got ''/boolean' for options 'PDO::MYSQL_ATTR_READ_DEFAULT_FILE'
+[026] Expecting '1'/boolean got ''/boolean' for options 'PDO::MYSQL_ATTR_READ_DEFAULT_FILE'
 done!

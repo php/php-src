@@ -119,61 +119,61 @@ fclose($res);
 *** Testing class_uses() : variation ***
 
 --int 0--
-object or string expected
+Object or string expected
 
 --int 1--
-object or string expected
+Object or string expected
 
 --int 12345--
-object or string expected
+Object or string expected
 
 --int -12345--
-object or string expected
+Object or string expected
 
 --float 10.5--
-object or string expected
+Object or string expected
 
 --float -10.5--
-object or string expected
+Object or string expected
 
 --float 12.3456789000e10--
-object or string expected
+Object or string expected
 
 --float -12.3456789000e10--
-object or string expected
+Object or string expected
 
 --float .5--
-object or string expected
+Object or string expected
 
 --empty array--
-object or string expected
+Object or string expected
 
 --int indexed array--
-object or string expected
+Object or string expected
 
 --associative array--
-object or string expected
+Object or string expected
 
 --nested arrays--
-object or string expected
+Object or string expected
 
 --uppercase NULL--
-object or string expected
+Object or string expected
 
 --lowercase null--
-object or string expected
+Object or string expected
 
 --lowercase true--
-object or string expected
+Object or string expected
 
 --lowercase false--
-object or string expected
+Object or string expected
 
 --uppercase TRUE--
-object or string expected
+Object or string expected
 
 --uppercase FALSE--
-object or string expected
+Object or string expected
 
 --empty string DQ--
 Error: 2 - class_uses(): Class  does not exist and could not be loaded, %s(%d)
@@ -192,10 +192,10 @@ array(0) {
 }
 
 --undefined var--
-object or string expected
+Object or string expected
 
 --unset var--
-object or string expected
+Object or string expected
 
 --resource--
-object or string expected
+Object or string expected

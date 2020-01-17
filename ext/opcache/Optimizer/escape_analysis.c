@@ -338,7 +338,7 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 				if (opline->op1_type != IS_CV
 				 || (OP1_INFO() & MAY_BE_REF)
 				 || (op->op1_def >= 0 && ssa->vars[op->op1_def].alias)) {
-					/* asignment into escaping structure */
+					/* assignment into escaping structure */
 					return 1;
 				}
 				/* reference dependencies processed separately */
@@ -354,7 +354,7 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 				if (opline->op1_type != IS_CV
 				 || (OP1_INFO() & MAY_BE_REF)
 				 || (op->op1_def >= 0 && ssa->vars[op->op1_def].alias)) {
-					/* asignment into escaping variable */
+					/* assignment into escaping variable */
 					return 1;
 				}
 				if (opline->op2_type == IS_CV || opline->result_type != IS_UNUSED) {

@@ -1,5 +1,5 @@
 --TEST--
-Register Alloction 002: SEND_VAL_EX uses %r0 as a temporay register
+Register Alloction 002: SEND_VAL_EX uses %r0 as a temporary register
 --INI--
 opcache.enable=1
 opcache.enable_cli=1

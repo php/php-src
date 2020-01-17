@@ -43,7 +43,7 @@ function checkAndClean() {
   }
 }
 
-echo "\n ---> Test arrays: \n";
+echo "\n ---> Test arrays:\n";
 var_dump(ob_start(array("f")));
 checkAndClean();
 
@@ -72,11 +72,11 @@ var_dump(ob_start(array('f', 'C::g', array(array($c, "g"), array($c, "h")))));
 checkAndClean();
 ?>
 --EXPECTF--
- ---> Test arrays: 
+ ---> Test arrays:
 
 Warning: ob_start(): array must have exactly two members in %s on line 44
 
-Notice: ob_start(): failed to create buffer in %s on line 44
+Notice: ob_start(): Failed to create buffer in %s on line 44
 bool(false)
 Array
 (
@@ -84,7 +84,7 @@ Array
 
 Warning: ob_start(): class 'f' not found in %s on line 47
 
-Notice: ob_start(): failed to create buffer in %s on line 47
+Notice: ob_start(): Failed to create buffer in %s on line 47
 bool(false)
 Array
 (
@@ -92,7 +92,7 @@ Array
 
 Warning: ob_start(): array must have exactly two members in %s on line 50
 
-Notice: ob_start(): failed to create buffer in %s on line 50
+Notice: ob_start(): Failed to create buffer in %s on line 50
 bool(false)
 Array
 (
@@ -100,7 +100,7 @@ Array
 
 Warning: ob_start(): array must have exactly two members in %s on line 53
 
-Notice: ob_start(): failed to create buffer in %s on line 53
+Notice: ob_start(): Failed to create buffer in %s on line 53
 bool(false)
 Array
 (
@@ -108,7 +108,7 @@ Array
 
 Warning: ob_start(): array must have exactly two members in %s on line 56
 
-Notice: ob_start(): failed to create buffer in %s on line 56
+Notice: ob_start(): Failed to create buffer in %s on line 56
 bool(false)
 Array
 (
@@ -128,7 +128,7 @@ Array
 
 Warning: ob_start(): array must have exactly two members in %s on line 68
 
-Notice: ob_start(): failed to create buffer in %s on line 68
+Notice: ob_start(): Failed to create buffer in %s on line 68
 bool(false)
 Array
 (

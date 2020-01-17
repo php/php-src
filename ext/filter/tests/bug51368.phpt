@@ -18,5 +18,5 @@ var_dump(filter_var('12345', FILTER_VALIDATE_FLOAT, $options));
 float(1000)
 float(1234.567)
 
-Warning: filter_var(): thousand separator must be at least one char in %s on line %d
+Warning: filter_var(): Thousand separator must be at least one char in %s on line %d
 bool(false)

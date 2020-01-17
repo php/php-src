@@ -396,7 +396,7 @@ static void set_output_options(php_output_options* options, zval* output_opts)
 /* php arrays have no distinction between array and struct types.
  * they even allow mixed.  Thus, we determine the type by iterating
  * through the entire array and figuring out each element.
- * room for some optimation here if we stop after a specific # of elements.
+ * room for some optimisation here if we stop after a specific # of elements.
  */
 static XMLRPC_VECTOR_TYPE determine_vector_type (HashTable *ht)
 {
@@ -877,7 +877,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 				} else {
 					/* could not create description */
 					if (err.xml_elem_error.parser_code) {
-						php_error_docref(NULL, E_WARNING, "xml parse error: [line %ld, column %ld, message: %s] Unable to add introspection data returned from %s()",
+						php_error_docref(NULL, E_WARNING, "XML parse error: [line %ld, column %ld, message: %s] Unable to add introspection data returned from %s()",
 								err.xml_elem_error.column, err.xml_elem_error.line, err.xml_elem_error.parser_error, ZSTR_VAL(php_function_name));
 					} else {
 						php_error_docref(NULL, E_WARNING, "Unable to add introspection data returned from %s()", ZSTR_VAL(php_function_name));
@@ -1111,13 +1111,13 @@ PHP_FUNCTION(xmlrpc_parse_method_descriptions)
 		} else {
 			/* could not create description */
 			if (err.xml_elem_error.parser_code) {
-				php_error_docref(NULL, E_WARNING, "xml parse error: [line %ld, column %ld, message: %s] Unable to create introspection data",
+				php_error_docref(NULL, E_WARNING, "XML parse error: [line %ld, column %ld, message: %s] Unable to create introspection data",
 						err.xml_elem_error.column, err.xml_elem_error.line, err.xml_elem_error.parser_error);
 			} else {
 				php_error_docref(NULL, E_WARNING, "Invalid xml structure. Unable to create introspection data");
 			}
 
-			php_error_docref(NULL, E_WARNING, "xml parse error. no method description created");
+			php_error_docref(NULL, E_WARNING, "XML parse error. no method description created");
 		}
 	}
 }

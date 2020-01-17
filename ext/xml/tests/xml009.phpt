@@ -3,7 +3,7 @@ XML parser test, default namespaces
 --SKIPIF--
 <?php
 require_once("skipif.inc");
-if (! @xml_parser_create_ns('ISO-8859-1')) { die("skip xml_parser_create_ns is not supported on this plattform");}
+if (! @xml_parser_create_ns('ISO-8859-1')) { die("skip xml_parser_create_ns is not supported on this platform");}
 ?>
 --FILE--
 <?php

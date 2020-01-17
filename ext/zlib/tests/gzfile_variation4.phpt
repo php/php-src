@@ -25,17 +25,17 @@ foreach ( $variation as $var ) {
 }
 ?>
 --EXPECTF--
-Warning: gzfile(10.5): failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(10.5): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: gzfile(-10.5): failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(-10.5): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: gzfile(123456789000): failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(123456789000): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: gzfile(-123456789000): failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(-123456789000): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: gzfile(0.5): failed to open stream: No such file or directory in %s on line %d
+Warning: gzfile(0.5): Failed to open stream: No such file or directory in %s on line %d
 bool(false)

@@ -89,7 +89,7 @@ int mbfl_filt_conv_uudec(int c, mbfl_convert_filter * filter)
 			}
 			if (filter->cache == 5)
 			{
-				/* thats good enough - wait for a newline */
+				/* that's good enough - wait for a newline */
 				filter->status = uudec_state_until_newline;
 				filter->cache = 0;
 			}

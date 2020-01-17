@@ -216,7 +216,7 @@ static int fpm_event_poll_add(struct fpm_event_s *ev) /* {{{ */
 		return 0;
 	}
 
-	zlog(ZLOG_ERROR, "poll: not enought space to add event (fd=%d)", ev->fd);
+	zlog(ZLOG_ERROR, "poll: not enough space to add event (fd=%d)", ev->fd);
 	return -1;
 }
 /* }}} */

@@ -137,7 +137,7 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 
 			if (ZEND_NUM_ARGS() == 5 && maxlen < 0) {
 				efree(arch);
-				php_error_docref(NULL, E_WARNING, "length must be greater than or equal to zero");
+				php_error_docref(NULL, E_WARNING, "Length must be greater than or equal to zero");
 				RETURN_FALSE;
 			}
 

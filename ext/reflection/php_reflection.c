@@ -231,14 +231,7 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 		case REF_TYPE_TYPE:
 		{
 			type_reference *type_ref = intern->ptr;
-			if (ZEND_TYPE_HAS_LIST(type_ref->type)) {
-				void *entry;
-				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type_ref->type), entry) {
-					if (ZEND_TYPE_LIST_IS_NAME(entry)) {
-						zend_string_release(ZEND_TYPE_LIST_GET_NAME(entry));
-					}
-				} ZEND_TYPE_LIST_FOREACH_END();
-			} else if (ZEND_TYPE_HAS_NAME(type_ref->type)) {
+			if (ZEND_TYPE_HAS_NAME(type_ref->type)) {
 				zend_string_release(ZEND_TYPE_NAME(type_ref->type));
 			}
 			efree(type_ref);
@@ -1174,16 +1167,12 @@ static void reflection_type_factory(zend_type type, zval *object, zend_bool lega
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_TYPE;
 
-	/* Property types may be resolved during the lifetime of the ReflectionType,
-	 * so we need to make sure that the strings we reference are not released. */
-	if (ZEND_TYPE_HAS_LIST(type)) {
-		void *entry;
-		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), entry) {
-			if (ZEND_TYPE_LIST_IS_NAME(entry)) {
-				zend_string_addref(ZEND_TYPE_LIST_GET_NAME(entry));
-			}
-		} ZEND_TYPE_LIST_FOREACH_END();
-	} else if (ZEND_TYPE_HAS_NAME(type)) {
+	/* Property types may be resolved during the lifetime of the ReflectionType.
+	 * If we reference a string, make sure it doesn't get released. However, only
+	 * do this for the top-level type, as resolutions inside type lists will be
+	 * fully visible to us (we'd have to do a fully copy of the type if we wanted
+	 * to prevent that). */
+	if (ZEND_TYPE_HAS_NAME(type)) {
 		zend_string_addref(ZEND_TYPE_NAME(type));
 	}
 }
@@ -2949,15 +2938,9 @@ ZEND_METHOD(reflection_union_type, getTypes)
 
 	array_init(return_value);
 	if (ZEND_TYPE_HAS_LIST(param->type)) {
-		void *entry;
-		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(param->type), entry) {
-			if (ZEND_TYPE_LIST_IS_NAME(entry)) {
-				append_type(return_value,
-					(zend_type) ZEND_TYPE_INIT_CLASS(ZEND_TYPE_LIST_GET_NAME(entry), 0, 0));
-			} else {
-				append_type(return_value,
-					(zend_type) ZEND_TYPE_INIT_CE(ZEND_TYPE_LIST_GET_CE(entry), 0, 0));
-			}
+		zend_type *list_type;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(param->type), list_type) {
+			append_type(return_value, *list_type);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(param->type)) {
 		append_type(return_value,
@@ -4621,6 +4604,8 @@ ZEND_METHOD(reflection_class, isCloneable)
 			if (UNEXPECTED(object_init_ex(&obj, ce) != SUCCESS)) {
 				return;
 			}
+			/* We're not calling the constructor, so don't call the destructor either. */
+			zend_object_store_ctor_failed(Z_OBJ(obj));
 			RETVAL_BOOL(Z_OBJ_HANDLER(obj, clone_obj) != NULL);
 			zval_ptr_dtor(&obj);
 		}

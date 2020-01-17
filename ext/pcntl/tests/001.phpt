@@ -61,7 +61,7 @@ function test_stop_signal(){
 		if ( pcntl_wifstopped($status) ) {
 			$signal_print=pcntl_wstopsig($status);
 			if ($signal_print==SIGSTOP) $signal_print="SIGSTOP";
-			print "\nProcess was stoped by signal : ". $signal_print;
+			print "\nProcess was stopped by signal : ". $signal_print;
 		}
 		posix_kill($pid, SIGCONT);
 	}
@@ -82,4 +82,4 @@ Testing pcntl_wifsignaled....
 Process was terminated by signal : SIGTERM
 
 Testing pcntl_wifstopped and pcntl_wstopsig....
-Process was stoped by signal : SIGSTOP
+Process was stopped by signal : SIGSTOP

@@ -1,5 +1,5 @@
 --TEST--
-Type group use declarations should not allow override on inner itens
+Type group use declarations should not allow override on inner items
 --FILE--
 <?php
 

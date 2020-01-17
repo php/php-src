@@ -34,7 +34,7 @@ array(3) {
   }
 }
 
-Warning: mb_ereg(): empty pattern in %s on line %d
+Warning: mb_ereg(): Empty pattern in %s on line %d
 bool(false)
 array(3) {
   [0]=>

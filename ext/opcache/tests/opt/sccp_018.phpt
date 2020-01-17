@@ -1,5 +1,5 @@
 --TEST--
-SCCP 018: Object assignemnt
+SCCP 018: Object assignment
 --INI--
 opcache.enable=1
 opcache.enable_cli=1

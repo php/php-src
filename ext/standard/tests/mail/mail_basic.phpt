@@ -1,13 +1,8 @@
 --TEST--
 Test mail() function : basic functionality
 --INI--
-sendmail_path=tee mailBasic.out >/dev/null
+sendmail_path={MAIL:mailBasic.out}
 mail.add_x_header = Off
---SKIPIF--
-<?php
-if(substr(PHP_OS, 0, 3) == "WIN")
-  die("skip Won't run on Windows");
-?>
 --FILE--
 <?php
 /* Prototype  : int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])

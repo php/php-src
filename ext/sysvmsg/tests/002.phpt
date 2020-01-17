@@ -1,7 +1,7 @@
 --TEST--
 msg_receive() should return false when unserialize() failed
 --SKIPIF--
-<?php if (!extension_loaded("sysvmsg")) die("skip sysvmsg extenions is not available")?>
+<?php if (!extension_loaded("sysvmsg")) die("skip sysvmsg extensions is not available")?>
 --FILE--
 <?php
 
@@ -18,6 +18,6 @@ if (!msg_remove_queue($queue)) {
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: msg_receive(): message corrupted in %s002.php on line %d
+Warning: msg_receive(): Message corrupted in %s002.php on line %d
 bool(false)
 Done

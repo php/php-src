@@ -40,7 +40,7 @@ require_once('skipifconnectfailure.inc');
 
 	// set after client error
 	if ('' === ($tmp = mysqli_stmt_error($stmt)))
-		printf("[010] Execting string/any non empty, got %s/%s\n", gettype($tmp), $tmp);
+		printf("[010] Expecting string/any non empty, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_stmt_close($stmt);
 

@@ -24,7 +24,7 @@ try {
 --EXPECTF--
 MY_METADATA_NULL
 
-Warning: file_get_contents(phar://%s): failed to open stream: phar error: "test.php" is not a file in phar "%s.phar" in %s.php on line %d
+Warning: file_get_contents(phar://%s): Failed to open stream: phar error: "test.php" is not a file in phar "%s.phar" in %s.php on line %d
 array(1) {
   ["whatever"]=>
   int(123)

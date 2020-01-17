@@ -2160,13 +2160,11 @@ static int zend_jit_hybrid_profile_jit_stub(dasm_State **Dst)
 #if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
 	|	mov r2, aword [r2]
 #elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
-	|	xor r1, r1
 	|	test r2, 1
 	|	jz >1
-	|	MEM_OP2_2_ZTS mov, r1, aword, compiler_globals, map_ptr_base, r1
-	|	sub r1, 1
+	|	MEM_OP2_2_ZTS add, r2, aword, compiler_globals, map_ptr_base, r1
 	|1:
-	|	mov	r2, aword [r1 + r2]
+	|	mov	r2, aword [r2]
 #else
 # error "Unknown ZEND_MAP_PTR_KIND"
 #endif
@@ -6872,7 +6870,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		/* Reuse reserved arguments stack */
 		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R4, 0x20);
 #else
-		/* CPU stack alocated temorary zval */
+		/* CPU stack alocated temporary zval */
 		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R4, 8);
 #endif
 	}
@@ -7010,13 +7008,11 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 #if ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR
 				|	mov r2, aword [r2]
 #elif ZEND_MAP_PTR_KIND == ZEND_MAP_PTR_KIND_PTR_OR_OFFSET
-				|	xor r1, r1
 				|	test r2, 1
 				|	jz >1
-				|	MEM_OP2_2_ZTS mov, r1, aword, compiler_globals, map_ptr_base, r1
-				|	sub r1, 1
+				|	MEM_OP2_2_ZTS add, r2, aword, compiler_globals, map_ptr_base, r1
 				|1:
-				|	mov	r2, aword [r1 + r2]
+				|	mov	r2, aword [r2]
 #else
 # error "Unknown ZEND_MAP_PTR_KIND"
 #endif
@@ -7950,7 +7946,7 @@ static int zend_jit_free_compiled_variables(dasm_State **Dst, const zend_op *opl
 
 static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa)
 {
-	// Avoid multiple leave sequnces
+	// Avoid multiple leave sequences
 	if (jit_return_label >= 0) {
 		| jmp =>jit_return_label
 		return 1;
@@ -8851,7 +8847,7 @@ static uint32_t zend_get_known_property_offset(zend_class_entry *ce, zend_string
 
 	if (ce->ce_flags & ZEND_ACC_INHERITED) {
 		if (!ce->parent) {
-			/* property offests may be changed by inheritance */
+			/* property offets may be changed by inheritance */
 			return ZEND_WRONG_PROPERTY_OFFSET;
 		} else {
 			zend_class_entry *parent = ce->parent;
@@ -8862,7 +8858,7 @@ static uint32_t zend_get_known_property_offset(zend_class_entry *ce, zend_string
 				} else if (parent->info.user.filename != filename) {
 					/* some of parents class declarations might be changed infdependently */
 					/* TODO: this check may be not enough, because even
-					 * in the same it's possible to conditionnaly define
+					 * in the same it's possible to conditionally define
 					 * few classes with the same name, and "parent" may
 					 * change from request to request.
 					 */

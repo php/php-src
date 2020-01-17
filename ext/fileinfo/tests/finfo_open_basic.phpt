@@ -24,7 +24,7 @@ var_dump( finfo_open( FILEINFO_CONTINUE, $magicFile ) );
 var_dump( finfo_open( FILEINFO_PRESERVE_ATIME, $magicFile ) );
 var_dump( finfo_open( FILEINFO_RAW, $magicFile ) );
 
-// OO inteface to finfo
+// OO interface to finfo
 var_dump( new finfo( FILEINFO_MIME, $magicFile ) );
 var_dump( new finfo() );
 

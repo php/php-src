@@ -131,13 +131,12 @@ typedef struct {
 } zend_type;
 
 typedef struct {
-	size_t num_types;
-	void *types[1];
+	uint32_t num_types;
+	zend_type types[1];
 } zend_type_list;
 
 #define _ZEND_TYPE_EXTRA_FLAGS_SHIFT 24
 #define _ZEND_TYPE_MASK ((1u << 24) - 1)
-#define _ZEND_TYPE_MAY_BE_MASK ((1u << (IS_VOID+1)) - 1)
 /* Only one of these bits may be set. */
 #define _ZEND_TYPE_NAME_BIT (1u << 23)
 #define _ZEND_TYPE_CE_BIT   (1u << 22)
@@ -145,6 +144,8 @@ typedef struct {
 #define _ZEND_TYPE_KIND_MASK (_ZEND_TYPE_LIST_BIT|_ZEND_TYPE_CE_BIT|_ZEND_TYPE_NAME_BIT)
 /* Whether the type list is arena allocated */
 #define _ZEND_TYPE_ARENA_BIT (1u << 20)
+/* Type mask excluding the flags above. */
+#define _ZEND_TYPE_MAY_BE_MASK ((1u << 20) - 1)
 /* Must have same value as MAY_BE_NULL */
 #define _ZEND_TYPE_NULLABLE_BIT 0x2
 
@@ -181,43 +182,37 @@ typedef struct {
 #define ZEND_TYPE_LIST(t) \
 	((zend_type_list *) (t).ptr)
 
-/* Type lists use the low bit to distinguish NAME and CE entries,
- * both of which may exist in the same list. */
-#define ZEND_TYPE_LIST_IS_CE(entry) \
-	(((uintptr_t) (entry)) & 1)
-
-#define ZEND_TYPE_LIST_IS_NAME(entry) \
-	!ZEND_TYPE_LIST_IS_CE(entry)
-
-#define ZEND_TYPE_LIST_GET_NAME(entry) \
-	((zend_string *) (entry))
-
-#define ZEND_TYPE_LIST_GET_CE(entry) \
-	((zend_class_entry *) ((uintptr_t) (entry) & ~1))
-
-#define ZEND_TYPE_LIST_ENCODE_NAME(name) \
-	((void *) (name))
-
-#define ZEND_TYPE_LIST_ENCODE_CE(ce) \
-	((void *) (((uintptr_t) ce) | 1))
-
 #define ZEND_TYPE_LIST_SIZE(num_types) \
-	(sizeof(zend_type_list) + ((num_types) - 1) * sizeof(void *))
+	(sizeof(zend_type_list) + ((num_types) - 1) * sizeof(zend_type))
 
-#define ZEND_TYPE_LIST_FOREACH_PTR(list, entry_ptr) do { \
-	void **_list = (list)->types; \
-	void **_end = _list + (list)->num_types; \
+/* This iterates over a zend_type_list. */
+#define ZEND_TYPE_LIST_FOREACH(list, type_ptr) do { \
+	zend_type *_list = (list)->types; \
+	zend_type *_end = _list + (list)->num_types; \
 	for (; _list < _end; _list++) { \
-		entry_ptr = _list;
-
-#define ZEND_TYPE_LIST_FOREACH(list, entry) do { \
-	void **_list = (list)->types; \
-	void **_end = _list + (list)->num_types; \
-	for (; _list < _end; _list++) { \
-		entry = *_list;
+		type_ptr = _list;
 
 #define ZEND_TYPE_LIST_FOREACH_END() \
 	} \
+} while (0)
+
+/* This iterates over any zend_type. If it's a type list, all list elements will
+ * be visited. If it's a single type, only the single type is visited. */
+#define ZEND_TYPE_FOREACH(type, type_ptr) do { \
+	zend_type *_cur, *_end; \
+	if (ZEND_TYPE_HAS_LIST(type)) { \
+		zend_type_list *_list = ZEND_TYPE_LIST(type); \
+		_cur = _list->types; \
+		_end = _cur + _list->num_types; \
+	} else { \
+		_cur = &(type); \
+		_end = _cur + 1; \
+	} \
+	do { \
+		type_ptr = _cur;
+
+#define ZEND_TYPE_FOREACH_END() \
+	} while (++_cur < _end); \
 } while (0)
 
 #define ZEND_TYPE_SET_PTR(t, _ptr) \
@@ -533,20 +528,21 @@ struct _zend_ast_ref {
 #define IS_REFERENCE				10
 #define IS_CONSTANT_AST				11 /* Constant expressions */
 
-/* Fake types used only for type hinting. IS_VOID should be the last. */
+/* Fake types used only for type hinting.
+ * These are allowed to overlap with the types below. */
 #define IS_CALLABLE					12
 #define IS_ITERABLE					13
 #define IS_VOID						14
 
 /* internal types */
-#define IS_INDIRECT             	15
-#define IS_PTR						16
-#define IS_ALIAS_PTR				17
-#define _IS_ERROR					17
+#define IS_INDIRECT             	12
+#define IS_PTR						13
+#define IS_ALIAS_PTR				14
+#define _IS_ERROR					15
 
 /* used for casts */
-#define _IS_BOOL					18
-#define _IS_NUMBER					19
+#define _IS_BOOL					16
+#define _IS_NUMBER					17
 
 static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
@@ -656,7 +652,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 /* zval_gc_flags(zval.value->gc.u.type_info) (common flags) */
 #define GC_COLLECTABLE				(1<<4)
 #define GC_PROTECTED                (1<<5) /* used for recursion detection */
-#define GC_IMMUTABLE                (1<<6) /* can't be canged in place */
+#define GC_IMMUTABLE                (1<<6) /* can't be changed in place */
 #define GC_PERSISTENT               (1<<7) /* allocated using malloc */
 #define GC_PERSISTENT_LOCAL         (1<<8) /* persistent, but thread-local */
 

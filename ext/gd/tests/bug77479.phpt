@@ -14,7 +14,7 @@ imagecolorallocate($im, 0, 0, 0);
 imagewbmp($im, __DIR__ . '/77479.wbmp');
 ?>
 --EXPECTF--
-Warning: imagewbmp():%S product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
+Warning: imagewbmp():%S Product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
  in %s on line %d
 
 Warning: imagewbmp(): Could not create WBMP in %s on line %d

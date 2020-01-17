@@ -144,7 +144,7 @@ function print_success() {
 
 	printf('%1$sSuccess. The extension is now ready to be compiled. To do so, use the%s', PHP_EOL);
 	printf('following steps:%1$s%1$s', PHP_EOL);
-	printf('cd /path/to/php-src/%s%s', $options['ext'], PHP_EOL);
+	printf('cd /path/to/php-src/ext/%s%s', $options['ext'], PHP_EOL);
 	printf('phpize%s', PHP_EOL);
 	printf('%sconfigure%s', $file_prefix, PHP_EOL);
 	printf('%smake%2$s%2$s', $make_prefix, PHP_EOL);
@@ -330,7 +330,7 @@ function copy_sources() {
 
 	$files = [
 			'skeleton.c'		=> $options['ext'] . '.c',
-			'skeleton.stub'		=> $options['ext'] . '.stub.php',
+			'skeleton.stub.php'	=> $options['ext'] . '.stub.php',
 			'php_skeleton.h'	=> 'php_' . $options['ext'] . '.h'
 			];
 

@@ -40,7 +40,7 @@ require_once('skipifconnectfailure.inc');
 
 	// set after client error
 	if (0 === ($tmp = mysqli_stmt_errno($stmt)))
-		printf("[010] Execting int/any non zero, got %s/%s\n", gettype($tmp), $tmp);
+		printf("[010] Expecting int/any non zero, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_stmt_close($stmt);
 

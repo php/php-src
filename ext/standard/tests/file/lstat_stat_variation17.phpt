@@ -27,7 +27,7 @@ $dirname = "$file_path/lstat_stat_variation17";
 mkdir($dirname);
 
 $old_stat = stat($dirname);
-sleep(2);
+sleep(1);
 var_dump( chmod($dirname, 0777) );
 // clear the stat
 clearstatcache();

@@ -2110,11 +2110,6 @@ PHP_FUNCTION(mb_strpos)
 		}
 	}
 
-	if (needle.len == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty delimiter");
-		RETURN_FALSE;
-	}
-
 	n = mbfl_strpos(&haystack, &needle, offset, reverse);
 	if (!mbfl_is_error(n)) {
 		RETVAL_LONG(n);
@@ -2189,11 +2184,6 @@ PHP_FUNCTION(mb_stripos)
 		RETURN_THROWS();
 	}
 
-	if (needle.len == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty delimiter");
-		RETURN_FALSE;
-	}
-
 	n = php_mb_stripos(0, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, offset, from_encoding);
 
 	if (!mbfl_is_error(n)) {
@@ -2243,11 +2233,6 @@ PHP_FUNCTION(mb_strstr)
 	haystack.no_language = needle.no_language = MBSTRG(language);
 	haystack.encoding = needle.encoding = php_mb_get_encoding(enc_name);
 	if (!haystack.encoding) {
-		RETURN_FALSE;
-	}
-
-	if (needle.len == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty delimiter");
 		RETURN_FALSE;
 	}
 
@@ -2347,11 +2332,6 @@ PHP_FUNCTION(mb_stristr)
 	haystack.no_language = needle.no_language = MBSTRG(language);
 	haystack.encoding = needle.encoding = php_mb_get_encoding(from_encoding);
 	if (!haystack.encoding) {
-		RETURN_FALSE;
-	}
-
-	if (!needle.len) {
-		php_error_docref(NULL, E_WARNING, "Empty delimiter");
 		RETURN_FALSE;
 	}
 
@@ -4846,10 +4826,6 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 		needle.len = len;
 
 		if (!needle.val) {
-			break;
-		}
-
-		if (needle.len == 0) {
 			break;
 		}
 

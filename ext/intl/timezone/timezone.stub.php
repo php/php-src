@@ -31,7 +31,7 @@ class IntlTimeZone
     /** @return string|false */
     public function getDisplayName(bool $isDaylight = false, int $style = IntlTimeZone::DISPLAY_LONG, ?string $locale = null) {}
 
-    /** @return int|false */
+    /** @return int */
     public function getDSTSavings() {}
 
     /** @return string|false */
@@ -52,7 +52,7 @@ class IntlTimeZone
     /** @return bool */
     public function getOffset(float $date, bool $local, &$rawOffset, &$dstOffset) {}
 
-    /** @return int|false */
+    /** @return int */
     public function getRawOffset() {}
 
     /** @return string|false */
@@ -101,7 +101,7 @@ function intltz_get_canonical_id(string $zoneId, &$isSystemID = null): string|fa
 
 function intltz_get_display_name(IntlTimeZone $tz, bool $isDaylight = false, int $style = IntlTimeZone::DISPLAY_LONG, ?string $locale = null): string|false {}
 
-function intltz_get_dst_savings(IntlTimeZone $tz): int|false {}
+function intltz_get_dst_savings(IntlTimeZone $tz): int {}
 
 function intltz_get_equivalent_id(string $zoneId, int $index): string|false {}
 
@@ -115,7 +115,7 @@ function intltz_get_id(IntlTimeZone $tz): string|false {}
 
 function intltz_get_offset(IntlTimeZone $tz, float $date, bool $local, &$rawOffset, &$dstOffset): bool {}
 
-function intltz_get_raw_offset(IntlTimeZone $tz): int|false {}
+function intltz_get_raw_offset(IntlTimeZone $tz): int {}
 
 function intltz_get_region(string $zoneId): string|false {}
 

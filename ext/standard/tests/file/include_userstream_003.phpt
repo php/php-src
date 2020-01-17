@@ -98,26 +98,26 @@ Deprecated: Directive 'allow_url_include' is deprecated in Unknown on line 0
 
 Warning: file_get_contents(): test1:// wrapper is disabled in the server configuration by allow_url_fopen=0 in %sinclude_userstream_003.php on line 86
 
-Warning: file_get_contents(test1://hello): failed to open stream: no suitable wrapper could be found in %sinclude_userstream_003.php on line 86
+Warning: file_get_contents(test1://hello): Failed to open stream: no suitable wrapper could be found in %sinclude_userstream_003.php on line 86
 
 
 Warning: include(): test1:// wrapper is disabled in the server configuration by allow_url_fopen=0 in %sinclude_userstream_003.php on line 87
 
-Warning: include(test1://hello): failed to open stream: no suitable wrapper could be found in %sinclude_userstream_003.php on line 87
+Warning: include(test1://hello): Failed to open stream: no suitable wrapper could be found in %sinclude_userstream_003.php on line 87
 
 Warning: include(): Failed opening 'test1://hello' for inclusion (include_path='%s') in %sinclude_userstream_003.php on line 87
 
 Warning: fopen(): test1:// wrapper is disabled in the server configuration by allow_url_fopen=0 in %sinclude_userstream_003.php on line 10
 
-Warning: fopen(test1://hello): failed to open stream: no suitable wrapper could be found in %sinclude_userstream_003.php on line 10
+Warning: fopen(test1://hello): Failed to open stream: no suitable wrapper could be found in %sinclude_userstream_003.php on line 10
 
-Warning: file_get_contents(test2://hello): failed to open stream: "test::stream_open" call failed in %sinclude_userstream_003.php on line 88
+Warning: file_get_contents(test2://hello): Failed to open stream: "test::stream_open" call failed in %sinclude_userstream_003.php on line 88
 
 
 Warning: fopen(): test1:// wrapper is disabled in the server configuration by allow_url_fopen=0 in %sinclude_userstream_003.php on line 10
 
-Warning: fopen(test1://hello): failed to open stream: no suitable wrapper could be found in %sinclude_userstream_003.php on line 10
+Warning: fopen(test1://hello): Failed to open stream: no suitable wrapper could be found in %sinclude_userstream_003.php on line 10
 
-Warning: include(test2://hello): failed to open stream: "test::stream_open" call failed in %sinclude_userstream_003.php on line 89
+Warning: include(test2://hello): Failed to open stream: "test::stream_open" call failed in %sinclude_userstream_003.php on line 89
 
 Warning: include(): Failed opening 'test2://hello' for inclusion (include_path='%s') in %sinclude_userstream_003.php on line 89

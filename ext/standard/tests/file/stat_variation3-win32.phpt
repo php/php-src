@@ -30,7 +30,7 @@ echo "-- Testing stat() on dir after subdir and file is created in it --\n";
 $dirname = "$file_path/stat_variation3";
 $old_stat = stat($dirname);
 clearstatcache();
-sleep(2);
+sleep(1);
 mkdir("$dirname/stat_variation3_subdir");
 $file_handle = fopen("$dirname/stat_variation3a.tmp", "w");
 fclose($file_handle);

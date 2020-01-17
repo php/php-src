@@ -5,7 +5,7 @@ Bug #55701 (GlobIterator throws LogicException with message 'The parent construc
 
 //
 // Some methods of GlobIterator do not throw a RuntimeException when the glob pattern doesn't match any file.
-// Most methods of GlobIterator throw a RuntimeException when the glob pattern does't match any file
+// Most methods of GlobIterator throw a RuntimeException when the glob pattern doesn't match any file
 // because they get the properties of the current file
 function testBaseClass($f) {
     // The tested iterator is in an invalid state; the behaviour of most of its methods is undefined

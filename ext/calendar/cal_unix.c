@@ -35,7 +35,7 @@ PHP_FUNCTION(unixtojd)
 	if (!ts) {
 		ts = time(NULL);
 	} else if (ts < 0) {
-		zend_value_error("timestamp must not be negative");
+		zend_value_error("Timestamp must not be negative");
 		RETURN_THROWS();
 	}
 

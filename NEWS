@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Removed the pdo_odbc.db2_instance_name php.ini directive. (Kalle)
   . Fixed bug #77619 (Wrong reflection on MultipleIterator::__construct).
     (Fabien Villepinte)
+  . Fixed bug #65274 (Enhance undefined class constant error with class name).
+    (Nikita)
+  . Fixed bug #49555 (Fatal error "Function must be a string" message should be
+    renamed). (Nikita)
 
 - Date:
   . Fixed bug #65547 (Default value for sunrise/sunset zenith still wrong).
@@ -22,6 +26,7 @@ PHP                                                                        NEWS
   . Made the $num_points parameter of php_imagepolygon optional. (cmb)
   . Removed deprecated image2wbmp(). (cmb)
   . Removed deprecated png2wbmp() and jpeg2wbmp(). (cmb)
+  . Added imagegetinterpolation(). (cmb)
 
 - Intl:
   . Removed deprecated INTL_IDNA_VARIANT_2003. (cmb)
@@ -88,6 +93,8 @@ PHP                                                                        NEWS
     (peter279k)
   . Fixed bug #76859 (stream_get_line skips data if used with data-generating
     filter). (kkopachev)
+  . Fixed bug #78385 (parse_url() does not include 'query' when question mark
+    is the last char). (Islam Israfilov)
 
 - tidy:
   . Removed the unused $use_include_path parameter from tidy_repair_string().

@@ -21,6 +21,6 @@ unlink($fn);
 
 ?>
 --EXPECTF--
-Warning: imap_append(): internal date not correctly formatted in %s on line %d
+Warning: imap_append(): Internal date not correctly formatted in %s on line %d
 
-Exception: imap_append(): supplied resource is not a valid imap resource
+Exception: imap_append(): Supplied resource is not a valid imap resource

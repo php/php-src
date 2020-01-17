@@ -941,18 +941,18 @@ static zend_bool zend_check_and_resolve_property_class_type(
 		zend_property_info *info, zend_class_entry *object_ce) {
 	zend_class_entry *ce;
 	if (ZEND_TYPE_HAS_LIST(info->type)) {
-		void **entry;
-		ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(info->type), entry) {
-			if (ZEND_TYPE_LIST_IS_NAME(*entry)) {
-				zend_string *name = ZEND_TYPE_LIST_GET_NAME(*entry);
+		zend_type *list_type;
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(info->type), list_type) {
+			if (ZEND_TYPE_HAS_NAME(*list_type)) {
+				zend_string *name = ZEND_TYPE_NAME(*list_type);
 				ce = resolve_single_class_type(name, info->ce);
 				if (!ce) {
 					continue;
 				}
 				zend_string_release(name);
-				*entry = ZEND_TYPE_LIST_ENCODE_CE(ce);
+				ZEND_TYPE_SET_CE(*list_type, ce);
 			} else {
-				ce = ZEND_TYPE_LIST_GET_CE(*entry);
+				ce = ZEND_TYPE_CE(*list_type);
 			}
 			if (instanceof_function(object_ce, ce)) {
 				return 1;
@@ -1032,12 +1032,12 @@ static zend_always_inline zend_bool zend_check_type_slow(
 	if (ZEND_TYPE_HAS_CLASS(type) && Z_TYPE_P(arg) == IS_OBJECT) {
 		zend_class_entry *ce;
 		if (ZEND_TYPE_HAS_LIST(type)) {
-			void *entry;
-			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), entry) {
+			zend_type *list_type;
+			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
 				if (*cache_slot) {
 					ce = *cache_slot;
 				} else {
-					ce = zend_fetch_class(ZEND_TYPE_LIST_GET_NAME(entry),
+					ce = zend_fetch_class(ZEND_TYPE_NAME(*list_type),
 						(ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 					if (!ce) {
 						cache_slot++;
@@ -1597,14 +1597,18 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		string_len = Z_STRLEN_P(value);
 		c = (zend_uchar)Z_STRVAL_P(value)[0];
 	}
-
-	if (string_len == 0) {
-		/* Error on empty input string */
-		zend_error(E_WARNING, "Cannot assign an empty string to a string offset");
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
+	
+	if (string_len != 1) {
+		if (string_len == 0) {
+			/* Error on empty input string */
+			zend_throw_error(NULL, "Cannot assign an empty string to a string offset");
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
+			}
+			return;
 		}
-		return;
+
+		zend_error(E_WARNING, "Only the first byte will be assigned to the string offset");
 	}
 
 	if (offset < 0) { /* Handle negative offset */
@@ -4032,7 +4036,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zend_o
 			object_or_called_scope = object;
 		}
 	} else {
-		zend_throw_error(NULL, "Function name must be a string");
+		zend_throw_error(NULL, "Object of type %s is not callable", ZSTR_VAL(function->ce->name));
 		return NULL;
 	}
 
@@ -4117,7 +4121,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 			}
 		}
 	} else {
-		zend_throw_error(NULL, "Function name must be a string");
+		zend_throw_error(NULL, "Array callback must have exactly two elements");
 		return NULL;
 	}
 
@@ -4297,6 +4301,10 @@ static zend_always_inline int _zend_quick_get_constant(
 
 	if (!check_defined_only) {
 		ZVAL_COPY_OR_DUP(EX_VAR(opline->result.var), &c->value);
+		if (ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED) {
+			zend_error(E_DEPRECATED, "Constant %s is deprecated", ZSTR_VAL(c->name));
+			return SUCCESS;
+		}
 	}
 
 	CACHE_PTR(opline->extended_value, c);

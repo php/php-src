@@ -33,7 +33,7 @@ echo "*** Testing stat() on file by truncating it to given size ***\n";
 $old_stat = stat($filename);
 // clear the cache
 clearstatcache();
-sleep(2);
+sleep(1);
 // opening file in r/w mode
 $file_handle = fopen($filename, "r+");
 var_dump( ftruncate($file_handle, 512) );  // truncate it

@@ -241,7 +241,7 @@ PHP_FUNCTION(msg_get_queue)
 		/* doesn't already exist; create it */
 		mq->id = msgget(key, IPC_CREAT | IPC_EXCL | perms);
 		if (mq->id < 0)	{
-			php_error_docref(NULL, E_WARNING, "failed for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
+			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", key, strerror(errno));
 			efree(mq);
 			RETURN_FALSE;
 		}
@@ -294,7 +294,7 @@ PHP_FUNCTION(msg_receive)
 	}
 
 	if (maxsize <= 0) {
-		php_error_docref(NULL, E_WARNING, "maximum size of the message has to be greater than zero");
+		php_error_docref(NULL, E_WARNING, "Maximum size of the message has to be greater than zero");
 		return;
 	}
 
@@ -338,7 +338,7 @@ PHP_FUNCTION(msg_receive)
 
 			PHP_VAR_UNSERIALIZE_INIT(var_hash);
 			if (!php_var_unserialize(&tmp, &p, p + result, &var_hash)) {
-				php_error_docref(NULL, E_WARNING, "message corrupted");
+				php_error_docref(NULL, E_WARNING, "Message corrupted");
 				ZEND_TRY_ASSIGN_REF_FALSE(out_message);
 				RETVAL_FALSE;
 			} else {

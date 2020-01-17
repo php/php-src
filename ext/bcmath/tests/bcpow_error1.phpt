@@ -9,5 +9,5 @@ if (!extension_loaded('bcmath')) die('skip bcmath extension is not available');
 var_dump(bcpow('1', '1.1', 2));
 ?>
 --EXPECTF--
-Warning: bcpow(): non-zero scale in exponent in %s on line %d
+Warning: bcpow(): Non-zero scale in exponent in %s on line %d
 string(4) "1.00"

@@ -31,8 +31,8 @@ try {
 }
 ?>
 --EXPECTF--
-Exception: IntlDateFormatter::__construct(): datefmt_create: no such time zone: 'bad timezone' in %s on line %d
+Exception: IntlDateFormatter::__construct(): datefmt_create: No such time zone: 'bad timezone' in %s on line %d
 
-Exception: IntlDateFormatter::__construct(): datefmt_create: invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN. Alternatively, it can be an IntlCalendar object in %s on line %d
+Exception: IntlDateFormatter::__construct(): datefmt_create: Invalid value for calendar type; it must be one of IntlDateFormatter::TRADITIONAL (locale's default calendar) or IntlDateFormatter::GREGORIAN. Alternatively, it can be an IntlCalendar object in %s on line %d
 
 Exception: IntlDateFormatter::__construct(): datefmt_create: Invalid calendar argument; should be an integer or an IntlCalendar instance in %s on line %d

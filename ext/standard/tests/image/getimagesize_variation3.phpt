@@ -49,10 +49,10 @@ array(0) {
 
 -- Non-existent file (nofile.ext) --
 
-Warning: getimagesize(%snofile.ext): failed to open stream: No such file or directory in %s on line %d
+Warning: getimagesize(%snofile.ext): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
-Warning: getimagesize(%snofile.ext): failed to open stream: No such file or directory in %s on line %d
+Warning: getimagesize(%snofile.ext): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 array(0) {
 }

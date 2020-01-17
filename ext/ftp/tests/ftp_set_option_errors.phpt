@@ -1,5 +1,5 @@
 --TEST--
-Testing ftp_set_option erros while setting up
+Testing ftp_set_option errors while setting up
 --CREDITS--
 Gabriel Caruso (carusogabriel34@gmail.com)
 --SKIPIF--

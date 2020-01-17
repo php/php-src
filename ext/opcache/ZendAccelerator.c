@@ -602,16 +602,13 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 				num_args++;
 			}
 			for (i = 0 ; i < num_args; i++) {
-				if (ZEND_TYPE_HAS_LIST(arg_info[i].type)) {
-					void **entry;
-					ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(arg_info[i].type), entry) {
-						ZEND_ASSERT(ZEND_TYPE_LIST_IS_NAME(*entry));
-						*entry = zend_new_interned_string(ZEND_TYPE_LIST_GET_NAME(*entry));
-					} ZEND_TYPE_LIST_FOREACH_END();
-				} else if (ZEND_TYPE_HAS_NAME(arg_info[i].type)) {
-					ZEND_TYPE_SET_PTR(arg_info[i].type,
-						new_interned_string(ZEND_TYPE_NAME(arg_info[i].type)));
-				}
+				zend_type *single_type;
+				ZEND_TYPE_FOREACH(arg_info[i].type, single_type) {
+					if (ZEND_TYPE_HAS_NAME(*single_type)) {
+						ZEND_TYPE_SET_PTR(*single_type,
+							new_interned_string(ZEND_TYPE_NAME(*single_type)));
+					}
+				} ZEND_TYPE_FOREACH_END();
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -3133,7 +3130,7 @@ void accel_shutdown(void)
 #endif
 
 	if (!_file_cache_only) {
-		/* Delay SHM dettach */
+		/* Delay SHM detach */
 		orig_post_shutdown_cb = zend_post_shutdown_cb;
 		zend_post_shutdown_cb = accel_post_shutdown;
 	}
@@ -3462,13 +3459,6 @@ static void get_unlinked_dependency(zend_class_entry *ce, const char **kind, con
 			*name = ZSTR_VAL(ce->parent_name);
 			return;
 		}
-#ifdef ZEND_WIN32
-		if (p->type == ZEND_INTERNAL_CLASS) {
-			*kind = "Windows can't link to internal parent ";
-			*name = ZSTR_VAL(ce->parent_name);
-			return;
-		}
-#endif
 		if (!(p->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 			*kind = "Parent with unresolved initializers ";
 			*name = ZSTR_VAL(ce->parent_name);
@@ -3576,12 +3566,6 @@ static zend_class_entry *preload_fetch_resolved_ce(zend_string *name, zend_class
 		/* Ignore the following requirements if this is the class referring to itself */
 		return ce;
 	}
-#ifdef ZEND_WIN32
-	/* On Windows we can't link with internal class, because of ASLR */
-	if (ce->type == ZEND_INTERNAL_CLASS) {
-		return NULL;
-	}
-#endif
 	if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 		return NULL;
 	}
@@ -3594,31 +3578,18 @@ static zend_class_entry *preload_fetch_resolved_ce(zend_string *name, zend_class
 static zend_bool preload_try_resolve_property_types(zend_class_entry *ce)
 {
 	zend_bool ok = 1;
-	zend_property_info *prop;
-	zend_class_entry *p;
-
 	if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+		zend_property_info *prop;
 		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-			if (ZEND_TYPE_HAS_LIST(prop->type)) {
-				void **entry;
-				ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(prop->type), entry) {
-					if (ZEND_TYPE_LIST_IS_NAME(*entry)) {
-						p = preload_fetch_resolved_ce(ZEND_TYPE_LIST_GET_NAME(*entry), ce);
-						if (!p) {
-							ok = 0;
-							continue;
-						}
-						*entry = ZEND_TYPE_LIST_ENCODE_CE(p);
-					}
-				} ZEND_TYPE_LIST_FOREACH_END();
-			} else if (ZEND_TYPE_HAS_NAME(prop->type)) {
-				p = preload_fetch_resolved_ce(ZEND_TYPE_NAME(prop->type), ce);
+			zend_type *single_type;
+			ZEND_TYPE_FOREACH(prop->type, single_type) {
+				zend_class_entry *p = preload_fetch_resolved_ce(ZEND_TYPE_NAME(*single_type), ce);
 				if (!p) {
 					ok = 0;
 					continue;
 				}
-				ZEND_TYPE_SET_CE(prop->type, p);
-			}
+				ZEND_TYPE_SET_CE(*single_type, p);
+			} ZEND_TYPE_FOREACH_END();
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -3638,19 +3609,15 @@ static zend_bool preload_is_class_type_known(zend_class_entry *ce, zend_string *
 	return known;
 }
 
-static zend_bool preload_is_type_known(zend_class_entry *ce, zend_type type) {
-	if (ZEND_TYPE_HAS_LIST(type)) {
-		void *entry;
-		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), entry) {
-			if (ZEND_TYPE_LIST_IS_NAME(entry)
-					&& !preload_is_class_type_known(ce, ZEND_TYPE_LIST_GET_NAME(entry))) {
+static zend_bool preload_is_type_known(zend_class_entry *ce, zend_type *type) {
+	zend_type *single_type;
+	ZEND_TYPE_FOREACH(*type, single_type) {
+		if (ZEND_TYPE_HAS_NAME(*single_type)) {
+			if (!preload_is_class_type_known(ce, ZEND_TYPE_NAME(*single_type))) {
 				return 0;
 			}
-		} ZEND_TYPE_LIST_FOREACH_END();
-	}
-	if (ZEND_TYPE_HAS_NAME(type)) {
-		return preload_is_class_type_known(ce, ZEND_TYPE_NAME(type));
-	}
+		}
+	} ZEND_TYPE_FOREACH_END();
 	return 1;
 }
 
@@ -3698,13 +3665,13 @@ static zend_bool preload_needed_types_known(zend_class_entry *ce) {
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, lcname, fptr) {
 		uint32_t i;
 		if (fptr->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-			if (!preload_is_type_known(ce, fptr->common.arg_info[-1].type) &&
+			if (!preload_is_type_known(ce, &fptr->common.arg_info[-1].type) &&
 				preload_is_method_maybe_override(ce, lcname)) {
 				return 0;
 			}
 		}
 		for (i = 0; i < fptr->common.num_args; i++) {
-			if (!preload_is_type_known(ce, fptr->common.arg_info[i].type) &&
+			if (!preload_is_type_known(ce, &fptr->common.arg_info[i].type) &&
 				preload_is_method_maybe_override(ce, lcname)) {
 				return 0;
 			}
@@ -3752,10 +3719,6 @@ static void preload_link(void)
 					parent = zend_hash_find_ptr(EG(class_table), key);
 					zend_string_release(key);
 					if (!parent) continue;
-#ifdef ZEND_WIN32
-					/* On Windows we can't link with internal class, because of ASLR */
-					if (parent->type == ZEND_INTERNAL_CLASS) continue;
-#endif
 					if (!(parent->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 						continue;
 					}
@@ -3772,13 +3735,6 @@ static void preload_link(void)
 							found = 0;
 							break;
 						}
-#ifdef ZEND_WIN32
-						/* On Windows we can't link with internal class, because of ASLR */
-						if (p->type == ZEND_INTERNAL_CLASS) {
-							found = 0;
-							break;
-						}
-#endif
 						if (!(p->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 							found = 0;
 							break;
@@ -3795,13 +3751,6 @@ static void preload_link(void)
 							found = 0;
 							break;
 						}
-#ifdef ZEND_WIN32
-						/* On Windows we can't link with internal class, because of ASLR */
-						if (p->type == ZEND_INTERNAL_CLASS) {
-							found = 0;
-							break;
-						}
-#endif
 					}
 					if (!found) continue;
 				}
@@ -3945,26 +3894,6 @@ static void preload_link(void)
 	} ZEND_HASH_FOREACH_END();
 }
 
-#ifdef ZEND_WIN32
-static void preload_check_windows_restriction(zend_class_entry *scope, zend_class_entry *ce) {
-	if (ce && ce->type == ZEND_INTERNAL_CLASS) {
-		zend_error_noreturn(E_ERROR,
-			"Class %s uses internal class %s during preloading, which is not supported on Windows",
-			ZSTR_VAL(scope->name), ZSTR_VAL(ce->name));
-	}
-}
-
-static void preload_check_windows_restrictions(zend_class_entry *scope) {
-	uint32_t i;
-
-	preload_check_windows_restriction(scope, scope->parent);
-
-	for (i = 0; i < scope->num_interfaces; i++) {
-		preload_check_windows_restriction(scope, scope->interfaces[i]);
-	}
-}
-#endif
-
 static inline int preload_update_class_constants(zend_class_entry *ce) {
 	/* This is a separate function to work around what appears to be a bug in GCC
 	 * maybe-uninitialized analysis. */
@@ -4017,10 +3946,6 @@ static void preload_ensure_classes_loadable() {
 				continue;
 			}
 
-#ifdef ZEND_WIN32
-			preload_check_windows_restrictions(ce);
-#endif
-
 			if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 				if (preload_update_class_constants(ce) == FAILURE) {
 					zend_error_noreturn(E_ERROR,
@@ -4034,20 +3959,14 @@ static void preload_ensure_classes_loadable() {
 				if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
 					zend_property_info *prop;
 					ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-						if (ZEND_TYPE_HAS_LIST(prop->type)) {
-							void **entry;
-							ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(prop->type), entry) {
-								if (ZEND_TYPE_LIST_IS_NAME(*entry)) {
-									zend_class_entry *ce = preload_load_prop_type(
-										prop, ZEND_TYPE_LIST_GET_NAME(*entry));
-									*entry = ZEND_TYPE_LIST_ENCODE_CE(ce);
-								}
-							} ZEND_TYPE_LIST_FOREACH_END();
-						} else if (ZEND_TYPE_HAS_NAME(prop->type)) {
-							zend_class_entry *ce =
-								preload_load_prop_type(prop, ZEND_TYPE_NAME(prop->type));
-							ZEND_TYPE_SET_CE(prop->type, ce);
-						}
+						zend_type *single_type;
+						ZEND_TYPE_FOREACH(prop->type, single_type) {
+							if (ZEND_TYPE_HAS_NAME(*single_type)) {
+								zend_class_entry *ce = preload_load_prop_type(
+									prop, ZEND_TYPE_NAME(*single_type));
+								ZEND_TYPE_SET_CE(*single_type, ce);
+							}
+						} ZEND_TYPE_FOREACH_END();
 					} ZEND_HASH_FOREACH_END();
 				}
 				ce->ce_flags |= ZEND_ACC_PROPERTY_TYPES_RESOLVED;
@@ -4357,7 +4276,7 @@ static void preload_load(void)
 	if (CG(map_ptr_last) != ZCSG(map_ptr_last)) {
 		CG(map_ptr_last) = ZCSG(map_ptr_last);
 		CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(CG(map_ptr_last) + 1, 4096);
-		CG(map_ptr_base) = perealloc(CG(map_ptr_base), CG(map_ptr_size) * sizeof(void*), 1);
+		ZEND_MAP_PTR_SET_REAL_BASE(CG(map_ptr_base), perealloc(ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base)), CG(map_ptr_size) * sizeof(void*), 1));
 	}
 }
 
@@ -4698,9 +4617,11 @@ static int accel_finish_startup(void)
 	}
 
 	if (ZCG(accel_directives).preload && *ZCG(accel_directives).preload) {
-#ifndef ZEND_WIN32
+#ifdef ZEND_WIN32
+		zend_accel_error(ACCEL_LOG_ERROR, "Preloading is not supported on Windows");
+		return FAILURE;
+#else
 		int in_child = 0;
-#endif
 		int ret = SUCCESS;
 		int rc;
 		int orig_error_reporting;
@@ -4734,7 +4655,6 @@ static int accel_finish_startup(void)
 			return SUCCESS;
 		}
 
-#ifndef ZEND_WIN32
 		if (geteuid() == 0) {
 			pid_t pid;
 			struct passwd *pw;
@@ -4798,7 +4718,6 @@ static int accel_finish_startup(void)
 				zend_accel_error(ACCEL_LOG_WARNING, "\"opcache.preload_user\" is ignored");
 			}
 		}
-#endif
 
 		sapi_module.activate = NULL;
 		sapi_module.deactivate = NULL;
@@ -4810,11 +4729,9 @@ static int accel_finish_startup(void)
 		sapi_module.ub_write = preload_ub_write;
 		sapi_module.flush = preload_flush;
 
-#ifndef ZEND_WIN32
 		if (in_child) {
 			CG(compiler_options) |= ZEND_COMPILE_PRELOAD_IN_CHILD;
 		}
-#endif
 		CG(compiler_options) |= ZEND_COMPILE_PRELOAD;
 		CG(compiler_options) |= ZEND_COMPILE_HANDLE_OP_ARRAY;
 		CG(compiler_options) |= ZEND_COMPILE_IGNORE_INTERNAL_CLASSES;
@@ -4889,7 +4806,6 @@ static int accel_finish_startup(void)
 
 		sapi_activate();
 
-#ifndef ZEND_WIN32
 		if (in_child) {
 			if (ret == SUCCESS) {
 				exit(0);
@@ -4897,9 +4813,9 @@ static int accel_finish_startup(void)
 				exit(2);
 			}
 		}
-#endif
 
 		return ret;
+#endif
 	}
 
 	return SUCCESS;

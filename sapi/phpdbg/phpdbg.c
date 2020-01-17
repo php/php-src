@@ -1073,7 +1073,7 @@ const char phpdbg_ini_hardcoded[] =
 "error_log=\n"
 "output_buffering=off\n\0";
 
-/* overwriteable ini defaults must be set in phpdbg_ini_defaults() */
+/* overwritable ini defaults must be set in phpdbg_ini_defaults() */
 #define INI_DEFAULT(name, value) \
 	ZVAL_NEW_STR(&tmp, zend_string_init(value, sizeof(value) - 1, 1)); \
 	zend_hash_str_update(configuration_hash, name, sizeof(name) - 1, &tmp);
@@ -1988,7 +1988,7 @@ phpdbg_interact:
 					if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
 
 						if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
-							/* renegociate connections */
+							/* renegotiate connections */
 							phpdbg_remote_init(address, listen, server, &socket, &stream);
 
 							/* set streams */

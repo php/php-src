@@ -19,7 +19,7 @@ $dir_handle = opendir( __DIR__ );
 //store resources in array for comparison.
 $resources = array($file_handle, $dir_handle);
 
-// search for resouce type in the resource array
+// search for resource type in the resource array
 var_dump( array_search($file_handle, $resources, true) );
 //checking for (int) type resource
 var_dump( array_search((int)$dir_handle, $resources, true) );

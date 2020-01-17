@@ -890,7 +890,7 @@ static int is_valid_path(const char *path)
 
   initializes request_info structure
 
-  specificly in this section we handle proper translations
+  specifically in this section we handle proper translations
   for:
 
   PATH_INFO
@@ -1908,7 +1908,7 @@ consult the installation file that came with this distribution, or visit \n\
 			}
 
 			/*
-			 * have to duplicate SG(request_info).path_translated to be able to log errrors
+			 * have to duplicate SG(request_info).path_translated to be able to log errors
 			 * php_fopen_primary_script seems to delete SG(request_info).path_translated on failure
 			 */
 			primary_script = estrdup(SG(request_info).path_translated);

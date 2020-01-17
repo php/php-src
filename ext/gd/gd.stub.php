@@ -232,6 +232,8 @@ function imageaffinematrixget(int $type, $options = UNKNOWN): array|false {}
 
 function imageaffinematrixconcat(array $m1, array $m2): array|false {}
 
+function imagegetinterpolation(GdImage $im): int {}
+
 function imagesetinterpolation(GdImage $im, int $method = IMG_BILENEAR_FIXED): bool {}
 
 function imageresolution(GdImage $im, int $res_x = UNKNOWN, int $res_y = UNKNOWN): array|bool {}

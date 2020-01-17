@@ -36,7 +36,7 @@ $old_dirname = "$file_path/stat_variation4";
 $old_stat = stat($old_dirname);
 // clear the cache
 clearstatcache();
-sleep(2);
+sleep(1);
 var_dump( is_dir($old_dirname) );
 $new_stat = stat($old_dirname);
 

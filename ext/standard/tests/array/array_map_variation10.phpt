@@ -8,7 +8,7 @@ Test array_map() function : usage variations - anonymous callback function
  */
 
 /*
- * Test array_map() by passing anoymous callback function with following variations
+ * Test array_map() by passing anonymous callback function with following variations
  */
 
 echo "*** Testing array_map() : anonymous callback function ***\n";

@@ -31,7 +31,7 @@ NULL
 bool(false)
 NULL
 
-Warning: openssl_private_decrypt(): key array must be of the form array(0 => key, 1 => phrase) in %s on line %d
+Warning: openssl_private_decrypt(): Key array must be of the form array(0 => key, 1 => phrase) in %s on line %d
 
 Warning: openssl_private_decrypt(): key parameter is not a valid private key in %s on line %d
 bool(false)

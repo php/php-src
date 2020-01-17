@@ -65,7 +65,7 @@ $link->close();
 		if (!$row = $res->fetch_assoc())
 			printf("[006] [%d] %s\n", $link->errno, $link->error);
 		if (!strlen($row["Value"]))
-			printf("[007] Empty cipher. No encrytion!");
+			printf("[007] Empty cipher. No encryption!");
 		var_dump($row);
 	}
 
@@ -95,7 +95,7 @@ $link->close();
 		if (!$row = $res->fetch_assoc())
 			printf("[012] [%d] %s\n", $link->errno, $link->error);
 		if (!strlen($row["Value"]))
-			printf("[013] Empty cipher. No encrytion!");
+			printf("[013] Empty cipher. No encryption!");
 		var_dump($row);
 	}
 

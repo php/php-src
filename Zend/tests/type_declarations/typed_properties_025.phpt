@@ -1,5 +1,5 @@
 --TEST--
-Test typed properties type must preceed first declaration in group
+Test typed properties type must precede first declaration in group
 --FILE--
 <?php
 class Foo {

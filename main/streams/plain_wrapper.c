@@ -231,7 +231,7 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 		}
 		close(fd);
 
-		php_error_docref(NULL, E_WARNING, "unable to allocate stream");
+		php_error_docref(NULL, E_WARNING, "Unable to allocate stream");
 
 		return NULL;
 	}
@@ -353,7 +353,7 @@ static ssize_t php_stdiop_write(php_stream *stream, const char *buf, size_t coun
 				/* TODO: Should this be treated as a proper error or not? */
 				return bytes_written;
 			}
-			php_error_docref(NULL, E_NOTICE, "write of %zu bytes failed with errno=%d %s", count, errno, strerror(errno));
+			php_error_docref(NULL, E_NOTICE, "Write of %zu bytes failed with errno=%d %s", count, errno, strerror(errno));
 		}
 		return bytes_written;
 	} else {
@@ -421,7 +421,7 @@ static ssize_t php_stdiop_read(php_stream *stream, char *buf, size_t count)
 			} else if (errno == EINTR) {
 				/* TODO: Should this be treated as a proper error or not? */
 			} else {
-				php_error_docref(NULL, E_NOTICE, "read of %zu bytes failed with errno=%d %s", count, errno, strerror(errno));
+				php_error_docref(NULL, E_NOTICE, "Read of %zu bytes failed with errno=%d %s", count, errno, strerror(errno));
 
 				/* TODO: Remove this special-case? */
 				if (errno != EBADF) {
@@ -536,7 +536,7 @@ static int php_stdiop_seek(php_stream *stream, zend_off_t offset, int whence, ze
 	assert(data != NULL);
 
 	if (!data->is_seekable) {
-		php_error_docref(NULL, E_WARNING, "cannot seek on this stream");
+		php_error_docref(NULL, E_WARNING, "Cannot seek on this stream");
 		return -1;
 	}
 
@@ -1293,7 +1293,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 	if (!recursive) {
 		ret = php_mkdir(dir, mode);
 	} else {
-		/* we look for directory separator from the end of string, thus hopefuly reducing our work load */
+		/* we look for directory separator from the end of string, thus hopefully reducing our work load */
 		char *e;
 		zend_stat_t sb;
 		size_t dir_len = strlen(dir), offset = 0;

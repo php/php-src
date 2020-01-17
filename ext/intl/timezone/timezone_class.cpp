@@ -195,7 +195,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 		}
 		timeZone = TimeZone::createTimeZone(id);
 		if (timeZone == NULL) {
-			spprintf(&message, 0, "%s: could not create time zone", func);
+			spprintf(&message, 0, "%s: Could not create time zone", func);
 			if (message) {
 				intl_errors_set(outside_error, U_MEMORY_ALLOCATION_ERROR, message, 1);
 				efree(message);
@@ -204,7 +204,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 			return NULL;
 		}
 		if (timeZone->getID(gottenId) != id) {
-			spprintf(&message, 0, "%s: no such time zone: '%s'",
+			spprintf(&message, 0, "%s: No such time zone: '%s'",
 				func, Z_STRVAL_P(zv_timezone));
 			if (message) {
 				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR, message, 1);

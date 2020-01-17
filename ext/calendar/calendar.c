@@ -217,7 +217,7 @@ PHP_FUNCTION(cal_info)
 
 
 	if (cal != -1 && (cal < 0 || cal >= CAL_NUM_CALS)) {
-		zend_value_error("invalid calendar ID " ZEND_LONG_FMT, cal);
+		zend_value_error("Invalid calendar ID: " ZEND_LONG_FMT, cal);
 		RETURN_THROWS();
 	}
 
@@ -239,7 +239,7 @@ PHP_FUNCTION(cal_days_in_month)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		zend_value_error("invalid calendar ID " ZEND_LONG_FMT, cal);
+		zend_value_error("Invalid calendar ID: " ZEND_LONG_FMT, cal);
 		RETURN_THROWS();
 	}
 
@@ -248,7 +248,7 @@ PHP_FUNCTION(cal_days_in_month)
 	sdn_start = calendar->to_jd(year, month, 1);
 
 	if (sdn_start == 0) {
-		zend_value_error("invalid date");
+		zend_value_error("Invalid date");
 		RETURN_THROWS();
 	}
 
@@ -285,7 +285,7 @@ PHP_FUNCTION(cal_to_jd)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		zend_value_error("invalid calendar ID " ZEND_LONG_FMT, cal);
+		zend_value_error("Invalid calendar ID: " ZEND_LONG_FMT, cal);
 		RETURN_THROWS();
 	}
 
@@ -306,7 +306,7 @@ PHP_FUNCTION(cal_from_jd)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		zend_value_error("invalid calendar ID " ZEND_LONG_FMT, cal);
+		zend_value_error("Invalid calendar ID: " ZEND_LONG_FMT, cal);
 		RETURN_THROWS();
 	}
 	calendar = &cal_conversion_table[cal];

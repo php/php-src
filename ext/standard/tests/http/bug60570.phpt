@@ -38,13 +38,13 @@ function do_test() {
 
 do_test();
 --EXPECTF--
-Warning: file_get_contents(http://127.0.0.1:12342/): failed to open stream: HTTP request failed! HTTP/1.0 404 Not Found
+Warning: file_get_contents(http://127.0.0.1:12342/): Failed to open stream: HTTP request failed! HTTP/1.0 404 Not Found
  in %s on line %d
 
-Warning: file_get_contents(http://127.0.0.1:12342/): failed to open stream: HTTP request failed! HTTP/1.0 404 Not Found
+Warning: file_get_contents(http://127.0.0.1:12342/): Failed to open stream: HTTP request failed! HTTP/1.0 404 Not Found
  in %s on line %d
 
-Warning: file_get_contents(http://127.0.0.1:12342/): failed to open stream: HTTP request failed! HTTP/1.0 404 Not Found
+Warning: file_get_contents(http://127.0.0.1:12342/): Failed to open stream: HTTP request failed! HTTP/1.0 404 Not Found
  in %s on line %d
 leak? penultimate iteration: %d, last one: %d
 bool(true)

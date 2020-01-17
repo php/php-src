@@ -75,12 +75,12 @@ bool(false)
 
 -- invalid filename --
 
-Warning: sha1_file(rewncwYcn89q): failed to open stream: No such file or directory in %s on line %d
+Warning: sha1_file(rewncwYcn89q): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- Scalar value as filename --
 
-Warning: sha1_file(12): failed to open stream: No such file or directory in %s on line %d
+Warning: sha1_file(12): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 
 -- NULL as filename --

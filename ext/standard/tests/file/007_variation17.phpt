@@ -49,7 +49,7 @@ string(20) "line
 line of text
 li"
 
-Notice: fwrite(): write of 37 bytes failed with errno=9 Bad file descriptor in %s on line %d
+Notice: fwrite(): Write of 37 bytes failed with errno=9 Bad file descriptor in %s on line %d
 bool(false)
 bool(true)
 string(7) "Unknown"

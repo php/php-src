@@ -52,7 +52,7 @@ function dump_openssl_errors($name) {
 $output_file =  __DIR__ . "/openssl_error_string_basic_output.tmp";
 // invalid file for read is something that does not exist in current directory
 $invalid_file_for_read = __DIR__ . "/invalid_file_for_read_operation.txt";
-// invalid file for is the test dir as writting file to existing dir should alway fail
+// invalid file for is the test dir as writing file to existing dir should always fail
 $invalid_file_for_write = __DIR__;
 // crt file
 $crt_file = "file://" . __DIR__ . "/cert.crt";

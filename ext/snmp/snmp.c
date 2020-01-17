@@ -879,7 +879,7 @@ static int netsnmp_session_init(php_snmp_session **session_p, int version, char 
 			}
 			*pptr = '\0';
 		} else {
-			php_error_docref(NULL, E_WARNING, "malformed IPv6 address, closing square bracket missing");
+			php_error_docref(NULL, E_WARNING, "Malformed IPv6 address, closing square bracket missing");
 			return (-1);
 		}
 	} else { /* IPv4 address */

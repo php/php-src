@@ -31,7 +31,7 @@ echo "*** Testing stat() on directory after using is_dir() on it ***\n";
 $old_stat = stat($dirname);
 // clear the cache
 clearstatcache();
-sleep(2);
+sleep(1);
 var_dump( is_dir($dirname) );
 $new_stat = stat($dirname);
 

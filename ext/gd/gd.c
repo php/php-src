@@ -294,6 +294,7 @@ static const zend_function_entry gd_functions[] = {
 	PHP_FE(imageaffine,								arginfo_imageaffine)
 	PHP_FE(imageaffinematrixconcat,					arginfo_imageaffinematrixconcat)
 	PHP_FE(imageaffinematrixget,					arginfo_imageaffinematrixget)
+	PHP_FE(imagegetinterpolation,					arginfo_imagegetinterpolation)
 	PHP_FE(imagesetinterpolation,					arginfo_imagesetinterpolation)
 	PHP_FE(imagesettile,							arginfo_imagesettile)
 	PHP_FE(imagesetbrush,							arginfo_imagesetbrush)
@@ -3936,12 +3937,6 @@ PHP_FUNCTION(imageaffine)
 			RETURN_THROWS();
 		}
 		pRect = &rect;
-	} else {
-		rect.x = -1;
-		rect.y = -1;
-		rect.width = gdImageSX(src);
-		rect.height = gdImageSY(src);
-		pRect = NULL;
 	}
 
 	if (gdTransformAffineGetImage(&dst, src, pRect, affine) != GD_TRUE) {
@@ -4105,6 +4100,26 @@ PHP_FUNCTION(imageaffinematrixconcat)
 		add_index_double(return_value, i, mr[i]);
 	}
 } /* }}} */
+
+/* {{{ proto resource imagegetinterpolation(resource im)
+   Get the default interpolation method. */
+PHP_FUNCTION(imagegetinterpolation)
+{
+	zval *IM;
+	gdImagePtr im;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &IM, gd_image_ce) == FAILURE)  {
+		RETURN_THROWS();
+	}
+	im = php_gd_libgdimageptr_from_zval_p(IM);
+
+#ifdef HAVE_GD_GET_INTERPOLATION
+	RETURN_LONG(gdImageGetInterpolationMethod(im));
+#else
+	RETURN_LONG(im->interpolation_id);
+#endif
+}
+/* }}} */
 
 /* {{{ proto resource imagesetinterpolation(resource im [, int method]])
    Set the default interpolation method, passing -1 or 0 sets it to the libgd default (bilinear). */

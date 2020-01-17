@@ -1,5 +1,5 @@
 --TEST--
-SPL: spl_autoload_functions() with closures and invokables
+SPL: spl_autoload_functions() with closures and invocables
 --FILE--
 <?php
 $closure = function($class) {

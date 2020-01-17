@@ -12,11 +12,11 @@ $unit_test_args = unserialize('a:3:{i:0;O:15:"NumberFormatter":0:{}i:1;d:-214748
 var_dump($unit_test_args);
 
 // execute the code from #testFormatTypeInt64Intl
-$unit_test_args[0]->format($unit_test_args[1], \NumberFormatter::TYPE_INT64);
-
-echo "== didn't crash ==".PHP_EOL;
-
-?>
+try {
+    $unit_test_args[0]->format($unit_test_args[1], \NumberFormatter::TYPE_INT64);
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
 --EXPECT--
 array(3) {
   [0]=>
@@ -27,4 +27,4 @@ array(3) {
   [2]=>
   string(21) "(SFD2,147,483,649.00)"
 }
-== didn't crash ==
+Found unconstructed NumberFormatter

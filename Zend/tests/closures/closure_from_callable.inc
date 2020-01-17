@@ -153,7 +153,7 @@ class MagicCall
 
 
 
-class PublicInvokable
+class PublicInvocable
 {
 	public function __invoke($param1)
 	{

@@ -55,7 +55,7 @@ extern "C" {
 typedef enum _xml_elem_verbosity {
    xml_elem_no_white_space,    /* compact xml with no white space            */
    xml_elem_newlines_only,     /* add newlines for enhanced readability      */
-   xml_elem_pretty             /* add newlines and indent accordint to depth */
+   xml_elem_pretty             /* add newlines and indent accordind to depth */
 } XML_ELEM_VERBOSITY;
 /******/
 

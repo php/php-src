@@ -96,7 +96,7 @@ ps_fetch_from_1_to_8_bytes(zval * zv, const MYSQLND_FIELD * const field, const u
 			case 8:lval = (int64_t) sint8korr(*row);break;
 			/*
 			  7, 6 and 5 are not possible.
-			  BIT is only unsigned, thus only uint5|6|7 macroses exist
+			  BIT is only unsigned, thus only uint5|6|7 macros exist
 			*/
 			case 4:lval = (int64_t) sint4korr(*row);break;
 			case 3:lval = (int64_t) sint3korr(*row);break;

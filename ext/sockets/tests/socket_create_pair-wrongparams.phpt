@@ -19,17 +19,17 @@ var_dump(socket_create_pair(AF_INET, 31337, 0, $sockets));
 
 ?>
 --EXPECTF--
-Warning: socket_create_pair(): unable to create socket pair [%d]: %s not supported in %s on line %d
+Warning: socket_create_pair(): Unable to create socket pair [%d]: %s not supported in %s on line %d
 bool(false)
 
-Warning: socket_create_pair(): invalid socket domain [31337] specified for argument 1, assuming AF_INET in %s on line %d
+Warning: socket_create_pair(): Invalid socket domain [31337] specified for argument 1, assuming AF_INET in %s on line %d
 
-Warning: socket_create_pair(): unable to create socket pair [%d]: %s not supported in %s on line %d
+Warning: socket_create_pair(): Unable to create socket pair [%d]: %s not supported in %s on line %d
 bool(false)
 
-Warning: socket_create_pair(): invalid socket type [31337] specified for argument 2, assuming SOCK_STREAM in %s on line %d
+Warning: socket_create_pair(): Invalid socket type [31337] specified for argument 2, assuming SOCK_STREAM in %s on line %d
 
-Warning: socket_create_pair(): unable to create socket pair [%d]: %s not supported %s on line %d
+Warning: socket_create_pair(): Unable to create socket pair [%d]: %s not supported %s on line %d
 bool(false)
 --CREDITS--
 Till Klampaeckel, till@php.net

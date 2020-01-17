@@ -86,11 +86,11 @@ The File Contents
 The File Contents
 -- %s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\..\\\readfileVar私はガラスを食べられます8Sub\\..\\..\readfileVar私はガラスを食べられます8Sub --
 
-Warning: readfile(%s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\..\\\readfileVar私はガラスを食べられます8Sub\\..\\..\readfileVar私はガラスを食べられます8Sub\fileToRead.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(%s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\..\\\readfileVar私はガラスを食べられます8Sub\\..\\..\readfileVar私はガラスを食べられます8Sub\fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
 
 -- %s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\BADDIR --
 
-Warning: readfile(%s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\BADDIR\fileToRead.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(%s\readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub\BADDIR\fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
 
 -- readfileVar私はガラスを食べられます8\readfileVar私はガラスを食べられます8Sub --
 The File Contents
@@ -102,7 +102,7 @@ The File Contents
 The File Contents
 -- BADDIR --
 
-Warning: readfile(BADDIR\fileToRead.tmp): failed to open stream: No such file or directory in %s on line %d
+Warning: readfile(BADDIR\fileToRead.tmp): Failed to open stream: No such file or directory in %s on line %d
 
 -- /%s/readfileVar私はガラスを食べられます8/readfileVar私はガラスを食べられます8Sub --
 The File Contents

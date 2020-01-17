@@ -243,7 +243,7 @@ var_dump( empty($point1->x) );  // expected: bool(true)
 // unset all members and check
 unset($point1->y);
 unset($point1->lable);
-// dump the objec to check that all variables are unset
+// dump the object to check that all variables are unset
 var_dump($point1);
 var_dump( isset($point1) );  // expected: bool(ture)
 var_dump( empty($point1) );  // expected: bool(false)

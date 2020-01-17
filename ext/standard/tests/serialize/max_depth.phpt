@@ -68,7 +68,7 @@ class Test implements Serializable {
     public function unserialize($str) {
         // Should fail, due to combined nesting level
         var_dump(unserialize(create_nested_data(129, 'a:1:{i:0;', '}')));
-        // Should succeeed, below combined nesting level
+        // Should succeed, below combined nesting level
         var_dump(unserialize(create_nested_data(128, 'a:1:{i:0;', '}')) !== false);
     }
 }

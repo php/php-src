@@ -135,7 +135,7 @@ gdImagePtr gdImageCreateFromXbm(FILE * fd)
 			h[3] = ch;
 		}
 		if (sscanf(h, "%x", &b) != 1) {
-			gd_error("invalid XBM");
+			gd_error("Invalid XBM");
 			gdImageDestroy(im);
 			return 0;
 		}

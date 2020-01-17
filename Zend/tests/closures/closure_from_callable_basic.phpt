@@ -37,8 +37,8 @@ echo 'Closure is already a closure';
 $fn = Closure::fromCallable($closure);
 echo $fn(" OK".PHP_EOL);
 
-echo 'Class with public invokable';
-$fn = Closure::fromCallable(new PublicInvokable);
+echo 'Class with public invocable';
+$fn = Closure::fromCallable(new PublicInvocable);
 echo $fn(" OK".PHP_EOL);
 
 echo "Instance return private method as callable";
@@ -105,7 +105,7 @@ Access public instance method of parent object through parent::  OK
 Function that exists OK
 Function that exists with different spelling OK
 Closure is already a closure OK
-Class with public invokable OK
+Class with public invocable OK
 Instance return private method as callable OK
 Instance return private static method as callable OK
 Instance return protected static method as callable OK

@@ -26,7 +26,7 @@ chmod("$file_path/is_readable_variation2", 0001);
 var_dump( is_readable("$file_path/is_readable_variation2") );  // exp: bool(false)
 chmod("$file_path/is_readable_variation2", 0777);  // chmod to enable deletion of directory
 
-echo "\n*** Testing miscelleneous input for is_readable() function ***\n";
+echo "\n*** Testing miscellaneous input for is_readable() function ***\n";
 $name_prefix = "is_readable_variation2";
 create_files(__DIR__, 1, "numeric", 0755, 1, "w", $name_prefix, 1);
 create_files(__DIR__, 1, "text", 0755, 1, "w", $name_prefix, 2);
@@ -77,7 +77,7 @@ rmdir(__DIR__."/is_readable_variation2/");
 *** Testing is_readable() on directory without read permission ***
 bool(false)
 
-*** Testing miscelleneous input for is_readable() function ***
+*** Testing miscellaneous input for is_readable() function ***
 -- Iteration 1 --
 bool(true)
 -- Iteration 2 --

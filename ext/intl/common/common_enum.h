@@ -41,8 +41,8 @@ extern "C" {
 	object = ZEND_THIS; \
 	INTLITERATOR_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (ii->iterator == NULL) { \
-		intl_errors_set(&ii->err, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed IntlIterator", 0); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, "Found unconstructed IntlIterator"); \
+		RETURN_THROWS(); \
 	}
 
 typedef struct {

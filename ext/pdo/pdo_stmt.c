@@ -799,7 +799,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 
 			case PDO_FETCH_KEY_PAIR:
 				if (stmt->column_count != 2) {
-					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain extactly 2 columns.");
+					pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain exactly 2 columns.");
 					return 0;
 				}
 				if (!return_all) {
@@ -961,10 +961,9 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 				case PDO_FETCH_USE_DEFAULT:
 				case PDO_FETCH_BOTH:
 					zend_symtable_update(Z_ARRVAL_P(return_value), stmt->columns[i].name, &val);
-					if (Z_REFCOUNTED(val)) {
-						Z_ADDREF(val);
+					if (zend_hash_index_add(Z_ARRVAL_P(return_value), i, &val) != NULL) {
+						Z_TRY_ADDREF(val);
 					}
-					zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &val);
 					break;
 
 				case PDO_FETCH_NAMED:

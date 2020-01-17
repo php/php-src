@@ -523,7 +523,7 @@ PHP_FUNCTION(stream_wrapper_register)
 			}
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "class '%s' is undefined", ZSTR_VAL(classname));
+		php_error_docref(NULL, E_WARNING, "Class '%s' is undefined", ZSTR_VAL(classname));
 	}
 
 	zend_list_delete(rsrc);

@@ -41,11 +41,11 @@ foreach($inputs as $input) {
 -- Iteration 1 --
 Without $regs arg:
 
-Warning: mb_ereg(): empty pattern in %s on line %d
+Warning: mb_ereg(): Empty pattern in %s on line %d
 bool(false)
 With $regs arg:
 
-Warning: mb_ereg(): empty pattern in %s on line %d
+Warning: mb_ereg(): Empty pattern in %s on line %d
 bool(false)
 array(0) {
 }
@@ -53,11 +53,11 @@ array(0) {
 -- Iteration 2 --
 Without $regs arg:
 
-Warning: mb_ereg(): empty pattern in %s on line %d
+Warning: mb_ereg(): Empty pattern in %s on line %d
 bool(false)
 With $regs arg:
 
-Warning: mb_ereg(): empty pattern in %s on line %d
+Warning: mb_ereg(): Empty pattern in %s on line %d
 bool(false)
 array(0) {
 }
@@ -65,11 +65,11 @@ array(0) {
 -- Iteration 3 --
 Without $regs arg:
 
-Warning: mb_ereg(): empty pattern in %s on line %d
+Warning: mb_ereg(): Empty pattern in %s on line %d
 bool(false)
 With $regs arg:
 
-Warning: mb_ereg(): empty pattern in %s on line %d
+Warning: mb_ereg(): Empty pattern in %s on line %d
 bool(false)
 array(0) {
 }
@@ -77,11 +77,11 @@ array(0) {
 -- Iteration 4 --
 Without $regs arg:
 
-Warning: mb_ereg(): empty pattern in %s on line %d
+Warning: mb_ereg(): Empty pattern in %s on line %d
 bool(false)
 With $regs arg:
 
-Warning: mb_ereg(): empty pattern in %s on line %d
+Warning: mb_ereg(): Empty pattern in %s on line %d
 bool(false)
 array(0) {
 }
@@ -89,11 +89,11 @@ array(0) {
 -- Iteration 5 --
 Without $regs arg:
 
-Warning: mb_ereg(): empty pattern in %s on line %d
+Warning: mb_ereg(): Empty pattern in %s on line %d
 bool(false)
 With $regs arg:
 
-Warning: mb_ereg(): empty pattern in %s on line %d
+Warning: mb_ereg(): Empty pattern in %s on line %d
 bool(false)
 array(0) {
 }
@@ -101,11 +101,11 @@ array(0) {
 -- Iteration 6 --
 Without $regs arg:
 
-Warning: mb_ereg(): empty pattern in %s on line %d
+Warning: mb_ereg(): Empty pattern in %s on line %d
 bool(false)
 With $regs arg:
 
-Warning: mb_ereg(): empty pattern in %s on line %d
+Warning: mb_ereg(): Empty pattern in %s on line %d
 bool(false)
 array(0) {
 }
@@ -113,11 +113,11 @@ array(0) {
 -- Iteration 7 --
 Without $regs arg:
 
-Warning: mb_ereg(): empty pattern in %s on line %d
+Warning: mb_ereg(): Empty pattern in %s on line %d
 bool(false)
 With $regs arg:
 
-Warning: mb_ereg(): empty pattern in %s on line %d
+Warning: mb_ereg(): Empty pattern in %s on line %d
 bool(false)
 array(0) {
 }
@@ -125,11 +125,11 @@ array(0) {
 -- Iteration 8 --
 Without $regs arg:
 
-Warning: mb_ereg(): empty pattern in %s on line %d
+Warning: mb_ereg(): Empty pattern in %s on line %d
 bool(false)
 With $regs arg:
 
-Warning: mb_ereg(): empty pattern in %s on line %d
+Warning: mb_ereg(): Empty pattern in %s on line %d
 bool(false)
 array(0) {
 }

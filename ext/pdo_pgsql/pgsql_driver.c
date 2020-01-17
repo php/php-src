@@ -1030,7 +1030,7 @@ static PHP_METHOD(PDO, pgsqlLOBUnlink)
 /* }}} */
 
 /* {{{ proto mixed PDO::pgsqlGetNotify([ int $result_type = PDO::FETCH_USE_DEFAULT] [, int $ms_timeout = 0 ]])
-   Get asyncronous notification */
+   Get asynchronous notification */
 static PHP_METHOD(PDO, pgsqlGetNotify)
 {
 	pdo_dbh_t *dbh;
@@ -1061,7 +1061,7 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
  		RETURN_FALSE;
 #if ZEND_ENABLE_ZVAL_LONG64
 	} else if (ms_timeout > INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "timeout was shrunk to %d", INT_MAX);
+		php_error_docref(NULL, E_WARNING, "Timeout was shrunk to %d", INT_MAX);
 		ms_timeout = INT_MAX;
 #endif
 	}

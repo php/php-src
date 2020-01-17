@@ -15,7 +15,7 @@ echo "*** Testing error conditions ***\n";
 $file = preg_replace("~\.phpt?$~", '.tmp', __FILE__);
 $fp = fopen($file, "w");
 
-/* array of operatons */
+/* array of operations */
 $operations = array(
   0,
   LOCK_NB,

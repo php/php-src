@@ -261,7 +261,7 @@ int php_cli_server_get_system_time(char *buf) {
 
 	gettimeofday(&tv, NULL);
 
-	/* TODO: should be checked for NULL tm/return vaue */
+	/* TODO: should be checked for NULL tm/return value */
 	php_localtime_r(&tv.tv_sec, &tm);
 	php_asctime_r(&tm, buf);
 	return 0;

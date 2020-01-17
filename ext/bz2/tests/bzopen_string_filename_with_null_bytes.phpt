@@ -19,5 +19,5 @@ try {
 
 ?>
 --EXPECT--
-filename must not contain null bytes
-filename must not contain null bytes
+Filename must not contain null bytes
+Filename must not contain null bytes
