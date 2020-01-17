@@ -9,43 +9,33 @@ ffi.enable=1
 --FILE--
 <?php
 $cdef = '
-typedef struct _php_stream_notifier php_stream_notifier;
-typedef struct _php_stream_context php_stream_context;
-typedef void (*php_stream_notification_func)(php_stream_context *context,
-                int notifycode, int severity,
-                char *xmsg, int xcode,
-                size_t bytes_sofar, size_t bytes_max,
-                void * ptr);
-struct _php_stream_notifier {
-    php_stream_notification_func func;
-    void (*dtor)(php_stream_notifier *notifier);
-    void* ptr;
-    int mask;
-    size_t progress, progress_max; /* position for progress notification */
-};
-
-struct _php_stream_context {
-    php_stream_notifier *notifier;
-    void* options;   /* hash keyed by wrapper family or specific wrapper */
-    void *res;     /* used for auto-cleanup */
-};
-
-extern void php_stream_context_free(php_stream_context *context);
-extern php_stream_context *php_stream_context_alloc(void);
+typedef struct _zend_file_handle {
+    union {
+            void*         *fp;
+            void*   stream;
+    } handle;
+    const char        *filename;
+    void*       *opened_path;
+    void*  type;
+    /* free_filename is used by wincache */
+    /* TODO: Clean up filename vs opened_path mess */
+    void*         free_filename;
+    char              *buf;
+    size_t            len;
+} zend_file_handle;
+void zend_stream_init_filename(zend_file_handle *handle, const char *filename);
 ';
 
 $ffi1 = FFI::cdef($cdef);
 $ffi2 = FFI::cdef($cdef);
-$c1 = $ffi1->new('php_stream_context', false);
-$c2 = $ffi1->php_stream_context_alloc();
-FFI::memcmp($c2[0], $c2, FFI::sizeof($c1));
-
+$c1 = $ffi1->new('zend_file_handle');
 try {
-    $tz = $ffi2->php_stream_context_free(FFI::addr($c1));
+    $ffi2->zend_stream_init_filename(FFI::addr($c1), __FILE__);
     echo 'Success';
 } catch (FFI\Exception $e) {
     echo 'incompatible';
 }
+
 ?>
 --EXPECT--
 Success
