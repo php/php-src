@@ -2280,6 +2280,7 @@ parent_loop_end:
 					break;
 				case 'h':
 				case '?':
+				case -2:
 					if (request) {
 						fcgi_destroy_request(request);
 					}
@@ -2289,6 +2290,9 @@ parent_loop_end:
 					php_cgi_usage(argv[0]);
 					php_output_end_all();
 					exit_status = 0;
+					if (c == -2) {
+						exit_status = 1;
+					}
 					goto out;
 			}
 		}

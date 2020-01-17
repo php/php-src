@@ -1414,7 +1414,7 @@ phpdbg_main:
 		exec = settings->exec;
 	}
 
-	while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2)) != -1) {
+	while ((opt = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 1, 2)) != -1) {
 		switch (opt) {
 			case 'r':
 				if (settings == NULL) {
@@ -1552,6 +1552,11 @@ phpdbg_main:
 
 			case 'h': {
 				show_help = 1;
+			} break;
+
+			case -2: {
+				show_help = 1;
+				exit_status = 1;
 			} break;
 
 			case 'V': {
