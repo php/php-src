@@ -211,7 +211,7 @@ static ZEND_FUNCTION(ffi_trampoline);
 static ZEND_COLD void zend_ffi_return_unsupported(zend_ffi_type *type);
 static ZEND_COLD void zend_ffi_pass_unsupported(zend_ffi_type *type);
 static ZEND_COLD void zend_ffi_assign_incompatible(zval *arg, zend_ffi_type *type);
-
+static void zend_ffi_type_hash_dtor(zval *zv);
 #if FFI_CLOSURES
 static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value, uint32_t n);
 #endif
@@ -895,24 +895,36 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value, uint32_t
 	zend_fcall_info_cache fcc;
 	char *error = NULL;
 	char invalid_error[255] = "an";
-	char unsupport_error[255];
+	char occur_error[255];
 	uint32_t arg_count;
 	void *code;
 	void *callback;
 	zend_ffi_callback_data *callback_data;
 
 	if(n != ZEND_FFI_NO_ARG_OFFSET) {
-		sprintf(unsupport_error, ", parameter %u occur", n + 1);
+		sprintf(occur_error, ", parameter %u occur", n + 1);
 		sprintf(invalid_error, "parameter %u to be", n + 1);
-	}
-	if (type->attr & ZEND_FFI_ATTR_VARIADIC) {
-		zend_throw_error(zend_ffi_exception_ce, "Variadic function closures are not supported%s", unsupport_error);
-		return NULL;
 	}
 
 	if (!zend_is_callable_ex(value, NULL, 0, NULL, &fcc, &error)) {
 		zend_throw_error(zend_ffi_exception_ce, "Attempt to assign %s invalid callback, %s", invalid_error, error);
 		return NULL;
+	}
+
+	uint32_t pass_arg_count = fcc.function_handler->common.required_num_args;
+	if(type->attr & ZEND_FFI_ATTR_VARIADIC) {
+		if(!type->func.args) {
+			type->func.args = pemalloc(sizeof(HashTable), FFI_G(persistent));
+			zend_hash_init(type->func.args, 0, NULL, zend_ffi_type_hash_dtor, FFI_G(persistent));
+		}
+
+		static zend_ffi_type zend_ffi_type_void = {.kind=ZEND_FFI_TYPE_VOID, .size=1, .align=1};
+		static zend_ffi_type zend_ffi_type_ptr = {.kind=ZEND_FFI_TYPE_POINTER, .size=sizeof(void*), .align=_Alignof(void*), .pointer.type = (zend_ffi_type*)&zend_ffi_type_void};
+		uint32_t arg_idx = zend_hash_num_elements(type->func.args);
+
+		for(; arg_idx < pass_arg_count+1; arg_idx++) {
+			zend_hash_next_index_insert_ptr(type->func.args, &zend_ffi_type_ptr);
+		}
 	}
 
 	arg_count = type->func.args ? zend_hash_num_elements(type->func.args) : 0;
@@ -923,7 +935,7 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value, uint32_t
 
 	callback = ffi_closure_alloc(sizeof(ffi_closure), &code);
 	if (!callback) {
-		zend_throw_error(zend_ffi_exception_ce, "Cannot allocate callback%s", unsupport_error);
+		zend_throw_error(zend_ffi_exception_ce, "Cannot allocate callback, parameter %u occur", occur_error);
 		return NULL;
 	}
 
@@ -959,14 +971,14 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value, uint32_t
 	}
 
 	if (ffi_prep_cif(&callback_data->cif, type->func.abi, callback_data->arg_count, callback_data->ret_type, callback_data->arg_types) != FFI_OK) {
-		zend_throw_error(zend_ffi_exception_ce, "Cannot prepare callback CIF");
+		zend_throw_error(zend_ffi_exception_ce, "Cannot prepare callback CIF%s", occur_error);
 		efree(callback_data);
 		ffi_closure_free(callback);
 		return NULL;
 	}
 
 	if (ffi_prep_closure_loc(callback, &callback_data->cif, zend_ffi_callback_trampoline, callback_data, code) != FFI_OK) {
-		zend_throw_error(zend_ffi_exception_ce, "Cannot prepare callback");
+		zend_throw_error(zend_ffi_exception_ce, "Cannot prepare callback%s", occur_error);
 		efree(callback_data);
 		ffi_closure_free(callback);
 		return NULL;
