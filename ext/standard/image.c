@@ -50,6 +50,7 @@ PHPAPI const char php_sig_iff[4] = {'F','O','R','M'};
 PHPAPI const char php_sig_ico[4] = {(char)0x00, (char)0x00, (char)0x01, (char)0x00};
 PHPAPI const char php_sig_riff[4] = {'R', 'I', 'F', 'F'};
 PHPAPI const char php_sig_webp[4] = {'W', 'E', 'B', 'P'};
+PHPAPI const char php_sig_avif[4] = {'a', 'v', 'i', 'f'};
 
 /* REMEMBER TO ADD MIME-TYPE TO FUNCTION php_image_type_to_mime_type */
 /* PCX must check first 64bytes and byte 0=0x0a and byte2 < 0x06 */
@@ -88,6 +89,7 @@ PHP_MINIT_FUNCTION(imagetypes)
 	REGISTER_LONG_CONSTANT("IMAGETYPE_XBM",     IMAGE_FILETYPE_XBM,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_ICO",     IMAGE_FILETYPE_ICO,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_WEBP",	IMAGE_FILETYPE_WEBP,	CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMAGETYPE_AVIF",	IMAGE_FILETYPE_AVIF,	CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_UNKNOWN", IMAGE_FILETYPE_UNKNOWN, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("IMAGETYPE_COUNT",   IMAGE_FILETYPE_COUNT,   CONST_CS | CONST_PERSISTENT);
 	return SUCCESS;
@@ -1148,6 +1150,103 @@ static struct gfxinfo *php_handle_webp(php_stream * stream)
 }
 /* }}} */
 
+/* {{{ php_handle_avif
+ */
+static struct gfxinfo *php_handle_avif(php_stream * stream) {
+	struct gfxinfo *result = NULL;
+	unsigned int width = 0, height = 0;
+	unsigned char channels = 0, bits = 0, i, bits_tmp;
+	unsigned int size, type;
+	size_t begin, end, pos = 0;
+	int check_ispe = 0, check_pixi = 0, eof;
+
+	if (php_stream_seek(stream, 0, SEEK_SET)) {
+		return NULL;
+	}
+	for(;;) {
+		eof = php_stream_eof(stream);
+		if (eof == -1) {
+			return NULL;
+		} else if ((check_ispe == 1 && check_pixi == 1) || eof == 1) {
+			break;
+		}
+
+		begin = pos;
+		size  = php_read4(stream); pos += 4;
+		type  = php_read4(stream); pos += 4;
+		end   = begin + size;
+
+		switch (type) {
+			case 1835365473u:    /* meta */
+				if (php_stream_seek(stream, 4, SEEK_CUR)) {
+					return NULL;
+				}
+				pos += 4;
+				continue;
+
+			case 1768977008u:    /* iprp */
+			case 1768973167u:    /* ipco */
+				continue;
+
+			case 1769173093u:    /* ispe */
+				if (php_stream_seek(stream, 4, SEEK_CUR)) {
+					return NULL;
+				}
+				pos += 4;
+				width  = php_read4(stream); pos += 4;
+				height = php_read4(stream); pos += 4;
+				check_ispe = 1;
+				break;
+
+			case 1885960297u:    /* pixi */
+				if (php_stream_seek(stream, 4, SEEK_CUR)) {
+					return NULL;
+				}
+				pos += 4;
+
+				/* channels */
+				if (php_stream_read(stream, (char *)&channels, 1) != 1) {
+					return NULL;
+				}
+				pos++;
+
+				/* bits */
+				for (i = 0; i < channels; i++) {
+					if (php_stream_read(stream, (char *)&bits_tmp, 1) != 1) {
+						return NULL;
+					}
+					pos++;
+
+					if (bits_tmp > bits) {
+						bits = bits_tmp;
+					}
+				}
+				check_pixi = 1;
+				break;
+
+			default:
+				break;
+		}
+
+		pos = end;
+		if (php_stream_seek(stream, end, SEEK_SET)) {
+			return NULL;
+		}
+	}
+
+	result = (struct gfxinfo *) ecalloc(1, sizeof(struct gfxinfo));
+	if (result == NULL) {
+		return NULL;
+	}
+
+	result->width    = width;
+	result->height   = height;
+	result->bits     = bits;
+	result->channels = channels;
+	return result;
+}
+/* }}} */
+
 /* {{{ php_image_type_to_mime_type
  * Convert internal image_type to mime type */
 PHPAPI char * php_image_type_to_mime_type(int image_type)
@@ -1183,6 +1282,8 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
 			return "image/vnd.microsoft.icon";
 		case IMAGE_FILETYPE_WEBP:
 			return "image/webp";
+		case IMAGE_FILETYPE_AVIF:
+			return "image/avif";
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
 			return "application/octet-stream"; /* suppose binary format */
@@ -1264,6 +1365,9 @@ PHP_FUNCTION(image_type_to_extension)
 			break;
 		case IMAGE_FILETYPE_WEBP:
 			imgext = ".webp";
+			break;
+		case IMAGE_FILETYPE_AVIF:
+			imgext = ".avif";
 			break;
 	}
 
@@ -1347,6 +1451,8 @@ PHPAPI int php_getimagetype(php_stream * stream, const char *input, char *filety
 /* BYTES READ: 12 */
    	if (twelve_bytes_read && !memcmp(filetype, php_sig_jp2, 12)) {
 		return IMAGE_FILETYPE_JP2;
+	} else if (twelve_bytes_read && !memcmp(filetype+8, php_sig_avif, 4)) {
+		return IMAGE_FILETYPE_AVIF;
 	}
 
 /* AFTER ALL ABOVE FAILED */
@@ -1430,6 +1536,9 @@ static void php_getimagesize_from_stream(php_stream *stream, char *input, zval *
 			break;
 		case IMAGE_FILETYPE_WEBP:
 			result = php_handle_webp(stream);
+			break;
+		case IMAGE_FILETYPE_AVIF:
+			result = php_handle_avif(stream);
 			break;
 		default:
 		case IMAGE_FILETYPE_UNKNOWN:
