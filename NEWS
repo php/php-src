@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #49555 (Fatal error "Function must be a string" message should be
     renamed). (Nikita)
 
+- CURL:
+  . Bumped required libcurl version to 7.29.0. (cmb)
+
 - Date:
   . Fixed bug #65547 (Default value for sunrise/sunset zenith still wrong).
     (cmb)

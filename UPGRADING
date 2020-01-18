@@ -389,6 +389,9 @@ PHP 8.0 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- CURL:
+  . The CURL extension now requires at least libcurl 7.29.0.
+
 - GD:
   . The $num_points parameter of imagepolygon(), imageopenpolygon() and
     imagefilledpolygon() is now optional, i.e. these functions may be called
