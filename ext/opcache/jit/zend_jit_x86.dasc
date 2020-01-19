@@ -6870,7 +6870,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		/* Reuse reserved arguments stack */
 		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R4, 0x20);
 #else
-		/* CPU stack alocated temporary zval */
+		/* CPU stack allocated temporary zval */
 		res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R4, 8);
 #endif
 	}
@@ -7917,7 +7917,7 @@ static int zend_jit_free_compiled_variables(dasm_State **Dst, const zend_op *opl
 		}
 
 #ifdef ZEND_JIT_USE_RC_INFERENCE
-		/* Refcount may be increased by RETRUN opcode */
+		/* Refcount may be increased by RETURN opcode */
 		if ((info & MAY_BE_RC1) && !(info & MAY_BE_RCN)) {
 			for (j = 0; j < ssa->cfg.blocks_count; j++) {
 				if ((ssa->cfg.blocks[j].flags & ZEND_BB_REACHABLE) &&
@@ -8847,7 +8847,7 @@ static uint32_t zend_get_known_property_offset(zend_class_entry *ce, zend_string
 
 	if (ce->ce_flags & ZEND_ACC_INHERITED) {
 		if (!ce->parent) {
-			/* property offets may be changed by inheritance */
+			/* property offsets may be changed by inheritance */
 			return ZEND_WRONG_PROPERTY_OFFSET;
 		} else {
 			zend_class_entry *parent = ce->parent;

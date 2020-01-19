@@ -1,5 +1,5 @@
 --TEST--
-Bug #30096 (gmmktime does not return the corrent time)
+Bug #30096 (gmmktime does not return the correct time)
 --INI--
 error_reporting=2047
 --FILE--

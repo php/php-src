@@ -1,5 +1,5 @@
 --TEST--
-Test setlocale() function : usage variations - passing multiple valid/invlaid locales as argument
+Test setlocale() function : usage variations - passing multiple valid/invalid locales as argument
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') {

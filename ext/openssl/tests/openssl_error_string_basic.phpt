@@ -145,7 +145,7 @@ expect_openssl_errors('openssl_csr_get_subject open', ['02001002', '2006D080']);
 @openssl_csr_get_subject($crt_file);
 expect_openssl_errors('openssl_csr_get_subjec pem', [$err_pem_no_start_line]);
 
-// other possible cuases that are difficult to catch:
+// other possible causes that are difficult to catch:
 // - ASN1_STRING_to_UTF8 fails in add_assoc_name_entry
 // - invalid php_x509_request field (NULL) would cause error with CONF_get_string
 

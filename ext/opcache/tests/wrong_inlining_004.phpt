@@ -1,5 +1,5 @@
 --TEST--
-Inlining throgh call_user_func()
+Inlining through call_user_func()
 --INI--
 opcache.enable=1
 opcache.enable_cli=1

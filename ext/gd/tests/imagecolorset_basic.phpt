@@ -20,7 +20,7 @@ imagecolorallocate($im, 255, 0, 0);
 // Get the color index for the background
 $bg = imagecolorat($im, 0, 0);
 
-// Set the backgrund to be blue
+// Set the background to be blue
 imagecolorset($im, $bg, 0, 0, 255);
 
 include_once __DIR__ . '/func.inc';

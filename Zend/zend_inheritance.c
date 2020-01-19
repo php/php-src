@@ -451,7 +451,7 @@ static inheritance_status zend_perform_covariant_type_check(
 			}
 		} ZEND_TYPE_LIST_FOREACH_END();
 
-		/* All individual checks suceeded, overall success */
+		/* All individual checks succeeded, overall success */
 		if (all_success) {
 			return INHERITANCE_SUCCESS;
 		}

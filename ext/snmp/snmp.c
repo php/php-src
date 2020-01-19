@@ -308,7 +308,7 @@ static void php_snmp_getvalue(struct variable_list *vars, zval *snmpval, int val
 	int buflen = sizeof(sbuf) - 1;
 	int val_len = vars->val_len;
 
-	/* use emalloc() for large values, use static array otherwize */
+	/* use emalloc() for large values, use static array otherwise */
 
 	/* There is no way to know the size of buffer snprint_value() needs in order to print a value there.
 	 * So we are forced to probe it
