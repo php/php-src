@@ -3278,7 +3278,7 @@ static size_t preload_try_strip_filename(zend_string *filename) {
 	if (ZSTR_LEN(filename) > sizeof(" eval()'d code")
 		&& *(ZSTR_VAL(filename) + ZSTR_LEN(filename) - sizeof(" eval()'d code")) == ':') {
 		const char *cfilename = ZSTR_VAL(filename);
-		size_t cfilenamelen = ZSTR_LEN(filename) - sizeof(" eval()'d code") - 2 /* :*/;
+		size_t cfilenamelen = ZSTR_LEN(filename) - sizeof(" eval()'d code") - 1 /*:*/;
 		while (cfilenamelen && cfilename[--cfilenamelen] != '(');
 		return cfilenamelen;
 	}
