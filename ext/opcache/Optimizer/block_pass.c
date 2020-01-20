@@ -973,7 +973,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 	}
 
 	new_opcodes = emalloc(len * sizeof(zend_op));
-	opline_delta = (void*)new_opcodes - (void*)op_array->opcodes;
+	opline_delta = ((uint8_t *)new_opcodes) - ((uint8_t *)op_array->opcodes);
 	opline = new_opcodes;
 
 	/* Copy code of reachable blocks into a single buffer */
@@ -1104,8 +1104,8 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 	if (func_info) {
 		zend_call_info *call_info = func_info->callee_info;
 		while (call_info) {
-			call_info->caller_init_opline = ((void*)call_info->caller_init_opline) + opline_delta;
-			call_info->caller_call_opline = ((void*)call_info->caller_call_opline) + opline_delta;
+			call_info->caller_init_opline = (zend_op *)(((uint8_t *)call_info->caller_init_opline) + opline_delta);
+			call_info->caller_call_opline = (zend_op *)(((uint8_t *)call_info->caller_call_opline) + opline_delta);
 			call_info = call_info->next_callee;
 		}
 	}
