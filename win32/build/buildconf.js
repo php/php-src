@@ -258,4 +258,4 @@ C.WriteBlankLines(1);
 C.Write(file_get_contents("win32/build/configure.tail"));
 
 B.WriteLine("@echo off");
-B.WriteLine("cscript /nologo configure.js %*");
+B.WriteLine("cscript /nologo /e:jscript configure.js %*");
