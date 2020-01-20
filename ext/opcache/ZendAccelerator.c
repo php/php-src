@@ -3273,6 +3273,18 @@ static void preload_restart(void)
 	}
 }
 
+static size_t preload_try_strip_filename(zend_string *filename) {
+	/*FIXME: better way to hanlde eval()'d code? see COMPILED_STRING_DESCRIPTION_FORMAT */
+	if (ZSTR_LEN(filename) > sizeof(" eval()'d code")
+		&& *(ZSTR_VAL(filename) + ZSTR_LEN(filename) - sizeof(" eval()'d code")) == ':') {
+		const char *cfilename = ZSTR_VAL(filename);
+		size_t cfilenamelen = ZSTR_LEN(filename) - sizeof(" eval()'d code") - 2 /* :*/;
+		while (cfilenamelen && cfilename[--cfilenamelen] != '(');
+		return cfilenamelen;
+	}
+	return 0;
+}
+
 static void preload_move_user_functions(HashTable *src, HashTable *dst)
 {
 	Bucket *p;
@@ -3289,7 +3301,12 @@ static void preload_move_user_functions(HashTable *src, HashTable *dst)
 			if (function->op_array.filename != filename) {
 				filename = function->op_array.filename;
 				if (filename) {
-					copy = zend_hash_exists(preload_scripts, filename);
+					if (!(copy = zend_hash_exists(preload_scripts, filename))) {
+						size_t eval_len = preload_try_strip_filename(filename);
+						if (eval_len) {
+							copy = zend_hash_str_exists(preload_scripts, ZSTR_VAL(filename), eval_len);
+						}
+					}
 				} else {
 					copy = 0;
 				}
@@ -3323,7 +3340,12 @@ static void preload_move_user_classes(HashTable *src, HashTable *dst)
 			if (ce->info.user.filename != filename) {
 				filename = ce->info.user.filename;
 				if (filename) {
-					copy = zend_hash_exists(preload_scripts, filename);
+					if (!(copy = zend_hash_exists(preload_scripts, filename))) {
+						size_t eval_len = preload_try_strip_filename(filename);
+						if (eval_len) {
+							copy = zend_hash_str_exists(preload_scripts, ZSTR_VAL(filename), eval_len);
+						}
+					}
 				} else {
 					copy = 0;
 				}
