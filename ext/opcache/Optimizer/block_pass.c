@@ -22,6 +22,7 @@
 #include "php.h"
 #include "Optimizer/zend_optimizer.h"
 #include "Optimizer/zend_optimizer_internal.h"
+#include "Optimizer/zend_call_graph.h"
 #include "zend_API.h"
 #include "zend_constants.h"
 #include "zend_execute.h"
@@ -924,12 +925,14 @@ optimize_const_unary_op:
 /* Rebuild plain (optimized) op_array from CFG */
 static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
+	zend_func_info *func_info;
 	zend_basic_block *blocks = cfg->blocks;
 	zend_basic_block *end = blocks + cfg->blocks_count;
 	zend_basic_block *b;
 	zend_op *new_opcodes;
 	zend_op *opline;
 	uint32_t len = 0;
+	size_t opline_delta;
 	int n;
 
 	for (b = blocks; b < end; b++) {
@@ -970,6 +973,7 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 	}
 
 	new_opcodes = emalloc(len * sizeof(zend_op));
+	opline_delta = (void*)new_opcodes - (void*)op_array->opcodes;
 	opline = new_opcodes;
 
 	/* Copy code of reachable blocks into a single buffer */
@@ -1093,6 +1097,17 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 		ZEND_ASSERT(op_array == &ctx->script->main_op_array);
 		ctx->script->first_early_binding_opline =
 			zend_build_delayed_early_binding_list(op_array);
+	}
+
+	/* update call graph (needed in second run of pass 5) */
+	func_info = ZEND_FUNC_INFO(op_array);
+	if (func_info) {
+		zend_call_info *call_info = func_info->callee_info;
+		while (call_info) {
+			call_info->caller_init_opline = ((void*)call_info->caller_init_opline) + opline_delta;
+			call_info->caller_call_opline = ((void*)call_info->caller_call_opline) + opline_delta;
+			call_info = call_info->next_callee;
+		}
 	}
 
 	/* rebuild map (just for printing) */
