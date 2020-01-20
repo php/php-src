@@ -3328,7 +3328,7 @@ static zend_op_array *preload_compile_file(zend_file_handle *file_handle, int ty
 	return op_array;
 }
 
-static void preload_sort_classes(void *base, size_t count, size_t siz, compare_func_t compare, swap_func_t swp) /* {{{ */
+static void preload_sort_classes(void *base, size_t count, size_t siz, compare_func_t compare, swap_func_t swp)
 {
 	Bucket *b1 = base;
 	Bucket *b2;
@@ -3718,9 +3718,11 @@ static void preload_link(void)
 					continue;
 				}
 
-				zend_string *key = zend_string_tolower(ce->name);
-				zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, key);
-				zend_string_release(key);
+				{
+					zend_string *key = zend_string_tolower(ce->name);
+					zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, key);
+					zend_string_release(key);
+				}
 
 				if (EXPECTED(zv)) {
 					/* Set filename & lineno information for inheritance errors */
@@ -4439,7 +4441,7 @@ static int accel_preload(const char *config)
 		script->ping_auto_globals_mask = ping_auto_globals_mask;
 
 		/* Store all functions and classes in a single pseudo-file */
-		filename = zend_string_init("$PRELOAD$", strlen("$PRELOAD$"), 0);
+		filename = zend_string_init("$PRELOAD$", sizeof("$PRELOAD$") - 1, 0);
 #if ZEND_USE_ABS_CONST_ADDR
 		init_op_array(&script->script.main_op_array, ZEND_USER_FUNCTION, 1);
 #else
