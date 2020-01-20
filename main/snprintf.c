@@ -961,7 +961,6 @@ static int format_converter(register buffy * odp, const char *fmt, va_list ap) /
 
 
 				case 's':
-				case 'v':
 					s = va_arg(ap, char *);
 					if (s != NULL) {
 						s_len = strlen(s);
