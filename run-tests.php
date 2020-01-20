@@ -534,7 +534,7 @@ Synopsis:
     php run-tests.php [options] [files] [directories]
 
 Options:
-    -j<workers> Run <workers> simultaneous testing processes in parallel for
+    -j<workers> Run up to <workers> simultaneous testing processes in parallel for
                 quicker testing on systems with multiple logical processors.
                 Note that this is experimental feature.
 
@@ -1285,7 +1285,8 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 	// Parallel testing
 	global $PHP_FAILED_TESTS, $workers, $workerID, $workerSock;
 
-	if ($workers !== null && !$workerID) {
+	/* Ignore -jN if there is only one file to analyze. */
+	if ($workers !== null && count($test_files) > 1 && !$workerID) {
 		run_all_tests_parallel($test_files, $env, $redir_tested);
 		return;
 	}
@@ -1397,6 +1398,8 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	if ($shuffle) {
 		shuffle($test_files);
 	}
+	/* Don't start more workers than test files */
+	$workers = max(1, min($workers, count($test_files)));
 
 	echo "Spawning workers… ";
 
