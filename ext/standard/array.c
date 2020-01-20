@@ -3970,7 +3970,7 @@ PHP_FUNCTION(array_keys)
 
 	/* Base case: empty input */
 	if (!elem_count) {
-		RETURN_ZVAL(input, 1, 0);
+		RETURN_COPY(input);
 	}
 
 	/* Initialize return array */
@@ -4086,7 +4086,7 @@ PHP_FUNCTION(array_values)
 	/* Return vector-like packed arrays as-is */
 	if (HT_IS_PACKED(arrval) && HT_IS_WITHOUT_HOLES(arrval) &&
 		arrval->nNextFreeElement == arrlen) {
-		RETURN_ZVAL(input, 1, 0);
+		RETURN_COPY(input);
 	}
 
 	/* Initialize return array */
@@ -6064,7 +6064,7 @@ PHP_FUNCTION(array_reduce)
 	} ZEND_HASH_FOREACH_END();
 
 	zend_release_fcall_info_cache(&fci_cache);
-	RETVAL_ZVAL(&result, 1, 1);
+	RETURN_COPY_VALUE(&result);
 }
 /* }}} */
 

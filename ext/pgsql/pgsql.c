@@ -2337,14 +2337,14 @@ PHP_FUNCTION(pg_last_notice)
 				if ((notice = zend_hash_get_current_data(Z_ARRVAL_P(notices))) == NULL) {
 					RETURN_EMPTY_STRING();
 				}
-				RETURN_ZVAL(notice, 1, 0);
+				RETURN_COPY(notice);
 			} else {
 				RETURN_EMPTY_STRING();
 			}
 			break;
 		case PGSQL_NOTICE_ALL:
 			if (notices) {
-				RETURN_ZVAL(notices, 1, 0);
+				RETURN_COPY(notices);
 			} else {
 				array_init(return_value);
 				return;

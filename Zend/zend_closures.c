@@ -338,7 +338,7 @@ ZEND_METHOD(Closure, fromCallable)
 
 	if (Z_TYPE_P(callable) == IS_OBJECT && instanceof_function(Z_OBJCE_P(callable), zend_ce_closure)) {
 		/* It's already a closure */
-		RETURN_ZVAL(callable, 1, 0);
+		RETURN_COPY(callable);
 	}
 
 	/* create closure as if it were called from parent scope */

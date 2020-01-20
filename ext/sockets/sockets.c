@@ -2278,7 +2278,7 @@ PHP_FUNCTION(socket_export_stream)
 	/* Either we already exported a stream or the socket came from an import,
 	 * just return the existing stream */
 	if (!Z_ISUNDEF(socket->zstream)) {
-		RETURN_ZVAL(&socket->zstream, 1, 0);
+		RETURN_COPY(&socket->zstream);
 	}
 
 	/* Determine if socket is using a protocol with one of the default registered
@@ -2350,7 +2350,7 @@ PHP_FUNCTION(socket_export_stream)
 
 	php_stream_to_zval(stream, &socket->zstream);
 
-	RETURN_ZVAL(&socket->zstream, 1, 0);
+	RETURN_COPY(&socket->zstream);
 }
 /* }}} */
 
