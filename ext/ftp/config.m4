@@ -3,10 +3,11 @@ PHP_ARG_ENABLE([ftp],
   [AS_HELP_STRING([--enable-ftp],
     [Enable FTP support])])
 
+dnl TODO: Rename this option for master.
 PHP_ARG_WITH([openssl-dir],
-  [OpenSSL dir for FTP],
-  [AS_HELP_STRING([[--with-openssl-dir[=DIR]]],
-    [FTP: openssl install prefix])],
+  [whether to explicitly enable FTP SSL support],
+  [AS_HELP_STRING([[--with-openssl-dir]],
+    [FTP: Whether to enable FTP SSL support without ext/openssl])],
   [no],
   [no])
 
