@@ -48,3 +48,11 @@ class Z2 extends Z {}
 function get_anon() {
     return new class {};
 }
+
+if (!isset($rt)) {
+	eval("class Foo {}");
+
+	class Bar extends Foo {}
+
+	eval("function f3() {} ");
+}

@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug #79084 (mysqlnd may fetch wrong column indexes with MYSQLI_BOTH).
     (cmb)
 
+- Opcache:
+  . Fixed #79114 (Eval class during preload causes class to be only half
+    available). (Laruence)
+
 - Reflection:
   . Fixed bug #79115 (ReflectionClass::isCloneable call reflected class
     __destruct). (Nikita)
