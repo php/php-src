@@ -1300,6 +1300,16 @@ static void zend_optimize_op_array(zend_op_array      *op_array,
 	/* Redo pass_two() */
 	zend_redo_pass_two(op_array);
 
+	/* pass 5:
+	 * - CFG optimization (again) after converting code to no-ops.
+	 */
+	if (ZEND_OPTIMIZER_PASS_5 & ctx->optimization_level) {
+		zend_optimize_cfg(op_array, ctx);
+		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_5) {
+			zend_dump_op_array(op_array, 0, "after repeating pass 5", NULL);
+		}
+	}
+
 	if (op_array->live_range) {
 		zend_recalc_live_ranges(op_array, NULL);
 	}
@@ -1414,6 +1424,13 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 		if (debug_level & ZEND_DUMP_AFTER_PASS_7) {
 			for (i = 0; i < call_graph.op_arrays_count; i++) {
 				zend_dump_op_array(call_graph.op_arrays[i], 0, "after pass 7", NULL);
+			}
+		}
+
+		for (i = 0; i < call_graph.op_arrays_count; i++) {
+			zend_optimize_cfg(call_graph.op_arrays[i], &ctx);
+			if (debug_level & ZEND_DUMP_AFTER_PASS_5) {
+				zend_dump_op_array(call_graph.op_arrays[i], 0, "after pass 5 (again)", NULL);
 			}
 		}
 

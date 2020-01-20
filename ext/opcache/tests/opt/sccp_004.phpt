@@ -31,10 +31,9 @@ $_main: ; (lines=1, args=0, vars=0, tmps=0)
     ; %ssccp_004.php:1-17
 L0 (17):    RETURN int(1)
 
-foo: ; (lines=4, args=1, vars=1, tmps=0)
+foo: ; (lines=3, args=1, vars=1, tmps=0)
     ; (after optimizer)
     ; %ssccp_004.php:2-15
 L0 (2):     CV0($x) = RECV 1
-L1 (11):    ECHO bool(true)
-L2 (14):    ECHO int(1)
-L3 (15):    RETURN null
+L1 (14):    ECHO string("11")
+L2 (15):    RETURN null
