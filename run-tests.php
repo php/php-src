@@ -1341,7 +1341,7 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 
 /** The heart of parallel testing. */
 function run_all_tests_parallel($test_files, $env, $redir_tested) {
-	global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $SHOW_ONLY_GROUPS;
+	global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $SHOW_ONLY_GROUPS, $valgrind;
 
 	// The PHP binary running run-tests.php, and run-tests.php itself
 	// This PHP executable is *not* necessarily the same as the tested version
@@ -1415,6 +1415,7 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	}
 	$sockPort = substr($sockName, $portPos + 1);
 	$sockUri = "tcp://$sockHost:$sockPort";
+	$totalFileCount = count($test_files);
 
 	for ($i = 1; $i <= $workers; $i++) {
 		$proc = proc_open(
@@ -1548,8 +1549,14 @@ escape:
 								$sequentialTests = [];
 							}
 							// Batch multiple tests to reduce communication overhead.
+							// - When valgrind is used, communication overhead is relatively small,
+							//   so just use a batch size of 1.
+							// - If this is running a small enough number of tests,
+							//   reduce the batch size to give batches to more workers.
 							$files = [];
-							$batchSize = $shuffle ? 4 : 32;
+							$maxBatchSize = $valgrind ? 1 : ($shuffle ? 4 : 32);
+							$averageFilesPerWorker = max(1, (int)ceil($totalFileCount / count($workerProcs)));
+							$batchSize = min($maxBatchSize, $averageFilesPerWorker);
 							while (count($files) <= $batchSize && $file = array_pop($test_files)) {
 								foreach ($fileConflictsWith[$file] as $conflictKey) {
 									if (isset($activeConflicts[$conflictKey])) {
