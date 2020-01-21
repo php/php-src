@@ -8,7 +8,7 @@ if (!extension_loaded('xsl')) die("skip Extension XSL is required\n");
 <?php
 include("prepare.inc");
 
-$outputfile = __DIR__."/bug54446test.txt";
+$outputfile = __DIR__."/bug54446test_with_ini.txt";
 if (file_exists($outputfile)) {
     unlink($outputfile);
 }
@@ -74,21 +74,21 @@ if (file_exists($outputfile)) {
 --EXPECTF--
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %s element output in %s on line %d
 
-Warning: XSLTProcessor::transformToXml(): File write for %s/bug54446test.txt refused in %s on line %d
+Warning: XSLTProcessor::transformToXml(): File write for %s/bug54446test_with_ini.txt refused in %s on line %d
 
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %d element output in %s on line %d
 
-Warning: XSLTProcessor::transformToXml(): xsltDocumentElem: write rights for %s/bug54446test.txt denied in %s on line %d
+Warning: XSLTProcessor::transformToXml(): xsltDocumentElem: write rights for %s/bug54446test_with_ini.txt denied in %s on line %d
 OK, no file created
 OK, file exists
 
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %s element output in %s on line %d
 
-Warning: XSLTProcessor::transformToXml(): File write for %s/bug54446test.txt refused in %s on line %d
+Warning: XSLTProcessor::transformToXml(): File write for %s/bug54446test_with_ini.txt refused in %s on line %d
 
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %d element output in %s on line %d
 
-Warning: XSLTProcessor::transformToXml(): xsltDocumentElem: write rights for %s/bug54446test.txt denied in %s on line %d
+Warning: XSLTProcessor::transformToXml(): xsltDocumentElem: write rights for %s/bug54446test_with_ini.txt denied in %s on line %d
 OK, no file created
 --CREDITS--
 Christian Stocker, chregu@php.net
