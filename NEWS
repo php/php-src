@@ -2,10 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.4.2
 
-
-
-09 Jan 2020, PHP 7.4.2RC1
-
 - Core:
   . Preloading support on Windows has been disabled. (Nikita)
   . Fixed bug #79022 (class_exists returns True for classes that are not ready
