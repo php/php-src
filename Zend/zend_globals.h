@@ -77,6 +77,23 @@ struct _zend_compiler_globals {
 	HashTable *function_table;	/* function symbol table */
 	HashTable *class_table;		/* class table */
 
+	/* Lookup table for the type check cache (TCC). It is a matrix
+	 * having columns corresponding to class entries and rows
+	 * corresponding to type names like "array|Traversable". Only
+	 * type names for which using the cache is profitable are
+	 * included. The number of columns is limited and configurable
+	 * by means of the tcc_class_slots config variable. Class entries
+	 * are assigned columns while loading them. Rows are added at
+	 * run time whenever new type names are encountered. The total
+	 * size of the matrix is limited to the maximum size controlled
+	 * by the tcc_memory_limit config variable.
+	 */
+	uint8_t **type_check_cache;
+
+	uint8_t *tcc_dummy_row;			/* TCC cache row for generating cache misses */
+	int last_assigned_tcc_column;	/* Last TCC column assigned to any CE */
+	HashTable *type_names_table;	/* List of type names corresponding to rows in type_check_cache */
+
 	HashTable filenames_table;
 
 	HashTable *auto_globals;
@@ -167,6 +184,9 @@ struct _zend_executor_globals {
 	zend_long precision;
 
 	int ticks_count;
+
+	zend_long tcc_memory_limit;    /* Memory limit for TCC matrix in bytes */
+	zend_long tcc_num_class_slots; /* Number of columns in TCC matrix */
 
 	uint32_t persistent_constants_count;
 	uint32_t persistent_functions_count;

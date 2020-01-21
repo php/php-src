@@ -28,6 +28,7 @@
 #include "zend_variables.h"
 #include "zend_execute.h"
 #include "zend_type_info.h"
+#include "zend_type_check_cache.h"
 
 
 BEGIN_EXTERN_C()

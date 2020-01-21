@@ -305,6 +305,37 @@ static PHP_INI_MH(OnChangeMemoryLimit)
 
 /* {{{ PHP_INI_MH
  */
+static PHP_INI_MH(OnChangeTccMemoryLimit)
+{
+	zend_long tcc_memory_limit;
+	if (new_value) {
+		tcc_memory_limit = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	} else {
+		// TODO: Can new_value ever be NULL?
+		tcc_memory_limit = 1024 * 1024;
+	}
+	return zend_set_tcc_memory_limit(tcc_memory_limit);
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH
+ */
+static PHP_INI_MH(OnChangeTccClassSlots)
+{
+	zend_long tcc_class_slots;
+	if (new_value) {
+		tcc_class_slots = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
+	} else {
+		// TODO: Can new_value ever be NULL?
+		tcc_class_slots = 1024;
+	}
+
+	return zend_set_tcc_class_slots(tcc_class_slots);
+}
+/* }}} */
+
+/* {{{ PHP_INI_MH
+ */
 static PHP_INI_MH(OnSetLogFilter)
 {
 	const char *filter = ZSTR_VAL(new_value);
@@ -792,6 +823,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("mail.log",					NULL,		PHP_INI_SYSTEM|PHP_INI_PERDIR,		OnUpdateMailLog,			mail_log,			php_core_globals,	core_globals)
 	PHP_INI_ENTRY("browscap",					NULL,		PHP_INI_SYSTEM,		OnChangeBrowscap)
 	PHP_INI_ENTRY("memory_limit",				"128M",		PHP_INI_ALL,		OnChangeMemoryLimit)
+	PHP_INI_ENTRY("tcc_memory_limit",			"1M",		PHP_INI_SYSTEM,		OnChangeTccMemoryLimit)
+	PHP_INI_ENTRY("tcc_class_slots",			"1K",		PHP_INI_SYSTEM,		OnChangeTccClassSlots)
 	PHP_INI_ENTRY("precision",					"14",		PHP_INI_ALL,		OnSetPrecision)
 	PHP_INI_ENTRY("sendmail_from",				NULL,		PHP_INI_ALL,		NULL)
 	PHP_INI_ENTRY("sendmail_path",	DEFAULT_SENDMAIL_PATH,	PHP_INI_SYSTEM,		NULL)

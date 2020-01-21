@@ -116,6 +116,7 @@ struct _zend_class_entry {
 		zend_string *parent_name;
 	};
 	int refcount;
+	int tcc_column_index; /* Assigned column in type check cache */
 	uint32_t ce_flags;
 
 	int default_properties_count;

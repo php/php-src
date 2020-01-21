@@ -513,19 +513,15 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_RECV_VARIADIC:
 				{
 					size_t num_classes = type_num_classes(op_array, opline->op1.num);
-					if (num_classes) {
-						opline->extended_value = cache_size;
-						cache_size += num_classes * sizeof(void *);
-					}
+					opline->extended_value = cache_size;
+					cache_size += (1 + num_classes) * sizeof(void *);
 					break;
 				}
 				case ZEND_VERIFY_RETURN_TYPE:
 				{
 					size_t num_classes = type_num_classes(op_array, 0);
-					if (num_classes) {
-						opline->op2.num = cache_size;
-						cache_size += num_classes * sizeof(void *);
-					}
+					opline->op2.num = cache_size;
+					cache_size += (1 + num_classes) * sizeof(void *);
 					break;
 				}
 				case ZEND_ASSIGN_STATIC_PROP_OP:
@@ -588,6 +584,10 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						} else {
 							opline->extended_value = cache_size | (opline->extended_value & ZEND_FETCH_OBJ_FLAGS);
 							cache_size += 3 * sizeof(void *);
+							if (opline->opcode == ZEND_ASSIGN_OBJ || opline->opcode == ZEND_ASSIGN_OBJ_REF) {
+								// Property writes use an additional slot for type checking using TCC
+								cache_size += sizeof(void *);
+							}
 							if (opline->op1_type == IS_UNUSED) {
 								property_slot[opline->op2.constant] = opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS;
 							}
@@ -715,6 +715,10 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 								opline->op1.constant,
 								LITERAL_STATIC_PROPERTY,
 								&cache_size) | (opline->extended_value & ZEND_FETCH_OBJ_FLAGS);
+							if (opline->opcode == ZEND_ASSIGN_STATIC_PROP || opline->opcode == ZEND_ASSIGN_STATIC_PROP_REF) {
+								// Property writes use an additional slot for type checking using TCC
+								cache_size += sizeof(void *);
+							}
 						} else {
 							opline->extended_value = cache_size | (opline->extended_value & ZEND_FETCH_OBJ_FLAGS);
 							cache_size += 3 * sizeof(void *);

@@ -1144,9 +1144,33 @@ static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execu
 static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot)
 {
 	uint32_t type_mask;
+	uint8_t *tcc = NULL;
 
 	if (ZEND_TYPE_HAS_CLASS(arg_info->type) && Z_TYPE_P(arg) == IS_OBJECT) {
 		zend_class_entry *ce;
+		uint8_t *tcc_cache_row = NULL;
+		tcc_cache_row = *cache_slot;
+		if (UNEXPECTED(!tcc_cache_row)) {
+			// Pointer to the row in the type check cache is not
+			// in the run time cache yet. Fetch it now.
+			tcc_cache_row = tcc_get_row(&arg_info->type);
+			*cache_slot = tcc_cache_row;
+		}
+
+		// Compute address of type check cache entry
+		tcc = tcc_cache_row + Z_OBJCE_P(arg)->tcc_column_index;
+
+		if (EXPECTED(*tcc)) {
+			// We did this type check before and it
+			// was a match. We are done.
+			return;
+		}
+
+		ZEND_ASSERT(*tcc == 0);
+
+		// Jump to the cache slots that contain the CE.
+		cache_slot++;
+
 		if (ZEND_TYPE_HAS_LIST(arg_info->type)) {
 			zend_type *list_type;
 			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(arg_info->type), list_type) {
@@ -1162,6 +1186,10 @@ static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_arra
 					*cache_slot = ce;
 				}
 				if (instanceof_function(Z_OBJCE_P(arg), ce)) {
+					if (TCC_CONTAINS(*cache_slot, Z_OBJCE_P(arg))) {
+						// Store type check result in cache
+						*tcc = 1;
+					}
 					return;
 				}
 				cache_slot++;
@@ -1177,17 +1205,32 @@ static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_arra
 				*cache_slot = (void *) ce;
 			}
 			if (instanceof_function(Z_OBJCE_P(arg), ce)) {
+				if (TCC_CONTAINS(*cache_slot, Z_OBJCE_P(arg))) {
+					// Store type check result in cache
+					*tcc = 1;
+				}
 				return;
 			}
 		}
+	} else if (ZEND_TYPE_HAS_CLASS(arg_info->type)) {
+		// Jump to the cache slots that contain the CE.
+		cache_slot++;
 	}
 
 builtin_types:
 	type_mask = ZEND_TYPE_FULL_MASK(arg_info->type);
 	if ((type_mask & MAY_BE_CALLABLE) && zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL)) {
+		if (tcc && TCC_CONTAINS(*cache_slot, Z_OBJCE_P(arg))) {
+			// Store type check result in cache
+			*tcc = 1;
+		}
 		return;
 	}
 	if ((type_mask & MAY_BE_ITERABLE) && zend_is_iterable(arg)) {
+		if (tcc && TCC_CONTAINS(*cache_slot, Z_OBJCE_P(arg))) {
+			// Store type check result in cache
+			*tcc = 1;
+		}
 		return;
 	}
 	if (zend_verify_scalar_type_hint(type_mask, arg, ZEND_ARG_USES_STRICT_TYPES(), /* is_internal */ 0)) {
