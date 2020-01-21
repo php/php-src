@@ -45,6 +45,10 @@ PHP                                                                        NEWS
 - Libxml:
   . Fixed bug #79029 (Use After Free's in XMLReader / XMLWriter). (Laruence)
 
+- Mbstring:
+  . Fixed bug #79037 (global buffer-overflow in `mbfl_filt_conv_big5_wchar`).
+    (CVE-2020-7060) (Nikita)
+
 - OPcache:
   . Fixed bug #78961 (erroneous optimization of re-assigned $GLOBALS). (Dmitry)
   . Fixed bug #78950 (Preloading trait method with static variables). (Nikita)
@@ -69,6 +73,8 @@ PHP                                                                        NEWS
     Kentarō)
 
 - Session:
+  . Fixed bug #79091 (heap use-after-free in session_create_id()). (cmb,
+    Nikita)
   . Fixed bug #79031 (Session unserialization problem). (Nikita)
 
 - Shmop:
@@ -82,6 +88,7 @@ PHP                                                                        NEWS
   . Fixed bug #78976 (SplFileObject::fputcsv returns -1 on failure). (cmb)
 
 - Standard:
+  . Fixed bug #79099 (OOB read in php_strip_tags_ex). (CVE-2020-7059). (cmb)
   . Fixed bug #79000 (Non-blocking socket stream reports EAGAIN as error).
     (Nikita)
   . Fixed bug #54298 (Using empty additional_headers adding extraneous CRLF).
