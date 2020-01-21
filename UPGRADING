@@ -472,6 +472,11 @@ PHP 8.0 UPGRADE NOTES
 12. Windows Support
 ========================================
 
+- Standard:
+  . Program execution functions (proc_open(), exec(), popen() etc.) using the
+    shell now consistently execute `%comspec% /s /c "$commandline"`, which has
+    the same effect as executing `$commandline` (without additional quotes).
+
 - php-test-pack:
   . The test runner has been renamed from run-test.php to run-tests.php, to
     match its name in php-src.

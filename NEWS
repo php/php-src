@@ -108,6 +108,7 @@ PHP                                                                        NEWS
     filter). (kkopachev)
   . Fixed bug #78385 (parse_url() does not include 'query' when question mark
     is the last char). (Islam Israfilov)
+  . Made quoting of cmd execution functions consistent. (cmb)
 
 - tidy:
   . Removed the unused $use_include_path parameter from tidy_repair_string().
