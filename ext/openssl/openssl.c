@@ -4691,7 +4691,6 @@ PHP_FUNCTION(openssl_pkey_get_public)
 		RETURN_FALSE;
 	}
 	ZVAL_RES(return_value, res);
-	Z_ADDREF_P(return_value);
 }
 /* }}} */
 
@@ -4733,7 +4732,6 @@ PHP_FUNCTION(openssl_pkey_get_private)
 		RETURN_FALSE;
 	}
 	ZVAL_RES(return_value, res);
-	Z_ADDREF_P(return_value);
 }
 
 /* }}} */

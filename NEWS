@@ -15,6 +15,9 @@ PHP                                                                        NEWS
   . Fixed bug #79084 (mysqlnd may fetch wrong column indexes with MYSQLI_BOTH).
     (cmb)
 
+- OpenSSL:
+  . Fixed bug #79145 (openssl memory leak). (cmb, Nikita)
+
 - Reflection:
   . Fixed bug #79115 (ReflectionClass::isCloneable call reflected class
     __destruct). (Nikita)
