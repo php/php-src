@@ -5601,28 +5601,14 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	zend_class_entry *tmp_ce, *ce;
-	zend_property_info *tmp_info;
+	zend_class_entry *ce;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	ce = tmp_ce = intern->ce;
-	while (tmp_ce && (tmp_info = zend_hash_find_ptr(&tmp_ce->properties_info, ref->unmangled_name)) != NULL) {
-		if (tmp_info->flags & ZEND_ACC_PRIVATE) {
-			/* it's a private property, so it can't be inherited */
-			break;
-		}
-		ce = tmp_ce;
-		if (tmp_ce == tmp_info->ce) {
-			/* declared in this class, done */
-			break;
-		}
-		tmp_ce = tmp_ce->parent;
-	}
-
+	ce = ref->prop ? ref->prop->ce : intern->ce;
 	zend_reflection_class_factory(ce, return_value);
 }
 /* }}} */
