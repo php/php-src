@@ -59,7 +59,7 @@ static const sljit_u8 reg_map[SLJIT_NUMBER_OF_REGISTERS + 6] = {
 #define TMP_REG3_mapped 6
 #define ADDR_TMP_mapped 7
 
-/* Flags are kept in volatile registers. */
+/* Flags are keept in volatile registers. */
 #define EQUAL_FLAG 8
 /* And carry flag as well. */
 #define ULESS_FLAG 9
@@ -115,7 +115,7 @@ SLJIT_API_FUNC_ATTRIBUTE const char *sljit_get_platform_name(void)
 typedef sljit_uw sljit_ins;
 
 struct jit_instr {
-	const struct tilegx_opcode* opcode;
+	const struct tilegx_opcode* opcode; 
 	tilegx_pipeline pipe;
 	unsigned long input_registers;
 	unsigned long output_registers;
@@ -896,7 +896,7 @@ static sljit_s32 push_jr_buffer(struct sljit_compiler *compiler, tilegx_mnemonic
 	inst_buf[inst_buf_index].output_registers = 0;
 	inst_buf[inst_buf_index].line = line;
 	inst_buf_index++;
-
+ 
 	return flush_buffer(compiler);
 }
 
@@ -1178,7 +1178,7 @@ SLJIT_API_FUNC_ATTRIBUTE sljit_s32 sljit_emit_enter(struct sljit_compiler *compi
 {
 	sljit_ins base;
 	sljit_s32 i, tmp;
-
+ 
 	CHECK_ERROR();
 	CHECK(check_sljit_emit_enter(compiler, options, args, scratches, saveds, fscratches, fsaveds, local_size));
 	set_emit_enter(compiler, options, args, scratches, saveds, fscratches, fsaveds, local_size);
