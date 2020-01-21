@@ -6057,7 +6057,7 @@ PHP_FUNCTION(array_reduce)
 		} else {
 			zval_ptr_dtor(&args[1]);
 			zval_ptr_dtor(&args[0]);
-			return;
+			RETURN_NULL();
 		}
 	} ZEND_HASH_FOREACH_END();
 
