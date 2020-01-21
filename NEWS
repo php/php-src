@@ -24,6 +24,9 @@ PHP                                                                        NEWS
   . Fixed #79114 (Eval class during preload causes class to be only half
     available). (Laruence)
 
+- OpenSSL:
+  . Fixed bug #79145 (openssl memory leak). (cmb, Nikita)
+
 - Reflection:
   . Fixed bug #79115 (ReflectionClass::isCloneable call reflected class
     __destruct). (Nikita)
