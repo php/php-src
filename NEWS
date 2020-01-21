@@ -32,6 +32,10 @@ PHP                                                                        NEWS
 - Libxml:
   . Fixed bug #79029 (Use After Free's in XMLReader / XMLWriter). (Laruence)
 
+- Mbstring:
+  . Fixed bug #79037 (global buffer-overflow in `mbfl_filt_conv_big5_wchar`). 
+    (CVE-2020-7060) (Nikita)
+
 - OPcache:
   . Fixed bug #79040 (Warning Opcode handlers are unusable due to ASLR). (cmb)
 
@@ -47,10 +51,14 @@ PHP                                                                        NEWS
   . Fixed bug #78982 (pdo_pgsql returns dead persistent connection). (SATŌ
     Kentarō)
 
+- Session:
+  . Fixed bug #79091 (heap use-after-free in session_create_id()). (cmb, Nikita)
+
 - Shmop:
   . Fixed bug #78538 (shmop memory leak). (cmb)
 
 - Standard:
+  . Fixed bug #79099 (OOB read in php_strip_tags_ex). (CVE-2020-7059). (cmb)
   . Fixed bug #54298 (Using empty additional_headers adding extraneous CRLF).
     (cmb)
 
