@@ -1030,7 +1030,6 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties) /* {{{ */
 ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 {
 	if (!(class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-		zend_class_entry *ce;
 		zend_class_constant *c;
 		zval *val;
 		zend_property_info *prop_info;
@@ -1056,39 +1055,33 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 			}
 		}
 
-		ce = class_type;
-		while (ce) {
-			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
-				if (prop_info->ce == ce) {
-					if (prop_info->flags & ZEND_ACC_STATIC) {
-						val = CE_STATIC_MEMBERS(class_type) + prop_info->offset;
-					} else {
-						val = (zval*)((char*)class_type->default_properties_table + prop_info->offset - OBJ_PROP_TO_OFFSET(0));
-					}
-					if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-						if (ZEND_TYPE_IS_SET(prop_info->type)) {
-							zval tmp;
+		ZEND_HASH_FOREACH_PTR(&class_type->properties_info, prop_info) {
+			if (prop_info->flags & ZEND_ACC_STATIC) {
+				val = CE_STATIC_MEMBERS(class_type) + prop_info->offset;
+			} else {
+				val = (zval*)((char*)class_type->default_properties_table + prop_info->offset - OBJ_PROP_TO_OFFSET(0));
+			}
+			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+				if (ZEND_TYPE_IS_SET(prop_info->type)) {
+					zval tmp;
 
-							ZVAL_COPY(&tmp, val);
-							if (UNEXPECTED(zval_update_constant_ex(&tmp, ce) != SUCCESS)) {
-								zval_ptr_dtor(&tmp);
-								return FAILURE;
-							}
-							/* property initializers must always be evaluated with strict types */;
-							if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, /* strict */ 1))) {
-								zval_ptr_dtor(&tmp);
-								return FAILURE;
-							}
-							zval_ptr_dtor(val);
-							ZVAL_COPY_VALUE(val, &tmp);
-						} else if (UNEXPECTED(zval_update_constant_ex(val, ce) != SUCCESS)) {
-							return FAILURE;
-						}
+					ZVAL_COPY(&tmp, val);
+					if (UNEXPECTED(zval_update_constant_ex(&tmp, prop_info->ce) != SUCCESS)) {
+						zval_ptr_dtor(&tmp);
+						return FAILURE;
 					}
+					/* property initializers must always be evaluated with strict types */;
+					if (UNEXPECTED(!zend_verify_property_type(prop_info, &tmp, /* strict */ 1))) {
+						zval_ptr_dtor(&tmp);
+						return FAILURE;
+					}
+					zval_ptr_dtor(val);
+					ZVAL_COPY_VALUE(val, &tmp);
+				} else if (UNEXPECTED(zval_update_constant_ex(val, prop_info->ce) != SUCCESS)) {
+					return FAILURE;
 				}
-			} ZEND_HASH_FOREACH_END();
-			ce = ce->parent;
-		}
+			}
+		} ZEND_HASH_FOREACH_END();
 
 		class_type->ce_flags |= ZEND_ACC_CONSTANTS_UPDATED;
 	}
