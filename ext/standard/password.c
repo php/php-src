@@ -37,10 +37,10 @@
 
 static zend_array php_password_algos;
 
-int php_password_algo_register(const char *ident, const php_password_algo *algo) {
+int php_password_algo_register(const php_password_algo *algo) {
 	zval zalgo;
 	ZVAL_PTR(&zalgo, (php_password_algo*)algo);
-	if (zend_hash_str_add(&php_password_algos, ident, strlen(ident), &zalgo)) {
+	if (zend_hash_str_add(&php_password_algos, algo->id, strlen(algo->id), &zalgo)) {
 		return SUCCESS;
 	}
 	return FAILURE;
@@ -225,13 +225,19 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	return result;
 }
 
+static void php_password_bcrypt_get_default_options(zval *return_value) {
+	add_assoc_long(return_value, "cost", PHP_PASSWORD_BCRYPT_COST);
+}
+
 const php_password_algo php_password_algo_bcrypt = {
+	"2y",
 	"bcrypt",
 	php_password_bcrypt_hash,
 	php_password_bcrypt_verify,
 	php_password_bcrypt_needs_rehash,
 	php_password_bcrypt_get_info,
 	php_password_bcrypt_valid,
+	php_password_bcrypt_get_default_options,
 };
 
 
@@ -274,6 +280,12 @@ static int php_password_argon2_get_info(zval *return_value, const zend_string *h
 	add_assoc_long(return_value, "threads", threads);
 
 	return SUCCESS;
+}
+
+static void php_password_argon2_get_default_options(zval *return_value) {
+	add_assoc_long(return_value, "memory_cost", PHP_PASSWORD_ARGON2_MEMORY_COST);
+	add_assoc_long(return_value, "time_cost", PHP_PASSWORD_ARGON2_TIME_COST);
+	add_assoc_long(return_value, "threads", PHP_PASSWORD_ARGON2_THREADS);
 }
 
 static zend_bool php_password_argon2_needs_rehash(const zend_string *hash, zend_array *options) {
@@ -394,11 +406,13 @@ static zend_string *php_password_argon2i_hash(const zend_string *password, zend_
 
 const php_password_algo php_password_algo_argon2i = {
 	"argon2i",
+	"argon2i",
 	php_password_argon2i_hash,
 	php_password_argon2i_verify,
 	php_password_argon2_needs_rehash,
 	php_password_argon2_get_info,
 	NULL,
+	php_password_argon2_get_default_options,
 };
 
 /* argon2id specific methods */
@@ -413,11 +427,13 @@ static zend_string *php_password_argon2id_hash(const zend_string *password, zend
 
 const php_password_algo php_password_algo_argon2id = {
 	"argon2id",
+	"argon2id",
 	php_password_argon2id_hash,
 	php_password_argon2id_verify,
 	php_password_argon2_needs_rehash,
 	php_password_argon2_get_info,
 	NULL,
+	php_password_argon2_get_default_options,
 };
 #endif
 
@@ -426,18 +442,18 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 	zend_hash_init(&php_password_algos, 4, NULL, ZVAL_PTR_DTOR, 1);
 	REGISTER_NULL_CONSTANT("PASSWORD_DEFAULT", CONST_CS | CONST_PERSISTENT);
 
-	if (FAILURE == php_password_algo_register("2y", &php_password_algo_bcrypt)) {
+	if (FAILURE == php_password_algo_register(&php_password_algo_bcrypt)) {
 		return FAILURE;
 	}
 	REGISTER_STRING_CONSTANT("PASSWORD_BCRYPT", "2y", CONST_CS | CONST_PERSISTENT);
 
 #if HAVE_ARGON2LIB
-	if (FAILURE == php_password_algo_register("argon2i", &php_password_algo_argon2i)) {
+	if (FAILURE == php_password_algo_register(&php_password_algo_argon2i)) {
 		return FAILURE;
 	}
 	REGISTER_STRING_CONSTANT("PASSWORD_ARGON2I", "argon2i", CONST_CS | CONST_PERSISTENT);
 
-	if (FAILURE == php_password_algo_register("argon2id", &php_password_algo_argon2id)) {
+	if (FAILURE == php_password_algo_register(&php_password_algo_argon2id)) {
 		return FAILURE;
 	}
 	REGISTER_STRING_CONSTANT("PASSWORD_ARGON2ID", "argon2id", CONST_CS | CONST_PERSISTENT);
@@ -696,5 +712,24 @@ PHP_FUNCTION(password_algos) {
 	ZEND_HASH_FOREACH_STR_KEY(&php_password_algos, algo) {
 		add_next_index_str(return_value, zend_string_copy(algo));
 	} ZEND_HASH_FOREACH_END();
+}
+/* }}} */
+
+/* {{{ proto array password_default_algo() */
+PHP_FUNCTION(password_default_algo) {
+	const php_password_algo *algo;
+	zval options;
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	array_init(return_value);
+	array_init(&options);
+
+	algo = php_password_algo_default();
+	algo->get_default_options(&options);
+
+	add_assoc_string(return_value, "algo", algo->id);
+	add_assoc_string(return_value, "algoName", algo->name);
+	add_assoc_zval(return_value, "options", &options);
 }
 /* }}} */

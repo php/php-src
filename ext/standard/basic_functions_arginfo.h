@@ -1760,6 +1760,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_password_algos arginfo_ob_list_handlers
 
+#define arginfo_password_default_algo arginfo_ob_list_handlers
+
 #if defined(PHP_CAN_SUPPORT_PROC_OPEN)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_proc_open, 0, 0, 3)
 	ZEND_ARG_INFO(0, cmd)

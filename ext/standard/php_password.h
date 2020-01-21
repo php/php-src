@@ -23,6 +23,7 @@ PHP_FUNCTION(password_verify);
 PHP_FUNCTION(password_needs_rehash);
 PHP_FUNCTION(password_get_info);
 PHP_FUNCTION(password_algos);
+PHP_FUNCTION(password_default_algo);
 
 PHP_MINIT_FUNCTION(password);
 PHP_MSHUTDOWN_FUNCTION(password);
@@ -41,12 +42,14 @@ PHP_MSHUTDOWN_FUNCTION(password);
 #endif
 
 typedef struct _php_password_algo {
+	const char *id;
 	const char *name;
 	zend_string *(*hash)(const zend_string *password, zend_array *options);
 	zend_bool (*verify)(const zend_string *password, const zend_string *hash);
 	zend_bool (*needs_rehash)(const zend_string *password, zend_array *options);
 	int (*get_info)(zval *return_value, const zend_string *hash);
 	zend_bool (*valid)(const zend_string *hash);
+	void (*get_default_options)(zval *return_value);
 } php_password_algo;
 
 extern const php_password_algo php_password_algo_bcrypt;
@@ -55,7 +58,7 @@ extern const php_password_algo php_password_algo_argon2i;
 extern const php_password_algo php_password_algo_argon2id;
 #endif
 
-PHPAPI int php_password_algo_register(const char*, const php_password_algo*);
+PHPAPI int php_password_algo_register(const php_password_algo*);
 PHPAPI void php_password_algo_unregister(const char*);
 PHPAPI const php_password_algo* php_password_algo_default();
 PHPAPI zend_string *php_password_algo_extract_ident(const zend_string*);

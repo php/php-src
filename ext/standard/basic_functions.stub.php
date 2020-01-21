@@ -1131,6 +1131,8 @@ function password_verify(string $password, string $hash): bool {}
 
 function password_algos(): array {}
 
+function password_default_algo(): array {}
+
 /* proc_open.c */
 
 #ifdef PHP_CAN_SUPPORT_PROC_OPEN

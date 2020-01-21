@@ -113,7 +113,7 @@ static zend_bool php_sodium_argon2_needs_rehash(const zend_string *hash, zend_ar
 
 static int php_sodium_argon2_get_info(zval *return_value, const zend_string *hash) {
 	const char* p = NULL;
-	zend_long v = 0, threads = 1;
+	zend_long v = 0, threads = PHP_SODIUM_PWHASH_THREADS;
 	zend_long memory_cost = PHP_SODIUM_PWHASH_MEMLIMIT;
 	zend_long time_cost = PHP_SODIUM_PWHASH_OPSLIMIT;
 
@@ -140,6 +140,12 @@ static int php_sodium_argon2_get_info(zval *return_value, const zend_string *has
 	return SUCCESS;
 }
 
+static void php_sodium_argon2_get_default_options(zval *return_value) {
+	add_assoc_long(return_value, "memory_cost", PHP_SODIUM_PWHASH_MEMLIMIT);
+	add_assoc_long(return_value, "time_cost", PHP_SODIUM_PWHASH_OPSLIMIT);
+	add_assoc_long(return_value, "threads", PHP_SODIUM_PWHASH_THREADS);
+}
+
 /* argon2i specific methods */
 
 static zend_string *php_sodium_argon2i_hash(const zend_string *password, zend_array *options) {
@@ -148,11 +154,13 @@ static zend_string *php_sodium_argon2i_hash(const zend_string *password, zend_ar
 
 static const php_password_algo sodium_algo_argon2i = {
 	"argon2i",
+	"argon2i",
 	php_sodium_argon2i_hash,
 	php_sodium_argon2_verify,
 	php_sodium_argon2_needs_rehash,
 	php_sodium_argon2_get_info,
 	NULL,
+	php_sodium_argon2_get_default_options,
 };
 
 /* argon2id specific methods */
@@ -163,11 +171,13 @@ static zend_string *php_sodium_argon2id_hash(const zend_string *password, zend_a
 
 static const php_password_algo sodium_algo_argon2id = {
 	"argon2id",
+	"argon2id",
 	php_sodium_argon2id_hash,
 	php_sodium_argon2_verify,
 	php_sodium_argon2_needs_rehash,
 	php_sodium_argon2_get_info,
 	NULL,
+	php_sodium_argon2_get_default_options,
 };
 
 PHP_MINIT_FUNCTION(sodium_password_hash) /* {{{ */ {
@@ -180,12 +190,12 @@ PHP_MINIT_FUNCTION(sodium_password_hash) /* {{{ */ {
 	}
 	zend_string_release(argon2i);
 
-	if (FAILURE == php_password_algo_register("argon2i", &sodium_algo_argon2i)) {
+	if (FAILURE == php_password_algo_register(&sodium_algo_argon2i)) {
 		return FAILURE;
 	}
 	REGISTER_STRING_CONSTANT("PASSWORD_ARGON2I", "argon2i", CONST_CS | CONST_PERSISTENT);
 
-	if (FAILURE == php_password_algo_register("argon2id", &sodium_algo_argon2id)) {
+	if (FAILURE == php_password_algo_register(&sodium_algo_argon2id)) {
 		return FAILURE;
 	}
 	REGISTER_STRING_CONSTANT("PASSWORD_ARGON2ID", "argon2id", CONST_CS | CONST_PERSISTENT);

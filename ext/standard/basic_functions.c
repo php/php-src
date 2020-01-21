@@ -315,6 +315,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(password_needs_rehash,											arginfo_password_needs_rehash)
 	PHP_FE(password_verify,													arginfo_password_verify)
 	PHP_FE(password_algos,													arginfo_password_algos)
+	PHP_FE(password_default_algo,											arginfo_password_default_algo)
 	PHP_FE(convert_uuencode,												arginfo_convert_uuencode)
 	PHP_FE(convert_uudecode,												arginfo_convert_uudecode)
 
