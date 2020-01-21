@@ -1860,7 +1860,7 @@ TEST $file
 
 		} else {
 
-			if (!isset($section_text['PHPDBG']) && @count($section_text['FILE']) + @count($section_text['FILEEOF']) + @count($section_text['FILE_EXTERNAL']) != 1) {
+			if (!isset($section_text['PHPDBG']) && isset($section_text['FILE']) + isset($section_text['FILEEOF']) + isset($section_text['FILE_EXTERNAL']) != 1) {
 				$bork_info = "missing section --FILE--";
 			}
 
@@ -1885,7 +1885,7 @@ TEST $file
 				}
 			}
 
-			if ((@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX'])) != 1) {
+			if ((isset($section_text['EXPECT']) + isset($section_text['EXPECTF']) + isset($section_text['EXPECTREGEX'])) != 1) {
 				$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX--";
 			}
 		}
@@ -2209,7 +2209,7 @@ TEST $file
 					$test_files[] = array($f, $file);
 				}
 			}
-			$test_cnt += @count($test_files) - 1;
+			$test_cnt += count($test_files) - 1;
 			$test_idx--;
 
 			show_redirect_start($IN_REDIRECT['TESTS'], $tested, $tested_file);
@@ -2243,7 +2243,7 @@ TEST $file
 		}
 	}
 
-	if (is_array($org_file) || @count($section_text['REDIRECTTEST']) == 1) {
+	if (is_array($org_file) || isset($section_text['REDIRECTTEST'])) {
 
 		if (is_array($org_file)) {
 			$file = $org_file[0];
