@@ -5278,7 +5278,7 @@ state_1:
 			}
 
 			lc = '>';
-			if (is_xml && *(p -1) == '-') {
+			if (is_xml && p >= buf + 1 && *(p -1) == '-') {
 				break;
 			}
 			in_q = state = is_xml = 0;
@@ -5310,7 +5310,7 @@ state_1:
 			goto reg_char_1;
 		case '!':
 			/* JavaScript & Other HTML scripting languages */
-			if (*(p-1) == '<') {
+			if (p >= buf + 1 && *(p-1) == '<') {
 				state = 3;
 				lc = c;
 				p++;
@@ -5320,7 +5320,7 @@ state_1:
 			}
 			break;
 		case '?':
-			if (*(p-1) == '<') {
+			if (p >= buf + 1 && *(p-1) == '<') {
 				br=0;
 				state = 2;
 				p++;
