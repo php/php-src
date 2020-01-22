@@ -13,9 +13,9 @@ var_dump(mb_convert_encoding('foo', 'UTF-8', array(['bar'], ['baz'])));
 Warning: mb_convert_encoding(): Illegal character encoding specified in %s on line %d
 string(0) ""
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 
-Notice: Array to string conversion in %s on line %d
+Warning: Array to string conversion in %s on line %d
 
 Warning: mb_convert_encoding(): Illegal character encoding specified in %s on line %d
 string(3) "foo"
