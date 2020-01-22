@@ -3243,6 +3243,7 @@ PHP_FUNCTION(mb_convert_encoding)
 					} else {
 						_from_encodings = estrdup(ZSTR_VAL(encoding_str));
 					}
+					zend_string_release(encoding_str);
 				} ZEND_HASH_FOREACH_END();
 
 				if (_from_encodings != NULL && !strlen(_from_encodings)) {
