@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2019, PHP 7.2.27
+23 Jan 2020, PHP 7.2.27
 
 - Mbstring:
   . Fixed bug #79037 (global buffer-overflow in `mbfl_filt_conv_big5_wchar`). 
