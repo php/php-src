@@ -43,6 +43,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #78902 (Memory leak when using stream_filter_append). (liudaixiao)
+  . Fixed bug #78969 (PASSWORD_DEFAULT should match PASSWORD_BCRYPT instead of being null). (kocsismate)
 
 - Zip:
   . Add ZipArchive::CM_LZMA2 constant (since libzip 1.6.0). (remi)

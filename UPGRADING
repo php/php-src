@@ -150,7 +150,7 @@ PHP 7.4 UPGRADE NOTES
   . Password hashing algorithm identifiers are now nullable strings rather
     than integers.
 
-     * PASSWORD_DEFAULT was int 1; now is null
+     * PASSWORD_DEFAULT was int 1; now is null in PHP <7.4.3 and string '2y' afterwards
      * PASSWORD_BCRYPT was int 1; now is string '2y'
      * PASSWORD_ARGON2I was int 2; now is string 'argon2i'
      * PASSWORD_ARGON2ID was int 3; now is string 'argon2id'
@@ -726,7 +726,7 @@ PHP 7.4 UPGRADE NOTES
   the INI directive opcache.cache_id. All processes with the same cache ID and
   user share an OPcache instance.
 
-- The OpenSSL default config path has been changed to 
+- The OpenSSL default config path has been changed to
   "C:\Program Files\Common Files\SSL\openssl.cnf" and
   "C:\Program Files (x86)\Common Files\SSL\openssl.cnf", respectively.
 

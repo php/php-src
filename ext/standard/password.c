@@ -496,7 +496,7 @@ const php_password_algo php_password_algo_argon2id = {
 PHP_MINIT_FUNCTION(password) /* {{{ */
 {
 	zend_hash_init(&php_password_algos, 4, NULL, ZVAL_PTR_DTOR, 1);
-	REGISTER_NULL_CONSTANT("PASSWORD_DEFAULT", CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("PASSWORD_DEFAULT", "2y", CONST_CS | CONST_PERSISTENT);
 
 	if (FAILURE == php_password_algo_register("2y", &php_password_algo_bcrypt)) {
 		return FAILURE;
