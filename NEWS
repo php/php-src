@@ -11,6 +11,9 @@ PHP                                                                        NEWS
   . Fixed bug #79078 (Hypothetical use-after-free in curl_multi_add_handle()).
     (cmb)
 
+- MBString:
+  . Fixed bug #79154 (mb_convert_encoding() can modify $from_encoding). (cmb)
+
 - MySQLnd:
   . Fixed bug #79084 (mysqlnd may fetch wrong column indexes with MYSQLI_BOTH).
     (cmb)
