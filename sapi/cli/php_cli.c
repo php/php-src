@@ -1278,7 +1278,7 @@ int main(int argc, char *argv[])
 			case '?':
 				php_cli_usage(argv[0]);
 				goto out;
-			case -2: /* print usage on bad options, exit 1 */
+			case PHP_GETOPT_INVALID_ARG: /* print usage on bad options, exit 1 */
 				php_cli_usage(argv[0]);
 				exit_status = 1;
 				goto out;

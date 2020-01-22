@@ -46,7 +46,7 @@ static int php_opt_error(int argc, char * const *argv, int oint, int optchr, int
 			break;
 		}
 	}
-	return(-2);
+	return PHP_GETOPT_INVALID_ARG;
 }
 /* }}} */
 
