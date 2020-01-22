@@ -764,6 +764,11 @@ PHP_FUNCTION(count)
 		Z_PARAM_LONG(mode)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (mode != COUNT_NORMAL && mode != COUNT_RECURSIVE) {
+		zend_value_error("Mode value is invalid");
+		RETURN_THROWS();
+	}
+
 	switch (Z_TYPE_P(array)) {
 		case IS_NULL:
 			/* Intentionally not converted to an exception */
