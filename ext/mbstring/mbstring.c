@@ -3369,12 +3369,12 @@ PHP_FUNCTION(mb_convert_encoding)
 
 					if ( _from_encodings) {
 						l = strlen(_from_encodings);
-						n = strlen(Z_STRVAL_P(hash_entry));
+						n = strlen(ZSTR_VAL(encoding_str));
 						_from_encodings = erealloc(_from_encodings, l+n+2);
 						memcpy(_from_encodings + l, ",", 1);
-						memcpy(_from_encodings + l + 1, Z_STRVAL_P(hash_entry), Z_STRLEN_P(hash_entry) + 1);
+						memcpy(_from_encodings + l + 1, ZSTR_VAL(encoding_str), ZSTR_LEN(encoding_str) + 1);
 					} else {
-						_from_encodings = estrdup(Z_STRVAL_P(hash_entry));
+						_from_encodings = estrdup(ZSTR_VAL(encoding_str));
 					}
 					zend_string_release(encoding_str);
 				} ZEND_HASH_FOREACH_END();

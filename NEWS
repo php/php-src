@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug #79112 (IMAP extension can't find OpenSSL libraries at configure
     time). (Nikita)
 
+- MBString:
+  . Fixed bug #79149 (SEGV in mb_convert_encoding with non-string encodings).
+    (cmb)
+
 - MySQLnd:
   . Fixed bug #79084 (mysqlnd may fetch wrong column indexes with MYSQLI_BOTH).
     (cmb)
