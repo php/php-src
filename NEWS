@@ -25,6 +25,10 @@ PHP                                                                        NEWS
   . Fixed bug #79115 (ReflectionClass::isCloneable call reflected class
     __destruct). (Nikita)
 
+- SPL:
+  . Fixed bug #79151 (heap use after free caused by
+    spl_dllist_it_helper_move_forward). (Nikita)
+
 23 Jan 2020, PHP 7.3.14
 
 - Core
