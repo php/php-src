@@ -587,7 +587,6 @@ static void xbuf_format_converter(void *xbuf, zend_bool is_char, const char *fmt
 
 
 				case 's':
-				case 'v':
 					s = va_arg(ap, char *);
 					if (s != NULL) {
 						if (!adjust_precision) {
