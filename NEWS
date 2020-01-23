@@ -3,7 +3,9 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.4.3
 
 - Core:
-  . Fixed bug ##79146 (cscript can fail to run on some systems). (clarodeus)
+  . Fixed bug #79146 (cscript can fail to run on some systems). (clarodeus)
+  . Fixed bug #79155 (Property nullability lost when using multiple property
+    definition). (Nikita)
 
 - CURL:
   . Fixed bug #79078 (Hypothetical use-after-free in curl_multi_add_handle()).

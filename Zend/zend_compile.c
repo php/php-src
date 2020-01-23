@@ -5282,6 +5282,8 @@ ZEND_API void zend_set_function_arg_flags(zend_function *func) /* {{{ */
 static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null) /* {{{ */
 {
 	zend_bool allow_null = force_allow_null;
+	zend_ast_attr orig_ast_attr = ast->attr;
+	zend_type type;
 	if (ast->attr & ZEND_TYPE_NULLABLE) {
 		allow_null = 1;
 		ast->attr &= ~ZEND_TYPE_NULLABLE;
@@ -5291,15 +5293,15 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 		return ZEND_TYPE_ENCODE(ast->attr, allow_null);
 	} else {
 		zend_string *class_name = zend_ast_get_str(ast);
-		zend_uchar type = zend_lookup_builtin_type_by_name(class_name);
+		zend_uchar type_code = zend_lookup_builtin_type_by_name(class_name);
 
-		if (type != 0) {
+		if (type_code != 0) {
 			if ((ast->attr & ZEND_NAME_NOT_FQ) != ZEND_NAME_NOT_FQ) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Type declaration '%s' must be unqualified",
 					ZSTR_VAL(zend_string_tolower(class_name)));
 			}
-			return ZEND_TYPE_ENCODE(type, allow_null);
+			type = ZEND_TYPE_ENCODE(type_code, allow_null);
 		} else {
 			uint32_t fetch_type = zend_get_class_fetch_type_ast(ast);
 			if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
@@ -5310,9 +5312,12 @@ static zend_type zend_compile_typename(zend_ast *ast, zend_bool force_allow_null
 				zend_string_addref(class_name);
 			}
 
-			return ZEND_TYPE_ENCODE_CLASS(class_name, allow_null);
+			type = ZEND_TYPE_ENCODE_CLASS(class_name, allow_null);
 		}
 	}
+
+	ast->attr = orig_ast_attr;
+	return type;
 }
 /* }}} */
 
