@@ -59414,16 +59414,12 @@ void zend_vm_init(void)
 	VM_TRACE_START();
 }
 
-static HashTable *zend_handlers_table = NULL;
-
 void zend_vm_dtor(void)
 {
 	VM_TRACE_END();
-	if (zend_handlers_table) {
-		zend_hash_destroy(zend_handlers_table);
-		free(zend_handlers_table);
-	}
 }
+
+static HashTable *zend_handlers_table = NULL;
 
 static void init_opcode_serialiser(void)
 {

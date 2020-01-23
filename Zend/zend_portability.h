@@ -610,12 +610,4 @@ extern "C++" {
 # define ZEND_PREFER_RELOAD
 #endif
 
-#if defined(ZEND_WIN32) && defined(_DEBUG) && defined(PHP_WIN32_DEBUG_HEAP)
-# define ZEND_IGNORE_LEAKS_BEGIN() _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) & ~_CRTDBG_ALLOC_MEM_DF)
-# define ZEND_IGNORE_LEAKS_END() _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_ALLOC_MEM_DF)
-#else
-# define ZEND_IGNORE_LEAKS_BEGIN()
-# define ZEND_IGNORE_LEAKS_END()
-#endif
-
 #endif /* ZEND_PORTABILITY_H */
