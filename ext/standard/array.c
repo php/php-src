@@ -764,6 +764,11 @@ PHP_FUNCTION(count)
 		Z_PARAM_LONG(mode)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (mode != COUNT_NORMAL && mode != COUNT_RECURSIVE) {
+		zend_value_error("Mode value is invalid");
+		RETURN_THROWS();
+	}
+
 	switch (Z_TYPE_P(array)) {
 		case IS_NULL:
 			/* Intentionally not converted to an exception */
@@ -3970,7 +3975,7 @@ PHP_FUNCTION(array_keys)
 
 	/* Base case: empty input */
 	if (!elem_count) {
-		RETURN_ZVAL(input, 1, 0);
+		RETURN_COPY(input);
 	}
 
 	/* Initialize return array */
@@ -4086,7 +4091,7 @@ PHP_FUNCTION(array_values)
 	/* Return vector-like packed arrays as-is */
 	if (HT_IS_PACKED(arrval) && HT_IS_WITHOUT_HOLES(arrval) &&
 		arrval->nNextFreeElement == arrlen) {
-		RETURN_ZVAL(input, 1, 0);
+		RETURN_COPY(input);
 	}
 
 	/* Initialize return array */
@@ -6011,7 +6016,6 @@ PHP_FUNCTION(array_reduce)
 	zval *input;
 	zval args[2];
 	zval *operand;
-	zval result;
 	zval retval;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache = empty_fcall_info_cache;
@@ -6027,9 +6031,9 @@ PHP_FUNCTION(array_reduce)
 
 
 	if (ZEND_NUM_ARGS() > 2) {
-		ZVAL_COPY(&result, initial);
+		ZVAL_COPY(return_value, initial);
 	} else {
-		ZVAL_NULL(&result);
+		ZVAL_NULL(return_value);
 	}
 
 	/* (zval **)input points to an element of argument stack
@@ -6038,7 +6042,6 @@ PHP_FUNCTION(array_reduce)
 	htbl = Z_ARRVAL_P(input);
 
 	if (zend_hash_num_elements(htbl) == 0) {
-		ZVAL_COPY_VALUE(return_value, &result);
 		zend_release_fcall_info_cache(&fci_cache);
 		return;
 	}
@@ -6048,23 +6051,22 @@ PHP_FUNCTION(array_reduce)
 	fci.no_separation = 0;
 
 	ZEND_HASH_FOREACH_VAL(htbl, operand) {
-		ZVAL_COPY_VALUE(&args[0], &result);
+		ZVAL_COPY_VALUE(&args[0], return_value);
 		ZVAL_COPY(&args[1], operand);
 		fci.params = args;
 
 		if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
 			zval_ptr_dtor(&args[1]);
 			zval_ptr_dtor(&args[0]);
-			ZVAL_COPY_VALUE(&result, &retval);
+			ZVAL_COPY_VALUE(return_value, &retval);
 		} else {
 			zval_ptr_dtor(&args[1]);
 			zval_ptr_dtor(&args[0]);
-			return;
+			RETURN_NULL();
 		}
 	} ZEND_HASH_FOREACH_END();
 
 	zend_release_fcall_info_cache(&fci_cache);
-	RETVAL_ZVAL(&result, 1, 1);
 }
 /* }}} */
 

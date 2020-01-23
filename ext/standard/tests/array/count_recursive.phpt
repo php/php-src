@@ -104,14 +104,10 @@ echo "\n-- Testing count() on arrays containing references --\n";
 $arr = array(1, array("a", "b", "c"));
 $arr[2] = &$arr[1];
 
-$mode_arr = array( COUNT_NORMAL, COUNT_RECURSIVE, 0, 1, -1, -1.45, 2, TRUE,
-                   FALSE, NULL);
-for( $i =0; $i < count( $mode_arr ); $i++) {
-  echo "For mode '$mode_arr[$i]' count is => ";
-  var_dump(count($arr, $mode_arr[$i]));
-}
-
-echo "\nDone";
+echo "Count normal" . \PHP_EOL;
+var_dump(count($arr, COUNT_NORMAL));
+echo "Count recursive" . \PHP_EOL;
+var_dump(count($arr, COUNT_RECURSIVE));
 
 /* closing the resource handles */
 fclose( $resource1 );
@@ -209,15 +205,7 @@ COUNT_NORMAL: should be 3, is 3
 int(2)
 
 -- Testing count() on arrays containing references --
-For mode '0' count is => int(3)
-For mode '1' count is => int(9)
-For mode '0' count is => int(3)
-For mode '1' count is => int(9)
-For mode '-1' count is => int(3)
-For mode '-1.45' count is => int(3)
-For mode '2' count is => int(3)
-For mode '1' count is => int(9)
-For mode '' count is => int(3)
-For mode '' count is => int(3)
-
-Done
+Count normal
+int(3)
+Count recursive
+int(9)

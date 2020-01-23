@@ -534,7 +534,7 @@ Synopsis:
     php run-tests.php [options] [files] [directories]
 
 Options:
-    -j<workers> Run <workers> simultaneous testing processes in parallel for
+    -j<workers> Run up to <workers> simultaneous testing processes in parallel for
                 quicker testing on systems with multiple logical processors.
                 Note that this is experimental feature.
 
@@ -1285,7 +1285,8 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 	// Parallel testing
 	global $PHP_FAILED_TESTS, $workers, $workerID, $workerSock;
 
-	if ($workers !== null && !$workerID) {
+	/* Ignore -jN if there is only one file to analyze. */
+	if ($workers !== null && count($test_files) > 1 && !$workerID) {
 		run_all_tests_parallel($test_files, $env, $redir_tested);
 		return;
 	}
@@ -1340,7 +1341,7 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 
 /** The heart of parallel testing. */
 function run_all_tests_parallel($test_files, $env, $redir_tested) {
-	global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $SHOW_ONLY_GROUPS;
+	global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS, $shuffle, $SHOW_ONLY_GROUPS, $valgrind;
 
 	// The PHP binary running run-tests.php, and run-tests.php itself
 	// This PHP executable is *not* necessarily the same as the tested version
@@ -1397,6 +1398,8 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	if ($shuffle) {
 		shuffle($test_files);
 	}
+	/* Don't start more workers than test files */
+	$workers = max(1, min($workers, count($test_files)));
 
 	echo "Spawning workers… ";
 
@@ -1412,6 +1415,7 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	}
 	$sockPort = substr($sockName, $portPos + 1);
 	$sockUri = "tcp://$sockHost:$sockPort";
+	$totalFileCount = count($test_files);
 
 	for ($i = 1; $i <= $workers; $i++) {
 		$proc = proc_open(
@@ -1545,8 +1549,14 @@ escape:
 								$sequentialTests = [];
 							}
 							// Batch multiple tests to reduce communication overhead.
+							// - When valgrind is used, communication overhead is relatively small,
+							//   so just use a batch size of 1.
+							// - If this is running a small enough number of tests,
+							//   reduce the batch size to give batches to more workers.
 							$files = [];
-							$batchSize = $shuffle ? 4 : 32;
+							$maxBatchSize = $valgrind ? 1 : ($shuffle ? 4 : 32);
+							$averageFilesPerWorker = max(1, (int)ceil($totalFileCount / count($workerProcs)));
+							$batchSize = min($maxBatchSize, $averageFilesPerWorker);
 							while (count($files) <= $batchSize && $file = array_pop($test_files)) {
 								foreach ($fileConflictsWith[$file] as $conflictKey) {
 									if (isset($activeConflicts[$conflictKey])) {
@@ -1860,7 +1870,7 @@ TEST $file
 
 		} else {
 
-			if (!isset($section_text['PHPDBG']) && @count($section_text['FILE']) + @count($section_text['FILEEOF']) + @count($section_text['FILE_EXTERNAL']) != 1) {
+			if (!isset($section_text['PHPDBG']) && isset($section_text['FILE']) + isset($section_text['FILEEOF']) + isset($section_text['FILE_EXTERNAL']) != 1) {
 				$bork_info = "missing section --FILE--";
 			}
 
@@ -1885,7 +1895,7 @@ TEST $file
 				}
 			}
 
-			if ((@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX'])) != 1) {
+			if ((isset($section_text['EXPECT']) + isset($section_text['EXPECTF']) + isset($section_text['EXPECTREGEX'])) != 1) {
 				$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX--";
 			}
 		}
@@ -2216,7 +2226,7 @@ TEST $file
 					$test_files[] = array($f, $file);
 				}
 			}
-			$test_cnt += @count($test_files) - 1;
+			$test_cnt += count($test_files) - 1;
 			$test_idx--;
 
 			show_redirect_start($IN_REDIRECT['TESTS'], $tested, $tested_file);
@@ -2250,7 +2260,7 @@ TEST $file
 		}
 	}
 
-	if (is_array($org_file) || @count($section_text['REDIRECTTEST']) == 1) {
+	if (is_array($org_file) || isset($section_text['REDIRECTTEST'])) {
 
 		if (is_array($org_file)) {
 			$file = $org_file[0];

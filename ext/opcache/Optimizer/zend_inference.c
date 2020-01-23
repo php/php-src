@@ -1030,23 +1030,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					}
 				}
 			} else if (ssa->ops[line].result_def == var) {
-				if (opline->extended_value == IS_NULL) {
-					tmp->min = 0;
-					tmp->max = 0;
-					return 1;
-				} else if (opline->extended_value == _IS_BOOL) {
-					if (OP1_HAS_RANGE()) {
-						op1_min = OP1_MIN_RANGE();
-						op1_max = OP1_MAX_RANGE();
-						tmp->min = (op1_min > 0 || op1_max < 0);
-						tmp->max = (op1_min != 0 || op1_max != 0);
-						return 1;
-					} else {
-						tmp->min = 0;
-						tmp->max = 1;
-						return 1;
-					}
-				} else if (opline->extended_value == IS_LONG) {
+				if (opline->extended_value == IS_LONG) {
 					if (OP1_HAS_RANGE()) {
 						tmp->min = OP1_MIN_RANGE();
 						tmp->max = OP1_MAX_RANGE();
@@ -2499,24 +2483,19 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 				COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
 			}
-			tmp = 0;
-			if (opline->extended_value == _IS_BOOL) {
-				tmp |= MAY_BE_TRUE|MAY_BE_FALSE;
-			} else {
-				tmp |= 1 << opline->extended_value;
-				if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-					if ((tmp & MAY_BE_ANY) == (t1 & MAY_BE_ANY)) {
-						tmp |= (t1 & MAY_BE_RC1) | MAY_BE_RCN;
-					} else if ((opline->extended_value == IS_ARRAY ||
-					            opline->extended_value == IS_OBJECT) &&
-					           (t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT))) {
-							tmp |= MAY_BE_RC1 | MAY_BE_RCN;
-					} else if (opline->extended_value == IS_STRING &&
-					           (t1 & (MAY_BE_STRING|MAY_BE_OBJECT))) {
+			tmp = 1 << opline->extended_value;
+			if (tmp & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+				if ((tmp & MAY_BE_ANY) == (t1 & MAY_BE_ANY)) {
+					tmp |= (t1 & MAY_BE_RC1) | MAY_BE_RCN;
+				} else if ((opline->extended_value == IS_ARRAY ||
+							opline->extended_value == IS_OBJECT) &&
+						   (t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT))) {
 						tmp |= MAY_BE_RC1 | MAY_BE_RCN;
-					} else {
-						tmp |= MAY_BE_RC1;
-					}
+				} else if (opline->extended_value == IS_STRING &&
+						   (t1 & (MAY_BE_STRING|MAY_BE_OBJECT))) {
+					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
+				} else {
+					tmp |= MAY_BE_RC1;
 				}
 			}
 			if (opline->extended_value == IS_ARRAY) {
@@ -4618,10 +4597,6 @@ int zend_may_throw(const zend_op *opline, const zend_op_array *op_array, zend_ss
 			return (t1 & MAY_BE_OBJECT) || (t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_CAST:
 			switch (opline->extended_value) {
-				case IS_NULL:
-					return 0;
-				case _IS_BOOL:
-					return (t1 & MAY_BE_OBJECT);
 				case IS_LONG:
 				case IS_DOUBLE:
 					return (t1 & MAY_BE_OBJECT);
@@ -4630,9 +4605,8 @@ int zend_may_throw(const zend_op *opline, const zend_op_array *op_array, zend_ss
 				case IS_ARRAY:
 					return (t1 & MAY_BE_OBJECT);
 				case IS_OBJECT:
-					return (t1 & MAY_BE_ARRAY);
-				default:
-					return 1;
+					return 0;
+				EMPTY_SWITCH_DEFAULT_CASE()
 			}
 		case ZEND_ARRAY_KEY_EXISTS:
 			if ((t2 & MAY_BE_ANY) != MAY_BE_ARRAY) {

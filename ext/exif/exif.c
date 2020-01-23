@@ -335,7 +335,7 @@ static char *exif_get_tagformat(int format)
 #define TAG_GPS_AREA_INFORMATION        0x001C
 #define TAG_GPS_DATE_STAMP              0x001D
 #define TAG_GPS_DIFFERENTIAL            0x001E
-#define TAG_TIFF_COMMENT                0x00FE /* SHOUDLNT HAPPEN */
+#define TAG_TIFF_COMMENT                0x00FE /* SHOULDN'T HAPPEN */
 #define TAG_NEW_SUBFILE                 0x00FE /* New version of subfile tag */
 #define TAG_SUBFILE_TYPE                0x00FF /* Old version of subfile tag */
 #define TAG_IMAGEWIDTH                  0x0100
@@ -3002,7 +3002,7 @@ static int exif_process_user_comment(image_info_type *ImageInfo, char **pszInfoP
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;
 		} else if (!memcmp(szValuePtr, "JIS\0\0\0\0\0", 8)) {
-			/* JIS should be tanslated to MB or we leave it to the user - leave it to the user */
+			/* JIS should be translated to MB or we leave it to the user - leave it to the user */
 			*pszEncoding = estrdup((const char*)szValuePtr);
 			szValuePtr = szValuePtr+8;
 			ByteCount -= 8;

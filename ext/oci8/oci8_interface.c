@@ -2382,11 +2382,9 @@ PHP_FUNCTION(oci_collection_element_get)
 
 	PHP_OCI_ZVAL_TO_COLLECTION(tmp, collection);
 
-	if (php_oci_collection_element_get(collection, element_index, &value)) {
+	if (php_oci_collection_element_get(collection, element_index, return_value)) {
 		RETURN_FALSE;
 	}
-
-	RETURN_ZVAL(&value, 1, 1);
 }
 /* }}} */
 

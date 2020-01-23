@@ -2053,7 +2053,7 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcic;
-	zval *zresource_ptr = &intern->u.file.zresource, retval;
+	zval *zresource_ptr = &intern->u.file.zresource;
 	int result;
 	int num_args = pass_num_args + (arg2 ? 2 : 1);
 
@@ -2070,11 +2070,9 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 		WRONG_PARAM_COUNT_WITH_RETVAL(FAILURE);
 	}
 
-	ZVAL_UNDEF(&retval);
-
 	fci.size = sizeof(fci);
 	fci.object = NULL;
-	fci.retval = &retval;
+	fci.retval = return_value;
 	fci.param_count = num_args;
 	fci.params = params;
 	fci.no_separation = 1;
@@ -2086,10 +2084,8 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 
 	result = zend_call_function(&fci, &fcic);
 
-	if (result == FAILURE || Z_ISUNDEF(retval)) {
+	if (result == FAILURE || Z_ISUNDEF_P(return_value)) {
 		RETVAL_FALSE;
-	} else {
-		ZVAL_ZVAL(return_value, &retval, 0, 0);
 	}
 
 	efree(params);

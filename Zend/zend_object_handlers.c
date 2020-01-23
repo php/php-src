@@ -1379,12 +1379,8 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 				/* Call the top-level defined __call().
 				 * see: tests/classes/__call_004.phpt  */
 
-				zend_class_entry *call_ce = object->ce;
-
-				while (!call_ce->__call) {
-					call_ce = call_ce->parent;
-				}
-				return zend_get_user_call_function(call_ce, function_name);
+				ZEND_ASSERT(object->ce->__call);
+				return zend_get_user_call_function(object->ce, function_name);
 			} else if (ce->__callstatic) {
 				return zend_get_user_callstatic_function(ce, function_name);
 			} else {

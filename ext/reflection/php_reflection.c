@@ -5601,28 +5601,14 @@ ZEND_METHOD(reflection_property, getDeclaringClass)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	zend_class_entry *tmp_ce, *ce;
-	zend_property_info *tmp_info;
+	zend_class_entry *ce;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	ce = tmp_ce = intern->ce;
-	while (tmp_ce && (tmp_info = zend_hash_find_ptr(&tmp_ce->properties_info, ref->unmangled_name)) != NULL) {
-		if (tmp_info->flags & ZEND_ACC_PRIVATE) {
-			/* it's a private property, so it can't be inherited */
-			break;
-		}
-		ce = tmp_ce;
-		if (tmp_ce == tmp_info->ce) {
-			/* declared in this class, done */
-			break;
-		}
-		tmp_ce = tmp_ce->parent;
-	}
-
+	ce = ref->prop ? ref->prop->ce : intern->ce;
 	zend_reflection_class_factory(ce, return_value);
 }
 /* }}} */
@@ -5697,6 +5683,90 @@ ZEND_METHOD(reflection_property, hasType)
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	RETVAL_BOOL(ref->prop && ZEND_TYPE_IS_SET(ref->prop->type));
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionProperty::hasDefaultValue()
+   Returns whether property has a default value */
+ZEND_METHOD(reflection_property, hasDefaultValue)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zend_property_info *prop_info;
+	zval *prop;
+	zend_class_entry *ce;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	prop_info = ref->prop;
+
+	if (prop_info == NULL) {
+		RETURN_FALSE;
+	}
+
+	ce = prop_info->ce;
+
+	if ((prop_info->flags & ZEND_ACC_STATIC) != 0) {
+		prop = &ce->default_static_members_table[prop_info->offset];
+		ZVAL_DEINDIRECT(prop);
+	} else {
+		prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
+	}
+
+	RETURN_BOOL(!Z_ISUNDEF_P(prop));
+}
+/* }}} */
+
+/* {{{ proto public mixed ReflectionProperty::getDefaultValue()
+   Returns the default value of a property */
+ZEND_METHOD(reflection_property, getDefaultValue)
+{
+	reflection_object *intern;
+	property_reference *ref;
+	zend_property_info *prop_info;
+	zval *prop;
+	zend_class_entry *ce;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+
+	prop_info = ref->prop;
+
+	if (prop_info == NULL) {
+		return; // throw exception?
+	}
+
+	ce = prop_info->ce;
+
+	if ((prop_info->flags & ZEND_ACC_STATIC) != 0) {
+		prop = &ce->default_static_members_table[prop_info->offset];
+		ZVAL_DEINDIRECT(prop);
+	} else {
+		prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
+	}
+
+	if (Z_ISUNDEF_P(prop)) {
+		return;
+	}
+
+	/* copy: enforce read only access */
+	ZVAL_DEREF(prop);
+	ZVAL_COPY_OR_DUP(return_value, prop);
+
+	/* this is necessary to make it able to work with default array
+	* properties, returned to user */
+	if (Z_TYPE_P(return_value) == IS_CONSTANT_AST) {
+		if (UNEXPECTED(zval_update_constant_ex(return_value, ce) != SUCCESS)) {
+			RETURN_THROWS();
+		}
+	}
 }
 /* }}} */
 
@@ -6475,6 +6545,8 @@ static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, setAccessible, arginfo_class_ReflectionProperty_setAccessible, 0)
 	ZEND_ME(reflection_property, getType, arginfo_class_ReflectionProperty_getType, 0)
 	ZEND_ME(reflection_property, hasType, arginfo_class_ReflectionProperty_hasType, 0)
+	ZEND_ME(reflection_property, hasDefaultValue, arginfo_class_ReflectionProperty_hasDefaultValue, 0)
+	ZEND_ME(reflection_property, getDefaultValue, arginfo_class_ReflectionProperty_getDefaultValue, 0)
 	PHP_FE_END
 };
 

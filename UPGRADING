@@ -43,6 +43,9 @@ PHP 8.0 UPGRADE NOTES
     of $this.
   . Removed ability to use array_key_exists() with objects. Use one of isset()
     or property_exists() instead.
+  . Made the behavior of array_key_exists() regarding the type of the key
+    parameter consistent with isset() and normal array access. All key types now use
+    the usual coercions and array/object keys throw a TypeError.
   . Any array that has a number n as its first numeric key will use n+1 for
     its next implicit key. Even if n is negative.
     RFC: https://wiki.php.net/rfc/negative_array_index
@@ -178,6 +181,9 @@ PHP 8.0 UPGRADE NOTES
   . The deprecated constant INTL_IDNA_VARIANT_2003 has been removed.
     RFC: https://wiki.php.net/rfc/deprecate-and-remove-intl_idna_variant_2003
   . The deprecated Normalizer::NONE constant has been removed.
+  . The IntlDateFormatter::RELATIVE_FULL, IntlDateFormatter::RELATIVE_LONG,
+    IntlDateFormatter::RELATIVE_MEDIUM, and IntlDateFormatter::RELATIVE_SHORT constants
+    have been added.
 
 - LDAP:
   . The deprecated function ldap_sort has been removed.
@@ -388,6 +394,9 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 9. Other Changes to Extensions
 ========================================
+
+- CURL:
+  . The CURL extension now requires at least libcurl 7.29.0.
 
 - GD:
   . The $num_points parameter of imagepolygon(), imageopenpolygon() and

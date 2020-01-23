@@ -544,7 +544,7 @@ PHP_FUNCTION(hash_final)
 			hash->key[i] ^= 0x6A;
 		}
 
-		/* Feed this result into the outter hash */
+		/* Feed this result into the outer hash */
 		hash->ops->hash_init(hash->context);
 		hash->ops->hash_update(hash->context, hash->key, hash->ops->block_size);
 		hash->ops->hash_update(hash->context, (unsigned char *) ZSTR_VAL(digest), hash->ops->digest_size);

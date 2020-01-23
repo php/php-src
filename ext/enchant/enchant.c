@@ -312,7 +312,7 @@ PHP_FUNCTION(enchant_broker_init)
 /* }}} */
 
 /* {{{ proto bool enchant_broker_free(resource broker)
-   Destroys the broker object and its dictionnaries */
+   Destroys the broker object and its dictionaries */
 PHP_FUNCTION(enchant_broker_free)
 {
 	zval *broker;

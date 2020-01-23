@@ -1271,8 +1271,7 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	}
 
 	if (object->flags & RTIT_BYPASS_KEY) {
-		RETVAL_ZVAL(&key, 1, 1);
-		return;
+		RETURN_COPY_VALUE(&key);
 	}
 
 	if (Z_TYPE(key) != IS_STRING) {
@@ -1842,7 +1841,6 @@ SPL_METHOD(RecursiveFilterIterator, __construct)
 SPL_METHOD(RecursiveFilterIterator, hasChildren)
 {
 	spl_dual_it_object   *intern;
-	zval                  retval;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -1850,12 +1848,7 @@ SPL_METHOD(RecursiveFilterIterator, hasChildren)
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, ZEND_THIS);
 
-	zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "haschildren", &retval);
-	if (Z_TYPE(retval) != IS_UNDEF) {
-		RETURN_ZVAL(&retval, 0, 1);
-	} else {
-		RETURN_FALSE;
-	}
+	zend_call_method_with_0_params(Z_OBJ(intern->inner.zobject), intern->inner.ce, NULL, "haschildren", return_value);
 } /* }}} */
 
 /* {{{ proto RecursiveFilterIterator RecursiveFilterIterator::getChildren()

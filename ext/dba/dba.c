@@ -1003,8 +1003,8 @@ PHP_FUNCTION(dba_fetch)
 				skip = 0;
 			}
 		} else if (!strcmp(info->hnd->name, "inifile")) {
-			/* "-1" is compareable to 0 but allows a non restrictive
-			 * access which is fater. For example 'inifile' uses this
+			/* "-1" is comparable to 0 but allows a non restrictive
+			 * access which is faster. For example 'inifile' uses this
 			 * to allow faster access when the key was already found
 			 * using firstkey/nextkey. However explicitly setting the
 			 * value to 0 ensures the first value.
