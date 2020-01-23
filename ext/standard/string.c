@@ -4816,7 +4816,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, uint8_t *stateptr, const
 				switch (state) {
 					case 1: /* HTML/XML */
 						lc = '>';
-						if (is_xml && *(p -1) == '-') {
+						if (is_xml && p >= buf + 1 && *(p-1) == '-') {
 							break;
 						}
 						in_q = state = is_xml = 0;
@@ -4837,7 +4837,7 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, uint8_t *stateptr, const
 						break;
 
 					case 2: /* PHP */
-						if (!br && lc != '\"' && *(p-1) == '?') {
+						if (!br && lc != '\"' && p >= buf + 1 && *(p-1) == '?') {
 							in_q = state = 0;
 							tp = tbuf;
 						}
