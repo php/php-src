@@ -37,6 +37,9 @@ PHP                                                                        NEWS
   . Fixed bug #79115 (ReflectionClass::isCloneable call reflected class
     __destruct). (Nikita)
 
+- Standard:
+  . Fixed bug #78902 (Memory leak when using stream_filter_append). (liudaixiao)
+
 23 Jan 2020, PHP 7.4.2
 
 - Core:
