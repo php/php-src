@@ -16,6 +16,9 @@ if (PHP_LIBXML == "yes") {
 			ADD_DEF_FILE("ext\\libxml\\php_libxml2.def");
 		}
 		PHP_INSTALL_HEADERS("ext/libxml/", "php_libxml.h");
+		if (PHP_CRT_DEBUG == "yes") {
+			ADD_FLAG("CFLAGS_LIBXML", "/D PHP_WIN32_DEBUG_HEAP");
+		}
 	} else {
 		WARNING("libxml support can't be enabled, iconv or libxml are missing")
 		PHP_LIBXML = "no"
