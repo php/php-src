@@ -5478,15 +5478,15 @@ static zend_type zend_compile_single_typename(zend_ast *ast)
 		return (zend_type) ZEND_TYPE_INIT_CODE(ast->attr, 0, 0);
 	} else {
 		zend_string *class_name = zend_ast_get_str(ast);
-		zend_uchar type = zend_lookup_builtin_type_by_name(class_name);
+		zend_uchar type_code = zend_lookup_builtin_type_by_name(class_name);
 
-		if (type != 0) {
+		if (type_code != 0) {
 			if ((ast->attr & ZEND_NAME_NOT_FQ) != ZEND_NAME_NOT_FQ) {
 				zend_error_noreturn(E_COMPILE_ERROR,
 					"Type declaration '%s' must be unqualified",
 					ZSTR_VAL(zend_string_tolower(class_name)));
 			}
-			return (zend_type) ZEND_TYPE_INIT_CODE(type, 0, 0);
+			return (zend_type) ZEND_TYPE_INIT_CODE(type_code, 0, 0);
 		} else {
 			const char *correct_name;
 			zend_string *orig_name = zend_ast_get_str(ast);
@@ -5540,6 +5540,7 @@ static zend_type zend_compile_typename(
 		zend_ast *ast, zend_bool force_allow_null, zend_bool use_arena) /* {{{ */
 {
 	zend_bool allow_null = force_allow_null;
+	zend_ast_attr orig_ast_attr = ast->attr;
 	zend_type type = ZEND_TYPE_INIT_NONE(0);
 	if (ast->attr & ZEND_TYPE_NULLABLE) {
 		allow_null = 1;
@@ -5649,6 +5650,7 @@ static zend_type zend_compile_typename(
 		}
 	}
 
+	ast->attr = orig_ast_attr;
 	return type;
 }
 /* }}} */
