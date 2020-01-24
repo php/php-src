@@ -2901,7 +2901,7 @@ function generate_diff($wanted, $wanted_re, $output)
 	$r = is_null($wanted_re) ? $w : explode("\n", $wanted_re);
 	$diff = generate_array_diff($r, $o, !is_null($wanted_re), $w);
 
-	return implode("\r\n", $diff);
+	return implode(PHP_EOL, $diff);
 }
 
 function error($message)
