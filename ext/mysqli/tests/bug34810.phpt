@@ -16,8 +16,7 @@ class DbConnection {
 		var_dump($link);
 
 		$link = mysqli_init();
-		/* @ is to suppress 'Property access is not allowed yet' */
-		@var_dump($link);
+        var_dump($link);
 
 		$mysql = new my_mysqli($host, $user, $passwd, $db, $port, $socket);
 		$mysql->query("DROP TABLE IF EXISTS test_warnings");
@@ -36,8 +35,6 @@ class DbConnection {
 
 			if ("" == $warning->message)
 				printf("[004] Message string must not be empty\n");
-
-
 		} else {
 			printf("[002] Empty error message!\n");
 			var_dump($warning);
@@ -102,8 +99,6 @@ object(mysqli)#%d (%d) {
   int(0)
 }
 object(mysqli)#%d (%d) {
-  ["affected_rows"]=>
-  bool(false)
   ["client_info"]=>
   string(%d) "%s"
   ["client_version"]=>
@@ -116,27 +111,5 @@ object(mysqli)#%d (%d) {
   int(0)
   ["error"]=>
   string(0) ""
-  ["error_list"]=>
-  bool(false)
-  ["field_count"]=>
-  bool(false)
-  ["host_info"]=>
-  bool(false)
-  ["info"]=>
-  bool(false)
-  ["insert_id"]=>
-  bool(false)
-  ["server_info"]=>
-  bool(false)
-  ["server_version"]=>
-  bool(false)
-  ["sqlstate"]=>
-  bool(false)
-  ["protocol_version"]=>
-  bool(false)
-  ["thread_id"]=>
-  bool(false)
-  ["warning_count"]=>
-  bool(false)
 }
 Done

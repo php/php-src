@@ -129,17 +129,7 @@ array(7) refcount(2){
     &int(4)
   }
   [6]=>
-  &object(mysqli_result)#%d (5) refcount(%d){
-    ["current_field"]=>
-    NULL
-    ["field_count"]=>
-    NULL
-    ["lengths"]=>
-    bool(false)
-    ["num_rows"]=>
-    NULL
-    ["type"]=>
-    bool(false)
+  &object(mysqli_result)#%d (0) refcount(%d){
   }
 }
 array(1) refcount(2){
