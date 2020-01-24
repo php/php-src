@@ -915,6 +915,12 @@ mysqlnd_caching_sha2_get_auth_data(struct st_mysqlnd_authentication_plugin * sel
 	DBG_INF_FMT("salt(%d)=[%.*s]", auth_plugin_data_len, auth_plugin_data_len, auth_plugin_data);
 	*auth_data_len = 0;
 
+	if (auth_plugin_data_len < SCRAMBLE_LENGTH) {
+		SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "The server sent wrong length for scramble");
+		DBG_ERR_FMT("The server sent wrong length for scramble %u. Expected %u", auth_plugin_data_len, SCRAMBLE_LENGTH);
+		DBG_RETURN(NULL);
+	}
+
 	DBG_INF("First auth step: send hashed password");
 	/* copy scrambled pass*/
 	if (passwd && passwd_len) {
@@ -1022,7 +1028,7 @@ mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
 		char xor_str[passwd_len + 1];
 		memcpy(xor_str, passwd, passwd_len);
 		xor_str[passwd_len] = '\0';
-		mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, auth_plugin_data_len);
+		mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, SCRAMBLE_LENGTH);
 
 		server_public_key_len = RSA_size(server_public_key);
 		/*

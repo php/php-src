@@ -25,6 +25,8 @@ PHP                                                                        NEWS
 - MySQLnd:
   . Fixed bug #79084 (mysqlnd may fetch wrong column indexes with MYSQLI_BOTH).
     (cmb)
+  . Fixed bug #79011 (MySQL caching_sha2_password Access denied for password
+    with more than 20 chars). (Nikita)
 
 - Opcache:
   . Fixed #79114 (Eval class during preload causes class to be only half
