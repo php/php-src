@@ -5108,7 +5108,7 @@ state_2:
 			break;
 		case '"':
 		case '\'':
-			if (*(p-1) != '\\') {
+			if (p >= buf + 1 && *(p-1) != '\\') {
 				if (lc == c) {
 					lc = '\0';
 				} else if (lc != '\\') {
