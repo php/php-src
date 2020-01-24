@@ -819,25 +819,13 @@ mbfl_strpos(
 	size_t result;
 	mbfl_string _haystack_u8, _needle_u8;
 	const mbfl_string *haystack_u8, *needle_u8 = NULL;
-	const unsigned char *u8_tbl;
-
-	if (haystack == NULL || haystack->val == NULL || needle == NULL || needle->val == NULL) {
-		return (size_t) -8;
-	}
-
-	{
-		const mbfl_encoding *u8_enc = &mbfl_encoding_utf8;
-		if (u8_enc->mblen_table == NULL) {
-			return (size_t) -8;
-		}
-		u8_tbl = u8_enc->mblen_table;
-	}
+	const unsigned char *u8_tbl = mbfl_encoding_utf8.mblen_table;
 
 	if (haystack->encoding->no_encoding != mbfl_no_encoding_utf8) {
 		mbfl_string_init(&_haystack_u8);
 		haystack_u8 = mbfl_convert_encoding(haystack, &_haystack_u8, &mbfl_encoding_utf8);
 		if (haystack_u8 == NULL) {
-			result = (size_t) -4;
+			result = MBFL_ERROR_ENCODING;
 			goto out;
 		}
 	} else {
@@ -848,14 +836,14 @@ mbfl_strpos(
 		mbfl_string_init(&_needle_u8);
 		needle_u8 = mbfl_convert_encoding(needle, &_needle_u8, &mbfl_encoding_utf8);
 		if (needle_u8 == NULL) {
-			result = (size_t) -4;
+			result = MBFL_ERROR_ENCODING;
 			goto out;
 		}
 	} else {
 		needle_u8 = needle;
 	}
 
-	result = (size_t) -1;
+	result = MBFL_ERROR_NOT_FOUND;
 	if (haystack_u8->len < needle_u8->len) {
 		goto out;
 	}
@@ -898,7 +886,7 @@ mbfl_strpos(
 		p = haystack_u8_val;
 		while (offset-- > 0) {
 			if (p >= e) {
-				result = (size_t) -16;
+				result = MBFL_ERROR_OFFSET;
 				goto out;
 			}
 			p += u8_tbl[*p];
@@ -968,7 +956,7 @@ mbfl_strpos(
 				while (offset < 0) {
 					unsigned char c;
 					if (p <= e) {
-						result = (size_t) -16;
+						result = MBFL_ERROR_OFFSET;
 						goto out;
 					}
 					c = *(--p);
@@ -983,7 +971,7 @@ mbfl_strpos(
 			const unsigned char *ee = haystack_u8_val + haystack_u8->len;
 			while (offset-- > 0) {
 				if (e >= ee) {
-					result = (size_t) -16;
+					result = MBFL_ERROR_OFFSET;
 					goto out;
 				}
 				e += u8_tbl[*e];
@@ -1046,9 +1034,6 @@ mbfl_substr_count(
 	mbfl_convert_filter *filter;
 	struct collector_strpos_data pc;
 
-	if (haystack == NULL || needle == NULL) {
-		return (size_t) -8;
-	}
 	/* needle is converted into wchar */
 	mbfl_wchar_device_init(&pc.needle);
 	filter = mbfl_convert_filter_new(
@@ -1056,18 +1041,18 @@ mbfl_substr_count(
 	  &mbfl_encoding_wchar,
 	  mbfl_wchar_device_output, 0, &pc.needle);
 	if (filter == NULL) {
-		return (size_t) -4;
+		return MBFL_ERROR_ENCODING;
 	}
 	mbfl_convert_filter_feed_string(filter, needle->val, needle->len);
 	mbfl_convert_filter_flush(filter);
 	mbfl_convert_filter_delete(filter);
 	pc.needle_len = pc.needle.pos;
 	if (pc.needle.buffer == NULL) {
-		return (size_t) -4;
+		return MBFL_ERROR_ENCODING;
 	}
-	if (pc.needle_len <= 0) {
+	if (pc.needle_len == 0) {
 		mbfl_wchar_device_clear(&pc.needle);
-		return (size_t) -2;
+		return MBFL_ERROR_EMPTY;
 	}
 	/* initialize filter and collector data */
 	filter = mbfl_convert_filter_new(
@@ -1076,13 +1061,13 @@ mbfl_substr_count(
 	  collector_strpos, 0, &pc);
 	if (filter == NULL) {
 		mbfl_wchar_device_clear(&pc.needle);
-		return (size_t) -4;
+		return MBFL_ERROR_ENCODING;
 	}
 	pc.start = 0;
 	pc.output = 0;
 	pc.needle_pos = 0;
 	pc.found_pos = 0;
-	pc.matched_pos = (size_t) -1;
+	pc.matched_pos = MBFL_ERROR_NOT_FOUND;
 
 	/* feed data */
 	p = haystack->val;
@@ -1090,12 +1075,12 @@ mbfl_substr_count(
 	if (p != NULL) {
 		while (n > 0) {
 			if ((*filter->filter_function)(*p++, filter) < 0) {
-				pc.matched_pos = (size_t) -4;
+				pc.matched_pos = MBFL_ERROR_ENCODING;
 				break;
 			}
-			if (pc.matched_pos != (size_t) -1) {
+			if (pc.matched_pos != MBFL_ERROR_NOT_FOUND) {
 				++result;
-				pc.matched_pos = (size_t) -1;
+				pc.matched_pos = MBFL_ERROR_NOT_FOUND;
 				pc.needle_pos = 0;
 			}
 			n--;

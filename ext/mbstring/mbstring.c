@@ -2114,17 +2114,14 @@ PHP_FUNCTION(mb_strpos)
 	if (!mbfl_is_error(n)) {
 		RETVAL_LONG(n);
 	} else {
-		switch (-n) {
-		case 1:
+		switch (n) {
+		case MBFL_ERROR_NOT_FOUND:
 			break;
-		case 2:
-			php_error_docref(NULL, E_WARNING, "Needle has not positive length");
-			break;
-		case 4:
+		case MBFL_ERROR_ENCODING:
 			php_error_docref(NULL, E_WARNING, "Unknown encoding or conversion error");
 			break;
-		case 8:
-			php_error_docref(NULL, E_NOTICE, "Argument is empty");
+		case MBFL_ERROR_OFFSET:
+			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 			break;
 		default:
 			php_error_docref(NULL, E_WARNING, "Unknown error in mb_strpos");
