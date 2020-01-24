@@ -29,8 +29,9 @@ PHP                                                                        NEWS
     with more than 20 chars). (Nikita)
 
 - Opcache:
-  . Fixed #79114 (Eval class during preload causes class to be only half
+  . Fixed bug #79114 (Eval class during preload causes class to be only half
     available). (Laruence)
+  . Fixed bug #79128 (Preloading segfaults if preload_user is used). (Nikita)
 
 - OpenSSL:
   . Fixed bug #79145 (openssl memory leak). (cmb, Nikita)
