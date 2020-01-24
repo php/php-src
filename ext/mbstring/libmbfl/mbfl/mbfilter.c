@@ -83,6 +83,7 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "zend_operators.h"
 
 #include <stddef.h>
 #include <string.h>
@@ -898,54 +899,26 @@ mbfl_strpos(
 		goto out;
 	}
 
-	if (needle_u8->len == 0) {
-		size_t haystack_length = mbfl_strlen(haystack_u8);
-		if (offset < 0) {
-			result = haystack_length + offset;
-		} else if (reverse) {
-			result = haystack_length;
-		} else {
-			result = (size_t) offset;
-		}
-		goto out;
-	}
-
 	if (!reverse) {
-		size_t jtbl[1 << (sizeof(unsigned char) * 8)];
-		size_t needle_u8_len = needle_u8->len;
-		size_t i;
-		const unsigned char *p, *q, *e;
-		const unsigned char *haystack_u8_val = haystack_u8->val,
-		                    *needle_u8_val = needle_u8->val;
-		for (i = 0; i < sizeof(jtbl) / sizeof(*jtbl); ++i) {
-			jtbl[i] = needle_u8_len + 1;
-		}
-		for (i = 0; i < needle_u8_len - 1; ++i) {
-			jtbl[needle_u8_val[i]] = needle_u8_len - i;
-		}
-		e = haystack_u8_val + haystack_u8->len;
-		p = offset_pointer + needle_u8_len;
-		if (p > e) {
-			goto out;
-		}
-		while (p <= e) {
-			const unsigned char *pv = p;
-			q = needle_u8_val + needle_u8_len;
-			for (;;) {
-				if (q == needle_u8_val) {
-					result = mbfl_pointer_to_offset_utf8(haystack_u8_val, p);
-					goto out;
-				}
-				if (*--q != *--p) {
-					break;
-				}
-			}
-			p += jtbl[*p];
-			if (p <= pv) {
-				p = pv + 1;
-			}
+		const char *found_pos = zend_memnstr(
+				(const char *) offset_pointer,
+				(const char *) needle_u8->val, needle_u8->len,
+				(const char *) haystack_u8->val + haystack_u8->len);
+		if (found_pos) {
+			result = mbfl_pointer_to_offset_utf8(
+				haystack_u8->val, (const unsigned char *) found_pos);
 		}
 	} else {
+		if (needle_u8->len == 0) {
+			size_t haystack_length = mbfl_strlen(haystack_u8);
+			if (offset < 0) {
+				result = haystack_length + offset;
+			} else {
+				result = haystack_length;
+			}
+			goto out;
+		}
+
 		size_t jtbl[1 << (sizeof(unsigned char) * 8)];
 		size_t needle_u8_len = needle_u8->len, needle_len = 0;
 		size_t i;
