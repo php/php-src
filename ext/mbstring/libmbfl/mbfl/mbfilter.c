@@ -810,12 +810,12 @@ mbfl_oddlen(mbfl_string *string)
 	/* NOT REACHED */
 }
 
-static const unsigned char *mbfl_find_offset_utf8(const mbfl_string *str, ssize_t offset) {
+static const unsigned char *mbfl_find_offset_utf8(
+		const unsigned char *str, const unsigned char *end, ssize_t offset) {
 	if (offset < 0) {
-		const unsigned char *pos = str->val + str->len;
-		const unsigned char *begin = str->val;
+		const unsigned char *pos = end;
 		while (offset < 0) {
-			if (pos <= begin) {
+			if (pos <= str) {
 				return NULL;
 			}
 
@@ -829,8 +829,7 @@ static const unsigned char *mbfl_find_offset_utf8(const mbfl_string *str, ssize_
 		return pos;
 	} else {
 		const unsigned char *u8_tbl = mbfl_encoding_utf8.mblen_table;
-		const unsigned char *pos = str->val;
-		const unsigned char *end = str->val + str->len;
+		const unsigned char *pos = str;
 		while (offset-- > 0) {
 			if (pos >= end) {
 				return NULL;
@@ -888,7 +887,8 @@ mbfl_strpos(
 		needle_u8 = needle;
 	}
 
-	offset_pointer = mbfl_find_offset_utf8(haystack_u8, offset);
+	offset_pointer = mbfl_find_offset_utf8(
+		haystack_u8->val, haystack_u8->val + haystack_u8->len, offset);
 	if (!offset_pointer) {
 		result = MBFL_ERROR_OFFSET;
 		goto out;
@@ -899,99 +899,37 @@ mbfl_strpos(
 		goto out;
 	}
 
+	const char *found_pos;
 	if (!reverse) {
-		const char *found_pos = zend_memnstr(
+		found_pos = zend_memnstr(
+			(const char *) offset_pointer,
+			(const char *) needle_u8->val, needle_u8->len,
+			(const char *) haystack_u8->val + haystack_u8->len);
+	} else {
+		if (offset >= 0) {
+			found_pos = zend_memnrstr(
 				(const char *) offset_pointer,
 				(const char *) needle_u8->val, needle_u8->len,
 				(const char *) haystack_u8->val + haystack_u8->len);
-		if (found_pos) {
-			result = mbfl_pointer_to_offset_utf8(
-				haystack_u8->val, (const unsigned char *) found_pos);
-		}
-	} else {
-		if (needle_u8->len == 0) {
-			size_t haystack_length = mbfl_strlen(haystack_u8);
-			if (offset < 0) {
-				result = haystack_length + offset;
-			} else {
-				result = haystack_length;
-			}
-			goto out;
-		}
-
-		size_t jtbl[1 << (sizeof(unsigned char) * 8)];
-		size_t needle_u8_len = needle_u8->len, needle_len = 0;
-		size_t i;
-		const unsigned char *p, *e, *q, *qe;
-		const unsigned char *haystack_u8_val = haystack_u8->val,
-		                    *needle_u8_val = needle_u8->val;
-		for (i = 0; i < sizeof(jtbl) / sizeof(*jtbl); ++i) {
-			jtbl[i] = needle_u8_len;
-		}
-		for (i = needle_u8_len - 1; i > 0; --i) {
-			unsigned char c = needle_u8_val[i];
-			jtbl[c] = i;
-			if (c < 0x80) {
-				++needle_len;
-			} else if ((c & 0xc0) != 0x80) {
-				++needle_len;
-			}
-		}
-		{
-			unsigned char c = needle_u8_val[0];
-			if (c < 0x80) {
-				++needle_len;
-			} else if ((c & 0xc0) != 0x80) {
-				++needle_len;
-			}
-		}
-		e = haystack_u8_val;
-		p = e + haystack_u8->len;
-		qe = needle_u8_val + needle_u8_len;
-		if (offset < 0) {
-			if (-offset > needle_len) {
-				offset += needle_len;
-				while (offset < 0) {
-					unsigned char c;
-					if (p <= e) {
-						result = MBFL_ERROR_OFFSET;
-						goto out;
-					}
-					c = *(--p);
-					if (c < 0x80) {
-						++offset;
-					} else if ((c & 0xc0) != 0x80) {
-						++offset;
-					}
-				}
-			}
 		} else {
-			e = offset_pointer;
-		}
-		if (p < e + needle_u8_len) {
-			goto out;
-		}
-		p -= needle_u8_len;
-		while (p >= e) {
-			const unsigned char *pv = p;
-			q = needle_u8_val;
-			for (;;) {
-				if (q == qe) {
-					p -= needle_u8_len;
-					result = mbfl_pointer_to_offset_utf8(haystack_u8_val, p);
-					goto out;
-				}
-				if (*q != *p) {
-					break;
-				}
-				++p, ++q;
+			size_t needle_len = mbfl_strlen(needle_u8);
+			offset_pointer = mbfl_find_offset_utf8(
+				offset_pointer, haystack_u8->val + haystack_u8->len, needle_len);
+			if (!offset_pointer) {
+				offset_pointer = haystack_u8->val + haystack_u8->len;
 			}
-			p -= jtbl[*p];
-			if (p >= pv) {
-				p = pv - 1;
-			}
+
+			found_pos = zend_memnrstr(
+				(const char *) haystack_u8->val,
+				(const char *) needle_u8->val, needle_u8->len,
+				(const char *) offset_pointer);
 		}
 	}
+
+	if (found_pos) {
+		result = mbfl_pointer_to_offset_utf8(haystack_u8->val, (const unsigned char *) found_pos);
+	}
+
 out:
 	if (haystack_u8 == &_haystack_u8) {
 		mbfl_string_clear(&_haystack_u8);
