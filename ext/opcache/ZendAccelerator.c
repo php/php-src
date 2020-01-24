@@ -4270,19 +4270,24 @@ static zend_persistent_script* preload_script_in_shared_memory(zend_persistent_s
 static void preload_load(void)
 {
 	/* Load into process tables */
-	if (zend_hash_num_elements(&ZCSG(preload_script)->script.function_table)) {
-		Bucket *p = ZCSG(preload_script)->script.function_table.arData;
-		Bucket *end = p + ZCSG(preload_script)->script.function_table.nNumUsed;
+	zend_script *script = &ZCSG(preload_script)->script;
+	if (zend_hash_num_elements(&script->function_table)) {
+		Bucket *p = script->function_table.arData;
+		Bucket *end = p + script->function_table.nNumUsed;
 
+		zend_hash_extend(CG(function_table),
+			CG(function_table)->nNumUsed + script->function_table.nNumUsed, 0);
 		for (; p != end; p++) {
 			_zend_hash_append_ptr_ex(CG(function_table), p->key, Z_PTR(p->val), 1);
 		}
 	}
 
-	if (zend_hash_num_elements(&ZCSG(preload_script)->script.class_table)) {
-		Bucket *p = ZCSG(preload_script)->script.class_table.arData;
-		Bucket *end = p + ZCSG(preload_script)->script.class_table.nNumUsed;
+	if (zend_hash_num_elements(&script->class_table)) {
+		Bucket *p = script->class_table.arData;
+		Bucket *end = p + script->class_table.nNumUsed;
 
+		zend_hash_extend(CG(class_table),
+			CG(class_table)->nNumUsed + script->class_table.nNumUsed, 0);
 		for (; p != end; p++) {
 			_zend_hash_append_ex(CG(class_table), p->key, &p->val, 1);
 		}
