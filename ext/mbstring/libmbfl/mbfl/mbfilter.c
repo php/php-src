@@ -840,6 +840,19 @@ static const unsigned char *mbfl_find_offset_utf8(const mbfl_string *str, ssize_
 	}
 }
 
+static size_t mbfl_pointer_to_offset_utf8(const unsigned char *start, const unsigned char *pos) {
+	size_t result = 0;
+	while (pos > start) {
+		unsigned char c = *--pos;
+		if (c < 0x80) {
+			++result;
+		} else if ((c & 0xc0) != 0x80) {
+			++result;
+		}
+	}
+	return result;
+}
+
 size_t
 mbfl_strpos(
     mbfl_string *haystack,
@@ -920,15 +933,7 @@ mbfl_strpos(
 			q = needle_u8_val + needle_u8_len;
 			for (;;) {
 				if (q == needle_u8_val) {
-					result = 0;
-					while (p > haystack_u8_val) {
-						unsigned char c = *--p;
-						if (c < 0x80) {
-							++result;
-						} else if ((c & 0xc0) != 0x80) {
-							++result;
-						}
-					}
+					result = mbfl_pointer_to_offset_utf8(haystack_u8_val, p);
 					goto out;
 				}
 				if (*--q != *--p) {
@@ -999,16 +1004,8 @@ mbfl_strpos(
 			q = needle_u8_val;
 			for (;;) {
 				if (q == qe) {
-					result = 0;
 					p -= needle_u8_len;
-					while (p > haystack_u8_val) {
-						unsigned char c = *--p;
-						if (c < 0x80) {
-							++result;
-						} else if ((c & 0xc0) != 0x80) {
-							++result;
-						}
-					}
+					result = mbfl_pointer_to_offset_utf8(haystack_u8_val, p);
 					goto out;
 				}
 				if (*q != *p) {
