@@ -22,7 +22,7 @@ require_once('skipifconnectfailure.inc');
 	$mysql = new my_mysql();
 
 	var_dump($mysql->p_test);
-	@var_dump($mysql->errno);
+	var_dump($mysql->errno);
 
 	$mysql->connect($host, $user, $passwd, $db, $port, $socket);
 	$mysql->select_db("nonexistingdb");
@@ -38,5 +38,7 @@ array(2) {
   [1]=>
   %s(3) "bar"
 }
+
+Warning: main(): Couldn't fetch my_mysql in %s on line %d
 bool(false)
 bool(true)

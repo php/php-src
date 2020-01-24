@@ -26,6 +26,9 @@ PHP                                                                        NEWS
   . Fixed bug #79149 (SEGV in mb_convert_encoding with non-string encodings).
     (cmb)
 
+- MySQLi:
+  . Fixed bug #78666 (Properties may emit a warning on var_dump()). (kocsismate)
+
 - MySQLnd:
   . Fixed bug #79084 (mysqlnd may fetch wrong column indexes with MYSQLI_BOTH).
     (cmb)

@@ -138,7 +138,7 @@ mysqli.allow_local_infile=1
 	}
 
 	mysqli_close($link);
-	@var_dump($link);
+	var_dump($link);
 
 	if ($IS_MYSQLND) {
 		ini_set('mysqli.default_host', 'p:' . $host);
@@ -179,42 +179,12 @@ mysqli.allow_local_infile=1
 --EXPECTF--
 Warning: mysqli_real_connect(): (%s/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d
 object(mysqli)#%d (%d) {
-  ["affected_rows"]=>
-  bool(false)
-  ["client_info"]=>
-  %s
   ["client_version"]=>
   int(%d)
   ["connect_errno"]=>
   int(%d)
   ["connect_error"]=>
   NULL
-  ["errno"]=>
-  %s
-  ["error"]=>
-  %s
-  ["error_list"]=>
-  bool(false)
-  ["field_count"]=>
-  bool(false)
-  ["host_info"]=>
-  bool(false)
-  ["info"]=>
-  bool(false)
-  ["insert_id"]=>
-  bool(false)
-  ["server_info"]=>
-  bool(false)
-  ["server_version"]=>
-  bool(false)
-  ["sqlstate"]=>
-  bool(false)
-  ["protocol_version"]=>
-  bool(false)
-  ["thread_id"]=>
-  bool(false)
-  ["warning_count"]=>
-  bool(false)
 }
 
 Warning: mysqli_real_connect(): Couldn't fetch mysqli in %s on line %d

@@ -199,49 +199,65 @@ PHP_METHOD(mysqli_warning, next)
 /* }}} */
 
 /* {{{ property mysqli_warning_message */
-static
-zval *mysqli_warning_message(mysqli_object *obj, zval *retval)
+static int mysqli_warning_message(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MYSQLI_WARNING *w;
 
 	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
-		return NULL;
+		if (!quiet) {
+			php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));
+		}
+		ZVAL_NULL(retval);
+
+		return FAILURE;
 	}
 
 	w = (MYSQLI_WARNING *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 	ZVAL_COPY(retval, &w->reason);
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property mysqli_warning_sqlstate */
-static
-zval *mysqli_warning_sqlstate(mysqli_object *obj, zval *retval)
+static int mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MYSQLI_WARNING *w;
 
 	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
-		return NULL;
+		if (!quiet) {
+			php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));
+		}
+		ZVAL_NULL(retval);
+
+		return FAILURE;
 	}
 
 	w = (MYSQLI_WARNING *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 	ZVAL_COPY(retval, &w->sqlstate);
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property mysqli_warning_error */
-static
-zval *mysqli_warning_errno(mysqli_object *obj, zval *retval)
+static int mysqli_warning_errno(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MYSQLI_WARNING *w;
 
 	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
-		return NULL;
+		if (!quiet) {
+			php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));
+		}
+		ZVAL_NULL(retval);
+
+		return FAILURE;
 	}
+
 	w = (MYSQLI_WARNING *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 	ZVAL_LONG(retval, w->errorno);
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 

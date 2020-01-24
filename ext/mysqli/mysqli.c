@@ -69,7 +69,7 @@ zend_class_entry *mysqli_warning_class_entry;
 zend_class_entry *mysqli_exception_class_entry;
 
 
-typedef zval *(*mysqli_read_t)(mysqli_object *obj, zval *rv);
+typedef int (*mysqli_read_t)(mysqli_object *obj, zval *rv, zend_bool quiet);
 typedef int (*mysqli_write_t)(mysqli_object *obj, zval *newval);
 
 typedef struct _mysqli_prop_handler {
@@ -281,10 +281,13 @@ static void mysqli_warning_free_storage(zend_object *object)
 /* }}} */
 
 /* {{{ mysqli_read_na */
-static zval *mysqli_read_na(mysqli_object *obj, zval *retval)
+static int mysqli_read_na(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
-	zend_throw_error(NULL, "Cannot read property");
-	return NULL;
+	if (!quiet) {
+		zend_throw_error(NULL, "Cannot read property");
+	}
+
+	return FAILURE;
 }
 /* }}} */
 
@@ -292,6 +295,7 @@ static zval *mysqli_read_na(mysqli_object *obj, zval *retval)
 static int mysqli_write_na(mysqli_object *obj, zval *newval)
 {
 	zend_throw_error(NULL, "Cannot write property");
+
 	return FAILURE;
 }
 /* }}} */
@@ -320,8 +324,9 @@ zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_sl
 	}
 
 	if (hnd) {
-		retval = hnd->read_func(obj, rv);
-		if (retval == NULL) {
+		if (hnd->read_func(obj, rv, type == BP_VAR_IS) == SUCCESS || type != BP_VAR_IS) {
+			retval = rv;
+		} else {
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
@@ -435,6 +440,7 @@ HashTable *mysqli_object_get_debug_info(zval *object, int *is_temp)
 		zval rv, member;
 		zval *value;
 		ZVAL_STR(&member, entry->name);
+
 		value = mysqli_read_property(object, &member, BP_VAR_IS, 0, &rv);
 		if (value != &EG(uninitialized_zval)) {
 			zend_hash_add(retval, Z_STR(member), value);

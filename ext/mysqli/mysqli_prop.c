@@ -29,49 +29,56 @@
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
 
-#define CHECK_STATUS(value) \
+#define CHECK_STATUS(value, quiet) \
 	if (!obj->ptr || ((MYSQLI_RESOURCE *)obj->ptr)->status < value ) { \
-		php_error_docref(NULL, E_WARNING, "Property access is not allowed yet"); \
+		if (!quiet) { \
+			php_error_docref(NULL, E_WARNING, "Property access is not allowed yet"); \
+		} \
 		ZVAL_FALSE(retval); \
-		return retval; \
+		return FAILURE; \
 	} \
 
 #define MYSQLI_GET_MYSQL(statusval) \
 MYSQL *p; \
 if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
-	php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));\
+	if (!quiet) { \
+		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name)); \
+	} \
 	ZVAL_FALSE(retval);\
-	return retval; \
+	return FAILURE; \
 } else { \
-	CHECK_STATUS(statusval);\
+	CHECK_STATUS(statusval, quiet);\
     p = (MYSQL *)((MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->mysql;\
 }
 
 #define MYSQLI_GET_RESULT(statusval) \
 MYSQL_RES *p; \
 if (!obj->ptr) { \
-	php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));\
+	if (!quiet) { \
+		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name)); \
+	} \
 	ZVAL_NULL(retval);\
-	return retval; \
+	return FAILURE; \
 } else { \
-	CHECK_STATUS(statusval);\
+	CHECK_STATUS(statusval, quiet);\
 	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr; \
 }
-
 
 #define MYSQLI_GET_STMT(statusval) \
 MYSQL_STMT *p; \
 if (!obj->ptr) { \
-	php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));\
+	if (!quiet) { \
+		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name)); \
+	} \
 	ZVAL_NULL(retval);\
-	return retval; \
+	return FAILURE; \
 } else { \
-	CHECK_STATUS(statusval);\
-	p = (MYSQL_STMT *)((MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->stmt;\
+	CHECK_STATUS(statusval, quiet); \
+	p = (MYSQL_STMT *)((MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr)->stmt; \
 }
 
 #define MYSQLI_MAP_PROPERTY_FUNC_LONG( __func, __int_func, __get_type, __ret_type, __ret_type_sprint_mod)\
-static zval *__func(mysqli_object *obj, zval *retval) \
+static int __func(mysqli_object *obj, zval *retval, zend_bool quiet) \
 {\
 	__ret_type l;\
 	__get_type;\
@@ -84,12 +91,12 @@ static zval *__func(mysqli_object *obj, zval *retval) \
 		} else { \
 			ZVAL_NEW_STR(retval, strpprintf(0, __ret_type_sprint_mod, l)); \
 		} \
-	}\
-	return retval;\
+	} \
+	return SUCCESS; \
 }
 
 #define MYSQLI_MAP_PROPERTY_FUNC_STRING(__func, __int_func, __get_type)\
-static zval *__func(mysqli_object *obj, zval *retval)\
+static int __func(mysqli_object *obj, zval *retval, zend_bool quiet)\
 {\
 	char *c;\
 	__get_type;\
@@ -103,66 +110,70 @@ static zval *__func(mysqli_object *obj, zval *retval)\
 			ZVAL_STRING(retval, c);\
 		}\
 	}\
-	return retval; \
+	return SUCCESS; \
 }
 
 /* {{{ property link_client_version_read */
-static zval *link_client_version_read(mysqli_object *obj, zval *retval)
+static int link_client_version_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	ZVAL_LONG(retval, MYSQL_VERSION_ID);
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property link_client_info_read */
-static zval *link_client_info_read(mysqli_object *obj, zval *retval)
+static int link_client_info_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
-	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED);
+	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED, quiet);
 	ZVAL_STRING(retval, MYSQL_SERVER_VERSION);
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property link_connect_errno_read */
-static zval *link_connect_errno_read(mysqli_object *obj, zval *retval)
+static int link_connect_errno_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	ZVAL_LONG(retval, (zend_long)MyG(error_no));
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property link_connect_error_read */
-static zval *link_connect_error_read(mysqli_object *obj, zval *retval)
+static int link_connect_error_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	if (MyG(error_msg)) {
 		ZVAL_STRING(retval, MyG(error_msg));
 	} else {
 		ZVAL_NULL(retval);
 	}
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property link_affected_rows_read */
-static zval *link_affected_rows_read(mysqli_object *obj, zval *retval)
+static int link_affected_rows_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MY_MYSQL *mysql;
 	my_ulonglong rc;
 
-	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED);
+	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED, quiet);
 
  	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
 	if (!mysql) {
 		ZVAL_NULL(retval);
 	} else {
-		CHECK_STATUS(MYSQLI_STATUS_VALID);
+		CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
 
 		rc = mysql_affected_rows(mysql->mysql);
 
 		if (rc == (my_ulonglong) -1) {
 			ZVAL_LONG(retval, -1);
-			return retval;
+			return SUCCESS;
 		}
 
 		if (rc < ZEND_LONG_MAX) {
@@ -171,16 +182,17 @@ static zval *link_affected_rows_read(mysqli_object *obj, zval *retval)
 			ZVAL_NEW_STR(retval, strpprintf(0, MYSQLI_LLU_SPEC, rc));
 		}
 	}
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property link_error_list_read */
-static zval *link_error_list_read(mysqli_object *obj, zval *retval)
+static int link_error_list_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MY_MYSQL *mysql;
 
-	CHECK_STATUS(MYSQLI_STATUS_VALID);
+	CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
 
  	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
@@ -216,7 +228,7 @@ static zval *link_error_list_read(mysqli_object *obj, zval *retval)
 		ZVAL_EMPTY_ARRAY(retval);
 	}
 
-	return retval;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -237,11 +249,11 @@ MYSQLI_MAP_PROPERTY_FUNC_LONG(link_warning_count_read, mysql_warning_count, MYSQ
 /* result properties */
 
 /* {{{ property result_type_read */
-static zval *result_type_read(mysqli_object *obj, zval *retval)
+static int result_type_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MYSQL_RES *p;
 
-	CHECK_STATUS(MYSQLI_STATUS_VALID);
+	CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
  	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
 	if (!p) {
@@ -249,12 +261,13 @@ static zval *result_type_read(mysqli_object *obj, zval *retval)
 	} else {
 		ZVAL_LONG(retval, mysqli_result_is_unbuffered(p) ? MYSQLI_USE_RESULT:MYSQLI_STORE_RESULT);
 	}
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property result_lengths_read */
-static zval *result_lengths_read(mysqli_object *obj, zval *retval)
+static int result_lengths_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MYSQL_RES *p;
 #if defined(MYSQLI_USE_MYSQLND)
@@ -264,7 +277,7 @@ static zval *result_lengths_read(mysqli_object *obj, zval *retval)
 #endif
 	uint32_t field_count;
 
-	CHECK_STATUS(MYSQLI_STATUS_VALID);
+	CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
 	p = (MYSQL_RES *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 	field_count = mysql_num_fields(p);
 	if (!p || !field_count || !(ret = mysql_fetch_lengths(p))) {
@@ -278,7 +291,8 @@ static zval *result_lengths_read(mysqli_object *obj, zval *retval)
 			add_index_long(retval, i, ret[i]);
 		}
 	}
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -289,11 +303,11 @@ MYSQLI_MAP_PROPERTY_FUNC_LONG(result_num_rows_read, mysql_num_rows, MYSQLI_GET_R
 /* statement properties */
 
 /* {{{ property stmt_id_read */
-static zval *stmt_id_read(mysqli_object *obj, zval *retval)
+static int stmt_id_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MY_STMT *p;
 
-	CHECK_STATUS(MYSQLI_STATUS_VALID);
+	CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
 
  	p = (MY_STMT*)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
@@ -302,17 +316,18 @@ static zval *stmt_id_read(mysqli_object *obj, zval *retval)
 	} else {
 		ZVAL_LONG(retval, mysqli_stmt_get_id(p->stmt));
 	}
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property stmt_affected_rows_read */
-static zval *stmt_affected_rows_read(mysqli_object *obj, zval *retval)
+static int stmt_affected_rows_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MY_STMT *p;
 	my_ulonglong rc;
 
-	CHECK_STATUS(MYSQLI_STATUS_VALID);
+	CHECK_STATUS(MYSQLI_STATUS_VALID, quiet);
 
  	p = (MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
@@ -323,7 +338,7 @@ static zval *stmt_affected_rows_read(mysqli_object *obj, zval *retval)
 
 		if (rc == (my_ulonglong) -1) {
 			ZVAL_LONG(retval, -1);
-			return retval;
+			return SUCCESS;
 		}
 
 		if (rc < ZEND_LONG_MAX) {
@@ -332,16 +347,17 @@ static zval *stmt_affected_rows_read(mysqli_object *obj, zval *retval)
 			ZVAL_NEW_STR(retval, strpprintf(0, MYSQLI_LLU_SPEC, rc));
 		}
 	}
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property stmt_error_list_read */
-static zval *stmt_error_list_read(mysqli_object *obj, zval *retval)
+static int stmt_error_list_read(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MY_STMT * stmt;
 
-	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED);
+	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED, quiet);
 
  	stmt = (MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 	if (stmt && stmt->stmt) {
@@ -375,7 +391,8 @@ static zval *stmt_error_list_read(mysqli_object *obj, zval *retval)
 	} else {
 		ZVAL_EMPTY_ARRAY(retval);
 	}
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
