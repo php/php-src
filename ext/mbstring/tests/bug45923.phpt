@@ -168,7 +168,7 @@ bool(false)
 bool(false)
 > Offset: 12
 
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 > Offset: -1
 int(8)
@@ -178,7 +178,7 @@ int(8)
 int(4)
 > Offset: -20
 
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 
 ------- strripos -----------

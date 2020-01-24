@@ -58,12 +58,12 @@ int(5)
 
 -- ASCII string with out of bound positive offset --
 
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 
 -- ASCII string with out of bound negative offset --
 
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 
 -- Multi-byte string without offset --
@@ -77,10 +77,10 @@ int(19)
 
 -- Multi-byte string with out of bound positive offset --
 
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 
 -- Multi-byte string with out of bound negative offset --
 
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strrpos(): Offset not contained in string in %s on line %d
 bool(false)

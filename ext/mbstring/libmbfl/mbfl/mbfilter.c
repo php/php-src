@@ -809,6 +809,37 @@ mbfl_oddlen(mbfl_string *string)
 	/* NOT REACHED */
 }
 
+static const unsigned char *mbfl_find_offset_utf8(const mbfl_string *str, ssize_t offset) {
+	if (offset < 0) {
+		const unsigned char *pos = str->val + str->len;
+		const unsigned char *begin = str->val;
+		while (offset < 0) {
+			if (pos <= begin) {
+				return NULL;
+			}
+
+			unsigned char c = *(--pos);
+			if (c < 0x80) {
+				++offset;
+			} else if ((c & 0xc0) != 0x80) {
+				++offset;
+			}
+		}
+		return pos;
+	} else {
+		const unsigned char *u8_tbl = mbfl_encoding_utf8.mblen_table;
+		const unsigned char *pos = str->val;
+		const unsigned char *end = str->val + str->len;
+		while (offset-- > 0) {
+			if (pos >= end) {
+				return NULL;
+			}
+			pos += u8_tbl[*pos];
+		}
+		return pos;
+	}
+}
+
 size_t
 mbfl_strpos(
     mbfl_string *haystack,
@@ -819,7 +850,7 @@ mbfl_strpos(
 	size_t result;
 	mbfl_string _haystack_u8, _needle_u8;
 	const mbfl_string *haystack_u8, *needle_u8 = NULL;
-	const unsigned char *u8_tbl = mbfl_encoding_utf8.mblen_table;
+	const unsigned char *offset_pointer;
 
 	if (haystack->encoding->no_encoding != mbfl_no_encoding_utf8) {
 		mbfl_string_init(&_haystack_u8);
@@ -843,6 +874,12 @@ mbfl_strpos(
 		needle_u8 = needle;
 	}
 
+	offset_pointer = mbfl_find_offset_utf8(haystack_u8, offset);
+	if (!offset_pointer) {
+		result = MBFL_ERROR_OFFSET;
+		goto out;
+	}
+
 	result = MBFL_ERROR_NOT_FOUND;
 	if (haystack_u8->len < needle_u8->len) {
 		goto out;
@@ -850,15 +887,6 @@ mbfl_strpos(
 
 	if (needle_u8->len == 0) {
 		size_t haystack_length = mbfl_strlen(haystack_u8);
-		/* Check if offset is out of bound */
-		if (
-			(offset > 0 && offset > haystack_length)
-			|| (offset < 0 && -offset > haystack_length)
-		) {
-			result = -16;
-			goto out;
-		}
-
 		if (offset < 0) {
 			result = haystack_length + offset;
 		} else if (reverse) {
@@ -883,15 +911,7 @@ mbfl_strpos(
 			jtbl[needle_u8_val[i]] = needle_u8_len - i;
 		}
 		e = haystack_u8_val + haystack_u8->len;
-		p = haystack_u8_val;
-		while (offset-- > 0) {
-			if (p >= e) {
-				result = MBFL_ERROR_OFFSET;
-				goto out;
-			}
-			p += u8_tbl[*p];
-		}
-		p += needle_u8_len;
+		p = offset_pointer + needle_u8_len;
 		if (p > e) {
 			goto out;
 		}
@@ -968,14 +988,7 @@ mbfl_strpos(
 				}
 			}
 		} else {
-			const unsigned char *ee = haystack_u8_val + haystack_u8->len;
-			while (offset-- > 0) {
-				if (e >= ee) {
-					result = MBFL_ERROR_OFFSET;
-					goto out;
-				}
-				e += u8_tbl[*e];
-			}
+			e = offset_pointer;
 		}
 		if (p < e + needle_u8_len) {
 			goto out;

@@ -41,12 +41,12 @@ foreach ($offsets as $i) {
 -- Offset is -25 --
 Multibyte String:
 
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 ASCII String:
 mb_strrpos:
 
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 strrpos:
 Offset not contained in string
@@ -54,12 +54,12 @@ Offset not contained in string
 -- Offset is -24 --
 Multibyte String:
 
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 ASCII String:
 mb_strrpos:
 
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strrpos(): Offset not contained in string in %s on line %d
 bool(false)
 strrpos:
 Offset not contained in string

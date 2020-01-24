@@ -2079,6 +2079,22 @@ PHP_FUNCTION(mb_strlen)
 }
 /* }}} */
 
+static void handle_strpos_error(size_t error) {
+	switch (error) {
+	case MBFL_ERROR_NOT_FOUND:
+		break;
+	case MBFL_ERROR_ENCODING:
+		php_error_docref(NULL, E_WARNING, "Unknown encoding or conversion error");
+		break;
+	case MBFL_ERROR_OFFSET:
+		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
+		break;
+	default:
+		php_error_docref(NULL, E_WARNING, "Unknown error in mb_strpos");
+		break;
+	}
+}
+
 /* {{{ proto int mb_strpos(string haystack, string needle [, int offset [, string encoding]])
    Find position of first occurrence of a string within another */
 PHP_FUNCTION(mb_strpos)
@@ -2099,34 +2115,11 @@ PHP_FUNCTION(mb_strpos)
 		RETURN_FALSE;
 	}
 
-	if (offset != 0) {
-		size_t slen = mbfl_strlen(&haystack);
-		if (offset < 0) {
-			offset += slen;
-		}
-		if (offset < 0 || offset > slen) {
-			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
-			RETURN_FALSE;
-		}
-	}
-
 	n = mbfl_strpos(&haystack, &needle, offset, reverse);
 	if (!mbfl_is_error(n)) {
 		RETVAL_LONG(n);
 	} else {
-		switch (n) {
-		case MBFL_ERROR_NOT_FOUND:
-			break;
-		case MBFL_ERROR_ENCODING:
-			php_error_docref(NULL, E_WARNING, "Unknown encoding or conversion error");
-			break;
-		case MBFL_ERROR_OFFSET:
-			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
-			break;
-		default:
-			php_error_docref(NULL, E_WARNING, "Unknown error in mb_strpos");
-			break;
-		}
+		handle_strpos_error(n);
 		RETVAL_FALSE;
 	}
 }
@@ -2150,19 +2143,11 @@ PHP_FUNCTION(mb_strrpos)
 		RETURN_FALSE;
 	}
 
-	if (offset != 0) {
-		size_t haystack_char_len = mbfl_strlen(&haystack);
-		if ((offset > 0 && offset > haystack_char_len) ||
-			(offset < 0 && -offset > haystack_char_len)) {
-			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
-			RETURN_FALSE;
-		}
-	}
-
 	n = mbfl_strpos(&haystack, &needle, offset, 1);
 	if (!mbfl_is_error(n)) {
 		RETVAL_LONG(n);
 	} else {
+		handle_strpos_error(n);
 		RETVAL_FALSE;
 	}
 }
