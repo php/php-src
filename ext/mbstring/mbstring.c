@@ -2171,6 +2171,7 @@ PHP_FUNCTION(mb_stripos)
 	if (!mbfl_is_error(n)) {
 		RETVAL_LONG(n);
 	} else {
+		handle_strpos_error(n);
 		RETVAL_FALSE;
 	}
 }
@@ -2194,6 +2195,7 @@ PHP_FUNCTION(mb_strripos)
 	if (!mbfl_is_error(n)) {
 		RETVAL_LONG(n);
 	} else {
+		handle_strpos_error(n);
 		RETVAL_FALSE;
 	}
 }
@@ -4809,26 +4811,6 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 
 		if (!needle.val) {
 			break;
-		}
-
- 		if (offset != 0) {
- 			size_t haystack_char_len = mbfl_strlen(&haystack);
-
- 			if (mode) {
-				if ((offset > 0 && (size_t)offset > haystack_char_len) ||
-					(offset < 0 && (size_t)(-offset) > haystack_char_len)) {
- 					php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
- 					break;
- 				}
- 			} else {
-				if (offset < 0) {
-					offset += (zend_long)haystack_char_len;
-				}
-				if (offset < 0 || (size_t)offset > haystack_char_len) {
- 					php_error_docref(NULL, E_WARNING, "Offset not contained in string");
- 					break;
- 				}
- 			}
 		}
 
 		n = mbfl_strpos(&haystack, &needle, offset, mode);

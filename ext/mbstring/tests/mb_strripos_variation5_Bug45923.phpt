@@ -74,40 +74,40 @@ int(20)
 **-- Offset is: 30 --**
 -- ASCII String --
 
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strripos(): Offset not contained in string in %s on line %d
 bool(false)
 --Multibyte String --
 
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strripos(): Offset not contained in string in %s on line %d
 bool(false)
 
 **-- Offset is: 40 --**
 -- ASCII String --
 
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strripos(): Offset not contained in string in %s on line %d
 bool(false)
 --Multibyte String --
 
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strripos(): Offset not contained in string in %s on line %d
 bool(false)
 
 **-- Offset is: 50 --**
 -- ASCII String --
 
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strripos(): Offset not contained in string in %s on line %d
 bool(false)
 --Multibyte String --
 
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strripos(): Offset not contained in string in %s on line %d
 bool(false)
 
 **-- Offset is: 60 --**
 -- ASCII String --
 
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strripos(): Offset not contained in string in %s on line %d
 bool(false)
 --Multibyte String --
 
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strripos(): Offset not contained in string in %s on line %d
 bool(false)
 Done

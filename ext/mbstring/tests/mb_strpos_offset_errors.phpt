@@ -32,8 +32,8 @@ bool(false)
 Warning: mb_stripos(): Offset not contained in string in %s on line %d
 bool(false)
 
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strripos(): Offset not contained in string in %s on line %d
 bool(false)
 
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
+Warning: mb_strripos(): Offset not contained in string in %s on line %d
 bool(false)
