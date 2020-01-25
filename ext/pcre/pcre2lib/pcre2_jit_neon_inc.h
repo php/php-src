@@ -109,7 +109,7 @@ vect_t vmask = VDUPQ(mask);
 #if defined(FFCPS)
 compare_type compare1_type = compare_match1;
 compare_type compare2_type = compare_match1;
-vect_t cmp1a, cmp1b, cmp2a, cmp2b;
+vect_t cmp1a = vdupq_n_u8(0), cmp1b = vdupq_n_u8(0), cmp2a = vdupq_n_u8(0), cmp2b = vdupq_n_u8(0);
 const sljit_u32 diff = IN_UCHARS(offs1 - offs2);
 PCRE2_UCHAR char1a = ic.c.c1;
 PCRE2_UCHAR char2a = ic.c.c3;
