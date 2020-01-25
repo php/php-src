@@ -217,8 +217,8 @@ PHP 8.0 UPGRADE NOTES
   . A non-string pattern argument to mb_ereg_replace() will now be interpreted
     as a string instead of an ASCII codepoint. The previous behavior may be
     restored with an explicit call to chr().
-  . The needle argument for mb_strpos(), mb_strrpos(), mb_stripos(), mb_strripos(), mb_strstr() and mb_stristr()
-    can now be empty.
+  . The needle argument for mb_strpos(), mb_strrpos(), mb_stripos(), mb_strripos(),
+    mb_strstr(), mb_stristr(), mb_strrchr() and mb_strrichr() can now be empty.
   . The $is_hex parameter, which was not used internally, has been removed from
     mb_decode_numericentity().
   . The legacy behaviour of passing the encoding as the third argument instead of an offset for the mb_strrpos
@@ -286,7 +286,8 @@ PHP 8.0 UPGRADE NOTES
     string. Previously non-string needles were interpreted as an ASCII code
     point. An explicit call to chr() can be used to restore the previous
     behavior.
-  . The needle argument for strpos(), strrpos(), stripos(), strripos(), strstr() and stristr() can now be empty.
+  . The needle argument for strpos(), strrpos(), stripos(), strripos(), strstr(),
+    stristr() and strrchr() can now be empty.
   . The length argument for substr(), substr_count(), substr_compare(), and
     iconv_substr() can now be null. Null values will behave as if no length
     argument was provided and will therefore return the remainder of the string
