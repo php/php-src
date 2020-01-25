@@ -927,6 +927,9 @@ int zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 #endif
 	EG(error_reporting) = E_ALL & ~E_NOTICE;
 
+	CG(active_calls_in_constants) = (HashTable *)malloc(sizeof(HashTable));
+	zend_hash_init_ex(CG(active_calls_in_constants), 8, NULL, NULL, 1, 0);
+
 	zend_interned_strings_init();
 	zend_startup_builtin_functions();
 	zend_register_standard_constants();
@@ -1083,6 +1086,8 @@ void zend_shutdown(void) /* {{{ */
 
 	zend_hash_destroy(GLOBAL_CONSTANTS_TABLE);
 	free(GLOBAL_CONSTANTS_TABLE);
+	zend_hash_destroy(CG(active_calls_in_constants));
+	free(CG(active_calls_in_constants));
 	zend_shutdown_strtod();
 
 #ifdef ZTS

@@ -590,7 +590,7 @@ static int validate_constant_array(HashTable *ht) /* {{{ */
 }
 /* }}} */
 
-static void copy_constant_array(zval *dst, zval *src) /* {{{ */
+void copy_constant_array(zval *dst, zval *src) /* {{{ */
 {
 	zend_string *key;
 	zend_ulong idx;

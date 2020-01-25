@@ -19,6 +19,7 @@
 
 #include "zend_ast.h"
 #include "zend_API.h"
+#include "zend_builtin_functions.h"
 #include "zend_operators.h"
 #include "zend_language_parser.h"
 #include "zend_smart_str.h"
@@ -473,6 +474,37 @@ static int zend_ast_add_unpacked_element(zval *result, zval *expr) {
 	return FAILURE;
 }
 
+static int validate_constant_array_or_throw(HashTable *ht) /* {{{ */
+{
+	int ret = 1;
+	zval *val;
+
+	GC_PROTECT_RECURSION(ht);
+	ZEND_HASH_FOREACH_VAL_IND(ht, val) {
+		ZVAL_DEREF(val);
+		if (Z_REFCOUNTED_P(val)) {
+			if (Z_TYPE_P(val) == IS_ARRAY) {
+				if (Z_REFCOUNTED_P(val)) {
+					if (Z_IS_RECURSIVE_P(val)) {
+						zend_throw_error(NULL, "Calls in constants cannot be recursive arrays");
+						ret = 0;
+						break;
+					} else if (!validate_constant_array_or_throw(Z_ARRVAL_P(val))) {
+						ret = 0;
+						break;
+					}
+				}
+			} else if (Z_TYPE_P(val) != IS_STRING && Z_TYPE_P(val) != IS_RESOURCE) {
+				zend_throw_error(NULL, "Calls in constants may only evaluate to scalar values, arrays or resources");
+				ret = 0;
+				break;
+			}
+		}
+	} ZEND_HASH_FOREACH_END();
+	GC_UNPROTECT_RECURSION(ht);
+	return ret;
+}
+/* }}} */
 ZEND_API int ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope)
 {
 	zval op1, op2;
@@ -720,6 +752,161 @@ ZEND_API int ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_c
 				zval_ptr_dtor_nogc(&op2);
 			}
 			break;
+		case ZEND_AST_CALL:
+		{
+			uint32_t i, j, arg_count, param_count = 0, capacity;
+			zend_string *fname, *fname_lower;
+			zval *func;
+			zval *func_name;
+			zend_ast *func_name_ast;
+			zend_ast_list *arg_list_ast;
+
+			zval *args;
+			func_name_ast = ast->child[0];
+			if (func_name_ast->kind != ZEND_AST_ZVAL || Z_TYPE_P(zend_ast_get_zval(func_name_ast)) != IS_STRING) {
+				/* Impossible */
+				zend_throw_error(NULL, "Unsupported constant expression for function call name");
+				return FAILURE;
+			}
+			func_name = zend_ast_get_zval(func_name_ast);
+			fname = Z_STR_P(func_name);
+			arg_list_ast = zend_ast_get_list(ast->child[1]);
+			arg_count = arg_list_ast->children;
+			capacity = arg_count;
+			args = emalloc(capacity * sizeof(zval));
+
+			for (i = 0; i < arg_list_ast->children; i++) {
+				zend_ast *elem = arg_list_ast->child[i];
+				// fprintf(stderr, "elem->kind=%d\n", (int)elem->kind);
+				if (elem->kind == ZEND_AST_UNPACK) {
+					HashTable *ht;
+					zval expr;
+					zval *val;
+					zend_string *key;
+					/* evaluate expr of ...expr */
+					if (UNEXPECTED(zend_ast_evaluate(&expr, elem->child[0], scope) != SUCCESS)) {
+						goto call_failure;
+					}
+					if (UNEXPECTED(Z_TYPE(expr) != IS_ARRAY)) {
+						zend_throw_error(NULL, "Only arrays and Traversables can be unpacked");
+						zval_ptr_dtor(&expr);
+						goto call_failure;
+					}
+					ht = Z_ARRVAL(expr);
+					if (zend_hash_num_elements(ht) > 1) {
+						capacity += zend_hash_num_elements(ht) - 1;
+						args = erealloc(args, capacity * sizeof(zval));
+					}
+					ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
+						if (key) {
+							zend_throw_error(NULL, "Cannot unpack array with string keys");
+							zval_ptr_dtor(&expr);
+							goto call_failure;
+						} else {
+							ZVAL_COPY(&args[param_count], val);
+							param_count++;
+						}
+					} ZEND_HASH_FOREACH_END();
+					zval_ptr_dtor(&expr);
+					continue;
+				}
+				// XXX what is the scope
+				if (UNEXPECTED(zend_ast_evaluate(&args[param_count], elem, scope) != SUCCESS)) {
+call_failure:
+					for (j = 0; j < param_count; j++) {
+						zval_ptr_dtor_nogc(&args[j]);
+					}
+					efree(args);
+					return FAILURE;
+				}
+				param_count++;
+			}
+			/* Based on INIT_FCALL - TODO: Any issues with the backtrace varying based on when this gets used? */
+			fname_lower = zend_string_tolower(fname);
+			// fprintf(stderr, "Looking up '%s' attr=%d\n", ZSTR_VAL(fname), (int)func_name_ast->attr);
+			func = zend_hash_find(EG(function_table), fname_lower);
+			if (func == NULL && func_name_ast->attr == ZEND_NAME_NOT_FQ) {
+				/* If NS\fn_name() couldn't be found, try fn_name() */
+				const char *after_ns = zend_memrchr(ZSTR_VAL(fname_lower), '\\', ZSTR_LEN(fname_lower));
+				if (after_ns) {
+					after_ns += 1;
+					zend_string *old_fname_lower = fname_lower;
+					fname_lower = zend_string_init(after_ns, (ZSTR_VAL(old_fname_lower) + ZSTR_LEN(old_fname_lower)) - after_ns, 0);
+					zend_string_release(old_fname_lower);
+
+					// fprintf(stderr, "Looking up '%s' as fallback\n", ZSTR_VAL(fname_lower));
+					func = zend_hash_find(EG(function_table), fname_lower);
+					// fprintf(stderr, "Found %llx\n", (long long)func);
+				}
+			}
+			// fprintf(stderr, "Going to call %s()\n", ZSTR_VAL(fname));
+			if (UNEXPECTED(func == NULL)) {
+				zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(fname));
+				zend_string_release(fname_lower);
+				ret = FAILURE;
+			} else {
+				zval result_copy;
+				ZVAL_NULL(&result_copy);
+				/* TODO: Handle case where pointers are longer than zend_ulong */
+				/* NOTE: This uses a hash table because cannot and shouldn't modify the bytes of ast when opcache is enabled - the memory is protected */
+				if (zend_hash_index_add_ptr(CG(active_calls_in_constants), (zend_ulong) ast, ast) == NULL) {
+					zend_string_release(fname_lower);
+					/* XXX should there be a way to recover from this error? */
+					/* XXX PHP converts constants with errors to null? */
+					zend_throw_error(NULL, "Unrecoverable error calling %s() in recursive constant definition", ZSTR_VAL(fname));
+					ret = FAILURE;
+				} else {
+					zval resolved_func_name_zv;
+					ZVAL_STR(&resolved_func_name_zv, fname_lower);
+					ret = call_user_function(CG(function_table), NULL, &resolved_func_name_zv, &result_copy, param_count, args);
+					zval_ptr_dtor(&resolved_func_name_zv);
+					if (EG(exception)) {
+						ret = FAILURE;
+					}
+					zend_hash_index_del(CG(active_calls_in_constants), (zend_ulong) ast);
+				}
+
+				if (ret != FAILURE) {
+					switch (Z_TYPE(result_copy)) {
+						case IS_LONG:
+						case IS_DOUBLE:
+						case IS_STRING:
+						case IS_FALSE:
+						case IS_TRUE:
+						case IS_NULL:
+						case IS_RESOURCE:
+							*result = result_copy;
+							break;
+						case IS_ARRAY:
+							if (Z_REFCOUNTED_P(&result_copy)) {
+								if (!validate_constant_array_or_throw(Z_ARRVAL(result_copy))) {
+									ret = FAILURE;
+								} else {
+									/* Recursively copy arrays and replace references with values */
+									copy_constant_array(result, &result_copy);
+									zval_ptr_dtor(&result_copy);
+								}
+							} else {
+								*result = result_copy;
+							}
+							break;
+						default:
+							zend_throw_error(NULL, "Calls in constants may only evaluate to scalar values, arrays or resources");
+							ret = FAILURE;
+							break;
+					}
+				}
+				if (ret == FAILURE) {
+					zval_ptr_dtor_nogc(&result_copy);
+				}
+			}
+			for (j = 0; j < param_count; j++) {
+				zval_ptr_dtor_nogc(&args[j]);
+			}
+			efree(args);
+			// FIXME validate that the result is a constant AST and throw if it isn't.
+			break;
+		}
 		default:
 			zend_throw_error(NULL, "Unsupported constant expression");
 			ret = FAILURE;

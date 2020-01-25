@@ -129,6 +129,7 @@ struct _zend_compiler_globals {
 	HashTable *delayed_autoloads;
 
 	uint32_t rtd_key_counter;
+	HashTable *active_calls_in_constants;	/* avoid recursive function calls */
 };
 
 

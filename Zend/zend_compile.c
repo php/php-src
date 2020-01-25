@@ -6352,6 +6352,13 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags) /
 		}
 
 		if (value_ast) {
+			if (!(flags & ZEND_ACC_STATIC) && ast_contains_call(value_ast)) {
+				/* Currently, public $prop = generate_unique_id() will only evaluate property defaults once,
+				 * because _object_and_properties_init initializes all of the default values of properties at the same time.
+				 * Leave deciding how this should be handled to subsequent RFCs. */
+				zend_error_noreturn(E_COMPILE_ERROR, "Default value for instance property %s::$%s cannot contain function calls",
+					ZSTR_VAL(ce->name), ZSTR_VAL(name));
+			}
 			zend_const_expr_to_zval(&value_zv, value_ast);
 
 			if (ZEND_TYPE_IS_SET(type) && !Z_CONSTANT(value_zv)
@@ -8572,7 +8579,9 @@ void zend_compile_const_expr(zend_ast **ast_ptr) /* {{{ */
 	}
 
 	if (!zend_is_allowed_in_const_expr(ast->kind)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
+		if (ast->kind != ZEND_AST_ARG_LIST && ast->kind != ZEND_AST_CALL) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid operations");
+		}
 	}
 
 	switch (ast->kind) {
@@ -8588,6 +8597,30 @@ void zend_compile_const_expr(zend_ast **ast_ptr) /* {{{ */
 		case ZEND_AST_MAGIC_CONST:
 			zend_compile_const_expr_magic_const(ast_ptr);
 			break;
+		case ZEND_AST_CALL:
+		{
+			zend_bool is_fully_qualified;
+			zval *original_zv;
+			zend_string *original_name;
+			zend_string *resolved_name;
+			zend_ast *func_name_ast = ast->child[0];
+			if (func_name_ast->kind != ZEND_AST_ZVAL || Z_TYPE_P(zend_ast_get_zval(func_name_ast)) != IS_STRING) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid name for function call");
+			}
+			original_zv = zend_ast_get_zval(func_name_ast);
+			original_name = Z_STR_P(original_zv);
+			if (memchr(ZSTR_VAL(original_name), ':', ZSTR_LEN(original_name))) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid name for function call");
+			}
+			resolved_name = zend_resolve_function_name(original_name, func_name_ast->attr, &is_fully_qualified);
+			// fprintf(stderr, "original_name=%s resolved_name=%s attr=%d is_fully_qualified=%d\n", ZSTR_VAL(original_name), ZSTR_VAL(resolved_name), (int)ast->child[0]->attr, (int)is_fully_qualified);
+			Z_STR_P(original_zv) = resolved_name;
+			zend_string_release(original_name);
+			func_name_ast->attr = is_fully_qualified ? ZEND_NAME_FQ : ZEND_NAME_NOT_FQ;
+
+			zend_ast_apply(ast->child[1], zend_compile_const_expr);
+			break;
+		}
 		default:
 			zend_ast_apply(ast, zend_compile_const_expr);
 			break;
@@ -9218,5 +9251,33 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 
 	zend_ast_destroy(ast);
 	*ast_ptr = zend_ast_create_zval(&result);
+}
+/* }}} */
+
+zend_bool ast_contains_call(zend_ast *ast) /* {{{ */
+{
+	if (ast == NULL) {
+		return 0;
+	}
+	if (zend_ast_is_list(ast)) {
+		zend_ast_list *list = zend_ast_get_list(ast);
+		uint32_t i;
+		for (i = 0; i < list->children; ++i) {
+			if (ast_contains_call(list->child[i])) {
+				return 1;
+			}
+		}
+	} else {
+		if (ast->kind == ZEND_AST_CALL) {
+			return 1;
+		}
+		uint32_t i, children = zend_ast_get_num_children(ast);
+		for (i = 0; i < children; ++i) {
+			if (ast_contains_call(ast->child[i])) {
+				return 1;
+			}
+		}
+	}
+	return 0;
 }
 /* }}} */

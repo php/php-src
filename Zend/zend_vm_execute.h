@@ -3013,7 +3013,8 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_INIT_SPEC_CON
 					ZVAL_UNDEF(param);
 					HANDLE_EXCEPTION();
 				}
-				if (!Z_REFCOUNTED_P(param)) {
+				if (!Z_REFCOUNTED_P(param) && !ast_contains_call(Z_ASTVAL_P(default_value))) {
+					/* Could put the result of ast_contains_call in one of the high bits of extended_value instead, if it wouldn't conflict with the type? */
 					ZVAL_COPY_VALUE(cache_val, param);
 				}
 			}

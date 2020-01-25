@@ -5124,7 +5124,7 @@ ZEND_VM_HOT_HANDLER(64, ZEND_RECV_INIT, NUM, CONST, CACHE_SLOT)
 					ZVAL_UNDEF(param);
 					HANDLE_EXCEPTION();
 				}
-				if (!Z_REFCOUNTED_P(param)) {
+				if (!Z_REFCOUNTED_P(param) && !ast_contains_call(Z_ASTVAL_P(default_value))) {
 					ZVAL_COPY_VALUE(cache_val, param);
 				}
 			}
