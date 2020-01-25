@@ -1421,12 +1421,9 @@ session.cookie_samesite =
 ; http://php.net/session.serialize-handler
 session.serialize_handler = php
 
-; Defines the probability that the 'garbage collection' process is started
-; on every session initialization. The probability is calculated by using
-; gc_probability/gc_divisor. Where session.gc_probability is the numerator
-; and gc_divisor is the denominator in the equation. Setting this value to 1
-; when the session.gc_divisor value is 100 will give you approximately a 1% chance
-; the gc will run on any given request.
+; Defines the probability that the 'garbage collection' process is started on every
+; session initialization. The probability is calculated by using gc_probability/gc_divisor,
+; e.g. 1/100 means there is a 1% chance that the GC process starts on each request.
 ; Default Value: 1
 ; Development Value: 1
 ; Production Value: 1
@@ -1434,13 +1431,9 @@ session.serialize_handler = php
 session.gc_probability = 1
 
 ; Defines the probability that the 'garbage collection' process is started on every
-; session initialization. The probability is calculated by using the following equation:
-; gc_probability/gc_divisor. Where session.gc_probability is the numerator and
-; session.gc_divisor is the denominator in the equation. Setting this value to 100
-; when the session.gc_probability value is 1 will give you approximately a 1% chance
-; the gc will run on any given request. Increasing this value to 1000 will give you
-; a 0.1% chance the gc will run on any given request. For high volume production servers,
-; this is a more efficient approach.
+; session initialization. The probability is calculated by using gc_probability/gc_divisor,
+; e.g. 1/100 means there is a 1% chance that the GC process starts on each request.
+; For high volume production servers, using a value of 1000 is a more efficient approach.
 ; Default Value: 100
 ; Development Value: 1000
 ; Production Value: 1000
