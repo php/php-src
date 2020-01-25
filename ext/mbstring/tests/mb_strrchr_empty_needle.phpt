@@ -15,23 +15,23 @@ $string_ascii = 'abc def';
 $string_mb = "日本語テキストです。01234５６７８９。";
 
 echo "\n-- ASCII string --\n";
-var_dump(bin2hex(mb_strrchr($string_ascii, '', false, 'ISO-8859-1')));
-var_dump(bin2hex(mb_strrchr($string_ascii, '')));
-var_dump(bin2hex(mb_strrchr($string_ascii, '', true)));
+var_dump(mb_strrchr($string_ascii, '', false, 'ISO-8859-1'));
+var_dump(mb_strrchr($string_ascii, ''));
+var_dump(mb_strrchr($string_ascii, '', true));
 
 echo "\n-- Multibyte string --\n";
-var_dump(bin2hex(mb_strrchr($string_mb, '')));
-var_dump(bin2hex(mb_strrchr($string_mb, '', false, 'utf-8')));
-var_dump(bin2hex(mb_strrchr($string_mb, '', true)));
+var_dump(mb_strrchr($string_mb, ''));
+var_dump(mb_strrchr($string_mb, '', false, 'utf-8'));
+var_dump(mb_strrchr($string_mb, '', true));
 
 ?>
 --EXPECT--
 -- ASCII string --
 string(0) ""
 string(0) ""
-string(0) ""
+string(7) "abc def"
 
 -- Multibyte string --
 string(0) ""
 string(0) ""
-string(0) ""
+string(53) "日本語テキストです。01234５６７８９。"

@@ -2266,13 +2266,6 @@ PHP_FUNCTION(mb_strrchr)
 		RETURN_FALSE;
 	}
 
-	if (haystack.len == 0) {
-		RETURN_FALSE;
-	}
-	if (needle.len == 0) {
-		RETURN_FALSE;
-	}
-
 	n = mbfl_strpos(&haystack, &needle, 0, 1);
 	if (!mbfl_is_error(n)) {
 		if (part) {
