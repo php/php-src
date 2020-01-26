@@ -10,7 +10,7 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #49555 (Fatal error "Function must be a string" message should be
     renamed). (Nikita)
-  . Fixed bug #70839 (Convertion optional argument to variadic forbidden by LSP
+  . Fixed bug #70839 (Converting optional argument to variadic forbidden by LSP
     checks). (Nikita)
 
 - CURL:
@@ -19,7 +19,7 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #65547 (Default value for sunrise/sunset zenith still wrong).
     (cmb)
-  . Fixed bug #69044 (discrepency between time and microtime). (krakjoe)
+  . Fixed bug #69044 (discrepancy between time and microtime). (krakjoe)
 
 - DOM:
   . Add property DOMXPath::$registerNodeNamespaces and constructor argument
@@ -57,7 +57,7 @@ PHP                                                                        NEWS
   . Fixed #60594 (mysqlnd exposes 160 lines of stats in phpinfo). (PeeHaa)
 
 - OpCache:
-  . Fixed bug #78654 (Incorrectly computed opcache checksum on files with 
+  . Fixed bug #78654 (Incorrectly computed opcache checksum on files with
     non-ascii characters). (mhagstrand)
 
 - PCRE:
@@ -79,7 +79,7 @@ PHP                                                                        NEWS
   . Fixed bug #77805 (phpdbg build fails when readline is shared). (krakjoe)
 
 - Reflection:
-  . Fixed bug #78697 (ReflectionClass::implementsInterface - inaccurate error 
+  . Fixed bug #78697 (ReflectionClass::implementsInterface - inaccurate error
     message with traits). (villfa)
 
 - Session:
@@ -113,7 +113,7 @@ PHP                                                                        NEWS
   . Fixed bug #76874 (xml_parser_free() should never leak memory). (Nikita)
 
 - XMLWriter:
-  . Changed functions to accept/return XMKWriter objects instead of resources.
+  . Changed functions to accept/return XMLWriter objects instead of resources.
     (cmb)
 
 - Zip:
