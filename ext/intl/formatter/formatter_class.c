@@ -25,6 +25,7 @@
 #include "formatter_attr.h"
 
 #include <zend_exceptions.h>
+#include "Zend/zend_interfaces.h"
 
 zend_class_entry *NumberFormatter_ce_ptr = NULL;
 static zend_object_handlers NumberFormatter_handlers;
@@ -183,6 +184,8 @@ void formatter_register_class( void )
 	INIT_CLASS_ENTRY( ce, "NumberFormatter", NumberFormatter_class_functions );
 	ce.create_object = NumberFormatter_object_create;
 	NumberFormatter_ce_ptr = zend_register_internal_class( &ce );
+	NumberFormatter_ce_ptr->serialize = zend_class_serialize_deny;
+	NumberFormatter_ce_ptr->unserialize = zend_class_unserialize_deny;
 
 	memcpy(&NumberFormatter_handlers, &std_object_handlers,
 		sizeof(NumberFormatter_handlers));
