@@ -35,7 +35,7 @@
 #include "zend_multiply.h"
 #include "zend_object_handlers.h"
 
-#define LONG_SIGN_MASK (((zend_long)1) << (8*sizeof(zend_long)-1))
+#define LONG_SIGN_MASK ZEND_LONG_MIN
 
 BEGIN_EXTERN_C()
 ZEND_API int ZEND_FASTCALL add_function(zval *result, zval *op1, zval *op2);

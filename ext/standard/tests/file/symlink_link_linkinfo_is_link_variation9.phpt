@@ -50,7 +50,7 @@ echo "lstat() returns lstat['dev'] as $s1[0]\n";
 if( $s1[0] == $linkinfo )
   echo "\nlinkinfo() value matches lstat['dev']\n";
 else
-  echo "\nWarning: linkinfo() value doesnt match lstat['dev']\n";
+  echo "\nWarning: linkinfo() value doesn't match lstat['dev']\n";
 // delete link
 unlink($soft_link);
 
@@ -65,7 +65,7 @@ echo "lstat() returns lstat['dev'] as $s1[0]\n";
 if( $s1[0] == $linkinfo )
   echo "\nlinkinfo() value matches lstat['dev']\n";
 else
-  echo "\nWarning: linkinfo() value doesnt match lstat['dev']\n";
+  echo "\nWarning: linkinfo() value doesn't match lstat['dev']\n";
 
 // delete link
 unlink($hard_link);
@@ -82,7 +82,7 @@ echo "lstat() returns lstat['dev'] as $s1[0]\n";
 if( $s1[0] == $linkinfo )
   echo "\nlinkinfo() value matches lstat['dev']\n";
 else
-  echo "\nWarning: linkinfo() value doesnt match lstat['dev']\n";
+  echo "\nWarning: linkinfo() value doesn't match lstat['dev']\n";
 
 // delete link
 unlink($soft_link);

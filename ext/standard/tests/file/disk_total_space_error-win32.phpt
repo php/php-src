@@ -5,6 +5,8 @@ Test disk_total_space() function : error conditions
 if(substr(PHP_OS, 0, 3) != 'WIN' )
   die("skip Valid only for Windows");
 ?>
+--CONFLICTS--
+disk_total_space
 --FILE--
 <?php
 /*

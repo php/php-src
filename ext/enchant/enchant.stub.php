@@ -15,11 +15,8 @@ function enchant_broker_get_error($broker) {}
 /** @param resource $broker */
 function enchant_broker_set_dict_path($broker, int $name, string $value): bool {}
 
-/**
- * @param resource $broker
- * @return string|false
- */
-function enchant_broker_get_dict_path($broker, int $name) {}
+/** @param resource $broker */
+function enchant_broker_get_dict_path($broker, int $name): string|false {}
 
 /** @param resource $broker */
 function enchant_broker_list_dicts($broker): array {}
@@ -69,11 +66,8 @@ function enchant_dict_is_in_session($dict, string $word): bool {}
 /** @param resource $dict */
 function enchant_dict_store_replacement($dict, string $mis, string $cor): void {}
 
-/**
-* @param resource $dict
-* @return string|false
-*/
-function enchant_dict_get_error($dict) {}
+/** @param resource $dict */
+function enchant_dict_get_error($dict): string|false {}
 
 /** @param resource $dict */
 function enchant_dict_describe($dict): array {}

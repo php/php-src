@@ -839,7 +839,7 @@ PHP_FUNCTION(mb_regex_encoding)
 	OnigEncoding mbctype;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &encoding, &encoding_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!encoding) {
@@ -897,13 +897,13 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	char *str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|z", &arg_pattern, &arg_pattern_len, &string, &string_len, &array) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (array != NULL) {
 		array = zend_try_array_init(array);
 		if (!array) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -921,7 +921,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	}
 
 	if (arg_pattern_len == 0) {
-		php_error_docref(NULL, E_WARNING, "empty pattern");
+		php_error_docref(NULL, E_WARNING, "Empty pattern");
 		RETVAL_FALSE;
 		goto out;
 	}
@@ -1036,7 +1036,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 						&replace, &replace_len,
 						&string, &string_len,
 						&option_str, &option_str_len) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 		} else {
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "sfs|s",
@@ -1044,7 +1044,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 						&arg_replace_fci, &arg_replace_fci_cache,
 						&string, &string_len,
 						&option_str, &option_str_len) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 		}
 
@@ -1251,7 +1251,7 @@ PHP_FUNCTION(mb_split)
 	zend_long count = -1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l", &arg_pattern, &arg_pattern_len, &string, &string_len, &count) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (count > 0) {
@@ -1342,7 +1342,7 @@ PHP_FUNCTION(mb_ereg_match)
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|s",
 		                          &arg_pattern, &arg_pattern_len, &string, &string_len,
 		                          &option_str, &option_str_len)==FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 
 		if (option_str != NULL) {
@@ -1395,7 +1395,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	OnigSyntaxType *syntax;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|ss", &arg_pattern, &arg_pattern_len, &arg_options, &arg_options_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	option = MBREX(regex_default_options);
@@ -1530,7 +1530,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 	OnigOptionType option;
 
 	if (zend_parse_parameters(argc, "S|ss", &arg_str, &arg_pattern, &arg_pattern_len, &arg_options, &arg_options_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (argc > 1 && arg_pattern_len == 0) {
@@ -1586,7 +1586,7 @@ PHP_FUNCTION(mb_ereg_search_getregs)
 	OnigUChar *str;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (MBREX(search_regs) != NULL && Z_TYPE(MBREX(search_str)) == IS_STRING) {
@@ -1624,7 +1624,7 @@ PHP_FUNCTION(mb_ereg_search_getregs)
 PHP_FUNCTION(mb_ereg_search_getpos)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETVAL_LONG(MBREX(search_pos));
@@ -1638,7 +1638,7 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 	zend_long position;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &position) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Accept negative position if length of search string can be determined */
@@ -1683,7 +1683,7 @@ PHP_FUNCTION(mb_regex_set_options)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s",
 	                          &string, &string_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (string != NULL) {
 		opt = 0;

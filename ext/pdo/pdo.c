@@ -29,6 +29,7 @@
 #include "php_pdo_int.h"
 #include "zend_exceptions.h"
 #include "ext/spl/spl_exceptions.h"
+#include "pdo_arginfo.h"
 
 zend_class_entry *pdo_dbh_ce, *pdo_dbstmt_ce, *pdo_row_ce;
 
@@ -84,9 +85,7 @@ PHP_FUNCTION(pdo_drivers)
 {
 	pdo_driver_t *pdriver;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -94,11 +93,6 @@ PHP_FUNCTION(pdo_drivers)
 		add_next_index_stringl(return_value, (char*)pdriver->driver_name, pdriver->driver_name_len);
 	} ZEND_HASH_FOREACH_END();
 }
-/* }}} */
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO(arginfo_pdo_drivers, 0)
-ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ pdo_functions[] */

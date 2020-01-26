@@ -458,7 +458,7 @@ PHP_FUNCTION(dom_import_simplexml)
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &node) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	nodeobj = (php_libxml_node_object *) ((char *) Z_OBJ_P(node) - Z_OBJ_HT_P(node)->offset);

@@ -120,7 +120,7 @@ static PHP_METHOD(UConverter, toUCallback) {
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lzzz",
 		&reason, &source, &codeUnits, &error) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_converter_default_callback(return_value, ZEND_THIS, reason, error);
@@ -142,7 +142,7 @@ static PHP_METHOD(UConverter, fromUCallback) {
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lzzz",
 		&reason, &source, &codePoint, &error) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_converter_default_callback(return_value, ZEND_THIS, reason, error);
@@ -427,7 +427,7 @@ static void php_converter_do_set_encoding(UConverter **pcnv, INTERNAL_FUNCTION_P
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &enc, &enc_len) == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "Bad arguments, "
 				"expected one string argument", 0);
-		return;
+		RETURN_THROWS();
 	}
 	intl_errors_reset(&objval->error);
 
@@ -457,7 +457,7 @@ static void php_converter_do_get_encoding(php_converter_object *objval, UConvert
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, "Expected no arguments", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	intl_errors_reset(&objval->error);

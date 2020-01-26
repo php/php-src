@@ -16,6 +16,6 @@ trycatch_dump(
     fn () => imagepolygon($g, array(200,10, 200,100, 280,100), 2, $fgnd)
 );
 ?>
---EXPECT--
+--EXPECTF--
 !! [ValueError] Polygon must have at least 3 points
 !! [ValueError] Polygon must have at least 3 points

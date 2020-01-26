@@ -1393,7 +1393,7 @@ PHP_FUNCTION(mb_language)
 	zend_string *name = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|S", &name) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (name == NULL) {
 		RETVAL_STRING((char *)mbfl_no_language2name(MBSTRG(language)));
@@ -1419,7 +1419,7 @@ PHP_FUNCTION(mb_internal_encoding)
 	const mbfl_encoding *encoding;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &name, &name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (name == NULL) {
 		name = MBSTRG(current_internal_encoding) ? MBSTRG(current_internal_encoding)->name: NULL;
@@ -1454,7 +1454,7 @@ PHP_FUNCTION(mb_http_input)
 
 	retname = 1;
  	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &typ, &typ_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
  	}
  	if (typ == NULL) {
  		result = MBSTRG(http_input_identify);
@@ -1543,7 +1543,7 @@ PHP_FUNCTION(mb_http_output)
 	const mbfl_encoding *encoding;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &name, &name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (name == NULL) {
@@ -1574,7 +1574,7 @@ PHP_FUNCTION(mb_detect_order)
 	zval *arg1 = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg1) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!arg1) {
@@ -1600,7 +1600,7 @@ PHP_FUNCTION(mb_detect_order)
 				break;
 			default:
 				if (!try_convert_to_string(arg1)) {
-					return;
+					RETURN_THROWS();
 				}
 				if (FAILURE == php_mb_parse_encoding_list(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), &list, &size, 0)) {
 					if (list) {
@@ -1651,7 +1651,7 @@ PHP_FUNCTION(mb_substitute_character)
 	zval *arg1 = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg1) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!arg1) {
@@ -1711,7 +1711,7 @@ PHP_FUNCTION(mb_preferred_mime_name)
 	size_t name_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	} else {
 		no_encoding = mbfl_name2no_encoding(name);
 		if (no_encoding == mbfl_no_encoding_invalid) {
@@ -1745,12 +1745,12 @@ PHP_FUNCTION(mb_parse_str)
 
 	track_vars_array = NULL;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz", &encstr, &encstr_len, &track_vars_array) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	track_vars_array = zend_try_array_init(track_vars_array);
 	if (!track_vars_array) {
-		return;
+		RETURN_THROWS();
 	}
 
 	encstr = estrndup(encstr, encstr_len);
@@ -1791,7 +1791,7 @@ PHP_FUNCTION(mb_output_handler)
 	char *s, *mimetype = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl", &arg_string, &arg_string_len, &arg_status) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	encoding = MBSTRG(current_http_output_encoding);
@@ -2090,7 +2090,7 @@ PHP_FUNCTION(mb_strpos)
 	size_t n;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|lS", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &offset, &enc_name) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	haystack.no_language = needle.no_language = MBSTRG(language);
@@ -2108,11 +2108,6 @@ PHP_FUNCTION(mb_strpos)
 			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 			RETURN_FALSE;
 		}
-	}
-
-	if (needle.len == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty delimiter");
-		RETURN_FALSE;
 	}
 
 	n = mbfl_strpos(&haystack, &needle, offset, reverse);
@@ -2146,43 +2141,10 @@ PHP_FUNCTION(mb_strrpos)
 {
 	mbfl_string haystack, needle;
 	zend_string *enc_name = NULL;
-	zval *zoffset = NULL;
 	zend_long offset = 0, n;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|zS", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &zoffset, &enc_name) == FAILURE) {
-		return;
-	}
-
-	if (zoffset) {
-		if (Z_TYPE_P(zoffset) == IS_STRING) {
-			switch (Z_STRVAL_P(zoffset)[0]) {
-				case '0':
-				case '1':
-				case '2':
-				case '3':
-				case '4':
-				case '5':
-				case '6':
-				case '7':
-				case '8':
-				case '9':
-				case ' ':
-				case '-':
-				case '.':
-					convert_to_long_ex(zoffset);
-					offset = Z_LVAL_P(zoffset);
-					break;
-				default :
-					enc_name = Z_STR_P(zoffset);
-					php_error_docref(NULL, E_DEPRECATED,
-						"Passing the encoding as third parameter is deprecated. "
-						"Use an explicit zero offset");
-					break;
-			}
-		} else {
-			convert_to_long_ex(zoffset);
-			offset = Z_LVAL_P(zoffset);
-		}
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|lS", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &offset, &enc_name) == FAILURE) {
+		RETURN_THROWS();
 	}
 
 	haystack.no_language = needle.no_language = MBSTRG(language);
@@ -2219,12 +2181,7 @@ PHP_FUNCTION(mb_stripos)
 	zend_string *from_encoding = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|lS", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &offset, &from_encoding) == FAILURE) {
-		return;
-	}
-
-	if (needle.len == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty delimiter");
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	n = php_mb_stripos(0, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, offset, from_encoding);
@@ -2247,7 +2204,7 @@ PHP_FUNCTION(mb_strripos)
 	zend_string *from_encoding = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|lS", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &offset, &from_encoding) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	n = php_mb_stripos(1, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, offset, from_encoding);
@@ -2270,17 +2227,12 @@ PHP_FUNCTION(mb_strstr)
 	zend_bool part = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bS", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &enc_name) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	haystack.no_language = needle.no_language = MBSTRG(language);
 	haystack.encoding = needle.encoding = php_mb_get_encoding(enc_name);
 	if (!haystack.encoding) {
-		RETURN_FALSE;
-	}
-
-	if (needle.len == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty delimiter");
 		RETURN_FALSE;
 	}
 
@@ -2321,7 +2273,7 @@ PHP_FUNCTION(mb_strrchr)
 	zend_bool part = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bS", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &enc_name) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	haystack.no_language = needle.no_language = MBSTRG(language);
@@ -2374,17 +2326,12 @@ PHP_FUNCTION(mb_stristr)
 	zend_string *from_encoding = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bS", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &from_encoding) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	haystack.no_language = needle.no_language = MBSTRG(language);
 	haystack.encoding = needle.encoding = php_mb_get_encoding(from_encoding);
 	if (!haystack.encoding) {
-		RETURN_FALSE;
-	}
-
-	if (!needle.len) {
-		php_error_docref(NULL, E_WARNING, "Empty delimiter");
 		RETURN_FALSE;
 	}
 
@@ -2425,7 +2372,7 @@ PHP_FUNCTION(mb_strrichr)
 	zend_string *from_encoding = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bS", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &from_encoding) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	haystack.no_language = needle.no_language = MBSTRG(language);
@@ -2470,7 +2417,7 @@ PHP_FUNCTION(mb_substr_count)
 	zend_string *enc_name = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|S", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &enc_name) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	haystack.no_language = needle.no_language = MBSTRG(language);
@@ -2506,7 +2453,7 @@ PHP_FUNCTION(mb_substr)
 	mbfl_string string, result, *ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l!S", &str, &str_len, &from, &len, &len_is_null, &encoding) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	string.no_language = MBSTRG(language);
@@ -2569,7 +2516,7 @@ PHP_FUNCTION(mb_strcut)
 	mbfl_string string, result, *ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l!S", (char **)&string.val, &string.len, &from, &len, &len_is_null, &encoding) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	string.no_language = MBSTRG(language);
@@ -2626,7 +2573,7 @@ PHP_FUNCTION(mb_strwidth)
 	zend_string *enc_name = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|S", (char **)&string.val, &string.len, &enc_name) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	string.no_language = MBSTRG(language);
@@ -2655,7 +2602,7 @@ PHP_FUNCTION(mb_strimwidth)
 	mbfl_string string, result, marker, *ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sll|sS", &str, &str_len, &from, &width, &trimmarker, &trimmarker_len, &encoding) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	string.no_language = marker.no_language = MBSTRG(language);
@@ -2906,12 +2853,12 @@ PHP_FUNCTION(mb_convert_encoding)
 	HashTable *target_hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs|z", &input, &arg_new, &new_len, &arg_old) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(input) != IS_STRING && Z_TYPE_P(input) != IS_ARRAY) {
 		if (!try_convert_to_string(input)) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -2932,12 +2879,12 @@ PHP_FUNCTION(mb_convert_encoding)
 
 					if ( _from_encodings) {
 						l = strlen(_from_encodings);
-						n = strlen(Z_STRVAL_P(hash_entry));
+						n = strlen(ZSTR_VAL(encoding_str));
 						_from_encodings = erealloc(_from_encodings, l+n+2);
 						memcpy(_from_encodings + l, ",", 1);
-						memcpy(_from_encodings + l + 1, Z_STRVAL_P(hash_entry), Z_STRLEN_P(hash_entry) + 1);
+						memcpy(_from_encodings + l + 1, ZSTR_VAL(encoding_str), ZSTR_LEN(encoding_str) + 1);
 					} else {
-						_from_encodings = estrdup(Z_STRVAL_P(hash_entry));
+						_from_encodings = estrdup(ZSTR_VAL(encoding_str));
 					}
 					zend_string_release(encoding_str);
 				} ZEND_HASH_FOREACH_END();
@@ -2950,7 +2897,7 @@ PHP_FUNCTION(mb_convert_encoding)
 				break;
 			default:
 				if (!try_convert_to_string(arg_old)) {
-					return;
+					RETURN_THROWS();
 				}
 
 				_from_encodings = Z_STRVAL_P(arg_old);
@@ -3004,7 +2951,7 @@ PHP_FUNCTION(mb_convert_case)
 	RETVAL_FALSE;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|S!", &str, &str_len,
 				&case_mode, &from_encoding) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	enc = php_mb_get_encoding(from_encoding);
@@ -3041,7 +2988,7 @@ PHP_FUNCTION(mb_strtoupper)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|S!", &str, &str_len,
 				&from_encoding) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	enc = php_mb_get_encoding(from_encoding);
@@ -3075,7 +3022,7 @@ PHP_FUNCTION(mb_strtolower)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|S!", &str, &str_len,
 				&from_encoding) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	enc = php_mb_get_encoding(from_encoding);
@@ -3110,7 +3057,7 @@ PHP_FUNCTION(mb_detect_encoding)
 	size_t size;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z!b", &str, &str_len, &encoding_list, &strict) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* make encoding list */
@@ -3129,7 +3076,7 @@ PHP_FUNCTION(mb_detect_encoding)
 			break;
 		default:
 			if (!try_convert_to_string(encoding_list)) {
-				return;
+				RETURN_THROWS();
 			}
 			if (FAILURE == php_mb_parse_encoding_list(Z_STRVAL_P(encoding_list), Z_STRLEN_P(encoding_list), &list, &size, 0)) {
 				if (list) {
@@ -3183,7 +3130,7 @@ PHP_FUNCTION(mb_list_encodings)
 	int i;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -3204,7 +3151,7 @@ PHP_FUNCTION(mb_encoding_aliases)
 	size_t name_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	encoding = mbfl_name2encoding(name);
@@ -3241,7 +3188,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 	string.encoding = MBSTRG(current_internal_encoding);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|sssl", (char **)&string.val, &string.len, &charset_name, &charset_name_len, &trans_enc_name, &trans_enc_name_len, &linefeed, &linefeed_len, &indent) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	charset = &mbfl_encoding_pass;
@@ -3291,7 +3238,7 @@ PHP_FUNCTION(mb_decode_mimeheader)
 	string.encoding = MBSTRG(current_internal_encoding);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", (char **)&string.val, &string.len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	mbfl_string_init(&result);
@@ -3317,7 +3264,7 @@ PHP_FUNCTION(mb_convert_kana)
 	zend_string *encname = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|sS", (char **)&string.val, &string.len, &optstr, &optstr_len, &encname) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* option */
@@ -3514,7 +3461,7 @@ PHP_FUNCTION(mb_convert_variables)
 	int recursion_error = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz+", &to_enc, &to_enc_len, &zfrom_enc, &args, &argc) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* new encoding */
@@ -3540,7 +3487,7 @@ PHP_FUNCTION(mb_convert_variables)
 			break;
 		default:
 			if (!try_convert_to_string(zfrom_enc)) {
-				return;
+				RETURN_THROWS();
 			}
 			php_mb_parse_encoding_list(Z_STRVAL_P(zfrom_enc), Z_STRLEN_P(zfrom_enc), &elist, &elistsz, 0);
 			break;
@@ -3639,11 +3586,11 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 
 	if (type == 0) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sh|sb", &str, &str_len, &target_hash, &encoding, &encoding_len, &is_hex) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sh|s", &str, &str_len, &target_hash, &encoding, &encoding_len) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -3669,7 +3616,7 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 	i = zend_hash_num_elements(target_hash);
 	if (i % 4 != 0) {
 		zend_value_error("count($convmap) must be a multiple of 4");
-		return;
+		RETURN_THROWS();
 	}
 	convmap = (int *)safe_emalloc(i, sizeof(int), 0);
 	mapelm = convmap;
@@ -3946,7 +3893,7 @@ PHP_FUNCTION(mb_send_mail)
 	}
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss|zS", &to, &to_len, &subject, &subject_len, &message, &message_len, &headers, &extra_cmd) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* ASCIIZ check */
@@ -3962,7 +3909,7 @@ PHP_FUNCTION(mb_send_mail)
 				zend_string_release_ex(tmp_headers, 0);
 				break;
 			case IS_ARRAY:
-				str_headers = php_mail_build_headers(headers);
+				str_headers = php_mail_build_headers(Z_ARRVAL_P(headers));
 				break;
 			default:
 				php_error_docref(NULL, E_WARNING, "headers parameter must be string or array");
@@ -4195,7 +4142,7 @@ PHP_FUNCTION(mb_get_info)
 	const mbfl_encoding **entry;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &typ, &typ_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!typ || !strcasecmp("all", typ)) {
@@ -4480,7 +4427,7 @@ PHP_FUNCTION(mb_check_encoding)
 	zend_string *enc = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zS", &input, &enc) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* FIXME: Actually check all inputs, except $_FILES file content. */
@@ -4497,7 +4444,7 @@ PHP_FUNCTION(mb_check_encoding)
 		}
 	} else {
 		if (!try_convert_to_string(input)) {
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 		if (!php_mb_check_encoding(Z_STRVAL_P(input), Z_STRLEN_P(input), enc ? ZSTR_VAL(enc): NULL)) {
 			RETURN_FALSE;
@@ -4879,10 +4826,6 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 		needle.len = len;
 
 		if (!needle.val) {
-			break;
-		}
-
-		if (needle.len == 0) {
 			break;
 		}
 

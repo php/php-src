@@ -592,11 +592,11 @@ PHPAPI void (*php_internal_encoding_changed)(void) = NULL;
  */
 static PHP_INI_MH(OnUpdateDefaultCharset)
 {
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	if (php_internal_encoding_changed) {
+		php_internal_encoding_changed();
+	}
 	if (new_value) {
-		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
-		if (php_internal_encoding_changed) {
-			php_internal_encoding_changed();
-		}
 #ifdef PHP_WIN32
 		php_win32_cp_do_update(ZSTR_VAL(new_value));
 #endif
@@ -609,11 +609,11 @@ static PHP_INI_MH(OnUpdateDefaultCharset)
  */
 static PHP_INI_MH(OnUpdateInternalEncoding)
 {
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	if (php_internal_encoding_changed) {
+		php_internal_encoding_changed();
+	}
 	if (new_value) {
-		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
-		if (php_internal_encoding_changed) {
-			php_internal_encoding_changed();
-		}
 #ifdef PHP_WIN32
 		php_win32_cp_do_update(ZSTR_VAL(new_value));
 #endif
@@ -626,11 +626,11 @@ static PHP_INI_MH(OnUpdateInternalEncoding)
  */
 static PHP_INI_MH(OnUpdateInputEncoding)
 {
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	if (php_internal_encoding_changed) {
+		php_internal_encoding_changed();
+	}
 	if (new_value) {
-		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
-		if (php_internal_encoding_changed) {
-			php_internal_encoding_changed();
-		}
 #ifdef PHP_WIN32
 		php_win32_cp_do_update(NULL);
 #endif
@@ -643,11 +643,11 @@ static PHP_INI_MH(OnUpdateInputEncoding)
  */
 static PHP_INI_MH(OnUpdateOutputEncoding)
 {
+	OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	if (php_internal_encoding_changed) {
+		php_internal_encoding_changed();
+	}
 	if (new_value) {
-		OnUpdateString(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
-		if (php_internal_encoding_changed) {
-			php_internal_encoding_changed();
-		}
 #ifdef PHP_WIN32
 		php_win32_cp_do_update(NULL);
 #endif
@@ -1117,9 +1117,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	if (replace_buffer) {
 		zend_string_free(replace_buffer);
 	} else {
-		if (buffer_len > 0) {
-			efree(buffer);
-		}
+		efree(buffer);
 	}
 
 	php_error(type, "%s", message);
@@ -1499,7 +1497,7 @@ PHP_FUNCTION(set_time_limit)
 	zend_string *key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &new_timeout) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	new_timeout_strlen = (int)zend_spprintf(&new_timeout_str, 0, ZEND_LONG_FMT, new_timeout);

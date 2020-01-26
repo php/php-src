@@ -70,7 +70,7 @@ showInfo("privB");
 showInfo("pubC");
 showInfo("protC");
 showInfo("privC");
-showInfo("doesntExist");
+showInfo("doesNotExist");
 
 showInfo("A::pubC");
 showInfo("A::protC");
@@ -89,9 +89,9 @@ showInfo("C::privC");
 showInfo("X::pubC");
 showInfo("X::protC");
 showInfo("X::privC");
-showInfo("X::doesntExist");
+showInfo("X::doesNotExist");
 
-showInfo("doesntexist::doesntExist");
+showInfo("doesNotexist::doesNotExist");
 
 ?>
 --EXPECTF--
@@ -155,8 +155,8 @@ object(ReflectionProperty)#%d (2) {
   string(1) "C"
 }
 Cannot access non-public member C::$privC
---- (Reflecting on doesntExist) ---
-Property doesntExist does not exist
+--- (Reflecting on doesNotExist) ---
+Property doesNotExist does not exist
 --- (Reflecting on A::pubC) ---
 object(ReflectionProperty)#%d (2) {
   ["name"]=>
@@ -245,7 +245,7 @@ Fully qualified property name X::pubC does not specify a base class of C
 Fully qualified property name X::protC does not specify a base class of C
 --- (Reflecting on X::privC) ---
 Fully qualified property name X::privC does not specify a base class of C
---- (Reflecting on X::doesntExist) ---
-Fully qualified property name X::doesntExist does not specify a base class of C
---- (Reflecting on doesntexist::doesntExist) ---
-Class doesntexist does not exist
+--- (Reflecting on X::doesNotExist) ---
+Fully qualified property name X::doesNotExist does not specify a base class of C
+--- (Reflecting on doesNotexist::doesNotExist) ---
+Class doesnotexist does not exist

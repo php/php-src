@@ -29,14 +29,14 @@ PHP_FUNCTION(unixtojd)
 	struct tm *ta, tmbuf;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &ts) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!ts) {
 		ts = time(NULL);
 	} else if (ts < 0) {
-		zend_value_error("timestamp must not be negative");
-		return;
+		zend_value_error("Timestamp must not be negative");
+		RETURN_THROWS();
 	}
 
 	if (!(ta = php_localtime_r(&ts, &tmbuf))) {
@@ -54,13 +54,13 @@ PHP_FUNCTION(jdtounix)
 	zend_long uday;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &uday) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	uday -= 2440588 /* J.D. of 1.1.1970 */;
 
 	if (uday < 0 || uday > 24755) {
 		zend_value_error("jday must be within the Unix epoch");
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(uday * 24 * 3600);

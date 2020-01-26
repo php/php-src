@@ -1,5 +1,5 @@
 --TEST--
-ldap_option_reqcert_error() - A test to check if ldap cant connect to a LDAP server with a invalid certificate with certificate checking enabled
+ldap_option_reqcert_error() - A test to check if ldap can't connect to a LDAP server with a invalid certificate with certificate checking enabled
 --CREDITS--
 Edwin Hoksberg <edwin@edwinhoksberg.nl>
 --SKIPIF--

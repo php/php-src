@@ -531,8 +531,7 @@ ZEND_API int ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_c
 
 			if (UNEXPECTED(zv == NULL)) {
 				ZVAL_UNDEF(result);
-				ret = zend_use_undefined_constant(name, ast->attr, result);
-				break;
+				return FAILURE;
 			}
 			ZVAL_COPY_OR_DUP(result, zv);
 			break;
@@ -1569,7 +1568,7 @@ simple_list:
 			}
 			break;
 		case ZEND_AST_TYPE:
-			switch (ast->attr) {
+			switch (ast->attr & ~ZEND_TYPE_NULLABLE) {
 				case IS_ARRAY:    APPEND_STR("array");
 				case IS_CALLABLE: APPEND_STR("callable");
 				EMPTY_SWITCH_DEFAULT_CASE();

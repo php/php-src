@@ -67,12 +67,12 @@ __HALT_COMPILER();"
 ============================================================================
 ============================================================================
 
-Warning: Phar::setDefaultStub(): method accepts no arguments for a tar- or zip-based phar stub, 1 given in %sphar_setdefaultstub.php on line %d
+Warning: Phar::setDefaultStub(): Method accepts no arguments for a tar- or zip-based phar stub, 1 given in %sphar_setdefaultstub.php on line %d
 string(60) "<?php // zip-based phar archive stub file
 __HALT_COMPILER();"
 ============================================================================
 ============================================================================
 
-Warning: Phar::setDefaultStub(): method accepts no arguments for a tar- or zip-based phar stub, 2 given in %sphar_setdefaultstub.php on line %d
+Warning: Phar::setDefaultStub(): Method accepts no arguments for a tar- or zip-based phar stub, 2 given in %sphar_setdefaultstub.php on line %d
 string(60) "<?php // zip-based phar archive stub file
 __HALT_COMPILER();"

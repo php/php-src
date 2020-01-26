@@ -1,5 +1,5 @@
 --TEST--
-ReflectionMethod::__toString() tests (overriden method)
+ReflectionMethod::__toString() tests (overridden method)
 --FILE--
 <?php
 class Foo {

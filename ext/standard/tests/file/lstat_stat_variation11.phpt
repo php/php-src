@@ -31,7 +31,7 @@ echo "*** Testing stat() on a file after using is_file() on it ***\n";
 $old_stat = stat($filename);
 // clear the stat
 clearstatcache();
-sleep(2);
+sleep(1);
 var_dump( is_file($filename) );
 $new_stat = stat($filename);
 // compare self stats

@@ -1067,7 +1067,7 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 	XML_Char *encoding;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), (ns_support ? "|ss": "|s"), &encoding_param, &encoding_param_len, &ns_param, &ns_param_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (encoding_param != NULL) {
@@ -1084,7 +1084,7 @@ static void php_xml_parser_create_impl(INTERNAL_FUNCTION_PARAMETERS, int ns_supp
 		} else if (strcasecmp(encoding_param, "US-ASCII") == 0) {
 			encoding = (XML_Char*)"US-ASCII";
 		} else {
-			php_error_docref(NULL, E_WARNING, "unsupported source encoding \"%s\"", encoding_param);
+			php_error_docref(NULL, E_WARNING, "Unsupported source encoding \"%s\"", encoding_param);
 			RETURN_FALSE;
 		}
 	} else {
@@ -1133,7 +1133,7 @@ PHP_FUNCTION(xml_set_object)
 	zval *pind, *mythis;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oo", &pind, xml_parser_ce, &mythis) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1154,7 +1154,7 @@ PHP_FUNCTION(xml_set_element_handler)
 	zval *pind, *shdl, *ehdl;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ozz", &pind, xml_parser_ce, &shdl, &ehdl) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1173,7 +1173,7 @@ PHP_FUNCTION(xml_set_character_data_handler)
 	zval *pind, *hdl;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz", &pind, xml_parser_ce, &hdl) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1191,7 +1191,7 @@ PHP_FUNCTION(xml_set_processing_instruction_handler)
 	zval *pind, *hdl;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz", &pind, xml_parser_ce, &hdl) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1209,7 +1209,7 @@ PHP_FUNCTION(xml_set_default_handler)
 	zval *pind, *hdl;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz", &pind, xml_parser_ce, &hdl) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1227,7 +1227,7 @@ PHP_FUNCTION(xml_set_unparsed_entity_decl_handler)
 	zval *pind, *hdl;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz", &pind, xml_parser_ce, &hdl) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1245,7 +1245,7 @@ PHP_FUNCTION(xml_set_notation_decl_handler)
 	zval *pind, *hdl;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz", &pind, xml_parser_ce, &hdl) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1263,7 +1263,7 @@ PHP_FUNCTION(xml_set_external_entity_ref_handler)
 	zval *pind, *hdl;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz", &pind, xml_parser_ce, &hdl) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1281,7 +1281,7 @@ PHP_FUNCTION(xml_set_start_namespace_decl_handler)
 	zval *pind, *hdl;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz", &pind, xml_parser_ce, &hdl) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1299,7 +1299,7 @@ PHP_FUNCTION(xml_set_end_namespace_decl_handler)
 	zval *pind, *hdl;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Oz", &pind, xml_parser_ce, &hdl) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1321,7 +1321,7 @@ PHP_FUNCTION(xml_parse)
 	zend_bool isFinal = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Os|b", &pind, xml_parser_ce, &data, &data_len, &isFinal) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1344,7 +1344,7 @@ PHP_FUNCTION(xml_parse_into_struct)
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Osz|z", &pind, xml_parser_ce, &data, &data_len, &xdata, &info) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1352,13 +1352,13 @@ PHP_FUNCTION(xml_parse_into_struct)
 	if (info) {
 		info = zend_try_array_init(info);
 		if (!info) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
 	xdata = zend_try_array_init(xdata);
 	if (!xdata) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_COPY_VALUE(&parser->data, xdata);
@@ -1389,7 +1389,7 @@ PHP_FUNCTION(xml_get_error_code)
 	zval *pind;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pind, xml_parser_ce) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1405,7 +1405,7 @@ PHP_FUNCTION(xml_error_string)
 	char *str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &code) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	str = (char *)XML_ErrorString((int)code);
@@ -1423,7 +1423,7 @@ PHP_FUNCTION(xml_get_current_line_number)
 	zval *pind;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pind, xml_parser_ce) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1439,7 +1439,7 @@ PHP_FUNCTION(xml_get_current_column_number)
 	zval *pind;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pind, xml_parser_ce) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1455,7 +1455,7 @@ PHP_FUNCTION(xml_get_current_byte_index)
 	zval *pind;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pind, xml_parser_ce) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1471,7 +1471,7 @@ PHP_FUNCTION(xml_parser_free)
 	xml_parser *parser;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &pind, xml_parser_ce) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1493,7 +1493,7 @@ PHP_FUNCTION(xml_parser_set_option)
 	zend_long opt;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Olz", &pind, xml_parser_ce, &opt, &val) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);
@@ -1514,7 +1514,7 @@ PHP_FUNCTION(xml_parser_set_option)
 		case PHP_XML_OPTION_TARGET_ENCODING: {
 			const xml_encoding *enc;
 			if (!try_convert_to_string(val)) {
-				return;
+				RETURN_THROWS();
 			}
 
 			enc = xml_get_encoding((XML_Char*)Z_STRVAL_P(val));
@@ -1543,7 +1543,7 @@ PHP_FUNCTION(xml_parser_get_option)
 	zend_long opt;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol", &pind, xml_parser_ce, &opt) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	parser = Z_XMLPARSER_P(pind);

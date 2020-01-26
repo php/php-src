@@ -22,11 +22,9 @@ function pcntl_sigprocmask(int $how, array $set, &$oldset = null): bool {}
 
 #ifdef HAVE_STRUCT_SIGINFO_T
 #if HAVE_SIGWAITINFO && HAVE_SIGTIMEDWAIT
-/** @return int|false */
-function pcntl_sigwaitinfo(array $set, &$info = []) {}
+function pcntl_sigwaitinfo(array $set, &$info = []): int|false {}
 
-/** @return int|false */
-function pcntl_sigtimedwait(array $set, &$info = [], int $seconds = 0, int $nanoseconds = 0) {}
+function pcntl_sigtimedwait(array $set, &$info = [], int $seconds = 0, int $nanoseconds = 0): int|false {}
 #endif
 #endif
 
@@ -40,16 +38,12 @@ function pcntl_wifcontinued(int $status): bool {}
 
 function pcntl_wifsignaled(int $status): bool {}
 
-/** @return int|false */
-function pcntl_wifexitstatus(int $status) {}
+function pcntl_wifexitstatus(int $status): int|false {}
 
-/** @return int|false */
-function pcntl_wtermsig(int $status) {}
+function pcntl_wtermsig(int $status): int|false {}
 
-/** @return int|false */
-function pcntl_wstopsig(int $status) {}
+function pcntl_wstopsig(int $status): int|false {}
 
-/** @return false */
 function pcntl_exec(string $path, array $args = [], array $envs = []): bool {}
 
 function pcntl_alarm(int $seconds): int {}
@@ -57,8 +51,7 @@ function pcntl_alarm(int $seconds): int {}
 function pcntl_get_last_error(): int {}
 
 #ifdef HAVE_GETPRIORITY
-/** @return int|false */
-function pcntl_getpriority(int $pid = UNKNOWN, int $process_identifier = PRIO_PROCESS) {}
+function pcntl_getpriority(int $pid = UNKNOWN, int $process_identifier = PRIO_PROCESS): int|false {}
 #endif
 
 #ifdef HAVE_SETPRIORITY

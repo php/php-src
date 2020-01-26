@@ -5,7 +5,6 @@ function curl_close($handle): void {}
 
 /**
  * @param resource $handle
- *
  * @return resource|false
  */
 function curl_copy_handle($handle) {}
@@ -16,19 +15,11 @@ function curl_errno($handle): int {}
 /** @param resource $handle */
 function curl_error($handle): string {}
 
-/**
- * @param resource $handle
- *
- * @return string|false
- */
-function curl_escape($handle, string $string) {}
+/** @param resource $handle */
+function curl_escape($handle, string $string): string|false {}
 
-/**
- * @param resource $handle
- *
- * @return string|bool
- */
-function curl_exec($handle) {}
+/** @param resource $handle */
+function curl_exec($handle): string|bool {}
 
 function curl_file_create(
     string $filename,
@@ -38,14 +29,12 @@ function curl_file_create(
 
 /**
  * @param resource $handle
- *
  * @return mixed
  */
 function curl_getinfo($handle, int $option = UNKNOWN) {}
 
 /**
  * @param resource $handle
- *
  * @return resource|false
  */
 function curl_init(string $url = UNKNOWN) {}
@@ -59,11 +48,7 @@ function curl_multi_add_handle($multi_handle, $handle): int {}
 /** @param resource $multi_handle */
 function curl_multi_close($multi_handle): void {}
 
-/**
- * @param resource $multi_handle
- *
- * @return int|false
- */
+/** @param resource $multi_handle */
 function curl_multi_errno($multi_handle): int {}
 
 /** @param resource $multi_handle */
@@ -72,12 +57,8 @@ function curl_multi_exec($multi_handle, &$still_running): int {}
 /** @param resource $multi_handle */
 function curl_multi_getcontent($multi_handle): ?string {}
 
-/**
- * @param resource $multi_handle
- *
- * @return array|false
- */
-function curl_multi_info_read($multi_handle, &$msgs_in_queue = null) {}
+/** @param resource $multi_handle */
+function curl_multi_info_read($multi_handle, &$msgs_in_queue = null): array|false {}
 
 /** @return resource */
 function curl_multi_init() {}
@@ -107,12 +88,8 @@ function curl_pause($handle, int $bitmask): int {}
 /** @param resource $handle */
 function curl_reset($handle): void {}
 
-/**
- * @param resource $handle
- * @param array $options
- */
+/** @param resource $handle */
 function curl_setopt_array($handle, array $options): bool {}
-
 
 /**
  * @param resource $handle
@@ -136,12 +113,7 @@ function curl_share_strerror(int $error_number): ?string {}
 
 function curl_strerror(int $error_number): ?string {}
 
-/**
- * @param resource $handle
- *
- * @return string|false
- */
-function curl_unescape($handle, string $string) {}
+/** @param resource $handle */
+function curl_unescape($handle, string $string): string|false {}
 
-/** @return array|false */
-function curl_version(int $age = UNKNOWN) {}
+function curl_version(int $age = UNKNOWN): array|false {}

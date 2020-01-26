@@ -28,7 +28,11 @@ var_dump( $count );
 
 $fp = fopen( __FILE__, "r" );
 $fp_copy = $fp;
-var_dump( str_replace($fp_copy, $fp_copy, $fp_copy, $fp_copy) );
+try {
+    var_dump( str_replace($fp_copy, $fp_copy, $fp_copy, $fp_copy) );
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 var_dump( $fp_copy );
 fclose($fp);
 
@@ -43,5 +47,5 @@ string(1) "q"
 int(1)
 string(0) ""
 int(0)
-string(%d) "Resource id #%d"
-int(1)
+str_replace() expects parameter 3 to be string or array, resource given
+resource(%d) of type (stream)

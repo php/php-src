@@ -151,16 +151,16 @@ static void zend_persist_zval_calc(zval *z)
 static void zend_persist_type_calc(zend_type *type)
 {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
-		void **entry;
+		zend_type *list_type;
 		if (ZEND_TYPE_USES_ARENA(*type) && !ZCG(is_immutable_class)) {
 			ADD_ARENA_SIZE(ZEND_TYPE_LIST_SIZE(ZEND_TYPE_LIST(*type)->num_types));
 		} else {
 			ADD_SIZE(ZEND_TYPE_LIST_SIZE(ZEND_TYPE_LIST(*type)->num_types));
 		}
-		ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(*type), entry) {
-			zend_string *type_name = ZEND_TYPE_LIST_GET_NAME(*entry);
+		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(*type), list_type) {
+			zend_string *type_name = ZEND_TYPE_NAME(*list_type);
 			ADD_INTERNED_STRING(type_name);
-			*entry = ZEND_TYPE_LIST_ENCODE_NAME(type_name);
+			ZEND_TYPE_SET_PTR(*list_type, type_name);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {
 		zend_string *type_name = ZEND_TYPE_NAME(*type);
@@ -349,16 +349,12 @@ static void check_property_type_resolution(zend_class_entry *ce) {
 
 	if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
 		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-			if (ZEND_TYPE_HAS_LIST(prop->type)) {
-				void *entry;
-				ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(prop->type), entry) {
-					if (ZEND_TYPE_LIST_IS_NAME(entry)) {
-						return;
-					}
-				} ZEND_TYPE_LIST_FOREACH_END();
-			} else if (ZEND_TYPE_HAS_NAME(prop->type)) {
-				return;
-			}
+			zend_type *single_type;
+			ZEND_TYPE_FOREACH(prop->type, single_type) {
+				if (ZEND_TYPE_HAS_NAME(*single_type)) {
+					return;
+				}
+			} ZEND_TYPE_FOREACH_END();
 		} ZEND_HASH_FOREACH_END();
 	}
 	ce->ce_flags |= ZEND_ACC_PROPERTY_TYPES_RESOLVED;
@@ -370,6 +366,12 @@ static void zend_persist_class_entry_calc(zval *zv)
 	Bucket *p;
 
 	if (ce->type == ZEND_USER_CLASS) {
+		/* The same zend_class_entry may be reused by class_alias */
+		if (zend_shared_alloc_get_xlat_entry(ce)) {
+			return;
+		}
+		zend_shared_alloc_register_xlat_entry(ce, ce);
+
 		check_property_type_resolution(ce);
 
 		ZCG(is_immutable_class) =

@@ -67,5 +67,5 @@ error:1416F086:SSL routines:tls_process_server_certificate:certificate verify fa
 
 Warning: stream_socket_client(): Failed to enable crypto in %s : eval()'d code on line %d
 
-Warning: stream_socket_client(): unable to connect to ssl://127.0.0.1:64322 (Unknown error) in %s : eval()'d code on line %d
+Warning: stream_socket_client(): Unable to connect to ssl://127.0.0.1:64322 (Unknown error) in %s : eval()'d code on line %d
 bool(false)

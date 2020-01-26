@@ -471,7 +471,7 @@ static int pdo_pgsql_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_
 static int pdo_pgsql_check_liveness(pdo_dbh_t *dbh)
 {
 	pdo_pgsql_db_handle *H = (pdo_pgsql_db_handle *)dbh->driver_data;
-	if (PQstatus(H->server) == CONNECTION_BAD) {
+	if (!PQconsumeInput(H->server) || PQstatus(H->server) == CONNECTION_BAD) {
 		PQreset(H->server);
 	}
 	return (PQstatus(H->server) == CONNECTION_OK) ? SUCCESS : FAILURE;
@@ -546,7 +546,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa|sss",
 					&table_name, &table_name_len, &pg_rows,
 					&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!zend_hash_num_elements(Z_ARRVAL_P(pg_rows))) {
@@ -592,7 +592,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 			size_t query_len;
 			if (!try_convert_to_string(tmp)) {
 				efree(query);
-				return;
+				RETURN_THROWS();
 			}
 
 			if (buffer_len < Z_STRLEN_P(tmp)) {
@@ -658,7 +658,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromFile)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sp|sss",
 				&table_name, &table_name_len, &filename, &filename_len,
 				&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Obtain db Handler */
@@ -759,7 +759,7 @@ static PHP_METHOD(PDO, pgsqlCopyToFile)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sp|sss",
 					&table_name, &table_name_len, &filename, &filename_len,
 					&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
@@ -852,7 +852,7 @@ static PHP_METHOD(PDO, pgsqlCopyToArray)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|sss",
 		&table_name, &table_name_len,
 		&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
@@ -958,7 +958,7 @@ static PHP_METHOD(PDO, pgsqlLOBOpen)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|s",
 				&oidstr, &oidstrlen, &modestr, &modestrlen)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	oid = (Oid)strtoul(oidstr, &end_ptr, 10);
@@ -1005,7 +1005,7 @@ static PHP_METHOD(PDO, pgsqlLOBUnlink)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s",
 				&oidstr, &oidlen)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	oid = (Oid)strtoul(oidstr, &end_ptr, 10);
@@ -1030,7 +1030,7 @@ static PHP_METHOD(PDO, pgsqlLOBUnlink)
 /* }}} */
 
 /* {{{ proto mixed PDO::pgsqlGetNotify([ int $result_type = PDO::FETCH_USE_DEFAULT] [, int $ms_timeout = 0 ]])
-   Get asyncronous notification */
+   Get asynchronous notification */
 static PHP_METHOD(PDO, pgsqlGetNotify)
 {
 	pdo_dbh_t *dbh;
@@ -1041,7 +1041,7 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "|ll",
 				&result_type, &ms_timeout)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	dbh = Z_PDO_DBH_P(ZEND_THIS);
@@ -1061,20 +1061,28 @@ static PHP_METHOD(PDO, pgsqlGetNotify)
  		RETURN_FALSE;
 #if ZEND_ENABLE_ZVAL_LONG64
 	} else if (ms_timeout > INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "timeout was shrunk to %d", INT_MAX);
+		php_error_docref(NULL, E_WARNING, "Timeout was shrunk to %d", INT_MAX);
 		ms_timeout = INT_MAX;
 #endif
 	}
 
 	H = (pdo_pgsql_db_handle *)dbh->driver_data;
 
-	PQconsumeInput(H->server);
+	if (!PQconsumeInput(H->server)) {
+		pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
+		PDO_HANDLE_DBH_ERR();
+		RETURN_FALSE;
+	}
 	pgsql_notify = PQnotifies(H->server);
 
 	if (ms_timeout && !pgsql_notify) {
 		php_pollfd_for_ms(PQsocket(H->server), PHP_POLLREADABLE, (int)ms_timeout);
 
-		PQconsumeInput(H->server);
+		if (!PQconsumeInput(H->server)) {
+			pdo_pgsql_error(dbh, PGRES_FATAL_ERROR, NULL);
+			PDO_HANDLE_DBH_ERR();
+			RETURN_FALSE;
+		}
 		pgsql_notify = PQnotifies(H->server);
 	}
 

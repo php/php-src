@@ -9,5 +9,5 @@ if (!extension_loaded('bcmath')) die('skip bcmath extension is not available');
 var_dump(bcpow('0', '9223372036854775808', 2));
 ?>
 --EXPECTF--
-Warning: bcpow(): exponent too large in %s on line %d
+Warning: bcpow(): Exponent too large in %s on line %d
 string(4) "1.00"

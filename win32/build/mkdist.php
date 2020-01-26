@@ -284,7 +284,7 @@ Build: $build_dir
 
 EOT
 );
-/* list build-in extensions */
+/* list built-in extensions */
 $exts = get_loaded_extensions();
 fprintf($fp, "\r\nBuilt-in Extensions\r\n");
 fwrite($fp, "===========================\r\n");
@@ -496,7 +496,7 @@ $dirs = array(
 foreach ($dirs as $dir) {
 	copy_test_dir($dir, $test_dir);
 }
-copy('run-tests.php', $test_dir . '/run-test.php');
+copy('run-tests.php', $test_dir . '/run-tests.php');
 
 /* change this next line to true to use good-old
  * hand-assembled go-pear-bundle from the snapshot template */

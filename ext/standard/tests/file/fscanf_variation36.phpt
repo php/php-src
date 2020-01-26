@@ -42,7 +42,7 @@ $counter = 1;
 
 // writing to the file
 foreach($array_types as $value) {
-  @fprintf($file_handle, $value);
+  @fprintf($file_handle, "%s", $value);
   @fprintf($file_handle, "\n");
 }
 // closing the file
@@ -61,7 +61,11 @@ foreach($hexa_formats as $hexa_format) {
   rewind($file_handle);
   echo "\n-- iteration $counter --\n";
   while( !feof($file_handle) ) {
-    var_dump( fscanf($file_handle,$hexa_format) );
+    try {
+      var_dump(fscanf($file_handle,$hexa_format));
+    } catch (ValueError $exception) {
+      echo $exception->getMessage() . "\n";
+    }
   }
   $counter++;
 }
@@ -74,7 +78,7 @@ $file_path = __DIR__;
 $filename = "$file_path/fscanf_variation36.tmp";
 unlink($filename);
 ?>
---EXPECTF--
+--EXPECT--
 *** Test fscanf(): different hexa format types with arrays ***
 
 -- iteration 1 --
@@ -384,42 +388,18 @@ array(1) {
 bool(false)
 
 -- iteration 7 --
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
-
-Warning: fscanf(): Bad scan conversion character " " in %s on line %d
-NULL
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
+Bad scan conversion character " "
 bool(false)
 
 -- iteration 8 --

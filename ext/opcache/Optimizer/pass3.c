@@ -262,7 +262,7 @@ void zend_optimizer_pass3(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						/*       should be used once on the branch path.           */
 						/*                                                         */
 						/*       The pattern works well only if jums processed in  */
-						/*       direct order, otherwise it breakes JMPZ_EX        */
+						/*       direct order, otherwise it breaks JMPZ_EX         */
 						/*       sequences too early.                              */
 						opline->result.var = target->result.var;
 						target = target + 1;

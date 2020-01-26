@@ -668,6 +668,10 @@ ZEND_API zval *zend_std_read_property(zend_object *zobj, zend_string *name, int 
 		if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
 			goto exit;
 		}
+		if (UNEXPECTED(Z_PROP_FLAG_P(retval) == IS_PROP_UNINIT)) {
+			/* Skip __get() for uninitialized typed properties */
+			goto uninit_error;
+		}
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))) {
 		if (EXPECTED(zobj->properties != NULL)) {
 			if (!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(property_offset)) {
@@ -771,6 +775,7 @@ call_getter:
 		}
 	}
 
+uninit_error:
 	if (type != BP_VAR_IS) {
 		if (UNEXPECTED(prop_info)) {
 			zend_throw_error(NULL, "Typed property %s::$%s must not be accessed before initialization",
@@ -1013,8 +1018,16 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 			if (EXPECTED(!zobj->ce->__get) ||
 			    UNEXPECTED((*zend_get_property_guard(zobj, name)) & IN_GET)) {
 				if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
-					ZVAL_NULL(retval);
-					zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+					if (UNEXPECTED(prop_info)) {
+						zend_throw_error(NULL,
+							"Typed property %s::$%s must not be accessed before initialization",
+							ZSTR_VAL(prop_info->ce->name),
+							ZSTR_VAL(name));
+						retval = &EG(error_zval);
+					} else {
+						ZVAL_NULL(retval);
+						zend_error(E_WARNING, "Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+					}
 				}
 			} else {
 				/* we do have getter - fail and let it try again with usual get/set */
@@ -1077,8 +1090,11 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 			}
 			return;
 		}
-		/* Reset the IS_PROP_UNINIT flag, if it exists. */
-		Z_PROP_FLAG_P(slot) = 0;
+		if (UNEXPECTED(Z_PROP_FLAG_P(slot) == IS_PROP_UNINIT)) {
+			/* Reset the IS_PROP_UNINIT flag, if it exists and bypass __unset(). */
+			Z_PROP_FLAG_P(slot) = 0;
+			return;
+		}
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))
 	 && EXPECTED(zobj->properties != NULL)) {
 		if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
@@ -1363,12 +1379,8 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 				/* Call the top-level defined __call().
 				 * see: tests/classes/__call_004.phpt  */
 
-				zend_class_entry *call_ce = object->ce;
-
-				while (!call_ce->__call) {
-					call_ce = call_ce->parent;
-				}
-				return zend_get_user_call_function(call_ce, function_name);
+				ZEND_ASSERT(object->ce->__call);
+				return zend_get_user_call_function(object->ce, function_name);
 			} else if (ce->__callstatic) {
 				return zend_get_user_callstatic_function(ce, function_name);
 			} else {
@@ -1665,6 +1677,11 @@ ZEND_API int zend_std_has_property(zend_object *zobj, zend_string *name, int has
 		value = OBJ_PROP(zobj, property_offset);
 		if (Z_TYPE_P(value) != IS_UNDEF) {
 			goto found;
+		}
+		if (UNEXPECTED(Z_PROP_FLAG_P(value) == IS_PROP_UNINIT)) {
+			/* Skip __isset() for uninitialized typed properties */
+			result = 0;
+			goto exit;
 		}
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))) {
 		if (EXPECTED(zobj->properties != NULL)) {

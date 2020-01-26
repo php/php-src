@@ -1,33 +1,26 @@
 <?php
 
-/** @return string|false */
-function session_name(string $name = UNKNOWN) {}
+function session_name(string $name = UNKNOWN): string|false {}
 
-/** @return string|false */
-function session_module_name(string $module = UNKNOWN) {}
+function session_module_name(string $module = UNKNOWN): string|false {}
 
-/** @return string|false */
-function session_save_path(string $path = UNKNOWN) {}
+function session_save_path(string $path = UNKNOWN): string|false {}
 
-/** @return string|false */
-function session_id(string $id = UNKNOWN) {}
+function session_id(string $id = UNKNOWN): string|false {}
 
-/** @return string|false */
-function session_create_id(string $prefix = "") {}
+function session_create_id(string $prefix = ""): string|false {}
 
 function session_regenerate_id(bool $delete_old_session = false): bool {}
 
 function session_decode(string $data): bool {}
 
-/** @return string|false */
-function session_encode() {}
+function session_encode(): string|false {}
 
 function session_destroy(): bool {}
 
 function session_unset(): bool {}
 
-/** @return int|false */
-function session_gc() {}
+function session_gc(): int|false {}
 
 function session_get_cookie_params(): array {}
 
@@ -45,11 +38,9 @@ function session_commit(): bool {}
 
 function session_set_save_handler($open, $close = null, $read = null, $write = null, $destroy = null, $gc = null, $create_sid = null, $validate_sid = null, $update_timestamp = null): bool {}
 
-/** @return string|false */
-function session_cache_limiter(string $cache_limiter = UNKNOWN) {}
+function session_cache_limiter(string $cache_limiter = UNKNOWN): string|false {}
 
-/** @return int|false */
-function session_cache_expire(?int $new_cache_expire = null) {}
+function session_cache_expire(?int $new_cache_expire = null): int|false {}
 
 function session_set_cookie_params($lifetime_or_options, string $path = UNKNOWN, string $domain  = "", ?bool $secure = null, ?bool $httponly = null): bool {}
 

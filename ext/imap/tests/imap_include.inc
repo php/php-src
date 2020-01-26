@@ -77,7 +77,7 @@ function setup_test_mailbox($mailbox_suffix, $message_count, &$new_mailbox = nul
 	echo "Create a temporary mailbox and add " . $message_count .  " msgs\n";
 	$new_mailbox = create_mailbox($imap_stream, $mailbox_suffix, $message_count, $msg_type);
 	if ($new_mailbox === false) {
-	   echo "Cant create a temporary mailbox: " . imap_last_error(). "\n";
+	   echo "Can't create a temporary mailbox: " . imap_last_error(). "\n";
 	   return false;
 	}
 
@@ -85,7 +85,7 @@ function setup_test_mailbox($mailbox_suffix, $message_count, &$new_mailbox = nul
 
 	// reopen stream to new mailbox
 	if (imap_reopen($imap_stream, $new_mailbox) === false) {
-		echo "cant re-open '$new_mailbox' mailbox: " . imap_last_error() . "\n";
+		echo "can't re-open '$new_mailbox' mailbox: " . imap_last_error() . "\n";
 		return false;
 	}
 

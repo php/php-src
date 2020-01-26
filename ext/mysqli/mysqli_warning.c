@@ -181,7 +181,7 @@ PHP_METHOD(mysqli_warning, next)
 	if (obj->ptr) {
 		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
 										 &mysqli_warning, mysqli_warning_class_entry) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 
 		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, mysqli_warning, "mysqli_warning", MYSQLI_STATUS_VALID);
@@ -255,7 +255,7 @@ PHP_METHOD(mysqli_warning, __construct)
 	MYSQLI_RESOURCE *mysqli_resource;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &z) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	obj = Z_MYSQLI_P(z);
 
@@ -288,7 +288,7 @@ PHP_METHOD(mysqli_warning, __construct)
 			RETURN_FALSE;
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "invalid class argument");
+		php_error_docref(NULL, E_WARNING, "Invalid class argument");
 		RETURN_FALSE;
 	}
 

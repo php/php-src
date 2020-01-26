@@ -557,22 +557,6 @@ ZEND_API zend_bool zend_is_executing(void) /* {{{ */
 }
 /* }}} */
 
-ZEND_API ZEND_COLD int zend_use_undefined_constant(zend_string *name, zend_ast_attr attr, zval *result) /* {{{ */
-{
-	char *colon;
-
-	if (UNEXPECTED(EG(exception))) {
-		return FAILURE;
-	} else if ((colon = (char*)zend_memrchr(ZSTR_VAL(name), ':', ZSTR_LEN(name)))) {
-		zend_throw_error(NULL, "Undefined class constant '%s'", ZSTR_VAL(name));
-		return FAILURE;
-	} else {
-		zend_throw_error(NULL, "Undefined constant '%s'", ZSTR_VAL(name));
-		return FAILURE;
-	}
-}
-/* }}} */
-
 ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 {
 	if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
@@ -581,10 +565,10 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 		if (ast->kind == ZEND_AST_CONSTANT) {
 			zend_string *name = zend_ast_get_constant_name(ast);
 			zval *zv = zend_get_constant_ex(name, scope, ast->attr);
-
 			if (UNEXPECTED(zv == NULL)) {
-				return zend_use_undefined_constant(name, ast->attr, p);
+				return FAILURE;
 			}
+
 			zval_ptr_dtor_nogc(p);
 			ZVAL_COPY_OR_DUP(p, zv);
 		} else {
@@ -836,6 +820,7 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	zend_string *lc_name;
 	zend_fcall_info fcall_info;
 	zend_fcall_info_cache fcall_cache;
+	zend_class_entry *orig_fake_scope;
 
 	if (key) {
 		lc_name = key;
@@ -926,11 +911,14 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 	fcall_cache.called_scope = NULL;
 	fcall_cache.object = NULL;
 
+	orig_fake_scope = EG(fake_scope);
+	EG(fake_scope) = NULL;
 	zend_exception_save();
 	if ((zend_call_function(&fcall_info, &fcall_cache) == SUCCESS) && !EG(exception)) {
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 	}
 	zend_exception_restore();
+	EG(fake_scope) = orig_fake_scope;
 
 	zval_ptr_dtor(&args[0]);
 	zval_ptr_dtor_str(&fcall_info.function_name);

@@ -32,5 +32,5 @@ __halt_compiler();
 --EXPECTF--
 file contents
 this works
-Phar error: Cannot retrieve contents, "a" in phar "%sphar_oo_getcontents.phar.php" is a directory
-Phar error: Cannot retrieve contents, "hi" in phar "%sphar_oo_getcontents.phar.php" is a directory
+phar error: Cannot retrieve contents, "a" in phar "%sphar_oo_getcontents.phar.php" is a directory
+phar error: Cannot retrieve contents, "hi" in phar "%sphar_oo_getcontents.phar.php" is a directory

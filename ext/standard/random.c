@@ -206,14 +206,14 @@ PHP_FUNCTION(random_bytes)
 
 	if (size < 1) {
 		zend_throw_exception(zend_ce_error, "Length must be greater than 0", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	bytes = zend_string_alloc(size, 0);
 
 	if (php_random_bytes_throw(ZSTR_VAL(bytes), size) == FAILURE) {
 		zend_string_release_ex(bytes, 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	ZSTR_VAL(bytes)[size] = '\0';
@@ -281,11 +281,11 @@ PHP_FUNCTION(random_int)
 
 	if (min > max) {
 		zend_throw_exception(zend_ce_error, "Minimum value must be less than or equal to the maximum value", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (php_random_int_throw(min, max, &result) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(result);

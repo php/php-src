@@ -622,7 +622,7 @@ class Tester
         $read = [$this->outDesc];
         $write = null;
         $except = null;
-        if (stream_select($read, $write, $except, 3)) {
+        if (stream_select($read, $write, $except, $timeout=3)) {
             return fgets($this->outDesc);
         } else {
             return null;

@@ -890,7 +890,7 @@ static int is_valid_path(const char *path)
 
   initializes request_info structure
 
-  specificly in this section we handle proper translations
+  specifically in this section we handle proper translations
   for:
 
   PATH_INFO
@@ -1465,7 +1465,7 @@ PHP_FUNCTION(fastcgi_finish_request) /* {{{ */
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!fcgi_is_closed(request)) {
@@ -1487,7 +1487,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 	fcgi_request *request;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -1501,7 +1501,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 PHP_FUNCTION(fpm_get_status) /* {{{ */
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (fpm_status_export_to_zval(return_value)) {
@@ -1570,11 +1570,7 @@ int main(int argc, char *argv[])
 								does that for us!  thies@thieso.net
 								20000419 */
 
-	/* Subset of signals from fpm_signals_init_main() to avoid unexpected death during early init
-		or during reload just after execvp() or fork */
-	int init_signal_array[] = { SIGUSR1, SIGUSR2, SIGCHLD };
-	if (0 > fpm_signals_init_mask(init_signal_array, sizeof(init_signal_array)/sizeof(init_signal_array[0])) ||
-	    0 > fpm_signals_block()) {
+	if (0 > fpm_signals_init_mask() || 0 > fpm_signals_block()) {
 		zlog(ZLOG_WARNING, "Could die in the case of too early reload signal");
 	}
 	zlog(ZLOG_DEBUG, "Blocked some signals");
@@ -1912,7 +1908,7 @@ consult the installation file that came with this distribution, or visit \n\
 			}
 
 			/*
-			 * have to duplicate SG(request_info).path_translated to be able to log errrors
+			 * have to duplicate SG(request_info).path_translated to be able to log errors
 			 * php_fopen_primary_script seems to delete SG(request_info).path_translated on failure
 			 */
 			primary_script = estrdup(SG(request_info).path_translated);

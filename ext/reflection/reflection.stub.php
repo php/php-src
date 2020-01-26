@@ -112,7 +112,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract
     public function isDisabled() {}
 
     public function invoke(...$args) {}
-    
+
     public function invokeArgs(array $args) {}
 
     /** @return Closure */
@@ -199,7 +199,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
 class ReflectionClass implements Reflector
 {
     final private function __clone() {}
-    
+
     public static function export($argument, bool $return = false) {}
 
     /** @param object|string $argument */
@@ -258,7 +258,7 @@ class ReflectionClass implements Reflector
 
     /** @return ReflectionProperty[] */
     public function getProperties(?int $filter = null) {}
-        
+
     /** @return bool */
     public function hasConstant(string $name) {}
 
@@ -425,6 +425,11 @@ class ReflectionProperty implements Reflector
 
     /** @return bool */
     public function hasType() {}
+
+    public function hasDefaultValue(): bool {}
+
+    /** @return mixed */
+    public function getDefaultValue() {}
 }
 
 class ReflectionClassConstant implements Reflector
@@ -607,7 +612,7 @@ class ReflectionZendExtension implements Reflector
     final private function __clone() {}
 
     public static function export($name, bool $return = false) {}
-    
+
     public function __construct(string $name) {}
 
     /** @return string */
@@ -631,14 +636,10 @@ class ReflectionZendExtension implements Reflector
 
 final class ReflectionReference
 {
-    /**
-     * @param int|string $key
-     * @return ?ReflectionReference
-     */
-    public static function fromArrayElement(array $array, $key) {}
+    /** @param int|string $key */
+    public static function fromArrayElement(array $array, $key): ?ReflectionReference {}
 
-    /** @return string */
-    public function getId() {}
+    public function getId(): string {}
 
     private function __clone() {}
 

@@ -7,15 +7,13 @@ function func_num_args(): int {}
 /** @return mixed */
 function func_get_arg(int $arg_num) {}
 
-/** @return array|false */
-function func_get_args() {}
+function func_get_args(): array|false {}
 
 function strlen(string $str): int {}
 
 function strcmp(string $str1, string $str2): int {}
 
-/** @return int|false */
-function strncmp(string $str1, string $str2, int $len) {}
+function strncmp(string $str1, string $str2, int $len): int|false {}
 
 function error_reporting($new_error_level = UNKNOWN): int {}
 
@@ -23,21 +21,17 @@ function define(string $constant_name, $value, bool $case_insensitive = false): 
 
 function defined(string $constant_name): bool {}
 
-/** @return string|false */
-function get_class(object $object = UNKNOWN) {}
+function get_class(object $object = UNKNOWN): string|false {}
 
-/** @return string|false */
-function get_called_class() {}
+function get_called_class(): string|false {}
 
-/** @return string|false */
-function get_parent_class($object = UNKNOWN) {}
+function get_parent_class($object = UNKNOWN): string|false {}
 
 function is_subclass_of($object, string $class_name, bool $allow_string = true): bool {}
 
 function is_a($object, string $class_name, bool $allow_string = false): bool {}
 
-/** @return array|false */
-function get_class_vars(string $class_name) {}
+function get_class_vars(string $class_name): array|false {}
 
 function get_object_vars(object $obj): array {}
 
@@ -87,7 +81,7 @@ function get_declared_interfaces(): array {}
 
 function get_defined_functions(bool $exclude_disabled = false): array {}
 
-function get_defined_vars(): ?array {}
+function get_defined_vars(): array {}
 
 function get_resource_type($res): string {}
 
@@ -103,8 +97,7 @@ function debug_print_backtrace(int $options = 0, int $limit = 0): void {}
 
 function extension_loaded(string $extension_name): bool {}
 
-/** @return array|false */
-function get_extension_funcs(string $extension_name) {}
+function get_extension_funcs(string $extension_name): array|false {}
 
 #if ZEND_DEBUG && defined(ZTS)
 function zend_thread_id(): int {}

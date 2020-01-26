@@ -11,7 +11,7 @@ Test sort() function : basic functionality
 /*
  * Testing sort() by providing arrays with default keys and assoc arrays
  * to check the basic functionality with following flag values.
- *  flag value as defualt
+ *  flag value as default
  *  SORT_REGULAR - compare items normally
  *  SORT_NUMERIC - compare items numerically
  *  SORT_STRING - compare items as strings
@@ -29,12 +29,12 @@ $unsorted_strings = array(
 // array with default keys containing unsorted numeric values
 $unsorted_numerics =  array( 100, 33, 555, 22 );
 
-echo "\n-- Testing sort() by supplying string array, 'flag' value is defualt --\n";
+echo "\n-- Testing sort() by supplying string array, 'flag' value is default --\n";
 $temp_array = $unsorted_strings;
 var_dump( sort($temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
 
-echo "\n-- Testing sort() by supplying numeric array, 'flag' value is defualt --\n";
+echo "\n-- Testing sort() by supplying numeric array, 'flag' value is default --\n";
 $temp_array = $unsorted_numerics;
 var_dump( sort($temp_array) ); // expecting : bool(true)
 var_dump( $temp_array);
@@ -79,7 +79,7 @@ echo "Done\n";
 --EXPECT--
 *** Testing sort() : basic functionality ***
 
--- Testing sort() by supplying string array, 'flag' value is defualt --
+-- Testing sort() by supplying string array, 'flag' value is default --
 bool(true)
 array(8) {
   [0]=>
@@ -100,7 +100,7 @@ array(8) {
   string(8) "orange20"
 }
 
--- Testing sort() by supplying numeric array, 'flag' value is defualt --
+-- Testing sort() by supplying numeric array, 'flag' value is default --
 bool(true)
 array(4) {
   [0]=>

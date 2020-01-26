@@ -237,7 +237,8 @@ PHP_FUNCTION(version_compare)
 	if (!strncmp(op, "!=", op_len) || !strncmp(op, "<>", op_len) || !strncmp(op, "ne", op_len)) {
 		RETURN_BOOL(compare != 0);
 	}
-	RETURN_NULL();
+
+	zend_value_error("Invalid comparison operator");
 }
 
 /* }}} */

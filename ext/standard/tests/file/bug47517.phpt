@@ -16,4 +16,4 @@ if (!$status) {
 file_put_contents('C:\Program Files\myfile.txt', 'hello');
 ?>
 --EXPECTF--
-Warning: file_put_contents(C:\Program Files\myfile.txt): failed to open stream: Permission denied in %sbug47517.php on line %d
+Warning: file_put_contents(C:\Program Files\myfile.txt): Failed to open stream: Permission denied in %sbug47517.php on line %d

@@ -16,7 +16,7 @@ MySQLPDOTest::skip();
 		class myclass implements Serializable {
 
 			private static $instance = null;
-			protected $myprotected = 'a protected propery';
+			protected $myprotected = 'a protected property';
 
 			// Good old magic stuff
 			private function __construct($caller = NULL) {
@@ -129,14 +129,14 @@ Unserializing the previously serialized object...
 myclass::unserialize('Data from serialize')
 object(myclass)#4 (1) {
   ["myprotected":protected]=>
-  string(19) "a protected propery"
+  string(20) "a protected property"
 }
 
 Using PDO::FETCH_CLASS|PDO::FETCH_SERIALIZE to fetch the object from DB and unserialize it...
 myclass::unserialize('C:7:"myclass":19:{Data from serialize}')
 object(myclass)#%d (1) {
   ["myprotected":protected]=>
-  string(19) "a protected propery"
+  string(20) "a protected property"
 }
 
 Using PDO::FETCH_CLASS to fetch the object from DB and unserialize it...
@@ -144,7 +144,7 @@ myclass::__set(myobj, 'C:7:"myclass":19:{Data from serialize}')
 myclass::__construct(PDO shall call __construct())
 object(myclass)#%d (2) {
   ["myprotected":protected]=>
-  string(19) "a protected propery"
+  string(20) "a protected property"
   ["myobj"]=>
   string(38) "C:7:"myclass":19:{Data from serialize}"
 }

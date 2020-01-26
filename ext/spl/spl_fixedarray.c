@@ -546,12 +546,12 @@ SPL_METHOD(SplFixedArray, __construct)
 	zend_long size = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &size) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (size < 0) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "array size cannot be less than zero");
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLFIXEDARRAY_P(object);
@@ -574,7 +574,7 @@ SPL_METHOD(SplFixedArray, __wakeup)
 	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (intern->array.size == 0) {
@@ -603,7 +603,7 @@ SPL_METHOD(SplFixedArray, count)
 	spl_fixedarray_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLFIXEDARRAY_P(object);
@@ -618,7 +618,7 @@ SPL_METHOD(SplFixedArray, toArray)
 	spl_fixedarray_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
@@ -652,7 +652,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 	zend_bool save_indexes = 1;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a|b", &data, &save_indexes) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	num = zend_hash_num_elements(Z_ARRVAL_P(data));
@@ -666,7 +666,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 		ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(data), num_index, str_index) {
 			if (str_index != NULL || (zend_long)num_index < 0) {
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "array must contain only positive integer keys");
-				return;
+				RETURN_THROWS();
 			}
 
 			if (num_index > max_index) {
@@ -677,7 +677,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 		tmp = max_index + 1;
 		if (tmp <= 0) {
 			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "integer overflow detected");
-			return;
+			RETURN_THROWS();
 		}
 		spl_fixedarray_init(&array, tmp);
 
@@ -714,7 +714,7 @@ SPL_METHOD(SplFixedArray, getSize)
 	spl_fixedarray_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLFIXEDARRAY_P(object);
@@ -731,12 +731,12 @@ SPL_METHOD(SplFixedArray, setSize)
 	zend_long size;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &size) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (size < 0) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "array size cannot be less than zero");
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLFIXEDARRAY_P(object);
@@ -754,7 +754,7 @@ SPL_METHOD(SplFixedArray, offsetExists)
 	spl_fixedarray_object  *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zindex) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
@@ -770,7 +770,7 @@ SPL_METHOD(SplFixedArray, offsetGet)
 	spl_fixedarray_object  *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zindex) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
@@ -791,7 +791,7 @@ SPL_METHOD(SplFixedArray, offsetSet)
 	spl_fixedarray_object  *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &zindex, &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
@@ -807,7 +807,7 @@ SPL_METHOD(SplFixedArray, offsetUnset)
 	spl_fixedarray_object  *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zindex) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
@@ -906,7 +906,7 @@ SPL_METHOD(SplFixedArray, key)
 	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(intern->current);
@@ -920,7 +920,7 @@ SPL_METHOD(SplFixedArray, next)
 	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern->current++;
@@ -934,7 +934,7 @@ SPL_METHOD(SplFixedArray, valid)
 	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(intern->current >= 0 && intern->current < intern->array.size);
@@ -948,7 +948,7 @@ SPL_METHOD(SplFixedArray, rewind)
 	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern->current = 0;
@@ -963,7 +963,7 @@ SPL_METHOD(SplFixedArray, current)
 	spl_fixedarray_object *intern  = Z_SPLFIXEDARRAY_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_LONG(&zindex, intern->current);

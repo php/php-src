@@ -20,7 +20,7 @@ echo "*** Testing vsprintf() : hexa formats and non-hexa values ***\n";
 
 // defining array of different hexa formats
 $formats =
-  '%x %+x %-x 
+  '%x %+x %-x
    %lx %Lx %4x %-4x
    %10.4x %-10.4x %.4x 
    %\'#2x %\'2x %\'$2x %\'_2x
@@ -83,35 +83,35 @@ echo "Done";
 *** Testing vsprintf() : hexa formats and non-hexa values ***
 
 -- Iteration 1 --
-string(125) "2 0 a 
+string(124) "2 0 a
    1e240 x fffffffffffffb2e 4d2 
                           
    3039 c fffffffffffffff4 fffffffffffe1dc0
    a 1e240 2 0"
 
 -- Iteration 2 --
-string(164) "2 fffffffffffffffe 2 
+string(163) "2 fffffffffffffffe 2
    1e240 x ffffffffff439a5b bc65a5
                           
    bc61b4 127ae7 ffffffffff4732f9 ffffffffff439ede
    2 1e240 2 fffffffffffffffe"
 
 -- Iteration 3 --
-string(90) "0 0 0 
+string(89) "0 0 0
    7b x ffffffffffffff85 7b  
                           
    4d2 0 $0 _0
    0 7b 0 0"
 
 -- Iteration 4 --
-string(75) "1 1 1 
+string(74) "1 1 1
    1 x    1 1   
                           
    #1 1 $1 _1
    1 1 1 1"
 
 -- Iteration 5 --
-string(75) "1 1 0 
+string(74) "1 1 0
    1 x    0 1   
                           
    #0 1 $1 _0

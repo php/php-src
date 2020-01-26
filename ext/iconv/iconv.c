@@ -2002,7 +2002,7 @@ PHP_FUNCTION(iconv_strlen)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|s",
 		&str, &charset, &charset_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (charset_len >= ICONV_CSNMAXLEN) {
@@ -2037,7 +2037,7 @@ PHP_FUNCTION(iconv_substr)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sl|l!s",
 		&str, &offset, &length, &len_is_null,
 		&charset, &charset_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (charset_len >= ICONV_CSNMAXLEN) {
@@ -2077,7 +2077,7 @@ PHP_FUNCTION(iconv_strpos)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|ls",
 		&haystk, &ndl,
 		&offset, &charset, &charset_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (charset_len >= ICONV_CSNMAXLEN) {
@@ -2131,7 +2131,7 @@ PHP_FUNCTION(iconv_strrpos)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|s",
 		&haystk, &ndl,
 		&charset, &charset_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (ZSTR_LEN(ndl) < 1) {
@@ -2176,7 +2176,7 @@ PHP_FUNCTION(iconv_mime_encode)
 		&field_name, &field_value,
 		&pref) == FAILURE) {
 
-		return;
+		RETURN_THROWS();
 	}
 
 	if (pref != NULL) {
@@ -2274,7 +2274,7 @@ PHP_FUNCTION(iconv_mime_decode)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|ls",
 		&encoded_str, &mode, &charset, &charset_len) == FAILURE) {
 
-		return;
+		RETURN_THROWS();
 	}
 
 	if (charset_len >= ICONV_CSNMAXLEN) {
@@ -2314,7 +2314,7 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|ls",
 		&encoded_str, &mode, &charset, &charset_len) == FAILURE) {
 
-		return;
+		RETURN_THROWS();
 	}
 
 	if (charset_len >= ICONV_CSNMAXLEN) {
@@ -2407,8 +2407,9 @@ PHP_NAMED_FUNCTION(php_if_iconv)
 	zend_string *out_buffer;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ssS",
-		&in_charset, &in_charset_len, &out_charset, &out_charset_len, &in_buffer) == FAILURE)
-		return;
+		&in_charset, &in_charset_len, &out_charset, &out_charset_len, &in_buffer) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	if (in_charset_len >= ICONV_CSNMAXLEN || out_charset_len >= ICONV_CSNMAXLEN) {
 		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
@@ -2437,8 +2438,9 @@ PHP_FUNCTION(iconv_set_encoding)
 	size_t type_len, retval;
 	zend_string *name;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sS", &type, &type_len, &charset) == FAILURE)
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sS", &type, &type_len, &charset) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	if (ZSTR_LEN(charset) >= ICONV_CSNMAXLEN) {
 		php_error_docref(NULL, E_WARNING, "Charset parameter exceeds the maximum allowed length of %d characters", ICONV_CSNMAXLEN);
@@ -2473,8 +2475,9 @@ PHP_FUNCTION(iconv_get_encoding)
 	char *type = "all";
 	size_t type_len = sizeof("all")-1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &type, &type_len) == FAILURE)
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &type, &type_len) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	if (!strcasecmp("all", type)) {
 		array_init(return_value);

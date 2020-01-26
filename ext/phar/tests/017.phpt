@@ -29,5 +29,5 @@ $dir = opendir('phar://hio');
 string(%d) "%s017.phar.php"
 bool(true)
 
-Warning: opendir(phar://hio): failed to open dir: phar error: no directory in "phar://hio", must have at least phar://hio/ for root directory (always use full path to a new phar)
+Warning: opendir(phar://hio): Failed to open directory: phar error: no directory in "phar://hio", must have at least phar://hio/ for root directory (always use full path to a new phar)
 phar url "phar://hio" is unknown in %s017.php on line %d

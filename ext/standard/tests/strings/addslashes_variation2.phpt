@@ -8,7 +8,7 @@ Test addslashes() function : usage variations - strings with characters to be ba
 */
 
 /*
- * Test addslashes() with various strings containing characters thats can be backslashed
+ * Test addslashes() with various strings containing characters that can be backslashed
 */
 
 echo "*** Testing addslashes() : with various strings containing characters to be backslashed ***\n";

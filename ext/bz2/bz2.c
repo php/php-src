@@ -333,14 +333,14 @@ static PHP_FUNCTION(bzread)
 	zend_string *data;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "r|l", &bz, &len)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_stream_from_zval(stream, bz);
 
-	if ((len + 1) < 1) {
-		php_error_docref(NULL, E_WARNING, "length may not be negative");
-		RETURN_FALSE;
+	if (len  < 0) {
+		zend_value_error("Length cannot be negative");
+		RETURN_THROWS();
 	}
 
 	data = php_stream_read_to_str(stream, len);
@@ -363,23 +363,24 @@ static PHP_FUNCTION(bzopen)
 	php_stream *stream = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs", &file, &mode, &mode_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (mode_len != 1 || (mode[0] != 'r' && mode[0] != 'w')) {
-		php_error_docref(NULL, E_WARNING, "'%s' is not a valid mode for bzopen(). Only 'w' and 'r' are supported.", mode);
-		RETURN_FALSE;
+		zend_value_error("'%s' is not a valid mode for bzopen(). Only 'w' and 'r' are supported.", mode);
+		RETURN_THROWS();
 	}
 
 	/* If it's not a resource its a string containing the filename to open */
 	if (Z_TYPE_P(file) == IS_STRING) {
 		if (Z_STRLEN_P(file) == 0) {
-			php_error_docref(NULL, E_WARNING, "filename cannot be empty");
+			php_error_docref(NULL, E_WARNING, "Filename cannot be empty");
 			RETURN_FALSE;
 		}
 
 		if (CHECK_ZVAL_NULL_PATH(file)) {
-			RETURN_FALSE;
+			zend_type_error("Filename must not contain null bytes");
+			RETURN_THROWS();
 		}
 
 		stream = php_stream_bz2open(NULL, Z_STRVAL_P(file), mode, REPORT_ERRORS, NULL);
@@ -392,10 +393,10 @@ static PHP_FUNCTION(bzopen)
 		stream_mode_len = strlen(stream->mode);
 
 		if (stream_mode_len != 1 && !(stream_mode_len == 2 && memchr(stream->mode, 'b', 2))) {
-			php_error_docref(NULL, E_WARNING, "cannot use stream opened in mode '%s'", stream->mode);
+			php_error_docref(NULL, E_WARNING, "Cannot use stream opened in mode '%s'", stream->mode);
 			RETURN_FALSE;
 		} else if (stream_mode_len == 1 && stream->mode[0] != 'r' && stream->mode[0] != 'w' && stream->mode[0] != 'a' && stream->mode[0] != 'x') {
-			php_error_docref(NULL, E_WARNING, "cannot use stream opened in mode '%s'", stream->mode);
+			php_error_docref(NULL, E_WARNING, "Cannot use stream opened in mode '%s'", stream->mode);
 			RETURN_FALSE;
 		}
 
@@ -403,7 +404,7 @@ static PHP_FUNCTION(bzopen)
 			case 'r':
 				/* only "r" and "rb" are supported */
 				if (stream->mode[0] != mode[0] && !(stream_mode_len == 2 && stream->mode[1] != mode[0])) {
-					php_error_docref(NULL, E_WARNING, "cannot read from a stream opened in write only mode");
+					php_error_docref(NULL, E_WARNING, "Cannot read from a stream opened in write only mode");
 					RETURN_FALSE;
 				}
 				break;
@@ -429,8 +430,8 @@ static PHP_FUNCTION(bzopen)
 
 		stream = php_stream_bz2open_from_BZFILE(bz, mode, stream);
 	} else {
-		php_error_docref(NULL, E_WARNING, "first parameter has to be string or file-resource");
-		RETURN_FALSE;
+		zend_type_error("First parameter has to be string or file-resource");
+		RETURN_THROWS();
 	}
 
 	if (stream) {
@@ -481,7 +482,7 @@ static PHP_FUNCTION(bzcompress)
 	unsigned int      dest_len;        /* Length of the destination buffer */
 
 	if (zend_parse_parameters(argc, "s|ll", &source, &source_len, &zblock_size, &zwork_factor) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Assign them to easy to use variables, dest_len is initially the length of the data
@@ -533,7 +534,7 @@ static PHP_FUNCTION(bzdecompress)
 	bz_stream bzs;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &source, &source_len, &small)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	bzs.bzalloc = NULL;
@@ -600,7 +601,7 @@ static void php_bz2_error(INTERNAL_FUNCTION_PARAMETERS, int opt)
 	struct php_bz2_stream_data_t *self;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &bzp) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_stream_from_zval(stream, bzp);

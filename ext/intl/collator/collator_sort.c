@@ -301,7 +301,7 @@ static void collator_sort_internal( int renumber, INTERNAL_FUNCTION_PARAMETERS )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oa/|l",
 		&object, Collator_ce_ptr, &array, &sort_flags ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -392,7 +392,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oa",
 		&object, Collator_ce_ptr, &array ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -404,7 +404,7 @@ PHP_FUNCTION( collator_sort_with_sort_keys )
 			"Object not initialized", 0 );
 		zend_throw_error(NULL, "Object not initialized");
 
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/*
@@ -555,7 +555,7 @@ PHP_FUNCTION( collator_get_sort_key )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os",
 		&object, Collator_ce_ptr, &str, &str_len ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -567,7 +567,7 @@ PHP_FUNCTION( collator_get_sort_key )
 			"Object not initialized", 0 );
 		zend_throw_error(NULL, "Object not initialized");
 
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/*

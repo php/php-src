@@ -15,10 +15,10 @@ try {
   $comment->replaceData(999,4,'-inserted');
 } catch (DOMException $e ) {
   if ($e->getMessage() == 'Index Size Error'){
-    echo "Throws DOMException for offest too large\n";
+    echo "Throws DOMException for offset too large\n";
   }
 }
 
 ?>
 --EXPECT--
-Throws DOMException for offest too large
+Throws DOMException for offset too large

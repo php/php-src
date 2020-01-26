@@ -4,7 +4,7 @@ Bug #70239 Creating a huge array doesn't result in exhausted, but segfault, var 
 <?php
 try {
     var_dump(range(PHP_INT_MIN, 0));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 ?>

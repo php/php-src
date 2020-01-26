@@ -195,7 +195,7 @@ php_oci_collection *php_oci_collection_create(php_oci_connection *connection, ch
 			break;
 			/* we only support VARRAYs and TABLEs */
 		default:
-			php_error_docref(NULL, E_WARNING, "unknown collection type %d", collection->coll_typecode);
+			php_error_docref(NULL, E_WARNING, "Unknown collection type %d", collection->coll_typecode);
 			break;
 	}
 

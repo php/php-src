@@ -13,7 +13,7 @@ try {
 
 try {
     var_dump(max(array()));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -31,7 +31,6 @@ var_dump(max(true, false, true));
 var_dump(max(1, true, false, true));
 var_dump(max(0, true, false, true));
 
-echo "Done\n";
 ?>
 --EXPECT--
 When only one parameter is given, it must be an array
@@ -44,4 +43,3 @@ bool(true)
 bool(true)
 int(1)
 bool(true)
-Done

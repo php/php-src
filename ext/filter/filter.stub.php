@@ -29,7 +29,4 @@ function filter_var_array(array $data, $options = NULL, bool $add_empty = true) 
 
 function filter_list(): array {}
 
-/**
- * @return int|false
- */
-function filter_id(string $filtername) {}
+function filter_id(string $filtername): int|false {}

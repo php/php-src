@@ -72,7 +72,7 @@ foreach ($tests as $testnum => $test) {
     }
 
     // draw bounding box:
-    imagepolygon($g, $bboxDrawn, 4, $red);
+    imagepolygon($g, $bboxDrawn, $red);
 
     // draw baseline:
     $width = sqrt(pow($bboxDrawn[2] - $bboxDrawn[0], 2) + pow($bboxDrawn[3] - $bboxDrawn[1], 2));

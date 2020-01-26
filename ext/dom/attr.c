@@ -34,7 +34,7 @@
 */
 
 const zend_function_entry php_dom_attr_class_functions[] = {
-	PHP_FALIAS(isId, dom_attr_is_id, arginfo_class_DOMAttr_isId)
+	PHP_ME(domattr, isId, arginfo_class_DOMAttr_isId, ZEND_ACC_PUBLIC)
 	PHP_ME(domattr, __construct, arginfo_class_DOMAttr___construct, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
@@ -49,7 +49,7 @@ PHP_METHOD(domattr, __construct)
 	size_t name_len, value_len, name_valid;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &name, &name_len, &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_DOMOBJ_P(ZEND_THIS);
@@ -209,11 +209,11 @@ int dom_attr_schema_type_info_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ proto bool dom_attr_is_id()
+/* {{{ proto bool domattr::isId()
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-isId
 Since: DOM Level 3
 */
-PHP_FUNCTION(dom_attr_is_id)
+PHP_METHOD(domattr, isId)
 {
 	zval *id;
 	dom_object *intern;
@@ -221,7 +221,7 @@ PHP_FUNCTION(dom_attr_is_id)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(attrp, id, xmlAttrPtr, intern);

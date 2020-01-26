@@ -260,14 +260,14 @@ $variations = array (
    non-scalar variables using var_dump() */
 check_vardump($variations);
 
-echo "\n*** Testing var_dump() on miscelleneous input arguments ***\n";
+echo "\n*** Testing var_dump() on miscellaneous input arguments ***\n";
 $misc_values = array (
   @$unset_var,
   NULL,  // NULL argument
   @$undef_variable,  //undefined variable
   null
 );
-/* calling check_vardump() to display miscelleneous data using var_dump() */
+/* calling check_vardump() to display miscellaneous data using var_dump() */
 check_vardump($misc_values);
 
 echo "\n*** Testing var_dump() on multiple arguments ***\n";
@@ -923,7 +923,7 @@ array(4) {
   string(5) "/00\7"
 }
 
-*** Testing var_dump() on miscelleneous input arguments ***
+*** Testing var_dump() on miscellaneous input arguments ***
 -- Iteration 1 --
 NULL
 -- Iteration 2 --

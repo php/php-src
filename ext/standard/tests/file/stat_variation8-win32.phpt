@@ -37,7 +37,7 @@ fclose($file_handle);
 clearstatcache(true, $filename);
 $old_stat = stat($filename);
 // clear the cache
-sleep(2);
+sleep(1);
 
 // opening file in r/w mode
 $file_handle = fopen($filename, "r+");

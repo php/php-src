@@ -6,6 +6,13 @@ PHP                                                                        NEWS
   . Removed the pdo_odbc.db2_instance_name php.ini directive. (Kalle)
   . Fixed bug #77619 (Wrong reflection on MultipleIterator::__construct).
     (Fabien Villepinte)
+  . Fixed bug #65274 (Enhance undefined class constant error with class name).
+    (Nikita)
+  . Fixed bug #49555 (Fatal error "Function must be a string" message should be
+    renamed). (Nikita)
+
+- CURL:
+  . Bumped required libcurl version to 7.29.0. (cmb)
 
 - Date:
   . Fixed bug #65547 (Default value for sunrise/sunset zenith still wrong).
@@ -19,8 +26,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #55005 (imagepolygon num_points requirement). (cmb)
   . Replaced gd resources with objects. (Mark Randall)
+  . Made the $num_points parameter of php_imagepolygon optional. (cmb)
   . Removed deprecated image2wbmp(). (cmb)
   . Removed deprecated png2wbmp() and jpeg2wbmp(). (cmb)
+  . Added imagegetinterpolation(). (cmb)
 
 - Intl:
   . Removed deprecated INTL_IDNA_VARIANT_2003. (cmb)
@@ -78,11 +87,17 @@ PHP                                                                        NEWS
 - sodium:
   . Fixed bug #77646 (sign_detached() strings not terminated). (Frank)
 
+- SQLite3:
+  . Added SQLite3::setAuthorizer() and respective class constants. (bohwaz)
+
 - Standard:
+  . Implemented FR #78638 (__PHP_Incomplete_Class should be final). (Laruence)
   . Fixed bug #77204 (getimagesize(): Read error! should mention file path).
     (peter279k)
   . Fixed bug #76859 (stream_get_line skips data if used with data-generating
     filter). (kkopachev)
+  . Fixed bug #78385 (parse_url() does not include 'query' when question mark
+    is the last char). (Islam Israfilov)
 
 - tidy:
   . Removed the unused $use_include_path parameter from tidy_repair_string().

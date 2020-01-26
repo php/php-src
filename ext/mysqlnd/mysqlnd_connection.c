@@ -669,13 +669,9 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 
 	{
 		const MYSQLND_CSTRING scheme = { transport.s, transport.l };
-		/* This will be overwritten below with a copy, but we can use it during authentication */
-		conn->unix_socket.s = (char *)socket_or_pipe.s;
 		if (FAIL == conn->m->connect_handshake(conn, &scheme, &username, &password, &database, mysql_flags)) {
-			conn->unix_socket.s = NULL;
 			goto err;
 		}
-		conn->unix_socket.s = NULL;
 	}
 
 	{
@@ -2645,7 +2641,7 @@ mysqlnd_poll(MYSQLND **r_array, MYSQLND **e_array, MYSQLND ***dont_poll, long se
 	retval = php_select(max_fd + 1, &rfds, &wfds, &efds, tv_p);
 
 	if (retval == -1) {
-		php_error_docref(NULL, E_WARNING, "unable to select [%d]: %s (max_fd=%d)",
+		php_error_docref(NULL, E_WARNING, "Unable to select [%d]: %s (max_fd=%d)",
 						errno, strerror(errno), max_fd);
 		DBG_RETURN(FAIL);
 	}

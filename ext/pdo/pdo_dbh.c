@@ -32,6 +32,7 @@
 #include "zend_object_handlers.h"
 #include "zend_hash.h"
 #include "zend_interfaces.h"
+#include "pdo_arginfo.h"
 
 static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
 
@@ -225,7 +226,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		snprintf(alt_dsn, sizeof(alt_dsn), "pdo.dsn.%s", data_source);
 		if (FAILURE == cfg_get_string(alt_dsn, &ini_dsn)) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name");
-			return;
+			RETURN_THROWS();
 		}
 
 		data_source = ini_dsn;
@@ -233,7 +234,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 		if (!colon) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name (via INI: %s)", alt_dsn);
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -242,12 +243,12 @@ static PHP_METHOD(PDO, dbh_constructor)
 		data_source = dsn_from_uri(data_source + sizeof("uri:")-1, alt_dsn, sizeof(alt_dsn));
 		if (!data_source) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source URI");
-			return;
+			RETURN_THROWS();
 		}
 		colon = strchr(data_source, ':');
 		if (!colon) {
 			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name (via URI)");
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -257,7 +258,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 		/* NB: don't want to include the data_source in the error message as
 		 * it might contain a password */
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "could not find driver");
-		return;
+		RETURN_THROWS();
 	}
 
 	dbh = Z_PDO_DBH_P(object);
@@ -342,7 +343,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 	dbh->auto_commit = pdo_attr_lval(options, PDO_ATTR_AUTOCOMMIT, 1);
 
 	if (!dbh->data_source || (username && !dbh->username) || (password && !dbh->password)) {
-		php_error_docref(NULL, E_ERROR, "out of memory");
+		php_error_docref(NULL, E_ERROR, "Out of memory");
 	}
 
 	zend_replace_error_handling(EH_THROW, pdo_exception_ce, &zeh);
@@ -559,21 +560,20 @@ static PHP_METHOD(PDO, beginTransaction)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	PDO_CONSTRUCT_CHECK;
 
 	if (dbh->in_txn) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is already an active transaction");
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (!dbh->methods->begin) {
 		/* TODO: this should be an exception; see the auto-commit mode
 		 * comments below */
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "This driver doesn't support transactions");
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (dbh->methods->begin(dbh)) {
@@ -592,14 +592,13 @@ static PHP_METHOD(PDO, commit)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	PDO_CONSTRUCT_CHECK;
 
 	if (!dbh->in_txn) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is no active transaction");
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (dbh->methods->commit(dbh)) {
@@ -618,14 +617,13 @@ static PHP_METHOD(PDO, rollBack)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	PDO_CONSTRUCT_CHECK;
 
 	if (!dbh->in_txn) {
 		zend_throw_exception_ex(php_pdo_get_exception(), 0, "There is no active transaction");
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (dbh->methods->rollback(dbh)) {
@@ -644,9 +642,8 @@ static PHP_METHOD(PDO, inTransaction)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	PDO_CONSTRUCT_CHECK;
 
 	if (!dbh->methods->in_transaction) {
@@ -899,8 +896,8 @@ static PHP_METHOD(PDO, getAttribute)
 }
 /* }}} */
 
-/* {{{ proto int PDO::exec(string query)
-   Execute a query that does not return a row set, returning the number of affected rows */
+/* {{{ proto int PDO::exec(string statement)
+   Execute a statement that does not return a row set, returning the number of affected rows */
 static PHP_METHOD(PDO, exec)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
@@ -928,8 +925,8 @@ static PHP_METHOD(PDO, exec)
 }
 /* }}} */
 
-/* {{{ proto string PDO::lastInsertId([string seqname])
-   Returns the id of the last row that we affected on this connection.  Some databases require a sequence or table name to be passed in.  Not always meaningful. */
+/* {{{ proto string PDO::lastInsertId([string name])
+   Returns the id of the last row that we affected on this connection. Some databases require a sequence or table name to be passed in. Not always meaningful. */
 static PHP_METHOD(PDO, lastInsertId)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
@@ -968,9 +965,8 @@ static PHP_METHOD(PDO, errorCode)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	PDO_CONSTRUCT_CHECK;
 
 	if (dbh->query_stmt) {
@@ -989,7 +985,7 @@ static PHP_METHOD(PDO, errorCode)
 }
 /* }}} */
 
-/* {{{ proto int PDO::errorInfo()
+/* {{{ proto array PDO::errorInfo()
    Fetch extended error information associated with the last operation on the database handle */
 static PHP_METHOD(PDO, errorInfo)
 {
@@ -999,9 +995,7 @@ static PHP_METHOD(PDO, errorInfo)
 
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	PDO_CONSTRUCT_CHECK;
 
@@ -1051,12 +1045,12 @@ static PHP_METHOD(PDO, query)
 	/* Return a meaningful error when no parameters were passed */
 	if (!ZEND_NUM_ARGS()) {
 		zend_parse_parameters(0, "z|z", NULL, NULL);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (FAILURE == zend_parse_parameters(1, "s", &statement,
 			&statement_len)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PDO_DBH_CLEAR_ERR();
@@ -1120,7 +1114,7 @@ static PHP_METHOD(PDO, query)
 /* }}} */
 
 /* {{{ proto string PDO::quote(string string [, int paramtype])
-   quotes string for use in a query.  The optional paramtype acts as a hint for drivers that have alternate quoting styles.  The default value is PDO_PARAM_STR */
+   quotes string for use in a query. The optional paramtype acts as a hint for drivers that have alternate quoting styles. The default value is PDO_PARAM_STR */
 static PHP_METHOD(PDO, quote)
 {
 	pdo_dbh_t *dbh = Z_PDO_DBH_P(ZEND_THIS);
@@ -1159,9 +1153,7 @@ static PHP_METHOD(PDO, getAvailableDrivers)
 {
 	pdo_driver_t *pdriver;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -1171,61 +1163,22 @@ static PHP_METHOD(PDO, getAvailableDrivers)
 }
 /* }}} */
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, dsn)
-	ZEND_ARG_INFO(0, username)
-	ZEND_ARG_INFO(0, passwd)
-	ZEND_ARG_INFO(0, options) /* array */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo_prepare, 0, 0, 1)
-	ZEND_ARG_INFO(0, statement)
-	ZEND_ARG_INFO(0, options) /* array */
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_pdo_setattribute, 0)
-	ZEND_ARG_INFO(0, attribute)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_pdo_getattribute, 0)
-	ZEND_ARG_INFO(0, attribute)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_pdo_exec, 0)
-	ZEND_ARG_INFO(0, query)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo_lastinsertid, 0, 0, 0)
-	ZEND_ARG_INFO(0, seqname)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pdo_quote, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, paramtype)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_pdo__void, 0)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 const zend_function_entry pdo_dbh_functions[] = /* {{{ */ {
-	ZEND_MALIAS(PDO, __construct, dbh_constructor,	arginfo_pdo___construct,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, prepare, 				arginfo_pdo_prepare,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, beginTransaction,       arginfo_pdo__void,         ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, commit,                 arginfo_pdo__void,         ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, rollBack,               arginfo_pdo__void,         ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, inTransaction,          arginfo_pdo__void,         ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, setAttribute,	arginfo_pdo_setattribute,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, exec,			arginfo_pdo_exec,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, query,			NULL,					ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, lastInsertId,	arginfo_pdo_lastinsertid,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, errorCode,              arginfo_pdo__void,         ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, errorInfo,              arginfo_pdo__void,         ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, getAttribute,	arginfo_pdo_getattribute,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, quote,			arginfo_pdo_quote,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDO, getAvailableDrivers,    arginfo_pdo__void,         ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_MALIAS(PDO, __construct, dbh_constructor,  arginfo_class_PDO___construct,	ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, prepare, 				arginfo_class_PDO_prepare,				ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, beginTransaction,       arginfo_class_PDO_beginTransaction,		ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, commit,                 arginfo_class_PDO_commit,         		ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, rollBack,               arginfo_class_PDO_rollBack,         	ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, inTransaction,          arginfo_class_PDO_inTransaction,		ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, setAttribute,			arginfo_class_PDO_setAttribute,			ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, exec,					arginfo_class_PDO_exec,					ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, query,					arginfo_class_PDO_query,				ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, lastInsertId,			arginfo_class_PDO_lastInsertId,			ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, errorCode,              arginfo_class_PDO_errorCode,        	ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, errorInfo,              arginfo_class_PDO_errorInfo,         	ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, getAttribute,			arginfo_class_PDO_getAttribute,			ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, quote,					arginfo_class_PDO_quote,				ZEND_ACC_PUBLIC)
+	PHP_ME(PDO, getAvailableDrivers,    arginfo_class_PDO_getAvailableDrivers,	ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_FE_END
 };
 /* }}} */

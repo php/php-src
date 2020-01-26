@@ -380,17 +380,9 @@ static void zend_file_cache_serialize_type(
 		ZEND_TYPE_SET_PTR(*type, list);
 		UNSERIALIZE_PTR(list);
 
-		void **entry;
-		ZEND_TYPE_LIST_FOREACH_PTR(list, entry) {
-			if (ZEND_TYPE_LIST_IS_NAME(*entry)) {
-				zend_string *name = ZEND_TYPE_LIST_GET_NAME(*entry);
-				SERIALIZE_STR(name);
-				*entry = ZEND_TYPE_LIST_ENCODE_NAME(name);
-			} else {
-				zend_class_entry *ce = ZEND_TYPE_LIST_GET_CE(*entry);
-				SERIALIZE_PTR(ce);
-				*entry = ZEND_TYPE_LIST_ENCODE_CE(ce);
-			}
+		zend_type *list_type;
+		ZEND_TYPE_LIST_FOREACH(list, list_type) {
+			zend_file_cache_serialize_type(list_type, script, info, buf);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {
 		zend_string *type_name = ZEND_TYPE_NAME(*type);
@@ -1108,17 +1100,9 @@ static void zend_file_cache_unserialize_type(
 		UNSERIALIZE_PTR(list);
 		ZEND_TYPE_SET_PTR(*type, list);
 
-		void **entry;
-		ZEND_TYPE_LIST_FOREACH_PTR(list, entry) {
-			if (ZEND_TYPE_LIST_IS_NAME(*entry)) {
-				zend_string *name = ZEND_TYPE_LIST_GET_NAME(*entry);
-				UNSERIALIZE_STR(name);
-				*entry = ZEND_TYPE_LIST_ENCODE_NAME(name);
-			} else {
-				zend_class_entry *ce = ZEND_TYPE_LIST_GET_CE(*entry);
-				UNSERIALIZE_PTR(ce);
-				*entry = ZEND_TYPE_LIST_ENCODE_CE(ce);
-			}
+		zend_type *list_type;
+		ZEND_TYPE_LIST_FOREACH(list, list_type) {
+			zend_file_cache_unserialize_type(list_type, script, buf);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {
 		zend_string *type_name = ZEND_TYPE_NAME(*type);
@@ -1282,7 +1266,15 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 			ZEND_MAP_PTR_NEW(op_array->run_time_cache);
 		} else {
 			ZEND_MAP_PTR_INIT(op_array->static_variables_ptr, &op_array->static_variables);
-			UNSERIALIZE_PTR(ZEND_MAP_PTR(op_array->run_time_cache));
+			if (ZEND_MAP_PTR(op_array->run_time_cache)) {
+				if (script->corrupted) {
+					/* Not in SHM: Use serialized arena pointer. */
+					UNSERIALIZE_PTR(ZEND_MAP_PTR(op_array->run_time_cache));
+				} else {
+					/* In SHM: Allocate new pointer. */
+					ZEND_MAP_PTR_NEW(op_array->run_time_cache);
+				}
+			}
 		}
 	}
 }

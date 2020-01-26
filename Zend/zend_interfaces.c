@@ -193,7 +193,7 @@ ZEND_API void zend_user_it_get_current_key(zend_object_iterator *_iter, zval *ke
 	zend_call_method_with_0_params(Z_OBJ_P(object), iter->ce, &iter->ce->iterator_funcs_ptr->zf_key, "key", &retval);
 
 	if (Z_TYPE(retval) != IS_UNDEF) {
-		ZVAL_ZVAL(key, &retval, 1, 1);
+		ZVAL_COPY_VALUE(key, &retval);
 	} else {
 		if (!EG(exception)) {
 			zend_error(E_WARNING, "Nothing returned from %s::key()", ZSTR_VAL(iter->ce->name));

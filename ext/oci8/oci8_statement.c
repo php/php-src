@@ -1090,7 +1090,7 @@ int php_oci_bind_post_exec(zval *data)
 				break;
 		}
 	} else if ((Z_TYPE_P(zv) == IS_TRUE) || (Z_TYPE_P(zv) == IS_FALSE)) {
-		/* This convetrsion is done on purpose (ext/oci8 uses LVAL as a temorary value) */
+		/* This convetrsion is done on purpose (ext/oci8 uses LVAL as a temporary value) */
 		if (Z_LVAL_P(zv) == 0)
 			ZVAL_BOOL(zv, FALSE);
 		else if (Z_LVAL_P(zv) == 1)
@@ -1409,12 +1409,12 @@ sb4 php_oci_bind_in_callback(
 	} else if (phpbind->statement != 0) {
 		/* RSET */
 		*bufpp = phpbind->statement;
-		*alenp = -1;		/* seems to be allright */
+		*alenp = -1;		/* seems to be alright */
 		*indpp = (dvoid *)&phpbind->indicator;
 	} else {
 		/* descriptor bind */
 		*bufpp = phpbind->descriptor;
-		*alenp = -1;		/* seems to be allright */
+		*alenp = -1;		/* seems to be alright */
 		*indpp = (dvoid *)&phpbind->indicator;
 	}
 

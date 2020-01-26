@@ -49,7 +49,7 @@ if ($version < 50000)
 
 	try {
 
-		// What will happen if a PS returns a differen number of result set column upon each execution?
+		// What will happen if a PS returns a different number of result set column upon each execution?
 		// Lets try with a SP accepting parameters...
 		$db->exec('DROP PROCEDURE IF EXISTS p');
 		$db->exec('CREATE PROCEDURE p(IN cols INT) BEGIN IF cols < 2 THEN SELECT cols AS "one"; ELSE SELECT 1 AS "one", cols AS "two"; END IF; END;');

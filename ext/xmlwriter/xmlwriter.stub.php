@@ -1,10 +1,8 @@
 <?php
 
-/** @return XMLWriter|false */
-function xmlwriter_open_uri(string $uri) {}
+function xmlwriter_open_uri(string $uri): XMLWriter|false {}
 
-/** @return XMLWriter|false */
-function xmlwriter_open_memory() {}
+function xmlwriter_open_memory(): XMLWriter|false {}
 
 function xmlwriter_set_indent(XMLWriter $xmlwriter, bool $indent): bool {}
 
@@ -84,8 +82,7 @@ function xmlwriter_write_dtd_entity(XMLWriter $xmlwriter, string $name, string $
 
 function xmlwriter_output_memory(XMLWriter $xmlwriter, bool $flush = true): string {}
 
-/** @return string|int */
-function xmlwriter_flush(XMLWriter $xmlwriter, bool $empty = true) {}
+function xmlwriter_flush(XMLWriter $xmlwriter, bool $empty = true): string|int {}
 
 class XMLWriter
 {
@@ -171,6 +168,5 @@ class XMLWriter
 
     function outputMemory(bool $flush = true): string {}
 
-    /** @return string|int */
-    function flush(bool $empty = true) {}
+    function flush(bool $empty = true): string|int {}
 }

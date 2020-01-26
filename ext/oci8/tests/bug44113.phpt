@@ -21,7 +21,7 @@ oci8_test_sql_execute($c, $stmtarray);
 
 // Run Test
 // The test can take some time to complete and can exceed PHP's test
-// timout limit on slow networks.
+// timeout limit on slow networks.
 
 for ($x = 0; $x < 70000; $x++) {
 	if (!($var = oci_new_collection($c, 'BUG44113_LIST_T'))) {

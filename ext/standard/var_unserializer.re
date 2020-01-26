@@ -559,10 +559,13 @@ string_key:
 
 				if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
 					if (Z_TYPE_P(old_data) == IS_INDIRECT) {
+						/* This is a property with a declaration */
 						old_data = Z_INDIRECT_P(old_data);
 						info = zend_get_typed_property_info_for_slot(obj, old_data);
 						var_push_dtor(var_hash, old_data);
-						data = zend_hash_update_ind(ht, Z_STR(key), &d);
+						Z_TRY_DELREF_P(old_data);
+						ZVAL_COPY_VALUE(old_data, &d);
+						data = old_data;
 
 						if (UNEXPECTED(info)) {
 							/* Remember to which property this slot belongs, so we can add a

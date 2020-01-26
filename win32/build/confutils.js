@@ -319,7 +319,7 @@ function conf_process_args()
 	var i, j;
 	var configure_help_mode = false;
 	var analyzed = false;
-	var nice = "cscript /nologo configure.js ";
+	var nice = "cscript /nologo /e:jscript configure.js ";
 	var disable_all = false;
 
 	args = WScript.Arguments;
@@ -442,7 +442,8 @@ can be built that way. \
 		 'pcre-regex', 'fastcgi', 'force-cgi-redirect',
 		 'path-info-check', 'zts', 'ipv6', 'memory-limit',
 		 'zend-multibyte', 'fd-setsize', 'memory-manager',
-		 'pgi', 'pgo', 'all-shared', 'config-profile'
+		 'pgi', 'pgo', 'all-shared', 'config-profile',
+		 'sanitizer'
 		);
 	var force;
 
@@ -2300,19 +2301,6 @@ function generate_config_h()
 		outfile.WriteLine("#define " + keys[i] + " " + pieces);
 	}
 
-	if (VS_TOOLSET) {
-		if (VCVERS >= 1800) {
-			outfile.WriteLine("");
-			outfile.WriteLine("#define HAVE_ACOSH 1");
-			outfile.WriteLine("#define HAVE_ASINH 1");
-			outfile.WriteLine("#define HAVE_ATANH 1");
-		}
-		if (VCVERS >= 1900) {
-			outfile.WriteLine("#define HAVE_LOG1P 1");
-		}
-	}
-
-
 	outfile.Close();
 }
 
@@ -2339,7 +2327,7 @@ function generate_phpize()
 	MF.WriteLine("var PHP_MINOR_VERSION=" + PHP_MINOR_VERSION);
 	MF.WriteLine("var PHP_RELEASE_VERSION=" + PHP_RELEASE_VERSION);
 	MF.WriteBlankLines(1);
-	MF.WriteLine("/* Genereted extensions list with mode (static/shared) */");
+	MF.WriteLine("/* Generated extensions list with mode (static/shared) */");
 
 	var count = extensions_enabled.length;
 	for (i in extensions_enabled) {
@@ -2350,7 +2338,7 @@ function generate_phpize()
 	}
 
 	MF.WriteBlankLines(2);
-	MF.WriteLine("/* Genereted win32/build/phpize.js.in */");
+	MF.WriteLine("/* Generated win32/build/phpize.js.in */");
 	MF.WriteBlankLines(1);
 	MF.Write(file_get_contents("win32/build/phpize.js.in"));
 	MF.Close();
@@ -2434,7 +2422,7 @@ function handle_analyzer_makefile_flags(fd, key, val)
 {
 	var relevant = false;
 
-	/* VS integrates /analyze with the bulid process,
+	/* VS integrates /analyze with the build process,
 		no further action is required. */
 	if ("no" == PHP_ANALYZER || "vs" == PHP_ANALYZER) {
 		return;
@@ -3100,8 +3088,8 @@ function toolset_get_compiler_name(short)
 			return name;
 		} if (version >= 1920) {
 			/* NOTE - VS is intentional. Due to changes in recent Visual Studio
-						versioning scheme refering to the exact VC++ version is
-						hardly predictable. From this version on, it refers to 
+						versioning scheme referring to the exact VC++ version is
+						hardly predictable. From this version on, it refers to
 						Visual Studio version and implies the default toolset.
 						When new versions are introduced, adapt also checks in
 						php_win32_image_compatible(), if needed. */
@@ -3423,8 +3411,13 @@ function toolset_setup_build_mode()
 			ADD_FLAG("CFLAGS", "/Zi");
 			ADD_FLAG("LDFLAGS", "/incremental:no /debug /opt:ref,icf");
 		}
-		// Equivalent to Release_TSInline build -> best optimization
-		ADD_FLAG("CFLAGS", "/LD /MD /W3 /Ox /D NDebug /D NDEBUG /D ZEND_WIN32_FORCE_INLINE /GF /D ZEND_DEBUG=0");
+		ADD_FLAG("CFLAGS", "/LD /MD /W3");
+		if (PHP_SANITIZER == "yes" && CLANG_TOOLSET) {
+			ADD_FLAG("CFLAGS", "/Od /D NDebug /D NDEBUG /D ZEND_WIN32_NEVER_INLINE /D ZEND_DEBUG=0");
+		} else {
+			// Equivalent to Release_TSInline build -> best optimization
+			ADD_FLAG("CFLAGS", "/Ox /D NDebug /D NDEBUG /D ZEND_WIN32_FORCE_INLINE /GF /D ZEND_DEBUG=0");
+		}
 
 		// if you have VS.Net /GS hardens the binary against buffer overruns
 		// ADD_FLAG("CFLAGS", "/GS");
@@ -3662,7 +3655,7 @@ function get_clang_lib_dir()
 	if (COMPILER_NAME_LONG.match(/clang version ([\d\.]+) \((.*)\)/)) {
 		ver = RegExp.$1;
 	} else {
-		ERROR("Faled to determine clang lib path");
+		ERROR("Failed to determine clang lib path");
 	}
 
 	if (X64) {
@@ -3695,12 +3688,11 @@ function add_asan_opts(cflags_name, libs_name, ldflags_name)
 	if (COMPILER_NAME_LONG.match(/clang version ([\d\.]+) \((.*)\)/)) {
 		ver = RegExp.$1;
 	} else {
-		ERROR("Faled to determine clang lib path");
+		ERROR("Failed to determine clang lib path");
 	}
 
 	if (!!cflags_name) {
 		ADD_FLAG(cflags_name, "-fsanitize=address");
-		ADD_FLAG(cflags_name, "-fsanitize-address-use-after-scope");
 	}
 	if (!!libs_name) {
 		if (X64) {

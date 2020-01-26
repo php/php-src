@@ -9,7 +9,7 @@ Test krsort() function : usage variations - sort bool values
 
 /*
  * testing krsort() by providing array of boolean values for $array argument with following flag values:
- *  1.flag value as defualt
+ *  1.flag value as default
  *  2.SORT_REGULAR - compare items normally
 */
 
@@ -18,7 +18,7 @@ echo "*** Testing krsort() : usage variations ***\n";
 // bool value array
 $bool_values = array (true => true, false => false, TRUE => TRUE, FALSE => FALSE);
 
-echo "\n-- Testing krsort() by supplying boolean value array, 'flag' value is defualt --\n";
+echo "\n-- Testing krsort() by supplying boolean value array, 'flag' value is default --\n";
 $temp_array = $bool_values;
 var_dump(krsort($temp_array) );
 var_dump($temp_array);
@@ -43,7 +43,7 @@ echo "Done\n";
 --EXPECT--
 *** Testing krsort() : usage variations ***
 
--- Testing krsort() by supplying boolean value array, 'flag' value is defualt --
+-- Testing krsort() by supplying boolean value array, 'flag' value is default --
 bool(true)
 array(2) {
   [1]=>

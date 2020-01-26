@@ -498,7 +498,7 @@ PHP_FUNCTION(stream_wrapper_register)
 	zend_long flags = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|l", &protocol, &classname, &flags) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	uwrap = (struct php_user_stream_wrapper *)ecalloc(1, sizeof(*uwrap));
@@ -523,7 +523,7 @@ PHP_FUNCTION(stream_wrapper_register)
 			}
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "class '%s' is undefined", ZSTR_VAL(classname));
+		php_error_docref(NULL, E_WARNING, "Class '%s' is undefined", ZSTR_VAL(classname));
 	}
 
 	zend_list_delete(rsrc);
@@ -538,7 +538,7 @@ PHP_FUNCTION(stream_wrapper_unregister)
 	zend_string *protocol;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &protocol) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if (php_unregister_url_stream_wrapper_volatile(protocol) == FAILURE) {
@@ -560,7 +560,7 @@ PHP_FUNCTION(stream_wrapper_restore)
 	HashTable *global_wrapper_hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &protocol) == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	global_wrapper_hash = php_stream_get_url_stream_wrappers_hash_global();

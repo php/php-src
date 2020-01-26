@@ -50,7 +50,7 @@ static inline int get_options(zend_array *options, size_t *memlimit, size_t *ops
 		zend_long smemlimit = zval_get_long(opt);
 
 		if ((smemlimit < 0) || (smemlimit < crypto_pwhash_MEMLIMIT_MIN >> 10) || (smemlimit > (crypto_pwhash_MEMLIMIT_MAX >> 10))) {
-			php_error_docref(NULL, E_WARNING, "Memory cost is outside of allowed memory range");
+			zend_value_error("Memory cost is outside of allowed memory range");
 			return FAILURE;
 		}
 		*memlimit = smemlimit << 10;
@@ -58,12 +58,12 @@ static inline int get_options(zend_array *options, size_t *memlimit, size_t *ops
 	if ((opt = zend_hash_str_find(options, "time_cost", strlen("time_cost")))) {
 		*opslimit = zval_get_long(opt);
 		if ((*opslimit < crypto_pwhash_OPSLIMIT_MIN) || (*opslimit > crypto_pwhash_OPSLIMIT_MAX)) {
-			php_error_docref(NULL, E_WARNING, "Time cost is outside of allowed time range");
+			zend_value_error("Time cost is outside of allowed time range");
 			return FAILURE;
 		}
 	}
 	if ((opt = zend_hash_str_find(options, "threads", strlen("threads"))) && (zval_get_long(opt) != 1)) {
-		php_error_docref(NULL, E_WARNING, "A thread value other than 1 is not supported by this implementation");
+		zend_value_error("A thread value other than 1 is not supported by this implementation");
 		return FAILURE;
 	}
 	return SUCCESS;
@@ -74,7 +74,7 @@ static zend_string *php_sodium_argon2_hash(const zend_string *password, zend_arr
 	zend_string *ret;
 
 	if ((ZSTR_LEN(password) >= 0xffffffff)) {
-		php_error_docref(NULL, E_WARNING, "Password is too long");
+		zend_value_error("Password is too long");
 		return NULL;
 	}
 
@@ -84,7 +84,7 @@ static zend_string *php_sodium_argon2_hash(const zend_string *password, zend_arr
 
 	ret = zend_string_alloc(crypto_pwhash_STRBYTES - 1, 0);
 	if (crypto_pwhash_str_alg(ZSTR_VAL(ret), ZSTR_VAL(password), ZSTR_LEN(password), opslimit, memlimit, alg)) {
-		php_error_docref(NULL, E_WARNING, "Unexpected failure hashing password");
+		zend_value_error("Unexpected failure hashing password");
 		zend_string_release(ret);
 		return NULL;
 	}

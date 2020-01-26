@@ -18,5 +18,5 @@ try{
 }
 ?>
 --EXPECT--
-invalid calendar ID -1
-invalid date
+Invalid calendar ID: -1
+Invalid date

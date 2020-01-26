@@ -68,7 +68,7 @@ Connection: close
 
 "
 
-Warning: fopen(http://127.0.0.1:12342/foo/bar): failed to open stream: HTTP request failed! HTTP/1.0 404 Not found
+Warning: fopen(http://127.0.0.1:12342/foo/bar): Failed to open stream: HTTP request failed! HTTP/1.0 404 Not found
  in %s on line %d
 bool(false)
 string(%d) "GET /foo/bar HTTP/1.0

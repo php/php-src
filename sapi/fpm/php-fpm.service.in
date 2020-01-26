@@ -24,20 +24,10 @@ ProtectHome=true
 # Mounts the /usr, /boot, and /etc directories read-only for processes invoked by this unit.
 ProtectSystem=full
 
-# Ensures that the service process and all its children can never gain new privileges
-NoNewPrivileges=true
-
 # Sets up a new /dev namespace for the executed processes and only adds API pseudo devices
 # such as /dev/null, /dev/zero or /dev/random (as well as the pseudo TTY subsystem) to it,
 # but no physical devices such as /dev/sda.
 PrivateDevices=true
-
-# Required for dropping privileges and running as a different user
-CapabilityBoundingSet=CAP_SETGID CAP_SETUID
-
-# Attempts to create memory mappings that are writable and executable at the same time,
-# or to change existing memory mappings to become executable are prohibited.
-MemoryDenyWriteExecute=true
 
 # Explicit module loading will be denied. This allows to turn off module load and unload
 # operations on modular kernels. It is recommended to turn this on for most services that
@@ -62,7 +52,7 @@ RestrictRealtime=true
 
 # Restricts the set of socket address families accessible to the processes of this unit.
 # Protects against vulnerabilities such as CVE-2016-8655
-RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictAddressFamilies=AF_INET AF_INET6 AF_NETLINK AF_UNIX
 
 # Takes away the ability to create or manage any kind of namespace
 RestrictNamespaces=true

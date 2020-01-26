@@ -19,5 +19,5 @@ var_dump( ob_get_flush() );
 --EXPECTF--
 *** Testing ob_get_flush() : error conditions ***
 
-Notice: ob_get_flush(): failed to delete and flush buffer. No buffer to delete or flush in %s on line %d
+Notice: ob_get_flush(): Failed to delete and flush buffer. No buffer to delete or flush in %s on line %d
 bool(false)

@@ -36,19 +36,16 @@ function finfo_set_flags($finfo, int $options): bool {}
 /**
  * @param resource $finfo
  * @param ?resource $context
- * @return string|false
  */
-function finfo_file($finfo, string $file_name, int $options = FILEINFO_NONE, $context = null) {}
+function finfo_file($finfo, string $file_name, int $options = FILEINFO_NONE, $context = null): string|false {}
 
 /**
  * @param resource $finfo
  * @param ?resource $context
- * @return string|false
  */
-function finfo_buffer($finfo, string $string, int $options = FILEINFO_NONE, $context = null) {}
+function finfo_buffer($finfo, string $string, int $options = FILEINFO_NONE, $context = null): string|false {}
 
 /**
  * @param resource|string $filename
- * @return string|false
  */
-function mime_content_type($filename) {}
+function mime_content_type($filename): string|false {}

@@ -22,52 +22,59 @@ foreach ($funcs as $func) {
 Function [ <internal:intl> function locale_get_display_language ] {
 
   - Parameters [2] {
-    Parameter #0 [ <required> $locale ]
-    Parameter #1 [ <optional> $in_locale ]
+    Parameter #0 [ <required> string $locale ]
+    Parameter #1 [ <optional> ?string $in_locale ]
   }
+  - Return [ string|false ]
 }
 Function [ <internal:intl> function locale_get_display_name ] {
 
   - Parameters [2] {
-    Parameter #0 [ <required> $locale ]
-    Parameter #1 [ <optional> $in_locale ]
+    Parameter #0 [ <required> string $locale ]
+    Parameter #1 [ <optional> ?string $in_locale ]
   }
+  - Return [ string|false ]
 }
 Function [ <internal:intl> function locale_get_display_region ] {
 
   - Parameters [2] {
-    Parameter #0 [ <required> $locale ]
-    Parameter #1 [ <optional> $in_locale ]
+    Parameter #0 [ <required> string $locale ]
+    Parameter #1 [ <optional> ?string $in_locale ]
   }
+  - Return [ string|false ]
 }
 Function [ <internal:intl> function locale_get_display_script ] {
 
   - Parameters [2] {
-    Parameter #0 [ <required> $locale ]
-    Parameter #1 [ <optional> $in_locale ]
+    Parameter #0 [ <required> string $locale ]
+    Parameter #1 [ <optional> ?string $in_locale ]
   }
+  - Return [ string|false ]
 }
 Function [ <internal:intl> function locale_get_display_variant ] {
 
   - Parameters [2] {
-    Parameter #0 [ <required> $locale ]
-    Parameter #1 [ <optional> $in_locale ]
+    Parameter #0 [ <required> string $locale ]
+    Parameter #1 [ <optional> ?string $in_locale ]
   }
+  - Return [ string|false ]
 }
 Function [ <internal:intl> function locale_filter_matches ] {
 
   - Parameters [3] {
-    Parameter #0 [ <required> $langtag ]
-    Parameter #1 [ <required> $locale ]
-    Parameter #2 [ <optional> $canonicalize ]
+    Parameter #0 [ <required> string $langtag ]
+    Parameter #1 [ <required> string $locale ]
+    Parameter #2 [ <optional> bool $canonicalize ]
   }
+  - Return [ ?bool ]
 }
 Function [ <internal:intl> function locale_lookup ] {
 
   - Parameters [4] {
-    Parameter #0 [ <required> $langtag ]
-    Parameter #1 [ <required> $locale ]
-    Parameter #2 [ <optional> $canonicalize ]
-    Parameter #3 [ <optional> $def ]
+    Parameter #0 [ <required> array $langtag ]
+    Parameter #1 [ <required> string $locale ]
+    Parameter #2 [ <optional> bool $canonicalize ]
+    Parameter #3 [ <optional> ?string $def ]
   }
+  - Return [ ?string ]
 }

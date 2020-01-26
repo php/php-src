@@ -303,12 +303,6 @@ if test "$ac_cv_attribute_aligned" = "yes"; then
   AC_DEFINE([HAVE_ATTRIBUTE_ALIGNED], 1, [whether the compiler supports __attribute__ ((__aligned__))])
 fi
 
-dnl
-dnl Check for available functions
-dnl
-dnl log2 could be used to improve the log function, however it requires C99. The
-dnl check for log2 should be turned on, as soon as we support C99.
-AC_CHECK_FUNCS(asinh acosh atanh log1p hypot)
 AC_FUNC_FNMATCH
 
 dnl
@@ -491,7 +485,7 @@ dnl
 dnl Setup extension sources
 dnl
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
-                            cyr_convert.c datetime.c dir.c dl.c dns.c exec.c file.c filestat.c \
+                            datetime.c dir.c dl.c dns.c exec.c file.c filestat.c \
                             flock_compat.c formatted_print.c fsock.c head.c html.c image.c \
                             info.c iptc.c lcg.c link.c mail.c math.c md5.c metaphone.c \
                             microtime.c pack.c pageinfo.c quot_print.c rand.c mt_rand.c \

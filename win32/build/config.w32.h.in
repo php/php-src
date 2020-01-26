@@ -118,10 +118,6 @@
 
 #define HAVE_MBLEN
 
-#undef HAVE_ATOF_ACCEPTS_NAN
-#undef HAVE_ATOF_ACCEPTS_INF
-#define HAVE_HUGE_VAL_NAN 0
-
 /* vs.net 2005 has a 64-bit time_t.  This will likely break
  * 3rdParty libs that were built with older compilers; switch
  * back to 32-bit */
@@ -132,8 +128,6 @@
 #define _REENTRANT 1
 #define HAVE_MBRLEN 1
 #define HAVE_MBSTATE_T 1
-
-#define HAVE_HUGE_VAL_INF 1
 
 #define HAVE_GETRUSAGE
 

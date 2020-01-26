@@ -3,7 +3,7 @@ Test timezone_name_from_abbr() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string timezone_name_from_abbr  ( string $abbr  [, int $gmtOffset= -1  [, int $isdst= -1  ]] )
- * Description: Returns the timezone name from abbrevation
+ * Description: Returns the timezone name from abbreviation
  * Source code: ext/date/php_date.c
  * Alias to functions:
  */

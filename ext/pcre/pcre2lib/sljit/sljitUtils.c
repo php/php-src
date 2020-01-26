@@ -70,7 +70,7 @@ static HANDLE allocator_mutex = 0;
 
 static SLJIT_INLINE void allocator_grab_lock(void)
 {
-	/* No idea what to do if an error occures. Static mutexes should never fail... */
+	/* No idea what to do if an error occurs. Static mutexes should never fail... */
 	if (!allocator_mutex)
 		allocator_mutex = CreateMutex(NULL, TRUE, NULL);
 	else
@@ -90,7 +90,7 @@ static HANDLE global_mutex = 0;
 
 SLJIT_API_FUNC_ATTRIBUTE void SLJIT_FUNC sljit_grab_lock(void)
 {
-	/* No idea what to do if an error occures. Static mutexes should never fail... */
+	/* No idea what to do if an error occurs. Static mutexes should never fail... */
 	if (!global_mutex)
 		global_mutex = CreateMutex(NULL, TRUE, NULL);
 	else

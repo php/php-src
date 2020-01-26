@@ -7,6 +7,7 @@
 #include "php.h"
 #include "ext/standard/info.h"
 #include "php_%EXTNAME%.h"
+#include "%EXTNAME%_arginfo.h"
 
 /* For compatibility with older PHP versions */
 #ifndef ZEND_PARSE_PARAMETERS_NONE
@@ -64,16 +65,6 @@ PHP_MINFO_FUNCTION(%EXTNAME%)
 	php_info_print_table_header(2, "%EXTNAME% support", "enabled");
 	php_info_print_table_end();
 }
-/* }}} */
-
-/* {{{ arginfo
- */
-ZEND_BEGIN_ARG_INFO(arginfo_%EXTNAME%_test1, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_%EXTNAME%_test2, 0)
-	ZEND_ARG_INFO(0, str)
-ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ %EXTNAME%_functions[]

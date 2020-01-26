@@ -268,10 +268,8 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(posix)
 #endif
 
-#define PHP_POSIX_NO_ARGS	if (zend_parse_parameters_none() == FAILURE) return;
-
 #define PHP_POSIX_RETURN_LONG_FUNC(func_name)	\
-	PHP_POSIX_NO_ARGS	\
+	ZEND_PARSE_PARAMETERS_NONE();	\
 	RETURN_LONG(func_name());
 
 #define PHP_POSIX_SINGLE_ARG_FUNC(func_name)	\
@@ -399,7 +397,7 @@ PHP_FUNCTION(posix_getgroups)
 	int    result;
 	int    i;
 
-	PHP_POSIX_NO_ARGS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if ((result = getgroups(NGROUPS_MAX, gidlist)) < 0) {
 		POSIX_G(last_error) = errno;
@@ -422,7 +420,7 @@ PHP_FUNCTION(posix_getlogin)
 {
 	char *p;
 
-	PHP_POSIX_NO_ARGS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (NULL == (p = getlogin())) {
 		POSIX_G(last_error) = errno;
@@ -518,7 +516,7 @@ PHP_FUNCTION(posix_uname)
 {
 	struct utsname u;
 
-	PHP_POSIX_NO_ARGS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (uname(&u) < 0) {
 		POSIX_G(last_error) = errno;
@@ -550,7 +548,7 @@ PHP_FUNCTION(posix_times)
 	struct tms t;
 	clock_t    ticks;
 
-	PHP_POSIX_NO_ARGS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if ((ticks = times(&t)) == -1) {
 		POSIX_G(last_error) = errno;
@@ -578,7 +576,7 @@ PHP_FUNCTION(posix_ctermid)
 {
 	char  buffer[L_ctermid];
 
-	PHP_POSIX_NO_ARGS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (NULL == ctermid(buffer)) {
 		/* Found no documentation how the defined behaviour is when this
@@ -608,7 +606,7 @@ static int php_posix_stream_get_fd(zval *zfp, int *fd) /* {{{ */
 	} else if (php_stream_can_cast(stream, PHP_STREAM_AS_FD) == SUCCESS) {
 		php_stream_cast(stream, PHP_STREAM_AS_FD, (void*)fd, 0);
 	} else {
-		php_error_docref(NULL, E_WARNING, "could not use stream of type '%s'",
+		php_error_docref(NULL, E_WARNING, "Could not use stream of type '%s'",
 				stream->ops->label);
 		return 0;
 	}
@@ -709,7 +707,7 @@ PHP_FUNCTION(posix_getcwd)
 	char  buffer[MAXPATHLEN];
 	char *p;
 
-	PHP_POSIX_NO_ARGS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	p = VCWD_GETCWD(buffer, MAXPATHLEN);
 	if (!p) {
@@ -943,7 +941,7 @@ try_again:
 
 	if (!php_posix_group_to_array(g, return_value)) {
 		zend_array_destroy(Z_ARR_P(return_value));
-		php_error_docref(NULL, E_WARNING, "unable to convert posix group to array");
+		php_error_docref(NULL, E_WARNING, "Unable to convert posix group to array");
 		RETVAL_FALSE;
 	}
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
@@ -996,7 +994,7 @@ PHP_FUNCTION(posix_getgrgid)
 
 	if (!php_posix_group_to_array(g, return_value)) {
 		zend_array_destroy(Z_ARR_P(return_value));
-		php_error_docref(NULL, E_WARNING, "unable to convert posix group struct to array");
+		php_error_docref(NULL, E_WARNING, "Unable to convert posix group struct to array");
 		RETVAL_FALSE;
 	}
 #if defined(ZTS) && defined(HAVE_GETGRGID_R) && defined(_SC_GETGR_R_SIZE_MAX)
@@ -1063,7 +1061,7 @@ PHP_FUNCTION(posix_getpwnam)
 
 	if (!php_posix_passwd_to_array(pw, return_value)) {
 		zend_array_destroy(Z_ARR_P(return_value));
-		php_error_docref(NULL, E_WARNING, "unable to convert posix passwd struct to array");
+		php_error_docref(NULL, E_WARNING, "Unable to convert posix passwd struct to array");
 		RETVAL_FALSE;
 	}
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
@@ -1114,7 +1112,7 @@ PHP_FUNCTION(posix_getpwuid)
 
 	if (!php_posix_passwd_to_array(pw, return_value)) {
 		zend_array_destroy(Z_ARR_P(return_value));
-		php_error_docref(NULL, E_WARNING, "unable to convert posix passwd struct to array");
+		php_error_docref(NULL, E_WARNING, "Unable to convert posix passwd struct to array");
 		RETVAL_FALSE;
 	}
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWUID_R)
@@ -1226,7 +1224,7 @@ PHP_FUNCTION(posix_getrlimit)
 {
 	const struct limitlist *l = NULL;
 
-	PHP_POSIX_NO_ARGS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -1274,7 +1272,7 @@ PHP_FUNCTION(posix_setrlimit)
    Retrieve the error number set by the last posix function which failed. */
 PHP_FUNCTION(posix_get_last_error)
 {
-	PHP_POSIX_NO_ARGS;
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(POSIX_G(last_error));
 }

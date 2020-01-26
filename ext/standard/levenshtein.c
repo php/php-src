@@ -99,21 +99,21 @@ PHP_FUNCTION(levenshtein)
 	switch (argc) {
 		case 2: /* just two strings: use maximum performance version */
 			if (zend_parse_parameters(2, "ss", &str1, &str1_len, &str2, &str2_len) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			distance = reference_levdist(str1, str1_len, str2, str2_len, 1, 1, 1);
 			break;
 
 		case 5: /* more general version: calc cost by ins/rep/del weights */
 			if (zend_parse_parameters(5, "sslll", &str1, &str1_len, &str2, &str2_len, &cost_ins, &cost_rep, &cost_del) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			distance = reference_levdist(str1, str1_len, str2, str2_len, cost_ins, cost_rep, cost_del);
 			break;
 
 		case 3: /* most general version: calc cost by user-supplied function */
 			if (zend_parse_parameters(3, "sss", &str1, &str1_len, &str2, &str2_len, &callback_name, &callback_len) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			distance = custom_levdist(str1, str2, callback_name);
 			break;

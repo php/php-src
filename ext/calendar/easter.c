@@ -45,12 +45,12 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
 		"|ll", &year, &method) == FAILURE) {
-			return;
+			RETURN_THROWS();
 	}
 
 	if (gm && (year<1970 || year>2037)) {				/* out of range for timestamps */
 		zend_value_error("This function is only valid for years between 1970 and 2037 inclusive");
-		return;
+		RETURN_THROWS();
 	}
 
 	golden = (year % 19) + 1;					/* the Golden number */

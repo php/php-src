@@ -86,11 +86,11 @@ file_put_contents() expects parameter 1 to be a valid path, string given
 file_put_contents() expects parameter 1 to be a valid path, array given
 -- Iteration 8 --
 
-Warning: file_put_contents(%sdir): failed to open stream: %s in %s on line %d
+Warning: file_put_contents(%sdir): Failed to open stream: %s in %s on line %d
 Failed to write data to: %sdir
 -- Iteration 9 --
 
-Warning: file_put_contents(%sphp): failed to open stream: %s in %s on line %d
+Warning: file_put_contents(%sphp): Failed to open stream: %s in %s on line %d
 Failed to write data to: %sphp
 
 *** Done ***

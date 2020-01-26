@@ -40,7 +40,7 @@ PHP_FUNCTION( collator_get_locale )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ol",
 		&object, Collator_ce_ptr, &type ) == FAILURE )
 	{
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -52,7 +52,7 @@ PHP_FUNCTION( collator_get_locale )
 			"Object not initialized", 0 );
 		zend_throw_error(NULL, "Object not initialized");
 
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Get locale by specified type. */

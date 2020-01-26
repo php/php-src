@@ -268,7 +268,7 @@ static PHP_FUNCTION(json_encode)
 		if (encoder.error_code != PHP_JSON_ERROR_NONE) {
 			smart_str_free(&buf);
 			zend_throw_exception(php_json_exception_ce, php_json_get_error_msg(encoder.error_code), encoder.error_code);
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 	}
 
@@ -313,13 +313,13 @@ static PHP_FUNCTION(json_decode)
 	}
 
 	if (depth <= 0) {
-		php_error_docref(NULL, E_WARNING, "Depth must be greater than zero");
-		RETURN_NULL();
+		zend_value_error("Depth must be greater than zero");
+		RETURN_THROWS();
 	}
 
 	if (depth > INT_MAX) {
-		php_error_docref(NULL, E_WARNING, "Depth must be lower than %d", INT_MAX);
-		RETURN_NULL();
+		zend_value_error("Depth must be lower than %d", INT_MAX);
+		RETURN_THROWS();
 	}
 
 	/* For BC reasons, the bool $assoc overrides the long $options bit for PHP_JSON_OBJECT_AS_ARRAY */
@@ -339,9 +339,7 @@ static PHP_FUNCTION(json_decode)
    Returns the error code of the last json_encode() or json_decode() call. */
 static PHP_FUNCTION(json_last_error)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(JSON_G(error_code));
 }
@@ -351,9 +349,7 @@ static PHP_FUNCTION(json_last_error)
    Returns the error string of the last json_encode() or json_decode() call. */
 static PHP_FUNCTION(json_last_error_msg)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_STRING(php_json_get_error_msg(JSON_G(error_code)));
 }

@@ -25,7 +25,7 @@ try {
 ok
 --EXPECTF--
 FFI\ParserException: 'function' type is not allowed at line 1
-FFI\ParserException: struct/union can't contain an instance of itself at line 1
+FFI\ParserException: Struct/union can't contain an instance of itself at line 1
 object(FFI\CData:struct X)#%d (1) {
   ["ptr"]=>
   NULL

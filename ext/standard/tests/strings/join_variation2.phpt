@@ -20,7 +20,7 @@ $glue = '::';
 $unset_var = array(1, 2);
 unset($unset_var);
 
-// get a resouce variable
+// get a resource variable
 $fp = fopen(__FILE__, "r");
 
 // define a class
@@ -108,49 +108,49 @@ echo "Done\n";
 
 --- Testing join() by supplying different values for 'pieces' argument ---
 -- Iteration 1 --
-Invalid arguments passed
+join() expects parameter 2 to be array, int given
 -- Iteration 2 --
-Invalid arguments passed
+join() expects parameter 2 to be array, int given
 -- Iteration 3 --
-Invalid arguments passed
+join() expects parameter 2 to be array, int given
 -- Iteration 4 --
-Invalid arguments passed
+join() expects parameter 2 to be array, int given
 -- Iteration 5 --
-Invalid arguments passed
+join() expects parameter 2 to be array, float given
 -- Iteration 6 --
-Invalid arguments passed
+join() expects parameter 2 to be array, float given
 -- Iteration 7 --
-Invalid arguments passed
+join() expects parameter 2 to be array, float given
 -- Iteration 8 --
-Invalid arguments passed
+join() expects parameter 2 to be array, float given
 -- Iteration 9 --
-Invalid arguments passed
+join() expects parameter 2 to be array, float given
 -- Iteration 10 --
-Invalid arguments passed
+join() expects parameter 2 to be array, bool given
 -- Iteration 11 --
-Invalid arguments passed
+join() expects parameter 2 to be array, bool given
 -- Iteration 12 --
-Invalid arguments passed
+join() expects parameter 2 to be array, bool given
 -- Iteration 13 --
-Invalid arguments passed
+join() expects parameter 2 to be array, bool given
 -- Iteration 14 --
-Invalid arguments passed
+join() expects parameter 2 to be array, string given
 -- Iteration 15 --
-Invalid arguments passed
+join() expects parameter 2 to be array, string given
 -- Iteration 16 --
-Invalid arguments passed
+join() expects parameter 2 to be array, object given
 -- Iteration 17 --
-Invalid arguments passed
+join() expects parameter 2 to be array, string given
 -- Iteration 18 --
-Invalid arguments passed
+join() expects parameter 2 to be array, string given
 -- Iteration 19 --
-Invalid arguments passed
+join() expects parameter 2 to be array, null given
 -- Iteration 20 --
-Invalid arguments passed
+join() expects parameter 2 to be array, null given
 -- Iteration 21 --
-Invalid arguments passed
+join() expects parameter 2 to be array, resource given
 -- Iteration 22 --
-Invalid arguments passed
+join() expects parameter 2 to be array, null given
 -- Iteration 23 --
-Invalid arguments passed
+join() expects parameter 2 to be array, null given
 Done

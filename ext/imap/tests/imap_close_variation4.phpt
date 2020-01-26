@@ -77,15 +77,15 @@ CL_EXPUNGE was set
 
 -- Iteration 3 --
 
-Warning: imap_close(): invalid value for the flags parameter in %s on line %d
+Warning: imap_close(): Invalid value for the flags parameter in %s on line %d
 bool(false)
 
 -- Iteration 4 --
 
-Warning: imap_close(): invalid value for the flags parameter in %s on line %d
+Warning: imap_close(): Invalid value for the flags parameter in %s on line %d
 bool(false)
 
 -- Iteration 5 --
 
-Warning: imap_close(): invalid value for the flags parameter in %s on line %d
+Warning: imap_close(): Invalid value for the flags parameter in %s on line %d
 bool(false)

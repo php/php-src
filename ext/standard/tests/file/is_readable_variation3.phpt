@@ -17,7 +17,7 @@ echo "*** Testing is_readable(): usage variations ***\n";
 $file_handle = fopen(__FILE__, "r");
 unset($file_handle);
 
-echo "\n*** Testing is_readable() on miscelleneous filenames ***\n";
+echo "\n*** Testing is_readable() on miscellaneous filenames ***\n";
 $misc_files = array(
   0,
   1234,
@@ -40,7 +40,7 @@ echo "Done\n";
 --EXPECTF--
 *** Testing is_readable(): usage variations ***
 
-*** Testing is_readable() on miscelleneous filenames ***
+*** Testing is_readable() on miscellaneous filenames ***
 bool(false)
 bool(false)
 bool(false)

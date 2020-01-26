@@ -388,7 +388,7 @@ static void php_xmlreader_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_rea
 	char *name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!name_len) {
@@ -419,7 +419,7 @@ static void php_xmlreader_no_arg(INTERNAL_FUNCTION_PARAMETERS, xmlreader_read_in
 	xmlreader_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
@@ -447,7 +447,7 @@ static void php_xmlreader_no_arg_string(INTERNAL_FUNCTION_PARAMETERS, xmlreader_
 	xmlreader_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
@@ -477,7 +477,7 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 	char *source;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p!", &source, &source_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (source != NULL && !source_len) {
@@ -529,7 +529,7 @@ PHP_METHOD(xmlreader, close)
 	xmlreader_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
@@ -561,7 +561,7 @@ PHP_METHOD(xmlreader, getAttributeNo)
 	xmlreader_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &attr_pos) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
@@ -587,7 +587,7 @@ PHP_METHOD(xmlreader, getAttributeNs)
 	char *name, *ns_uri, *retchar = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &name, &name_len, &ns_uri, &ns_uri_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (name_len == 0 || ns_uri_len == 0) {
@@ -618,7 +618,7 @@ PHP_METHOD(xmlreader, getParserProperty)
 	xmlreader_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &property) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
@@ -665,7 +665,7 @@ PHP_METHOD(xmlreader, moveToAttribute)
 	char *name;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (name_len == 0) {
@@ -698,7 +698,7 @@ PHP_METHOD(xmlreader, moveToAttributeNo)
 	xmlreader_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &attr_pos) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
@@ -727,7 +727,7 @@ PHP_METHOD(xmlreader, moveToAttributeNs)
 	char *name, *ns_uri;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &name, &name_len, &ns_uri, &ns_uri_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (name_len == 0 || ns_uri_len == 0) {
@@ -782,7 +782,7 @@ PHP_METHOD(xmlreader, read)
 	xmlreader_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
@@ -812,7 +812,7 @@ PHP_METHOD(xmlreader, next)
 	char *name = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &name, &name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
@@ -851,7 +851,7 @@ PHP_METHOD(xmlreader, open)
 	xmlTextReaderPtr reader = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|s!l", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = getThis();
@@ -937,7 +937,7 @@ PHP_METHOD(xmlreader, setSchema)
 	char *source;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p!", &source, &source_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (source != NULL && !source_len) {
@@ -979,7 +979,7 @@ PHP_METHOD(xmlreader, setParserProperty)
 	xmlreader_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lb", &property, &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
@@ -1034,7 +1034,7 @@ PHP_METHOD(xmlreader, XML)
 	xmlTextReaderPtr reader;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s!l", &source, &source_len, &encoding, &encoding_len, &options) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = getThis();
@@ -1117,7 +1117,7 @@ PHP_METHOD(xmlreader, expand)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|O!", &basenode, dom_node_class_entry) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (basenode != NULL) {

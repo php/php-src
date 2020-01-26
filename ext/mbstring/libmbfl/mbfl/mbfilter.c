@@ -656,7 +656,7 @@ filter_count_output(int c, void *data)
 }
 
 size_t
-mbfl_strlen(mbfl_string *string)
+mbfl_strlen(const mbfl_string *string)
 {
 	size_t len, n, k;
 	unsigned char *p;
@@ -855,13 +855,29 @@ mbfl_strpos(
 		needle_u8 = needle;
 	}
 
-	if (needle_u8->len < 1) {
-		result = (size_t) -8;
+	result = (size_t) -1;
+	if (haystack_u8->len < needle_u8->len) {
 		goto out;
 	}
 
-	result = (size_t) -1;
-	if (haystack_u8->len < needle_u8->len) {
+	if (needle_u8->len == 0) {
+		size_t haystack_length = mbfl_strlen(haystack_u8);
+		/* Check if offset is out of bound */
+		if (
+			(offset > 0 && offset > haystack_length)
+			|| (offset < 0 && -offset > haystack_length)
+		) {
+			result = -16;
+			goto out;
+		}
+
+		if (offset < 0) {
+			result = haystack_length + offset;
+		} else if (reverse) {
+			result = haystack_length;
+		} else {
+			result = (size_t) offset;
+		}
 		goto out;
 	}
 

@@ -403,7 +403,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &docp) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	nodep = php_libxml_import_node(docp);
@@ -630,7 +630,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc)
 	sheetp = (xsltStylesheetPtr) intern->ptr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|S!", &docp, &ret_class) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	newdocp = php_xsl_apply_stylesheet(id, intern, sheetp, docp);
@@ -687,7 +687,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri)
 	sheetp = (xsltStylesheetPtr) intern->ptr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "op", &docp, &uri, &uri_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	newdocp = php_xsl_apply_stylesheet(id, intern, sheetp, docp);
@@ -719,7 +719,7 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 	sheetp = (xsltStylesheetPtr) intern->ptr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &docp) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	newdocp = php_xsl_apply_stylesheet(id, intern, sheetp, docp);
@@ -800,7 +800,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 	DOM_GET_THIS(id);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sS", &namespace, &namespace_len, &name) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	intern = Z_XSL_P(id);
 	if ((value = zend_hash_find(intern->parameter, name)) != NULL) {
@@ -824,7 +824,7 @@ PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 	DOM_GET_THIS(id);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sS", &namespace, &namespace_len, &name) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	intern = Z_XSL_P(id);
 	if (zend_hash_del(intern->parameter, name) == SUCCESS) {
@@ -910,7 +910,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs)
 
 	DOM_GET_THIS(id);
  	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &securityPrefs) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	intern = Z_XSL_P(id);
 	oldSecurityPrefs = intern->securityPrefs;

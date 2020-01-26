@@ -1,5 +1,5 @@
 --TEST--
-Test DOMDocument::createAttribute() for expected expection thrown when wrong parameter passed
+Test DOMDocument::createAttribute() for expected exception thrown when wrong parameter passed
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--

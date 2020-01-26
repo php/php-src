@@ -786,9 +786,7 @@ static inline int ct_eval_func_call(
 	int overflow;
 
 	if (num_args == 0) {
-		if (zend_string_equals_literal(name, "get_magic_quotes_gpc")
-				|| zend_string_equals_literal(name, "get_magic_quotes_gpc_runtime")
-				|| zend_string_equals_literal(name, "php_sapi_name")
+		if (zend_string_equals_literal(name, "php_sapi_name")
 				|| zend_string_equals_literal(name, "imagetypes")
 				|| zend_string_equals_literal(name, "phpversion")) {
 			/* pass */
@@ -2165,11 +2163,6 @@ static void sccp_visit_phi(scdf_ctx *scdf, zend_ssa_phi *phi) {
 static zval *value_from_type_and_range(sccp_ctx *ctx, int var_num, zval *tmp) {
 	zend_ssa *ssa = ctx->scdf.ssa;
 	zend_ssa_var_info *info = &ssa->var_info[var_num];
-
-	if (ssa->vars[var_num].var >= ctx->scdf.op_array->last_var) {
-		// TODO Non-CVs may cause issues with FREEs
-		return NULL;
-	}
 
 	if (info->type & MAY_BE_UNDEF) {
 		return NULL;

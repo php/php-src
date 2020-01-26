@@ -60,7 +60,6 @@ mysqli_close($link);
 		'INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY' => 'NOT_NULL PRI_KEY UNSIGNED AUTO_INCREMENT NUM PART_KEY',
 		'CHAR(1) DEFAULT NULL'	=> '',
 		'CHAR(1) NOT NULL' => 'NOT_NULL NO_DEFAULT_VALUE',
-		'TIMESTAMP NOT NULL' => 'NOT_NULL UNSIGNED ZEROFILL BINARY TIMESTAMP',
 		'VARBINARY(127) DEFAULT NULL' => 'BINARY',
 		'BLOB'	=> 'BLOB BINARY',
 		'TINYBLOB'	=> 'BLOB BINARY',
@@ -106,13 +105,6 @@ mysqli_close($link);
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
-	$is_maria_db = strpos(mysqli_get_server_info($link), "MariaDB") !== false;
-	if ($is_maria_db) {
-		$columns['TIMESTAMP NOT NULL'] = 'ON_UPDATE_NOW TIMESTAMP BINARY UNSIGNED NOT_NULL';
-	} else if (mysqli_get_server_version($link) > 50600) {
-		$columns['TIMESTAMP NOT NULL'] = 'ON_UPDATE_NOW TIMESTAMP BINARY NOT_NULL';
-	}
-
 	foreach ($columns as $column_def => $expected_flags) {
 		if (!mysqli_query($link, 'DROP TABLE IF EXISTS test')) {
 			printf("[002] %s [%d] %s\n", $column_def,
@@ -150,16 +142,6 @@ mysqli_close($link);
 		results.The test does not yet fully reflect all server changes/bugs etc.
 		*/
 		switch ($column_def) {
-			case 'TIMESTAMP NOT NULL':
-				// http://bugs.mysql.com/bug.php?id=30081 - new flag introduced in 5.1.24/6.0.4
-				$version = mysqli_get_server_version($link);
-				if ((($version >  50122) && ($version < 60000) && ($version != 50200)) ||
-						($version >= 60004)) {
-					// new flag ON_UPDATE_NOW_FLAG (8192)
-					$expected_flags .= ' ON_UPDATE_NOW';
-				}
-				break;
-
 			case 'INT UNSIGNED NOT NULL':
 			case 'INT NOT NULL':
 			case 'CHAR(1) NOT NULL':

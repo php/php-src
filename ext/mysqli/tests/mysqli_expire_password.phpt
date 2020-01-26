@@ -61,7 +61,6 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'%
 		$link->query("SELECT id FROM test WHERE id = 1");
 		printf("[002] Connect should fail, [%d] %s\n", $link->errno, $link->error);
 	}
-
 	/* explicitly requesting default */
 	$link = mysqli_init();
 	$link->options(MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS, 0);
@@ -92,7 +91,9 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'%
 		printf("[007] Cannot connect [%d] %s\n",
 			mysqli_connect_errno(), mysqli_connect_error());
 	} else {
-		$link->query("SET PASSWORD=PASSWORD('expiretest')");
+		if (!$link->query("SET PASSWORD='expiretest'")) {
+			$link->query("SET PASSWORD=PASSWORD('expiretest')");
+		}
 		printf("[008] Connect allowed, pw set, [%d] %s\n", $link->errno, $link->error);
 		if ($res = $link->query("SELECT id FROM test WHERE id = 1"))
 			var_dump($res->fetch_assoc());

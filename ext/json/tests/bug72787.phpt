@@ -6,9 +6,12 @@ Bug #72787 (json_decode reads out of bounds)
 --FILE--
 <?php
 
-var_dump(json_decode('[]', false, 0x100000000));
+try {
+    var_dump(json_decode('[]', false, 0x100000000));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
 --EXPECTF--
-Warning: json_decode(): Depth must be lower than %d in %s on line %d
-NULL
+Depth must be lower than %d

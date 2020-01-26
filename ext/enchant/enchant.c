@@ -293,7 +293,7 @@ PHP_FUNCTION(enchant_broker_init)
 	EnchantBroker *pbroker;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	pbroker = enchant_broker_init();
@@ -312,14 +312,14 @@ PHP_FUNCTION(enchant_broker_init)
 /* }}} */
 
 /* {{{ proto bool enchant_broker_free(resource broker)
-   Destroys the broker object and its dictionnaries */
+   Destroys the broker object and its dictionaries */
 PHP_FUNCTION(enchant_broker_free)
 {
 	zval *broker;
 	enchant_broker *pbroker;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &broker) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	PHP_ENCHANT_GET_BROKER;
 
@@ -337,7 +337,7 @@ PHP_FUNCTION(enchant_broker_get_error)
 	char *msg;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &broker) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_BROKER;
@@ -362,7 +362,7 @@ PHP_FUNCTION(enchant_broker_set_dict_path)
 	size_t value_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rls", &broker, &dict_type, &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!value_len) {
@@ -401,7 +401,7 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 	char *value;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &broker, &dict_type) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_BROKER;
@@ -456,7 +456,7 @@ PHP_FUNCTION(enchant_broker_list_dicts)
 	enchant_broker *pbroker;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &broker) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_BROKER;
@@ -479,7 +479,7 @@ PHP_FUNCTION(enchant_broker_request_dict)
 	int pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &broker, &tag, &taglen) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_BROKER;
@@ -527,7 +527,7 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 	int pos;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rp", &broker, &pwl, &pwllen) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (php_check_open_basedir(pwl)) {
@@ -569,7 +569,7 @@ PHP_FUNCTION(enchant_broker_free_dict)
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &dict) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_DICT;
@@ -589,7 +589,7 @@ PHP_FUNCTION(enchant_broker_dict_exists)
 	enchant_broker * pbroker;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &broker, &tag, &taglen) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_BROKER;
@@ -615,7 +615,7 @@ PHP_FUNCTION(enchant_broker_set_ordering)
 	enchant_broker * pbroker;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rss", &broker, &ptag, &ptaglen, &pordering, &porderinglen) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_BROKER;
@@ -634,7 +634,7 @@ PHP_FUNCTION(enchant_broker_describe)
 	enchant_broker * pbroker;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &broker) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_BROKER;
@@ -654,13 +654,13 @@ PHP_FUNCTION(enchant_dict_quick_check)
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|z", &dict, &word, &wordlen, &sugg) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (sugg) {
 		sugg = zend_try_array_init(sugg);
 		if (!sugg) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -702,7 +702,7 @@ PHP_FUNCTION(enchant_dict_check)
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &dict, &word, &wordlen) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_DICT;
@@ -724,7 +724,7 @@ PHP_FUNCTION(enchant_dict_suggest)
 	size_t n_sugg_st;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &dict, &word, &wordlen) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_DICT;
@@ -754,7 +754,7 @@ PHP_FUNCTION(enchant_dict_add_to_personal)
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &dict, &word, &wordlen) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_DICT;
@@ -773,7 +773,7 @@ PHP_FUNCTION(enchant_dict_add_to_session)
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &dict, &word, &wordlen) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_DICT;
@@ -792,7 +792,7 @@ PHP_FUNCTION(enchant_dict_is_in_session)
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs", &dict, &word, &wordlen) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_DICT;
@@ -815,7 +815,7 @@ PHP_FUNCTION(enchant_dict_store_replacement)
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rss", &dict, &mis, &mislen, &cor, &corlen) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_DICT;
@@ -833,7 +833,7 @@ PHP_FUNCTION(enchant_dict_get_error)
 	char *msg;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &dict) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_DICT;
@@ -855,7 +855,7 @@ PHP_FUNCTION(enchant_dict_describe)
 	enchant_dict *pdict;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &dict) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_ENCHANT_GET_DICT;

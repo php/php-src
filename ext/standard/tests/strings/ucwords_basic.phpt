@@ -9,7 +9,7 @@ Test ucwords() function : basic functionality
 
 echo "*** Testing ucwords() : basic functionality ***\n";
 
-// lines with different whitespace charecter
+// lines with different whitespace character
 $str_array = array(
  "testing ucwords",
  'testing ucwords',

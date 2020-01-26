@@ -24,13 +24,13 @@
 #define ZEND_JIT_LEVEL_INLINE      2     /* selective inline threading */
 #define ZEND_JIT_LEVEL_OPT_FUNC    3     /* optimized JIT based on Type-Inference */
 #define ZEND_JIT_LEVEL_OPT_FUNCS   4     /* optimized JIT based on Type-Inference and call-tree */
-#define ZEND_JIT_LEVEL_OPT_SCRIPT  5     /* optimized JIT based on Type-Inference and inner-procedure analises */
+#define ZEND_JIT_LEVEL_OPT_SCRIPT  5     /* optimized JIT based on Type-Inference and inner-procedure analysis */
 
 #define ZEND_JIT_LEVEL(n)          ((n) % 10)
 
 #define ZEND_JIT_ON_SCRIPT_LOAD    0
 #define ZEND_JIT_ON_FIRST_EXEC     1
-#define ZEND_JIT_ON_PROF_REQUEST   2     /* compile the most frequently caled on first requrest functions */
+#define ZEND_JIT_ON_PROF_REQUEST   2     /* compile the most frequently caled on first request functions */
 #define ZEND_JIT_ON_HOT_COUNTERS   3     /* compile functions after N calls or loop iterations */
 #define ZEND_JIT_ON_DOC_COMMENT    4     /* compile functions with "@jit" tag in doc-comments */
 
@@ -51,7 +51,7 @@
 
 
 /* Makes profile based JIT (opcache.jit=2*) to generate code only for most
- * offten called functions (above the threshold).
+ * often called functions (above the threshold).
  * TODO: this setting should be configurable
  */
 #define ZEND_JIT_PROF_THRESHOLD    0.005

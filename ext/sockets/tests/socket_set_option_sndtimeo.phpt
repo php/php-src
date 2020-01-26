@@ -30,7 +30,7 @@ var_dump($retval_3 === $options);
 socket_close($socket);
 ?>
 --EXPECTF--
-Warning: socket_set_option(): no key "sec" passed in optval in %s on line %d
+Warning: socket_set_option(): No key "sec" passed in optval in %s on line %d
 bool(true)
 bool(true)
 --CREDITS--

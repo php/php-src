@@ -1197,7 +1197,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 
 			{
 				/* store temp_filename as-is (in case upload_tmp_dir
-				 * contains escapeable characters. escape only the variable name.) */
+				 * contains escapable characters. escape only the variable name.) */
 				zval zfilename;
 
 				/* Initialize variables */

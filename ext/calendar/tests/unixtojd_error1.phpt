@@ -20,7 +20,7 @@ var_dump(unixtojd(null)) . PHP_EOL;
 var_dump(unixtojd(time())) . PHP_EOL;
 ?>
 --EXPECTF--
-timestamp must not be negative
+Timestamp must not be negative
 int(%d)
 int(%d)
 int(%d)

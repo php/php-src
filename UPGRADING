@@ -113,8 +113,10 @@ PHP 8.0 UPGRADE NOTES
     * Attempting to use a resource as an array key.
     * Attempting to use null, a boolean or a float as a string offset.
     * Attempting to read an out-of-bounds string offset.
+    * Attempting to assign an empty string to a string offset.
 
     RFC: https://wiki.php.net/rfc/engine_warnings
+  . Attempting to assign multiple bytes to a string offset will now emit a warning.
   . Unexpected characters in source files (such as null bytes outside of
     strings) will now result in a ParseError exception instead of a compile
     warning.
@@ -209,8 +211,12 @@ PHP 8.0 UPGRADE NOTES
   . A non-string pattern argument to mb_ereg_replace() will now be interpreted
     as a string instead of an ASCII codepoint. The previous behavior may be
     restored with an explicit call to chr().
+  . The needle argument for mb_strpos(), mb_strrpos(), mb_stripos(), mb_strripos(), mb_strstr() and mb_stristr()
+    can now be empty.
   . The $is_hex parameter, which was not used internally, has been removed from
     mb_decode_numericentity().
+  . The legacy behaviour of passing the encoding as the third argument instead of an offset for the mb_strrpos
+    function has been removed, provide an explicit 0 offset with the encoding as the fourth argument.
 
 - PCRE:
   . When passing invalid escape sequences they are no longer interpreted as
@@ -287,6 +293,22 @@ PHP 8.0 UPGRADE NOTES
     generated salt is used instead.
   . The quotemeta() function will now return an empty string if an empty string
     was passed. Previously false was returned.
+  . hebrevc() has been removed.
+  . convert_cyr_string() has been removed.
+  . money_format() has been removed.
+  . ezmlm_hash() has been removed.
+  . get_magic_quotes_gpc() and get_magic_quotes_gpc_runtime() has been removed.
+  . FILTER_SANITIZE_MAGIC_QUOTES has been removed.
+  . Calling implode() with parameters in a reverse order ($pieces, $glue) is no
+    longer supported.
+  . parse_url() will now distinguish absent and empty queries and fragments:
+
+        http://example.com/foo   => query = null, fragment = null
+        http://example.com/foo?  => query = "",   fragment = null
+        http://example.com/foo#  => query = null, fragment = ""
+        http://example.com/foo?# => query = "",   fragment = ""
+
+    Previously all cases resulted in query and fragment being null.
 
 - tidy:
   . The $use_include_path parameter, which was not used internally, has been
@@ -320,7 +342,13 @@ PHP 8.0 UPGRADE NOTES
 - Core:
   . Added support for union types.
     RFC: https://wiki.php.net/rfc/union_types_v2
+  . Added WeakMap.
+    RFC: https://wiki.php.net/rfc/weak_maps
   . Added ValueError class.
+
+- Date:
+  . Added DateTime::createFromInterface() and
+    DateTimeImmutable::createFromInterface().
 
 ========================================
 3. Changes in SAPI modules
@@ -337,6 +365,12 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 6. New Functions
 ========================================
+
+- SQLite3:
+  . Add SQLite3::setAuthorizer() and respective class constants to set a
+    userland callback that will be used to authorize or not an action on the
+    database.
+    PR: https://github.com/php/php-src/pull/4797
 
 - Standard:
   . Added fdiv() method, which performs a floating-point division under
@@ -355,9 +389,24 @@ PHP 8.0 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- CURL:
+  . The CURL extension now requires at least libcurl 7.29.0.
+
+- GD:
+  . The $num_points parameter of imagepolygon(), imageopenpolygon() and
+    imagefilledpolygon() is now optional, i.e. these functions may be called
+    with either 3 or 4 arguments. If the arguments is omitted, it is calculated
+    as count($points)/2.
+  . The function imagegetinterpolation() to get the current interpolation method
+    has been added.
+
 ========================================
 10. New Global Constants
 ========================================
+
+- Filter:
+  . FILTER_VALIDATE_BOOL has been added as an alias for FILTER_VALIDATE_BOOLEAN.
+    The new name is preferred, as it uses the canonical type name.
 
 ========================================
 11. Changes to INI File Handling
@@ -366,6 +415,10 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 12. Windows Support
 ========================================
+
+- php-test-pack:
+  . The test runner has been renamed from run-test.php to run-tests.php, to
+    match its name in php-src.
 
 ========================================
 13. Other Changes

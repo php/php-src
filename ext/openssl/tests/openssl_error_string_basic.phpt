@@ -52,7 +52,7 @@ function dump_openssl_errors($name) {
 $output_file =  __DIR__ . "/openssl_error_string_basic_output.tmp";
 // invalid file for read is something that does not exist in current directory
 $invalid_file_for_read = __DIR__ . "/invalid_file_for_read_operation.txt";
-// invalid file for is the test dir as writting file to existing dir should alway fail
+// invalid file for is the test dir as writing file to existing dir should always fail
 $invalid_file_for_write = __DIR__;
 // crt file
 $crt_file = "file://" . __DIR__ . "/cert.crt";
@@ -145,7 +145,7 @@ expect_openssl_errors('openssl_csr_get_subject open', ['02001002', '2006D080']);
 @openssl_csr_get_subject($crt_file);
 expect_openssl_errors('openssl_csr_get_subjec pem', [$err_pem_no_start_line]);
 
-// other possible cuases that are difficult to catch:
+// other possible causes that are difficult to catch:
 // - ASN1_STRING_to_UTF8 fails in add_assoc_name_entry
 // - invalid php_x509_request field (NULL) would cause error with CONF_get_string
 

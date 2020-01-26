@@ -45,7 +45,7 @@ PHP_METHOD(domcomment, __construct)
 	size_t value_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	nodep = xmlNewComment((xmlChar *) value);

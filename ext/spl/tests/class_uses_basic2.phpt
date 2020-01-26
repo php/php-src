@@ -20,7 +20,7 @@ class barUser { use bar; }
 class foobarUser { use foo, bar; }
 
 /** There is no semantics for traits in the inheritance chain.
-    Traits are flattend into a class, and that semantics is nothing
+    Traits are flattened into a class, and that semantics is nothing
     like a type, or interface, and thus, not propergated. */
 class fooViaBarUser extends barUser { use foo; }
 

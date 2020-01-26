@@ -56,7 +56,7 @@ foreach ($permission_values as $perm) {
 	}
 	mkdir($dir_path);
 
-	// change the dir permisson to test dir on it
+	// change the dir permission to test dir on it
 	var_dump( chmod($dir_path, $perm) );
 
 	var_dump($dh = opendir($dir_path));

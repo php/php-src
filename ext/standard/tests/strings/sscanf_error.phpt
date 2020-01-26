@@ -14,13 +14,14 @@ $format = "%s %s";
 
 echo "\n-- Testing sscanf() function with more than expected no. of arguments --\n";
 
-var_dump( sscanf($str, $format, $str1, $str2, $extra_str) );
-
+try {
+    sscanf($str, $format, $str1, $str2, $extra_str);
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 ?>
 --EXPECTF--
 *** Testing sscanf() : error conditions ***
 
 -- Testing sscanf() function with more than expected no. of arguments --
-
-Warning: sscanf(): Variable is not assigned by any conversion specifiers in %s on line %d
-int(-1)
+Variable is not assigned by any conversion specifiers

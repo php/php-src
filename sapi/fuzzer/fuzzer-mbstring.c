@@ -20,6 +20,7 @@
 #include "Zend/zend.h"
 #include "main/php_config.h"
 #include "main/php_main.h"
+#include "oniguruma.h"
 
 #include <stdio.h>
 #include <stdint.h>
@@ -66,6 +67,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 
 int LLVMFuzzerInitialize(int *argc, char ***argv) {
 	fuzzer_init_php();
+
+	/* The default parse depth limit allows stack overflows under asan. */
+	onig_set_parse_depth_limit(512);
 
 	/* fuzzer_shutdown_php(); */
 	return 0;

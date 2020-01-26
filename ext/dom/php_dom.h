@@ -147,7 +147,7 @@ entry = zend_register_internal_class_ex(&ce, parent_ce);
 
 #define DOM_NO_ARGS() \
 	if (zend_parse_parameters_none() == FAILURE) { \
-		return; \
+		RETURN_THROWS(); \
 	}
 
 #define DOM_NOT_IMPLEMENTED() \

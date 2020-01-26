@@ -55,8 +55,7 @@ function variant_cast(variant $variant, int $type): variant {}
 
 function com_get_active_object(string $progid, int $code_page = UNKNOWN): variant {}
 
-/** @return string|false */
-function com_create_guid() {}
+function com_create_guid(): string|false {}
 
 function com_event_sink(variant $comobject, object $sinkobject, $sinkinterface = UNKNOWN): bool {}
 

@@ -92,8 +92,13 @@ fprintf($fp, "\n*** Testing vprintf() with with unexpected values for format arg
 
 $counter = 1;
 foreach( $values as $value ) {
-  fprintf( $fp, "\n-- Iteration %d --\n",$counter);
-  vfprintf($fp, $value, $args);
+  fprintf($fp, "\n-- Iteration %d --\n", $counter);
+
+  try {
+    vfprintf($fp, $value, $args);
+  } catch (TypeError $exception) {
+    fprintf($fp, "%s\n", $exception->getMessage());
+  }
   $counter++;
 }
 
@@ -106,16 +111,6 @@ unlink($data_file);
 ?>
 --EXPECTF--
 *** Testing vfprintf() : with unexpected values for format argument ***
-
-Warning: Array to string conversion in %s on line %d
-
-Warning: Array to string conversion in %s on line %d
-
-Warning: Array to string conversion in %s on line %d
-
-Warning: Array to string conversion in %s on line %d
-
-Warning: Array to string conversion in %s on line %d
 
 *** Testing vprintf() with with unexpected values for format argument ***
 
@@ -138,15 +133,20 @@ Warning: Array to string conversion in %s on line %d
 -- Iteration 9 --
 0.5
 -- Iteration 10 --
-Array
+vfprintf() expects parameter 2 to be string, array given
+
 -- Iteration 11 --
-Array
+vfprintf() expects parameter 2 to be string, array given
+
 -- Iteration 12 --
-Array
+vfprintf() expects parameter 2 to be string, array given
+
 -- Iteration 13 --
-Array
+vfprintf() expects parameter 2 to be string, array given
+
 -- Iteration 14 --
-Array
+vfprintf() expects parameter 2 to be string, array given
+
 -- Iteration 15 --
 
 -- Iteration 16 --
@@ -170,4 +170,4 @@ object
 -- Iteration 25 --
 
 -- Iteration 26 --
-Resource id #%d
+vfprintf() expects parameter 2 to be string, resource given

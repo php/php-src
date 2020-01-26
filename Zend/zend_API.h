@@ -109,6 +109,8 @@ typedef struct _zend_fcall_info_cache {
 	{ #name, ZEND_TYPE_INIT_CODE(IS_CALLABLE, allow_null, _ZEND_ARG_INFO_FLAGS(pass_by_ref, 0)) },
 #define ZEND_ARG_TYPE_INFO(pass_by_ref, name, type_hint, allow_null) \
 	{ #name, ZEND_TYPE_INIT_CODE(type_hint, allow_null, _ZEND_ARG_INFO_FLAGS(pass_by_ref, 0)) },
+#define ZEND_ARG_TYPE_MASK(pass_by_ref, name, type_mask) \
+	{ #name, ZEND_TYPE_INIT_MASK(type_mask | _ZEND_ARG_INFO_FLAGS(pass_by_ref, 0)) },
 #define ZEND_ARG_VARIADIC_INFO(pass_by_ref, name) \
 	{ #name, ZEND_TYPE_INIT_NONE(_ZEND_ARG_INFO_FLAGS(pass_by_ref, 1)) },
 #define ZEND_ARG_VARIADIC_TYPE_INFO(pass_by_ref, name, type_hint, allow_null) \
@@ -127,6 +129,10 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(name, return_reference, required_num_args, type) \
 	static const zend_internal_arg_info name[] = { \
 		{ (const char*)(zend_uintptr_t)(required_num_args), ZEND_TYPE_INIT_MASK(type | _ZEND_ARG_INFO_FLAGS(return_reference, 0)) },
+
+#define ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(name, return_reference, required_num_args, class_name, type) \
+	static const zend_internal_arg_info name[] = { \
+		{ (const char*)(zend_uintptr_t)(required_num_args), ZEND_TYPE_INIT_CLASS_CONST_MASK(#class_name, type | _ZEND_ARG_INFO_FLAGS(return_reference, 0)) },
 
 #define ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(name, return_reference, required_num_args, type, allow_null) \
 	static const zend_internal_arg_info name[] = { \
@@ -646,6 +652,8 @@ END_EXTERN_C()
 #define RETVAL_ARR(r)			 		ZVAL_ARR(return_value, r)
 #define RETVAL_EMPTY_ARRAY()			ZVAL_EMPTY_ARRAY(return_value)
 #define RETVAL_OBJ(r)			 		ZVAL_OBJ(return_value, r)
+#define RETVAL_COPY(zv)					ZVAL_COPY(return_value, zv)
+#define RETVAL_COPY_VALUE(zv)			ZVAL_COPY_VALUE(return_value, zv)
 #define RETVAL_ZVAL(zv, copy, dtor)		ZVAL_ZVAL(return_value, zv, copy, dtor)
 #define RETVAL_FALSE  					ZVAL_FALSE(return_value)
 #define RETVAL_TRUE   					ZVAL_TRUE(return_value)
@@ -665,9 +673,12 @@ END_EXTERN_C()
 #define RETURN_ARR(r) 					do { RETVAL_ARR(r); return; } while (0)
 #define RETURN_EMPTY_ARRAY()			do { RETVAL_EMPTY_ARRAY(); return; } while (0)
 #define RETURN_OBJ(r) 					do { RETVAL_OBJ(r); return; } while (0)
+#define RETURN_COPY(zv)					do { RETVAL_COPY(zv); return; } while (0)
+#define RETURN_COPY_VALUE(zv)			do { RETVAL_COPY_VALUE(zv); return; } while (0)
 #define RETURN_ZVAL(zv, copy, dtor)		do { RETVAL_ZVAL(zv, copy, dtor); return; } while (0)
 #define RETURN_FALSE  					do { RETVAL_FALSE; return; } while (0)
 #define RETURN_TRUE   					do { RETVAL_TRUE; return; } while (0)
+#define RETURN_THROWS()					do { ZEND_ASSERT(EG(exception)); (void) return_value; return; } while (0)
 
 #define HASH_OF(p) (Z_TYPE_P(p)==IS_ARRAY ? Z_ARRVAL_P(p) : ((Z_TYPE_P(p)==IS_OBJECT ? Z_OBJ_HT_P(p)->get_properties(Z_OBJ_P(p)) : NULL)))
 #define ZVAL_IS_NULL(z) (Z_TYPE_P(z) == IS_NULL)
@@ -1123,6 +1134,7 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 	_(Z_EXPECTED_OBJECT,	"object") \
 	_(Z_EXPECTED_DOUBLE,	"float") \
 	_(Z_EXPECTED_NUMBER,	"int or float") \
+	_(Z_EXPECTED_STRING_OR_ARRAY, "string or array") \
 
 #define Z_EXPECTED_TYPE_ENUM(id, str) id,
 #define Z_EXPECTED_TYPE_STR(id, str)  str,
@@ -1529,6 +1541,14 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 #define Z_PARAM_VARIADIC(spec, dest, dest_num) \
 	Z_PARAM_VARIADIC_EX(spec, dest, dest_num, 0)
 
+#define Z_PARAM_STR_OR_ARRAY_HT(dest_str, dest_ht) \
+	Z_PARAM_PROLOGUE(0, 0); \
+	if (UNEXPECTED(!zend_parse_arg_str_or_array_ht(_arg, &dest_str, &dest_ht))) { \
+		_expected_type = Z_EXPECTED_STRING_OR_ARRAY; \
+		_error_code = ZPP_ERROR_WRONG_ARG; \
+		break; \
+	}
+
 /* End of new parameter parsing API */
 
 /* Inlined implementations shared by new and old parameter parsing APIs */
@@ -1745,6 +1765,22 @@ static zend_always_inline void zend_parse_arg_zval(zval *arg, zval **dest, int c
 static zend_always_inline void zend_parse_arg_zval_deref(zval *arg, zval **dest, int check_null)
 {
 	*dest = (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) ? NULL : arg;
+}
+
+static zend_always_inline int zend_parse_arg_str_or_array_ht(
+		zval *arg, zend_string **dest_str, HashTable **dest_ht)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
+		*dest_str = Z_STR_P(arg);
+		*dest_ht = NULL;
+	} else if (EXPECTED(Z_TYPE_P(arg) == IS_ARRAY)) {
+		*dest_ht = Z_ARRVAL_P(arg);
+		*dest_str = NULL;
+	} else {
+		*dest_ht = NULL;
+		return zend_parse_arg_str_slow(arg, dest_str);
+	}
+	return 1;
 }
 
 END_EXTERN_C()

@@ -50,14 +50,13 @@ for($count = 0; $count < count($values); $count++) {
     var_dump( chunk_split($heredoc_str, $values[$count], $ending) );
   } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
-  } catch (\Error $e) {
+  } catch (\ValueError $e) {
       echo $e->getMessage() . "\n";
   }
 }
 
-echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing chunk_split() : different 'chunklen' with heredoc 'str' ***
 -- Iteration 1 --
 Chunk length should be greater than zero
@@ -87,4 +86,3 @@ chunk_split():::"
 chunk_split() expects parameter 2 to be int, float given
 -- Iteration 8 --
 Chunk length should be greater than zero
-Done

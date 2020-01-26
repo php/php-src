@@ -9,15 +9,23 @@ if (!extension_loaded("zlib")) {
 --FILE--
 <?php
 $badResource = fopen("php://memory", "r+");
-var_dump(deflate_add($badResource, "test"));
+
+try {
+    var_dump(deflate_add($badResource, "test"));
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 $resource = deflate_init(ZLIB_ENCODING_DEFLATE);
 $badFlushType = 6789;
-var_dump(deflate_add($resource, "test", $badFlushType));
-?>
---EXPECTF--
-Warning: deflate_add(): Invalid deflate resource in %s on line %d
-bool(false)
 
-Warning: deflate_add(): flush mode must be ZLIB_NO_FLUSH, ZLIB_PARTIAL_FLUSH, ZLIB_SYNC_FLUSH, ZLIB_FULL_FLUSH, ZLIB_BLOCK or ZLIB_FINISH in %s on line %d
-bool(false)
+try {
+    var_dump(deflate_add($resource, "test", $badFlushType));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
+?>
+--EXPECT--
+deflate_add(): supplied resource is not a valid zlib deflate resource
+Flush mode must be ZLIB_NO_FLUSH, ZLIB_PARTIAL_FLUSH, ZLIB_SYNC_FLUSH, ZLIB_FULL_FLUSH, ZLIB_BLOCK or ZLIB_FINISH

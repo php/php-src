@@ -7,13 +7,16 @@ Test json_decode() function : error conditions
 echo "*** Testing json_decode() : error conditions ***\n";
 
 echo "\n-- Testing json_decode() function with depth below 0 --\n";
-var_dump(json_decode('"abc"', true, -1));
+
+try {
+    var_dump(json_decode('"abc"', true, -1));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing json_decode() : error conditions ***
 
 -- Testing json_decode() function with depth below 0 --
-
-Warning: json_decode(): Depth must be greater than zero in %s on line %d
-NULL
+Depth must be greater than zero

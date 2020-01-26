@@ -14,17 +14,17 @@ echo "\n";
 
 try {
     var_dump(explode("", ""));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 try {
     var_dump(explode("", NULL));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 try {
     var_dump(explode(NULL, ""));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -33,7 +33,7 @@ var_dump(explode("a", "a"));
 var_dump(explode("a", NULL));
 try {
     var_dump(explode(NULL, "a"));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 var_dump(explode("abc", "acb"));

@@ -600,6 +600,8 @@ constant_binary_op:
 				zend_optimizer_collect_constant(ctx, &ZEND_OP1_LITERAL(opline), &ZEND_OP2_LITERAL(opline));
 			}
 			break;
+#if 0
+		/* see ext/opcache/tests/bug78961.phpt */
 //		case ZEND_FETCH_R:
 		case ZEND_FETCH_W:
 //		case ZEND_FETCH_RW:
@@ -643,6 +645,7 @@ constant_binary_op:
 				MAKE_NOP(opline);
 			}
 			break;
+#endif
 
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:

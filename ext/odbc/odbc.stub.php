@@ -17,18 +17,12 @@ function odbc_prepare($connection_id, string $query) {}
 /** @param resource $result_id */
 function odbc_execute($result_id, array $parameters_array = UNKNOWN): bool {}
 
-/**
- * @param resource $result_id
- * @return string|false
- */
-function odbc_cursor($result_id) {}
+/** @param resource $result_id */
+function odbc_cursor($result_id): string|false {}
 
 #ifdef HAVE_SQLDATASOURCES
-/**
- * @param resource $connection_id
- * @return array|false
- */
-function odbc_data_source($connection_id, int $fetch_type) {}
+/** @param resource $connection_id */
+function odbc_data_source($connection_id, int $fetch_type): array|false {}
 #endif
 
 /**
@@ -44,24 +38,15 @@ function odbc_exec($connection_id, string $query, int $flags = UNKNOWN) {}
 function odbc_do($connection_id, string $query, int $flags = UNKNOWN) {}
 
 #ifdef PHP_ODBC_HAVE_FETCH_HASH
-/**
- * @param resource $result
- * @return stdClass|false
- */
-function odbc_fetch_object($result, int $rownumber = -1) {}
+/** @param resource $result */
+function odbc_fetch_object($result, int $rownumber = -1): stdClass|false {}
 
-/**
- * @param resource $result
- * @return array|false
- */
-function odbc_fetch_array($result, int $rownumber = -1) {}
+/** @param resource $result */
+function odbc_fetch_array($result, int $rownumber = -1): array|false {}
 #endif
 
-/**
- * @param resource $result_id
- * @return int|false
- */
-function odbc_fetch_into($result_id, &$result_array, int $rownumber = 0) {}
+/** @param resource $result_id */
+function odbc_fetch_into($result_id, &$result_array, int $rownumber = 0): int|false {}
 
 /** @param resource $result_id */
 function odbc_fetch_row($result_id, int $row_number = UNKNOWN): bool {}
@@ -69,15 +54,11 @@ function odbc_fetch_row($result_id, int $row_number = UNKNOWN): bool {}
 /**
  * @param resource $result_id
  * @param string|int $field
- * @return string|bool|null
  */
-function odbc_result($result_id, $field) {}
+function odbc_result($result_id, $field): string|bool|null {}
 
-/**
- * @param resource $result_id
- * @return int|false
- */
-function odbc_result_all($result_id, string $format = '') {}
+/** @param resource $result_id */
+function odbc_result_all($result_id, string $format = ''): int|false {}
 
 /** @param resource $result_id */
 function odbc_free_result($result_id): bool {}
@@ -102,47 +83,26 @@ function odbc_next_result($result_id): bool {}
 /** @param resource $result_id */
 function odbc_num_fields($result_id): int {}
 
-/**
- * @param resource $result_id
- * @return string|false
- */
-function odbc_field_name($result_id, int $field_number) {}
+/** @param resource $result_id */
+function odbc_field_name($result_id, int $field_number): string|false {}
 
-/**
- * @param resource $result_id
- * @return string|false
- */
-function odbc_field_type($result_id, int $field_number) {}
+/** @param resource $result_id */
+function odbc_field_type($result_id, int $field_number): string|false {}
 
-/**
- * @param resource $result_id
- * @return int|false
- */
-function odbc_field_len($result_id, int $field_number) {}
+/** @param resource $result_id */
+function odbc_field_len($result_id, int $field_number): int|false {}
 
-/**
- * @param resource $result_id
- * @return int|false
- */
-function odbc_field_precision($result_id, int $field_number) {}
+/** @param resource $result_id */
+function odbc_field_precision($result_id, int $field_number): int|false {}
 
-/**
- * @param resource $result_id
- * @return int|false
- */
-function odbc_field_scale($result_id, int $field_number) {}
+/** @param resource $result_id */
+function odbc_field_scale($result_id, int $field_number): int|false {}
 
-/**
- * @param resource $result_id
- * @return int|false
- */
-function odbc_field_num($result_id, string $field_name) {}
+/** @param resource $result_id */
+function odbc_field_num($result_id, string $field_name): int|false {}
 
-/**
- * @param resource $connection_id
- * @return int|bool
- */
-function odbc_autocommit($connection_id, int $onoff = 0) {}
+/** @param resource $connection_id */
+function odbc_autocommit($connection_id, int $onoff = 0): int|bool {}
 
 /** @param resource $connection_id */
 function odbc_commit($connection_id): bool {}

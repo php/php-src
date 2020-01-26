@@ -1,5 +1,5 @@
 --TEST--
-Bug #76869 (Incorrect bypassing protected method accessibilty check)
+Bug #76869 (Incorrect bypassing protected method accessibility check)
 --FILE--
 <?php
 class A {

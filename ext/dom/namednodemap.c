@@ -32,10 +32,10 @@
 */
 
 const zend_function_entry php_dom_namednodemap_class_functions[] = { /* {{{ */
-	PHP_FALIAS(getNamedItem, dom_namednodemap_get_named_item, arginfo_class_DOMNamedNodeMap_getNamedItem)
-	PHP_FALIAS(item, dom_namednodemap_item, arginfo_class_DOMNamedNodeMap_item)
-	PHP_FALIAS(getNamedItemNS, dom_namednodemap_get_named_item_ns, arginfo_class_DOMNamedNodeMap_getNamedItemNS)
-	PHP_FALIAS(count, dom_namednodemap_count, arginfo_class_DOMNamedNodeMap_count)
+	PHP_ME(domnamednodemap, getNamedItem, arginfo_class_DOMNamedNodeMap_getNamedItem, ZEND_ACC_PUBLIC)
+	PHP_ME(domnamednodemap, item, arginfo_class_DOMNamedNodeMap_item, ZEND_ACC_PUBLIC)
+	PHP_ME(domnamednodemap, getNamedItemNS, arginfo_class_DOMNamedNodeMap_getNamedItemNS, ZEND_ACC_PUBLIC)
+	PHP_ME(domnamednodemap, count, arginfo_class_DOMNamedNodeMap_count, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -85,7 +85,7 @@ int dom_namednodemap_length_read(dom_object *obj, zval *retval)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1074577549
 Since:
 */
-PHP_FUNCTION(dom_namednodemap_get_named_item)
+PHP_METHOD(domnamednodemap, getNamedItem)
 {
 	zval *id;
 	int ret;
@@ -100,7 +100,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &named, &namedlen) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_DOMOBJ_P(id);
@@ -141,7 +141,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-349467F9
 Since:
 */
-PHP_FUNCTION(dom_namednodemap_item)
+PHP_METHOD(domnamednodemap, item)
 {
 	zval *id;
 	zend_long index;
@@ -155,7 +155,7 @@ PHP_FUNCTION(dom_namednodemap_item)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &index) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	if (index >= 0) {
 		if (ZEND_LONG_INT_OVFL(index)) {
@@ -205,7 +205,7 @@ PHP_FUNCTION(dom_namednodemap_item)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getNamedItemNS
 Since: DOM Level 2
 */
-PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
+PHP_METHOD(domnamednodemap, getNamedItemNS)
 {
 	zval *id;
 	int ret;
@@ -220,7 +220,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!s", &uri, &urilen, &named, &namedlen) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_DOMOBJ_P(id);
@@ -259,14 +259,14 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 
 /* {{{ proto int|bool dom_namednodemap_count();
 */
-PHP_FUNCTION(dom_namednodemap_count)
+PHP_METHOD(domnamednodemap, count)
 {
 	zval *id;
 	dom_object *intern;
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_DOMOBJ_P(id);

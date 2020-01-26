@@ -1,5 +1,5 @@
 --TEST--
-Test DateTime class inheritance : with user space fromat() method
+Test DateTime class inheritance : with user space format() method
 --FILE--
 <?php
 //Set the default time zone

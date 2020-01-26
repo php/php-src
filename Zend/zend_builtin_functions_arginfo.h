@@ -10,7 +10,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_func_get_arg, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, arg_num, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_func_get_args, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_func_get_args, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_strlen, 0, 1, IS_LONG, 0)
@@ -22,7 +22,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_strcmp, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, str2, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_strncmp, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strncmp, 0, 3, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, str1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, str2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, len, IS_LONG, 0)
@@ -42,13 +42,14 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_defined, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, constant_name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_get_class, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_class, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_get_called_class arginfo_func_get_args
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_called_class, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_get_parent_class, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_parent_class, 0, 0, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
@@ -60,7 +61,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_is_a arginfo_is_subclass_of
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_get_class_vars, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_class_vars, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, class_name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -142,8 +143,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_defined_functions, 0, 0, IS_
 	ZEND_ARG_TYPE_INFO(0, exclude_disabled, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_defined_vars, 0, 0, IS_ARRAY, 1)
-ZEND_END_ARG_INFO()
+#define arginfo_get_defined_vars arginfo_get_included_files
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_get_resource_type, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, res)
@@ -175,7 +175,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_extension_loaded, 0, 1, _IS_BOOL
 	ZEND_ARG_TYPE_INFO(0, extension_name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_get_extension_funcs, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_extension_funcs, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, extension_name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 

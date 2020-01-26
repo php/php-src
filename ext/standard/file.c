@@ -543,8 +543,8 @@ PHP_FUNCTION(file_get_contents)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_NUM_ARGS() == 5 && maxlen < 0) {
-		php_error_docref(NULL, E_WARNING, "length must be greater than or equal to zero");
-		RETURN_FALSE;
+		zend_value_error("Length must be greater than or equal to zero");
+		RETURN_THROWS();
 	}
 
 	context = php_stream_context_from_zval(zcontext, 0);
@@ -854,9 +854,7 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
 {
 	php_stream *stream;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	stream = php_stream_fopen_tmpfile();
 
@@ -1115,7 +1113,7 @@ PHP_FUNCTION(fscanf)
 	 * with a leak if we have an invalid filehandle. This needs changing
 	 * if the code behind ZEND_VERIFY_RESOURCE changed. - cc */
 	if (!what) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	buf = php_stream_get_line((php_stream *) what, NULL, 0, &len);
@@ -1766,7 +1764,7 @@ PHPAPI PHP_FUNCTION(fread)
 }
 /* }}} */
 
-static const char *php_fgetcsv_lookup_trailing_spaces(const char *ptr, size_t len, const char delimiter) /* {{{ */
+static const char *php_fgetcsv_lookup_trailing_spaces(const char *ptr, size_t len) /* {{{ */
 {
 	int inc_len;
 	unsigned char last_chars[2] = { 0, 0 };
@@ -2051,7 +2049,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 	/* Strip trailing space from buf, saving end of line in case required for enclosure field */
 
 	bptr = buf;
-	tptr = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len, delimiter);
+	tptr = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len);
 	line_end_len = buf_len - (size_t)(tptr - buf);
 	line_end = limit = tptr;
 
@@ -2149,7 +2147,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 								bptr = buf = new_buf;
 								hunk_begin = buf;
 
-								line_end = limit = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len, delimiter);
+								line_end = limit = (char *)php_fgetcsv_lookup_trailing_spaces(buf, buf_len);
 								line_end_len = buf_len - (size_t)(limit - buf);
 
 								state = 0;
@@ -2276,7 +2274,7 @@ PHPAPI void php_fgetcsv(php_stream *stream, char delimiter, char enclosure, int 
 			memcpy(tptr, hunk_begin, bptr - hunk_begin);
 			tptr += (bptr - hunk_begin);
 
-			comp_end = (char *)php_fgetcsv_lookup_trailing_spaces(temp, tptr - temp, delimiter);
+			comp_end = (char *)php_fgetcsv_lookup_trailing_spaces(temp, tptr - temp);
 			if (*bptr == delimiter) {
 				bptr++;
 			}
@@ -2467,9 +2465,8 @@ PHP_FUNCTION(fnmatch)
    Returns directory path used for temporary files */
 PHP_FUNCTION(sys_get_temp_dir)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	RETURN_STRING((char *)php_get_temporary_directory());
 }
 /* }}} */

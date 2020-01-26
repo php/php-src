@@ -70,7 +70,7 @@ $r = pg_query($db, "SELECT * FROM tmp_statistics");
 while (false != ($row = pg_fetch_row($r))) {
 	var_dump($row);
 }
-echo $errors, " errors catched\n";
+echo $errors, " errors caught\n";
 
 pg_query($db, "DROP TABLE tmp_statistics");
 pg_close($db);
@@ -191,4 +191,4 @@ array(2) {
   [1]=>
   string(19) "2001:4f8:3:ba::/112"
 }
-7 errors catched
+7 errors caught

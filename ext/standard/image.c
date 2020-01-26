@@ -398,7 +398,7 @@ static unsigned int php_next_marker(php_stream * stream, int last_marker, int ff
 			extraneous++;
 	}
 		if (extraneous) {
-			php_error_docref(NULL, E_WARNING, "corrupt JPEG data: %zu extraneous bytes before marker", extraneous);
+			php_error_docref(NULL, E_WARNING, "Corrupt JPEG data: %zu extraneous bytes before marker", extraneous);
 		}
 	}
 	a = 1;
@@ -1497,7 +1497,7 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	if (argc == 2) {
 		info = zend_try_array_init(info);
 		if (!info) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 

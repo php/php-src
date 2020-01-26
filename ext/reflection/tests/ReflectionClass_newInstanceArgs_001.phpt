@@ -33,16 +33,12 @@ $rcD = new ReflectionClass('D');
 $rcE = new ReflectionClass('E');
 
 try {
-	var_dump($rcB->newInstanceArgs());
+	$rcB->newInstanceArgs();
 } catch (Throwable $e) {
 	echo "Exception: " . $e->getMessage() . "\n";
 }
 
-try {
-	var_dump($rcB->newInstanceArgs(array('x', 123)));
-} catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
-}
+var_dump($rcB->newInstanceArgs(array('x', 123)));
 
 try {
 	$rcC->newInstanceArgs();

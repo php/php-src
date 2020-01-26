@@ -60,7 +60,7 @@ SINCE:               5.3
 -------------------------------------------------------------------------------
 EXTENSION:           phpdbg
 PRIMARY MAINTAINER:  Joe Watkins <krakjoe@php.net>, Bob Weinand <bwoebi@php.net>
-MAINTENANCE:         Unkown
+MAINTENANCE:         Unknown
 STATUS:              5.6
 -------------------------------------------------------------------------------
 
@@ -431,7 +431,7 @@ STATUS:              Working
 SINCE:               4.0.2
 -------------------------------------------------------------------------------
 EXTENSION:           readline
-PRIMARY MAINTAINER:  Unkown
+PRIMARY MAINTAINER:  Unknown
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -480,17 +480,17 @@ STATUS:              Working
 SINCE:               5.0.0
 -------------------------------------------------------------------------------
 EXTENSION:           sysvmsg
-PRIMARY MAINTAINER:  Unkown
+PRIMARY MAINTAINER:  Unknown
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           sysvsem
-PRIMARY MAINTAINER:  Unkown
+PRIMARY MAINTAINER:  Unknown
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           sysvshm
-PRIMARY MAINTAINER:  Unkown
+PRIMARY MAINTAINER:  Unknown
 MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------

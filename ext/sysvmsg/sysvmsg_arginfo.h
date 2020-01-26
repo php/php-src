@@ -29,7 +29,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_msg_remove_queue, 0, 1, _IS_BOOL
 	ZEND_ARG_INFO(0, queue)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_stat_queue, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_msg_stat_queue, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, queue)
 ZEND_END_ARG_INFO()
 

@@ -2717,7 +2717,7 @@ static zval *to_zval_map(zval *ret, encodeTypePtr type, xmlNodePtr data)
 			} else if (Z_TYPE(key) == IS_LONG) {
 				zend_hash_index_update(Z_ARRVAL_P(ret), Z_LVAL(key), &value);
 			} else {
-				soap_error0(E_ERROR,  "Encoding: Can't decode apache map, only Strings or Longs are allowd as keys");
+				soap_error0(E_ERROR,  "Encoding: Can't decode apache map, only Strings or Longs are allowed as keys");
 			}
 			zval_ptr_dtor(&key);
 		}

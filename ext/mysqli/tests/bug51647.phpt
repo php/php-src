@@ -12,6 +12,9 @@ if ($IS_MYSQLND && !extension_loaded("openssl"))
 if (!($link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)))
 	die(sprintf("skip Connect failed, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
+if (false === strpos($link->host_info, 'TCP/IP'))
+	die(sprintf("skip SSL only supported on TCP/IP"));
+
 $row = NULL;
 if ($res = $link->query('SHOW VARIABLES LIKE "have_ssl"')) {
 	$row = $res->fetch_row();
@@ -62,7 +65,7 @@ $link->close();
 		if (!$row = $res->fetch_assoc())
 			printf("[006] [%d] %s\n", $link->errno, $link->error);
 		if (!strlen($row["Value"]))
-			printf("[007] Empty cipher. No encrytion!");
+			printf("[007] Empty cipher. No encryption!");
 		var_dump($row);
 	}
 
@@ -92,7 +95,7 @@ $link->close();
 		if (!$row = $res->fetch_assoc())
 			printf("[012] [%d] %s\n", $link->errno, $link->error);
 		if (!strlen($row["Value"]))
-			printf("[013] Empty cipher. No encrytion!");
+			printf("[013] Empty cipher. No encryption!");
 		var_dump($row);
 	}
 

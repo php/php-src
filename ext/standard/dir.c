@@ -68,20 +68,20 @@ static zend_class_entry *dir_class_entry_ptr;
 		if (myself) { \
 			if ((tmp = zend_hash_str_find(Z_OBJPROP_P(myself), "handle", sizeof("handle")-1)) == NULL) { \
 				zend_throw_error(NULL, "Unable to find my handle property"); \
-				return; \
+				RETURN_THROWS(); \
 			} \
 			if ((dirp = (php_stream *)zend_fetch_resource_ex(tmp, "Directory", php_file_le_stream())) == NULL) { \
-				return; \
+				RETURN_THROWS(); \
 			} \
 		} else { \
 			if (!DIRG(default_dir) || \
 				(dirp = (php_stream *)zend_fetch_resource(DIRG(default_dir), "Directory", php_file_le_stream())) == NULL) { \
-				return; \
+				RETURN_THROWS(); \
 			} \
 		} \
 	} else { \
 		if ((dirp = (php_stream *)zend_fetch_resource(Z_RES_P(id), "Directory", php_file_le_stream())) == NULL) { \
-			return; \
+			RETURN_THROWS(); \
 		} \
 	}
 
@@ -260,7 +260,7 @@ PHP_FUNCTION(closedir)
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
 		zend_type_error("%d is not a valid Directory resource", dirp->res->handle);
-		return;
+		RETURN_THROWS();
 	}
 
 	res = dirp->res;
@@ -347,9 +347,7 @@ PHP_FUNCTION(getcwd)
 	char path[MAXPATHLEN];
 	char *ret=NULL;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 #if HAVE_GETCWD
 	ret = VCWD_GETCWD(path, MAXPATHLEN);
@@ -376,7 +374,7 @@ PHP_FUNCTION(rewinddir)
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
 		zend_type_error("%d is not a valid Directory resource", dirp->res->handle);
-		return;
+		RETURN_THROWS();
 	}
 
 	php_stream_rewinddir(dirp);
@@ -395,7 +393,7 @@ PHP_NAMED_FUNCTION(php_if_readdir)
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
 		zend_type_error("%d is not a valid Directory resource", dirp->res->handle);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (php_stream_readdir(dirp, &entry)) {
@@ -559,8 +557,8 @@ PHP_FUNCTION(scandir)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (dirn_len < 1) {
-		zend_throw_error(NULL, "Directory name cannot be empty");
-		return;
+		zend_value_error("Directory name cannot be empty");
+		RETURN_THROWS();
 	}
 
 	if (zcontext) {

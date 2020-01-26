@@ -114,7 +114,7 @@ U_CFUNC PHP_FUNCTION(breakiter_set_text)
             &text, &text_len) == FAILURE) {
         intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
             "breakiter_set_text: bad arguments", 0);
-        RETURN_FALSE;
+        RETURN_THROWS();
     }
 
     /* ... */

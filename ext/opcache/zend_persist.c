@@ -260,7 +260,7 @@ static void zend_persist_zval(zval *z)
 
 static void zend_persist_type(zend_type *type) {
 	if (ZEND_TYPE_HAS_LIST(*type)) {
-		void **entry;
+		zend_type *list_type;
 		zend_type_list *list = ZEND_TYPE_LIST(*type);
 		if (ZEND_TYPE_USES_ARENA(*type)) {
 			if (!ZCG(is_immutable_class)) {
@@ -275,10 +275,10 @@ static void zend_persist_type(zend_type *type) {
 		}
 		ZEND_TYPE_SET_PTR(*type, list);
 
-		ZEND_TYPE_LIST_FOREACH_PTR(list, entry) {
-			zend_string *type_name = ZEND_TYPE_LIST_GET_NAME(*entry);
+		ZEND_TYPE_LIST_FOREACH(list, list_type) {
+			zend_string *type_name = ZEND_TYPE_NAME(*list_type);
 			zend_accel_store_interned_string(type_name);
-			*entry = ZEND_TYPE_LIST_ENCODE_NAME(type_name);
+			ZEND_TYPE_SET_PTR(*list_type, type_name);
 		} ZEND_TYPE_LIST_FOREACH_END();
 	} else if (ZEND_TYPE_HAS_NAME(*type)) {
 		zend_string *type_name = ZEND_TYPE_NAME(*type);
@@ -730,6 +730,12 @@ static void zend_persist_class_entry(zval *zv)
 	zend_class_entry *ce = Z_PTR_P(zv);
 
 	if (ce->type == ZEND_USER_CLASS) {
+		/* The same zend_class_entry may be reused by class_alias */
+		zend_class_entry *new_ce = zend_shared_alloc_get_xlat_entry(ce);
+		if (new_ce) {
+			Z_PTR_P(zv) = new_ce;
+			return;
+		}
 		if ((ce->ce_flags & ZEND_ACC_LINKED)
 		 && (ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)
 		 && (ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)
@@ -957,28 +963,18 @@ static void zend_update_parent_ce(zend_class_entry *ce)
 	if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
 		zend_property_info *prop;
 		ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-			if (ZEND_TYPE_HAS_LIST(prop->type)) {
-				void **entry;
-				ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(prop->type), entry) {
-					if (ZEND_TYPE_LIST_IS_CE(*entry)) {
-						zend_class_entry *ce = ZEND_TYPE_LIST_GET_CE(*entry);
-						if (ce->type == ZEND_USER_CLASS) {
-							ce = zend_shared_alloc_get_xlat_entry(ce);
-							if (ce) {
-								*entry = ZEND_TYPE_LIST_ENCODE_CE(ce);
-							}
+			zend_type *single_type;
+			ZEND_TYPE_FOREACH(prop->type, single_type) {
+				if (ZEND_TYPE_HAS_CE(*single_type)) {
+					zend_class_entry *ce = ZEND_TYPE_CE(*single_type);
+					if (ce->type == ZEND_USER_CLASS) {
+						ce = zend_shared_alloc_get_xlat_entry(ce);
+						if (ce) {
+							ZEND_TYPE_SET_PTR(*single_type, ce);
 						}
 					}
-				} ZEND_TYPE_LIST_FOREACH_END();
-			} else if (ZEND_TYPE_HAS_CE(prop->type)) {
-				zend_class_entry *ce = ZEND_TYPE_CE(prop->type);
-				if (ce->type == ZEND_USER_CLASS) {
-					ce = zend_shared_alloc_get_xlat_entry(ce);
-					if (ce) {
-						ZEND_TYPE_SET_PTR(prop->type, ce);
-					}
 				}
-			}
+			} ZEND_TYPE_FOREACH_END();
 		} ZEND_HASH_FOREACH_END();
 	}
 
@@ -1074,8 +1070,11 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 		zend_accel_store_interned_string(p->key);
 		zend_persist_class_entry(&p->val);
 	} ZEND_HASH_FOREACH_END();
-    ZEND_HASH_FOREACH_PTR(class_table, ce) {
-		zend_update_parent_ce(ce);
+    ZEND_HASH_FOREACH_BUCKET(class_table, p) {
+		if (EXPECTED(Z_TYPE(p->val) != IS_ALIAS_PTR)) {
+			ce = Z_PTR(p->val);
+			zend_update_parent_ce(ce);
+		}
 	} ZEND_HASH_FOREACH_END();
 }
 
@@ -1129,7 +1128,9 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	} ZEND_HASH_FOREACH_END();
 	zend_persist_op_array_ex(&script->script.main_op_array, script);
 
-	ZCSG(map_ptr_last) = CG(map_ptr_last);
+	if (for_shm) {
+		ZCSG(map_ptr_last) = CG(map_ptr_last);
+	}
 
 #ifdef HAVE_JIT
 	if (ZCG(jit_enabled) && for_shm) {

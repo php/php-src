@@ -174,14 +174,14 @@ PHP_FUNCTION(socket_sendmsg)
 
 	/* zmsg should be passed by ref */
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra|l", &zsocket, &zmsg, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	LONG_CHECK_VALID_INT(flags);
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(zsocket),
 					php_sockets_le_socket_name, php_sockets_le_socket())) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	msghdr = from_zval_run_conversions(zmsg, php_sock, from_zval_write_msghdr_send,
@@ -219,14 +219,14 @@ PHP_FUNCTION(socket_recvmsg)
 	//ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags);
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra|l",
 			&zsocket, &zmsg, &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	LONG_CHECK_VALID_INT(flags);
 
 	if ((php_sock = (php_socket *)zend_fetch_resource(Z_RES_P(zsocket),
 					php_sockets_le_socket_name, php_sockets_le_socket())) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	msghdr = from_zval_run_conversions(zmsg, php_sock, from_zval_write_msghdr_recv,
@@ -265,7 +265,7 @@ PHP_FUNCTION(socket_recvmsg)
 		}
 	} else {
 		SOCKETS_G(last_error) = errno;
-		php_error_docref(NULL, E_WARNING, "error in recvmsg [%d]: %s",
+		php_error_docref(NULL, E_WARNING, "Error in recvmsg [%d]: %s",
 				errno, sockets_strerror(errno));
 		RETURN_FALSE;
 	}
@@ -282,7 +282,7 @@ PHP_FUNCTION(socket_cmsg_space)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|l",
 			&level, &type, &n) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	LONG_CHECK_VALID_INT(level);

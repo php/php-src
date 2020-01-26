@@ -124,7 +124,7 @@ ZEND_METHOD(Closure, call)
 	fci.params = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o*", &newthis, &fci.params, &fci.param_count) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	closure = (zend_closure *) Z_OBJ_P(ZEND_THIS);
@@ -196,7 +196,7 @@ ZEND_METHOD(Closure, bind)
 	zend_class_entry *ce, *called_scope;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oo!|z", &zclosure, zend_ce_closure, &newthis, &scope_arg) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	closure = (zend_closure *)Z_OBJ_P(zclosure);
@@ -333,12 +333,12 @@ ZEND_METHOD(Closure, fromCallable)
 	char *error = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &callable) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(callable) == IS_OBJECT && instanceof_function(Z_OBJCE_P(callable), zend_ce_closure)) {
 		/* It's already a closure */
-		RETURN_ZVAL(callable, 1, 0);
+		RETURN_COPY(callable);
 	}
 
 	/* create closure as if it were called from parent scope */
@@ -433,7 +433,7 @@ static ZEND_COLD zval *zend_closure_read_property(zend_object *object, zend_stri
 static ZEND_COLD zval *zend_closure_write_property(zend_object *object, zend_string *member, zval *value, void **cache_slot) /* {{{ */
 {
 	ZEND_CLOSURE_PROPERTY_ERROR();
-	return value;
+	return &EG(error_zval);
 }
 /* }}} */
 

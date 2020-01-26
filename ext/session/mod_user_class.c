@@ -45,7 +45,7 @@ PHP_METHOD(SessionHandler, open)
 	PS_SANITY_CHECK;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &save_path, &save_path_len, &session_name, &session_name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PS(mod_user_is_open) = 1;
@@ -96,7 +96,7 @@ PHP_METHOD(SessionHandler, read)
 	PS_SANITY_CHECK_IS_OPEN;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &key) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (PS(default_mod)->s_read(&PS(mod_data), key, &val, PS(gc_maxlifetime)) == FAILURE) {
@@ -116,7 +116,7 @@ PHP_METHOD(SessionHandler, write)
 	PS_SANITY_CHECK_IS_OPEN;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &key, &val) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(SUCCESS == PS(default_mod)->s_write(&PS(mod_data), key, val, PS(gc_maxlifetime)));
@@ -132,7 +132,7 @@ PHP_METHOD(SessionHandler, destroy)
 	PS_SANITY_CHECK_IS_OPEN;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &key) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(SUCCESS == PS(default_mod)->s_destroy(&PS(mod_data), key));
@@ -149,7 +149,7 @@ PHP_METHOD(SessionHandler, gc)
 	PS_SANITY_CHECK_IS_OPEN;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &maxlifetime) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (PS(default_mod)->s_gc(&PS(mod_data), maxlifetime, &nrdels) == FAILURE) {
@@ -168,7 +168,7 @@ PHP_METHOD(SessionHandler, create_sid)
 	PS_SANITY_CHECK;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-	    return;
+	    RETURN_THROWS();
 	}
 
 	id = PS(default_mod)->s_create_sid(&PS(mod_data));
@@ -186,7 +186,7 @@ PHP_METHOD(SessionHandler, validateId)
 	PS_SANITY_CHECK_IS_OPEN;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &key) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Legacy save handler may not support validate_sid API. Return TRUE. */
@@ -203,7 +203,7 @@ PHP_METHOD(SessionHandler, updateTimestamp)
 	PS_SANITY_CHECK_IS_OPEN;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &key, &val) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Legacy save handler may not support update_timestamp API. Just write. */

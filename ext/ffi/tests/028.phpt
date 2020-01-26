@@ -47,6 +47,6 @@ try {
 ok
 ok
 ok
-FFI\ParserException: flexible array member not at end of struct at line 1
-FFI\ParserException: flexible array member not at end of struct at line 1
-FFI\ParserException: flexible array member in union at line 1
+FFI\ParserException: Flexible array member not at end of struct at line 1
+FFI\ParserException: Flexible array member not at end of struct at line 1
+FFI\ParserException: Flexible array member in union at line 1

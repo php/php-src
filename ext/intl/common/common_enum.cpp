@@ -209,7 +209,7 @@ static PHP_METHOD(IntlIterator, current)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
@@ -224,7 +224,7 @@ static PHP_METHOD(IntlIterator, key)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
@@ -241,7 +241,7 @@ static PHP_METHOD(IntlIterator, next)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
@@ -256,7 +256,7 @@ static PHP_METHOD(IntlIterator, rewind)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;
@@ -273,7 +273,7 @@ static PHP_METHOD(IntlIterator, valid)
 	INTLITERATOR_METHOD_INIT_VARS;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	INTLITERATOR_METHOD_FETCH_OBJECT;

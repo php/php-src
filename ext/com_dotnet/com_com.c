@@ -62,13 +62,13 @@ PHP_FUNCTION(com_create_instance)
 			ZEND_NUM_ARGS(), "sa|ls",
 			&module_name, &module_name_len, &server_params, &cp,
 			&typelib_name, &typelib_name_len)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	cp_it = php_win32_cp_get_by_id((DWORD)cp);
 	if (!cp_it) {
 		php_com_throw_exception(E_INVALIDARG, "Could not create COM object - invalid codepage!");
-		return;
+		RETURN_THROWS();
 	}
 	obj->code_page = (int)cp;
 
@@ -116,7 +116,7 @@ PHP_FUNCTION(com_create_instance)
 
 	if (server_name && !COMG(allow_dcom)) {
 		php_com_throw_exception(E_ERROR, "DCOM has been disabled by your administrator [com.allow_dcom=0]");
-		return;
+		RETURN_THROWS();
 	}
 
 	moniker = php_com_string_to_olestring(module_name, module_name_len, obj->code_page);
@@ -231,7 +231,7 @@ PHP_FUNCTION(com_create_instance)
 
 		php_com_throw_exception(res, msg);
 		efree(msg);
-		return;
+		RETURN_THROWS();
 	}
 
 	/* we got the object and it lives ! */
@@ -298,7 +298,7 @@ PHP_FUNCTION(com_get_active_object)
 	php_com_initialize();
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l",
 				&module_name, &module_name_len, &code_page)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	module = php_com_string_to_olestring(module_name, module_name_len, (int)code_page);
@@ -666,7 +666,7 @@ PHP_FUNCTION(com_create_guid)
 	OLECHAR *guid_string;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_com_initialize();
@@ -699,7 +699,7 @@ PHP_FUNCTION(com_event_sink)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "Oo|z/",
 			&object, php_com_variant_class_entry, &sinkobject, &sink)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_com_initialize();
@@ -760,7 +760,7 @@ PHP_FUNCTION(com_print_typeinfo)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "z/|s!b", &arg1, &ifacename,
 				&ifacelen, &wantsink)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_com_initialize();
@@ -792,7 +792,7 @@ PHP_FUNCTION(com_message_pump)
 	DWORD result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &timeoutms) == FAILURE)
-		return;
+		RETURN_THROWS();
 
 	php_com_initialize();
 	result = MsgWaitForMultipleObjects(0, NULL, FALSE, (DWORD)timeoutms, QS_ALLINPUT);
@@ -823,7 +823,7 @@ PHP_FUNCTION(com_load_typelib)
 	int cached = 0;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &name, &namelen, &cs)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!cs) {

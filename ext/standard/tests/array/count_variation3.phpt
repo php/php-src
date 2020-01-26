@@ -34,6 +34,6 @@ int(4)
 
 -- $mode = 1: --
 
-Warning: count(): recursion detected in %s on line %d
+Warning: count(): Recursion detected in %s on line %d
 int(4)
 Done

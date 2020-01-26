@@ -63,7 +63,7 @@ get_edit_attr($pc1);
 oci_close($pc1);
 
 
-echo"\n\n**Test 1.3 change the value and verify with existing conenctions.*********\n";
+echo"\n\n**Test 1.3 change the value and verify with existing connections.*********\n";
 set_edit_attr('MYEDITION1');
 get_edit_attr($conn2);
 get_edit_attr($conn3); // Old value
@@ -131,7 +131,7 @@ echo " Set the value back using oci-set_edition\n";
 set_edit_attr('MYEDITION');
 get_edit_attr($c2);
 
-echo " Get the value with a new conenction\n";
+echo " Get the value with a new connection\n";
 $c3 = get_conn(1);
 get_edit_attr($c3);
 
@@ -178,7 +178,7 @@ The value of current EDITION is MYEDITION
 The value of current EDITION is MYEDITION
 
 
-**Test 1.3 change the value and verify with existing conenctions.*********
+**Test 1.3 change the value and verify with existing connections.*********
  The value of edition has been successfully set
 The value of current EDITION is MYEDITION
 The value of current EDITION is MYEDITION
@@ -235,7 +235,7 @@ The value of current EDITION is MYEDITION
  Set the value back using oci-set_edition
  The value of edition has been successfully set
 The value of current EDITION is MYEDITION
- Get the value with a new conenction
+ Get the value with a new connection
 Testing with oci_connect()
 The value of current EDITION is MYEDITION
 

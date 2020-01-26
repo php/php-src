@@ -13,7 +13,7 @@ require __DIR__."/details.inc";
 // Test will open a connection
 // Close the connection
 // Open another connection
-// With oci_close() being a no-op, the same conneciton will be returned
+// With oci_close() being a no-op, the same connection will be returned
 
 
 echo "This is with a OCI_CONNECT\n";

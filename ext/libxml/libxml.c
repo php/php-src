@@ -327,6 +327,10 @@ static void *php_libxml_streams_IO_open_wrapper(const char *filename, const char
 	context = php_stream_context_from_zval(Z_ISUNDEF(LIBXML(stream_context))? NULL : &LIBXML(stream_context), 0);
 
 	ret_val = php_stream_open_wrapper_ex(path_to_open, (char *)mode, REPORT_ERRORS, NULL, context);
+	if (ret_val) {
+		/* Prevent from closing this by fclose() */
+		((php_stream*)ret_val)->flags |= PHP_STREAM_FLAG_NO_FCLOSE;
+	}
 	if (isescaped) {
 		xmlFree(resolved_path);
 	}
@@ -975,9 +979,7 @@ static PHP_FUNCTION(libxml_get_last_error)
 {
 	xmlErrorPtr error;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	error = xmlGetLastError();
 
@@ -1010,9 +1012,7 @@ static PHP_FUNCTION(libxml_get_errors)
 
 	xmlErrorPtr error;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (LIBXML(error_list)) {
 
@@ -1051,9 +1051,7 @@ static PHP_FUNCTION(libxml_get_errors)
    Clear last error from libxml */
 static PHP_FUNCTION(libxml_clear_errors)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	xmlResetLastError();
 	if (LIBXML(error_list)) {

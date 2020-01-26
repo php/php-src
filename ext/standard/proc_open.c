@@ -245,7 +245,7 @@ PHP_FUNCTION(proc_terminate)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 #ifdef PHP_WIN32
@@ -276,7 +276,7 @@ PHP_FUNCTION(proc_close)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	FG(pclose_wait) = 1;
@@ -306,7 +306,7 @@ PHP_FUNCTION(proc_get_status)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if ((proc = (struct php_process_handle *)zend_fetch_resource(Z_RES_P(zproc), "process", le_proc_open)) == NULL) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -401,8 +401,7 @@ static zend_string *get_valid_arg_string(zval *zv, int elem_num) {
 	}
 
 	if (strlen(ZSTR_VAL(str)) != ZSTR_LEN(str)) {
-		php_error_docref(NULL, E_WARNING,
-			"Command array element %d contains a null byte", elem_num);
+		zend_value_error("Command array element %d contains a null byte", elem_num);
 		zend_string_release(str);
 		return NULL;
 	}
@@ -529,8 +528,8 @@ PHP_FUNCTION(proc_open)
 		zval *arg_zv;
 		uint32_t num_elems = zend_hash_num_elements(Z_ARRVAL_P(command_zv));
 		if (num_elems == 0) {
-			php_error_docref(NULL, E_WARNING, "Command array must have at least one element");
-			RETURN_FALSE;
+			zend_value_error("Command array must have at least one element");
+			RETURN_THROWS();
 		}
 
 #ifdef PHP_WIN32
@@ -622,7 +621,7 @@ PHP_FUNCTION(proc_open)
 		zval *ztype;
 
 		if (str_index) {
-			php_error_docref(NULL, E_WARNING, "descriptor spec must be an integer indexed array");
+			zend_value_error("Descriptor spec must be an integer indexed array");
 			goto exit_fail;
 		}
 
@@ -642,20 +641,20 @@ PHP_FUNCTION(proc_open)
 #ifdef PHP_WIN32
 			descriptors[ndesc].childend = dup_fd_as_handle((int)fd);
 			if (descriptors[ndesc].childend == NULL) {
-				php_error_docref(NULL, E_WARNING, "unable to dup File-Handle for descriptor %d", nindex);
+				php_error_docref(NULL, E_WARNING, "Unable to dup File-Handle for descriptor %d", nindex);
 				goto exit_fail;
 			}
 #else
 			descriptors[ndesc].childend = dup(fd);
 			if (descriptors[ndesc].childend < 0) {
-				php_error_docref(NULL, E_WARNING, "unable to dup File-Handle for descriptor " ZEND_ULONG_FMT " - %s", nindex, strerror(errno));
+				php_error_docref(NULL, E_WARNING, "Unable to dup File-Handle for descriptor " ZEND_ULONG_FMT " - %s", nindex, strerror(errno));
 				goto exit_fail;
 			}
 #endif
 			descriptors[ndesc].mode = DESC_FILE;
 
 		} else if (Z_TYPE_P(descitem) != IS_ARRAY) {
-			php_error_docref(NULL, E_WARNING, "Descriptor item must be either an array or a File-Handle");
+			zend_value_error("Descriptor item must be either an array or a File-Handle");
 			goto exit_fail;
 		} else {
 
@@ -664,7 +663,7 @@ PHP_FUNCTION(proc_open)
 					goto exit_fail;
 				}
 			} else {
-				php_error_docref(NULL, E_WARNING, "Missing handle qualifier in array");
+				zend_value_error("Missing handle qualifier in array");
 				goto exit_fail;
 			}
 
@@ -677,14 +676,14 @@ PHP_FUNCTION(proc_open)
 						goto exit_fail;
 					}
 				} else {
-					php_error_docref(NULL, E_WARNING, "Missing mode parameter for 'pipe'");
+					zend_value_error("Missing mode parameter for 'pipe'");
 					goto exit_fail;
 				}
 
 				descriptors[ndesc].mode = DESC_PIPE;
 
 				if (0 != pipe(newpipe)) {
-					php_error_docref(NULL, E_WARNING, "unable to create pipe %s", strerror(errno));
+					php_error_docref(NULL, E_WARNING, "Unable to create pipe %s", strerror(errno));
 					goto exit_fail;
 				}
 
@@ -718,7 +717,7 @@ PHP_FUNCTION(proc_open)
 						goto exit_fail;
 					}
 				} else {
-					php_error_docref(NULL, E_WARNING, "Missing file name parameter for 'file'");
+					zend_value_error("Missing file name parameter for 'file'");
 					goto exit_fail;
 				}
 
@@ -727,7 +726,7 @@ PHP_FUNCTION(proc_open)
 						goto exit_fail;
 					}
 				} else {
-					php_error_docref(NULL, E_WARNING, "Missing mode parameter for 'file'");
+					zend_value_error("Missing mode parameter for 'file'");
 					goto exit_fail;
 				}
 
@@ -760,11 +759,11 @@ PHP_FUNCTION(proc_open)
 				php_file_descriptor_t childend;
 
 				if (!ztarget) {
-					php_error_docref(NULL, E_WARNING, "Missing redirection target");
+					zend_value_error("Missing redirection target");
 					goto exit_fail;
 				}
 				if (Z_TYPE_P(ztarget) != IS_LONG) {
-					php_error_docref(NULL, E_WARNING, "Redirection target must be an integer");
+					zend_value_error("Redirection target must be an integer");
 					goto exit_fail;
 				}
 
@@ -838,7 +837,7 @@ PHP_FUNCTION(proc_open)
 					/* open things up */
 					dev_ptmx = open("/dev/ptmx", O_RDWR);
 					if (dev_ptmx == -1) {
-						php_error_docref(NULL, E_WARNING, "failed to open /dev/ptmx, errno %d", errno);
+						php_error_docref(NULL, E_WARNING, "Failed to open /dev/ptmx, errno %d", errno);
 						goto exit_fail;
 					}
 					grantpt(dev_ptmx);
@@ -846,7 +845,7 @@ PHP_FUNCTION(proc_open)
 					slave_pty = open(ptsname(dev_ptmx), O_RDWR);
 
 					if (slave_pty == -1) {
-						php_error_docref(NULL, E_WARNING, "failed to open slave pty, errno %d", errno);
+						php_error_docref(NULL, E_WARNING, "Failed to open slave pty, errno %d", errno);
 						goto exit_fail;
 					}
 				}
@@ -855,7 +854,7 @@ PHP_FUNCTION(proc_open)
 				descriptors[ndesc].parentend = dup(dev_ptmx);
 				descriptors[ndesc].mode_flags = O_RDWR;
 #else
-				php_error_docref(NULL, E_WARNING, "pty pseudo terminal not supported on this system");
+				php_error_docref(NULL, E_WARNING, "PTY pseudo terminal not supported on this system");
 				goto exit_fail;
 #endif
 			} else {
@@ -1063,7 +1062,7 @@ PHP_FUNCTION(proc_open)
 				close(descriptors[i].parentend);
 		}
 
-		php_error_docref(NULL, E_WARNING, "fork failed - %s", strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Fork failed - %s", strerror(errno));
 
 		goto exit_fail;
 

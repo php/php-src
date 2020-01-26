@@ -29,7 +29,7 @@ var_dump( is_writable("$file_path/is_writable_variation2") );  // exp: bool(fals
 var_dump( is_writeable("$file_path/is_writable_variation2") );  // exp: bool(false)
 chmod("$file_path/is_writable_variation2", 0777);  // chmod to enable deletion of directory
 
-echo "\n*** Testing miscelleneous input for is_writable() function ***\n";
+echo "\n*** Testing miscellaneous input for is_writable() function ***\n";
 $name_prefix = "is_writable_variation2";
 create_files(__DIR__, 1, "numeric", 0755, 1, "w", $name_prefix, 1);
 create_files(__DIR__, 1, "text", 0755, 1, "w", $name_prefix, 2);
@@ -83,7 +83,7 @@ rmdir(__DIR__."/is_writable_variation2/");
 bool(false)
 bool(false)
 
-*** Testing miscelleneous input for is_writable() function ***
+*** Testing miscellaneous input for is_writable() function ***
 -- Iteration 1 --
 bool(true)
 bool(true)

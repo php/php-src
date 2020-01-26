@@ -272,7 +272,7 @@ ftp_login(ftpbuf_t *ftp, const char *user, const size_t user_len, const char *pa
 
 		ctx = SSL_CTX_new(SSLv23_client_method());
 		if (ctx == NULL) {
-			php_error_docref(NULL, E_WARNING, "failed to create the SSL context");
+			php_error_docref(NULL, E_WARNING, "Failed to create the SSL context");
 			return 0;
 		}
 
@@ -288,7 +288,7 @@ ftp_login(ftpbuf_t *ftp, const char *user, const size_t user_len, const char *pa
 		SSL_CTX_free(ctx);
 
 		if (ftp->ssl_handle == NULL) {
-			php_error_docref(NULL, E_WARNING, "failed to create the SSL handle");
+			php_error_docref(NULL, E_WARNING, "Failed to create the SSL handle");
 			return 0;
 		}
 

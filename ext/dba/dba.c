@@ -168,7 +168,7 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 	char *key_str, *key_free;									\
 	size_t key_len; 											\
 	if (zend_parse_parameters(ac, "zr", &key, &id) == FAILURE) { 	\
-		return; 												\
+		RETURN_THROWS();										\
 	} 															\
 	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {\
 		RETURN_FALSE;											\
@@ -182,12 +182,12 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 	switch(ac) {												\
 	case 2: 													\
 		if (zend_parse_parameters(ac, "zr", &key, &id) == FAILURE) { \
-			return;												\
+			RETURN_THROWS();									\
 		} 														\
 		break;  												\
 	case 3: 													\
 		if (zend_parse_parameters(ac, "zlr", &key, &skip, &id) == FAILURE) { \
-			return;												\
+			RETURN_THROWS();									\
 		} 														\
 		break;  												\
 	default:													\
@@ -200,13 +200,13 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 
 #define DBA_FETCH_RESOURCE(info, id)	\
 	if ((info = (dba_info *)zend_fetch_resource2(Z_RES_P(id), "DBA identifier", le_db, le_pdb)) == NULL) { \
-		return; \
+		RETURN_THROWS(); \
 	}
 
 #define DBA_FETCH_RESOURCE_WITH_ID(info, id)	\
 	if ((info = (dba_info *)zend_fetch_resource2(Z_RES_P(id), "DBA identifier", le_db, le_pdb)) == NULL) { \
 		DBA_ID_DONE; \
-		return; \
+		RETURN_THROWS(); \
 	}
 
 #define DBA_ID_GET2   DBA_ID_PARS; DBA_GET2;   DBA_FETCH_RESOURCE_WITH_ID(info, id)
@@ -507,7 +507,7 @@ static void php_dba_update(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	size_t key_len;
 
 	if (zend_parse_parameters(ac, "zsr", &key, &val, &val_len, &id) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if ((key_len = php_dba_make_key(key, &key_str, &key_free)) == 0) {
@@ -598,7 +598,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	/* Exception during string conversion */
 	if (EG(exception)) {
 		FREENOW;
-		return;
+		RETURN_THROWS();
 	}
 
 	if (persistent) {
@@ -964,7 +964,7 @@ PHP_FUNCTION(dba_close)
 	dba_info *info = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &id) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DBA_FETCH_RESOURCE(info, id);
@@ -1003,8 +1003,8 @@ PHP_FUNCTION(dba_fetch)
 				skip = 0;
 			}
 		} else if (!strcmp(info->hnd->name, "inifile")) {
-			/* "-1" is compareable to 0 but allows a non restrictive
-			 * access which is fater. For example 'inifile' uses this
+			/* "-1" is comparable to 0 but allows a non restrictive
+			 * access which is faster. For example 'inifile' uses this
 			 * to allow faster access when the key was already found
 			 * using firstkey/nextkey. However explicitly setting the
 			 * value to 0 ensures the first value.
@@ -1048,7 +1048,7 @@ PHP_FUNCTION(dba_key_split)
 		}
 	}
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &key, &key_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	array_init(return_value);
 	if (key[0] == '[' && (name = strchr(key, ']')) != NULL) {
@@ -1071,7 +1071,7 @@ PHP_FUNCTION(dba_firstkey)
 	dba_info *info = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &id) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DBA_FETCH_RESOURCE(info, id);
@@ -1098,7 +1098,7 @@ PHP_FUNCTION(dba_nextkey)
 	dba_info *info = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &id) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DBA_FETCH_RESOURCE(info, id);
@@ -1160,7 +1160,7 @@ PHP_FUNCTION(dba_optimize)
 	dba_info *info = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &id) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DBA_FETCH_RESOURCE(info, id);
@@ -1183,7 +1183,7 @@ PHP_FUNCTION(dba_sync)
 	dba_info *info = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &id) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DBA_FETCH_RESOURCE(info, id);
@@ -1204,7 +1204,7 @@ PHP_FUNCTION(dba_handlers)
 	zend_bool full_info = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &full_info) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -1231,7 +1231,7 @@ PHP_FUNCTION(dba_list)
 	dba_info *info;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);

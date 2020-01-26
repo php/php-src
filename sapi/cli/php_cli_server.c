@@ -261,7 +261,7 @@ int php_cli_server_get_system_time(char *buf) {
 
 	gettimeofday(&tv, NULL);
 
-	/* TODO: should be checked for NULL tm/return vaue */
+	/* TODO: should be checked for NULL tm/return value */
 	php_localtime_r(&tv.tv_sec, &tm);
 	php_asctime_r(&tm, buf);
 	return 0;
@@ -382,7 +382,7 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 	zval tmp;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	client = SG(server_context);
@@ -428,7 +428,7 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 PHP_FUNCTION(apache_response_headers) /* {{{ */
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);
@@ -508,7 +508,7 @@ static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
 
 		if (php_cli_server_workers_max > 1) {
 			zend_long php_cli_server_worker;
-			
+
 			php_cli_server_workers = calloc(
 				php_cli_server_workers_max, sizeof(pid_t));
 			if (!php_cli_server_workers) {
@@ -526,7 +526,7 @@ static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
 
 				if (pid == FAILURE) {
 					/* no more forks allowed, work with what we have ... */
-					php_cli_server_workers_max = 
+					php_cli_server_workers_max =
 						php_cli_server_worker + 1;
 					return SUCCESS;
 				} else if (pid == SUCCESS) {
@@ -2317,14 +2317,14 @@ static void php_cli_server_dtor(php_cli_server *server) /* {{{ */
 			 int php_cli_server_worker_status;
 
 			 do {
-				if (waitpid(php_cli_server_workers[php_cli_server_worker], 
-						   &php_cli_server_worker_status, 
+				if (waitpid(php_cli_server_workers[php_cli_server_worker],
+						   &php_cli_server_worker_status,
 						   0) == FAILURE) {
 					/* an extremely bad thing happened */
 					break;
 				}
 
-			 } while (!WIFEXITED(php_cli_server_worker_status) && 
+			 } while (!WIFEXITED(php_cli_server_worker_status) &&
 					  !WIFSIGNALED(php_cli_server_worker_status));
 		}
 

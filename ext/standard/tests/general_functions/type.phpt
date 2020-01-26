@@ -160,8 +160,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 array(3) {
   [0]=>
   int(1)
@@ -170,11 +169,9 @@ array(3) {
   [2]=>
   int(3)
 }
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 string(14) "another string"
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 array(3) {
   [0]=>
   int(2)
@@ -183,29 +180,21 @@ array(3) {
   [2]=>
   int(4)
 }
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 int(1)
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 float(2)
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 NULL
-string(42) "settype(): Cannot convert to resource type"
+Error: Cannot convert to resource type
 bool(false)
-bool(false)
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 string(11) "some string"
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 resource(%d) of type (Unknown)
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 resource(%d) of type (stream)
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 object(stdClass)#%d (0) {
 }
 bool(true)

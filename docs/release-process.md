@@ -417,6 +417,10 @@
  2. Timely get used to the differences in preparing and announcing a stable
     release.
 
+ 3. Before releasing X.Y.0, merge the NEWS entries of the pre-releases, so that
+    there is only a single section about PHP X.Y.0, instead of individual
+    sections for each pre-release.
+
 ## Prime the selection of the Release Managers of the next version
 
  1. About three months before the scheduled release of the first alpha of the

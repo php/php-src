@@ -1353,7 +1353,7 @@ PHPAPI int _php_stream_seek(php_stream *stream, zend_off_t offset, int whence)
 		return 0;
 	}
 
-	php_error_docref(NULL, E_WARNING, "stream does not support seeking");
+	php_error_docref(NULL, E_WARNING, "Stream does not support seeking");
 
 	return -1;
 }
@@ -1842,7 +1842,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 			if (localhost == 0 && path[n+3] != '\0' && path[n+3] != '/') {
 #endif
 				if (options & REPORT_ERRORS) {
-					php_error_docref(NULL, E_WARNING, "remote host file access not supported, %s", path);
+					php_error_docref(NULL, E_WARNING, "Remote host file access not supported, %s", path);
 				}
 				return NULL;
 			}
@@ -2019,7 +2019,7 @@ PHPAPI php_stream *_php_stream_opendir(const char *path, int options,
 		php_stream_wrapper_log_error(wrapper, options ^ REPORT_ERRORS, "not implemented");
 	}
 	if (stream == NULL && (options & REPORT_ERRORS)) {
-		php_stream_display_wrapper_errors(wrapper, path, "failed to open dir");
+		php_stream_display_wrapper_errors(wrapper, path, "Failed to open directory");
 	}
 	php_stream_tidy_wrapper_error_log(wrapper);
 
@@ -2066,6 +2066,9 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 			/* we've found this file, don't re-check include_path or run realpath */
 			options |= STREAM_ASSUME_REALPATH;
 			options &= ~USE_PATH;
+		}
+		if (EG(exception)) {
+			return NULL;
 		}
 	}
 
@@ -2165,7 +2168,7 @@ PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mod
 	}
 
 	if (stream == NULL && (options & REPORT_ERRORS)) {
-		php_stream_display_wrapper_errors(wrapper, path, "failed to open stream");
+		php_stream_display_wrapper_errors(wrapper, path, "Failed to open stream");
 		if (opened_path && *opened_path) {
 			zend_string_release_ex(*opened_path, 0);
 			*opened_path = NULL;

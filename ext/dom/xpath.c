@@ -35,10 +35,10 @@
 
 const zend_function_entry php_dom_xpath_class_functions[] = {
 	PHP_ME(domxpath, __construct, arginfo_class_DOMXPath___construct, ZEND_ACC_PUBLIC)
-	PHP_FALIAS(registerNamespace, dom_xpath_register_ns, arginfo_class_DOMXPath_registerNamespace)
-	PHP_FALIAS(query, dom_xpath_query, arginfo_class_DOMXPath_query)
-	PHP_FALIAS(evaluate, dom_xpath_evaluate, arginfo_class_DOMXPath_evaluate)
-	PHP_FALIAS(registerPhpFunctions, dom_xpath_register_php_functions, arginfo_class_DOMXPath_registerPhpFunctions)
+	PHP_ME(domxpath, registerNamespace, arginfo_class_DOMXPath_registerNamespace, ZEND_ACC_PUBLIC)
+	PHP_ME(domxpath, query, arginfo_class_DOMXPath_query, ZEND_ACC_PUBLIC)
+	PHP_ME(domxpath, evaluate, arginfo_class_DOMXPath_evaluate, ZEND_ACC_PUBLIC)
+	PHP_ME(domxpath, registerPhpFunctions, arginfo_class_DOMXPath_registerPhpFunctions, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
@@ -231,7 +231,7 @@ PHP_METHOD(domxpath, __construct)
 	xmlXPathContextPtr ctx, oldctx;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O|b", &doc, dom_document_class_entry, &register_node_ns) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(docp, doc, xmlDocPtr, docobj);
@@ -302,7 +302,7 @@ int dom_xpath_register_node_ns_write(dom_object *obj, zval *newval)
 /* }}} */
 
 /* {{{ proto bool dom_xpath_register_ns(string prefix, string uri) */
-PHP_FUNCTION(dom_xpath_register_ns)
+PHP_METHOD(domxpath, registerNamespace)
 {
 	zval *id;
 	xmlXPathContextPtr ctxp;
@@ -312,7 +312,7 @@ PHP_FUNCTION(dom_xpath_register_ns)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &prefix, &prefix_len, &ns_uri, &ns_uri_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_XPATHOBJ_P(id);
@@ -358,7 +358,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 	register_node_ns = intern->register_node_ns;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|O!b", &expr, &expr_len, &context, dom_node_class_entry, &register_node_ns) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ctxp = (xmlXPathContextPtr) intern->dom.ptr;
@@ -487,21 +487,21 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 /* }}} */
 
 /* {{{ proto DOMNodeList dom_xpath_query(string expr [,DOMNode context [, bool registerNodeNS]]) */
-PHP_FUNCTION(dom_xpath_query)
+PHP_METHOD(domxpath, query)
 {
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY);
 }
 /* }}} end dom_xpath_query */
 
 /* {{{ proto mixed dom_xpath_evaluate(string expr [,DOMNode context [, bool registerNodeNS]]) */
-PHP_FUNCTION(dom_xpath_evaluate)
+PHP_METHOD(domxpath, evaluate)
 {
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE);
 }
 /* }}} end dom_xpath_evaluate */
 
 /* {{{ proto void dom_xpath_register_php_functions() */
-PHP_FUNCTION(dom_xpath_register_php_functions)
+PHP_METHOD(domxpath, registerPhpFunctions)
 {
 	zval *id;
 	dom_xpath_object *intern;

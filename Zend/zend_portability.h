@@ -289,7 +289,7 @@ char *alloca();
 	(_default)
 #endif
 
-#if ZEND_DEBUG
+#if ZEND_DEBUG || defined(ZEND_WIN32_NEVER_INLINE)
 # define zend_always_inline inline
 # define zend_never_inline
 #else
@@ -438,49 +438,23 @@ char *alloca();
 #define ZEND_BIT_TEST(bits, bit) \
 	(((bits)[(bit) / (sizeof((bits)[0])*8)] >> ((bit) & (sizeof((bits)[0])*8-1))) & 1)
 
-/* We always define a function, even if there's a macro or expression we could
- * alias, so that using it in contexts where we can't make function calls
- * won't fail to compile on some machines and not others.
- */
-static zend_always_inline double _zend_get_inf(void) /* {{{ */
-{
-#ifdef INFINITY
-	return INFINITY;
-#elif HAVE_HUGE_VAL_INF
-	return HUGE_VAL;
-#elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
-# define _zend_DOUBLE_INFINITY_HIGH       0x7ff00000
-	double val = 0.0;
-	((uint32_t*)&val)[1] = _zend_DOUBLE_INFINITY_HIGH;
-	((uint32_t*)&val)[0] = 0;
-	return val;
-#elif HAVE_ATOF_ACCEPTS_INF
-	return atof("INF");
-#else
-	return 1.0/0.0;
-#endif
-} /* }}} */
-#define ZEND_INFINITY (_zend_get_inf())
+#define ZEND_INFINITY INFINITY
 
-static zend_always_inline double _zend_get_nan(void) /* {{{ */
-{
-#ifdef NAN
-	return NAN;
-#elif HAVE_HUGE_VAL_NAN
-	return HUGE_VAL + -HUGE_VAL;
-#elif defined(__i386__) || defined(_X86_) || defined(ALPHA) || defined(_ALPHA) || defined(__alpha)
-# define _zend_DOUBLE_QUIET_NAN_HIGH      0xfff80000
-	double val = 0.0;
-	((uint32_t*)&val)[1] = _zend_DOUBLE_QUIET_NAN_HIGH;
-	((uint32_t*)&val)[0] = 0;
-	return val;
-#elif HAVE_ATOF_ACCEPTS_NAN
-	return atof("NAN");
+#define ZEND_NAN NAN
+
+#if defined(__cplusplus) && __cplusplus >= 201103L
+extern "C++" {
+# include <cmath>
+}
+# define zend_isnan std::isnan
+# define zend_isinf std::isinf
+# define zend_finite std::isfinite
 #else
-	return 0.0/0.0;
+# include <math.h>
+# define zend_isnan(a) isnan(a)
+# define zend_isinf(a) isinf(a)
+# define zend_finite(a) isfinite(a)
 #endif
-} /* }}} */
-#define ZEND_NAN (_zend_get_nan())
 
 #define ZEND_STRL(str)		(str), (sizeof(str)-1)
 #define ZEND_STRS(str)		(str), (sizeof(str))
@@ -505,18 +479,6 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #define ZEND_VALID_SOCKET(sock) (INVALID_SOCKET != (sock))
 #else
 #define ZEND_VALID_SOCKET(sock) ((sock) >= 0)
-#endif
-
-/* va_copy() is __va_copy() in old gcc versions.
- * According to the autoconf manual, using
- * memcpy(&dst, &src, sizeof(va_list))
- * gives maximum portability. */
-#ifndef va_copy
-# ifdef __va_copy
-#  define va_copy(dest, src) __va_copy((dest), (src))
-# else
-#  define va_copy(dest, src) memcpy(&(dest), &(src), sizeof(va_list))
-# endif
 #endif
 
 /* Intrinsics macros start. */

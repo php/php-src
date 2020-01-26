@@ -33,9 +33,9 @@
 */
 
 const zend_function_entry php_dom_text_class_functions[] = {
-	PHP_FALIAS(splitText, dom_text_split_text, arginfo_class_DOMText_splitText)
-	PHP_FALIAS(isWhitespaceInElementContent, dom_text_is_whitespace_in_element_content, arginfo_class_DOMText_isWhitespaceInElementContent)
-	PHP_FALIAS(isElementContentWhitespace, dom_text_is_whitespace_in_element_content, arginfo_class_DOMText_isElementContentWhitespace)
+	PHP_ME(domtext, splitText, arginfo_class_DOMText_splitText, ZEND_ACC_PUBLIC)
+	PHP_ME(domtext, isWhitespaceInElementContent, arginfo_class_DOMText_isWhitespaceInElementContent, ZEND_ACC_PUBLIC)
+	PHP_MALIAS(domtext, isElementContentWhitespace, isWhitespaceInElementContent, arginfo_class_DOMText_isElementContentWhitespace, ZEND_ACC_PUBLIC)
 	PHP_ME(domtext, __construct, arginfo_class_DOMText___construct, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
@@ -49,7 +49,7 @@ PHP_METHOD(domtext, __construct)
 	size_t value_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	nodep = xmlNewText((xmlChar *) value);
@@ -114,7 +114,7 @@ int dom_text_whole_text_read(dom_object *obj, zval *retval)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-38853C1D
 Since:
 */
-PHP_FUNCTION(dom_text_split_text)
+PHP_METHOD(domtext, splitText)
 {
 	zval       *id;
 	xmlChar    *cur;
@@ -128,7 +128,7 @@ PHP_FUNCTION(dom_text_split_text)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &offset) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 
@@ -176,7 +176,7 @@ PHP_FUNCTION(dom_text_split_text)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-isWhitespaceInElementContent
 Since: DOM Level 3
 */
-PHP_FUNCTION(dom_text_is_whitespace_in_element_content)
+PHP_METHOD(domtext, isWhitespaceInElementContent)
 {
 	zval       *id;
 	xmlNodePtr  node;
@@ -184,7 +184,7 @@ PHP_FUNCTION(dom_text_is_whitespace_in_element_content)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
 

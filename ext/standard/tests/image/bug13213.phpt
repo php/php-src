@@ -5,7 +5,7 @@ Bug #13213 (GetImageSize and wrong JPEG Comments)
 var_dump(GetImageSize(__DIR__.'/bug13213.jpg'));
 ?>
 --EXPECTF--
-Warning: getimagesize(): corrupt JPEG data: 2 extraneous bytes before marker in %s%ebug13213.php on line %d
+Warning: getimagesize(): Corrupt JPEG data: 2 extraneous bytes before marker in %s%ebug13213.php on line %d
 array(7) {
   [0]=>
   int(1)

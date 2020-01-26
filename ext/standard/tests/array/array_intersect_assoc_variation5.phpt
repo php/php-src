@@ -63,7 +63,7 @@ $arr2 = array(0 => 0, 2 => "float", 4 => "f3", 33333333 => "f4",
               "\tHello" => 111, 2.2, 'color', "Hello world" => "string",
               "pen\n" => 33,  133 => "int");
 
-// loop through each sub-array within $arrrays to check the behavior of array_intersect_assoc()
+// loop through each sub-array within $arrays to check the behavior of array_intersect_assoc()
 $iterator = 1;
 foreach($arrays as $arr1) {
   echo "-- Iteration $iterator --\n";

@@ -326,7 +326,7 @@ PHP_FUNCTION(mt_rand)
 
 	if (UNEXPECTED(max < min)) {
 		zend_value_error("max (" ZEND_LONG_FMT ") is smaller than min (" ZEND_LONG_FMT ")", max, min);
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(php_mt_rand_common(min, max));
@@ -337,9 +337,7 @@ PHP_FUNCTION(mt_rand)
    Returns the maximum value a random number from Mersenne Twister can have */
 PHP_FUNCTION(mt_getrandmax)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	/*
 	 * Melo: it could be 2^^32 but we only use 2^^31 to maintain

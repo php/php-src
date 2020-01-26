@@ -58,8 +58,8 @@ static inline BreakIterator_object *php_intl_breakiterator_fetch_object(zend_obj
 	BREAKITER_METHOD_FETCH_OBJECT_NO_CHECK; \
 	if (bio->biter == NULL) \
 	{ \
-		intl_errors_set(&bio->err, U_ILLEGAL_ARGUMENT_ERROR, "Found unconstructed BreakIterator", 0); \
-		RETURN_FALSE; \
+		zend_throw_error(NULL, "Found unconstructed BreakIterator"); \
+		RETURN_THROWS(); \
 	}
 
 void breakiterator_object_create(zval *object, BreakIterator *break_iter, int brand_new);

@@ -1,5 +1,5 @@
 --TEST--
-does the imagepalettetotruecollor function realy converts the image palette?
+does the imagepalettetotruecollor function really converts the image palette?
 --CREDITS--
 Carlos André Ferrari <caferrari [at] gmail [dot] com>
 --SKIPIF--

@@ -901,6 +901,7 @@ default_socket_timeout = 60
 ;extension=bz2
 ;extension=curl
 ;extension=ffi
+;extension=ftp
 ;extension=fileinfo
 ;extension=gd2
 ;extension=gettext
@@ -1912,7 +1913,7 @@ ldap.max_links = -1
 ;openssl.capath=
 
 [ffi]
-; FFI API restriction. Possibe values:
+; FFI API restriction. Possible values:
 ; "preload" - enabled in CLI scripts and preloaded files (default)
 ; "false"   - always disabled
 ; "true"    - always enabled

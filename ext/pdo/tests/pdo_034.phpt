@@ -44,7 +44,7 @@ array(5) {
   string(1) "4"
 }
 
-Warning: PDOStatement::fetch(): SQLSTATE[HY000]: General error: PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain extactly 2 columns. in %spdo_034.php on line %d
+Warning: PDOStatement::fetch(): SQLSTATE[HY000]: General error: PDO::FETCH_KEY_PAIR fetch mode requires the result set to contain exactly 2 columns. in %spdo_034.php on line %d
 
 Warning: PDOStatement::fetch(): SQLSTATE[HY000]: General error%spdo_034.php on line %d
 bool(false)

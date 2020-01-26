@@ -14,7 +14,7 @@ require __DIR__."/details.inc";
 // Close the connection
 // Open another connection
 // With oci_close() the connection is released to the pool and hence the
-// the second conneciton will be different
+// the second connection will be different
 
 
 // OCI_CONNECT

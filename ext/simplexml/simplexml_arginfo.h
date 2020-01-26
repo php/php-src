@@ -1,6 +1,6 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_load_file, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_simplexml_load_file, 0, 1, SimpleXMLElement, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, class_name, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, options, IS_LONG, 0)
@@ -8,7 +8,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_load_file, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, is_prefix, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_load_string, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_simplexml_load_string, 0, 1, SimpleXMLElement, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, class_name, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, options, IS_LONG, 0)

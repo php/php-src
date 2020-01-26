@@ -49,7 +49,7 @@ PHP_FUNCTION(dns_get_mx) /* {{{ */
 	PDNS_RECORD     pResult, pRec;          /* Pointer to DNS_RECORD structure */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz|z", &hostname, &hostname_len, &mx_list, &weight_list) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	status = DnsQuery_A(hostname, DNS_TYPE_MX, DNS_QUERY_STANDARD, NULL, &pResult, NULL);
@@ -103,12 +103,12 @@ PHP_FUNCTION(dns_check_record)
 	PDNS_RECORD     pResult;          /* Pointer to DNS_RECORD structure */
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &hostname, &hostname_len, &rectype, &rectype_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (hostname_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Host cannot be empty");
-		RETURN_FALSE;
+		zend_value_error("Host cannot be empty");
+		RETURN_THROWS();
 	}
 
 	if (rectype) {
@@ -357,19 +357,19 @@ PHP_FUNCTION(dns_get_record)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz!z!b",
 			&hostname, &hostname_len, &type_param, &authns, &addtl, &raw) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (authns) {
 		authns = zend_try_array_init(authns);
 		if (!authns) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 	if (addtl) {
 		addtl = zend_try_array_init(addtl);
 		if (!addtl) {
-			return;
+			RETURN_THROWS();
 		}
 	}
 

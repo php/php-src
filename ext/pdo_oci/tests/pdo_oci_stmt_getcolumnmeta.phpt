@@ -236,7 +236,7 @@ SQL
 	$db->exec('INSERT INTO test(id, label) VALUES (1, 1)');
 	$stmt = $db->query('SELECT id, label FROM test');
 	$meta = $stmt->getColumnMeta(0);
-	// verify the flags array countains a not_null flag and not nullable flags
+	// verify the flags array contains a not_null flag and not nullable flags
 	if (!isset($meta['flags'])) {
 		printf("[1001] No flags contained in metadata %s\n", var_export($meta, true));
 	} else {
@@ -252,7 +252,7 @@ SQL
 			printf("[1002] Flags seem wrong %s\n", var_export($meta, true));
 	}
 	$meta = $stmt->getColumnMeta(1);
-	// verify the flags array countains a nullable flag and not not_null flags
+	// verify the flags array contains a nullable flag and not not_null flags
 	if (!isset($meta['flags'])) {
 		printf("[1003] No flags contained in metadata %s\n", var_export($meta, true));
 	} else {

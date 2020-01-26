@@ -1011,7 +1011,7 @@ PHP_FUNCTION(mysqli_stmt_construct)
 	{
 		case 1:  /* mysql_stmt_init */
 			if (zend_parse_parameters(1, "O", &mysql_link, mysqli_link_class_entry)==FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
@@ -1021,7 +1021,7 @@ PHP_FUNCTION(mysqli_stmt_construct)
 		break;
 		case 2:
 			if (zend_parse_parameters(2, "Os", &mysql_link, mysqli_link_class_entry, &statement, &statement_len)==FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
@@ -1068,12 +1068,12 @@ PHP_FUNCTION(mysqli_result_construct)
 	switch (ZEND_NUM_ARGS()) {
 		case 1:
 			if (zend_parse_parameters(1, "O", &mysql_link, mysqli_link_class_entry)==FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			break;
 		case 2:
 			if (zend_parse_parameters(2, "Ol", &mysql_link, mysqli_link_class_entry, &resmode)==FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			break;
 		default:
@@ -1196,7 +1196,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		zend_string *class_name = NULL;
 
 		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|Sa", &mysql_result, mysqli_result_class_entry, &class_name, &ctor_params) == FAILURE) {
-			return;
+			RETURN_THROWS();
 		}
 		if (class_name == NULL) {
 			ce = zend_standard_class_def;
@@ -1209,19 +1209,19 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 		}
 		if (UNEXPECTED(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
 			zend_throw_error(NULL, "Class '%s' cannot be instantiated", ZSTR_VAL(ce->name));
-			return;
+			RETURN_THROWS();
 		}
 		fetchtype = MYSQLI_ASSOC;
 	} else {
 		if (override_flags) {
 			if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			fetchtype = override_flags;
 		} else {
 			fetchtype = MYSQLI_BOTH;
 			if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|l", &mysql_result, mysqli_result_class_entry, &fetchtype) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 		}
 	}
@@ -1267,7 +1267,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 					 * argument passed by reference.
 					 */
 					zend_throw_exception(zend_ce_exception, "Parameter ctor_params must be an array", 0);
-					return;
+					RETURN_THROWS();
 				}
 			}
 

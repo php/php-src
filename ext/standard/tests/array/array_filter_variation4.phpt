@@ -32,7 +32,7 @@ var_dump( array_filter($input, "callback1") );
 function callback2($input)
 {
 }
-echo "-- Callback funciton with parameter and without return --\n";
+echo "-- Callback function with parameter and without return --\n";
 var_dump( array_filter($input, "callback2") );
 
 
@@ -79,7 +79,7 @@ array(8) {
   ["null"]=>
   NULL
 }
--- Callback funciton with parameter and without return --
+-- Callback function with parameter and without return --
 array(0) {
 }
 -- Callback function without parameter and return --

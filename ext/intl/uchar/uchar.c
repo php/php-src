@@ -56,7 +56,7 @@ IC_METHOD(chr) {
 	int buffer_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (convert_cp(&cp, zcp) == FAILURE) {
@@ -84,7 +84,7 @@ IC_METHOD(ord) {
 	zval *zcp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (convert_cp(&cp, zcp) == FAILURE) {
@@ -106,7 +106,7 @@ IC_METHOD(hasBinaryProperty) {
 	zval *zcp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &zcp, &prop) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (convert_cp(&cp, zcp) == FAILURE) {
@@ -128,7 +128,7 @@ IC_METHOD(getIntPropertyValue) {
 	zval *zcp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &zcp, &prop) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (convert_cp(&cp, zcp) == FAILURE) {
@@ -147,7 +147,7 @@ IC_METHOD(getIntPropertyMinValue) {
 	zend_long prop;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &prop) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(u_getIntPropertyMinValue((UProperty)prop));
@@ -162,7 +162,7 @@ IC_METHOD(getIntPropertyMaxValue) {
 	zend_long prop;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &prop) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(u_getIntPropertyMaxValue((UProperty)prop));
@@ -178,7 +178,7 @@ IC_METHOD(getNumericValue) {
 	zval *zcp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (convert_cp(&cp, zcp) == FAILURE) {
@@ -228,7 +228,7 @@ IC_METHOD(enumCharTypes) {
 	enumCharType_data context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "f", &context.fci, &context.fci_cache) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	u_enumCharTypes((UCharEnumTypeRange*)enumCharType_callback, &context);
 }
@@ -243,7 +243,7 @@ IC_METHOD(getBlockCode) {
 	zval *zcp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (convert_cp(&cp, zcp) == FAILURE) {
@@ -268,7 +268,7 @@ IC_METHOD(charName) {
 	int32_t buffer_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &zcp, &nameChoice) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (convert_cp(&cp, zcp) == FAILURE) {
@@ -300,7 +300,7 @@ IC_METHOD(charFromName) {
 	UErrorCode error = U_ZERO_ERROR;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &name, &name_len, &nameChoice) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ret = u_charFromName((UCharNameChoice)nameChoice, name, &error);
@@ -354,7 +354,7 @@ IC_METHOD(enumCharNames) {
 	UErrorCode error = U_ZERO_ERROR;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzf|l", &zstart, &zlimit, &context.fci, &context.fci_cache, &nameChoice) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (convert_cp(&start, zstart) == FAILURE || convert_cp(&limit, zlimit) == FAILURE) {
@@ -377,7 +377,7 @@ IC_METHOD(getPropertyName) {
 	const char *ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &property, &nameChoice) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ret = u_getPropertyName((UProperty)property, (UPropertyNameChoice)nameChoice);
@@ -400,7 +400,7 @@ IC_METHOD(getPropertyEnum) {
 	size_t alias_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &alias, &alias_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(u_getPropertyEnum(alias));
@@ -418,7 +418,7 @@ IC_METHOD(getPropertyValueName) {
 	const char *ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|l", &property, &value, &nameChoice) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ret = u_getPropertyValueName((UProperty)property, value, (UPropertyNameChoice)nameChoice);
@@ -443,7 +443,7 @@ IC_METHOD(getPropertyValueEnum) {
 	size_t name_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &property, &name, &name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(u_getPropertyValueEnum((UProperty)property, name));
@@ -461,7 +461,7 @@ IC_METHOD(foldCase) {
 	zend_long options = U_FOLD_CASE_DEFAULT;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &zcp, &options) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (convert_cp(&cp, zcp) == FAILURE) {
@@ -493,7 +493,7 @@ IC_METHOD(digit) {
 	int ret;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &zcp, &radix) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (convert_cp(&cp, zcp) == FAILURE) {
@@ -519,7 +519,7 @@ IC_METHOD(forDigit) {
 	zend_long digit, radix = 10;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &digit, &radix) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(u_forDigit(digit, radix));
@@ -537,7 +537,7 @@ IC_METHOD(charAge) {
 	int i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (convert_cp(&cp, zcp) == FAILURE) {
@@ -560,7 +560,7 @@ IC_METHOD(getUnicodeVersion) {
 	int i;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	u_getUnicodeVersion(version);
@@ -584,7 +584,7 @@ IC_METHOD(getFC_NFKC_Closure) {
 	UErrorCode error = U_ZERO_ERROR;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (convert_cp(&cp, zcp) == FAILURE) {

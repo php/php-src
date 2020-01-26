@@ -97,7 +97,7 @@ string(%d) "%sextfile.php"
 var_dump(__FILE__);
 ?>
 
-Warning: file_get_contents(phar://%stempmanifest1.phar.php/testit/directory): failed to open stream: phar error: path "testit/directory" is a directory in phar://%stempmanifest1.phar.php/index.php on line %d
+Warning: file_get_contents(phar://%stempmanifest1.phar.php/testit/directory): Failed to open stream: phar error: path "testit/directory" is a directory in phar://%stempmanifest1.phar.php/index.php on line %d
 
 oops
 string(%d) "phar://%sextfile.php"

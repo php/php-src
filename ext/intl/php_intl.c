@@ -42,6 +42,7 @@
 #include "formatter/formatter_parse.h"
 
 #include "grapheme/grapheme.h"
+#include "grapheme/grapheme_arginfo.h"
 
 #include "msgformat/msgformat.h"
 #include "msgformat/msgformat_class.h"
@@ -52,10 +53,12 @@
 #include "normalizer/normalizer.h"
 #include "normalizer/normalizer_class.h"
 #include "normalizer/normalizer_normalize.h"
+#include "normalizer/normalizer_arginfo.h"
 
 #include "locale/locale.h"
 #include "locale/locale_class.h"
 #include "locale/locale_methods.h"
+#include "locale/locale_arginfo.h"
 
 #include "dateformat/dateformat.h"
 #include "dateformat/dateformat_class.h"
@@ -67,6 +70,7 @@
 #include "dateformat/dateformat_data.h"
 
 #include "resourcebundle/resourcebundle_class.h"
+#include "resourcebundle/resourcebundle_arginfo.h"
 
 #include "transliterator/transliterator.h"
 #include "transliterator/transliterator_class.h"
@@ -84,6 +88,7 @@
 #include "breakiterator/breakiterator_iterators.h"
 
 #include "idn/idn.h"
+#include "idn/idn_arginfo.h"
 #include "uchar/uchar.h"
 
 # include "spoofchecker/spoofchecker_class.h"
@@ -169,74 +174,8 @@ ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_currency_arginfo, 0, 0, 3)
 	ZEND_ARG_INFO(1, position)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX( locale_get_loc_in_loc_args, 0, ZEND_RETURN_VALUE, 1 )
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, in_locale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( locale_filter_matches_args, 0, ZEND_RETURN_VALUE, 2 )
-	ZEND_ARG_INFO(0, langtag)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, canonicalize)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( locale_lookup_args, 0, ZEND_RETURN_VALUE, 2 )
-	ZEND_ARG_INFO(0, langtag)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, canonicalize)
-	ZEND_ARG_INFO(0, def)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(locale_0_args, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(locale_1_arg, 0, 0, 1)
-	ZEND_ARG_INFO(0, arg1)
-ZEND_END_ARG_INFO()
-
 #define intl_0_args collator_static_0_args
 #define intl_1_arg collator_static_1_arg
-
-ZEND_BEGIN_ARG_INFO_EX(normalizer_args, 0, 0, 1)
-	ZEND_ARG_INFO(0, input)
-	ZEND_ARG_INFO(0, form)
-ZEND_END_ARG_INFO()
-
-#if U_ICU_VERSION_MAJOR_NUM >= 56
-ZEND_BEGIN_ARG_INFO_EX(decomposition_args, 0, 0, 1)
-	ZEND_ARG_INFO(0, input)
-ZEND_END_ARG_INFO();
-#endif
-
-ZEND_BEGIN_ARG_INFO_EX(grapheme_1_arg, 0, 0, 1)
-	ZEND_ARG_INFO(0, string)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(grapheme_search_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, haystack)
-	ZEND_ARG_INFO(0, needle)
-	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(grapheme_substr_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, start)
-	ZEND_ARG_INFO(0, length)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(grapheme_strstr_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, haystack)
-	ZEND_ARG_INFO(0, needle)
-	ZEND_ARG_INFO(0, before_needle)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(grapheme_extract_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, arg1)
-	ZEND_ARG_INFO(0, arg2)
-	ZEND_ARG_INFO(0, arg3)
-	ZEND_ARG_INFO(0, arg4)
-	ZEND_ARG_INFO(1, arg5)  /* 1 = pass by reference */
-ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(datefmt_parse_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, formatter)
@@ -322,7 +261,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_parse, 0, 0, 2)
 	ZEND_ARG_INFO(0, source)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_parse_message, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_parse_message, 0, 0, 3)
 	ZEND_ARG_INFO(0, locale)
 	ZEND_ARG_INFO(0, pattern)
 	ZEND_ARG_INFO(0, source)
@@ -371,41 +310,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_create, 0, 0, 3)
 	ZEND_ARG_INFO(0, timezone_str)
 	ZEND_ARG_INFO(0, calendar)
 	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_idn_to_ascii, 0, 0, 1)
-	ZEND_ARG_INFO(0, domain)
-	ZEND_ARG_INFO(0, option)
-	ZEND_ARG_INFO(0, variant)
-	ZEND_ARG_INFO(1, idn_info)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_create_proc, 0, 0, 2 )
-	ZEND_ARG_INFO( 0, locale )
-	ZEND_ARG_INFO( 0, bundlename )
-	ZEND_ARG_INFO( 0, fallback )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get_proc, 0, 0, 2 )
-    ZEND_ARG_INFO( 0, bundle )
-	ZEND_ARG_INFO( 0, index )
-	ZEND_ARG_INFO( 0, fallback )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_count_proc, 0, 0, 1 )
-  ZEND_ARG_INFO( 0, bundle )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_locales_proc, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, bundlename )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get_error_code_proc, 0, 0, 1 )
-  ZEND_ARG_INFO( 0, bundle )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get_error_message_proc, 0, 0, 1 )
-  ZEND_ARG_INFO( 0, bundle )
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_void, 0, 0, 0 )
@@ -607,38 +511,38 @@ static const zend_function_entry intl_functions[] = {
 	PHP_FE( numfmt_get_error_message, arginfo_numfmt_get_error_code )
 
 	/* normalizer functions */
-	PHP_FE( normalizer_normalize, normalizer_args )
-	PHP_FE( normalizer_is_normalized, normalizer_args )
+	PHP_FE( normalizer_normalize, arginfo_normalizer_normalize )
+	PHP_FE( normalizer_is_normalized, arginfo_normalizer_is_normalized )
 #if U_ICU_VERSION_MAJOR_NUM >= 56
-	PHP_FE( normalizer_get_raw_decomposition, decomposition_args )
+	PHP_FE( normalizer_get_raw_decomposition, arginfo_normalizer_get_raw_decomposition )
 #endif
 
 	/* Locale functions */
-	PHP_NAMED_FE( locale_get_default, zif_locale_get_default, locale_0_args )
-	PHP_NAMED_FE( locale_set_default, zif_locale_set_default, locale_1_arg )
-	PHP_FE( locale_get_primary_language, locale_1_arg )
-	PHP_FE( locale_get_script, locale_1_arg )
-	PHP_FE( locale_get_region, locale_1_arg )
-	PHP_FE( locale_get_keywords, locale_1_arg )
-	PHP_FE( locale_get_display_script, locale_get_loc_in_loc_args )
-	PHP_FE( locale_get_display_region, locale_get_loc_in_loc_args )
-	PHP_FE( locale_get_display_name, locale_get_loc_in_loc_args )
-	PHP_FE( locale_get_display_language, locale_get_loc_in_loc_args)
-	PHP_FE( locale_get_display_variant, locale_get_loc_in_loc_args )
-	PHP_FE( locale_compose, locale_1_arg )
-	PHP_FE( locale_parse, locale_1_arg )
-	PHP_FE( locale_get_all_variants, locale_1_arg )
-	PHP_FE( locale_filter_matches, locale_filter_matches_args )
-	PHP_FE( locale_canonicalize, locale_1_arg )
-	PHP_FE( locale_lookup, locale_lookup_args )
-	PHP_FE( locale_accept_from_http, locale_1_arg )
+	PHP_NAMED_FE( locale_get_default, zif_locale_get_default, arginfo_locale_get_default )
+	PHP_NAMED_FE( locale_set_default, zif_locale_set_default, arginfo_locale_set_default )
+	PHP_FE( locale_get_primary_language, arginfo_locale_get_primary_language )
+	PHP_FE( locale_get_script, arginfo_locale_get_script )
+	PHP_FE( locale_get_region, arginfo_locale_get_region )
+	PHP_FE( locale_get_keywords, arginfo_locale_get_keywords )
+	PHP_FE( locale_get_display_script, arginfo_locale_get_display_script )
+	PHP_FE( locale_get_display_region, arginfo_locale_get_display_region )
+	PHP_FE( locale_get_display_name, arginfo_locale_get_display_name )
+	PHP_FE( locale_get_display_language, arginfo_locale_get_display_language)
+	PHP_FE( locale_get_display_variant, arginfo_locale_get_display_variant )
+	PHP_FE( locale_compose, arginfo_locale_compose )
+	PHP_FE( locale_parse, arginfo_locale_parse )
+	PHP_FE( locale_get_all_variants, arginfo_locale_get_all_variants )
+	PHP_FE( locale_filter_matches, arginfo_locale_filter_matches )
+	PHP_FE( locale_canonicalize, arginfo_locale_canonicalize )
+	PHP_FE( locale_lookup, arginfo_locale_lookup )
+	PHP_FE( locale_accept_from_http, arginfo_locale_accept_from_http )
 
 	/* MessageFormatter functions */
 	PHP_FE( msgfmt_create, arginfo_msgfmt_create )
 	PHP_FE( msgfmt_format, arginfo_msgfmt_format )
 	PHP_FE( msgfmt_format_message, arginfo_msgfmt_format_message )
 	PHP_FE( msgfmt_parse, arginfo_msgfmt_parse )
-	PHP_FE( msgfmt_parse_message, arginfo_numfmt_parse_message )
+	PHP_FE( msgfmt_parse_message, arginfo_msgfmt_parse_message )
 	PHP_FE( msgfmt_set_pattern, arginfo_msgfmt_set_pattern )
 	PHP_FE( msgfmt_get_pattern, arginfo_msgfmt_get_locale )
 	PHP_FE( msgfmt_get_locale, arginfo_msgfmt_get_locale )
@@ -668,27 +572,27 @@ static const zend_function_entry intl_functions[] = {
 	PHP_FE( datefmt_get_error_message, arginfo_msgfmt_get_error_message )
 
 	/* grapheme functions */
-	PHP_FE( grapheme_strlen, grapheme_1_arg )
-	PHP_FE( grapheme_strpos, grapheme_search_args )
-	PHP_FE( grapheme_stripos, grapheme_search_args )
-	PHP_FE( grapheme_strrpos, grapheme_search_args )
-	PHP_FE( grapheme_strripos, grapheme_search_args )
-	PHP_FE( grapheme_substr, grapheme_substr_args )
-	PHP_FE( grapheme_strstr, grapheme_strstr_args )
-	PHP_FE( grapheme_stristr, grapheme_strstr_args )
-	PHP_FE( grapheme_extract, grapheme_extract_args )
+	PHP_FE( grapheme_strlen, arginfo_grapheme_strlen )
+	PHP_FE( grapheme_strpos, arginfo_grapheme_strpos )
+	PHP_FE( grapheme_stripos, arginfo_grapheme_stripos )
+	PHP_FE( grapheme_strrpos, arginfo_grapheme_strrpos )
+	PHP_FE( grapheme_strripos, arginfo_grapheme_strripos )
+	PHP_FE( grapheme_substr, arginfo_grapheme_substr )
+	PHP_FE( grapheme_strstr, arginfo_grapheme_strstr )
+	PHP_FE( grapheme_stristr, arginfo_grapheme_stristr )
+	PHP_FE( grapheme_extract, arginfo_grapheme_extract )
 
 	/* IDN functions */
 	PHP_FE( idn_to_ascii, arginfo_idn_to_ascii)
-	PHP_FE( idn_to_utf8, arginfo_idn_to_ascii)
+	PHP_FE( idn_to_utf8, arginfo_idn_to_utf8)
 
 	/* ResourceBundle functions */
-	PHP_FE( resourcebundle_create, arginfo_resourcebundle_create_proc )
-	PHP_FE( resourcebundle_get, arginfo_resourcebundle_get_proc )
-	PHP_FE( resourcebundle_count, arginfo_resourcebundle_count_proc )
-	PHP_FE( resourcebundle_locales, arginfo_resourcebundle_locales_proc )
-	PHP_FE( resourcebundle_get_error_code, arginfo_resourcebundle_get_error_code_proc )
-	PHP_FE( resourcebundle_get_error_message, arginfo_resourcebundle_get_error_message_proc )
+	PHP_FE( resourcebundle_create, arginfo_resourcebundle_create )
+	PHP_FE( resourcebundle_get, arginfo_resourcebundle_get )
+	PHP_FE( resourcebundle_count, arginfo_resourcebundle_count )
+	PHP_FE( resourcebundle_locales, arginfo_resourcebundle_locales )
+	PHP_FE( resourcebundle_get_error_code, arginfo_resourcebundle_get_error_code )
+	PHP_FE( resourcebundle_get_error_message, arginfo_resourcebundle_get_error_message )
 
 	/* Transliterator functions */
 	PHP_FE( transliterator_create, arginfo_transliterator_create )

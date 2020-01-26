@@ -340,7 +340,7 @@ static void php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_rea
 	zval *self;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os", &self, xmlwriter_class_entry_ce, &name, &name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -365,7 +365,7 @@ static void php_xmlwriter_end(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_read_int_t
 	zval *self;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &self, xmlwriter_class_entry_ce) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -389,7 +389,7 @@ static PHP_FUNCTION(xmlwriter_set_indent)
 	zval *self;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Ob", &self, xmlwriter_class_entry_ce, &indent) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -440,7 +440,7 @@ static PHP_FUNCTION(xmlwriter_start_attribute_ns)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osss!", &self, xmlwriter_class_entry_ce,
 		&prefix, &prefix_len, &name, &name_len, &uri, &uri_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -469,7 +469,7 @@ static PHP_FUNCTION(xmlwriter_write_attribute)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss", &self, xmlwriter_class_entry_ce,
 		&name, &name_len, &content, &content_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -498,7 +498,7 @@ static PHP_FUNCTION(xmlwriter_write_attribute_ns)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osss!s", &self, xmlwriter_class_entry_ce,
 		&prefix, &prefix_len, &name, &name_len, &uri, &uri_len, &content, &content_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -535,7 +535,7 @@ static PHP_FUNCTION(xmlwriter_start_element_ns)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os!ss!", &self, xmlwriter_class_entry_ce,
 		&prefix, &prefix_len, &name, &name_len, &uri, &uri_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -581,7 +581,7 @@ static PHP_FUNCTION(xmlwriter_write_element)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|s!", &self, xmlwriter_class_entry_ce,
 		&name, &name_len, &content, &content_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -621,7 +621,7 @@ static PHP_FUNCTION(xmlwriter_write_element_ns)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os!ss!|s!", &self, xmlwriter_class_entry_ce,
 		&prefix, &prefix_len, &name, &name_len, &uri, &uri_len, &content, &content_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -677,7 +677,7 @@ static PHP_FUNCTION(xmlwriter_write_pi)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss", &self, xmlwriter_class_entry_ce,
 		&name, &name_len, &content, &content_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -703,7 +703,7 @@ static PHP_FUNCTION(xmlwriter_start_cdata)
 	zval *self;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &self, xmlwriter_class_entry_ce) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -759,7 +759,7 @@ static PHP_FUNCTION(xmlwriter_start_comment)
 	zval *self;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &self, xmlwriter_class_entry_ce) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -801,7 +801,7 @@ static PHP_FUNCTION(xmlwriter_start_document)
 	zval *self;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|s!s!s!", &self, xmlwriter_class_entry_ce, &version, &version_len, &enc, &enc_len, &alone, &alone_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -835,7 +835,7 @@ static PHP_FUNCTION(xmlwriter_start_dtd)
 	zval *self;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|s!s!", &self, xmlwriter_class_entry_ce, &name, &name_len, &pubid, &pubid_len, &sysid, &sysid_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -869,7 +869,7 @@ static PHP_FUNCTION(xmlwriter_write_dtd)
 	zval *self;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Os|s!s!s!", &self, xmlwriter_class_entry_ce, &name, &name_len, &pubid, &pubid_len, &sysid, &sysid_len, &subset, &subset_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -912,7 +912,7 @@ static PHP_FUNCTION(xmlwriter_write_dtd_element)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss", &self, xmlwriter_class_entry_ce,
 		&name, &name_len, &content, &content_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -957,7 +957,7 @@ static PHP_FUNCTION(xmlwriter_write_dtd_attlist)
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss", &self, xmlwriter_class_entry_ce,
 		&name, &name_len, &content, &content_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -986,7 +986,7 @@ static PHP_FUNCTION(xmlwriter_start_dtd_entity)
 	zval *self;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osb", &self, xmlwriter_class_entry_ce, &name, &name_len, &isparm) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -1028,7 +1028,7 @@ static PHP_FUNCTION(xmlwriter_write_dtd_entity)
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oss|bsss", &self, xmlwriter_class_entry_ce,
 		&name, &name_len, &content, &content_len, &pe, &pubid, &pubid_len,
 		&sysid, &sysid_len, &ndataid, &ndataid_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 
@@ -1058,7 +1058,7 @@ static PHP_FUNCTION(xmlwriter_open_uri)
 	ze_xmlwriter_object *ze_obj = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &source, &source_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (self) {
@@ -1112,7 +1112,7 @@ static PHP_FUNCTION(xmlwriter_open_memory)
 	ze_xmlwriter_object *ze_obj = NULL;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (self) {
@@ -1162,7 +1162,7 @@ static void php_xmlwriter_flush(INTERNAL_FUNCTION_PARAMETERS, int force_string) 
 	zval *self;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|b", &self, xmlwriter_class_entry_ce, &empty) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	XMLWRITER_FROM_OBJECT(ptr, self);
 

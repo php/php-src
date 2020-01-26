@@ -1,10 +1,8 @@
 <?php
 
-/** @return XmlParser|false */
-function xml_parser_create(string $encoding = UNKNOWN) {}
+function xml_parser_create(string $encoding = UNKNOWN): XmlParser|false {}
 
-/** @return XmlParser|false */
-function xml_parser_create_ns(string $encoding = UNKNOWN, string $sep = ':') {}
+function xml_parser_create_ns(string $encoding = UNKNOWN, string $sep = ':'): XmlParser|false {}
 
 function xml_set_object(XmlParser $parser, object $obj): bool {}
 

@@ -325,7 +325,7 @@
 
 #elif (defined SLJIT_DEBUG && SLJIT_DEBUG)
 
-/* Assertion failure occures if an invalid argument is passed. */
+/* Assertion failure occurs if an invalid argument is passed. */
 #undef SLJIT_ARGUMENT_CHECKS
 #define SLJIT_ARGUMENT_CHECKS 1
 

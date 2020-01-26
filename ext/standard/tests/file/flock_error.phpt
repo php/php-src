@@ -1,5 +1,7 @@
 --TEST--
 Test flock() function: Error conditions
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /*
@@ -13,7 +15,7 @@ echo "*** Testing error conditions ***\n";
 $file = preg_replace("~\.phpt?$~", '.tmp', __FILE__);
 $fp = fopen($file, "w");
 
-/* array of operatons */
+/* array of operations */
 $operations = array(
   0,
   LOCK_NB,
@@ -46,8 +48,6 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
-
-echo "\n*** Done ***\n";
 ?>
 --CLEAN--
 <?php
@@ -88,5 +88,3 @@ flock() expects parameter 2 to be int, string given
 --- Iteration 8 ---
 flock() expects parameter 2 to be int, string given
 flock(): supplied resource is not a valid stream resource
-
-*** Done ***

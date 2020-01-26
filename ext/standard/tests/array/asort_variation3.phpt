@@ -10,7 +10,7 @@ Test asort() function : usage variations - sort integer/float values
 
 /*
  * Testing asort() by providing different integer/float value arrays for $array argument with following values
- * 1. flag value as defualt
+ * 1. flag value as default
  * 2. SORT_REGULAR - compare items normally
  * 3. SORT_NUMERIC - compare items numerically
 */

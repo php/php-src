@@ -5,6 +5,8 @@ Test tempnam() function: usage variations - invalid/non-existing dir
 if(substr(PHP_OS, 0, 3) != "WIN")
   die("skip Only run on Windows");
 ?>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /* Prototype:  string tempnam ( string $dir, string $prefix );
@@ -64,8 +66,6 @@ for( $i=0; $i<count($names_arr); $i++ ) {
 
 	unlink($file_name);
 }
-
-echo "\n*** Done ***\n";
 ?>
 --EXPECTF--
 *** Testing tempnam() with invalid/non-existing directory names ***
@@ -115,5 +115,3 @@ Notice: tempnam(): file created in the system's temporary directory in %stempnam
 File name is => %s%et%s
 File permissions are => 100666
 File created in => temp dir
-
-*** Done ***

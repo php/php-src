@@ -579,7 +579,7 @@ SPL_METHOD(SplHeap, count)
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	count = spl_ptr_heap_count(intern->heap);
@@ -594,7 +594,7 @@ SPL_METHOD(SplHeap, isEmpty)
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(spl_ptr_heap_count(intern->heap) == 0);
@@ -609,14 +609,14 @@ SPL_METHOD(SplHeap, insert)
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	Z_TRY_ADDREF_P(value);
@@ -633,19 +633,19 @@ SPL_METHOD(SplHeap, extract)
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (spl_ptr_heap_delete_top(intern->heap, return_value, ZEND_THIS) == FAILURE) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't extract from an empty heap", 0);
-		return;
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -659,14 +659,14 @@ SPL_METHOD(SplPriorityQueue, insert)
 	spl_pqueue_elem elem;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &data, &priority) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_COPY(&elem.data, data);
@@ -686,19 +686,19 @@ SPL_METHOD(SplPriorityQueue, extract)
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	if (spl_ptr_heap_delete_top(intern->heap, &elem, ZEND_THIS) == FAILURE) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't extract from an empty heap", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_pqueue_extract_helper(return_value, &elem, intern->flags);
@@ -714,21 +714,21 @@ SPL_METHOD(SplPriorityQueue, top)
 	spl_pqueue_elem *elem;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	elem = spl_ptr_heap_top(intern->heap);
 
 	if (!elem) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't peek at an empty heap", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_pqueue_extract_helper(return_value, elem, intern->flags);
@@ -744,13 +744,13 @@ SPL_METHOD(SplPriorityQueue, setExtractFlags)
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	value &= SPL_PQUEUE_EXTR_MASK;
 	if (!value) {
 		zend_throw_exception(spl_ce_RuntimeException, "Must specify at least one extract flag", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -766,7 +766,7 @@ SPL_METHOD(SplPriorityQueue, getExtractFlags)
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -782,7 +782,7 @@ SPL_METHOD(SplHeap, recoverFromCorruption)
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -800,7 +800,7 @@ SPL_METHOD(SplHeap, isCorrupted)
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
@@ -816,7 +816,7 @@ SPL_METHOD(SplPriorityQueue, compare)
 	zval *a, *b;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a, &b) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(spl_ptr_heap_zval_max_cmp(a, b, NULL));
@@ -831,21 +831,21 @@ SPL_METHOD(SplHeap, top)
 	spl_heap_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (intern->heap->flags & SPL_HEAP_CORRUPTED) {
 		zend_throw_exception(spl_ce_RuntimeException, "Heap is corrupted, heap properties are no longer ensured.", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	value = spl_ptr_heap_top(intern->heap);
 
 	if (!value) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't peek at an empty heap", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_COPY_DEREF(return_value, value);
@@ -859,7 +859,7 @@ SPL_METHOD(SplMinHeap, compare)
 	zval *a, *b;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a, &b) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(spl_ptr_heap_zval_min_cmp(a, b, NULL));
@@ -873,7 +873,7 @@ SPL_METHOD(SplMaxHeap, compare)
 	zval *a, *b;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a, &b) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(spl_ptr_heap_zval_max_cmp(a, b, NULL));
@@ -969,7 +969,7 @@ SPL_METHOD(SplHeap, key)
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(intern->heap->count - 1);
@@ -983,7 +983,7 @@ SPL_METHOD(SplHeap, next)
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_ptr_heap_delete_top(intern->heap, NULL, ZEND_THIS);
@@ -997,7 +997,7 @@ SPL_METHOD(SplHeap, valid)
 	spl_heap_object *intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(intern->heap->count != 0);
@@ -1009,7 +1009,7 @@ SPL_METHOD(SplHeap, valid)
 SPL_METHOD(SplHeap, rewind)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	/* do nothing, the iterator always points to the top element */
 }
@@ -1022,7 +1022,7 @@ SPL_METHOD(SplHeap, current)
 	spl_heap_object *intern  = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!intern->heap->count) {
@@ -1041,7 +1041,7 @@ SPL_METHOD(SplPriorityQueue, current)
 	spl_heap_object  *intern  = Z_SPLHEAP_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!intern->heap->count) {

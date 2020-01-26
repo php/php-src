@@ -6,13 +6,13 @@ $input_array = array('a', 'b', 'c', 'd', 'e');
 
 try {
     var_dump(array_chunk($input_array, 0));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 try {
     var_dump(array_chunk($input_array, 0, true));
-} catch (\Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 

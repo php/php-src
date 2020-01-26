@@ -17,15 +17,11 @@ $val = 1;
 
 try {
     var_dump( array_fill($start_key,$num,$val) );
-} catch (Error $e) {
+} catch (\ValueError $e) {
     echo $e->getMessage() . "\n";
 }
 
 ?>
-
-DONE
---EXPECTF--
+--EXPECT--
 *** Testing array_fill() : error conditions ***
 Number of elements can't be negative
-
-DONE

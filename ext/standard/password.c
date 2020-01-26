@@ -83,20 +83,20 @@ static zend_string* php_password_make_salt(size_t length) /* {{{ */
 	zend_string *ret, *buffer;
 
 	if (length > (INT_MAX / 3)) {
-		php_error_docref(NULL, E_WARNING, "Length is too large to safely generate");
+		zend_value_error("Length is too large to safely generate");
 		return NULL;
 	}
 
 	buffer = zend_string_alloc(length * 3 / 4 + 1, 0);
 	if (FAILURE == php_random_bytes_silent(ZSTR_VAL(buffer), ZSTR_LEN(buffer))) {
-		php_error_docref(NULL, E_WARNING, "Unable to generate salt");
+		zend_value_error("Unable to generate salt");
 		zend_string_release_ex(buffer, 0);
 		return NULL;
 	}
 
 	ret = zend_string_alloc(length, 0);
 	if (php_password_salt_to64(ZSTR_VAL(buffer), ZSTR_LEN(buffer), length, ZSTR_VAL(ret)) == FAILURE) {
-		php_error_docref(NULL, E_WARNING, "Generated salt too short");
+		zend_value_error("Generated salt too short");
 		zend_string_release_ex(buffer, 0);
 		zend_string_release_ex(ret, 0);
 		return NULL;
@@ -193,7 +193,7 @@ static zend_string* php_password_bcrypt_hash(const zend_string *password, zend_a
 	}
 
 	if (cost < 4 || cost > 31) {
-		php_error_docref(NULL, E_WARNING, "Invalid bcrypt cost parameter specified: " ZEND_LONG_FMT, cost);
+		zend_value_error("Invalid bcrypt cost parameter specified: " ZEND_LONG_FMT, cost);
 		return NULL;
 	}
 
@@ -316,7 +316,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 	}
 
 	if (memory_cost > ARGON2_MAX_MEMORY || memory_cost < ARGON2_MIN_MEMORY) {
-		php_error_docref(NULL, E_WARNING, "Memory cost is outside of allowed memory range");
+		zend_value_error("Memory cost is outside of allowed memory range");
 		return NULL;
 	}
 
@@ -325,7 +325,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 	}
 
 	if (time_cost > ARGON2_MAX_TIME || time_cost < ARGON2_MIN_TIME) {
-		php_error_docref(NULL, E_WARNING, "Time cost is outside of allowed time range");
+		zend_value_error("Time cost is outside of allowed time range");
 		return NULL;
 	}
 
@@ -334,7 +334,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 	}
 
 	if (threads > ARGON2_MAX_LANES || threads == 0) {
-		php_error_docref(NULL, E_WARNING, "Invalid number of threads");
+		zend_value_error("Invalid number of threads");
 		return NULL;
 	}
 
@@ -374,7 +374,7 @@ static zend_string *php_password_argon2_hash(const zend_string *password, zend_a
 
 	if (status != ARGON2_OK) {
 		zend_string_efree(encoded);
-		php_error_docref(NULL, E_WARNING, "%s", argon2_error_message(status));
+		zend_value_error("%s", argon2_error_message(status));
 		return NULL;
 	}
 
@@ -650,7 +650,7 @@ PHP_FUNCTION(password_verify)
 }
 /* }}} */
 
-/* {{{ proto string|null password_hash(string password, mixed algo[, array options = array()])
+/* {{{ proto string password_hash(string password, mixed algo[, array options = array()])
 Hash a password */
 PHP_FUNCTION(password_hash)
 {
@@ -669,15 +669,17 @@ PHP_FUNCTION(password_hash)
 	algo = php_password_algo_find_zval(zalgo);
 	if (!algo) {
 		zend_string *algostr = zval_get_string(zalgo);
-		php_error_docref(NULL, E_WARNING, "Unknown password hashing algorithm: %s", ZSTR_VAL(algostr));
+		zend_value_error("Unknown password hashing algorithm: %s", ZSTR_VAL(algostr));
 		zend_string_release(algostr);
-		RETURN_NULL();
+		RETURN_THROWS();
 	}
 
 	digest = algo->hash(password, options);
 	if (!digest) {
-		/* algo->hash should have raised an error. */
-		RETURN_NULL();
+		if (!EG(exception)) {
+			zend_throw_error(NULL, "Password hashing failed for unknown reason");
+		}
+		RETURN_THROWS();
 	}
 
 	RETURN_NEW_STR(digest);

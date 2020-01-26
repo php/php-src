@@ -296,7 +296,7 @@ static PHP_FUNCTION(phpdbg_exec)
 	zend_string *exec;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &exec) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	{
@@ -336,7 +336,7 @@ static PHP_FUNCTION(phpdbg_break_next)
 	zend_execute_data *ex;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ex = EG(current_execute_data);
@@ -359,7 +359,7 @@ static PHP_FUNCTION(phpdbg_break_file)
 	zend_long line;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl", &file, &flen, &line) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	phpdbg_set_breakpoint_file(file, 0, line);
@@ -372,7 +372,7 @@ static PHP_FUNCTION(phpdbg_break_method)
 	size_t clen, mlen;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &class, &clen, &method, &mlen) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	phpdbg_set_breakpoint_method(class, method);
@@ -385,7 +385,7 @@ static PHP_FUNCTION(phpdbg_break_function)
 	size_t   function_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &function, &function_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	phpdbg_set_breakpoint_symbol(function, function_len);
@@ -396,7 +396,7 @@ static PHP_FUNCTION(phpdbg_break_function)
 static PHP_FUNCTION(phpdbg_clear)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_FILE]);
@@ -418,7 +418,7 @@ static PHP_FUNCTION(phpdbg_color)
 	size_t color_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &element, &color, &color_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	switch (element) {
@@ -440,7 +440,7 @@ static PHP_FUNCTION(phpdbg_prompt)
 	size_t prompt_len = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &prompt, &prompt_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	phpdbg_set_prompt(prompt);
@@ -452,7 +452,7 @@ static PHP_FUNCTION(phpdbg_start_oplog)
 	phpdbg_oplog_list *prev;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	prev = PHPDBG_G(oplog_list);
@@ -539,7 +539,7 @@ static PHP_FUNCTION(phpdbg_get_executable)
 	HashTable files_tmp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|H", &options) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (options && (option_buffer = zend_hash_str_find(options, ZEND_STRL("functions")))) {
@@ -633,7 +633,7 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 	zend_bool by_opcode = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|H", &options) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!PHPDBG_G(oplog_list)) {
@@ -1073,7 +1073,7 @@ const char phpdbg_ini_hardcoded[] =
 "error_log=\n"
 "output_buffering=off\n\0";
 
-/* overwriteable ini defaults must be set in phpdbg_ini_defaults() */
+/* overwritable ini defaults must be set in phpdbg_ini_defaults() */
 #define INI_DEFAULT(name, value) \
 	ZVAL_NEW_STR(&tmp, zend_string_init(value, sizeof(value) - 1, 1)); \
 	zend_hash_str_update(configuration_hash, name, sizeof(name) - 1, &tmp);
@@ -1988,7 +1988,7 @@ phpdbg_interact:
 					if ((PHPDBG_G(flags) & PHPDBG_IS_DISCONNECTED)) {
 
 						if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
-							/* renegociate connections */
+							/* renegotiate connections */
 							phpdbg_remote_init(address, listen, server, &socket, &stream);
 
 							/* set streams */

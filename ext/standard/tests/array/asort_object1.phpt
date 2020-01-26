@@ -10,7 +10,7 @@ Test asort() function : object functionality - sort objects
 
 /*
  * testing asort() by providing integer/string object arrays with following flag values
- * 1. Defualt flag value
+ * 1. Default flag value
  * 2. SORT_REGULAR - compare items normally
 */
 
@@ -59,14 +59,14 @@ $unsorted_str_obj = array (
 );
 
 
-echo "\n-- Testing asort() by supplying various object arrays, 'flag' value is defualt --\n";
+echo "\n-- Testing asort() by supplying various object arrays, 'flag' value is default --\n";
 
-// testing asort() function by supplying integer object array, flag value is defualt
+// testing asort() function by supplying integer object array, flag value is default
 $temp_array = $unsorted_int_obj;
 var_dump(asort($temp_array) );
 var_dump($temp_array);
 
-// testing asort() function by supplying string object array, flag value is defualt
+// testing asort() function by supplying string object array, flag value is default
 $temp_array = $unsorted_str_obj;
 var_dump(asort($temp_array) );
 var_dump($temp_array);
@@ -87,7 +87,7 @@ echo "Done\n";
 --EXPECTF--
 *** Testing asort() : object functionality ***
 
--- Testing asort() by supplying various object arrays, 'flag' value is defualt --
+-- Testing asort() by supplying various object arrays, 'flag' value is default --
 bool(true)
 array(6) {
   [4]=>

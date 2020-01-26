@@ -34,7 +34,7 @@ if (!extension_loaded('sockets')) {
 
 	var_dump($sock, $sock2);
 
-	/* Close duplicated socket, teh orig is still valid. */
+	/* Close duplicated socket, the original is still valid. */
 	socket_close($sock2);
 	var_dump($sock, $sock2);
 

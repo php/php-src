@@ -40,7 +40,7 @@ var_dump(base64_encode($mb));
 if ($mb == $greek_lower) {
 	echo "Correctly converted\n";
 } else {
-	echo "Incorreclty converted\n";
+	echo "Incorrectly converted\n";
 }
 
 echo "Done";

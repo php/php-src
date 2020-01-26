@@ -25,5 +25,5 @@ Arg 1 wrong type
 
 Warning: ob_start(): no array or string given in %s on line 17
 
-Notice: ob_start(): failed to create buffer in %s on line 17
+Notice: ob_start(): Failed to create buffer in %s on line 17
 bool(false)

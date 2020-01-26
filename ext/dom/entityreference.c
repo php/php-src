@@ -46,7 +46,7 @@ PHP_METHOD(domentityreference, __construct)
 	size_t name_len, name_valid;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	name_valid = xmlValidateName((xmlChar *) name, 0);

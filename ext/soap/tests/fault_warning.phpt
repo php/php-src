@@ -11,7 +11,7 @@ echo get_class($fault) . "\n";
 $fault = new SoapFault(null, "message");
 echo get_class($fault) . "\n";
 $fault = new SoapFault(["more"], "message");  // two elements in array required
-$fault = new SoapFault(["m", "more", "superflous"], "message"); // two required
+$fault = new SoapFault(["m", "more", "superfluous"], "message"); // two required
 $fault = new SoapFault(["more-ns", "Sender"], "message");  // two given
 echo get_class($fault);
 ?>

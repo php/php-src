@@ -33,7 +33,7 @@ PHP_FUNCTION(mysqli_report)
 
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &flags) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	MyG(report_mode) = flags;

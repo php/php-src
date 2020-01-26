@@ -204,83 +204,6 @@ PHPAPI double _php_math_round(double value, int places, int mode) {
 }
 /* }}} */
 
-/* {{{ php_asinh
-*/
-static double php_asinh(double z)
-{
-#ifdef HAVE_ASINH
-	return(asinh(z));
-#else
-# ifdef _WIN64
-	if (z >= 0) {
-		return log(z + sqrt(z * z + 1));
-	}
-	else {
-		return -log(-z + sqrt(z * z + 1));
-	}
-# else
-	return(log(z + sqrt(1 + pow(z, 2))) / log(M_E));
-# endif
-#endif
-}
-/* }}} */
-
-/* {{{ php_acosh
-*/
-static double php_acosh(double x)
-{
-#ifdef HAVE_ACOSH
-	return(acosh(x));
-#else
-# ifdef _WIN64
-	if (x >= 1) {
-		return log(x + sqrt(x * x - 1));
-	} else {
-		return ZEND_NAN;
-	}
-# else
-	return(log(x + sqrt(x * x - 1)));
-# endif
-#endif
-}
-/* }}} */
-
-/* {{{ php_atanh
-*/
-static double php_atanh(double z)
-{
-#ifdef HAVE_ATANH
-	return(atanh(z));
-#else
-	return(0.5 * log((1 + z) / (1 - z)));
-#endif
-}
-/* }}} */
-
-/* {{{ php_log1p
-*/
-static double php_log1p(double x)
-{
-#ifdef HAVE_LOG1P
-	return(log1p(x));
-#else
-	return(log(1 + x));
-#endif
-}
-/* }}} */
-
-/* {{{ php_expm1
-*/
-static double php_expm1(double x)
-{
-#ifndef PHP_WIN32
-	return(expm1(x));
-#else
-	return(exp(x) - 1);
-#endif
-}
-/* }}}*/
-
 /* {{{ proto int|float abs(int|float number)
    Return the absolute value of the number */
 PHP_FUNCTION(abs)
@@ -533,7 +456,7 @@ PHP_FUNCTION(asinh)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(php_asinh(num));
+	RETURN_DOUBLE(asinh(num));
 }
 /* }}} */
 
@@ -546,7 +469,7 @@ PHP_FUNCTION(acosh)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(php_acosh(num));
+	RETURN_DOUBLE(acosh(num));
 }
 /* }}} */
 
@@ -559,7 +482,7 @@ PHP_FUNCTION(atanh)
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
-	RETURN_DOUBLE(php_atanh(num));
+	RETURN_DOUBLE(atanh(num));
 }
 /* }}} */
 
@@ -567,9 +490,7 @@ PHP_FUNCTION(atanh)
    Returns an approximation of pi */
 PHP_FUNCTION(pi)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_DOUBLE(M_PI);
 }
@@ -644,10 +565,7 @@ PHP_FUNCTION(exp)
 /* }}} */
 
 /* {{{ proto float expm1(float number)
-   Returns exp(number) - 1, computed in a way that accurate even when the value of number is close to zero */
-/*
-   WARNING: this function is experimental: it could change its name or
-   disappear in the next version of PHP!
+   Returns exp(number) - 1, computed in a way that accurate even when the value of number is close to zero
 */
 PHP_FUNCTION(expm1)
 {
@@ -657,15 +575,12 @@ PHP_FUNCTION(expm1)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_DOUBLE(php_expm1(num));
+	RETURN_DOUBLE(expm1(num));
 }
 /* }}} */
 
 /* {{{ proto float log1p(float number)
-   Returns log(1 + number), computed in a way that accurate even when the value of number is close to zero */
-/*
-   WARNING: this function is experimental: it could change its name or
-   disappear in the next version of PHP!
+   Returns log(1 + number), computed in a way that accurate even when the value of number is close to zero
 */
 PHP_FUNCTION(log1p)
 {
@@ -675,11 +590,11 @@ PHP_FUNCTION(log1p)
 		Z_PARAM_DOUBLE(num)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_DOUBLE(php_log1p(num));
+	RETURN_DOUBLE(log1p(num));
 }
 /* }}} */
 
-/* {{{ proto float|false log(float number, [float base])
+/* {{{ proto float log(float number, [float base])
    Returns the natural logarithm of the number, or the base log if base is specified */
 PHP_FUNCTION(log)
 {
@@ -695,11 +610,9 @@ PHP_FUNCTION(log)
 		RETURN_DOUBLE(log(num));
 	}
 
-#ifdef HAVE_LOG2
 	if (base == 2.0) {
 		RETURN_DOUBLE(log2(num));
 	}
-#endif
 
 	if (base == 10.0) {
 		RETURN_DOUBLE(log10(num));
@@ -710,8 +623,8 @@ PHP_FUNCTION(log)
 	}
 
 	if (base <= 0.0) {
-		php_error_docref(NULL, E_WARNING, "base must be greater than 0");
-		RETURN_FALSE;
+		zend_value_error("Base must be greater than 0");
+		RETURN_THROWS();
 	}
 
 	RETURN_DOUBLE(log(num) / log(base));
@@ -757,13 +670,7 @@ PHP_FUNCTION(hypot)
 		Z_PARAM_DOUBLE(num2)
 	ZEND_PARSE_PARAMETERS_END();
 
-#if HAVE_HYPOT
 	RETURN_DOUBLE(hypot(num1, num2));
-#elif defined(_MSC_VER)
-	RETURN_DOUBLE(_hypot(num1, num2));
-#else
-	RETURN_DOUBLE(sqrt((num1 * num1) + (num2 * num2)));
-#endif
 }
 /* }}} */
 
@@ -1094,16 +1001,16 @@ PHP_FUNCTION(base_convert)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!try_convert_to_string(number)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (frombase < 2 || frombase > 36) {
 		zend_value_error("Invalid `from base' (" ZEND_LONG_FMT ")", frombase);
-		return;
+		RETURN_THROWS();
 	}
 	if (tobase < 2 || tobase > 36) {
 		zend_value_error("Invalid `to base' (" ZEND_LONG_FMT ")", tobase);
-		return;
+		RETURN_THROWS();
 	}
 
 	_php_math_basetozval(Z_STR_P(number), (int)frombase, &temp);
@@ -1329,12 +1236,12 @@ PHP_FUNCTION(intdiv)
 
 	if (divisor == 0) {
 		zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Division by zero");
-		return;
+		RETURN_THROWS();
 	} else if (divisor == -1 && dividend == ZEND_LONG_MIN) {
 		/* Prevent overflow error/crash ... really should not happen:
 		   We don't return a float here as that violates function contract */
 		zend_throw_exception_ex(zend_ce_arithmetic_error, 0, "Division of PHP_INT_MIN by -1 is not an integer");
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(dividend / divisor);

@@ -239,13 +239,13 @@ static void zend_hash_clone_prop_info(HashTable *ht)
 					list = ARENA_REALLOC(list);
 					ZEND_TYPE_SET_PTR(prop_info->type, list);
 
-					void **entry;
-					ZEND_TYPE_LIST_FOREACH_PTR(ZEND_TYPE_LIST(prop_info->type), entry) {
-						if (ZEND_TYPE_LIST_IS_CE(*entry)) {
-							zend_class_entry *ce = ZEND_TYPE_LIST_GET_CE(*entry);
+					zend_type *list_type;
+					ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(prop_info->type), list_type) {
+						if (ZEND_TYPE_HAS_CE(*list_type)) {
+							zend_class_entry *ce = ZEND_TYPE_CE(*list_type);
 							if (IN_ARENA(ce)) {
 								ce = ARENA_REALLOC(ce);
-								*entry = ZEND_TYPE_LIST_ENCODE_CE(ce);
+								ZEND_TYPE_SET_PTR(*list_type, ce);
 							}
 						}
 					} ZEND_TYPE_LIST_FOREACH_END();
@@ -263,7 +263,7 @@ static void zend_hash_clone_prop_info(HashTable *ht)
 
 #define zend_update_inherited_handler(handler) \
 { \
-	if (ce->handler != NULL) { \
+	if (ce->handler != NULL && IN_ARENA(ce->handler)) { \
 		ce->handler = ARENA_REALLOC(ce->handler); \
 	} \
 }
@@ -439,8 +439,16 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
-				/* Mangled key */
-				t = zend_hash_update(target, p->key, &p->val);
+				/* Runtime definition key. There are two circumstances under which the key can
+				 * already be defined:
+				 *  1. The file has been re-included without being changed in the meantime. In
+				 *     this case we can keep the old value, because we know that the definition
+				 *     hasn't changed.
+				 *  2. The file has been changed in the meantime, but the RTD key ends up colliding.
+				 *     This would be a bug.
+				 * As we can't distinguish these cases, we assume that it is 1. and keep the old
+				 * value. */
+				continue;
 			} else {
 				goto failure;
 			}
@@ -483,8 +491,8 @@ static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable 
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
-				/* Mangled key */
-				zend_hash_update_ptr(target, p->key, Z_PTR(p->val));
+				/* See comment in zend_accel_function_hash_copy(). */
+				continue;
 			} else {
 				goto failure;
 			}
@@ -526,7 +534,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source)
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
-				/* Mangled key - ignore and wait for runtime */
+				/* See comment in zend_accel_function_hash_copy(). */
 				continue;
 			} else if (UNEXPECTED(!ZCG(accel_directives).ignore_dups)) {
 				zend_class_entry *ce1 = Z_PTR(p->val);
@@ -563,7 +571,7 @@ static void zend_accel_class_hash_copy_from_shm(HashTable *target, HashTable *so
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
-				/* Mangled key - ignore and wait for runtime */
+				/* See comment in zend_accel_function_hash_copy(). */
 				continue;
 			} else if (UNEXPECTED(!ZCG(accel_directives).ignore_dups)) {
 				zend_class_entry *ce1 = Z_PTR(p->val);

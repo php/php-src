@@ -37,9 +37,9 @@ foreach($classes as $class) {
 	var_dump($rc->getMethod("s"));
 	echo "  --> Check for F(): ";
 	var_dump($rc->getMethod("F"));
-	echo "  --> Check for doesntExist(): ";
+	echo "  --> Check for doesNotExist(): ";
 	try {
-		var_dump($rc->getMethod("doesntExist"));
+		var_dump($rc->getMethod("doesNotExist"));
 	} catch (Exception $e) {
 		echo $e->getMessage() . "\n";
 	}
@@ -65,7 +65,7 @@ Reflecting on class pubf:
   ["class"]=>
   string(4) "pubf"
 }
-  --> Check for doesntExist(): Method doesntExist does not exist
+  --> Check for doesNotExist(): Method doesNotExist does not exist
 Reflecting on class subpubf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
   ["name"]=>
@@ -85,7 +85,7 @@ Reflecting on class subpubf:
   ["class"]=>
   string(4) "pubf"
 }
-  --> Check for doesntExist(): Method doesntExist does not exist
+  --> Check for doesNotExist(): Method doesNotExist does not exist
 Reflecting on class protf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
   ["name"]=>
@@ -105,7 +105,7 @@ Reflecting on class protf:
   ["class"]=>
   string(5) "protf"
 }
-  --> Check for doesntExist(): Method doesntExist does not exist
+  --> Check for doesNotExist(): Method doesNotExist does not exist
 Reflecting on class subprotf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
   ["name"]=>
@@ -125,7 +125,7 @@ Reflecting on class subprotf:
   ["class"]=>
   string(5) "protf"
 }
-  --> Check for doesntExist(): Method doesntExist does not exist
+  --> Check for doesNotExist(): Method doesNotExist does not exist
 Reflecting on class privf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
   ["name"]=>
@@ -145,7 +145,7 @@ Reflecting on class privf:
   ["class"]=>
   string(5) "privf"
 }
-  --> Check for doesntExist(): Method doesntExist does not exist
+  --> Check for doesNotExist(): Method doesNotExist does not exist
 Reflecting on class subprivf: 
   --> Check for f(): object(ReflectionMethod)#%d (2) {
   ["name"]=>
@@ -165,4 +165,4 @@ Reflecting on class subprivf:
   ["class"]=>
   string(5) "privf"
 }
-  --> Check for doesntExist(): Method doesntExist does not exist
+  --> Check for doesNotExist(): Method doesNotExist does not exist

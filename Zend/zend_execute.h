@@ -146,7 +146,6 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 
 ZEND_API int zval_update_constant(zval *pp);
 ZEND_API int zval_update_constant_ex(zval *pp, zend_class_entry *scope);
-ZEND_API ZEND_COLD int zend_use_undefined_constant(zend_string *name, zend_ast_attr attr, zval *result);
 
 /* dedicated Zend executor functions - do not use! */
 struct _zend_vm_stack {
@@ -312,6 +311,7 @@ ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, zen
 
 ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name);
 ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_str(const char *name, size_t len);
+ZEND_API void ZEND_FASTCALL zend_init_func_run_time_cache(zend_op_array *op_array);
 
 ZEND_API void zend_fetch_dimension_const(zval *result, zval *container, zval *dim, int type);
 

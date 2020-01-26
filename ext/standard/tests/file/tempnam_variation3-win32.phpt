@@ -5,6 +5,8 @@ Test tempnam() function: usage variations - obscure prefixes
 if(substr(PHP_OS, 0, 3) != "WIN")
 	die("skip run only on Windows");
 ?>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /* Prototype:  string tempnam ( string $dir, string $prefix );
@@ -89,7 +91,6 @@ for( $i=0; $i<count($names_arr); $i++ ) {
 }
 
 rmdir($file_path);
-echo "\n*** Done. ***\n";
 ?>
 --EXPECTF--
 *** Testing tempnam() with obscure prefixes ***
@@ -116,5 +117,3 @@ tempnam() expects parameter 2 to be a valid path, array given
 OK
 -- Iteration 9 --
 OK
-
-*** Done. ***

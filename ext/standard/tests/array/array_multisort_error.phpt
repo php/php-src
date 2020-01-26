@@ -14,7 +14,7 @@ echo "\n-- Testing array_multisort() function with repeated flags --\n";
 $ar1 = array(1);
 try {
     var_dump( array_multisort($ar1, SORT_ASC, SORT_ASC) );
-} catch (Error $e) {
+} catch (\TypeError $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -22,7 +22,7 @@ echo "\n-- Testing array_multisort() function with repeated flags --\n";
 $ar1 = array(1);
 try {
     var_dump( array_multisort($ar1, SORT_STRING, SORT_NUMERIC) );
-} catch (Error $e) {
+} catch (\TypeError $e) {
     echo $e->getMessage() . "\n";
 }
 

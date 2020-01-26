@@ -38,6 +38,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_void_return, IS_VOID, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_deprecated, IS_VOID, 0)
+	ZEND_ARG_INFO(0, arg1)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_terminate_string, 0, 0, 1)
 	ZEND_ARG_INFO(1, str)
 ZEND_END_ARG_INFO()
@@ -76,7 +80,14 @@ ZEND_FUNCTION(zend_test_void_return)
 	/* dummy */
 }
 
-/* Create a string without terminating null byte. Must be termined with
+ZEND_FUNCTION(zend_test_deprecated)
+{
+	zval *arg1;
+
+	zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg1);
+}
+
+/* Create a string without terminating null byte. Must be terminated with
  * zend_terminate_string() before destruction, otherwise a warning is issued
  * in debug builds. */
 ZEND_FUNCTION(zend_create_unterminated_string)
@@ -84,7 +95,7 @@ ZEND_FUNCTION(zend_create_unterminated_string)
 	zend_string *str, *res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	res = zend_string_alloc(ZSTR_LEN(str), 0);
@@ -100,7 +111,7 @@ ZEND_FUNCTION(zend_terminate_string)
 	zend_string *str;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
@@ -113,7 +124,7 @@ ZEND_FUNCTION(zend_leak_bytes)
 	zend_long leakbytes = 3;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &leakbytes) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	emalloc(leakbytes);
@@ -127,7 +138,7 @@ ZEND_FUNCTION(zend_leak_variable)
 	zval *zv;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zv) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!Z_REFCOUNTED_P(zv)) {
@@ -259,8 +270,8 @@ PHP_MINIT_FUNCTION(zend_test)
 		zend_string *class_name2 = zend_string_init("Iterator", sizeof("Iterator") - 1, 1);
 		zend_type_list *type_list = malloc(ZEND_TYPE_LIST_SIZE(2));
 		type_list->num_types = 2;
-		type_list->types[0] = ZEND_TYPE_LIST_ENCODE_NAME(class_name1);
-		type_list->types[1] = ZEND_TYPE_LIST_ENCODE_NAME(class_name2);
+		type_list->types[0] = (zend_type) ZEND_TYPE_INIT_CLASS(class_name1, 0, 0);
+		type_list->types[1] = (zend_type) ZEND_TYPE_INIT_CLASS(class_name2, 0, 0);
 		zend_type type = ZEND_TYPE_INIT_PTR(type_list, _ZEND_TYPE_LIST_BIT, 1, 0);
 		zval val;
 		ZVAL_NULL(&val);
@@ -290,6 +301,8 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_declare_property_null(zend_test_trait, "testProp", sizeof("testProp")-1, ZEND_ACC_PUBLIC);
 
 	zend_register_class_alias("_ZendTestClassAlias", zend_test_class);
+
+	REGISTER_LONG_CONSTANT("ZEND_TEST_DEPRECATED", 42, CONST_PERSISTENT | CONST_DEPRECATED);
 	return SUCCESS;
 }
 
@@ -322,6 +335,7 @@ static const zend_function_entry zend_test_functions[] = {
 	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
 	ZEND_FE(zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return)
 	ZEND_FE(zend_test_void_return, arginfo_zend_test_void_return)
+	ZEND_DEP_FE(zend_test_deprecated, arginfo_zend_test_deprecated)
 	ZEND_FE(zend_create_unterminated_string, NULL)
 	ZEND_FE(zend_terminate_string, arginfo_zend_terminate_string)
 	ZEND_FE(zend_leak_bytes, NULL)
@@ -348,3 +362,12 @@ ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(zend_test)
 #endif
+
+struct bug79096 bug79096(void)
+{
+  struct bug79096 b;
+
+  b.a = 1;
+  b.b = 1;
+  return b;
+}

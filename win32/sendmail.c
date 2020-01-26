@@ -1,7 +1,7 @@
 /*
  *    PHP Sendmail for Windows.
  *
- *  This file is rewritten specificly for PHPFI.  Some functionality
+ *  This file is rewritten specifically for PHPFI.  Some functionality
  *  has been removed (MIME and file attachments).  This code was
  *  modified from code based on code written by Jarle Aase.
  *
@@ -91,7 +91,7 @@ static char *ErrorMessages[] =
 };
 
 /* This pattern converts all single occurrences of \n (Unix)
- * withour a leading \r to \r\n and all occurrences of \r (Mac)
+ * without a leading \r to \r\n and all occurrences of \r (Mac)
  * without a trailing \n to \r\n
  * Thx to Nibbler from ircnet/#linuxger
  */
@@ -114,7 +114,7 @@ static char *ErrorMessages[] =
 
 /* This function is meant to unify the headers passed to to mail()
  * This means, use PCRE to transform single occurrences of \n or \r in \r\n
- * As a second step we also eleminate all \r\n occurrences which are:
+ * As a second step we also eliminate all \r\n occurrences which are:
  * 1) At the start of the header
  * 2) At the end of the header
  * 3) Two or more occurrences in the header are removed so only one is left
@@ -207,9 +207,6 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		/* Create a lowercased header for all the searches so we're finally case
 		 * insensitive when searching for a pattern. */
 		headers_lc = zend_string_tolower(headers_trim);
-		if (headers_lc == headers_trim) {
-			zend_string_release_ex(headers_lc, 0);
-		}
 	}
 
 	/* Fall back to sendmail_from php.ini setting */
@@ -273,7 +270,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		/* 128 is safe here, the specifier in snprintf isn't longer than that */
 		*error_message = ecalloc(1, HOST_NAME_LEN + 128);
 		snprintf(*error_message, HOST_NAME_LEN + 128,
-			"Failed to connect to mailserver at \"%s\" port %d, verify your \"SMTP\" "
+			"Failed to connect to mailserver at \"%s\" port " ZEND_ULONG_FMT ", verify your \"SMTP\" "
 			"and \"smtp_port\" setting in php.ini or use ini_set()",
 			PW32G(mail_host), !INI_INT("smtp_port") ? 25 : INI_INT("smtp_port"));
 		return FAILURE;
@@ -890,7 +887,7 @@ again:
 	/* Check for newline */
 	Index += rlen;
 
-	/* SMPT RFC says \r\n is the only valid line ending, who are we to argue ;)
+	/* SMTP RFC says \r\n is the only valid line ending, who are we to argue ;)
 	 * The response code must contain at least 5 characters ex. 220\r\n */
 	if (Received < 5 || buf[Received - 1] != '\n' || buf[Received - 2] != '\r') {
 		goto again;
@@ -961,7 +958,7 @@ static unsigned long GetAddr(LPSTR szHost)
 // Name:  int FormatEmailAddress
 // Input:
 // Output:
-// Description: Formats the email address to remove any content ouside
+// Description: Formats the email address to remove any content outside
 //   of the angle brackets < > as per RFC 2821.
 //
 //   Returns the invalidly formatted mail address if the < > are

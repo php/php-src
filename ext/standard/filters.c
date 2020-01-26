@@ -1369,14 +1369,14 @@ static int strfilter_convert_append_bucket(
 
 			switch (err) {
 				case PHP_CONV_ERR_INVALID_SEQ:
-					php_error_docref(NULL, E_WARNING, "stream filter (%s): invalid byte sequence", inst->filtername);
+					php_error_docref(NULL, E_WARNING, "Stream filter (%s): invalid byte sequence", inst->filtername);
 					goto out_failure;
 
 				case PHP_CONV_ERR_MORE:
 					if (ps != NULL) {
 						if (icnt > 0) {
 							if (inst->stub_len >= sizeof(inst->stub)) {
-								php_error_docref(NULL, E_WARNING, "stream filter (%s): insufficient buffer", inst->filtername);
+								php_error_docref(NULL, E_WARNING, "Stream filter (%s): insufficient buffer", inst->filtername);
 								goto out_failure;
 							}
 							inst->stub[inst->stub_len++] = *(ps++);
@@ -1391,7 +1391,7 @@ static int strfilter_convert_append_bucket(
 					break;
 
 				case PHP_CONV_ERR_UNEXPECTED_EOS:
-					php_error_docref(NULL, E_WARNING, "stream filter (%s): unexpected end of stream", inst->filtername);
+					php_error_docref(NULL, E_WARNING, "Stream filter (%s): unexpected end of stream", inst->filtername);
 					goto out_failure;
 
 				case PHP_CONV_ERR_TOO_BIG: {
@@ -1421,7 +1421,7 @@ static int strfilter_convert_append_bucket(
 				} break;
 
 				case PHP_CONV_ERR_UNKNOWN:
-					php_error_docref(NULL, E_WARNING, "stream filter (%s): unknown error", inst->filtername);
+					php_error_docref(NULL, E_WARNING, "Stream filter (%s): unknown error", inst->filtername);
 					goto out_failure;
 
 				default:
@@ -1437,13 +1437,13 @@ static int strfilter_convert_append_bucket(
 				php_conv_convert(inst->cd, &ps, &icnt, &pd, &ocnt)));
 		switch (err) {
 			case PHP_CONV_ERR_INVALID_SEQ:
-				php_error_docref(NULL, E_WARNING, "stream filter (%s): invalid byte sequence", inst->filtername);
+				php_error_docref(NULL, E_WARNING, "Stream filter (%s): invalid byte sequence", inst->filtername);
 				goto out_failure;
 
 			case PHP_CONV_ERR_MORE:
 				if (ps != NULL) {
 					if (icnt > sizeof(inst->stub)) {
-						php_error_docref(NULL, E_WARNING, "stream filter (%s): insufficient buffer", inst->filtername);
+						php_error_docref(NULL, E_WARNING, "Stream filter (%s): insufficient buffer", inst->filtername);
 						goto out_failure;
 					}
 					memcpy(inst->stub, ps, icnt);
@@ -1451,7 +1451,7 @@ static int strfilter_convert_append_bucket(
 					ps += icnt;
 					icnt = 0;
 				} else {
-					php_error_docref(NULL, E_WARNING, "stream filter (%s): unexpected octet values", inst->filtername);
+					php_error_docref(NULL, E_WARNING, "Stream filter (%s): unexpected octet values", inst->filtername);
 					goto out_failure;
 				}
 				break;
@@ -1483,7 +1483,7 @@ static int strfilter_convert_append_bucket(
 			} break;
 
 			case PHP_CONV_ERR_UNKNOWN:
-				php_error_docref(NULL, E_WARNING, "stream filter (%s): unknown error", inst->filtername);
+				php_error_docref(NULL, E_WARNING, "Stream filter (%s): unknown error", inst->filtername);
 				goto out_failure;
 
 			default:
@@ -1583,7 +1583,7 @@ static php_stream_filter *strfilter_convert_create(const char *filtername, zval 
 	int conv_mode = 0;
 
 	if (filterparams != NULL && Z_TYPE_P(filterparams) != IS_ARRAY) {
-		php_error_docref(NULL, E_WARNING, "stream filter (%s): invalid filter parameter", filtername);
+		php_error_docref(NULL, E_WARNING, "Stream filter (%s): invalid filter parameter", filtername);
 		return NULL;
 	}
 

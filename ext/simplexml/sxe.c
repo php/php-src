@@ -39,7 +39,7 @@ PHP_SXE_API zend_class_entry *ce_SimpleXMLElement;
 PHP_METHOD(ce_SimpleXMLIterator, rewind)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_sxe_rewind_iterator(Z_SXEOBJ_P(ZEND_THIS));
@@ -53,7 +53,7 @@ PHP_METHOD(ce_SimpleXMLIterator, valid)
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(!Z_ISUNDEF(sxe->iter.data));
@@ -68,7 +68,7 @@ PHP_METHOD(ce_SimpleXMLIterator, current)
 	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_ISUNDEF(sxe->iter.data)) {
@@ -89,7 +89,7 @@ PHP_METHOD(ce_SimpleXMLIterator, key)
 	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_ISUNDEF(sxe->iter.data)) {
@@ -111,7 +111,7 @@ PHP_METHOD(ce_SimpleXMLIterator, key)
 PHP_METHOD(ce_SimpleXMLIterator, next)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_sxe_move_forward_iterator(Z_SXEOBJ_P(ZEND_THIS));
@@ -127,7 +127,7 @@ PHP_METHOD(ce_SimpleXMLIterator, hasChildren)
 	xmlNodePtr      node;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_ISUNDEF(sxe->iter.data) || sxe->iter.type == SXE_ITER_ATTRLIST) {
@@ -154,7 +154,7 @@ PHP_METHOD(ce_SimpleXMLIterator, getChildren)
 	zval *data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_ISUNDEF(sxe->iter.data) || sxe->iter.type == SXE_ITER_ATTRLIST) {

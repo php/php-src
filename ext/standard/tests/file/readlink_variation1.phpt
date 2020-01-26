@@ -2,6 +2,8 @@
 Test readlink() function: usage variations - invalid filenames
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
+--CONFLICTS--
+obscure_filename
 --FILE--
 <?php
 /* Prototype: string readlink ( string $path );
@@ -30,8 +32,6 @@ foreach( $filenames as $filename ) {
   var_dump( readlink($filename) );
   clearstatcache();
 }
-
-echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
@@ -61,5 +61,3 @@ bool(false)
 
 Warning: readlink(): %s in %s on line %d
 bool(false)
-
-*** Done ***

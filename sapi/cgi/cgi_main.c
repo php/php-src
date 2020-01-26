@@ -1101,7 +1101,7 @@ static int is_valid_path(const char *path)
 
   initializes request_info structure
 
-  specificly in this section we handle proper translations
+  specifically in this section we handle proper translations
   for:
 
   PATH_INFO
@@ -1575,7 +1575,7 @@ static PHP_MINFO_FUNCTION(cgi)
 PHP_FUNCTION(apache_child_terminate) /* {{{ */
 {
 	if (zend_parse_parameters_none()) {
-		return;
+		RETURN_THROWS();
 	}
 	if (fcgi_is_fastcgi()) {
 		fcgi_terminate();
@@ -1587,7 +1587,7 @@ PHP_FUNCTION(apache_child_terminate) /* {{{ */
 PHP_FUNCTION(apache_request_headers) /* {{{ */
 {
 	if (zend_parse_parameters_none()) {
-		return;
+		RETURN_THROWS();
 	}
 	array_init(return_value);
 	if (fcgi_is_fastcgi()) {
@@ -1700,7 +1700,7 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 PHP_FUNCTION(apache_response_headers) /* {{{ */
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	array_init(return_value);

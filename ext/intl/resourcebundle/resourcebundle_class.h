@@ -38,13 +38,11 @@ static inline ResourceBundle_object *php_intl_resourcebundle_fetch_object(zend_o
 #define RESOURCEBUNDLE_METHOD_INIT_VARS		INTL_METHOD_INIT_VARS(ResourceBundle, rb)
 #define RESOURCEBUNDLE_METHOD_FETCH_OBJECT_NO_CHECK	INTL_METHOD_FETCH_OBJECT(INTL_RESOURCEBUNDLE, rb)
 #define RESOURCEBUNDLE_METHOD_FETCH_OBJECT							\
-	INTL_METHOD_FETCH_OBJECT(INTL_RESOURCEBUNDLE, rb);					\
+	INTL_METHOD_FETCH_OBJECT(INTL_RESOURCEBUNDLE, rb);				\
 	if (RESOURCEBUNDLE_OBJECT(rb) == NULL) {						\
-		intl_errors_set(&rb->error, U_ILLEGAL_ARGUMENT_ERROR,		\
-				"Found unconstructed ResourceBundle", 0);	\
-		RETURN_FALSE;												\
+		zend_throw_error(NULL, "Found unconstructed ResourceBundle");	\
+		RETURN_THROWS();											\
 	}
-
 
 #define RESOURCEBUNDLE_OBJECT(rb)			(rb)->me
 

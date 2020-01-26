@@ -32,11 +32,11 @@
 */
 
 const zend_function_entry php_dom_characterdata_class_functions[] = {
-	PHP_FALIAS(substringData, dom_characterdata_substring_data, arginfo_class_DOMCharacterData_substringData)
-	PHP_FALIAS(appendData, dom_characterdata_append_data, arginfo_class_DOMCharacterData_appendData)
-	PHP_FALIAS(insertData, dom_characterdata_insert_data, arginfo_class_DOMCharacterData_insertData)
-	PHP_FALIAS(deleteData, dom_characterdata_delete_data, arginfo_class_DOMCharacterData_deleteData)
-	PHP_FALIAS(replaceData, dom_characterdata_replace_data, arginfo_class_DOMCharacterData_replaceData)
+	PHP_ME(domcharacterdata, substringData, arginfo_class_DOMCharacterData_substringData, ZEND_ACC_PUBLIC)
+	PHP_ME(domcharacterdata, appendData, arginfo_class_DOMCharacterData_appendData, ZEND_ACC_PUBLIC)
+	PHP_ME(domcharacterdata, insertData, arginfo_class_DOMCharacterData_insertData, ZEND_ACC_PUBLIC)
+	PHP_ME(domcharacterdata, deleteData, arginfo_class_DOMCharacterData_deleteData, ZEND_ACC_PUBLIC)
+	PHP_ME(domcharacterdata, replaceData, arginfo_class_DOMCharacterData_replaceData, ZEND_ACC_PUBLIC)
 	PHP_ME(domcharacterdata, remove, arginfo_class_DOMChildNode_remove, ZEND_ACC_PUBLIC)
 	PHP_ME(domcharacterdata, after, arginfo_class_DOMChildNode_after, ZEND_ACC_PUBLIC)
 	PHP_ME(domcharacterdata, before, arginfo_class_DOMChildNode_before, ZEND_ACC_PUBLIC)
@@ -126,7 +126,7 @@ int dom_characterdata_length_read(dom_object *obj, zval *retval)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6531BCCF
 Since:
 */
-PHP_FUNCTION(dom_characterdata_substring_data)
+PHP_METHOD(domcharacterdata, substringData)
 {
 	zval       *id;
 	xmlChar    *cur;
@@ -138,7 +138,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset, &count) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
@@ -176,7 +176,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-32791A2F
 Since:
 */
-PHP_FUNCTION(dom_characterdata_append_data)
+PHP_METHOD(domcharacterdata, appendData)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -186,7 +186,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
@@ -199,7 +199,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3EDB695F
 Since:
 */
-PHP_FUNCTION(dom_characterdata_insert_data)
+PHP_METHOD(domcharacterdata, insertData)
 {
 	zval *id;
 	xmlChar		*cur, *first, *second;
@@ -212,7 +212,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &offset, &arg, &arg_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
@@ -249,7 +249,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7C603781
 Since:
 */
-PHP_FUNCTION(dom_characterdata_delete_data)
+PHP_METHOD(domcharacterdata, deleteData)
 {
 	zval *id;
 	xmlChar    *cur, *substring, *second;
@@ -260,7 +260,7 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &offset, &count) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);
@@ -305,7 +305,7 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-E5CBA7FB
 Since:
 */
-PHP_FUNCTION(dom_characterdata_replace_data)
+PHP_METHOD(domcharacterdata, replaceData)
 {
 	zval *id;
 	xmlChar		*cur, *substring, *second = NULL;
@@ -318,7 +318,7 @@ PHP_FUNCTION(dom_characterdata_replace_data)
 
 	id = ZEND_THIS;
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lls", &offset, &count, &arg, &arg_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(node, id, xmlNodePtr, intern);

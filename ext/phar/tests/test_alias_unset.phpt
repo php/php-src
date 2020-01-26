@@ -40,4 +40,4 @@ $a = file_get_contents($pname . '/file1.txt'); // this fails because $fname2 ref
 Cannot open archive "%stest_alias_unset.2.phar.php", alias is already in use by existing archive
 string(5) "first"
 
-Warning: file_get_contents(phar://%sfile1.txt): failed to open stream: Cannot open archive "%stest_alias_unset.phar.php", alias is already in use by existing archive in %stest_alias_unset.php on line %d
+Warning: file_get_contents(phar://%sfile1.txt): Failed to open stream: Cannot open archive "%stest_alias_unset.phar.php", alias is already in use by existing archive in %stest_alias_unset.php on line %d

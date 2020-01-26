@@ -10,7 +10,7 @@ if (!$IS_MYSQLND) {
 }
 ?>
 --INI--
-mysqlnd.debug=d:t:O,/tmp/mysqlnd.trace
+mysqlnd.debug=d:t:O,{TMP}/mysqlnd.trace
 mysqlnd.net_read_buffer_size=1
 mysqlnd.mempool_default_size=1
 mysqlnd.fetch_data_copy=0

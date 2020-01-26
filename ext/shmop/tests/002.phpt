@@ -52,22 +52,22 @@ echo PHP_EOL, '## shmop_write function tests ##';
 Warning: shmop_open():  is not a valid flag in %s on line %d
 bool(false)
 
-Warning: shmop_open(): invalid access mode in %s on line %d
+Warning: shmop_open(): Invalid access mode in %s on line %d
 bool(false)
 
-Warning: shmop_open(): unable to attach or create shared memory segment 'Invalid argument' in %s on line %d
+Warning: shmop_open(): Unable to attach or create shared memory segment 'Invalid argument' in %s on line %d
 bool(false)
 
 Warning: shmop_open(): Shared memory segment size must be greater than zero in %s on line %d
 bool(false)
 
 ## shmop_read function tests ##
-Warning: shmop_read(): start is out of range in %s on line %d
+Warning: shmop_read(): Start is out of range in %s on line %d
 bool(false)
 
-Warning: shmop_read(): count is out of range in %s on line %d
+Warning: shmop_read(): Count is out of range in %s on line %d
 bool(false)
 
 ## shmop_write function tests ##
-Warning: shmop_write(): offset out of range in %s on line %d
+Warning: shmop_write(): Offset out of range in %s on line %d
 bool(false)

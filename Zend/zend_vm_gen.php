@@ -2394,19 +2394,22 @@ function gen_vm($def, $skel) {
 		           strpos($line,"ZEND_VM_HOT_OBJ_TYPE_SPEC_HANDLER(") === 0) {
 		  // Parsing opcode handler's definition
 			if (preg_match(
-					"/^ZEND_VM_(HOT_|INLINE_|HOT_OBJ_|HOT_SEND_|HOT_NOCONST_|HOT_NOCONSTCONST_)?TYPE_SPEC_HANDLER\(\s*([A-Z_]+)\s*,\s*((?:[^(,]|\([^()]*|(?R)*\))*),\s*([A-Za-z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
+					"/^ZEND_VM_(HOT_|INLINE_|HOT_OBJ_|HOT_SEND_|HOT_NOCONST_|HOT_NOCONSTCONST_)?TYPE_SPEC_HANDLER\(\s*([A-Z_|]+)\s*,\s*((?:[^(,]|\([^()]*|(?R)*\))*),\s*([A-Za-z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
 					$line,
 					$m) == 0) {
 				die("ERROR ($def:$lineno): Invalid ZEND_VM_TYPE_HANDLER_HANDLER definition.\n");
 			}
 			$hot = !empty($m[1]) ? $m[1] : false;
-			$orig_op = $m[2];
-			if (!isset($opnames[$orig_op])) {
-				die("ERROR ($def:$lineno): Opcode with name '$orig_op' is not defined.\n");
-			}
-			$orig_code = $opnames[$orig_op];
-			$condition = $m[3];
+			$orig_op_list = $m[2];
 			$code = $extra_num++;
+			foreach (explode('|', $orig_op_list) as $orig_op) {
+				if (!isset($opnames[$orig_op])) {
+					die("ERROR ($def:$lineno): Opcode with name '$orig_op' is not defined.\n");
+				}
+				$orig_code = $opnames[$orig_op];
+				$condition = $m[3];
+				$opcodes[$orig_code]['type_spec'][$code] = $condition;
+			}
 			$op = $m[4];
 			$op1  = parse_operand_spec($def, $lineno, $m[5], $flags1);
 			$op2  = parse_operand_spec($def, $lineno, $m[6], $flags2);
@@ -2418,7 +2421,6 @@ function gen_vm($def, $skel) {
 			if (isset($opcodes[$code])) {
 				die("ERROR ($def:$lineno): Opcode with name '$code' is already defined.\n");
 			}
-			$opcodes[$orig_code]['type_spec'][$code] = $condition;
 			$used_extra_spec["TYPE"] = 1;
 			$opcodes[$code] = array("op"=>$op,"op1"=>$op1,"op2"=>$op2,"code"=>"","flags"=>$flags,"hot"=>$hot,"is_type_spec"=>true);
 			if (isset($m[10])) {

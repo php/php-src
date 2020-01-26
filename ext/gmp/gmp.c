@@ -826,7 +826,7 @@ static inline void _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAMETERS, gmp_binary_op
 	zval *a_arg, *b_arg;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a_arg, &b_arg) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	gmp_zval_binary_ui_op(return_value, a_arg, b_arg, gmp_op, gmp_ui_op, check_b_zero);
@@ -869,7 +869,7 @@ static inline void _gmp_unary_op(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_op_t gm
 	zval *a_arg;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &a_arg) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	gmp_zval_unary_op(return_value, a_arg, gmp_op);
@@ -885,7 +885,7 @@ static inline void _gmp_unary_opl(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_opl_t 
 	gmp_temp_t temp_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &a_arg) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
@@ -903,7 +903,7 @@ static inline void _gmp_binary_opl(INTERNAL_FUNCTION_PARAMETERS, gmp_binary_opl_
 	gmp_temp_t temp_a, temp_b;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a_arg, &b_arg) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
@@ -925,7 +925,7 @@ ZEND_FUNCTION(gmp_init)
 	zend_long base = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &number_arg, &base) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (base && (base < 2 || base > GMP_MAX_BASE)) {
@@ -995,7 +995,7 @@ ZEND_FUNCTION(gmp_import)
 	mpz_ptr gmpnumber;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ll", &data, &data_len, &size, &options) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (gmp_import_export_validate(size, options, &order, &endian) == FAILURE) {
@@ -1026,7 +1026,7 @@ ZEND_FUNCTION(gmp_export)
 	gmp_temp_t temp_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|ll", &gmpnumber_arg, &size, &options) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (gmp_import_export_validate(size, options, &order, &endian) == FAILURE) {
@@ -1059,7 +1059,7 @@ ZEND_FUNCTION(gmp_intval)
 	zval *gmpnumber_arg;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &gmpnumber_arg) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	if (IS_GMP(gmpnumber_arg)) {
@@ -1080,7 +1080,7 @@ ZEND_FUNCTION(gmp_strval)
 	gmp_temp_t temp_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &gmpnumber_arg, &base) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* Although the maximum base in general in GMP is 62, mpz_get_str()
@@ -1130,7 +1130,7 @@ ZEND_FUNCTION(gmp_div_qr)
 	zend_long round = GMP_ROUND_ZERO;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz|l", &a_arg, &b_arg, &round) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	switch (round) {
@@ -1158,7 +1158,7 @@ ZEND_FUNCTION(gmp_div_r)
 	zend_long round = GMP_ROUND_ZERO;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz|l", &a_arg, &b_arg, &round) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	switch (round) {
@@ -1186,7 +1186,7 @@ ZEND_FUNCTION(gmp_div_q)
 	zend_long round = GMP_ROUND_ZERO;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz|l", &a_arg, &b_arg, &round) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	switch (round) {
@@ -1246,7 +1246,7 @@ ZEND_FUNCTION(gmp_fact)
 	zval *a_arg;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &a_arg) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	if (IS_GMP(a_arg)) {
@@ -1284,7 +1284,7 @@ ZEND_FUNCTION(gmp_binomial)
 	mpz_ptr gmpnum_result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &n_arg, &k) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (k < 0) {
@@ -1315,7 +1315,7 @@ ZEND_FUNCTION(gmp_pow)
 	zend_long exp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &base_arg, &exp) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (exp < 0) {
@@ -1346,7 +1346,7 @@ ZEND_FUNCTION(gmp_powm)
 	gmp_temp_t temp_base, temp_exp, temp_mod;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzz", &base_arg, &exp_arg, &mod_arg) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_base, base_arg, temp_base);
@@ -1395,7 +1395,7 @@ ZEND_FUNCTION(gmp_sqrt)
 	gmp_temp_t temp_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &a_arg) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
@@ -1422,7 +1422,7 @@ ZEND_FUNCTION(gmp_sqrtrem)
 	zval result1, result2;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &a_arg) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
@@ -1455,7 +1455,7 @@ ZEND_FUNCTION(gmp_root)
 	gmp_temp_t temp_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &a_arg, &nth) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (nth <= 0) {
@@ -1488,7 +1488,7 @@ ZEND_FUNCTION(gmp_rootrem)
 	zval result1, result2;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &a_arg, &nth) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (nth <= 0) {
@@ -1534,7 +1534,7 @@ ZEND_FUNCTION(gmp_perfect_square)
 	gmp_temp_t temp_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &a_arg) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
@@ -1553,7 +1553,7 @@ ZEND_FUNCTION(gmp_perfect_power)
 	gmp_temp_t temp_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &a_arg) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
@@ -1573,7 +1573,7 @@ ZEND_FUNCTION(gmp_prob_prime)
 	gmp_temp_t temp_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|l", &gmpnumber_arg, &reps) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, gmpnumber_arg, temp_a);
@@ -1609,7 +1609,7 @@ ZEND_FUNCTION(gmp_gcdext)
 	zval result_g, result_s, result_t;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a_arg, &b_arg) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
@@ -1640,7 +1640,7 @@ ZEND_FUNCTION(gmp_invert)
 	int res;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a_arg, &b_arg) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
@@ -1684,7 +1684,7 @@ ZEND_FUNCTION(gmp_kronecker)
 	int result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a_arg, &b_arg) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(a_arg) == IS_LONG && Z_TYPE_P(b_arg) != IS_LONG) {
@@ -1724,7 +1724,7 @@ ZEND_FUNCTION(gmp_cmp)
 	zval *a_arg, *b_arg;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a_arg, &b_arg) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	gmp_cmp(return_value, a_arg, b_arg);
@@ -1741,7 +1741,7 @@ ZEND_FUNCTION(gmp_sign)
 	gmp_temp_t temp_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &a_arg) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
@@ -1771,7 +1771,7 @@ ZEND_FUNCTION(gmp_random_seed)
 	gmp_temp_t temp_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &seed) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	gmp_init_random();
@@ -1799,7 +1799,7 @@ ZEND_FUNCTION(gmp_random_bits)
 	mpz_ptr gmpnum_result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &bits) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (bits <= 0) {
@@ -1824,7 +1824,7 @@ ZEND_FUNCTION(gmp_random_range)
 	gmp_temp_t temp_a, temp_b;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &min_arg, &max_arg) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	gmp_init_random();
@@ -1932,7 +1932,7 @@ ZEND_FUNCTION(gmp_setbit)
 	mpz_ptr gmpnum_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol|b", &a_arg, gmp_ce, &index, &set) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (index < 0) {
@@ -1963,7 +1963,7 @@ ZEND_FUNCTION(gmp_clrbit)
 	mpz_ptr gmpnum_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ol", &a_arg, gmp_ce, &index) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	if (index < 0) {
@@ -1986,7 +1986,7 @@ ZEND_FUNCTION(gmp_testbit)
 	gmp_temp_t temp_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &a_arg, &index) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	if (index < 0) {
@@ -2026,7 +2026,7 @@ ZEND_FUNCTION(gmp_scan0)
 	zend_long start;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &a_arg, &start) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	if (start < 0) {
@@ -2051,7 +2051,7 @@ ZEND_FUNCTION(gmp_scan1)
 	zend_long start;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &a_arg, &start) == FAILURE){
-		return;
+		RETURN_THROWS();
 	}
 
 	if (start < 0) {

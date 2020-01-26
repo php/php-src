@@ -68,7 +68,7 @@ $arrays = array (
 $arr2 = array(1, 2, 1.2, 2.3333, "col\tor", '\v\fworld', $fp,
               "Hello world", $heredoc, new classA(), 444.432, "fruit");
 
-// loop through each sub-array within $arrrays to check the behavior of array_intersect()
+// loop through each sub-array within $arrays to check the behavior of array_intersect()
 $iterator = 1;
 foreach($arrays as $arr1) {
   echo "-- Iterator $iterator --\n";

@@ -1,12 +1,12 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_parse_string, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_tidy_parse_string, 0, 1, tidy, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
 	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_error_buffer, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_tidy_get_error_buffer, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, object, tidy, 0)
 ZEND_END_ARG_INFO()
 
@@ -14,7 +14,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_tidy_get_output, 0, 1, IS_STRING
 	ZEND_ARG_OBJ_INFO(0, object, tidy, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_parse_file, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_tidy_parse_file, 0, 1, tidy, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, file, IS_STRING, 0)
 	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
@@ -25,15 +25,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_tidy_clean_repair, 0, 1, _IS_BOO
 	ZEND_ARG_OBJ_INFO(0, object, tidy, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_repair_string, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_tidy_repair_string, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
-	ZEND_ARG_INFO(0, config_file)
+	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_repair_file, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_tidy_repair_file, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-	ZEND_ARG_INFO(0, config_file)
+	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, use_include_path, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -44,7 +44,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_tidy_get_release, 0, 0, IS_STRIN
 ZEND_END_ARG_INFO()
 
 #if HAVE_TIDYOPTGETDOC
-ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_opt_doc, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_tidy_get_opt_doc, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, object, tidy, 0)
 	ZEND_ARG_TYPE_INFO(0, optname, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -72,7 +72,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_tidy_config_count arginfo_tidy_get_status
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_getopt, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_tidy_getopt, 0, 2, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_BOOL)
 	ZEND_ARG_OBJ_INFO(0, object, tidy, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -91,7 +91,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-	ZEND_ARG_INFO(0, config_file)
+	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, use_include_path, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
@@ -112,19 +112,19 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_tidy_parseString, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
-	ZEND_ARG_INFO(0, config_optinons)
+	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_tidy_repairString, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
-	ZEND_ARG_INFO(0, config_file)
+	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_tidy_repairFile, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-	ZEND_ARG_INFO(0, config_file)
+	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, use_include_path, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()

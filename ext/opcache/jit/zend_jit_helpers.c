@@ -610,7 +610,7 @@ try_string_offset:
 		offset = Z_LVAL_P(dim);
 	}
 
-	if (UNEXPECTED(Z_STRLEN_P(container) < (size_t)((offset < 0) ? -offset : (offset + 1)))) {
+	if (UNEXPECTED(Z_STRLEN_P(container) < ((offset < 0) ? -(size_t)offset : ((size_t)offset + 1)))) {
 		zend_error(E_WARNING, "Uninitialized string offset: " ZEND_LONG_FMT, offset);
 		ZVAL_EMPTY_STRING(result);
 	} else {
@@ -658,7 +658,7 @@ try_string_offset:
 		offset = Z_LVAL_P(dim);
 	}
 
-	if (UNEXPECTED(Z_STRLEN_P(container) < (size_t)((offset < 0) ? -offset : (offset + 1)))) {
+	if (UNEXPECTED(Z_STRLEN_P(container) < ((offset < 0) ? -(size_t)offset : ((size_t)offset + 1)))) {
 		ZVAL_NULL(result);
 	} else {
 		zend_uchar c;
@@ -895,13 +895,18 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		c = (zend_uchar)Z_STRVAL_P(value)[0];
 	}
 
-	if (string_len == 0) {
-		/* Error on empty input string */
-		zend_error(E_WARNING, "Cannot assign an empty string to a string offset");
-		if (result) {
-			ZVAL_NULL(result);
+
+	if (string_len != 1) {
+		if (string_len == 0) {
+			/* Error on empty input string */
+			zend_throw_error(NULL, "Cannot assign an empty string to a string offset");
+			if (result) {
+				ZVAL_NULL(result);
+			}
+			return;
 		}
-		return;
+
+		zend_error(E_WARNING, "Only the first byte will be assigned to the string offset");
 	}
 
 	if (offset < 0) { /* Handle negative offset */
@@ -1143,12 +1148,12 @@ static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_arra
 	if (ZEND_TYPE_HAS_CLASS(arg_info->type) && Z_TYPE_P(arg) == IS_OBJECT) {
 		zend_class_entry *ce;
 		if (ZEND_TYPE_HAS_LIST(arg_info->type)) {
-			void *entry;
-			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(arg_info->type), entry) {
+			zend_type *list_type;
+			ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(arg_info->type), list_type) {
 				if (*cache_slot) {
 					ce = *cache_slot;
 				} else {
-					ce = zend_fetch_class(ZEND_TYPE_LIST_GET_NAME(entry),
+					ce = zend_fetch_class(ZEND_TYPE_NAME(*list_type),
 						(ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 					if (!ce) {
 						cache_slot++;

@@ -899,7 +899,7 @@ static int fpm_conf_process_all_pools() /* {{{ */
 
 			for (i = 0; i < strlen(ping); i++) {
 				if (!isalnum(ping[i]) && ping[i] != '/' && ping[i] != '-' && ping[i] != '_' && ping[i] != '.' && ping[i] != '~') {
-					zlog(ZLOG_ERROR, "[pool %s] the ping path '%s' must containt only the following characters '[alphanum]/_-.~'", wp->config->name, ping);
+					zlog(ZLOG_ERROR, "[pool %s] the ping path '%s' must contain only the following characters '[alphanum]/_-.~'", wp->config->name, ping);
 					return -1;
 				}
 			}
@@ -1538,7 +1538,7 @@ int fpm_conf_load_ini_file(char *filename) /* {{{ */
 	}
 
 	if (ini_recursion++ > 4) {
-		zlog(ZLOG_ERROR, "failed to include more than 5 files recusively");
+		zlog(ZLOG_ERROR, "failed to include more than 5 files recursively");
 		close(fd);
 		return -1;
 	}

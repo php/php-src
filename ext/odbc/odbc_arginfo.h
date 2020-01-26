@@ -23,12 +23,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_execute, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, parameters_array, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_cursor, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_cursor, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, result_id)
 ZEND_END_ARG_INFO()
 
 #if defined(HAVE_SQLDATASOURCES)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_data_source, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_data_source, 0, 2, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_TYPE_INFO(0, fetch_type, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -43,17 +43,20 @@ ZEND_END_ARG_INFO()
 #define arginfo_odbc_do arginfo_odbc_exec
 
 #if defined(PHP_ODBC_HAVE_FETCH_HASH)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_fetch_object, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_odbc_fetch_object, 0, 1, stdClass, MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_TYPE_INFO(0, rownumber, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(PHP_ODBC_HAVE_FETCH_HASH)
-#define arginfo_odbc_fetch_array arginfo_odbc_fetch_object
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_fetch_array, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
+	ZEND_ARG_INFO(0, result)
+	ZEND_ARG_TYPE_INFO(0, rownumber, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_fetch_into, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_fetch_into, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, result_id)
 	ZEND_ARG_INFO(1, result_array)
 	ZEND_ARG_TYPE_INFO(0, rownumber, IS_LONG, 0)
@@ -64,12 +67,12 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_odbc_fetch_row, 0, 1, _IS_BOOL, 
 	ZEND_ARG_TYPE_INFO(0, row_number, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_result, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_result, 0, 2, MAY_BE_STRING|MAY_BE_BOOL|MAY_BE_NULL)
 	ZEND_ARG_INFO(0, result_id)
 	ZEND_ARG_INFO(0, field)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_result_all, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_result_all, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, result_id)
 	ZEND_ARG_TYPE_INFO(0, format, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -103,25 +106,28 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_odbc_num_fields arginfo_odbc_num_rows
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_field_name, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_field_name, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, result_id)
 	ZEND_ARG_TYPE_INFO(0, field_number, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_odbc_field_type arginfo_odbc_field_name
 
-#define arginfo_odbc_field_len arginfo_odbc_field_name
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_field_len, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
+	ZEND_ARG_INFO(0, result_id)
+	ZEND_ARG_TYPE_INFO(0, field_number, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_odbc_field_precision arginfo_odbc_field_name
+#define arginfo_odbc_field_precision arginfo_odbc_field_len
 
-#define arginfo_odbc_field_scale arginfo_odbc_field_name
+#define arginfo_odbc_field_scale arginfo_odbc_field_len
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_field_num, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_field_num, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, result_id)
 	ZEND_ARG_TYPE_INFO(0, field_name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_autocommit, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_odbc_autocommit, 0, 1, MAY_BE_LONG|MAY_BE_BOOL)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_TYPE_INFO(0, onoff, IS_LONG, 0)
 ZEND_END_ARG_INFO()

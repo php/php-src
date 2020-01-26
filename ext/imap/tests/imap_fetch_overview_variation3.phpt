@@ -71,8 +71,8 @@ imap_fetch_overview() returns an object
 
 Testing with option value:int(%d)
 
-Warning: imap_fetch_overview(): invalid value for the options parameter in %s on line %d
+Warning: imap_fetch_overview(): Invalid value for the options parameter in %s on line %d
 
 Testing with option value:int(-%d)
 
-Warning: imap_fetch_overview(): invalid value for the options parameter in %s on line %d
+Warning: imap_fetch_overview(): Invalid value for the options parameter in %s on line %d
