@@ -4184,7 +4184,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 			if ('\\' == filename[cnt]) {
 				filename[cnt] = '/';
 			}
-		} while (cnt++ <= filename_len);
+		} while (cnt++ < filename_len);
 	}
 #endif
 
