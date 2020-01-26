@@ -7,7 +7,7 @@ DOMParentNode::append()
 require_once("dom_test.inc");
 
 $dom = new DOMDocument;
-$dom->loadXML('<test><mark/></test>');
+$dom->loadXML('<test><mark/><mark /><mark /></test>');
 if(!$dom) {
   echo "Error while parsing the document\n";
   exit;
@@ -23,8 +23,26 @@ var_dump($dom->documentElement->childElementCount);
 print_node($element->childNodes[0]);
 print_node($element->childNodes[1]);
 print_node($element->childNodes[2]);
+print_node($element->childNodes[3]);
+print_node($element->childNodes[4]);
+
+$element->append(
+  $dom->createElement('element', 'content'),
+  'content'
+);
+var_dump($dom->documentElement->childElementCount);
 --EXPECT--
-int(2)
+int(4)
+Node Name: mark
+Node Type: 1
+Num Children: 0
+Node Content: 
+
+Node Name: mark
+Node Type: 1
+Num Children: 0
+Node Content: 
+
 Node Name: mark
 Node Type: 1
 Num Children: 0
@@ -39,3 +57,5 @@ Node Name: #text
 Node Type: 3
 Num Children: 0
 Node Content: content
+
+int(5)
