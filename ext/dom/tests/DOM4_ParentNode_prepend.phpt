@@ -7,13 +7,15 @@ DOMParentNode::prepend()
 require_once("dom_test.inc");
 
 $dom = new DOMDocument;
-$dom->loadXML('<test><mark/></test>');
+$dom->loadXML('<test><mark/><mark/><mark/></test>');
 if(!$dom) {
   echo "Error while parsing the document\n";
   exit;
 }
 
 $element = $dom->documentElement;
+var_dump($element->childElementCount);
+
 $element->prepend(
   $dom->createElement('element', 'content'),
   'content'
@@ -22,7 +24,17 @@ $element->prepend(
 print_node($element->childNodes[0]);
 print_node($element->childNodes[1]);
 print_node($element->childNodes[2]);
+print_node($element->childNodes[3]);
+print_node($element->childNodes[4]);
+
+$element = $dom->documentElement;
+$element->prepend(
+  $dom->createElement('element', 'content'),
+  'content'
+);
+var_dump($element->childElementCount);
 --EXPECT--
+int(3)
 Node Name: element
 Node Type: 1
 Num Children: 1
@@ -36,4 +48,16 @@ Node Content: content
 Node Name: mark
 Node Type: 1
 Num Children: 0
-Node Content:
+Node Content: 
+
+Node Name: mark
+Node Type: 1
+Num Children: 0
+Node Content: 
+
+Node Name: mark
+Node Type: 1
+Num Children: 0
+Node Content: 
+
+int(5)
