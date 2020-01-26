@@ -32,6 +32,6 @@ L0 (15):    RETURN int(1)
 foo: ; (lines=3, args=0, vars=0, tmps=0)
     ; (after optimizer)
     ; %ssccp_010.php:2-13
-L0 (10):    ECHO int(1)
-L1 (12):    ECHO int(1)
+L0 (10):    ECHO string("1")
+L1 (12):    ECHO string("1")
 L2 (13):    RETURN null
