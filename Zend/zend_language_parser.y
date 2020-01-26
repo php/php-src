@@ -232,8 +232,8 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> interface_declaration_statement interface_extends_list
 %type <ast> group_use_declaration inline_use_declarations inline_use_declaration
 %type <ast> mixed_group_use_declaration use_declaration unprefixed_use_declaration
-%type <ast> unprefixed_use_declarations const_decl declare_const_decl inner_statement
-%type <ast> expr expr_or_declare_value optional_expr while_statement for_statement foreach_variable
+%type <ast> unprefixed_use_declarations const_decl inner_statement
+%type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
 %type <ast> extends_from parameter optional_type argument global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
@@ -244,7 +244,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> variable_class_name dereferencable_scalar constant dereferencable
 %type <ast> callable_expr callable_variable static_member new_variable
 %type <ast> encaps_var encaps_var_offset isset_variables
-%type <ast> top_statement_list use_declarations const_list declare_const_list inner_statement_list if_stmt
+%type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
 %type <ast> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
 %type <ast> echo_expr_list unset_variables catch_name_list catch_list parameter_list class_statement_list
 %type <ast> implements_list case_list if_stmt_without_else
@@ -403,11 +403,6 @@ const_list:
 	|	const_decl { $$ = zend_ast_create_list(1, ZEND_AST_CONST_DECL, $1); }
 ;
 
-declare_const_list:
-		declare_const_list ',' declare_const_decl { $$ = zend_ast_list_add($1, $3); }
-	|	declare_const_decl { $$ = zend_ast_create_list(1, ZEND_AST_CONST_DECL, $1); }
-;
-
 inner_statement_list:
 		inner_statement_list inner_statement
 			{ $$ = zend_ast_list_add($1, $2); }
@@ -454,7 +449,7 @@ statement:
 	|	T_FOREACH '(' expr T_AS foreach_variable T_DOUBLE_ARROW foreach_variable ')'
 		foreach_statement
 			{ $$ = zend_ast_create(ZEND_AST_FOREACH, $3, $7, $5, $9); }
-	|	T_DECLARE '(' declare_const_list ')'
+	|	T_DECLARE '(' const_list ')'
 			{ if (!zend_handle_encoding_declaration($3)) { YYERROR; } }
 		declare_statement
 			{ $$ = zend_ast_create(ZEND_AST_DECLARE, $3, $6); }
@@ -849,16 +844,6 @@ class_const_decl:
 
 const_decl:
 	T_STRING '=' expr backup_doc_comment { $$ = zend_ast_create(ZEND_AST_CONST_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL)); }
-;
-
-declare_const_decl:
-	T_STRING '=' expr_or_declare_value backup_doc_comment { $$ = zend_ast_create(ZEND_AST_CONST_ELEM, $1, $3, ($4 ? zend_ast_create_zval_from_str($4) : NULL)); }
-;
-
-expr_or_declare_value:
-	    expr {$$ = $1; }
-	|   T_GLOBAL { $$ = zend_ast_create(ZEND_AST_CONST, zend_ast_create_zval_from_str(zend_string_init_interned("global", sizeof("global") - 1, 0))); }
-	|   T_DEFAULT { $$ = zend_ast_create(ZEND_AST_CONST, zend_ast_create_zval_from_str(zend_string_init_interned("default", sizeof("default") - 1, 0))); }
 ;
 
 echo_expr_list:

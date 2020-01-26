@@ -1,11 +1,10 @@
 --TEST--
-'function_and_const_lookup=default'
+function_and_const_lookup='default'
 --FILE--
 <?php
 // default has no effect on name resolution
-declare(function_and_const_lookup=default);
+declare(function_and_const_lookup='default');
 // Preserve the existing fatal error for redeclaring a const that was used?
-// TODO: Should this forbid declaring *any* global const if 'function_and_const_lookup=global' was part of the current scope?
 namespace Other {
 const MY_CONSTANT = 'MY_CONSTANT(NAMESPACED)';
 }

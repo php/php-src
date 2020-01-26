@@ -1,10 +1,8 @@
 --TEST--
-'function_and_const_lookup=global' with redundant uses.
+function_and_const_lookup="global" with redundant uses.
 --FILE--
 <?php
-declare(function_and_const_lookup=global);
-// Preserve the existing fatal error for redeclaring a const that was used?
-// TODO: Should this forbid declaring *any* global const if 'function_and_const_lookup=global' was part of the current scope?
+declare(function_and_const_lookup="global");
 namespace Other {
 const MY_CONSTANT = 'MY_CONSTANT(NAMESPACED)';
 }
@@ -21,7 +19,7 @@ echo "MY_CONSTANT (namespace relative) = " . namespace\MY_CONSTANT . "\n";
 function printf(string $message, ...$args) {
     echo "Stub for printf $message";
 }
-printf("Test\n");  // this is global, because there's function_and_const_lookup=global and no 'use function Other\printf'
+printf("Test\n");  // this is global, because there's function_and_const_lookup="global" and no 'use function Other\printf'
 printf_original("Test printf_original\n");
 \printf("Test\n");
 namespace\printf("Test\n");
@@ -34,13 +32,13 @@ use const OTHER_MISSING as other_missing;  // should not warn
 echo "MY_CONSTANT = " . MY_CONSTANT . "\n";
 }
 --EXPECTF--
-Warning: The 'use const MY_CONSTANT;' is redundant due to 'declare(function_and_const_lookup=global)' in %s on line 13
+Warning: The 'use const MY_CONSTANT;' is redundant due to 'declare(function_and_const_lookup="global")' in %s on line 11
 
-Warning: The use statement with non-compound name 'MY_CONSTANT' has no effect in %s on line 28
+Warning: The use statement with non-compound name 'MY_CONSTANT' has no effect in %s on line 26
 
-Warning: The 'use const MY_CONSTANT;' is redundant due to 'declare(function_and_const_lookup=global)' in %s on line 28
+Warning: The 'use const MY_CONSTANT;' is redundant due to 'declare(function_and_const_lookup="global")' in %s on line 26
 
-Warning: The 'use const MISSING;' is redundant due to 'declare(function_and_const_lookup=global)' in %s on line 29
+Warning: The 'use const MISSING;' is redundant due to 'declare(function_and_const_lookup="global")' in %s on line 27
 MY_CONSTANT (not FQ) = MY_CONSTANT(GLOBAL)
 MY_CONSTANT (namespace relative) = MY_CONSTANT(NAMESPACED)
 Test

@@ -1,10 +1,10 @@
 --TEST--
-'function_and_const_lookup=global' with multiple namespaces
+'function_and_const_lookup='global'' with multiple namespaces
 --INI--
 error_reporting=E_ALL
 --FILE--
 <?php
-declare(function_and_const_lookup=global);
+declare(function_and_const_lookup='global');
 namespace Other {
 use Error;
 

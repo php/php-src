@@ -5376,42 +5376,6 @@ static int zend_declare_is_first_statement(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-static void zend_compile_function_and_const_lookup_declare(zend_ast *ast, zend_ast *value_ast) /* {{{ */
-{
-	zval value_zv;
-	if (value_ast->kind != ZEND_AST_CONST) {
-		/* Allow declare(function_and_const_lookup = global) but not declare(function_and_const_lookup = 'global') */
-		zend_error_noreturn(E_COMPILE_ERROR, "declare(function_and_const_lookup) value must be the name global or default");
-	}
-	value_ast = value_ast->child[0];
-	if (value_ast->kind != ZEND_AST_ZVAL) {
-		/* Allow declare(function_and_const_lookup = global) but not declare(function_and_const_lookup = 'global') */
-		zend_error_noreturn(E_COMPILE_ERROR, "declare(function_and_const_lookup) value must be the name global or default");
-	}
-
-	if (FAILURE == zend_declare_is_first_statement(ast)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "function_and_const_lookup declaration must be "
-			"the very first statement in the script");
-	}
-
-	if (ast->child[1] != NULL) {
-		zend_error_noreturn(E_COMPILE_ERROR, "function_and_const_lookup declaration must not "
-			"use block mode");
-	}
-
-
-	zend_const_expr_to_zval(&value_zv, value_ast);
-
-	if (Z_TYPE(value_zv) != IS_STRING || (!zend_string_equals_literal(Z_STR(value_zv), "global") && !zend_string_equals_literal(Z_STR(value_zv), "default"))) {
-		zend_error_noreturn(E_COMPILE_ERROR, "declare(function_and_const_lookup) value must be the name global or default");
-	}
-
-	if (zend_string_equals_literal(Z_STR(value_zv), "global")) {
-		FC(function_and_const_lookup) = 1;
-	}
-}
-/* }}} */
-
 void zend_compile_declare(zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *declares = zend_ast_get_list(ast->child[0]);
@@ -5425,11 +5389,6 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 		zend_ast *value_ast = declare_ast->child[1];
 		zend_string *name = zend_ast_get_str(name_ast);
 
-		if (zend_string_equals_literal_ci(name, "function_and_const_lookup")) {
-			zend_compile_function_and_const_lookup_declare(ast, value_ast);
-
-			continue;
-		}
 		if (value_ast->kind != ZEND_AST_ZVAL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "declare(%s) value must be a literal", ZSTR_VAL(name));
 		}
@@ -5466,6 +5425,27 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 
 			if (Z_LVAL(value_zv) == 1) {
 				CG(active_op_array)->fn_flags |= ZEND_ACC_STRICT_TYPES;
+			}
+		} else if (zend_string_equals_literal_ci(name, "function_and_const_lookup")) {
+			zval *value_zv_ptr;
+
+			if (FAILURE == zend_declare_is_first_statement(ast)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "function_and_const_lookup declaration must be "
+					"the very first statement in the script");
+			}
+
+			if (ast->child[1] != NULL) {
+				zend_error_noreturn(E_COMPILE_ERROR, "function_and_const_lookup declaration must not "
+					"use block mode");
+			}
+
+			value_zv_ptr = zend_ast_get_zval(value_ast);
+			if (Z_TYPE_P(value_zv_ptr) != IS_STRING || (!zend_string_equals_literal(Z_STR_P(value_zv_ptr), "global") && !zend_string_equals_literal(Z_STR_P(value_zv_ptr), "default"))) {
+				zend_error_noreturn(E_COMPILE_ERROR, "declare(function_and_const_lookup) value must be the string 'global' or 'default'");
+			}
+
+			if (zend_string_equals_literal(Z_STR_P(value_zv_ptr), "global")) {
+				FC(function_and_const_lookup) = 1;
 			}
 		} else {
 			zend_error(E_COMPILE_WARNING, "Unsupported declare '%s'", ZSTR_VAL(name));
@@ -6887,11 +6867,11 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 		if (FC(function_and_const_lookup)) {
 			if (type == ZEND_SYMBOL_FUNCTION) {
 				if ((new_name_ast == NULL || zend_string_equals_ci(new_name, old_name)) && zend_memrchr(ZSTR_VAL(old_name), '\\', ZSTR_LEN(old_name)) == NULL) {
-					zend_error(E_WARNING, "The 'use function %s;' is redundant due to 'declare(function_and_const_lookup=global)'", ZSTR_VAL(old_name));
+					zend_error(E_WARNING, "The 'use function %s;' is redundant due to 'declare(function_and_const_lookup=\"global\")'", ZSTR_VAL(old_name));
 				}
 			} else if (type == ZEND_SYMBOL_CONST) {
 				if ((new_name_ast == NULL || zend_string_equals(new_name, old_name)) && zend_memrchr(ZSTR_VAL(old_name), '\\', ZSTR_LEN(old_name)) == NULL) {
-					zend_error(E_WARNING, "The 'use const %s;' is redundant due to 'declare(function_and_const_lookup=global)'", ZSTR_VAL(old_name));
+					zend_error(E_WARNING, "The 'use const %s;' is redundant due to 'declare(function_and_const_lookup=\"global\")'", ZSTR_VAL(old_name));
 				}
 			}
 		}
