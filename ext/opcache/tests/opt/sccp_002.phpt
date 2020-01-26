@@ -32,6 +32,6 @@ foo: ; (lines=4, args=1, vars=1, tmps=0)
     ; (after optimizer)
     ; %ssccp_002.php:2-12
 L0 (2):     CV0($x) = RECV 1
-L1 (9):     ECHO int(1)
-L2 (11):    ECHO int(1)
+L1 (9):     ECHO string("1")
+L2 (11):    ECHO string("1")
 L3 (12):    RETURN null
