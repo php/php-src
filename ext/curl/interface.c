@@ -2262,7 +2262,7 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 		case CURLOPT_DISALLOW_USERNAME_IN_URL:
 #endif
 #if LIBCURL_VERSION_NUM >= 0x074000 /* Available since 7.64.0 */
-		case CURLOPT_DISALLOW_USERNAME_IN_URL:
+		case CURLOPT_HTTP09_ALLOWED:
 #endif
 			lval = zval_get_long(zvalue);
 			if ((option == CURLOPT_PROTOCOLS || option == CURLOPT_REDIR_PROTOCOLS) &&
