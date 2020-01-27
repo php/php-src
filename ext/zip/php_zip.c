@@ -2902,6 +2902,12 @@ static PHP_MINIT_FUNCTION(zip)
 	REGISTER_ZIP_CLASS_CONST_LONG("EM_AES_256",				ZIP_EM_AES_256);
 #endif
 
+#if HAVE_LIBZIP_VERSION
+	zend_declare_class_constant_string(zip_class_entry, "LIBZIP_VERSION", sizeof("LIBZIP_VERSION")-1, zip_libzip_version());
+#else
+	zend_declare_class_constant_string(zip_class_entry, "LIBZIP_VERSION", sizeof("LIBZIP_VERSION")-1, LIBZIP_VERSION);
+#endif
+
 	php_register_url_stream_wrapper("zip", &php_stream_zip_wrapper);
 
 	le_zip_dir   = zend_register_list_destructors_ex(php_zip_free_dir,   NULL, le_zip_dir_name,   module_number);
