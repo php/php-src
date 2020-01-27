@@ -2282,6 +2282,7 @@ parent_loop_end:
 					break;
 				case 'h':
 				case '?':
+				case PHP_GETOPT_INVALID_ARG:
 					if (request) {
 						fcgi_destroy_request(request);
 					}
@@ -2291,6 +2292,9 @@ parent_loop_end:
 					php_cgi_usage(argv[0]);
 					php_output_end_all();
 					exit_status = 0;
+					if (c == PHP_GETOPT_INVALID_ARG) {
+						exit_status = 1;
+					}
 					goto out;
 			}
 		}

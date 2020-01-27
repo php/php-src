@@ -26,6 +26,7 @@
 #define OPTERRNF (2)
 #define OPTERRARG (3)
 
+// Print error message to stderr and return -2 to distinguish it from '?' command line option.
 static int php_opt_error(int argc, char * const *argv, int oint, int optchr, int err, int show_err) /* {{{ */
 {
 	if (show_err)
@@ -47,7 +48,7 @@ static int php_opt_error(int argc, char * const *argv, int oint, int optchr, int
 			break;
 		}
 	}
-	return('?');
+	return PHP_GETOPT_INVALID_ARG;
 }
 /* }}} */
 

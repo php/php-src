@@ -1228,7 +1228,7 @@ int main(int argc, char *argv[])
 	setmode(_fileno(stderr), O_BINARY);		/* make the stdio mode be binary */
 #endif
 
-	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 0, 2))!=-1) {
+	while ((c = php_getopt(argc, argv, OPTIONS, &php_optarg, &php_optind, 1, 2))!=-1) {
 		switch (c) {
 			case 'c':
 				if (ini_path_override) {
@@ -1279,6 +1279,10 @@ int main(int argc, char *argv[])
 			case 'h': /* help & quit */
 			case '?':
 				php_cli_usage(argv[0]);
+				goto out;
+			case PHP_GETOPT_INVALID_ARG: /* print usage on bad options, exit 1 */
+				php_cli_usage(argv[0]);
+				exit_status = 1;
 				goto out;
 			case 'i': case 'v': case 'm':
 				sapi_module = &cli_sapi_module;
