@@ -47,6 +47,7 @@ PHP                                                                        NEWS
 
 - Zip:
   . Add ZipArchive::CM_LZMA2 constant (since libzip 1.6.0). (remi)
+  . Add ZipArchive::LIBZIP_VERSION constant. (remi)
 
 23 Jan 2020, PHP 7.4.2
 
