@@ -37,6 +37,9 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #79145 (openssl memory leak). (cmb, Nikita)
 
+- Phar:
+  . Fixed bug #76584 (PharFileInfo::decompress not working). (cmb)
+
 - Reflection:
   . Fixed bug #79115 (ReflectionClass::isCloneable call reflected class
     __destruct). (Nikita)
