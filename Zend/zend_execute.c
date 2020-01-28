@@ -4452,6 +4452,39 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 	return _zend_quick_get_constant(key, 0, 1 OPLINE_CC EXECUTE_DATA_CC);
 } /* }}} */
 
+#if defined(ZEND_VM_IP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
+/* Special versions of functions that sets EX(opline) before calling zend_vm_stack_extend() */
+static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame_ex(uint32_t used_stack, uint32_t call_info, zend_function *func, uint32_t num_args, void *object_or_called_scope) /* {{{ */
+{
+	zend_execute_data *call = (zend_execute_data*)EG(vm_stack_top);
+
+	ZEND_ASSERT_VM_STACK_GLOBAL;
+
+	if (UNEXPECTED(used_stack > (size_t)(((char*)EG(vm_stack_end)) - (char*)call))) {
+		EX(opline) = opline; /* this is the only difference */
+		call = (zend_execute_data*)zend_vm_stack_extend(used_stack);
+		ZEND_ASSERT_VM_STACK_GLOBAL;
+		zend_vm_init_call_frame(call, call_info | ZEND_CALL_ALLOCATED, func, num_args, object_or_called_scope);
+		return call;
+	} else {
+		EG(vm_stack_top) = (zval*)((char*)call + used_stack);
+		zend_vm_init_call_frame(call, call_info, func, num_args, object_or_called_scope);
+		return call;
+	}
+} /* }}} */
+
+static zend_always_inline zend_execute_data *_zend_vm_stack_push_call_frame(uint32_t call_info, zend_function *func, uint32_t num_args, void *object_or_called_scope) /* {{{ */
+{
+	uint32_t used_stack = zend_vm_calc_used_stack(num_args, func);
+
+	return _zend_vm_stack_push_call_frame_ex(used_stack, call_info,
+		func, num_args, object_or_called_scope);
+} /* }}} */
+#else
+# define _zend_vm_stack_push_call_frame_ex zend_vm_stack_push_call_frame_ex
+# define _zend_vm_stack_push_call_frame    zend_vm_stack_push_call_frame
+#endif
+
 #ifdef ZEND_VM_TRACE_HANDLERS
 # include "zend_vm_trace_handlers.h"
 #elif defined(ZEND_VM_TRACE_MAP)
