@@ -2210,8 +2210,10 @@ typedef struct {
 	union {
 		zend_class_entry *dependency_ce;
 		struct {
-			const zend_function *parent_fn;
-			const zend_function *child_fn;
+			/* Traits may use temporary on-stack functions during inheritance checks,
+			 * so use copies of functions here as well. */
+			zend_function parent_fn;
+			zend_function child_fn;
 		};
 		struct {
 			const zend_property_info *parent_prop;
@@ -2263,8 +2265,8 @@ static void add_compatibility_obligation(
 	HashTable *obligations = get_or_init_obligations_for_class(ce);
 	variance_obligation *obligation = emalloc(sizeof(variance_obligation));
 	obligation->type = OBLIGATION_COMPATIBILITY;
-	obligation->child_fn = child_fn;
-	obligation->parent_fn = parent_fn;
+	obligation->child_fn = *child_fn;
+	obligation->parent_fn = *parent_fn;
 	zend_hash_next_index_insert_ptr(obligations, obligation);
 }
 
@@ -2293,13 +2295,13 @@ static int check_variance_obligation(zval *zv) {
 		}
 	} else if (obligation->type == OBLIGATION_COMPATIBILITY) {
 		inheritance_status status = zend_do_perform_implementation_check(
-			obligation->child_fn, obligation->parent_fn);
+			&obligation->child_fn, &obligation->parent_fn);
 		if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
 			if (EXPECTED(status == INHERITANCE_UNRESOLVED)) {
 				return ZEND_HASH_APPLY_KEEP;
 			}
 			ZEND_ASSERT(status == INHERITANCE_ERROR);
-			emit_incompatible_method_error(obligation->child_fn, obligation->parent_fn, status);
+			emit_incompatible_method_error(&obligation->child_fn, &obligation->parent_fn, status);
 		}
 		/* Either the compatibility check was successful or only threw a warning. */
 	} else {
@@ -2366,10 +2368,10 @@ static void report_variance_errors(zend_class_entry *ce) {
 			/* Just used to populate the delayed_autoloads table,
 			 * which will be used when printing the "unresolved" error. */
 			inheritance_status status = zend_do_perform_implementation_check(
-				obligation->child_fn, obligation->parent_fn);
+				&obligation->child_fn, &obligation->parent_fn);
 			ZEND_ASSERT(status == INHERITANCE_UNRESOLVED);
 			emit_incompatible_method_error(
-				obligation->child_fn, obligation->parent_fn, status);
+				&obligation->child_fn, &obligation->parent_fn, status);
 		} else if (obligation->type == OBLIGATION_PROPERTY_COMPATIBILITY) {
 			emit_incompatible_property_error(obligation->child_prop, obligation->parent_prop);
 		} else {
