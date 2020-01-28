@@ -973,7 +973,7 @@ PHP_FUNCTION(mysqli_get_warnings)
 	MY_MYSQL			*mysql;
 	zval				*mysql_link;
 	MYSQLI_RESOURCE		*mysqli_resource;
-	MYSQLI_WARNING		*w;
+	MYSQLI_WARNING		*w = NULL;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_link, mysqli_link_class_entry) == FAILURE) {
 		return;
@@ -986,7 +986,8 @@ PHP_FUNCTION(mysqli_get_warnings)
 #else
 		w = php_get_warnings(mysql->mysql);
 #endif
-	} else {
+	}
+	if (!w) {
 		RETURN_FALSE;
 	}
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
@@ -1002,7 +1003,7 @@ PHP_FUNCTION(mysqli_stmt_get_warnings)
 	MY_STMT				*stmt;
 	zval				*stmt_link;
 	MYSQLI_RESOURCE		*mysqli_resource;
-	MYSQLI_WARNING		*w;
+	MYSQLI_WARNING		*w = NULL;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &stmt_link, mysqli_stmt_class_entry) == FAILURE) {
 		return;
@@ -1011,7 +1012,8 @@ PHP_FUNCTION(mysqli_stmt_get_warnings)
 
 	if (mysqli_stmt_warning_count(stmt->stmt)) {
 		w = php_get_warnings(mysqli_stmt_get_connection(stmt->stmt));
-	} else {
+	}
+	if (!w) {
 		RETURN_FALSE;
 	}
 	mysqli_resource = (MYSQLI_RESOURCE *)ecalloc (1, sizeof(MYSQLI_RESOURCE));
