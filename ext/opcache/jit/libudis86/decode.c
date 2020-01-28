@@ -260,7 +260,7 @@ decode_prefixes(struct ud *u)
     case 0x65: 
       u->pfx_seg = UD_R_GS; 
       break;
-    case 0x67: /* adress-size override prefix */ 
+    case 0x67: /* address-size override prefix */ 
       u->pfx_adr = 0x67;
       break;
     case 0xF0: 
