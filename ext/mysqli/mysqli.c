@@ -283,7 +283,9 @@ static void mysqli_warning_free_storage(zend_object *object)
 /* {{{ mysqli_read_na */
 static int mysqli_read_na(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
-	zend_throw_error(NULL, "Cannot read property");
+	if (!quiet) {
+		zend_throw_error(NULL, "Cannot read property");
+	}
 
 	return FAILURE;
 }
@@ -322,14 +324,10 @@ zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_sl
 	}
 
 	if (hnd) {
-		if (hnd->read_func(obj, rv, type == BP_VAR_IS) == SUCCESS && rv != NULL) {
+		if (hnd->read_func(obj, rv, type == BP_VAR_IS) == SUCCESS || type != BP_VAR_IS) {
 			retval = rv;
 		} else {
-			if (type == BP_VAR_IS || rv == NULL) {
-				retval = &EG(uninitialized_zval);
-			} else {
-				retval = rv;
-			}
+			retval = &EG(uninitialized_zval);
 		}
 	} else {
 		retval = zend_std_read_property(object, member, type, cache_slot, rv);

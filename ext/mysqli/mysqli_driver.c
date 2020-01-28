@@ -61,7 +61,7 @@ static int name(mysqli_object *obj, zval *value) \
 static int name(mysqli_object *obj, zval *retval, zend_bool quiet) \
 { \
 	ZVAL_STRING(retval, MyG(value)); \
-	return SUCESS; \
+	return SUCCESS; \
 } \
 
 #define MAP_PROPERTY_MYG_STRING_WRITE(name, value) \
