@@ -2301,6 +2301,67 @@ static ZIPARCHIVE_METHOD(setCompressionIndex)
 }
 /* }}} */
 
+#ifdef HAVE_SET_MTIME
+/* {{{ proto bool ZipArchive::setMtimeName(string name, int timestamp[, int flags])
+Set the modification time of a file in zip, using its name */
+static ZIPARCHIVE_METHOD(setMtimeName)
+ {
+	struct zip *intern;
+	zval *this = ZEND_THIS;
+	size_t name_len;
+	char *name;
+	zip_int64_t idx;
+	zend_long mtime, flags = 0;
+
+	ZIP_FROM_OBJECT(intern, this);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|l",
+			&name, &name_len, &mtime,  &flags) == FAILURE) {
+		return;
+	}
+
+	if (name_len < 1) {
+		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
+	}
+
+	idx = zip_name_locate(intern, name, 0);
+	if (idx < 0) {
+		RETURN_FALSE;
+	}
+
+	if (zip_file_set_mtime(intern, (zip_uint64_t)idx,
+			(time_t)mtime, (zip_uint32_t)flags) != 0) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool ZipArchive::setMtimeIndex(int index, int timestamp[, int flags])
+Set the modification time of a file in zip, using its index */
+static ZIPARCHIVE_METHOD(setMtimeIndex)
+{
+	struct zip *intern;
+	zval *this = ZEND_THIS;
+	zend_long index;
+	zend_long mtime, flags = 0;
+
+	ZIP_FROM_OBJECT(intern, this);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|l",
+			&index, &mtime, &flags) == FAILURE) {
+		return;
+	}
+
+	if (zip_file_set_mtime(intern, (zip_uint64_t)index,
+			(time_t)mtime, (zip_uint32_t)flags) != 0) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
+
 /* {{{ proto bool ZipArchive::deleteIndex(int index)
 Delete a file using its index */
 static ZIPARCHIVE_METHOD(deleteIndex)
@@ -2755,6 +2816,10 @@ static const zend_function_entry zip_class_functions[] = {
 #endif
 	ZIPARCHIVE_ME(setCompressionName,		arginfo_class_ZipArchive_setCompressionName, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(setCompressionIndex,		arginfo_class_ZipArchive_setCompressionIndex, ZEND_ACC_PUBLIC)
+#ifdef HAVE_SET_MTIME
+	ZIPARCHIVE_ME(setMtimeName,			    arginfo_class_ZipArchive_setMtimeName, ZEND_ACC_PUBLIC)
+	ZIPARCHIVE_ME(setMtimeIndex,		    arginfo_class_ZipArchive_setMtimeIndex, ZEND_ACC_PUBLIC)
+#endif
 #ifdef HAVE_ENCRYPTION
 	ZIPARCHIVE_ME(setEncryptionName,		arginfo_class_ZipArchive_setEncryptionName, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(setEncryptionIndex,		arginfo_class_ZipArchive_setEncryptionIndex, ZEND_ACC_PUBLIC)

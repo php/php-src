@@ -118,5 +118,6 @@ PHP                                                                        NEWS
 
 - Zip:
   . Fixed bug #72374 (remove_path strips first char of filename). (tyage)
+  . Add ZipArchive::setMtimeName and ZipArchive::setMtimeIndex methods
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

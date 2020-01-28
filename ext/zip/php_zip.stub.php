@@ -90,6 +90,12 @@ class ZipArchive
     /** @return null|false */
     public function setCommentName(string $name, string $comment) {}
 
+    /** @return null|false */
+    public function setMtimeIndex(int $index, int $timestamp, int $flags = 0) {}
+
+    /** @return null|false */
+    public function setMtimeName(string $name, int $timestamp, int $flags = 0) {}
+
     /** @return string|false */
     public function getCommentIndex(int $index, int $flags = 0) {}
 
