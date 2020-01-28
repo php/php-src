@@ -2461,6 +2461,7 @@ PHP_FUNCTION(mb_str_split)
 
 		mbfl_convert_filter_delete(decoder);
 		mbfl_convert_filter_delete(filter);
+		mbfl_memory_device_clear(&device);
 		return;
 	}
 

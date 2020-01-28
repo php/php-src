@@ -69,6 +69,10 @@ foreach(mb_str_split($utf16le_bad, 1, "UTF-16LE") as $chunk){
 }
 echo PHP_EOL;
 
+var_dump(mb_str_split("", 1, "ASCII"));
+var_dump(mb_str_split("", 1, "UTF-8"));
+var_dump(mb_str_split("", 1, "UTF-16LE"));
+
 ?>
 --EXPECT--
 UTF-8: l:2 v:3132 l:5 v:33f09280a9
@@ -77,5 +81,9 @@ UTF-16BE: l:4 v:d800dc00 l:4 v:dbffdfff
 UTF-16LE: l:4 v:00d800dc l:4 v:ffdbffdf
 BAD UTF-16BE: l:4 v:d800dc00 l:2 v:003f l:2 v:003f
 BAD UTF-16LE: l:4 v:00d800dc l:2 v:3f00 l:2 v:3f00
-
-
+array(0) {
+}
+array(0) {
+}
+array(0) {
+}
