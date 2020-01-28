@@ -7,6 +7,8 @@ PHP                                                                        NEWS
   . Fixed bug #79155 (Property nullability lost when using multiple property
     definition). (Nikita)
   . Fixed bug #78323 (Code 0 is returned on invalid options). (Ivan Mikheykin)
+  . Fixed bug #78989 (Delayed variance check involving trait segfaults).
+    (Nikita)
 
 - CURL:
   . Fixed bug #79078 (Hypothetical use-after-free in curl_multi_add_handle()).

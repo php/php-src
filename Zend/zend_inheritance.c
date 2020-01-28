@@ -2237,8 +2237,10 @@ typedef struct {
 	union {
 		zend_class_entry *dependency_ce;
 		struct {
-			const zend_function *parent_fn;
-			const zend_function *child_fn;
+			/* Traits may use temporary on-stack functions during inheritance checks,
+			 * so use copies of functions here as well. */
+			zend_function parent_fn;
+			zend_function child_fn;
 			zend_bool always_error;
 		};
 		struct {
@@ -2292,8 +2294,8 @@ static void add_compatibility_obligation(
 	HashTable *obligations = get_or_init_obligations_for_class(ce);
 	variance_obligation *obligation = emalloc(sizeof(variance_obligation));
 	obligation->type = OBLIGATION_COMPATIBILITY;
-	obligation->child_fn = child_fn;
-	obligation->parent_fn = parent_fn;
+	obligation->child_fn = *child_fn;
+	obligation->parent_fn = *parent_fn;
 	obligation->always_error = always_error;
 	zend_hash_next_index_insert_ptr(obligations, obligation);
 }
@@ -2324,7 +2326,7 @@ static int check_variance_obligation(zval *zv) {
 	} else if (obligation->type == OBLIGATION_COMPATIBILITY) {
 		zend_string *unresolved_class;
 		inheritance_status status = zend_do_perform_implementation_check(
-			&unresolved_class, obligation->child_fn, obligation->parent_fn);
+			&unresolved_class, &obligation->child_fn, &obligation->parent_fn);
 
 		if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
 			if (EXPECTED(status == INHERITANCE_UNRESOLVED)) {
@@ -2332,7 +2334,7 @@ static int check_variance_obligation(zval *zv) {
 			}
 			ZEND_ASSERT(status == INHERITANCE_ERROR);
 			emit_incompatible_method_error_or_warning(
-				obligation->child_fn, obligation->parent_fn, status, unresolved_class,
+				&obligation->child_fn, &obligation->parent_fn, status, unresolved_class,
 				obligation->always_error);
 		}
 		/* Either the compatibility check was successful or only threw a warning. */
@@ -2402,10 +2404,10 @@ static void report_variance_errors(zend_class_entry *ce) {
 		if (obligation->type == OBLIGATION_COMPATIBILITY) {
 			/* Just used to fetch the unresolved_class in this case. */
 			status = zend_do_perform_implementation_check(
-				&unresolved_class, obligation->child_fn, obligation->parent_fn);
+				&unresolved_class, &obligation->child_fn, &obligation->parent_fn);
 			ZEND_ASSERT(status == INHERITANCE_UNRESOLVED);
 			emit_incompatible_method_error_or_warning(
-				obligation->child_fn, obligation->parent_fn,
+				&obligation->child_fn, &obligation->parent_fn,
 				status, unresolved_class, obligation->always_error);
 		} else if (obligation->type == OBLIGATION_PROPERTY_COMPATIBILITY) {
 			emit_incompatible_property_error(obligation->child_prop, obligation->parent_prop);
