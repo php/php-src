@@ -7,20 +7,24 @@ error_reporting=E_ALL
 declare(function_and_const_lookup='global');
 namespace Other {
 use Error;
+use const Other\OTHER_TEST_CONSTANT;
 
 const OTHER_TEST_CONSTANT = 'Other test constant';
-try {
-    echo "OTHER_TEST_CONSTANT=" . OTHER_TEST_CONSTANT . "\n";
-} catch (Error $e) {
-    echo "Caught: {$e->getMessage()}\n";
-}
-use const Other\OTHER_TEST_CONSTANT;
+echo "OTHER_TEST_CONSTANT=" . OTHER_TEST_CONSTANT . "\n";
 echo "namespace\OTHER_TEST_CONSTANT=" . namespace\OTHER_TEST_CONSTANT . "\n";
-
+try {
+    echo "\OTHER_TEST_CONSTANT=" . \OTHER_TEST_CONSTANT . "\n";
+} catch (Error $e) {
+    echo "Caught {$e->getMessage()}\n";
+}
 }
 
 namespace Test {
+use function Test\printf;
+use const Test\TEST_CONSTANT;
 function printf(string $msg, ...$args) {
+    // The requirement that 'use function Test\printf;' is explicitly declared in an above statement
+    // forces confusing code like this to be fully qualified.
     \printf("Prefix: $msg", ...$args);
 }
 const TEST_CONSTANT = 'Namespaced constant';
@@ -55,21 +59,27 @@ namespace\printf("Test %d\n", 2);
 echo "Not fully qualified: " . TEST_CONSTANT . "\n";
 echo "Fully qualified: " . \TEST_CONSTANT . "\n";
 echo "Namespace relative: " . namespace\TEST_CONSTANT . "\n";
+function my_function() {
+    echo "In " . __FUNCTION__ . "\n";
+}
+my_function();
 }
 
 namespace Other {
+use function Other\printf;
 function printf(string $msg, ...$args) {
     echo "Stub for printf: $msg";
 }
 }
 --EXPECT--
-Caught: Undefined constant 'OTHER_TEST_CONSTANT'
+OTHER_TEST_CONSTANT=Other test constant
 namespace\OTHER_TEST_CONSTANT=Other test constant
-Test 1
+Caught Undefined constant 'OTHER_TEST_CONSTANT'
+Prefix: Test 1
 Prefix: Test 2
 Test 3
 Stub for printf: Aliases should continue to work
-Not fully qualified: Global constant
+Not fully qualified: Namespaced constant
 Fully qualified: Global constant
 Namespace relative: Namespaced constant
 Used constant: Other test constant
@@ -82,3 +92,4 @@ Test 3
 Not fully qualified: Global constant
 Fully qualified: Global constant
 Namespace relative: Global constant
+In my_function

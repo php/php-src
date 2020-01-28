@@ -6124,20 +6124,25 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 
 static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_ast_decl *decl, zend_bool toplevel) /* {{{ */
 {
-	zend_string *unqualified_name, *name, *lcname, *key;
+	zend_string *unqualified_name, *name, *lcname, *key, *import_name;
 	zend_op *opline;
 
 	unqualified_name = decl->name;
 	op_array->function_name = name = zend_prefix_with_ns(unqualified_name);
 	lcname = zend_string_tolower(name);
+	import_name = NULL;
 
 	if (FC(imports_function)) {
-		zend_string *import_name = zend_hash_find_ptr_lc(
+		import_name = zend_hash_find_ptr_lc(
 			FC(imports_function), ZSTR_VAL(unqualified_name), ZSTR_LEN(unqualified_name));
 		if (import_name && !zend_string_equals_ci(lcname, import_name)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare function %s "
 				"because the name is already in use", ZSTR_VAL(name));
 		}
+	}
+	if (FC(function_and_const_lookup) && FC(current_namespace) && !import_name) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare function %s "
+			"because the name is already in use due to declare(function_and_const_lookup='global'). Add 'use function %s;' above to fix that", ZSTR_VAL(name), ZSTR_VAL(name));
 	}
 
 	if (zend_string_equals_literal(lcname, "__autoload")) {
@@ -6935,6 +6940,7 @@ void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 		zend_string *unqualified_name = zend_ast_get_str(name_ast);
 
 		zend_string *name;
+		zend_string *import_name;
 		znode name_node, value_node;
 		zval *value_zv = &value_node.u.constant;
 
@@ -6949,12 +6955,17 @@ void zend_compile_const_decl(zend_ast *ast) /* {{{ */
 		name = zend_prefix_with_ns(unqualified_name);
 		name = zend_new_interned_string(name);
 
+		import_name = NULL;
 		if (FC(imports_const)) {
-			zend_string *import_name = zend_hash_find_ptr(FC(imports_const), unqualified_name);
+			import_name = zend_hash_find_ptr(FC(imports_const), unqualified_name);
 			if (import_name && !zend_string_equals(import_name, name)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare const %s because "
 					"the name is already in use", ZSTR_VAL(name));
 			}
+		}
+		if (FC(function_and_const_lookup) && FC(current_namespace) && !import_name) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare const %s "
+				"because the name is already in use due to declare(function_and_const_lookup='global'). Add 'use const %s;' above to fix that", ZSTR_VAL(name), ZSTR_VAL(name));
 		}
 
 		name_node.op_type = IS_CONST;
