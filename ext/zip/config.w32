@@ -15,7 +15,7 @@ if (PHP_ZIP != "no") {
 		}
 
 		AC_DEFINE('HAVE_ZIP', 1);
-		ADD_FLAG("CFLAGS_ZIP", "/D _WIN32 /D HAVE_ENCRYPTION");
+		ADD_FLAG("CFLAGS_ZIP", "/D _WIN32 /D HAVE_ENCRYPTION /D HAVE_LIBZIP_VERSION");
 	} else {
 		WARNING("zip not enabled; libraries and headers not found");
 	}
