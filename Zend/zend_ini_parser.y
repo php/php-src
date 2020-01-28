@@ -1,3 +1,4 @@
+%require "3.0"
 %{
 /*
    +----------------------------------------------------------------------+
@@ -31,7 +32,6 @@
 #include "win32/syslog.h"
 #endif
 
-#define YYERROR_VERBOSE
 #define YYSTYPE zval
 
 int ini_parse(void);
@@ -290,6 +290,7 @@ static void zval_ini_dtor(zval *zv)
 
 %expect 0
 %define api.pure full
+%define parse.error verbose
 
 %token TC_SECTION
 %token TC_RAW
