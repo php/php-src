@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   . Fixed bug #78323 (Code 0 is returned on invalid options). (Ivan Mikheykin)
   . Fixed bug #78989 (Delayed variance check involving trait segfaults).
     (Nikita)
+  . Fixed bug #79174 (cookie values with spaces fail to round-trip). (cmb)
 
 - CURL:
   . Fixed bug #79078 (Hypothetical use-after-free in curl_multi_add_handle()).

@@ -125,7 +125,7 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 		smart_str_append(&buf, name);
 		smart_str_appendc(&buf, '=');
 		if (url_encode) {
-			zend_string *encoded_value = php_url_encode(ZSTR_VAL(value), ZSTR_LEN(value));
+			zend_string *encoded_value = php_raw_url_encode(ZSTR_VAL(value), ZSTR_LEN(value));
 			smart_str_append(&buf, encoded_value);
 			zend_string_release_ex(encoded_value, 0);
 		} else {
