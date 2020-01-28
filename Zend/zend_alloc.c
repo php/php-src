@@ -2698,10 +2698,23 @@ ZEND_API void shutdown_memory_manager(int silent, int full_shutdown)
 #if ZEND_MM_CUSTOM
 static void *tracked_malloc(size_t size)
 {
+	zend_mm_heap *heap = AG(mm_heap);
+	if (size > heap->limit) {
+#if ZEND_DEBUG
+		zend_mm_safe_error(heap,
+			"Allowed memory size of %zu bytes exhausted at %s:%d (tried to allocate %zu bytes)",
+			heap->limit, "file", 0, size);
+#else
+		zend_mm_safe_error(heap,
+			"Allowed memory size of %zu bytes exhausted (tried to allocate %zu bytes)",
+			heap->limit, size);
+#endif
+	}
+
 	void *ptr = __zend_malloc(size);
 	zend_ulong h = ((uintptr_t) ptr) >> ZEND_MM_ALIGNMENT_LOG2;
 	ZEND_ASSERT((void *) (uintptr_t) (h << ZEND_MM_ALIGNMENT_LOG2) == ptr);
-	zend_hash_index_add_empty_element(AG(mm_heap)->tracked_allocs, h);
+	zend_hash_index_add_empty_element(heap->tracked_allocs, h);
 	return ptr;
 }
 
@@ -2742,6 +2755,9 @@ static void alloc_globals_ctor(zend_alloc_globals *alloc_globals)
 		zend_mm_heap *mm_heap = alloc_globals->mm_heap = malloc(sizeof(zend_mm_heap));
 		memset(mm_heap, 0, sizeof(zend_mm_heap));
 		mm_heap->use_custom_heap = ZEND_MM_CUSTOM_HEAP_STD;
+		mm_heap->limit = ((size_t)Z_L(-1) >> (size_t)Z_L(1));
+		mm_heap->overflow = 0;
+
 		if (!tracked) {
 			/* Use system allocator. */
 			mm_heap->custom_heap.std._malloc = __zend_malloc;
