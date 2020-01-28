@@ -3838,6 +3838,9 @@ static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *forma
 	if (errors->error_count > 0) {
 		php_error_docref(NULL, E_WARNING, "Unknown or bad format (%s)", format);
 		retval = FAILURE;
+		if (p) {
+			timelib_rel_time_dtor(p);
+		}
 	} else {
 		if(p) {
 			*rt = p;
