@@ -454,12 +454,15 @@ failure:
 		}
 	}
 
-	if (!(flags & ZEND_FETCH_CLASS_SILENT)) {
-		if (!c) {
+	if (!c) {
+		if (!(flags & ZEND_FETCH_CLASS_SILENT)) {
 			zend_throw_error(NULL, "Undefined constant '%s'", name);
-		} else if (ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED) {
-			zend_error(E_DEPRECATED, "Constant %s is deprecated", name);
 		}
+		return NULL;
+	}
+
+	if (!(flags & ZEND_FETCH_CLASS_SILENT) && (ZEND_CONSTANT_FLAGS(c) & CONST_DEPRECATED)) {
+		zend_error(E_DEPRECATED, "Constant %s is deprecated", name);
 	}
 	return &c->value;
 }
