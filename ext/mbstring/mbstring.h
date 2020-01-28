@@ -118,7 +118,7 @@ MBSTRING_API char *php_mb_convert_encoding_ex(
 		const char *input, size_t length,
 		const mbfl_encoding *to_encoding, const mbfl_encoding *from_encoding, size_t *output_len);
 MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length,
-                                      const char *_to_encoding,
+                                      const mbfl_encoding *to_encoding,
                                       const char *_from_encodings,
                                       size_t *output_len);
 

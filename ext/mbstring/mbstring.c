@@ -2691,25 +2691,15 @@ MBSTRING_API char *php_mb_convert_encoding_ex(const char *input, size_t length, 
 /* }}} */
 
 /* {{{ MBSTRING_API char *php_mb_convert_encoding() */
-MBSTRING_API char *php_mb_convert_encoding(const char *input, size_t length, const char *_to_encoding, const char *_from_encodings, size_t *output_len)
+MBSTRING_API char *php_mb_convert_encoding(const char *input, size_t length, const mbfl_encoding *to_encoding, const char *_from_encodings, size_t *output_len)
 {
-	const mbfl_encoding *from_encoding, *to_encoding;
+	const mbfl_encoding *from_encoding;
 
 	if (output_len) {
 		*output_len = 0;
 	}
 	if (!input) {
 		return NULL;
-	}
-	/* new encoding */
-	if (_to_encoding && strlen(_to_encoding)) {
-		to_encoding = mbfl_name2encoding(_to_encoding);
-		if (!to_encoding) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", _to_encoding);
-			return NULL;
-		}
-	} else {
-		to_encoding = MBSTRG(current_internal_encoding);
 	}
 
 	/* pre-conversion encoding */
@@ -2743,7 +2733,7 @@ MBSTRING_API char *php_mb_convert_encoding(const char *input, size_t length, con
 }
 /* }}} */
 
-MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, const char *_to_encoding, const char *_from_encodings)
+MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, const mbfl_encoding *to_encoding, const char *_from_encodings)
 {
 	HashTable *output, *chash;
 	zend_long idx;
@@ -2766,7 +2756,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 	ZEND_HASH_FOREACH_KEY_VAL(input, idx, key, entry) {
 		/* convert key */
 		if (key) {
-			ckey = php_mb_convert_encoding(ZSTR_VAL(key), ZSTR_LEN(key), _to_encoding, _from_encodings, &ckey_len);
+			ckey = php_mb_convert_encoding(ZSTR_VAL(key), ZSTR_LEN(key), to_encoding, _from_encodings, &ckey_len);
 			key = zend_string_init(ckey, ckey_len, 0);
 			efree(ckey);
 		}
@@ -2774,7 +2764,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 		ZEND_ASSERT(entry);
 		switch(Z_TYPE_P(entry)) {
 			case IS_STRING:
-				cval = php_mb_convert_encoding(Z_STRVAL_P(entry), Z_STRLEN_P(entry), _to_encoding, _from_encodings, &cval_len);
+				cval = php_mb_convert_encoding(Z_STRVAL_P(entry), Z_STRLEN_P(entry), to_encoding, _from_encodings, &cval_len);
 				ZVAL_STRINGL(&entry_tmp, cval, cval_len);
 				efree(cval);
 				break;
@@ -2786,7 +2776,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 				ZVAL_COPY(&entry_tmp, entry);
 				break;
 			case IS_ARRAY:
-				chash = php_mb_convert_encoding_recursive(Z_ARRVAL_P(entry), _to_encoding, _from_encodings);
+				chash = php_mb_convert_encoding_recursive(Z_ARRVAL_P(entry), to_encoding, _from_encodings);
 				if (chash) {
 					ZVAL_ARR(&entry_tmp, chash);
 				} else {
@@ -2820,17 +2810,22 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 PHP_FUNCTION(mb_convert_encoding)
 {
 	zval *input;
-	char *arg_new;
-	size_t new_len;
 	zval *arg_old = NULL;
 	size_t size, l, n;
 	char *_from_encodings = NULL, *ret, *s_free = NULL;
+	zend_string *to_encoding_name;
+	const mbfl_encoding *to_encoding;
 
 	zval *hash_entry;
 	HashTable *target_hash;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs|z", &input, &arg_new, &new_len, &arg_old) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zS|z", &input, &to_encoding_name, &arg_old) == FAILURE) {
 		RETURN_THROWS();
+	}
+
+	to_encoding = php_mb_get_encoding(to_encoding_name);
+	if (!to_encoding) {
+		RETURN_FALSE;
 	}
 
 	if (Z_TYPE_P(input) != IS_STRING && Z_TYPE_P(input) != IS_ARRAY) {
@@ -2884,7 +2879,7 @@ PHP_FUNCTION(mb_convert_encoding)
 
 	if (Z_TYPE_P(input) == IS_STRING) {
 		/* new encoding */
-		ret = php_mb_convert_encoding(Z_STRVAL_P(input), Z_STRLEN_P(input), arg_new, _from_encodings, &size);
+		ret = php_mb_convert_encoding(Z_STRVAL_P(input), Z_STRLEN_P(input), to_encoding, _from_encodings, &size);
 		if (ret != NULL) {
 			// TODO: avoid reallocation ???
 			RETVAL_STRINGL(ret, size);		/* the string is already strdup()'ed */
@@ -2897,7 +2892,7 @@ PHP_FUNCTION(mb_convert_encoding)
 		}
 	} else {
 		HashTable *tmp;
-		tmp = php_mb_convert_encoding_recursive(Z_ARRVAL_P(input), arg_new, _from_encodings);
+		tmp = php_mb_convert_encoding_recursive(Z_ARRVAL_P(input), to_encoding, _from_encodings);
 		RETURN_ARR(tmp);
 	}
 
