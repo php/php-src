@@ -59,7 +59,7 @@ require_once('skipifconnectfailure.inc');
 
 	$references[$idx++] = &$res;
 	mysqli_free_result($res);
-	@debug_zval_dump($references);
+	debug_zval_dump($references);
 
 	if (!(mysqli_real_query($link, "SELECT id, label FROM test ORDER BY id ASC LIMIT 1")) ||
 			!($res = mysqli_use_result($link)))
@@ -129,17 +129,7 @@ array(7) refcount(2){
     &int(4)
   }
   [6]=>
-  &object(mysqli_result)#%d (5) refcount(%d){
-    ["current_field"]=>
-    NULL
-    ["field_count"]=>
-    NULL
-    ["lengths"]=>
-    bool(false)
-    ["num_rows"]=>
-    NULL
-    ["type"]=>
-    bool(false)
+  &object(mysqli_result)#%d (0) refcount(%d){
   }
 }
 array(1) refcount(2){
