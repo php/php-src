@@ -24,7 +24,7 @@ $expected = array(
 	'Set-Cookie: name=deleted; expires='.date('D, d-M-Y H:i:s', 1).' GMT; Max-Age=0',
 	'Set-Cookie: name=deleted; expires='.date('D, d-M-Y H:i:s', 1).' GMT; Max-Age=0',
 	'Set-Cookie: name=value',
-	'Set-Cookie: name=space+value',
+	'Set-Cookie: name=space%20value',
 	'Set-Cookie: name=value',
 	'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsp).' GMT; Max-Age=5',
 	'Set-Cookie: name=value; expires='.date('D, d-M-Y H:i:s', $tsn).' GMT; Max-Age=0',
