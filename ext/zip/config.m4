@@ -15,7 +15,7 @@ if test "$PHP_ZIP" != "no"; then
   ], [
     AC_MSG_WARN(Libzip >= 1.0.0 needed for setting mtime)
   ], [
-    -L$LIBZIP_LIBDIR
+    $LIBZIP_LIBS
   ])
 
   PHP_CHECK_LIBRARY(zip, zip_file_set_encryption,
