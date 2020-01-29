@@ -291,7 +291,8 @@ PHP_HASH_API void PHP_GOSTFinal(unsigned char digest[32], PHP_GOST_CTX *context)
 		GostTransform(context, context->buffer);
 	}
 
-	memcpy(l, context->count, sizeof(context->count));
+	l[0] = context->count[0];
+	l[1] = context->count[1];
 	Gost(context, l);
 	memcpy(l, &context->state[8], sizeof(l));
 	Gost(context, l);
