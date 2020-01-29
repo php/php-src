@@ -2554,7 +2554,7 @@ collector_decode_htmlnumericentity(int c, void *data)
 		f = 0;
 		if (c >= 0x30 && c <= 0x39) {	/* '0' - '9' */
 			s = pc->cache;
-			if (s > INT_MAX/10) {
+			if (pc->digit > 9 || s > INT_MAX/10) {
 				pc->status = 0;
 				f = 1;
 			} else {
