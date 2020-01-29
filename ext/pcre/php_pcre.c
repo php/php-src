@@ -2664,6 +2664,33 @@ last:
 }
 /* }}} */
 
+#define PREG_QUOTE_WORDLEN 32
+#define PREG_QUOTE_BITMASK (PREG_QUOTE_WORDLEN - 1)
+
+static const uint32_t preg_quote_bitmap[4] = { /* 128 bits ASCII map */
+	0x00000000, /* '\0' is handled differently */
+	0xf4006f1a, /* ! # $ ( ) * + - . : < = > ? */
+	0x78000000, /* [ \ ] ^ */
+	0x38000000  /* { | } */
+};
+
+static unsigned preg_quote_extra(char c)
+{/*{{{*/
+	unsigned u;
+	uint32_t w;
+
+	if (!isascii(c)) {
+		return 0;
+	}
+	if (c == '\0') {
+		return 3;
+	}
+	u = (unsigned)c;
+	assert(u < 128);
+	w = preg_quote_bitmap[u / PREG_QUOTE_WORDLEN];
+	return (w >> (u & PREG_QUOTE_BITMASK)) & 1;
+}/*}}}*/
+
 /* {{{ proto string preg_quote(string str [, string delim_char])
    Quote regular expression characters plus an optional character */
 static PHP_FUNCTION(preg_quote)
@@ -2673,7 +2700,8 @@ static PHP_FUNCTION(preg_quote)
 	char		*in_str;			/* Input string */
 	char		*in_str_end;    	/* End of the input string */
 	zend_string	*out_str;			/* Output string with quoted characters */
-	size_t       extra_len;         /* Number of additional characters */
+	size_t       extra;             /* Number of additional characters */
+	size_t       extra_len;         /* Total number of additional characters */
 	char 		*p,					/* Iterator for input string */
 				*q,					/* Iterator for output string */
 				 delim_char = '\0',	/* Delimiter character to be quoted */
@@ -2703,41 +2731,11 @@ static PHP_FUNCTION(preg_quote)
 	p = in_str;
 	do {
 		c = *p;
-		switch(c) {
-			case '.':
-			case '\\':
-			case '+':
-			case '*':
-			case '?':
-			case '[':
-			case '^':
-			case ']':
-			case '$':
-			case '(':
-			case ')':
-			case '{':
-			case '}':
-			case '=':
-			case '!':
-			case '>':
-			case '<':
-			case '|':
-			case ':':
-			case '-':
-			case '#':
-				extra_len++;
-				break;
-
-			case '\0':
-				extra_len+=3;
-				break;
-
-			default:
-				if (c == delim_char) {
-					extra_len++;
-				}
-				break;
+		extra = preg_quote_extra(c);
+		if (extra == 0) {
+			extra = (c == delim_char);
 		}
+		extra_len += extra;
 		p++;
 	} while (p != in_str_end);
 
@@ -2753,33 +2751,15 @@ static PHP_FUNCTION(preg_quote)
 
 	do {
 		c = *p;
-		switch(c) {
-			case '.':
-			case '\\':
-			case '+':
-			case '*':
-			case '?':
-			case '[':
-			case '^':
-			case ']':
-			case '$':
-			case '(':
-			case ')':
-			case '{':
-			case '}':
-			case '=':
-			case '!':
-			case '>':
-			case '<':
-			case '|':
-			case ':':
-			case '-':
-			case '#':
+		extra = preg_quote_extra(c);
+		switch(extra) {
+			case 1:
 				*q++ = '\\';
 				*q++ = c;
 				break;
 
-			case '\0':
+			case 3:
+				assert(c == '\0');
 				*q++ = '\\';
 				*q++ = '0';
 				*q++ = '0';
