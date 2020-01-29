@@ -3370,7 +3370,7 @@ PHP_FUNCTION(mb_convert_encoding)
 
 					if ( _from_encodings) {
 						l = strlen(_from_encodings);
-						n = strlen(ZSTR_VAL(encoding_str));
+						n = ZSTR_LEN(encoding_str);
 						_from_encodings = erealloc(_from_encodings, l+n+2);
 						memcpy(_from_encodings + l, ",", 1);
 						memcpy(_from_encodings + l + 1, ZSTR_VAL(encoding_str), ZSTR_LEN(encoding_str) + 1);
