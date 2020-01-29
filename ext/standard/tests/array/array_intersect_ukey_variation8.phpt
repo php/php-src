@@ -30,5 +30,5 @@ try {
 ?>
 --EXPECTF--
 *** Testing array_intersect_ukey() : usage variation ***
-array_intersect_ukey() expects parameter 3 to be a valid callback, function 'unknown_function' not found or invalid function name
-array_intersect_ukey() expects parameter 3 to be a valid callback, function 'unknown_function' not found or invalid function name
+array_intersect_ukey() expects argument #3 to be a valid callback, function 'unknown_function' not found or invalid function name
+array_intersect_ukey() expects argument #3 to be a valid callback, function 'unknown_function' not found or invalid function name

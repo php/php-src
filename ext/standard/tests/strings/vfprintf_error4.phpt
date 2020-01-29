@@ -38,7 +38,7 @@ $file = 'vfprintf_error4.txt';
 unlink( $file );
 
 ?>
---EXPECTF--
+--EXPECT--
 -- Testing vfprintf() function with other strangeties  --
-vfprintf() expects parameter 1 to be resource, string given
+vfprintf() expects argument #1 ($handle) to be of type resource, string given
 Error found: Argument number must be greater than zero.

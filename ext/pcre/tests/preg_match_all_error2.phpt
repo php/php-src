@@ -23,11 +23,11 @@ foreach($input as $value) {
 }
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing preg_match_all() : error conditions ***
 
 Arg value is: Array
-preg_match_all() expects parameter 2 to be string, array given
+preg_match_all() expects argument #2 ($subject) to be of type string, array given
 NULL
 
 Arg value is: test

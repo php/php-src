@@ -57,9 +57,9 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 invoke() on a non-object:
-string(71) "ReflectionMethod::invoke() expects parameter 1 to be object, bool given"
+string(89) "ReflectionMethod::invoke() expects argument #1 ($object) to be of type object, bool given"
 
 invoke() on a non-instance:
 string(72) "Given object is not an instance of the class this method was declared in"

@@ -28,7 +28,7 @@ var_dump($i->format('%s'));
 string(32) "5138-11-16 09:46:40 100000000000"
 bool(false)
 string(12) "100000000000"
-DateTime::setTimestamp() expects parameter 1 to be int, float given
+DateTime::setTimestamp() expects argument #1 ($timestamp) to be of type int, float given
 string(32) "5138-11-16 09:46:40 100000000000"
 bool(false)
 string(10) "1215752192"

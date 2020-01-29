@@ -8,7 +8,7 @@ foo(null);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Argument 1 passed to foo() must be an instance of bar, null given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: foo() expects argument #1 ($ex) to be of type bar, null given, called in %s on line %d and defined in %s:%d
 Stack trace:
 #0 %s(%d): foo(NULL)
 #1 {main}

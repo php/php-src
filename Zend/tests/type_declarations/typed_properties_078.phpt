@@ -1,5 +1,5 @@
 --TEST--
-Typed references must be kept track of and always be only the intersection of the types currently holding that reference
+Typed references must be kept track of and always be only the intersection of the type currently holding that reference
 --FILE--
 <?php
 

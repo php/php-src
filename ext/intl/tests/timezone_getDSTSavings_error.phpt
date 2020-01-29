@@ -11,7 +11,7 @@ ini_set("intl.error_level", E_WARNING);
 var_dump(intltz_get_dst_savings(null));
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: intltz_get_dst_savings() expects parameter 1 to be IntlTimeZone, null given in %s:%d
+Fatal error: Uncaught TypeError: intltz_get_dst_savings() expects argument #1 ($tz) to be of type IntlTimeZone, null given in %s:%d
 Stack trace:
 #0 %s(%d): intltz_get_dst_savings(NULL)
 #1 {main}

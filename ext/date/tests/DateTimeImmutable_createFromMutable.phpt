@@ -24,4 +24,4 @@ object(DateTimeImmutable)#%d (3) {
   ["timezone"]=>
   string(13) "Europe/London"
 }
-DateTimeImmutable::createFromMutable() expects parameter 1 to be DateTime, object given
+DateTimeImmutable::createFromMutable() expects argument #1 ($object) to be of type DateTime, object given

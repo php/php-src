@@ -39,7 +39,7 @@ foreach($it as $k => $v)
 
 ?>
 --EXPECTF--
-Error AppendIterator::append() expects parameter 1 to be Iterator, array given in %s on line %d
+Error AppendIterator::append() expects argument #1 ($iterator) to be of type Iterator, array given in %s on line %d
 object(ArrayIterator)#%d (1) {
   %s"storage"%s"ArrayIterator":private]=>
   array(2) {

@@ -98,25 +98,25 @@ float(1)
 float(0)
 
 -- Iteration 7 --
-ceil() expects parameter 1 to be int or float, string given
+ceil() expects argument #1 ($number) to be of type int|float, string given
 
 -- Iteration 8 --
-ceil() expects parameter 1 to be int or float, string given
+ceil() expects argument #1 ($number) to be of type int|float, string given
 
 -- Iteration 9 --
-ceil() expects parameter 1 to be int or float, array given
+ceil() expects argument #1 ($number) to be of type int|float, array given
 
 -- Iteration 10 --
-ceil() expects parameter 1 to be int or float, string given
+ceil() expects argument #1 ($number) to be of type int|float, string given
 
 -- Iteration 11 --
-ceil() expects parameter 1 to be int or float, string given
+ceil() expects argument #1 ($number) to be of type int|float, string given
 
 -- Iteration 12 --
-ceil() expects parameter 1 to be int or float, string given
+ceil() expects argument #1 ($number) to be of type int|float, string given
 
 -- Iteration 13 --
-ceil() expects parameter 1 to be int or float, object given
+ceil() expects argument #1 ($number) to be of type int|float, object given
 
 -- Iteration 14 --
 float(0)
@@ -125,4 +125,4 @@ float(0)
 float(0)
 
 -- Iteration 16 --
-ceil() expects parameter 1 to be int or float, resource given
+ceil() expects argument #1 ($number) to be of type int|float, resource given

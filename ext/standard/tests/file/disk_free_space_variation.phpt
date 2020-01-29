@@ -110,19 +110,19 @@ float(%d)
 float(%d)
 
 -- Iteration 9 --
-disk_free_space() expects parameter 1 to be a valid path, string given
-diskfreespace() expects parameter 1 to be a valid path, string given
+disk_free_space() expects argument #1 ($directory) to be a valid path, string given
+diskfreespace() expects argument #1 ($directory) to be a valid path, string given
 
 -- Iteration 10 --
-disk_free_space() expects parameter 1 to be a valid path, string given
-diskfreespace() expects parameter 1 to be a valid path, string given
+disk_free_space() expects argument #1 ($directory) to be a valid path, string given
+diskfreespace() expects argument #1 ($directory) to be a valid path, string given
 
 -- Iteration 11 --
-disk_free_space() expects parameter 1 to be a valid path, string given
-diskfreespace() expects parameter 1 to be a valid path, string given
+disk_free_space() expects argument #1 ($directory) to be a valid path, string given
+diskfreespace() expects argument #1 ($directory) to be a valid path, string given
 
 -- Iteration 12 --
-disk_free_space() expects parameter 1 to be a valid path, string given
-diskfreespace() expects parameter 1 to be a valid path, string given
+disk_free_space() expects argument #1 ($directory) to be a valid path, string given
+diskfreespace() expects argument #1 ($directory) to be a valid path, string given
 
 --- Done ---

@@ -41,7 +41,7 @@ Warning: Array to string conversion in %s on line %d
 
 Warning: Array to string conversion in %s on line %d
 string(27) "ArrayTESTArrayTESTPHPTEST50"
-The first argument must be a string
+join() expects argument #1 ($glue) to be of type string, array given
 
 Warning: Array to string conversion in %s on line %d
 

@@ -47,5 +47,5 @@ string(1) "q"
 int(1)
 string(0) ""
 int(0)
-str_replace() expects parameter 3 to be string or array, resource given
+str_replace() expects argument #3 ($subject) to be of type string|array, resource given
 resource(%d) of type (stream)

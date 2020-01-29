@@ -228,40 +228,40 @@ try {
 }
 ?>
 --EXPECTF--
-Phar::mungServer() expects parameter 1 to be array, string given
-Phar::createDefaultStub() expects parameter 1 to be a valid path, array given
-Phar::loadPhar() expects parameter 1 to be a valid path, array given
-Phar::canCompress() expects parameter 1 to be int, string given
-Phar::__construct() expects parameter 1 to be a valid path, array given
-Phar::convertToExecutable() expects parameter 1 to be int, array given
-Phar::convertToData() expects parameter 1 to be int, array given
-PharData::delete() expects parameter 1 to be a valid path, array given
+Phar::mungServer() expects argument #1 ($munglist) to be of type array, string given
+Phar::createDefaultStub() expects argument #1 ($index) to be a valid path, array given
+Phar::loadPhar() expects argument #1 ($filename) to be a valid path, array given
+Phar::canCompress() expects argument #1 ($method) to be of type int, string given
+Phar::__construct() expects argument #1 ($filename) to be a valid path, array given
+Phar::convertToExecutable() expects argument #1 ($format) to be of type int, array given
+Phar::convertToData() expects argument #1 ($format) to be of type int, array given
+PharData::delete() expects argument #1 ($entry) to be a valid path, array given
 Cannot write out phar archive, phar is read-only
 Entry oops does not exist and cannot be deleted
 %sfrontcontroller10.phar
 Cannot write out phar archive, phar is read-only
 A Phar alias cannot be set in a plain tar archive
-Phar::setAlias() expects parameter 1 to be string, array given
+Phar::setAlias() expects argument #1 ($alias) to be of type string, array given
 Cannot change stub, phar is read-only
 A Phar stub cannot be set in a plain tar archive
-Phar::setStub() expects parameter 1 to be string, array given
+Phar::setStub() expects argument #1 ($newstub) to be of type string, array given
 A Phar stub cannot be set in a plain tar archive
-Phar::setDefaultStub() expects parameter 1 to be string, array given
+Phar::setDefaultStub() expects argument #1 ($index) to be of type string, array given
 Cannot change stub: phar.readonly=1
 Cannot set signature algorithm, phar is read-only
-Phar::compress() expects parameter 1 to be int, array given
+Phar::compress() expects argument #1 ($compression_type) to be of type int, array given
 Cannot compress phar archive, phar is read-only
-Phar::compressFiles() expects parameter 1 to be int, array given
+Phar::compressFiles() expects argument #1 ($compression_type) to be of type int, array given
 Phar is readonly, cannot change compression
 Phar::copy() expects exactly 2 parameters, 1 given
 Cannot copy "a" to "b", phar is read-only
-Phar::offsetExists() expects parameter 1 to be a valid path, array given
-Phar::offsetGet() expects parameter 1 to be a valid path, array given
+Phar::offsetExists() expects argument #1 ($entry) to be a valid path, array given
+Phar::offsetGet() expects argument #1 ($entry) to be a valid path, array given
 Phar::offsetSet() expects exactly 2 parameters, 1 given
-PharData::offsetUnset() expects parameter 1 to be a valid path, array given
+PharData::offsetUnset() expects argument #1 ($entry) to be a valid path, array given
 Write operations disabled by the php.ini setting phar.readonly
-Phar::addEmptyDir() expects parameter 1 to be a valid path, array given
-Phar::addFile() expects parameter 1 to be a valid path, array given
+Phar::addEmptyDir() expects argument #1 ($dirname) to be a valid path, array given
+Phar::addFile() expects argument #1 ($filename) to be a valid path, array given
 Phar::addFromString() expects exactly 2 parameters, 1 given
 Write operations disabled by the php.ini setting phar.readonly
 Phar::setMetadata() expects exactly 1 parameter, 2 given

@@ -20,8 +20,8 @@ new class {
 };
 ?>
 --EXPECTF--
-Warning: Parameter 1 to ref() expected to be a reference, value given in %sbug72598_2.php on line 14
+Warning: ref() expects argument #1 ($ref) to be passed by reference, value given in %s on line %d
 int(0)
 
-Warning: Parameter 1 to ref() expected to be a reference, value given in %sbug72598_2.php on line 14
+Warning: ref() expects argument #1 ($ref) to be passed by reference, value given in %s on line %d
 int(0)

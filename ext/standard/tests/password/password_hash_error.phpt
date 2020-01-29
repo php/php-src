@@ -40,6 +40,6 @@ password_hash() expects at least 2 parameters, 1 given
 
 Warning: Array to string conversion in %s on line %d
 Unknown password hashing algorithm: Array
-password_hash() expects parameter 3 to be array, object given
-password_hash() expects parameter 3 to be array, string given
-password_hash() expects parameter 1 to be string, array given
+password_hash() expects argument #3 ($options) to be of type array, object given
+password_hash() expects argument #3 ($options) to be of type array, string given
+password_hash() expects argument #1 ($password) to be of type string, array given

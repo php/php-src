@@ -57,6 +57,6 @@ string(1) "7"
 string(12) "100008388608"
 string(12) "100000000000"
 string(12) "100000000008"
-gmp_setbit() expects parameter 1 to be GMP, string given
-gmp_setbit() expects parameter 1 to be GMP, array given
+gmp_setbit() expects argument #1 ($a) to be of type GMP, string given
+gmp_setbit() expects argument #1 ($a) to be of type GMP, array given
 Done

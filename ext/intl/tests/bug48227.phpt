@@ -16,7 +16,7 @@ foreach (['', 1, NULL, $x] as $value) {
 
 ?>
 --EXPECT--
-NumberFormatter::format() expects parameter 1 to be number, string given
+NumberFormatter::format() expects argument #1 ($value) to be of type number, string given
 string(1) "1"
 string(1) "0"
-NumberFormatter::format() expects parameter 1 to be number, object given
+NumberFormatter::format() expects argument #1 ($value) to be of type number, object given

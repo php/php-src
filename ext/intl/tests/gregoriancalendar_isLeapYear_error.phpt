@@ -14,7 +14,7 @@ var_dump(intlgregcal_is_leap_year(1, 2));
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: intlgregcal_is_leap_year() expects parameter 1 to be IntlGregorianCalendar, int given in %s:%d
+Fatal error: Uncaught TypeError: intlgregcal_is_leap_year() expects argument #1 ($calendar) to be of type IntlGregorianCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlgregcal_is_leap_year(1, 2)
 #1 {main}

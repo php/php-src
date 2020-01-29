@@ -109,7 +109,7 @@ echo "\n";
 unlink($data_file);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vfprintf() : with unexpected values for format argument ***
 
 *** Testing vprintf() with with unexpected values for format argument ***
@@ -133,19 +133,19 @@ unlink($data_file);
 -- Iteration 9 --
 0.5
 -- Iteration 10 --
-vfprintf() expects parameter 2 to be string, array given
+vfprintf() expects argument #2 ($format) to be of type string, array given
 
 -- Iteration 11 --
-vfprintf() expects parameter 2 to be string, array given
+vfprintf() expects argument #2 ($format) to be of type string, array given
 
 -- Iteration 12 --
-vfprintf() expects parameter 2 to be string, array given
+vfprintf() expects argument #2 ($format) to be of type string, array given
 
 -- Iteration 13 --
-vfprintf() expects parameter 2 to be string, array given
+vfprintf() expects argument #2 ($format) to be of type string, array given
 
 -- Iteration 14 --
-vfprintf() expects parameter 2 to be string, array given
+vfprintf() expects argument #2 ($format) to be of type string, array given
 
 -- Iteration 15 --
 
@@ -170,4 +170,4 @@ object
 -- Iteration 25 --
 
 -- Iteration 26 --
-vfprintf() expects parameter 2 to be string, resource given
+vfprintf() expects argument #2 ($format) to be of type string, resource given

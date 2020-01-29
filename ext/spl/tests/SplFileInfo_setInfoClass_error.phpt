@@ -13,4 +13,4 @@ try {
 
 ?>
 --EXPECT--
-SplFileInfo::setInfoClass() expects parameter 1 to be a class name derived from SplFileInfo, 'stdClass' given
+SplFileInfo::setInfoClass() expects argument #1 ($class_name) to be a class name derived from SplFileInfo, 'stdClass' given

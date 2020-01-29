@@ -49,7 +49,7 @@ include $pname . '/foo/hi';
 <?php rmdir(__DIR__ . '/poo'); ?>
 <?php unlink(__DIR__ . '/fgc_edgecases.txt'); ?>
 --EXPECTF--
-file_get_contents() expects parameter 1 to be a valid path, array given
+file_get_contents() expects argument #1 ($filename) to be a valid path, array given
 blah
 <?php
 echo file_get_contents("foo/" . basename(__FILE__));

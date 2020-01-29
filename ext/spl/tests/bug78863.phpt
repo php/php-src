@@ -16,7 +16,7 @@ foreach ($it as $fileinfo) {
 }
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: DirectoryIterator::__construct() expects parameter 1 to be a valid path, string given in %s:%d
+Fatal error: Uncaught TypeError: DirectoryIterator::__construct() expects argument #1 ($path) to be a valid path, string given in %s:%d
 Stack trace:
 #0 %s(%d): DirectoryIterator->__construct('%s')
 #1 {main}

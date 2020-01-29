@@ -30,5 +30,5 @@ try {
 ?>
 --EXPECT--
 *** Testing array_diff_ukey() : usage variation ***
-array_diff_ukey() expects parameter 3 to be a valid callback, function 'unknown_function' not found or invalid function name
-array_diff_ukey() expects parameter 3 to be a valid callback, function 'unknown_function' not found or invalid function name
+array_diff_ukey() expects argument #3 to be a valid callback, function 'unknown_function' not found or invalid function name
+array_diff_ukey() expects argument #3 to be a valid callback, function 'unknown_function' not found or invalid function name

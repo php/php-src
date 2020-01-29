@@ -100,11 +100,11 @@ bool(false)
 -- Iteration 7 --
 bool(false)
 -- Iteration 8 --
-stristr() expects parameter 2 to be string, array given
+stristr() expects argument #2 ($needle) to be of type string, array given
 -- Iteration 9 --
-stristr() expects parameter 2 to be string, array given
+stristr() expects argument #2 ($needle) to be of type string, array given
 -- Iteration 10 --
-stristr() expects parameter 2 to be string, array given
+stristr() expects argument #2 ($needle) to be of type string, array given
 -- Iteration 11 --
 bool(false)
 -- Iteration 12 --
@@ -120,7 +120,7 @@ string(11) "Hello World"
 -- Iteration 17 --
 bool(false)
 -- Iteration 18 --
-stristr() expects parameter 2 to be string, resource given
+stristr() expects argument #2 ($needle) to be of type string, resource given
 -- Iteration 19 --
 string(11) "Hello World"
 -- Iteration 20 --

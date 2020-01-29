@@ -19,7 +19,7 @@ var_dump(intlcal_is_set(1, 2));
 Warning: IntlCalendar::isSet(): intlcal_is_set: invalid field in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: intlcal_is_set() expects parameter 1 to be IntlCalendar, int given in %s:%d
+Fatal error: Uncaught TypeError: intlcal_is_set() expects argument #1 ($calendar) to be of type IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_is_set(1, 2)
 #1 {main}

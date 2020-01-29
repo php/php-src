@@ -83,8 +83,8 @@ try {
 }
 
 session_start();
---EXPECTF--
+--EXPECT--
 *** Testing session_set_save_handler() function: interface wrong ***
 bool(true)
-session_set_save_handler() expects parameter 1 to be SessionHandlerInterface, object given
+session_set_save_handler() expects argument #1 ($open) to be of type SessionHandlerInterface, object given
 good handler writing

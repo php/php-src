@@ -78,8 +78,8 @@ bool(false)
 Warning: fileperms(): stat failed for %s/fileperms_variation3/fileperms*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-fileperms() expects parameter 1 to be a valid path, string given
+fileperms() expects argument #1 ($filename) to be a valid path, string given
 - Iteration 8 -
-fileperms() expects parameter 1 to be a valid path, string given
+fileperms() expects argument #1 ($filename) to be a valid path, string given
 
 *** Done ***

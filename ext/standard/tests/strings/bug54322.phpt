@@ -9,4 +9,4 @@ try {
 }
 ?>
 --EXPECT--
-get_html_translation_table() expects parameter 1 to be int, float given
+get_html_translation_table() expects argument #1 ($table) to be of type int, float given

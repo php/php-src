@@ -60,5 +60,5 @@ Property  does not exist
 Property 1 does not exist
 Property 1.5 does not exist
 Property 1 does not exist
-ReflectionClass::getProperty() expects parameter 1 to be string, array given
-ReflectionClass::getProperty() expects parameter 1 to be string, object given
+ReflectionClass::getProperty() expects argument #1 ($name) to be of type string, array given
+ReflectionClass::getProperty() expects argument #1 ($name) to be of type string, object given

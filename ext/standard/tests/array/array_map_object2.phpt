@@ -41,10 +41,10 @@ try {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() :  with non-existent class and method ***
 -- with non-existent class --
-array_map() expects parameter 1 to be a valid callback, class 'non-existent' not found
+array_map() expects argument #1 ($callback) to be a valid callback, class 'non-existent' not found
 -- with existent class and non-existent method --
-array_map() expects parameter 1 to be a valid callback, class 'SimpleClass' does not have a method 'non-existent'
+array_map() expects argument #1 ($callback) to be a valid callback, class 'SimpleClass' does not have a method 'non-existent'
 Done

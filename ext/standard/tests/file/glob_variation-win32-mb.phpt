@@ -334,7 +334,7 @@ array(0) {
 }
 
 -- Iteration 8 --
-glob() expects parameter 1 to be a valid path, string given
+glob() expects argument #1 ($pattern) to be a valid path, string given
 
 -- Iteration 9 --
 array(0) {
@@ -437,7 +437,7 @@ array(1) {
 array(0) {
 }
 -- Iteration 8 --
-glob() expects parameter 1 to be a valid path, string given
+glob() expects argument #1 ($pattern) to be a valid path, string given
 -- Iteration 9 --
 array(0) {
 }

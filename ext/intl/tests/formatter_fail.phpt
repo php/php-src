@@ -100,13 +100,13 @@ IntlException: Constructor failed in %s on line %d
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 'numfmt_create: number formatter creation failed: U_UNSUPPORTED_ERROR'
 
-TypeError: NumberFormatter::__construct() expects parameter 1 to be string, array given in %s on line %d
+TypeError: NumberFormatter::__construct() expects argument #1 ($locale) to be of type string, array given in %s on line %d
 'U_ZERO_ERROR'
 
-TypeError: NumberFormatter::create() expects parameter 1 to be string, array given in %s on line %d
+TypeError: NumberFormatter::create() expects argument #1 ($locale) to be of type string, array given in %s on line %d
 'U_ZERO_ERROR'
 
-TypeError: numfmt_create() expects parameter 1 to be string, array given in %s on line %d
+TypeError: numfmt_create() expects argument #1 ($locale) to be of type string, array given in %s on line %d
 'U_ZERO_ERROR'
 
 IntlException: Constructor failed in %s on line %d

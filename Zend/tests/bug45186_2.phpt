@@ -52,5 +52,5 @@ string(1) "y"
 __call:
 string(1) "y"
 ok
-call_user_func() expects parameter 1 to be a valid callback, class 'bar' does not have a method 'www'
-call_user_func() expects parameter 1 to be a valid callback, cannot access self:: when no class scope is active
+call_user_func() expects argument #1 ($function) to be a valid callback, class 'bar' does not have a method 'www'
+call_user_func() expects argument #1 ($function) to be a valid callback, cannot access self:: when no class scope is active

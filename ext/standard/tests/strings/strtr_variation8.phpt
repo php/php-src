@@ -90,7 +90,7 @@ fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtr() function: with unexpected inputs for 'replace_pairs' ***
 
 -- Iteration 1 --
@@ -142,7 +142,7 @@ If two arguments are passed, the second argument must be an array
 If two arguments are passed, the second argument must be an array
 
 -- Iteration 17 --
-strtr() expects parameter 2 to be string or array, resource given
+strtr() expects argument #2 ($from) to be of type string|array, resource given
 
 -- Iteration 18 --
 If two arguments are passed, the second argument must be an array

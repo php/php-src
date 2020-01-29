@@ -38,6 +38,6 @@ try {
 
 ?>
 --EXPECTF--
-Return value of C::test1() must be of the type int, string returned
-Argument 1 passed to C::test2() must be of the type int, string given, called in %s on line %d
-Argument 1 passed to C::test3() must be of the type int, string given, called in %s on line %d
+Return value of C::test1() must be of type int, string returned
+C::test2() expects argument #1 ($arg) to be of type int, string given, called in %s on line %d
+C::test3() expects argument #1 ($arg) to be of type int, string given, called in %s on line %d

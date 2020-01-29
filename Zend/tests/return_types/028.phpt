@@ -17,4 +17,4 @@ try {
 
 ?>
 --EXPECTF--
-Return value of foo() must be an instance of stdClass, array returned in %s on line %d
+Return value of foo() must be of type stdClass, array returned in %s on line %d

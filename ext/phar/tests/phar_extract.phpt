@@ -142,7 +142,7 @@ string(3) "hi3"
 string(3) "hi2"
 bool(false)
 Invalid argument, expected a filename (string) or array of filenames
-Phar::extractTo() expects parameter 1 to be a valid path, array given
+Phar::extractTo() expects argument #1 ($pathto) to be a valid path, array given
 Invalid argument, extraction path must be non-zero length
 Unable to use path "%soops" for extraction, it is a file, must be a directory
 Invalid argument, array of filenames to extract contains non-string value
