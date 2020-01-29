@@ -1173,7 +1173,7 @@ case $host_alias in
   i[[3456]]86-*-linux-* | x86_64-*-linux-*)
 	AC_MSG_CHECKING(linker support for -zcommon-page-size=2097152)
     save_LDFLAGS=$LDFLAGS
-    $LDFLAGS="$LDFLAGS -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152"
+    LDFLAGS="$LDFLAGS -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152"
     AC_RUN_IFELSE(
         [AC_LANG_SOURCE([[int main() {return 0;}]])],
         [ac_cv_common_page_size=yes],
@@ -1187,7 +1187,7 @@ case $host_alias in
         AC_MSG_RESULT([no])
         AC_MSG_CHECKING(linker support for -zmax-page-size=2097152)
         save_LDFLAGS=$LDFLAGS
-        $LDFLAGS="$LDFLAGS -Wl,-zmax-page-size=2097152"
+        LDFLAGS="$LDFLAGS -Wl,-zmax-page-size=2097152"
         AC_RUN_IFELSE(
             [AC_LANG_SOURCE([[int main() {return 0;}]])],
             [ac_cv_max_page_size=yes],
