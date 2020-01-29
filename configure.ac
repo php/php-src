@@ -1050,6 +1050,42 @@ esyscmd(./build/config-stubs ext)
 dnl Extensions post-config.
 dnl ----------------------------------------------------------------------------
 
+dnl Align segments on huge page boundary
+case $host_alias in
+  i[[3456]]86-*-linux-* | x86_64-*-linux-*)
+	AC_MSG_CHECKING(linker support for -zcommon-page-size=2097152)
+    save_LDFLAGS=$LDFLAGS
+    LDFLAGS="$LDFLAGS -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152"
+    AC_RUN_IFELSE(
+        [AC_LANG_SOURCE([[int main() {return 0;}]])],
+        [ac_cv_common_page_size=yes],
+        [ac_cv_common_page_size=no],
+        [ac_cv_common_page_size=no])
+    LDFLAGS=$save_LDFLAGS
+    if test "$ac_cv_common_page_size" = "yes"; then
+        AC_MSG_RESULT([yes])
+        EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152"
+    else
+        AC_MSG_RESULT([no])
+        AC_MSG_CHECKING(linker support for -zmax-page-size=2097152)
+        save_LDFLAGS=$LDFLAGS
+        LDFLAGS="$LDFLAGS -Wl,-zmax-page-size=2097152"
+        AC_RUN_IFELSE(
+            [AC_LANG_SOURCE([[int main() {return 0;}]])],
+            [ac_cv_max_page_size=yes],
+            [ac_cv_max_page_size=no],
+            [ac_cv_max_page_size=no])
+        LDFLAGS=$save_LDFLAGS
+        if test "$ac_cv_max_page_size" = "yes"; then
+            AC_MSG_RESULT([yes])
+            EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM -Wl,-zmax-page-size=2097152"
+        else
+            AC_MSG_RESULT([no])
+        fi
+    fi
+    ;;
+esac
+
 enable_shared=yes
 enable_static=yes
 
@@ -1167,13 +1203,6 @@ PHP_CONFIGURE_PART(Configuring TSRM)
 if test "$PHP_THREAD_SAFETY" = "yes"; then
   TSRM_THREADS_CHECKS
 fi
-
-dnl Align segments on huge page boundary
-case $host_alias in
-  i[[3456]]86-*-linux-* | x86_64-*-linux-*)
-    EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM -Wl,-zcommon-page-size=2097152 -Wl,-zmax-page-size=2097152"
-    ;;
-esac
 
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $LDFLAGS"
 EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $LDFLAGS"
