@@ -19,7 +19,7 @@ var_dump(finfo_open(FILEINFO_MIME, '/foo/bar/inexistent'));
 
 ?>
 --EXPECTF--
-finfo_open() expects parameter 2 to be a valid path, string given
+finfo_open() expects argument #2 ($arg) to be a valid path, string given
 resource(%d) of type (file_info)
 resource(%d) of type (file_info)
 

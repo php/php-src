@@ -37,7 +37,7 @@ ok
 ok
 ok
 
-Fatal error: Uncaught TypeError: Argument 1 passed to foo\test5() must be an instance of bar, instance of foo\bar given, called in %sbug42802.php on line %d and defined in %sbug42802.php:%d
+Fatal error: Uncaught TypeError: foo\test5() expects argument #1 ($bar) to be of type bar, foo\bar given, called in %s on line %d and defined in %s:%d
 Stack trace:
 #0 %s(%d): foo\test5(Object(foo\bar))
 #1 {main}

@@ -110,9 +110,9 @@ Notice: tempnam(): file created in the system's temporary directory in %stempnam
 Failed, not created in the correct directory %s vs %s
 0
 -- Iteration 6 --
-tempnam() expects parameter 2 to be a valid path, string given
+tempnam() expects argument #2 ($prefix) to be a valid path, string given
 -- Iteration 7 --
-tempnam() expects parameter 2 to be a valid path, array given
+tempnam() expects argument #2 ($prefix) to be a valid path, array given
 -- Iteration 8 --
 OK
 -- Iteration 9 --

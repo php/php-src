@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECTF--
-imagexbm() expects parameter 2 to be a valid path, string given
+imagexbm() expects argument #2 ($filename) to be a valid path, string given

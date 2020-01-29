@@ -28,8 +28,8 @@ try {
 ?>
 --EXPECT--
 *** Trying Ord With Integer
-*** Caught ord() expects parameter 1 to be string, int given
+*** Caught ord() expects argument #1 ($character) to be of type string, int given
 *** Trying Array Map With Invalid Callback
-*** Caught array_map() expects parameter 1 to be a valid callback, first array member is not a valid class name or object
+*** Caught array_map() expects argument #1 ($callback) to be a valid callback, first array member is not a valid class name or object
 *** Trying Strlen With Float
-*** Caught strlen() expects parameter 1 to be string, float given
+*** Caught strlen() expects argument #1 ($str) to be of type string, float given

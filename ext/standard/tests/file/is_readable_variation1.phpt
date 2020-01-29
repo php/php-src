@@ -81,11 +81,11 @@ bool(false)
 -- Iteration 6 --
 bool(false)
 -- Iteration 7 --
-is_readable() expects parameter 1 to be a valid path, string given
+is_readable() expects argument #1 ($filename) to be a valid path, string given
 -- Iteration 8 --
-is_readable() expects parameter 1 to be a valid path, string given
+is_readable() expects argument #1 ($filename) to be a valid path, string given
 -- Iteration 9 --
-is_readable() expects parameter 1 to be a valid path, string given
+is_readable() expects argument #1 ($filename) to be a valid path, string given
 -- Iteration 10 --
 bool(true)
 -- Iteration 11 --

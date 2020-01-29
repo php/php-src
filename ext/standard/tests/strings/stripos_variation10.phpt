@@ -126,19 +126,19 @@ bool(false)
 int(17)
 
 -- Iteration 10 --
-stripos() expects parameter 2 to be string, array given
+stripos() expects argument #2 ($needle) to be of type string, array given
 
 -- Iteration 11 --
-stripos() expects parameter 2 to be string, array given
+stripos() expects argument #2 ($needle) to be of type string, array given
 
 -- Iteration 12 --
-stripos() expects parameter 2 to be string, array given
+stripos() expects argument #2 ($needle) to be of type string, array given
 
 -- Iteration 13 --
-stripos() expects parameter 2 to be string, array given
+stripos() expects argument #2 ($needle) to be of type string, array given
 
 -- Iteration 14 --
-stripos() expects parameter 2 to be string, array given
+stripos() expects argument #2 ($needle) to be of type string, array given
 
 -- Iteration 15 --
 int(9)
@@ -168,7 +168,7 @@ int(0)
 int(0)
 
 -- Iteration 24 --
-stripos() expects parameter 2 to be string, resource given
+stripos() expects argument #2 ($needle) to be of type string, resource given
 
 -- Iteration 25 --
 int(0)

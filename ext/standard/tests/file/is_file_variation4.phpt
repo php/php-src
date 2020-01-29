@@ -56,7 +56,7 @@ $dir_name = $file_path."/is_file_variation4";
 unlink($dir_name."/is_file_variation4.tmp");
 rmdir($dir_name);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_file() with different notations of file names ***
 - Iteration 1 -
 bool(true)
@@ -71,8 +71,8 @@ bool(false)
 - Iteration 6 -
 bool(false)
 - Iteration 7 -
-is_file() expects parameter 1 to be a valid path, string given
+is_file() expects argument #1 ($filename) to be a valid path, string given
 - Iteration 8 -
-is_file() expects parameter 1 to be a valid path, string given
+is_file() expects argument #1 ($filename) to be a valid path, string given
 
 *** Done ***

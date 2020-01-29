@@ -68,7 +68,7 @@ int(42)
 int(42)
 int(42)
 Cannot assign stdClass to property Test::$prop of type X|Y|Z|int
-Argument 1 passed to Test::method() must be of type X|Y|Z|int, instance of stdClass given, called in %s on line %d
+Test::method() expects argument #1 ($arg) to be of type X|Y|Z|int, stdClass given, called in %s on line %d
 object(X)#4 (0) {
 }
 object(X)#6 (0) {

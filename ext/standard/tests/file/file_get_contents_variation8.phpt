@@ -75,9 +75,9 @@ bool(false)
 Warning: file_get_contents( ): Failed to open stream: No such file or directory in %s on line %d
 bool(false)
 -- Iteration 6 --
-file_get_contents() expects parameter 1 to be a valid path, string given
+file_get_contents() expects argument #1 ($filename) to be a valid path, string given
 -- Iteration 7 --
-file_get_contents() expects parameter 1 to be a valid path, array given
+file_get_contents() expects argument #1 ($filename) to be a valid path, array given
 -- Iteration 8 --
 
 Warning: file_get_contents(/no/such/file/dir): Failed to open stream: No such file or directory in %s on line %d

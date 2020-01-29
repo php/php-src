@@ -76,6 +76,6 @@ sfBgVeqg0P4SWez5fHXqBNcjMdMI5f0bikcDZSIfTHS8FX+PMurLBC8UPB0YNIOl
 JViHkCA9x6m8RJXAFvqmgLlWlUzbDv/cRrDfjWjR
 -----END CERTIFICATE REQUEST-----
 "
-openssl_csr_export_to_file() expects parameter 1 to be resource, string given
+openssl_csr_export_to_file() expects argument #1 ($csr) to be of type resource, string given
 openssl_csr_export_to_file(): supplied resource is not a valid OpenSSL X.509 CSR resource
 bool(true)

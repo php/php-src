@@ -43,5 +43,5 @@ string(10) "%r\0%r*%r\0%rvar_pro"
 string(14) "test_protected"
 string(7) "var_pub"
 string(11) "test_public"
-array_walk_recursive() expects parameter 1 to be array, string given
+array_walk_recursive() expects argument #1 ($input) to be of type array, string given
 Done

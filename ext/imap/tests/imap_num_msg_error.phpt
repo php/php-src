@@ -22,6 +22,6 @@ Checking with no parameters
 Warning: imap_num_msg() expects exactly 1 parameter, 0 given in %s on line %d
 Checking with incorrect parameter type
 
-Warning: imap_num_msg() expects parameter 1 to be resource, string given in %s on line %d
+Warning: imap_num_msg() expects argument #1 to be of type resource, string given in %s on line %d
 
-Warning: imap_num_msg() expects parameter 1 to be resource, bool given in %s on line %d
+Warning: imap_num_msg() expects argument #1 to be of type resource, bool given in %s on line %d

@@ -11,7 +11,7 @@ $one = new One();
 $one->a(new One());
 $one->a(123);
 --EXPECTF--
-Fatal error: Uncaught TypeError: Argument 1 passed to One::a() must be an object, int given, called in %s:4
+Fatal error: Uncaught TypeError: One::a() expects argument #1 ($obj) to be of type object, int given, called in %s:%d
 Stack trace:
 #0 %s(9): One->a(123)
 #1 {main}

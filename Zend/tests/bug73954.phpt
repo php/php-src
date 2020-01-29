@@ -16,7 +16,7 @@ takes_int(log(tan(3.14)));
 float(NAN)
 bool(true)
 
-Fatal error: Uncaught TypeError: Argument 1 passed to takes_int() must be of the type int, float given, called in %s on line 9 and defined in %s:6
+Fatal error: Uncaught TypeError: takes_int() expects argument #1 ($int) to be of type int, float given, called in %s on line %d and defined in %s:%d
 Stack trace:
 #0 %s(9): takes_int(NAN)
 #1 {main}

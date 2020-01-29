@@ -30,4 +30,4 @@ object(DateTime)#%d (3) {
   string(13) "Europe/London"
 }
 bool(true)
-DateTime::createFromImmutable() expects parameter 1 to be DateTimeImmutable, object given
+DateTime::createFromImmutable() expects argument #1 ($object) to be of type DateTimeImmutable, object given

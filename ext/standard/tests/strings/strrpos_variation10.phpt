@@ -116,15 +116,15 @@ bool(false)
 -- Iteration 9 --
 int(28)
 -- Iteration 10 --
-strrpos() expects parameter 2 to be string, array given
+strrpos() expects argument #2 ($needle) to be of type string, array given
 -- Iteration 11 --
-strrpos() expects parameter 2 to be string, array given
+strrpos() expects argument #2 ($needle) to be of type string, array given
 -- Iteration 12 --
-strrpos() expects parameter 2 to be string, array given
+strrpos() expects argument #2 ($needle) to be of type string, array given
 -- Iteration 13 --
-strrpos() expects parameter 2 to be string, array given
+strrpos() expects argument #2 ($needle) to be of type string, array given
 -- Iteration 14 --
-strrpos() expects parameter 2 to be string, array given
+strrpos() expects argument #2 ($needle) to be of type string, array given
 -- Iteration 15 --
 int(41)
 -- Iteration 16 --
@@ -144,7 +144,7 @@ int(87)
 -- Iteration 23 --
 int(87)
 -- Iteration 24 --
-strrpos() expects parameter 2 to be string, resource given
+strrpos() expects argument #2 ($needle) to be of type string, resource given
 -- Iteration 25 --
 int(87)
 -- Iteration 26 --

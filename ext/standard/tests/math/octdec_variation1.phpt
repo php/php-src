@@ -160,7 +160,7 @@ int(0)
 int(0)
 
 -- Iteration 20 --
-octdec() expects parameter 1 to be string, array given
+octdec() expects argument #1 ($octal_string) to be of type string, array given
 
 -- Iteration 21 --
 
@@ -184,5 +184,5 @@ int(0)
 int(0)
 
 -- Iteration 26 --
-octdec() expects parameter 1 to be string, resource given
+octdec() expects argument #1 ($octal_string) to be of type string, resource given
 ---Done---

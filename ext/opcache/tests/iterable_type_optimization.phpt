@@ -10,7 +10,7 @@ test(new stdClass);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Return value of test() must be iterable, object returned in %s:%d
+Fatal error: Uncaught TypeError: Return value of test() must be of type iterable, object returned in %s:%d
 Stack trace:
 #0 %s(%d): test(Object(stdClass))
 #1 {main}

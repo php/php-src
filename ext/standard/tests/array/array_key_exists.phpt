@@ -91,7 +91,7 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic functionalities ***
 -- Iteration 1 --
 bool(true)
@@ -224,5 +224,5 @@ bool(true)
 Illegal offset type
 
 *** Testing operation on objects ***
-array_key_exists() expects parameter 2 to be array, object given
+array_key_exists() expects argument #2 ($array) to be of type array, object given
 Done

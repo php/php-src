@@ -108,49 +108,49 @@ echo "Done\n";
 
 --- Testing join() by supplying different values for 'pieces' argument ---
 -- Iteration 1 --
-join() expects parameter 2 to be array, int given
+join() expects argument #2 ($pieces) to be of type array, int given
 -- Iteration 2 --
-join() expects parameter 2 to be array, int given
+join() expects argument #2 ($pieces) to be of type array, int given
 -- Iteration 3 --
-join() expects parameter 2 to be array, int given
+join() expects argument #2 ($pieces) to be of type array, int given
 -- Iteration 4 --
-join() expects parameter 2 to be array, int given
+join() expects argument #2 ($pieces) to be of type array, int given
 -- Iteration 5 --
-join() expects parameter 2 to be array, float given
+join() expects argument #2 ($pieces) to be of type array, float given
 -- Iteration 6 --
-join() expects parameter 2 to be array, float given
+join() expects argument #2 ($pieces) to be of type array, float given
 -- Iteration 7 --
-join() expects parameter 2 to be array, float given
+join() expects argument #2 ($pieces) to be of type array, float given
 -- Iteration 8 --
-join() expects parameter 2 to be array, float given
+join() expects argument #2 ($pieces) to be of type array, float given
 -- Iteration 9 --
-join() expects parameter 2 to be array, float given
+join() expects argument #2 ($pieces) to be of type array, float given
 -- Iteration 10 --
-join() expects parameter 2 to be array, bool given
+join() expects argument #2 ($pieces) to be of type array, bool given
 -- Iteration 11 --
-join() expects parameter 2 to be array, bool given
+join() expects argument #2 ($pieces) to be of type array, bool given
 -- Iteration 12 --
-join() expects parameter 2 to be array, bool given
+join() expects argument #2 ($pieces) to be of type array, bool given
 -- Iteration 13 --
-join() expects parameter 2 to be array, bool given
+join() expects argument #2 ($pieces) to be of type array, bool given
 -- Iteration 14 --
-join() expects parameter 2 to be array, string given
+join() expects argument #2 ($pieces) to be of type array, string given
 -- Iteration 15 --
-join() expects parameter 2 to be array, string given
+join() expects argument #2 ($pieces) to be of type array, string given
 -- Iteration 16 --
-join() expects parameter 2 to be array, object given
+join() expects argument #2 ($pieces) to be of type array, object given
 -- Iteration 17 --
-join() expects parameter 2 to be array, string given
+join() expects argument #2 ($pieces) to be of type array, string given
 -- Iteration 18 --
-join() expects parameter 2 to be array, string given
+join() expects argument #2 ($pieces) to be of type array, string given
 -- Iteration 19 --
-join() expects parameter 2 to be array, null given
+join() expects argument #2 ($pieces) to be of type array, null given
 -- Iteration 20 --
-join() expects parameter 2 to be array, null given
+join() expects argument #2 ($pieces) to be of type array, null given
 -- Iteration 21 --
-join() expects parameter 2 to be array, resource given
+join() expects argument #2 ($pieces) to be of type array, resource given
 -- Iteration 22 --
-join() expects parameter 2 to be array, null given
+join() expects argument #2 ($pieces) to be of type array, null given
 -- Iteration 23 --
-join() expects parameter 2 to be array, null given
+join() expects argument #2 ($pieces) to be of type array, null given
 Done

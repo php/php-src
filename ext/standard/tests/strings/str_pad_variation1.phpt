@@ -36,7 +36,6 @@ var_dump( str_pad($input, $php_int_max_pad_length) );
 ?>
 --EXPECTF--
 *** Testing str_pad() function: with large value for for 'pad_length' argument ***
-str_pad() expects parameter 2 to be int, float given
+str_pad() expects argument #2 ($pad_length) to be of type int, float given
 
 Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) in %s on line %d
-

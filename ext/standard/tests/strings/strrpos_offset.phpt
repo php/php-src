@@ -36,7 +36,7 @@ try {
 echo "Done\n";
 ?>
 --EXPECT--
-strrpos() expects parameter 3 to be int, float given
+strrpos() expects argument #3 ($offset) to be of type int, float given
 Offset not contained in string
 Offset not contained in string
 Offset not contained in string

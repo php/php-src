@@ -79,8 +79,8 @@ bool(false)
 Warning: fileowner(): stat failed for %s/fileowner_variation3/fileowner*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-fileowner() expects parameter 1 to be a valid path, string given
+fileowner() expects argument #1 ($filename) to be a valid path, string given
 - Iteration 8 -
-fileowner() expects parameter 1 to be a valid path, string given
+fileowner() expects argument #1 ($filename) to be a valid path, string given
 
 *** Done ***

@@ -56,8 +56,8 @@ Warning: preg_match(): Unknown modifier 'F' in %spreg_match_error1.php on line %
 bool(false)
 
 Arg value is Array
-preg_match() expects parameter 1 to be string, array given
+preg_match() expects argument #1 ($pattern) to be of type string, array given
 
 Arg value is /[a-zA-Z]/
 int(1)
-preg_match() expects parameter 1 to be string, object given
+preg_match() expects argument #1 ($pattern) to be of type string, object given

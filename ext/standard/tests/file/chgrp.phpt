@@ -13,5 +13,5 @@ try {
     echo $exception->getMessage() . "\n";
 }
 ?>
---EXPECTF--
-Parameter 2 should be string or int, null given
+--EXPECT--
+chgrp() expects argument #2 ($group) to be of type string|int, null given

@@ -54,7 +54,7 @@ $file_path = __DIR__;
 $dir_name = $file_path."/is_dir_variation4";
 rmdir($dir_name);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_dir() with different notations of dir names ***
 -- Iteration 1 --
 bool(true)
@@ -81,9 +81,9 @@ bool(true)
 bool(false)
 
 -- Iteration 9 --
-is_dir() expects parameter 1 to be a valid path, string given
+is_dir() expects argument #1 ($filename) to be a valid path, string given
 
 -- Iteration 10 --
-is_dir() expects parameter 1 to be a valid path, string given
+is_dir() expects argument #1 ($filename) to be a valid path, string given
 
 *** Done ***

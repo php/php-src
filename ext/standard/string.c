@@ -1276,7 +1276,7 @@ PHP_FUNCTION(implode)
 
 	if (pieces == NULL) {
 		if (arg1_array == NULL) {
-			zend_type_error("Argument must be an array");
+			zend_type_error("%s() expects argument #1 ($pieces) to be of type array, string given", get_active_function_name());
 			RETURN_THROWS();
 		}
 
@@ -1284,7 +1284,7 @@ PHP_FUNCTION(implode)
 		pieces = arg1_array;
 	} else {
 		if (arg1_str == NULL) {
-			zend_type_error("The first argument must be a string");
+			zend_type_error("%s() expects argument #1 ($glue) to be of type string, array given", get_active_function_name());
 			RETURN_THROWS();
 		}
 	}

@@ -15,6 +15,6 @@ Notice: Undefined offset: 0 in %s on line %d
 
 Warning: Trying to access array offset on value of type null in %s on line %d
 
-Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line %d
+Warning: foo() expects argument #1 ($ref) to be passed by reference, value given in %s on line %d
 array(0) {
 }

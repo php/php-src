@@ -41,7 +41,7 @@ var_dump(unserialize('O:19:"ReflectionReference":0:{}'));
 ?>
 --EXPECTF--
 Call to private ReflectionReference::__construct() from invalid context
-ReflectionReference::fromArrayElement() expects parameter 1 to be array, object given
+ReflectionReference::fromArrayElement() expects argument #1 ($array) to be of type array, object given
 Key must be array or string
 Array key not found
 Serialization of 'ReflectionReference' is not allowed

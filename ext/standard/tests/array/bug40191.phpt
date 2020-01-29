@@ -17,5 +17,5 @@ try {
 echo "Done\n";
 ?>
 --EXPECT--
-array_unique() expects parameter 1 to be array, object given
+array_unique() expects argument #1 ($arg) to be of type array, object given
 Done

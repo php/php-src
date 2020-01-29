@@ -49,14 +49,14 @@ try {
     echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 --EXPECT--
-error: 0, IntlCalendar::isEquivalentTo() expects parameter 1 to be IntlCalendar, int given
+error: 0, IntlCalendar::isEquivalentTo() expects argument #1 ($calendar) to be of type IntlCalendar, int given
 
 error: 0, IntlCalendar::isEquivalentTo() expects exactly 1 parameter, 2 given
 
-error: 0, IntlCalendar::isEquivalentTo() expects parameter 1 to be IntlCalendar, int given
+error: 0, IntlCalendar::isEquivalentTo() expects argument #1 ($calendar) to be of type IntlCalendar, int given
 
 error: 0, intlcal_is_equivalent_to() expects exactly 2 parameters, 1 given
 
-error: 0, intlcal_is_equivalent_to() expects parameter 2 to be IntlCalendar, int given
+error: 0, intlcal_is_equivalent_to() expects argument #2 ($calendar) to be of type IntlCalendar, int given
 
-error: 0, intlcal_is_equivalent_to() expects parameter 1 to be IntlCalendar, int given
+error: 0, intlcal_is_equivalent_to() expects argument #1 ($calendarObject) to be of type IntlCalendar, int given

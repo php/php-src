@@ -1124,17 +1124,19 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 #define FAST_ZPP 1
 
 #define Z_EXPECTED_TYPES(_) \
-	_(Z_EXPECTED_LONG,		"int") \
-	_(Z_EXPECTED_BOOL,		"bool") \
-	_(Z_EXPECTED_STRING,	"string") \
-	_(Z_EXPECTED_ARRAY,		"array") \
-	_(Z_EXPECTED_FUNC,		"valid callback") \
-	_(Z_EXPECTED_RESOURCE,	"resource") \
+	_(Z_EXPECTED_LONG,		"of type int") \
+	_(Z_EXPECTED_BOOL,		"of type bool") \
+	_(Z_EXPECTED_STRING,	"of type string") \
+	_(Z_EXPECTED_ARRAY,		"of type array") \
+	_(Z_EXPECTED_FUNC,		"a valid callback") \
+	_(Z_EXPECTED_RESOURCE,	"of type resource") \
 	_(Z_EXPECTED_PATH,		"a valid path") \
-	_(Z_EXPECTED_OBJECT,	"object") \
-	_(Z_EXPECTED_DOUBLE,	"float") \
-	_(Z_EXPECTED_NUMBER,	"int or float") \
-	_(Z_EXPECTED_STRING_OR_ARRAY, "string or array") \
+	_(Z_EXPECTED_OBJECT,	"of type object") \
+	_(Z_EXPECTED_DOUBLE,	"of type float") \
+	_(Z_EXPECTED_NUMBER,	"of type int|float") \
+	_(Z_EXPECTED_STRING_OR_ARRAY, "of type string|array") \
+
+#define Z_EXPECTED_TYPE
 
 #define Z_EXPECTED_TYPE_ENUM(id, str) id,
 #define Z_EXPECTED_TYPE_STR(id, str)  str,
@@ -1149,6 +1151,11 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(int min_
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, zend_expected_type expected_type, zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, const char *name, zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *error);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error(zend_class_entry *error_ce, uint32_t arg_num, const char *format, ...);
+#define zend_argument_type_error(arg_num, ...) \
+	zend_argument_error(zend_ce_type_error, arg_num, __VA_ARGS__)
+#define zend_argument_value_error(arg_num, ...) \
+	zend_argument_error(zend_ce_value_error, arg_num, __VA_ARGS__)
 
 #define ZPP_ERROR_OK             0
 #define ZPP_ERROR_FAILURE        1

@@ -29,7 +29,7 @@ array(2) {
   string(3) "foo"
 }
 
-Fatal error: Uncaught TypeError: Argument 1 passed to foo() must be callable, array given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: foo() expects argument #1 ($bar) to be of type callable, array given, called in %s on line %d and defined in %s:%d
 Stack trace:
 #0 %s(%d): foo(Array)
 #1 {main}

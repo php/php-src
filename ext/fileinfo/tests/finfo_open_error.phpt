@@ -42,5 +42,5 @@ bool(false)
 
 Notice: finfo_open(): Warning: using regular magic file `%smagic' in %sfinfo_open_error.php on line %d
 resource(6) of type (file_info)
-finfo_open() expects parameter 1 to be int, string given
-finfo::__construct() expects parameter 1 to be int, string given
+finfo_open() expects argument #1 ($options) to be of type int, string given
+finfo::__construct() expects argument #1 ($options) to be of type int, string given

@@ -61,7 +61,7 @@ bool(false)
 Warning: oci_free_descriptor(): %s is not a valid oci8 descriptor resource in %s on line %d
 bool(false)
 
-Warning: oci_free_descriptor() expects parameter 1 to be OCI-Lob, object given in %s on line %d
+Warning: oci_free_descriptor() expects argument #1 to be of type OCI-Lob, object given in %s on line %d
 NULL
 
 Warning: oci_free_descriptor(): Unable to find descriptor property in %s on line %d

@@ -52,14 +52,14 @@ var_dump( in_array("one", $in_array_obj->array_var) );
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sub-arrays with in_array() ***
 bool(true)
 bool(true)
 bool(true)
 
 *** Testing objects with in_array() ***
-in_array() expects parameter 2 to be array, object given
-in_array() expects parameter 2 to be array, object given
+in_array() expects argument #2 ($haystack) to be of type array, object given
+in_array() expects argument #2 ($haystack) to be of type array, object given
 bool(true)
 Done

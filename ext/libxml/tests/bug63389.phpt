@@ -14,5 +14,5 @@ try {
 echo "okey";
 ?>
 --EXPECT--
-libxml_set_streams_context() expects parameter 1 to be resource, string given
+libxml_set_streams_context() expects argument #1 ($context) to be of type resource, string given
 okey

@@ -26,9 +26,9 @@ try {
 
 echo "OK!";
 ?>
---EXPECTF--
+--EXPECT--
 password_needs_rehash() expects at least 2 parameters, 1 given
 bool(false)
-password_needs_rehash() expects parameter 1 to be string, array given
-password_needs_rehash() expects parameter 3 to be array, string given
+password_needs_rehash() expects argument #1 ($hash) to be of type string, array given
+password_needs_rehash() expects argument #3 ($options) to be of type array, string given
 OK!

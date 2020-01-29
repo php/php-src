@@ -1388,8 +1388,7 @@ ZEND_FUNCTION(set_error_handler)
 	if (Z_TYPE_P(error_handler) != IS_NULL) { /* NULL == unset */
 		if (!zend_is_callable(error_handler, 0, NULL)) {
 			zend_string *error_handler_name = zend_get_callable_name(error_handler);
-			zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
-					   get_active_function_name(), error_handler_name?ZSTR_VAL(error_handler_name):"unknown");
+			zend_error(E_WARNING, "%s() expects argument #1 ($error_handler) to be a valid callback", get_active_function_name());
 			zend_string_release_ex(error_handler_name, 0);
 			return;
 		}
@@ -1453,8 +1452,7 @@ ZEND_FUNCTION(set_exception_handler)
 	if (Z_TYPE_P(exception_handler) != IS_NULL) { /* NULL == unset */
 		if (!zend_is_callable(exception_handler, 0, NULL)) {
 		zend_string *exception_handler_name = zend_get_callable_name(exception_handler);
-			zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
-					   get_active_function_name(), exception_handler_name?ZSTR_VAL(exception_handler_name):"unknown");
+			zend_error(E_WARNING, "%s() expects argument #1 ($exception_handler) to be a valid callback", get_active_function_name());
 			zend_string_release_ex(exception_handler_name, 0);
 			return;
 		}

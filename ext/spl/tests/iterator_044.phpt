@@ -83,8 +83,8 @@ NULL
 ===1===
 object(stdClass)#%d (0) {
 }
-CachingIterator::offsetExists() expects parameter 1 to be string, object given
-CachingIterator::offsetGet() expects parameter 1 to be string, object given
+CachingIterator::offsetExists() expects argument #1 ($index) to be of type string, object given
+CachingIterator::offsetGet() expects argument #1 ($index) to be of type string, object given
 ===2===
 object(MyFoo)#%d (0) {
 }
@@ -124,8 +124,8 @@ int(0)
 ===1===
 object(stdClass)#1 (0) {
 }
-CachingIterator::offsetExists() expects parameter 1 to be string, object given
-CachingIterator::offsetGet() expects parameter 1 to be string, object given
+CachingIterator::offsetExists() expects argument #1 ($index) to be of type string, object given
+CachingIterator::offsetGet() expects argument #1 ($index) to be of type string, object given
 ===2===
 object(MyFoo)#2 (0) {
 }

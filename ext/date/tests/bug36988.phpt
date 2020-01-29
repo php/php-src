@@ -13,4 +13,4 @@ try {
 }
 ?>
 --EXPECT--
-mktime() expects parameter 6 to be int, float given
+mktime() expects argument #6 ($year) to be of type int, float given

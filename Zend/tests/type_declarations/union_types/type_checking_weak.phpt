@@ -35,7 +35,7 @@ function test(string $type, array $values) {
         } catch (TypeError $e) {
             $msg = $e->getMessage();
             $msg = strstr($msg, ', called in', true);
-            $msg = str_replace('1 passed to {closure}()', '...', $msg);
+            $msg = str_replace('{closure}() expects argument #1', 'Argument ...', $msg);
             echo $msg;
         }
         echo "\n";
@@ -71,14 +71,14 @@ INF              => INF
 "42"             => 42
 "42.0"           => 42.0
 "42x"            => 42 (A non well formed numeric value encountered)
-"x"              => Argument ... must be of type int|float, string given
-""               => Argument ... must be of type int|float, string given
+"x"              => Argument ... ($arg) to be of type int|float, string given
+""               => Argument ... ($arg) to be of type int|float, string given
 true             => 1
 false            => 0
-null             => Argument ... must be of type int|float, null given
-[]               => Argument ... must be of type int|float, array given
-new stdClass     => Argument ... must be of type int|float, object given
-new WithToString => Argument ... must be of type int|float, object given
+null             => Argument ... ($arg) to be of type int|float, null given
+[]               => Argument ... ($arg) to be of type int|float, array given
+new stdClass     => Argument ... ($arg) to be of type int|float, object given
+new WithToString => Argument ... ($arg) to be of type int|float, object given
 
 Type int|float|false:
 42               => 42
@@ -87,14 +87,14 @@ INF              => INF
 "42"             => 42
 "42.0"           => 42.0
 "42x"            => 42 (A non well formed numeric value encountered)
-"x"              => Argument ... must be of type int|float|false, string given
-""               => Argument ... must be of type int|float|false, string given
+"x"              => Argument ... ($arg) to be of type int|float|false, string given
+""               => Argument ... ($arg) to be of type int|float|false, string given
 true             => 1
 false            => false
-null             => Argument ... must be of type int|float|false, null given
-[]               => Argument ... must be of type int|float|false, array given
-new stdClass     => Argument ... must be of type int|float|false, object given
-new WithToString => Argument ... must be of type int|float|false, object given
+null             => Argument ... ($arg) to be of type int|float|false, null given
+[]               => Argument ... ($arg) to be of type int|float|false, array given
+new stdClass     => Argument ... ($arg) to be of type int|float|false, object given
+new WithToString => Argument ... ($arg) to be of type int|float|false, object given
 
 Type int|float|bool:
 42               => 42
@@ -107,10 +107,10 @@ INF              => INF
 ""               => false
 true             => true
 false            => false
-null             => Argument ... must be of type int|float|bool, null given
-[]               => Argument ... must be of type int|float|bool, array given
-new stdClass     => Argument ... must be of type int|float|bool, object given
-new WithToString => Argument ... must be of type int|float|bool, object given
+null             => Argument ... ($arg) to be of type int|float|bool, null given
+[]               => Argument ... ($arg) to be of type int|float|bool, array given
+new stdClass     => Argument ... ($arg) to be of type int|float|bool, object given
+new WithToString => Argument ... ($arg) to be of type int|float|bool, object given
 
 Type int|bool:
 42               => 42
@@ -123,10 +123,10 @@ INF              => true
 ""               => false
 true             => true
 false            => false
-null             => Argument ... must be of type int|bool, null given
-[]               => Argument ... must be of type int|bool, array given
-new stdClass     => Argument ... must be of type int|bool, object given
-new WithToString => Argument ... must be of type int|bool, object given
+null             => Argument ... ($arg) to be of type int|bool, null given
+[]               => Argument ... ($arg) to be of type int|bool, array given
+new stdClass     => Argument ... ($arg) to be of type int|bool, object given
+new WithToString => Argument ... ($arg) to be of type int|bool, object given
 
 Type int|string|null:
 42               => 42
@@ -140,8 +140,8 @@ INF              => "INF"
 true             => 1
 false            => 0
 null             => null
-[]               => Argument ... must be of type string|int|null, array given
-new stdClass     => Argument ... must be of type string|int|null, object given
+[]               => Argument ... ($arg) to be of type string|int|null, array given
+new stdClass     => Argument ... ($arg) to be of type string|int|null, object given
 new WithToString => "__toString()"
 
 Type string|bool:
@@ -155,9 +155,9 @@ INF              => "INF"
 ""               => ""
 true             => true
 false            => false
-null             => Argument ... must be of type string|bool, null given
-[]               => Argument ... must be of type string|bool, array given
-new stdClass     => Argument ... must be of type string|bool, object given
+null             => Argument ... ($arg) to be of type string|bool, null given
+[]               => Argument ... ($arg) to be of type string|bool, array given
+new stdClass     => Argument ... ($arg) to be of type string|bool, object given
 new WithToString => "__toString()"
 
 Type float|array:
@@ -167,14 +167,14 @@ INF              => INF
 "42"             => 42.0
 "42.0"           => 42.0
 "42x"            => 42.0 (A non well formed numeric value encountered)
-"x"              => Argument ... must be of type array|float, string given
-""               => Argument ... must be of type array|float, string given
+"x"              => Argument ... ($arg) to be of type array|float, string given
+""               => Argument ... ($arg) to be of type array|float, string given
 true             => 1.0
 false            => 0.0
-null             => Argument ... must be of type array|float, null given
+null             => Argument ... ($arg) to be of type array|float, null given
 []               => []
-new stdClass     => Argument ... must be of type array|float, object given
-new WithToString => Argument ... must be of type array|float, object given
+new stdClass     => Argument ... ($arg) to be of type array|float, object given
+new WithToString => Argument ... ($arg) to be of type array|float, object given
 
 Type string|array:
 42               => "42"
@@ -187,9 +187,9 @@ INF              => "INF"
 ""               => ""
 true             => "1"
 false            => ""
-null             => Argument ... must be of type array|string, null given
+null             => Argument ... ($arg) to be of type array|string, null given
 []               => []
-new stdClass     => Argument ... must be of type array|string, object given
+new stdClass     => Argument ... ($arg) to be of type array|string, object given
 new WithToString => "__toString()"
 
 Type bool|array:
@@ -203,7 +203,7 @@ INF              => true
 ""               => false
 true             => true
 false            => false
-null             => Argument ... must be of type array|bool, null given
+null             => Argument ... ($arg) to be of type array|bool, null given
 []               => []
-new stdClass     => Argument ... must be of type array|bool, object given
-new WithToString => Argument ... must be of type array|bool, object given
+new stdClass     => Argument ... ($arg) to be of type array|bool, object given
+new WithToString => Argument ... ($arg) to be of type array|bool, object given
