@@ -806,12 +806,8 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 
 		if (server_public_key) {
 			int server_public_key_len;
-#if HAVE_COMPILER_C99_VLA
-			char xor_str[passwd_len + 1];
-#else
 			ALLOCA_FLAG(use_heap)
 			char *xor_str = do_alloca(passwd_len + 1, use_heap);
-#endif
 			memcpy(xor_str, passwd, passwd_len);
 			xor_str[passwd_len] = '\0';
 			mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, auth_plugin_data_len);
@@ -833,10 +829,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 			ret = malloc(*auth_data_len);
 			RSA_public_encrypt(passwd_len + 1, (zend_uchar *) xor_str, ret, server_public_key, RSA_PKCS1_OAEP_PADDING);
 			RSA_free(server_public_key);
-
-#if !HAVE_COMPILER_C99_VLA
 			free_alloca(xor_str, use_heap);
-#endif
 		}
 	}
 
@@ -1034,12 +1027,8 @@ mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
 
 	if (server_public_key) {
 		int server_public_key_len;
-#if HAVE_COMPILER_C99_VLA
-		char xor_str[passwd_len + 1];
-#else
 		ALLOCA_FLAG(use_heap)
 		char *xor_str = do_alloca(passwd_len + 1, use_heap);
-#endif
 		memcpy(xor_str, passwd, passwd_len);
 		xor_str[passwd_len] = '\0';
 		mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, SCRAMBLE_LENGTH);
@@ -1059,9 +1048,7 @@ mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
 
 		*crypted = emalloc(server_public_key_len);
 		RSA_public_encrypt(passwd_len + 1, (zend_uchar *) xor_str, *crypted, server_public_key, RSA_PKCS1_OAEP_PADDING);
-#if !HAVE_COMPILER_C99_VLA
 		free_alloca(xor_str, use_heap);
-#endif
 		DBG_RETURN(server_public_key_len);
 	}
 	DBG_RETURN(0);
