@@ -55,7 +55,8 @@ PHP                                                                        NEWS
   . Fixed bug #78969 (PASSWORD_DEFAULT should match PASSWORD_BCRYPT instead of being null). (kocsismate)
 
 - Zip:
-  . Add ZipArchive::CM_LZMA2 constant (since libzip 1.6.0). (remi)
+  . Add ZipArchive::CM_LZMA2 and ZipArchive::CM_XZ constants (since libzip 1.6.0). (remi)
+  . Add ZipArchive::ER_* missing constants. (remi)
   . Add ZipArchive::LIBZIP_VERSION constant. (remi)
 
 23 Jan 2020, PHP 7.4.2
