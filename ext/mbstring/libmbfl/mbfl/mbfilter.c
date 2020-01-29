@@ -2508,12 +2508,10 @@ collector_decode_htmlnumericentity(int c, void *data)
 			(*pc->decoder->filter_function)(0x23, pc->decoder);		/* '#' */
 			r = 1;
 			n = pc->digit;
-			while (n > 0) {
+			while (n > 1) {
 				r *= 10;
 				n--;
 			}
-			s %= r;
-			r /= 10;
 			while (r > 0) {
 				d = s/r;
 				s %= r;
@@ -2686,12 +2684,10 @@ int mbfl_filt_decode_htmlnumericentity_flush(mbfl_convert_filter *filter)
 			s = pc->cache;
 			r = 1;
 			n = pc->digit;
-			while (n > 0) {
+			while (n > 1) {
 				r *= 10;
 				n--;
 			}
-			s %= r;
-			r /= 10;
 			while (r > 0) {
 				d = s/r;
 				s %= r;
