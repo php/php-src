@@ -36,6 +36,9 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #78902 (Memory leak when using stream_filter_append). (liudaixiao)
 
+- XSL:
+  . Fixed bug #70078 (XSL callbacks with nodes as parameter leak memory). (cmb)
+
 23 Jan 2020, PHP 7.3.14
 
 - Core

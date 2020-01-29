@@ -274,7 +274,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 								node->parent = nsparent;
 								node->ns = curns;
 							} else {
-								node = xmlDocCopyNodeList(domintern->document->ptr, node);
+								node = xmlDocCopyNode(node, domintern->document->ptr, 1);
 							}
 
 							php_dom_create_object(node, &child, domintern);
