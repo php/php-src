@@ -30,6 +30,7 @@
 #include "zend_closures.h"
 #include "zend_compile.h"
 #include "zend_hash.h"
+#include "zend_vm_opcodes.h"
 
 #define DEBUG_OBJECT_HANDLERS 0
 
@@ -172,6 +173,134 @@ ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /
 	zend_error_noreturn(E_ERROR, ZEND_DEBUGINFO_FUNC_NAME "() must return an array");
 
 	return NULL; /* Compilers are dumb and don't understand that noreturn means that the function does NOT need a return value... */
+}
+/* }}} */
+
+
+static int zend_std_call_op_handler(zend_uchar opcode, zval *result, zval *op1, zval *op2) /* {{{ */
+{
+	zend_class_entry *ce;
+	zend_object *zobj;
+	if(Z_TYPE_P(op1) == IS_OBJECT) {
+		zobj = Z_OBJ_P(op1);
+		ce = Z_OBJCE_P(op1);
+	} else if(Z_TYPE_P(op2) == IS_OBJECT) {
+		zobj = Z_OBJ_P(op2);
+		ce = Z_OBJCE_P(op2);
+	} else {
+		return FAILURE;
+	}
+
+	zend_class_entry *orig_fake_scope = EG(fake_scope);
+	zend_fcall_info fci;
+	zend_fcall_info_cache fcic;
+	zval params[2] = {*op1, *op2};
+
+	EG(fake_scope) = NULL;
+
+	/* op handlers like __add are called with two operands op1, op2 */
+	fci.size = sizeof(fci);
+	fci.retval = result;
+	fci.param_count = 2;
+	fci.params = params;
+	fci.no_separation = 1;
+	//ZVAL_UNDEF(&fci.function_name); /* Unused */
+
+	do
+	{
+		fci.object = zobj;
+
+		/* Determine what handler should be used, based on opcode */
+		switch (opcode)
+		{
+		case ZEND_ADD:
+			fcic.function_handler = ce->__add;
+			ZVAL_STRING(&fci.function_name, ZEND_ADD_FUNC_NAME);
+			break;
+		case ZEND_SUB:
+			fcic.function_handler = ce->__sub;
+			ZVAL_STRING(&fci.function_name, ZEND_SUB_FUNC_NAME);
+			break;
+		case ZEND_MUL:
+			fcic.function_handler = ce->__mul;
+			ZVAL_STRING(&fci.function_name, ZEND_MUL_FUNC_NAME);
+			break;
+		case ZEND_DIV:
+			fcic.function_handler = ce->__div;
+			ZVAL_STRING(&fci.function_name, ZEND_DIV_FUNC_NAME);
+			break;
+		case ZEND_POW:
+			fcic.function_handler = ce->__pow;
+			ZVAL_STRING(&fci.function_name, ZEND_POW_FUNC_NAME);
+			break;
+		case ZEND_MOD:
+			fcic.function_handler = ce->__mod;
+			ZVAL_STRING(&fci.function_name, ZEND_MOD_FUNC_NAME);
+			break;
+		case ZEND_CONCAT:
+			fcic.function_handler = ce->__concat;
+			ZVAL_STRING(&fci.function_name, ZEND_CONCAT_FUNC_NAME);
+			break;
+		case ZEND_SL:
+			fcic.function_handler = ce->__sl;
+			ZVAL_STRING(&fci.function_name, ZEND_SHIFT_LEFT_FUNC_NAME);
+			break;
+		case ZEND_SR:
+			fcic.function_handler = ce->__sr;
+			ZVAL_STRING(&fci.function_name, ZEND_SHIFT_RIGHT_FUNC_NAME);
+			break;
+		case ZEND_BW_OR:
+			fcic.function_handler = ce->__or;
+			ZVAL_STRING(&fci.function_name, ZEND_OR_FUNC_NAME);
+			break;
+		case ZEND_BW_AND:
+			fcic.function_handler = ce->__and;
+			ZVAL_STRING(&fci.function_name, ZEND_AND_FUNC_NAME);
+			break;
+		case ZEND_BW_XOR:
+			fcic.function_handler = ce->__xor;
+			ZVAL_STRING(&fci.function_name, ZEND_XOR_FUNC_NAME);
+			break;
+		default:
+			return FAILURE;
+			break;
+		}
+
+		/* Check if function exists, check on other operand if possible */
+		if (fcic.function_handler == NULL)
+		{
+			if(zobj == Z_OBJ_P(op1) && Z_TYPE_P(op2) == IS_OBJECT) {
+				zobj = Z_OBJ_P(op2);
+				ce = Z_OBJCE_P(op2);
+				zval_ptr_dtor(&fci.function_name);
+				/* Retry checking if other operand has method */
+				continue;
+			}
+
+			zend_error(E_NOTICE, "You have to implement the %s function in class %s to use this operator with an object!",
+					   Z_STRVAL(fci.function_name), ZSTR_VAL(ce->name));
+			zval_ptr_dtor(&fci.function_name);
+			return FAILURE;
+		}
+
+		fcic.called_scope = ce;
+		fcic.object = zobj;
+
+		int tmp = zend_call_function(&fci, &fcic);
+
+		if (!EG(exception) && (Z_TYPE_P(result) == IS_UNDEF || Z_TYPE_P(result) == IS_NULL))
+		{
+			zend_error(E_ERROR, "Method %s::%s must return a non-null value", ZSTR_VAL(ce->name), Z_STRVAL(fci.function_name));
+			zval_ptr_dtor(&fci.function_name);
+			return FAILURE;
+		}
+
+		EG(fake_scope) = orig_fake_scope;
+
+		zval_ptr_dtor(&fci.function_name);
+
+		return tmp;
+	} while (1);
 }
 /* }}} */
 
@@ -1904,7 +2033,7 @@ ZEND_API const zend_object_handlers std_object_handlers = {
 	zend_std_get_debug_info,				/* get_debug_info */
 	zend_std_get_closure,					/* get_closure */
 	zend_std_get_gc,						/* get_gc */
-	NULL,									/* do_operation */
+	zend_std_call_op_handler,				/* do_operation */
 	zend_std_compare_objects,				/* compare */
 	NULL,									/* get_properties_for */
 };

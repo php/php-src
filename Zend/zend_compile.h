@@ -1041,6 +1041,21 @@ END_EXTERN_C()
 #define ZEND_INVOKE_FUNC_NAME       "__invoke"
 #define ZEND_DEBUGINFO_FUNC_NAME    "__debuginfo"
 
+
+#define ZEND_ADD_FUNC_NAME			"__add"
+#define ZEND_SUB_FUNC_NAME			"__sub"
+#define ZEND_MUL_FUNC_NAME			"__mul"
+#define ZEND_DIV_FUNC_NAME			"__div"
+#define ZEND_POW_FUNC_NAME			"__pow"
+#define ZEND_CONCAT_FUNC_NAME		"__concat"
+#define ZEND_MOD_FUNC_NAME			"__mod"
+#define ZEND_SHIFT_LEFT_FUNC_NAME	"__sl"
+#define ZEND_SHIFT_RIGHT_FUNC_NAME	"__sr"
+#define ZEND_OR_FUNC_NAME			"__or"
+#define ZEND_AND_FUNC_NAME			"__and"
+#define ZEND_XOR_FUNC_NAME			"__xor"
+
+
 /* The following constants may be combined in CG(compiler_options)
  * to change the default compiler behavior */
 

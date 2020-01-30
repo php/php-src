@@ -1967,6 +1967,54 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 	} else if (name_len == sizeof(ZEND_DEBUGINFO_FUNC_NAME) - 1 &&
 		!memcmp(lcname, ZEND_DEBUGINFO_FUNC_NAME, sizeof(ZEND_DEBUGINFO_FUNC_NAME)-1) && fptr->common.num_args != 0) {
 		zend_error(error_type, "Method %s::%s() cannot take arguments", ZSTR_VAL(ce->name), ZEND_DEBUGINFO_FUNC_NAME);
+	} else if (name_len == sizeof(ZEND_ADD_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_ADD_FUNC_NAME, sizeof(ZEND_ADD_FUNC_NAME) - 1)) {
+		if (fptr->common.num_args != 2) {
+			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_ADD_FUNC_NAME);
+		}
+	} else if (name_len == sizeof(ZEND_SUB_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_SUB_FUNC_NAME, sizeof(ZEND_SUB_FUNC_NAME) - 1)) {
+		if (fptr->common.num_args != 2) {
+			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_SUB_FUNC_NAME);
+		}
+	} else if (name_len == sizeof(ZEND_MUL_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_MUL_FUNC_NAME, sizeof(ZEND_MUL_FUNC_NAME) - 1)) {
+		if (fptr->common.num_args != 2) {
+			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_MUL_FUNC_NAME);
+		}
+	} else if (name_len == sizeof(ZEND_DIV_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_DIV_FUNC_NAME, sizeof(ZEND_DIV_FUNC_NAME) - 1)) {
+		if (fptr->common.num_args != 2) {
+			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_DIV_FUNC_NAME);
+		}
+	} else if (name_len == sizeof(ZEND_POW_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_POW_FUNC_NAME, sizeof(ZEND_POW_FUNC_NAME) - 1)) {
+		if (fptr->common.num_args != 2) {
+			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_POW_FUNC_NAME);
+		}
+	} else if (name_len == sizeof(ZEND_MOD_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_MOD_FUNC_NAME, sizeof(ZEND_MOD_FUNC_NAME) - 1)) {
+		if (fptr->common.num_args != 2) {
+			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_MOD_FUNC_NAME);
+		}
+	} else if (name_len == sizeof(ZEND_CONCAT_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_CONCAT_FUNC_NAME, sizeof(ZEND_CONCAT_FUNC_NAME) - 1)) {
+		if (fptr->common.num_args != 2) {
+			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_CONCAT_FUNC_NAME);
+		}
+	} else if (name_len == sizeof(ZEND_SHIFT_LEFT_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_SHIFT_LEFT_FUNC_NAME, sizeof(ZEND_SHIFT_LEFT_FUNC_NAME) - 1)) {
+		if (fptr->common.num_args != 2) {
+			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_SHIFT_LEFT_FUNC_NAME);
+		}
+	} else if (name_len == sizeof(ZEND_SHIFT_RIGHT_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_SHIFT_RIGHT_FUNC_NAME, sizeof(ZEND_SHIFT_RIGHT_FUNC_NAME) - 1)) {
+		if (fptr->common.num_args != 2) {
+			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_SHIFT_RIGHT_FUNC_NAME);
+		}
+	} else if (name_len == sizeof(ZEND_OR_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_OR_FUNC_NAME, sizeof(ZEND_OR_FUNC_NAME) - 1)) {
+		if (fptr->common.num_args != 2) {
+			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_OR_FUNC_NAME);
+		}
+	} else if (name_len == sizeof(ZEND_AND_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_AND_FUNC_NAME, sizeof(ZEND_AND_FUNC_NAME) - 1)) {
+		if (fptr->common.num_args != 2) {
+			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_AND_FUNC_NAME);
+		}
+	} else if (name_len == sizeof(ZEND_XOR_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_XOR_FUNC_NAME, sizeof(ZEND_XOR_FUNC_NAME) - 1)) {
+		if (fptr->common.num_args != 2) {
+			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_XOR_FUNC_NAME);
+		}
 	}
 }
 /* }}} */

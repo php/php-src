@@ -6092,6 +6092,42 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 	} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
 		zend_check_magic_method_attr(fn_flags, "__debugInfo", 0);
 		ce->__debugInfo = (zend_function *) op_array;
+	} else if (zend_string_equals_literal(lcname, ZEND_ADD_FUNC_NAME)) {
+		zend_check_magic_method_attr(fn_flags, "__add", 1);
+		ce->__add = (zend_function *) op_array;
+	} else if (zend_string_equals_literal(lcname, ZEND_SUB_FUNC_NAME)) {
+		zend_check_magic_method_attr(fn_flags, "__sub", 1);
+		ce->__sub = (zend_function *) op_array;
+	} else if (zend_string_equals_literal(lcname, ZEND_MUL_FUNC_NAME)) {
+		zend_check_magic_method_attr(fn_flags, "__mul", 1);
+		ce->__mul = (zend_function *) op_array;
+	} else if (zend_string_equals_literal(lcname, ZEND_POW_FUNC_NAME)) {
+		zend_check_magic_method_attr(fn_flags, "__pow", 1);
+		ce->__pow = (zend_function *) op_array;
+	} else if (zend_string_equals_literal(lcname, ZEND_DIV_FUNC_NAME)) {
+		zend_check_magic_method_attr(fn_flags, "__div", 1);
+		ce->__div = (zend_function *) op_array;
+	} else if (zend_string_equals_literal(lcname, ZEND_CONCAT_FUNC_NAME)) {
+		zend_check_magic_method_attr(fn_flags, "__concat", 1);
+		ce->__concat = (zend_function *) op_array;
+	} else if (zend_string_equals_literal(lcname, ZEND_MOD_FUNC_NAME)) {
+		zend_check_magic_method_attr(fn_flags, "__mod", 1);
+		ce->__mod = (zend_function *) op_array;
+	} else if (zend_string_equals_literal(lcname, ZEND_SHIFT_LEFT_FUNC_NAME)) {
+		zend_check_magic_method_attr(fn_flags, "__sl", 1);
+		ce->__sl = (zend_function *) op_array;
+	} else if (zend_string_equals_literal(lcname, ZEND_SHIFT_RIGHT_FUNC_NAME)) {
+		zend_check_magic_method_attr(fn_flags, "__sr", 1);
+		ce->__sr = (zend_function *) op_array;
+	} else if (zend_string_equals_literal(lcname, ZEND_OR_FUNC_NAME)) {
+		zend_check_magic_method_attr(fn_flags, "__or", 1);
+		ce->__or = (zend_function *) op_array;
+	} else if (zend_string_equals_literal(lcname, ZEND_AND_FUNC_NAME)) {
+		zend_check_magic_method_attr(fn_flags, "__and", 1);
+		ce->__and = (zend_function *) op_array;
+	} else if (zend_string_equals_literal(lcname, ZEND_XOR_FUNC_NAME)) {
+		zend_check_magic_method_attr(fn_flags, "__xor", 1);
+		ce->__xor = (zend_function *) op_array;
 	}
 
 	zend_string_release_ex(lcname, 0);
