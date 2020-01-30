@@ -90,11 +90,13 @@ class ZipArchive
     /** @return null|false */
     public function setCommentName(string $name, string $comment) {}
 
+#ifdef HAVE_SET_MTIME
     /** @return null|false */
     public function setMtimeIndex(int $index, int $timestamp, int $flags = 0) {}
 
     /** @return null|false */
     public function setMtimeName(string $name, int $timestamp, int $flags = 0) {}
+#endif
 
     /** @return string|false */
     public function getCommentIndex(int $index, int $flags = 0) {}
@@ -170,5 +172,15 @@ class ZipArchive
 
     /** @return bool */
     public function setEncryptionIndex(int $index, int $method, string $password = UNKNOWN) {}
+#endif
+
+#ifdef HAVE_PROGRESS_CALLBACK
+    /** @return bool */
+    public function registerProgressCallback(float $rate, callable $callback) {}
+#endif
+
+#ifdef HAVE_CANCEL_CALLBACK
+    /** @return bool */
+    public function registerCancelCallback(callable $callback) {}
 #endif
 }
