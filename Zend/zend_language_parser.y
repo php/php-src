@@ -179,6 +179,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_STATIC     "static (T_STATIC)"
 %token T_ABSTRACT   "abstract (T_ABSTRACT)"
 %token T_FINAL      "final (T_FINAL)"
+%token T_IMMUTABLE  "immutable (T_IMMUTABLE)"
 %token T_PRIVATE    "private (T_PRIVATE)"
 %token T_PROTECTED  "protected (T_PROTECTED)"
 %token T_PUBLIC     "public (T_PUBLIC)"
@@ -282,7 +283,7 @@ reserved_non_modifiers:
 
 semi_reserved:
 	  reserved_non_modifiers
-	| T_STATIC | T_ABSTRACT | T_FINAL | T_PRIVATE | T_PROTECTED | T_PUBLIC
+	| T_STATIC | T_ABSTRACT | T_FINAL | T_IMMUTABLE | T_PRIVATE | T_PROTECTED | T_PUBLIC
 ;
 
 identifier:
@@ -522,6 +523,7 @@ class_modifiers:
 class_modifier:
 		T_ABSTRACT 		{ $$ = ZEND_ACC_EXPLICIT_ABSTRACT_CLASS; }
 	|	T_FINAL 		{ $$ = ZEND_ACC_FINAL; }
+	|	T_IMMUTABLE		{ $$ = ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS; }
 ;
 
 trait_declaration_statement:

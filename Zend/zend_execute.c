@@ -1649,6 +1649,17 @@ static zend_property_info *zend_get_prop_not_accepting_double(zend_reference *re
 	return NULL;
 }
 
+static zend_property_info *zend_get_property_immutable_reference(zend_reference *ref)
+{
+	zend_property_info *prop;
+	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
+		if (prop->ce->ce_flags & ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS) {
+			return prop;
+		}
+	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
+	return NULL;
+}
+
 static ZEND_COLD zend_long zend_throw_incdec_ref_error(
 		zend_reference *ref, zend_property_info *error_prop OPLINE_DC)
 {
@@ -1691,6 +1702,32 @@ static ZEND_COLD zend_long zend_throw_incdec_prop_error(zend_property_info *prop
 	}
 }
 
+static ZEND_COLD zend_long zend_throw_incdec_immutable_prop_error(zend_property_info *prop OPLINE_DC) {
+	if (ZEND_IS_INCREMENT(opline->opcode)) {
+		zend_throw_error(NULL, "Cannot increment property %s::$%s of an immutable class",
+			ZSTR_VAL(prop->ce->name), zend_get_unmangled_property_name(prop->name));
+		return ZEND_LONG_MAX;
+	} else {
+		zend_throw_error(NULL, "Cannot decrement property %s::$%s of an immutable class",
+			ZSTR_VAL(prop->ce->name), zend_get_unmangled_property_name(prop->name));
+		return ZEND_LONG_MIN;
+	}
+}
+
+static ZEND_COLD zend_long zend_throw_incdec_immutable_prop_ref_error(
+		zend_reference *ref, zend_property_info *error_prop OPLINE_DC)
+{
+	if (ZEND_IS_INCREMENT(opline->opcode)) {
+		zend_throw_error(NULL, "Cannot increment a reference held by property %s::$%s of an immutable class",
+			ZSTR_VAL(error_prop->ce->name), zend_get_unmangled_property_name(error_prop->name));
+		return ZEND_LONG_MAX;
+	} else {
+		zend_throw_error(NULL, "Cannot decrement a reference held by property %s::$%s of an immutable class",
+			ZSTR_VAL(error_prop->ce->name), zend_get_unmangled_property_name(error_prop->name));
+		return ZEND_LONG_MIN;
+	}
+}
+
 static void zend_incdec_typed_ref(zend_reference *ref, zval *copy OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval tmp;
@@ -1708,8 +1745,14 @@ static void zend_incdec_typed_ref(zend_reference *ref, zval *copy OPLINE_DC EXEC
 		decrement_function(var_ptr);
 	}
 
+	zend_property_info *error_prop = zend_get_property_immutable_reference(ref);
+	if (UNEXPECTED(error_prop)) {
+		zend_long val = zend_throw_incdec_immutable_prop_ref_error(ref, error_prop OPLINE_CC);
+		ZVAL_LONG(var_ptr, val);
+	}
+
 	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(copy) == IS_LONG) {
-		zend_property_info *error_prop = zend_get_prop_not_accepting_double(ref);
+		error_prop = zend_get_prop_not_accepting_double(ref);
 		if (UNEXPECTED(error_prop)) {
 			zend_long val = zend_throw_incdec_ref_error(ref, error_prop OPLINE_CC);
 			ZVAL_LONG(var_ptr, val);
@@ -1755,6 +1798,12 @@ static void zend_incdec_typed_prop(zend_property_info *prop_info, zval *var_ptr,
 
 static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_info OPLINE_DC EXECUTE_DATA_DC)
 {
+	if (UNEXPECTED(prop_info && prop_info->ce->ce_flags & ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS)) {
+		zend_long val = zend_throw_incdec_immutable_prop_error(prop_info OPLINE_CC);
+		ZVAL_LONG(prop, val);
+		return;
+	}
+
 	if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
 		if (ZEND_IS_INCREMENT(opline->opcode)) {
 			fast_long_increment_function(prop);
@@ -1793,6 +1842,12 @@ static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_i
 
 static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_info OPLINE_DC EXECUTE_DATA_DC)
 {
+	if (UNEXPECTED(prop_info && prop_info->ce->ce_flags & ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS)) {
+		zend_long val = zend_throw_incdec_immutable_prop_error(prop_info OPLINE_CC);
+		ZVAL_LONG(prop, val);
+		return;
+	}
+
 	if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
 		ZVAL_LONG(EX_VAR(opline->result.var), Z_LVAL_P(prop));
 		if (ZEND_IS_INCREMENT(opline->opcode)) {
@@ -1835,7 +1890,7 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zend_object *
 	zval z_copy;
 
 	GC_ADDREF(object);
-	z =object->handlers->read_property(object, name, BP_VAR_R, cache_slot, &rv);
+	z = object->handlers->read_property(object, name, BP_VAR_R, cache_slot, &rv);
 	if (UNEXPECTED(EG(exception))) {
 		OBJ_RELEASE(object);
 		ZVAL_UNDEF(EX_VAR(opline->result.var));

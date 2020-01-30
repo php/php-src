@@ -229,13 +229,14 @@ typedef struct _zend_oparray_context {
 /* op_array or class is preloaded                         |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 10) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 13, 14, 15, 24...)                |     |     |     */
+/* Class Flags (unused: 14, 15, 24...)                    |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
 #define ZEND_ACC_INTERFACE               (1 <<  0) /*  X  |     |     |     */
 #define ZEND_ACC_TRAIT                   (1 <<  1) /*  X  |     |     |     */
 #define ZEND_ACC_ANON_CLASS              (1 <<  2) /*  X  |     |     |     */
+#define ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS (1 << 13)/*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class linked with parent, interfaces and traits        |     |     |     */
 #define ZEND_ACC_LINKED                  (1 <<  3) /*  X  |     |     |     */

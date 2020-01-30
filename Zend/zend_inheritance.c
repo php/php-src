@@ -1139,7 +1139,7 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 		if (UNEXPECTED(!(parent_ce->ce_flags & ZEND_ACC_INTERFACE))) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Interface %s may not inherit from class (%s)", ZSTR_VAL(ce->name), ZSTR_VAL(parent_ce->name));
 		}
-	} else if (UNEXPECTED(parent_ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_FINAL))) {
+	} else if (UNEXPECTED(parent_ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_FINAL|ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS))) {
 		/* Class declaration must not extend traits or interfaces */
 		if (parent_ce->ce_flags & ZEND_ACC_INTERFACE) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Class %s cannot extend from interface %s", ZSTR_VAL(ce->name), ZSTR_VAL(parent_ce->name));
@@ -1150,6 +1150,11 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 		/* Class must not extend a final class */
 		if (parent_ce->ce_flags & ZEND_ACC_FINAL) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Class %s may not inherit from final class (%s)", ZSTR_VAL(ce->name), ZSTR_VAL(parent_ce->name));
+		}
+
+		/* Non-immutable class must not extend an immutable class */
+		if (!(ce->ce_flags & ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS) && parent_ce->ce_flags & ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Non-immutable class %s may not inherit from immutable class (%s)", ZSTR_VAL(ce->name), ZSTR_VAL(parent_ce->name));
 		}
 	}
 

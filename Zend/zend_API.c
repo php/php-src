@@ -3551,7 +3551,7 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 			case IS_ARRAY:
 			case IS_OBJECT:
 			case IS_RESOURCE:
-				zend_error_noreturn(E_CORE_ERROR, "Internal zval's can't be arrays, objects or resources");
+				zend_error_noreturn(E_CORE_ERROR, "Internal ZVALs can't be arrays, objects or resources");
 				break;
 			default:
 				break;

@@ -218,6 +218,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 					ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(dst), prop_info);
 				}
 			}
+
 			src++;
 			dst++;
 		} while (src != end);

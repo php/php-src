@@ -521,7 +521,7 @@ dynamic:
 					goto dynamic;
 				} else {
 wrong:
-					/* Information was available, but we were denied access.  Error out. */
+					/* Information was available, but we were denied access. Error out. */
 					if (!silent) {
 						zend_bad_property_access(property_info, ce, member);
 					}
@@ -805,7 +805,13 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 		variable_ptr = OBJ_PROP(zobj, property_offset);
+
 		if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
+			if (UNEXPECTED(zobj->ce->ce_flags & ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS && Z_PROP_FLAG_P(variable_ptr) != IS_PROP_UNINIT)) {
+				zend_throw_error(NULL, "Cannot assign value to property %s::$%s of an immutable class more than once", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				goto exit;
+			}
+
 			Z_TRY_ADDREF_P(value);
 
 			if (UNEXPECTED(prop_info)) {
@@ -823,7 +829,7 @@ found:
 			goto exit;
 		}
 		if (Z_PROP_FLAG_P(variable_ptr) == IS_PROP_UNINIT) {
-			/* Writes to uninitializde typed properties bypass __set(). */
+			/* Writes to uninitialized typed properties bypass __set(). */
 			Z_PROP_FLAG_P(variable_ptr) = 0;
 			goto write_std_property;
 		}
@@ -836,6 +842,12 @@ found:
 				zobj->properties = zend_array_dup(zobj->properties);
 			}
 			if ((variable_ptr = zend_hash_find(zobj->properties, name)) != NULL) {
+				if (UNEXPECTED(zobj->ce->ce_flags & ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS)) {
+					zend_throw_error(NULL, "Cannot assign value to property %s:$%s of an immutable class", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+					variable_ptr = &EG(error_zval);
+					goto exit;
+				}
+
 				Z_TRY_ADDREF_P(value);
 				goto found;
 			}
@@ -856,17 +868,32 @@ found:
 			(*guard) &= ~IN_SET;
 			OBJ_RELEASE(zobj);
 			variable_ptr = value;
-		} else if (EXPECTED(!IS_WRONG_PROPERTY_OFFSET(property_offset))) {
-			goto write_std_property;
 		} else {
-			/* Trigger the correct error */
-			zend_wrong_offset(zobj->ce, name);
-			ZEND_ASSERT(EG(exception));
-			variable_ptr = &EG(error_zval);
-			goto exit;
+			if (UNEXPECTED(zobj->ce->ce_flags & ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS)) {
+				zend_throw_error(NULL, "Cannot declare dynamic property %s:$%s of an immutable class", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+				variable_ptr = &EG(error_zval);
+				goto exit;
+			}
+
+			if (EXPECTED(!IS_WRONG_PROPERTY_OFFSET(property_offset))) {
+				goto write_std_property;
+			} else {
+				/* Trigger the correct error */
+				zend_wrong_offset(zobj->ce, name);
+				ZEND_ASSERT(EG(exception));
+				variable_ptr = &EG(error_zval);
+				goto exit;
+			}
 		}
 	} else {
 		ZEND_ASSERT(!IS_WRONG_PROPERTY_OFFSET(property_offset));
+
+		if (UNEXPECTED(zobj->ce->ce_flags & ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS)) {
+			zend_throw_error(NULL, "Cannot declare dynamic property %s:$%s of an immutable class", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
+			variable_ptr = &EG(error_zval);
+			goto exit;
+		}
+
 write_std_property:
 		Z_TRY_ADDREF_P(value);
 		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
@@ -1077,6 +1104,11 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 		zval *slot = OBJ_PROP(zobj, property_offset);
 
 		if (Z_TYPE_P(slot) != IS_UNDEF) {
+			if (UNEXPECTED(zobj->ce->ce_flags & ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS)) {
+				zend_throw_error(NULL, "Cannot unset a property of an immutable class %s", ZSTR_VAL(zobj->ce->name));
+				return;
+			}
+
 			if (UNEXPECTED(Z_ISREF_P(slot)) &&
 					(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(slot)))) {
 				if (prop_info) {
@@ -1097,6 +1129,11 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 		}
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))
 	 && EXPECTED(zobj->properties != NULL)) {
+	 	if (UNEXPECTED(zobj->ce->ce_flags & ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS)) {
+			zend_throw_error(NULL, "Cannot unset a property of an immutable class %s", ZSTR_VAL(zobj->ce->name));
+			return;
+		}
+
 		if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 			if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
 				GC_DELREF(zobj->properties);
@@ -1112,9 +1149,14 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 
 	/* magic unset */
 	if (zobj->ce->__unset) {
+		if (UNEXPECTED(zobj->ce->ce_flags & ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS)) {
+			zend_throw_error(NULL, "Cannot unset a property of an immutable class %s", ZSTR_VAL(zobj->ce->name));
+			return;
+		}
+
 		uint32_t *guard = zend_get_property_guard(zobj, name);
 		if (!((*guard) & IN_UNSET)) {
-			/* have unseter - try with it! */
+			/* have unsetter - try with it! */
 			(*guard) |= IN_UNSET; /* prevent circular unsetting */
 			zend_std_call_unsetter(zobj, name);
 			(*guard) &= ~IN_UNSET;
@@ -1259,6 +1301,12 @@ static ZEND_COLD zend_never_inline void zend_bad_method_call(zend_function *fbc,
 }
 /* }}} */
 
+static ZEND_COLD zend_never_inline void zend_immutable_constructor_call(zend_function *fbc) /* {{{ */
+{
+	zend_throw_error(NULL, "Cannot call the constructor of an immutable class %s", ZEND_FN_SCOPE_NAME(fbc));
+}
+/* }}} */
+
 static ZEND_COLD zend_never_inline void zend_abstract_method_call(zend_function *fbc) /* {{{ */
 {
 	zend_throw_error(NULL, "Cannot call abstract method %s::%s()",
@@ -1322,6 +1370,14 @@ ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *
 					fbc = NULL;
 				}
 			}
+		}
+	} else if (UNEXPECTED(zobj->ce->ce_flags & ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS)) {
+		if (zobj->ce->constructor
+			&& ZSTR_LEN(lc_method_name) == ZSTR_LEN(zobj->ce->constructor->common.function_name)
+        	&& zend_binary_strncasecmp(ZSTR_VAL(lc_method_name), ZSTR_LEN(lc_method_name), ZSTR_VAL(zobj->ce->constructor->common.function_name), ZSTR_LEN(lc_method_name), ZSTR_LEN(lc_method_name)) == 0
+		) {
+			zend_immutable_constructor_call(fbc);
+			fbc = NULL;
 		}
 	}
 

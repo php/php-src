@@ -819,6 +819,11 @@ uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 			"Cannot use the final modifier on an abstract class", 0);
 		return 0;
 	}
+	if ((flags & ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS) && (new_flag & ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS)) {
+		zend_throw_exception(zend_ce_compile_error, "Multiple immutable modifiers are not allowed", 0);
+		return 0;
+	}
+
 	return new_flags;
 }
 /* }}} */
@@ -6397,6 +6402,8 @@ static void zend_check_const_and_trait_alias_attr(uint32_t attr, const char* ent
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'abstract' as %s modifier", entity);
 	} else if (attr & ZEND_ACC_FINAL) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'final' as %s modifier", entity);
+	} else if (attr & ZEND_ACC_EXPLICIT_IMMUTABLE_CLASS) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use 'immutable' as %s modifier", entity);
 	}
 }
 /* }}} */
