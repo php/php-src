@@ -19,6 +19,7 @@ echo mb_decode_numericentity('&#1000000000', $convmap), "\n";
 echo mb_decode_numericentity('&#9000000000', $convmap), "\n";
 echo mb_decode_numericentity('&#10000000000', $convmap), "\n";
 echo mb_decode_numericentity('&#100000000000', $convmap), "\n";
+echo mb_decode_numericentity('&#000000000000', $convmap), "\n";
 
 $convmap = [];
 echo mb_decode_numericentity('f&ouml;o', $convmap, "UTF-8")."\n";
@@ -39,5 +40,6 @@ aŒbœcŠdše€fg
 &#9000000000
 &#10000000000
 &#100000000000
+&#000000000000
 f&ouml;o
 count($convmap) must be a multiple of 4
