@@ -1,3 +1,4 @@
+%require "3.0"
 %code top {
 /*
   +----------------------------------------------------------------------+
@@ -118,7 +119,7 @@ object_end:
 ;
 
 members:
-		/* empty */
+		%empty
 			{
 				if ((parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) && parser->methods.object_create == php_json_parser_object_create) {
 					ZVAL_EMPTY_ARRAY(&$$);
@@ -182,7 +183,7 @@ array_end:
 ;
 
 elements:
-		/* empty */
+		%empty
 			{
 				if (parser->methods.array_create == php_json_parser_array_create) {
 					ZVAL_EMPTY_ARRAY(&$$);
