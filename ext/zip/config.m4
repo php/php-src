@@ -35,6 +35,22 @@ if test "$PHP_ZIP" != "no"; then
     $LIBZIP_LIBS
   ])
 
+  PHP_CHECK_LIBRARY(zip, zip_register_progress_callback_with_state,
+  [
+    AC_DEFINE(HAVE_PROGRESS_CALLBACK, 1, [Libzip >= 1.3.0 with zip_register_progress_callback_with_state function])
+  ], [
+  ], [
+    $LIBZIP_LIBS
+  ])
+
+  PHP_CHECK_LIBRARY(zip, zip_register_cancel_callback_with_state,
+  [
+    AC_DEFINE(HAVE_CANCEL_CALLBACK, 1, [Libzip >= 1.6.0 with zip_register_cancel_callback_with_state function])
+  ], [
+  ], [
+    $LIBZIP_LIBS
+  ])
+
   AC_DEFINE(HAVE_ZIP,1,[ ])
 
   PHP_ZIP_SOURCES="php_zip.c zip_stream.c"

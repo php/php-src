@@ -111,17 +111,21 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZipArchive_setCommentName, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, comment, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#if defined(HAVE_SET_MTIME)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZipArchive_setMtimeIndex, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#endif
 
+#if defined(HAVE_SET_MTIME)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZipArchive_setMtimeName, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZipArchive_getCommentIndex, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
@@ -239,5 +243,18 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZipArchive_setEncryptionIndex, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, method, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_PROGRESS_CALLBACK)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZipArchive_registerProgressCallback, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, rate, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_CANCEL_CALLBACK)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZipArchive_registerCancelCallback, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 #endif
