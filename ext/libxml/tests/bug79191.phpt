@@ -10,15 +10,15 @@ if (!extension_loaded('dom')) die('dom extension not available');
 try {
     new \SoapClient('does-not-exist.wsdl');
 } catch (Throwable $t) {
-}#
+}
 
 $dom = new DOMDocument;
 $dom->loadxml('<?xml version="1.0" ?><root />');
 var_dump($dom->save(__DIR__ . '/bug79191.xml'));
 ?>
---EXPECTF--
-int(%d)
 --CLEAN--
 <?php
 unlink(__DIR__ . '/bug79191.xml');
 ?>
+--EXPECTF--
+int(%d)
