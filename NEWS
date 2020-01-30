@@ -81,6 +81,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug #78697 (ReflectionClass::implementsInterface - inaccurate error
     message with traits). (villfa)
+  . Implement ReflectionProperty::hasDefaultValue and
+    Reflection::getDefaultValue (beberlei)
 
 - Session:
   . Fixed bug #78624 (session_gc return value for user defined session
