@@ -817,7 +817,17 @@ static void zend_calc_live_ranges(
 		}
 		if (opline->op2_type & (IS_TMP_VAR|IS_VAR)) {
 			uint32_t var_num = EX_VAR_TO_NUM(opline->op2.var) - var_offset;
-			if (EXPECTED(last_use[var_num] == (uint32_t) -1)) {
+			if (UNEXPECTED(opline->opcode == ZEND_FE_FETCH_R
+					|| opline->opcode == ZEND_FE_FETCH_RW)) {
+				/* OP2 of FE_FETCH is actually a def, not a use. */
+				if (last_use[var_num] != (uint32_t) -1) {
+					if (opnum + 1 != last_use[var_num]) {
+						emit_live_range(
+							op_array, var_num, opnum, last_use[var_num], needs_live_range);
+					}
+					last_use[var_num] = (uint32_t) -1;
+				}
+			} else if (EXPECTED(last_use[var_num] == (uint32_t) -1)) {
 #if 1
 				/* OP_DATA uses only op1 operand */
 				ZEND_ASSERT(opline->opcode != ZEND_OP_DATA);
