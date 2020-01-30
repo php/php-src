@@ -1,3 +1,4 @@
+%require "3.0"
 %{
 
 /*
@@ -65,7 +66,7 @@ typedef void* yyscan_t;
 input
 	: command { $$ = $1; }
 	| input T_SEPARATOR command { phpdbg_stack_separate($1.top); $$ = $3; }
-	| /* empty */
+	| %empty
 	;
 
 command
@@ -143,7 +144,7 @@ parameter
 
 req_id
 	: T_REQ_ID { PHPDBG_G(req_id) = $1.num; }
-	| /* empty */
+	| %empty
 ;
 
 full_expression

@@ -297,7 +297,7 @@ identifier:
 
 top_statement_list:
 		top_statement_list top_statement { $$ = zend_ast_list_add($1, $2); }
-	|	/* empty */ { $$ = zend_ast_create_list(0, ZEND_AST_STMT_LIST); }
+	|	%empty { $$ = zend_ast_create_list(0, ZEND_AST_STMT_LIST); }
 ;
 
 namespace_name:
@@ -357,7 +357,7 @@ mixed_group_use_declaration:
 ;
 
 possible_comma:
-		/* empty */
+		%empty
 	|	','
 ;
 
@@ -407,7 +407,7 @@ const_list:
 inner_statement_list:
 		inner_statement_list inner_statement
 			{ $$ = zend_ast_list_add($1, $2); }
-	|	/* empty */
+	|	%empty
 			{ $$ = zend_ast_create_list(0, ZEND_AST_STMT_LIST); }
 ;
 
@@ -463,7 +463,7 @@ statement:
 ;
 
 catch_list:
-		/* empty */
+		%empty
 			{ $$ = zend_ast_create_list(0, ZEND_AST_CATCH_LIST); }
 	|	catch_list T_CATCH '(' catch_name_list T_VARIABLE ')' '{' inner_statement_list '}'
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_CATCH, $4, $5, $8)); }
@@ -475,7 +475,7 @@ catch_name_list:
 ;
 
 finally_statement:
-		/* empty */ { $$ = NULL; }
+		%empty { $$ = NULL; }
 	|	T_FINALLY '{' inner_statement_list '}' { $$ = $3; }
 ;
 
@@ -496,12 +496,12 @@ function_declaration_statement:
 ;
 
 is_reference:
-		/* empty */	{ $$ = 0; }
+		%empty	{ $$ = 0; }
 	|	'&'			{ $$ = ZEND_PARAM_REF; }
 ;
 
 is_variadic:
-		/* empty */ { $$ = 0; }
+		%empty { $$ = 0; }
 	|	T_ELLIPSIS  { $$ = ZEND_PARAM_VARIADIC; }
 ;
 
@@ -538,17 +538,17 @@ interface_declaration_statement:
 ;
 
 extends_from:
-		/* empty */				{ $$ = NULL; }
+		%empty				{ $$ = NULL; }
 	|	T_EXTENDS class_name	{ $$ = $2; }
 ;
 
 interface_extends_list:
-		/* empty */			        { $$ = NULL; }
+		%empty			        { $$ = NULL; }
 	|	T_EXTENDS class_name_list	{ $$ = $2; }
 ;
 
 implements_list:
-		/* empty */		        		{ $$ = NULL; }
+		%empty		        		{ $$ = NULL; }
 	|	T_IMPLEMENTS class_name_list	{ $$ = $2; }
 ;
 
@@ -582,7 +582,7 @@ switch_case_list:
 ;
 
 case_list:
-		/* empty */ { $$ = zend_ast_create_list(0, ZEND_AST_SWITCH_LIST); }
+		%empty { $$ = zend_ast_create_list(0, ZEND_AST_SWITCH_LIST); }
 	|	case_list T_CASE expr case_separator inner_statement_list
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, $3, $5)); }
 	|	case_list T_DEFAULT case_separator inner_statement_list
@@ -634,7 +634,7 @@ alt_if_stmt:
 
 parameter_list:
 		non_empty_parameter_list { $$ = $1; }
-	|	/* empty */	{ $$ = zend_ast_create_list(0, ZEND_AST_PARAM_LIST); }
+	|	%empty	{ $$ = zend_ast_create_list(0, ZEND_AST_PARAM_LIST); }
 ;
 
 
@@ -654,7 +654,7 @@ parameter:
 
 
 optional_type:
-		/* empty */	{ $$ = NULL; }
+		%empty	{ $$ = NULL; }
 	|	type_expr	{ $$ = $1; }
 ;
 
@@ -676,7 +676,7 @@ union_type:
 ;
 
 return_type:
-		/* empty */	{ $$ = NULL; }
+		%empty	{ $$ = NULL; }
 	|	':' type_expr	{ $$ = $2; }
 ;
 
@@ -722,7 +722,7 @@ static_var:
 class_statement_list:
 		class_statement_list class_statement
 			{ $$ = zend_ast_list_add($1, $2); }
-	|	/* empty */
+	|	%empty
 			{ $$ = zend_ast_create_list(0, ZEND_AST_STMT_LIST); }
 ;
 
@@ -802,7 +802,7 @@ variable_modifiers:
 ;
 
 method_modifiers:
-		/* empty */						{ $$ = ZEND_ACC_PUBLIC; }
+		%empty						{ $$ = ZEND_ACC_PUBLIC; }
 	|	non_empty_member_modifiers
 			{ $$ = $1; if (!($$ & ZEND_ACC_PPP_MASK)) { $$ |= ZEND_ACC_PUBLIC; } }
 ;
@@ -856,7 +856,7 @@ echo_expr:
 ;
 
 for_exprs:
-		/* empty */			{ $$ = NULL; }
+		%empty			{ $$ = NULL; }
 	|	non_empty_for_exprs	{ $$ = $1; }
 ;
 
@@ -1026,24 +1026,24 @@ function:
 ;
 
 backup_doc_comment:
-	/* empty */ { $$ = CG(doc_comment); CG(doc_comment) = NULL; }
+	%empty { $$ = CG(doc_comment); CG(doc_comment) = NULL; }
 ;
 
 backup_fn_flags:
-	%prec PREC_ARROW_FUNCTION /* empty */ { $$ = CG(extra_fn_flags); CG(extra_fn_flags) = 0; }
+	%prec PREC_ARROW_FUNCTION %empty { $$ = CG(extra_fn_flags); CG(extra_fn_flags) = 0; }
 ;
 
 backup_lex_pos:
-	/* empty */ { $$ = LANG_SCNG(yy_text); }
+	%empty { $$ = LANG_SCNG(yy_text); }
 ;
 
 returns_ref:
-		/* empty */	{ $$ = 0; }
+		%empty	{ $$ = 0; }
 	|	'&'			{ $$ = ZEND_ACC_RETURN_REFERENCE; }
 ;
 
 lexical_vars:
-		/* empty */ { $$ = NULL; }
+		%empty { $$ = NULL; }
 	|	T_USE '(' lexical_var_list ')' { $$ = $3; }
 ;
 
@@ -1081,12 +1081,12 @@ class_name_reference:
 ;
 
 exit_expr:
-		/* empty */				{ $$ = NULL; }
+		%empty				{ $$ = NULL; }
 	|	'(' optional_expr ')'	{ $$ = $2; }
 ;
 
 backticks_expr:
-		/* empty */
+		%empty
 			{ $$ = zend_ast_create_zval_from_str(ZSTR_EMPTY_ALLOC()); }
 	|	T_ENCAPSED_AND_WHITESPACE { $$ = $1; }
 	|	encaps_list { $$ = $1; }
@@ -1094,7 +1094,7 @@ backticks_expr:
 
 
 ctor_arguments:
-		/* empty */	{ $$ = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
+		%empty	{ $$ = zend_ast_create_list(0, ZEND_AST_ARG_LIST); }
 	|	argument_list { $$ = $1; }
 ;
 
@@ -1134,7 +1134,7 @@ constant:
 ;
 
 optional_expr:
-		/* empty */	{ $$ = NULL; }
+		%empty	{ $$ = NULL; }
 	|	expr		{ $$ = $1; }
 ;
 
@@ -1223,7 +1223,7 @@ array_pair_list:
 ;
 
 possible_array_pair:
-		/* empty */ { $$ = NULL; }
+		%empty { $$ = NULL; }
 	|	array_pair  { $$ = $1; }
 ;
 

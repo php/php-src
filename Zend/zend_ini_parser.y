@@ -317,7 +317,7 @@ static void zval_ini_dtor(zval *zv)
 
 statement_list:
 		statement_list statement
-	|	/* empty */
+	|	%empty
 ;
 
 statement:
@@ -351,7 +351,7 @@ statement:
 
 section_string_or_value:
 		var_string_list_section			{ $$ = $1; }
-	|	/* empty */						{ zend_ini_init_string(&$$); }
+	|	%empty						{ zend_ini_init_string(&$$); }
 ;
 
 string_or_value:
@@ -364,13 +364,13 @@ string_or_value:
 
 option_offset:
 		var_string_list					{ $$ = $1; }
-	|	/* empty */						{ zend_ini_init_string(&$$); }
+	|	%empty						{ zend_ini_init_string(&$$); }
 ;
 
 encapsed_list:
 		encapsed_list cfg_var_ref		{ zend_ini_add_string(&$$, &$1, &$2); zend_string_free(Z_STR($2)); }
 	|	encapsed_list TC_QUOTED_STRING	{ zend_ini_add_string(&$$, &$1, &$2); zend_string_free(Z_STR($2)); }
-	|	/* empty */						{ zend_ini_init_string(&$$); }
+	|	%empty						{ zend_ini_init_string(&$$); }
 ;
 
 var_string_list_section:
