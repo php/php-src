@@ -3154,13 +3154,7 @@ get_function_via_handler:
 					if (strict_class &&
 					    (!fcc->function_handler->common.scope ||
 					     !instanceof_function(ce_org, fcc->function_handler->common.scope))) {
-						if (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-							if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION &&
-								fcc->function_handler->common.function_name) {
-								zend_string_release_ex(fcc->function_handler->common.function_name, 0);
-							}
-							zend_free_trampoline(fcc->function_handler);
-						}
+						zend_release_fcall_info_cache(fcc);
 					} else {
 						retval = 1;
 						call_via_handler = (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;
