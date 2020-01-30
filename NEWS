@@ -39,6 +39,8 @@ PHP                                                                        NEWS
   . Fixed bug #79114 (Eval class during preload causes class to be only half
     available). (Laruence)
   . Fixed bug #79128 (Preloading segfaults if preload_user is used). (Nikita)
+  . Fixed bug #79193 (Incorrect type inference for self::$field =& $field).
+    (Nikita)
 
 - OpenSSL:
   . Fixed bug #79145 (openssl memory leak). (cmb, Nikita)
