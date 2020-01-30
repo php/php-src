@@ -54,6 +54,9 @@ PHP                                                                        NEWS
   . Fixed bug #78902 (Memory leak when using stream_filter_append). (liudaixiao)
   . Fixed bug #78969 (PASSWORD_DEFAULT should match PASSWORD_BCRYPT instead of being null). (kocsismate)
 
+- XSL:
+  . Fixed bug #70078 (XSL callbacks with nodes as parameter leak memory). (cmb)
+
 - Zip:
   . Add ZipArchive::CM_LZMA2 and ZipArchive::CM_XZ constants (since libzip 1.6.0). (remi)
   . Add ZipArchive::ER_* missing constants. (remi)
