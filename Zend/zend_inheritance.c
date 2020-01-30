@@ -2265,8 +2265,17 @@ static void add_compatibility_obligation(
 	HashTable *obligations = get_or_init_obligations_for_class(ce);
 	variance_obligation *obligation = emalloc(sizeof(variance_obligation));
 	obligation->type = OBLIGATION_COMPATIBILITY;
-	obligation->child_fn = *child_fn;
-	obligation->parent_fn = *parent_fn;
+	/* Copy functions, because they may be stack-allocated in the case of traits. */
+	if (child_fn->common.type == ZEND_INTERNAL_FUNCTION) {
+		memcpy(&obligation->child_fn, child_fn, sizeof(zend_internal_function));
+	} else {
+		memcpy(&obligation->child_fn, child_fn, sizeof(zend_op_array));
+	}
+	if (parent_fn->common.type == ZEND_INTERNAL_FUNCTION) {
+		memcpy(&obligation->parent_fn, parent_fn, sizeof(zend_internal_function));
+	} else {
+		memcpy(&obligation->parent_fn, parent_fn, sizeof(zend_op_array));
+	}
 	zend_hash_next_index_insert_ptr(obligations, obligation);
 }
 
