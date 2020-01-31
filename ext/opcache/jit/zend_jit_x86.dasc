@@ -7957,6 +7957,10 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 
 	|=>jit_return_label:
 
+	|	// EG(current_execute_data) = EX(prev_execute_data);
+	|	mov r0, EX->prev_execute_data
+	|	MEM_OP2_1_ZTS mov, aword, executor_globals, current_execute_data, r0, r2
+
 	// i_free_compiled_variables(execute_data);
 	if (!zend_jit_free_compiled_variables(Dst, opline, op_array, ssa)) {
 		return 0;
@@ -7969,9 +7973,6 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 
 	if ((op_array->scope && !(op_array->fn_flags & ZEND_ACC_STATIC)) ||
 	    (op_array->fn_flags & ZEND_ACC_CLOSURE)) {
-		|	// EG(current_execute_data) = EX(prev_execute_data);
-		|	mov r0, EX->prev_execute_data
-		|	MEM_OP2_1_ZTS mov, aword, executor_globals, current_execute_data, r0, r2
 		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 			|	// OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 			|	mov r0, EX->func
@@ -7987,18 +7988,11 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 			|	OBJ_RELEASE r0, ecx, >4
 		}
 		|4:
-		|	// EG(vm_stack_top) = (zval*)execute_data;
-		|	MEM_OP2_1_ZTS mov, aword, executor_globals, vm_stack_top, FP, r0
-		|	// execute_data = EX(prev_execute_data);
-		|	mov FP, EX->prev_execute_data
-	} else {
-		|	// EG(vm_stack_top) = (zval*)execute_data;
-		|	MEM_OP2_1_ZTS mov, aword, executor_globals, vm_stack_top, FP, r0
-		|	// execute_data = EX(prev_execute_data);
-		|	mov FP, EX->prev_execute_data
-		|	// EG(current_execute_data) = execute_data
-		|	MEM_OP2_1_ZTS mov, aword, executor_globals, current_execute_data, FP, r0
 	}
+	|	// EG(vm_stack_top) = (zval*)execute_data;
+	|	MEM_OP2_1_ZTS mov, aword, executor_globals, vm_stack_top, FP, r0
+	|	// execute_data = EX(prev_execute_data);
+	|	mov FP, EX->prev_execute_data
 	|	// if (EG(exception))
 	|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r0
 	|	LOAD_OPLINE
