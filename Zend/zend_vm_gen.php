@@ -1787,6 +1787,7 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
             out($f,"#ifdef ZEND_VM_IP_GLOBAL_REG\n");
             out($f,"\t\t\t\topline = vm_stack_data.orig_opline;\n");
             out($f,"#endif\n");
+            out($f,"\t\t\t\tEG(vm_reentry_count)--;\n");
             out($f,"\t\t\t\treturn;\n");
             out($f,"\t\t\tHYBRID_DEFAULT:\n");
             out($f,"\t\t\t\tVM_TRACE(ZEND_NULL)\n");
@@ -1984,7 +1985,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                             out($f,"#define HANDLE_EXCEPTION() ZEND_ASSERT(EG(exception)); LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
                             out($f,"#define HANDLE_EXCEPTION_LEAVE() ZEND_ASSERT(EG(exception)); LOAD_OPLINE(); ZEND_VM_LEAVE()\n");
                             out($f,"#define ZEND_VM_CONTINUE() goto zend_vm_continue\n");
-                            out($f,"#define ZEND_VM_RETURN()   return\n");
+                            out($f,"#define ZEND_VM_RETURN()   EG(vm_reentry_count)--; return\n");
                             out($f,"#define ZEND_VM_ENTER_EX() ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
                             out($f,"#define ZEND_VM_ENTER()    execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()\n");
                             out($f,"#define ZEND_VM_LEAVE()    ZEND_VM_CONTINUE()\n");
@@ -2015,7 +2016,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                                 out($f,"#define HANDLE_EXCEPTION_LEAVE() ZEND_ASSERT(EG(exception)); goto ZEND_HANDLE_EXCEPTION_LABEL\n");
                             }
                             out($f,"#define ZEND_VM_CONTINUE() goto *(void**)(OPLINE->handler)\n");
-                            out($f,"#define ZEND_VM_RETURN()   return\n");
+                            out($f,"#define ZEND_VM_RETURN()   EG(vm_reentry_count)--; return\n");
                             out($f,"#define ZEND_VM_ENTER_EX() ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
                             out($f,"#define ZEND_VM_ENTER()    execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()\n");
                             out($f,"#define ZEND_VM_LEAVE()    ZEND_VM_CONTINUE()\n");
@@ -2184,6 +2185,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                                 "# ifdef ZEND_VM_IP_GLOBAL_REG\n" .
                                 $m[1]."opline = vm_stack_data.orig_opline;\n" .
                                 "# endif\n" .
+                                $m[1]."EG(vm_reentry_count)--;\n" .
                                 $m[1]."return;\n" .
                                 "#else\n" .
                                 $m[1]."if (EXPECTED(ret > 0)) {\n" .
@@ -2193,6 +2195,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
                                 "# ifdef ZEND_VM_IP_GLOBAL_REG\n" .
                                 $m[1]."\topline = vm_stack_data.orig_opline;\n" .
                                 "# endif\n".
+                                $m[1]."\tEG(vm_reentry_count)--;\n".
                                 $m[1]."\treturn;\n".
                                 $m[1]."}\n".
                                 "#endif\n");

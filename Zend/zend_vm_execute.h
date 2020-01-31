@@ -54488,6 +54488,12 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 	LOAD_OPLINE();
 	ZEND_VM_LOOP_INTERRUPT_CHECK();
 
+	if (EG(vm_reentry_count)++ > EG(vm_reentry_limit)) {
+		zend_vm_reentry_limit_error();
+		LOAD_OPLINE();
+		/* Fall through to handle exception below. */
+	}
+
 	while (1) {
 #if !defined(ZEND_VM_FP_GLOBAL_REG) || !defined(ZEND_VM_IP_GLOBAL_REG)
 			int ret;
@@ -58983,6 +58989,7 @@ zend_leave_helper_SPEC_LABEL:
 #ifdef ZEND_VM_IP_GLOBAL_REG
 				opline = vm_stack_data.orig_opline;
 #endif
+				EG(vm_reentry_count)--;
 				return;
 			HYBRID_DEFAULT:
 				VM_TRACE(ZEND_NULL)
@@ -58994,6 +59001,7 @@ zend_leave_helper_SPEC_LABEL:
 # ifdef ZEND_VM_IP_GLOBAL_REG
 			opline = vm_stack_data.orig_opline;
 # endif
+			EG(vm_reentry_count)--;
 			return;
 #else
 			if (EXPECTED(ret > 0)) {
@@ -59003,6 +59011,7 @@ zend_leave_helper_SPEC_LABEL:
 # ifdef ZEND_VM_IP_GLOBAL_REG
 				opline = vm_stack_data.orig_opline;
 # endif
+				EG(vm_reentry_count)--;
 				return;
 			}
 #endif

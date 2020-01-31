@@ -2046,6 +2046,13 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_new_element_for_s
 	zend_throw_error(NULL, "[] operator not supported for strings");
 }
 
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_vm_reentry_limit_error()
+{
+	zend_throw_error(NULL,
+		"VM reentry limit of " ZEND_ULONG_FMT " reached. Infinite recursion?",
+		EG(vm_reentry_limit));
+}
+
 static ZEND_COLD void zend_binary_assign_op_dim_slow(zval *container, zval *dim OPLINE_DC EXECUTE_DATA_DC)
 {
 	if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {

@@ -192,6 +192,7 @@ ZEND_INI_BEGIN()
 #endif
 	STD_ZEND_INI_BOOLEAN("zend.exception_ignore_args",	"0",	ZEND_INI_ALL,		OnUpdateBool, exception_ignore_args, zend_executor_globals, executor_globals)
 	STD_ZEND_INI_ENTRY("zend.exception_string_param_max_len",	"15",	ZEND_INI_ALL,	OnSetExceptionStringParamMaxLen,	exception_string_param_max_len,		zend_executor_globals,	executor_globals)
+	STD_ZEND_INI_ENTRY("zend.vm_reentry_limit", "1000", ZEND_INI_ALL, OnUpdateLong, vm_reentry_limit, zend_executor_globals, executor_globals)
 ZEND_INI_END()
 
 ZEND_API size_t zend_vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) /* {{{ */

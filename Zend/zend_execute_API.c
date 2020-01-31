@@ -175,6 +175,7 @@ void init_executor(void) /* {{{ */
 
 	EG(fake_scope) = NULL;
 	EG(trampoline).common.function_name = NULL;
+	EG(vm_reentry_count) = 0;
 
 	EG(ht_iterators_count) = sizeof(EG(ht_iterators_slots)) / sizeof(HashTableIterator);
 	EG(ht_iterators_used) = 0;
