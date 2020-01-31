@@ -48,7 +48,6 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t
 	if (UNEXPECTED(call_info & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 		zend_clean_and_cache_symbol_table(EX(symbol_table));
 	}
-	EG(current_execute_data) = EX(prev_execute_data);
 
 	zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 	if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
@@ -88,7 +87,6 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t ca
 		}
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
 	}
-	EG(current_execute_data) = EX(prev_execute_data);
 	if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 	}
