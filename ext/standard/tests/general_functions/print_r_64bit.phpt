@@ -105,7 +105,7 @@ $strings = array (
   'PHP',
   "abcd\x0n1234\x0005678\x0000efgh\xijkl",  // strings with hexadecimal NULL
   "abcd\0efgh\0ijkl\x00mnop\x000qrst\00uvwx\0000yz",  // strings with octal NULL
-  "1234\t\n5678\n\t9100\rabcda"  // strings with escape characters
+  "1234\t\n5678\n\t9100\"abcda"  // strings with escape characters
 );
 /* calling check_printr() to display contents of strings using print_r() */
 check_printr($strings);
@@ -244,8 +244,8 @@ $resources = array (
    using print_r() */
 check_printr($resources);
 
-echo "\n*** Testing print_r() on different combinations of scalar 
-            and non-scalar variables ***\n";
+echo "\n*** Testing print_r() on different combinations of scalar
+    and non-scalar variables ***\n";
 /* a variable which is unset */
 $unset_var = 10.5;
 unset($unset_var);
@@ -608,13 +608,13 @@ abcd efgh ijkl mnop 0qrst uvwx 0yz
 -- Iteration 14 --
 1234	
 5678
-	9100abcda
+	9100"abcda
 1234	
 5678
-	9100abcda
+	9100"abcda
 1234	
 5678
-	9100abcda
+	9100"abcda
 *** Testing print_r() on boolean variables ***
 
 -- Iteration 1 --
@@ -1473,8 +1473,8 @@ Resource id #5
 Resource id #6
 Resource id #6
 Resource id #6
-*** Testing print_r() on different combinations of scalar 
-            and non-scalar variables ***
+*** Testing print_r() on different combinations of scalar
+    and non-scalar variables ***
 
 -- Iteration 1 --
 Array

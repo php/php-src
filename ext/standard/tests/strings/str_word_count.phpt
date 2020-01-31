@@ -2,7 +2,7 @@
 str_word_count()
 --FILE--
 <?php
-$str = "Hello friend, you're  
+$str = "Hello friend, you're
     looking          good today!";
 $b =& $str;
 var_dump(str_word_count($str, 1));
@@ -79,11 +79,11 @@ array(6) {
   string(6) "friend"
   [14]=>
   string(6) "you're"
-  [27]=>
+  [25]=>
   string(7) "looking"
-  [44]=>
+  [42]=>
   string(4) "good"
-  [49]=>
+  [47]=>
   string(5) "today"
 }
 int(6)
@@ -91,7 +91,7 @@ Invalid format value 3
 Invalid format value 123
 Invalid format value -1
 Invalid format value 999999999
-string(55) "Hello friend, you're  
+string(53) "Hello friend, you're
     looking          good today!"
 int(5)
 int(6)

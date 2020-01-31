@@ -21,10 +21,10 @@ echo "*** Testing vprintf() : int formats and non-integer values ***\n";
 // defining array of int formats
 $formats =
   '%d %+d %-d 
-   %ld %Ld %4d %-4d
-   %10.4d %-10.4d %.4d %04.4d
-   %\'#2d %\'2d %\'$2d %\'_2d
-   %3$d %4$d %1$d %2$d';
+    %ld %Ld %4d %-4d
+    %10.4d %-10.4d %.4d %04.4d
+    %\'#2d %\'2d %\'$2d %\'_2d
+    %3$d %4$d %1$d %2$d';
 
 // Arrays of non int values for the format defined in $format.
 // Each sub array contains non int values which correspond to each format in $format
@@ -77,32 +77,32 @@ foreach($args_array as $args) {
 
 -- Iteration 1 --
 2 +0 10 
-   123456 d -1234 1234
-   20000000000 200000     4000 22000000
-   12345 12 -12 -123456
-   10 123456 2 0
-int(112)
+    123456 d -1234 1234
+    20000000000 200000     4000 22000000
+    12345 12 -12 -123456
+    10 123456 2 0
+int(116)
 
 -- Iteration 2 --
 0 +0 0 
-   123 d -123 123 
-            0 0          123456 0000
-   1234 0 $0 _0
-   0 123 0 0
-int(92)
+    123 d -123 123 
+             0 0          123456 0000
+    1234 0 $0 _0
+    0 123 0 0
+int(96)
 
 -- Iteration 3 --
 1 +1 1 
-   1 d    1 1   
-            1 1          1 0001
-   #1 1 $1 _1
-   1 1 1 1
-int(81)
+    1 d    1 1   
+             1 1          1 0001
+    #1 1 $1 _1
+    1 1 1 1
+int(85)
 
 -- Iteration 4 --
 1 +1 0 
-   1 d    0 1   
-            1 0          1 0000
-   #0 1 $1 _0
-   0 1 1 1
-int(81)
+    1 d    0 1   
+             1 0          1 0000
+    #0 1 $1 _0
+    0 1 1 1
+int(85)

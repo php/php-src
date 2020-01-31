@@ -16,16 +16,16 @@ comment */
 
 // a class
 class TestClass {
-	public function foo() {
-		echo "Called foo()\n";
-	}
+    public function foo() {
+        echo "Called foo()\n";
+    }
 }
 
 $a = new TestClass();
 $a->foo();
 
 for ($i = 0; $i < 10; $i++) {
-	echo "Loop iteration $i\n";
+    echo "Loop iteration $i\n";
 }
 
 ?>';
@@ -54,7 +54,7 @@ eval($script);
 
 ?>
 --EXPECT--
-string(259) "
+string(274) "
 
 // A php script to test token_get_all()
 
@@ -64,16 +64,16 @@ comment */
 
 // a class
 class TestClass {
-	public function foo() {
-		echo "Called foo()\n";
-	}
+    public function foo() {
+        echo "Called foo()\n";
+    }
 }
 
 $a = new TestClass();
 $a->foo();
 
 for ($i = 0; $i < 10; $i++) {
-	echo "Loop iteration $i\n";
+    echo "Loop iteration $i\n";
 }
 
 "

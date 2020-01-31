@@ -10,9 +10,9 @@ opcache.save_comments=1
 /**
 
 
-		My
+        My
 Doc
-		* Comment
+        * Comment
 for A
 
 * */
@@ -60,9 +60,9 @@ foreach ($classes as $class) {
 string(%d) "/**
 
 
-		My
+        My
 Doc
-		* Comment
+        * Comment
 for A
 
 * */"

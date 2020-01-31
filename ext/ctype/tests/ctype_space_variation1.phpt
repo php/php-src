@@ -31,7 +31,7 @@ class classA
 
 // heredoc string
 $heredoc = <<<EOT
- 
+\t
 EOT;
 
 // get a resource variable
@@ -92,7 +92,7 @@ foreach($inputs as $input) {
 	echo "\n-- Iteration $iterator --\n";
 	var_dump( ctype_space($input) );
 	$iterator++;
-};
+}
 
 fclose($fp);
 
