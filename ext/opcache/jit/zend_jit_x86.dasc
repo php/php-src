@@ -6593,6 +6593,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 	|	// EG(vm_stack_top) = (zval*)((char*)call + used_stack);
 	|.cold_code
 	|1:
+	|	SAVE_VALID_OPLINE opline
 	if (func) {
 		|	mov FCARG1d, used_stack
 	}
