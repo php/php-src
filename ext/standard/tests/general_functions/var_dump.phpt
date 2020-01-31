@@ -99,7 +99,7 @@ $strings = array (
   'PHP',
   "abcd\x0n1234\x0005678\x0000efgh\xijkl",  // strings with hexadecimal NULL
   "abcd\0efgh\0ijkl\x00mnop\x000qrst\00uvwx\0000yz",  // strings with octal NULL
-  "1234\t\n5678\n\t9100\rabcda"  // strings with escape characters
+  "1234\t\n5678\n\t9100\"abcda"  // strings with escape characters
 );
 /* calling check_vardump() to display contents of strings
    using var_dump() */
@@ -448,10 +448,9 @@ string(29) "abcd n1234 05678 00efgh\xijkl"
 -- Iteration 13 --
 string(34) "abcd efgh ijkl mnop 0qrst uvwx 0yz"
 -- Iteration 14 --
-string(22) "1234
+string(22) "1234	
 5678
-	9100
-abcda"
+	9100"abcda"
 
 *** Testing var_dump() on boolean variables ***
 -- Iteration 1 --
@@ -1103,10 +1102,9 @@ array(14) {
   [12]=>
   string(34) "abcd efgh ijkl mnop 0qrst uvwx 0yz"
   [13]=>
-  string(22) "1234
+  string(22) "1234	
 5678
-	9100
-abcda"
+	9100"abcda"
 }
 array(15) {
   [0]=>
