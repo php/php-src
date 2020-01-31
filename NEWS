@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug #78989 (Delayed variance check involving trait segfaults).
     (Nikita)
   . Fixed bug #79174 (cookie values with spaces fail to round-trip). (cmb)
+  . Fixed bug #76047 (Use-after-free when accessing already destructed
+    backtrace arguments). (Nikita)
 
 - CURL:
   . Fixed bug #79078 (Hypothetical use-after-free in curl_multi_add_handle()).
