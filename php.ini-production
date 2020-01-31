@@ -936,6 +936,8 @@ default_socket_timeout = 60
 ;extension=xmlrpc
 ;extension=xsl
 
+;zend_extension=opcache
+
 ;;;;;;;;;;;;;;;;;;;
 ; Module Settings ;
 ;;;;;;;;;;;;;;;;;;;
