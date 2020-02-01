@@ -1,18 +1,23 @@
 %require "3.0"
-%{
-
 /*
  * phpdbg_parser.y
  * (from php-src root)
  */
 
+%code requires {
 #include "phpdbg.h"
+#ifndef YY_TYPEDEF_YY_SCANNER_T
+#define YY_TYPEDEF_YY_SCANNER_T
+typedef void* yyscan_t;
+#endif
+}
+
+%code {
+
 #include "phpdbg_cmd.h"
 #include "phpdbg_utils.h"
 #include "phpdbg_cmd.h"
 #include "phpdbg_prompt.h"
-
-#define YYSTYPE phpdbg_param_t
 
 #include "phpdbg_parser.h"
 #include "phpdbg_lexer.h"
@@ -27,18 +32,12 @@ ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 #define YYFREE free
 #endif
 
-%}
-
-%define api.pure full
-%define parse.error verbose
-
-%code requires {
-#include "phpdbg.h"
-#ifndef YY_TYPEDEF_YY_SCANNER_T
-#define YY_TYPEDEF_YY_SCANNER_T
-typedef void* yyscan_t;
-#endif
 }
+
+%define api.prefix {phpdbg_}
+%define api.pure full
+%define api.value.type {phpdbg_param_t}
+%define parse.error verbose
 
 %token T_EVAL       "eval"
 %token T_RUN        "run"

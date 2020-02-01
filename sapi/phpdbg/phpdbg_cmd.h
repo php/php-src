@@ -81,10 +81,6 @@ struct _phpdbg_param {
 	(v)->top = NULL; \
 } while(0)
 
-#ifndef YYSTYPE
-#define YYSTYPE phpdbg_param_t
-#endif
-
 #define PHPDBG_ASYNC_SAFE 1
 
 typedef int (*phpdbg_command_handler_t)(const phpdbg_param_t*);

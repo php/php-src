@@ -32,8 +32,6 @@
 #include "win32/syslog.h"
 #endif
 
-#define YYSTYPE zval
-
 int ini_parse(void);
 
 #define ZEND_INI_PARSER_CB	(CG(ini_parser_param))->ini_parser_cb
@@ -289,7 +287,9 @@ static void zval_ini_dtor(zval *zv)
 %}
 
 %expect 0
+%define api.prefix {ini_}
 %define api.pure full
+%define api.value.type {zval}
 %define parse.error verbose
 
 %token TC_SECTION

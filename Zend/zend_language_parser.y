@@ -1,5 +1,4 @@
 %require "3.0"
-%{
 /*
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
@@ -20,7 +19,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend_compile.h"
+%code top {
 #include "zend.h"
 #include "zend_list.h"
 #include "zend_globals.h"
@@ -33,21 +32,21 @@
 #define yytnamerr zend_yytnamerr
 static YYSIZE_T zend_yytnamerr(char*, const char*);
 
-#define YYSTYPE zend_parser_stack_elem
-
 #ifdef _MSC_VER
 #define YYMALLOC malloc
 #define YYFREE free
 #endif
-
-%}
-
-%define api.pure full
-%define parse.error verbose
-%expect 0
+}
 
 %code requires {
+#include "zend_compile.h"
 }
+
+%define api.prefix {zend}
+%define api.pure full
+%define api.value.type {zend_parser_stack_elem}
+%define parse.error verbose
+%expect 0
 
 %destructor { zend_ast_destroy($$); } <ast>
 %destructor { if ($$) zend_string_release_ex($$, 0); } <str>
