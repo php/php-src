@@ -78,7 +78,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %precedence T_INSTANCEOF
 %precedence '~' T_INT_CAST T_DOUBLE_CAST T_STRING_CAST T_ARRAY_CAST T_OBJECT_CAST T_BOOL_CAST T_UNSET_CAST '@'
 %right T_POW
-%precedence T_NEW T_CLONE
+%precedence T_CLONE
 
 /* Resolve danging else conflict */
 %precedence T_NOELSE

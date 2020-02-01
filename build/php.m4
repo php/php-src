@@ -81,7 +81,7 @@ AC_DEFUN([PHP_DEFINE],[
 dnl
 dnl PHP_SUBST(varname)
 dnl
-dnl Adds variable with it's value into Makefile, e.g.:
+dnl Adds variable with its value into Makefile, e.g.:
 dnl CC = gcc
 dnl
 AC_DEFUN([PHP_SUBST],[
@@ -89,14 +89,14 @@ AC_DEFUN([PHP_SUBST],[
 ])
 
 dnl
-dnl PHP_SUBST_OLD(varname)
+dnl PHP_SUBST_OLD(varname, [VALUE])
 dnl
 dnl Same as PHP_SUBST() but also substitutes all @VARNAME@ instances in every
 dnl file passed to AC_OUTPUT.
 dnl
 AC_DEFUN([PHP_SUBST_OLD],[
-  PHP_SUBST($1)
-  AC_SUBST($1)
+  AC_SUBST($@)
+  PHP_SUBST([$1])
 ])
 
 dnl
@@ -1815,7 +1815,7 @@ AC_DEFUN([PHP_PROG_BISON], [
     done
 
     if test "$php_bison_check" != "invalid"; then
-      AC_SUBST([YFLAGS], [-Wempty-rule])
+      PHP_SUBST_OLD([YFLAGS], [-Wall])
       AC_MSG_RESULT([$php_bison_version (ok)])
     else
       AC_MSG_RESULT([$php_bison_version])
