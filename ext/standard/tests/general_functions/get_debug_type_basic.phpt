@@ -19,16 +19,23 @@ namespace {
     echo get_debug_type(new Demo\ClassInNamespace()) . "\n";
 
     /* scalars */
+    echo get_debug_type("foo") . "\n";
+    echo get_debug_type(false) . "\n";
+    echo get_debug_type(true) . "\n";
     echo get_debug_type(1) . "\n";
     echo get_debug_type(1.1) . "\n";
-    echo get_debug_type("foo") . "\n";
-    echo get_debug_type(Test::class) . "\n";
+    echo get_debug_type([]) . "\n";
+    echo get_debug_type(null) . "\n";
+
 }
 
 --EXPECT--
 ClassInGlobal
 Demo\ClassInNamespace
-integer
-double
 string
-string
+bool
+bool
+int
+float
+array
+null

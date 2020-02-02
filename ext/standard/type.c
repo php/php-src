@@ -42,22 +42,32 @@ PHP_FUNCTION(gettype)
 PHP_FUNCTION(get_debug_type)
 {
 	zval *arg;
-	zend_string *type;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (Z_TYPE_P(arg) == IS_OBJECT) {
-		RETURN_STR_COPY(Z_OBJ_P(arg)->ce->name);
-	}
-
-	type = zend_zval_get_type(arg);
-	if (EXPECTED(type)) {
-		RETURN_INTERNED_STR(type);
-	} else {
-		RETURN_STRING("unknown type");
-	}
+    switch (Z_TYPE_P(arg)) {
+        case IS_NULL:
+            RETURN_STRING("null");
+        case IS_FALSE:
+        case IS_TRUE:
+            RETURN_STRING("bool");
+        case IS_LONG:
+            RETURN_STRING("int");
+        case IS_DOUBLE:
+            RETURN_STRING("float");
+        case IS_STRING:
+            RETURN_STRING("string");
+        case IS_ARRAY:
+            RETURN_STRING("array");
+        case IS_OBJECT:
+            RETURN_STR_COPY(Z_OBJ_P(arg)->ce->name);
+        case IS_RESOURCE:
+            RETURN_STRING("resource");
+        default:
+            RETURN_STRING("unknown");
+    }
 }
 /* }}} */
 
