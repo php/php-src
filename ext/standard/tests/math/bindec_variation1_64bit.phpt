@@ -77,12 +77,14 @@ foreach($inputs as $input) {
 		var_dump(bindec($input));
 	} catch (TypeError $e) {
 		echo $e->getMessage(), "\n";
-	}
+	} catch (InvalidArgumentException $e) {
+        echo "INVALID\n";
+    }
 	$iterator++;
 };
 fclose($fp);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing bindec() : usage variations ***
 
 -- Iteration 1 --
@@ -92,39 +94,25 @@ int(0)
 int(1)
 
 -- Iteration 3 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(1)
+INVALID
 
 -- Iteration 4 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
+INVALID
 
 -- Iteration 5 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(2)
+INVALID
 
 -- Iteration 6 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(2)
+INVALID
 
 -- Iteration 7 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(8)
+INVALID
 
 -- Iteration 8 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(1)
+INVALID
 
 -- Iteration 9 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
+INVALID
 
 -- Iteration 10 --
 int(0)
@@ -154,19 +142,13 @@ int(0)
 bindec() expects parameter 1 to be string, array given
 
 -- Iteration 19 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
+INVALID
 
 -- Iteration 20 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
+INVALID
 
 -- Iteration 21 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
+INVALID
 
 -- Iteration 22 --
 int(0)

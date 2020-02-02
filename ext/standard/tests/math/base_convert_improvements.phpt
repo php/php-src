@@ -15,14 +15,22 @@ echo base_convert("0b1010" , 2, 10) . "\n";
 echo "=======================================";
 
 // These should fail
-echo base_convert('fg', 16, 10);
-echo base_convert('f 0xff ', 16, 10);
-echo base_convert('1xff ', 16, 10);
-echo base_convert(chr(0), 16, 10);
-echo base_convert("0o7" , 9, 10);
-echo base_convert("0 0" , 9, 10) . "\n";
+echo base_convert_with_catch('fg', 16, 10);
+echo base_convert_with_catch('f 0xff ', 16, 10);
+echo base_convert_with_catch('1xff ', 16, 10);
+echo base_convert_with_catch(chr(0), 16, 10);
+echo base_convert_with_catch("0o7" , 9, 10);
+echo base_convert_with_catch("0 0" , 9, 10) . "\n";
+
+function base_convert_with_catch($original, $fromBase, $toBase) {
+    try {
+        return base_convert($original, $fromBase, $toBase);
+    } catch (InvalidArgumentException $e) {
+        return "Invalid\n";
+    }
+}
 ?>
---EXPECTF--
+--EXPECT--
 255
 16
 255
@@ -32,16 +40,9 @@ echo base_convert("0 0" , 9, 10) . "\n";
 255
 7
 10
-=======================================
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-15
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-61695
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-511
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-0
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-7
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-0
+=======================================Invalid
+Invalid
+Invalid
+Invalid
+Invalid
+Invalid

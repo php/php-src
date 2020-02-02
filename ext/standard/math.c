@@ -21,6 +21,7 @@
 #include "php_math.h"
 #include "zend_multiply.h"
 #include "zend_exceptions.h"
+#include "ext/spl/spl_exceptions.h"
 #include "zend_portability.h"
 
 #include <math.h>
@@ -812,7 +813,7 @@ PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret)
 	}
 
 	if (invalidchars > 0) {
-		zend_error(E_DEPRECATED, "Invalid characters passed for attempted conversion, these have been ignored");
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid characters passed for base conversion");
 	}
 
 	if (mode == 1) {

@@ -81,12 +81,14 @@ foreach($inputs as $input) {
 		var_dump(hexdec($input));
 	} catch (TypeError $e) {
 		echo $e->getMessage(), "\n";
+	} catch (InvalidArgumentException $e) {
+		echo "INVALID\n";
 	}
 	$iterator++;
 };
 fclose($fp);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing hexdec() : usage variations ***
 
 -- Iteration 1 --
@@ -99,9 +101,7 @@ int(1)
 int(74565)
 
 -- Iteration 4 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(9029)
+INVALID
 
 -- Iteration 5 --
 int(285960729237)
@@ -110,27 +110,19 @@ int(285960729237)
 int(285960729238)
 
 -- Iteration 7 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(261)
+INVALID
 
 -- Iteration 8 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(261)
+INVALID
 
 -- Iteration 9 --
 int(20015998341120)
 
 -- Iteration 10 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(1250999896553)
+INVALID
 
 -- Iteration 11 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(5)
+INVALID
 
 -- Iteration 12 --
 int(0)
@@ -160,19 +152,13 @@ int(0)
 hexdec() expects parameter 1 to be string, array given
 
 -- Iteration 21 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(2748)
+INVALID
 
 -- Iteration 22 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(2748)
+INVALID
 
 -- Iteration 23 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(2748)
+INVALID
 
 -- Iteration 24 --
 int(0)

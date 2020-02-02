@@ -77,13 +77,15 @@ foreach($inputs as $input) {
 		var_dump(octdec($input));
 	} catch (TypeError $e) {
 		echo $e->getMessage(), "\n";
-	}
+	} catch (InvalidArgumentException $e) {
+        echo "INVALID\n";
+    }
 	$iterator++;
 };
 fclose($fp);
 ?>
 ---Done---
---EXPECTF--
+--EXPECT--
 *** Testing octdec() : usage variations ***
 
 -- Iteration 1 --
@@ -96,44 +98,28 @@ int(1)
 int(5349)
 
 -- Iteration 4 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(1253)
+INVALID
 
 -- Iteration 5 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(1134037)
+INVALID
 
 -- Iteration 6 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(1134038)
+INVALID
 
 -- Iteration 7 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(69)
+INVALID
 
 -- Iteration 8 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(69)
+INVALID
 
 -- Iteration 9 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(175304192)
+INVALID
 
 -- Iteration 10 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(342391)
+INVALID
 
 -- Iteration 11 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(5)
+INVALID
 
 -- Iteration 12 --
 int(0)
@@ -163,19 +149,13 @@ int(0)
 octdec() expects parameter 1 to be string, array given
 
 -- Iteration 21 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
+INVALID
 
 -- Iteration 22 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
+INVALID
 
 -- Iteration 23 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
+INVALID
 
 -- Iteration 24 --
 int(0)

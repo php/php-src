@@ -29,11 +29,16 @@ $values = array(0x123abc,
 
 foreach($values as $value) {
 	echo "\n-- hexdec $value --\n";
-	var_dump(hexdec($value));
+    try {
+        $output = hexdec($value);
+    } catch (InvalidArgumentException $e) {
+        $output = 'INVALID';
+    }
+	var_dump($output);
 };
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing hexdec() : basic functionality ***
 
 -- hexdec 1194684 --
@@ -61,9 +66,7 @@ int(2147483647)
 int(2147483648)
 
 -- hexdec 0x123XYZABC --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(1194684)
+string(7) "INVALID"
 
 -- hexdec 311015 --
 int(3215381)
@@ -72,9 +75,7 @@ int(3215381)
 int(3215381)
 
 -- hexdec 31101.3 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(3215379)
+string(7) "INVALID"
 
 -- hexdec 3110130 --
 int(51446064)

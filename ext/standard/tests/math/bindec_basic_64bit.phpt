@@ -29,49 +29,31 @@ $values = array(111000111,
 				null);
 
 for ($i = 0; $i < count($values); $i++) {
-	$res = bindec($values[$i]);
+    try {
+        $res = bindec($values[$i]);
+    } catch (InvalidArgumentException $e) {
+        $res = 'INVALID';
+    }
 	var_dump($res);
 }
 ?>
---EXPECTF--
+--EXPECT--
 int(455)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(32766)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(5)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(129)
+string(7) "INVALID"
+string(7) "INVALID"
+string(7) "INVALID"
+string(7) "INVALID"
 int(455)
 int(224)
 int(2147483647)
 int(2147483648)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(129)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(13)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(13)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(26)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(6)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(0)
+string(7) "INVALID"
+string(7) "INVALID"
+string(7) "INVALID"
+string(7) "INVALID"
+string(7) "INVALID"
+string(7) "INVALID"
+string(7) "INVALID"
 int(1)
 int(0)
 int(0)

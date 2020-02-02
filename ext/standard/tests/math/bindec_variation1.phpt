@@ -77,7 +77,9 @@ foreach($inputs as $input) {
 		var_dump(bindec($input));
 	} catch (TypeError $e) {
 		echo $e->getMessage(), "\n";
-	}
+	} catch (InvalidArgumentException $e) {
+        echo "INVALID\n";
+    }
 	$iterator++;
 };
 fclose($fp);

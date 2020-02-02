@@ -71,7 +71,12 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
 	echo "\n-- Iteration $iterator --\n";
-	var_dump(base_convert($input, 10, 8));
+    try {
+        $output = base_convert($input, 10, 8);
+    } catch (InvalidArgumentException $e) {
+        $output = 'INVALID';
+    }
+	var_dump($output);
 	$iterator++;
 };
 fclose($fp);
@@ -89,37 +94,25 @@ string(1) "1"
 string(2) "14"
 
 -- Iteration 4 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(2) "14"
+string(7) "INVALID"
 
 -- Iteration 5 --
 string(11) "17777777777"
 
 -- Iteration 6 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(3) "151"
+string(7) "INVALID"
 
 -- Iteration 7 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(3) "151"
+string(7) "INVALID"
 
 -- Iteration 8 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(7) "4553207"
+string(7) "INVALID"
 
 -- Iteration 9 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(7) "4553207"
+string(7) "INVALID"
 
 -- Iteration 10 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "5"
+string(7) "INVALID"
 
 -- Iteration 11 --
 string(1) "0"
@@ -148,24 +141,16 @@ string(1) "0"
 -- Iteration 19 --
 
 Warning: Array to string conversion in %s on line %d
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "0"
+string(7) "INVALID"
 
 -- Iteration 20 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "0"
+string(7) "INVALID"
 
 -- Iteration 21 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "0"
+string(7) "INVALID"
 
 -- Iteration 22 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "0"
+string(7) "INVALID"
 
 -- Iteration 23 --
 string(1) "0"
@@ -174,6 +159,4 @@ string(1) "0"
 string(1) "0"
 
 -- Iteration 25 --
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-string(1) "5"
+string(7) "INVALID"

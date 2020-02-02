@@ -28,37 +28,29 @@ $values = array(01234567,
 				null);
 
 for ($i = 0; $i < count($values); $i++) {
-	$res = octdec($values[$i]);
+    try {
+        $res = octdec($values[$i]);
+    } catch (InvalidArgumentException $e) {
+        $res = 'INVALID';
+    }
 	var_dump($res);
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing octdec() : basic functionality ***
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(14489)
+string(7) "INVALID"
 int(253)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(36947879)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(4618484)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(4104)
+string(7) "INVALID"
+string(7) "INVALID"
+string(7) "INVALID"
 int(5349)
 int(342391)
 int(375)
 int(2147483647)
 int(2147483648)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(668)
+string(7) "INVALID"
 int(5349)
-
-Deprecated: Invalid characters passed for attempted conversion, these have been ignored in %s on line %d
-int(102923)
+string(7) "INVALID"
 int(823384)
 int(1)
 int(0)
