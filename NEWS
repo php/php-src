@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug #79078 (Hypothetical use-after-free in curl_multi_add_handle()).
     (cmb)
 
+ -Intl:
+  . Fixed bug #79212 (NumberFormatter::format() may detect wrong type). (cmb)
+
 - MBString:
   . Fixed bug #79154 (mb_convert_encoding() can modify $from_encoding). (cmb)
 
