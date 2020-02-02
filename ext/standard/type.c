@@ -47,27 +47,27 @@ PHP_FUNCTION(get_debug_type)
 		Z_PARAM_ZVAL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-    switch (Z_TYPE_P(arg)) {
-        case IS_NULL:
-            RETURN_STRING("null");
-        case IS_FALSE:
-        case IS_TRUE:
-            RETURN_STRING("bool");
-        case IS_LONG:
-            RETURN_STRING("int");
-        case IS_DOUBLE:
-            RETURN_STRING("float");
-        case IS_STRING:
-            RETURN_STRING("string");
-        case IS_ARRAY:
-            RETURN_STRING("array");
-        case IS_OBJECT:
-            RETURN_STR_COPY(Z_OBJ_P(arg)->ce->name);
-        case IS_RESOURCE:
-            RETURN_STRING("resource");
-        default:
-            RETURN_STRING("unknown");
-    }
+	switch (Z_TYPE_P(arg)) {
+		case IS_NULL:
+			RETURN_STRING("null");
+		case IS_FALSE:
+		case IS_TRUE:
+			RETURN_STRING("bool");
+		case IS_LONG:
+			RETURN_STRING("int");
+		case IS_DOUBLE:
+			RETURN_STRING("float");
+		case IS_STRING:
+			RETURN_STRING("string");
+		case IS_ARRAY:
+			RETURN_STRING("array");
+		case IS_OBJECT:
+			RETURN_STR_COPY(Z_OBJ_P(arg)->ce->name);
+		case IS_RESOURCE:
+			RETURN_STRING("resource");
+		default:
+			RETURN_STRING("unknown");
+	}
 }
 /* }}} */
 
