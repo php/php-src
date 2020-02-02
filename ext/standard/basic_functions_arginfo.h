@@ -2010,6 +2010,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gettype, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
+#define arginfo_get_debug_type arginfo_gettype
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_settype, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(1, var)
 	ZEND_ARG_TYPE_INFO(0, type, IS_STRING, 0)

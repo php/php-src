@@ -1317,6 +1317,9 @@ function stream_set_timeout($socket, int $seconds, int $microseconds = 0): bool 
 /** @param mixed $var */
 function gettype($var): string {}
 
+/** @param mixed $var */
+function get_debug_type($var): string {}
+
 function settype(&$var, string $type): bool {}
 
 /** @param mixed $value */

@@ -487,6 +487,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(strval,															arginfo_strval)
 	PHP_FE(boolval,															arginfo_boolval)
 	PHP_FE(gettype,															arginfo_gettype)
+	PHP_FE(get_debug_type,													arginfo_get_debug_type)
 	PHP_FE(settype,															arginfo_settype)
 	PHP_FE(is_null,															arginfo_is_null)
 	PHP_FE(is_resource,														arginfo_is_resource)

@@ -37,6 +37,31 @@ PHP_FUNCTION(gettype)
 }
 /* }}} */
 
+/* {{{ proto string get_debug_type(mixed var)
+   Returns the type of the variable resolving class names */
+PHP_FUNCTION(get_debug_type)
+{
+	zval *arg;
+	zend_string *type;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (Z_TYPE_P(arg) == IS_OBJECT) {
+		RETURN_STR_COPY(Z_OBJ_P(arg)->ce->name);
+	}
+
+	type = zend_zval_get_type(arg);
+	if (EXPECTED(type)) {
+		RETURN_INTERNED_STR(type);
+	} else {
+		RETURN_STRING("unknown type");
+	}
+}
+/* }}} */
+
+
 /* {{{ proto bool settype(mixed &var, string type)
    Set the type of the variable */
 PHP_FUNCTION(settype)
