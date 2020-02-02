@@ -37,6 +37,52 @@ PHP_FUNCTION(gettype)
 }
 /* }}} */
 
+/* {{{ proto string get_debug_type(mixed var)
+   Returns the type of the variable resolving class names */
+PHP_FUNCTION(get_debug_type)
+{
+	zval *arg;
+	const char *name;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(arg)
+	ZEND_PARSE_PARAMETERS_END();
+
+	switch (Z_TYPE_P(arg)) {
+		case IS_NULL:
+			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_NULL_LOWERCASE));
+		case IS_FALSE:
+		case IS_TRUE:
+			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_BOOL));
+		case IS_LONG:
+			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_INT));
+		case IS_DOUBLE:
+			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_FLOAT));
+		case IS_STRING:
+			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_STRING));
+		case IS_ARRAY:
+			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_ARRAY));
+		case IS_OBJECT:
+			if (Z_OBJ_P(arg)->ce->ce_flags & ZEND_ACC_ANON_CLASS) {
+				name = ZSTR_VAL(Z_OBJ_P(arg)->ce->name);
+				RETURN_NEW_STR(zend_string_init(name, strlen(name), 0));
+			} else {
+				RETURN_STR_COPY(Z_OBJ_P(arg)->ce->name);
+			}
+		case IS_RESOURCE:
+			name = zend_rsrc_list_get_rsrc_type(Z_RES_P(arg));
+			if (name) {
+				RETURN_NEW_STR(zend_strpprintf(0, "resource (%s)", name));
+			} else {
+				RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_CLOSED_RESOURCE));
+			}
+		default:
+			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_UNKNOWN));
+	}
+}
+/* }}} */
+
+
 /* {{{ proto bool settype(mixed &var, string type)
    Set the type of the variable */
 PHP_FUNCTION(settype)

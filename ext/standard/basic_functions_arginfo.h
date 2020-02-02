@@ -2051,6 +2051,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gettype, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
 
+#define arginfo_get_debug_type arginfo_gettype
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_settype, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(1, var)
 	ZEND_ARG_TYPE_INFO(0, type, IS_STRING, 0)
@@ -2792,6 +2794,7 @@ ZEND_FUNCTION(stream_set_chunk_size);
 ZEND_FUNCTION(stream_set_timeout);
 #endif
 ZEND_FUNCTION(gettype);
+ZEND_FUNCTION(get_debug_type);
 ZEND_FUNCTION(settype);
 ZEND_FUNCTION(intval);
 ZEND_FUNCTION(floatval);
@@ -3436,6 +3439,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FALIAS(socket_set_timeout, stream_set_timeout, arginfo_socket_set_timeout)
 #endif
 	ZEND_FE(gettype, arginfo_gettype)
+	ZEND_FE(get_debug_type, arginfo_get_debug_type)
 	ZEND_FE(settype, arginfo_settype)
 	ZEND_FE(intval, arginfo_intval)
 	ZEND_FE(floatval, arginfo_floatval)
