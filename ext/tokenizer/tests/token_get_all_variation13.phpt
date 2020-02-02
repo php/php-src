@@ -35,7 +35,7 @@ abstract class MyClass
   protected var $c;
   static $d;
   final $e = 10;
-  
+
   abstract public function myFunction($a);
 }
 class ChildClass extends MyClass implements MyInterface
@@ -573,8 +573,8 @@ array(145) {
     [0]=>
     int(%d)
     [1]=>
-    string(6) "
-  
+    string(4) "
+
   "
     [2]=>
     int(12)

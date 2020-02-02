@@ -10,7 +10,7 @@ require_once('skipif.inc');
 $xml = <<< EOXML
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <courses>
-	<!-- Hello World! -->
+    <!-- Hello World! -->
 </courses>
 EOXML;
 
@@ -30,8 +30,8 @@ for ($index = 0; $index < $children->length; $index++) {
 bool(true)
 --- child 0 ---
 DOMText
-string(2) "
-	"
+string(5) "
+    "
 --- child 1 ---
 DOMComment
 string(14) " Hello World! "

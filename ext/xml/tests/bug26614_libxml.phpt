@@ -12,7 +12,7 @@ this test works fine with Expat but fails with libxml
 which we now use as default
 
 further investigation has shown that not only line count
-is skippet on CDATA sections but that libxml does also
+is skipped on CDATA sections but that libxml does also
 show different column numbers and byte positions depending
 on context and in opposition to what one would expect to
 see and what good old Expat reported just fine ...
@@ -25,7 +25,7 @@ $xmls["CDATA"] ='<?xml version="1.0" encoding="iso-8859-1" ?>
 <data>
 <![CDATA[
 multi
-line 
+line
 CDATA
 block
 ]]>
@@ -36,7 +36,7 @@ $xmls["Comment"] ='<?xml version="1.0" encoding="iso-8859-1" ?>
 <data>
 <!-- ATA[
 multi
-line 
+line
 CDATA
 block
 -->
@@ -47,7 +47,7 @@ $xmls["Text"] ='<?xml version="1.0" encoding="iso-8859-1" ?>
 <data>
 -!-- ATA[
 multi
-line 
+line
 CDATA
 block
 ---
@@ -84,10 +84,10 @@ foreach ($xmls as $desc => $xml) {
 --EXPECTF--
 CDATA
 <DATA> at line 2, col %d (byte 9)
-</DATA> at line 9, col %d (byte 56)
+</DATA> at line 9, col %d (byte 55)
 Comment
 <DATA> at line 2, col %d (byte 9)
-</DATA> at line 9, col %d (byte 56)
+</DATA> at line 9, col %d (byte 55)
 Text
 <DATA> at line 2, col %d (byte 9)
-</DATA> at line 9, col %d (byte 56)
+</DATA> at line 9, col %d (byte 55)

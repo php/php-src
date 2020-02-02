@@ -12,18 +12,18 @@ Simon Hughes <odbc3@hotmail.com>
 $xml = <<< EOXML
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <courses>
-	<course title="one">
-		<notes>
-			<note>c1n1</note>
-			<note>c1n2</note>
-		</notes>
-	</course>
-	<course title="two">
-		<notes>
-			<note>c2n1</note>
-			<note>c2n2</note>
-		</notes>
-	</course>
+    <course title="one">
+        <notes>
+            <note>c1n1</note>
+            <note>c1n2</note>
+        </notes>
+    </course>
+    <course title="two">
+        <notes>
+            <note>c2n1</note>
+            <note>c2n2</note>
+        </notes>
+    </course>
 </courses>
 EOXML;
 
@@ -75,31 +75,31 @@ for ($index = 0; $index < $children->length; $index++) {
 Start cloneNode test
 node 0
 Course: new title3:DOMElement
-~string(24) "
-		
-			c1n1
-			c1n2
-		
-	"
+~string(57) "
+        
+            c1n1
+            c1n2
+        
+    "
 node 1
 Course: two:DOMElement
-~string(24) "
-		
-			c2n1
-			c2n2
-		
-	"
+~string(57) "
+        
+            c2n1
+            c2n2
+        
+    "
 node 2
 Course: new title default:DOMElement
 ~string(0) ""
 node 3
 Course: new title true:DOMElement
-~string(24) "
-		
-			c1n1
-			c1n2
-		
-	"
+~string(57) "
+        
+            c1n1
+            c1n2
+        
+    "
 node 4
 Course: new title false:DOMElement
 ~string(0) ""
