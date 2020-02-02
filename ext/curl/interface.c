@@ -2139,9 +2139,7 @@ static int seek_cb(void *arg, curl_off_t offset, int origin) /* {{{ */
 	ZEND_ASSERT(!cb_arg->ch);
 
 	if (cb_arg->stream == NULL) {
-		if (!(cb_arg->stream = php_stream_open_wrapper(ZSTR_VAL(cb_arg->filename), "rb", IGNORE_PATH, NULL))) {
-			return CURL_SEEKFUNC_CANTSEEK;
-		}
+		return CURL_SEEKFUNC_CANTSEEK;
 	}
 	res = php_stream_seek(cb_arg->stream, offset, origin);
 	return res == SUCCESS ? CURL_SEEKFUNC_OK : CURL_SEEKFUNC_CANTSEEK;
