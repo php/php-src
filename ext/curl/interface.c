@@ -1809,7 +1809,7 @@ static void curl_free_cb_arg(void **cb_arg_p)
 	struct mime_data_cb_arg *cb_arg = (struct mime_data_cb_arg *) *cb_arg_p;
 
 	if (cb_arg->ch) {
-		Z_DELREF(cb_arg->postfields);
+		zval_ptr_dtor(&cb_arg->postfields);
 	} else {
 		ZEND_ASSERT(cb_arg->stream == NULL);
 		zend_string_release(cb_arg->filename);
