@@ -23,10 +23,17 @@ PHP_FUNCTION(gettype)
 {
 	zval *arg;
 	zend_string *type;
+	zend_bool resolve_object_names = 0;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ZVAL(arg)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(resolve_object_names)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (resolve_object_names && Z_TYPE_P(arg) == IS_OBJECT) {
+		RETURN_STR_COPY(Z_OBJ_P(arg)->ce->name);
+	}
 
 	type = zend_zval_get_type(arg);
 	if (EXPECTED(type)) {
