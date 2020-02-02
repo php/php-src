@@ -9,6 +9,10 @@ if (!extension_loaded('gmp')) die('skip gmp extension not available');
 <?php
 $fmt = new NumberFormatter('en_US', NumberFormatter::PATTERN_DECIMAL);
 var_dump($fmt->format(gmp_init('823749273428379492374')));
+
+$fmt = new NumberFormatter('en_US', NumberFormatter::PATTERN_DECIMAL);
+var_dump($fmt->format([1], NumberFormatter::TYPE_INT64));
 ?>
 --EXPECT--
 string(21) "823749273428379400000"
+string(1) "1"
