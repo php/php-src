@@ -17,6 +17,10 @@ PHP                                                                        NEWS
  -Intl:
   . Fixed bug #79212 (NumberFormatter::format() may detect wrong type). (cmb)
 
+- Libxml:
+  . Fixed bug #79191 (Error in SoapClient ctor disables DOMDocument::save()).
+    (Nikita, cmb)
+
 - MBString:
   . Fixed bug #79154 (mb_convert_encoding() can modify $from_encoding). (cmb)
 
