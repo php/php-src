@@ -23,7 +23,7 @@ $otherVals = array(0, 1, -1, 7, 9, 65, -44, MAX_32Bit, MIN_32Bit, MAX_64Bit, MIN
 
 foreach ($longVals as $longVal) {
    foreach($otherVals as $otherVal) {
-	   echo "--- testing: $longVal, $otherVal ---\n";
+       echo "--- testing: $longVal, $otherVal ---\n";
       var_dump(pow($longVal, $otherVal));
    }
 }

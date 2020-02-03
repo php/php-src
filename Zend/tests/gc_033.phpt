@@ -18,9 +18,9 @@ unset($a);
 
 /* let's full the gc roots */
 for ($i=0; $i<9999; $i++) {
-	    $b = range(0, 1);
-		    $b[0] = &$b;
-		    unset($b);
+        $b = range(0, 1);
+            $b[0] = &$b;
+            unset($b);
 }
 
 /* then $a will be freed, but $a->a[0] is not. reference to a freed $a */

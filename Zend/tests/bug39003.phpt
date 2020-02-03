@@ -5,7 +5,7 @@ Bug #39003 (autoloader is called for type hinting)
 
 class ClassName
 {
-	public $var = 'bla';
+    public $var = 'bla';
 }
 
 function test (OtherClassName $object) { }

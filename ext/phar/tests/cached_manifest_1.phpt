@@ -15,7 +15,7 @@ while (false !== ($b = readdir($a))) {
 var_dump($b);
 }
 foreach (new RecursiveIteratorIterator(new Phar($pname)) as $f) {
-	var_dump($f->getPathName());
+    var_dump($f->getPathName());
 }
 var_dump(is_dir($pname . '/b'));
 var_dump(is_dir($pname . '/d'));

@@ -6,10 +6,10 @@ require "ns_027.inc";
 
 class Foo {
   function __construct() {
-  	echo __CLASS__,"\n";
+    echo __CLASS__,"\n";
   }
   static function Bar() {
-  	echo __CLASS__,"\n";
+    echo __CLASS__,"\n";
   }
 }
 

@@ -35,13 +35,13 @@ $options = array ('1', true,
 $iterator = 1;
 imap_check($stream_id);
 foreach($options as $option) {
-	echo "\n-- Iteration $iterator --\n";
-	if(is_string(imap_fetchbody($stream_id, $msg_uid, $section, $option))) {
-		echo "FT_UID valid\n";
-	} else {
+    echo "\n-- Iteration $iterator --\n";
+    if(is_string(imap_fetchbody($stream_id, $msg_uid, $section, $option))) {
+        echo "FT_UID valid\n";
+    } else {
                 echo "FT_UID not valid\n";
         }
-	$iterator++;
+    $iterator++;
 }
 
 ?>

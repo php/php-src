@@ -4,8 +4,8 @@ Bug #79155: Property nullability lost when using multiple property definition
 <?php
 
 class Foo {
-	public ?string $a, $b;
-	public ?stdClass $c, $d;
+    public ?string $a, $b;
+    public ?stdClass $c, $d;
 }
 
 $t = new Foo;

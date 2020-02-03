@@ -14,8 +14,8 @@ class DateTimeZoneExt1 extends DateTimeZone {
 }
 
 class DateTimeZoneExt2 extends DateTimeZone{
-	public $foo = "Hello";
-	private $bar = 99;
+    public $foo = "Hello";
+    private $bar = 99;
 }
 
 class DateTimeZoneExt3 extends DateTimeZoneExt2 {

@@ -3,7 +3,7 @@ Test typed properties disallow incorrect type initial value (scalar)
 --FILE--
 <?php
 class Foo {
-	public int $bar = "string";
+    public int $bar = "string";
 }
 ?>
 --EXPECTF--

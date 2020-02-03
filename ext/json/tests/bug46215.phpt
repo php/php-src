@@ -6,7 +6,7 @@ Bug #46215 (json_encode mutates its parameter and has some class-specific state)
 <?php
 
 class foo {
-	protected $a = array();
+    protected $a = array();
 }
 
 $a = new foo;

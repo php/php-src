@@ -22,9 +22,9 @@ $fnw = __DIR__ . DIRECTORY_SEPARATOR . "š.txt"; // UTF-8
 
 $f = fopen($fnw, 'w');
 if ($f) {
-	var_dump($f, fwrite($f, "writing to an mb filename"));
+    var_dump($f, fwrite($f, "writing to an mb filename"));
 } else {
-	echo "open utf8 failed\n";
+    echo "open utf8 failed\n";
 }
 var_dump(fclose($f));
 

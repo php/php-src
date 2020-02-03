@@ -4,19 +4,19 @@ Closure 007: Nested lambdas in classes
 <?php
 
 class A {
-	private $x = 0;
+    private $x = 0;
 
-	function getClosureGetter () {
-		return function () {
-			return function () {
-				$this->x++;
-			};
-		};
-	}
+    function getClosureGetter () {
+        return function () {
+            return function () {
+                $this->x++;
+            };
+        };
+    }
 
-	function printX () {
-		echo $this->x."\n";
-	}
+    function printX () {
+        echo $this->x."\n";
+    }
 }
 
 $a = new A;

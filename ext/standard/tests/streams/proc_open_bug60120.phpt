@@ -32,14 +32,14 @@ $process = proc_open(
     getcwd(),
     [],
     [
-        'suppress_errors' => true, 
+        'suppress_errors' => true,
         'bypass_shell' => false
     ]
 );
 
 if (!is_resource($process)) {
     die(sprintf(
-        "could not open process \"%s\"", 
+        "could not open process \"%s\"",
         $command));
 }
 

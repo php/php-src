@@ -11,10 +11,10 @@ opcache.preload=
 --FILE--
 <?php
 function foo() {
-	$a = 1;
-	$b = $a + 2;
-	$a += $b;
-	return $a;
+    $a = 1;
+    $b = $a + 2;
+    $a += $b;
+    return $a;
 }
 ?>
 --EXPECTF--

@@ -7,10 +7,10 @@ DBA QDBM handler test
 ?>
 --FILE--
 <?php
-	$handler = 'qdbm';
-	require_once __DIR__ .'/test.inc';
-	$lock_flag = ''; // lock in library
-	require_once __DIR__ .'/dba_handler.inc';
+    $handler = 'qdbm';
+    require_once __DIR__ .'/test.inc';
+    $lock_flag = ''; // lock in library
+    require_once __DIR__ .'/dba_handler.inc';
 ?>
 --CLEAN--
 <?php

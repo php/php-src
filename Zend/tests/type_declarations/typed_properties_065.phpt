@@ -4,12 +4,12 @@ Typed property on by-ref array dimension
 <?php
 
 $a = new class implements ArrayAccess {
-	public int $foo = 1;
+    public int $foo = 1;
 
-	function offsetExists($o) { return 1; }
-	function &offsetGet($o) { return $this->foo; }
-	function offsetSet($o, $v) { print "offsetSet($v)\n"; }
-	function offsetUnset($o) { print "offsetUnset() ?!?"; }
+    function offsetExists($o) { return 1; }
+    function &offsetGet($o) { return $this->foo; }
+    function offsetSet($o, $v) { print "offsetSet($v)\n"; }
+    function offsetUnset($o) { print "offsetUnset() ?!?"; }
 };
 
 $a[0] += 1;
@@ -35,19 +35,19 @@ try {
 echo gettype($a->foo),"\n";
 
 try {
-	--$a[0];
+    --$a[0];
 } catch (Error $e) { echo $e->getMessage(), "\n"; }
 echo gettype($a->foo),"\n";
 
 $a->foo = PHP_INT_MAX;
 
 try {
-	$a[0]++;
+    $a[0]++;
 } catch (Error $e) { echo $e->getMessage(), "\n"; }
 echo gettype($a->foo),"\n";
 
 try {
-	++$a[0];
+    ++$a[0];
 } catch (Error $e) { echo $e->getMessage(), "\n"; }
 echo gettype($a->foo),"\n";
 

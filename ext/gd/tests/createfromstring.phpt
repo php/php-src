@@ -18,9 +18,9 @@ $im_string = file_get_contents(__DIR__ . '/tc.png');
 $im = imagecreatefromstring($im_string);
 echo 'createfromstring truecolor png: ';
 if (imagecolorat($im, 3,3) != 0x0) {
-	echo 'failed';
+    echo 'failed';
 } else {
-	echo 'ok';
+    echo 'ok';
 }
 echo "\n";
 unlink($dir . '/tc.png');
@@ -42,9 +42,9 @@ echo'createfromstring palette png: ';
 $c = imagecolorsforindex($im, imagecolorat($im, 3,3));
 $failed = false;
 if ($c['red'] != 255 || $c['green'] != 0 || $c['blue'] != 0) {
-	echo 'failed';
+    echo 'failed';
 } else {
-	echo 'ok';
+    echo 'ok';
 }
 echo "\n";
 unlink($dir . '/p.png');

@@ -12,8 +12,8 @@ class DateTimeExt1 extends DateTime {
 }
 
 class DateTimeExt2 extends DateTime{
-	public $foo = "Hello";
-	private $bar = 99;
+    public $foo = "Hello";
+    private $bar = 99;
 }
 
 class DateTimeExt3 extends DateTimeExt2 {

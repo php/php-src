@@ -6,10 +6,10 @@ error_reporting=0
 <?php
 class foo
 {
-	function __toString()
-	{
-		return "Object";
-	}
+    function __toString()
+    {
+        return "Object";
+    }
 }
 
 

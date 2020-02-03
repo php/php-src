@@ -39,16 +39,16 @@ class myIterator implements Iterator
     }
 }
 try {
-	chdir(__DIR__);
-	$phar = new Phar($fname);
-	$ret = $phar->buildFromIterator(new myIterator);
-	foreach ($ret as $a => $val) {
-		$ret[$a] = str_replace(dirname($fname2) . DIRECTORY_SEPARATOR, '*', $val);
-	}
-	var_dump($ret);
+    chdir(__DIR__);
+    $phar = new Phar($fname);
+    $ret = $phar->buildFromIterator(new myIterator);
+    foreach ($ret as $a => $val) {
+        $ret[$a] = str_replace(dirname($fname2) . DIRECTORY_SEPARATOR, '*', $val);
+    }
+    var_dump($ret);
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
 ?>
 --CLEAN--

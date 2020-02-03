@@ -84,9 +84,9 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of dechex()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(dechex($input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(dechex($input));
+    $iterator++;
 };
 fclose($fp);
 ?>

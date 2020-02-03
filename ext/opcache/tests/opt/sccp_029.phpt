@@ -10,7 +10,7 @@ opcache.preload=
 --FILE--
 <?php
 
-class Test { 
+class Test {
     public string $x = "x";
 }
 function test() {

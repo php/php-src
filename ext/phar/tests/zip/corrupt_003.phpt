@@ -5,9 +5,9 @@ Phar: corrupted zip (truncated file comment)
 --FILE--
 <?php
 try {
-	new PharData(__DIR__ . '/files/filecomment.zip');
+    new PharData(__DIR__ . '/files/filecomment.zip');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
 --EXPECTF--

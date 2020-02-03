@@ -10,9 +10,9 @@ opcache.optimization_level=-1
 <?php
 function test()
 {
-	$success = true;
-	$success = $success AND true;
-	return $success;
+    $success = true;
+    $success = $success AND true;
+    return $success;
 }
 
 var_dump(test());

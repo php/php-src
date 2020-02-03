@@ -12,7 +12,7 @@ if((substr(PHP_OS, 0, 3) == "WIN"))
 */
 for ($i=0 ; $i<5 ; $i++) {
     try {
-	    var_dump(dirname("/foo/bar/baz", $i));
+        var_dump(dirname("/foo/bar/baz", $i));
     } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }

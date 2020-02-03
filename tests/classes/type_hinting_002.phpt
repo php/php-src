@@ -4,7 +4,7 @@ ZE2 class type hinting non existing class
 <?php
 
 class Foo {
-	function a(NonExisting $foo) {}
+    function a(NonExisting $foo) {}
 }
 
 $o = new Foo;

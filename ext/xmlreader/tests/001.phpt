@@ -13,7 +13,7 @@ $reader->XML($xmlstring);
 
 // Only go through
 while ($reader->read()) {
-	echo $reader->name."\n";
+    echo $reader->name."\n";
 }
 $xmlstring = '';
 $reader = new XMLReader();

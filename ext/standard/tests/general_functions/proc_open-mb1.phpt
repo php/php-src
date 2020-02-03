@@ -13,21 +13,21 @@ $f = __DIR__ . DIRECTORY_SEPARATOR . "proc_only_mb1.php";
 file_put_contents($f,'<?php var_dump($argv); ?>');
 
 $ds = array(
-		0 => array("pipe", "r"),
-		1 => array("pipe", "w"),
-		2 => array("pipe", "w")
-		);
+        0 => array("pipe", "r"),
+        1 => array("pipe", "w"),
+        2 => array("pipe", "w")
+        );
 
 $p = proc_open(
-		"$php -n $f テストマルチバイト・パス füße карамба",
-		$ds,
-		$pipes
-		);
+        "$php -n $f テストマルチバイト・パス füße карамба",
+        $ds,
+        $pipes
+        );
 
 $out = "";
 
 while (!feof($pipes[1])) {
-	$out .= fread($pipes[1], 1024);
+    $out .= fread($pipes[1], 1024);
 }
 
 proc_close($p);

@@ -18,7 +18,7 @@ $fakezval .= "\x00";
 $fakezval .= "\x00\x00";
 
 for ($i = 0; $i < 5; $i++) {
-	$v[$i] = $fakezval.$i;
+    $v[$i] = $fakezval.$i;
 }
 
 var_dump($data);
@@ -26,11 +26,11 @@ var_dump($data);
 function ptr2str($ptr)
 {
 $out = '';
-	for ($i = 0; $i < 8; $i++) {
-		$out .= chr($ptr & 0xff);
-		$ptr >>= 8;
-	}
-	return $out;
+    for ($i = 0; $i < 8; $i++) {
+        $out .= chr($ptr & 0xff);
+        $ptr >>= 8;
+    }
+    return $out;
 }
 ?>
 --EXPECTF--

@@ -18,7 +18,7 @@ $browsers = include __DIR__ . DIRECTORY_SEPARATOR . 'browsernames.inc';
 echo "*** Testing get_browser() : basic functionality ***\n";
 
 for( $x = 0; $x < 20; $x++) {
-	var_dump( get_browser( $browsers[$x], true ) );
+    var_dump( get_browser( $browsers[$x], true ) );
 }
 
 ?>

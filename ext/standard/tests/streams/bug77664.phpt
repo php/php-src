@@ -3,8 +3,8 @@ BUG #77664 (Segmentation fault when using undefined constant in custom wrapper)
 --FILE--
 <?php
 class ErrorWrapper {
-	public $context;
-	public $var = self::INVALID;
+    public $context;
+    public $var = self::INVALID;
 }
 stream_wrapper_register('error',ErrorWrapper::class);
 file_get_contents('error://test');

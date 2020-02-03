@@ -18,14 +18,14 @@ $fp = gzopen($filename, "rb");
 
 $data = '';
 while ($buf = gzread($fp, 8092)) {
-	$data .= $buf;
+    $data .= $buf;
 }
 
 if ($data == $original) {
-	echo "Strings are equal\n";
+    echo "Strings are equal\n";
 } else {
-	echo "Strings are not equal\n";
-	var_dump($data);
+    echo "Strings are not equal\n";
+    var_dump($data);
 }
 gzclose($fp);
 unlink($filename);

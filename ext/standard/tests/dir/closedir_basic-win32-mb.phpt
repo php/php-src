@@ -34,7 +34,7 @@ echo "\n-- Call closedir() with \$dir_handle argument supplied: --\n";
 $dh2 = opendir($dir_path);
 
 if ((int)$dh1 === (int)$dh2) {
-	echo "\nNo new resource created\n";
+    echo "\nNo new resource created\n";
 }
 var_dump(closedir($dh2));
 echo "-- Check Directory Handle: --\n";

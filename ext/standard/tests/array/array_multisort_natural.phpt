@@ -11,19 +11,19 @@ Test array_multisort() function : natural sorting
 echo "*** Testing array_multisort() : natural sorting\n";
 
 $a = array(
-	'Second',
-	'First',
-	'Twentieth',
-	'Tenth',
-	'Third',
+    'Second',
+    'First',
+    'Twentieth',
+    'Tenth',
+    'Third',
 );
 
 $b = array(
-	'2 a',
-	'1 b',
-	'20 c',
-	'10 d',
-	'3 e',
+    '2 a',
+    '1 b',
+    '20 c',
+    '10 d',
+    '3 e',
 );
 
 array_multisort($b, SORT_NATURAL, $a);

@@ -4,29 +4,29 @@ Reflection and inheriting static properties
 <?php
 
 class base {
-	static protected $prop = 2;
+    static protected $prop = 2;
 
-	static function show() {
-		echo __METHOD__ . '(' . self::$prop . ")\n";
-	}
+    static function show() {
+        echo __METHOD__ . '(' . self::$prop . ")\n";
+    }
 
-	static function inc() {
-		base::$prop++;
-		echo __METHOD__ . "()\n";
-	}
+    static function inc() {
+        base::$prop++;
+        echo __METHOD__ . "()\n";
+    }
 }
 
 class derived extends base {
-	static public $prop = 2;
+    static public $prop = 2;
 
-	static function show() {
-		echo __METHOD__ . '(' . self::$prop . ")\n";
-	}
+    static function show() {
+        echo __METHOD__ . '(' . self::$prop . ")\n";
+    }
 
-	static function inc() {
-		derived::$prop++;
-		echo __METHOD__ . "()\n";
-	}
+    static function inc() {
+        derived::$prop++;
+        echo __METHOD__ . "()\n";
+    }
 }
 
 base::show();

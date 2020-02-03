@@ -37,8 +37,8 @@ foreach($strings as $string) {
   $decode = convert_uudecode($encode);
 
   if ($decode != $string) {
-  	var_dump($encode, $decode, $string);
-  	exit("TEST FAILED on iteration $count\n");
+    var_dump($encode, $decode, $string);
+    exit("TEST FAILED on iteration $count\n");
   }
 
   $count ++;

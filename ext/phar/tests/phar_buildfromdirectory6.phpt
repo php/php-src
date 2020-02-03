@@ -14,11 +14,11 @@ foreach(range(1, 4) as $i) {
 }
 
 try {
-	$phar = new Phar(__DIR__ . '/buildfromdirectory6.phar');
-	var_dump($phar->buildFromDirectory(__DIR__ . '/testdir6', '/\.php$/'));
+    $phar = new Phar(__DIR__ . '/buildfromdirectory6.phar');
+    var_dump($phar->buildFromDirectory(__DIR__ . '/testdir6', '/\.php$/'));
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
 
 var_dump(file_exists(__DIR__ . '/buildfromdirectory6.phar'));

@@ -8,8 +8,8 @@ ZE2 Autoload from destructor
 <?php
 
 spl_autoload_register(function ($class_name) {
-	require_once(__DIR__ . '/' . strtolower($class_name) . '.inc');
-	echo 'autoload(' . $class_name . ")\n";
+    require_once(__DIR__ . '/' . strtolower($class_name) . '.inc');
+    echo 'autoload(' . $class_name . ")\n";
 });
 
 var_dump(interface_exists('autoload_interface', false));

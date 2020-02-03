@@ -4,15 +4,15 @@ Closure 036: Rebinding closures, keep calling scope
 <?php
 
 class A {
-	private $x;
+    private $x;
 
-	public function __construct($v) {
-		$this->x = $v;
-	}
+    public function __construct($v) {
+        $this->x = $v;
+    }
 
-	public function getIncrementor() {
-		return function() { return ++$this->x; };
-	}
+    public function getIncrementor() {
+        return function() { return ++$this->x; };
+    }
 }
 
 $a = new A(0);

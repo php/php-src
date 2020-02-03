@@ -28,22 +28,22 @@ EOT;
 $str_array = array(
                     // string with newline character
                     "\n",
-		    "\\n",
+            "\\n",
                     "Hello \nworld",
                     "Hello \\nworld",
                     '\n',
-		    '\\n',
+            '\\n',
                     'Hello \nworld',
                     'Hello \\nworld',
                     $heredoc_string_with_newline,
 
                     // string with tab character
- 		    "\t",
-		    "\\t",
+            "\t",
+            "\\t",
                     "Hello \tworld",
                     "Hello \\tworld",
- 		    '\t',
-		    '\\t',
+            '\t',
+            '\\t',
                     'Hello \tworld',
                     'Hello \\tworld',
                     $heredoc_string_with_tab

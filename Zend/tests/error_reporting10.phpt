@@ -7,13 +7,13 @@ error_reporting(E_ALL);
 
 function make_exception()
 {
-	@$blah;
-	error_reporting(0);
-	throw new Exception();
+    @$blah;
+    error_reporting(0);
+    throw new Exception();
 }
 
 try {
-	@make_exception();
+    @make_exception();
 } catch (Exception $e) {}
 
 var_dump(error_reporting());
@@ -21,7 +21,7 @@ var_dump(error_reporting());
 error_reporting(E_ALL&~E_NOTICE);
 
 try {
-	@make_exception();
+    @make_exception();
 } catch (Exception $e) {}
 
 var_dump(error_reporting());

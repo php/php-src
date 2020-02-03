@@ -10,28 +10,28 @@ include 'config.inc';
 $conn = odbc_connect($dsn, $user, $pass);
 
 $sqlCommandList = array(
-	"/* empty batch is without error */",
-	"/* non existent procedure xy */ execute xy",
-	"/* empty batch,error message is not empty */",
-	"/* valid select with result */ select * from sys.sysobjects",
-	"/* another erroneous query */ SELECT * FROM zwiebelfleisch",
-	"/* valid select with result */ select * from sys.sysobjects",
+    "/* empty batch is without error */",
+    "/* non existent procedure xy */ execute xy",
+    "/* empty batch,error message is not empty */",
+    "/* valid select with result */ select * from sys.sysobjects",
+    "/* another erroneous query */ SELECT * FROM zwiebelfleisch",
+    "/* valid select with result */ select * from sys.sysobjects",
 );
 
 foreach ($sqlCommandList as $exampleNumber => $sql) {
-	$r = @odbc_exec($conn, $sql);
+    $r = @odbc_exec($conn, $sql);
 
-	if (false === $r) {
-		$e = odbc_errormsg($conn);
-		$n = odbc_error($conn);
+    if (false === $r) {
+        $e = odbc_errormsg($conn);
+        $n = odbc_error($conn);
 
-		var_dump($sql, $n, $e);
-		echo "\n";
-	}
+        var_dump($sql, $n, $e);
+        echo "\n";
+    }
 
-	if ($r) {
-		odbc_free_result($r);
-	}
+    if ($r) {
+        odbc_free_result($r);
+    }
 
 }
 

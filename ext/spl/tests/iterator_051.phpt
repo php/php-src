@@ -5,14 +5,14 @@ SPL: RegexIterator::GET_MATCH, USE_KEY
 
 class MyRegexIterator extends RegexIterator
 {
-	function show()
-	{
-		foreach($this as $k => $v)
-		{
-			var_dump($k);
-			var_dump($v);
-		}
-	}
+    function show()
+    {
+        foreach($this as $k => $v)
+        {
+            var_dump($k);
+            var_dump($v);
+        }
+    }
 }
 
 $ar = new ArrayIterator(array('1'=>0,'1,2'=>1,'1,2,3'=>2,0=>3,'FooBar'=>4,','=>5,',,'=>6));

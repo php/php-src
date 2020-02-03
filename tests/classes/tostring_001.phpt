@@ -11,7 +11,7 @@ class test2
 {
     function __toString()
     {
-    	echo __METHOD__ . "()\n";
+        echo __METHOD__ . "()\n";
         return "Converted\n";
     }
 }
@@ -20,7 +20,7 @@ class test3
 {
     function __toString()
     {
-    	echo __METHOD__ . "()\n";
+        echo __METHOD__ . "()\n";
         return 42;
     }
 }

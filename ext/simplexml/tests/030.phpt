@@ -5,7 +5,7 @@ SimpleXML: isset and unset by offset
 --FILE--
 <?php
 $xml =<<<EOF
-<root s:att1="b" att1="a" 
+<root s:att1="b" att1="a"
       xmlns:s="urn::test" xmlns:t="urn::test-t">
    <child1>test</child1>
    <child1>test 2</child1>

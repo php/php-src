@@ -44,20 +44,20 @@ $permission_values = array(
 
 $iterator = 1;
 foreach ($permission_values as $perm) {
-	echo "\n-- Iteration $iterator --\n";
+    echo "\n-- Iteration $iterator --\n";
 
-	// Remove the directory if already exists
-	if (is_dir($dir_path)){
-		chmod ($dir_path, 0777); // change dir permission to allow all operation
-		rmdir ($dir_path);
-	}
-	mkdir($dir_path);
+    // Remove the directory if already exists
+    if (is_dir($dir_path)){
+        chmod ($dir_path, 0777); // change dir permission to allow all operation
+        rmdir ($dir_path);
+    }
+    mkdir($dir_path);
 
-	// change the dir permission to test dir on it
-	var_dump( chmod($dir_path, $perm) );
+    // change the dir permission to test dir on it
+    var_dump( chmod($dir_path, $perm) );
 
-	var_dump(scandir($dir_path));
-	$iterator++;
+    var_dump(scandir($dir_path));
+    $iterator++;
 }
 ?>
 --CLEAN--

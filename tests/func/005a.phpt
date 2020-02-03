@@ -13,7 +13,7 @@ echo "Start\n";
 
 function boo()
 {
-	echo "Shutdown\n";
+    echo "Shutdown\n";
 }
 
 register_shutdown_function("boo");

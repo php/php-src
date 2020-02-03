@@ -5,7 +5,7 @@ Hash: Attempt to reuse a closed hash context
 
 $h = hash_init('md5');
 hash_final($h);
-try { 
+try {
     hash_update($h, 'foo');
 }
 catch (\Error $e) {

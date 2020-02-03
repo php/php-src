@@ -4,8 +4,8 @@ Testing __toString() declaration with wrong modifier
 <?php
 
 class a {
-	static protected function __toString($a, $b) {
-	}
+    static protected function __toString($a, $b) {
+    }
 }
 
 ?>

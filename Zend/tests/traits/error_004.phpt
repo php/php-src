@@ -7,7 +7,7 @@ class abc {
 }
 
 class A {
-	use abc;
+    use abc;
 }
 
 ?>

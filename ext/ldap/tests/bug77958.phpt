@@ -13,23 +13,23 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 
 $mods = array(
-	array(
-		"attrib"	=> "telephoneNumber",
-		"modtype"	=> LDAP_MODIFY_BATCH_ADD,
-		"values"	=> array(
-			123456
-		)
-	),
-	array(
-		"attrib"	=> "description",
-		"modtype"	=> LDAP_MODIFY_BATCH_REMOVE_ALL
-	)
+    array(
+        "attrib"	=> "telephoneNumber",
+        "modtype"	=> LDAP_MODIFY_BATCH_ADD,
+        "values"	=> array(
+            123456
+        )
+    ),
+    array(
+        "attrib"	=> "description",
+        "modtype"	=> LDAP_MODIFY_BATCH_REMOVE_ALL
+    )
 );
 
 var_dump(
-	ldap_modify_batch($link, "cn=userA,$base", $mods),
-	$entry = ldap_first_entry($link, ldap_read($link, "cn=userA,$base", "(telephoneNumber=*)")),
-	ldap_get_values($link, $entry, "telephoneNumber")
+    ldap_modify_batch($link, "cn=userA,$base", $mods),
+    $entry = ldap_first_entry($link, ldap_read($link, "cn=userA,$base", "(telephoneNumber=*)")),
+    ldap_get_values($link, $entry, "telephoneNumber")
 );
 ?>
 --CLEAN--

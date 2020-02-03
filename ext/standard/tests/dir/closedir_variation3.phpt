@@ -27,7 +27,7 @@ echo "\n-- Check file pointer: --\n";
 var_dump($fp);
 
 if(is_resource($fp)) {
-	fclose($fp);
+    fclose($fp);
 }
 ?>
 --EXPECTF--

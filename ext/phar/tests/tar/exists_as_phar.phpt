@@ -21,9 +21,9 @@ copy($fname, $tname);
 $phar->setAlias('hio2');
 
 try {
-	$p = new Phar($tname);
+    $p = new Phar($tname);
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 ?>

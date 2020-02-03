@@ -6,20 +6,20 @@ mb_ereg() and invalid arguments
 <?php
 
 $a = array(
-	array(1,2,3),
-	array("", "", ""),
-	array(array(), 1, ""),
-	array(1, array(), ""),
-	array(1, "", array()),
-	);
+    array(1,2,3),
+    array("", "", ""),
+    array(array(), 1, ""),
+    array(1, array(), ""),
+    array(1, "", array()),
+    );
 
 foreach ($a as $args) {
-	try {
-		var_dump(mb_ereg($args[0], $args[1], $args[2]));
-	} catch (TypeError $e) {
-		echo $e->getMessage(), "\n";
-	}
-	var_dump($args);
+    try {
+        var_dump(mb_ereg($args[0], $args[1], $args[2]));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    var_dump($args);
 }
 ?>
 --EXPECTF--

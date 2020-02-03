@@ -8,10 +8,10 @@ ocilogon()
 require __DIR__."/connect.inc";
 
 if (!empty($dbase)) {
-	var_dump(ocilogon($user, $password, $dbase));
+    var_dump(ocilogon($user, $password, $dbase));
 }
 else {
-	var_dump(ocilogon($user, $password));
+    var_dump(ocilogon($user, $password));
 }
 
 echo "Done\n";

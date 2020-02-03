@@ -11,20 +11,20 @@ function refs(&$ref1, &$ref2) {
 
 class C {
 
-	function __construct(&$ref1, &$ref2) {
-	  $ref1 = "Ref1 changed";
-	  $ref2 = "Ref2 changed";
-	}
+    function __construct(&$ref1, &$ref2) {
+      $ref1 = "Ref1 changed";
+      $ref2 = "Ref2 changed";
+    }
 
-	function refs(&$ref1, &$ref2) {
-	  $ref1 = "Ref1 changed";
-	  $ref2 = "Ref2 changed";
-	}
+    function refs(&$ref1, &$ref2) {
+      $ref1 = "Ref1 changed";
+      $ref2 = "Ref2 changed";
+    }
 
-	static function static_refs(&$ref1, &$ref2) {
-	  $ref1 = "Ref1 changed";
-	  $ref2 = "Ref2 changed";
-	}
+    static function static_refs(&$ref1, &$ref2) {
+      $ref1 = "Ref1 changed";
+      $ref2 = "Ref2 changed";
+    }
 
 }
 

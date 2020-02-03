@@ -22,7 +22,7 @@ $options = CL_EXPUNGE;
 
 // mark messages in inbox for deletion
 for ($i = 1; $i < 4; $i++) {
-	imap_delete($stream_id, $i);
+    imap_delete($stream_id, $i);
 }
 
 // Calling imap_close() with all possible arguments

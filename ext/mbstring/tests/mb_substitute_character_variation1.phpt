@@ -17,10 +17,10 @@ echo "*** Testing mb_substitute_character() : usage variation ***\n";
 
 // Define error handler
 function test_error_handler($err_no, $err_msg, $filename, $linenum) {
-	if (error_reporting() & $err_no) {
-		// report non-silenced errors
-		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
-	}
+    if (error_reporting() & $err_no) {
+        // report non-silenced errors
+        echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+    }
 }
 set_error_handler('test_error_handler');
 
@@ -33,9 +33,9 @@ unset ($unset_var);
 // define some classes
 class classWithToString
 {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString

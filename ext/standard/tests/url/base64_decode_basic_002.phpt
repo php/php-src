@@ -16,7 +16,7 @@ var_dump(base64_decode($noWhiteSpace, true));
 
 echo "\nWhitespace does not affect base64_decode, even with \$strict===true:\n";
 $withWhiteSpace = "a GVs   bG8gd2
-		 				9ybGQh";
+                        9ybGQh";
 var_dump(base64_decode($withWhiteSpace));
 var_dump(base64_decode($withWhiteSpace, false));
 var_dump(base64_decode($withWhiteSpace, true));

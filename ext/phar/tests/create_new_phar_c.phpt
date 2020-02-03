@@ -9,7 +9,7 @@ phar.require_hash=1
 <?php
 
 file_put_contents('phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php/a.php',
-	'brand new!');
+    'brand new!');
 
 $phar = new Phar(__DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php');
 

@@ -4,7 +4,7 @@ Testing __callstatic declaration in interface with missing the 'static' modifier
 <?php
 
 interface a {
-	function __callstatic($a, $b);
+    function __callstatic($a, $b);
 }
 
 ?>

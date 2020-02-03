@@ -17,7 +17,7 @@ date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
 $inputs = array(
-	  'A literal % character' => "%%",
+      'A literal % character' => "%%",
 );
 
 // loop through each element of the array for timestamp

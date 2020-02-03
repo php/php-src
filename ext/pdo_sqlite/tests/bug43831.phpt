@@ -6,23 +6,23 @@ Bug #43831 ($this gets mangled when extending PDO with persistent connection)
 <?php
 
 class Foo extends PDO {
-	function __construct($dsn) {
-		parent::__construct($dsn, null, null, array(PDO::ATTR_PERSISTENT => true));
-	}
+    function __construct($dsn) {
+        parent::__construct($dsn, null, null, array(PDO::ATTR_PERSISTENT => true));
+    }
 }
 
 class Baz extends PDO {
-	function __construct($dsn) {
-		parent::__construct($dsn, null, null, array(PDO::ATTR_PERSISTENT => true));
-	}
+    function __construct($dsn) {
+        parent::__construct($dsn, null, null, array(PDO::ATTR_PERSISTENT => true));
+    }
 }
 
 class Bar extends Baz {
-	function quux() {
-		echo get_class($this), "\n";
-		$foo = new Foo("sqlite::memory:");
-		echo get_class($this), "\n";
-	}
+    function quux() {
+        echo get_class($this), "\n";
+        $foo = new Foo("sqlite::memory:");
+        echo get_class($this), "\n";
+    }
 }
 
 $bar = new Bar("sqlite::memory:");

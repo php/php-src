@@ -4,16 +4,16 @@ Bug #24658 (combo of typehint / reference causes crash)
 <?php
 class foo {}
 function no_typehint($a) {
-	var_dump($a);
+    var_dump($a);
 }
 function typehint(foo $a) {
-	var_dump($a);
+    var_dump($a);
 }
 function no_typehint_ref(&$a) {
-	var_dump($a);
+    var_dump($a);
 }
 function typehint_ref(foo &$a) {
-	var_dump($a);
+    var_dump($a);
 }
 $v = new foo();
 $a = array(new foo(), 1, 2);

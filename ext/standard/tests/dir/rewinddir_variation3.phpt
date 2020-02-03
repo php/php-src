@@ -28,9 +28,9 @@ $result2 = fread($fp, 5);
 
 echo "\n-- Check if rewinddir() has repositioned the file pointer --\n";
 if ($result1 === $result2) {
-	echo "rewinddir() works on file pointers\n";
+    echo "rewinddir() works on file pointers\n";
 } else {
-	echo "rewinddir() does not work on file pointers\n";
+    echo "rewinddir() does not work on file pointers\n";
 }
 ?>
 --EXPECTF--

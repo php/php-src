@@ -15,25 +15,25 @@ copy($dirname . 'test.zip', $file);
 
 $zip = new ZipArchive;
 if (!$zip->open($file)) {
-	exit('failed');
+    exit('failed');
 }
 
 $zip->addEmptyDir('emptydir');
 if ($zip->status == ZIPARCHIVE::ER_OK) {
-	if (!verify_entries($zip, [
-		"bar",
-		"foobar/",
-		"foobar/baz",
-		"entry1.txt",
-		"emptydir/"
-	])) {
-		echo "failed\n";
-	} else {
-		echo "OK";
-	}
-	$zip->close();
+    if (!verify_entries($zip, [
+        "bar",
+        "foobar/",
+        "foobar/baz",
+        "entry1.txt",
+        "emptydir/"
+    ])) {
+        echo "failed\n";
+    } else {
+        echo "OK";
+    }
+    $zip->close();
 } else {
-	echo "failed3\n";
+    echo "failed3\n";
 }
 @unlink($file);
 ?>

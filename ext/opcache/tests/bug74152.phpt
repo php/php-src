@@ -16,11 +16,11 @@ $bar = null;
 switch ($foo) {
 default:
 case 'foo':
-	if ($bar) {
-		echo 'true';
-	} else {
-		echo 'false';
-	}
+    if ($bar) {
+        echo 'true';
+    } else {
+        echo 'false';
+    }
 }
 ?>
 --EXPECT--

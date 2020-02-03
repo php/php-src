@@ -28,9 +28,9 @@ $xml = <<< EOXML
 EOXML;
 
 function dumpcourse($current) {
-	$title = ($current->nodeType != XML_TEXT_NODE && $current->hasAttribute('title')) ? $current->getAttribute('title'):"no title";
-	echo "Course: $title:";echo get_class($current), "\n";
-	echo "~";var_dump($current->textContent);
+    $title = ($current->nodeType != XML_TEXT_NODE && $current->hasAttribute('title')) ? $current->getAttribute('title'):"no title";
+    echo "Course: $title:";echo get_class($current), "\n";
+    echo "~";var_dump($current->textContent);
 }
 
 $dom = new DOMDocument();
@@ -41,20 +41,20 @@ $children = $root->childNodes;
 $len = $children->length;
 echo "original has $len nodes\n";
 for ($index = $children->length - 1; $index >=0; $index--) {
-	echo "node $index\n";
-	$current = $children->item($index);
-	dumpcourse($current);
-	if ($current->nodeType == XML_TEXT_NODE) {
-		$noderemoved = $root->removeChild($current);
-	}
+    echo "node $index\n";
+    $current = $children->item($index);
+    dumpcourse($current);
+    if ($current->nodeType == XML_TEXT_NODE) {
+        $noderemoved = $root->removeChild($current);
+    }
 }
 $children = $root->childNodes;
 $len = $children->length;
 echo "after text removed it now has $len nodes\n";
 for ($index = 0; $index < $children->length; $index++) {
-	echo "node $index\n";
-	$current = $children->item($index);
-	dumpcourse($current);
+    echo "node $index\n";
+    $current = $children->item($index);
+    dumpcourse($current);
 }
 --EXPECT--
 original has 5 nodes

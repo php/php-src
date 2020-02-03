@@ -6,7 +6,7 @@ gmp_legendre() basic tests
 <?php
 
 for ($i = -1; $i < 10; $i++) {
-	var_dump(gmp_strval(gmp_legendre(($i*$i)-1, 3)));
+    var_dump(gmp_strval(gmp_legendre(($i*$i)-1, 3)));
 }
 
 var_dump(gmp_strval(gmp_legendre(7, 23)));

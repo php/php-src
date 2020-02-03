@@ -36,12 +36,12 @@ class myIterator implements Iterator
     }
 }
 try {
-	chdir(__DIR__);
-	$phar = new Phar(__DIR__ . '/buildfromiterator.phar.tar');
-	var_dump($phar->buildFromIterator(new myIterator(array('a' => new stdClass))));
+    chdir(__DIR__);
+    $phar = new Phar(__DIR__ . '/buildfromiterator.phar.tar');
+    var_dump($phar->buildFromIterator(new myIterator(array('a' => new stdClass))));
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
 ?>
 --CLEAN--

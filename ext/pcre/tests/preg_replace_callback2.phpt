@@ -4,7 +4,7 @@ preg_replace_callback() 2
 <?php
 
 function f() {
-	throw new Exception();
+    throw new Exception();
 }
 
 try {
@@ -12,7 +12,7 @@ var_dump(preg_replace_callback('/\w/', 'f', 'z'));
 } catch(Exception $e) {}
 
 function g($x) {
-	return "'$x[0]'";
+    return "'$x[0]'";
 }
 
 var_dump(preg_replace_callback('@\b\w{1,2}\b@', 'g', array('a b3 bcd', 'v' => 'aksfjk', 12 => 'aa bb')));

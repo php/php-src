@@ -5,30 +5,30 @@
 const C = "const ok\n";
 
 function foo() {
-	return "func ok\n";
+    return "func ok\n";
 }
 
 class foo {
-	const C = "const ok\n";
-	const C2 = namespace\C;
-	static $var = "var ok\n";
-	function __construct() {
-		echo "class ok\n";
-	}
-	static function bar() {
-		return "method ok\n";
-	}
+    const C = "const ok\n";
+    const C2 = namespace\C;
+    static $var = "var ok\n";
+    function __construct() {
+        echo "class ok\n";
+    }
+    static function bar() {
+        return "method ok\n";
+    }
 }
 
 function f1($x=namespace\C) {
-	return $x;
+    return $x;
 }
 function f2($x=namespace\foo::C) {
-	return $x;
+    return $x;
 }
 
 function f3(namespace\foo $x) {
-	return "ok\n";
+    return "ok\n";
 }
 
 echo namespace\C;

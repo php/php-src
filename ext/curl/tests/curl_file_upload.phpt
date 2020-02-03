@@ -7,15 +7,15 @@ CURL file uploading
 
 function testcurl($ch, $name, $mime = '', $postname = '')
 {
-	if(!empty($postname)) {
-		$file = new CurlFile($name, $mime, $postname);
-	} else if(!empty($mime)) {
-		$file = new CurlFile($name, $mime);
-	} else {
-		$file = new CurlFile($name);
-	}
-	curl_setopt($ch, CURLOPT_POSTFIELDS, array("file" => $file));
-	var_dump(curl_exec($ch));
+    if(!empty($postname)) {
+        $file = new CurlFile($name, $mime, $postname);
+    } else if(!empty($mime)) {
+        $file = new CurlFile($name, $mime);
+    } else {
+        $file = new CurlFile($name);
+    }
+    curl_setopt($ch, CURLOPT_POSTFIELDS, array("file" => $file));
+    var_dump(curl_exec($ch));
 }
 
 include 'server.inc';

@@ -4,11 +4,11 @@ Iterable typed properties must be accepted to by-ref array arguments
 <?php
 
 $obj = new class {
-	public ?iterable $it = null;
+    public ?iterable $it = null;
 };
 
 function arr(?array &$arr) {
-	$arr = [1];
+    $arr = [1];
 }
 
 arr($obj->it);

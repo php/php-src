@@ -28,9 +28,9 @@ $xml = <<< EOXML
 EOXML;
 
 function dumpcourse($current) {
-	$title = ($current->nodeType != XML_TEXT_NODE && $current->hasAttribute('title')) ? $current->getAttribute('title'):"no title";
-	echo "Course: $title:";echo(get_class($current)), "\n";
-	echo "~";var_dump($current->textContent);
+    $title = ($current->nodeType != XML_TEXT_NODE && $current->hasAttribute('title')) ? $current->getAttribute('title'):"no title";
+    echo "Course: $title:";echo(get_class($current)), "\n";
+    echo "~";var_dump($current->textContent);
 }
 
 $dom = new DOMDocument();
@@ -41,10 +41,10 @@ $root = $dom->documentElement;
 $children = $root->childNodes;
 $len = $children->length;
 for ($index = $children->length - 1; $index >=0; $index--) {
-	$current = $children->item($index);
-	if ($current->nodeType == XML_TEXT_NODE) {
-		$noderemoved = $root->removeChild($current);
-	}
+    $current = $children->item($index);
+    if ($current->nodeType == XML_TEXT_NODE) {
+        $noderemoved = $root->removeChild($current);
+    }
 }
 
 echo "Start cloneNode test\n";
@@ -68,8 +68,8 @@ $root->appendChild($cloned_first_course_false);
 
 $children = $root->childNodes;
 for ($index = 0; $index < $children->length; $index++) {
-	echo "node $index\n";
-	dumpcourse($children->item($index));
+    echo "node $index\n";
+    dumpcourse($children->item($index));
 }
 --EXPECT--
 Start cloneNode test

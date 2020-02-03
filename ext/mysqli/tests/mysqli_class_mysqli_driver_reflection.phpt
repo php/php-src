@@ -16,10 +16,10 @@ if (!$IS_MYSQLND)
 ?>
 --FILE--
 <?php
-	require_once('reflection_tools.inc');
-	$class = new ReflectionClass('mysqli_driver');
-	inspectClass($class);
-	print "done!";
+    require_once('reflection_tools.inc');
+    $class = new ReflectionClass('mysqli_driver');
+    inspectClass($class);
+    print "done!";
 ?>
 --EXPECTF--
 Inspecting class 'mysqli_driver'

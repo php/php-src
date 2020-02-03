@@ -22,27 +22,27 @@ default_charset=cp874
 include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $names = array( /* cp874 */
-	"à»ç¹á¿éÁ·Õè·´ÊÍº1",
-	"à»ç¹á¿éÁ·Õè·´ÊÍº2",
-	"à»ç¹á¿éÁ·Õè·´ÊÍº3",
-	"à»ç¹á¿éÁ·Õè·´ÊÍº4",
-	"à»ç¹á¿éÁ·Õè·´ÊÍº5",
-	"à»ç¹á¿éÁ·Õè·´ÊÍº6",
-	"à»ç¹á¿éÁ·Õè·´ÊÍº7",
-	"à»ç¹á¿éÁ·Õè·´ÊÍº8",
-	"à»ç¹á¿éÁ·Õè·´ÊÍº8 10",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº1",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº2",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº3",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº4",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº5",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº6",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº7",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº8",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº8 10",
 );
 
 $i = 0;
 foreach ($names as $name) {
-	$path = __DIR__ . DIRECTORY_SEPARATOR . $name . ".txt";
+    $path = __DIR__ . DIRECTORY_SEPARATOR . $name . ".txt";
 
-	file_put_contents($path, "hello" . $i++);
+    file_put_contents($path, "hello" . $i++);
 
-	get_basename_with_cp($path, 874);
-	var_dump(file_get_contents($path));
+    get_basename_with_cp($path, 874);
+    var_dump(file_get_contents($path));
 
-	unlink($path);
+    unlink($path);
 }
 
 ?>

@@ -11,14 +11,14 @@ opcache.preload=
 --FILE--
 <?php
 function foo() {
-	$k = 0;
-	$a = [null];
-	echo isset($a[$k]);
-	echo "b";
-	echo isset($a[$k+1]);
-	echo "c";
-	echo $a[$k];
-	echo $a; // Should not be optimized
+    $k = 0;
+    $a = [null];
+    echo isset($a[$k]);
+    echo "b";
+    echo isset($a[$k+1]);
+    echo "c";
+    echo $a[$k];
+    echo $a; // Should not be optimized
 }
 ?>
 --EXPECTF--

@@ -7,9 +7,9 @@ filter_var() and FILTER_VALIDATE_BOOL
 
 class test {
 
-	function __toString() {
-		return "blah";
-	}
+    function __toString() {
+        return "blah";
+    }
 }
 
 $t = new test;

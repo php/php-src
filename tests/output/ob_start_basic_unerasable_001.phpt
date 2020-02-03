@@ -3,9 +3,9 @@ ob_start(): Ensure content of unerasable buffer can be accessed by ob_get_conten
 --FILE--
 <?php
 function callback($string) {
-	static $callback_invocations;
-	$callback_invocations++;
-	return "[callback:$callback_invocations]$string\n";
+    static $callback_invocations;
+    $callback_invocations++;
+    return "[callback:$callback_invocations]$string\n";
 }
 
 ob_start('callback', 0, false);

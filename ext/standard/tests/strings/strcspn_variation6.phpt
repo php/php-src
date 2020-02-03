@@ -62,15 +62,15 @@ $heredoc_strings = array(
 
 // defining array of mask strings
 $mask_array = array(
-		    "",
-		    '',
-		    "\n\trsti \l",
-		    '\n\trsti \l',
-		    "\t",
-		    "t\ ",
-		    '\t',
-		    "\t\ ",
-		    " \t",
+            "",
+            '',
+            "\n\trsti \l",
+            '\n\trsti \l',
+            "\t",
+            "t\ ",
+            '\t',
+            "\t\ ",
+            " \t",
                     "\t\i\100\xaa"
                    );
 

@@ -16,12 +16,12 @@ $code = '
 $test = "var"; //var
 /* test class */
 class test {
-	private $var = array();
+    private $var = array();
 
-	public static function foo(Test $arg) {
-		echo "hello";
-		var_dump($this);
-	}
+    public static function foo(Test $arg) {
+        echo "hello";
+        var_dump($this);
+    }
 }
 
 $o = new test;

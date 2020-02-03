@@ -11,9 +11,9 @@ foreach($array1 as $start)
       foreach($array2 as $value)
       {
          echo '==========================='."\n";
-	 echo 'start: '.$start.' num: '.$num.' value: '.$value."\n";
-  	 $output = array_fill($start, $num, $value);
-	 var_dump($output);
+     echo 'start: '.$start.' num: '.$num.' value: '.$value."\n";
+     $output = array_fill($start, $num, $value);
+     var_dump($output);
       }
    }
 }

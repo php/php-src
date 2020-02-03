@@ -5,12 +5,12 @@ SPL: SplObjectStorage serialization
 
 class TestClass
 {
-	public $test = 25;
+    public $test = 25;
 
-	public function __construct($test = 42)
-	{
-		$this->test = $test;
-	}
+    public function __construct($test = 42)
+    {
+        $this->test = $test;
+    }
 }
 
 $storage = new SplObjectStorage();
@@ -24,7 +24,7 @@ var_dump(count($storage));
 
 foreach($storage as $object)
 {
-	var_dump($object->test);
+    var_dump($object->test);
 }
 
 var_dump(serialize($storage));
@@ -36,7 +36,7 @@ var_dump(count($storage2));
 
 foreach($storage2 as $object)
 {
-	var_dump($object->test);
+    var_dump($object->test);
 }
 
 ?>

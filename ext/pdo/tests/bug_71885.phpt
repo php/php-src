@@ -22,27 +22,27 @@ $db->exec("CREATE TABLE test (a int)");
 $sql = "SELECT * FROM test WHERE a ?? 1";
 
 try {
-	$db->exec($sql);
+    $db->exec($sql);
 } catch (PDOException $e) {
-	var_dump(strpos($e->getMessage(), "?") !== false);
+    var_dump(strpos($e->getMessage(), "?") !== false);
 }
 
 try {
-	$stmt = $db->prepare($sql);
-	$stmt->execute();
+    $stmt = $db->prepare($sql);
+    $stmt->execute();
 } catch (PDOException $e) {
-	var_dump(strpos($e->getMessage(), "?") !== false);
+    var_dump(strpos($e->getMessage(), "?") !== false);
 }
 
 if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) == 'mysql') {
-	$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 1);
+    $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, 1);
 }
 
 try {
-	$stmt = $db->prepare($sql);
-	$stmt->execute();
+    $stmt = $db->prepare($sql);
+    $stmt->execute();
 } catch (PDOException $e) {
-	var_dump(strpos($e->getMessage(), "?") !== false);
+    var_dump(strpos($e->getMessage(), "?") !== false);
 }
 
 ?>

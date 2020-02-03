@@ -19,9 +19,9 @@ $cmd = $icacls . ' ' . $unreadable . ' /inheritance:r /deny ' . $user . ':(F,M,R
 exec($cmd);
 
 try {
-	$db = new SQLite3($unreadable);
+    $db = new SQLite3($unreadable);
 } catch (Exception $e) {
-	echo $e . "\n";
+    echo $e . "\n";
 }
 echo "Done\n";
 

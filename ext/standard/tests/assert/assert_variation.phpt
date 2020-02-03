@@ -9,22 +9,22 @@ assert.bail = 0
 <?php
 function f1()
 {
-	echo "f1 called\n";
+    echo "f1 called\n";
 }
 function f2()
 {
-	echo "f2 called\n";
+    echo "f2 called\n";
 }
 function f3()
 {
-	echo "f3 called\n";
+    echo "f3 called\n";
 }
 class c1
 {
-	static function assert($file, $line, $unused, $desc)
-	{
-		echo "Class assertion failed $line, \"$desc\"\n";
-	}
+    static function assert($file, $line, $unused, $desc)
+    {
+        echo "Class assertion failed $line, \"$desc\"\n";
+    }
 }
 echo "Initial values: assert_options(ASSERT_CALLBACK) => [".assert_options(ASSERT_CALLBACK)."]\n";
 echo "Initial values: ini.get(\"assert.callback\") => [".ini_get("assert.callback")."]\n";

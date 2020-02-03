@@ -74,7 +74,7 @@ $heredoc_strings = array(
                    $heredoc_with_alphanumerics,
                    $heredoc_with_embedded_nulls,
                    $heredoc_with_hexa_octal,
-  		   $heredoc_with_long_string
+           $heredoc_with_long_string
                    );
 
 // loop to test the function with each heredoc string in the array

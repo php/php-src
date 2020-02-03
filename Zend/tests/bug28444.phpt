@@ -5,39 +5,39 @@ Bug #28444 (Cannot access undefined property for object with overloaded property
 
 class ObjectOne
 {
-	public $x;
+    public $x;
 
-	function __construct($x)
-	{
-		$this->x = $x;
-	}
+    function __construct($x)
+    {
+        $this->x = $x;
+    }
 
-	function __toString() {
-		return "Object";
-	}
+    function __toString() {
+        return "Object";
+    }
 }
 
 class Overloaded
 {
-	public $props = array();
-	public $x;
+    public $props = array();
+    public $x;
 
-	function __construct($x)
-	{
-		$this->x = new ObjectOne($x);
-	}
+    function __construct($x)
+    {
+        $this->x = new ObjectOne($x);
+    }
 
-	function __get($prop)
-	{
-		echo __METHOD__ . "($prop)\n";
-		return $this->props[$prop];
-	}
+    function __get($prop)
+    {
+        echo __METHOD__ . "($prop)\n";
+        return $this->props[$prop];
+    }
 
-	function __set($prop, $val)
-	{
-		echo __METHOD__ . "($prop,$val)\n";
-		$this->props[$prop] = $val;
-	}
+    function __set($prop, $val)
+    {
+        echo __METHOD__ . "($prop,$val)\n";
+        $this->props[$prop] = $val;
+    }
 }
 $y = new Overloaded(2);
 var_dump($y->x);

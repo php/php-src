@@ -11,8 +11,8 @@ require(__DIR__.'/skipif.inc');
 require(__DIR__."/connect.inc");
 
 $stmtarray = array(
-	"drop table phpdefblobtable",
-	"create table phpdefblobtable (id number(10), fileimage blob)"
+    "drop table phpdefblobtable",
+    "create table phpdefblobtable (id number(10), fileimage blob)"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -76,7 +76,7 @@ while (oci_fetch($stmt)) {
 }
 
 $stmtarray = array(
-	"drop table phpdefblobtable"
+    "drop table phpdefblobtable"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

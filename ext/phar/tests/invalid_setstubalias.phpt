@@ -11,25 +11,25 @@ $fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
 
 $p = new Phar($fname);
 try {
-	$p['.phar/stub.php'] = 'hi';
+    $p['.phar/stub.php'] = 'hi';
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	$p['.phar/alias.txt'] = 'hi';
+    $p['.phar/alias.txt'] = 'hi';
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 $p = new Phar($fname2);
 try {
-	$p['.phar/stub.php'] = 'hi';
+    $p['.phar/stub.php'] = 'hi';
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	$p['.phar/alias.txt'] = 'hi';
+    $p['.phar/alias.txt'] = 'hi';
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 ?>

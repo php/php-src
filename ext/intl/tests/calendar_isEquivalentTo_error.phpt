@@ -18,35 +18,35 @@ echo "error: $errno, $errstr\n";
 set_error_handler('eh');
 
 try {
-	var_dump($c->isEquivalentTo(0));
+    var_dump($c->isEquivalentTo(0));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
-	var_dump($c->isEquivalentTo($c, 1));
+    var_dump($c->isEquivalentTo($c, 1));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
-	var_dump($c->isEquivalentTo(1));
+    var_dump($c->isEquivalentTo(1));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 
 try {
-	var_dump(intlcal_is_equivalent_to($c));
+    var_dump(intlcal_is_equivalent_to($c));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
-	var_dump(intlcal_is_equivalent_to($c, 1));
+    var_dump(intlcal_is_equivalent_to($c, 1));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
-	var_dump(intlcal_is_equivalent_to(1, $c));
+    var_dump(intlcal_is_equivalent_to(1, $c));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 --EXPECT--
 error: 0, IntlCalendar::isEquivalentTo() expects parameter 1 to be IntlCalendar, int given

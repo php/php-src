@@ -19,14 +19,14 @@ if (version_compare(get_zlib_version(), '1.2.7') < 0) {
 $f = __DIR__."/004.txt.gz";
 $h = gzopen($f, 'r');
 if ($h) {
-	$count = 0;
-	while (($c = fgetc( $h )) !== false) {
-	   $count++;
-	   echo $c;
-	}
+    $count = 0;
+    while (($c = fgetc( $h )) !== false) {
+       $count++;
+       echo $c;
+    }
 
-	echo "\ncharacters counted=$count\n";
-	gzclose($h);
+    echo "\ncharacters counted=$count\n";
+    gzclose($h);
 }
 
 ?>

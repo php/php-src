@@ -28,9 +28,9 @@ Content-Length: 3
 a=b
 HEADER
 )) {
-	while (!feof($fp)) {
-		echo fgets($fp);
-	}
+    while (!feof($fp)) {
+        echo fgets($fp);
+    }
 }
 
 fclose($fp);

@@ -4,27 +4,27 @@ Test of the *intersect* bunch of functions (both assoc and non-assoc)
 <?php
 error_reporting(E_ALL);
 class cr {
-	private $priv_member;
-	public  $public_member;
-	function __construct($val) {
-		$this->priv_member = $val;
-		$this->public_member = $val;
-	}
-	static function comp_func_cr($a, $b) {
-		if ($a->priv_member === $b->priv_member) return 0;
-		return ($a->priv_member > $b->priv_member)? 1:-1;
-	}
+    private $priv_member;
+    public  $public_member;
+    function __construct($val) {
+        $this->priv_member = $val;
+        $this->public_member = $val;
+    }
+    static function comp_func_cr($a, $b) {
+        if ($a->priv_member === $b->priv_member) return 0;
+        return ($a->priv_member > $b->priv_member)? 1:-1;
+    }
 }
 
 function comp_func($a, $b) {
-	if ($a === $b) return 0;
-	return ($a > $b)? 1:-1;
+    if ($a === $b) return 0;
+    return ($a > $b)? 1:-1;
 
 }
 
 function comp_func_cr($a, $b) {
-	if ($a->public_member === $b->public_member) return 0;
-	return ($a->public_member > $b->public_member)? 1:-1;
+    if ($a->public_member === $b->public_member) return 0;
+    return ($a->public_member > $b->public_member)? 1:-1;
 }
 
 $a = array("0.1" => new cr(9), "0.5" => new cr(12), 0 => new cr(23), 1=> new cr(4), 2 => new cr(-15),);

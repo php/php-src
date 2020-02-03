@@ -4,7 +4,7 @@ Testing __set() declaration in abstract class with wrong modifier
 <?php
 
 abstract class b {
-	abstract protected function __set($a);
+    abstract protected function __set($a);
 }
 
 ?>

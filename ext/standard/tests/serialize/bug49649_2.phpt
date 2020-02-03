@@ -23,11 +23,11 @@ $serialized = 'TzozOiJGb28iOjQ6e3M6MTI6IgBGb28AcHJpdmF0ZSI7aToxO3M6MTI6IgAqAHByb
 
 class Foo
 {
-	private $public = null;
+    private $public = null;
 
-	private $protected = null;
+    private $protected = null;
 
-	private $private = null;
+    private $private = null;
 }
 
 $class = unserialize(base64_decode($serialized));

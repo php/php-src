@@ -28,9 +28,9 @@ Content-Length: 3
 a=b
 HEADER
 )) {
-	while (!feof($fp)) {
-		$output .= fgets($fp);
-	}
+    while (!feof($fp)) {
+        $output .= fgets($fp);
+    }
 }
 
 echo preg_replace("/<style>(.*?)<\/style>/s", "<style>AAA</style>", $output), "\n";
@@ -50,9 +50,9 @@ Host: {$host}
 
 HEADER
 )) {
-	while (!feof($fp)) {
-		$output .= fgets($fp);
-	}
+    while (!feof($fp)) {
+        $output .= fgets($fp);
+    }
 }
 
 echo preg_replace("/<style>(.*?)<\/style>/s", "<style>AAA</style>", $output), "\n";
@@ -71,9 +71,9 @@ Host: {$host}
 
 HEADER
 )) {
-	while (!feof($fp)) {
-		$output .= fgets($fp);
-	}
+    while (!feof($fp)) {
+        $output .= fgets($fp);
+    }
 }
 
 echo preg_replace("/<style>(.*?)<\/style>/s", "<style>AAA</style>", $output), "\n";

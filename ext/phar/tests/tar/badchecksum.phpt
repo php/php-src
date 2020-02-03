@@ -14,9 +14,9 @@ $a->addFile('hithere', 'contents', null, 'checksum');
 $a->close();
 
 try {
-	$p = new PharData($fname);
+    $p = new PharData($fname);
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 ?>

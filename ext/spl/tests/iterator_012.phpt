@@ -17,7 +17,7 @@ echo "===Foreach===\n";
 
 foreach($it as $key=>$val)
 {
-	echo "$key=>$val\n";
+    echo "$key=>$val\n";
 }
 
 ?>

@@ -85,9 +85,9 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of decoct()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(decoct($input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(decoct($input));
+    $iterator++;
 };
 fclose($fp);
 ?>

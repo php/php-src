@@ -3,10 +3,10 @@ ReflectionClass::getName()
 --FILE--
 <?php
 class TrickClass {
-	function __toString() {
-		//Return the name of another class
-		return "Exception";
-	}
+    function __toString() {
+        //Return the name of another class
+        return "Exception";
+    }
 }
 
 $r1 = new ReflectionClass("stdClass");

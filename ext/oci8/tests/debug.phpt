@@ -10,10 +10,10 @@ require(__DIR__."/details.inc");
 oci_internal_debug(true);
 
 if (!empty($dbase)) {
-	oci_connect($user, $password, $dbase);
+    oci_connect($user, $password, $dbase);
 }
 else {
-	oci_connect($user, $password);
+    oci_connect($user, $password);
 }
 
 oci_internal_debug(false);

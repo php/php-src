@@ -66,13 +66,13 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of floor()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	try {
-		var_dump(floor($input));
-	} catch (TypeError $e) {
-		echo $e->getMessage(), "\n";
-	}
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(floor($input));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 ?>

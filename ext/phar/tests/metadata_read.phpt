@@ -20,18 +20,18 @@ $files['d'] = array('cont' => 'd', 'meta' => array('hi'=>'there','foo'=>'bar'));
 include 'files/phar_test.inc';
 
 foreach($files as $name => $cont) {
-	var_dump(file_get_contents($pname.'/'.$name));
+    var_dump(file_get_contents($pname.'/'.$name));
 }
 
 $phar = new Phar($fname);
 foreach($files as $name => $cont) {
-	var_dump($phar[$name]->getMetadata());
+    var_dump($phar[$name]->getMetadata());
 }
 
 unset($phar);
 
 foreach($files as $name => $cont) {
-	var_dump(file_get_contents($pname.'/'.$name));
+    var_dump(file_get_contents($pname.'/'.$name));
 }
 ?>
 --CLEAN--

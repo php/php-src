@@ -17,14 +17,14 @@ $reader->read();
 $reader->read();
 
 if ($reader->nodeType != XMLREADER::END_ELEMENT) {
-	if ($reader->nodeType == XMLREADER::ELEMENT && $reader->hasAttributes) {
-		$attr = $reader->moveToFirstAttribute();
-		if ($reader->moveToElement()) {
-			if ($reader->name == 'book') {
-				echo "ok\n";
-			}
-		}
-	}
+    if ($reader->nodeType == XMLREADER::ELEMENT && $reader->hasAttributes) {
+        $attr = $reader->moveToFirstAttribute();
+        if ($reader->moveToElement()) {
+            if ($reader->name == 'book') {
+                echo "ok\n";
+            }
+        }
+    }
 }
 
 $reader->close();

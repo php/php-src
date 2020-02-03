@@ -34,7 +34,7 @@ $row = oci_fetch_assoc($statement);
 $string = str_repeat("test", 32768*4*4);
 
 for ($i = 0; $i < 8; $i++) {
-	$row['CLOB']->write($string);
+    $row['CLOB']->write($string);
 }
 
 oci_commit($c);

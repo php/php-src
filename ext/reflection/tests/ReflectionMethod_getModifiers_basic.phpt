@@ -60,12 +60,12 @@ class TestClass
 class DerivedClass extends TestClass {}
 
 interface TestInterface {
-	public function int();
-	public function __clone();
+    public function int();
+    public function __clone();
 }
 
 abstract class AbstractClass {
-	public abstract function foo();
+    public abstract function foo();
 }
 
 

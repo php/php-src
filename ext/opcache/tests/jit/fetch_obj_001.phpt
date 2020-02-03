@@ -10,7 +10,7 @@ opcache.jit_buffer_size=1M
 --FILE--
 <?php
 function foo(&$a) {
-	$a = 2;
+    $a = 2;
 }
 
 function foo2(&$a) {
@@ -36,17 +36,17 @@ var_dump($obj);
 
 function bar() {
     $obj = new stdClass;
-	foo($obj->a);
-	var_dump($obj);
-	foo2($obj->b);
-	var_dump($obj);
-	foo3($obj->a, "2" . "3");
-	foo3($obj->a, $obj->b);
-	var_dump($obj);
+    foo($obj->a);
+    var_dump($obj);
+    foo2($obj->b);
+    var_dump($obj);
+    foo3($obj->a, "2" . "3");
+    foo3($obj->a, $obj->b);
+    var_dump($obj);
 
-	$a = &$obj->a;
-	$a = fopen(__FILE__, "r");
-	var_dump($obj);
+    $a = &$obj->a;
+    $a = fopen(__FILE__, "r");
+    var_dump($obj);
 
     $d = array();
     try {
@@ -54,7 +54,7 @@ function bar() {
     } catch (Error $err) {
         echo $err->getMessage(), "\n";
     }
-	var_dump($d);
+    var_dump($d);
 
     $e = NULL;
     try {
@@ -62,7 +62,7 @@ function bar() {
     } catch (Error $err) {
         echo $err->getMessage(), "\n";
     }
-	var_dump($e);
+    var_dump($e);
 
     $f = "";
     try {
@@ -70,7 +70,7 @@ function bar() {
     } catch (Error $err) {
         echo $err->getMessage(), "\n";
     }
-	var_dump($f);
+    var_dump($f);
 }
 
 bar();

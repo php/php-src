@@ -4,7 +4,7 @@ proc_open() with > 16 pipes
 <?php
 
 for ($i = 3; $i<= 30; $i++) {
-	$spec[$i] = array('pipe', 'w');
+    $spec[$i] = array('pipe', 'w');
 }
 
 $php = getenv("TEST_PHP_EXECUTABLE");

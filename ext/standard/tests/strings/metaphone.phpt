@@ -19,7 +19,7 @@ $array = array(
 );
 
 foreach($array as $str) {
-	var_dump(metaphone($str));
+    var_dump(metaphone($str));
 }
 
 echo "Done\n";

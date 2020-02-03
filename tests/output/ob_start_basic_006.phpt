@@ -8,32 +8,32 @@ ob_start(): ensure multiple buffer initialization with a single call using array
 */
 
 function f($string) {
-	static $i=0;
-	$i++;
-	$len = strlen($string);
-	return "f[call:$i; len:$len] - $string\n";
+    static $i=0;
+    $i++;
+    $len = strlen($string);
+    return "f[call:$i; len:$len] - $string\n";
 }
 
 Class C {
-	public $id = 'none';
+    public $id = 'none';
 
-	function __construct($id) {
-		$this->id = $id;
-	}
+    function __construct($id) {
+        $this->id = $id;
+    }
 
-	static function g($string) {
-		static $i=0;
-		$i++;
-		$len = strlen($string);
-		return "C::g[call:$i; len:$len] - $string\n";
-	}
+    static function g($string) {
+        static $i=0;
+        $i++;
+        $len = strlen($string);
+        return "C::g[call:$i; len:$len] - $string\n";
+    }
 
-	function h($string) {
-		static $i=0;
-		$i++;
-		$len = strlen($string);
-		return "C::h[call:$i; len:$len; id:$this->id] - $string\n";
-	}
+    function h($string) {
+        static $i=0;
+        $i++;
+        $len = strlen($string);
+        return "C::h[call:$i; len:$len; id:$this->id] - $string\n";
+    }
 }
 
 function checkAndClean() {

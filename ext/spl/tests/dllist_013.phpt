@@ -5,9 +5,9 @@ SPL: DoublyLinkedList: insert operations
 $dll = new SplDoublyLinkedList();
 // errors
 try {
-	$dll->add(2,5);
+    $dll->add(2,5);
 } catch (OutOfRangeException $e) {
-	echo "Exception: ".$e->getMessage()."\n";
+    echo "Exception: ".$e->getMessage()."\n";
 }
 
 $dll->add(0,6);						//	6

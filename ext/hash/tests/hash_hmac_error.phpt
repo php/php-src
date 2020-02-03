@@ -21,7 +21,7 @@ catch (\Error $e) {
 }
 
 echo "\n-- Testing hash_hmac() function with non-cryptographic hash algorithm --\n";
-try { 
+try {
     var_dump(hash_hmac('crc32', $data, $key));
 }
 catch (\Error $e) {

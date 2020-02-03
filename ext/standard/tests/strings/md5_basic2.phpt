@@ -15,10 +15,10 @@ var_dump(bin2hex($md5_raw));
 $md5 = md5($str, false);
 
 if (strcmp(bin2hex($md5_raw), $md5) == 0 ) {
-	echo "TEST PASSED\n";
+    echo "TEST PASSED\n";
 } else {
-	echo "TEST FAILED\n";
-	var_dump($md5_raw, $md5);
+    echo "TEST FAILED\n";
+    var_dump($md5_raw, $md5);
 }
 
 ?>

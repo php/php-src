@@ -4,7 +4,7 @@ Trying to use an undefined trait
 <?php
 
 class A {
-	use abc;
+    use abc;
 }
 
 ?>

@@ -15,26 +15,26 @@ copy($dirname . 'test.zip', $file);
 
 $zip = new ZipArchive;
 if (!$zip->open($file)) {
-	exit('failed');
+    exit('failed');
 }
 if (!$zip->addFile($dirname . 'utils.inc', 'test.php')) {
-	echo "failed\n";
+    echo "failed\n";
 }
 if ($zip->status == ZIPARCHIVE::ER_OK) {
-	if (!verify_entries($zip, [
-		"bar",
-		"foobar/",
-		"foobar/baz",
-		"entry1.txt",
-		"test.php"
-	])) {
-		echo "failed\n";
-	} else {
-		echo "OK";
-	}
-	$zip->close();
+    if (!verify_entries($zip, [
+        "bar",
+        "foobar/",
+        "foobar/baz",
+        "entry1.txt",
+        "test.php"
+    ])) {
+        echo "failed\n";
+    } else {
+        echo "OK";
+    }
+    $zip->close();
 } else {
-	echo "failed\n";
+    echo "failed\n";
 }
 @unlink($file);
 ?>

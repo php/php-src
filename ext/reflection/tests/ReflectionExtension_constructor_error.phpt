@@ -6,21 +6,21 @@ Leon Luijkx <leon@phpgg.nl>
 --FILE--
 <?php
 try {
-	$obj = new ReflectionExtension();
+    $obj = new ReflectionExtension();
 } catch (TypeError $re) {
-	echo "Ok - ".$re->getMessage().PHP_EOL;
+    echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 
 try {
-	$obj = new ReflectionExtension('foo', 'bar');
+    $obj = new ReflectionExtension('foo', 'bar');
 } catch (TypeError $re) {
-	echo "Ok - ".$re->getMessage().PHP_EOL;
+    echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 
 try {
-	$obj = new ReflectionExtension([]);
+    $obj = new ReflectionExtension([]);
 } catch (TypeError $re) {
-	echo "Ok - ".$re->getMessage().PHP_EOL;
+    echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 
 

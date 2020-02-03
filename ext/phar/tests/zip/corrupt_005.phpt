@@ -5,9 +5,9 @@ Phar: encrypted zip
 --FILE--
 <?php
 try {
-	new PharData(__DIR__ . '/files/encrypted.zip');
+    new PharData(__DIR__ . '/files/encrypted.zip');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
 --EXPECTF--

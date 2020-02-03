@@ -13,25 +13,25 @@ Felix De Vliegher <felix.devliegher@gmail.com>
 /* Preparation */
 class a
 {
-	function __toString()
-	{
-		return "Hello WORLD";
-	}
+    function __toString()
+    {
+        return "Hello WORLD";
+    }
 }
 
 class b
 {
-	function __toString()
-	{
-		return "HELLO world";
-	}
+    function __toString()
+    {
+        return "HELLO world";
+    }
 }
 
 $a = new a();
 $b = new b();
 
 function str_dump($a, $b) {
-	var_dump(strnatcasecmp($a, $b));
+    var_dump(strnatcasecmp($a, $b));
 }
 
 echo "*** Testing strnatcasecmp() : variation ***\n";

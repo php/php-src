@@ -13,15 +13,15 @@ require(__DIR__.'/connect.inc');
 // Initialization
 
 $stmtarray = array(
-	"create or replace procedure bug46994_proc1(p1 in out nocopy clob) is
-		 begin
-			 dbms_lob.trim(p1, 0);
-			 dbms_lob.writeappend(p1, 26, 'This should be the output.');
+    "create or replace procedure bug46994_proc1(p1 in out nocopy clob) is
+         begin
+             dbms_lob.trim(p1, 0);
+             dbms_lob.writeappend(p1, 26, 'This should be the output.');
          end bug46994_proc1;",
-	"create or replace procedure bug46994_proc2(p1 in out nocopy clob) is
-		 begin
-			 dbms_lob.trim(p1, 0);
-			 dbms_lob.writeappend(p1, 37, 'The output should be even longer now.');
+    "create or replace procedure bug46994_proc2(p1 in out nocopy clob) is
+         begin
+             dbms_lob.trim(p1, 0);
+             dbms_lob.writeappend(p1, 37, 'The output should be even longer now.');
          end bug46994_proc2;"
 );
 
@@ -60,8 +60,8 @@ var_dump($myclob->load());  // Use cached size code path
 // Cleanup
 
 $stmtarray = array(
-	"drop procedure bug46994_proc1",
-	"drop procedure bug46994_proc2"
+    "drop procedure bug46994_proc1",
+    "drop procedure bug46994_proc2"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

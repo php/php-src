@@ -15,8 +15,8 @@ $it = IntlBreakIterator::createCodePointInstance()->getPartsIterator();
 $it->getBreakIterator()->setText($text);
 
 foreach ($it as $k => $v) {
-	echo "$k. $v (" . sprintf("U+%04X", $it->getBreakIterator()->getLastCodePoint()) .
-		") at {$it->getBreakIterator()->current()}\r\n";
+    echo "$k. $v (" . sprintf("U+%04X", $it->getBreakIterator()->getLastCodePoint()) .
+        ") at {$it->getBreakIterator()->current()}\r\n";
 }
 
 ?>

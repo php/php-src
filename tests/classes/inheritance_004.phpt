@@ -10,7 +10,7 @@ function f() {}
 
 class B extends A
 {
-	function f($x) {}
+    function f($x) {}
 }
 
 ?>

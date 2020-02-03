@@ -40,17 +40,17 @@ foreach($delimiters as $delimiter) {
         echo $e->getMessage() . "\n";
     }
     try {
-	    var_dump( explode($delimiter, $string, 0) );
+        var_dump( explode($delimiter, $string, 0) );
     } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
     try {
-	    var_dump( explode($delimiter, $string, 1) );
+        var_dump( explode($delimiter, $string, 1) );
     } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }
     try {
-	    var_dump( explode($delimiter, $string, 2) );
+        var_dump( explode($delimiter, $string, 2) );
     } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }

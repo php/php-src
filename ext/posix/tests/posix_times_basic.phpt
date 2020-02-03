@@ -14,8 +14,8 @@ Test posix_times() function : basic functionality
 
 
   if ($times == FALSE) {
-  	$errno= posix_get_last_error();
-  	var_dump(posix_strerror($errno));
+    $errno= posix_get_last_error();
+    var_dump(posix_strerror($errno));
   }
 
 ?>

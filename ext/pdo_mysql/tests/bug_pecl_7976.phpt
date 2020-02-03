@@ -25,16 +25,16 @@ $db = MySQLPDOTest::factory();
 
 function bug_pecl_7976($db) {
 
-	$db->exec('DROP PROCEDURE IF EXISTS p');
-	$db->exec('CREATE PROCEDURE p() BEGIN SELECT "1" AS _one; END;');
+    $db->exec('DROP PROCEDURE IF EXISTS p');
+    $db->exec('CREATE PROCEDURE p() BEGIN SELECT "1" AS _one; END;');
 
-	$stmt = $db->query('CALL p()');
-	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-	$stmt->closeCursor();
+    $stmt = $db->query('CALL p()');
+    var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+    $stmt->closeCursor();
 
-	$stmt = $db->query('CALL p()');
-	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
-	$stmt->closeCursor();
+    $stmt = $db->query('CALL p()');
+    var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+    $stmt->closeCursor();
 
 }
 

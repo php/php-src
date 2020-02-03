@@ -41,9 +41,9 @@ Content-Length: {$post_len}
 {$post_data}
 HEADER
 )) {
-	while (!feof($fp)) {
-		echo fgets($fp);
-	}
+    while (!feof($fp)) {
+        echo fgets($fp);
+    }
 }
 
 ?>

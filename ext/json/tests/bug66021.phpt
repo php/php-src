@@ -6,7 +6,7 @@ Bug #66021 (Blank line inside empty array/object when JSON_PRETTY_PRINT is set)
 <?php
 
 class Foo {
-	private $bar = 'baz';
+    private $bar = 'baz';
 }
 
 echo json_encode(array(array(), (object) array(), new Foo), JSON_PRETTY_PRINT);

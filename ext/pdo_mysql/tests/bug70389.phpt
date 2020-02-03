@@ -10,9 +10,9 @@ MySQLPDOTest::skip();
 <?php
 require(__DIR__. DIRECTORY_SEPARATOR . 'config.inc');
 $flags = [
-	PDO::MYSQL_ATTR_FOUND_ROWS	=> true,
-	PDO::MYSQL_ATTR_LOCAL_INFILE	=> true,
-	PDO::ATTR_PERSISTENT 		=> true,
+    PDO::MYSQL_ATTR_FOUND_ROWS	=> true,
+    PDO::MYSQL_ATTR_LOCAL_INFILE	=> true,
+    PDO::ATTR_PERSISTENT 		=> true,
 ];
 
 $std = new StdClass();

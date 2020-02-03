@@ -5,14 +5,14 @@ SPL: RegexIterator::SPLIT
 
 class MyRegexIterator extends RegexIterator
 {
-	function show()
-	{
-		foreach($this as $k => $v)
-		{
-			var_dump($k);
-			var_dump($v);
-		}
-	}
+    function show()
+    {
+        foreach($this as $k => $v)
+        {
+            var_dump($k);
+            var_dump($v);
+        }
+    }
 }
 
 $ar = new ArrayIterator(array('1','1,2','1,2,3','',NULL,array(),'FooBar',',',',,'));

@@ -8,19 +8,19 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	require('table.inc');
+    require('table.inc');
 
-	if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
-		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	}
+    if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
+        printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
 
-	var_dump(mysqli_fetch_field_direct($res, -1));
-	var_dump(mysqli_fetch_field_direct($res, 0));
-	var_dump(mysqli_fetch_field_direct($res, 2));
+    var_dump(mysqli_fetch_field_direct($res, -1));
+    var_dump(mysqli_fetch_field_direct($res, 0));
+    var_dump(mysqli_fetch_field_direct($res, 2));
 
-	mysqli_free_result($res);
+    mysqli_free_result($res);
 
     try {
         mysqli_fetch_field_direct($res, 0);
@@ -28,8 +28,8 @@ require_once('skipifconnectfailure.inc');
         echo $exception->getMessage() . "\n";
     }
 
-	mysqli_close($link);
-	print "done!";
+    mysqli_close($link);
+    print "done!";
 ?>
 --CLEAN--
 <?php

@@ -5,7 +5,7 @@ SOAP Server 18: user fault (through throw)
 --FILE--
 <?php
 function test() {
-	throw new SoapFault("MyFault","My fault string");
+    throw new SoapFault("MyFault","My fault string");
 }
 
 $server = new soapserver(null,array('uri'=>"http://testuri.org"));

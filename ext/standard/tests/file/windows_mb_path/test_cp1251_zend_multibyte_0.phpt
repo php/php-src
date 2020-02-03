@@ -27,10 +27,10 @@ $fn = $prefix . DIRECTORY_SEPARATOR . $item;
 
 $f = fopen($fn, 'r');
 if ($f) {
-	var_dump($f, fread($f, 42));
-	var_dump(fclose($f));
+    var_dump($f, fread($f, 42));
+    var_dump(fclose($f));
 } else {
-	echo "open failed\n";
+    echo "open failed\n";
 }
 
 remove_data("file_cp1251");

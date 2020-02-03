@@ -12,7 +12,7 @@ $file = __DIR__ . '/__tmp_oo_set_comment_error.zip';
 
 $zip = new ZipArchive;
 if (!$zip->open($file, ZIPARCHIVE::CREATE)) {
-	exit('failed');
+    exit('failed');
 }
 
 $zip->addFromString('entry1.txt', 'entry #1');

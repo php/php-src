@@ -14,8 +14,8 @@ Test parse_url() function: Parse a load of URLs without specifying the component
 include_once(__DIR__ . '/urls.inc');
 
 foreach ($urls as $url) {
-	echo "\n--> $url: ";
-	var_dump(parse_url($url));
+    echo "\n--> $url: ";
+    var_dump(parse_url($url));
 }
 
 echo "Done";

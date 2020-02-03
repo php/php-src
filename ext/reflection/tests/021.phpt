@@ -3,7 +3,7 @@ ReflectionClass::hasConstant
 --FILE--
 <?php
 class Foo {
-	const c1 = 1;
+    const c1 = 1;
 }
 $class = new ReflectionClass("Foo");
 var_dump($class->hasConstant("c1"));

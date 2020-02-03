@@ -19,35 +19,35 @@ echo "*** Testing strspn() : with different mask strings and default start and l
 // defining different strings
 $strings = array(
                    "",
-		   '',
-		   "\n",
-		   '\n',
-		   "hello\tworld\nhello\nworld\n",
-		   'hello\tworld\nhello\nworld\n',
- 		   "1234hello45world\t123",
- 		   '1234hello45world\t123',
-		   "hello\0world\012",
-		   'hello\0world\012',
-		   chr(0).chr(0),
-		   chr(0)."hello\0world".chr(0),
-		   chr(0).'hello\0world'.chr(0),
-		   "hello".chr(0)."world",
-		   'hello'.chr(0).'world',
-		   "hello\0\100\xaaaworld",
-		   'hello\0\100\xaaaworld'
+           '',
+           "\n",
+           '\n',
+           "hello\tworld\nhello\nworld\n",
+           'hello\tworld\nhello\nworld\n',
+           "1234hello45world\t123",
+           '1234hello45world\t123',
+           "hello\0world\012",
+           'hello\0world\012',
+           chr(0).chr(0),
+           chr(0)."hello\0world".chr(0),
+           chr(0).'hello\0world'.chr(0),
+           "hello".chr(0)."world",
+           'hello'.chr(0).'world',
+           "hello\0\100\xaaaworld",
+           'hello\0\100\xaaaworld'
                    );
 
 // define the array of mask strings
 $mask_array = array(
-		    "",
-		    '',
-		    "f\n\trelshti \l",
-		    'f\n\trelsthi \l',
-		    "\telh",
-		    "t\ ",
-		    '\telh',
-		    "felh\t\ ",
-		    " \t",
+            "",
+            '',
+            "f\n\trelshti \l",
+            'f\n\trelsthi \l',
+            "\telh",
+            "t\ ",
+            '\telh',
+            "felh\t\ ",
+            " \t",
                     "fhel\t\i\100\xa"
                    );
 

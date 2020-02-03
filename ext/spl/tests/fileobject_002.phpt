@@ -5,23 +5,23 @@ SPL: SplFileObject::fgetc
 
 function test($name)
 {
-	echo "===$name===\n";
+    echo "===$name===\n";
 
-	$o = new SplFileObject(__DIR__ . '/' . $name);
+    $o = new SplFileObject(__DIR__ . '/' . $name);
 
-	var_dump($o->key());
-	while(($c = $o->fgetc()) !== false)
-	{
+    var_dump($o->key());
+    while(($c = $o->fgetc()) !== false)
+    {
         // Kinda ugly but works around new lines mess
         if ($c === "\r") {
             continue;
         }
-		var_dump($o->key(), $c, $o->eof());
-	}
-	echo "===EOF?===\n";
-	var_dump($o->eof());
-	var_dump($o->key());
-	var_dump($o->eof());
+        var_dump($o->key(), $c, $o->eof());
+    }
+    echo "===EOF?===\n";
+    var_dump($o->eof());
+    var_dump($o->key());
+    var_dump($o->eof());
 }
 
 test('fileobject_001a.txt');

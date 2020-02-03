@@ -9,20 +9,20 @@ SPL: ArrayObject/Iterator from IteratorAggregate
 
 class test implements IteratorAggregate
 {
-	public    $pub = "public";
-	protected $pro = "protected";
-	private   $pri = "private";
+    public    $pub = "public";
+    protected $pro = "protected";
+    private   $pri = "private";
 
-	function __construct()
-	{
-		$this->imp = "implicit";
-	}
+    function __construct()
+    {
+        $this->imp = "implicit";
+    }
 
-	function getIterator()
-	{
-		$it = new ArrayObject($this);
-		return $it->getIterator();
-	}
+    function getIterator()
+    {
+        $it = new ArrayObject($this);
+        return $it->getIterator();
+    }
 };
 
 $test = new test;
@@ -34,7 +34,7 @@ print_r($test->getIterator());
 
 foreach($test as $key => $val)
 {
-	echo "$key => $val\n";
+    echo "$key => $val\n";
 }
 
 ?>

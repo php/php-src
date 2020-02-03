@@ -19,7 +19,7 @@ echo "*** Testing get_browser() : variation functionality: extra browser names *
 
 $count = count( $browsers );
 for( $x = 20; $x < $count; $x++) {
-	var_dump( get_browser( $browsers[$x], true ) );
+    var_dump( get_browser( $browsers[$x], true ) );
 }
 
 ?>

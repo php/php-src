@@ -3,7 +3,7 @@ Test typed properties disallow incorrect type initial value (object)
 --FILE--
 <?php
 class Foo {
-	public stdClass $bar = null;
+    public stdClass $bar = null;
 }
 ?>
 --EXPECTF--

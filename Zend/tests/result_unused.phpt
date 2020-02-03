@@ -14,10 +14,10 @@ $x[0];
 $x[3];
 
 class Foo {
-	public $prop = array(3);
-	function __get($name) {
-		return array(4);
-	}
+    public $prop = array(3);
+    function __get($name) {
+        return array(4);
+    }
 }
 $x = new Foo();
 $x->prop;

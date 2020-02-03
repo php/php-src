@@ -17,7 +17,7 @@ $fmt_clone = clone $fmt;
 
 $res = $fmt->setPattern("0.0" );
 if( $res === false )
-	$res_str .= ut_nfmt_get_error_message( $fmt ) . " (" . ut_nfmt_get_error_code( $fmt ) . ")\n";
+    $res_str .= ut_nfmt_get_error_message( $fmt ) . " (" . ut_nfmt_get_error_code( $fmt ) . ")\n";
 
 $res_str .= "Formatted number: " . ut_nfmt_format( $fmt, $test_value ) . "\n";
 $res_str .= "Formatted(clone) number: " . ut_nfmt_format( $fmt_clone, $test_value ) . "\n";

@@ -4,9 +4,9 @@ Bug #52484 (__set() ignores setting properties with empty names)
 <?php
 
 class A {
-	function __unset($prop) {
-		unset($this->$prop);
-	}
+    function __unset($prop) {
+        unset($this->$prop);
+    }
 }
 
 $a = new A();

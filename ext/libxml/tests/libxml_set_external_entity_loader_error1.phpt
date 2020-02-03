@@ -14,9 +14,9 @@ $r = $dd->loadXML($xml);
 
 var_dump(libxml_set_external_entity_loader(function($a, $b, $c, $d) {}));
 try {
-	var_dump($dd->validate());
+    var_dump($dd->validate());
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "Done.\n";

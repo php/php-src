@@ -5,9 +5,9 @@ Phar: unable to process zip (zip spanning multiple archives)
 --FILE--
 <?php
 try {
-	new PharData(__DIR__ . '/files/disknumber.zip');
+    new PharData(__DIR__ . '/files/disknumber.zip');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
 --EXPECTF--

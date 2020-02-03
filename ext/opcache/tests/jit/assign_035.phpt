@@ -19,8 +19,8 @@ class A {
 
     $arr = [
       'a' => $closure(),
-	  'b' => [$closure() => [],],
-	 ];
+      'b' => [$closure() => [],],
+     ];
 
     $x = $arr;
     unset($x['b'][$closure()]['d']);

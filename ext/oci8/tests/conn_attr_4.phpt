@@ -59,16 +59,16 @@ echo "\nSetting to different values \n";
 $values_array = array(1000,NULL,'this is a very huge string with a length  > 64 !!!!!this is a very huge string with a length  > 64 !!!!!this is a very huge string with a length  > 64 !!!!!this is a very huge string with a length  > 64 !!!!!');
 
 foreach($values_array as $val ) {
-	oci_set_module_name($c1,$val);
-	oci_set_client_identifier($c1,$val);
-	oci_set_client_info($c1,$val);
-	$r = oci_set_action($c1,$val);
-	if ($r) {
-		echo "Values set successfully to $val\n";
-		foreach($attr_array as $attr) {
+    oci_set_module_name($c1,$val);
+    oci_set_client_identifier($c1,$val);
+    oci_set_client_info($c1,$val);
+    $r = oci_set_action($c1,$val);
+    if ($r) {
+        echo "Values set successfully to $val\n";
+        foreach($attr_array as $attr) {
             get_attr($c1,$attr);
         }
-	}
+    }
 }
 
 clean_up($c);

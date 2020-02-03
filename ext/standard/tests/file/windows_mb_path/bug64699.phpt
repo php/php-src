@@ -25,7 +25,7 @@ $dirs = array("a", "ソ", "ゾ", "şŞıİğĞ", "多国語", "表");
 
 mkdir($prefix);
 foreach ($dirs as $d) {
-	mkdir($prefix . $d);
+    mkdir($prefix . $d);
 }
 
 $dir = $prefix;
@@ -41,7 +41,7 @@ if ($dh = opendir($dir)) {
 }
 
 foreach ($dirs as $d) {
-	rmdir($prefix . $d);
+    rmdir($prefix . $d);
 }
 rmdir($prefix);
 

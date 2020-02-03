@@ -11,15 +11,15 @@ opcache.preload=
 --FILE--
 <?php
 function foo(int $x) {
-	$o = new stdClass;
-	if ($x) {
-		$o->foo = 0;
-		$o->bar = 1;
-	} else {
-		$o->foo = 0;
-		$o->bar = 2;
-	}
-	echo $o->foo;
+    $o = new stdClass;
+    if ($x) {
+        $o->foo = 0;
+        $o->bar = 1;
+    } else {
+        $o->foo = 0;
+        $o->bar = 2;
+    }
+    echo $o->foo;
 }
 ?>
 --EXPECTF--

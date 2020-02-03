@@ -15,9 +15,9 @@ Test array_count_values() function : Test all normal parameter variations
 echo "*** Testing array_count_values() : parameter variations ***\n";
 
 class A {
-	static function hello() {
-	  echo "Hello\n";
-	}
+    static function hello() {
+      echo "Hello\n";
+    }
 }
 
 $ob = new A();

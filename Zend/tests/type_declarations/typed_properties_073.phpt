@@ -2,14 +2,14 @@
 Typed property must cast when used with &__get()
 --FILE--
 <?php
-  
-class Test {
-	public $prop = "42";
-	public int $val;
 
-	public function &__get($name) {
-		return $this->prop;
-	}
+class Test {
+    public $prop = "42";
+    public int $val;
+
+    public function &__get($name) {
+        return $this->prop;
+    }
 }
 
 $test = new Test;

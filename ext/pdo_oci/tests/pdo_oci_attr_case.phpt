@@ -13,22 +13,22 @@ require(__DIR__ . '/../../pdo/tests/pdo_test.inc');
 
 function do_query1($dbh)
 {
-	var_dump($dbh->getAttribute(PDO::ATTR_CASE));
-	$s = $dbh->prepare("select dummy from dual");
-	$s->execute();
-	while ($r = $s->fetch(PDO::FETCH_ASSOC)) {
-		var_dump($r);
-	}
+    var_dump($dbh->getAttribute(PDO::ATTR_CASE));
+    $s = $dbh->prepare("select dummy from dual");
+    $s->execute();
+    while ($r = $s->fetch(PDO::FETCH_ASSOC)) {
+        var_dump($r);
+    }
 }
 
 function do_query2($dbh, $mode)
 {
-	echo "Mode desired is $mode\n";
-	$s = $dbh->prepare("select dummy from dual", array(PDO::ATTR_CASE, $mode));
-	$s->execute();
-	while ($r = $s->fetch(PDO::FETCH_ASSOC)) {
-		var_dump($r);
-	}
+    echo "Mode desired is $mode\n";
+    $s = $dbh->prepare("select dummy from dual", array(PDO::ATTR_CASE, $mode));
+    $s->execute();
+    while ($r = $s->fetch(PDO::FETCH_ASSOC)) {
+        var_dump($r);
+    }
 }
 
 $dbh = PDOTest::factory();

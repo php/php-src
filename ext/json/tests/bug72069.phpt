@@ -10,10 +10,10 @@ var_dump($result);
 
 class A implements \JsonSerializable
 {
-	function jsonSerialize()
-	{
-		return ['end' => json_decode(null, true)];
-	}
+    function jsonSerialize()
+    {
+        return ['end' => json_decode(null, true)];
+    }
 }
 $a = new A();
 $toJsonData = $a->jsonSerialize();

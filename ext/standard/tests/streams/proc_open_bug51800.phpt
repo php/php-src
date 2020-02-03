@@ -47,7 +47,7 @@ exit(0);
 ');
 
 if (!$r) {
-	die("couldn't create helper script '$callee'");
+    die("couldn't create helper script '$callee'");
 }
 
 $process = proc_open($cmd, $descriptors, $pipes);
@@ -56,13 +56,13 @@ if (is_resource($process))
 {
         fclose($pipes[0]);
 
-	while (!feof($pipes[1]))
-		$stdout .= fread($pipes[1], 1024);
-	fclose($pipes[1]);
+    while (!feof($pipes[1]))
+        $stdout .= fread($pipes[1], 1024);
+    fclose($pipes[1]);
 
-	while (!feof($pipes[2]))
-		$stderr .= fread($pipes[2], 1024);
-	fclose($pipes[2]);
+    while (!feof($pipes[2]))
+        $stderr .= fread($pipes[2], 1024);
+    fclose($pipes[2]);
 
         $status = proc_close($process);
 }

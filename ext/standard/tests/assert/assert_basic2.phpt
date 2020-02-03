@@ -9,12 +9,12 @@ assert.bail = 0
 <?php
 function f2()
 {
-	echo "f2 called\n";
+    echo "f2 called\n";
 }
 
 function f1()
 {
-	echo "f1 called\n";
+    echo "f1 called\n";
 }
 
 var_dump($o = assert_options(ASSERT_CALLBACK));

@@ -21,8 +21,8 @@ $result = ldap_search($link, "$base", "(cn=*)");
 $ref = ldap_first_reference($link, $result);
 $refs = null;
 var_dump(
-	ldap_parse_reference($link, $ref, $refs),
-	$refs
+    ldap_parse_reference($link, $ref, $refs),
+    $refs
 );
 ?>
 --CLEAN--

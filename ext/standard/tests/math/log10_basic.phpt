@@ -20,30 +20,30 @@ echo "log10 $arg_0 = ";
 $r0 = log10($arg_0);
 var_dump($r0);
 if (allowed_rounding_error($r0 ,0.0 )) {
-	echo "Pass\n";
+    echo "Pass\n";
 }
 else {
-	echo "Fail\n";
+    echo "Fail\n";
 }
 
 echo "log10 $arg_1 = ";
 $r1 = log10($arg_1);
 var_dump($r1);
 if (allowed_rounding_error($r1 ,1.0 )) {
-	echo "Pass\n";
+    echo "Pass\n";
 }
 else {
-	echo "Fail\n";
+    echo "Fail\n";
 }
 
 echo "log10 $arg_2 = ";
 $r2 = log10($arg_2);
 var_dump($r2);
 if (allowed_rounding_error($r2 ,2.0 )) {
-	echo "Pass\n";
+    echo "Pass\n";
 }
 else {
-	echo "Fail\n";
+    echo "Fail\n";
 }
 ?>
 --EXPECTF--

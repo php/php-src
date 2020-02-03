@@ -44,7 +44,7 @@ echo "Test\n";
 include "php_cli_server.inc";
 
 php_cli_server_start("var_dump(\$_FILES);", null,
-	["-d", "post_max_size=3G", "-d", "upload_max_filesize=3G"]);
+    ["-d", "post_max_size=3G", "-d", "upload_max_filesize=3G"]);
 
 list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
 $port = intval($port)?:80;
@@ -74,13 +74,13 @@ EOF
 
 $data = str_repeat("0123456789", 10000);
 for ($i = 0; $i < $length; $i += 10000 * 10) {
-	fwrite($fp, $data) or die("write failed @ ($i)");
+    fwrite($fp, $data) or die("write failed @ ($i)");
 }
 
 fwrite($fp, $post) or die("write post failed");
 
 while (!feof($fp)) {
-	$output .= fgets($fp);
+    $output .= fgets($fp);
 }
 echo $output;
 fclose($fp);

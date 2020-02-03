@@ -4,16 +4,16 @@ array unpacking with string keys (not supported)
 <?php
 
 try {
-	$array = [1, 2, "foo" => 3, 4];
-	var_dump([...$array]);
+    $array = [1, 2, "foo" => 3, 4];
+    var_dump([...$array]);
 } catch (Error $ex) {
-	var_dump($ex->getMessage());
+    var_dump($ex->getMessage());
 }
 try {
-	$iterator = new ArrayIterator([1, 2, "foo" => 3, 4]);
-	var_dump([...$iterator]);
+    $iterator = new ArrayIterator([1, 2, "foo" => 3, 4]);
+    var_dump([...$iterator]);
 } catch (Error $ex) {
-	var_dump($ex->getMessage());
+    var_dump($ex->getMessage());
 }
 
 --EXPECT--

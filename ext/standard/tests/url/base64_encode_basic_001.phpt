@@ -15,9 +15,9 @@ Test base64_encode() function : basic functionality
 echo "*** Testing base64_encode() : basic functionality ***\n";
 
 for ($i=0; $i<256; $i++) {
-	$str = pack("c", $i);
-	$enc = base64_encode($str);
-	printf("0x%X: %s\n", $i, $enc);
+    $str = pack("c", $i);
+    $enc = base64_encode($str);
+    printf("0x%X: %s\n", $i, $enc);
 }
 
 echo "Done";

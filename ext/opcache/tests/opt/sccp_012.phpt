@@ -13,16 +13,16 @@ opcache.preload=
 function foo() {
     $o = new stdClass();
     $o->foo = 0;
-	$i = 1;
-	$c = $i < 2;
-	if ($c) {
-		$k = 2 * $i;
-		$o->foo = $i;
-		echo $o->foo;
-	}
-	$o->foo += 2;
-	$o->foo++;
-	echo $o->foo;
+    $i = 1;
+    $c = $i < 2;
+    if ($c) {
+        $k = 2 * $i;
+        $o->foo = $i;
+        echo $o->foo;
+    }
+    $o->foo += 2;
+    $o->foo++;
+    echo $o->foo;
 }
 ?>
 --EXPECTF--

@@ -20,27 +20,27 @@ $bar = $d . '\\5b53796d666f6e795c42756e646c655c5477696742756e646c655c436f6e74726
 mkdir($d, NULL, true);
 
 foreach (array($foo, $bar) as $f) {
-	touch($f);
+    touch($f);
 
-	$foo_obj = new \SplFileInfo($f);
-	var_dump(
-		$f,
-		strlen($f) > 260, /* exceeds _MAX_PATH */
-		file_exists($f),
-		file_exists($foo_obj),
-		is_readable($f),
-		is_readable($foo_obj),
-		is_writable($f),
-		is_writable($foo_obj)
-	);
+    $foo_obj = new \SplFileInfo($f);
+    var_dump(
+        $f,
+        strlen($f) > 260, /* exceeds _MAX_PATH */
+        file_exists($f),
+        file_exists($foo_obj),
+        is_readable($f),
+        is_readable($foo_obj),
+        is_writable($f),
+        is_writable($foo_obj)
+    );
 
-	unlink($f);
+    unlink($f);
 }
 
 $p = $d;
 do {
-	rmdir($p);
-	$p = dirname($p);
+    rmdir($p);
+    $p = dirname($p);
 } while ($p != $base);
 
 ?>

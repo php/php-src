@@ -6,13 +6,13 @@ Testing clone on objects whose class derived from DateTimeZone class
 date_default_timezone_set("Europe/London");
 
 class DateTimeZoneExt1 extends DateTimeZone {
-	public $property1 = 99;
-	public $property2 = "Hello";
+    public $property1 = 99;
+    public $property2 = "Hello";
 }
 
 class DateTimeZoneExt2 extends DateTimeZoneExt1 {
-	public $property3 = true;
-	public $property4 = 10.5;
+    public $property3 = true;
+    public $property4 = 10.5;
 }
 
 echo "*** Testing clone on objects whose class derived from DateTimeZone class ***\n";

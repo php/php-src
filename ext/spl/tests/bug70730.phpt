@@ -4,20 +4,20 @@ Bug #70730 (Incorrect ArrayObject serialization if unset is called in serialize(
 <?php
 class A extends \ArrayObject
 {
-	protected $foo;
+    protected $foo;
 
-	public function __construct()
-	{
-		$this->foo = 'bar';
-	}
+    public function __construct()
+    {
+        $this->foo = 'bar';
+    }
 
-	public function serialize()
-	{
-		unset($this->foo);
-		$result = parent::serialize();
-		$this->foo = 'bar';
-		return $result;
-	}
+    public function serialize()
+    {
+        unset($this->foo);
+        $result = parent::serialize();
+        $this->foo = 'bar';
+        return $result;
+    }
 }
 
 $a = new A();

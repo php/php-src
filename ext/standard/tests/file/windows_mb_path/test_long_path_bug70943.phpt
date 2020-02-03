@@ -17,8 +17,8 @@ touch($testFile);
 
 echo "Opening file... ";
 if ($fp = fopen($testFile, "r")) {
-	fclose($fp);
-	echo "OK", "\n";
+    fclose($fp);
+    echo "OK", "\n";
 }
 
 unlink($testFile);

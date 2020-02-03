@@ -36,12 +36,12 @@ class myIterator implements Iterator
     }
 }
 try {
-	chdir(__DIR__);
-	$phar = new Phar(__DIR__ . '/buildfromiterator.phar.zip');
-	var_dump($phar->buildFromIterator(new myIterator(array(basename(__FILE__, 'php') . 'phpt'))));
+    chdir(__DIR__);
+    $phar = new Phar(__DIR__ . '/buildfromiterator.phar.zip');
+    var_dump($phar->buildFromIterator(new myIterator(array(basename(__FILE__, 'php') . 'phpt'))));
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
 ?>
 --CLEAN--
