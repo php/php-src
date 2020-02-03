@@ -59,7 +59,7 @@ static void pdo_sqlite_stmt_set_column_count(pdo_stmt_t *stmt, int new_count)
 	}
 
 	/*
-	 * The column count has not changed : no need to reload columns description 
+	 * The column count has not changed : no need to reload columns description
 	 * Note: Do not handle attribute name change, without column count change
 	 */
 	if (new_count == stmt->column_count) {

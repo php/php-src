@@ -410,7 +410,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 	CALENDAR_METHOD_INIT_VARS;
 
 	object = getThis();
-	
+
 	/* must come before zpp because zpp would convert the args in the stack to 0 */
 	if (ZEND_NUM_ARGS() > (object ? 6 : 7) ||
 				zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {

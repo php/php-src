@@ -110,7 +110,7 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 #if PHP_DEBUG
 	size_t save_in_len = in_len;
 #endif
- 
+
 	assert(in && in_len ? in[in_len] == '\0' : 1);
 
 	if (!in) {

@@ -451,7 +451,7 @@ static int zend_ast_add_unpacked_element(zval *result, zval *expr) {
 		HashTable *ht = Z_ARRVAL_P(expr);
 		zval *val;
 		zend_string *key;
-		
+
 		ZEND_HASH_FOREACH_STR_KEY_VAL(ht, key, val) {
 			if (key) {
 				zend_throw_error(NULL, "Cannot unpack array with string keys");

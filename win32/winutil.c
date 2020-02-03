@@ -449,7 +449,7 @@ static zend_always_inline BOOL is_compatible(const char *name, BOOL is_smaller, 
 		free(err_txt);
 		return FALSE;
 	}
-	
+
 	DWORD major = img->FileHeader->OptionalHeader.MajorLinkerVersion;
 	DWORD minor = img->FileHeader->OptionalHeader.MinorLinkerVersion;
 
@@ -461,7 +461,7 @@ static zend_always_inline BOOL is_compatible(const char *name, BOOL is_smaller, 
 		is used with a newer CRT, but not the other way round.
 		Otherwise, if the linker major version is not same, it is an error, as
 		per the current knowledge.
-		
+
 		This check is to be extended as new VS versions come out. */
 	DWORD core_minor = (DWORD)(PHP_LINKER_MINOR/10);
 	DWORD comp_minor = (DWORD)(minor/10);

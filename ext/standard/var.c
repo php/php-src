@@ -1070,7 +1070,7 @@ again:
 
 				if (ce != PHP_IC_ENTRY && zend_hash_str_exists(&ce->function_table, "__sleep", sizeof("__sleep")-1)) {
 					zval retval, tmp;
-					
+
 					Z_ADDREF_P(struc);
 					ZVAL_OBJ(&tmp, Z_OBJ_P(struc));
 

@@ -8,36 +8,36 @@ $source = count($_SERVER['argv']) > 1 ? $_SERVER['argv'][1] : 'https://raw.githu
 // See if we can actually load it.
 $types = @file($source);
 if ($types === false) {
-	fprintf(STDERR, "Error: unable to read $source\n");
-	exit(1);
+    fprintf(STDERR, "Error: unable to read $source\n");
+    exit(1);
 }
 
 // Remove comments and flip into an extensions array.
 $extensions = [];
 array_walk($types, function ($line) use (&$extensions) {
-	$line = trim($line);
-	if ($line && $line[0] != '#') {
-		$fields = preg_split('/\s+/', $line);
-		if (count($fields) > 1) {
-			$mime = array_shift($fields);
-			foreach ($fields as $extension) {
-				$extensions[$extension] = $mime;
-			}
-		}
-	}
+    $line = trim($line);
+    if ($line && $line[0] != '#') {
+        $fields = preg_split('/\s+/', $line);
+        if (count($fields) > 1) {
+            $mime = array_shift($fields);
+            foreach ($fields as $extension) {
+                $extensions[$extension] = $mime;
+            }
+        }
+    }
 });
 
 $additional_mime_maps = [
-	"map" => "application/json",	// from commit: a0d62f08ae8cbebc88e5c92e08fca8d0cdc7309d
-	"jsm" => "application/javascript",
+    "map" => "application/json",	// from commit: a0d62f08ae8cbebc88e5c92e08fca8d0cdc7309d
+    "jsm" => "application/javascript",
 ];
 
 foreach($additional_mime_maps as $ext => $mime) {
-	if (!isset($extensions[$ext])) {
-		$extensions[$ext] = $mime;
-	} else {
-		printf(STDERR, "Ignored exist mime type: $ext => $mime\n");
-	}
+    if (!isset($extensions[$ext])) {
+        $extensions[$ext] = $mime;
+    } else {
+        printf(STDERR, "Ignored exist mime type: $ext => $mime\n");
+    }
 }
 
 ?>
@@ -66,15 +66,15 @@ foreach($additional_mime_maps as $ext => $mime) {
 #define PHP_CLI_SERVER_MIME_TYPE_MAP_H
 
 typedef struct php_cli_server_ext_mime_type_pair {
-	const char *ext;
-	const char *mime_type;
+    const char *ext;
+    const char *mime_type;
 } php_cli_server_ext_mime_type_pair;
 
 static const php_cli_server_ext_mime_type_pair mime_type_map[] = {
 <?php foreach ($extensions as $extension => $mime): ?>
-	{ "<?= addcslashes($extension, "\0..\37!@\@\177..\377") ?>", "<?= addcslashes($mime, "\0..\37!@\@\177..\377") ?>" },
+    { "<?= addcslashes($extension, "\0..\37!@\@\177..\377") ?>", "<?= addcslashes($mime, "\0..\37!@\@\177..\377") ?>" },
 <?php endforeach ?>
-	{ NULL, NULL }
+    { NULL, NULL }
 };
 
 #endif /* PHP_CLI_SERVER_MIME_TYPE_MAP_H */

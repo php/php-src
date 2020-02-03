@@ -2581,7 +2581,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 		ret = FALSE;
 	}
 	return ret;
-} 
+}
 /* }}} */
 
 static void do_soap_call(zend_execute_data *execute_data,
@@ -3820,7 +3820,7 @@ static int serialize_response_call2(xmlNodePtr body, sdlFunctionPtr function, ch
 		*node = method;
 	}
 	return use;
-} 
+}
 /* }}} */
 
 static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function_name, char *uri, zval *ret, soapHeader* headers, int version) /* {{{ */

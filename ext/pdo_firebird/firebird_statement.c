@@ -627,7 +627,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 						{
 							zend_long lval;
 							double dval;
-						
+
 							if ((Z_STRLEN_P(parameter) == 0)) {
 								*(FB_BOOLEAN*)var->sqldata = FB_FALSE;
 								break;
@@ -665,7 +665,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 				break;
 			}
 #endif
-			
+
 
 			/* check if a NULL should be inserted */
 			switch (Z_TYPE_P(parameter)) {
