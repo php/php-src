@@ -62,9 +62,11 @@ PHP                                                                        NEWS
   . Fixed bug #70078 (XSL callbacks with nodes as parameter leak memory). (cmb)
 
 - Zip:
-  . Add ZipArchive::CM_LZMA2 and ZipArchive::CM_XZ constants (since libzip 1.6.0). (remi)
-  . Add ZipArchive::ER_* missing constants. (remi)
-  . Add ZipArchive::LIBZIP_VERSION constant. (remi)
+  . Add ZipArchive::CM_LZMA2 and ZipArchive::CM_XZ constants (since libzip 1.6.0). (Remi)
+  . Add ZipArchive::RDONLY (since libzip 1.0.0). (Remi)
+  . Add ZipArchive::ER_* missing constants. (Remi)
+  . Add ZipArchive::LIBZIP_VERSION constant. (Remi)
+  . Fixed bug #73119 (Wrong return for ZipArchive::addEmptyDir Method). (Remi)
 
 23 Jan 2020, PHP 7.4.2
 
