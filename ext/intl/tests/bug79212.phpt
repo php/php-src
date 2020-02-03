@@ -13,6 +13,6 @@ var_dump($fmt->format(gmp_init('823749273428379492374')));
 $fmt = new NumberFormatter('en_US', NumberFormatter::PATTERN_DECIMAL);
 var_dump($fmt->format([1], NumberFormatter::TYPE_INT64));
 ?>
---EXPECT--
-string(21) "823749273428379400000"
+--EXPECTF--
+string(21) "823749273428379%c%c%c%c%c%c"
 string(1) "1"
