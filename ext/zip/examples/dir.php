@@ -15,7 +15,7 @@ echo "filename: " . $za->filename . "\n";
 echo "comment: " . $za->comment . "\n";
 
 for ($i=0; $i<$za->numFiles;$i++) {
-	echo "index: $i\n";
-	print_r($za->statIndex($i));
+    echo "index: $i\n";
+    print_r($za->statIndex($i));
 }
 echo "numFile:" . $za->numFiles . "\n";

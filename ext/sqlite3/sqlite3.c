@@ -322,7 +322,7 @@ PHP_METHOD(sqlite3, enableExtendedResultCodes)
 	int ret;
 
 	SQLITE3_CHECK_INITIALIZED(db_obj, db_obj->db, SQLite3)
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|b", &enable) == FAILURE) {
 		return;
 	}

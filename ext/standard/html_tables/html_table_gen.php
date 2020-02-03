@@ -51,52 +51,52 @@ $t = <<<CODE
 **************************************************************************/
 
 enum entity_charset { cs_utf_8, cs_8859_1, cs_cp1252, cs_8859_15, cs_cp1251,
-					  cs_8859_5, cs_cp866, cs_macroman, cs_koi8r, cs_big5,
-					  cs_gb2312, cs_big5hkscs, cs_sjis, cs_eucjp,
-					  cs_numelems /* used to count the number of charsets */
-					};
+                      cs_8859_5, cs_cp866, cs_macroman, cs_koi8r, cs_big5,
+                      cs_gb2312, cs_big5hkscs, cs_sjis, cs_eucjp,
+                      cs_numelems /* used to count the number of charsets */
+                    };
 #define CHARSET_UNICODE_COMPAT(cs)	((cs) <= cs_8859_1)
 #define CHARSET_SINGLE_BYTE(cs)		((cs) > cs_utf_8 && (cs) < cs_big5)
 #define CHARSET_PARTIAL_SUPPORT(cs)	((cs) >= cs_big5)
 
 static const struct {
-	const char *codeset;
-	uint32_t codeset_len;
-	enum entity_charset charset;
+    const char *codeset;
+    uint32_t codeset_len;
+    enum entity_charset charset;
 } charset_map[] = {
-	{ "ISO-8859-1",		sizeof("ISO-8859-1")-1,		cs_8859_1 },
-	{ "ISO8859-1",		sizeof("ISO8859-1")-1,		cs_8859_1 },
-	{ "ISO-8859-15",	sizeof("ISO-8859-15")-1,	cs_8859_15 },
-	{ "ISO8859-15",		sizeof("ISO8859-15")-1,		cs_8859_15 },
-	{ "utf-8",			sizeof("utf-8")-1,			cs_utf_8 },
-	{ "cp1252", 		sizeof("cp1252")-1, 		cs_cp1252 },
-	{ "Windows-1252",	sizeof("Windows-1252")-1,	cs_cp1252 },
-	{ "1252",			sizeof("1252")-1,			cs_cp1252 },
-	{ "BIG5",			sizeof("BIG5")-1,			cs_big5 },
-	{ "950",			sizeof("950")-1,			cs_big5 },
-	{ "GB2312",			sizeof("GB2312")-1,			cs_gb2312 },
-	{ "936",			sizeof("936")-1,			cs_gb2312 },
-	{ "BIG5-HKSCS",		sizeof("BIG5-HKSCS")-1,		cs_big5hkscs },
-	{ "Shift_JIS",		sizeof("Shift_JIS")-1,		cs_sjis },
-	{ "SJIS",			sizeof("SJIS")-1,			cs_sjis },
-	{ "932",			sizeof("932")-1,			cs_sjis },
-	{ "SJIS-win",		sizeof("SJIS-win")-1,		cs_sjis },
-	{ "CP932",			sizeof("CP932")-1,			cs_sjis },
-	{ "EUCJP",			sizeof("EUCJP")-1,			cs_eucjp },
-	{ "EUC-JP",			sizeof("EUC-JP")-1,			cs_eucjp },
-	{ "eucJP-win",		sizeof("eucJP-win")-1,		cs_eucjp },
-	{ "KOI8-R",			sizeof("KOI8-R")-1,			cs_koi8r },
-	{ "koi8-ru",		sizeof("koi8-ru")-1,		cs_koi8r },
-	{ "koi8r",			sizeof("koi8r")-1,			cs_koi8r },
-	{ "cp1251",			sizeof("cp1251")-1,			cs_cp1251 },
-	{ "Windows-1251",	sizeof("Windows-1251")-1,	cs_cp1251 },
-	{ "win-1251",		sizeof("win-1251")-1,		cs_cp1251 },
-	{ "iso8859-5",		sizeof("iso8859-5")-1,		cs_8859_5 },
-	{ "iso-8859-5",		sizeof("iso-8859-5")-1,		cs_8859_5 },
-	{ "cp866",			sizeof("cp866")-1,			cs_cp866 },
-	{ "866",			sizeof("866")-1,			cs_cp866 },
-	{ "ibm866",			sizeof("ibm866")-1,			cs_cp866 },
-	{ "MacRoman",		sizeof("MacRoman")-1,		cs_macroman }
+    { "ISO-8859-1",		sizeof("ISO-8859-1")-1,		cs_8859_1 },
+    { "ISO8859-1",		sizeof("ISO8859-1")-1,		cs_8859_1 },
+    { "ISO-8859-15",	sizeof("ISO-8859-15")-1,	cs_8859_15 },
+    { "ISO8859-15",		sizeof("ISO8859-15")-1,		cs_8859_15 },
+    { "utf-8",			sizeof("utf-8")-1,			cs_utf_8 },
+    { "cp1252", 		sizeof("cp1252")-1, 		cs_cp1252 },
+    { "Windows-1252",	sizeof("Windows-1252")-1,	cs_cp1252 },
+    { "1252",			sizeof("1252")-1,			cs_cp1252 },
+    { "BIG5",			sizeof("BIG5")-1,			cs_big5 },
+    { "950",			sizeof("950")-1,			cs_big5 },
+    { "GB2312",			sizeof("GB2312")-1,			cs_gb2312 },
+    { "936",			sizeof("936")-1,			cs_gb2312 },
+    { "BIG5-HKSCS",		sizeof("BIG5-HKSCS")-1,		cs_big5hkscs },
+    { "Shift_JIS",		sizeof("Shift_JIS")-1,		cs_sjis },
+    { "SJIS",			sizeof("SJIS")-1,			cs_sjis },
+    { "932",			sizeof("932")-1,			cs_sjis },
+    { "SJIS-win",		sizeof("SJIS-win")-1,		cs_sjis },
+    { "CP932",			sizeof("CP932")-1,			cs_sjis },
+    { "EUCJP",			sizeof("EUCJP")-1,			cs_eucjp },
+    { "EUC-JP",			sizeof("EUC-JP")-1,			cs_eucjp },
+    { "eucJP-win",		sizeof("eucJP-win")-1,		cs_eucjp },
+    { "KOI8-R",			sizeof("KOI8-R")-1,			cs_koi8r },
+    { "koi8-ru",		sizeof("koi8-ru")-1,		cs_koi8r },
+    { "koi8r",			sizeof("koi8r")-1,			cs_koi8r },
+    { "cp1251",			sizeof("cp1251")-1,			cs_cp1251 },
+    { "Windows-1251",	sizeof("Windows-1251")-1,	cs_cp1251 },
+    { "win-1251",		sizeof("win-1251")-1,		cs_cp1251 },
+    { "iso8859-5",		sizeof("iso8859-5")-1,		cs_8859_5 },
+    { "iso-8859-5",		sizeof("iso-8859-5")-1,		cs_8859_5 },
+    { "cp866",			sizeof("cp866")-1,			cs_cp866 },
+    { "866",			sizeof("866")-1,			cs_cp866 },
+    { "ibm866",			sizeof("ibm866")-1,			cs_cp866 },
+    { "MacRoman",		sizeof("MacRoman")-1,		cs_macroman }
 };
 
 /* longest entity name length excluding & and ; */
@@ -273,8 +273,8 @@ $t = <<<CODE
 /* Definitions for mappings *from* Unicode */
 
 typedef struct {
-	unsigned short un_code_point; /* we don't need bigger */
-	unsigned char cs_code; /* currently, we only have maps to single-byte encodings */
+    unsigned short un_code_point; /* we don't need bigger */
+    unsigned char cs_code; /* currently, we only have maps to single-byte encodings */
 } uni_to_enc;
 
 
@@ -373,28 +373,28 @@ $t = <<<'CODE'
 /* The default entity may be NULL. Binary search is still possible while
    is senseless as there are just two rows (see also find_entity_for_char()). */
 typedef union {
-	struct {
-		const char *default_entity;
-		unsigned size; /* number of remaining entries in the table */
-		unsigned short default_entity_len;
-	} leading_entry;
-	struct {
-		const char *entity;
-		unsigned second_cp; /* second code point */
-		unsigned short entity_len;
-	} normal_entry;
+    struct {
+        const char *default_entity;
+        unsigned size; /* number of remaining entries in the table */
+        unsigned short default_entity_len;
+    } leading_entry;
+    struct {
+        const char *entity;
+        unsigned second_cp; /* second code point */
+        unsigned short entity_len;
+    } normal_entry;
 } entity_multicodepoint_row;
 
 /* blocks of these should start at code points k where k % 0xFC0 == 0 */
 typedef struct {
-	char ambiguous; /* if 0 look into entity */
-	union {
-		struct {
-			const char *entity; /* may be NULL */
-			unsigned short entity_len;
-		} ent;
-		const entity_multicodepoint_row *multicodepoint_table;
-	} data;
+    char ambiguous; /* if 0 look into entity */
+    union {
+        struct {
+            const char *entity; /* may be NULL */
+            unsigned short entity_len;
+        } ent;
+        const entity_multicodepoint_row *multicodepoint_table;
+    } data;
 } entity_stage3_row;
 
 /* Calculate k & 0x3F Use as offset */
@@ -407,10 +407,10 @@ typedef const entity_stage3_row *const *entity_stage1_row; /* 64 elements */
  * If larger than 1D, we have no mapping. Otherwise lookup that index */
 
 typedef struct {
-	const entity_stage1_row *ms_table;
-	/* for tables with only basic entities, this member is to be accessed
-	 * directly for better performance: */
-	const entity_stage3_row *table;
+    const entity_stage1_row *ms_table;
+    /* for tables with only basic entities, this member is to be accessed
+     * directly for better performance: */
+    const entity_stage3_row *table;
 } entity_table_opt;
 
 /* Replaced "GT" > "gt" and "QUOT" > "quot" for consistency's sake. */
@@ -424,12 +424,12 @@ if (!$pass2)
 $dp = array();
 
 foreach (explode("\n", $data) as $l) {
-	if (preg_match('/^(#?[a-z0-9]+)\s+([a-f0-9]+) ([a-f0-9]+)/i', $l, $matches)) {
-		//echo sprintf("\t{\"%-21s 1, 0x%05d},\n", $matches[1].",", $matches[2]);
-		$dp[] = array($matches[1], $matches[2], $matches[3]);
-	} else if (preg_match('/^(#?[a-z0-9]+)\s+([a-f0-9]+)/i', $l, $matches)) {
-		$dp[] = array($matches[1], $matches[2]);
-	}
+    if (preg_match('/^(#?[a-z0-9]+)\s+([a-f0-9]+) ([a-f0-9]+)/i', $l, $matches)) {
+        //echo sprintf("\t{\"%-21s 1, 0x%05d},\n", $matches[1].",", $matches[2]);
+        $dp[] = array($matches[1], $matches[2], $matches[3]);
+    } else if (preg_match('/^(#?[a-z0-9]+)\s+([a-f0-9]+)/i', $l, $matches)) {
+        $dp[] = array($matches[1], $matches[2]);
+    }
 }
 
 $origdp = $dp;
@@ -438,18 +438,18 @@ usort($dp, function($a, $b) { return hexdec($a[1])-hexdec($b[1]); });
 
 $multicp_rows = array();
 foreach ($dp as $el) {
-	if (count($el) == 3) {
-		$multicp_rows[$el[1]] = array();
-	}
+    if (count($el) == 3) {
+        $multicp_rows[$el[1]] = array();
+    }
 }
 
 foreach ($dp as $el) {
-	if (key_exists($el[1], $multicp_rows)) {
-		if (count($el) == 3)
-			$multicp_rows[$el[1]][$el[2]] = $el[0];
-		else
-			$multicp_rows[$el[1]]["default"] = $el[0];
-	}
+    if (key_exists($el[1], $multicp_rows)) {
+        if (count($el) == 3)
+            $multicp_rows[$el[1]][$el[2]] = $el[0];
+        else
+            $multicp_rows[$el[1]]["default"] = $el[0];
+    }
 }
 
 if ($pass2 < 2)
@@ -468,24 +468,24 @@ echo
 "/* {{{ Start of double code point tables for $name */", "\n\n";
 
 foreach ($multicp_rows as $k => $v) {
-	echo "static const entity_multicodepoint_row multi_cp_{$ident}_",
-		sprintf("%05s", $k), "[] = {", "\n";
-	if (key_exists("default", $v)) {
+    echo "static const entity_multicodepoint_row multi_cp_{$ident}_",
+        sprintf("%05s", $k), "[] = {", "\n";
+    if (key_exists("default", $v)) {
         if ($v['default'] == 'GT') /* hack to make > translate to &gt; not GT; */
             $v['default'] = "gt";
-		echo "\t{ {", sprintf("\"%-21s", $v["default"].'",'),
-			"\t", sprintf("%02d", (count($v) - 1)), ",\t\t",
+        echo "\t{ {", sprintf("\"%-21s", $v["default"].'",'),
+            "\t", sprintf("%02d", (count($v) - 1)), ",\t\t",
             sprintf("% 2d", strlen($v["default"])), '} },', "\n";
-	} else {
-		echo "\t{ {", sprintf("%-22s", 'NULL,'),
-			"\t", sprintf("%02d", count($v)), ",\t\t0} },\n";
-	}
-	unset($v["default"]);
-	foreach ($v as $l => $w) {
-		echo "\t{ {", sprintf("\"%-21s", $w.'",'), "\t", sprintf("0x%05s", $l), ",\t",
+    } else {
+        echo "\t{ {", sprintf("%-22s", 'NULL,'),
+            "\t", sprintf("%02d", count($v)), ",\t\t0} },\n";
+    }
+    unset($v["default"]);
+    foreach ($v as $l => $w) {
+        echo "\t{ {", sprintf("\"%-21s", $w.'",'), "\t", sprintf("0x%05s", $l), ",\t",
             sprintf("% 2d", strlen($w)), '} },', "\n";
-	}
-	echo "};\n";
+    }
+    echo "};\n";
 }
 echo "\n/* End of double code point tables }}} */", "\n\n";
 
@@ -496,23 +496,23 @@ if ($pass2 < 2)
 
 $t = <<<CODE
 static const entity_stage3_row empty_stage3_table[] = {
-	/* 64 elements */
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+    /* 64 elements */
+    {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+    {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+    {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+    {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+    {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+    {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+    {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+    {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+    {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+    {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+    {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+    {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+    {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+    {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+    {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+    {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 };
 
 CODE;
@@ -522,49 +522,49 @@ if (!$pass2)
 
 $mstable = array();
 foreach ($dp as $el) {
-	$s1 = (hexdec($el[1]) & 0xFFF000) >> 12;
-	$s2 = (hexdec($el[1]) & 0xFC0) >> 6;
-	$s3 = hexdec($el[1]) & 0x3F;
-	if (key_exists($el[1], $multicp_rows)) {
-		$mstable[$s1][$s2][$s3] = "";
-	} else {
-		$mstable[$s1][$s2][$s3] = $el[0];
-	}
+    $s1 = (hexdec($el[1]) & 0xFFF000) >> 12;
+    $s2 = (hexdec($el[1]) & 0xFC0) >> 6;
+    $s3 = hexdec($el[1]) & 0x3F;
+    if (key_exists($el[1], $multicp_rows)) {
+        $mstable[$s1][$s2][$s3] = "";
+    } else {
+        $mstable[$s1][$s2][$s3] = $el[0];
+    }
 }
 
 for ($i = 0; $i < 0x1E; $i++) {
-	for ($k = 0; $k < 64; $k++) {
-		$any3 = false;
-		$col3 = array();
-		for ($l = 0; $l < 64; $l++) {
-			if (isset($mstable[$i][$k][$l])) {
-				$any3 = true;
-				$col3[$l] = $mstable[$i][$k][$l];
-			} else {
-				$col3[$l] = null;
-			}
-		}
-		if ($any3) {
-			echo "static const entity_stage3_row stage3_table_{$ident}_",
-				sprintf("%02X%03X", $i, $k << 6), "[] = {\n";
-			foreach ($col3 as $y => $z) {
-				if ($y == 0) echo "\t";
-				elseif ($y % 4 == 0) echo "\n\t";
-				else echo " ";
-				if ($z === NULL)
-					echo "{0, { {NULL, 0} } },";
+    for ($k = 0; $k < 64; $k++) {
+        $any3 = false;
+        $col3 = array();
+        for ($l = 0; $l < 64; $l++) {
+            if (isset($mstable[$i][$k][$l])) {
+                $any3 = true;
+                $col3[$l] = $mstable[$i][$k][$l];
+            } else {
+                $col3[$l] = null;
+            }
+        }
+        if ($any3) {
+            echo "static const entity_stage3_row stage3_table_{$ident}_",
+                sprintf("%02X%03X", $i, $k << 6), "[] = {\n";
+            foreach ($col3 as $y => $z) {
+                if ($y == 0) echo "\t";
+                elseif ($y % 4 == 0) echo "\n\t";
+                else echo " ";
+                if ($z === NULL)
+                    echo "{0, { {NULL, 0} } },";
                 elseif ($z === "QUOT") /* hack to translate " into &quote;, not &QUOT; */
                     echo "{0, { {\"quot\", 4} } },";
-				elseif ($z !== "")
-					echo "{0, { {\"$z\", ", strlen($z), "} } },";
-				else
-					echo "{1, { {(void *)", sprintf("multi_cp_{$ident}_%05X",
-						($i << 12) | ($k << 6) | $y ), ", 0} } },";
+                elseif ($z !== "")
+                    echo "{0, { {\"$z\", ", strlen($z), "} } },";
+                else
+                    echo "{1, { {(void *)", sprintf("multi_cp_{$ident}_%05X",
+                        ($i << 12) | ($k << 6) | $y ), ", 0} } },";
 
-			}
-			echo "\n};\n\n";
-		}
-	}
+            }
+            echo "\n};\n\n";
+        }
+    }
 }
 
 if ($pass2 < 2)
@@ -578,22 +578,22 @@ echo
 
 $t = <<<CODE
 static const entity_stage2_row empty_stage2_table[] = {
-	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
-	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
-	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
-	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
-	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
-	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
-	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
-	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
-	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
-	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
-	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
-	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
-	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
-	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
-	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
-	empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
+    empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
+    empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
+    empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
+    empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
+    empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
+    empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
+    empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
+    empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
+    empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
+    empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
+    empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
+    empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
+    empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
+    empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
+    empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
+    empty_stage3_table, empty_stage3_table, empty_stage3_table, empty_stage3_table,
 };
 
 CODE;
@@ -602,26 +602,26 @@ if (!$pass2)
     echo $t;
 
 for ($i = 0; $i < 0x1E; $i++) {
-	$any = false;
-	for ($k = 0; $k < 64; $k++) {
-		if (isset($mstable[$i][$k]))
-			$any = true;
-	}
-	if ($any) {
-		echo "static const entity_stage2_row stage2_table_{$ident}_",
-			sprintf("%02X000", $i), "[] = {\n";
-		for ($k = 0; $k < 64; $k++) {
-			if ($k == 0) echo "\t";
-			elseif ($k % 4 == 0) echo "\n\t";
-			else echo " ";
-			if (isset($mstable[$i][$k])) {
-				echo sprintf("stage3_table_{$ident}_%05X", ($i << 12) | ($k << 6)), ",";
-			} else {
-				echo "empty_stage3_table", ",";
-			}
-		}
-		echo "\n};\n\n";
-	}
+    $any = false;
+    for ($k = 0; $k < 64; $k++) {
+        if (isset($mstable[$i][$k]))
+            $any = true;
+    }
+    if ($any) {
+        echo "static const entity_stage2_row stage2_table_{$ident}_",
+            sprintf("%02X000", $i), "[] = {\n";
+        for ($k = 0; $k < 64; $k++) {
+            if ($k == 0) echo "\t";
+            elseif ($k % 4 == 0) echo "\n\t";
+            else echo " ";
+            if (isset($mstable[$i][$k])) {
+                echo sprintf("stage3_table_{$ident}_%05X", ($i << 12) | ($k << 6)), ",";
+            } else {
+                echo "empty_stage3_table", ",";
+            }
+        }
+        echo "\n};\n\n";
+    }
 }
 
 echo
@@ -629,10 +629,10 @@ echo
 
 echo "static const entity_stage1_row entity_ms_table_{$ident}[] = {\n";
 for ($i = 0; $i < 0x1E; $i++) {
-	if (isset($mstable[$i]))
-		echo "\t", sprintf("stage2_table_{$ident}_%02X000", $i), ",\n";
-	else
-		echo "\tempty_stage2_table,\n";
+    if (isset($mstable[$i]))
+        echo "\t", sprintf("stage2_table_{$ident}_%02X000", $i), ",\n";
+    else
+        echo "\tempty_stage2_table,\n";
 }
 echo "};\n\n";
 
@@ -701,17 +701,17 @@ echo
 
 $t = <<<CODE
 typedef struct {
-	const char *entity;
-	unsigned short entity_len;
-	unsigned int codepoint1;
-	unsigned int codepoint2;
+    const char *entity;
+    unsigned short entity_len;
+    unsigned int codepoint1;
+    unsigned int codepoint2;
 } entity_cp_map;
 
 typedef const entity_cp_map *entity_ht_bucket;
 
 typedef struct {
-	unsigned num_elems; /* power of 2 */
-	const entity_ht_bucket *buckets; /* .num_elems elements */
+    unsigned num_elems; /* power of 2 */
+    const entity_ht_bucket *buckets; /* .num_elems elements */
 } entity_ht;
 
 static const entity_cp_map ht_bucket_empty[] = { {NULL, 0, 0, 0} };
@@ -724,15 +724,15 @@ if (!$pass2)
 function hashfun($str)
 {
 
-	$hash = 5381;
-	$nKeyLength = strlen($str);
-	$pos = 0;
+    $hash = 5381;
+    $nKeyLength = strlen($str);
+    $pos = 0;
 
-	for (; $nKeyLength > 0; $nKeyLength--) {
-		$hash = (int)(((int)(((int)($hash << 5)) + $hash)) + ord($str[$pos++]))
-				 & 0xFFFFFFFF;
-	}
-	return $hash;
+    for (; $nKeyLength > 0; $nKeyLength--) {
+        $hash = (int)(((int)(((int)($hash << 5)) + $hash)) + ord($str[$pos++]))
+                 & 0xFFFFFFFF;
+    }
+    return $hash;
 
 }
 
@@ -740,31 +740,31 @@ $numelems = max(pow(2, ceil(log(1.5*count($origdp))/log(2))),16);
 $mask = $numelems - 1;
 $hashes = array();
 foreach ($origdp as $e) {
-	$hashes[hashfun($e[0]) & $mask][] = $e;
-	if (isset($e[2])) {
-		$entlen = strlen($e[0]) + 2;
-		$utf8len = strlen(
-			mb_convert_encoding("&#x{$e[1]};&#x{$e[2]};", "UTF-8", "HTML-ENTITIES"));
-		if ($utf8len > $entlen*1.2) {
-			die("violated assumption for traverse_for_entities");
-		}
-	}
+    $hashes[hashfun($e[0]) & $mask][] = $e;
+    if (isset($e[2])) {
+        $entlen = strlen($e[0]) + 2;
+        $utf8len = strlen(
+            mb_convert_encoding("&#x{$e[1]};&#x{$e[2]};", "UTF-8", "HTML-ENTITIES"));
+        if ($utf8len > $entlen*1.2) {
+            die("violated assumption for traverse_for_entities");
+        }
+    }
 }
 
 for ($i = 0; $i < $numelems; $i++) {
-	if (empty($hashes[$i]))
-		continue;
-	echo "static const entity_cp_map ht_bucket_{$ident}_", sprintf("%03X", $i) ,"[] = {";
-	foreach ($hashes[$i] as $h) {
-		if (isset($h[2])) {
-			echo sprintf(' {"%s", %d, 0x%05X, 0x%05X},',
-				$h[0], strlen($h[0]), hexdec($h[1]), hexdec($h[2]));
-		} else {
-			echo sprintf(' {"%s", %d, 0x%05X, 0},',
-				$h[0], strlen($h[0]), hexdec($h[1]));
-		}
-	}
-	echo " {NULL, 0, 0, 0} };\n";
+    if (empty($hashes[$i]))
+        continue;
+    echo "static const entity_cp_map ht_bucket_{$ident}_", sprintf("%03X", $i) ,"[] = {";
+    foreach ($hashes[$i] as $h) {
+        if (isset($h[2])) {
+            echo sprintf(' {"%s", %d, 0x%05X, 0x%05X},',
+                $h[0], strlen($h[0]), hexdec($h[1]), hexdec($h[2]));
+        } else {
+            echo sprintf(' {"%s", %d, 0x%05X, 0},',
+                $h[0], strlen($h[0]), hexdec($h[1]));
+        }
+    }
+    echo " {NULL, 0, 0, 0} };\n";
 }
 echo "\n";
 
@@ -772,20 +772,20 @@ echo
 "static const entity_cp_map *const ht_buckets_{$ident}[] = {\n";
 
 for ($i = 0; $i < $numelems; $i++) {
-	if ($i == 0) echo "\t";
-	elseif ($i % 4 == 0) echo "\n\t";
-	else echo " ";
-	if (empty($hashes[$i]))
-		echo "ht_bucket_empty,";
-	else
-		echo "ht_bucket_{$ident}_", sprintf("%03X", $i), ",";
+    if ($i == 0) echo "\t";
+    elseif ($i % 4 == 0) echo "\n\t";
+    else echo " ";
+    if (empty($hashes[$i]))
+        echo "ht_bucket_empty,";
+    else
+        echo "ht_bucket_{$ident}_", sprintf("%03X", $i), ",";
 }
 echo "\n};\n\n";
 
 echo
 "static const entity_ht ent_ht_{$ident} = {
-	", sprintf("0x%X", $numelems), ",
-	ht_buckets_{$ident}
+    ", sprintf("0x%X", $numelems), ",
+    ht_buckets_{$ident}
 };\n\n";
 
 echo

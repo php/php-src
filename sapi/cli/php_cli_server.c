@@ -510,7 +510,7 @@ static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
 
 		if (php_cli_server_workers_max > 1) {
 			zend_long php_cli_server_worker;
-			
+
 			php_cli_server_workers = calloc(
 				php_cli_server_workers_max, sizeof(pid_t));
 			if (!php_cli_server_workers) {
@@ -528,7 +528,7 @@ static int sapi_cli_server_startup(sapi_module_struct *sapi_module) /* {{{ */
 
 				if (pid == FAILURE) {
 					/* no more forks allowed, work with what we have ... */
-					php_cli_server_workers_max = 
+					php_cli_server_workers_max =
 						php_cli_server_worker + 1;
 					return SUCCESS;
 				} else if (pid == SUCCESS) {
@@ -2321,14 +2321,14 @@ static void php_cli_server_dtor(php_cli_server *server) /* {{{ */
 			 int php_cli_server_worker_status;
 
 			 do {
-				if (waitpid(php_cli_server_workers[php_cli_server_worker], 
-						   &php_cli_server_worker_status, 
+				if (waitpid(php_cli_server_workers[php_cli_server_worker],
+						   &php_cli_server_worker_status,
 						   0) == FAILURE) {
 					/* an extremely bad thing happened */
 					break;
 				}
 
-			 } while (!WIFEXITED(php_cli_server_worker_status) && 
+			 } while (!WIFEXITED(php_cli_server_worker_status) &&
 					  !WIFSIGNALED(php_cli_server_worker_status));
 		}
 
