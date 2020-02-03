@@ -38,6 +38,15 @@ $excludes = [
     'Zend/tests/flexible-',
 ];
 
+$psr12Excludes = [
+    'ext/tokenizer/tests',
+    'ext/standard/tests/general_functions',
+    'ext/standard/tests/strings',
+    '.stub.php',
+];
+
+// Apply basic formatting
+
 foreach ($it as $file) {
     if (!$file->isFile()) {
         continue;
@@ -58,19 +67,40 @@ foreach ($it as $file) {
     $origCode = $code = file_get_contents($path);
 
     if ($lang === 'c') {
-        $code = stripTrailingWhitespace($code);
+        //$code = stripTrailingWhitespace($code);
         // TODO: Avoid this for now.
         // $code = reindentToTabs($code);
     } else if ($lang === 'php') {
         $code = stripTrailingWhitespace($code);
         $code = reindentToSpaces($code);
+
+        $formatPsr12 = true;
+        foreach ($psr12Excludes as $exclude) {
+            if (strpos($path, $exclude) !== false) {
+                $formatPsr12 = false;
+                break;
+            }
+        }
+
+        if ($formatPsr12) {
+            $code = applyPsr12($code);
+        }
     } else if ($lang === 'phpt') {
         // TODO: Don't reformat .phpt on PHP-7.4.
-        /*$code = transformTestCode($code, function(string $code) {
+        $code = transformTestCode($code, function(string $code) use ($path, $psr12Excludes) {
             $code = stripTrailingWhitespace($code);
             $code = reindentToSpaces($code);
+
+            foreach ($psr12Excludes as $exclude) {
+                if (strpos($path, $exclude) !== false) {
+                    return $code;
+                }
+            }
+
+            $code = applyPsr12($code) . "\n?>\n";
+
             return $code;
-        });*/
+        });
     }
 
     if ($origCode !== $code) {
@@ -119,7 +149,7 @@ function transformTestCode(string $code, callable $transformer): string {
     }
 
     return preg_replace_callback(
-        '/(--FILE--)(.+?)(--[A-Z_]+--)/s',
+        '/(--FILE--)(.+?)(--[A-Z_]+--|={2,}DONE={2,})/s',
         function(array $matches) use($transformer) {
             return $matches[1] . $transformer($matches[2]) . $matches[3];
         },
@@ -145,4 +175,51 @@ function getLanguageFromExtension(string $ext): ?string {
     default:
         return null;
     }
+}
+
+function applyPsr12(string $code): string {
+    $phpcbfPath = getPhpCodeBeautifierPath();
+    $cacheFilePath = __DIR__ . "/formatting-cache.php";
+
+    file_put_contents($cacheFilePath, $code);
+
+    passthru("php $phpcbfPath --standard=PSR12 $cacheFilePath", $exit);
+
+    if ($exit <= 1) {
+        $code = file_get_contents($cacheFilePath);
+    }
+
+    if (file_exists($cacheFilePath)) {
+        unlink($cacheFilePath);
+    }
+
+    return $code;
+}
+
+function getPhpCodeBeautifierPath(): string {
+    $version = "3.5.4";
+    $phpCodeSnifferDir = __DIR__ . "/PHP-CodeSniffer-$version";
+    if (!is_dir($phpCodeSnifferDir)) {
+        $cwd = getcwd();
+        chdir(__DIR__);
+
+        passthru("wget https://github.com/squizlabs/PHP_CodeSniffer/archive/$version.tar.gz", $exit);
+        if ($exit !== 0) {
+            passthru("curl -LO https://github.com/squizlabs/PHP_CodeSniffer/archive/$version.tar.gz", $exit);
+        }
+        if ($exit !== 0) {
+            throw new Exception("Failed to download PHP CodeSniffer tarball");
+        }
+        if (!mkdir($phpCodeSnifferDir)) {
+            throw new Exception("Failed to create directory $phpCodeSnifferDir");
+        }
+        passthru("tar xvzf $version.tar.gz -C PHP-CodeSniffer-$version --strip-components 1", $exit);
+        if ($exit !== 0) {
+            throw new Exception("Failed to extract PHP-CodeSniffer tarball");
+        }
+        unlink(__DIR__ . "/$version.tar.gz");
+        chdir($cwd);
+    }
+
+    return $phpCodeSnifferDir . "/bin/phpcbf";
 }
