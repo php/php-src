@@ -12,6 +12,11 @@ $curl_version = curl_version();
 if ($curl_version['version_number'] < 0x071100) {
 	exit("skip: test works only with curl >= 7.17.0");
 }
+$socket = fsockopen('127.0.0.1', 9, $errno, $errstr, 1);
+if ($socket === false) {
+	exit("skip discard protocol unsupported");
+}
+fclose($socket);
 ?>
 --FILE--
 <?php
