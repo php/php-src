@@ -24,6 +24,9 @@ PHP                                                                        NEWS
   . Fixed bug #79112 (IMAP extension can't find OpenSSL libraries at configure
     time). (Nikita)
 
+ -Intl:
+  . Fixed bug #79212 (NumberFormatter::format() may detect wrong type). (cmb)
+
 - MBString:
   . Fixed bug #79149 (SEGV in mb_convert_encoding with non-string encodings).
     (cmb)

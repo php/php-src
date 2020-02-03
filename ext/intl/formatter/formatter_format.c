@@ -53,23 +53,23 @@ PHP_FUNCTION( numfmt_format )
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
-	if(type == FORMAT_TYPE_DEFAULT) {
-		if(Z_TYPE_P(number) == IS_STRING) {
-			convert_scalar_to_number_ex(number);
-		}
-
-		if(Z_TYPE_P(number) == IS_LONG) {
-			/* take INT32 on 32-bit, int64 on 64-bit */
-			type = (sizeof(zend_long) == 8)?FORMAT_TYPE_INT64:FORMAT_TYPE_INT32;
-		} else if(Z_TYPE_P(number) == IS_DOUBLE) {
-			type = FORMAT_TYPE_DOUBLE;
-		} else {
-			type = FORMAT_TYPE_INT32;
-		}
+	if(Z_TYPE_P(number) != IS_ARRAY) {
+		convert_scalar_to_number_ex(number);
+	} else {
+		convert_to_long(number);
 	}
 
-	if(Z_TYPE_P(number) != IS_DOUBLE && Z_TYPE_P(number) != IS_LONG) {
-		convert_scalar_to_number(number );
+	if(type == FORMAT_TYPE_DEFAULT) {
+		switch(Z_TYPE_P(number)) {
+			case IS_LONG:
+				/* take INT32 on 32-bit, int64 on 64-bit */
+				type = (sizeof(zend_long) == 8)?FORMAT_TYPE_INT64:FORMAT_TYPE_INT32;
+				break;
+			case IS_DOUBLE:
+				type = FORMAT_TYPE_DOUBLE;
+				break;
+			EMPTY_SWITCH_DEFAULT_CASE();
+		}
 	}
 
 	switch(type) {
