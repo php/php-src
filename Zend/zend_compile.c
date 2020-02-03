@@ -1225,7 +1225,7 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 	return str;
 }
 
-zend_string *zend_type_to_string(zend_type type) {
+ZEND_API zend_string *zend_type_to_string(zend_type type) {
 	return zend_type_to_string_resolved(type, NULL);
 }
 
