@@ -20,9 +20,9 @@ echo "*** Testing vfprintf() : unsigned formats and signed & other types of valu
 
 // defining array of unsigned formats
 $formats =
-  '%u %+u %-u 
+  '%u %+u %-u
    %lu %Lu %4u %-4u
-   %10.4u %-10.4u %.4u 
+   %10.4u %-10.4u %.4u
    %\'#2u %\'2u %\'$2u %\'_2u
    %3$u %4$u %1$u %2$u';
 
@@ -85,26 +85,26 @@ unlink($data_file);
 *** Testing vfprintf() : unsigned formats and signed & other types of values ***
 
 -- Iteration 1 --
-2 0 10 
+2 0 10
    123456 u 1234 2820130816
-   2840207360 1177509888 12345 
+   2840207360 1177509888 12345
    12 4294967284 4294843840 _3
    10 123456 2 0
 -- Iteration 2 --
-0 0 0 
+0 0 0
    123 u 4294967173 123 
-            0 0          0 
+            0 0          0
    1234 0 $0 _0
    0 123 0 0
 -- Iteration 3 --
-1 1 1 
+1 1 1
    1 u    1 1   
-            1 1          1 
+            1 1          1
    #1 1 $1 _1
    1 1 1 1
 -- Iteration 4 --
-1 1 0 
+1 1 0
    1 u    0 1   
-            1 1          0 
+            1 1          0
    #0 1 $1 _0
    0 1 1 1
