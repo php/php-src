@@ -265,11 +265,11 @@ void shutdown_executor(void) /* {{{ */
 		zend_close_rsrc_list(&EG(regular_list));
 	} zend_end_try();
 
-	zend_objects_store_free_object_storage(&EG(objects_store), fast_shutdown);
-
-	/* All resources and objects are destroyed. */
+	/* All resources are destroyed. */
 	/* No PHP callback functions may be called after this point. */
 	EG(active) = 0;
+
+	zend_objects_store_free_object_storage(&EG(objects_store), fast_shutdown);
 
 	zend_try {
 		zend_llist_apply(&zend_extensions, (llist_apply_func_t) zend_extension_deactivator);
