@@ -65,6 +65,9 @@ PHP                                                                        NEWS
   . Fixed bug #78902 (Memory leak when using stream_filter_append). (liudaixiao)
   . Fixed bug #78969 (PASSWORD_DEFAULT should match PASSWORD_BCRYPT instead of being null). (kocsismate)
 
+- Testing:
+  . Fixed bug #78090 (bug45161.phpt takes forever to finish). (cmb)
+
 - XSL:
   . Fixed bug #70078 (XSL callbacks with nodes as parameter leak memory). (cmb)
 
