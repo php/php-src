@@ -11,13 +11,13 @@ $x = array( new XMLWriter() );
 $x[0]->openUri("bug79029_1.txt");
 $x[0]->startComment();
 
-$x = new XMLWriter();
-$x->openUri("bug79029_2.txt");
+$y = new XMLWriter();
+$y->openUri("bug79029_2.txt");
 fclose(@end(get_resources()));
 
 file_put_contents("bug79029_3.txt", "a");
-$x = new XMLReader();
-$x->open("bug79029_3.txt");
+$z = new XMLReader();
+$z->open("bug79029_3.txt");
 fclose(@end(get_resources()));
 ?>
 okey
