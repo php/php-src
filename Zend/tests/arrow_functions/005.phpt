@@ -3,8 +3,10 @@ Arrow function $this binding
 --FILE--
 <?php
 
-class Test {
-    public function method() {
+class Test
+{
+    public function method()
+    {
         // It would be okay if this is NULL, but the rest should work
         $fn = fn() => 42;
         $r = new ReflectionFunction($fn);
@@ -31,12 +33,13 @@ class Test {
         var_dump($fn());
     }
 
-    public function method2() {
+    public function method2()
+    {
         var_dump($this);
     }
 }
 
-(new Test)->method();
+(new Test())->method();
 
 ?>
 --EXPECT--

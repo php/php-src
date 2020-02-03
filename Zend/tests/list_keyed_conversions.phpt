@@ -9,7 +9,7 @@ $results = [
     "" => ""
 ];
 
-list(NULL => $NULL, 1.5 => $float, FALSE => $FALSE, TRUE => $TRUE) = $results;
+list(null => $NULL, 1.5 => $float, false => $FALSE, true => $TRUE) = $results;
 var_dump($NULL, $float, $FALSE, $TRUE);
 
 echo PHP_EOL;

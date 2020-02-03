@@ -3,22 +3,27 @@ Covariant return-by-ref constraints
 --FILE--
 <?php
 
-class A implements ArrayAccess {
+class A implements ArrayAccess
+{
     public $foo = array();
 
-    public function &offsetGet($n) {
+    public function &offsetGet($n)
+    {
         return $this->foo[$n];
     }
 
-    public function offsetSet($n, $v) {
+    public function offsetSet($n, $v)
+    {
     }
-    public function offsetUnset($n) {
+    public function offsetUnset($n)
+    {
     }
-    public function offsetExists($n) {
+    public function offsetExists($n)
+    {
     }
 }
 
-$a = new A;
+$a = new A();
 
 $a['foo']['bar'] = 2;
 

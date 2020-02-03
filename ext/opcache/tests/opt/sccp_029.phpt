@@ -10,10 +10,12 @@ opcache.preload=
 --FILE--
 <?php
 
-class Test { 
+class Test
+{
     public string $x = "x";
 }
-function test() {
+function test()
+{
     $test = new Test();
     $ref = "y";
     $test->x =& $ref;

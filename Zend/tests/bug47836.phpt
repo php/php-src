@@ -11,6 +11,7 @@ try {
 }
 
 var_dump($arr);
+
 ?>
 --EXPECTF--
 Cannot add element to the array as the next element is already occupied

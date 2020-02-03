@@ -3,15 +3,19 @@ Bug #47054 (BC break in static functions called as dynamic)
 --FILE--
 <?php
 
-class C {
-  final static function s() {
-    print "Called class: " . get_called_class() . "\n";
-  }
+class C
+{
+    final static function s()
+    {
+        print "Called class: " . get_called_class() . "\n";
+    }
 }
-class D extends C {
-  public function m() {
-    $this->s();
-  }
+class D extends C
+{
+    public function m()
+    {
+        $this->s();
+    }
 }
 
 $d = new D();

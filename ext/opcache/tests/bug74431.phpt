@@ -8,22 +8,27 @@ opcache.optimization_level=0xffffffff
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function test(){
+
+function test()
+{
     $arr = [1,2];
     $j = 0;
     $cond = true;
-    foreach ($arr as $i => $v){
-        while(1){
-            if($cond){
+    foreach ($arr as $i => $v) {
+        while (1) {
+            if ($cond) {
                 break;
             }
         }
         $j++;
-        echo $j."\n";
-        if ($j>10) break;
+        echo $j . "\n";
+        if ($j > 10) {
+            break;
+        }
     }
 }
 test();
+
 ?>
 --EXPECT--
 1

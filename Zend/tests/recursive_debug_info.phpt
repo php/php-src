@@ -3,13 +3,15 @@ Test recursive __debugInfo() method
 --FILE--
 <?php
 
-class Test {
-    public function __debugInfo() {
+class Test
+{
+    public function __debugInfo()
+    {
         return [$this];
     }
 }
 
-var_dump(new Test);
+var_dump(new Test());
 
 ?>
 --EXPECT--

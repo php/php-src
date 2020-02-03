@@ -3,11 +3,17 @@ Invalid union type variance: Removing argument union type
 --FILE--
 <?php
 
-class A {
-    public function method(int|float $a) {}
+class A
+{
+    public function method(int | float $a)
+    {
+    }
 }
-class B extends A {
-    public function method(int $a) {}
+class B extends A
+{
+    public function method(int $a)
+    {
+    }
 }
 
 ?>

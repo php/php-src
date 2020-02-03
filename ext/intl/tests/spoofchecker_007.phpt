@@ -21,6 +21,7 @@ $x->setRestrictionLevel(Spoofchecker::SINGLE_SCRIPT_RESTRICTIVE);
 
 $mixed = "\u{91CE}\u{7403}\u{30FC} abc";
 var_dump($x->isSuspicious($mixed));
+
 ?>
 --EXPECT--
 bool(false)

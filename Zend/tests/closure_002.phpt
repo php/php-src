@@ -6,11 +6,11 @@ Closure 002: Lambda with lexical variables (global scope)
 $x = 4;
 
 $lambda1 = function () use ($x) {
-	echo "$x\n";
+    echo "$x\n";
 };
 
 $lambda2 = function () use (&$x) {
-	echo "$x\n";
+    echo "$x\n";
 };
 
 $lambda1();
@@ -20,6 +20,7 @@ $lambda1();
 $lambda2();
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 4

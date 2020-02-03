@@ -7,6 +7,7 @@ if (!extension_loaded("xmlreader")) print "skip xmlreader extension not availabl
 ?>
 --FILE--
 <?php
+
 $x = array( new XMLWriter() );
 $x[0]->openUri("bug79029_1.txt");
 $x[0]->startComment();
@@ -21,6 +22,8 @@ $x->open("bug79029_3.txt");
 fclose(@end(get_resources()));
 ?>
 okey
+
+?>
 --CLEAN--
 <?php
 @unlink("bug79029_1.txt");

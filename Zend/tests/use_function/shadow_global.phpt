@@ -7,11 +7,9 @@ namespace {
     require 'includes/global_bar.inc';
     require 'includes/foo_bar.inc';
 }
-
 namespace {
     var_dump(bar());
 }
-
 namespace {
     use function foo\bar;
     var_dump(bar());

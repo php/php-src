@@ -9,7 +9,7 @@ require_once(__DIR__.'/skipif.inc');
 --FILE--
 <?php
 
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__ . '/imap_include.inc');
 $stream_id = setup_test_mailbox('', 1);
 
 imap_delete($stream_id, 1);

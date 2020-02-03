@@ -3,11 +3,17 @@ Invalid union type variance: Adding extra return type
 --FILE--
 <?php
 
-class A {
-    public function method(): int {}
+class A
+{
+    public function method(): int
+    {
+    }
 }
-class B extends A {
-    public function method(): int|float {}
+class B extends A
+{
+    public function method(): int | float
+    {
+    }
 }
 
 ?>

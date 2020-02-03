@@ -4,12 +4,14 @@ jdtojulian()
 <?php include 'skipif.inc'; ?>
 --FILE--
 <?php
-echo jdtojulian(0). "\n";
-echo jdtojulian(1). "\n";
-echo jdtojulian(2298874). "\n";
-echo jdtojulian(2299151). "\n";
-echo jdtojulian(2440588). "\n";
-echo jdtojulian(2816423). "\n";
+
+echo jdtojulian(0) . "\n";
+echo jdtojulian(1) . "\n";
+echo jdtojulian(2298874) . "\n";
+echo jdtojulian(2299151) . "\n";
+echo jdtojulian(2440588) . "\n";
+echo jdtojulian(2816423) . "\n";
+
 ?>
 --EXPECT--
 0/0/0

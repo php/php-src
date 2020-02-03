@@ -12,11 +12,13 @@ opcache.protect_memory=1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 $file = __DIR__ . "/bug74663.inc";
 file_put_contents($file, "");
 include $file;
 
 var_dump(is_file($file));
+
 ?>
 --CLEAN--
 <?php

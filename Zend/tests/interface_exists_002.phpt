@@ -5,11 +5,20 @@ Testing interface_exists() inside a namespace
 
 namespace foo;
 
-interface IFoo { }
+interface IFoo
+{
 
-interface ITest extends IFoo { }
+}
 
-interface IBar extends IFoo { }
+interface ITest extends IFoo
+{
+
+}
+
+interface IBar extends IFoo
+{
+
+}
 
 
 var_dump(interface_exists('IFoo'));

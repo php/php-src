@@ -5,6 +5,7 @@ IntlTimeZone::getDisplayName(): type parameter (ICU >= 49 && ICU < 50.1.2)
 <?php if (version_compare(INTL_ICU_VERSION, '50.1.2') >=  0) die('skip for ICU < 50.1.2'); ?>
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 ini_set("error_reporting", -1);
 ini_set("display_errors", 1);

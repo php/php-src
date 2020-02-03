@@ -2,10 +2,12 @@
 Bug #60774 (DateInterval::format("%a") is always zero when an interval is created using the createFromDateString method)
 --FILE--
 <?php
-$i= DateInterval::createFromDateString('2 days');
+
+$i = DateInterval::createFromDateString('2 days');
 var_dump($i);
 echo $i->format("%d"), "\n";
 echo $i->format("%a"), "\n";
+
 ?>
 --EXPECTF--
 object(DateInterval)#1 (%d) {

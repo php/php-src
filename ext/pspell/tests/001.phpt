@@ -23,17 +23,18 @@ $string .= "Sorry? ";
 $string .= "My hovercraft (pantomimes puffing a cigarette)... is full of eels (pretends to strike a match). ";
 $string .= "Ahh, matches!";
 
-$pspell = pspell_new ("en", "", "", "", (PSPELL_FAST|PSPELL_RUN_TOGETHER));
-$array = explode(' ',preg_replace('/[^a-zA-Z0-9 ]/','',$string));
-for($i=0,$u=count($array);$i<$u;++$i) {
-    echo $array[$i].' : ';
+$pspell = pspell_new("en", "", "", "", (PSPELL_FAST | PSPELL_RUN_TOGETHER));
+$array = explode(' ', preg_replace('/[^a-zA-Z0-9 ]/', '', $string));
+for ($i = 0,$u = count($array); $i < $u; ++$i) {
+    echo $array[$i] . ' : ';
     if (!pspell_check($pspell, $array[$i])) {
         echo "..false\n";
-        echo "Possible spellings: " . join(',',pspell_suggest ($pspell, $array[$i])) . "\n";
+        echo "Possible spellings: " . join(',', pspell_suggest($pspell, $array[$i])) . "\n";
     } else {
         echo "true\n";
     }
 }
+
 ?>
 --EXPECTF--
 I : true

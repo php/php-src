@@ -4,8 +4,12 @@ Use conflicts are detected for late-bound classes
 <?php
 
 /* Reverse declaration order disables early-binding */
-class B extends A {}
-class A {}
+class B extends A
+{
+}
+class A
+{
+}
 use Foo\B;
 
 ?>

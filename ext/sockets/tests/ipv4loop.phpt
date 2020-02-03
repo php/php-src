@@ -8,45 +8,47 @@ IPv4 Loopback test
 ?>
 --FILE--
 <?php
-	/* Setup socket server */
-	$server = socket_create(AF_INET, SOCK_STREAM, getprotobyname('tcp'));
-	if (!$server) {
-		die('Unable to create AF_INET socket [server]');
-	}
 
-	if (!socket_bind($server, '127.0.0.1', 0)) {
-		die("Unable to bind to 127.0.0.1");
-	}
+    /* Setup socket server */
+    $server = socket_create(AF_INET, SOCK_STREAM, getprotobyname('tcp'));
+if (!$server) {
+    die('Unable to create AF_INET socket [server]');
+}
 
-	if (!socket_listen($server, 2)) {
-		die('Unable to listen on socket');
-	}
+if (!socket_bind($server, '127.0.0.1', 0)) {
+    die("Unable to bind to 127.0.0.1");
+}
 
-	socket_getsockname($server, $unused, $port);
+if (!socket_listen($server, 2)) {
+    die('Unable to listen on socket');
+}
 
-	/* Connect to it */
-	$client = socket_create(AF_INET, SOCK_STREAM, getprotobyname('tcp'));
-	if (!$client) {
-		die('Unable to create AF_INET socket [client]');
-	}
-	if (!socket_connect($client, '127.0.0.1', $port)) {
-		die('Unable to connect to server socket');
-	}
+    socket_getsockname($server, $unused, $port);
 
-	/* Accept that connection */
-	$socket = socket_accept($server);
-	if (!$socket) {
-		die('Unable to accept connection');
-	}
+    /* Connect to it */
+    $client = socket_create(AF_INET, SOCK_STREAM, getprotobyname('tcp'));
+if (!$client) {
+    die('Unable to create AF_INET socket [client]');
+}
+if (!socket_connect($client, '127.0.0.1', $port)) {
+    die('Unable to connect to server socket');
+}
 
-	socket_write($client, "ABCdef123\n");
+    /* Accept that connection */
+    $socket = socket_accept($server);
+if (!$socket) {
+    die('Unable to accept connection');
+}
 
-	$data = socket_read($socket, 10, PHP_BINARY_READ);
-	var_dump($data);
+    socket_write($client, "ABCdef123\n");
 
-	socket_close($client);
-	socket_close($socket);
-	socket_close($server);
+    $data = socket_read($socket, 10, PHP_BINARY_READ);
+    var_dump($data);
+
+    socket_close($client);
+    socket_close($socket);
+    socket_close($server);
+
 ?>
 --EXPECT--
 string(10) "ABCdef123

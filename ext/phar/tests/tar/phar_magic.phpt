@@ -7,6 +7,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar.php';
 $p = new Phar($fname);
 var_dump($p->isFileFormat(Phar::TAR));
@@ -18,6 +19,7 @@ set_include_path("phar://" . __FILE__);
 include "phar://" . __FILE__ . "/a";
 __HALT_COMPILER();');
 include $fname;
+
 ?>
 --CLEAN--
 <?php

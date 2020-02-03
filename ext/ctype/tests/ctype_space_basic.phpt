@@ -4,6 +4,7 @@ Test ctype_space() function : basic functionality
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 /* Prototype  : bool ctype_space(mixed $c)
  * Description: Checks for whitespace character(s)
  * Source code: ext/ctype/ctype.c
@@ -20,6 +21,7 @@ $c2 = "Hello, world!\n";
 var_dump(ctype_space($c2));
 
 setlocale(LC_CTYPE, $orig);
+
 ?>
 --EXPECT--
 *** Testing ctype_space() : basic functionality ***

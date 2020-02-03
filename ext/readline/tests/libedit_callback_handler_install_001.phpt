@@ -7,8 +7,9 @@ if (READLINE_LIB != "libedit") die("skip libedit only");
 --FILE--
 <?php
 
-function foo() {
-	readline_callback_handler_remove();
+function foo()
+{
+    readline_callback_handler_remove();
 }
 
 var_dump(readline_callback_handler_install('testing: ', 'foo'));

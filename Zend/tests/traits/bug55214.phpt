@@ -3,37 +3,45 @@ Bug #55214 (Use of __CLASS__ within trait returns trait name not class name)
 --FILE--
 <?php
 
-trait ATrait {
-  public static $static_var = __CLASS__;
-  public $var = __CLASS__;
+trait ATrait
+{
+    public static $static_var = __CLASS__;
+    public $var = __CLASS__;
 
-  public static function get_class_name() {
-    return __CLASS__;
-  }
+    public static function get_class_name()
+    {
+        return __CLASS__;
+    }
 
-  public function get_class_name_obj() {
-    return __CLASS__;
-  }
+    public function get_class_name_obj()
+    {
+        return __CLASS__;
+    }
 
-  public static function get_class_name2() {
-    return self::$static_var;
-  }
+    public static function get_class_name2()
+    {
+        return self::$static_var;
+    }
 
-  public function get_class_name_obj2() {
-    return $this->var;
-  }
+    public function get_class_name_obj2()
+    {
+        return $this->var;
+    }
 }
 
-trait Indirect {
-	use ATrait;
+trait Indirect
+{
+    use ATrait;
 }
 
-class SomeClass {
-   use ATrait;
+class SomeClass
+{
+    use ATrait;
 }
 
-class UsingIndirect {
-	use Indirect;
+class UsingIndirect
+{
+    use Indirect;
 }
 
 $r = SomeClass::get_class_name();
@@ -57,7 +65,6 @@ $r = $o->get_class_name_obj();
 var_dump($r);
 $r = $o->get_class_name_obj2();
 var_dump($r);
-
 
 ?>
 --EXPECT--

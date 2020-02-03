@@ -5,7 +5,8 @@ Inherit internal static property into userland class
 --FILE--
 <?php
 
-class Test extends _ZendTestClass {
+class Test extends _ZendTestClass
+{
 }
 
 var_dump(Test::$_StaticProp);

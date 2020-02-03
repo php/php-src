@@ -2,9 +2,11 @@
 SPL: SplHeap recursive var_dump
 --FILE--
 <?php
-$a = new SplMaxHeap;
+
+$a = new SplMaxHeap();
 $a->insert($a);
-var_dump($a)
+var_dump($a);
+
 ?>
 --EXPECTF--
 object(SplMaxHeap)#%d (3) {

@@ -2,17 +2,19 @@
 SplFileObject::fflush function - basic test
 --FILE--
 <?php
+
 /*
  * test a successful flush
 */
-$obj = New SplFileObject(__DIR__.'/SplFileObject_testinput.csv');
+$obj = new SplFileObject(__DIR__ . '/SplFileObject_testinput.csv');
 var_dump($obj->fflush());
 
 /*
  * test a unsuccessful flush
 */
 //create a basic stream class
-class VariableStream {
+class VariableStream
+{
     var $position;
     var $varname;
 
@@ -21,7 +23,8 @@ class VariableStream {
         return true;
     }
 
-    function url_stat() {
+    function url_stat()
+    {
     }
 }
 stream_wrapper_register("SPLtest", "VariableStream");
@@ -29,7 +32,7 @@ $ftruncate_test = "";
 //end creating stream
 
 //open an SplFileObject using the above test stream
-$obj = New SplFileObject("SPLtest://ftruncate_test");
+$obj = new SplFileObject("SPLtest://ftruncate_test");
 var_dump($obj->fflush());
 
 ?>

@@ -5,16 +5,18 @@ Phar: process bzip2-compressed zip entry
 <?php if (!extension_loaded("bz2")) die("skip bz2 not available"); ?>
 --FILE--
 <?php
+
 try {
-	$a = new PharData(dirname(__FILE__) . '/files/bzip2.zip');
-	foreach ($a as $entry => $file) {
-		echo $file->getContent();
-	}
-	$a = new Phar(dirname(__FILE__) . '/files/bz2_alias.phar.zip');
-	var_dump($a->getAlias());
+    $a = new PharData(dirname(__FILE__) . '/files/bzip2.zip');
+    foreach ($a as $entry => $file) {
+        echo $file->getContent();
+    }
+    $a = new Phar(dirname(__FILE__) . '/files/bz2_alias.phar.zip');
+    var_dump($a->getAlias());
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
+
 ?>
 --EXPECT--
 <?php

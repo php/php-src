@@ -3,11 +3,13 @@ Trying to use a class as trait
 --FILE--
 <?php
 
-class abc {
+class abc
+{
 }
 
-class A {
-	use abc;
+class A
+{
+    use abc;
 }
 
 ?>

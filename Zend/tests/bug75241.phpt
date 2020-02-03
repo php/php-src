@@ -3,8 +3,9 @@ Bug #75241 (Null pointer dereference in zend_mm_alloc_small())
 --FILE--
 <?php
 
-$d->d = &$d + $d->d/=0;
+$d->d = &$d + $d->d /= 0;
 var_dump($d);
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Error: Attempt to modify property 'd' of non-object in %s:%d

@@ -17,6 +17,7 @@ echo hash('gost-crypto', $test1),
      "\n",
      hash('gost', '')
     ;
+
 ?>
 --EXPECT--
 231d8bb980d3faa30fee6ec475df5669cf6c24bbce22f46d6737470043a99f8e

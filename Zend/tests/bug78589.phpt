@@ -3,11 +3,14 @@ Bug #78589: Memory leak with GC + __destruct()
 --FILE--
 <?php
 
-class Test {
-    public function __destruct() {}
+class Test
+{
+    public function __destruct()
+    {
+    }
 }
 
-$test = new Test;
+$test = new Test();
 $test->foo = [&$test->foo];
 $ary = [&$ary, $test];
 unset($ary, $test);

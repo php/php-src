@@ -4,6 +4,7 @@ Crash when using dynamic call syntax with fully qualified name in a namespace
 <?php
 
 namespace Foo;
+
 try {
     ('\bar')();
 } catch (\Error $e) {

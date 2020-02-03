@@ -8,10 +8,12 @@ $arrOb = new ArrayObject($arr);
 
 $recArrIt = new RecursiveArrayIterator($arrOb->getIterator());
 
-class MyRecursiveIteratorIterator extends RecursiveIteratorIterator {
+class MyRecursiveIteratorIterator extends RecursiveIteratorIterator
+{
 
-    function nextelement() {
-    	throw new Exception;
+    function nextelement()
+    {
+        throw new Exception();
     }
 }
 

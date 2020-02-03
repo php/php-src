@@ -3,35 +3,42 @@ Property access errors should be thrown for overloaded properties protected by r
 --FILE--
 <?php
 
-function setProp($obj) {
+function setProp($obj)
+{
     $obj->prop = 42;
 }
 
-function getProp($obj) {
+function getProp($obj)
+{
     var_dump($obj->prop);
 }
 
-function unsetProp($obj) {
+function unsetProp($obj)
+{
     unset($obj->prop);
 }
 
-class Test {
+class Test
+{
     private $prop;
 
-    public function __get($k) {
+    public function __get($k)
+    {
         getProp($this);
     }
 
-    public function __set($k, $v) {
+    public function __set($k, $v)
+    {
         setProp($this);
     }
 
-    public function __unset($k) {
+    public function __unset($k)
+    {
         unsetProp($this);
     }
 }
 
-$test = new Test;
+$test = new Test();
 try {
     $test->prop = "bar";
 } catch (Error $e) {

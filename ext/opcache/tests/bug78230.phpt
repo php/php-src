@@ -3,7 +3,8 @@ Bug #78230: Incorrect type check optimization
 --FILE--
 <?php
 
-function test($x) {
+function test($x)
+{
     $y = (array) $x;
     var_dump(is_array($y));
 }

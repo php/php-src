@@ -2,6 +2,7 @@
 string offset 004
 --FILE--
 <?php
+
 // Test assignments using (positive and negative) string offsets
 
 $str = "abcdefghijklmno";
@@ -32,8 +33,9 @@ var_dump($str);
 $str[-2] = 'UFO';
 var_dump($str);
 
-$str[-$i] = $str[$j*2];
+$str[-$i] = $str[$j * 2];
 var_dump($str);
+
 ?>
 --EXPECTF--
 string(15) "abCdefghijklmno"

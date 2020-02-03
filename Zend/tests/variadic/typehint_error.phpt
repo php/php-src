@@ -3,7 +3,8 @@ Variadic arguments enforce types
 --FILE--
 <?php
 
-function test(array... $args) {
+function test(array ...$args)
+{
     var_dump($args);
 }
 

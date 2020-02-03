@@ -7,6 +7,8 @@ class Foo extends static {
 }
 
 ?>
+
+?>
 ==DONE==
 --EXPECTF--
 Fatal error: Cannot use 'static' as class name, as it is reserved in %s on line %d

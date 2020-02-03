@@ -11,18 +11,22 @@ opcache.protect_memory=1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function foo($row) {
-	foreach ($row as $key => $value) {
-		if (is_int($key)) {
-			$key++;
-		}
-		if (isset($row[$key])) {
-			return false;
-		}
-	}
-	return true;
+
+function foo($row)
+{
+    foreach ($row as $key => $value) {
+        if (is_int($key)) {
+            $key++;
+        }
+        if (isset($row[$key])) {
+            return false;
+        }
+    }
+    return true;
 }
 ?>
 OK
+
+?>
 --EXPECT--
 OK

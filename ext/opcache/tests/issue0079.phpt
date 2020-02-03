@@ -8,14 +8,18 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-class Test {
-    public function run() {
+
+class Test
+{
+    public function run()
+    {
         $r = $this->my_parse_m();
-        var_dump ($r);
+        var_dump($r);
         return $r;
     }
 
-    public function my_parse_m() {
+    public function my_parse_m()
+    {
         $test = true;
         if ($test === true) {
             $a = 'b';
@@ -28,7 +32,9 @@ class Test {
 }
 
 $t = new Test();
-var_dump ($t->run());
+var_dump($t->run());
+
+?>
 --EXPECT--
 bool(true)
 bool(true)

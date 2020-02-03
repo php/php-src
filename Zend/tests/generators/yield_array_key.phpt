@@ -3,7 +3,8 @@ Array keys can be yielded from generators
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     yield [] => 1;
 }
 

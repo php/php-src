@@ -3,7 +3,8 @@ Bug #78341: Failure to detect smart branch in DFA pass
 --FILE--
 <?php
 
-function test($a) {
+function test($a)
+{
     // Just some dead code...
     if (strpos("foo", "foo") !== 0) {
         echo "Foo";

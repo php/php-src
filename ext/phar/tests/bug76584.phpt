@@ -9,6 +9,7 @@ if (!extension_loaded('zlib')) die('skip zlib extension not available');
 phar.readonly=0
 --FILE--
 <?php
+
 $phar = new Phar(__DIR__ . '/76584.phar');
 $phar->addFromString('76584.txt', 'This is a test file.');
 $file = $phar['76584.txt'];
@@ -19,6 +20,7 @@ var_dump($file->isCompressed());
 mkdir(__DIR__ . '/76584');
 var_dump($phar->extractTo(__DIR__ . '/76584'));
 echo file_get_contents(__DIR__ . '/76584/76584.txt');
+
 ?>
 --EXPECT--
 bool(true)

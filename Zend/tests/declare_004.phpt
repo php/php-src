@@ -5,9 +5,9 @@ zend.multibyte=1
 --FILE--
 <?php
 
-declare(encoding = 1);
-declare(encoding = 1123131232131312321);
-declare(encoding = M_PI);
+declare(encoding=1);
+declare(encoding=1123131232131312321);
+declare(encoding= M_PI);
 
 print 'DONE';
 

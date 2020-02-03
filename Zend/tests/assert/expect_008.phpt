@@ -5,16 +5,26 @@ zend.assertions=0
 assert.exception=1
 --FILE--
 <?php
-class One {
-    public function __construct() {
+
+class One
+{
+    public function __construct()
+    {
         assert($this || 0);
     }
 }
-class Two extends One {}
+class Two extends One
+{
+}
 
-class OdEar extends AssertionError {}
+class OdEar extends AssertionError
+{
+}
 
-function blah(){ return 1; }
+function blah()
+{
+    return 1;
+}
 
 $variable = 1;
 assert(true, "constant message");
@@ -26,9 +36,10 @@ new Two();
 new Two();
 new Two();
 
-assert (blah() || blah() || blah(), blah() || blah() || blah() || blah());
+assert(blah() || blah() || blah(), blah() || blah() || blah() || blah());
 
 var_dump(true);
+
 ?>
 --EXPECT--
 bool(true)

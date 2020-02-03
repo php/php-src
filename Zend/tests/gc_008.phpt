@@ -4,6 +4,7 @@ GC 008: Unreferenced object cycle
 zend.enable_gc=1
 --FILE--
 <?php
+
 $a = new stdClass();
 $a->a = new stdClass();
 $a->a->a = $a->a;
@@ -11,7 +12,8 @@ var_dump($a->a);
 var_dump(gc_collect_cycles());
 unset($a);
 var_dump(gc_collect_cycles());
-echo "ok\n"
+echo "ok\n";
+
 ?>
 --EXPECTF--
 object(stdClass)#%d (1) {

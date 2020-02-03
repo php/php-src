@@ -3,7 +3,7 @@ Incrementing and decrementing a referenced property
 --FILE--
 <?php
 
-$obj = new stdClass;
+$obj = new stdClass();
 $obj->prop = 1;
 $ref =& $obj->prop;
 var_dump(++$obj->prop);

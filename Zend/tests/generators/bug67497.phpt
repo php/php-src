@@ -3,13 +3,14 @@ Bug #67467: eval with parse error causes segmentation fault in generator
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     $a = 1;
     yield $a;
 }
 
 try {
-	eval('abc');
+    eval('abc');
 } catch (ParseError $ex) {
 }
 

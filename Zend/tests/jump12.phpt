@@ -2,9 +2,10 @@
 jump 09: goto in declare statement
 --FILE--
 <?php
+
 a: print "ok!\n";
 goto c;
-declare (ticks=1) {
+declare(ticks=1) {
     b:
         print "ok!\n";
         exit;
@@ -12,6 +13,7 @@ declare (ticks=1) {
 c:
     print "ok!\n";
     goto b;
+
 ?>
 --EXPECT--
 ok!

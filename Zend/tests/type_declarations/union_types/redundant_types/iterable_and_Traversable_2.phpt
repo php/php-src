@@ -3,7 +3,8 @@ Using both iterable and Traversable, with extra classes
 --FILE--
 <?php
 
-function test(): iterable|Traversable|ArrayAccess {
+function test(): iterable | Traversable | ArrayAccess
+{
 }
 
 ?>

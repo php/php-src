@@ -8,6 +8,7 @@ Belgian PHP Testfest 2009
 <?php require_once __DIR__ .'/skipifbindfailure.inc'; ?>
 --FILE--
 <?php
+
 include "connect.inc";
 
 $link = ldap_connect($host, $port);
@@ -29,6 +30,7 @@ var_dump($result);
 
 $result = ldap_search(array($link, $link), $dn, array($filter), array('top'));
 var_dump($result);
+
 ?>
 --EXPECTF--
 Warning: ldap_search(): Search: No such object in %s on line %d

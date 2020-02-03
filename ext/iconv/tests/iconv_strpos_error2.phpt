@@ -7,6 +7,7 @@ function_exists('iconv_strpos') or die("skip iconv_strpos() is not available in 
 ?>
 --FILE--
 <?php
+
 /* Prototype  : int iconv_strpos(string haystack, string needle [, int offset [, string charset]])
  * Description: Find position of first occurrence of a string within another
  * Source code: ext/iconv/iconv.c
@@ -22,9 +23,10 @@ $needle = 'world';
 $offset = 2;
 $encoding = 'unknown-encoding';
 
-var_dump( iconv_strpos($haystack, $needle, $offset, $encoding) );
+var_dump(iconv_strpos($haystack, $needle, $offset, $encoding));
 
 echo "Done";
+
 ?>
 --EXPECTF--
 *** Testing iconv_strpos() : error conditions ***

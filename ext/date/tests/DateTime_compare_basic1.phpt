@@ -8,15 +8,18 @@ echo "Simple test for DateTime compare object handler\n";
 //Set the default time zone
 date_default_timezone_set("Europe/London");
 
-class DateTimeExt1 extends DateTime {
+class DateTimeExt1 extends DateTime
+{
 }
 
-class DateTimeExt2 extends DateTime{
-	public $foo = "Hello";
-	private $bar = 99;
+class DateTimeExt2 extends DateTime
+{
+    public $foo = "Hello";
+    private $bar = 99;
 }
 
-class DateTimeExt3 extends DateTimeExt2 {
+class DateTimeExt3 extends DateTimeExt2
+{
 }
 
 $obj1 = new DateTime("2009-02-12 12:47:41 GMT");
@@ -48,6 +51,7 @@ date_modify($obj4, "+1 day");
 var_dump($obj1 == $obj2);
 var_dump($obj1 == $obj3);
 var_dump($obj1 == $obj4);
+
 ?>
 --EXPECT--
 Simple test for DateTime compare object handler

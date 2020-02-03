@@ -8,6 +8,7 @@ if (!function_exists("ftp_ssl_connect")) die("skip ftp_ssl is disabled");
 ?>
 --FILE--
 <?php
+
 echo "*** Testing ftp_ssl_connect() function : error conditions ***\n";
 echo "\n-- Testing ftp_ssl_connect() function on failure --\n";
 var_dump(ftp_ssl_connect('totes.invalid'));
@@ -15,7 +16,10 @@ var_dump(ftp_ssl_connect('totes.invalid'));
 echo "\n-- Testing ftp_ssl_connect() function timeout warning for value 0 --\n";
 ftp_ssl_connect('totes.invalid', 21, 0);
 
-echo "===DONE===\n";
+echo "
+
+?>
+===DONE===\n";
 --EXPECTF--
 *** Testing ftp_ssl_connect() function : error conditions ***
 

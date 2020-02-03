@@ -3,7 +3,8 @@ Yield from by reference is not supported
 --FILE--
 <?php
 
-function &gen() {
+function &gen()
+{
     yield from [];
 }
 

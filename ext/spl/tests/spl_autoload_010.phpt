@@ -4,22 +4,29 @@ SPL: spl_autoload() and prepend
 include_path=.
 --FILE--
 <?php
-function autoloadA($name) {
+
+function autoloadA($name)
+{
     echo "A -> $name\n";
 }
-function autoloadB($name) {
+function autoloadB($name)
+{
     echo "B -> $name\n";
 }
-function autoloadC($name) {
+function autoloadC($name)
+{
     echo "C -> $name\n";
-    class C{}
+    class C
+    {
+    }
 }
 
 spl_autoload_register('autoloadA');
 spl_autoload_register('autoloadB', true, true);
 spl_autoload_register('autoloadC');
 
-new C;
+new C();
+
 ?>
 --EXPECT--
 B -> C

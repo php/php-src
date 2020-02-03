@@ -8,38 +8,42 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 
-$c = new IntlGregorianCalendar(NULL, 'pt_PT');
+$c = new IntlGregorianCalendar(null, 'pt_PT');
 
 $gmt = IntlTimeZone::getGMT();
 
-function eh($errno, $errstr) {
-echo "error: $errno, $errstr\n";
+function eh($errno, $errstr)
+{
+    echo "error: $errno, $errstr\n";
 }
 set_error_handler('eh');
 
 try {
-	var_dump($c->setTimeZone($gmt, 2));
+    var_dump($c->setTimeZone($gmt, 2));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
-	var_dump($c->setTimeZone());
+    var_dump($c->setTimeZone());
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 
-try{
-	var_dump(intlcal_set_time_zone($c, 1, 2));
+try {
+    var_dump(intlcal_set_time_zone($c, 1, 2));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
-try{
-	var_dump(intlcal_set_time_zone(1, $gmt));
+try {
+    var_dump(intlcal_set_time_zone(1, $gmt));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
+
+?>
 --EXPECT--
 error: 0, IntlCalendar::setTimeZone() expects exactly 1 parameter, 2 given
 

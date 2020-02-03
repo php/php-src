@@ -3,7 +3,8 @@ Warning on continue targeting switch
 --FILE--
 <?php
 
-function test() {
+function test()
+{
     switch ($foo) {
         case 0:
             continue; // INVALID

@@ -12,6 +12,7 @@ var_dump(strcasecmp("q123", "Q123"));
 var_dump(strcasecmp("01", "01"));
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 int(0)

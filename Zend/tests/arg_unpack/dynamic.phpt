@@ -3,7 +3,7 @@ Unpack arguments for dynamic call
 --FILE--
 <?php
 
-$fn = function(...$args) {
+$fn = function (...$args) {
     var_dump($args);
 };
 

@@ -3,11 +3,13 @@ get_class() tests
 --FILE--
 <?php
 
-class foo {
-	function bar () {
-		var_dump(get_class());
-	}
-    function testNull ()
+class foo
+{
+    function bar()
+    {
+        var_dump(get_class());
+    }
+    function testNull()
     {
         try {
             var_dump(get_class(null));
@@ -17,11 +19,12 @@ class foo {
     }
 }
 
-class foo2 extends foo {
+class foo2 extends foo
+{
 }
 
-$f1 = new foo;
-$f2 = new foo2;
+$f1 = new foo();
+$f2 = new foo2();
 
 $f1->bar();
 $f2->bar();
@@ -39,6 +42,7 @@ var_dump(get_class($f2));
 $f1->testNull();
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 string(3) "foo"

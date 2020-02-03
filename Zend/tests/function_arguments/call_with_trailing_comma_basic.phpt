@@ -58,6 +58,8 @@ $bar(
 unset($foo, $bar,);
 var_dump(isset($foo, $bar,));
 ?>
+
+?>
 --EXPECT--
 foo
 array(2) {

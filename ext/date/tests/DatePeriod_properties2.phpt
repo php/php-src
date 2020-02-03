@@ -5,7 +5,7 @@ date.timezone=UTC
 --FILE--
 <?php
 
-$period = new DatePeriod(new DateTime, new DateInterval('P1D'), new DateTime);
+$period = new DatePeriod(new DateTime(), new DateInterval('P1D'), new DateTime());
 
 $properties = [
     "recurrences",

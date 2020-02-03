@@ -12,7 +12,9 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 ?>
 --FILE--
 <?php
+
 var_dump(class_exists('Foo'));
+
 ?>
 --EXPECTF--
 Fatal error: Undefined class constant 'self::DOES_NOT_EXIST' in Unknown on line 0

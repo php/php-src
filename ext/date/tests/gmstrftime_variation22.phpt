@@ -11,6 +11,7 @@ if (!setlocale(LC_TIME, "POSIX")) {
 ?>
 --FILE--
 <?php
+
 /* Prototype  : string gmstrftime(string format [, int timestamp])
  * Description: Format a GMT/UCT time/date according to locale settings
  * Source code: ext/date/php_date.c
@@ -28,16 +29,16 @@ date_default_timezone_set("Asia/Calcutta");
 //array of values to iterate over
 $inputs = array(
       'Preferred date and time representation' => "%c",
-	  'Preferred date representation' => "%x",
-	  'Preferred time representation' => "%X",
+      'Preferred date representation' => "%x",
+      'Preferred time representation' => "%X",
 );
 
 // loop through each element of the array for timestamp
 
-foreach($inputs as $key =>$value) {
+foreach ($inputs as $key => $value) {
       echo "\n--$key--\n";
-      var_dump( $value );
-      var_dump( gmstrftime($value, $timestamp) );
+      var_dump($value);
+      var_dump(gmstrftime($value, $timestamp));
 };
 
 ?>

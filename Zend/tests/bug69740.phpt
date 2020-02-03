@@ -3,7 +3,8 @@ Bug #69740: finally in generator (yield) swallows exception in iteration
 --FILE--
 <?php
 
-function generate() {
+function generate()
+{
     try {
         yield 1;
         yield 2;

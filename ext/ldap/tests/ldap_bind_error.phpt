@@ -8,6 +8,7 @@ Patrick Allaert <patrickallaert@php.net>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
+
 require "connect.inc";
 
 $link = ldap_connect($host, $port);
@@ -18,6 +19,7 @@ var_dump(ldap_bind($link, $user, "ThisIsNotCorrect$passwd"));
 
 // Invalid DN syntax
 var_dump(ldap_bind($link, "unexistingProperty=weirdValue,$user", $passwd));
+
 ?>
 --EXPECTF--
 Warning: ldap_bind(): Unable to bind to server: Invalid credentials in %s on line %d

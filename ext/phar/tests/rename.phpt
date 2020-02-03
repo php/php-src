@@ -7,6 +7,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php
@@ -22,6 +23,7 @@ echo file_get_contents($pname . '/a') . "\n";
 rename($pname . '/a', $pname . '/b');
 echo file_get_contents($pname . '/b') . "\n";
 echo file_get_contents($pname . '/a') . "\n";
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

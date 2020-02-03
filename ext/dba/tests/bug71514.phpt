@@ -7,6 +7,7 @@ if (!in_array('inifile', dba_handlers())) die('skip inifile handler not availabl
 ?>
 --FILE--
 <?php
+
 $filename = __DIR__ . DIRECTORY_SEPARATOR . 'bug71514.ini';
 
 $db = dba_open($filename, 'c', 'inifile');
@@ -16,6 +17,7 @@ dba_replace('foo', 'value2', $db);
 var_dump(dba_fetch('foo', $db));
 
 dba_close($db);
+
 ?>
 --EXPECT--
 string(6) "value2"

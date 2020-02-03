@@ -8,13 +8,16 @@ opcache.enable_cli=1
 --FILE--
 <?php
 
-
-function neverUsed() {
+function neverUsed()
+{
     $bool = false;
-    while ($bool) { };
+    while ($bool) {
+    };
     //do { } while ($bool);
 }
 ?>
 okey
+
+?>
 --EXPECT--
 okey

@@ -3,7 +3,8 @@ A generator can only be rewinded before or at the first yield
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     echo "before yield\n";
     yield;
     echo "after yield\n";
@@ -21,24 +22,30 @@ try {
     echo "\n", $e, "\n\n";
 }
 
-function &gen2() {
+function &gen2()
+{
     $foo = 'bar';
     yield $foo;
     yield $foo;
 }
 
 $gen = gen2();
-foreach ($gen as $v) { }
+foreach ($gen as $v) {
+}
 try {
-    foreach ($gen as $v) { }
+    foreach ($gen as $v) {
+    }
 } catch (Exception $e) {
     echo $e, "\n\n";
 }
 
-function gen3() {
+function gen3()
+{
     echo "in generator\n";
 
-    if (false) yield;
+    if (false) {
+        yield;
+    }
 }
 
 $gen = gen3();

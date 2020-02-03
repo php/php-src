@@ -2,11 +2,14 @@
 SPL: SplObjectStorage: recursive var_dump
 --FILE--
 <?php
+
 $o = new SplObjectStorage();
 
-$o[new StdClass] = $o;
+$o[new StdClass()] = $o;
 
 var_dump($o);
+
+?>
 --EXPECTF--
 object(SplObjectStorage)#%d (1) {
   ["storage":"SplObjectStorage":private]=>

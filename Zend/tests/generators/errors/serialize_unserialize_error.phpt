@@ -3,7 +3,10 @@ Generators can't be serialized or unserialized
 --FILE--
 <?php
 
-function gen() { yield; }
+function gen()
+{
+    yield;
+}
 
 $gen = gen();
 

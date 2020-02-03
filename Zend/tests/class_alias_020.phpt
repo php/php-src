@@ -5,23 +5,24 @@ Testing class alias in multiple namespaces
 
 namespace foo;
 
-
-class foo {
+class foo
+{
 }
 
-class_alias(__NAMESPACE__ .'\foo', 'foo');
+class_alias(__NAMESPACE__ . '\foo', 'foo');
 
 namespace foo\bar;
 
-class foo {
+class foo
+{
 }
 
-class_alias(__NAMESPACE__ .'\foo', 'bar');
+class_alias(__NAMESPACE__ . '\foo', 'bar');
 
 
-var_dump(new \foo, new \bar);
+var_dump(new \foo(), new \bar());
 
-var_dump(new \foo\foo, new \foo\bar);
+var_dump(new \foo\foo(), new \foo\bar());
 
 ?>
 --EXPECTF--

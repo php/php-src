@@ -16,7 +16,7 @@ class B extends A
     private $test;
 }
 
-$b = new B;
+$b = new B();
 var_dump($b->test);
 
 ?>

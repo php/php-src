@@ -8,7 +8,9 @@ if (!extension_loaded('%EXTNAME%')) {
 ?>
 --FILE--
 <?php
+
 echo 'The extension "%EXTNAME%" is available';
+
 ?>
 --EXPECT--
 The extension "%EXTNAME%" is available

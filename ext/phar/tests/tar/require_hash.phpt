@@ -7,6 +7,7 @@ phar.readonly=1
 phar.require_hash=0
 --FILE--
 <?php
+
 ini_set('phar.require_hash', 1);
 include __DIR__ . '/files/tarmaker.php.inc';
 $fname = __DIR__ . '/require_hash.phar.tar';
@@ -21,20 +22,20 @@ $tar->addFile('.phar/stub.php', "__HALT_COMPILER();");
 $tar->close();
 
 try {
-	$phar = new Phar($fname);
-	var_dump($phar->getStub());
+    $phar = new Phar($fname);
+    var_dump($phar->getStub());
 } catch (Exception $e) {
-	echo $e->getMessage()."\n";
+    echo $e->getMessage() . "\n";
 }
 ini_set('phar.require_hash', 0);
 try {
-	$phar = new PharData($fname2);
-	$phar['file'] = 'hi';
-	var_dump($phar->getSignature());
-	$phar->setSignatureAlgorithm(Phar::MD5);
-	var_dump($phar->getSignature());
+    $phar = new PharData($fname2);
+    $phar['file'] = 'hi';
+    var_dump($phar->getSignature());
+    $phar->setSignatureAlgorithm(Phar::MD5);
+    var_dump($phar->getSignature());
 } catch (Exception $e) {
-	echo $e->getMessage()."\n";
+    echo $e->getMessage() . "\n";
 }
 
 ?>

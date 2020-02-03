@@ -1,166 +1,198 @@
 <?php
 
-function hallo() {
+function hallo()
+{
 }
 
-function simpleucall($n) {
-  for ($i = 0; $i < $n; $i++)
-    hallo();
+function simpleucall($n)
+{
+    for ($i = 0; $i < $n; $i++) {
+        hallo();
+    }
 }
 
-function simpleudcall($n) {
-  for ($i = 0; $i < $n; $i++)
-    hallo2();
+function simpleudcall($n)
+{
+    for ($i = 0; $i < $n; $i++) {
+        hallo2();
+    }
 }
 
-function hallo2() {
+function hallo2()
+{
 }
 
-function simpleicall($n) {
-  for ($i = 0; $i < $n; $i++)
-    func_num_args();
+function simpleicall($n)
+{
+    for ($i = 0; $i < $n; $i++) {
+        func_num_args();
+    }
 }
 
-class Foo {
+class Foo
+{
     static $a = 0;
     public $b = 0;
     const TEST = 0;
 
-    static function read_static($n) {
+    static function read_static($n)
+    {
         for ($i = 0; $i < $n; ++$i) {
             $x = self::$a;
         }
     }
 
-    static function write_static($n) {
+    static function write_static($n)
+    {
         for ($i = 0; $i < $n; ++$i) {
             self::$a = 0;
         }
     }
 
-    static function isset_static($n) {
+    static function isset_static($n)
+    {
         for ($i = 0; $i < $n; ++$i) {
             $x = isset(self::$a);
         }
     }
 
-    static function empty_static($n) {
+    static function empty_static($n)
+    {
         for ($i = 0; $i < $n; ++$i) {
             $x = empty(self::$a);
         }
     }
 
-    static function f() {
+    static function f()
+    {
     }
 
-    static function call_static($n) {
+    static function call_static($n)
+    {
         for ($i = 0; $i < $n; ++$i) {
             self::f();
         }
     }
 
-    function read_prop($n) {
+    function read_prop($n)
+    {
         for ($i = 0; $i < $n; ++$i) {
             $x = $this->b;
         }
     }
 
-    function write_prop($n) {
+    function write_prop($n)
+    {
         for ($i = 0; $i < $n; ++$i) {
             $this->b = 0;
         }
     }
 
-    function assign_add_prop($n) {
+    function assign_add_prop($n)
+    {
         for ($i = 0; $i < $n; ++$i) {
             $this->b += 2;
         }
     }
 
-    function pre_inc_prop($n) {
+    function pre_inc_prop($n)
+    {
         for ($i = 0; $i < $n; ++$i) {
             ++$this->b;
         }
     }
 
-    function pre_dec_prop($n) {
+    function pre_dec_prop($n)
+    {
         for ($i = 0; $i < $n; ++$i) {
             --$this->b;
         }
     }
 
-    function post_inc_prop($n) {
+    function post_inc_prop($n)
+    {
         for ($i = 0; $i < $n; ++$i) {
             $this->b++;
         }
     }
 
-    function post_dec_prop($n) {
+    function post_dec_prop($n)
+    {
         for ($i = 0; $i < $n; ++$i) {
             $this->b--;
         }
     }
 
-    function isset_prop($n) {
+    function isset_prop($n)
+    {
         for ($i = 0; $i < $n; ++$i) {
             $x = isset($this->b);
         }
     }
 
-    function empty_prop($n) {
+    function empty_prop($n)
+    {
         for ($i = 0; $i < $n; ++$i) {
             $x = empty($this->b);
         }
     }
 
-    function g() {
+    function g()
+    {
     }
 
-    function call($n) {
+    function call($n)
+    {
         for ($i = 0; $i < $n; ++$i) {
             $this->g();
         }
     }
 
-    function read_const($n) {
+    function read_const($n)
+    {
         for ($i = 0; $i < $n; ++$i) {
             $x = $this::TEST;
         }
     }
-
 }
 
-function read_static($n) {
+function read_static($n)
+{
     for ($i = 0; $i < $n; ++$i) {
         $x = Foo::$a;
     }
 }
 
-function write_static($n) {
+function write_static($n)
+{
     for ($i = 0; $i < $n; ++$i) {
         Foo::$a = 0;
     }
 }
 
-function isset_static($n) {
+function isset_static($n)
+{
     for ($i = 0; $i < $n; ++$i) {
         $x = isset(Foo::$a);
     }
 }
 
-function empty_static($n) {
+function empty_static($n)
+{
     for ($i = 0; $i < $n; ++$i) {
         $x = empty(Foo::$a);
     }
 }
 
-function call_static($n) {
+function call_static($n)
+{
     for ($i = 0; $i < $n; ++$i) {
         Foo::f();
     }
 }
 
-function create_object($n) {
+function create_object($n)
+{
     for ($i = 0; $i < $n; ++$i) {
         $x = new Foo();
     }
@@ -168,13 +200,15 @@ function create_object($n) {
 
 define('TEST', null);
 
-function read_const($n) {
+function read_const($n)
+{
     for ($i = 0; $i < $n; ++$i) {
         $x = TEST;
     }
 }
 
-function read_auto_global($n) {
+function read_auto_global($n)
+{
     for ($i = 0; $i < $n; ++$i) {
         $x = $_GET;
     }
@@ -182,41 +216,48 @@ function read_auto_global($n) {
 
 $g_var = 0;
 
-function read_global_var($n) {
+function read_global_var($n)
+{
     for ($i = 0; $i < $n; ++$i) {
         $x = $GLOBALS['g_var'];
     }
 }
 
-function read_hash($n) {
+function read_hash($n)
+{
     $hash = array('test' => 0);
     for ($i = 0; $i < $n; ++$i) {
         $x = $hash['test'];
     }
 }
 
-function read_str_offset($n) {
+function read_str_offset($n)
+{
     $str = "test";
     for ($i = 0; $i < $n; ++$i) {
         $x = $str[1];
     }
 }
 
-function issetor($n) {
+function issetor($n)
+{
     $val = array(0,1,2,3,4,5,6,7,8,9);
     for ($i = 0; $i < $n; ++$i) {
         $x = $val ?: null;
     }
 }
 
-function issetor2($n) {
-    $f = false; $j = 0;
+function issetor2($n)
+{
+    $f = false;
+    $j = 0;
     for ($i = 0; $i < $n; ++$i) {
         $x = $f ?: $j + 1;
     }
 }
 
-function ternary($n) {
+function ternary($n)
+{
     $val = array(0,1,2,3,4,5,6,7,8,9);
     $f = false;
     for ($i = 0; $i < $n; ++$i) {
@@ -224,8 +265,10 @@ function ternary($n) {
     }
 }
 
-function ternary2($n) {
-    $f = false; $j = 0;
+function ternary2($n)
+{
+    $f = false;
+    $j = 0;
     for ($i = 0; $i < $n; ++$i) {
         $x = $f ? $f : $j + 1;
     }
@@ -233,51 +276,52 @@ function ternary2($n) {
 
 /*****/
 
-function empty_loop($n) {
+function empty_loop($n)
+{
     for ($i = 0; $i < $n; ++$i) {
     }
 }
 
 function gethrtime()
 {
-  $hrtime = hrtime();
-  return (($hrtime[0]*1000000000 + $hrtime[1]) / 1000000000);
+    $hrtime = hrtime();
+    return (($hrtime[0] * 1000000000 + $hrtime[1]) / 1000000000);
 }
 
 function start_test()
 {
-  ob_start();
-  return gethrtime();
+    ob_start();
+    return gethrtime();
 }
 
 function end_test($start, $name, $overhead = null)
 {
-  global $total;
-  global $last_time;
-  $end = gethrtime();
-  ob_end_clean();
-  $last_time = $end-$start;
-  $total += $last_time;
-  $num = number_format($last_time,3);
-  $pad = str_repeat(" ", 24-strlen($name)-strlen($num));
-  if (is_null($overhead)) {
-    echo $name.$pad.$num."\n";
-  } else {
-    $num2 = number_format($last_time - $overhead,3);
-    echo $name.$pad.$num."    ".$num2."\n";
-  }
-  ob_start();
-  return gethrtime();
+    global $total;
+    global $last_time;
+    $end = gethrtime();
+    ob_end_clean();
+    $last_time = $end - $start;
+    $total += $last_time;
+    $num = number_format($last_time, 3);
+    $pad = str_repeat(" ", 24 - strlen($name) - strlen($num));
+    if (is_null($overhead)) {
+        echo $name . $pad . $num . "\n";
+    } else {
+        $num2 = number_format($last_time - $overhead, 3);
+        echo $name . $pad . $num . "    " . $num2 . "\n";
+    }
+    ob_start();
+    return gethrtime();
 }
 
 function total()
 {
-  global $total;
-  $pad = str_repeat("-", 24);
-  echo $pad."\n";
-  $num = number_format($total,3);
-  $pad = str_repeat(" ", 24-strlen("Total")-strlen($num));
-  echo "Total".$pad.$num."\n";
+    global $total;
+    $pad = str_repeat("-", 24);
+    echo $pad . "\n";
+    $num = number_format($total, 3);
+    $pad = str_repeat(" ", 24 - strlen("Total") - strlen($num));
+    echo "Total" . $pad . $num . "\n";
 }
 
 const N = 5000000;

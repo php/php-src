@@ -4,7 +4,9 @@ Removing a block that has duplicate successors
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function test($foo) {
+
+function test($foo)
+{
     $bar = 0;
     if ($bar === 1 && $foo && PHP_SAPI !== 'cli') {
         echo "foo\n";
@@ -12,6 +14,7 @@ function test($foo) {
     echo "bar\n";
 }
 test(1);
+
 ?>
 --EXPECT--
 bar

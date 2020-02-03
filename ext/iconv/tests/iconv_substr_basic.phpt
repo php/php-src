@@ -11,6 +11,7 @@ internal_encoding=ISO-8859-1
 output_encoding=ISO-8859-1
 --FILE--
 <?php
+
 /* Prototype  : string iconv_substr(string str, int offset, [int length, string charset])
  * Description: Returns part of a string
  * Source code: ext/iconv/iconv.c
@@ -41,6 +42,7 @@ $result_2 = iconv_substr($string_mb, 2, 7, 'utf-8');
 var_dump(bin2hex($result_2));
 
 echo "Done";
+
 ?>
 --EXPECT--
 *** Testing iconv_substr() : basic functionality ***

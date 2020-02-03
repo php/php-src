@@ -7,7 +7,7 @@ Typed properties in internal classes
 
 // Internal typed properties
 
-$obj = new _ZendTestClass;
+$obj = new _ZendTestClass();
 var_dump($obj->intProp);
 try {
     $obj->intProp = "foobar";
@@ -21,15 +21,16 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
-$obj->classProp = new stdClass;
+$obj->classProp = new stdClass();
 var_dump($obj);
 
 // Inherit from internal class
 
-class Test extends _ZendTestClass {
+class Test extends _ZendTestClass
+{
 }
 
-$obj = new Test;
+$obj = new Test();
 var_dump($obj->intProp);
 try {
     $obj->intProp = "foobar";
@@ -43,7 +44,7 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
-$obj->classProp = new stdClass;
+$obj->classProp = new stdClass();
 var_dump($obj);
 
 // Static internal typed properties

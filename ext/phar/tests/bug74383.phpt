@@ -4,6 +4,7 @@ Phar: bug #74383: Wrong reflection on Phar::running
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
+
 $rc = new ReflectionClass(Phar::class);
 $rm = $rc->getMethod("running");
 echo $rm->getNumberOfParameters();

@@ -2,6 +2,7 @@
 Bug #64228 (RecursiveDirectoryIterator always assumes SKIP_DOTS)
 --FILE--
 <?php
+
 $dirs = array();
 $empty_dir = __DIR__ . "/empty";
 @mkdir($empty_dir);
@@ -15,6 +16,7 @@ foreach ($i as $key => $value) {
 
 sort($dirs);
 print_r($dirs);
+
 ?>
 --EXPECT--
 Array

@@ -2,7 +2,9 @@
 SPL SplTempFileObject constructor sets correct defaults when passed a negative value
 --FILE--
 <?php
+
 var_dump(new SplTempFileObject(-1));
+
 ?>
 --EXPECT--
 object(SplTempFileObject)#1 (5) {

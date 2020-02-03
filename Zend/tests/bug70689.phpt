@@ -3,18 +3,19 @@ Bug #70689 (Exception handler does not work as expected)
 --FILE--
 <?php
 
-function foo($foo) {
-	echo "Executing foo\n";
+function foo($foo)
+{
+    echo "Executing foo\n";
 }
 
-set_error_handler(function($errno, $errstr) {
-	throw new Exception($errstr);
+set_error_handler(function ($errno, $errstr) {
+    throw new Exception($errstr);
 });
 
 try {
-	foo();
+    foo();
 } catch (Exception $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 
 ?>

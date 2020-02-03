@@ -2,6 +2,7 @@
 Test strftime() function : basic functionality
 --FILE--
 <?php
+
 /* Prototype  : string strftime(string format [, int timestamp])
  * Description: Format a local time/date according to locale settings
  * Source code: ext/date/php_date.c
@@ -16,10 +17,10 @@ $format = '%b %d %Y %H:%M:%S';
 $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 
 // Calling strftime() with all possible arguments
-var_dump( strftime($format, $timestamp) );
+var_dump(strftime($format, $timestamp));
 
 // Calling strftime() with mandatory arguments
-var_dump( strftime($format) );
+var_dump(strftime($format));
 
 ?>
 --EXPECTF--

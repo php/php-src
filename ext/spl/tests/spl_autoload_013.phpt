@@ -2,18 +2,22 @@
 SPL: spl_autoload_functions() with closures and invocables
 --FILE--
 <?php
-$closure = function($class) {
-  echo "a called\n";
+
+$closure = function ($class) {
+    echo "a called\n";
 };
 
-class Autoloader {
-  private $dir;
-  public function __construct($dir) {
-    $this->dir = $dir;
-  }
-  public function __invoke($class) {
-    var_dump("{$this->dir}/$class.php");
-  }
+class Autoloader
+{
+    private $dir;
+    public function __construct($dir)
+    {
+        $this->dir = $dir;
+    }
+    public function __invoke($class)
+    {
+        var_dump("{$this->dir}/$class.php");
+    }
 }
 
 $al1 = new Autoloader('d1');

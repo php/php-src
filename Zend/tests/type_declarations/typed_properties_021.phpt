@@ -2,8 +2,10 @@
 Test typed properties delay type check on constant
 --FILE--
 <?php
-class Foo {
-	public int $bar = BAR::BAZ;
+
+class Foo
+{
+    public int $bar = BAR::BAZ;
 }
 
 try {
@@ -11,6 +13,7 @@ try {
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
+
 ?>
 --EXPECT--
 Class 'BAR' not found

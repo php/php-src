@@ -2,13 +2,16 @@
 Bug #72543 (different references behavior comparing to PHP 5)
 --FILE--
 <?php
-function create_references(&$array) {
+
+function create_references(&$array)
+{
     foreach ($array as $key => $value) {
         create_references($array[$key]);
     }
 }
 
-function change_copy($copy) {
+function change_copy($copy)
+{
         $copy['b']['z']['z'] = $copy['b'];
 }
 
@@ -25,6 +28,7 @@ var_dump($copy);
 
 change_copy($copy);
 var_dump($copy); //RECURSION
+
 ?>
 --EXPECT--
 array(1) {

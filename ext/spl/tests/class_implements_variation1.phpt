@@ -2,6 +2,7 @@
 SPL: Test class_implements() function : variation
 --FILE--
 <?php
+
 /* Prototype  : array class_implements(mixed what [, bool autoload ])
  * Description: Return all classes and interfaces implemented by SPL
  * Source code: ext/spl/php_spl.c
@@ -12,11 +13,12 @@ echo "*** Testing class_implements() : variation ***\n";
 
 
 // Define error handler
-function test_error_handler($err_no, $err_msg, $filename, $linenum) {
-	if (error_reporting() & $err_no) {
-		// report non-silenced errors
-		echo "Error: $err_no - $err_msg, $filename($linenum)\n";
-	}
+function test_error_handler($err_no, $err_msg, $filename, $linenum)
+{
+    if (error_reporting() & $err_no) {
+        // report non-silenced errors
+        echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+    }
 }
 set_error_handler('test_error_handler');
 
@@ -24,18 +26,19 @@ set_error_handler('test_error_handler');
 $autoload = true;
 
 //resource
-$res = fopen(__FILE__,'r');
+$res = fopen(__FILE__, 'r');
 
 //get an unset variable
 $unset_var = 10;
-unset ($unset_var);
+unset($unset_var);
 
 // define some classes
 class classWithToString
 {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString()
+    {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString
@@ -74,14 +77,14 @@ $inputs = array(
       'nested arrays' => array('foo', $index_array, $assoc_array),
 
       // null data
-      'uppercase NULL' => NULL,
+      'uppercase NULL' => null,
       'lowercase null' => null,
 
       // boolean data
       'lowercase true' => true,
-      'lowercase false' =>false,
-      'uppercase TRUE' =>TRUE,
-      'uppercase FALSE' =>FALSE,
+      'lowercase false' => false,
+      'uppercase TRUE' => true,
+      'uppercase FALSE' => false,
 
       // empty data
       'empty string DQ' => "",
@@ -103,13 +106,13 @@ $inputs = array(
 
 // loop through each element of the array for pattern
 
-foreach($inputs as $key =>$value) {
+foreach ($inputs as $key => $value) {
       echo "\n--$key--\n";
-      try {
-        var_dump( class_implements($value, $autoload) );
-      } catch (\TypeError $e) {
-          echo $e->getMessage() . \PHP_EOL;
-      }
+    try {
+        var_dump(class_implements($value, $autoload));
+    } catch (\TypeError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 };
 
 fclose($res);

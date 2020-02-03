@@ -10,7 +10,9 @@ Francesco Fullone ff@ideato.it
 ?>
 --FILE--
 <?php
+
 var_dump(posix_geteuid());
+
 ?>
 --EXPECTF--
 int(%d)

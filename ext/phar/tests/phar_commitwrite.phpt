@@ -7,6 +7,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 $p = new Phar(__DIR__ . '/phar_commitwrite.phar', 0, 'phar_commitwrite.phar');
 $p['file1.txt'] = 'hi';
 $p->stopBuffering();
@@ -20,6 +21,7 @@ include 'phar://phar_commitwrite.phar/startup.php';
 __HALT_COMPILER();
 ?>");
 var_dump($p->getStub());
+
 ?>
 --CLEAN--
 <?php

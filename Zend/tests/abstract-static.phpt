@@ -2,10 +2,12 @@
 Test for abstract static classes
 --FILE--
 <?php
+
 abstract class TestClass
 {
-    abstract static public function getName();
+    abstract public static function getName();
 }
+
 ?>
 ===DONE===
 --EXPECT--

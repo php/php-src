@@ -3,20 +3,34 @@ iterable type#004 - Parameter covariance
 --FILE--
 <?php
 
-class Foo {
-    function testArray(array $array) {}
+class Foo
+{
+    function testArray(array $array)
+    {
+    }
 
-    function testTraversable(Traversable $traversable) {}
+    function testTraversable(Traversable $traversable)
+    {
+    }
 
-    function testScalar(int $int) {}
+    function testScalar(int $int)
+    {
+    }
 }
 
-class Bar extends Foo {
-    function testArray(iterable $iterable) {}
+class Bar extends Foo
+{
+    function testArray(iterable $iterable)
+    {
+    }
 
-    function testTraversable(iterable $iterable) {}
+    function testTraversable(iterable $iterable)
+    {
+    }
 
-    function testScalar(iterable $iterable) {}
+    function testScalar(iterable $iterable)
+    {
+    }
 }
 
 ?>

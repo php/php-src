@@ -5,18 +5,23 @@ Fully qualified classes in trait return types
 
 namespace FooSpace;
 
-trait Fooable {
-    function foo(): \Iterator {
+trait Fooable
+{
+    function foo(): \Iterator
+    {
         return new \EmptyIterator();
     }
 }
 
-class Foo {
+class Foo
+{
     use Fooable;
 }
 
-$foo = new Foo;
+$foo = new Foo();
 var_dump($foo->foo([]));
+
+?>
 --EXPECTF--
 object(EmptyIterator)#%d (%d) {
 }

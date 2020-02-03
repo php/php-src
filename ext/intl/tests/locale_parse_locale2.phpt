@@ -63,24 +63,22 @@ function ut_main()
         'de-419-DE',
         'a-DE',
         'ar-a-aaa-b-bbb-a-ccc',
-	'x-AAAAAA',
+    'x-AAAAAA',
     );
 
 
     $res_str = '';
 
-    foreach( $locales as $locale )
-    {
-        $arr = ut_loc_locale_parse( $locale);
+    foreach ($locales as $locale) {
+        $arr = ut_loc_locale_parse($locale);
         $res_str .= "---------------------\n";
         $res_str .= "$locale:\n";
-        if( $arr){
-            foreach( $arr as $key => $value){
+        if ($arr) {
+            foreach ($arr as $key => $value) {
                     $res_str .= "$key : '$value' , ";
             }
             $res_str = rtrim($res_str);
-        }
-        else{
+        } else {
             $res_str .= "No values found from Locale parsing.";
         }
         $res_str .= "\n";
@@ -88,10 +86,9 @@ function ut_main()
 
     $res_str .= "\n";
     return $res_str;
-
 }
 
-include_once( 'ut_common.inc' );
+include_once('ut_common.inc');
 ut_run();
 
 ?>

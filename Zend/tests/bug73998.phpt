@@ -4,7 +4,8 @@ Bug #73998 (array_key_exists fails on arrays created by get_object_vars)
 Properties of objects with numeric names should be accessible
 --FILE--
 <?php
-$a = new stdClass;
+
+$a = new stdClass();
 $a->{1234} = "Numeric";
 $a->a1234 = "String";
 

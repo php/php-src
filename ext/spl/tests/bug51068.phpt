@@ -2,24 +2,26 @@
 SPL: glob wrapper interactions with DirectoryIterator
 --FILE--
 <?php
+
 touch('bug.51068');
 mkdir('bug.51068.dir');
 touch('bug.51068.dir/lvl2.bug.51068');
 $iter = new DirectoryIterator('glob://*.51068');
 foreach ($iter as $f) {
-	var_dump($f->getFilename());
-	var_dump($f->getSize());
+    var_dump($f->getFilename());
+    var_dump($f->getSize());
 }
 $iter = new DirectoryIterator('glob://bug.51068.dir/*.51068');
 foreach ($iter as $f) {
-  var_dump($f->getFilename());
-  var_dump($f->getSize());
+    var_dump($f->getFilename());
+    var_dump($f->getSize());
 }
 $iter = new DirectoryIterator('glob://bug.51068.dir');
 foreach ($iter as $f) {
-  var_dump($f->getFilename());
-  var_dump($f->getSize() >= 0);
+    var_dump($f->getFilename());
+    var_dump($f->getSize() >= 0);
 }
+
 ?>
 --CLEAN--
 <?php

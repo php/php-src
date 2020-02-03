@@ -4,18 +4,20 @@ Phar: test a zip archive created by unix "zip" command
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
+
 $a = new PharData(__DIR__ . '/files/zip.zip');
 foreach ($a as $b) {
-	if ($b->isDir()) {
-		echo "dir " . $b->getPathName() . "\n";
-	} else {
-		echo $b->getPathName(), "\n";
-		echo file_get_contents($b->getPathName()), "\n";
-	}
+    if ($b->isDir()) {
+        echo "dir " . $b->getPathName() . "\n";
+    } else {
+        echo $b->getPathName(), "\n";
+        echo file_get_contents($b->getPathName()), "\n";
+    }
 }
 if (isset($a['notempty/hi.txt'])) {
-	echo $a['notempty/hi.txt']->getPathName() . "\n";
+    echo $a['notempty/hi.txt']->getPathName() . "\n";
 }
+
 ?>
 --EXPECTF--
 dir phar://%s/zip.zip%cempty

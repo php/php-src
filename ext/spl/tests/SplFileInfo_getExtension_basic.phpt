@@ -2,6 +2,7 @@
 SPL: SplFileInfo::getExtension() basic test
 --FILE--
 <?php
+
 $file = md5('SplFileInfo::getExtension');
 $exts = array('.txt', '.extension', '..', '.', '');
 foreach ($exts as $ext) {
@@ -9,6 +10,7 @@ foreach ($exts as $ext) {
     $info = new SplFileInfo($file . $ext);
     var_dump($info->getExtension(), pathinfo($file . $ext, PATHINFO_EXTENSION));
 }
+
 ?>
 --CLEAN--
 <?php

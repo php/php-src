@@ -4,14 +4,16 @@ Generator cycle collection edge cases
 <?php
 
 // Extra args
-function gen1() {
+function gen1()
+{
     yield;
 }
-$obj = new stdClass;
+$obj = new stdClass();
 $obj->gen = gen1($obj);
 
 // Symtable
-function gen2() {
+function gen2()
+{
     $varName = 'a';
     $$varName = yield;
     yield;
@@ -20,7 +22,8 @@ $gen = gen2();
 $gen->send($gen);
 
 // Symtable indirect
-function gen3() {
+function gen3()
+{
     $varName = 'a';
     $$varName = 42;
     $var = yield;
@@ -30,7 +33,8 @@ $gen = gen3();
 $gen->send($gen);
 
 // Yield from root
-function gen4() {
+function gen4()
+{
     yield from yield;
 }
 $gen = gen4();

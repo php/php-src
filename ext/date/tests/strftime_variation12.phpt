@@ -8,6 +8,7 @@ if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
 ?>
 --FILE--
 <?php
+
 /* Prototype  : string strftime(string format [, int timestamp])
  * Description: Format a local time/date according to locale settings
  * Source code: ext/date/php_date.c
@@ -23,8 +24,8 @@ $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 
 echo "\n-- Testing strftime() function with  Abbreviated month name format %h --\n";
 $format = "%h";
-var_dump( strftime($format) );
-var_dump( strftime($format, $timestamp) );
+var_dump(strftime($format));
+var_dump(strftime($format, $timestamp));
 
 ?>
 --EXPECTF--

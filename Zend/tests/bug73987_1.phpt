@@ -3,14 +3,21 @@ Bug #73987 (Method compatibility check looks to original definition and not pare
 --FILE--
 <?php
 
-interface I {
-  public function example();
+interface I
+{
+    public function example();
 }
-class A implements I {
-  public function example(): int { } // compatible with I::example
+class A implements I
+{
+    public function example(): int
+    {
+    } // compatible with I::example
 }
-class B extends A {
-  public function example(): string { } // compatible with I::example
+class B extends A
+{
+    public function example(): string
+    {
+    } // compatible with I::example
 }
 
 ?>

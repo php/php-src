@@ -3,8 +3,10 @@ Overriding SplFixedArray::offsetGet() only
 --FILE--
 <?php
 
-class MyArray extends SplFixedArray {
-    public function offsetGet($key) {
+class MyArray extends SplFixedArray
+{
+    public function offsetGet($key)
+    {
         return "prefix_" . parent::offsetGet($key);
     }
 }

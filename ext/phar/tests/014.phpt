@@ -6,16 +6,18 @@ Phar::mapPhar filesize mismatch
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php __HALT_COMPILER(); ?>";
 // wrong crc32
 
 $files = array();
-$files['a'] = array('cont'=>'a', 'crc32'=>crc32('aX'));
+$files['a'] = array('cont' => 'a', 'crc32' => crc32('aX'));
 include 'files/phar_test.inc';
 
-echo file_get_contents($pname.'/a');
+echo file_get_contents($pname . '/a');
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

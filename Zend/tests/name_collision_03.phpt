@@ -3,8 +3,14 @@ Object naming collision error: class/trait
 --FILE--
 <?php
 
-class A { }
-trait A { }
+class A
+{
+
+}
+trait A
+{
+
+}
 
 ?>
 --EXPECTF--

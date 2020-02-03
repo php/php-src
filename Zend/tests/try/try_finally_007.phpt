@@ -2,9 +2,11 @@
 Try finally (with goto previous label)
 --FILE--
 <?php
-function foo () {
+
+function foo()
+{
     try {
-label:
+        label:
         echo "label";
         try {
         } finally {
@@ -17,6 +19,7 @@ label:
 }
 
 foo();
+
 ?>
 --EXPECTF--
 Fatal error: jump out of a finally block is disallowed in %stry_finally_007.php on line %d

@@ -3,7 +3,9 @@ Null cannot be used as a standalone type
 --FILE--
 <?php
 
-function test(): null {}
+function test(): null
+{
+}
 
 ?>
 --EXPECTF--

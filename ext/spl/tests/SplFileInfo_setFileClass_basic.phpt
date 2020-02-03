@@ -3,7 +3,9 @@ SplFileInfo::setFileClass() expects SplFileObject or child class
 --FILE--
 <?php
 
-class MyFileObject extends SplFileObject {}
+class MyFileObject extends SplFileObject
+{
+}
 
 $info = new SplFileInfo(__FILE__);
 

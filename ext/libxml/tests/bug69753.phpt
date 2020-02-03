@@ -9,11 +9,13 @@ if (!extension_loaded('dom')) die('skip dom extension not available');
 ?>
 --FILE--
 <?php
+
 libxml_use_internal_errors(true);
 $doc = new DomDocument();
 $doc->load(__DIR__ . DIRECTORY_SEPARATOR . 'bug69753.xml');
 $error = libxml_get_last_error();
 var_dump($error->file);
+
 ?>
 --EXPECTF--
 string(%d) "file:///%s/ext/libxml/tests/bug69753.xml"

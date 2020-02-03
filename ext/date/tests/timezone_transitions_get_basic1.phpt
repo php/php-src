@@ -2,6 +2,7 @@
 Test timezone_transitions_get() function : basic functionality
 --FILE--
 <?php
+
 /* Prototype  : array timezone_transitions_get  ( DateTimeZone $object, [ int $timestamp_begin  [, int $timestamp_end  ]]  )
  * Description: Returns all transitions for the timezone
  * Source code: ext/date/php_date.c
@@ -20,12 +21,12 @@ $tran = timezone_transitions_get($tz);
 
 echo "\n-- Get all 60s transitions --\n";
 $tran = timezone_transitions_get($tz, -306972000, -37241999);
-var_dump( gettype($tran) );
+var_dump(gettype($tran));
 
-echo "\n-- Total number of transitions: " . count($tran). " --\n";
+echo "\n-- Total number of transitions: " . count($tran) . " --\n";
 
 echo "\n-- Format a sample entry pfor Spring 1963 --\n";
-var_dump( $tran[6] );
+var_dump($tran[6]);
 
 ?>
 --EXPECT--

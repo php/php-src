@@ -3,12 +3,14 @@ Bug #70987 (static::class within Closure::call() causes segfault)
 --FILE--
 <?php
 
-class foo {}
+class foo
+{
+}
 $bar = function () {
-   return static::class;
+    return static::class;
 };
 
-var_dump($bar->call(new foo));
+var_dump($bar->call(new foo()));
 
 ?>
 --EXPECT--

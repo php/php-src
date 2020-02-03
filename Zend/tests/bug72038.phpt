@@ -3,14 +3,15 @@ Bug #72038 (Function calls with values to a by-ref parameter don't always throw 
 --FILE--
 <?php
 
-test($foo = new stdClass);
+test($foo = new stdClass());
 var_dump($foo);
 test($bar = 2);
 var_dump($bar);
 test($baz = &$bar);
 var_dump($baz);
 
-function test(&$param) {
+function test(&$param)
+{
         $param = 1;
 }
 

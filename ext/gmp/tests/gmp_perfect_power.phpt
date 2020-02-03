@@ -22,7 +22,7 @@ echo "\n";
 
 $n = gmp_init("7442665456261594668083173595997");
 var_dump(gmp_perfect_power($n));
-var_dump(gmp_perfect_power($n+1));
+var_dump(gmp_perfect_power($n + 1));
 
 ?>
 --EXPECT--

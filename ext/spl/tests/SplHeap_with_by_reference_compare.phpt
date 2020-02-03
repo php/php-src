@@ -2,14 +2,18 @@
 SplHeap using a compare function returning by-reference
 --FILE--
 <?php
-class Heap extends SplMinHeap {
-    public function &compare($a, $b) {
+
+class Heap extends SplMinHeap
+{
+    public function &compare($a, $b)
+    {
         return $a;
     }
 }
-$h = new Heap;
+$h = new Heap();
 $h->insert(0);
 $h->insert(0);
+
 ?>
 ===DONE===
 --EXPECT--

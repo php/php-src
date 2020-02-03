@@ -13,8 +13,9 @@ function ut_main()
     return $ret;
 }
 
-include_once( 'ut_common.inc' );
+include_once('ut_common.inc');
 ut_run();
+
 ?>
 --EXPECT--
 false

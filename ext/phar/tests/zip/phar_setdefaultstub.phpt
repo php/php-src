@@ -20,10 +20,10 @@ echo "==========================================================================
 echo "============================================================================\n";
 
 try {
-	$phar->setDefaultStub();
-	$phar->stopBuffering();
-} catch(Exception $e) {
-	echo $e->getMessage(). "\n";
+    $phar->setDefaultStub();
+    $phar->stopBuffering();
+} catch (Exception $e) {
+    echo $e->getMessage() . "\n";
 }
 
 var_dump($phar->getStub());
@@ -32,10 +32,10 @@ echo "==========================================================================
 echo "============================================================================\n";
 
 try {
-	$phar->setDefaultStub('my/custom/thingy.php');
-	$phar->stopBuffering();
-} catch(Exception $e) {
-	echo $e->getMessage(). "\n";
+    $phar->setDefaultStub('my/custom/thingy.php');
+    $phar->stopBuffering();
+} catch (Exception $e) {
+    echo $e->getMessage() . "\n";
 }
 
 var_dump($phar->getStub());
@@ -44,10 +44,10 @@ echo "==========================================================================
 echo "============================================================================\n";
 
 try {
-	$phar->setDefaultStub('my/custom/thingy.php', 'the/web.php');
-	$phar->stopBuffering();
-} catch(Exception $e) {
-	echo $e->getMessage(). "\n";
+    $phar->setDefaultStub('my/custom/thingy.php', 'the/web.php');
+    $phar->stopBuffering();
+} catch (Exception $e) {
+    echo $e->getMessage() . "\n";
 }
 
 var_dump($phar->getStub());

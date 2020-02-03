@@ -5,10 +5,11 @@ Ensure "undefined offset" notice formats message correctly when undefined key is
 
 [][-1];
 [][-1.1];
-(new ArrayObject)[-1];
-(new ArrayObject)[-1.1];
+(new ArrayObject())[-1];
+(new ArrayObject())[-1.1];
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Notice: Undefined offset: -1 in %s on line 3

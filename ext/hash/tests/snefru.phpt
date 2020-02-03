@@ -2,11 +2,13 @@
 Hash: snefru algorithm
 --FILE--
 <?php
+
 echo hash('snefru', ''), "\n";
 echo hash('snefru', 'The quick brown fox jumps over the lazy dog'), "\n";
 echo hash('snefru', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), "\n";
 echo hash('snefru', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), "\n";
 echo hash('snefru', 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'), "\n";
+
 ?>
 --EXPECT--
 8617f366566a011837f4fb4ba5bedea2b892f3ed8b894023d16ae344b2be5881

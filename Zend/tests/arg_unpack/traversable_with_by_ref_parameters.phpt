@@ -3,11 +3,13 @@ Traversables cannot be unpacked into by-reference parameters
 --FILE--
 <?php
 
-function test($val1, $val2, $val3, &$ref) {
+function test($val1, $val2, $val3, &$ref)
+{
     $ref = 42;
 }
 
-function gen($array) {
+function gen($array)
+{
     foreach ($array as $element) {
         yield $element;
     }

@@ -3,12 +3,18 @@ Illegal variadic inheritance due to reference mismatch
 --FILE--
 <?php
 
-class A {
-    public function test(&$a, &$b) {}
+class A
+{
+    public function test(&$a, &$b)
+    {
+    }
 }
 
-class B extends A {
-    public function test(...$args) {}
+class B extends A
+{
+    public function test(...$args)
+    {
+    }
 }
 
 ?>

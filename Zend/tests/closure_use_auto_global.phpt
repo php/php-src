@@ -3,8 +3,9 @@ Cannot use() auto-global
 --FILE--
 <?php
 
-function test() {
-    $fn = function() use($GLOBALS) {
+function test()
+{
+    $fn = function () use ($GLOBALS) {
         var_dump($GLOBALS);
     };
     $fn();

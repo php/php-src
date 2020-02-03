@@ -18,22 +18,25 @@ trait AccessibleProperties
     }
 }
 
-class Foo4567 {
+class Foo4567
+{
     use AccessibleProperties;
 
     protected $a = 'Some value';
 }
 
-class Foo45 {
+class Foo45
+{
     use AccessibleProperties;
 
     protected $a = 'Some value';
 }
 
-$foo = new Foo4567;
+$foo = new Foo4567();
 var_dump(isset($foo->a));
-$foo = new Foo45;
+$foo = new Foo45();
 var_dump($foo->a);
+
 ?>
 --EXPECT--
 bool(true)

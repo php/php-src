@@ -8,7 +8,8 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-require_once(__DIR__.'/snmp_include.inc');
+
+require_once(__DIR__ . '/snmp_include.inc');
 
 echo "Checking working\n";
 var_dump(snmp_get_quick_print());

@@ -2,7 +2,9 @@
 SPL SplTempFileObject constructor sets correct defaults when pass 0 arguments
 --FILE--
 <?php
+
 var_dump(new SplTempFileObject());
+
 ?>
 --EXPECT--
 object(SplTempFileObject)#1 (5) {

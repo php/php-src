@@ -3,10 +3,11 @@ Don't optimize object -> iterable
 --FILE--
 <?php
 
-function test(object $arg): iterable {
+function test(object $arg): iterable
+{
     return $arg;
 }
-test(new stdClass);
+test(new stdClass());
 
 ?>
 --EXPECTF--

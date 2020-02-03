@@ -9,6 +9,7 @@ include('skipif.inc');
 error_reporting=2039
 --FILE--
 <?php
+
 // Should be ok.
 // Content from file is from libiconv testkit. Tested both
 // with a string as an implode, no difference.
@@ -25,6 +26,7 @@ set_time_limit(5);
 $test = 'Écrit par %s.';
 
 var_dump(iconv("ISO-8859-1", "ASCII//TRANSLIT", $test));
+
 ?>
 --EXPECT--
 string(14) "'Ecrit par %s."

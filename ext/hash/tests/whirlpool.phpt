@@ -2,9 +2,11 @@
 Hash: whirlpool algorithm
 --FILE--
 <?php
+
 echo hash('whirlpool', ''), "\n";
-echo hash('whirlpool', $s='---qwertzuiopasdfghjklyxcvbnm------qwertzuiopasdfghjklyxcvbnm---'), "\n";
-echo hash('whirlpool', str_repeat($s.'0', 1000)), "\n";
+echo hash('whirlpool', $s = '---qwertzuiopasdfghjklyxcvbnm------qwertzuiopasdfghjklyxcvbnm---'), "\n";
+echo hash('whirlpool', str_repeat($s . '0', 1000)), "\n";
+
 ?>
 --EXPECT--
 19fa61d75522a4669b44e39c1d2e1726c530232130d407f89afee0964997f7a73e83be698b288febcf88e3e03c4f0757ea8964e59b63d93708b138cc42a66eb3

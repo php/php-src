@@ -12,15 +12,20 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 ?>
 --FILE--
 <?php
-interface K {}
-interface L extends K {}
+
+interface K
+{
+}
+interface L extends K
+{
+}
 require __DIR__ . '/preload_variance.inc';
 
-$a = new A;
-$b = new B;
-$d = new D;
-$f = new F;
-$g = new G;
+$a = new A();
+$b = new B();
+$d = new D();
+$f = new F();
+$g = new G();
 
 ?>
 --EXPECTF--

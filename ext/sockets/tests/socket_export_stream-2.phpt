@@ -29,6 +29,7 @@ try {
 
 
 echo "Done.";
+
 ?>
 --EXPECTF--
 socket_export_stream(): supplied resource is not a valid Socket resource

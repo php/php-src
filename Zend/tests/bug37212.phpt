@@ -26,7 +26,9 @@ class B extends A
         $this->value = $obj->value; // value defined in common base class
     }
 }
-class C extends A {}
+class C extends A
+{
+}
 
 $B = new B("B");
 var_dump($B);

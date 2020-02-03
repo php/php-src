@@ -3,14 +3,16 @@ Exception in compound assign op should prevent call to overloaded object handler
 --FILE--
 <?php
 
-class Test {
-    public function __get($k) {
+class Test
+{
+    public function __get($k)
+    {
         $this->$k = 42;
         return 0;
     }
 }
 
-$test = new ArrayObject;
+$test = new ArrayObject();
 $test[0] = 42;
 try {
     $test[0] %= 0;
@@ -19,7 +21,7 @@ try {
 }
 var_dump($test);
 
-$test2 = new Test;
+$test2 = new Test();
 try {
     $test2->prop %= 0;
 } catch (Error $e) {

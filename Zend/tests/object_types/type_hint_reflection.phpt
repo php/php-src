@@ -3,15 +3,21 @@ Reflecting object type hint
 --FILE--
 <?php
 
-interface One {
+interface One
+{
     public function a(object $obj);
 }
 
-class Two implements One {
-    public function a(object $obj) {}
+class Two implements One
+{
+    public function a(object $obj)
+    {
+    }
 }
 
-function a(object $obj) {}
+function a(object $obj)
+{
+}
 
 $typeHintOne = (new ReflectionClass(One::class))->getMethod('a')->getParameters()[0]->getType();
 var_dump($typeHintOne->isBuiltin(), $typeHintOne->getName());
@@ -21,6 +27,8 @@ var_dump($typeHintTwo->isBuiltin(), $typeHintTwo->getName());
 
 $typeHinta = (new ReflectionFunction('a'))->getParameters()[0]->getType();
 var_dump($typeHinta->isBuiltin(), $typeHinta->getName());
+
+?>
 --EXPECT--
 bool(true)
 string(6) "object"

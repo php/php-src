@@ -30,8 +30,8 @@ $sig1 = md5_file($fname);
 
 include $pname . '/a.php';
 
-file_put_contents($pname .'/a.php', "modified!\n");
-file_put_contents($pname .'/b.php', "another!\n");
+file_put_contents($pname . '/a.php', "modified!\n");
+file_put_contents($pname . '/b.php', "another!\n");
 
 $phar = new Phar($fname);
 $sig2 = md5_file($fname);

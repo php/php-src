@@ -32,6 +32,8 @@ include $alias . '/b.php';
 include $alias . '/b/c.php';
 ?>
 
+
+?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--

@@ -11,13 +11,17 @@ opcache.protect_memory=1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function foo() {
-  $i = 1;
-  $x = 2;
-  var_dump($i=$x);
-  return $i;
+
+function foo()
+{
+    $i = 1;
+    $x = 2;
+    var_dump($i = $x);
+    return $i;
 }
 var_dump(foo());
+
+?>
 --EXPECT--
 int(2)
 int(2)

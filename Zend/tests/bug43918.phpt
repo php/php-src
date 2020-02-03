@@ -4,6 +4,7 @@ Bug #43918 (Segmentation fault in garbage collector)
 <?php if (!extension_loaded("simplexml")) print "skip SimpleXML extension required"; ?>
 --FILE--
 <?php
+
 $xmlstr = <<<XML
 <?xml version='1.0' standalone='yes'?>
 <movies>
@@ -32,13 +33,13 @@ $xmlstr = <<<XML
 XML;
 
 $Array = array( );
-for( $XX = 0; $XX < 2000; ++$XX )
-{
- $Array[] = $xml = new SimpleXMLElement($xmlstr);
+for ($XX = 0; $XX < 2000; ++$XX) {
+    $Array[] = $xml = new SimpleXMLElement($xmlstr);
 }
 
-gc_collect_cycles( );
+gc_collect_cycles();
 echo "ok\n";
+
 ?>
 --EXPECT--
 ok

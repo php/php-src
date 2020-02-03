@@ -3,16 +3,17 @@ Bug #79155: Property nullability lost when using multiple property definition
 --FILE--
 <?php
 
-class Foo {
-	public ?string $a, $b;
-	public ?stdClass $c, $d;
+class Foo
+{
+    public ?string $a, $b;
+    public ?stdClass $c, $d;
 }
 
-$t = new Foo;
+$t = new Foo();
 $t->a = "str";
 $t->b = "str";
-$t->c = new stdClass;
-$t->d = new stdClass;
+$t->c = new stdClass();
+$t->d = new stdClass();
 
 var_dump($t->a, $t->b, $t->c, $t->d);
 

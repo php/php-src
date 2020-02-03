@@ -10,7 +10,7 @@ if (!extension_loaded("xmlwriter")) die("skip");
 $doc_dest = 'OO_006.xml';
 $xw = new XMLWriter();
 $xw->openUri($doc_dest);
-$xw->startDtd('foo', NULL, 'urn:bar');
+$xw->startDtd('foo', null, 'urn:bar');
 $xw->endDtd();
 $xw->startElement('foo');
 $xw->writeElementNS('foo', 'bar', 'urn:foo', 'dummy content');
@@ -21,6 +21,7 @@ $output_bytes = $xw->flush(true);
 echo file_get_contents($doc_dest);
 unset($xw);
 unlink($doc_dest);
+
 ?>
 --EXPECT--
 <!DOCTYPE foo SYSTEM "urn:bar"><foo><foo:bar xmlns:foo="urn:foo">dummy content</foo:bar></foo>

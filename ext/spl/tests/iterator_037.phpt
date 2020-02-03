@@ -5,51 +5,44 @@ SPL: CachingIterator and __toString
 
 function test($ar, $flags)
 {
-	echo "===$flags===\n";
-	$it = new CachingIterator($ar, 0);
-	try
-	{
-		$it->setFlags($flags);
-	}
-	catch (Exception $e)
-	{
-		echo 'Exception: ' . $e->getMessage() . "\n";
-		var_dump($it->getFlags());
-		return;
-	}
-	var_dump($it->getFlags());
-	try
-	{
-		foreach($it as $v)
-		{
-			var_dump((string)$it);
-		}
-	}
-	catch (Exception $e)
-	{
-		echo 'Exception: ' . $e->getMessage() . "\n";
-	}
+    echo "===$flags===\n";
+    $it = new CachingIterator($ar, 0);
+    try {
+        $it->setFlags($flags);
+    } catch (Exception $e) {
+        echo 'Exception: ' . $e->getMessage() . "\n";
+        var_dump($it->getFlags());
+        return;
+    }
+    var_dump($it->getFlags());
+    try {
+        foreach ($it as $v) {
+            var_dump((string)$it);
+        }
+    } catch (Exception $e) {
+        echo 'Exception: ' . $e->getMessage() . "\n";
+    }
 }
 
 class MyItem
 {
-	function __construct($value)
-	{
-		$this->value = $value;
-	}
+    function __construct($value)
+    {
+        $this->value = $value;
+    }
 
-	function __toString()
-	{
-		return (string)$this->value;
-	}
+    function __toString()
+    {
+        return (string)$this->value;
+    }
 }
 
 class MyArrayIterator extends ArrayIterator
 {
-	function __toString()
-	{
-		return $this->key() . ':' . $this->current();
-	}
+    function __toString()
+    {
+        return $this->key() . ':' . $this->current();
+    }
 }
 
 $ar = new MyArrayIterator(array(1, 2, 3));
@@ -68,23 +61,17 @@ test($ar, CachingIterator::TOSTRING_USE_KEY | CachingIterator::TOSTRING_USE_CURR
 test($ar, CachingIterator::TOSTRING_USE_KEY | CachingIterator::TOSTRING_USE_INNER);
 
 echo "===X===\n";
-try
-{
-	$it = new CachingIterator($ar, CachingIterator::CALL_TOSTRING);
-	$it->setFlags(0);
+try {
+    $it = new CachingIterator($ar, CachingIterator::CALL_TOSTRING);
+    $it->setFlags(0);
+} catch (Exception $e) {
+    echo 'Exception: ' . $e->getMessage() . "\n";
 }
-catch (Exception $e)
-{
-	echo 'Exception: ' . $e->getMessage() . "\n";
-}
-try
-{
-	$it = new CachingIterator($ar, CachingIterator::TOSTRING_USE_INNER);
-	$it->setFlags(0);
-}
-catch (Exception $e)
-{
-	echo 'Exception: ' . $e->getMessage() . "\n";
+try {
+    $it = new CachingIterator($ar, CachingIterator::TOSTRING_USE_INNER);
+    $it->setFlags(0);
+} catch (Exception $e) {
+    echo 'Exception: ' . $e->getMessage() . "\n";
 }
 
 ?>

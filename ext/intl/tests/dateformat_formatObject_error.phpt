@@ -6,17 +6,28 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "pt_PT");
 ini_set("date.timezone", "Europe/Lisbon");
 
-var_dump(IntlDateFormatter::formatObject(new stdclass));
+var_dump(IntlDateFormatter::formatObject(new stdclass()));
 
-class A extends IntlCalendar {function __construct(){}}
-var_dump(IntlDateFormatter::formatObject(new A));
-class B extends DateTime {function __construct(){}}
+class A extends IntlCalendar
+{
+    function __construct()
+    {
+    }
+}
+var_dump(IntlDateFormatter::formatObject(new A()));
+class B extends DateTime
+{
+    function __construct()
+    {
+    }
+}
 try {
-    var_dump(IntlDateFormatter::formatObject(new B));
+    var_dump(IntlDateFormatter::formatObject(new B()));
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }

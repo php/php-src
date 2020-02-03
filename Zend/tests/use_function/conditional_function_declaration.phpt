@@ -4,7 +4,8 @@ function that is conditionally defined is subject to symbol use checks
 <?php
 
 if (0) {
-    function foo() {
+    function foo()
+    {
     }
 }
 

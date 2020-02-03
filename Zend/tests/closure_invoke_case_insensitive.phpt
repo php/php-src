@@ -3,7 +3,7 @@ Closure::__invoke() is case insensitive
 --FILE--
 <?php
 
-$inc = function(&$n) {
+$inc = function (&$n) {
     $n++;
 };
 

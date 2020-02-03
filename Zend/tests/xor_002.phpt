@@ -28,6 +28,7 @@ $s ^= "test long";
 var_dump(bin2hex($s));
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 string(6) "030107"

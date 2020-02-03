@@ -2,7 +2,9 @@
 Check that SCCP correctly handles non-terminating frees of loop variables
 --FILE--
 <?php
-function test() {
+
+function test()
+{
     $arr = [];
     foreach ($arr as $item) {
         if (!empty($result)) {
@@ -13,6 +15,7 @@ function test() {
 }
 
 var_dump(test());
+
 ?>
 --EXPECT--
 int(2)

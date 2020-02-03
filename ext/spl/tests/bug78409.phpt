@@ -3,7 +3,7 @@ Bug #78409: Segfault when creating instance of ArrayIterator without constructor
 --FILE--
 <?php
 
-$a = new ArrayObject;
+$a = new ArrayObject();
 $u = [
     0,
     [],

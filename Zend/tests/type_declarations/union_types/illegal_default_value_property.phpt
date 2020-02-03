@@ -3,8 +3,9 @@ Default value not legal for any type in the union
 --FILE--
 <?php
 
-class Test {
-    public int|float $prop = "0";
+class Test
+{
+    public int | float $prop = "0";
 }
 
 ?>

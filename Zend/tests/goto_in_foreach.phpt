@@ -5,11 +5,12 @@ goto inside foreach
 
 foreach ([0] as $x) {
     goto a;
-a:
+    a:
     echo "loop\n";
 }
 
 echo "done\n";
+
 ?>
 --EXPECT--
 loop

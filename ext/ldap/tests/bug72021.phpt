@@ -6,9 +6,11 @@ Chad Sikorra <Chad.Sikorra@gmail.com>
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 $subject = " Joe,= \rSmith ";
 
 var_dump(ldap_escape($subject, null, LDAP_ESCAPE_DN));
+
 ?>
 --EXPECT--
 string(24) "\20Joe\2c\3d \0dSmith\20"

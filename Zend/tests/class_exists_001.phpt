@@ -5,11 +5,12 @@ Testing class_exists() inside namespace
 
 namespace foo;
 
-class foo {
+class foo
+{
 
 }
 
-class_alias(__NAMESPACE__ .'\foo', 'bar');
+class_alias(__NAMESPACE__ . '\foo', 'bar');
 
 
 var_dump(class_exists('\bar'));

@@ -3,7 +3,8 @@ Generators cannot be cloned
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     yield;
 }
 

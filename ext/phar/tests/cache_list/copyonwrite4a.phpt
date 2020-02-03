@@ -8,9 +8,11 @@ phar.readonly=0
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
+
 var_dump(file_exists('phar://' . __DIR__ . '/files/write4.phar/testit.txt'));
 Phar::mount('phar://' . __DIR__ . '/files/write4.phar/testit.txt', 'phar://' . __DIR__ . '/files/write4.phar/tobemounted');
 var_dump(file_exists('phar://' . __DIR__ . '/files/write4.phar/testit.txt'), file_get_contents('phar://' . __DIR__ . '/files/write4.phar/testit.txt'));
+
 ?>
 --EXPECT--
 bool(false)

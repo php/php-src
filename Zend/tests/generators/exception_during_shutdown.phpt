@@ -3,7 +3,8 @@ Generator exceptions during shutdown should not be swallowed
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     try {
         echo "before yield\n";
         yield;

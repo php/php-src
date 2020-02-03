@@ -3,7 +3,9 @@ Variadic argument cannot have a default value
 --FILE--
 <?php
 
-function test(...$args = 123) {}
+function test(...$args = 123)
+{
+}
 
 ?>
 --EXPECTF--

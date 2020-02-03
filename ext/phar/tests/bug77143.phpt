@@ -6,13 +6,15 @@ phar.readonly=0
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
+
 chdir(__DIR__);
 try {
-var_dump(new Phar('bug77143.phar',0,'project.phar'));
-echo "OK\n";
-} catch(UnexpectedValueException $e) {
-	echo $e->getMessage();
+    var_dump(new Phar('bug77143.phar', 0, 'project.phar'));
+    echo "OK\n";
+} catch (UnexpectedValueException $e) {
+    echo $e->getMessage();
 }
+
 ?>
 --EXPECTF--
 internal corruption of phar "%sbug77143.phar" (truncated manifest header)

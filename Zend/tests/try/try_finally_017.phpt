@@ -3,19 +3,22 @@ Exception during break 2 with multiple try/catch
 --FILE--
 <?php
 
-class A {
+class A
+{
     public $a = 1;
     public $b = 2;
 
-    public function __destruct() {
-        throw new Exception;
+    public function __destruct()
+    {
+        throw new Exception();
     }
 }
 
-function foo() {
+function foo()
+{
     foreach ([0] as $_) {
         try {
-            foreach (new A as $value) {
+            foreach (new A() as $value) {
                 try {
                     break 2;
                 } catch (Exception $e) {
@@ -33,6 +36,7 @@ function foo() {
 }
 
 foo();
+
 ?>
 --EXPECT--
 finally1

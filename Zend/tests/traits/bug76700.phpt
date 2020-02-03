@@ -2,9 +2,13 @@
 Bug #76700 (false-positive "Error: Call to protected method" when using trait aliases)
 --FILE--
 <?php
+
 trait T1
 {
-    protected function aa() { echo 123; }
+    protected function aa()
+    {
+        echo 123;
+    }
 }
 
 trait T2
@@ -26,5 +30,7 @@ class B extends A
 
 $b = new B();
 $b->aa();
+
+?>
 --EXPECT--
 123

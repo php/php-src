@@ -4,7 +4,8 @@ Try catch finally (break / cont in try block)
 adoy
 --FILE--
 <?php
-for ($i = 0;  $i < 100 ; $i ++) {
+
+for ($i = 0; $i < 100; $i++) {
     try {
         break;
     } finally {
@@ -13,7 +14,7 @@ for ($i = 0;  $i < 100 ; $i ++) {
 }
 
 
-for ($i = 0;  $i < 2; $i ++) {
+for ($i = 0; $i < 2; $i++) {
     try {
         continue;
     } finally {
@@ -21,7 +22,7 @@ for ($i = 0;  $i < 2; $i ++) {
     }
 }
 
-for ($i = 0;  $i < 3; $i ++) {
+for ($i = 0; $i < 3; $i++) {
     try {
         try {
             continue;
@@ -32,9 +33,9 @@ for ($i = 0;  $i < 3; $i ++) {
             }
         }
     } catch (Exception $e) {
-       var_dump("cactched");
-    }  finally {
-       var_dump("finally");
+        var_dump("cactched");
+    } finally {
+        var_dump("finally");
     }
 }
 

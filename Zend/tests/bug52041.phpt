@@ -2,8 +2,10 @@
 Bug #52041 (Memory leak when writing on uninitialized variable returned from function)
 --FILE--
 <?php
-function foo() {
-	return $x;
+
+function foo()
+{
+    return $x;
 }
 
 try {
@@ -45,6 +47,7 @@ foo()[0] += 2;
 foo()[0][0] += 2;
 
 var_dump(foo());
+
 ?>
 --EXPECTF--
 Warning: Undefined variable: x in %s on line %d

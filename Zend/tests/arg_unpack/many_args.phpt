@@ -3,7 +3,8 @@ Argument unpacking with many arguments
 --FILE--
 <?php
 
-function f(...$args) {
+function f(...$args)
+{
     var_dump(count($args));
 }
 

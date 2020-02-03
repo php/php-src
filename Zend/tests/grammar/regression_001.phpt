@@ -3,8 +3,12 @@ Test to check static method calls syntax regression
 --FILE--
 <?php
 
-class Foo {
-	public static function function(){ echo __METHOD__, PHP_EOL; }
+class Foo
+{
+    public static function function()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
 }
 
 Foo::function();
@@ -13,15 +17,16 @@ Foo::
 function();
 
 Foo::
-	 function();
+     function();
 
 
 Foo::
-	 function(
-
-);
+     function(
+     );
 
 echo "\nDone\n";
+
+?>
 --EXPECT--
 Foo::function
 Foo::function

@@ -2,6 +2,7 @@
 Test basic date_parse()
 --FILE--
 <?php
+
     date_default_timezone_set('UTC');
     var_dump(date_parse("2006-12-12 10:00:00.5"));
     var_dump(date_parse("2006-12-12"));
@@ -13,6 +14,7 @@ Test basic date_parse()
     var_dump(date_parse("0-0"));
     var_dump(date_parse(""));
     echo "Done\n";
+
 ?>
 --EXPECTF--
 array(12) {

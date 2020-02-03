@@ -9,6 +9,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php __HALT_COMPILER(); ?>";
@@ -17,22 +18,22 @@ $files = array();
 $files['a'] = array('cont' => 'a');
 $files['b'] = array('cont' => 'b', 'meta' => 'hi there');
 $files['c'] = array('cont' => 'c', 'meta' => array('hi', 'there'));
-$files['d'] = array('cont' => 'd', 'meta' => array('hi'=>'there','foo'=>'bar'));
+$files['d'] = array('cont' => 'd', 'meta' => array('hi' => 'there','foo' => 'bar'));
 include 'files/phar_test.inc';
 
-foreach($files as $name => $cont) {
-	var_dump(file_get_contents($pname.'/'.$name));
+foreach ($files as $name => $cont) {
+    var_dump(file_get_contents($pname . '/' . $name));
 }
 
 $phar = new Phar($fname);
 $phar->startBuffering();
 $phar['a']->setMetadata(42);
-$phar['b']->setMetadata(NULL);
-$phar['c']->setMetadata(array(25, 'foo'=>'bar'));
+$phar['b']->setMetadata(null);
+$phar['c']->setMetadata(array(25, 'foo' => 'bar'));
 $phar['d']->setMetadata(true);
 
-foreach($files as $name => $cont) {
-	var_dump($phar[$name]->getMetadata());
+foreach ($files as $name => $cont) {
+    var_dump($phar[$name]->getMetadata());
 }
 $phar->stopBuffering();
 
@@ -40,13 +41,14 @@ unset($phar);
 
 $phar = new Phar($fname);
 
-foreach($files as $name => $cont) {
-	var_dump(file_get_contents($pname.'/'.$name));
+foreach ($files as $name => $cont) {
+    var_dump(file_get_contents($pname . '/' . $name));
 }
 
-foreach($files as $name => $cont) {
-	var_dump($phar[$name]->getMetadata());
+foreach ($files as $name => $cont) {
+    var_dump($phar[$name]->getMetadata());
 }
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

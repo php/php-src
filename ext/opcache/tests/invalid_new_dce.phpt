@@ -8,31 +8,58 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 
-abstract class Foo {}
-interface Bar {}
-trait Baz {}
+abstract class Foo
+{
+}
+interface Bar
+{
+}
+trait Baz
+{
+}
 
-class Abc {
+class Abc
+{
     const BAR = Abc::BAR;
 }
 
-function test1() {
-    $x = new Foo;
+function test1()
+{
+    $x = new Foo();
 }
-function test2() {
-    $x = new Bar;
+function test2()
+{
+    $x = new Bar();
 }
-function test3() {
-    $x = new Baz;
+function test3()
+{
+    $x = new Baz();
 }
-function test4() {
-    $x = new Abc;
+function test4()
+{
+    $x = new Abc();
 }
 
-try { test1(); } catch (Error $e) { echo $e->getMessage(), "\n"; }
-try { test2(); } catch (Error $e) { echo $e->getMessage(), "\n"; }
-try { test3(); } catch (Error $e) { echo $e->getMessage(), "\n"; }
-try { test4(); } catch (Error $e) { echo $e->getMessage(), "\n"; }
+try {
+    test1();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    test2();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    test3();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    test4();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 --EXPECT--

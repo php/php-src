@@ -13,14 +13,24 @@ set_error_handler(function (int $errno, string $errmsg, string $file, int $line)
 });
 
 $functions = [
-    'int' => function (int $i) { return $i; },
-    'float' => function (float $f) { return $f; },
-    'string' => function (string $s) { return $s; },
-    'bool' => function (bool $b) { return $b; }
+    'int' => function (int $i) {
+        return $i;
+    },
+    'float' => function (float $f) {
+        return $f;
+    },
+    'string' => function (string $s) {
+        return $s;
+    },
+    'bool' => function (bool $b) {
+        return $b;
+    }
 ];
 
-class Stringable {
-    public function __toString() {
+class Stringable
+{
+    public function __toString()
+    {
         return "foobar";
     }
 }
@@ -35,12 +45,12 @@ $values = [
     "",
     PHP_INT_MAX,
     NAN,
-    TRUE,
-    FALSE,
-    NULL,
+    true,
+    false,
+    null,
     [],
-    new StdClass,
-    new Stringable,
+    new StdClass(),
+    new Stringable(),
     fopen("data:text/plain,foobar", "r")
 ];
 
@@ -57,6 +67,7 @@ foreach ($functions as $type => $function) {
     }
 }
 echo PHP_EOL . "Done";
+
 ?>
 --EXPECTF--
 Testing 'int' type:

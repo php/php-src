@@ -8,6 +8,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = '<?php __HALT_COMPILER(); ?>';
@@ -23,6 +24,7 @@ $phar = new Phar($fname);
 var_dump($phar->getModified());
 $phar->compressFiles(Phar::GZ);
 var_dump($phar->getModified());
+
 ?>
 --CLEAN--
 <?php

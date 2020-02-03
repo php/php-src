@@ -2,8 +2,11 @@
 Bug #66811: Cannot access static::class in lambda, written outside of a class
 --FILE--
 <?php
-class A {
-    public static function f() {
+
+class A
+{
+    public static function f()
+    {
         return function () {
             var_dump(self::class);
             var_dump(static::class);
@@ -11,7 +14,9 @@ class A {
     }
 }
 
-class B extends A {}
+class B extends A
+{
+}
 
 $f = B::f();
 $f();

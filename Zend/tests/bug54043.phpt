@@ -3,7 +3,7 @@ Bug #54043: Remove inconsitency of internal exceptions and user defined exceptio
 --FILE--
 <?php
 
-$time = '9999-11-33';	// obviously invalid ;-)
+$time = '9999-11-33';   // obviously invalid ;-)
 $timeZone = new DateTimeZone('UTC');
 
 try {

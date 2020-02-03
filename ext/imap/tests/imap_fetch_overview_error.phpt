@@ -6,6 +6,7 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
+
 /* Prototype  : array imap_fetch_overview(resource $stream_id, int $msg_no [, int $options])
  * Description: Read an overview of the information in the headers
  * of the given message sequence
@@ -18,7 +19,7 @@ require_once(__DIR__.'/skipif.inc');
 
 echo "*** Testing imap_fetch_overview() : error conditions ***\n";
 
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__ . '/imap_include.inc');
 
 //Test imap_fetch_overview with one more than the expected number of arguments
 echo "\n-- Testing imap_fetch_overview() function with more than expected no. of arguments --\n";
@@ -26,11 +27,12 @@ $stream_id = setup_test_mailbox('', 2, $mailbox, 'notSimple'); // set up temp ma
 $msg_no = 1;
 $options = FT_UID;
 $extra_arg = 10;
-var_dump( imap_fetch_overview($stream_id, $msg_no, $options, $extra_arg) );
+var_dump(imap_fetch_overview($stream_id, $msg_no, $options, $extra_arg));
 
 // Testing imap_fetch_overview with one less than the expected number of arguments
 echo "\n-- Testing imap_fetch_overview() function with less than expected no. of arguments --\n";
-var_dump( imap_fetch_overview($stream_id) );
+var_dump(imap_fetch_overview($stream_id));
+
 ?>
 --CLEAN--
 <?php

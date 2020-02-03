@@ -10,9 +10,11 @@ opcache.enable_cli=1
 
 var_dump(foo());
 
-function foo() : string {
-  return (string) 42;
+function foo(): string
+{
+    return (string) 42;
 }
+
 ?>
 --EXPECT--
 string(2) "42"

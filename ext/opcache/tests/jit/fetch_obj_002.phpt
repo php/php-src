@@ -9,28 +9,34 @@ opcache.jit_buffer_size=1M
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-class A {
-   public $x = 2;
+
+class A
+{
+    public $x = 2;
 }
 
-class B {
-   public $x = 3;
-   public function __get($name) {
-      var_dump("__get");
-   }
+class B
+{
+    public $x = 3;
+    public function __get($name)
+    {
+        var_dump("__get");
+    }
 }
 
-function bar() {
-   $a = new A();
-   var_dump($a->x);
-   var_dump($a->y);
-   $b = new B();
-   var_dump($b->x);
-   unset($b->x);
-   $b->x;
+function bar()
+{
+    $a = new A();
+    var_dump($a->x);
+    var_dump($a->y);
+    $b = new B();
+    var_dump($b->x);
+    unset($b->x);
+    $b->x;
 }
 
 bar();
+
 ?>
 --EXPECTF--
 int(2)

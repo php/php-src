@@ -8,6 +8,7 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
+
 echo "Checking with no parameters\n";
 imap_timeout();
 

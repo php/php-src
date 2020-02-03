@@ -7,6 +7,7 @@ if (!extension_loaded('sockets')) {
 }
 --FILE--
 <?php
+
 $sockets = array();
 if (strtolower(substr(PHP_OS, 0, 3)) == 'win') {
     $domain = AF_INET;
@@ -19,6 +20,8 @@ $write  = null;
 $except = null;
 $ref =& $sockets[0]; // bug #78038
 var_dump(socket_select($sockets, $write, $except, 0));
+
+?>
 --EXPECT--
 int(0)
 --CREDITS--

@@ -4,15 +4,18 @@ SPL: RecursiveIteratorIterator::__construct(void)
 Sebastian Schürmann
 --FILE--
 <?php
-class myRecursiveIteratorIterator extends RecursiveIteratorIterator {
+
+class myRecursiveIteratorIterator extends RecursiveIteratorIterator
+{
 
 }
 
 try {
-	$it = new myRecursiveIteratorIterator();
+    $it = new myRecursiveIteratorIterator();
 } catch (InvalidArgumentException $e) {
-	echo 'InvalidArgumentException thrown';
+    echo 'InvalidArgumentException thrown';
 }
+
 ?>
 --EXPECT--
 InvalidArgumentException thrown

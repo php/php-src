@@ -7,7 +7,9 @@ Don't create FETCH_DIM_R with UNUSED op2
 
 // Order matters
 test($arr[]);
-function test($arg) {}
+function test($arg)
+{
+}
 
 ?>
 --EXPECTF--

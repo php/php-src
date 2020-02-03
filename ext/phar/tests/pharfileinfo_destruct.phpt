@@ -6,6 +6,7 @@ Phar: PharFileInfo::__destruct
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
 $pname = 'phar://' . $fname;
 
@@ -17,6 +18,7 @@ unset($b);
 
 $b = new PharFileInfo($pname . '/a/subdir/here');
 unset($b);
+
 ?>
 ===DONE===
 --CLEAN--

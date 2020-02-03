@@ -3,7 +3,8 @@ Type inference should not result in infinite loop
 --FILE--
 <?php
 
-function test() {
+function test()
+{
     $b = false;
     do {
         $a = $a + PHP_INT_MAX + 2;

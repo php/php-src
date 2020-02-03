@@ -3,23 +3,28 @@ Closure 027: Testing Closure type-hint
 --FILE--
 <?php
 
-function test(closure $a) {
-	var_dump($a());
+function test(closure $a)
+{
+    var_dump($a());
 }
 
 
-test(function() { return new stdclass; });
+test(function () {
+    return new stdclass();
+});
 
-test(function() { });
+test(function () {
+});
 
-$a = function($x) use ($y) {};
+$a = function ($x) use ($y) {
+};
 try {
-	test($a);
+    test($a);
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
-test(new stdclass);
+test(new stdclass());
 
 ?>
 --EXPECTF--

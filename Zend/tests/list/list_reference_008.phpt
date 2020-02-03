@@ -2,6 +2,7 @@
 "Reference Unpacking - Oddities" list()
 --FILE--
 <?php
+
 $a = 1;
 $b =& $a;
 $arr = [&$a, &$b];
@@ -31,8 +32,10 @@ $a = [1, 2];
 $ref =& $a;
 list(&$a, &$b) = $a;
 var_dump($a, $b);
-$a++; $b++;
+$a++;
+$b++;
 var_dump($ref);
+
 ?>
 --EXPECT--
 int(1)

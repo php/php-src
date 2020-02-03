@@ -2,6 +2,7 @@
 Bug #40036 (empty() does not work correctly with ArrayObject when using ARRAY_AS_PROPS)
 --FILE--
 <?php
+
 class View extends ArrayObject
 {
     public function __construct(array $array = array())
@@ -23,6 +24,7 @@ if (empty($view['bar']) || empty($view->bar)) {
 if (empty($view['baz']) || empty($view->baz)) {
     echo "View::baz empty\n";
 }
+
 ?>
 --EXPECT--
 View::foo empty

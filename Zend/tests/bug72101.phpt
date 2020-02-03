@@ -2,53 +2,69 @@
 Bug #72101 (crash on complex code)
 --FILE--
 <?php
-class PHPUnit_Framework_MockObject_Stub_ReturnCallback {
+
+class PHPUnit_Framework_MockObject_Stub_ReturnCallback
+{
     protected $callback;
-    public function __construct($callback) {
+    public function __construct($callback)
+    {
         $this->callback = $callback;
     }
-    public function invoke($invocation) {
+    public function invoke($invocation)
+    {
         return call_user_func_array($this->callback, $invocation->parameters);
     }
 }
 
-class PHPUnit_Framework_MockObject_InvocationMocker {
+class PHPUnit_Framework_MockObject_InvocationMocker
+{
     protected $matchers = [];
-    public function addMatcher( $matcher) {
+    public function addMatcher($matcher)
+    {
         $this->matchers[] = $matcher;
     }
-    public function invoke( $invocation) {
+    public function invoke($invocation)
+    {
         foreach ($this->matchers as $match) {
             $match->invoked($invocation);
         }
     }
 }
 
-class PHPUnit_Framework_MockObject_Matcher {
+class PHPUnit_Framework_MockObject_Matcher
+{
     public $stub = null;
-    public function invoked($invocation) {
+    public function invoked($invocation)
+    {
         return $this->stub->invoke($invocation);
     }
 }
 
-class MethodCallbackByReference {
-    public function bar(&$a, &$b, $c) {
+class MethodCallbackByReference
+{
+    public function bar(&$a, &$b, $c)
+    {
         Legacy::bar($a, $b, $c);
     }
-    public function callback(&$a, &$b, $c) {
+    public function callback(&$a, &$b, $c)
+    {
         $b = 1;
     }
 }
-class PHPUnit_Framework_MockObject_Invocation_Static {
+class PHPUnit_Framework_MockObject_Invocation_Static
+{
     public $parameters;
-    public function __construct(array $parameters) {
+    public function __construct(array $parameters)
+    {
         $this->parameters = $parameters;
     }
 }
 
-class Mock_MethodCallbackByReference_7b180d26 extends MethodCallbackByReference {
+class Mock_MethodCallbackByReference_7b180d26 extends MethodCallbackByReference
+{
     public $inv_mocker;
-    public function bar(&$a, &$b, $c) {
+    public function bar(&$a, &$b, $c)
+    {
         $arguments = array($a, $b, $c);
         $result = $this->inv_mocker->invoke(
             new PHPUnit_Framework_MockObject_Invocation_Static(
@@ -59,7 +75,7 @@ class Mock_MethodCallbackByReference_7b180d26 extends MethodCallbackByReference 
     }
 }
 
-set_error_handler(function() {
+set_error_handler(function () {
 //    var_dump(func_get_args());
     DoesNotExists::$nope = true;
 }, E_ALL);
@@ -73,6 +89,8 @@ $OuterMatcher->methodNameMatcher = null;
 $OuterMatcher->stub = new PHPUnit_Framework_MockObject_Stub_ReturnCallback([$foo, 'callback']);
 $a = $b = $c = 0;
 $foo->bar($a, $b, $c);
+
+?>
 --EXPECTF--
 Fatal error: Uncaught Error: Class 'DoesNotExists' not found in %sbug72101.php:61
 Stack trace:

@@ -3,7 +3,8 @@ yield cannot be used in a finally block when the generator is force-closed
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     try {
         echo "before yield\n";
         yield;

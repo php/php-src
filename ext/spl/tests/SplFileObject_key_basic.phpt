@@ -6,6 +6,7 @@ Erwin Poeze <erwin.poeze@gmail.com>
 #PFZ June PHP TestFest 2012
 --FILE--
 <?php
+
 //line 2
 //line 3
 //line 4
@@ -14,6 +15,7 @@ $s = new SplFileObject(__FILE__);
 
 $s->seek(3);
 echo $s->key();
+
 ?>
 --EXPECT--
 3

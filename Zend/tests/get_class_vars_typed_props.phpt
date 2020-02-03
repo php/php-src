@@ -3,7 +3,8 @@ get_class_vars() returns uninitialized typed properties with a null value
 --FILE--
 <?php
 
-class Test {
+class Test
+{
     public static int $int1;
     public static int $int2 = 42;
     public int $int3;

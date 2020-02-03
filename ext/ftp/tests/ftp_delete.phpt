@@ -8,6 +8,7 @@ User Group: PHP-WVL & PHPGent #PHPTestFest
 <?php require 'skipif.inc'; ?>
 --FILE--
 <?php
+
 require 'server.inc';
 
 $ftp = ftp_connect('127.0.0.1', $port);
@@ -21,6 +22,7 @@ echo "Test case #2: removal of non-existent file from FTP, should return false:"
 var_dump(ftp_delete($ftp, 'false-file.boo'));
 
 ftp_close($ftp);
+
 ?>
 --EXPECTF--
 Test case #1: removal of existing file from FTP, should return true:

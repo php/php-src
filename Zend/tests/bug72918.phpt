@@ -2,6 +2,7 @@
 Bug #72918 (negative offset inside a quoted string leads to parse error)
 --FILE--
 <?php
+
 $array = [-3 => 'foo'];
 $string = 'abcde';
 
@@ -12,6 +13,7 @@ $array[-3]
 $string[-3]
 
 EOT;
+
 ?>
 --EXPECT--
 foo

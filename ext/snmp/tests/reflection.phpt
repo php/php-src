@@ -17,7 +17,6 @@ echo new reflectionmethod('snmp', 'set');
 echo new reflectionmethod('snmp', 'getErrno');
 echo new reflectionmethod('snmp', 'getError');
 
-
 ?>
 --EXPECT--
 Method [ <internal:snmp, ctor> public method __construct ] {

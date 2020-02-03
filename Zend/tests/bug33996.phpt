@@ -4,6 +4,7 @@ Bug #33996 (No information given for fatal error on passing invalid value to typ
 error_reporting=8191
 --FILE--
 <?php
+
 class Foo
 {
     // nothing
@@ -20,16 +21,17 @@ function NormalTest($a)
 }
 
 try {
-	NormalTest();
+    NormalTest();
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 try {
-	FooTest();
+    FooTest();
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 FooTest(new Foo());
+
 ?>
 --EXPECTF--
 Exception: Too few arguments to function NormalTest(), 0 passed in %sbug33996.php on line 18 and exactly 1 expected

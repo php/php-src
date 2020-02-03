@@ -8,9 +8,11 @@ if (!extension_loaded('%EXTNAME%')) {
 ?>
 --FILE--
 <?php
-$ret = %EXTNAME%_test1();
+
+$ret = % EXTNAME % _test1();
 
 var_dump($ret);
+
 ?>
 --EXPECT--
 The extension %EXTNAME% is loaded and working!

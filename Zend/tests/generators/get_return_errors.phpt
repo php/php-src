@@ -3,7 +3,8 @@ Generator::getReturn() error cases
 --FILE--
 <?php
 
-function gen1() {
+function gen1()
+{
     yield 1;
     yield 2;
     return 3;
@@ -17,7 +18,8 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-function gen2() {
+function gen2()
+{
     throw new Exception("gen2() throw");
     yield 1;
     return 2;
@@ -36,7 +38,8 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-function gen3() {
+function gen3()
+{
     throw new Exception("gen3() throw");
     return 1;
     yield 2;
@@ -50,7 +53,8 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-function gen4() {
+function gen4()
+{
     yield;
     return 1;
 }

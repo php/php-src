@@ -84,7 +84,7 @@ class Obj
     var $__halt_compiler = '__halt_compiler';
 }
 
-$obj = new Obj;
+$obj = new Obj();
 
 echo $obj->empty, PHP_EOL;
 echo $obj->callable, PHP_EOL;

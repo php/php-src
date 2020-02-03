@@ -4,6 +4,7 @@ Test ctype_xdigit() function : usage variations - heaxadecimal and octal values
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 /* Prototype  : bool ctype_xdigit(mixed $c)
  * Description: Checks for character(s) representing a hexadecimal digit
  * Source code: ext/ctype/ctype.c
@@ -34,24 +35,25 @@ $hex_values2 = array(0x61, 0x62, 0x63, 0x64);
 
 echo "\n-- Octal values --\n";
 echo "'Incorrect' Integers: \n";
-foreach($octal_values1 as $c) {
-	var_dump(ctype_xdigit($c));
+foreach ($octal_values1 as $c) {
+    var_dump(ctype_xdigit($c));
 }
 echo "'Correct' Integers: \n";
-foreach($octal_values2 as $c) {
-	var_dump(ctype_xdigit($c));
+foreach ($octal_values2 as $c) {
+    var_dump(ctype_xdigit($c));
 }
 
 echo "\n-- Hexadecimal values --\n";
 echo "'Incorrect' Integers: \n";
-foreach($hex_values1 as $c) {
-	var_dump(ctype_xdigit($c));
+foreach ($hex_values1 as $c) {
+    var_dump(ctype_xdigit($c));
 }
 echo "'Correct' Integers: \n";
-foreach($hex_values2 as $c) {
-	var_dump(ctype_xdigit($c));
+foreach ($hex_values2 as $c) {
+    var_dump(ctype_xdigit($c));
 }
 setlocale(LC_CTYPE, $orig);
+
 ?>
 --EXPECT--
 *** Testing ctype_xdigit() : usage variations ***

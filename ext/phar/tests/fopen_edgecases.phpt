@@ -7,6 +7,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.phar.php';
 $fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '.3.phar.php';
@@ -64,8 +65,8 @@ file_put_contents($pname . '/test.php', '<?php
 $a = fopen("./notfound.php", "r");
 ?>');
 include $pname . '/test.php';
-?>
 
+?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php'); ?>

@@ -8,6 +8,7 @@ error_reporting=E_ALL
 date.timezone=UTC
 --FILE--
 <?php
+
 print_r(timezone_identifiers_list(4096));
 
 ?>

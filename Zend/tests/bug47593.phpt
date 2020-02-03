@@ -4,17 +4,22 @@ Bug #47593 (interface_exists() returns false when using absolute namespace path)
 <?php
 
 namespace test;
+
 const TEST = 11;
 
-class foo {
-	public function xyz() {
-	}
+class foo
+{
+    public function xyz()
+    {
+    }
 }
 
-interface baz {
+interface baz
+{
 }
 
-function bar() {
+function bar()
+{
 }
 
 
@@ -23,7 +28,6 @@ var_dump(function_exists('\test\bar'));
 var_dump(constant('\test\TEST'));
 var_dump(defined('\test\TEST'));
 var_dump(defined('TEST'));
-
 
 ?>
 --EXPECT--

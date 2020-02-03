@@ -71,7 +71,7 @@ $serialized = serialize($container);
 unset($arObj);
 
 $arObj = unserialize($serialized);
-foreach($arObj as $key => $value) {
+foreach ($arObj as $key => $value) {
     echo $key . ' => ' . $value . PHP_EOL;
 }
 

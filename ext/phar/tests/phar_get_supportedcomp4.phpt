@@ -6,7 +6,9 @@ Phar::getSupportedCompression() (none)
 <?php if (extension_loaded("zlib")) die("skip zlib is available"); ?>
 --FILE--
 <?php
+
 var_dump(Phar::getSupportedCompression());
+
 ?>
 --EXPECT--
 array(0) {

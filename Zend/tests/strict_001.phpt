@@ -12,6 +12,7 @@ $array = array(1,2,3,4,5,6,7);
 var_dump($array[$fp]);
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d

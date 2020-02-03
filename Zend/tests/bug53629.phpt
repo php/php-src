@@ -26,6 +26,7 @@ highlight_string($str2, true);
 
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 Done

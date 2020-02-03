@@ -3,25 +3,29 @@ Conflicting properties with different visibility modifiers should result in a fa
 --FILE--
 <?php
 
-trait THello1 {
-  public $hello;
+trait THello1
+{
+    public $hello;
 }
 
-trait THello2 {
-  private $hello;
+trait THello2
+{
+    private $hello;
 }
 
 echo "PRE-CLASS-GUARD\n";
 
-class TraitsTest {
-	use THello1;
-	use THello2;
+class TraitsTest
+{
+    use THello1;
+    use THello2;
 }
 
 echo "POST-CLASS-GUARD\n";
 
-$t = new TraitsTest;
+$t = new TraitsTest();
 $t->hello = "foo";
+
 ?>
 --EXPECTF--
 PRE-CLASS-GUARD

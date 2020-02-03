@@ -4,9 +4,12 @@ Bug #62500 (Segfault in DateInterval class when extended)
 date.timezone=GMT
 --FILE--
 <?php
-class Crasher extends DateInterval {
+
+class Crasher extends DateInterval
+{
     public $foo;
-    public function __construct($time_spec) {
+    public function __construct($time_spec)
+    {
         var_dump($this->foo);
         $this->foo = 3;
         var_dump($this->foo);
@@ -19,6 +22,8 @@ try {
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
+
+?>
 --EXPECTF--
 NULL
 int(3)

@@ -6,6 +6,7 @@ Boro Sitnikovski <buritomath@yahoo.com>
 date.timezone = UTC
 --FILE--
 <?php
+
 $iToday = new DateTimeImmutable('today');
 $iTomorrow = new DateTimeImmutable('tomorrow');
 
@@ -22,6 +23,7 @@ var_dump($iToday === $mToday);
 var_dump($iToday < $mTomorrow);
 var_dump($iToday == $mTomorrow);
 var_dump($iToday > $mTomorrow);
+
 ?>
 --EXPECT--
 bool(true)

@@ -3,13 +3,15 @@ Bug #68148: $this is null inside include
 --FILE--
 <?php
 
-class Test {
-    public function method() {
+class Test
+{
+    public function method()
+    {
         eval('var_dump($this);');
     }
 }
 
-(new Test)->method();
+(new Test())->method();
 
 ?>
 --EXPECT--

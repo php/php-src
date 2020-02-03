@@ -4,6 +4,7 @@ Transliterator::getErrorCode (basic)
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 $t = Transliterator::create("[\p{Bidi_Mirrored}] Hex");
 var_dump($t->transliterate("\x8F"));
@@ -15,6 +16,8 @@ var_dump($t->transliterate(""));
 echo $t->getErrorCode(), "\n";
 
 echo "Done.\n";
+
+?>
 --EXPECTF--
 Warning: Transliterator::transliterate(): String conversion of string to UTF-16 failed in %s on line %d
 bool(false)

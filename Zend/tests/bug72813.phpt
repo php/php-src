@@ -2,6 +2,7 @@
 Bug #72813 (Segfault with __get returned by ref)
 --FILE--
 <?php
+
 class Test
 {
     private $props = ['a' => 'text', 'b' => 1];
@@ -13,7 +14,9 @@ class Test
 
     public function __set($prop, $value)
     {
-        if ($prop === 'b') $value = [$value];
+        if ($prop === 'b') {
+            $value = [$value];
+        }
         $this->props[$prop] = $value;
     }
 
@@ -23,9 +26,10 @@ class Test
     }
 }
 
-$obj = new Test;
+$obj = new Test();
 $obj->b = $obj->b;
 print_r($obj->getProperties());
+
 ?>
 --EXPECT--
 Array

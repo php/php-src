@@ -20,6 +20,7 @@ foreach (DateTimeZone::listIdentifiers() as $timezone) {
         echo "\nWrong result for $timezone!\n";
     }
 }
+
 ?>
 ===DONE===
 --EXPECT--

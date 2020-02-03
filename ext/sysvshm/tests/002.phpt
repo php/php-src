@@ -29,6 +29,7 @@ var_dump($s = shm_attach($key));
 shm_remove($s);
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Warning: shm_attach(): Segment size must be greater than zero in %s on line %d

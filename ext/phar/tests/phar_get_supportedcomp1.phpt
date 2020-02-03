@@ -8,7 +8,9 @@ Phar::getSupportedCompression() (bz2 and zlib)
 phar.require_hash=0
 --FILE--
 <?php
+
 var_dump(Phar::getSupportedCompression());
+
 ?>
 --EXPECT--
 array(2) {

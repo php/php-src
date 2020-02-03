@@ -2,6 +2,7 @@
 Bug #66702 (RegexIterator inverted result works as expected)
 --FILE--
 <?php
+
 /**
  * @author Joshua Thijssen <jthijssen+php@noxlogic.nl>
  */
@@ -17,6 +18,8 @@ $it2 = new \RegexIterator($it, "/^ba/", \RegexIterator::MATCH, \RegexIterator::U
 print_r(iterator_to_array($it2));
 $it2 = new \RegexIterator($it, "/^ba/", \RegexIterator::MATCH, \RegexIterator::USE_KEY | \RegexIterator::INVERT_MATCH);
 print_r(iterator_to_array($it2));
+
+?>
 --EXPECT--
 Array
 (

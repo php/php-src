@@ -4,12 +4,15 @@ Bug #60738 Allow 'set_error_handler' to handle NULL
 <?php
 
 var_dump(set_exception_handler(
-    function() { echo 'Intercepted exception!', "\n"; }
+    function () {
+        echo 'Intercepted exception!', "\n";
+    }
 ));
 
 var_dump(set_exception_handler(null));
 
 throw new Exception('Exception!');
+
 ?>
 --EXPECTF--
 NULL

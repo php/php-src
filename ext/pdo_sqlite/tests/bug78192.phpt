@@ -6,6 +6,7 @@ if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
 ?>
 --FILE--
 <?php
+
 $connection = new \PDO('sqlite::memory:');
 $connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 $connection->query('CREATE TABLE user (id INTEGER PRIMARY KEY NOT NULL, name VARCHAR(255) NOT NULL)');
@@ -23,6 +24,8 @@ var_dump($stmt->fetchAll(\PDO::FETCH_ASSOC));
 $connection->query('ALTER TABLE user ADD new_col VARCHAR(255)');
 $stmt->execute(['id' => 10]);
 var_dump($stmt->fetchAll(\PDO::FETCH_ASSOC));
+
+?>
 --EXPECT--
 array(1) {
   [0]=>

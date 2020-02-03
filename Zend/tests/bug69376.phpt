@@ -2,7 +2,9 @@
 Bug #69376 (Wrong ref counting)
 --FILE--
 <?php
-function &test() {
+
+function &test()
+{
     $var = array();
     $var[] =& $var;
 
@@ -15,6 +17,7 @@ $b[0] = 123;
 
 print_r($a);
 print_r($b);
+
 ?>
 --EXPECT--
 Array

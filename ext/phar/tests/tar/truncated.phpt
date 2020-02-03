@@ -4,10 +4,11 @@ Phar: truncated tar
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
+
 try {
-	$p = new PharData(__DIR__ . '/files/trunc.tar');
+    $p = new PharData(__DIR__ . '/files/trunc.tar');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 ?>

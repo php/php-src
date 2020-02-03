@@ -4,8 +4,10 @@ Assign to $this leaks when $this not defined
 <?php
 
 try {
-	$this->a = new stdClass;
-} catch (Error $e) { echo $e->getMessage(), "\n"; }
+    $this->a = new stdClass();
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 ?>
 --EXPECT--

@@ -10,6 +10,7 @@ $diff = $dt1->diff($dt2);
 var_dump($diff->f);
 var_dump(get_object_vars($diff)['f']);
 var_dump($diff->f === get_object_vars($diff)['f']);
+
 ?>
 --EXPECT--
 float(0.123456)

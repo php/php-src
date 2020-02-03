@@ -10,6 +10,7 @@ $c = $a ^ $b;
 var_dump($c);
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 int(1)

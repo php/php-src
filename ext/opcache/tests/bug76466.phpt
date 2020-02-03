@@ -8,13 +8,16 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function foo() {
+
+function foo()
+{
     for ($i = 0; $i < 2; $i++) {
         $field_array[] = [$i, 0];
     }
     var_dump($field_array);
 }
 foo();
+
 ?>
 --EXPECT--
 array(2) {

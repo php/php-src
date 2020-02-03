@@ -6,6 +6,7 @@ Phar: url stat
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php
@@ -22,6 +23,7 @@ include 'files/phar_test.inc';
 include $fname;
 
 var_dump(stat('phar://hio/a'), stat('phar://hio/b'));
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

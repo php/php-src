@@ -2,6 +2,7 @@
 Bug #44660 (Indexed and reference assignment to property of non-object don't trigger warning)
 --FILE--
 <?php
+
 $s = "hello";
 $a = true;
 
@@ -45,6 +46,7 @@ try {
 
 echo "\n--> Confirm assignments have had no impact:\n";
 var_dump($a);
+
 ?>
 --EXPECTF--
 --> read access: 

@@ -7,16 +7,38 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 namespace Foo;
-class Bar { public function get() {} }
-class Record implements \ArrayAccess {
-    public function offsetSet($offset, $value) { throw new \Exception; }
-    public function offsetGet($offset) { var_dump($offset); }
-    public function offsetExists($offset) { throw new \Exception; }
-    public function offsetUnset($offset) { throw new \Exception; }
+
+class Bar
+{
+    public function get()
+    {
+    }
 }
-class Baz {
-    public function run() {
+class Record implements \ArrayAccess
+{
+    public function offsetSet($offset, $value)
+    {
+        throw new \Exception();
+    }
+    public function offsetGet($offset)
+    {
+        var_dump($offset);
+    }
+    public function offsetExists($offset)
+    {
+        throw new \Exception();
+    }
+    public function offsetUnset($offset)
+    {
+        throw new \Exception();
+    }
+}
+class Baz
+{
+    public function run()
+    {
         $a = pow(1, 2);
         $b = new Bar();
         $c = new Bar();
@@ -27,6 +49,7 @@ class Baz {
     }
 }
 (new Baz())->run();
+
 ?>
 --EXPECT--
 string(1) "a"

@@ -2,7 +2,9 @@
 Bug #52430 (date_parse parse 24:xx:xx as valid time)
 --FILE--
 <?php
+
 var_dump(date_parse('2010-1-1 24:59:59'));
+
 ?>
 --EXPECT--
 array(12) {

@@ -3,8 +3,9 @@ Bug #64979 (Wrong behavior of static variables in closure generators)
 --FILE--
 <?php
 
-function new_closure_gen() {
-    return function() {
+function new_closure_gen()
+{
+    return function () {
         static $foo = 0;
         yield ++$foo;
     };

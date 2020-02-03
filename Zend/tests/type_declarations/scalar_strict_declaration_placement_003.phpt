@@ -4,7 +4,10 @@ Test strict declaration being first operation only 003
 hi<?php
 
 declare(strict_types=1);
+
 var_dump(strlen(32));
+
+?>
 
 ?>
 --EXPECTF--

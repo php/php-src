@@ -3,10 +3,11 @@ Bug #78752: Segfault if GC triggered while generator stack frame is being destro
 --FILE--
 <?php
 
-function gen(&$gen) {
-    $a = new stdClass;
+function gen(&$gen)
+{
+    $a = new stdClass();
     $a->a = $a;
-    $b = new stdClass;
+    $b = new stdClass();
     $b->b = $b;
     yield 1;
 }
@@ -14,7 +15,7 @@ function gen(&$gen) {
 $gen = gen($gen);
 var_dump($gen->current());
 for ($i = 0; $i < 9999; $i++) {
-    $a = new stdClass;
+    $a = new stdClass();
     $a->a = $a;
 }
 $gen->next();

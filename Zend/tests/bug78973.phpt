@@ -5,10 +5,12 @@ opcache.optimization_level=0
 --FILE--
 <?php
 
-function test($x) {
+function test($x)
+{
 }
 test(new class {
-    public function __destruct() {
+    public function __destruct()
+    {
         debug_print_backtrace();
     }
 });

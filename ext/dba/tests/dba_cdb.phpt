@@ -8,9 +8,11 @@ DBA CDB handler test
 ?>
 --FILE--
 <?php
-	$handler = 'cdb';
-	require_once(__DIR__ .'/test.inc');
-	require_once(__DIR__ .'/dba_handler.inc');
+
+    $handler = 'cdb';
+    require_once(__DIR__ . '/test.inc');
+    require_once(__DIR__ . '/dba_handler.inc');
+
 ?>
 --CLEAN--
 <?php

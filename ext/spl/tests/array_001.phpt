@@ -3,7 +3,7 @@ SPL: ArrayObject
 --FILE--
 <?php
 
-$ar = array(0=>0, 1=>1);
+$ar = array(0 => 0, 1 => 1);
 $ar = new ArrayObject($ar);
 
 var_dump($ar);
@@ -12,7 +12,7 @@ $ar[2] = 2;
 var_dump($ar[2]);
 var_dump($ar["3"] = 3);
 
-var_dump(array_merge((array)$ar, array(4=>4, 5=>5)));
+var_dump(array_merge((array)$ar, array(4 => 4, 5 => 5)));
 
 var_dump($ar["a"] = "a");
 

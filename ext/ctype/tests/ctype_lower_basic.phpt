@@ -4,6 +4,7 @@ Test ctype_lower() function : basic functionality
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 /* Prototype  : bool ctype_lower(mixed $c)
  * Description: Checks for lowercase character(s)
  * Source code: ext/ctype/ctype.c
@@ -20,6 +21,7 @@ var_dump(ctype_lower($c1));
 var_dump(ctype_lower($c2));
 
 setlocale(LC_CTYPE, $orig);
+
 ?>
 --EXPECT--
 *** Testing ctype_lower() : basic functionality ***

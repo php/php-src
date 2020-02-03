@@ -8,8 +8,10 @@ date_default_timezone_get() function [2]
 date.timezone=
 --FILE--
 <?php
-	putenv('TZ=');
-	echo date_default_timezone_get(), "\n";
+
+    putenv('TZ=');
+    echo date_default_timezone_get(), "\n";
+
 ?>
 --EXPECT--
 UTC

@@ -3,7 +3,8 @@ Bug #75218: Change remaining uncatchable fatal errors for parsing into ParseErro
 --FILE--
 <?php
 
-function try_eval($code) {
+function try_eval($code)
+{
     try {
         eval($code);
     } catch (CompileError $e) {

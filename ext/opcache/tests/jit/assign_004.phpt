@@ -10,15 +10,19 @@ opcache.jit_buffer_size=1M
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function foo() {
-	$a = null;
-	$b = $a;
-	$c = null;
-	$d = $c;
-	$a = 1;
-	$c = $a;
-	return $c;
+
+function foo()
+{
+    $a = null;
+    $b = $a;
+    $c = null;
+    $d = $c;
+    $a = 1;
+    $c = $a;
+    return $c;
 }
 var_dump(foo());
+
+?>
 --EXPECT--
 int(1)

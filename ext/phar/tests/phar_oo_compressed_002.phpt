@@ -8,6 +8,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = '<?php __HALT_COMPILER(); ?>';
@@ -28,7 +29,7 @@ var_dump($phar['b']->isCompressed());
 var_dump(file_get_contents($pname . '/c'));
 var_dump($phar['c']->isCompressed());
 
-$context = stream_context_create(array('phar'=>array('compress'=>Phar::GZ)));
+$context = stream_context_create(array('phar' => array('compress' => Phar::GZ)));
 
 file_put_contents($pname . '/b', 'new b');
 file_put_contents($pname . '/c', 'new c', 0, $context);

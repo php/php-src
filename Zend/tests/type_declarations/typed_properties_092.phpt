@@ -3,27 +3,31 @@ Refs on ASSIGN_OBJ fast-path
 --FILE--
 <?php
 
-function &ref(&$foo) {
+function &ref(&$foo)
+{
     return $foo;
 }
 
-class Test {
+class Test
+{
     public array $prop;
     public int $prop2;
 
-    public function foo() {
+    public function foo()
+    {
         $array = [];
         $ref =& $array;
         $this->prop = $array;
     }
 
-    public function bar() {
+    public function bar()
+    {
         $str = "123";
         $this->prop2 = ref($str);
     }
 }
 
-$test = new Test;
+$test = new Test();
 $test->foo();
 $test->foo();
 $test->bar();

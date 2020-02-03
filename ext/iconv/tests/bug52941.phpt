@@ -4,6 +4,7 @@ Bug #52941 (The 'iconv_mime_decode_headers' function is skipping headers)
 <?php extension_loaded('iconv') or die('skip iconv extension is not available'); ?>
 --FILE--
 <?php
+
 $headers = <<<HEADERS
 From: =?UTF-8?B?PGZvb0BleGFtcGxlLmNvbT4=?=
 Subject: =?ks_c_5601-1987?B?UkU6odk=?=
@@ -27,6 +28,7 @@ var_dump($decoded['Subject']);
 var_dump($decoded['X-Foo']);
 var_dump($decoded['X-Bar']);
 var_dump($decoded['To']);
+
 ?>
 --EXPECTF--
 string(17) "<foo@example.com>"

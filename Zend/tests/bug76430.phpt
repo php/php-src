@@ -3,11 +3,14 @@ Bug #76430: __METHOD__ inconsistent outside of method
 --FILE--
 <?php
 
-class Foo {
+class Foo
+{
     const X = __METHOD__;
 }
-function foo() {
-    class Bar {
+function foo()
+{
+    class Bar
+    {
         const X = __METHOD__;
     }
 }

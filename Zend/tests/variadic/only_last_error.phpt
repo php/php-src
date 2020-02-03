@@ -3,7 +3,9 @@ Only the last argument can be variadic
 --FILE--
 <?php
 
-function test($foo, ...$bar, $baz) {}
+function test($foo, ...$bar, $baz)
+{
+}
 
 ?>
 --EXPECTF--

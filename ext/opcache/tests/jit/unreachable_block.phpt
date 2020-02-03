@@ -10,16 +10,22 @@ opcache.protect_memory=1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-class A {
+
+class A
+{
     public function Value()
     {
         switch ($this->returnType) {
-            case 'float':  return $this->returnTypeNullable ? null : 0;
-            default: return; 
+            case 'float':
+                return $this->returnTypeNullable ? null : 0;
+            default:
+                return;
         }
     }
 }
 ?>
 okey
+
+?>
 --EXPECT--
 okey

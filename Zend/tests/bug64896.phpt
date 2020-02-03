@@ -4,26 +4,27 @@ Bug #64896 (Segfault with gc_collect_cycles using unserialize on certain objects
 zend.enable_gc=1
 --FILE--
 <?php
-$bar = NULL;
+
+$bar = null;
 class bad
 {
-	private $_private = array();
+    private $_private = array();
 
-	public function __construct()
-	{
-		$this->_private[] = 'php';
-	}
+    public function __construct()
+    {
+        $this->_private[] = 'php';
+    }
 
-	public function __destruct()
-	{
-		global $bar;
-		$bar = $this;
-	}
+    public function __destruct()
+    {
+        global $bar;
+        $bar = $this;
+    }
 }
 
-$foo = new stdclass;
+$foo = new stdclass();
 $foo->foo = $foo;
-$foo->bad = new bad;
+$foo->bad = new bad();
 
 gc_disable();
 
@@ -37,6 +38,7 @@ object(bad)#4 (1) {
   &UNKNOWN:0
 }
 */
+
 ?>
 --EXPECTF--
 object(bad)#%d (1) {

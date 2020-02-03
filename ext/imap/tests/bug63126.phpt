@@ -24,11 +24,12 @@ if (!$kerberos) {
 ?>
 --FILE--
 <?php
+
 $tests = array(
     'Array'  => array('DISABLE_AUTHENTICATOR' => array('GSSAPI','NTLM')),
     'String' => array('DISABLE_AUTHENTICATOR' => 'GSSAPI'),
 );
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__ . '/imap_include.inc');
 foreach ($tests as $name => $testparams) {
     echo "Test for $name\n";
     $in = imap_open($default_mailbox, $username, $password, OP_HALFOPEN, 1, $testparams);
@@ -45,6 +46,7 @@ foreach ($tests as $name => $testparams) {
     }
 }
 echo "Done\n";
+
 ?>
 --EXPECT--
 Test for Array

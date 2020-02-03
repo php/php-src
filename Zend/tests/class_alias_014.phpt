@@ -5,7 +5,8 @@ Testing creation of alias to class name without namespace prefix
 
 namespace foo;
 
-class bar {
+class bar
+{
 }
 
 class_alias('bar', 'baz');

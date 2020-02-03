@@ -6,6 +6,7 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 $tz = IntlTimeZone::createEnumeration('NL');
 var_dump(get_class($tz));

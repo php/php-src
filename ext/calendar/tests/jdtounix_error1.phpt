@@ -8,11 +8,13 @@ date.timezone=UTC
 <?php include 'skipif.inc'; ?>
 --FILE--
 <?php
+
 try {
     jdtounix(2440579);
 } catch (ValueError $ex) {
     echo $ex->getMessage(), PHP_EOL;
 }
+
 ?>
 --EXPECT--
 jday must be within the Unix epoch

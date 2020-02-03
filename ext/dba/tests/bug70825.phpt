@@ -7,6 +7,7 @@ if (!in_array('inifile', dba_handlers())) die('skip inifile handler not availabl
 ?>
 --FILE--
 <?php
+
 $filename = __DIR__ . DIRECTORY_SEPARATOR . 'bug70825.ini';
 
 $db = dba_open($filename, 'n', 'inifile');
@@ -48,6 +49,7 @@ var_dump(dba_fetch('[foo]bar', 1, $db));
 var_dump(dba_fetch('[foo]bar', 2, $db));
 dba_close($db);
 unlink($filename);
+
 ?>
 --EXPECT--
 string(2) "23"

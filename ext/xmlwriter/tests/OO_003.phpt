@@ -21,13 +21,14 @@ $xw->endAttribute();
 $xw->text("Test text for tag1");
 $res = $xw->startElement('tag2');
 if ($res < 1) {
-	echo "StartElement context validation failed\n";
-	exit();
+    echo "StartElement context validation failed\n";
+    exit();
 }
 $xw->endDocument();
 
 // Force to write and empty the buffer
 echo $xw->flush(true);
+
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>

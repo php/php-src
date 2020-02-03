@@ -3,18 +3,25 @@ is_callable() with trampoline should not caused UAF
 --FILE--
 <?php
 
-class B {}
-class A extends B {
-    public function bar($func) {
+class B
+{
+}
+class A extends B
+{
+    public function bar($func)
+    {
         var_dump(is_callable(array('parent', 'foo')));
     }
 
-    public function __call($func, $args) {
+    public function __call($func, $args)
+    {
     }
 }
 
-class X {
-    public static function __callStatic($func, $args) {
+class X
+{
+    public static function __callStatic($func, $args)
+    {
     }
 }
 

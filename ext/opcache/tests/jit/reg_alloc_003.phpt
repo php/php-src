@@ -10,7 +10,9 @@ opcache.protect_memory=1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function test($char_code) {
+
+function test($char_code)
+{
     if ($char_code == !($char_code & 0xffffff80)) {
         return "correct";
     } else {
@@ -18,6 +20,7 @@ function test($char_code) {
     }
 }
 echo test(65), "\n";
+
 ?>
 --EXPECT--
 correct

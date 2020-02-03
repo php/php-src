@@ -7,8 +7,12 @@ if (spl_autoload_functions() !== false) die('skip __autoload() registered by php
 --FILE--
 <?php
 
-function SplAutoloadTest1($name) {}
-function SplAutoloadTest2($name) {}
+function SplAutoloadTest1($name)
+{
+}
+function SplAutoloadTest2($name)
+{
+}
 
 var_dump(spl_autoload_functions());
 

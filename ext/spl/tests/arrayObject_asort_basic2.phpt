@@ -2,6 +2,7 @@
 SPL: Test ArrayObject::asort() function : basic functionality with object based store
 --FILE--
 <?php
+
 /* Prototype  : int ArrayObject::asort()
  * Description: proto int ArrayIterator::asort()
  * Sort the entries by values.
@@ -10,17 +11,19 @@ SPL: Test ArrayObject::asort() function : basic functionality with object based 
  */
 
 echo "*** Testing ArrayObject::asort() : basic functionality ***\n";
-Class C {
-	public $prop1 = 'x';
-	public $prop2 = 'z';
-	private $prop3 = 'a';
-	public $prop4 = 'x';
+class C
+{
+    public $prop1 = 'x';
+    public $prop2 = 'z';
+    private $prop3 = 'a';
+    public $prop4 = 'x';
 }
 
-$c = new C;
+$c = new C();
 $ao1 = new ArrayObject($c);
 var_dump($ao1->asort());
 var_dump($ao1, $c);
+
 ?>
 --EXPECT--
 *** Testing ArrayObject::asort() : basic functionality ***

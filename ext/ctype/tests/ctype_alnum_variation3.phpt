@@ -4,6 +4,7 @@ Test ctype_alnum() function : usage variations - different string values
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 /* Prototype  : bool ctype_alnum(mixed $c)
  * Description: Checks for alphanumeric character(s)
  * Source code: ext/ctype/ctype.c
@@ -46,13 +47,14 @@ $values = array(
 
 // loop through each element of $values to test behaviour of ctype_alnum()
 $iterator = 1;
-foreach($values as $value) {
+foreach ($values as $value) {
       echo "\n-- Iteration $iterator --\n";
-      var_dump( ctype_alnum($value) );
+      var_dump(ctype_alnum($value));
       $iterator++;
 };
 
 setlocale(LC_CTYPE, $orig);
+
 ?>
 --EXPECT--
 *** Testing ctype_alnum() : usage variations ***

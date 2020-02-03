@@ -8,15 +8,19 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function get_const() {
+
+function get_const()
+{
     return 42;
 }
 
-function test() {
+function test()
+{
     var_dump(get_const($undef));
 }
 
 test();
+
 ?>
 --EXPECTF--
 Warning: Undefined variable: undef in %s on line %d

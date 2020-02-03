@@ -2,6 +2,7 @@
 Test gmstrftime() function : usage variation - Checking newline and tab formats which was not supported on Windows before VC14.
 --FILE--
 <?php
+
 /* Prototype  : string gmstrftime(string format [, int timestamp])
  * Description: Format a GMT/UCT time/date according to locale settings
  * Source code: ext/date/php_date.c
@@ -17,16 +18,16 @@ date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
 $inputs = array(
-	  'Newline character' => "%n",
-	  'Tab character' => "%t"
+      'Newline character' => "%n",
+      'Tab character' => "%t"
 );
 
 // loop through each element of the array for timestamp
 
-foreach($inputs as $key =>$value) {
+foreach ($inputs as $key => $value) {
       echo "\n--$key--\n";
-      var_dump( gmstrftime($value) );
-      var_dump( gmstrftime($value, $timestamp) );
+      var_dump(gmstrftime($value));
+      var_dump(gmstrftime($value, $timestamp));
 };
 
 ?>

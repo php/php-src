@@ -7,6 +7,7 @@ Phar::compressFiles(Phar::GZ) zip format
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip.php';
 $pname = 'phar://' . $fname;
 

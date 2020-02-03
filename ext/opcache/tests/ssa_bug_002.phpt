@@ -5,7 +5,8 @@ Incorrect NOP removal on jump to NOP
 --FILE--
 <?php
 
-function test(int $i) : int {
+function test(int $i): int
+{
     if ($i == 1) {
         $x = $i + 1;
     }

@@ -3,11 +3,12 @@ Classes can only be used once they are fully linked
 --FILE--
 <?php
 
-spl_autoload_register(function($class) {
+spl_autoload_register(function ($class) {
     echo new ReflectionClass(A::class), "\n";
 });
 
-class A implements I {
+class A implements I
+{
 }
 
 ?>

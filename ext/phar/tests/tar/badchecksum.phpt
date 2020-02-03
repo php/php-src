@@ -4,6 +4,7 @@ Phar: tar with bad checksum
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';
 $pname = 'phar://' . $fname;
 
@@ -14,9 +15,9 @@ $a->addFile('hithere', 'contents', null, 'checksum');
 $a->close();
 
 try {
-	$p = new PharData($fname);
+    $p = new PharData($fname);
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 ?>

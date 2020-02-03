@@ -8,7 +8,9 @@ if (!PHP_DEBUG) die('skip requires debug build');
 ?>
 --FILE--
 <?php
+
 zend_test_array_return();
+
 ?>
 --EXPECTF--
 Fatal error: Return value of zend_test_array_return() must be of the type array, null returned in %s on line %d

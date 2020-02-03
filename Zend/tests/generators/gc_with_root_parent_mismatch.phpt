@@ -3,12 +3,14 @@ Generator GC when the yield from parent chain does not reach the root
 --FILE--
 <?php
 
-function root() {
+function root()
+{
     yield 1;
     yield 2;
 }
 
-function delegate($gen) {
+function delegate($gen)
+{
     yield from $gen;
 }
 

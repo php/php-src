@@ -3,12 +3,14 @@ Check that iterating a typed property by reference adds a type source
 --FILE--
 <?php
 
-class Test {
+class Test
+{
     public array $ary = [];
 }
 
-$test = new Test;
-foreach ($test->ary as &$value) {}
+$test = new Test();
+foreach ($test->ary as &$value) {
+}
 var_dump($test);
 
 ?>

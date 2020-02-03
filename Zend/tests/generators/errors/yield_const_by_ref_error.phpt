@@ -3,7 +3,8 @@ A notice is thrown when yielding a constant value by reference
 --FILE--
 <?php
 
-function &gen() {
+function &gen()
+{
     yield "foo";
 }
 

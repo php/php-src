@@ -6,14 +6,16 @@ Phar: invalid aliases
 <?php if (!extension_loaded("bz2")) die("skip no bz2"); ?>
 --FILE--
 <?php
+
 $e = __DIR__ . '/files/';
 for ($i = 1; $i <= 5; $i++) {
-try {
-new Phar($e . "badalias$i.phar.tar");
-} catch (Exception $ee) {
-echo $ee->getMessage(), "\n";
+    try {
+        new Phar($e . "badalias$i.phar.tar");
+    } catch (Exception $ee) {
+        echo $ee->getMessage(), "\n";
+    }
 }
-}
+
 ?>
 --EXPECTF--
 phar error: invalid alias "hi/thereaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa..." in tar-based phar "%sbadalias1.phar.tar"

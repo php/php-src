@@ -3,7 +3,8 @@ Immediately invoked closure with extra args
 --FILE--
 <?php
 
-(function() {})(new stdClass);
+(function () {
+})(new stdClass());
 
 ?>
 ===DONE===

@@ -2,6 +2,7 @@
 Indirect call with 'Class::method' syntax with class in namespace
 --FILE--
 <?php
+
 namespace TestNamespace
 {
     class TestClass
@@ -17,7 +18,6 @@ namespace TestNamespace
         }
     }
 }
-
 namespace CallNamespace
 {
     // Test basic call using Class::method syntax.
@@ -37,6 +37,7 @@ namespace CallNamespace
     // Test call with splat operator.
     $callback(...$args);
 }
+
 ?>
 --EXPECT--
 Static method called!

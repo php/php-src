@@ -11,6 +11,7 @@ opcache.protect_memory=1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 $var = "intergalactic";
 $var1 = "space";
 $var2 = &$var1;
@@ -19,6 +20,7 @@ var_dump($var);
 var_dump($var1);
 var_dump($var2);
 echo "Done\n";
+
 ?>
 --EXPECT--
 string(5) "space"

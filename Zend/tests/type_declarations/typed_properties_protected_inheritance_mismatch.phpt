@@ -3,8 +3,14 @@ Typed property invariance violation for protected properties
 --FILE--
 <?php
 
-class A { protected int $x; }
-class B extends A { protected $x; }
+class A
+{
+    protected int $x;
+}
+class B extends A
+{
+    protected $x;
+}
 
 ?>
 --EXPECTF--

@@ -9,21 +9,23 @@ if (!extension_loaded('intl'))
 <?php
 
 $tzs = array(
-  'Gnomeregan' => array(NULL),
-  'India Standard Time' => array(NULL),
+  'Gnomeregan' => array(null),
+  'India Standard Time' => array(null),
   'Pacific Standard Time' => array('001', 'CA', 'MX', 'US', 'ZZ'),
   'Romance Standard Time' => array('001', 'BE', 'DK', 'ES', 'FR'),
 );
 
 foreach ($tzs as $tz => $regions) {
-  echo "** $tz\n";
-  foreach ($regions as $region) {
-    var_dump(IntlTimeZone::getIDForWindowsID($tz, $region));
-    if (intl_get_error_code() != U_ZERO_ERROR) {
-      echo "Error: ", intl_get_error_message(), "\n";
+    echo "** $tz\n";
+    foreach ($regions as $region) {
+        var_dump(IntlTimeZone::getIDForWindowsID($tz, $region));
+        if (intl_get_error_code() != U_ZERO_ERROR) {
+            echo "Error: ", intl_get_error_message(), "\n";
+        }
     }
-  }
 }
+
+?>
 --EXPECT--
 ** Gnomeregan
 bool(false)

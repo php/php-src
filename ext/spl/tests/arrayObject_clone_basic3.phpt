@@ -2,11 +2,13 @@
 SPL: Cloning nested ArrayObjects.
 --FILE--
 <?php
-class C {
-	public $p = 'C::p.orig';
+
+class C
+{
+    public $p = 'C::p.orig';
 }
 
-$wrappedObject = new C;
+$wrappedObject = new C();
 $innerArrayObject = new ArrayObject($wrappedObject);
 
 $outerArrayObject =  new ArrayObject($innerArrayObject);
@@ -20,6 +22,7 @@ $outerArrayObject['new.oAO'] = 'new element added to $outerArrayObject';
 $clonedOuterArrayObject['new.coAO'] = 'new element added to $clonedOuterArrayObject';
 
 var_dump($wrappedObject, $innerArrayObject, $outerArrayObject, $clonedOuterArrayObject);
+
 ?>
 --EXPECT--
 object(C)#1 (5) {

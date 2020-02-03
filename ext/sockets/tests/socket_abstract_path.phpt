@@ -11,7 +11,8 @@ if (PHP_OS != 'Linux') {
 ?>
 --FILE--
 <?php
-include __DIR__."/mcast_helpers.php.inc";
+
+include __DIR__ . "/mcast_helpers.php.inc";
 
 $path = "\x00/foo_bar";
 
@@ -28,14 +29,17 @@ socket_connect($clients, $path) or die("Error connecting");
 $conns = socket_accept($servers) or die("Could not accept connection");
 
 $r = socket_sendmsg($clients, [
-	//"name" => [ "addr" => $path, ],
-	"iov" => ["test ", "thing", "\n"],
+    //"name" => [ "addr" => $path, ],
+    "iov" => ["test ", "thing", "\n"],
 ], 0);
 var_dump($r);
 checktimeout($conns, 500);
 
-if (!socket_recv($conns, $buf, 20, 0)) die("recv");
+if (!socket_recv($conns, $buf, 20, 0)) {
+    die("recv");
+}
 print_r($buf);
+
 ?>
 --EXPECT--
 creating server socket

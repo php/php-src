@@ -20,6 +20,7 @@ var_dump(gmp_strval(gmp_neg($n)));
 var_dump(gmp_neg(array()));
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 int(0)

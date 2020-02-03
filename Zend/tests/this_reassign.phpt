@@ -2,12 +2,15 @@
 $this re-assign
 --FILE--
 <?php
-function foo() {
-	$a = "this";
-	$$a = 0;
-	var_dump($$a);
+
+function foo()
+{
+    $a = "this";
+    $$a = 0;
+    var_dump($$a);
 }
 foo();
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Error: Cannot re-assign $this in %sthis_reassign.php:4

@@ -6,9 +6,9 @@ Test to ensure const list syntax declaration works
 class Obj
 {
     const DECLARE = 'declare',
-          RETURN = 'return',
-          FUNCTION = 'function',
-          USE = 'use';
+          return = 'return',
+          function = 'function',
+          use = 'use';
 }
 
 echo Obj::DECLARE, PHP_EOL;
@@ -17,8 +17,10 @@ echo Obj::FUNCTION, PHP_EOL;
 echo Obj::USE, PHP_EOL;
 echo Obj::
 
-    USE, PHP_EOL;
+    use, PHP_EOL;
 echo "\nDone\n";
+
+?>
 --EXPECT--
 declare
 return

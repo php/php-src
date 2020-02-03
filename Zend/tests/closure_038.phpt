@@ -3,23 +3,30 @@ Closure 038: Rebinding closures, change scope, different runtime type
 --FILE--
 <?php
 
-class A {
-	private $x;
+class A
+{
+    private $x;
 
-	public function __construct($v) {
-		$this->x = $v;
-	}
+    public function __construct($v)
+    {
+        $this->x = $v;
+    }
 
-	public function getIncrementor() {
-		return function() { return ++$this->x; };
-	}
+    public function getIncrementor()
+    {
+        return function () {
+            return ++$this->x;
+        };
+    }
 }
-class B extends A {
-	private $x;
-	public function __construct($v) {
-		parent::__construct($v);
-		$this->x = $v*2;
-	}
+class B extends A
+{
+    private $x;
+    public function __construct($v)
+    {
+        parent::__construct($v);
+        $this->x = $v * 2;
+    }
 }
 
 $a = new A(0);
@@ -42,7 +49,7 @@ $cb2 = Closure::bind($ca, $b, 'B');
 var_dump($cb());
 var_dump($cb2());
 
-$cb = $ca->bindTo($b, NULL);
+$cb = $ca->bindTo($b, null);
 var_dump($cb());
 
 ?>

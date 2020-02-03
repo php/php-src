@@ -2,9 +2,13 @@
 SPL: Cloning an instance of ArrayObject which wraps an object.
 --FILE--
 <?php
-class C { }
 
-$c = new C;
+class C
+{
+
+}
+
+$c = new C();
 $ao1 =  new ArrayObject($c);
 $c->p1 = 'new prop added to c before clone';
 
@@ -14,6 +18,7 @@ $c->p2 = 'new prop added to c after clone';
 $ao1['new.ao1'] = 'new element added to ao1';
 $ao2['new.ao2'] = 'new element added to ao2';
 var_dump($c, $ao1, $ao2);
+
 ?>
 --EXPECT--
 object(C)#1 (3) {

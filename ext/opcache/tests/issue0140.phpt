@@ -10,6 +10,7 @@ opcache.file_update_protection=0
 <?php if (getenv("SKIP_SLOW_TESTS")) die("skip slow tests excluded by request") ?>
 --FILE--
 <?php
+
 define("FILENAME", __DIR__ . "/issuer0140.inc.php");
 file_put_contents(FILENAME, "1\n");
 
@@ -30,6 +31,7 @@ unlink(FILENAME);
 var_dump(is_readable(FILENAME));
 var_dump(@include(FILENAME));
 var_dump(@filemtime(FILENAME));
+
 ?>
 --EXPECTF--
 bool(true)

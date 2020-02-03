@@ -3,16 +3,25 @@ Bug #62814: It is possible to stiffen child class members visibility
 --FILE--
 <?php
 
-class A {
-    private function test() { }
+class A
+{
+    private function test()
+    {
+    }
 }
 
-class B extends A {
-    protected function test() { }
+class B extends A
+{
+    protected function test()
+    {
+    }
 }
 
-class C extends B {
-    private function test() { }
+class C extends B
+{
+    private function test()
+    {
+    }
 }
 
 ?>

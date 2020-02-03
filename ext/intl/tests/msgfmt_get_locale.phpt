@@ -19,20 +19,20 @@ function ut_main()
 
     $res_str = '';
 
-    foreach( $locales as $locale )
-    {
-        $fmt = ut_msgfmt_create( $locale, "Test" );
-        $res_str .= "$locale: " . dump( ut_msgfmt_get_locale( $fmt ) );
+    foreach ($locales as $locale) {
+        $fmt = ut_msgfmt_create($locale, "Test");
+        $res_str .= "$locale: " . dump(ut_msgfmt_get_locale($fmt));
         $res_str .= "\n";
     }
 
     return $res_str;
 }
 
-include_once( 'ut_common.inc' );
+include_once('ut_common.inc');
 
 // Run the test
 ut_run();
+
 ?>
 --EXPECT--
 en_UK: 'en_UK'

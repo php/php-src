@@ -10,7 +10,9 @@ opcache.preload=
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 return isset($undef) || php_sapi_name() == php_sapi_name();
+
 ?>
 --EXPECTF--
 $_main: ; (lines=4, args=0, vars=1, tmps=1)

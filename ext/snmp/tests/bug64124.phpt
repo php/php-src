@@ -13,7 +13,8 @@ if (@inet_ntop($packed) === false) {
 ?>
 --FILE--
 <?php
-require_once(__DIR__.'/snmp_include.inc');
+
+require_once(__DIR__ . '/snmp_include.inc');
 
 # hostname variable was modified inline in netsnmp_session_init()
 # Should be checked with IPv6 since IPv4 processing code do not alter pointer position
@@ -30,6 +31,7 @@ var_dump(snmpget($checkvar, $community, '.1.3.6.1.2.1.1.1.0'));
 var_dump(($checkvar === $hostname6_port));
 var_dump(snmpget($checkvar, $community, '.1.3.6.1.2.1.1.1.0'));
 var_dump(($checkvar === $hostname6_port));
+
 ?>
 --EXPECTF--
 string(%d) "%s"

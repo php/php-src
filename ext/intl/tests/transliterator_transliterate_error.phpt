@@ -10,13 +10,15 @@ ini_set("intl.error_level", E_WARNING);
 $tr = Transliterator::create("latin");
 
 //Arguments
-var_dump(transliterator_transliterate($tr,"str",7));
-var_dump(transliterator_transliterate($tr,"str",7,6));
+var_dump(transliterator_transliterate($tr, "str", 7));
+var_dump(transliterator_transliterate($tr, "str", 7, 6));
 
 //bad UTF-8
 transliterator_transliterate($tr, "\x80\x03");
 
 echo "Done.\n";
+
+?>
 --EXPECTF--
 Warning: transliterator_transliterate(): transliterator_transliterate: Neither "start" nor the "end" arguments can exceed the number of UTF-16 code units (in this case, 3) in %s on line %d
 bool(false)

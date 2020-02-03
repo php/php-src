@@ -4,22 +4,26 @@ libxml_set_external_entity_loader() error: bad arguments
 <?php if (!extension_loaded('dom')) die('skip dom extension not available'); ?>
 --FILE--
 <?php
+
 $xml = <<<XML
 <!DOCTYPE foo PUBLIC "-//FOO/BAR" "http://example.com/foobar">
 <foo>bar</foo>
 XML;
 
-$dd = new DOMDocument;
+$dd = new DOMDocument();
 $r = $dd->loadXML($xml);
 
-var_dump(libxml_set_external_entity_loader(function($a, $b, $c, $d) {}));
+var_dump(libxml_set_external_entity_loader(function ($a, $b, $c, $d) {
+}));
 try {
-	var_dump($dd->validate());
+    var_dump($dd->validate());
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "Done.\n";
+
+?>
 --EXPECTF--
 bool(true)
 

@@ -4,7 +4,9 @@ Bug #75570 ("Narrowing occurred during type inference" error)
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function renderRawGraph(array $parents) {
+
+function renderRawGraph(array $parents)
+{
     $graph = array();
     foreach ($parents as $p) {
         foreach ($graph as $v) {
@@ -17,5 +19,7 @@ function renderRawGraph(array $parents) {
 }
 ?>
 OK
+
+?>
 --EXPECT--
 OK

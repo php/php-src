@@ -3,17 +3,21 @@ Indirect method call with chaining
 --FILE--
 <?php
 
-class foo {
-	public $x = 'testing';
+class foo
+{
+    public $x = 'testing';
 
-	public function bar() {
-		return "foo";
-	}
-	public function baz() {
-		return new self;
-	}
-	static function xyz() {
-	}
+    public function bar()
+    {
+        return "foo";
+    }
+    public function baz()
+    {
+        return new self();
+    }
+    static function xyz()
+    {
+    }
 }
 
 var_dump((new foo())->bar());               // string(3) "foo"

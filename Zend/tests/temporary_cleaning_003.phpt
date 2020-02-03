@@ -3,11 +3,12 @@ Fundamental memory leak test on temporaries
 --FILE--
 <?php
 
-function ops() {
+function ops()
+{
     throw new Exception();
 }
 
-try{
+try {
     $x = 1;
     $r = [$x] + ops();
 } catch (Exception $e) {

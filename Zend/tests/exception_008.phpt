@@ -5,19 +5,21 @@ Exception in __destruct while exception is pending
 
 class TestFirst
 {
-	function __destruct() {
-		throw new Exception("First");
-	}
+    function __destruct()
+    {
+        throw new Exception("First");
+    }
 }
 
 class TestSecond
 {
-	function __destruct() {
-		throw new Exception("Second");
-	}
+    function __destruct()
+    {
+        throw new Exception("Second");
+    }
 }
 
-$ar = array(new TestFirst, new TestSecond);
+$ar = array(new TestFirst(), new TestSecond());
 
 unset($ar);
 

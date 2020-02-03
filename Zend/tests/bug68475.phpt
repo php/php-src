@@ -2,6 +2,7 @@
 Bug #68475 Calling function using $callable() syntax with strings of form 'Class::method'
 --FILE--
 <?php
+
 class TestClass
 {
     public static function staticMethod()
@@ -47,6 +48,7 @@ try {
 } catch (Error $e) {
     echo $e->getMessage() . "\n";
 }
+
 ?>
 --EXPECT--
 Static method called!

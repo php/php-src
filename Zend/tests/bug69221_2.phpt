@@ -3,7 +3,7 @@ Bug #69221: Segmentation fault when using a generator in combination with an Ite
 --FILE--
 <?php
 
-$gen = function() {
+$gen = function () {
     yield 1;
 };
 

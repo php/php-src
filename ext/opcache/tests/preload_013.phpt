@@ -13,8 +13,10 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 ?>
 --FILE--
 <?php
+
 test();
 test2();
+
 ?>
 ===DONE===
 --EXPECT--

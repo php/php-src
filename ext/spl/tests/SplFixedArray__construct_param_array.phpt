@@ -6,9 +6,9 @@ PHPNW Test Fest 2009 - Jordan Hatch
 <?php
 
 try {
-	$array = new SplFixedArray( array("string", 1) );
+    $array = new SplFixedArray(array("string", 1));
 } catch (TypeError $iae) {
-	echo "Ok - ".$iae->getMessage().PHP_EOL;
+    echo "Ok - " . $iae->getMessage() . PHP_EOL;
 }
 
 ?>

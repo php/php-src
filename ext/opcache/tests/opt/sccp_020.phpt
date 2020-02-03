@@ -9,14 +9,17 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function foo() {
-	$b = $a = new stdClass;
-	$a->x = 5;
-	$b->x = 42;
-	echo $a->x;
-	echo "\n";
+
+function foo()
+{
+    $b = $a = new stdClass();
+    $a->x = 5;
+    $b->x = 42;
+    echo $a->x;
+    echo "\n";
 }
 foo();
+
 ?>
 --EXPECT--
 42

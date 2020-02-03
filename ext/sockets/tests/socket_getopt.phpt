@@ -10,6 +10,7 @@ if (!extension_loaded('sockets')) {
 ?>
 --FILE--
 <?php
+
 $domain = AF_INET;
 $level = IPPROTO_IP;
 $s = socket_create($domain, SOCK_DGRAM, SOL_UDP) or die("err");
@@ -44,6 +45,7 @@ var_dump($r);
 $r = socket_getopt($s, $level, IP_MULTICAST_IF);
 var_dump($r);
 echo "\n";
+
 ?>
 --CLEAN--
 <?php

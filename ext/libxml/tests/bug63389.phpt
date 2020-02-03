@@ -4,6 +4,7 @@ Bug #63389 (Missing context check on libxml_set_streams_context() causes memleak
 <?php if (!extension_loaded('libxml')) die('skip libxml extension not available'); ?>
 --FILE--
 <?php
+
 $fp = fopen("php://input", "r");
 libxml_set_streams_context($fp);
 try {
@@ -12,6 +13,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 echo "okey";
+
 ?>
 --EXPECT--
 libxml_set_streams_context() expects parameter 1 to be resource, string given

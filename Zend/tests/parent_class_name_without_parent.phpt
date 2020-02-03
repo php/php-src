@@ -3,17 +3,20 @@ Getting parent class name when there is no parent generates an error
 --FILE--
 <?php
 
-trait T {
-    public function f() {
+trait T
+{
+    public function f()
+    {
         var_dump(parent::class);
     }
 }
 
-class C {
+class C
+{
     use T;
 }
 
-(new C)->f();
+(new C())->f();
 
 ?>
 --EXPECTF--

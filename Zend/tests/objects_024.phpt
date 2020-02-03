@@ -3,21 +3,25 @@ Testing direct assigning for property of object returned by function
 --FILE--
 <?php
 
-class foo {
-	static $bar = array();
+class foo
+{
+    static $bar = array();
 
-	public function __set($a, $b) {
-		self::$bar[] = $b;
-	}
+    public function __set($a, $b)
+    {
+        self::$bar[] = $b;
+    }
 
-	public function __get($a) {
-		/* last */
-		return self::$bar[count(self::$bar)-1];
-	}
+    public function __get($a)
+    {
+        /* last */
+        return self::$bar[count(self::$bar) - 1];
+    }
 }
 
-function test() {
-	return new foo;
+function test()
+{
+    return new foo();
 }
 
 $a = test()->bar = 1;
@@ -25,7 +29,7 @@ var_dump($a, count(foo::$bar), test()->whatever);
 
 print "\n";
 
-$a = test()->bar = NULL;
+$a = test()->bar = null;
 var_dump($a, count(foo::$bar), test()->whatever);
 
 print "\n";

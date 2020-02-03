@@ -12,6 +12,7 @@ opcache.file_cache={TMP}
 opcache.file_cache_only=1
 --FILE--
 <?php
+
 $tmpdir = sys_get_temp_dir();
 $pattern = $tmpdir . '/*/*/' . str_replace(':', '', __DIR__) . '/bug78189.php.bin';
 $filenames = glob($pattern);
@@ -25,5 +26,6 @@ if (count($filenames)) {
 } else {
     echo "no opcache file found!\n";
 }
+
 ?>
 --EXPECT--

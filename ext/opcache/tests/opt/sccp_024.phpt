@@ -10,16 +10,20 @@ opcache.preload=
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-class A {
-	function t($obj) {
-		$a = "A";
+
+class A
+{
+    function t($obj)
+    {
+        $a = "A";
         $b = "self";
         $c = 1;
         echo ($obj instanceof $a);
         echo ($obj instanceof $b);
         echo ($obj instanceof $c);
-	}
+    }
 }
+
 ?>
 --EXPECTF--
 $_main: ; (lines=1, args=0, vars=0, tmps=0)

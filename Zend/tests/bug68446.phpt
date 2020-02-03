@@ -2,15 +2,18 @@
 Bug #68446 (Array constant not accepted for array parameter default)
 --FILE--
 <?php
+
 const FOO = [1];
 const BAR = null;
 
-function a(array $a = FOO) {
-	var_dump($a);
+function a(array $a = FOO)
+{
+    var_dump($a);
 }
 
-function b(?array $b = BAR) {
-	var_dump($b);
+function b(?array $b = BAR)
+{
+    var_dump($b);
 }
 
 b(null);
@@ -19,6 +22,7 @@ b();
 a([]);
 a();
 a(null);
+
 ?>
 --EXPECTF--
 NULL

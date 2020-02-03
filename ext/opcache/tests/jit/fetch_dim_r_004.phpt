@@ -10,9 +10,11 @@ opcache.jit_buffer_size=1M
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function foo($n) {
-	$a = "ABCDEF";
-	var_dump($a[$n]);
+
+function foo($n)
+{
+    $a = "ABCDEF";
+    var_dump($a[$n]);
 }
 foo(0);
 foo(2);
@@ -23,13 +25,15 @@ foo(false);
 foo(true);
 foo(null);
 foo("ab");
-$x="a";
-$y="b";
-foo($x.$y);
+$x = "a";
+$y = "b";
+foo($x . $y);
 foo("2x");
-$x=2;
-$y="x";
-foo($x.$y);
+$x = 2;
+$y = "x";
+foo($x . $y);
+
+?>
 --EXPECTF--
 string(1) "A"
 string(1) "C"

@@ -13,6 +13,7 @@ iconv.http_input=ISO-8859-1
 iconv.http_output=ISO-8859-1
 --FILE--
 <?php
+
 echo "Getting INI\n";
 var_dump(ini_get('default_charset'));
 var_dump(ini_get('internal_encoding'));
@@ -41,6 +42,8 @@ var_dump(ini_get('output_encoding'));
 var_dump(ini_get('iconv.internal_encoding'));
 var_dump(ini_get('iconv.input_encoding'));
 var_dump(ini_get('iconv.output_encoding'));
+
+?>
 --EXPECT--
 Getting INI
 string(10) "ISO-8859-1"

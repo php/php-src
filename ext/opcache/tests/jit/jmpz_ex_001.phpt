@@ -10,21 +10,26 @@ opcache.protect_memory=1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-class Test {
+
+class Test
+{
     public $prop;
-    public function method() {
+    public function method()
+    {
         return $this->prop && $this->prop->method2();
     }
 }
 
-class Test2 {
-    public function method2() {
+class Test2
+{
+    public function method2()
+    {
         return true;
     }
 };
 
-$test = new Test;
-$test->prop = new Test2;
+$test = new Test();
+$test->prop = new Test2();
 var_dump($test->method());
 
 ?>

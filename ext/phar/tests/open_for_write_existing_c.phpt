@@ -9,6 +9,7 @@ phar.readonly=1
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php __HALT_COMPILER(); ?>";
@@ -21,6 +22,7 @@ include 'files/phar_test.inc';
 
 var_dump(fopen($pname . '/b/c.php', 'wb'));
 include $pname . '/b/c.php';
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

@@ -8,15 +8,18 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function loadEntities($entity_information) {
-	$entity_types = [];
-	foreach ($entity_information as $info) {
-		$entity_types[$info] = 1;
-	}
-	var_dump((bool)($entity_types[$info]));
+
+function loadEntities($entity_information)
+{
+    $entity_types = [];
+    foreach ($entity_information as $info) {
+        $entity_types[$info] = 1;
+    }
+    var_dump((bool)($entity_types[$info]));
 }
 
 loadEntities(array("first", "second"));
+
 ?>
 --EXPECT--
 bool(true)

@@ -3,16 +3,18 @@ Bug #69419: Returning compatible sub generator produces a warning
 --FILE--
 <?php
 
-function & genRefInner() {
+function & genRefInner()
+{
     $var = 1;
     yield $var;
 }
 
-function & genRefOuter() {
+function & genRefOuter()
+{
     return genRefInner();
 }
 
-foreach(genRefOuter() as $i) {
+foreach (genRefOuter() as $i) {
     var_dump($i);
 }
 

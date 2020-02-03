@@ -15,7 +15,7 @@ if (!extension_loaded('intl'))
 function ut_main()
 {
 
-$pattern=<<<_MSG_
+    $pattern = <<<_MSG_
 {0, select,
   female {{1, plural, offset:1
       =0 {{2} does not give a party.}
@@ -35,28 +35,28 @@ $pattern=<<<_MSG_
 _MSG_;
 
 
-$args = array(
+    $args = array(
       array('female', 0,  'Alice', 'Bob'),
       array('male',   1,  'Alice', 'Bob'),
       array('none',   2,  'Alice', 'Bob'),
       array('female', 27, 'Alice', 'Bob'),
-);
+    );
 
-$str_res = '';
+    $str_res = '';
 
-        $fmt = ut_msgfmt_create( 'en_US', $pattern );
-		if(!$fmt) {
-			$str_res .= dump(intl_get_error_message())."\n";
-			return $str_res;
-		}
-        foreach ($args as $arg) {
-            $str_res .= dump( ut_msgfmt_format($fmt, $arg) ). "\n";
-            $str_res .= dump( ut_msgfmt_format_message('en_US', $pattern, $arg) ) . "\n";
+        $fmt = ut_msgfmt_create('en_US', $pattern);
+    if (!$fmt) {
+        $str_res .= dump(intl_get_error_message()) . "\n";
+        return $str_res;
+    }
+    foreach ($args as $arg) {
+        $str_res .= dump(ut_msgfmt_format($fmt, $arg)) . "\n";
+        $str_res .= dump(ut_msgfmt_format_message('en_US', $pattern, $arg)) . "\n";
     }
     return $str_res;
 }
 
-include_once( 'ut_common.inc' );
+include_once('ut_common.inc');
 
 // Run the test
 ut_run();

@@ -4,6 +4,7 @@ Test ctype_upper() function : usage variations - different integers
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 /* Prototype  : bool ctype_upper(mixed $c)
  * Description: Checks for uppercase character(s)
  * Source code: ext/ctype/ctype.c
@@ -18,12 +19,13 @@ echo "*** Testing ctype_upper() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($i = 0; $i < 256; $i++) {
-	if (ctype_upper($i)) {
-		echo "character code $i is a uppercase character\n";
-	}
+    if (ctype_upper($i)) {
+        echo "character code $i is a uppercase character\n";
+    }
 }
 
 setlocale(LC_CTYPE, $orig);
+
 ?>
 --EXPECT--
 *** Testing ctype_upper() : usage variations ***

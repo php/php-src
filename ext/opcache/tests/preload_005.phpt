@@ -12,8 +12,10 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 ?>
 --FILE--
 <?php
+
 $x = 123;
 var_dump(get_x());
+
 ?>
 --EXPECT--
 int(123)

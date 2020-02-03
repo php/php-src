@@ -8,9 +8,12 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 
 var_dump(intlcal_get_time_zone(1));
+
+?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: intlcal_get_time_zone() expects parameter 1 to be IntlCalendar, int given in %s:%d
 Stack trace:

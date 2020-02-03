@@ -5,6 +5,7 @@ IntlRuleBasedBreakIterator::getRules(): basic test
 <?php if (version_compare(INTL_ICU_VERSION, '61.1') >=  0) die('skip for ICU < 61.1'); ?>
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "pt_PT");
 

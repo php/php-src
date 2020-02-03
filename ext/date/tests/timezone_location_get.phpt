@@ -7,8 +7,10 @@ Havard Eide <nucleuz@gmail.com>
 date.timezone=UTC
 --FILE--
 <?php
+
 $location = timezone_location_get(new DateTimeZone("Europe/Oslo"));
 var_dump($location);
+
 ?>
 --EXPECTF--
 array(4) {

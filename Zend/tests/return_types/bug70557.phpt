@@ -5,15 +5,17 @@ opcache.enable=0
 --FILE--
 <?php
 
-function getNumber() : int {
-	return "foo";
+function getNumber(): int
+{
+    return "foo";
 }
 
 try {
-	getNumber();
+    getNumber();
 } catch (TypeError $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
+
 ?>
 --EXPECT--
 string(68) "Return value of getNumber() must be of the type int, string returned"

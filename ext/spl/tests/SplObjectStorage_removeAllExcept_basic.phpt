@@ -9,11 +9,11 @@ Matthew Turland (me@matthewturland.com)
     $b = (object) 'b';
     $c = (object) 'c';
 
-   $foo = new SplObjectStorage;
+   $foo = new SplObjectStorage();
     $foo->attach($a);
     $foo->attach($b);
 
-    $bar = new SplObjectStorage;
+    $bar = new SplObjectStorage();
     $bar->attach($b);
     $bar->attach($c);
 

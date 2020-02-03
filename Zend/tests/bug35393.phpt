@@ -4,9 +4,10 @@ Bug #35393 (changing static protected members from outside the class)
 error_reporting=4095
 --FILE--
 <?php
+
 class ObjectPath
 {
-    static protected $type = array(0=>'main');
+    protected static $type = array(0 => 'main');
 
     static function getType()
     {
@@ -16,6 +17,7 @@ class ObjectPath
 print_r(ObjectPath::getType());
 $object_type = array_pop((ObjectPath::getType()));
 print_r(ObjectPath::getType());
+
 ?>
 --EXPECTF--
 Array

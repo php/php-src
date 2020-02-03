@@ -13,6 +13,7 @@ $fo = new SplFileObject('fileobject_004.phpt', 'r', true);
 var_dump($fo->getPath());
 var_dump($fo->getFilename());
 var_dump($fo->getRealPath());
+
 ?>
 --EXPECTF--
 string(%d) "%sspl%stests"

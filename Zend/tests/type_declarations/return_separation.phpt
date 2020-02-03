@@ -3,14 +3,16 @@ Return values are separated for references with rc=1
 --FILE--
 <?php
 
-function test1() : array {
+function test1(): array
+{
     $array = [];
     $ref =& $array;
     unset($ref);
     return $array;
 }
 
-function test2() : string {
+function test2(): string
+{
     $int = 42;
     $ref =& $int;
     unset($ref);

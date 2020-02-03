@@ -7,23 +7,23 @@ class impl
 {
     public function __construct()
     {
-       $this->counter++;
+        $this->counter++;
     }
-    public function __set( $name, $value )
+    public function __set($name, $value)
     {
-        throw new Exception( "doesn't work" );
+        throw new Exception("doesn't work");
     }
 
-    public function __get( $name )
+    public function __get($name)
     {
-        throw new Exception( "doesn't work" );
+        throw new Exception("doesn't work");
     }
-
 }
 
 $impl = new impl();
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Exception: doesn't work in %s:%d

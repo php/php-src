@@ -9,7 +9,8 @@ if (!function_exists('snmp_set_oid_output_format')) die('skip This function is o
 ?>
 --FILE--
 <?php
-require_once(__DIR__.'/snmp_include.inc');
+
+require_once(__DIR__ . '/snmp_include.inc');
 
 echo "Checking error handling\n";
 var_dump(snmp_set_oid_output_format(123));
@@ -17,6 +18,7 @@ var_dump(snmp_set_oid_output_format(123));
 echo "Checking working\n";
 var_dump(snmp_set_oid_output_format(SNMP_OID_OUTPUT_FULL));
 var_dump(snmp_set_oid_output_format(SNMP_OID_OUTPUT_NUMERIC));
+
 ?>
 --EXPECTF--
 Checking error handling

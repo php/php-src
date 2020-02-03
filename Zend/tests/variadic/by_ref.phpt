@@ -3,7 +3,8 @@ Variadic arguments with by-reference passing
 --FILE--
 <?php
 
-function test(&... $args) {
+function test(&...$args)
+{
     $i = 0;
     foreach ($args as &$arg) {
         $arg = $i++;

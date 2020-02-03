@@ -6,6 +6,7 @@ Phar: Phar::running()
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 
@@ -16,6 +17,7 @@ var_dump(Phar::running(false));
 ?>';
 include $pname . '/index.php';
 var_dump(Phar::running());
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

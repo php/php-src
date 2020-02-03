@@ -3,11 +3,13 @@ Stack is cleaned up properly when an exception is thrown during a function call
 --FILE--
 <?php
 
-function throwException() {
+function throwException()
+{
     throw new Exception('test');
 }
 
-function gen() {
+function gen()
+{
     yield 'foo';
     strlen("foo", "bar", throwException());
     yield 'bar';

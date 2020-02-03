@@ -13,22 +13,22 @@ if (!extension_loaded('posix')) {
 --FILE--
 <?php
 
-
 echo "*** Test substituting argument 1 with boolean values ***\n";
 
 
 
 $variation_array = array(
   'lowercase true' => true,
-  'lowercase false' =>false,
-  'uppercase TRUE' =>TRUE,
-  'uppercase FALSE' =>FALSE,
+  'lowercase false' => false,
+  'uppercase TRUE' => true,
+  'uppercase FALSE' => false,
   );
 
 
-foreach ( $variation_array as $var ) {
-  var_dump(posix_ttyname( $var  ) );
+foreach ($variation_array as $var) {
+    var_dump(posix_ttyname($var));
 }
+
 ?>
 --EXPECT--
 *** Test substituting argument 1 with boolean values ***

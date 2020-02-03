@@ -2,13 +2,16 @@
 SPL: SplHeap: exceptions
 --FILE--
 <?php
-class myHeap extends SplHeap {
-    public function compare($a, $b) {
+
+class myHeap extends SplHeap
+{
+    public function compare($a, $b)
+    {
         throw new exception("foo");
     }
 }
 
-$h = new myHeap;
+$h = new myHeap();
 
 try {
     $h->insert(1);
@@ -17,26 +20,26 @@ try {
     echo "inserted 2\n";
     $h->insert(3);
     echo "inserted 3\n";
-} catch(Exception $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+} catch (Exception $e) {
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 try {
     $h->insert(4);
     echo "inserted 4\n";
-} catch(Exception $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+} catch (Exception $e) {
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 try {
     var_dump($h->extract());
-} catch(Exception $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+} catch (Exception $e) {
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 try {
     var_dump($h->extract());
-} catch(Exception $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+} catch (Exception $e) {
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "Recovering..\n";
@@ -44,14 +47,15 @@ $h->recoverFromCorruption();
 
 try {
     var_dump($h->extract());
-} catch(Exception $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+} catch (Exception $e) {
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 try {
     var_dump($h->extract());
-} catch(Exception $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+} catch (Exception $e) {
+    echo "Exception: " . $e->getMessage() . "\n";
 }
+
 ?>
 --EXPECT--
 inserted 1

@@ -4,7 +4,9 @@ Incorrect empty basic block elimination
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function wp_get_archives( $args = '' ) {
+
+function wp_get_archives($args = '')
+{
     $defaults = array(
         'type' => 'monthly', 'limit' => '',
         'format' => 'html', 'before' => '',
@@ -12,21 +14,21 @@ function wp_get_archives( $args = '' ) {
         'echo' => 1, 'order' => 'DESC',
     );
 
-    $r = wp_parse_args( $args, $defaults );
+    $r = wp_parse_args($args, $defaults);
 
-    if ( ! empty( $r['limit'] ) ) {
-        $r['limit'] = absint( $r['limit'] );
+    if (! empty($r['limit'])) {
+        $r['limit'] = absint($r['limit']);
         $r['limit'] = ' LIMIT ' . $r['limit'];
     }
 
     $archive_date_format_over_ride = 0;
     $archive_day_date_format = 'Y/m/d';
 
-    if (!$archive_date_format_over_ride ) {
-        $archive_day_date_format = get_option( 'date_format' );
+    if (!$archive_date_format_over_ride) {
+        $archive_day_date_format = get_option('date_format');
     }
 
-    if ( $r['echo'] ) {
+    if ($r['echo']) {
         echo $output;
     } else {
         return $output;
@@ -34,5 +36,7 @@ function wp_get_archives( $args = '' ) {
 }
 ?>
 OK
+
+?>
 --EXPECT--
 OK

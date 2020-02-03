@@ -7,6 +7,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 class myIterator implements Iterator
 {
     var $a;
@@ -14,36 +15,42 @@ class myIterator implements Iterator
     {
         $this->a = $a;
     }
-    function next() {
+    function next()
+    {
         echo "next\n";
         return next($this->a);
     }
-    function current() {
+    function current()
+    {
         echo "current\n";
         return current($this->a);
     }
-    function key() {
+    function key()
+    {
         echo "key\n";
         return key($this->a);
     }
-    function valid() {
+    function valid()
+    {
         echo "valid\n";
         return current($this->a);
     }
-    function rewind() {
+    function rewind()
+    {
         echo "rewind\n";
         return reset($this->a);
     }
 }
 try {
-	chdir(__DIR__);
-	$phar = new Phar(__DIR__ . '/buildfromiterator.phar.tar');
-	var_dump($phar->buildFromIterator(new myIterator(array('a' => basename(__FILE__, 'php') . 'phpt'))));
-	var_dump($phar->isFileFormat(Phar::TAR));
+    chdir(__DIR__);
+    $phar = new Phar(__DIR__ . '/buildfromiterator.phar.tar');
+    var_dump($phar->buildFromIterator(new myIterator(array('a' => basename(__FILE__, 'php') . 'phpt'))));
+    var_dump($phar->isFileFormat(Phar::TAR));
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
+
 ?>
 --CLEAN--
 <?php

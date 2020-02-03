@@ -3,12 +3,16 @@ Variadic arguments must have compatible passing modes
 --FILE--
 <?php
 
-interface DB {
+interface DB
+{
     public function query($query, &...$params);
 }
 
-class MySQL implements DB {
-    public function query($query, ...$params) { }
+class MySQL implements DB
+{
+    public function query($query, ...$params)
+    {
+    }
 }
 
 ?>

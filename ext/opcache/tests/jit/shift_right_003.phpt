@@ -10,7 +10,9 @@ opcache.protect_memory=1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function encodeDynamicInteger(int $int): string {
+
+function encodeDynamicInteger(int $int): string
+{
     $out = "";
     for ($i = 0; ($int >> $i) > 0x80; $i += 7) {
         $out .= \chr(0x80 | (($int >> $i) & 0x7f));
@@ -19,6 +21,7 @@ function encodeDynamicInteger(int $int): string {
 }
 $s = encodeDynamicInteger(235);
 var_dump(strlen($s), ord($s[0]), ord($s[1]));
+
 ?>
 --EXPECT--
 int(2)

@@ -12,5 +12,7 @@ readline_redisplay();
 
 ?>
 okey
+
+?>
 --EXPECT--
 okey

@@ -9,24 +9,24 @@ phar.readonly=0
 <?php
 
 try {
-Phar::unlinkArchive("");
+    Phar::unlinkArchive("");
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
 
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
 $pdname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
 
 try {
-Phar::unlinkArchive($fname);
+    Phar::unlinkArchive($fname);
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
 file_put_contents($pdname, 'blahblah');
 try {
-Phar::unlinkArchive($pdname);
+    Phar::unlinkArchive($pdname);
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
 try {
     Phar::unlinkArchive(array());
@@ -51,9 +51,9 @@ $phar = new Phar($fname);
 var_dump($phar->isFileFormat(Phar::ZIP));
 var_dump($phar->getStub());
 try {
-Phar::unlinkArchive($fname);
+    Phar::unlinkArchive($fname);
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
 $phar = $phar->convertToExecutable(Phar::ZIP);
 var_dump($phar->isFileFormat(Phar::ZIP));
@@ -79,6 +79,7 @@ include Phar::running(true) . "/another.php";
 $phar['another.php'] = "hi\n";
 unset($phar);
 include $pname . '/evil.php';
+
 ?>
 --CLEAN--
 <?php

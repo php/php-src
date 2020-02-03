@@ -32,7 +32,6 @@ TEST;
 
 var_dump(strlen($test) == 2);
 
-
 ?>
 --EXPECT--
 bool(true)

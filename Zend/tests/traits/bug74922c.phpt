@@ -3,17 +3,22 @@ Bug #74922 (Composed class has fatal error with duplicate, equal const propertie
 --FILE--
 <?php
 
-trait T {
+trait T
+{
     public $x = self::X;
 }
-trait T2 {
+trait T2
+{
     public $x = self::X;
 }
-class C {
-    use T, T2;
+class C
+{
+    use T;
+    use T2;
+
     const X = 42;
 }
-var_dump((new C)->x);
+var_dump((new C())->x);
 
 ?>
 --EXPECT--

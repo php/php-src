@@ -5,11 +5,13 @@ Lukasz Andrzejak meltir@meltir.com
 #testfest London 2009-05-09
 --FILE--
 <?php
+
 $i = new ArrayIterator(array(1,1,1,1,1));
-$i = new CachingIterator($i,CachingIterator::FULL_CACHE);
+$i = new CachingIterator($i, CachingIterator::FULL_CACHE);
 foreach ($i as $value) {
-  echo $i->count()."\n";
+    echo $i->count() . "\n";
 }
+
 ?>
 --EXPECT--
 1

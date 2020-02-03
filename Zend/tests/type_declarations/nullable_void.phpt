@@ -3,7 +3,8 @@ Void cannot be nullable
 --FILE--
 <?php
 
-function test() : ?void {
+function test(): ?void
+{
 }
 
 ?>

@@ -4,9 +4,11 @@ Bug #77257: value of variable assigned in a switch() construct gets lost
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function test($x) {
+
+function test($x)
+{
     $a = false;
-    switch($x["y"]) {
+    switch ($x["y"]) {
         case "a":
             $a = true;
             break;
@@ -18,6 +20,7 @@ function test($x) {
     return $a;
 }
 var_dump(test(["y" => "a"]));
+
 ?>
 --EXPECT--
 bool(true)

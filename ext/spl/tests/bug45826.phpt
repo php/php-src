@@ -2,8 +2,9 @@
 ArrayObject/ArrayIterator : serialization
 --FILE--
 <?php
+
 $o = new ArrayObject();
-$y = new StdClass;
+$y = new StdClass();
 $o->append($y);
 $o->append($y);
 $o->append($o);
@@ -16,7 +17,7 @@ $s2 = $o->serialize();
 var_dump($s1);
 var_dump($s2);
 
-$o1 =unserialize($s1);
+$o1 = unserialize($s1);
 
 var_dump($o1[0] === $o1[1]);
 var_dump($o1[2] === $o1);
@@ -29,19 +30,22 @@ var_dump($o2[2] !== $o2);
 var_dump($o2[2][2] === $o2[2]);
 
 echo "#### Extending ArrayObject\n";
-unset($o,$x,$s1,$s2,$o1,$o2);
-class ArrayObject2 extends ArrayObject {
-    public function __serialize() {
+unset($o, $x, $s1, $s2, $o1, $o2);
+class ArrayObject2 extends ArrayObject
+{
+    public function __serialize()
+    {
         return parent::__serialize();
     }
 
-    public function __unserialize($s) {
+    public function __unserialize($s)
+    {
         return parent::__unserialize($s);
     }
 }
 
 $o = new ArrayObject2();
-$y = new StdClass;
+$y = new StdClass();
 $o->append($y);
 $o->append($y);
 $o->append($o);
@@ -65,6 +69,7 @@ $o2->__unserialize($s2);
 var_dump($o2[0] === $o2[1]);
 var_dump($o2[2] !== $o2);
 var_dump($o2[2][2] === $o2[2]);
+
 ?>
 --EXPECT--
 bool(true)

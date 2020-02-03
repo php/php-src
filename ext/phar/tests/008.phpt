@@ -4,16 +4,18 @@ Phar::mapPhar truncated manifest (not enough for manifest length)
 <?php if (!extension_loaded("phar")) die("skip");?>
 --FILE--
 <?php
+
 $file = "<?php
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
 $file .= pack('V', 500) . 'notenough';
 file_put_contents(__DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php', $file);
 try {
-include __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
+    include __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 } catch (Exception $e) {
-echo $e->getMessage();
+    echo $e->getMessage();
 }
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

@@ -8,14 +8,16 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 function test()
 {
-	$success = true;
-	$success = $success AND true;
-	return $success;
+    $success = true;
+    $success = $success and true;
+    return $success;
 }
 
 var_dump(test());
+
 ?>
 --EXPECT--
 bool(true)

@@ -3,7 +3,7 @@ accessing object dimension
 --FILE--
 <?php
 
-$object = new stdClass;
+$object = new stdClass();
 var_dump($object[1]);
 
 ?>

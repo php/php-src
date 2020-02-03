@@ -2,6 +2,7 @@
 Hash: gost algorithm
 --FILE--
 <?php
+
 echo hash('gost', ''), "\n";
 echo hash('gost', 'The quick brown fox jumps over the lazy dog'), "\n";
 echo hash('gost', 'The quick brown fox jumps over the lazy cog'), "\n";
@@ -15,6 +16,7 @@ echo hash('gost-crypto', 'The quick brown fox jumps over the lazy cog'), "\n";
 echo hash('gost-crypto', str_repeat('a', 31)), "\n";
 echo hash('gost-crypto', str_repeat('a', 32)), "\n";
 echo hash('gost-crypto', str_repeat('a', 33)), "\n";
+
 ?>
 --EXPECT--
 ce85b99cc46752fffee35cab9a7b0278abb4c2d2055cff685af4912c49490f8d

@@ -15,6 +15,7 @@ var_dump(libxml_get_last_error());
 var_dump(libxml_clear_errors());
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 bool(false)

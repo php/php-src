@@ -3,10 +3,15 @@ Bug #60173 (Wrong error message on reflective trait instantiation)
 --FILE--
 <?php
 
-trait foo { }
+trait foo
+{
+
+}
 
 $rc = new ReflectionClass('foo');
 $rc->newInstance();
+
+?>
 --EXPECTF--
 Fatal error: Uncaught Error: Cannot instantiate trait foo in %s:%d
 Stack trace:

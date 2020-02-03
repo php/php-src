@@ -5,14 +5,16 @@ Testing parameter type-hinted (array) with default value inside namespace
 
 namespace foo;
 
-class bar {
-	public function __construct(array $x = NULL) {
-		var_dump($x);
-	}
+class bar
+{
+    public function __construct(array $x = null)
+    {
+        var_dump($x);
+    }
 }
 
 new bar(null);
-new bar(new \stdclass);
+new bar(new \stdclass());
 
 ?>
 --EXPECTF--

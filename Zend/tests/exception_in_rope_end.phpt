@@ -3,7 +3,9 @@ Exception during rope finalization
 --FILE--
 <?php
 
-set_error_handler(function() { throw new Exception; });
+set_error_handler(function () {
+    throw new Exception();
+});
 
 try {
     $b = "foo";

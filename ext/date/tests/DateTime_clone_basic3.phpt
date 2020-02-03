@@ -2,6 +2,7 @@
 Test clone of DateTime objects
 --FILE--
 <?php
+
 //Set the default time zone
 date_default_timezone_set("Europe/London");
 
@@ -24,6 +25,7 @@ var_dump($d1_clone);
 echo "\n-- clone it --\n";
 $d2_clone = clone $d1_clone;
 var_dump($d2_clone);
+
 ?>
 --EXPECTF--
 *** Testing clone on DateTime objects ***

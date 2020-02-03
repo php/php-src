@@ -3,7 +3,8 @@ Return in try with throw in finally, inside other finally
 --FILE--
 <?php
 
-function test() {
+function test()
+{
     try {
         throw new Exception(1);
     } finally {

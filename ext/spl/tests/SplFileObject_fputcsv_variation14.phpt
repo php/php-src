@@ -15,6 +15,7 @@ var_dump($fo->fputcsv(array('water', 'fruit'), ',,', '""'));
 unset($fo);
 
 echo "Done\n";
+
 ?>
 --CLEAN--
 <?php

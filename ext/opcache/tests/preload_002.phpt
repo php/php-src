@@ -12,10 +12,13 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 ?>
 --FILE--
 <?php
+
 var_dump((new ReflectionMethod('x', 'foo'))->getPrototype()->class);
 var_dump((new ReflectionMethod('x', 'bar'))->getPrototype()->class);
 ?>
 OK
+
+?>
 --EXPECT--
 string(1) "b"
 string(1) "a"

@@ -9,9 +9,12 @@ if (PHP_INT_SIZE == 4) {
 ?>
 --FILE--
 <?php
+
 $x = 3315881921229094912;
 
 var_dump(cal_from_jd($x, CAL_JULIAN));
+
+?>
 --EXPECT--
 array(9) {
   ["date"]=>

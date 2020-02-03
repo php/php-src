@@ -3,7 +3,8 @@ class_exists() tests
 --FILE--
 <?php
 
-class foo {
+class foo
+{
 }
 
 var_dump(class_exists("qwerty"));
@@ -15,6 +16,7 @@ var_dump(class_exists("stdClass", false));
 var_dump(class_exists("stdClass"));
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 bool(false)

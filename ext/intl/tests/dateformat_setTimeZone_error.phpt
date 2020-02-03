@@ -6,11 +6,12 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "pt_PT");
 ini_set("date.timezone", 'Atlantic/Azores');
 
-$df = new IntlDateFormatter(NULL, 0, 0);
+$df = new IntlDateFormatter(null, 0, 0);
 
 var_dump($df->setTimeZone(array()));
 var_dump($df->setTimeZone('non existing timezone'));

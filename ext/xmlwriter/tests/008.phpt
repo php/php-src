@@ -8,8 +8,8 @@ if (!extension_loaded("xmlwriter")) die("skip");
 <?php
 
 $xw = xmlwriter_open_memory();
-xmlwriter_set_indent($xw, TRUE);
-xmlwriter_start_document($xw, NULL, "UTF-8");
+xmlwriter_set_indent($xw, true);
+xmlwriter_start_document($xw, null, "UTF-8");
 xmlwriter_start_dtd_entity($xw, "ent", false);
 xmlwriter_text($xw, "val");
 xmlwriter_end_dtd_entity($xw);
@@ -27,6 +27,7 @@ xmlwriter_end_document($xw);
 // Force to write and empty the buffer
 $output = xmlwriter_flush($xw, true);
 print $output;
+
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>

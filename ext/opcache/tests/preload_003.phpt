@@ -12,10 +12,13 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 ?>
 --FILE--
 <?php
+
 Y::foo();
 Y::bar();
 ?>
 OK
+
+?>
 --EXPECT--
 string(7) "T1::foo"
 string(7) "T2::bar"

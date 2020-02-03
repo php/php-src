@@ -3,7 +3,8 @@ Break 2 in try and return in finally inside nested loop
 --FILE--
 <?php
 
-function foo() {
+function foo()
+{
     $array = [1, 2, $n = 3];
     foreach ($array as $value) {
         foreach ($array as $value) {
@@ -19,6 +20,7 @@ function foo() {
 }
 
 foo();
+
 ?>
 --EXPECT--
 try

@@ -12,13 +12,11 @@ if (!class_exists(SampleFilter::class)) {
 
         public function filter($in, $out, &$consumed, $closing)
         {
-            while ($bucket = stream_bucket_make_writeable($in))
-            {
+            while ($bucket = stream_bucket_make_writeable($in)) {
                 $this->data .= $bucket->data;
             }
 
-            if ($closing || feof($this->stream))
-            {
+            if ($closing || feof($this->stream)) {
                 $consumed = strlen($this->data);
 
                 $this->data = str_replace('bug', 'feature', $this->data);
@@ -33,7 +31,7 @@ if (!class_exists(SampleFilter::class)) {
         }
     }
     stream_filter_register('sample.filter', SampleFilter::class);
-    $uri = 'php://filter/read=sample.filter/resource='. __FILE__;
+    $uri = 'php://filter/read=sample.filter/resource=' . __FILE__;
 
     include $uri; // We expect one more "feature" output at line 3
 }

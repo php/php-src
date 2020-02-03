@@ -4,7 +4,9 @@ Bug #60738 Allow 'set_error_handler' to handle NULL
 <?php
 
 var_dump(set_error_handler(
-    function() { echo 'Intercepted error!', "\n"; }
+    function () {
+        echo 'Intercepted error!', "\n";
+    }
 ));
 
 trigger_error('Error!');
@@ -12,6 +14,7 @@ trigger_error('Error!');
 var_dump(set_error_handler(null));
 
 trigger_error('Error!');
+
 ?>
 --EXPECTF--
 NULL

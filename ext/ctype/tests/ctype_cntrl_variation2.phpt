@@ -4,6 +4,7 @@ Test ctype_cntrl() function : usage variations - different integers
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 /* Prototype  : bool ctype_cntrl(mixed $c)
  * Description: Checks for control character(s)
  * Source code: ext/ctype/ctype.c
@@ -19,12 +20,13 @@ echo "*** Testing ctype_cntrl() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($i = 0; $i < 256; $i++) {
-	if (ctype_cntrl($i)) {
-		echo "character code $i is control character\n";
-	}
+    if (ctype_cntrl($i)) {
+        echo "character code $i is control character\n";
+    }
 }
 
 setlocale(LC_CTYPE, $orig);
+
 ?>
 --EXPECT--
 *** Testing ctype_cntrl() : usage variations ***

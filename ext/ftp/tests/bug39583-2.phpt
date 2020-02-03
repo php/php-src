@@ -6,10 +6,13 @@ require 'skipif.inc';
 ?>
 --FILE--
 <?php
+
 require 'server.inc';
 
 $ftp = ftp_connect('127.0.0.1', $port);
-if (!$ftp) die("Couldn't connect to the server");
+if (!$ftp) {
+    die("Couldn't connect to the server");
+}
 
 var_dump(ftp_login($ftp, 'user', 'pass'));
 
@@ -22,12 +25,13 @@ $upload = ftp_put($ftp, $destination_file, $source_file, FTP_BINARY);
 // check upload status
 if (!$upload) {
        echo "FTP upload has failed!";
-   } else {
-       echo "Uploaded $source_file as $destination_file";
-   }
+} else {
+    echo "Uploaded $source_file as $destination_file";
+}
 
 // close the FTP stream
 ftp_close($ftp);
+
 ?>
 --EXPECTF--
 bool(true)

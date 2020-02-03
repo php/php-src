@@ -3,16 +3,23 @@ Returns are covariant, but we don't allow the code due to class ordering
 --FILE--
 <?php
 
-class A {
-    public function method() : B {}
+class A
+{
+    public function method(): B
+    {
+    }
 }
-class B extends A {
-    public function method() : C {}
+class B extends A
+{
+    public function method(): C
+    {
+    }
 }
-class C extends B {
+class C extends B
+{
 }
 
-new C;
+new C();
 
 ?>
 --EXPECTF--

@@ -5,7 +5,7 @@ Bug #38461 (setting private attribute with __set() produces segfault)
 
 class Operation
 {
-    function __set( $var, $value )
+    function __set($var, $value)
     {
         $this->$var = $value;
     }
@@ -16,10 +16,11 @@ class ExtOperation extends Operation
     private $x;
 }
 
-$op = new ExtOperation;
+$op = new ExtOperation();
 $op->x = 'test';
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Error: Cannot access private property ExtOperation::$x in %s:%d

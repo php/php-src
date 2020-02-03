@@ -6,31 +6,33 @@ Phar: set alias with invalid alias containing / \ : or ;
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
 
 $p = new Phar($fname);
 try {
-	$p->setAlias('hi/');
+    $p->setAlias('hi/');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	$p->setAlias('hi\\l');
+    $p->setAlias('hi\\l');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-	$p->setAlias('hil;');
+    $p->setAlias('hil;');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-	$p->setAlias(':hil');
+    $p->setAlias(':hil');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
+
 ?>
 --CLEAN--
 <?php

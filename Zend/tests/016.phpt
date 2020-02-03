@@ -3,10 +3,11 @@ isset() with object properties when operating on non-object
 --FILE--
 <?php
 
-$foo = NULL;
+$foo = null;
 isset($foo->bar->bar);
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 Done

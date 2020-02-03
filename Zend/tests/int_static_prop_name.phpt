@@ -3,7 +3,8 @@ Using an integer as a static property name
 --FILE--
 <?php
 
-class Foo {
+class Foo
+{
     public static $bar = 42;
 }
 

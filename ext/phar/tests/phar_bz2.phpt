@@ -10,6 +10,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/phar_bz2.phar';
 $pname = 'phar://' . $fname;
 $fname2 = __DIR__ . '/phar_bz2.2.phar';
@@ -41,10 +42,11 @@ var_dump($b->isFileFormat(Phar::PHAR));
 var_dump($b->isCompressed() == Phar::BZ2);
 // additional code coverage
 try {
-$b->isFileFormat(25);
+    $b->isFileFormat(25);
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
+
 ?>
 --CLEAN--
 <?php

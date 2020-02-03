@@ -10,6 +10,7 @@ foreach ($a as $b) {
     }
     return;
 }
+
 ?>
 ===DONE===
 --EXPECT--

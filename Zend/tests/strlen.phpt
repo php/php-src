@@ -5,31 +5,31 @@ Fixed execute_data corruption with __toString()
 
 class Test
 {
-  public $something = 'hello';
+    public $something = 'hello';
 
-  public function __toString()
-  {
-    return $this->something;
-  }
+    public function __toString()
+    {
+        return $this->something;
+    }
 }
 
-$t = new Test;
+$t = new Test();
 var_dump(strlen($t));
 var_dump($t->something);
 
 class Test2
 {
-  public $something;
+    public $something;
 
-  public function __construct(&$a)
-  {
-    $this->something = &$a;
-  }
+    public function __construct(&$a)
+    {
+        $this->something = &$a;
+    }
 
-  public function __toString()
-  {
-    return $this->something;
-  }
+    public function __toString()
+    {
+        return $this->something;
+    }
 }
 
 $a = 'world';
@@ -41,6 +41,8 @@ var_dump($a);
 $a = 'foobar';
 var_dump(strlen($t2));
 var_dump($t2->something);
+
+?>
 --EXPECT--
 int(5)
 string(5) "hello"

@@ -5,9 +5,19 @@ Bug #74922 (Composed class has fatal error with duplicate, equal const propertie
 
 const VALUE = true;
 
-trait Foo {public $var = VALUE;}
-trait Bar {public $var = true;}
-class Baz {use Foo, Bar;}
+trait Foo
+{
+    public $var = VALUE;
+}
+trait Bar
+{
+    public $var = true;
+}
+class Baz
+{
+    use Foo;
+           use Bar;
+}
 
 echo "DONE";
 

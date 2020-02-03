@@ -10,6 +10,7 @@ opcache.protect_memory=1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 class Caster
 {
     const EXCLUDE_PUBLIC = 8;
@@ -31,9 +32,10 @@ class Caster
 
         return $a;
     }
-
 }
 ?>
 OK
+
+?>
 --EXPECT--
 OK

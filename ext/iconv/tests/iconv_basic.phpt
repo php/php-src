@@ -7,6 +7,7 @@ function_exists('iconv') or die("skip iconv() is not available in this build");
 ?>
 --FILE--
 <?php
+
 /* Prototype  : string iconv(string in_charset, string out_charset, string str)
  * Description: Returns converted string in desired encoding
  * Source code: ext/iconv/iconv.c
@@ -27,7 +28,7 @@ echo "\n-- Convert to EUC-JP --\n";
 echo "Expected EUC-JP encoded string in base64:\n";
 var_dump(bin2hex($euc_jp_string));
 echo "Converted Strings:\n";
-var_dump(bin2hex(iconv('SJIS', 'EUC-JP', $sjis_string )));
+var_dump(bin2hex(iconv('SJIS', 'EUC-JP', $sjis_string)));
 var_dump(bin2hex(iconv('UTF-8', 'EUC-JP', $utf8_string)));
 
 echo "\n-- Convert to SJIS --\n";
@@ -45,6 +46,7 @@ var_dump(bin2hex(iconv('SJIS', 'UTF-8', $sjis_string)));
 var_dump(bin2hex(iconv('EUC-JP', 'UTF-8', $euc_jp_string)));
 
 echo "Done";
+
 ?>
 --EXPECT--
 *** Testing iconv() : basic functionality ***

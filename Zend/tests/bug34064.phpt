@@ -2,11 +2,13 @@
 Bug #34064 (arr[] as param to function in class gives invalid opcode)
 --FILE--
 <?php
-class XmlTest {
+
+class XmlTest
+{
 
     function test_ref(&$test)
     {
-    	$test = "ok";
+        $test = "ok";
     }
 
     function test($test)
@@ -24,6 +26,7 @@ class XmlTest {
 
 $o = new XmlTest();
 $o->run();
+
 ?>
 --EXPECTF--
 array(1) {

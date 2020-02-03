@@ -3,18 +3,22 @@ Bug #70223 (Incrementing value returned by magic getter)
 --FILE--
 <?php
 
-class A {
+class A
+{
 
     private $foo = 0;
 
-    public function &__get($foo){ return $this->foo; }
-
+    public function &__get($foo)
+    {
+        return $this->foo;
+    }
 }
 
-$a = new A;
+$a = new A();
 echo $a->f++;
 echo $a->f++;
 echo $a->f++;
+
 ?>
 --EXPECT--
 012

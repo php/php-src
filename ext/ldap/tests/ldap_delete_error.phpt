@@ -8,23 +8,25 @@ Patrick Allaert <patrickallaert@php.net>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
+
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
 // Invalid DN
 var_dump(
-	ldap_delete($link, "weirdAttribute=val"),
-	ldap_error($link),
-	ldap_errno($link)
+    ldap_delete($link, "weirdAttribute=val"),
+    ldap_error($link),
+    ldap_errno($link)
 );
 
 // Deleting unexisting data
 var_dump(
-	ldap_delete($link, "dc=my-domain,$base"),
-	ldap_error($link),
-	ldap_errno($link)
+    ldap_delete($link, "dc=my-domain,$base"),
+    ldap_error($link),
+    ldap_errno($link)
 );
+
 ?>
 --CLEAN--
 <?php

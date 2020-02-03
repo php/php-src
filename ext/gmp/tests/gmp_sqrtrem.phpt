@@ -53,6 +53,7 @@ var_dump(gmp_strval($r[1]));
 var_dump(gmp_sqrtrem(array()));
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Warning: gmp_sqrtrem(): Number has to be greater than or equal to 0 in %s on line %d

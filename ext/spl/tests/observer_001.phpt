@@ -5,69 +5,66 @@ SPL: SplObserver and SplSubject (empty notify)
 
 class ObserverImpl implements SplObserver
 {
-	protected $name = '';
+    protected $name = '';
 
-	function __construct($name = 'obj')
-	{
-		$this->name = '$' . $name;
-	}
+    function __construct($name = 'obj')
+    {
+        $this->name = '$' . $name;
+    }
 
-	function update(SplSubject $subject)
-	{
-		echo $this->name . '->' . __METHOD__ . '(' . $subject->getName() . ");\n";
-	}
+    function update(SplSubject $subject)
+    {
+        echo $this->name . '->' . __METHOD__ . '(' . $subject->getName() . ");\n";
+    }
 
-	function getName()
-	{
-		return $this->name;
-	}
+    function getName()
+    {
+        return $this->name;
+    }
 }
 
 class SubjectImpl implements SplSubject
 {
-	protected $name = '';
-	protected $observers = array();
+    protected $name = '';
+    protected $observers = array();
 
-	function __construct($name = 'sub')
-	{
-		$this->name = '$' . $name;
-	}
+    function __construct($name = 'sub')
+    {
+        $this->name = '$' . $name;
+    }
 
     function attach(SplObserver $observer)
     {
-    	echo '$sub->' . __METHOD__ . '(' . $observer->getName() . ");\n";
-    	if (!in_array($observer, $this->observers))
-    	{
-	    	$this->observers[] = $observer;
-	    }
+        echo '$sub->' . __METHOD__ . '(' . $observer->getName() . ");\n";
+        if (!in_array($observer, $this->observers)) {
+            $this->observers[] = $observer;
+        }
     }
 
     function detach(SplObserver $observer)
     {
-    	echo '$sub->' . __METHOD__ . '(' . $observer->getName() . ");\n";
-    	$idx = array_search($observer, $this->observers);
-    	if ($idx !== false)
-    	{
-    		unset($this->observers[$idx]);
-    	}
+        echo '$sub->' . __METHOD__ . '(' . $observer->getName() . ");\n";
+        $idx = array_search($observer, $this->observers);
+        if ($idx !== false) {
+            unset($this->observers[$idx]);
+        }
     }
 
     function notify()
     {
-    	echo '$sub->' . __METHOD__ . "();\n";
-    	foreach($this->observers as $observer)
-    	{
-    		$observer->update($this);
-    	}
+        echo '$sub->' . __METHOD__ . "();\n";
+        foreach ($this->observers as $observer) {
+            $observer->update($this);
+        }
     }
 
-	function getName()
-	{
-		return $this->name;
-	}
+    function getName()
+    {
+        return $this->name;
+    }
 }
 
-$sub = new SubjectImpl;
+$sub = new SubjectImpl();
 
 $ob1 = new ObserverImpl("ob1");
 $ob2 = new ObserverImpl("ob2");
@@ -92,6 +89,7 @@ $sub->notify();
 $sub->attach($ob3);
 
 $sub->notify();
+
 ?>
 --EXPECT--
 $sub->SubjectImpl::attach($ob1);

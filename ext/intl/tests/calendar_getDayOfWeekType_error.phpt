@@ -8,13 +8,16 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 
-$c = new IntlGregorianCalendar(NULL, 'pt_PT');
+$c = new IntlGregorianCalendar(null, 'pt_PT');
 
 var_dump($c->getDayOfWeekType(0));
 
 var_dump(intlcal_get_day_of_week_type(1, 1));
+
+?>
 --EXPECTF--
 Warning: IntlCalendar::getDayOfWeekType(): intlcal_get_day_of_week_type: invalid day of week in %s on line %d
 bool(false)

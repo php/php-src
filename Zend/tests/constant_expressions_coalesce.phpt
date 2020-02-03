@@ -30,15 +30,31 @@ var_dump(T_4);
 var_dump(T_5);
 var_dump(T_6);
 
-var_dump((function(){ static $var = null ?? A[1]['undefined']['index'] ?? 1; return $var; })());
-var_dump((function(){ static $var = null ?? A['undefined']['index'] ?? 2; return $var; })());
-var_dump((function(){ static $var = null ?? A[1][0][2] ?? 3; return $var; })());
-var_dump((function(){ static $var = A[1][0][2] ?? 4; return $var; })());
+var_dump((function () {
+    static $var = null ?? A[1]['undefined']['index'] ?? 1;
+    return $var;
+})());
+var_dump((function () {
+    static $var = null ?? A['undefined']['index'] ?? 2;
+    return $var;
+})());
+var_dump((function () {
+    static $var = null ?? A[1][0][2] ?? 3;
+    return $var;
+})());
+var_dump((function () {
+    static $var = A[1][0][2] ?? 4;
+    return $var;
+})());
 
-var_dump((new class { public $var = null ?? A[1]['undefined']['index'] ?? 1; })->var);
-var_dump((new class { public $var = null ?? A['undefined']['index'] ?? 2; })->var);
-var_dump((new class { public $var = null ?? A[1][0][2] ?? 3; })->var);
-var_dump((new class { public $var = A[1][0][2] ?? 4; })->var);
+var_dump((new class { public $var = null ?? A[1]['undefined']['index'] ?? 1;
+})->var);
+var_dump((new class { public $var = null ?? A['undefined']['index'] ?? 2;
+})->var);
+var_dump((new class { public $var = null ?? A[1][0][2] ?? 3;
+})->var);
+var_dump((new class { public $var = A[1][0][2] ?? 4;
+})->var);
 
 ?>
 --EXPECTF--

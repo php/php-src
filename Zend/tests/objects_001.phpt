@@ -3,13 +3,14 @@ comparing objects to other types
 --FILE--
 <?php
 
-class Bar {
+class Bar
+{
 }
 
-$b = new Bar;
+$b = new Bar();
 
-var_dump($b == NULL);
-var_dump($b != NULL);
+var_dump($b == null);
+var_dump($b != null);
 var_dump($b == true);
 var_dump($b != true);
 var_dump($b == false);
@@ -26,6 +27,7 @@ var_dump($b == 1);
 
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 bool(false)

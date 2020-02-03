@@ -8,7 +8,8 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-require_once(__DIR__.'/snmp_include.inc');
+
+require_once(__DIR__ . '/snmp_include.inc');
 
 //EXPECTF format is quickprint OFF
 snmp_set_enum_print(false);
@@ -97,6 +98,7 @@ var_dump($session->getError());
 var_dump(($session->get($oid1) === $oldvalue1));
 var_dump(($session->get($oid2) === $oldvalue2));
 var_dump($session->close());
+
 ?>
 --EXPECTF--
 SNMP::ERRNO_NOERROR

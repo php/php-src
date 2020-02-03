@@ -4,6 +4,7 @@ Incorrect type inference
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 class PHP_CodeCoverage
 {
     private function addUncoveredFilesFromWhitelist()
@@ -17,5 +18,7 @@ class PHP_CodeCoverage
 }
 ?>
 OK
+
+?>
 --EXPECT--
 OK

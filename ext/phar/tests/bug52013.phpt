@@ -16,6 +16,7 @@ phar.readonly=0
 open_basedir=
 --FILE--
 <?php
+
 mkdir(__DIR__ . '/testdir');
 file_put_contents(__DIR__ . '/testdir/1.php', str_repeat(' ', 1455));
 
@@ -26,6 +27,7 @@ $phar->compressFiles(Phar::GZ);
 $phar->decompressFiles();
 
 echo 'ok';
+
 ?>
 --CLEAN--
 <?php

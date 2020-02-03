@@ -3,9 +3,12 @@ Aborted yield during nested calls
 --FILE--
 <?php
 
-function func() {}
+function func()
+{
+}
 
-function gen($x) {
+function gen($x)
+{
     func(func($x, $x, func($x, yield)));
 }
 

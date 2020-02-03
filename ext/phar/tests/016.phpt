@@ -7,6 +7,7 @@ Phar::mapPhar invalid file (gzipped file length is too short)
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php __HALT_COMPILER(); ?>";
@@ -14,9 +15,9 @@ $file = "<?php __HALT_COMPILER(); ?>";
 
 $files = array();
 // "hi" gzdeflated
-$files['a'] = array('cont'=>'a','comp'=> pack('H*', 'cbc80400'),'flags'=>0x00001000, 'ulen' => 1, 'clen' => 4);
+$files['a'] = array('cont' => 'a','comp' => pack('H*', 'cbc80400'),'flags' => 0x00001000, 'ulen' => 1, 'clen' => 4);
 $files['b'] = $files['a'];
-$files['c'] = array('cont'=>'*');
+$files['c'] = array('cont' => '*');
 $files['d'] = $files['a'];
 include 'files/phar_test.inc';
 
@@ -24,6 +25,7 @@ var_dump(file_get_contents($pname . '/a'));
 var_dump(file_get_contents($pname . '/b'));
 var_dump(file_get_contents($pname . '/c'));
 var_dump(file_get_contents($pname . '/d'));
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

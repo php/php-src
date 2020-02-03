@@ -3,13 +3,16 @@ Testing class_alias() with abstract class using an arbitrary class name as alias
 --FILE--
 <?php
 
-abstract class foo { }
+abstract class foo
+{
+
+}
 
 class_alias('foo', "\0");
 
 $a = "\0";
 
-new $a;
+new $a();
 
 ?>
 --EXPECTF--

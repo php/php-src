@@ -3,9 +3,15 @@ Trying to implement a trait
 --FILE--
 <?php
 
-trait abc { }
+trait abc
+{
 
-class foo implements abc { }
+}
+
+class foo implements abc
+{
+
+}
 
 ?>
 --EXPECTF--

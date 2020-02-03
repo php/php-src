@@ -16,6 +16,7 @@ $output_bytes = xmlwriter_flush($xw, true);
 echo file_get_contents($doc_dest);
 unset($xw);
 unlink($doc_dest);
+
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>

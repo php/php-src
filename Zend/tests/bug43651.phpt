@@ -2,8 +2,12 @@
 Bug #43651 (is_callable() with one or more nonconsecutive colons crashes)
 --FILE--
 <?php
-class Test {
-    static function foo() {}
+
+class Test
+{
+    static function foo()
+    {
+    }
 }
 
 var_dump(is_callable("\\\\"));
@@ -22,6 +26,8 @@ var_dump(is_callable("Test::foo"));
 var_dump(is_callable("\\Test::foo"));
 var_dump(is_callable("is_string"));
 var_dump(is_callable("\\is_string"));
+
+?>
 --EXPECT--
 bool(false)
 bool(false)

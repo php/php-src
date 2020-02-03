@@ -3,28 +3,31 @@ Testing array dereferencing on return of a method with and without reference
 --FILE--
 <?php
 
-class foo {
-	static $x = array();
+class foo
+{
+    static $x = array();
 
-	public function &a() {
-		self::$x = array(1, 2, 3);
-		return self::$x;
-	}
+    public function &a()
+    {
+        self::$x = array(1, 2, 3);
+        return self::$x;
+    }
 
-	public function b() {
-		$x = array(1);
-		$x[] = 2;
-		return $x;
-	}
+    public function b()
+    {
+        $x = array(1);
+        $x[] = 2;
+        return $x;
+    }
 }
 
-$foo = new foo;
+$foo = new foo();
 
 // Changing the static variable
 $foo->a()[0] = 2;
 var_dump($foo::$x);
 
-$foo->b()[] = new stdClass;
+$foo->b()[] = new stdClass();
 
 $h = $foo->b();
 var_dump($h);

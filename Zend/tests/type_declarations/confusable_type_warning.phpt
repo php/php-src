@@ -32,6 +32,8 @@ namespace {
 }
 
 ?>
+
+?>
 --EXPECTF--
 Warning: "integer" will be interpreted as a class name. Did you mean "int"? Write "\integer" to suppress this warning in %s on line %d
 

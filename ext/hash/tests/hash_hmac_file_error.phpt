@@ -15,26 +15,23 @@ $file = __DIR__ . "hash_file.txt";
 $key = 'secret';
 
 echo "\n-- Testing hash_hmac_file() function with invalid hash algorithm --\n";
-try { 
-    var_dump(hash_hmac_file('foo', $file, $key, TRUE));
-}
-catch (\Error $e) {
+try {
+    var_dump(hash_hmac_file('foo', $file, $key, true));
+} catch (\Error $e) {
     echo $e->getMessage() . "\n";
 }
 
 echo "\n-- Testing hash_hmac_file() function with non-cryptographic hash algorithm --\n";
 try {
-    var_dump(hash_hmac_file('crc32', $file, $key, TRUE));
-}
-catch (\Error $e) {
+    var_dump(hash_hmac_file('crc32', $file, $key, true));
+} catch (\Error $e) {
     echo $e->getMessage() . "\n";
 }
 
 echo "\n-- Testing hash_hmac_file() function with bad path --\n";
 try {
-    var_dump(hash_hmac_file('md5', $file.chr(0).$file, $key, TRUE));
-}
-catch (\Error $e) {
+    var_dump(hash_hmac_file('md5', $file . chr(0) . $file, $key, true));
+} catch (\Error $e) {
     echo $e->getMessage() . "\n";
 }
 

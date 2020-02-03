@@ -3,7 +3,10 @@ Trying to throw exception of an interface
 --FILE--
 <?php
 
-interface a { }
+interface a
+{
+
+}
 
 throw new a();
 

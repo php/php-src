@@ -7,8 +7,9 @@ if (!extension_loaded('zend-test')) die('skip zend-test extension not loaded');
 --FILE--
 <?php
 
-class Bar{
-  use _ZendTestTrait;
+class Bar
+{
+    use _ZendTestTrait;
 }
 
 $bar = new Bar();

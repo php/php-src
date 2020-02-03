@@ -3,12 +3,15 @@ Test typed properties work fine with simple inheritance
 --FILE--
 <?php
 
-class A {
-	public int $a = 1;
+class A
+{
+    public int $a = 1;
 }
-class B extends A {}
+class B extends A
+{
+}
 
-$o = new B;
+$o = new B();
 var_dump($o->a);
 $o->a = "a";
 

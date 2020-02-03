@@ -2,6 +2,7 @@
 Test strftime() function : usage variation - Passing week related format strings to format argument.
 --FILE--
 <?php
+
 /* Prototype  : string strftime(string format [, int timestamp])
  * Description: Format a local time/date according to locale settings
  * Source code: ext/date/php_date.c
@@ -18,15 +19,15 @@ $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 $inputs = array(
       'Abbreviated weekday name' => "%a",
       'Full weekday name' => "%A",
-	  'Week number of the year' => "%U",
-	  'Week number of the year in decimal number' => "%W",
+      'Week number of the year' => "%U",
+      'Week number of the year in decimal number' => "%W",
 );
 // loop through each element of the array for timestamp
 
-foreach($inputs as $key =>$value) {
+foreach ($inputs as $key => $value) {
       echo "\n--$key--\n";
-      var_dump( strftime($value) );
-      var_dump( strftime($value, $timestamp) );
+      var_dump(strftime($value));
+      var_dump(strftime($value, $timestamp));
 };
 
 ?>

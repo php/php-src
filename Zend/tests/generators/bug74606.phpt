@@ -3,24 +3,25 @@ Bug #74606 (Segfault within try/catch/finally nesting in Generators)
 --FILE--
 <?php
 
-function gen() {
-	$array = ["foo"];
-	$array[] = "bar";
+function gen()
+{
+    $array = ["foo"];
+    $array[] = "bar";
 
-	foreach ($array as $item) {
-		try {
-			try {
-				yield;
-			} finally {
-				echo "fin $item\n";
-			}
-		} catch (\Exception $e) {
-			echo "catch\n";
-			continue;
-		}
-	}
+    foreach ($array as $item) {
+        try {
+            try {
+                yield;
+            } finally {
+                echo "fin $item\n";
+            }
+        } catch (\Exception $e) {
+            echo "catch\n";
+            continue;
+        }
+    }
 }
-gen()->throw(new Exception);
+gen()->throw(new Exception());
 
 ?>
 --EXPECT--

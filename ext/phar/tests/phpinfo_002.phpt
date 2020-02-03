@@ -14,7 +14,9 @@ phar.require_hash=1
 phar.cache_list=
 --FILE--
 <?php
+
 phpinfo(INFO_MODULES);
+
 ?>
 --EXPECTF--
 %a

@@ -6,7 +6,7 @@ assert.exception=1
 --FILE--
 <?php
 
-define ("XXXXX", 1);
+define("XXXXX", 1);
 assert(false);
 
 ?>

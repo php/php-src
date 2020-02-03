@@ -3,7 +3,7 @@ Defining constants with non-scalar values
 --FILE--
 <?php
 
-define('foo', new stdClass);
+define('foo', new stdClass());
 try {
     var_dump(foo);
 } catch (Error $e) {

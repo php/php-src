@@ -3,16 +3,17 @@ Memory leak when returning TMP/VAR with wrong return type
 --FILE--
 <?php
 
-function foo(): stdClass {
-	$a = new stdClass;
-	$b = [];
-	return [$a, $b];
+function foo(): stdClass
+{
+    $a = new stdClass();
+    $b = [];
+    return [$a, $b];
 }
 
 try {
-	foo();
+    foo();
 } catch (Error $e) {
-	echo $e->getMessage(), " in ", $e->getFile(), " on line ", $e->getLine();
+    echo $e->getMessage(), " in ", $e->getFile(), " on line ", $e->getLine();
 }
 
 ?>

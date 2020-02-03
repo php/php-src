@@ -3,7 +3,8 @@ Array offsets can be yielded by reference
 --FILE--
 <?php
 
-function &gen(array &$array) {
+function &gen(array &$array)
+{
     yield $array[0];
 }
 

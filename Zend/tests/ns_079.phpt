@@ -2,10 +2,12 @@
 079: nested namespaces
 --FILE--
 <?php
+
 namespace foo {
     namespace oops {
     }
 }
+
 ?>
 ===DONE===
 --EXPECTF--

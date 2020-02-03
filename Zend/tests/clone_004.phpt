@@ -3,13 +3,15 @@ Testing usage of object as array on clone statement
 --FILE--
 <?php
 
-class foo {
-	public function __get($a) {
-		return new $this;
-	}
+class foo
+{
+    public function __get($a)
+    {
+        return new $this();
+    }
 }
 
-$c = new foo;
+$c = new foo();
 
 $a = clone $c->b[1];
 

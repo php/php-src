@@ -4,21 +4,23 @@ Tests for DateTime::createFromImmutable.
 date.timezone=Europe/London
 --FILE--
 <?php
-$current = "2014-03-02 16:24:08";
-$i = date_create_immutable( $current );
 
-$m = DateTime::createFromImmutable( $i );
-var_dump( $m );
+$current = "2014-03-02 16:24:08";
+$i = date_create_immutable($current);
+
+$m = DateTime::createFromImmutable($i);
+var_dump($m);
 
 $m->modify('+ 1 hour');
 
-var_dump( $i->format('Y-m-d H:i:s') === $current );
+var_dump($i->format('Y-m-d H:i:s') === $current);
 
 try {
-    DateTime::createFromImmutable( date_create( $current ) );
+    DateTime::createFromImmutable(date_create($current));
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
+
 ?>
 --EXPECTF--
 object(DateTime)#%d (3) {

@@ -4,6 +4,7 @@ shrink a full array of integers
 PHPNW Testfest 2009 - Lorna Mitchell
 --FILE--
 <?php
+
 $array = new SplFixedArray(5);
 $array[0] = 1;
 $array[1] = 1;

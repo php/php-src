@@ -67,30 +67,27 @@ function ut_main()
     );
 
 /*
-	$locales = array(
-		'es'
-	);
+    $locales = array(
+        'es'
+    );
 */
     $res_str = '';
 
-    foreach( $locales as $locale )
-    {
-        $isSuccessful = ut_loc_set_default( $locale);
-	if ($isSuccessful ){
-		$lang = ut_loc_get_default( );
-		$res_str .= "$locale: set locale '$lang'";
-	}
-	else{
-		$res_str .= "$locale: Error in set locale";
-	}
+    foreach ($locales as $locale) {
+        $isSuccessful = ut_loc_set_default($locale);
+        if ($isSuccessful) {
+            $lang = ut_loc_get_default();
+            $res_str .= "$locale: set locale '$lang'";
+        } else {
+            $res_str .= "$locale: Error in set locale";
+        }
         $res_str .= "\n";
     }
 
     return $res_str;
-
 }
 
-include_once( 'ut_common.inc' );
+include_once('ut_common.inc');
 ut_run();
 
 ?>

@@ -2,6 +2,7 @@
 Bug #53437 DateInterval basic serialization
 --FILE--
 <?php
+
 $di0 = new DateInterval('P2Y4DT6H8M');
 
 $s = serialize($di0);

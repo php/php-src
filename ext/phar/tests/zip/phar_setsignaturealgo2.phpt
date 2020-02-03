@@ -10,6 +10,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
 $fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.phar.zip';
 $fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '.3.phar.zip';
@@ -32,36 +33,37 @@ $p = new Phar($fname3);
 var_dump($p->getSignature());
 
 try {
-$p->setSignatureAlgorithm(Phar::SHA256);
-copy($fname3, $fname4);
-$p = new Phar($fname4);
-var_dump($p->getSignature());
+    $p->setSignatureAlgorithm(Phar::SHA256);
+    copy($fname3, $fname4);
+    $p = new Phar($fname4);
+    var_dump($p->getSignature());
 } catch (Exception $e) {
-echo $e->getMessage();
+    echo $e->getMessage();
 }
 try {
-$p->setSignatureAlgorithm(Phar::SHA512);
-copy($fname4, $fname5);
-$p = new Phar($fname5);
-var_dump($p->getSignature());
+    $p->setSignatureAlgorithm(Phar::SHA512);
+    copy($fname4, $fname5);
+    $p = new Phar($fname5);
+    var_dump($p->getSignature());
 } catch (Exception $e) {
-echo $e->getMessage();
+    echo $e->getMessage();
 }
 try {
-$config = __DIR__ . '/../files/openssl.cnf';
-$config_arg = array('config' => $config);
-$keys=openssl_pkey_new($config_arg);
-openssl_pkey_export($keys, $privkey, NULL, $config_arg);
-$pubkey=openssl_pkey_get_details($keys);
-$p->setSignatureAlgorithm(Phar::OPENSSL, $privkey);
+    $config = __DIR__ . '/../files/openssl.cnf';
+    $config_arg = array('config' => $config);
+    $keys = openssl_pkey_new($config_arg);
+    openssl_pkey_export($keys, $privkey, null, $config_arg);
+    $pubkey = openssl_pkey_get_details($keys);
+    $p->setSignatureAlgorithm(Phar::OPENSSL, $privkey);
 
-copy($fname5, $fname6);
-file_put_contents($fname6 . '.pubkey', $pubkey['key']);
-$p = new Phar($fname6);
-var_dump($p->getSignature());
+    copy($fname5, $fname6);
+    file_put_contents($fname6 . '.pubkey', $pubkey['key']);
+    $p = new Phar($fname6);
+    var_dump($p->getSignature());
 } catch (Exception $e) {
-echo $e->getMessage();
+    echo $e->getMessage();
 }
+
 ?>
 --CLEAN--
 <?php

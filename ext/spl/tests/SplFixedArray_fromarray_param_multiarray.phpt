@@ -4,8 +4,10 @@ Tries to create a SplFixedArray using the fromArray() function and a multi dimen
 Philip Norton philipnorton42@gmail.com
 --FILE--
 <?php
+
 $array = SplFixedArray::fromArray(array(array('1')));
 var_dump($array);
+
 ?>
 --EXPECT--
 object(SplFixedArray)#1 (1) {

@@ -4,6 +4,7 @@ Bug #66921 - Wrong argument type hint for function intltz_from_date_time_zone
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--
 <?php
+
 $f = new ReflectionFunction('intltz_from_date_time_zone');
 var_dump($f->getParameters()[0]->getClass());
 

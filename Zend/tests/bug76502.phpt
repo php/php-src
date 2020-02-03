@@ -4,7 +4,7 @@ Bug #76502: Chain of mixed exceptions and errors does not serialize properly
 <?php
 
 $examples = [
-    "Exception(Exception())" => new Exception("outer", 0,  new Exception("inner")),
+    "Exception(Exception())" => new Exception("outer", 0, new Exception("inner")),
     "Error(Error())"         => new Error("outer", 0, new Error("inner")),
     "Error(Exception())"     => new Error("outer", 0, new Exception("inner")),
     "Exception(Error())"     => new Exception("outer", 0, new Error("inner"))

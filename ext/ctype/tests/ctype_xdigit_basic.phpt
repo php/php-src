@@ -4,6 +4,7 @@ Test ctype_xdigit() function : basic functionality
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 /* Prototype  : bool ctype_xdigit(mixed $c)
  * Description: Checks for character(s) representing a hexadecimal digit
  * Source code: ext/ctype/ctype.c
@@ -19,6 +20,7 @@ var_dump(ctype_xdigit($c1));
 var_dump(ctype_xdigit($c2));
 
 setlocale(LC_CTYPE, $orig);
+
 ?>
 --EXPECT--
 *** Testing ctype_xdigit() : basic functionality ***

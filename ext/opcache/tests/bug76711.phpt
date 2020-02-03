@@ -8,11 +8,14 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function test($foo) {
+
+function test($foo)
+{
     var_dump(0);
     var_dump($foo[0]);
 }
 test("str");
+
 ?>
 --EXPECT--
 int(0)

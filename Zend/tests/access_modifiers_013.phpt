@@ -3,8 +3,11 @@ Prevent abstract and final in the same class declaration
 --FILE--
 <?php
 
-final abstract class C {
-	private function priv() { }
+final abstract class C
+{
+    private function priv()
+    {
+    }
 }
 
 ?>

@@ -4,7 +4,7 @@ Bug #78436: Missing addref in SplPriorityQueue EXTR_BOTH mode
 <?php
 
 $pq = new SplPriorityQueue();
-$pq->insert(new stdClass, 1);
+$pq->insert(new stdClass(), 1);
 var_dump($pq);
 var_dump($pq);
 

@@ -4,7 +4,7 @@ Bug #78456: Segfault when serializing SplDoublyLinkedList
 <?php
 
 $dllist = new SplDoublyLinkedList();
-$dllist->push(new stdClass);
+$dllist->push(new stdClass());
 var_dump($s = serialize($dllist));
 var_dump(unserialize($s));
 

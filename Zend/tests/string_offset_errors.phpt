@@ -3,7 +3,8 @@ Some string offset errors
 --FILE--
 <?php
 
-function &test() : string {
+function &test(): string
+{
     $str = "foo";
     return $str[0];
 }

@@ -2,15 +2,20 @@
 Internal covariant return type of self
 --FILE--
 <?php
-class Foo {
-    public static function test() : self {
-        return new Foo;
+
+class Foo
+{
+    public static function test(): self
+    {
+        return new Foo();
     }
 }
 
-class Bar extends Foo {
-    public static function test() : self {
-        return new Bar;
+class Bar extends Foo
+{
+    public static function test(): self
+    {
+        return new Bar();
     }
 }
 

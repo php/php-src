@@ -8,6 +8,7 @@ Patrick Allaert <patrickallaert@php.net>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
+
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
@@ -15,10 +16,11 @@ insert_dummy_data($link, $base);
 $result = ldap_list($link, "$base", "(objectClass=person)");
 $entry = ldap_first_entry($link, $result);
 var_dump(
-	$entry = ldap_next_entry($link, $entry),
-	ldap_get_values($link, $entry, 'sn'),
-	$entry = ldap_next_entry($link, $entry)
+    $entry = ldap_next_entry($link, $entry),
+    ldap_get_values($link, $entry, 'sn'),
+    $entry = ldap_next_entry($link, $entry)
 );
+
 ?>
 --CLEAN--
 <?php

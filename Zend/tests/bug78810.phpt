@@ -3,11 +3,12 @@ Bug #78810: RW fetches do not throw "uninitialized property" exception
 --FILE--
 <?php
 
-class Test {
+class Test
+{
     public int $i;
 }
 
-$test = new Test;
+$test = new Test();
 try {
     $test->i++;
 } catch (Error $e) {

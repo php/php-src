@@ -8,6 +8,7 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
+
 echo "Checking with no parameters\n";
 imap_fetchstructure();
 
@@ -15,20 +16,20 @@ echo  "Checking with incorrect parameter type\n";
 imap_fetchstructure('');
 imap_fetchstructure(false);
 
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__ . '/imap_include.inc');
 $stream_id = setup_test_mailbox('', 1);
 
 imap_fetchstructure($stream_id);
-imap_fetchstructure($stream_id,0);
+imap_fetchstructure($stream_id, 0);
 
-$z = imap_fetchstructure($stream_id,1);
+$z = imap_fetchstructure($stream_id, 1);
 
 
 $fields = array('type','encoding','ifsubtype','subtype',
 'ifdescription','lines','bytes','parameters');
 
 foreach ($fields as $key) {
-	var_dump(isset($z->$key));
+    var_dump(isset($z->$key));
 }
 var_dump($z->type);
 var_dump($z->encoding);
@@ -38,6 +39,7 @@ var_dump($z->ifparameters);
 var_dump(is_object($z->parameters[0]));
 
 imap_close($stream_id);
+
 ?>
 --CLEAN--
 <?php

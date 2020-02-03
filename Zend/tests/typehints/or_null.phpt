@@ -5,28 +5,38 @@ Test "or null"/"or be null" in type-checking errors for userland functions
 
 // This should test every branch in zend_execute.c's `zend_verify_arg_type`, `zend_verify_return_type` and `zend_verify_missing_return_type` functions which produces an "or null"/"or be null" part in its error message
 
-function unloadedClass(?I\Dont\Exist $param) {}
+function unloadedClass(?I\Dont\Exist $param)
+{
+}
 
 try {
-    unloadedClass(new \StdClass);
+    unloadedClass(new \StdClass());
 } catch (\TypeError $e) {
     echo $e, PHP_EOL;
 }
 
-class RealClass {}
-interface RealInterface {}
+class RealClass
+{
+}
+interface RealInterface
+{
+}
 
-function loadedClass(?RealClass $param) {}
-function loadedInterface(?RealInterface $param) {}
+function loadedClass(?RealClass $param)
+{
+}
+function loadedInterface(?RealInterface $param)
+{
+}
 
 try {
-    loadedClass(new \StdClass);
+    loadedClass(new \StdClass());
 } catch (\TypeError $e) {
     echo $e, PHP_EOL;
 }
 
 try {
-    loadedInterface(new \StdClass);
+    loadedInterface(new \StdClass());
 } catch (\TypeError $e) {
     echo $e, PHP_EOL;
 }
@@ -49,7 +59,9 @@ try {
     echo $e, PHP_EOL;
 }
 
-function callableF(?callable $param) {}
+function callableF(?callable $param)
+{
+}
 
 try {
     callableF(1);
@@ -57,7 +69,9 @@ try {
     echo $e, PHP_EOL;
 }
 
-function iterableF(?iterable $param) {}
+function iterableF(?iterable $param)
+{
+}
 
 try {
     iterableF(1);
@@ -65,16 +79,19 @@ try {
     echo $e, PHP_EOL;
 }
 
-function intF(?int $param) {}
+function intF(?int $param)
+{
+}
 
 try {
-    intF(new StdClass);
+    intF(new StdClass());
 } catch (\TypeError $e) {
     echo $e, PHP_EOL;
 }
 
-function returnUnloadedClass(): ?I\Dont\Exist {
-    return new \StdClass;
+function returnUnloadedClass(): ?I\Dont\Exist
+{
+    return new \StdClass();
 }
 
 try {
@@ -83,8 +100,9 @@ try {
     echo $e, PHP_EOL;
 }
 
-function returnLoadedClass(): ?RealClass {
-    return new \StdClass;
+function returnLoadedClass(): ?RealClass
+{
+    return new \StdClass();
 }
 
 try {
@@ -93,8 +111,9 @@ try {
     echo $e, PHP_EOL;
 }
 
-function returnLoadedInterface(): ?RealInterface {
-    return new \StdClass;
+function returnLoadedInterface(): ?RealInterface
+{
+    return new \StdClass();
 }
 
 try {
@@ -103,7 +122,8 @@ try {
     echo $e, PHP_EOL;
 }
 
-function returnUnloadedClassScalar(): ?I\Dont\Exist {
+function returnUnloadedClassScalar(): ?I\Dont\Exist
+{
     return 1;
 }
 
@@ -113,7 +133,8 @@ try {
     echo $e, PHP_EOL;
 }
 
-function returnLoadedClassScalar(): ?RealClass {
+function returnLoadedClassScalar(): ?RealClass
+{
     return 1;
 }
 
@@ -123,7 +144,8 @@ try {
     echo $e, PHP_EOL;
 }
 
-function returnLoadedInterfaceScalar(): ?RealInterface {
+function returnLoadedInterfaceScalar(): ?RealInterface
+{
     return 1;
 }
 
@@ -133,7 +155,8 @@ try {
     echo $e, PHP_EOL;
 }
 
-function returnCallable(): ?callable {
+function returnCallable(): ?callable
+{
     return 1;
 }
 
@@ -143,7 +166,8 @@ try {
     echo $e, PHP_EOL;
 }
 
-function returnIterable(): ?iterable {
+function returnIterable(): ?iterable
+{
     return 1;
 }
 
@@ -153,8 +177,9 @@ try {
     echo $e, PHP_EOL;
 }
 
-function returnInt(): ?int {
-    return new \StdClass;
+function returnInt(): ?int
+{
+    return new \StdClass();
 }
 
 try {
@@ -163,7 +188,8 @@ try {
     echo $e, PHP_EOL;
 }
 
-function returnMissingUnloadedClass(): ?I\Dont\Exist {
+function returnMissingUnloadedClass(): ?I\Dont\Exist
+{
 }
 
 try {
@@ -172,7 +198,8 @@ try {
     echo $e, PHP_EOL;
 }
 
-function returnMissingLoadedClass(): ?RealClass {
+function returnMissingLoadedClass(): ?RealClass
+{
 }
 
 try {
@@ -181,7 +208,8 @@ try {
     echo $e, PHP_EOL;
 }
 
-function returnMissingLoadedInterface(): ?RealInterface {
+function returnMissingLoadedInterface(): ?RealInterface
+{
 }
 
 try {
@@ -190,7 +218,8 @@ try {
     echo $e, PHP_EOL;
 }
 
-function returnMissingCallable(): ?callable {
+function returnMissingCallable(): ?callable
+{
 }
 
 try {
@@ -199,7 +228,8 @@ try {
     echo $e, PHP_EOL;
 }
 
-function returnMissingIterable(): ?iterable {
+function returnMissingIterable(): ?iterable
+{
 }
 
 try {
@@ -208,7 +238,8 @@ try {
     echo $e, PHP_EOL;
 }
 
-function returnMissingInt(): ?int {
+function returnMissingInt(): ?int
+{
 }
 
 try {

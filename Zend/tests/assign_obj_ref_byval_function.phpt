@@ -3,11 +3,12 @@ Assign result of by-value function to object property by-reference
 --FILE--
 <?php
 
-function notRef() {
+function notRef()
+{
     return null;
 }
 
-$obj = new stdClass;
+$obj = new stdClass();
 $obj->prop =& notRef();
 var_dump($obj);
 

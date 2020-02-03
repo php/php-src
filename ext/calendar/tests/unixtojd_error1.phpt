@@ -8,6 +8,7 @@ edgarsandi - <edgar.r.sandi@gmail.com>
 date.timezone=UTC
 --FILE--
 <?php
+
 putenv('TZ=UTC');
 
 try {
@@ -18,6 +19,7 @@ try {
 var_dump(unixtojd(false)) . PHP_EOL;
 var_dump(unixtojd(null)) . PHP_EOL;
 var_dump(unixtojd(time())) . PHP_EOL;
+
 ?>
 --EXPECTF--
 Timestamp must not be negative

@@ -2,6 +2,7 @@
 Bug #78531 (Crash when using undefined variable as object)
 --FILE--
 <?php
+
 try {
     $u1->a += 5;
 } catch (Error $e) {
@@ -22,6 +23,7 @@ try {
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
+
 ?>
 --EXPECTF--
 Warning: Undefined variable: u1 in %s on line %d

@@ -3,8 +3,9 @@
 --FILE--
 <?php
 
-function foo(): \iterable {
-	return [];
+function foo(): \iterable
+{
+    return [];
 }
 var_dump(foo());
 

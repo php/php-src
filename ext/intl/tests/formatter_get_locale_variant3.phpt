@@ -26,24 +26,27 @@ function ut_main()
 
     $res_str = '';
 
-    foreach( $locales as $locale )
-    {
-        $fmt = ut_nfmt_create( $locale, NumberFormatter::DECIMAL );
+    foreach ($locales as $locale) {
+        $fmt = ut_nfmt_create($locale, NumberFormatter::DECIMAL);
         $res_str .= "$locale: ";
-        foreach( $loc_types as $loc_type => $loc_type_name )
-            $res_str .= sprintf( " %s=%s",
-            $loc_type_name,
-            dump( ut_nfmt_get_locale( $fmt, $loc_type ) ) );
+        foreach ($loc_types as $loc_type => $loc_type_name) {
+            $res_str .= sprintf(
+                " %s=%s",
+                $loc_type_name,
+                dump(ut_nfmt_get_locale($fmt, $loc_type))
+            );
+        }
         $res_str .= "\n";
     }
 
     return $res_str;
 }
 
-include_once( 'ut_common.inc' );
+include_once('ut_common.inc');
 
 // Run the test
 ut_run();
+
 ?>
 --EXPECT--
 en_UK:  actual='en' valid='en'

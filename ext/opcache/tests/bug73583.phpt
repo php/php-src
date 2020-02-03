@@ -9,11 +9,19 @@ opcache.file_update_protection=0
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 if (true) {
-	class A { }
-	function A() { }
-	function A() { }
+    class A
+    {
+    }
+    function A()
+    {
+    }
+    function A()
+    {
+    }
 }
+
 ?>
 --EXPECTF--
 Fatal error: Cannot redeclare A() (previously declared in %sbug73583.php:4) in %sbug73583.php on line 5

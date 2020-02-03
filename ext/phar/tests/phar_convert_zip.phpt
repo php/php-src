@@ -35,6 +35,7 @@ copy($fname2, $fname3);
 $phar = new Phar($fname3);
 var_dump($phar->isFileFormat(Phar::ZIP));
 var_dump($phar->getStub());
+
 ?>
 --CLEAN--
 <?php

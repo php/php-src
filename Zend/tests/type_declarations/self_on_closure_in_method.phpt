@@ -3,15 +3,17 @@ self return type on closure in a method
 --FILE--
 <?php
 
-class A {
-    public function test() {
-        return function() : self {
+class A
+{
+    public function test()
+    {
+        return function (): self {
             return $this;
         };
     }
 }
 
-var_dump((new A)->test()());
+var_dump((new A())->test()());
 
 ?>
 --EXPECT--

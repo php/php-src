@@ -8,8 +8,9 @@ Inlining of functions with ref arguments
 function by_ref(&$var)
 {
 }
-function &get_array() {
-    $array = [new stdClass];
+function &get_array()
+{
+    $array = [new stdClass()];
     return $array;
 }
 function test()

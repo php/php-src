@@ -2,6 +2,7 @@
 Bug #46874 (DatePeriod not resetting after foreach loop)
 --FILE--
 <?php
+
 $dp = new DatePeriod('R5/2008-03-01T13:00:00Z/P1Y2M10DT2H30M');
 
 foreach ($dp as $date) {
@@ -14,6 +15,7 @@ echo "\n";
 foreach ($dp as $date) {
     echo $date->format("Y-m-d H:i:s\n");
 }
+
 ?>
 --EXPECT--
 2008-03-01 13:00:00

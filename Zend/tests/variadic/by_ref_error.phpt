@@ -3,7 +3,9 @@ By-ref variadics enforce the reference
 --FILE--
 <?php
 
-function test(&... $args) { }
+function test(&...$args)
+{
+}
 
 test(1);
 

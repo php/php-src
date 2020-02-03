@@ -2,14 +2,18 @@
 Combination of foreach, finally and exception (call order)
 --FILE--
 <?php
-class A {
-	public $n = 0;
-	function __construct($n) {
-		$this->n = $n;
-	}
-	function __destruct() {
-		echo "destruct" . $this->n . "\n";
-	}
+
+class A
+{
+    public $n = 0;
+    function __construct($n)
+    {
+        $this->n = $n;
+    }
+    function __destruct()
+    {
+        echo "destruct" . $this->n . "\n";
+    }
 }
 
 foreach ([new A(1)] as $a) {
@@ -32,6 +36,7 @@ foreach ([new A(1)] as $a) {
         echo "finally2\n";
     }
 }
+
 ?>
 --EXPECT--
 destruct3

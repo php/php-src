@@ -5,7 +5,11 @@ Bug #69054 (Null dereference in readline_(read|write)_history() without paramete
 --INI--
 open_basedir={TMP}
 --FILE--
-<?php readline_read_history(); ?>
+<?php
+
+readline_read_history();
+
+?>
 ==DONE==
 --EXPECT--
 ==DONE==

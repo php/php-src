@@ -9,6 +9,7 @@ Edwin Hoksberg <edwin@edwinhoksberg.nl>
 ?>
 --FILE--
 <?php
+
 require "connect.inc";
 
 ldap_set_option(null, LDAP_OPT_X_TLS_REQUIRE_CERT, LDAP_OPT_X_TLS_HARD);
@@ -17,6 +18,7 @@ $link = ldap_connect($host, $port);
 ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version);
 
 var_dump(@ldap_bind($link, $user, $passwd));
+
 ?>
 --EXPECT--
 bool(true)

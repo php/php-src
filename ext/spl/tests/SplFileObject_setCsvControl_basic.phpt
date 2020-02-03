@@ -4,7 +4,9 @@ SPL: SplFileObject::setCsvControl basic
 Erwin Poeze <erwin.poeze at gmail.com>
 --FILE--
 <?php
-file_put_contents('csv_control_data_basic.csv',
+
+file_put_contents(
+    'csv_control_data_basic.csv',
 <<<CDATA
 'groene appelen'|10
 'gele bananen'|20
@@ -18,6 +20,7 @@ foreach ($s as $row) {
     list($fruit, $quantity) = $row;
     echo "$fruit : $quantity\n";
 }
+
 ?>
 --CLEAN--
 <?php

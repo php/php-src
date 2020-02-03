@@ -3,7 +3,8 @@ Test different types of generator return values (VM operands)
 --FILE--
 <?php
 
-function gen1() {
+function gen1()
+{
     return; // CONST
     yield;
 }
@@ -11,7 +12,8 @@ function gen1() {
 $gen = gen1();
 var_dump($gen->getReturn());
 
-function gen2() {
+function gen2()
+{
     return "str"; // CONST
     yield;
 }
@@ -19,7 +21,8 @@ function gen2() {
 $gen = gen2();
 var_dump($gen->getReturn());
 
-function gen3($var) {
+function gen3($var)
+{
     return $var; // CV
     yield;
 }
@@ -27,7 +30,8 @@ function gen3($var) {
 $gen = gen3([1, 2, 3]);
 var_dump($gen->getReturn());
 
-function gen4($obj) {
+function gen4($obj)
+{
     return $obj->prop; // VAR
     yield;
 }
@@ -35,7 +39,8 @@ function gen4($obj) {
 $gen = gen4((object) ['prop' => 321]);
 var_dump($gen->getReturn());
 
-function gen5($val) {
+function gen5($val)
+{
     return (int) $val; // TMP
     yield;
 }

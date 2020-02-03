@@ -3,20 +3,27 @@ Bug #45862 (get_class_vars is inconsistent with 'protected' and 'private' variab
 --FILE--
 <?php
 
-class Ancestor {
-  function test() {
-    var_dump(get_class_vars("Tester"));
-    var_dump(Tester::$prot);
-  }
+class Ancestor
+{
+    function test()
+    {
+        var_dump(get_class_vars("Tester"));
+        var_dump(Tester::$prot);
+    }
 }
 
-class Tester extends Ancestor {
-  static protected $prot = "protected var";
-  static private $priv = "private var";
+class Tester extends Ancestor
+{
+    protected static $prot = "protected var";
+    private static $priv = "private var";
 }
 
-class Child extends Tester {
-  function test() { var_dump(get_class_vars("Tester")); }
+class Child extends Tester
+{
+    function test()
+    {
+        var_dump(get_class_vars("Tester"));
+    }
 }
 
 echo "\n From parent scope\n";

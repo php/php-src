@@ -12,8 +12,10 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 ?>
 --FILE--
 <?php
-$bar = new Bar;
+
+$bar = new Bar();
 $bar->test();
+
 ?>
 --EXPECT--
 NULL

@@ -16,6 +16,8 @@ var_dump(socket_create_pair(AF_INET, null, null, $sockets));
 var_dump(socket_create_pair(31337, null, null, $sockets));
 
 var_dump(socket_create_pair(AF_INET, 31337, 0, $sockets));
+
+?>
 --EXPECTF--
 bool(true)
 

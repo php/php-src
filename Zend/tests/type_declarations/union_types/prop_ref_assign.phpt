@@ -3,12 +3,13 @@ Assignments to references that are held by properties with union types
 --FILE--
 <?php
 
-class Test {
-    public int|string $x;
-    public float|string $y;
+class Test
+{
+    public int | string $x;
+    public float | string $y;
 }
 
-$test = new Test;
+$test = new Test();
 $r = "foobar";
 $test->x =& $r;
 $test->y =& $r;

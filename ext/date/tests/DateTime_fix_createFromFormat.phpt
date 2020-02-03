@@ -15,7 +15,7 @@ $orig = new DateTime('2012-11-29 17:00:00');
 $string = "Thu., Nov. 29, 2012 5:00PM";
 
 // Create a DateTime object from format
-$fromFormat = DateTime::createFromFormat( "D., M# j, Y g:iA", $string );
+$fromFormat = DateTime::createFromFormat("D., M# j, Y g:iA", $string);
 
 echo "Format method: " . $orig->format("D., M. j, Y g:iA") . "\n";
 echo "createFromFormat method: " . $fromFormat->format("D., M. j, Y g:iA") . "\n";

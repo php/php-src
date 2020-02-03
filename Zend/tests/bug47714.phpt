@@ -2,7 +2,9 @@
 Testing lambda function in set_exception_handler()
 --FILE--
 <?php
-function au($class) {
+
+function au($class)
+{
         eval('class handler {
                   function handle($e) {
                       echo $e->getMessage()."\n";
@@ -12,12 +14,13 @@ function au($class) {
 
 spl_autoload_register('au');
 
-set_exception_handler(function($exception) {
+set_exception_handler(function ($exception) {
         $h = new handler();
         $h->handle($exception);
 });
 
 throw new Exception('exception');
+
 ?>
 --EXPECT--
 exception

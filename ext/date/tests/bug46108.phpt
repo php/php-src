@@ -5,7 +5,7 @@ Bug #46108 (DateTime - Memory leak when unserializing)
 
 date_default_timezone_set('America/Sao_Paulo');
 
-var_dump(unserialize(serialize(new Datetime)));
+var_dump(unserialize(serialize(new Datetime())));
 
 ?>
 --EXPECTF--

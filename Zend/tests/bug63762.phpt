@@ -2,13 +2,14 @@
 Bug #63762 - Sigsegv when Exception::$trace is changed by user
 --FILE--
 <?php
+
 $e = new Exception();
 
 $ref = new ReflectionProperty($e, 'trace');
-$ref->setAccessible(TRUE);
+$ref->setAccessible(true);
 
 echo "Array of NULL:\n";
-$ref->setValue($e, array(NULL));
+$ref->setValue($e, array(null));
 
 var_dump($e->getTraceAsString());
 
@@ -18,14 +19,15 @@ var_dump($e->getTraceAsString());
 
 echo "\nArray of array of NULL values:\n";
 $ref->setValue($e, array(array(
-    'file'  => NULL,
-    'line'  => NULL,
-    'class' => NULL,
-    'type'  => NULL,
-    'function' => NULL,
-    'args'  => NULL
+    'file'  => null,
+    'line'  => null,
+    'class' => null,
+    'type'  => null,
+    'function' => null,
+    'args'  => null
 )));
 var_dump($e->getTraceAsString());
+
 ?>
 --EXPECTF--
 Array of NULL:

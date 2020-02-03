@@ -6,9 +6,12 @@ Bug #46051 (SplFileInfo::openFile - memory overlap)
 $x = new splfileinfo(__FILE__);
 
 try {
-    $x->openFile(NULL, NULL, NULL);
-} catch (TypeError $e) { }
+    $x->openFile(null, null, null);
+} catch (TypeError $e) {
+}
 
 var_dump($x->getPathName());
+
+?>
 --EXPECTF--
 string(%d) "%sbug46051.php"

@@ -9,6 +9,7 @@ Patrick Allaert <patrickallaert@php.net>
 <?php if (!function_exists("ldap_sasl_bind")) die("skip LDAP extension not compiled with SASL support"); ?>
 --FILE--
 <?php
+
 require "connect.inc";
 
 $link = ldap_connect($host, $port);
@@ -27,6 +28,7 @@ var_dump(ldap_sasl_bind($link, null, $passwd, 'DIGEST-MD5', "realm", "Manager", 
 
 // Invalid DN syntax
 var_dump(ldap_sasl_bind($link, "unexistingProperty=weirdValue,$user", $passwd));
+
 ?>
 --EXPECTF--
 Warning: ldap_sasl_bind(): Unable to bind to server: Invalid DN syntax in %s on line %d

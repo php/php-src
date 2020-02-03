@@ -15,9 +15,8 @@ $it->next();
 
 echo "===Foreach===\n";
 
-foreach($it as $key=>$val)
-{
-	echo "$key=>$val\n";
+foreach ($it as $key => $val) {
+    echo "$key=>$val\n";
 }
 
 ?>

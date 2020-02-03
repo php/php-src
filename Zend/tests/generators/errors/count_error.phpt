@@ -3,7 +3,10 @@ Generators can't be counted
 --FILE--
 <?php
 
-function gen() { yield; }
+function gen()
+{
+    yield;
+}
 
 $gen = gen();
 

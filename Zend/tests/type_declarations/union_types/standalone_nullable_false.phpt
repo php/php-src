@@ -3,7 +3,9 @@ Nullable false cannot be used as a standalone type
 --FILE--
 <?php
 
-function test(): ?false {}
+function test(): ?false
+{
+}
 
 ?>
 --EXPECTF--

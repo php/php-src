@@ -8,9 +8,14 @@ opcache.optimization_level=-1
 <?php if (!extension_loaded('Zend OPcache')) die("skip Zend OPcache extension not loaded"); ?>
 --FILE--
 <?php
-printf ("A=%s\n", getA());
-const A="hello";
-function getA() {return A;}
+
+printf("A=%s\n", getA());
+const A = "hello";
+function getA()
+{
+    return A;
+}
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Error: Undefined constant 'A' in %s:%d

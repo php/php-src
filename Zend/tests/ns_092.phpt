@@ -2,12 +2,34 @@
 Typed group use statements
 --FILE--
 <?php
+
 namespace Foo\Bar {
-    class A { function __construct() {echo __METHOD__,"\n";} }
-    class B { function __construct() {echo __METHOD__,"\n";} }
-    function fiz(){ echo __FUNCTION__,"\n"; }
-    function biz(){ echo __FUNCTION__,"\n"; }
-    function buz(){ echo __FUNCTION__,"\n"; }
+    class A
+    {
+        function __construct()
+        {
+            echo __METHOD__,"\n";
+        }
+    }
+    class B
+    {
+        function __construct()
+        {
+            echo __METHOD__,"\n";
+        }
+    }
+    function fiz()
+    {
+        echo __FUNCTION__,"\n";
+    }
+    function biz()
+    {
+        echo __FUNCTION__,"\n";
+    }
+    function buz()
+    {
+        echo __FUNCTION__,"\n";
+    }
     const FOO = 1;
     const BAR = 2;
 }
@@ -28,7 +50,10 @@ namespace Fiz\Biz\Buz {
 
     use Foo\Bar\{ A, B, const BAR as BOZ };
 
-    function buz(){ echo __FUNCTION__,"\n"; }
+    function buz()
+    {
+        echo __FUNCTION__,"\n";
+    }
     const FOO = 100;
 
     echo "==== MIXED ====\n";
@@ -47,6 +72,8 @@ namespace Fiz\Biz\Buz {
     boz();
     A();
 }
+
+?>
 --EXPECTF--
 ==== MIXED ====
 Foo\Bar\A::__construct

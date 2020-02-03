@@ -2,6 +2,7 @@
 Bug #69758 (Item added to array not being removed by array_pop/shift)
 --FILE--
 <?php
+
 $tokens     = array();
 $conditions = array();
 for ($i = 0; $i <= 10; $i++) {
@@ -21,6 +22,7 @@ for ($i = 0; $i <= 10; $i++) {
 
 // Conditions should be empty.
 var_dump($conditions);
+
 ?>
 --EXPECT--
 array(0) {

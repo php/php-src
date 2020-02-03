@@ -10,21 +10,25 @@ opcache.jit_buffer_size=1M
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 namespace A;
 
-class A {
-	private $evalParameters;
-	public function evaluate() {
-		$this->evalParameters = array("a" => "okey");
-		extract($this->evalParameters, EXTR_SKIP);
-		echo $a;
-		return false;
-	}
+class A
+{
+    private $evalParameters;
+    public function evaluate()
+    {
+        $this->evalParameters = array("a" => "okey");
+        extract($this->evalParameters, EXTR_SKIP);
+        echo $a;
+        return false;
+    }
 }
 
 $a = new A();
 
 $a->evaluate();
+
 ?>
 --EXPECT--
 okey

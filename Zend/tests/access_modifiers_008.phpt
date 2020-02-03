@@ -5,14 +5,26 @@ Discussion: http://marc.info/?l=php-internals&m=120221184420957&w=2
 --FILE--
 <?php
 
-class A {
-	static protected function f() {return 'A::f()';}
+class A
+{
+    protected static function f()
+    {
+        return 'A::f()';
+    }
 }
-class B1 extends A {
-	static protected function f() {return 'B1::f()';}
+class B1 extends A
+{
+    protected static function f()
+    {
+        return 'B1::f()';
+    }
 }
-class B2 extends A {
-	static public function test() {echo B1::f();}
+class B2 extends A
+{
+    public static function test()
+    {
+        echo B1::f();
+    }
 }
 B2::test();
 

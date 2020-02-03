@@ -3,23 +3,30 @@ Bug #60217 (Requiring the same method from different traits.)
 --FILE--
 <?php
 
-trait T1 {
-    public abstract function foo();
+trait T1
+{
+    abstract public function foo();
 }
 
-trait T2 {
-    public abstract function foo();
+trait T2
+{
+    abstract public function foo();
 }
 
-class C {
-    use T1, T2;
+class C
+{
+    use T1;
+    use T2;
 
-    public function foo() {
+    public function foo()
+    {
         echo "C::foo() works.\n";
     }
 }
 
-$o = new C;
+$o = new C();
 $o->foo();
+
+?>
 --EXPECT--
 C::foo() works.

@@ -3,7 +3,7 @@ Testing dynamic call with invalid method name
 --FILE--
 <?php
 
-$a = new stdClass;
+$a = new stdClass();
 $b = 1;
 
 $a::$b();

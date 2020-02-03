@@ -2,9 +2,11 @@
 Bug #63911 (Ignore conflicting trait methods originationg from identical sub traits)
 --FILE--
 <?php
+
 trait A
 {
-    public function a(){
+    public function a()
+    {
         echo 'Done';
     }
 }
@@ -18,9 +20,12 @@ trait C
 }
 class D
 {
-    use B, C;
+    use B;
+    use C;
 }
 
-(new D)->a();
+(new D())->a();
+
+?>
 --EXPECT--
 Done

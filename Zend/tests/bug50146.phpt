@@ -3,9 +3,10 @@ Bug #50146 (property_exists: Closure object cannot have properties)
 --FILE--
 <?php
 
-$obj = function(){};
+$obj = function () {
+};
 
-var_dump(property_exists($obj,'foo'));
+var_dump(property_exists($obj, 'foo'));
 
 $ref = new ReflectionObject($obj);
 var_dump($ref->hasProperty('b'));

@@ -3,12 +3,14 @@ Testing visibility of object returned by function
 --FILE--
 <?php
 
-class foo {
-	private $test = 1;
+class foo
+{
+    private $test = 1;
 }
 
-function test() {
-	return new foo;
+function test()
+{
+    return new foo();
 }
 
 test()->test = 2;

@@ -4,7 +4,10 @@ Bug #34617 (zend_deactivate: objects_store used after zend_objects_store_destroy
 <?php if (!extension_loaded("xml")) print "skip the xml extension not available"; ?>
 --FILE--
 <?php
-class Thing {}
+
+class Thing
+{
+}
 function boom()
 {
     $reader = xml_parser_create();
@@ -14,6 +17,7 @@ function boom()
     xml_parser_free($reader);
 }
 boom();
+
 ?>
 --EXPECT--
 ok

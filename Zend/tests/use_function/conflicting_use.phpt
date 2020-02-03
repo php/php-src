@@ -4,17 +4,17 @@ use function statements with conflicting names
 <?php
 
 namespace foo {
-    function baz() {
+    function baz()
+    {
         return 'foo.baz';
     }
 }
-
 namespace bar {
-    function baz() {
+    function baz()
+    {
         return 'bar.baz';
     }
 }
-
 namespace {
     use function foo\baz, bar\baz;
     echo "Done\n";

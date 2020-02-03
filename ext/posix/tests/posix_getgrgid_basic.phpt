@@ -6,6 +6,7 @@ Test posix_getgrgid() function : basic functionality
 ?>
 --FILE--
 <?php
+
   echo "Basic test of POSIX getgid and getgrid functions\n";
 
   $gid = posix_getgid();

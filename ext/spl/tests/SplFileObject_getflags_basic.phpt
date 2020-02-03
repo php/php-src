@@ -13,6 +13,7 @@ $fo = new SplFileObject('SplFileObject_getflags_basic.csv');
 
 $fo->setFlags(SplFileObject::DROP_NEW_LINE);
 var_dump($fo->getFlags());
+
 ?>
 --CLEAN--
 <?php

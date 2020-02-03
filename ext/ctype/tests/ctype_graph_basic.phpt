@@ -4,6 +4,7 @@ Test ctype_graph() function : basic functionality
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 /* Prototype  : bool ctype_graph(mixed $c)
  * Description: Checks for any printable character(s) except space
  * Source code: ext/ctype/ctype.c
@@ -20,6 +21,7 @@ var_dump(ctype_graph($c1));
 var_dump(ctype_graph($c2));
 
 setlocale(LC_CTYPE, $orig);
+
 ?>
 --EXPECT--
 *** Testing ctype_graph() : basic functionality ***

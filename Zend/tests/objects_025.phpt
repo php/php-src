@@ -3,17 +3,20 @@ Testing invalid method names with __call and __callstatic
 --FILE--
 <?php
 
-class foo {
-	public function __call($a, $b) {
-		print "non-static - ok\n";
-	}
+class foo
+{
+    public function __call($a, $b)
+    {
+        print "non-static - ok\n";
+    }
 
-	public static function __callstatic($a, $b) {
-		print "static - ok\n";
-	}
+    public static function __callstatic($a, $b)
+    {
+        print "static - ok\n";
+    }
 }
 
-$a = new foo;
+$a = new foo();
 $a->foooo();
 $a::foooo();
 
@@ -29,7 +32,7 @@ $b = str_repeat('a', 10000);
 $a->$b();
 $a::$b();
 
-$b = NULL;
+$b = null;
 $a->$b();
 
 ?>

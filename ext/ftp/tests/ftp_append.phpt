@@ -6,10 +6,13 @@ require 'skipif.inc';
 ?>
 --FILE--
 <?php
+
 require 'server.inc';
 
 $ftp = ftp_connect('127.0.0.1', $port);
-if (!$ftp) die("Couldn't connect to the server");
+if (!$ftp) {
+    die("Couldn't connect to the server");
+}
 
 var_dump(ftp_login($ftp, 'user', 'pass'));
 
@@ -25,6 +28,7 @@ $fooBarPath = __DIR__ . '/ftp_append_foobar';
 var_dump(file_get_contents($fooBarPath));
 
 ftp_close($ftp);
+
 ?>
 --CLEAN--
 <?php

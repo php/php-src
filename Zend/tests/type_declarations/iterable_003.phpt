@@ -3,14 +3,19 @@ iterable type#003 - Return types
 --FILE--
 <?php
 
-function foo(): iterable {
-	return [];
+function foo(): iterable
+{
+    return [];
 }
-function bar(): iterable {
-	return (function () { yield; })();
+function bar(): iterable
+{
+    return (function () {
+        yield;
+    })();
 }
 
-function baz(): iterable {
+function baz(): iterable
+{
     return 1;
 }
 

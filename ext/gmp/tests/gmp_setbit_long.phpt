@@ -24,12 +24,13 @@ gmp_setbit() with large index
 <?php
 
 $n = gmp_init("227200");
-for($a = 1<<30; $a > 0 && $a < 0x8000000000; $a <<= 2) {
-	$i = $a - 1;
+for ($a = 1 << 30; $a > 0 && $a < 0x8000000000; $a <<= 2) {
+    $i = $a - 1;
     printf("%X\n", $i);
     gmp_setbit($n, $i, 1);
 }
 echo "Done\n";
+
 ?>
 --EXPECTF--
 3FFFFFFF

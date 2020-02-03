@@ -2,7 +2,8 @@
 SPL: DirectoryIterator and seek
 --FILE--
 <?php
-$di = new DirectoryIterator(__DIR__."/..");
+
+$di = new DirectoryIterator(__DIR__ . "/..");
 $di->seek(2);
 
 $n = 0;
@@ -32,13 +33,14 @@ echo "Without seek we get $o\n";
 
 try {
     $p = 0;
-    $di->seek($o+1);
+    $di->seek($o + 1);
     $p = 1;
 } catch (\OutOfBoundsException $ex) {
     echo $ex->getMessage() . PHP_EOL;
 }
 
 var_dump($n !== $m, $m === $o, $p === 0);
+
 ?>
 --EXPECTF--
 With seek(2) we get %d

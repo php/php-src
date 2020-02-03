@@ -9,7 +9,9 @@ Michelangelo van Dam dragonbe@gmail.com
 ?>
 --FILE--
 <?php
+
 var_dump(posix_getegid());
+
 ?>
 --EXPECTF--
 int(%d)

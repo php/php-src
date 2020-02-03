@@ -4,6 +4,7 @@ Bug #61860: Offsets may be wrong for grapheme_stri* functions
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--
 <?php
+
 $haystack = 'Auf der Straße nach Paris habe ich mit dem Fahrer gesprochen';
 var_dump(
     grapheme_stripos($haystack, 'pariS '),

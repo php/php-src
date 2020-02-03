@@ -3,7 +3,7 @@ SPL: ArrayIterator with NULL key
 --FILE--
 <?php
 
-$ar = new ArrayIterator(array(NULL=>NULL));
+$ar = new ArrayIterator(array(null => null));
 @var_dump($ar);
 var_dump($ar->getArrayCopy());
 

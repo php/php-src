@@ -2,8 +2,12 @@
 Bug #55705 (Omitting a callable typehinted argument causes a segfault)
 --FILE--
 <?php
-function f(callable $c) {}
+
+function f(callable $c)
+{
+}
 f();
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught ArgumentCountError: Too few arguments to function f(), 0 passed in %s on line 3 and exactly 1 expected in %s:2

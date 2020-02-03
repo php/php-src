@@ -21,6 +21,7 @@ try {
 }
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 bool(true)

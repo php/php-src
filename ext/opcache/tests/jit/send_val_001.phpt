@@ -9,15 +9,19 @@ opcache.jit_buffer_size=1M
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function foo($type) {
+
+function foo($type)
+{
         $key = md5(
             is_array($type) ? \implode('_', $type) : $type .
             "ops"
         );
-		return $key;
+        return $key;
 }
 var_dump(foo("int"));
 var_dump(foo(["int"]));
+
+?>
 --EXPECT--
 string(32) "253a948ecc9192cb47e492f692aa63a8"
 string(32) "fa7153f7ed1cb6c0fcf2ffb2fac21748"

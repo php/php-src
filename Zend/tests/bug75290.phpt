@@ -5,7 +5,8 @@ Bug #75290 (debug info of Closures of internal functions contain garbage argumen
 
 var_dump((new ReflectionFunction('sin'))->getClosure());
 
-var_dump(function ($someThing) {});
+var_dump(function ($someThing) {
+});
 
 ?>
 --EXPECT--

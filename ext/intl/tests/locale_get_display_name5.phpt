@@ -14,9 +14,9 @@ locale_get_display_name() icu >= 53.1
 
 function ut_main()
 {
-    $res_str='';
+    $res_str = '';
 
-	$disp_locales=array('en','fr','de');
+    $disp_locales = array('en','fr','de');
 
     $locales = array(
         'sl_IT_nedis_KIRTI',
@@ -84,24 +84,21 @@ function ut_main()
 
     $res_str = '';
 
-   	foreach( $locales as $locale )
-    {
-       	$res_str .= "locale='$locale'\n";
-   		foreach( $disp_locales as $disp_locale )
-    	{
-        	$scr = ut_loc_get_display_name( $locale ,$disp_locale );
-		$scr = str_replace(array('(', ')'), '#', $scr);
-        	$res_str .= "disp_locale=$disp_locale :  display_name=$scr";
-        	$res_str .= "\n";
-		}
+    foreach ($locales as $locale) {
+        $res_str .= "locale='$locale'\n";
+        foreach ($disp_locales as $disp_locale) {
+            $scr = ut_loc_get_display_name($locale, $disp_locale);
+            $scr = str_replace(array('(', ')'), '#', $scr);
+            $res_str .= "disp_locale=$disp_locale :  display_name=$scr";
+            $res_str .= "\n";
+        }
         $res_str .= "-----------------\n";
     }
 
     return $res_str;
-
 }
 
-include_once( 'ut_common.inc' );
+include_once('ut_common.inc');
 ut_run();
 
 ?>

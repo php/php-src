@@ -3,11 +3,13 @@ Bug #70965 (yield from with a common iterator primes too much)
 --FILE--
 <?php
 
-function it() {
+function it()
+{
     yield from [1, 2, 3, 4, 5];
 }
 
-function bar($g) {
+function bar($g)
+{
     yield from $g;
 }
 
@@ -16,7 +18,7 @@ $gens[] = bar($gen);
 $gens[] = bar($gen);
 
 do {
-    foreach($gens as $g) {
+    foreach ($gens as $g) {
         var_dump($g->current());
         $gen->next();
     }

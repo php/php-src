@@ -27,15 +27,14 @@ function ut_main()
     $res_str = '';
     $number = 1234567.89;
 
-    foreach( $locales as $locale => $currency )
-    {
-        $fmt = ut_nfmt_create( $locale, NumberFormatter::CURRENCY );
-        $res_str .= "$locale: " . var_export( ut_nfmt_format_currency( $fmt, $number, $currency ), true ) . "\n";
+    foreach ($locales as $locale => $currency) {
+        $fmt = ut_nfmt_create($locale, NumberFormatter::CURRENCY);
+        $res_str .= "$locale: " . var_export(ut_nfmt_format_currency($fmt, $number, $currency), true) . "\n";
     }
     return $res_str;
 }
 
-include_once( 'ut_common.inc' );
+include_once('ut_common.inc');
 
 // Run the test
 ut_run();

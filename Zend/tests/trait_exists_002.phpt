@@ -5,9 +5,15 @@ Testing trait_exists() inside a namespace
 
 namespace foo;
 
-trait IFoo { }
+trait IFoo
+{
 
-trait ITest { }
+}
+
+trait ITest
+{
+
+}
 
 
 var_dump(trait_exists('IFoo'));

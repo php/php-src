@@ -6,9 +6,13 @@ Edge-cases in elimination of JMPZ JMP with same target
 <?php
 
 $foo = "foo";
-if ($foo . "bar") { goto label; }
+if ($foo . "bar") {
+    goto label;
+}
 label:
-if ($undef) { goto label2; }
+if ($undef) {
+    goto label2;
+}
 label2:
 echo "done\n";
 

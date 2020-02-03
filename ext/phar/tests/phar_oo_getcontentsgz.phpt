@@ -7,6 +7,7 @@ Phar object: getContent() (verify it works with compression)
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.phar.php';
 
@@ -18,6 +19,7 @@ copy($fname, $fname2);
 $phar2 = new Phar($fname2);
 var_dump($phar2['a']->isCompressed());
 echo $phar2['a']->getContent() . "\n";
+
 ?>
 --CLEAN--
 <?php

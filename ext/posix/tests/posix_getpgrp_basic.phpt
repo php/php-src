@@ -6,6 +6,7 @@ Test posix_getpgrp() function : basic functionality
 ?>
 --FILE--
 <?php
+
   echo "Basic test of POSIX getpgrp function\n";
 
   $pgrp = posix_getpgrp();

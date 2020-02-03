@@ -13,57 +13,55 @@ locale_lookup.phpt()
 
 function ut_main()
 {
-	$loc_ranges = array(
-		'de-de',
-		'sl_IT',
-		'sl_IT_Nedis',
-		'jbo',
-		'art-lojban'
-	);
+    $loc_ranges = array(
+        'de-de',
+        'sl_IT',
+        'sl_IT_Nedis',
+        'jbo',
+        'art-lojban'
+    );
 
-	$lang_tags = array(
-		'de-DEVA',
-		'de-DE-1996',
-		'de-DE',
-		'zh_Hans',
-		'de-CH-1996',
-		'sl_IT',
-		'sl_IT_nedis-a-kirti-x-xyz',
-		'sl_IT_rozaj',
-		'sl_IT_NEDIS_ROJAZ_1901',
-		'i-enochian',
-		'sgn-CH-de',
-		'art-lojban',
-		'i-lux',
-		'art-lojban',
-		'jbo',
-		'en_sl_IT',
-		'zh-Hant-CN-x-prv1-prv2'
-	);
+    $lang_tags = array(
+        'de-DEVA',
+        'de-DE-1996',
+        'de-DE',
+        'zh_Hans',
+        'de-CH-1996',
+        'sl_IT',
+        'sl_IT_nedis-a-kirti-x-xyz',
+        'sl_IT_rozaj',
+        'sl_IT_NEDIS_ROJAZ_1901',
+        'i-enochian',
+        'sgn-CH-de',
+        'art-lojban',
+        'i-lux',
+        'art-lojban',
+        'jbo',
+        'en_sl_IT',
+        'zh-Hant-CN-x-prv1-prv2'
+    );
 
 
     $res_str = '';
     $isCanonical = false;
 
-	foreach($loc_ranges as $loc_range){
-            $res_str .="--------------\n";
-            $result= ut_loc_locale_lookup( $lang_tags , $loc_range,$isCanonical,"en_US");
-            $comma_arr =implode(",",$lang_tags);
+    foreach ($loc_ranges as $loc_range) {
+            $res_str .= "--------------\n";
+            $result = ut_loc_locale_lookup($lang_tags, $loc_range, $isCanonical, "en_US");
+            $comma_arr = implode(",", $lang_tags);
             $res_str .= "loc_range:$loc_range \nlang_tags: $comma_arr\n";
             $res_str .= "\nlookup result:$result\n";
 //canonicalized version
-            $result= ut_loc_locale_lookup( $lang_tags , $loc_range,!($isCanonical),"en_US");
+            $result = ut_loc_locale_lookup($lang_tags, $loc_range, !($isCanonical), "en_US");
             $can_loc_range = ut_loc_canonicalize($loc_range);
             $res_str .= "Canonical lookup result:$result\n";
+    }
 
-	}
-
-	$res_str .= "\n";
+    $res_str .= "\n";
     return $res_str;
-
 }
 
-include_once( 'ut_common.inc' );
+include_once('ut_common.inc');
 ut_run();
 
 ?>

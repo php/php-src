@@ -11,7 +11,7 @@ Francesco Fullone ff@ideato.it
 --FILE--
 <?php
 
-var_dump( posix_ctermid() );
+var_dump(posix_ctermid());
 
 ?>
 --EXPECTF--

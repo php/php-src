@@ -3,7 +3,8 @@ Array must be separated if unpacking by reference
 --FILE--
 <?php
 
-function inc(&... $args) {
+function inc(&...$args)
+{
     foreach ($args as &$arg) {
         $arg++;
     }

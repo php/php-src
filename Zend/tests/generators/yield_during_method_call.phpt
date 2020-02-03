@@ -3,14 +3,17 @@ Yield can be used during a method call
 --FILE--
 <?php
 
-class A {
-    public function b($c) {
+class A
+{
+    public function b($c)
+    {
         echo $c, "\n";
     }
 }
 
-function gen() {
-    $a = new A;
+function gen()
+{
+    $a = new A();
     $a->b(yield);
 }
 

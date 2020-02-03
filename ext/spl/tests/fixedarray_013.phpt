@@ -6,14 +6,15 @@ SPL: FixedArray: Passing the object using [] as parameter
 $a = new SplFixedArray(100);
 
 
-function test(SplFixedArray &$arr) {
-	print "ok\n";
+function test(SplFixedArray &$arr)
+{
+    print "ok\n";
 }
 
 try {
-	test($a[]);
+    test($a[]);
 } catch (Exception $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 
 ?>

@@ -4,12 +4,14 @@ Check that SplQueue can't be set to LIFO
 Rob Knight <themanhimself@robknight.org.uk> PHPNW Test Fest 2009
 --FILE--
 <?php
+
 $queue = new SplQueue();
 try {
-  $queue->setIteratorMode(SplDoublyLinkedList::IT_MODE_LIFO);
+    $queue->setIteratorMode(SplDoublyLinkedList::IT_MODE_LIFO);
 } catch (Exception $e) {
-  echo $e->getMessage();
+    echo $e->getMessage();
 }
+
 ?>
 --EXPECT--
 Iterators' LIFO/FIFO modes for SplStack/SplQueue objects are frozen

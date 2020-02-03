@@ -4,14 +4,15 @@ Phar: bug #69453: Memory Corruption in phar_parse_tarfile when entry filename st
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
+
 $fname = __DIR__ . '/bug69453.tar.phar';
 try {
-$r = new Phar($fname, 0);
-} catch(UnexpectedValueException $e) {
-	echo $e;
+    $r = new Phar($fname, 0);
+} catch (UnexpectedValueException $e) {
+    echo $e;
 }
-?>
 
+?>
 --EXPECTF--
 UnexpectedValueException: phar error: "%s%ebug69453.tar.phar" is a corrupted tar file (checksum mismatch of file "") in %s:%d
 Stack trace:

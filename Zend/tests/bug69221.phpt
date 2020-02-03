@@ -3,8 +3,9 @@ Bug #69221: Segmentation fault when using a generator in combination with an Ite
 --FILE--
 <?php
 
-function gen() {
-	yield 1;
+function gen()
+{
+    yield 1;
 };
 
 $gen1 = gen();
@@ -17,7 +18,9 @@ foreach ($gen1 as $v1) {
 }
 
 unset($gen1);
-foreach ($gen2 as $v) { var_dump($v); }
+foreach ($gen2 as $v) {
+    var_dump($v);
+}
 
 ?>
 --EXPECT--

@@ -2,28 +2,29 @@
 SPL: DoublyLinkedList: Queues
 --FILE--
 <?php
+
 $queue = new SplQueue();
 // errors
 try {
     $queue->dequeue();
 } catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 try {
     $queue->shift();
 } catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 // data consistency
 $a = 2;
 $queue->enqueue($a);
-echo $queue->dequeue()."\n";
+echo $queue->dequeue() . "\n";
 
 // peakable
 $queue->enqueue(1);
 $queue->enqueue(2);
-echo $queue->top()."\n";
+echo $queue->top() . "\n";
 
 // iterable
 foreach ($queue as $elem) {
@@ -31,10 +32,10 @@ foreach ($queue as $elem) {
 }
 
 // countable
-$queue->enqueue(NULL);
-$queue->enqueue(NULL);
-echo count($queue)."\n";
-echo $queue->count()."\n";
+$queue->enqueue(null);
+$queue->enqueue(null);
+echo count($queue) . "\n";
+echo $queue->count() . "\n";
 var_dump($queue->dequeue());
 var_dump($queue->dequeue());
 
@@ -42,7 +43,8 @@ var_dump($queue->dequeue());
 $queue->enqueue(2);
 $queue_clone = clone $queue;
 $queue_clone->dequeue();
-echo count($queue)."\n";
+echo count($queue) . "\n";
+
 ?>
 --EXPECT--
 Exception: Can't shift from an empty datastructure

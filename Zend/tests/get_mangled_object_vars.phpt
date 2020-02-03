@@ -3,23 +3,26 @@ get_mangled_object_vars() function
 --FILE--
 <?php
 
-class A {
+class A
+{
     public $pub = 1;
     protected $prot = 2;
     private $priv = 3;
 }
-class B extends A {
+class B extends A
+{
     private $priv = 4;
 }
 
-$obj = new B;
+$obj = new B();
 $obj->dyn = 5;
 $obj->{"6"} = 6;
 
 var_export(get_mangled_object_vars($obj));
 echo "\n";
 
-class AO extends ArrayObject {
+class AO extends ArrayObject
+{
     private $priv = 1;
 }
 

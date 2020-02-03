@@ -2,6 +2,7 @@
 SPL: DirectoryIterator::getExtension() basic test
 --FILE--
 <?php
+
 $dir = __DIR__ . DIRECTORY_SEPARATOR . md5('DirectoryIterator::getExtension') . DIRECTORY_SEPARATOR;
 
 if (!mkdir($dir)) {
@@ -27,6 +28,7 @@ foreach (new DirectoryIterator($dir) as $file) {
 var_dump($dit_exts === $nfo_exts);
 sort($dit_exts);
 var_dump($dit_exts);
+
 ?>
 --CLEAN--
 <?php

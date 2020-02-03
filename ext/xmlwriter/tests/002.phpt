@@ -12,6 +12,7 @@ xmlwriter_end_document($xw);
 
 // Force to write and empty the buffer
 echo xmlwriter_flush($xw, true);
+
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>

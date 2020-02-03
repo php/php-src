@@ -2,35 +2,46 @@
 Magic object handlers segfaults and memory errors
 --FILE--
 <?php
-function f($x) {
-	return $x;
+
+function f($x)
+{
+    return $x;
 }
 
-class foo implements ArrayAccess {
-	function __get($property) {
-		$GLOBALS["y"] = $property;
-	}
-	function __set($property, $value) {
-		$GLOBALS["y"] = $property;
-	}
-	function __call($func, $args) {
-		$GLOBALS["y"] = $func;
-	}
-	static function __callStatic($func, $args) {
-		$GLOBALS["y"] = $func;
-	}
-	function offsetGet($index) {
-		$GLOBALS["y"] = $index;
-	}
-	function offsetSet($index, $newval) {
-		$GLOBALS["y"] = $index;
-	}
-	function offsetExists($index) {
-		$GLOBALS["y"] = $index;
-	}
-	function offsetUnset($index) {
-		$GLOBALS["y"] = $index;
-	}
+class foo implements ArrayAccess
+{
+    function __get($property)
+    {
+        $GLOBALS["y"] = $property;
+    }
+    function __set($property, $value)
+    {
+        $GLOBALS["y"] = $property;
+    }
+    function __call($func, $args)
+    {
+        $GLOBALS["y"] = $func;
+    }
+    static function __callStatic($func, $args)
+    {
+        $GLOBALS["y"] = $func;
+    }
+    function offsetGet($index)
+    {
+        $GLOBALS["y"] = $index;
+    }
+    function offsetSet($index, $newval)
+    {
+        $GLOBALS["y"] = $index;
+    }
+    function offsetExists($index)
+    {
+        $GLOBALS["y"] = $index;
+    }
+    function offsetUnset($index)
+    {
+        $GLOBALS["y"] = $index;
+    }
 }
 
 $x = new foo();
@@ -62,26 +73,26 @@ echo $y,"\n";
 
 // IS_TMP_VAR
 $c = "tmp";
-$z = $x->{$c."_get"};
+$z = $x->{$c . "_get"};
 echo $y,"\n";
-$x->{$c."_set"} = 1;
+$x->{$c . "_set"} = 1;
 echo $y,"\n";
-$x->{$c."_call"}();
+$x->{$c . "_call"}();
 echo $y,"\n";
-$z = $x[$c."_dim_get"];
+$z = $x[$c . "_dim_get"];
 echo $y,"\n";
-$x[$c."_dim_set"] = 1;
+$x[$c . "_dim_set"] = 1;
 echo $y,"\n";
-isset($x[$c."_dim_isset"]);
+isset($x[$c . "_dim_isset"]);
 echo $y,"\n";
-unset($x[$c."_dim_unset"]);
+unset($x[$c . "_dim_unset"]);
 echo $y,"\n";
 
 // IS_TMP_VAR + conversion
 $c = 0;
-$z = $x->{$c+3};
+$z = $x->{$c + 3};
 echo $y,"\n";
-$x->{$c+4} = 1;
+$x->{$c + 4} = 1;
 echo $y,"\n";
 
 // IS_CV
@@ -136,6 +147,7 @@ $z = $x->{f(7)};
 echo $y,"\n";
 $x->{f(8)} = 1;
 echo $y,"\n";
+
 ?>
 --EXPECT--
 const_get

@@ -18,6 +18,7 @@ if (PHP_OS_FAMILY === 'Windows') { die('SKIP Testing file inodes, not available 
 //file
 $fileInfo = new SplFileInfo('not_existing');
 var_dump($fileInfo->getInode());
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught RuntimeException: SplFileInfo::getInode(): stat failed for %s in %s

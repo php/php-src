@@ -9,7 +9,7 @@ if (getenv('SKIP_ASAN')) die('skip pspell leaks memory for invalid dicationaries
 --FILE--
 <?php
 
-$wordlist = __DIR__.'/wordlist.txt';
+$wordlist = __DIR__ . '/wordlist.txt';
 
 var_dump(pspell_new_personal(__FILE__, 'en'));
 $p = pspell_new_personal($wordlist, 'en');
@@ -29,9 +29,10 @@ var_dump(pspell_check($p, 'ola'));
 
 echo "--\n";
 var_dump(pspell_save_wordlist($p));
-var_dump(strpos(file_get_contents("$wordlist.tmp"), 'ola') !== FALSE);
+var_dump(strpos(file_get_contents("$wordlist.tmp"), 'ola') !== false);
 
 unlink("$wordlist.tmp");
+
 ?>
 --EXPECTF--
 Warning: pspell_new_personal(): PSPELL couldn't open the dictionary. reason: The file "%s005.php" is not in the proper format. in %s005.php on line 5

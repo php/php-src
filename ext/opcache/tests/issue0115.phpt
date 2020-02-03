@@ -11,6 +11,7 @@ phar.readonly=0
 server
 --FILE--
 <?php
+
 $stub = '<?php
 Phar::interceptFileFuncs();
 require "phar://this/index.php";
@@ -33,9 +34,10 @@ $p->setStub($stub);
 unset($p);
 
 include "php_cli_server.inc";
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d extension=phar.'.PHP_SHLIB_SUFFIX);
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d extension=phar.' . PHP_SHLIB_SUFFIX);
 echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/issue0115_1.phar.php');
 echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/issue0115_2.phar.php');
+
 ?>
 --CLEAN--
 <?php

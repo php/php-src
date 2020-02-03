@@ -23,8 +23,8 @@ socket_bind($sock, '0.0.0.0', 58393);
 $stream = socket_export_stream($sock);
 var_dump($stream);
 $so = socket_set_option($sock, IPPROTO_IP, MCAST_JOIN_GROUP, array(
-	"group"	=> '224.0.0.23',
-	"interface" => "lo",
+    "group" => '224.0.0.23',
+    "interface" => "lo",
 ));
 var_dump($so);
 
@@ -37,6 +37,8 @@ var_dump($so);
 stream_set_blocking($stream, 0);
 var_dump(fread($stream, strlen($m)));
 echo "Done.\n";
+
+?>
 --EXPECTF--
 resource(%d) of type (stream)
 bool(true)

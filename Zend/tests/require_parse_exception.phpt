@@ -5,7 +5,8 @@ allow_url_include=1
 --FILE--
 <?php
 
-function test_parse_error($code) {
+function test_parse_error($code)
+{
     try {
         require 'data://text/plain;base64,' . base64_encode($code);
     } catch (ParseError $e) {

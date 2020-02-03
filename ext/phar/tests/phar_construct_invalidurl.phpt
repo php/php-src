@@ -6,21 +6,23 @@ default_charset=UTF-8
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
+
 try {
-	$a = new Phar('http://should.fail.com');
+    $a = new Phar('http://should.fail.com');
 } catch (UnexpectedValueException $e) {
-	echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
 try {
-	$a = new Phar('http://');
+    $a = new Phar('http://');
 } catch (UnexpectedValueException $e) {
-	echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
 try {
-	$a = new Phar('http:/');
+    $a = new Phar('http:/');
 } catch (UnexpectedValueException $e) {
-	echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
+
 ?>
 --EXPECT--
 Cannot create a phar archive from a URL like "http://should.fail.com". Phar objects can only be created from local files

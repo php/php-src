@@ -20,7 +20,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-$varargs = fn(?int... $args): array => $args;
+$varargs = fn(?int ...$args): array => $args;
 var_dump($varargs(20, null, 30));
 try {
     $varargs(40, "foo");

@@ -4,6 +4,7 @@ Test ctype_upper() function : usage variations - different strings
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 /* Prototype  : bool ctype_upper(mixed $c)
  * Description: Checks for uppercase character(s)
  * Source code: ext/ctype/ctype.c
@@ -47,13 +48,14 @@ $values = array(
 );
 
 $iterator = 1;
-foreach($values as $value) {
+foreach ($values as $value) {
       echo "\n-- Iteration $iterator --\n";
-      var_dump( ctype_upper($value) );
+      var_dump(ctype_upper($value));
       $iterator++;
 };
 
 setlocale(LC_CTYPE, $orig);
+
 ?>
 --EXPECT--
 *** Testing ctype_upper() : usage variations ***

@@ -6,6 +6,7 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
+
 /* Prototype  : array imap_fetch_overview(resource $stream_id, int $msg_no [, int $options])
  * Description: Read an overview of the information in the headers
  * of the given message sequence
@@ -14,7 +15,7 @@ require_once(__DIR__.'/skipif.inc');
 
 echo "*** Testing imap_fetch_overview() : basic functionality ***\n";
 
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__ . '/imap_include.inc');
 
 // create a new mailbox and add two new messages to it
 $stream_id = setup_test_mailbox('', 2, $mailbox, 'notSimple');

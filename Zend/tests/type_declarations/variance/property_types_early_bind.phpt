@@ -3,13 +3,17 @@ Early binding should be prevented if property types cannot be checked
 --FILE--
 <?php
 
-class X {}
+class X
+{
+}
 class_alias('X', 'Y');
 
-class A {
+class A
+{
     public X $prop;
 }
-class B extends A {
+class B extends A
+{
     public Y $prop;
 }
 

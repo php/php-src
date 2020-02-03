@@ -2,9 +2,11 @@
 Bug #70277 (new DateTimeZone($foo) is ignoring text after null byte)
 --FILE--
 <?php
+
 $timezone = "Europe/Zurich\0Foo";
 var_dump(timezone_open($timezone));
 var_dump(new DateTimeZone($timezone));
+
 ?>
 --EXPECTF--
 Warning: timezone_open(): Timezone must not contain null bytes in %sbug70277.php on line %d

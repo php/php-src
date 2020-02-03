@@ -6,6 +6,7 @@ phar: mkdir/rmdir edge cases
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 Phar::interceptFileFuncs();
@@ -20,10 +21,11 @@ rmdir($pname . '/a');
 $a->addEmptyDir('bb');
 $a->addEmptyDir('bb');
 try {
-$a->addEmptyDir('.phar');
+    $a->addEmptyDir('.phar');
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
+
 ?>
 --CLEAN--
 <?php

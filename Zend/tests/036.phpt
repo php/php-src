@@ -4,12 +4,14 @@ Trying to use lambda in array offset
 <?php
 
 try {
-    $test[function(){}] = 1;
+    $test[function () {
+    }] = 1;
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-    $a{function() { }} = 1;
+    $a{function () {
+    }} = 1;
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }

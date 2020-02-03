@@ -2,6 +2,7 @@
 Hash: ripemd256 algorithm
 --FILE--
 <?php
+
 echo hash('ripemd256', '') . "\n";
 echo hash('ripemd256', 'a') . "\n";
 echo hash('ripemd256', 'abc') . "\n";
@@ -11,6 +12,8 @@ echo hash('ripemd256', 'abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq
 echo hash('ripemd256', 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') . "\n";
 echo hash('ripemd256', '12345678901234567890123456789012345678901234567890123456789012345678901234567890') . "\n";
 echo hash('ripemd256', str_repeat('a', 1000000)) . "\n";
+
+?>
 --EXPECT--
 02ba4c4e5f8ecd1877fc52d64d30e37a2d9774fb1e5d026380ae0168e3c5522d
 f9333e45d857f5d90a91bab70a1eba0cfb1be4b0783c9acfcd883a9134692925

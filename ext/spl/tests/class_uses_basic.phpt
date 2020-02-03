@@ -2,6 +2,7 @@
 SPL: Test class_implements() function : basic
 --FILE--
 <?php
+
 /* Prototype  : array class_uses(mixed what [, bool autoload ])
  * Description: Return all traits used by a class
  * Source code: ext/spl/php_spl.c
@@ -11,12 +12,17 @@ SPL: Test class_implements() function : basic
 echo "*** Testing class_uses() : basic ***\n";
 
 
-trait foo { }
-class bar { use foo; }
+trait foo
+{
 
-var_dump(class_uses(new bar));
+}
+class bar
+{
+    use foo;
+}
+
+var_dump(class_uses(new bar()));
 var_dump(class_uses('bar'));
-
 
 ?>
 --EXPECT--

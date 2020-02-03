@@ -2,15 +2,18 @@
 SPL: Ensure access to non-visible properties falls back to dimension access with ArrayObject::ARRAY_AS_PROPS.
 --FILE--
 <?php
-class C extends ArrayObject {
-	private $x = 'secret';
 
-	static function go($c) {
-	  var_dump($c->x);
-	}
+class C extends ArrayObject
+{
+    private $x = 'secret';
+
+    static function go($c)
+    {
+        var_dump($c->x);
+    }
 }
 
-$c = new C(array('x'=>'public'));
+$c = new C(array('x' => 'public'));
 
 $c->setFlags(ArrayObject::ARRAY_AS_PROPS);
 C::go($c);
@@ -20,6 +23,7 @@ var_dump($c->x);
 $c->setFlags(0);
 C::go($c);
 var_dump($c->x);
+
 ?>
 --EXPECTF--
 string(6) "secret"

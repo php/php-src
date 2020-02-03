@@ -3,7 +3,8 @@ Generator::throw() on an already closed generator
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     yield;
 }
 

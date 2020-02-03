@@ -2,27 +2,29 @@
 Scoping in destructor call
 --FILE--
 <?php
-        class T
-        {
-                private $var = array();
 
-                public function add($a)
-                {
-                        array_push($this->var, $a);
-                }
+class T
+{
+        private $var = array();
 
-                public function __destruct()
-                {
-                        print_r($this->var);
-                }
-        }
+    public function add($a)
+    {
+                array_push($this->var, $a);
+    }
 
-        class TT extends T
-        {
-        }
+    public function __destruct()
+    {
+                    print_r($this->var);
+    }
+}
+
+class TT extends T
+{
+}
         $t = new TT();
         $t->add("Hello");
         $t->add("World");
+
 ?>
 --EXPECT--
 Array

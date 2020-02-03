@@ -5,13 +5,13 @@ SPL: Countable
 
 class Test implements Countable
 {
-	function count()
-	{
-		return 4;
-	}
+    function count()
+    {
+        return 4;
+    }
 };
 
-$a = new Test;
+$a = new Test();
 
 var_dump(count($a));
 

@@ -3,7 +3,7 @@ It's not possible to directly instantiate the Generator class
 --FILE--
 <?php
 
-new Generator;
+new Generator();
 
 ?>
 --EXPECTF--

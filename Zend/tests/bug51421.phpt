@@ -3,14 +3,20 @@ Bug #51421 (Abstract __construct constructor argument list not enforced)
 --FILE--
 <?php
 
-class ExampleClass {}
-
-abstract class TestInterface {
-	abstract public function __construct(ExampleClass $var);
+class ExampleClass
+{
 }
 
-class Test extends TestInterface {
-	public function __construct() {}
+abstract class TestInterface
+{
+    abstract public function __construct(ExampleClass $var);
+}
+
+class Test extends TestInterface
+{
+    public function __construct()
+    {
+    }
 }
 
 ?>

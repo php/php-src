@@ -3,10 +3,11 @@ foreach() (and other) variables aren't leaked on premature close
 --FILE--
 <?php
 
-function gen(array $array) {
-	foreach ($array as $value) {
-		yield $value;
-	}
+function gen(array $array)
+{
+    foreach ($array as $value) {
+        yield $value;
+    }
 }
 
 $gen = gen(['Foo', 'Bar']);

@@ -3,15 +3,18 @@ Bug #77922: Double release of doc comment on inherited shadow property
 --FILE--
 <?php
 
-class A {
+class A
+{
     /** Foo */
     private $prop;
 }
 
-class B extends A {
+class B extends A
+{
 }
 
-class C extends B {
+class C extends B
+{
 }
 
 ?>

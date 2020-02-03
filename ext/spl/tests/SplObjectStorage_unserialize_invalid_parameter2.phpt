@@ -13,13 +13,12 @@ $data_provider = array(
     'x:i:2;O:8:"stdClass":0:{},s:5:"value";;m:a:0:{}',
 );
 
-foreach($data_provider as $input) {
-
-	$s = new SplObjectStorage();
+foreach ($data_provider as $input) {
+    $s = new SplObjectStorage();
 
     try {
         $s->unserialize($input);
-    } catch(UnexpectedValueException $e) {
+    } catch (UnexpectedValueException $e) {
         echo $e->getMessage() . PHP_EOL;
     }
 }

@@ -5,14 +5,18 @@ error_reporting=8191
 --FILE--
 <?php
 
-class test {
-	function __construct() {
-	}
-	function test() {
-	}
+class test
+{
+    function __construct()
+    {
+    }
+    function test()
+    {
+    }
 }
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 Done

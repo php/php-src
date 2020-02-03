@@ -3,20 +3,28 @@ Bug #43200 (Interface implementation / inheritance not possible in abstract clas
 --FILE--
 <?php
 
-interface a {
-	function foo();
-	function bar();
+interface a
+{
+    function foo();
+    function bar();
 }
-interface b {
-	function foo();
-}
-
-abstract class c {
-	function bar() { }
+interface b
+{
+    function foo();
 }
 
-class x extends c implements a, b {
-	function foo() { }
+abstract class c
+{
+    function bar()
+    {
+    }
+}
+
+class x extends c implements a, b
+{
+    function foo()
+    {
+    }
 }
 
 echo new ReflectionClass('x');

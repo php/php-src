@@ -3,12 +3,14 @@ Global variable import using a name with side effects
 --FILE--
 <?php
 
-function sf($arg) {
+function sf($arg)
+{
     echo "called\n";
     return $arg;
 }
 
-function test() {
+function test()
+{
     global ${sf("a")};
     var_dump($a);
 }

@@ -11,7 +11,9 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 var_dump(Phar::getSupportedSignatures());
+
 ?>
 --EXPECT--
 array(5) {

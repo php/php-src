@@ -3,20 +3,29 @@ callable type#001
 --FILE--
 <?php
 
-class bar {
-    function baz() {}
-    static function foo() {}
+class bar
+{
+    function baz()
+    {
+    }
+    static function foo()
+    {
+    }
 }
-function foo(callable $bar) {
+function foo(callable $bar)
+{
     var_dump($bar);
 }
-$closure = function () {};
+$closure = function () {
+};
 
 foo("strpos");
 foo("foo");
 foo($closure);
 foo(array("bar", "foo"));
 foo(array("bar", "baz"));
+
+?>
 --EXPECTF--
 string(6) "strpos"
 string(3) "foo"

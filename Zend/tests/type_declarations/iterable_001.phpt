@@ -3,11 +3,13 @@ iterable type#001
 --FILE--
 <?php
 
-function test(iterable $iterable) {
+function test(iterable $iterable)
+{
     var_dump($iterable);
 }
 
-function gen() {
+function gen()
+{
     yield 1;
     yield 2;
     yield 3;
@@ -22,6 +24,8 @@ try {
 } catch (Throwable $e) {
     echo $e->getMessage();
 }
+
+?>
 --EXPECTF--
 array(3) {
   [0]=>

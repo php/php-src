@@ -14,10 +14,12 @@ phar.require_hash=0
 phar.cache_list=
 --FILE--
 <?php
+
 phpinfo(INFO_MODULES);
-ini_set('phar.readonly',1);
-ini_set('phar.require_hash',1);
+ini_set('phar.readonly', 1);
+ini_set('phar.require_hash', 1);
 phpinfo(INFO_MODULES);
+
 ?>
 --EXPECTF--
 %aPhar

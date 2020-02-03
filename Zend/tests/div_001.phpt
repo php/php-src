@@ -24,6 +24,7 @@ $c = $d2 / $d1;
 var_dump($c);
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 float(394758.39454545)

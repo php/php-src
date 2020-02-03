@@ -10,17 +10,20 @@ opcache.preload=
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function foo(int $x) {
-	$o = new stdClass;
-	if ($x) {
-		$o->foo = 0;
-		$o->bar = 1;
-	} else {
-		$o->foo = 0;
-		$o->bar = 2;
-	}
-	echo $o->foo;
+
+function foo(int $x)
+{
+    $o = new stdClass();
+    if ($x) {
+        $o->foo = 0;
+        $o->bar = 1;
+    } else {
+        $o->foo = 0;
+        $o->bar = 2;
+    }
+    echo $o->foo;
 }
+
 ?>
 --EXPECTF--
 $_main: ; (lines=1, args=0, vars=0, tmps=0)

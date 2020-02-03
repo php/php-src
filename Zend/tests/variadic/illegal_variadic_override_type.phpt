@@ -3,12 +3,18 @@ Illegal variadic inheritance due to type mismatch
 --FILE--
 <?php
 
-class A {
-    public function test(int $a, int $b) {}
+class A
+{
+    public function test(int $a, int $b)
+    {
+    }
 }
 
-class B extends A {
-    public function test(string ...$args) {}
+class B extends A
+{
+    public function test(string ...$args)
+    {
+    }
 }
 
 ?>

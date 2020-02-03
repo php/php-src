@@ -2,6 +2,7 @@
 SPL: SplHeap: var_dump
 --FILE--
 <?php
+
 $h = new SplMaxHeap();
 
 $h->insert(1);
@@ -10,6 +11,7 @@ $h->insert(0);
 $h->insert(4);
 
 var_dump($h);
+
 ?>
 --EXPECT--
 object(SplMaxHeap)#1 (3) {

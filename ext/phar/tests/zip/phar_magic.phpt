@@ -9,6 +9,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip.php';
 $pname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip.php';
 $p = new Phar($fname);
@@ -23,6 +24,7 @@ set_include_path("phar://" . __FILE__);
 include "phar://" . __FILE__ . "/a";
 __HALT_COMPILER();');
 include $pname;
+
 ?>
 --CLEAN--
 <?php

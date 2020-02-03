@@ -2,20 +2,25 @@
 "Reference Unpacking - Class Property and Methods" list()
 --FILE--
 <?php
-class A {
+
+class A
+{
     public $a = [['hello']];
     public $b = ['world'];
 
-    public function getVar() {
+    public function getVar()
+    {
         return $this->a;
     }
 
-    public function &getVarRef() {
+    public function &getVarRef()
+    {
         return $this->a;
     }
 }
 
-class B {
+class B
+{
     static $a = [['world']];
 }
 
@@ -35,6 +40,7 @@ var_dump($a->a);
 
 [&$var] = B::$a;
 var_dump(B::$a);
+
 ?>
 --EXPECTF--
 array(1) {

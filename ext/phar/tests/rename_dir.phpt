@@ -23,6 +23,7 @@ echo file_get_contents($pname . '/a/x') . "\n";
 rename($pname . '/a', $pname . '/b');
 echo file_get_contents($pname . '/b/x') . "\n";
 echo file_get_contents($pname . '/a/x') . "\n";
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

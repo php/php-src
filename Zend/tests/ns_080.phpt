@@ -2,13 +2,17 @@
 080: bracketed namespaces and __HALT_COMPILER();
 --FILE--
 <?php
+
 namespace foo {
-echo "hi\n";
+    echo "hi\n";
 }
-__HALT_COMPILER();
+
+__halt_compiler();
 namespace unprocessed {
 echo "should not echo\n";
 }
+?>
+
 ?>
 ===DONE===
 --EXPECT--

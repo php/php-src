@@ -8,9 +8,12 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 
 var_dump(intlcal_get_error_code(null));
+
+?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: intlcal_get_error_code() expects parameter 1 to be IntlCalendar, null given in %s:%d
 Stack trace:

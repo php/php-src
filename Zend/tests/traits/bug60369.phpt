@@ -3,13 +3,16 @@ Bug #60369 (Crash with static property in trait)
 --FILE--
 <?php
 
-trait PropertiesTrait {
-   static $same = true;
+trait PropertiesTrait
+{
+    static $same = true;
 }
 
-class Properties {
-   use PropertiesTrait;
-   public $same = true;
+class Properties
+{
+    use PropertiesTrait;
+
+    public $same = true;
 }
 
 ?>

@@ -2,6 +2,7 @@
 Test gmmktime() function : basic functionality
 --FILE--
 <?php
+
 /* Prototype  : int gmmktime([int hour [, int min [, int sec [, int mon [, int day [, int year]]]]]])
  * Description: Get UNIX timestamp for a GMT date
  * Source code: ext/date/php_date.c
@@ -19,7 +20,7 @@ $day = 8;
 $year = 2008;
 
 // Calling gmmktime() with all possible arguments
-var_dump( gmmktime($hour, $min, $sec, $mon, $day, $year) );
+var_dump(gmmktime($hour, $min, $sec, $mon, $day, $year));
 
 ?>
 --EXPECTF--

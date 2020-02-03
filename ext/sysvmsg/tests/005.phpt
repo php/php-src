@@ -8,14 +8,14 @@ sysvmsg functions on non-existing queue
 $tests = array(null, 'foo');
 
 foreach ($tests as $q) {
-
     if ($q === null) {
-		do {
-			$id = ftok(__FILE__, chr(mt_rand(0, 255))); } while (msg_queue_exists($id));
+        do {
+            $id = ftok(__FILE__, chr(mt_rand(0, 255)));
+        } while (msg_queue_exists($id));
     }
 
-	$q = msg_get_queue($id) or die("Failed to create queue");
-	msg_remove_queue($q) or die("Failed to close queue");
+    $q = msg_get_queue($id) or die("Failed to create queue");
+    msg_remove_queue($q) or die("Failed to close queue");
 
     echo "Using '$q' as queue resource:\n";
 
@@ -35,6 +35,7 @@ foreach ($tests as $q) {
 }
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Using 'Resource id #4' as queue resource:

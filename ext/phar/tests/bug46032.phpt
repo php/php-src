@@ -6,21 +6,24 @@ Phar: bug #46032: PharData::__construct wrong memory read
 --FILE--
 <?php
 
-$a = __DIR__ .'/mytest';
+$a = __DIR__ . '/mytest';
 
 try {
-	new phar($a);
-} catch (exception $e) { }
+    new phar($a);
+} catch (exception $e) {
+}
 
 var_dump($a);
 
 try {
-	new phar($a);
-} catch (exception $e) { }
+    new phar($a);
+} catch (exception $e) {
+}
 
 var_dump($a);
 
 new phardata('0000000000000000000');
+
 ?>
 ===DONE===
 --EXPECTF--

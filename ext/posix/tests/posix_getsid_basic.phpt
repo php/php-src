@@ -6,6 +6,7 @@ Test posix_getsid() function : basic functionality
 ?>
 --FILE--
 <?php
+
   echo "Basic test of posix_getsid function\n";
 
   $pid = posix_getpid();

@@ -11,11 +11,15 @@ opcache.protect_memory=1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function bar() {
-	$a = strlen("a");
-	$a++;
-	return $a;
+
+function bar()
+{
+    $a = strlen("a");
+    $a++;
+    return $a;
 }
 var_dump(bar());
+
+?>
 --EXPECT--
 int(2)

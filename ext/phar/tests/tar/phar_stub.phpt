@@ -7,6 +7,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 $fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.phar.tar.php';
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar.php';
 $pname = 'phar://' . $fname;
@@ -56,6 +57,7 @@ echo $phar->getStub();
 $phar['testing'] = 'hi';
 
 echo $phar->getStub();
+
 ?>
 --CLEAN--
 <?php

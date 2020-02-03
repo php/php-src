@@ -7,12 +7,13 @@ class Bla
 {
 }
 
-$b = new Bla;
+$b = new Bla();
 
 var_dump($b != null);
 var_dump($b == null);
 var_dump($b !== null);
 var_dump($b === null);
+
 ?>
 --EXPECT--
 bool(true)

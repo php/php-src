@@ -5,7 +5,8 @@ Lance Kesson jac_kesson@hotmail.com
 #testfest London 2009-05-09
 --FILE--
 <?php
-$array=array('a','b');
+
+$array = array('a','b');
 
 $iterator = new ArrayIterator($array);
 

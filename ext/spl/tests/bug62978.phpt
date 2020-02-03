@@ -2,6 +2,7 @@
 Bug #62987 (Assigning to ArrayObject[null][something] overrides all undefined variables)
 --FILE--
 <?php
+
 $a = new ArrayObject();
 
 $b = array();
@@ -24,6 +25,8 @@ $fp = fopen(__FILE__, 'r');
 var_dump($a[$fp]);
 
 fclose($fp);
+
+?>
 --EXPECTF--
 Notice: Undefined index: epic_magic in %sbug62978.php on line %d
 NULL

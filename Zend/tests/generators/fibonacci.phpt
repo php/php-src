@@ -3,7 +3,8 @@ Creating an infinite fibonacci list using a generator
 --FILE--
 <?php
 
-function fib() {
+function fib()
+{
     list($a, $b) = [1, 1];
     while (true) {
         yield $b;
@@ -12,7 +13,9 @@ function fib() {
 }
 
 foreach (fib() as $n) {
-    if ($n > 1000) break;
+    if ($n > 1000) {
+        break;
+    }
 
     var_dump($n);
 }

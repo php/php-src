@@ -9,6 +9,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 $p = new Phar(__DIR__ . '/phar_begin_setstub_commit.phar', 0, 'phar_begin_setstub_commit.phar');
 //var_dump($p->getStub());
 var_dump($p->isBuffering());
@@ -28,6 +29,7 @@ var_dump($p->isBuffering());
 include 'phar://phar_begin_setstub_commit.phar/a.php';
 include 'phar://phar_begin_setstub_commit.phar/b.php';
 var_dump($p->getStub());
+
 ?>
 --CLEAN--
 <?php

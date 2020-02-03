@@ -8,14 +8,18 @@ opcache.enable_cli=1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function parseQuery() {
+
+function parseQuery()
+{
     $m = array("l", "a", "r", "u", "e", "n", "c", "e");
-    foreach($m as $n) {
+    foreach ($m as $n) {
         @list($a, $b) = $n;
     }
 }
 parseQuery();
 echo "ok\n";
+
+?>
 --EXPECT--
 Deprecated: Directive 'allow_url_include' is deprecated in Unknown on line 0
 ok

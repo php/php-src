@@ -10,6 +10,7 @@ opcache.revalidate_path=1
 server
 --FILE--
 <?php
+
 $dir = __DIR__;
 $dir1 = "$dir/test1";
 $dir2 = "$dir/test2";
@@ -19,21 +20,21 @@ $file2 = "$dir2/index.php";
 $main = "$dir/main.php";
 @mkdir($dir1);
 @mkdir($dir2);
-@file_put_contents($main,  '<?php include(\'' . $link .'/index.php\');');
+@file_put_contents($main, '<?php include(\'' . $link . '/index.php\');');
 @file_put_contents($file1, "TEST 1\n");
 @file_put_contents($file2, "TEST 2\n");
 while (filemtime($file1) != filemtime($file2)) {
-	touch($file1);
-	touch($file2);
+    touch($file1);
+    touch($file2);
 }
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	@rmdir($link);
-	$ln = str_replace('/', '\\', $link);
-	$d1 = realpath($dir1);
-	`mklink /j $ln $d1`;
+    @rmdir($link);
+    $ln = str_replace('/', '\\', $link);
+    $d1 = realpath($dir1);
+    `mklink /j $ln $d1`;
 } else {
-	@unlink($link);
-	@symlink($dir1, $link);
+    @unlink($link);
+    @symlink($dir1, $link);
 }
 
 include "php_cli_server.inc";
@@ -42,16 +43,17 @@ php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d opcache.rev
 echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/main.php');
 echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/main.php');
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	@rmdir($link);
-	$ln = str_replace('/', '\\', $link);
-	$d2 = realpath($dir2);
-	`mklink /j $ln $d2`;
+    @rmdir($link);
+    $ln = str_replace('/', '\\', $link);
+    $d2 = realpath($dir2);
+    `mklink /j $ln $d2`;
 } else {
-	@unlink($link);
-	@symlink($dir2, $link);
+    @unlink($link);
+    @symlink($dir2, $link);
 }
 echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/main.php');
 echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/main.php');
+
 ?>
 --CLEAN--
 <?php

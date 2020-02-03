@@ -8,7 +8,7 @@ Chris MacPherson chris@kombine.co.uk
 --FILE--
 <?php
 
-$db = new PDO( 'sqlite::memory:');
+$db = new PDO('sqlite::memory:');
 
 $db->sqliteCreateFunction('bar-alias', 'bar');
 

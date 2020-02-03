@@ -5,15 +5,15 @@ Bug #37667 (Object is not added into array returned by __get)
 
 class Test
 {
-	protected $property = array('foo' => 'bar');
+    protected $property = array('foo' => 'bar');
 
-	function __get($name)
-	{
-		return $this->property;
-	}
+    function __get($name)
+    {
+        return $this->property;
+    }
 }
 
-$obj = new Test;
+$obj = new Test();
 
 var_dump($obj->property['foo']);
 var_dump($obj->property[2]);

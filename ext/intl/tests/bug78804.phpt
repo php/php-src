@@ -8,6 +8,7 @@ if (Locale::filterMatches('en-US', 'und', true)) {
 } else {
     echo 'Not matches';
 }
+
 ?>
 --EXPECT--
 Not matches

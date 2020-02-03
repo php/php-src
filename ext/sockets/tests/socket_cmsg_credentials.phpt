@@ -20,7 +20,8 @@ $path = __DIR__ . "/unix_sock";
 @unlink($path);
 --FILE--
 <?php
-include __DIR__."/mcast_helpers.php.inc";
+
+include __DIR__ . "/mcast_helpers.php.inc";
 $path = __DIR__ . "/unix_sock";
 
 @unlink($path);
@@ -51,11 +52,15 @@ $data = [
     "buffer_size" => 2000,
     "controllen" => socket_cmsg_space(SOL_SOCKET, SCM_CREDENTIALS)
 ];
-if (!socket_recvmsg($s, $data, 0)) die("recvmsg");
+if (!socket_recvmsg($s, $data, 0)) {
+    die("recvmsg");
+}
 print_r($data);
 
 $pid = getmypid();
 var_dump($data['control'][0]['data']['pid'] === $pid);
+
+?>
 --EXPECTF--
 creating send socket
 resource(%d) of type (Socket)

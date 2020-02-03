@@ -14,6 +14,8 @@ try { (function() { call_user_func("fail"); })(); } catch (Error $e) {}
 try { [new class { static function foo() {} function __destruct () { throw new Error; } }, "foo"](); } catch (Error $e) {}
 
 ?>
+
+?>
 ===DONE===
 --EXPECT--
 ===DONE===

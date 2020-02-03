@@ -4,10 +4,11 @@ SPL: FixedArray: Trying to instantiate passing string to constructor parameter
 <?php
 
 try {
-	$a = new SplFixedArray('FOO');
+    $a = new SplFixedArray('FOO');
 } catch (TypeError $iae) {
-	echo "Ok - ".$iae->getMessage().PHP_EOL;
+    echo "Ok - " . $iae->getMessage() . PHP_EOL;
 }
+
 ?>
 --EXPECT--
 Ok - SplFixedArray::__construct() expects parameter 1 to be int, string given

@@ -3,14 +3,15 @@ It is not possible to resume an already running generator
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     $gen = yield;
     try {
-	    $gen->next();
-	} catch (Error $e) {
-		echo "\nException: " . $e->getMessage() . "\n";
-	}
-	$gen->next();
+        $gen->next();
+    } catch (Error $e) {
+        echo "\nException: " . $e->getMessage() . "\n";
+    }
+    $gen->next();
 }
 
 $gen = gen();

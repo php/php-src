@@ -3,8 +3,9 @@ Testing __set() declaration in abstract class with wrong modifier
 --FILE--
 <?php
 
-abstract class b {
-	abstract protected function __set($a);
+abstract class b
+{
+    abstract protected function __set($a);
 }
 
 ?>

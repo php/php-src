@@ -2,6 +2,7 @@
 Test getdate() function : usage variation - Verifyig by supplying year-wise sample time stamps since Unix epoch time
 --FILE--
 <?php
+
 /* Prototype  : array getdate([int timestamp])
  * Description: Get date/time information
  * Source code: ext/date/php_date.c
@@ -16,18 +17,18 @@ date_default_timezone_set("Asia/Calcutta");
 //array of values to iterate over
 $inputs = array(
 
-	//Year wise time stamps
-	'01 Jan 1970' => 0,
-	'01 Jan 1971' => 31536000,
-	'01 Jan 1972' => 63072000,
-	'01 Jan 1973' => 94694400,
+    //Year wise time stamps
+    '01 Jan 1970' => 0,
+    '01 Jan 1971' => 31536000,
+    '01 Jan 1972' => 63072000,
+    '01 Jan 1973' => 94694400,
 );
 
 // loop through each element of the array for timestamp
 
-foreach($inputs as $key =>$value) {
+foreach ($inputs as $key => $value) {
       echo "\n--$key--\n";
-      var_dump( getdate($value) );
+      var_dump(getdate($value));
 };
 
 ?>

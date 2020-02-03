@@ -7,6 +7,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php __HALT_COMPILER(); ?>";
@@ -25,7 +26,9 @@ $md5 = md5_file($fname);
 unlink($pname . '/b/c.php');
 clearstatcache();
 $md52 = md5_file($fname);
-if ($md5 == $md52) echo 'file was not modified';
+if ($md5 == $md52) {
+    echo 'file was not modified';
+}
 ?>
 ===AFTER===
 <?php
@@ -34,6 +37,8 @@ include 'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php/b.ph
 include 'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php/b/c.php';
 ?>
 
+
+?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--

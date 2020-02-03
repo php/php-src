@@ -7,6 +7,7 @@ phar.require_hash=1
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $a = new Phar($fname);
 $a['index.php'] = '<?php
@@ -22,6 +23,7 @@ set_include_path("phar://" . __FILE__ . "/dir" . PATH_SEPARATOR . "phar://" . __
 include "index.php";
 __HALT_COMPILER();');
 include $fname;
+
 ?>
 ===DONE===
 --CLEAN--

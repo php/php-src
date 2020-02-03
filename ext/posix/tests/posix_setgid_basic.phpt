@@ -11,12 +11,10 @@ Francesco Fullone ff@ideato.it
 --FILE--
 <?php
 
-
 echo "*** Test by calling method or function with its expected arguments ***\n";
 
 $gid = posix_getgid();
-var_dump(posix_setgid( $gid ) );
-
+var_dump(posix_setgid($gid));
 
 ?>
 --EXPECT--

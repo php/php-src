@@ -2,6 +2,7 @@
 Test ArrayObject::uksort() function : wrong arg count
 --FILE--
 <?php
+
 /* Prototype  : int ArrayObject::uksort(callback cmp_function)
  * Description: proto int ArrayIterator::uksort(callback cmp_function)
  Sort the entries by key using user defined function.
@@ -12,16 +13,17 @@ Test ArrayObject::uksort() function : wrong arg count
 $ao = new ArrayObject();
 
 try {
-	$ao->uksort();
+    $ao->uksort();
 } catch (BadMethodCallException $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-	$ao->uksort(1,2);
+    $ao->uksort(1, 2);
 } catch (BadMethodCallException $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
+
 ?>
 --EXPECT--
 Function expects exactly one argument

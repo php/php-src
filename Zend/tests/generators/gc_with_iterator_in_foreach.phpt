@@ -3,7 +3,8 @@ Generator GC triggered with live iterator in foreach
 --FILE--
 <?php
 
-function gen($iter, &$gen) {
+function gen($iter, &$gen)
+{
     foreach ($iter as $v) {
         yield;
     }

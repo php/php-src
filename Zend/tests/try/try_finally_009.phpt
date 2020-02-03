@@ -2,8 +2,10 @@
 Try finally (with for continue)
 --FILE--
 <?php
-function foo () {
-    for($i = 0; $i < 5; $i++) {
+
+function foo()
+{
+    for ($i = 0; $i < 5; $i++) {
         do {
             try {
                 try {
@@ -11,13 +13,14 @@ function foo () {
                 }
             } catch (Exception $e) {
             } finally {
-              continue;
+                continue;
             }
         } while (0);
     }
 }
 
 foo();
+
 ?>
 --EXPECTF--
 Fatal error: jump out of a finally block is disallowed in %stry_finally_009.php on line %d

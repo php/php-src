@@ -7,6 +7,7 @@ Patrick Allaert <patrickallaert@php.net>
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 require "connect.inc";
 
 $link = ldap_connect($host, $port);
@@ -15,6 +16,7 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
+
 ?>
 --EXPECT--
 ldap_first_attribute(): supplied resource is not a valid ldap result entry resource

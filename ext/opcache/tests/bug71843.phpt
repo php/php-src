@@ -8,6 +8,7 @@ opcache.optimization_level=0xFFFFBFFF
 <?php if (!extension_loaded('Zend OPcache')) die("skip"); ?>
 --FILE--
 <?php
+
 define('E', 'E');
 define('R', 'R');
 define('See', 'See');
@@ -15,6 +16,8 @@ define('See', 'See');
 6 && ~See
 ?>
 okey
+
+?>
 --EXPECTF--
 Warning: A non-numeric value encountered in %s on line %d
 

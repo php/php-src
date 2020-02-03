@@ -9,8 +9,11 @@ opcache.file_update_protection=0
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-if(constant('PHP_BINARY')) {
-	echo "OK\n";
+
+if (constant('PHP_BINARY')) {
+    echo "OK\n";
 }
+
+?>
 --EXPECT--
 OK

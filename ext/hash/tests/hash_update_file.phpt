@@ -4,12 +4,14 @@ Hash: hash_update_file() test
 marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
 --FILE--
 <?php
+
 $filePath = __DIR__ . DIRECTORY_SEPARATOR . 'hash_update_stream.txt';
 file_put_contents($filePath, 'The quick brown fox jumped over the lazy dog.');
 
 $ctx = hash_init('md5');
 var_dump(hash_update_file($ctx, $filePath));
 echo hash_final($ctx);
+
 ?>
 --EXPECT--
 bool(true)

@@ -5,13 +5,15 @@ Testing parameter type-hinted with default value inside namespace
 
 namespace foo;
 
-class bar {
-	public function __construct(\stdclass $x = NULL) {
-		var_dump($x);
-	}
+class bar
+{
+    public function __construct(\stdclass $x = null)
+    {
+        var_dump($x);
+    }
 }
 
-new bar(new \stdclass);
+new bar(new \stdclass());
 new bar(null);
 
 ?>

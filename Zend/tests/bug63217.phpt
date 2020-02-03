@@ -6,26 +6,32 @@ opcache.enable=1
 opcache.optimization_level=-1
 --FILE--
 <?php
-class Test implements ArrayAccess {
-    public function offsetExists($offset) {
+
+class Test implements ArrayAccess
+{
+    public function offsetExists($offset)
+    {
         echo "offsetExists given ";
         var_dump($offset);
     }
-    public function offsetUnset($offset) {
+    public function offsetUnset($offset)
+    {
         echo "offsetUnset given ";
         var_dump($offset);
     }
-    public function offsetSet($offset, $value) {
+    public function offsetSet($offset, $value)
+    {
         echo "offsetSet given ";
         var_dump($offset);
     }
-    public function offsetGet($offset) {
+    public function offsetGet($offset)
+    {
         echo "offsetGet given ";
         var_dump($offset);
     }
 }
 
-$test = new Test;
+$test = new Test();
 
 /* These should all produce string(...) "..." output and not int(...) */
 isset($test['0']);
@@ -50,7 +56,8 @@ $foo = $test[(string)'123'];
 /**
  * @see https://github.com/php/php-src/pull/2607#issuecomment-313781748
  */
-function test(): string {
+function test(): string
+{
     $array["10"] = 42;
     foreach ($array as $key => $value) {
         return $key;

@@ -3,11 +3,12 @@ Bug #46238 (Segmentation fault on static call with empty string method)
 --FILE--
 <?php
 
-class a {
-        static function __callStatic($name, $arguments)
-        {
-                var_dump(array($name, $arguments));
-        }
+class a
+{
+    static function __callStatic($name, $arguments)
+    {
+            var_dump(array($name, $arguments));
+    }
 }
 
 $a = 'a';
@@ -15,7 +16,7 @@ $b = '';
 
 $a::$b($a);
 $a::$b(array());
-$a::$b(NULL);
+$a::$b(null);
 $a::$b(1);
 $a::$b();
 
@@ -24,7 +25,7 @@ $b = "\0";
 
 $a::$b($a);
 $a::$b(array());
-$a::$b(NULL);
+$a::$b(null);
 $a::$b(1);
 $a::$b();
 

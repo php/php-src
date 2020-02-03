@@ -2,25 +2,30 @@
 Bug #52361 (Throwing an exception in a destructor causes invalid catching)
 --FILE--
 <?php
-class aaa {
-	public function __destruct() {
-		try {
-			throw new Exception(__CLASS__);
-		} catch(Exception $ex) {
-			echo "1. $ex\n";
-		}
-	}
+
+class aaa
+{
+    public function __destruct()
+    {
+        try {
+            throw new Exception(__CLASS__);
+        } catch (Exception $ex) {
+            echo "1. $ex\n";
+        }
+    }
 }
-function bbb() {
-	$a = new aaa();
-	throw new Exception(__FUNCTION__);
+function bbb()
+{
+    $a = new aaa();
+    throw new Exception(__FUNCTION__);
 }
 try {
-	bbb();
-	echo "must be skipped !!!";
-} catch(Exception $ex) {
-	echo "2. $ex\n";
+    bbb();
+    echo "must be skipped !!!";
+} catch (Exception $ex) {
+    echo "2. $ex\n";
 }
+
 ?>
 --EXPECTF--
 1. Exception: aaa in %sbug52361.php:5

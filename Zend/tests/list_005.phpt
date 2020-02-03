@@ -19,7 +19,7 @@ var_dump($a, $b, $c);
 
 print "----\n";
 
-$obj = new stdClass;
+$obj = new stdClass();
 
 list($a, $b, $c) = $obj;
 

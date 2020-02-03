@@ -19,6 +19,7 @@ $x->setChecks(Spoofchecker::MIXED_SCRIPT_CONFUSABLE |
   Spoofchecker::SINGLE_SCRIPT_CONFUSABLE);
 var_dump($x->areConfusable("HELLO", "H\xD0\x95LLO"));
 var_dump($x->areConfusable("hello", "h\xD0\xB5llo"));
+
 ?>
 --EXPECT--
 Check with default settings

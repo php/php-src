@@ -69,18 +69,16 @@ function ut_main()
 
     $res_str = '';
 
-    foreach( $locales as $locale )
-    {
-        $scr = ut_loc_get_region( $locale);
+    foreach ($locales as $locale) {
+        $scr = ut_loc_get_region($locale);
         $res_str .= "$locale:  region='$scr'";
         $res_str .= "\n";
     }
 
     return $res_str;
-
 }
 
-include_once( 'ut_common.inc' );
+include_once('ut_common.inc');
 ut_run();
 
 ?>

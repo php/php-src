@@ -6,6 +6,7 @@ Phar: PharFileInfo::setMetadata/delMetadata extra code coverage
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
 $pname = 'phar://' . $fname;
 
@@ -16,26 +17,27 @@ $tar = $phar->convertToData(Phar::TAR);
 
 $b = $phar['a/b'];
 try {
-$phar['a']->setMetadata('hi');
+    $phar['a']->setMetadata('hi');
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 try {
-$phar['a']->delMetadata();
+    $phar['a']->delMetadata();
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 ini_set('phar.readonly', 1);
 try {
-$b->setMetadata('hi');
+    $b->setMetadata('hi');
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 try {
-$b->delMetadata();
+    $b->delMetadata();
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar'); ?>

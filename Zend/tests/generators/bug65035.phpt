@@ -3,12 +3,14 @@ Bug #65035: yield / exit segfault
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     f();
     yield;
 }
 
-function f() {
+function f()
+{
     exit('Done');
 }
 

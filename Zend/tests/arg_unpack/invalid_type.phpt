@@ -3,7 +3,8 @@ Only arrays and Traversables can be unpacked
 --FILE--
 <?php
 
-function test(...$args) {
+function test(...$args)
+{
     var_dump($args);
 }
 
@@ -18,7 +19,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 try {
-    test(...new stdClass);
+    test(...new stdClass());
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
@@ -29,7 +30,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 try {
-    test(1, 2, 3, ...new StdClass, ...3.14, ...[4, 5]);
+    test(1, 2, 3, ...new StdClass(), ...3.14, ...[4, 5]);
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }

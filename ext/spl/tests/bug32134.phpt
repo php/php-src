@@ -13,9 +13,11 @@ class myArray extends ArrayIterator
 
     public function offsetGet($index)
     {
-		static $i = 0;
+        static $i = 0;
         echo __METHOD__ . "($index)\n";
-        if (++$i > 3) exit(1);
+        if (++$i > 3) {
+            exit(1);
+        }
         return parent::offsetGet($index);
     }
 
@@ -24,7 +26,6 @@ class myArray extends ArrayIterator
         echo __METHOD__ . "($index,$newval)\n";
         return parent::offsetSet($index, $newval);
     }
-
 }
 
 $myArray = new myArray();

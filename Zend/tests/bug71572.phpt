@@ -25,6 +25,7 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 var_dump($str);
+
 ?>
 --EXPECT--
 Cannot assign an empty string to a string offset

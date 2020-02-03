@@ -11,6 +11,7 @@ if (!extension_loaded('sockets')) {
 ?>
 --FILE--
 <?php
+
 $port = 80;
 $host = "yahoo.com";
 $stringSocket = "send_socket_to_connected_socket";
@@ -19,20 +20,20 @@ $stringSocketLength = strlen($stringSocket);
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 $socketConn = socket_connect($socket, $host, $port);
 
-if(socket_send($socket, $stringSocket, $stringSocketLength, MSG_OOB)===$stringSocketLength){
-  print("okey\n");
+if (socket_send($socket, $stringSocket, $stringSocketLength, MSG_OOB) === $stringSocketLength) {
+    print("okey\n");
 }
 
-if(!defined('MSG_EOR') || socket_send($socket, $stringSocket, $stringSocketLength, MSG_EOR)===$stringSocketLength){
-  print("okey\n");
+if (!defined('MSG_EOR') || socket_send($socket, $stringSocket, $stringSocketLength, MSG_EOR) === $stringSocketLength) {
+    print("okey\n");
 }
 
-if(!defined('MSG_EOF') || socket_send($socket, $stringSocket, $stringSocketLength, MSG_EOF)===$stringSocketLength){
-  print("okey\n");
+if (!defined('MSG_EOF') || socket_send($socket, $stringSocket, $stringSocketLength, MSG_EOF) === $stringSocketLength) {
+    print("okey\n");
 }
 
-if(socket_send($socket, $stringSocket, $stringSocketLength, MSG_DONTROUTE)===$stringSocketLength){
-  print("okey\n");
+if (socket_send($socket, $stringSocket, $stringSocketLength, MSG_DONTROUTE) === $stringSocketLength) {
+    print("okey\n");
 }
 ?>
 <?php
@@ -43,6 +44,7 @@ unset($stringSocket);
 unset($stringSocketLength);
 unset($socket);
 unset($socketConn);
+
 ?>
 --EXPECT--
 okey

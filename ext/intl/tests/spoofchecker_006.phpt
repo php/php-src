@@ -16,6 +16,7 @@ $x = new Spoofchecker();
 $x->setAllowedLocales("gr_GR");
 var_dump($x->isSuspicious("NAPKIN PEZ"));
 var_dump($x->isSuspicious("napkin pez"));
+
 ?>
 --EXPECT--
 paypal with Cyrillic spoof characters

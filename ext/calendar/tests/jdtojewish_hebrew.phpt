@@ -6,6 +6,7 @@ if (!extension_loaded('calendar')) die('skip calendar extension not available');
 ?>
 --FILE--
 <?php
+
 for ($year = 5000; $year <= 5001; $year++) {
     $leap = ($year === 5001) ? 'leap' : 'normal';
     echo "$leap year $year\n";
@@ -17,6 +18,7 @@ for ($year = 5000; $year <= 5001; $year++) {
     }
     echo "\n";
 }
+
 ?>
 --EXPECT--
 normal year 5000

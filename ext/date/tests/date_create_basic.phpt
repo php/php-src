@@ -2,6 +2,7 @@
 Test date_create() function : basic functionality
 --FILE--
 <?php
+
 /* Prototype  : DateTime date_create  ([ string $time  [, DateTimeZone $timezone  ]] )
  * Description: Returns new DateTime object
  * Source code: ext/date/php_date.c
@@ -13,11 +14,11 @@ date_default_timezone_set("Europe/London");
 
 echo "*** Testing date_create() : basic functionality ***\n";
 
-var_dump( date_create() );
+var_dump(date_create());
 
-var_dump( date_create("GMT") );
-var_dump( date_create("2005-07-14 22:30:41") );
-var_dump( date_create("2005-07-14 22:30:41 GMT") );
+var_dump(date_create("GMT"));
+var_dump(date_create("2005-07-14 22:30:41"));
+var_dump(date_create("2005-07-14 22:30:41 GMT"));
 
 ?>
 --EXPECTF--

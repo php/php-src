@@ -10,12 +10,17 @@ opcache.preload=
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-class A {
+
+class A
+{
 }
-function foo(int $x) {
-	$a = new A;
-	$a->foo = $x;
+function foo(int $x)
+{
+    $a = new A();
+    $a->foo = $x;
 }
+
+?>
 --EXPECTF--
 $_main: ; (lines=1, args=0, vars=0, tmps=0)
     ; (after optimizer)

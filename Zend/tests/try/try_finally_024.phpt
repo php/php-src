@@ -3,7 +3,8 @@ Exception in finally inside finally following try/catch containing throwing try/
 --FILE--
 <?php
 
-function test() {
+function test()
+{
     try {
         throw new Exception(1);
     } finally {
@@ -12,7 +13,8 @@ function test() {
             } finally {
                 throw new Exception(2);
             }
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+        }
         try {
         } finally {
             throw new Exception(3);
@@ -25,6 +27,7 @@ try {
 } catch (Exception $e) {
     echo $e, "\n";
 }
+
 ?>
 --EXPECTF--
 Exception: 1 in %s:%d

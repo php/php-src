@@ -9,7 +9,8 @@ if (!extension_loaded('json')) die('skip requires json');
 
 declare(strict_types=1);
 
-function dump($value) {
+function dump($value)
+{
     if (is_object($value)) {
         return 'new ' . get_class($value);
     }
@@ -19,7 +20,8 @@ function dump($value) {
     return json_encode($value, JSON_PRESERVE_ZERO_FRACTION);
 }
 
-function test(string $type, array $values) {
+function test(string $type, array $values)
+{
     $alignment = 16;
 
     echo "\nType $type:\n";
@@ -44,15 +46,17 @@ function test(string $type, array $values) {
     }
 }
 
-class WithToString {
-    public function __toString() {
+class WithToString
+{
+    public function __toString()
+    {
         return "__toString()";
     }
 }
 
 $values = [
     42, 42.0, INF, "42", "42.0", "42x", "x", "",
-    true, false, null, [], new stdClass, new WithToString,
+    true, false, null, [], new stdClass(), new WithToString(),
 ];
 test('int|float', $values);
 test('int|float|false', $values);

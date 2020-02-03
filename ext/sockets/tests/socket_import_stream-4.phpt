@@ -11,33 +11,34 @@ if(substr(PHP_OS, 0, 3) == 'WIN' ) {
 --FILE--
 <?php
 
-function test($stream, $sock) {
-	if ($stream !== null) {
-		echo "stream_set_blocking ";
-		try {
-			print_r(stream_set_blocking($stream, 0));
-		} catch (TypeError $e) {
-			echo $e->getMessage(), "\n";
-		}
-		echo "\n";
-	}
-	if ($sock !== null) {
-		echo "socket_set_block ";
-		try {
-			print_r(socket_set_block($sock));
-		} catch (TypeError $e) {
-			echo $e->getMessage(), "\n";
-		}
-		echo "\n";
-		echo "socket_get_option ";
-		try {
-			print_r(socket_get_option($sock, SOL_SOCKET, SO_TYPE));
-		} catch (TypeError $e) {
-			echo $e->getMessage(), "\n";
-		}
-		echo "\n";
-	}
-	echo "\n";
+function test($stream, $sock)
+{
+    if ($stream !== null) {
+        echo "stream_set_blocking ";
+        try {
+            print_r(stream_set_blocking($stream, 0));
+        } catch (TypeError $e) {
+            echo $e->getMessage(), "\n";
+        }
+        echo "\n";
+    }
+    if ($sock !== null) {
+        echo "socket_set_block ";
+        try {
+            print_r(socket_set_block($sock));
+        } catch (TypeError $e) {
+            echo $e->getMessage(), "\n";
+        }
+        echo "\n";
+        echo "socket_get_option ";
+        try {
+            print_r(socket_get_option($sock, SOL_SOCKET, SO_TYPE));
+        } catch (TypeError $e) {
+            echo $e->getMessage(), "\n";
+        }
+        echo "\n";
+    }
+    echo "\n";
 }
 
 echo "normal\n";
@@ -70,6 +71,8 @@ socket_close($sock4);
 test($stream4, $sock4);
 
 echo "Done.\n";
+
+?>
 --EXPECTF--
 normal
 stream_set_blocking 1

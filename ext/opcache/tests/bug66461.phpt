@@ -11,6 +11,9 @@ opcache.interned_strings_buffer=0
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 echo "ok\n";
+
+?>
 --EXPECT--
 ok

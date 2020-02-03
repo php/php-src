@@ -16,6 +16,7 @@ define("TEST_CONST2", "test");
 var_dump(constant("TEST_CONST2"));
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 Undefined constant ''

@@ -3,12 +3,16 @@ Typehints for variadic arguments have to be compatible
 --FILE--
 <?php
 
-interface DB {
+interface DB
+{
     public function query($query, string ...$params);
 }
 
-class MySQL implements DB {
-    public function query($query, int ...$params) { }
+class MySQL implements DB
+{
+    public function query($query, int ...$params)
+    {
+    }
 }
 
 ?>

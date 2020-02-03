@@ -16,6 +16,7 @@ file_put_contents($file_p, '<?php class p { protected $var = ""; } ?>');
 require $file_c;
 $a = new c();
 require $file_c;
+
 ?>
 --CLEAN--
 <?php

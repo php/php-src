@@ -7,8 +7,10 @@ opcache.enable_cli=1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 $Pile['vars'][(string)'toto'] = 'tutu';
 var_dump($Pile['vars']['toto']);
+
 ?>
 --EXPECT--
 string(4) "tutu"

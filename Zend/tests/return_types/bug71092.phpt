@@ -5,15 +5,17 @@ opcache.enable=0
 --FILE--
 <?php
 
-function boom(): array {
-	$data = [['id']];
-	switch ($data[0]) {
-	case ['id']:
-		return null;
-	}
+function boom(): array
+{
+    $data = [['id']];
+    switch ($data[0]) {
+        case ['id']:
+            return null;
+    }
 }
 
 boom();
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: Return value of boom() must be of the type array, null returned in %sbug71092.php:%d

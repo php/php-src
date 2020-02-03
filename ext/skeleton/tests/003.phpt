@@ -11,6 +11,8 @@ if (!extension_loaded('%EXTNAME%')) {
 var_dump(%EXTNAME%_test2());
 var_dump(%EXTNAME%_test2('PHP'));
 ?>
+
+?>
 --EXPECT--
 string(11) "Hello World"
 string(9) "Hello PHP"

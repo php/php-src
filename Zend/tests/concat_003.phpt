@@ -8,7 +8,7 @@ if (getenv('SKIP_PERF_SENSITIVE')) die("skip performance sensitive test");
 --FILE--
 <?php
 
-$time = microtime(TRUE);
+$time = microtime(true);
 
 /* This might vary on Linux/Windows, so the worst case and also count in slow machines. */
 $t_max = 1.0;
@@ -24,18 +24,19 @@ $datas = array_fill(0, 220000, [
     '保留地址',
 ]);
 
-$time = microtime(TRUE);
+$time = microtime(true);
 $texts = '';
-foreach ($datas AS $data)
-{
+foreach ($datas as $data) {
     $texts .= implode("\t", $data) . "\r\n";
 }
 
-$t = microtime(TRUE) - $time;
+$t = microtime(true) - $time;
 var_dump($t < $t_max);
 
 ?>
 +++DONE+++
+
+?>
 --EXPECT--
 bool(true)
 +++DONE+++

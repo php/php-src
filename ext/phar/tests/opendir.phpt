@@ -7,14 +7,15 @@ phar.require_hash=1
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $a = new Phar($fname);
 $a['index.php'] = '<?php
 $a = opendir("dir");
 if ($a) {
-	while (false !== ($e = readdir($a))) {
-		echo $e;
-	}
+    while (false !== ($e = readdir($a))) {
+        echo $e;
+    }
 }
 ?>';
 $a['dir/file1.txt'] = 'hi';
@@ -29,6 +30,7 @@ include $fname;
 echo "\n";
 opendir('phar://');
 opendir('phar://hi.phar');
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

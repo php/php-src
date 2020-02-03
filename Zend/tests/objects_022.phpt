@@ -3,29 +3,41 @@ Testing 'self', 'parent' as type-hint
 --FILE--
 <?php
 
-interface iTest { }
+interface iTest
+{
 
-class baz implements iTest {}
+}
 
-class bar { }
+class baz implements iTest
+{
+}
 
-class foo extends bar {
-    public function testFoo(self $obj) {
+class bar
+{
+
+}
+
+class foo extends bar
+{
+    public function testFoo(self $obj)
+    {
         var_dump($obj);
     }
-    public function testBar(parent $obj) {
+    public function testBar(parent $obj)
+    {
         var_dump($obj);
     }
-    public function testBaz(iTest $obj) {
+    public function testBaz(iTest $obj)
+    {
         var_dump($obj);
     }
 }
 
-$foo = new foo;
-$foo->testFoo(new foo);
-$foo->testBar(new bar);
-$foo->testBaz(new baz);
-$foo->testFoo(new stdClass); // Recoverable fatal error
+$foo = new foo();
+$foo->testFoo(new foo());
+$foo->testBar(new bar());
+$foo->testBaz(new baz());
+$foo->testFoo(new stdClass()); // Recoverable fatal error
 
 ?>
 --EXPECTF--

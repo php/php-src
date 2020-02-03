@@ -2,13 +2,17 @@
 Return type covariance in interface implementation
 --FILE--
 <?php
-interface foo {
-    public function bar() : foo;
+
+interface foo
+{
+    public function bar(): foo;
 }
 
 
-class qux implements foo {
-    public function bar() : qux {
+class qux implements foo
+{
+    public function bar(): qux
+    {
         return $this;
     }
 }

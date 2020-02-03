@@ -2,7 +2,8 @@
 WeakReference
 --FILE--
 <?php
-$std = new stdClass;
+
+$std = new stdClass();
 
 debug_zval_dump($std);
 
@@ -20,6 +21,7 @@ unset($std);
 
 debug_zval_dump($wr->get());
 debug_zval_dump($wr2->get());
+
 ?>
 --EXPECT--
 object(stdClass)#1 (0) refcount(2){

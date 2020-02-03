@@ -22,7 +22,9 @@ echo "\n";
 $md5 = md5_file($fname);
 unset($phar['f.php']);
 $md52 = md5_file($fname);
-if ($md5 == $md52) echo 'File on disk has not changed';
+if ($md5 == $md52) {
+    echo 'File on disk has not changed';
+}
 var_dump(isset($phar['f.php']));
 
 ?>

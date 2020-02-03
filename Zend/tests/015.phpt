@@ -10,6 +10,7 @@ var_dump(trigger_error("error", E_USER_WARNING));
 var_dump(trigger_error("error", E_USER_DEPRECATED));
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Notice: error in %s on line %d

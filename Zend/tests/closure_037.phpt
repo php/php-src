@@ -2,41 +2,50 @@
 Closure 037: self:: and static:: within closures
 --FILE--
 <?php
-class A {
-	private $x = 0;
 
-	function getClosure () {
-			return function () {
-				$this->x++;
-				self::printX();
-				self::print42();
-				static::print42();
-			};
-	}
+class A
+{
+    private $x = 0;
 
-	function printX () {
-		echo $this->x."\n";
-	}
+    function getClosure()
+    {
+            return function () {
+                $this->x++;
+                self::printX();
+                self::print42();
+                static::print42();
+            };
+    }
 
-	function print42() {
-		echo "42\n";
-	}
+    function printX()
+    {
+        echo $this->x . "\n";
+    }
+
+    function print42()
+    {
+        echo "42\n";
+    }
 }
 
-class B extends A {
-	function print42() {
-		echo "forty two\n";
-	}
+class B extends A
+{
+    function print42()
+    {
+        echo "forty two\n";
+    }
 }
 
-$a = new A;
+$a = new A();
 $closure = $a->getClosure();
 $closure();
-$b = new B;
+$b = new B();
 $closure = $b->getClosure();
 $closure();
 ?>
 Done.
+
+?>
 --EXPECT--
 1
 42

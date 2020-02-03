@@ -2,6 +2,7 @@
 Test gmstrftime() function : usage variation - Passing month related format strings to format argument.
 --FILE--
 <?php
+
 /* Prototype  : string gmstrftime(string format [, int timestamp])
  * Description: Format a GMT/UCT time/date according to locale settings
  * Source code: ext/date/php_date.c
@@ -17,15 +18,15 @@ $timestamp = gmmktime(8, 8, 8, 8, 8, 2008);
 $inputs = array(
       'Abbreviated month name' => "%b",
       'Full month name' => "%B",
-	  'Month as decimal' => "%m",
+      'Month as decimal' => "%m",
 );
 
 // loop through each element of the array for timestamp
 
-foreach($inputs as $key =>$value) {
+foreach ($inputs as $key => $value) {
       echo "\n--$key--\n";
-      var_dump( gmstrftime($value) );
-      var_dump( gmstrftime($value, $timestamp) );
+      var_dump(gmstrftime($value));
+      var_dump(gmstrftime($value, $timestamp));
 };
 
 ?>

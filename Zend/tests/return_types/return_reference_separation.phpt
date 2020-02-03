@@ -2,16 +2,20 @@
 Return value separation
 --FILE--
 <?php
-function test1(&$abc) : string {
-	return $abc;
+
+function test1(&$abc): string
+{
+    return $abc;
 }
 
-function &test2(int $abc) : string {
-	return $abc;
+function &test2(int $abc): string
+{
+    return $abc;
 }
 
-function &test3(int &$abc) : string {
-	return $abc;
+function &test3(int &$abc): string
+{
+    return $abc;
 }
 
 $a = 123;

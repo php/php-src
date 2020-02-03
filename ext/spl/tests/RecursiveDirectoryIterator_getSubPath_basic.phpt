@@ -5,6 +5,7 @@ Pawel Krynicki <pawel [dot] krynicki [at] xsolve [dot] pl>
 #testfest AmsterdamPHP 2012-06-23
 --FILE--
 <?php
+
 $depth0 = "depth01";
 $depth1 = 'depth1';
 $depth2 = 'depth2';
@@ -15,14 +16,15 @@ $iterator = new RecursiveDirectoryIterator(__DIR__ . DIRECTORY_SEPARATOR . $dept
 $it = new RecursiveIteratorIterator($iterator);
 
 $list = [];
-while($it->valid()) {
-  $list[] = $it->getSubPath();
-  $it->next();
+while ($it->valid()) {
+    $list[] = $it->getSubPath();
+    $it->next();
 }
 asort($list);
 foreach ($list as $item) {
-	echo $item . "\n";
+    echo $item . "\n";
 }
+
 ?>
 --CLEAN--
 <?php

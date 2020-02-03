@@ -13,7 +13,6 @@ if (!extension_loaded('posix')) {
 --FILE--
 <?php
 
-
 echo "*** Test substituting argument 1 with array values ***\n";
 
 
@@ -29,9 +28,10 @@ $variation_array = array(
   );
 
 
-foreach ( $variation_array as $var ) {
-  var_dump(posix_ttyname( $var  ) );
+foreach ($variation_array as $var) {
+    var_dump(posix_ttyname($var));
 }
+
 ?>
 --EXPECT--
 *** Test substituting argument 1 with array values ***

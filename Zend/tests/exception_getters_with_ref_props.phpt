@@ -3,8 +3,10 @@ Calling exception getters when properties hold references
 --FILE--
 <?php
 
-class MyException extends Exception {
-    public function __construct(&$refMsg, &$refCode, &$refFile, &$refLine) {
+class MyException extends Exception
+{
+    public function __construct(&$refMsg, &$refCode, &$refFile, &$refLine)
+    {
         $this->message =& $refMsg;
         $this->code =& $refCode;
         $this->file =& $refFile;

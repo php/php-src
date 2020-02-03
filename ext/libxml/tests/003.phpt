@@ -4,6 +4,7 @@ libxml_use_internal_errors() memory leaks
 <?php if (!extension_loaded('simplexml')) die('skip simplexml extension not available'); ?>
 --FILE--
 <?php
+
 var_dump(libxml_use_internal_errors(true));
 
 $xmlstr = <<< XML
@@ -21,6 +22,7 @@ simplexml_load_string($xmlstr);
 var_dump(libxml_use_internal_errors(false));
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 bool(false)

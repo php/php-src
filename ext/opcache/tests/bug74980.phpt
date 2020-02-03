@@ -11,20 +11,20 @@ opcache.enable_cli=1
 class A
 {
 
-	static function foo()
-	{
-		while ($undef) {
-			$arr[][] = NULL;
-		}
+    static function foo()
+    {
+        while ($undef) {
+            $arr[][] = null;
+        }
 
-		foreach ($arr as $a) {
-			bar($a + []);
-		}
-	}
-
+        foreach ($arr as $a) {
+            bar($a + []);
+        }
+    }
 }
 
 echo "okey";
+
 ?>
 --EXPECT--
 okey

@@ -3,29 +3,31 @@ Indirect method call by array - Calling __call() and __callStatic()
 --FILE--
 <?php
 
-class foo {
-	public function __call($a, $b) {
-		printf("From %s:\n", __METHOD__);
-		var_dump($a);
-		var_dump($this);
-	}
-	static public function __callStatic($a, $b) {
-		printf("From %s:\n", __METHOD__);
-		var_dump($a);
-		var_dump($this);
-	}
+class foo
+{
+    public function __call($a, $b)
+    {
+        printf("From %s:\n", __METHOD__);
+        var_dump($a);
+        var_dump($this);
+    }
+    public static function __callStatic($a, $b)
+    {
+        printf("From %s:\n", __METHOD__);
+        var_dump($a);
+        var_dump($this);
+    }
 }
 
 $arr = array('foo', 'abc');
 try {
-	$arr();
+    $arr();
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
-$foo = new foo;
+$foo = new foo();
 $arr = array($foo, 'abc');
 $arr();
-
 
 ?>
 --EXPECTF--

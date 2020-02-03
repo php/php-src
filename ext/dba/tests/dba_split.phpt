@@ -7,6 +7,7 @@ DBA Split Test
 ?>
 --FILE--
 <?php
+
 var_dump(dba_key_split(1));
 var_dump(dba_key_split(null));
 var_dump(dba_key_split(""));

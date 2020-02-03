@@ -6,6 +6,7 @@ Phar: test edge cases of fopen() function interception #2
 phar.readonly=0
 --FILE--
 <?php
+
 Phar::interceptFileFuncs();
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
@@ -32,6 +33,7 @@ fopen("../oops", "r");
 ?>
 ');
 include $pname . '/foo/hi';
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

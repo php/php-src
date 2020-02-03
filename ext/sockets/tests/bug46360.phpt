@@ -7,7 +7,9 @@ Florian Anderiasch
 fa@php.net
 --FILE--
 <?php
+
     var_dump(TCP_NODELAY);
+
 ?>
 --EXPECTF--
 int(%d)

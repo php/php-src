@@ -70,7 +70,7 @@
 
 */
 
-error_reporting(E_ALL&~E_NOTICE);
+error_reporting(E_ALL & ~E_NOTICE);
 
 $data = file_get_contents(__FILE__);
 $time = array();
@@ -81,7 +81,7 @@ for ($j = 0; $j < 10; $j++) {
         for ($i = 0; $i < 1000; $i++) {
             hash($algo, $data);
         }
-        $time[$algo] += microtime(true)-$start;
+        $time[$algo] += microtime(true) - $start;
     }
 }
 

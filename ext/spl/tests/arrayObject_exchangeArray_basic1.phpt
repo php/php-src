@@ -2,6 +2,7 @@
 SPL: ArrayObject::exchangeArray() and copy-on-write references
 --FILE--
 <?php
+
 $ao = new ArrayObject();
 $swapIn = array();
 $cowRef = $swapIn; // create a copy-on-write ref to $swapIn
@@ -19,6 +20,7 @@ var_dump($cowRef);
 
 echo "\n--> ao:  ";
 var_dump($ao);
+
 ?>
 --EXPECTF--
 --> swapIn:  array(1) {

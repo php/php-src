@@ -4,6 +4,7 @@ Dynamic static call to instance method should throw.
 Aaron Piotrowski <aaron@icicle.io>
 --FILE--
 <?php
+
 class TestClass
 {
     private $test;
@@ -17,6 +18,7 @@ class TestClass
 
 $callback = 'TestClass::method';
 echo $callback();
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Error: Non-static method TestClass::method() cannot be called statically in %s:%d

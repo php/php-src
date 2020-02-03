@@ -3,11 +3,12 @@ Bug #68262: Broken reference across cloned objects
 --FILE--
 <?php
 
-class C {
+class C
+{
     public $p;
 }
 
-$first = new C;
+$first = new C();
 $first->p = 'init';
 
 $clone = clone $first;

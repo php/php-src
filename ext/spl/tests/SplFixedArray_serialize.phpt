@@ -5,7 +5,7 @@ SplFixedArray serialisation
 
 $array = new SplFixedArray(5);
 
-$obj = new stdClass;
+$obj = new stdClass();
 $obj->prop = 'value';
 
 $array[0] = 'foo';

@@ -7,12 +7,13 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.1.phar.php';
 $pname = 'phar://hio';
 $file = '<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
 
 $files = array();
-$files['a.php']   = '<?php echo "This is a\n"; include "'.$pname.'/b.php"; ?>';
+$files['a.php']   = '<?php echo "This is a\n"; include "' . $pname . '/b.php"; ?>';
 $files['dir/'] = '';
 $hasdir = 1;
 include 'files/phar_test.inc';
@@ -29,6 +30,7 @@ $a['dir']->chmod(000);
 var_dump($a['dir']->isReadable());
 $a['dir']->chmod(0666);
 var_dump($a['dir']->isReadable());
+
 ?>
 --CLEAN--
 <?php

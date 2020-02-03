@@ -7,6 +7,7 @@ Patrick Allaert <patrickallaert@php.net>
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 require "connect.inc";
 
 // no hostname, no port
@@ -28,6 +29,7 @@ var_dump($link);
 // bad hostname (connect should work, not bind)
 $link = ldap_connect("nonexistent" . $host);
 var_dump($link);
+
 ?>
 --EXPECTF--
 resource(%d) of type (ldap link)

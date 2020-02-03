@@ -3,7 +3,8 @@ Typed return without value generates compile-time error
 --FILE--
 <?php
 
-function test() : int {
+function test(): int
+{
     return;
 }
 

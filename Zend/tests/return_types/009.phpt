@@ -2,16 +2,24 @@
 Return type covariance error
 --FILE--
 <?php
-interface foo {
-    public function bar() : foo;
+
+interface foo
+{
+    public function bar(): foo;
 }
 
-interface biz {}
+interface biz
+{
+}
 
-class qux implements foo {
-    public function bar() : biz {
+class qux implements foo
+{
+    public function bar(): biz
+    {
         return $this;
     }
 }
+
+?>
 --EXPECTF--
 Fatal error: Declaration of qux::bar(): biz must be compatible with foo::bar(): foo in %s on line %d

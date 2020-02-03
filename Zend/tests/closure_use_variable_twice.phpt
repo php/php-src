@@ -4,7 +4,7 @@ Closure cannot use one variable twice
 <?php
 
 $a = 1;
-$fn = function() use ($a, &$a) {
+$fn = function () use ($a, &$a) {
     $a = 2;
 };
 $fn();

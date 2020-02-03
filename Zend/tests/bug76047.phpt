@@ -3,22 +3,26 @@ Bug #76047: Use-after-free when accessing already destructed backtrace arguments
 --FILE--
 <?php
 
-class Vuln {
+class Vuln
+{
     public $a;
-    public function __destruct() {
+    public function __destruct()
+    {
         unset($this->a);
-        $backtrace = (new Exception)->getTrace();
+        $backtrace = (new Exception())->getTrace();
         var_dump($backtrace);
     }
 }
 
-function test($arg) {
+function test($arg)
+{
     $arg = str_shuffle(str_repeat('A', 79));
     $vuln = new Vuln();
     $vuln->a = $arg;
 }
 
-function test2($arg) {
+function test2($arg)
+{
     $$arg = 1; // Trigger symbol table
     $arg = str_shuffle(str_repeat('A', 79));
     $vuln = new Vuln();

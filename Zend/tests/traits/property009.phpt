@@ -3,40 +3,46 @@ Handling of public fields with traits needs to have same semantics as with norma
 --FILE--
 <?php
 
-class BaseWithPropA {
-  public $hello = 0;
+class BaseWithPropA
+{
+    public $hello = 0;
 }
 
 // This is how publics are handled in normal inheritance
-class SubclassClassicInheritance extends BaseWithPropA {
-  public $hello = 0;
+class SubclassClassicInheritance extends BaseWithPropA
+{
+    public $hello = 0;
 }
 
 // And here, we need to make sure, that the traits behave the same
 
-trait AHelloProperty {
-  public $hello = 0;
+trait AHelloProperty
+{
+    public $hello = 0;
 }
 
-class BaseWithTPropB {
+class BaseWithTPropB
+{
     use AHelloProperty;
 }
 
-class SubclassA extends BaseWithPropA {
+class SubclassA extends BaseWithPropA
+{
     use AHelloProperty;
 }
 
-class SubclassB extends BaseWithTPropB {
+class SubclassB extends BaseWithTPropB
+{
     use AHelloProperty;
 }
 
-$classic = new SubclassClassicInheritance;
+$classic = new SubclassClassicInheritance();
 var_dump($classic);
 
-$a = new SubclassA;
+$a = new SubclassA();
 var_dump($a);
 
-$b = new SubclassB;
+$b = new SubclassB();
 var_dump($b);
 
 ?>

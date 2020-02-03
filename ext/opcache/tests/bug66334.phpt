@@ -10,10 +10,13 @@ enable_dl=0
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 if (extension_loaded("unknown_extension")) {
-	var_dump(1);
+    var_dump(1);
 } else {
-	var_dump(2);
+    var_dump(2);
 }
+
+?>
 --EXPECT--
 int(2)

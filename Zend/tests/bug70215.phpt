@@ -3,15 +3,20 @@ Bug #70215 (Segfault when invoke is static)
 --FILE--
 <?php
 
-class A {
-	public static function __invoke() {
-		echo __CLASS__;
-	}
+class A
+{
+    public static function __invoke()
+    {
+        echo __CLASS__;
+    }
 }
 
-class B extends A { }
+class B extends A
+{
 
-$b = new B;
+}
+
+$b = new B();
 
 $b();
 

@@ -3,8 +3,10 @@ A static method can be a generator
 --FILE--
 <?php
 
-class Test {
-    public static function gen() {
+class Test
+{
+    public static function gen()
+    {
         var_dump(get_class());
         var_dump(get_called_class());
         yield 1;
@@ -13,7 +15,8 @@ class Test {
     }
 }
 
-class ExtendedTest extends Test {
+class ExtendedTest extends Test
+{
 }
 
 foreach (ExtendedTest::gen() as $i) {

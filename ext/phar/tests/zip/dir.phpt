@@ -7,6 +7,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip.php';
 $pname = 'phar://' . $fname;
 $fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.1.phar.php';
@@ -28,6 +29,7 @@ clearstatcache();
 var_dump(file_exists($pname . '/another/dir/'));
 var_dump(file_exists($pname2 . '/test/'));
 var_dump(file_exists($pname3 . '/another/dir/'));
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php'); ?>

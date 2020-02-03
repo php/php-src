@@ -6,6 +6,7 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "pt_PT");
 
@@ -28,7 +29,7 @@ $rbbi = new IntlRuleBasedBreakIterator($rules);
 $rbbi->setText('sdfkjsdf88á.... ,;');
 
 do {
-	var_dump($rbbi->current(), $rbbi->getRuleStatusVec());
+    var_dump($rbbi->current(), $rbbi->getRuleStatusVec());
 } while ($rbbi->next() != IntlBreakIterator::DONE);
 
 ?>

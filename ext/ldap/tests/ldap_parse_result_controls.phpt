@@ -11,6 +11,7 @@ skipifunsupportedcontrol(LDAP_CONTROL_PAGEDRESULTS);
 ?>
 --FILE--
 <?php
+
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
@@ -19,14 +20,15 @@ insert_dummy_data($link, $base);
 $dn = "$base";
 $filter = "(cn=user*)";
 var_dump(
-	ldap_control_paged_result($link, 1),
-	$result = ldap_search($link, $dn, $filter, array('cn')),
-	ldap_parse_result($link, $result, $errcode, $dn, $errmsg, $refs, $ctrls),
-	$ctrls[LDAP_CONTROL_PAGEDRESULTS]['oid'],
-	$ctrls[LDAP_CONTROL_PAGEDRESULTS]['value']['size'],
-	bin2hex($ctrls[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie']),
-	ldap_get_entries($link, $result)['count']
+    ldap_control_paged_result($link, 1),
+    $result = ldap_search($link, $dn, $filter, array('cn')),
+    ldap_parse_result($link, $result, $errcode, $dn, $errmsg, $refs, $ctrls),
+    $ctrls[LDAP_CONTROL_PAGEDRESULTS]['oid'],
+    $ctrls[LDAP_CONTROL_PAGEDRESULTS]['value']['size'],
+    bin2hex($ctrls[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie']),
+    ldap_get_entries($link, $result)['count']
 );
+
 ?>
 --CLEAN--
 <?php

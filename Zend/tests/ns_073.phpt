@@ -5,12 +5,12 @@ Testing type-hinted lambda parameter inside namespace
 
 namespace foo;
 
-$x = function (\stdclass $x = NULL) {
-	var_dump($x);
+$x = function (\stdclass $x = null) {
+    var_dump($x);
 };
 
-$x(NULL);
-$x(new \stdclass);
+$x(null);
+$x(new \stdclass());
 
 ?>
 --EXPECTF--

@@ -3,12 +3,16 @@ Additional optional parameters must have a matching prototype
 --FILE--
 <?php
 
-interface DB {
+interface DB
+{
     public function query($query, string ...$params);
 }
 
-class MySQL implements DB {
-    public function query($query, int $extraParam = null, string ...$params) { }
+class MySQL implements DB
+{
+    public function query($query, int $extraParam = null, string ...$params)
+    {
+    }
 }
 
 ?>

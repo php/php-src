@@ -8,9 +8,10 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 
-$c = new IntlGregorianCalendar(NULL, 'pt_PT');
+$c = new IntlGregorianCalendar(null, 'pt_PT');
 
 try {
     var_dump($c->fieldDifference($c, 2, 3));
@@ -25,6 +26,8 @@ try {
     echo $e->getMessage(), "\n";
 }
 var_dump(intlcal_field_difference(1, 0, 1));
+
+?>
 --EXPECTF--
 IntlCalendar::fieldDifference() expects exactly 2 parameters, 3 given
 

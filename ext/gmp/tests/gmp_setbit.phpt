@@ -45,6 +45,7 @@ try {
 }
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 string(2) "-1"

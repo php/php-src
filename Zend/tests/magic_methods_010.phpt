@@ -3,9 +3,11 @@ Testing __toString() declaration with wrong modifier
 --FILE--
 <?php
 
-class a {
-	static protected function __toString($a, $b) {
-	}
+class a
+{
+    protected static function __toString($a, $b)
+    {
+    }
 }
 
 ?>

@@ -4,14 +4,19 @@ class name as scalar from ::class keyword error using parent in method signature
 <?php
 
 namespace Foo\Bar {
-    class One {}
-    class Two extends One {
-        public function baz($x = parent::class) {
+    class One
+    {
+    }
+    class Two extends One
+    {
+        public function baz($x = parent::class)
+        {
             var_dump($x);
         }
     }
-    (new Two)->baz();
+    (new Two())->baz();
 }
+
 ?>
 --EXPECT--
 string(11) "Foo\Bar\One"

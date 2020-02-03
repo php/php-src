@@ -5,85 +5,313 @@ Test semi-reserved words as class methods
 
 class Obj
 {
-    function empty(){ echo __METHOD__, PHP_EOL; }
-    function callable(){ echo __METHOD__, PHP_EOL; }
-    function class(){ echo __METHOD__, PHP_EOL; }
-    function trait(){ echo __METHOD__, PHP_EOL; }
-    function extends(){ echo __METHOD__, PHP_EOL; }
-    function implements(){ echo __METHOD__, PHP_EOL; }
-    function static(){ echo __METHOD__, PHP_EOL; }
-    function abstract(){ echo __METHOD__, PHP_EOL; }
-    function final(){ echo __METHOD__, PHP_EOL; }
-    function public(){ echo __METHOD__, PHP_EOL; }
-    function protected(){ echo __METHOD__, PHP_EOL; }
-    function private(){ echo __METHOD__, PHP_EOL; }
-    function const(){ echo __METHOD__, PHP_EOL; }
-    function enddeclare(){ echo __METHOD__, PHP_EOL; }
-    function endfor(){ echo __METHOD__, PHP_EOL; }
-    function endforeach(){ echo __METHOD__, PHP_EOL; }
-    function endif(){ echo __METHOD__, PHP_EOL; }
-    function endwhile(){ echo __METHOD__, PHP_EOL; }
-    function and(){ echo __METHOD__, PHP_EOL; }
-    function global(){ echo __METHOD__, PHP_EOL; }
-    function goto(){ echo __METHOD__, PHP_EOL; }
-    function instanceof(){ echo __METHOD__, PHP_EOL; }
-    function insteadof(){ echo __METHOD__, PHP_EOL; }
-    function interface(){ echo __METHOD__, PHP_EOL; }
-    function namespace(){ echo __METHOD__, PHP_EOL; }
-    function new(){ echo __METHOD__, PHP_EOL; }
-    function or(){ echo __METHOD__, PHP_EOL; }
-    function xor(){ echo __METHOD__, PHP_EOL; }
-    function try(){ echo __METHOD__, PHP_EOL; }
-    function use(){ echo __METHOD__, PHP_EOL; }
-    function var(){ echo __METHOD__, PHP_EOL; }
-    function exit(){ echo __METHOD__, PHP_EOL; }
-    function list(){ echo __METHOD__, PHP_EOL; }
-    function clone(){ echo __METHOD__, PHP_EOL; }
-    function include(){ echo __METHOD__, PHP_EOL; }
-    function include_once(){ echo __METHOD__, PHP_EOL; }
-    function throw(){ echo __METHOD__, PHP_EOL; }
-    function array(){ echo __METHOD__, PHP_EOL; }
-    function print(){ echo __METHOD__, PHP_EOL; }
-    function echo(){ echo __METHOD__, PHP_EOL; }
-    function require(){ echo __METHOD__, PHP_EOL; }
-    function require_once(){ echo __METHOD__, PHP_EOL; }
-    function return(){ echo __METHOD__, PHP_EOL; }
-    function else(){ echo __METHOD__, PHP_EOL; }
-    function elseif(){ echo __METHOD__, PHP_EOL; }
-    function default(){ echo __METHOD__, PHP_EOL; }
-    function break(){ echo __METHOD__, PHP_EOL; }
-    function continue(){ echo __METHOD__, PHP_EOL; }
-    function switch(){ echo __METHOD__, PHP_EOL; }
-    function yield(){ echo __METHOD__, PHP_EOL; }
-    function function(){ echo __METHOD__, PHP_EOL; }
-    function fn(){ echo __METHOD__, PHP_EOL; }
-    function if(){ echo __METHOD__, PHP_EOL; }
-    function endswitch(){ echo __METHOD__, PHP_EOL; }
-    function finally(){ echo __METHOD__, PHP_EOL; }
-    function for(){ echo __METHOD__, PHP_EOL; }
-    function foreach(){ echo __METHOD__, PHP_EOL; }
-    function declare(){ echo __METHOD__, PHP_EOL; }
-    function case(){ echo __METHOD__, PHP_EOL; }
-    function do(){ echo __METHOD__, PHP_EOL; }
-    function while(){ echo __METHOD__, PHP_EOL; }
-    function as(){ echo __METHOD__, PHP_EOL; }
-    function catch(){ echo __METHOD__, PHP_EOL; }
-    function die(){ echo __METHOD__, PHP_EOL; }
-    function self(){ echo __METHOD__, PHP_EOL; }
-    function parent(){ echo __METHOD__, PHP_EOL; }
-    function isset(){ echo __METHOD__, PHP_EOL; }
-    function unset(){ echo __METHOD__, PHP_EOL; }
-    function __CLASS__(){ echo __METHOD__, PHP_EOL; }
-    function __TRAIT__(){ echo __METHOD__, PHP_EOL; }
-    function __FUNCTION__(){ echo __METHOD__, PHP_EOL; }
-    function __METHOD__(){ echo __METHOD__, PHP_EOL; }
-    function __LINE__(){ echo __METHOD__, PHP_EOL; }
-    function __FILE__(){ echo __METHOD__, PHP_EOL; }
-    function __DIR__(){ echo __METHOD__, PHP_EOL; }
-    function __NAMESPACE__(){ echo __METHOD__, PHP_EOL; }
+    function empty()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function callable()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function class()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function trait()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function extends()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function implements()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function static()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function abstract()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function final()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function public()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function protected()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function private()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function const()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function enddeclare()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function endfor()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function endforeach()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function endif()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function endwhile()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function and()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function global()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function goto()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function instanceof()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function insteadof()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function interface()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function namespace()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function new()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function or()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function xor()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function try()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function use()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function var()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function exit()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function list()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function clone()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function include()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function include_once()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function throw()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function array()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function print()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function echo()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function require()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function require_once()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function return()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function else()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function elseif()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function default()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function break()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function continue()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function switch()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function yield()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function function()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function fn()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function if()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function endswitch()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function finally()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function for()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function foreach()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function declare()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function case()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function do()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function while()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function as()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function catch()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function die()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function self()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function parent()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function isset()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function unset()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function __CLASS__()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function __TRAIT__()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function __FUNCTION__()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function __METHOD__()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function __LINE__()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function __FILE__()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function __DIR__()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
+    function __NAMESPACE__()
+    {
+        echo __METHOD__, PHP_EOL;
+    }
 }
 
-$obj = new Obj;
+$obj = new Obj();
 
 $obj->empty();
 $obj->callable();
@@ -163,6 +391,8 @@ $obj->__DIR__();
 $obj->__NAMESPACE__();
 
 echo "\nDone\n";
+
+?>
 --EXPECT--
 Obj::empty
 Obj::callable

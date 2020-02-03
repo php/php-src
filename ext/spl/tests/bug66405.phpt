@@ -4,6 +4,7 @@ SPL: RecursiveDirectoryIterator with CURRENT_AS_PATHNAME flag
 Paul Garvin pgarvin76@gmail.com
 --FILE--
 <?php
+
 $td = __DIR__ . '/bug66405';
 mkdir($td);
 touch($td . '/file1.txt');
@@ -42,6 +43,7 @@ foreach ($rii as $file) {
 $results = explode("\n", ob_get_clean());
 sort($results);
 echo implode("\n", $results);
+
 ?>
 --CLEAN--
 <?php

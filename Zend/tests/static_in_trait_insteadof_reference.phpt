@@ -3,11 +3,15 @@ Cannot use static in trait insteadof method reference
 --FILE--
 <?php
 
-trait SomeTrait {
-    public function foobar() {}
+trait SomeTrait
+{
+    public function foobar()
+    {
+    }
 }
 
-class Test {
+class Test
+{
     use SomeTrait {
         static::foobar insteadof SomeTrait;
     }

@@ -3,9 +3,12 @@ Cannot use $this as lexical variable
 --FILE--
 <?php
 
-class Foo {
-    public function f() {
-        return function() use ($this) {};
+class Foo
+{
+    public function f()
+    {
+        return function () use ($this) {
+        };
     }
 }
 

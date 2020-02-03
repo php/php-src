@@ -6,6 +6,7 @@ Phar: tar with huge filenames, buffer overflow
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';
 $fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.tar';
 $pname = 'phar://' . $fname;
@@ -20,7 +21,7 @@ $tar->close();
 
 $p1 = new PharData($fname);
 foreach ($p1 as $file) {
-	echo $file->getFileName(), "\n";
+    echo $file->getFileName(), "\n";
 }
 echo $p1['a/' . str_repeat('a', 100)]->getContent() . "\n";
 echo $p1[str_repeat('a', 155) . '/' . str_repeat('a', 100)]->getContent() . "\n";

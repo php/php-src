@@ -1,9 +1,12 @@
 --TEST--
 Compound assignment operator on static property holding ref
 --FILE--
-<?php declare(strict_types=1);
+<?php
 
-class Test {
+declare(strict_types=1);
+
+class Test
+{
     public static int $intProp = 123;
     public static $prop;
 }
@@ -15,6 +18,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 var_dump(Test::$prop, Test::$intProp);
+
 ?>
 --EXPECT--
 Cannot assign string to reference held by property Test::$intProp of type int

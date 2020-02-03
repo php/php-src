@@ -6,6 +6,7 @@ Erwin Poeze <erwin.poeze@gmail.com>
 #PFZ June PHP TestFest 2012
 --FILE--
 <?php
+
 //line 2
 //line 3
 //line 4

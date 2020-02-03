@@ -3,7 +3,8 @@ Ignoring return inside loop using finally
 --FILE--
 <?php
 
-function foo() {
+function foo()
+{
     $array = [1, 2, $n = 3];
     foreach ($array as $value) {
         var_dump($value);
@@ -13,13 +14,15 @@ function foo() {
                     return;
                 }
             } finally {
-                throw new Exception;
+                throw new Exception();
             }
-        } catch (Exception $e) { }
+        } catch (Exception $e) {
+        }
     }
 }
 
 foo();
+
 ?>
 --EXPECT--
 int(1)

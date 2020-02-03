@@ -2,10 +2,12 @@
 Bug #49778 (DateInterval::format("%a") is always zero when an interval is created from an ISO string)
 --FILE--
 <?php
-$i=new DateInterval('P7D');
+
+$i = new DateInterval('P7D');
 var_dump($i);
 echo $i->format("%d"), "\n";
 echo $i->format("%a"), "\n";
+
 ?>
 --EXPECTF--
 object(DateInterval)#%d (16) {

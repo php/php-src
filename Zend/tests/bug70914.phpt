@@ -12,6 +12,7 @@ if (!extension_loaded("pdo_sqlite")) {
 $db = new PDO('sqlite::memory:');
 $st = $db->query('SELECT 1');
 $re = $st->fetchObject('%Z');
+
 ?>
 --EXPECTREGEX--
 Fatal error: Class '%Z' not found in .+bug70914.php on line \d+

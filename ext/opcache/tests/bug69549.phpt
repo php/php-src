@@ -8,11 +8,13 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 $a = array(true);
-if($a[0] && false) {
-  echo 'test';
+if ($a[0] && false) {
+    echo 'test';
 }
 echo "ok\n";
+
 ?>
 --EXPECT--
 ok

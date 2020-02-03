@@ -5,13 +5,14 @@ Testing creation of alias to global scope
 
 namespace foo;
 
-class bar {
+class bar
+{
 }
 
 class_alias('foo\bar', 'foo');
 
-var_dump(new \foo);
-var_dump(new foo);
+var_dump(new \foo());
+var_dump(new foo());
 
 ?>
 --EXPECTF--

@@ -3,14 +3,14 @@ Bug #74372: autoloading file with syntax error uses next autoloader, may hide pa
 --FILE--
 <?php
 
-spl_autoload_register(function($class) {
+spl_autoload_register(function ($class) {
     eval("ha ha ha");
 });
-spl_autoload_register(function($class) {
+spl_autoload_register(function ($class) {
     echo "Don't call me.\n";
 });
 
-new Foo;
+new Foo();
 
 ?>
 --EXPECTF--

@@ -4,17 +4,28 @@ Scalar type strict mode
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --FILE--
 <?php
+
 declare(strict_types=1);
 
 $functions = [
-    'int' => function (int $i) { return $i; },
-    'float' => function (float $f) { return $f; },
-    'string' => function (string $s) { return $s; },
-    'bool' => function (bool $b) { return $b; }
+    'int' => function (int $i) {
+        return $i;
+    },
+    'float' => function (float $f) {
+        return $f;
+    },
+    'string' => function (string $s) {
+        return $s;
+    },
+    'bool' => function (bool $b) {
+        return $b;
+    }
 ];
 
-class Stringable {
-    public function __toString() {
+class Stringable
+{
+    public function __toString()
+    {
         return "foobar";
     }
 }
@@ -29,12 +40,12 @@ $values = [
     "",
     PHP_INT_MAX,
     NAN,
-    TRUE,
-    FALSE,
-    NULL,
+    true,
+    false,
+    null,
     [],
-    new StdClass,
-    new Stringable,
+    new StdClass(),
+    new Stringable(),
     fopen("data:text/plain,foobar", "r")
 ];
 
@@ -52,6 +63,7 @@ foreach ($functions as $type => $function) {
 }
 
 echo PHP_EOL . "Done";
+
 ?>
 --EXPECTF--
 Testing 'int' type:

@@ -6,6 +6,7 @@ Phar: Phar::isValidPharFilename()
 phar.readonly=1
 --FILE--
 <?php
+
 chdir(__DIR__);
 var_dump(Phar::isValidPharFilename('*'));
 var_dump(Phar::isValidPharFilename('*', true));

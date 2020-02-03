@@ -33,7 +33,7 @@ var_dump($phar->getAlias());
 try {
     $phar['.phar/alias.txt'] = 'pinocchio';
 } catch (Exception $e) {
-    echo $e->getMessage()."\n";
+    echo $e->getMessage() . "\n";
 }
 var_dump($phar->getAlias());
 

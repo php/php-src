@@ -26,18 +26,19 @@ class Bar
     }
 }
 
-$o = new Bar;
+$o = new Bar();
 echo $o;
 
 echo "===NONE===\n";
 
 class NoneTest
 {
-	function __toString() {
-	}
+    function __toString()
+    {
+    }
 }
 
-$o = new NoneTest;
+$o = new NoneTest();
 try {
     echo $o;
 } catch (Error $e) {
@@ -48,16 +49,17 @@ echo "===THROW===\n";
 
 class ErrorTest
 {
-	function __toString() {
-		throw new Exception("This is an error!");
-	}
+    function __toString()
+    {
+        throw new Exception("This is an error!");
+    }
 }
 
-$o = new ErrorTest;
+$o = new ErrorTest();
 try {
-	echo $o;
+    echo $o;
 } catch (Exception $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 
 ?>

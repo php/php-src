@@ -25,7 +25,7 @@ $files['b'] = 'b';
 $files['c'] = 'c';
 
 foreach ($files as $n => $file) {
-	$phar[$n] = $file;
+    $phar[$n] = $file;
 }
 $phar->stopBuffering();
 
@@ -45,6 +45,7 @@ copy($fname2, $fname3);
 $p2->setAlias('unused2');
 $p3 = new Phar($fname3);
 echo $p3->getAlias(), "\n";
+
 ?>
 --CLEAN--
 <?php

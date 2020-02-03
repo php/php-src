@@ -13,6 +13,8 @@ var_dump(gmp_add(PHP_INT_MAX, PHP_INT_MAX));
 var_dump(gmp_mul(PHP_INT_MAX, PHP_INT_MIN));
 ?>
 DONE
+
+?>
 --EXPECTF--
 object(GMP)#%d (%d) {
   ["num"]=>

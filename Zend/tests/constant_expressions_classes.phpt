@@ -9,8 +9,8 @@ opcache.optimization_level=-1
 
 # This test validates that autoloading works for common const expression (AST) use cases
 $classlist = [
-  'A'=> 'class A { const HW = "this is A"; }',
-  'B'=> 'class B extends A { const HW = parent::HW." extended by B"; }',
+  'A' => 'class A { const HW = "this is A"; }',
+  'B' => 'class B extends A { const HW = parent::HW." extended by B"; }',
   'space1\C' => 'namespace space1; class C { const HW = "this is space1\C"; }',
   'D' => 'class D  { const HW = \space1\C::HW." extended by D"; }',
   'trE' => 'trait trE { public static function getHW() { return parent::HW; } }',
@@ -20,11 +20,11 @@ $classlist = [
 ];
 
 spl_autoload_register(function ($class) use ($classlist) {
-	if (isset($classlist[$class])) {
-		eval($classlist[$class]);
-	} else {
-		die("Cannot autoload $class\n");
-	}
+    if (isset($classlist[$class])) {
+        eval($classlist[$class]);
+    } else {
+        die("Cannot autoload $class\n");
+    }
 });
 
 printf("B::HW = %s\n", B::HW);

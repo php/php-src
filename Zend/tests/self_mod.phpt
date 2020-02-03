@@ -17,6 +17,7 @@ $s2 %= 33;
 var_dump($s2);
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 int(13)

@@ -12,11 +12,14 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 ?>
 --FILE--
 <?php
+
 include(__DIR__ . "/preload_bug78937.inc");
-class Bar {
+class Bar
+{
 }
 bar();
-var_dump(new Foo);
+var_dump(new Foo());
+
 ?>
 --EXPECTF--
 Warning: Can't preload unlinked class Foo: Unknown parent Bar in %spreload_bug78937.inc on line 6

@@ -2,8 +2,13 @@
 Exception inside a foreach loop with return
 --FILE--
 <?php
-class saboteurTestController {
-    public function isConsistent() { throw new \Exception(); }
+
+class saboteurTestController
+{
+    public function isConsistent()
+    {
+        throw new \Exception();
+    }
 }
 
 $controllers = array(new saboteurTestController(),new saboteurTestController());
@@ -16,6 +21,7 @@ foreach ($controllers as $controller) {
         echo "Exception\n";
     }
 }
+
 ?>
 --EXPECT--
 Exception

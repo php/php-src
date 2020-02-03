@@ -2,27 +2,34 @@
 SPL: FixedArray: Iterators
 --FILE--
 <?php
-class A extends SplFixedArray {
-	public $prop1 = "dummy";
-	public $prop2 = "dummy";
 
-    public function current() {
+class A extends SplFixedArray
+{
+    public $prop1 = "dummy";
+    public $prop2 = "dummy";
+
+    public function current()
+    {
         echo "A::current\n";
         return parent::current();
     }
-    public function key() {
+    public function key()
+    {
         echo "A::key\n";
         return parent::key();
     }
-    public function rewind() {
+    public function rewind()
+    {
         echo "A::rewind\n";
         return parent::rewind();
     }
-    public function valid() {
+    public function valid()
+    {
         echo "A::valid\n";
         return parent::valid();
     }
-    public function next() {
+    public function next()
+    {
         echo "A::next\n";
         return parent::next();
     }
@@ -48,6 +55,7 @@ $a[4] = "f";
 foreach ($a as $k => $v) {
     echo "$k => $v\n";
 }
+
 ?>
 --EXPECT--
 ==Direct instance==

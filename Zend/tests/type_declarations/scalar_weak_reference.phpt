@@ -5,10 +5,18 @@ Weak scalar types, with references
 
 // implicitly weak mode code
 
-function to_int(int &$x) {}
-function to_float(float &$x) {}
-function to_string(string &$x) {}
-function to_bool(bool &$x) {}
+function to_int(int &$x)
+{
+}
+function to_float(float &$x)
+{
+}
+function to_string(string &$x)
+{
+}
+function to_bool(bool &$x)
+{
+}
 
 $x = 1.0;
 var_dump($x);
@@ -20,6 +28,7 @@ to_string($x);
 var_dump($x);
 to_bool($x);
 var_dump($x);
+
 ?>
 --EXPECT--
 float(1)

@@ -3,8 +3,10 @@ Generator shouldn't crash if last yielded value is a closure
 --FILE--
 <?php
 
-function gen() {
-    yield function() {};
+function gen()
+{
+    yield function () {
+    };
 }
 
 $gen = gen();

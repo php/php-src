@@ -2,6 +2,7 @@
 077: Unknown compile-time constants in namespace
 --FILE--
 <?php
+
 namespace foo;
 
 function foo($a = array(0 => \unknown))
@@ -9,6 +10,8 @@ function foo($a = array(0 => \unknown))
 }
 
 foo();
+
+?>
 --EXPECTF--
 Fatal error: Uncaught Error: Undefined constant 'unknown' in %sns_077_%d.php:%d
 Stack trace:

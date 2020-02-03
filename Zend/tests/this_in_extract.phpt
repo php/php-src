@@ -2,15 +2,18 @@
 $this re-assign in extract()
 --FILE--
 <?php
-function foo() {
+
+function foo()
+{
     try {
-        extract(["this"=>42, "a"=>24]);
+        extract(["this" => 42, "a" => 24]);
     } catch (Error $e) {
         echo $e->getMessage(), "\n";
     }
     var_dump($a);
 }
 foo();
+
 ?>
 --EXPECTF--
 Cannot re-assign $this

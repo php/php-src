@@ -5,6 +5,7 @@ zend.assertions=0
 assert.exception=0
 --FILE--
 <?php
+
 ini_set("zend.assertions", 0);
 var_dump(assert(false));
 var_dump(assert(true));
@@ -12,6 +13,7 @@ ini_set("zend.assertions", 1);
 var_dump(assert(false));
 var_dump(assert(true));
 ini_set("zend.assertions", -1);
+
 ?>
 --EXPECTF--
 bool(true)

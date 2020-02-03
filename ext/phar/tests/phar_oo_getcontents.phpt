@@ -6,6 +6,7 @@ Phar object: getContent()
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 
 $phar = new Phar($fname);
@@ -14,15 +15,16 @@ this works';
 $phar->addEmptyDir('hi');
 echo $phar['a/b']->getContent() . "\n";
 try {
-echo $phar['a']->getContent(), "\n";
+    echo $phar['a']->getContent(), "\n";
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 try {
-echo $phar['hi']->getContent(), "\n";
+    echo $phar['hi']->getContent(), "\n";
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
+
 ?>
 --CLEAN--
 <?php

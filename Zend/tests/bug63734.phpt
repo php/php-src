@@ -4,24 +4,29 @@ Bug #63734 (Garbage collector can free zvals that are still referenced)
 zend.enable_gc = 1
 --FILE--
 <?php
-class C {
+
+class C
+{
     public $ref;
     public $ary;
-    public function __construct() {
+    public function __construct()
+    {
         $this->ref = $this;
         $this->ary[] = 42;
     }
-    public function __destruct() {
+    public function __destruct()
+    {
         global $ary;
         $ary[] = $this->ary[0];
     }
 }
 
-$c = new C;
+$c = new C();
 unset($c);
 gc_collect_cycles();
 
 var_dump($ary);
+
 ?>
 --EXPECT--
 array(1) {

@@ -9,7 +9,7 @@ Bug #48240 (DBA Segmentation fault dba_nextkey)
 <?php
 
 $handler = 'db4';
-require_once(__DIR__ .'/test.inc');
+require_once(__DIR__ . '/test.inc');
 
 $db = dba_open($db_filename, 'c', 'db4');
 

@@ -2,6 +2,7 @@
 Test DateTime::modify() function : basic functionality
 --FILE--
 <?php
+
 /* Prototype  : public DateTime DateTime::modify  ( string $modify  )
  * Description: Alter the timestamp of a DateTime object by incrementing or decrementing in a format accepted by strtotime().
  * Source code: ext/date/php_date.c

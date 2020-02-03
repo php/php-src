@@ -12,12 +12,13 @@ var_dump($g = gmp_sub(10000, 10001));
 var_dump(gmp_strval($g));
 var_dump($g = gmp_sub(10000, -1));
 var_dump(gmp_strval($g));
-var_dump($g = gmp_sub(10000, new stdclass));
+var_dump($g = gmp_sub(10000, new stdclass()));
 var_dump(gmp_strval($g));
-var_dump($g = gmp_sub(new stdclass, 100));
+var_dump($g = gmp_sub(new stdclass(), 100));
 var_dump(gmp_strval($g));
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Warning: gmp_sub(): Unable to convert variable to GMP - string is not an integer in %s on line %d

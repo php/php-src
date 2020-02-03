@@ -2,6 +2,7 @@
 SPL: DoublyLinkedList: iterator modes
 --FILE--
 <?php
+
 $dll = new SplDoublyLinkedList();
 $dll->push(2);
 $dll->push(3);

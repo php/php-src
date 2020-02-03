@@ -2,15 +2,32 @@
 Bug #32993 (implemented Iterator function current() don't throw exception)
 --FILE--
 <?php
-class Test implements Iterator {
+
+class Test implements Iterator
+{
 
     public $arr = array();
 
-    public function rewind()    { return reset($this->arr); }
-    public function current()   { throw new Exception(); }
-    public function key()       { return key($this->arr); }
-    public function next()      { return next($this->arr); }
-    public function valid()     { return (current($this->arr) !== false); }
+    public function rewind()
+    {
+        return reset($this->arr);
+    }
+    public function current()
+    {
+        throw new Exception();
+    }
+    public function key()
+    {
+        return key($this->arr);
+    }
+    public function next()
+    {
+        return next($this->arr);
+    }
+    public function valid()
+    {
+        return (current($this->arr) !== false);
+    }
 }
 
 $t = new Test();
@@ -24,6 +41,7 @@ try {
     ; // handle exception
 }
 echo "ok\n";
+
 ?>
 --EXPECT--
 ok

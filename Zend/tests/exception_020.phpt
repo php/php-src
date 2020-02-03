@@ -3,8 +3,10 @@ Test that the original class name is present in the error out when extending Err
 --FILE--
 <?php
 
-class MyErrorException extends ErrorException{}
-throw new MyErrorException(new stdClass);
+class MyErrorException extends ErrorException
+{
+}
+throw new MyErrorException(new stdClass());
 
 ?>
 --EXPECTF--

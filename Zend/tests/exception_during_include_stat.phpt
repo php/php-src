@@ -3,8 +3,10 @@ Make sure exceptions during include/require stating are properly propagated
 --FILE--
 <?php
 
-class StreamWrapper {
-    public function url_stat($path, $flags) {
+class StreamWrapper
+{
+    public function url_stat($path, $flags)
+    {
         throw new Exception('stat failed');
     }
 }

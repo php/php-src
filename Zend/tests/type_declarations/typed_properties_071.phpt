@@ -2,12 +2,13 @@
 Test assignment to typed reference with weak type conversion
 --FILE--
 <?php
-  
-class Test {
+
+class Test
+{
     public string $x = "x";
 }
 
-$test = new Test;
+$test = new Test();
 var_dump($test);
 $y = "y";
 $test->x = &$y;

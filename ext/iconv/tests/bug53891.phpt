@@ -6,6 +6,7 @@ if (!extension_loaded('iconv')) die('skip iconv extension not available');
 ?>
 --FILE--
 <?php
+
 $preferences = array(
     'scheme' => 'Q',
     'input-charset'  => 'utf-8',
@@ -14,6 +15,7 @@ $preferences = array(
     'line-break-chars' => "\r\n",
 );
 var_dump(iconv_mime_encode('subject', "d obeybiubrsfqllpdtpge…", $preferences));
+
 ?>
 --EXPECT--
 string(54) "subject: =?utf-8?Q?d=20obeybiubrsfqllpdtpge=E2=80=A6?="

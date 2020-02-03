@@ -5,6 +5,7 @@ Matt Raines matt@raines.me.uk
 #testfest London 2009-05-09
 --FILE--
 <?php
+
 $sample_array = array(1, 2, array(3, 4));
 
 $iterator = new RecursiveIteratorIterator(new RecursiveArrayIterator($sample_array));
@@ -16,6 +17,7 @@ var_dump($iterator->getSubIterator()->getArrayCopy());
 $iterator->next();
 var_dump(get_class($iterator->getSubIterator()));
 var_dump($iterator->getSubIterator()->getArrayCopy());
+
 ?>
 --EXPECT--
 string(22) "RecursiveArrayIterator"

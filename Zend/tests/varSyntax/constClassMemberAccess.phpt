@@ -3,7 +3,8 @@ Const class member access with deference
 --FILE--
 <?php
 
-class A {
+class A
+{
     const A = ['a' => ['b' => 'c']];
 }
 

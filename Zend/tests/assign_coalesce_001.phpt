@@ -10,7 +10,8 @@ $bar = "ba";
 $bar .= "r";
 
 // Identity function used to track single-evaluation
-function id($arg) {
+function id($arg)
+{
     echo "id($arg)\n";
     return $arg;
 }
@@ -45,19 +46,20 @@ $ary[id($bar)] ??= $foo;
 var_dump($ary);
 
 echo "\nObjects:\n";
-$obj = new stdClass;
+$obj = new stdClass();
 $obj->foo ??= 123;
 $obj->$foo ??= $bar;
 $obj->$bar ??= $foo;
 var_dump($obj);
 
-$obj = new stdClass;
+$obj = new stdClass();
 $obj->{id($foo)} ??= 123;
 $obj->{id($foo)} ??= $bar;
 $obj->{id($bar)} ??= $foo;
 var_dump($obj);
 
-class Test {
+class Test
+{
     public static $foo;
     public static $bar;
 }

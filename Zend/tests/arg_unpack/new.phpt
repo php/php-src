@@ -3,8 +3,10 @@ Unpack arguments for new expression
 --FILE--
 <?php
 
-class Foo {
-    public function __construct(...$args) {
+class Foo
+{
+    public function __construct(...$args)
+    {
         var_dump($args);
     }
 }

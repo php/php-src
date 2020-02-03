@@ -2,13 +2,17 @@
 SPL: SplObjectStorage addAll/removeAll
 --FILE--
 <?php
-class A extends SplObjectStorage { }
 
-$o1 = new StdClass;
-$o2 = new StdClass;
-$o3 = new StdClass;
+class A extends SplObjectStorage
+{
 
-$a = new A;
+}
+
+$o1 = new StdClass();
+$o2 = new StdClass();
+$o3 = new StdClass();
+
+$a = new A();
 $a->attach($o1);
 $a->attach($o2);
 
@@ -25,6 +29,7 @@ var_dump($a->count());
 
 $a->removeAll($b);
 var_dump($a->count());
+
 ?>
 --EXPECT--
 int(3)

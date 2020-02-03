@@ -9,10 +9,11 @@ $iterator->append($events);
 
 $events->next();
 
-while($iterator->valid()) {
-	echo $iterator->current(), "\n";
-	$iterator->next();
+while ($iterator->valid()) {
+    echo $iterator->current(), "\n";
+    $iterator->next();
 }
+
 ?>
 --EXPECT--
 2

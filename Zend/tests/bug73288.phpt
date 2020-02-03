@@ -6,24 +6,30 @@ opcache.enable_cli=1
 --FILE--
 <?php
 
-class NoClone {
-	public function __clone() {
-		throw new Exception("No Cloneable");
-	}
+class NoClone
+{
+    public function __clone()
+    {
+        throw new Exception("No Cloneable");
+    }
 }
 
-class C {
-	public function __get($name) {
-		return new NoClone;
-	}
+class C
+{
+    public function __get($name)
+    {
+        return new NoClone();
+    }
 }
 
-function test_clone() {
-	$c = new C;
-	$b = clone $c->x;
+function test_clone()
+{
+    $c = new C();
+    $b = clone $c->x;
 }
 
 test_clone();
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Exception: No Cloneable in %sbug73288.php:%d

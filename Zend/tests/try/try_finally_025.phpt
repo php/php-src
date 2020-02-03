@@ -3,7 +3,8 @@ Throw in try of try/finally inside catch
 --FILE--
 <?php
 
-function test() {
+function test()
+{
     try {
         throw new Exception(1);
     } catch (Exception $e) {

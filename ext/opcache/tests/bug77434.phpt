@@ -9,14 +9,16 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 
-function test(int $x) {
+function test(int $x)
+{
     $a = ['a' => 0, 'b' => $x];
     $b = [];
     $b[0] = $a;
     $c = $b[0];
 }
 
-function test2(int $x) {
+function test2(int $x)
+{
     $a = ['a' => 0, 'b' => $x];
     $b = [$a];
     $c = $b[0];

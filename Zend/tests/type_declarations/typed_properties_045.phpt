@@ -2,12 +2,15 @@
 foreach() must return properly typed references
 --FILE--
 <?php
-class Foo {
+
+class Foo
+{
     public int $bar = 0;
     public float $baz = 0.5;
     private float $privateProp = 0.5;
 
-    public function test() {
+    public function test()
+    {
         foreach ($this as $k => &$val) {
             if ($k == 'privateProp') {
                 var_dump($val);
@@ -23,7 +26,7 @@ class Foo {
     }
 }
 
-$foo = new Foo;
+$foo = new Foo();
 foreach ($foo as $k => &$val) {
     var_dump($val);
 
@@ -38,6 +41,7 @@ foreach ($foo as $k => &$val) {
     }
 }
 $foo->test();
+
 ?>
 --EXPECT--
 int(0)

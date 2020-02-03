@@ -2,14 +2,17 @@
 Free pending exceptions / return values on clone on yield in finally
 --FILE--
 <?php
-function gen1() {
+
+function gen1()
+{
     try {
         throw new Exception();
     } finally {
         yield;
     }
 }
-function gen2() {
+function gen2()
+{
     try {
         $bar = "bar";
         return "foo" . $bar;
@@ -17,7 +20,8 @@ function gen2() {
         yield;
     }
 }
-function gen3() {
+function gen3()
+{
     try {
         throw new Exception();
     } finally {
@@ -29,7 +33,8 @@ function gen3() {
         }
     }
 }
-function gen4() {
+function gen4()
+{
     try {
         try {
             $bar = "bar";

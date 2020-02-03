@@ -4,6 +4,7 @@ Bug #51393 (DateTime::createFromFormat() fails if format string contains timezon
 date.timezone=UTC
 --FILE--
 <?php
+
 $dt = DateTime::createFromFormat('O', '+0800');
 var_dump($dt->getOffset());
 
@@ -54,6 +55,7 @@ var_dump($dt->getOffset());
 
 $dt = DateTime::createFromFormat('O', 'invalid');
 var_dump($dt);
+
 ?>
 --EXPECT--
 int(28800)

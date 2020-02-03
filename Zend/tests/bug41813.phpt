@@ -7,6 +7,7 @@ $foo = "50";
 $foo[0]->bar = "xyz";
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Error: Cannot use string offset as an object in %s:%d

@@ -6,7 +6,7 @@ Bug #50810 (property_exists does not work for private)
 class ExampleSuperClass
 {
     private $foo;
-    static protected $bar;
+    protected static $bar;
 
     private function foo()
     {
@@ -16,7 +16,6 @@ class ExampleSuperClass
     {
         return property_exists($this, 'foo');
     }
-
 }
 
 class ExampleSubClass extends ExampleSuperClass

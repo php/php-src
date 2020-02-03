@@ -12,7 +12,7 @@ Francesco Fullone ff@ideato.it
 <?php
 
 $myuid = posix_getuid();
-$uid = var_dump(posix_setuid( $myuid ) );
+$uid = var_dump(posix_setuid($myuid));
 
 ?>
 --EXPECT--

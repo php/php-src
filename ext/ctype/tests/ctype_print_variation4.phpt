@@ -4,6 +4,7 @@ Test ctype_print() function : usage variations - octal and hexadecimal values
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 /* Prototype  : bool ctype_print(mixed $c)
  * Description: Checks for printable character(s)
  * Source code: ext/ctype/ctype.c
@@ -22,20 +23,21 @@ $hex_values = array (0x20, 0x21, 0x23, 0x24);
 
 echo "\n-- Octal Values --\n";
 $iterator = 1;
-foreach($octal_values as $c) {
-	echo "-- Iteration $iterator --\n";
-	var_dump(ctype_print($c));
-	$iterator++;
+foreach ($octal_values as $c) {
+    echo "-- Iteration $iterator --\n";
+    var_dump(ctype_print($c));
+    $iterator++;
 }
 
 echo "\n-- Hexadecimal Values --\n";
 $iterator = 1;
-foreach($hex_values as $c) {
-	echo "-- Iteration $iterator --\n";
-	var_dump(ctype_print($c));
-	$iterator++;
+foreach ($hex_values as $c) {
+    echo "-- Iteration $iterator --\n";
+    var_dump(ctype_print($c));
+    $iterator++;
 }
 setlocale(LC_CTYPE, $orig);
+
 ?>
 --EXPECT--
 *** Testing ctype_print() : usage variations ***

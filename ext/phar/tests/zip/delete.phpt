@@ -22,6 +22,7 @@ $phar->stopBuffering();
 echo file_get_contents($alias . '/a') . "\n";
 $phar->delete('a');
 echo file_get_contents($alias . '/a') . "\n";
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>

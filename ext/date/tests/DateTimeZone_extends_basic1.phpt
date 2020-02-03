@@ -10,10 +10,10 @@ echo "*** Testing basic DateTimeZone inheritance() ***\n";
 
 class DateTimeZoneExt extends DateTimeZone
 {
-	public function __toString()
-	{
-		return parent::getName();
-	}
+    public function __toString()
+    {
+        return parent::getName();
+    }
 }
 
 echo "\n-- Create an instance of DateTimeZoneExt --\n";

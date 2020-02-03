@@ -3,12 +3,13 @@ Generator::throw() with something that's not an exception
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     yield;
 }
 
 $gen = gen();
-$gen->throw(new stdClass);
+$gen->throw(new stdClass());
 
 ?>
 --EXPECTF--

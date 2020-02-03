@@ -2,30 +2,39 @@
 Bug #61998 (Using traits with method aliases appears to result in crash during execution)
 --FILE--
 <?php
-class Foo {
+
+class Foo
+{
     use T1 {
-       func as newFunc;
+        func as newFunc;
     }
 
-    public function func() {
+    public function func()
+    {
         echo "From Foo\n";
     }
 }
 
-trait T1 {
-    public function func() {
+trait T1
+{
+    public function func()
+    {
         echo "From T1\n";
     }
 }
 
-class Bar {
-    public function func() {
+class Bar
+{
+    public function func()
+    {
         echo "From Bar\n";
     }
-    public function func2() {
+    public function func2()
+    {
         echo "From Bar\n";
     }
-    public function func3() {
+    public function func3()
+    {
         echo "From Bar\n";
     }
     use T1 {
@@ -39,8 +48,10 @@ class Bar {
     }
 }
 
-trait T2 {
-    public function func2() {
+trait T2
+{
+    public function func2()
+    {
         echo "From T2\n";
     }
 }
@@ -57,6 +68,8 @@ $b->func2(); //from Bar
 $b->newFunc2(); //from T2
 $b->newFunc3(); //from T2
 $b->func3(); //from Bar
+
+?>
 --EXPECT--
 From T1
 From Foo

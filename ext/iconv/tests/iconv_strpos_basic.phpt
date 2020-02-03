@@ -9,6 +9,7 @@ function_exists('iconv_strpos') or die("skip iconv_strpos() is not available in 
 error_reporting=E_ALL & ~E_DEPRECATED
 --FILE--
 <?php
+
 /* Prototype  : int iconv_strpos(string haystack, string needle [, int offset [, string charset]])
  * Description: Find position of first occurrence of a string within another
  * Source code: ext/iconv/iconv.c
@@ -41,6 +42,7 @@ $needle2 = base64_decode("44GT44KT44Gr44Gh44Gv44CB5LiW55WM");
 var_dump(iconv_strpos($string_mb, $needle2));
 
 echo "Done";
+
 ?>
 --EXPECT--
 *** Testing iconv_strpos() : basic functionality***

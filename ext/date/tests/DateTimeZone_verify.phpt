@@ -16,6 +16,7 @@ var_dump($methods);
 echo "..and get names of all its class constants\n";
 $constants = $class->getConstants();
 var_dump($constants);
+
 ?>
 --EXPECTF--
 *** Verify DateTimeZone class ***

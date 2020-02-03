@@ -3,8 +3,9 @@ Trying to use an undefined trait
 --FILE--
 <?php
 
-class A {
-	use abc;
+class A
+{
+    use abc;
 }
 
 ?>

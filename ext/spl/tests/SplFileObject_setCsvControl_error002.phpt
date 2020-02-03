@@ -4,7 +4,9 @@ SPL: SplFileObject::setCsvControl error 002
 Erwin Poeze <erwin.poeze at gmail.com>
 --FILE--
 <?php
-file_put_contents('csv_control_data_error002.csv',
+
+file_put_contents(
+    'csv_control_data_error002.csv',
 <<<CDATA
 'groene appelen'|10
 'gele bananen'|20
@@ -14,6 +16,7 @@ CDATA
 $s = new SplFileObject('csv_control_data_error002.csv');
 $s->setFlags(SplFileObject::READ_CSV);
 $s->setCsvControl('|', 'two');
+
 ?>
 --CLEAN--
 <?php

@@ -6,8 +6,11 @@ if (!extension_loaded('calendar')) die('skip ext/calendar required');
 ?>
 --FILE--
 <?php
+
 var_dump(cal_from_jd(347997, CAL_JEWISH));
-var_dump(jdmonthname(347997,CAL_MONTH_JEWISH));?>
+var_dump(jdmonthname(347997, CAL_MONTH_JEWISH));
+
+?>
 --EXPECT--
 array(9) {
   ["date"]=>

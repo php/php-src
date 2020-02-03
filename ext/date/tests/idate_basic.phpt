@@ -2,6 +2,7 @@
 Test idate() function : basic functionality
 --FILE--
 <?php
+
 /* Prototype  : int idate(string format [, int timestamp])
  * Description: Format a local time/date as integer
  * Source code: ext/date/php_date.c
@@ -15,7 +16,8 @@ $format = 'Y';
 
 // Calling idate() with mandatory arguments
 date_default_timezone_set("Asia/Calcutta");
-var_dump( idate($format) );
+var_dump(idate($format));
+
 ?>
 --EXPECTF--
 *** Testing idate() : basic functionality ***

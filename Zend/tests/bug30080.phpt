@@ -2,13 +2,17 @@
 Bug #30080 (Passing array or non array of objects)
 --FILE--
 <?php
-class foo {
-  function __construct($arrayobj) {
-    var_dump($arrayobj);
-  }
+
+class foo
+{
+    function __construct($arrayobj)
+    {
+        var_dump($arrayobj);
+    }
 }
 
-new foo(array(new stdClass));
+new foo(array(new stdClass()));
+
 ?>
 --EXPECTF--
 array(1) {

@@ -5,7 +5,7 @@ foreach with empty list
 
 $array = [['a', 'b'], 'c', 'd'];
 
-foreach($array as $key => list()) {
+foreach ($array as $key => list()) {
 }
 
 ?>

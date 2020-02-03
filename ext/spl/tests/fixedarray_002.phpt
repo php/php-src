@@ -2,49 +2,56 @@
 SPL: FixedArray: overloading
 --FILE--
 <?php
-class A extends SplFixedArray {
-	public $prop1 = NULL;
-	public $prop2 = NULL;
 
-    public function count() {
+class A extends SplFixedArray
+{
+    public $prop1 = null;
+    public $prop2 = null;
+
+    public function count()
+    {
         return 2;
     }
 
-    public function offsetGet($n) {
+    public function offsetGet($n)
+    {
         echo "A::offsetGet\n";
         return parent::offsetGet($n);
     }
-    public function offsetSet($n, $v) {
+    public function offsetSet($n, $v)
+    {
         echo "A::offsetSet\n";
         return parent::offsetSet($n, $v);
     }
-    public function offsetUnset($n) {
+    public function offsetUnset($n)
+    {
         echo "A::offsetUnset\n";
         return parent::offsetUnset($n);
     }
-    public function offsetExists($n) {
+    public function offsetExists($n)
+    {
         echo "A::offsetExists\n";
         return parent::offsetExists($n);
     }
 }
 
-$a = new A;
+$a = new A();
 
 // errors
 try {
     $a[0] = "value1";
 } catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 try {
     var_dump($a["asdf"]);
 } catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 try {
     unset($a[-1]);
 } catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 $a->setSize(10);
 
@@ -66,6 +73,7 @@ var_dump($a[0], $a[2], $a[3], $a[4]);
 // countable
 
 var_dump(count($a), $a->getSize(), count($a) == $a->getSize());
+
 ?>
 --EXPECT--
 A::offsetSet

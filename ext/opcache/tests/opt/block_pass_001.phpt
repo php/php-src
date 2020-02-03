@@ -8,17 +8,21 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-abstract class Broadcaster {
+
+abstract class Broadcaster
+{
     protected function normalizeChannelHandlerToCallable($callback)
-        {
+    {
             return is_callable($callback) ? $callback : function (...$args) use ($callback) {
                 return Container::getInstance()
                     ->make($callback)
                 ->join(...$args);
-        };
+            };
     }
 }
 ?>
 OK
+
+?>
 --EXPECT--
 OK

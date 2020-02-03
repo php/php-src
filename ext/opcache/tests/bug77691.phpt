@@ -6,12 +6,14 @@ Bug #77691: Opcache passes wrong value for inline array push assignments
 <?php
 
 if (true) {
-    function dump($str) {
+    function dump($str)
+    {
         var_dump($str);
     }
 }
 
-function test() {
+function test()
+{
     $array = [];
     dump($array[] = 'test');
     dump($array);

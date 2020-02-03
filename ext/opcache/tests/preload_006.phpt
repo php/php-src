@@ -13,7 +13,9 @@ if (getenv('SKIP_ASAN')) die('xfail Startup failure leak');
 ?>
 --FILE--
 <?php
+
 echo "Foobar\n";
+
 ?>
 --EXPECTF--
 Fatal error: Declaration of B::foo($bar) must be compatible with A::foo() in %spreload_inheritance_error.inc on line 8

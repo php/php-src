@@ -3,17 +3,22 @@ Bug #78344: Segmentation fault on zend_check_protected
 --FILE--
 <?php
 
-class A {
+class A
+{
     protected const FOO = 1;
 }
 
-class B {}
-class C extends B {
-    public function method() {
+class B
+{
+}
+class C extends B
+{
+    public function method()
+    {
         var_dump(A::FOO);
     }
 }
-(new C)->method();
+(new C())->method();
 
 ?>
 --EXPECTF--

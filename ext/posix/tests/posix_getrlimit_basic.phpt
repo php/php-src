@@ -7,6 +7,7 @@ if (!function_exists('posix_getrlimit')) die('skip posix_getrlimit() not found')
 ?>
 --FILE--
 <?php
+
 echo "Basic test of POSIX posix_getrlimit function\n";
 var_dump(posix_getrlimit());
 

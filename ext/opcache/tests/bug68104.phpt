@@ -10,8 +10,10 @@ disable_functions=dl
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 var_dump(is_callable("dl"));
 dl("a.so");
+
 ?>
 --EXPECTF--
 bool(true)

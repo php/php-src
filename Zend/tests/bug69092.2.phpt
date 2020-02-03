@@ -4,13 +4,16 @@ Bug #69092-2 (Declare Encoding Compile Check Wrong) - multibyte off
 zend.multibyte=0
 --FILE--
 <?php
+
 echo "Hi";
 
-function foo() {
-	declare(encoding="UTF-8");
+function foo()
+{
+    declare(encoding="UTF-8");
 }
 
-echo "Bye"
+echo "Bye";
+
 ?>
 --EXPECTF--
 Warning: declare(encoding=...) ignored because Zend multibyte feature is turned off by settings in %s on line %d

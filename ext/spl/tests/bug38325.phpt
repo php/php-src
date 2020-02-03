@@ -2,8 +2,10 @@
 Bug #38325 (spl_autoload_register() gaves wrong line for "class not found")
 --FILE--
 <?php
+
 spl_autoload_register();
 new ThisClassDoesNotExistEverFoo();
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Error: Class 'ThisClassDoesNotExistEverFoo' not found in %s:%d

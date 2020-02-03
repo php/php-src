@@ -3,8 +3,14 @@ Object naming collision error: interface/trait
 --FILE--
 <?php
 
-interface A { }
-trait A { }
+interface A
+{
+
+}
+trait A
+{
+
+}
 
 ?>
 --EXPECTF--

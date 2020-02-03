@@ -3,17 +3,22 @@ Trying inherit abstract function twice
 --FILE--
 <?php
 
-interface d {
-	static function B();
+interface d
+{
+    static function B();
 }
 
-interface c {
-	function b();
+interface c
+{
+    function b();
 }
 
 class_alias('c', 'w');
 
-interface a extends d, w { }
+interface a extends d, w
+{
+
+}
 
 ?>
 --EXPECTF--

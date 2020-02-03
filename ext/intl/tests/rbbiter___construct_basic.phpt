@@ -6,6 +6,7 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "pt_PT");
 
@@ -26,9 +27,9 @@ $rbbi = new IntlRuleBasedBreakIterator($rules);
 var_dump(get_class($rbbi));
 
 try {
-	$obj = new IntlRuleBasedBreakIterator('[\p{Letter}\uFFFD]+;[:number:]+', 'aoeu');
+    $obj = new IntlRuleBasedBreakIterator('[\p{Letter}\uFFFD]+;[:number:]+', 'aoeu');
 } catch (IntlException $e) {
-	var_dump(intl_get_error_code(), intl_get_error_message());
+    var_dump(intl_get_error_code(), intl_get_error_message());
 }
 
 ?>

@@ -5,7 +5,8 @@ call_user_func() should error on reference arguments
 
 namespace Foo;
 
-function bar(&$ref) {
+function bar(&$ref)
+{
     $ref = 24;
 }
 

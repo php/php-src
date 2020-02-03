@@ -2,17 +2,21 @@
 Bug #52238 - Crash when an Exception occurred in iterator_to_array
 --FILE--
 <?php
+
 class Foo implements IteratorAggregate
 {
-    public function bar() {
-        throw new Exception;
+    public function bar()
+    {
+        throw new Exception();
     }
 
-    public function getIterator() {
+    public function getIterator()
+    {
         return new ArrayIterator($this->bar());
     }
 }
-var_dump(iterator_to_array(new Foo));
+var_dump(iterator_to_array(new Foo()));
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Exception in %s

@@ -8,12 +8,16 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function foo($key, $value, array $attributes) {
-	return is_array($value)
-		? [$key, array_merge($value, $attributes)]
-		: [$value, $attributes];
+
+function foo($key, $value, array $attributes)
+{
+    return is_array($value)
+        ? [$key, array_merge($value, $attributes)]
+        : [$value, $attributes];
 }
 ?>
 OK
+
+?>
 --EXPECT--
 OK

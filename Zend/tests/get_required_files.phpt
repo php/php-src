@@ -6,8 +6,10 @@ sschuermann@chip.de
 Testfest 2009 Munich
 --FILE--
 <?php
+
 $files = get_required_files();
 var_dump($files);
+
 ?>
 --EXPECTF--
 array(1) {

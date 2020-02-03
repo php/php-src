@@ -4,7 +4,9 @@ xmlwriter_open_uri with file:///
 <?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
 --FILE--
 <?php
+
 var_dump(xmlwriter_open_uri('file:///'));
+
 ?>
 --CREDITS--
 Koen Kuipers koenk82@gmail.com

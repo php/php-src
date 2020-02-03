@@ -5,7 +5,8 @@ Incorrect optimization of $i = $i++
 --FILE--
 <?php
 
-function test() {
+function test()
+{
     $i = 1;
     $i = $i++;
     var_dump($i);

@@ -8,19 +8,22 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $dirName = __DIR__;
 $pname = 'phar://' . $fname;
-$pArchive="DataArchive.phar";
+$pArchive = "DataArchive.phar";
 $p = new Phar($fname, 0, $pArchive);
-for ($i = 0; $i < 4*1024; $i++){
-	echo("$i\n");
-	if (!is_dir($fileDir="$dirName/test_data"))
-	mkdir($fileDir, 0777, true);
-	file_put_contents("$fileDir/$i", "");
-	$p->addFile("$fileDir/$i", "$dirName");
+for ($i = 0; $i < 4 * 1024; $i++) {
+    echo("$i\n");
+    if (!is_dir($fileDir = "$dirName/test_data")) {
+        mkdir($fileDir, 0777, true);
+    }
+    file_put_contents("$fileDir/$i", "");
+    $p->addFile("$fileDir/$i", "$dirName");
 }
 echo("\n Written Files($i)\n");
+
 ?>
 --CLEAN--
 <?php

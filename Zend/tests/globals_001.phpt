@@ -18,6 +18,7 @@ unset($_SERVER);
 var_dump($_SERVER);
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 bool(true)

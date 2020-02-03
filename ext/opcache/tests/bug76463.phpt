@@ -9,11 +9,14 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 
-function test() {
-	$old_data = isset($old_data) ? (array)$old_data : [];
+function test()
+{
+    $old_data = isset($old_data) ? (array)$old_data : [];
 }
 
 ?>
 okey
+
+?>
 --EXPECT--
 okey

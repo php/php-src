@@ -4,7 +4,9 @@ Bug #75255 (Request hangs and not finish)
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function generatePlanImage() {
+
+function generatePlanImage()
+{
     if ($abc > 5) {
         $abc = 5;
     }
@@ -16,5 +18,7 @@ function generatePlanImage() {
 }
 ?>
 DONE
+
+?>
 --EXPECT--
 DONE

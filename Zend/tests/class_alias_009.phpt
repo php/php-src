@@ -3,11 +3,17 @@ Testing interface declaration using the original and alias class name
 --FILE--
 <?php
 
-interface a { }
+interface a
+{
+
+}
 
 class_alias('a', 'b');
 
-interface c extends a, b { }
+interface c extends a, b
+{
+
+}
 
 ?>
 --EXPECTF--

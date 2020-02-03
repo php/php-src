@@ -3,13 +3,14 @@ Indirect modification of isref by-value return value not possible
 --FILE--
 <?php
 
-class A {
+class A
+{
     public $b;
 }
 
 $arr = [];
 
-$a = new A;
+$a = new A();
 $a->b =& $arr;
 
 (new ReflectionProperty('A', 'b'))->getValue($a)[] = 42;

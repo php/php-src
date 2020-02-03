@@ -4,11 +4,17 @@ Use of parent inside a class that has / has no parent (failure case 1)
 <?php
 
 // Illegal: A::parent is ill-defined
-class A {
-    public function method(parent $x) {}
+class A
+{
+    public function method(parent $x)
+    {
+    }
 }
-class B extends A {
-    public function method(parent $x) {}
+class B extends A
+{
+    public function method(parent $x)
+    {
+    }
 }
 
 ?>

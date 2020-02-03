@@ -7,42 +7,48 @@ Bug #78015: Incorrect evaluation of expressions involving partials array in SCCP
 
 $x = 1;
 
-function test1() {
+function test1()
+{
     global $x;
     $a = ['b' => [$x], 'c' => [$x]];
     $d = $a['b'] + $a['c'];
     return $d;
 }
 
-function test2() {
+function test2()
+{
     global $x;
     $a = ['b' => [$x]];
     $d = !$a['b'];
     return $d;
 }
 
-function test3() {
+function test3()
+{
     global $x;
     $a = ['b' => [$x]];
     $d = (int) $a['b'];
     return $d;
 }
 
-function test4() {
+function test4()
+{
     global $x;
     $a = ['b' => [$x]];
     $d = $a['b'] ?: 42;
     return $d;
 }
 
-function test5() {
+function test5()
+{
     global $x;
     $a = ['b' => [$x]];
     $d = is_array($a['b']);
     return $d;
 }
 
-function test6() {
+function test6()
+{
     global $x;
     $a = ['b' => [$x]];
     $b = "foo";
@@ -50,7 +56,8 @@ function test6() {
     return $d;
 }
 
-function test7() {
+function test7()
+{
     global $x;
     $a = ['b' => [$x]];
     $y = 1;
@@ -60,20 +67,22 @@ function test7() {
     return $y;
 }
 
-function test8($array) {
+function test8($array)
+{
     $i = 0;
     $ret = [[]];
     foreach ($array as $_) {
-      $i++;
-      $ret = [[
+        $i++;
+        $ret = [[
         'x' => 0,
         'y' => $i,
-      ]];
+        ]];
     }
     return $ret[0];
 }
 
-function test9() {
+function test9()
+{
     global $x;
     $a = ['b' => [$x]];
     return serialize($a['b']);

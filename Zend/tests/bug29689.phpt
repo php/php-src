@@ -2,7 +2,9 @@
 Bug #29689 (default value of protected member overrides default value of private)
 --FILE--
 <?php
-class foo {
+
+class foo
+{
     private $foo = 'foo';
     private $foo2 = 'foo2';
 
@@ -12,7 +14,8 @@ class foo {
     }
 }
 
-class bar extends foo {
+class bar extends foo
+{
     protected $foo = 'bar';
 
     function printFoo()
@@ -22,12 +25,14 @@ class bar extends foo {
     }
 }
 
-class baz extends bar {
+class baz extends bar
+{
     protected $foo = 'baz';
     protected $foo2 = 'baz2';
 }
 
-class bar2 extends foo {
+class bar2 extends foo
+{
     function printFoo()
     {
         parent::printFoo();
@@ -35,12 +40,13 @@ class bar2 extends foo {
     }
 }
 
-class baz2 extends bar2 {
+class baz2 extends bar2
+{
     protected $foo = 'baz2';
     protected $foo2 = 'baz22';
 }
 
-$bar = new bar;
+$bar = new bar();
 $bar->printFoo();
 echo "---baz--\n";
 $baz = new baz();
@@ -48,6 +54,7 @@ $baz->printFoo();
 echo "---baz2--\n";
 $baz = new baz2();
 $baz->printFoo();
+
 ?>
 --EXPECTF--
 foo: foo foo2

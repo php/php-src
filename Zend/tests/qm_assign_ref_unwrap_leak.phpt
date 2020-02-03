@@ -3,7 +3,8 @@ Leak in QM_ASSIGN when unwrapping references (rc=1)
 --FILE--
 <?php
 
-function &ref() {
+function &ref()
+{
     $str = "str";
     $str .= "str";
     return $str;

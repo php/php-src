@@ -10,7 +10,8 @@ opcache.jit_buffer_size=1M
 --FILE--
 <?php
 
-function test1(string $val) {
+function test1(string $val)
+{
     switch ($val) {
         case 'str1':
         case 'str2':
@@ -19,7 +20,8 @@ function test1(string $val) {
     }
     echo "wrong\n";
 }
-function test2(int $val) {
+function test2(int $val)
+{
     switch ($val) {
         case 1:
         case 2:

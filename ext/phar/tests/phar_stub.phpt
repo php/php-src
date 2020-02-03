@@ -7,6 +7,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
@@ -61,7 +62,7 @@ fclose($fp);
 $fp = fopen($fname, 'rb');
 echo fread($fp, strlen($file)) . "\n";
 if (fread($fp, strlen('booya')) == 'booya') {
-	echo 'failed - copied booya';
+    echo 'failed - copied booya';
 }
 fclose($fp);
 $phar['testing'] = 'hi';
@@ -70,7 +71,7 @@ $phar['testing'] = 'hi';
 $fp = fopen($fname, 'rb');
 echo fread($fp, strlen($file)) . "\n";
 if (fread($fp, strlen('booya')) == 'booya') {
-	echo 'failed - copied booya';
+    echo 'failed - copied booya';
 }
 fclose($fp);
 

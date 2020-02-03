@@ -24,9 +24,10 @@ var_dump(gmp_strval($g, 100000));
 var_dump(gmp_strval($g, 10));
 
 var_dump(gmp_strval(array(1,2)));
-var_dump(gmp_strval(new stdclass));
+var_dump(gmp_strval(new stdclass()));
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Warning: gmp_strval(): Unable to convert variable to GMP - string is not an integer in %s on line %d

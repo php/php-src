@@ -4,13 +4,16 @@ Type inference of SEND_UNPACK with empty array
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function test() {
+
+function test()
+{
     $array = [1, 2, 3];
     $values = [];
     var_dump(array_push($array, 4, ...$values));
     var_dump($array);
 }
 test();
+
 ?>
 --EXPECT--
 int(4)

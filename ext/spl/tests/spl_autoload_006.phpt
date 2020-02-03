@@ -5,11 +5,13 @@ include_path=.
 --FILE--
 <?php
 
-class MyAutoLoader {
+class MyAutoLoader
+{
 
-        static function autoLoad($className) {
-        	echo __METHOD__ . "($className)\n";
-        }
+    static function autoLoad($className)
+    {
+        echo __METHOD__ . "($className)\n";
+    }
 }
 
 spl_autoload_register('MyAutoLoader::autoLoad');

@@ -8,16 +8,21 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-class Foo {
-    private function getConst() {
+
+class Foo
+{
+    private function getConst()
+    {
         return 42;
     }
-    public function test() {
+    public function test()
+    {
         var_dump($this->getConst());
     }
 }
 
 Foo::test();
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Error: Non-static method Foo::test() cannot be called statically in %s:%d

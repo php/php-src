@@ -21,6 +21,7 @@ var_dump(gmp_hamdist(array(), $n));
 var_dump(gmp_hamdist(array(), array()));
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 int(13)

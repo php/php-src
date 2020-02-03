@@ -6,18 +6,22 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 
-class A extends IntlTimeZone {
-function __construct() {}
+class A extends IntlTimeZone
+{
+    function __construct()
+    {
+    }
 }
 
 $tz = new A();
 var_dump($tz);
 try {
-var_dump(clone $tz);
+    var_dump(clone $tz);
 } catch (Exception $e) {
-	var_dump(get_class($e), $e->getMessage());
+    var_dump(get_class($e), $e->getMessage());
 }
 
 ?>

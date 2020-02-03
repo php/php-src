@@ -4,8 +4,10 @@ Try catch finally (re-throw exception in catch block)
 adoy
 --FILE--
 <?php
-function dummy($msg) {
-   var_dump($msg);
+
+function dummy($msg)
+{
+    var_dump($msg);
 }
 try {
     try {
@@ -18,11 +20,12 @@ try {
         dummy("finally");
     }
 } catch (Exception $e) {
-  dummy("catch2");
+    dummy("catch2");
 } finally {
-  dummy("finally2");
+    dummy("finally2");
 }
 var_dump("end");
+
 ?>
 --EXPECT--
 string(3) "try"

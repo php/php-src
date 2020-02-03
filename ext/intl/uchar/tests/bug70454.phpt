@@ -4,11 +4,13 @@ Bug #70454 (IntlChar::forDigit second parameter should be optional)
 <?php if (!extension_loaded('intl')) die("skip requires ext/intl") ?>
 --FILE--
 <?php
+
 var_dump(IntlChar::forDigit(0));
 var_dump(IntlChar::forDigit(3));
 var_dump(IntlChar::forDigit(3, 10));
 var_dump(IntlChar::forDigit(10));
 var_dump(IntlChar::forDigit(10, 16));
+
 ?>
 --EXPECT--
 int(48)

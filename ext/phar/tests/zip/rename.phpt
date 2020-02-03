@@ -24,6 +24,7 @@ echo file_get_contents($alias . '/a') . "\n";
 rename($alias . '/a', $alias . '/b');
 echo file_get_contents($alias . '/b') . "\n";
 echo file_get_contents($alias . '/a') . "\n";
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>

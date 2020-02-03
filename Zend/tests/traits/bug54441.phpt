@@ -3,15 +3,19 @@ Bug #54441 (Changing trait static method visibility)
 --FILE--
 <?php
 
-trait Foo {
-  public function bar() {}
+trait Foo
+{
+    public function bar()
+    {
+    }
 }
 
-class Boo {
-  use Foo {
-    bar as dontKnow;
-    dontKnow as protected;
-  }
+class Boo
+{
+    use Foo {
+        bar as dontKnow;
+        dontKnow as protected;
+    }
 }
 
 ?>

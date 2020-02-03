@@ -4,6 +4,7 @@ Test date_interval_create_from_date_string() function : basic functionality
 Rodrigo Prado de Jesus <royopa [at] gmail [dot] com>
 --FILE--
 <?php
+
 $string = '1 day'; //P1D
 $i = date_interval_create_from_date_string($string);
 var_dump($i->d);
@@ -24,6 +25,7 @@ $string = '1 year + 1 day';
 $i = date_interval_create_from_date_string($string);
 var_dump($i->y);
 var_dump($i->d);
+
 ?>
 --EXPECT--
 int(1)

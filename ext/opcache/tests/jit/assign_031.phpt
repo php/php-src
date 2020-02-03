@@ -11,9 +11,11 @@ opcache.protect_memory=1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 $c =& $a;
 $b = $a;
 echo "ok\n";
+
 ?>
 --EXPECT--
 ok

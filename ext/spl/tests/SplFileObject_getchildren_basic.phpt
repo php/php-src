@@ -4,7 +4,8 @@ SPL: SplFileObject::getchildren basic
 Erwin Poeze <erwin.poeze at gmail.com>
 --FILE--
 <?php
-$s = new SplFileObject( __FILE__ );
+
+$s = new SplFileObject(__FILE__);
 var_dump($s->getChildren());
 
 ?>

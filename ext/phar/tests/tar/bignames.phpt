@@ -6,6 +6,7 @@ Phar: tar with huge filenames
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';
 $fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.tar';
 $fname3 = __DIR__ . '/' . basename(__FILE__, '.php') . '.3.tar';
@@ -21,24 +22,25 @@ echo $p2[str_repeat('a', 100) . '/b']->getContent() . "\n";
 echo $p2[str_repeat('a', 155) . '/' . str_repeat('b', 100)]->getContent() . "\n";
 
 try {
-	$p2[str_repeat('a', 400)] = 'yuck';
+    $p2[str_repeat('a', 400)] = 'yuck';
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-	$p2 = new PharData($fname3);
-	$p2[str_repeat('a', 101)] = 'yuck';
+    $p2 = new PharData($fname3);
+    $p2[str_repeat('a', 101)] = 'yuck';
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-	$p2 = new PharData($fname4);
-	$p2[str_repeat('b', 160) . '/' . str_repeat('a', 90)] = 'yuck';
+    $p2 = new PharData($fname4);
+    $p2[str_repeat('b', 160) . '/' . str_repeat('a', 90)] = 'yuck';
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
+
 ?>
 --CLEAN--
 <?php

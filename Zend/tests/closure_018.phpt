@@ -3,17 +3,19 @@ Closure 018: Assigning lambda to static var and returning by ref
 --FILE--
 <?php
 
-class foo {
-	public function test(&$x) {
-		static $lambda;
-		$lambda = function &() use (&$x) {
-			return $x = $x * $x;
-		};
-		return $lambda();
-	}
+class foo
+{
+    public function test(&$x)
+    {
+        static $lambda;
+        $lambda = function & () use (&$x) {
+            return $x = $x * $x;
+        };
+        return $lambda();
+    }
 }
 
-$test = new foo;
+$test = new foo();
 
 $y = 2;
 var_dump($test->test($y));

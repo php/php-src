@@ -8,12 +8,16 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function f() {
-	  $retval = false;
-	    if ($retval) { }
+
+function f()
+{
+      $retval = false;
+    if ($retval) {
+    }
 }
 f();
 exit("OK");
+
 ?>
 --EXPECT--
 OK

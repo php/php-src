@@ -10,6 +10,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
+
 include __DIR__ . '/files/tarmaker.php.inc';
 $fname = __DIR__ . '/tar_gzip.phar';
 $pname = 'phar://' . $fname;
@@ -37,6 +38,7 @@ copy($fname, $fname2);
 $b = new Phar($fname2);
 var_dump($b->isFileFormat(Phar::TAR));
 var_dump($b->isCompressed() == Phar::GZ);
+
 ?>
 --CLEAN--
 <?php

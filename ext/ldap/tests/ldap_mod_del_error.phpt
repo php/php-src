@@ -8,6 +8,7 @@ Patrick Allaert <patrickallaert@php.net>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
+
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
@@ -20,6 +21,7 @@ var_dump(ldap_mod_del($link, "weirdAttribute=val", array()));
 
 // Invalid attributes
 var_dump(ldap_mod_del($link, "$base", array('dc')));
+
 ?>
 --CLEAN--
 <?php

@@ -4,6 +4,7 @@ Phar: tar with hard link to nowhere
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';
 $pname = 'phar://' . $fname;
 
@@ -20,10 +21,11 @@ $a->addFile('hardlink', 'internal/file.txt', array(
 $a->close();
 
 try {
-	$p = new PharData($fname);
+    $p = new PharData($fname);
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
+
 ?>
 --CLEAN--
 <?php

@@ -25,7 +25,7 @@ include 'files/phar_test.inc';
 $phar = new Phar($fname);
 
 foreach ($phar as $entry) {
-    echo file_get_contents($entry)."\n";
+    echo file_get_contents($entry) . "\n";
 }
 
 ?>

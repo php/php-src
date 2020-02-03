@@ -4,8 +4,10 @@ Transliterator::getErrorMessage (error)
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 echo transliterator_get_error_message(array()), "\n";
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: transliterator_get_error_message() expects parameter 1 to be Transliterator, array given in %s:%d

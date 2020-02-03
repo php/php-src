@@ -5,77 +5,89 @@ Rebinding of ::getClosure()s
 
 use SplDoublyLinkedList as DLL;
 
-function func($arg) { }
-
-class Cls {
-    public function method() {}
-    public static function staticMethod($arg) {}
+function func($arg)
+{
 }
 
-class ClsChild extends Cls {}
+class Cls
+{
+    public function method()
+    {
+    }
+    public static function staticMethod($arg)
+    {
+    }
+}
 
-class ClsUnrelated {}
+class ClsChild extends Cls
+{
+}
+
+class ClsUnrelated
+{
+}
 
 /* Format: [Function, [Obj, Scope]] */
 $tests = [
     ['func', [
         [null,         null],
-        [new Cls,      null],
-        [new Cls,      'Cls'],
+        [new Cls(),      null],
+        [new Cls(),      'Cls'],
         [null,         'Cls'],
         [null,         'stdClass'],
-        [new stdClass, null],
+        [new stdClass(), null],
     ]],
 
     ['strlen', [
         [null,         null],
-        [new Cls,      null],
-        [new Cls,      'Cls'],
+        [new Cls(),      null],
+        [new Cls(),      'Cls'],
         [null,         'Cls'],
         [null,         'stdClass'],
-        [new stdClass, null],
+        [new stdClass(), null],
     ]],
 
     [['Cls', 'staticMethod'], [
         [null,   'Cls'],
-        [new Cls, null],
-        [new Cls, 'Cls'],
+        [new Cls(), null],
+        [new Cls(), 'Cls'],
         [null,    null],
         [null,    'ClsChild'],
         [null,    'ClsUnrelated'],
     ]],
 
-    [[new Cls, 'method'], [
+    [[new Cls(), 'method'], [
         [null,             'Cls'],
-        [new Cls,          'Cls'],
-        [new ClsChild,     'Cls'],
-        [new ClsUnrelated, 'Cls'],
-        [new Cls,          null],
-        [new Cls,          'ClsUnrelated'],
-        [new Cls,          'ClsChild'],
+        [new Cls(),          'Cls'],
+        [new ClsChild(),     'Cls'],
+        [new ClsUnrelated(), 'Cls'],
+        [new Cls(),          null],
+        [new Cls(),          'ClsUnrelated'],
+        [new Cls(),          'ClsChild'],
     ]],
 
-    [[new DLL, 'count'], [
-        [new DLL, DLL::class],
-        [new SplStack, DLL::class],
-        [new ClsUnrelated, DLL::class],
+    [[new DLL(), 'count'], [
+        [new DLL(), DLL::class],
+        [new SplStack(), DLL::class],
+        [new ClsUnrelated(), DLL::class],
         [null, null],
         [null, DLL::class],
-        [new DLL, null],
-        [new DLL, ClsUnrelated::class],
+        [new DLL(), null],
+        [new DLL(), ClsUnrelated::class],
     ]],
 
-    [function() {}, [
+    [function () {
+    }, [
         [null,         null],
-        [new Cls,      null],
-        [new Cls,      'Cls'],
+        [new Cls(),      null],
+        [new Cls(),      'Cls'],
         [null,         'Cls'],
         [null,         'stdClass'],
-        [new stdClass, null],
+        [new stdClass(), null],
     ]],
 ];
 
-set_error_handler(function($errno, $errstr) {
+set_error_handler(function ($errno, $errstr) {
     echo "$errstr\n\n";
 });
 

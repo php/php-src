@@ -3,14 +3,15 @@ Increment/decrement a typed property with int|float type
 --FILE--
 <?php
 
-class Test {
-    public int|float $prop;
-    public int|bool $prop2;
+class Test
+{
+    public int | float $prop;
+    public int | bool $prop2;
 }
 
 /* Incrementing a int|float property past int min/max is legal */
 
-$test = new Test;
+$test = new Test();
 $test->prop = PHP_INT_MAX;
 $x = $test->prop++;
 var_dump(is_double($test->prop));
@@ -27,7 +28,7 @@ $test->prop = PHP_INT_MIN;
 $x = --$test->prop;
 var_dump(is_double($test->prop));
 
-$test = new Test;
+$test = new Test();
 $test->prop = PHP_INT_MAX;
 $r =& $test->prop;
 $x = $test->prop++;

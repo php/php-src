@@ -8,6 +8,7 @@ if (strpos(PHP_OS, 'WIN') === false) die("skip Extra warning on Windows.");
 phar.readonly=0
 --FILE--
 <?php
+
 Phar::interceptFileFuncs();
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.php';
@@ -23,6 +24,7 @@ opendir("foo/hi");
 ?>
 ');
 include $pname . '/foo/hi';
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

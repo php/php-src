@@ -6,13 +6,15 @@ date.timezone=UTC
 <?php include 'skipif.inc'; ?>
 --FILE--
 <?php
+
   print_r(cal_info());
   print_r(cal_info(1));
-  try {
-      cal_info(99999);
-  } catch (ValueError $ex) {
-      echo "{$ex->getMessage()}\n";
-  }
+try {
+    cal_info(99999);
+} catch (ValueError $ex) {
+    echo "{$ex->getMessage()}\n";
+}
+
 ?>
 --EXPECT--
 Array

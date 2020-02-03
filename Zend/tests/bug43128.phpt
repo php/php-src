@@ -12,9 +12,11 @@ eval("class $a {}");
 # call_user_func($a); // Warning
 # $a->$a();           // Fatal error
 
-if ($a instanceof $a); // Segmentation fault
-new $a;                // Segmentation fault
+if ($a instanceof $a) {
+// Segmentation fault
+}new $a();                // Segmentation fault
 echo "ok\n";
+
 ?>
 --EXPECT--
 ok

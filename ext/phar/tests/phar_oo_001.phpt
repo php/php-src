@@ -18,26 +18,22 @@ var_dump(count($phar));
 
 class MyPhar extends Phar
 {
-	function __construct()
-	{
-	}
+    function __construct()
+    {
+    }
 }
 
-try
-{
-	$phar = new MyPhar();
-	var_dump($phar->getVersion());
-}
-catch (LogicException $e)
-{
-	var_dump($e->getMessage());
+try {
+    $phar = new MyPhar();
+    var_dump($phar->getVersion());
+} catch (LogicException $e) {
+    var_dump($e->getMessage());
 }
 try {
-	$phar = new Phar('test.phar');
-	$phar->__construct('oops');
-} catch (LogicException $e)
-{
-	var_dump($e->getMessage());
+    $phar = new Phar('test.phar');
+    $phar->__construct('oops');
+} catch (LogicException $e) {
+    var_dump($e->getMessage());
 }
 
 ?>

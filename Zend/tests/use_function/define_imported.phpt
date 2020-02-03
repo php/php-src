@@ -6,7 +6,9 @@ defining function with same name as imported should fail
 namespace {
     use function foo\bar;
 
-    function bar() {}
+    function bar()
+    {
+    }
 }
 
 ?>

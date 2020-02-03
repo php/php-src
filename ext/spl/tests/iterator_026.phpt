@@ -9,10 +9,9 @@ $it = new RecursiveArrayIterator($ar);
 $it = new RecursiveCachingIterator($it);
 $it = new RecursiveIteratorIterator($it);
 
-foreach($it as $k=>$v)
-{
-	echo "$k=>$v\n";
-	echo "hasNext: " . ($it->getInnerIterator()->hasNext() ? "yes" : "no") . "\n";
+foreach ($it as $k => $v) {
+    echo "$k=>$v\n";
+    echo "hasNext: " . ($it->getInnerIterator()->hasNext() ? "yes" : "no") . "\n";
 }
 
 ?>

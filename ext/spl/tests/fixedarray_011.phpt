@@ -5,7 +5,7 @@ SPL: FixedArray: Testing setSize() with NULL
 
 $a = new SplFixedArray(100);
 
-$a->setSize(NULL);
+$a->setSize(null);
 
 print "ok\n";
 

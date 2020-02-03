@@ -2,15 +2,19 @@
 debug_print_backtrace limit
 --FILE--
 <?php
-function a() {
+
+function a()
+{
     b();
 }
 
-function b() {
+function b()
+{
     c();
 }
 
-function c() {
+function c()
+{
     debug_print_backtrace(0, 1);
     debug_print_backtrace(0, 2);
     debug_print_backtrace(0, 0);
@@ -18,6 +22,7 @@ function c() {
 }
 
 a();
+
 ?>
 --EXPECTF--
 #0  c() called at [%sdebug_print_backtrace_limit.php:7]

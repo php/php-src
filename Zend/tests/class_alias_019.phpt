@@ -5,11 +5,11 @@ Trying to redeclare class name in global scope inside namespace
 
 namespace foo;
 
-
-class foo {
+class foo
+{
 }
 
-class_alias(__NAMESPACE__ .'\foo', 'foo');
+class_alias(__NAMESPACE__ . '\foo', 'foo');
 class_alias('\foo', 'foo');
 
 ?>

@@ -10,6 +10,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.txt';
 file_put_contents($fname2, 'a');
@@ -18,38 +19,44 @@ class myIterator implements Iterator
     var $a;
     var $count = 1;
 
-    function next() {
+    function next()
+    {
         return (++$this->count < 3000) ? 'f' . $this->count : false;
     }
-    function current() {
+    function current()
+    {
         if (($this->count % 100) === 0) {
             echo $this->count, "\n";
         }
         return $GLOBALS['fname2'];
     }
-    function key() {
+    function key()
+    {
         return 'f' . $this->count;
     }
-    function valid() {
+    function valid()
+    {
         return $this->count < 3000;
     }
-    function rewind() {
+    function rewind()
+    {
         $this->count = 1;
         return $GLOBALS['fname2'];
     }
 }
 try {
-	chdir(__DIR__);
-	$phar = new Phar($fname);
-	$ret = $phar->buildFromIterator(new myIterator);
-	foreach ($ret as $a => $val) {
-		$ret[$a] = str_replace(dirname($fname2) . DIRECTORY_SEPARATOR, '*', $val);
-	}
-	var_dump($ret);
+    chdir(__DIR__);
+    $phar = new Phar($fname);
+    $ret = $phar->buildFromIterator(new myIterator());
+    foreach ($ret as $a => $val) {
+        $ret[$a] = str_replace(dirname($fname2) . DIRECTORY_SEPARATOR, '*', $val);
+    }
+    var_dump($ret);
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
+
 ?>
 --CLEAN--
 <?php

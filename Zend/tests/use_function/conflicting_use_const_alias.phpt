@@ -5,11 +5,11 @@ use const and use function with the same alias
 
 namespace {
     const foo = 'foo.const';
-    function foo() {
+    function foo()
+    {
         return 'foo.function';
     }
 }
-
 namespace x {
     use const foo as bar;
     use function foo as bar;

@@ -3,10 +3,12 @@ Testing dynamic calls
 --FILE--
 <?php
 
-class foo {
-	static public function a() {
-		print "ok\n";
-	}
+class foo
+{
+    public static function a()
+    {
+        print "ok\n";
+    }
 }
 
 $a = 'a';

@@ -2,8 +2,11 @@
 Bug #73156 (segfault on undefined function)
 --FILE--
 <?php
-class A {
-    public function __call($name, $args) {
+
+class A
+{
+    public function __call($name, $args)
+    {
         eval('$args = array(); var_dump(debug_backtrace());');
     }
 }
@@ -11,6 +14,7 @@ class A {
 $a = new A();
 
 $a->test("test");
+
 ?>
 --EXPECTF--
 array(2) {

@@ -6,6 +6,7 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
+
 /* Prototype  : string imap_fetchbody(resource $stream_id, int $msg_no, string $section [, int $options])
  * Description: Get a specific body section
  * Source code: ext/imap/php_imap.c
@@ -18,7 +19,7 @@ require_once(__DIR__.'/skipif.inc');
  */
 echo "*** Testing imap_fetchbody() : usage variations ***\n";
 
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__ . '/imap_include.inc');
 
 // Initialise required variables
 $stream_id = setup_test_mailbox('', 1); // set up temporary mailbox with one simple message
@@ -34,14 +35,14 @@ $options = array ('1', true,
 // iterate over each element of $options array to test whether FT_UID is set
 $iterator = 1;
 imap_check($stream_id);
-foreach($options as $option) {
-	echo "\n-- Iteration $iterator --\n";
-	if(is_string(imap_fetchbody($stream_id, $msg_uid, $section, $option))) {
-		echo "FT_UID valid\n";
-	} else {
+foreach ($options as $option) {
+    echo "\n-- Iteration $iterator --\n";
+    if (is_string(imap_fetchbody($stream_id, $msg_uid, $section, $option))) {
+        echo "FT_UID valid\n";
+    } else {
                 echo "FT_UID not valid\n";
-        }
-	$iterator++;
+    }
+    $iterator++;
 }
 
 ?>

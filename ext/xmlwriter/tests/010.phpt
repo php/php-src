@@ -7,7 +7,7 @@ if (!extension_loaded("xmlwriter")) die("skip");
 --FILE--
 <?php
 
-$file = __DIR__.'/010.tmp';
+$file = __DIR__ . '/010.tmp';
 
 $xw = xmlwriter_open_uri($file);
 
@@ -27,6 +27,7 @@ var_dump(file_get_contents($file));
 @unlink($file);
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 bool(true)

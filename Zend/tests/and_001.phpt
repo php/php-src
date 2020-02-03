@@ -29,6 +29,7 @@ $s &= "some long";
 var_dump($s);
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 string(3) "020"

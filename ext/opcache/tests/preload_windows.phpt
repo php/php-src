@@ -12,5 +12,7 @@ if (PHP_OS_FAMILY != 'Windows') die('skip Windows only test');
 ?>
 --FILE--
 Unreachable
+
+?>
 --EXPECTF--
 %s: Error Preloading is not supported on Windows

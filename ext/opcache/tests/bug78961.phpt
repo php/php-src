@@ -8,10 +8,12 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 $GLOBALS = array();
 $GLOBALS['td'] = array();
 $GLOBALS['td']['nsno'] = 3;
 var_dump($GLOBALS['td']['nsno']);
+
 ?>
 --EXPECT--
 int(3)

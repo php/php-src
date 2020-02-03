@@ -14,6 +14,7 @@ Jacopo Romei <jacopo@sviluppoagile.it>
 //file
 $fileInfo = new SplFileInfo('not_existing');
 var_dump($fileInfo->getGroup());
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught RuntimeException: SplFileInfo::getGroup(): stat failed for not_existing in %s

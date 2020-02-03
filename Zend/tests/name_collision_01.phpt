@@ -3,8 +3,14 @@ Object naming collision error: class/class
 --FILE--
 <?php
 
-class A { }
-class A { }
+class A
+{
+
+}
+class A
+{
+
+}
 
 ?>
 --EXPECTF--

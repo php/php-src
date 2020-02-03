@@ -33,6 +33,7 @@ try {
 } catch (TypeError $exception) {
     echo $exception->getMessage() . "\n";
 }
+
 ?>
 --EXPECTF--
 bool(true)

@@ -3,7 +3,8 @@ Bug #75786: segfault when using spread operator on generator passed by reference
 --FILE--
 <?php
 
-function &gen($items) {
+function &gen($items)
+{
     foreach ($items as $key => &$value) {
         yield $key => $value;
     }

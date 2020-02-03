@@ -35,6 +35,7 @@ class ChildClass extends ParentClass
 }
 
 $staff = ChildClass::GetCurrent();
+
 ?>
 --EXPECTF--
 Notice: Only variable references should be returned by reference in %sbug65372.php on line 30

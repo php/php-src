@@ -16,6 +16,7 @@ var_dump(gmp_sign($n));
 var_dump(gmp_sign(array()));
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 int(-1)

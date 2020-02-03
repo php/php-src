@@ -3,7 +3,8 @@ Precedence of yield and arrow operators
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     yield "a" . "b";
     yield "a" or die;
     yield "k" => "a" . "b";

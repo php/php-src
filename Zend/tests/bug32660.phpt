@@ -2,22 +2,23 @@
 Bug #32660 (Assignment by reference causes crash when field access is overloaded (__get))
 --FILE--
 <?php
+
 class A
 {
-	public $q;
+    public $q;
 
-	function __construct()
-	{
-		$this->q = 3;//array();
-	}
+    function __construct()
+    {
+        $this->q = 3;//array();
+    }
 
-	function __get($name)
-	{
-		return $this->q;
-	}
+    function __get($name)
+    {
+        return $this->q;
+    }
 }
 
-$a = new A;
+$a = new A();
 
 $b = "short";
 $c =& $a->whatever;
@@ -26,6 +27,7 @@ print_r($a);
 $a->whatever =& $b;
 $b = "much longer";
 print_r($a);
+
 ?>
 --EXPECTF--
 Notice: Indirect modification of overloaded property A::$whatever has no effect in %sbug32660.php on line 20

@@ -2,6 +2,7 @@
 SplFileObject::fread function
 --FILE--
 <?php
+
 $obj = new SplFileObject(__FILE__, 'r');
 $data = $obj->fread(5);
 var_dump($data);

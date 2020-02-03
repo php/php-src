@@ -3,14 +3,15 @@ Static member access
 --FILE--
 <?php
 
-class A {
+class A
+{
     public static $b = 0;
     public static $c = [0, 1];
     public static $A_str = 'A';
 }
 
 $A_str = 'A';
-$A_obj = new A;
+$A_obj = new A();
 $b_str = 'b';
 $c_str = 'c';
 

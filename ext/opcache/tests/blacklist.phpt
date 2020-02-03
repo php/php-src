@@ -19,14 +19,16 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
+
 $conf = opcache_get_configuration();
 $conf = $conf['blacklist'];
-$conf[3] = preg_replace("!^\\Q".__DIR__."\\E!", "__DIR__", $conf[3]);
-$conf[4] = preg_replace("!^\\Q".__DIR__."\\E!", "__DIR__", $conf[4]);
+$conf[3] = preg_replace("!^\\Q" . __DIR__ . "\\E!", "__DIR__", $conf[3]);
+$conf[4] = preg_replace("!^\\Q" . __DIR__ . "\\E!", "__DIR__", $conf[4]);
 print_r($conf);
 include("blacklist.inc");
 $status = opcache_get_status();
 print_r(count($status['scripts']));
+
 ?>
 --EXPECTF--
 Array

@@ -24,6 +24,7 @@ if ($interval->format('Y-m-d H:i:s') != $clonedInterval->format('Y-m-d H:i:s')) 
 }
 
 echo 'success';
+
 ?>
 --EXPECT--
 success

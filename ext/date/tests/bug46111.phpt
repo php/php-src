@@ -2,6 +2,7 @@
 Bug #46111 (strtotime() returns false for some valid timezones)
 --FILE--
 <?php
+
 date_default_timezone_set('Asia/Calcutta');
 $timezones = timezone_identifiers_list();
 
@@ -15,6 +16,7 @@ foreach ($timezones as $zone) {
     }
 }
 print "[strtotime(timezone) == false - End List]\n";
+
 ?>
 --EXPECT--
 [strtotime(timezone) == false - Begin List]

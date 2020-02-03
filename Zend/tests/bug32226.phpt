@@ -5,28 +5,25 @@ Bug #32226 (SEGV with exception handler on non existing instance)
 
 class A
 {
-        public function __construct()
-        {
-                set_exception_handler(array($this, 'EH'));
+    public function __construct()
+    {
+            set_exception_handler(array($this, 'EH'));
 
-                throw new Exception();
-        }
+            throw new Exception();
+    }
 
-        public function EH()
-        {
-                restore_exception_handler();
+    public function EH()
+    {
+            restore_exception_handler();
 
-                throw new Exception();
-        }
+            throw new Exception();
+    }
 }
 
-try
-{
-$a = new A();
-}
-catch(Exception $e)
-{
-	echo "Caught\n";
+try {
+    $a = new A();
+} catch (Exception $e) {
+    echo "Caught\n";
 }
 
 ?>

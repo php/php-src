@@ -2,23 +2,31 @@
 Aliasing on conflicting method should not cover up conflict.
 --FILE--
 <?php
+
 error_reporting(E_ALL);
 
-trait Hello {
-   public function sayHello() {
-     echo 'Hello';
-   }
+trait Hello
+{
+    public function sayHello()
+    {
+        echo 'Hello';
+    }
 }
 
-trait World {
-   public function sayHello() {
-     echo ' World!';
-   }
+trait World
+{
+    public function sayHello()
+    {
+        echo ' World!';
+    }
 }
 
 
-class MyClass {
-   use Hello, World { sayHello as sayWorld; }
+class MyClass
+{
+    use Hello, World {
+        sayHello as sayWorld;
+    }
 }
 
 $o = new MyClass();

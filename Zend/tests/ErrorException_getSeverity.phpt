@@ -14,671 +14,671 @@ const EXCEPTION_TRACE_AS_STRING_MSG = "#0 {main}";
 
 try {
     throw new ErrorException();
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_ERROR);
     var_dump($e->getMessage() === "");
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_ERROR);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_ERROR);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_ERROR);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_ERROR);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_WARNING);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_WARNING);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_PARSE);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_PARSE);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_NOTICE);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_NOTICE);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_CORE_ERROR);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_CORE_ERROR);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_CORE_WARNING);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_CORE_WARNING);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_CORE_WARNING);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_CORE_WARNING);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_COMPILE_ERROR);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_COMPILE_ERROR);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_COMPILE_WARNING);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_COMPILE_WARNING);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_ERROR);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_USER_ERROR);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_WARNING);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_USER_WARNING);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_NOTICE);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_USER_NOTICE);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_STRICT);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_STRICT);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_RECOVERABLE_ERROR);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_RECOVERABLE_ERROR);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_DEPRECATED);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_DEPRECATED);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_DEPRECATED);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_USER_DEPRECATED);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_ERROR, __FILE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_ERROR);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_WARNING, __FILE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_WARNING);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_PARSE, __FILE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_PARSE);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_NOTICE, __FILE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_NOTICE);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_CORE_ERROR, __FILE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_CORE_ERROR);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_CORE_WARNING, __FILE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_CORE_WARNING);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_CORE_WARNING, __FILE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_CORE_WARNING);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_COMPILE_ERROR, __FILE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_COMPILE_ERROR);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_COMPILE_WARNING, __FILE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_COMPILE_WARNING);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_ERROR, __FILE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_USER_ERROR);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_WARNING, __FILE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_USER_WARNING);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_NOTICE, __FILE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_USER_NOTICE);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_STRICT, __FILE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_STRICT);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_RECOVERABLE_ERROR, __FILE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_RECOVERABLE_ERROR);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_DEPRECATED, __FILE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_DEPRECATED);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_DEPRECATED, __FILE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_USER_DEPRECATED);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_ERROR, __FILE__, __LINE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_ERROR);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_WARNING, __FILE__, __LINE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_WARNING);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_PARSE, __FILE__, __LINE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_PARSE);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_NOTICE, __FILE__, __LINE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_NOTICE);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_CORE_ERROR, __FILE__, __LINE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_CORE_ERROR);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_CORE_WARNING, __FILE__, __LINE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_CORE_WARNING);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_CORE_WARNING, __FILE__, __LINE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_CORE_WARNING);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_COMPILE_ERROR, __FILE__, __LINE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_COMPILE_ERROR);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_COMPILE_WARNING, __FILE__, __LINE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_COMPILE_WARNING);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_ERROR, __FILE__, __LINE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_USER_ERROR);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_WARNING, __FILE__, __LINE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_USER_WARNING);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_NOTICE, __FILE__, __LINE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_USER_NOTICE);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_STRICT, __FILE__, __LINE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_STRICT);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_RECOVERABLE_ERROR, __FILE__, __LINE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_RECOVERABLE_ERROR);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_DEPRECATED, __FILE__, __LINE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_DEPRECATED);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
     throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_DEPRECATED, __FILE__, __LINE__);
-} catch(ErrorException $e) {
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_USER_DEPRECATED);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
-    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_DEPRECATED, __FILE__, __LINE__, NULL);
-} catch(ErrorException $e) {
+    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_DEPRECATED, __FILE__, __LINE__, null);
+} catch (ErrorException $e) {
     echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
     var_dump($e->getSeverity() === E_USER_DEPRECATED);
     var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
     var_dump($e->getCode() === 0);
-    var_dump($e->getPrevious() === NULL);
+    var_dump($e->getPrevious() === null);
     var_dump($e->getFile() === __FILE__);
     var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
 }
 
 try {
-    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_ERROR, __FILE__, __LINE__, NULL);
-} catch(Exception $exceptionErr) {
+    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_ERROR, __FILE__, __LINE__, null);
+} catch (Exception $exceptionErr) {
     try {
         throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_ERROR, __FILE__, __LINE__, $exceptionErr->getPrevious());
-    } catch(ErrorException $e) {
+    } catch (ErrorException $e) {
         echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
         var_dump($e->getSeverity() === E_ERROR);
         var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
         var_dump($e->getCode() === 0);
-        var_dump($e->getPrevious() === NULL);
+        var_dump($e->getPrevious() === null);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
     }
 }
 
 try {
-    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_WARNING, __FILE__, __LINE__, NULL);
-} catch(Exception $exceptionErr) {
+    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_WARNING, __FILE__, __LINE__, null);
+} catch (Exception $exceptionErr) {
     try {
         throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_WARNING, __FILE__, __LINE__, $exceptionErr->getPrevious());
-    } catch(ErrorException $e) {
+    } catch (ErrorException $e) {
         echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
         var_dump($e->getSeverity() === E_WARNING);
         var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
         var_dump($e->getCode() === 0);
-        var_dump($e->getPrevious() === NULL);
+        var_dump($e->getPrevious() === null);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
     }
 }
 
 try {
-    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_PARSE, __FILE__, __LINE__, NULL);
-} catch(Exception $exceptionErr) {
+    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_PARSE, __FILE__, __LINE__, null);
+} catch (Exception $exceptionErr) {
     try {
         throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_PARSE, __FILE__, __LINE__, $exceptionErr->getPrevious());
-    } catch(ErrorException $e) {
+    } catch (ErrorException $e) {
         echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
         var_dump($e->getSeverity() === E_PARSE);
         var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
         var_dump($e->getCode() === 0);
-        var_dump($e->getPrevious() === NULL);
+        var_dump($e->getPrevious() === null);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
     }
@@ -686,176 +686,176 @@ try {
 
 
 try {
-    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_NOTICE, __FILE__, __LINE__, NULL);
-} catch(Exception $exceptionErr) {
+    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_NOTICE, __FILE__, __LINE__, null);
+} catch (Exception $exceptionErr) {
     try {
         throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_NOTICE, __FILE__, __LINE__, $exceptionErr->getPrevious());
-    } catch(ErrorException $e) {
+    } catch (ErrorException $e) {
         echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
         var_dump($e->getSeverity() === E_NOTICE);
         var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
         var_dump($e->getCode() === 0);
-        var_dump($e->getPrevious() === NULL);
+        var_dump($e->getPrevious() === null);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
     }
 }
 
 try {
-    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_CORE_ERROR, __FILE__, __LINE__, NULL);
-} catch(Exception $exceptionErr) {
+    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_CORE_ERROR, __FILE__, __LINE__, null);
+} catch (Exception $exceptionErr) {
     try {
         throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_CORE_ERROR, __FILE__, __LINE__, $exceptionErr->getPrevious());
-    } catch(ErrorException $e) {
+    } catch (ErrorException $e) {
         echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
         var_dump($e->getSeverity() === E_CORE_ERROR);
         var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
         var_dump($e->getCode() === 0);
-        var_dump($e->getPrevious() === NULL);
+        var_dump($e->getPrevious() === null);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
     }
 }
 
 try {
-    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_CORE_WARNING, __FILE__, __LINE__, NULL);
-} catch(Exception $exceptionErr) {
+    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_CORE_WARNING, __FILE__, __LINE__, null);
+} catch (Exception $exceptionErr) {
     try {
         throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_CORE_WARNING, __FILE__, __LINE__, $exceptionErr->getPrevious());
-    } catch(ErrorException $e) {
+    } catch (ErrorException $e) {
         echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
         var_dump($e->getSeverity() === E_CORE_WARNING);
         var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
         var_dump($e->getCode() === 0);
-        var_dump($e->getPrevious() === NULL);
+        var_dump($e->getPrevious() === null);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
     }
 }
 
 try {
-    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_COMPILE_ERROR, __FILE__, __LINE__, NULL);
-} catch(Exception $exceptionErr) {
+    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_COMPILE_ERROR, __FILE__, __LINE__, null);
+} catch (Exception $exceptionErr) {
     try {
         throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_COMPILE_ERROR, __FILE__, __LINE__, $exceptionErr->getPrevious());
-    } catch(ErrorException $e) {
+    } catch (ErrorException $e) {
         echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
         var_dump($e->getSeverity() === E_COMPILE_ERROR);
         var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
         var_dump($e->getCode() === 0);
-        var_dump($e->getPrevious() === NULL);
+        var_dump($e->getPrevious() === null);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
     }
 }
 
 try {
-    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_COMPILE_WARNING, __FILE__, __LINE__, NULL);
-} catch(Exception $exceptionErr) {
+    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_COMPILE_WARNING, __FILE__, __LINE__, null);
+} catch (Exception $exceptionErr) {
     try {
         throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_COMPILE_WARNING, __FILE__, __LINE__, $exceptionErr->getPrevious());
-    } catch(ErrorException $e) {
+    } catch (ErrorException $e) {
         echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
         var_dump($e->getSeverity() === E_COMPILE_WARNING);
         var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
         var_dump($e->getCode() === 0);
-        var_dump($e->getPrevious() === NULL);
+        var_dump($e->getPrevious() === null);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
     }
 }
 
 try {
-    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_ERROR, __FILE__, __LINE__, NULL);
-} catch(Exception $exceptionErr) {
+    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_ERROR, __FILE__, __LINE__, null);
+} catch (Exception $exceptionErr) {
     try {
         throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_ERROR, __FILE__, __LINE__, $exceptionErr->getPrevious());
-    } catch(ErrorException $e) {
+    } catch (ErrorException $e) {
         echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
         var_dump($e->getSeverity() === E_USER_ERROR);
         var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
         var_dump($e->getCode() === 0);
-        var_dump($e->getPrevious() === NULL);
+        var_dump($e->getPrevious() === null);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
     }
 }
 
 try {
-    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_WARNING, __FILE__, __LINE__, NULL);
-} catch(Exception $exceptionErr) {
+    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_WARNING, __FILE__, __LINE__, null);
+} catch (Exception $exceptionErr) {
     try {
         throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_WARNING, __FILE__, __LINE__, $exceptionErr->getPrevious());
-    } catch(ErrorException $e) {
+    } catch (ErrorException $e) {
         echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
         var_dump($e->getSeverity() === E_USER_WARNING);
         var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
         var_dump($e->getCode() === 0);
-        var_dump($e->getPrevious() === NULL);
+        var_dump($e->getPrevious() === null);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
     }
 }
 
 try {
-    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_NOTICE, __FILE__, __LINE__, NULL);
-} catch(Exception $exceptionErr) {
+    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_NOTICE, __FILE__, __LINE__, null);
+} catch (Exception $exceptionErr) {
     try {
         throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_NOTICE, __FILE__, __LINE__, $exceptionErr->getPrevious());
-    } catch(ErrorException $e) {
+    } catch (ErrorException $e) {
         echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
         var_dump($e->getSeverity() === E_USER_NOTICE);
         var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
         var_dump($e->getCode() === 0);
-        var_dump($e->getPrevious() === NULL);
+        var_dump($e->getPrevious() === null);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
     }
 }
 
 try {
-    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_STRICT, __FILE__, __LINE__, NULL);
-} catch(Exception $exceptionErr) {
+    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_STRICT, __FILE__, __LINE__, null);
+} catch (Exception $exceptionErr) {
     try {
         throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_STRICT, __FILE__, __LINE__, $exceptionErr->getPrevious());
-    } catch(ErrorException $e) {
+    } catch (ErrorException $e) {
         echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
         var_dump($e->getSeverity() === E_STRICT);
         var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
         var_dump($e->getCode() === 0);
-        var_dump($e->getPrevious() === NULL);
+        var_dump($e->getPrevious() === null);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
     }
 }
 
 try {
-    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_RECOVERABLE_ERROR, __FILE__, __LINE__, NULL);
-} catch(Exception $exceptionErr) {
+    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_RECOVERABLE_ERROR, __FILE__, __LINE__, null);
+} catch (Exception $exceptionErr) {
     try {
         throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_RECOVERABLE_ERROR, __FILE__, __LINE__, $exceptionErr->getPrevious());
-    } catch(ErrorException $e) {
+    } catch (ErrorException $e) {
         echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
         var_dump($e->getSeverity() === E_RECOVERABLE_ERROR);
         var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
         var_dump($e->getCode() === 0);
-        var_dump($e->getPrevious() === NULL);
+        var_dump($e->getPrevious() === null);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
     }
 }
 
 try {
-    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_DEPRECATED, __FILE__, __LINE__, NULL);
-} catch(Exception $exceptionErr) {
+    throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_DEPRECATED, __FILE__, __LINE__, null);
+} catch (Exception $exceptionErr) {
     try {
         throw new ErrorException(EXCEPTION_PARAM_MSG, EXCEPTION_CODE_ERROR, E_USER_DEPRECATED, __FILE__, __LINE__, $exceptionErr->getPrevious());
-    } catch(ErrorException $e) {
+    } catch (ErrorException $e) {
         echo EXCEPTION_SEVERITY_ERROR_MSG . $e->getSeverity();
         var_dump($e->getSeverity() === E_USER_DEPRECATED);
         var_dump($e->getMessage() === EXCEPTION_PARAM_MSG);
         var_dump($e->getCode() === 0);
-        var_dump($e->getPrevious() === NULL);
+        var_dump($e->getPrevious() === null);
         var_dump($e->getFile() === __FILE__);
         var_dump($e->getTraceAsString() === EXCEPTION_TRACE_AS_STRING_MSG);
     }

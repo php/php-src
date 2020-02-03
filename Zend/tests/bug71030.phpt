@@ -3,14 +3,16 @@ Bug #71030: Self-assignment in list() may have inconsistent behavior
 --FILE--
 <?php
 
-function test1() {
+function test1()
+{
     $a = [1, 2];
     $c =& $a;
     list($c, $b) = $a;
     var_dump($a, $b);
 }
 
-function test2() {
+function test2()
+{
     $a = [1, 2];
     $_a = "a";
     list($$_a, $b) = $a;

@@ -3,36 +3,37 @@ Bug #62991 (Segfault with generator and closure)
 --FILE--
 <?php
 
-function test( array $array )
+function test(array $array)
 {
-    $closure = function() use ( $array ) {
-        print_r( $array );
+    $closure = function () use ($array) {
+        print_r($array);
         yield "hi";
     };
     return $closure();
 }
 
-function test2( array $array )
+function test2(array $array)
 {
-    $closure = function() use ( $array ) {
-        print_r( $array );
+    $closure = function () use ($array) {
+        print_r($array);
         yield "hi";
     };
     return $closure; // if you return the $closure and call it outside this function it works.
 }
 
-$generator = test(array( 1, 2, 3 ) );
-foreach($generator as $something) {
+$generator = test(array( 1, 2, 3 ));
+foreach ($generator as $something) {
 }
 
-$generator = test2(array( 1, 2, 3 ) );
-foreach($generator() as $something) {
+$generator = test2(array( 1, 2, 3 ));
+foreach ($generator() as $something) {
 }
 
 
-$generator = test2(array( 1, 2, 3 ) );
+$generator = test2(array( 1, 2, 3 ));
 
 echo "okey\n";
+
 ?>
 --EXPECT--
 Array

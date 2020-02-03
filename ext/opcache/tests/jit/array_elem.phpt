@@ -3,7 +3,8 @@ Refcount inference when adding array elements
 --FILE--
 <?php
 
-function test($a) {
+function test($a)
+{
     $ary = [$a];
     $ary2 = [0, $ary, $ary];
     return $ary2;

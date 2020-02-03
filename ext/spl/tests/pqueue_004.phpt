@@ -2,6 +2,7 @@
 SPL: SplPriorityQueue: var_dump
 --FILE--
 <?php
+
 $pq = new SplPriorityQueue();
 
 $pq->insert("a", 0);
@@ -10,6 +11,7 @@ $pq->insert("c", 5);
 $pq->insert("d", -2);
 
 var_dump($pq);
+
 ?>
 --EXPECT--
 object(SplPriorityQueue)#1 (3) {

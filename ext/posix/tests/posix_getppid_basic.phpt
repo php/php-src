@@ -6,6 +6,7 @@ Test posix_getppid() function : basic functionality
 ?>
 --FILE--
 <?php
+
   echo "Basic test of POSIX getppid function\n";
 
   $ppid = posix_getppid();

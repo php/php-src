@@ -2,14 +2,18 @@
 Combination of foreach, finally and goto (call order)
 --FILE--
 <?php
-class A {
-	public $n = 0;
-	function __construct($n) {
-		$this->n = $n;
-	}
-	function __destruct() {
-		echo "destruct" . $this->n . "\n";
-	}
+
+class A
+{
+    public $n = 0;
+    function __construct($n)
+    {
+        $this->n = $n;
+    }
+    function __destruct()
+    {
+        echo "destruct" . $this->n . "\n";
+    }
 }
 
 foreach ([new A(1)] as $a) {
@@ -25,12 +29,13 @@ foreach ([new A(1)] as $a) {
             } finally {
                 echo "finally1\n";
             }
-out: ;
+            out: ;
         }
     } finally {
         echo "finally2\n";
     }
 }
+
 ?>
 --EXPECT--
 destruct3

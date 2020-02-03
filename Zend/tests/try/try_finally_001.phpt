@@ -2,15 +2,18 @@
 Try finally (basic test)
 --FILE--
 <?php
-function foo ($a) {
-   try {
-     throw new Exception("ex");
-   } finally {
-     var_dump($a);
-   }
+
+function foo($a)
+{
+    try {
+        throw new Exception("ex");
+    } finally {
+        var_dump($a);
+    }
 }
 
 foo("finally");
+
 ?>
 --EXPECTF--
 string(7) "finally"

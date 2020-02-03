@@ -4,7 +4,8 @@ Trying to use lambda as array key
 <?php
 
 try {
-    var_dump(array(function() { } => 1));
+    var_dump(array(function () {
+    } => 1));
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }

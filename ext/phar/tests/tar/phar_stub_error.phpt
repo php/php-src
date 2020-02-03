@@ -11,7 +11,7 @@ phar.readonly=0
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
 
 $phar = new Phar($fname);
-$stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>' ."\r\n";
+$stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>' . "\r\n";
 $phar->setStub($stub);
 $phar->setAlias('hio');
 $phar['a'] = 'a';
@@ -23,9 +23,9 @@ var_dump($phar->getStub() == $stub);
 $newstub = '<?php echo "second stub\n"; _x_HALT_COMPILER(); ?>';
 
 try {
-	$phar->setStub($newstub);
-} catch(exception $e) {
-	echo 'Exception: ' . $e->getMessage() . "\n";
+    $phar->setStub($newstub);
+} catch (exception $e) {
+    echo 'Exception: ' . $e->getMessage() . "\n";
 }
 
 var_dump($phar->getStub());

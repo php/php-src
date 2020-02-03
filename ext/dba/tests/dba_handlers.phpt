@@ -8,8 +8,9 @@ die("info $HND handler used");
 ?>
 --FILE--
 <?php
-$handler="flatfile";
-require_once(__DIR__ .'/test.inc');
+
+$handler = "flatfile";
+require_once(__DIR__ . '/test.inc');
 echo "database handler: $handler\n";
 
 function check($h)

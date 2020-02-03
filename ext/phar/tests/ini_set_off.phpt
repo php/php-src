@@ -9,6 +9,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 var_dump(ini_set('phar.require_hash', 1));
 var_dump(ini_set('phar.readonly', 1));
 var_dump(ini_get('phar.require_hash'));
@@ -52,6 +53,8 @@ var_dump(ini_set('phar.readonly', 0));
 var_dump(Phar::canWrite());
 var_dump(ini_get('phar.require_hash'));
 var_dump(ini_get('phar.readonly'));
+?>
+
 ?>
 --EXPECT--
 string(1) "0"

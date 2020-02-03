@@ -2,7 +2,9 @@
 Bug #70228 (memleak if return hidden by throw in finally block)
 --FILE--
 <?php
-function test() {
+
+function test()
+{
     try {
         return str_repeat("a", 2);
     } finally {
@@ -15,6 +17,7 @@ try {
 } catch (Exception $e) {
     echo $e->getMessage(), "\n";
 }
+
 ?>
 --EXPECT--
 ops

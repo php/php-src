@@ -8,19 +8,19 @@ phar.readonly=0
 --FILE--
 <?php
 
-mkdir(__DIR__.'/testdir5');
-foreach(range(1, 4) as $i) {
-    file_put_contents(__DIR__."/testdir5/file$i.txt", "some content for file $i");
+mkdir(__DIR__ . '/testdir5');
+foreach (range(1, 4) as $i) {
+    file_put_contents(__DIR__ . "/testdir5/file$i.txt", "some content for file $i");
 }
 
 try {
-	$phar = new Phar(__DIR__ . '/buildfromdirectory5.phar');
-	$a = $phar->buildFromDirectory(__DIR__ . '/testdir5', '/\.txt/');
-	asort($a);
-	var_dump($a);
+    $phar = new Phar(__DIR__ . '/buildfromdirectory5.phar');
+    $a = $phar->buildFromDirectory(__DIR__ . '/testdir5', '/\.txt/');
+    asort($a);
+    var_dump($a);
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
 
 var_dump(file_exists(__DIR__ . '/buildfromdirectory5.phar'));

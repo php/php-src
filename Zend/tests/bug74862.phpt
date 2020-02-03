@@ -3,15 +3,14 @@ Bug #74862 (Unable to clone instance when private __clone defined)
 --FILE--
 <?php
 
-class a {
+class a
+{
     private function __clone()
     {
-
     }
 
     private function __construct()
     {
-
     }
 
     public static function getInstance()
@@ -27,7 +26,8 @@ class a {
     }
 }
 
-class c extends a {
+class c extends a
+{
 
 }
 
@@ -37,6 +37,7 @@ $d = c::getInstance();
 // private clone
 $e = $d->cloneIt();
 var_dump($e);
+
 ?>
 --EXPECT--
 object(c)#2 (0) {

@@ -2,23 +2,29 @@
 Traits can fulfill the requirements of abstract base classes.
 --FILE--
 <?php
+
 error_reporting(E_ALL);
 
-abstract class Base {
-  abstract function sayWorld();
+abstract class Base
+{
+    abstract function sayWorld();
 }
 
-trait Hello {
-   public function sayHello() {
-     echo 'Hello';
-   }
-   public function sayWorld() {
-     echo ' World!';
-   }
- }
+trait Hello
+{
+    public function sayHello()
+    {
+        echo 'Hello';
+    }
+    public function sayWorld()
+    {
+        echo ' World!';
+    }
+}
 
-class MyHelloWorld extends Base {
-	use Hello;
+class MyHelloWorld extends Base
+{
+    use Hello;
 }
 
 $o = new MyHelloWorld();

@@ -27,5 +27,7 @@ class ObjB extends ObjA
 $obj = new ObjB(new ArrayObject());
 
 var_dump($obj == unserialize(serialize($obj)));
+
+?>
 --EXPECT--
 bool(true)

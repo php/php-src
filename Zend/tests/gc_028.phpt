@@ -4,22 +4,26 @@ GC 028: GC and destructors
 zend.enable_gc=1
 --FILE--
 <?php
-class Foo {
-	public $bar;
-	function __destruct() {
-		if ($this->bar !== null) {
-			unset($this->bar);
-		}
-	}
-}
-class Bar {
-	public $foo;
-        function __destruct() {
-                if ($this->foo !== null) {
-                        unset($this->foo);
-                }
-        }
 
+class Foo
+{
+    public $bar;
+    function __destruct()
+    {
+        if ($this->bar !== null) {
+            unset($this->bar);
+        }
+    }
+}
+class Bar
+{
+    public $foo;
+    function __destruct()
+    {
+        if ($this->foo !== null) {
+                unset($this->foo);
+        }
+    }
 }
 $foo = new Foo();
 $bar = new Bar();
@@ -29,6 +33,7 @@ unset($foo);
 unset($bar);
 var_dump(gc_collect_cycles());
 var_dump(gc_collect_cycles());
+
 ?>
 --EXPECT--
 int(0)

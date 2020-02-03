@@ -3,7 +3,7 @@ Throw reference
 --FILE--
 <?php
 
-$e = new Exception;
+$e = new Exception();
 $ref =& $e;
 throw $e;
 

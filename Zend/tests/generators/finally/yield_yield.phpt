@@ -3,7 +3,8 @@ Try { yield } finally { yield }
 --FILE--
 <?php
 
-function foo() {
+function foo()
+{
     try {
         echo "1";
         yield "2";
@@ -18,5 +19,7 @@ function foo() {
 foreach (foo() as $x) {
     echo $x;
 }
+
+?>
 --EXPECT--
 1234567

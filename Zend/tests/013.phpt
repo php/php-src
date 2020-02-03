@@ -3,7 +3,8 @@ interface_exists() tests
 --FILE--
 <?php
 
-interface foo {
+interface foo
+{
 }
 
 var_dump(interface_exists("qwerty"));
@@ -15,6 +16,7 @@ var_dump(interface_exists("stdClass", false));
 var_dump(interface_exists("stdClass"));
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 bool(false)

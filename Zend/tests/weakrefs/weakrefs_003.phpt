@@ -2,37 +2,39 @@
 WeakReference object handlers
 --FILE--
 <?php
-$wr = WeakReference::create(new stdClass);
+
+$wr = WeakReference::create(new stdClass());
 
 try {
-	$wr->disallow;
+    $wr->disallow;
 } catch (Error $ex) {
-	var_dump($ex->getMessage());
+    var_dump($ex->getMessage());
 }
 
 try {
-	$wr->disallow = "writes";
+    $wr->disallow = "writes";
 } catch (Error $ex) {
-	var_dump($ex->getMessage());
+    var_dump($ex->getMessage());
 }
 
 try {
-	isset($wr->disallow);
+    isset($wr->disallow);
 } catch (Error $ex) {
-	var_dump($ex->getMessage());
+    var_dump($ex->getMessage());
 }
 
 try {
-	unset($wr->disallow);
+    unset($wr->disallow);
 } catch (Error $ex) {
-	var_dump($ex->getMessage());
+    var_dump($ex->getMessage());
 }
 
 try {
-	$disallow = &$wr->disallowed;
+    $disallow = &$wr->disallowed;
 } catch (Error $ex) {
-	var_dump($ex->getMessage());
+    var_dump($ex->getMessage());
 }
+
 ?>
 --EXPECT--
 string(47) "WeakReference objects do not support properties"

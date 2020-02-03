@@ -7,7 +7,9 @@ Havard Eide <nucleuz@gmail.com>
 date.timezone=UTC
 --FILE--
 <?php
+
 new DatePeriod();
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Exception: DatePeriod::__construct(): This constructor accepts either (DateTimeInterface, DateInterval, int) OR (DateTimeInterface, DateInterval, DateTime) OR (string) as arguments. in %s:%d

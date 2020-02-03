@@ -10,6 +10,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/phar_gzip.phar';
 $pname = 'phar://' . $fname;
 $fname2 = __DIR__ . '/phar_gzip.2.phar';
@@ -39,6 +40,7 @@ $a->setAlias('another');
 $b = new Phar($fname2);
 var_dump($b->isFileFormat(Phar::PHAR));
 var_dump($b->isCompressed() == Phar::GZ);
+
 ?>
 --CLEAN--
 <?php

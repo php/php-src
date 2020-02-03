@@ -3,8 +3,9 @@ Aborted yield during switch
 --FILE--
 <?php
 
-function gen($x) {
-    switch ($x."y") {
+function gen($x)
+{
+    switch ($x . "y") {
         default:
             yield;
     }

@@ -3,7 +3,7 @@ DateTimeImmutable::modify() with invalid format
 --FILE--
 <?php
 
-$datetime = new DateTimeImmutable;
+$datetime = new DateTimeImmutable();
 var_dump($datetime->modify(''));
 
 ?>

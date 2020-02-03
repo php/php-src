@@ -13,7 +13,6 @@ if (!extension_loaded('posix')) {
 --FILE--
 <?php
 
-
 echo "*** Test substituting argument 1 with emptyUnsetUndefNull values ***\n";
 
 
@@ -26,14 +25,15 @@ $variation_array = array(
   'undefined var' => @$undefined_var,
   'empty string DQ' => "",
   'empty string SQ' => '',
-  'uppercase NULL' => NULL,
+  'uppercase NULL' => null,
   'lowercase null' => null,
   );
 
 
-foreach ( $variation_array as $var ) {
-  var_dump(posix_ttyname( $var  ) );
+foreach ($variation_array as $var) {
+    var_dump(posix_ttyname($var));
 }
+
 ?>
 --EXPECT--
 *** Test substituting argument 1 with emptyUnsetUndefNull values ***

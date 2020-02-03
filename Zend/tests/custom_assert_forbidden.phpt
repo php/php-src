@@ -5,7 +5,9 @@ Defining a free-standing assert() function is deprecated
 
 namespace FooBar;
 
-function assert() {}
+function assert()
+{
+}
 
 ?>
 --EXPECTF--

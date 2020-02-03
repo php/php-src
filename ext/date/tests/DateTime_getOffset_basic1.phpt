@@ -2,6 +2,7 @@
 Test DateTime::getOffset() function : basic functionality
 --FILE--
 <?php
+
 /* Prototype  : public int DateTime::getOffset  ( void  )
  * Description: Returns the daylight saving time offset
  * Source code: ext/date/php_date.c

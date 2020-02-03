@@ -3,7 +3,8 @@ Bug #51791 (constant() failed to check undefined constant and php interpreter st
 --FILE--
 <?php
 
-class A  {
+class A
+{
     const B = 1;
 }
 try {

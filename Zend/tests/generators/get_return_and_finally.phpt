@@ -3,7 +3,8 @@ Test interaction of Generator::getReturn() and finally
 --FILE--
 <?php
 
-function gen1() {
+function gen1()
+{
     try {
         throw new Exception("gen1() throw");
     } finally {
@@ -16,7 +17,8 @@ function gen1() {
 $gen = gen1();
 var_dump($gen->getReturn());
 
-function gen2() {
+function gen2()
+{
     try {
         return 42;
     } finally {

@@ -4,8 +4,9 @@ Bug #63055 (Segfault in zend_gc with SF2 testsuite)
 zend.enable_gc=1
 --FILE--
 <?php
+
 /* the default gc root size is 10,000 */
-for ($i=0; $i<9998; $i++) {
+for ($i = 0; $i < 9998; $i++) {
     $array = array();
     $array[0] = &$array;
     unset($array);
@@ -20,6 +21,7 @@ $matches[2] = $dummy;
 
 str_replace("foo", "bar", "foobar", $matches);
 echo "okey";
+
 ?>
 --EXPECT--
 okey

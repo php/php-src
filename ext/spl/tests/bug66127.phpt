@@ -4,9 +4,11 @@ Bug #66127 (Segmentation fault with ArrayObject unset)
 error_reporting = E_ALL & ~E_NOTICE
 --FILE--
 <?php
+
 function crash()
 {
-    set_error_handler(function () {});
+    set_error_handler(function () {
+    });
     $var = 1;
     trigger_error('error');
     $var2 = $var;
@@ -20,6 +22,7 @@ unset($items[0]);
 unset($items[0][0]);
 crash();
 echo "Worked!\n";
+
 ?>
 --EXPECT--
 Worked!

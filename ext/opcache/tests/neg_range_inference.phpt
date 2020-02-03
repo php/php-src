@@ -5,7 +5,8 @@ Incorrect negative range inference
 --FILE--
 <?php
 
-function test() {
+function test()
+{
     for ($i = 0; $i < 10; $i++) {
         if ($i != 5) {
             $t = (int) ($i < 5);

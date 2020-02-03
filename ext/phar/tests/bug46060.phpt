@@ -7,6 +7,7 @@ Phar: Bug #46060: addEmptyDir() breaks
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';
 $fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.tar';
 
@@ -18,6 +19,7 @@ copy($fname, $fname2);
 $phar = new PharData($fname2);
 
 var_dump($phar['blah']->isDir(), $phar['test']->isDir());
+
 ?>
 --CLEAN--
 <?php

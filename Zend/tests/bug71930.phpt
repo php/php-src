@@ -9,9 +9,11 @@ if (!extension_loaded("curl")) {
 --FILE--
 <?php
 
-class A {
-	public static function dummy() {
-	}
+class A
+{
+    public static function dummy()
+    {
+    }
 }
 
 $a = array();
@@ -22,9 +24,13 @@ $ch1 = curl_init();
 curl_setopt($ch1, CURLOPT_HEADERFUNCTION, $a);
 
 set_error_handler($a);
-set_error_handler(function()use($ch1){});
-set_error_handler(function(){});
+set_error_handler(function () use ($ch1) {
+});
+set_error_handler(function () {
+});
 ?>
 okey
+
+?>
 --EXPECT--
 okey

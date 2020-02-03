@@ -4,6 +4,7 @@ Test ctype_space() function : usage variations - different data types as $c argu
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 /* Prototype  : bool ctype_space(mixed $c)
  * Description: Checks for whitespace character(s)
  * Source code: ext/ctype/ctype.c
@@ -19,14 +20,15 @@ $orig = setlocale(LC_CTYPE, "C");
 
 //get an unset variable
 $unset_var = 10;
-unset ($unset_var);
+unset($unset_var);
 
 // get a class
 class classA
 {
-	public function __toString() {
-		return "\n\t\r";
-	}
+    public function __toString()
+    {
+        return "\n\t\r";
+    }
 }
 
 // heredoc string
@@ -54,14 +56,14 @@ $inputs = array(
        .5,
 
        // null data
-/*10*/ NULL,
+/*10*/ null,
        null,
 
        // boolean data
 /*12*/ true,
        false,
-       TRUE,
-       FALSE,
+       true,
+       false,
 
        // empty data
 /*16*/ "",
@@ -88,15 +90,16 @@ $inputs = array(
 
 // loop through each element of $inputs to check the behavior of ctype_space()
 $iterator = 1;
-foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump( ctype_space($input) );
-	$iterator++;
+foreach ($inputs as $input) {
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(ctype_space($input));
+    $iterator++;
 }
 
 fclose($fp);
 
 setlocale(LC_CTYPE, $orig);
+
 ?>
 --EXPECT--
 *** Testing ctype_space() : usage variations ***

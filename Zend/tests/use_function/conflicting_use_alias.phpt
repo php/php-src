@@ -4,11 +4,11 @@ use and use function with the same alias
 <?php
 
 namespace {
-    function foo() {
+    function foo()
+    {
         return 'foo';
     }
 }
-
 namespace x {
     use foo as bar;
     use function foo as bar;

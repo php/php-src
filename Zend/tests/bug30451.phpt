@@ -3,31 +3,33 @@ Bug #30451 (static properties permissions broken)
 --FILE--
 <?php
 
-class A {
+class A
+{
 
-	protected static $property = TRUE;
+    protected static $property = true;
 
-	protected static function method() {
-		return TRUE;
-	}
-
+    protected static function method()
+    {
+        return true;
+    }
 }
 
-class B extends A {
+class B extends A
+{
 
-	public function __construct() {
+    public function __construct()
+    {
 
-		var_dump(self::method());
-		var_dump(parent::method());
+        var_dump(self::method());
+        var_dump(parent::method());
 
-		var_dump(self::$property);
-		var_dump(parent::$property);
-
-	}
-
+        var_dump(self::$property);
+        var_dump(parent::$property);
+    }
 }
 
-new B;
+new B();
+
 ?>
 --EXPECT--
 bool(true)

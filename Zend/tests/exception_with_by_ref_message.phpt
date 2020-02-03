@@ -5,7 +5,8 @@ Exception with by-ref message
 
 class MyException extends Exception
 {
-    public function __construct(&$msg) {
+    public function __construct(&$msg)
+    {
         $this->message =& $msg;
     }
 }

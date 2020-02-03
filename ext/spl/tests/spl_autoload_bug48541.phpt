@@ -3,18 +3,20 @@ SPL: spl_autoload_register() Bug #48541: registering multiple closures fails wit
 --FILE--
 <?php
 
-class X {
-  public function getClosure() {
-    return function($class) {
-      echo "a2 called\n";
-    };
-  }
+class X
+{
+    public function getClosure()
+    {
+        return function ($class) {
+            echo "a2 called\n";
+        };
+    }
 }
 
 $a = function ($class) {
     echo "a called\n";
 };
-$x = new X;
+$x = new X();
 $a2 = $x->getClosure();
 $b = function ($class) {
     eval('class ' . $class . '{function __construct(){echo "foo\n";}}');
@@ -28,7 +30,8 @@ $c = $a;
 $c2 = $a2;
 spl_autoload_register($c);
 spl_autoload_register($c2);
-$c = new foo;
+$c = new foo();
+
 ?>
 --EXPECT--
 a called

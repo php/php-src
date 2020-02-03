@@ -8,13 +8,16 @@ opcache.file_cache_only=0
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function undef_negation() {
+
+function undef_negation()
+{
     echo "In undef_negation\n";
     $v = !$v;
     var_export($v);
     echo "\n";
 }
-function undef_bool_cast() {
+function undef_bool_cast()
+{
     echo "In undef_bool_cast\n";
     $v = (bool)$v;
     var_export($v);
@@ -22,6 +25,7 @@ function undef_bool_cast() {
 }
 undef_negation();
 undef_bool_cast();
+
 ?>
 --EXPECTF--
 In undef_negation

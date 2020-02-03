@@ -3,18 +3,20 @@ Bug #64555: Array key within interned string gets wrong hash value
 --FILE--
 <?php
 
-class Foo {
+class Foo
+{
     protected $unsetme = 1;
     protected $keepme = 2;
 
-    public function test() {
+    public function test()
+    {
         $a = get_object_vars($this);
 
         foreach ($a as $k => $v) {
             if ($k == 'unsetme') {
                 echo "Unsetting: $k\n";
                 unset($a[$k]);
-            } else if ($k == 'keepme') {
+            } elseif ($k == 'keepme') {
                 echo "Changing: $k\n";
                 $a[$k] = 42;
                 $a['keepme'] = 43;
@@ -25,7 +27,7 @@ class Foo {
     }
 }
 
-$f = new Foo;
+$f = new Foo();
 $f->test();
 
 ?>

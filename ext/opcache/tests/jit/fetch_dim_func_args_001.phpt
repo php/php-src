@@ -9,12 +9,16 @@ opcache.jit_buffer_size=1M
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 namespace A;
 
-class A {
-	public function change(array $config) {
-		$config['keys'] = array_keys($config["a"]);;
-	}
+class A
+{
+    public function change(array $config)
+    {
+        $config['keys'] = array_keys($config["a"]);
+        ;
+    }
 }
 
 $a = new A();
@@ -22,5 +26,7 @@ $a = new A();
 $a->change($a = array("a" => range(1, 5)));
 ?>
 okey
+
+?>
 --EXPECT--
 okey

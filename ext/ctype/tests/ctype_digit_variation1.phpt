@@ -4,6 +4,7 @@ Test ctype_digit() function : usage variations - different data types as $c arg
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 /* Prototype  : bool ctype_digit(mixed $c)
  * Description: Checks for numeric character(s)
  * Source code: ext/ctype/ctype.c
@@ -19,14 +20,15 @@ $orig = setlocale(LC_CTYPE, "C");
 
 //get an unset variable
 $unset_var = 10;
-unset ($unset_var);
+unset($unset_var);
 
 // get a class
 class classA
 {
-	public function __toString() {
-		return "123456";
-	}
+    public function __toString()
+    {
+        return "123456";
+    }
 }
 
 // heredoc string
@@ -54,14 +56,14 @@ $inputs = array(
        .5,
 
        // null data
-/*10*/ NULL,
+/*10*/ null,
        null,
 
        // boolean data
 /*12*/ true,
        false,
-       TRUE,
-       FALSE,
+       true,
+       false,
 
        // empty data
 /*16*/ "",
@@ -88,15 +90,16 @@ $inputs = array(
 
 // loop through each element of $inputs to check the behavior of ctype_digit()
 $iterator = 1;
-foreach($inputs as $input) {
-  echo "\n-- Iteration $iterator --\n";
-  var_dump( ctype_digit($input) );
-  $iterator++;
+foreach ($inputs as $input) {
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(ctype_digit($input));
+    $iterator++;
 };
 
 fclose($fp);
 
 setlocale(LC_CTYPE, $orig);
+
 ?>
 --EXPECT--
 *** Testing ctype_digit() : usage variations ***

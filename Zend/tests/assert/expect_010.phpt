@@ -5,14 +5,20 @@ zend.assertions=1
 assert.exception=1
 --FILE--
 <?php
-class One {
-    public function __construct() {
+
+class One
+{
+    public function __construct()
+    {
         assert(false);
     }
 }
-class Two extends One {}
+class Two extends One
+{
+}
 
 new Two();
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught AssertionError: assert(false) in %sexpect_010.php:%d

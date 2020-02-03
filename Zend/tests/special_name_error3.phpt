@@ -3,7 +3,9 @@ Cannot use special class name as trait name
 --FILE--
 <?php
 
-trait self {}
+trait self
+{
+}
 
 ?>
 --EXPECTF--

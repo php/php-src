@@ -10,8 +10,11 @@ opcache.file_cache_only=1
 <?php if (substr(PHP_OS, 0, 3) == 'WIN') die('skip..  not for Windows'); ?>
 --FILE--
 <?php
+
 ini_set("include_path", "/tmp");
 ?>
 okey
+
+?>
 --EXPECT--
 okey

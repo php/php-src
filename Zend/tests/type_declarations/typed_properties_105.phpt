@@ -2,7 +2,9 @@
 Bug #77673 ReflectionClass::getDefaultProperties returns spooky array
 --FILE--
 <?php
-class A {
+
+class A
+{
     public B $c;
 }
 
@@ -12,6 +14,7 @@ $defaults = $class->getDefaultProperties();
 
 var_dump($defaults);
 var_dump(array_key_exists('c', $defaults));
+
 ?>
 --EXPECT--
 array(0) {

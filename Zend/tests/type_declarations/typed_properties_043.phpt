@@ -3,24 +3,25 @@ Trying to assign to a static 'self' typed property on a trait must not fixate th
 --FILE--
 <?php
 
-trait Test {
+trait Test
+{
     public static self $selfProp;
     public static ?self $selfNullProp;
     public static parent $parentProp;
 }
 
 try {
-    Test::$selfProp = new stdClass;
+    Test::$selfProp = new stdClass();
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-    Test::$selfNullProp = new stdClass;
+    Test::$selfNullProp = new stdClass();
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-    Test::$parentProp = new stdClass;
+    Test::$parentProp = new stdClass();
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
@@ -28,14 +29,17 @@ try {
 Test::$selfNullProp = null;
 var_dump(Test::$selfNullProp);
 
-class Foo {}
-class Bar extends Foo {
+class Foo
+{
+}
+class Bar extends Foo
+{
     use Test;
 }
 
-Bar::$selfProp = new Bar;
-Bar::$selfNullProp = new Bar;
-Bar::$parentProp = new Foo;
+Bar::$selfProp = new Bar();
+Bar::$selfNullProp = new Bar();
+Bar::$parentProp = new Foo();
 
 var_dump(Bar::$selfProp, Bar::$selfNullProp, Bar::$parentProp);
 

@@ -3,7 +3,10 @@ Coalesce assign (??=): Non-writable variable
 --FILE--
 <?php
 
-function foo() { return 123; }
+function foo()
+{
+    return 123;
+}
 foo() ??= 456;
 
 ?>

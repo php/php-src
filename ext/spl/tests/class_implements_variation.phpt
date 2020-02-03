@@ -2,6 +2,7 @@
 SPL: Test class_implements() function : variation - no interfaces and autoload
 --FILE--
 <?php
+
 /* Prototype  : array class_implements(mixed what [, bool autoload ])
  * Description: Return all classes and interfaces implemented by SPL
  * Source code: ext/spl/php_spl.c
@@ -11,12 +12,14 @@ SPL: Test class_implements() function : variation - no interfaces and autoload
 echo "*** Testing class_implements() : variation ***\n";
 
 echo "--- testing no interfaces ---\n";
-class fs {}
-var_dump(class_implements(new fs));
+class fs
+{
+}
+var_dump(class_implements(new fs()));
 var_dump(class_implements('fs'));
 
 spl_autoload_register(function ($classname) {
-   echo "attempting to autoload $classname\n";
+    echo "attempting to autoload $classname\n";
 });
 
 echo "\n--- testing autoload ---\n";

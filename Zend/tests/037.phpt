@@ -5,7 +5,10 @@ Trying to access inexistent static property of Closure
 
 namespace closure;
 
-class closure { static $x = 1;}
+class closure
+{
+    static $x = 1;
+}
 
 $x = __NAMESPACE__;
 var_dump(closure::$x);

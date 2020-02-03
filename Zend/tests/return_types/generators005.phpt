@@ -2,12 +2,16 @@
 Return type covariance works with generators
 --FILE--
 <?php
-interface Collection extends IteratorAggregate {
+
+interface Collection extends IteratorAggregate
+{
     function getIterator(): Iterator;
 }
 
-class SomeCollection implements Collection {
-    function getIterator(): Iterator {
+class SomeCollection implements Collection
+{
+    function getIterator(): Iterator
+    {
         foreach ($this->data as $key => $value) {
             yield $key => $value;
         }
@@ -16,6 +20,8 @@ class SomeCollection implements Collection {
 
 $some = new SomeCollection();
 var_dump($some->getIterator());
+
+?>
 --EXPECTF--
 object(Generator)#%d (%d) {
 }

@@ -5,13 +5,13 @@ Bug #54013 (ReflectionParam for duplicate parameter contains garbage) (PHP7)
 
 class a
 {
-        function b($aaaaaaaa, $aaaaaaaa)
-        {
-                $params = func_get_args();
-        }
+    function b($aaaaaaaa, $aaaaaaaa)
+    {
+            $params = func_get_args();
+    }
 }
 
-$c = new a;
+$c = new a();
 $c->b('waa?', 'meukee!');
 
 $reflectionClass = new ReflectionClass($c);

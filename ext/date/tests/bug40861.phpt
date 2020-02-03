@@ -2,6 +2,7 @@
 Bug #40861 (Multiple +/- on relative units breaks strtotime())
 --FILE--
 <?php
+
 date_default_timezone_set("GMT");
 
 $offset = +60;

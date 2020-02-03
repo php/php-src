@@ -6,6 +6,7 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
+
 /* Prototype  : bool imap_clearflag_full  ( resource $imap_stream  , string $sequence  , string $flag  [, string $options  ] )
  * Description: Clears flags on messages.
  * Source code: ext/imap/php_imap.c
@@ -13,16 +14,16 @@ require_once(__DIR__.'/skipif.inc');
 
 echo "*** Testing imap_clearflag_full() : basic functionality ***\n";
 
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__ . '/imap_include.inc');
 
 echo "Create a new mailbox for test\n";
 $imap_stream = setup_test_mailbox("", 10);
 if (!is_resource($imap_stream)) {
-	exit("TEST FAILED: Unable to create test mailbox\n");
+    exit("TEST FAILED: Unable to create test mailbox\n");
 }
 
 $check = imap_check($imap_stream);
-echo "Initial msg count in new_mailbox : ". $check->Nmsgs . "\n";
+echo "Initial msg count in new_mailbox : " . $check->Nmsgs . "\n";
 
 echo "Set some flags\n";
 var_dump(imap_setflag_full($imap_stream, "1,3", "\\Seen \\Answered"));
@@ -46,6 +47,7 @@ var_dump(imap_search($imap_stream, "FLAGGED"));
 var_dump(imap_search($imap_stream, "DELETED"));
 
 imap_close($imap_stream);
+
 ?>
 --CLEAN--
 <?php

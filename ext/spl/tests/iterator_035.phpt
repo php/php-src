@@ -10,6 +10,7 @@ $a[] = $tmp;
 $a[] = &$tmp;
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Notice: Indirect modification of overloaded element of ArrayIterator has no effect in %s on line %d

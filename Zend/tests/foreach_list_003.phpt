@@ -5,7 +5,7 @@ foreach with list key
 
 $array = [['a', 'b'], 'c', 'd'];
 
-foreach($array as list($key) => list(list(), $a)) {
+foreach ($array as list($key) => list(list(), $a)) {
 }
 
 ?>

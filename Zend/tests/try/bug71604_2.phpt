@@ -3,7 +3,8 @@ Bug #71604: Aborted Generators continue after nested finally (2)
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     try {
         throw new Exception(1);
     } finally {

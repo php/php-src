@@ -4,19 +4,20 @@ Regression: sort() eq but different len.
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--
 <?php
+
 /*
  * Test sorting strings that have different length but otherwise equal.
  */
 
-function sort_using_locale( $locale, $test_array )
+function sort_using_locale($locale, $test_array)
 {
-    $coll = ut_coll_create( $locale );
+    $coll = ut_coll_create($locale);
 
     // Sort array.
-    ut_coll_sort( $coll, $test_array );
+    ut_coll_sort($coll, $test_array);
 
     // And return the sorted array.
-    return dump( $test_array ) . "\n";
+    return dump($test_array) . "\n";
 }
 
 function ut_main()
@@ -29,14 +30,15 @@ function ut_main()
     $a2 = array( 'пп', 'ппп', 'п' );
 
     // Sort them.
-    $res_str .= sort_using_locale( 'en_US', $a1 );
-    $res_str .= sort_using_locale( 'ru_RU', $a2 );
+    $res_str .= sort_using_locale('en_US', $a1);
+    $res_str .= sort_using_locale('ru_RU', $a2);
 
     return $res_str;
 }
 
-require_once( 'ut_common.inc' );
+require_once('ut_common.inc');
 ut_run();
+
 ?>
 --EXPECT--
 array (

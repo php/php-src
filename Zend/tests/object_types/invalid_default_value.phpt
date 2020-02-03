@@ -3,7 +3,9 @@ Object type can only default to null
 --FILE--
 <?php
 
-function test(object $obj = 42) { }
+function test(object $obj = 42)
+{
+}
 
 ?>
 --EXPECTF--

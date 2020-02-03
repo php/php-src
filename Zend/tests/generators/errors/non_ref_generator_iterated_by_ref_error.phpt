@@ -3,10 +3,14 @@ Non-ref generators cannot be iterated by-ref
 --FILE--
 <?php
 
-function gen() { yield; }
+function gen()
+{
+    yield;
+}
 
 $gen = gen();
-foreach ($gen as &$value) { }
+foreach ($gen as &$value) {
+}
 
 ?>
 --EXPECTF--

@@ -6,10 +6,13 @@ if (!extension_loaded('iconv')) die('skip ext/iconv required');
 ?>
 --FILE--
 <?php
-$hdr = iconv_mime_decode_headers(file_get_contents(__DIR__ . "/bug78069.data"),2);
+
+$hdr = iconv_mime_decode_headers(file_get_contents(__DIR__ . "/bug78069.data"), 2);
 var_dump(count($hdr));
 ?>
 DONE
+
+?>
 --EXPECT--
 int(1)
 DONE

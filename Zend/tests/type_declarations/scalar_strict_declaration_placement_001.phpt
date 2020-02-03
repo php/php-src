@@ -3,11 +3,12 @@ Test strict declaration being first operation only
 --FILE--
 <?php
 
-function takes_int(int $x) {
+function takes_int(int $x)
+{
     global $errored;
     if ($errored) {
         echo "Failure!", PHP_EOL;
-        $errored = FALSE;
+        $errored = false;
     } else {
         echo "Success!", PHP_EOL;
     }
@@ -17,6 +18,7 @@ function takes_int(int $x) {
 <?php
 
 declare(strict_types=1);
+
 var_dump(takes_int(32));
 
 ?>

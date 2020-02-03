@@ -20,11 +20,17 @@ class cache implements ArrayAccess
 {
     private $container = array();
 
-    public function offsetGet($id) {}
+    public function offsetGet($id)
+    {
+    }
 
-    public function offsetSet($id, $value) {}
+    public function offsetSet($id, $value)
+    {
+    }
 
-    public function offsetUnset($id) {}
+    public function offsetUnset($id)
+    {
+    }
 
     public function offsetExists($id)
     {
@@ -37,6 +43,7 @@ $cache = new cache();
 var_dump(isset($cache[$id]));
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught ErrorException: Undefined variable: id in %s:%d

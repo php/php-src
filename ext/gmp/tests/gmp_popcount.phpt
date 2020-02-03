@@ -15,6 +15,7 @@ var_dump(gmp_popcount($n));
 var_dump(gmp_popcount(array()));
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 int(-1)

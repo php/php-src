@@ -8,14 +8,16 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 function test()
 {
-	$openmenu = '';
-	$openstr2 = "&amp;openmenu={$openmenu}{$addlang}\"";
-	return 0;
+    $openmenu = '';
+    $openstr2 = "&amp;openmenu={$openmenu}{$addlang}\"";
+    return 0;
 }
 
 var_dump(test());
+
 ?>
 --EXPECTF--
 Warning: Undefined variable: addlang in %s on line %d

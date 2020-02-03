@@ -2,6 +2,7 @@
 SPL: Test class_uses() function : variation - no interfaces and autoload
 --FILE--
 <?php
+
 /* Prototype  : array class_uses(mixed what [, bool autoload ])
  * Description: Return all traits used by a class
  * Source code: ext/spl/php_spl.c
@@ -11,12 +12,14 @@ SPL: Test class_uses() function : variation - no interfaces and autoload
 echo "*** Testing class_uses() : variation ***\n";
 
 echo "--- testing no traits ---\n";
-class fs {}
-var_dump(class_uses(new fs));
+class fs
+{
+}
+var_dump(class_uses(new fs()));
 var_dump(class_uses('fs'));
 
 spl_autoload_register(function ($classname) {
-   echo "attempting to autoload $classname\n";
+    echo "attempting to autoload $classname\n";
 });
 
 echo "\n--- testing autoload ---\n";

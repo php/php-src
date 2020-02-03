@@ -2,23 +2,29 @@
 Bug #53511 (Exceptions are lost in case an exception is thrown in catch operator)
 --FILE--
 <?php
-class Foo {
-	function __destruct() {
-		throw new Exception("ops 1");
-	}
+
+class Foo
+{
+    function __destruct()
+    {
+        throw new Exception("ops 1");
+    }
 }
 
-function test() {
-	$e = new Foo();
-	try {
-		throw new Exception("ops 2");
-	} catch (Exception $e) {
-		echo $e->getMessage()."\n";
-	}
+function test()
+{
+    $e = new Foo();
+    try {
+        throw new Exception("ops 2");
+    } catch (Exception $e) {
+        echo $e->getMessage() . "\n";
+    }
 }
 
 test();
 echo "bug\n";
+
+?>
 --EXPECTF--
 Fatal error: Uncaught Exception: ops 2 in %sbug53511.php:11
 Stack trace:

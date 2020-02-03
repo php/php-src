@@ -30,8 +30,8 @@ echo "sha512: " . hash_hmac('sha512', $content, $key) . "\n";
 echo "snefru: " . hash_hmac('snefru', $content, $key) . "\n";
 echo "tiger192,3: " . hash_hmac('tiger192,3', $content, $key) . "\n";
 echo "whirlpool: " . hash_hmac('whirlpool', $content, $key) . "\n";
-echo "md5(raw): " . bin2hex(hash_hmac('md5', $content, $key, TRUE)) . "\n";
-echo "sha256(raw): " . bin2hex(hash_hmac('sha256', $content, $key, TRUE)) . "\n";
+echo "md5(raw): " . bin2hex(hash_hmac('md5', $content, $key, true)) . "\n";
+echo "sha256(raw): " . bin2hex(hash_hmac('sha256', $content, $key, true)) . "\n";
 
 ?>
 --EXPECT--

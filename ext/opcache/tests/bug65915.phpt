@@ -8,6 +8,7 @@ opcache.file_cache_only=0
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 $tmp = __DIR__ . "/bug65915.inc.php";
 
 file_put_contents($tmp, '<?php return function(){ return "a";};');
@@ -21,6 +22,7 @@ $f = require $tmp;
 var_dump($f());
 
 @unlink($tmp);
+
 ?>
 --EXPECT--
 string(1) "a"

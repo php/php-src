@@ -3,7 +3,8 @@ Nullable typed return without value generates friendlier error message
 --FILE--
 <?php
 
-function test() : ?int {
+function test(): ?int
+{
     return;
 }
 

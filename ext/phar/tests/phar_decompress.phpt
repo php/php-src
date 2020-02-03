@@ -8,6 +8,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '2.phar.gz';
 $pname = 'phar://' . $fname;
@@ -44,6 +45,7 @@ try {
 } catch (Exception $e) {
     echo $e->getMessage() . "\n";
 }
+
 ?>
 --CLEAN--
 <?php

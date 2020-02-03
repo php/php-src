@@ -3,12 +3,12 @@ Basic WeakMap behavior (as a map)
 --FILE--
 <?php
 
-$map = new WeakMap;
+$map = new WeakMap();
 var_dump(count($map));
 
-$obj = new stdClass;
+$obj = new stdClass();
 $obj->value = 1;
-$obj2 = new stdClass;
+$obj2 = new stdClass();
 $obj2->value = 2;
 
 $map[$obj] = $obj2;

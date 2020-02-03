@@ -31,9 +31,9 @@ echo $tgz->getPath() . "\n";
 $tbz = $phar->convertToData(Phar::TAR, Phar::BZ2);
 echo $tbz->getPath() . "\n";
 try {
-$phar = $tbz->convertToExecutable(Phar::PHAR, Phar::NONE);
+    $phar = $tbz->convertToExecutable(Phar::PHAR, Phar::NONE);
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 copy($tbz->getPath(), $fname2);
 $tbz = new PharData($fname2);
@@ -48,19 +48,19 @@ $data = $zip->convertToData();
 echo $data->getPath() . "\n";
 // extra code coverage
 try {
-$data->setStub('hi');
+    $data->setStub('hi');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$data->setDefaultStub();
+    $data->setDefaultStub();
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$data->setAlias('hi');
+    $data->setAlias('hi');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 $tar = $phar->convertToExecutable(Phar::TAR);
 echo $tar->getPath() . "\n";
@@ -69,88 +69,89 @@ echo $data->getPath() . "\n";
 $tgz = $tar->convertToExecutable(null, Phar::GZ);
 echo $tgz->getPath() . "\n";
 try {
-$tgz->convertToExecutable(25);
+    $tgz->convertToExecutable(25);
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$tgz->convertToExecutable(Phar::ZIP, Phar::GZ);
+    $tgz->convertToExecutable(Phar::ZIP, Phar::GZ);
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$tgz->convertToExecutable(Phar::ZIP, Phar::BZ2);
+    $tgz->convertToExecutable(Phar::ZIP, Phar::BZ2);
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$phar->convertToData();
+    $phar->convertToData();
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$tgz->convertToData(Phar::PHAR);
+    $tgz->convertToData(Phar::PHAR);
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$tgz->convertToData(25);
+    $tgz->convertToData(25);
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$tgz->convertToData(Phar::ZIP, Phar::GZ);
+    $tgz->convertToData(Phar::ZIP, Phar::GZ);
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$tgz->convertToData(Phar::ZIP, Phar::BZ2);
+    $tgz->convertToData(Phar::ZIP, Phar::BZ2);
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$tgz->convertToExecutable(Phar::TAR, 25);
+    $tgz->convertToExecutable(Phar::TAR, 25);
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$tgz->convertToData(Phar::TAR, 25);
+    $tgz->convertToData(Phar::TAR, 25);
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 // extra code coverage
 try {
-$data->setStub('hi');
+    $data->setStub('hi');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$data->setAlias('hi');
+    $data->setAlias('hi');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$data->setDefaultStub();
+    $data->setDefaultStub();
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$tgz->convertToData(Phar::TAR, Phar::GZ, '.phar.tgz.oops');
+    $tgz->convertToData(Phar::TAR, Phar::GZ, '.phar.tgz.oops');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-$phar->convertToExecutable(Phar::TAR, Phar::GZ, '.tgz.oops');
+    $phar->convertToExecutable(Phar::TAR, Phar::GZ, '.tgz.oops');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-$tgz->convertToData(Phar::TAR, Phar::GZ, '.phar/.tgz.oops');
+    $tgz->convertToData(Phar::TAR, Phar::GZ, '.phar/.tgz.oops');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
+
 ?>
 --CLEAN--
 <?php

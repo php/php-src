@@ -3,14 +3,16 @@ Bug #65322: compile time errors won't trigger auto loading
 --FILE--
 <?php
 
-spl_autoload_register(function($class) {
+spl_autoload_register(function ($class) {
     var_dump($class);
-    class X {}
+    class X
+    {
+    }
 });
 
-set_error_handler(function($_, $msg, $file) {
+set_error_handler(function ($_, $msg, $file) {
     var_dump($msg, $file);
-    new X;
+    new X();
 });
 
 /* This is just a particular example of a non-fatal compile-time error

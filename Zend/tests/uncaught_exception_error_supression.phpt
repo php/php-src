@@ -3,7 +3,8 @@ Error suppression should have no impact on uncaught exceptions
 --FILE--
 <?php
 
-function abc() {
+function abc()
+{
     throw new Error('Example Exception');
 }
 

@@ -10,14 +10,17 @@ opcache.preload=
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function foo(int $a) {
-	$a = 10;
-	$b = 20;
-	$x = func_get_args();
-	$a = 30;
-	$b = 40;
-	return $x;
+
+function foo(int $a)
+{
+    $a = 10;
+    $b = 20;
+    $x = func_get_args();
+    $a = 30;
+    $b = 40;
+    return $x;
 }
+
 ?>
 --EXPECTF--
 $_main: ; (lines=1, args=0, vars=0, tmps=0)

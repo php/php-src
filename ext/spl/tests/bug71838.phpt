@@ -3,14 +3,17 @@ Bug #71839: Deserializing serialized SPLObjectStorage-Object can't access proper
 --FILE--
 <?php
 
-class A extends SplObjectStorage {
+class A extends SplObjectStorage
+{
     protected $a = null;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->a = '123';
     }
 
-    public function getA() {
+    public function getA()
+    {
         return $this->a;
     }
 }

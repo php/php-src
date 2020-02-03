@@ -8,7 +8,8 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-require_once(__DIR__.'/snmp_include.inc');
+
+require_once(__DIR__ . '/snmp_include.inc');
 
 //EXPECTF format is quickprint OFF
 snmp_set_enum_print(false);
@@ -22,11 +23,11 @@ $session = new SNMP(SNMP::VERSION_1, $hostname, $community, $timeout, $retries);
 var_dump($session);
 
 $session->max_oids = 40;
-$session->enum_print = TRUE;
-$session->quick_print = TRUE;
+$session->enum_print = true;
+$session->quick_print = true;
 $session->valueretrieval = SNMP_VALUE_LIBRARY;
 $session->oid_output_format = SNMP_OID_OUTPUT_NUMERIC;
-$session->oid_increasing_check = FALSE;
+$session->oid_increasing_check = false;
 
 var_dump($session);
 
@@ -43,7 +44,7 @@ var_dump(property_exists($session, "enum_print"));
 var_dump(isset($session->enum_print));
 var_dump(empty($session->enum_print));
 
-$param=123;
+$param = 123;
 $session->$param = "param_value";
 var_dump($session);
 var_dump($session->$param);
@@ -62,8 +63,9 @@ var_dump($session->oid_output_format);
 $session->info = array("blah" => 2);
 var_dump($session->info);
 
-$session->max_oids = NULL;
+$session->max_oids = null;
 var_dump($session->max_oids);
+
 ?>
 --EXPECTF--
 Check working

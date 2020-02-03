@@ -5,14 +5,18 @@ Fully qualified classes are allowed in return types
 
 namespace Collections;
 
-class Foo {
-    function foo(\Iterator $i): \Iterator {
+class Foo
+{
+    function foo(\Iterator $i): \Iterator
+    {
         return $i;
     }
 }
 
-$foo = new Foo;
+$foo = new Foo();
 var_dump($foo->foo(new \EmptyIterator()));
+
+?>
 --EXPECTF--
 object(EmptyIterator)#%d (0) {
 }

@@ -4,11 +4,11 @@ Closure 001: Lambda without lexical variables
 <?php
 
 $lambda1 = function () {
-	echo "Hello World!\n";
+    echo "Hello World!\n";
 };
 
 $lambda2 = function ($x) {
-	echo "Hello $x!\n";
+    echo "Hello $x!\n";
 };
 
 var_dump(is_callable($lambda1));
@@ -19,6 +19,7 @@ call_user_func($lambda1);
 call_user_func($lambda2, "Universe");
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 bool(true)

@@ -11,6 +11,7 @@ if ($arch != 'x86_64' && $arch != 'i386')
 ?>
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 
 $lsb = IntlTimeZone::createTimeZone('Europe/Lisbon');

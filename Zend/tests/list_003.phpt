@@ -3,7 +3,7 @@ list() with non-array
 --FILE--
 <?php
 
-list($a) = NULL;
+list($a) = null;
 
 list($b) = 1;
 

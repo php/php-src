@@ -2,6 +2,7 @@
 Bug #73350 (Exception::__toString() cause circular references)
 --FILE--
 <?php
+
 $e = new Exception();
 
 // This line cause problem :(
@@ -10,6 +11,7 @@ $e = new Exception();
 
 // This line show the clue (PHP Warning: ...).
 var_export($e);
+
 ?>
 --EXPECTF--
 Exception::__set_state(array(

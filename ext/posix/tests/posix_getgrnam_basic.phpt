@@ -7,12 +7,14 @@ Test posix_getgrnam() function : basic functionality
 ?>
 --FILE--
 <?php
+
   $groupid = posix_getgroups()[0];
   $group = posix_getgrgid($groupid);
   $groupinfo = posix_getgrnam($group["name"]);
   var_dump($groupinfo);
   $groupinfo = posix_getgrnam("");
   var_dump($groupinfo);
+
 ?>
 --EXPECTF--
 array(4) {

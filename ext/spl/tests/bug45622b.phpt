@@ -2,11 +2,25 @@
 Ensure fix to bug45622 doesn't cause __isset() to be called when ArrayObject::ARRAY_AS_PROPS is used.
 --FILE--
 <?php
-class UsesMagic extends ArrayObject {
-	function __get($n)     {  echo "In " . __METHOD__ . "!\n"; }
-	function __set($n, $v) {  echo "In " . __METHOD__ . "!\n"; }
-	function __isset($n)   {  echo "In " . __METHOD__ . "!\n"; }
-	function __unset($n)   {  echo "In " . __METHOD__ . "!\n"; }
+
+class UsesMagic extends ArrayObject
+{
+    function __get($n)
+    {
+        echo "In " . __METHOD__ . "!\n";
+    }
+    function __set($n, $v)
+    {
+        echo "In " . __METHOD__ . "!\n";
+    }
+    function __isset($n)
+    {
+        echo "In " . __METHOD__ . "!\n";
+    }
+    function __unset($n)
+    {
+        echo "In " . __METHOD__ . "!\n";
+    }
 }
 $ao = new UsesMagic(array(), ArrayObject::ARRAY_AS_PROPS);
 
@@ -21,6 +35,7 @@ unset($ao->prop3);
 
 echo "Shouldn't trigger __isset.\n";
 isset($ao->prop4);
+
 ?>
 --EXPECTF--
 Doesn't trigger __get.

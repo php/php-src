@@ -20,6 +20,8 @@ socket_write($sock, "test message");
 socket_close($sock);
 
 var_dump(stream_get_contents($s1));
+
+?>
 --EXPECTF--
 resource(%d) of type (Socket)
 string(12) "test message"

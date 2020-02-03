@@ -2,6 +2,7 @@
 Check Serialization/unserialization
 --FILE--
 <?php
+
 $q = new SplQueue();
 
 $q->enqueue("a");
@@ -17,6 +18,8 @@ $s->push("b");
 var_dump($s, $ss = serialize($s), unserialize($ss));
 ?>
 ==END==
+
+?>
 --EXPECTF--
 object(SplQueue)#%d (2) {
   ["flags":"SplDoublyLinkedList":private]=>

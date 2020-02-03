@@ -5,16 +5,20 @@ date.timezone=UTC
 --FILE--
 <?php
 
-class Date {
-    public function __construct($in) {
+class Date
+{
+    public function __construct($in)
+    {
         $this->date = date_create($in);
     }
 
-    public function getYear1() {
+    public function getYear1()
+    {
         return date_format($this->date, 'Y');
     }
 
-    public function getYear2() {
+    public function getYear2()
+    {
         return call_user_func([$this->date, 'format'], 'Y');
     }
 }

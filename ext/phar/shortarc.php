@@ -93,7 +93,7 @@ if (@(isset($_SERVER['REQUEST_URI']) && isset($_SERVER['REQUEST_METHOD']) && ($_
             highlight_file($a);
             exit;
         }
-        header('Content-Type: ' .$mimes[$b['extension']]);
+        header('Content-Type: ' . $mimes[$b['extension']]);
         header('Content-Length: ' . filesize($a));
         readfile($a);
         exit;
@@ -110,7 +110,7 @@ class Extract_Phar
     const START = 'index.php';
     const LEN = XXXX;
 
-    static function go($return  = false)
+    static function go($return = false)
     {
         $fp = fopen(__FILE__, 'rb');
         fseek($fp, self::LEN);
@@ -128,7 +128,7 @@ class Extract_Phar
 
         if (strlen($m) < $L[1]) {
             die('ERROR: manifest length read was "' .
-                strlen($m) .'" should be "' .
+                strlen($m) . '" should be "' .
                 $L[1] . '"');
         }
 
@@ -153,15 +153,16 @@ class Extract_Phar
 
         if (!$temp || !is_writable($temp)) {
             $sessionpath = session_save_path();
-            if (strpos ($sessionpath, ";") !== false)
-                $sessionpath = substr ($sessionpath, strpos ($sessionpath, ";")+1);
+            if (strpos($sessionpath, ";") !== false) {
+                $sessionpath = substr($sessionpath, strpos($sessionpath, ";") + 1);
+            }
             if (!file_exists($sessionpath) || !is_dir($sessionpath)) {
                 die('Could not locate temporary directory to extract phar');
             }
             $temp = $sessionpath;
         }
 
-        $temp .= '/pharextract/'.basename(__FILE__, '.phar');
+        $temp .= '/pharextract/' . basename(__FILE__, '.phar');
         self::$temp = $temp;
         self::$origdir = getcwd();
         @mkdir($temp, 0777, true);

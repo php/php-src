@@ -5,15 +5,17 @@ Testing array dereference with chaining
 
 error_reporting(E_ALL);
 
-class foo {
-	public $arr;
+class foo
+{
+    public $arr;
 
-	public function &a() {
-		return $this->arr;
-	}
+    public function &a()
+    {
+        return $this->arr;
+    }
 }
 
-$foo = new foo;
+$foo = new foo();
 
 $h = &$foo->a();
 $h[] = 1;

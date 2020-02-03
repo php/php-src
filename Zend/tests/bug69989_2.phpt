@@ -4,7 +4,8 @@ Collection of some cycles on unfinished generators
 <?php
 
 // CV
-function gen1() {
+function gen1()
+{
     $gen = yield;
     yield;
 }
@@ -13,23 +14,26 @@ $gen = gen1();
 $gen->send($gen);
 
 // This
-class Test {
+class Test
+{
     public $gen;
-    public function gen2() {
+    public function gen2()
+    {
         yield;
     }
 }
 
-$test = new Test;
+$test = new Test();
 $test->gen = $test->gen2();
 
 // Closure object
-$gen3 = (function() use (&$gen3) {
+$gen3 = (function () use (&$gen3) {
     yield;
 })();
 
 // Yield from array
-function gen4() {
+function gen4()
+{
     yield from [yield];
 }
 

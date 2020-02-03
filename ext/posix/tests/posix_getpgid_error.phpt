@@ -8,6 +8,7 @@ if((!extension_loaded("posix")) || (!function_exists("posix_getpgid"))) {
 ?>
 --FILE--
 <?php
+
 /* Prototype  : proto int posix_getpgid(void)
  * Description: Get the process group id of the specified process (This is not a POSIX function, but a SVR4ism, so we compile conditionally)
  * Source code: ext/posix/posix.c
@@ -18,9 +19,10 @@ echo "*** Testing posix_getpgid() : error conditions ***\n";
 
 echo "\n-- Testing posix_getpgid() with negative pid  --\n";
 $pid = -99;
-var_dump( posix_getpgid($pid) );
+var_dump(posix_getpgid($pid));
 
 echo "Done";
+
 ?>
 --EXPECTF--
 *** Testing posix_getpgid() : error conditions ***

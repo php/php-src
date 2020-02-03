@@ -2,16 +2,18 @@
 SPL: Bug #70169	Use After Free Vulnerability in unserialize() with SplDoublyLinkedList
 --FILE--
 <?php
+
 $inner = 'i:1;';
-$exploit = 'a:2:{i:0;C:19:"SplDoublyLinkedList":'.strlen($inner).':{'.$inner.'}i:1;R:3;}';
+$exploit = 'a:2:{i:0;C:19:"SplDoublyLinkedList":' . strlen($inner) . ':{' . $inner . '}i:1;R:3;}';
 
 $data = unserialize($exploit);
 
-for($i = 0; $i < 5; $i++) {
-    $v[$i] = 'hi'.$i;
+for ($i = 0; $i < 5; $i++) {
+    $v[$i] = 'hi' . $i;
 }
 
 var_dump($data);
+
 ?>
 --EXPECTF--
 array(2) {

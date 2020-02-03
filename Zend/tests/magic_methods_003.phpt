@@ -3,10 +3,12 @@ Testing __unset declaring as static
 --FILE--
 <?php
 
-class foo {
-	static function __unset($a) {
-		print "unset\n";
-	}
+class foo
+{
+    static function __unset($a)
+    {
+        print "unset\n";
+    }
 }
 
 ?>

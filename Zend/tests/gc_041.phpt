@@ -4,15 +4,18 @@ GC 041: Handling of references in nested data of objects with destructor
 zend.enable_gc = 1
 --FILE--
 <?php
-class ryat {
-	    var $ryat;
+
+class ryat
+{
+        var $ryat;
         var $chtg;
         var $nested;
-	    function __destruct() {
-	            $GLOBALS['x'] = $this;
-        }
+    function __destruct()
+    {
+            $GLOBALS['x'] = $this;
+    }
 }
-$o = new ryat;
+$o = new ryat();
 $o->nested = [];
 $o->nested[] =& $o->nested;
 $o->ryat = $o;
@@ -20,6 +23,7 @@ $x =& $o->chtg;
 unset($o);
 var_dump(gc_collect_cycles());
 var_dump($x);
+
 ?>
 --EXPECT--
 int(0)

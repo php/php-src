@@ -3,17 +3,19 @@ Typed property assignment by ref with variable name
 --FILE--
 <?php
 
-class Test {
+class Test
+{
     public int $prop;
 }
 
 $name = new class {
-    public function __toString() {
+    public function __toString()
+    {
         return 'prop';
     }
 };
 
-$test = new Test;
+$test = new Test();
 $ref = "foobar";
 try {
     $test->$name =& $ref;

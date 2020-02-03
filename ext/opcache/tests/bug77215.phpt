@@ -8,10 +8,11 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 
-function _crash($eValeur) {
+function _crash($eValeur)
+{
     switch ($eValeur["a"]) {
         default:
-            switch($eValeur["a"]) {
+            switch ($eValeur["a"]) {
                 default:
                     return 2;
             }
@@ -19,6 +20,7 @@ function _crash($eValeur) {
 }
 
 var_dump(_crash(["a" => "b"]));
+
 ?>
 --EXPECT--
 int(2)

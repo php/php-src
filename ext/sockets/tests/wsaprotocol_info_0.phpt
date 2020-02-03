@@ -11,40 +11,42 @@ if (!extension_loaded('sockets')) {
 ?>
 --FILE--
 <?php
-	$address = 'localhost';
-	$port = 10000;
 
-	if (($sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false) {
-		fprintf(STDERR, "socket_create() failed: reason: " . socket_strerror(socket_last_error()) . "\n");
-	}
+    $address = 'localhost';
+    $port = 10000;
 
-	if (socket_bind($sock, $address, $port) === false) {
-		fprintf(STDERR, "socket_bind() failed: reason: " . socket_strerror(socket_last_error($sock)) . "\n");
-	}
+if (($sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false) {
+    fprintf(STDERR, "socket_create() failed: reason: " . socket_strerror(socket_last_error()) . "\n");
+}
 
-	if (socket_listen($sock, 5) === false) {
-		fprintf(STDERR, "socket_listen() failed: reason: " . socket_strerror(socket_last_error($sock)) . "\n");
-	}
+if (socket_bind($sock, $address, $port) === false) {
+    fprintf(STDERR, "socket_bind() failed: reason: " . socket_strerror(socket_last_error($sock)) . "\n");
+}
 
-	/* Duplicate socket in the same process. */
-	$pid = getmypid();
-	$info = socket_wsaprotocol_info_export($sock, $pid);
-	$sock2 = socket_wsaprotocol_info_import($info);
-	var_dump(socket_wsaprotocol_info_release($info));
+if (socket_listen($sock, 5) === false) {
+    fprintf(STDERR, "socket_listen() failed: reason: " . socket_strerror(socket_last_error($sock)) . "\n");
+}
 
-	var_dump($sock, $sock2);
+    /* Duplicate socket in the same process. */
+    $pid = getmypid();
+    $info = socket_wsaprotocol_info_export($sock, $pid);
+    $sock2 = socket_wsaprotocol_info_import($info);
+    var_dump(socket_wsaprotocol_info_release($info));
 
-	/* Close duplicated socket, the original is still valid. */
-	socket_close($sock2);
-	var_dump($sock, $sock2);
+    var_dump($sock, $sock2);
 
-	/* Using invalid PID. */
-	$info = socket_wsaprotocol_info_export($sock, 123412341);
+    /* Close duplicated socket, the original is still valid. */
+    socket_close($sock2);
+    var_dump($sock, $sock2);
 
-	socket_close($sock);
+    /* Using invalid PID. */
+    $info = socket_wsaprotocol_info_export($sock, 123412341);
 
-	/* Importing with invalid identifier. */
-	$sock2 = socket_wsaprotocol_info_import("garbage");
+    socket_close($sock);
+
+    /* Importing with invalid identifier. */
+    $sock2 = socket_wsaprotocol_info_import("garbage");
+
 ?>
 --EXPECTF--
 bool(true)

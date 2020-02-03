@@ -7,7 +7,8 @@ if (LIBXML_VERSION >= 20900) die('skip this test is for libxml < 2.9.0 only');
 ?>
 --FILE--
 <?php
-define('LIBXML_BIGLINES', 1<<22);
+
+define('LIBXML_BIGLINES', 1 << 22);
 $foos = str_repeat('<foo/>' . PHP_EOL, 65535);
 $xml = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
@@ -19,6 +20,7 @@ XML;
 $dom = new DOMDocument();
 $dom->loadXML($xml, LIBXML_BIGLINES);
 var_dump($dom->getElementsByTagName('bar')->item(0)->getLineNo());
+
 ?>
 --EXPECT--
 int(65535)

@@ -3,7 +3,7 @@ SPL: ArrayIterator implements ArrayAccess
 --FILE--
 <?php
 
-$obj = new ArrayObject(array('1st', 1, 2=>'3rd', '4th'=>4));
+$obj = new ArrayObject(array('1st', 1, 2 => '3rd', '4th' => 4));
 
 var_dump($obj->getArrayCopy());
 

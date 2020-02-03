@@ -7,6 +7,7 @@ Côme Chilliet <mcmic@php.net>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php
+
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
@@ -17,6 +18,7 @@ var_dump($ctrls);
 var_dump(ldap_error($link));
 var_dump(ldap_errno($link));
 var_dump(test_bind($host, $port, "cn=userA,$base", "newPassword", $protocol_version));
+
 ?>
 --CLEAN--
 <?php

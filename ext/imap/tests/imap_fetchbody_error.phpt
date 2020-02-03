@@ -6,6 +6,7 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
+
 /* Prototype  :string imap_fetchbody(resource $stream_id, int $msg_no, string $section
  *          [, int $options])
  * Description: Get a specific body section
@@ -17,7 +18,7 @@ require_once(__DIR__.'/skipif.inc');
  */
 
 echo "*** Testing imap_fetchbody() : error conditions ***\n";
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__ . '/imap_include.inc');
 
 //Test imap_fetchbody with one more than the expected number of arguments
 echo "\n-- Testing imap_fetchbody() function with more than expected no. of arguments --\n";
@@ -28,12 +29,13 @@ $section = '1';
 $options = FT_PEEK;
 $extra_arg = 10;
 
-var_dump( imap_fetchbody($stream_id, $msg_no, $section, $options, $extra_arg) );
+var_dump(imap_fetchbody($stream_id, $msg_no, $section, $options, $extra_arg));
 
 // Testing imap_fetchbody with one less than the expected number of arguments
 echo "\n-- Testing imap_fetchbody() function with less than expected no. of arguments --\n";
 
-var_dump( imap_fetchbody($stream_id, $msg_no) );
+var_dump(imap_fetchbody($stream_id, $msg_no));
+
 ?>
 --CLEAN--
 <?php

@@ -2,6 +2,7 @@
 Bug #78356: Array returned from ArrayAccess is incorrectly unpacked as argument
 --FILE--
 <?php
+
 $object = new class implements ArrayAccess {
     public function offsetGet($offset)
     {
@@ -11,10 +12,15 @@ $object = new class implements ArrayAccess {
     {
         return true;
     }
-    public function offsetUnset($offset) {}
-    public function offsetSet($offset, $value) {}
+    public function offsetUnset($offset)
+    {
+    }
+    public function offsetSet($offset, $value)
+    {
+    }
 };
 var_dump(max(...$object[0]));
+
 ?>
 --EXPECT--
 int(2)

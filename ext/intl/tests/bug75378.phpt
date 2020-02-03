@@ -13,6 +13,7 @@ $parsedDate = $formatter->parse("2017-10-12", $position);
 var_dump($position);
 $localdate = $formatter->localtime("2017-10-12 00:00:00", $position1);
 var_dump($position1);
+
 ?>
 --EXPECT--
 int(10)

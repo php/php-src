@@ -11,6 +11,7 @@ var_dump($var);
 var_dump($var1);
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 int(2)

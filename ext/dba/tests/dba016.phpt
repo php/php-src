@@ -9,7 +9,7 @@ require_once(__DIR__ .'/skipif.inc');
 <?php
 
 $handler = "flatfile";
-require_once(__DIR__ .'/test.inc');
+require_once(__DIR__ . '/test.inc');
 echo "database handler: $handler\n";
 
 $db_file1 = dba_popen($db_filename, 'n-t', 'flatfile');

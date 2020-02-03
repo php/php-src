@@ -3,9 +3,15 @@ Testing creation of alias using an existing interface name
 --FILE--
 <?php
 
-class foo { }
+class foo
+{
 
-interface test { }
+}
+
+interface test
+{
+
+}
 
 
 class_alias('foo', 'test');

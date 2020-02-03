@@ -11,6 +11,8 @@ $other = new DateTime("31-July-2008");
 $diff = date_diff($date, $other);
 
 var_dump($diff);
+
+?>
 --EXPECTF--
 object(DateInterval)#%d (16) {
   ["y"]=>

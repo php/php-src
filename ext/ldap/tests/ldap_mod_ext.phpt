@@ -13,45 +13,53 @@ skipifunsupportedcontrol(LDAP_CONTROL_POST_READ);
 ?>
 --FILE--
 <?php
+
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 
 $entry = array(
-	"description"	=> "Domain description",
+    "description"   => "Domain description",
 );
 
 var_dump(
-	$result = ldap_mod_add_ext($link, "o=test,$base", $entry,
-		[
-			['oid' => LDAP_CONTROL_PRE_READ,  'iscritical' => TRUE, 'value' => ['attrs' => ['description']]],
-			['oid' => LDAP_CONTROL_POST_READ, 'iscritical' => TRUE, 'value' => ['attrs' => ['description']]],
-		]
-	),
-	ldap_parse_result($link, $result, $errcode, $matcheddn, $errmsg, $referrals, $ctrls),
-	$errcode,
-	$errmsg,
-	$ctrls,
-	ldap_get_entries(
-		$link,
-		ldap_search($link, "o=test,$base", "(Description=Domain description)")
-	),
-	$result = ldap_mod_del_ext($link, "o=test,$base", $entry,
-		[
-			['oid' => LDAP_CONTROL_PRE_READ,  'iscritical' => TRUE, 'value' => ['attrs' => ['description']]],
-			['oid' => LDAP_CONTROL_POST_READ, 'iscritical' => TRUE, 'value' => ['attrs' => ['description']]],
-		]
-	),
-	ldap_parse_result($link, $result, $errcode, $matcheddn, $errmsg, $referrals, $ctrls),
-	$errcode,
-	$errmsg,
-	$ctrls,
-	ldap_get_entries(
-		$link,
-		ldap_search($link, "o=test,$base", "(Description=Domain description)")
-	)
+    $result = ldap_mod_add_ext(
+        $link,
+        "o=test,$base",
+        $entry,
+        [
+            ['oid' => LDAP_CONTROL_PRE_READ,  'iscritical' => true, 'value' => ['attrs' => ['description']]],
+            ['oid' => LDAP_CONTROL_POST_READ, 'iscritical' => true, 'value' => ['attrs' => ['description']]],
+        ]
+    ),
+    ldap_parse_result($link, $result, $errcode, $matcheddn, $errmsg, $referrals, $ctrls),
+    $errcode,
+    $errmsg,
+    $ctrls,
+    ldap_get_entries(
+        $link,
+        ldap_search($link, "o=test,$base", "(Description=Domain description)")
+    ),
+    $result = ldap_mod_del_ext(
+        $link,
+        "o=test,$base",
+        $entry,
+        [
+            ['oid' => LDAP_CONTROL_PRE_READ,  'iscritical' => true, 'value' => ['attrs' => ['description']]],
+            ['oid' => LDAP_CONTROL_POST_READ, 'iscritical' => true, 'value' => ['attrs' => ['description']]],
+        ]
+    ),
+    ldap_parse_result($link, $result, $errcode, $matcheddn, $errmsg, $referrals, $ctrls),
+    $errcode,
+    $errmsg,
+    $ctrls,
+    ldap_get_entries(
+        $link,
+        ldap_search($link, "o=test,$base", "(Description=Domain description)")
+    )
 );
+
 ?>
 --CLEAN--
 <?php

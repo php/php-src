@@ -8,8 +8,10 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 var_dump(opcache_invalidate('1'));
 var_dump("okey");
+
 ?>
 --EXPECT--
 bool(false)

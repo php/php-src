@@ -10,6 +10,7 @@ if (!extension_loaded("mbstring")) {
 zend.multibyte=1
 --FILE--
 <?php
+
 declare(strict_types=1);
 declare(encoding="ISO-8859-1");
 

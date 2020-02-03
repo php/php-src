@@ -3,26 +3,34 @@ iterable type#005 - Return type covariance
 --FILE--
 <?php
 
-class Test {
-    function method(): iterable {
+class Test
+{
+    function method(): iterable
+    {
         return [];
     }
 }
 
-class TestArray extends Test {
-    function method(): array {
+class TestArray extends Test
+{
+    function method(): array
+    {
         return [];
     }
 }
 
-class TestTraversable extends Test {
-    function method(): Traversable {
+class TestTraversable extends Test
+{
+    function method(): Traversable
+    {
         return new ArrayIterator([]);
     }
 }
 
-class TestScalar extends Test {
-    function method(): int {
+class TestScalar extends Test
+{
+    function method(): int
+    {
         return 1;
     }
 }

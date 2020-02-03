@@ -3,7 +3,9 @@ Testing array with '[]' passed as argument by value
 --FILE--
 <?php
 
-function test($var) { }
+function test($var)
+{
+}
 test($arr[]);
 
 ?>

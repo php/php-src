@@ -15,6 +15,7 @@ var_dump($db->exec('CREATE TABLE test1 (id INT);'));
 $db = new PDO('sqlite:' . $filename, null, null, [PDO::SQLITE_ATTR_OPEN_FLAGS => PDO::SQLITE_OPEN_READONLY, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 
 var_dump($db->exec('CREATE TABLE test2 (id INT);'));
+
 ?>
 --CLEAN--
 <?php

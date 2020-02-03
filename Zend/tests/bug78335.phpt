@@ -3,16 +3,19 @@ Bug #78335: Static properties/variables containing cycles report as leak
 --FILE--
 <?php
 
-class Test {
+class Test
+{
     public static $test;
 
-    public static function method() {
+    public static function method()
+    {
         static $foo;
         $foo = [&$foo];
     }
 }
 
-function test() {
+function test()
+{
     static $foo;
     $foo = [&$foo];
 }

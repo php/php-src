@@ -22,11 +22,13 @@ $tzs = array(
 );
 
 foreach ($tzs as $tz) {
-  var_dump(IntlTimeZone::getWindowsID($tz));
-  if (intl_get_error_code() != U_ZERO_ERROR) {
-    echo "Error: ", intl_get_error_message(), "\n";
-  }
+    var_dump(IntlTimeZone::getWindowsID($tz));
+    if (intl_get_error_code() != U_ZERO_ERROR) {
+        echo "Error: ", intl_get_error_message(), "\n";
+    }
 }
+
+?>
 --EXPECT--
 string(24) "SA Pacific Standard Time"
 string(18) "Cuba Standard Time"

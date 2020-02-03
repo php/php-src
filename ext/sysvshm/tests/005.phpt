@@ -12,7 +12,7 @@ $key = ftok(__FILE__, 't');
 $s = shm_attach($key, 1024);
 
 shm_put_var($s, -1, "test string");
-shm_put_var($s, 0, new stdclass);
+shm_put_var($s, 0, new stdclass());
 shm_put_var($s, 1, array(1,2,3));
 shm_put_var($s, 2, false);
 shm_put_var($s, 3, null);
@@ -34,6 +34,7 @@ var_dump(shm_get_var($s, 3));
 shm_remove($s);
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Warning: shm_get_var(): Variable key 1000 doesn't exist in %s005.php on line %d

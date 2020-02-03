@@ -7,6 +7,7 @@ function_exists('iconv_strrpos') or die("skip iconv_strrpos() is not available i
 ?>
 --FILE--
 <?php
+
 /* Prototype  : proto int iconv_strrpos(string haystack, string needle [, string charset])
  * Description: Find position of last occurrence of a string within another
  * Source code: ext/iconv/iconv.c
@@ -23,9 +24,10 @@ $needle = '123';
 $offset = 5;
 $encoding = 'unknown-encoding';
 
-var_dump(iconv_strrpos($haystack, $needle , $encoding));
+var_dump(iconv_strrpos($haystack, $needle, $encoding));
 
 echo "Done";
+
 ?>
 --EXPECTF--
 *** Testing iconv_strrpos() : error conditions ***

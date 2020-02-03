@@ -5,26 +5,36 @@ Test sorting of various ArrayObject backing storage
 
 $obj = (object)['a' => 2, 'b' => 1];
 $ao = new ArrayObject($obj);
-$ao->uasort(function($a, $b) { return $a <=> $b; });
+$ao->uasort(function ($a, $b) {
+    return $a <=> $b;
+});
 var_dump($ao);
 
 $ao2 = new ArrayObject($ao);
-$ao2->uasort(function($a, $b) { return $b <=> $a; });
+$ao2->uasort(function ($a, $b) {
+    return $b <=> $a;
+});
 var_dump($ao2);
 
 $ao3 = new ArrayObject();
 $ao3->exchangeArray($ao3);
 $ao3->a = 2;
 $ao3->b = 1;
-$ao3->uasort(function($a, $b) { return $a <=> $b; });
+$ao3->uasort(function ($a, $b) {
+    return $a <=> $b;
+});
 var_dump($ao3);
 
 $ao4 = new ArrayObject([]);
-$ao4->uasort(function($a, $b) { return $a <=> $b; });
+$ao4->uasort(function ($a, $b) {
+    return $a <=> $b;
+});
 var_dump($ao4);
 
 $ao5 = new ArrayObject(['a' => 2, 'b' => 1]);
-$ao5->uasort(function($a, $b) { return $a <=> $b; });
+$ao5->uasort(function ($a, $b) {
+    return $a <=> $b;
+});
 var_dump($ao5);
 
 ?>

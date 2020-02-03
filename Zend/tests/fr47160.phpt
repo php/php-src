@@ -3,48 +3,61 @@ Calling method from array
 --FILE--
 <?php
 
-class Hello {
-	public function world($x) {
-		echo "Hello, $x\n";return $this;
-	}
+class Hello
+{
+    public function world($x)
+    {
+        echo "Hello, $x\n";
+        return $this;
+    }
 }
 
-class Hello2 {
-	static public function world($x) {
-		echo "Hello, $x\n";
-	}
+class Hello2
+{
+    public static function world($x)
+    {
+        echo "Hello, $x\n";
+    }
 }
 
-class Magic {
-	public function __call($f, $a) {
-		printf("%s called (%s)!\n", __METHOD__, $f);
-	}
+class Magic
+{
+    public function __call($f, $a)
+    {
+        printf("%s called (%s)!\n", __METHOD__, $f);
+    }
 }
 
-class Magic2 {
-	public static function __callStatic($f, $a) {
-		printf("%s called (%s)!\n", __METHOD__, $f);
-	}
+class Magic2
+{
+    public static function __callStatic($f, $a)
+    {
+        printf("%s called (%s)!\n", __METHOD__, $f);
+    }
 }
 
-class Magic3 {
-	public static function __callStatic($f, $a) {
-		printf("%s called (%s)!\n", __METHOD__, $f);
-	}
-	public function __call($f, $a) {
-		printf("%s called (%s)!\n", __METHOD__, $f);
-	}
+class Magic3
+{
+    public static function __callStatic($f, $a)
+    {
+        printf("%s called (%s)!\n", __METHOD__, $f);
+    }
+    public function __call($f, $a)
+    {
+        printf("%s called (%s)!\n", __METHOD__, $f);
+    }
 }
 
-$h= new Hello;
+$h = new Hello();
 $f = array($h,'world');
 var_dump($f('again'));
 var_dump(call_user_func($f, 'again'));
 
 printf("-----\n");
 
-function bar() {
-	return array(new Hello,'world');
+function bar()
+{
+    return array(new Hello(),'world');
 }
 $f = bar();
 var_dump($f('there'));
@@ -52,9 +65,11 @@ var_dump(call_user_func($f, 'there'));
 
 printf("-----\n");
 
-$x = function ($c,$v) { return array($c, $v); };
+$x = function ($c, $v) {
+    return array($c, $v);
+};
 
-$c = new Hello;
+$c = new Hello();
 $m = 'world';
 $f = $x($c, $m);
 var_dump($f('devs'));
@@ -62,7 +77,7 @@ var_dump(call_user_func($f, 'devs'));
 
 printf("-----\n");
 
-$f = array(new Magic, 'foo');
+$f = array(new Magic(), 'foo');
 $f();
 call_user_func($f);
 
@@ -81,13 +96,13 @@ call_user_func($f);
 
 printf("-----\n");
 
-$f = array(new Magic3, 'foo');
+$f = array(new Magic3(), 'foo');
 $f();
 call_user_func($f);
 
 printf("-----\n");
 
-$f = array(new Hello2, 'world');
+$f = array(new Hello2(), 'world');
 var_dump($f('you'));
 var_dump(call_user_func($f, 'you'));
 

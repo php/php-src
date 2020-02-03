@@ -7,10 +7,9 @@ Bug #67761 (Phar::mapPhar fails for Phars inside a path containing ".tar")
 
 echo "Test\n";
 
-include __DIR__."/files/bug67761.tar/bug67761.phar";
+include __DIR__ . "/files/bug67761.tar/bug67761.phar";
 
 ?>
-
 --EXPECT--
 Test
 #!/usr/bin/env php

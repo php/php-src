@@ -3,12 +3,14 @@ Trying assign value to property when an object is not returned in a function
 --FILE--
 <?php
 
-class foo {
-	public function a() {
-	}
+class foo
+{
+    public function a()
+    {
+    }
 }
 
-$test = new foo;
+$test = new foo();
 
 $test->a()->a;
 print "ok\n";

@@ -30,7 +30,9 @@ var_dump($var);
 // Nested arrow functions closing over variable
 $var = 6;
 var_dump((fn() => fn() => $var)()());
-var_dump((fn() => function() use($var) { return $var; })()());
+var_dump((fn() => function () use ($var) {
+ return $var;
+})()());
 
 ?>
 --EXPECT--

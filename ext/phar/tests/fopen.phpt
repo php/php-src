@@ -7,6 +7,7 @@ phar.require_hash=1
 phar.readonly=0
 --FILE--
 <?php
+
 Phar::interceptFileFuncs();
 $a = fopen(__FILE__, 'rb'); // this satisfies 1 line of code coverage
 fclose($a);
@@ -30,6 +31,7 @@ set_include_path("phar://" . __FILE__ . "/dir" . PATH_SEPARATOR . "phar://" . __
 include "index.php";
 __HALT_COMPILER();');
 include $fname;
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

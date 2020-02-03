@@ -2,6 +2,7 @@
 Bug #72177 Scope issue in __destruct after ReflectionProperty::setValue()
 --FILE--
 <?php
+
 class Child
 {
     protected $bar;
@@ -30,6 +31,7 @@ $p = new Parnt();
 $p->doSomething();
 
 echo "OK\n";
+
 ?>
 --EXPECT--
 OK

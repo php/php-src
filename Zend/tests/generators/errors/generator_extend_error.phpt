@@ -3,7 +3,10 @@ The Generator class cannot be extended
 --FILE--
 <?php
 
-class ExtendedGenerator extends Generator { }
+class ExtendedGenerator extends Generator
+{
+
+}
 
 ?>
 --EXPECTF--

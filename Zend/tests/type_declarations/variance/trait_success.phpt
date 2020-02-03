@@ -5,21 +5,30 @@ Trait delayed variance check succeeds
 
 // Taken from bug #79179.
 
-spl_autoload_register(function() {
-    interface InterfaceB extends InterfaceA {}
+spl_autoload_register(function () {
+    interface InterfaceB extends InterfaceA
+    {
+    }
 });
 
-interface InterfaceA {}
+interface InterfaceA
+{
+}
 
-trait SomeTrait {
+trait SomeTrait
+{
     abstract public function func(): ?InterfaceA;
 }
 
-class Foo {
-    public function func(): ?InterfaceB {}
+class Foo
+{
+    public function func(): ?InterfaceB
+    {
+    }
 }
 
-class Bar extends Foo {
+class Bar extends Foo
+{
     use SomeTrait;
 }
 

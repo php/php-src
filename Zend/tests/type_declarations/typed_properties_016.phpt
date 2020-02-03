@@ -2,15 +2,18 @@
 Test typed properties initial values
 --FILE--
 <?php
-class Foo {
-	public int $int = 1;
-	public float $flt = 2.2;
+
+class Foo
+{
+    public int $int = 1;
+    public float $flt = 2.2;
     public float $flt2 = 2;
-	public array $arr = [];
-	public bool $bool = false;
+    public array $arr = [];
+    public bool $bool = false;
     public iterable $iter = [];
 }
-var_dump(new Foo);
+var_dump(new Foo());
+
 ?>
 --EXPECT--
 object(Foo)#1 (6) {

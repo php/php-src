@@ -17,6 +17,7 @@ $s2 >>= 3;
 var_dump($s2);
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 int(30)

@@ -36,36 +36,36 @@ $file_modes = array ("r+", "r+b", "r+t",
 
 $loop_counter = 1;
 foreach ($csv_lists as $csv_list) {
-  for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
+    for ($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
+        echo "\n-- file opened in $file_modes[$mode_counter] --\n";
+      // create the file and add the content with has csv fields
+        if (strstr($file_modes[$mode_counter], "r")) {
+            $fo = new SplFileObject($file, 'w');
+        } else {
+            $fo = new SplFileObject($file, $file_modes[$mode_counter]);
+        }
+        $delimiter = $csv_list[0];
+        $enclosure = $csv_list[1];
+        $csv_field = $csv_list[2];
 
-    echo "\n-- file opened in $file_modes[$mode_counter] --\n";
-    // create the file and add the content with has csv fields
-    if ( strstr($file_modes[$mode_counter], "r") ) {
-      $fo = new SplFileObject($file, 'w');
-    } else {
-      $fo = new SplFileObject($file, $file_modes[$mode_counter]);
-    }
-    $delimiter = $csv_list[0];
-    $enclosure = $csv_list[1];
-    $csv_field = $csv_list[2];
+      // write to a file in csv format
+        var_dump($fo->fputcsv($csv_field, '+', $enclosure));
+      // check the file pointer position and eof
+        var_dump($fo->ftell());
+        var_dump($fo->eof());
+      //close the file
+        unset($fo);
 
-    // write to a file in csv format
-    var_dump( $fo->fputcsv($csv_field, '+', $enclosure) );
-    // check the file pointer position and eof
-    var_dump( $fo->ftell() );
-    var_dump( $fo->eof() );
-    //close the file
-    unset($fo);
+      // print the file contents
+        var_dump(file_get_contents($file));
 
-    // print the file contents
-    var_dump( file_get_contents($file) );
-
-    //delete file
-    unlink($file);
-  } //end of mode loop
+      //delete file
+        unlink($file);
+    } //end of mode loop
 } // end of foreach
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 *** Testing fputcsv() : with different delimiter and same enclosure ***

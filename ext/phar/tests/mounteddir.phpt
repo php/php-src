@@ -10,6 +10,7 @@ tempmanifest1.phar.php
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/tempmanifest1.phar.php';
 $pname = 'phar://' . $fname;
 
@@ -47,40 +48,41 @@ include $fname;
 $a = opendir($pname . '/testit');
 $out = array();
 while (false !== ($b = readdir($a))) {
-	$out[] = $b;
+    $out[] = $b;
 }
 sort($out);
 foreach ($out as $b) {
-	echo "$b\n";
+    echo "$b\n";
 }
 $out = array();
 foreach (new Phar($pname . '/testit') as $b) {
-	$out[] = $b->getPathName();
+    $out[] = $b->getPathName();
 }
 sort($out);
 foreach ($out as $b) {
-	echo "$b\n";
+    echo "$b\n";
 }
 try {
-Phar::mount($pname . '/testit', 'another\\..\\mistake');
+    Phar::mount($pname . '/testit', 'another\\..\\mistake');
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 try {
-Phar::mount($pname . '/notfound', __DIR__ . '/this/does/not/exist');
+    Phar::mount($pname . '/notfound', __DIR__ . '/this/does/not/exist');
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 try {
-Phar::mount($pname . '/testit', __DIR__);
+    Phar::mount($pname . '/testit', __DIR__);
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 try {
-Phar::mount($pname . '/testit/extfile.php', __DIR__);
+    Phar::mount($pname . '/testit/extfile.php', __DIR__);
 } catch (Exception $e) {
-echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
+
 ?>
 --CLEAN--
 <?php

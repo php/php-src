@@ -3,17 +3,21 @@ Bug #75717: RecursiveArrayIterator does not traverse arrays by reference
 --FILE--
 <?php
 
-function flatten(array $nestedArraysAndStrings){
-    $flat=[];
+function flatten(array $nestedArraysAndStrings)
+{
+    $flat = [];
     $iter = new RecursiveIteratorIterator(
-        new RecursiveArrayIterator($nestedArraysAndStrings));
-    foreach($iter as $leaf){ $flat[] = $leaf; }
+        new RecursiveArrayIterator($nestedArraysAndStrings)
+    );
+    foreach ($iter as $leaf) {
+        $flat[] = $leaf;
+    }
     return join(null, $flat);
 }
 
 $noRefs = [[[['some']]],[' nested '],"items"];
 
-$withRefs = []+$noRefs;
+$withRefs = [] + $noRefs;
 $wat = $noRefs[0];
 $withRefs[0] = &$wat;
 

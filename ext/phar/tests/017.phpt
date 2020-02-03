@@ -8,6 +8,7 @@ if (!extension_loaded("phar")) die("skip");
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php
@@ -22,6 +23,7 @@ include 'files/phar_test.inc';
 
 include $pname;
 $dir = opendir('phar://hio');
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

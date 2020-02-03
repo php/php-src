@@ -11,14 +11,16 @@ opcache.optimization_level=-1
 // This is required for the segfault
 md5('foo');
 
-class Extended_Class {};
+class Extended_Class
+{
+};
 $response = array(
     'a' => 'b'
 );
-new Extended_Class( array(
+new Extended_Class(array(
     'foo' => $response,
     'foo2' => 'bar2'
-) );
+));
 
 ?>
 ===DONE===

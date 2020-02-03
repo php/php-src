@@ -3,7 +3,9 @@ Combining void with class type
 --FILE--
 <?php
 
-function test(): T|void {}
+function test(): T | void
+{
+}
 
 ?>
 --EXPECTF--

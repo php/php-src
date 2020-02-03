@@ -7,6 +7,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
+
 include __DIR__ . '/files/tarmaker.php.inc';
 
 $fname = __DIR__ . '/tar_003.phar.tar';
@@ -26,14 +27,14 @@ fclose($g);
 echo file_get_contents($alias . '/internal/file/here');
 
 try {
-$tar = opendir($alias . '/');
+    $tar = opendir($alias . '/');
 } catch (Exception $e) {
-echo $e->getMessage()."\n";
+    echo $e->getMessage() . "\n";
 }
 
 while (false !== ($v = readdir($tar))) {
-	echo (is_file($alias . '/' . $v) ? "file\n" : "dir\n");
-	echo $v . "\n";
+    echo (is_file($alias . '/' . $v) ? "file\n" : "dir\n");
+    echo $v . "\n";
 }
 closedir($tar);
 
@@ -41,8 +42,8 @@ closedir($tar);
 echo "second round\n";
 $tar = opendir($alias . '/');
 while (false !== ($v = readdir($tar))) {
-	echo (is_file($alias . '/' . $v) ? "file\n" : "dir\n");
-	echo $v . "\n";
+    echo (is_file($alias . '/' . $v) ? "file\n" : "dir\n");
+    echo $v . "\n";
 }
 closedir($tar);
 

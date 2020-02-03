@@ -6,10 +6,13 @@ Bug #74164 (PHP hangs when an invalid value is dynamically passed to typehinted 
 namespace Foo;
 
 set_error_handler(function ($type, $msg) {
-	throw new \Exception($msg);
+    throw new \Exception($msg);
 });
 
-call_user_func(function (array &$ref) {var_dump("xxx");}, 'not_an_array_variable');
+call_user_func(function (array &$ref) {
+    var_dump("xxx");
+}, 'not_an_array_variable');
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Exception: Parameter 1 to Foo\{closure}() expected to be a reference, value given in %sbug74164.php:%d

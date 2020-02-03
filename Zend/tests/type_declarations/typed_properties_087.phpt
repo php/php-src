@@ -3,7 +3,8 @@ Ensure null-initialization of nullable typed static property taken by reference
 --FILE--
 <?php
 
-class A {
+class A
+{
     public static ?int $a;
 }
 

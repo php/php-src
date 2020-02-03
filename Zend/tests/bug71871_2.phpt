@@ -3,7 +3,8 @@ Bug #71871: Interfaces allow final and abstract functions
 --FILE--
 <?php
 
-interface test {
+interface test
+{
     abstract function test();
 }
 

@@ -14,6 +14,7 @@ var_dump($var1);
 var_dump($var2);
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 string(5) "space"

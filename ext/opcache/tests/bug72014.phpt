@@ -8,6 +8,7 @@ opcache.file_update_protection=0
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 file_put_contents(__DIR__ . "/bug72014.annon.php", <<<PHP
 <?php
 \$a = new class() { public \$testvar = "Foo\n"; };
@@ -18,6 +19,7 @@ PHP
 include(__DIR__ . "/bug72014.annon.php");
 include(__DIR__ . "/bug72014.annon.php");
 include(__DIR__ . "/bug72014.annon.php");
+
 ?>
 --CLEAN--
 <?php

@@ -2,6 +2,7 @@
 Bug #73858: diff() of two relative/described DateTimes is wrong
 --FILE--
 <?php
+
 /*
 In the "verbose setup method" I'm trying setup the DateTime object myself
 to see if it's the format string which is parsed in correctly or if it's the DateTime
@@ -12,7 +13,7 @@ $es = 'february first day of this month midnight - 1 second';
 
 $s = new DateTime($ss);
 $e = new DateTime($es);
-$d= $e->diff($s);
+$d = $e->diff($s);
 var_dump($d->days); // 0 ... but should be 30
 
 $s = (new DateTime(null))->setTimestamp(strtotime($ss)); // verbose setup method
@@ -26,12 +27,12 @@ is the important one, if it uses the verbose method it returns the correct value
 */
 $s = (new DateTime(null))->setTimestamp(strtotime($ss)); // verbose setup method
 $e = new DateTime($es);
-$d= $e->diff($s);
+$d = $e->diff($s);
 var_dump($d->days); // 0 ... but should be 30
 
 $s = new DateTime($ss);
 $e = (new DateTime(null))->setTimestamp(strtotime($es)); // verbose setup method
-$d= $e->diff($s);
+$d = $e->diff($s);
 var_dump($d->days); // 30 ... and should be 30
 
 /*
@@ -40,7 +41,7 @@ on, that's just coincidental that seems to imply that the "- 1 second" in the da
 */
 $s = new DateTime($ss);
 $e = (new DateTime(null))->setTimestamp(strtotime($es)); // verbose setup method
-$d= $s->diff($e);
+$d = $s->diff($e);
 var_dump($d->days); // 30 ... and should be 30
 
 /*
@@ -53,6 +54,7 @@ $s = new DateTime($ss);
 $e = new DateTime('february first day of this month midnight');
 $e->modify('- 1 second');
 var_dump($e->diff($s)->days); // 30 ... and should be 30
+
 ?>
 --EXPECT--
 int(30)

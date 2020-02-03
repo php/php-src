@@ -12,6 +12,7 @@ skipifunsupportedcontrol(LDAP_CONTROL_VLVREQUEST);
 ?>
 --FILE--
 <?php
+
 include "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
@@ -19,56 +20,73 @@ insert_dummy_data($link, $base);
 
 /* First test with only SORT control */
 var_dump(
-	$result = ldap_search($link, $base, '(cn=*)', array('cn'), 0, 0, 0, LDAP_DEREF_NEVER,
-		[
-			[
-				'oid' => LDAP_CONTROL_SORTREQUEST,
-				'iscritical' => TRUE,
-				'value' => [
-					['attr' => 'cn', 'oid' => '2.5.13.3' /* caseIgnoreOrderingMatch */, 'reverse' => TRUE]
-				]
-			]
-		]
-	),
-	ldap_get_entries($link, $result),
-	ldap_parse_result($link, $result, $errcode , $matcheddn , $errmsg , $referrals, $controls),
-	$errcode,
-	$errmsg,
-	$controls
+    $result = ldap_search(
+        $link,
+        $base,
+        '(cn=*)',
+        array('cn'),
+        0,
+        0,
+        0,
+        LDAP_DEREF_NEVER,
+        [
+            [
+                'oid' => LDAP_CONTROL_SORTREQUEST,
+                'iscritical' => true,
+                'value' => [
+                    ['attr' => 'cn', 'oid' => '2.5.13.3' /* caseIgnoreOrderingMatch */, 'reverse' => true]
+                ]
+            ]
+        ]
+    ),
+    ldap_get_entries($link, $result),
+    ldap_parse_result($link, $result, $errcode, $matcheddn, $errmsg, $referrals, $controls),
+    $errcode,
+    $errmsg,
+    $controls
 );
 
 /* Then with VLV control */
 var_dump(
-	$result = ldap_search($link, $base, '(cn=*)', array('cn'), 0, 0, 0, LDAP_DEREF_NEVER,
-		[
-			[
-				'oid' => LDAP_CONTROL_SORTREQUEST,
-				'iscritical' => TRUE,
-				'value' => [
-					['attr' => 'cn', 'oid' => '2.5.13.3' /* caseIgnoreOrderingMatch */, 'reverse' => TRUE]
-				]
-			],
-			[
-				'oid' => LDAP_CONTROL_VLVREQUEST,
-				'iscritical' => TRUE,
-				'value' => [
-					'before'	=> 0, // Return 0 entry before target
-					'after'		=> 1, // Return 1 entry after target
-					'offset'	=> 2, // Target entry is the second one
-					'count'		=> 0, // We have no idea how many entries there are
-				]
-			]
-		]
-	),
-	ldap_get_entries($link, $result),
-	ldap_parse_result($link, $result, $errcode , $matcheddn , $errmsg , $referrals, $controls),
-	array_keys($controls),
-	$controls[LDAP_CONTROL_SORTRESPONSE],
-	$controls[LDAP_CONTROL_VLVRESPONSE]['value']['target'],
-	$controls[LDAP_CONTROL_VLVRESPONSE]['value']['count'],
-	$controls[LDAP_CONTROL_VLVRESPONSE]['value']['errcode'],
-	bin2hex($controls[LDAP_CONTROL_VLVRESPONSE]['value']['context'])
+    $result = ldap_search(
+        $link,
+        $base,
+        '(cn=*)',
+        array('cn'),
+        0,
+        0,
+        0,
+        LDAP_DEREF_NEVER,
+        [
+            [
+                'oid' => LDAP_CONTROL_SORTREQUEST,
+                'iscritical' => true,
+                'value' => [
+                    ['attr' => 'cn', 'oid' => '2.5.13.3' /* caseIgnoreOrderingMatch */, 'reverse' => true]
+                ]
+            ],
+            [
+                'oid' => LDAP_CONTROL_VLVREQUEST,
+                'iscritical' => true,
+                'value' => [
+                    'before'    => 0, // Return 0 entry before target
+                    'after'     => 1, // Return 1 entry after target
+                    'offset'    => 2, // Target entry is the second one
+                    'count'     => 0, // We have no idea how many entries there are
+                ]
+            ]
+        ]
+    ),
+    ldap_get_entries($link, $result),
+    ldap_parse_result($link, $result, $errcode, $matcheddn, $errmsg, $referrals, $controls),
+    array_keys($controls),
+    $controls[LDAP_CONTROL_SORTRESPONSE],
+    $controls[LDAP_CONTROL_VLVRESPONSE]['value']['target'],
+    $controls[LDAP_CONTROL_VLVRESPONSE]['value']['count'],
+    $controls[LDAP_CONTROL_VLVRESPONSE]['value']['errcode'],
+    bin2hex($controls[LDAP_CONTROL_VLVRESPONSE]['value']['context'])
 );
+
 ?>
 --CLEAN--
 <?php

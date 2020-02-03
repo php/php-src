@@ -6,12 +6,13 @@ Nathaniel McHugh nat@fishtrap.co.uk
 --FILE--
 <?php
 
-class MyHeap extends SplHeap{
+class MyHeap extends SplHeap
+{
 
-public function compare($a, $b){
-return $a < $b;
-}
-
+    public function compare($a, $b)
+    {
+        return $a < $b;
+    }
 }
 
 
@@ -21,6 +22,7 @@ $heap->insert(1);
 var_dump($heap->isEmpty());
 $heap->extract();
 var_dump($heap->isEmpty());
+
 ?>
 --EXPECTF--
 bool(true)

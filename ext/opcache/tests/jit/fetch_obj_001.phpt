@@ -9,19 +9,23 @@ opcache.jit_buffer_size=1M
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function foo(&$a) {
-	$a = 2;
+
+function foo(&$a)
+{
+    $a = 2;
 }
 
-function foo2(&$a) {
+function foo2(&$a)
+{
     $a = array();
 }
 
-function foo3(&$a, $var) {
+function foo3(&$a, $var)
+{
     $a = $var;
 }
 
-$obj = new stdClass;
+$obj = new stdClass();
 foo($obj->a);
 var_dump($obj);
 foo2($obj->b);
@@ -34,46 +38,48 @@ $a = &$obj->a;
 $a = fopen(__FILE__, "r");
 var_dump($obj);
 
-function bar() {
-    $obj = new stdClass;
-	foo($obj->a);
-	var_dump($obj);
-	foo2($obj->b);
-	var_dump($obj);
-	foo3($obj->a, "2" . "3");
-	foo3($obj->a, $obj->b);
-	var_dump($obj);
+function bar()
+{
+    $obj = new stdClass();
+    foo($obj->a);
+    var_dump($obj);
+    foo2($obj->b);
+    var_dump($obj);
+    foo3($obj->a, "2" . "3");
+    foo3($obj->a, $obj->b);
+    var_dump($obj);
 
-	$a = &$obj->a;
-	$a = fopen(__FILE__, "r");
-	var_dump($obj);
+    $a = &$obj->a;
+    $a = fopen(__FILE__, "r");
+    var_dump($obj);
 
     $d = array();
     try {
-        foo($d->{"ab" ."c"});
+        foo($d->{"ab" . "c"});
     } catch (Error $err) {
         echo $err->getMessage(), "\n";
     }
-	var_dump($d);
+    var_dump($d);
 
-    $e = NULL;
+    $e = null;
     try {
-        foo($e->{"ab" ."c"});
+        foo($e->{"ab" . "c"});
     } catch (Error $err) {
         echo $err->getMessage(), "\n";
     }
-	var_dump($e);
+    var_dump($e);
 
     $f = "";
     try {
-        foo($f->{"ab" ."c"});
+        foo($f->{"ab" . "c"});
     } catch (Error $err) {
         echo $err->getMessage(), "\n";
     }
-	var_dump($f);
+    var_dump($f);
 }
 
 bar();
+
 ?>
 --EXPECTF--
 object(stdClass)#%d (1) {

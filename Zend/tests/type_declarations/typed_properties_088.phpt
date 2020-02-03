@@ -3,20 +3,23 @@ Check for correct invalidation of prop_info cache slots
 --FILE--
 <?php
 
-class A {
+class A
+{
     public int $prop;
 }
-class B {
+class B
+{
     public $prop;
 }
 
-function test($obj) {
+function test($obj)
+{
     $obj->prop = "42";
     var_dump($obj);
 }
 
-test(new A);
-test(new B);
+test(new A());
+test(new B());
 
 ?>
 --EXPECT--

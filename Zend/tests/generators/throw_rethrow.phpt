@@ -3,7 +3,8 @@ Generator::throw() where the generator throws a different exception
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     echo "before yield\n";
     try {
         yield;

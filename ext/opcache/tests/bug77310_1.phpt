@@ -5,7 +5,8 @@ Bug #77310 (1): Incorrect SCCP for compound assign to arrays
 --FILE--
 <?php
 
-function breakit($data_arr) {
+function breakit($data_arr)
+{
     $foo[0] = "";
     for ($i = 0; $i < count($data_arr); $i++) {
         $foo[0] .= $data_arr[$i];

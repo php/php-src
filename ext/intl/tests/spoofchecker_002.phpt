@@ -12,6 +12,7 @@ echo "Checking if words are confusable\n";
 var_dump($x->areConfusable("hello, world", "goodbye, world"));
 var_dump($x->areConfusable("hello, world", "hello, world"));
 var_dump($x->areConfusable("hello, world", "he11o, wor1d"));
+
 ?>
 --EXPECT--
 Checking if words are confusable

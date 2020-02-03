@@ -12,7 +12,9 @@ if ($status !== 0) {
 ?>
 --FILE--
 <?php
-function countOpenFiles() {
+
+function countOpenFiles()
+{
     exec('lsof -p ' . escapeshellarg(getmypid()) . ' 2> /dev/null', $out);
     return count($out);
 }
@@ -25,6 +27,7 @@ $arch->compress(Phar::GZ);
 unset($arch);
 $openFiles2 = countOpenFiles();
 var_dump($openFiles1 === $openFiles2);
+
 ?>
 --CLEAN--
 <?php

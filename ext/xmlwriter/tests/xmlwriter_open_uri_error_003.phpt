@@ -4,7 +4,9 @@ xmlwriter_open_uri with non existing file
 <?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
 --FILE--
 <?php
+
 var_dump(xmlwriter_open_uri('foo/bar.tmp'));
+
 ?>
 --CREDITS--
 Koen Kuipers koenk82@gmail.com

@@ -2,14 +2,17 @@
 Test typed static property
 --FILE--
 <?php
-function &ref() {
-	static $a = 5;
-	return $a;
+
+function &ref()
+{
+    static $a = 5;
+    return $a;
 }
 
-class Foo {
-	public static int $i;
-	public static string $s = "x";
+class Foo
+{
+    public static int $i;
+    public static string $s = "x";
 }
 
 var_dump(Foo::$i = 1);
@@ -31,6 +34,7 @@ var_dump(Foo::$i);
 var_dump(Foo::$s = ref());
 var_dump(Foo::$s);
 var_dump(ref());
+
 ?>
 --EXPECT--
 int(1)

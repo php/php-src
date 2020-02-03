@@ -4,12 +4,14 @@ SPL: SplDoublyLinkedList : offsetUnset - last element
 PHPNW TestFest2009 - Rowan Merewood <rowan@merewood.org>
 --FILE--
 <?php
+
 $list = new SplDoublyLinkedList();
 $list->push('oh');
 $list->push('hai');
 $list->push('thar');
 $list->offsetUnset(2);
 var_dump($list);
+
 ?>
 --EXPECT--
 object(SplDoublyLinkedList)#1 (2) {

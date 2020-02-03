@@ -2,6 +2,7 @@
 Test gmdate() function : basic functionality
 --FILE--
 <?php
+
 /* Prototype  : string gmdate(string format [, long timestamp])
  * Description: Format a GMT date/time
  * Source code: ext/date/php_date.c
@@ -16,10 +17,10 @@ $format = DATE_ISO8601;
 $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 
 // Calling gmdate() with all possible arguments
-var_dump( gmdate($format, $timestamp) );
+var_dump(gmdate($format, $timestamp));
 
 // Calling gmdate() with mandatory arguments
-var_dump( gmdate($format) );
+var_dump(gmdate($format));
 
 ?>
 --EXPECTF--

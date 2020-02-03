@@ -6,9 +6,11 @@ if (!extension_loaded('intl')) die('skip intl extension not available');
 ?>
 --FILE--
 <?php
+
 $it = IntlBreakIterator::createCharacterInstance();
 $it->setText('foo');
 var_dump($it);
+
 ?>
 --EXPECTF--
 object(IntlRuleBasedBreakIterator)#%d (3) {

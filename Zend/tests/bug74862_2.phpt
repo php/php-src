@@ -3,18 +3,18 @@ Bug #74862 (Unable to clone instance when private __clone defined in a child cla
 --FILE--
 <?php
 
-class main {
+class main
+{
 }
 
-class a extends main {
+class a extends main
+{
     private function __clone()
     {
-
     }
 
     private function __construct()
     {
-
     }
 
     public static function getInstance()
@@ -30,7 +30,8 @@ class a extends main {
     }
 }
 
-class c extends a {
+class c extends a
+{
 
 }
 
@@ -40,6 +41,7 @@ $d = c::getInstance();
 // private clone
 $e = $d->cloneIt();
 var_dump($e);
+
 ?>
 --EXPECT--
 object(c)#2 (0) {

@@ -22,24 +22,25 @@ function ut_main()
         1.2,
     );
 
-    $coll = ut_coll_create( 'en_US' );
+    $coll = ut_coll_create('en_US');
     $res_str = '';
 
-    foreach( $locales as $locale )
-    {
-        $rc = ut_coll_get_locale( $coll, $locale );
+    foreach ($locales as $locale) {
+        $rc = ut_coll_get_locale($coll, $locale);
 
         $res_str .= sprintf(
             "Locale of type %s is %s\n",
-            dump( $locale ),
-            dump( $rc ) );
+            dump($locale),
+            dump($rc)
+        );
     }
 
     return $res_str . "\n";
 }
 
-include_once( 'ut_common.inc' );
+include_once('ut_common.inc');
 ut_run();
+
 ?>
 --EXPECT--
 Locale of type 1 is 'en_US'

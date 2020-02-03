@@ -2,10 +2,12 @@
 SPL: DoublyLinkedList: recursive var_dump
 --FILE--
 <?php
-$a = new SplDoublyLinkedList;
+
+$a = new SplDoublyLinkedList();
 $a[] = $a;
 
 var_dump($a);
+
 ?>
 --EXPECTF--
 object(SplDoublyLinkedList)#%d (2) {

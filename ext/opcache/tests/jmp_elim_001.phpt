@@ -6,12 +6,15 @@ Edge-cases in constant conditional jump elimination
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 $webserver = "Apache";
 $cpuArc = "x86_64";
 $archName = (strstr($cpuArc, "64") || PHP_INT_SIZE === 8) ? "64" : "32";
 $info = array('arch' => $archName,
-              'webserver' =>$webserver);
+              'webserver' => $webserver);
 header('Content-Type: application/json');
 echo json_encode($info) . "\n";
+
+?>
 --EXPECT--
 {"arch":"64","webserver":"Apache"}

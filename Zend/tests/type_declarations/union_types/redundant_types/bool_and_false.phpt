@@ -3,7 +3,8 @@ Using both bool and false in a union
 --FILE--
 <?php
 
-function test(): bool|false {
+function test(): bool | false
+{
 }
 
 ?>

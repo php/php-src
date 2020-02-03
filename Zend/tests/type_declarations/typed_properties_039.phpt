@@ -3,21 +3,23 @@ Repeated assign of a variable to mismatched property type must not succeed
 --FILE--
 <?php
 
-class A {
-        public int $foo;
+class A
+{
+    public int $foo;
 }
 
-class B {
-        public A $foo;
+class B
+{
+    public A $foo;
 }
 
-$objs = [new A, new A];
+$objs = [new A(), new A()];
 $v = 1;
 
 foreach ($objs as $obj) {
         $obj->foo = $v;
-        $v = new A;
-        $obj = new B;
+        $v = new A();
+        $obj = new B();
         $obj->foo = $v;
 }
 

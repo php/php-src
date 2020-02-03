@@ -5,9 +5,9 @@ PHPNW Test Fest 2009 - Jordan Hatch
 --FILE--
 <?php
 
-$array = new SplFixedArray( NULL );
+$array = new SplFixedArray(null);
 
-print_r( $array );
+print_r($array);
 
 ?>
 --EXPECT--

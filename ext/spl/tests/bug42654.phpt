@@ -2,6 +2,7 @@
 Bug #42654 (RecursiveIteratorIterator modifies only part of leaves)
 --FILE--
 <?php
+
 $data = array(1 => 'val1',
               array(2 => 'val2',
                     array(3 => 'val3'),
@@ -11,7 +12,7 @@ $data = array(1 => 'val1',
 
 $iterator = new RecursiveIteratorIterator(new
 RecursiveArrayIterator($data));
-foreach($iterator as $foo) {
+foreach ($iterator as $foo) {
     $key = $iterator->key();
     echo "update $key\n";
     var_dump($iterator->getInnerIterator());
@@ -20,6 +21,7 @@ foreach($iterator as $foo) {
 }
 $copy = $iterator->getArrayCopy();
 var_dump($copy);
+
 ?>
 --EXPECTF--
 update 1

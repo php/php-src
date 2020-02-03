@@ -22,5 +22,7 @@ try {
 }
 
 ?>
+
+?>
 --EXPECT--
 caught

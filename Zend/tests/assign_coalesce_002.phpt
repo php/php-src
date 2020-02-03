@@ -8,12 +8,14 @@ $foo .= "o";
 $bar = "ba";
 $bar .= "r";
 
-function id($arg) {
+function id($arg)
+{
     echo "id($arg)\n";
     return $arg;
 }
 
-function do_throw($msg) {
+function do_throw($msg)
+{
     throw new Exception($msg);
 }
 
@@ -25,46 +27,62 @@ try {
 }
 var_dump($ary);
 
-class AA implements ArrayAccess {
-    public function offsetExists($k) {
+class AA implements ArrayAccess
+{
+    public function offsetExists($k)
+    {
         return true;
     }
-    public function &offsetGet($k) {
+    public function &offsetGet($k)
+    {
         $var = ["foo" => "bar"];
         return $var;
     }
-    public function offsetSet($k,$v) {}
-    public function offsetUnset($k) {}
+    public function offsetSet($k, $v)
+    {
+    }
+    public function offsetUnset($k)
+    {
+    }
 }
 
-class Dtor {
-    public function __destruct() {
+class Dtor
+{
+    public function __destruct()
+    {
         throw new Exception("dtor");
     }
 }
 
-$ary = new AA;
+$ary = new AA();
 try {
-    $ary[new Dtor][id($foo)] ??= $bar;
+    $ary[new Dtor()][id($foo)] ??= $bar;
 } catch (Exception $e) {
     echo $e->getMessage(), "\n";
 }
 var_dump($foo);
 
-class AA2 implements ArrayAccess {
-    public function offsetExists($k) {
+class AA2 implements ArrayAccess
+{
+    public function offsetExists($k)
+    {
         return false;
     }
-    public function offsetGet($k) {
+    public function offsetGet($k)
+    {
         return null;
     }
-    public function offsetSet($k,$v) {}
-    public function offsetUnset($k) {}
+    public function offsetSet($k, $v)
+    {
+    }
+    public function offsetUnset($k)
+    {
+    }
 }
 
-$ary = ["foo" => new AA2];
+$ary = ["foo" => new AA2()];
 try {
-    $ary[id($foo)][new Dtor] ??= $bar;
+    $ary[id($foo)][new Dtor()] ??= $bar;
 } catch (Exception $e) {
     echo $e->getMessage(), "\n";
 }

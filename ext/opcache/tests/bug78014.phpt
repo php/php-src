@@ -12,11 +12,17 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 ?>
 --FILE--
 <?php
-class B extends A {
-    function foo(): int { return 24; }
+
+class B extends A
+{
+    function foo(): int
+    {
+        return 24;
+    }
 }
-$c = new C;
+$c = new C();
 var_dump($c->foo());
+
 ?>
 --EXPECTF--
 Warning: Can't preload unlinked class C: Parent with unresolved initializers B in %s on line %d

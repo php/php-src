@@ -3,24 +3,29 @@ get_parent_class() tests
 --FILE--
 <?php
 
-interface i {
-	function test();
+interface i
+{
+    function test();
 }
 
-class foo implements i {
-	function test() {
-		var_dump(get_parent_class());
-	}
+class foo implements i
+{
+    function test()
+    {
+        var_dump(get_parent_class());
+    }
 }
 
-class bar extends foo {
-	function test_bar() {
-		var_dump(get_parent_class());
-	}
+class bar extends foo
+{
+    function test_bar()
+    {
+        var_dump(get_parent_class());
+    }
 }
 
-$bar = new bar;
-$foo = new foo;
+$bar = new bar();
+$foo = new foo();
 
 $foo->test();
 $bar->test();
@@ -35,11 +40,12 @@ var_dump(get_parent_class("i"));
 var_dump(get_parent_class(""));
 var_dump(get_parent_class("[[[["));
 var_dump(get_parent_class(" "));
-var_dump(get_parent_class(new stdclass));
+var_dump(get_parent_class(new stdclass()));
 var_dump(get_parent_class(array()));
 var_dump(get_parent_class(1));
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 bool(false)

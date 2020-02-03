@@ -43,14 +43,14 @@ var_dump($phar->getAlias());
 echo "================= convertToPhar() ====================\n";
 
 try {
-	$phar = $phar->convertToExecutable(Phar::PHAR);
-	var_dump($phar->isFileFormat(Phar::PHAR));
-	var_dump($phar->isFileFormat(Phar::TAR));
-	var_dump($phar->isFileFormat(Phar::ZIP));
-	var_dump(strlen($phar->getStub()));
-	var_dump($phar->getAlias());
-} catch(Exception $e) {
-	echo $e->getMessage()."\n";
+    $phar = $phar->convertToExecutable(Phar::PHAR);
+    var_dump($phar->isFileFormat(Phar::PHAR));
+    var_dump($phar->isFileFormat(Phar::TAR));
+    var_dump($phar->isFileFormat(Phar::ZIP));
+    var_dump(strlen($phar->getStub()));
+    var_dump($phar->getAlias());
+} catch (Exception $e) {
+    echo $e->getMessage() . "\n";
 }
 
 echo "================ convertToTar(GZ) ====================\n";
@@ -65,15 +65,16 @@ var_dump($phar->getAlias());
 echo "================= convertToPhar() ====================\n";
 
 try {
-	$phar = $phar->convertToExecutable(Phar::PHAR);
-	var_dump($phar->isFileFormat(Phar::PHAR));
-	var_dump($phar->isFileFormat(Phar::TAR));
-	var_dump($phar->isFileFormat(Phar::ZIP));
-	var_dump(strlen($phar->getStub()));
-	var_dump($phar->getAlias());
-} catch(Exception $e) {
-	echo $e->getMessage()."\n";
+    $phar = $phar->convertToExecutable(Phar::PHAR);
+    var_dump($phar->isFileFormat(Phar::PHAR));
+    var_dump($phar->isFileFormat(Phar::TAR));
+    var_dump($phar->isFileFormat(Phar::ZIP));
+    var_dump(strlen($phar->getStub()));
+    var_dump($phar->getAlias());
+} catch (Exception $e) {
+    echo $e->getMessage() . "\n";
 }
+
 ?>
 --CLEAN--
 <?php

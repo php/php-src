@@ -2,17 +2,21 @@
 Handling of UNDEF property in compound assign 
 --FILE--
 <?php
-class C {
+
+class C
+{
     public $a = 0;
 }
-function foo() {
-    $x = new C;
+function foo()
+{
+    $x = new C();
     $x->a = 1;
     unset($x->a);
     $x->a += 2;
     var_dump($x);
 }
 foo();
+
 ?>
 --EXPECTF--
 Warning: Undefined property: C::$a in %s on line %d

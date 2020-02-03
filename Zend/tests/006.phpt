@@ -13,6 +13,7 @@ var_dump(strncasecmp("q123", "Q123", 3));
 var_dump(strncasecmp("01", "01", 1000));
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Warning: Length must be greater than or equal to 0 in %s on line %d

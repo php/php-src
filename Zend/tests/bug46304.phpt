@@ -3,9 +3,9 @@ Bug #46304 (defining namespaced constant using define())
 --FILE--
 <?php
 
-define('NS1\ns2\const1','value1');
-define('ns1\ns2\const2','value2');
-define('ns1\NS2\coNSt3','value3');
+define('NS1\ns2\const1', 'value1');
+define('ns1\ns2\const2', 'value2');
+define('ns1\NS2\coNSt3', 'value3');
 
 print NS1\ns2\const1 . "\n";
 print ns1\ns2\const1 . "\n";
@@ -20,6 +20,7 @@ print ns1\ns2\coNSt3 . "\n";
 print ns1\ns2\coNSt3 . "\n";
 
 print NS1\ns2\coNSt1 . "\n";
+
 ?>
 --EXPECTF--
 value1

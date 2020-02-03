@@ -6,6 +6,7 @@ EUC-JP to SJIS
 error_reporting=2039
 --FILE--
 <?php
+
 /* charset=EUC-JP */
 
 $str = "
@@ -49,7 +50,7 @@ $str = "
 
 $str = iconv("EUC-JP", "SJIS", $str);
 $str = base64_encode($str);
-echo $str."\n";
+echo $str . "\n";
 
 ?>
 --EXPECT--

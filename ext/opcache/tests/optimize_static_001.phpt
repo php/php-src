@@ -8,16 +8,20 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function foo() {
-	static $a = UNDEFINED_CONST;
+
+function foo()
+{
+    static $a = UNDEFINED_CONST;
 }
 try {
-	foo();
+    foo();
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 ?>
 OK
+
+?>
 --EXPECT--
 Exception: Undefined constant 'UNDEFINED_CONST'
 OK

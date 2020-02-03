@@ -3,7 +3,7 @@ Bug #78921: When Reflection triggers class load, property visibility is incorrec
 --FILE--
 <?php
 
-spl_autoload_register(function($className) {
+spl_autoload_register(function ($className) {
     if ($className == 'PrivateStatic') {
         class PrivateStatic
         {

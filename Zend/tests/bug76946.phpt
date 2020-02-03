@@ -3,14 +3,16 @@ Bug #76946: Cyclic reference in generator not detected
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     $gen = yield;
     foreach ([1, $gen] as $v) {
         yield $v;
     }
 }
 
-function gen2() {
+function gen2()
+{
     $gen = yield;
     $gen + yield;
 }

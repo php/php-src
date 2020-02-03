@@ -4,6 +4,7 @@ Phar: bug #74386: Phar::__construct(): wrong number of parameters by reflection
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
+
 $r = new ReflectionMethod(Phar::class, '__construct');
 var_dump($r->getNumberOfRequiredParameters());
 var_dump($r->getNumberOfParameters());
@@ -11,6 +12,7 @@ var_dump($r->getNumberOfParameters());
 $r = new ReflectionMethod(PharData::class, '__construct');
 var_dump($r->getNumberOfRequiredParameters());
 var_dump($r->getNumberOfParameters());
+
 ?>
 --EXPECT--
 int(1)

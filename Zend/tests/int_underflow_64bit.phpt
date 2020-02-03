@@ -19,6 +19,7 @@ foreach ($doubles as $d) {
 }
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 int(-9223372036854775808)

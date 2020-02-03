@@ -43,7 +43,7 @@ class MyArray extends ArrayObject
     }
 }
 
-$x = new MyArrayObject;
+$x = new MyArrayObject();
 $x->a1 = new stdClass();
 var_dump($x->a1);
 

@@ -14,6 +14,7 @@ Jacopo Romei <jacopo@sviluppoagile.it>
 //file
 $fileInfo = new SplFileInfo('not_existing');
 var_dump($fileInfo->getPerms() == 0100557);
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught RuntimeException: SplFileInfo::getPerms(): stat failed for %s in %s

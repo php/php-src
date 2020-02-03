@@ -8,7 +8,8 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-require_once(__DIR__.'/snmp_include.inc');
+
+require_once(__DIR__ . '/snmp_include.inc');
 
 echo "Checking error handling\n";
 var_dump(snmp_set_valueretrieval(67));
@@ -21,10 +22,10 @@ snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 var_dump(snmp_get_valueretrieval() === SNMP_VALUE_PLAIN);
 snmp_set_valueretrieval(SNMP_VALUE_OBJECT);
 var_dump(snmp_get_valueretrieval() === SNMP_VALUE_OBJECT);
-snmp_set_valueretrieval(SNMP_VALUE_PLAIN|SNMP_VALUE_OBJECT);
-var_dump(snmp_get_valueretrieval() === (SNMP_VALUE_PLAIN|SNMP_VALUE_OBJECT));
-snmp_set_valueretrieval(SNMP_VALUE_LIBRARY|SNMP_VALUE_OBJECT);
-var_dump(snmp_get_valueretrieval() === (SNMP_VALUE_LIBRARY|SNMP_VALUE_OBJECT));
+snmp_set_valueretrieval(SNMP_VALUE_PLAIN | SNMP_VALUE_OBJECT);
+var_dump(snmp_get_valueretrieval() === (SNMP_VALUE_PLAIN | SNMP_VALUE_OBJECT));
+snmp_set_valueretrieval(SNMP_VALUE_LIBRARY | SNMP_VALUE_OBJECT);
+var_dump(snmp_get_valueretrieval() === (SNMP_VALUE_LIBRARY | SNMP_VALUE_OBJECT));
 
 ?>
 --EXPECTF--

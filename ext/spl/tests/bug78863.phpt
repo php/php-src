@@ -2,6 +2,7 @@
 Bug #78863 (DirectoryIterator class silently truncates after a null byte)
 --FILE--
 <?php
+
 $dir = __DIR__ . '/bug78863';
 mkdir($dir);
 touch("$dir/bad");
@@ -14,6 +15,7 @@ foreach ($it as $fileinfo) {
         var_dump($fileinfo->getFilename());
     }
 }
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught TypeError: DirectoryIterator::__construct() expects parameter 1 to be a valid path, string given in %s:%d

@@ -20,18 +20,21 @@ function make_exception_and_change_err_reporting()
 
 
 try {
-	@make_exception();
-} catch (Exception $e) {}
+    @make_exception();
+} catch (Exception $e) {
+}
 
 var_dump(error_reporting());
 
 try {
-	@make_exception_and_change_err_reporting();
-} catch (Exception $e) {}
+    @make_exception_and_change_err_reporting();
+} catch (Exception $e) {
+}
 
 var_dump(error_reporting());
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 int(32767)

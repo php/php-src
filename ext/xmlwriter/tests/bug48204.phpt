@@ -4,8 +4,10 @@ xmlwriter_open_uri with PHP_MAXPATHLEN + 1
 <?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
 --FILE--
 <?php
+
 $path = str_repeat('a', PHP_MAXPATHLEN + 1);
 var_dump(xmlwriter_open_uri('file:///' . $path));
+
 ?>
 --CREDITS--
 Koen Kuipers koenk82@gmail.com

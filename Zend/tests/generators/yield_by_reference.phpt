@@ -3,7 +3,8 @@ Generators can yield by-reference
 --FILE--
 <?php
 
-function &iter(array &$array) {
+function &iter(array &$array)
+{
     foreach ($array as $key => &$value) {
         yield $key => $value;
     }

@@ -6,6 +6,7 @@ precision=14
 <?php if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only"); ?>
 --FILE--
 <?php
+
 var_dump(0b1);
 var_dump(0b11);
 var_dump(0b111);
@@ -79,6 +80,8 @@ var_dump(-0b11111111111111111111111111111111);
 var_dump(-0b1111111111111111111111111111111);
 var_dump(-0b111111111111111111111111111111);
 var_dump(-0b1);
+
+?>
 --EXPECT--
 int(1)
 int(3)

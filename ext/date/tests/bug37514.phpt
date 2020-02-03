@@ -2,6 +2,7 @@
 Bug #37514 (strtotime doesn't assume year correctly).
 --FILE--
 <?php
+
 date_default_timezone_set('UTC');
 echo date('r', strtotime('May 18th 5:05', 1168156376)), "\n";
 echo date('r', strtotime('May 18th 5:05pm', 1168156376)), "\n";
@@ -9,6 +10,7 @@ echo date('r', strtotime('May 18th 5:05 pm', 1168156376)), "\n";
 echo date('r', strtotime('May 18th 5:05am', 1168156376)), "\n";
 echo date('r', strtotime('May 18th 5:05 am', 1168156376)), "\n";
 echo date('r', strtotime('May 18th 2006 5:05pm', 1168156376)), "\n";
+
 ?>
 --EXPECT--
 Fri, 18 May 2007 05:05:00 +0000

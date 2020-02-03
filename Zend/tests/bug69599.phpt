@@ -3,7 +3,8 @@ Bug #69599: Strange generator+exception+variadic crash
 --FILE--
 <?php
 
-function crash() {
+function crash()
+{
     sin(...[0]);
     throw new \Exception();
     yield;

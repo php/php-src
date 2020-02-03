@@ -6,6 +6,7 @@ Bug #65414 Injection (A1) in .phar files magic .phar directory
 phar.readonly = 0
 --FILE--
 <?php
+
 $phar = new \Phar(__DIR__ . '/bug65414.phar', 0, 'bug65414.phar');
 $bads = [
     '.phar/injected-1.txt',
@@ -23,6 +24,7 @@ foreach ($bads as $bad) {
     }
 }
 echo 'done' . PHP_EOL;
+
 ?>
 --CLEAN--
 <?php

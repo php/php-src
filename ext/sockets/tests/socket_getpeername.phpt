@@ -11,6 +11,7 @@ fa@php.net
 ?>
 --FILE--
 <?php
+
     $s_c     = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
     $s_bind  = socket_bind($s_c, '0.0.0.0');
     var_dump($s_bind);
@@ -21,6 +22,7 @@ fa@php.net
     var_dump($ip);
     var_dump($port);
     socket_close($s_c);
+
 ?>
 --EXPECTF--
 bool(true)

@@ -6,7 +6,8 @@ Bug #73954 (NAN check fails on Alpine Linux with musl)
 var_dump(NAN);
 var_dump(is_nan(NAN));
 
-function takes_int(int $int) {
+function takes_int(int $int)
+{
 }
 
 takes_int(log(tan(3.14)));

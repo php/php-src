@@ -6,6 +6,7 @@ Gabriel Caruso (carusogabriel34@gmail.com)
 <?php require 'skipif.inc'; ?>
 --FILE--
 <?php
+
 require 'server.inc';
 define('FOO_BAR', 10);
 
@@ -17,6 +18,7 @@ var_dump(ftp_get_option($ftp, FTP_TIMEOUT_SEC));
 var_dump(ftp_get_option($ftp, FTP_AUTOSEEK));
 var_dump(ftp_get_option($ftp, FTP_USEPASVADDRESS));
 var_dump(ftp_get_option($ftp, FOO_BAR));
+
 ?>
 --EXPECTF--
 int(%d)

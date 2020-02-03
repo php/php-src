@@ -2,6 +2,7 @@
 Bug #70561 (DirectoryIterator::seek should throw OutOfBoundsException)
 --FILE--
 <?php
+
 $di = new DirectoryIterator(__DIR__ . '/..');
 
 $cnt = 0;
@@ -12,11 +13,12 @@ while ($di->valid()) {
 }
 
 try {
-    $di->seek($cnt+1);
+    $di->seek($cnt + 1);
 } catch (OutOfBoundsException $ex) {
     echo $ex->getMessage() . PHP_EOL;
 }
 echo "Is valid? " . (int) $di->valid() . PHP_EOL;
+
 ?>
 --EXPECTF--
 Seek position %d is out of range

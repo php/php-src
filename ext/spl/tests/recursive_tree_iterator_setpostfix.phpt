@@ -6,22 +6,22 @@ Joshua Thijssen (jthijssen@noxlogic.nl)
 <?php
 
 $arr = array(
-	0 => array(
-		"a",
-		1,
-	),
-	"a" => array(
-		2,
-		"b",
-		3 => array(
-			4,
-			"c",
-		),
-		"3" => array(
-			4,
-			"c",
-		),
-	),
+    0 => array(
+        "a",
+        1,
+    ),
+    "a" => array(
+        2,
+        "b",
+        3 => array(
+            4,
+            "c",
+        ),
+        "3" => array(
+            4,
+            "c",
+        ),
+    ),
 );
 
 $it = new RecursiveArrayIterator($arr);
@@ -37,8 +37,8 @@ echo $it->getPostfix();
 echo "\n\n";
 
 echo "----\n";
-foreach($it as $k => $v) {
-	echo "[$k] => $v\n";
+foreach ($it as $k => $v) {
+    echo "[$k] => $v\n";
 }
 
 echo "----\n";
@@ -47,11 +47,9 @@ echo $it->getPostfix();
 echo "\n\n";
 
 echo "----\n";
-foreach($it as $k => $v) {
-	echo "[$k] => $v\n";
+foreach ($it as $k => $v) {
+    echo "[$k] => $v\n";
 }
-
-
 
 ?>
 --EXPECT--

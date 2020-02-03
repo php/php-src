@@ -3,9 +3,10 @@ Ensure proper backtraces with anon classes
 --FILE--
 <?php
 
-(function($obj) {
-	throw new Exception();
-})(new class {});
+(function ($obj) {
+    throw new Exception();
+})(new class {
+});
 
 ?>
 --EXPECTF--

@@ -3,7 +3,8 @@ finally is run even if a generator is closed mid-execution
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     try {
         try {
             echo "before yield\n";

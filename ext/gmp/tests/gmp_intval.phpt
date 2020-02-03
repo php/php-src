@@ -12,7 +12,7 @@ var_dump(gmp_intval("-1"));
 var_dump(gmp_intval(-1));
 var_dump(gmp_intval(-2349828));
 var_dump(gmp_intval(2342344));
-var_dump(gmp_intval(new stdclass));
+var_dump(gmp_intval(new stdclass()));
 var_dump(gmp_intval(array()));
 
 $fp = fopen(__FILE__, 'r');
@@ -22,6 +22,7 @@ $g = gmp_init("12345678");
 var_dump(gmp_intval($g));
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 int(0)

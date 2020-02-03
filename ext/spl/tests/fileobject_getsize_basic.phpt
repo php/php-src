@@ -7,11 +7,13 @@ H�vard Eide <nucleuz at gmail.com>
 include_path=.
 --FILE--
 <?php
-$file = __DIR__ ."/data.txt";
+
+$file = __DIR__ . "/data.txt";
 file_put_contents($file, "foobar");
 
-$s = new SplFileObject( $file );
+$s = new SplFileObject($file);
 echo $s->getSize();
+
 ?>
 --CLEAN--
 <?php

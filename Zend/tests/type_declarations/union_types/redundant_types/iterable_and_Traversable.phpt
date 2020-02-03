@@ -3,7 +3,8 @@ Using both iterable and Traversable
 --FILE--
 <?php
 
-function test(): iterable|Traversable {
+function test(): iterable | Traversable
+{
 }
 
 ?>

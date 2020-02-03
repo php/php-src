@@ -3,13 +3,16 @@ Return type and Reflection::export()
 --FILE--
 <?php
 
-class A {
-    function foo(array $a): array {
+class A
+{
+    function foo(array $a): array
+    {
         return $a;
     }
 }
 
 echo new ReflectionClass("A");
+
 ?>
 --EXPECTF--
 Class [ <user> class A ] {

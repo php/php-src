@@ -4,12 +4,16 @@ Bug #72057 (PHP hangs when user error handler throws exception after Notice from
 <?php
 
 set_error_handler(
-    function() {
+    function () {
         throw new Exception("My custom error");
     }
 );
 
-(function (int $i) { bar(); })("7as");
+(function (int $i) {
+    bar();
+})("7as");
+
+?>
 --EXPECTF--
 Fatal error: Uncaught Exception: My custom error in %s:%d
 Stack trace:

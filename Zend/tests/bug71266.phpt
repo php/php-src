@@ -2,6 +2,7 @@
 Bug #71266 (Missing separation of properties HT in foreach etc)
 --FILE--
 <?php
+
 $one = 1;
 $two = 2;
 $arr = ['foo' => $one, 'bar' => $two];
@@ -15,6 +16,7 @@ $arr = ['foo' => $one, 'bar' => $two];
 $obj = (object) $arr;
 next($obj);
 var_dump(current($arr));
+
 ?>
 --EXPECT--
 int(1)

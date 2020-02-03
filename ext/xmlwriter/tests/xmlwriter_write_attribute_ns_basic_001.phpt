@@ -4,9 +4,10 @@ xmlwriter_write_attribute_ns basic function tests
 <?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
 --FILE--
 <?php
+
 $xw = xmlwriter_open_memory();
-xmlwriter_set_indent($xw, TRUE);
-xmlwriter_start_document($xw, NULL, "UTF-8");
+xmlwriter_set_indent($xw, true);
+xmlwriter_start_document($xw, null, "UTF-8");
 xmlwriter_start_element($xw, 'root');
 xmlwriter_write_attribute_ns($xw, 'prefix', 'id', 'http://www.php.net/uri', 'elem1');
 xmlwriter_start_element($xw, 'elem1');
@@ -17,6 +18,7 @@ xmlwriter_end_document($xw);
 
 $output = xmlwriter_flush($xw, true);
 print $output;
+
 ?>
 --CREDITS--
 Koen Kuipers koenk82@gmail.com

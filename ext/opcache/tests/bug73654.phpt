@@ -4,14 +4,17 @@ Bug #73654: Segmentation fault in zend_call_function
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 echo xyz();
 
-function x () : string {
+function x(): string
+{
     return 'x';
 }
 
-function xyz() : string {
-    return x().'yz';
+function xyz(): string
+{
+    return x() . 'yz';
 }
 
 ?>

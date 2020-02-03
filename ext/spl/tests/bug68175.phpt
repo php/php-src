@@ -2,6 +2,7 @@
 Bug #68175 (RegexIterator pregFlags are NULL instead of 0)
 --FILE--
 <?php
+
 $arr = new ArrayIterator(array());
 $regex = new RegexIterator($arr, '/^test/');
 var_dump(
@@ -9,6 +10,7 @@ var_dump(
     $regex->getFlags(),
     $regex->getPregFlags()
 );
+
 ?>
 --EXPECT--
 int(0)

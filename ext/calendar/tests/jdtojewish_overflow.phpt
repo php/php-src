@@ -8,10 +8,12 @@ if (!extension_loaded('calendar')) die('skip ext/calendar required');
 ?>
 --FILE--
 <?php
-for ($i=324542840; $i<324542850; $i++) {
-	echo $i, ':', jdtojewish($i), PHP_EOL;
+
+for ($i = 324542840; $i < 324542850; $i++) {
+    echo $i, ':', jdtojewish($i), PHP_EOL;
 }
 echo 'DONE', PHP_EOL;
+
 ?>
 --EXPECT--
 324542840:12/7/887605

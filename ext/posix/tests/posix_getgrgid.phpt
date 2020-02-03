@@ -11,6 +11,7 @@ if (!extension_loaded('posix')) {
 ?>
 --FILE--
 <?php
+
 $grp = posix_getgrgid(0);
 if (!isset($grp['name'])) {
     die('Array index "name" does not exist.');
@@ -38,6 +39,7 @@ if (!isset($grp['gid'])) {
     die('Array index "gid" does not exist.');
 }
 var_dump($grp['gid']);
+
 ?>
 --EXPECT--
 int(0)

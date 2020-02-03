@@ -3,11 +3,13 @@ The result of a by-ref function call can be yielded just fine
 --FILE--
 <?php
 
-function &nop(&$var) {
+function &nop(&$var)
+{
     return $var;
 }
 
-function &gen(&$var) {
+function &gen(&$var)
+{
     yield nop($var);
 }
 

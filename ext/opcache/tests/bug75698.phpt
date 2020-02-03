@@ -9,12 +9,14 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 
-function test() {
-  $a = array("a","b","c","b");
-  $b = array();
-  foreach ($a as $c)
-    @$b[$c]++; // the @ is required to crash PHP 7.2.0
-  var_dump($b);
+function test()
+{
+    $a = array("a","b","c","b");
+    $b = array();
+    foreach ($a as $c) {
+        @$b[$c]++; // the @ is required to crash PHP 7.2.0
+    }
+    var_dump($b);
 }
 
 test();

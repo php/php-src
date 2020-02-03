@@ -3,7 +3,8 @@ Argument default value not legal for any type in the union
 --FILE--
 <?php
 
-function test(int|float $arg = "0") {
+function test(int | float $arg = "0")
+{
 }
 
 ?>

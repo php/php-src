@@ -4,11 +4,12 @@ using function with same name as defined should fail
 <?php
 
 namespace {
-    function bar() {}
+    function bar()
+    {
+    }
 
     use function foo\bar;
 }
-
 namespace {
     echo "Done";
 }

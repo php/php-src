@@ -3,11 +3,12 @@ Misoptimize due to type narrowing
 --FILE--
 <?php
 
-function test() {
+function test()
+{
     $b = false;
-    $x = (1<<53)+1;
+    $x = (1 << 53) + 1;
     do {
-        $x = 1.0 * ($x - (1<<53));
+        $x = 1.0 * ($x - (1 << 53));
     } while ($b);
     return $x;
 }

@@ -14,9 +14,11 @@ fa@php.net
 ?>
 --FILE--
 <?php
-    for ($i=0;$i<=132;$i++) {
-        var_dump(socket_strerror($i));
-    }
+
+for ($i = 0; $i <= 132; $i++) {
+    var_dump(socket_strerror($i));
+}
+
 ?>
 --EXPECTF--
 string(7) "Success"

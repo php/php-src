@@ -4,6 +4,7 @@ Bug #75608 ("Narrowing occurred during type inference" error)
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 class ReactionRatingService
 {
     public function calculateBoostPoints()
@@ -16,7 +17,7 @@ class ReactionRatingService
             $queue        = [];
             foreach ($reactionRatings as $ratingData) {
                 if ($runningScore != $reaction['Score']) {
-                    if ( ! $ratingData['BoostEarned']) {
+                    if (! $ratingData['BoostEarned']) {
                         $queue[] = $ratingData['UserID'];
                     }
                 } else {
@@ -31,5 +32,7 @@ class ReactionRatingService
 }
 ?>
 OK
+
+?>
 --EXPECT--
 OK

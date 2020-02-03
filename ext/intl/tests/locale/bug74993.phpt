@@ -5,6 +5,7 @@ Bug #74993 Wrong reflection on some locale_* functions
 extension_loaded('intl') || print 'skip';
 --FILE--
 <?php
+
 $funcs = [
     'locale_get_display_language',
     'locale_get_display_name',
@@ -18,6 +19,8 @@ $funcs = [
 foreach ($funcs as $func) {
     echo (new ReflectionFunction($func));
 }
+
+?>
 --EXPECT--
 Function [ <internal:intl> function locale_get_display_language ] {
 

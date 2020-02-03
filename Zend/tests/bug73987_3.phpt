@@ -3,16 +3,23 @@ Bug #73987 (Method compatibility check looks to original definition and not pare
 --FILE--
 <?php
 
-abstract class A {
+abstract class A
+{
     abstract function example();
 }
 
-class B extends A {
-    function example(): int  { }
+class B extends A
+{
+    function example(): int
+    {
+    }
 }
 
-class C extends B {
-    function example(): string { }
+class C extends B
+{
+    function example(): string
+    {
+    }
 }
 
 ?>

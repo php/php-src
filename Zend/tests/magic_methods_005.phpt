@@ -3,8 +3,9 @@ Testing __call() declaration in interface with wrong modifier
 --FILE--
 <?php
 
-interface a {
-	static function __call($a, $b);
+interface a
+{
+    static function __call($a, $b);
 }
 
 ?>

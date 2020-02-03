@@ -1,5 +1,6 @@
 #!/usr/bin/env php
 <?php
+
 /*
    +----------------------------------------------------------------------+
    | Copyright (c) The PHP Group                                          |
@@ -20,7 +21,8 @@
 
 /* {{{ error
  */
-function error($message) {
+function error($message)
+{
     printf('Error: %s%s', $message, PHP_EOL);
     exit;
 }
@@ -28,7 +30,8 @@ function error($message) {
 
 /* {{{ print_help
  */
-function print_help() {
+function print_help()
+{
     if (PHP_OS_FAMILY != 'Windows') {
         $file_prefix = './';
         $make_prefix = '';
@@ -120,7 +123,8 @@ HELP;
 
 /* {{{ task
  */
-function task($label, $callback) {
+function task($label, $callback)
+{
     printf('%s... ', $label);
 
     $callback();
@@ -131,7 +135,8 @@ function task($label, $callback) {
 
 /* {{{ print_success
  */
-function print_success() {
+function print_success()
+{
     global $options;
 
     if (PHP_OS_FAMILY != 'Windows') {
@@ -156,29 +161,27 @@ function print_success() {
 
 /* {{{ process_args
  */
-function process_args($argv, $argc) {
+function process_args($argv, $argc)
+{
     $options = [
-            'unix'		=> true,
-            'windows' 	=> true,
-            'ext' 		=> '',
-            'dir'		=> __DIR__ . DIRECTORY_SEPARATOR,
-            'skel' 		=> __DIR__ . DIRECTORY_SEPARATOR . 'skeleton' . DIRECTORY_SEPARATOR,
-            'author'	=> false,
-            'experimental'	=> false,
-            'std'		=> false
+            'unix'      => true,
+            'windows'   => true,
+            'ext'       => '',
+            'dir'       => __DIR__ . DIRECTORY_SEPARATOR,
+            'skel'      => __DIR__ . DIRECTORY_SEPARATOR . 'skeleton' . DIRECTORY_SEPARATOR,
+            'author'    => false,
+            'experimental'  => false,
+            'std'       => false
             ];
 
-    for($i = 1; $i < $argc; ++$i)
-    {
+    for ($i = 1; $i < $argc; ++$i) {
         $val = $argv[$i];
 
-        if($val[0] != '-' || $val[1] != '-')
-        {
+        if ($val[0] != '-' || $val[1] != '-') {
             continue;
         }
 
-        switch($opt = strtolower(substr($val, 2)))
-        {
+        switch ($opt = strtolower(substr($val, 2))) {
             case 'help': {
                 print_help();
             }
@@ -203,7 +206,7 @@ function process_args($argv, $argc) {
             case 'author': {
                 if (!isset($argv[$i + 1]) || ($argv[$i + 1][0] == '-' && $argv[$i + 1][1] == '-')) {
                     error('Argument "' . $val . '" expects a value, none passed');
-                } else if ($opt == 'dir' && empty($argv[$i + 1])) {
+                } elseif ($opt == 'dir' && empty($argv[$i + 1])) {
                     continue 2;
                 }
 
@@ -218,17 +221,17 @@ function process_args($argv, $argc) {
 
     if (empty($options['ext'])) {
         error('No extension name passed, use "--ext <name>"');
-    } else if (!$options['unix'] && !$options['windows']) {
+    } elseif (!$options['unix'] && !$options['windows']) {
         error('Cannot pass both --onlyunix and --onlywindows');
-    } else if (!is_dir($options['skel'])) {
+    } elseif (!is_dir($options['skel'])) {
         error('The skeleton directory was not found');
     }
 
     // Validate extension name
     if (!preg_match('/^[a-z][a-z0-9_]+$/i', $options['ext'])) {
         error('Invalid extension name. Valid names start with a letter,'
-            .' followed by any number of letters, numbers, or underscores.'
-            .' Using only lower case letters is preferred.');
+            . ' followed by any number of letters, numbers, or underscores.'
+            . ' Using only lower case letters is preferred.');
     }
 
     $options['ext'] = str_replace(['\\', '/'], '', strtolower($options['ext']));
@@ -239,7 +242,8 @@ function process_args($argv, $argc) {
 
 /* {{{ process_source_tags
  */
-function process_source_tags($file, $short_name) {
+function process_source_tags($file, $short_name)
+{
     global $options;
 
     $source = file_get_contents($file);
@@ -296,7 +300,8 @@ HEADER;
 
 /* {{{ copy_config_scripts
  */
-function copy_config_scripts() {
+function copy_config_scripts()
+{
     global $options;
 
     $files = [];
@@ -311,7 +316,7 @@ function copy_config_scripts() {
 
     $files[] = '.gitignore';
 
-    foreach($files as $config_script) {
+    foreach ($files as $config_script) {
         $new_config_script = $options['dir'] . $options['ext'] . DIRECTORY_SEPARATOR . $config_script;
 
         if (!copy($options['skel'] . $config_script . '.in', $new_config_script)) {
@@ -325,13 +330,14 @@ function copy_config_scripts() {
 
 /* {{{ copy_sources
  */
-function copy_sources() {
+function copy_sources()
+{
     global $options;
 
     $files = [
-            'skeleton.c'		=> $options['ext'] . '.c',
-            'skeleton.stub.php'	=> $options['ext'] . '.stub.php',
-            'php_skeleton.h'	=> 'php_' . $options['ext'] . '.h'
+            'skeleton.c'        => $options['ext'] . '.c',
+            'skeleton.stub.php' => $options['ext'] . '.stub.php',
+            'php_skeleton.h'    => 'php_' . $options['ext'] . '.h'
             ];
 
     foreach ($files as $src_file => $dst_file) {
@@ -346,7 +352,8 @@ function copy_sources() {
 
 /* {{{ copy_tests
  */
-function copy_tests() {
+function copy_tests()
+{
     global $options;
 
     $test_files = glob($options['skel'] . 'tests/*', GLOB_MARK);
@@ -385,11 +392,11 @@ $options = process_args($argv, $argc);
 
 if (!$options['dir'] || !is_dir($options['dir'])) {
     error('The selected output directory does not exist');
-} else if (is_dir($options['dir'] . $options['ext'])) {
+} elseif (is_dir($options['dir'] . $options['ext'])) {
     error('There is already a folder named "' . $options['ext'] . '" in the output directory');
-} else if (!mkdir($options['dir'] . $options['ext'])) {
+} elseif (!mkdir($options['dir'] . $options['ext'])) {
     error('Unable to create extension directory in the output directory');
-} else if (!mkdir($options['dir'] . $options['ext'] . DIRECTORY_SEPARATOR . 'tests')) {
+} elseif (!mkdir($options['dir'] . $options['ext'] . DIRECTORY_SEPARATOR . 'tests')) {
     error('Unable to create the tests directory');
 }
 

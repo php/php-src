@@ -2,6 +2,7 @@
 Test idate() function : usage variation - Checking return of year(1 or 2 digits) format starting with zero and nonzero.
 --FILE--
 <?php
+
 /* Prototype  : int idate(string format [, int timestamp])
  * Description: Format a local time/date as integer
  * Source code: ext/date/php_date.c
@@ -16,11 +17,12 @@ $format = 'y';
 
 echo "\n-- Testing idate() function for 2 digit year having no zero as starting number --\n";
 $timestamp = mktime(8, 8, 8, 8, 8, 1970);
-var_dump( idate($format, $timestamp) );
+var_dump(idate($format, $timestamp));
 
 echo "\n-- Testing idate() function for 2 digit year having zero as starting number --\n";
 $timestamp = mktime(8, 8, 8, 8, 8, 2001);
-var_dump( idate($format, $timestamp) );
+var_dump(idate($format, $timestamp));
+
 ?>
 --EXPECT--
 *** Testing idate() : usage variation ***

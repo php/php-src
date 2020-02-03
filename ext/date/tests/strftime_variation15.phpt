@@ -2,6 +2,7 @@
 Test strftime() function : usage variation - Checking time related formats which was not supported on Windows before VC14.
 --FILE--
 <?php
+
 /* Prototype  : string strftime(string format [, int timestamp])
  * Description: Format a local time/date according to locale settings
  * Source code: ext/date/php_date.c
@@ -17,17 +18,17 @@ $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 
 //array of values to iterate over
 $inputs = array(
-	  'Time in a.m/p.m notation' => "%r",
-	  'Time in 24 hour notation' => "%R",
-	  'Current time %H:%M:%S format' => "%T",
+      'Time in a.m/p.m notation' => "%r",
+      'Time in 24 hour notation' => "%R",
+      'Current time %H:%M:%S format' => "%T",
 );
 
 // loop through each element of the array for timestamp
 
-foreach($inputs as $key =>$value) {
+foreach ($inputs as $key => $value) {
       echo "\n--$key--\n";
-	  var_dump( strftime($value) );
-	  var_dump( strftime($value, $timestamp) );
+      var_dump(strftime($value));
+      var_dump(strftime($value, $timestamp));
 }
 
 ?>

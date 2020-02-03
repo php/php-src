@@ -2,7 +2,9 @@
 076: Unknown constants in namespace
 --FILE--
 <?php
+
 namespace foo;
+
 use Error;
 
 try {

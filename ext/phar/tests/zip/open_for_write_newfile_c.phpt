@@ -23,7 +23,7 @@ $files['b.php'] = '<?php echo "This is b\n"; ?>';
 $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
 
 foreach ($files as $n => $file) {
-	$phar[$n] = $file;
+    $phar[$n] = $file;
 }
 $phar->stopBuffering();
 
@@ -33,8 +33,8 @@ var_dump(fopen($alias . '/b/new.php', 'wb'));
 
 include $alias . '/b/c.php';
 include $alias . '/b/new.php';
-?>
 
+?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>
 --EXPECTF--

@@ -2,6 +2,7 @@
 Hash: sha256 algorithm
 --FILE--
 <?php
+
 echo hash('sha256', '') . "\n";
 echo hash('sha256', 'a') . "\n";
 echo hash('sha256', '012345678901234567890123456789012345678901234567890123456789') . "\n";
@@ -10,6 +11,8 @@ echo hash('sha256', '01234567890123456789012345678901234567890123456789012345678
 echo hash('sha256', 'abc') . "\n";
 echo hash('sha256', 'abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq') . "\n";
 echo hash('sha256', str_repeat('a', 1000000)) . "\n";
+
+?>
 --EXPECT--
 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb

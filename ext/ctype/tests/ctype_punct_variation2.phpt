@@ -4,6 +4,7 @@ Test ctype_punct() function : usage variations - different integers
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 /* Prototype  : bool ctype_punct(mixed $c)
  * Description: Checks for any printable character which is not whitespace
  * or an alphanumeric character
@@ -20,12 +21,13 @@ echo "*** Testing ctype_punct() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($c = 1; $c < 256; $c++) {
-	if (ctype_punct($c)) {
-		echo "character code $c is punctuation\n";
-	}
+    if (ctype_punct($c)) {
+        echo "character code $c is punctuation\n";
+    }
 }
 
 setlocale(LC_CTYPE, $orig);
+
 ?>
 --EXPECT--
 *** Testing ctype_punct() : usage variations ***

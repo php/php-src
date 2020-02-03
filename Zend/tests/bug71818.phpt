@@ -4,6 +4,7 @@ Bug #71818 (Memory leak when array altered in destructor)
 zend.enable_gc = 1
 --FILE--
 <?php
+
 class MemoryLeak
 {
     public function __construct()
@@ -25,6 +26,7 @@ for ($i = 0; $i < 100000; ++$i) {
     $obj = new MemoryLeak();
 }
 echo "OK\n";
+
 ?>
 --EXPECT--
 OK

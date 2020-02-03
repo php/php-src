@@ -2,6 +2,7 @@
 SPL: SplPriorityQueue: iteration through methods
 --FILE--
 <?php
+
 $h = new SplPriorityQueue();
 
 $h->insert(1, 1);
@@ -10,14 +11,15 @@ $h->insert(0, 0);
 $h->insert(4, 4);
 
 $h->rewind();
-echo "count(\$h) = ".count($h)."\n";
-echo "\$h->count() = ".$h->count()."\n";
+echo "count(\$h) = " . count($h) . "\n";
+echo "\$h->count() = " . $h->count() . "\n";
 while ($h->valid()) {
     $k = $h->key();
     $v = $h->current();
     echo "$k=>$v\n";
     $h->next();
 }
+
 ?>
 --EXPECT--
 count($h) = 4

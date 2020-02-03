@@ -3,32 +3,40 @@ Coalesce assign (??=): ArrayAccess handling
 --FILE--
 <?php
 
-function id($arg) {
+function id($arg)
+{
     echo "id($arg)\n";
     return $arg;
 }
 
-class AA implements ArrayAccess {
+class AA implements ArrayAccess
+{
     public $data;
-    public function __construct($data = []) {
+    public function __construct($data = [])
+    {
         $this->data = $data;
     }
-    public function &offsetGet($k) {
+    public function &offsetGet($k)
+    {
         echo "offsetGet($k)\n";
         return $this->data[$k];
     }
-    public function offsetExists($k) {
+    public function offsetExists($k)
+    {
         echo "offsetExists($k)\n";
         return array_key_exists($k, $this->data);
     }
-    public function offsetSet($k,$v) {
+    public function offsetSet($k, $v)
+    {
         echo "offsetSet($k,$v)\n";
         $this->data[$k] = $v;
     }
-    public function offsetUnset($k) { }
+    public function offsetUnset($k)
+    {
+    }
 }
 
-$ary = new AA(["foo" => new AA, "null" => null]);
+$ary = new AA(["foo" => new AA(), "null" => null]);
 
 echo "[foo]\n";
 $ary["foo"] ??= "bar";

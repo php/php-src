@@ -2,33 +2,38 @@
 SPL: ArrayObject: ensure a wrapped object's magic methods for property access are not invoked when manipulating the ArrayObject's elements using [].
 --FILE--
 <?php
-class UsesMagic {
-	public $a = 1;
-	public $b = 2;
-	public $c = 3;
 
-	private $priv = 'secret';
+class UsesMagic
+{
+    public $a = 1;
+    public $b = 2;
+    public $c = 3;
 
-	function __get($name) {
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __set($name, $value) {
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __isset($name) {
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __unset($name) {
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
+    private $priv = 'secret';
 
+    function __get($name)
+    {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __set($name, $value)
+    {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __isset($name)
+    {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __unset($name)
+    {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
 }
 
-$obj = new UsesMagic;
+$obj = new UsesMagic();
 
 $ao = new ArrayObject($obj);
 echo "\n--> Write existent, non-existent and dynamic:\n";
@@ -66,6 +71,7 @@ echo "  Original wrapped object:\n";
 var_dump($obj);
 echo "  Wrapping ArrayObject:\n";
 var_dump($ao);
+
 ?>
 --EXPECTF--
 --> Write existent, non-existent and dynamic:

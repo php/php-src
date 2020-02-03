@@ -3,8 +3,9 @@ Trying to create a constant on Trait
 --FILE--
 <?php
 
-trait foo {
-	const a = 1;
+trait foo
+{
+    const a = 1;
 }
 
 ?>

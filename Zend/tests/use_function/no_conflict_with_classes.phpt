@@ -5,7 +5,9 @@
 
 namespace Foo;
 
-class Bar {}
+class Bar
+{
+}
 
 use function bar;
 

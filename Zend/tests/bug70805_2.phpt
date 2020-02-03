@@ -4,36 +4,43 @@ Bug #70805 (Segmentation faults whilst running Drupal 8 test suite) (Memleak)
 zend.enable_gc = 1
 --FILE--
 <?php
-class A {
+
+class A
+{
 }
 
-class B {
+class B
+{
 }
 
-class C {
-	public function __destruct() {
-		if (isset($GLOBALS["a"])) {
-			unset($GLOBALS["a"]);
-		}
-	}
+class C
+{
+    public function __destruct()
+    {
+        if (isset($GLOBALS["a"])) {
+            unset($GLOBALS["a"]);
+        }
+    }
 }
 
-$a = new A;
-$a->b = new B;
+$a = new A();
+$a->b = new B();
 $a->b->a = $a;
 
 $i = 0;
 
 while ($i++ < 9999) {
-	$t = [];
-	$t[] = &$t;
-	unset($t);
+    $t = [];
+    $t[] = &$t;
+    unset($t);
 }
-$t = [new C];
+$t = [new C()];
 $t[] = &$t;
 unset($t);
 
 unset($a);
 var_dump(gc_collect_cycles());
+
+?>
 --EXPECT--
 int(2)

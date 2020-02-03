@@ -3,7 +3,7 @@ A "non well formed" notice converted to exception should result in a ZPP failure
 --FILE--
 <?php
 
-set_error_handler(function($_, $msg) {
+set_error_handler(function ($_, $msg) {
     throw new Exception($msg);
 }, E_NOTICE);
 

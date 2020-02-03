@@ -3,8 +3,10 @@ Testing Closure::fromCallable() functionality: Getting non-static method statica
 --FILE--
 <?php
 
-class A {
-    public function method() {
+class A
+{
+    public function method()
+    {
     }
 }
 

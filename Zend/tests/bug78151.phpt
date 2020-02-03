@@ -18,6 +18,7 @@ class Arr
 }
 
 $arr = new Arr(['foo' => 'bar']);
+
 ?>
 --EXPECT--
 string(3) "bar"

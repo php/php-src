@@ -41,6 +41,7 @@ var_dump($phar->getStub());
 var_dump($phar->getAlias());
 var_dump($phar->getMetadata());
 var_dump($phar['a']->getMetadata());
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php'); ?>

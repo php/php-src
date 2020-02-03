@@ -8,9 +8,10 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 
-$c = new IntlGregorianCalendar(NULL, 'pt_PT');
+$c = new IntlGregorianCalendar(null, 'pt_PT');
 
 var_dump($c->getLeastMaximum(-1));
 var_dump($c->getMaximum(-1));
@@ -22,31 +23,34 @@ var_dump(intlcal_get_maximum($c, -1));
 var_dump(intlcal_get_greatest_minimum($c, -1));
 var_dump(intlcal_get_minimum($c, -1));
 
-function eh($errno, $errstr) {
-echo "error: $errno, $errstr\n";
+function eh($errno, $errstr)
+{
+    echo "error: $errno, $errstr\n";
 }
 set_error_handler('eh');
 
 try {
-	var_dump(intlcal_get_least_maximum(1, 1));
+    var_dump(intlcal_get_least_maximum(1, 1));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
-	var_dump(intlcal_get_maximum(1, 1));
+    var_dump(intlcal_get_maximum(1, 1));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
-	var_dump(intlcal_get_greatest_minimum(1, -1));
+    var_dump(intlcal_get_greatest_minimum(1, -1));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
-	var_dump(intlcal_get_minimum(1, -1));
+    var_dump(intlcal_get_minimum(1, -1));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
+
+?>
 --EXPECTF--
 Warning: IntlCalendar::getLeastMaximum(): intlcal_get_least_maximum: invalid field in %s on line %d
 bool(false)

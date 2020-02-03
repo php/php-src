@@ -4,14 +4,19 @@ Inheritance Hinting Compile Checking Failure Internal Classes
 opcache.enable_cli=1
 --FILE--
 <?php
-class Foo {
-    public static function test() : Traversable {
+
+class Foo
+{
+    public static function test(): Traversable
+    {
         return new ArrayIterator([1, 2]);
     }
 }
 
-class Bar extends Foo {
-    public static function test() : ArrayObject {
+class Bar extends Foo
+{
+    public static function test(): ArrayObject
+    {
         return new ArrayObject([1, 2]);
     }
 }

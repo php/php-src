@@ -15,22 +15,23 @@ $p = new Phar($fname);
 $p->setAlias('foo');
 $p['unused'] = 'hi';
 try {
-$a = new Phar($fname2, 0, 'foo');
+    $a = new Phar($fname2, 0, 'foo');
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
 copy($fname, $fname2);
 echo "2\n";
 try {
-$a = new Phar($fname2);
+    $a = new Phar($fname2);
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
 try {
-$b = new Phar($fname, 0, 'another');
+    $b = new Phar($fname, 0, 'another');
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
+
 ?>
 --CLEAN--
 <?php

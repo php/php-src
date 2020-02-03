@@ -18,6 +18,8 @@ if (getenv('SKIP_ASAN')) die('xfail Startup failure leak');
 ?>
 --FILE--
 <?php
+
 var_dump("Script should fail");
+
 ?>
 --EXPECT--

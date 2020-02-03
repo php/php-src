@@ -2,7 +2,9 @@
 SPL SplTempFileObject constructor sets correct values when passed fixed memory size
 --FILE--
 <?php
+
 var_dump(new SplTempFileObject(1024));
+
 ?>
 --EXPECT--
 object(SplTempFileObject)#1 (5) {

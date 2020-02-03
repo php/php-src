@@ -5,12 +5,12 @@ Bug #28442 (Changing a static variables in a class changes it across sub/super c
 
 class ClassA
 {
-   static $prop;
+    static $prop;
 }
 
 class ClassB extends ClassA
 {
-   static $prop;
+    static $prop;
 }
 
 class ClassC extends ClassB

@@ -10,13 +10,16 @@ opcache.preload=
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function test($var) {
+
+function test($var)
+{
     if (!is_string($var) || (is_object($var) && !method_exists($var, '__toString'))) {
         return;
     }
 
-    var_dump($username); 
+    var_dump($username);
 }
+
 ?>
 --EXPECTF--
 $_main: ; (lines=1, args=0, vars=0, tmps=0)

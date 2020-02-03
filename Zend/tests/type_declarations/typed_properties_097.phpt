@@ -5,11 +5,12 @@ Incrementing/decrementing past max/min value (additional cases)
 --FILE--
 <?php
 
-class Test {
+class Test
+{
     public int $foo;
 }
 
-$test = new Test;
+$test = new Test();
 
 $test->foo = PHP_INT_MIN;
 try {

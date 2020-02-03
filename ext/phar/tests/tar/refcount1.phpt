@@ -7,6 +7,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
+
 include __DIR__ . '/files/tarmaker.php.inc';
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
 $alias = 'phar://' . $fname;
@@ -23,7 +24,7 @@ $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
 $files['.phar/alias.txt'] = 'hio';
 
 foreach ($files as $n => $file) {
-	$tar->addFile($n, $file);
+    $tar->addFile($n, $file);
 }
 
 $tar->close();
@@ -45,7 +46,6 @@ var_dump(fread($b, 20));
 include $alias . '/b/c.php';
 
 ?>
-
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--

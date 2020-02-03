@@ -6,7 +6,9 @@ Test function posix_setegid() by calling it with its expected arguments
 ?>
 --FILE--
 <?php
+
 var_dump(posix_setegid(posix_getegid()));
+
 ?>
 --EXPECT--
 bool(true)

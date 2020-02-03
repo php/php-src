@@ -2,21 +2,22 @@
 SPL: SplPriorityQueue: std operations and extract flags
 --FILE--
 <?php
+
 $pq = new SplPriorityQueue();
 
 // errors
 try {
     $pq->extract();
 } catch (RuntimeException $e) {
-    echo "Exception: ".$e->getMessage()."\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 $pq->insert("a", 1);
 $pq->insert("b", 2);
 $pq->insert("c", 0);
 
-foreach ($pq as $k=>$v) {
-    echo "$k=>".print_r($v, 1)."\n";
+foreach ($pq as $k => $v) {
+    echo "$k=>" . print_r($v, 1) . "\n";
 }
 
 echo "EXTR_BOTH\n";
@@ -28,8 +29,8 @@ $pq1->insert("a", 1);
 $pq1->insert("b", 2);
 $pq1->insert("c", 0);
 
-foreach ($pq1 as $k=>$v) {
-    echo "$k=>".print_r($v, 1)."\n";
+foreach ($pq1 as $k => $v) {
+    echo "$k=>" . print_r($v, 1) . "\n";
 }
 
 echo "EXTR_DATA\n";
@@ -41,8 +42,8 @@ $pq2->insert("a", 1);
 $pq2->insert("b", 2);
 $pq2->insert("c", 0);
 
-foreach ($pq2 as $k=>$v) {
-    echo "$k=>".print_r($v, 1)."\n";
+foreach ($pq2 as $k => $v) {
+    echo "$k=>" . print_r($v, 1) . "\n";
 }
 
 echo "EXTR_PRIORITY\n";
@@ -54,8 +55,8 @@ $pq3->insert("a", 1);
 $pq3->insert("b", 2);
 $pq3->insert("c", 0);
 
-foreach ($pq3 as $k=>$v) {
-    echo "$k=>".print_r($v, 1)."\n";
+foreach ($pq3 as $k => $v) {
+    echo "$k=>" . print_r($v, 1) . "\n";
 }
 
 ?>

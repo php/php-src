@@ -3,16 +3,21 @@ Bug #74607 (Traits enforce different inheritance rules - number of required para
 --FILE--
 <?php
 
-abstract class L1{
-abstract function m3($x);
+abstract class L1
+{
+    abstract function m3($x);
 }
 
-trait L2t{
-function m3($x, $y = 0){}
+trait L2t
+{
+    function m3($x, $y = 0)
+    {
+    }
 }
 
-class L2 extends L1{
-use L2t;
+class L2 extends L1
+{
+    use L2t;
 }
 
 echo "DONE";

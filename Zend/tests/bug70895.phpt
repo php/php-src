@@ -18,6 +18,7 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
+
 ?>
 --EXPECT--
 array_map() expects parameter 1 to be a valid callback, function '%n' not found or invalid function name

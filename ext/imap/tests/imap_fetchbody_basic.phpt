@@ -6,6 +6,7 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
+
 /* Prototype  : string imap_fetchbody(resource $stream_id, int $msg_no, string $section
  *           [, int $options])
  * Description: Get a specific body section
@@ -13,7 +14,7 @@ require_once(__DIR__.'/skipif.inc');
  */
 
 echo "*** Testing imap_fetchbody() : basic functionality ***\n";
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__ . '/imap_include.inc');
 
 // Initialise all required variables
 
@@ -27,34 +28,33 @@ $options = array ('FT_UID' => FT_UID, 'FT_PEEK' => FT_PEEK, 'FT_INTERNAL' => FT_
 // Calling imap_fetchbody() with all possible arguments
 echo "\n-- All possible arguments --\n";
 foreach ($options as $key => $option) {
-	echo "-- Option is $key --\n";
-	switch ($key) {
+    echo "-- Option is $key --\n";
+    switch ($key) {
+        case 'FT_UID';
+            $msg_uid = imap_uid($stream_id, $msg_no);
+            var_dump(imap_fetchbody($stream_id, $msg_uid, $section, $option));
+        break;
 
-		case 'FT_UID';
-		$msg_uid = imap_uid($stream_id, $msg_no);
-		var_dump( imap_fetchbody($stream_id, $msg_uid, $section, $option) );
-		break;
+        case 'FT_PEEK';
+            var_dump(imap_fetchbody($stream_id, $msg_no, $section, $option));
+            $overview = imap_fetch_overview($stream_id, 1);
+            echo "Seen Flag: ";
+            var_dump($overview[0]->seen);
+        break;
 
-		case 'FT_PEEK';
-		var_dump( imap_fetchbody($stream_id, $msg_no, $section, $option) );
-		$overview = imap_fetch_overview($stream_id, 1);
-		echo "Seen Flag: ";
-		var_dump( $overview[0]->seen );
-		break;
-
-		case 'FT_INTERNAL';
-		var_dump( imap_fetchbody($stream_id, $msg_no, $section, $option) );
-		break;
-
-	}
+        case 'FT_INTERNAL';
+            var_dump(imap_fetchbody($stream_id, $msg_no, $section, $option));
+        break;
+    }
 }
 
 // Calling imap_fetchbody() with mandatory arguments
 echo "\n-- Mandatory arguments --\n";
-var_dump( imap_fetchbody($stream_id, $msg_no, $section) );
+var_dump(imap_fetchbody($stream_id, $msg_no, $section));
 $overview = imap_fetch_overview($stream_id, 1);
 echo "Seen Flag: ";
-var_dump( $overview[0]->seen );
+var_dump($overview[0]->seen);
+
 ?>
 --CLEAN--
 <?php

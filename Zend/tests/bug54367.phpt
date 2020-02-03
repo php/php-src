@@ -2,15 +2,23 @@
 Bug #54367 (Use of closure causes problem in ArrayAccess)
 --FILE--
 <?php
+
 class MyObjet implements ArrayAccess
 {
-    public function offsetSet($offset, $value) { }
-    public function offsetExists($offset) {  }
-    public function offsetUnset($offset) { }
-
-    public function offsetGet ($offset)
+    public function offsetSet($offset, $value)
     {
-	return function ($var) use ($offset) { // here is the problem
+    }
+    public function offsetExists($offset)
+    {
+    }
+    public function offsetUnset($offset)
+    {
+    }
+
+    public function offsetGet($offset)
+    {
+        return function ($var) use ($offset) {
+ // here is the problem
               var_dump($offset, $var);
         };
     }
@@ -18,6 +26,7 @@ class MyObjet implements ArrayAccess
 
 $a = new MyObjet();
 echo $a['p']('foo');
+
 ?>
 --EXPECT--
 string(1) "p"

@@ -10,13 +10,16 @@ if (!extension_loaded("mbstring")) {
 zend.multibyte=On
 --FILE--
 <?php
+
 echo "Hi";
 
-function foo() {
-	declare(encoding="utf-8");
+function foo()
+{
+    declare(encoding="utf-8");
 }
 
-echo "Bye"
+echo "Bye";
+
 ?>
 --EXPECTF--
 Fatal error: Encoding declaration pragma must be the very first statement in the script in %s on line %d

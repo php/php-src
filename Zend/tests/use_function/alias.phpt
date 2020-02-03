@@ -4,17 +4,17 @@ aliasing imported functions to resolve naming conflicts
 <?php
 
 namespace foo {
-    function baz() {
+    function baz()
+    {
         return 'foo.baz';
     }
 }
-
 namespace bar {
-    function baz() {
+    function baz()
+    {
         return 'bar.baz';
     }
 }
-
 namespace {
     use function foo\baz as foo_baz,
                  bar\baz as bar_baz;

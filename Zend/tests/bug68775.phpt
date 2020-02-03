@@ -3,11 +3,13 @@ Bug #68775: yield in a function argument crashes or loops indefinitely
 --FILE--
 <?php
 
-function a($x) {
+function a($x)
+{
     var_dump($x);
 }
 
-function gen() {
+function gen()
+{
      a(yield);
 }
 

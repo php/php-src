@@ -10,16 +10,19 @@ opcache.preload=
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function foo() {
-	$k = 0;
-	$a = [null];
-	echo isset($a[$k]);
-	echo "b";
-	echo isset($a[$k+1]);
-	echo "c";
-	echo $a[$k];
-	echo $a; // Should not be optimized
+
+function foo()
+{
+    $k = 0;
+    $a = [null];
+    echo isset($a[$k]);
+    echo "b";
+    echo isset($a[$k + 1]);
+    echo "c";
+    echo $a[$k];
+    echo $a; // Should not be optimized
 }
+
 ?>
 --EXPECTF--
 $_main: ; (lines=1, args=0, vars=0, tmps=0)

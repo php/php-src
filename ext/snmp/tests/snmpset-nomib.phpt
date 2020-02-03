@@ -10,7 +10,8 @@ require_once(__DIR__.'/skipif.inc');
 MIBS=
 --FILE--
 <?php
-require_once(__DIR__.'/snmp_include.inc');
+
+require_once(__DIR__ . '/snmp_include.inc');
 
 //EXPECTF format is quickprint OFF
 snmp_set_quick_print(false);

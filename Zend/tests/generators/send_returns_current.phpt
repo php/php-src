@@ -3,7 +3,8 @@ $generator->send() returns the yielded value
 --FILE--
 <?php
 
-function reverseEchoGenerator() {
+function reverseEchoGenerator()
+{
     $data = yield;
     while (true) {
         $data = (yield strrev($data));

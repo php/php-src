@@ -8,12 +8,15 @@ phar.require_hash=1
 --FILE--
 <?php
 
-file_put_contents('phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php/a.php',
-	'brand new!');
+file_put_contents(
+    'phar://' . __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php/a.php',
+    'brand new!'
+);
 
 $phar = new Phar(__DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php');
 
 var_dump($phar->getSignature());
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

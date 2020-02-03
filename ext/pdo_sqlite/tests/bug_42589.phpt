@@ -6,6 +6,7 @@ if (!extension_loaded('pdo') || !extension_loaded('pdo_sqlite')) die('skip not l
 ?>
 --FILE--
 <?php
+
 $db = new PDO("sqlite::memory:");
 
 $db->exec('CREATE TABLE test (field1 VARCHAR(10))');
@@ -17,6 +18,7 @@ $meta2 = $result->getColumnMeta(1);
 
 var_dump(!empty($meta1['table']) && $meta1['table'] == 'test');
 var_dump(!empty($meta2['table']) && $meta2['table'] == 'test');
+
 ?>
 --EXPECT--
 bool(true)

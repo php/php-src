@@ -4,18 +4,22 @@ Initial value of static var in method depends on the include time of the class d
 Maybe not a bug
 --FILE--
 <?php
-class Foo {
- public function __construct() {
-  eval("class Bar extends Foo {}");
- }
- public static function test() {
-  static $i = 0;
-  var_dump(++$i);
- }
+
+class Foo
+{
+    public function __construct()
+    {
+        eval("class Bar extends Foo {}");
+    }
+    public static function test()
+    {
+        static $i = 0;
+        var_dump(++$i);
+    }
 }
 
 foo::test();
-new Foo;
+new Foo();
 foo::test();
 
 /**
@@ -23,6 +27,8 @@ foo::test();
  */
 Bar::test();
 Bar::test();
+
+?>
 --EXPECT--
 int(1)
 int(2)

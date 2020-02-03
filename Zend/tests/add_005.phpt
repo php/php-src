@@ -15,6 +15,7 @@ $c = $d + $i;
 var_dump($c);
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 float(2834756759.1231)

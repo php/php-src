@@ -3,8 +3,8 @@ Trying use object of type stdClass as array
 --FILE--
 <?php
 
-$a[0] = new stdclass;
-$a[0][0] = new stdclass;
+$a[0] = new stdclass();
+$a[0][0] = new stdclass();
 
 ?>
 --EXPECTF--

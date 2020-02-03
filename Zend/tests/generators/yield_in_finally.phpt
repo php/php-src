@@ -3,7 +3,8 @@ yield can be used in finally (apart from forced closes)
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     try {
         echo "before return\n";
         return;

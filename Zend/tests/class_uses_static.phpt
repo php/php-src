@@ -3,8 +3,9 @@ Class cannot use static as a trait, as it is reserved
 --FILE--
 <?php
 
-class Test {
-    use static;
+class Test
+{
+    use static ;
 }
 
 ?>

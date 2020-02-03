@@ -12,6 +12,7 @@ iconv.internal_encoding=ISO-8859-1
 iconv.output_encoding=ISO-8859-1
 --FILE--
 <?php
+
 /* Prototype  : mixed iconv_get_encoding([string type])
  * Description: Get internal encoding and output encoding for ob_iconv_handler()
  * Prototype  : bool iconv_set_encoding(string type, string charset)
@@ -47,6 +48,7 @@ var_dump(iconv_get_encoding("all"));
 
 
 echo "Done";
+
 ?>
 --EXPECT--
 *** Testing iconv_get_encoding()/iconv_set_encoding() : basic functionality ***

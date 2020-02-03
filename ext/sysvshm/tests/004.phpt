@@ -21,6 +21,7 @@ var_dump(shm_put_var($s, 11, $string));
 shm_remove($s);
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 bool(true)

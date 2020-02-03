@@ -8,7 +8,6 @@ namespace {
 
     use const foo\bar;
 }
-
 namespace {
     echo "Done";
 }

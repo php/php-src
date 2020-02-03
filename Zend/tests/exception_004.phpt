@@ -3,12 +3,15 @@ Throwing exception using a class that isn't derived from the Exception base clas
 --FILE--
 <?php
 
-class Foo { }
+class Foo
+{
+
+}
 
 try {
-	throw new Foo();
+    throw new Foo();
 } catch (Foo $e) {
-	var_dump($e);
+    var_dump($e);
 }
 
 ?>

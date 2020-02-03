@@ -10,7 +10,9 @@ $recArrIt = new RecursiveArrayIterator($arrOb->getIterator());
 
 $recItIt = new RecursiveIteratorIterator($recArrIt);
 
-foreach ($recItIt as &$val) echo "$val\n";
+foreach ($recItIt as &$val) {
+    echo "$val\n";
+}
 
 ?>
 --EXPECTF--

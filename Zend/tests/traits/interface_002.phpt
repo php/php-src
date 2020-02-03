@@ -3,21 +3,24 @@ Checking error message when the trait doesn't implements the interface
 --FILE--
 <?php
 
-trait foo {
-	public function a() {
-	}
+trait foo
+{
+    public function a()
+    {
+    }
 }
 
-interface baz {
-	public function abc();
+interface baz
+{
+    public function abc();
 }
 
-class bar implements baz {
-	use foo;
-
+class bar implements baz
+{
+    use foo;
 }
 
-new bar;
+new bar();
 
 ?>
 --EXPECTF--

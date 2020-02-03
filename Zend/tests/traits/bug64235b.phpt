@@ -23,8 +23,7 @@ trait TestTrait
 
 class TestChildClass extends TestParentClass
 {
-    use TestTrait
-    {
+    use TestTrait {
         TestTrait::method as methodAlias;
         TestParentClass::method as TestParent;
     }

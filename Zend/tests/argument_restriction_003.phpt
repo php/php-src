@@ -2,18 +2,25 @@
 Bug #55719 (Argument restriction should come with a more specific error message)
 --FILE--
 <?php
-class Foo {
+
+class Foo
+{
 }
 
-Abstract Class Base {
-	public function test(Foo $foo, array $bar, $option = NULL, $extra = "lllllllllllllllllllllllllllllllllllllllllllllllllll") {
-	}
+abstract class Base
+{
+    public function test(Foo $foo, array $bar, $option = null, $extra = "lllllllllllllllllllllllllllllllllllllllllllllllllll")
+    {
+    }
 }
 
-class Sub extends Base {
-	public function test() {
-	}
+class Sub extends Base
+{
+    public function test()
+    {
+    }
 }
+
 ?>
 --EXPECTF--
 Fatal error: Declaration of Sub::test() must be compatible with Base::test(Foo $foo, array $bar, $option = NULL, $extra = 'llllllllll...') in %sargument_restriction_003.php on line %d

@@ -22,7 +22,7 @@ echo sprintf("Second Error Info: SQLSTATE Error Code: (%s), Driver Specific Erro
 
 
 echo "Creating new PDO with Extended Result Codes turned on" . PHP_EOL;
-$db = new PDO('sqlite::memory:', '', '', [PDO::SQLITE_ATTR_EXTENDED_RESULT_CODES => TRUE]);
+$db = new PDO('sqlite::memory:', '', '', [PDO::SQLITE_ATTR_EXTENDED_RESULT_CODES => true]);
 
 $db->exec("CREATE TABLE dog ( id INTEGER PRIMARY KEY, name TEXT, annoying INTEGER )");
 

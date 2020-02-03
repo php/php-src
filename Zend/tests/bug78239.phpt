@@ -4,6 +4,7 @@ Bug #78239: Deprecation notice during string conversion converted to exception h
 <?php if (!extension_loaded("zend-test")) die("skip requires zend-test extension"); ?>
 --FILE--
 <?php
+
 function handleError($level, $message, $file = '', $line = 0, $context = [])
 {
     throw new ErrorException($message, 0, $level, $file, $line);
@@ -11,7 +12,7 @@ function handleError($level, $message, $file = '', $line = 0, $context = [])
 
 set_error_handler('handleError');
 
-$r = new _ZendTestClass;
+$r = new _ZendTestClass();
 (string)$r ?: "";
 
 ?>

@@ -3,7 +3,8 @@ finally is run on object dtor, not free
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     try {
         yield;
     } finally {
@@ -14,7 +15,8 @@ function gen() {
 $gen = gen();
 $gen->rewind();
 
-set_error_handler(function() use($gen) {});
+set_error_handler(function () use ($gen) {
+});
 
 ?>
 --EXPECT--

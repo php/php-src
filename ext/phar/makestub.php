@@ -1,4 +1,5 @@
 <?php
+
 $s = str_replace("\r", '', file_get_contents(dirname(__FILE__) . '/shortarc.php'));
 
 $s .= "\nExtract_Phar::go();\n__HALT_COMPILER();";
@@ -103,5 +104,4 @@ foreach ($s3split as $i => $unused) {
 $stub .= ");
 }";
 
-file_put_contents(dirname(__FILE__) . '/stub.h', $stub."\n");
-?>
+file_put_contents(dirname(__FILE__) . '/stub.h', $stub . "\n");

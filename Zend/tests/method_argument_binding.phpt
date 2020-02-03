@@ -3,41 +3,54 @@ Edge cases in compile-time method argument binding
 --FILE--
 <?php
 
-class A {
-    private function method($x) {}
+class A
+{
+    private function method($x)
+    {
+    }
 }
 
-class B extends A {
-    public function test() {
+class B extends A
+{
+    public function test()
+    {
         $x = 1;
         $this->method($x);
         var_dump($x);
     }
 }
 
-class C extends B {
-    public function method(&$x) {
+class C extends B
+{
+    public function method(&$x)
+    {
         ++$x;
     }
 }
 
-(new C)->test();
+(new C())->test();
 
-class D {
-    private final function method(&$x) {
+class D
+{
+    final private function method(&$x)
+    {
         ++$x;
     }
 }
 
-class E extends D {
-    public function __call($name, $args) { }
+class E extends D
+{
+    public function __call($name, $args)
+    {
+    }
 
-    public function test() {
+    public function test()
+    {
         $this->method($x);
     }
 }
 
-(new E)->test();
+(new E())->test();
 
 ?>
 --EXPECTF--

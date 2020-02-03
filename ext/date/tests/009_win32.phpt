@@ -7,12 +7,13 @@ if (false === setlocale(LC_TIME, "en-us")) die("skip, couldn't set the locale to
 ?>
 --FILE--
 <?php
+
 date_default_timezone_set('Asia/Jerusalem');
 
 $loc = setlocale(LC_TIME, "0");
 setlocale(LC_TIME, "en-us");
 
-$t = mktime(0,0,0, 6, 27, 2006);
+$t = mktime(0, 0, 0, 6, 27, 2006);
 
 var_dump(strftime(""));
 
@@ -33,6 +34,7 @@ var_dump(gmstrftime("blah", $t));
 echo "Done\n";
 
 setlocale(LC_TIME, $loc);
+
 ?>
 --EXPECTF--
 bool(false)

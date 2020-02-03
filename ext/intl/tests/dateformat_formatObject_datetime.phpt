@@ -6,6 +6,7 @@ if (!extension_loaded('intl')) die('skip intl extension not enabled') ?>
 <?php if (version_compare(INTL_ICU_VERSION, '50.1.2') >=  0) die('skip for ICU < 50.1.2'); ?>
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "pt_PT");
 ini_set("date.timezone", "Europe/Lisbon");

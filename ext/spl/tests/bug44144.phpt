@@ -2,13 +2,18 @@
 Bug #44144 (spl_autoload_functions() should return object instance when appropriate)
 --FILE--
 <?php
-class Foo {
-  public function nonstaticMethod() {}
+
+class Foo
+{
+    public function nonstaticMethod()
+    {
+    }
 }
-$foo = new Foo;
+$foo = new Foo();
 spl_autoload_register(array($foo, 'nonstaticMethod'));
 $funcs = spl_autoload_functions();
 var_dump($funcs);
+
 ?>
 --EXPECTF--
 array(1) {

@@ -15,6 +15,7 @@ $s1 = ~$s2;
 var_dump(bin2hex($s1));
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 int(-24)

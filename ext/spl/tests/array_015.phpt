@@ -21,18 +21,16 @@ $it->next();
 var_dump($it->current());
 var_dump($ar);
 
-foreach($it as $k => $v)
-{
-	$ar->offsetUnset($k+1);
-	echo "$k=>$v\n";
+foreach ($it as $k => $v) {
+    $ar->offsetUnset($k + 1);
+    echo "$k=>$v\n";
 }
 
 var_dump($ar);
 
-foreach($it as $k => $v)
-{
-	$ar->offsetUnset($k);
-	echo "$k=>$v\n";
+foreach ($it as $k => $v) {
+    $ar->offsetUnset($k);
+    echo "$k=>$v\n";
 }
 
 var_dump($ar);

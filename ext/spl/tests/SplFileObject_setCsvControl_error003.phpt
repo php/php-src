@@ -6,7 +6,9 @@ Erwin Poeze <erwin.poeze at gmail.com>
 include_path=.
 --FILE--
 <?php
-file_put_contents('csv_control_data_error003.csv',
+
+file_put_contents(
+    'csv_control_data_error003.csv',
 <<<CDATA
 'groene appelen'|10
 'gele bananen'|20
@@ -16,6 +18,7 @@ CDATA
 $s = new SplFileObject('csv_control_data_error003.csv');
 $s->setFlags(SplFileObject::READ_CSV);
 $s->setCsvControl('|', '\'', 'three');
+
 ?>
 --CLEAN--
 <?php

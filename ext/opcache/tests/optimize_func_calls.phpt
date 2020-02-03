@@ -9,15 +9,18 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 
-class A {
-	public $obj;
-	public function test($a) {
-	}
+class A
+{
+    public $obj;
+    public function test($a)
+    {
+    }
 }
 
-function a(&$b) {
-	$b = "changed";
-	return "done";
+function a(&$b)
+{
+    $b = "changed";
+    return "done";
 }
 
 $a = "a";
@@ -58,8 +61,8 @@ foo(new A());
  * ZEND_SEND_VAR
  * DO_FCALL_BY_NAME
  */
-foo((new A)->obj);
-$obj = new A;
+foo((new A())->obj);
+$obj = new A();
 ref($obj->obj);
 var_dump($obj->obj);
 
@@ -77,18 +80,23 @@ var_dump($b);
  */
 ref("xxx");
 
-function retarray() {
-	return array("retarray");
+function retarray()
+{
+    return array("retarray");
 }
 
-function foo($a) {
-	print_r(func_get_args());
+function foo($a)
+{
+    print_r(func_get_args());
 }
 
-function ref(&$b) {
-	$b = "changed";
-	return "ref";
+function ref(&$b)
+{
+    $b = "changed";
+    return "ref";
 }
+
+?>
 --EXPECTF--
 Array
 (

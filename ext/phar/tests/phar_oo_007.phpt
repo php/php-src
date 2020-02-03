@@ -11,11 +11,11 @@ require_once 'files/phar_oo_test.inc';
 
 class MyFile extends SplFileObject
 {
-	function __construct($name)
-	{
-		echo __METHOD__ . "(" . str_replace(str_replace('\\', '/', __DIR__), '*', $name) . ")\n";
-		parent::__construct($name);
-	}
+    function __construct($name)
+    {
+        echo __METHOD__ . "(" . str_replace(str_replace('\\', '/', __DIR__), '*', $name) . ")\n";
+        parent::__construct($name);
+    }
 }
 
 $phar = new Phar($fname);
@@ -53,6 +53,8 @@ var_dump($f->fgets());
 var_dump($f->eof());
 
 //unset($f); without unset we check for working refcounting
+
+?>
 
 ?>
 --CLEAN--

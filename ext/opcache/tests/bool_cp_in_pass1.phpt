@@ -4,7 +4,9 @@ Incorrect constant propagation on BOOL in pass 1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function test($foo) {
+
+function test($foo)
+{
     $bar = 0;
     if ($bar === 1 && $foo && PHP_SAPI !== 'cgi') {
         echo "bar\n";
@@ -12,6 +14,7 @@ function test($foo) {
     echo "foo\n";
 }
 test(1);
+
 ?>
 --EXPECT--
 foo

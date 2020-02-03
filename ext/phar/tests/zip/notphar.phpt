@@ -8,11 +8,13 @@ detect_unicode=0
 zend.multibyte=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
 $pname = 'phar://' . $fname;
 
 copy(__DIR__ . '/files/zip.zip', $fname);
 include $fname;
+
 ?>
 ===DONE===
 --CLEAN--

@@ -7,13 +7,16 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function test() {
+
+function test()
+{
     $anyArrayOne = ['foo' => 'bar', 'bar' => 'baz'];
     $anyArrayTwo = ['foo' => null];
 
     print_r(array_diff_key($anyArrayOne, $anyArrayTwo));
 }
 test();
+
 ?>
 --EXPECT--
 Array

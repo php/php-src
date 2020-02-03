@@ -13,7 +13,6 @@ $fa->setSize(2);
 var_dump($fa);
 var_dump($fa->getSize());
 
-
 ?>
 --EXPECTF--
 object(SplFixedArray)#%d (3) {

@@ -2,6 +2,7 @@
 SplFileObject::fputcsv(): functionality tests
 --FILE--
 <?php
+
 $file = __DIR__ . '/SplFileObject_fputcsv.csv';
 $fo = new SplFileObject($file, 'w');
 
@@ -29,26 +30,28 @@ $list = array (
 );
 
 foreach ($list as $v) {
-	$fo->fputcsv(explode(',', $v));
+    $fo->fputcsv(explode(',', $v));
 }
 unset($fo);
 
 $res = file($file);
-foreach($res as &$val)
-{
-	$val = substr($val, 0, -1);
+foreach ($res as &$val) {
+    $val = substr($val, 0, -1);
 }
-echo '$list = ';var_export($res);echo ";\n";
+echo '$list = ';
+var_export($res);
+echo ";\n";
 
 $fp = fopen($file, "r");
 $res = array();
-while($l=fgetcsv($fp))
-{
-	$res[] = join(',',$l);
+while ($l = fgetcsv($fp)) {
+    $res[] = join(',', $l);
 }
 fclose($fp);
 
-echo '$list = ';var_export($res);echo ";\n";
+echo '$list = ';
+var_export($res);
+echo ";\n";
 
 ?>
 --CLEAN--

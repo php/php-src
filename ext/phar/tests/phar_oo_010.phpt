@@ -32,6 +32,8 @@ var_dump(isset($phar[12]));
 var_dump(isset($phar['b']));
 
 ?>
+
+?>
 --CLEAN--
 <?php
 unlink(__DIR__ . '/files/phar_oo_010.phar.php');

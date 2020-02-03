@@ -25,6 +25,7 @@ $s4 &= "  ";
 var_dump($s4);
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 int(18)

@@ -2,6 +2,7 @@
 Bug #72496 (declare public method with signature incompatible with parent private method should not throw a warning)
 --FILE--
 <?php
+
 class Foo
 {
     private function getFoo()
@@ -39,5 +40,7 @@ class Bar extends Foo
 }
 
 echo "OK\n";
+
+?>
 --EXPECT--
 OK

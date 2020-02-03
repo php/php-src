@@ -2,12 +2,14 @@
 Bug #76534 (PHP hangs on 'illegal string offset on string references with an error handler)
 --FILE--
 <?php
+
 set_error_handler(function ($severity, $message, $file, $line) {
-	throw new \Exception($message);
+    throw new \Exception($message);
 });
 
 $x = "foo";
 $y = &$x["bar"];
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Exception: Illegal string offset 'bar' in %sbug76534.php:%d

@@ -6,13 +6,16 @@ require 'skipif.inc';
 ?>
 --FILE--
 <?php
+
 require 'server.inc';
 
 $file = "mediumfile.txt";
 
 $ftp = ftp_connect('127.0.0.1', $port);
 ftp_login($ftp, 'user', 'pass');
-if (!$ftp) die("Couldn't connect to the server");
+if (!$ftp) {
+    die("Couldn't connect to the server");
+}
 
 $local_file = __DIR__ . DIRECTORY_SEPARATOR . $file;
 touch($local_file);
@@ -24,6 +27,7 @@ while ($r == FTP_MOREDATA) {
 ftp_close($ftp);
 
 echo file_get_contents($local_file);
+
 ?>
 --CLEAN--
 <?php

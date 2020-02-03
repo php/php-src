@@ -9,6 +9,7 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
+
 echo "Checking with no parameters\n";
 imap_open();
 imap_open(false);
@@ -20,7 +21,7 @@ echo "Checking with incorrect parameters\n" ;
 imap_open('', '', '');
 imap_open('', '', '', -1);
 
-require_once(__DIR__.'/imap_include.inc');
+require_once(__DIR__ . '/imap_include.inc');
 imap_open($default_mailbox, $username, $password, NIL, -1);
 
 ?>

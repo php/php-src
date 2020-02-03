@@ -6,30 +6,39 @@ Strict scalar type basics
 declare(strict_types=1);
 
 $functions = [
-    'int' => function (int $i) { return $i; },
-    'float' => function (float $f) { return $f; },
-    'string' => function (string $s) { return $s; },
-    'bool' => function (bool $b) { return $b; }
+    'int' => function (int $i) {
+        return $i;
+    },
+    'float' => function (float $f) {
+        return $f;
+    },
+    'string' => function (string $s) {
+        return $s;
+    },
+    'bool' => function (bool $b) {
+        return $b;
+    }
 ];
 
 $values = [
     1,
     1.0,
     "1",
-    TRUE,
-    FALSE,
-    NULL,
+    true,
+    false,
+    null,
     [],
-    new StdClass,
+    new StdClass(),
     fopen("data:text/plain,foobar", "r")
 ];
 
-function type($value) {
+function type($value)
+{
     if (is_float($value)) {
         return "float";
-    } else if (is_bool($value)) {
+    } elseif (is_bool($value)) {
         return $value ? "true" : "false";
-    } else if (is_null($value)) {
+    } elseif (is_null($value)) {
         return "null";
     } else {
         return gettype($value);
@@ -49,6 +58,7 @@ foreach ($functions as $type => $function) {
     }
 }
 echo PHP_EOL . "Done";
+
 ?>
 --EXPECTF--
 Testing 'int' type:

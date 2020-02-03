@@ -2,6 +2,7 @@
 Bug #28072 (static array with some constant keys will be incorrectly ordered)
 --FILE--
 <?php
+
 define("FIRST_KEY", "a");
 define("THIRD_KEY", "c");
 
@@ -30,6 +31,7 @@ function test2()
 
 test();
 test2();
+
 ?>
 --EXPECT--
 Array

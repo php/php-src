@@ -3,9 +3,11 @@ foreach() & undefined var
 --FILE--
 <?php
 
-foreach($a as $val);
+foreach ($a as $val) {
+}
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Warning: Undefined variable: a in %s on line %d

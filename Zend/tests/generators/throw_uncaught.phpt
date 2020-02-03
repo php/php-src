@@ -3,7 +3,8 @@ Generator::throw() where the exception is not caught in the generator
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     yield 'thisThrows';
     yield 'notReached';
 }

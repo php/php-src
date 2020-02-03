@@ -3,7 +3,7 @@ WeakMap error conditions
 --FILE--
 <?php
 
-$map = new WeakMap;
+$map = new WeakMap();
 try {
     $map[1] = 2;
 } catch (TypeError $e) {
@@ -36,7 +36,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 try {
-    var_dump($map[new stdClass]);
+    var_dump($map[new stdClass()]);
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }

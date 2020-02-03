@@ -11,6 +11,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 $a = new Phar(__DIR__ . '/files/sha1.phar');
 $r = $a->getSignature();
 var_dump($r['hash_type']);
@@ -26,6 +27,7 @@ var_dump($r['hash_type']);
 $a = new Phar(__DIR__ . '/files/openssl.phar');
 $r = $a->getSignature();
 var_dump($r['hash_type']);
+
 ?>
 --EXPECT--
 string(5) "SHA-1"

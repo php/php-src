@@ -8,13 +8,14 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 
-function test() {
+function test()
+{
     $foo = "test";
     var_dump($foo ?? "default");
 
     $null = null;
     var_dump($null ?? 3);
-    var_dump($null ?? new stdClass);
+    var_dump($null ?? new stdClass());
 }
 test();
 

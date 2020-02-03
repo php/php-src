@@ -3,11 +3,13 @@ Yielding the result of a non-ref function call throw a notice
 --FILE--
 <?php
 
-function foo() {
+function foo()
+{
     return "bar";
 }
 
-function &gen() {
+function &gen()
+{
     yield foo();
 }
 

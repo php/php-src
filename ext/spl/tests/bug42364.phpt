@@ -2,6 +2,7 @@
 Bug #42364 (Crash when using getRealPath with DirectoryIterator)
 --FILE--
 <?php
+
 $dir = __DIR__ . '/bug42364';
 @mkdir($dir);
 touch($dir . '/test');
@@ -19,6 +20,7 @@ foreach ($it as $e) {
 if ($count > 0) {
     echo "Found $count entries!\n";
 }
+
 ?>
 --CLEAN--
 <?php

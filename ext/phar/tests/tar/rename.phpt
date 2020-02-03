@@ -7,6 +7,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
+
 include __DIR__ . '/files/tarmaker.php.inc';
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
 $alias = 'phar://' . $fname;
@@ -21,7 +22,7 @@ $files = array();
 $files['a'] = 'a';
 
 foreach ($files as $n => $file) {
-	$tar->addFile($n, $file);
+    $tar->addFile($n, $file);
 }
 
 $tar->close();
@@ -32,6 +33,7 @@ echo file_get_contents($alias . '/a') . "\n";
 rename($alias . '/a', $alias . '/b');
 echo file_get_contents($alias . '/b') . "\n";
 echo file_get_contents($alias . '/a') . "\n";
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>

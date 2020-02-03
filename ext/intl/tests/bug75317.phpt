@@ -6,12 +6,14 @@ if (!extension_loaded('intl')) die('skip intl extension is not available');
 ?>
 --FILE--
 <?php
+
 $utf8 = UConverter::getAliases('utf-8')[0];
 $utf16 = UConverter::getAliases('utf-16')[0];
 $utf32 = UConverter::getAliases('utf-32')[0];
 $latin1 = UConverter::getAliases('latin1')[0];
 
-function printResult($actual, $expected) {
+function printResult($actual, $expected)
+{
     var_dump($actual === $expected ? true : "expected: $expected, actual: $actual");
 }
 

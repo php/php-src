@@ -4,24 +4,38 @@ Absolute namespaces should be allowed
 <?php
 
 namespace Foo\Bar {
-    class ClassA{}
-    class ClassB{}
-    class ClassC{}
+    class ClassA
+    {
+    }
+    class ClassB
+    {
+    }
+    class ClassC
+    {
+    }
 
-    function fn_a(){ return __FUNCTION__; }
-    function fn_b(){ return __FUNCTION__; }
-    function fn_c(){ return __FUNCTION__; }
+    function fn_a()
+    {
+        return __FUNCTION__;
+    }
+    function fn_b()
+    {
+        return __FUNCTION__;
+    }
+    function fn_c()
+    {
+        return __FUNCTION__;
+    }
 
     const CONST_A = 1;
     const CONST_B = 2;
     const CONST_C = 3;
 }
-
 namespace Baz {
 
-    use \Foo\Bar\{ClassA, ClassB, ClassC};
-    use function \Foo\Bar\{fn_a, fn_b, fn_c};
-    use const \Foo\Bar\{CONST_A, CONST_B, CONST_C};
+    use Foo\Bar\{ClassA, ClassB, ClassC};
+    use function Foo\Bar\{fn_a, fn_b, fn_c};
+    use const Foo\Bar\{CONST_A, CONST_B, CONST_C};
 
     var_dump(ClassA::class);
     var_dump(ClassB::class);
@@ -35,6 +49,7 @@ namespace Baz {
 
     echo "\nDone\n";
 }
+
 ?>
 --EXPECT--
 string(14) "Foo\Bar\ClassA"

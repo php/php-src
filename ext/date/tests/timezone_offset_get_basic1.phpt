@@ -2,6 +2,7 @@
 Test timezone_offset_get() function : basic functionality
 --FILE--
 <?php
+
 /* Prototype  : int timezone_offset_get  ( DateTimeZone $object  , DateTime $datetime  )
  * Description: Returns the timezone offset from GMT
  * Source code: ext/date/php_date.c

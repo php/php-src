@@ -4,6 +4,7 @@ Test ctype_xdigit() function : usage variations - different integers
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 /* Prototype  : bool ctype_xdigit(mixed $c)
  * Description: Checks for character(s) representing a hexadecimal digit
  * Source code: ext/ctype/ctype.c
@@ -18,13 +19,14 @@ echo "*** Testing ctype_xdigit() : usage variations ***\n";
 
 $orig = setlocale(LC_CTYPE, "C");
 
-for($c = 1; $c < 256; $c++) {
-	if (ctype_xdigit($c)) {
-		echo "character code $c is a hexadecimal 'digit'\n";
-	}
+for ($c = 1; $c < 256; $c++) {
+    if (ctype_xdigit($c)) {
+        echo "character code $c is a hexadecimal 'digit'\n";
+    }
 }
 
 setlocale(LC_CTYPE, $orig);
+
 ?>
 --EXPECT--
 *** Testing ctype_xdigit() : usage variations ***

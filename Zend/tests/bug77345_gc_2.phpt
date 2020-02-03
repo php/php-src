@@ -16,7 +16,8 @@ class Node
 var_dump(gc_enabled());
 var_dump('start');
 
-function xxx() {
+function xxx()
+{
     $firstNode = new Node();
     $firstNode->previous = $firstNode;
     $firstNode->next = $firstNode;
@@ -42,6 +43,8 @@ xxx();
 gc_collect_cycles();
 
 var_dump('end');
+
+?>
 --EXPECT--
 bool(true)
 string(5) "start"

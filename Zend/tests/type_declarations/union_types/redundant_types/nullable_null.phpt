@@ -3,7 +3,8 @@ Combining nullability with null
 --FILE--
 <?php
 
-function test(): ?null {
+function test(): ?null
+{
 }
 
 ?>

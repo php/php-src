@@ -16,27 +16,26 @@ $test_num = 1;
 /*
  * Sort various arrays in specified locale.
  */
-function sort_arrays( $locale, $test_arrays, $sort_flag = Collator::SORT_REGULAR )
+function sort_arrays($locale, $test_arrays, $sort_flag = Collator::SORT_REGULAR)
 {
     $res_str = '';
 
-    $coll = ut_coll_create( $locale );
+    $coll = ut_coll_create($locale);
 
-    foreach( $test_arrays as $test_array )
-    {
+    foreach ($test_arrays as $test_array) {
         // Try to sort test data.
-        $res_val = ut_coll_asort( $coll, $test_array, $sort_flag );
+        $res_val = ut_coll_asort($coll, $test_array, $sort_flag);
 
         // Return output data.
-        $res_dump = "\n" . dump( $test_array ) .
-                    "\n Result: " . dump( $res_val );
+        $res_dump = "\n" . dump($test_array) .
+                    "\n Result: " . dump($res_val);
 
-		// Preppend test signature to output string
-        $md5 = md5( $res_dump );
+        // Preppend test signature to output string
+        $md5 = md5($res_dump);
 
         global $test_num;
 
-        $res_str .= "\n\n".
+        $res_str .= "\n\n" .
                     "Test $test_num.$md5:" .
                     $res_dump;
         ++$test_num;
@@ -65,7 +64,7 @@ function ut_main()
                'c' => 'aa' ),
 
         array( 'a'  => 'a' ,
-               'aaa'=> 'a' ,
+               'aaa' => 'a' ,
                'aa' => 'a' ),
 
         array( '1' => 'abc',
@@ -82,7 +81,7 @@ function ut_main()
                '3' => 2    )
     );
 
-    $res_str .= sort_arrays( 'en_US', $test_params );
+    $res_str .= sort_arrays('en_US', $test_params);
 
     // Sort an array in SORT_STRING mode using en_US locale.
     $test_params = array(
@@ -103,7 +102,7 @@ function ut_main()
                '3' => 'i'  )
     );
 
-    $res_str .= sort_arrays( 'en_US', $test_params, Collator::SORT_STRING );
+    $res_str .= sort_arrays('en_US', $test_params, Collator::SORT_STRING);
 
     // Sort a non-ASCII array using ru_RU locale.
     $test_params = array(
@@ -117,7 +116,7 @@ function ut_main()
                '2' => 'пп' )
     );
 
-    $res_str .= sort_arrays( 'ru_RU', $test_params );
+    $res_str .= sort_arrays('ru_RU', $test_params);
 
 
     // Sort an array using Lithuanian locale.
@@ -127,13 +126,14 @@ function ut_main()
                'a' => 'k' )
     );
 
-    $res_str .= sort_arrays( 'lt_LT', $test_params );
+    $res_str .= sort_arrays('lt_LT', $test_params);
 
     return $res_str . "\n";
 }
 
-include_once( 'ut_common.inc' );
+include_once('ut_common.inc');
 ut_run();
+
 ?>
 --EXPECT--
 Test 1.162b81ac12878b817fc39063097e45b5:

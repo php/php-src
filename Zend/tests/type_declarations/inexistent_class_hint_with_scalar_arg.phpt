@@ -3,7 +3,9 @@ Inexistent class as type receiving scalar argument
 --FILE--
 <?php
 
-function foo(bar $ex) {}
+function foo(bar $ex)
+{
+}
 foo(null);
 
 ?>

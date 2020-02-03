@@ -2,7 +2,9 @@
 Bug #72213 (Finally leaks on nested exceptions)
 --FILE--
 <?php
-function test() {
+
+function test()
+{
     try {
         throw new Exception(1);
     } finally {
@@ -21,5 +23,7 @@ try {
 } catch (Exception $e) {
     echo "caught {$e->getMessage()}\n";
 }
+
+?>
 --EXPECT--
 caught 1

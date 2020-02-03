@@ -5,11 +5,12 @@ Julien Pauli <doctorrock83@gmail.com>
 #testfest phpcampparis 2008-06-07
 --FILE--
 <?php
+
 $a = new stdClass();
 
 $array = array(array('z',$a),array('q','s'));
 
-$rai = new RecursiveArrayIterator($array,RecursiveArrayIterator::CHILD_ARRAYS_ONLY);
+$rai = new RecursiveArrayIterator($array, RecursiveArrayIterator::CHILD_ARRAYS_ONLY);
 
 foreach (new RecursiveIteratorIterator($rai) as $t) {
     var_dump($t);
@@ -19,6 +20,7 @@ $rai = new RecursiveArrayIterator($array);
 foreach (new RecursiveIteratorIterator($rai) as $t) {
     var_dump($t);
 }
+
 ?>
 --EXPECT--
 string(1) "z"

@@ -12,6 +12,7 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 ?>
 --FILE--
 <?php
+
 var_dump(function_exists("f1"));
 var_dump(function_exists("f2"));
 
@@ -20,6 +21,8 @@ include(__DIR__ . "/preload.inc");
 var_dump(function_exists("f2"));
 ?>
 OK
+
+?>
 --EXPECTF--
 bool(true)
 bool(false)

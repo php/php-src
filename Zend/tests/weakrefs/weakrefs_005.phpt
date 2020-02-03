@@ -2,7 +2,9 @@
 WeakReference no __construct
 --FILE--
 <?php
+
 new WeakReference();
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Error: Direct instantiation of 'WeakReference' is not allowed, use WeakReference::create instead in %s:2

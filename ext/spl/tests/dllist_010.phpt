@@ -2,6 +2,7 @@
 SPL: DoublyLinkedList: prev
 --FILE--
 <?php
+
 $dll = new SplDoublyLinkedList();
 $dll->push(1);
 $dll->push(2);

@@ -2,6 +2,7 @@
 "Reference Unpacking - General" list()
 --FILE--
 <?php
+
 $arr = array(1, array(2));
 list(&$a, list(&$b)) = $arr;
 var_dump($a, $b);
@@ -25,6 +26,7 @@ $arr = array("one" => 1, "two" => array(2));
 ["one" => &$a, "two" => [&$b], "three" => &$c] = $arr;
 var_dump($a, $b, $c);
 var_dump($arr);
+
 ?>
 --EXPECT--
 int(1)

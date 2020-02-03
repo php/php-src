@@ -4,6 +4,7 @@ Phar::mapPhar truncated manifest/improper params
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
+
 try {
     Phar::mapPhar(5, 'hio', 'hi');
 } catch (TypeError $e) {
@@ -15,7 +16,9 @@ try {
 } catch (Exception $e) {
     echo $e->getMessage(), "\n";
 }
-__HALT_COMPILER(); ?>
+__halt_compiler(); ?>
+
+?>
 --EXPECTF--
 Phar::mapPhar() expects at most 2 parameters, 3 given
 internal corruption of phar "%s002.php" (truncated manifest at manifest length)

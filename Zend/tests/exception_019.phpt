@@ -3,7 +3,7 @@ Testing throw exception doesn't crash with wrong params, variant 2
 --FILE--
 <?php
 
-throw new Exception(new stdClass);
+throw new Exception(new stdClass());
 
 ?>
 --EXPECTF--

@@ -2,6 +2,7 @@
 Bug #48187 (DateTime::diff() corrupting microtime() result)
 --FILE--
 <?php
+
 date_default_timezone_set('UTC');
 
 // two arbitrary dates
@@ -22,6 +23,7 @@ if (time() - $begin_t < 1) {
 } else {
     var_dump('time() difference greater or equal 1 second');
 }
+
 ?>
 --EXPECT--
 string(36) "microtime() difference less 1 second"

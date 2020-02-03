@@ -3,16 +3,19 @@ class constants as default function arguments
 --FILE--
 <?php
 
-class test {
-	const val = 1;
+class test
+{
+    const val = 1;
 }
 
-function foo($v = test::val) {
-	var_dump($v);
+function foo($v = test::val)
+{
+    var_dump($v);
 }
 
-function bar($b = NoSuchClass::val) {
-	var_dump($b);
+function bar($b = NoSuchClass::val)
+{
+    var_dump($b);
 }
 
 foo();
@@ -22,6 +25,7 @@ bar(10);
 bar();
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 int(1)

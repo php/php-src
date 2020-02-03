@@ -4,11 +4,11 @@ SPL: SplFileObject::setMaxLineLen error 001()
 Erwin Poeze <erwin.poeze at gmail.com>
 --FILE--
 <?php
-$s = new SplFileObject( __FILE__ );
+
+$s = new SplFileObject(__FILE__);
 try {
     $s->setMaxLineLen(-1);
-}
-catch (DomainException $e) {
+} catch (DomainException $e) {
     echo 'DomainException thrown';
 }
 

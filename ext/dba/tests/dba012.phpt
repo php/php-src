@@ -9,8 +9,9 @@ require_once(__DIR__ .'/skipif.inc');
 dba.default_handler=flatfile
 --FILE--
 <?php
+
 $handler = "flatfile";
-require_once(__DIR__ .'/test.inc');
+require_once(__DIR__ . '/test.inc');
 echo "database handler: $handler\n";
 
 echo "Test 1\n";

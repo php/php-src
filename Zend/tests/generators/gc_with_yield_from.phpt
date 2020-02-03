@@ -5,18 +5,20 @@ zend.enable_gc = 1
 --FILE--
 <?php
 
-function root() {
-	global $gens; // create cyclic reference to root
-	try {
-		yield 1;
-	} finally {
-		var_dump($gens);
-	}
+function root()
+{
+    global $gens; // create cyclic reference to root
+    try {
+        yield 1;
+    } finally {
+        var_dump($gens);
+    }
 }
 
-function gen($x) {
-	global $gens;
-	yield from $gens[] = $x ? gen(--$x) : root();
+function gen($x)
+{
+    global $gens;
+    yield from $gens[] = $x ? gen(--$x) : root();
 }
 
 $gen = $gens[] = gen(2);

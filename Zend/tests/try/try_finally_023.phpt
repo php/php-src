@@ -3,18 +3,21 @@ Loop var dtor throwing exception during return inside try/catch inside finally
 --FILE--
 <?php
 
-class Dtor {
-    public function __destruct() {
+class Dtor
+{
+    public function __destruct()
+    {
         throw new Exception(2);
     }
 }
 
-function test() {
+function test()
+{
     try {
         throw new Exception(1);
     } finally {
         try {
-            foreach ([new Dtor] as $v) {
+            foreach ([new Dtor()] as $v) {
                 unset($v);
                 return 42;
             }

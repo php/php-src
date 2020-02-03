@@ -4,14 +4,15 @@ Tests for DateTimeImmutable.
 date.timezone=Europe/London
 --FILE--
 <?php
+
 $tz = new DateTimeZone("Asia/Tokyo");
 $current = "2012-12-27 16:24:08";
 
 function dump($a, $b, $c)
 {
-	echo 'orig:    ', $a->format('Y-m-d H:i:s e'), "\n";
-	echo 'copy:    ', $b->format('Y-m-d H:i:s e'), "\n";
-	echo 'changed: ', $c->format('Y-m-d H:i:s e'), "\n";
+    echo 'orig:    ', $a->format('Y-m-d H:i:s e'), "\n";
+    echo 'copy:    ', $b->format('Y-m-d H:i:s e'), "\n";
+    echo 'changed: ', $c->format('Y-m-d H:i:s e'), "\n";
 }
 
 echo "modify():\n";
@@ -97,6 +98,7 @@ $v = date_create($current);
 $z = $v;
 $x = $z->setTimestamp(2012234222);
 dump($v, $z, $x);
+
 ?>
 --EXPECT--
 modify():

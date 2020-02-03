@@ -7,6 +7,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 
 $phar = new Phar($fname);
@@ -15,8 +16,9 @@ $phar['sub/top.txt'] = 'there';
 $phar['another.file.txt'] = 'wowee';
 $newphar = new Phar($fname);
 foreach (new RecursiveIteratorIterator($newphar) as $path => $obj) {
-	var_dump($obj->getPathName());
+    var_dump($obj->getPathName());
 }
+
 ?>
 --CLEAN--
 <?php

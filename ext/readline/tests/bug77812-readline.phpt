@@ -8,6 +8,7 @@ if (!function_exists('proc_open')) die('skip proc_open() not available');
 ?>
 --FILE--
 <?php
+
 $php = getenv('TEST_PHP_EXECUTABLE');
 $ini = getenv('TEST_PHP_EXTRA_ARGS');
 $descriptorspec = [['pipe', 'r'], STDOUT, STDERR];
@@ -20,6 +21,7 @@ fwrite($pipes[0], "echo <<<FOO\nFOOL\nFOO\n,1;\n");
 fwrite($pipes[0], "echo <<<FOO\nFOO4\nFOO\n,2;\n");
 fclose($pipes[0]);
 proc_close($proc);
+
 ?>
 --EXPECTF--
 resource(%d) of type (process)

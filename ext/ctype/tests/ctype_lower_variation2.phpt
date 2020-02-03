@@ -4,6 +4,7 @@ Test ctype_lower() function : usage variations - different integers
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 /* Prototype  : bool ctype_lower(mixed $c)
  * Description: Checks for lowercase character(s)
  * Source code: ext/ctype/ctype.c
@@ -19,12 +20,13 @@ echo "*** Testing ctype_lower() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($i = 0; $i < 256; $i++) {
-	if (ctype_lower($i)) {
-		echo "character code $i is a lower case character\n";
-	}
+    if (ctype_lower($i)) {
+        echo "character code $i is a lower case character\n";
+    }
 }
 
 setlocale(LC_CTYPE, $orig);
+
 ?>
 --EXPECT--
 *** Testing ctype_lower() : usage variations ***

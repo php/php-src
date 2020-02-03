@@ -6,6 +6,7 @@ Phar: addFile/addFromString
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $phar = new Phar($fname);
@@ -14,30 +15,31 @@ echo file_get_contents($pname . '/a') . "\n";
 $phar->addFile($pname . '/a', 'b');
 echo file_get_contents($pname . '/b') . "\n";
 try {
-$phar->addFile($pname . '/a');
+    $phar->addFile($pname . '/a');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$phar->addFile($pname . '/a', 'a');
+    $phar->addFile($pname . '/a', 'a');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$phar->addFile(__DIR__ . '/does/not/exist');
+    $phar->addFile(__DIR__ . '/does/not/exist');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$phar->addFile($pname . '/a', '.phar/stub.php');
+    $phar->addFile($pname . '/a', '.phar/stub.php');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$phar->addFromString('.phar/stub.php', 'hi');
+    $phar->addFromString('.phar/stub.php', 'hi');
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

@@ -3,15 +3,18 @@ Test to check regressions on string interpolation with class members access
 --FILE--
 <?php
 
-class Friday {
+class Friday
+{
     public $require = "fun";
 }
 
-$friday = new Friday;
+$friday = new Friday();
 
 echo "$friday->require ($friday->require) {$friday->require}", PHP_EOL;
 
 echo "\nDone\n";
+
+?>
 --EXPECT--
 fun (fun) fun
 

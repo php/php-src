@@ -7,7 +7,9 @@ Patrick Allaert <patrickallaert@php.net>
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 var_dump(ldap_err2str(2));
+
 ?>
 --EXPECT--
 string(14) "Protocol error"

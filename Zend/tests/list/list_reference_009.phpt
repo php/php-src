@@ -2,6 +2,7 @@
 "Reference Unpacking - VM Safety" list()
 --FILE--
 <?php
+
 $ary = [[0, 1]];
 [[
     0 => &$a,
@@ -17,6 +18,7 @@ $ary = [[0, 1]];
     ($ary["foo"] = 1) => &$b
 ] = $ary[0];
 var_dump($ary, $a, $b);
+
 ?>
 --EXPECT--
 array(2) {

@@ -4,11 +4,13 @@ Bug #67805 SplFileObject setMaxLineLength
 Willian Gustavo Veiga <contact@willianveiga.com>
 --FILE--
 <?php
+
 $splFileObject = new SplFileObject(__FILE__);
 $splFileObject->setMaxLineLen(3);
 $line = $splFileObject->getCurrentLine();
 var_dump($line === '<?p');
 var_dump(strlen($line) === 3);
+
 ?>
 --EXPECT--
 bool(true)

@@ -10,10 +10,11 @@ try {
     $c = $a % $b;
     var_dump($c);
 } catch (DivisionByZeroError $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 Exception: Modulo by zero

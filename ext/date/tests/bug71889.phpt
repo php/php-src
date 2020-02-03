@@ -4,8 +4,10 @@ Bug #71889 (DateInterval::format segfault on '%' input)
 date.timezone=US/Eastern
 --FILE--
 <?php
+
 $di = new DateInterval('P1D');
 var_dump($di->format("%"));
+
 ?>
 --EXPECT--
 string(0) ""

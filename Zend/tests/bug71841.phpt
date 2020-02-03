@@ -2,8 +2,9 @@
 Bug #71841 (EG(error_zval) is not handled well)
 --FILE--
 <?php
+
 $z = unserialize('O:1:"A":0:{}');
-@var_dump($z->e.=0);
+@var_dump($z->e .= 0);
 @var_dump(++$z->x);
 @var_dump($z->y++);
 
@@ -23,6 +24,7 @@ try {
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
+
 ?>
 --EXPECT--
 NULL

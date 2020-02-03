@@ -3,11 +3,15 @@ Nullable covariant return types
 --FILE--
 <?php
 
-interface A {
+interface A
+{
     function method(): ?int;
 }
 
-interface B extends A {
+interface B extends A
+{
     function method(): int;
 }
+
+?>
 --EXPECT--

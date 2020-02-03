@@ -15,19 +15,21 @@ Emmanuel Dreyfus <manu@netbsd.org>
 ?>
 --FILE--
 <?php
+
 require "connect.inc";
 
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
 insert_dummy_data($link, $base);
 ldap_add($link, "cn=tmp,$base", array(
-	"objectclass" => array("person", "dynamicObject"),
-	"cn" => "tmp",
-	"sn" => "tmp"
+    "objectclass" => array("person", "dynamicObject"),
+    "cn" => "tmp",
+    "sn" => "tmp"
 ));
 var_dump(
-	ldap_exop_refresh($link, "cn=tmp,$base", 1234)
+    ldap_exop_refresh($link, "cn=tmp,$base", 1234)
 );
+
 ?>
 --CLEAN--
 <?php

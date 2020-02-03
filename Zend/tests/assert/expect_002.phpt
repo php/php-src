@@ -5,8 +5,10 @@ zend.assertions=1
 assert.exception=1
 --FILE--
 <?php
+
 assert(false);
 var_dump(true);
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught AssertionError: assert(false) in %sexpect_002.php:%d

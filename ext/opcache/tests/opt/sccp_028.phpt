@@ -10,10 +10,12 @@ opcache.preload=
 --FILE--
 <?php
 
-class Foo {
+class Foo
+{
     public int $bar = 1;
 }
-function test() {
+function test()
+{
     $foo = new Foo();
     $foo->bar = "10";
     var_dump($foo->bar);

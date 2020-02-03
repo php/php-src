@@ -5,15 +5,17 @@ opcache.enable=0
 --FILE--
 <?php
 
-function foo() : array {
-	try {
-		throw new Exception("xxxx");
-	} finally {
-		return null;
-	}
+function foo(): array
+{
+    try {
+        throw new Exception("xxxx");
+    } finally {
+        return null;
+    }
 }
 
 foo();
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Exception: xxxx in %s:%d

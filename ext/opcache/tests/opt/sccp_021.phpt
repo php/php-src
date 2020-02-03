@@ -9,22 +9,28 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-class A {
-	public function memleak($num_tokens) {
-		$queries = array();
-		for ( $i = 0; $i < $num_tokens; ++$i ) {
-			if ( 0 < $i )
-				$queries[$i] = $queries[$i - 1] . '&';
-			else
-				$queries[$i] = '';
 
-			$queries[$i] .= $query_token;
-		}
+class A
+{
+    public function memleak($num_tokens)
+    {
+        $queries = array();
+        for ($i = 0; $i < $num_tokens; ++$i) {
+            if (0 < $i) {
+                $queries[$i] = $queries[$i - 1] . '&';
+            } else {
+                $queries[$i] = '';
+            }
 
-		return;
-	}
+            $queries[$i] .= $query_token;
+        }
+
+        return;
+    }
 }
 ?>
 okey
+
+?>
 --EXPECT--
 okey

@@ -5,105 +5,108 @@ msgfmt creation failures icu >= 4.8
 --FILE--
 <?php
 
-function err($fmt) {
-	if(!$fmt) {
-		echo var_export(intl_get_error_message(), true)."\n";
-	}
+function err($fmt)
+{
+    if (!$fmt) {
+        echo var_export(intl_get_error_message(), true) . "\n";
+    }
 }
 
-function print_exception($e) {
-	echo "\n" . get_class($e) . ": " . $e->getMessage()
+function print_exception($e)
+{
+    echo "\n" . get_class($e) . ": " . $e->getMessage()
        . " in " . $e->getFile() . " on line " . $e->getLine() . "\n";
 }
 
-function crt($t, $l, $s) {
-	switch(true) {
-		case $t == "O":
-			try {
-				return new MessageFormatter($l, $s);
-			} catch (Throwable $e) {
-				print_exception($e);
-				return null;
-			}
-			break;
-		case $t == "C":
-			try {
-				return MessageFormatter::create($l, $s);
-			} catch (Throwable $e) {
-				print_exception($e);
-				return null;
-			}
-			break;
-		case $t == "P":
-			try {
-				return msgfmt_create($l, $s);
-			} catch (Throwable $e) {
-				print_exception($e);
-				return null;
-			}
-			break;
-	}
+function crt($t, $l, $s)
+{
+    switch (true) {
+        case $t == "O":
+            try {
+                return new MessageFormatter($l, $s);
+            } catch (Throwable $e) {
+                print_exception($e);
+                return null;
+            }
+            break;
+        case $t == "C":
+            try {
+                return MessageFormatter::create($l, $s);
+            } catch (Throwable $e) {
+                print_exception($e);
+                return null;
+            }
+            break;
+        case $t == "P":
+            try {
+                return msgfmt_create($l, $s);
+            } catch (Throwable $e) {
+                print_exception($e);
+                return null;
+            }
+            break;
+    }
 }
 
 $args = array(
-	array(null, null),
-	array("whatever", "{0,whatever}"),
-	array(array(), array()),
-	array("en", "{0,choice}"),
-	array("fr", "{0,"),
-	array("en_US", "\xD0"),
+    array(null, null),
+    array("whatever", "{0,whatever}"),
+    array(array(), array()),
+    array("en", "{0,choice}"),
+    array("fr", "{0,"),
+    array("en_US", "\xD0"),
 );
 
 try {
-	$fmt = new MessageFormatter();
+    $fmt = new MessageFormatter();
 } catch (TypeError $e) {
-	print_exception($e);
-	$fmt = null;
+    print_exception($e);
+    $fmt = null;
 }
 err($fmt);
 try {
-	$fmt = msgfmt_create();
+    $fmt = msgfmt_create();
 } catch (TypeError $e) {
-	print_exception($e);
-	$fmt = null;
+    print_exception($e);
+    $fmt = null;
 }
 err($fmt);
 try {
-	$fmt = MessageFormatter::create();
+    $fmt = MessageFormatter::create();
 } catch (TypeError $e) {
-	print_exception($e);
-	$fmt = null;
+    print_exception($e);
+    $fmt = null;
 }
 err($fmt);
 try {
-	$fmt = new MessageFormatter('en');
+    $fmt = new MessageFormatter('en');
 } catch (TypeError $e) {
-	print_exception($e);
-	$fmt = null;
+    print_exception($e);
+    $fmt = null;
 }
 err($fmt);
 try {
-	$fmt = msgfmt_create('en');
+    $fmt = msgfmt_create('en');
 } catch (TypeError $e) {
-	print_exception($e);
-	$fmt = null;
+    print_exception($e);
+    $fmt = null;
 }
 err($fmt);
 try {
-	$fmt = MessageFormatter::create('en');
+    $fmt = MessageFormatter::create('en');
 } catch (TypeError $e) {
-	print_exception($e);
-	$fmt = null;
+    print_exception($e);
+    $fmt = null;
 }
 err($fmt);
 
-foreach($args as $arg) {
-	$fmt = crt("O", $arg[0], $arg[1]);
-	err($fmt);
-	$fmt = crt("C", $arg[0], $arg[1]);
-	err($fmt);
-	$fmt = crt("P", $arg[0], $arg[1]);
-	err($fmt);
+foreach ($args as $arg) {
+    $fmt = crt("O", $arg[0], $arg[1]);
+    err($fmt);
+    $fmt = crt("C", $arg[0], $arg[1]);
+    err($fmt);
+    $fmt = crt("P", $arg[0], $arg[1]);
+    err($fmt);
 }
 
 ?>

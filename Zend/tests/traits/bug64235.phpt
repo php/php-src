@@ -23,12 +23,12 @@ trait TestTrait
 
 class TestChildClass extends TestParentClass
 {
-    use TestTrait
-    {
+    use TestTrait {
         TestTrait::method as methodAlias;
         TestParentClass::method insteadof TestTrait;
     }
 }
+
 ?>
 --EXPECTF--
 Fatal error: Class TestParentClass is not a trait, Only traits may be used in 'as' and 'insteadof' statements in %sbug64235.php on line %d

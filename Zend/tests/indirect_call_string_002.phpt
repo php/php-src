@@ -2,6 +2,7 @@
 Indirect call with empty class and/or method name.
 --FILE--
 <?php
+
 class TestClass
 {
     public static function __callStatic($method, array $args)
@@ -73,6 +74,7 @@ try {
 } catch (Error $e) {
     echo $e->getMessage() . "\n";
 }
+
 ?>
 --EXPECT--
 string(0) ""

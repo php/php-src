@@ -2,38 +2,46 @@
 Bug #45805 (Crash on throwing exception from error handler)
 --FILE--
 <?php
+
 class PHPUnit_Util_ErrorHandler
 {
     public static function handleError($errno, $errstr, $errfile, $errline)
     {
-        throw new RuntimeException;
+        throw new RuntimeException();
     }
 }
 
-class A {
-    public function getX() {
-        return NULL;
+class A
+{
+    public function getX()
+    {
+        return null;
     }
 }
 
-class B {
-    public function foo() {
-        $obj    = new A;
+class B
+{
+    public function foo()
+    {
+        $obj    = new A();
         $source = &$obj->getX();
     }
 
-    public function bar() {
+    public function bar()
+    {
         $m = new ReflectionMethod('B', 'foo');
         $m->invoke($this);
     }
 }
 
 set_error_handler(
-  array('PHPUnit_Util_ErrorHandler', 'handleError'), E_ALL
+    array('PHPUnit_Util_ErrorHandler', 'handleError'),
+    E_ALL
 );
 
-$o = new B;
+$o = new B();
 $o->bar();
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught RuntimeException in %sbug45805.php:%d

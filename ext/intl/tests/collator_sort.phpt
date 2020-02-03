@@ -16,28 +16,27 @@ $test_num = 1;
 /*
  * Sort arrays in the given list using specified locale.
  */
-function sort_arrays( $locale, $arrays, $sort_flag = Collator::SORT_REGULAR )
+function sort_arrays($locale, $arrays, $sort_flag = Collator::SORT_REGULAR)
 {
     $res_str = '';
 
-    $coll = ut_coll_create( $locale );
+    $coll = ut_coll_create($locale);
 
-    foreach( $arrays as $array )
-    {
+    foreach ($arrays as $array) {
         // Sort array values
-        $res_val = ut_coll_sort( $coll, $array, $sort_flag );
+        $res_val = ut_coll_sort($coll, $array, $sort_flag);
 
         // Concatenate the sorted array and function result
         // with output string.
-        $res_dump = "\n" . dump( $array ) .
-                    "\n Result: " . dump( $res_val );
+        $res_dump = "\n" . dump($array) .
+                    "\n Result: " . dump($res_val);
 
-		// Preppend test signature to output string
-        $md5 = md5( $res_dump );
+        // Preppend test signature to output string
+        $md5 = md5($res_dump);
 
         global $test_num;
 
-        $res_str .= "\n\n".
+        $res_str .= "\n\n" .
                     "Test $test_num.$md5:" .
                     $res_dump;
         ++$test_num;
@@ -67,7 +66,7 @@ function ut_main()
         array( 'y'  , 'k'  , 'i' )
     );
 
-    $res_str .= sort_arrays( 'en_US', $test_params );
+    $res_str .= sort_arrays('en_US', $test_params);
 
     $test_params = array(
         array( '100', '25' , '36'  ),
@@ -77,7 +76,7 @@ function ut_main()
     );
 
     // Sort in en_US locale with SORT_STRING flag
-    $res_str .= sort_arrays( 'en_US', $test_params, Collator::SORT_STRING );
+    $res_str .= sort_arrays('en_US', $test_params, Collator::SORT_STRING);
 
 
     // Sort a non-ASCII array using ru_RU locale.
@@ -86,20 +85,21 @@ function ut_main()
         array( 'аа', 'ааа' , 'а' )
     );
 
-    $res_str .= sort_arrays( 'ru_RU', $test_params );
+    $res_str .= sort_arrays('ru_RU', $test_params);
 
     // Sort an array using Lithuanian locale.
     $test_params = array(
         array( 'y'  , 'k'  , 'i' )
     );
 
-    $res_str .= sort_arrays( 'lt_LT', $test_params );
+    $res_str .= sort_arrays('lt_LT', $test_params);
 
     return $res_str;
 }
 
-include_once( 'ut_common.inc' );
+include_once('ut_common.inc');
 ut_run();
+
 ?>
 --EXPECT--
 Test 1.e8f1cd28133d79ecd660002f1c660d0e:

@@ -4,6 +4,7 @@ DatePeriod: Test getter
 date.timezone=UTC
 --FILE--
 <?php
+
 $start = new DateTime('2000-01-01 00:00:00', new DateTimeZone('Europe/Berlin'));
 $end   = new DateTime('2000-01-31 00:00:00', new DateTimeZone('UTC'));
 $interval = new DateInterval('P1D');

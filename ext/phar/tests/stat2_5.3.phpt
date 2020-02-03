@@ -7,6 +7,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
+
 Phar::interceptFileFuncs();
 var_dump(is_file(__FILE__));
 
@@ -31,6 +32,7 @@ $b->setStub('<?php
 include "phar://" . __FILE__ . "/foo/stat.php";
 __HALT_COMPILER();');
 include $fname3;
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>

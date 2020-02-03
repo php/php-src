@@ -2,6 +2,7 @@
 Bug #41528 (Classes extending ArrayObject do not serialize correctly)
 --FILE--
 <?php
+
 class ClassOne extends ArrayObject
 {
     public $a = 2;
@@ -17,6 +18,7 @@ $classOne = unserialize(serialize($classOne));
 
 var_dump($classOne);
 var_dump($classOne->a);
+
 ?>
 --EXPECT--
 object(ClassOne)#1 (2) {

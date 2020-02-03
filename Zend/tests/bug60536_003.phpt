@@ -3,30 +3,35 @@ Properties should be initialized correctly (relevant to #60536)
 --FILE--
 <?php
 
-class BaseWithPropA {
-  private $hello = 0;
+class BaseWithPropA
+{
+    private $hello = 0;
 }
 
-trait AHelloProperty {
-  private $hello = 0;
+trait AHelloProperty
+{
+    private $hello = 0;
 }
 
-class BaseWithTPropB {
+class BaseWithTPropB
+{
     use AHelloProperty;
 }
 
-class SubclassA extends BaseWithPropA {
+class SubclassA extends BaseWithPropA
+{
     use AHelloProperty;
 }
 
-class SubclassB extends BaseWithTPropB {
+class SubclassB extends BaseWithTPropB
+{
     use AHelloProperty;
 }
 
-$a = new SubclassA;
+$a = new SubclassA();
 var_dump($a);
 
-$b = new SubclassB;
+$b = new SubclassB();
 var_dump($b);
 
 ?>

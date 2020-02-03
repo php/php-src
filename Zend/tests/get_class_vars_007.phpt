@@ -3,14 +3,16 @@ get_class_vars(): Testing with static properties
 --FILE--
 <?php
 
-class A {
-	static public $a, $aa;
-	static private $b, $bb;
-	static protected $c, $cc;
+class A
+{
+    public static $a, $aa;
+    private static $b, $bb;
+    protected static $c, $cc;
 
-	static public function test() {
-		var_dump(get_class_vars(__CLASS__));
-	}
+    public static function test()
+    {
+        var_dump(get_class_vars(__CLASS__));
+    }
 }
 
 var_dump(get_class_vars('A'));

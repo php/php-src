@@ -23,23 +23,21 @@ function ut_main()
         '',
         'root',
         'uk@currency=EURO',
-	'12345678911131517192123252729313335373941434547495153575961636567697173757779818385878991939597991234567891113151719212325272931333537394143454749515357596163656769717375777981838587899193959799'
+    '12345678911131517192123252729313335373941434547495153575961636567697173757779818385878991939597991234567891113151719212325272931333537394143454749515357596163656769717375777981838587899193959799'
     );
 
-    foreach( $locales as $locale )
-    {
+    foreach ($locales as $locale) {
         // Create Collator with the current locale.
-        $coll = ut_coll_create( $locale );
-        if( !is_object($coll) )
-        {
+        $coll = ut_coll_create($locale);
+        if (!is_object($coll)) {
             $res_str .= "Error creating collator with '$locale' locale: " .
                  intl_get_error_message() . "\n";
             continue;
         }
 
         // Get the requested, valid and actual locales.
-        $vloc = ut_coll_get_locale( $coll, Locale::VALID_LOCALE );
-        $aloc = ut_coll_get_locale( $coll, Locale::ACTUAL_LOCALE );
+        $vloc = ut_coll_get_locale($coll, Locale::VALID_LOCALE);
+        $aloc = ut_coll_get_locale($coll, Locale::ACTUAL_LOCALE);
 
         // Show them.
         $res_str .= "Locale: '$locale'\n" .
@@ -51,7 +49,7 @@ function ut_main()
     return $res_str;
 }
 
-include_once( 'ut_common.inc' );
+include_once('ut_common.inc');
 ut_run();
 
 ?>

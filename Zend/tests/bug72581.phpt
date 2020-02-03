@@ -10,6 +10,7 @@ $a = serialize($e);
 $b = unserialize($a);
 
 var_dump($b->__toString());
+
 ?>
 --EXPECTF--
 string(%s) "Exception: aaa in %sbug72581.php:%d

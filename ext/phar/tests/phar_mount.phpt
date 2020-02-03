@@ -6,6 +6,7 @@ Phar: Phar::mount
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
@@ -37,17 +38,18 @@ set_include_path("phar://" . __FILE__);
 include "index.php";
 __HALT_COMPILER();');
 try {
-include $fname2;
+    include $fname2;
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
 try {
-Phar::mount($pname . '/oops', '/home/oops/../../etc/passwd:');
+    Phar::mount($pname . '/oops', '/home/oops/../../etc/passwd:');
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
 Phar::mount($pname . '/testit2', $pname . '/testit1');
-echo substr($a['testit2']->getContent(),0, 50),"\n";
+echo substr($a['testit2']->getContent(), 0, 50),"\n";
+
 ?>
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

@@ -3,15 +3,22 @@ Trying to access a protected trait method
 --FILE--
 <?php
 
-trait foo {
-	public function test() { return 3; }
+trait foo
+{
+    public function test()
+    {
+        return 3;
+    }
 }
 
-class bar {
-	use foo { test as protected; }
+class bar
+{
+    use foo {
+        test as protected;
+    }
 }
 
-$x = new bar;
+$x = new bar();
 var_dump($x->test());
 
 ?>

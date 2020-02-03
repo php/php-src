@@ -3,12 +3,16 @@ It's not possible to turn a variadic function into a non-variadic one
 --FILE--
 <?php
 
-interface DB {
+interface DB
+{
     public function query($query, ...$params);
 }
 
-class MySQL implements DB {
-    public function query($query, $params) { }
+class MySQL implements DB
+{
+    public function query($query, $params)
+    {
+    }
 }
 
 ?>

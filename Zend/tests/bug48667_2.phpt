@@ -3,7 +3,10 @@ Bug #48667 (Implementing both iterator and iteratoraggregate)
 --FILE--
 <?php
 
-abstract class A implements IteratorAggregate, Iterator { }
+abstract class A implements IteratorAggregate, Iterator
+{
+
+}
 
 ?>
 --EXPECTF--

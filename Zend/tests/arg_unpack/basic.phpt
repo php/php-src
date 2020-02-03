@@ -3,19 +3,23 @@ Basic argument unpacking
 --FILE--
 <?php
 
-function test(...$args) {
+function test(...$args)
+{
     var_dump($args);
 }
 
-function test2($arg1, $arg2, $arg3 = null) {
+function test2($arg1, $arg2, $arg3 = null)
+{
     var_dump($arg1, $arg2, $arg3);
 }
 
-function getArray($array) {
+function getArray($array)
+{
     return $array;
 }
 
-function arrayGen($array) {
+function arrayGen($array)
+{
     foreach ($array as $element) {
         yield $element;
     }

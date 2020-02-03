@@ -25,6 +25,7 @@ var_dump(shm_get_var($s, 1));
 
 shm_remove($s);
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Warning: shm_remove_var(): Variable key -10 doesn't exist in %s006.php on line %d

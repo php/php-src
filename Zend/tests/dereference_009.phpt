@@ -7,8 +7,9 @@ error_reporting(E_ALL);
 
 $a = array();
 
-function &a() {
-	return $GLOBALS['a'];
+function &a()
+{
+    return $GLOBALS['a'];
 }
 
 var_dump($h =& a());

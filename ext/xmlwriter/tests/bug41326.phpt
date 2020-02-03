@@ -6,6 +6,7 @@ if (!extension_loaded("xmlwriter")) die("skip");
 ?>
 --FILE--
 <?php
+
 $xml = new XmlWriter();
 $xml->openMemory();
 $xml->setIndent(true);
@@ -28,12 +29,13 @@ $xw->startDocument();
 $xw->startElementNS('test', 'test', 'urn:x-test:');
 $xw->writeElementNS('test', 'foo', null, '');
 $xw->writeElementNS(null, 'bar', 'urn:x-test:', '');
-$xw->writeElementNS(null, 'bar', 'urn:x-test:', NULL);
+$xw->writeElementNS(null, 'bar', 'urn:x-test:', null);
 $xw->writeElementNS(null, 'bar', 'urn:x-test:');
 $xw->writeElementNS(null, 'bar', '', '');
 $xw->endElement();
 $xw->endDocument();
 print $xw->flush(true);
+
 ?>
 --EXPECTF--
 <?xml version="1.0"?>

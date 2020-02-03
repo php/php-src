@@ -12,7 +12,9 @@ if ($test === false) {
 ?>
 --FILE--
 <?php
-	var_dump(iconv_substr('x', 0, 1, 'UTF-8'));
+
+    var_dump(iconv_substr('x', 0, 1, 'UTF-8'));
+
 ?>
 --EXPECT--
 string(1) "x"

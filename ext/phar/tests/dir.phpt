@@ -7,6 +7,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.1.phar.php';
@@ -49,6 +50,7 @@ ini_set('phar.readonly', 0);
 rmdir($pname);
 rmdir($pname . '/');
 mkdir($pname . '/');
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

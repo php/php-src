@@ -2,20 +2,24 @@
 Test __get on unset typed property must fail properly
 --FILE--
 <?php
+
 declare(strict_types=1);
 
-class Foo {
-	public int $bar;
+class Foo
+{
+    public int $bar;
 
-	public function __get($name) {
-		var_dump($name);
-	}
+    public function __get($name)
+    {
+        var_dump($name);
+    }
 }
 
 $foo = new Foo();
 
 unset($foo->bar);
 var_dump($foo->bar);
+
 ?>
 --EXPECTF--
 string(3) "bar"

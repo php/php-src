@@ -3,15 +3,19 @@ Bug #74954 (crash after update of generator yielding from finished generator)
 --FILE--
 <?php
 
-function from() {
+function from()
+{
         yield 1;
         throw new Exception();
 }
 
-function gen($gen) {
-        try {
-                var_dump(yield from $gen);
-        } catch (Exception $e) { print "Caught exception!\n$e\n"; }
+function gen($gen)
+{
+    try {
+            var_dump(yield from $gen);
+    } catch (Exception $e) {
+        print "Caught exception!\n$e\n";
+    }
 }
 
 $gen = from();
@@ -23,10 +27,10 @@ foreach ($gens as $g) {
 }
 
 do {
-        foreach ($gens as $i => $g) {
-                $g->next();
-        }
-} while($gens[0]->valid());
+    foreach ($gens as $i => $g) {
+            $g->next();
+    }
+} while ($gens[0]->valid());
 
 ?>
 --EXPECTF--

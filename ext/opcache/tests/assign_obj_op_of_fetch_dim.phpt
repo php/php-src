@@ -3,7 +3,8 @@ Type inference for $ary[$idx]->prop +=
 --FILE--
 <?php
 
-function test() {
+function test()
+{
     $ary = [];
     $ary[0]->y += 2;
     var_dump(is_object($ary[0]));

@@ -30,8 +30,8 @@ if (function_exists("opcache_get_status")) {
     }
 }
 
-file_put_contents($pname .'/a.php', "modified!\n");
-file_put_contents($pname .'/b.php', "another!\n");
+file_put_contents($pname . '/a.php', "modified!\n");
+file_put_contents($pname . '/b.php', "another!\n");
 
 $phar = new Phar($fname);
 $sig2 = $phar->getSignature();

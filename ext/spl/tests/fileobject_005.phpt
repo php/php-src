@@ -8,10 +8,10 @@ Mark Ammann
 
 set_include_path(dirname(__DIR__));
 
-$path = __DIR__.DIRECTORY_SEPARATOR.'fileobject_005.txt';
+$path = __DIR__ . DIRECTORY_SEPARATOR . 'fileobject_005.txt';
 touch($path);
 
-$fo = new SplFileObject('tests'.DIRECTORY_SEPARATOR.'fileobject_005.txt', 'w+', true);
+$fo = new SplFileObject('tests' . DIRECTORY_SEPARATOR . 'fileobject_005.txt', 'w+', true);
 $fo->fwrite("blahlubba");
 var_dump($fo->ftruncate(4));
 

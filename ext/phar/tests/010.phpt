@@ -6,6 +6,7 @@ Phar::mapPhar buffer overrun
 phar.require_hash=0
 --FILE--
 <?php
+
 $file = "<?php
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
@@ -17,11 +18,12 @@ $file .= pack('VVnVV', strlen($manifest), 1, 0x1000, 0x00000000, 3) . 'hio' . pa
 
 file_put_contents(__DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php', $file);
 try {
-include __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
-echo file_get_contents('phar://hio/a');
+    include __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
+    echo file_get_contents('phar://hio/a');
 } catch (Exception $e) {
-echo $e->getMessage();
+    echo $e->getMessage();
 }
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

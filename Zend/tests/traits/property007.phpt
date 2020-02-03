@@ -3,29 +3,35 @@ Introducing new private variables of the same name in a subclass is ok, and does
 --FILE--
 <?php
 
-class Base {
-  protected $hello;
+class Base
+{
+    protected $hello;
 }
 
-trait THello1 {
-  protected $hello;
+trait THello1
+{
+    protected $hello;
 }
 
 // Protected and public are handle more strict with a warning then what is
 // expected from normal inheritance since they can have easier coliding semantics
 echo "PRE-CLASS-GUARD\n";
-class SameNameInSubClassProducesNotice extends Base {
+class SameNameInSubClassProducesNotice extends Base
+{
     use THello1;
 }
 echo "POST-CLASS-GUARD\n";
 
 // now the same with a class that defines the property itself, too.
 
-class Notice extends Base {
+class Notice extends Base
+{
     use THello1;
+
     protected $hello;
 }
 echo "POST-CLASS-GUARD2\n";
+
 ?>
 --EXPECT--
 PRE-CLASS-GUARD

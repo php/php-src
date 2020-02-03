@@ -7,6 +7,7 @@ if (!extension_loaded('intl'))
 ?>
 --FILE--
 <?php
+
 $text = "{a} {b} {c} {d} {e} {f} {g} {h} {i} {j} {k} {l}";
 
 $vars = array(

@@ -7,12 +7,14 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 $i = 1;
 $x1 = "okey";
 myFunction(${"x$i"});
 
-function myFunction($x) {
-	var_dump($x);
+function myFunction($x)
+{
+    var_dump($x);
 }
 
 ?>

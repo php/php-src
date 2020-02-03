@@ -16,29 +16,28 @@ $test_num = 1;
 /*
  * Sort arrays in the given list using specified locale.
  */
-function sort_arrays( $locale, $arrays )
+function sort_arrays($locale, $arrays)
 {
     $res_str = '';
 
-    $coll = ut_coll_create( $locale );
+    $coll = ut_coll_create($locale);
 
-    foreach( $arrays as $array )
-    {
+    foreach ($arrays as $array) {
         // Sort array values
-        $res_val = ut_coll_sort_with_sort_keys( $coll, $array );
+        $res_val = ut_coll_sort_with_sort_keys($coll, $array);
 
         // Concatenate the sorted array and function result
         // with output string.
-        $res_dump = "\n" . dump( $array ) .
-                    "\n Result: " . dump( $res_val );
+        $res_dump = "\n" . dump($array) .
+                    "\n Result: " . dump($res_val);
 
 
         // Preppend test signature to output string
-        $md5 = md5( $res_dump );
+        $md5 = md5($res_dump);
 
         global $test_num;
 
-        $res_str .= "\n\n".
+        $res_str .= "\n\n" .
                     "Test $test_num.$md5:" .
                     $res_dump;
         ++$test_num;
@@ -67,7 +66,7 @@ function ut_main()
         array( 'y'  , 'i'  , 'k'   )
     );
 
-    $res_str .= sort_arrays( 'en_US', $test_params );
+    $res_str .= sort_arrays('en_US', $test_params);
 
     // Sort a non-ASCII array using ru_RU locale.
     $test_params = array(
@@ -75,7 +74,7 @@ function ut_main()
         array( 'аа', 'ааа', 'а' )
     );
 
-    $res_str .= sort_arrays( 'ru_RU', $test_params );
+    $res_str .= sort_arrays('ru_RU', $test_params);
 
     // Array with data for sorting.
     $test_params = array(
@@ -83,13 +82,14 @@ function ut_main()
     );
 
     // Sort an array using Lithuanian locale.
-    $res_str .= sort_arrays( 'lt_LT', $test_params );
+    $res_str .= sort_arrays('lt_LT', $test_params);
 
     return $res_str . "\n";
 }
 
-include_once( 'ut_common.inc' );
+include_once('ut_common.inc');
 ut_run();
+
 ?>
 --EXPECT--
 Test 1.e8f1cd28133d79ecd660002f1c660d0e:

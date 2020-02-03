@@ -4,6 +4,7 @@ GC 037: gc_status()
 zend.enable_gc = 1
 --FILE--
 <?php
+
 $a = array();
 $a[] =& $a;
 unset($a);
@@ -11,6 +12,8 @@ var_dump(gc_status());
 gc_collect_cycles();
 gc_collect_cycles();
 var_dump(gc_status());
+
+?>
 --EXPECT--
 array(4) {
   ["runs"]=>

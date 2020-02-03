@@ -13,10 +13,13 @@ if(substr(PHP_OS, 0, 3) != 'WIN' ) {
 ?>
 --FILE--
 <?php
+
 $phar = new Phar("A:A:.phar");
 $phar["hello_habr.txt"] = '<? Hello Habr!?>';
 ?>
 DONE
+
+?>
 --EXPECTF--
 Fatal error: Uncaught UnexpectedValueException: Cannot create phar 'A:A:.phar', file extension (or combination) not recognised or the directory does not exist in %sbug71625.php:%d
 Stack trace:

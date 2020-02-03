@@ -4,6 +4,7 @@ Test ctype_cntrl() function : usage variations - Different strings
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 /* Prototype  : bool ctype_cntrl(mixed $c)
  * Description: Checks for control character(s)
  * Source code: ext/ctype/ctype.c
@@ -54,13 +55,14 @@ $values = array(
 
 // loop through each element of $values to test behaviour of ctype_cntrl()
 $iterator = 1;
-foreach($values as $value) {
+foreach ($values as $value) {
       echo "\n-- Iteration $iterator --\n";
-      var_dump( ctype_cntrl($value) );
+      var_dump(ctype_cntrl($value));
       $iterator++;
 };
 
 setlocale(LC_CTYPE, $orig);
+
 ?>
 --EXPECT--
 *** Testing ctype_cntrl() : usage variations ***

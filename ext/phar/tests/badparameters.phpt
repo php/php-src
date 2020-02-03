@@ -6,6 +6,7 @@ Phar: bad parameters to various methods
 phar.readonly=0
 --FILE--
 <?php
+
 ini_set('phar.readonly', 1);
 
 try {
@@ -29,12 +30,12 @@ try {
     echo $e->getMessage(), "\n";
 }
 try {
-	$a = new Phar(array());
+    $a = new Phar(array());
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-	$a = new Phar(__DIR__ . '/files/frontcontroller10.phar');
+    $a = new Phar(__DIR__ . '/files/frontcontroller10.phar');
 } catch (PharException $e) {
     echo $e->getMessage(), "\n";
 }
@@ -49,12 +50,12 @@ try {
     echo $e->getMessage(), "\n";
 }
 try {
-	$b = new PharData(__DIR__ . '/whatever.tar');
+    $b = new PharData(__DIR__ . '/whatever.tar');
 } catch (PharException $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-	$c = new PharData(__DIR__ . '/whatever.zip');
+    $c = new PharData(__DIR__ . '/whatever.zip');
 } catch (PharException $e) {
     echo $e->getMessage(), "\n";
 }
@@ -216,7 +217,7 @@ try {
 }
 ini_set('phar.readonly', 0);
 try {
-    $a->setMetadata(1,2);
+    $a->setMetadata(1, 2);
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
@@ -226,6 +227,7 @@ try {
 } catch (Exception $e) {
     echo $e->getMessage() . "\n";
 }
+
 ?>
 --EXPECTF--
 Phar::mungServer() expects parameter 1 to be array, string given

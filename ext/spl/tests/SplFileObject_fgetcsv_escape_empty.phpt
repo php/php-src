@@ -2,17 +2,19 @@
 SplFileObject::fgetcsv() with empty $escape
 --FILE--
 <?php
+
 $contents = <<<EOS
 "cell1","cell2\\","cell3","cell4"
 "\\\\\\line1
 line2\\\\\\"
 EOS;
-$file = new SplTempFileObject;
+$file = new SplTempFileObject();
 $file->fwrite($contents);
 $file->rewind();
 while (($data = $file->fgetcsv(',', '"', ''))) {
     print_r($data);
 }
+
 ?>
 --EXPECT--
 Array

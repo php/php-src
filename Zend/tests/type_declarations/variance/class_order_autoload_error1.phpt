@@ -3,22 +3,29 @@ Variance error in the presence of autoloading (1)
 --FILE--
 <?php
 
-spl_autoload_register(function($class) {
+spl_autoload_register(function ($class) {
     if ($class === 'A') {
-        class A {
-            public function method() : C {}
+        class A
+        {
+            public function method(): C
+            {
+            }
         }
-    } else if ($class == 'B') {
-        class B extends A {
-            public function method() : B {}
+    } elseif ($class == 'B') {
+        class B extends A
+        {
+            public function method(): B
+            {
+            }
         }
     } else {
-        class C extends B {
+        class C extends B
+        {
         }
     }
 });
 
-$b = new B;
+$b = new B();
 
 ?>
 --EXPECTF--

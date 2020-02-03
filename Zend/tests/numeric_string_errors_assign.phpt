@@ -4,7 +4,8 @@ Invalid numeric string E_WARNINGs and E_NOTICEs, combined assignment operations
 <?php
 
 // prevents CT eval
-function foxcache($val) {
+function foxcache($val)
+{
     return [$val][0];
 }
 
@@ -105,6 +106,7 @@ var_dump($a);
 $a = foxcache(139);
 $a ^= "reprehenderit";
 var_dump($a);
+
 ?>
 --EXPECTF--
 Notice: A non well formed numeric value encountered in %s on line %d

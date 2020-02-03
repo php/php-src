@@ -4,12 +4,12 @@ SplFixedArray::__construct() with string passed as parameter.
 PHPNW Test Fest 2009 - Jordan Hatch
 --FILE--
 <?php
-try {
-	$array = new SplFixedArray( "string" );
-} catch (TypeError $iae) {
-	echo "Ok - ".$iae->getMessage().PHP_EOL;
-}
 
+try {
+    $array = new SplFixedArray("string");
+} catch (TypeError $iae) {
+    echo "Ok - " . $iae->getMessage() . PHP_EOL;
+}
 
 ?>
 --EXPECT--

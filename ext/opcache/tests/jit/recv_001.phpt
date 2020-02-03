@@ -14,10 +14,11 @@ opcache.protect_memory=1
 
 function test(array $args, $short_options, $long_options = null)
 {
-	echo "okey";
+    echo "okey";
 }
 
 test(array(), "d:e", 222, 3434);
 
+?>
 --EXPECT--
 okey

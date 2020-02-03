@@ -3,10 +3,12 @@ Bug #52484.2 (__set() ignores setting properties with empty names)
 --FILE--
 <?php
 
-class A {
-	function __set($prop, $val) {
-		$this->$prop = $val;
-	}
+class A
+{
+    function __set($prop, $val)
+    {
+        $this->$prop = $val;
+    }
 }
 
 $a = new A();

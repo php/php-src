@@ -11,25 +11,28 @@ if ($zend_mm_enabled === "0") {
 ?>
 --FILE--
 <?php
+
 class DestructableObject
 {
-        public function __destruct()
-        {
-                DestructableObject::__destruct();
-        }
+    public function __destruct()
+    {
+            DestructableObject::__destruct();
+    }
 }
 class DestructorCreator
 {
-        public function __destruct()
-        {
-                $this->test = new DestructableObject;
-        }
+    public function __destruct()
+    {
+            $this->test = new DestructableObject();
+    }
 }
 class Test
 {
-        public static $mystatic;
+    public static $mystatic;
 }
 $x = new Test();
 Test::$mystatic = new DestructorCreator();
+
+?>
 --EXPECTF--
 Fatal error: Allowed memory size of %s bytes exhausted%s(tried to allocate %s bytes) in %s on line %d

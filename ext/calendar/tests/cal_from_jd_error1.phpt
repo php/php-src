@@ -6,11 +6,13 @@ edgarsandi - <edgar.r.sandi@gmail.com>
 <?php include 'skipif.inc'; ?>
 --FILE--
 <?php
+
 try {
     cal_from_jd(1748326, -1);
 } catch (ValueError $ex) {
     echo "{$ex->getMessage()}\n";
 }
+
 ?>
 --EXPECT--
 Invalid calendar ID: -1

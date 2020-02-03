@@ -5,13 +5,20 @@ Trait delayed variance check fails
 
 // Taken from bug #78989.
 
-class X {
-    function method($a): A {}
+class X
+{
+    function method($a): A
+    {
+    }
 }
-trait T {
-    function method($r): B {}
+trait T
+{
+    function method($r): B
+    {
+    }
 }
-class U extends X {
+class U extends X
+{
     use T;
 }
 

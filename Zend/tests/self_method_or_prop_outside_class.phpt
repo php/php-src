@@ -3,7 +3,7 @@ Accessing self:: properties or methods outside a class
 --FILE--
 <?php
 
-$fn = function() {
+$fn = function () {
     $str = "foo";
     try {
         self::${$str . "bar"};

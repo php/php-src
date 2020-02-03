@@ -30,6 +30,7 @@ print_r($priorityQueue->top());
 echo "EXTR_DATA",PHP_EOL;
 $priorityQueue->setExtractFlags(SplPriorityQueue::EXTR_DATA);
 echo "value: ",$priorityQueue->top(),PHP_EOL;
+
 ?>
 --EXPECT--
 int(1)

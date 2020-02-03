@@ -3,7 +3,9 @@ Bug #77360: class_uses causes segfault
 --FILE--
 <?php
 
-class foobar {}
+class foobar
+{
+}
 $str = "foo";
 $str .= "bar";
 var_dump(class_uses($str, false));

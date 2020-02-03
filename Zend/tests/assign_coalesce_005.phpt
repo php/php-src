@@ -3,8 +3,10 @@ Coalesce assign (??=): Cannot reassign $this
 --FILE--
 <?php
 
-class Test {
-    public function foobar() {
+class Test
+{
+    public function foobar()
+    {
         $this ??= 123;
     }
 }

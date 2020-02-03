@@ -7,11 +7,13 @@ DBA TCADB handler test
 ?>
 --FILE--
 <?php
+
     $lock_flag = 'l';
-    $db_filename = $db_file = __DIR__ .'/test0.tch';
+    $db_filename = $db_file = __DIR__ . '/test0.tch';
     @unlink($db_filename);
-    @unlink($db_filename.'.lck');
-	require_once __DIR__ .'/dba_handler.inc';
+    @unlink($db_filename . '.lck');
+    require_once __DIR__ . '/dba_handler.inc';
+
 ?>
 --CLEAN--
 <?php

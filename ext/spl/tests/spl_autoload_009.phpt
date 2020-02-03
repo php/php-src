@@ -7,14 +7,14 @@ include_path=.
 
 function my_autoload($name)
 {
-	require $name . '.class.inc';
-	var_dump(class_exists($name));
+    require $name . '.class.inc';
+    var_dump(class_exists($name));
 }
 
 spl_autoload_register("spl_autoload");
 spl_autoload_register("my_autoload");
 
-$obj = new testclass;
+$obj = new testclass();
 
 ?>
 --EXPECTF--

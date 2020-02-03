@@ -3,9 +3,10 @@ class constants basic tests
 --FILE--
 <?php
 
-class test {
-	const val = "string";
-	const val2 = 1;
+class test
+{
+    const val = "string";
+    const val2 = 1;
 }
 
 var_dump(test::val);
@@ -14,6 +15,7 @@ var_dump(test::val2);
 var_dump(test::val3);
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 string(6) "string"

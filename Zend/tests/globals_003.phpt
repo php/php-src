@@ -5,28 +5,30 @@ variables_order="egpcs"
 --FILE--
 <?php
 
-class test {
+class test
+{
 
-	static function bar() {
+    static function bar()
+    {
 
-		var_dump(isset($_SERVER));
-		var_dump(empty($_SERVER));
-		var_dump(gettype($_SERVER));
-		var_dump(count($_SERVER));
+        var_dump(isset($_SERVER));
+        var_dump(empty($_SERVER));
+        var_dump(gettype($_SERVER));
+        var_dump(count($_SERVER));
 
-		var_dump($_SERVER['PHP_SELF']);
-		unset($_SERVER['PHP_SELF']);
-		var_dump($_SERVER['PHP_SELF']);
+        var_dump($_SERVER['PHP_SELF']);
+        unset($_SERVER['PHP_SELF']);
+        var_dump($_SERVER['PHP_SELF']);
 
-		unset($_SERVER);
-		var_dump($_SERVER);
-
-	}
+        unset($_SERVER);
+        var_dump($_SERVER);
+    }
 }
 
 test::bar();
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 bool(true)

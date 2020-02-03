@@ -9,8 +9,8 @@ if (!extension_loaded("xmlwriter")) die("skip");
 
 $xw = new XMLWriter();
 $xw->openMemory();
-$xw->setIndent(TRUE);
-$xw->startDocument(NULL, "UTF-8");
+$xw->setIndent(true);
+$xw->startDocument(null, "UTF-8");
 $xw->writeDtdElement('sxe', '(elem1+, elem11, elem22*)');
 $xw->writeDtdAttlist('sxe', 'id     CDATA  #implied');
 $xw->startDtdElement('elem1');
@@ -24,6 +24,7 @@ $xw->endDocument();
 // Force to write and empty the buffer
 $output = $xw->flush(true);
 print $output;
+
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>

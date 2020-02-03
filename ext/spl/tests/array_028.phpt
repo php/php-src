@@ -2,6 +2,7 @@
 ArrayObject/Iterator on array with NUL bytes
 --FILE--
 <?php
+
 $array = [
     "\0foo" => "bar",
 ];
@@ -20,6 +21,7 @@ $obj = new ArrayObject($it);
 foreach ($obj as $v) {
     var_dump($v);
 }
+
 ?>
 --EXPECT--
 string(3) "bar"

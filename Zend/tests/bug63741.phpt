@@ -2,7 +2,9 @@
 Bug #63741 (Crash when autoloading from spl)
 --FILE--
 <?php
-file_put_contents(__DIR__."/bug63741.tmp.php",
+
+file_put_contents(
+    __DIR__ . "/bug63741.tmp.php",
 <<<'EOT'
 <?php
 if (isset($autoloading))
@@ -41,7 +43,8 @@ else
 EOT
 );
 
-include __DIR__."/bug63741.tmp.php";
+include __DIR__ . "/bug63741.tmp.php";
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__."/bug63741.tmp.php"); ?>

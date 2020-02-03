@@ -2,6 +2,7 @@
 Bug #55135 (Array keys are no longer type casted in unset())
 --FILE--
 <?php
+
 // This fails.
 $array = array(1 => 2);
 $a = "1";
@@ -22,6 +23,7 @@ $array = array(1 => 2);
 
 unset($array["1"]);
 print_r($array);
+
 ?>
 --EXPECT--
 Array

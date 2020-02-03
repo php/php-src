@@ -3,35 +3,40 @@ Bug #50383 (Exceptions thrown in __call / __callStatic do not include file and l
 --FILE--
 <?php
 
-class myClass {
-	public static function __callStatic($method, $args) {
-		throw new Exception("Missing static method '$method'\n");
-	}
-	public function __call($method, $args) {
-		throw new Exception("Missing method '$method'\n");
-	}
+class myClass
+{
+    public static function __callStatic($method, $args)
+    {
+        throw new Exception("Missing static method '$method'\n");
+    }
+    public function __call($method, $args)
+    {
+        throw new Exception("Missing method '$method'\n");
+    }
 }
 
-function thrower() {
-	myClass::ThrowException();
+function thrower()
+{
+    myClass::ThrowException();
 }
-function thrower2() {
-	$x = new myClass;
-	$x->foo();
-}
-
-try {
-	thrower();
-} catch(Exception $e) {
-	print $e->getMessage();
-	print_r($e->getTrace());
+function thrower2()
+{
+    $x = new myClass();
+    $x->foo();
 }
 
 try {
-	thrower2();
+    thrower();
 } catch (Exception $e) {
-	print $e->getMessage();
-	print_r($e->getTrace());
+    print $e->getMessage();
+    print_r($e->getTrace());
+}
+
+try {
+    thrower2();
+} catch (Exception $e) {
+    print $e->getMessage();
+    print_r($e->getTrace());
 }
 
 ?>

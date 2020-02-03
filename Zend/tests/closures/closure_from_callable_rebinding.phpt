@@ -3,17 +3,20 @@ Testing Closure::fromCallable() functionality: Rebinding
 --FILE--
 <?php
 
-class A {
-    public function method() {
+class A
+{
+    public function method()
+    {
         var_dump($this);
     }
 }
 
-class B {
+class B
+{
 }
 
-$fn = Closure::fromCallable([new A, 'method']);
-$fn->call(new B);
+$fn = Closure::fromCallable([new A(), 'method']);
+$fn->call(new B());
 
 ?>
 --EXPECTF--

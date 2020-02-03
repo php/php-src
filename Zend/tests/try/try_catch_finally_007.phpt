@@ -4,12 +4,14 @@ Try catch finally (goto in try/catch block)
 adoy
 --FILE--
 <?php
-function foo($ret = FALSE) {
+
+function foo($ret = false)
+{
     try {
         try {
             do {
                 goto label;
-            } while(0);
+            } while (0);
             foreach (array() as $val) {
                 continue;
             }
@@ -19,15 +21,17 @@ function foo($ret = FALSE) {
         }
     } catch (Exception $e) {
         goto local;
-local:
+        local:
         var_dump("caught");
-        if ($ret) return "return";
+        if ($ret) {
+            return "return";
+        }
     } finally {
-       var_dump("finally2");
+        var_dump("finally2");
     }
 
-label:
-   var_dump("label");
+    label:
+    var_dump("label");
 }
 
 var_dump(foo());

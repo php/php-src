@@ -2,71 +2,75 @@
 Bug #40833 (Crash when using unset() on an ArrayAccess object retrieved via __get)
 --FILE--
 <?php
-	class entity
-	{
-		private $data;
-		private $modified;
 
-		function __get($name)
-		{
-			if ( isset($this->data[$name]) )
-				return $this->data[$name];
-			else
-				return $this->data[$name] = new set($this);
-		}
+class entity
+{
+    private $data;
+    private $modified;
 
-		function __set($name, $value)
-		{
-			$this->modified[$name] = $value;
-		}
-	}
+    function __get($name)
+    {
+        if (isset($this->data[$name])) {
+            return $this->data[$name];
+        } else {
+            return $this->data[$name] = new set($this);
+        }
+    }
 
-	class set implements ArrayAccess
-	{
-		private $entity;
+    function __set($name, $value)
+    {
+        $this->modified[$name] = $value;
+    }
+}
 
-		function __construct($entity)
-		{
-			$this->entity = $entity;
-			$this->entity->whatever = $this;
-		}
+class set implements ArrayAccess
+{
+    private $entity;
 
-		function clear() {
-			$this->entity->whatever = null;
-		}
+    function __construct($entity)
+    {
+        $this->entity = $entity;
+        $this->entity->whatever = $this;
+    }
 
-		function offsetUnset($offset)
-		{
-			$this->clear();
-//			$this->entity->{$this->name} = null;
-		}
+    function clear()
+    {
+        $this->entity->whatever = null;
+    }
 
-		function offsetSet($offset, $value)
-		{
-		}
+    function offsetUnset($offset)
+    {
+        $this->clear();
+//          $this->entity->{$this->name} = null;
+    }
 
-		function offsetGet($offset)
-		{
-			return 'Bogus ';
-		}
+    function offsetSet($offset, $value)
+    {
+    }
 
-		function offsetExists($offset)
-		{
-		}
-	}
+    function offsetGet($offset)
+    {
+        return 'Bogus ';
+    }
 
-	$entity = new entity();
-	echo($entity->whatever[0]);
+    function offsetExists($offset)
+    {
+    }
+}
 
-	//This will crash
-//	$entity->whatever->clear();
-	unset($entity->whatever[0]);
+    $entity = new entity();
+    echo($entity->whatever[0]);
 
-	//This will not crash (comment previous & uncomment this to test
-//	$test = $entity->whatever; unset($test[0]);
+    //This will crash
+//  $entity->whatever->clear();
+    unset($entity->whatever[0]);
 
-	echo($entity->whatever[0]);
-	echo "ok\n";
+    //This will not crash (comment previous & uncomment this to test
+//  $test = $entity->whatever; unset($test[0]);
+
+    echo($entity->whatever[0]);
+    echo "ok\n";
+
 ?>
 --EXPECT--
 Bogus Bogus ok

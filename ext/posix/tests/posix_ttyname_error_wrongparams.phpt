@@ -19,12 +19,14 @@ PHP Testfest Berlin 2009-05-10
 ?>
 --FILE--
 <?php
+
 var_dump(posix_ttyname(0)); // param not a resource
 try {
     var_dump(posix_ttyname(curl_init())); // wrong resource type
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
+
 ?>
 --EXPECT--
 bool(false)

@@ -3,17 +3,20 @@ Bug #65161: Generator + autoload + syntax error = segfault
 --FILE--
 <?php
 
-function autoload() {
+function autoload()
+{
     foo();
 }
 spl_autoload_register('autoload');
 
-function testGenerator() {
+function testGenerator()
+{
     new SyntaxError('param');
     yield;
 }
 
-foreach (testGenerator() as $i);
+foreach (testGenerator() as $i) {
+}
 
 ?>
 --EXPECTF--

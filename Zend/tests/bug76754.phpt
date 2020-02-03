@@ -8,11 +8,16 @@ opcache.enable_cli=0
 
 class FOO
 {
-	private const FOO = 'BAR';
+    private const FOO = 'BAR';
 }
 
-class BAR extends FOO { }
+class BAR extends FOO
+{
+
+}
 ?>
 okey
+
+?>
 --EXPECT--
 okey

@@ -3,7 +3,8 @@ Duplicate class type
 --FILE--
 <?php
 
-function test(): Foo|int|FOO {
+function test(): Foo | int | FOO
+{
 }
 
 ?>

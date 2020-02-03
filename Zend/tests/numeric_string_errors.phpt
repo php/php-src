@@ -50,6 +50,7 @@ var_dump(+"voluptate");
 echo "---", PHP_EOL;
 var_dump(-"151 velit");
 var_dump(-"esse");
+
 ?>
 --EXPECTF--
 Notice: A non well formed numeric value encountered in %s on line %d

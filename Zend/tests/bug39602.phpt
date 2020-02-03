@@ -7,9 +7,11 @@ session.save_handler=qwerty
 error_reporting=0
 --FILE--
 <?php
-ini_set("session.save_handler","files");
+
+ini_set("session.save_handler", "files");
 $x = new stdClass();
 echo "ok";
+
 ?>
 --EXPECT--
 ok

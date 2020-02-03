@@ -2,6 +2,7 @@
 Bug #41964 (strtotime returns a timestamp for non-time string of pattern '(A|a) .+')
 --FILE--
 <?php
+
 date_default_timezone_set("UTC");
 
 error_reporting(0);
@@ -33,7 +34,6 @@ echo "\n";
 $res = date_parse('a nothing');
 var_dump($res['zone'], $res['tz_abbr']);
 echo "\n";
-
 
 ?>
 --EXPECT--

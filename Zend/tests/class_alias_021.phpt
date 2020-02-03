@@ -5,15 +5,18 @@ Overriding internal class with class alias
 
 namespace foo;
 
-class bar { }
+class bar
+{
+
+}
 
 class_alias('foo\bar', 'baz');
 
-use \baz as stdClass;
+use baz as stdClass;
 
-var_dump(new bar);
-var_dump(new stdClass);
-var_dump(new \baz);
+var_dump(new bar());
+var_dump(new stdClass());
+var_dump(new \baz());
 
 ?>
 --EXPECTF--

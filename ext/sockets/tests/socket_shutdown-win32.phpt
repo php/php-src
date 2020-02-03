@@ -13,30 +13,32 @@ if(substr(PHP_OS, 0, 3) != 'WIN' ) {
 ?>
 --FILE--
 <?php
+
 $host = "yahoo.com";
 $port = 80;
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 $socketConn = socket_connect($socket, $host, $port);
-var_dump(socket_shutdown($socket,0));
+var_dump(socket_shutdown($socket, 0));
 socket_close($socket);
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 $socketConn = socket_connect($socket, $host, $port);
-var_dump(socket_shutdown($socket,1));
+var_dump(socket_shutdown($socket, 1));
 socket_close($socket);
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
 $socketConn = socket_connect($socket, $host, $port);
-var_dump(socket_shutdown($socket,2));
+var_dump(socket_shutdown($socket, 2));
 socket_close($socket);
 
 $socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-var_dump(socket_shutdown($socket,0));
+var_dump(socket_shutdown($socket, 0));
 
 $socketConn = socket_connect($socket, $host, $port);
-var_dump(socket_shutdown($socket,-1));
+var_dump(socket_shutdown($socket, -1));
 socket_close($socket);
+
 ?>
 --CLEAN--
 <?php

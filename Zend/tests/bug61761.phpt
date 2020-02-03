@@ -5,12 +5,16 @@ Bug #61761 ('Overriding' a private static method with a different signature caus
 
 class A
 {
-        private static function test($a) { }
+    private static function test($a)
+    {
+    }
 }
 
 class B extends A
 {
-        private static function test($a, $b) { }
+    private static function test($a, $b)
+    {
+    }
 }
 
 ?>

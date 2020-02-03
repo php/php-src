@@ -9,17 +9,17 @@ SPL: ArrayObject from object
 
 class test
 {
-	public    $pub = "public";
-	protected $pro = "protected";
-	private   $pri = "private";
+    public $pub = "public";
+    protected $pro = "protected";
+    private $pri = "private";
 
-	function __construct()
-	{
-		$this->imp = "implicit";
-	}
+    function __construct()
+    {
+        $this->imp = "implicit";
+    }
 };
 
-$test = new test;
+$test = new test();
 $test->dyn = "dynamic";
 
 print_r($test);
@@ -28,9 +28,8 @@ $object = new ArrayObject($test);
 
 print_r($object);
 
-foreach($test as $key => $val)
-{
-	echo "$key => $val\n";
+foreach ($test as $key => $val) {
+    echo "$key => $val\n";
 }
 
 ?>

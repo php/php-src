@@ -3,7 +3,9 @@ Closure 015: converting to string/unicode
 --FILE--
 <?php
 
-$x = function() { return 1; };
+$x = function () {
+    return 1;
+};
 try {
     print (string) $x;
 } catch (Error $e) {

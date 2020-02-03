@@ -3,8 +3,14 @@ Object naming collision error: interface/interface
 --FILE--
 <?php
 
-interface A { }
-interface A { }
+interface A
+{
+
+}
+interface A
+{
+
+}
 
 ?>
 --EXPECTF--

@@ -15,11 +15,15 @@ var_dump(unserialize(serialize($n)));
 
 try {
     unserialize('C:3:"GMP":0:{}');
-} catch (Exception $e) { var_dump($e->getMessage()); }
+} catch (Exception $e) {
+    var_dump($e->getMessage());
+}
 
 try {
     unserialize('C:3:"GMP":9:{s:2:"42";}');
-} catch (Exception $e) { var_dump($e->getMessage()); }
+} catch (Exception $e) {
+    var_dump($e->getMessage());
+}
 
 ?>
 --EXPECTF--

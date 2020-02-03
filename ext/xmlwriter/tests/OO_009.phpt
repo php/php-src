@@ -6,12 +6,13 @@ if (!extension_loaded("xmlwriter")) die("skip");
 ?>
 --FILE--
 <?php
+
 /*
 Libxml 2.6.24 and up adds a new line after a processing instruction (PI)
 */
 $xw = new XMLWriter();
 $xw->openMemory();
-$xw->setIndent(TRUE);
+$xw->setIndent(true);
 $xw->startDocument("1.0", "UTF-8");
 $xw->startElement('root');
 $xw->writeAttribute('id', 'elem1');
@@ -32,6 +33,7 @@ $xw->endDocument();
 // Force to write and empty the buffer
 $output = $xw->flush(true);
 print $output;
+
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="UTF-8"?>

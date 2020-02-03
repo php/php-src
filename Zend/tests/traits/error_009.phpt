@@ -3,9 +3,15 @@ Trying to extend a trait
 --FILE--
 <?php
 
-trait abc { }
+trait abc
+{
 
-class foo extends abc { }
+}
+
+class foo extends abc
+{
+
+}
 
 ?>
 --EXPECTF--

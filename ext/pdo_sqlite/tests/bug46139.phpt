@@ -10,9 +10,11 @@ if (!extension_loaded('pdo_sqlite')) print 'skip not loaded';
 require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 
-class Person {
-    public $test = NULL;
-    public function __construct() {
+class Person
+{
+    public $test = null;
+    public function __construct()
+    {
         var_dump($this->test);
     }
 }

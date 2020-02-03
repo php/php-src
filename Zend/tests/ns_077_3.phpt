@@ -9,6 +9,8 @@ function foo($a = array(namespace\unknown => unknown))
 }
 
 foo();
+
+?>
 --EXPECTF--
 Fatal error: Uncaught Error: Undefined constant 'foo\unknown' in %sns_077_%d.php:%d
 Stack trace:

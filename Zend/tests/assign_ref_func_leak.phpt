@@ -3,7 +3,8 @@ Assigning the result of a non-reference function by-reference should not leak
 --FILE--
 <?php
 
-function func() {
+function func()
+{
     return [0];
 }
 

@@ -3,7 +3,10 @@ Trying redeclare class with class_alias()
 --FILE--
 <?php
 
-class foo { }
+class foo
+{
+
+}
 
 class_alias('foo', 'FOO');
 

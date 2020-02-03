@@ -7,13 +7,15 @@ die("info $HND handler used");
 ?>
 --FILE--
 <?php
-require_once(__DIR__ .'/test.inc');
+
+require_once(__DIR__ . '/test.inc');
 echo "database handler: $handler\n";
 var_dump(dba_open($db_file, 'n'));
 var_dump(dba_open($db_file, 'n', 'bogus'));
 var_dump(dba_open($db_file, 'q', $handler));
 var_dump(dba_open($db_file, 'nq', $handler));
 var_dump(dba_open($db_file, 'n', $handler, 2, 3, 4, 5, 6, 7, 8));
+
 ?>
 --CLEAN--
 <?php

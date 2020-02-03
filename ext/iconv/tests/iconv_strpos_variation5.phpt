@@ -9,6 +9,7 @@ function_exists('iconv_strpos') or die("skip iconv_strpos() is not available in 
 error_reporting=E_ALL & ~E_DEPRECATED
 --FILE--
 <?php
+
 /* Prototype  : int iconv_strpos(string haystack, string needle [, int offset [, string charset]])
  * Description: Find position of first occurrence of a string within another
  * Source code: ext/iconv/iconv.c
@@ -35,14 +36,15 @@ $needle_mb = base64_decode('44CC');
  * 60 is larger than *BYTE* count for $string_mb
  */
 for ($i = -30; $i <= 60; $i += 10) {
-	echo "\n**-- Offset is: $i --**\n";
-	echo "-- ASCII String --\n";
-	var_dump(iconv_strpos($string_ascii, $needle_ascii, $i));
-	echo "--Multibyte String --\n";
-	var_dump(iconv_strpos($string_mb, $needle_mb, $i, 'UTF-8'));
+    echo "\n**-- Offset is: $i --**\n";
+    echo "-- ASCII String --\n";
+    var_dump(iconv_strpos($string_ascii, $needle_ascii, $i));
+    echo "--Multibyte String --\n";
+    var_dump(iconv_strpos($string_mb, $needle_mb, $i, 'UTF-8'));
 }
 
 echo "Done";
+
 ?>
 --EXPECTF--
 *** Testing iconv_strpos() : usage variations ***

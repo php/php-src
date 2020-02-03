@@ -2,7 +2,8 @@
 Bug #61347 (inconsist isset behavior of Arrayobject)
 --FILE--
 <?php
-$a = array('b' => NULL, 37 => NULL);
+
+$a = array('b' => null, 37 => null);
 var_dump(isset($a['b'])); //false
 
 $b = new ArrayObject($a);
@@ -21,6 +22,8 @@ var_dump(isset($b[37])); //true
 var_dump(isset($b['no_exists'])); //false
 var_dump(empty($b['b'])); //true
 var_dump(empty($b[37])); //true
+
+?>
 --EXPECTF--
 bool(false)
 bool(false)

@@ -4,6 +4,7 @@ Bug #52113 (Seg fault while creating (by unserialization) DatePeriod)
 date.timezone=UTC
 --FILE--
 <?php
+
 $start = new DateTime('2003-01-02 08:00:00');
 $end = new DateTime('2003-01-02 12:00:00');
 $diff = $start->diff($end);

@@ -10,17 +10,20 @@ opcache.protect_memory=1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 namespace A;
 
-function test() {
+function test()
+{
 
-	$modelData = array();
-	$ret = false ||
-		((is_array($modelData) || $modelData instanceof \Countable) && true) || false;
-	return $ret;
+    $modelData = array();
+    $ret = false ||
+        ((is_array($modelData) || $modelData instanceof \Countable) && true) || false;
+    return $ret;
 }
 
 var_dump(test());
+
 ?>
 --EXPECT--
 bool(true)

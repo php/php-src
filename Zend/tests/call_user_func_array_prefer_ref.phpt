@@ -16,7 +16,6 @@ namespace {
     var_dump($array);
     unset($array);
 }
-
 namespace Foo {
     call_user_func_array('array_multisort', [[3, 2, 1]]);
 

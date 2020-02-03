@@ -7,10 +7,12 @@ Patrick Allaert <patrickallaert@php.net>
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 require "connect.inc";
 
 $link = ldap_connect($host, $port);
 var_dump($link);
+
 ?>
 --EXPECTF--
 resource(%d) of type (ldap link)

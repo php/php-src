@@ -2,11 +2,13 @@
 Bug #71028 (Undefined index with ArrayIterator)
 --FILE--
 <?php
-function cast(&$a) {
-		$a = (int)$a;
+
+function cast(&$a)
+{
+        $a = (int)$a;
 }
 
-$a = new ArrayIterator;
+$a = new ArrayIterator();
 $a[-1] = 123;
 
 $b = "-1";
@@ -17,6 +19,7 @@ $a[$b] = "okey";
 var_dump($a[$b]);
 unset($a[$b]);
 var_dump(isset($a[$b]));
+
 ?>
 --EXPECT--
 bool(true)

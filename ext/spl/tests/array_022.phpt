@@ -6,14 +6,14 @@ SPL: ArrayObject/Iterator and reference to self
 
 class MyArrayObject extends ArrayObject
 {
-	public function __construct()
-	{
-		parent::__construct($this);
-		$this['bar'] = 'baz';
-	}
+    public function __construct()
+    {
+        parent::__construct($this);
+        $this['bar'] = 'baz';
+    }
 }
 
-$a = new MyArrayObject;
+$a = new MyArrayObject();
 
 $b = clone $a;
 $b['baz'] = 'Foo';
@@ -27,20 +27,22 @@ var_dump($b);
 
 class MyArrayIterator extends ArrayIterator
 {
-	public function __construct()
-	{
-		parent::__construct($this);
-		$this['bar'] = 'baz';
-	}
+    public function __construct()
+    {
+        parent::__construct($this);
+        $this['bar'] = 'baz';
+    }
 }
 
-$a = new MyArrayIterator;
+$a = new MyArrayIterator();
 
 $b = clone $a;
 $b['baz'] = 'Foo';
 
 var_dump($a);
 var_dump($b);
+
+?>
 
 ?>
 --EXPECTF--

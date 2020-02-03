@@ -5,8 +5,11 @@ Weak casts must not overwrite source variables
 
 $b = 1;
 $a = "$b";
-class A { public int $a; }
-$o = new A;
+class A
+{
+    public int $a;
+}
+$o = new A();
 $o->a = $b;
 var_dump($o, $a);
 

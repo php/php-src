@@ -2,11 +2,13 @@
 Bug #53437 (Crash when using unserialized DatePeriod instance), variation 2
 --FILE--
 <?php
+
 $s = 'O:10:"DatePeriod":0:{}';
 
 $dp = unserialize($s);
 
 var_dump($dp);
+
 ?>
 ==DONE==
 --EXPECTF--

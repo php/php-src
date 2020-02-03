@@ -4,10 +4,12 @@ __HALT_COMPILER() basic test
 <?php
 
 $fp = fopen(__FILE__, "r");
-fseek($fp, __COMPILER_HALT_OFFSET__+1);
+fseek($fp, __COMPILER_HALT_OFFSET__ + 1);
 print fread($fp, 1000);
 
-__HALT_COMPILER();
+__halt_compiler();
 Overlay information...
+
+?>
 --EXPECT--
 Overlay information...

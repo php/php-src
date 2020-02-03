@@ -2,6 +2,7 @@
 Bug #51819 (Case discrepancy in timezone names cause Uncaught exception and fatal error)
 --FILE--
 <?php
+
 date_default_timezone_set('UTC');
 
 $aTzAbbr = timezone_abbreviations_list();
@@ -29,6 +30,7 @@ foreach ($aTz as $sTz) {
 }
 
 var_dump('this should be the only output');
+
 ?>
 --EXPECT--
 string(30) "this should be the only output"

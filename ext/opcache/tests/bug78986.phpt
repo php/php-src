@@ -5,13 +5,17 @@ Bug #78986: Opcache segfaults when inheriting ctor from immutable into mutable c
 
 define('TEST_TEST', 1);
 
-class TestClass2 {
-    function __construct() {}
+class TestClass2
+{
+    function __construct()
+    {
+    }
 }
 
-class TestClass extends TestClass2 {
+class TestClass extends TestClass2
+{
     var $test = [
-        TEST_TEST => 'test'  
+        TEST_TEST => 'test'
     ];
 }
 

@@ -14,20 +14,20 @@ $extract = __DIR__ . '/test-extract3';
 $phar = new PharData($fname);
 
 try {
-	$phar->extractTo($extract);
+    $phar->extractTo($extract);
 } catch (Exception $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 
 $phar = new PharData($fname2);
 foreach ($phar as $filename) {
-	echo "$filename\n";
+    echo "$filename\n";
 }
 
 try {
-	$phar->extractTo($extract);
+    $phar->extractTo($extract);
 } catch (Exception $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 
 ?>

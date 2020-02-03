@@ -3,12 +3,13 @@ Ignoring a sent value shouldn't leak memory
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     yield;
 }
 
 $gen = gen();
-$gen->send(NULL);
+$gen->send(null);
 
 echo "DONE";
 

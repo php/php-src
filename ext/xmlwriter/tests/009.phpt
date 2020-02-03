@@ -7,12 +7,13 @@ if (!function_exists("xmlwriter_start_comment")) die("skip: libxml2 2.6.7+ requi
 ?>
 --FILE--
 <?php
+
 /*
 Libxml 2.6.24 and up adds a new line after a processing instruction (PI)
 */
 $xw = xmlwriter_open_memory();
-xmlwriter_set_indent($xw, TRUE);
-xmlwriter_start_document($xw, NULL, "UTF-8");
+xmlwriter_set_indent($xw, true);
+xmlwriter_start_document($xw, null, "UTF-8");
 xmlwriter_start_element($xw, 'root');
 xmlwriter_write_attribute($xw, 'id', 'elem1');
 xmlwriter_start_element($xw, 'elem1');
@@ -32,6 +33,7 @@ xmlwriter_end_document($xw);
 // Force to write and empty the buffer
 $output = xmlwriter_flush($xw, true);
 print $output;
+
 ?>
 --EXPECTF--
 <?xml version="1.0" encoding="UTF-8"?>

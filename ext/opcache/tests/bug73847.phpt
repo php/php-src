@@ -4,7 +4,9 @@ Bug #73847: Recursion when a variable is redefined as array
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function test() {
+
+function test()
+{
     $a = 42;
     $a = array($a);
     var_dump($a);
@@ -22,6 +24,7 @@ function test() {
     var_dump($a);
 }
 test();
+
 ?>
 --EXPECT--
 array(1) {

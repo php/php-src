@@ -7,6 +7,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar';
 
 $phar = new Phar($fname, 0, 'a.phar');
@@ -14,6 +15,7 @@ $phar['x'] = 'hi';
 unset($phar);
 rename("phar://a.phar/x", "phar://a.phar/y");
 var_dump(rename("phar://a.phar/x", "phar://a.phar/y"));
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');?>

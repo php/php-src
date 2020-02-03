@@ -49,6 +49,8 @@ trycatch_dump(
     fn() => hash_hkdf('sha1', $ikm, 20 * 255 + 1) // Length can't be more than 255 times the hash digest size
 )
 ?>
+
+?>
 --EXPECT--
 *** Testing hash_hkdf(): error conditions ***
 

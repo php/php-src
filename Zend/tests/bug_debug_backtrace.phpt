@@ -2,21 +2,26 @@
 Bug - crash in debug_backtrace when trace starts in eval
 --FILE--
 <?php
-function foo() {
+
+function foo()
+{
     bar();
 }
 
-function bar() {
+function bar()
+{
     boo();
 }
 
-function boo(){
+function boo()
+{
     debug_print_backtrace();
 }
 
 eval("foo();");
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 #0  boo() called at [%s:%d]

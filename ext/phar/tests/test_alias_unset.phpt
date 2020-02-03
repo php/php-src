@@ -6,6 +6,7 @@ Phar: test for the odd case where we intend to remove an archive from memory
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '.2.phar.php';
@@ -23,15 +24,16 @@ unset($phar2);
 
 $a = fopen($pname . '/file1.txt', 'r'); // this works because there are no references to $fname2 open
 try {
-$phar2 = new Phar($fname2); // fails because references open to $fname
+    $phar2 = new Phar($fname2); // fails because references open to $fname
 } catch (Exception $e) {
-echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
 fclose($a);
 $phar2 = new Phar($fname2); // succeeds because all refs are closed
 var_dump($phar2->getAlias());
 
 $a = file_get_contents($pname . '/file1.txt'); // this fails because $fname2 ref exists
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>

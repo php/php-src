@@ -2,17 +2,23 @@
 010: Accessing internal namespace class
 --FILE--
 <?php
+
 namespace X;
+
 use X as Y;
-class Foo {
-	const C = "const ok\n";
-	static $var = "var ok\n";
-	function __construct() {
-		echo "class ok\n";
-	}
-	static function bar() {
-		echo "method ok\n";
-	}
+
+class Foo
+{
+    const C = "const ok\n";
+    static $var = "var ok\n";
+    function __construct()
+    {
+        echo "class ok\n";
+    }
+    static function bar()
+    {
+        echo "method ok\n";
+    }
 }
 new Foo();
 new Y\Foo();
@@ -26,6 +32,8 @@ echo \X\Foo::C;
 echo Foo::$var;
 echo Y\Foo::$var;
 echo \X\Foo::$var;
+
+?>
 --EXPECT--
 class ok
 class ok

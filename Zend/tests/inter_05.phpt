@@ -3,7 +3,10 @@ Trying to inherit a class in an interface
 --FILE--
 <?php
 
-interface a extends Exception { }
+interface a extends Exception
+{
+
+}
 
 ?>
 --EXPECTF--

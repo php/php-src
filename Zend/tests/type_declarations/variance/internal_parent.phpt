@@ -3,8 +3,11 @@ Internal class as parent
 --FILE--
 <?php
 
-class Test extends DateTime {
-    public static function createFromFormat($format, $time, Wrong $timezone = null) { }
+class Test extends DateTime
+{
+    public static function createFromFormat($format, $time, Wrong $timezone = null)
+    {
+    }
 }
 
 ?>

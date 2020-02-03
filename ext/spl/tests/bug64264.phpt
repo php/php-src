@@ -2,7 +2,9 @@
 Bug #64264 (SPLFixedArray toArray problem)
 --FILE--
 <?php
-class MyFixedArray extends \SplFixedArray {
+
+class MyFixedArray extends \SplFixedArray
+{
     protected $foo;
     protected $bar;
 }
@@ -20,6 +22,7 @@ unset($array[4]);
 $myFixedArr->setSize(2);
 
 print_r($myFixedArr->toArray());
+
 ?>
 --EXPECT--
 Array

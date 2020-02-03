@@ -67,18 +67,16 @@ function ut_main()
 
     $res_str = '';
 
-    foreach( $locales as $locale )
-    {
-        $scr = ut_loc_get_script( $locale);
+    foreach ($locales as $locale) {
+        $scr = ut_loc_get_script($locale);
         $res_str .= "$locale:  script='$scr'";
         $res_str .= "\n";
     }
 
     return $res_str;
-
 }
 
-include_once( 'ut_common.inc' );
+include_once('ut_common.inc');
 ut_run();
 
 ?>

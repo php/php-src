@@ -8,7 +8,9 @@ highlight.default = #0000BB
 highlight.html    = #000000
 --FILE--
 <?php
+
 highlight_string('<?php /*some comment..');
+
 ?>
 --EXPECT--
 <code><span style="color: #000000">

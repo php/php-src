@@ -2,6 +2,7 @@
 Conversion of special float values to int
 --FILE--
 <?php
+
 $values = [
     0.0,
     INF,
@@ -11,11 +12,12 @@ $values = [
     NAN
 ];
 
-foreach($values as $value) {
+foreach ($values as $value) {
     var_dump($value);
     var_dump((int)$value);
     echo PHP_EOL;
 }
+
 ?>
 --EXPECT--
 float(0)

@@ -5,9 +5,12 @@ Assign elision exception safety: ICALL
 --FILE--
 <?php
 
-set_error_handler(function() { throw new Exception; });
+set_error_handler(function () {
+    throw new Exception();
+});
 
-function test() {
+function test()
+{
     $x = str_replace(['foo'], [[]], ['foo']);
 }
 try {

@@ -4,13 +4,15 @@ Handling of large year values
 <?php if (PHP_INT_SIZE != 8) die("skip 64-bit only"); ?>
 --FILE--
 <?php
+
 date_default_timezone_set("America/Toronto");
 
-$t = mktime(0,0,0,1,1,292277026596);
+$t = mktime(0, 0, 0, 1, 1, 292277026596);
 
 var_dump(date("r", $t));
 
 echo "OK\n";
+
 ?>
 --EXPECT--
 string(39) "Fri, 01 Jan 292277026596 00:00:00 -0500"

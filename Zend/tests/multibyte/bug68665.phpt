@@ -11,8 +11,9 @@ zend.multibyte=1
 internal_encoding=big5
 --FILE--
 <?php
-echo '\'hello';
-?>
 
+echo '\'hello';
+
+?>
 --EXPECT--
 'hello

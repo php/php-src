@@ -8,6 +8,7 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 
 var_dump(intlgregcal_is_leap_year(1, 2));

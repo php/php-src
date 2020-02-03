@@ -9,6 +9,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
+
 include __DIR__ . '/files/tarmaker.php.inc';
 
 $fname = __DIR__ . '/tar_004.phar.tar';
@@ -28,6 +29,7 @@ include "phar://" . __FILE__ . "/tar_004.php";
 $tar->close();
 
 include $fname;
+
 ?>
 --CLEAN--
 <?php

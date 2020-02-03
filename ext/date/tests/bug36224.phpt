@@ -2,6 +2,7 @@
 Bug #36224 (date(DATE_ATOM) gives wrong resulsts)
 --FILE--
 <?php
+
 date_default_timezone_set("Europe/Oslo");
 
 echo date(DATE_ATOM, strtotime('2006-01-31T19:23:56Z')) . "\n";

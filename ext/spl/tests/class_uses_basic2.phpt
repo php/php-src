@@ -2,6 +2,7 @@
 SPL: Test class_uses() function : basic
 --FILE--
 <?php
+
 /* Prototype  : array class_uses(mixed what [, bool autoload ])
  * Description: Return all traits used by a class
  * Source code: ext/spl/php_spl.c
@@ -11,33 +12,56 @@ SPL: Test class_uses() function : basic
 echo "*** Testing class_uses() : basic ***\n";
 
 
-trait foo { }
-class fooUser { use foo; }
+trait foo
+{
 
-trait bar { }
-class barUser { use bar; }
+}
+class fooUser
+{
+    use foo;
+}
 
-class foobarUser { use foo, bar; }
+trait bar
+{
+
+}
+class barUser
+{
+    use bar;
+}
+
+class foobarUser
+{
+    use foo;
+                   use bar;
+}
 
 /** There is no semantics for traits in the inheritance chain.
     Traits are flattened into a class, and that semantics is nothing
     like a type, or interface, and thus, not propergated. */
-class fooViaBarUser extends barUser { use foo; }
+class fooViaBarUser extends barUser
+{
+    use foo;
+}
 
-class fooExtended extends fooUser {}
+class fooExtended extends fooUser
+{
+}
 
-s_var_dump(class_uses(new foobarUser));
+s_var_dump(class_uses(new foobarUser()));
 s_var_dump(class_uses('foobarUser'));
-s_var_dump(class_uses(new fooViaBarUser));
+s_var_dump(class_uses(new fooViaBarUser()));
 s_var_dump(class_uses('fooViaBarUser'));
-s_var_dump(class_uses(new fooExtended));
+s_var_dump(class_uses(new fooExtended()));
 s_var_dump(class_uses('fooExtended'));
 
 
-function s_var_dump($arr) {
-   krsort($arr);
-   var_dump($arr);
+function s_var_dump($arr)
+{
+    krsort($arr);
+    var_dump($arr);
 }
+
 ?>
 --EXPECT--
 *** Testing class_uses() : basic ***

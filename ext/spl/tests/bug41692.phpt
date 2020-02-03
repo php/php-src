@@ -3,7 +3,8 @@ Bug #41692 (ArrayObject shows weird behaviour in respect to inheritance)
 --FILE--
 <?php
 
-class Bar extends ArrayObject {
+class Bar extends ArrayObject
+{
     private $foo = array( 1, 2, 3 );
     function __construct()
     {
@@ -19,6 +20,7 @@ $bar = new Bar();
 var_dump($bar);
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 object(Bar)#%d (2) {

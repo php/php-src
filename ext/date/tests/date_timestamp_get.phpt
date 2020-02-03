@@ -11,6 +11,7 @@ Virgílio de Carvalho Pontes <vigiliocpontes [at] outlook [dot] com>
 Vitor Mattos <vitor [at] php [dot] rio>
 --FILE--
 <?php
+
 $beginDtObj = date_create('1970-01-01T00:00:00UTC');
 $beginTimestamp = date_timestamp_get($beginDtObj);
 var_dump($beginTimestamp);
@@ -18,6 +19,7 @@ var_dump($beginTimestamp);
 // Test the DateTime feature alias in function date_timestamp_get().
 $dateTimeTz = (new DateTime('1970-01-01T00:00:00UTC'))->getTimeStamp();
 var_dump($dateTimeTz === $beginTimestamp);
+
 ?>
 --EXPECT--
 int(0)

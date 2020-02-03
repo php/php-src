@@ -8,7 +8,8 @@ Bug #40854 (imap_mail_compose() creates an invalid terminator for multipart e-ma
 ?>
 --FILE--
 <?php
-$envelope["from"]= "joe@example.com";
+
+$envelope["from"] = "joe@example.com";
 $envelope["to"]  = "foo@example.com";
 $envelope["cc"]  = "bar@example.com";
 
@@ -31,6 +32,7 @@ $body[2] = $part2;
 $body[3] = $part3;
 
 echo imap_mail_compose($envelope, $body);
+
 ?>
 --EXPECTF--
 From: joe@example.com

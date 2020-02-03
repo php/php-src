@@ -2,10 +2,12 @@
 Bug #71539.2 (Memory error on $arr[$a] =& $arr[$b] if RHS rehashes)
 --FILE--
 <?php
+
 $a = [0,1,2,3,4,5,6];
 $a[200] =& $a[100];
-$a[100] =42;
+$a[100] = 42;
 var_dump($a);
+
 ?>
 --EXPECT--
 array(9) {

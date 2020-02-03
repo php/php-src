@@ -110,6 +110,7 @@ var_dump(gmp_random_seed('not a number'));
 
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 NULL

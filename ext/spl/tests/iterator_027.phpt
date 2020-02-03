@@ -9,19 +9,16 @@ $it = new RecursiveArrayIterator($ar);
 $it = new RecursiveIteratorIterator($it);
 $it = new CachingIterator($it, CachingIterator::FULL_CACHE);
 
-foreach($it as $k=>$v)
-{
-	echo "$k=>$v\n";
+foreach ($it as $k => $v) {
+    echo "$k=>$v\n";
 }
 
 echo "===CHECK===\n";
 
-for ($i = 0; $i < 4; $i++)
-{
-	if (isset($it[$i]))
-	{
-		var_dump($i, $it[$i]);
-	}
+for ($i = 0; $i < 4; $i++) {
+    if (isset($it[$i])) {
+        var_dump($i, $it[$i]);
+    }
 }
 
 $it[2] = 'foo';

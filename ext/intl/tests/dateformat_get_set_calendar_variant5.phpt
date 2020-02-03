@@ -6,19 +6,23 @@ if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '58.1') < 0) die('skip for ICU >= 58.1'); ?>
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 ini_set("intl.default_locale", "pt_PT");
 ini_set("date.timezone", 'Atlantic/Azores');
 
 $ts = strtotime('2012-01-01 00:00:00 UTC');
 
-function d(IntlDateFormatter $df) {
-global $ts;
-echo $df->format($ts), "\n";
-var_dump($df->getCalendar(),
-$df->getCalendarObject()->getType(),
-$df->getCalendarObject()->getTimeZone()->getId());
-echo "\n";
+function d(IntlDateFormatter $df)
+{
+    global $ts;
+    echo $df->format($ts), "\n";
+    var_dump(
+        $df->getCalendar(),
+        $df->getCalendarObject()->getType(),
+        $df->getCalendarObject()->getTimeZone()->getId()
+    );
+    echo "\n";
 }
 
 $df = new IntlDateFormatter('fr@calendar=islamic', 0, 0, 'Europe/Minsk');

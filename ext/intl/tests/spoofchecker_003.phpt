@@ -17,6 +17,7 @@ echo "Is suspcious, ko_KR\n";
 
 $x->setAllowedLocales('en_US, ko_KR');
 var_dump($x->isSuspicious($korean));
+
 ?>
 --EXPECT--
 Is suspcious, en_US

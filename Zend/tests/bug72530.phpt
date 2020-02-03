@@ -3,17 +3,19 @@ Bug #72530: Use After Free in GC with Certain Destructors
 --FILE--
 <?php
 
-class ryat {
+class ryat
+{
     var $ryat;
     var $chtg;
 
-    function __destruct() {
+    function __destruct()
+    {
         $this->chtg = $this->ryat;
         $this->ryat = 1;
     }
 }
 
-$o = new ryat;
+$o = new ryat();
 $o->ryat = $o;
 $x =& $o->chtg;
 

@@ -8,7 +8,7 @@ if (!function_exists('ftok')){ print 'skip'; }
 --FILE--
 <?php
 
-$key = ftok(__DIR__."/003.phpt", 'q');
+$key = ftok(__DIR__ . "/003.phpt", 'q');
 
 $s = shm_attach($key);
 
@@ -25,6 +25,7 @@ try {
 }
 
 echo "Done\n";
+
 ?>
 --CLEAN--
 <?php

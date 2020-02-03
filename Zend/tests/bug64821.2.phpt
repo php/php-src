@@ -3,13 +3,15 @@ Bug #64821 Custom Exceptions crash when internal properties overridden (variatio
 --FILE--
 <?php
 
-class a extends exception {
-	public function __construct() {
-		$this->line = array();
-	}
+class a extends exception
+{
+    public function __construct()
+    {
+        $this->line = array();
+    }
 }
 
-throw new a;
+throw new a();
 
 ?>
 --EXPECTF--

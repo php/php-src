@@ -21,7 +21,7 @@ var_dump(file_get_contents($pname . '/b.php'));
 
 function error_handler($errno, $errmsg)
 {
-	echo "Error: $errmsg";
+    echo "Error: $errmsg";
 }
 
 set_error_handler('error_handler');
@@ -37,26 +37,21 @@ $checks = array(
     "Font\xF0\x80\x90\x90pro.ttf",   //Invalid multi-byte character - surrogate pair code point
     "\xFC\x81\x81\x81\x81pro.ttf", //RFC 3629 limited char points to 0000-10FFFF aka 5 byte utf-8 not valid
 );
-foreach($checks as $check)
-{
-	$count++;
-	echo "$count:";
-	file_put_contents($pname . '/' . $check, "error");
-	echo "\n";
+foreach ($checks as $check) {
+    $count++;
+    echo "$count:";
+    file_put_contents($pname . '/' . $check, "error");
+    echo "\n";
 }
 
 $phar = new Phar($fname);
 $checks = array("a\0");
-foreach($checks as $check)
-{
-	try
-	{
-		$phar[$check] = 'error';
-	}
-	catch (TypeError $e)
-	{
-		echo 'Exception: ' . $e->getMessage() . "\n";
-	}
+foreach ($checks as $check) {
+    try {
+        $phar[$check] = 'error';
+    } catch (TypeError $e) {
+        echo 'Exception: ' . $e->getMessage() . "\n";
+    }
 }
 
 ?>

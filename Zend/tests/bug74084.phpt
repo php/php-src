@@ -4,6 +4,7 @@ Bug #74084 (Out of bound read - zend_mm_alloc_small)
 error_reporting=0
 --FILE--
 <?php
+
 $$A += $$B['a'] = &$$C;
 unset($$A);
 try {
@@ -29,6 +30,7 @@ try {
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
+
 ?>
 --EXPECT--
 Unsupported operand types

@@ -2,6 +2,7 @@
 Test mktime() function : error conditions
 --FILE--
 <?php
+
 /* Prototype  : int mktime  ([ int $hour= date("H")  [, int $minute= date("i")  [, int $second= date("s")  [, int $month= date("n")  [, int $day= date("j")  [, int $year= date("Y")  [, int $is_dst= -1  ]]]]]]] )
  * Description: Get Unix timestamp for a date
  * Source code: ext/date/php_date.c
@@ -15,7 +16,7 @@ echo "*** Testing mktime() : error conditions ***\n";
 
 echo "\n-- Testing mktime() function with Zero arguments --\n";
 try {
-    var_dump( mktime() );
+    var_dump(mktime());
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
@@ -29,7 +30,7 @@ $day = 2;
 $year = 1963;
 $extra_arg = 10;
 try {
-    var_dump( mktime($hour, $minute, $sec, $month, $day, $year, $extra_arg) );
+    var_dump(mktime($hour, $minute, $sec, $month, $day, $year, $extra_arg));
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }

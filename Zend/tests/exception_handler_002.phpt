@@ -5,17 +5,20 @@ exception handler tests - 2
 
 set_exception_handler("foo");
 
-function foo($e) {
-	var_dump(get_class($e)." thrown!");
-	throw new Exception();
+function foo($e)
+{
+    var_dump(get_class($e) . " thrown!");
+    throw new Exception();
 }
 
-class test extends Exception {
+class test extends Exception
+{
 }
 
 throw new test();
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 string(12) "test thrown!"

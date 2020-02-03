@@ -8,6 +8,7 @@ opcache.optimization_level=0x7FFFBFFF
 <?php if (!extension_loaded('Zend OPcache')) die("skip"); ?>
 --FILE--
 <?php
+
 $file = __DIR__ . "/bug71127.inc";
 
 file_put_contents($file, "<?php define('FOO', 'bad'); echo FOO;?>");
@@ -15,6 +16,7 @@ file_put_contents($file, "<?php define('FOO', 'bad'); echo FOO;?>");
 define("FOO", "okey");
 
 include($file);
+
 ?>
 --CLEAN--
 <?php

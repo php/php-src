@@ -3,17 +3,18 @@ Closure 019: Calling lambda using $GLOBALS and global $var
 --FILE--
 <?php
 
-$lambda = function &(&$x) {
-	return $x = $x * $x;
+$lambda = function & (&$x) {
+    return $x = $x * $x;
 };
 
-function test() {
-	global $lambda;
+function test()
+{
+    global $lambda;
 
-	$y = 3;
-	var_dump($GLOBALS['lambda']($y));
-	var_dump($lambda($y));
-	var_dump($GLOBALS['lambda'](1));
+    $y = 3;
+    var_dump($GLOBALS['lambda']($y));
+    var_dump($lambda($y));
+    var_dump($GLOBALS['lambda'](1));
 }
 
 test();

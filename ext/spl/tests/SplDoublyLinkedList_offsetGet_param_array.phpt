@@ -5,9 +5,9 @@ PHPNW Test Fest 2009 - Jordan Hatch
 --FILE--
 <?php
 
-$array = new SplDoublyLinkedList( );
+$array = new SplDoublyLinkedList();
 
-$get = $array->offsetGet( array( 'fail' ) );
+$get = $array->offsetGet(array( 'fail' ));
 
 ?>
 --EXPECTF--

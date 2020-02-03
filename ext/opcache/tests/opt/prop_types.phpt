@@ -11,29 +11,35 @@ opcache.preload=
 --FILE--
 <?php
 
-class Test {
+class Test
+{
     public bool $public;
     protected int $protected;
     private float $private;
 
-    public function inTest() {
+    public function inTest()
+    {
         var_dump($this->public, $this->protected, $this->private);
     }
 
-    public function inTestWithTest2(Test2 $test2) {
+    public function inTestWithTest2(Test2 $test2)
+    {
         var_dump($test2->public, $test2->protected, $test2->private);
     }
 }
 
-class Test2 extends Test {
+class Test2 extends Test
+{
     private array $private;
 
-    public function inTest2() {
+    public function inTest2()
+    {
         var_dump($this->public, $this->protected, $this->private);
     }
 }
 
-function noScope(Test $test) {
+function noScope(Test $test)
+{
     var_dump($test->public, $test->protected, $test->private);
 }
 

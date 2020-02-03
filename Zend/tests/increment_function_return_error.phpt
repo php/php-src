@@ -3,7 +3,8 @@ It's not possible to increment the return value of a function
 --FILE--
 <?php
 
-function test() {
+function test()
+{
     return 42;
 }
 

@@ -3,7 +3,8 @@ Using a type twice in a union
 --FILE--
 <?php
 
-function test(): int|INT {
+function test(): int | INT
+{
 }
 
 ?>

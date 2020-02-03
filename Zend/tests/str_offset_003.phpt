@@ -2,10 +2,12 @@
 string offset 003
 --FILE--
 <?php
+
 // Test negative string offsets
 
-function foo($x) {
-	var_dump($x);
+function foo($x)
+{
+    var_dump($x);
 }
 
 $str = "abcdef";
@@ -18,6 +20,7 @@ foo($str[-10]);
 foo($str[-3]);
 foo($str[2][-2]);
 foo($str[2][-1]);
+
 ?>
 --EXPECTF--
 Warning: Uninitialized string offset: -10 in %s on line %d

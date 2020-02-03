@@ -19,7 +19,8 @@ var_dump(gettype(get_defined_constants(true)));
 var_dump(gettype(get_defined_constants()));
 var_dump(count(get_defined_constants()));
 
-function test () {
+function test()
+{
 }
 
 var_dump(gettype(get_defined_functions()));
@@ -36,6 +37,7 @@ var_dump(count(get_extension_funcs("zend")));
 
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 string(6) "stream"

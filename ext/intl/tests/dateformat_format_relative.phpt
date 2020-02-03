@@ -25,7 +25,8 @@ printFormat(IntlDateFormatter::RELATIVE_LONG, IntlDateFormatter::NONE, getDayInP
 printFormat(IntlDateFormatter::RELATIVE_MEDIUM, IntlDateFormatter::NONE, getDayInPast());
 printFormat(IntlDateFormatter::RELATIVE_SHORT, IntlDateFormatter::NONE, getDayInPast());
 
-function printFormat(int $dateFormat, int $timeFormat, DateTimeImmutable $time) {
+function printFormat(int $dateFormat, int $timeFormat, DateTimeImmutable $time)
+{
     $formatter = new IntlDateFormatter(
         "en_US",
         $dateFormat,
@@ -37,22 +38,27 @@ function printFormat(int $dateFormat, int $timeFormat, DateTimeImmutable $time) 
     echo $formatter->format($time) . "\n";
 }
 
-function getToday(): DateTimeImmutable {
+function getToday(): DateTimeImmutable
+{
     return new DateTimeImmutable();
 }
 
-function getYesterday(): DateTimeImmutable {
+function getYesterday(): DateTimeImmutable
+{
     return new DateTimeImmutable("-1 day");
 }
 
-function getTomorrow(): DateTimeImmutable {
+function getTomorrow(): DateTimeImmutable
+{
     return new DateTimeImmutable("+1 day");
 }
 
-function getDayInPast(): DateTimeImmutable {
+function getDayInPast(): DateTimeImmutable
+{
     return new DateTimeImmutable("2020-01-20 20:20:20", new DateTimeZone("UTC"));
 }
 
+?>
 --EXPECT--
 yesterday
 yesterday

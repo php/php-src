@@ -6,6 +6,7 @@ if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
 --FILE--
 <?php
+
 ini_set("intl.error_level", E_WARNING);
 ini_set("error_reporting", -1);
 ini_set("display_errors", 1);

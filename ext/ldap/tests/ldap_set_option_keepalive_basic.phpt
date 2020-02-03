@@ -6,20 +6,24 @@ Chad Sikorra <Chad.Sikorra@gmail.com>
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 require "connect.inc";
 $link = ldap_connect($host, $port);
 
-foreach([
-	LDAP_OPT_X_KEEPALIVE_IDLE,
-	LDAP_OPT_X_KEEPALIVE_PROBES,
-	LDAP_OPT_X_KEEPALIVE_INTERVAL,
-] as $option) {
-	$result = ldap_set_option($link, $option, 5);
-	var_dump($result);
+foreach (
+    [
+    LDAP_OPT_X_KEEPALIVE_IDLE,
+    LDAP_OPT_X_KEEPALIVE_PROBES,
+    LDAP_OPT_X_KEEPALIVE_INTERVAL,
+    ] as $option
+) {
+    $result = ldap_set_option($link, $option, 5);
+    var_dump($result);
 
-	ldap_get_option($link, $option, $optionval);
-	var_dump($optionval);
+    ldap_get_option($link, $option, $optionval);
+    var_dump($optionval);
 }
+
 ?>
 --EXPECT--
 bool(true)

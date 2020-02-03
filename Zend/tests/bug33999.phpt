@@ -4,11 +4,13 @@ Bug #33999 (object remains object when cast to int)
 error_reporting=4095
 --FILE--
 <?php
-class Foo {
-  public $bar = "bat";
+
+class Foo
+{
+    public $bar = "bat";
 }
 
-$foo = new Foo;
+$foo = new Foo();
 var_dump($foo);
 
 $bar = (int)$foo;
@@ -16,6 +18,7 @@ var_dump($bar);
 
 $baz = (float)$foo;
 var_dump($baz);
+
 ?>
 --EXPECTF--
 object(Foo)#1 (1) {

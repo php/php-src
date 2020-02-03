@@ -2,6 +2,7 @@
 Bug #64070 (Inheritance with Traits failed with error)
 --FILE--
 <?php
+
 trait first_trait
 {
     function first_function()
@@ -30,6 +31,7 @@ class first_class
 $obj = new first_class();
 $obj->first_function();
 $obj->second_function();
+
 ?>
 --EXPECT--
 From Second Trait

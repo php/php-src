@@ -4,27 +4,29 @@ Test ResourceBundle array access and count - existing/missing keys
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 --FILE--
 <?php
-	include "resourcebundle.inc";
 
-	// fall back
-	$r = new ResourceBundle( 'en_US', BUNDLE );
+    include "resourcebundle.inc";
 
-	printf( "length: %d\n", count($r) );
-	printf( "teststring: %s\n", $r['teststring'] );
-	printf( "testint: %d\n", $r['testint'] );
+    // fall back
+    $r = new ResourceBundle('en_US', BUNDLE);
 
-	print_r( $r['testvector'] );
+    printf("length: %d\n", count($r));
+    printf("teststring: %s\n", $r['teststring']);
+    printf("testint: %d\n", $r['testint']);
 
-	printf( "testbin: %s\n", bin2hex($r['testbin']) );
+    print_r($r['testvector']);
 
-	$r2 = $r['testtable'];
-	printf( "testtable: %d\n", $r2['major'] );
+    printf("testbin: %s\n", bin2hex($r['testbin']));
 
-	$r2 = $r['testarray'];
-	printf( "testarray: %s\n", $r2[2] );
+    $r2 = $r['testtable'];
+    printf("testtable: %d\n", $r2['major']);
 
-	$t = $r['nonexisting'];
-	echo debug( $t );
+    $r2 = $r['testarray'];
+    printf("testarray: %s\n", $r2[2]);
+
+    $t = $r['nonexisting'];
+    echo debug($t);
+
 ?>
 --EXPECT--
 length: 6

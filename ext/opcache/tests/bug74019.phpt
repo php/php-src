@@ -8,17 +8,20 @@ opcache.enable_cli=1
 --FILE--
 <?php
 
-class A {
-	public function seg() {
-		list($a, $b) = A::CONSTS;
-		var_dump($a, $b);
-		return;
-	}
-	const CONSTS = [1, 2];
+class A
+{
+    public function seg()
+    {
+        list($a, $b) = A::CONSTS;
+        var_dump($a, $b);
+        return;
+    }
+    const CONSTS = [1, 2];
 }
 
-$a = new A;
+$a = new A();
 $a->seg();
+
 ?>
 --EXPECT--
 int(1)

@@ -3,7 +3,8 @@ try { return } finally { return } in generator
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     try {
         try {
             echo "before return\n";

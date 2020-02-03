@@ -3,12 +3,14 @@ Exceptions throwing by generators during foreach iteration are properly handled
 --FILE--
 <?php
 
-function gen() {
+function gen()
+{
     throw new Exception("foo");
     yield; // force generator
 }
 
-foreach (gen() as $value) { }
+foreach (gen() as $value) {
+}
 
 ?>
 --EXPECTF--

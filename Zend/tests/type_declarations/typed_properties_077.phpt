@@ -3,12 +3,13 @@ Converted values shall be returned and not the original value upon property assi
 --FILE--
 <?php
 
-class Test {
+class Test
+{
     public int $i;
     public string $s;
 }
 
-$test = new Test;
+$test = new Test();
 var_dump($test->i = "42");
 var_dump($test->s = 42);
 

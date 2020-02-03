@@ -3,7 +3,8 @@ Using both object and a class type
 --FILE--
 <?php
 
-function test(): object|Test {
+function test(): object | Test
+{
 }
 
 ?>

@@ -4,20 +4,23 @@ Bug #53437 (Check that var_dump out is the same using the whole object or it's s
 date.timezone = Europe/Berlin
 --FILE--
 <?php
+
 $dt = new DateTime('2009-10-11');
 
 $df = $dt->diff(new DateTime('2009-10-13'));
 
-var_dump($df,
-	$df->y,
-	$df->m,
-	$df->d,
-	$df->h,
-	$df->i,
-	$df->s,
-	$df->f,
-	$df->invert,
-	$df->days);
+var_dump(
+    $df,
+    $df->y,
+    $df->m,
+    $df->d,
+    $df->h,
+    $df->i,
+    $df->s,
+    $df->f,
+    $df->invert,
+    $df->days
+);
 
 ?>
 --EXPECTF--

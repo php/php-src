@@ -4,24 +4,30 @@ Try catch finally (goto in try/catch block)
 adoy
 --FILE--
 <?php
-function foo($ex = NULL) {
+
+function foo($ex = null)
+{
     try {
         try {
             goto label;
         } finally {
             var_dump("finally1");
-            if ($ex) throw $ex;
+            if ($ex) {
+                throw $ex;
+            }
         }
     } catch (Exception $e) {
-       var_dump("caught");
-       if ($ex) return "return1";
+        var_dump("caught");
+        if ($ex) {
+            return "return1";
+        }
     } finally {
-       var_dump("finally2");
+        var_dump("finally2");
     }
 
-label:
-   var_dump("label");
-   return "return2";
+    label:
+    var_dump("label");
+    return "return2";
 }
 
 var_dump(foo());

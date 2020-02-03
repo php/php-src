@@ -4,7 +4,8 @@ Dtor may throw exception furing FE_FETCH assignment
 <?php
 
 $v = new class {
-    function __destruct() {
+    function __destruct()
+    {
         throw new Exception("foo");
     }
 };

@@ -2,6 +2,7 @@
 Bug #43703 (Signature compatibility check broken)
 --FILE--
 <?php
+
 class JoinPoint
 {
 }
@@ -19,5 +20,7 @@ class Read extends Pointcut
 }
 ?>
 DONE
+
+?>
 --EXPECT--
 DONE

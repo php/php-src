@@ -2,15 +2,19 @@
 Const class properties(runtime cache)
 --FILE--
 <?php
-class A {
+
+class A
+{
 }
 
-$a = new A;
+$a = new A();
 
 echo "runtime\n";
 var_dump($a->{array()});
 var_dump($a->{1});
-var_dump($a->{function(){}});
+var_dump($a->{function () {
+}});
+
 ?>
 --EXPECTF--
 Warning: Array to string conversion in %s on line %d

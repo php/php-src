@@ -2,6 +2,7 @@
 042: Import in namespace and constants
 --FILE--
 <?php
+
 namespace test\ns1;
 
 const FOO = "ok\n";
@@ -14,6 +15,8 @@ echo \test\ns1\FOO;
 echo \test\ns1\FOO;
 echo ns2\FOO;
 echo ns3\ns1\FOO;
+
+?>
 --EXPECT--
 ok
 ok

@@ -9,10 +9,14 @@ opcache.file_update_protection=0
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function foo() {
-	$speed = 'slow' || 'fast';
+
+function foo()
+{
+    $speed = 'slow' || 'fast';
 }
 foo();
 echo "ok\n";
+
+?>
 --EXPECT--
 ok

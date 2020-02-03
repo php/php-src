@@ -3,7 +3,8 @@ Throw in finally inside catch inside finally
 --FILE--
 <?php
 
-function test() {
+function test()
+{
     try {
         throw new Exception(1);
     } finally {

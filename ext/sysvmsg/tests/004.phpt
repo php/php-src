@@ -4,6 +4,7 @@ msg_set_queue() and msg_stat_queue()
 <?php if (!extension_loaded("sysvmsg")) die("skip sysvmsg extension is not available")?>
 --FILE--
 <?php
+
 $id = ftok(__FILE__, 'r');
 
 $q = msg_get_queue($id);
@@ -28,7 +29,7 @@ var_dump(count(array_diff_assoc($arr, msg_stat_queue($q))) == 0);
 
 echo "Set smaller qbytes:\n";
 $res = msg_stat_queue($q);
-$arr = array('msg_qbytes' => ($res['msg_qbytes'] -1));
+$arr = array('msg_qbytes' => ($res['msg_qbytes'] - 1));
 var_dump(msg_set_queue($q, $arr));
 echo "Did really work:\n";
 var_dump(count(array_diff_assoc($arr, msg_stat_queue($q))) == 0);
@@ -38,6 +39,7 @@ if (!msg_remove_queue($q)) {
 }
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 Set mode:

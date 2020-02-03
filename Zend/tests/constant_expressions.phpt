@@ -2,6 +2,7 @@
 Constant Expressions
 --FILE--
 <?php
+
 const T_1 = 1 << 1;
 const T_2 = 1 / 2;
 const T_3 = 1.5 + 1.5;
@@ -12,8 +13,8 @@ const T_7 = __LINE__;
 const T_8 = <<<ENDOFSTRING
 This is a test string
 ENDOFSTRING;
-const T_9 = ~-1;
-const T_10 = (-1?:1) + (0?2:3);
+const T_9 = ~ - 1;
+const T_10 = (-1 ?: 1) + (0 ? 2 : 3);
 const T_11 = 1 && 0;
 const T_12 = 1 and 1;
 const T_13 = 0 || 0;
@@ -65,6 +66,7 @@ var_dump(T_24);
 var_dump(T_25);
 var_dump(T_26);
 var_dump(T_27);
+
 ?>
 --EXPECT--
 int(2)

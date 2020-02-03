@@ -6,10 +6,12 @@ Test for bug #75851: Year component overflow with date formats "c", "o", "r" and
 date.timezone = UTC
 --FILE--
 <?php
-echo date(DATE_ATOM."\n".DATE_RFC2822."\nc\nr\no\ny\nY\nU\n\n", PHP_INT_MIN);
-echo date(DATE_ATOM."\n".DATE_RFC2822."\nc\nr\no\ny\nY\nU\n\n", 67767976233532799);
-echo date(DATE_ATOM."\n".DATE_RFC2822."\nc\nr\no\ny\nY\nU\n\n", 67767976233532800);
-echo date(DATE_ATOM."\n".DATE_RFC2822."\nc\nr\no\ny\nY\nU\n\n", PHP_INT_MAX);
+
+echo date(DATE_ATOM . "\n" . DATE_RFC2822 . "\nc\nr\no\ny\nY\nU\n\n", PHP_INT_MIN);
+echo date(DATE_ATOM . "\n" . DATE_RFC2822 . "\nc\nr\no\ny\nY\nU\n\n", 67767976233532799);
+echo date(DATE_ATOM . "\n" . DATE_RFC2822 . "\nc\nr\no\ny\nY\nU\n\n", 67767976233532800);
+echo date(DATE_ATOM . "\n" . DATE_RFC2822 . "\nc\nr\no\ny\nY\nU\n\n", PHP_INT_MAX);
+
 ?>
 --EXPECT--
 -292277022657-01-27T08:29:52+00:00

@@ -3,7 +3,8 @@ Leak when using an invalid parent:: reference in a constant definition
 --FILE--
 <?php
 
-class A {
+class A
+{
     const B = parent::C;
 }
 

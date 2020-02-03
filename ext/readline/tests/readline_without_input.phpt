@@ -10,8 +10,10 @@ if (!function_exists('readline')) die("skip readline() not available");
 ?>
 --FILE--
 <?php
+
 var_dump(readline());
 var_dump(readline('Prompt:'));
+
 ?>
 --EXPECTF--
 bool(false)

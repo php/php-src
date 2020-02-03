@@ -8,6 +8,7 @@ if (!extension_loaded("phar")) die("skip");
 phar.readonly=0
 --FILE--
 <?php
+
 $p = new Phar(__DIR__ . '/phar_begin_setstub_commit.phar.zip', 0, 'phar_begin_setstub_commit.phar');
 var_dump($p->isFileFormat(Phar::ZIP));
 //var_dump($p->getStub());
@@ -40,6 +41,7 @@ fseek($a, 0);
 $p->setStub($a, $c);
 var_dump($p->getStub());
 fclose($a);
+
 ?>
 --CLEAN--
 <?php

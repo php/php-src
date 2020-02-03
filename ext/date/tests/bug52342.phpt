@@ -2,6 +2,7 @@
 Bug #52342 (DateTime setIsoDate results in wrong timestamp)
 --FILE--
 <?php
+
 date_default_timezone_set('Europe/Berlin');
 $from = new DateTime();
 $from->setTime(0, 0, 0);
@@ -14,6 +15,7 @@ echo date('d.m.Y H:i', $from->getTimestamp()), "\n"; //C
 $from->add(new DateInterval('P0D'));
 echo $from->getTimestamp(), "\n"; //B
 echo date('d.m.Y H:i', $from->getTimestamp()), "\n"; //C
+
 ?>
 --EXPECT--
 12.07.2010 00:00

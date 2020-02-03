@@ -16,7 +16,7 @@ try {
     echo $e->getMessage(), "\n";
 }
 try {
-    (new stdClass)();
+    (new stdClass())();
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }

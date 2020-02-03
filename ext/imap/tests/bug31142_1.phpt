@@ -9,7 +9,7 @@ Bug #31142 test #1 (imap_mail_compose() generates incorrect output)
 --FILE--
 <?php
 
-$envelope["from"]= "joe@example.com";
+$envelope["from"] = "joe@example.com";
 $envelope["to"]  = "foo@example.com";
 $envelope["cc"]  = "bar@example.com";
 

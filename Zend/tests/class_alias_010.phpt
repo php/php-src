@@ -3,11 +3,17 @@ Trying use an existing alias name in class declaration
 --FILE--
 <?php
 
-interface a { }
+interface a
+{
+
+}
 
 class_alias('a', 'b');
 
-class b { }
+class b
+{
+
+}
 
 ?>
 --EXPECTF--

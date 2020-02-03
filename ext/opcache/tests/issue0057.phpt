@@ -9,21 +9,23 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 
-class ZException extends Exception {
+class ZException extends Exception
+{
 }
 
-function dummy($query) {
+function dummy($query)
+{
     try {
         switch ($query) {
             case 1;
             break;
             case 2;
             break;
-        default:
-            throw new Exception('exception');
+            default:
+                throw new Exception('exception');
         }
     } catch (ZException $e) {
-        return NULL;
+        return null;
     }
 }
 

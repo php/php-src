@@ -3,7 +3,10 @@ call_user_func() should not use FUNC_ARG fetches
 --FILE--
 <?php
 
-function foo(&$ref) { $ref = 24; }
+function foo(&$ref)
+{
+    $ref = 24;
+}
 
 $a = [];
 call_user_func('foo', $a[0][0]);

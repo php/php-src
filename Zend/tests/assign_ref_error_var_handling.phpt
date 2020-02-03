@@ -3,7 +3,8 @@ If the LHS of ref-assign ERRORs, that takes precedence over the "only variables"
 --FILE--
 <?php
 
-function val() {
+function val()
+{
     return 42;
 }
 

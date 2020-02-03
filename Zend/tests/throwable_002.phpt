@@ -4,7 +4,9 @@ Test using an Exception as the previous Throwable for an Error
 Aaron Piotrowski <aaron@icicle.io>
 --FILE--
 <?php
+
 throw new Error('Error message', 0, new Exception('Exception message'));
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Exception: Exception message in %s:%d

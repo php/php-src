@@ -2,7 +2,9 @@
 Bug#71412 ArrayIterator reflection parameter info
 --FILE--
 <?php
+
 echo (new ReflectionMethod('ArrayIterator', '__construct'));
+
 ?>
 --EXPECT--
 Method [ <internal:SPL, ctor> public method __construct ] {

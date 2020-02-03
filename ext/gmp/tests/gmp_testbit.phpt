@@ -36,6 +36,7 @@ var_dump(gmp_testbit($n, 5));
 var_dump(gmp_strval($n));
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Warning: gmp_testbit(): Index must be greater than or equal to zero in %s on line %d

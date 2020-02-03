@@ -33,10 +33,9 @@ function ut_main()
     ini_restore("intl.default_locale");
 
     return $res_str;
-
 }
 
-include_once( 'ut_common.inc' );
+include_once('ut_common.inc');
 ut_run();
 
 ?>

@@ -21,6 +21,7 @@ var_dump(gmp_strval(gmp_com($n)));
 var_dump(gmp_strval(gmp_com(array())));
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 string(2) "-1"

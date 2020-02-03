@@ -3,14 +3,16 @@ Cannot assign by reference to overloaded object, even if __get() returns by-ref
 --FILE--
 <?php
 
-class Test {
+class Test
+{
     private $x;
-    public function &__get($name) {
+    public function &__get($name)
+    {
         return $this->x;
     }
 }
 
-$test = new Test;
+$test = new Test();
 $y = 5;
 $test->x =& $y;
 var_dump($test->x);

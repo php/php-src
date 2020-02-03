@@ -9,7 +9,7 @@ if (!extension_loaded("xmlwriter")) die("skip");
 
 $xw = new XMLWriter();
 $xw->openMemory();
-$xw->setIndent(TRUE);
+$xw->setIndent(true);
 $xw->setIndentString('   ');
 $xw->startDocument('1.0', "UTF-8");
 $xw->startElement('root');
@@ -27,6 +27,7 @@ $xw->endDocument();
 // Force to write and empty the buffer
 $output = $xw->flush(true);
 print $output;
+
 ?>
 --EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>

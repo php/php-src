@@ -2,7 +2,8 @@
 SplFileObject::getCsvControl function - basic test
 --FILE--
 <?php
-$obj = New SplFileObject(__DIR__.'/SplFileObject_testinput.csv');
+
+$obj = new SplFileObject(__DIR__ . '/SplFileObject_testinput.csv');
 var_dump($obj->getCsvControl());
 
 ?>

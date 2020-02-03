@@ -3,19 +3,21 @@ Closure::call
 --FILE--
 <?php
 
-class Foo {
+class Foo
+{
     public $x = 0;
-    function bar() {
+    function bar()
+    {
         return function () {
             return $this->x;
         };
     }
 }
 
-$foo = new Foo;
+$foo = new Foo();
 $qux = $foo->bar();
 
-$foobar = new Foo;
+$foobar = new Foo();
 $foobar->x = 3;
 
 var_dump($qux());
@@ -30,7 +32,7 @@ $bar = function () {
     return $this->x;
 };
 
-$elePHPant = new StdClass;
+$elePHPant = new StdClass();
 $elePHPant->x = 7;
 
 // Try on a StdClass
@@ -45,7 +47,8 @@ $beta = function ($z) {
 var_dump($beta->call($foobar, 7));
 
 // Ensure ->call calls with scope of passed object
-class FooBar {
+class FooBar
+{
     private $x = 3;
 }
 
@@ -53,7 +56,7 @@ $foo = function () {
     var_dump($this->x);
 };
 
-$foo->call(new FooBar);
+$foo->call(new FooBar());
 
 ?>
 --EXPECTF--

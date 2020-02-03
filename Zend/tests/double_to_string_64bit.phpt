@@ -34,6 +34,7 @@ foreach ($doubles as $d) {
 }
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 string(7) "2.9E+37"

@@ -5,9 +5,9 @@ date.timezone=UTC
 --FILE--
 <?php
 
-$start = new DateTime;
+$start = new DateTime();
 $interval = new DateInterval('P1D');
-$end = new DateTime;
+$end = new DateTime();
 $period = new DatePeriod($start, $interval, $end);
 
 echo "recurrences: ";
@@ -27,6 +27,7 @@ var_dump($period->end == $end);
 
 echo "interval: ";
 var_dump($period->interval->format("%R%d"));
+
 ?>
 --EXPECT--
 recurrences: int(1)

@@ -15,9 +15,11 @@ opcache.preload=
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 echo "Foo Bar\n";
 opcache_reset();
 echo "Opcache reset";
+
 ?>
 --EXPECTF--
 %s Message Cached script '%sbasic_logging%s'

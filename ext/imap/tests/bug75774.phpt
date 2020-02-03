@@ -8,12 +8,12 @@ extension_loaded('imap') or die('skip imap extension not available in this build
 <?php
 
 $fn = __DIR__ . DIRECTORY_SEPARATOR . "foo75774";
-$var1=fopen($fn, "w");
+$var1 = fopen($fn, "w");
 
 try {
-	imap_append($var1, "", "", "", "");
+    imap_append($var1, "", "", "", "");
 } catch (Throwable $e) {
-	echo "\nException: " . $e->getMessage() . "\n";
+    echo "\nException: " . $e->getMessage() . "\n";
 }
 
 fclose($var1);

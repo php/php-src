@@ -2,6 +2,7 @@
 Hash: CRC32 algorithm
 --FILE--
 <?php
+
 echo "crc32\n";
 echo hash('crc32', ''), "\n";
 echo hash('crc32', 'a'), "\n";

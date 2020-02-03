@@ -20,6 +20,7 @@ $s |= "test";
 var_dump($s);
 
 echo "Done\n";
+
 ?>
 --EXPECT--
 string(8) "3337>755"

@@ -5,7 +5,7 @@ Testing full-reference on list()
 
 error_reporting(E_ALL);
 
-$a = new stdclass;
+$a = new stdclass();
 $b =& $a;
 
 list($a, list($b)) = array($a, array($b));

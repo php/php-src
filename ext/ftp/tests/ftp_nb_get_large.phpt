@@ -12,11 +12,14 @@ if (disk_free_space(__DIR__) < 10*1024*1024*1024) {
 ?>
 --FILE--
 <?php
+
 require 'server.inc';
 
 $ftp = ftp_connect('127.0.0.1', $port);
 ftp_login($ftp, 'user', 'pass');
-if (!$ftp) die("Couldn't connect to the server");
+if (!$ftp) {
+    die("Couldn't connect to the server");
+}
 
 $local_file = __DIR__ . DIRECTORY_SEPARATOR . "ftp_nb_get_large.txt";
 touch($local_file);
@@ -26,6 +29,7 @@ fseek($fp, 5368709119);
 var_dump(fread($fp, 1));
 var_dump(filesize($local_file));
 fclose($fp);
+
 ?>
 --CLEAN--
 <?php

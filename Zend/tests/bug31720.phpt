@@ -2,6 +2,7 @@
 Bug #31720 (Invalid object callbacks not caught in array_walk())
 --FILE--
 <?php
+
 $array = array('at least one element');
 
 try {
@@ -9,6 +10,7 @@ try {
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
+
 ?>
 --EXPECTF--
 Warning: Undefined variable: nonesuchvar in %s on line %d

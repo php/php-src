@@ -7,7 +7,8 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 
-function test() {
+function test()
+{
     $a = ["3"];
     $x = 1;
     foreach ($a as $x) {

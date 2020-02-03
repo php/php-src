@@ -13,6 +13,7 @@ print $output . PHP_EOL;
 var_dump(xmlwriter_write_dtd($xmlwriter, '', '', ''));
 $output = xmlwriter_flush($xmlwriter, true);
 print $output;
+
 ?>
 --CREDITS--
 Koen Kuipers koenk82@gmail.com

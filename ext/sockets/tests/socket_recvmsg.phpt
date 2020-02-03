@@ -17,7 +17,8 @@ if (!defined('IPV6_RECVPKTINFO')) {
 ?>
 --FILE--
 <?php
-include __DIR__."/mcast_helpers.php.inc";
+
+include __DIR__ . "/mcast_helpers.php.inc";
 $addr = '::1';
 
 echo "creating send socket\n";
@@ -37,7 +38,9 @@ socket_set_option($s, IPPROTO_IPV6, IPV6_RECVPKTINFO, 1) or die("err");
 
 $r = socket_sendto($sends1, $m = "testing packet", strlen($m), 0, $addr, 3001);
 var_dump($r);
-if ($r < 12) die;
+if ($r < 12) {
+    die;
+}
 checktimeout($s, 500);
 
 $data = [
@@ -45,8 +48,12 @@ $data = [
     "buffer_size" => 2000,
     "controllen" => socket_cmsg_space(IPPROTO_IPV6, IPV6_PKTINFO),
 ];
-if (!socket_recvmsg($s, $data, 0)) die("recvmsg");
+if (!socket_recvmsg($s, $data, 0)) {
+    die("recvmsg");
+}
 print_r($data);
+
+?>
 --EXPECTF--
 creating send socket
 resource(%d) of type (Socket)

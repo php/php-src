@@ -7,6 +7,7 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
+
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
@@ -25,15 +26,16 @@ echo $phar->getAlias() . "\n";
 $b = $phar;
 $phar = new Phar(__DIR__ . '/notphar.phar');
 try {
-	$phar->setAlias('test');
+    $phar->setAlias('test');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	$b = new Phar(__DIR__ . '/nope.phar', 0, 'test');
+    $b = new Phar(__DIR__ . '/nope.phar', 0, 'test');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
+
 ?>
 --CLEAN--
 <?php

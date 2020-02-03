@@ -2,6 +2,7 @@
 SPL: Test ArrayObject::asort() function : basic functionality with array based store
 --FILE--
 <?php
+
 /* Prototype  : int ArrayObject::asort()
  * Description: proto int ArrayIterator::asort()
  * Sort the entries by values.
@@ -12,7 +13,7 @@ SPL: Test ArrayObject::asort() function : basic functionality with array based s
 echo "*** Testing ArrayObject::asort() : basic functionality ***\n";
 
 $ao1 = new ArrayObject(array(4,2,3));
-$ao2 = new ArrayObject(array('a'=>4,'b'=>2,'c'=>3));
+$ao2 = new ArrayObject(array('a' => 4,'b' => 2,'c' => 3));
 var_dump($ao1->asort());
 var_dump($ao1);
 try {
@@ -23,6 +24,7 @@ try {
 var_dump($ao2);
 var_dump($ao2->asort(SORT_NUMERIC));
 var_dump($ao2);
+
 ?>
 --EXPECTF--
 *** Testing ArrayObject::asort() : basic functionality ***

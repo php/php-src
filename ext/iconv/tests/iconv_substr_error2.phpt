@@ -7,6 +7,7 @@ function_exists('iconv_substr') or die("skip iconv_substr() is not available in 
 ?>
 --FILE--
 <?php
+
 /* Prototype  : string iconv_substr(string str, int offset, [int length, string charset])
  * Description: Returns part of a string
  * Source code: ext/iconv/iconv.c
@@ -23,9 +24,10 @@ $start = 1;
 $length = 5;
 $encoding = 'unknown-encoding';
 
-var_dump( iconv_substr($str, $start, $length, $encoding));
+var_dump(iconv_substr($str, $start, $length, $encoding));
 
 echo "Done";
+
 ?>
 --EXPECTF--
 *** Testing iconv_substr() : error conditions ***

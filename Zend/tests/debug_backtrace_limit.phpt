@@ -2,15 +2,19 @@
 debug_backtrace limit
 --FILE--
 <?php
-function a() {
+
+function a()
+{
     b();
 }
 
-function b() {
+function b()
+{
     c();
 }
 
-function c() {
+function c()
+{
     print_r(debug_backtrace(0, 1));
     print_r(debug_backtrace(0, 2));
     print_r(debug_backtrace(0, 0));
@@ -18,6 +22,7 @@ function c() {
 }
 
 a();
+
 ?>
 --EXPECTF--
 Array

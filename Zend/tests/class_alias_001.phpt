@@ -3,12 +3,15 @@ Testing class_alias()
 --FILE--
 <?php
 
-class foo { }
+class foo
+{
+
+}
 
 class_alias('foo', 'bar');
 
-$a = new foo;
-$b = new bar;
+$a = new foo();
+$b = new bar();
 
 var_dump($a == $b, $a === $b);
 var_dump($a instanceof $b);

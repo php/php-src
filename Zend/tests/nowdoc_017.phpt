@@ -3,7 +3,8 @@ Testing nowdoc in default value for property
 --FILE--
 <?php
 
-class foo {
+class foo
+{
     public $bar = <<<'EOT'
 bar
 EOT;

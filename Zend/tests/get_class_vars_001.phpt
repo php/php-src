@@ -3,16 +3,18 @@ get_class_vars(): Simple test
 --FILE--
 <?php
 
-class A {
-	public $a = 1;
-	private $b = 2;
-	private $c = 3;
+class A
+{
+    public $a = 1;
+    private $b = 2;
+    private $c = 3;
 }
 
-class B extends A {
-	static public $aa = 4;
-	static private $bb = 5;
-	static protected $cc = 6;
+class B extends A
+{
+    public static $aa = 4;
+    private static $bb = 5;
+    protected static $cc = 6;
 }
 
 

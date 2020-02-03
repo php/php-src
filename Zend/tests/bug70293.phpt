@@ -5,7 +5,8 @@ zend.assertions=-1
 --FILE--
 <?php
 
-function f() {
+function f()
+{
     assert(@$a ?: 1);
     echo "OK";
 };

@@ -2,8 +2,10 @@
 Nullable return value
 --FILE--
 <?php
-function foo($x) : ?array {
-	return $x;
+
+function foo($x): ?array
+{
+    return $x;
 }
 
 foo([]);
@@ -11,6 +13,7 @@ echo "ok\n";
 foo(null);
 echo "ok\n";
 foo(0);
+
 ?>
 --EXPECTF--
 ok

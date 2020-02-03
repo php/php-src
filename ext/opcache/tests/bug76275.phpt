@@ -8,6 +8,7 @@ opcache.file_cache={TMP}
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 if (PHP_VERSION_ID >= 70000) {
     echo "Done";
     return;
@@ -24,5 +25,7 @@ if (!is_callable('random_bytes')) {
         return '';
     }
 }
+
+?>
 --EXPECT--
 Done

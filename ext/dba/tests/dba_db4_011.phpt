@@ -8,10 +8,11 @@ die("info $HND handler used");
 ?>
 --FILE--
 <?php
+
 $handler = "db4";
-require_once(__DIR__ .'/test.inc');
+require_once(__DIR__ . '/test.inc');
 echo "database handler: $handler\n";
-if (($db_file=dba_open($db_filename, "c", $handler))!==FALSE) {
+if (($db_file = dba_open($db_filename, "c", $handler)) !== false) {
     var_dump(dba_insert("key1", "Content String 1", $db_file));
     var_dump(dba_insert("key2", "Content String 2", $db_file));
     var_dump(dba_insert("key2", "Same key", $db_file));

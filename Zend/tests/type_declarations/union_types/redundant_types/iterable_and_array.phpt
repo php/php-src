@@ -3,7 +3,8 @@ Using both iterable and array
 --FILE--
 <?php
 
-function test(): iterable|array {
+function test(): iterable | array
+{
 }
 
 ?>

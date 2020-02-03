@@ -3,23 +3,30 @@ Bug #60217 (Requiring the same method from different traits and abstract methods
 --FILE--
 <?php
 
-trait TBroken1 {
-    public abstract function foo($a, $b = 0);
+trait TBroken1
+{
+    abstract public function foo($a, $b = 0);
 }
 
-trait TBroken2 {
-    public abstract function foo($a);
+trait TBroken2
+{
+    abstract public function foo($a);
 }
 
-class CBroken {
-    use TBroken1, TBroken2;
+class CBroken
+{
+    use TBroken1;
+    use TBroken2;
 
-    public function foo($a) {
+    public function foo($a)
+    {
         echo 'FOO';
     }
 }
 
-$o = new CBroken;
+$o = new CBroken();
 $o->foo(1);
+
+?>
 --EXPECTF--
 Fatal error: Declaration of TBroken2::foo($a) must be compatible with TBroken1::foo($a, $b = 0) in %s on line %d

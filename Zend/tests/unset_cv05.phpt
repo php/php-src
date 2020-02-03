@@ -11,10 +11,12 @@ include(__DIR__.'/../../ext/session/tests/skipif.inc');
 ?>
 --FILE--
 <?php
+
 $_SESSION = "ok\n";
 session_start();
 echo $_SESSION;
 echo "\nok\n";
+
 ?>
 --EXPECTF--
 Warning: Array to string conversion in %s on line %d

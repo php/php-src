@@ -6,15 +6,19 @@ require 'skipif.inc';
 ?>
 --FILE--
 <?php
+
 require 'server.inc';
 
 $ftp = ftp_connect('127.0.0.1', $port);
-if (!$ftp) die("Couldn't connect to the server");
+if (!$ftp) {
+    die("Couldn't connect to the server");
+}
 
 ftp_login($ftp, 'user', 'pass');
 
 var_dump(ftp_rename($ftp, 'existing_file', 'nonexisting_file'));
 var_dump(ftp_rename($ftp, 'nonexisting_file', 'nonexisting_file'));
+
 ?>
 --EXPECTF--
 bool(true)

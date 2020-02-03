@@ -2,6 +2,7 @@
 __DIR__ constant test with nested includes
 --FILE--
 <?php
+
 echo __DIR__ . "\n";
 echo dirname(__FILE__) . "\n";
 include 'fixtures/folder1/fixture.inc';
@@ -24,6 +25,7 @@ include 'fixtures/folder4/subfolder1/fixture.inc';
 include 'fixtures/folder4/subfolder2/fixture.inc';
 include 'fixtures/folder4/subfolder3/fixture.inc';
 include 'fixtures/folder4/subfolder4/fixture.inc';
+
 ?>
 --EXPECTF--
 %stests%sconstants

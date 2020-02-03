@@ -58,6 +58,7 @@ elseif (PHP_OS == 'FreeBSD') {
 memory_limit=2100M
 --FILE--
 <?php
+
 $a1 = str_repeat("1", 1024 * 1024 * 1024 * 0.5);
 echo "1\n";
 $a2 = str_repeat("2", 1024 * 1024 * 1024 * 0.5);
@@ -68,6 +69,7 @@ $a4 = str_repeat("4", 1024 * 1024 * 1024 * 0.5);
 echo "4\n";
 $a5 = str_repeat("5", 1024 * 1024 * 1024 * 0.5);
 echo "5\n";
+
 ?>
 --EXPECTF--
 1

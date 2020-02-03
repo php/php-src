@@ -9,11 +9,14 @@ opcache.opt_debug_level=0x20000
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function test() {
+
+function test()
+{
     $var = null;
     $var = $var ?: test2();
     return $var;
 }
+
 ?>
 --EXPECTF--
 $_main: ; (lines=1, args=0, vars=0, tmps=0)

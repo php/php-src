@@ -39,15 +39,16 @@ include $pname . '/b/c.php';
 
 $cache_dir = ini_get("opcache.file_cache");
 if (is_dir($cache_dir)) {
-	$it = new RecursiveIteratorIterator(
-		new RecursiveDirectoryIterator($cache_dir, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST
-	);
-	foreach ($it as $fi) {
-		$fn = ($fi->isDir() ? 'rmdir' : 'unlink');
-		$fn($fi->getRealPath());
-	}
-	
-	rmdir($cache_dir);
+    $it = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($cache_dir, RecursiveDirectoryIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
+    foreach ($it as $fi) {
+        $fn = ($fi->isDir() ? 'rmdir' : 'unlink');
+        $fn($fi->getRealPath());
+    }
+
+    rmdir($cache_dir);
 }
 
 ?>

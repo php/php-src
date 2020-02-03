@@ -3,8 +3,9 @@ Yielding from the already running Generator should fail (bug #69458)
 --FILE--
 <?php
 
-function gen() {
-	yield from yield;
+function gen()
+{
+    yield from yield;
 }
 
 ($gen = gen())->send($gen);

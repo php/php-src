@@ -5,8 +5,10 @@ __toString() exception during PDO Sqlite parameter binding
 --FILE--
 <?php
 
-class throws {
-    function __toString() {
+class throws
+{
+    function __toString()
+    {
         throw new Exception("Sorry");
     }
 }
@@ -20,7 +22,7 @@ $stmt->bindValue('i', $param1);
 $param2 = "foo";
 $stmt->bindParam('v', $param2);
 
-$param2 = new throws;
+$param2 = new throws();
 
 try {
     $stmt->execute();

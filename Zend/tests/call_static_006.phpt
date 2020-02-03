@@ -3,10 +3,12 @@ Testing __callStatic
 --FILE--
 <?php
 
-class foo {
-	static function __callstatic($a, $b) {
-		var_dump($a);
-	}
+class foo
+{
+    static function __callstatic($a, $b)
+    {
+        var_dump($a);
+    }
 }
 
 foo::__construct();

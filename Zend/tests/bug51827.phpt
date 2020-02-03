@@ -3,9 +3,9 @@ Bug #51827 (Bad warning when register_shutdown_function called with wrong num of
 --FILE--
 <?php
 
-
-function abc() {
-	var_dump(1);
+function abc()
+{
+    var_dump(1);
 }
 
 register_shutdown_function('timE');

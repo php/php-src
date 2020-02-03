@@ -2,8 +2,9 @@
 Test strict declaration block declaration 008
 --FILE--
 <?php
+
 declare(strict_types=1) {
-	var_dump(strlen("abc"));
+    var_dump(strlen("abc"));
 }
 
 ?>

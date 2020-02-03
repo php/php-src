@@ -3,17 +3,20 @@ Generator return value has to have Traversable-ish, but may also have extra type
 --FILE--
 <?php
 
-interface I {
-    public function test(): iterable|false;
+interface I
+{
+    public function test(): iterable | false;
 }
 
-class C implements I {
-    public function test(): iterable|false {
+class C implements I
+{
+    public function test(): iterable | false
+    {
         yield;
     }
 }
 
-var_dump((new C)->test());
+var_dump((new C())->test());
 
 ?>
 --EXPECT--

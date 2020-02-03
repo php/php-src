@@ -5,41 +5,41 @@ Bug #38618 (RecursiveArrayIterator::hasChildren() follows objects)
 
 class FruitPublic
 {
-  public $title;
+    public $title;
 
-  public function __construct($title)
-  {
-    $this->title = $title;
-  }
+    public function __construct($title)
+    {
+        $this->title = $title;
+    }
 
-  public function __toString()
-  {
-    return $this->title;
-  }
+    public function __toString()
+    {
+        return $this->title;
+    }
 }
 
 class FruitProtected
 {
-  protected $title;
+    protected $title;
 
-  public function __construct($title)
-  {
-    $this->title = $title;
-  }
+    public function __construct($title)
+    {
+        $this->title = $title;
+    }
 
-  public function __toString()
-  {
-    return $this->title;
-  }
+    public function __toString()
+    {
+        return $this->title;
+    }
 }
 
 function test_array($array, $which, $flags = 0)
 {
-  echo "===$which===\n";
-  $it = new RecursiveArrayIterator($array, $flags);
-  foreach (new RecursiveIteratorIterator($it) as $k => $fruit) {
-    echo $k , ' => ', $fruit, "\n";
-  }
+    echo "===$which===\n";
+    $it = new RecursiveArrayIterator($array, $flags);
+    foreach (new RecursiveIteratorIterator($it) as $k => $fruit) {
+        echo $k , ' => ', $fruit, "\n";
+    }
 }
 
 $array = array(
@@ -83,6 +83,7 @@ test_array($array, 'Protected Property');
 
 test_array($array, 'Public Property New', RecursiveArrayIterator::CHILD_ARRAYS_ONLY);
 test_array($array, 'Protected Property New', RecursiveArrayIterator::CHILD_ARRAYS_ONLY);
+
 ?>
 --EXPECT--
 ===Default with array===

@@ -3,10 +3,15 @@ Try catch finally
 --FILE--
 <?php
 
-class AE extends Exception {};
-class BE extends Exception {};
+class AE extends Exception
+{
+};
+class BE extends Exception
+{
+};
 
-function foo () {
+function foo()
+{
     try {
         try {
             try {
@@ -21,16 +26,17 @@ function foo () {
             echo "2";
         }
     } catch (BE $e) {
-      die("error");
+        die("error");
     } catch (Exception $e) {
         echo "3";
     } finally {
         echo "4";
     }
-   return 1;
+    return 1;
 }
 
 var_dump(foo());
+
 ?>
 --EXPECT--
 1234int(1)

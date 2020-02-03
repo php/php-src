@@ -5,11 +5,12 @@ Incorrect elision of return type checks
 --FILE--
 <?php
 
-function test1($x) : callable {
+function test1($x): callable
+{
     if ($x == 1) {
         $c = 'foo';
     } elseif ($x == 2) {
-        $c = new stdClass;
+        $c = new stdClass();
     } else {
         $c = [$x => &$x];
     }
@@ -22,9 +23,12 @@ try {
     echo "Error: {$e->getMessage()}\n";
 }
 
-class Foo {}
-function test2() : Foo {
-    $obj = new stdClass;
+class Foo
+{
+}
+function test2(): Foo
+{
+    $obj = new stdClass();
     return $obj;
 }
 

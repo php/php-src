@@ -2,38 +2,48 @@
 ZE2 Late Static Binding with exceptions
 --FILE--
 <?php
-function foo() {
+
+function foo()
+{
     B::throwException();
 }
-class C {
-    public static function bla() {
+class C
+{
+    public static function bla()
+    {
         B::throwException();
     }
-    public static function getException() {
+    public static function getException()
+    {
         return new Exception();
-
     }
 }
-class A {
+class A
+{
 
-    public static function throwException_after() {
+    public static function throwException_after()
+    {
         C::bla();
     }
-    public static function throwException() {
+    public static function throwException()
+    {
         throw C::getException();
     }
-    public static function test() {
+    public static function test()
+    {
         static::who();
     }
-    public static function who() {
+    public static function who()
+    {
         echo "A\n";
     }
 
-    public static function mycatch() {
+    public static function mycatch()
+    {
         try {
             static::who();
             B::throwException_after();
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             static::who();
             A::test();
             static::who();
@@ -45,7 +55,8 @@ class A {
         }
     }
 
-    public static function simpleCatch() {
+    public static function simpleCatch()
+    {
         try {
             static::who();
             throw new Exception();
@@ -55,17 +66,19 @@ class A {
     }
 }
 
-class B extends A {
-    public static function who() {
+class B extends A
+{
+    public static function who()
+    {
         echo "B\n";
     }
-
 }
 
 echo "via A:\n";
 A::myCatch();
 echo "via B:\n";
 B::myCatch();
+
 ?>
 --EXPECT--
 via A:

@@ -8,16 +8,20 @@ opcache.optimization_level=-1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function func($blogname, $user = '' ) {
-	if (! is_object( $user ) || ( is_object($user) && ( $user->login != $blogname )) ) {
-		test();
-	}
 
-	$result = array('user' => $user);
+function func($blogname, $user = '')
+{
+    if (! is_object($user) || ( is_object($user) && ( $user->login != $blogname ))) {
+        test();
+    }
 
-	return true;
+    $result = array('user' => $user);
+
+    return true;
 }
 ?>
 okey
+
+?>
 --EXPECT--
 okey

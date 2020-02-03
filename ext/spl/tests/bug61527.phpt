@@ -2,6 +2,7 @@
 Bug #61527 (Recursive/ArrayIterator gives misleading notice when array empty or moved to the end)
 --FILE--
 <?php
+
 $ao = new ArrayObject(array());
 $ai = $ao->getIterator();
 
@@ -42,12 +43,12 @@ var_dump($ai2->next());
 var_dump($ai2->key());
 
 /* testing RecursiveArrayIterator */
-$ao3 = new ArrayObject(array(), NULL, 'RecursiveArrayIterator');
+$ao3 = new ArrayObject(array(), null, 'RecursiveArrayIterator');
 $ai3 = $ao3->getIterator();
 
 var_dump($ai3->getChildren());
 
-$ao4 = new ArrayObject(array(1, 2), NULL, 'RecursiveArrayIterator');
+$ao4 = new ArrayObject(array(1, 2), null, 'RecursiveArrayIterator');
 $ai4 = $ao4->getIterator();
 
 $ai4->next();
@@ -61,6 +62,7 @@ var_dump($ai4->hasChildren());
 
 $ao4->offsetUnset($ai4->key());
 var_dump($ai4->getChildren());
+
 ?>
 ==DONE==
 <?php exit(0); ?>

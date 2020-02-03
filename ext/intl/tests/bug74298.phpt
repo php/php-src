@@ -4,6 +4,7 @@ Bug #74298 (IntlDateFormatter->format() doesn't return microseconds/fractions)
 <?php if (!extension_loaded('intl')) print 'skip'; ?>
 --FILE--
 <?php
+
 var_dump((new \DateTime('2017-01-01 01:02:03.123456'))->format('Y-m-d\TH:i:s.u'));
 
 var_dump((new \IntlDateFormatter(
@@ -23,6 +24,7 @@ var_dump(datefmt_create(
     \IntlDateFormatter::GREGORIAN,
     'yyyy-MM-dd HH:mm:ss.SSSSSS'
 )->format(new \DateTime('2017-01-01 01:02:03.123456', new \DateTimeZone('UTC'))));
+
 ?>
 --EXPECT--
 string(26) "2017-01-01T01:02:03.123456"

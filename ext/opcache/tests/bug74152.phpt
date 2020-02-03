@@ -14,14 +14,15 @@ $foo = 'foo';
 $bar = null;
 
 switch ($foo) {
-default:
-case 'foo':
-	if ($bar) {
-		echo 'true';
-	} else {
-		echo 'false';
-	}
+    default:
+    case 'foo':
+        if ($bar) {
+            echo 'true';
+        } else {
+            echo 'false';
+        }
 }
+
 ?>
 --EXPECT--
 false

@@ -3,16 +3,19 @@ Printing the stack trace in a generator
 --FILE--
 <?php
 
-function f1() {
+function f1()
+{
     debug_print_backtrace();
 }
 
-function f2($arg1, $arg2) {
+function f2($arg1, $arg2)
+{
     f1();
     yield; // force generator
 }
 
-function f3($gen) {
+function f3($gen)
+{
     $gen->rewind(); // trigger run
 }
 

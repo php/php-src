@@ -3,12 +3,14 @@ Access to typed static properties before initialization
 --FILE--
 <?php
 
-class Test {
+class Test
+{
     public static int $a;
     protected static int $b;
     private static int $c;
 
-    static function run() {
+    static function run()
+    {
         try {
             self::$a;
         } catch (Error $e) {

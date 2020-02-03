@@ -18,6 +18,7 @@ var_dump(gmp_strval(gmp_abs("-099987654")));
 var_dump(gmp_abs(array()));
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Warning: gmp_abs(): Unable to convert variable to GMP - string is not an integer in %s on line %d

@@ -3,24 +3,27 @@ Bug #70228 (memleak if return in finally block)
 --FILE--
 <?php
 
-function foo() {
+function foo()
+{
     $array = [1, 2, $n = 3];
     foreach ($array as $value) {
         var_dump($value);
         try {
             try {
-            	switch (str_repeat("b", 2)) {
-            		case "bb":
-	                    return str_repeat("a", 2);
+                switch (str_repeat("b", 2)) {
+                    case "bb":
+                        return str_repeat("a", 2);
                 }
             } finally {
-                throw new Exception;
+                throw new Exception();
             }
-        } catch (Exception $e) { }
+        } catch (Exception $e) {
+        }
     }
 }
 
 foo();
+
 ?>
 --EXPECT--
 int(1)

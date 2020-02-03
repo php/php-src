@@ -3,7 +3,7 @@ foreach with list syntax
 --FILE--
 <?php
 
-foreach(array(array(1,2), array(3,4)) as list($a, $b)) {
+foreach (array(array(1,2), array(3,4)) as list($a, $b)) {
     var_dump($a . $b);
 }
 
@@ -29,7 +29,6 @@ foreach ($multi as list(list($a, $b), list($c, $d))) {
 foreach ($multi as $key => list(list($a, $b), list($c, $d))) {
     var_dump($key . $a . $b . $c . $d);
 }
-
 
 ?>
 --EXPECT--

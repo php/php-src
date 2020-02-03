@@ -8,12 +8,14 @@ PHPNW Testfest 2009 - Simon Westcott (swestcott@gmail.com)
 $s = new SplObjectStorage();
 
 try {
-    $s->unserialize(NULL);
-} catch(UnexpectedValueException $e) {
+    $s->unserialize(null);
+} catch (UnexpectedValueException $e) {
     echo $e->getMessage();
 }
 
 ?>
 Done
+
+?>
 --EXPECT--
 Done

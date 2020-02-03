@@ -17,7 +17,8 @@ $path = __DIR__ . "/unix_sock";
 @unlink($path);
 --FILE--
 <?php
-include __DIR__."/mcast_helpers.php.inc";
+
+include __DIR__ . "/mcast_helpers.php.inc";
 $path = __DIR__ . "/unix_sock";
 
 @unlink($path);
@@ -54,12 +55,16 @@ $data = [
     "controllen" => socket_cmsg_space(SOL_SOCKET, SCM_RIGHTS, 4)
 ];
 var_dump($data);
-if (!socket_recvmsg($s, $data, 0)) die("recvmsg");
+if (!socket_recvmsg($s, $data, 0)) {
+    die("recvmsg");
+}
 
 if ($data["control"]) {
     $control = $data["control"][0];
-    if ($control["level"] == SOL_SOCKET &&
-        $control["type"]  == SCM_RIGHTS) {
+    if (
+        $control["level"] == SOL_SOCKET &&
+        $control["type"]  == SCM_RIGHTS
+    ) {
         foreach ($control["data"] as $resource) {
             if (!is_resource($resource)) {
                 echo "FAIL RES\n";
@@ -77,6 +82,8 @@ if ($data["control"]) {
     echo "FAIL CONTROL\n";
     var_dump($data);
 }
+
+?>
 --EXPECTF--
 creating send socket
 resource(%d) of type (Socket)

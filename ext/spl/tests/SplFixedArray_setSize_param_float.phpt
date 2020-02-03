@@ -4,9 +4,11 @@ SplFixedArray::setSize() with a float param
 PHPNW Testfest 2009 - Adrian Hardy
 --FILE--
 <?php
+
 $fixed_array = new SplFixedArray(2);
 $fixed_array->setSize(3.14159);
 var_dump($fixed_array);
+
 ?>
 --EXPECT--
 object(SplFixedArray)#1 (3) {

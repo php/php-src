@@ -3,11 +3,15 @@ Aborted yield during object instantiation
 --FILE--
 <?php
 
-class Foo {
-    public function __construct() {}
+class Foo
+{
+    public function __construct()
+    {
+    }
 }
 
-function gen() {
+function gen()
+{
     $x = new Foo(yield);
 }
 

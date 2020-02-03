@@ -6,11 +6,9 @@ aliasing imported constants to resolve naming conflicts
 namespace foo {
     const baz = 42;
 }
-
 namespace bar {
     const baz = 43;
 }
-
 namespace {
     use const foo\baz as foo_baz,
               bar\baz as bar_baz;

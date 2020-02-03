@@ -6,22 +6,26 @@ Chad Sikorra <Chad.Sikorra@gmail.com>
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+
 require "connect.inc";
 $link = ldap_connect($host, $port);
 
-foreach([
-	LDAP_OPT_X_TLS_PROTOCOL_SSL2,
-	LDAP_OPT_X_TLS_PROTOCOL_SSL3,
-	LDAP_OPT_X_TLS_PROTOCOL_TLS1_0,
-	LDAP_OPT_X_TLS_PROTOCOL_TLS1_1,
-	LDAP_OPT_X_TLS_PROTOCOL_TLS1_2,
-] as $option) {
-	$result = ldap_set_option($link, LDAP_OPT_X_TLS_PROTOCOL_MIN, $option);
-	var_dump($result);
+foreach (
+    [
+    LDAP_OPT_X_TLS_PROTOCOL_SSL2,
+    LDAP_OPT_X_TLS_PROTOCOL_SSL3,
+    LDAP_OPT_X_TLS_PROTOCOL_TLS1_0,
+    LDAP_OPT_X_TLS_PROTOCOL_TLS1_1,
+    LDAP_OPT_X_TLS_PROTOCOL_TLS1_2,
+    ] as $option
+) {
+    $result = ldap_set_option($link, LDAP_OPT_X_TLS_PROTOCOL_MIN, $option);
+    var_dump($result);
 
-	ldap_get_option($link, LDAP_OPT_X_TLS_PROTOCOL_MIN, $optionval);
-	var_dump($optionval);
+    ldap_get_option($link, LDAP_OPT_X_TLS_PROTOCOL_MIN, $optionval);
+    var_dump($optionval);
 }
+
 ?>
 --EXPECT--
 bool(true)

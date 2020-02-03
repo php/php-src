@@ -3,7 +3,10 @@ Bug #75242: RecursiveArrayIterator doesn't have constants from parent class
 --FILE--
 <?php
 
-class Foo extends ArrayIterator { }
+class Foo extends ArrayIterator
+{
+
+}
 
 $r = new ReflectionClass(Foo::class);
 var_dump($r->getConstants());

@@ -9,10 +9,10 @@ require_once(__DIR__ .'/skipif.inc');
 <?php
 
 $handler = "db4";
-require_once(__DIR__ .'/test.inc');
+require_once(__DIR__ . '/test.inc');
 echo "database handler: $handler\n";
 
-if (($db_file = dba_open($db_filename, "cd", $handler)) !== FALSE) {
+if (($db_file = dba_open($db_filename, "cd", $handler)) !== false) {
     if (file_exists($db_filename)) {
         echo "database file created\n";
         var_dump(dba_insert("key1", "This is a test insert", $db_file));

@@ -10,11 +10,15 @@ opcache.jit_buffer_size=1M
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-function foo() {
-	$a[0][0] += 2;
-	return $a[0];
+
+function foo()
+{
+    $a[0][0] += 2;
+    return $a[0];
 }
 var_dump(foo());
+
+?>
 --EXPECTF--
 Warning: Undefined variable: a in %s on line %d
 

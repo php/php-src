@@ -2,6 +2,7 @@
 timezone_offset_get() tests
 --FILE--
 <?php
+
 date_default_timezone_set('UTC');
 
 $dto = date_create("2006-12-12");

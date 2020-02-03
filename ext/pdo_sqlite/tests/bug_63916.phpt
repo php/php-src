@@ -7,6 +7,7 @@ if (PHP_INT_SIZE < 8) die('skip');
 ?>
 --FILE--
 <?php
+
 $num = 100004313234244; // exceeds 32 bits
 $conn = new PDO('sqlite::memory:');
 $conn->query('CREATE TABLE users (id INTEGER NOT NULL, num INTEGER NOT NULL, PRIMARY KEY(id))');
@@ -19,7 +20,7 @@ $stmt->execute();
 $stmt = $conn->query('SELECT num FROM users');
 $result = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
-var_dump($num,$result[0]);
+var_dump($num, $result[0]);
 
 ?>
 --EXPECT--

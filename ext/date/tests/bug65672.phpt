@@ -6,7 +6,7 @@ date.timezone=UTC
 <?php
 
 $interval = new DateInterval('P1D');
-$period = new class(new DateTime, $interval, new DateTime) extends DatePeriod {
+$period = new class (new DateTime(), $interval, new DateTime()) extends DatePeriod {
     public $extra = "stuff";
 };
 

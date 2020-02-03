@@ -2,6 +2,7 @@
 Bug #65328 (Segfault when getting SplStack object Value)
 --FILE--
 <?php
+
 /**
  * @author AlexanderC
  */
@@ -38,8 +39,8 @@ class Tree
         $iterator = $this->getIterator();
 
         /** @var Node $node */
-        foreach($iterator as $node) {
-            if($node->getUid() === $uid) {
+        foreach ($iterator as $node) {
+            if ($node->getUid() === $uid) {
                 return $node;
             }
         }
@@ -56,8 +57,8 @@ class Tree
         $result = new \SplStack();
 
         /** @var Node $node */
-        foreach($this->getIterator() as $node) {
-            if($node->getUid() == $uid) {
+        foreach ($this->getIterator() as $node) {
+            if ($node->getUid() == $uid) {
                 $result->push($node);
             }
         }
@@ -117,7 +118,7 @@ class Node extends \RecursiveArrayIterator implements \Countable
      */
     public function __construct($data, $uid = null, Node $parent = null, $assureUnique = false)
     {
-        if(null !== $parent) {
+        if (null !== $parent) {
             $this->parent = $parent;
         }
 
@@ -189,7 +190,7 @@ class Node extends \RecursiveArrayIterator implements \Countable
      */
     public function setParent(Node $parent)
     {
-        if(true === $this->assureUnique && !self::checkUnique($parent, $this->uid)) {
+        if (true === $this->assureUnique && !self::checkUnique($parent, $this->uid)) {
             throw new \RuntimeException("Node uid is not unique in assigned node tree");
         }
 
@@ -206,7 +207,7 @@ class Node extends \RecursiveArrayIterator implements \Countable
         $headNode = $node;
         do {
             $headNode = $node;
-        } while($node = $node->getParent());
+        } while ($node = $node->getParent());
 
         $tree = new Tree($headNode);
 
@@ -293,6 +294,8 @@ $node2 = new Node('value2', 2);
 $node1->addChild($node2);
 
 print_r($tree->findAll(2)->offsetGet(0));
+
+?>
 --EXPECTF--
 Node Object
 (

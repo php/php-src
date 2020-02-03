@@ -2,6 +2,7 @@
 strtotime() function - a test to show the difference in behaviour between 'first' and '1', "second" and "2"...
 --FILE--
 <?php
+
 date_default_timezone_set('UTC');
 /*
  * The first of December 2008 is a Monday.
@@ -34,6 +35,7 @@ var_dump(date('Y-m-d', strtotime('second Monday December 2008')));
  * This is parsed as the "third following Monday after the first Monday in December"
  */
 var_dump(date('Y-m-d', strtotime('third Monday December 2008')));
+
 ?>
 --EXPECT--
 string(10) "2008-12-01"

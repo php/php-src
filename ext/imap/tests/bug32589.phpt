@@ -8,6 +8,7 @@ Bug #32589 (crash inside imap_mail_compose() function)
 ?>
 --FILE--
 <?php
+
 $m_envelope["To"] = "mail@example.com";
 $m_part1["type"] = TYPEMULTIPART;
 $m_part1["subtype"] = "mixed";
@@ -21,6 +22,7 @@ $m_part2["contents.data"] = "hello";
 $m_body[1] = $m_part1;
 $m_body[2] = $m_part2;
 echo imap_mail_compose($m_envelope, $m_body);
+
 ?>
 --EXPECTF--
 MIME-Version: 1.0

@@ -8,6 +8,7 @@ highlight.default = #0000BB
 highlight.html    = #000000
 --FILE--
 <?php
+
 $code = <<<'EOF'
 <?php
   $x = <<<'EOT'
@@ -16,6 +17,7 @@ EOT
 ?>
 EOF;
 highlight_string($code);
+
 ?>
 --EXPECT--
 <code><span style="color: #000000">

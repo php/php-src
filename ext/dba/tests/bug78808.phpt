@@ -8,14 +8,16 @@ require_once __DIR__ .'/skipif.inc';
 ?>
 --FILE--
 <?php
+
 $handler = 'lmdb';
-require_once __DIR__ .'/test.inc';
-$lmdb_h = dba_open($db_filename, 'c', 'lmdb', 0644, 5*1048576);
+require_once __DIR__ . '/test.inc';
+$lmdb_h = dba_open($db_filename, 'c', 'lmdb', 0644, 5 * 1048576);
 for ($i = 0; $i < 50000; $i++) {
-    dba_insert('key' . $i, 'value '. $i, $lmdb_h);
+    dba_insert('key' . $i, 'value ' . $i, $lmdb_h);
 }
 dba_close($lmdb_h);
 echo "done\n";
+
 ?>
 --EXPECT--
 done

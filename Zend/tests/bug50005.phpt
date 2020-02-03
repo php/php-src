@@ -3,13 +3,15 @@ Bug #50005 (Throwing through Reflection modified Exception object makes segmenta
 --FILE--
 <?php
 
-class a extends exception {
-	public function __construct() {
-		$this->file = null;
-	}
+class a extends exception
+{
+    public function __construct()
+    {
+        $this->file = null;
+    }
 }
 
-throw new a;
+throw new a();
 
 ?>
 --EXPECTF--

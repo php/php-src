@@ -12,10 +12,11 @@ if (!file_exists($mibdir . '/SNMPv2-MIB.txt')) die('skip MIB file not in the sys
 ?>
 --FILE--
 <?php
-require_once(__DIR__.'/snmp_include.inc');
+
+require_once(__DIR__ . '/snmp_include.inc');
 
 echo "Checking error handling\n";
-var_dump(snmp_read_mib(__DIR__.'/cannotfindthisfile'));
+var_dump(snmp_read_mib(__DIR__ . '/cannotfindthisfile'));
 
 echo "Checking working\n";
 var_dump(snmp_read_mib($mibdir . '/SNMPv2-MIB.txt'));

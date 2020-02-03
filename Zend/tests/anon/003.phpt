@@ -2,14 +2,18 @@
 reusing anonymous classes
 --FILE--
 <?php
-while (@$i++<10) {
-    var_dump(new class($i) {
 
-        public function __construct($i) {
+while (@$i++ < 10) {
+    var_dump(new class ($i) {
+
+        public function __construct($i)
+        {
             $this->i = $i;
         }
     });
 }
+
+?>
 --EXPECTF--
 object(class@%s)#1 (1) {
   ["i"]=>

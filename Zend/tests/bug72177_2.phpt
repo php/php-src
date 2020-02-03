@@ -2,6 +2,7 @@
 Bug #72177 Scope issue in __destruct after ReflectionProperty::setValue()
 --FILE--
 <?php
+
 class Foo
 {
     private $bar = 'bar';
@@ -29,6 +30,7 @@ $r = new ReflectionProperty(Foo::class, 'bar');
 
 $r->setAccessible(true);
 echo "OK\n";
+
 ?>
 --EXPECT--
 OK

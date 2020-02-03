@@ -10,15 +10,18 @@ echo "Simple test for DateTimeZone compare object handler\n";
 //Set the default time zone
 date_default_timezone_set("Europe/London");
 
-class DateTimeZoneExt1 extends DateTimeZone {
+class DateTimeZoneExt1 extends DateTimeZone
+{
 }
 
-class DateTimeZoneExt2 extends DateTimeZone{
-	public $foo = "Hello";
-	private $bar = 99;
+class DateTimeZoneExt2 extends DateTimeZone
+{
+    public $foo = "Hello";
+    private $bar = 99;
 }
 
-class DateTimeZoneExt3 extends DateTimeZoneExt2 {
+class DateTimeZoneExt3 extends DateTimeZoneExt2
+{
 }
 
 $obj1 = new DateTimeZone("Europe/London");

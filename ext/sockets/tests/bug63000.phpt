@@ -7,6 +7,7 @@ if (!extension_loaded('sockets')) {
 }
 --FILE--
 <?php
+
 $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 socket_bind($socket, '0.0.0.0', 31057);
 
@@ -15,5 +16,7 @@ $so = socket_set_option($socket, IPPROTO_IP, MCAST_JOIN_GROUP, array(
     "interface" => 0,
 ));
 var_dump($so);
+
+?>
 --EXPECT--
 bool(true)

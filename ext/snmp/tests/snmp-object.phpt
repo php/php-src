@@ -8,7 +8,8 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-require_once(__DIR__.'/snmp_include.inc');
+
+require_once(__DIR__ . '/snmp_include.inc');
 
 //EXPECTF format is quickprint OFF
 snmp_set_enum_print(false);
@@ -33,9 +34,9 @@ var_dump($session->close());
 echo "GET with preserving original OID names\n";
 $session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);
 $orig = array('.1.3.6.1.2.1.1.1.0', '.1.3.6.1.2.1.1.5.0');
-$result = $session->get($orig, TRUE);
-foreach($orig as $oid){
-	var_dump($result[$oid]);
+$result = $session->get($orig, true);
+foreach ($orig as $oid) {
+    var_dump($result[$oid]);
 }
 var_dump($session->close());
 
@@ -50,7 +51,7 @@ var_dump($session->close());
 
 echo "WALK multiple on single OID, max_repetitions set to 30\n";
 $session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);
-$z = $session->walk('.1.3.6.1.2.1.1', FALSE, 30);
+$z = $session->walk('.1.3.6.1.2.1.1', false, 30);
 var_dump(gettype($z));
 var_dump(count($z));
 var_dump(key($z));
@@ -59,7 +60,7 @@ var_dump($session->close());
 
 echo "WALK multiple on single OID, max_repetitions set to 30, non_repeaters set to 0\n";
 $session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);
-$z = $session->walk('.1.3.6.1.2.1.1', FALSE, 30, 0);
+$z = $session->walk('.1.3.6.1.2.1.1', false, 30, 0);
 var_dump(gettype($z));
 var_dump(count($z));
 var_dump(key($z));
@@ -78,7 +79,7 @@ var_dump($session->close());
 
 echo "WALK multiple on single OID with OID suffix as keys\n";
 $session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries);
-$z = $session->walk('.1.3.6.1.2.1.1', TRUE);
+$z = $session->walk('.1.3.6.1.2.1.1', true);
 var_dump(gettype($z));
 var_dump(count($z));
 var_dump(key($z));

@@ -2,61 +2,72 @@
 Bug #32674 (exception in iterator causes crash)
 --FILE--
 <?php
-class collection implements Iterator {
 
-  private $_elements = array();
+class collection implements Iterator
+{
 
-  public function __construct() {
-  }
+    private $_elements = array();
 
-  public function rewind() {
-    reset($this->_elements);
-  }
+    public function __construct()
+    {
+    }
 
-  public function count() {
-    return count($this->_elements);
-  }
+    public function rewind()
+    {
+        reset($this->_elements);
+    }
 
-  public function current() {
-    $element = current($this->_elements);
-    return $element;
-  }
+    public function count()
+    {
+        return count($this->_elements);
+    }
 
-  public function next() {
-    $element = next($this->_elements);
-    return $element;
-  }
+    public function current()
+    {
+        $element = current($this->_elements);
+        return $element;
+    }
 
-  public function key() {
-    $this->_fillCollection();
-    $element = key($this->_elements);
-    return $element;
-  }
+    public function next()
+    {
+        $element = next($this->_elements);
+        return $element;
+    }
 
-  public function valid() {
-    throw new Exception('shit happened');
+    public function key()
+    {
+        $this->_fillCollection();
+        $element = key($this->_elements);
+        return $element;
+    }
 
-    return ($this->current() !== false);
-  }
+    public function valid()
+    {
+        throw new Exception('shit happened');
+
+        return ($this->current() !== false);
+    }
 }
 
-class class2 {
-  public $dummy;
+class class2
+{
+    public $dummy;
 }
 
 $obj = new class2();
 $col = new collection();
 
 try {
-	foreach($col as $co) {
-  	//irrelevant
-	}
-	echo 'shouldn`t get here';
-	//$dummy = 'this will not crash';
-	$obj->dummy = 'this will crash';
+    foreach ($col as $co) {
+    //irrelevant
+    }
+    echo 'shouldn`t get here';
+    //$dummy = 'this will not crash';
+    $obj->dummy = 'this will crash';
 } catch (Exception $e) {
-	echo "ok\n";
+    echo "ok\n";
 }
+
 ?>
 --EXPECT--
 ok

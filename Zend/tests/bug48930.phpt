@@ -7,9 +7,11 @@ Bug #48930 (__COMPILER_HALT_OFFSET__ incorrect in PHP>=5.3)
 /*
  * Test
  */
-printf("__COMPILER_HALT_OFFSET__ is %d\n",__COMPILER_HALT_OFFSET__);
+printf("__COMPILER_HALT_OFFSET__ is %d\n", __COMPILER_HALT_OFFSET__);
 
 __halt_compiler();
+
+?>
 
 ?>
 --EXPECT--

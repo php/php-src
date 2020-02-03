@@ -2,34 +2,42 @@
 SPL: FixedArray: overridden iterator methods
 --FILE--
 <?php
-class SplFixedArray2 extends SplFixedArray {
-    public function rewind() {
+
+class SplFixedArray2 extends SplFixedArray
+{
+    public function rewind()
+    {
         echo "rewind\n";
         return parent::rewind();
     }
-    public function valid() {
+    public function valid()
+    {
         echo "valid\n";
         return parent::valid();
     }
-    public function next() {
+    public function next()
+    {
         echo "next\n";
         return parent::next();
     }
-    public function current() {
+    public function current()
+    {
         echo "current\n";
         return parent::current();
     }
-    public function key() {
+    public function key()
+    {
         echo "key\n";
         return parent::key();
     }
 }
 
 $fa = new SplFixedArray2(3);
-foreach($fa as $k=>$v) {
+foreach ($fa as $k => $v) {
     echo "$k=>";
     var_dump($v);
 }
+
 ?>
 --EXPECT--
 rewind

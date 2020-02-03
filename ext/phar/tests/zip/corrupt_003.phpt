@@ -4,11 +4,13 @@ Phar: corrupted zip (truncated file comment)
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
+
 try {
-	new PharData(__DIR__ . '/files/filecomment.zip');
+    new PharData(__DIR__ . '/files/filecomment.zip');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
+
 ?>
 --EXPECTF--
 phar error: corrupt zip archive, zip file comment truncated in zip-based phar "%sfilecomment.zip"

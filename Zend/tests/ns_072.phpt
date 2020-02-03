@@ -5,24 +5,28 @@ Testing parameter type-hinted with interface
 
 namespace foo;
 
-interface foo {
+interface foo
+{
 
 }
 
-class bar {
-	public function __construct(foo $x = NULL) {
-		var_dump($x);
-	}
+class bar
+{
+    public function __construct(foo $x = null)
+    {
+        var_dump($x);
+    }
 }
 
-class test implements foo {
+class test implements foo
+{
 
 }
 
 
-new bar(new test);
+new bar(new test());
 new bar(null);
-new bar(new \stdclass);
+new bar(new \stdclass());
 
 ?>
 --EXPECTF--

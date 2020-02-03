@@ -2,7 +2,9 @@
 Dynamic calls to scope introspection functions are forbidden (function variations)
 --FILE--
 <?php
-function test() {
+
+function test()
+{
 
     try {
         $func = 'extract';

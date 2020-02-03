@@ -17,6 +17,7 @@ var_dump(gmp_scan0($n, 10));
 var_dump(gmp_scan0(array(), 200));
 
 echo "Done\n";
+
 ?>
 --EXPECTF--
 Warning: gmp_scan0(): Starting index must be greater than or equal to zero in %s on line %d

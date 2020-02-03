@@ -26,6 +26,7 @@ var_dump(rmdir($alias . '/a'));
 echo file_get_contents($alias . '/a/x') . "\n";
 unlink($alias . '/a/x');
 var_dump(rmdir($alias . '/a'));
+
 ?>
 --CLEAN--
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip'); ?>

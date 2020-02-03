@@ -2,7 +2,9 @@
 Bug #70997 (When using parentClass:: instead of parent::, static context changed)
 --FILE--
 <?php
-class A {
+
+class A
+{
     const TEST = false;
 
     public function test()
@@ -11,7 +13,8 @@ class A {
     }
 }
 
-class B extends A {
+class B extends A
+{
     const TEST = true;
 
     public function test()
@@ -20,7 +23,9 @@ class B extends A {
     }
 }
 
-$b = new B;
+$b = new B();
 $b->test();
+
+?>
 --EXPECT--
 bool(true)

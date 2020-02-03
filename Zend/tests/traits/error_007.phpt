@@ -3,10 +3,11 @@ Trying to instantiate a trait
 --FILE--
 <?php
 
-trait abc {
+trait abc
+{
 }
 
-new abc;
+new abc();
 
 ?>
 --EXPECTF--

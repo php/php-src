@@ -8,47 +8,48 @@ require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-require_once(__DIR__.'/snmp_include.inc');
+
+require_once(__DIR__ . '/snmp_include.inc');
 
 //EXPECTF format is quickprint OFF
 snmp_set_quick_print(false);
 snmp_set_valueretrieval(SNMP_VALUE_PLAIN);
 
 try {
-	var_dump(new SNMP(SNMP::VERSION_1, $hostname));
+    var_dump(new SNMP(SNMP::VERSION_1, $hostname));
 } catch (TypeError $e) {
-	print $e->getMessage() . "\n";
+    print $e->getMessage() . "\n";
 }
 try {
-	var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, ''));
+    var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, ''));
 } catch (TypeError $e) {
-	print $e->getMessage() . "\n";
+    print $e->getMessage() . "\n";
 }
 try {
-	var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, $timeout, ''));
+    var_dump(new SNMP(SNMP::VERSION_1, $hostname, $community, $timeout, ''));
 } catch (TypeError $e) {
-	print $e->getMessage() . "\n";
+    print $e->getMessage() . "\n";
 }
 try {
-	var_dump(new SNMP(7, $hostname, $community));
+    var_dump(new SNMP(7, $hostname, $community));
 } catch (Exception $e) {
-	print $e->getMessage() . "\n";
+    print $e->getMessage() . "\n";
 }
 
 echo "Exception handling\n";
 $session = new SNMP(SNMP::VERSION_3, $hostname, $user_noauth, $timeout, $retries);
 try {
-	var_dump($session->get('.1.3.6.1.2.1.1.1..0'));
+    var_dump($session->get('.1.3.6.1.2.1.1.1..0'));
 } catch (SNMPException $e) {
-	var_dump($e->getCode());
-	var_dump($e->getMessage());
+    var_dump($e->getCode());
+    var_dump($e->getMessage());
 }
 $session->exceptions_enabled = SNMP::ERRNO_ANY;
 try {
-	var_dump($session->get('.1.3.6.1.2.1.1.1..0'));
+    var_dump($session->get('.1.3.6.1.2.1.1.1..0'));
 } catch (SNMPException $e) {
-	var_dump($e->getCode());
-	var_dump($e->getMessage());
+    var_dump($e->getCode());
+    var_dump($e->getMessage());
 }
 var_dump($session->close());
 
@@ -67,6 +68,7 @@ var_dump($session->max_oids);
 $session->max_oids = "ttt";
 $session->max_oids = 0;
 var_dump($session->max_oids);
+
 ?>
 --EXPECTF--
 SNMP::__construct() expects at least 3 parameters, 2 given

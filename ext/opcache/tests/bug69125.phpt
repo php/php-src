@@ -16,6 +16,7 @@ $array[1] = "okey";
 
 var_dump($array[SZERO]);
 var_dump($array[SONE]);
+
 ?>
 --EXPECT--
 string(4) "okey"

@@ -30,6 +30,7 @@ foreach ($methods as $method) {
     $rm = new ReflectionMethod(Locale::class, $method);
     printf("%s: %d, %d\n", $method, $rm->getNumberOfParameters(), $rm->getNumberOfRequiredParameters());
 }
+
 ?>
 --EXPECT--
 getDefault: 0, 0

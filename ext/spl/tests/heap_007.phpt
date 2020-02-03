@@ -2,6 +2,7 @@
 SPL: SplHeap: iteration through methods
 --FILE--
 <?php
+
 $h = new SplMaxHeap();
 
 $h->insert(1);
@@ -10,8 +11,8 @@ $h->insert(0);
 $h->insert(4);
 
 $h->rewind();
-echo "count(\$h) = ".count($h)."\n";
-echo "\$h->count() = ".$h->count()."\n";
+echo "count(\$h) = " . count($h) . "\n";
+echo "\$h->count() = " . $h->count() . "\n";
 
 while ($h->valid()) {
     $k = $h->key();
@@ -19,6 +20,7 @@ while ($h->valid()) {
     echo "$k=>$v\n";
     $h->next();
 }
+
 ?>
 --EXPECT--
 count($h) = 4

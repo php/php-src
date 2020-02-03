@@ -5,20 +5,23 @@ Trying to create an object from dereferencing uninitialized variable
 
 error_reporting(E_ALL);
 
-class foo {
-	public $x;
-	static public $y;
+class foo
+{
+    public $x;
+    public static $y;
 
-	public function a() {
-		return $this->x;
-	}
+    public function a()
+    {
+        return $this->x;
+    }
 
-	static public function b() {
-		return self::$y;
-	}
+    public static function b()
+    {
+        return self::$y;
+    }
 }
 
-$foo = new foo;
+$foo = new foo();
 $h = $foo->a()[0]->a;
 var_dump($h);
 

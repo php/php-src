@@ -11,16 +11,19 @@ opcache.protect_memory=1
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
-class Foo {
+
+class Foo
+{
     const X = false;
 
-    static function bar() {
+    static function bar()
+    {
         $count = 0;
         if (self::X) {
             $count = intval(9223372036854775807);
         }
         if (self::X) {
-           $count = 2;
+            $count = 2;
         }
         if ($count != 0) {
             return "bug";
@@ -29,6 +32,8 @@ class Foo {
     }
 }
 var_dump(Foo::bar());
+
+?>
 --EXPECT--
 string(2) "ok"
 

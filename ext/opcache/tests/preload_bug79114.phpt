@@ -12,12 +12,14 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 ?>
 --FILE--
 <?php
+
 var_dump(class_exists(Foo::class));
 var_dump(class_exists(Bar::class));
 new Bar();
 var_dump(class_parents('Bar'));
 new Foo();
 f3();
+
 ?>
 --EXPECTF--
 bool(true)
