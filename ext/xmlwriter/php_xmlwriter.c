@@ -89,13 +89,12 @@ typedef int (*xmlwriter_read_int_t)(xmlTextWriterPtr writer);
 
 static zend_object_handlers xmlwriter_object_handlers;
 
-/* {{{ xmlwriter_object_free_storage */
-static void xmlwriter_object_free_storage(zend_object *object)
+/* {{{{ xmlwriter_object_dtor */
+static void xmlwriter_object_dtor(zend_object *object)
 {
 	ze_xmlwriter_object *intern = php_xmlwriter_fetch_object(object);
-	if (!intern) {
-		return;
-	}
+
+	/* freeing the resource here may leak, but otherwise we may use it after it has been freed */
 	if (intern->ptr) {
 		xmlFreeTextWriter(intern->ptr);
 		intern->ptr = NULL;
@@ -104,6 +103,15 @@ static void xmlwriter_object_free_storage(zend_object *object)
 		xmlBufferFree(intern->output);
 		intern->output = NULL;
 	}
+	zend_objects_destroy_object(object);
+}
+/* }}} */
+
+/* {{{ xmlwriter_object_free_storage */
+static void xmlwriter_object_free_storage(zend_object *object)
+{
+	ze_xmlwriter_object *intern = php_xmlwriter_fetch_object(object);
+
 	zend_object_std_dtor(&intern->std);
 }
 /* }}} */
@@ -1211,6 +1219,7 @@ static PHP_MINIT_FUNCTION(xmlwriter)
 
 	memcpy(&xmlwriter_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	xmlwriter_object_handlers.offset = XtOffsetOf(ze_xmlwriter_object, std);
+	xmlwriter_object_handlers.dtor_obj = xmlwriter_object_dtor;
 	xmlwriter_object_handlers.free_obj = xmlwriter_object_free_storage;
 	xmlwriter_object_handlers.clone_obj = NULL;
 	INIT_CLASS_ENTRY(ce, "XMLWriter", xmlwriter_class_functions);
