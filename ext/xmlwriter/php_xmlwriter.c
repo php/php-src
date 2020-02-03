@@ -130,6 +130,7 @@ static void xmlwriter_object_dtor(zend_object *object)
 		xmlwriter_free_resource_ptr(intern->xmlwriter_ptr);
 	}
 	intern->xmlwriter_ptr = NULL;
+	zend_objects_destroy_object(object);
 }
 /* }}} */
 
