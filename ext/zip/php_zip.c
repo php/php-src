@@ -1626,11 +1626,12 @@ static ZIPARCHIVE_METHOD(addEmptyDir)
 	if (idx >= 0) {
 		RETVAL_FALSE;
 	} else {
-		if (zip_add_dir(intern, (const char *)s) == -1) {
+		if (zip_dir_add(intern, (const char *)s, 0) == -1) {
 			RETVAL_FALSE;
+		} else {
+			zip_error_clear(intern);
+			RETVAL_TRUE;
 		}
-		zip_error_clear(intern);
-		RETVAL_TRUE;
 	}
 
 	if (s != dirname) {
@@ -3044,6 +3045,9 @@ static PHP_MINIT_FUNCTION(zip)
 	REGISTER_ZIP_CLASS_CONST_LONG("EXCL", ZIP_EXCL);
 	REGISTER_ZIP_CLASS_CONST_LONG("CHECKCONS", ZIP_CHECKCONS);
 	REGISTER_ZIP_CLASS_CONST_LONG("OVERWRITE", ZIP_OVERWRITE);
+#ifdef ZIP_RDONLY
+	REGISTER_ZIP_CLASS_CONST_LONG("RDONLY", ZIP_RDONLY);
+#endif
 
 	REGISTER_ZIP_CLASS_CONST_LONG("FL_NOCASE", ZIP_FL_NOCASE);
 	REGISTER_ZIP_CLASS_CONST_LONG("FL_NODIR", ZIP_FL_NODIR);
