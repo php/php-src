@@ -26,6 +26,7 @@ namespace {
     echo get_debug_type(1.1) . "\n";
     echo get_debug_type([]) . "\n";
     echo get_debug_type(null) . "\n";
+    echo get_debug_type(fopen(__FILE__, 'r')) . "\n";
 
 }
 
@@ -39,3 +40,4 @@ int
 float
 array
 null
+resource
