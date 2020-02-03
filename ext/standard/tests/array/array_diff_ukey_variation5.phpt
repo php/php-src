@@ -12,7 +12,7 @@ echo "*** Testing array_diff_ukey() : usage variation ***\n";
 // Initialise function arguments not being substituted (if any)
 $array1 = array(
 
-	  'first' => array('blue' => 1, 'red' => 2),
+      'first' => array('blue' => 1, 'red' => 2),
 
       'second' => array('yellow' => 7),
 
@@ -21,7 +21,7 @@ $array1 = array(
 
 $array2 = array (
 
-	  'first' => array('blue' => 1, 'red' => 2,),
+      'first' => array('blue' => 1, 'red' => 2,),
 
       'second' => array('cyan' => 8),
 

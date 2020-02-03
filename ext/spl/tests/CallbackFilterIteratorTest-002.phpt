@@ -4,41 +4,41 @@ CallbackFilterIterator 002
 <?php
 
 set_error_handler(function($errno, $errstr){
-	echo $errstr . "\n";
-	return true;
+    echo $errstr . "\n";
+    return true;
 });
 
 try {
-	new CallbackFilterIterator();
+    new CallbackFilterIterator();
 } catch (TypeError $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-	new CallbackFilterIterator(null);
+    new CallbackFilterIterator(null);
 } catch (TypeError $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-	new CallbackFilterIterator(new ArrayIterator(array()), null);
+    new CallbackFilterIterator(new ArrayIterator(array()), null);
 } catch (TypeError $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-	new CallbackFilterIterator(new ArrayIterator(array()), array());
+    new CallbackFilterIterator(new ArrayIterator(array()), array());
 } catch (TypeError $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 $it = new CallbackFilterIterator(new ArrayIterator(array(1)), function() {
-	throw new Exception("some message");
+    throw new Exception("some message");
 });
 try {
-	foreach($it as $e);
+    foreach($it as $e);
 } catch(Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 --EXPECT--
 CallbackFilterIterator::__construct() expects exactly 2 parameters, 0 given

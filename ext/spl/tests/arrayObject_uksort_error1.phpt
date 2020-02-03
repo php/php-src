@@ -12,15 +12,15 @@ Test ArrayObject::uksort() function : wrong arg count
 $ao = new ArrayObject();
 
 try {
-	$ao->uksort();
+    $ao->uksort();
 } catch (BadMethodCallException $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-	$ao->uksort(1,2);
+    $ao->uksort(1,2);
 } catch (BadMethodCallException $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
 --EXPECT--

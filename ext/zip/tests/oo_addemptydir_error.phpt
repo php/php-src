@@ -12,16 +12,16 @@ include __DIR__ . '/utils.inc';
 
 $zip = new ZipArchive;
 if (!$zip->open(__DIR__ . '/test.zip', ZipArchive::RDONLY)) {
-	exit('failed');
+    exit('failed');
 }
 
 var_dump($zip->addEmptyDir('emptydir'));
 if ($zip->status == ZipArchive::ER_RDONLY) {
-	echo "OK\n";
+    echo "OK\n";
 } else if ($zip->status == ZipArchive::ER_OK) {
-	dump_entries_name($zip);
+    dump_entries_name($zip);
 } else {
-	echo "Lost\n";
+    echo "Lost\n";
 }
 $zip->close();
 ?>

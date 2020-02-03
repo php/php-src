@@ -12,28 +12,28 @@ image_type_to_mime_type()
 echo "Starting image_type_to_mime_type() test\n\n";
 
 $image_types = array (
-	IMAGETYPE_GIF,
-	IMAGETYPE_JPEG,
-	IMAGETYPE_PNG,
-	IMAGETYPE_SWF,
-	IMAGETYPE_PSD,
-	IMAGETYPE_BMP,
-	IMAGETYPE_TIFF_II,
-	IMAGETYPE_TIFF_MM,
-	IMAGETYPE_JPC,
-	IMAGETYPE_JP2,
-	IMAGETYPE_JPX,
-	IMAGETYPE_JB2,
-	IMAGETYPE_IFF,
-	IMAGETYPE_WBMP,
-	IMAGETYPE_JPEG2000,
-	IMAGETYPE_XBM,
-	IMAGETYPE_WEBP
+    IMAGETYPE_GIF,
+    IMAGETYPE_JPEG,
+    IMAGETYPE_PNG,
+    IMAGETYPE_SWF,
+    IMAGETYPE_PSD,
+    IMAGETYPE_BMP,
+    IMAGETYPE_TIFF_II,
+    IMAGETYPE_TIFF_MM,
+    IMAGETYPE_JPC,
+    IMAGETYPE_JP2,
+    IMAGETYPE_JPX,
+    IMAGETYPE_JB2,
+    IMAGETYPE_IFF,
+    IMAGETYPE_WBMP,
+    IMAGETYPE_JPEG2000,
+    IMAGETYPE_XBM,
+    IMAGETYPE_WEBP
 );
 
-	foreach($image_types as $image_type) {
-		var_dump(image_type_to_mime_type($image_type));
-	}
+    foreach($image_types as $image_type) {
+        var_dump(image_type_to_mime_type($image_type));
+    }
 
 echo "\nDone image_type_to_mime_type() test\n";
 ?>

@@ -9,8 +9,8 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 function f() {
-	  $retval = false;
-	    if ($retval) { }
+      $retval = false;
+        if ($retval) { }
 }
 f();
 exit("OK");

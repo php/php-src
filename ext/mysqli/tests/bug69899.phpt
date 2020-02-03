@@ -26,9 +26,9 @@ $mysqli = new mysqli($host, $user, $passwd, $db, $port, $socket);
 $stmt   = $mysqli->prepare('SELECT 1');
 
 var_dump(
-	$mysqli->close(),
-	$stmt->free_result(),
-	$stmt->close()
+    $mysqli->close(),
+    $stmt->free_result(),
+    $stmt->close()
 );
 
 ?>

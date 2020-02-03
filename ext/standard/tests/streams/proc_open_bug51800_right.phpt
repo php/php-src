@@ -31,7 +31,7 @@ exit(0);
 ');
 
 if (!$r) {
-	die("couldn't create helper script '$callee'");
+    die("couldn't create helper script '$callee'");
 }
 
 $process = proc_open($cmd, $descriptors, $pipes);

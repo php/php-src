@@ -47,10 +47,10 @@ $float_values = array (
 );
 
 $hexa_formats = array( 	"%x",
-			"%hx", "%lx", "%Lx",
-		        " %x", "%x ", "% x",
-		        "\t%x", "\n%x", "%4x",
-	  	        "%30x", "%[0-9A-Za-z]", "%*x");
+            "%hx", "%lx", "%Lx",
+                " %x", "%x ", "% x",
+                "\t%x", "\n%x", "%4x",
+                "%30x", "%[0-9A-Za-z]", "%*x");
 
 $counter = 1;
 

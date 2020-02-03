@@ -5,13 +5,13 @@ Reflection properties are read only
 
 class ReflectionMethodEx extends ReflectionMethod
 {
-	public $foo = "xyz";
+    public $foo = "xyz";
 
-	function __construct($c,$m)
-	{
-		echo __METHOD__ . "\n";
-		parent::__construct($c,$m);
-	}
+    function __construct($c,$m)
+    {
+        echo __METHOD__ . "\n";
+        parent::__construct($c,$m);
+    }
 }
 
 $r = new ReflectionMethodEx('ReflectionMethodEx','getName');
@@ -23,11 +23,11 @@ var_dump($r->foo);
 
 try
 {
-	$r->class = 'bullshit';
+    $r->class = 'bullshit';
 }
 catch(ReflectionException $e)
 {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try
 {
@@ -35,7 +35,7 @@ $r->name = 'bullshit';
 }
 catch(ReflectionException $e)
 {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 $r->foo = 'bar';

@@ -4,8 +4,8 @@ using multiple access modifiers (static methods)
 <?php
 
 class test {
-	static static function foo() {
-	}
+    static static function foo() {
+    }
 }
 
 echo "Done\n";

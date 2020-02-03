@@ -20,14 +20,14 @@ function NormalTest($a)
 }
 
 try {
-	NormalTest();
+    NormalTest();
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 try {
-	FooTest();
+    FooTest();
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 FooTest(new Foo());
 ?>

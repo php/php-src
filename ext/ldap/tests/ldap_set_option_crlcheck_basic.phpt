@@ -18,15 +18,15 @@ require "connect.inc";
 $link = ldap_connect($host, $port);
 
 foreach([
-	LDAP_OPT_X_TLS_CRL_NONE,
-	LDAP_OPT_X_TLS_CRL_PEER,
-	LDAP_OPT_X_TLS_CRL_ALL,
+    LDAP_OPT_X_TLS_CRL_NONE,
+    LDAP_OPT_X_TLS_CRL_PEER,
+    LDAP_OPT_X_TLS_CRL_ALL,
 ] as $option) {
-	$result = ldap_set_option($link, LDAP_OPT_X_TLS_CRLCHECK, $option);
-	var_dump($result);
+    $result = ldap_set_option($link, LDAP_OPT_X_TLS_CRLCHECK, $option);
+    var_dump($result);
 
-	ldap_get_option($link, LDAP_OPT_X_TLS_CRLCHECK, $optionval);
-	var_dump($optionval);
+    ldap_get_option($link, LDAP_OPT_X_TLS_CRLCHECK, $optionval);
+    var_dump($optionval);
 }
 ?>
 --EXPECT--

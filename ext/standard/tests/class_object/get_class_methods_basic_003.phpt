@@ -13,23 +13,23 @@ Test get_class_methods() function : basic functionality
  */
 
 interface I {
-	public function pubI();
+    public function pubI();
 
 }
 
 class C implements I {
-	public function pubI() {}
+    public function pubI() {}
 
-	private function privC() {}
-	protected function protC() {}
-	public function pubC() {}
+    private function privC() {}
+    protected function protC() {}
+    public function pubC() {}
 
-	public static function testFromC() {
-		echo "Accessing I from C:\n";
-		var_dump(get_class_methods("I"));
-		echo "Accessing C from C:\n";
-		var_dump(get_class_methods("C"));
-	}
+    public static function testFromC() {
+        echo "Accessing I from C:\n";
+        var_dump(get_class_methods("I"));
+        echo "Accessing C from C:\n";
+        var_dump(get_class_methods("C"));
+    }
 }
 
 

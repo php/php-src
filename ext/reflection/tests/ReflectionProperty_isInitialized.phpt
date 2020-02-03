@@ -4,12 +4,12 @@ Test ReflectionProperty::isInitialized()
 <?php
 
 class A {
-	public static ?string $ssv = null;
-	public static ?string $ss;
-	public static $s;
-	public ?int $iv = null;
-	public ?int $i;
-	public $n;
+    public static ?string $ssv = null;
+    public static ?string $ss;
+    public static $s;
+    public ?int $iv = null;
+    public ?int $i;
+    public $n;
 
     private int $p;
 }

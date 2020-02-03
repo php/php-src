@@ -27,14 +27,14 @@ $lowers = array('Basic Latin' => 'abcdefghijklmnopqrstuvwxyz',
                 'Russian' => base64_decode('0LDQsdCy0LPQtNC10LbQtw=='));
 
 foreach ($lowers as $lang => $sourcestring) {
-	echo "\n-- $lang --\n";
-	$a = mb_strtoupper($sourcestring, 'UTF-8');
-	var_dump(base64_encode($a));
-	if ($a == $uppers[$lang]) {
-		echo "Correctly Converted\n";
-	} else {
-		echo "Incorrectly Converted\n";
-	}
+    echo "\n-- $lang --\n";
+    $a = mb_strtoupper($sourcestring, 'UTF-8');
+    var_dump(base64_encode($a));
+    if ($a == $uppers[$lang]) {
+        echo "Correctly Converted\n";
+    } else {
+        echo "Incorrectly Converted\n";
+    }
 }
 
 echo "Done";

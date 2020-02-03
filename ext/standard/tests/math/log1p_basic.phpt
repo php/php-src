@@ -13,23 +13,23 @@ precision=14
 echo "*** Testing log1p() : basic functionality ***\n";
 
 $values = array(23,
-				-23,
-				2.345e1,
-				-2.345e1,
-				0x17,
-				027,
-				"23",
-				"23.45",
-				"2.345e1",
-				null,
-				true,
-				false);
+                -23,
+                2.345e1,
+                -2.345e1,
+                0x17,
+                027,
+                "23",
+                "23.45",
+                "2.345e1",
+                null,
+                true,
+                false);
 
 echo "\n LOG1p tests\n";
 
 foreach($values as $value) {
-	echo "\n-- log1p $value --\n";
-	var_dump(log1p($value));
+    echo "\n-- log1p $value --\n";
+    var_dump(log1p($value));
 };
 
 

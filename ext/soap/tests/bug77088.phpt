@@ -11,7 +11,7 @@ try
 {
     $options = NULL;
     $sClient = new SoapClient("test.wsdl", $options);
-} 
+}
 catch(TypeError $e)
 {
     var_dump($e);

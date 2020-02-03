@@ -9,8 +9,8 @@ if (!extension_loaded('zend-test')) die('skip zend-test extension not available'
 <?php
 $header = <<<HEADER
 struct bug79096 {
-	uint64_t a;
-	uint64_t b;
+    uint64_t a;
+    uint64_t b;
 };
 
 struct bug79096 bug79096(void);

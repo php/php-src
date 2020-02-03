@@ -4,8 +4,8 @@ errmsg: __clone() cannot accept any arguments
 <?php
 
 class test {
-	function __clone($var) {
-	}
+    function __clone($var) {
+    }
 }
 
 echo "Done\n";

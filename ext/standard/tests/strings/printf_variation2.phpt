@@ -31,54 +31,54 @@ $file_handle = fopen(__FILE__, 'r');
 //array of values to iterate over
 $values = array(
 
-	      // int data
+          // int data
 /*1*/     0,
-	      1,
-	      12345,
-	      -2345,
+          1,
+          12345,
+          -2345,
 
-	      // float data
+          // float data
 /*5*/     10.5,
-	      -10.5,
-	      10.1234567e10,
-	      10.7654321E-10,
-	      .5,
+          -10.5,
+          10.1234567e10,
+          10.7654321E-10,
+          .5,
 
-	      // array data
+          // array data
 /*10*/    array(),
-	      array(0),
-	      array(1),
-	      array(1, 2),
-	      array('color' => 'red', 'item' => 'pen'),
+          array(0),
+          array(1),
+          array(1, 2),
+          array('color' => 'red', 'item' => 'pen'),
 
-	      // null data
+          // null data
 /*15*/    NULL,
-	      null,
+          null,
 
-	      // boolean data
+          // boolean data
 /*17*/    true,
-	      false,
-	      TRUE,
-	      FALSE,
+          false,
+          TRUE,
+          FALSE,
 
-	      // empty data
+          // empty data
 /*21*/    "",
-	      '',
+          '',
 
-	      // string data
+          // string data
 /*23*/    "string",
-	      'string',
+          'string',
 
-	      // object data
+          // object data
 /*25*/    new sample(),
 
-	      // undefined data
+          // undefined data
 /*26*/    @$undefined_var,
 
-	      // unset data
+          // unset data
 /*27*/    @$unset_var,
 
-	      // resource data
+          // resource data
 /*28*/    $file_handle
 );
 

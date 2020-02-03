@@ -11,23 +11,23 @@ ini_set("intl.default_locale", "pt_PT");
 ini_set("date.timezone", 'Atlantic/Azores');
 
 function print_exception($e) {
-	echo "\nException: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() . "\n";
+    echo "\nException: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() . "\n";
 }
 
 try {
-	var_dump(new IntlDateFormatter(NULL, 0, 0, 'bad timezone'));
+    var_dump(new IntlDateFormatter(NULL, 0, 0, 'bad timezone'));
 } catch (IntlException $e) {
-	print_exception($e);
+    print_exception($e);
 }
 try {
-	var_dump(new IntlDateFormatter(NULL, 0, 0, NULL, 3));
+    var_dump(new IntlDateFormatter(NULL, 0, 0, NULL, 3));
 } catch (IntlException $e) {
-	print_exception($e);
+    print_exception($e);
 }
 try {
-	var_dump(new IntlDateFormatter(NULL, 0, 0, NULL, new stdclass));
+    var_dump(new IntlDateFormatter(NULL, 0, 0, NULL, new stdclass));
 } catch (IntlException $e) {
-	print_exception($e);
+    print_exception($e);
 }
 ?>
 --EXPECTF--

@@ -7,9 +7,9 @@ DBA DBM handler test
 ?>
 --FILE--
 <?php
-	$handler = 'dbm';
-	require_once __DIR__ .'/test.inc';
-	require_once __DIR__ .'/dba_handler.inc';
+    $handler = 'dbm';
+    require_once __DIR__ .'/test.inc';
+    require_once __DIR__ .'/dba_handler.inc';
 ?>
 --CLEAN--
 <?php

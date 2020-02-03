@@ -25,31 +25,31 @@ oci8_test_sql_execute($c, $stmtarray);
 $select_sql = "select * from field_funcs3_tab";
 
 if (!($s = oci_parse($c, $select_sql))) {
-	die("oci_parse(select) failed!\n");
+    die("oci_parse(select) failed!\n");
 }
 
 if (!oci_execute($s)) {
-	die("oci_execute(select) failed!\n");
+    die("oci_execute(select) failed!\n");
 }
 
 $row = oci_fetch_array($s, OCI_NUM + OCI_RETURN_NULLS + OCI_RETURN_LOBS);
 var_dump($row);
 
 foreach ($row as $num => $field) {
-	$num++;
-	var_dump(oci_field_is_null($s, $num));
-	var_dump(oci_field_name($s, $num));
-	var_dump(oci_field_type($s, $num));
-	var_dump(oci_field_type_raw($s, $num));
-	var_dump(oci_field_scale($s, $num));
-	var_dump(oci_field_precision($s, $num));
-	var_dump(oci_field_size($s, $num));
+    $num++;
+    var_dump(oci_field_is_null($s, $num));
+    var_dump(oci_field_name($s, $num));
+    var_dump(oci_field_type($s, $num));
+    var_dump(oci_field_type_raw($s, $num));
+    var_dump(oci_field_scale($s, $num));
+    var_dump(oci_field_precision($s, $num));
+    var_dump(oci_field_size($s, $num));
 }
 
 // Clean up
 
 $stmtarray = array(
-	"drop table field_funcs3_tab"
+    "drop table field_funcs3_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

@@ -30,7 +30,7 @@ echo "SELECTING results\n";
 $results = $db->query("SELECT id, quote(data) AS data FROM test ORDER BY id ASC");
 while ($result = $results->fetchArray(SQLITE3_NUM))
 {
-	var_dump($result);
+    var_dump($result);
 }
 $results->finalize();
 

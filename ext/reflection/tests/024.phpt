@@ -3,9 +3,9 @@ ReflectionObject::__toString (filtering privates/protected dynamic properties)
 --FILE--
 <?php
 class C1 {
-	private   $p1 = 1;
-	protected $p2 = 2;
-	public    $p3 = 3;
+    private   $p1 = 1;
+    protected $p2 = 2;
+    public    $p3 = 3;
 }
 
 $x = new C1();

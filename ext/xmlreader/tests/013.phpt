@@ -18,10 +18,10 @@ $reader = new XMLReader();
 $reader->XML($xml);
 $reader->setSchema(__DIR__ . '/013.xsd');
 while($reader->read()) {
-	if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'item') {
-		$reader->read();
-		var_dump($reader->value);
-	}
+    if ($reader->nodeType == XMLReader::ELEMENT && $reader->name == 'item') {
+        $reader->read();
+        var_dump($reader->value);
+    }
 }
 $reader->close();
 

@@ -19,7 +19,7 @@ $tz = new DateTimeZone("Europe/London");
 $tran = $tz->getTransitions(-306972000, -37241999);
 
 if (!is_array($tran)) {
-	echo "TEST FAILED: Expected an array\n";
+    echo "TEST FAILED: Expected an array\n";
 }
 
 echo "\n-- Total number of transitions: " . count($tran). " --\n";

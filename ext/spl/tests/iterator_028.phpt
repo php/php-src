@@ -41,12 +41,12 @@ $it->setMaxDepth(-1);
 var_dump($it->getMaxDepth());
 try
 {
-	$it->setMaxDepth(4);
-	$it->setMaxDepth(-2);
+    $it->setMaxDepth(4);
+    $it->setMaxDepth(-2);
 }
 catch(Exception $e)
 {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 var_dump($it->getMaxDepth());
 ?>

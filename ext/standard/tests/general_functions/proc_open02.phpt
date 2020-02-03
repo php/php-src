@@ -10,9 +10,9 @@ if (getenv('SKIP_SLOW_TESTS')) echo 'skip slow test';
 $ds = array(array('pipe', 'r'));
 
 $cat = proc_open(
-	'/bin/sleep 2',
-	$ds,
-	$pipes
+    '/bin/sleep 2',
+    $ds,
+    $pipes
 );
 
 usleep(20000); // let the OS run the sleep process before sending the signal

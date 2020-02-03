@@ -12,12 +12,12 @@ echo "*** Testing ReflectionFunction::getClosure() : basic functionality ***\n";
 
 function foo()
 {
-	var_dump( "Inside foo function" );
+    var_dump( "Inside foo function" );
 }
 
 function bar( $arg )
 {
-	var_dump( "Arg is " . $arg );
+    var_dump( "Arg is " . $arg );
 }
 
 $func = new ReflectionFunction( 'foo' );

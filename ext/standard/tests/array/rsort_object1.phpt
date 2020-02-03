@@ -16,27 +16,27 @@ echo "*** Testing rsort() : object functionality ***\n";
 // class declaration for integer objects
 class for_integer_rsort
 {
-	public $class_value;
-	// initializing object member value
-	function __construct($value){
-		$this->class_value = $value;
-	}
+    public $class_value;
+    // initializing object member value
+    function __construct($value){
+        $this->class_value = $value;
+    }
 
 }
 
 // class declaration for string objects
 class for_string_rsort
 {
-	public $class_value;
-	// initializing object member value
-	function __construct($value){
-		$this->class_value = $value;
-	}
+    public $class_value;
+    // initializing object member value
+    function __construct($value){
+        $this->class_value = $value;
+    }
 
-	// return string value
-	function __tostring() {
-		return (string)$this->value;
-	}
+    // return string value
+    function __tostring() {
+        return (string)$this->value;
+    }
 
 }
 

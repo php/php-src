@@ -3,11 +3,11 @@ Private property inheritance check
 --FILE--
 <?php
 Class A {
-	private $c;
+    private $c;
 }
 
 Class B extends A {
-	private $c;
+    private $c;
 }
 
 Class C extends B {

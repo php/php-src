@@ -4,7 +4,7 @@ Test typed properties work fine with simple inheritance
 <?php
 
 class A {
-	public int $a = 1;
+    public int $a = 1;
 }
 class B extends A {}
 

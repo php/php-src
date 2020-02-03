@@ -5,8 +5,8 @@ errmsg: __construct() cannot be static
 
 class test {
 
-	static function __construct() {
-	}
+    static function __construct() {
+    }
 }
 
 echo "Done\n";

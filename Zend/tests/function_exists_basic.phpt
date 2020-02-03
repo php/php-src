@@ -24,7 +24,7 @@ var_dump(function_exists('g'));
 
 echo "Method: ";
 Class C {
-	static function f() {}
+    static function f() {}
 }
 var_dump(function_exists('C::f'));
 ?>

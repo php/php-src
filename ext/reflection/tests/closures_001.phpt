@@ -11,10 +11,10 @@ var_dump($rm->getNumberOfParameters());
 var_dump($rm->getNumberOfRequiredParameters());
 $rms = $ro->getMethods();
 foreach($rms as $rm) {
-	if ($rm->getName() == '__invoke') {
-		var_dump($rm->getNumberOfParameters());
-		var_dump($rm->getNumberOfRequiredParameters());
-	}
+    if ($rm->getName() == '__invoke') {
+        var_dump($rm->getNumberOfParameters());
+        var_dump($rm->getNumberOfRequiredParameters());
+    }
 }
 
 echo "---\n";

@@ -6,11 +6,11 @@ Returning a references returned by another function
 
 function &returnVarByRef () {
     $b=1;
-	return $b;
+    return $b;
 }
 
 function &testReturnVarByRef() {
-	return returnVarByRef();
+    return returnVarByRef();
 }
 
 function returnVal () {
@@ -18,7 +18,7 @@ return 1;
 }
 
 function &testReturnValByRef() {
-	return returnVal();
+    return returnVal();
 }
 
 echo "\n---> 1. Return a variable by reference -> No warning:\n";

@@ -5,22 +5,22 @@ SPL: SplObjectStorage with accociatied information
 
 class TestClass
 {
-	public $test = 25;
+    public $test = 25;
 
-	public function __construct($test = 42)
-	{
-		$this->test = $test;
-	}
+    public function __construct($test = 42)
+    {
+        $this->test = $test;
+    }
 }
 
 class MyStorage extends SplObjectStorage
 {
-	public $bla = 25;
+    public $bla = 25;
 
-	public function __construct($bla = 26)
-	{
-		$this->bla = $bla;
-	}
+    public function __construct($bla = 26)
+    {
+        $this->bla = $bla;
+    }
 }
 
 $storage = new MyStorage();
@@ -34,7 +34,7 @@ var_dump(count($storage));
 
 foreach($storage as $object)
 {
-	var_dump($object->test);
+    var_dump($object->test);
 }
 
 var_dump($storage);
@@ -48,7 +48,7 @@ var_dump(count($storage2));
 
 foreach($storage2 as $object)
 {
-	var_dump($object->test);
+    var_dump($object->test);
 }
 
 var_dump($storage2);

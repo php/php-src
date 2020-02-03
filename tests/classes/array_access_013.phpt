@@ -15,7 +15,7 @@ $t = new Test;
 
 try
 {
-	echo isset($t[0]);
+    echo isset($t[0]);
 }
 catch(Exception $e)
 {
@@ -24,7 +24,7 @@ catch(Exception $e)
 
 try
 {
-	echo $t[0];
+    echo $t[0];
 }
 catch(Exception $e)
 {
@@ -33,7 +33,7 @@ catch(Exception $e)
 
 try
 {
-	$t[0] = 1;
+    $t[0] = 1;
 }
 catch(Exception $e)
 {
@@ -42,7 +42,7 @@ catch(Exception $e)
 
 try
 {
-	unset($t[0]);
+    unset($t[0]);
 }
 catch(Exception $e)
 {

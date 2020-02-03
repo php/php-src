@@ -3,19 +3,19 @@ Returning a reference from a function via another function
 --FILE--
 <?php
 function returnConstantByValue() {
-	return 100;
+    return 100;
 }
 
 function &returnConstantByRef() {
-	return 100;
+    return 100;
 }
 
 function &returnVariableByRef() {
-	return $GLOBALS['a'];
+    return $GLOBALS['a'];
 }
 
 function &returnFunctionCallByRef($functionToCall) {
-	return $functionToCall();
+    return $functionToCall();
 }
 
 echo "\n---> 1. Via a return by ref function call, assign by reference the return value of a function that returns by value:\n";

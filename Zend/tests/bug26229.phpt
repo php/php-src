@@ -13,14 +13,14 @@ $obj = new array_iterator;
 
 try
 {
-	foreach ($obj as $property => $value)
-	{
-		var_dump($value);
-	}
+    foreach ($obj as $property => $value)
+    {
+        var_dump($value);
+    }
 }
 catch(Exception $e)
 {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
 --EXPECT--

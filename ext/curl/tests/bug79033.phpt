@@ -8,11 +8,11 @@ include 'server.inc';
 $host = curl_cli_server_start();
 $ch = curl_init();
 curl_setopt_array($ch, [
-	CURLOPT_URL => "{$host}/get.inc?test=post",
-	CURLOPT_POST => true,
+    CURLOPT_URL => "{$host}/get.inc?test=post",
+    CURLOPT_POST => true,
     CURLOPT_POSTFIELDS => [],
     CURLINFO_HEADER_OUT => true,
-	CURLOPT_RETURNTRANSFER => true,
+    CURLOPT_RETURNTRANSFER => true,
 ]);
 var_dump(curl_exec($ch));
 var_dump(curl_getinfo($ch)["request_header"]);

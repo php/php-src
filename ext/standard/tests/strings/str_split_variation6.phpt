@@ -38,7 +38,7 @@ for($count = 0; $count < count($values); $count++) {
     echo "-- Iteration ".($count + 1)." --\n";
 
     try {
-	    var_dump( str_split($str, $values[$count]) );
+        var_dump( str_split($str, $values[$count]) );
     } catch (\ValueError $e) {
         echo $e->getMessage() . "\n";
     }

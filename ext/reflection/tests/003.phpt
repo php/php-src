@@ -5,18 +5,18 @@ ReflectionMethod::invoke() with base class method
 
 class Foo
 {
-	function Test()
-	{
-		echo __METHOD__ . "\n";
-	}
+    function Test()
+    {
+        echo __METHOD__ . "\n";
+    }
 }
 
 class Bar extends Foo
 {
-	function Test()
-	{
-		echo __METHOD__ . "\n";
-	}
+    function Test()
+    {
+        echo __METHOD__ . "\n";
+    }
 }
 
 $o = new Bar;

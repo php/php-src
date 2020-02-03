@@ -18,7 +18,7 @@ $options = [
 $ctx = stream_context_create($options);
 
 $responses = [
-	"data://text/plain,000000000100\xA\xA"
+    "data://text/plain,000000000100\xA\xA"
 ];
 $pid = http_server('tcp://127.0.0.1:12342', $responses);
 

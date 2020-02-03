@@ -4,8 +4,8 @@ mysqli get_client_info
 <?php	require_once('skipif.inc'); ?>
 --FILE--
 <?php
-	$s = mysqli_get_client_info();
-	echo gettype($s);
+    $s = mysqli_get_client_info();
+    echo gettype($s);
 ?>
 --EXPECT--
 string

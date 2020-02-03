@@ -4,7 +4,7 @@ Adding a function object return type
 <?php
 
 function a() : object {
-	return 12345;
+    return 12345;
 }
 a();
 --EXPECTF--

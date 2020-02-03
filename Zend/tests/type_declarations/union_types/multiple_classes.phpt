@@ -17,7 +17,7 @@ spl_autoload_register(function($class) {
 
 $test = new Test;
 
-$test->prop = 42; 
+$test->prop = 42;
 var_dump($test->prop);
 var_dump($test->method(42));
 

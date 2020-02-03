@@ -5,10 +5,10 @@ Bug #12776 (array_walk crash)
 
 function test($val,$key)
 {
-	global $globalArray;
-	$globalArray[]=$key; // this will end up crashing
-	$globalArray[]=(string)$key; // this will end up OK
-	print "val: $val; key: $key\n"; flush();
+    global $globalArray;
+    $globalArray[]=$key; // this will end up crashing
+    $globalArray[]=(string)$key; // this will end up OK
+    print "val: $val; key: $key\n"; flush();
 }
 
 $arr=array('k'=>'v');

@@ -26,7 +26,7 @@ echo "msgf:  " . $msgf->format(array($time)) . "\n";
 '{1, select, date {{0,date,full}} other {{0,time,h:m:s a V}}}');
 
 echo "msgf2: ", $msgf->format(array($time, 'date')), " ",
-		$msgf->format(array($time, 'time')), "\n";
+        $msgf->format(array($time, 'time')), "\n";
 */
 
 ?>

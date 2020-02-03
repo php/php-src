@@ -10,10 +10,10 @@ Test getimagesize() function : variation - Passing non image files
 
 $file_types_array = array (
     //File containing text string
-	"File with text data" => "test.txt",
+    "File with text data" => "test.txt",
 
-	//File containing forcibly corrupted bmp image
-	"File with corrupted BMP data" => "200x100_unknown.unknown",
+    //File containing forcibly corrupted bmp image
+    "File with corrupted BMP data" => "200x100_unknown.unknown",
 
     //File which doesn't exist
      "Non-existent file" => "nofile.ext",

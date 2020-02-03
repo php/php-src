@@ -10,7 +10,7 @@ Bug #67248 (imageaffinematrixget missing check of parameters)
 require __DIR__ . '/func.inc';
 
 for($i=0;$i<7;$i++) {
-	trycatch_dump(
+    trycatch_dump(
         fn() => imageaffinematrixget($i)
     );
 }

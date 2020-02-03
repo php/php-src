@@ -4,11 +4,11 @@ Trying to access a protected trait method
 <?php
 
 trait foo {
-	public function test() { return 3; }
+    public function test() { return 3; }
 }
 
 class bar {
-	use foo { test as protected; }
+    use foo { test as protected; }
 }
 
 $x = new bar;

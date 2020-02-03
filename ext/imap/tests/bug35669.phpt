@@ -8,7 +8,7 @@ Bug #35669 (imap_mail_compose() crashes with multipart-multiboundary-email)
 ?>
 --FILE--
 <?php
-	$envelope["from"] = 'Santa <somewhere@northpole.gov>';
+    $envelope["from"] = 'Santa <somewhere@northpole.gov>';
         $envelope["to"]  = 'The bad smurf <bad@smurf.com>';
         $envelope['date'] = 'Wed, 04 Jan 2006 19:24:43 -0500';
 

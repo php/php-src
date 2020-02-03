@@ -23,9 +23,9 @@ var_dump($phar->getStub() == $stub);
 $newstub = '<?php echo "second stub\n"; _x_HALT_COMPILER(); ?>';
 
 try {
-	$phar->setStub($newstub);
+    $phar->setStub($newstub);
 } catch(exception $e) {
-	echo 'Exception: ' . $e->getMessage() . "\n";
+    echo 'Exception: ' . $e->getMessage() . "\n";
 }
 
 var_dump($phar->getStub());

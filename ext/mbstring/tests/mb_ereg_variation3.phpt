@@ -37,14 +37,14 @@ $character_classes = array ('aB1'    => '[[:alnum:]]+', /*1*/
 
 $iterator = 1;
 foreach($character_classes as $string => $pattern) {
-	if (is_array(@$regs)) {
-		$regs = null;
-	}
-	// make sure any multibyte output is in base 64
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(mb_ereg($pattern, $string, $regs));
-	base64_encode_var_dump($regs);
-	$iterator++;
+    if (is_array(@$regs)) {
+        $regs = null;
+    }
+    // make sure any multibyte output is in base 64
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(mb_ereg($pattern, $string, $regs));
+    base64_encode_var_dump($regs);
+    $iterator++;
 }
 /**
  * replicate a var dump of an array but outputted string values are base64 encoded
@@ -52,20 +52,20 @@ foreach($character_classes as $string => $pattern) {
  * @param array $regs
  */
 function base64_encode_var_dump($regs) {
-	if ($regs) {
-		echo "array(" . count($regs) . ") {\n";
-		foreach ($regs as $key => $value) {
-			echo "  [$key]=>\n  ";
-			if (is_string($value)) {
-				var_dump(base64_encode($value));
-			} else {
-				var_dump($value);
-			}
-		}
-		echo "}\n";
-	} else {
-		echo "NULL\n";
-	}
+    if ($regs) {
+        echo "array(" . count($regs) . ") {\n";
+        foreach ($regs as $key => $value) {
+            echo "  [$key]=>\n  ";
+            if (is_string($value)) {
+                var_dump(base64_encode($value));
+            } else {
+                var_dump($value);
+            }
+        }
+        echo "}\n";
+    } else {
+        echo "NULL\n";
+    }
 }
 
 echo "Done";

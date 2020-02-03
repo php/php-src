@@ -4,11 +4,11 @@ call_user_func_array() passes by reference if the array element is referenced, r
 <?php
 
 function by_val($arg) {
-	$arg = 'changed';
+    $arg = 'changed';
 }
 
 function by_ref(&$arg) {
-	$arg = 'changed';
+    $arg = 'changed';
 }
 
 echo "------ Calling by_val() with unreferenced argument ------\n";

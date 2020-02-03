@@ -9,15 +9,15 @@ function expect_openssl_errors($name, $expected_error_codes) {
     $expected_errors = array_fill_keys($expected_error_codes, false);
     $all_errors = array();
     while (($error_string = openssl_error_string()) !== false) {
-	if (preg_match(",.+:([0-9A-F]+):.+,", $error_string, $m) > 0) {
+    if (preg_match(",.+:([0-9A-F]+):.+,", $error_string, $m) > 0) {
             $error_code = $m[1];
             if (isset($expected_errors[$error_code])) {
                 $expected_errors[$error_code] = true;
             }
-	    $all_errors[$error_code] = $error_string;
+        $all_errors[$error_code] = $error_string;
         } else {
-		$all_errors[] = $error_string;
-	}
+        $all_errors[] = $error_string;
+    }
     }
 
     $fail = false;
@@ -31,12 +31,12 @@ function expect_openssl_errors($name, $expected_error_codes) {
     if (!$fail) {
         echo "$name: ok\n";
     } else {
-	echo "$name: uncaught errors\n";
-	foreach ($all_errors as $code => $str) {
-		if (!isset($expected_errors[$code]) || !$expected_errors[$code]) {
-			echo "\t", $code, ": ", $str, "\n";
-		}
-	}
+    echo "$name: uncaught errors\n";
+    foreach ($all_errors as $code => $str) {
+        if (!isset($expected_errors[$code]) || !$expected_errors[$code]) {
+            echo "\t", $code, ": ", $str, "\n";
+        }
+    }
     }
 }
 
@@ -78,7 +78,7 @@ var_dump($enc_error);
 var_dump(openssl_error_string());
 // internally OpenSSL ERR won't save more than 15 (16 - 1) errors so lets test it
 for ($i = 0; $i < 20; $i++) {
-	openssl_encrypt($data, $method, $enc_key);
+    openssl_encrypt($data, $method, $enc_key);
 }
 $error_queue_size = 0;
 while (($enc_error_new = openssl_error_string()) !== false) {

@@ -9,7 +9,7 @@ assert.bail = 0
 <?php
 function f1()
 {
-	echo "f1 called\n";
+    echo "f1 called\n";
 }
 
 //bail out on error

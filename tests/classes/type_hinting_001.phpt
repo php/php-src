@@ -4,21 +4,21 @@ ZE2 class type hinting
 <?php
 
 interface Foo {
-	function a(Foo $foo);
+    function a(Foo $foo);
 }
 
 interface Bar {
-	function b(Bar $bar);
+    function b(Bar $bar);
 }
 
 class FooBar implements Foo, Bar {
-	function a(Foo $foo) {
-		// ...
-	}
+    function a(Foo $foo) {
+        // ...
+    }
 
-	function b(Bar $bar) {
-		// ...
-	}
+    function b(Bar $bar) {
+        // ...
+    }
 }
 
 class Blort {

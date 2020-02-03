@@ -7,78 +7,78 @@ error_reporting=8191
 
 class TestA
 {
-	public function doSomething($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		return --$i;
-	}
+    public function doSomething($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        return --$i;
+    }
 
-	public function doSomethingThis($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		return --$i;
-	}
+    public function doSomethingThis($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        return --$i;
+    }
 
-	public function doSomethingParent($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		return --$i;
-	}
+    public function doSomethingParent($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        return --$i;
+    }
 
-	public function doSomethingParentThis($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		return --$i;
-	}
+    public function doSomethingParentThis($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        return --$i;
+    }
 
-	public static function doSomethingStatic($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		return --$i;
-	}
+    public static function doSomethingStatic($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        return --$i;
+    }
 }
 
 class TestB extends TestA
 {
-	public function doSomething($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		$i++;
-		if ($i >= 5) return 5;
-		return call_user_func_array(array("TestA", "doSomething"), array($i));
-	}
+    public function doSomething($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        $i++;
+        if ($i >= 5) return 5;
+        return call_user_func_array(array("TestA", "doSomething"), array($i));
+    }
 
-	public function doSomethingThis($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		$i++;
-		if ($i >= 5) return 5;
-		return call_user_func_array(array($this, "TestA::doSomethingThis"), array($i));
-	}
+    public function doSomethingThis($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        $i++;
+        if ($i >= 5) return 5;
+        return call_user_func_array(array($this, "TestA::doSomethingThis"), array($i));
+    }
 
-	public function doSomethingParent($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		$i++;
-		if ($i >= 5) return 5;
-		return call_user_func_array(array("parent", "doSomethingParent"), array($i));
-	}
+    public function doSomethingParent($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        $i++;
+        if ($i >= 5) return 5;
+        return call_user_func_array(array("parent", "doSomethingParent"), array($i));
+    }
 
-	public function doSomethingParentThis($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		$i++;
-		if ($i >= 5) return 5;
-		return call_user_func_array(array($this, "parent::doSomethingParentThis"), array($i));
-	}
+    public function doSomethingParentThis($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        $i++;
+        if ($i >= 5) return 5;
+        return call_user_func_array(array($this, "parent::doSomethingParentThis"), array($i));
+    }
 
-	public static function doSomethingStatic($i)
-	{
-		echo __METHOD__ . "($i)\n";
-		$i++;
-		if ($i >= 5) return 5;
-		return call_user_func_array(array("TestA", "doSomethingStatic"), array($i));
-	}
+    public static function doSomethingStatic($i)
+    {
+        echo __METHOD__ . "($i)\n";
+        $i++;
+        if ($i >= 5) return 5;
+        return call_user_func_array(array("TestA", "doSomethingStatic"), array($i));
+    }
 }
 
 $x = new TestB();

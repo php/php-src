@@ -23,17 +23,17 @@ $hex_values = array(0x30, 0x31, 0x32, 0x33);
 echo "\n-- Octal Values --\n";
 $iterator = 1;
 foreach($octal_values as $c) {
-	echo "-- Iteration $iterator --\n";
-	var_dump(ctype_alnum($c));
-	$iterator++;
+    echo "-- Iteration $iterator --\n";
+    var_dump(ctype_alnum($c));
+    $iterator++;
 }
 
 echo "\n-- Hexadecimal Values --\n";
 $iterator = 1;
 foreach($hex_values as $c) {
-	echo "-- Iteration $iterator --\n";
-	var_dump(ctype_alnum($c));
-	$iterator++;
+    echo "-- Iteration $iterator --\n";
+    var_dump(ctype_alnum($c));
+    $iterator++;
 }
 
 setlocale(LC_CTYPE, $orig);

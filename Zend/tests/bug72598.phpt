@@ -3,7 +3,7 @@ Bug #72598 (Reference is lost after array_slice())
 --FILE--
 <?php
 function ref(&$ref) {
-	var_dump($ref);
+    var_dump($ref);
 }
 
 new class {

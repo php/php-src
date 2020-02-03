@@ -20,19 +20,19 @@ oci8_test_sql_execute($c, $stmtarray);
 // Run Test
 
 if (!ocicommit($c)) {
-	die("ocicommit() failed!\n");
+    die("ocicommit() failed!\n");
 }
 
 $select_sql = "select * from prefetch_old_tab";
 
 if (!($s = ociparse($c, $select_sql))) {
-	die("ociparse(select) failed!\n");
+    die("ociparse(select) failed!\n");
 }
 
 var_dump(ocisetprefetch($s, 10));
 
 if (!ociexecute($s)) {
-	die("ociexecute(select) failed!\n");
+    die("ociexecute(select) failed!\n");
 }
 
 var_dump(ocifetch($s));

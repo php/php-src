@@ -3,8 +3,8 @@ ReflectionClass::__toString() - ensure inherited private props are hidden.
 --FILE--
 <?php
 Class c {
-	private $a;
-	static private $b;
+    private $a;
+    static private $b;
 }
 
 class d extends c {}

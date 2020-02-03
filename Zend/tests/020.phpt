@@ -6,11 +6,11 @@ func_get_arg() invalid usage
 var_dump(func_get_arg(1));
 
 function bar() {
-	var_dump(func_get_arg(1));
+    var_dump(func_get_arg(1));
 }
 
 function foo() {
-	bar(func_get_arg(1));
+    bar(func_get_arg(1));
 }
 
 foo(1,2);

@@ -15,7 +15,7 @@ insert_dummy_data($link, $base);
 $result = ldap_search($link, "$base", "(o=test)");
 $entry = ldap_first_entry($link, $result);
 var_dump(
-	ldap_get_values_len($link, $entry, "o")
+    ldap_get_values_len($link, $entry, "o")
 );
 ?>
 --CLEAN--

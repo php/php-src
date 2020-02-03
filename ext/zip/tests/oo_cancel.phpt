@@ -17,12 +17,12 @@ $file = $dirname . '__tmp_oo_progress.zip';
 
 $zip = new ZipArchive;
 if (!$zip->open($file, ZIPARCHIVE::CREATE)) {
-	exit('failed');
+    exit('failed');
 }
 
 var_dump($zip->registerCancelCallback(function () {
-	// Always cancel
-	return -1;
+    // Always cancel
+    return -1;
 }));
 var_dump($zip->addFromString(PHP_BINARY, 'entry #1'));
 

@@ -12,7 +12,7 @@ $array[1] = "world";
 $array[2] = "elePHPant";
 
 foreach ( $array as $value ) {
-	echo $array->key( );
+    echo $array->key( );
 }
 
 ?>

@@ -3,8 +3,8 @@ Bug #41633.3 (Crash instantiating classes with self-referencing constants)
 --FILE--
 <?php
 class Foo {
-	const A = Foo::B;
-	const B = Foo::A;
+    const A = Foo::B;
+    const B = Foo::A;
 }
 echo Foo::A;
 ?>

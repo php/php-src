@@ -3,7 +3,7 @@ Nullable return value
 --FILE--
 <?php
 function foo($x) : ?array {
-	return $x;
+    return $x;
 }
 
 foo([]);

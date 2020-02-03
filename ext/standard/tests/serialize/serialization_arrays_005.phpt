@@ -14,24 +14,24 @@ serialization: arrays with references, nested
  */
 
 function check(&$a) {
-	var_dump($a);
-	$ser = serialize($a);
-	var_dump($ser);
+    var_dump($a);
+    $ser = serialize($a);
+    var_dump($ser);
 
-	$b = unserialize($ser);
+    $b = unserialize($ser);
 
-	// Change each element and dump result.
-	foreach($b as $k=>$v) {
-		if (is_array($v)){
-			foreach($b[$k] as $sk=>$sv) {
-				$b[$k][$sk] = "b$k.$sk.changed";
-				var_dump($b);
-			}
-		} else {
-			$b[$k] = "b$k.changed";
-			var_dump($b);
-		}
-	}
+    // Change each element and dump result.
+    foreach($b as $k=>$v) {
+        if (is_array($v)){
+            foreach($b[$k] as $sk=>$sv) {
+                $b[$k][$sk] = "b$k.$sk.changed";
+                var_dump($b);
+            }
+        } else {
+            $b[$k] = "b$k.changed";
+            var_dump($b);
+        }
+    }
 }
 
 echo "\n\n--- Nested array references 1 element in containing array:\n";

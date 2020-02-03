@@ -5,7 +5,7 @@ ZE2 factory and singleton, test 10
 class test {
 
   private function __destruct() {
-  	echo __METHOD__ . "\n";
+    echo __METHOD__ . "\n";
   }
 }
 

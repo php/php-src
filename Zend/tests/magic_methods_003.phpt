@@ -4,9 +4,9 @@ Testing __unset declaring as static
 <?php
 
 class foo {
-	static function __unset($a) {
-		print "unset\n";
-	}
+    static function __unset($a) {
+        print "unset\n";
+    }
 }
 
 ?>

@@ -9,9 +9,9 @@ error_reporting(E_ALL);
 include 'config.inc';
 
 class test_class {
-	function __construct($arg1, $arg2) {
-		echo __METHOD__ . "($arg1,$arg2)\n";
-	}
+    function __construct($arg1, $arg2) {
+        echo __METHOD__ . "($arg1,$arg2)\n";
+    }
 }
 
 $db = pg_connect($conn_str);

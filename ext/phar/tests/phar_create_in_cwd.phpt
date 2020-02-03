@@ -9,10 +9,10 @@ phar.readonly=0
 <?php
 chdir(__DIR__);
 try {
-	$p = new Phar('phar_create_in_cwd.phar');
-	$p['file1.txt'] = 'hi';
-	var_dump(strlen($p->getStub()));
-	$p->setStub("<?php
+    $p = new Phar('phar_create_in_cwd.phar');
+    $p['file1.txt'] = 'hi';
+    var_dump(strlen($p->getStub()));
+    $p->setStub("<?php
 spl_autoload_register(function(\$class) {
     include 'phar://' . str_replace('_', '/', \$class);
 });
@@ -20,9 +20,9 @@ Phar::mapPhar('phar_create_in_cwd.phar');
 include 'phar://phar_create_in_cwd.phar/startup.php';
 __HALT_COMPILER();
 ?>");
-	var_dump($p->getStub());
+    var_dump($p->getStub());
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
 --CLEAN--

@@ -10,12 +10,12 @@ oci8.ping_interval=0
 require(__DIR__.'/details.inc');
 
 for ($i = 0; $i < 2; $i++) {
-	if (!empty($dbase)) {
-		$c = oci_pconnect($user,$password,$dbase);
-	}
-	else {
-		$c = oci_pconnect($user,$password);
-	}
+    if (!empty($dbase)) {
+        $c = oci_pconnect($user,$password,$dbase);
+    }
+    else {
+        $c = oci_pconnect($user,$password);
+    }
 }
 
 echo "Done\n";

@@ -15,14 +15,14 @@ $files = array();
 $files['a.php']   = '<?php echo "This is a\n"; include "'.$pname.'/b.php"; ?>';
 include 'files/phar_test.inc';
 try {
-	$a = new Phar($fname);
-	var_dump($a['a.php']->isExecutable());
-	$a['a.php']->chmod(0777);
-	var_dump($a['a.php']->isExecutable());
-	$a['a.php']->chmod(0666);
-	var_dump($a['a.php']->isExecutable());
+    $a = new Phar($fname);
+    var_dump($a['a.php']->isExecutable());
+    $a['a.php']->chmod(0777);
+    var_dump($a['a.php']->isExecutable());
+    $a['a.php']->chmod(0666);
+    var_dump($a['a.php']->isExecutable());
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
 --CLEAN--

@@ -21,9 +21,9 @@ echo "*** Testing arsort() : basic functionality ***\n";
 
 // an array containing unsorted string values with indices
 $unsorted_strings = array(
-	"l" => "lemon", "o" => "orange",
-	"O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
-	"b" => "banana",
+    "l" => "lemon", "o" => "orange",
+    "O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
+    "b" => "banana",
 );
 // an array containing unsorted numeric values with indices
 $unsorted_numerics =  array( 1 => 100, 2 => 33, 3 => 555, 4 => 22 );

@@ -7,8 +7,8 @@ default_charset=EUC-JP
 filter.default=unsafe_raw
 --FILE--
 <?php
-	print ini_get('default_charset')."\n";
-	var_dump(htmlentities("\xa1\xa2\xa1\xa3\xa1\xa4", ENT_QUOTES, ''));
+    print ini_get('default_charset')."\n";
+    var_dump(htmlentities("\xa1\xa2\xa1\xa3\xa1\xa4", ENT_QUOTES, ''));
 ?>
 --EXPECTF--
 EUC-JP

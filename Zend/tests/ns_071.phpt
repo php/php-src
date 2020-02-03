@@ -6,9 +6,9 @@ Testing parameter type-hinted (array) with default value inside namespace
 namespace foo;
 
 class bar {
-	public function __construct(array $x = NULL) {
-		var_dump($x);
-	}
+    public function __construct(array $x = NULL) {
+        var_dump($x);
+    }
 }
 
 new bar(null);

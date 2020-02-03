@@ -4,13 +4,13 @@ Evaluation order during assignments.
 <?php
 
 function f() {
-	echo "in f()\n";
-	return "name";
+    echo "in f()\n";
+    return "name";
 }
 
 function g() {
-	echo "in g()\n";
-	return "assigned value";
+    echo "in g()\n";
+    return "assigned value";
 }
 
 
@@ -41,9 +41,9 @@ var_dump($oc);
 
 
 class C {
-	public static $name = "original";
-	public static $a = array();
-	public static $string = "hello";
+    public static $name = "original";
+    public static $a = array();
+    public static $string = "hello";
 }
 echo "\n\nOrder with static property assignment:\n";
 C::${f()} = g();
@@ -56,12 +56,12 @@ var_dump(C::$a);
 echo "\n\nOrder with indexed string assignment:\n";
 $string = "hello";
 function getOffset() {
-	echo "in getOffset()\n";
-	return 0;
+    echo "in getOffset()\n";
+    return 0;
 }
 function newChar() {
-	echo "in newChar()\n";
-	return 'j';
+    echo "in newChar()\n";
+    return 'j';
 }
 $string[getOffset()] = newChar();
 var_dump($string);

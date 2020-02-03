@@ -4,8 +4,8 @@ errmsg: default value for parameters with array type can only be an array or NUL
 <?php
 
 class test {
-	function foo(array $a = "s") {
-	}
+    function foo(array $a = "s") {
+    }
 }
 
 echo "Done\n";

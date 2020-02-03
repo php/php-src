@@ -10,15 +10,15 @@ require_once('skipif.inc');
 $ldap = ldap_connect('127.0.0.1', 3333);
 
 ldap_mod_replace($ldap, null, array(
-	'lockoutTime' => array(0),
+    'lockoutTime' => array(0),
 ));
 
 ldap_modify_batch($ldap, null, array(    [
-	"attrib"  => "mail",
-	"modtype" => LDAP_MODIFY_BATCH_ADD,
-	"values"  => [
-		"test@example.com",
-		"test-2@example.com", ]]));
+    "attrib"  => "mail",
+    "modtype" => LDAP_MODIFY_BATCH_ADD,
+    "values"  => [
+        "test@example.com",
+        "test-2@example.com", ]]));
 
 
 ldap_close($ldap);

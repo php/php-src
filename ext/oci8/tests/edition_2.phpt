@@ -87,12 +87,12 @@ oci_close($c5);
 echo "\n\n**Test 1.4 - with different type of values *********\n";
 $values_array = array(123,NULL,'NO EDITION','edition name which has more than thirty chars!!!edition name which has more than thirty chars!!!');
 foreach ($values_array as $val ) {
-	set_edit_attr($val);
-	$c1 = get_conn(1); //oci_connect()
-	if ($c1) {
-		get_edit_attr($c1);
-		oci_close($c1);
-	}
+    set_edit_attr($val);
+    $c1 = get_conn(1); //oci_connect()
+    if ($c1) {
+        get_edit_attr($c1);
+        oci_close($c1);
+    }
 }
 
 echo "\n\n**Test 1.5 - Negative case with an invalid string value. *********\n";
@@ -149,7 +149,7 @@ echo "Done\n";
 
 
 function set_scope() {
-	$r = set_edit_attr('MYEDITION1');
+    $r = set_edit_attr('MYEDITION1');
 }
 
 function get_scope() {
@@ -158,8 +158,8 @@ function get_scope() {
         $m = oci_error();
         die("Error:" . $m['message']);
     }
-	get_edit_attr($sc1);
-	oci_close($sc1);
+    get_edit_attr($sc1);
+    oci_close($sc1);
 }
 ?>
 --EXPECTF--

@@ -36,13 +36,13 @@ if($broker) {
     if (is_array($provider)) {
         echo("OK\n");
 
-	if ((isset($provider[$counter]['name']) && isset($provider[$counter]['desc']) && isset($provider[$counter]['file']))) {
-	   echo("OK\n");
+    if ((isset($provider[$counter]['name']) && isset($provider[$counter]['desc']) && isset($provider[$counter]['file']))) {
+       echo("OK\n");
 
-	} else {
-	   echo("failed, broker describe\n");
+    } else {
+       echo("failed, broker describe\n");
 
-	}
+    }
     } else {
         echo "failed, brocker describe array \n";
     }

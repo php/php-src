@@ -5,7 +5,7 @@ report_memleaks=1
 --FILE--
 <?php
 class FooBar {
-		const bar = ["bar" => 3]["bar"];
+        const bar = ["bar" => 3]["bar"];
 }
 echo "okey";
 --EXPECT--

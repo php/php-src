@@ -11,7 +11,7 @@ Test class_exists() function : basic functionality
 echo "*** Testing class_exists() : basic functionality ***\n";
 
 spl_autoload_register(function ($className) {
-	echo "In autoload($className)\n";
+    echo "In autoload($className)\n";
 });
 
 echo "Calling class_exists() on non-existent class with autoload explicitly enabled:\n";

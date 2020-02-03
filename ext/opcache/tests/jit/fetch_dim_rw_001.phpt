@@ -11,8 +11,8 @@ opcache.jit_buffer_size=1M
 --FILE--
 <?php
 function foo() {
-	$a[0][0] += 2;
-	return $a[0];
+    $a[0][0] += 2;
+    return $a[0];
 }
 var_dump(foo());
 --EXPECTF--

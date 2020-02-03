@@ -18,7 +18,7 @@ var_dump($tz, $tz2);
 try {
 var_dump($tz == $tz2);
 } catch (Exception $e) {
-	var_dump(get_class($e), $e->getMessage());
+    var_dump(get_class($e), $e->getMessage());
 }
 
 ?>

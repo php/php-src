@@ -4,12 +4,12 @@ Testing __set implementation with wrong declaration
 <?php
 
 abstract class b {
-	abstract function __set($a, $b);
+    abstract function __set($a, $b);
 }
 
 class a extends b {
-	private function __set($a, $b) {
-	}
+    private function __set($a, $b) {
+    }
 }
 
 ?>

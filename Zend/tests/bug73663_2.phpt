@@ -3,8 +3,8 @@ Bug #73663.2 ("Invalid opcode 65/16/8" occurs with a variable created with list(
 --FILE--
 <?php
 function change(&$ref) {
-	$ref = range(1, 10);
-	return;
+    $ref = range(1, 10);
+    return;
 }
 
 $array = [1];

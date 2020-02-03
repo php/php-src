@@ -24,14 +24,14 @@ try {
     echo $e->getMessage(), "\n";
 }
 try {
-	var_dump(new IntlGregorianCalendar(1,2,NULL,4));
+    var_dump(new IntlGregorianCalendar(1,2,NULL,4));
 } catch (ArgumentCountError $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 try {
-	var_dump(new IntlGregorianCalendar(1,2,3,4,NULL,array()));
+    var_dump(new IntlGregorianCalendar(1,2,3,4,NULL,array()));
 } catch (TypeError $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 --EXPECT--
 Too many arguments

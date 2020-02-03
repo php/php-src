@@ -24,13 +24,13 @@ $valid_nulls = array(
 /* Loop to check for above null values with var_export() */
 echo "\n*** Output for null values ***\n";
 foreach($valid_nulls as $key => $null_value) {
-	echo "\n-- Iteration: $key --\n";
-	var_export( $null_value );
-	echo "\n";
-	var_export( $null_value, FALSE);
-	echo "\n";
-	var_dump( var_export( $null_value, true) );
-	echo "\n";
+    echo "\n-- Iteration: $key --\n";
+    var_export( $null_value );
+    echo "\n";
+    var_export( $null_value, FALSE);
+    echo "\n";
+    var_dump( var_export( $null_value, true) );
+    echo "\n";
 }
 ?>
 --EXPECT--

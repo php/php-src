@@ -48,8 +48,8 @@ $statement = oci_parse ($c, $query);
 oci_execute($statement, OCI_DEFAULT);
 
 while ($row = oci_fetch_array($statement, OCI_ASSOC)) {
-	$result = $row['LOB_1']->load();
-	var_dump($result);
+    $result = $row['LOB_1']->load();
+    var_dump($result);
 }
 
 $query = 'SELECT * FROM lob_test ORDER BY mykey DESC';
@@ -57,8 +57,8 @@ $statement = oci_parse ($c, $query);
 oci_execute($statement, OCI_DEFAULT);
 
 while ($row = oci_fetch_array($statement, OCI_ASSOC)) {
-	$result = $row['LOB_1']->load();
-	var_dump($result);
+    $result = $row['LOB_1']->load();
+    var_dump($result);
 }
 
 $drop = "DROP table lob_test";

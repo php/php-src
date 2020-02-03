@@ -28,24 +28,24 @@ echo "error: $errno, $errstr\n";
 set_error_handler('eh');
 
 try {
-	var_dump(intlcal_get_least_maximum(1, 1));
+    var_dump(intlcal_get_least_maximum(1, 1));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
-	var_dump(intlcal_get_maximum(1, 1));
+    var_dump(intlcal_get_maximum(1, 1));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
-	var_dump(intlcal_get_greatest_minimum(1, -1));
+    var_dump(intlcal_get_greatest_minimum(1, -1));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 try {
-	var_dump(intlcal_get_minimum(1, -1));
+    var_dump(intlcal_get_minimum(1, -1));
 } catch (Error $ex) {
-	echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
+    echo "error: " . $ex->getCode() . ", " . $ex->getMessage() . "\n\n";
 }
 --EXPECTF--
 Warning: IntlCalendar::getLeastMaximum(): intlcal_get_least_maximum: invalid field in %s on line %d

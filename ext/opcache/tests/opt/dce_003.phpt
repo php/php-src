@@ -11,8 +11,8 @@ opcache.preload=
 --FILE--
 <?php
 function foo(int $a) {
-	$b = $a += 3;
-	return $a;
+    $b = $a += 3;
+    return $a;
 }
 ?>
 --EXPECTF--

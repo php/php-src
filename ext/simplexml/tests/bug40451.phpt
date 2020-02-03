@@ -7,9 +7,9 @@ Bug #40451 (addAttribute() may crash when used with non-existent child node)
 
 $string = <<<XML
 <?xml version="1.0"?>
-	<Host enable="true">
-	 <Name>host.server.com</Name>
-	 </Host>
+    <Host enable="true">
+     <Name>host.server.com</Name>
+     </Host>
 XML;
 
 $xml = simplexml_load_string($string);

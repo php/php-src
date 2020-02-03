@@ -7,7 +7,7 @@ class A {
     private static $b = "b";
     private static $c = "c";
     public function __construct() {
-	var_dump($this->a, $this->b, $this->c);
+    var_dump($this->a, $this->b, $this->c);
     }
 }
 class B extends A {

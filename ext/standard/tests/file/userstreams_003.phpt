@@ -3,37 +3,37 @@ User-space streams: stream_set_option()
 --FILE--
 <?php
 class test_wrapper_base {
-	public $return_value;
-	public $expected_option;
-	public $expected_value;
-	function stream_open($path, $mode, $openedpath) {
-		return true;
-	}
-	function stream_eof() {
-		return false;
-	}
+    public $return_value;
+    public $expected_option;
+    public $expected_value;
+    function stream_open($path, $mode, $openedpath) {
+        return true;
+    }
+    function stream_eof() {
+        return false;
+    }
 }
 class test_wrapper extends test_wrapper_base {
-	function stream_set_option($option, $value, $ptrparam) {
-		echo "value:\n";
-		var_dump($value);
-		echo "ptrparam:\n";
-		var_dump($ptrparam);
-		echo "\$option === $option === " . $this->expected_option . ":\n";
-		var_dump($option === $this->expected_option);
-		echo "\$value === $value === " . $this->expected_value. ":\n";
-		var_dump($value === $this->expected_value);
-		return $this->return_value;
-	}
+    function stream_set_option($option, $value, $ptrparam) {
+        echo "value:\n";
+        var_dump($value);
+        echo "ptrparam:\n";
+        var_dump($ptrparam);
+        echo "\$option === $option === " . $this->expected_option . ":\n";
+        var_dump($option === $this->expected_option);
+        echo "\$value === $value === " . $this->expected_value. ":\n";
+        var_dump($value === $this->expected_value);
+        return $this->return_value;
+    }
 }
 
 function test($name, $fd, $return_value, $func, $args, $expected_option, $expected_value) {
-	echo "\n------ $name: -------\n";
-	$data = stream_get_meta_data($fd);
-	$data['wrapper_data']->return_value = $return_value;
-	$data['wrapper_data']->expected_option = $expected_option;
-	$data['wrapper_data']->expected_value = $expected_value;
-	var_dump(call_user_func_array($func, $args));
+    echo "\n------ $name: -------\n";
+    $data = stream_get_meta_data($fd);
+    $data['wrapper_data']->return_value = $return_value;
+    $data['wrapper_data']->expected_option = $expected_option;
+    $data['wrapper_data']->expected_value = $expected_value;
+    var_dump(call_user_func_array($func, $args));
 }
 
 var_dump(stream_wrapper_register('test', 'test_wrapper'));

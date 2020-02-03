@@ -13,9 +13,9 @@ require __DIR__.'/connect.inc';
 // Initialization
 
 $stmtarray = array(
-	"DROP table lob_041_tab",
-	"CREATE table lob_041_tab(c1 CLOB)",
-	"INSERT INTO lob_041_tab VALUES('test data')"
+    "DROP table lob_041_tab",
+    "CREATE table lob_041_tab(c1 CLOB)",
+    "INSERT INTO lob_041_tab VALUES('test data')"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -57,7 +57,7 @@ var_dump($data);
 echo "Done\n";
 
 $stmtarray = array(
-	"DROP table lob_041_tab"
+    "DROP table lob_041_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

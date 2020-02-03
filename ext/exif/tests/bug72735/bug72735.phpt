@@ -5,17 +5,17 @@ Bug #72735 (Samsung picture thumb not read (zero size))
 --FILE--
 <?php
 foreach (['nokia.jpg', 'samsung.jpg', 'panasonic.jpg'] as $picture) {
-	echo $picture . ': ';
+    echo $picture . ': ';
 
-	$len = strlen(exif_thumbnail(__DIR__ . DIRECTORY_SEPARATOR . $picture));
+    $len = strlen(exif_thumbnail(__DIR__ . DIRECTORY_SEPARATOR . $picture));
 
-	if (!$len) {
-		echo 'Error, no length returned', PHP_EOL;
+    if (!$len) {
+        echo 'Error, no length returned', PHP_EOL;
 
-		continue;
-	}
+        continue;
+    }
 
-	echo 'int(' . $len . ')', PHP_EOL;
+    echo 'int(' . $len . ')', PHP_EOL;
 }
 ?>
 --EXPECT--

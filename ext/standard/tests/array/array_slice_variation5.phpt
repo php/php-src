@@ -16,8 +16,8 @@ echo "*** Testing array_slice() : usage variations ***\n";
 $input = array ('one' => 1, 2 => 'two', 'three', 9 => 'nine', 'ten' => 10);
 
 for ($i = -7; $i <= 7; $i++) {
-	echo "\n-- \$offset is $i --\n";
-	var_dump(array_slice($input, $i));
+    echo "\n-- \$offset is $i --\n";
+    var_dump(array_slice($input, $i));
 }
 echo "\n-- \$offset is maximum integer value --\n";
 var_dump(array_slice($input, PHP_INT_MAX));

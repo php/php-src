@@ -14,7 +14,7 @@ echo "*** Testing hash_file() : basic functionality ***\n";
 $file = __DIR__ . "hash_file.txt";
 /* Creating a temporary file file */
 if (($fp = fopen( $file, "w+")) == FALSE) {
-	echo "Cannot create file ($file)";
+    echo "Cannot create file ($file)";
     exit;
 }
 

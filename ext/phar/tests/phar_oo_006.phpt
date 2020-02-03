@@ -11,21 +11,21 @@ require_once 'files/phar_oo_test.inc';
 
 class MyFile extends SplFileObject
 {
-	function __construct($what)
-	{
-		echo __METHOD__ . "($what)\n";
-		parent::__construct($what);
-	}
+    function __construct($what)
+    {
+        echo __METHOD__ . "($what)\n";
+        parent::__construct($what);
+    }
 }
 
 $phar = new Phar($fname);
 try
 {
-	$phar->setFileClass('SplFileInfo');
+    $phar->setFileClass('SplFileInfo');
 }
 catch (TypeError $e)
 {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 $phar->setInfoClass('MyFile');
 

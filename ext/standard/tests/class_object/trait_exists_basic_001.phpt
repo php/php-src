@@ -11,7 +11,7 @@ Test trait_exists() function : basic functionality
 echo "*** Testing trait_exists() : basic functionality ***\n";
 
 spl_autoload_register(function ($traitName) {
-	echo "In autoload($traitName)\n";
+    echo "In autoload($traitName)\n";
 });
 
 trait MyTrait {}

@@ -30,7 +30,7 @@ var_dump($dh2 = opendir($dir_path2));
 $data = array();
 echo "\n-- Read and rewind first directory (argument supplied) --\n";
 while(FALSE !== $file1 = readdir($dh1)) {
-	$data[] = $file1;
+    $data[] = $file1;
 }
 $first = $data[0];
 sort($data);
@@ -42,7 +42,7 @@ var_dump(readdir($dh1) == $first);
 $data = array();
 echo "\n-- Read and rewind second directory (no argument supplied) --\n";
 while(FALSE !== $file2 = readdir()) {
-	$data[] = $file2;
+    $data[] = $file2;
 }
 $first = $data[0];
 sort($data);

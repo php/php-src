@@ -9,24 +9,24 @@ get_object_vars(): visibility from non static methods (target object passed as a
  */
 
 Class A {
-	private $hiddenPriv = 'A::hiddenPriv';
+    private $hiddenPriv = 'A::hiddenPriv';
 
-	public function testA($b) {
-		echo __METHOD__ . "\n";
-		var_dump(get_object_vars($b));
-	}
+    public function testA($b) {
+        echo __METHOD__ . "\n";
+        var_dump(get_object_vars($b));
+    }
 }
 
 Class B extends A {
-	private $hiddenPriv = 'B::hiddenPriv';
-	private $priv = 'B::priv';
-	protected $prot = 'B::prot';
-	public $pub = 'B::pub';
+    private $hiddenPriv = 'B::hiddenPriv';
+    private $priv = 'B::priv';
+    protected $prot = 'B::prot';
+    public $pub = 'B::pub';
 
-	public function testB($b) {
-		echo __METHOD__ . "\n";
-		var_dump(get_object_vars($b));
-	}
+    public function testB($b) {
+        echo __METHOD__ . "\n";
+        var_dump(get_object_vars($b));
+    }
 }
 
 

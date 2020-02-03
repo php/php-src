@@ -7,19 +7,19 @@ default_charset=UTF-8
 --FILE--
 <?php
 try {
-	$a = new Phar('http://should.fail.com');
+    $a = new Phar('http://should.fail.com');
 } catch (UnexpectedValueException $e) {
-	echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
 try {
-	$a = new Phar('http://');
+    $a = new Phar('http://');
 } catch (UnexpectedValueException $e) {
-	echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
 try {
-	$a = new Phar('http:/');
+    $a = new Phar('http:/');
 } catch (UnexpectedValueException $e) {
-	echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
 ?>
 --EXPECT--

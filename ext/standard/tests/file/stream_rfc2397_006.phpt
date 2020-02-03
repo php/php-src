@@ -6,19 +6,19 @@ allow_url_fopen=1
 <?php
 
 $streams = array(
-	"data:;base64,\0Zm9vYmFyIGZvb2Jhcg==",
-	"data:;base64,Zm9vYmFy\0IGZvb2Jhcg==",
-	'data:;base64,#Zm9vYmFyIGZvb2Jhcg==',
-	'data:;base64,#Zm9vYmFyIGZvb2Jhc=',
-	);
+    "data:;base64,\0Zm9vYmFyIGZvb2Jhcg==",
+    "data:;base64,Zm9vYmFy\0IGZvb2Jhcg==",
+    'data:;base64,#Zm9vYmFyIGZvb2Jhcg==',
+    'data:;base64,#Zm9vYmFyIGZvb2Jhc=',
+    );
 
 foreach($streams as $stream)
 {
-	try {
-		var_dump(file_get_contents($stream));
-	} catch (TypeError $e) {
-		echo $e->getMessage(), "\n";
-	}
+    try {
+        var_dump(file_get_contents($stream));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 
 ?>

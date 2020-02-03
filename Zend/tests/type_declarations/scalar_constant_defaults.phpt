@@ -12,35 +12,35 @@ const STRING_ADD_VAL = "this" . " is a test";
 const NULL_VAL = null;
 
 function int_val(int $a = INT_VAL): int {
-	return $a;
+    return $a;
 }
 
 function float_val(float $a = FLOAT_VAL): float {
-	return $a;
+    return $a;
 }
 
 function string_val(string $a = STRING_VAL): string {
-	return $a;
+    return $a;
 }
 
 function int_add_val(int $a = INT_ADD_VAL): int {
-	return $a;
+    return $a;
 }
 
 function float_add_val(float $a = FLOAT_ADD_VAL): float {
-	return $a;
+    return $a;
 }
 
 function string_add_val(string $a = STRING_ADD_VAL): string {
-	return $a;
+    return $a;
 }
 
 function int_val_default_null(int $a = NULL_VAL) {
-	return $a;
+    return $a;
 }
 
 function nullable_int_val_default_null(?int $a = NULL_VAL) {
-	return $a;
+    return $a;
 }
 
 echo "Testing int val" . PHP_EOL;

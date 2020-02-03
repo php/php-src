@@ -12,12 +12,12 @@ var_dump(
 
 // Invalid
 var_dump(
-	mb_ord("\u{d800}", "typo"),
-	mb_ord("\u{d800}", "pass"),
-	mb_ord("\u{d800}", "jis"),
-	mb_ord("\u{d800}", "cp50222"),
-	mb_ord("\u{d800}", "utf-7"),
-	mb_ord("")
+    mb_ord("\u{d800}", "typo"),
+    mb_ord("\u{d800}", "pass"),
+    mb_ord("\u{d800}", "jis"),
+    mb_ord("\u{d800}", "cp50222"),
+    mb_ord("\u{d800}", "utf-7"),
+    mb_ord("")
 );
 
 mb_internal_encoding("utf-7");

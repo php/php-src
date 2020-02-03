@@ -3,17 +3,17 @@ yielding values from an array
 --FILE--
 <?php
 function from() {
-	yield 0;
-	yield from []; // must not yield anything
-	yield from [1,2];
+    yield 0;
+    yield from []; // must not yield anything
+    yield from [1,2];
 }
 
 function gen() {
-	yield from from();
+    yield from from();
 }
 
 foreach(gen() as $v) {
-	var_dump($v);
+    var_dump($v);
 }
 ?>
 --EXPECT--

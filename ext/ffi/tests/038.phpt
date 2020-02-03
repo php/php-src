@@ -8,7 +8,7 @@ ffi.enable=1
 <?php
 $a = FFI::new("int[10]");
 for ($i = 0; $i < 10; $i++) {
-	$a[$i] = $i;
+    $a[$i] = $i;
 }
 $p = FFI::cast("int*", $a);
 var_dump($p[0]);

@@ -21,7 +21,7 @@ remove_node($doc);
 
 $node = $doc->getElementById( 'id1' );
 if ($node) {
-	print 'Found Node: '.$node->nodeName."\n";
+    print 'Found Node: '.$node->nodeName."\n";
 }
 $root = $doc->documentElement;
 print 'Root Node: '.$root->nodeName."\n";

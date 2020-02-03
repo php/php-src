@@ -13,29 +13,29 @@ class TestSoapClient extends SoapClient {
 xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
 xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<soapenv:Body>
-		<soapenv:Fault>
-			<faultcode>soapenv:Server.userException</faultcode>
-			<faultstring>service.EchoServiceException</faultstring>
-			<detail>
-				<service.EchoServiceException xsi:type="ns1:EchoServiceException" xmlns:ns1="urn:service.EchoService">
-					<intParameter xsi:type="xsd:int">105</intParameter>
-					<parameter xsi:type="soapenc:string" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">string param</parameter>
-				</service.EchoServiceException>
-				<ns2:hostname xmlns:ns2="http://xml.apache.org/axis/">steckovic</ns2:hostname>
-			</detail>
-		</soapenv:Fault>
-	</soapenv:Body>
+    <soapenv:Body>
+        <soapenv:Fault>
+            <faultcode>soapenv:Server.userException</faultcode>
+            <faultstring>service.EchoServiceException</faultstring>
+            <detail>
+                <service.EchoServiceException xsi:type="ns1:EchoServiceException" xmlns:ns1="urn:service.EchoService">
+                    <intParameter xsi:type="xsd:int">105</intParameter>
+                    <parameter xsi:type="soapenc:string" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/">string param</parameter>
+                </service.EchoServiceException>
+                <ns2:hostname xmlns:ns2="http://xml.apache.org/axis/">steckovic</ns2:hostname>
+            </detail>
+        </soapenv:Fault>
+    </soapenv:Body>
 </soapenv:Envelope>
 EOF;
-	}
+    }
 }
 
 ini_set('soap.wsdl_cache_enabled', 0);
 
 $parameters = [
-	'trace' => 1,
-	'exceptions' => 0,
+    'trace' => 1,
+    'exceptions' => 0,
 ];
 $client = new TestSoapClient(__DIR__ . '/bug50675.wsdl', $parameters);
 

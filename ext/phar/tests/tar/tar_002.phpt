@@ -16,10 +16,10 @@ $tar->close();
 $tar = fopen('phar://' . __DIR__ . '/tar_002.phar.tar/tar_002.phpt', 'rb');
 
 try {
-	$phar = new Phar(__DIR__ . '/tar_002.phar.tar');
-	echo "should not execute\n";
+    $phar = new Phar(__DIR__ . '/tar_002.phar.tar');
+    echo "should not execute\n";
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
 --CLEAN--

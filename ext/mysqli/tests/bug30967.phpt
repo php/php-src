@@ -7,20 +7,20 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	class mysql1 extends mysqli {
-	}
+    class mysql1 extends mysqli {
+    }
 
-	class mysql2 extends mysql1 {
-	}
+    class mysql2 extends mysql1 {
+    }
 
-	$mysql = new mysql2($host, $user, $passwd, $db, $port, $socket);
+    $mysql = new mysql2($host, $user, $passwd, $db, $port, $socket);
 
-	$mysql->query("THIS DOES NOT WORK");
-	printf("%d\n", $mysql->errno);
+    $mysql->query("THIS DOES NOT WORK");
+    printf("%d\n", $mysql->errno);
 
-	$mysql->close();
+    $mysql->close();
 ?>
 --EXPECT--
 1064

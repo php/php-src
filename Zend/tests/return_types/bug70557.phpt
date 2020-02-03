@@ -6,13 +6,13 @@ opcache.enable=0
 <?php
 
 function getNumber() : int {
-	return "foo";
+    return "foo";
 }
 
 try {
-	getNumber();
+    getNumber();
 } catch (TypeError $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 ?>
 --EXPECT--

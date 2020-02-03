@@ -6,39 +6,39 @@ Steve Seear <stevseea@php.net>
 --FILE--
 <?php
 class C {
-	public static $x;
+    public static $x;
 }
 
 $rc = new ReflectionClass('C');
 try {
-	var_dump($rc->setStaticPropertyValue("x", "default value", 'blah'));
+    var_dump($rc->setStaticPropertyValue("x", "default value", 'blah'));
 } catch (TypeError $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	var_dump($rc->setStaticPropertyValue());
+    var_dump($rc->setStaticPropertyValue());
 } catch (TypeError $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	var_dump($rc->setStaticPropertyValue(null));
+    var_dump($rc->setStaticPropertyValue(null));
 } catch (TypeError $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	var_dump($rc->setStaticPropertyValue(null,null));
+    var_dump($rc->setStaticPropertyValue(null,null));
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	var_dump($rc->setStaticPropertyValue(1.5, 'def'));
+    var_dump($rc->setStaticPropertyValue(1.5, 'def'));
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	var_dump($rc->setStaticPropertyValue(array(1,2,3), 'blah'));
+    var_dump($rc->setStaticPropertyValue(array(1,2,3), 'blah'));
 } catch (TypeError $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 

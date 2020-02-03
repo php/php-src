@@ -13,9 +13,9 @@ $server = xmlrpc_server_create ();
 function foo() { return 11111; }
 
 class bar {
-	static public function test() {
-		return 'foo';
-	}
+    static public function test() {
+        return 'foo';
+    }
 }
 
 xmlrpc_server_register_introspection_callback($server, 'foobar');

@@ -41,7 +41,7 @@ class MyHttpClient
             return \strlen($data);
         });
         curl_multi_add_handle($this->mh, $this->curl);
-        
+
         $stillRunning = null;
         while (true) {
             do {

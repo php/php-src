@@ -3,10 +3,10 @@ Bug #21732 (preg_replace() segfaults with invalid parameters)
 --FILE--
 <?php
 class foo {
-	function cb($param) {
-		var_dump($param);
-		return "yes!";
-	}
+    function cb($param) {
+        var_dump($param);
+        return "yes!";
+    }
 }
 
 try {

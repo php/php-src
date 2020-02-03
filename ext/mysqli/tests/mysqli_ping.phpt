@@ -8,30 +8,30 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	require('table.inc');
+    require('table.inc');
 
-	var_dump(mysqli_ping($link));
+    var_dump(mysqli_ping($link));
 
-	// provoke an error to check if mysqli_ping resets it
-	$res = mysqli_query($link, 'SELECT * FROM unknown_table');
-	if (!($errno = mysqli_errno($link)))
-		printf("[003] Statement should have caused an error\n");
+    // provoke an error to check if mysqli_ping resets it
+    $res = mysqli_query($link, 'SELECT * FROM unknown_table');
+    if (!($errno = mysqli_errno($link)))
+        printf("[003] Statement should have caused an error\n");
 
-	var_dump(mysqli_ping($link));
-	if ($errno === mysqli_errno($link))
-		printf("[004] Error codes should have been reset\n");
+    var_dump(mysqli_ping($link));
+    if ($errno === mysqli_errno($link))
+        printf("[004] Error codes should have been reset\n");
 
-	mysqli_close($link);
+    mysqli_close($link);
 
-	try {
+    try {
         mysqli_ping($link);
     } catch (Error $exception) {
         echo $exception->getMessage() . "\n";
     }
 
-	print "done!";
+    print "done!";
 ?>
 --EXPECT--
 bool(true)

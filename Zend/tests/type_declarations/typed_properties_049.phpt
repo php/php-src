@@ -3,7 +3,7 @@ Nullable typed property
 --FILE--
 <?php
 class Foo {
-	public int $foo = null;
+    public int $foo = null;
 }
 ?>
 --EXPECTF--

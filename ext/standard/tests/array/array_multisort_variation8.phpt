@@ -12,15 +12,15 @@ echo "*** Testing array_multisort() : usage variation  - test sort order of all 
 
 // Define error handler
 function test_error_handler($err_no, $err_msg, $filename, $linenum) {
-	// We're testing sort order not errors so ignore.
+    // We're testing sort order not errors so ignore.
 }
 set_error_handler('test_error_handler');
 
 // define some classes
 class classWithToString {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString { }

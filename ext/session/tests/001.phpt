@@ -12,9 +12,9 @@ session.save_handler=files
 error_reporting(E_ALL);
 
 class foo {
-	public $bar = "ok";
+    public $bar = "ok";
 
-	function method() { $this->yes = "done"; }
+    function method() { $this->yes = "done"; }
 }
 
 $baz = new foo;

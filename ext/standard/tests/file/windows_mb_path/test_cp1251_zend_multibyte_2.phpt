@@ -27,10 +27,10 @@ $fn = $prefix . DIRECTORY_SEPARATOR . $item;
 
 $f = fopen($fn, 'w');
 if ($f) {
-	var_dump($f, fwrite($f, "writing to an mb filename"));
-	var_dump(fclose($f));
+    var_dump($f, fwrite($f, "writing to an mb filename"));
+    var_dump(fclose($f));
 } else {
-	echo "open failed\n";
+    echo "open failed\n";
 }
 
 var_dump(file_get_contents($fn));

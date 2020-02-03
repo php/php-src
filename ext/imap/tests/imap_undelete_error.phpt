@@ -17,7 +17,7 @@ imap_undelete(false);
 
 require_once(__DIR__.'/imap_include.inc');
 $stream_id = imap_open($default_mailbox, $username, $password) or
-	die("Cannot connect to mailbox $default_mailbox: " . imap_last_error());
+    die("Cannot connect to mailbox $default_mailbox: " . imap_last_error());
 
 imap_undelete($stream_id);
 

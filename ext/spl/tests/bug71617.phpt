@@ -6,23 +6,23 @@ Bug #71617: private properties lost when unserializing ArrayObject
 class Test extends ArrayObject
 {
 
-	private $name = null;
+    private $name = null;
 
-	public function __construct(array $input)
-	{
-		parent::__construct($input, ArrayObject::ARRAY_AS_PROPS);
-	}
+    public function __construct(array $input)
+    {
+        parent::__construct($input, ArrayObject::ARRAY_AS_PROPS);
+    }
 
-	public function setName($name)
-	{
-		$this->name = $name;
-		return $this;
-	}
+    public function setName($name)
+    {
+        $this->name = $name;
+        return $this;
+    }
 
-	public function getName()
-	{
-		return $this->name;
-	}
+    public function getName()
+    {
+        return $this->name;
+    }
 }
 
 $test = new Test(['a' => 'a', 'b' => 'b']);

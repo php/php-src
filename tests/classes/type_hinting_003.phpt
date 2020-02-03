@@ -5,29 +5,29 @@ ZE2 class type hinting with arrays
 
 class Test
 {
-	static function f1(array $ar)
-	{
-		echo __METHOD__ . "()\n";
-		var_dump($ar);
-	}
+    static function f1(array $ar)
+    {
+        echo __METHOD__ . "()\n";
+        var_dump($ar);
+    }
 
-	static function f2(array $ar = NULL)
-	{
-		echo __METHOD__ . "()\n";
-		var_dump($ar);
-	}
+    static function f2(array $ar = NULL)
+    {
+        echo __METHOD__ . "()\n";
+        var_dump($ar);
+    }
 
-	static function f3(array $ar = array())
-	{
-		echo __METHOD__ . "()\n";
-		var_dump($ar);
-	}
+    static function f3(array $ar = array())
+    {
+        echo __METHOD__ . "()\n";
+        var_dump($ar);
+    }
 
-	static function f4(array $ar = array(25))
-	{
-		echo __METHOD__ . "()\n";
-		var_dump($ar);
-	}
+    static function f4(array $ar = array(25))
+    {
+        echo __METHOD__ . "()\n";
+        var_dump($ar);
+    }
 }
 
 Test::f1(array(42));

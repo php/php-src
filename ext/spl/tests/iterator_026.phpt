@@ -11,8 +11,8 @@ $it = new RecursiveIteratorIterator($it);
 
 foreach($it as $k=>$v)
 {
-	echo "$k=>$v\n";
-	echo "hasNext: " . ($it->getInnerIterator()->hasNext() ? "yes" : "no") . "\n";
+    echo "$k=>$v\n";
+    echo "hasNext: " . ($it->getInnerIterator()->hasNext() ? "yes" : "no") . "\n";
 }
 
 ?>

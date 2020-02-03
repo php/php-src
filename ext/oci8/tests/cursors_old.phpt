@@ -30,13 +30,13 @@ $stmt = ociparse($c, $sql);
 ociexecute($stmt);
 
 while ($result = ocifetchinto($stmt, $data, OCI_ASSOC)) {
-	ociexecute($data["CURS"]);
-	ocifetchinto($data["CURS"], $subdata, OCI_ASSOC);
-	var_dump($subdata);
-	var_dump(ocicancel($data["CURS"]));
-	ocifetchinto($data["CURS"], $subdata, OCI_ASSOC);
-	var_dump($subdata);
-	var_dump(ocicancel($data["CURS"]));
+    ociexecute($data["CURS"]);
+    ocifetchinto($data["CURS"], $subdata, OCI_ASSOC);
+    var_dump($subdata);
+    var_dump(ocicancel($data["CURS"]));
+    ocifetchinto($data["CURS"], $subdata, OCI_ASSOC);
+    var_dump($subdata);
+    var_dump(ocicancel($data["CURS"]));
 }
 
 // Cleanup

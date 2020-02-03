@@ -5,8 +5,8 @@ SOAP Server 16: user fault
 --FILE--
 <?php
 function test() {
-	global $server;
-	$server->fault("MyFault","My fault string");
+    global $server;
+    $server->fault("MyFault","My fault string");
 }
 
 $server = new soapserver(null,array('uri'=>"http://testuri.org"));

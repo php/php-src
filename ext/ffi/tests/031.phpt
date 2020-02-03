@@ -7,14 +7,14 @@ ffi.enable=1
 --FILE--
 <?php
 function test_size($expected_size, $type) {
-	try {
-		$size = FFI::sizeof(FFI::new($type));
-		if ($size !== $expected_size) {
-			echo "FAIL: sizeof($type) != $expected_size ($size)\n";
-		}
-	} catch (Throwable $e) {
-		echo $type . "=>" . get_class($e) . ": " . $e->getMessage()."\n";
-	}
+    try {
+        $size = FFI::sizeof(FFI::new($type));
+        if ($size !== $expected_size) {
+            echo "FAIL: sizeof($type) != $expected_size ($size)\n";
+        }
+    } catch (Throwable $e) {
+        echo $type . "=>" . get_class($e) . ": " . $e->getMessage()."\n";
+    }
 }
 
 test_size( 4, "struct {int a:2; int b:2;}");

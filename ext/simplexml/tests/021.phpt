@@ -8,10 +8,10 @@ SimpleXML: Element check
 $ok = 1;
 $doc = simplexml_load_string('<root><exists>foo</exists></root>');
 if(!isset($doc->exists)) {
-	$ok *= 0;
+    $ok *= 0;
 }
 if(isset($doc->doesnotexist)) {
-	$ok *= 0;
+    $ok *= 0;
 }
 if ($ok) {
          print "Works\n";

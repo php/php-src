@@ -10,7 +10,7 @@ require(__DIR__.'/connect.inc');
 // Initialization
 
 $stmtarray = array(
-	"drop table bind_sqltint_tab",
+    "drop table bind_sqltint_tab",
 
     "create table bind_sqltint_tab (
         id                number,
@@ -208,7 +208,7 @@ var_dump($p2);
 // Clean up
 
 $stmtarray = array(
-	"drop table bind_sqltint_tab"
+    "drop table bind_sqltint_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

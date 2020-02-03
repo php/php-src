@@ -35,7 +35,7 @@ $session = new SNMP(SNMP::VERSION_2c, $hostname, $community, $timeout, $retries)
 $orig = array('.1.3.6.1.2.1.1.1.0', '.1.3.6.1.2.1.1.5.0');
 $result = $session->get($orig, TRUE);
 foreach($orig as $oid){
-	var_dump($result[$oid]);
+    var_dump($result[$oid]);
 }
 var_dump($session->close());
 

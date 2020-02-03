@@ -34,27 +34,27 @@ $st = $db->query('SELECT * FROM testing');
 var_dump($st->fetchAll(PDO::FETCH_FUNC, array('self', 'foo')));
 
 class foo {
-	public function method($x) {
-		return "--- $x ---";
-	}
+    public function method($x) {
+        return "--- $x ---";
+    }
 }
 class bar extends foo {
-	public function __construct($db) {
-		$st = $db->query('SELECT * FROM testing');
-		var_dump($st->fetchAll(PDO::FETCH_FUNC, array($this, 'parent::method')));
-	}
+    public function __construct($db) {
+        $st = $db->query('SELECT * FROM testing');
+        var_dump($st->fetchAll(PDO::FETCH_FUNC, array($this, 'parent::method')));
+    }
 
-	static public function test($x, $y) {
-		return $x .'---'. $y;
-	}
+    static public function test($x, $y) {
+        return $x .'---'. $y;
+    }
 
-	private function test2($x, $y) {
-		return $x;
-	}
+    private function test2($x, $y) {
+        return $x;
+    }
 
-	public function test3($x, $y) {
-		return $x .'==='. $y;
-	}
+    public function test3($x, $y) {
+        return $x .'==='. $y;
+    }
 }
 
 new bar($db);

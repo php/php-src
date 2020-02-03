@@ -6,22 +6,22 @@ libxml_set_streams_context()
 <?php
 
 $ctxs = array(
-	NULL,
-	'bogus',
-	123,
-	new stdclass,
-	array('a'),
-	stream_context_create(),
+    NULL,
+    'bogus',
+    123,
+    new stdclass,
+    array('a'),
+    stream_context_create(),
 );
 
 foreach ($ctxs as $ctx) {
-	try {
+    try {
         var_dump(libxml_set_streams_context($ctx));
     } catch (TypeError $e) {
         echo $e->getMessage(), "\n";
     }
-	$dom = new DOMDocument();
-	var_dump($dom->load(__DIR__.'/test.xml'));
+    $dom = new DOMDocument();
+    var_dump($dom->load(__DIR__.'/test.xml'));
 }
 
 echo "Done\n";

@@ -10,8 +10,8 @@ $iterator->append($events);
 $events->next();
 
 while($iterator->valid()) {
-	echo $iterator->current(), "\n";
-	$iterator->next();
+    echo $iterator->current(), "\n";
+    $iterator->next();
 }
 ?>
 --EXPECT--

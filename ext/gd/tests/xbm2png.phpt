@@ -14,13 +14,13 @@ xbm --> png conversion test
 ?>
 --FILE--
 <?php
-	$cwd = __DIR__;
+    $cwd = __DIR__;
 
-	echo "XBM to PNG conversion: ";
-	echo imagepng(imagecreatefromxbm($cwd . "/conv_test.xbm"), $cwd . "/test_xbm.png") ? 'ok' : 'failed';
-	echo "\n";
+    echo "XBM to PNG conversion: ";
+    echo imagepng(imagecreatefromxbm($cwd . "/conv_test.xbm"), $cwd . "/test_xbm.png") ? 'ok' : 'failed';
+    echo "\n";
 
-	@unlink($cwd . "/test_xbm.png");
+    @unlink($cwd . "/test_xbm.png");
 ?>
 --EXPECT--
 XBM to PNG conversion: ok

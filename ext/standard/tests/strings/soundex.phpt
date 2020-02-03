@@ -25,7 +25,7 @@ $array = array(
 );
 
 foreach ($array as $str) {
-	var_dump(soundex($str));
+    var_dump(soundex($str));
 }
 
 echo "Done\n";

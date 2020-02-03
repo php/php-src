@@ -36,9 +36,9 @@ $r = OCIBindByName($stid, ':MYBV', $mybv, 0 );
 if (!$r) { echo "Bind error"; die; }
 
 for ($i = 1; $i < MYLIMIT; $i++) {
-	$r = OCIExecute($stid, OCI_DEFAULT);
-	if (!$r) { echo "Execute error"; die; }
-	var_dump($mybv);
+    $r = OCIExecute($stid, OCI_DEFAULT);
+    if (!$r) { echo "Execute error"; die; }
+    var_dump($mybv);
 }
 
 OCICommit($c);

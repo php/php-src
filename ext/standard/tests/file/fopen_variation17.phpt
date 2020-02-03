@@ -36,30 +36,30 @@ function runtest() {
     mkdir($dir1.'/'.$extraDir);
     mkdir($extraDir);
 
-	$tmpfile = $extraDir . '/' . basename(__FILE__, ".php") . ".tmp";
-	$h = fopen($tmpfile, "w+", true);
-	fwrite($h, "This is the test file");
-	fclose($h);
+    $tmpfile = $extraDir . '/' . basename(__FILE__, ".php") . ".tmp";
+    $h = fopen($tmpfile, "w+", true);
+    fwrite($h, "This is the test file");
+    fclose($h);
 
-	$h = @fopen($dir1.'/'.$tmpfile, "r");
-	if ($h === false) {
-	   echo "Not created in dir1\n";
-	}
-	else {
-	   echo "created in dir1\n";
-	   fclose($h);
-	}
+    $h = @fopen($dir1.'/'.$tmpfile, "r");
+    if ($h === false) {
+       echo "Not created in dir1\n";
+    }
+    else {
+       echo "created in dir1\n";
+       fclose($h);
+    }
 
-	$h = fopen($tmpfile, "r", true);
-	if ($h === false) {
-	   echo "could not find file for reading\n";
-	}
-	else {
-	   echo "found file for reading\n";
-	   fclose($h);
-	}
+    $h = fopen($tmpfile, "r", true);
+    if ($h === false) {
+       echo "could not find file for reading\n";
+    }
+    else {
+       echo "found file for reading\n";
+       fclose($h);
+    }
 
-	unlink($tmpfile);
+    unlink($tmpfile);
         rmdir($dir1.'/'.$extraDir);
         rmdir($extraDir);
 }

@@ -4,7 +4,7 @@ Test to check static method calls syntax regression
 <?php
 
 class Foo {
-	public static function function(){ echo __METHOD__, PHP_EOL; }
+    public static function function(){ echo __METHOD__, PHP_EOL; }
 }
 
 Foo::function();
@@ -13,11 +13,11 @@ Foo::
 function();
 
 Foo::
-	 function();
+     function();
 
 
 Foo::
-	 function(
+     function(
 
 );
 

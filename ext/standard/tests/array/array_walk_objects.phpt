@@ -4,13 +4,13 @@ array_walk() and objects
 <?php
 
 function walk($key, $value) {
-	var_dump($value, $key);
+    var_dump($value, $key);
 }
 
 class test {
-	private $var_pri = "test_private";
-	protected $var_pro = "test_protected";
-	public $var_pub = "test_public";
+    private $var_pri = "test_private";
+    protected $var_pro = "test_protected";
+    public $var_pub = "test_public";
 }
 
 $stdclass = new stdclass;

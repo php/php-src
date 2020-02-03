@@ -9,19 +9,19 @@ function bar($x='no argument')
 }
 try
 {
-	bar('first try');
+    bar('first try');
 }
 catch (Exception $e)
 {
-	print $e->getMessage()."\n";
+    print $e->getMessage()."\n";
 }
 try
 {
-	call_user_func('bar','second try');
+    call_user_func('bar','second try');
 }
 catch (Exception $e)
 {
-	print $e->getMessage()."\n";
+    print $e->getMessage()."\n";
 }
 
 ?>

@@ -15,12 +15,12 @@ function ut_main()
     $res_str = '';
 
     $locales = array(
-		"de_DE@currency=EUR;collation=PHONEBOOK",
+        "de_DE@currency=EUR;collation=PHONEBOOK",
         'uk-ua_CALIFORNIA@currency=GRN'
-	);
+    );
 
     $locales = array(
-	'de_DE@currency=EUR;collation=PHONEBOOK',
+    'de_DE@currency=EUR;collation=PHONEBOOK',
         'root',
         'uk@currency=EURO',
         'Hindi',
@@ -77,14 +77,14 @@ function ut_main()
     {
         $keywords_arr = ut_loc_get_keywords( $locale);
         $res_str .= "$locale: ";
-		if( $keywords_arr){
-			foreach( $keywords_arr as $key => $value){
-        			$res_str .= "Key is $key and Value is $value \n";
-			}
-		}
-		else{
-			$res_str .= "No keywords found.";
-		}
+        if( $keywords_arr){
+            foreach( $keywords_arr as $key => $value){
+                    $res_str .= "Key is $key and Value is $value \n";
+            }
+        }
+        else{
+            $res_str .= "No keywords found.";
+        }
         $res_str .= "\n";
     }
 

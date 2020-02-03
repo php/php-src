@@ -7,65 +7,65 @@ ZE2 ArrayAccess and ArrayReferenceProxy with references
 
 class ArrayReferenceProxy implements ArrayAccess
 {
-	private $object;
-	private $element;
+    private $object;
+    private $element;
 
-	function __construct(ArrayAccess $object, array &$element)
-	{
-		echo __METHOD__ . "(Array)\n";
-		$this->object = $object;
-		$this->element = &$element;
-	}
+    function __construct(ArrayAccess $object, array &$element)
+    {
+        echo __METHOD__ . "(Array)\n";
+        $this->object = $object;
+        $this->element = &$element;
+    }
 
-	function offsetExists($index) {
-		echo __METHOD__ . "($this->element, $index)\n";
-		return array_key_exists($index, $this->element);
-	}
+    function offsetExists($index) {
+        echo __METHOD__ . "($this->element, $index)\n";
+        return array_key_exists($index, $this->element);
+    }
 
-	function offsetGet($index) {
-		echo __METHOD__ . "(Array, $index)\n";
-		return isset($this->element[$index]) ? $this->element[$index] : NULL;
-	}
+    function offsetGet($index) {
+        echo __METHOD__ . "(Array, $index)\n";
+        return isset($this->element[$index]) ? $this->element[$index] : NULL;
+    }
 
-	function offsetSet($index, $value) {
-		echo __METHOD__ . "(Array, $index, $value)\n";
-		$this->element[$index] = $value;
-	}
+    function offsetSet($index, $value) {
+        echo __METHOD__ . "(Array, $index, $value)\n";
+        $this->element[$index] = $value;
+    }
 
-	function offsetUnset($index) {
-		echo __METHOD__ . "(Array, $index)\n";
-		unset($this->element[$index]);
-	}
+    function offsetUnset($index) {
+        echo __METHOD__ . "(Array, $index)\n";
+        unset($this->element[$index]);
+    }
 }
 
 class Peoples implements ArrayAccess
 {
-	public $person;
+    public $person;
 
-	function __construct()
-	{
-		$this->person = array(array('name'=>'Foo'));
-	}
+    function __construct()
+    {
+        $this->person = array(array('name'=>'Foo'));
+    }
 
-	function offsetExists($index)
-	{
-		return array_key_exists($index, $this->person);
-	}
+    function offsetExists($index)
+    {
+        return array_key_exists($index, $this->person);
+    }
 
-	function offsetGet($index)
-	{
-		return new ArrayReferenceProxy($this, $this->person[$index]);
-	}
+    function offsetGet($index)
+    {
+        return new ArrayReferenceProxy($this, $this->person[$index]);
+    }
 
-	function offsetSet($index, $value)
-	{
-		$this->person[$index] = $value;
-	}
+    function offsetSet($index, $value)
+    {
+        $this->person[$index] = $value;
+    }
 
-	function offsetUnset($index)
-	{
-		unset($this->person[$index]);
-	}
+    function offsetUnset($index)
+    {
+        unset($this->person[$index]);
+    }
 }
 
 $people = new Peoples;

@@ -8,31 +8,31 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	require('table.inc');
-	if (!$res = mysqli_query($link, "SELECT id FROM test ORDER BY id LIMIT 1", MYSQLI_USE_RESULT)) {
-		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	}
+    require('table.inc');
+    if (!$res = mysqli_query($link, "SELECT id FROM test ORDER BY id LIMIT 1", MYSQLI_USE_RESULT)) {
+        printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
 
-	var_dump(mysqli_field_tell($res));
-	var_dump(mysqli_field_tell($res));
-	var_dump(mysqli_fetch_field($res));
-	var_dump(mysqli_fetch_field($res));
-	var_dump(mysqli_field_tell($res));
+    var_dump(mysqli_field_tell($res));
+    var_dump(mysqli_field_tell($res));
+    var_dump(mysqli_fetch_field($res));
+    var_dump(mysqli_fetch_field($res));
+    var_dump(mysqli_field_tell($res));
 
-	var_dump(mysqli_field_seek($res, 2));
-	var_dump(mysqli_field_tell($res));
+    var_dump(mysqli_field_seek($res, 2));
+    var_dump(mysqli_field_tell($res));
 
-	var_dump(mysqli_field_seek($res, -1));
-	var_dump(mysqli_field_tell($res));
+    var_dump(mysqli_field_seek($res, -1));
+    var_dump(mysqli_field_tell($res));
 
-	var_dump(mysqli_field_seek($res, 0));
-	var_dump(mysqli_field_tell($res));
+    var_dump(mysqli_field_seek($res, 0));
+    var_dump(mysqli_field_tell($res));
 
 
 
-	mysqli_free_result($res);
+    mysqli_free_result($res);
 
     try {
         mysqli_field_tell($res);
@@ -40,9 +40,9 @@ require_once('skipifconnectfailure.inc');
         echo $exception->getMessage() . "\n";
     }
 
-	mysqli_close($link);
+    mysqli_close($link);
 
-	print "done!";
+    print "done!";
 ?>
 --CLEAN--
 <?php

@@ -7,9 +7,9 @@ if (!extension_loaded("xmlrpc")) print "skip";
 --FILE--
 <?php
 if (false !== strpos(PHP_OS, "WIN")) {
-	$fl = "c:\\windows\\explorer.exe";
+    $fl = "c:\\windows\\explorer.exe";
 } else {
-	$fl = "/etc/passwd";
+    $fl = "/etc/passwd";
 }
 $var0 = fopen($fl,"r");
 $var1 = xmlrpc_encode($var0);

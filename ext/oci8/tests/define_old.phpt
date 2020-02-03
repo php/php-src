@@ -29,7 +29,7 @@ ocidefinebyname($stmt, "STRING", $string, 20);
 ociexecute($stmt);
 
 while (ocifetch($stmt)) {
-	var_dump($string);
+    var_dump($string);
 }
 
 // Cleanup

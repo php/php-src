@@ -4,21 +4,21 @@ SPL: FixedArray: Invalid arguments
 <?php
 
 try {
-	$a = new SplFixedArray(new stdClass);
+    $a = new SplFixedArray(new stdClass);
 } catch (TypeError $iae) {
-	echo "Ok - ".$iae->getMessage().PHP_EOL;
+    echo "Ok - ".$iae->getMessage().PHP_EOL;
 }
 
 try {
-	$a = new SplFixedArray('FOO');
+    $a = new SplFixedArray('FOO');
 } catch (TypeError $iae) {
-	echo "Ok - ".$iae->getMessage().PHP_EOL;
+    echo "Ok - ".$iae->getMessage().PHP_EOL;
 }
 
 try {
-	$a = new SplFixedArray('');
+    $a = new SplFixedArray('');
 } catch (TypeError $iae) {
-	echo "Ok - ".$iae->getMessage().PHP_EOL;
+    echo "Ok - ".$iae->getMessage().PHP_EOL;
 }
 
 ?>

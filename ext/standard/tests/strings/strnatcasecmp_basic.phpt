@@ -11,7 +11,7 @@ Felix De Vliegher <felix.devliegher@gmail.com>
  */
 
 function str_dump($one, $two) {
-	var_dump(strnatcasecmp($one, $two));
+    var_dump(strnatcasecmp($one, $two));
 }
 
 echo "*** Testing strnatcasecmp() : basic functionality ***\n";

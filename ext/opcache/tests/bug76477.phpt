@@ -11,9 +11,9 @@ opcache.optimization_level=-1
 testString();
 function testString()
 {
-	$token = "ABC";
-	$lengthBytes = strlenb($token);
-	var_dump($lengthBytes == 0);
+    $token = "ABC";
+    $lengthBytes = strlenb($token);
+    var_dump($lengthBytes == 0);
 }
 
 function strlenb() { return call_user_func_array("strlen", func_get_args()); }

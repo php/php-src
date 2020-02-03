@@ -13,10 +13,10 @@ $a = 'main.a';
 $b = 'main.b';
 
 function f() {
-	$b = 'f.b';
-	$c = 'f.c';
-	var_dump(compact('a','b','c'));
-	var_dump(compact(array('a','b','c')));
+    $b = 'f.b';
+    $c = 'f.c';
+    var_dump(compact('a','b','c'));
+    var_dump(compact(array('a','b','c')));
 }
 
 f();

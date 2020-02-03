@@ -11,7 +11,7 @@ $client = new class(__DIR__ . '/bug77410.wsdl', [
 ]) extends SoapClient {
     public function __doRequest($request, $location, $action, $version, $one_way = 0) {
         echo $request, "\n";
-        return ''; 
+        return '';
     }
 };
 

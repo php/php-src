@@ -9,23 +9,23 @@ class MyAutoLoader {
 
         function autoLoad($className)
         {
-        	echo __METHOD__ . "($className)\n";
+            echo __METHOD__ . "($className)\n";
         }
 
         function autoThrow($className)
         {
-        	echo __METHOD__ . "($className)\n";
-        	throw new Exception("Unavailable");
+            echo __METHOD__ . "($className)\n";
+            throw new Exception("Unavailable");
         }
 }
 
 try
 {
-	spl_autoload_register(array('MyAutoLoader', 'autoLoad'), true);
+    spl_autoload_register(array('MyAutoLoader', 'autoLoad'), true);
 }
 catch(Exception $e)
 {
-	echo 'Exception: ' . $e->getMessage() . "\n";
+    echo 'Exception: ' . $e->getMessage() . "\n";
 }
 
 // and
@@ -37,11 +37,11 @@ spl_autoload_register(array($myAutoLoader, 'autoThrow'));
 
 try
 {
-	var_dump(class_exists("TestClass", true));
+    var_dump(class_exists("TestClass", true));
 }
 catch(Exception $e)
 {
-	echo 'Exception: ' . $e->getMessage() . "\n";
+    echo 'Exception: ' . $e->getMessage() . "\n";
 }
 
 ?>

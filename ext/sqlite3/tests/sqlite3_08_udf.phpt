@@ -7,7 +7,7 @@ SQLite3::createFunction
 
 function my_udf_md5($foo)
 {
-	return md5($foo);
+    return md5($foo);
 }
 
 require_once(__DIR__ . '/new_db.inc');
@@ -27,7 +27,7 @@ echo "SELECTING results\n";
 $results = $db->query("SELECT my_udf_md5(id) FROM test ORDER BY id ASC");
 while ($result = $results->fetchArray(SQLITE3_NUM))
 {
-	var_dump($result);
+    var_dump($result);
 }
 $results->finalize();
 

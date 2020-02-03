@@ -5,10 +5,10 @@ Bug #27304 (Static functions don't function properly)
 
 class Staticexample
 {
-	static function test()
-	{
-		var_dump(isset($this));
-	}
+    static function test()
+    {
+        var_dump(isset($this));
+    }
 }
 
 $b = new Staticexample();

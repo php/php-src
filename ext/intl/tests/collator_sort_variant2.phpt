@@ -32,7 +32,7 @@ function sort_arrays( $locale, $arrays, $sort_flag = Collator::SORT_REGULAR )
         $res_dump = "\n" . dump( $array ) .
                     "\n Result: " . dump( $res_val );
 
-		// Preppend test signature to output string
+        // Preppend test signature to output string
         $md5 = md5( $res_dump );
 
         global $test_num;

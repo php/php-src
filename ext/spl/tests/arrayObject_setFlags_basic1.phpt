@@ -3,7 +3,7 @@ SPL: ArrayObject::setFlags basic usage with ArrayObject::ARRAY_AS_PROPS. Current
 --FILE--
 <?php
 class C extends ArrayObject {
-	public $p = 'object property';
+    public $p = 'object property';
 }
 
 function access_p($ao) {

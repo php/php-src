@@ -18,10 +18,10 @@ $sxe = simplexml_load_string($xml);
 
 function test($xpath)
 {
-	global $sxe;
+    global $sxe;
 
-	echo "===$xpath===\n";
-	var_dump($sxe->xpath($xpath));
+    echo "===$xpath===\n";
+    var_dump($sxe->xpath($xpath));
 }
 
 test('elem/@attr2');

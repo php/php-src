@@ -13,7 +13,7 @@ class myArray extends ArrayIterator
 
     public function offsetGet($index)
     {
-		static $i = 0;
+        static $i = 0;
         echo __METHOD__ . "($index)\n";
         if (++$i > 3) exit(1);
         return parent::offsetGet($index);

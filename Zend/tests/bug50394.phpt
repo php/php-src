@@ -6,7 +6,7 @@ function inc( &$x ) { $x++; }
 
 class Proxy {
         function __call( $name, $args ) {
-		echo "$name called!\n";
+        echo "$name called!\n";
                 call_user_func_array( 'inc', $args );
         }
 }

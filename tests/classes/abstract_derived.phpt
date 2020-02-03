@@ -7,7 +7,7 @@ class base {
 }
 
 class derived extends base {
-	abstract function show();
+    abstract function show();
 }
 
 ?>

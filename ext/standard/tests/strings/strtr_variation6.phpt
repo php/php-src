@@ -34,41 +34,41 @@ $str = "012atm";
 // array of values for 'from'
 $from_arr =  array (
 
-		  // integer values
+          // integer values
 /*1*/	  0,
-		  1,
-		  -2,
+          1,
+          -2,
 
-		  // float values
+          // float values
 /*4*/	  10.5,
-		  -20.5,
-		  10.1234567e10,
+          -20.5,
+          10.1234567e10,
 
-		  // array values
+          // array values
 /*7*/	  array(),
-		  array(0),
-		  array(1, 2),
+          array(0),
+          array(1, 2),
 
-		  // boolean values
+          // boolean values
 /*10*/	  true,
-		  false,
-		  TRUE,
-		  FALSE,
+          false,
+          TRUE,
+          FALSE,
 
-		  // null values
+          // null values
 /*14*/	  NULL,
-		  null,
+          null,
 
-		  // objects
+          // objects
 /*16*/	  new sample(),
 
-		  // resource
+          // resource
 /*17*/	  $file_handle,
 
-		  // undefined variable
+          // undefined variable
 /*18*/	  @$undefined_var,
 
-		  // unset variable
+          // unset variable
 /*19*/	  @$unset_var
 );
 

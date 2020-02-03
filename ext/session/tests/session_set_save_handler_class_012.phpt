@@ -20,19 +20,19 @@ ob_start();
 echo "*** Testing session_set_save_handler() : incorrect arguments for existing handler open ***\n";
 
 class MySession extends SessionHandler {
-	public $i = 0;
-	public function open($path, $name) {
-		++$this->i;
-		echo 'Open ', session_id(), "\n";
-		// This test was written for broken return value handling
-		// Mimmick what was actually being tested by returning true here
-		return (null === parent::open());
-	}
-	public function read($key) {
-		++$this->i;
-		echo 'Read ', session_id(), "\n";
-		return parent::read($key);
-	}
+    public $i = 0;
+    public function open($path, $name) {
+        ++$this->i;
+        echo 'Open ', session_id(), "\n";
+        // This test was written for broken return value handling
+        // Mimmick what was actually being tested by returning true here
+        return (null === parent::open());
+    }
+    public function read($key) {
+        ++$this->i;
+        echo 'Read ', session_id(), "\n";
+        return parent::read($key);
+    }
 }
 
 $oldHandler = ini_get('session.save_handler');

@@ -10,7 +10,7 @@ if(!extension_loaded('zip')) die('skip');
 echo "Procedural\n";
 $zip = zip_open(__DIR__ . '/test.zip');
 if (!is_resource($zip)) {
-	die("Failure");
+    die("Failure");
 }
 var_dump(zip_close($zip));
 try {
@@ -22,17 +22,17 @@ try {
 echo "Object\n";
 $zip = new ZipArchive();
 if (!$zip->open(__DIR__ . '/test.zip')) {
-	die('Failure');
+    die('Failure');
 }
 if ($zip->status == ZIPARCHIVE::ER_OK) {
-	var_dump($zip->close());
-	try {
-		$zip->close();
-	} catch (ValueError $err) {
-		echo $err->getMessage(), PHP_EOL;
-	}
+    var_dump($zip->close());
+    try {
+        $zip->close();
+    } catch (ValueError $err) {
+        echo $err->getMessage(), PHP_EOL;
+    }
 } else {
-	die("Failure");
+    die("Failure");
 }
 
 ?>

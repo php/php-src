@@ -15,36 +15,36 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-	require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
+    require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 
-	$orgDsn = getenv('PDOTEST_DSN');
-	$orgUser = getenv('PDOTEST_USER');
-	$orgPass = getenv('PDOTEST_PASS');
+    $orgDsn = getenv('PDOTEST_DSN');
+    $orgUser = getenv('PDOTEST_USER');
+    $orgPass = getenv('PDOTEST_PASS');
 
-	try
-	{
-		putenv("PDOTEST_DSN=$orgDsn;user=$orgUser;password=$orgPass");
-		putenv("PDOTEST_USER");
-		putenv("PDOTEST_PASS");
+    try
+    {
+        putenv("PDOTEST_DSN=$orgDsn;user=$orgUser;password=$orgPass");
+        putenv("PDOTEST_USER");
+        putenv("PDOTEST_PASS");
 
-		$link = PDOTest::factory();
-		echo "using credentials in dsn: done\n";
+        $link = PDOTest::factory();
+        echo "using credentials in dsn: done\n";
 
 
-		// test b/c - credentials in DSN are ignored when user/pass passed as separate params
-		putenv("PDOTEST_DSN=$orgDsn;user=incorrect;password=ignored");
-		putenv("PDOTEST_USER=$orgUser");
-		putenv("PDOTEST_PASS=$orgPass");
+        // test b/c - credentials in DSN are ignored when user/pass passed as separate params
+        putenv("PDOTEST_DSN=$orgDsn;user=incorrect;password=ignored");
+        putenv("PDOTEST_USER=$orgUser");
+        putenv("PDOTEST_PASS=$orgPass");
 
-		$link = PDOTest::factory();
-		echo "ignoring credentials in dsn: done\n";
-	}
-	finally
-	{
-		putenv("PDOTEST_DSN=$orgDsn");
-		putenv("PDOTEST_USER=$orgUser");
-		putenv("PDOTEST_PASS=$orgPass");
-	}
+        $link = PDOTest::factory();
+        echo "ignoring credentials in dsn: done\n";
+    }
+    finally
+    {
+        putenv("PDOTEST_DSN=$orgDsn");
+        putenv("PDOTEST_USER=$orgUser");
+        putenv("PDOTEST_PASS=$orgPass");
+    }
 ?>
 --EXPECTF--
 using credentials in dsn: done

@@ -15,13 +15,13 @@ $array2 = array('green' => 5, 'blue' => 6, 'yellow' => 7, 'cyan'   => 8);
 
 class MyClass
 {
-	static function static_compare_func($key1, $key2) {
-		return strcasecmp($key1, $key2);
-	}
+    static function static_compare_func($key1, $key2) {
+        return strcasecmp($key1, $key2);
+    }
 
-	public function class_compare_func($key1, $key2) {
-		return strcasecmp($key1, $key2);
-	}
+    public function class_compare_func($key1, $key2) {
+        return strcasecmp($key1, $key2);
+    }
 
 }
 

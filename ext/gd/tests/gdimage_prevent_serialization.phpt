@@ -11,7 +11,7 @@ if(!extension_loaded('gd')) {
 
     $img_src = imagecreatetruecolor(32, 32);
     var_dump(serialize($img_src));
-    
+
 ?>
 --EXPECTF--
 Fatal error: Uncaught Exception: Serialization of 'GdImage' is not allowed in %s:%d

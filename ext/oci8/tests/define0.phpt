@@ -29,7 +29,7 @@ $string = '';
 oci_define_by_name($stmt, "STRING", $string, 20);
 oci_execute($stmt);
 while (oci_fetch($stmt)) {
-	var_dump($string);
+    var_dump($string);
 }
 
 echo "Test 2\n";
