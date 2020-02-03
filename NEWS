@@ -45,6 +45,9 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #78902 (Memory leak when using stream_filter_append). (liudaixiao)
 
+- Testing:
+  . Fixed bug #78090 (bug45161.phpt takes forever to finish). (cmb)
+
 - XSL:
   . Fixed bug #70078 (XSL callbacks with nodes as parameter leak memory). (cmb)
 
