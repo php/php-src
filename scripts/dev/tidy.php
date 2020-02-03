@@ -65,12 +65,11 @@ foreach ($it as $file) {
         $code = stripTrailingWhitespace($code);
         $code = reindentToSpaces($code);
     } else if ($lang === 'phpt') {
-        // TODO: Don't reformat .phpt on PHP-7.4.
-        /*$code = transformTestCode($code, function(string $code) {
+        $code = transformTestCode($code, function(string $code) {
             $code = stripTrailingWhitespace($code);
             $code = reindentToSpaces($code);
             return $code;
-        });*/
+        });
     }
 
     if ($origCode !== $code) {
@@ -137,8 +136,7 @@ function getLanguageFromExtension(string $ext): ?string {
     case 're':
         return 'c';
     case 'php':
-    // TODO: Reformat .inc files.
-    //case 'inc':
+    case 'inc':
         return 'php';
     case 'phpt':
         return 'phpt';
