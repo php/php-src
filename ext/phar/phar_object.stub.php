@@ -96,7 +96,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
      */
     public function offsetExists($entry) {}
 
-    /** 
+    /**
      * @param string $entry
      * @return PharFileInfo
      */
@@ -130,7 +130,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     /** @return void */
     public function setSignatureAlgorithm(int $algorithm, string $privatekey = UNKNOWN) {}
 
-    /** 
+    /**
      * @param resource $newstub
      * @return bool
      */
@@ -318,7 +318,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     /** @return void */
     public function setSignatureAlgorithm(int $algorithm, string $privatekey = UNKNOWN) {}
 
-    /** 
+    /**
      * @param resource $newstub
      * @return bool
      */

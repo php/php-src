@@ -1597,7 +1597,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 		string_len = Z_STRLEN_P(value);
 		c = (zend_uchar)Z_STRVAL_P(value)[0];
 	}
-	
+
 	if (string_len != 1) {
 		if (string_len == 0) {
 			/* Error on empty input string */

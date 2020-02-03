@@ -17,13 +17,13 @@ class FFI
      */
     static function new($type, bool $owned = true, bool $persistent = false) {}
 
-    /** 
+    /**
      * @prefer-ref $ptr
      * @return void
      */
     static function free(FFI\CData $ptr) {}
 
-    /** 
+    /**
      * @param FFI\CType|string $type
      * @prefer-ref $ptr
      * @return ?FFI\CData
