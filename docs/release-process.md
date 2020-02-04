@@ -339,7 +339,8 @@
     that replies to the announcement on php-general@ or internals@ will not
     accidentally hit the php-announce@ mailinglist.
     
-11. Post tweet with release announcement and link to news article on php.net ([@official_php](https://twitter.com/official_php))  
+11. Post tweet with release announcement and link to news article on php.net 
+    ([@official_php](https://twitter.com/official_php))  
 
 ## Re-releasing the same version (or -pl)
 
