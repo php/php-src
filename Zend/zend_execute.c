@@ -1958,6 +1958,44 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_index(const
 	zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset));
 }
 
+static zend_never_inline ZEND_COLD int ZEND_FASTCALL zend_undefined_offset_write(
+		HashTable *ht, zend_long lval)
+{
+	/* The array may be destroyed while throwing the notice.
+	 * Temporarily increase the refcount to detect this situation. */
+	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+		GC_ADDREF(ht);
+	}
+	zend_undefined_offset(lval);
+	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+		zend_array_destroy(ht);
+		return FAILURE;
+	}
+	if (EG(exception)) {
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
+static zend_never_inline ZEND_COLD int ZEND_FASTCALL zend_undefined_index_write(
+		HashTable *ht, zend_string *offset)
+{
+	/* The array may be destroyed while throwing the notice.
+	 * Temporarily increase the refcount to detect this situation. */
+	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
+		GC_ADDREF(ht);
+	}
+	zend_undefined_index(offset);
+	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
+		zend_array_destroy(ht);
+		return FAILURE;
+	}
+	if (EG(exception)) {
+		return FAILURE;
+	}
+	return SUCCESS;
+}
+
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_method(const zend_class_entry *ce, const zend_string *method)
 {
 	zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(method));
@@ -2079,9 +2117,10 @@ num_undef:
 				retval = &EG(uninitialized_zval);
 				break;
 			case BP_VAR_RW:
-				zend_undefined_offset(hval);
-				retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
-				break;
+				if (UNEXPECTED(zend_undefined_offset_write(ht, hval) == FAILURE)) {
+					return NULL;
+				}
+				/* break missing intentionally */
 			case BP_VAR_W:
 				retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
 				break;
@@ -2109,7 +2148,9 @@ str_index:
 							retval = &EG(uninitialized_zval);
 							break;
 						case BP_VAR_RW:
-							zend_undefined_index(offset_key);
+							if (UNEXPECTED(zend_undefined_index_write(ht, offset_key))) {
+								return NULL;
+							}
 							/* break missing intentionally */
 						case BP_VAR_W:
 							ZVAL_NULL(retval);
@@ -2127,9 +2168,10 @@ str_index:
 					retval = &EG(uninitialized_zval);
 					break;
 				case BP_VAR_RW:
-					zend_undefined_index(offset_key);
-					retval = zend_hash_update(ht, offset_key, &EG(uninitialized_zval));
-					break;
+					if (UNEXPECTED(zend_undefined_index_write(ht, offset_key) == FAILURE)) {
+						return NULL;
+					}
+					/* break missing intentionally */
 				case BP_VAR_W:
 					retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
 					break;

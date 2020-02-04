@@ -19,6 +19,8 @@ PHP                                                                        NEWS
     offset by reference). (Nikita)
   . Fixed bug #79792 (HT iterators not removed if empty array is destroyed).
     (Nikita)
+  . Fixed bug #78598 (Changing array during undef index RW error segfaults).
+    (Nikita)
 
 - Fileinfo:
   . Fixed bug #79756 (finfo_file crash (FILEINFO_MIME)). (cmb)
