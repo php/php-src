@@ -1,5 +1,5 @@
 --TEST--
-datefmt_get_locale_code()
+datefmt_get_locale()
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) die('skip');
 if (PHP_INT_SIZE != 8) die('skip 64-bit only');

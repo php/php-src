@@ -206,9 +206,9 @@ PHP_FUNCTION( datefmt_is_lenient )
 }
 /* }}} */
 
-/* {{{ proto string IntlDateFormatter::setLenient()
+/* {{{ proto void IntlDateFormatter::setLenient()
  * Set formatter lenient. }}} */
-/* {{{ proto string datefmt_setLenient(IntlDateFormatter $mf)
+/* {{{ proto void datefmt_setLenient(IntlDateFormatter $mf)
  * Set formatter lenient.
  */
 PHP_FUNCTION( datefmt_set_lenient )

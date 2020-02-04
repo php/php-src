@@ -68,6 +68,7 @@
 #include "dateformat/dateformat_format_object.h"
 #include "dateformat/dateformat_parse.h"
 #include "dateformat/dateformat_data.h"
+#include "dateformat/dateformat_arginfo.h"
 
 #include "resourcebundle/resourcebundle_class.h"
 #include "resourcebundle/resourcebundle_arginfo.h"
@@ -97,6 +98,7 @@
 # include "spoofchecker/spoofchecker_main.h"
 
 #include "msgformat/msgformat.h"
+#include "msgformat/msgformat_arginfo.h"
 #include "common/common_error.h"
 #include "common/common_enum.h"
 
@@ -177,12 +179,6 @@ ZEND_END_ARG_INFO()
 #define intl_0_args collator_static_0_args
 #define intl_1_arg collator_static_1_arg
 
-ZEND_BEGIN_ARG_INFO_EX(datefmt_parse_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, formatter)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(1, position)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_create, 0, 0, 2)
 	ZEND_ARG_INFO(0, locale)
 	ZEND_ARG_INFO(0, style)
@@ -230,86 +226,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_get_locale, 0, 0, 1)
 	ZEND_ARG_INFO(0, nf)
 	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_create, 0, 0, 2)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_get_error_code, 0, 0, 1)
-	ZEND_ARG_INFO(0, nf)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_get_error_message, 0, 0, 1)
-	ZEND_ARG_INFO(0, coll)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_format, 0, 0, 2)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, args)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_format_message, 0, 0, 3)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, args)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_parse, 0, 0, 2)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, source)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_parse_message, 0, 0, 3)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, source)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_set_pattern, 0, 0, 2)
-	ZEND_ARG_INFO(0, mf)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_get_locale, 0, 0, 1)
-	ZEND_ARG_INFO(0, mf)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_set_pattern, 0, 0, 2)
-	ZEND_ARG_INFO(0, mf)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_set_timezone, 0, 0, 2)
-	ZEND_ARG_INFO(0, mf)
-	ZEND_ARG_INFO(0, timezone)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_set_calendar, 0, 0, 2)
-	ZEND_ARG_INFO(0, mf)
-	ZEND_ARG_INFO(0, calendar)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_format, 0, 0, 0)
-	ZEND_ARG_INFO(0, args)
-	ZEND_ARG_INFO(0, array)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_format_object, 0, 0, 1)
-	ZEND_ARG_INFO(0, object)
-	ZEND_ARG_INFO(0, format)
-	ZEND_ARG_INFO(0, locale)
-ZEND_END_ARG_INFO()
-
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_create, 0, 0, 3)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, date_type)
-	ZEND_ARG_INFO(0, time_type)
-	ZEND_ARG_INFO(0, timezone_str)
-	ZEND_ARG_INFO(0, calendar)
-	ZEND_ARG_INFO(0, pattern)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_void, 0, 0, 0 )
@@ -551,25 +467,25 @@ static const zend_function_entry intl_functions[] = {
 
 	/* IntlDateFormatter functions */
 	PHP_FE( datefmt_create, arginfo_datefmt_create )
-	PHP_FE( datefmt_get_datetype, arginfo_msgfmt_get_locale )
-	PHP_FE( datefmt_get_timetype, arginfo_msgfmt_get_locale )
-	PHP_FE( datefmt_get_calendar, arginfo_msgfmt_get_locale )
-	PHP_FE( datefmt_get_calendar_object, arginfo_msgfmt_get_locale )
+	PHP_FE( datefmt_get_datetype, arginfo_datefmt_get_datetype )
+	PHP_FE( datefmt_get_timetype, arginfo_datefmt_get_timetype )
+	PHP_FE( datefmt_get_calendar, arginfo_datefmt_get_calendar )
+	PHP_FE( datefmt_get_calendar_object, arginfo_datefmt_get_calendar_object )
 	PHP_FE( datefmt_set_calendar, arginfo_datefmt_set_calendar )
-	PHP_FE( datefmt_get_locale, arginfo_msgfmt_get_locale )
-	PHP_FE( datefmt_get_timezone_id, arginfo_msgfmt_get_locale )
-	PHP_FE( datefmt_get_timezone, arginfo_msgfmt_get_locale )
+	PHP_FE( datefmt_get_locale, arginfo_datefmt_get_locale )
+	PHP_FE( datefmt_get_timezone_id, arginfo_datefmt_get_timezone_id )
+	PHP_FE( datefmt_get_timezone, arginfo_datefmt_get_timezone )
 	PHP_FE( datefmt_set_timezone, arginfo_datefmt_set_timezone )
-	PHP_FE( datefmt_get_pattern, arginfo_msgfmt_get_locale )
+	PHP_FE( datefmt_get_pattern, arginfo_datefmt_get_pattern )
 	PHP_FE( datefmt_set_pattern, arginfo_datefmt_set_pattern )
-	PHP_FE( datefmt_is_lenient, arginfo_msgfmt_get_locale )
-	PHP_FE( datefmt_set_lenient, arginfo_msgfmt_get_locale )
+	PHP_FE( datefmt_is_lenient, arginfo_datefmt_is_lenient )
+	PHP_FE( datefmt_set_lenient, arginfo_datefmt_set_lenient )
 	PHP_FE( datefmt_format, arginfo_datefmt_format )
 	PHP_FE( datefmt_format_object, arginfo_datefmt_format_object )
-	PHP_FE( datefmt_parse, datefmt_parse_args )
-	PHP_FE( datefmt_localtime , datefmt_parse_args )
-	PHP_FE( datefmt_get_error_code, arginfo_msgfmt_get_error_code )
-	PHP_FE( datefmt_get_error_message, arginfo_msgfmt_get_error_message )
+	PHP_FE( datefmt_parse, arginfo_datefmt_parse )
+	PHP_FE( datefmt_localtime , arginfo_datefmt_localtime )
+	PHP_FE( datefmt_get_error_code, arginfo_datefmt_get_error_code )
+	PHP_FE( datefmt_get_error_message, arginfo_datefmt_get_error_message )
 
 	/* grapheme functions */
 	PHP_FE( grapheme_strlen, arginfo_grapheme_strlen )
