@@ -1118,11 +1118,11 @@ static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execu
 
 	if (UNEXPECTED(value == NULL)) {
 		value = zend_hash_add_new(&EG(symbol_table), Z_STR_P(varname), &EG(uninitialized_zval));
-		idx = ((char*)value - (char*)EG(symbol_table).arData) / sizeof(Bucket);
+		idx = (char*)value - (char*)EG(symbol_table).arData;
 		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
 		CACHE_PTR(cache_slot, (void*)(uintptr_t)(idx + 1));
 	} else {
-		idx = ((char*)value - (char*)EG(symbol_table).arData) / sizeof(Bucket);
+		idx = (char*)value - (char*)EG(symbol_table).arData;
 		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
 		CACHE_PTR(cache_slot, (void*)(uintptr_t)(idx + 1));
 		/* GLOBAL variable may be an INDIRECT pointer to CV */

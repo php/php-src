@@ -8462,15 +8462,17 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, const z
 	|	mov	r0, EX->run_time_cache
 	|	mov r0, aword [r0 + opline->extended_value]
 	|	sub r0, 1
-	//if (EXPECTED(idx < EG(symbol_table).nNumUsed))
-	|	MEM_OP2_2_ZTS cmp, eax, dword, executor_globals, symbol_table.nNumUsed, r1
-	|	jae >9
-	//Bucket *p = EG(symbol_table).arData + idx;
+	//if (EXPECTED(idx < EG(symbol_table).nNumUsed * sizeof(Bucket)))
 	|.if X64
-		|	shl r0, 5
+		|	MEM_OP2_2_ZTS movsxd, r1, dword, executor_globals, symbol_table.nNumUsed, r1
+		|	shl r1, 5
 	|.else
-		|	imul r0, sizeof(Bucket)
+		|	MEM_OP2_2_ZTS mov, r1, dword, executor_globals, symbol_table.nNumUsed, r1
+		|	imul r1, sizeof(Bucket)
 	|.endif
+	|	cmp r0, r1
+	|	jae >9
+	//Bucket *p = (Bucket*)((char*)EG(symbol_table).arData + idx);
 	|	MEM_OP2_2_ZTS add, r0, aword, executor_globals, symbol_table.arData, r1
 	|	IF_Z_TYPE r0, IS_UNDEF, >9
 	//	(EXPECTED(p->key == Z_STR_P(varname))
