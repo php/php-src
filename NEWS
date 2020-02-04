@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #79396 (DateTime hour incorrect during DST jump forward). (Nate
     Brunette)
 
+- FPM:
+  . Implement request #77062 (Allow numeric [UG]ID in FPM listen.{owner,group})
+    (Andre Nathan)
+
 - Iconv:
   . Fixed bug #79200 (Some iconv functions cut Windows-1258). (cmb)
 
