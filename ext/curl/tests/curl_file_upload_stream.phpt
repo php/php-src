@@ -24,5 +24,5 @@ curl_close($ch);
 ===DONE===
 --EXPECT--
 bool(true)
-string(21) "i-love-php|text/plain"
+string(24) "i-love-php|text/plain|11"
 ===DONE===

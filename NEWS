@@ -16,6 +16,7 @@ PHP                                                                        NEWS
 - CURL:
   . Fixed bug #79078 (Hypothetical use-after-free in curl_multi_add_handle()).
     (cmb)
+  . Fixed bug #79019 (Copied cURL handles upload empty file). (cmb)
 
 - FFI:
   . Fixed bug #79096 (FFI Struct Segfault). (cmb)
