@@ -20,7 +20,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "3.3.15-dev"
+#define ZEND_VERSION "3.3.15RC1"
 
 #define ZEND_ENGINE_3
 
