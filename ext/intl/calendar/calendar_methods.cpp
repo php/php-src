@@ -415,7 +415,7 @@ U_CFUNC PHP_FUNCTION(intlcal_set)
 		co->ucal->set((int32_t)args[0], (int32_t)args[1], (int32_t)args[2]);
 	} else if (arg_num == 4) {
 		zend_argument_count_error("No variant with 4 arguments");
-		return;
+		RETURN_THROWS();
 	} else if (arg_num == 5) {
 		co->ucal->set((int32_t)args[0], (int32_t)args[1], (int32_t)args[2], (int32_t)args[3], (int32_t)args[4]);
 	} else {

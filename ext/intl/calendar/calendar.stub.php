@@ -6,7 +6,7 @@ class IntlCalendar
 
     /**
      * @param IntlTimeZone|DateTimeZone|string|null $timeZone
-     * @return IntlGregorianCalendar|null
+     * @return IntlCalendar|null
      */
     public static function createInstance($timeZone = null, ?string $locale = null) {}
 
@@ -175,7 +175,7 @@ class IntlGregorianCalendar extends IntlCalendar
 /** @param IntlTimeZone|DateTimeZone|string|null $timeZone */
 function intlcal_create_instance($timeZone = null, ?string $locale = null): IntlCalendar|null {}
 
-function intlcal_get_keyword_values_for_locale(string $key, string $locale, bool $commonlyUsed): Iterator|false {}
+function intlcal_get_keyword_values_for_locale(string $key, string $locale, bool $commonlyUsed): IntlIterator|false {}
 
 function intlcal_get_now(): float {}
 
