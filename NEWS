@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.4.3
+06 Feb 2020, PHP 7.4.3RC1
 
 - Core:
   . Fixed bug #79146 (cscript can fail to run on some systems). (clarodeus)
