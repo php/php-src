@@ -1792,14 +1792,8 @@ static void curl_free_post(void **post)
 /* }}} */
 
 struct mime_data_cb_arg {
-	php_curl *ch;
-	union {
-		zval postfields;
-		struct {
-			zend_string *filename;
-			php_stream *stream;
-		};
-	};
+	zend_string *filename;
+	php_stream *stream;
 };
 
 /* {{{ curl_free_cb_arg
@@ -1808,12 +1802,8 @@ static void curl_free_cb_arg(void **cb_arg_p)
 {
 	struct mime_data_cb_arg *cb_arg = (struct mime_data_cb_arg *) *cb_arg_p;
 
-	if (cb_arg->ch) {
-		zval_ptr_dtor(&cb_arg->postfields);
-	} else {
-		ZEND_ASSERT(cb_arg->stream == NULL);
-		zend_string_release(cb_arg->filename);
-	}
+	ZEND_ASSERT(cb_arg->stream == NULL);
+	zend_string_release(cb_arg->filename);
 	efree(cb_arg);
 }
 /* }}} */
@@ -1919,7 +1909,9 @@ php_curl *alloc_curl_handle()
 
 	ch->to_free->slist = emalloc(sizeof(HashTable));
 	zend_hash_init(ch->to_free->slist, 4, NULL, curl_free_slist, 0);
-
+#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
+	ZVAL_UNDEF(&ch->postfields);
+#endif
 	return ch;
 }
 /* }}} */
@@ -2115,8 +2107,6 @@ static size_t read_cb(char *buffer, size_t size, size_t nitems, void *arg) /* {{
 	struct mime_data_cb_arg *cb_arg = (struct mime_data_cb_arg *) arg;
 	ssize_t numread;
 
-	ZEND_ASSERT(!cb_arg->ch);
-
 	if (cb_arg->stream == NULL) {
 		if (!(cb_arg->stream = php_stream_open_wrapper(ZSTR_VAL(cb_arg->filename), "rb", IGNORE_PATH, NULL))) {
 			return CURL_READFUNC_ABORT;
@@ -2136,8 +2126,6 @@ static int seek_cb(void *arg, curl_off_t offset, int origin) /* {{{ */
 	struct mime_data_cb_arg *cb_arg = (struct mime_data_cb_arg *) arg;
 	int res;
 
-	ZEND_ASSERT(!cb_arg->ch);
-
 	if (cb_arg->stream == NULL) {
 		return CURL_SEEKFUNC_CANTSEEK;
 	}
@@ -2150,28 +2138,10 @@ static void free_cb(void *arg) /* {{{ */
 {
 	struct mime_data_cb_arg *cb_arg = (struct mime_data_cb_arg *) arg;
 
-	ZEND_ASSERT(!cb_arg->ch);
-
 	if (cb_arg->stream != NULL) {
 		php_stream_close(cb_arg->stream);
 		cb_arg->stream = NULL;
 	}
-}
-/* }}} */
-
-static zval *get_postfields_of_handle(php_curl *ch) /* {{{ */
-{
-	struct mime_data_cb_arg *cb_arg, **cb_arg_p;
-
-	cb_arg_p = zend_llist_get_last(&ch->to_free->stream);
-	while (cb_arg_p) {
-		cb_arg = *cb_arg_p;
-		if (cb_arg->ch == ch) {
-			return &cb_arg->postfields;
-		}
-		cb_arg_p = zend_llist_get_prev(&ch->to_free->stream);
-	}
-	return NULL;
 }
 /* }}} */
 #endif
@@ -2247,13 +2217,10 @@ static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields
 				}
 
 #if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
-				cb_arg = emalloc(sizeof *cb_arg);
-				cb_arg->ch = ch;
-				ZVAL_COPY(&cb_arg->postfields, zpostfields);
-				zend_llist_add_element(&ch->to_free->stream, &cb_arg);
+				zval_ptr_dtor(&ch->postfields);
+				ZVAL_COPY(&ch->postfields, zpostfields);
 
 				cb_arg = emalloc(sizeof *cb_arg);
-				cb_arg->ch = NULL;
 				cb_arg->filename = zend_string_copy(postval);
 				cb_arg->stream = NULL;
 
@@ -2373,8 +2340,8 @@ PHP_FUNCTION(curl_copy_handle)
 	_php_setup_easy_copy_handlers(dupch, ch);
 
 #if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
-	postfields = get_postfields_of_handle(ch);
-	if (postfields) {
+	postfields = &ch->postfields;
+	if (Z_TYPE_P(postfields) != IS_UNDEF) {
 		if (build_mime_structure_from_hash(dupch, postfields) != SUCCESS) {
 			_php_curl_close_ex(dupch);
 			php_error_docref(NULL, E_WARNING, "Cannot rebuild mime structure");
@@ -3685,6 +3652,9 @@ static void _php_curl_close_ex(php_curl *ch)
 #endif
 
 	efree(ch->handlers);
+#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
+	zval_ptr_dtor(&ch->postfields);
+#endif
 	efree(ch);
 }
 /* }}} */
