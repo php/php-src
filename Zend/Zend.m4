@@ -221,7 +221,10 @@ else
   AC_DEFINE(ZEND_DEBUG,0,[ ])
 fi
 
-test -n "$GCC" && CFLAGS="$CFLAGS -Wall -Wno-strict-aliasing"
+test -n "$GCC" && CFLAGS="$CFLAGS -Wall -Wextra -Wno-strict-aliasing -Wno-implicit-fallthrough -Wno-unused-parameter -Wno-sign-compare"
+dnl Check if compiler supports -Wno-clobbered (only GCC)
+AX_CHECK_COMPILE_FLAG([-Wno-clobbered], CFLAGS="$CFLAGS -Wno-clobbered", , [-Werror])
+
 test -n "$DEBUG_CFLAGS" && CFLAGS="$CFLAGS $DEBUG_CFLAGS"
 
 if test "$ZEND_ZTS" = "yes"; then
