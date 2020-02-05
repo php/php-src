@@ -2058,12 +2058,8 @@ typedef struct {
 	char *valid_end;   /* exclusive */
 } exif_offset_info;
 
-static zend_always_inline zend_bool size_add_overflows(size_t size1, size_t size2) {
-	return SIZE_MAX - size1 < size2;
-}
-
 static zend_always_inline zend_bool ptr_offset_overflows(char *ptr, size_t offset) {
-	return size_add_overflows((size_t) ptr, offset);
+	return UINTPTR_MAX - (uintptr_t) ptr < offset;
 }
 
 static inline void exif_offset_info_init(
@@ -2105,6 +2101,8 @@ static inline zend_bool exif_offset_info_contains(
 		return 0;
 	}
 
+	/* start and valid_start are both inclusive, end and valid_end are both exclusive,
+	 * so we use >= and <= to do the checks, respectively. */
 	end = start + length;
 	return start >= info->valid_start && end <= info->valid_end;
 }
@@ -3286,7 +3284,8 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 	}
 
 	for (de=0;de<NumDirEntries;de++) {
-		if (!exif_process_IFD_TAG(ImageInfo, dir_start + 2 + 12 *de,
+		size_t offset = 2 + 12 * de;
+		if (!exif_process_IFD_TAG(ImageInfo, dir_start + offset,
 								  info, displacement, section_index, 0, maker_note->tag_table)) {
 			return FALSE;
 		}
