@@ -995,7 +995,7 @@ static zend_always_inline zend_bool i_zend_check_property_type(zend_property_inf
 	return zend_verify_scalar_type_hint(ZEND_TYPE_FULL_MASK(info->type), property, strict, 0);
 }
 
-static zend_bool zend_always_inline i_zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict)
+static zend_always_inline zend_bool i_zend_verify_property_type(zend_property_info *info, zval *property, zend_bool strict)
 {
 	if (i_zend_check_property_type(info, property, strict)) {
 		return 1;

@@ -161,7 +161,7 @@ static inline reflection_object *reflection_object_from_obj(zend_object *obj) {
 
 static zend_object_handlers reflection_object_handlers;
 
-static uint32_t zend_always_inline prop_get_flags(property_reference *ref) {
+static zend_always_inline uint32_t prop_get_flags(property_reference *ref) {
 	return ref->prop ? ref->prop->flags : ZEND_ACC_PUBLIC;
 }
 
