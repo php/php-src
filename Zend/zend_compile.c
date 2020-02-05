@@ -5679,7 +5679,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 	uint32_t i;
 	zend_op_array *op_array = CG(active_op_array);
 	zend_arg_info *arg_infos;
-	zend_bool have_optional_param = 0;
+	zend_string *optional_param = NULL;
 
 	if (return_type_ast) {
 		/* Use op_array->arg_info[-1] for return type */
@@ -5748,14 +5748,23 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 			default_node.op_type = IS_CONST;
 			zend_const_expr_to_zval(&default_node.u.constant, default_ast);
 			CG(compiler_options) = cops;
-			have_optional_param = 1;
+
+			if (!optional_param) {
+				/* Ignore parameters of the form "Type $param = null".
+				 * This is the PHP 5 style way of writing "?Type $param", so allow it for now. */
+				zend_bool is_implicit_nullable =
+					type_ast && Z_TYPE(default_node.u.constant) == IS_NULL;
+				if (!is_implicit_nullable) {
+					optional_param = name;
+				}
+			}
 		} else {
 			opcode = ZEND_RECV;
 			default_node.op_type = IS_UNUSED;
 			op_array->required_num_args = i + 1;
-			if (have_optional_param) {
-				zend_error(E_DEPRECATED, "Required parameter $%s follows optional parameter",
-					ZSTR_VAL(name));
+			if (optional_param) {
+				zend_error(E_DEPRECATED, "Required parameter $%s follows optional parameter $%s",
+					ZSTR_VAL(name), ZSTR_VAL(optional_param));
 			}
 		}
 

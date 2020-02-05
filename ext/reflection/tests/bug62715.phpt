@@ -17,7 +17,7 @@ foreach ($r->getParameters() as $p) {
 }
 ?>
 --EXPECTF--
-Deprecated: Required parameter $c follows optional parameter in %s on line %d
+Deprecated: Required parameter $c follows optional parameter $b in %s on line %d
 bool(true)
 bool(true)
 bool(false)
