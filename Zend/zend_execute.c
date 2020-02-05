@@ -1974,6 +1974,9 @@ static zend_never_inline ZEND_COLD int ZEND_FASTCALL zend_undefined_offset_write
 		zend_array_destroy(ht);
 		return FAILURE;
 	}
+	if (EG(exception)) {
+		return FAILURE;
+	}
 	return SUCCESS;
 }
 
@@ -1988,6 +1991,9 @@ static zend_never_inline ZEND_COLD int ZEND_FASTCALL zend_undefined_index_write(
 	zend_undefined_index(offset);
 	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE) && !GC_DELREF(ht)) {
 		zend_array_destroy(ht);
+		return FAILURE;
+	}
+	if (EG(exception)) {
 		return FAILURE;
 	}
 	return SUCCESS;
