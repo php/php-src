@@ -1,5 +1,7 @@
 --TEST--
 Bug #48770 (call_user_func_array() fails to call parent from inheriting class)
+--XFAIL--
+See Bug #48770
 --FILE--
 <?php
 
