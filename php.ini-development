@@ -306,12 +306,12 @@ serialize_precision = -1
 ; http://php.net/open-basedir
 ;open_basedir =
 
-; This directive allows you to disable certain functions for security reasons.
+; This directive allows you to disable certain functions.
 ; It receives a comma-delimited list of function names.
 ; http://php.net/disable-functions
 disable_functions =
 
-; This directive allows you to disable certain classes for security reasons.
+; This directive allows you to disable certain classes.
 ; It receives a comma-delimited list of class names.
 ; http://php.net/disable-classes
 disable_classes =
