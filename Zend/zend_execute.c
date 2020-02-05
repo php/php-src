@@ -2123,8 +2123,7 @@ num_undef:
 				if (UNEXPECTED(zend_undefined_offset_write(ht, hval) == FAILURE)) {
 					return NULL;
 				}
-				retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
-				break;
+				/* break missing intentionally */
 			case BP_VAR_W:
 				retval = zend_hash_index_add_new(ht, hval, &EG(uninitialized_zval));
 				break;
@@ -2175,8 +2174,7 @@ str_index:
 					if (UNEXPECTED(zend_undefined_index_write(ht, offset_key) == FAILURE)) {
 						return NULL;
 					}
-					retval = zend_hash_update(ht, offset_key, &EG(uninitialized_zval));
-					break;
+					/* break missing intentionally */
 				case BP_VAR_W:
 					retval = zend_hash_add_new(ht, offset_key, &EG(uninitialized_zval));
 					break;
