@@ -1,5 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+?? ??? ????, PHP 7.4.4
+
+- PCRE:
+  . Fixed bug #79188 (Memory corruption in preg_replace/preg_replace_callback
+    and unicode). (Nikita)
+
 ?? ??? ????, PHP 7.4.3
 
 - Core:
