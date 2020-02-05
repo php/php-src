@@ -24,8 +24,18 @@ class B extends A {
     public function func($str) {
         call_user_func_array(array($this, 'parent::func2'), array($str));
         call_user_func_array(array($this, 'parent::func3'), array($str));
-        call_user_func_array(array($this, 'parent::func22'), array($str));
-        call_user_func_array(array($this, 'parent::inexistent'), array($str));
+        
+        try {
+            call_user_func_array(array($this, 'parent::func22'), array($str));
+        } catch (\TypeError $e) {
+            echo $e->getMessage() . \PHP_EOL;
+        }
+        
+        try {
+            call_user_func_array(array($this, 'parent::inexistent'), array($str));
+        } catch (\TypeError $e) {
+            echo $e->getMessage() . \PHP_EOL;
+        }
     }
     private function func2($str) {
         var_dump(__METHOD__ .': '. $str);
@@ -45,10 +55,8 @@ $c = new C;
 $c->func('This should work!');
 
 ?>
---EXPECTF--
+--EXPECT--
 string(27) "A::func2: This should work!"
 string(27) "A::func3: This should work!"
-
-Warning: call_user_func_array() expects parameter 1 to be a valid callback, cannot access private method A::func22() in %s on line %d
-
-Warning: call_user_func_array() expects parameter 1 to be a valid callback, class 'A' does not have a method 'inexistent' in %s on line %d
+call_user_func_array() expects parameter 1 to be a valid callback, cannot access private method A::func22()
+call_user_func_array() expects parameter 1 to be a valid callback, class 'A' does not have a method 'inexistent'
