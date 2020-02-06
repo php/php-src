@@ -23,6 +23,7 @@ $element->replaceWith(
 print_node($dom->documentElement);
 print_node($dom->documentElement->childNodes[0]);
 print_node($dom->documentElement->childNodes[1]);
+?>
 --EXPECT--
 Node Name: test
 Node Type: 1

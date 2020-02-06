@@ -27,6 +27,7 @@ try {
 } catch (DOMException $e) {
     echo $e->getMessage();
 }
+?>
 --EXPECT--
 Wrong Document Error
 Wrong Document Error

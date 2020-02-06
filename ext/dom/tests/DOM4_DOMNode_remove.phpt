@@ -18,6 +18,7 @@ print_node($element->firstChild);
 $returnValue = $element->firstChild->remove();
 print_node($element->firstChild);
 var_dump($returnValue);
+?>
 --EXPECT--
 Node Name: one
 Node Type: 1

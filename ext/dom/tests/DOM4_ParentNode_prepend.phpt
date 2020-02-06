@@ -4,6 +4,8 @@ DOMParentNode::prepend()
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+declare(strict_types=1);
+
 require_once("dom_test.inc");
 
 $dom = new DOMDocument;
@@ -14,18 +16,13 @@ if(!$dom) {
 }
 
 $element = $dom->documentElement;
-var_dump($element->childElementCount);
-
 $element->prepend(
   $dom->createElement('element', 'content'),
   'content'
 );
 
-print_node($element->childNodes[0]);
-print_node($element->childNodes[1]);
-print_node($element->childNodes[2]);
-print_node($element->childNodes[3]);
-print_node($element->childNodes[4]);
+var_dump($element->childElementCount);
+print_node_list_compact($element->childNodes);
 
 $element = $dom->documentElement;
 $element->prepend(
@@ -33,31 +30,19 @@ $element->prepend(
   'content'
 );
 var_dump($element->childElementCount);
+?>
 --EXPECT--
-int(3)
-Node Name: element
-Node Type: 1
-Num Children: 1
-Node Content: content
-
-Node Name: #text
-Node Type: 3
-Num Children: 0
-Node Content: content
-
-Node Name: mark
-Node Type: 1
-Num Children: 0
-Node Content:
-
-Node Name: mark
-Node Type: 1
-Num Children: 1
-Node Content:
-
-Node Name: mark
-Node Type: 1
-Num Children: 0
-Node Content:
-
+int(4)
+<element>
+  content
+</element>
+content
+<mark>
+</mark>
+<mark>
+  <nested>
+  </nested>
+</mark>
+<mark>
+</mark>
 int(5)

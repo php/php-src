@@ -367,14 +367,13 @@ PHP_METHOD(domcharacterdata, replaceData)
 
 PHP_METHOD(domcharacterdata, remove)
 {
-	zval *id;
+	zval *id = ZEND_THIS;
 	xmlNodePtr children, child;
 	dom_object *intern;
 	int stricterror;
 
-	id = ZEND_THIS;
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	DOM_GET_OBJ(child, id, xmlNodePtr, intern);
@@ -422,7 +421,7 @@ PHP_METHOD(domcharacterdata, after)
 	xmlNode *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
@@ -439,7 +438,7 @@ PHP_METHOD(domcharacterdata, before)
 	xmlNode *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
@@ -456,7 +455,7 @@ PHP_METHOD(domcharacterdata, replaceWith)
 	xmlNode *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;

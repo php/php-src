@@ -26,6 +26,7 @@ var_dump($element->childElementCount);
 var_dump($element->lastElementChild->firstElementChild);
 var_dump($element->lastElementChild->lastElementChild);
 var_dump($element->lastElementChild->childElementCount);
+?>
 --EXPECT--
 bool(true)
 Node Name: test

@@ -16,6 +16,7 @@ if(!$dom) {
 $element = $dom->documentElement;
 print_node($element->firstElementChild->nextElementSibling);
 print_node($element->lastElementChild->previousElementSibling);
+?>
 --EXPECT--
 Node Name: bar
 Node Type: 1

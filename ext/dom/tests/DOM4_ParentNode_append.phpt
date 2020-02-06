@@ -4,6 +4,8 @@ DOMParentNode::append()
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
+declare(strict_types=1);
+
 require_once("dom_test.inc");
 
 $dom = new DOMDocument;
@@ -20,42 +22,24 @@ $element->append(
 );
 
 var_dump($dom->documentElement->childElementCount);
-print_node($element->childNodes[0]);
-print_node($element->childNodes[1]);
-print_node($element->childNodes[2]);
-print_node($element->childNodes[3]);
-print_node($element->childNodes[4]);
+print_node_list_compact($element->childNodes);
 
 $element->append(
   $dom->createElement('element', 'content'),
   'content'
 );
 var_dump($dom->documentElement->childElementCount);
+?>
 --EXPECT--
 int(4)
-Node Name: mark
-Node Type: 1
-Num Children: 0
-Node Content:
-
-Node Name: mark
-Node Type: 1
-Num Children: 0
-Node Content:
-
-Node Name: mark
-Node Type: 1
-Num Children: 0
-Node Content:
-
-Node Name: element
-Node Type: 1
-Num Children: 1
-Node Content: content
-
-Node Name: #text
-Node Type: 3
-Num Children: 0
-Node Content: content
-
+<mark>
+</mark>
+<mark>
+</mark>
+<mark>
+</mark>
+<element>
+  content
+</element>
+content
 int(5)

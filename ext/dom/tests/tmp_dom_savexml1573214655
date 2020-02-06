@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<courses>
-	<!-- Hello World! -->
-	<aNode>
-		<childNode>
-			<childlessNode/>
-		</childNode>
-	</aNode>
-</courses>

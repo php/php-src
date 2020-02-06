@@ -25,5 +25,6 @@ try {
 } catch (DOMException $e) {
     echo $e->getMessage();
 }
+?>
 --EXPECT--
 Hierarchy Request Error

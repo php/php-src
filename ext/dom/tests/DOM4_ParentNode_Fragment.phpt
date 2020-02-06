@@ -26,6 +26,7 @@ var_dump($fragment->childElementCount);
 var_dump($fragment->lastElementChild->firstElementChild);
 var_dump($fragment->lastElementChild->lastElementChild);
 var_dump($fragment->lastElementChild->childElementCount);
+?>
 --EXPECT--
 bool(true)
 Node Name: bar

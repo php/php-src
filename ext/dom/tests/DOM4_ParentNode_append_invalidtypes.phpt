@@ -16,7 +16,7 @@ if(!$dom) {
 try {
     $dom->documentElement->append(array());
 } catch(TypeError $e) {
-    echo "OK!";
+    echo "OK! {$e->getMessage()}";
 }
 --EXPECT--
-OK!
+OK! Invalid argument type must be either DOMNode or string
