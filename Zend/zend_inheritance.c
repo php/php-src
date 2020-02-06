@@ -534,8 +534,10 @@ static inheritance_status zend_do_perform_implementation_check(
 		&& ((proto->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0
 			&& (proto->common.fn_flags & ZEND_ACC_ABSTRACT) == 0)));
 
-	/* If the prototype method is private do not enforce a signature */
-	ZEND_ASSERT(!(proto->common.fn_flags & ZEND_ACC_PRIVATE));
+	/* If the prototype method is private and not abstract, we do not enforce a signature.
+	 * private abstract methods can only occur in traits. */
+	ZEND_ASSERT(!(proto->common.fn_flags & ZEND_ACC_PRIVATE)
+			|| (proto->common.fn_flags & ZEND_ACC_ABSTRACT));
 
 	/* The number of required arguments cannot increase. */
 	if (proto->common.required_num_args < fe->common.required_num_args) {
@@ -850,7 +852,7 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(z
 		child->common.fn_flags |= ZEND_ACC_CHANGED;
 	}
 
-	if (parent_flags & ZEND_ACC_PRIVATE) {
+	if ((parent_flags & ZEND_ACC_PRIVATE) && !(parent_flags & ZEND_ACC_ABSTRACT)) {
 		return INHERITANCE_SUCCESS;
 	}
 
@@ -1590,7 +1592,8 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 
 		/* Abstract method signatures from the trait must be satisfied. */
 		if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
-			perform_delayable_implementation_check(ce, existing_fn, fn);
+			do_inheritance_check_on_method(existing_fn, fn, ce, NULL);
+			fn->common.prototype = NULL;
 			return;
 		}
 

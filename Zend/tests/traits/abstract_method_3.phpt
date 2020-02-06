@@ -1,16 +1,16 @@
 --TEST--
-Abstract method from trait enforced in class
+Private abstract method from trait enforced in class
 --FILE--
 <?php
 
 trait T {
-    abstract public function neededByTheTrait(int $a, string $b);
+    abstract private function neededByTheTrait(int $a, string $b);
 }
 
 class C {
     use T;
 
-    public function neededByTheTrait(array $a, object $b) {}
+    private function neededByTheTrait(array $a, object $b) {}
 }
 
 ?>

@@ -13,7 +13,7 @@ trait T2 {
 class C {
     use T1, T2;
 
-    function test(): int {}
+    public function test(): int {}
 }
 
 ?>

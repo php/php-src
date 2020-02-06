@@ -6101,7 +6101,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 	}
 
 	if (op_array->fn_flags & ZEND_ACC_ABSTRACT) {
-		if (op_array->fn_flags & ZEND_ACC_PRIVATE) {
+		if ((op_array->fn_flags & ZEND_ACC_PRIVATE) && !(ce->ce_flags & ZEND_ACC_TRAIT)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "%s function %s::%s() cannot be declared private",
 				in_interface ? "Interface" : "Abstract", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
