@@ -1477,3 +1477,15 @@ static zval * ZEND_FASTCALL zend_jit_prepare_assign_dim_ref(zval *ref) {
 	}
 	return val;
 }
+
+static void ZEND_FASTCALL zend_jit_pre_inc(zval *var_ptr, zval *ret)
+{
+	increment_function(var_ptr);
+	ZVAL_COPY(ret, var_ptr);
+}
+
+static void ZEND_FASTCALL zend_jit_pre_dec(zval *var_ptr, zval *ret)
+{
+	decrement_function(var_ptr);
+	ZVAL_COPY(ret, var_ptr);
+}

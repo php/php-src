@@ -2938,9 +2938,19 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, const zend_
 				|	TRY_ADDREF op1_info, ah, r2
 			}
 			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
-				|	EXT_CALL increment_function, r0
+				if (opline->opcode == ZEND_PRE_INC && opline->result_type != IS_UNUSED) {
+					|	LOAD_ZVAL_ADDR FCARG2a, res_addr
+					|	EXT_CALL zend_jit_pre_inc, r0
+				} else {
+					|	EXT_CALL increment_function, r0
+				}
 			} else {
-				|	EXT_CALL decrement_function, r0
+				if (opline->opcode == ZEND_PRE_DEC && opline->result_type != IS_UNUSED) {
+					|	LOAD_ZVAL_ADDR FCARG2a, res_addr
+					|	EXT_CALL zend_jit_pre_dec, r0
+				} else {
+					|	EXT_CALL decrement_function, r0
+				}
 			}
 		} else {
 			zend_reg tmp_reg;
@@ -2970,11 +2980,11 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, const zend_
 				}
 			}
 			|	SSE_SET_ZVAL_DVAL op1_def_addr, tmp_reg
-		}
-		if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
-		    opline->result_type != IS_UNUSED) {
-			|	ZVAL_COPY_VALUE res_addr, res_use_info, op1_addr, op1_def_info, ZREG_R0, ZREG_R1
-			|	TRY_ADDREF op1_def_info, ah, r1
+			if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
+			    opline->result_type != IS_UNUSED) {
+				|	ZVAL_COPY_VALUE res_addr, res_use_info, op1_addr, op1_def_info, ZREG_R0, ZREG_R1
+				|	TRY_ADDREF op1_def_info, ah, r1
+			}
 		}
 		|	jmp >3
 		|.code
