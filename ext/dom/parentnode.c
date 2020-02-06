@@ -216,30 +216,30 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 
 void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 {
-	xmlNode *contextNode = dom_object_get_node(context);
+	xmlNode *parentNode = dom_object_get_node(context);
 	xmlNodePtr newchild, node, prevsib;
-	xmlNode *fragment = dom_zvals_to_fragment(context->document, contextNode, nodes, nodesc);
+	xmlNode *fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
 
 	if (fragment == NULL) {
 		return;
 	}
 
 	newchild = fragment->children;
-	prevsib = contextNode->last;
+	prevsib = parentNode->last;
 
 	if (newchild) {
 		if (prevsib != NULL) {
 			prevsib->next = newchild;
 		} else {
-			contextNode->children = newchild;
+			parentNode->children = newchild;
 		}
 
 		newchild->prev = prevsib;
-		contextNode->last = fragment->last;
+		parentNode->last = fragment->last;
 
 		node = newchild;
 		while (node != NULL) {
-			node->parent = contextNode;
+			node->parent = parentNode;
 
 			if (node == fragment->last) {
 				break;
@@ -250,7 +250,7 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 		fragment->children = NULL;
 		fragment->last = NULL;
 
-		dom_reconcile_ns(contextNode->doc, newchild);
+		dom_reconcile_ns(parentNode->doc, newchild);
 	}
 
 	xmlFree(fragment);
@@ -258,9 +258,9 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 
 void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
 {
-	xmlNode *contextNode = dom_object_get_node(context);
+	xmlNode *parentNode = dom_object_get_node(context);
 	xmlNodePtr newchild, node, prevsib, nextsib;
-	xmlNode *fragment = dom_zvals_to_fragment(context->document, contextNode, nodes, nodesc);
+	xmlNode *fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
 
 	if (fragment == NULL) {
 		return;
@@ -268,17 +268,17 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
 
 	newchild = fragment->children;
 	prevsib = NULL;
-	nextsib = contextNode->children;
+	nextsib = parentNode->children;
 
 	if (newchild) {
-		contextNode->children = newchild;
+		parentNode->children = newchild;
 		newchild->prev = prevsib;
 		fragment->last->next = nextsib;
 		nextsib->prev = fragment->last;
 
 		node = newchild;
 		while (node != NULL) {
-			node->parent = contextNode;
+			node->parent = parentNode;
 
 			if (node == fragment->last) {
 				break;
@@ -289,7 +289,7 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
 		fragment->children = NULL;
 		fragment->last = NULL;
 
-		dom_reconcile_ns(contextNode->doc, newchild);
+		dom_reconcile_ns(parentNode->doc, newchild);
 	}
 
 	xmlFree(fragment);
@@ -298,7 +298,7 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
 void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
 {
 	xmlNode *prevsib = dom_object_get_node(context);
-	xmlNodePtr newchild, node, contextNode;
+	xmlNodePtr newchild, node, parentNode;
 	xmlNode *fragment;
 
 	int stricterror = dom_get_strict_error(context->document);
@@ -308,8 +308,8 @@ void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
 		return;
 	}
 
-	contextNode = prevsib->parent;
-	fragment = dom_zvals_to_fragment(context->document, contextNode, nodes, nodesc);
+	parentNode = prevsib->parent;
+	fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
 
 	if (fragment == NULL) {
 		return;
@@ -318,13 +318,13 @@ void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
 	newchild = fragment->children;
 
 	if (newchild) {
+		fragment->last->next = prevsib->next;
 		prevsib->next = newchild;
 		newchild->prev = prevsib;
-		contextNode->last = fragment->last;
 
 		node = newchild;
 		while (node != NULL) {
-			node->parent = contextNode;
+			node->parent = parentNode;
 
 			if (node == fragment->last) {
 				break;
@@ -344,12 +344,12 @@ void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
 void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
 {
 	xmlNode *nextsib = dom_object_get_node(context);
-	xmlNodePtr newchild, node, prevsib, contextNode;
+	xmlNodePtr newchild, node, prevsib, parentNode;
 	xmlNode *fragment;
 
-	prevsib = NULL;
-	contextNode = nextsib->parent;
-	fragment = dom_zvals_to_fragment(context->document, contextNode, nodes, nodesc);
+	prevsib = nextsib->prev;
+	parentNode = nextsib->parent;
+	fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
 
 	if (fragment == NULL) {
 		return;
@@ -358,14 +358,18 @@ void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
 	newchild = fragment->children;
 
 	if (newchild) {
-		contextNode->children = newchild;
+		if (parentNode->children == nextsib) {
+			parentNode->children = newchild;
+		} else {
+			prevsib->next = newchild;
+		}
 		newchild->prev = prevsib;
 		fragment->last->next = nextsib;
 		nextsib->prev = fragment->last;
 
 		node = newchild;
 		while (node != NULL) {
-			node->parent = contextNode;
+			node->parent = parentNode;
 
 			if (node == fragment->last) {
 				break;

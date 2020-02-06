@@ -25,10 +25,10 @@ $secondMark->before('text inserted before second');
 print_node_list_compact($dom->documentElement->childNodes);
 ?>
 --EXPECT--
-text inserted before
 <inserted-before>
   content
 </inserted-before>
+text inserted before
 <mark>
   first
 </mark>
