@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 
 ?? ??? ????, PHP 7.4.4
 
+- CURL:
+  . Fixed bug #79019 (Copied cURL handles upload empty file). (cmb)
+
 - PCRE:
   . Fixed bug #79188 (Memory corruption in preg_replace/preg_replace_callback
     and unicode). (Nikita)
@@ -23,7 +26,6 @@ PHP                                                                        NEWS
 - CURL:
   . Fixed bug #79078 (Hypothetical use-after-free in curl_multi_add_handle()).
     (cmb)
-  . Fixed bug #79019 (Copied cURL handles upload empty file). (cmb)
 
 - FFI:
   . Fixed bug #79096 (FFI Struct Segfault). (cmb)
