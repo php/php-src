@@ -6606,7 +6606,6 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 	if (extends_ast) {
 		ce->parent_name =
 			zend_resolve_const_class_name_reference(extends_ast, "class name");
-		ce->ce_flags |= ZEND_ACC_INHERITED;
 	}
 
 	CG(active_class_entry) = ce;

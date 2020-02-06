@@ -229,7 +229,7 @@ typedef struct _zend_oparray_context {
 /* op_array or class is preloaded                         |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 10) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 24...)                            |     |     |     */
+/* Class Flags (unused: 13, 24...)                        |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -250,9 +250,6 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Class constants updated                                |     |     |     */
 #define ZEND_ACC_CONSTANTS_UPDATED       (1 << 12) /*  X  |     |     |     */
-/*                                                        |     |     |     */
-/* Class extends another class                            |     |     |     */
-#define ZEND_ACC_INHERITED               (1 << 13) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* Class implements interface(s)                          |     |     |     */
 #define ZEND_ACC_IMPLEMENT_INTERFACES    (1 << 14) /*  X  |     |     |     */

@@ -4538,8 +4538,7 @@ int zend_may_throw(const zend_op *opline, const zend_op_array *op_array, zend_ss
 				zend_class_entry *ce = var_info->ce;
 
 				if (var_info->is_instanceof ||
-				    !ce || ce->create_object || ce->__get || ce->__set ||
-				    (ce->ce_flags & ZEND_ACC_INHERITED)) {
+				    !ce || ce->create_object || ce->__get || ce->__set || ce->parent) {
 					return 1;
 				}
 

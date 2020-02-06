@@ -8842,28 +8842,23 @@ static uint32_t zend_get_known_property_offset(zend_class_entry *ce, zend_string
 		return ZEND_WRONG_PROPERTY_OFFSET;
 	}
 
-	if (ce->ce_flags & ZEND_ACC_INHERITED) {
-		if (!ce->parent) {
-			/* property offsets may be changed by inheritance */
-			return ZEND_WRONG_PROPERTY_OFFSET;
-		} else {
-			zend_class_entry *parent = ce->parent;
+	if (ce->parent) {
+		zend_class_entry *parent = ce->parent;
 
-			do {
-				if (parent->type == ZEND_INTERNAL_CLASS) {
-					break;
-				} else if (parent->info.user.filename != filename) {
-					/* some of parents class declarations might be changed infdependently */
-					/* TODO: this check may be not enough, because even
-					 * in the same it's possible to conditionally define
-					 * few classes with the same name, and "parent" may
-					 * change from request to request.
-					 */
-					return ZEND_WRONG_PROPERTY_OFFSET;
-				}
-				parent = parent->parent;
-			} while (parent);
-		}
+		do {
+			if (parent->type == ZEND_INTERNAL_CLASS) {
+				break;
+			} else if (parent->info.user.filename != filename) {
+				/* some of parents class declarations might be changed infdependently */
+				/* TODO: this check may be not enough, because even
+				 * in the same it's possible to conditionally define
+				 * few classes with the same name, and "parent" may
+				 * change from request to request.
+				 */
+				return ZEND_WRONG_PROPERTY_OFFSET;
+			}
+			parent = parent->parent;
+		} while (parent);
 	}
 
 	info = (zend_property_info*)zend_hash_find_ptr(&ce->properties_info, member);
