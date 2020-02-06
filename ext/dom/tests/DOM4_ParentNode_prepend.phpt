@@ -16,6 +16,7 @@ if(!$dom) {
 }
 
 $element = $dom->documentElement;
+$firstMark = $element->childNodes[0];
 $element->prepend(
   $dom->createElement('element', 'content'),
   'content'
@@ -30,6 +31,9 @@ $element->prepend(
   'content'
 );
 var_dump($element->childElementCount);
+
+$firstMark->prepend('content');
+print_node_list_compact($firstMark->childNodes);
 ?>
 --EXPECT--
 int(4)
@@ -46,3 +50,4 @@ content
 <mark>
 </mark>
 int(5)
+content

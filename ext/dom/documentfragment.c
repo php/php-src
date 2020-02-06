@@ -179,11 +179,7 @@ PHP_METHOD(domdocumentfragment, prepend)
 	id = ZEND_THIS;
 	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
 
-	if (context->children == NULL) {
-		dom_parent_node_append(intern, args, argc);
-	} else {
-		dom_parent_node_prepend(intern, args, argc);
-	}
+	dom_parent_node_prepend(intern, args, argc);
 }
 /* }}} */
 

@@ -259,6 +259,12 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
 {
 	xmlNode *parentNode = dom_object_get_node(context);
+
+	if (parentNode->children == NULL) {
+		dom_parent_node_append(context, nodes, nodesc);
+		return;
+	}
+
 	xmlNodePtr newchild, node, prevsib, nextsib;
 	xmlNode *fragment = dom_zvals_to_fragment(context->document, parentNode, nodes, nodesc);
 
