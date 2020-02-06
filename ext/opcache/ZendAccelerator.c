@@ -4150,14 +4150,14 @@ static int preload_optimize(zend_persistent_script *script)
 	}
 
 	ZEND_HASH_FOREACH_PTR(&script->script.class_table, ce) {
-		if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
+		if (ce->num_traits) {
 			preload_fix_trait_methods(ce);
 		}
 	} ZEND_HASH_FOREACH_END();
 
 	ZEND_HASH_FOREACH_PTR(preload_scripts, script) {
 		ZEND_HASH_FOREACH_PTR(&script->script.class_table, ce) {
-			if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
+			if (ce->num_traits) {
 				preload_fix_trait_methods(ce);
 			}
 		} ZEND_HASH_FOREACH_END();

@@ -2460,7 +2460,7 @@ ZEND_API int zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_nam
 		}
 		zend_do_inheritance(ce, parent);
 	}
-	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
+	if (ce->num_traits) {
 		zend_do_bind_traits(ce);
 	}
 	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
