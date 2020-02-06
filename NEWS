@@ -3,6 +3,10 @@ PHP                                                                        NEWS
 
 ?? ??? ????, PHP 7.4.4
 
+- COM:
+  . Fixed bug #66322 (COMPersistHelper::SaveToFile can save to wrong location).
+    (cmb)
+
 - CURL:
   . Fixed bug #79019 (Copied cURL handles upload empty file). (cmb)
 
