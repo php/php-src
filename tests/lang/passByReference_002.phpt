@@ -12,4 +12,7 @@ f(2);
 
 ?>
 --EXPECTF--
-Fatal error: Only variables can be passed by reference in %s on line 8
+Fatal error: Uncaught Error: Cannot pass parameter 1 by reference in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

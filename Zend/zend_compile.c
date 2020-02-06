@@ -718,7 +718,8 @@ void zend_do_free(znode *op1) /* {{{ */
 	if (op1->op_type == IS_TMP_VAR) {
 		zend_op *opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 
-		while (opline->opcode == ZEND_END_SILENCE) {
+		while (opline->opcode == ZEND_END_SILENCE ||
+		       opline->opcode == ZEND_OP_DATA) {
 			opline--;
 		}
 
@@ -736,6 +737,22 @@ void zend_do_free(znode *op1) /* {{{ */
 				case ZEND_POST_DEC:
 					/* convert $i++ to ++$i */
 					opline->opcode -= 2;
+					opline->result_type = IS_UNUSED;
+					return;
+				case ZEND_ASSIGN:
+				case ZEND_ASSIGN_DIM:
+				case ZEND_ASSIGN_OBJ:
+				case ZEND_ASSIGN_STATIC_PROP:
+				case ZEND_ASSIGN_OP:
+				case ZEND_ASSIGN_DIM_OP:
+				case ZEND_ASSIGN_OBJ_OP:
+				case ZEND_ASSIGN_STATIC_PROP_OP:
+				case ZEND_PRE_INC_STATIC_PROP:
+				case ZEND_PRE_DEC_STATIC_PROP:
+				case ZEND_PRE_INC_OBJ:
+				case ZEND_PRE_DEC_OBJ:
+				case ZEND_PRE_INC:
+				case ZEND_PRE_DEC:
 					opline->result_type = IS_UNUSED;
 					return;
 			}
@@ -2921,7 +2938,7 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			zend_delayed_compile_var(&var_node, var_ast, BP_VAR_W, 0);
 			zend_compile_expr(&expr_node, expr_ast);
 			zend_delayed_compile_end(offset);
-			zend_emit_op(result, ZEND_ASSIGN, &var_node, &expr_node);
+			zend_emit_op_tmp(result, ZEND_ASSIGN, &var_node, &expr_node);
 			return;
 		case ZEND_AST_STATIC_PROP:
 			offset = zend_delayed_compile_begin();
@@ -2930,6 +2947,8 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 
 			opline = zend_delayed_compile_end(offset);
 			opline->opcode = ZEND_ASSIGN_STATIC_PROP;
+			opline->result_type = IS_TMP_VAR;
+			result->op_type = IS_TMP_VAR;
 
 			zend_emit_op_data(&expr_node);
 			return;
@@ -2953,6 +2972,8 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 
 			opline = zend_delayed_compile_end(offset);
 			opline->opcode = ZEND_ASSIGN_DIM;
+			opline->result_type = IS_TMP_VAR;
+			result->op_type = IS_TMP_VAR;
 
 			opline = zend_emit_op_data(&expr_node);
 			return;
@@ -2963,6 +2984,8 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 
 			opline = zend_delayed_compile_end(offset);
 			opline->opcode = ZEND_ASSIGN_OBJ;
+			opline->result_type = IS_TMP_VAR;
+			result->op_type = IS_TMP_VAR;
 
 			zend_emit_op_data(&expr_node);
 			return;
@@ -3086,7 +3109,7 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 			zend_delayed_compile_var(&var_node, var_ast, BP_VAR_RW, 0);
 			zend_compile_expr(&expr_node, expr_ast);
 			zend_delayed_compile_end(offset);
-			opline = zend_emit_op(result, ZEND_ASSIGN_OP, &var_node, &expr_node);
+			opline = zend_emit_op_tmp(result, ZEND_ASSIGN_OP, &var_node, &expr_node);
 			opline->extended_value = opcode;
 			return;
 		case ZEND_AST_STATIC_PROP:
@@ -3098,6 +3121,8 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 			cache_slot = opline->extended_value;
 			opline->opcode = ZEND_ASSIGN_STATIC_PROP_OP;
 			opline->extended_value = opcode;
+			opline->result_type = IS_TMP_VAR;
+			result->op_type = IS_TMP_VAR;
 
 			opline = zend_emit_op_data(&expr_node);
 			opline->extended_value = cache_slot;
@@ -3110,6 +3135,8 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 			opline = zend_delayed_compile_end(offset);
 			opline->opcode = ZEND_ASSIGN_DIM_OP;
 			opline->extended_value = opcode;
+			opline->result_type = IS_TMP_VAR;
+			result->op_type = IS_TMP_VAR;
 
 			zend_emit_op_data(&expr_node);
 			return;
@@ -3122,6 +3149,8 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 			cache_slot = opline->extended_value;
 			opline->opcode = ZEND_ASSIGN_OBJ_OP;
 			opline->extended_value = opcode;
+			opline->result_type = IS_TMP_VAR;
+			result->op_type = IS_TMP_VAR;
 
 			opline = zend_emit_op_data(&expr_node);
 			opline->extended_value = cache_slot;
@@ -3236,11 +3265,9 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 					opcode = ZEND_SEND_VAR_EX;
 				}
 			} else {
-				if (fbc) {
+				/* Delay "Only variables can be passed by reference" error to execution */
+				if (fbc && !ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
 					opcode = ZEND_SEND_VAL;
-					if (ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
-						zend_error_noreturn(E_COMPILE_ERROR, "Only variables can be passed by reference");
-					}
 				} else {
 					opcode = ZEND_SEND_VAL_EX;
 				}
@@ -7577,13 +7604,17 @@ void zend_compile_pre_incdec(znode *result, zend_ast *ast) /* {{{ */
 	if (var_ast->kind == ZEND_AST_PROP) {
 		zend_op *opline = zend_compile_prop(result, var_ast, BP_VAR_RW, 0);
 		opline->opcode = ast->kind == ZEND_AST_PRE_INC ? ZEND_PRE_INC_OBJ : ZEND_PRE_DEC_OBJ;
+		opline->result_type = IS_TMP_VAR;
+		result->op_type = IS_TMP_VAR;
 	} else if (var_ast->kind == ZEND_AST_STATIC_PROP) {
 		zend_op *opline = zend_compile_static_prop(result, var_ast, BP_VAR_RW, 0, 0);
 		opline->opcode = ast->kind == ZEND_AST_PRE_INC ? ZEND_PRE_INC_STATIC_PROP : ZEND_PRE_DEC_STATIC_PROP;
+		opline->result_type = IS_TMP_VAR;
+		result->op_type = IS_TMP_VAR;
 	} else {
 		znode var_node;
 		zend_compile_var(&var_node, var_ast, BP_VAR_RW, 0);
-		zend_emit_op(result, ast->kind == ZEND_AST_PRE_INC ? ZEND_PRE_INC : ZEND_PRE_DEC,
+		zend_emit_op_tmp(result, ast->kind == ZEND_AST_PRE_INC ? ZEND_PRE_INC : ZEND_PRE_DEC,
 			&var_node, NULL);
 	}
 }
@@ -7764,20 +7795,26 @@ void zend_compile_assign_coalesce(znode *result, zend_ast *ast) /* {{{ */
 	opline = &CG(active_op_array)->opcodes[CG(active_op_array)->last-1];
 	switch (var_ast->kind) {
 		case ZEND_AST_VAR:
-			zend_emit_op(&assign_node, ZEND_ASSIGN, &var_node_w, &default_node);
+			zend_emit_op_tmp(&assign_node, ZEND_ASSIGN, &var_node_w, &default_node);
 			break;
 		case ZEND_AST_STATIC_PROP:
 			opline->opcode = ZEND_ASSIGN_STATIC_PROP;
+			opline->result_type = IS_TMP_VAR;
+			var_node_w.op_type = IS_TMP_VAR;
 			zend_emit_op_data(&default_node);
 			assign_node = var_node_w;
 			break;
 		case ZEND_AST_DIM:
 			opline->opcode = ZEND_ASSIGN_DIM;
+			opline->result_type = IS_TMP_VAR;
+			var_node_w.op_type = IS_TMP_VAR;
 			zend_emit_op_data(&default_node);
 			assign_node = var_node_w;
 			break;
 		case ZEND_AST_PROP:
 			opline->opcode = ZEND_ASSIGN_OBJ;
+			opline->result_type = IS_TMP_VAR;
+			var_node_w.op_type = IS_TMP_VAR;
 			zend_emit_op_data(&default_node);
 			assign_node = var_node_w;
 			break;
