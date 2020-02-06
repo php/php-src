@@ -130,6 +130,18 @@ PHP 8.0 UPGRADE NOTES
     exception.
   . Some "Only variables should be passed by reference" notices have been converted
     to "Cannot pass parameter by reference" exception.
+  . The generated name for anonymous classes has changed. It will now include
+    the name of the first parent or interface:
+
+        new class extends ParentClass {};
+        // -> ParentClass@anonymous
+        new class implements FirstInterface, SecondInterface {};
+        // -> FirstInterface@anonymous
+        new class {};
+        // -> class@anonymous
+
+    The name shown above is still followed by a null byte and and a unique
+    suffix.
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
@@ -385,7 +397,6 @@ PHP 8.0 UPGRADE NOTES
   . Some consistency fixes to variable syntax have been applied, for example
     writing `Foo::BAR::$baz` is now allowed.
     RFC: https://wiki.php.net/rfc/variable_syntax_tweaks
-
 
 - Date:
   . Added DateTime::createFromInterface() and
