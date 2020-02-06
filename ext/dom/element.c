@@ -1200,7 +1200,7 @@ PHP_METHOD(domelement, remove)
 	dom_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
@@ -1218,7 +1218,7 @@ PHP_METHOD(domelement, after)
 	xmlNode *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
@@ -1235,7 +1235,7 @@ PHP_METHOD(domelement, before)
 	xmlNode *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
@@ -1256,7 +1256,7 @@ PHP_METHOD(domelement, append)
 	xmlNode *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
@@ -1278,7 +1278,7 @@ PHP_METHOD(domelement, prepend)
 	xmlNode *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
@@ -1304,7 +1304,7 @@ PHP_METHOD(domelement, replaceWith)
 	xmlNode *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;

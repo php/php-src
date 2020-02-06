@@ -151,7 +151,7 @@ PHP_METHOD(domdocumentfragment, append)
 	xmlNode *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
@@ -173,7 +173,7 @@ PHP_METHOD(domdocumentfragment, prepend)
 	xmlNode *context;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	id = ZEND_THIS;
