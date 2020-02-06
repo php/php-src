@@ -48,16 +48,16 @@ Node Content: content
 Node Name: mark
 Node Type: 1
 Num Children: 0
-Node Content: 
+Node Content:
 
 Node Name: mark
 Node Type: 1
 Num Children: 0
-Node Content: 
+Node Content:
 
 Node Name: mark
 Node Type: 1
 Num Children: 0
-Node Content: 
+Node Content:
 
 int(5)
