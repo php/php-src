@@ -868,7 +868,7 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(z
 		parent = proto;
 	}
 
-	if (!check_only && child->common.prototype != proto) {
+	if (!check_only && child->common.prototype != proto && child_zv) {
 		do {
 			if (child->common.scope != ce
 			 && child->type == ZEND_USER_FUNCTION
@@ -876,7 +876,7 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(z
 				if (ce->ce_flags & ZEND_ACC_INTERFACE) {
 					/* Few parent interfaces contain the same method */
 					break;
-				} else if (child_zv) {
+				} else {
 					/* op_array wasn't duplicated yet */
 					zend_function *new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 					memcpy(new_function, child, sizeof(zend_op_array));
@@ -1593,7 +1593,6 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 		/* Abstract method signatures from the trait must be satisfied. */
 		if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
 			do_inheritance_check_on_method(existing_fn, fn, ce, NULL);
-			fn->common.prototype = NULL;
 			return;
 		}
 
@@ -1616,7 +1615,6 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 			/* inherited members are overridden by members inserted by traits */
 			/* check whether the trait method fulfills the inheritance requirements */
 			do_inheritance_check_on_method(fn, existing_fn, ce, NULL);
-			fn->common.prototype = NULL;
 		}
 	}
 
