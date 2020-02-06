@@ -10,7 +10,7 @@ if (PHP_INT_SIZE != 4) die('skip this test is for 32bit platforms only');
 --FILE--
 <?php
 for ($i=536838860; $i<536838870; $i++) {
-	echo $i, ':', jdtogregorian($i), PHP_EOL;
+    echo $i, ':', jdtogregorian($i), PHP_EOL;
 }
 echo 'DONE', PHP_EOL;
 ?>

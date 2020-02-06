@@ -9,11 +9,11 @@ Test get_parent_class() function : usage variations  - unexpected argument type.
  */
 
 spl_autoload_register(function ($className) {
-	echo "In autoload($className)\n";
+    echo "In autoload($className)\n";
 });
 
 function test_error_handler($err_no, $err_msg, $filename, $linenum) {
-	echo "Error: $err_no - $err_msg\n";
+    echo "Error: $err_no - $err_msg\n";
 }
 set_error_handler('test_error_handler');
 

@@ -11,7 +11,7 @@ class TestClass2 {
 
 class TestClass extends TestClass2 {
     var $test = [
-        TEST_TEST => 'test'  
+        TEST_TEST => 'test'
     ];
 }
 

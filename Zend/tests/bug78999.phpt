@@ -3,9 +3,9 @@ Bug #78999 (Cycle leak when using function result as temporary)
 --FILE--
 <?php
 function get() {
-	$t = new stdClass;
-	$t->prop = $t;
-	return $t;
+    $t = new stdClass;
+    $t->prop = $t;
+    return $t;
 }
 var_dump(get());
 var_dump(gc_collect_cycles());

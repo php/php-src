@@ -19,45 +19,45 @@ ob_start();
 echo "*** Testing session_set_save_handler() function: id interface ***\n";
 
 class MySession2 implements SessionHandlerInterface, SessionIdInterface {
-	public $path;
+    public $path;
 
-	public function open($path, $name) {
-		if (!$path) {
-			$path = sys_get_temp_dir();
-		}
-		$this->path = $path . '/u_sess_' . $name;
-		return true;
-	}
+    public function open($path, $name) {
+        if (!$path) {
+            $path = sys_get_temp_dir();
+        }
+        $this->path = $path . '/u_sess_' . $name;
+        return true;
+    }
 
-	public function close() {
-		return true;
-	}
+    public function close() {
+        return true;
+    }
 
-	public function read($id) {
-		return (string)@file_get_contents($this->path . $id);
-	}
+    public function read($id) {
+        return (string)@file_get_contents($this->path . $id);
+    }
 
-	public function write($id, $data) {
-		// Empty $data = 0 = false
-		return (bool)file_put_contents($this->path . $id, $data);
-	}
+    public function write($id, $data) {
+        // Empty $data = 0 = false
+        return (bool)file_put_contents($this->path . $id, $data);
+    }
 
-	public function destroy($id) {
-		@unlink($this->path . $id);
-	}
+    public function destroy($id) {
+        @unlink($this->path . $id);
+    }
 
-	public function gc($maxlifetime) {
-		foreach (glob($this->path . '*') as $filename) {
-			if (filemtime($filename) + $maxlifetime < time()) {
-				@unlink($filename);
-			}
-		}
-		return true;
-	}
+    public function gc($maxlifetime) {
+        foreach (glob($this->path . '*') as $filename) {
+            if (filemtime($filename) + $maxlifetime < time()) {
+                @unlink($filename);
+            }
+        }
+        return true;
+    }
 
-	public function create_sid() {
-		return pathinfo(__FILE__)['filename'];
-	}
+    public function create_sid() {
+        return pathinfo(__FILE__)['filename'];
+    }
 }
 
 $handler = new MySession2;

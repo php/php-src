@@ -6,7 +6,7 @@ Objects of DOM extension: debug info object handler.
 <?php
 $xml = <<<XML
 <foo>
-	<bar>foobar</bar>
+    <bar>foobar</bar>
 </foo>
 XML;
 $d = new domdocument;
@@ -58,6 +58,6 @@ DOMDocument Object
     [localName] => 
     [baseURI] => %s
     [textContent] => 
-	foobar
+    foobar
 
 )

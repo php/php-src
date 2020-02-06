@@ -4,21 +4,21 @@ ZE2 ArrayAccess cannot assign by reference
 <?php
 
 class ArrayAccessImpl implements ArrayAccess {
-	private $data = array();
+    private $data = array();
 
-	public function offsetUnset($index) {}
+    public function offsetUnset($index) {}
 
-	public function offsetSet($index, $value) {
-		$this->data[$index] = $value;
-	}
+    public function offsetSet($index, $value) {
+        $this->data[$index] = $value;
+    }
 
-	public function offsetGet($index) {
-		return $this->data[$index];
-	}
+    public function offsetGet($index) {
+        return $this->data[$index];
+    }
 
-	public function offsetExists($index) {
-		return isset($this->data[$index]);
-	}
+    public function offsetExists($index) {
+        return isset($this->data[$index]);
+    }
 }
 
 $data = new ArrayAccessImpl();

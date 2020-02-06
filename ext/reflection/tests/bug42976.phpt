@@ -4,9 +4,9 @@ Bug #42976 (Crash when constructor for newInstance() or newInstanceArgs() fails)
 <?php
 
 Class C {
-	function __construct(&$x) {
-		$x = "x.changed";
-	}
+    function __construct(&$x) {
+        $x = "x.changed";
+    }
 }
 
 $x = "x.original";

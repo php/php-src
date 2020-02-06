@@ -38,9 +38,9 @@ EOF;
 $sxe = simplexml_load_string($xml, 'SimpleXMLIterator');
 
 foreach(new RecursiveIteratorIterator($sxe, 1) as $name => $data) {
-	var_dump($name);
-	var_dump(get_class($data));
-	var_dump(trim($data));
+    var_dump($name);
+    var_dump(get_class($data));
+    var_dump(trim($data));
 }
 
 echo "===DUMP===\n";

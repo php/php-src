@@ -19,9 +19,9 @@ echo "*** Testing ctype_lower() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($i = 0; $i < 256; $i++) {
-	if (ctype_lower($i)) {
-		echo "character code $i is a lower case character\n";
-	}
+    if (ctype_lower($i)) {
+        echo "character code $i is a lower case character\n";
+    }
 }
 
 setlocale(LC_CTYPE, $orig);

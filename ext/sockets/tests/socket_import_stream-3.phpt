@@ -22,8 +22,8 @@ $stream = stream_socket_server("udp://0.0.0.0:58379", $errno, $errstr, STREAM_SE
 $sock = socket_import_stream($stream);
 var_dump($sock);
 $so = socket_set_option($sock, IPPROTO_IP, MCAST_JOIN_GROUP, array(
-	"group"	=> '224.0.0.23',
-	"interface" => "lo",
+    "group"	=> '224.0.0.23',
+    "interface" => "lo",
 ));
 var_dump($so);
 

@@ -9,7 +9,7 @@ allow_url_fopen=1
 require 'server.inc';
 
 $responses = array(
-	"data://text/plain,HTTP/1.0 200 Ok\r\nContent-Length\r\n",
+    "data://text/plain,HTTP/1.0 200 Ok\r\nContent-Length\r\n",
 );
 
 $pid = http_server("tcp://127.0.0.1:22351", $responses, $output);

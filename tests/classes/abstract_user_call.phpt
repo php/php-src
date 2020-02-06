@@ -5,15 +5,15 @@ ZE2 An abstrcat method cannot be called indirectly
 
 abstract class test_base
 {
-	abstract function func();
+    abstract function func();
 }
 
 class test extends test_base
 {
-	function func()
-	{
-		echo __METHOD__ . "()\n";
-	}
+    function func()
+    {
+        echo __METHOD__ . "()\n";
+    }
 }
 
 $o = new test;

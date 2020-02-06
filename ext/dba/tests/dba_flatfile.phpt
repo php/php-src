@@ -7,9 +7,9 @@ DBA FlatFile handler test
 ?>
 --FILE--
 <?php
-	$handler = 'flatfile';
-	require_once(__DIR__ .'/test.inc');
-	require_once(__DIR__ .'/dba_handler.inc');
+    $handler = 'flatfile';
+    require_once(__DIR__ .'/test.inc');
+    require_once(__DIR__ .'/dba_handler.inc');
 ?>
 --CLEAN--
 <?php

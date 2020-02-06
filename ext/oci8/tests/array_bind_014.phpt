@@ -47,8 +47,8 @@ $statement = oci_parse($c, $create_pkg_body);
 oci_execute($statement);
 
 for ($i = 1; $i < 6; $i++) {
-	$statement = oci_parse($c, "INSERT INTO bind_test VALUES (".$i.")");
-	oci_execute($statement);
+    $statement = oci_parse($c, "INSERT INTO bind_test VALUES (".$i.")");
+    oci_execute($statement);
 }
 
 $statement = oci_parse($c, "BEGIN array_bind_014_pkg.iobind(:c1); END;");

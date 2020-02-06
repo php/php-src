@@ -12,9 +12,9 @@ opcache.jit_buffer_size=1M
 namespace A;
 
 class A {
-	public function change(array $config) {
-		$config['keys'] = array_keys($config["a"]);;
-	}
+    public function change(array $config) {
+        $config['keys'] = array_keys($config["a"]);;
+    }
 }
 
 $a = new A();

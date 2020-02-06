@@ -4,9 +4,9 @@ get_class() tests
 <?php
 
 class foo {
-	function bar () {
-		var_dump(get_class());
-	}
+    function bar () {
+        var_dump(get_class());
+    }
     function testNull ()
     {
         try {

@@ -3,7 +3,7 @@ Bug #60222 (time_nanosleep() does validate input params)
 --FILE--
 <?php
     try {
-	    time_nanosleep(-1, 0);
+        time_nanosleep(-1, 0);
     } catch (ValueError $exception) {
         echo $exception->getMessage() . "\n";
     }

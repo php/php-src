@@ -4,8 +4,8 @@ Error message in error handler during compilation
 <?php
 
 set_error_handler(function($_, $msg, $file) {
-	var_dump($msg, $file);
-	echo $undefined;
+    var_dump($msg, $file);
+    echo $undefined;
 });
 
 /* This is just a particular example of a non-fatal compile-time error

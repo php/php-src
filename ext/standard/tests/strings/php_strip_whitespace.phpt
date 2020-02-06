@@ -19,15 +19,15 @@ $data = '<?php
 /* test class */
 class test {
 
-	/* function foo () */
+    /* function foo () */
 
-	function foo () /* {{{ */
-	{
+    function foo () /* {{{ */
+    {
 
 
-		echo $var; //does not exist
-	}
-	/* }}} */
+        echo $var; //does not exist
+    }
+    /* }}} */
 
 }
 ?>';

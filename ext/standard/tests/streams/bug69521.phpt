@@ -19,15 +19,15 @@ fclose($link);
 
 while (!feof($fp))
 {
-	$read = $write = array($fp);
+    $read = $write = array($fp);
 
-	if ($written === strlen($data))
-		$write = array();
+    if ($written === strlen($data))
+        $write = array();
 
-	$changed = stream_select($read, $write, $except, 0, 500000);
+    $changed = stream_select($read, $write, $except, 0, 500000);
 
-	if (!empty($read))
-		echo fread($fp, 4);
+    if (!empty($read))
+        echo fread($fp, 4);
 }
 ?>
 --EXPECT--

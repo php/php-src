@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #49555 (Fatal error "Function must be a string" message should be
     renamed). (Nikita)
+  . Fixed bug #70839 (Converting optional argument to variadic forbidden by LSP
+    checks). (Nikita)
 
 - CURL:
   . Bumped required libcurl version to 7.29.0. (cmb)
@@ -17,11 +19,15 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #65547 (Default value for sunrise/sunset zenith still wrong).
     (cmb)
-  . Fixed bug #69044 (discrepency between time and microtime). (krakjoe)
+  . Fixed bug #69044 (discrepancy between time and microtime). (krakjoe)
 
 - DOM:
   . Add property DOMXPath::$registerNodeNamespaces and constructor argument
     that allow global flag to configure query() or evaluate() calls.
+
+- FPM:
+  . Fixed bug #64865 (Search for .user.ini files from script dir up to
+    CONTEXT_DOCUMENT_ROOT). (Will Bender)
 
 - GD:
   . Fixed bug #55005 (imagepolygon num_points requirement). (cmb)
@@ -51,7 +57,7 @@ PHP                                                                        NEWS
   . Fixed #60594 (mysqlnd exposes 160 lines of stats in phpinfo). (PeeHaa)
 
 - OpCache:
-  . Fixed bug #78654 (Incorrectly computed opcache checksum on files with 
+  . Fixed bug #78654 (Incorrectly computed opcache checksum on files with
     non-ascii characters). (mhagstrand)
 
 - PCRE:
@@ -73,8 +79,10 @@ PHP                                                                        NEWS
   . Fixed bug #77805 (phpdbg build fails when readline is shared). (krakjoe)
 
 - Reflection:
-  . Fixed bug #78697 (ReflectionClass::implementsInterface - inaccurate error 
+  . Fixed bug #78697 (ReflectionClass::implementsInterface - inaccurate error
     message with traits). (villfa)
+  . Implement ReflectionProperty::hasDefaultValue and
+    Reflection::getDefaultValue (beberlei)
 
 - Session:
   . Fixed bug #78624 (session_gc return value for user defined session
@@ -107,10 +115,13 @@ PHP                                                                        NEWS
   . Fixed bug #76874 (xml_parser_free() should never leak memory). (Nikita)
 
 - XMLWriter:
-  . Changed functions to accept/return XMKWriter objects instead of resources.
+  . Changed functions to accept/return XMLWriter objects instead of resources.
     (cmb)
 
 - Zip:
   . Fixed bug #72374 (remove_path strips first char of filename). (tyage)
+  . Add ZipArchive::setMtimeName and ZipArchive::setMtimeIndex methods. (Remi)
+  . Add ZipArchive::setProgressCallback method (since libzip 1.3.0). (Remi)
+  . Add ZipArchive::setCancelCallback method (since libzip 1.6.0). (Remi)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

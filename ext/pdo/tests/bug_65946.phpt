@@ -17,22 +17,22 @@ $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, true);
 $db->exec('CREATE TABLE test(id int)');
 $db->exec('INSERT INTO test VALUES(1)');
 switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
-	case 'dblib':
-		$sql = 'SELECT TOP :limit * FROM test';
-		break;
-	case 'odbc':
-		$sql = 'SELECT TOP (:limit) * FROM test';
-		break;
-	case 'firebird':
-		$sql = 'SELECT FIRST :limit * FROM test';
-		break;
-	case 'oci':
-		//$sql = 'SELECT * FROM test FETCH FIRST :limit ROWS ONLY';  // Oracle 12c syntax
-		$sql = "select id from (select a.*, rownum rnum from (SELECT * FROM test) a where rownum <= :limit)";
-		break;
-	default:
-		$sql = 'SELECT * FROM test LIMIT :limit';
-		break;
+    case 'dblib':
+        $sql = 'SELECT TOP :limit * FROM test';
+        break;
+    case 'odbc':
+        $sql = 'SELECT TOP (:limit) * FROM test';
+        break;
+    case 'firebird':
+        $sql = 'SELECT FIRST :limit * FROM test';
+        break;
+    case 'oci':
+        //$sql = 'SELECT * FROM test FETCH FIRST :limit ROWS ONLY';  // Oracle 12c syntax
+        $sql = "select id from (select a.*, rownum rnum from (SELECT * FROM test) a where rownum <= :limit)";
+        break;
+    default:
+        $sql = 'SELECT * FROM test LIMIT :limit';
+        break;
 }
 $stmt = $db->prepare($sql);
 $stmt->bindValue('limit', 1, PDO::PARAM_INT);

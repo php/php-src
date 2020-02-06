@@ -15,9 +15,9 @@ imageantialias($im, true);
 imageline($im, 0, 0, 10, 0, 0x000000);
 
 if (imagecolorat($im, 9, 0) == 0x000000) {
-	echo 'DONE';
+    echo 'DONE';
 } else {
-	echo 'Bugged';
+    echo 'Bugged';
 }
 
 imagedestroy($im);

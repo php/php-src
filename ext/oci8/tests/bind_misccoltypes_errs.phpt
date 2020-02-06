@@ -10,9 +10,9 @@ require(__DIR__.'/connect.inc');
 // Initialization
 
 $stmtarray = array(
-	"drop table bind_misccoltypes_errs_tab",
+    "drop table bind_misccoltypes_errs_tab",
 
-	"create table bind_misccoltypes_errs_tab (
+    "create table bind_misccoltypes_errs_tab (
         id                number,
         char_t            char(1),
         char_t10          char(10),
@@ -108,7 +108,7 @@ check_col($c, 'varchar2_t10', 7);
 // Clean up
 
 $stmtarray = array(
-	"drop table bind_misccoltypes_errs_tab"
+    "drop table bind_misccoltypes_errs_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

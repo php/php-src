@@ -47,19 +47,19 @@ include $fname;
 $a = opendir($pname . '/testit');
 $out = array();
 while (false !== ($b = readdir($a))) {
-	$out[] = $b;
+    $out[] = $b;
 }
 sort($out);
 foreach ($out as $b) {
-	echo "$b\n";
+    echo "$b\n";
 }
 $out = array();
 foreach (new Phar($pname . '/testit') as $b) {
-	$out[] = $b->getPathName();
+    $out[] = $b->getPathName();
 }
 sort($out);
 foreach ($out as $b) {
-	echo "$b\n";
+    echo "$b\n";
 }
 try {
 Phar::mount($pname . '/testit', 'another\\..\\mistake');

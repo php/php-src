@@ -25,10 +25,10 @@ include $fname;
 $dir = opendir('phar://hio/b');
 
 if ($dir) {
-	while (false !== ($a = readdir($dir))) {
-		var_dump($a);
-		var_dump(is_dir('phar://hio/b/' . $a));
-	}
+    while (false !== ($a = readdir($dir))) {
+        var_dump($a);
+        var_dump(is_dir('phar://hio/b/' . $a));
+    }
 }
 
 ?>

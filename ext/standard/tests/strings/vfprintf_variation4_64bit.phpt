@@ -20,11 +20,11 @@ echo "*** Testing vfprintf() : int formats and non-integer values ***\n";
 
 // defining array of int formats
 $formats =
-  '%d %+d %-d 
-   %ld %Ld %4d %-4d
-   %10.4d %-10.4d %.4d %04.4d
-   %\'#2d %\'2d %\'$2d %\'_2d
-   %3$d %4$d %1$d %2$d';
+    '%d %+d %-d
+    %ld %Ld %4d %-4d
+    %10.4d %-10.4d %.4d %04.4d
+    %\'#2d %\'2d %\'$2d %\'_2d
+    %3$d %4$d %1$d %2$d';
 
 // Arrays of non int values for the format defined in $format.
 // Each sub array contains non int values which correspond to each format in $format
@@ -35,7 +35,8 @@ $args_array = array(
         123456.234, 123456.234, -1234.6789, +1234.6789,
         2e10, +2e5, 4e3, 22e+6,
         12345.780, 12.000000011111, -12.00000111111, -123456.234,
-        3.33, +4.44, 1.11,-2.22 ),
+        3.33, +4.44, 1.11,-2.22
+    ),
 
   // array of strings
   array(" ", ' ', 'hello',
@@ -86,26 +87,26 @@ unlink($data_file);
 *** Testing vfprintf() : int formats and non-integer values ***
 
 -- Iteration 1 --
-2 +0 10 
-   123456 d -1234 1234
-   20000000000 200000     4000 22000000
-   12345 12 -12 -123456
-   10 123456 2 0
+2 +0 10
+    123456 d -1234 1234
+    20000000000 200000     4000 22000000
+    12345 12 -12 -123456
+    10 123456 2 0
 -- Iteration 2 --
-0 +0 0 
-   123 d -123 123 
-            0 0          123456 0000
-   1234 0 $0 _0
-   0 123 0 0
+0 +0 0
+    123 d -123 123 
+             0 0          123456 0000
+    1234 0 $0 _0
+    0 123 0 0
 -- Iteration 3 --
-1 +1 1 
-   1 d    1 1   
-            1 1          1 0001
-   #1 1 $1 _1
-   1 1 1 1
+1 +1 1
+    1 d    1 1   
+             1 1          1 0001
+    #1 1 $1 _1
+    1 1 1 1
 -- Iteration 4 --
-1 +1 0 
-   1 d    0 1   
-            1 0          1 0000
-   #0 1 $1 _0
-   0 1 1 1
+1 +1 0
+    1 d    0 1   
+             1 0          1 0000
+    #0 1 $1 _0
+    0 1 1 1

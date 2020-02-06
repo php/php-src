@@ -4,11 +4,11 @@ Ensure that extending of undefined class throws the exception
 <?php
 
 try {
-	class A extends B {}
+    class A extends B {}
 } catch (Error $e) {
-	var_dump(class_exists('A'));
-	var_dump(class_exists('B'));
-	throw $e;
+    var_dump(class_exists('A'));
+    var_dump(class_exists('B'));
+    throw $e;
 }
 
 ?>

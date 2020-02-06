@@ -9,7 +9,7 @@ try {
     echo "  $key=>$value\n";
   }
 } catch (TypeError $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 
 try {
@@ -19,7 +19,7 @@ try {
     echo "  $key=>$value\n";
   }
 } catch (TypeError $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 
 
@@ -29,7 +29,7 @@ try {
     echo "  $key=>$value\n";
   }
 } catch (TypeError $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 
 try {
@@ -38,7 +38,7 @@ try {
     echo "  $key=>$value\n";
   }
 } catch (TypeError $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 
 ?>

@@ -63,27 +63,27 @@ $heredoc_strings = array(
 
 // defining array of different mask strings
 $mask_array = array(
-		    "",
-		    '',
-		    "f\nh\trstie \l",
-		    'f\n\thrstei \l',
-		    "\t",
-		    "t\ e",
-		    '\t',
-		    "f\te\h ",
-		    " \t",
+            "",
+            '',
+            "f\nh\trstie \l",
+            'f\n\thrstei \l',
+            "\t",
+            "t\ e",
+            '\t',
+            "f\te\h ",
+            " \t",
                     "f\t\ih\100e\xa"
                    );
 
 // defining array of different start values
 $start_array = array(
-		    0,
-		    1,
-  	            2,
-		    -1,
-		    -2,
-		    2147483647,  // max positive integer
-		    -2147483648,  // min negative integer
+            0,
+            1,
+                2,
+            -1,
+            -2,
+            2147483647,  // max positive integer
+            -2147483648,  // min negative integer
                    );
 
 

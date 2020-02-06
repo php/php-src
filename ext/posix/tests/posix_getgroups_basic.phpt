@@ -11,9 +11,9 @@ Test posix_getgroups() function : basic functionality
   $groups = posix_getgroups();
 
   if (!is_array($groups)) {
-  	echo "TEST FAILED - array result expected\n";
+    echo "TEST FAILED - array result expected\n";
   } else {
-  	echo "TEST PASSED\n";
+    echo "TEST PASSED\n";
   }
 
 ?>

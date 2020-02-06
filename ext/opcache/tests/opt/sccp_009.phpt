@@ -11,9 +11,9 @@ opcache.preload=
 --FILE--
 <?php
 function foo(int $x) {
-	$a[0] = $x;
-	$a[1] = 2;
-	echo $a[1];
+    $a[0] = $x;
+    $a[1] = 2;
+    echo $a[1];
 }
 ?>
 --EXPECTF--
@@ -26,5 +26,5 @@ foo: ; (lines=3, args=1, vars=1, tmps=0)
     ; (after optimizer)
     ; %ssccp_009.php:2-6
 L0 (2):     CV0($x) = RECV 1
-L1 (5):     ECHO int(2)
+L1 (5):     ECHO string("2")
 L2 (6):     RETURN null

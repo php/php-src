@@ -32,7 +32,7 @@ mkdir($dir);
 $ints = array (PHP_INT_MAX, -PHP_INT_MAX, 0);
 
 foreach($ints as $sorting_order) {
-	var_dump( scandir($dir, $sorting_order) );
+    var_dump( scandir($dir, $sorting_order) );
 }
 
 delete_files($dir, 2, "私はガラスを食べられますfile");

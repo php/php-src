@@ -4,13 +4,13 @@ ZE2 A method cannot be redeclared abstract
 <?php
 
 class pass {
-	function show() {
-		echo "Call to function show()\n";
-	}
+    function show() {
+        echo "Call to function show()\n";
+    }
 }
 
 class fail extends pass {
-	abstract function show();
+    abstract function show();
 }
 
 echo "Done\n"; // Shouldn't be displayed

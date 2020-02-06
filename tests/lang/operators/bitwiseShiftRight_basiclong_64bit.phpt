@@ -24,7 +24,7 @@ error_reporting(E_ERROR);
 
 foreach ($longVals as $longVal) {
    foreach($otherVals as $otherVal) {
-	  echo "--- testing: $longVal >> $otherVal ---\n";
+      echo "--- testing: $longVal >> $otherVal ---\n";
       try {
         var_dump($longVal>>$otherVal);
       } catch (ArithmeticError $e) {
@@ -35,8 +35,8 @@ foreach ($longVals as $longVal) {
 
 foreach ($otherVals as $otherVal) {
    foreach($longVals as $longVal) {
-	  echo "--- testing: $otherVal >> $longVal ---\n";
-	  try {
+      echo "--- testing: $otherVal >> $longVal ---\n";
+      try {
         var_dump($otherVal>>$longVal);
       } catch (ArithmeticError $e) {
         echo "Exception: " . $e->getMessage() . "\n";

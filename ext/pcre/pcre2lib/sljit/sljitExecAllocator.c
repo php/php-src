@@ -114,26 +114,23 @@ static SLJIT_INLINE int get_map_jit_flag()
 
 	/* The following code is thread safe because multiple initialization
 	   sets map_jit_flag to the same value and the code has no side-effects.
-	   Changing the kernel version without system restart is (very) unlikely. */
+	   Changing the kernel version witout system restart is (very) unlikely. */
 	if (map_jit_flag == -1) {
 		struct utsname name;
 
+		map_jit_flag = 0;
 		uname(&name);
 
 		/* Kernel version for 10.14.0 (Mojave) */
 		if (atoi(name.release) >= 18) {
-			/* Only use MAP_JIT if a hardened runtime is used, because MAP_JIT is incompatible
-			   with fork(). */
-			void *ptr = mmap(
-				NULL, getpagesize(), PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+			/* Only use MAP_JIT if a hardened runtime is used, because MAP_JIT is incompatible with fork(). */
+			void *ptr = mmap(NULL, getpagesize(), PROT_WRITE|PROT_EXEC, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+
 			if (ptr == MAP_FAILED) {
 				map_jit_flag = MAP_JIT;
 			} else {
-				map_jit_flag = 0;
 				munmap(ptr, getpagesize());
 			}
-		} else {
-			map_jit_flag = 0;
 		}
 	}
 
@@ -150,6 +147,7 @@ static SLJIT_INLINE int get_map_jit_flag()
 static SLJIT_INLINE void* alloc_chunk(sljit_uw size)
 {
 	void *retval;
+	const int prot = PROT_READ | PROT_WRITE | PROT_EXEC;
 
 #ifdef MAP_ANON
 
@@ -159,16 +157,25 @@ static SLJIT_INLINE void* alloc_chunk(sljit_uw size)
 	flags |= get_map_jit_flag();
 #endif
 
-	retval = mmap(NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC, flags, -1, 0);
+	retval = mmap(NULL, size, prot, flags, -1, 0);
 #else /* !MAP_ANON */
 	if (dev_zero < 0) {
 		if (open_dev_zero())
 			return NULL;
 	}
-	retval = mmap(NULL, size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE, dev_zero, 0);
+	retval = mmap(NULL, size, prot, MAP_PRIVATE, dev_zero, 0);
 #endif /* MAP_ANON */
 
-	return (retval != MAP_FAILED) ? retval : NULL;
+	if (retval == MAP_FAILED)
+		retval = NULL;
+	else {
+		if (mprotect(retval, size, prot) < 0) {
+			munmap(retval, size);
+			retval = NULL;
+		}
+	}
+
+	return retval;
 }
 
 static SLJIT_INLINE void free_chunk(void *chunk, sljit_uw size)
@@ -358,7 +365,7 @@ SLJIT_API_FUNC_ATTRIBUTE void sljit_free_unused_memory_exec(void)
 	free_block = free_blocks;
 	while (free_block) {
 		next_free_block = free_block->next;
-		if (!free_block->header.prev_size &&
+		if (!free_block->header.prev_size && 
 				AS_BLOCK_HEADER(free_block, free_block->size)->size == 1) {
 			total_size -= free_block->size;
 			sljit_remove_free_block(free_block);

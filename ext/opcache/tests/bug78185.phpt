@@ -10,12 +10,12 @@ opcache.file_cache_only=1
 --FILE--
 <?php
 if (substr(PHP_OS, 0, 3) !== 'WIN') {
-	$pattern = __DIR__ . '/*/' . __DIR__ . '/*78185.php.bin';
+    $pattern = __DIR__ . '/*/' . __DIR__ . '/*78185.php.bin';
 } else {
-	$pattern = __DIR__ . '/*/*/' . str_replace(':', '', __DIR__) . '/*78185.php.bin';
+    $pattern = __DIR__ . '/*/*/' . str_replace(':', '', __DIR__) . '/*78185.php.bin';
 }
 foreach (glob($pattern) as $p) {
-	var_dump($p);
+    var_dump($p);
 }
 ?>
 --CLEAN--

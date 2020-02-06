@@ -26,10 +26,10 @@ ORACLE_HOME=""
 require __DIR__."/details.inc";
 
 if (!empty($dbase)) {
-	var_dump(oci_connect($user, $password, $dbase));
+    var_dump(oci_connect($user, $password, $dbase));
 }
 else {
-	var_dump(oci_connect($user, $password));
+    var_dump(oci_connect($user, $password));
 }
 
 ?>

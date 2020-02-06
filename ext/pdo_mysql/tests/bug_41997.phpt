@@ -29,7 +29,7 @@ $db->exec('CREATE PROCEDURE p() BEGIN SELECT 1 AS "one"; END');
 
 $stmt = $db->query("CALL p()");
 do {
-	var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+    var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 } while ($stmt->nextRowset());
 var_dump($stmt->errorInfo());
 

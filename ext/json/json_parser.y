@@ -1,3 +1,4 @@
+%require "3.0"
 %code top {
 /*
   +----------------------------------------------------------------------+
@@ -40,10 +41,9 @@ int json_yydebug = 1;
 
 }
 
-%define api.pure full
 %define api.prefix {php_json_yy}
-%lex-param  { php_json_parser *parser  }
-%parse-param { php_json_parser *parser }
+%define api.pure full
+%param  { php_json_parser *parser  }
 
 %union {
 	zval value;
@@ -118,7 +118,7 @@ object_end:
 ;
 
 members:
-		/* empty */
+		%empty
 			{
 				if ((parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) && parser->methods.object_create == php_json_parser_object_create) {
 					ZVAL_EMPTY_ARRAY(&$$);
@@ -182,7 +182,7 @@ array_end:
 ;
 
 elements:
-		/* empty */
+		%empty
 			{
 				if (parser->methods.array_create == php_json_parser_array_create) {
 					ZVAL_EMPTY_ARRAY(&$$);

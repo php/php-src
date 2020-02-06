@@ -26,23 +26,23 @@ Streams Based IPv6 UDP Loopback test
     }
   }
 
-	if (!$server) {
-		die('Unable to create AF_INET6 socket [server]');
-	}
+    if (!$server) {
+        die('Unable to create AF_INET6 socket [server]');
+    }
 
-	/* Connect to it */
-	$client = stream_socket_client("udp://[::1]:$port");
-	if (!$client) {
-		die('Unable to create AF_INET6 socket [client]');
-	}
+    /* Connect to it */
+    $client = stream_socket_client("udp://[::1]:$port");
+    if (!$client) {
+        die('Unable to create AF_INET6 socket [client]');
+    }
 
-	fwrite($client, "ABCdef123\n");
+    fwrite($client, "ABCdef123\n");
 
-	$data = fread($server, 10);
-	var_dump($data);
+    $data = fread($server, 10);
+    var_dump($data);
 
-	fclose($client);
-	fclose($server);
+    fclose($client);
+    fclose($server);
 ?>
 --EXPECT--
 string(10) "ABCdef123

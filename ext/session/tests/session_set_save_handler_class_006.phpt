@@ -19,19 +19,19 @@ ob_start();
 echo "*** Testing session_set_save_handler() : using objects in close ***\n";
 
 class MySession7_Foo {
-	public $state = 'ok';
-	function __destruct() {
-		$this->state = 'destroyed';
-	}
+    public $state = 'ok';
+    function __destruct() {
+        $this->state = 'destroyed';
+    }
 }
 
 class MySession7 extends SessionHandler {
-	public $foo;
-	public function close() {
-		var_dump($this->foo);
-		@var_dump($GLOBALS['bar']);
-		return parent::close();
-	}
+    public $foo;
+    public function close() {
+        var_dump($this->foo);
+        @var_dump($GLOBALS['bar']);
+        return parent::close();
+    }
 }
 
 $bar = new MySession7_Foo;

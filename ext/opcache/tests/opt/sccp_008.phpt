@@ -11,12 +11,12 @@ opcache.preload=
 --FILE--
 <?php
 function foo(int $x) {
-	if ($x) {
-		$a = [0,1];
-	} else {
-		$a = [0,2];
-	}
-	echo $a[1];
+    if ($x) {
+        $a = [0,1];
+    } else {
+        $a = [0,2];
+    }
+    echo $a[1];
 }
 ?>
 --EXPECTF--

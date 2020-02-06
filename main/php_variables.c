@@ -571,7 +571,7 @@ void _php_import_environment_variables(zval *array_ptr)
 			php_register_variable_quick(*env, name_len, &val, Z_ARRVAL_P(array_ptr));
 		}
 	}
-	
+
 	tsrm_env_unlock();
 }
 

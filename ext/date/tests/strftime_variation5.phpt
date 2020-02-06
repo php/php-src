@@ -17,10 +17,10 @@ $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 
 //array of values to iterate over
 $inputs = array(
-	  'Year as decimal number without a century' => "%y",
-	  'Year as decimal number including the century' => "%Y",
-	  'Time zone offset' => "%Z",
-	  'Time zone offset' => "%z",
+      'Year as decimal number without a century' => "%y",
+      'Year as decimal number including the century' => "%Y",
+      'Time zone offset' => "%Z",
+      'Time zone offset' => "%z",
 );
 
 // loop through each element of the array for timestamp

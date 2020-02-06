@@ -26,42 +26,42 @@ $file_handle = fopen(__FILE__, "r");
 // array with different values for $input
 $inputs =  array (
 
-		  // integer values
+          // integer values
 /*1*/	  0,
-		  1,
-		  -2,
-		  -PHP_INT_MAX,
+          1,
+          -2,
+          -PHP_INT_MAX,
 
-		  // float values
+          // float values
 /*5*/	  10.5,
-		  -20.5,
-		  10.1234567e10,
+          -20.5,
+          10.1234567e10,
 
-		  // array values
+          // array values
 /*8*/	  array(),
-		  array(0),
-		  array(1, 2),
+          array(0),
+          array(1, 2),
 
-		  // boolean values
+          // boolean values
 /*11*/	  true,
-		  false,
-		  TRUE,
-		  FALSE,
+          false,
+          TRUE,
+          FALSE,
 
-		  // null values
+          // null values
 /*15*/	  NULL,
-		  null,
+          null,
 
-		  // objects
+          // objects
 /*17*/	  new sample(),
 
-		  // resource
+          // resource
 /*18*/	  $file_handle,
 
-		  // undefined variable
+          // undefined variable
 /*19*/	  @$undefined_var,
 
-		  // unset variable
+          // unset variable
 /*20*/	  @$unset_var
 );
 

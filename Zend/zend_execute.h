@@ -230,15 +230,7 @@ static zend_always_inline void zend_vm_stack_free_extra_args_ex(uint32_t call_in
 		uint32_t count = ZEND_CALL_NUM_ARGS(call) - call->func->op_array.num_args;
 		zval *p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
 		do {
-			if (Z_REFCOUNTED_P(p)) {
-				zend_refcounted *r = Z_COUNTED_P(p);
-				if (!GC_DELREF(r)) {
-					ZVAL_NULL(p);
-					rc_dtor_func(r);
-				} else {
-					gc_check_possible_root(r);
-				}
-			}
+			i_zval_ptr_dtor(p);
 			p++;
 		} while (--count);
  	}
@@ -257,13 +249,7 @@ static zend_always_inline void zend_vm_stack_free_args(zend_execute_data *call)
 		zval *p = ZEND_CALL_ARG(call, 1);
 
 		do {
-			if (Z_REFCOUNTED_P(p)) {
-				zend_refcounted *r = Z_COUNTED_P(p);
-				if (!GC_DELREF(r)) {
-					ZVAL_NULL(p);
-					rc_dtor_func(r);
-				}
-			}
+			zval_ptr_dtor_nogc(p);
 			p++;
 		} while (--num_args);
 	}

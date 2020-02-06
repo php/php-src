@@ -39,7 +39,7 @@ $inputs = array(
        // int data
 /*1*/
 'int' => array(
-	   0,
+       0,
        1,
        12345,
        -2345),
@@ -84,7 +84,7 @@ $inputs = array(
 /*7*/
 'binary' => array(
        b"binary",
-	   (binary)"binary"),
+       (binary)"binary"),
 
        // object data
 /*8*/

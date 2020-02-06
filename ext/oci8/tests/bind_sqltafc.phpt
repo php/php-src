@@ -10,9 +10,9 @@ require(__DIR__.'/connect.inc');
 // Initialization
 
 $stmtarray = array(
-	"drop table bind_sqltafc_tab",
-	"create table bind_sqltafc_tab (id number, char_t char(1), char_t10 char(10), varchar2_t10 varchar2(10), number_t number)",
-	"insert into bind_sqltafc_tab values (0, 'a', 'abcd', 'efghij', 1.1)"
+    "drop table bind_sqltafc_tab",
+    "create table bind_sqltafc_tab (id number, char_t char(1), char_t10 char(10), varchar2_t10 varchar2(10), number_t number)",
+    "insert into bind_sqltafc_tab values (0, 'a', 'abcd', 'efghij', 1.1)"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -79,7 +79,7 @@ q($c, 6);
 // Clean up
 
 $stmtarray = array(
-	"drop table bind_sqltafc_tab"
+    "drop table bind_sqltafc_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

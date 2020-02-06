@@ -47,7 +47,7 @@ if (is_dir($dirw)) {
         closedir($dh);
     }
 } else {
-	echo "is_dir failed\n";
+    echo "is_dir failed\n";
 }
 set_active_cp($old_cp);
 

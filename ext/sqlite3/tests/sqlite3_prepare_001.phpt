@@ -6,8 +6,8 @@ SQLite3 - memory leak on SQLite3Result and SQLite3Stmt
 <?php
 
 function test(&$x) {
-	$class = new SQLite3(':memory:');
-	$x = $class->prepare('SELECT 1');
+    $class = new SQLite3(':memory:');
+    $x = $class->prepare('SELECT 1');
 }
 
 test($foo);

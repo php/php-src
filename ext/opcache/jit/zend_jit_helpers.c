@@ -1118,11 +1118,11 @@ static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execu
 
 	if (UNEXPECTED(value == NULL)) {
 		value = zend_hash_add_new(&EG(symbol_table), Z_STR_P(varname), &EG(uninitialized_zval));
-		idx = ((char*)value - (char*)EG(symbol_table).arData) / sizeof(Bucket);
+		idx = (char*)value - (char*)EG(symbol_table).arData;
 		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
 		CACHE_PTR(cache_slot, (void*)(uintptr_t)(idx + 1));
 	} else {
-		idx = ((char*)value - (char*)EG(symbol_table).arData) / sizeof(Bucket);
+		idx = (char*)value - (char*)EG(symbol_table).arData;
 		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
 		CACHE_PTR(cache_slot, (void*)(uintptr_t)(idx + 1));
 		/* GLOBAL variable may be an INDIRECT pointer to CV */
@@ -1476,4 +1476,16 @@ static zval * ZEND_FASTCALL zend_jit_prepare_assign_dim_ref(zval *ref) {
 		ZVAL_ARR(val, zend_new_array(8));
 	}
 	return val;
+}
+
+static void ZEND_FASTCALL zend_jit_pre_inc(zval *var_ptr, zval *ret)
+{
+	increment_function(var_ptr);
+	ZVAL_COPY(ret, var_ptr);
+}
+
+static void ZEND_FASTCALL zend_jit_pre_dec(zval *var_ptr, zval *ret)
+{
+	decrement_function(var_ptr);
+	ZVAL_COPY(ret, var_ptr);
 }

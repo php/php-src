@@ -43,6 +43,9 @@ PHP 8.0 UPGRADE NOTES
     of $this.
   . Removed ability to use array_key_exists() with objects. Use one of isset()
     or property_exists() instead.
+  . Made the behavior of array_key_exists() regarding the type of the key
+    parameter consistent with isset() and normal array access. All key types now use
+    the usual coercions and array/object keys throw a TypeError.
   . Any array that has a number n as its first numeric key will use n+1 for
     its next implicit key. Even if n is negative.
     RFC: https://wiki.php.net/rfc/negative_array_index
@@ -178,6 +181,9 @@ PHP 8.0 UPGRADE NOTES
   . The deprecated constant INTL_IDNA_VARIANT_2003 has been removed.
     RFC: https://wiki.php.net/rfc/deprecate-and-remove-intl_idna_variant_2003
   . The deprecated Normalizer::NONE constant has been removed.
+  . The IntlDateFormatter::RELATIVE_FULL, IntlDateFormatter::RELATIVE_LONG,
+    IntlDateFormatter::RELATIVE_MEDIUM, and IntlDateFormatter::RELATIVE_SHORT constants
+    have been added.
 
 - LDAP:
   . The deprecated function ldap_sort has been removed.
@@ -211,8 +217,8 @@ PHP 8.0 UPGRADE NOTES
   . A non-string pattern argument to mb_ereg_replace() will now be interpreted
     as a string instead of an ASCII codepoint. The previous behavior may be
     restored with an explicit call to chr().
-  . The needle argument for mb_strpos(), mb_strrpos(), mb_stripos(), mb_strripos(), mb_strstr() and mb_stristr()
-    can now be empty.
+  . The needle argument for mb_strpos(), mb_strrpos(), mb_stripos(), mb_strripos(),
+    mb_strstr(), mb_stristr(), mb_strrchr() and mb_strrichr() can now be empty.
   . The $is_hex parameter, which was not used internally, has been removed from
     mb_decode_numericentity().
   . The legacy behaviour of passing the encoding as the third argument instead of an offset for the mb_strrpos
@@ -280,7 +286,8 @@ PHP 8.0 UPGRADE NOTES
     string. Previously non-string needles were interpreted as an ASCII code
     point. An explicit call to chr() can be used to restore the previous
     behavior.
-  . The needle argument for strpos(), strrpos(), stripos(), strripos(), strstr() and stristr() can now be empty.
+  . The needle argument for strpos(), strrpos(), stripos(), strripos(), strstr(),
+    stristr() and strrchr() can now be empty.
   . The length argument for substr(), substr_count(), substr_compare(), and
     iconv_substr() can now be null. Null values will behave as if no length
     argument was provided and will therefore return the remainder of the string
@@ -345,6 +352,17 @@ PHP 8.0 UPGRADE NOTES
   . Added WeakMap.
     RFC: https://wiki.php.net/rfc/weak_maps
   . Added ValueError class.
+  . Any number of function parameters may now be replaced by a variadic
+    argument, as long as the types are compatible. For example, the following
+    code is now allowed:
+
+        class A {
+            public function method(int $many, string $parameters, $here) {}
+        }
+        class B extends A {
+            public function method(...$everything) {}
+        }
+
 
 - Date:
   . Added DateTime::createFromInterface() and
@@ -353,6 +371,10 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 3. Changes in SAPI modules
 ========================================
+
+- CGI and FPM will now use CONTEXT_DOCUMENT_ROOT to scan for .user.ini files,
+  if it is defined. Otherwise, DOCUMENT_ROOT will be used as before. This
+  improves support for Apache mod_userdir and mod_alias.
 
 ========================================
 4. Deprecated Functionality

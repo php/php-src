@@ -2957,6 +2957,13 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 			}
 			break;
+		case ZEND_ASSIGN_STATIC_PROP_REF:
+			if ((opline+1)->op1_type == IS_CV) {
+				opline++;
+				i++;
+				UPDATE_SSA_TYPE(MAY_BE_REF, ssa_ops[i].op1_def);
+			}
+			break;
 		case ZEND_BIND_GLOBAL:
 			tmp = MAY_BE_REF | MAY_BE_ANY
 				| MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
@@ -4531,8 +4538,7 @@ int zend_may_throw(const zend_op *opline, const zend_op_array *op_array, zend_ss
 				zend_class_entry *ce = var_info->ce;
 
 				if (var_info->is_instanceof ||
-				    !ce || ce->create_object || ce->__get || ce->__set ||
-				    (ce->ce_flags & ZEND_ACC_INHERITED)) {
+				    !ce || ce->create_object || ce->__get || ce->__set || ce->parent) {
 					return 1;
 				}
 

@@ -340,6 +340,21 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_FETCH_LIST_R:
 		case ZEND_COPY_TMP:
 			return 0;
+		case ZEND_ECHO:
+		{
+			zval zv;
+			if (Z_TYPE_P(val) != IS_STRING && zend_optimizer_eval_cast(&zv, IS_STRING, val) == SUCCESS) {
+				zval_ptr_dtor_nogc(val);
+				val = &zv;
+			}
+			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
+			if (Z_TYPE_P(val) == IS_STRING && Z_STRLEN_P(val) == 0) {
+				MAKE_NOP(opline);
+			}
+			/* TODO: In a subsequent pass, *after* this step and compacting nops, combine consecutive ZEND_ECHOs using the block information from ssa->cfg */
+			/* (e.g. for ext/opcache/tests/opt/sccp_010.phpt) */
+			break;
+		}
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
 		case ZEND_FETCH_R:

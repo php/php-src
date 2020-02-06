@@ -4,8 +4,8 @@ class constants basic tests
 <?php
 
 class test {
-	const val = "string";
-	const val2 = 1;
+    const val = "string";
+    const val2 = 1;
 }
 
 var_dump(test::val);

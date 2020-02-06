@@ -9,7 +9,7 @@ class foo {
   public $a;
   public $b;
   function display() {
-  	echo "This is class foo\n";
+    echo "This is class foo\n";
     echo "a = ".$this->a."\n";
     echo "b = ".$this->b."\n";
   }

@@ -18,8 +18,8 @@ $intlcal->set(IntlCalendar::FIELD_HOUR_OF_DAY, 2);
 $intlcal->set(IntlCalendar::FIELD_MINUTE, 30);
 echo "Should be 3h30\n";
 var_dump(
-	$intlcal->get(IntlCalendar::FIELD_HOUR_OF_DAY),
-	$intlcal->get(IntlCalendar::FIELD_MINUTE)
+    $intlcal->get(IntlCalendar::FIELD_HOUR_OF_DAY),
+    $intlcal->get(IntlCalendar::FIELD_MINUTE)
 );
 
 var_dump($intlcal->setSkippedWallTimeOption(IntlCalendar::WALLTIME_FIRST));
@@ -28,8 +28,8 @@ $intlcal->set(IntlCalendar::FIELD_HOUR_OF_DAY, 2);
 $intlcal->set(IntlCalendar::FIELD_MINUTE, 30);
 echo "Should be 1h30\n";
 var_dump(
-	$intlcal->get(IntlCalendar::FIELD_HOUR_OF_DAY),
-	$intlcal->get(IntlCalendar::FIELD_MINUTE)
+    $intlcal->get(IntlCalendar::FIELD_HOUR_OF_DAY),
+    $intlcal->get(IntlCalendar::FIELD_MINUTE)
 );
 
 var_dump(intlcal_set_skipped_wall_time_option($intlcal, IntlCalendar::WALLTIME_NEXT_VALID));
@@ -38,8 +38,8 @@ $intlcal->set(IntlCalendar::FIELD_HOUR_OF_DAY, 2);
 $intlcal->set(IntlCalendar::FIELD_MINUTE, 30);
 echo "Should be 3h00\n";
 var_dump(
-	$intlcal->get(IntlCalendar::FIELD_HOUR_OF_DAY),
-	$intlcal->get(IntlCalendar::FIELD_MINUTE)
+    $intlcal->get(IntlCalendar::FIELD_HOUR_OF_DAY),
+    $intlcal->get(IntlCalendar::FIELD_MINUTE)
 );
 
 

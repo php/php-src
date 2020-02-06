@@ -2,12 +2,12 @@
 <definitions
         xmlns="http://schemas.xmlsoap.org/wsdl/"
         xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
-        xmlns:tns="http://example.x-road.ee/producer/"
+        xmlns:tns="http://example.x-road.eu/producer/"
         xmlns:xrd="http://x-road.eu/xsd/xroad.xsd"
-        targetNamespace="http://example.x-road.ee/producer/">
+        targetNamespace="http://example.x-road.eu/producer/">
     <types>
-        <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://example.x-road.ee/producer/">
-            <import namespace="http://x-road.ee/xsd/x-road.xsd" schemaLocation="http://x-road.ee/xsd/x-road.xsd"/>
+        <schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://example.x-road.eu/producer/">
+            <import namespace="http://x-road.eu/xsd/x-road.xsd" schemaLocation="bug76348.xsd"/>
             <import namespace="http://www.w3.org/XML/1998/namespace"
                     schemaLocation="http://www.w3.org/2009/01/xml.xsd"/>
             <element name="exampleOperation">

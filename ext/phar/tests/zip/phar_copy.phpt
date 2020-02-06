@@ -19,20 +19,20 @@ $p = new Phar($fname);
 
 try
 {
-	$p['a'] = 'hi';
-	$p->startBuffering();
-	$p->copy('a', 'b');
-	echo file_get_contents($p['b']->getPathName());
-	$p->copy('b', 'c');
-	$p->stopBuffering();
-	echo file_get_contents($p['c']->getPathName());
-	copy($fname, $fname2);
-	var_dump($p->isFileFormat(Phar::ZIP));
-	$p->copy('a', $ename);
+    $p['a'] = 'hi';
+    $p->startBuffering();
+    $p->copy('a', 'b');
+    echo file_get_contents($p['b']->getPathName());
+    $p->copy('b', 'c');
+    $p->stopBuffering();
+    echo file_get_contents($p['c']->getPathName());
+    copy($fname, $fname2);
+    var_dump($p->isFileFormat(Phar::ZIP));
+    $p->copy('a', $ename);
 }
 catch(Exception $e)
 {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ini_set('phar.readonly',1);
 $p2 = new Phar($fname2);

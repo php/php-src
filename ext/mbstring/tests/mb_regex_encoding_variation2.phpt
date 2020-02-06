@@ -79,11 +79,11 @@ $encoding = array('UCS-4',			/*1*/
 
 $iterator = 1;
 foreach($encoding as $enc) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(mb_regex_encoding());
-	var_dump(mb_regex_encoding($enc));
-	var_dump(mb_regex_encoding());
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(mb_regex_encoding());
+    var_dump(mb_regex_encoding($enc));
+    var_dump(mb_regex_encoding());
+    $iterator++;
 }
 echo "Done";
 ?>

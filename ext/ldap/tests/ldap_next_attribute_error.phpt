@@ -15,7 +15,7 @@ insert_dummy_data($link, $base);
 $result = ldap_search($link, "$base", "(objectclass=organization)");
 $entry = ldap_first_entry($link, $result);
 var_dump(
-	ldap_next_attribute($link, $entry)
+    ldap_next_attribute($link, $entry)
 );
 ?>
 --CLEAN--

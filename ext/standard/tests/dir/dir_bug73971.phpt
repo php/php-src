@@ -26,7 +26,7 @@ $d->close();
 echo "\ntest DirectoryIterator\n";
 $dir = new DirectoryIterator($base);
 foreach ($dir as $finfo) {
-	var_dump($finfo->getFilename());
+    var_dump($finfo->getFilename());
 }
 
 ?>

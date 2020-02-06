@@ -10,7 +10,7 @@ opcache.optimization_level=-1
 <?php
 
 function test() {
-	$old_data = isset($old_data) ? (array)$old_data : [];
+    $old_data = isset($old_data) ? (array)$old_data : [];
 }
 
 ?>

@@ -77,22 +77,22 @@ foreach ([
 echo "\n*** property types\n";
 
 class PropTypeTest {
-	public int $int;
-	public string $string;
-	public array $arr;
-	public iterable $iterable;
-	public stdClass $std;
-	public OtherThing $other;
-	public $mixed;
+    public int $int;
+    public string $string;
+    public array $arr;
+    public iterable $iterable;
+    public stdClass $std;
+    public OtherThing $other;
+    public $mixed;
 }
 
 $reflector = new ReflectionClass(PropTypeTest::class);
 
 foreach ($reflector->getProperties() as $name => $property) {
-	if ($property->hasType()) {
-		printf("public %s $%s;\n",
-			$property->getType()->getName(), $property->getName());
-	} else printf("public $%s;\n", $property->getName());
+    if ($property->hasType()) {
+        printf("public %s $%s;\n",
+            $property->getType()->getName(), $property->getName());
+    } else printf("public $%s;\n", $property->getName());
 }
 
 echo "*** resolved property types\n";

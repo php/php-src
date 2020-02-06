@@ -10,11 +10,11 @@ require(__DIR__.'/connect.inc');
 // Initialization
 
 $stmtarray = array(
-	"drop table fetch_all5_tab",
-	"create table fetch_all5_tab (mycol1 number, mycol2 varchar2(20))",
-	"insert into fetch_all5_tab values (1, 'abc')",
-	"insert into fetch_all5_tab values (2, 'def')",
-	"insert into fetch_all5_tab values (3, 'ghi')"
+    "drop table fetch_all5_tab",
+    "create table fetch_all5_tab (mycol1 number, mycol2 varchar2(20))",
+    "insert into fetch_all5_tab values (1, 'abc')",
+    "insert into fetch_all5_tab values (2, 'def')",
+    "insert into fetch_all5_tab values (3, 'ghi')"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -48,7 +48,7 @@ var_dump($res);
 // Clean up
 
 $stmtarray = array(
-	"drop table fetch_all5_tab"
+    "drop table fetch_all5_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

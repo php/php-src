@@ -7,17 +7,17 @@ Phar: test a zip archive created by openoffice
 <?php
 $a = new PharData(__DIR__ . '/files/odt.odt');
 foreach (new RecursiveIteratorIterator($a, RecursiveIteratorIterator::LEAVES_ONLY) as $b) {
-	if ($b->isDir()) {
-		echo "dir " . $b->getPathName() . "\n";
-	} else {
-		echo $b->getPathName() . "\n";
-	}
+    if ($b->isDir()) {
+        echo "dir " . $b->getPathName() . "\n";
+    } else {
+        echo $b->getPathName() . "\n";
+    }
 }
 // this next line is for increased code coverage
 try {
-	$b = new Phar(__DIR__ . '/files/odt.odt');
+    $b = new Phar(__DIR__ . '/files/odt.odt');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
 --EXPECTF--

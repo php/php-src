@@ -6,9 +6,9 @@ opcache.optimization_level=0
 <?php
 $statuses = array();
 function oh($str, $flags) {
-	global $statuses;
-	$statuses[] = "$flags: $str";
-	return $str;
+    global $statuses;
+    $statuses[] = "$flags: $str";
+    return $str;
 }
 ob_start("oh", 3);
 echo "yes";

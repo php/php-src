@@ -17,7 +17,7 @@ EOT;
 /* heredoc string with only numerics */
 $heredoc_numeric_string = <<<EOT
 123456 3993
-4849 string 
+4849 string
 EOT;
 /* null heardoc string */
 $heredoc_empty_string = <<<EOT

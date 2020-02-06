@@ -19,9 +19,9 @@ echo "*** Testing ctype_alnum() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($i = 0; $i < 256; $i++) {
-	if (ctype_alnum($i)) {
-		echo "character code $i is alpha numeric\n";
-	}
+    if (ctype_alnum($i)) {
+        echo "character code $i is alpha numeric\n";
+    }
 }
 
 setlocale(LC_CTYPE, $orig);

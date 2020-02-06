@@ -229,7 +229,7 @@ typedef struct _zend_oparray_context {
 /* op_array or class is preloaded                         |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 10) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
-/* Class Flags (unused: 24...)                            |     |     |     */
+/* Class Flags (unused: 13, 14, 15, 24...)                |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */
 /* Special class types                                    |     |     |     */
@@ -250,15 +250,6 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* Class constants updated                                |     |     |     */
 #define ZEND_ACC_CONSTANTS_UPDATED       (1 << 12) /*  X  |     |     |     */
-/*                                                        |     |     |     */
-/* Class extends another class                            |     |     |     */
-#define ZEND_ACC_INHERITED               (1 << 13) /*  X  |     |     |     */
-/*                                                        |     |     |     */
-/* Class implements interface(s)                          |     |     |     */
-#define ZEND_ACC_IMPLEMENT_INTERFACES    (1 << 14) /*  X  |     |     |     */
-/*                                                        |     |     |     */
-/* Class uses trait(s)                                    |     |     |     */
-#define ZEND_ACC_IMPLEMENT_TRAITS        (1 << 15) /*  X  |     |     |     */
 /*                                                        |     |     |     */
 /* User class has methods with static variables           |     |     |     */
 #define ZEND_HAS_STATIC_IN_METHODS       (1 << 16) /*  X  |     |     |     */
@@ -848,7 +839,7 @@ int ZEND_FASTCALL zendlex(zend_parser_stack_elem *elem);
 void zend_assert_valid_class_name(const zend_string *const_name);
 
 zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scope);
-zend_string *zend_type_to_string(zend_type type);
+ZEND_API zend_string *zend_type_to_string(zend_type type);
 
 /* BEGIN: OPCODES */
 

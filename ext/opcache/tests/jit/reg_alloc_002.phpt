@@ -12,10 +12,10 @@ opcache.protect_memory=1
 <?php
 class A {
     public function process($call) {
-		$i = 0;
-		foreach (array("a", "b", "c") as $attr) {
-			$call($i++, "xxx");
-		}
+        $i = 0;
+        foreach (array("a", "b", "c") as $attr) {
+            $call($i++, "xxx");
+        }
     }
 }
 

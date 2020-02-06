@@ -14,22 +14,25 @@ $fp = fopen(__FILE__, "r");
 // invalid length argument
 echo "-- Testing fgets() with invalid length arguments --\n";
 $len = 0;
-var_dump( fgets($fp, $len) );
+try {
+    var_dump( fgets($fp, $len) );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 $len = -10;
-var_dump( fgets($fp, $len) );
+try {
+    var_dump( fgets($fp, $len) );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 $len = 1;
 var_dump( fgets($fp, $len) ); // return length - 1 always, expect false
 
-echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing error conditions ***
 -- Testing fgets() with invalid length arguments --
-
-Warning: fgets(): Length parameter must be greater than 0 in %s on line %d
+Length parameter must be greater than 0
+Length parameter must be greater than 0
 bool(false)
-
-Warning: fgets(): Length parameter must be greater than 0 in %s on line %d
-bool(false)
-bool(false)
-Done

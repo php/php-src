@@ -25,8 +25,8 @@ $stmt = oci_parse($c, "select string from define5_tab where id = 1");
 oci_execute($stmt);
 var_dump(oci_define_by_name($stmt, "STRING", $string));
 while (oci_fetch($stmt)) {
-	var_dump($string);  // gives NULL
-	var_dump(oci_result($stmt, 'STRING'));
+    var_dump($string);  // gives NULL
+    var_dump(oci_result($stmt, 'STRING'));
 }
 
 echo "Test 2 - normal define order\n";
@@ -35,15 +35,15 @@ var_dump(oci_define_by_name($stmt, "STRING", $string));
 oci_execute($stmt);
 
 while (oci_fetch($stmt)) {
-	var_dump($string);
+    var_dump($string);
 }
 
 echo "Test 3 - no new define done\n";
 $stmt = oci_parse($c, "select string from define5_tab where id = 2");
 oci_execute($stmt);
 while (oci_fetch($stmt)) {
-	var_dump($string); // not updated with new value
-	var_dump(oci_result($stmt, 'STRING'));
+    var_dump($string); // not updated with new value
+    var_dump(oci_result($stmt, 'STRING'));
 }
 
 // Cleanup

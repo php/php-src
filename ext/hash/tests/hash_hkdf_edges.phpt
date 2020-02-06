@@ -17,7 +17,7 @@ echo 'Length % digestSize != 0: ', bin2hex(hash_hkdf('md5', $ikm, 17)), "\n";
 echo 'Algo name case-sensitivity: ', (bin2hex(hash_hkdf('Md5', $ikm, 7)) === '98b16391063ece' ? 'true' : 'false'), "\n";
 echo "Non-crypto algo name case-sensitivity:\n";
 
-try { 
+try {
     var_dump(hash_hkdf('jOaAt', $ikm));
 }
 catch (\Error $e) {

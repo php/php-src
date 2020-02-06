@@ -4,7 +4,7 @@ Scalar type - disallow relative types
 <?php
 
 function foo(bar\int $a): int {
-	return $a;
+    return $a;
 }
 
 foo(10);

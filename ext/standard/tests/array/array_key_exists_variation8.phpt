@@ -95,16 +95,16 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of array_key_exists()
 $iterator = 1;
 foreach($inputs as $type => $input) {
-	echo "\n-- Iteration $iterator: $type data --\n";
+    echo "\n-- Iteration $iterator: $type data --\n";
 
-	//iterate over again to get all different key values
-	foreach ($inputs as $new_type => $new_input) {
-		echo "-- \$key arguments are $new_type data:\n";
-		foreach ($new_input as $key => $search) {
-			var_dump(array_key_exists($key, $input));
-		}
-	}
-	$iterator++;
+    //iterate over again to get all different key values
+    foreach ($inputs as $new_type => $new_input) {
+        echo "-- \$key arguments are $new_type data:\n";
+        foreach ($new_input as $key => $search) {
+            var_dump(array_key_exists($key, $input));
+        }
+    }
+    $iterator++;
 };
 
 echo "Done";

@@ -10,29 +10,29 @@ $ro = new ReflectionObject(new C);
 
 echo "\n\nTest bad arguments:\n";
 try {
-	var_dump($ro->isSubclassOf());
+    var_dump($ro->isSubclassOf());
 } catch (TypeError $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	var_dump($ro->isSubclassOf('C', 'C'));
+    var_dump($ro->isSubclassOf('C', 'C'));
 } catch (TypeError $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	var_dump($ro->isSubclassOf(null));
+    var_dump($ro->isSubclassOf(null));
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	var_dump($ro->isSubclassOf('ThisClassDoesNotExist'));
+    var_dump($ro->isSubclassOf('ThisClassDoesNotExist'));
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	var_dump($ro->isSubclassOf(2));
+    var_dump($ro->isSubclassOf(2));
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
 --EXPECT--

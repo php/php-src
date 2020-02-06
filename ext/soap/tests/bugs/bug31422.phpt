@@ -10,8 +10,8 @@ error_log=
 --FILE--
 <?php
 function Add($x,$y) {
-	fopen();
-	user_error("Hello", E_USER_ERROR);
+    fopen();
+    user_error("Hello", E_USER_ERROR);
   return $x+$y;
 }
 

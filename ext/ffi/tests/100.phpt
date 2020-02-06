@@ -15,19 +15,19 @@ ffi.enable=1
 <?php
 // Check if target supports "fastcall" calling convention
 try {
-	FFI::cdef("extern size_t __attribute__((fastcall)) (*zend_printf)(const char *format);");
-	$fastcall = "__attribute__((fastcall)) ";
+    FFI::cdef("extern size_t __attribute__((fastcall)) (*zend_printf)(const char *format);");
+    $fastcall = "__attribute__((fastcall)) ";
 } catch (Throwable $e) {
-	$fastcall = "";
+    $fastcall = "";
 }
 $zend = FFI::cdef("
-	const char *get_zend_version(void);
-	//char *get_zend_version(void);
-	extern size_t (*zend_printf)(const char *format, ...);
+    const char *get_zend_version(void);
+    //char *get_zend_version(void);
+    extern size_t (*zend_printf)(const char *format, ...);
 
-	unsigned long $fastcall zend_hash_func(const char *str, size_t len);
+    unsigned long $fastcall zend_hash_func(const char *str, size_t len);
 
-	void $fastcall zend_str_tolower(char *str, size_t length);
+    void $fastcall zend_str_tolower(char *str, size_t length);
 
 ");
 var_dump(trim(explode("\n",$zend->get_zend_version())[0]));

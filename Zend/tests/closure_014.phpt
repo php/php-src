@@ -3,18 +3,18 @@ Closure 014: return by value/reference
 --FILE--
 <?php
 class C1 {
-	function __invoke() {
-		return 0;
-	}
+    function __invoke() {
+        return 0;
+    }
 }
 class C2 {
-	function &__invoke(&$a) {
-		return $a;
-	}
+    function &__invoke(&$a) {
+        return $a;
+    }
 }
 class C3 {
-	function __invoke() {
-	}
+    function __invoke() {
+    }
 }
 
 $x = new C1();
@@ -23,7 +23,7 @@ var_dump($x->__invoke());
 $x();
 $x->__invoke();
 $x = function() {
-	return 0;
+    return 0;
 };
 var_dump($x());
 var_dump($x->__invoke());
@@ -41,7 +41,7 @@ var_dump($b);
 $x($b);
 $x->__invoke($b);
 $x = function & (&$a) {
-	return $a;
+    return $a;
 };
 $e =& $x($c);
 $e = 4;

@@ -21,8 +21,8 @@ var_dump($sxe->content->file);
 echo "===FOREACH===\n";
 foreach($sxe->content->file as $file)
 {
-	var_dump($file);
-	var_dump($file['glob']);
+    var_dump($file);
+    var_dump($file['glob']);
 }
 
 ?>

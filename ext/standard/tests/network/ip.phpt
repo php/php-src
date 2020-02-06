@@ -8,17 +8,17 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 <?php
 
 $array = array(
-	"127.0.0.1",
-	"10.0.0.1",
-	"255.255.255.255",
-	"255.255.255.0",
-	"0.0.0.0",
-	"66.163.161.116",
+    "127.0.0.1",
+    "10.0.0.1",
+    "255.255.255.255",
+    "255.255.255.0",
+    "0.0.0.0",
+    "66.163.161.116",
 );
 
 foreach ($array as $ip) {
-	var_dump($long = ip2long($ip));
-	var_dump(long2ip($long));
+    var_dump($long = ip2long($ip));
+    var_dump(long2ip($long));
 }
 
 var_dump(ip2long(""));

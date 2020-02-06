@@ -5,17 +5,17 @@ Bug #70713: Use After Free Vulnerability in array_walk()/array_walk_recursive()
 
 class obj
 {
-	function __tostring()
-	{
-		global $arr;
+    function __tostring()
+    {
+        global $arr;
 
-		$arr = 1;
-		for ($i = 0; $i < 5; $i++) {
-			$v[$i] = 'hi'.$i;
-		}
+        $arr = 1;
+        for ($i = 0; $i < 5; $i++) {
+            $v[$i] = 'hi'.$i;
+        }
 
-		return 'hi';
-	}
+        return 'hi';
+    }
 }
 
 $arr = array('string' => new obj);

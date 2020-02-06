@@ -23,21 +23,21 @@ unset( $funset );
 
 class FooClass
 {
-	public function __toString()
-	{
-		return "Object";
-	}
+    public function __toString()
+    {
+        return "Object";
+    }
 }
 
 // Output facilitating function
 function writeAndDump($fp, $format, $args)
 {
-	ftruncate( $fp, 0 );
-	$length = vfprintf( $fp, $format, $args );
-	rewind( $fp );
-	$content = stream_get_contents( $fp );
-	var_dump( $content );
-	var_dump( $length );
+    ftruncate( $fp, 0 );
+    $length = vfprintf( $fp, $format, $args );
+    rewind( $fp );
+    $content = stream_get_contents( $fp );
+    var_dump( $content );
+    var_dump( $length );
 }
 
 // Test vfprintf()

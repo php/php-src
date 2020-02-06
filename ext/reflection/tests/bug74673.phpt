@@ -5,9 +5,9 @@ Bug #74673 (Segfault when cast Reflection object to string with undefined consta
 
 class A
 {
-	public function method($test = PHP_SELF + 1)
-	{
-	}
+    public function method($test = PHP_SELF + 1)
+    {
+    }
 }
 
 $class = new ReflectionClass('A');

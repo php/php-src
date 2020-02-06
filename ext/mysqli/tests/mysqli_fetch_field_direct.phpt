@@ -8,25 +8,28 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	require('table.inc');
+    require('table.inc');
 
-	if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
-		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	}
+    if (!$res = mysqli_query($link, "SELECT id AS ID, label FROM test AS TEST ORDER BY id LIMIT 1")) {
+        printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
 
-	var_dump(mysqli_fetch_field_direct($res, -1));
-	var_dump(mysqli_fetch_field_direct($res, 0));
-	var_dump(mysqli_fetch_field_direct($res, 2));
+    var_dump(mysqli_fetch_field_direct($res, -1));
+    var_dump(mysqli_fetch_field_direct($res, 0));
+    var_dump(mysqli_fetch_field_direct($res, 2));
 
-	mysqli_free_result($res);
+    mysqli_free_result($res);
 
-	if (false !== ($tmp = mysqli_fetch_field_direct($res, 0)))
-		printf("[005] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
+    try {
+        mysqli_fetch_field_direct($res, 0);
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
 
-	mysqli_close($link);
-	print "done!";
+    mysqli_close($link);
+    print "done!";
 ?>
 --CLEAN--
 <?php
@@ -66,6 +69,5 @@ object(stdClass)#%d (13) {
 
 Warning: mysqli_fetch_field_direct(): Field offset is invalid for resultset in %s on line %d
 bool(false)
-
-Warning: mysqli_fetch_field_direct(): Couldn't fetch mysqli_result in %s on line %d
+mysqli_result object is already closed
 done!

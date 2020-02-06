@@ -46,23 +46,23 @@ $permission_values = array(
 // Open directory with different permission values, read and close, expected: none of them to succeed.
 $iterator = 1;
 foreach($permission_values as $perm) {
-	echo "\n-- Iteration $iterator --\n";
+    echo "\n-- Iteration $iterator --\n";
 
-	if (is_dir($dir_path)) {
-		chmod ($dir_path, 0777); // change dir permission to allow all operation
-		rmdir ($dir_path);
-	}
-	mkdir($dir_path);
+    if (is_dir($dir_path)) {
+        chmod ($dir_path, 0777); // change dir permission to allow all operation
+        rmdir ($dir_path);
+    }
+    mkdir($dir_path);
 
-	// change the dir permission to test dir on it
-	var_dump( chmod($dir_path, $perm) );
-	var_dump($dh = opendir($dir_path));
+    // change the dir permission to test dir on it
+    var_dump( chmod($dir_path, $perm) );
+    var_dump($dh = opendir($dir_path));
 
-	echo "-- Calling readdir() --\n";
-	var_dump(readdir($dh));
+    echo "-- Calling readdir() --\n";
+    var_dump(readdir($dh));
 
-	closedir($dh);
-	$iterator++;
+    closedir($dh);
+    $iterator++;
 }
 ?>
 --CLEAN--

@@ -6,7 +6,7 @@ Bug #37565 (Using reflection::export with simplexml causing a crash)
 <?php
 
 function my_error_handler($errno, $errstr, $errfile, $errline) {
-	    echo "Error: $errstr\n";
+        echo "Error: $errstr\n";
 }
 
 set_error_handler('my_error_handler');
@@ -16,15 +16,15 @@ class Setting extends ReflectionObject
 }
 
 try {
-	Reflection::export(simplexml_load_string('<test/>', 'Setting'));
+    Reflection::export(simplexml_load_string('<test/>', 'Setting'));
 } catch (Error $e) {
-	my_error_handler($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
+    my_error_handler($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
 }
 
 try {
-	Reflection::export(simplexml_load_file('data:,<test/>', 'Setting'));
+    Reflection::export(simplexml_load_file('data:,<test/>', 'Setting'));
 } catch (Error $e) {
-	my_error_handler($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
+    my_error_handler($e->getCode(), $e->getMessage(), $e->getFile(), $e->getLine());
 }
 
 ?>

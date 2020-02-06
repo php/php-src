@@ -26,22 +26,22 @@ $stmt->execute();
 $stmt->setFetchMode(PDO::FETCH_NUM);
 foreach ($stmt as $data)
 {
-	var_dump($data);
+    var_dump($data);
 }
 
 class Test
 {
-	function __construct($name = 'N/A')
-	{
-		echo __METHOD__ . "($name)\n";
-	}
+    function __construct($name = 'N/A')
+    {
+        echo __METHOD__ . "($name)\n";
+    }
 }
 
 unset($stmt);
 
 foreach ($db->query($SELECT, PDO::FETCH_CLASS, 'Test') as $data)
 {
-	var_dump($data);
+    var_dump($data);
 }
 
 unset($stmt);
@@ -50,7 +50,7 @@ $stmt = $db->query($SELECT, PDO::FETCH_CLASS, 'Test', array('WOW'));
 
 foreach($stmt as $data)
 {
-	var_dump($data);
+    var_dump($data);
 }
 ?>
 --EXPECTF--

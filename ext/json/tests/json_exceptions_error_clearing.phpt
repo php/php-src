@@ -14,26 +14,26 @@ json_decode("\xFF");
 var_dump(json_last_error());
 
 try {
-	json_decode("", false, 512, JSON_THROW_ON_ERROR);
+    json_decode("", false, 512, JSON_THROW_ON_ERROR);
 } catch (JsonException $e) {
-	echo "Caught JSON exception: ", $e->getCode(), PHP_EOL;
+    echo "Caught JSON exception: ", $e->getCode(), PHP_EOL;
 }
 
 var_dump(json_last_error());
 
 try {
-	json_decode("{", false, 512, JSON_THROW_ON_ERROR);
+    json_decode("{", false, 512, JSON_THROW_ON_ERROR);
 } catch (JsonException $e) {
-	echo "Caught JSON exception: ", $e->getCode(), PHP_EOL;
+    echo "Caught JSON exception: ", $e->getCode(), PHP_EOL;
 }
 
 var_dump(json_last_error());
 
 
 try {
-	json_encode(NAN, JSON_THROW_ON_ERROR);
+    json_encode(NAN, JSON_THROW_ON_ERROR);
 } catch (JsonException $e) {
-	echo "Caught JSON exception: ", $e->getCode(), PHP_EOL;
+    echo "Caught JSON exception: ", $e->getCode(), PHP_EOL;
 }
 
 var_dump(json_last_error());

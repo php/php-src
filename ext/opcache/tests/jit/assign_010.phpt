@@ -11,9 +11,9 @@ opcache.jit_buffer_size=1M
 --FILE--
 <?php
 function foo() {
-	$a = array();
-	$b =& $a;
-	$a = $b;
+    $a = array();
+    $b =& $a;
+    $a = $b;
 }
 foo();
 echo "ok\n";

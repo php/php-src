@@ -24,9 +24,9 @@ $rn2 = (int)$c2;
 // rn1 and rn2 should be different.
 
 if ($rn1 === $rn2)
-	echo "First and second connections share a resource: Not OK\n";
+    echo "First and second connections share a resource: Not OK\n";
 else
-	echo "First and second connections are different  OK\n";
+    echo "First and second connections are different  OK\n";
 
 // Close the connections
 oci_close($c1);

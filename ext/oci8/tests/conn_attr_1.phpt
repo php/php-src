@@ -36,19 +36,19 @@ echo"**Test 1.2 - Set and get values for the attributes **************\n";
 
 $conn1 = get_conn(1); //oci_connect()
 foreach($attr_array as $attr) {
-	set_attr($conn1,$attr,1);
+    set_attr($conn1,$attr,1);
     get_attr($conn1,$attr);
 }
 
 $conn2 = get_conn(2); //oci_pconnect()
 foreach($attr_array as $attr) {
-	set_attr($conn2,$attr,2);
+    set_attr($conn2,$attr,2);
     get_attr($conn2,$attr);
 }
 
 $conn3 = get_conn(3); //oci_new_connect()
 foreach($attr_array as $attr) {
-	set_attr($conn3,$attr,3);
+    set_attr($conn3,$attr,3);
     get_attr($conn3,$attr);
 }
 

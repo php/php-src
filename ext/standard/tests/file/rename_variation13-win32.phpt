@@ -42,7 +42,7 @@ $file_path = __DIR__."/renameVar13";
 $aFile = $file_path.'/afile.tmp';
 
 if (!mkdir($file_path)) {
-	die("fail to create $file_path tmp dir");
+    die("fail to create $file_path tmp dir");
 }
 
 for( $i=0; $i < count($names_arr); $i++ ) {

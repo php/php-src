@@ -28,7 +28,7 @@ $fields = array('type','encoding','ifsubtype','subtype',
 'ifdescription','lines','bytes','parameters');
 
 foreach ($fields as $key) {
-	var_dump(isset($z->$key));
+    var_dump(isset($z->$key));
 }
 var_dump($z->type);
 var_dump($z->encoding);

@@ -5,8 +5,8 @@ errmsg: __destruct() cannot be static
 
 class test {
 
-	static function __destruct() {
-	}
+    static function __destruct() {
+    }
 }
 
 echo "Done\n";

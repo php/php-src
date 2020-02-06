@@ -8,9 +8,9 @@ Test wrong number of arguments and wrong arg types for ob_start()
 */
 
 Class C {
-	static function f($str) {
-		return $str;
-	}
+    static function f($str) {
+        return $str;
+    }
 }
 
 var_dump(ob_start(array("nonExistent","f")));

@@ -35,7 +35,7 @@ for($i = -1; $i < 10; $i++) {
     $output = gzencode($data, $i);
 
     // Clear OS byte before encode
-	$output[9] = "\x00";
+    $output[9] = "\x00";
 
     var_dump(md5($output));
 }
@@ -46,7 +46,7 @@ for($i = -1; $i < 10; $i++) {
     $output = gzencode($smallstring, $i);
 
     // Clear OS byte before encode
-	$output[9] = "\x00";
+    $output[9] = "\x00";
 
     var_dump(md5($output));
 }

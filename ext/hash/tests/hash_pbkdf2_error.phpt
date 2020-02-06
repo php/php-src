@@ -13,7 +13,7 @@ $password = 'password';
 $salt = 'salt';
 
 echo "\n-- Testing hash_pbkdf2() function with invalid hash algorithm --\n";
-try { 
+try {
     var_dump(hash_pbkdf2('foo', $password, $salt, 1));
 }
 catch (\Error $e) {
@@ -22,7 +22,7 @@ catch (\Error $e) {
 
 
 echo "\n-- Testing hash_pbkdf2() function with non-cryptographic hash algorithm --\n";
-try { 
+try {
     var_dump(hash_pbkdf2('crc32', $password, $salt, 1));
 }
 catch (\Error $e) {
@@ -30,14 +30,14 @@ catch (\Error $e) {
 }
 
 echo "\n-- Testing hash_pbkdf2() function with invalid iterations --\n";
-try { 
+try {
     var_dump(hash_pbkdf2('md5', $password, $salt, 0));
 }
 catch (\Error $e) {
     echo $e->getMessage() . "\n";
 }
 
-try { 
+try {
     var_dump(hash_pbkdf2('md5', $password, $salt, -1));
 }
 catch (\Error $e) {
@@ -45,7 +45,7 @@ catch (\Error $e) {
 }
 
 echo "\n-- Testing hash_pbkdf2() function with invalid length --\n";
-try { 
+try {
     var_dump(hash_pbkdf2('md5', $password, $salt, 1, -1));
 }
 catch (\Error $e) {

@@ -39,7 +39,7 @@
 ZEND_EXTERN_MODULE_GLOBALS(phpdbg)
 
 /* {{{ color structures */
-const static phpdbg_color_t colors[] = {
+static const phpdbg_color_t colors[] = {
 	PHPDBG_COLOR_D("none",             "0;0"),
 
 	PHPDBG_COLOR_D("white",            "0;64"),
@@ -70,7 +70,7 @@ const static phpdbg_color_t colors[] = {
 }; /* }}} */
 
 /* {{{ */
-const static phpdbg_element_t elements[] = {
+static const phpdbg_element_t elements[] = {
 	PHPDBG_ELEMENT_D("prompt", PHPDBG_COLOR_PROMPT),
 	PHPDBG_ELEMENT_D("error", PHPDBG_COLOR_ERROR),
 	PHPDBG_ELEMENT_D("notice", PHPDBG_COLOR_NOTICE),

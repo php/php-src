@@ -52,10 +52,10 @@ echo "*** Testing basic operations ***\n";
 $loop_counter = 1;
 foreach ($arrays as $item) {
         echo "** Iteration $loop_counter **\n"; $loop_counter++;
-	var_dump(array_change_key_case($item));
-	var_dump(array_change_key_case($item, CASE_UPPER));
-	var_dump(array_change_key_case($item, CASE_LOWER));
-	echo "\n";
+    var_dump(array_change_key_case($item));
+    var_dump(array_change_key_case($item, CASE_UPPER));
+    var_dump(array_change_key_case($item, CASE_LOWER));
+    echo "\n";
 }
 
 echo "end\n";

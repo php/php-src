@@ -43,7 +43,7 @@ $reader = new XMLReader();
 $reader->XML($xmlstring);
 
 if ($reader->setRelaxNGSchema('')) {
-	echo 'failed';
+    echo 'failed';
 }
 $reader->close();
 ?>

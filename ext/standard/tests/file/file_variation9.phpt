@@ -27,7 +27,7 @@ foreach ($contents as $content) {
     fwrite($h, $content);
     fclose($h);
     var_dump(file($testfile));
-	unlink($testfile);
+    unlink($testfile);
 }
 
 echo "\n*** Done ***\n";

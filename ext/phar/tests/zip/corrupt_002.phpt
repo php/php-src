@@ -5,9 +5,9 @@ Phar: corrupted zip (no end of zip record)
 --FILE--
 <?php
 try {
-	new PharData(__DIR__ . '/files/nozipend.zip');
+    new PharData(__DIR__ . '/files/nozipend.zip');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
 --EXPECTF--

@@ -4,10 +4,10 @@ iterable type#003 - Return types
 <?php
 
 function foo(): iterable {
-	return [];
+    return [];
 }
 function bar(): iterable {
-	return (function () { yield; })();
+    return (function () { yield; })();
 }
 
 function baz(): iterable {

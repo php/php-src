@@ -11,10 +11,10 @@ SPL: Test ArrayObject::ksort() function : basic functionality with object base s
 
 echo "*** Testing ArrayObject::ksort() : basic functionality ***\n";
 Class C {
-	public $x = 'prop1';
-	public $z = 'prop2';
-	public $a = 'prop3';
-	private $b = 'prop4';
+    public $x = 'prop1';
+    public $z = 'prop2';
+    public $a = 'prop3';
+    private $b = 'prop4';
 }
 
 $c = new C;

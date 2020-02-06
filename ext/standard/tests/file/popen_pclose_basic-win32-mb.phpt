@@ -28,7 +28,7 @@ echo "*** Testing popen(): writing to the pipe ***\n";
 $arr = array("ggg", "ddd", "aaa", "sss");
 // popen("sort", "w") fails if variables_order="GPCS"
 // this is set in the default INI file
-// it doesn't seem to be changeable in the --INI-- section
+// it doesn't seem to be changeable in the--INI-- section
 //	also, doing: ini_set('variables_order', ''); doesn't work!
 //
 // the only solution is to either put the absolute path here, or

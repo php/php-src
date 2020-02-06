@@ -4,9 +4,9 @@ errmsg: can't use method return value in write context
 <?php
 
 class test {
-	function foo() {
-		return "blah";
-	}
+    function foo() {
+        return "blah";
+    }
 }
 
 $t = new test;

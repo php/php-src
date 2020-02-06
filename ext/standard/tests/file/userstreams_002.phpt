@@ -3,30 +3,30 @@ User-space streams: stream_cast()
 --FILE--
 <?php
 class test_wrapper_base {
-	public $return_value;
-	function stream_open($path, $mode, $openedpath) {
-		return true;
-	}
-	function stream_eof() {
-		return false;
-	}
+    public $return_value;
+    function stream_open($path, $mode, $openedpath) {
+        return true;
+    }
+    function stream_eof() {
+        return false;
+    }
 }
 class test_wrapper extends test_wrapper_base {
-	function stream_cast($castas) {
-		return $this->return_value;
-	}
+    function stream_cast($castas) {
+        return $this->return_value;
+    }
 }
 function test($name, $fd, $return_value) {
-	echo "\n------ $name: -------\n";
-	$data = stream_get_meta_data($fd);
-	$data['wrapper_data']->return_value = $return_value;
-	$r = array($fd);
-	$w = $e = null;
-	try {
-		var_dump(stream_select($r, $w, $e, 0) !== false);
-	} catch (TypeError|ValueError $e) {
-		echo $e->getMessage(), "\n";
-	}
+    echo "\n------ $name: -------\n";
+    $data = stream_get_meta_data($fd);
+    $data['wrapper_data']->return_value = $return_value;
+    $r = array($fd);
+    $w = $e = null;
+    try {
+        var_dump(stream_select($r, $w, $e, 0) !== false);
+    } catch (TypeError|ValueError $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 
 var_dump(stream_wrapper_register('test', 'test_wrapper'));

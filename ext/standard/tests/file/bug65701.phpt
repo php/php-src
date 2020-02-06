@@ -7,7 +7,7 @@ Boro Sitnikovski <buritomath@yahoo.com>
 $file_path = __DIR__ . "/bug65701/";
 
 if (!is_dir($file_path)) {
-	mkdir($file_path);
+    mkdir($file_path);
 }
 
 $src = $file_path . '/srcbug65701_file.txt';

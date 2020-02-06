@@ -11,7 +11,7 @@ class wpq {
 }
 
 function ret_assoc() {
-	$x = "XXX";
+    $x = "XXX";
     return array('foo' => 'bar', $x);
 }
 

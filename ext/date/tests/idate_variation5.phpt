@@ -17,13 +17,13 @@ date_default_timezone_set("Asia/Calcutta");
 $inputs = array(
 
       'Internet Time' => 'B',
-	  '12 hour format' => 'h',
-	  '24 hour format' => 'H',
-	  'Minutes' => 'i',
-	  'DST Activated' => 'I',
-	  'Seconds' => 's',
-	  'Seconds since Unix Epoch' => 'U',
-	  'Time zone offset' => 'Z'
+      '12 hour format' => 'h',
+      '24 hour format' => 'H',
+      'Minutes' => 'i',
+      'DST Activated' => 'I',
+      'Seconds' => 's',
+      'Seconds since Unix Epoch' => 'U',
+      'Time zone offset' => 'Z'
 );
 
 // loop through each element of the array for timestamp

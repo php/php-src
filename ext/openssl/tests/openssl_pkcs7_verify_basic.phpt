@@ -6,12 +6,12 @@ openssl_pkcs7_verify() tests
 <?php
 $outfile = tempnam(sys_get_temp_dir(), "ssl");
 if ($outfile === false) {
-	die("failed to get a temporary filename!");
+    die("failed to get a temporary filename!");
 }
 
 $contentfile = tempnam(sys_get_temp_dir(), "ssl");
 if ($contentfile === false) {
-	die("failed to get a temporary filename!");
+    die("failed to get a temporary filename!");
 }
 
 $pkcsfile = __DIR__ . "/openssl_pkcs7_verify__pkcsfile.tmp";
@@ -30,13 +30,13 @@ var_dump(openssl_pkcs7_verify($eml, PKCS7_NOVERIFY, $outfile, $cainfo, $outfile,
 var_dump(file_get_contents($pkcsfile));
 
 if (file_exists($outfile)) {
-	echo "true\n";
-	unlink($outfile);
+    echo "true\n";
+    unlink($outfile);
 }
 
 if (file_exists($contentfile)) {
-	echo "true\n";
-	unlink($contentfile);
+    echo "true\n";
+    unlink($contentfile);
 }
 ?>
 --CLEAN--

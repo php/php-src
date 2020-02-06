@@ -5,9 +5,9 @@ Bug #30799 (SoapServer doesn't handle private or protected properties)
 --FILE--
 <?php
 class foo {
-	public    $a="a";
-	private   $b="b";
-	protected $c="c";
+    public    $a="a";
+    private   $b="b";
+    protected $c="c";
 
 }
 

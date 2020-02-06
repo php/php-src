@@ -12,11 +12,11 @@ output_buffering=0
 
 function dump_string_length( $string )
 {
-	ob_start();
-	echo $string;
-	$len = ob_get_length();
-	ob_end_clean();
-	var_dump( $len );
+    ob_start();
+    echo $string;
+    $len = ob_get_length();
+    ob_end_clean();
+    var_dump( $len );
 }
 
 echo "*** Testing ob_get_length() : basic functionality ***\n";

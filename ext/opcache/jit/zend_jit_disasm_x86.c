@@ -444,6 +444,8 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_only_vars_by_reference);
 	REGISTER_HELPER(zend_jit_invalid_array_access);
 	REGISTER_HELPER(zend_jit_prepare_assign_dim_ref);
+	REGISTER_HELPER(zend_jit_pre_inc);
+	REGISTER_HELPER(zend_jit_pre_dec);
 	REGISTER_HELPER(zend_runtime_jit);
 	REGISTER_HELPER(zend_jit_hot_func);
 #undef  REGISTER_HELPER

@@ -82,12 +82,12 @@ PHP 8.0 INTERNALS UPGRADE NOTES
      compare handler, using ZEND_COMPARE_OBJECTS_FALLBACK() macro.
      
   k. The 'I' length modifier, used to denote 32 and 64bit integer from the custom
-     snprintf implementation has been removed.
+     snprintf and spprintf implementations has been removed.
      Use the ZEND_LONG_FMT, ZEND_ULONG_FMT and ZEND_XLONG_FMT macros defined in
      php-src/Zend/zend_long.h
 
-     The 'v' format from the custom snprintf implementation has been removed.
-     Use the standard 's' format instead.
+     The 'v' format from the custom snprintf and spprintf implementations has
+     been removed. Use the standard 's' format instead.
 
 ========================
 2. Build system changes

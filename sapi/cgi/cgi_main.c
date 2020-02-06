@@ -913,9 +913,12 @@ static int sapi_cgi_activate(void)
 			if (fcgi_is_fastcgi()) {
 				fcgi_request *request = (fcgi_request*) SG(server_context);
 
-				doc_root = FCGI_GETENV(request, "DOCUMENT_ROOT");
+				/* Prefer CONTEXT_DOCUMENT_ROOT if set */
+				doc_root = FCGI_GETENV(request, "CONTEXT_DOCUMENT_ROOT");
+				doc_root = doc_root ? doc_root : FCGI_GETENV(request, "DOCUMENT_ROOT");
 			} else {
-				doc_root = getenv("DOCUMENT_ROOT");
+				doc_root = getenv("CONTEXT_DOCUMENT_ROOT");
+				doc_root = doc_root ? doc_root : getenv("DOCUMENT_ROOT");
 			}
 			/* DOCUMENT_ROOT should also be defined at this stage..but better check it anyway */
 			if (doc_root) {
@@ -2280,6 +2283,7 @@ parent_loop_end:
 					break;
 				case 'h':
 				case '?':
+				case PHP_GETOPT_INVALID_ARG:
 					if (request) {
 						fcgi_destroy_request(request);
 					}
@@ -2289,6 +2293,9 @@ parent_loop_end:
 					php_cgi_usage(argv[0]);
 					php_output_end_all();
 					exit_status = 0;
+					if (c == PHP_GETOPT_INVALID_ARG) {
+						exit_status = 1;
+					}
 					goto out;
 			}
 		}

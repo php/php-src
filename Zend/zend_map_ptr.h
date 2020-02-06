@@ -80,9 +80,9 @@
 		ZEND_MAP_PTR(ptr) = zend_map_ptr_new(); \
 	} while (0)
 # define ZEND_MAP_PTR_REAL_BASE(base) \
-	((void*)(((char*)(base)) + 1))
+	((void*)(((uintptr_t)(base)) + 1))
 # define ZEND_MAP_PTR_SET_REAL_BASE(base, ptr) do { \
-		base = (void*)(((char*)(ptr)) - 1); \
+		base = (void*)(((uintptr_t)(ptr)) - 1); \
 	} while (0)
 #else
 # error "Unknown ZEND_MAP_PTR_KIND"

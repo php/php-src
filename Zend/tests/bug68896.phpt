@@ -3,10 +3,10 @@ Bug #68896 (Changing ArrayObject value cause Segment Fault)
 --FILE--
 <?php
 class A implements ArrayAccess {
-	private $a = [];
-	function offsetGet($offset) {
-		return $this->a[$offset];
-	}
+    private $a = [];
+    function offsetGet($offset) {
+        return $this->a[$offset];
+    }
         function offsetSet($offset, $value) {
                 $this->a[$offset] = $value;
         }

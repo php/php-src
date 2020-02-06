@@ -21,14 +21,14 @@ catch (\Error $e) {
 }
 
 echo "\n-- Testing hash_init() function with HASH_HMAC and no key --\n";
-try { 
+try {
     var_dump(hash_init('md5', HASH_HMAC));
 }
 catch (\Error $e) {
     echo  $e->getMessage() . "\n";
 }
 
-try { 
+try {
     var_dump(hash_init('md5', HASH_HMAC, null));
 }
 catch (\Error $e) {

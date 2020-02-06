@@ -9,9 +9,9 @@ function foobar($errno, $errstr, $errfile, $errline) { }
 set_error_handler('foobar');
 
 function test($x) {
-	global $foo;
+    global $foo;
 
-	$x->invokeArgs(array(0));
+    $x->invokeArgs(array(0));
 }
 
 $x = new ReflectionFunction('str_pad');

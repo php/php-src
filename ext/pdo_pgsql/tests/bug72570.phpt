@@ -18,9 +18,9 @@ $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 $stmt = $db->prepare("SELECT 1");
 
 try {
-	var_dump($stmt->execute([1]));
+    var_dump($stmt->execute([1]));
 } catch (PDOException $e) {
-	var_dump($e->getCode());
+    var_dump($e->getCode());
 }
 
 ?>

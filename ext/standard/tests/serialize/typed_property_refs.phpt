@@ -4,18 +4,18 @@ unserialize with references to typed properties shall skip the references or fai
 <?php
 
 class A {
-	public int $a;
-	public $b;
+    public int $a;
+    public $b;
 }
 
 class B {
-	public $a;
-	public int $b;
+    public $a;
+    public int $b;
 }
 
 class C {
-	public int $a;
-	public string $b;
+    public int $a;
+    public string $b;
 }
 
 class D {

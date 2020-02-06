@@ -13,7 +13,7 @@ opcache.jit_buffer_size=1M
 function foo() {
   $persons = 2;
   for ($i=0; $i<$persons; $i++) {
-	$children = 2;
+    $children = 2;
   }
 }
 foo();

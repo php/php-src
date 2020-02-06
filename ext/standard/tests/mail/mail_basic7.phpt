@@ -22,13 +22,13 @@ $to = 'user@example.com';
 $subject = 'Test Subject';
 $message = 'A Message';
 $additional_headers = array(
-	'KHeaders' => 'aaaa',
-	'bcc'=>'foo@bar',
-	'foo'=>
-	array(
-		"bar\r\n hoge",
-		"bar\r\n\t fuga",
-	),
+    'KHeaders' => 'aaaa',
+    'bcc'=>'foo@bar',
+    'foo'=>
+    array(
+        "bar\r\n hoge",
+        "bar\r\n\t fuga",
+    ),
 );
 $outFile = "mailBasic7.out";
 @unlink($outFile);
@@ -48,14 +48,14 @@ $subject = 'Test Subject';
 $message = 'A Message';
 // Headers should not have array values
 $additional_headers = array(
-	'orig-date' => array('foo1'),
-	'from' => array('foo2'),
-	'sender' => array('foo3'),
-	'reply-to' => array('foo4'),
-	'to' => array('foo5'),
-	'bcc' => array('foo6'),
-	'message-id' => array('foo7'),
-	'in-reply-to'=> array('foo8'),
+    'orig-date' => array('foo1'),
+    'from' => array('foo2'),
+    'sender' => array('foo3'),
+    'reply-to' => array('foo4'),
+    'to' => array('foo5'),
+    'bcc' => array('foo6'),
+    'message-id' => array('foo7'),
+    'in-reply-to'=> array('foo8'),
 );
 $outFile = "mailBasic7.out";
 @unlink($outFile);
@@ -74,13 +74,13 @@ $to = 'user@example.com';
 $subject = 'Test Subject';
 $message = 'A Message';
 $additional_headers = array(
-	'foo1' => array('foo1'=>'bar1'),
-	'foo2' => array('foo2', array('foo3')),
-	'foo3' => array(123),
-	'foo4' => array(123.456),
-	'foo5' => array(FALSE),
-	'foo6' => array(NULL),
-	'foo7' => array(new StdClass),
+    'foo1' => array('foo1'=>'bar1'),
+    'foo2' => array('foo2', array('foo3')),
+    'foo3' => array(123),
+    'foo4' => array(123.456),
+    'foo5' => array(FALSE),
+    'foo6' => array(NULL),
+    'foo7' => array(new StdClass),
 );
 $outFile = "mailBasic7.out";
 @unlink($outFile);
@@ -99,16 +99,16 @@ $to = 'user@example.com';
 $subject = 'Test Subject';
 $message = 'A Message';
 $additional_headers = array(
-	'*:foo1' => array('bar1'),
-	'foo2:::' => array('bar1'),
-	'foo3()' => array('bar1'),
-	'foo4@' => array('bar1'),
-	'foo5|' => array('bar1'),
-	"\0foo6" => array('bar1'),
-	"foo7\0" => array('bar1'),
-	"foo8" => array(),
-	"foo9" => '%&$#!',
-	"foo10" => "abc\0\tdef",
+    '*:foo1' => array('bar1'),
+    'foo2:::' => array('bar1'),
+    'foo3()' => array('bar1'),
+    'foo4@' => array('bar1'),
+    'foo5|' => array('bar1'),
+    "\0foo6" => array('bar1'),
+    "foo7\0" => array('bar1'),
+    "foo8" => array(),
+    "foo9" => '%&$#!',
+    "foo10" => "abc\0\tdef",
 );
 $outFile = "mailBasic7.out";
 @unlink($outFile);

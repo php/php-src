@@ -33,7 +33,7 @@ $sql = "CREATE TABLE IF NOT EXISTS test(id INT); INSERT INTO test(id) VALUES (1)
 // Compare MySQL C-API documentation
 $stmt = $db->query($sql);
 do {
-	var_dump($stmt->fetchAll());
+    var_dump($stmt->fetchAll());
 } while ($stmt->nextRowset());
 
 print "done!";

@@ -15,22 +15,22 @@ class twoFuncs {
 }
 
 try {
-	$ciTF = new twoFuncs;
+    $ciTF = new twoFuncs;
 
-	$oScript = new COM("MSScriptControl.ScriptControl");
-	$oScript->Language = "VBScript";
+    $oScript = new COM("MSScriptControl.ScriptControl");
+    $oScript->Language = "VBScript";
 
-	$oScript->AddObject ("tfA", $ciTF, true);
-	foreach (array(1,2) as $i) {
-		$oScript->ExecuteStatement ("tfA.func$i");
-		$oScript->ExecuteStatement ("func$i");
-	}
-	$oScript->AddObject ("tfB", $ciTF);
-	foreach (array(1,2) as $i) {
-		$oScript->ExecuteStatement ("tfB.func$i");
-	}
+    $oScript->AddObject ("tfA", $ciTF, true);
+    foreach (array(1,2) as $i) {
+        $oScript->ExecuteStatement ("tfA.func$i");
+        $oScript->ExecuteStatement ("func$i");
+    }
+    $oScript->AddObject ("tfB", $ciTF);
+    foreach (array(1,2) as $i) {
+        $oScript->ExecuteStatement ("tfB.func$i");
+    }
 } catch (Exception $e) {
-	print $e;
+    print $e;
 }
 ?>
 --EXPECT--

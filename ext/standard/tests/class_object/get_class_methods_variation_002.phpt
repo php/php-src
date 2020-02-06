@@ -11,7 +11,7 @@ Test get_class_methods() function : usage variations  - case sensitivity
 echo "*** Testing get_class_methods() : usage variations ***\n";
 
 class caseSensitivityTest {
-	function MyMeThOd() {}
+    function MyMeThOd() {}
 }
 
 var_dump( get_class_methods('CasesensitivitytesT') );

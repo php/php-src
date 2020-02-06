@@ -436,7 +436,7 @@ static int php_skip_variable(php_stream * stream)
  */
 static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 {
-	unsigned short length;
+	size_t length;
 	char *buffer;
 	char markername[16];
 	zval *tmp;
@@ -447,7 +447,7 @@ static int php_read_APP(php_stream * stream, unsigned int marker, zval *info)
 	}
 	length -= 2;				/* length includes itself */
 
-	buffer = emalloc((size_t)length);
+	buffer = emalloc(length);
 
 	if (php_stream_read(stream, buffer, (size_t) length) != length) {
 		efree(buffer);

@@ -9,9 +9,9 @@ $o = new stdclass;
 $o->prop = "value";
 
 try {
-	var_dump($o + $a);
+    var_dump($o + $a);
 } catch (Error $e) {
-	echo "\nException: " . $e->getMessage() . "\n";
+    echo "\nException: " . $e->getMessage() . "\n";
 }
 
 $c = $o + $a;

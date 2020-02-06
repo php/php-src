@@ -8,11 +8,11 @@ if(!extension_loaded('zip')) die('skip');
 <?php
 
 class TestStream {
-	function url_stat($path, $flags) {
-		if (!($flags & STREAM_URL_STAT_QUIET))
-			trigger_error("not quiet");
-		return array();
-	}
+    function url_stat($path, $flags) {
+        if (!($flags & STREAM_URL_STAT_QUIET))
+            trigger_error("not quiet");
+        return array();
+    }
 }
 
 stream_wrapper_register("teststream", "TestStream");
@@ -21,8 +21,8 @@ $dirname = __DIR__ . '/';
 $file = $dirname . 'test_with_comment.zip';
 $zip = new ZipArchive;
 if ($zip->open($file) !== TRUE) {
-	echo "open failed.\n";
-	exit('failed');
+    echo "open failed.\n";
+    exit('failed');
 }
 
 $a = $zip->extractTo('teststream://test');

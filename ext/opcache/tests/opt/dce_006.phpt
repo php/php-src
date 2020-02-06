@@ -11,11 +11,11 @@ opcache.preload=
 --FILE--
 <?php
 class A {
-	function __destruct() {}
+    function __destruct() {}
 }
 function foo(int $x) {
-	$a = new A;
-	$a->foo = $x;
+    $a = new A;
+    $a->foo = $x;
 }
 --EXPECTF--
 $_main: ; (lines=1, args=0, vars=0, tmps=0)

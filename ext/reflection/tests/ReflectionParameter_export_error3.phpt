@@ -5,12 +5,12 @@ Stefan Koopmanschap <stefan@stefankoopmanschap.nl>
 --FILE--
 <?php
 function ReflectionParameterTest($test, $test2 = null) {
-	echo $test;
+    echo $test;
 }
 $reflect = new ReflectionFunction('ReflectionParameterTest');
 $params = $reflect->getParameters();
 foreach($params as $key => $value) {
-	ReflectionParameter::export('ReflectionParameterTest', 'incorrect_parameter');
+    ReflectionParameter::export('ReflectionParameterTest', 'incorrect_parameter');
 }
 --EXPECTF--
 Deprecated: Function ReflectionParameter::export() is deprecated in %s on line %d

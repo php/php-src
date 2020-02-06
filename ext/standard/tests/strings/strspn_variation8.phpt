@@ -63,33 +63,33 @@ $heredoc_strings = array(
 
 // defining array of different mask strings
 $mask_array = array(
-		    "",
-		    '',
-		    "f\n\\0htersti \l",
-		    "\t",
-		    "het\ ",
-		    "fel\th\ ",
+            "",
+            '',
+            "f\n\\0htersti \l",
+            "\t",
+            "het\ ",
+            "fel\th\ ",
                     "f\t\hiel\100\xaa"
                    );
 
 // defining array of different start values
 $start_array = array(
-		    0,
-		    1,
- 	            2,
-		    -1,
-		    2147483647,  // max positive integer
-		    -2147483648,  // min negative integer
+            0,
+            1,
+                2,
+            -1,
+            2147483647,  // max positive integer
+            -2147483648,  // min negative integer
                    );
 
 // defining array of different len values
 $len_array = array(
-		    0,
-		    1,
- 	            2,
-		    -1,
-		    2147483647,  // max positive integer
-		    -2147483648,  // min negative integer
+            0,
+            1,
+                2,
+            -1,
+            2147483647,  // max positive integer
+            -2147483648,  // min negative integer
                    );
 
 

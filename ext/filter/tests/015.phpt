@@ -50,7 +50,7 @@ array(),
 "http://example.com:65537",
 );
 foreach ($values as $value) {
-	var_dump(filter_var($value, FILTER_VALIDATE_URL));
+    var_dump(filter_var($value, FILTER_VALIDATE_URL));
 }
 
 

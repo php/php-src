@@ -7,11 +7,11 @@ serialize_precision=17
 <?php
 function test($v)
 {
-	echo var_export($v, true) . "\n";
-	var_dump($v);
-	echo "$v\n";
-	print_r($v);
-	echo "\n------\n";
+    echo var_export($v, true) . "\n";
+    var_dump($v);
+    echo "$v\n";
+    print_r($v);
+    echo "\n------\n";
 }
 
 test(1.7e+300);

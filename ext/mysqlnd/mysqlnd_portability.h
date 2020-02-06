@@ -15,7 +15,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 
 
 /* Comes from global.h as OFFSET, renamed to STRUCT_OFFSET */
-#define STRUCT_OFFSET(t, f)   ((size_t)(char *)&((t *)0)->f)
+#define STRUCT_OFFSET(t, f)   XtOffsetOf(t, f)
 
 #ifndef __attribute
 #if !defined(__GNUC__)

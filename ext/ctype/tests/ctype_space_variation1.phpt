@@ -24,14 +24,14 @@ unset ($unset_var);
 // get a class
 class classA
 {
-	public function __toString() {
-		return "\n\t\r";
-	}
+    public function __toString() {
+        return "\n\t\r";
+    }
 }
 
 // heredoc string
 $heredoc = <<<EOT
- 
+\t
 EOT;
 
 // get a resource variable
@@ -89,10 +89,10 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of ctype_space()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump( ctype_space($input) );
-	$iterator++;
-};
+    echo "\n-- Iteration $iterator --\n";
+    var_dump( ctype_space($input) );
+    $iterator++;
+}
 
 fclose($fp);
 

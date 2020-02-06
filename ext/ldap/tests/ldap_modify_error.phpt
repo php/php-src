@@ -19,12 +19,12 @@ var_dump(ldap_modify($link, "cn=not-found,$base", array()));
 var_dump(ldap_modify($link, "weirdAttribute=val", array()));
 
 $entry = array(
-	"objectClass"	=> array(
-		"top",
-		"dcObject",
-		"organization"),
-	"dc"			=> "my-domain",
-	"o"				=> "my-domain",
+    "objectClass"	=> array(
+        "top",
+        "dcObject",
+        "organization"),
+    "dc"			=> "my-domain",
+    "o"				=> "my-domain",
 );
 
 ldap_add($link, "dc=my-domain,$base", $entry);

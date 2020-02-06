@@ -26,12 +26,12 @@ echo "intTheValue = {$intTheValue}\n";
 $arrTheArray = array();
 
 function &getArray() {
-	global $arrTheArray;
-	return $arrTheArray;
+    global $arrTheArray;
+    return $arrTheArray;
 }
 
 function addToArray(&$arr, $strToAdd) {
-	$arr[] = $strToAdd;
+    $arr[] = $strToAdd;
 }
 
 addToArray(getArray(), "xx1");
@@ -47,21 +47,21 @@ echo "arrTheArray = " . print_r($arrTheArray, 1);
 /****/
 
 class RefTest {
-	protected $arr;
+    protected $arr;
 
-	function Add($strToAdd) {
-		$this->addToArray($this->getArray(), $strToAdd);
-	}
+    function Add($strToAdd) {
+        $this->addToArray($this->getArray(), $strToAdd);
+    }
 
-	function &getArray() {
-		if (!$this->arr)
-			$this->arr = array();
-		return $this->arr;
-	}
+    function &getArray() {
+        if (!$this->arr)
+            $this->arr = array();
+        return $this->arr;
+    }
 
-	private function addToArray(&$arr, $strToAdd) {
-		$arr[] = $strToAdd;
-	}
+    private function addToArray(&$arr, $strToAdd) {
+        $arr[] = $strToAdd;
+    }
 }
 
 $objRefTest = new RefTest();

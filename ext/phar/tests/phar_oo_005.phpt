@@ -17,12 +17,12 @@ $it = new RecursiveIteratorIterator($it);
 
 foreach($it as $name => $ent)
 {
-	var_dump(str_replace(array('\\', $fname), array('/', '*'), $name));
-	var_dump(str_replace(array('\\', $fname), array('/', '*'), $ent->getPathname()));
-	var_dump(str_replace('\\', '/', $it->getSubPath()));
-	var_dump(str_replace('\\', '/', $it->getSubPathName()));
-	$sub = $it->getPathInfo();
-	var_dump(str_replace('\\', '/', $sub->getFilename()));
+    var_dump(str_replace(array('\\', $fname), array('/', '*'), $name));
+    var_dump(str_replace(array('\\', $fname), array('/', '*'), $ent->getPathname()));
+    var_dump(str_replace('\\', '/', $it->getSubPath()));
+    var_dump(str_replace('\\', '/', $it->getSubPathName()));
+    $sub = $it->getPathInfo();
+    var_dump(str_replace('\\', '/', $sub->getFilename()));
 }
 
 ?>

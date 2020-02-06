@@ -14,18 +14,18 @@ serialization: arrays with references to the containing array
  */
 
 function check(&$a) {
-	var_dump($a);
-	$ser = serialize($a);
-	var_dump($ser);
+    var_dump($a);
+    $ser = serialize($a);
+    var_dump($ser);
 
-	$b = unserialize($ser);
-	var_dump($b);
-	$b[0] = "b0.changed";
-	var_dump($b);
-	$b[1] = "b1.changed";
-	var_dump($b);
-	$b[2] = "b2.changed";
-	var_dump($b);
+    $b = unserialize($ser);
+    var_dump($b);
+    $b[0] = "b0.changed";
+    var_dump($b);
+    $b[1] = "b1.changed";
+    var_dump($b);
+    $b[2] = "b2.changed";
+    var_dump($b);
 }
 
 echo "\n\n--- 1 refs container:\n";

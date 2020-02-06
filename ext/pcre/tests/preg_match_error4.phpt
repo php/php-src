@@ -926,7 +926,7 @@ if($count === false) {
             throw new \RuntimeException('Failed to execute regex: Unknown error');
     }
 } else {
-	var_dump("Done, $count matches.");
+    var_dump("Done, $count matches.");
 }
 ?>
 --EXPECT--

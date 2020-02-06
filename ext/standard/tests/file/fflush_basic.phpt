@@ -22,7 +22,7 @@ if($file_handle == false)
   exit("Error:failed to open file $filename");
 
 if(substr(PHP_OS, 0, 3) == "WIN")  {
-	$data = str_replace("\r",'', $data);
+    $data = str_replace("\r",'', $data);
 }
 
 // writing data to the file

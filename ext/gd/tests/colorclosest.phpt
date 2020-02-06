@@ -31,11 +31,11 @@ print_r(imagecolorsforindex($im, $c));
 
 $im = imagecreate(5,5);
 for ($i=0; $i<256; $i++) {
-	if ($i == 246) {
-		imagecolorallocate($im, $i,10,10);
-	} else {
-		imagecolorallocate($im, $i,0,0);
-	}
+    if ($i == 246) {
+        imagecolorallocate($im, $i,10,10);
+    } else {
+        imagecolorallocate($im, $i,0,0);
+    }
 }
 $c = imagecolorclosest($im, 255,10,10);
 print_r(imagecolorsforindex($im, $c));
@@ -65,11 +65,11 @@ print_r(imagecolorsforindex($im, $c));
 
 $im = imagecreate(5,5);
 for ($i=0; $i<256; $i++) {
-	if ($i == 246) {
-		imagecolorallocatealpha($im, $i,10,10,1);
-	} else {
-		imagecolorallocatealpha($im, $i,0,0,100);
-	}
+    if ($i == 246) {
+        imagecolorallocatealpha($im, $i,10,10,1);
+    } else {
+        imagecolorallocatealpha($im, $i,0,0,100);
+    }
 }
 $c = imagecolorclosestalpha($im, 255,10,10,1);
 print_r(imagecolorsforindex($im, $c));

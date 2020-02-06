@@ -27,17 +27,17 @@ $i0 = $i1 = 0;
 $step = 1024;
 
 while ($i0 < strlen($data0) && $i1 < strlen($data1)) {
-	fwrite(STDOUT, substr($data0, $i0, $step));
-	fwrite(STDERR, substr($data1, $i1, $step));
-	$i0 += $step;
-	$i1 += $step;
+    fwrite(STDOUT, substr($data0, $i0, $step));
+    fwrite(STDERR, substr($data1, $i1, $step));
+    $i0 += $step;
+    $i1 += $step;
 }
 
 exit(0);
 ');
 
 if (!$r) {
-	die("couldn't create helper script '$callee'");
+    die("couldn't create helper script '$callee'");
 }
 
 $process = proc_open($cmd, $descriptors, $pipes);

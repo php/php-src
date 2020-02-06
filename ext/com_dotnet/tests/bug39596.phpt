@@ -8,13 +8,13 @@ if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present"; 
 error_reporting(E_ALL);
 
 try {
-	$binding_string = array('aaa','bbb','ccc');
-	$v = new VARIANT( $binding_string, VT_ARRAY );
-	foreach ($v AS $element) {
-		print $element."\n";
-	}
+    $binding_string = array('aaa','bbb','ccc');
+    $v = new VARIANT( $binding_string, VT_ARRAY );
+    foreach ($v AS $element) {
+        print $element."\n";
+    }
 } catch (Exception $e) {
-	print $e;
+    print $e;
 }
 ?>
 --EXPECT--

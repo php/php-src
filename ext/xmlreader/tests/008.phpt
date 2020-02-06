@@ -32,7 +32,7 @@ $reader->setParserProperty(XMLREADER::LOADDTD, TRUE);
 $reader->setParserProperty(XMLREADER::VALIDATE, TRUE);
 while($reader->read());
 if ($reader->isValid()) {
-	echo "file DTD: ok\n";
+    echo "file DTD: ok\n";
 }
 $reader->close();
 unlink($file);
@@ -60,7 +60,7 @@ $reader->setParserProperty(XMLREADER::LOADDTD, TRUE);
 $reader->setParserProperty(XMLREADER::VALIDATE, TRUE);
 while($reader->read());
 if ($reader->isValid()) {
-	echo "string DTD: ok\n";
+    echo "string DTD: ok\n";
 }
 ?>
 --EXPECT--

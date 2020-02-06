@@ -16,10 +16,10 @@ echo "\n*** Testing Miscellaneous input data ***\n";
 /*  If replace has fewer values than search, then an empty
     string is used for the rest of replacement values */
 var_dump( str_replace(array("a", "a", "b"),
-		      array("q", "q"),
-		      "aaabb", $count
-		     )
-	);
+              array("q", "q"),
+              "aaabb", $count
+             )
+    );
 var_dump($count);
 var_dump( str_replace(array("a", "a", "b"),
                       array("q", "q"),

@@ -3,7 +3,7 @@ Bug #52041 (Memory leak when writing on uninitialized variable returned from fun
 --FILE--
 <?php
 function foo() {
-	return $x;
+    return $x;
 }
 
 try {

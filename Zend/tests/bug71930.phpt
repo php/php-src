@@ -10,8 +10,8 @@ if (!extension_loaded("curl")) {
 <?php
 
 class A {
-	public static function dummy() {
-	}
+    public static function dummy() {
+    }
 }
 
 $a = array();

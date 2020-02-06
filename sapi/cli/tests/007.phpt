@@ -18,12 +18,12 @@ $code ='
 /* some test script */
 
 class test { /* {{{ */
-	public $var = "test"; //test var
-#perl style comment 
-	private $pri; /* private attr */
+    public $var = "test"; //test var
+#perl style comment
+    private $pri; /* private attr */
 
-	function foo(/* void */) {
-	}
+    function foo(/* void */) {
+    }
 }
 /* }}} */
 

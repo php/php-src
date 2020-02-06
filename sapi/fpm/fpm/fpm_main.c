@@ -733,7 +733,10 @@ static int sapi_cgi_activate(void) /* {{{ */
 
 		/* Load and activate user ini files in path starting from DOCUMENT_ROOT */
 		if (PG(user_ini_filename) && *PG(user_ini_filename)) {
-			doc_root = FCGI_GETENV(request, "DOCUMENT_ROOT");
+			/* Prefer CONTEXT_DOCUMENT_ROOT if set */
+			doc_root = FCGI_GETENV(request, "CONTEXT_DOCUMENT_ROOT");
+			doc_root = doc_root ? doc_root : FCGI_GETENV(request, "DOCUMENT_ROOT");
+
 			/* DOCUMENT_ROOT should also be defined at this stage..but better check it anyway */
 			if (doc_root) {
 				doc_root_len = strlen(doc_root);
@@ -1695,6 +1698,7 @@ int main(int argc, char *argv[])
 			default:
 			case 'h':
 			case '?':
+			case PHP_GETOPT_INVALID_ARG:
 				cgi_sapi_module.startup(&cgi_sapi_module);
 				php_output_activate();
 				SG(headers_sent) = 1;
@@ -1702,7 +1706,7 @@ int main(int argc, char *argv[])
 				php_output_end_all();
 				php_output_deactivate();
 				fcgi_shutdown();
-				exit_status = (c == 'h') ? FPM_EXIT_OK : FPM_EXIT_USAGE;
+				exit_status = (c != PHP_GETOPT_INVALID_ARG) ? FPM_EXIT_OK : FPM_EXIT_USAGE;
 				goto out;
 
 			case 'v': /* show php version & quit */

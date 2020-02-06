@@ -25,23 +25,23 @@ teardown_include_path();
 
 function runtest() {
     $tempDir = 'fopen_variation13.dir.tmp';
-	$tmpfile = 'fopen_variation13.tmp';
-	$absFile = getcwd().'/'.$tempDir.'/'.$tmpfile;
+    $tmpfile = 'fopen_variation13.tmp';
+    $absFile = getcwd().'/'.$tempDir.'/'.$tmpfile;
 
-	mkdir($tempDir);
-	$h = fopen($absFile, "w", true);
-	fwrite($h, "This is the test file");
-	fclose($h);
+    mkdir($tempDir);
+    $h = fopen($absFile, "w", true);
+    fwrite($h, "This is the test file");
+    fclose($h);
 
 
-	$h = fopen($absFile, "r");
-	if ($h === false) {
-	   echo "Not created absolute location\n";
-	}
-	else {
-	   echo "Created in correct location\n";
-	   fclose($h);
-	}
+    $h = fopen($absFile, "r");
+    if ($h === false) {
+       echo "Not created absolute location\n";
+    }
+    else {
+       echo "Created in correct location\n";
+       fclose($h);
+    }
     unlink($absFile);
     rmdir($tempDir);
 

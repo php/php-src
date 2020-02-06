@@ -22,7 +22,7 @@
 /* GOST context */
 typedef struct {
 	uint32_t state[16];
-	size_t count[2];
+	uint32_t count[2];
 	unsigned char length;
 	unsigned char buffer[32];
 	const uint32_t (*tables)[4][256];

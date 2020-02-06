@@ -19,11 +19,11 @@ EOF;
 
 class SXETest extends SimpleXMLIterator
 {
-	function count()
-	{
-		echo __METHOD__ . "\n";
-		return parent::count();
-	}
+    function count()
+    {
+        echo __METHOD__ . "\n";
+        return parent::count();
+    }
 }
 
 $sxe = new SXETest($xml);

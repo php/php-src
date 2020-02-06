@@ -7,7 +7,7 @@ PHP bug #77247 (heap buffer overflow in phar_detect_phar_fname_ext)
 try {
 var_dump(new Phar('a/.b', 0,'test.phar'));
 } catch(UnexpectedValueException $e) {
-	echo "OK";
+    echo "OK";
 }
 ?>
 --EXPECT--

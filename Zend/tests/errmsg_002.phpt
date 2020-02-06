@@ -4,8 +4,8 @@ errmsg: function cannot be declared private
 <?php
 
 abstract class test {
-	abstract private function foo() {
-	}
+    abstract private function foo() {
+    }
 }
 
 echo "Done\n";

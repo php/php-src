@@ -21,7 +21,7 @@ $pdo->query("INSERT INTO $tbl (`bit`) VALUES (0b01100)");
 $ret = $pdo->query("SELECT * FROM $tbl")->fetchAll();
 
 foreach ($ret as $i) {
-	var_dump($i["bit"]);
+    var_dump($i["bit"]);
 }
 
 ?>

@@ -9,9 +9,9 @@ ctype on integers
   function ctype_test_001($function) {
     $n=0;
     for($a=0;$a<256;$a++) {
-	    if($function($a)) $n++;
+        if($function($a)) $n++;
     }
-	  echo "$function $n\n";
+      echo "$function $n\n";
   }
 ctype_test_001("ctype_lower");
 ctype_test_001("ctype_upper");

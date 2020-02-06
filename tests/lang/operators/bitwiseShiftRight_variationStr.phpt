@@ -12,8 +12,8 @@ error_reporting(E_ERROR);
 
 foreach ($strVals as $strVal) {
    foreach($strVals as $otherVal) {
-	  echo "--- testing: '$strVal' >> '$otherVal' ---\n";
-	  try {
+      echo "--- testing: '$strVal' >> '$otherVal' ---\n";
+      try {
         var_dump($strVal>>$otherVal);
       } catch (ArithmeticError $e) {
         echo "Exception: " . $e->getMessage() . "\n";

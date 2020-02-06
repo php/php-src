@@ -2995,6 +2995,7 @@ PHP_METHOD(DateTimeImmutable, modify)
 
 	date_clone_immutable(object, &new_object);
 	if (!php_date_modify(&new_object, modify, modify_len)) {
+		zval_ptr_dtor(&new_object);
 		RETURN_FALSE;
 	}
 
@@ -3838,6 +3839,9 @@ static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *forma
 	if (errors->error_count > 0) {
 		php_error_docref(NULL, E_WARNING, "Unknown or bad format (%s)", format);
 		retval = FAILURE;
+		if (p) {
+			timelib_rel_time_dtor(p);
+		}
 	} else {
 		if(p) {
 			*rt = p;
@@ -4263,6 +4267,9 @@ static int date_period_initialize(timelib_time **st, timelib_time **et, timelib_
 	if (errors->error_count > 0) {
 		php_error_docref(NULL, E_WARNING, "Unknown or bad format (%s)", format);
 		retval = FAILURE;
+		if (p) {
+			timelib_rel_time_dtor(p);
+		}
 	} else {
 		*st = b;
 		*et = e;
@@ -5052,15 +5059,18 @@ static zval *date_period_write_property(zend_object *object, zend_string *name, 
 		return value;
 	}
 
-	std_object_handlers.write_property(object, name, value, cache_slot);
-	return value;
+	return zend_std_write_property(object, name, value, cache_slot);
 }
 /* }}} */
 
 /* {{{ date_period_get_property_ptr_ptr */
-static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *member, int type, void **cache_slot)
+static zval *date_period_get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot)
 {
-	/* Fall back to read_property handler. */
-	return NULL;
+	if (date_period_is_magic_property(name)) {
+		zend_throw_error(NULL, "Retrieval of DatePeriod->%s for modification is unsupported", ZSTR_VAL(name));
+		return &EG(error_zval);
+	}
+
+	return zend_std_get_property_ptr_ptr(object, name, type, cache_slot);
 }
 /* }}} */

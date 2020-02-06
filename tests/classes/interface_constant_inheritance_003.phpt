@@ -3,11 +3,11 @@ Ensure a class may not inherit two constants with the same name from two separat
 --FILE--
 <?php
 interface I1 {
-	const FOO = 10;
+    const FOO = 10;
 }
 
 interface I2 {
-	const FOO = 10;
+    const FOO = 10;
 }
 
 class C implements I1,I2 {

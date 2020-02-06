@@ -8,9 +8,9 @@ function test(array... $args) {
 }
 
 try {
-	test([0], [1], 2);
+    test([0], [1], 2);
 } catch(Error $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 
 ?>

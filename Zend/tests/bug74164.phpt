@@ -6,7 +6,7 @@ Bug #74164 (PHP hangs when an invalid value is dynamically passed to typehinted 
 namespace Foo;
 
 set_error_handler(function ($type, $msg) {
-	throw new \Exception($msg);
+    throw new \Exception($msg);
 });
 
 call_user_func(function (array &$ref) {var_dump("xxx");}, 'not_an_array_variable');

@@ -4,8 +4,8 @@ Testing __callstatic declaration with wrong modifier
 <?php
 
 class a {
-	static protected function __callstatic($a, $b) {
-	}
+    static protected function __callstatic($a, $b) {
+    }
 }
 
 ?>

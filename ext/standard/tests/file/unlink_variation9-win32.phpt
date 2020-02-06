@@ -58,14 +58,14 @@ $files = array(
 
 
 foreach($files as $fileToUnlink) {
-	$file = $workDir.'/'.$tmpFile;
-	$tounlink = $fileToUnlink;
+    $file = $workDir.'/'.$tmpFile;
+    $tounlink = $fileToUnlink;
    touch($file);
    echo "-- removing $tounlink --\n";
    $res = unlink($tounlink);
    if ($res === true) {
       if (file_exists($tounlink) === false) {
-      	echo "file removed\n";
+        echo "file removed\n";
       }
       else {
         echo "FAILED: file not removed\n";

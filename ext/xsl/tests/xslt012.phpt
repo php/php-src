@@ -30,9 +30,9 @@ if(!$proc) {
 $proc->importStylesheet($xsl);
 
 $parameters = Array(
-					'foo' => 'barbar',
-					'foo1' => 'test',
-					);
+                    'foo' => 'barbar',
+                    'foo1' => 'test',
+                    );
 
 $proc->setParameter( "", $parameters);
 

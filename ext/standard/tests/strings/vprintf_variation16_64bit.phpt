@@ -20,11 +20,11 @@ echo "*** Testing vprintf() : unsigned formats and signed & other types of value
 
 // defining array of unsigned formats
 $formats =
-  '%u %+u %-u 
-   %lu %Lu %4u %-4u
-   %10.4u %-10.4u %.4u 
-   %\'#2u %\'2u %\'$2u %\'_2u
-   %3$u %4$u %1$u %2$u';
+    '%u %+u %-u
+    %lu %Lu %4u %-4u
+    %10.4u %-10.4u %.4u
+    %\'#2u %\'2u %\'$2u %\'_2u
+    %3$u %4$u %1$u %2$u';
 
 // Arrays of signed and other type of values for the format defined in $format.
 // Each sub array contains signed values which correspond to each format in $format
@@ -76,33 +76,33 @@ foreach($args_array as $args) {
 *** Testing vprintf() : unsigned formats and signed & other types of values ***
 
 -- Iteration 1 --
-2 0 10 
-   123456 u 1234 20000000000
-   2000000000000 22000000000000 12345 
-   12 18446744073709551604 18446744073709428160 _3
-   10 123456 2 0
-int(143)
+2 0 10
+    123456 u 1234 20000000000
+    2000000000000 22000000000000 12345
+    12 18446744073709551604 18446744073709428160 _3
+    10 123456 2 0
+int(145)
 
 -- Iteration 2 --
-0 0 0 
-   123 u 18446744073709551493 123 
-            0 0          0 
-   1234 0 $0 _0
-   0 123 0 0
-int(98)
+0 0 0
+    123 u 18446744073709551493 123 
+             0 0          0
+    1234 0 $0 _0
+    0 123 0 0
+int(100)
 
 -- Iteration 3 --
-1 1 1 
-   1 u    1 1   
-            1 1          1 
-   #1 1 $1 _1
-   1 1 1 1
-int(76)
+1 1 1
+    1 u    1 1   
+             1 1          1
+    #1 1 $1 _1
+    1 1 1 1
+int(78)
 
 -- Iteration 4 --
-1 1 0 
-   1 u    0 1   
-            1 1          0 
-   #0 1 $1 _0
-   0 1 1 1
-int(76)
+1 1 0
+    1 u    0 1   
+             1 1          0
+    #0 1 $1 _0
+    0 1 1 1
+int(78)

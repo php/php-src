@@ -19,47 +19,47 @@ echo "*** Testing strspn() : with different start and len values ***\n";
 // defining different strings
 $strings = array(
                    "",
-		   '',
-		   "\n",
-		   '\n',
-		   "hello\tworld\nhello\nworld\n",
- 		   "1234hello45world\t123",
-		   "hello\0world\012",
-		   chr(0).chr(0),
-		   chr(0)."hello\0world".chr(0),
-		   "hello".chr(0)."world",
-		   "hello\0\100\xaaaworld",
+           '',
+           "\n",
+           '\n',
+           "hello\tworld\nhello\nworld\n",
+           "1234hello45world\t123",
+           "hello\0world\012",
+           chr(0).chr(0),
+           chr(0)."hello\0world".chr(0),
+           "hello".chr(0)."world",
+           "hello\0\100\xaaaworld",
                    );
 
 // define the array of mask strings
 $mask_array = array(
-		    "",
-		    '',
-		    "f\n\trelshti \l",
-		    'f\n\trelsthi \l',
-		    "\telh",
-		    "felh\t\ ",
+            "",
+            '',
+            "f\n\trelshti \l",
+            'f\n\trelsthi \l',
+            "\telh",
+            "felh\t\ ",
                     "fhel\t\i\100\xa"
                    );
 
 // defining the array for start values
 $start_array = array(
-		    0,
-		    1,
-		    2,
-		    -1,
-		    2147483647,  // max positive integer
-		    -2147483648,  // min negative integer
+            0,
+            1,
+            2,
+            -1,
+            2147483647,  // max positive integer
+            -2147483648,  // min negative integer
                    );
 
 // defining an array of len values
 $len_array = array(
-		    0,
-		    1,
-  		    2,
-		    -1,
-		    2147483647,  // max positive integer
-		    -2147483648,  // min negative integer
+            0,
+            1,
+            2,
+            -1,
+            2147483647,  // max positive integer
+            -2147483648,  // min negative integer
                    );
 
 

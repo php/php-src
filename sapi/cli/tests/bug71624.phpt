@@ -20,11 +20,11 @@ file_put_contents($filename_txt, $txt);
 
 $test_args = ['$argi', '$argn'];
 foreach ($test_args as $test_arg) {
-	if (substr(PHP_OS, 0, 3) == 'WIN') {
-		var_dump(`type "$filename_txt" | "$php" -n -R "echo $test_arg . PHP_EOL;"`);
-	} else {
-		var_dump(`cat "$filename_txt" | "$php" -n -R 'echo $test_arg . PHP_EOL;'`);
-	}
+    if (substr(PHP_OS, 0, 3) == 'WIN') {
+        var_dump(`type "$filename_txt" | "$php" -n -R "echo $test_arg . PHP_EOL;"`);
+    } else {
+        var_dump(`cat "$filename_txt" | "$php" -n -R 'echo $test_arg . PHP_EOL;'`);
+    }
 }
 
 @unlink($filename_txt);

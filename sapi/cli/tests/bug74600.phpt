@@ -14,14 +14,14 @@ file_put_contents($ini_file, <<<INI
 INI
 );
 $desc = array(
-	0 => array("pipe", "r"),
-	1 => array("pipe", "w"),
-	2 => array("pipe", "w"),
+    0 => array("pipe", "r"),
+    1 => array("pipe", "w"),
+    2 => array("pipe", "w"),
 );
 $pipes = array();
 $proc = proc_open("$php -c $ini_file -r 'echo \"okey\";'", $desc, $pipes);
 if (!$proc) {
-	exit(1);
+    exit(1);
 }
 var_dump(stream_get_contents($pipes[1]));
 var_dump(stream_get_contents($pipes[2]));

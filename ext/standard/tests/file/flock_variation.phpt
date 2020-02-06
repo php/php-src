@@ -9,7 +9,7 @@ Description: PHP supports a portable way of locking complete files
 */
 
 echo "*** Testing flock() fun with the various operation and
-            wouldblock values                                ***\n";
+    wouldblock values                                ***\n";
 
 $file = preg_replace("~\.phpt?$~", null, __FILE__);
 $fp = fopen($file, "w");
@@ -67,7 +67,7 @@ echo "\n*** Done ***\n";
 ?>
 --EXPECT--
 *** Testing flock() fun with the various operation and
-            wouldblock values                                ***
+    wouldblock values                                ***
 --- Outer iteration 0 ---
 bool(true)
 -- Inner iteration 0 in 0 --

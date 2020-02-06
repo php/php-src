@@ -5,9 +5,9 @@ WeakReference serials
 $wr = WeakReference::create(new stdClass);
 
 try {
-	serialize($wr);
+    serialize($wr);
 } catch (Exception $ex) {
-	var_dump($ex->getMessage());
+    var_dump($ex->getMessage());
 }
 
 $wrs = 'O:13:"WeakReference":0:{}';

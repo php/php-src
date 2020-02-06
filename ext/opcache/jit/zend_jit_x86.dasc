@@ -2938,9 +2938,19 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, const zend_
 				|	TRY_ADDREF op1_info, ah, r2
 			}
 			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
-				|	EXT_CALL increment_function, r0
+				if (opline->opcode == ZEND_PRE_INC && opline->result_type != IS_UNUSED) {
+					|	LOAD_ZVAL_ADDR FCARG2a, res_addr
+					|	EXT_CALL zend_jit_pre_inc, r0
+				} else {
+					|	EXT_CALL increment_function, r0
+				}
 			} else {
-				|	EXT_CALL decrement_function, r0
+				if (opline->opcode == ZEND_PRE_DEC && opline->result_type != IS_UNUSED) {
+					|	LOAD_ZVAL_ADDR FCARG2a, res_addr
+					|	EXT_CALL zend_jit_pre_dec, r0
+				} else {
+					|	EXT_CALL decrement_function, r0
+				}
 			}
 		} else {
 			zend_reg tmp_reg;
@@ -2970,11 +2980,11 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, const zend_
 				}
 			}
 			|	SSE_SET_ZVAL_DVAL op1_def_addr, tmp_reg
-		}
-		if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
-		    opline->result_type != IS_UNUSED) {
-			|	ZVAL_COPY_VALUE res_addr, res_use_info, op1_addr, op1_def_info, ZREG_R0, ZREG_R1
-			|	TRY_ADDREF op1_def_info, ah, r1
+			if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
+			    opline->result_type != IS_UNUSED) {
+				|	ZVAL_COPY_VALUE res_addr, res_use_info, op1_addr, op1_def_info, ZREG_R0, ZREG_R1
+				|	TRY_ADDREF op1_def_info, ah, r1
+			}
 		}
 		|	jmp >3
 		|.code
@@ -6593,6 +6603,7 @@ static int zend_jit_push_call_frame(dasm_State **Dst, const zend_op *opline, con
 	|	// EG(vm_stack_top) = (zval*)((char*)call + used_stack);
 	|.cold_code
 	|1:
+	|	SAVE_VALID_OPLINE opline
 	if (func) {
 		|	mov FCARG1d, used_stack
 	}
@@ -7206,7 +7217,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		if (func) {
 			for (i = 0; i < call_info->num_args; i++ ) {
 				uint32_t offset = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
-				|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_RX, offset), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 0, 1, 1, opline
+				|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_RX, offset), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 0, 1, 0, opline
 			}
 		} else {
 			|	mov FCARG1a, RX
@@ -7938,7 +7949,7 @@ static int zend_jit_free_compiled_variables(dasm_State **Dst, const zend_op *opl
 
 		if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
 			uint32_t offset = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
-			| ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_FP, offset), info, 1, 1, 1, opline
+			| ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_FP, offset), info, 1, 1, 0, opline
 		}
 	}
 	return 1;
@@ -7956,6 +7967,10 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 
 	|=>jit_return_label:
 
+	|	// EG(current_execute_data) = EX(prev_execute_data);
+	|	mov r0, EX->prev_execute_data
+	|	MEM_OP2_1_ZTS mov, aword, executor_globals, current_execute_data, r0, r2
+
 	// i_free_compiled_variables(execute_data);
 	if (!zend_jit_free_compiled_variables(Dst, opline, op_array, ssa)) {
 		return 0;
@@ -7968,9 +7983,6 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 
 	if ((op_array->scope && !(op_array->fn_flags & ZEND_ACC_STATIC)) ||
 	    (op_array->fn_flags & ZEND_ACC_CLOSURE)) {
-		|	// EG(current_execute_data) = EX(prev_execute_data);
-		|	mov r0, EX->prev_execute_data
-		|	MEM_OP2_1_ZTS mov, aword, executor_globals, current_execute_data, r0, r2
 		if (op_array->fn_flags & ZEND_ACC_CLOSURE) {
 			|	// OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 			|	mov r0, EX->func
@@ -7986,18 +7998,11 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 			|	OBJ_RELEASE r0, ecx, >4
 		}
 		|4:
-		|	// EG(vm_stack_top) = (zval*)execute_data;
-		|	MEM_OP2_1_ZTS mov, aword, executor_globals, vm_stack_top, FP, r0
-		|	// execute_data = EX(prev_execute_data);
-		|	mov FP, EX->prev_execute_data
-	} else {
-		|	// EG(vm_stack_top) = (zval*)execute_data;
-		|	MEM_OP2_1_ZTS mov, aword, executor_globals, vm_stack_top, FP, r0
-		|	// execute_data = EX(prev_execute_data);
-		|	mov FP, EX->prev_execute_data
-		|	// EG(current_execute_data) = execute_data
-		|	MEM_OP2_1_ZTS mov, aword, executor_globals, current_execute_data, FP, r0
 	}
+	|	// EG(vm_stack_top) = (zval*)execute_data;
+	|	MEM_OP2_1_ZTS mov, aword, executor_globals, vm_stack_top, FP, r0
+	|	// execute_data = EX(prev_execute_data);
+	|	mov FP, EX->prev_execute_data
 	|	// if (EG(exception))
 	|	MEM_OP2_1_ZTS cmp, aword, executor_globals, exception, 0, r0
 	|	LOAD_OPLINE
@@ -8467,15 +8472,17 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, const z
 	|	mov	r0, EX->run_time_cache
 	|	mov r0, aword [r0 + opline->extended_value]
 	|	sub r0, 1
-	//if (EXPECTED(idx < EG(symbol_table).nNumUsed))
-	|	MEM_OP2_2_ZTS cmp, eax, dword, executor_globals, symbol_table.nNumUsed, r1
-	|	jae >9
-	//Bucket *p = EG(symbol_table).arData + idx;
+	//if (EXPECTED(idx < EG(symbol_table).nNumUsed * sizeof(Bucket)))
 	|.if X64
-		|	shl r0, 5
+		|	MEM_OP2_2_ZTS movsxd, r1, dword, executor_globals, symbol_table.nNumUsed, r1
+		|	shl r1, 5
 	|.else
-		|	imul r0, sizeof(Bucket)
+		|	MEM_OP2_2_ZTS mov, r1, dword, executor_globals, symbol_table.nNumUsed, r1
+		|	imul r1, sizeof(Bucket)
 	|.endif
+	|	cmp r0, r1
+	|	jae >9
+	//Bucket *p = (Bucket*)((char*)EG(symbol_table).arData + idx);
 	|	MEM_OP2_2_ZTS add, r0, aword, executor_globals, symbol_table.arData, r1
 	|	IF_Z_TYPE r0, IS_UNDEF, >9
 	//	(EXPECTED(p->key == Z_STR_P(varname))
@@ -8845,28 +8852,23 @@ static uint32_t zend_get_known_property_offset(zend_class_entry *ce, zend_string
 		return ZEND_WRONG_PROPERTY_OFFSET;
 	}
 
-	if (ce->ce_flags & ZEND_ACC_INHERITED) {
-		if (!ce->parent) {
-			/* property offsets may be changed by inheritance */
-			return ZEND_WRONG_PROPERTY_OFFSET;
-		} else {
-			zend_class_entry *parent = ce->parent;
+	if (ce->parent) {
+		zend_class_entry *parent = ce->parent;
 
-			do {
-				if (parent->type == ZEND_INTERNAL_CLASS) {
-					break;
-				} else if (parent->info.user.filename != filename) {
-					/* some of parents class declarations might be changed infdependently */
-					/* TODO: this check may be not enough, because even
-					 * in the same it's possible to conditionally define
-					 * few classes with the same name, and "parent" may
-					 * change from request to request.
-					 */
-					return ZEND_WRONG_PROPERTY_OFFSET;
-				}
-				parent = parent->parent;
-			} while (parent);
-		}
+		do {
+			if (parent->type == ZEND_INTERNAL_CLASS) {
+				break;
+			} else if (parent->info.user.filename != filename) {
+				/* some of parents class declarations might be changed infdependently */
+				/* TODO: this check may be not enough, because even
+				 * in the same it's possible to conditionally define
+				 * few classes with the same name, and "parent" may
+				 * change from request to request.
+				 */
+				return ZEND_WRONG_PROPERTY_OFFSET;
+			}
+			parent = parent->parent;
+		} while (parent);
 	}
 
 	info = (zend_property_info*)zend_hash_find_ptr(&ce->properties_info, member);

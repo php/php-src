@@ -13,7 +13,7 @@ error_reporting(E_ALL ^ E_NOTICE);
 
 class MyClass
 {
-	// no toString() method defined
+    // no toString() method defined
 }
 
 // Testing strval with a object which has no toString() method

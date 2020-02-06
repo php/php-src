@@ -4,7 +4,7 @@ Trying to create a constant on Trait
 <?php
 
 trait foo {
-	const a = 1;
+    const a = 1;
 }
 
 ?>
