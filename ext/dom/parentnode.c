@@ -179,13 +179,18 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 				xmlSetTreeDoc(newNode, documentNode);
 
 				if (!xmlAddChild(fragment, newNode)) {
+					xmlFree(fragment);
+
 					php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
 					return NULL;
 				}
 
 				continue;
 			} else {
+				xmlFree(fragment);
+
 				zend_type_error("Invalid argument type must be either DOMNode or string");
+				return NULL;
 			}
 		} else if (Z_TYPE(nodes[i]) == IS_STRING) {
 			newNode = xmlNewDocText(documentNode, (xmlChar *) Z_STRVAL(nodes[i]));
@@ -193,10 +198,16 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 			xmlSetTreeDoc(newNode, documentNode);
 
 			if (!xmlAddChild(fragment, newNode)) {
+				xmlFree(fragment);
+
 				return NULL;
 			}
 		} else {
+			xmlFree(fragment);
+
 			zend_type_error("Invalid argument type must be either DOMNode or string");
+
+			return NULL;
 		}
 	}
 
@@ -241,6 +252,8 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 
 		dom_reconcile_ns(contextNode->doc, newchild);
 	}
+
+	xmlFree(fragment);
 }
 
 void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
@@ -278,6 +291,8 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
 
 		dom_reconcile_ns(contextNode->doc, newchild);
 	}
+
+	xmlFree(fragment);
 }
 
 void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
@@ -322,6 +337,8 @@ void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
 
 		dom_reconcile_ns(prevsib->doc, newchild);
 	}
+
+	xmlFree(fragment);
 }
 
 void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
@@ -361,6 +378,8 @@ void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
 
 		dom_reconcile_ns(nextsib->doc, newchild);
 	}
+
+	xmlFree(fragment);
 }
 
 void dom_child_node_remove(dom_object *context)
