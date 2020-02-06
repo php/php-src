@@ -394,7 +394,7 @@ CPH_METHOD(SaveToFile)
 				RETURN_FALSE;
 			}
 
-			olefilename = php_com_string_to_olestring(filename, strlen(fullpath), helper->codepage);
+			olefilename = php_com_string_to_olestring(fullpath, strlen(fullpath), helper->codepage);
 			efree(fullpath);
 		}
 		res = IPersistFile_Save(helper->ipf, olefilename, remember);
