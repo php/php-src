@@ -1161,7 +1161,7 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 
 	/* Inherit interfaces */
 	if (parent_ce->num_interfaces) {
-		if (!(ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES)) {
+		if (!ce->num_interfaces) {
 			zend_do_inherit_interfaces(ce, parent_ce);
 		} else {
 			uint32_t i;
@@ -2463,7 +2463,7 @@ ZEND_API int zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_nam
 	if (ce->num_traits) {
 		zend_do_bind_traits(ce);
 	}
-	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
+	if (interfaces) {
 		zend_do_implement_interfaces(ce, interfaces);
 	}
 	if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {

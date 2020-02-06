@@ -6523,7 +6523,6 @@ void zend_compile_implements(zend_ast *ast) /* {{{ */
 		interface_names[i].lc_name = zend_string_tolower(interface_names[i].name);
 	}
 
-	ce->ce_flags |= ZEND_ACC_IMPLEMENT_INTERFACES;
 	ce->num_interfaces = list->children;
 	ce->interface_names = interface_names;
 }
@@ -6664,7 +6663,7 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 
 	if (toplevel
 		/* We currently don't early-bind classes that implement interfaces or use traits */
-	 && !(ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) && !ce->num_traits
+	 && !ce->num_interfaces && !ce->num_traits
 	 && !(CG(compiler_options) & ZEND_COMPILE_PRELOAD)) {
 		if (extends_ast) {
 			zend_class_entry *parent_ce = zend_lookup_class_ex(
@@ -6725,7 +6724,7 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 		if (extends_ast && toplevel
 			 && (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING)
 				/* We currently don't early-bind classes that implement interfaces or use traits */
-			 && !(ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) && !ce->num_traits
+			 && !ce->num_interfaces && !ce->num_traits
 		) {
 			CG(active_op_array)->fn_flags |= ZEND_ACC_EARLY_BINDING;
 			opline->opcode = ZEND_DECLARE_CLASS_DELAYED;
