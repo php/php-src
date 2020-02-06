@@ -410,6 +410,8 @@ PHP 8.0 UPGRADE NOTES
   . Some consistency fixes to variable syntax have been applied, for example
     writing `Foo::BAR::$baz` is now allowed.
     RFC: https://wiki.php.net/rfc/variable_syntax_tweaks
+  . Added Stringable.
+    RFC: https://wiki.php.net/rfc/stringable
 
 - Date:
   . Added DateTime::createFromInterface() and

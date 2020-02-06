@@ -6066,6 +6066,24 @@ static void zend_check_magic_method_attr(uint32_t attr, const char* method, zend
 }
 /* }}} */
 
+static void add_stringable_interface(zend_class_entry *ce) {
+	for (uint32_t i = 0; i < ce->num_interfaces; i++) {
+		if (zend_string_equals_literal(ce->interface_names[i].lc_name, "stringable")) {
+			/* Interface already explicitly implemented */
+			return;
+		}
+	}
+
+	ce->num_interfaces++;
+	ce->interface_names =
+		erealloc(ce->interface_names, sizeof(zend_class_name) * ce->num_interfaces);
+	// TODO: Add known interned strings instead?
+	ce->interface_names[ce->num_interfaces - 1].name =
+		zend_string_init("Stringable", sizeof("Stringable") - 1, 0);
+	ce->interface_names[ce->num_interfaces - 1].lc_name =
+		zend_string_init("stringable", sizeof("stringable") - 1, 0);
+}
+
 void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_bool has_body) /* {{{ */
 {
 	zend_class_entry *ce = CG(active_class_entry);
@@ -6147,6 +6165,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 	} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
 		zend_check_magic_method_attr(fn_flags, "__toString", 0);
 		ce->__tostring = (zend_function *) op_array;
+		add_stringable_interface(ce);
 	} else if (zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME)) {
 		zend_check_magic_method_attr(fn_flags, "__invoke", 0);
 	} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
@@ -6680,6 +6699,10 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 
 	CG(active_class_entry) = ce;
 
+	if (implements_ast) {
+		zend_compile_implements(implements_ast);
+	}
+
 	zend_compile_stmt(stmt_ast);
 
 	/* Reset lineno for final opcodes and errors */
@@ -6717,10 +6740,6 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 				"Clone method %s::%s() cannot declare a return type",
 				ZSTR_VAL(ce->name), ZSTR_VAL(ce->clone->common.function_name));
 		}
-	}
-
-	if (implements_ast) {
-		zend_compile_implements(implements_ast);
 	}
 
 	if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
