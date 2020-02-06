@@ -7,7 +7,7 @@ DOMParentNode::prepend()
 require_once("dom_test.inc");
 
 $dom = new DOMDocument;
-$dom->loadXML('<test><mark/><mark/><mark/></test>');
+$dom->loadXML('<test><mark/><mark><nested /></mark><mark/></test>');
 if(!$dom) {
   echo "Error while parsing the document\n";
   exit;
@@ -52,7 +52,7 @@ Node Content:
 
 Node Name: mark
 Node Type: 1
-Num Children: 0
+Num Children: 1
 Node Content:
 
 Node Name: mark
