@@ -6,6 +6,8 @@ PHP                                                                        NEWS
 - COM:
   . Fixed bug #66322 (COMPersistHelper::SaveToFile can save to wrong location).
     (cmb)
+  . Fixed bug #79242 (COM error constants don't match com_exception codes on
+    x86). (cmb)
 
 - CURL:
   . Fixed bug #79019 (Copied cURL handles upload empty file). (cmb)
