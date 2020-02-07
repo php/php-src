@@ -2122,20 +2122,18 @@ typedef struct _zend_abstract_info {
 
 static void zend_verify_abstract_class_function(zend_function *fn, zend_abstract_info *ai) /* {{{ */
 {
-	if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
-		if (ai->cnt < MAX_ABSTRACT_INFO_CNT) {
-			ai->afn[ai->cnt] = fn;
-		}
-		if (fn->common.fn_flags & ZEND_ACC_CTOR) {
-			if (!ai->ctor) {
-				ai->cnt++;
-				ai->ctor = 1;
-			} else {
-				ai->afn[ai->cnt] = NULL;
-			}
-		} else {
+	if (ai->cnt < MAX_ABSTRACT_INFO_CNT) {
+		ai->afn[ai->cnt] = fn;
+	}
+	if (fn->common.fn_flags & ZEND_ACC_CTOR) {
+		if (!ai->ctor) {
 			ai->cnt++;
+			ai->ctor = 1;
+		} else {
+			ai->afn[ai->cnt] = NULL;
 		}
+	} else {
+		ai->cnt++;
 	}
 }
 /* }}} */
@@ -2144,16 +2142,23 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 {
 	zend_function *func;
 	zend_abstract_info ai;
-
-	ZEND_ASSERT((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS);
+	zend_bool is_explicit_abstract = (ce->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) != 0;
 	memset(&ai, 0, sizeof(ai));
 
 	ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
-		zend_verify_abstract_class_function(func, &ai);
+		if (func->common.fn_flags & ZEND_ACC_ABSTRACT) {
+			/* If the class is explicitly abstract, we only check private abstract methods,
+			 * because only they must be declared in the same class. */
+			if (!is_explicit_abstract || (func->common.fn_flags & ZEND_ACC_PRIVATE)) {
+				zend_verify_abstract_class_function(func, &ai);
+			}
+		}
 	} ZEND_HASH_FOREACH_END();
 
 	if (ai.cnt) {
-		zend_error_noreturn(E_ERROR, "Class %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
+		zend_error_noreturn(E_ERROR, !is_explicit_abstract
+			? "Class %s contains %d abstract method%s and must therefore be declared abstract or implement the remaining methods (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")"
+			: "Class %s must implement %d abstract private method%s (" MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT MAX_ABSTRACT_INFO_FMT ")",
 			ZSTR_VAL(ce->name), ai.cnt,
 			ai.cnt > 1 ? "s" : "",
 			DISPLAY_ABSTRACT_FN(0),
@@ -2432,7 +2437,9 @@ ZEND_API int zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_nam
 	if (interfaces) {
 		zend_do_implement_interfaces(ce, interfaces);
 	}
-	if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
+	if (!(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT))
+		&& (ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))
+	) {
 		zend_verify_abstract_class(ce);
 	}
 
