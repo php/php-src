@@ -246,11 +246,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 #define COM_CONST(x) REGISTER_LONG_CONSTANT(#x, x, CONST_CS|CONST_PERSISTENT)
 
 #if SIZEOF_ZEND_LONG == 8
-# define COM_ERR_CONST(x) { \
-	zend_long __tmp; \
-	ULongToIntPtr(x, &__tmp); \
-	REGISTER_LONG_CONSTANT(#x, __tmp, CONST_CS|CONST_PERSISTENT); \
-}
+# define COM_ERR_CONST(x) REGISTER_LONG_CONSTANT(#x, (zend_long) (ULONG) (x), CONST_CS|CONST_PERSISTENT)
 #else
 # define COM_ERR_CONST COM_CONST
 #endif
