@@ -6,16 +6,21 @@ Test pass by reference semantics
 // Showing warning:
 // "Only variables should be passed by reference in %s on line %d"
 $stack = array ( array ( 'two' ));
-var_dump(array_shift(array_shift($stack)));
+try {
+	var_dump(array_shift(array_shift($stack)));
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 
 // This should show the identical warning
 $original = array ( array ( 'one' ));
 $stack = $original;
-var_dump(array_shift(array_shift($stack)));
+try {
+	var_dump(array_shift(array_shift($stack)));
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 ?>
---EXPECTF--
-Notice: Only variables should be passed by reference in %s on line %d
-string(3) "two"
-
-Notice: Only variables should be passed by reference in %s on line %d
-string(3) "one"
+--EXPECT--
+Exception: Cannot pass parameter 1 by reference
+Exception: Cannot pass parameter 1 by reference

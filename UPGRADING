@@ -128,7 +128,7 @@ PHP 8.0 UPGRADE NOTES
   . Compile time fatal error "Only variables can be passed by reference" has been
     delayed until run-time and converted to "Cannot pass parameter by reference"
     exception.
-  . Some "Only variables should be passed by reference" notices have been converted
+  . "Only variables should be passed by reference" notice has been converted
     to "Cannot pass parameter by reference" exception.
 
 - COM:

@@ -12,11 +12,15 @@ class X {
 }
 
 //$arr1 = X::getArr();
-array_splice(X::getArr(), 1, 1);
+try {
+	array_splice(X::getArr(), 1, 1);
+} catch (Throwable $e) {
+	echo "Exception :" . $e->getMessage() . "\n";
+}
 print_r(X::getArr());
 ?>
---EXPECTF--
-Notice: Only variables should be passed by reference in %sbug33257.php on line 10
+--EXPECT--
+Exception :Cannot pass parameter 1 by reference
 Array
 (
     [0] => a

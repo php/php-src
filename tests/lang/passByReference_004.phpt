@@ -13,9 +13,12 @@ function bar($value)
     return $value;
 }
 
-foo(bar(5));
+try {
+	foo(bar(5));
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 
 ?>
---EXPECTF--
-Notice: Only variables should be passed by reference in %s on line 13
-int(5)
+--EXPECT--
+Exception: Cannot pass parameter 1 by reference

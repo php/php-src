@@ -19,7 +19,11 @@ $stack = array ( array ( array ('zero', 'one', 'two'), 'un', 'deux'), 'eins', 'z
 
 // not following strict standards
 echo "\n-- Incorrect Method: --\n";
-var_dump(array_shift(array_shift(array_shift($stack))));
+try {
+	var_dump(array_shift(array_shift(array_shift($stack))));
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 
 $stack = array (array( array('zero', 'one', 'two'), 'un', 'deux'), 'eins', 'zwei');
 // correct way of doing above:
@@ -30,15 +34,11 @@ var_dump(array_shift($result2));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_shift() : usage variations ***
 
 -- Incorrect Method: --
-
-Notice: Only variables should be passed by reference in %s on line %d
-
-Notice: Only variables should be passed by reference in %s on line %d
-string(4) "zero"
+Exception: Cannot pass parameter 1 by reference
 
 -- Correct Method: --
 string(4) "zero"

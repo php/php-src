@@ -4603,17 +4603,12 @@ ZEND_VM_HANDLER(106, ZEND_SEND_VAR_NO_REF, VAR, NUM)
 	zval *varptr, *arg;
 
 	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	if (UNEXPECTED(!Z_ISREF_P(varptr))) {
+		ZEND_VM_DISPATCH_TO_HELPER(zend_cannot_pass_by_ref_helper);
+	}
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 	ZVAL_COPY_VALUE(arg, varptr);
-
-	if (EXPECTED(Z_ISREF_P(varptr))) {
-		ZEND_VM_NEXT_OPCODE();
-	}
-
-	SAVE_OPLINE();
-	ZVAL_NEW_REF(arg, arg);
-	zend_error(E_NOTICE, "Only variables should be passed by reference");
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_HOT_SEND_HANDLER(50, ZEND_SEND_VAR_NO_REF_EX, VAR, NUM, SPEC(QUICK_ARG))
@@ -4622,38 +4617,49 @@ ZEND_VM_HOT_SEND_HANDLER(50, ZEND_SEND_VAR_NO_REF_EX, VAR, NUM, SPEC(QUICK_ARG))
 	zval *varptr, *arg;
 	uint32_t arg_num = opline->op2.num;
 
+	varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+
 	if (EXPECTED(arg_num <= MAX_ARG_FLAG_NUM)) {
-		if (!QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_SEND_VAR);
-		}
+		if (UNEXPECTED(!QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
+			if (UNEXPECTED(Z_ISREF_P(varptr))) {
+				zend_refcounted *ref = Z_COUNTED_P(varptr);
 
-		varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
-		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
-		ZVAL_COPY_VALUE(arg, varptr);
-
-		if (EXPECTED(Z_ISREF_P(varptr) ||
-		    QUICK_ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
-			ZEND_VM_NEXT_OPCODE();
+				varptr = Z_REFVAL_P(varptr);
+				ZVAL_COPY_VALUE(arg, varptr);
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+					efree_size(ref, sizeof(zend_reference));
+				} else if (Z_OPT_REFCOUNTED_P(arg)) {
+					Z_ADDREF_P(arg);
+				}
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (UNEXPECTED(!Z_ISREF_P(varptr)) &&
+		           UNEXPECTED(QUICK_ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
+			ZEND_VM_DISPATCH_TO_HELPER(zend_cannot_pass_by_ref_helper);
 		}
 	} else {
-		if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-			ZEND_VM_DISPATCH_TO_HANDLER(ZEND_SEND_VAR);
-		}
+		if (UNEXPECTED(!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
+			if (UNEXPECTED(Z_ISREF_P(varptr))) {
+				zend_refcounted *ref = Z_COUNTED_P(varptr);
 
-		varptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
-		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
-		ZVAL_COPY_VALUE(arg, varptr);
-
-		if (EXPECTED(Z_ISREF_P(varptr) ||
-		    ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
-			ZEND_VM_NEXT_OPCODE();
+				varptr = Z_REFVAL_P(varptr);
+				ZVAL_COPY_VALUE(arg, varptr);
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+					efree_size(ref, sizeof(zend_reference));
+				} else if (Z_OPT_REFCOUNTED_P(arg)) {
+					Z_ADDREF_P(arg);
+				}
+				ZEND_VM_NEXT_OPCODE();
+			}
+		} else if (UNEXPECTED(!Z_ISREF_P(varptr)) &&
+		           UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
+			ZEND_VM_DISPATCH_TO_HELPER(zend_cannot_pass_by_ref_helper);
 		}
 	}
 
-	SAVE_OPLINE();
-	ZVAL_NEW_REF(arg, arg);
-	zend_error(E_NOTICE, "Only variables should be passed by reference");
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	ZVAL_COPY_VALUE(arg, varptr);
+	ZEND_VM_NEXT_OPCODE();
 }
 
 ZEND_VM_HANDLER(67, ZEND_SEND_REF, VAR|CV, NUM)

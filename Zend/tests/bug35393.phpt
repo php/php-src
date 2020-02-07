@@ -14,16 +14,19 @@ class ObjectPath
     }
 }
 print_r(ObjectPath::getType());
-$object_type = array_pop((ObjectPath::getType()));
+try {
+	$object_type = array_pop((ObjectPath::getType()));
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 print_r(ObjectPath::getType());
 ?>
---EXPECTF--
+--EXPECT--
 Array
 (
     [0] => main
 )
-
-Notice: Only variables should be passed by reference in %sbug35393.php on line 12
+Exception: Cannot pass parameter 1 by reference
 Array
 (
     [0] => main

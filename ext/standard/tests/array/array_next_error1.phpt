@@ -5,8 +5,11 @@ next - ensure warning is received when passing an indirect temporary.
 function f() {
     return array(1, 2);
 }
-var_dump(next(f()));
+try {
+	var_dump(next(f()));
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() . "\n";
+}
 ?>
---EXPECTF--
-Notice: Only variables should be passed by reference in %s on line %d
-int(2)
+--EXPECT--
+Exception: Cannot pass parameter 1 by reference
