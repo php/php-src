@@ -9379,10 +9379,12 @@ static zend_bool zend_jit_verify_return_type(dasm_State **Dst, const zend_op *op
 		|	SAVE_VALID_OPLINE opline
 		|	EXT_CALL zend_jit_verify_return_slow, r0
 	|.else
+		|	sub r4, 8
 		|	push r0
 		|	push (ptrdiff_t)arg_info
 		|	SAVE_VALID_OPLINE opline
 		|	EXT_CALL zend_jit_verify_return_slow, r0
+		|	sub r4, 8
 	|.endif
 	if (!zend_jit_check_exception(Dst)) {
 		return 0;
