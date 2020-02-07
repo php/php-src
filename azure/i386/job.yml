@@ -10,8 +10,8 @@ jobs:
     - template: apt.yml
     - script: |
         ./buildconf --force
-        export CFLAGS=-m32
-        export CXXFLAGS=-m32
+        export CFLAGS="-m32 -msse2"
+        export CXXFLAGS="-m32 -msse2"
         export LDFLAGS=-L/usr/lib/i386-linux-gnu
         export PKG_CONFIG=/usr/bin/i686-linux-gnu-pkg-config
         ./configure ${{ parameters.configurationParameters }} \
