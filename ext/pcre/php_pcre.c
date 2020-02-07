@@ -1109,6 +1109,22 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 }
 /* }}} */
 
+static zend_always_inline zend_bool is_known_valid_utf8(
+		zend_string *subject_str, PCRE2_SIZE start_offset) {
+	if (!(GC_FLAGS(subject_str) & IS_STR_VALID_UTF8)) {
+		/* We don't know whether the string is valid UTF-8 or not. */
+		return 0;
+	}
+
+	if (start_offset == ZSTR_LEN(subject_str)) {
+		/* Degenerate case: Offset points to end of string. */
+		return 1;
+	}
+
+	/* Check that the offset does not point to an UTF-8 continuation byte. */
+	return (ZSTR_VAL(subject_str)[start_offset] & 0xc0) != 0x80;
+}
+
 /* {{{ php_pcre_match_impl() */
 PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
 	zval *subpats, int global, int use_flags, zend_long flags, zend_off_t start_offset)
@@ -1130,7 +1146,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	PCRE2_SPTR       mark = NULL;		/* Target for MARK name */
 	zval			 marks;				/* Array of marks for PREG_PATTERN_ORDER */
 	pcre2_match_data *match_data;
-	PCRE2_SIZE		 start_offset2;
+	PCRE2_SIZE		 start_offset2, orig_start_offset;
 
 	char *subject = ZSTR_VAL(subject_str);
 	size_t subject_len = ZSTR_LEN(subject_str);
@@ -1226,8 +1242,10 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		}
 	}
 
-	options = (pce->compile_options & PCRE2_UTF) && !(GC_FLAGS(subject_str) & IS_STR_VALID_UTF8)
-		? 0 : PCRE2_NO_UTF_CHECK;
+	orig_start_offset = start_offset2;
+	options =
+		(pce->compile_options & PCRE2_UTF) && !is_known_valid_utf8(subject_str, orig_start_offset)
+			? 0 : PCRE2_NO_UTF_CHECK;
 
 	/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
@@ -1417,7 +1435,8 @@ error:
 
 	if (PCRE_G(error_code) == PHP_PCRE_NO_ERROR) {
 		/* If there was no error and we're in /u mode, remember that the string is valid UTF-8. */
-		if ((pce->compile_options & PCRE2_UTF) && !ZSTR_IS_INTERNED(subject_str)) {
+		if ((pce->compile_options & PCRE2_UTF)
+				&& !ZSTR_IS_INTERNED(subject_str) && orig_start_offset == 0) {
 			GC_ADD_FLAGS(subject_str, IS_STR_VALID_UTF8);
 		}
 
