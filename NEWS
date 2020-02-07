@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - COM:
   . Fixed bug #66322 (COMPersistHelper::SaveToFile can save to wrong location).
     (cmb)
+  . Fixed bug #79242 (COM error constants don't match com_exception codes on
+    x86). (cmb)
 
 - PCRE:
   . Fixed bug #79188 (Memory corruption in preg_replace/preg_replace_callback
