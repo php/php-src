@@ -734,10 +734,10 @@ static inline void phpdbg_handle_exception(void) /* {{{ */
 		EG(exception) = NULL;
 		msg = ZSTR_EMPTY_ALLOC();
 	} else {
-		zend_class_entry *ce = zend_get_exception_base(&zv);
-		zend_update_property_string(ce, &zv, ZEND_STRL("string"), Z_STRVAL(tmp));
+		zend_class_entry *base_ce = zend_get_exception_base(&zv);
+		zend_update_property_string(base_ce, &zv, ZEND_STRL("string"), Z_STRVAL(tmp));
 		zval_ptr_dtor(&tmp);
-		msg = zval_get_string(zend_read_property(zend_get_exception_base(&zv), &zv, ZEND_STRL("string"), 1, &rv));
+		msg = zval_get_string(zend_read_property(base_ce, &zv, ZEND_STRL("string"), 1, &rv));
 	}
 
 	phpdbg_error("exception",
