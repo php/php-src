@@ -15,8 +15,19 @@ var_dump(preg_match($pattern, $text, $matches, 0, 0));
 var_dump(preg_match($pattern, $text, $matches, 0, 1));
 var_dump(preg_last_error() == PREG_BAD_UTF8_OFFSET_ERROR);
 
+echo "\n";
+
+$text = "VA\xff"; $text .= "LID";
+var_dump(preg_match($pattern, $text, $matches, 0, 4));
+var_dump(preg_match($pattern, $text, $matches, 0, 0));
+var_dump(preg_last_error() == PREG_BAD_UTF8_ERROR);
+
 ?>
 --EXPECT--
 int(0)
+bool(false)
+bool(true)
+
+int(1)
 bool(false)
 bool(true)

@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #79188 (Memory corruption in preg_replace/preg_replace_callback
     and unicode). (Nikita)
+  . Fixed bug #79241 (Segmentation fault on preg_match()). (Nikita)
 
 ?? ??? ????, PHP 7.4.3
 
