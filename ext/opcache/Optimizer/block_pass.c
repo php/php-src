@@ -250,13 +250,38 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			case ZEND_FREE:
 				if (opline->op1_type == IS_TMP_VAR) {
 					src = VAR_SOURCE(opline->op1);
-					if (src &&
-					    (src->opcode == ZEND_BOOL || src->opcode == ZEND_BOOL_NOT)) {
-						/* T = BOOL(X), FREE(T) => T = BOOL(X) */
-						/* The remaining BOOL is removed by a separate optimization */
-						VAR_SOURCE(opline->op1) = NULL;
-						MAKE_NOP(opline);
-						++(*opt_count);
+					if (src) {
+						switch (src->opcode) {
+							case ZEND_BOOL:
+							case ZEND_BOOL_NOT:
+								/* T = BOOL(X), FREE(T) => T = BOOL(X) */
+								/* The remaining BOOL is removed by a separate optimization */
+								VAR_SOURCE(opline->op1) = NULL;
+								MAKE_NOP(opline);
+								++(*opt_count);
+								break;
+							case ZEND_ASSIGN:
+							case ZEND_ASSIGN_DIM:
+							case ZEND_ASSIGN_OBJ:
+							case ZEND_ASSIGN_STATIC_PROP:
+							case ZEND_ASSIGN_OP:
+							case ZEND_ASSIGN_DIM_OP:
+							case ZEND_ASSIGN_OBJ_OP:
+							case ZEND_ASSIGN_STATIC_PROP_OP:
+							case ZEND_PRE_INC:
+							case ZEND_PRE_DEC:
+							case ZEND_PRE_INC_OBJ:
+							case ZEND_PRE_DEC_OBJ:
+							case ZEND_PRE_INC_STATIC_PROP:
+							case ZEND_PRE_DEC_STATIC_PROP:
+								src->result_type = IS_UNUSED;
+								VAR_SOURCE(opline->op1) = NULL;
+								MAKE_NOP(opline);
+								++(*opt_count);
+								break;
+							default:
+								break;
+						}
 					}
 				} else if (opline->op1_type == IS_VAR) {
 					src = VAR_SOURCE(opline->op1);
@@ -1649,7 +1674,7 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 
 		while (opline >= end) {
 			/* usage checks */
-			if (opline->result_type == IS_VAR) {
+			if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
 				if (!zend_bitset_in(usage, VAR_NUM(opline->result.var))) {
 					switch (opline->opcode) {
 						case ZEND_ASSIGN_OP:
@@ -1666,13 +1691,6 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 						case ZEND_DO_FCALL_BY_NAME:
 							opline->result_type = IS_UNUSED;
 							break;
-					}
-				} else {
-					zend_bitset_excl(usage, VAR_NUM(opline->result.var));
-				}
-			} else if (opline->result_type == IS_TMP_VAR) {
-				if (!zend_bitset_in(usage, VAR_NUM(opline->result.var))) {
-					switch (opline->opcode) {
 						case ZEND_POST_INC:
 						case ZEND_POST_DEC:
 						case ZEND_POST_INC_OBJ:

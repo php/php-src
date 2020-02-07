@@ -12,4 +12,7 @@ change(list($val) = $array);
 var_dump($array);
 ?>
 --EXPECTF--
-Fatal error: Only variables can be passed by reference in %s on line %d
+Fatal error: Uncaught Error: Cannot pass parameter 1 by reference in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

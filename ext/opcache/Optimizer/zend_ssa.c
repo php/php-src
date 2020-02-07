@@ -427,7 +427,7 @@ static void place_essa_pis(
 					pi_range_not_equals(pi, -1, 1);
 				}
 			}
-		} else if (opline->op1_type == IS_VAR &&
+		} else if (opline->op1_type == IS_TMP_VAR &&
 		           ((opline-1)->opcode == ZEND_PRE_INC ||
 		            (opline-1)->opcode == ZEND_PRE_DEC) &&
 		           opline->op1.var == (opline-1)->result.var &&
