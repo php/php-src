@@ -396,73 +396,145 @@ ZEND_METHOD(error_exception, __construct)
 #define GET_PROPERTY_SILENT(object, id) \
 	zend_read_property_ex(i_get_exception_base(object), (object), ZSTR_KNOWN(id), 1, &rv)
 
+static zend_long *_get_long_prop(zend_object *exception, zend_known_string_id id, zend_bool silent)
+{ /* {{{ */
+	zval rv, obj;
+	ZVAL_OBJ(&obj, exception);
+	zval *prop = GET_PROPERTY_SILENT(&obj, id);
+	ZVAL_DEREF(prop);
+	if (Z_TYPE_P(prop) != IS_LONG) {
+		if (!silent) {
+			zend_type_error("Exception %s was not a long", ZSTR_VAL(ZSTR_KNOWN(id)));
+		}
+		return NULL;
+	}
+	return &Z_LVAL_P(prop);
+} /* }}} */
+
+static zend_string *_get_str_prop(zend_object *exception, zend_known_string_id id, zend_bool silent)
+{ /* {{{ */
+	zval rv, obj;
+	ZVAL_OBJ(&obj, exception);
+	zval *prop = GET_PROPERTY_SILENT(&obj, id);
+	ZVAL_DEREF(prop);
+	if (Z_TYPE_P(prop) != IS_STRING) {
+		if (!silent) {
+			zend_type_error("Exception %s is not a string", ZSTR_VAL(ZSTR_KNOWN(id)));
+		}
+		return NULL;
+	}
+	return Z_STR_P(prop);
+} /* }}} */
+
+static HashTable *_get_arr_prop(zend_object *exception, zend_known_string_id id, zend_bool silent)
+{ /* {{{ */
+	zval rv, obj;
+	ZVAL_OBJ(&obj, exception);
+	zval *prop = GET_PROPERTY_SILENT(&obj, id);
+	ZVAL_DEREF(prop);
+	if (Z_TYPE_P(prop) != IS_ARRAY) {
+		if (!silent) {
+			zend_type_error("Exception %s is not an array", ZSTR_VAL(ZSTR_KNOWN(id)));
+		}
+		return NULL;
+	}
+	return Z_ARR_P(prop);
+} /* }}} */
+
+ZEND_API zend_string *zend_exception_get_file(zend_object *exception, zend_bool silent)
+{ /* {{{ */
+	return _get_str_prop(exception, ZEND_STR_FILE, silent);
+} /* }}} */
+
 /* {{{ proto string Exception|Error::getFile()
    Get the file in which the exception occurred */
 ZEND_METHOD(exception, getFile)
 {
-	zval *prop, rv;
-
+	zend_string *file;
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_FILE);
-	ZVAL_DEREF(prop);
-	ZVAL_COPY(return_value, prop);
+	if ((file = zend_exception_get_file(Z_OBJ_P(ZEND_THIS), 0))) {
+		zend_string_addref(file);
+		RETURN_STR(file);
+	}
 }
 /* }}} */
+
+ZEND_API zend_long *zend_exception_get_line(zend_object *exception, zend_bool silent)
+{ /* {{{ */
+	return _get_long_prop(exception, ZEND_STR_LINE, silent);
+} /* }}} */
 
 /* {{{ proto int Exception|Error::getLine()
    Get the line in which the exception occurred */
 ZEND_METHOD(exception, getLine)
 {
-	zval *prop, rv;
+	zend_long *line;
 
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_LINE);
-	ZVAL_DEREF(prop);
-	ZVAL_COPY(return_value, prop);
+	if ((line = zend_exception_get_line(Z_OBJ_P(ZEND_THIS), 0))) {
+		RETURN_LONG(*line);
+	}
 }
 /* }}} */
+
+ZEND_API zend_string *zend_exception_get_message(zend_object *exception, zend_bool silent)
+{ /* {{{ */
+	return _get_str_prop(exception, ZEND_STR_MESSAGE, silent);
+} /* }}} */
 
 /* {{{ proto string Exception|Error::getMessage()
    Get the exception message */
 ZEND_METHOD(exception, getMessage)
 {
-	zval *prop, rv;
-
+	zend_string *str;
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_MESSAGE);
-	ZVAL_DEREF(prop);
-	ZVAL_COPY(return_value, prop);
+	if ((str = zend_exception_get_message(Z_OBJ_P(ZEND_THIS), 0))) {
+		zend_string_addref(str);
+		RETURN_STR(str);
+	}
 }
 /* }}} */
+
+ZEND_API zval *zend_exception_get_code(zend_object *exception, zend_bool silent)
+{ /* {{{ */
+	zval *prop, rv, obj;
+	ZVAL_OBJ(&obj, exception);
+	prop = GET_PROPERTY_SILENT(&obj, ZEND_STR_CODE);
+	ZVAL_DEREF(prop);
+	return prop;
+} /* }}} */
 
 /* {{{ proto int Exception|Error::getCode()
    Get the exception code */
 ZEND_METHOD(exception, getCode)
 {
-	zval *prop, rv;
-
+	zval *code;
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_CODE);
-	ZVAL_DEREF(prop);
-	ZVAL_COPY(return_value, prop);
+	code = zend_exception_get_code(Z_OBJ_P(ZEND_THIS), 0);
+	ZVAL_COPY(return_value, code);
 }
 /* }}} */
+
+ZEND_API HashTable *zend_exception_get_trace(zend_object *exception, zend_bool silent)
+{ /* {{{ */
+	return _get_arr_prop(exception, ZEND_STR_TRACE, silent);
+} /* }}} */
 
 /* {{{ proto array Exception|Error::getTrace()
    Get the stack trace for the location in which the exception occurred */
 ZEND_METHOD(exception, getTrace)
 {
-	zval *prop, rv;
-
+	HashTable *trace;
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_TRACE);
-	ZVAL_DEREF(prop);
-	ZVAL_COPY(return_value, prop);
+	if ((trace = zend_exception_get_trace(Z_OBJ_P(ZEND_THIS), 0))) {
+		GC_ADDREF(trace);
+		ZVAL_ARR(return_value, trace);
+	}
 }
 /* }}} */
 
@@ -470,27 +542,31 @@ ZEND_METHOD(exception, getTrace)
    Get the exception severity */
 ZEND_METHOD(error_exception, getSeverity)
 {
-	zval *prop, rv;
-
+	zend_long *sev;
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	prop = GET_PROPERTY(ZEND_THIS, ZEND_STR_SEVERITY);
-	ZVAL_DEREF(prop);
-	ZVAL_COPY(return_value, prop);
+	if ((sev = _get_long_prop(Z_OBJ_P(ZEND_THIS), ZEND_STR_SEVERITY, 0))) {
+		RETURN_LONG(*sev);
+	}
 }
 /* }}} */
 
-#define TRACE_APPEND_KEY(key) do {                                          \
-		tmp = zend_hash_find(ht, key);                                      \
-		if (tmp) {                                                          \
-			if (Z_TYPE_P(tmp) != IS_STRING) {                               \
-				zend_error(E_WARNING, "Value for %s is no string",          \
-					ZSTR_VAL(key));                                         \
-				smart_str_appends(str, "[unknown]");                        \
-			} else {                                                        \
-				smart_str_appends(str, Z_STRVAL_P(tmp));                    \
-			}                                                               \
-		} \
+#define TRACE_APPEND_KEY(key, silent)                                          \
+	do {                                                                   \
+		tmp = zend_hash_find(ht, key);                                 \
+		if (tmp) {                                                     \
+			if (Z_TYPE_P(tmp) != IS_STRING) {                      \
+				if (!silent) {                                 \
+					zend_error(                            \
+						E_WARNING,                     \
+						"Trace %s is not a string",    \
+						ZSTR_VAL(key));                \
+				}                                              \
+				smart_str_appends(str, "[unknown]");           \
+			} else {                                               \
+				smart_str_appends(str, Z_STRVAL_P(tmp));       \
+			}                                                      \
+		}                                                              \
 	} while (0)
 
 static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
@@ -550,8 +626,9 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 }
 /* }}} */
 
-static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* {{{ */
-{
+static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num,
+                                zend_bool include_args, zend_bool silent)
+{  /* {{{ */
 	zval *file, *tmp;
 
 	smart_str_appendc(str, '#');
@@ -561,20 +638,19 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 	file = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_FILE), 1);
 	if (file) {
 		if (Z_TYPE_P(file) != IS_STRING) {
-			zend_error(E_WARNING, "Function name is no string");
+			if (!silent) {
+				zend_error(E_WARNING, "Trace file is not a string");
+			}
 			smart_str_appends(str, "[unknown function]");
-		} else{
-			zend_long line;
+		} else {
+			zend_long line = 0;
 			tmp = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_LINE), 1);
 			if (tmp) {
 				if (Z_TYPE_P(tmp) == IS_LONG) {
 					line = Z_LVAL_P(tmp);
-				} else {
-					zend_error(E_WARNING, "Line is no long");
-					line = 0;
+				} else if (!silent) {
+					zend_error(E_WARNING, "Trace line is not a long");
 				}
-			} else {
-				line = 0;
 			}
 			smart_str_append(str, Z_STR_P(file));
 			smart_str_appendc(str, '(');
@@ -584,59 +660,60 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 	} else {
 		smart_str_appends(str, "[internal function]: ");
 	}
-	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_CLASS));
-	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_TYPE));
-	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_FUNCTION));
+	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_CLASS), silent);
+	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_TYPE), silent);
+	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_FUNCTION), silent);
 	smart_str_appendc(str, '(');
 	tmp = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_ARGS), 1);
 	if (tmp) {
 		if (Z_TYPE_P(tmp) == IS_ARRAY) {
-			size_t last_len = ZSTR_LEN(str->s);
-			zval *arg;
+			if (include_args) {
+				zval *arg;
+				size_t last_len = ZSTR_LEN(str->s);
+				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(tmp), arg) {
+					_build_trace_args(arg, str);
+				} ZEND_HASH_FOREACH_END();
 
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(tmp), arg) {
-				_build_trace_args(arg, str);
-			} ZEND_HASH_FOREACH_END();
-
-			if (last_len != ZSTR_LEN(str->s)) {
-				ZSTR_LEN(str->s) -= 2; /* remove last ', ' */
+				if (last_len != ZSTR_LEN(str->s)) {
+					/* remove last ', ' */
+					ZSTR_LEN(str->s) -= 2;
+				}
+			} else if (zend_hash_num_elements(Z_ARR_P(tmp)) > 0) {
+				smart_str_appends(str, "...");
 			}
-		} else {
-			zend_error(E_WARNING, "args element is no array");
+		} else if (!silent) {
+			zend_error(E_WARNING, "Trace args is not an array");
 		}
 	}
 	smart_str_appends(str, ")\n");
-}
-/* }}} */
+} /* }}} */
 
-/* {{{ proto string Exception|Error::getTraceAsString()
-   Obtain the backtrace for the exception as a string (instead of an array) */
-ZEND_METHOD(exception, getTraceAsString)
-{
-	zval *trace, *frame, rv;
+ZEND_API zend_string *zend_exception_get_trace_as_string(zend_object *exception, zend_bool include_args, zend_bool silent)
+{ /* {{{ */
+
+	zval *frame;
+	HashTable *trace;
 	zend_ulong index;
-	zval *object;
-	zend_class_entry *base_ce;
 	smart_str str = {0};
 	uint32_t num = 0;
 
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	object = ZEND_THIS;
-	base_ce = i_get_exception_base(object);
-
-	trace = zend_read_property_ex(base_ce, object, ZSTR_KNOWN(ZEND_STR_TRACE), 1, &rv);
-	if (Z_TYPE_P(trace) != IS_ARRAY) {
-		zend_type_error("Trace is not an array");
-		return;
+	trace = zend_exception_get_trace(exception, silent);
+	if (!trace) {
+		// zend_exception_get_trace should already warn/error as appropriate
+		return NULL;
 	}
-	ZEND_HASH_FOREACH_NUM_KEY_VAL(Z_ARRVAL_P(trace), index, frame) {
+
+	ZEND_HASH_FOREACH_NUM_KEY_VAL(trace, index, frame) {
 		if (Z_TYPE_P(frame) != IS_ARRAY) {
-			zend_error(E_WARNING, "Expected array for frame " ZEND_ULONG_FMT, index);
+			if (!silent) {
+				zend_error(E_WARNING,
+				           "Expected array for frame " ZEND_ULONG_FMT,
+				           index);
+			}
 			continue;
 		}
 
-		_build_trace_string(&str, Z_ARRVAL_P(frame), num++);
+		_build_trace_string(&str, Z_ARRVAL_P(frame), num++, include_args, silent);
 	} ZEND_HASH_FOREACH_END();
 
 	smart_str_appendc(&str, '#');
@@ -644,7 +721,21 @@ ZEND_METHOD(exception, getTraceAsString)
 	smart_str_appends(&str, " {main}");
 	smart_str_0(&str);
 
-	RETURN_NEW_STR(str.s);
+	return str.s;
+} /* }}} */
+
+/* {{{ proto string Exception|Error::getTraceAsString()
+   Obtain the backtrace for the exception as a string (instead of an array) */
+ZEND_METHOD(exception, getTraceAsString)
+{
+	zend_string *trace;
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	trace = zend_exception_get_trace_as_string(Z_OBJ_P(ZEND_THIS), 1, 0);
+	if (!trace) {
+		return;
+	}
+	RETURN_NEW_STR(trace);
 }
 /* }}} */
 

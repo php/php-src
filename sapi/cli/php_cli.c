@@ -1074,12 +1074,9 @@ static int do_cli(int argc, char **argv) /* {{{ */
 					zend_call_method_with_1_params(Z_OBJ(ref), pce, &pce->constructor, "__construct", NULL, &arg);
 
 					if (EG(exception)) {
-						zval tmp, *msg, rv;
-
-						ZVAL_OBJ(&tmp, EG(exception));
-						msg = zend_read_property(zend_ce_exception, &tmp, "message", sizeof("message")-1, 0, &rv);
-						zend_printf("Exception: %s\n", Z_STRVAL_P(msg));
-						zval_ptr_dtor(&tmp);
+						zend_string *msg = zend_exception_get_message(EG(exception), 1);
+						zend_printf("Exception: %s\n", msg ? msg->val : "(exception message was not a string)");
+						OBJ_RELEASE(EG(exception));
 						EG(exception) = NULL;
 					} else {
 						zend_print_zval(&ref, 0);

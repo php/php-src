@@ -9,6 +9,6 @@ $x->test();
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Trace is not an array in %s:%d
+Fatal error: Uncaught TypeError: Exception trace is not an array in %s:%d
 %a
   thrown in %s on line %d

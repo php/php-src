@@ -68,6 +68,15 @@ extern ZEND_API void (*zend_throw_exception_hook)(zval *ex);
 /* show an exception using zend_error(severity,...), severity should be E_ERROR */
 ZEND_API ZEND_COLD void zend_exception_error(zend_object *exception, int severity);
 
+/* Note that codes are supposed to be integers, but MySQL uses strings so this
+ * returns a zval instead of zend_long. */
+ZEND_API zval *zend_exception_get_code(zend_object *exception, zend_bool silent);
+ZEND_API zend_string *zend_exception_get_file(zend_object *exception, zend_bool silent);
+ZEND_API zend_long *zend_exception_get_line(zend_object *exception, zend_bool silent);
+ZEND_API zend_string *zend_exception_get_message(zend_object *exception, zend_bool silent);
+ZEND_API HashTable *zend_exception_get_trace(zend_object *exception, zend_bool silent);
+ZEND_API zend_string *zend_exception_get_trace_as_string(zend_object *exception, zend_bool include_args, zend_bool silent);
+
 #include "zend_globals.h"
 
 static zend_always_inline void zend_rethrow_exception(zend_execute_data *execute_data)

@@ -39,14 +39,14 @@ string(36) "#0 [internal function]: ()
 
 Array of array of NULL values:
 
-Warning: Function name is no string in %s on line %d
+Warning: Trace file is not a string in %s on line %d
 
-Warning: Value for class is no string in %s on line %d
+Warning: Trace class is not a string in %s on line %d
 
-Warning: Value for type is no string in %s on line %d
+Warning: Trace type is not a string in %s on line %d
 
-Warning: Value for function is no string in %s on line %d
+Warning: Trace function is not a string in %s on line %d
 
-Warning: args element is no array in %s on line %d
+Warning: Trace args is not an array in %s on line %d
 string(60) "#0 [unknown function][unknown][unknown][unknown]()
 #1 {main}"
