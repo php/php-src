@@ -2,7 +2,9 @@
 Bug #73679 DOTNET read access violation using invalid codepage
 --SKIPIF--
 <?php # vim:ft=php
-if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present"; ?>
+if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present";
+if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only");
+?>
 --FILE--
 <?php
 
