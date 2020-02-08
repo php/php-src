@@ -1,5 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? Feb 2020, PHP 7.4.3
+
+- COM:
+  . Fixed bug #79247 (Garbage collecting variant objects segfaults). (cmb)
+
+
 06 Feb 2020, PHP 7.4.3RC1
 
 - Core:
