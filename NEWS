@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   . Fixed bug #79242 (COM error constants don't match com_exception codes on
     x86). (cmb)
   . Fixed bug #79247 (Garbage collecting variant objects segfaults). (cmb)
+  . Fixed bug #79248 (Traversing empty VT_ARRAY throws com_exception). (cmb)
 
 - CURL:
   . Fixed bug #79019 (Copied cURL handles upload empty file). (cmb)
