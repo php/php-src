@@ -227,6 +227,13 @@ static HashTable *com_properties_get(zend_object *object)
 	return &zend_empty_array;
 }
 
+static HashTable *com_get_gc(zval *object, zval **table, int *n)
+{
+	*table = NULL;
+	*n = 0;
+	return NULL;
+}
+
 static void function_dtor(zval *zv)
 {
 	zend_internal_function *f = (zend_internal_function*)Z_PTR_P(zv);
@@ -552,7 +559,7 @@ zend_object_handlers php_com_object_handlers = {
 	com_object_count,
 	NULL,									/* get_debug_info */
 	NULL,									/* get_closure */
-	zend_std_get_gc,						/* get_gc */
+	com_get_gc,								/* get_gc */
 	NULL,									/* do_operation */
 	com_objects_compare,					/* compare */
 	NULL,									/* get_properties_for */
