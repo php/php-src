@@ -290,7 +290,7 @@ static int zend_std_call_op_handler(zend_uchar opcode, zval *result, zval *op1, 
 
 		if (!EG(exception) && (Z_TYPE_P(result) == IS_UNDEF || Z_TYPE_P(result) == IS_NULL))
 		{
-			zend_error(E_ERROR, "Method %s::%s must return a non-null value", ZSTR_VAL(ce->name), Z_STRVAL(fci.function_name));
+			zend_type_error("Method %s::%s must return a non-null value", ZSTR_VAL(ce->name), Z_STRVAL(fci.function_name));
 			zval_ptr_dtor(&fci.function_name);
 			return FAILURE;
 		}
