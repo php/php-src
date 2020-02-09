@@ -8258,6 +8258,52 @@ void zend_compile_class_name(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+void zend_compile_static_callback(znode *result, zend_ast *ast) /* {{{ */
+{
+	// TODO emit [::class, 'method']
+	// See zend_compile_class_name
+
+	zend_ast *class_ast = ast->child[0];
+	zend_ast *method_ast = ast->child[1];
+	zend_op *opline;
+	zval *zv_classname;
+
+
+	// zval = ast->child[1];
+
+
+}
+/* }}} */
+
+void zend_compile_method_callback(znode *result, zend_ast *ast) /* {{{ */
+{
+	// TODO emit [$var, 'method']
+	// See zend_compile_method_call
+
+	zend_ast *obj_ast = ast->child[0];
+	zend_ast *method_ast = ast->child[1];
+	znode obj_node;
+
+	if (is_this_fetch(obj_ast)) {
+		if (this_guaranteed_exists()) {
+			obj_node.op_type = IS_UNUSED;
+		} else {
+			zend_emit_op(&obj_node, ZEND_FETCH_THIS, NULL, NULL);
+		}
+		CG(active_op_array)->fn_flags |= ZEND_ACC_USES_THIS;
+	} else {
+		zend_compile_expr(&obj_node, obj_ast);
+	}
+}
+/* }}} */
+
+void zend_compile_func_callback(znode *result, zend_ast *ast) /* {{{ */
+{
+	// TODO emit 'function'
+	// See zend_compile_call
+}
+/* }}} */
+
 static zend_op *zend_compile_rope_add_ex(zend_op *opline, znode *result, uint32_t num, znode *elem_node) /* {{{ */
 {
 	if (num == 0) {
@@ -8863,6 +8909,15 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 			return;
 		case ZEND_AST_CLASS_NAME:
 			zend_compile_class_name(result, ast);
+			return;
+		case ZEND_AST_STATIC_CALLBACK:
+			zend_compile_static_callback(result, ast);
+			return;
+		case ZEND_AST_METHOD_CALLBACK:
+			zend_compile_method_callback(result, ast);
+			return;
+		case ZEND_AST_FUNC_CALLBACK:
+			zend_compile_func_callback(result, ast);
 			return;
 		case ZEND_AST_ENCAPS_LIST:
 			zend_compile_encaps_list(result, ast);

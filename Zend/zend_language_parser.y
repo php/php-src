@@ -884,6 +884,8 @@ new_expr:
 expr:
 		variable
 			{ $$ = $1; }
+	| callback
+			{ $$ = $1; }
 	|	T_LIST '(' array_pair_list ')' '=' expr
 			{ $3->attr = ZEND_ARRAY_SYNTAX_LIST; $$ = zend_ast_create(ZEND_AST_ASSIGN, $3, $6); }
 	|	'[' array_pair_list ']' '=' expr
@@ -1122,6 +1124,19 @@ scalar:
 	|	T_START_HEREDOC encaps_list T_END_HEREDOC { $$ = $2; }
 	|	dereferencable_scalar	{ $$ = $1; }
 	|	constant			{ $$ = $1; }
+;
+
+callback:
+	|	T_FN T_PAAMAYIM_NEKUDOTAYIM callback_expr    { $$ = $3; }
+;
+
+callback_expr:
+		variable T_OBJECT_OPERATOR T_STRING
+			{ $$ = zend_ast_create(ZEND_AST_METHOD_CALLBACK, $1, $3); }
+	|	class_name T_PAAMAYIM_NEKUDOTAYIM T_STRING
+			{ $$ = zend_ast_create(ZEND_AST_STATIC_CALLBACK, $1, $3); }
+	|	name
+			{ $$ = zend_ast_create(ZEND_AST_FUNC_CALLBACK, $1); }
 ;
 
 constant:

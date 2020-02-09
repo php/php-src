@@ -1681,6 +1681,10 @@ simple_list:
 			smart_str_appends(str, "goto ");
 			zend_ast_export_name(str, ast->child[0], 0, indent);
 			break;
+		case ZEND_AST_FUNC_CALLBACK:
+			smart_str_appendc(str, "fn::");
+			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			break;
 		case ZEND_AST_BREAK:
 			APPEND_NODE_1("break");
 		case ZEND_AST_CONTINUE:
@@ -1943,6 +1947,18 @@ simple_list:
 				smart_str_appendc(str, ' ');
 				zend_ast_export_name(str, ast->child[1], 0, indent);
 			}
+			break;
+		case ZEND_AST_METHOD_CALLBACK:
+			smart_str_appends(str, "fn::");
+			zend_ast_export_ex(str, ast->child[0], 0, indent);
+			smart_str_appends(str, "->");
+			zend_ast_export_var(str, ast->child[1], 0, indent);
+			break;
+		case ZEND_AST_STATIC_CALLBACK:
+			smart_str_appends(str, "fn::");
+			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			smart_str_appends(str, "::");
+			zend_ast_export_var(str, ast->child[1], 0, indent);
 			break;
 
 		/* 3 child nodes */
