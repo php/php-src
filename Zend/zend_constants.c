@@ -138,6 +138,9 @@ void zend_register_standard_constants(void)
 	REGISTER_MAIN_BOOL_CONSTANT("FALSE", 0, CONST_PERSISTENT);
 	REGISTER_MAIN_NULL_CONSTANT("NULL", CONST_PERSISTENT);
 
+	/** Operand Type not supported constant */
+	REGISTER_MAIN_NULL_CONSTANT("PHP_OPERAND_TYPES_NOT_SUPPORTED", CONST_PERSISTENT);
+
 	true_const = zend_hash_str_find_ptr(EG(zend_constants), "TRUE", sizeof("TRUE")-1);
 	false_const = zend_hash_str_find_ptr(EG(zend_constants), "FALSE", sizeof("FALSE")-1);
 	null_const = zend_hash_str_find_ptr(EG(zend_constants), "NULL", sizeof("NULL")-1);

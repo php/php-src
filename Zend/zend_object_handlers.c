@@ -270,6 +270,7 @@ static int zend_std_call_op_handler(zend_uchar opcode, zval *result, zval *op1, 
 		if (fcic.function_handler == NULL)
 		{
 			if(zobj == Z_OBJ_P(op1) && Z_TYPE_P(op2) == IS_OBJECT) {
+retry:
 				zobj = Z_OBJ_P(op2);
 				ce = Z_OBJCE_P(op2);
 				zval_ptr_dtor(&fci.function_name);
@@ -285,12 +286,32 @@ static int zend_std_call_op_handler(zend_uchar opcode, zval *result, zval *op1, 
 
 		fcic.called_scope = ce;
 		fcic.object = zobj;
+		fcic.function_handler->type = ZEND_USER_FUNCTION;
 
 		int tmp = zend_call_function(&fci, &fcic);
 
-		if (!EG(exception) && (Z_TYPE_P(result) == IS_UNDEF || Z_TYPE_P(result) == IS_NULL))
+		/** The operand handler can either return PHP_OPERAND_NOT_SUPPORTED */
+		if (Z_TYPE_P(result) == IS_NULL) {
+			if(zobj == Z_OBJ_P(op1) && Z_TYPE_P(op2) == IS_OBJECT) {
+				goto retry;
+			} else {
+				zend_type_error("The operand handlers do not support the given operand types!");
+			}
+		}
+
+		/** or throw an type error (useful in combination of typehints), to signal that it does not support the given types */
+		if (EG(exception) && instanceof_function(EG(exception)->ce, zend_ce_type_error)) {
+			zend_clear_exception();
+			if (zobj == Z_OBJ_P(op1) && Z_TYPE_P(op2) == IS_OBJECT) {
+				goto retry;
+			} else {
+				zend_type_error("The operand handlers do not support the given operand types!");
+			}
+		}
+
+		if (!EG(exception) && (Z_TYPE_P(result) == IS_UNDEF))
 		{
-			zend_type_error("Method %s::%s must return a non-null value", ZSTR_VAL(ce->name), Z_STRVAL(fci.function_name));
+			zend_type_error("Method %s::%s must return a non-null value or null to signal that it does not support the given types.", ZSTR_VAL(ce->name), Z_STRVAL(fci.function_name));
 			zval_ptr_dtor(&fci.function_name);
 			return FAILURE;
 		}
