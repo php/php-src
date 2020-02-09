@@ -22,6 +22,10 @@ PHP                                                                        NEWS
     cmb)
   . Fixed bug #79271 (DOMDocumentType::$childNodes is NULL). (cmb)
 
+- FPM:
+  . Fixed bug #77653 (operator displayed instead of the real error message).
+    (Jakub Zelenka)
+
 - PCRE:
   . Fixed bug #79188 (Memory corruption in preg_replace/preg_replace_callback
     and unicode). (Nikita)

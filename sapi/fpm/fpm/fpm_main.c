@@ -87,6 +87,7 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #include "fpm_request.h"
 #include "fpm_status.h"
 #include "fpm_signals.h"
+#include "fpm_stdio.h"
 #include "fpm_conf.h"
 #include "fpm_php.h"
 #include "fpm_log.h"
@@ -1967,6 +1968,8 @@ fastcgi_request_done:
 			SG(request_info).path_translated = NULL;
 
 			php_request_shutdown((void *) 0);
+
+			fpm_stdio_flush_child();
 
 			requests++;
 			if (UNEXPECTED(max_requests && (requests == max_requests))) {
