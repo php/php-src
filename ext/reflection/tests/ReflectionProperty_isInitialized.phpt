@@ -62,6 +62,12 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+try {
+    var_dump($rp->isInitialized());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+
 class WithMagic {
     public $prop;
     public int $intProp;
@@ -108,6 +114,7 @@ bool(false)
 Object type:
 bool(false)
 Given object is not an instance of the class this property was declared in
+No object provided for isInitialized() on instance property
 Class with __isset:
 bool(false)
 bool(false)

@@ -5467,8 +5467,12 @@ ZEND_METHOD(reflection_property, getValue)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	zval *object, *name;
+	zval *object = NULL, *name;
 	zval *member_p = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|o!", &object) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
@@ -5487,7 +5491,8 @@ ZEND_METHOD(reflection_property, getValue)
 	} else {
 		zval rv;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &object) == FAILURE) {
+		if (!object) {
+			zend_type_error("No object provided for getValue() on instance property");
 			RETURN_THROWS();
 		}
 
@@ -5553,8 +5558,12 @@ ZEND_METHOD(reflection_property, isInitialized)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	zval *object, *name;
+	zval *object = NULL, *name;
 	zval *member_p = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|o!", &object) == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
@@ -5575,7 +5584,8 @@ ZEND_METHOD(reflection_property, isInitialized)
 		zend_class_entry *old_scope;
 		int retval;
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &object) == FAILURE) {
+		if (!object) {
+			zend_type_error("No object provided for isInitialized() on instance property");
 			RETURN_THROWS();
 		}
 

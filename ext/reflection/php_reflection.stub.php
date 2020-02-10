@@ -391,7 +391,7 @@ class ReflectionProperty implements Reflector
     public function setValue($object_or_value, $value = UNKNOWN) {}
 
     /** @return bool */
-    public function isInitialized(object $object = UNKNOWN) {}
+    public function isInitialized(?object $object = null) {}
 
     /** @return bool */
     public function isPublic() {}

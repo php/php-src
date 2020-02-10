@@ -317,9 +317,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionProperty_setValue, 0, 0, 1)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionProperty_isInitialized, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_ReflectionProperty_isInitialized arginfo_class_ReflectionProperty_getValue
 
 #define arginfo_class_ReflectionProperty_isPublic arginfo_class_Reflector___toString
 
