@@ -750,7 +750,7 @@ static int do_fetch(pdo_stmt_t *stmt, int do_bind, zval *return_value, enum pdo_
 {
 	int flags, idx, old_arg_count = 0;
 	zend_class_entry *ce = NULL, *old_ce = NULL;
-	zval grp_val, *pgrp, retval, old_ctor_args = {{0}};
+	zval grp_val, *pgrp, retval, old_ctor_args;
 	int colno;
 
 	if (how == PDO_FETCH_USE_DEFAULT) {
