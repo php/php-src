@@ -1823,6 +1823,13 @@ static int zend_jit_throw_cannot_pass_by_ref_stub(dasm_State **Dst)
 		|	mov r1, OP:r0->result.var
 	|.endif
 	|	SET_Z_TYPE_INFO RX+r1, IS_UNDEF
+	|	// last EX(call) frame may be delayed
+	|	cmp RX, EX->call
+	|	je >1
+	|	mov	r1, EX->call
+	|	mov	EX:RX->prev_execute_data, r1
+	|	mov	EX->call, RX
+	|1:
 	|	mov RX, r0
 	|.if X64
 		|	xor CARG1, CARG1
