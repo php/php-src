@@ -15,12 +15,12 @@ class X {
 try {
 	array_splice(X::getArr(), 1, 1);
 } catch (Throwable $e) {
-	echo "Exception :" . $e->getMessage() . "\n";
+	echo "Exception: " . $e->getMessage() . "\n";
 }
 print_r(X::getArr());
 ?>
 --EXPECT--
-Exception :Cannot pass parameter 1 by reference
+Exception: Cannot pass parameter 1 by reference
 Array
 (
     [0] => a
