@@ -229,6 +229,12 @@ typedef struct _zend_oparray_context {
 /* op_array or class is preloaded                         |     |     |     */
 #define ZEND_ACC_PRELOADED               (1 << 10) /*  X  |  X  |     |     */
 /*                                                        |     |     |     */
+/* Property Flags (unused: 8...)                          |     |     |     */
+/* ===========                                            |     |     |     */
+/*                                                        |     |     |     */
+/* Decorated property                                     |     |     |     */
+#define ZEND_ACC_DECORATED               (1 <<  7) /*     |     |  X  |     */
+/*                                                        |     |     |     */
 /* Class Flags (unused: 13, 14, 15, 24...)                |     |     |     */
 /* ===========                                            |     |     |     */
 /*                                                        |     |     |     */

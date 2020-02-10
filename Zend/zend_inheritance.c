@@ -2201,6 +2201,80 @@ void zend_verify_abstract_class(zend_class_entry *ce) /* {{{ */
 }
 /* }}} */
 
+static zend_op_array *create_decorator_op_array(zend_class_entry *ce, zend_function *orig_func)
+{
+	/* We use non-NULL value to avoid useless run_time_cache allocation.
+	 * The low bit must be zero, to not be interpreted as a MAP_PTR offset. */
+	static const void *dummy = (void*)(intptr_t)2;
+
+	uint32_t preserve_flags = ZEND_ACC_HAS_TYPE_HINTS|ZEND_ACC_HAS_RETURN_TYPE;
+
+	zend_op_array *func = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
+	memset(func, 0, sizeof(zend_op_array));
+
+	func->refcount = (uint32_t *) emalloc(sizeof(uint32_t));
+	*func->refcount = 1;
+
+	func->type = ZEND_USER_FUNCTION;
+	func->fn_flags = ZEND_ACC_PUBLIC;
+	func->fn_flags |= orig_func->common.fn_flags & preserve_flags;
+	func->function_name = zend_string_copy(orig_func->common.function_name);
+	func->scope = ce;
+	func->num_args = orig_func->common.num_args;
+	func->required_num_args = orig_func->common.required_num_args;
+	func->arg_info = orig_func->common.arg_info;
+
+	/* Place the method at position of the class declaration,
+	 * as we don't have any more accurate location information. */
+	func->filename = ce->info.user.filename;
+	func->line_start = ce->info.user.line_start;
+	func->line_end = ce->info.user.line_start;
+
+	func->opcodes = EG(call_decorated_ops);
+	ZEND_MAP_PTR_INIT(func->run_time_cache, (void***)&dummy);
+
+	return func;
+}
+
+static void zend_decorate_class(zend_class_entry *ce)
+{
+	zend_property_info *prop = ce->decorated_prop;
+
+	zend_class_entry *decorated_ce;
+	if (ZEND_TYPE_HAS_NAME(prop->type)) {
+		/* TODO: Allow exception here? */
+		zend_string *decorated_name = ZEND_TYPE_NAME(prop->type);
+		decorated_ce = zend_fetch_class_by_name(decorated_name, NULL, 0);
+		ZEND_TYPE_SET_CE(prop->type, decorated_ce);
+		zend_string_release(decorated_name);
+	} else if (ZEND_TYPE_HAS_CE(prop->type)) {
+		decorated_ce = ZEND_TYPE_CE(prop->type);
+	} else {
+		ZEND_ASSERT(0 && "Decorated property must have single class type");
+	}
+
+	zend_string *lcname;
+	zend_function *func;
+	ZEND_HASH_FOREACH_STR_KEY_PTR(&decorated_ce->function_table, lcname, func) {
+		/* Only the public interface of the decorated class is proxied. */
+		if (!(func->common.fn_flags & ZEND_ACC_PUBLIC)) {
+			continue;
+		}
+
+		/* Static methods are not proxied. */
+		if (func->common.fn_flags & ZEND_ACC_STATIC) {
+			continue;
+		}
+
+		/* The method was explicitly overridden in the class, skip. */
+		if (zend_hash_find(&ce->function_table, lcname)) {
+			continue;
+		}
+
+		zend_hash_add_new_ptr(&ce->function_table, lcname, create_decorator_op_array(ce, func));
+	} ZEND_HASH_FOREACH_END();
+}
+
 typedef struct {
 	enum {
 		OBLIGATION_DEPENDENCY,
@@ -2453,7 +2527,9 @@ ZEND_API int zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_nam
 			interfaces[num_parent_interfaces + i] = iface;
 		}
 	}
-
+	if (ce->decorated_prop) {
+		zend_decorate_class(ce);
+	}
 	if (parent) {
 		if (!(parent->ce_flags & ZEND_ACC_LINKED)) {
 			add_dependency_obligation(ce, parent);

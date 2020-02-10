@@ -555,9 +555,17 @@ static void zend_init_exception_op(void) /* {{{ */
 
 static void zend_init_call_trampoline_op(void) /* {{{ */
 {
+	zend_op *decorated_ops = EG(call_decorated_ops);
+
 	memset(&EG(call_trampoline_op), 0, sizeof(EG(call_trampoline_op)));
 	EG(call_trampoline_op).opcode = ZEND_CALL_TRAMPOLINE;
 	ZEND_VM_SET_OPCODE_HANDLER(&EG(call_trampoline_op));
+
+	memset(decorated_ops, 0, sizeof(EG(call_decorated_ops)));
+	decorated_ops[0].opcode = ZEND_CALL_DECORATED;
+	ZEND_VM_SET_OPCODE_HANDLER(&decorated_ops[0]);
+	decorated_ops[1].opcode = ZEND_RETURN_DECORATED;
+	ZEND_VM_SET_OPCODE_HANDLER(&decorated_ops[1]);
 }
 /* }}} */
 

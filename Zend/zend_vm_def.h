@@ -8159,6 +8159,135 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 	ZEND_VM_LEAVE();
 }
 
+/* Forwards to the generated method. Note that unlike CALL_TRAMPOLINE, this is going to insert
+ * a proper stack frame. */
+ZEND_VM_HANDLER(195, ZEND_CALL_DECORATED, ANY, ANY)
+{
+	zend_function *func = EX(func);
+	zend_class_entry *ce = func->common.scope;
+	zend_property_info *prop = ce->decorated_prop;
+	zval *decorated_zv = OBJ_PROP(Z_OBJ(EX(This)), prop->offset);
+
+	SAVE_OPLINE();
+	if (UNEXPECTED(Z_ISUNDEF_P(decorated_zv))) {
+		zend_throw_error(NULL, "Typed property %s::$%s must not be accessed before initialization",
+			ZSTR_VAL(prop->ce->name),
+			zend_get_unmangled_property_name(prop->name));
+		HANDLE_EXCEPTION();
+	}
+
+	zend_object *decorated_obj = Z_OBJ_P(decorated_zv);
+	zend_class_entry *decorated_ce = decorated_obj->ce;
+
+	// TODO: What's a good way to cache this?
+	zend_string *lcname = zend_string_tolower(func->common.function_name);
+	zend_function *fbc = zend_hash_find_ptr(&decorated_ce->function_table, lcname);
+	zend_string_release(lcname);
+
+	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+		init_func_run_time_cache(&fbc->op_array);
+	}
+
+	uint32_t num_args = EX_NUM_ARGS();
+	uint32_t call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_HAS_THIS;
+	zval *ret = EX(return_value);
+	zend_execute_data *call =
+		zend_vm_stack_push_call_frame(call_info, fbc, num_args, decorated_obj);
+
+	if (num_args) {
+		zval *p = ZEND_CALL_ARG(execute_data, 1);
+		zval *q = ZEND_CALL_ARG(call, 1);
+		zval *end = p + num_args;
+
+		for (; p < end; p++, q++) {
+			ZVAL_COPY(q, p);
+		}
+	}
+
+	/* The following is essentially copied from DO_FCALL. */
+	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)) {
+		call->prev_execute_data = execute_data;
+		execute_data = call;
+		i_init_func_execute_data(&fbc->op_array, ret, 0 EXECUTE_DATA_CC);
+
+		if (EXPECTED(zend_execute_ex == execute_ex)) {
+			LOAD_OPLINE_EX();
+			ZEND_VM_ENTER_EX();
+		} else {
+			SAVE_OPLINE_EX();
+			execute_data = EX(prev_execute_data);
+			LOAD_OPLINE();
+			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_TOP);
+			zend_execute_ex(call);
+		}
+	} else {
+		zval retval;
+		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
+
+		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
+			zend_deprecated_function(fbc);
+			if (UNEXPECTED(EG(exception) != NULL)) {
+				UNDEF_RESULT();
+				if (!RETURN_VALUE_USED(opline)) {
+					ret = &retval;
+					ZVAL_UNDEF(ret);
+				}
+				ZEND_VM_C_GOTO(decorated_fcall_end);
+			}
+		}
+
+		call->prev_execute_data = execute_data;
+		EG(current_execute_data) = call;
+
+#if ZEND_DEBUG
+		zend_bool should_throw = zend_internal_call_should_throw(fbc, call);
+#endif
+
+		ZVAL_NULL(ret);
+		if (!zend_execute_internal) {
+			/* saves one function call if zend_execute_internal is not used */
+			fbc->internal_function.handler(call, ret);
+		} else {
+			zend_execute_internal(call, ret);
+		}
+
+#if ZEND_DEBUG
+		if (!EG(exception) && call->func) {
+			if (should_throw) {
+				zend_internal_call_arginfo_violation(call->func);
+			}
+			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
+				zend_verify_internal_return_type(call->func, ret));
+			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
+				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
+		}
+#endif
+
+		EG(current_execute_data) = execute_data;
+
+ZEND_VM_C_LABEL(decorated_fcall_end):
+		zend_vm_stack_free_args(call);
+		if (!RETURN_VALUE_USED(opline)) {
+			i_zval_ptr_dtor(ret);
+		}
+	}
+
+	zend_vm_stack_free_call_frame(call);
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		zend_rethrow_exception(execute_data);
+		HANDLE_EXCEPTION();
+	}
+
+	ZEND_VM_SET_OPCODE(opline + 1);
+	ZEND_VM_CONTINUE();
+}
+
+ZEND_VM_HANDLER(196, ZEND_RETURN_DECORATED, ANY, ANY)
+{
+	/* EX(return_value) is already populated, return directly. */
+	ZEND_VM_DISPATCH_TO_HELPER(zend_leave_helper);
+}
+
 ZEND_VM_HANDLER(182, ZEND_BIND_LEXICAL, TMP, CV, REF)
 {
 	USE_OPLINE
