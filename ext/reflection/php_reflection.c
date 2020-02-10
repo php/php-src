@@ -41,7 +41,7 @@
 #include "zend_extensions.h"
 #include "zend_builtin_functions.h"
 #include "zend_smart_str.h"
-#include "reflection_arginfo.h"
+#include "php_reflection_arginfo.h"
 
 /* Key used to avoid leaking addresses in ReflectionProperty::getId() */
 #define REFLECTION_KEY_LEN 16
