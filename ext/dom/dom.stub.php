@@ -261,7 +261,8 @@ class DOMImplementation {
     public function hasFeature(string $feature, string $version) {}
 
     /** @return DOMDocumentType|false */
-    public function createDocumentType($qualifiedName, $publicId, $systemId) {}
+    public function createDocumentType(
+        string $qualifiedName, string $publicId = "", string $systemId = "") {}
 
     /** @return DOMDocument|false */
     public function createDocument(string $namespaceURI = "", string $qualifiedName = "", DOMDocumentType $doctype = UNKNOWN) {}
