@@ -4621,7 +4621,7 @@ ZEND_VM_HOT_SEND_HANDLER(50, ZEND_SEND_VAR_NO_REF_EX, VAR, NUM, SPEC(QUICK_ARG))
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 
 	if (EXPECTED(arg_num <= MAX_ARG_FLAG_NUM)) {
-		if (UNEXPECTED(!QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
+		if (EXPECTED(!QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
 			if (UNEXPECTED(Z_ISREF_P(varptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(varptr);
 
@@ -4639,7 +4639,7 @@ ZEND_VM_HOT_SEND_HANDLER(50, ZEND_SEND_VAR_NO_REF_EX, VAR, NUM, SPEC(QUICK_ARG))
 			ZEND_VM_DISPATCH_TO_HELPER(zend_cannot_pass_by_ref_helper);
 		}
 	} else {
-		if (UNEXPECTED(!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
+		if (EXPECTED(!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
 			if (UNEXPECTED(Z_ISREF_P(varptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(varptr);
 

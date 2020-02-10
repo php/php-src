@@ -19895,7 +19895,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_NO_REF_EX_SPEC_VAR_HA
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 
 	if (EXPECTED(0)) {
-		if (UNEXPECTED(!QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
+		if (EXPECTED(!QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
 			if (UNEXPECTED(Z_ISREF_P(varptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(varptr);
 
@@ -19913,7 +19913,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_NO_REF_EX_SPEC_VAR_HA
 			ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 	} else {
-		if (UNEXPECTED(!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
+		if (EXPECTED(!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
 			if (UNEXPECTED(Z_ISREF_P(varptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(varptr);
 
@@ -19946,7 +19946,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_NO_REF_EX
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
 
 	if (EXPECTED(1)) {
-		if (UNEXPECTED(!QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
+		if (EXPECTED(!QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
 			if (UNEXPECTED(Z_ISREF_P(varptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(varptr);
 
@@ -19964,7 +19964,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_NO_REF_EX
 			ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 	} else {
-		if (UNEXPECTED(!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
+		if (EXPECTED(!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num))) {
 			if (UNEXPECTED(Z_ISREF_P(varptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(varptr);
 
