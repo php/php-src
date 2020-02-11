@@ -519,6 +519,7 @@ again:
 					ZVAL_STRING(rv, *(char**)ptr);
 					return;
 				}
+				
 				if (!cdata) {
 					if (is_ret) {
 						cdata = zend_ffi_cdata_to_zval_slow_ret(ptr, type, flags);
@@ -894,16 +895,21 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value, uint32_t
 {
 	zend_fcall_info_cache fcc;
 	char *error = NULL;
-	char invalid_error[255] = "an";
-	char occur_error[255];
+	char *invalid_error = "";
+	char *occur_error = "";
 	uint32_t arg_count;
 	void *code;
 	void *callback;
 	zend_ffi_callback_data *callback_data;
 
 	if(n != ZEND_FFI_NO_ARG_OFFSET) {
-		sprintf(occur_error, ", parameter %u occur", n + 1);
-		sprintf(invalid_error, "parameter %u to be", n + 1);
+		zend_spprintf(&occur_error, 0, ", parameter %u occur", n + 1);
+		zend_spprintf(&invalid_error, 0, "parameter %u to be", n + 1);
+	}
+
+	if(type->attr & ZEND_FFI_ATTR_VARIADIC) {
+		zend_throw_error(zend_ffi_exception_ce, "Variadic function closures are not supported%s", occur_error);
+		return NULL;
 	}
 
 	if (!zend_is_callable_ex(value, NULL, 0, NULL, &fcc, &error)) {
@@ -911,21 +917,7 @@ static void *zend_ffi_create_callback(zend_ffi_type *type, zval *value, uint32_t
 		return NULL;
 	}
 
-	uint32_t pass_arg_count = fcc.function_handler->common.required_num_args;
-	if(type->attr & ZEND_FFI_ATTR_VARIADIC) {
-		if(!type->func.args) {
-			type->func.args = pemalloc(sizeof(HashTable), FFI_G(persistent));
-			zend_hash_init(type->func.args, 0, NULL, zend_ffi_type_hash_dtor, FFI_G(persistent));
-		}
-
-		static zend_ffi_type zend_ffi_type_void = {.kind=ZEND_FFI_TYPE_VOID, .size=1, .align=1};
-		static zend_ffi_type zend_ffi_type_ptr = {.kind=ZEND_FFI_TYPE_POINTER, .size=sizeof(void*), .align=_Alignof(void*), .pointer.type = (zend_ffi_type*)&zend_ffi_type_void};
-		uint32_t arg_idx = zend_hash_num_elements(type->func.args);
-
-		for(; arg_idx < pass_arg_count+1; arg_idx++) {
-			zend_hash_next_index_insert_ptr(type->func.args, &zend_ffi_type_ptr);
-		}
-	}
+	
 
 	arg_count = type->func.args ? zend_hash_num_elements(type->func.args) : 0;
 	if (arg_count < fcc.function_handler->common.required_num_args) {
@@ -2703,12 +2695,12 @@ static ZEND_FUNCTION(ffi_trampoline) /* {{{ */
 
 	ret = do_alloca(MAX(ret_type->size, sizeof(ffi_arg)), ret_use_heap);
 	ffi_call(&cif, addr, ret, arg_values);
-
 	for (n = 0; n < arg_count; n++) {
 		if (arg_types[n]->type == FFI_TYPE_STRUCT) {
 			efree(arg_types[n]);
 		}
 	}
+
 	if (ret_type->type == FFI_TYPE_STRUCT) {
 		efree(ret_type);
 	}
