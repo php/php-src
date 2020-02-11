@@ -1395,40 +1395,6 @@ static void* dasm_labels[zend_lb_MAX];
 ||	}
 |.endmacro
 
-|.macro SEPARATE_ZVAL_NOREF, addr, op_info, cold
-||	if ((op_info & MAY_BE_ARRAY) && RC_MAY_BE_N(op_info)) {
-||		if (cold) {
-|			IF_ZVAL_TYPE addr, IS_ARRAY, >1
-|.cold_code
-|1:
-||		} else {
-|			IF_NOT_ZVAL_TYPE addr, IS_ARRAY, >2
-||		}
-|		GET_ZVAL_PTR r0, addr
-||		if (RC_MAY_BE_1(op_info)) {
-|			cmp dword [r0], 1 // if (GC_REFCOUNTED() > 1)
-|			jbe >2
-||		}
-|		IF_NOT_ZVAL_REFCOUNTED addr, >1
-|		GC_DELREF r0
-|1:
-||		if (Z_REG(addr) == ZREG_FCARG1a) {
-|			mov aword T1, FCARG1a // save
-||		} else {
-|			LOAD_ZVAL_ADDR FCARG1a, addr
-||		}
-|		EXT_CALL zval_copy_ctor_func, r0
-||		if (Z_REG(addr) == ZREG_FCARG1a) {
-|			mov FCARG1a, aword T1 // restore
-||		}
-||		if (cold) {
-|			jmp >2
-|.code
-||		}
-|2:
-||	}
-|.endmacro
-
 |.macro SEPARATE_ARRAY, addr, op_info, cold
 ||	if (RC_MAY_BE_N(op_info)) {
 ||		zend_reg tmp_reg;
