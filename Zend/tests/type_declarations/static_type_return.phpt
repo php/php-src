@@ -75,7 +75,7 @@ object(B)#3 (0) {
 
 object(A)#3 (0) {
 }
-Return value of A::test2() must be an instance of static, instance of A returned
+Return value of A::test2() must be an instance of B, instance of A returned
 
 object(A)#3 (0) {
 }
@@ -84,7 +84,7 @@ object(C)#3 (0) {
 
 object(A)#3 (0) {
 }
-Return value of A::test4() must be of type static|array, instance of A returned
+Return value of A::test4() must be of type B|array, instance of A returned
 
 Return value of {closure}() must be an instance of static, instance of stdClass returned
 object(A)#1 (0) {

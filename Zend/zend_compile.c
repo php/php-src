@@ -1197,7 +1197,14 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 
 	uint32_t type_mask = ZEND_TYPE_FULL_MASK(type);
 	if (type_mask & MAY_BE_STATIC) {
-		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_STATIC));
+		zend_string *name = ZSTR_KNOWN(ZEND_STR_STATIC);
+		if (scope) {
+			zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
+			if (called_scope) {
+				name = called_scope->name;
+			}
+		}
+		str = add_type_string(str, name);
 	}
 	if (type_mask & MAY_BE_CALLABLE) {
 		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_CALLABLE));

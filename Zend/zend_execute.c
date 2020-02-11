@@ -674,7 +674,7 @@ static ZEND_COLD void zend_verify_type_error_common(
 	}
 
 	if (is_union_type(arg_info->type)) {
-		zend_string *type_str = zend_type_to_string(arg_info->type);
+		zend_string *type_str = zend_type_to_string_resolved(arg_info->type, zf->common.scope);
 		smart_str_appends(&str, "be of type ");
 		smart_str_append(&str, type_str);
 		zend_string_release(type_str);
@@ -714,9 +714,16 @@ static ZEND_COLD void zend_verify_type_error_common(
 			case MAY_BE_ITERABLE:
 				smart_str_appends(&str, "be iterable");
 				break;
-			case MAY_BE_STATIC:
-				smart_str_appends(&str, "be an instance of static");
+			case MAY_BE_STATIC: {
+				zend_class_entry *called_scope = zend_get_called_scope(EG(current_execute_data));
+				smart_str_appends(&str, "be an instance of ");
+				if (called_scope) {
+					smart_str_append(&str, called_scope->name);
+				} else {
+					smart_str_appends(&str, "static");
+				}
 				break;
+			}
 			default:
 			{
 				/* Hack to print the type without null */
