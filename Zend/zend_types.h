@@ -1333,12 +1333,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 #define SEPARATE_ZVAL_IF_NOT_REF(zv) do {				\
 		zval *__zv = (zv);								\
 		if (Z_TYPE_P(__zv) == IS_ARRAY) {				\
-			if (Z_REFCOUNT_P(__zv) > 1) {				\
-				if (Z_REFCOUNTED_P(__zv)) {				\
-					Z_DELREF_P(__zv);					\
-				}										\
-				ZVAL_ARR(__zv, zend_array_dup(Z_ARR_P(__zv)));\
-			}											\
+			SEPARATE_ARRAY(__zv);                       \
 		}												\
 	} while (0)
 
