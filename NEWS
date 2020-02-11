@@ -22,6 +22,9 @@ PHP                                                                        NEWS
     and unicode). (Nikita)
   . Fixed bug #79241 (Segmentation fault on preg_match()). (Nikita)
 
+- Standard:
+  . Fixed bug #79254 (getenv() w/o arguments not showing changes). (cmb)
+
 ?? ??? ????, PHP 7.4.3
 
 - Core:
