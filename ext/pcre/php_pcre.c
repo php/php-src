@@ -1272,19 +1272,27 @@ matched:
 					if (subpat_names) {
 						if (offset_capture) {
 							for (i = 0; i < count; i++) {
-								add_offset_pair(subpats, subject + offsets[i<<1],
-												offsets[(i<<1)+1] - offsets[i<<1],
-												offsets[i<<1], subpat_names[i], unmatched_as_null);
+                                if (PCRE2_UNSET != offsets[i<<1] || !zend_hash_str_exists(HASH_OF(subpats), subpat_names[i], strlen(subpat_names[i]))) {
+                                    add_offset_pair(subpats, subject + offsets[i<<1],
+                                                    offsets[(i<<1)+1] - offsets[i<<1],
+                                                    offsets[i<<1], subpat_names[i], unmatched_as_null);
+                                } else {
+                                    add_offset_pair(subpats, subject + offsets[i<<1],
+                                                    offsets[(i<<1)+1] - offsets[i<<1],
+                                                    offsets[i<<1], NULL, unmatched_as_null);
+                                }
 							}
 						} else {
 							for (i = 0; i < count; i++) {
 								if (subpat_names[i]) {
 									if (PCRE2_UNSET == offsets[i<<1]) {
-										if (unmatched_as_null) {
-											add_assoc_null(subpats, subpat_names[i]);
-										} else {
-											add_assoc_str(subpats, subpat_names[i], ZSTR_EMPTY_ALLOC());
-										}
+                                        if (!zend_hash_str_exists(HASH_OF(subpats), subpat_names[i], strlen(subpat_names[i]))) {
+                                            if (unmatched_as_null) {
+                                                add_assoc_null(subpats, subpat_names[i]);
+                                            } else {
+                                                add_assoc_str(subpats, subpat_names[i], ZSTR_EMPTY_ALLOC());
+                                            }
+                                        }
 									} else {
 										add_assoc_stringl(subpats, subpat_names[i], subject + offsets[i<<1],
 														  offsets[(i<<1)+1] - offsets[i<<1]);
