@@ -21,6 +21,8 @@ PHP                                                                        NEWS
   . Fixed bug #79188 (Memory corruption in preg_replace/preg_replace_callback
     and unicode). (Nikita)
   . Fixed bug #79241 (Segmentation fault on preg_match()). (Nikita)
+  . Fixed bug #79257 (Duplicate named groups (?J) prefer last alternative even
+    if not matched). (Nikita)
 
 - Standard:
   . Fixed bug #79254 (getenv() w/o arguments not showing changes). (cmb)

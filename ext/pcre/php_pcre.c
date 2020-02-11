@@ -995,6 +995,20 @@ static inline void populate_match_value(
 	}
 }
 
+static inline void add_named(
+		zval *subpats, zend_string *name, zval *val, zend_bool unmatched) {
+	/* If the DUPNAMES option is used, multiple subpatterns might have the same name.
+	 * In this case we want to preserve the one that actually has a value. */
+	if (!unmatched) {
+		zend_hash_update(Z_ARRVAL_P(subpats), name, val);
+	} else {
+		if (!zend_hash_add(Z_ARRVAL_P(subpats), name, val)) {
+			return;
+		}
+	}
+	Z_TRY_ADDREF_P(val);
+}
+
 /* {{{ add_offset_pair */
 static inline void add_offset_pair(
 		zval *result, const char *subject, PCRE2_SIZE start_offset, PCRE2_SIZE end_offset,
@@ -1023,8 +1037,7 @@ static inline void add_offset_pair(
 	}
 
 	if (name) {
-		Z_ADDREF(match_pair);
-		zend_hash_update(Z_ARRVAL_P(result), name, &match_pair);
+		add_named(result, name, &match_pair, start_offset == PCRE2_UNSET);
 	}
 	zend_hash_next_index_insert(Z_ARRVAL_P(result), &match_pair);
 }
@@ -1054,8 +1067,7 @@ static void populate_subpat_array(
 				populate_match_value(
 					&val, subject, offsets[2*i], offsets[2*i+1], unmatched_as_null);
 				if (subpat_names[i]) {
-					Z_TRY_ADDREF(val);
-					zend_hash_update(Z_ARRVAL_P(subpats), subpat_names[i], &val);
+					add_named(subpats, subpat_names[i], &val, offsets[2*i] == PCRE2_UNSET);
 				}
 				zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &val);
 			}
@@ -1063,7 +1075,7 @@ static void populate_subpat_array(
 				for (i = count; i < num_subpats; i++) {
 					ZVAL_NULL(&val);
 					if (subpat_names[i]) {
-						zend_hash_update(Z_ARRVAL_P(subpats), subpat_names[i], &val);
+						zend_hash_add(Z_ARRVAL_P(subpats), subpat_names[i], &val);
 					}
 					zend_hash_next_index_insert(Z_ARRVAL_P(subpats), &val);
 				}
