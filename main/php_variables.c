@@ -541,37 +541,56 @@ static zend_always_inline int valid_environment_name(const char *name, const cha
 	return 1;
 }
 
-void _php_import_environment_variables(zval *array_ptr)
+static zend_always_inline void import_environment_variable(HashTable *ht, char *env)
 {
-	char **env, *p;
+	char *p;
 	size_t name_len, len;
 	zval val;
 	zend_ulong idx;
 
-	for (env = environ; env != NULL && *env != NULL; env++) {
-		p = strchr(*env, '=');
-		if (!p
-		 || p == *env
-		 || !valid_environment_name(*env, p)) {
-			/* malformed entry? */
-			continue;
-		}
-		name_len = p - *env;
-		p++;
-		len = strlen(p);
-		if (len == 0) {
-			ZVAL_EMPTY_STRING(&val);
-		} else if (len == 1) {
-			ZVAL_INTERNED_STR(&val, ZSTR_CHAR((zend_uchar)*p));
-		} else {
-			ZVAL_NEW_STR(&val, zend_string_init(p, len, 0));
-		}
-		if (ZEND_HANDLE_NUMERIC_STR(*env, name_len, idx)) {
-			zend_hash_index_update(Z_ARRVAL_P(array_ptr), idx, &val);
-		} else {
-			php_register_variable_quick(*env, name_len, &val, Z_ARRVAL_P(array_ptr));
-		}
+	p = strchr(env, '=');
+	if (!p
+		|| p == env
+		|| !valid_environment_name(env, p)) {
+		/* malformed entry? */
+		return;
 	}
+	name_len = p - env;
+	p++;
+	len = strlen(p);
+	if (len == 0) {
+		ZVAL_EMPTY_STRING(&val);
+	} else if (len == 1) {
+		ZVAL_INTERNED_STR(&val, ZSTR_CHAR((zend_uchar)*p));
+	} else {
+		ZVAL_NEW_STR(&val, zend_string_init(p, len, 0));
+	}
+	if (ZEND_HANDLE_NUMERIC_STR(env, name_len, idx)) {
+		zend_hash_index_update(ht, idx, &val);
+	} else {
+		php_register_variable_quick(env, name_len, &val, ht);
+	}
+}
+
+void _php_import_environment_variables(zval *array_ptr)
+{
+#ifndef PHP_WIN32
+	char **env;
+#else
+	char *environment, *env;
+#endif
+
+#ifndef PHP_WIN32
+	for (env = environ; env != NULL && *env != NULL; env++) {
+		import_environment_variable(Z_ARRVAL_P(array_ptr), *env);
+	}
+#else
+	environment = GetEnvironmentStringsA();
+	for (env = environment; env != NULL && *env; env += strlen(env) + 1) {
+		import_environment_variable(Z_ARRVAL_P(array_ptr), env);
+	}
+	FreeEnvironmentStringsA(environment);
+#endif
 }
 
 zend_bool php_std_auto_global_callback(char *name, uint32_t name_len)
