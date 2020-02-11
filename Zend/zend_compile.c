@@ -1806,6 +1806,8 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 
 	ce->default_properties_table = NULL;
 	ce->default_static_members_table = NULL;
+	ce->rigid_properties = 0;
+	
 	zend_hash_init_ex(&ce->properties_info, 8, NULL, (persistent_hashes ? zend_destroy_property_info_internal : NULL), persistent_hashes, 0);
 	zend_hash_init_ex(&ce->constants_table, 8, NULL, NULL, persistent_hashes, 0);
 	zend_hash_init_ex(&ce->function_table, 8, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, 0);

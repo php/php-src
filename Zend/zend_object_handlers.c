@@ -800,9 +800,10 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 	uintptr_t property_offset;
 	zend_property_info *prop_info = NULL;
 	ZEND_ASSERT(!Z_ISREF_P(value));
+	zend_class_entry *ce;
 
 	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__set != NULL), cache_slot, &prop_info);
-
+	
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 		variable_ptr = OBJ_PROP(zobj, property_offset);
 		if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
@@ -867,7 +868,20 @@ found:
 		}
 	} else {
 		ZEND_ASSERT(!IS_WRONG_PROPERTY_OFFSET(property_offset));
+		
 write_std_property:
+		/* implementing RigidProperties prevents the creation of new properties on an object  */
+		ce = zobj->ce;
+		if (ce->rigid_properties == 0) {
+			ce->rigid_properties = instanceof_function(ce, zend_ce_rigidproperties) ? 1 : 2;
+		}
+
+		if (ce->rigid_properties == 1) {
+			zend_throw_error(NULL, "Cannot add additional property '%s' to a class with rigid properties", ZSTR_VAL(name));
+			variable_ptr = &EG(error_zval);
+			goto exit;
+		}
+
 		Z_TRY_ADDREF_P(value);
 		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 
