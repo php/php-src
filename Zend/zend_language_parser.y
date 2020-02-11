@@ -156,6 +156,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_FOREACH    "foreach (T_FOREACH)"
 %token T_ENDFOREACH "endforeach (T_ENDFOREACH)"
 %token T_DECLARE    "declare (T_DECLARE)"
+%token T_DECORATED  "decorated (T_DECORATED)"
 %token T_ENDDECLARE "enddeclare (T_ENDDECLARE)"
 %token T_AS         "as (T_AS)"
 %token T_SWITCH     "switch (T_SWITCH)"
@@ -797,6 +798,8 @@ method_body:
 
 variable_modifiers:
 		non_empty_member_modifiers		{ $$ = $1; }
+	|	non_empty_member_modifiers T_DECORATED
+			{ $$ = $1 | ZEND_ACC_DECORATED; }
 	|	T_VAR							{ $$ = ZEND_ACC_PUBLIC; }
 ;
 

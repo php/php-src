@@ -171,6 +171,8 @@ struct _zend_class_entry {
 	zend_trait_alias **trait_aliases;
 	zend_trait_precedence **trait_precedences;
 
+	struct _zend_property_info *decorated_prop;
+
 	union {
 		struct {
 			zend_string *filename;

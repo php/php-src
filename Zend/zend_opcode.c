@@ -453,6 +453,15 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 
 	efree_size(op_array->refcount, sizeof(*(op_array->refcount)));
 
+	if (op_array->function_name) {
+		zend_string_release_ex(op_array->function_name, 0);
+	}
+
+	/* Uses shared opcodes and arginfo. Don't free past here. */
+	if (op_array->opcodes == EG(call_decorated_ops)) {
+		return;
+	}
+
 	if (op_array->vars) {
 		i = op_array->last_var;
 		while (i > 0) {
@@ -474,11 +483,9 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			efree(op_array->literals);
 		}
 	}
+
 	efree(op_array->opcodes);
 
-	if (op_array->function_name) {
-		zend_string_release_ex(op_array->function_name, 0);
-	}
 	if (op_array->doc_comment) {
 		zend_string_release_ex(op_array->doc_comment, 0);
 	}

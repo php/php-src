@@ -1849,6 +1849,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->serialize_func = NULL;
 		ce->unserialize_func = NULL;
 		ce->__debugInfo = NULL;
+		ce->decorated_prop = NULL;
 		if (ce->type == ZEND_INTERNAL_CLASS) {
 			ce->info.internal.module = NULL;
 			ce->info.internal.builtin_functions = NULL;
@@ -6375,7 +6376,21 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags) /
 			ZVAL_UNDEF(&value_zv);
 		}
 
-		zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, type);
+		zend_property_info *prop_info =
+			zend_declare_typed_property(ce, name, &value_zv, flags, doc_comment, type);
+
+		if (flags & ZEND_ACC_DECORATED) {
+			if (ce->decorated_prop) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot declare multiple properties as \"decorated\"");
+			}
+			ce->decorated_prop = prop_info;
+
+			if (!ZEND_TYPE_HAS_NAME(type) || ZEND_TYPE_PURE_MASK(type) != 0) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Decorator property must have exactly one class type");
+			}
+		}
 	}
 }
 /* }}} */
@@ -6690,7 +6705,7 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 
 	if (toplevel
 		/* We currently don't early-bind classes that implement interfaces or use traits */
-	 && !ce->num_interfaces && !ce->num_traits
+	 && !ce->num_interfaces && !ce->num_traits && !ce->decorated_prop
 	 && !(CG(compiler_options) & ZEND_COMPILE_PRELOAD)) {
 		if (extends_ast) {
 			zend_class_entry *parent_ce = zend_lookup_class_ex(
@@ -6751,7 +6766,7 @@ zend_op *zend_compile_class_decl(zend_ast *ast, zend_bool toplevel) /* {{{ */
 		if (extends_ast && toplevel
 			 && (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING)
 				/* We currently don't early-bind classes that implement interfaces or use traits */
-			 && !ce->num_interfaces && !ce->num_traits
+			 && !ce->num_interfaces && !ce->num_traits && !ce->decorated_prop
 		) {
 			CG(active_op_array)->fn_flags |= ZEND_ACC_EARLY_BINDING;
 			opline->opcode = ZEND_DECLARE_CLASS_DELAYED;
