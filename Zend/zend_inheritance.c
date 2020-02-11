@@ -342,22 +342,16 @@ static zend_bool zend_type_permits_self(
 	/* Any types that may satisfy self must have already been loaded at this point
 	 * (as a parent or interface), so we never need to register delayed variance obligations
 	 * for this case. */
-	if (ZEND_TYPE_HAS_LIST(type)) {
-		void *entry;
-		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), entry) {
-		zend_string *name = resolve_class_name(scope, ZEND_TYPE_LIST_GET_NAME(entry));
+	zend_type *single_type;
+	ZEND_TYPE_FOREACH(type, single_type) {
+		if (ZEND_TYPE_HAS_NAME(*single_type)) {
+			zend_string *name = resolve_class_name(scope, ZEND_TYPE_NAME(*single_type));
 			zend_class_entry *ce = lookup_class(self, name, /* register_unresolved */ 0);
 			if (ce && unlinked_instanceof(self, ce)) {
 				return 1;
 			}
-		} ZEND_TYPE_LIST_FOREACH_END();
-		return 0;
-	}
-	if (ZEND_TYPE_HAS_NAME(type)) {
-		zend_string *name = resolve_class_name(scope, ZEND_TYPE_NAME(type));
-		zend_class_entry *ce = lookup_class(self, name, /* register_unresolved */ 0);
-		return ce && unlinked_instanceof(self, ce);
-	}
+		}
+	} ZEND_TYPE_FOREACH_END();
 	return 0;
 }
 
