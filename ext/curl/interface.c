@@ -1844,12 +1844,7 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	ch->handlers->write_header->fp = source->handlers->write_header->fp;
 	ch->handlers->read->fp = source->handlers->read->fp;
 	ch->handlers->read->res = source->handlers->read->res;
-#if CURLOPT_PASSWDDATA != 0
-	if (!Z_ISUNDEF(source->handlers->passwd)) {
-		ZVAL_COPY(&ch->handlers->passwd, &source->handlers->passwd);
-		curl_easy_setopt(source->cp, CURLOPT_PASSWDDATA, (void *) ch);
-	}
-#endif
+
 	if (!Z_ISUNDEF(source->handlers->write->func_name)) {
 		ZVAL_COPY(&ch->handlers->write->func_name, &source->handlers->write->func_name);
 	}
