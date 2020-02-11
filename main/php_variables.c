@@ -543,20 +543,28 @@ static zend_always_inline int valid_environment_name(const char *name, const cha
 
 void _php_import_environment_variables(zval *array_ptr)
 {
-	char **env, *p;
+	char **env, *ep, *p;
+#ifdef PHP_WIN32
+	char *envir;
+#endif
 	size_t name_len, len;
 	zval val;
 	zend_ulong idx;
 
-	for (env = environ; env != NULL && *env != NULL; env++) {
-		p = strchr(*env, '=');
+#ifndef PHP_WIN32
+	for (env = environ; env != NULL && (ep = *env) != NULL; env++) {
+#else
+	envir = GetEnvironmentStringsA();
+	for (ep = envir; ep != NULL && *ep; ep += strlen(ep) + 1) {
+#endif
+		p = strchr(ep, '=');
 		if (!p
-		 || p == *env
-		 || !valid_environment_name(*env, p)) {
+		 || p == ep
+		 || !valid_environment_name(ep, p)) {
 			/* malformed entry? */
 			continue;
 		}
-		name_len = p - *env;
+		name_len = p - ep;
 		p++;
 		len = strlen(p);
 		if (len == 0) {
@@ -566,12 +574,15 @@ void _php_import_environment_variables(zval *array_ptr)
 		} else {
 			ZVAL_NEW_STR(&val, zend_string_init(p, len, 0));
 		}
-		if (ZEND_HANDLE_NUMERIC_STR(*env, name_len, idx)) {
+		if (ZEND_HANDLE_NUMERIC_STR(ep, name_len, idx)) {
 			zend_hash_index_update(Z_ARRVAL_P(array_ptr), idx, &val);
 		} else {
-			php_register_variable_quick(*env, name_len, &val, Z_ARRVAL_P(array_ptr));
+			php_register_variable_quick(ep, name_len, &val, Z_ARRVAL_P(array_ptr));
 		}
 	}
+#ifdef PHP_WIN32
+	FreeEnvironmentStringsA(envir);
+#endif
 }
 
 zend_bool php_std_auto_global_callback(char *name, uint32_t name_len)
