@@ -320,22 +320,31 @@ PHP_MINFO_FUNCTION(tokenizer)
 }
 /* }}} */
 
-static inline zend_string *make_str(unsigned char *text, size_t leng) {
+static zend_string *make_str(unsigned char *text, size_t leng, HashTable *interned_strings) {
 	if (leng == 1) {
 		return ZSTR_CHAR(text[0]);
+	} else if (interned_strings) {
+		zend_string *interned_str = zend_hash_str_find_ptr(interned_strings, (char *) text, leng);
+		if (interned_str) {
+			return zend_string_copy(interned_str);
+		}
+		interned_str = zend_string_init((char *) text, leng, 0);
+		zend_hash_add_new_ptr(interned_strings, interned_str, interned_str);
+		return interned_str;
 	} else {
 		return zend_string_init((char *) text, leng, 0);
 	}
 }
 
-static void add_token(zval *return_value, int token_type,
-		unsigned char *text, size_t leng, int lineno, zend_class_entry *token_class) {
+static void add_token(
+		zval *return_value, int token_type, unsigned char *text, size_t leng, int lineno,
+		zend_class_entry *token_class, HashTable *interned_strings) {
 	zval token;
 	if (token_class) {
 		zend_object *obj = zend_objects_new(token_class);
 		ZVAL_OBJ(&token, obj);
 		ZVAL_LONG(OBJ_PROP_NUM(obj, 0), token_type);
-		ZVAL_STR(OBJ_PROP_NUM(obj, 1), make_str(text, leng));
+		ZVAL_STR(OBJ_PROP_NUM(obj, 1), make_str(text, leng, interned_strings));
 		ZVAL_LONG(OBJ_PROP_NUM(obj, 2), lineno);
 		ZVAL_LONG(OBJ_PROP_NUM(obj, 3), text - LANG_SCNG(yy_start));
 
@@ -352,10 +361,10 @@ static void add_token(zval *return_value, int token_type,
 	} else if (token_type >= 256) {
 		array_init(&token);
 		add_next_index_long(&token, token_type);
-		add_next_index_str(&token, make_str(text, leng));
+		add_next_index_str(&token, make_str(text, leng, interned_strings));
 		add_next_index_long(&token, lineno);
 	} else {
-		ZVAL_STR(&token, make_str(text, leng));
+		ZVAL_STR(&token, make_str(text, leng, interned_strings));
 	}
 	zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &token);
 }
@@ -368,6 +377,7 @@ static zend_bool tokenize(zval *return_value, zend_string *source, zend_class_en
 	int token_type;
 	int token_line = 1;
 	int need_tokens = -1; /* for __halt_compiler lexing. -1 = disabled */
+	HashTable interned_strings;
 
 	ZVAL_STR_COPY(&source_zval, source);
 	zend_save_lexical_state(&original_lex_state);
@@ -378,10 +388,13 @@ static zend_bool tokenize(zval *return_value, zend_string *source, zend_class_en
 	}
 
 	LANG_SCNG(yy_state) = yycINITIAL;
+	zend_hash_init(&interned_strings, 0, NULL, NULL, 0);
 	array_init(return_value);
 
 	while ((token_type = lex_scan(&token, NULL))) {
-		add_token(return_value, token_type, zendtext, zendleng, token_line, token_class);
+		add_token(
+			return_value, token_type, zendtext, zendleng, token_line,
+			token_class, &interned_strings);
 
 		if (Z_TYPE(token) != IS_UNDEF) {
 			zval_ptr_dtor_nogc(&token);
@@ -396,8 +409,9 @@ static zend_bool tokenize(zval *return_value, zend_string *source, zend_class_en
 			) {
 				/* fetch the rest into a T_INLINE_HTML */
 				if (zendcursor != zendlimit) {
-					add_token(return_value, T_INLINE_HTML,
-						zendcursor, zendlimit - zendcursor, token_line, token_class);
+					add_token(
+						return_value, T_INLINE_HTML, zendcursor, zendlimit - zendcursor,
+						token_line, token_class, &interned_strings);
 				}
 				break;
 			}
@@ -415,6 +429,7 @@ static zend_bool tokenize(zval *return_value, zend_string *source, zend_class_en
 
 	zval_ptr_dtor_str(&source_zval);
 	zend_restore_lexical_state(&original_lex_state);
+	zend_hash_destroy(&interned_strings);
 
 	return 1;
 }
@@ -440,7 +455,7 @@ void on_event(zend_php_scanner_event event, int token, int line, void *context)
 				token = T_OPEN_TAG_WITH_ECHO;
 			}
 			add_token(ctx->tokens, token,
-				LANG_SCNG(yy_text), LANG_SCNG(yy_leng), line, ctx->token_class);
+				LANG_SCNG(yy_text), LANG_SCNG(yy_leng), line, ctx->token_class, NULL);
 			break;
 		case ON_FEEDBACK:
 			tokens_ht = Z_ARRVAL_P(ctx->tokens);
@@ -455,7 +470,8 @@ void on_event(zend_php_scanner_event event, int token, int line, void *context)
 		case ON_STOP:
 			if (LANG_SCNG(yy_cursor) != LANG_SCNG(yy_limit)) {
 				add_token(ctx->tokens, T_INLINE_HTML, LANG_SCNG(yy_cursor),
-					LANG_SCNG(yy_limit) - LANG_SCNG(yy_cursor), CG(zend_lineno), ctx->token_class);
+					LANG_SCNG(yy_limit) - LANG_SCNG(yy_cursor), CG(zend_lineno),
+					ctx->token_class, NULL);
 			}
 			break;
 	}
