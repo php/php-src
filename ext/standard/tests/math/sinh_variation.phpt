@@ -34,19 +34,19 @@ for ($i = 0; $i < count($values); $i++) {
 
 ?>
 --EXPECTF--
-float(4872401723)
-float(-4872401723)
-float(7641446995)
-float(-7641446995)
-float(4872401723)
-float(4872401723)
-float(4872401723)
-float(7641446995)
-float(7641446995)
+float(4872401723.124452)
+float(-4872401723.124452)
+float(7641446994.979367)
+float(-7641446994.979367)
+float(4872401723.124452)
+float(4872401723.124452)
+float(4872401723.124452)
+float(7641446994.979367)
+float(7641446994.979367)
 float(INF)
 
 Notice: A non well formed numeric value encountered in %s on line %d
 float(INF)
 float(0)
-float(1.175201194)
+float(1.1752011936438014)
 float(0)

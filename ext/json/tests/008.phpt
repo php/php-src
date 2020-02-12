@@ -12,6 +12,6 @@ var_dump($x->largenum);
 echo "Done\n";
 ?>
 --EXPECT--
-float(1.2345678901235E+29)
+float(1.2345678901234568E+29)
 string(30) "123456789012345678901234567890"
 Done

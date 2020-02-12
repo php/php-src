@@ -37,22 +37,22 @@ foreach($values as $value) {
 *** Testing expm1() : basic functionality ***
 
 -- Iteration 1 --
-float(22025.465794807)
+float(22025.465794806718)
 
 -- Iteration 2 --
-float(29731.618852891)
+float(29731.618852891435)
 
 -- Iteration 3 --
 float(INF)
 
 -- Iteration 4 --
-float(29048849665246)
+float(29048849665246.426)
 
 -- Iteration 5 --
-float(1.811239082889E+41)
+float(1.8112390828890233E+41)
 
 -- Iteration 6 --
-float(22025.465794807)
+float(22025.465794806718)
 
 -- Iteration 7 --
 float(INF)
@@ -61,10 +61,10 @@ float(INF)
 float(INF)
 
 -- Iteration 9 --
-float(8.6593400423994E+16)
+float(86593400423993740)
 
 -- Iteration 10 --
-float(1.718281828459)
+float(1.718281828459045)
 
 -- Iteration 11 --
 float(0)

@@ -109,19 +109,19 @@ float(0)
 float(INF)
 
 -- Iteration 6 --
-float(1856.6929774279)
+float(1856.6929774278785)
 
 -- Iteration 7 --
-float(0.00053859200856424)
+float(0.0005385920085642399)
 
 -- Iteration 8 --
 float(INF)
 
 -- Iteration 9 --
-float(1.0000000037168)
+float(1.000000003716816)
 
 -- Iteration 10 --
-float(4.5055521304275)
+float(4.505552130427524)
 
 -- Iteration 11 --
 float(1)

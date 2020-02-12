@@ -48,5 +48,5 @@ float(1)
 Notice: A non well formed numeric value encountered in %s on line %d
 float(1)
 float(0)
-float(0.761594156)
+float(0.7615941559557649)
 float(0)

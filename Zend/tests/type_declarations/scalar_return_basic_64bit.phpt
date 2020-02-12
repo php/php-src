@@ -117,7 +117,7 @@ float(1)
 *** Trying string(0) ""
 *** Caught Return value of {closure}() must be of the type float, string returned in %s on line %d
 *** Trying int(9223372036854775807)
-float(9.2233720368548E+18)
+float(9.223372036854776E+18)
 *** Trying float(NAN)
 float(NAN)
 *** Trying bool(true)
