@@ -801,7 +801,7 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 	zend_property_info *prop_info = NULL;
 	ZEND_ASSERT(!Z_ISREF_P(value));
 	zend_class_entry *ce;
-
+	
 	property_offset = zend_get_property_offset(zobj->ce, name, (zobj->ce->__set != NULL), cache_slot, &prop_info);
 	
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
@@ -826,7 +826,7 @@ found:
 		if (Z_PROP_FLAG_P(variable_ptr) == IS_PROP_UNINIT) {
 			/* Writes to uninitializde typed properties bypass __set(). */
 			Z_PROP_FLAG_P(variable_ptr) = 0;
-			goto write_std_property;
+			goto write_std_property_beyond_check;
 		}
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))) {
 		if (EXPECTED(zobj->properties != NULL)) {
@@ -881,7 +881,8 @@ write_std_property:
 			variable_ptr = &EG(error_zval);
 			goto exit;
 		}
-
+		
+write_std_property_beyond_check:
 		Z_TRY_ADDREF_P(value);
 		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 

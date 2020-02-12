@@ -4,11 +4,14 @@ Test that a userland class with rigid properties cannot have additional properti
 <?php
 
 class Foo implements RigidProperties {
-    public int $x = 0;
+    public int $x;
+
+    public int $y = 1;
 }
 
 $foo = new Foo();
-$foo->x = 123;
+$foo->x = 123; // uninitialized check
+$foo->y = 123; // initialized check
 
 try {
     $foo->bar = 123;
