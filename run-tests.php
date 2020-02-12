@@ -1424,7 +1424,8 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
                 "TEST_PHP_URI" => $sockUri,
             ],
             [
-                "suppress_errors" => TRUE
+                "suppress_errors" => TRUE,
+                'create_new_console' => TRUE,
             ]
         );
         if ($proc === FALSE) {
