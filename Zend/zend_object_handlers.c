@@ -312,13 +312,6 @@ retry:
 			}
 		}
 
-		if (!EG(exception) && (Z_TYPE_P(result) == IS_UNDEF))
-		{
-			zend_type_error("Method %s::%s must return a non-null value or null to signal that it does not support the given types.", ZSTR_VAL(ce->name), Z_STRVAL(fci.function_name));
-			zval_ptr_dtor(&fci.function_name);
-			return FAILURE;
-		}
-
 		EG(fake_scope) = orig_fake_scope;
 
 		zval_ptr_dtor(&fci.function_name);
