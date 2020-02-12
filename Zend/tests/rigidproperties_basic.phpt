@@ -9,6 +9,13 @@ class Foo implements RigidProperties {
     public int $y = 1;
 }
 
+class NotRigid {
+
+}
+
+$nr = new NotRigid();
+$nr->x = 1234;
+
 $foo = new Foo();
 $foo->x = 123; // uninitialized check
 $foo->y = 123; // initialized check
@@ -26,6 +33,8 @@ try {
 catch (\Error $e) {
     echo (string)$e . "\n\n";
 }
+
+
 
 --EXPECTF--
 Error: Cannot add additional property 'bar' to a class with rigid properties in %s:%d
