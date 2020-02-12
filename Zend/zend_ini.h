@@ -138,21 +138,21 @@ END_EXTERN_C()
 	ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, (void *) XtOffsetOf(struct_type, property_name), (void *) &struct_ptr, NULL, zend_ini_boolean_displayer_cb)
 #endif
 
-#define INI_INT(name) zend_ini_long((name), sizeof(name)-1, 0)
-#define INI_FLT(name) zend_ini_double((name), sizeof(name)-1, 0)
-#define INI_STR(name) zend_ini_string_ex((name), sizeof(name)-1, 0, NULL)
+#define INI_INT(name) zend_ini_long((name), strlen(name), 0)
+#define INI_FLT(name) zend_ini_double((name), strlen(name), 0)
+#define INI_STR(name) zend_ini_string_ex((name), strlen(name), 0, NULL)
 #define INI_BOOL(name) ((zend_bool) INI_INT(name))
 
-#define INI_ORIG_INT(name)	zend_ini_long((name), sizeof(name)-1, 1)
-#define INI_ORIG_FLT(name)	zend_ini_double((name), sizeof(name)-1, 1)
-#define INI_ORIG_STR(name)	zend_ini_string((name), sizeof(name)-1, 1)
+#define INI_ORIG_INT(name)	zend_ini_long((name), strlen(name), 1)
+#define INI_ORIG_FLT(name)	zend_ini_double((name), strlen(name), 1)
+#define INI_ORIG_STR(name)	zend_ini_string((name), strlen(name), 1)
 #define INI_ORIG_BOOL(name) ((zend_bool) INI_ORIG_INT(name))
 
 #define REGISTER_INI_ENTRIES() zend_register_ini_entries(ini_entries, module_number)
 #define UNREGISTER_INI_ENTRIES() zend_unregister_ini_entries(module_number)
 #define DISPLAY_INI_ENTRIES() display_ini_entries(zend_module)
 
-#define REGISTER_INI_DISPLAYER(name, displayer) zend_ini_register_displayer((name), sizeof(name)-1, displayer)
+#define REGISTER_INI_DISPLAYER(name, displayer) zend_ini_register_displayer((name), strlen(name), displayer)
 #define REGISTER_INI_BOOLEAN(name) REGISTER_INI_DISPLAYER(name, zend_ini_boolean_displayer_cb)
 
 /* Standard message handlers */
