@@ -1,7 +1,7 @@
 --TEST--
 Test variations in usage of cos()
 --INI--
-precision = 10
+serialize_precision = 10
 --FILE--
 <?php
 /*

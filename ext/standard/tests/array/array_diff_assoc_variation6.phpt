@@ -83,7 +83,7 @@ array(2) {
   [0]=>
   string(4) "zero"
   ["two"]=>
-  float(2)
+  float(2.00000000000001)
 }
 array(3) {
   [0]=>
@@ -97,7 +97,7 @@ array(3) {
 -- Iteration 2 --
 array(1) {
   ["two"]=>
-  float(2)
+  float(2.00000000000001)
 }
 array(2) {
   [2]=>
@@ -109,7 +109,7 @@ array(2) {
 -- Iteration 3 --
 array(1) {
   ["two"]=>
-  float(2)
+  float(2.00000000000001)
 }
 array(2) {
   [2]=>
@@ -123,7 +123,7 @@ array(2) {
   [0]=>
   string(4) "zero"
   ["two"]=>
-  float(2)
+  float(2.00000000000001)
 }
 array(2) {
   [0]=>
@@ -137,7 +137,7 @@ array(2) {
   [0]=>
   string(4) "zero"
   ["two"]=>
-  float(2)
+  float(2.00000000000001)
 }
 array(2) {
   [2]=>
@@ -161,11 +161,11 @@ array(2) {
   [0]=>
   string(4) "zero"
   ["two"]=>
-  float(2)
+  float(2.00000000000001)
 }
 array(2) {
   [0]=>
-  float(2)
+  float(2.00000000000001)
   [2]=>
   float(1.0E-11)
 }
@@ -175,11 +175,11 @@ array(2) {
   [0]=>
   string(4) "zero"
   ["two"]=>
-  float(2)
+  float(2.00000000000001)
 }
 array(2) {
   [2]=>
-  float(2)
+  float(2.00000000000001)
   [0]=>
   float(1.0E-11)
 }

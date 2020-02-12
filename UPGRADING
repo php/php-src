@@ -342,6 +342,10 @@ PHP 8.0 UPGRADE NOTES
         http://example.com/foo?# => query = "",   fragment = ""
 
     Previously all cases resulted in query and fragment being null.
+  . var_dump() and debug_zval_dump() will now print floating-point numbers
+    using serialize_precision rather than precision. In a default configuration,
+    this means that floating-point numbers are now printed with full accuracy
+    by these debugging functions.
 
 - tidy:
   . The $use_include_path parameter, which was not used internally, has been

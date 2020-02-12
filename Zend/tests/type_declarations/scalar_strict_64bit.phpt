@@ -131,7 +131,7 @@ float(1.5)
 *** Caught {closure}() expects argument #1 ($f) to be of type float, string given, called in %s on line %d
 
 *** Trying int(9223372036854775807)
-float(9.2233720368548E+18)
+float(9.223372036854776E+18)
 
 *** Trying float(NAN)
 float(NAN)

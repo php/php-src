@@ -157,7 +157,7 @@ float(115.3)
 --- testing: '-7.7' + '123abc ' ---
 float(115.3)
 --- testing: '-7.7' + '3.4a' ---
-float(-4.3)
+float(-4.300000000000001)
 --- testing: '-7.7' + 'a5.9' ---
 float(-7.7)
 --- testing: 'abc' + '0' ---
@@ -365,7 +365,7 @@ float(-40.6)
 --- testing: '3.4a' + '1.2' ---
 float(4.6)
 --- testing: '3.4a' + '-7.7' ---
-float(-4.3)
+float(-4.300000000000001)
 --- testing: '3.4a' + 'abc' ---
 float(3.4)
 --- testing: '3.4a' + '123abc' ---
