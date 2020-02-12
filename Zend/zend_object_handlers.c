@@ -284,6 +284,19 @@ retry:
 			return FAILURE;
 		}
 
+
+		/* Check if the given types are supported by the given handler signature */
+
+		zval* arr[2] = {op1, op2};
+		if (!zend_check_arg_types(fcic.function_handler, 2, arr))
+		{
+			if (zobj == Z_OBJ_P(op1) && Z_TYPE_P(op2) == IS_OBJECT) {
+				goto retry;
+			} else {
+				zend_type_error("The operand handlers do not support the given operand types!");
+			}
+		}
+
 		fcic.called_scope = ce;
 		fcic.object = zobj;
 		fcic.function_handler->type = ZEND_USER_FUNCTION;
@@ -293,16 +306,6 @@ retry:
 		/** The operand handler can either return PHP_OPERAND_NOT_SUPPORTED */
 		if (Z_TYPE_P(result) == IS_NULL) {
 			if(zobj == Z_OBJ_P(op1) && Z_TYPE_P(op2) == IS_OBJECT) {
-				goto retry;
-			} else {
-				zend_type_error("The operand handlers do not support the given operand types!");
-			}
-		}
-
-		/** or throw an type error (useful in combination of typehints), to signal that it does not support the given types */
-		if (EG(exception) && instanceof_function(EG(exception)->ce, zend_ce_type_error)) {
-			zend_clear_exception();
-			if (zobj == Z_OBJ_P(op1) && Z_TYPE_P(op2) == IS_OBJECT) {
 				goto retry;
 			} else {
 				zend_type_error("The operand handlers do not support the given operand types!");
