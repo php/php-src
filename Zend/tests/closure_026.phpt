@@ -47,10 +47,7 @@ array(1) {
     ["this"]=>
     object(foo)#%d (1) {
       ["a"]=>
-      array(1) {
-        [0]=>
-        *RECURSION*
-      }
+      *RECURSION*
     }
   }
 }

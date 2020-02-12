@@ -123,7 +123,7 @@ again:
 			break;
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(struc);
-			if (level > 1 && !(GC_FLAGS(myht) & GC_IMMUTABLE)) {
+			if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
 				if (GC_IS_RECURSIVE(myht)) {
 					PUTS("*RECURSION*\n");
 					return;
@@ -136,7 +136,7 @@ again:
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 				php_array_element_dump(val, num, key, level);
 			} ZEND_HASH_FOREACH_END();
-			if (level > 1 && !(GC_FLAGS(myht) & GC_IMMUTABLE)) {
+			if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
 				GC_UNPROTECT_RECURSION(myht);
 			}
 			if (level > 1) {
