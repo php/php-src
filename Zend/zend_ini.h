@@ -81,14 +81,14 @@ ZEND_API int zend_alter_ini_entry_chars_ex(zend_string *name, const char *value,
 ZEND_API int zend_restore_ini_entry(zend_string *name, int stage);
 ZEND_API void display_ini_entries(zend_module_entry *module);
 
-ZEND_API zend_long zend_ini_long(char *name, size_t name_length, int orig);
-ZEND_API double zend_ini_double(char *name, size_t name_length, int orig);
-ZEND_API char *zend_ini_string(char *name, size_t name_length, int orig);
-ZEND_API char *zend_ini_string_ex(char *name, size_t name_length, int orig, zend_bool *exists);
+ZEND_API zend_long zend_ini_long(const char *name, size_t name_length, int orig);
+ZEND_API double zend_ini_double(const char *name, size_t name_length, int orig);
+ZEND_API char *zend_ini_string(const char *name, size_t name_length, int orig);
+ZEND_API char *zend_ini_string_ex(const char *name, size_t name_length, int orig, zend_bool *exists);
 ZEND_API zend_string *zend_ini_get_value(zend_string *name);
 ZEND_API zend_bool zend_ini_parse_bool(zend_string *str);
 
-ZEND_API int zend_ini_register_displayer(char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
+ZEND_API int zend_ini_register_displayer(const char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
 
 ZEND_API ZEND_INI_DISP(zend_ini_boolean_displayer_cb);
 ZEND_API ZEND_INI_DISP(zend_ini_color_displayer_cb);
