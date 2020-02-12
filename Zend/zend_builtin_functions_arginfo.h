@@ -196,3 +196,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_gc_disable arginfo_gc_enable
 
 #define arginfo_gc_status arginfo_get_included_files
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_namespace_declare, 0, 2, IS_VOID, 0)
+	ZEND_ARG_TYPE_INFO(0, namespace, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, declares, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()

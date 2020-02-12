@@ -1771,14 +1771,6 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 		return NULL;
 	}
 
-	/* Take ownership of namespace information */
-	new_persistent_script->ns_declares = CG(last_ns_declares);
-	new_persistent_script->namespaces = CG(last_namespaces);
-	new_persistent_script->num_namespaces = CG(last_num_namespaces);
-	CG(last_ns_declares) = NULL;
-	CG(last_namespaces) = NULL;
-	CG(last_num_namespaces) = 0;
-
 	/* Build the persistent_script structure.
 	   Here we aren't sure we would store it, but we will need it
 	   further anyway.
@@ -1793,6 +1785,14 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 			(uint32_t)-1;
 
 	efree(op_array); /* we have valid persistent_script, so it's safe to free op_array */
+
+	/* Take ownership of namespace information */
+	new_persistent_script->ns_declares = CG(last_ns_declares);
+	new_persistent_script->namespaces = CG(last_namespaces);
+	new_persistent_script->num_namespaces = CG(last_num_namespaces);
+	CG(last_ns_declares) = NULL;
+	CG(last_namespaces) = NULL;
+	CG(last_num_namespaces) = 0;
 
     /* Fill in the ping_auto_globals_mask for the new script. If jit for auto globals is enabled we
        will have to ping the used auto global variables before execution */

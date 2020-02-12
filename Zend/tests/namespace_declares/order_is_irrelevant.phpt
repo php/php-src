@@ -27,6 +27,6 @@ test('Foo\Bar\Baz');
 
 ?>
 --EXPECT--
-Foo: strlen() expects parameter 1 to be string, integer given
+Foo: strlen() expects parameter 1 to be string, int given
 Foo\Bar: 2
-Foo\Bar\Baz: strlen() expects parameter 1 to be string, integer given
+Foo\Bar\Baz: strlen() expects parameter 1 to be string, int given

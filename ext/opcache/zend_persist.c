@@ -1081,7 +1081,8 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 static void zend_accel_persist_namespace_info(zend_persistent_script *script)
 {
 	if (script->ns_declares) {
-		script->ns_declares = zend_accel_memdup(script->ns_declares, sizeof(zend_declarables));
+		script->ns_declares = zend_shared_memdup(
+			(void *) script->ns_declares, sizeof(zend_declarables));
 	}
 
 	if (script->namespaces) {
@@ -1089,7 +1090,8 @@ static void zend_accel_persist_namespace_info(zend_persistent_script *script)
 		for (i = 0; i < script->num_namespaces; i++) {
 			zend_accel_store_interned_string(script->namespaces[i]);
 		}
-		zend_accel_store(script->namespaces, sizeof(zend_string *) * script->num_namespaces);
+		script->namespaces = zend_shared_memdup_free(
+			script->namespaces, sizeof(zend_string *) * script->num_namespaces);
 	}
 }
 

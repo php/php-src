@@ -521,7 +521,7 @@ static void zend_accel_persist_namespace_info_calc(zend_persistent_script *scrip
 	if (script->namespaces) {
 		uint32_t i;
 		for (i = 0; i < script->num_namespaces; i++) {
-			ADD_INTERNED_STRING(script->namespaces[i], 0);
+			ADD_INTERNED_STRING(script->namespaces[i]);
 		}
 		ADD_SIZE(sizeof(zend_string *) * script->num_namespaces);
 	}

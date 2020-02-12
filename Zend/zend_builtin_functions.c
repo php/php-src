@@ -88,11 +88,6 @@ static ZEND_FUNCTION(namespace_declare);
 
 #include "zend_builtin_functions_arginfo.h"
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_namespace_declare, 0, 0, 2)
-	ZEND_ARG_INFO(0, namespace)
-	ZEND_ARG_INFO(0, declares)
-ZEND_END_ARG_INFO()
-
 /* }}} */
 
 static const zend_function_entry builtin_functions[] = { /* {{{ */

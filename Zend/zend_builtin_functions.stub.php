@@ -114,3 +114,5 @@ function gc_enable(): void {}
 function gc_disable(): void {}
 
 function gc_status(): array {}
+
+function namespace_declare(string $namespace, array $declares): void {}

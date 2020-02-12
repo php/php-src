@@ -1097,7 +1097,7 @@ END_EXTERN_C()
 #define ZEND_COMPILE_PRELOAD_IN_CHILD           (1<<17)
 
 /* collect last_ns_declares, last_namespaces, last_num_namespaces, for use by opcache */
-#define ZEND_COMPILE_COLLECT_NS_INFO			(1<<11)
+#define ZEND_COMPILE_COLLECT_NS_INFO			(1<<18)
 
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY

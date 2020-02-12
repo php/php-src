@@ -34,12 +34,12 @@ test('Foo\Bar', 'declare(strict_types=1);');
 
 ?>
 --EXPECT--
-Foo: strlen() expects parameter 1 to be string, integer given
+Foo: strlen() expects parameter 1 to be string, int given
 Foo\Bar: 2
-Foo\NotBar: strlen() expects parameter 1 to be string, integer given
+Foo\NotBar: strlen() expects parameter 1 to be string, int given
 Foo\Bar\Baz: 2
 Foobar: 2
-foo: strlen() expects parameter 1 to be string, integer given
+foo: strlen() expects parameter 1 to be string, int given
 foo\BAR: 2
 Foo: 2
-Foo\Bar: strlen() expects parameter 1 to be string, integer given
+Foo\Bar: strlen() expects parameter 1 to be string, int given
