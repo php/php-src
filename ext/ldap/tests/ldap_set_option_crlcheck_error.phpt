@@ -11,5 +11,6 @@ $link = ldap_connect($host, $port);
 $result = ldap_set_option($link, LDAP_OPT_X_TLS_CRLCHECK, 9001);
 var_dump($result);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Usage of ldap_connect with two arguments is deprecated. in %s on line %d
 bool(false)

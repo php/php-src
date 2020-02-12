@@ -22,6 +22,8 @@ ldap_close($ldap);
 
 ?>
 --EXPECTF--
+Deprecated: Usage of ldap_connect with two arguments is deprecated. in %s on line %d
+
 Warning: ldap_mod_replace(): Modify: Can't contact LDAP server in %sbug73933.php on line %d
 
 Warning: ldap_modify_batch(): Batch Modify: Can't contact LDAP server in %sbug73933.php on line %d

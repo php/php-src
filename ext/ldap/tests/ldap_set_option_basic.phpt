@@ -16,6 +16,7 @@ var_dump(ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version));
 ldap_get_option($link, LDAP_OPT_PROTOCOL_VERSION, $option);
 var_dump($option);
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Usage of ldap_connect with two arguments is deprecated. in %s on line %d
 bool(true)
 int(3)

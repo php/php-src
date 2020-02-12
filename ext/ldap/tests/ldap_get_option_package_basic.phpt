@@ -14,6 +14,7 @@ var_dump(in_array($optionval, ['GnuTLS', 'OpenSSL', 'MozNSS']));
 // This is a read-only option.
 var_dump(ldap_set_option($link, LDAP_OPT_X_TLS_PACKAGE, 'foo'));
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Usage of ldap_connect with two arguments is deprecated. in %s on line %d
 bool(true)
 bool(false)

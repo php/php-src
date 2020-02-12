@@ -24,7 +24,8 @@ foreach([
     var_dump($optionval);
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Usage of ldap_connect with two arguments is deprecated. in %s on line %d
 bool(true)
 string(8) "/foo/bar"
 bool(true)

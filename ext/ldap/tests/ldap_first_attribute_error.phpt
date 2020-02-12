@@ -17,4 +17,5 @@ try {
 }
 ?>
 --EXPECT--
+Deprecated: Usage of ldap_connect with two arguments is deprecated. in %s on line %d
 ldap_first_attribute(): Argument #2 ($entry) must be of type LDAP\ResultEntry, LDAP\Connection given

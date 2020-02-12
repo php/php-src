@@ -48,7 +48,8 @@ var_dump(
     $option
 );
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Usage of ldap_connect with two arguments is deprecated. in %s on line %d
 bool(true)
 int(0)
 bool(true)
