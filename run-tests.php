@@ -254,6 +254,7 @@ NO_PROC_OPEN_ERROR;
         'auto_append_file=',
         'ignore_repeated_errors=0',
         'precision=14',
+        'serialize_precision=-1',
         'memory_limit=128M',
         'log_errors_max_len=0',
         'opcache.fast_shutdown=0',

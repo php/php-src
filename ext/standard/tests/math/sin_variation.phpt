@@ -1,7 +1,7 @@
 --TEST--
 Test variations in usage of sin()
 --INI--
-precision = 10
+serialize_precision = 10
 --FILE--
 <?php
 /*
@@ -34,19 +34,19 @@ for ($i = 0; $i < count($values); $i++) {
 
 ?>
 --EXPECTF--
-float(-0.8462204041751706)
-float(0.8462204041751706)
-float(-0.9937407101726596)
-float(0.9937407101726596)
-float(-0.8462204041751706)
-float(-0.8462204041751706)
-float(-0.8462204041751706)
-float(-0.9937407101726596)
-float(-0.9937407101726596)
-float(0.8268795405320025)
+float(-0.8462204042)
+float(0.8462204042)
+float(-0.9937407102)
+float(0.9937407102)
+float(-0.8462204042)
+float(-0.8462204042)
+float(-0.8462204042)
+float(-0.9937407102)
+float(-0.9937407102)
+float(0.8268795405)
 
 Notice: A non well formed numeric value encountered in %s on line %d
-float(0.8268795405320025)
+float(0.8268795405)
 float(0)
-float(0.8414709848078965)
+float(0.8414709848)
 float(0)

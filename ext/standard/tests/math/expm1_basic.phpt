@@ -1,7 +1,7 @@
 --TEST--
 Test expm1() - basic function test for expm1()
 --INI--
-precision=14
+serialize_precision=14
 --FILE--
 <?php
 /* Prototype  : float expm1 ( float $arg  )
@@ -37,22 +37,22 @@ foreach($values as $value) {
 *** Testing expm1() : basic functionality ***
 
 -- Iteration 1 --
-float(22025.465794806718)
+float(22025.465794807)
 
 -- Iteration 2 --
-float(29731.618852891435)
+float(29731.618852891)
 
 -- Iteration 3 --
 float(INF)
 
 -- Iteration 4 --
-float(29048849665246.426)
+float(29048849665246)
 
 -- Iteration 5 --
-float(1.8112390828890233E+41)
+float(1.811239082889E+41)
 
 -- Iteration 6 --
-float(22025.465794806718)
+float(22025.465794807)
 
 -- Iteration 7 --
 float(INF)
@@ -61,10 +61,10 @@ float(INF)
 float(INF)
 
 -- Iteration 9 --
-float(86593400423993740)
+float(8.6593400423994E+16)
 
 -- Iteration 10 --
-float(1.718281828459045)
+float(1.718281828459)
 
 -- Iteration 11 --
 float(0)

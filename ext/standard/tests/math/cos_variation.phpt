@@ -1,7 +1,7 @@
 --TEST--
 Test variations in usage of cos()
 --INI--
-precision = 10
+serialize_precision = 10
 --FILE--
 <?php
 /*
@@ -34,19 +34,19 @@ for ($i = 0; $i < count($values); $i++) {
 
 ?>
 --EXPECTF--
-float(-0.5328330203333975)
-float(-0.5328330203333975)
-float(-0.11171123911915933)
-float(-0.11171123911915933)
-float(-0.5328330203333975)
-float(-0.5328330203333975)
-float(-0.5328330203333975)
-float(-0.11171123911915933)
-float(-0.11171123911915933)
-float(0.5623790762907029)
+float(-0.5328330203)
+float(-0.5328330203)
+float(-0.1117112391)
+float(-0.1117112391)
+float(-0.5328330203)
+float(-0.5328330203)
+float(-0.5328330203)
+float(-0.1117112391)
+float(-0.1117112391)
+float(0.5623790763)
 
 Notice: A non well formed numeric value encountered in %s on line %d
-float(0.5623790762907029)
+float(0.5623790763)
 float(1)
-float(0.5403023058681398)
+float(0.5403023059)
 float(1)
