@@ -339,7 +339,7 @@ int dom_document_encoding_write(dom_object *obj, zval *newval)
 
 	str = zval_get_string(newval);
 
-	handler = xmlFindCharEncodingHandler(Z_STRVAL_P(newval));
+	handler = xmlFindCharEncodingHandler(ZSTR_VAL(str));
 
     if (handler != NULL) {
 		xmlCharEncCloseFunc(handler);
