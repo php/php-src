@@ -8640,7 +8640,7 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, const zend_op_
 				|	mov FCARG1a, r0
 				|	mov r0,	EX->run_time_cache
 				|	add r0, opline->extended_value
-				|	LOAD_ADDR FCARG2a, (ptrdiff_t)op_array
+				|	mov FCARG2a, EX->func
 				|.if X64WIN
 					|	mov CARG3, arg_num
 					|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
@@ -8784,7 +8784,7 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zen
 	|	mov FCARG1a, r0
 	|	mov r0,	EX->run_time_cache
 	|	lea r0, [r0 + opline->extended_value]
-	|	LOAD_ADDR FCARG2a, (ptrdiff_t)op_array
+	|	mov FCARG2a, EX->func
 	|.if X64WIN
 		|	mov CARG3, arg_num
 		|	LOAD_ADDR CARG4, (ptrdiff_t)arg_info
@@ -9345,7 +9345,7 @@ static zend_bool zend_jit_verify_return_type(dasm_State **Dst, const zend_op *op
 	|	mov FCARG1a, r0
 	|	mov r0,	EX->run_time_cache
 	|	add r0, opline->op2.num
-	|	LOAD_ADDR FCARG2a, (ptrdiff_t)op_array
+	|	mov FCARG2a, EX->func
 	|.if X64
 		|	LOAD_ADDR CARG3, (ptrdiff_t)arg_info
 		|	mov CARG4, r0
