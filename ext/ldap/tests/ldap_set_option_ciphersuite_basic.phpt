@@ -7,7 +7,7 @@ ldap
 --FILE--
 <?php
 require "connect.inc";
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 
 $result = ldap_set_option($link, LDAP_OPT_X_TLS_CIPHER_SUITE, '3DES');
 var_dump($result);
@@ -16,6 +16,5 @@ ldap_get_option($link, LDAP_OPT_X_TLS_CIPHER_SUITE, $optionval);
 var_dump($optionval);
 ?>
 --EXPECTF--
-Deprecated: Usage of ldap_connect with two arguments is deprecated. in %s on line %d
 bool(true)
 string(4) "3DES"

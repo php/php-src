@@ -9,7 +9,7 @@ ldap
 <?php
 require "connect.inc";
 
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 $option = null;
 ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version);
 
@@ -19,6 +19,5 @@ var_dump(
 );
 ?>
 --EXPECTF--
-Deprecated: Usage of ldap_connect with two arguments is deprecated. in %s on line %d
 bool(true)
 int(3)

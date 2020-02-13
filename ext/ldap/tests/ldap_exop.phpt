@@ -10,7 +10,7 @@ ldap
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 
 function build_reqdata_passwd($user, $oldpw, $newpw)
@@ -46,19 +46,19 @@ var_dump(
     $r = ldap_exop($link, LDAP_EXOP_WHO_AM_I),
     ldap_parse_exop($link, $r, $retdata2),
     $retdata2,
-    test_bind($host, $port, "cn=userA,$base", $userAPassword, $protocol_version),
+    test_bind($uri, "cn=userA,$base", $userAPassword, $protocol_version),
     $r = ldap_exop($link, LDAP_EXOP_MODIFY_PASSWD, build_reqdata_passwd("cn=userA,$base", $userAPassword, "")),
     ldap_parse_exop($link, $r, $retpwdata, $retpwoid),
     $genpw = extract_genpw($retpwdata),
     $retpwoid,
-    test_bind($host, $port, "cn=userA,$base", $genpw, $protocol_version)
+    test_bind($uri, "cn=userA,$base", $genpw, $protocol_version)
 );
 ?>
 --CLEAN--
 <?php
 require "connect.inc";
 
-$link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
+$link = ldap_connect_and_bind($uri, $user, $passwd, $protocol_version);
 
 remove_dummy_data($link, $base);
 ?>

@@ -15,15 +15,11 @@ require "connect.inc";
 var_dump(ldap_connect("ldap://$host:$port/$base"));
 
 $links = array();
-$links[0] = ldap_connect($host, $port);
-$links[1] = ldap_connect($host, $port);
+$links[0] = ldap_connect($uri);
+$links[1] = ldap_connect($uri);
 ?>
 --EXPECTF--
 Warning: ldap_connect(): Could not create session handle: %s in %s on line %d
 bool(false)
-
-Deprecated: Usage of ldap_connect with two arguments is deprecated. in %s on line %d
-
-Deprecated: Usage of ldap_connect with two arguments is deprecated. in %s on line %d
 
 Warning: ldap_connect(): Too many open links (1) in %s on line %d

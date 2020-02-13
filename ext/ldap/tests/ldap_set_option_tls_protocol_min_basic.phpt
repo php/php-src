@@ -7,7 +7,7 @@ ldap
 --FILE--
 <?php
 require "connect.inc";
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 
 foreach([
     LDAP_OPT_X_TLS_PROTOCOL_SSL2,
@@ -24,7 +24,6 @@ foreach([
 }
 ?>
 --EXPECTF--
-Deprecated: Usage of ldap_connect with two arguments is deprecated. in %s on line %d
 bool(true)
 int(512)
 bool(true)

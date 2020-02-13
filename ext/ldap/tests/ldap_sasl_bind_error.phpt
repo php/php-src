@@ -16,7 +16,7 @@ $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 insert_dummy_data($link, $base);
 ldap_unbind($link);
 
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version);
 
 // Invalid DN

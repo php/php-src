@@ -9,7 +9,7 @@ ldap
 <?php
 require "connect.inc";
 
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 $option = null;
 
 $controls = array(
@@ -62,7 +62,6 @@ ldap_get_option($link, LDAP_OPT_MATCHED_DN, $option);
 var_dump($option);
 ?>
 --EXPECTF--
-Deprecated: Usage of ldap_connect with two arguments is deprecated. in %s on line %d
 bool(true)
 bool(true)
 bool(true)

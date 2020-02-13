@@ -9,9 +9,8 @@ ldap
 <?php
 require "connect.inc";
 
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 var_dump(ldap_rename($link, "cn=userNotFound,$base", "cn=userZ", "$base", true));
 ?>
 --EXPECTF--
-Deprecated: Usage of ldap_connect with two arguments is deprecated. in %s on line %d
 bool(false)

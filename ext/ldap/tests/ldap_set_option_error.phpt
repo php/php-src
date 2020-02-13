@@ -9,7 +9,7 @@ ldap
 <?php
 require "connect.inc";
 
-$link = ldap_connect($host, $port);
+$link = ldap_connect($uri);
 $controls = array(
     array(
         array("xid" => "1.2.752.58.10.1", "iscritical" => true),
@@ -36,7 +36,6 @@ foreach ($controls as $control) {
 var_dump(ldap_set_option($link, 999999, 999999));
 ?>
 --EXPECT--
-Deprecated: Usage of ldap_connect with two arguments is deprecated. in %s on line %d
 bool(false)
 ValueError: ldap_set_option(): Control must have an "oid" key
 TypeError: ldap_set_option(): Argument #3 ($value) must contain only arrays, where each array is a control
