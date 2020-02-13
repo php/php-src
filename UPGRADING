@@ -481,7 +481,10 @@ PHP 8.0 UPGRADE NOTES
     PR: https://github.com/php/php-src/pull/4797
 
 - Standard:
-  . Added fdiv() method, which performs a floating-point division under
+  . Added str_contains($haystack, $needle) function, which checks whether
+    $haystack contains $needle as a sub-string. It is equivalent to writing
+    strpos($haystack, $needle) !== false.
+  . Added fdiv() function, which performs a floating-point division under
     IEEE 754 semantics. Division by zero is considered well-defined and
     will return one of Inf, -Inf or NaN.
 

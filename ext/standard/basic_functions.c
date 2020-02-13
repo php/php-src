@@ -173,6 +173,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(strtok,															arginfo_strtok)
 	PHP_FE(strtoupper,														arginfo_strtoupper)
 	PHP_FE(strtolower,														arginfo_strtolower)
+	PHP_FE(str_contains,													arginfo_str_contains)
 	PHP_FE(strpos,															arginfo_strpos)
 	PHP_FE(stripos,															arginfo_stripos)
 	PHP_FE(strrpos,															arginfo_strrpos)
