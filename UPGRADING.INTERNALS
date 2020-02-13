@@ -13,6 +13,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   j. compare_objects() and compare() object handlers
   k. The 'I' length modifier
   l. Some VM instructions switched to IS_TMP_VAR result instead of IS_VAR
+  m. All internal functions must have arginfo
 
 2. Build system changes
   a. Abstract
@@ -97,6 +98,9 @@ PHP 8.0 INTERNALS UPGRADE NOTES
      ZEND_ASSIGN_DIM_OP, ZEND_ASSIGN_OBJ_OP, ZEND_ASSIGN_STATIC_PROP_OP) and all
      pre increments/decrements (ZEND_PRE_INC, ZEND_PRE_DEC, ZEND_PRE_INC_OBJ
      ZEND_PRE_DEC_OBJ, ZEND_PRE_INC_STATIC_PROP ZEND_PRE_DEC_STATIC_PROP).
+
+  m. All internal functions and methods are now required to specify arginfo
+     information, otherwise warnings will be thrown on startup.
 
 ========================
 2. Build system changes

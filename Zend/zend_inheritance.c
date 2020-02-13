@@ -530,14 +530,6 @@ static inheritance_status zend_do_perform_implementation_check(
 	inheritance_status status, local_status;
 	zend_bool proto_is_variadic, fe_is_variadic;
 
-	/* If it's a user function then arg_info == NULL means we don't have any parameters but
-	 * we still need to do the arg number checks.  We are only willing to ignore this for internal
-	 * functions because extensions don't always define arg_info.
-	 */
-	if (!proto->common.arg_info && proto->common.type != ZEND_USER_FUNCTION) {
-		return INHERITANCE_SUCCESS;
-	}
-
 	/* Checks for constructors only if they are declared in an interface,
 	 * or explicitly marked as abstract
 	 */

@@ -2042,9 +2042,9 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		} else {
 			internal_function->fn_flags = ZEND_ACC_PUBLIC;
 		}
+
 		if (ptr->arg_info) {
 			zend_internal_function_info *info = (zend_internal_function_info*)ptr->arg_info;
-
 			internal_function->arg_info = (zend_internal_arg_info*)ptr->arg_info+1;
 			internal_function->num_args = ptr->num_args;
 			/* Currently you cannot denote that the function can accept less arguments than num_args */
@@ -2072,10 +2072,14 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 				internal_function->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
 			}
 		} else {
+			zend_error(E_CORE_WARNING, "Missing arginfo for %s%s%s()",
+				 scope ? ZSTR_VAL(scope->name) : "", scope ? "::" : "", ptr->fname);
+
 			internal_function->arg_info = NULL;
 			internal_function->num_args = 0;
 			internal_function->required_num_args = 0;
 		}
+
 		zend_set_function_arg_flags((zend_function*)internal_function);
 		if (ptr->flags & ZEND_ACC_ABSTRACT) {
 			if (scope) {
