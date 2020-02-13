@@ -17,6 +17,10 @@ PHP                                                                        NEWS
 - CURL:
   . Fixed bug #79019 (Copied cURL handles upload empty file). (cmb)
 
+- DOM:
+  . Fixed bug #77569: (Write Acess Violation in DomImplementation). (Nikita,
+    cmb)
+
 - PCRE:
   . Fixed bug #79188 (Memory corruption in preg_replace/preg_replace_callback
     and unicode). (Nikita)
