@@ -877,6 +877,11 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_strstr arginfo_stristr
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_str_contains, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strpos, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)

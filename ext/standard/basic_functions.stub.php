@@ -553,6 +553,8 @@ function stristr(string $haystack, string $needle, bool $before_needle = false):
 
 function strstr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
+function str_contains(string $haystack, string $needle): bool {}
+
 function strpos(string $haystack, string $needle, int $offset = 0): int|false {}
 
 function stripos(string $haystack, string $needle, int $offset = 0): int|false {}
