@@ -31,5 +31,5 @@ try {
     printf("Second call caught %s: %s\n", get_class($e), $e->getMessage());
 }
 ?>
---EXPECT--
-Fatal error: Constant expression uses function x_plus_1() which is not in get_const_expr_functions() in /home/tyson/programming/php-src/Zend/tests/call_in_const/recursion.php on line 7
+--EXPECTF--
+Fatal error: Constant expression uses function x_plus_1() which is not in get_const_expr_functions() in %s on line 7
