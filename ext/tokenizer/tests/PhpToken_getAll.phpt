@@ -1,5 +1,5 @@
 --TEST--
-TOKEN_AS_OBJECT mode
+PhpToken::getAll() method
 --FILE--
 <?php
 
