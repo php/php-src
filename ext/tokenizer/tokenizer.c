@@ -119,6 +119,29 @@ PHP_METHOD(PhpToken, getAll)
 	}
 }
 
+PHP_METHOD(PhpToken, __construct)
+{
+	zend_long id;
+	zend_string *text;
+	zend_long line = -1;
+	zend_long pos = -1;
+	zend_object *obj = Z_OBJ_P(ZEND_THIS);
+
+	ZEND_PARSE_PARAMETERS_START(2, 4)
+		Z_PARAM_LONG(id)
+		Z_PARAM_STR(text)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(line)
+		Z_PARAM_LONG(pos)
+	ZEND_PARSE_PARAMETERS_END();
+
+	ZVAL_LONG(OBJ_PROP_NUM(obj, 0), id);
+	zval_ptr_dtor(OBJ_PROP_NUM(obj, 1));
+	ZVAL_STR_COPY(OBJ_PROP_NUM(obj, 1), text);
+	ZVAL_LONG(OBJ_PROP_NUM(obj, 2), line);
+	ZVAL_LONG(OBJ_PROP_NUM(obj, 3), pos);
+}
+
 PHP_METHOD(PhpToken, is)
 {
 	zval *kind;
@@ -208,6 +231,7 @@ PHP_METHOD(PhpToken, getTokenName)
 
 static const zend_function_entry php_token_methods[] = {
 	PHP_ME(PhpToken, getAll, arginfo_class_PhpToken_getAll, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	PHP_ME(PhpToken, __construct, arginfo_class_PhpToken___construct, ZEND_ACC_PUBLIC)
 	PHP_ME(PhpToken, is, arginfo_class_PhpToken_is, ZEND_ACC_PUBLIC)
 	PHP_ME(PhpToken, isIgnorable, arginfo_class_PhpToken_isIgnorable, ZEND_ACC_PUBLIC)
 	PHP_ME(PhpToken, getTokenName, arginfo_class_PhpToken_getTokenName, ZEND_ACC_PUBLIC)
