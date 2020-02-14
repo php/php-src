@@ -35,14 +35,12 @@
 #define zendcursor LANG_SCNG(yy_cursor)
 #define zendlimit  LANG_SCNG(yy_limit)
 
-#define TOKEN_PARSE     (1 << 0)
-#define TOKEN_AS_OBJECT (1 << 1)
+#define TOKEN_PARSE (1 << 0)
 
 zend_class_entry *php_token_ce;
 
 void tokenizer_token_get_all_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("TOKEN_PARSE", TOKEN_PARSE, CONST_CS|CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("TOKEN_AS_OBJECT", TOKEN_AS_OBJECT, CONST_CS|CONST_PERSISTENT);
 }
 
 /* {{{ tokenizer_functions[]
@@ -100,6 +98,25 @@ static zval *php_token_get_text(zval *obj) {
 	ZVAL_DEREF(text);
 	ZEND_ASSERT(Z_TYPE_P(text) == IS_STRING);
 	return text;
+}
+
+static zend_bool tokenize_common(
+		zval *return_value, zend_string *source, zend_long flags, zend_bool as_object);
+
+PHP_METHOD(PhpToken, getAll)
+{
+	zend_string *source;
+	zend_long flags = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(source)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(flags)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (tokenize_common(return_value, source, flags, /* as_object */ 1) == FAILURE) {
+		RETURN_THROWS();
+	}
 }
 
 PHP_METHOD(PhpToken, is)
@@ -190,6 +207,7 @@ PHP_METHOD(PhpToken, getTokenName)
 }
 
 static const zend_function_entry php_token_methods[] = {
+	PHP_ME(PhpToken, getAll, arginfo_class_PhpToken_getAll, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME(PhpToken, is, arginfo_class_PhpToken_is, ZEND_ACC_PUBLIC)
 	PHP_ME(PhpToken, isIgnorable, arginfo_class_PhpToken_isIgnorable, ZEND_ACC_PUBLIC)
 	PHP_ME(PhpToken, getTokenName, arginfo_class_PhpToken_getTokenName, ZEND_ACC_PUBLIC)
@@ -421,6 +439,19 @@ static zend_bool tokenize_parse(zval *return_value, zend_string *source, zend_bo
 	return success;
 }
 
+static zend_bool tokenize_common(
+		zval *return_value, zend_string *source, zend_long flags, zend_bool as_object)
+{
+	if (flags & TOKEN_PARSE) {
+		return tokenize_parse(return_value, source, as_object);
+	} else {
+		int success = tokenize(return_value, source, as_object);
+		/* Normal token_get_all() should not throw. */
+		zend_clear_exception();
+		return success;
+	}
+}
+
 /* }}} */
 
 /* {{{ proto array token_get_all(string source [, int flags])
@@ -429,7 +460,6 @@ PHP_FUNCTION(token_get_all)
 {
 	zend_string *source;
 	zend_long flags = 0;
-	zend_bool success;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(source)
@@ -437,15 +467,7 @@ PHP_FUNCTION(token_get_all)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (flags & TOKEN_PARSE) {
-		success = tokenize_parse(return_value, source, (flags & TOKEN_AS_OBJECT) != 0);
-	} else {
-		success = tokenize(return_value, source, (flags & TOKEN_AS_OBJECT) != 0);
-		/* Normal token_get_all() should not throw. */
-		zend_clear_exception();
-	}
-
-	if (!success) {
+	if (tokenize_common(return_value, source, flags, /* as_object */ 0) == FAILURE) {
 		RETURN_THROWS();
 	}
 }

@@ -9,8 +9,8 @@ function foo() {
     echo "bar";
 }
 PHP;
-var_dump(token_get_all($code, TOKEN_AS_OBJECT));
-var_dump(token_get_all($code, TOKEN_AS_OBJECT|TOKEN_PARSE));
+var_dump(PhpToken::getAll($code));
+var_dump(PhpToken::getAll($code, TOKEN_PARSE));
 
 ?>
 --EXPECT--
