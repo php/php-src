@@ -17,9 +17,4 @@ var_dump(Example::IS_MATCH);
 var_dump(Example::IS_MATCH_V2);
 var_dump(Example::VALUES);
 --EXPECTF--
-int(1)
-
-Warning: Parameter 3 to preg_match() expected to be a reference, value given in %s on line 12
-int(1)
-array(0) {
-}
+Fatal error: Constant expression uses function preg_match() which is not in get_const_expr_functions() in %s on line 4

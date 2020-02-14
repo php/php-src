@@ -3,7 +3,7 @@ Can call internal functions from class constants
 --FILE--
 <?php
 class Example {
-    const X = sprintf("Hello, %s\n", "World");
+    const X = cos(0);
 
     public static function main() {
         echo "X is " . self::X . "\n";
@@ -12,4 +12,4 @@ class Example {
 Example::main();
 ?>
 --EXPECT--
-X is Hello, World
+X is 1

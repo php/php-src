@@ -20,6 +20,5 @@ class Example {
 }
 Example::main('test');
 ?>
---EXPECT--
-Caught Cannot call func_get_args() dynamically on line 7
-Caught Cannot call func_get_args() dynamically on line 12
+--EXPECTF--
+Fatal error: Constant expression uses function func_get_args() which is not in get_const_expr_functions() in %s on line 3

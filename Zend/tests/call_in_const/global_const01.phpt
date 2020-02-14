@@ -2,9 +2,10 @@
 Can call internal functions from global constants
 --FILE--
 <?php
-const NIL = var_export(null, true);
+const VALUES = RANGE(1, 100);
+const SUM = array_sum(VALUES);
 
-echo "NIL is " . NIL . "\n";
+echo "SUM is " . SUM . "\n";
 ?>
 --EXPECT--
-NIL is NULL
+SUM is 5050

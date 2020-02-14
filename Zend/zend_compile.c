@@ -8571,6 +8571,113 @@ void zend_compile_const_expr_magic_const(zend_ast **ast_ptr) /* {{{ */
 }
 /* }}} */
 
+static void assert_is_constant_function_name(zend_string *function_name, uint16_t ast_attr) { /* {{{ */
+	zend_string *fn = zend_string_tolower(function_name);
+	// FIXME: Optimize, Check length first, then strings of that length.
+	// This is written this way to make it easier to keep in sync with the RFC.
+	zend_bool in_whitelist =
+		zend_string_equals_literal(fn, "abs") ||
+		zend_string_equals_literal(fn, "acosh") ||
+		zend_string_equals_literal(fn, "acos") ||
+		zend_string_equals_literal(fn, "array_chunk") ||
+		zend_string_equals_literal(fn, "array_column") ||
+		zend_string_equals_literal(fn, "array_count_values") ||
+		zend_string_equals_literal(fn, "array_diff_assoc") ||
+		zend_string_equals_literal(fn, "array_diff_key") ||
+		zend_string_equals_literal(fn, "array_diff") ||
+		zend_string_equals_literal(fn, "array_fill_keys") ||
+		zend_string_equals_literal(fn, "array_fill") ||
+		zend_string_equals_literal(fn, "array_flip") ||
+		zend_string_equals_literal(fn, "array_intersect_assoc") ||
+		zend_string_equals_literal(fn, "array_intersect_key") ||
+		zend_string_equals_literal(fn, "array_intersect") ||
+		zend_string_equals_literal(fn, "array_key_exists") ||
+		zend_string_equals_literal(fn, "array_key_first") ||
+		zend_string_equals_literal(fn, "array_key_last") ||
+		zend_string_equals_literal(fn, "array_keys") ||
+		zend_string_equals_literal(fn, "array_merge_recursive") ||
+		zend_string_equals_literal(fn, "array_merge") ||
+		zend_string_equals_literal(fn, "array_pad") ||
+		zend_string_equals_literal(fn, "array_product") ||
+		zend_string_equals_literal(fn, "array_replace_recursive") ||
+		zend_string_equals_literal(fn, "array_replace") ||
+		zend_string_equals_literal(fn, "array_reverse") ||
+		zend_string_equals_literal(fn, "array_search") ||
+		zend_string_equals_literal(fn, "array_slice") ||
+		zend_string_equals_literal(fn, "array_sum") ||
+		zend_string_equals_literal(fn, "array_unique") ||
+		zend_string_equals_literal(fn, "array_values") ||
+		zend_string_equals_literal(fn, "asinh") ||
+		zend_string_equals_literal(fn, "asin") ||
+		zend_string_equals_literal(fn, "atan2") ||
+		zend_string_equals_literal(fn, "atanh") ||
+		zend_string_equals_literal(fn, "atan") ||
+		zend_string_equals_literal(fn, "boolval") ||
+		zend_string_equals_literal(fn, "ceil") ||
+		zend_string_equals_literal(fn, "checkdate") ||
+		zend_string_equals_literal(fn, "chr") ||
+		zend_string_equals_literal(fn, "cosh") ||
+		zend_string_equals_literal(fn, "cos") ||
+		zend_string_equals_literal(fn, "count") ||
+		zend_string_equals_literal(fn, "decbin") ||
+		zend_string_equals_literal(fn, "dechex") ||
+		zend_string_equals_literal(fn, "decoct") ||
+		zend_string_equals_literal(fn, "deg2rad") ||
+		zend_string_equals_literal(fn, "doubleval") ||
+		zend_string_equals_literal(fn, "expm1") ||
+		zend_string_equals_literal(fn, "exp") ||
+		zend_string_equals_literal(fn, "floatval") ||
+		zend_string_equals_literal(fn, "floor") ||
+		zend_string_equals_literal(fn, "fmod") ||
+		zend_string_equals_literal(fn, "gettype") ||
+		zend_string_equals_literal(fn, "gmmktime") ||
+		zend_string_equals_literal(fn, "hash_algos") ||
+		zend_string_equals_literal(fn, "hypot") ||
+		zend_string_equals_literal(fn, "in_array") ||
+		zend_string_equals_literal(fn, "intdiv") ||
+		zend_string_equals_literal(fn, "intval") ||
+		zend_string_equals_literal(fn, "is_array") ||
+		zend_string_equals_literal(fn, "is_bool") ||
+		zend_string_equals_literal(fn, "is_countable") ||
+		zend_string_equals_literal(fn, "is_double") ||
+		zend_string_equals_literal(fn, "is_finite") ||
+		zend_string_equals_literal(fn, "is_float") ||
+		zend_string_equals_literal(fn, "is_infinite") ||
+		zend_string_equals_literal(fn, "is_integer") ||
+		zend_string_equals_literal(fn, "is_int") ||
+		zend_string_equals_literal(fn, "is_iterable") ||
+		zend_string_equals_literal(fn, "is_long") ||
+		zend_string_equals_literal(fn, "is_nan") ||
+		zend_string_equals_literal(fn, "is_null") ||
+		zend_string_equals_literal(fn, "is_numeric") ||
+		zend_string_equals_literal(fn, "is_object") ||
+		zend_string_equals_literal(fn, "is_real") ||
+		zend_string_equals_literal(fn, "is_resource") ||
+		zend_string_equals_literal(fn, "is_scalar") ||
+		zend_string_equals_literal(fn, "is_string") ||
+		zend_string_equals_literal(fn, "log10") ||
+		zend_string_equals_literal(fn, "log1p") ||
+		zend_string_equals_literal(fn, "log") ||
+		zend_string_equals_literal(fn, "max") ||
+		zend_string_equals_literal(fn, "min") ||
+		zend_string_equals_literal(fn, "pi") ||
+		zend_string_equals_literal(fn, "pow") ||
+		zend_string_equals_literal(fn, "rad2deg") ||
+		zend_string_equals_literal(fn, "range") ||
+		zend_string_equals_literal(fn, "round") ||
+		zend_string_equals_literal(fn, "sinh") ||
+		zend_string_equals_literal(fn, "sin") ||
+		zend_string_equals_literal(fn, "sizeof") ||
+		zend_string_equals_literal(fn, "sqrt") ||
+		zend_string_equals_literal(fn, "tanh") ||
+		zend_string_equals_literal(fn, "tan");
+	zend_string_release(fn);
+	if (!in_whitelist) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Constant expression uses function %s() which is not in get_const_expr_functions()", ZSTR_VAL(function_name));
+	}
+}
+/* }}} */
+
 void zend_compile_const_expr(zend_ast **ast_ptr) /* {{{ */
 {
 	zend_ast *ast = *ast_ptr;
@@ -8613,8 +8720,9 @@ void zend_compile_const_expr(zend_ast **ast_ptr) /* {{{ */
 				zend_error_noreturn(E_COMPILE_ERROR, "Constant expression contains invalid name for function call");
 			}
 			resolved_name = zend_resolve_function_name(original_name, func_name_ast->attr, &is_fully_qualified);
+			assert_is_constant_function_name(resolved_name, func_name_ast->attr);
 			// fprintf(stderr, "original_name=%s resolved_name=%s attr=%d is_fully_qualified=%d\n", ZSTR_VAL(original_name), ZSTR_VAL(resolved_name), (int)ast->child[0]->attr, (int)is_fully_qualified);
-			Z_STR_P(original_zv) = resolved_name;
+			ZVAL_STR(original_zv, resolved_name);
 			zend_string_release(original_name);
 			func_name_ast->attr = is_fully_qualified ? ZEND_NAME_FQ : ZEND_NAME_NOT_FQ;
 

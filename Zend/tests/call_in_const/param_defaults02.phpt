@@ -22,7 +22,5 @@ try {
     printf("Caught %s on line %d\n", $e->getMessage(), $e->getLine());
 }
 ?>
---EXPECT--
-Caught Cannot call func_get_args() dynamically on line 7
-string(22) "overriding the default"
-Caught Cannot call func_get_args() dynamically on line 7
+--EXPECTF--
+Fatal error: Constant expression uses function NS\func_get_args() which is not in get_const_expr_functions() in %s on line 7

@@ -1,5 +1,5 @@
 --TEST--
-User-defined functions are evaluated every time in param defaults
+User-defined functions are evaluated every time in param defaults (not callable)
 --FILE--
 <?php
 
@@ -16,7 +16,5 @@ test_id();
 test_id(-1);
 test_id();
 ?>
---EXPECT--
-id is 101
-id is -1
-id is 102
+--EXPECTF--
+Fatal error: Constant expression uses function generate_new_id() which is not in get_const_expr_functions() in %s on line 9

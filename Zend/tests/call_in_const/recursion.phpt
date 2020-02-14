@@ -32,9 +32,4 @@ try {
 }
 ?>
 --EXPECT--
-Computing X + 1
-Caught Error: Unrecoverable error calling x_plus_1() in recursive constant definition
-Computing X + 1
-Second call caught Error: Unrecoverable error calling x_plus_1() in recursive constant definition
-Caught Error: Undefined constant 'MISSING_GLOBAL'
-Second call caught Error: Undefined constant 'MISSING_GLOBAL'
+Fatal error: Constant expression uses function x_plus_1() which is not in get_const_expr_functions() in /home/tyson/programming/php-src/Zend/tests/call_in_const/recursion.php on line 7

@@ -4,11 +4,21 @@ Allow varargs in calls in constants
 error_reporting=E_ALL
 --FILE--
 <?php
-const ARGS = ['Hello, %s', 'World'];
-const RESULT = sprintf(...ARGS);
-const RESULT_LINE = sprintf("%s\n", ...[RESULT]);
-echo RESULT_LINE;
-echo RESULT_LINE;
+const ARGS = [[100], [2]];
+const RESULT = array_merge(...ARGS);
+const RESULT_LINE = ARRAY_MERGE([600], ...[RESULT]);
+var_export(RESULT_LINE);
+echo "\n";
+var_export(RESULT_LINE);
+echo "\n";
 --EXPECTF--
-Hello, World
-Hello, World
+array (
+  0 => 600,
+  1 => 100,
+  2 => 2,
+)
+array (
+  0 => 600,
+  1 => 100,
+  2 => 2,
+)

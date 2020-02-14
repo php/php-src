@@ -1,5 +1,5 @@
 --TEST--
-Can call user-defined functions from defaults of static variables
+Cannot call user-defined functions from defaults of static variables
 --FILE--
 <?php
 function log_call(string $arg) {
@@ -14,7 +14,5 @@ $f = function () {
 $f();
 $f();
 ?>
---EXPECT--
-log_call('Hello, World')
-Hello, World
-Hello, World
+--EXPECTF--
+Fatal error: Constant expression uses function log_call() which is not in get_const_expr_functions() in %s on line 8

@@ -14,6 +14,5 @@ for ($i = 0; $i < 2; $i++) {
     }
 }
 ?>
---EXPECT--
-Caught Error: Call to undefined function missing_sprintf() at line 3
-Caught Error: Call to undefined function missing_sprintf() at line 3
+--EXPECTF--
+Fatal error: Constant expression uses function missing_sprintf() which is not in get_const_expr_functions() in %s on line 3
