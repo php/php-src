@@ -18,7 +18,7 @@ PHP                                                                        NEWS
   . Fixed bug #79019 (Copied cURL handles upload empty file). (cmb)
 
 - DOM:
-  . Fixed bug #77569: (Write Acess Violation in DomImplementation). (Nikita,
+  . Fixed bug #77569: (Write Access Violation in DomImplementation). (Nikita,
     cmb)
 
 - PCRE:
