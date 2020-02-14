@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2020, PHP 7.2.28
 
 - DOM:
-  . Fixed bug #77569: (Write Acess Violation in DomImplementation). (Nikita,
+  . Fixed bug #77569: (Write Access Violation in DomImplementation). (Nikita,
     cmb)
 
 23 Jan 2020, PHP 7.2.27
