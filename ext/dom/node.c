@@ -428,13 +428,9 @@ int dom_node_child_nodes_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	if (dom_node_children_valid(nodep) == FAILURE) {
-		ZVAL_NULL(retval);
-	} else {
-		php_dom_create_interator(retval, DOM_NODELIST);
-		intern = Z_DOMOBJ_P(retval);
-		dom_namednode_iter(obj, XML_ELEMENT_NODE, intern, NULL, NULL, NULL);
-	}
+	php_dom_create_interator(retval, DOM_NODELIST);
+	intern = Z_DOMOBJ_P(retval);
+	dom_namednode_iter(obj, XML_ELEMENT_NODE, intern, NULL, NULL, NULL);
 
 	return SUCCESS;
 }
