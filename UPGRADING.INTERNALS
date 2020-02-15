@@ -12,7 +12,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   i. get_closure() object handler
   j. compare_objects() and compare() object handlers
   k. The 'I' length modifier
-  l. Some VM instructions switched to IS_TMP_VAR result insted of IS_VAR
+  l. Some VM instructions switched to IS_TMP_VAR result instead of IS_VAR
 
 2. Build system changes
   a. Abstract
@@ -91,7 +91,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
      The 'v' format from the custom snprintf and spprintf implementations has
      been removed. Use the standard 's' format instead.
 
-  l. Some VM instructions switched to IS_TMP_VAR result insted of IS_VAR.
+  l. Some VM instructions switched to IS_TMP_VAR result instead of IS_VAR.
      Actually, all assignments (ZEND_ASSIGN, ZEND_ASSIGN_DIM, ZEND_ASSIGN_OBJ,
      ZEND_ASSIGN_STATIC_PROP), all compound assignments (ZEND_ASSIGN_OP,
      ZEND_ASSIGN_DIM_OP, ZEND_ASSIGN_OBJ_OP, ZEND_ASSIGN_STATIC_PROP_OP) and all

@@ -370,7 +370,7 @@ PHP 8.0 UPGRADE NOTES
   . It is now possible to fetch the class name of an object using
     `$object::class`. The result is the same as `get_class($object)`.
     RFC: https://wiki.php.net/rfc/class_name_literal_on_object
-  . New and instanceof can now be used with arbitary expressions, using
+  . New and instanceof can now be used with arbitrary expressions, using
     `new (expression)(...$args)` and `$obj instanceof (expression)`.
     RFC: https://wiki.php.net/rfc/variable_syntax_tweaks
   . Some consistency fixes to variable syntax have been applied, for example
