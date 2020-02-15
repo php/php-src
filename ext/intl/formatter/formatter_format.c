@@ -44,15 +44,15 @@ PHP_FUNCTION( numfmt_format )
 	{
 		RETURN_THROWS();
 	}
+	if(Z_TYPE_P(number) == IS_ARRAY) {
+		zend_type_error("given value must not be an array");
+		RETURN_THROWS();
+	}
 
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
-	if(Z_TYPE_P(number) != IS_ARRAY) {
-		convert_scalar_to_number_ex(number);
-	} else {
-		convert_to_long(number);
-	}
+	convert_scalar_to_number_ex(number);
 
 	if(type == FORMAT_TYPE_DEFAULT) {
 		switch(Z_TYPE_P(number)) {
