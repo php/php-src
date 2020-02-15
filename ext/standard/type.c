@@ -42,6 +42,8 @@ PHP_FUNCTION(gettype)
 PHP_FUNCTION(get_debug_type)
 {
 	zval *arg;
+	zend_string *name;
+	const char* res_name;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(arg)
@@ -62,11 +64,23 @@ PHP_FUNCTION(get_debug_type)
 		case IS_ARRAY:
 			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_ARRAY));
 		case IS_OBJECT:
-			RETURN_STR_COPY(Z_OBJ_P(arg)->ce->name);
+			goto resolve_class;
 		case IS_RESOURCE:
-			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_RESOURCE));
+			goto resolve_resource;
 		default:
 			RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_UNKNOWN));
+	}
+	
+resolve_class:
+	name = Z_OBJ_P(arg)->ce->name;
+	RETURN_NEW_STR(zend_string_init(ZSTR_VAL(name), strlen(ZSTR_VAL(name)), 0));
+	
+resolve_resource:
+	res_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(arg));
+	if (res_name) {
+		RETURN_NEW_STR(zend_strpprintf(0, "resource (%s)", res_name));
+	} else {
+		RETURN_INTERNED_STR(ZSTR_KNOWN(ZEND_STR_CLOSED_RESOURCE));
 	}
 }
 /* }}} */
