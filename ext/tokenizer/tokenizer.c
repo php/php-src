@@ -116,7 +116,7 @@ PHP_METHOD(PhpToken, getAll)
 	ZEND_PARSE_PARAMETERS_END();
 
 	token_class = zend_get_called_scope(execute_data);
-	if (tokenize_common(return_value, source, flags, token_class) == FAILURE) {
+	if (!tokenize_common(return_value, source, flags, token_class)) {
 		RETURN_THROWS();
 	}
 }
@@ -494,7 +494,7 @@ PHP_FUNCTION(token_get_all)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (tokenize_common(return_value, source, flags, /* token_class */ NULL) == FAILURE) {
+	if (!tokenize_common(return_value, source, flags, /* token_class */ NULL)) {
 		RETURN_THROWS();
 	}
 }
