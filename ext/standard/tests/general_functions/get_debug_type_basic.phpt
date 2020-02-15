@@ -44,6 +44,7 @@ namespace {
 --EXPECT--
 ClassInGlobal
 Demo\ClassInNamespace
+class@anonymous
 string
 bool
 bool
@@ -51,4 +52,5 @@ int
 float
 array
 null
-resource
+resource (stream)
+resource (closed)
