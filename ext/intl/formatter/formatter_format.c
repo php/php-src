@@ -45,7 +45,7 @@ PHP_FUNCTION( numfmt_format )
 		RETURN_THROWS();
 	}
 	if(Z_TYPE_P(number) == IS_ARRAY) {
-		zend_type_error("given value must not be an array");
+		zend_type_error("Given value must not be an array");
 		RETURN_THROWS();
 	}
 

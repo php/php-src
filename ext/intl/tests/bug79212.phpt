@@ -16,7 +16,7 @@ var_dump($fmt->format([1], NumberFormatter::TYPE_INT64));
 --EXPECTF--
 string(21) "823749273428379%c%c%c%c%c%c"
 
-Fatal error: Uncaught TypeError: given value must not be an array in %s:%d
+Fatal error: Uncaught TypeError: Given value must not be an array in %s:%d
 Stack trace:
 #0 %s(%d): NumberFormatter->format(Array, 2)
 #1 {main}
