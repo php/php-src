@@ -470,6 +470,12 @@ PHP 8.0 UPGRADE NOTES
   . The $use_include_path parameter, which was not used internally, has been
     removed from tidy_repair_string().
 
+- Tokenizer:
+  . T_COMMENT tokens will no longer include a trailing newline. The newline will
+    instead be part of a following T_WHITESPACE token. It should be noted that
+    T_COMMENT is not always followed by whitespace, it may also be followed by
+    T_CLOSE_TAG or end-of-file.
+
 - XML:
   . xml_parser_create(_ns) will now return an XmlParser object rather than a
     resource. Return value checks using is_resource() should be replaced with

@@ -2293,12 +2293,8 @@ inline_char_handler:
 	while (YYCURSOR < YYLIMIT) {
 		switch (*YYCURSOR++) {
 			case '\r':
-				if (*YYCURSOR == '\n') {
-					YYCURSOR++;
-				}
-				/* fall through */
 			case '\n':
-				CG(zend_lineno)++;
+				YYCURSOR--;
 				break;
 			case '?':
 				if (*YYCURSOR == '>') {

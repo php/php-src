@@ -22,50 +22,51 @@ foreach ($tokens as $i => $token) {
 }
 
 // is() variations
+$token = $tokens[5];
 
 echo "\nSuccess:\n";
-var_dump($tokens[4]->is(T_FUNCTION));
-var_dump($tokens[4]->is('function'));
-var_dump($tokens[4]->is(['class', T_FUNCTION]));
-var_dump($tokens[4]->is([T_CLASS, 'function']));
+var_dump($token->is(T_FUNCTION));
+var_dump($token->is('function'));
+var_dump($token->is(['class', T_FUNCTION]));
+var_dump($token->is([T_CLASS, 'function']));
 
 echo "\nFailure:\n";
-var_dump($tokens[4]->is(T_CLASS));
-var_dump($tokens[4]->is('class'));
-var_dump($tokens[4]->is(['class', T_TRAIT]));
-var_dump($tokens[4]->is([T_CLASS, 'trait']));
+var_dump($token->is(T_CLASS));
+var_dump($token->is('class'));
+var_dump($token->is(['class', T_TRAIT]));
+var_dump($token->is([T_CLASS, 'trait']));
 
 echo "\nError:\n";
 try {
-    $tokens[4]->is(3.141);
+    $token->is(3.141);
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-    $tokens[4]->is([3.141]);
+    $token->is([3.141]);
 } catch (TypeError $e) {
     echo $e->getMessage(), "\n";
 }
 
-unset($tokens[4]->id);
-unset($tokens[4]->text);
+unset($token->id);
+unset($token->text);
 try {
-    $tokens[4]->is(T_FUNCTION);
+    $token->is(T_FUNCTION);
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-    $tokens[4]->is('function');
+    $token->is('function');
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-    $tokens[4]->is([T_FUNCTION]);
+    $token->is([T_FUNCTION]);
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
 try {
-    $tokens[4]->is(['function']);
+    $token->is(['function']);
 } catch (Error $e) {
     echo $e->getMessage(), "\n";
 }
@@ -78,22 +79,23 @@ var_dump($token->getTokenName());
 --EXPECT--
 [ 0] T_OPEN_TAG                 ignorable
 [ 1] T_COMMENT                  ignorable
-[ 2] T_DOC_COMMENT              ignorable
-[ 3] T_WHITESPACE               ignorable
-[ 4] T_FUNCTION                 meaningful
-[ 5] T_WHITESPACE               ignorable
-[ 6] T_STRING                   meaningful
-[ 7] (                          meaningful
-[ 8] )                          meaningful
-[ 9] T_WHITESPACE               ignorable
-[10] {                          meaningful
-[11] T_WHITESPACE               ignorable
-[12] T_ECHO                     meaningful
-[13] T_WHITESPACE               ignorable
-[14] T_CONSTANT_ENCAPSED_STRING meaningful
-[15] ;                          meaningful
-[16] T_WHITESPACE               ignorable
-[17] }                          meaningful
+[ 2] T_WHITESPACE               ignorable
+[ 3] T_DOC_COMMENT              ignorable
+[ 4] T_WHITESPACE               ignorable
+[ 5] T_FUNCTION                 meaningful
+[ 6] T_WHITESPACE               ignorable
+[ 7] T_STRING                   meaningful
+[ 8] (                          meaningful
+[ 9] )                          meaningful
+[10] T_WHITESPACE               ignorable
+[11] {                          meaningful
+[12] T_WHITESPACE               ignorable
+[13] T_ECHO                     meaningful
+[14] T_WHITESPACE               ignorable
+[15] T_CONSTANT_ENCAPSED_STRING meaningful
+[16] ;                          meaningful
+[17] T_WHITESPACE               ignorable
+[18] }                          meaningful
 
 Success:
 bool(true)
