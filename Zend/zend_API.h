@@ -1384,7 +1384,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 #define Z_PARAM_LONG_OR_NULL(dest, is_null) \
 	Z_PARAM_LONG_EX(dest, is_null, 1, 0)
 
-/* no old equivalent */
+/* old "n" */
 #define Z_PARAM_NUMBER_EX(dest, check_null) \
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!zend_parse_arg_number(_arg, &dest, check_null))) { \

@@ -522,6 +522,16 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			}
 			break;
 
+		case 'n':
+			{
+				zval **p = va_arg(*va, zval **);
+
+				if (!zend_parse_arg_number(arg, p, check_null)) {
+					return "number";
+				}
+			}
+			break;
+
 		case 's':
 			{
 				char **p = va_arg(*va, char **);
@@ -793,7 +803,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			case 'f': case 'A':
 			case 'H': case 'p':
 			case 'S': case 'P':
-			case 'L':
+			case 'L': case 'n':
 				max_num_args++;
 				break;
 
