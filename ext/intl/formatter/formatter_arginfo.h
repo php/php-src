@@ -9,7 +9,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_NumberFormatter_create arginfo_class_NumberFormatter___construct
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter_format, 0, 0, 1)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_LONG|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
@@ -73,7 +73,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_numfmt_format, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, fmt, NumberFormatter, 0)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_LONG|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 

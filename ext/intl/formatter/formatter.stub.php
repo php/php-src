@@ -8,7 +8,7 @@ class NumberFormatter
     public static function create(string $locale, int $style, string $pattern = "") {}
 
     /** @return string|false */
-    public function format($value, int $type = NumberFormatter::TYPE_DEFAULT) {}
+    public function format(int|float $value, int $type = NumberFormatter::TYPE_DEFAULT) {}
 
     /** @return int|float|false */
     public function parse(string $value, int $type = NumberFormatter::TYPE_DOUBLE, &$position = null) {}
@@ -58,7 +58,7 @@ class NumberFormatter
 
 function numfmt_create(string $locale, int $style, string $pattern = ""): ?NumberFormatter {}
 
-function numfmt_format(NumberFormatter $fmt, $value, int $type = NumberFormatter::TYPE_DEFAULT): string|false {}
+function numfmt_format(NumberFormatter $fmt, int|float $value, int $type = NumberFormatter::TYPE_DEFAULT): string|false {}
 
 function numfmt_parse(NumberFormatter $fmt, string $value, int $type = NumberFormatter::TYPE_DOUBLE, &$position = null): int|float|false {}
 
