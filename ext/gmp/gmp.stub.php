@@ -1,7 +1,6 @@
 <?php
 
-/** @param int|bool|string $number */
-function gmp_init($number, int $base = 0): GMP|false {}
+function gmp_init(int|bool|string $number, int $base = 0): GMP|false {}
 
 function gmp_import(string $data, int $word_size = 1, int $options = GMP_MSW_FIRST | GMP_NATIVE_ENDIAN): GMP|false {}
 

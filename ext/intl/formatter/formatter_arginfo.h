@@ -32,7 +32,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter_setAttribute, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, attr, IS_LONG, 0)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_LONG|MAY_BE_DOUBLE)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_NumberFormatter_getAttribute, 0, 0, 1)
@@ -100,7 +100,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_numfmt_set_attribute, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, fmt, NumberFormatter, 0)
 	ZEND_ARG_TYPE_INFO(0, attr, IS_LONG, 0)
-	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_MASK(0, value, MAY_BE_LONG|MAY_BE_DOUBLE)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_numfmt_get_attribute, 0, 2, double, MAY_BE_LONG|MAY_BE_FALSE)

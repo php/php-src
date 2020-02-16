@@ -144,8 +144,7 @@ class ReflectionGenerator
 
 class ReflectionMethod extends ReflectionFunctionAbstract
 {
-    /** @param object|string $class_or_method */
-    public function __construct($class_or_method, string $name = UNKNOWN) {}
+    public function __construct(object|string $class_or_method, string $name = UNKNOWN) {}
 
     /** @return string */
     public function __toString() {}
@@ -202,8 +201,7 @@ class ReflectionClass implements Reflector
 
     public static function export($argument, bool $return = false) {}
 
-    /** @param object|string $argument */
-    public function __construct($argument) {}
+    public function __construct(object|string $argument) {}
 
     /** @return string */
     public function __toString() {}
@@ -376,8 +374,7 @@ class ReflectionProperty implements Reflector
 
     public static function export($class, $name, bool $return = false) {}
 
-    /** @param string|object $class */
-    public function __construct($class, string $name) {}
+    public function __construct(string|object $class, string $name) {}
 
     /** @return string */
     public function __toString() {}
@@ -474,11 +471,7 @@ class ReflectionParameter implements Reflector
 
     public static function export($function, $parameter, bool $return = false) {}
 
-    /**
-     * @param string|array|object
-     * @param int|string
-     */
-    public function __construct($function,  $parameter) {}
+    public function __construct(string|array|object $function, int|string $parameter) {}
 
     /** @return string */
     public function __toString() {}
@@ -636,8 +629,7 @@ class ReflectionZendExtension implements Reflector
 
 final class ReflectionReference
 {
-    /** @param int|string $key */
-    public static function fromArrayElement(array $array, $key): ?ReflectionReference {}
+    public static function fromArrayElement(array $array, int|string $key): ?ReflectionReference {}
 
     public function getId(): string {}
 

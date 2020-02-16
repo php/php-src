@@ -123,15 +123,13 @@ function openssl_error_string(): string|false {}
 
 /**
  * @param resource|string|array $key
- * @param int|string $method
  */
-function openssl_sign(string $data, &$signature, $key, $method = OPENSSL_ALGO_SHA1): bool {}
+function openssl_sign(string $data, &$signature, $key, int|string $method = OPENSSL_ALGO_SHA1): bool {}
 
 /**
  * @param resource|string|array $key
- * @param int|string $method
  */
-function openssl_verify(string $data, string $signature, $key, $method = OPENSSL_ALGO_SHA1): int|false {}
+function openssl_verify(string $data, string $signature, $key, int|string $method = OPENSSL_ALGO_SHA1): int|false {}
 
 function openssl_seal(string $data, &$sealdata, &$ekeys, array $pubkeys, string $method = UNKNOWN, &$iv = UNKNOWN): int|false {}
 

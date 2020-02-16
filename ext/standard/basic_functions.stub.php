@@ -123,9 +123,8 @@ function array_fill_keys(array $keys, $val): array {}
 /**
  * @param int|float|string $low
  * @param int|float|string $high
- * @param int|float $step
  */
-function range($low, $high, $step = 1): array {}
+function range($low, $high, int|float $step = 1): array {}
 
 function shuffle(array &$arg): bool {}
 
@@ -160,10 +159,9 @@ function array_values(array $arg): array {}
 function array_count_values(array $arg): array {}
 
 /**
- * @param int|string|null $column_key
  * @param int|string|null $index_key
  */
-function array_column(array $arg, $column_key, $index_key = null): array {}
+function array_column(array $arg, int|string|null $column_key, $index_key = null): array {}
 
 function array_reverse(array $input, bool $preserve_keys = false): array {}
 
@@ -476,11 +474,9 @@ function header(string $string, bool $replace = true, int $http_response_code = 
 
 function header_remove(string $name = UNKNOWN): void {}
 
-/** @param int|array $expires_or_options */
-function setrawcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
+function setrawcookie(string $name, string $value = '', int|array $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
 
-/** @param int|array $expires_or_options */
-function setcookie(string $name, string $value = '', $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
+function setcookie(string $name, string $value = '', int|array $expires_or_options = 0, string $path = '', string $domain = '', bool $secure = false, bool $httponly = false): bool {}
 
 function http_response_code(int $response_code = 0): int|bool {}
 
@@ -602,20 +598,16 @@ function stripcslashes(string $str): string {}
 function stripslashes(string $str): string {}
 
 /**
- * @param string|array $search
- * @param string|array $replace
  * @param int $replace_count
  */
 function str_replace(
-    $search, $replace, string|array $subject, &$replace_count = UNKNOWN): string|array {}
+    string|array $search, string|array $replace, string|array $subject, &$replace_count = UNKNOWN): string|array {}
 
 /**
- * @param string|array $search
- * @param string|array $replace
  * @param int $replace_count
  */
 function str_ireplace(
-    $search, $replace, string|array $subject, &$replace_count = UNKNOWN): string|array {}
+    string|array $search, string|array $replace, string|array $subject, &$replace_count = UNKNOWN): string|array {}
 
 function hebrev(string $str, int $max_chars_per_line = 0): string {}
 
@@ -624,10 +616,7 @@ function nl2br(string $str, bool $is_xhtml = true): string {}
 /** @param mixed $allowable_tags */
 function strip_tags(string $str, $allowable_tags = UNKNOWN): string {}
 
-/**
- * @param string|array $locales
- */
-function setlocale(int $category, $locales, ...$rest): string|false {}
+function setlocale(int $category, string|array $locales, ...$rest): string|false {}
 
 /** @param array $result */
 function parse_str(string $encoded_string, &$result): void {}
@@ -1186,10 +1175,9 @@ function stream_context_get_params($context): array {}
 
 /**
  * @param resource $context
- * @param array|string $param2
  * @param mixed $value
  */
-function stream_context_set_option($context, $param2, string $option_name = UNKNOWN, $value = UNKNOWN): bool {}
+function stream_context_set_option($context, array|string $param2, string $option_name = UNKNOWN, $value = UNKNOWN): bool {}
 
 /** @param resource $stream_or_context */
 function stream_context_get_options($stream_or_context): array {}
@@ -1231,7 +1219,6 @@ function stream_socket_server(string $local_socket, &$errno = null, &$errstr = n
 
 /**
  * @param resource $server_socket
- * @param float $timeout
  * @return resource|false
  */
 function stream_socket_accept($server_socket, float $timeout = UNKNOWN, &$peername = null) {}
@@ -1457,11 +1444,7 @@ function sapi_windows_cp_set(int $cp): bool {}
 
 function sapi_windows_cp_get(string $kind = UNKNOWN): int {}
 
-/**
- * @param int|string $in_codepage
- * @param int|string $out_codepage
- */
-function sapi_windows_cp_conv($in_codepage, $out_codepage, string $subject) {}
+function sapi_windows_cp_conv(int|string $in_codepage, int|string $out_codepage, string $subject) {}
 
 function sapi_windows_cp_is_utf8(): bool {}
 

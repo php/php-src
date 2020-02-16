@@ -40,27 +40,21 @@ function ldap_sasl_bind($link, string $binddn = UNKNOWN, string $password = UNKN
 
 /**
  * @param resource|array $link_identifier
- * @param string|array $base_dn
- * @param string|array $filter
  * @return resource|false
  */
-function ldap_read($link_identifier, $base_dn, $filter, array $attributes = [], int $attrsonly = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, array $servercontrols = []) {}
+function ldap_read($link_identifier, string|array $base_dn, string|array $filter, array $attributes = [], int $attrsonly = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, array $servercontrols = []) {}
 
 /**
  * @param resource|array $link_identifier
- * @param string|array $base_dn
- * @param string|array $filter
  * @return resource|false
  */
-function ldap_list($link_identifier, $base_dn, $filter, array $attributes = [], int $attrsonly = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, array $servercontrols = []) {}
+function ldap_list($link_identifier, string|array $base_dn, string|array $filter, array $attributes = [], int $attrsonly = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, array $servercontrols = []) {}
 
 /**
  * @param resource|array $link_identifier
- * @param string|array $base_dn
- * @param string|array $filter
  * @return resource|false
  */
-function ldap_search($link_identifier, $base_dn, $filter, array $attributes = [], int $attrsonly = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, array $servercontrols = []) {}
+function ldap_search($link_identifier, string|array $base_dn, string|array $filter, array $attributes = [], int $attrsonly = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, array $servercontrols = []) {}
 
 /**
  * @param resource $link_identifier

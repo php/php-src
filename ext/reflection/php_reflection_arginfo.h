@@ -106,7 +106,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionGenerator_getExecutingGenerator arginfo_class_Reflector___toString
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, class_or_method)
+	ZEND_ARG_TYPE_MASK(0, class_or_method, MAY_BE_OBJECT|MAY_BE_STRING)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -166,7 +166,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_export, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, argument)
+	ZEND_ARG_TYPE_MASK(0, argument, MAY_BE_OBJECT|MAY_BE_STRING)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClass___toString arginfo_class_Reflector___toString
@@ -300,7 +300,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionProperty_export arginfo_class_ReflectionMethod_export
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionProperty___construct, 0, 0, 2)
-	ZEND_ARG_INFO(0, class)
+	ZEND_ARG_TYPE_MASK(0, class, MAY_BE_STRING|MAY_BE_OBJECT)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -350,7 +350,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClassConstant_export arginfo_class_ReflectionMethod_export
 
-#define arginfo_class_ReflectionClassConstant___construct arginfo_class_ReflectionProperty___construct
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClassConstant___construct, 0, 0, 2)
+	ZEND_ARG_INFO(0, class)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClassConstant___toString arginfo_class_Reflector___toString
 
@@ -379,8 +382,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionParameter_export, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionParameter___construct, 0, 0, 2)
-	ZEND_ARG_INFO(0, function)
-	ZEND_ARG_INFO(0, parameter)
+	ZEND_ARG_TYPE_MASK(0, function, MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)
+	ZEND_ARG_TYPE_MASK(0, parameter, MAY_BE_LONG|MAY_BE_STRING)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionParameter___toString arginfo_class_Reflector___toString
@@ -484,7 +487,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_ReflectionReference_fromArrayElement, 0, 2, ReflectionReference, 1)
 	ZEND_ARG_TYPE_INFO(0, array, IS_ARRAY, 0)
-	ZEND_ARG_INFO(0, key)
+	ZEND_ARG_TYPE_MASK(0, key, MAY_BE_LONG|MAY_BE_STRING)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ReflectionReference_getId, 0, 0, IS_STRING, 0)

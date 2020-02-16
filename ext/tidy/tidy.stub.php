@@ -1,22 +1,18 @@
 <?php
 
-/** @param array|string $config_options */
-function tidy_parse_string(string $input, $config_options = UNKNOWN, string $encoding = UNKNOWN): tidy|false {}
+function tidy_parse_string(string $input, array|string $config_options = UNKNOWN, string $encoding = UNKNOWN): tidy|false {}
 
 function tidy_get_error_buffer(tidy $object): string|false {}
 
 function tidy_get_output(tidy $object): string {}
 
-/** @param array|string $config_options */
-function tidy_parse_file(string $file, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false): tidy|false {}
+function tidy_parse_file(string $file, array|string $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false): tidy|false {}
 
 function tidy_clean_repair(tidy $object): bool {}
 
-/** @param array|string $config_options */
-function tidy_repair_string(string $data, $config_options = UNKNOWN, string $encoding = UNKNOWN): string|false {}
+function tidy_repair_string(string $data, array|string $config_options = UNKNOWN, string $encoding = UNKNOWN): string|false {}
 
-/** @param array|string $config_options */
-function tidy_repair_file(string $filename, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false): string|false {}
+function tidy_repair_file(string $filename, array|string $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false): string|false {}
 
 function tidy_diagnose(tidy $object): bool {}
 
@@ -56,25 +52,20 @@ function tidy_get_body(tidy $tidy): ?tidyNode {}
 
 class tidy
 {
-    /** @param array|string $config_options */
-    public function __construct(string $filename = UNKNOWN, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false) {}
+    public function __construct(string $filename = UNKNOWN, array|string $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false) {}
 
     /** @return string|int|bool */
     public function getOpt(string $option) {}
 
     public function cleanRepair(): bool {}
 
-    /** @param array|string $config_options */
-    public function parseFile(string $file, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false): bool {}
+    public function parseFile(string $file, array|string $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false): bool {}
 
-    /** @param array|string $config_options */
-    public function parseString(string $input, $config_options = UNKNOWN, string $encoding = UNKNOWN): bool {}
+    public function parseString(string $input, array|string $config_options = UNKNOWN, string $encoding = UNKNOWN): bool {}
 
-    /** @param array|string $config_options */
-    public function repairString(string $data, $config_options = UNKNOWN, string $encoding = UNKNOWN): bool {}
+    public function repairString(string $data, array|string $config_options = UNKNOWN, string $encoding = UNKNOWN): bool {}
 
-    /** @param array|string $config_options */
-    public function repairFile(string $filename, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false): bool {}
+    public function repairFile(string $filename, array|string $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false): bool {}
 
     public function diagnose(): bool {}
 

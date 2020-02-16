@@ -8,10 +8,9 @@ class ResourceBundle implements Traversable
     public static function create(?string $locale, ?string $bundlename, bool $fallback = true) {}
 
     /**
-     * @param string|int $index
      * @return mixed
      */
-    public function get($index, bool $fallback = true) {}
+    public function get(string|int $index, bool $fallback = true) {}
 
     /** @return int */
     public function count() {}
@@ -29,10 +28,9 @@ class ResourceBundle implements Traversable
 function resourcebundle_create(?string $locale, ?string $bundlename, bool $fallback = true): ?ResourceBundle {}
 
 /**
- * @param string|int $index
  * @return mixed
  */
-function resourcebundle_get(ResourceBundle $bundle, $index) {}
+function resourcebundle_get(ResourceBundle $bundle, string|int $index) {}
 
 function resourcebundle_count(ResourceBundle $bundle): int {}
 

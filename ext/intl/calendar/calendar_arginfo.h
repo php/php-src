@@ -105,7 +105,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_roll, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, field, IS_LONG, 0)
-	ZEND_ARG_INFO(0, amountOrUpOrDown)
+	ZEND_ARG_TYPE_MASK(0, amountOrUpOrDown, MAY_BE_LONG|MAY_BE_BOOL)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlCalendar_isSet arginfo_class_IntlCalendar_get
@@ -217,7 +217,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intlcal_roll, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, calendar, IntlCalendar, 0)
 	ZEND_ARG_TYPE_INFO(0, field, IS_LONG, 0)
-	ZEND_ARG_INFO(0, amountOrUpOrDown)
+	ZEND_ARG_TYPE_MASK(0, amountOrUpOrDown, MAY_BE_LONG|MAY_BE_BOOL)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intlcal_clear, 0, 1, _IS_BOOL, 0)

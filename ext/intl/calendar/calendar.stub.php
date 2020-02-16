@@ -116,10 +116,9 @@ class IntlCalendar
     public function isWeekend(?float $date = null) {}
 
     /**
-     * @param int|bool $amountOrUpOrDown
      * @return bool
      */
-    public function roll(int $field, $amountOrUpOrDown) {}
+    public function roll(int $field, int|bool $amountOrUpOrDown) {}
 
     /** @return bool */
     public function isSet(int $field) {}
@@ -198,8 +197,7 @@ function intlcal_before(IntlCalendar $calendarObject, IntlCalendar $calendar): b
 
 function intlcal_set(IntlCalendar $calendar, int $year, int $month, int $dayOfMonth = UNKNOWN, $hour = UNKNOWN, int $minute = UNKNOWN, int $second = UNKNOWN): bool {}
 
-/** @param int|bool $amountOrUpOrDown */
-function intlcal_roll(IntlCalendar $calendar, int $field, $amountOrUpOrDown): bool {}
+function intlcal_roll(IntlCalendar $calendar, int $field, int|bool $amountOrUpOrDown): bool {}
 
 function intlcal_clear(IntlCalendar $calendar, ?int $field = null): bool {}
 

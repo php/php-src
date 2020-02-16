@@ -1,7 +1,7 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_gmp_init, 0, 1, GMP, MAY_BE_FALSE)
-	ZEND_ARG_INFO(0, number)
+	ZEND_ARG_TYPE_MASK(0, number, MAY_BE_LONG|MAY_BE_BOOL|MAY_BE_STRING)
 	ZEND_ARG_TYPE_INFO(0, base, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
