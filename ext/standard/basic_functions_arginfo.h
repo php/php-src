@@ -1584,49 +1584,51 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_abs, 0, 1, MAY_BE_LONG|MAY_BE_DO
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ceil, 0, 1, IS_DOUBLE, 0)
-	ZEND_ARG_TYPE_INFO(0, number, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_MASK(0, number, MAY_BE_LONG|MAY_BE_DOUBLE)
 ZEND_END_ARG_INFO()
 
 #define arginfo_floor arginfo_ceil
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_round, 0, 1, IS_DOUBLE, 0)
-	ZEND_ARG_INFO(0, number)
+	ZEND_ARG_TYPE_MASK(0, number, MAY_BE_LONG|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_INFO(0, precision, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_sin arginfo_ceil
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sin, 0, 1, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, number, IS_DOUBLE, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_cos arginfo_ceil
+#define arginfo_cos arginfo_sin
 
-#define arginfo_tan arginfo_ceil
+#define arginfo_tan arginfo_sin
 
-#define arginfo_asin arginfo_ceil
+#define arginfo_asin arginfo_sin
 
-#define arginfo_acos arginfo_ceil
+#define arginfo_acos arginfo_sin
 
-#define arginfo_atan arginfo_ceil
+#define arginfo_atan arginfo_sin
 
-#define arginfo_atanh arginfo_ceil
+#define arginfo_atanh arginfo_sin
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_atan2, 0, 2, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, y, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, x, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_sinh arginfo_ceil
+#define arginfo_sinh arginfo_sin
 
-#define arginfo_cosh arginfo_ceil
+#define arginfo_cosh arginfo_sin
 
-#define arginfo_tanh arginfo_ceil
+#define arginfo_tanh arginfo_sin
 
-#define arginfo_asinh arginfo_ceil
+#define arginfo_asinh arginfo_sin
 
-#define arginfo_acosh arginfo_ceil
+#define arginfo_acosh arginfo_sin
 
-#define arginfo_expm1 arginfo_ceil
+#define arginfo_expm1 arginfo_sin
 
-#define arginfo_log1p arginfo_ceil
+#define arginfo_log1p arginfo_sin
 
 #define arginfo_pi arginfo_lcg_value
 
@@ -1648,25 +1650,25 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pow, 0, 0, 2)
 	ZEND_ARG_INFO(0, exp)
 ZEND_END_ARG_INFO()
 
-#define arginfo_exp arginfo_ceil
+#define arginfo_exp arginfo_sin
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_log, 0, 1, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, number, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, base, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_log10 arginfo_ceil
+#define arginfo_log10 arginfo_sin
 
-#define arginfo_sqrt arginfo_ceil
+#define arginfo_sqrt arginfo_sin
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_hypot, 0, 2, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, x, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, y, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_deg2rad arginfo_ceil
+#define arginfo_deg2rad arginfo_sin
 
-#define arginfo_rad2deg arginfo_ceil
+#define arginfo_rad2deg arginfo_sin
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_bindec, 0, 1, MAY_BE_LONG|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_INFO(0, binary_string, IS_STRING, 0)

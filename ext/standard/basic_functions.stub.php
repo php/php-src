@@ -1018,11 +1018,11 @@ function mail(string $to, string $subject, string $message, string|array $additi
 
 function abs(int|float $number): int|float {}
 
-function ceil(float $number): float {}
+function ceil(int|float $number): float {}
 
-function floor(float $number): float {}
+function floor(int|float $number): float {}
 
-function round($number, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): float {}
+function round(int|float $number, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): float {}
 
 function sin(float $number): float {}
 
