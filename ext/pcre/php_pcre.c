@@ -52,17 +52,6 @@ struct _pcre_cache_entry {
 	uint32_t refcount;
 };
 
-typedef enum {
-	PHP_PCRE_NO_ERROR = 0,
-	PHP_PCRE_INTERNAL_ERROR,
-	PHP_PCRE_BACKTRACK_LIMIT_ERROR,
-	PHP_PCRE_RECURSION_LIMIT_ERROR,
-	PHP_PCRE_BAD_UTF8_ERROR,
-	PHP_PCRE_BAD_UTF8_OFFSET_ERROR,
-	PHP_PCRE_JIT_STACKLIMIT_ERROR
-} php_pcre_error_code;
-
-
 PHPAPI ZEND_DECLARE_MODULE_GLOBALS(pcre)
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
@@ -140,7 +129,7 @@ static void pcre_handle_exec_error(int pcre_code) /* {{{ */
 
 static const char *php_pcre_get_error_msg(php_pcre_error_code error_code) /* {{{ */
 {
-    switch(error_code) {
+    switch (error_code) {
         case PHP_PCRE_INTERNAL_ERROR:
             return "Internal error";
         case PHP_PCRE_BAD_UTF8_ERROR:

@@ -37,6 +37,17 @@ extern zend_module_entry pcre_module_entry;
 
 typedef struct _pcre_cache_entry pcre_cache_entry;
 
+/* error codes */
+typedef enum {
+    PHP_PCRE_NO_ERROR = 0,
+    PHP_PCRE_INTERNAL_ERROR,
+    PHP_PCRE_BACKTRACK_LIMIT_ERROR,
+    PHP_PCRE_RECURSION_LIMIT_ERROR,
+    PHP_PCRE_BAD_UTF8_ERROR,
+    PHP_PCRE_BAD_UTF8_OFFSET_ERROR,
+    PHP_PCRE_JIT_STACKLIMIT_ERROR
+} php_pcre_error_code;
+
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex);
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache_ex(zend_string *regex, int locale_aware);
 
@@ -70,7 +81,7 @@ ZEND_BEGIN_MODULE_GLOBALS(pcre)
 	zend_bool jit;
 #endif
 	zend_bool per_request_cache;
-	int  error_code;
+    php_pcre_error_code error_code;
 	/* Used for unmatched subpatterns in OFFSET_CAPTURE mode */
 	zval unmatched_null_pair;
 	zval unmatched_empty_pair;
