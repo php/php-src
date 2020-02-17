@@ -10,15 +10,17 @@ function dba_open($path, $mode, $handlername = UNKNOWN, ...$handler_parameters) 
 function dba_close($handle): void {}
 
 /**
+ * @param string|array $key
  * @param resource $handle
  */
-function dba_exists(string|array $key, $handle): bool {}
+function dba_exists($key, $handle): bool {}
 
 /**
+ * @param string|array $key
  * @param int|resource $skip actually this parameter is optional, not $handle
  * @param resource $handle
  */
-function dba_fetch(string|array $key, $skip, $handle = UNKOWN): string|false {}
+function dba_fetch($key, $skip, $handle = UNKOWN): string|false {}
 
 function dba_key_split(string $key): array|false {}
 
@@ -29,19 +31,22 @@ function dba_firstkey($handle): string|false {}
 function dba_nextkey($handle): string|false {}
 
 /**
+ * @param string|array $key
  * @param resource $handle
  */
-function dba_delete(string|array $key, $handle): bool {}
+function dba_delete($key, $handle): bool {}
 
 /**
+ * @param string|array $key
  * @param resource $handle
  */
-function dba_insert(string|array $key, string $value, $handle): bool {}
+function dba_insert($key, string $value, $handle): bool {}
 
 /**
+ * @param string|array $key
  * @param resource $handle
  */
-function dba_replace(string|array $key, string $value, $handle): bool {}
+function dba_replace($key, string $value, $handle): bool {}
 
 /** @param resource $handle */
 function dba_optimize($handle): bool {}

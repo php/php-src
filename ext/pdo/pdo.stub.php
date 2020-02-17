@@ -71,10 +71,11 @@ class PDOStatement implements Traversable {
     public function bindParam(int|string $parameter, &$param, int $type = PDO::PARAM_STR, int $maxlen = 0, $driverdata = null) {}
 
     /**
+     * @param int|string $parameter
      * @param mixed $value
      * @return bool
      */
-    public function bindValue(int|string $parameter, $value, int $type = PDO::PARAM_STR) {}
+    public function bindValue($parameter, $value, int $type = PDO::PARAM_STR) {}
 
     /** @return bool */
     public function closeCursor() {}

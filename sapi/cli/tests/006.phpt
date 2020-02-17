@@ -90,9 +90,9 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     Function [ <internal:pcre> function preg_replace ] {
 
       - Parameters [5] {
-        Parameter #0 [ <required> array|string $regex ]
-        Parameter #1 [ <required> array|string $replace ]
-        Parameter #2 [ <required> array|string $subject ]
+        Parameter #0 [ <required> $regex ]
+        Parameter #1 [ <required> $replace ]
+        Parameter #2 [ <required> $subject ]
         Parameter #3 [ <optional> int $limit ]
         Parameter #4 [ <optional> &$count ]
       }
@@ -101,9 +101,9 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     Function [ <internal:pcre> function preg_replace_callback ] {
 
       - Parameters [6] {
-        Parameter #0 [ <required> array|string $regex ]
+        Parameter #0 [ <required> $regex ]
         Parameter #1 [ <required> $callback ]
-        Parameter #2 [ <required> array|string $subject ]
+        Parameter #2 [ <required> $subject ]
         Parameter #3 [ <optional> int $limit ]
         Parameter #4 [ <optional> &$count ]
         Parameter #5 [ <optional> int $flags ]
@@ -114,7 +114,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
 
       - Parameters [5] {
         Parameter #0 [ <required> array $pattern ]
-        Parameter #1 [ <required> array|string $subject ]
+        Parameter #1 [ <required> $subject ]
         Parameter #2 [ <optional> int $limit ]
         Parameter #3 [ <optional> &$count ]
         Parameter #4 [ <optional> int $flags ]
@@ -124,9 +124,9 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     Function [ <internal:pcre> function preg_filter ] {
 
       - Parameters [5] {
-        Parameter #0 [ <required> array|string $regex ]
-        Parameter #1 [ <required> array|string $replace ]
-        Parameter #2 [ <required> array|string $subject ]
+        Parameter #0 [ <required> $regex ]
+        Parameter #1 [ <required> $replace ]
+        Parameter #2 [ <required> $subject ]
         Parameter #3 [ <optional> int $limit ]
         Parameter #4 [ <optional> &$count ]
       }

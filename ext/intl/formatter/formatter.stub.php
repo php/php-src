@@ -20,9 +20,10 @@ class NumberFormatter
     public function parseCurrency(string $value, &$currency, &$position = null) {}
 
     /**
+     * @param int|float $value
      * @return bool
      */
-    public function setAttribute(int $attr, int|float $value) {}
+    public function setAttribute(int $attr, $value) {}
 
     /** @return int|float|false */
     public function getAttribute(int $attr) {}
@@ -65,7 +66,8 @@ function numfmt_format_currency(NumberFormatter $fmt, float $value, string $curr
 
 function numfmt_parse_currency(NumberFormatter $fmt, string $value, &$currency, &$position = null): float|false {}
 
-function numfmt_set_attribute(NumberFormatter $fmt, int $attr, int|float $value): bool {}
+/** @param int|float $value */
+function numfmt_set_attribute(NumberFormatter $fmt, int $attr, $value): bool {}
 
 function numfmt_get_attribute(NumberFormatter $fmt, int $attr): int|double|false {}
 

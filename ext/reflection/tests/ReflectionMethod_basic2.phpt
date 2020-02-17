@@ -165,7 +165,7 @@ __toString():
 string(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 
   - Parameters [2] {
-    Parameter #0 [ <required> object|string $class ]
+    Parameter #0 [ <required> $class ]
     Parameter #1 [ <required> string $name ]
   }
 }
@@ -177,7 +177,7 @@ Deprecated: Function ReflectionMethod::export() is deprecated in %s on line %d
 string(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 
   - Parameters [2] {
-    Parameter #0 [ <required> object|string $class ]
+    Parameter #0 [ <required> $class ]
     Parameter #1 [ <required> string $name ]
   }
 }

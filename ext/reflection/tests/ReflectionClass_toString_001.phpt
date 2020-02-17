@@ -44,7 +44,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Method [ <internal:Reflection, ctor> public method __construct ] {
 
       - Parameters [1] {
-        Parameter #0 [ <required> object|string $argument ]
+        Parameter #0 [ <required> $argument ]
       }
     }
 

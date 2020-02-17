@@ -48,7 +48,8 @@ function mb_strwidth(string $str, string $encoding = UNKNOWN): int|false {}
 
 function mb_strimwidth(string $str, int $start, int $width, string $trimmarker = UNKNOWN, string $encoding = UNKNOWN): string|false {}
 
-function mb_convert_encoding(array|string $str, string $to, $from = UNKNOWN): array|string|false {}
+/** @param array|string $str */
+function mb_convert_encoding($str, string $to, $from = UNKNOWN): array|string|false {}
 
 function mb_convert_case(string $sourcestring, int $mode, ?string $encoding = null): string|false {}
 
@@ -69,7 +70,8 @@ function mb_decode_mimeheader(string $string): string|false {}
 
 function mb_convert_kana(string $str, string $option = UNKNOWN, string $encoding = UNKNOWN): string|false {}
 
-function mb_convert_variables(string $to, array|string $from, &$var, &...$vars): string|false {}
+/** @param array|string $from */
+function mb_convert_variables(string $to, $from, &$var, &...$vars): string|false {}
 
 function mb_encode_numericentity(string $string, array $convmap, string $encoding = UNKNOWN, bool $is_hex = false): string|false {}
 
