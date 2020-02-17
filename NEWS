@@ -6,6 +6,14 @@ PHP                                                                        NEWS
   . Fixed bug #77569: (Write Access Violation in DomImplementation). (Nikita,
     cmb)
 
+- Phar:
+  . Fixed bug #79082 (Files added to tar with Phar::buildFromIterator have
+    all-access permissions). (CVE-2020-7063) (stas)
+
+- Session:
+  . Fixed bug #79221 (Null Pointer Dereference in PHP Session Upload Progress).
+    (CVE-2020-7062) (stas)
+
 23 Jan 2020, PHP 7.2.27
 
 - Mbstring:
