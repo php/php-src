@@ -435,6 +435,11 @@ PHP 8.0 UPGRADE NOTES
 6. New Functions
 ========================================
 
+- PCRE:
+  . Added preg_last_error_msg(), which returns a human-readable message for
+    the last PCRE error. It complements preg_last_error(), which returns an
+    integer enum instead.
+
 - SQLite3:
   . Add SQLite3::setAuthorizer() and respective class constants to set a
     userland callback that will be used to authorize or not an action on the
