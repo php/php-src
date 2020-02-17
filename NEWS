@@ -18,16 +18,6 @@ PHP                                                                        NEWS
   . Fixed bug #79188 (Memory corruption in preg_replace/preg_replace_callback
     and unicode). (Nikita)
 
-- Phar:
-  . Fixed bug #79082 (Files added to tar with Phar::buildFromIterator have
-    all-access permissions). (CVE-2020-7063) (stas)
-  . Fixed bug #79171 (heap-buffer-overflow in phar_extract_file).
-    (CVE-	2020-7061) (cmb)
-
-- Session:
-  . Fixed bug #79221 (Null Pointer Dereference in PHP Session Upload Progress).
-    (CVE-2020-7062) (stas)
-
 - Standard:
   . Fixed bug #79254 (getenv() w/o arguments not showing changes). (cmb)
 
@@ -63,11 +53,19 @@ PHP                                                                        NEWS
   . Fixed bug #79145 (openssl memory leak). (cmb, Nikita)
 
 - Phar:
+  . Fixed bug #79082 (Files added to tar with Phar::buildFromIterator have
+    all-access permissions). (CVE-2020-7063) (stas)
+  . Fixed bug #79171 (heap-buffer-overflow in phar_extract_file).
+    (CVE-	2020-7061) (cmb)
   . Fixed bug #76584 (PharFileInfo::decompress not working). (cmb)
 
 - Reflection:
   . Fixed bug #79115 (ReflectionClass::isCloneable call reflected class
     __destruct). (Nikita)
+
+- Session:
+  . Fixed bug #79221 (Null Pointer Dereference in PHP Session Upload Progress).
+    (CVE-2020-7062) (stas)
 
 - SPL:
   . Fixed bug #79151 (heap use after free caused by
