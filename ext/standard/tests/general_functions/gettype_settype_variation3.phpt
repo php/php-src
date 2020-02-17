@@ -4,8 +4,6 @@ Test gettype() & settype() functions : usage variations
 <?php
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
---INI--
-precision=14
 --FILE--
 <?php
 /* Prototype: string gettype ( mixed $var );
@@ -278,7 +276,7 @@ string(6) "double"
 -- Iteration 20 --
 string(6) "string"
 bool(true)
-float(2.9743947493287E+21)
+float(2.974394749328742E+21)
 string(6) "double"
 -- Iteration 21 --
 string(6) "string"
@@ -308,7 +306,7 @@ string(6) "double"
 -- Iteration 26 --
 string(6) "string"
 bool(true)
-float(2.9743947493287E+21)
+float(2.974394749328742E+21)
 string(6) "double"
 -- Iteration 27 --
 string(6) "string"
@@ -673,7 +671,7 @@ string(6) "double"
 -- Iteration 20 --
 string(6) "string"
 bool(true)
-float(2.9743947493287E+21)
+float(2.974394749328742E+21)
 string(6) "double"
 -- Iteration 21 --
 string(6) "string"
@@ -703,7 +701,7 @@ string(6) "double"
 -- Iteration 26 --
 string(6) "string"
 bool(true)
-float(2.9743947493287E+21)
+float(2.974394749328742E+21)
 string(6) "double"
 -- Iteration 27 --
 string(6) "string"

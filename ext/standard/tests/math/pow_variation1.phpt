@@ -1,7 +1,7 @@
 --TEST--
 Test pow() function : usage variations - different data types as $base argument
 --INI--
-precision = 14
+serialize_precision = 14
 --SKIPIF--
 <?php
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");

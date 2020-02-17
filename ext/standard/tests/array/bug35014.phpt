@@ -2,8 +2,6 @@
 Bug #35014 (array_product() always returns 0) (32bit)
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only"); ?>
---INI--
-precision=14
 --FILE--
 <?php
 $tests = array(
@@ -27,6 +25,6 @@ int(0)
 int(3)
 int(9)
 float(1)
-float(9.9999998E+15)
-float(2.8404260053903E+20)
+float(9999999800000000)
+float(2.8404260053902914E+20)
 float(8589934590)

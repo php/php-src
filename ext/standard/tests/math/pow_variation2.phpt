@@ -1,7 +1,7 @@
 --TEST--
 Test pow() function : usage variations - different data types as $exp argument
 --INI--
-precision = 14
+serialize_precision = 14
 --FILE--
 <?php
 /* Prototype  : number pow  ( number $base  , number $exp  )
@@ -109,19 +109,19 @@ float(0)
 float(INF)
 
 -- Iteration 6 --
-float(1856.6929774278785)
+float(1856.6929774279)
 
 -- Iteration 7 --
-float(0.0005385920085642399)
+float(0.00053859200856424)
 
 -- Iteration 8 --
 float(INF)
 
 -- Iteration 9 --
-float(1.000000003716816)
+float(1.0000000037168)
 
 -- Iteration 10 --
-float(4.505552130427524)
+float(4.5055521304275)
 
 -- Iteration 11 --
 float(1)

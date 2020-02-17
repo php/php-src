@@ -1,7 +1,7 @@
 --TEST--
 Test variations in usage of cosh()
 --INI--
-precision = 10
+serialize_precision = 10
 --FILE--
 <?php
 /*
@@ -34,19 +34,19 @@ for ($i = 0; $i < count($values); $i++) {
 
 ?>
 --EXPECTF--
-float(4872401723.124452)
-float(4872401723.124452)
-float(7641446994.979367)
-float(7641446994.979367)
-float(4872401723.124452)
-float(4872401723.124452)
-float(4872401723.124452)
-float(7641446994.979367)
-float(7641446994.979367)
+float(4872401723)
+float(4872401723)
+float(7641446995)
+float(7641446995)
+float(4872401723)
+float(4872401723)
+float(4872401723)
+float(7641446995)
+float(7641446995)
 float(INF)
 
 Notice: A non well formed numeric value encountered in %s on line %d
 float(INF)
 float(1)
-float(1.5430806348152437)
+float(1.543080635)
 float(1)

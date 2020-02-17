@@ -1,7 +1,7 @@
 --TEST--
 Test variations in usage of asinh()
 --INI--
-precision = 10
+serialize_precision = 10
 --FILE--
 <?php
 /*
@@ -34,19 +34,19 @@ for ($i = 0; $i < count($values); $i++) {
 
 ?>
 --EXPECTF--
-float(3.8291136516208812)
-float(-3.8291136516208812)
-float(3.8484719917851553)
-float(-3.8484719917851553)
-float(3.8291136516208812)
-float(3.8291136516208812)
-float(3.8291136516208812)
-float(3.8484719917851553)
-float(3.8484719917851553)
-float(7.600902709541988)
+float(3.829113652)
+float(-3.829113652)
+float(3.848471992)
+float(-3.848471992)
+float(3.829113652)
+float(3.829113652)
+float(3.829113652)
+float(3.848471992)
+float(3.848471992)
+float(7.60090271)
 
 Notice: A non well formed numeric value encountered in %s on line %d
-float(7.600902709541988)
+float(7.60090271)
 float(0)
-float(0.881373587019543)
+float(0.881373587)
 float(0)
