@@ -42,6 +42,7 @@ PHP                                                                        NEWS
 
 - JIT:
   . Fixed bug #77857 (Wrong result if executed with JIT). (Laruence)
+  . Fixed bug #79255 (PHP cannot be compiled with enable JIT). (Laruence)
 
 - LDAP:
   . Removed deprecated ldap_sort. (mcmic)
