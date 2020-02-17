@@ -3685,6 +3685,12 @@ ZEND_METHOD(FFI, new) /* {{{ */
 		}
 	}
 
+	if (type->size == 0) {
+		zend_throw_error(zend_ffi_exception_ce, "Cannot instantiate FFI\\CData of zero size");
+		zend_ffi_type_dtor(type_ptr);
+		return;
+	}
+
 	ptr = pemalloc(type->size, flags & ZEND_FFI_FLAG_PERSISTENT);
 	memset(ptr, 0, type->size);
 

@@ -26,4 +26,4 @@ bool(false)
 
 Warning: FFI::isNull() expects parameter 1 to be FFI\CData, null given in %s045.php on line %d
 NULL
-FFI\Exception: FFI\Cdata is not a pointer
+FFI\Exception: Cannot instantiate FFI\CData of zero size
