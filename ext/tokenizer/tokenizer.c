@@ -116,6 +116,16 @@ PHP_METHOD(PhpToken, getAll)
 	ZEND_PARSE_PARAMETERS_END();
 
 	token_class = zend_get_called_scope(execute_data);
+
+	/* Check construction preconditions in advance, so these are not repeated for each token. */
+	if (token_class->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
+		zend_throw_error(NULL, "Cannot instantiate abstract class %s", ZSTR_VAL(token_class->name));
+		RETURN_THROWS();
+	}
+	if (zend_update_class_constants(token_class) == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	if (!tokenize_common(return_value, source, flags, token_class)) {
 		RETURN_THROWS();
 	}
