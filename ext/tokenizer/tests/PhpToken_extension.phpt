@@ -11,6 +11,8 @@ FUNCTION FOO() {
 PHP;
 
 class MyPhpToken extends PhpToken {
+    public int $extra = 123;
+
     public function getLoweredText(): string {
         return strtolower($this->text);
     }
@@ -18,6 +20,10 @@ class MyPhpToken extends PhpToken {
 
 foreach (MyPhpToken::getAll($code) as $token) {
     echo $token->getLoweredText();
+
+    if ($token->extra !== 123) {
+        echo "Missing property!\n";
+    }
 }
 
 ?>

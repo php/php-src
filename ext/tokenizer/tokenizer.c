@@ -307,6 +307,17 @@ static void add_token(zval *return_value, int token_type,
 		ZVAL_STR(OBJ_PROP_NUM(obj, 1), make_str(text, leng));
 		ZVAL_LONG(OBJ_PROP_NUM(obj, 2), lineno);
 		ZVAL_LONG(OBJ_PROP_NUM(obj, 3), text - LANG_SCNG(yy_start));
+
+		/* If the class is extended with additional properties, initialized them as well. */
+		if (UNEXPECTED(token_class->default_properties_count > 4)) {
+			zval *dst = OBJ_PROP_NUM(obj, 4);
+			zval *src = &token_class->default_properties_table[4];
+			zval *end = token_class->default_properties_table
+				+ token_class->default_properties_count;
+			for (; src < end; src++, dst++) {
+				ZVAL_COPY_PROP(dst, src);
+			}
+		}
 	} else if (token_type >= 256) {
 		array_init(&token);
 		add_next_index_long(&token, token_type);
