@@ -327,7 +327,7 @@ int dom_node_child_nodes_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	php_dom_create_interator(retval, DOM_NODELIST);
+	php_dom_create_iterator(retval, DOM_NODELIST);
 	intern = Z_DOMOBJ_P(retval);
 	dom_namednode_iter(obj, XML_ELEMENT_NODE, intern, NULL, NULL, NULL);
 
@@ -470,7 +470,7 @@ int dom_node_attributes_read(dom_object *obj, zval *retval)
 	}
 
 	if (nodep->type == XML_ELEMENT_NODE) {
-		php_dom_create_interator(retval, DOM_NAMEDNODEMAP);
+		php_dom_create_iterator(retval, DOM_NAMEDNODEMAP);
 		intern = Z_DOMOBJ_P(retval);
 		dom_namednode_iter(obj, XML_ATTRIBUTE_NODE, intern, NULL, NULL, NULL);
 	} else {

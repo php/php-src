@@ -1081,7 +1081,7 @@ zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type) /* {{{ */
 }
 /* }}} */
 
-void php_dom_create_interator(zval *return_value, int ce_type) /* {{{ */
+void php_dom_create_iterator(zval *return_value, int ce_type) /* {{{ */
 {
 	zend_class_entry *ce;
 

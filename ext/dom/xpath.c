@@ -459,7 +459,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 			} else {
 				ZVAL_EMPTY_ARRAY(&retval);
 			}
-			php_dom_create_interator(return_value, DOM_NODELIST);
+			php_dom_create_iterator(return_value, DOM_NODELIST);
 			nodeobj = Z_DOMOBJ_P(return_value);
 			dom_xpath_iter(&retval, nodeobj);
 			break;
