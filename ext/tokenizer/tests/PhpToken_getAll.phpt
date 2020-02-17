@@ -1,5 +1,7 @@
 --TEST--
 PhpToken::getAll() method
+--SKIPIF--
+<?php if (!extension_loaded("tokenizer")) print "skip tokenizer extension not enabled"; ?>
 --FILE--
 <?php
 
