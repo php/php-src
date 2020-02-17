@@ -49,7 +49,7 @@ object(DOMText)#%d (19) {
   ["parentNode"]=>
   NULL
   ["childNodes"]=>
-  NULL
+  string(22) "(object value omitted)"
   ["firstChild"]=>
   NULL
   ["lastChild"]=>
@@ -139,7 +139,7 @@ object(DOMText)#%d (19) {
   ["parentNode"]=>
   NULL
   ["childNodes"]=>
-  NULL
+  string(22) "(object value omitted)"
   ["firstChild"]=>
   NULL
   ["lastChild"]=>
