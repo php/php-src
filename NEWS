@@ -29,6 +29,9 @@ PHP                                                                        NEWS
   . Fixed bug #79257 (Duplicate named groups (?J) prefer last alternative even
     if not matched). (Nikita)
 
+- PDO_ODBC:
+  . Fixed bug #79038 (PDOStatement::nextRowset() leaks column values). (cmb)
+
 - Standard:
   . Fixed bug #79254 (getenv() w/o arguments not showing changes). (cmb)
 
