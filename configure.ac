@@ -695,20 +695,6 @@ if test "$ac_cv__asm_goto" = yes; then
   AC_DEFINE(HAVE_ASM_GOTO,1,[Define if asm goto support])
 fi
 
-dnl Check for variable length array support.
-AC_CACHE_CHECK([whether compiler supports VLA], ac_cv__compiler_c99_vla,
-[AC_RUN_IFELSE([AC_LANG_SOURCE([[
- #include <stdlib.h>
- int main(void) {
-         int i[rand()%10];
-	 return 0;
- }
- ]])],[ac_cv__compiler_c99_vla=yes], [ac_cv__compiler_c99_vla=no], [ac_cv__compiler_c99_vla=no])])
-
-if test "$ac_cv__compiler_c99_vla" = yes; then
-	AC_DEFINE(HAVE_COMPILER_C99_VLA, 1, [Compiler supports VLA])
-fi
-
 dnl Check valgrind support.
 PHP_ARG_WITH([valgrind],
   [whether to enable valgrind support],
