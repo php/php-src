@@ -143,58 +143,62 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_Phar_stopBuffering arginfo_class_Phar___destruct
 
-#define arginfo_class_Phar_apiVersion arginfo_class_Phar___destruct
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_apiVersion, 0, 0, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_canCompress, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_canCompress, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, method, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Phar_canWrite arginfo_class_Phar___destruct
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_canWrite, 0, 0, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_createDefaultStub, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_createDefaultStub, 0, 0, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, index, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, webindex, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_Phar_getSupportedCompression arginfo_class_Phar___destruct
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_getSupportedCompression, 0, 0, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_class_Phar_getSupportedSignatures arginfo_class_Phar___destruct
+#define arginfo_class_Phar_getSupportedSignatures arginfo_class_Phar_getSupportedCompression
 
-#define arginfo_class_Phar_interceptFileFuncs arginfo_class_Phar___destruct
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_interceptFileFuncs, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_isValidPharFilename, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_isValidPharFilename, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, executable, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_loadPhar, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_loadPhar, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_mapPhar, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_mapPhar, 0, 0, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_running, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_running, 0, 0, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, retphar, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_mount, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_mount, 0, 2, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, inphar, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, externalfile, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_mungServer, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_mungServer, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, munglist, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_unlinkArchive, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_unlinkArchive, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, archive, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_webPhar, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_webPhar, 0, 0, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, index, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, f404, IS_STRING, 0)
@@ -289,19 +293,19 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData_stopBuffering arginfo_class_Phar___destruct
 
-#define arginfo_class_PharData_apiVersion arginfo_class_Phar___destruct
+#define arginfo_class_PharData_apiVersion arginfo_class_Phar_apiVersion
 
 #define arginfo_class_PharData_canCompress arginfo_class_Phar_canCompress
 
-#define arginfo_class_PharData_canWrite arginfo_class_Phar___destruct
+#define arginfo_class_PharData_canWrite arginfo_class_Phar_canWrite
 
 #define arginfo_class_PharData_createDefaultStub arginfo_class_Phar_createDefaultStub
 
-#define arginfo_class_PharData_getSupportedCompression arginfo_class_Phar___destruct
+#define arginfo_class_PharData_getSupportedCompression arginfo_class_Phar_getSupportedCompression
 
-#define arginfo_class_PharData_getSupportedSignatures arginfo_class_Phar___destruct
+#define arginfo_class_PharData_getSupportedSignatures arginfo_class_Phar_getSupportedCompression
 
-#define arginfo_class_PharData_interceptFileFuncs arginfo_class_Phar___destruct
+#define arginfo_class_PharData_interceptFileFuncs arginfo_class_Phar_interceptFileFuncs
 
 #define arginfo_class_PharData_isValidPharFilename arginfo_class_Phar_isValidPharFilename
 
