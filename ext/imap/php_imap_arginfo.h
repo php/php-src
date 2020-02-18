@@ -39,6 +39,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_imap_headerinfo, 0, 2, stdCl
 	ZEND_ARG_TYPE_INFO(0, default_host, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_imap_header arginfo_imap_headerinfo
+
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_imap_rfc822_parse_headers, 0, 1, stdClass, 0)
 	ZEND_ARG_TYPE_INFO(0, headers, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, default_host, IS_STRING, 0)
@@ -60,6 +62,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_body, 0, 2, MAY_BE_STRING|M
 	ZEND_ARG_TYPE_INFO(0, msg_no, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, options, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_imap_fetchtext arginfo_imap_body
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imap_bodystruct, 0, 0, 3)
 	ZEND_ARG_INFO(0, stream_id)
@@ -120,6 +124,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_listscan, 0, 4, MAY_BE_ARRA
 	ZEND_ARG_TYPE_INFO(0, content, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_imap_scan arginfo_imap_listscan
+
+#define arginfo_imap_scanmailbox arginfo_imap_listscan
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_mail_copy, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_TYPE_INFO(0, msglist, IS_STRING, 0)
@@ -144,11 +152,15 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_createmailbox, 0, 2, _IS_BO
 	ZEND_ARG_TYPE_INFO(0, mailbox, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_imap_create arginfo_imap_createmailbox
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_imap_renamemailbox, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, stream_id)
 	ZEND_ARG_TYPE_INFO(0, old_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, new_name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_imap_rename arginfo_imap_renamemailbox
 
 #define arginfo_imap_deletemailbox arginfo_imap_createmailbox
 
@@ -224,7 +236,11 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_imap_list, 0, 3, MAY_BE_ARRAY|MA
 	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_imap_listmailbox arginfo_imap_list
+
 #define arginfo_imap_lsub arginfo_imap_list
+
+#define arginfo_imap_listsubscribed arginfo_imap_list
 
 #define arginfo_imap_getsubscribed arginfo_imap_list
 

@@ -50,6 +50,8 @@ function pcntl_alarm(int $seconds): int {}
 
 function pcntl_get_last_error(): int {}
 
+function pcntl_errno(): int {}
+
 #ifdef HAVE_GETPRIORITY
 function pcntl_getpriority(int $pid = UNKNOWN, int $process_identifier = PRIO_PROCESS): int|false {}
 #endif

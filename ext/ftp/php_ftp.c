@@ -75,7 +75,7 @@ static const zend_function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_nb_continue,		arginfo_ftp_nb_continue)
 	PHP_FE(ftp_nb_put,			arginfo_ftp_nb_put)
 	PHP_FE(ftp_nb_fput,			arginfo_ftp_nb_fput)
-	PHP_FALIAS(ftp_quit, ftp_close, arginfo_ftp_close)
+	PHP_FALIAS(ftp_quit, ftp_close, arginfo_ftp_quit)
 	PHP_FE_END
 };
 

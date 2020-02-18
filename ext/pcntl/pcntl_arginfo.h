@@ -87,6 +87,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_pcntl_get_last_error arginfo_pcntl_fork
 
+#define arginfo_pcntl_errno arginfo_pcntl_fork
+
 #if defined(HAVE_GETPRIORITY)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_pcntl_getpriority, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, pid, IS_LONG, 0)

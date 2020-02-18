@@ -189,8 +189,8 @@ static const zend_function_entry sockets_functions[] = {
 	PHP_FE(socket_addrinfo_explain,	arginfo_socket_addrinfo_explain)
 
 	/* for downwards compatibility */
-	PHP_FALIAS(socket_getopt, socket_get_option, arginfo_socket_get_option)
-	PHP_FALIAS(socket_setopt, socket_set_option, arginfo_socket_set_option)
+	PHP_FALIAS(socket_getopt, socket_get_option, arginfo_socket_getopt)
+	PHP_FALIAS(socket_setopt, socket_set_option, arginfo_socket_setopt)
 
 #ifdef PHP_WIN32
 	PHP_FE(socket_wsaprotocol_info_export, arginfo_socket_wsaprotocol_info_export)
