@@ -1,12 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? Feb 2020, PHP 7.4.3
-
-- COM:
-  . Fixed bug #79247 (Garbage collecting variant objects segfaults). (cmb)
-
-
-06 Feb 2020, PHP 7.4.3RC1
+20 Feb 2020, PHP 7.4.3
 
 - Core:
   . Fixed bug #79146 (cscript can fail to run on some systems). (clarodeus)
@@ -18,6 +12,9 @@ PHP                                                                        NEWS
   . Fixed bug #79174 (cookie values with spaces fail to round-trip). (cmb)
   . Fixed bug #76047 (Use-after-free when accessing already destructed
     backtrace arguments). (Nikita)
+
+- COM:
+  . Fixed bug #79247 (Garbage collecting variant objects segfaults). (cmb)
 
 - CURL:
   . Fixed bug #79078 (Hypothetical use-after-free in curl_multi_add_handle()).
@@ -61,11 +58,19 @@ PHP                                                                        NEWS
   . Fixed bug #79145 (openssl memory leak). (cmb, Nikita)
 
 - Phar:
+  . Fixed bug #79082 (Files added to tar with Phar::buildFromIterator have
+    all-access permissions). (CVE-2020-7063) (stas)
+  . Fixed bug #79171 (heap-buffer-overflow in phar_extract_file).
+    (CVE-2020-7061) (cmb)
   . Fixed bug #76584 (PharFileInfo::decompress not working). (cmb)
 
 - Reflection:
   . Fixed bug #79115 (ReflectionClass::isCloneable call reflected class
     __destruct). (Nikita)
+
+- Session:
+  . Fixed bug #79221 (Null Pointer Dereference in PHP Session Upload Progress).
+    (CVE-2020-7062) (stas)
 
 - Standard:
   . Fixed bug #78902 (Memory leak when using stream_filter_append). (liudaixiao)
