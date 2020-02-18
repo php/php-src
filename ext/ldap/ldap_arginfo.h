@@ -97,13 +97,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_get_attributes, 0, 2, IS_AR
 	ZEND_ARG_INFO(0, result_entry_identifier)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_get_values, 0, 3, MAY_BE_ARRAY|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_get_values_len, 0, 3, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, result_entry_identifier)
 	ZEND_ARG_TYPE_INFO(0, attribute, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_ldap_get_values_len arginfo_ldap_get_values
+#define arginfo_ldap_get_values arginfo_ldap_get_values_len
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ldap_get_dn, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, link_identifier)
@@ -145,8 +145,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_delete_ext, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, servercontrols, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_ldap_modify arginfo_ldap_add
-
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ldap_modify_batch, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_TYPE_INFO(0, dn, IS_STRING, 0)
@@ -159,6 +157,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_ldap_mod_add_ext arginfo_ldap_add_ext
 
 #define arginfo_ldap_mod_replace arginfo_ldap_add
+
+#define arginfo_ldap_modify arginfo_ldap_add
 
 #define arginfo_ldap_mod_replace_ext arginfo_ldap_add_ext
 

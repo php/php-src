@@ -114,6 +114,9 @@ function ftp_site($ftp, string $cmd): bool {}
 function ftp_close($ftp): bool {}
 
 /** @param resource $ftp */
+function ftp_quit($ftp): bool {}
+
+/** @param resource $ftp */
 function ftp_set_option($ftp, int $option, $value): bool {}
 
 /** @param resource $ftp */

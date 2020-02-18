@@ -74,14 +74,29 @@ function openssl_pkey_export($key, &$out, ?string $passphrase = null, ?array $co
  */
 function openssl_pkey_get_public($cert) {}
 
+/**
+ * @param resource|string|array $cert
+ * @return resource|false
+ */
+function openssl_get_publickey($cert) {}
+
 /** @param resource $key */
 function openssl_pkey_free($key): void {}
+
+/** @param resource $key */
+function openssl_free_key($key): void {}
 
 /**
  * @param resource|string|array $key
  * @return resource|false
  */
 function openssl_pkey_get_private($key, string $passphrase = UNKNOWN) {}
+
+/**
+ * @param resource|string|array $key
+ * @return resource|false
+ */
+function openssl_get_privatekey($key, string $passphrase = UNKNOWN) {}
 
 /** @param resource $key */
 function openssl_pkey_get_details($key): array|false {}

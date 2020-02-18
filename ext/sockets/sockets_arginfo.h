@@ -108,12 +108,16 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_socket_get_option, 0, 3, MAY_BE_
 	ZEND_ARG_TYPE_INFO(0, optname, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_socket_getopt arginfo_socket_get_option
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_set_option, 0, 4, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, socket)
 	ZEND_ARG_TYPE_INFO(0, level, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, optname, IS_LONG, 0)
 	ZEND_ARG_INFO(0, optval)
 ZEND_END_ARG_INFO()
+
+#define arginfo_socket_setopt arginfo_socket_set_option
 
 #if defined(HAVE_SOCKETPAIR)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_create_pair, 0, 4, _IS_BOOL, 1)

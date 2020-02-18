@@ -1,5 +1,5 @@
 --TEST--
-%EXTNAME%_test1() Basic test
+test1() Basic test
 --SKIPIF--
 <?php
 if (!extension_loaded('%EXTNAME%')) {
@@ -8,7 +8,7 @@ if (!extension_loaded('%EXTNAME%')) {
 ?>
 --FILE--
 <?php
-$ret = %EXTNAME%_test1();
+$ret = test1();
 
 var_dump($ret);
 ?>
