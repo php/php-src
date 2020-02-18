@@ -59,7 +59,7 @@ PHP                                                                        NEWS
   . Fixed bug #79082 (Files added to tar with Phar::buildFromIterator have
     all-access permissions). (CVE-2020-7063) (stas)
   . Fixed bug #79171 (heap-buffer-overflow in phar_extract_file).
-    (CVE-	2020-7061) (cmb)
+    (CVE-2020-7061) (cmb)
   . Fixed bug #76584 (PharFileInfo::decompress not working). (cmb)
 
 - Reflection:
