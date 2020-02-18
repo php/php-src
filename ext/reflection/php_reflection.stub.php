@@ -8,8 +8,6 @@ class Reflection
 {
     /** @return string[] */
     public static function getModifierNames(int $modifiers) {}
-
-    public static function export(Reflector $reflector, bool $return = false) {}
 }
 
 interface Reflector
@@ -106,8 +104,6 @@ class ReflectionFunction extends ReflectionFunctionAbstract
     /** @return string */
     public function __toString() {}
 
-    public static function export($name, bool $return = false) {}
-
     /** @return bool */
     public function isDisabled() {}
 
@@ -149,8 +145,6 @@ class ReflectionMethod extends ReflectionFunctionAbstract
 
     /** @return string */
     public function __toString() {}
-
-    public static function export($class, $name, bool $return = false) {}
 
     /** @return bool */
     public function isPublic() {}
@@ -199,8 +193,6 @@ class ReflectionMethod extends ReflectionFunctionAbstract
 class ReflectionClass implements Reflector
 {
     final private function __clone() {}
-
-    public static function export($argument, bool $return = false) {}
 
     /** @param object|string $argument */
     public function __construct($argument) {}
@@ -366,15 +358,11 @@ class ReflectionClass implements Reflector
 class ReflectionObject extends ReflectionClass
 {
     public function __construct(object $argument) {}
-
-    public static function export($argument, bool $return = false) {}
 }
 
 class ReflectionProperty implements Reflector
 {
     final private function __clone() {}
-
-    public static function export($class, $name, bool $return = false) {}
 
     /** @param string|object $class */
     public function __construct($class, string $name) {}
@@ -436,8 +424,6 @@ class ReflectionClassConstant implements Reflector
 {
     final private function __clone() {}
 
-    public static function export($class, $name, bool $return = false) {}
-
     /** @return string|object */
     public function __construct($class, string $name) {}
 
@@ -471,8 +457,6 @@ class ReflectionClassConstant implements Reflector
 class ReflectionParameter implements Reflector
 {
     final private function __clone() {}
-
-    public static function export($function, $parameter, bool $return = false) {}
 
     /**
      * @param string|array|object
@@ -566,8 +550,6 @@ class ReflectionExtension implements Reflector
 {
     final private function __clone() {}
 
-    public static function export($name, bool $return = false) {}
-
     public function __construct(string $name) {}
 
     /** @return string */
@@ -610,8 +592,6 @@ class ReflectionExtension implements Reflector
 class ReflectionZendExtension implements Reflector
 {
     final private function __clone() {}
-
-    public static function export($name, bool $return = false) {}
 
     public function __construct(string $name) {}
 

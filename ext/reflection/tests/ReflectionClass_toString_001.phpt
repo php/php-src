@@ -20,14 +20,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
   - Static properties [0] {
   }
 
-  - Static methods [1] {
-    Method [ <internal, deprecated:Reflection> static public method export ] {
-
-      - Parameters [2] {
-        Parameter #0 [ <required> $argument ]
-        Parameter #1 [ <optional> bool $return ]
-      }
-    }
+  - Static methods [0] {
   }
 
   - Properties [1] {
