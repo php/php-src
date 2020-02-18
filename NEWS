@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2020, PHP 7.2.28
+?? ??? 2020, PHP 7.2.29
+
+
+20 Feb 2020, PHP 7.2.28
 
 - DOM:
   . Fixed bug #77569: (Write Access Violation in DomImplementation). (Nikita,
