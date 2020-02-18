@@ -175,16 +175,14 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql)
 PHP_METHOD(mysqli_warning, next)
 {
 	MYSQLI_WARNING 	*w;
-	zval  			*mysqli_warning;
-	mysqli_object *obj = Z_MYSQLI_P(getThis());
+	mysqli_object *obj = Z_MYSQLI_P(ZEND_THIS);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	if (obj->ptr) {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
-										 &mysqli_warning, mysqli_warning_class_entry) == FAILURE) {
-			RETURN_THROWS();
-		}
-
-		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, mysqli_warning, "mysqli_warning", MYSQLI_STATUS_VALID);
+		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, ZEND_THIS, "mysqli_warning", MYSQLI_STATUS_VALID);
 
 		if (w && w->next) {
 			w = w->next;
