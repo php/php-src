@@ -4,11 +4,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_getModifierNames, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, modifiers, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflection_export, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, reflector, Reflector, 0)
-	ZEND_ARG_TYPE_INFO(0, return, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Reflector___toString, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
@@ -70,11 +65,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionFunction___toString arginfo_class_Reflector___toString
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionFunction_export, 0, 0, 1)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_TYPE_INFO(0, return, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
-
 #define arginfo_class_ReflectionFunction_isDisabled arginfo_class_Reflector___toString
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionFunction_invoke, 0, 0, 0)
@@ -111,12 +101,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod___construct, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionMethod___toString arginfo_class_Reflector___toString
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod_export, 0, 0, 2)
-	ZEND_ARG_INFO(0, class)
-	ZEND_ARG_INFO(0, name)
-	ZEND_ARG_TYPE_INFO(0, return, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionMethod_isPublic arginfo_class_Reflector___toString
 
@@ -159,11 +143,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod_setAccessible, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClass___clone arginfo_class_Reflector___toString
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_export, 0, 0, 1)
-	ZEND_ARG_INFO(0, argument)
-	ZEND_ARG_TYPE_INFO(0, return, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, argument)
@@ -293,11 +272,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionObject___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, argument, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_ReflectionObject_export arginfo_class_ReflectionClass_export
-
 #define arginfo_class_ReflectionProperty___clone arginfo_class_Reflector___toString
-
-#define arginfo_class_ReflectionProperty_export arginfo_class_ReflectionMethod_export
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionProperty___construct, 0, 0, 2)
 	ZEND_ARG_INFO(0, class)
@@ -348,8 +323,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClassConstant___clone arginfo_class_Reflector___toString
 
-#define arginfo_class_ReflectionClassConstant_export arginfo_class_ReflectionMethod_export
-
 #define arginfo_class_ReflectionClassConstant___construct arginfo_class_ReflectionProperty___construct
 
 #define arginfo_class_ReflectionClassConstant___toString arginfo_class_Reflector___toString
@@ -371,12 +344,6 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionClassConstant_getDocComment arginfo_class_Reflector___toString
 
 #define arginfo_class_ReflectionParameter___clone arginfo_class_Reflector___toString
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionParameter_export, 0, 0, 2)
-	ZEND_ARG_INFO(0, function)
-	ZEND_ARG_INFO(0, parameter)
-	ZEND_ARG_TYPE_INFO(0, return, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionParameter___construct, 0, 0, 2)
 	ZEND_ARG_INFO(0, function)
@@ -436,8 +403,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionExtension___clone arginfo_class_Reflector___toString
 
-#define arginfo_class_ReflectionExtension_export arginfo_class_ReflectionFunction_export
-
 #define arginfo_class_ReflectionExtension___construct arginfo_class_ReflectionClass_hasMethod
 
 #define arginfo_class_ReflectionExtension___toString arginfo_class_Reflector___toString
@@ -465,8 +430,6 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionExtension_isTemporary arginfo_class_Reflector___toString
 
 #define arginfo_class_ReflectionZendExtension___clone arginfo_class_Reflector___toString
-
-#define arginfo_class_ReflectionZendExtension_export arginfo_class_ReflectionFunction_export
 
 #define arginfo_class_ReflectionZendExtension___construct arginfo_class_ReflectionClass_hasMethod
 
