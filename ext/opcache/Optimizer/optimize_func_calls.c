@@ -297,6 +297,17 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					}
 				}
 				break;
+			case ZEND_SEND_EXPLICIT_VAL:
+				if (call_stack[call - 1].func) {
+					if (!ARG_MUST_BE_SENT_BY_REF(call_stack[call - 1].func, opline->op2.num)) {
+						if (opline->op1_type & (IS_CONST|IS_TMP_VAR)) {
+							opline->opcode = ZEND_SEND_VAL;
+						} else {
+							opline->opcode = ZEND_SEND_VAR;
+						}
+					}
+				}
+				break;
 			case ZEND_SEND_UNPACK:
 			case ZEND_SEND_USER:
 			case ZEND_SEND_ARRAY:

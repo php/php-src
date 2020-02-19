@@ -273,7 +273,8 @@ END_EXTERN_C()
 #define ZEND_ARRAY_KEY_EXISTS           194
 #define ZEND_SEND_EXPLICIT_REF          195
 #define ZEND_SEND_EXPLICIT_REF_FUNC     196
+#define ZEND_SEND_EXPLICIT_VAL          197
 
-#define ZEND_VM_LAST_OPCODE             196
+#define ZEND_VM_LAST_OPCODE             197
 
 #endif

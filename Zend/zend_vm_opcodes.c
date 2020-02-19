@@ -22,7 +22,7 @@
 #include <zend.h>
 #include <zend_vm_opcodes.h>
 
-static const char *zend_vm_opcodes_names[197] = {
+static const char *zend_vm_opcodes_names[198] = {
 	"ZEND_NOP",
 	"ZEND_ADD",
 	"ZEND_SUB",
@@ -220,9 +220,10 @@ static const char *zend_vm_opcodes_names[197] = {
 	"ZEND_ARRAY_KEY_EXISTS",
 	"ZEND_SEND_EXPLICIT_REF",
 	"ZEND_SEND_EXPLICIT_REF_FUNC",
+	"ZEND_SEND_EXPLICIT_VAL",
 };
 
-static uint32_t zend_vm_opcodes_flags[197] = {
+static uint32_t zend_vm_opcodes_flags[198] = {
 	0x00000000,
 	0x00000b0b,
 	0x00000b0b,
@@ -420,6 +421,7 @@ static uint32_t zend_vm_opcodes_flags[197] = {
 	0x00000707,
 	0x00001001,
 	0x00001001,
+	0x00001003,
 };
 
 ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(zend_uchar opcode) {
