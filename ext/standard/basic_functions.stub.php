@@ -336,8 +336,6 @@ function set_include_path(string $include_path): string|false {}
 
 function get_include_path(): string|false {}
 
-function restore_include_path(): void {}
-
 /** @param mixed $var */
 function print_r($var, bool $return = false): string|bool {}
 

@@ -434,7 +434,6 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(ini_restore,														arginfo_ini_restore)
 	PHP_FE(get_include_path,												arginfo_get_include_path)
 	PHP_FE(set_include_path,												arginfo_set_include_path)
-	PHP_DEP_FE(restore_include_path,											arginfo_restore_include_path)
 
 	PHP_FE(setcookie,														arginfo_setcookie)
 	PHP_FE(setrawcookie,													arginfo_setrawcookie)
@@ -2975,20 +2974,6 @@ PHP_FUNCTION(get_include_path)
 	}
 
 	RETURN_STRING(str);
-}
-/* }}} */
-
-/* {{{ proto void restore_include_path()
-   Restore the value of the include_path configuration option */
-PHP_FUNCTION(restore_include_path)
-{
-	zend_string *key;
-
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	key = zend_string_init("include_path", sizeof("include_path")-1, 0);
-	zend_restore_ini_entry(key, PHP_INI_STAGE_RUNTIME);
-	zend_string_efree(key);
 }
 /* }}} */
 
