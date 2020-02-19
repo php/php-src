@@ -508,8 +508,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_get_include_path arginfo_ob_get_flush
 
-#define arginfo_restore_include_path arginfo_flush
-
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_print_r, 0, 1, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_INFO(0, var)
 	ZEND_ARG_TYPE_INFO(0, return, _IS_BOOL, 0)
