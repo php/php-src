@@ -4744,6 +4744,57 @@ ZEND_VM_C_LABEL(invalid_send_ref):
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(197, ZEND_SEND_EXPLICIT_VAL, CONST|TMP|VAR|CV, NUM, SPEC(QUICK_ARG))
+{
+	USE_OPLINE
+	zval *value, *arg;
+	uint32_t arg_num = opline->op2.num;
+
+	if (EXPECTED(arg_num <= MAX_ARG_FLAG_NUM)) {
+		if (QUICK_ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+			ZEND_VM_DISPATCH_TO_HELPER(zend_cannot_pass_by_ref_helper);
+		}
+	} else if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+		ZEND_VM_DISPATCH_TO_HELPER(zend_cannot_pass_by_ref_helper);
+	}
+
+	value = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(value) == IS_UNDEF)) {
+		SAVE_OPLINE();
+		ZVAL_UNDEFINED_OP1();
+		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+		ZVAL_NULL(arg);
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
+
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+	if (OP1_TYPE == IS_CV) {
+		ZVAL_COPY_DEREF(arg, value);
+	} else if (OP1_TYPE == IS_TMP_VAR) {
+		ZVAL_COPY_VALUE(arg, value);
+	} else if (OP1_TYPE == IS_VAR) {
+		if (UNEXPECTED(Z_ISREF_P(value))) {
+			zend_refcounted *ref = Z_COUNTED_P(value);
+
+			value = Z_REFVAL_P(value);
+			ZVAL_COPY_VALUE(arg, value);
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
+				efree_size(ref, sizeof(zend_reference));
+			} else if (Z_OPT_REFCOUNTED_P(arg)) {
+				Z_ADDREF_P(arg);
+			}
+		} else {
+			ZVAL_COPY_VALUE(arg, value);
+		}
+	} else { /* CONST */
+		ZVAL_COPY_VALUE(arg, value);
+		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(arg))) {
+			Z_ADDREF_P(arg);
+		}
+	}
+	ZEND_VM_NEXT_OPCODE();
+}
+
 ZEND_VM_HOT_SEND_HANDLER(66, ZEND_SEND_VAR_EX, VAR|CV, NUM, SPEC(QUICK_ARG))
 {
 	USE_OPLINE

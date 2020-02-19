@@ -363,6 +363,7 @@ void zend_file_context_begin(zend_file_context *prev_context) /* {{{ */
 	FC(in_namespace) = 0;
 	FC(has_bracketed_namespaces) = 0;
 	FC(declarables).ticks = 0;
+	FC(declarables).require_explicit_send_by_ref = 0;
 	zend_hash_init(&FC(seen_symbols), 8, NULL, NULL, 0);
 }
 /* }}} */
@@ -3223,6 +3224,20 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 			} else {
 				opcode = fbc ? ZEND_SEND_REF : ZEND_SEND_EXPLICIT_REF;
 			}
+		} else if (FC(declarables).require_explicit_send_by_ref) {
+			zend_compile_expr(&arg_node, arg);
+			if (fbc) {
+				if (ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
+					/* Delay error until runtime */
+					opcode = ZEND_SEND_EXPLICIT_VAL;
+				} else if (arg_node.op_type & (IS_CONST|IS_TMP_VAR)) {
+					opcode = ZEND_SEND_VAL;
+				} else {
+					opcode = ZEND_SEND_VAR;
+				}
+			} else {
+				opcode = ZEND_SEND_EXPLICIT_VAL;
+			}
 		} else if (zend_is_call(arg)) {
 			zend_compile_var(&arg_node, arg, BP_VAR_R, 0);
 			if (arg_node.op_type & (IS_CONST|IS_TMP_VAR)) {
@@ -5480,7 +5495,15 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			if (Z_LVAL(value_zv) == 1) {
 				CG(active_op_array)->fn_flags |= ZEND_ACC_STRICT_TYPES;
 			}
+		} else if (zend_string_equals_literal_ci(name, "require_explicit_send_by_ref")) {
+			zval value_zv;
+			zend_const_expr_to_zval(&value_zv, value_ast);
+			if (Z_TYPE(value_zv) != IS_LONG || (Z_LVAL(value_zv) != 0 && Z_LVAL(value_zv) != 1)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"require_explicit_send_by_ref declaration must have 0 or 1 as its value");
+			}
 
+			FC(declarables).require_explicit_send_by_ref = Z_LVAL(value_zv);
 		} else {
 			zend_error(E_COMPILE_WARNING, "Unsupported declare '%s'", ZSTR_VAL(name));
 		}
