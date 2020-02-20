@@ -2,7 +2,7 @@
 Test preg_match() function : error conditions - jit stacklimit exhausted
 --SKIPIF--
 <?php
-if (ini_get("pcre.jit") === FALSE) {
+if (ini_get('pcre.jit') === false) {
 	die("skip no jit built");
 }
 ?>

@@ -37,7 +37,6 @@ extern zend_module_entry pcre_module_entry;
 
 typedef struct _pcre_cache_entry pcre_cache_entry;
 
-/* error codes */
 typedef enum {
     PHP_PCRE_NO_ERROR = 0,
     PHP_PCRE_INTERNAL_ERROR,
