@@ -242,6 +242,7 @@ class ArgInfo {
     const SEND_BY_VAL = 0;
     const SEND_BY_REF = 1;
     const SEND_PREFER_REF = 2;
+    const SEND_PREFER_VAL = 3;
 
     /** @var string */
     public $name;
@@ -274,6 +275,8 @@ class ArgInfo {
             return "1";
         case self::SEND_PREFER_REF:
             return "ZEND_SEND_PREFER_REF";
+        case self::SEND_PREFER_VAL:
+            return "ZEND_SEND_PREFER_VAL";
         }
         throw new Exception("Invalid sendBy value");
     }
@@ -349,6 +352,12 @@ function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond)
                     $paramMeta[$varName] = [];
                 }
                 $paramMeta[$varName]['preferRef'] = true;
+            } else if (preg_match('/^\*\s*@prefer-val\s+\$(.+)$/', trim($commentLine), $matches)) {
+                $varName = $matches[1];
+                if (!isset($paramMeta[$varName])) {
+                    $paramMeta[$varName] = [];
+                }
+                $paramMeta[$varName]['preferVal'] = true;
             }
         }
     }
@@ -359,10 +368,13 @@ function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond)
     foreach ($func->getParams() as $i => $param) {
         $varName = $param->var->name;
         $preferRef = !empty($paramMeta[$varName]['preferRef']);
+        $preferVal = !empty($paramMeta[$varName]['preferVal']);
         unset($paramMeta[$varName]);
 
         if ($preferRef) {
             $sendBy = ArgInfo::SEND_PREFER_REF;
+        } else if ($preferVal) {
+            $sendBy = ArgInfo::SEND_PREFER_VAL;
         } else if ($param->byRef) {
             $sendBy = ArgInfo::SEND_BY_REF;
         } else {
