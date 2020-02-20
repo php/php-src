@@ -449,7 +449,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_call_user_func, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, function, IS_CALLABLE, 0)
-	ZEND_ARG_VARIADIC_INFO(0, args)
+	ZEND_ARG_VARIADIC_INFO(ZEND_SEND_PREFER_VAL, args)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_call_user_func_array, 0, 0, 2)
@@ -457,7 +457,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_call_user_func_array, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_forward_static_call arginfo_call_user_func
+ZEND_BEGIN_ARG_INFO_EX(arginfo_forward_static_call, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, function, IS_CALLABLE, 0)
+	ZEND_ARG_VARIADIC_INFO(0, args)
+ZEND_END_ARG_INFO()
 
 #define arginfo_forward_static_call_array arginfo_call_user_func_array
 

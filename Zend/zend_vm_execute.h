@@ -2017,7 +2017,7 @@ send_array:
 						break;
 					} else if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 						if (UNEXPECTED(!Z_ISREF_P(arg))) {
-							if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+							if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 								/* By-value send is not allowed -- emit a warning,
 								 * but still perform the call. */
 								zend_param_must_be_ref(EX(call)->func, arg_num);
@@ -2044,7 +2044,7 @@ send_array:
 			ZEND_HASH_FOREACH_VAL(ht, arg) {
 				if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 					if (UNEXPECTED(!Z_ISREF_P(arg))) {
-						if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+						if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 							/* By-value send is not allowed -- emit a warning,
 							 * but still perform the call. */
 							zend_param_must_be_ref(EX(call)->func, arg_num);
@@ -3883,13 +3883,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_CONST_HANDLER(Z
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
-		zend_param_must_be_ref(EX(call)->func, opline->op2.num);
-	}
-
-	arg = RT_CONSTANT(opline, opline->op1);
 	param = ZEND_CALL_VAR(EX(call), opline->result.var);
-	ZVAL_COPY(param, arg);
+	if (opline->extended_value) {
+		arg = NULL;
+		if (Z_ISREF_P(arg)) {
+			Z_ADDREF_P(arg);
+		} else {
+			ZVAL_MAKE_REF_EX(arg, 2);
+		}
+		ZVAL_REF(param, Z_REF_P(arg));
+
+	} else {
+		if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
+			zend_param_must_be_ref(EX(call)->func, opline->op2.num);
+		}
+
+		arg = RT_CONSTANT(opline, opline->op1);
+		ZVAL_COPY(param, arg);
+
+	}
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -17735,14 +17747,26 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_TMP_HANDLER(ZEN
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
-		zend_param_must_be_ref(EX(call)->func, opline->op2.num);
+	param = ZEND_CALL_VAR(EX(call), opline->result.var);
+	if (opline->extended_value) {
+		arg = NULL;
+		if (Z_ISREF_P(arg)) {
+			Z_ADDREF_P(arg);
+		} else {
+			ZVAL_MAKE_REF_EX(arg, 2);
+		}
+		ZVAL_REF(param, Z_REF_P(arg));
+
+	} else {
+		if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
+			zend_param_must_be_ref(EX(call)->func, opline->op2.num);
+		}
+
+		arg = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
+		ZVAL_COPY(param, arg);
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	}
 
-	arg = _get_zval_ptr_tmp(opline->op1.var EXECUTE_DATA_CC);
-	param = ZEND_CALL_VAR(EX(call), opline->result.var);
-	ZVAL_COPY(param, arg);
-	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -20269,10 +20293,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_EXPLICIT_REF_SPEC_VAR_HAN
 	uint32_t arg_num = opline->op2.num;
 
 	if (EXPECTED(0)) {
-		if (!QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+		if (!QUICK_ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 			goto invalid_send_ref;
 		}
-	} else if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+	} else if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 invalid_send_ref:
 		SAVE_OPLINE();
 		zend_throw_error(NULL, "Cannot pass reference to by-value parameter %" PRIu32, arg_num);
@@ -20303,10 +20327,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_EXPLICIT_REF_SPEC_VAR_QUI
 	uint32_t arg_num = opline->op2.num;
 
 	if (EXPECTED(1)) {
-		if (!QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+		if (!QUICK_ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 			goto invalid_send_ref;
 		}
-	} else if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+	} else if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 invalid_send_ref:
 		SAVE_OPLINE();
 		zend_throw_error(NULL, "Cannot pass reference to by-value parameter %" PRIu32, arg_num);
@@ -20337,10 +20361,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_EXPLICIT_REF_FUNC_SPEC_VA
 	uint32_t arg_num = opline->op2.num;
 
 	if (EXPECTED(arg_num <= MAX_ARG_FLAG_NUM)) {
-		if (!QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+		if (!QUICK_ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 			goto invalid_send_ref;
 		}
-	} else if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+	} else if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 invalid_send_ref:
 		SAVE_OPLINE();
 		zend_throw_error(NULL, "Cannot pass reference to by-value parameter %" PRIu32, arg_num);
@@ -20596,14 +20620,26 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_VAR_HANDLER(ZEN
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
-		zend_param_must_be_ref(EX(call)->func, opline->op2.num);
+	param = ZEND_CALL_VAR(EX(call), opline->result.var);
+	if (opline->extended_value) {
+		arg = _get_zval_ptr_ptr_var(opline->op1.var EXECUTE_DATA_CC);
+		if (Z_ISREF_P(arg)) {
+			Z_ADDREF_P(arg);
+		} else {
+			ZVAL_MAKE_REF_EX(arg, 2);
+		}
+		ZVAL_REF(param, Z_REF_P(arg));
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	} else {
+		if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
+			zend_param_must_be_ref(EX(call)->func, opline->op2.num);
+		}
+
+		arg = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
+		ZVAL_COPY(param, arg);
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	}
 
-	arg = _get_zval_ptr_var_deref(opline->op1.var EXECUTE_DATA_CC);
-	param = ZEND_CALL_VAR(EX(call), opline->result.var);
-	ZVAL_COPY(param, arg);
-	zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -36342,10 +36378,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_EXPLICIT_REF_SPEC_CV_HAND
 	uint32_t arg_num = opline->op2.num;
 
 	if (EXPECTED(0)) {
-		if (!QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+		if (!QUICK_ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 			goto invalid_send_ref;
 		}
-	} else if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+	} else if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 invalid_send_ref:
 		SAVE_OPLINE();
 		zend_throw_error(NULL, "Cannot pass reference to by-value parameter %" PRIu32, arg_num);
@@ -36375,10 +36411,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_EXPLICIT_REF_SPEC_CV_QUIC
 	uint32_t arg_num = opline->op2.num;
 
 	if (EXPECTED(1)) {
-		if (!QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+		if (!QUICK_ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 			goto invalid_send_ref;
 		}
-	} else if (!ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+	} else if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 invalid_send_ref:
 		SAVE_OPLINE();
 		zend_throw_error(NULL, "Cannot pass reference to by-value parameter %" PRIu32, arg_num);
@@ -36604,13 +36640,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_CV_HANDLER(ZEND
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
-		zend_param_must_be_ref(EX(call)->func, opline->op2.num);
-	}
-
-	arg = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
 	param = ZEND_CALL_VAR(EX(call), opline->result.var);
-	ZVAL_COPY(param, arg);
+	if (opline->extended_value) {
+		arg = _get_zval_ptr_cv_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+		if (Z_ISREF_P(arg)) {
+			Z_ADDREF_P(arg);
+		} else {
+			ZVAL_MAKE_REF_EX(arg, 2);
+		}
+		ZVAL_REF(param, Z_REF_P(arg));
+
+	} else {
+		if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
+			zend_param_must_be_ref(EX(call)->func, opline->op2.num);
+		}
+
+		arg = _get_zval_ptr_cv_deref_BP_VAR_R(opline->op1.var EXECUTE_DATA_CC);
+		ZVAL_COPY(param, arg);
+
+	}
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }

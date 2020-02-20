@@ -292,6 +292,7 @@ function error_clear_last(): void {}
 
 /**
  * @param mixed ...$args
+ * @prefer-val $args
  * @return mixed
  */
 function call_user_func(callable $function, ...$args) {}

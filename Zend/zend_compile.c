@@ -3711,12 +3711,19 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 		zend_ast *arg_ast = args->child[i];
 		znode arg_node;
 		zend_op *opline;
+		zend_bool by_ref = 0;
 
-		zend_compile_expr(&arg_node, arg_ast);
+		if (arg_ast->kind == ZEND_AST_REF) {
+			zend_compile_var(&arg_node, arg_ast->child[0], BP_VAR_W, 1);
+			by_ref = 1;
+		} else {
+			zend_compile_expr(&arg_node, arg_ast);
+		}
 
 		opline = zend_emit_op(NULL, ZEND_SEND_USER, &arg_node, NULL);
 		opline->op2.num = i;
 		opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_ARG(NULL, i);
+		opline->extended_value = by_ref;
 	}
 	zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
 
