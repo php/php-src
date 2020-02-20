@@ -7287,12 +7287,15 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, const zend
 	}
 
 	if (opline->opcode == ZEND_SEND_VAL_EX) {
-		uint32_t mask = ZEND_SEND_BY_REF << ((arg_num + 3) * 2);
+		uint32_t mask = 3u << ((arg_num + 3) * 2);
+		uint32_t check = ZEND_SEND_BY_REF << ((arg_num + 3) * 2);
 
 		|	mov r0, EX:RX->func
 		if (arg_num <= MAX_ARG_FLAG_NUM) {
-			|	test dword [r0 + offsetof(zend_function, quick_arg_flags)], mask
-			|	jnz	>1
+			|	mov r0d, dword [r0 + offsetof(zend_function, quick_arg_flags)]
+			|	and r0d, mask
+			|	cmp r0d, check
+			|	je	>1
 		} else {
 			ZEND_ASSERT(0);
 		}
@@ -7419,7 +7422,7 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 	}
 
 	if (opline->opcode == ZEND_SEND_VAR_EX || opline->opcode == ZEND_SEND_VAR_NO_REF_EX) {
-		uint32_t mask = (ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF) << ((arg_num + 3) * 2);
+		uint32_t mask = ZEND_SEND_BY_REF << ((arg_num + 3) * 2);
 
 		|	mov r0, EX:RX->func
 		if (arg_num <= MAX_ARG_FLAG_NUM) {
