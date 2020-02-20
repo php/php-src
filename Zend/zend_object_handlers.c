@@ -1208,6 +1208,9 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	 * The low bit must be zero, to not be interpreted as a MAP_PTR offset.
 	 */
 	static const void *dummy = (void*)(intptr_t)2;
+	unsigned char arg_flags =
+		(ZEND_SEND_PREFER_VAL << 6) | (ZEND_SEND_PREFER_VAL << 4) |
+		(ZEND_SEND_PREFER_VAL << 2) | ZEND_SEND_PREFER_VAL;
 
 	ZEND_ASSERT(fbc);
 
@@ -1218,9 +1221,9 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	}
 
 	func->type = ZEND_USER_FUNCTION;
-	func->arg_flags[0] = 0xff;
-	func->arg_flags[1] = 0xff;
-	func->arg_flags[2] = 0xff;
+	func->arg_flags[0] = arg_flags;
+	func->arg_flags[1] = arg_flags;
+	func->arg_flags[2] = arg_flags;
 	func->fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_PUBLIC;
 	if (is_static) {
 		func->fn_flags |= ZEND_ACC_STATIC;

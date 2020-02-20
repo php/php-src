@@ -920,8 +920,8 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 
 #define ZEND_SEND_BY_VAL     0u
 #define ZEND_SEND_BY_REF     1u
-#define ZEND_SEND_PREFER_REF 2u
-#define ZEND_SEND_PREFER_VAL 3u
+#define ZEND_SEND_PREFER_VAL 2u
+#define ZEND_SEND_PREFER_REF 3u
 
 /* The send mode and is_variadic flag are stored as part of zend_type */
 #define _ZEND_SEND_MODE_SHIFT _ZEND_TYPE_EXTRA_FLAGS_SHIFT
@@ -960,8 +960,8 @@ static zend_always_inline int zend_check_arg_should_be_sent_by_ref(const zend_fu
 		arg_num = zf->common.num_args;
 	}
 
-	uint32_t send_mode = ZEND_ARG_SEND_MODE(&zf->common.arg_info[arg_num]);
-	return send_mode == ZEND_SEND_BY_REF || send_mode == ZEND_SEND_PREFER_REF;
+	/* The SEND_BY_REF bit is set for PREFER_REF as well. */
+	return (ZEND_ARG_SEND_MODE(&zf->common.arg_info[arg_num]) & ZEND_SEND_BY_REF) != 0;
 }
 
 static zend_always_inline int zend_check_arg_may_be_sent_by_ref(const zend_function *zf, uint32_t arg_num)
@@ -1007,8 +1007,7 @@ static zend_always_inline int zend_check_arg_may_be_sent_by_ref(const zend_funct
 	(ZEND_GET_ARG_FLAG(zf, arg_num) == ZEND_SEND_BY_REF)
 
 #define QUICK_ARG_SHOULD_BE_SENT_BY_REF(zf, arg_num) \
-	(ZEND_GET_ARG_FLAG(zf, arg_num) == ZEND_SEND_BY_REF || \
-	 ZEND_GET_ARG_FLAG(zf, arg_num) == ZEND_SEND_PREFER_REF)
+	((ZEND_GET_ARG_FLAG(zf, arg_num) & ZEND_SEND_BY_REF) != 0)
 
 #define QUICK_ARG_MAY_BE_SENT_BY_REF(zf, arg_num) \
 	(ZEND_GET_ARG_FLAG(zf, arg_num) != ZEND_SEND_BY_VAL)
