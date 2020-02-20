@@ -28,10 +28,3 @@ jobs:
     parameters:
       configurationName: I386_RELEASE_ZTS
       configurationParameters: '--disable-debug --enable-maintainer-zts'
-  - template: azure/community_job.yml
-    parameters:
-      configurationName: COMMUNITY
-      configurationParameters: >-
-          --enable-debug --enable-maintainer-zts
-          CFLAGS='-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC'
-          LDFLAGS='-fsanitize=undefined,address'
