@@ -55,8 +55,8 @@ static int scan(Scanner *s)
 	*/
 
 	/*!re2c
-		(["](([\\]ANYNOEOF)|ANYNOEOF\["\\])*["]) { RET(PDO_PARSER_TEXT); }
-		(['](([\\]ANYNOEOF)|ANYNOEOF\['\\])*[']) { RET(PDO_PARSER_TEXT); }
+		(["](ANYNOEOF\["]|"")*["])				{ RET(PDO_PARSER_TEXT); }
+		(['](ANYNOEOF\[']|'')*['])				{ RET(PDO_PARSER_TEXT); }
 		MULTICHAR								{ RET(PDO_PARSER_TEXT); }
 		ESCQUESTION								{ RET(PDO_PARSER_ESCAPED_QUESTION); }
 		BINDCHR									{ RET(PDO_PARSER_BIND); }
