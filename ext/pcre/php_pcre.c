@@ -130,6 +130,8 @@ static void pcre_handle_exec_error(int pcre_code) /* {{{ */
 static const char *php_pcre_get_error_msg(php_pcre_error_code error_code) /* {{{ */
 {
     switch (error_code) {
+        case PHP_PCRE_NO_ERROR:
+            return "No error";
         case PHP_PCRE_INTERNAL_ERROR:
             return "Internal error";
         case PHP_PCRE_BAD_UTF8_ERROR:
@@ -140,10 +142,12 @@ static const char *php_pcre_get_error_msg(php_pcre_error_code error_code) /* {{{
             return "Backtrack limit exhausted";
         case PHP_PCRE_RECURSION_LIMIT_ERROR:
             return "Recursion limit exhausted";
+
+#ifdef HAVE_PCRE_JIT_SUPPORT
         case PHP_PCRE_JIT_STACKLIMIT_ERROR:
             return "JIT stack limit exhausted";
-        case PHP_PCRE_NO_ERROR:
-            return "No error";
+#endif
+
         default:
             return "Unknown error";
     }
