@@ -285,6 +285,7 @@ PHP 8.0 UPGRADE NOTES
     representation of the type, and is no longer deprecated. In particular the
     result will include a nullability indicator for nullable types. The format
     of the return value is not stable and may change between PHP versions.
+  . Reflection export() methods have been removed.
 
 - Socket:
   . The deprecated AI_IDN_ALLOW_UNASSIGNED and AI_IDN_USE_STD3_ASCII_RULES
@@ -328,6 +329,7 @@ PHP 8.0 UPGRADE NOTES
   . convert_cyr_string() has been removed.
   . money_format() has been removed.
   . ezmlm_hash() has been removed.
+  . restore_include_path() has been removed.
   . get_magic_quotes_gpc() and get_magic_quotes_gpc_runtime() has been removed.
   . FILTER_SANITIZE_MAGIC_QUOTES has been removed.
   . Calling implode() with parameters in a reverse order ($pieces, $glue) is no
