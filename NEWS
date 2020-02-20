@@ -59,7 +59,7 @@ PHP                                                                        NEWS
   . Fixed bug #79112 (IMAP extension can't find OpenSSL libraries at configure
     time). (Nikita)
 
- -Intl:
+- Intl:
   . Fixed bug #79212 (NumberFormatter::format() may detect wrong type). (cmb)
 
 - Libxml:
