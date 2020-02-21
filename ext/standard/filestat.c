@@ -1074,12 +1074,12 @@ FileFunction(PHP_FN(file_exists), FS_EXISTS)
 
 /* {{{ proto array lstat(string filename)
    Give information about a file or symbolic link */
-FileFunction(php_if_lstat, FS_LSTAT)
+FileFunction(PHP_FN(lstat), FS_LSTAT)
 /* }}} */
 
 /* {{{ proto array stat(string filename)
    Give information about a file */
-FileFunction(php_if_stat, FS_STAT)
+FileFunction(PHP_FN(stat), FS_STAT)
 /* }}} */
 
 /* {{{ proto bool realpath_cache_size()

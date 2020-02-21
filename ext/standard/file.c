@@ -850,7 +850,7 @@ PHP_FUNCTION(tempnam)
 
 /* {{{ proto resource tmpfile(void)
    Create a temporary file that will be deleted automatically after use */
-PHP_NAMED_FUNCTION(php_if_tmpfile)
+PHP_FUNCTION(tmpfile)
 {
 	php_stream *stream;
 
@@ -868,7 +868,7 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
 
 /* {{{ proto resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
    Open a file or a URL and return a file pointer */
-PHP_NAMED_FUNCTION(php_if_fopen)
+PHP_FUNCTION(fopen)
 {
 	char *filename, *mode;
 	size_t filename_len, mode_len;
@@ -1483,7 +1483,7 @@ PHP_FUNCTION(unlink)
 
 /* {{{ proto bool ftruncate(resource fp, int size)
    Truncate file to 'size' length */
-PHP_NAMED_FUNCTION(php_if_ftruncate)
+PHP_FUNCTION(ftruncate)
 {
 	zval *fp;
 	zend_long size;
@@ -1512,7 +1512,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 
 /* {{{ proto array fstat(resource fp)
    Stat() on a filehandle */
-PHP_NAMED_FUNCTION(php_if_fstat)
+PHP_FUNCTION(fstat)
 {
 	zval *fp;
 	zval stat_dev, stat_ino, stat_mode, stat_nlink, stat_uid, stat_gid, stat_rdev,
