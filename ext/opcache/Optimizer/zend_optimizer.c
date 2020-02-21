@@ -777,8 +777,9 @@ static zend_class_entry *get_class_entry_from_op1(
 }
 
 zend_function *zend_optimizer_get_called_func(
-		zend_script *script, zend_op_array *op_array, zend_op *opline)
+		zend_script *script, zend_op_array *op_array, zend_op *opline, zend_bool *is_prototype)
 {
+	*is_prototype = 0;
 	switch (opline->opcode) {
 		case ZEND_INIT_FCALL:
 		{
@@ -825,7 +826,7 @@ zend_function *zend_optimizer_get_called_func(
 					if (fbc) {
 						zend_bool is_public = (fbc->common.fn_flags & ZEND_ACC_PUBLIC) != 0;
 						zend_bool same_scope = fbc->common.scope == op_array->scope;
-						if (is_public|| same_scope) {
+						if (is_public || same_scope) {
 							return fbc;
 						}
 					}
@@ -843,10 +844,15 @@ zend_function *zend_optimizer_get_called_func(
 					zend_bool is_private = (fbc->common.fn_flags & ZEND_ACC_PRIVATE) != 0;
 					zend_bool is_final = (fbc->common.fn_flags & ZEND_ACC_FINAL) != 0;
 					zend_bool same_scope = fbc->common.scope == op_array->scope;
-					if ((is_private && same_scope)
-							|| (is_final && (!is_private || same_scope))) {
-						return fbc;
+					if (is_private) {
+						/* Only use private method if in the same scope. We can't even use it
+						 * as a prototype, as it may be overridden with changed signature. */
+						return same_scope ? fbc : NULL;
 					}
+					/* If the method is non-final, it may be overriden,
+					 * but only with a compatible method signature. */
+					*is_prototype = !is_final;
+					return fbc;
 				}
 			}
 			break;

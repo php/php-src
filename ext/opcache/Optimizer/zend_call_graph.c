@@ -93,6 +93,7 @@ int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_f
 	int call = 0;
 	zend_call_info **call_stack;
 	ALLOCA_FLAG(use_heap);
+	zend_bool is_prototype;
 
 	call_stack = do_alloca((op_array->last / 2) * sizeof(zend_call_info*), use_heap);
 	call_info = NULL;
@@ -103,8 +104,9 @@ int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_f
 			case ZEND_INIT_STATIC_METHOD_CALL:
 				call_stack[call] = call_info;
 				func = zend_optimizer_get_called_func(
-					script, op_array, opline);
-				if (func) {
+					script, op_array, opline, &is_prototype);
+				/* TODO: Support prototypes? */
+				if (func && !is_prototype) {
 					call_info = zend_arena_calloc(arena, 1, sizeof(zend_call_info) + (sizeof(zend_send_arg_info) * ((int)opline->extended_value - 1)));
 					call_info->caller_op_array = op_array;
 					call_info->caller_init_opline = opline;

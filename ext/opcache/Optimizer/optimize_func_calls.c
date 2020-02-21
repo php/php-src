@@ -39,6 +39,7 @@
 typedef struct _optimizer_call_info {
 	zend_function *func;
 	zend_op       *opline;
+	zend_bool      is_prototype;
 	zend_bool      try_inline;
 	uint32_t       func_arg_num;
 } optimizer_call_info;
@@ -172,9 +173,12 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 			case ZEND_INIT_METHOD_CALL:
 			case ZEND_INIT_FCALL:
 			case ZEND_NEW:
+				/* The argument passing optimizations are valid for prototypes as well,
+				 * as inheritance cannot change between ref <-> non-ref arguments. */
 				call_stack[call].func = zend_optimizer_get_called_func(
-					ctx->script, op_array, opline);
-				call_stack[call].try_inline = opline->opcode != ZEND_NEW;
+					ctx->script, op_array, opline, &call_stack[call].is_prototype);
+				call_stack[call].try_inline =
+					!call_stack[call].is_prototype && opline->opcode != ZEND_NEW;
 				/* break missing intentionally */
 			case ZEND_INIT_DYNAMIC_CALL:
 			case ZEND_INIT_USER_CALL:
