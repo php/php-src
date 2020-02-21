@@ -37,16 +37,18 @@ PHPAPI zend_class_entry  *spl_ce_SplDoublyLinkedList;
 PHPAPI zend_class_entry  *spl_ce_SplQueue;
 PHPAPI zend_class_entry  *spl_ce_SplStack;
 
-#define SPL_LLIST_DELREF(elem) if(!--(elem)->rc) { \
+#define SPL_LLIST_RC(elem) Z_EXTRA((elem)->data)
+
+#define SPL_LLIST_DELREF(elem) if (!--SPL_LLIST_RC(elem)) { \
 	efree(elem); \
 }
 
-#define SPL_LLIST_CHECK_DELREF(elem) if((elem) && !--(elem)->rc) { \
+#define SPL_LLIST_CHECK_DELREF(elem) if ((elem) && !--SPL_LLIST_RC(elem)) { \
 	efree(elem); \
 }
 
-#define SPL_LLIST_ADDREF(elem) (elem)->rc++
-#define SPL_LLIST_CHECK_ADDREF(elem) if(elem) (elem)->rc++
+#define SPL_LLIST_ADDREF(elem) SPL_LLIST_RC(elem)++
+#define SPL_LLIST_CHECK_ADDREF(elem) if (elem) SPL_LLIST_RC(elem)++
 
 #define SPL_DLLIST_IT_DELETE 0x00000001 /* Delete flag makes the iterator delete the current element on next */
 #define SPL_DLLIST_IT_LIFO   0x00000002 /* LIFO flag makes the iterator traverse the structure as a LastInFirstOut */
@@ -60,7 +62,6 @@ PHPAPI zend_class_entry  *spl_ce_SplStack;
 typedef struct _spl_ptr_llist_element {
 	struct _spl_ptr_llist_element *prev;
 	struct _spl_ptr_llist_element *next;
-	int                            rc;
 	zval                           data;
 } spl_ptr_llist_element;
 
@@ -192,10 +193,10 @@ static void spl_ptr_llist_unshift(spl_ptr_llist *llist, zval *data) /* {{{ */
 {
 	spl_ptr_llist_element *elem = emalloc(sizeof(spl_ptr_llist_element));
 
-	elem->rc   = 1;
 	elem->prev = NULL;
 	elem->next = llist->head;
 	ZVAL_COPY_VALUE(&elem->data, data);
+	SPL_LLIST_RC(elem) = 1;
 
 	if (llist->head) {
 		llist->head->prev = elem;
@@ -216,10 +217,10 @@ static void spl_ptr_llist_push(spl_ptr_llist *llist, zval *data) /* {{{ */
 {
 	spl_ptr_llist_element *elem = emalloc(sizeof(spl_ptr_llist_element));
 
-	elem->rc   = 1;
 	elem->prev = llist->tail;
 	elem->next = NULL;
 	ZVAL_COPY_VALUE(&elem->data, data);
+	SPL_LLIST_RC(elem) = 1;
 
 	if (llist->tail) {
 		llist->tail->next = elem;
@@ -1311,7 +1312,7 @@ SPL_METHOD(SplDoublyLinkedList, add)
 		element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
 
 		ZVAL_COPY_VALUE(&elem->data, value);
-		elem->rc   = 1;
+		SPL_LLIST_RC(elem) = 1;
 		/* connect to the neighbours */
 		elem->next = element;
 		elem->prev = element->prev;
