@@ -5,7 +5,7 @@ parameters:
 jobs:
   - job: ${{ parameters.configurationName }}
     pool:
-      vmImage: 'ubuntu-16.04'
+      vmImage: 'ubuntu-18.04'
     steps:
     - template: apt.yml
     - script: |
