@@ -2004,7 +2004,7 @@ PHP_METHOD(sqlite3result, columnType)
 		RETURN_THROWS();
 	}
 
-	if (result_obj->complete) {
+	if (!sqlite3_data_count(result_obj->stmt_obj->stmt)) {
 		RETURN_FALSE;
 	}
 
@@ -2059,7 +2059,6 @@ PHP_METHOD(sqlite3result, fetchArray)
 			break;
 
 		case SQLITE_DONE:
-			result_obj->complete = 1;
 			RETURN_FALSE;
 			break;
 
@@ -2086,8 +2085,6 @@ PHP_METHOD(sqlite3result, reset)
 	if (sqlite3_reset(result_obj->stmt_obj->stmt) != SQLITE_OK) {
 		RETURN_FALSE;
 	}
-
-	result_obj->complete = 0;
 
 	RETURN_TRUE;
 }

@@ -108,7 +108,6 @@ struct _php_sqlite3_result_object  {
 	zval stmt_obj_zval;
 
 	int is_prepared_statement;
-	int complete;
 	zend_object zo;
 };
 
