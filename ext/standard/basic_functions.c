@@ -275,7 +275,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(proc_nice,														arginfo_proc_nice)
 #endif
 
-	PHP_FE(rand,															arginfo_mt_rand)
+	PHP_FE(rand,															arginfo_rand)
 	PHP_FALIAS(srand, mt_srand,												arginfo_srand)
 	PHP_FALIAS(getrandmax, mt_getrandmax,									arginfo_getrandmax)
 	PHP_FE(mt_rand,															arginfo_mt_rand)

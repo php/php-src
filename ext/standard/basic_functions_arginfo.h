@@ -1831,10 +1831,12 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_srand arginfo_mt_srand
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mt_rand, 0, 0, IS_LONG, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_rand, 0, 0, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, min, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, max, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_mt_rand arginfo_rand
 
 #define arginfo_mt_getrandmax arginfo_ob_get_level
 
