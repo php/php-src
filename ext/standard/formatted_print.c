@@ -670,7 +670,7 @@ php_formatted_print_get_array(zval *array, int *argc)
 
 /* {{{ proto string sprintf(string format [, mixed arg1 [, mixed ...]])
    Return a formatted string */
-PHP_FUNCTION(user_sprintf)
+PHP_FUNCTION(sprintf)
 {
 	zend_string *result;
 	char *format;
@@ -719,7 +719,7 @@ PHP_FUNCTION(vsprintf)
 
 /* {{{ proto int printf(string format [, mixed arg1 [, mixed ...]])
    Output a formatted string */
-PHP_FUNCTION(user_printf)
+PHP_FUNCTION(printf)
 {
 	zend_string *result;
 	size_t rlen;

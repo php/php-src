@@ -146,9 +146,9 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(get_html_translation_table,										arginfo_get_html_translation_table)
 	PHP_FE(sha1,															arginfo_sha1)
 	PHP_FE(sha1_file,														arginfo_sha1_file)
-	PHP_NAMED_FE(md5,php_if_md5,											arginfo_md5)
-	PHP_NAMED_FE(md5_file,php_if_md5_file,									arginfo_md5_file)
-	PHP_NAMED_FE(crc32,php_if_crc32,										arginfo_crc32)
+	PHP_FE(md5,																arginfo_md5)
+	PHP_FE(md5_file,														arginfo_md5_file)
+	PHP_FE(crc32,															arginfo_crc32)
 
 	PHP_FE(iptcparse,														arginfo_iptcparse)
 	PHP_FE(iptcembed,														arginfo_iptcembed)
@@ -235,8 +235,8 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(str_pad,															arginfo_str_pad)
 	PHP_FALIAS(chop,				rtrim,									arginfo_chop)
 	PHP_FALIAS(strchr,				strstr,									arginfo_strchr)
-	PHP_NAMED_FE(sprintf,			PHP_FN(user_sprintf),					arginfo_sprintf)
-	PHP_NAMED_FE(printf,			PHP_FN(user_printf),					arginfo_printf)
+	PHP_FE(sprintf,															arginfo_sprintf)
+	PHP_FE(printf,															arginfo_printf)
 	PHP_FE(vprintf,															arginfo_vprintf)
 	PHP_FE(vsprintf,														arginfo_vsprintf)
 	PHP_FE(fprintf,															arginfo_fprintf)
@@ -361,10 +361,10 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(fdiv,															arginfo_fdiv)
 	PHP_FE(intdiv,															arginfo_intdiv)
 #ifdef HAVE_INET_NTOP
-	PHP_RAW_NAMED_FE(inet_ntop,		zif_inet_ntop,								arginfo_inet_ntop)
+	PHP_FE(inet_ntop,														arginfo_inet_ntop)
 #endif
 #ifdef HAVE_INET_PTON
-	PHP_RAW_NAMED_FE(inet_pton,		php_inet_pton,								arginfo_inet_pton)
+	PHP_FE(inet_pton,														arginfo_inet_pton)
 #endif
 	PHP_FE(ip2long,															arginfo_ip2long)
 	PHP_FE(long2ip,															arginfo_long2ip)
@@ -517,10 +517,10 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(fgetc,															arginfo_fgetc)
 	PHP_FE(fgets,															arginfo_fgets)
 	PHP_FE(fread,															arginfo_fread)
-	PHP_NAMED_FE(fopen,				php_if_fopen,							arginfo_fopen)
+	PHP_FE(fopen,															arginfo_fopen)
 	PHP_FE(fpassthru,														arginfo_fpassthru)
-	PHP_NAMED_FE(ftruncate,			php_if_ftruncate,						arginfo_ftruncate)
-	PHP_NAMED_FE(fstat,				php_if_fstat,							arginfo_fstat)
+	PHP_FE(ftruncate,														arginfo_ftruncate)
+	PHP_FE(fstat,															arginfo_fstat)
 	PHP_FE(fseek,															arginfo_fseek)
 	PHP_FE(ftell,															arginfo_ftell)
 	PHP_FE(fflush,															arginfo_fflush)
@@ -530,7 +530,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(rename,															arginfo_rename)
 	PHP_FE(copy,															arginfo_copy)
 	PHP_FE(tempnam,															arginfo_tempnam)
-	PHP_NAMED_FE(tmpfile,			php_if_tmpfile,							arginfo_tmpfile)
+	PHP_FE(tmpfile,															arginfo_tmpfile)
 	PHP_FE(file,															arginfo_file)
 	PHP_FE(file_get_contents,												arginfo_file_get_contents)
 	PHP_FE(file_put_contents,												arginfo_file_put_contents)
@@ -629,7 +629,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_FE(getcwd,															arginfo_getcwd)
 	PHP_FE(rewinddir,														arginfo_rewinddir)
-	PHP_NAMED_FE(readdir,			php_if_readdir,							arginfo_readdir)
+	PHP_FE(readdir,															arginfo_readdir)
 	PHP_FALIAS(dir,					getdir,									arginfo_dir)
 	PHP_FE(scandir,															arginfo_scandir)
 #ifdef HAVE_GLOB
@@ -653,8 +653,8 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(is_file,															arginfo_is_file)
 	PHP_FE(is_dir,															arginfo_is_dir)
 	PHP_FE(is_link,															arginfo_is_link)
-	PHP_NAMED_FE(stat,				php_if_stat,							arginfo_stat)
-	PHP_NAMED_FE(lstat,				php_if_lstat,							arginfo_lstat)
+	PHP_FE(stat,															arginfo_stat)
+	PHP_FE(lstat,															arginfo_lstat)
 	PHP_FE(chown,															arginfo_chown)
 	PHP_FE(chgrp,															arginfo_chgrp)
 #if HAVE_LCHOWN
@@ -1301,7 +1301,7 @@ PHP_FUNCTION(constant)
 #ifdef HAVE_INET_NTOP
 /* {{{ proto string|false inet_ntop(string in_addr)
    Converts a packed inet address to a human readable IP address string */
-PHP_NAMED_FUNCTION(zif_inet_ntop)
+PHP_FUNCTION(inet_ntop)
 {
 	char *address;
 	size_t address_len;
@@ -1333,7 +1333,7 @@ PHP_NAMED_FUNCTION(zif_inet_ntop)
 #ifdef HAVE_INET_PTON
 /* {{{ proto string|false inet_pton(string ip_address)
    Converts a human readable IP address to a packed binary string */
-PHP_NAMED_FUNCTION(php_inet_pton)
+PHP_FUNCTION(inet_pton)
 {
 	int ret, af = AF_INET;
 	char *address;
