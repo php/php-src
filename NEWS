@@ -21,6 +21,9 @@ PHP                                                                        NEWS
 - PDO_ODBC:
   . Fixed bug #79038 (PDOStatement::nextRowset() leaks column values). (cmb)
 
+- SQLite3:
+  . Fixed bug #79294 (::columnType() may fail after SQLite3Stmt::reset()). (cmb)
+
 - Standard:
   . Fixed bug #79254 (getenv() w/o arguments not showing changes). (cmb)
 
