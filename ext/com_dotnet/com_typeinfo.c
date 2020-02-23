@@ -480,6 +480,7 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 	char *ansiname = NULL;
 	size_t ansinamelen;
 	int ret = 0;
+	DISPID lastid = 0;	/* for props */
 
 	if (FAILED(ITypeInfo_GetTypeAttr(typeinfo, &attr))) {
 		return 0;
@@ -513,7 +514,6 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 		/* So we've got the dispatch interface; lets list the event methods */
 		for (i = 0; i < attr->cFuncs; i++) {
 			zval tmp;
-			DISPID lastid = 0;	/* for props */
 			int isprop;
 
 			if (FAILED(ITypeInfo_GetFuncDesc(typeinfo, i, &func)))

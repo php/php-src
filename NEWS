@@ -13,6 +13,8 @@ PHP                                                                        NEWS
     x86). (cmb)
   . Fixed bug #79247 (Garbage collecting variant objects segfaults). (cmb)
   . Fixed bug #79248 (Traversing empty VT_ARRAY throws com_exception). (cmb)
+  . Fixed bug #79299 (com_print_typeinfo prints duplicate variables). (Litiano
+    Moura)
 
 - CURL:
   . Fixed bug #79019 (Copied cURL handles upload empty file). (cmb)
