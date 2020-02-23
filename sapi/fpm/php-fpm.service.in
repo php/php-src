@@ -17,10 +17,6 @@ ExecReload=/bin/kill -USR2 $MAINPID
 # access this service's directories.
 PrivateTmp=true
 
-# The directories /home, /root and /run/user are made inaccessible and empty for processes
-# invoked by this unit.
-ProtectHome=true
-
 # Mounts the /usr, /boot, and /etc directories read-only for processes invoked by this unit.
 ProtectSystem=full
 
