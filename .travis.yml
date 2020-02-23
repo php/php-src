@@ -3,7 +3,7 @@ git:
 
 dist: xenial
 language: c
-sudo: required
+os: linux
 addons:
   apt:
     packages:
