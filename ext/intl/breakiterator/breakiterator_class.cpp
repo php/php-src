@@ -27,6 +27,7 @@
 extern "C" {
 #define USE_BREAKITERATOR_POINTER 1
 #include "breakiterator_class.h"
+#include "breakiterator_arginfo.h"
 #include "breakiterator_methods.h"
 #include "rulebasedbreakiterator_methods.h"
 #include "codepointiterator_methods.h"
@@ -220,68 +221,32 @@ static zend_object *BreakIterator_object_create(zend_class_entry *ce)
 }
 /* }}} */
 
-/* {{{ BreakIterator/RuleBasedBreakIterator methods arguments info */
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_void, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_locale, 0, 0, 0)
-	ZEND_ARG_INFO(0, locale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_setText, 0, 0, 1)
-	ZEND_ARG_INFO(0, text)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_next, 0, 0, 0)
-	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_offset, 0, 0, 1)
-	ZEND_ARG_INFO(0, offset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_get_locale, 0, 0, 1)
-	ZEND_ARG_INFO(0, locale_type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_biter_getPartsIterator, 0, 0, 0)
-	ZEND_ARG_INFO(0, key_type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_rbbi___construct, 0, 0, 1)
-	ZEND_ARG_INFO(0, rules)
-	ZEND_ARG_INFO(0, areCompiled)
-ZEND_END_ARG_INFO()
-
-/* }}} */
-
 /* {{{ BreakIterator_class_functions
  * Every 'BreakIterator' class method has an entry in this table
  */
 static const zend_function_entry BreakIterator_class_functions[] = {
-	PHP_ME(BreakIterator,					__construct,							ainfo_biter_void,					ZEND_ACC_PRIVATE)
-	PHP_ME_MAPPING(createWordInstance,		breakiter_create_word_instance,			ainfo_biter_locale,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(createLineInstance,		breakiter_create_line_instance,			ainfo_biter_locale,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(createCharacterInstance,	breakiter_create_character_instance,	ainfo_biter_locale,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(createSentenceInstance,	breakiter_create_sentence_instance,		ainfo_biter_locale,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(createTitleInstance,		breakiter_create_title_instance,		ainfo_biter_locale,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(createCodePointInstance,	breakiter_create_code_point_instance,	ainfo_biter_void,					ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getText,					breakiter_get_text,						ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(setText,					breakiter_set_text,						ainfo_biter_setText,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(first,					breakiter_first,						ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(last,					breakiter_last,							ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(previous,				breakiter_previous,						ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(next,					breakiter_next,							ainfo_biter_next,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(current,					breakiter_current,						ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(following,				breakiter_following,					ainfo_biter_offset,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(preceding,				breakiter_preceding,					ainfo_biter_offset,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(isBoundary,				breakiter_is_boundary,					ainfo_biter_offset,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getLocale,				breakiter_get_locale,					ainfo_biter_get_locale,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getPartsIterator,		breakiter_get_parts_iterator,			ainfo_biter_getPartsIterator,		ZEND_ACC_PUBLIC)
+	PHP_ME(BreakIterator,					__construct,							arginfo_class_IntlBreakIterator___construct,				ZEND_ACC_PRIVATE)
+	PHP_ME_MAPPING(createWordInstance,		breakiter_create_word_instance,			arginfo_class_IntlBreakIterator_createWordInstance,			ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(createLineInstance,		breakiter_create_line_instance,			arginfo_class_IntlBreakIterator_createLineInstance,			ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(createCharacterInstance,	breakiter_create_character_instance,	arginfo_class_IntlBreakIterator_createCharacterInstance,	ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(createSentenceInstance,	breakiter_create_sentence_instance,		arginfo_class_IntlBreakIterator_createSentenceInstance,		ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(createTitleInstance,		breakiter_create_title_instance,		arginfo_class_IntlBreakIterator_createTitleInstance,		ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(createCodePointInstance,	breakiter_create_code_point_instance,	arginfo_class_IntlBreakIterator_createCodePointInstance,	ZEND_ACC_STATIC | ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getText,					breakiter_get_text,						arginfo_class_IntlBreakIterator_getText,					ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(setText,					breakiter_set_text,						arginfo_class_IntlBreakIterator_setText,					ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(first,					breakiter_first,						arginfo_class_IntlBreakIterator_first,						ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(last,					breakiter_last,							arginfo_class_IntlBreakIterator_last,						ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(previous,				breakiter_previous,						arginfo_class_IntlBreakIterator_previous,					ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(next,					breakiter_next,							arginfo_class_IntlBreakIterator_next,						ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(current,					breakiter_current,						arginfo_class_IntlBreakIterator_current,					ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(following,				breakiter_following,					arginfo_class_IntlBreakIterator_following,					ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(preceding,				breakiter_preceding,					arginfo_class_IntlBreakIterator_preceding,					ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(isBoundary,				breakiter_is_boundary,					arginfo_class_IntlBreakIterator_isBoundary,					ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getLocale,				breakiter_get_locale,					arginfo_class_IntlBreakIterator_getLocale,					ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getPartsIterator,		breakiter_get_parts_iterator,			arginfo_class_IntlBreakIterator_getPartsIterator,			ZEND_ACC_PUBLIC)
 
-	PHP_ME_MAPPING(getErrorCode,			breakiter_get_error_code,				ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getErrorMessage,			breakiter_get_error_message,			ainfo_biter_void,					ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getErrorCode,			breakiter_get_error_code,				arginfo_class_IntlBreakIterator_getErrorCode,				ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getErrorMessage,			breakiter_get_error_message,			arginfo_class_IntlBreakIterator_getErrorMessage,			ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -289,11 +254,11 @@ static const zend_function_entry BreakIterator_class_functions[] = {
 /* {{{ RuleBasedBreakIterator_class_functions
  */
 static const zend_function_entry RuleBasedBreakIterator_class_functions[] = {
-	PHP_ME(IntlRuleBasedBreakIterator,		__construct,							ainfo_rbbi___construct,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getRules,				rbbi_get_rules,							ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getRuleStatus,			rbbi_get_rule_status,					ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getRuleStatusVec,		rbbi_get_rule_status_vec,				ainfo_biter_void,					ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getBinaryRules,			rbbi_get_binary_rules,					ainfo_biter_void,					ZEND_ACC_PUBLIC)
+	PHP_ME(IntlRuleBasedBreakIterator,		__construct,							arginfo_class_IntlRuleBasedBreakIterator___construct,		ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getRules,				rbbi_get_rules,							arginfo_class_IntlRuleBasedBreakIterator_getRules,			ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getRuleStatus,			rbbi_get_rule_status,					arginfo_class_IntlRuleBasedBreakIterator_getRuleStatus,		ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getRuleStatusVec,		rbbi_get_rule_status_vec,				arginfo_class_IntlRuleBasedBreakIterator_getRuleStatusVec,	ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getBinaryRules,			rbbi_get_binary_rules,					arginfo_class_IntlRuleBasedBreakIterator_getBinaryRules,	ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -301,7 +266,7 @@ static const zend_function_entry RuleBasedBreakIterator_class_functions[] = {
 /* {{{ CodePointBreakIterator_class_functions
  */
 static const zend_function_entry CodePointBreakIterator_class_functions[] = {
-	PHP_ME_MAPPING(getLastCodePoint,		cpbi_get_last_code_point,				ainfo_biter_void,					ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getLastCodePoint,		cpbi_get_last_code_point,				arginfo_class_IntlCodePointBreakIterator_getLastCodePoint,	ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
