@@ -773,7 +773,7 @@ PHP_FUNCTION(com_print_typeinfo)
 
 	typeinfo = php_com_locate_typeinfo(typelibname, obj, ifacename, wantsink ? 1 : 0);
 	if (typeinfo) {
-		php_com_process_typeinfo(typeinfo, NULL, 1, NULL, obj ? obj->code_page : COMG(code_page));
+		php_com_print_typeinfo(typeinfo, obj ? obj->code_page : COMG(code_page));
 		ITypeInfo_Release(typeinfo);
 		RETURN_TRUE;
 	} else {
