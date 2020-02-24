@@ -20,7 +20,7 @@ for ($i=0 ; $i<5 ; $i++) {
 var_dump(dirname("/foo/bar/baz", PHP_INT_MAX));
 ?>
 --EXPECT--
-Invalid argument, levels must be >= 1
+dirname(): Argument #2 ($levels) must be greater than or equal to 1
 string(8) "/foo/bar"
 string(4) "/foo"
 string(1) "/"

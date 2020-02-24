@@ -105,11 +105,11 @@ string(6) "m1tatm"
 -- Iteration 6 --
 string(6) "tm0atm"
 -- Iteration 7 --
-If three arguments are passed, the second argument must be a string
+strtr(): Argument #2 ($from) must be of type string, array given
 -- Iteration 8 --
-If three arguments are passed, the second argument must be a string
+strtr(): Argument #2 ($from) must be of type string, array given
 -- Iteration 9 --
-If three arguments are passed, the second argument must be a string
+strtr(): Argument #2 ($from) must be of type string, array given
 -- Iteration 10 --
 string(6) "0a2atm"
 -- Iteration 11 --

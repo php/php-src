@@ -28,7 +28,7 @@ gzclose($h);
 ?>
 --EXPECT--
 string(10) "When you'r"
-Length parameter must be greater than 0
+gzread(): Argument #2 ($length) must be greater than 0
 string(5) "e tau"
-Length parameter must be greater than 0
+gzread(): Argument #2 ($length) must be greater than 0
 string(8) "ght thro"

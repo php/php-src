@@ -28,5 +28,5 @@ echo "Done\n";
 **** Testing gettype() and settype() functions ****
 
 *** Testing settype(): error conditions ***
-Invalid type
+settype(): Argument #2 ($type) must be a valid type
 Done

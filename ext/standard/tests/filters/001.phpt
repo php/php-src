@@ -24,9 +24,9 @@ var_dump(stream_filter_register("------", "nonexistentclass"));
 
 echo "Done\n";
 ?>
---EXPECTF--
-Filter name cannot be empty
-Class name cannot be empty
-Filter name cannot be empty
+--EXPECT--
+stream_filter_register(): Argument #1 ($filtername) must be a non-empty string
+stream_filter_register(): Argument #2 ($classname) must be a non-empty string
+stream_filter_register(): Argument #1 ($filtername) must be a non-empty string
 bool(true)
 Done

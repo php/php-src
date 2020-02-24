@@ -84,5 +84,5 @@ write with size: 250
 int(3)
 
 error conditions
-The chunk size must be a positive integer, 0 given
-The chunk size must be a positive integer, -1 given
+stream_set_chunk_size(): Argument #2 ($size) must be greater than 0
+stream_set_chunk_size(): Argument #2 ($size) must be greater than 0

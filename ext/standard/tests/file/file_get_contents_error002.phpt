@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-Length must be greater than or equal to zero
+file_get_contents(): Argument #5 ($maxlen) must be greater than or equal to 0

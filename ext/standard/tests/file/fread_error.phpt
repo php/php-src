@@ -33,5 +33,5 @@ try {
 --EXPECT--
 *** Testing error conditions ***
 -- Testing fread() with invalid length arguments --
-Length parameter must be greater than 0
-Length parameter must be greater than 0
+fread(): Argument #2 ($length) must be greater than 0
+fread(): Argument #2 ($length) must be greater than 0
