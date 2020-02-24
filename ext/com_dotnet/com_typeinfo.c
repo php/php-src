@@ -672,17 +672,16 @@ int php_com_print_typeinfo(ITypeInfo* typeinfo, int codepage)
 {
 	TYPEATTR* attr;
 	FUNCDESC* func;
-	FUNCDESC* nextFunc;
+	FUNCDESC* next_func;
 	int i;
 	OLECHAR* olename;
-	OLECHAR* docString;
+	OLECHAR* doc_str;
 	char* ansiname = NULL;
 	size_t ansinamelen;
 	char* guidstring;
 	char* class_name = NULL;
 	DISPID lastid = 0;	/* for props */
 	int isprop;
-
 	int j;
 	char* funcdesc;
 	char* param;
@@ -712,14 +711,14 @@ int php_com_print_typeinfo(ITypeInfo* typeinfo, int codepage)
 		{
 			char* propReadOnly = "";
 			lastid = func->memid;
-			ITypeInfo_GetDocumentation(typeinfo, func->memid, &olename, &docString, NULL, NULL);
+			ITypeInfo_GetDocumentation(typeinfo, func->memid, &olename, &doc_str, NULL, NULL);
 			ansiname = php_com_olestring_to_string(olename, &ansinamelen, codepage);
 			SysFreeString(olename);
 
 			char* funcdesc;
 			size_t funcdesclen;
 
-			if (!FAILED(ITypeInfo_GetFuncDesc(typeinfo, i + 1, &nextFunc)) && func->memid != nextFunc->memid)
+			if (!FAILED(ITypeInfo_GetFuncDesc(typeinfo, i + 1, &next_func)) && func->memid != next_func->memid)
 			{
 				propReadOnly = "-read";
 			}
@@ -731,10 +730,10 @@ int php_com_print_typeinfo(ITypeInfo* typeinfo, int codepage)
 			);
 			efree(ansiname);
 
-			if (docString) {
-				funcdesc = php_com_olestring_to_string(docString, &funcdesclen, codepage);
+			if (doc_str) {
+				funcdesc = php_com_olestring_to_string(doc_str, &funcdesclen, codepage);
 				php_printf(" %s", funcdesc);
-				SysFreeString(docString);
+				SysFreeString(doc_str);
 				efree(funcdesc);
 			}
 			php_printf("\n");
@@ -753,7 +752,7 @@ int php_com_print_typeinfo(ITypeInfo* typeinfo, int codepage)
 		isprop = (func->invkind & DISPATCH_PROPERTYGET || func->invkind & DISPATCH_PROPERTYPUT);
 		if (!isprop || lastid != func->memid) {
 			lastid = func->memid;
-			ITypeInfo_GetDocumentation(typeinfo, func->memid, &olename, &docString, NULL, NULL);
+			ITypeInfo_GetDocumentation(typeinfo, func->memid, &olename, &doc_str, NULL, NULL);
 			ansiname = php_com_olestring_to_string(olename, &ansinamelen, codepage);
 			SysFreeString(olename);
 
@@ -770,10 +769,10 @@ int php_com_print_typeinfo(ITypeInfo* typeinfo, int codepage)
 					ansiname,
 					func->elemdescFunc.tdesc.vt
 				);
-				if (docString) {
-					funcdesc = php_com_olestring_to_string(docString, &funcdesclen, codepage);
+				if (doc_str) {
+					funcdesc = php_com_olestring_to_string(doc_str, &funcdesclen, codepage);
 					php_printf(" %s", funcdesc);
-					SysFreeString(docString);
+					SysFreeString(doc_str);
 					efree(funcdesc);
 				}
 				php_printf("\n\t*/\n");
@@ -807,9 +806,9 @@ int php_com_print_typeinfo(ITypeInfo* typeinfo, int codepage)
 					vt_to_string(func->elemdescFunc.tdesc.vt)
 				);
 
-				if (docString) {
-					funcdesc = php_com_olestring_to_string(docString, &funcdesclen, codepage);
-					SysFreeString(docString);
+				if (doc_str) {
+					funcdesc = php_com_olestring_to_string(doc_str, &funcdesclen, codepage);
+					SysFreeString(doc_str);
 					php_printf("\t * %s\n", funcdesc);
 					efree(funcdesc);
 				}
