@@ -170,6 +170,7 @@ PHP_COM_DOTNET_API int php_com_import_typelib(ITypeLib *TL, int mode,
 void php_com_typelibrary_dtor(zval *pDest);
 ITypeInfo *php_com_locate_typeinfo(char *typelibname, php_com_dotnet_object *obj, char *dispname, int sink);
 int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int printdef, GUID *guid, int codepage);
+int php_com_print_typeinfo(ITypeInfo *typeinfo, int codepage);
 ITypeLib *php_com_cache_typelib(ITypeLib* TL, char *cache_key, zend_long cache_key_len);
 PHP_MINIT_FUNCTION(com_typeinfo);
 PHP_MSHUTDOWN_FUNCTION(com_typeinfo);

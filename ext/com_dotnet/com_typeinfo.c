@@ -416,33 +416,58 @@ static const struct {
 	VARTYPE vt;
 	const char *name;
 } vt_names[] = {
-	{ VT_NULL,		"VT_NULL" },
-	{ VT_EMPTY,		"VT_EMPTY" },
-	{ VT_UI1,		"VT_UI1" },
-	{ VT_I2,		"VT_I2" },
-	{ VT_I4,		"VT_I4" },
-	{ VT_R4,		"VT_R4" },
-	{ VT_R8,		"VT_R8" },
-	{ VT_BOOL,		"VT_BOOL" },
-	{ VT_ERROR,		"VT_ERROR" },
-	{ VT_CY,		"VT_CY" },
-	{ VT_DATE,		"VT_DATE" },
-	{ VT_BSTR,		"VT_BSTR" },
-	{ VT_DECIMAL,	"VT_DECIMAL" },
-	{ VT_UNKNOWN,	"VT_UNKNOWN" },
-	{ VT_DISPATCH,	"VT_DISPATCH" },
-	{ VT_VARIANT,	"VT_VARIANT" },
-	{ VT_I1,		"VT_I1" },
-	{ VT_UI2,		"VT_UI2" },
-	{ VT_UI4,		"VT_UI4" },
-	{ VT_INT,		"VT_INT" },
-	{ VT_UINT,		"VT_UINT" },
-	{ VT_ARRAY,		"VT_ARRAY" },
-	{ VT_BYREF,		"VT_BYREF" },
-	{ VT_VOID,		"VT_VOID" },
-	{ VT_PTR,		"VT_PTR" },
-	{ VT_HRESULT,	"VT_HRESULT" },
-	{ VT_SAFEARRAY, "VT_SAFEARRAY" },
+	{ VT_NULL,			    "null" },
+	{ VT_EMPTY,			    "void" },
+	{ VT_UI1,			    "string" },
+	{ VT_I2,			    "int" },
+	{ VT_I4,			    "int" },
+	{ VT_R4,			    "float" },
+	{ VT_R8,			    "float" },
+	{ VT_BOOL,			    "bool" },
+	{ VT_ERROR,			    "mixed|VT_ERROR" },
+	{ VT_CY,			    "float" },
+	{ VT_DATE,			    "string|VT_DATE" },
+	{ VT_BSTR,			    "string" },
+	{ VT_DECIMAL,		    "float" },
+	{ VT_UNKNOWN,		    "mixed|VT_UNKNOWN" },
+	{ VT_DISPATCH,		    "mixed|VT_DISPATCH" },
+	{ VT_VARIANT,		    "variant|VT_VARIANT" },
+	{ VT_I1,			    "int" },
+	{ VT_UI2,			    "string" },
+	{ VT_UI4,			    "string" },
+	{ VT_INT,			    "int" },
+	{ VT_UINT,			    "int" },
+	{ VT_ARRAY,			    "array" },
+	{ VT_BYREF,			    "mixed|VT_BYREF" },
+	{ VT_VOID,			    "void" },
+	{ VT_PTR,			    "mixed|VT_PTR" },
+	{ VT_HRESULT,		    "mixed|VT_HRESULT" },
+	{ VT_SAFEARRAY,		    "array" },
+	{ VT_CARRAY,		    "array" },
+	{ VT_USERDEFINED,	    "mixed|VT_USERDEFINED" },
+	{ VT_LPSTR,			    "mixed|VT_LPSTR" },
+	{ VT_LPWSTR,		    "mixed|VT_LPWSTR" },
+	{ VT_RECORD,		    "mixed|VT_RECORD" },
+	{ VT_INT_PTR,		    "mixed|VT_INT_PTR" },
+	{ VT_UINT_PTR,		    "mixed|VT_UINT_PTR" },
+	{ VT_FILETIME,		    "mixed|VT_FILETIME" },
+	{ VT_BLOB,			    "mixed|VT_BLOB" },
+	{ VT_STREAM,		    "mixed|VT_STREAM" },
+	{ VT_STORAGE,		    "mixed|VT_STORAGE" },
+	{ VT_STREAMED_OBJECT,   "mixed|VT_STREAMED_OBJECT" },
+	{ VT_STORED_OBJECT,     "mixed|VT_STORED_OBJECT" },
+	{ VT_BLOB_OBJECT,	    "mixed|VT_BLOB_OBJECT" },
+	{ VT_CF,			    "mixed|VT_CF" },
+	{ VT_CLSID,		        "mixed|VT_CLSID" },
+	{ VT_VERSIONED_STREAM,  "mixed|VT_VERSIONED_STREAM" },
+	{ VT_BSTR_BLOB,         "mixed|VT_BSTR_BLOB" },
+	{ VT_VECTOR,            "mixed|array" },
+	{ VT_ARRAY,             "mixed|array" },
+	{ VT_BYREF,             "mixed|VT_BYREF" },
+	{ VT_RESERVED,          "mixed|VT_RESERVED" },
+	{ VT_ILLEGAL,           "mixed|VT_ILLEGAL" },
+	{ VT_ILLEGALMASKED,     "mixed|VT_ILLEGALMASKED" },
+	{ VT_TYPEMASK,          "mixed|VT_TYPEMASK" },
 	{ 0, NULL }
 };
 
@@ -467,7 +492,6 @@ static char *php_com_string_from_clsid(const CLSID *clsid, int codepage)
 
 	return clsid_str;
 }
-
 
 int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int printdef, GUID *guid, int codepage)
 {
@@ -642,4 +666,215 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 	ITypeInfo_ReleaseTypeAttr(typeinfo, attr);
 
 	return ret;
+}
+
+int php_com_print_typeinfo(ITypeInfo* typeinfo, int codepage)
+{
+	TYPEATTR* attr;
+	FUNCDESC* func;
+	FUNCDESC* nextFunc;
+	int i;
+	OLECHAR* olename;
+	OLECHAR* docString;
+	char* ansiname = NULL;
+	size_t ansinamelen;
+	char* guidstring;
+	char* class_name = NULL;
+	DISPID lastid = 0;	/* for props */
+	int isprop;
+
+	int j;
+	char* funcdesc;
+	char* param;
+	size_t funcdesclen;
+	unsigned int cnames = 0;
+	BSTR* names;
+
+	if (FAILED(ITypeInfo_GetTypeAttr(typeinfo, &attr))) {
+		return 0;
+	}
+
+	ITypeInfo_GetDocumentation(typeinfo, MEMBERID_NIL, &olename, NULL, NULL, NULL);
+	class_name = php_com_olestring_to_string(olename, &ansinamelen, codepage);
+	guidstring = php_com_string_from_clsid(&attr->guid, codepage);
+	php_printf("/**\n * Class %s\n * GUID=%s\n *\n", class_name, guidstring);
+	efree(guidstring);
+
+	// print class doc block with properties
+	for (i = 0; i < attr->cFuncs; i++) {
+
+		if (FAILED(ITypeInfo_GetFuncDesc(typeinfo, i, &func)))
+			break;
+
+		isprop = (func->invkind & DISPATCH_PROPERTYGET || func->invkind & DISPATCH_PROPERTYPUT);
+
+		if (isprop && lastid != func->memid)
+		{
+			char* propReadOnly = "";
+			lastid = func->memid;
+			ITypeInfo_GetDocumentation(typeinfo, func->memid, &olename, &docString, NULL, NULL);
+			ansiname = php_com_olestring_to_string(olename, &ansinamelen, codepage);
+			SysFreeString(olename);
+
+			char* funcdesc;
+			size_t funcdesclen;
+
+			if (!FAILED(ITypeInfo_GetFuncDesc(typeinfo, i + 1, &nextFunc)) && func->memid != nextFunc->memid)
+			{
+				propReadOnly = "-read";
+			}
+
+			php_printf(" * @property%s %s $%s",
+				propReadOnly,
+				vt_to_string(func->elemdescFunc.tdesc.vt),
+				ansiname
+			);
+			efree(ansiname);
+
+			if (docString) {
+				funcdesc = php_com_olestring_to_string(docString, &funcdesclen, codepage);
+				php_printf(" %s", funcdesc);
+				SysFreeString(docString);
+				efree(funcdesc);
+			}
+			php_printf("\n");
+			ITypeInfo_ReleaseFuncDesc(typeinfo, func);
+		}
+
+	}
+	php_printf(" */\n");
+
+	// print class definition
+	php_printf("class %s \n{\n", class_name);
+	for (i = 0; i < attr->cFuncs; i++) {
+		if (FAILED(ITypeInfo_GetFuncDesc(typeinfo, i, &func)))
+			break;
+
+		isprop = (func->invkind & DISPATCH_PROPERTYGET || func->invkind & DISPATCH_PROPERTYPUT);
+		if (!isprop || lastid != func->memid) {
+			lastid = func->memid;
+			ITypeInfo_GetDocumentation(typeinfo, func->memid, &olename, &docString, NULL, NULL);
+			ansiname = php_com_olestring_to_string(olename, &ansinamelen, codepage);
+			SysFreeString(olename);
+
+			names = (BSTR*)safe_emalloc((func->cParams + 1), sizeof(BSTR), 0);
+			ITypeInfo_GetNames(typeinfo, func->memid, names, func->cParams + 1, &cnames);
+			/* first element is the function name */
+			SysFreeString(names[0]);
+
+			php_printf("\t/**\n\t * DISPID=%d\n", func->memid);
+
+			if (isprop) {
+				php_printf("\t * @var %s $%s [%d]",
+					vt_to_string(func->elemdescFunc.tdesc.vt),
+					ansiname,
+					func->elemdescFunc.tdesc.vt
+				);
+				if (docString) {
+					funcdesc = php_com_olestring_to_string(docString, &funcdesclen, codepage);
+					php_printf(" %s", funcdesc);
+					SysFreeString(docString);
+					efree(funcdesc);
+				}
+				php_printf("\n\t*/\n");
+				php_printf("\tvar $%s;\n\n", ansiname);
+			}
+			else {
+				// function: print params doc block
+				for (j = 0; j < func->cParams; j++) {
+					ELEMDESC* elem = &func->lprgelemdescParam[j];
+
+					/* when we handle prop put and get, this will look nicer */
+					if (j + 1 < (int)cnames) {
+						param = php_com_olestring_to_string(names[j + 1], &funcdesclen, codepage);
+					}
+					else {
+						param = "???";
+					}
+
+					php_printf("\t * @param %s $%s ",
+						elem->tdesc.vt == VT_PTR ? vt_to_string(elem->tdesc.lptdesc->vt) : vt_to_string(elem->tdesc.vt),
+						param);
+
+					if (elem->paramdesc.wParamFlags & PARAMFLAG_FIN)
+						php_printf("[in]");
+					if (elem->paramdesc.wParamFlags & PARAMFLAG_FOUT)
+						php_printf("[out]");
+
+					php_printf("\n");
+				}
+				php_printf("\t * @return %s \n",
+					vt_to_string(func->elemdescFunc.tdesc.vt)
+				);
+
+				if (docString) {
+					funcdesc = php_com_olestring_to_string(docString, &funcdesclen, codepage);
+					SysFreeString(docString);
+					php_printf("\t * %s\n", funcdesc);
+					efree(funcdesc);
+				}
+				php_printf("\t */\n");
+				//////////////////////
+				php_printf("\tfunction %s(", ansiname);
+				if (func->cParams > 0) {
+					php_printf("\n");
+				}
+
+				for (j = 0; j < func->cParams; j++) {
+					ELEMDESC* elem = &func->lprgelemdescParam[j];
+
+					php_printf("\t\t/* %s [%d] ", vt_to_string(elem->tdesc.vt), elem->tdesc.vt);
+
+					if (elem->paramdesc.wParamFlags & PARAMFLAG_FIN)
+						php_printf("[in]");
+					if (elem->paramdesc.wParamFlags & PARAMFLAG_FOUT)
+						php_printf("[out]");
+
+					if (elem->tdesc.vt == VT_PTR) {
+						/* what does it point to ? */
+						php_printf(" --> %s [%d] ",
+							vt_to_string(elem->tdesc.lptdesc->vt),
+							elem->tdesc.lptdesc->vt
+						);
+					}
+
+					/* when we handle prop put and get, this will look nicer */
+					if (j + 1 < (int)cnames) {
+						param = php_com_olestring_to_string(names[j + 1], &funcdesclen, codepage);
+						SysFreeString(names[j + 1]);
+					}
+					else {
+						param = "???";
+					}
+
+					php_printf(" */ %s%s%c\n",
+						elem->tdesc.vt == VT_PTR ? "&$" : "$",
+						param,
+						j == func->cParams - 1 ? ' ' : ','
+					);
+
+					if (j + 1 < (int)cnames) {
+						efree(param);
+					}
+				}
+
+				if (func->cParams > 0) {
+					php_printf("\t)\n\t{\n");
+				}
+				else {
+					php_printf(")\n\t{\n");
+				}
+
+				php_printf("\t}\n\n");
+			}
+
+			efree(names);
+		}
+	}
+	php_printf("}");
+	ITypeInfo_ReleaseFuncDesc(typeinfo, func);
+
+	ITypeInfo_ReleaseTypeAttr(typeinfo, attr);
+
+	return 1;
 }
