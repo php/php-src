@@ -460,41 +460,69 @@ finish:
 				strip_header(user_headers, t, "content-type:");
 			}
 
-			if ((s = strstr(t, "user-agent:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_USER_AGENT;
-			}
-			if ((s = strstr(t, "host:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_HOST;
-			}
-			if ((s = strstr(t, "from:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_FROM;
+			s = t;
+			while ((s = strstr(s, "user-agent:"))) {
+				if (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
+				                 *(s-1) == '\t' || *(s-1) == ' ') {
+					 have_header |= HTTP_HEADER_USER_AGENT;
 				}
-			if ((s = strstr(t, "authorization:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_AUTH;
+				s++;
 			}
-			if ((s = strstr(t, "content-length:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_CONTENT_LENGTH;
+
+			s = t;
+			while ((s = strstr(s, "host:"))) {
+				if (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
+				                 *(s-1) == '\t' || *(s-1) == ' ') {
+					 have_header |= HTTP_HEADER_HOST;
+				}
+				s++;
 			}
-			if ((s = strstr(t, "content-type:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_TYPE;
+
+			s = t;
+			while ((s = strstr(s, "from:"))) {
+				if (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
+				                 *(s-1) == '\t' || *(s-1) == ' ') {
+					 have_header |= HTTP_HEADER_FROM;
+				}
+				s++;
 			}
-			if ((s = strstr(t, "connection:")) &&
-			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
-			                 *(s-1) == '\t' || *(s-1) == ' ')) {
-				 have_header |= HTTP_HEADER_CONNECTION;
+
+			s = t;
+			while ((s = strstr(s, "authorization:"))) {
+				if (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
+				                 *(s-1) == '\t' || *(s-1) == ' ') {
+					 have_header |= HTTP_HEADER_AUTH;
+				}
+				s++;
 			}
+
+			s = t;
+			while ((s = strstr(s, "content-length:"))) {
+				if (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
+				                 *(s-1) == '\t' || *(s-1) == ' ') {
+					 have_header |= HTTP_HEADER_CONTENT_LENGTH;
+				}
+				s++;
+			}
+
+			s = t;
+			while ((s = strstr(s, "content-type:"))) {
+				if (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
+				                 *(s-1) == '\t' || *(s-1) == ' ') {
+					 have_header |= HTTP_HEADER_TYPE;
+				}
+				s++;
+			}
+
+			s = t;
+			while ((s = strstr(s, "connection:"))) {
+				if (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
+				                 *(s-1) == '\t' || *(s-1) == ' ') {
+					 have_header |= HTTP_HEADER_CONNECTION;
+				}
+				s++;
+			}
+
 			/* remove Proxy-Authorization header */
 			if (use_proxy && use_ssl && (s = strstr(t, "proxy-authorization:")) &&
 			    (s == t || *(s-1) == '\r' || *(s-1) == '\n' ||
