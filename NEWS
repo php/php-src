@@ -44,6 +44,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #79254 (getenv() w/o arguments not showing changes). (cmb)
+  . Fixed bug #79265 (Improper injection of Host header when using fopen for
+    http requests). (Miguel Xavier Penha Neto)
 
 ?? ??? ????, PHP 7.4.3
 
