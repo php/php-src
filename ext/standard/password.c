@@ -669,7 +669,7 @@ PHP_FUNCTION(password_hash)
 	algo = php_password_algo_find_zval(zalgo);
 	if (!algo) {
 		zend_string *algostr = zval_get_string(zalgo);
-		zend_value_error("Unknown password hashing algorithm: %s", ZSTR_VAL(algostr));
+		zend_argument_value_error(2, "must be a valid password hashing algorithm");
 		zend_string_release(algostr);
 		RETURN_THROWS();
 	}

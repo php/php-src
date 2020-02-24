@@ -241,7 +241,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 }
 /* }}} */
 
-ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error(zend_class_entry *error_ce, uint32_t arg_num, const char *format, ...) /* {{{ */
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error_variadic(zend_class_entry *error_ce, uint32_t arg_num, const char *format, va_list va) /* {{{ */
 {
 	const char *space;
 	const char *class_name;
@@ -254,17 +254,42 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error(zend_class_entry *erro
 	class_name = get_active_class_name(&space);
 	arg_name = get_active_function_arg_name(arg_num);
 
-	va_list va;
-	va_start(va, format);
 	zend_vspprintf(&message, 0, format, va);
-	va_end(va);
-
 	zend_throw_error(error_ce, "%s%s%s(): Argument #%d%s%s%s %s",
-		class_name, space, get_active_function_name(),
-		arg_num, arg_name ? " ($" : "", arg_name ? arg_name : "", arg_name ? ")" : "",
-		message
+		class_name, space, get_active_function_name(), arg_num,
+		arg_name ? " ($" : "", arg_name ? arg_name : "", arg_name ? ")" : "", message
     );
 	efree(message);
+}
+/* }}} */
+
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error(zend_class_entry *error_ce, uint32_t arg_num, const char *format, ...) /* {{{ */
+{
+	va_list va;
+
+	va_start(va, format);
+	zend_argument_error_variadic(error_ce, arg_num, format, va);
+	va_end(va);
+}
+/* }}} */
+
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_type_error(uint32_t arg_num, const char *format, ...) /* {{{ */
+{
+	va_list va;
+
+	va_start(va, format);
+	zend_argument_error_variadic(zend_ce_type_error, arg_num, format, va);
+	va_end(va);
+}
+/* }}} */
+
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num, const char *format, ...) /* {{{ */
+{
+	va_list va;
+
+	va_start(va, format);
+	zend_argument_error_variadic(zend_ce_value_error, arg_num, format, va);
+	va_end(va);
 }
 /* }}} */
 

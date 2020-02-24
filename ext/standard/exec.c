@@ -484,7 +484,7 @@ PHP_FUNCTION(escapeshellcmd)
 
 	if (command_len) {
 		if (command_len != strlen(command)) {
-			zend_type_error("Input string contains NULL bytes");
+			zend_argument_type_error(1, "must not contain any null bytes");
 			RETURN_THROWS();
 		}
 		RETVAL_STR(php_escape_shell_cmd(command));
@@ -506,7 +506,7 @@ PHP_FUNCTION(escapeshellarg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (argument_len != strlen(argument)) {
-		zend_type_error("Input string contains NULL bytes");
+		zend_argument_type_error(1, "must not contain any null bytes");
 		RETURN_THROWS();
 	}
 

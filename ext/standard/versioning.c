@@ -238,7 +238,7 @@ PHP_FUNCTION(version_compare)
 		RETURN_BOOL(compare != 0);
 	}
 
-	zend_value_error("Invalid comparison operator");
+	zend_argument_value_error(3, "must be a valid comparison operator");
 }
 
 /* }}} */

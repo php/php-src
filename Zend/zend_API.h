@@ -1154,10 +1154,8 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, z
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, const char *name, zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *error);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error(zend_class_entry *error_ce, uint32_t arg_num, const char *format, ...);
-#define zend_argument_type_error(arg_num, ...) \
-	zend_argument_error(zend_ce_type_error, arg_num, __VA_ARGS__)
-#define zend_argument_value_error(arg_num, ...) \
-	zend_argument_error(zend_ce_value_error, arg_num, __VA_ARGS__)
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_type_error(uint32_t arg_num, const char *format, ...);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num, const char *format, ...);
 
 #define ZPP_ERROR_OK             0
 #define ZPP_ERROR_FAILURE        1

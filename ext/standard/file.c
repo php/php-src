@@ -543,7 +543,7 @@ PHP_FUNCTION(file_get_contents)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_NUM_ARGS() == 5 && maxlen < 0) {
-		zend_value_error("Length must be greater than or equal to zero");
+		zend_argument_value_error(5, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -1040,7 +1040,7 @@ PHPAPI PHP_FUNCTION(fgets)
 		efree(buf);
 	} else if (argc > 1) {
 		if (len <= 0) {
-			zend_value_error("Length parameter must be greater than 0");
+			zend_argument_value_error(2, "must be greater than 0");
 			RETURN_THROWS();
 		}
 
@@ -1750,7 +1750,7 @@ PHPAPI PHP_FUNCTION(fread)
 	PHP_STREAM_TO_ZVAL(stream, res);
 
 	if (len <= 0) {
-		zend_value_error("Length parameter must be greater than 0");
+		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
@@ -1829,7 +1829,7 @@ PHP_FUNCTION(fputcsv)
 	if (delimiter_str != NULL) {
 		/* Make sure that there is at least one character in string */
 		if (delimiter_str_len < 1) {
-			zend_value_error("delimiter must be a character");
+			zend_argument_value_error(3, "must be a single character");
 			RETURN_THROWS();
 		} else if (delimiter_str_len > 1) {
 			php_error_docref(NULL, E_NOTICE, "delimiter must be a single character");
@@ -1841,7 +1841,7 @@ PHP_FUNCTION(fputcsv)
 
 	if (enclosure_str != NULL) {
 		if (enclosure_str_len < 1) {
-			zend_value_error("enclosure must be a character");
+			zend_argument_value_error(4, "must be a single character");
 			RETURN_THROWS();
 		} else if (enclosure_str_len > 1) {
 			php_error_docref(NULL, E_NOTICE, "enclosure must be a single character");
@@ -1967,7 +1967,7 @@ PHP_FUNCTION(fgetcsv)
 		if (delimiter_str != NULL) {
 			/* Make sure that there is at least one character in string */
 			if (delimiter_str_len < 1) {
-				zend_value_error("delimiter must be a character");
+				zend_argument_value_error(3, "must be a single character");
 				RETURN_THROWS();
 			} else if (delimiter_str_len > 1) {
 				php_error_docref(NULL, E_NOTICE, "delimiter must be a single character");
@@ -1979,7 +1979,7 @@ PHP_FUNCTION(fgetcsv)
 
 		if (enclosure_str != NULL) {
 			if (enclosure_str_len < 1) {
-				zend_value_error("enclosure must be a character");
+				zend_argument_value_error(4, "must be a single character");
 				RETURN_THROWS();
 			} else if (enclosure_str_len > 1) {
 				php_error_docref(NULL, E_NOTICE, "enclosure must be a single character");
@@ -2004,7 +2004,7 @@ PHP_FUNCTION(fgetcsv)
 		if (len_zv != NULL && Z_TYPE_P(len_zv) != IS_NULL) {
 			len = zval_get_long(len_zv);
 			if (len < 0) {
-				zend_value_error("Length parameter may not be negative");
+				zend_argument_value_error(2, "must be a greater than or equal to 0");
 				RETURN_THROWS();
 			} else if (len == 0) {
 				len = -1;
