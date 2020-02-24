@@ -1938,7 +1938,7 @@ PHP_FUNCTION(sleep)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (num < 0) {
-		zend_value_error("Number of seconds must be greater than or equal to 0");
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -1958,7 +1958,7 @@ PHP_FUNCTION(usleep)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (num < 0) {
-		zend_value_error("Number of microseconds must be greater than or equal to 0");
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 	if (usleep((unsigned int)num) < 0) {
@@ -1985,11 +1985,11 @@ PHP_FUNCTION(time_nanosleep)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (tv_sec < 0) {
-		zend_value_error("The seconds value must be greater than 0");
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 	if (tv_nsec < 0) {
-		zend_value_error("The nanoseconds value must be greater than 0");
+		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 

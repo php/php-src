@@ -20,4 +20,4 @@ try {
 ?>
 --EXPECT--
 -- Testing strpbrk() function with empty second argument --
-The character list cannot be empty
+strpbrk(): Argument #2 ($char_list) must be a non-empty string

@@ -33,9 +33,9 @@ var_dump(min(0, true, false, true));
 
 ?>
 --EXPECT--
-When only one parameter is given, it must be an array
-Array must contain at least one element
-When only one parameter is given, it must be an array
+min(): Argument #1 ($arg) must be of type array, int given
+min(): Argument #1 ($arg) must contain at least one element
+min(): Argument #1 ($arg) must be of type array, object given
 int(1)
 float(2.09)
 string(0) ""

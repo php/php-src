@@ -14,6 +14,6 @@ Bug #60222 (time_nanosleep() does validate input params)
         echo $exception->getMessage() . "\n";
     }
 ?>
---EXPECTF--
-The seconds value must be greater than 0
-The nanoseconds value must be greater than 0
+--EXPECT--
+time_nanosleep(): Argument #1 ($seconds) must be greater than or equal to 0
+time_nanosleep(): Argument #2 ($nanoseconds) must be greater than or equal to 0

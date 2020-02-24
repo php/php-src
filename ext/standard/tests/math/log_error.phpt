@@ -11,4 +11,4 @@ try {
 }
 ?>
 --EXPECT--
-Base must be greater than 0
+log(): Argument #2 ($base) must be greater than 0

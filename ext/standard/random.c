@@ -205,7 +205,7 @@ PHP_FUNCTION(random_bytes)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (size < 1) {
-		zend_throw_exception(zend_ce_error, "Length must be greater than 0", 0);
+		zend_argument_value_error(1, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
@@ -280,7 +280,7 @@ PHP_FUNCTION(random_int)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (min > max) {
-		zend_throw_exception(zend_ce_error, "Minimum value must be less than or equal to the maximum value", 0);
+		zend_argument_value_error(1, "must be less than or equal to argument #2 ($max)");
 		RETURN_THROWS();
 	}
 

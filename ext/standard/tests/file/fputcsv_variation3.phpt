@@ -80,649 +80,649 @@ echo "Done\n";
 *** Testing fputcsv() : with enclosure as NULL ***
 
 -- file opened in r+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in r+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in a+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in w+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+ --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+b --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""
 
 -- file opened in x+t --
-enclosure must be a character
+fputcsv(): Argument #4 ($enclosure) must be a single character
 int(0)
 bool(false)
 string(0) ""

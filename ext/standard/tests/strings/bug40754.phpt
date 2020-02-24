@@ -67,12 +67,12 @@ string(4) "bcde"
 string(6) "abcdex"
 bool(false)
 bool(false)
-Offset not contained in string
+substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 Warning: substr_compare(): The start position cannot exceed initial string length in %s on line %d
 bool(false)
 Offset not contained in string
-Offset not contained in string
+substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 Warning: substr_count(): Invalid length value in %s on line %d
 bool(false)

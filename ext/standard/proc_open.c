@@ -629,7 +629,7 @@ PHP_FUNCTION(proc_open)
 		zval *ztype;
 
 		if (str_index) {
-			zend_value_error("Descriptor spec must be an integer indexed array");
+			zend_argument_value_error(2, "must be an integer indexed array");
 			goto exit_fail;
 		}
 

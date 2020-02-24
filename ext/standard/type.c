@@ -84,7 +84,7 @@ PHP_FUNCTION(settype)
 		if (zend_string_equals_literal_ci(type, "resource")) {
 			zend_value_error("Cannot convert to resource type");
 		} else {
-			zend_value_error("Invalid type");
+			zend_argument_value_error(2, "must be a valid type");
 		}
 		RETURN_THROWS();
 	}

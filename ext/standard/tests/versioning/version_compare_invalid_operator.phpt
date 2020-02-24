@@ -11,4 +11,4 @@ try {
 }
 ?>
 --EXPECT--
-Invalid comparison operator
+version_compare(): Argument #3 ($operator) must be a valid comparison operator

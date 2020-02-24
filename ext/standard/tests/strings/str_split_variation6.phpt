@@ -47,7 +47,7 @@ for($count = 0; $count < count($values); $count++) {
 --EXPECT--
 *** Testing str_split() : different integer values for 'split_length' ***
 -- Iteration 1 --
-The length of each segment must be greater than zero
+str_split(): Argument #2 ($split_length) must be greater than 0
 -- Iteration 2 --
 array(42) {
   [0]=>
@@ -136,7 +136,7 @@ array(42) {
   string(1) "t"
 }
 -- Iteration 3 --
-The length of each segment must be greater than zero
+str_split(): Argument #2 ($split_length) must be greater than 0
 -- Iteration 4 --
 array(1) {
   [0]=>
@@ -155,4 +155,4 @@ array(1) {
   string(42) "This is a string with 123 & escape char \t"
 }
 -- Iteration 7 --
-The length of each segment must be greater than zero
+str_split(): Argument #2 ($split_length) must be greater than 0

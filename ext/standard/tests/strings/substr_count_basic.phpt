@@ -34,8 +34,8 @@ var_dump(substr_count($a, "bca", -200, -50));
 ?>
 --EXPECT--
 ***Testing basic operations ***
-Empty substring
-Empty substring
+substr_count(): Argument #2 ($needle) must be a non-empty string
+substr_count(): Argument #2 ($needle) must be a non-empty string
 int(0)
 int(0)
 int(0)

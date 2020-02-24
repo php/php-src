@@ -551,12 +551,12 @@ PHP_FUNCTION(stream_filter_register)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ZSTR_LEN(filtername)) {
-		zend_value_error("Filter name cannot be empty");
+		zend_argument_value_error(1, "must be a non-empty string");
 		RETURN_THROWS();
 	}
 
 	if (!ZSTR_LEN(classname)) {
-		zend_value_error("Class name cannot be empty");
+		zend_argument_value_error(2, "must be a non-empty string");
 		RETURN_THROWS();
 	}
 

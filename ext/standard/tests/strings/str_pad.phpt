@@ -339,6 +339,6 @@ string(16) "\t\variation\t\t"
 #### error conditions ####
 
 --- padding string as null ---
-Padding string cannot be empty
-Padding string cannot be empty
-Padding type has to be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH
+str_pad(): Argument #3 ($pad_string) must be a non-empty string
+str_pad(): Argument #3 ($pad_string) must be a non-empty string
+str_pad(): Argument #4 ($pad_type) must be STR_PAD_LEFT, STR_PAD_RIGHT, or STR_PAD_BOTH

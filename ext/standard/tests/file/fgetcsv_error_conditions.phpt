@@ -50,12 +50,12 @@ try {
 ?>
 --EXPECT--
 fgetcsv() with negative length
-Length parameter may not be negative
-Length parameter may not be negative
-Length parameter may not be negative
+fgetcsv(): Argument #2 ($length) must be a greater than or equal to 0
+fgetcsv(): Argument #2 ($length) must be a greater than or equal to 0
+fgetcsv(): Argument #2 ($length) must be a greater than or equal to 0
 fgetcsv() with delimiter as NULL
-delimiter must be a character
+fgetcsv(): Argument #3 ($delimiter) must be a single character
 fgetcsv() with enclosure as NULL
-enclosure must be a character
+fgetcsv(): Argument #4 ($enclosure) must be a single character
 fgetcsv() with delimiter & enclosure as NULL
-delimiter must be a character
+fgetcsv(): Argument #3 ($delimiter) must be a single character

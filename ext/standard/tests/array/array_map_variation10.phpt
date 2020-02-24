@@ -88,5 +88,5 @@ array(3) {
   NULL
 }
 -- passing NULL as 'arr1' --
-Expected parameter 2 to be an array, null given
+array_map(): Argument #2 ($arr1) must be of type array, null given
 Done
