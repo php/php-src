@@ -27,6 +27,7 @@ addons:
       - libpspell-dev
       - libsasl2-dev
       - libsqlite3-dev
+      - libsodium-dev
       - libtidy-dev
       - libwebp-dev
       - libxml2-dev
