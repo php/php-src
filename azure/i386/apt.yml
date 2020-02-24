@@ -40,6 +40,7 @@ steps:
                               libreadline-dev:i386 \
                               libffi-dev:i386 \
                               libfreetype6-dev:i386 \
+                              libsodium-dev:i386 \
                               postgresql \
                               postgresql-contrib \
                               ${{ parameters.packages }}

@@ -75,6 +75,7 @@ $TS \
 --with-kerberos \
 --enable-sysvmsg \
 --with-ffi \
+--with-sodium \
 --enable-zend-test=shared \
 --enable-werror \
 --with-pear
