@@ -2758,39 +2758,38 @@ static zend_always_inline void zend_assign_to_property_reference(zval *container
 	zend_fetch_property_address(variable_ptr, container, container_op_type, prop_ptr, prop_op_type,
 		cache_addr, BP_VAR_W, 0, 0 OPLINE_CC EXECUTE_DATA_CC);
 
-	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+	if (EXPECTED(Z_TYPE_P(variable_ptr) == IS_INDIRECT)) {
 		variable_ptr = Z_INDIRECT_P(variable_ptr);
-	}
+		if (/*OP_DATA_TYPE == IS_VAR &&*/
+				   (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
+				   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
 
-	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
+			if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+					variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
+				variable_ptr = &EG(uninitialized_zval);
+			}
+		} else {
+			zend_property_info *prop_info = NULL;
+
+			if (prop_op_type == IS_CONST) {
+				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
+			} else {
+				ZVAL_DEREF(container);
+				prop_info = zend_object_fetch_property_type_info(Z_OBJ_P(container), variable_ptr);
+			}
+
+			if (UNEXPECTED(prop_info)) {
+				variable_ptr = zend_assign_to_typed_property_reference(prop_info, variable_ptr, value_ptr EXECUTE_DATA_CC);
+			} else {
+				zend_assign_to_variable_reference(variable_ptr, value_ptr);
+			}
+		}
+	} else if (Z_ISERROR_P(variable_ptr)) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
+	} else {
 		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
 		zval_ptr_dtor(&variable);
 		variable_ptr = &EG(uninitialized_zval);
-	} else if (/*OP_DATA_TYPE == IS_VAR &&*/
-	           (opline->extended_value & ZEND_RETURNS_FUNCTION) &&
-			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
-
-		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
-				variable_ptr, value_ptr OPLINE_CC EXECUTE_DATA_CC))) {
-			variable_ptr = &EG(uninitialized_zval);
-		}
-	} else {
-		zend_property_info *prop_info = NULL;
-
-		if (prop_op_type == IS_CONST) {
-			prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
-		} else {
-			ZVAL_DEREF(container);
-			prop_info = zend_object_fetch_property_type_info(Z_OBJ_P(container), variable_ptr);
-		}
-
-		if (UNEXPECTED(prop_info)) {
-			variable_ptr = zend_assign_to_typed_property_reference(prop_info, variable_ptr, value_ptr EXECUTE_DATA_CC);
-		} else {
-			zend_assign_to_variable_reference(variable_ptr, value_ptr);
-		}
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
