@@ -126,20 +126,20 @@ bool(false)
 int(0)
 bool(false)
 -- Iteration 10 --
-TypeError: stripos() expects argument #1 ($haystack) to be of type string, array given
-TypeError: stripos() expects argument #1 ($haystack) to be of type string, array given
+TypeError: stripos(): Argument #1 ($haystack) must be of type string, array given
+TypeError: stripos(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 11 --
-TypeError: stripos() expects argument #1 ($haystack) to be of type string, array given
-TypeError: stripos() expects argument #1 ($haystack) to be of type string, array given
+TypeError: stripos(): Argument #1 ($haystack) must be of type string, array given
+TypeError: stripos(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 12 --
-TypeError: stripos() expects argument #1 ($haystack) to be of type string, array given
-TypeError: stripos() expects argument #1 ($haystack) to be of type string, array given
+TypeError: stripos(): Argument #1 ($haystack) must be of type string, array given
+TypeError: stripos(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 13 --
-TypeError: stripos() expects argument #1 ($haystack) to be of type string, array given
-TypeError: stripos() expects argument #1 ($haystack) to be of type string, array given
+TypeError: stripos(): Argument #1 ($haystack) must be of type string, array given
+TypeError: stripos(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 14 --
-TypeError: stripos() expects argument #1 ($haystack) to be of type string, array given
-TypeError: stripos() expects argument #1 ($haystack) to be of type string, array given
+TypeError: stripos(): Argument #1 ($haystack) must be of type string, array given
+TypeError: stripos(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 15 --
 int(0)
 bool(false)
@@ -168,8 +168,8 @@ ValueError: Offset not contained in string
 int(0)
 ValueError: Offset not contained in string
 -- Iteration 24 --
-TypeError: stripos() expects argument #1 ($haystack) to be of type string, resource given
-TypeError: stripos() expects argument #1 ($haystack) to be of type string, resource given
+TypeError: stripos(): Argument #1 ($haystack) must be of type string, resource given
+TypeError: stripos(): Argument #1 ($haystack) must be of type string, resource given
 -- Iteration 25 --
 int(0)
 ValueError: Offset not contained in string

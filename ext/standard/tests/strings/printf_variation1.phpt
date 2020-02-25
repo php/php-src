@@ -198,29 +198,29 @@ int(3)
 int(3)
 
 -- Iteration 10 --
-printf() expects argument #1 ($format) to be of type string, array given
-printf() expects argument #1 ($format) to be of type string, array given
-printf() expects argument #1 ($format) to be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 11 --
-printf() expects argument #1 ($format) to be of type string, array given
-printf() expects argument #1 ($format) to be of type string, array given
-printf() expects argument #1 ($format) to be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 12 --
-printf() expects argument #1 ($format) to be of type string, array given
-printf() expects argument #1 ($format) to be of type string, array given
-printf() expects argument #1 ($format) to be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 13 --
-printf() expects argument #1 ($format) to be of type string, array given
-printf() expects argument #1 ($format) to be of type string, array given
-printf() expects argument #1 ($format) to be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 14 --
-printf() expects argument #1 ($format) to be of type string, array given
-printf() expects argument #1 ($format) to be of type string, array given
-printf() expects argument #1 ($format) to be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
+printf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 15 --
 
@@ -311,6 +311,6 @@ int(0)
 int(0)
 
 -- Iteration 26 --
-printf() expects argument #1 ($format) to be of type string, resource given
-printf() expects argument #1 ($format) to be of type string, resource given
-printf() expects argument #1 ($format) to be of type string, resource given
+printf(): Argument #1 ($format) must be of type string, resource given
+printf(): Argument #1 ($format) must be of type string, resource given
+printf(): Argument #1 ($format) must be of type string, resource given

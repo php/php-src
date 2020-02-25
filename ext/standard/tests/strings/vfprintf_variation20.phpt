@@ -133,19 +133,19 @@ unlink($data_file);
 -- Iteration 9 --
 0.5
 -- Iteration 10 --
-vfprintf() expects argument #2 ($format) to be of type string, array given
+vfprintf(): Argument #2 ($format) must be of type string, array given
 
 -- Iteration 11 --
-vfprintf() expects argument #2 ($format) to be of type string, array given
+vfprintf(): Argument #2 ($format) must be of type string, array given
 
 -- Iteration 12 --
-vfprintf() expects argument #2 ($format) to be of type string, array given
+vfprintf(): Argument #2 ($format) must be of type string, array given
 
 -- Iteration 13 --
-vfprintf() expects argument #2 ($format) to be of type string, array given
+vfprintf(): Argument #2 ($format) must be of type string, array given
 
 -- Iteration 14 --
-vfprintf() expects argument #2 ($format) to be of type string, array given
+vfprintf(): Argument #2 ($format) must be of type string, array given
 
 -- Iteration 15 --
 
@@ -170,4 +170,4 @@ object
 -- Iteration 25 --
 
 -- Iteration 26 --
-vfprintf() expects argument #2 ($format) to be of type string, resource given
+vfprintf(): Argument #2 ($format) must be of type string, resource given

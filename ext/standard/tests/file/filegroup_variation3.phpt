@@ -78,8 +78,8 @@ bool(false)
 Warning: filegroup(): stat failed for %s/filegroup_variation3/filegroup*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-filegroup() expects argument #1 ($filename) to be a valid path, string given
+filegroup(): Argument #1 ($filename) must be a valid path, string given
 - Iteration 8 -
-filegroup() expects argument #1 ($filename) to be a valid path, string given
+filegroup(): Argument #1 ($filename) must be a valid path, string given
 
 *** Done ***

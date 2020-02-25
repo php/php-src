@@ -26,9 +26,9 @@ echo "Done\n";
 --EXPECTF--
 string(9) "x.changed"
 
-Warning: C::__construct() expects argument #1 ($x) to be passed by reference, value given in %s on line %d
+Warning: C::__construct(): Argument #1 ($x) must be passed by reference, value given in %s on line %d
 string(10) "x.original"
 
-Warning: C::__construct() expects argument #1 ($x) to be passed by reference, value given in %s on line %d
+Warning: C::__construct(): Argument #1 ($x) must be passed by reference, value given in %s on line %d
 string(10) "x.original"
 Done

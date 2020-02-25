@@ -49,6 +49,6 @@ Too few arguments to function bar(), 1 passed in %s and exactly 2 expected
 ArgumentCountError
 Too few arguments to function bat(), 1 passed in %s and exactly 2 expected
 TypeError
-bat() expects argument #1 ($foo) to be of type int, string given, called in %s on line %d
+bat(): Argument #1 ($foo) must be of type int, string given, called in %s on line %d
 TypeError
-bat() expects argument #2 ($bar) to be of type string, int given, called in %s on line %d
+bat(): Argument #2 ($bar) must be of type string, int given, called in %s on line %d

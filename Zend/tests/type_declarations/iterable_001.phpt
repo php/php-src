@@ -44,4 +44,4 @@ object(ArrayIterator)#1 (1) {
     int(3)
   }
 }
-test() expects argument #1 ($iterable) to be of type iterable, int given, called in %s on line %d
+test(): Argument #1 ($iterable) must be of type iterable, int given, called in %s on line %d

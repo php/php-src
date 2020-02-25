@@ -78,19 +78,19 @@ STDERR (php://fd/2):
 - current value  : bool(false)
 Not a stream:
 - current value  :
-Warning: sapi_windows_vt100_support() expects argument #1 to be of type resource, string given in %s on line %d
+Warning: sapi_windows_vt100_support(): Argument #1 must be of type resource, string given in %s on line %d
 bool(false)
 - enabling VT100 :
-Warning: sapi_windows_vt100_support() expects argument #1 to be of type resource, string given in %s on line %d
+Warning: sapi_windows_vt100_support(): Argument #1 must be of type resource, string given in %s on line %d
 bool(false)
 - current value  :
-Warning: sapi_windows_vt100_support() expects argument #1 to be of type resource, string given in %s on line %d
+Warning: sapi_windows_vt100_support(): Argument #1 must be of type resource, string given in %s on line %d
 bool(false)
 - disabling VT100:
-Warning: sapi_windows_vt100_support() expects argument #1 to be of type resource, string given in %s on line %d
+Warning: sapi_windows_vt100_support(): Argument #1 must be of type resource, string given in %s on line %d
 bool(false)
 - current value  :
-Warning: sapi_windows_vt100_support() expects argument #1 to be of type resource, string given in %s on line %d
+Warning: sapi_windows_vt100_support(): Argument #1 must be of type resource, string given in %s on line %d
 bool(false)
 Invalid stream (php://temp):
 - current value  :

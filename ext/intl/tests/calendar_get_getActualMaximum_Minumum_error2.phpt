@@ -93,11 +93,11 @@ error: 2, intlcal_get_actual_maximum(): intlcal_get_actual_maximum: invalid fiel
 bool(false)
 error: 2, intlcal_get_actual_minimum(): intlcal_get_actual_minimum: invalid field
 bool(false)
-error: 0, intlcal_get() expects argument #2 ($field) to be of type int, string given
+error: 0, intlcal_get(): Argument #2 ($field) must be of type int, string given
 
-error: 0, intlcal_get_actual_maximum() expects argument #2 ($field) to be of type int, string given
+error: 0, intlcal_get_actual_maximum(): Argument #2 ($field) must be of type int, string given
 
-error: 0, intlcal_get_actual_minimum() expects argument #2 ($field) to be of type int, string given
+error: 0, intlcal_get_actual_minimum(): Argument #2 ($field) must be of type int, string given
 
 error: 0, intlcal_get() expects exactly 2 parameters, 1 given
 

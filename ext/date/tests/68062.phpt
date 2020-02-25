@@ -14,4 +14,4 @@ try {
 }
 --EXPECT--
 3600
-DateTimeZone::getOffset() expects argument #1 ($datetime) to be of type DateTimeInterface, int given
+DateTimeZone::getOffset(): Argument #1 ($datetime) must be of type DateTimeInterface, int given

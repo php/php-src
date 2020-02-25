@@ -30,7 +30,7 @@ NULL
 Warning: Undefined variable: y in %s on line %d
 Exception: Too few arguments to function {closure}(), 0 passed in %s on line %d and exactly 1 expected
 
-Fatal error: Uncaught TypeError: test() expects argument #1 ($a) to be of type Closure, stdClass given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: test(): Argument #1 ($a) must be of type Closure, stdClass given, called in %s:%d
 Stack trace:
 #0 %s(%d): test(Object(stdClass))
 #1 {main}

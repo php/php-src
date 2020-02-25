@@ -31,7 +31,7 @@ try {
 }
 --EXPECT--
 int(0)
-string(106) "IntlTimeZone::hasSameRules() expects argument #1 ($otherTimeZone) to be of type IntlTimeZone, string given"
+string(101) "IntlTimeZone::hasSameRules(): Argument #1 ($otherTimeZone) must be of type IntlTimeZone, string given"
 
 int(0)
-string(88) "intltz_has_same_rules() expects argument #1 ($tz) to be of type IntlTimeZone, null given"
+string(83) "intltz_has_same_rules(): Argument #1 ($tz) must be of type IntlTimeZone, null given"

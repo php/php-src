@@ -62,5 +62,5 @@ Method  does not exist
 Method 1 does not exist
 Method 1.5 does not exist
 Method 1 does not exist
-ReflectionClass::getMethod() expects argument #1 ($name) to be of type string, array given
-ReflectionClass::getMethod() expects argument #1 ($name) to be of type string, object given
+ReflectionClass::getMethod(): Argument #1 ($name) must be of type string, array given
+ReflectionClass::getMethod(): Argument #1 ($name) must be of type string, object given

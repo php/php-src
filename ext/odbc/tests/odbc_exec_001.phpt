@@ -28,11 +28,11 @@ odbc_exec($conn, NULL);
 
 ?>
 --EXPECTF--
-Warning: odbc_exec() expects argument #3 to be of type int, string given in %s on line %d
+Warning: odbc_exec(): Argument #3 must be of type int, string given in %s on line %d
 
 Warning: odbc_exec(): SQL error: %s in %s on line %d
 
-Warning: odbc_exec() expects argument #3 to be of type int, string given in %s on line %d
+Warning: odbc_exec(): Argument #3 must be of type int, string given in %s on line %d
 
 Warning: odbc_exec(): SQL error: %s in %s on line %d
 

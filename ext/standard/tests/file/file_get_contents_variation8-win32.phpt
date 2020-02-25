@@ -82,10 +82,10 @@ Warning: file_get_contents( ): Failed to open stream: Permission denied in %s on
 bool(false)
 
 -- Filename: \0 --
-file_get_contents() expects argument #1 ($filename) to be a valid path, string given
+file_get_contents(): Argument #1 ($filename) must be a valid path, string given
 
 -- Filename: array() --
-file_get_contents() expects argument #1 ($filename) to be a valid path, array given
+file_get_contents(): Argument #1 ($filename) must be a valid path, array given
 
 -- Filename: /no/such/file/dir --
 

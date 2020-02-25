@@ -106,9 +106,9 @@ File name is => %s/%s
 File permissions are => 100600
 File created in => directory specified
 -- Iteration 6 --
-tempnam() expects argument #2 ($prefix) to be a valid path, string given
+tempnam(): Argument #2 ($prefix) must be a valid path, string given
 -- Iteration 7 --
-tempnam() expects argument #2 ($prefix) to be a valid path, array given
+tempnam(): Argument #2 ($prefix) must be a valid path, array given
 -- Iteration 8 --
 File name is => %s/dir%s
 File permissions are => 100600

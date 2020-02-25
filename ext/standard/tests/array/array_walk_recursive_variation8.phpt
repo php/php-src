@@ -40,5 +40,5 @@ bool(true)
 -- With 'min' built-in function --
 bool(true)
 -- With 'echo' language construct --
-array_walk_recursive() expects argument #2 ($funcname) to be a valid callback, function 'echo' not found or invalid function name
+array_walk_recursive(): Argument #2 ($funcname) must be a valid callback, function 'echo' not found or invalid function name
 Done

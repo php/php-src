@@ -13,7 +13,7 @@ function f(UndefClass $x)
 f(new stdClass);
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: f() expects argument #1 ($x) to be of type UndefClass, stdClass given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: f(): Argument #1 ($x) must be of type UndefClass, stdClass given, called in %s on line %d and defined in %s:%d
 Stack trace:
 #0 %s(%d): f(Object(stdClass))
 #1 {main}

@@ -45,7 +45,7 @@ array(3) {
   array(0) {
   }
 }
-mb_ereg() expects argument #1 ($pattern) to be of type string, array given
+mb_ereg(): Argument #1 ($pattern) must be of type string, array given
 array(3) {
   [0]=>
   array(0) {
@@ -55,7 +55,7 @@ array(3) {
   [2]=>
   &string(0) ""
 }
-mb_ereg() expects argument #2 ($string) to be of type string, array given
+mb_ereg(): Argument #2 ($string) must be of type string, array given
 array(3) {
   [0]=>
   int(1)

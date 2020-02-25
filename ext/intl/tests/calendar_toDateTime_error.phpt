@@ -21,7 +21,7 @@ var_dump(intlcal_to_date_time(3));
 Warning: IntlCalendar::toDateTime(): intlcal_to_date_time: DateTimeZone constructor threw exception in %s on line %d
 string(77) "exception: DateTimeZone::__construct(): Unknown or bad timezone (Etc/Unknown)"
 
-Fatal error: Uncaught TypeError: intlcal_to_date_time() expects argument #1 ($calendar) to be of type IntlCalendar, int given in %s:%d
+Fatal error: Uncaught TypeError: intlcal_to_date_time(): Argument #1 ($calendar) must be of type IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_to_date_time(3)
 #1 {main}

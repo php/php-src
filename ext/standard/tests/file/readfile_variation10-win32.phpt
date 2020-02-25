@@ -75,10 +75,10 @@ Warning: readfile(): Filename cannot be empty in %s on line %d
 Warning: readfile( ): Failed to open stream: Permission denied in %s on line %d
 
 -- Filename: \0 --
-readfile() expects argument #1 ($filename) to be a valid path, string given
+readfile(): Argument #1 ($filename) must be a valid path, string given
 
 -- Filename: array() --
-readfile() expects argument #1 ($filename) to be a valid path, array given
+readfile(): Argument #1 ($filename) must be a valid path, array given
 
 -- Filename: /no/such/file/dir --
 

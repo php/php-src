@@ -96,9 +96,9 @@ float(10.7)
 Testing string add val
 string(14) "this is a test"
 Testing int with default null constant
-int_val_default_null() expects argument #1 ($a) to be of type int, null given, called in %s on line %d
+int_val_default_null(): Argument #1 ($a) must be of type int, null given, called in %s on line %d
 Testing int with null null constant
-int_val_default_null() expects argument #1 ($a) to be of type int, null given, called in %s on line %d
+int_val_default_null(): Argument #1 ($a) must be of type int, null given, called in %s on line %d
 Testing nullable int with default null constant
 NULL
 Testing nullable int with null null constant

@@ -23,7 +23,7 @@ bool(false)
 Warning: IntlCalendar::setRepeatedWallTimeOption(): intlcal_set_repeated_wall_time_option: invalid option in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: intlcal_set_repeated_wall_time_option() expects argument #1 ($calendar) to be of type IntlCalendar, int given in %s:%d
+Fatal error: Uncaught TypeError: intlcal_set_repeated_wall_time_option(): Argument #1 ($calendar) must be of type IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_set_repeated_wall_time_option(1, 1)
 #1 {main}

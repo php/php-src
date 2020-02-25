@@ -47,10 +47,10 @@ try {
 --EXPECT--
 error: 0, IntlCalendar::equals() expects exactly 1 parameter, 0 given
 
-error: 0, IntlCalendar::equals() expects argument #1 ($calendar) to be of type IntlCalendar, object given
+error: 0, IntlCalendar::equals(): Argument #1 ($calendar) must be of type IntlCalendar, object given
 
 error: 0, IntlCalendar::equals() expects exactly 1 parameter, 2 given
 
-error: 0, intlcal_equals() expects argument #2 ($calendar) to be of type IntlCalendar, array given
+error: 0, intlcal_equals(): Argument #2 ($calendar) must be of type IntlCalendar, array given
 
-error: 0, intlcal_equals() expects argument #1 ($calendarObject) to be of type IntlCalendar, int given
+error: 0, intlcal_equals(): Argument #1 ($calendarObject) must be of type IntlCalendar, int given

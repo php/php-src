@@ -81,9 +81,9 @@ Failed to write data to:
 -- Iteration 5 --
 9 bytes written to:  
 -- Iteration 6 --
-file_put_contents() expects argument #1 ($filename) to be a valid path, string given
+file_put_contents(): Argument #1 ($filename) must be a valid path, string given
 -- Iteration 7 --
-file_put_contents() expects argument #1 ($filename) to be a valid path, array given
+file_put_contents(): Argument #1 ($filename) must be a valid path, array given
 -- Iteration 8 --
 
 Warning: file_put_contents(%sdir): Failed to open stream: %s in %s on line %d

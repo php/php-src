@@ -32,7 +32,7 @@ $a->b($b);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: FooBar::a() expects argument #1 ($foo) to be of type Foo, Blort given, called in %s on line 27 and defined in %s:12
+Fatal error: Uncaught TypeError: FooBar::a(): Argument #1 ($foo) must be of type Foo, Blort given, called in %s on line 27 and defined in %s:12
 Stack trace:
 #0 %s(%d): FooBar->a(Object(Blort))
 #1 {main}

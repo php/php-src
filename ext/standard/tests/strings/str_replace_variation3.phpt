@@ -200,8 +200,8 @@ array(2) {
 int(1)
 
 -- Testing Resources --
-str_replace() expects argument #3 ($subject) to be of type string|array, resource given
-str_replace() expects argument #3 ($subject) to be of type string|array, resource given
+str_replace(): Argument #3 ($subject) must be of type string|array, resource given
+str_replace(): Argument #3 ($subject) must be of type string|array, resource given
 
 -- Testing a longer and heredoc string --
 string(623) "FOUNDghijklmnopqrstuvwxyz0123456789FOUNDghijklmnopqrstuvwxyz0123456789

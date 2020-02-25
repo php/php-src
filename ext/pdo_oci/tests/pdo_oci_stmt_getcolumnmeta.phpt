@@ -47,7 +47,7 @@ SQL
     if (false !== ($tmp = @$stmt->getColumnMeta(-1)))
         printf("[004] Expecting false got %s\n", var_export($tmp, true));
 
-    // Warning: PDOStatement::getColumnMeta() expects argument #1 to be of type int, array given in
+    // Warning: PDOStatement::getColumnMeta(): Argument #1 must be of type int, array given in
     if (false !== ($tmp = @$stmt->getColumnMeta(array())))
         printf("[005] Expecting false got %s\n", var_export($tmp, true));
 

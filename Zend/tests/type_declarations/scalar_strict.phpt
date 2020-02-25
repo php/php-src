@@ -60,52 +60,52 @@ Testing 'int' type:
 int(1)
 
 *** Trying string(1) "1"
-*** Caught {closure}() expects argument #1 ($i) to be of type int, string given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, string given, called in %s on line %d
 
 *** Trying float(1)
-*** Caught {closure}() expects argument #1 ($i) to be of type int, float given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, float given, called in %s on line %d
 
 *** Trying float(1.5)
-*** Caught {closure}() expects argument #1 ($i) to be of type int, float given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, float given, called in %s on line %d
 
 *** Trying string(2) "1a"
-*** Caught {closure}() expects argument #1 ($i) to be of type int, string given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, string given, called in %s on line %d
 
 *** Trying string(1) "a"
-*** Caught {closure}() expects argument #1 ($i) to be of type int, string given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, string given, called in %s on line %d
 
 *** Trying string(0) ""
-*** Caught {closure}() expects argument #1 ($i) to be of type int, string given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, string given, called in %s on line %d
 
 *** Trying int(2147483647)
 int(2147483647)
 
 *** Trying float(NAN)
-*** Caught {closure}() expects argument #1 ($i) to be of type int, float given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, float given, called in %s on line %d
 
 *** Trying bool(true)
-*** Caught {closure}() expects argument #1 ($i) to be of type int, bool given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, bool given, called in %s on line %d
 
 *** Trying bool(false)
-*** Caught {closure}() expects argument #1 ($i) to be of type int, bool given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, bool given, called in %s on line %d
 
 *** Trying NULL
-*** Caught {closure}() expects argument #1 ($i) to be of type int, null given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, null given, called in %s on line %d
 
 *** Trying array(0) {
 }
-*** Caught {closure}() expects argument #1 ($i) to be of type int, array given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, array given, called in %s on line %d
 
 *** Trying object(stdClass)#5 (0) {
 }
-*** Caught {closure}() expects argument #1 ($i) to be of type int, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, object given, called in %s on line %d
 
 *** Trying object(Stringable)#6 (0) {
 }
-*** Caught {closure}() expects argument #1 ($i) to be of type int, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, object given, called in %s on line %d
 
 *** Trying resource(5) of type (stream)
-*** Caught {closure}() expects argument #1 ($i) to be of type int, resource given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($i) must be of type int, resource given, called in %s on line %d
 
 Testing 'float' type:
 
@@ -113,7 +113,7 @@ Testing 'float' type:
 float(1)
 
 *** Trying string(1) "1"
-*** Caught {closure}() expects argument #1 ($f) to be of type float, string given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, string given, called in %s on line %d
 
 *** Trying float(1)
 float(1)
@@ -122,13 +122,13 @@ float(1)
 float(1.5)
 
 *** Trying string(2) "1a"
-*** Caught {closure}() expects argument #1 ($f) to be of type float, string given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, string given, called in %s on line %d
 
 *** Trying string(1) "a"
-*** Caught {closure}() expects argument #1 ($f) to be of type float, string given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, string given, called in %s on line %d
 
 *** Trying string(0) ""
-*** Caught {closure}() expects argument #1 ($f) to be of type float, string given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, string given, called in %s on line %d
 
 *** Trying int(2147483647)
 float(2147483647)
@@ -137,42 +137,42 @@ float(2147483647)
 float(NAN)
 
 *** Trying bool(true)
-*** Caught {closure}() expects argument #1 ($f) to be of type float, bool given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, bool given, called in %s on line %d
 
 *** Trying bool(false)
-*** Caught {closure}() expects argument #1 ($f) to be of type float, bool given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, bool given, called in %s on line %d
 
 *** Trying NULL
-*** Caught {closure}() expects argument #1 ($f) to be of type float, null given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, null given, called in %s on line %d
 
 *** Trying array(0) {
 }
-*** Caught {closure}() expects argument #1 ($f) to be of type float, array given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, array given, called in %s on line %d
 
 *** Trying object(stdClass)#5 (0) {
 }
-*** Caught {closure}() expects argument #1 ($f) to be of type float, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, object given, called in %s on line %d
 
 *** Trying object(Stringable)#6 (0) {
 }
-*** Caught {closure}() expects argument #1 ($f) to be of type float, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, object given, called in %s on line %d
 
 *** Trying resource(5) of type (stream)
-*** Caught {closure}() expects argument #1 ($f) to be of type float, resource given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($f) must be of type float, resource given, called in %s on line %d
 
 Testing 'string' type:
 
 *** Trying int(1)
-*** Caught {closure}() expects argument #1 ($s) to be of type string, int given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, int given, called in %s on line %d
 
 *** Trying string(1) "1"
 string(1) "1"
 
 *** Trying float(1)
-*** Caught {closure}() expects argument #1 ($s) to be of type string, float given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, float given, called in %s on line %d
 
 *** Trying float(1.5)
-*** Caught {closure}() expects argument #1 ($s) to be of type string, float given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, float given, called in %s on line %d
 
 *** Trying string(2) "1a"
 string(2) "1a"
@@ -184,63 +184,63 @@ string(1) "a"
 string(0) ""
 
 *** Trying int(2147483647)
-*** Caught {closure}() expects argument #1 ($s) to be of type string, int given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, int given, called in %s on line %d
 
 *** Trying float(NAN)
-*** Caught {closure}() expects argument #1 ($s) to be of type string, float given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, float given, called in %s on line %d
 
 *** Trying bool(true)
-*** Caught {closure}() expects argument #1 ($s) to be of type string, bool given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, bool given, called in %s on line %d
 
 *** Trying bool(false)
-*** Caught {closure}() expects argument #1 ($s) to be of type string, bool given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, bool given, called in %s on line %d
 
 *** Trying NULL
-*** Caught {closure}() expects argument #1 ($s) to be of type string, null given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, null given, called in %s on line %d
 
 *** Trying array(0) {
 }
-*** Caught {closure}() expects argument #1 ($s) to be of type string, array given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, array given, called in %s on line %d
 
 *** Trying object(stdClass)#5 (0) {
 }
-*** Caught {closure}() expects argument #1 ($s) to be of type string, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, object given, called in %s on line %d
 
 *** Trying object(Stringable)#6 (0) {
 }
-*** Caught {closure}() expects argument #1 ($s) to be of type string, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, object given, called in %s on line %d
 
 *** Trying resource(5) of type (stream)
-*** Caught {closure}() expects argument #1 ($s) to be of type string, resource given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($s) must be of type string, resource given, called in %s on line %d
 
 Testing 'bool' type:
 
 *** Trying int(1)
-*** Caught {closure}() expects argument #1 ($b) to be of type bool, int given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, int given, called in %s on line %d
 
 *** Trying string(1) "1"
-*** Caught {closure}() expects argument #1 ($b) to be of type bool, string given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, string given, called in %s on line %d
 
 *** Trying float(1)
-*** Caught {closure}() expects argument #1 ($b) to be of type bool, float given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, float given, called in %s on line %d
 
 *** Trying float(1.5)
-*** Caught {closure}() expects argument #1 ($b) to be of type bool, float given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, float given, called in %s on line %d
 
 *** Trying string(2) "1a"
-*** Caught {closure}() expects argument #1 ($b) to be of type bool, string given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, string given, called in %s on line %d
 
 *** Trying string(1) "a"
-*** Caught {closure}() expects argument #1 ($b) to be of type bool, string given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, string given, called in %s on line %d
 
 *** Trying string(0) ""
-*** Caught {closure}() expects argument #1 ($b) to be of type bool, string given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, string given, called in %s on line %d
 
 *** Trying int(2147483647)
-*** Caught {closure}() expects argument #1 ($b) to be of type bool, int given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, int given, called in %s on line %d
 
 *** Trying float(NAN)
-*** Caught {closure}() expects argument #1 ($b) to be of type bool, float given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, float given, called in %s on line %d
 
 *** Trying bool(true)
 bool(true)
@@ -249,21 +249,21 @@ bool(true)
 bool(false)
 
 *** Trying NULL
-*** Caught {closure}() expects argument #1 ($b) to be of type bool, null given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, null given, called in %s on line %d
 
 *** Trying array(0) {
 }
-*** Caught {closure}() expects argument #1 ($b) to be of type bool, array given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, array given, called in %s on line %d
 
 *** Trying object(stdClass)#5 (0) {
 }
-*** Caught {closure}() expects argument #1 ($b) to be of type bool, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, object given, called in %s on line %d
 
 *** Trying object(Stringable)#6 (0) {
 }
-*** Caught {closure}() expects argument #1 ($b) to be of type bool, object given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, object given, called in %s on line %d
 
 *** Trying resource(5) of type (stream)
-*** Caught {closure}() expects argument #1 ($b) to be of type bool, resource given, called in %s on line %d
+*** Caught {closure}(): Argument #1 ($b) must be of type bool, resource given, called in %s on line %d
 
 Done

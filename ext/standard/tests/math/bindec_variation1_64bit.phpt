@@ -151,7 +151,7 @@ int(0)
 int(0)
 
 -- Iteration 18 --
-bindec() expects argument #1 ($binary_string) to be of type string, array given
+bindec(): Argument #1 ($binary_string) must be of type string, array given
 
 -- Iteration 19 --
 
@@ -175,4 +175,4 @@ int(0)
 int(0)
 
 -- Iteration 24 --
-bindec() expects argument #1 ($binary_string) to be of type string, resource given
+bindec(): Argument #1 ($binary_string) must be of type string, resource given

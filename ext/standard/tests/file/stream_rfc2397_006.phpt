@@ -23,8 +23,8 @@ foreach($streams as $stream)
 
 ?>
 --EXPECTF--
-file_get_contents() expects argument #1 ($filename) to be a valid path, string given
-file_get_contents() expects argument #1 ($filename) to be a valid path, string given
+file_get_contents(): Argument #1 ($filename) must be a valid path, string given
+file_get_contents(): Argument #1 ($filename) must be a valid path, string given
 
 Warning: file_get_contents(data:;base64,#Zm9vYmFyIGZvb2Jhcg==): Failed to open stream: rfc2397: unable to decode in %sstream_rfc2397_006.php on line %d
 bool(false)

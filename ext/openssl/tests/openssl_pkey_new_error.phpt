@@ -28,6 +28,6 @@ try {
 }
 ?>
 --EXPECT--
-openssl_pkey_get_details() expects argument #1 ($key) to be of type resource, bool given
-openssl_pkey_get_details() expects argument #1 ($key) to be of type resource, bool given
-openssl_pkey_get_details() expects argument #1 ($key) to be of type resource, bool given
+openssl_pkey_get_details(): Argument #1 ($key) must be of type resource, bool given
+openssl_pkey_get_details(): Argument #1 ($key) must be of type resource, bool given
+openssl_pkey_get_details(): Argument #1 ($key) must be of type resource, bool given

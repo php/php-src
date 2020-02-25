@@ -79,17 +79,17 @@ echo "Done\n";
 
 Invalid Connection resource
 
-Warning: oci_set_action() expects argument #1 to be of type resource, null given in %s on line %d
+Warning: oci_set_action(): Argument #1 must be of type resource, null given in %s on line %d
 NULL
 
 Invalid Connection resource 2
 
-Warning: oci_set_client_info() expects argument #1 to be of type resource, %s given in %s on line %d
+Warning: oci_set_client_info(): Argument #1 must be of type resource, %s given in %s on line %d
 NULL
 
 Invalid Value
 
-Warning: oci_set_action() expects argument #2 to be of type %s, resource given in %s on line %d
+Warning: oci_set_action(): Argument #2 must be of type %s, resource given in %s on line %d
 NULL
 
 Set Values multiple times

@@ -80,9 +80,9 @@ bool(false)
 -- Iteration 5 --
 bool(false)
 -- Iteration 6 --
-is_executable() expects argument #1 ($filename) to be a valid path, string given
+is_executable(): Argument #1 ($filename) must be a valid path, string given
 -- Iteration 7 --
-is_executable() expects argument #1 ($filename) to be a valid path, string given
+is_executable(): Argument #1 ($filename) must be a valid path, string given
 -- Iteration 8 --
 bool(false)
 -- Iteration 9 --

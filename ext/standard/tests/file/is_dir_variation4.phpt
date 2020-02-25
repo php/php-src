@@ -81,9 +81,9 @@ bool(true)
 bool(false)
 
 -- Iteration 9 --
-is_dir() expects argument #1 ($filename) to be a valid path, string given
+is_dir(): Argument #1 ($filename) must be a valid path, string given
 
 -- Iteration 10 --
-is_dir() expects argument #1 ($filename) to be a valid path, string given
+is_dir(): Argument #1 ($filename) must be a valid path, string given
 
 *** Done ***

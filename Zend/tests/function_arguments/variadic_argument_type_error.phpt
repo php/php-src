@@ -18,5 +18,5 @@ try {
 }
 
 --EXPECTF--
-foo() expects argument #2 ($bar) to be of type int, array given, called in %s on line %d
-foo() expects argument #4 ($bar) to be of type int, array given, called in %s on line %d
+foo(): Argument #2 ($bar) must be of type int, array given, called in %s on line %d
+foo(): Argument #4 ($bar) must be of type int, array given, called in %s on line %d

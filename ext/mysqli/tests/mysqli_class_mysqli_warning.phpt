@@ -96,7 +96,7 @@ if (!$TEST_EXPERIMENTAL)
 --EXPECTF--
 Warning: Wrong parameter count for mysqli_warning::mysqli_warning() in %s on line %d
 
-Warning: mysqli_warning::mysqli_warning() expects argument #1 to be of type object, null given in %s on line %d
+Warning: mysqli_warning::mysqli_warning(): Argument #1 must be of type object, null given in %s on line %d
 
 Warning: Wrong parameter count for mysqli_warning::mysqli_warning() in %s on line %d
 

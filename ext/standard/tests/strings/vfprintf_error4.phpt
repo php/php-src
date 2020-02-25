@@ -40,5 +40,5 @@ unlink( $file );
 ?>
 --EXPECT--
 -- Testing vfprintf() function with other strangeties  --
-vfprintf() expects argument #1 ($handle) to be of type resource, string given
+vfprintf(): Argument #1 ($handle) must be of type resource, string given
 Error found: Argument number must be greater than zero.

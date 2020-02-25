@@ -37,7 +37,7 @@ ok
 ok
 ok
 
-Fatal error: Uncaught TypeError: foo\test5() expects argument #1 ($bar) to be of type bar, foo\bar given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: foo\test5(): Argument #1 ($bar) must be of type bar, foo\bar given, called in %s:%d
 Stack trace:
 #0 %s(%d): foo\test5(Object(foo\bar))
 #1 {main}

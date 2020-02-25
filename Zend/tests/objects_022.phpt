@@ -36,7 +36,7 @@ object(bar)#%d (0) {
 object(baz)#%d (0) {
 }
 
-Fatal error: Uncaught TypeError: foo::testFoo() expects argument #1 ($obj) to be of type foo, stdClass given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: foo::testFoo(): Argument #1 ($obj) must be of type foo, stdClass given, called in %s:%d
 Stack trace:
 #0 %s(%d): foo->testFoo(Object(stdClass))
 #1 {main}

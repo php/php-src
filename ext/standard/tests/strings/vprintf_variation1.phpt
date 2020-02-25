@@ -143,19 +143,19 @@ int(13)
 int(3)
 
  -- Iteration 10 --
-vprintf() expects argument #1 ($format) to be of type string, array given
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 11 --
-vprintf() expects argument #1 ($format) to be of type string, array given
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 12 --
-vprintf() expects argument #1 ($format) to be of type string, array given
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 13 --
-vprintf() expects argument #1 ($format) to be of type string, array given
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 14 --
-vprintf() expects argument #1 ($format) to be of type string, array given
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 15 --
 
@@ -202,4 +202,4 @@ int(0)
 int(0)
 
  -- Iteration 26 --
-vprintf() expects argument #1 ($format) to be of type string, resource given
+vprintf(): Argument #1 ($format) must be of type string, resource given

@@ -38,7 +38,7 @@ object(ArrayObject)#%d (1) {
     int(4)
   }
 }
-asort() expects argument #2 ($sort_flags) to be of type int, string given
+asort(): Argument #2 ($sort_flags) must be of type int, string given
 object(ArrayObject)#%d (1) {
   ["storage":"ArrayObject":private]=>
   array(3) {

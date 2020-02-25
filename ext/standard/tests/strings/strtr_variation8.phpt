@@ -142,7 +142,7 @@ If two arguments are passed, the second argument must be an array
 If two arguments are passed, the second argument must be an array
 
 -- Iteration 17 --
-strtr() expects argument #2 ($from) to be of type string|array, resource given
+strtr(): Argument #2 ($from) must be of type string|array, resource given
 
 -- Iteration 18 --
 If two arguments are passed, the second argument must be an array

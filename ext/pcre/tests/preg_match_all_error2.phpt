@@ -27,7 +27,7 @@ echo "Done";
 *** Testing preg_match_all() : error conditions ***
 
 Arg value is: Array
-preg_match_all() expects argument #2 ($subject) to be of type string, array given
+preg_match_all(): Argument #2 ($subject) must be of type string, array given
 NULL
 
 Arg value is: test

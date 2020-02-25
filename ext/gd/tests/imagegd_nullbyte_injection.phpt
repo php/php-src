@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-imagegd() expects argument #2 ($to) to be a valid path, string given
+imagegd(): Argument #2 ($to) must be a valid path, string given

@@ -39,5 +39,5 @@ try {
 ?>
 --EXPECTF--
 Return value of C::test1() must be of type int, string returned
-C::test2() expects argument #1 ($arg) to be of type int, string given, called in %s on line %d
-C::test3() expects argument #1 ($arg) to be of type int, string given, called in %s on line %d
+C::test2(): Argument #1 ($arg) must be of type int, string given, called in %s on line %d
+C::test3(): Argument #1 ($arg) must be of type int, string given, called in %s on line %d

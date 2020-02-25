@@ -56,7 +56,7 @@ string(5) "three"
 int(5)
 
 *** Testing objects with array_search() ***
-array_search() expects argument #2 ($haystack) to be of type array, object given
-array_search() expects argument #2 ($haystack) to be of type array, object given
+array_search(): Argument #2 ($haystack) must be of type array, object given
+array_search(): Argument #2 ($haystack) must be of type array, object given
 int(1)
 Done
