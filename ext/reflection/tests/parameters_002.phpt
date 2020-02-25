@@ -72,59 +72,83 @@ check_params(new ReflectionFunction('test'));
 check_params(new ReflectionMethod('test::method'));
 
 ?>
---EXPECT--
+--EXPECTF--
 #####test()#####
 ===0===
 getName: string(3) "nix"
 isPassedByReference: bool(false)
+
+Deprecated: Function ReflectionParameter::getClass() is deprecated in %s on line %d
 getClass: NULL
 getDeclaringClass: NULL
-isArray: bool(false)
+isArray: 
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
+bool(false)
 allowsNull: bool(true)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===1===
 getName: string(2) "ar"
 isPassedByReference: bool(false)
+
+Deprecated: Function ReflectionParameter::getClass() is deprecated in %s on line %d
 getClass: NULL
 getDeclaringClass: NULL
-isArray: bool(true)
+isArray: 
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
+bool(true)
 allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===2===
 getName: string(3) "ref"
 isPassedByReference: bool(true)
+
+Deprecated: Function ReflectionParameter::getClass() is deprecated in %s on line %d
 getClass: NULL
 getDeclaringClass: NULL
-isArray: bool(false)
+isArray: 
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
+bool(false)
 allowsNull: bool(true)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===3===
 getName: string(3) "std"
 isPassedByReference: bool(false)
+
+Deprecated: Function ReflectionParameter::getClass() is deprecated in %s on line %d
 getClass: stdClass
 getDeclaringClass: NULL
-isArray: bool(false)
+isArray: 
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
+bool(false)
 allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===4===
 getName: string(2) "na"
 isPassedByReference: bool(false)
+
+Deprecated: Function ReflectionParameter::getClass() is deprecated in %s on line %d
 Class NonExistingClass does not exist
 getDeclaringClass: NULL
-isArray: bool(false)
+isArray: 
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
+bool(false)
 allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===5===
 getName: string(3) "opt"
 isPassedByReference: bool(true)
+
+Deprecated: Function ReflectionParameter::getClass() is deprecated in %s on line %d
 getClass: stdClass
 getDeclaringClass: NULL
-isArray: bool(false)
+isArray: 
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
+bool(false)
 allowsNull: bool(true)
 isOptional: bool(true)
 isDefaultValueAvailable: bool(true)
@@ -132,9 +156,13 @@ getDefaultValue: NULL
 ===6===
 getName: string(3) "def"
 isPassedByReference: bool(false)
+
+Deprecated: Function ReflectionParameter::getClass() is deprecated in %s on line %d
 getClass: NULL
 getDeclaringClass: NULL
-isArray: bool(false)
+isArray: 
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
+bool(false)
 allowsNull: bool(true)
 isOptional: bool(true)
 isDefaultValueAvailable: bool(true)
@@ -143,54 +171,78 @@ getDefaultValue: string(6) "FooBar"
 ===0===
 getName: string(3) "nix"
 isPassedByReference: bool(false)
+
+Deprecated: Function ReflectionParameter::getClass() is deprecated in %s on line %d
 getClass: NULL
 getDeclaringClass: test
-isArray: bool(false)
+isArray: 
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
+bool(false)
 allowsNull: bool(true)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===1===
 getName: string(2) "ar"
 isPassedByReference: bool(false)
+
+Deprecated: Function ReflectionParameter::getClass() is deprecated in %s on line %d
 getClass: NULL
 getDeclaringClass: test
-isArray: bool(true)
+isArray: 
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
+bool(true)
 allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===2===
 getName: string(3) "ref"
 isPassedByReference: bool(true)
+
+Deprecated: Function ReflectionParameter::getClass() is deprecated in %s on line %d
 getClass: NULL
 getDeclaringClass: test
-isArray: bool(false)
+isArray: 
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
+bool(false)
 allowsNull: bool(true)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===3===
 getName: string(3) "std"
 isPassedByReference: bool(false)
+
+Deprecated: Function ReflectionParameter::getClass() is deprecated in %s on line %d
 getClass: stdClass
 getDeclaringClass: test
-isArray: bool(false)
+isArray: 
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
+bool(false)
 allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===4===
 getName: string(2) "na"
 isPassedByReference: bool(false)
+
+Deprecated: Function ReflectionParameter::getClass() is deprecated in %s on line %d
 Class NonExistingClass does not exist
 getDeclaringClass: test
-isArray: bool(false)
+isArray: 
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
+bool(false)
 allowsNull: bool(false)
 isOptional: bool(false)
 isDefaultValueAvailable: bool(false)
 ===5===
 getName: string(3) "opt"
 isPassedByReference: bool(false)
+
+Deprecated: Function ReflectionParameter::getClass() is deprecated in %s on line %d
 getClass: stdClass
 getDeclaringClass: test
-isArray: bool(false)
+isArray: 
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
+bool(false)
 allowsNull: bool(true)
 isOptional: bool(true)
 isDefaultValueAvailable: bool(true)
@@ -198,9 +250,13 @@ getDefaultValue: NULL
 ===6===
 getName: string(3) "def"
 isPassedByReference: bool(false)
+
+Deprecated: Function ReflectionParameter::getClass() is deprecated in %s on line %d
 getClass: NULL
 getDeclaringClass: test
-isArray: bool(false)
+isArray: 
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
+bool(false)
 allowsNull: bool(true)
 isOptional: bool(true)
 isDefaultValueAvailable: bool(true)
