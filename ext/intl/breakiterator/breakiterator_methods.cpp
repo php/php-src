@@ -73,42 +73,42 @@ static void _breakiter_factory(const char *func_name,
 	breakiterator_object_create(return_value, biter, 1);
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_create_word_instance)
+U_CFUNC PHP_METHOD(BreakIterator, createWordInstance)
 {
 	_breakiter_factory("breakiter_create_word_instance",
 			&BreakIterator::createWordInstance,
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_create_line_instance)
+U_CFUNC PHP_METHOD(BreakIterator, createLineInstance)
 {
 	_breakiter_factory("breakiter_create_line_instance",
 			&BreakIterator::createLineInstance,
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_create_character_instance)
+U_CFUNC PHP_METHOD(BreakIterator, createCharacterInstance)
 {
 	_breakiter_factory("breakiter_create_character_instance",
 			&BreakIterator::createCharacterInstance,
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_create_sentence_instance)
+U_CFUNC PHP_METHOD(BreakIterator, createSentenceInstance)
 {
 	_breakiter_factory("breakiter_create_sentence_instance",
 			&BreakIterator::createSentenceInstance,
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_create_title_instance)
+U_CFUNC PHP_METHOD(BreakIterator, createTitleInstance)
 {
 	_breakiter_factory("breakiter_create_title_instance",
 			&BreakIterator::createTitleInstance,
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_create_code_point_instance)
+U_CFUNC PHP_METHOD(BreakIterator, createCodePointInstance)
 {
 	intl_error_reset(NULL);
 
@@ -120,7 +120,7 @@ U_CFUNC PHP_FUNCTION(breakiter_create_code_point_instance)
 	breakiterator_object_create(return_value, cpbi, 1);
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_get_text)
+U_CFUNC PHP_METHOD(BreakIterator, getText)
 {
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
@@ -138,7 +138,7 @@ U_CFUNC PHP_FUNCTION(breakiter_get_text)
 	}
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_set_text)
+U_CFUNC PHP_METHOD(BreakIterator, setText)
 {
 	UText	*ut = NULL;
 	zend_string	*text;
@@ -217,28 +217,28 @@ static void _breakiter_int32_ret_int32(
 	RETURN_LONG((zend_long)res);
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_first)
+U_CFUNC PHP_METHOD(BreakIterator, first)
 {
 	_breakiter_no_args_ret_int32("breakiter_first",
 			&BreakIterator::first,
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_last)
+U_CFUNC PHP_METHOD(BreakIterator, last)
 {
 	_breakiter_no_args_ret_int32("breakiter_last",
 			&BreakIterator::last,
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_previous)
+U_CFUNC PHP_METHOD(BreakIterator, previous)
 {
 	_breakiter_no_args_ret_int32("breakiter_previous",
 			&BreakIterator::previous,
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_next)
+U_CFUNC PHP_METHOD(BreakIterator, next)
 {
 	bool no_arg_version = false;
 
@@ -267,7 +267,7 @@ U_CFUNC PHP_FUNCTION(breakiter_next)
 	}
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_current)
+U_CFUNC PHP_METHOD(BreakIterator, current)
 {
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
@@ -283,21 +283,21 @@ U_CFUNC PHP_FUNCTION(breakiter_current)
 	RETURN_LONG((zend_long)res);
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_following)
+U_CFUNC PHP_METHOD(BreakIterator, following)
 {
 	_breakiter_int32_ret_int32("breakiter_following",
 			&BreakIterator::following,
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_preceding)
+U_CFUNC PHP_METHOD(BreakIterator, preceding)
 {
 	_breakiter_int32_ret_int32("breakiter_preceding",
 			&BreakIterator::preceding,
 			INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_is_boundary)
+U_CFUNC PHP_METHOD(BreakIterator, isBoundary)
 {
 	zend_long offset;
 	BREAKITER_METHOD_INIT_VARS;
@@ -322,7 +322,7 @@ U_CFUNC PHP_FUNCTION(breakiter_is_boundary)
 	RETURN_BOOL((zend_long)res);
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_get_locale)
+U_CFUNC PHP_METHOD(BreakIterator, getLocale)
 {
 	zend_long	locale_type;
 	BREAKITER_METHOD_INIT_VARS;
@@ -348,7 +348,7 @@ U_CFUNC PHP_FUNCTION(breakiter_get_locale)
 	RETURN_STRING(locale.getName());
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_get_parts_iterator)
+U_CFUNC PHP_METHOD(BreakIterator, getPartsIterator)
 {
 	zend_long key_type = 0;
 	BREAKITER_METHOD_INIT_VARS;
@@ -372,7 +372,7 @@ U_CFUNC PHP_FUNCTION(breakiter_get_parts_iterator)
 		object, return_value, (parts_iter_key_type)key_type);
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_get_error_code)
+U_CFUNC PHP_METHOD(BreakIterator, getErrorCode)
 {
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
@@ -386,7 +386,7 @@ U_CFUNC PHP_FUNCTION(breakiter_get_error_code)
 	RETURN_LONG((zend_long)BREAKITER_ERROR_CODE(bio));
 }
 
-U_CFUNC PHP_FUNCTION(breakiter_get_error_message)
+U_CFUNC PHP_METHOD(BreakIterator, getErrorMessage)
 {
 	zend_string* message = NULL;
 	BREAKITER_METHOD_INIT_VARS;
