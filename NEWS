@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #79244 (php crashes during parsing INI file). (Laruence)
+  . Fixed bug #63206 (restore_error_handler does not restore previous errors
+    mask). (Mark Plomer)
 
 - COM:
   . Fixed bug #66322 (COMPersistHelper::SaveToFile can save to wrong location).
