@@ -493,7 +493,10 @@ class ReflectionParameter implements Reflector
     /** @return ReflectionClass|null */
     public function getDeclaringClass() {}
 
-    /** @return ReflectionClass|null */
+    /**
+     * @return ReflectionClass|null
+     * @deprecated Use ReflectionParameter::getType() instead
+     */
     public function getClass() {}
 
     /** @return bool */
@@ -502,10 +505,16 @@ class ReflectionParameter implements Reflector
     /** @return ReflectionType|null */
     public function getType() {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @deprecated Use ReflectionParameter::getType() instead
+     */
     public function isArray() {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @deprecated Use ReflectionParameter::getType() instead
+     */
     public function isCallable() {}
 
     /** @return bool */

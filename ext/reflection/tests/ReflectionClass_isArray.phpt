@@ -13,8 +13,15 @@ foreach ($reflection->getParameters() as $parameter) {
     var_dump($parameter->isArray());
 }
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
 bool(true)
+
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
 bool(false)
+
+Deprecated: Function ReflectionParameter::isArray() is deprecated in %s on line %d
 bool(false)

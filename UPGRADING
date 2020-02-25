@@ -548,6 +548,10 @@ PHP 8.0 UPGRADE NOTES
   . ReflectionFunction::isDisabled() is deprecated, as it is no longer possible
     to create a ReflectionFunction for a disabled function. This method now
     always returns false.
+  . ReflectionParameter::getClass(), ReflectionParameter::isArray(), and
+    ReflectionParameter::isCallable() are deprecated.
+    ReflectionParameter::getType() and the ReflectionType APIs should be used
+    instead.
 
 ========================================
 5. Changed Functions
