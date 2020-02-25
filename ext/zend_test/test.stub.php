@@ -1,5 +1,15 @@
 <?php
 
+class _ZendTestClass {
+    public static function is_object(): int;
+
+    public function __toString(): string;
+}
+
+trait _ZendTestTrait {
+    public function testMethod(): bool;
+}
+
 function zend_test_array_return(): array {}
 
 function zend_test_nullable_array_return(): ?array {}

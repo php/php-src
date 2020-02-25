@@ -198,13 +198,13 @@ static ZEND_METHOD(_ZendTestTrait, testMethod) /* {{{ */ {
 /* }}} */
 
 static const zend_function_entry zend_test_class_methods[] = {
-	ZEND_ME(_ZendTestClass, is_object, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	ZEND_ME(_ZendTestClass, __toString, NULL, ZEND_ACC_DEPRECATED)
+	ZEND_ME(_ZendTestClass, is_object, arginfo_class__ZendTestClass_is_object, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(_ZendTestClass, __toString, arginfo_class__ZendTestClass___toString, ZEND_ACC_DEPRECATED)
 	ZEND_FE_END
 };
 
 static const zend_function_entry zend_test_trait_methods[] = {
-    ZEND_ME(_ZendTestTrait, testMethod, NULL, ZEND_ACC_PUBLIC)
+    ZEND_ME(_ZendTestTrait, testMethod, arginfo_class__ZendTestTrait_testMethod, ZEND_ACC_PUBLIC)
     ZEND_FE_END
 };
 
