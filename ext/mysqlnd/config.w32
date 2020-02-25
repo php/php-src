@@ -36,6 +36,9 @@ if (PHP_MYSQLND != "no") {
 		{
 			AC_DEFINE("MYSQLND_COMPRESSION_ENABLED", 1, "Compression support");
 			AC_DEFINE("MYSQLND_SSL_SUPPORTED", 1, "SSL support");
+			if (CHECK_LIB("crypt32.lib", "mysqlnd")) {
+				AC_DEFINE("MYSQLND_HAVE_SSL", 1, "Extended SSL support");
+			}
 		}
 		PHP_INSTALL_HEADERS("", "ext/mysqlnd");
 	}
