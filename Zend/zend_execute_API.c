@@ -751,7 +751,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 					const char *arg_name = get_function_arg_name(func, i + 1);
 
 					zend_error(E_WARNING,
-						"%s%s%s() expects argument #%d%s%s%s to be passed by reference, value given",
+						"%s%s%s(): Argument #%d%s%s%s must be passed by reference, value given",
 						func->common.scope ? ZSTR_VAL(func->common.scope->name) : "",
 						func->common.scope ? "::" : "",
 						ZSTR_VAL(func->common.function_name),
