@@ -383,9 +383,6 @@ U_CFUNC PHP_FUNCTION(breakiter_get_error_code)
 
 	/* Fetch the object (without resetting its last error code ). */
 	bio = Z_INTL_BREAKITERATOR_P(object);
-	if (bio == NULL)
-		RETURN_FALSE;
-
 	RETURN_LONG((zend_long)BREAKITER_ERROR_CODE(bio));
 }
 
@@ -402,8 +399,6 @@ U_CFUNC PHP_FUNCTION(breakiter_get_error_message)
 
 	/* Fetch the object (without resetting its last error code ). */
 	bio = Z_INTL_BREAKITERATOR_P(object);
-	if (bio == NULL)
-		RETURN_FALSE;
 
 	/* Return last error message. */
 	message = intl_error_get_message(BREAKITER_ERROR_P(bio));
