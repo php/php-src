@@ -96,7 +96,7 @@ static zval *driver_embedded_read(mysqli_object *obj, zval *retval)
 /* {{{ property driver_client_version_read */
 static zval *driver_client_version_read(mysqli_object *obj, zval *retval)
 {
-	ZVAL_LONG(retval, MYSQL_VERSION_ID);
+	ZVAL_LONG(retval, mysql_get_client_version());
 	return retval;
 }
 /* }}} */
