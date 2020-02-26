@@ -11,4 +11,4 @@ try {
 
 ?>
 --EXPECT--
-string(95) "SplFileObject::__construct() expects argument #2 ($open_mode) to be of type string, array given"
+string(90) "SplFileObject::__construct(): Argument #2 ($open_mode) must be of type string, array given"

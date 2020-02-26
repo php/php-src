@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-file_exists() expects argument #1 ($filename) to be a valid path, string given
+file_exists(): Argument #1 ($filename) must be a valid path, string given

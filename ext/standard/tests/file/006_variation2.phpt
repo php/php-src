@@ -146,15 +146,15 @@ bool(true)
 bool(true)
 43567
 -- Iteration 12 --
-chmod() expects argument #2 ($mode) to be of type int, string given
-chmod() expects argument #2 ($mode) to be of type int, string given
+chmod(): Argument #2 ($mode) must be of type int, string given
+chmod(): Argument #2 ($mode) must be of type int, string given
 -- Iteration 13 --
-chmod() expects argument #2 ($mode) to be of type int, string given
-chmod() expects argument #2 ($mode) to be of type int, string given
+chmod(): Argument #2 ($mode) must be of type int, string given
+chmod(): Argument #2 ($mode) must be of type int, string given
 -- Iteration 14 --
-chmod() expects argument #2 ($mode) to be of type int, string given
-chmod() expects argument #2 ($mode) to be of type int, string given
+chmod(): Argument #2 ($mode) must be of type int, string given
+chmod(): Argument #2 ($mode) must be of type int, string given
 -- Iteration 15 --
-chmod() expects argument #2 ($mode) to be of type int, string given
-chmod() expects argument #2 ($mode) to be of type int, string given
+chmod(): Argument #2 ($mode) must be of type int, string given
+chmod(): Argument #2 ($mode) must be of type int, string given
 *** Done ***

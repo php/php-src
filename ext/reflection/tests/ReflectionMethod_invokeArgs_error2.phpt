@@ -24,4 +24,4 @@ try {
 
 ?>
 --EXPECT--
-string(90) "ReflectionMethod::invokeArgs() expects argument #2 ($args) to be of type array, bool given"
+string(85) "ReflectionMethod::invokeArgs(): Argument #2 ($args) must be of type array, bool given"

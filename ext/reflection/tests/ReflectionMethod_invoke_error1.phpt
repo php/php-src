@@ -59,7 +59,7 @@ try {
 ?>
 --EXPECT--
 invoke() on a non-object:
-string(89) "ReflectionMethod::invoke() expects argument #1 ($object) to be of type object, bool given"
+string(84) "ReflectionMethod::invoke(): Argument #1 ($object) must be of type object, bool given"
 
 invoke() on a non-instance:
 string(72) "Given object is not an instance of the class this method was declared in"

@@ -18,7 +18,7 @@ var_dump(intlcal_get_weekend_transition(1, 1));
 Warning: IntlCalendar::getWeekendTransition(): intlcal_get_weekend_transition: invalid day of week in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: intlcal_get_weekend_transition() expects argument #1 ($calendar) to be of type IntlCalendar, int given in %s:%d
+Fatal error: Uncaught TypeError: intlcal_get_weekend_transition(): Argument #1 ($calendar) must be of type IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_get_weekend_transition(1, 1)
 #1 {main}

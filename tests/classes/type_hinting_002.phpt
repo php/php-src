@@ -11,7 +11,7 @@ $o = new Foo;
 $o->a($o);
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Foo::a() expects argument #1 ($foo) to be of type NonExisting, Foo given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: Foo::a(): Argument #1 ($foo) must be of type NonExisting, Foo given, called in %s on line %d and defined in %s:%d
 Stack trace:
 #0 %s(%d): Foo->a(Object(Foo))
 #1 {main}

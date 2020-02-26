@@ -79,8 +79,8 @@ bool(false)
 Warning: fileinode(): stat failed for %s/fileinode_variation3/fileinode*.tmp in %s on line %d
 bool(false)
 - Iteration 7 -
-fileinode() expects argument #1 ($filename) to be a valid path, string given
+fileinode(): Argument #1 ($filename) must be a valid path, string given
 - Iteration 8 -
-fileinode() expects argument #1 ($filename) to be a valid path, string given
+fileinode(): Argument #1 ($filename) must be a valid path, string given
 
 *** Done ***

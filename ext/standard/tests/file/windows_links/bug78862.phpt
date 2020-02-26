@@ -7,13 +7,8 @@ var_dump(link(__DIR__ . "/bug78862.target\0more", __DIR__ . "/bug78862.link\0mor
 var_dump(file_exists(__DIR__ . '/bug78862.link'));
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: link() expects argument #1 ($target) to be a valid path, string given in %s:%d
+Fatal error: Uncaught TypeError: link(): Argument #1 ($target) must be a valid path, string given in %s:%d
 Stack trace:
 #0 %s(%d): link('%s', '%s')
 #1 {main}
   thrown in %s on line %d
---CLEAN--
-<?php
-unlink(__DIR__ . '/bug78862.target');
-unlink(__DIR__ . '/bug78862.link');
-?>

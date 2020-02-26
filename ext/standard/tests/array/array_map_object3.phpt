@@ -81,7 +81,7 @@ array(3) {
   int(7)
 }
 -- accessing child method from parent class --
-array_map() expects argument #1 ($callback) to be a valid callback, class 'ParentClass' does not have a method 'staticChild'
+array_map(): Argument #1 ($callback) must be a valid callback, class 'ParentClass' does not have a method 'staticChild'
 -- accessing parent method using child class object --
 array(3) {
   [0]=>
@@ -92,5 +92,5 @@ array(3) {
   int(7)
 }
 -- accessing child method using parent class object --
-array_map() expects argument #1 ($callback) to be a valid callback, class 'ParentClass' does not have a method 'staticChild'
+array_map(): Argument #1 ($callback) must be a valid callback, class 'ParentClass' does not have a method 'staticChild'
 Done

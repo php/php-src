@@ -615,5 +615,5 @@ array(5) {
   [4]=>
   int(5)
 }
-range() expects argument #3 ($step) to be of type int|float, array given
+range(): Argument #3 ($step) must be of type int|float, array given
 Done

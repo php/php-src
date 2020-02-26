@@ -85,80 +85,80 @@ Warning: Undefined variable: undefined_var in %s on line %d
 Warning: Undefined variable: unset_var in %s on line %d
 
 Arg value: 0 (type: integer)
-get_class() expects argument #1 ($object) to be of type object, int given
+get_class(): Argument #1 ($object) must be of type object, int given
 
 Arg value: 1 (type: integer)
-get_class() expects argument #1 ($object) to be of type object, int given
+get_class(): Argument #1 ($object) must be of type object, int given
 
 Arg value: 12345 (type: integer)
-get_class() expects argument #1 ($object) to be of type object, int given
+get_class(): Argument #1 ($object) must be of type object, int given
 
 Arg value: -2345 (type: integer)
-get_class() expects argument #1 ($object) to be of type object, int given
+get_class(): Argument #1 ($object) must be of type object, int given
 
 Arg value: 10.5 (type: double)
-get_class() expects argument #1 ($object) to be of type object, float given
+get_class(): Argument #1 ($object) must be of type object, float given
 
 Arg value: -10.5 (type: double)
-get_class() expects argument #1 ($object) to be of type object, float given
+get_class(): Argument #1 ($object) must be of type object, float given
 
 Arg value: 101234567000 (type: double)
-get_class() expects argument #1 ($object) to be of type object, float given
+get_class(): Argument #1 ($object) must be of type object, float given
 
 Arg value: 1.07654321E-9 (type: double)
-get_class() expects argument #1 ($object) to be of type object, float given
+get_class(): Argument #1 ($object) must be of type object, float given
 
 Arg value: 0.5 (type: double)
-get_class() expects argument #1 ($object) to be of type object, float given
+get_class(): Argument #1 ($object) must be of type object, float given
 
 Arg value: Array (type: array)
-get_class() expects argument #1 ($object) to be of type object, array given
+get_class(): Argument #1 ($object) must be of type object, array given
 
 Arg value: Array (type: array)
-get_class() expects argument #1 ($object) to be of type object, array given
+get_class(): Argument #1 ($object) must be of type object, array given
 
 Arg value: Array (type: array)
-get_class() expects argument #1 ($object) to be of type object, array given
+get_class(): Argument #1 ($object) must be of type object, array given
 
 Arg value: Array (type: array)
-get_class() expects argument #1 ($object) to be of type object, array given
+get_class(): Argument #1 ($object) must be of type object, array given
 
 Arg value: Array (type: array)
-get_class() expects argument #1 ($object) to be of type object, array given
+get_class(): Argument #1 ($object) must be of type object, array given
 
 Arg value:  (type: NULL)
-get_class() expects argument #1 ($object) to be of type object, null given
+get_class(): Argument #1 ($object) must be of type object, null given
 
 Arg value:  (type: NULL)
-get_class() expects argument #1 ($object) to be of type object, null given
+get_class(): Argument #1 ($object) must be of type object, null given
 
 Arg value: 1 (type: boolean)
-get_class() expects argument #1 ($object) to be of type object, bool given
+get_class(): Argument #1 ($object) must be of type object, bool given
 
 Arg value:  (type: boolean)
-get_class() expects argument #1 ($object) to be of type object, bool given
+get_class(): Argument #1 ($object) must be of type object, bool given
 
 Arg value: 1 (type: boolean)
-get_class() expects argument #1 ($object) to be of type object, bool given
+get_class(): Argument #1 ($object) must be of type object, bool given
 
 Arg value:  (type: boolean)
-get_class() expects argument #1 ($object) to be of type object, bool given
+get_class(): Argument #1 ($object) must be of type object, bool given
 
 Arg value:  (type: string)
-get_class() expects argument #1 ($object) to be of type object, string given
+get_class(): Argument #1 ($object) must be of type object, string given
 
 Arg value:  (type: string)
-get_class() expects argument #1 ($object) to be of type object, string given
+get_class(): Argument #1 ($object) must be of type object, string given
 
 Arg value: string (type: string)
-get_class() expects argument #1 ($object) to be of type object, string given
+get_class(): Argument #1 ($object) must be of type object, string given
 
 Arg value: string (type: string)
-get_class() expects argument #1 ($object) to be of type object, string given
+get_class(): Argument #1 ($object) must be of type object, string given
 
 Arg value:  (type: NULL)
-get_class() expects argument #1 ($object) to be of type object, null given
+get_class(): Argument #1 ($object) must be of type object, null given
 
 Arg value:  (type: NULL)
-get_class() expects argument #1 ($object) to be of type object, null given
+get_class(): Argument #1 ($object) must be of type object, null given
 Done

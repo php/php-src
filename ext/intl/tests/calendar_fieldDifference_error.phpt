@@ -32,7 +32,7 @@ Warning: IntlCalendar::fieldDifference(): intlcal_field_difference: Call to ICU 
 bool(false)
 intlcal_field_difference() expects exactly 3 parameters, 4 given
 
-Fatal error: Uncaught TypeError: intlcal_field_difference() expects argument #1 ($calendar) to be of type IntlCalendar, int given in %s:%d
+Fatal error: Uncaught TypeError: intlcal_field_difference(): Argument #1 ($calendar) must be of type IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_field_difference(1, 0, 1)
 #1 {main}

@@ -23,7 +23,7 @@ bool(false)
 Warning: intlcal_clear(): intlcal_clear: invalid field in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: intlcal_clear() expects argument #1 ($calendar) to be of type IntlCalendar, int given in %s:%d
+Fatal error: Uncaught TypeError: intlcal_clear(): Argument #1 ($calendar) must be of type IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_clear(1, 2)
 #1 {main}

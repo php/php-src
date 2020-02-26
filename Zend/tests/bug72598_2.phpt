@@ -20,8 +20,8 @@ new class {
 };
 ?>
 --EXPECTF--
-Warning: ref() expects argument #1 ($ref) to be passed by reference, value given in %s on line %d
+Warning: ref(): Argument #1 ($ref) must be passed by reference, value given in %s on line %d
 int(0)
 
-Warning: ref() expects argument #1 ($ref) to be passed by reference, value given in %s on line %d
+Warning: ref(): Argument #1 ($ref) must be passed by reference, value given in %s on line %d
 int(0)

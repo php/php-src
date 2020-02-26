@@ -38,7 +38,7 @@ include $pname . '/foo/hi';
 <?php rmdir(__DIR__ . '/poo'); ?>
 <?php unlink(__DIR__ . '/fopen_edgecases2.txt'); ?>
 --EXPECTF--
-fopen() expects argument #1 ($filename) to be a valid path, array given
+fopen(): Argument #1 ($filename) must be a valid path, array given
 blah
 test
 

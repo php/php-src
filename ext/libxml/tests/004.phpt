@@ -28,15 +28,15 @@ echo "Done\n";
 
 ?>
 --EXPECT--
-libxml_set_streams_context() expects argument #1 ($context) to be of type resource, null given
+libxml_set_streams_context(): Argument #1 ($context) must be of type resource, null given
 bool(true)
-libxml_set_streams_context() expects argument #1 ($context) to be of type resource, string given
+libxml_set_streams_context(): Argument #1 ($context) must be of type resource, string given
 bool(true)
-libxml_set_streams_context() expects argument #1 ($context) to be of type resource, int given
+libxml_set_streams_context(): Argument #1 ($context) must be of type resource, int given
 bool(true)
-libxml_set_streams_context() expects argument #1 ($context) to be of type resource, object given
+libxml_set_streams_context(): Argument #1 ($context) must be of type resource, object given
 bool(true)
-libxml_set_streams_context() expects argument #1 ($context) to be of type resource, array given
+libxml_set_streams_context(): Argument #1 ($context) must be of type resource, array given
 bool(true)
 NULL
 bool(true)

@@ -12,7 +12,7 @@ set_error_handler(function ($type, $msg) {
 call_user_func(function (array &$ref) {var_dump("xxx");}, 'not_an_array_variable');
 ?>
 --EXPECTF--
-Fatal error: Uncaught Exception: Foo\{closure}() expects argument #1 ($ref) to be passed by reference, value given in %s:%d
+Fatal error: Uncaught Exception: Foo\{closure}(): Argument #1 ($ref) must be passed by reference, value given in %s:%d
 Stack trace:
 #0 [internal function]: Foo\{closure}(%s)
 #1 %sbug74164.php(%d): call_user_func(%s)

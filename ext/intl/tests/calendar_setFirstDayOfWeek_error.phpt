@@ -23,7 +23,7 @@ bool(false)
 Warning: intlcal_set_first_day_of_week(): intlcal_set_first_day_of_week: invalid day of week in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: intlcal_set_first_day_of_week() expects argument #1 ($calendar) to be of type IntlCalendar, int given in %s:%d
+Fatal error: Uncaught TypeError: intlcal_set_first_day_of_week(): Argument #1 ($calendar) must be of type IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_set_first_day_of_week(1, 2)
 #1 {main}

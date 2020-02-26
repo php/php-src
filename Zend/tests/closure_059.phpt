@@ -33,6 +33,6 @@ try {
     echo "Exception: " . $e->getMessage() . "\n";
 }
 --EXPECTF--
-Exception: {closure}() expects argument #1 ($a) to be of type A, B given, called in %s on line %d
-Exception: {closure}() expects argument #1 ($a) to be of type A, B given
-Exception: {closure}() expects argument #1 ($a) to be of type A, B given
+Exception: {closure}(): Argument #1 ($a) must be of type A, B given, called in %s on line %d
+Exception: {closure}(): Argument #1 ($a) must be of type A, B given
+Exception: {closure}(): Argument #1 ($a) must be of type A, B given

@@ -70,8 +70,8 @@ var_dump($session->max_oids);
 ?>
 --EXPECTF--
 SNMP::__construct() expects at least 3 parameters, 2 given
-SNMP::__construct() expects argument #4 to be of type int, string given
-SNMP::__construct() expects argument #5 to be of type int, string given
+SNMP::__construct(): Argument #4 must be of type int, string given
+SNMP::__construct(): Argument #5 must be of type int, string given
 Unknown SNMP protocol version
 Exception handling
 

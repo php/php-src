@@ -10,4 +10,4 @@ try {
 }
 ?>
 --EXPECT--
-strtotime() expects argument #2 ($now) to be of type int, object given
+strtotime(): Argument #2 ($now) must be of type int, object given

@@ -191,9 +191,9 @@ bool(false)
 -- Iteration 22 --
 bool(false)
 -- Iteration 23 --
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
 -- Iteration 24 --
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --
@@ -267,44 +267,44 @@ bool(true)
 --- With Strings ---
 -- Iteration 0 --
 bool(true)
-fnmatch() expects argument #2 ($filename) to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must be a valid path, string given
 bool(true)
-fnmatch() expects argument #2 ($filename) to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must be a valid path, string given
 bool(false)
 bool(true)
 -- Iteration 1 --
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
 -- Iteration 2 --
 bool(true)
-fnmatch() expects argument #2 ($filename) to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must be a valid path, string given
 bool(true)
-fnmatch() expects argument #2 ($filename) to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must be a valid path, string given
 bool(false)
 bool(true)
 -- Iteration 3 --
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
 -- Iteration 4 --
 bool(false)
-fnmatch() expects argument #2 ($filename) to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must be a valid path, string given
 bool(false)
-fnmatch() expects argument #2 ($filename) to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must be a valid path, string given
 bool(true)
 bool(false)
 -- Iteration 5 --
 bool(true)
-fnmatch() expects argument #2 ($filename) to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must be a valid path, string given
 bool(true)
-fnmatch() expects argument #2 ($filename) to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must be a valid path, string given
 bool(false)
 bool(true)
 
@@ -405,42 +405,42 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-fnmatch() expects argument #2 ($filename) to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must be a valid path, string given
 bool(false)
 bool(false)
 -- Iteration 1 --
 bool(true)
 bool(true)
 bool(true)
-fnmatch() expects argument #2 ($filename) to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must be a valid path, string given
 bool(false)
 bool(false)
 -- Iteration 2 --
 bool(true)
 bool(true)
 bool(true)
-fnmatch() expects argument #2 ($filename) to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must be a valid path, string given
 bool(false)
 bool(false)
 -- Iteration 3 --
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
-fnmatch() expects argument #1 ($pattern) to be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
+fnmatch(): Argument #1 ($pattern) must be a valid path, string given
 -- Iteration 4 --
 bool(false)
 bool(false)
 bool(false)
-fnmatch() expects argument #2 ($filename) to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must be a valid path, string given
 bool(true)
 bool(false)
 -- Iteration 5 --
 bool(false)
 bool(false)
 bool(false)
-fnmatch() expects argument #2 ($filename) to be a valid path, string given
+fnmatch(): Argument #2 ($filename) must be a valid path, string given
 bool(false)
 bool(true)
 

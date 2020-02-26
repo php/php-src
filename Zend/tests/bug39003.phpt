@@ -20,7 +20,7 @@ test($obj);
 echo "Done\n";
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: test() expects argument #1 ($object) to be of type OtherClassName, ClassName given, called in %s on line %d and defined in %s:%d
+Fatal error: Uncaught TypeError: test(): Argument #1 ($object) must be of type OtherClassName, ClassName given, called in %s:%d
 Stack trace:
 #0 %s(%d): test(Object(ClassName))
 #1 {main}

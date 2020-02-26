@@ -18,5 +18,5 @@ try {
 }
 ?>
 --EXPECTF--
-gen() expects argument #1 ($a) to be of type array, int given, called in %s on line %d
-gen() expects argument #1 ($a) to be of type array, int given, called in %s on line %d
+gen(): Argument #1 ($a) must be of type array, int given, called in %s on line %d
+gen(): Argument #1 ($a) must be of type array, int given, called in %s on line %d

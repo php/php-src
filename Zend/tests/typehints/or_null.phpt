@@ -219,39 +219,39 @@ try {
 
 ?>
 --EXPECTF--
-TypeError: unloadedClass() expects argument #1 ($param) to be of type ?I\Dont\Exist, stdClass given, called in %s on line %d and defined in %s:%d
+TypeError: unloadedClass(): Argument #1 ($param) must be of type ?I\Dont\Exist, stdClass given, called in %s:%d
 Stack trace:
 #0 %s(8): unloadedClass(Object(stdClass))
 #1 {main}
-TypeError: loadedClass() expects argument #1 ($param) to be of type ?RealClass, stdClass given, called in %s on line %d and defined in %s:%d
+TypeError: loadedClass(): Argument #1 ($param) must be of type ?RealClass, stdClass given, called in %s:%d
 Stack trace:
 #0 %s(20): loadedClass(Object(stdClass))
 #1 {main}
-TypeError: loadedInterface() expects argument #1 ($param) to be of type ?RealInterface, stdClass given, called in %s on line %d and defined in %s:%d
+TypeError: loadedInterface(): Argument #1 ($param) must be of type ?RealInterface, stdClass given, called in %s:%d
 Stack trace:
 #0 %s(26): loadedInterface(Object(stdClass))
 #1 {main}
-TypeError: unloadedClass() expects argument #1 ($param) to be of type ?I\Dont\Exist, int given, called in %s on line %d and defined in %s:%d
+TypeError: unloadedClass(): Argument #1 ($param) must be of type ?I\Dont\Exist, int given, called in %s:%d
 Stack trace:
 #0 %s(32): unloadedClass(1)
 #1 {main}
-TypeError: loadedClass() expects argument #1 ($param) to be of type ?RealClass, int given, called in %s on line %d and defined in %s:%d
+TypeError: loadedClass(): Argument #1 ($param) must be of type ?RealClass, int given, called in %s:%d
 Stack trace:
 #0 %s(38): loadedClass(1)
 #1 {main}
-TypeError: loadedInterface() expects argument #1 ($param) to be of type ?RealInterface, int given, called in %s on line %d and defined in %s:%d
+TypeError: loadedInterface(): Argument #1 ($param) must be of type ?RealInterface, int given, called in %s:%d
 Stack trace:
 #0 %s(44): loadedInterface(1)
 #1 {main}
-TypeError: callableF() expects argument #1 ($param) to be of type ?callable, int given, called in %s on line %d and defined in %s:%d
+TypeError: callableF(): Argument #1 ($param) must be of type ?callable, int given, called in %s:%d
 Stack trace:
 #0 %s(52): callableF(1)
 #1 {main}
-TypeError: iterableF() expects argument #1 ($param) to be of type ?iterable, int given, called in %s on line %d and defined in %s:%d
+TypeError: iterableF(): Argument #1 ($param) must be of type ?iterable, int given, called in %s:%d
 Stack trace:
 #0 %s(60): iterableF(1)
 #1 {main}
-TypeError: intF() expects argument #1 ($param) to be of type ?int, object given, called in %s on line %d and defined in %s:%d
+TypeError: intF(): Argument #1 ($param) must be of type ?int, object given, called in %s:%d
 Stack trace:
 #0 %s(68): intF(Object(stdClass))
 #1 {main}

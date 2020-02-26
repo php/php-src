@@ -21,7 +21,7 @@ catch(TypeError $e)
 --EXPECTF--
 object(TypeError)#%d (%d) {
   ["message":protected]=>
-  string(%d) "SoapClient::__construct() expects argument #2 ($options) to be of type array, null given"
+  string(%d) "SoapClient::__construct(): Argument #2 ($options) must be of type array, null given"
   ["string":"Error":private]=>
   string(0) ""
   ["code":protected]=>

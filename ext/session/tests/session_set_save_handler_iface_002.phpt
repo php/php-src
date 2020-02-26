@@ -86,5 +86,5 @@ session_start();
 --EXPECT--
 *** Testing session_set_save_handler() function: interface wrong ***
 bool(true)
-session_set_save_handler() expects argument #1 ($open) to be of type SessionHandlerInterface, object given
+session_set_save_handler(): Argument #1 ($open) must be of type SessionHandlerInterface, object given
 good handler writing

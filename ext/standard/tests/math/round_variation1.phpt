@@ -143,25 +143,25 @@ float(1)
 float(0)
 
 -- Iteration 17 --
-round() expects argument #1 ($number) to be of type int|float, string given
+round(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 18 --
-round() expects argument #1 ($number) to be of type int|float, string given
+round(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 19 --
-round() expects argument #1 ($number) to be of type int|float, array given
+round(): Argument #1 ($number) must be of type int|float, array given
 
 -- Iteration 20 --
-round() expects argument #1 ($number) to be of type int|float, string given
+round(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 21 --
-round() expects argument #1 ($number) to be of type int|float, string given
+round(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 22 --
-round() expects argument #1 ($number) to be of type int|float, string given
+round(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 23 --
-round() expects argument #1 ($number) to be of type int|float, object given
+round(): Argument #1 ($number) must be of type int|float, object given
 
 -- Iteration 24 --
 float(0)
@@ -170,4 +170,4 @@ float(0)
 float(0)
 
 -- Iteration 26 --
-round() expects argument #1 ($number) to be of type int|float, resource given
+round(): Argument #1 ($number) must be of type int|float, resource given

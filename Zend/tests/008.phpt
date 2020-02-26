@@ -25,7 +25,7 @@ var_dump(constant("test const"));
 echo "Done\n";
 ?>
 --EXPECTF--
-TypeError: define() expects argument #1 ($constant_name) to be of type string, array given
+TypeError: define(): Argument #1 ($constant_name) must be of type string, array given
 
 Notice: Constant TRUE already defined in %s on line %d
 bool(false)

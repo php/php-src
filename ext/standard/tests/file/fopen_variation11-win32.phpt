@@ -95,21 +95,21 @@ file in root
 Warning: fopen(c\fopen_variation11.tmp): Failed to open stream: No such file or directory in %s on line %d
 file not opened for read
 
-Warning: fclose() expects argument #1 to be of type resource, bool given in %s on line %d
+Warning: fclose(): Argument #1 must be of type resource, bool given in %s on line %d
 
 --\--
 
 Warning: fopen(\\FOPEN_VARIATION11.TMP): Failed to open stream: Invalid argument in %s on line %d
 file not opened for read
 
-Warning: fclose() expects argument #1 to be of type resource, bool given in %s on line %d
+Warning: fclose(): Argument #1 must be of type resource, bool given in %s on line %d
 
 --/--
 
 Warning: fopen(\\FOPEN_VARIATION11.TMP): Failed to open stream: Invalid argument in %s on line %d
 file not opened for read
 
-Warning: fclose() expects argument #1 to be of type resource, bool given in %s on line %d
+Warning: fclose(): Argument #1 must be of type resource, bool given in %s on line %d
 
 --c:fopen11.tmpdirTwo--
 file in fopen11.tmpdirTwo
@@ -119,7 +119,7 @@ file in fopen11.tmpdirTwo
 Warning: fopen(c:adir\fopen_variation11.tmp): Failed to open stream: No such file or directory in %s on line %d
 file not opened for read
 
-Warning: fclose() expects argument #1 to be of type resource, bool given in %s on line %d
+Warning: fclose(): Argument #1 must be of type resource, bool given in %s on line %d
 
 --c:\/--
 file in root
@@ -141,4 +141,4 @@ file in fopen11.tmpDir
 Warning: fopen(/sortout\fopen_variation11.tmp): Failed to open stream: No such file or directory in %s on line %d
 file not opened for read
 
-Warning: fclose() expects argument #1 to be of type resource, bool given in %s on line %d
+Warning: fclose(): Argument #1 must be of type resource, bool given in %s on line %d

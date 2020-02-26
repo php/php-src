@@ -24,7 +24,7 @@ var_dump( array_change_key_case( array("ONE" => 1, "one" => 1, "One" => 2), 5 ) 
 echo "end\n";
 ?>
 --EXPECT--
-array_change_key_case() expects argument #2 ($case) to be of type int, string given
+array_change_key_case(): Argument #2 ($case) must be of type int, string given
 array(4) {
   ["ONE"]=>
   int(1)

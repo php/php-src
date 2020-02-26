@@ -47,7 +47,7 @@ Warning: gmp_pow(): Negative exponent not supported in %s on line %d
 string(1) "0"
 string(14) "10240000000000"
 string(14) "10240000000000"
-gmp_pow() expects argument #2 ($exp) to be of type int, array given
+gmp_pow(): Argument #2 ($exp) must be of type int, array given
 
 Warning: gmp_pow(): Unable to convert variable to GMP - wrong type in %s on line %d
 bool(false)

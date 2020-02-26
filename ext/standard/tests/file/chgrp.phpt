@@ -14,4 +14,4 @@ try {
 }
 ?>
 --EXPECT--
-chgrp() expects argument #2 ($group) to be of type string|int, null given
+chgrp(): Argument #2 ($group) must be of type string|int, null given

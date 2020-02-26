@@ -61,6 +61,6 @@ array(1) {
   [2]=>
   int(3)
 }
-array_slice() expects argument #3 ($length) to be of type int, string given
-array_slice() expects argument #3 ($length) to be of type int, string given
+array_slice(): Argument #3 ($length) must be of type int, string given
+array_slice(): Argument #3 ($length) must be of type int, string given
 string(3) "foo"

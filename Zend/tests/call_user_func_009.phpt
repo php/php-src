@@ -10,8 +10,8 @@ var_dump(\call_user_func('sort', []));
 
 ?>
 --EXPECTF--
-Warning: sort() expects argument #1 ($arg) to be passed by reference, value given in %s on line %d
+Warning: sort(): Argument #1 ($arg) must be passed by reference, value given in %s on line %d
 bool(true)
 
-Warning: sort() expects argument #1 ($arg) to be passed by reference, value given in %s on line %d
+Warning: sort(): Argument #1 ($arg) must be passed by reference, value given in %s on line %d
 bool(true)

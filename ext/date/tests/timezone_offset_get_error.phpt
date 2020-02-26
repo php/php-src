@@ -65,16 +65,16 @@ try {
 *** Testing timezone_offset_get() : error conditions ***
 
 -- Testing timezone_offset_get() function with an invalid values for $object argument --
-string(92) "timezone_offset_get() expects argument #1 ($object) to be of type DateTimeZone, object given"
+string(87) "timezone_offset_get(): Argument #1 ($object) must be of type DateTimeZone, object given"
 
-string(89) "timezone_offset_get() expects argument #1 ($object) to be of type DateTimeZone, int given"
+string(84) "timezone_offset_get(): Argument #1 ($object) must be of type DateTimeZone, int given"
 
-string(90) "timezone_offset_get() expects argument #1 ($object) to be of type DateTimeZone, null given"
+string(85) "timezone_offset_get(): Argument #1 ($object) must be of type DateTimeZone, null given"
 
 
 -- Testing timezone_offset_get() function with an invalid values for $datetime argument --
-string(99) "timezone_offset_get() expects argument #2 ($datetime) to be of type DateTimeInterface, object given"
+string(94) "timezone_offset_get(): Argument #2 ($datetime) must be of type DateTimeInterface, object given"
 
-string(96) "timezone_offset_get() expects argument #2 ($datetime) to be of type DateTimeInterface, int given"
+string(91) "timezone_offset_get(): Argument #2 ($datetime) must be of type DateTimeInterface, int given"
 
-string(97) "timezone_offset_get() expects argument #2 ($datetime) to be of type DateTimeInterface, null given"
+string(92) "timezone_offset_get(): Argument #2 ($datetime) must be of type DateTimeInterface, null given"

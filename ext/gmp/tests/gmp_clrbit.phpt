@@ -47,5 +47,5 @@ Warning: gmp_clrbit(): Index must be greater than or equal to zero in %s on line
 string(7) "1000000"
 string(7) "1000000"
 string(30) "238462734628347239571822592658"
-gmp_clrbit() expects argument #1 ($a) to be of type GMP, array given
+gmp_clrbit(): Argument #1 ($a) must be of type GMP, array given
 Done

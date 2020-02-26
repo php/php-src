@@ -69,6 +69,6 @@ array(7) {
   [6]=>
   NULL
 }
-array_filter() expects argument #2 ($callback) to be a valid callback, function 'echo' not found or invalid function name
-array_filter() expects argument #2 ($callback) to be a valid callback, function 'exit' not found or invalid function name
+array_filter(): Argument #2 ($callback) must be a valid callback, function 'echo' not found or invalid function name
+array_filter(): Argument #2 ($callback) must be a valid callback, function 'exit' not found or invalid function name
 Done

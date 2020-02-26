@@ -28,8 +28,8 @@ Checking with no parameters
 Warning: imap_gc() Expects exactly 2 parameters, 0 given in %s on line %d
 Checking with incorrect parameter type
 
-Warning: imap_gc() expects argument #1 to be of type resource, string given in %s on line %d
+Warning: imap_gc(): Argument #1 must be of type resource, string given in %s on line %d
 
-Warning: imap_gc() expects argument #1 to be of type resource, bool given in %s on line %d
+Warning: imap_gc(): Argument #1 must be of type resource, bool given in %s on line %d
 
 Warning: imap_gc(): Invalid value for the flags parameter in %s on line %d

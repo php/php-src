@@ -154,15 +154,15 @@ string(2) "10"
 -- Iteration 9 --
 bool(false)
 -- Iteration 10 --
-strrchr() expects argument #2 ($needle) to be of type string, array given
+strrchr(): Argument #2 ($needle) must be of type string, array given
 -- Iteration 11 --
-strrchr() expects argument #2 ($needle) to be of type string, array given
+strrchr(): Argument #2 ($needle) must be of type string, array given
 -- Iteration 12 --
-strrchr() expects argument #2 ($needle) to be of type string, array given
+strrchr(): Argument #2 ($needle) must be of type string, array given
 -- Iteration 13 --
-strrchr() expects argument #2 ($needle) to be of type string, array given
+strrchr(): Argument #2 ($needle) must be of type string, array given
 -- Iteration 14 --
-strrchr() expects argument #2 ($needle) to be of type string, array given
+strrchr(): Argument #2 ($needle) must be of type string, array given
 -- Iteration 15 --
 bool(false)
 -- Iteration 16 --
@@ -182,7 +182,7 @@ bool(false)
 -- Iteration 23 --
 bool(false)
 -- Iteration 24 --
-strrchr() expects argument #2 ($needle) to be of type string, resource given
+strrchr(): Argument #2 ($needle) must be of type string, resource given
 -- Iteration 25 --
 bool(false)
 -- Iteration 26 --

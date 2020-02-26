@@ -166,29 +166,29 @@ string(3) "0.5"
 string(3) "0.5"
 
 -- Iteration 10 --
-sprintf() expects argument #1 ($format) to be of type string, array given
-sprintf() expects argument #1 ($format) to be of type string, array given
-sprintf() expects argument #1 ($format) to be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 11 --
-sprintf() expects argument #1 ($format) to be of type string, array given
-sprintf() expects argument #1 ($format) to be of type string, array given
-sprintf() expects argument #1 ($format) to be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 12 --
-sprintf() expects argument #1 ($format) to be of type string, array given
-sprintf() expects argument #1 ($format) to be of type string, array given
-sprintf() expects argument #1 ($format) to be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 13 --
-sprintf() expects argument #1 ($format) to be of type string, array given
-sprintf() expects argument #1 ($format) to be of type string, array given
-sprintf() expects argument #1 ($format) to be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 14 --
-sprintf() expects argument #1 ($format) to be of type string, array given
-sprintf() expects argument #1 ($format) to be of type string, array given
-sprintf() expects argument #1 ($format) to be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
+sprintf(): Argument #1 ($format) must be of type string, array given
 
 -- Iteration 15 --
 string(0) ""
@@ -246,7 +246,7 @@ string(0) ""
 string(0) ""
 
 -- Iteration 26 --
-sprintf() expects argument #1 ($format) to be of type string, resource given
-sprintf() expects argument #1 ($format) to be of type string, resource given
-sprintf() expects argument #1 ($format) to be of type string, resource given
+sprintf(): Argument #1 ($format) must be of type string, resource given
+sprintf(): Argument #1 ($format) must be of type string, resource given
+sprintf(): Argument #1 ($format) must be of type string, resource given
 Done
