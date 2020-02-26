@@ -757,14 +757,12 @@ mysqlnd_sha256_get_rsa_from_pem(const char *buf, size_t len)
 	DWORD der_len;
 	CERT_PUBLIC_KEY_INFO *key_info = NULL;
 	DWORD key_info_len;
+	ALLOCA_FLAG(use_heap);
 
 	if (!CryptStringToBinaryA(buf, len, CRYPT_STRING_BASE64HEADER, NULL, &der_len, NULL, NULL)) {
 		goto finish;
 	}
-	der_buf = malloc(der_len); /* TODO alloca? */
-	if (!der_buf) {
-		goto finish;
-	}
+	der_buf = do_alloca(der_len, use_heap);
 	if (!CryptStringToBinaryA(buf, len, CRYPT_STRING_BASE64HEADER, der_buf, &der_len, NULL, NULL)) {
 		goto finish;
 	}
@@ -780,7 +778,7 @@ finish:
 		LocalFree(key_info);
 	}
 	if (der_buf) {
-		free(der_buf);
+		free_alloca(der_buf, use_heap);
 	}
 	return (mysqlnd_rsa_t) ret;
 }
