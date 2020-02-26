@@ -40,6 +40,10 @@ PHP                                                                        NEWS
 - MySQLi:
   . Fixed bug #64032 (mysqli reports different client_version). (cmb)
 
+- MySQLnd:
+  . Implemented FR #79275 (Support auth_plugin_caching_sha2_password on
+    Windows). (cmb)
+
 - Opcache:
   . Fixed bug #79252 (preloading causes php-fpm to segfault during exit).
     (Nikita)

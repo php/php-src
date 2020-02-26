@@ -694,6 +694,7 @@ mysqlnd_xor_string(char * dst, const size_t dst_len, const char * xor_str, const
 	}
 }
 
+#ifndef PHP_WIN32
 
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
@@ -739,6 +740,91 @@ mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_pub
 	DBG_RETURN(ret);
 }
 /* }}} */
+
+#else
+
+#include <wincrypt.h>
+#include <bcrypt.h>
+
+typedef HANDLE mysqlnd_rsa_t;
+
+/* {{{ mysqlnd_sha256_get_rsa_from_pem */
+static mysqlnd_rsa_t
+mysqlnd_sha256_get_rsa_from_pem(const char *buf, size_t len)
+{
+	BCRYPT_KEY_HANDLE ret = 0;
+	LPCSTR der_buf = NULL;
+	DWORD der_len;
+	CERT_PUBLIC_KEY_INFO *key_info = NULL;
+	DWORD key_info_len;
+	ALLOCA_FLAG(use_heap);
+
+	if (!CryptStringToBinaryA(buf, len, CRYPT_STRING_BASE64HEADER, NULL, &der_len, NULL, NULL)) {
+		goto finish;
+	}
+	der_buf = do_alloca(der_len, use_heap);
+	if (!CryptStringToBinaryA(buf, len, CRYPT_STRING_BASE64HEADER, der_buf, &der_len, NULL, NULL)) {
+		goto finish;
+	}
+	if (!CryptDecodeObjectEx(X509_ASN_ENCODING, X509_PUBLIC_KEY_INFO, der_buf, der_len, CRYPT_ENCODE_ALLOC_FLAG, NULL, &key_info, &key_info_len)) {
+		goto finish;
+	}
+	if (!CryptImportPublicKeyInfoEx2(X509_ASN_ENCODING, key_info, CRYPT_OID_INFO_PUBKEY_ENCRYPT_KEY_FLAG, NULL, &ret)) {
+		goto finish;
+	}
+
+finish:
+	if (key_info) {
+		LocalFree(key_info);
+	}
+	if (der_buf) {
+		free_alloca(der_buf, use_heap);
+	}
+	return (mysqlnd_rsa_t) ret;
+}
+/* }}} */
+
+/* {{{ mysqlnd_sha256_public_encrypt */
+static zend_uchar *
+mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_public_key, size_t passwd_len, size_t * auth_data_len, char *xor_str)
+{
+	zend_uchar * ret = NULL;
+	DWORD server_public_key_len = passwd_len;
+	BCRYPT_OAEP_PADDING_INFO padding_info;
+
+	DBG_ENTER("mysqlnd_sha256_public_encrypt");
+
+	ZeroMemory(&padding_info, sizeof padding_info);
+	padding_info.pszAlgId = BCRYPT_SHA1_ALGORITHM;
+	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, xor_str, passwd_len + 1, &padding_info,
+			NULL, 0, NULL, 0, &server_public_key_len, BCRYPT_PAD_OAEP)) {
+		DBG_RETURN(0);
+	}
+
+	/*
+		Because RSA_PKCS1_OAEP_PADDING is used there is a restriction on the passwd_len.
+		RSA_PKCS1_OAEP_PADDING is recommended for new applications. See more here:
+		http://www.openssl.org/docs/crypto/RSA_public_encrypt.html
+	*/
+	if ((size_t) server_public_key_len <= passwd_len + 41) {
+		/* password message is to long */
+		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
+		DBG_ERR("password is too long");
+		DBG_RETURN(0);
+	}
+
+	*auth_data_len = server_public_key_len;
+	ret = malloc(*auth_data_len);
+	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, xor_str, passwd_len + 1, &padding_info,
+			NULL, 0, ret, server_public_key_len, &server_public_key_len, BCRYPT_PAD_OAEP)) {
+		DBG_RETURN(0);
+	}
+	BCryptDestroyKey((BCRYPT_KEY_HANDLE) server_public_key);
+	DBG_RETURN(ret);
+}
+/* }}} */
+
+#endif
 
 /* {{{ mysqlnd_sha256_get_rsa_key */
 static mysqlnd_rsa_t
@@ -916,6 +1002,8 @@ void php_mysqlnd_scramble_sha2(zend_uchar * const buffer, const zend_uchar * con
 }
 /* }}} */
 
+#ifndef PHP_WIN32
+
 /* {{{ mysqlnd_caching_sha2_public_encrypt */
 static size_t
 mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_public_key, size_t passwd_len, unsigned char **crypted, char *xor_str)
@@ -940,6 +1028,47 @@ mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t serv
 	DBG_RETURN(server_public_key_len);
 }
 /* }}} */
+
+#else
+
+/* {{{ mysqlnd_caching_sha2_public_encrypt */
+static size_t
+mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_public_key, size_t passwd_len, unsigned char **crypted, char *xor_str)
+{
+	DWORD server_public_key_len = passwd_len;
+	BCRYPT_OAEP_PADDING_INFO padding_info;
+
+	DBG_ENTER("mysqlnd_caching_sha2_public_encrypt");
+
+	ZeroMemory(&padding_info, sizeof padding_info);
+	padding_info.pszAlgId = BCRYPT_SHA1_ALGORITHM;
+	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, xor_str, passwd_len + 1, &padding_info,
+			NULL, 0, NULL, 0, &server_public_key_len, BCRYPT_PAD_OAEP)) {
+		DBG_RETURN(0);
+	}
+
+	/*
+		Because RSA_PKCS1_OAEP_PADDING is used there is a restriction on the passwd_len.
+		RSA_PKCS1_OAEP_PADDING is recommended for new applications. See more here:
+		http://www.openssl.org/docs/crypto/RSA_public_encrypt.html
+	*/
+	if ((size_t) server_public_key_len <= passwd_len + 41) {
+		/* password message is to long */
+		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
+		DBG_ERR("password is too long");
+		DBG_RETURN(0);
+	}
+
+	*crypted = emalloc(server_public_key_len);
+	if (BCryptEncrypt((BCRYPT_KEY_HANDLE) server_public_key, xor_str, passwd_len + 1, &padding_info,
+			NULL, 0, *crypted, server_public_key_len, &server_public_key_len, BCRYPT_PAD_OAEP)) {
+		DBG_RETURN(0);
+	}
+	DBG_RETURN(server_public_key_len);
+}
+/* }}} */
+
+#endif
 
 /* {{{ mysqlnd_native_auth_get_auth_data */
 static zend_uchar *
