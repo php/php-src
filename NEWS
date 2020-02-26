@@ -20,6 +20,9 @@ PHP                                                                        NEWS
     cmb)
   . Fixed bug #79271 (DOMDocumentType::$childNodes is NULL). (cmb)
 
+- MySQLi:
+  . Fixed bug #64032 (mysqli reports different client_version). (cmb)
+
 - PCRE:
   . Fixed bug #79188 (Memory corruption in preg_replace/preg_replace_callback
     and unicode). (Nikita)
