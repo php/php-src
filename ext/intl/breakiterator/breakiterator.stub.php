@@ -2,7 +2,7 @@
 
 /** @generate-function-entries */
 
-class IntlBreakIterator implements Traversable
+class IntlBreakIterator implements IteratorAggregate
 {
     /** @return IntlBreakIterator|null */
     public static function createCharacterInstance(?string $locale = null) {}
@@ -65,6 +65,8 @@ class IntlBreakIterator implements Traversable
 
     /** @return bool|null */
     public function setText(string $text) {}
+
+    public function getIterator(): Iterator {}
 }
 
 class IntlRuleBasedBreakIterator extends IntlBreakIterator

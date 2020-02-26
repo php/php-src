@@ -236,8 +236,7 @@ U_CFUNC void breakiterator_register_BreakIterator_class(void)
 	BreakIterator_handlers.get_debug_info = BreakIterator_get_debug_info;
 	BreakIterator_handlers.free_obj = BreakIterator_objects_free;
 
-	zend_class_implements(BreakIterator_ce_ptr, 1,
-			zend_ce_traversable);
+	zend_class_implements(BreakIterator_ce_ptr, 1, zend_ce_aggregate);
 
 	zend_declare_class_constant_long(BreakIterator_ce_ptr,
 		"DONE", sizeof("DONE") - 1, BreakIterator::DONE );

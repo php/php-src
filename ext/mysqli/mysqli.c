@@ -636,7 +636,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	zend_declare_property_null(ce, "num_rows",		sizeof("num_rows") - 1, ZEND_ACC_PUBLIC);
 	zend_declare_property_null(ce, "type",			sizeof("type") - 1, ZEND_ACC_PUBLIC);
 	mysqli_result_class_entry->get_iterator = php_mysqli_result_get_iterator;
-	zend_class_implements(mysqli_result_class_entry, 1, zend_ce_traversable);
+	zend_class_implements(mysqli_result_class_entry, 1, zend_ce_aggregate);
 	zend_hash_add_ptr(&classes, ce->name, &mysqli_result_properties);
 
 	REGISTER_MYSQLI_CLASS_ENTRY("mysqli_stmt", mysqli_stmt_class_entry, class_mysqli_stmt_methods);
@@ -1086,6 +1086,15 @@ PHP_FUNCTION(mysqli_result_construct)
 	MYSQLI_REGISTER_RESOURCE_EX(mysqli_resource, getThis());
 }
 /* }}} */
+
+PHP_METHOD(mysqli_result, getIterator)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+}
 
 /* {{{ php_mysqli_fetch_into_hash_aux
  */

@@ -27,6 +27,7 @@ extern "C" {
 #include "breakiterator_class.h"
 #include "../locale/locale.h"
 #include <zend_exceptions.h>
+#include <zend_interfaces.h>
 }
 
 using PHP::CodePointBreakIterator;
@@ -398,4 +399,13 @@ U_CFUNC PHP_METHOD(IntlBreakIterator, getErrorMessage)
 	/* Return last error message. */
 	message = intl_error_get_message(BREAKITER_ERROR_P(bio));
 	RETURN_STR(message);
+}
+
+U_CFUNC PHP_METHOD(IntlBreakIterator, getIterator)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
 }

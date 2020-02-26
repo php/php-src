@@ -81,6 +81,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_setFetchMode, 0, 0, 1)
 	ZEND_ARG_INFO(0, param2)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_PDOStatement_getIterator, 0, 0, Iterator, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_METHOD(PDOStatement, bindColumn);
 ZEND_METHOD(PDOStatement, bindParam);
@@ -101,6 +104,7 @@ ZEND_METHOD(PDOStatement, nextRowset);
 ZEND_METHOD(PDOStatement, rowCount);
 ZEND_METHOD(PDOStatement, setAttribute);
 ZEND_METHOD(PDOStatement, setFetchMode);
+ZEND_METHOD(PDOStatement, getIterator);
 
 
 static const zend_function_entry class_PDOStatement_methods[] = {
@@ -123,6 +127,7 @@ static const zend_function_entry class_PDOStatement_methods[] = {
 	ZEND_ME(PDOStatement, rowCount, arginfo_class_PDOStatement_rowCount, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDOStatement, setAttribute, arginfo_class_PDOStatement_setAttribute, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDOStatement, setFetchMode, arginfo_class_PDOStatement_setFetchMode, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, getIterator, arginfo_class_PDOStatement_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

@@ -55,6 +55,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlBreakIterator_setText, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_IntlBreakIterator_getIterator, 0, 0, Iterator, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlRuleBasedBreakIterator___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, rules, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, areCompiled, _IS_BOOL, 0, "false")
@@ -94,6 +97,7 @@ ZEND_METHOD(IntlBreakIterator, next);
 ZEND_METHOD(IntlBreakIterator, preceding);
 ZEND_METHOD(IntlBreakIterator, previous);
 ZEND_METHOD(IntlBreakIterator, setText);
+ZEND_METHOD(IntlBreakIterator, getIterator);
 ZEND_METHOD(IntlRuleBasedBreakIterator, __construct);
 ZEND_METHOD(IntlRuleBasedBreakIterator, getBinaryRules);
 ZEND_METHOD(IntlRuleBasedBreakIterator, getRules);
@@ -125,6 +129,7 @@ static const zend_function_entry class_IntlBreakIterator_methods[] = {
 	ZEND_ME(IntlBreakIterator, preceding, arginfo_class_IntlBreakIterator_preceding, ZEND_ACC_PUBLIC)
 	ZEND_ME(IntlBreakIterator, previous, arginfo_class_IntlBreakIterator_previous, ZEND_ACC_PUBLIC)
 	ZEND_ME(IntlBreakIterator, setText, arginfo_class_IntlBreakIterator_setText, ZEND_ACC_PUBLIC)
+	ZEND_ME(IntlBreakIterator, getIterator, arginfo_class_IntlBreakIterator_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

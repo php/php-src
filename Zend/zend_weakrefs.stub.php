@@ -11,7 +11,7 @@ final class WeakReference
     public function get(): ?object {}
 }
 
-final class WeakMap implements ArrayAccess, Countable, Traversable
+final class WeakMap implements ArrayAccess, Countable, IteratorAggregate
 {
     /**
      * @param object $object
@@ -32,4 +32,6 @@ final class WeakMap implements ArrayAccess, Countable, Traversable
     public function offsetUnset($object): void {}
 
     public function count(): int {}
+
+    public function getIterator(): Iterator {}
 }

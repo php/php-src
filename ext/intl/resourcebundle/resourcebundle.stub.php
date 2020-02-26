@@ -2,7 +2,7 @@
 
 /** @generate-function-entries */
 
-class ResourceBundle implements Traversable
+class ResourceBundle implements IteratorAggregate, Countable
 {
     public function __construct(?string $locale, ?string $bundlename, bool $fallback = true) {}
 
@@ -42,4 +42,6 @@ class ResourceBundle implements Traversable
      * @alias resourcebundle_get_error_message
      */
     public function getErrorMessage() {}
+
+    public function getIterator(): Iterator {}
 }

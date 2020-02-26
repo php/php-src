@@ -51,7 +51,7 @@ class PDOStatementAggregate extends PDOStatement implements IteratorAggregate
         /* default fetch mode is BOTH, so we see if the ctor can overwrite that */
     }
 
-    function getIterator()
+    function getIterator(): Iterator
     {
         echo __METHOD__ . "\n";
         $this->execute();

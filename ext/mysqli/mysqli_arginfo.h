@@ -617,6 +617,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_mysqli_result_free_result arginfo_class_mysqli_character_set_name
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_mysqli_result_getIterator, 0, 0, Iterator, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, mysqli_link, mysqli, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, statement, IS_STRING, 1, "null")
@@ -802,6 +805,7 @@ ZEND_FUNCTION(mysqli_result_construct);
 #if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_fetch_all);
 #endif
+ZEND_METHOD(mysqli_result, getIterator);
 ZEND_FUNCTION(mysqli_stmt_construct);
 #if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_stmt_more_results);
@@ -1001,6 +1005,7 @@ static const zend_function_entry class_mysqli_result_methods[] = {
 	ZEND_ME_MAPPING(fetch_row, mysqli_fetch_row, arginfo_class_mysqli_result_fetch_row, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(field_seek, mysqli_field_seek, arginfo_class_mysqli_result_field_seek, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(free_result, mysqli_free_result, arginfo_class_mysqli_result_free_result, ZEND_ACC_PUBLIC)
+	ZEND_ME(mysqli_result, getIterator, arginfo_class_mysqli_result_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

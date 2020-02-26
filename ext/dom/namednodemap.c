@@ -22,6 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "zend_interfaces.h"
 
 /*
 * class DOMNamedNodeMap
@@ -265,5 +266,14 @@ PHP_METHOD(DOMNamedNodeMap, count)
 	}
 }
 /* }}} end dom_namednodemap_count */
+
+PHP_METHOD(DOMNamedNodeMap, getIterator)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+}
 
 #endif
