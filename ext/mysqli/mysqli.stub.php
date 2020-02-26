@@ -91,7 +91,7 @@ class mysqli
     /** @return mysqli_result|bool */
     public function query(string $query, int $resultmode = MYSQLI_STORE_RESULT);
 
-    /** @return mysqli|bool */
+    /** @return bool */
     public function real_connect(
         ?string $host = null,
         ?string $user = null,
@@ -422,7 +422,7 @@ function mysqli_real_connect(
     ?string $database = null,
     ?int $port = null,
     int $flags = 0
-): mysqli|bool {}
+): bool {}
 
 function mysqli_real_escape_string(mysqli $mysqli_link, string $string_to_escape): string {}
 
