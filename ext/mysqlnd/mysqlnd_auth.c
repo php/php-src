@@ -718,7 +718,7 @@ static zend_uchar *
 mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_public_key, size_t passwd_len, size_t * auth_data_len, char *xor_str)
 {
 	zend_uchar * ret = NULL;
-	int server_public_key_len = RSA_size(server_public_key);
+	size_t server_public_key_len = (size_t) RSA_size(server_public_key);
 
 	DBG_ENTER("mysqlnd_sha256_public_encrypt");
 	/*
@@ -726,7 +726,7 @@ mysqlnd_sha256_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_pub
 		RSA_PKCS1_OAEP_PADDING is recommended for new applications. See more here:
 		http://www.openssl.org/docs/crypto/RSA_public_encrypt.html
 	*/
-	if ((size_t) server_public_key_len - 41 <= passwd_len) {
+	if (server_public_key_len <= passwd_len + 41) {
 		/* password message is to long */
 		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
 		DBG_ERR("password is too long");
@@ -1010,7 +1010,7 @@ void php_mysqlnd_scramble_sha2(zend_uchar * const buffer, const zend_uchar * con
 static size_t
 mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t server_public_key, size_t passwd_len, unsigned char **crypted, char *xor_str)
 {
-	int server_public_key_len = RSA_size(server_public_key);
+	size_t server_public_key_len = (size_t) RSA_size(server_public_key);
 
 	DBG_ENTER("mysqlnd_caching_sha2_public_encrypt");
 	/*
@@ -1018,7 +1018,7 @@ mysqlnd_caching_sha2_public_encrypt(MYSQLND_CONN_DATA * conn, mysqlnd_rsa_t serv
 		RSA_PKCS1_OAEP_PADDING is recommended for new applications. See more here:
 		http://www.openssl.org/docs/crypto/RSA_public_encrypt.html
 	*/
-	if ((size_t) server_public_key_len - 41 <= passwd_len) {
+	if (server_public_key_len <= passwd_len + 41) {
 		/* password message is to long */
 		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
 		DBG_ERR("password is too long");
@@ -1177,7 +1177,7 @@ mysqlnd_caching_sha2_get_key(MYSQLND_CONN_DATA *conn)
 }
 
 
-/* {{{ mysqlnd_caching_sha2_get_key */
+/* {{{ mysqlnd_caching_sha2_get_and_use_key */
 static size_t
 mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
 		const zend_uchar * auth_plugin_data, const size_t auth_plugin_data_len,
@@ -1185,8 +1185,7 @@ mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
 		const char * const passwd,
 		const size_t passwd_len)
 {
-	static mysqlnd_rsa_t server_public_key;
-	server_public_key = mysqlnd_caching_sha2_get_key(conn);
+	mysqlnd_rsa_t server_public_key = mysqlnd_caching_sha2_get_key(conn);
 
 	DBG_ENTER("mysqlnd_caching_sha2_get_and_use_key(");
 
