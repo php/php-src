@@ -1391,7 +1391,8 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	size_t arg_pattern_len, arg_options_len;
 	int err;
 	size_t n, i, pos, len;
-	ptrdiff_t beg, end;
+	/* Stored as int* in the OnigRegion struct */
+	int beg, end;
 	OnigOptionType option;
 	OnigUChar *str;
 	OnigSyntaxType *syntax;
@@ -1587,7 +1588,8 @@ PHP_FUNCTION(mb_ereg_search_init)
 PHP_FUNCTION(mb_ereg_search_getregs)
 {
 	size_t n, i, len;
-	ptrdiff_t beg, end;
+	/* Stored as int* in the OnigRegion struct */
+	int beg, end;
 	OnigUChar *str;
 
 	if (zend_parse_parameters_none() == FAILURE) {
