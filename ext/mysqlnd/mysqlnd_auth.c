@@ -706,9 +706,8 @@ typedef RSA * mysqlnd_rsa_t;
 static mysqlnd_rsa_t
 mysqlnd_sha256_get_rsa_from_pem(const char *buf, size_t len)
 {
-	RSA * ret = NULL;
 	BIO * bio = BIO_new_mem_buf(buf, len);
-	ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
+	RSA * ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
 	BIO_free(bio);
 	return ret;
 }
