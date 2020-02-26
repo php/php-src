@@ -2072,6 +2072,15 @@ PHP_METHOD(PDOStatement, debugDumpParams)
 }
 /* }}} */
 
+PHP_METHOD(PDOStatement, getIterator)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+}
+
 /* {{{ overloaded handlers for PDOStatement class */
 static zval *dbstmt_prop_write(zend_object *object, zend_string *name, zval *value, void **cache_slot)
 {
@@ -2583,7 +2592,7 @@ void pdo_stmt_init(void)
 	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
 	pdo_dbstmt_ce->serialize = zend_class_serialize_deny;
 	pdo_dbstmt_ce->unserialize = zend_class_unserialize_deny;
-	zend_class_implements(pdo_dbstmt_ce, 1, zend_ce_traversable);
+	zend_class_implements(pdo_dbstmt_ce, 1, zend_ce_aggregate);
 	zend_declare_property_null(pdo_dbstmt_ce, "queryString", sizeof("queryString")-1, ZEND_ACC_PUBLIC);
 
 	memcpy(&pdo_dbstmt_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));

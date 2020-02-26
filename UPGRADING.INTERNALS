@@ -18,6 +18,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   o. cast_object() object handler is now required
   p. ARG_COUNT() macro removed
   q. GC_COLLECTABLE flag
+  r. Cannot implement Traversable only
 
 2. Build system changes
   a. Abstract
@@ -121,6 +122,16 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   q. GC_COLLECTABLE flag was inverted into GC_NOT_COLLECTABLE.
      Assignments to GC_TYPE_INFO() might need to be changed to properly
      set the value of the GC_NOT_COLLECTABLE flag.
+
+  r. Just for for userland classes, it is no longer allowed to implement only
+     the Traversable interface. Instead, it is necessary to implement either
+     Iterator or IteratorAggregate. You can do the latter by implementing
+     zend_ce_aggregate and providing the following method implementation:
+
+         ZEND_METHOD(MyClass, getIterator) {
+             ZEND_PARSE_PARAMETERS_NONE();
+             zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+         }
 
 ========================
 2. Build system changes

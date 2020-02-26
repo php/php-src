@@ -766,6 +766,17 @@ PHP 8.0 UPGRADE NOTES
     longer referenced.
   . The deprecated parameter `$version` of curl_version() has been removed.
 
+- Date:
+  . DatePeriod now implements IteratorAggregate (instead of Traversable).
+
+- DOM:
+  . DOMNamedNodeMap now implements IteratorAggregate (instead of Traversable).
+  . DOMNodeList now implements IteratorAggregate (instead of Traversable).
+
+- Intl:
+  . IntlBreakIterator now implements IteratorAggregate (instead of Traversable).
+  . ResourceBundle now implements IteratorAggregate (instead of Traversable).
+
 - Enchant:
   . The enchant extension now uses libenchant-2 by default when available.
     libenchant version 1 is still supported but is deprecated and could
@@ -786,9 +797,13 @@ PHP 8.0 UPGRADE NOTES
 - MBString:
   . The Unicode data tables have been updated to version 13.0.0.
 
+- PDO:
+  . PDOStatement now implements IteratorAggregate (instead of Traversable).
+
 - MySQLi / PDO MySQL:
   . When mysqlnd is not used (which is the default and recommended option),
     the minimum supported libmysqlclient version is now 5.1.
+  . mysqli_result now implements IteratorAggregate (instead of Traversable).
 
 - PGSQL / PDO PGSQL:
   . The PGSQL and PDO PGSQL extensions now require at least libpq 9.1.

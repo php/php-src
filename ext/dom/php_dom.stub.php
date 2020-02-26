@@ -123,12 +123,14 @@ class DOMDocumentFragment implements DOMParentNode
     public function prepend(...$nodes): void {}
 }
 
-class DOMNodeList
+class DOMNodeList implements IteratorAggregate, Countable
 {
     /** @return int|false */
     public function count() {}
 
-    /** @return DOMNode|null */
+    public function getIterator(): Iterator {}
+
+    /** @return ?DOMNode */
     public function item(int $index) {}
 }
 
@@ -374,7 +376,7 @@ class DOMText
     public function splitText(int $offset) {}
 }
 
-class DOMNamedNodeMap
+class DOMNamedNodeMap implements IteratorAggregate, Countable
 {
     /** @return DOMNode|null */
     public function getNamedItem(string $name) {}
@@ -387,6 +389,8 @@ class DOMNamedNodeMap
 
     /** @return int|false */
     public function count() {}
+
+    public function getIterator(): Iterator {}
 }
 
 class DOMEntity extends DOMNode

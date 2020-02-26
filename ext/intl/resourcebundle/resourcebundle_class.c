@@ -368,6 +368,14 @@ PHP_FUNCTION( resourcebundle_get_error_message )
 }
 /* }}} */
 
+PHP_METHOD(ResourceBundle, getIterator) {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+}
+
 /* {{{ resourcebundle_register_class
  * Initialize 'ResourceBundle' class
  */
@@ -389,6 +397,6 @@ void resourcebundle_register_class( void )
 	ResourceBundle_object_handlers.read_dimension = resourcebundle_array_get;
 	ResourceBundle_object_handlers.count_elements = resourcebundle_array_count;
 
-	zend_class_implements(ResourceBundle_ce_ptr, 2, zend_ce_traversable, zend_ce_countable);
+	zend_class_implements(ResourceBundle_ce_ptr, 2, zend_ce_aggregate, zend_ce_countable);
 }
 /* }}} */

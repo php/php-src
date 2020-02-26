@@ -2,7 +2,7 @@
 
 /** @generate-function-entries */
 
-class PDOStatement implements Traversable
+class PDOStatement implements IteratorAggregate
 {
     /**
      * @param mixed $driverdata
@@ -76,6 +76,8 @@ class PDOStatement implements Traversable
 
     /** @return bool */
     public function setFetchMode(int $mode, $param1 = UNKNOWN, $param2 = UNKNOWN) {}
+
+    public function getIterator(): Iterator {}
 }
 
 final class PDORow

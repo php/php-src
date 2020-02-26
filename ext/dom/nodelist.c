@@ -22,6 +22,7 @@
 #include "php.h"
 #if defined(HAVE_LIBXML) && defined(HAVE_DOM)
 #include "php_dom.h"
+#include "zend_interfaces.h"
 
 /*
 * class DOMNodeList
@@ -175,5 +176,13 @@ PHP_METHOD(DOMNodeList, item)
 }
 /* }}} end dom_nodelist_item */
 
+ZEND_METHOD(DOMNodeList, getIterator)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+}
 
 #endif

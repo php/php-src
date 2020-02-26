@@ -423,6 +423,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DatePeriod___set_state arginfo_class_DateTime___set_state
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DatePeriod_getIterator, 0, 0, Iterator, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_FUNCTION(strtotime);
 ZEND_FUNCTION(date);
@@ -503,6 +506,7 @@ ZEND_METHOD(DatePeriod, getDateInterval);
 ZEND_METHOD(DatePeriod, getRecurrences);
 ZEND_METHOD(DatePeriod, __wakeup);
 ZEND_METHOD(DatePeriod, __set_state);
+ZEND_METHOD(DatePeriod, getIterator);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -651,5 +655,6 @@ static const zend_function_entry class_DatePeriod_methods[] = {
 	ZEND_ME(DatePeriod, getRecurrences, arginfo_class_DatePeriod_getRecurrences, ZEND_ACC_PUBLIC)
 	ZEND_ME(DatePeriod, __wakeup, arginfo_class_DatePeriod___wakeup, ZEND_ACC_PUBLIC)
 	ZEND_ME(DatePeriod, __set_state, arginfo_class_DatePeriod___set_state, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(DatePeriod, getIterator, arginfo_class_DatePeriod_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

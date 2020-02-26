@@ -300,7 +300,7 @@ class mysqli
     public function refresh(int $options) {}
 }
 
-class mysqli_result
+class mysqli_result implements IteratorAggregate
 {
     /** @alias mysqli_result_construct */
     public function __construct(object $mysqli_link, int $resmode = MYSQLI_STORE_RESULT) {}
@@ -384,6 +384,8 @@ class mysqli_result
      * @alias mysqli_free_result
      */
     public function free_result() {}
+
+    public function getIterator(): Iterator;
 }
 
 class mysqli_stmt

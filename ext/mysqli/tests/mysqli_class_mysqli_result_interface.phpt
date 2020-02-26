@@ -38,6 +38,7 @@ require_once('skipifconnectfailure.inc');
         'field_seek'            => true,
         'free'                  => true,
         'free_result'           => true,
+        'getIterator'           => true,
     );
     if ($IS_MYSQLND)
         $expected_methods['fetch_all'] = true;

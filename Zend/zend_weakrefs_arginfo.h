@@ -30,6 +30,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_WeakMap_count, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_WeakMap_getIterator, 0, 0, Iterator, 0)
+ZEND_END_ARG_INFO()
+
 
 ZEND_METHOD(WeakReference, __construct);
 ZEND_METHOD(WeakReference, create);
@@ -39,6 +42,7 @@ ZEND_METHOD(WeakMap, offsetSet);
 ZEND_METHOD(WeakMap, offsetExists);
 ZEND_METHOD(WeakMap, offsetUnset);
 ZEND_METHOD(WeakMap, count);
+ZEND_METHOD(WeakMap, getIterator);
 
 
 static const zend_function_entry class_WeakReference_methods[] = {
@@ -55,5 +59,6 @@ static const zend_function_entry class_WeakMap_methods[] = {
 	ZEND_ME(WeakMap, offsetExists, arginfo_class_WeakMap_offsetExists, ZEND_ACC_PUBLIC)
 	ZEND_ME(WeakMap, offsetUnset, arginfo_class_WeakMap_offsetUnset, ZEND_ACC_PUBLIC)
 	ZEND_ME(WeakMap, count, arginfo_class_WeakMap_count, ZEND_ACC_PUBLIC)
+	ZEND_ME(WeakMap, getIterator, arginfo_class_WeakMap_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

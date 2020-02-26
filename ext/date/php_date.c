@@ -1691,7 +1691,7 @@ static void date_register_classes(void) /* {{{ */
 	ce_period.create_object = date_object_new_period;
 	date_ce_period = zend_register_internal_class_ex(&ce_period, NULL);
 	date_ce_period->get_iterator = date_object_period_get_iterator;
-	zend_class_implements(date_ce_period, 1, zend_ce_traversable);
+	zend_class_implements(date_ce_period, 1, zend_ce_aggregate);
 	memcpy(&date_object_handlers_period, &std_object_handlers, sizeof(zend_object_handlers));
 	date_object_handlers_period.offset = XtOffsetOf(php_period_obj, std);
 	date_object_handlers_period.free_obj = date_object_free_storage_period;
@@ -4371,6 +4371,13 @@ PHP_METHOD(DatePeriod, getRecurrences)
 	RETURN_LONG(dpobj->recurrences - dpobj->include_start_date);
 }
 /* }}} */
+
+PHP_METHOD(DatePeriod, getIterator)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+}
 
 static int check_id_allowed(char *id, zend_long what) /* {{{ */
 {

@@ -576,6 +576,15 @@ ZEND_METHOD(WeakMap, count)
 	RETURN_LONG(count);
 }
 
+ZEND_METHOD(WeakMap, getIterator)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+}
+
 void zend_register_weakref_ce(void) /* {{{ */
 {
 	zend_class_entry ce;
@@ -597,15 +606,13 @@ void zend_register_weakref_ce(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "WeakMap", class_WeakMap_methods);
 	zend_ce_weakmap = zend_register_internal_class(&ce);
 	zend_ce_weakmap->ce_flags |= ZEND_ACC_FINAL | ZEND_ACC_NO_DYNAMIC_PROPERTIES;
+	zend_class_implements(
+		zend_ce_weakmap, 3, zend_ce_arrayaccess, zend_ce_countable, zend_ce_aggregate);
 
 	zend_ce_weakmap->create_object = zend_weakmap_create_object;
 	zend_ce_weakmap->get_iterator = zend_weakmap_get_iterator;
 	zend_ce_weakmap->serialize = zend_class_serialize_deny;
 	zend_ce_weakmap->unserialize = zend_class_unserialize_deny;
-
-	/* Must happen after get_iterator is assigned. */
-	zend_class_implements(
-		zend_ce_weakmap, 3, zend_ce_arrayaccess, zend_ce_countable, zend_ce_traversable);
 
 	memcpy(&zend_weakmap_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	zend_weakmap_handlers.offset = XtOffsetOf(zend_weakmap, std);

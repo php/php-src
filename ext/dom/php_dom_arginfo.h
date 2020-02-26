@@ -123,6 +123,9 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMNodeList_count arginfo_class_DOMNode_getLineNo
 
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_DOMNodeList_getIterator, 0, 0, Iterator, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNodeList_item, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, index, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -404,6 +407,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMNamedNodeMap_count arginfo_class_DOMNode_getLineNo
 
+#define arginfo_class_DOMNamedNodeMap_getIterator arginfo_class_DOMNodeList_getIterator
+
 #define arginfo_class_DOMEntityReference___construct arginfo_class_DOMElement_getAttribute
 
 #define arginfo_class_DOMProcessingInstruction___construct arginfo_class_DOMAttr___construct
@@ -470,6 +475,7 @@ ZEND_METHOD(DOMDocumentFragment, appendXML);
 ZEND_METHOD(DOMDocumentFragment, append);
 ZEND_METHOD(DOMDocumentFragment, prepend);
 ZEND_METHOD(DOMNodeList, count);
+ZEND_METHOD(DOMNodeList, getIterator);
 ZEND_METHOD(DOMNodeList, item);
 ZEND_METHOD(DOMCharacterData, appendData);
 ZEND_METHOD(DOMCharacterData, substringData);
@@ -564,6 +570,7 @@ ZEND_METHOD(DOMNamedNodeMap, getNamedItem);
 ZEND_METHOD(DOMNamedNodeMap, getNamedItemNS);
 ZEND_METHOD(DOMNamedNodeMap, item);
 ZEND_METHOD(DOMNamedNodeMap, count);
+ZEND_METHOD(DOMNamedNodeMap, getIterator);
 ZEND_METHOD(DOMEntityReference, __construct);
 ZEND_METHOD(DOMProcessingInstruction, __construct);
 #if defined(LIBXML_XPATH_ENABLED)
@@ -664,6 +671,7 @@ static const zend_function_entry class_DOMDocumentFragment_methods[] = {
 
 static const zend_function_entry class_DOMNodeList_methods[] = {
 	ZEND_ME(DOMNodeList, count, arginfo_class_DOMNodeList_count, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMNodeList, getIterator, arginfo_class_DOMNodeList_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNodeList, item, arginfo_class_DOMNodeList_item, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
@@ -794,6 +802,7 @@ static const zend_function_entry class_DOMNamedNodeMap_methods[] = {
 	ZEND_ME(DOMNamedNodeMap, getNamedItemNS, arginfo_class_DOMNamedNodeMap_getNamedItemNS, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNamedNodeMap, item, arginfo_class_DOMNamedNodeMap_item, ZEND_ACC_PUBLIC)
 	ZEND_ME(DOMNamedNodeMap, count, arginfo_class_DOMNamedNodeMap_count, ZEND_ACC_PUBLIC)
+	ZEND_ME(DOMNamedNodeMap, getIterator, arginfo_class_DOMNamedNodeMap_getIterator, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };
 

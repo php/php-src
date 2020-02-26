@@ -391,7 +391,7 @@ class DateInterval
     public static function __set_state(array $array) {}
 }
 
-class DatePeriod implements Traversable
+class DatePeriod implements IteratorAggregate
 {
     /* Has an overloaded signature */
     public function __construct($start, $interval = UNKNOWN, $end = UNKNOWN) {}
@@ -412,4 +412,6 @@ class DatePeriod implements Traversable
 
     /** @return DatePeriod */
     public static function __set_state(array $array) {}
+
+    public function getIterator(): Iterator {}
 }
