@@ -745,7 +745,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 				if (!fci->no_separation) {
 					/* Separation is enabled -- create a ref */
 					ZVAL_NEW_REF(arg, arg);
-				} else if (!ARG_MAY_BE_SENT_BY_REF(func, i + 1)) {
+				} else if (ARG_MUST_BE_SENT_BY_REF(func, i + 1)) {
 					/* By-value send is not allowed -- emit a warning,
 					 * but still perform the call with a by-value send. */
 					const char *arg_name = get_function_arg_name(func, i + 1);

@@ -1195,6 +1195,10 @@ ZEND_API int zend_check_protected(zend_class_entry *ce, zend_class_entry *scope)
 }
 /* }}} */
 
+ZEND_BEGIN_ARG_INFO_EX(zend_call_arg_info, 0, 0, 0)
+	ZEND_ARG_VARIADIC_INFO(ZEND_SEND_PREFER_VAL, args)
+ZEND_END_ARG_INFO()
+
 ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, int is_static) /* {{{ */
 {
 	size_t mname_len;
@@ -1204,6 +1208,9 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	 * The low bit must be zero, to not be interpreted as a MAP_PTR offset.
 	 */
 	static const void *dummy = (void*)(intptr_t)2;
+	unsigned char arg_flags =
+		(ZEND_SEND_PREFER_VAL << 6) | (ZEND_SEND_PREFER_VAL << 4) |
+		(ZEND_SEND_PREFER_VAL << 2) | ZEND_SEND_PREFER_VAL;
 
 	ZEND_ASSERT(fbc);
 
@@ -1214,9 +1221,9 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	}
 
 	func->type = ZEND_USER_FUNCTION;
-	func->arg_flags[0] = 0;
-	func->arg_flags[1] = 0;
-	func->arg_flags[2] = 0;
+	func->arg_flags[0] = arg_flags;
+	func->arg_flags[1] = arg_flags;
+	func->arg_flags[2] = arg_flags;
 	func->fn_flags = ZEND_ACC_CALL_VIA_TRAMPOLINE | ZEND_ACC_PUBLIC;
 	if (is_static) {
 		func->fn_flags |= ZEND_ACC_STATIC;
@@ -1241,7 +1248,7 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 	func->prototype = NULL;
 	func->num_args = 0;
 	func->required_num_args = 0;
-	func->arg_info = 0;
+	func->arg_info = (zend_arg_info *) zend_call_arg_info + 1;
 
 	return (zend_function*)func;
 }
