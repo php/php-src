@@ -2726,7 +2726,7 @@ static int zend_jit_store_var(dasm_State **Dst, uint32_t info, int var, zend_reg
 static int zend_jit_store_var_if_necessary(dasm_State **Dst, int var, zend_jit_addr src, uint32_t info)
 {
 	if (Z_MODE(src) == IS_REG && Z_STORE(src)) {
-		zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, (uint32_t)(uintptr_t)ZEND_CALL_VAR(NULL, var));
+		zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, var);
 		return zend_jit_spill_store(Dst, src, dst, info, 1);
 	}
 	return 1;
@@ -2735,7 +2735,7 @@ static int zend_jit_store_var_if_necessary(dasm_State **Dst, int var, zend_jit_a
 static int zend_jit_store_var_if_necessary_ex(dasm_State **Dst, int var, zend_jit_addr src, uint32_t info, zend_jit_addr old, uint32_t old_info)
 {
 	if (Z_MODE(src) == IS_REG && Z_STORE(src)) {
-		zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, (uint32_t)(uintptr_t)ZEND_CALL_VAR(NULL, var));
+		zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, var);
 		zend_bool set_type = 1;
 
 		if ((info & (MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)) ==

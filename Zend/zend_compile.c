@@ -3192,7 +3192,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 			zend_compile_expr(&arg_node, arg->child[0]);
 			opline = zend_emit_op(NULL, ZEND_SEND_UNPACK, &arg_node, NULL);
 			opline->op2.num = arg_count;
-			opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_ARG(NULL, arg_count);
+			opline->result.var = EX_NUM_TO_VAR(arg_count - 1);
 			continue;
 		}
 
@@ -3286,7 +3286,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 
 		opline = zend_emit_op(NULL, opcode, &arg_node, NULL);
 		opline->op2.opline_num = arg_num;
-		opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_ARG(NULL, arg_num);
+		opline->result.var = EX_NUM_TO_VAR(arg_num - 1);
 	}
 
 	return arg_count;
@@ -3680,7 +3680,7 @@ int zend_compile_func_cuf(znode *result, zend_ast_list *args, zend_string *lcnam
 
 		opline = zend_emit_op(NULL, ZEND_SEND_USER, &arg_node, NULL);
 		opline->op2.num = i;
-		opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_ARG(NULL, i);
+		opline->result.var = EX_NUM_TO_VAR(i - 1);
 	}
 	zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
 
