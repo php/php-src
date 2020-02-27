@@ -2,25 +2,25 @@
 
 interface DOMChildNode
 {
-    public function remove() : void;
+    public function remove(): void;
 
-    /** @var ...DOMNode|string|null $nodes */
-    public function before(... $nodes) : void;
+    /** @var ...DOMNode|string $nodes */
+    public function before(... $nodes): void;
 
-    /** @var ...DOMNode|string|null $nodes */
-    public function after(...$nodes) : void;
+    /** @var ...DOMNode|string $nodes */
+    public function after(...$nodes): void;
 
-    /** @var ...DOMNode|string|null $nodes */
-    public function replaceWith(...$nodes) : void;
+    /** @var ...DOMNode|string $nodes */
+    public function replaceWith(...$nodes): void;
 }
 
 interface DOMParentNode
 {
-    /** @var ...DOMNode|string|null $nodes */
-    public function append(...$nodes) : void;
+    /** @var ...DOMNode|string $nodes */
+    public function append(...$nodes): void;
 
-    /** @var ...DOMNode|string|null $nodes */
-    public function prepend(...$nodes) : void;
+    /** @var ...DOMNode|string $nodes */
+    public function prepend(...$nodes): void;
 }
 
 class DOMNode {
