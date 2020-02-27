@@ -1,6 +1,7 @@
 #include "uchar.h"
 #include "intl_data.h"
 #include "intl_convert.h"
+#include "uchar_arginfo.h"
 
 #include <unicode/uchar.h>
 #include <unicode/utf8.h>
@@ -30,7 +31,7 @@ static inline int convert_cp(UChar32* pcp, zval *zcp) {
 		}
 	} else {
 		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
-		intl_error_set_custom_msg(NULL, "Invalid parameter for unicode point.  Must be either integer or UTF-8 sequence.", 0);
+		intl_error_set_custom_msg(NULL, "Invalid parameter for unicode point. Must be either integer or UTF-8 sequence.", 0);
 		return FAILURE;
 	}
 	if ((cp < UCHAR_MIN_VALUE) || (cp > UCHAR_MAX_VALUE)) {
@@ -46,9 +47,6 @@ static inline int convert_cp(UChar32* pcp, zval *zcp) {
  * Converts a numeric codepoint to UTF-8
  * Acts as an identify function when given a valid UTF-8 encoded codepoint
  */
-ZEND_BEGIN_ARG_INFO_EX(chr_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, codepoint)
-ZEND_END_ARG_INFO();
 IC_METHOD(chr) {
 	UChar32 cp;
 	zval *zcp;
@@ -76,9 +74,6 @@ IC_METHOD(chr) {
  * Converts a UTf-8 encoded codepoint to its integer U32 value
  * Acts as an identity function when passed a valid integer codepoint
  */
-ZEND_BEGIN_ARG_INFO_EX(ord_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, character)
-ZEND_END_ARG_INFO();
 IC_METHOD(ord) {
 	UChar32 cp;
 	zval *zcp;
@@ -96,10 +91,6 @@ IC_METHOD(ord) {
 /* }}} */
 
 /* {{{ proto bool IntlChar::hasBinaryProperty(int|string $codepoint, int $property) */
-ZEND_BEGIN_ARG_INFO_EX(hasBinaryProperty_arginfo, 0, ZEND_RETURN_VALUE, 2)
-	ZEND_ARG_INFO(0, codepoint)
-	ZEND_ARG_INFO(0, property)
-ZEND_END_ARG_INFO();
 IC_METHOD(hasBinaryProperty) {
 	UChar32 cp;
 	zend_long prop;
@@ -118,10 +109,6 @@ IC_METHOD(hasBinaryProperty) {
 /* }}} */
 
 /* {{{ proto int IntlChar::getIntPropertyValue(int|string $codepoint, int $property) */
-ZEND_BEGIN_ARG_INFO_EX(getIntPropertyValue_arginfo, 0, ZEND_RETURN_VALUE, 2)
-	ZEND_ARG_INFO(0, codepoint)
-	ZEND_ARG_INFO(0, property)
-ZEND_END_ARG_INFO();
 IC_METHOD(getIntPropertyValue) {
 	UChar32 cp;
 	zend_long prop;
@@ -140,9 +127,6 @@ IC_METHOD(getIntPropertyValue) {
 /* }}} */
 
 /* {{{ proto int IntlChar::getIntPropertyMinValue(int $property) */
-ZEND_BEGIN_ARG_INFO_EX(getIntPropertyMinValue_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, property)
-ZEND_END_ARG_INFO();
 IC_METHOD(getIntPropertyMinValue) {
 	zend_long prop;
 
@@ -155,9 +139,6 @@ IC_METHOD(getIntPropertyMinValue) {
 /* }}} */
 
 /* {{{ proto int IntlChar::getIntPropertyMaxValue(int $property) */
-ZEND_BEGIN_ARG_INFO_EX(getIntPropertyMaxValue_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, property)
-ZEND_END_ARG_INFO();
 IC_METHOD(getIntPropertyMaxValue) {
 	zend_long prop;
 
@@ -170,9 +151,6 @@ IC_METHOD(getIntPropertyMaxValue) {
 /* }}} */
 
 /* {{{ proto float IntlChar::getNumericValue(int|string $codepoint) */
-ZEND_BEGIN_ARG_INFO_EX(getNumericValue_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, codepoint)
-ZEND_END_ARG_INFO();
 IC_METHOD(getNumericValue) {
 	UChar32 cp;
 	zval *zcp;
@@ -190,9 +168,6 @@ IC_METHOD(getNumericValue) {
 /* }}} */
 
 /* {{{ proto void IntlChar::enumCharTypes(callable $callback) */
-ZEND_BEGIN_ARG_INFO_EX(enumCharTypes_arginfo, 0, ZEND_RETURN_VALUE, 0)
-	ZEND_ARG_INFO(0, callback)
-ZEND_END_ARG_INFO();
 typedef struct _enumCharType_data {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
@@ -235,9 +210,6 @@ IC_METHOD(enumCharTypes) {
 /* }}} */
 
 /* {{{ proto int IntlChar::getBlockCode(int|string $codepoint) */
-ZEND_BEGIN_ARG_INFO_EX(getBlockCode_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, codepoint)
-ZEND_END_ARG_INFO()
 IC_METHOD(getBlockCode) {
 	UChar32 cp;
 	zval *zcp;
@@ -255,10 +227,6 @@ IC_METHOD(getBlockCode) {
 /* }}} */
 
 /* {{{ proto string IntlChar::charName(int|string $codepoint, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) */
-ZEND_BEGIN_ARG_INFO_EX(charName_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, codepoint)
-	ZEND_ARG_INFO(0, nameChoice)
-ZEND_END_ARG_INFO()
 IC_METHOD(charName) {
 	UChar32 cp;
 	zval *zcp;
@@ -288,10 +256,6 @@ IC_METHOD(charName) {
 /* }}} */
 
 /* {{{ proto int IntlChar::charFromName(string $characterName, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) */
-ZEND_BEGIN_ARG_INFO_EX(charFromName_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, characterName)
-	ZEND_ARG_INFO(0, nameChoice)
-ZEND_END_ARG_INFO()
 IC_METHOD(charFromName) {
 	char *name;
 	size_t name_len;
@@ -310,12 +274,6 @@ IC_METHOD(charFromName) {
 /* }}} */
 
 /* {{{ void void IntlChar::enumCharNames(int|string $start, int|string $limit, callable $callback, int $nameChoice = IntlChar::UNICODE_CHAR_NAME) */
-ZEND_BEGIN_ARG_INFO_EX(enumCharNames_arginfo, 0, ZEND_RETURN_VALUE, 3)
-	ZEND_ARG_INFO(0, start)
-	ZEND_ARG_INFO(0, limit)
-	ZEND_ARG_INFO(0, callback)
-	ZEND_ARG_INFO(0, nameChoice)
-ZEND_END_ARG_INFO();
 typedef struct _enumCharNames_data {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
@@ -367,10 +325,6 @@ IC_METHOD(enumCharNames) {
 /* }}} */
 
 /* {{{ proto string IntlChar::getPropertyName(int $property, int $nameChoice = IntlChar::LONG_PROPERTY_NAME) */
-ZEND_BEGIN_ARG_INFO_EX(getPropertyName_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, property)
-	ZEND_ARG_INFO(0, nameChoice)
-ZEND_END_ARG_INFO();
 IC_METHOD(getPropertyName) {
 	zend_long property;
 	zend_long nameChoice = U_LONG_PROPERTY_NAME;
@@ -392,9 +346,6 @@ IC_METHOD(getPropertyName) {
 /* }}} */
 
 /* {{{ proto int IntlChar::getPropertyEnum(string $alias) */
-ZEND_BEGIN_ARG_INFO_EX(getPropertyEnum_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, alias)
-ZEND_END_ARG_INFO();
 IC_METHOD(getPropertyEnum) {
 	char *alias;
 	size_t alias_len;
@@ -408,11 +359,6 @@ IC_METHOD(getPropertyEnum) {
 /* }}} */
 
 /* {{{ proto string IntlChar::getPropertyValueName(int $property, int $value[, int $nameChoice = IntlChar::LONG_PROPERTY_NAME) */
-ZEND_BEGIN_ARG_INFO_EX(getPropertyValueName_arginfo, 0, ZEND_RETURN_VALUE, 2)
-	ZEND_ARG_INFO(0, property)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, nameChoice)
-ZEND_END_ARG_INFO();
 IC_METHOD(getPropertyValueName) {
 	zend_long property, value, nameChoice = U_LONG_PROPERTY_NAME;
 	const char *ret;
@@ -433,10 +379,6 @@ IC_METHOD(getPropertyValueName) {
 /* }}} */
 
 /* {{{ proto int IntlChar::getPropertyValueEnum(int $property, string $name) */
-ZEND_BEGIN_ARG_INFO_EX(getPropertyValueEnum_arginfo, 0, ZEND_RETURN_VALUE, 2)
-	ZEND_ARG_INFO(0, property)
-	ZEND_ARG_INFO(0, name)
-ZEND_END_ARG_INFO();
 IC_METHOD(getPropertyValueEnum) {
 	zend_long property;
 	char *name;
@@ -451,10 +393,6 @@ IC_METHOD(getPropertyValueEnum) {
 /* }}} */
 
 /* {{{ proto int|string IntlChar::foldCase(int|string $codepoint, int $options = IntlChar::FOLD_CASE_DEFAULT) */
-ZEND_BEGIN_ARG_INFO_EX(foldCase_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, codepoint)
-	ZEND_ARG_INFO(0, options)
-ZEND_END_ARG_INFO();
 IC_METHOD(foldCase) {
 	UChar32 cp, ret;
 	zval *zcp;
@@ -482,10 +420,6 @@ IC_METHOD(foldCase) {
 /* }}} */
 
 /* {{{ proto int IntlChar::digit(int|string $codepoint[, int $radix = 10]) */
-ZEND_BEGIN_ARG_INFO_EX(digit_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, codepoint)
-	ZEND_ARG_INFO(0, radix)
-ZEND_END_ARG_INFO();
 IC_METHOD(digit) {
 	UChar32 cp;
 	zval *zcp;
@@ -511,10 +445,6 @@ IC_METHOD(digit) {
 /* }}} */
 
 /* {{{ proto int IntlChar::forDigit(int $digit[, int $radix = 10]) */
-ZEND_BEGIN_ARG_INFO_EX(forDigit_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, digit)
-	ZEND_ARG_INFO(0, radix)
-ZEND_END_ARG_INFO();
 IC_METHOD(forDigit) {
 	zend_long digit, radix = 10;
 
@@ -527,9 +457,6 @@ IC_METHOD(forDigit) {
 /* }}} */
 
 /* {{{ proto array IntlChar::charAge(int|string $codepoint) */
-ZEND_BEGIN_ARG_INFO_EX(charAge_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, codepoint)
-ZEND_END_ARG_INFO();
 IC_METHOD(charAge) {
 	UChar32 cp;
 	zval *zcp;
@@ -553,8 +480,6 @@ IC_METHOD(charAge) {
 /* }}} */
 
 /* {{{ proto array IntlChar::getUnicodeVersion() */
-ZEND_BEGIN_ARG_INFO_EX(getUnicodeVersion_arginfo, 0, ZEND_RETURN_VALUE, 0)
-ZEND_END_ARG_INFO();
 IC_METHOD(getUnicodeVersion) {
 	UVersionInfo version;
 	int i;
@@ -572,9 +497,6 @@ IC_METHOD(getUnicodeVersion) {
 /* }}} */
 
 /* {{{ proto string IntlChar::getFC_NFKC_Closure(int|string $codepoint) */
-ZEND_BEGIN_ARG_INFO_EX(getFC_NFKC_Closure_arginfo, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, codepoint)
-ZEND_END_ARG_INFO();
 IC_METHOD(getFC_NFKC_Closure) {
 	UChar32 cp;
 	zval *zcp;
@@ -613,9 +535,6 @@ IC_METHOD(getFC_NFKC_Closure) {
 
 /* {{{ proto bool IntlChar::<name>(int|string $codepoint) */
 #define IC_BOOL_METHOD_CHAR(name) \
-ZEND_BEGIN_ARG_INFO_EX(name##_arginfo, 0, ZEND_RETURN_VALUE, 1) \
-	ZEND_ARG_INFO(0, codepoint) \
-ZEND_END_ARG_INFO(); \
 IC_METHOD(name) { \
 	UChar32 cp; zval *zcp; \
 	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) || \
@@ -655,9 +574,6 @@ IC_BOOL_METHOD_CHAR(isJavaIDPart)
 
 /* {{{ proto int IntlChar::<name>(int|string $codepoint) */
 #define IC_INT_METHOD_CHAR(name) \
-ZEND_BEGIN_ARG_INFO_EX(name##_arginfo, 0, ZEND_RETURN_VALUE, 1) \
-	ZEND_ARG_INFO(0, codepoint) \
-ZEND_END_ARG_INFO(); \
 IC_METHOD(name) { \
 	UChar32 cp; zval *zcp; \
 	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) || \
@@ -676,9 +592,6 @@ IC_INT_METHOD_CHAR(charDigitValue)
  * Returns an int otherwise
  */
 #define IC_CHAR_METHOD_CHAR(name) \
-ZEND_BEGIN_ARG_INFO_EX(name##_arginfo, 0, ZEND_RETURN_VALUE, 1) \
-	ZEND_ARG_INFO(0, codepoint) \
-ZEND_END_ARG_INFO(); \
 IC_METHOD(name) { \
 	UChar32 cp, ret; zval *zcp; \
 	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zcp) == FAILURE) || \
@@ -705,7 +618,7 @@ IC_CHAR_METHOD_CHAR(getBidiPairedBracket)
 /* }}} */
 
 static const zend_function_entry intlchar_methods[] = {
-#define IC_ME(mname) PHP_ME(IntlChar, mname, mname##_arginfo, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+#define IC_ME(mname) PHP_ME(IntlChar, mname, arginfo_class_IntlChar_##mname, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	IC_ME(chr)
 	IC_ME(ord)
 	IC_ME(hasBinaryProperty)
