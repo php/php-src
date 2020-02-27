@@ -1335,10 +1335,11 @@ PHP_FUNCTION(imap_headers)
 		if ((i = cache->user_flags)) {
 			strcat(tmp, "{");
 			while (i) {
-				strncat(tmp, imap_le_struct->imap_stream->user_flags[find_rightmost_bit (&i)], sizeof(tmp));
-				if (i) strncat(tmp, " ", sizeof(tmp));
+				strncat(tmp, imap_le_struct->imap_stream->user_flags[find_rightmost_bit (&i)],
+					sizeof(tmp) - strlen(tmp) - 1);
+				if (i) strncat(tmp, " ", sizeof(tmp) - strlen(tmp) - 1);
 			}
-			strncat(tmp, "} ", sizeof(tmp));
+			strncat(tmp, "} ", sizeof(tmp) - strlen(tmp) - 1);
 		}
 		mail_fetchsubject(t = tmp + strlen(tmp), imap_le_struct->imap_stream, msgno, (long)25);
 		snprintf(t += strlen(t), sizeof(tmp) - strlen(tmp), " (%ld chars)", cache->rfc822_size);
@@ -3604,9 +3605,9 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	bufferHeader = (char *)safe_emalloc(bufferLen, 1, 1);
 	memset(bufferHeader, 0, bufferLen);
 	if (to && *to) {
-		strncat(bufferHeader, "To: ", bufferLen + 1);
-		strncat(bufferHeader, to, bufferLen + 1);
-		strncat(bufferHeader, "\r\n", bufferLen + 1);
+		strncat(bufferHeader, "To: ", sizeof(bufferHeader) - strlen(bufferHeader) - 1);
+		strncat(bufferHeader, to, sizeof(bufferHeader) - strlen(bufferHeader) - 1);
+		strncat(bufferHeader, "\r\n", sizeof(bufferHeader) - strlen(bufferHeader) - 1);
 		tempMailTo = estrdup(to);
 		bt_len = strlen(to);
 		bufferTo = (char *)safe_emalloc(bt_len, 1, 1);
@@ -3633,9 +3634,9 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	}
 
 	if (cc && *cc) {
-		strncat(bufferHeader, "Cc: ", bufferLen + 1);
-		strncat(bufferHeader, cc, bufferLen + 1);
-		strncat(bufferHeader, "\r\n", bufferLen + 1);
+		strncat(bufferHeader, "Cc: ", sizeof(bufferHeader) - strlen(bufferHeader) - 1);
+		strncat(bufferHeader, cc, sizeof(bufferHeader) - strlen(bufferHeader) - 1);
+		strncat(bufferHeader, "\r\n", sizeof(bufferHeader) - strlen(bufferHeader) - 1);
 		tempMailTo = estrdup(cc);
 		bt_len = strlen(cc);
 		bufferCc = (char *)safe_emalloc(bt_len, 1, 1);
@@ -3688,7 +3689,7 @@ int _php_imap_mail(char *to, char *subject, char *message, char *headers, char *
 	}
 
 	if (headers && *headers) {
-		strncat(bufferHeader, headers, bufferLen + 1);
+		strncat(bufferHeader, headers, sizeof(bufferHeader) - strlen(bufferHeader) - 1);
 	}
 
 	if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, bufferHeader, subject, bufferTo, message, bufferCc, bufferBcc, rpath) != SUCCESS) {

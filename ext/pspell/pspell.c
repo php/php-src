@@ -190,9 +190,9 @@ static PHP_FUNCTION(pspell_new)
 		RegCloseKey(hkey);
 		if (result == ERROR_SUCCESS) {
 			strlcpy(data_dir, aspell_dir, sizeof(data_dir));
-			strncat(data_dir, "\\data", sizeof(data_dir));
+			strncat(data_dir, "\\data", sizeof(data_dir) - strlen(data_dir) - 1);
 			strlcpy(dict_dir, aspell_dir, sizeof(dict_dir));
-			strncat(dict_dir, "\\dict", sizeof(dict_dir));
+			strncat(dict_dir, "\\dict", sizeof(dict_dir) - strlen(dict_dir) - 1);
 
 			pspell_config_replace(config, "data-dir", data_dir);
 			pspell_config_replace(config, "dict-dir", dict_dir);
@@ -287,9 +287,9 @@ static PHP_FUNCTION(pspell_new_personal)
 		RegCloseKey(hkey);
 		if (result == ERROR_SUCCESS) {
 			strlcpy(data_dir, aspell_dir, sizeof(data_dir));
-			strncat(data_dir, "\\data", sizeof(data_dir));
+			strncat(data_dir, "\\data", sizeof(data_dir) - strlen(data_dir) - 1);
 			strlcpy(dict_dir, aspell_dir, sizeof(dict_dir));
-			strncat(dict_dir, "\\dict", sizeof(dict_dir));
+			strncat(dict_dir, "\\dict", sizeof(dict_dir) - strlen(dict_dir) - 1);
 
 			pspell_config_replace(config, "data-dir", data_dir);
 			pspell_config_replace(config, "dict-dir", dict_dir);
@@ -606,9 +606,9 @@ static PHP_FUNCTION(pspell_config_create)
 		RegCloseKey(hkey);
 		if (result == ERROR_SUCCESS) {
 			strlcpy(data_dir, aspell_dir, sizeof(data_dir));
-			strncat(data_dir, "\\data", sizeof(data_dir));
+			strncat(data_dir, "\\data", sizeof(data_dir) - strlen(data_dir) - 1);
 			strlcpy(dict_dir, aspell_dir, sizeof(dict_dir));
-			strncat(dict_dir, "\\dict", sizeof(dict_dir));
+			strncat(dict_dir, "\\dict", sizeof(dict_dir) - strlen(dict_dir) - 1);
 
 			pspell_config_replace(config, "data-dir", data_dir);
 			pspell_config_replace(config, "dict-dir", dict_dir);

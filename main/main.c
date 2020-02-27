@@ -1637,7 +1637,7 @@ static ZEND_COLD void php_message_handler_for_zend(zend_long message, const void
 						char relay_buf[512];
 
 						snprintf(relay_buf, 512, "%s(%" PRIu32 ") : Actual location (location was relayed)\n", t->orig_filename, t->orig_lineno);
-						strncat(memory_leak_buf, relay_buf, sizeof(memory_leak_buf));
+						strncat(memory_leak_buf, relay_buf, sizeof(memory_leak_buf) - strlen(memory_leak_buf) - 1);
 					}
 				} else {
 					unsigned long leak_count = (zend_uintptr_t) data;
