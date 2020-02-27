@@ -24,7 +24,6 @@
 #include "Zend/zend_constants.h"
 #include "zend_smart_str.h"
 #include "jit/zend_jit.h"
-#include "jit/zend_jit_internal.h"
 
 #ifdef HAVE_JIT
 
@@ -33,6 +32,14 @@
 #include "Optimizer/zend_inference.h"
 #include "Optimizer/zend_call_graph.h"
 #include "Optimizer/zend_dump.h"
+
+#include "jit/zend_jit_internal.h"
+
+#ifdef ZTS
+int zend_jit_globals_id;
+#else
+zend_jit_globals jit_globals;
+#endif
 
 //#define CONTEXT_THREADED_JIT
 #define ZEND_JIT_USE_RC_INFERENCE
@@ -49,6 +56,7 @@
 
 #define JIT_PREFIX      "JIT$"
 #define JIT_STUB_PREFIX "JIT$$"
+#define TRACE_PREFIX    "TRACE-"
 
 #define DASM_M_GROW(ctx, t, p, sz, need) \
   do { \
@@ -97,10 +105,16 @@ static zend_long jit_bisect_pos = 0;
 static const void *zend_jit_runtime_jit_handler = NULL;
 static const void *zend_jit_profile_jit_handler = NULL;
 static const void *zend_jit_func_counter_handler = NULL;
+static const void *zend_jit_ret_counter_handler = NULL;
 static const void *zend_jit_loop_counter_handler = NULL;
 
 static int zend_may_overflow(const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa);
 static void ZEND_FASTCALL zend_runtime_jit(void);
+
+static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op *opline, zend_jit_trace_rec *trace);
+static uint32_t zend_jit_trace_get_exit_point(const zend_op *from_opline, const zend_op *to_opline, zend_jit_trace_rec *trace);
+static const void *zend_jit_trace_get_exit_addr(uint32_t n);
+static void zend_jit_trace_add_code(const void *start, uint32_t size);
 
 static zend_bool zend_ssa_is_last_use(const zend_op_array *op_array, const zend_ssa *ssa, int var, int use)
 {
@@ -148,7 +162,6 @@ static zend_bool zend_long_is_power_of_two(zend_long x)
 #include "dynasm/dasm_x86.h"
 #include "jit/zend_jit_x86.h"
 #include "jit/zend_jit_helpers.c"
-#include "jit/zend_jit_x86.c"
 #include "jit/zend_jit_disasm_x86.c"
 #ifndef _WIN32
 #include "jit/zend_jit_gdb.c"
@@ -159,6 +172,8 @@ static zend_bool zend_long_is_power_of_two(zend_long x)
 #endif
 #include "jit/zend_jit_vtune.c"
 
+#include "jit/zend_jit_x86.c"
+
 #if _WIN32
 # include <Windows.h>
 #else
@@ -167,8 +182,6 @@ static zend_bool zend_long_is_power_of_two(zend_long x)
 #   define MAP_ANONYMOUS MAP_ANON
 # endif
 #endif
-
-#define DASM_ALIGNMENT 16
 
 ZEND_EXT_API void zend_jit_status(zval *ret)
 {
@@ -220,7 +233,8 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
                                   zend_ssa                *ssa,
                                   const zend_op           *rt_opline,
                                   zend_lifetime_interval **ra,
-                                  const char              *name)
+                                  const char              *name,
+                                  zend_bool                is_trace)
 {
 	size_t size;
 	int ret;
@@ -289,6 +303,10 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 	entry = *dasm_ptr;
 	*dasm_ptr = (void*)((char*)*dasm_ptr + ZEND_MM_ALIGNED_SIZE_EX(size, DASM_ALIGNMENT));
 
+	if (is_trace) {
+		zend_jit_trace_add_code(entry, size);
+	}
+
 	if (op_array && ssa) {
 		int b;
 
@@ -339,7 +357,7 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 	} else {
 	    if (ZCG(accel_directives).jit_debug & (ZEND_JIT_DEBUG_ASM_STUBS|ZEND_JIT_DEBUG_ASM)) {
 			zend_jit_disasm_add_symbol(name, (uintptr_t)entry, size);
-		    if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM_STUBS) {
+		    if (is_trace || (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_ASM_STUBS) != 0) {
 				zend_jit_disasm(
 					name,
 					(op_array && op_array->filename) ? ZSTR_VAL(op_array->filename) : NULL,
@@ -2417,7 +2435,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						goto done;
 					case ZEND_INIT_FCALL:
 					case ZEND_INIT_FCALL_BY_NAME:
-						if (!zend_jit_init_fcall(&dasm_state, opline, b, op_array, ssa, call_level)) {
+						if (!zend_jit_init_fcall(&dasm_state, opline, b, op_array, ssa, call_level, NULL)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2466,7 +2484,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					case ZEND_DO_ICALL:
 					case ZEND_DO_FCALL_BY_NAME:
 					case ZEND_DO_FCALL:
-						if (!zend_jit_do_fcall(&dasm_state, opline, op_array, ssa, call_level, b + 1)) {
+						if (!zend_jit_do_fcall(&dasm_state, opline, op_array, ssa, call_level, b + 1, NULL)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2503,7 +2521,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								OP2_INFO(), OP2_REG_ADDR(),
 								res_addr,
 								zend_may_throw(opline, op_array, ssa),
-								smart_branch_opcode, target_label, target_label2)) {
+								smart_branch_opcode, target_label, target_label2,
+								NULL)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2530,7 +2549,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								OP2_INFO(), OP2_REG_ADDR(),
 								RES_REG_ADDR(),
 								zend_may_throw(opline, op_array, ssa),
-								smart_branch_opcode, target_label, target_label2)) {
+								smart_branch_opcode, target_label, target_label2,
+								NULL)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2550,7 +2570,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							smart_branch_opcode = 0;
 							target_label = target_label2 = (uint32_t)-1;
 						}
-						if (!zend_jit_defined(&dasm_state, opline, op_array, smart_branch_opcode, target_label, target_label2)) {
+						if (!zend_jit_defined(&dasm_state, opline, op_array, smart_branch_opcode, target_label, target_label2, NULL)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2574,7 +2594,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							smart_branch_opcode = 0;
 							target_label = target_label2 = (uint32_t)-1;
 						}
-						if (!zend_jit_type_check(&dasm_state, opline, op_array, OP1_INFO(), smart_branch_opcode, target_label, target_label2)) {
+						if (!zend_jit_type_check(&dasm_state, opline, op_array, OP1_INFO(), smart_branch_opcode, target_label, target_label2, NULL)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2589,9 +2609,38 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							if (!zend_jit_tail_handler(&dasm_state, opline)) {
 								goto jit_failure;
 							}
-						} else if (!zend_jit_return(&dasm_state, opline, op_array, ssa,
-								op1_info, OP1_REG_ADDR())) {
-							goto jit_failure;
+						} else {
+							int j;
+
+							if (!zend_jit_return(&dasm_state, opline, op_array,
+									op1_info, OP1_REG_ADDR())) {
+								goto jit_failure;
+							}
+							if (jit_return_label >= 0) {
+								if (!zend_jit_jmp(&dasm_state, jit_return_label)) {
+									goto jit_failure;
+								}
+								goto done;
+							}
+							jit_return_label = ssa->cfg.blocks_count * 2;
+							if (!zend_jit_label(&dasm_state, jit_return_label)) {
+								goto jit_failure;
+							}
+						    if (!zend_jit_leave_frame(&dasm_state)) {
+								goto jit_failure;
+						    }
+							for (j = 0 ; j < op_array->last_var; j++) {
+								uint32_t info = zend_ssa_cv_info(opline, op_array, ssa, j);
+
+								if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+									if (!zend_jit_free_cv(&dasm_state, opline, op_array, info, j)) {
+										goto jit_failure;
+									}
+								}
+							}
+						    if (!zend_jit_leave_func(&dasm_state, opline, op_array, NULL)) {
+								goto jit_failure;
+						    }
 						}
 						goto done;
 					case ZEND_BOOL:
@@ -2599,7 +2648,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if (!zend_jit_bool_jmpznz(&dasm_state, opline, op_array,
 								OP1_INFO(), OP1_REG_ADDR(), RES_REG_ADDR(),
 								-1, -1,
-								zend_may_throw(opline, op_array, ssa))) {
+								zend_may_throw(opline, op_array, ssa),
+								opline->opcode, NULL)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2625,7 +2675,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if (!zend_jit_bool_jmpznz(&dasm_state, opline, op_array,
 								OP1_INFO(), OP1_REG_ADDR(), res_addr,
 								ssa->cfg.blocks[b].successors[0], ssa->cfg.blocks[b].successors[1],
-								zend_may_throw(opline, op_array, ssa))) {
+								zend_may_throw(opline, op_array, ssa),
+								opline->opcode, NULL)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2666,7 +2717,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if (!zend_jit_isset_isempty_dim(&dasm_state, opline, op_array,
 								OP1_INFO(), OP2_INFO(),
 								zend_may_throw(opline, op_array, ssa),
-								smart_branch_opcode, target_label, target_label2)) {
+								smart_branch_opcode, target_label, target_label2,
+								NULL)) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2895,7 +2947,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								zend_jit_call(&dasm_state, next_opline, b + 1);
 								is_terminated = 1;
 							} else {
-								zend_jit_do_fcall(&dasm_state, next_opline, op_array, ssa, call_level, b + 1);
+								zend_jit_do_fcall(&dasm_state, next_opline, op_array, ssa, call_level, b + 1, NULL);
 							}
 						}
 					}
@@ -2916,7 +2968,7 @@ done:
 		}
 	}
 
-	handler = dasm_link_and_encode(&dasm_state, op_array, ssa, rt_opline, ra, NULL);
+	handler = dasm_link_and_encode(&dasm_state, op_array, ssa, rt_opline, ra, NULL, 0);
 	if (!handler) {
 		goto jit_failure;
 	}
@@ -3072,17 +3124,16 @@ void zend_jit_check_funcs(HashTable *function_table, zend_bool is_method) {
 void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend_op *opline)
 {
 	zend_op_array *op_array = &EX(func)->op_array;
-	zend_jit_op_array_extension *jit_extension;
+	zend_jit_op_array_hot_extension *jit_extension;
 	uint32_t i;
 
 	zend_shared_alloc_lock();
-	jit_extension = (zend_jit_op_array_extension*)ZEND_FUNC_INFO(op_array);
+	jit_extension = (zend_jit_op_array_hot_extension*)ZEND_FUNC_INFO(op_array);
 
 	if (jit_extension) {
 		SHM_UNPROTECT();
 		zend_jit_unprotect();
 
-		*(jit_extension->counter) = ZEND_JIT_HOT_COUNTER_INIT;
 		for (i = 0; i < op_array->last; i++) {
 			op_array->opcodes[i].handler = jit_extension->orig_handlers[i];
 		}
@@ -3103,7 +3154,7 @@ void ZEND_FASTCALL zend_jit_hot_func(zend_execute_data *execute_data, const zend
 static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 {
 	zend_op *opline = op_array->opcodes;
-	zend_jit_op_array_extension *jit_extension;
+	zend_jit_op_array_hot_extension *jit_extension;
 	zend_cfg cfg;
 	uint32_t i;
 
@@ -3114,7 +3165,7 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 		return FAILURE;
 	}
 
-	jit_extension = (zend_jit_op_array_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_extension) + (op_array->last - 1) * sizeof(void*));
+	jit_extension = (zend_jit_op_array_hot_extension*)zend_shared_alloc(sizeof(zend_jit_op_array_hot_extension) + (op_array->last - 1) * sizeof(void*));
 	jit_extension->counter = &zend_jit_hot_counters[zend_jit_op_array_hash(op_array) & (ZEND_HOT_COUNTERS_COUNT - 1)];
 	for (i = 0; i < op_array->last; i++) {
 		jit_extension->orig_handlers[i] = op_array->opcodes[i].handler;
@@ -3158,6 +3209,8 @@ static int zend_needs_manual_jit(const zend_op_array *op_array)
 	return 0;
 }
 
+#include "jit/zend_jit_trace.c"
+
 ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 {
 	if (dasm_ptr == NULL) {
@@ -3195,6 +3248,8 @@ ZEND_EXT_API int zend_jit_op_array(zend_op_array *op_array, zend_script *script)
 		return SUCCESS;
 	} else if (zend_jit_trigger == ZEND_JIT_ON_HOT_COUNTERS) {
 		return zend_jit_setup_hot_counters(op_array);
+	} else if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE) {
+		return zend_jit_setup_hot_trace_counters(op_array);
 	} else if (zend_jit_trigger == ZEND_JIT_ON_SCRIPT_LOAD) {
 		return zend_real_jit_func(op_array, script, NULL);
 	} else if (zend_jit_trigger == ZEND_JIT_ON_DOC_COMMENT) {
@@ -3230,7 +3285,8 @@ ZEND_EXT_API int zend_jit_script(zend_script *script)
 
 	if (zend_jit_trigger == ZEND_JIT_ON_FIRST_EXEC ||
 	    zend_jit_trigger == ZEND_JIT_ON_PROF_REQUEST ||
-	    zend_jit_trigger == ZEND_JIT_ON_HOT_COUNTERS) {
+	    zend_jit_trigger == ZEND_JIT_ON_HOT_COUNTERS ||
+	    zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE) {
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
 			if (zend_jit_op_array(call_graph.op_arrays[i], script) != SUCCESS) {
@@ -3381,7 +3437,7 @@ static int zend_jit_make_stubs(void)
 		if (!zend_jit_stubs[i].stub(&dasm_state)) {
 			return 0;
 		}
-		if (!dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, zend_jit_stubs[i].name)) {
+		if (!dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, zend_jit_stubs[i].name, 0)) {
 			return 0;
 		}
 	}
@@ -3392,7 +3448,7 @@ static int zend_jit_make_stubs(void)
 			if (!zend_jit_hybrid_runtime_jit_stub(&dasm_state)) {
 				return 0;
 			}
-			zend_jit_runtime_jit_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_runtime_jit");
+			zend_jit_runtime_jit_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_runtime_jit", 0);
 			if (!zend_jit_runtime_jit_handler) {
 				return 0;
 			}
@@ -3401,7 +3457,7 @@ static int zend_jit_make_stubs(void)
 			if (!zend_jit_hybrid_profile_jit_stub(&dasm_state)) {
 				return 0;
 			}
-			zend_jit_profile_jit_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_profile_jit");
+			zend_jit_profile_jit_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_profile_jit", 0);
 			if (!zend_jit_profile_jit_handler) {
 				return 0;
 			}
@@ -3410,7 +3466,7 @@ static int zend_jit_make_stubs(void)
 			if (!zend_jit_hybrid_func_counter_stub(&dasm_state)) {
 				return 0;
 			}
-			zend_jit_func_counter_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_func_counter");
+			zend_jit_func_counter_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_func_counter", 0);
 			if (!zend_jit_func_counter_handler) {
 				return 0;
 			}
@@ -3419,25 +3475,72 @@ static int zend_jit_make_stubs(void)
 			if (!zend_jit_hybrid_loop_counter_stub(&dasm_state)) {
 				return 0;
 			}
-			zend_jit_loop_counter_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_loop_counter");
+			zend_jit_loop_counter_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_loop_counter", 0);
+			if (!zend_jit_loop_counter_handler) {
+				return 0;
+			}
+		} else if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE) {
+			dasm_setup(&dasm_state, dasm_actions);
+			if (!zend_jit_hybrid_func_trace_counter_stub(&dasm_state)) {
+				return 0;
+			}
+			zend_jit_func_counter_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_func_counter", 0);
+			if (!zend_jit_func_counter_handler) {
+				return 0;
+			}
+
+			dasm_setup(&dasm_state, dasm_actions);
+			if (!zend_jit_hybrid_ret_trace_counter_stub(&dasm_state)) {
+				return 0;
+			}
+			zend_jit_ret_counter_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_ret_counter", 0);
+			if (!zend_jit_ret_counter_handler) {
+				return 0;
+			}
+
+			dasm_setup(&dasm_state, dasm_actions);
+			if (!zend_jit_hybrid_loop_trace_counter_stub(&dasm_state)) {
+				return 0;
+			}
+			zend_jit_loop_counter_handler = dasm_link_and_encode(&dasm_state, NULL, NULL, NULL, NULL, "JIT$$hybrid_loop_counter", 0);
 			if (!zend_jit_loop_counter_handler) {
 				return 0;
 			}
 		}
 	} else {
-		zend_jit_runtime_jit_handler = (const void*)zend_runtime_jit;
-		zend_jit_profile_jit_handler = (const void*)zend_jit_profile_helper;
-		zend_jit_func_counter_handler = (const void*)zend_jit_func_counter_helper;
-		zend_jit_loop_counter_handler = (const void*)zend_jit_loop_counter_helper;
+		if (zend_jit_trigger == ZEND_JIT_ON_FIRST_EXEC) {
+			zend_jit_runtime_jit_handler = (const void*)zend_runtime_jit;
+		} else if (zend_jit_trigger == ZEND_JIT_ON_PROF_REQUEST) {
+			zend_jit_profile_jit_handler = (const void*)zend_jit_profile_helper;
+		} else if (zend_jit_trigger == ZEND_JIT_ON_HOT_COUNTERS) {
+			zend_jit_func_counter_handler = (const void*)zend_jit_func_counter_helper;
+			zend_jit_loop_counter_handler = (const void*)zend_jit_loop_counter_helper;
+		} else if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE) {
+			zend_jit_func_counter_handler = (const void*)zend_jit_func_trace_helper;
+			zend_jit_ret_counter_handler = (const void*)zend_jit_ret_trace_helper;
+			zend_jit_loop_counter_handler = (const void*)zend_jit_loop_trace_helper;
+		}
 	}
 
 	dasm_free(&dasm_state);
 	return 1;
 }
 
+static void zend_jit_globals_ctor(zend_jit_globals *jit_globals)
+{
+	memset(jit_globals, 0, sizeof(zend_jit_globals));
+	zend_jit_trace_init_caches();
+}
+
 ZEND_EXT_API int zend_jit_startup(zend_long jit, void *buf, size_t size, zend_bool reattached)
 {
 	int ret;
+
+#ifdef ZTS
+	zend_jit_globals_id = ts_allocate_id(&zend_jit_globals_id, sizeof(zend_jit_globals), (ts_allocate_ctor) zend_jit_globals_ctor, NULL);
+#else
+	zend_jit_globals_ctor(&jit_globals);
+#endif
 
 	zend_jit_level = ZEND_JIT_LEVEL(jit);
 	zend_jit_trigger = ZEND_JIT_TRIGGER(jit);
@@ -3549,6 +3652,12 @@ ZEND_EXT_API int zend_jit_startup(zend_long jit, void *buf, size_t size, zend_bo
 #endif
 	}
 
+	if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE) {
+		if (zend_jit_trace_startup() != SUCCESS) {
+			return FAILURE;
+		}
+	}
+
 	return SUCCESS;
 }
 
@@ -3587,6 +3696,14 @@ ZEND_EXT_API void zend_jit_activate(void)
 		for (i = 0; i < ZEND_HOT_COUNTERS_COUNT; i++) {
 			zend_jit_hot_counters[i] = ZEND_JIT_HOT_COUNTER_INIT;
 		}
+	} else if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE) {
+		int i;
+
+		for (i = 0; i < ZEND_HOT_COUNTERS_COUNT; i++) {
+			zend_jit_hot_counters[i] = ZEND_JIT_TRACE_COUNTER_INIT;
+		}
+
+		zend_jit_trace_reset_caches();
 	}
 }
 

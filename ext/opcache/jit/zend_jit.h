@@ -33,6 +33,7 @@
 #define ZEND_JIT_ON_PROF_REQUEST   2     /* compile the most frequently caled on first request functions */
 #define ZEND_JIT_ON_HOT_COUNTERS   3     /* compile functions after N calls or loop iterations */
 #define ZEND_JIT_ON_DOC_COMMENT    4     /* compile functions with "@jit" tag in doc-comments */
+#define ZEND_JIT_ON_HOT_TRACE      5     /* trace functions after N calls or loop iterations */
 
 #define ZEND_JIT_TRIGGER(n)        (((n) / 10) % 10)
 
@@ -74,6 +75,14 @@
 #define ZEND_JIT_DEBUG_VTUNE     (1<<7)
 
 #define ZEND_JIT_DEBUG_GDB       (1<<8)
+
+#define ZEND_JIT_DEBUG_TRACE_START     (1<<12)
+#define ZEND_JIT_DEBUG_TRACE_STOP      (1<<13)
+#define ZEND_JIT_DEBUG_TRACE_COMPILED  (1<<14)
+#define ZEND_JIT_DEBUG_TRACE_EXIT      (1<<15)
+#define ZEND_JIT_DEBUG_TRACE_ABORT     (1<<16)
+#define ZEND_JIT_DEBUG_TRACE_BLACKLIST (1<<17)
+#define ZEND_JIT_DEBUG_TRACE_BYTECODE  (1<<18)
 
 ZEND_EXT_API int  zend_jit_op_array(zend_op_array *op_array, zend_script *script);
 ZEND_EXT_API int  zend_jit_script(zend_script *script);
