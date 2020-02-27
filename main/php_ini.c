@@ -492,9 +492,9 @@ int php_init_config(void)
 		/* Add environment location */
 		if (env_location[0]) {
 			if (*php_ini_search_path) {
-				strlcat(php_ini_search_path, paths_separator, search_path_size);
+				strncat(php_ini_search_path, paths_separator, search_path_size);
 			}
-			strlcat(php_ini_search_path, env_location, search_path_size);
+			strncat(php_ini_search_path, env_location, search_path_size);
 			php_ini_file_name = env_location;
 		}
 
@@ -503,9 +503,9 @@ int php_init_config(void)
 		reg_location = GetIniPathFromRegistry();
 		if (reg_location != NULL) {
 			if (*php_ini_search_path) {
-				strlcat(php_ini_search_path, paths_separator, search_path_size);
+				strncat(php_ini_search_path, paths_separator, search_path_size);
 			}
-			strlcat(php_ini_search_path, reg_location, search_path_size);
+			strncat(php_ini_search_path, reg_location, search_path_size);
 			efree(reg_location);
 		}
 #endif
@@ -513,9 +513,9 @@ int php_init_config(void)
 		/* Add cwd (not with CLI) */
 		if (!sapi_module.php_ini_ignore_cwd) {
 			if (*php_ini_search_path) {
-				strlcat(php_ini_search_path, paths_separator, search_path_size);
+				strncat(php_ini_search_path, paths_separator, search_path_size);
 			}
-			strlcat(php_ini_search_path, ".", search_path_size);
+			strncat(php_ini_search_path, ".", search_path_size);
 		}
 
 		if (PG(php_binary)) {
@@ -528,9 +528,9 @@ int php_init_config(void)
 				*(separator_location) = 0;
 			}
 			if (*php_ini_search_path) {
-				strlcat(php_ini_search_path, paths_separator, search_path_size);
+				strncat(php_ini_search_path, paths_separator, search_path_size);
 			}
-			strlcat(php_ini_search_path, binary_location, search_path_size);
+			strncat(php_ini_search_path, binary_location, search_path_size);
 			efree(binary_location);
 		}
 
@@ -540,9 +540,9 @@ int php_init_config(void)
 
 		if (0 < GetWindowsDirectory(default_location, MAXPATHLEN)) {
 			if (*php_ini_search_path) {
-				strlcat(php_ini_search_path, paths_separator, search_path_size);
+				strncat(php_ini_search_path, paths_separator, search_path_size);
 			}
-			strlcat(php_ini_search_path, default_location, search_path_size);
+			strncat(php_ini_search_path, default_location, search_path_size);
 		}
 
 		/* For people running under terminal services, GetWindowsDirectory will
@@ -550,18 +550,18 @@ int php_init_config(void)
 		 * windows directory too */
 		if (0 < GetSystemWindowsDirectory(default_location, MAXPATHLEN)) {
 			if (*php_ini_search_path) {
-				strlcat(php_ini_search_path, paths_separator, search_path_size);
+				strncat(php_ini_search_path, paths_separator, search_path_size);
 			}
-			strlcat(php_ini_search_path, default_location, search_path_size);
+			strncat(php_ini_search_path, default_location, search_path_size);
 		}
 		efree(default_location);
 
 #else
 		default_location = PHP_CONFIG_FILE_PATH;
 		if (*php_ini_search_path) {
-			strlcat(php_ini_search_path, paths_separator, search_path_size);
+			strncat(php_ini_search_path, paths_separator, search_path_size);
 		}
-		strlcat(php_ini_search_path, default_location, search_path_size);
+		strncat(php_ini_search_path, default_location, search_path_size);
 #endif
 	}
 
@@ -725,10 +725,10 @@ int php_init_config(void)
 			total_l += php_ini_scanned_files_len;
 			for (element = scanned_ini_list.head; element; element = element->next) {
 				if (php_ini_scanned_files_len) {
-					strlcat(php_ini_scanned_files, ",\n", total_l);
+					strncat(php_ini_scanned_files, ",\n", total_l);
 				}
-				strlcat(php_ini_scanned_files, *(char **)element->data, total_l);
-				strlcat(php_ini_scanned_files, element->next ? ",\n" : "\n", total_l);
+				strncat(php_ini_scanned_files, *(char **)element->data, total_l);
+				strncat(php_ini_scanned_files, element->next ? ",\n" : "\n", total_l);
 			}
 		}
 		zend_llist_destroy(&scanned_ini_list);

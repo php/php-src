@@ -902,8 +902,8 @@ PHP_FUNCTION(pcntl_exec)
 			pair_length = Z_STRLEN_P(element) + ZSTR_LEN(key) + 2;
 			*pair = emalloc(pair_length);
 			strlcpy(*pair, ZSTR_VAL(key), ZSTR_LEN(key) + 1);
-			strlcat(*pair, "=", pair_length);
-			strlcat(*pair, Z_STRVAL_P(element), pair_length);
+			strncat(*pair, "=", pair_length);
+			strncat(*pair, Z_STRVAL_P(element), pair_length);
 
 			/* Cleanup */
 			zend_string_release_ex(key, 0);

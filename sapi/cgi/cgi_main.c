@@ -2466,9 +2466,9 @@ parent_loop_end:
 					s = malloc(len);
 					*s = '\0';			/* we are pretending it came from the environment  */
 					for (i = php_optind; i < argc; i++) {
-						strlcat(s, argv[i], len);
+						strncat(s, argv[i], len);
 						if (i < (argc - 1)) {
-							strlcat(s, PG(arg_separator).input, len);
+							strncat(s, PG(arg_separator).input, len);
 						}
 					}
 					SG(request_info).query_string = s;

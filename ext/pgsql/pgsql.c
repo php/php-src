@@ -4289,7 +4289,7 @@ PHP_FUNCTION(pg_copy_from)
 					query = (char *)emalloc(ZSTR_LEN(tmp) + 2);
 					strlcpy(query, ZSTR_VAL(tmp), ZSTR_LEN(tmp) + 2);
 					if (ZSTR_LEN(tmp) > 0 && *(query + ZSTR_LEN(tmp) - 1) != '\n') {
-						strlcat(query, "\n", ZSTR_LEN(tmp) + 2);
+						strncat(query, "\n", ZSTR_LEN(tmp) + 2);
 					}
 					if (PQputCopyData(pgsql, query, (int)strlen(query)) != 1) {
 						efree(query);
@@ -4314,7 +4314,7 @@ PHP_FUNCTION(pg_copy_from)
 					query = (char *)emalloc(ZSTR_LEN(tmp) + 2);
 					strlcpy(query, ZSTR_LVAL(tmp), ZSTR_LEN(tmp) + 2);
 					if (ZSTR_LEN(tmp) > 0 && *(query + ZSTR_LEN(tmp) - 1) != '\n') {
-						strlcat(query, "\n", ZSTR_LEN(tmp) + 2);
+						strncat(query, "\n", ZSTR_LEN(tmp) + 2);
 					}
 					if (PQputline(pgsql, query)==EOF) {
 						efree(query);

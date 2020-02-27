@@ -373,8 +373,8 @@ SAPI_API size_t sapi_apply_default_charset(char **mimetype, size_t len)
 			newlen = len + (sizeof(";charset=")-1) + strlen(charset);
 			newtype = emalloc(newlen + 1);
 	 		PHP_STRLCPY(newtype, *mimetype, newlen + 1, len);
-			strlcat(newtype, ";charset=", newlen + 1);
-			strlcat(newtype, charset, newlen + 1);
+			strncat(newtype, ";charset=", newlen + 1);
+			strncat(newtype, charset, newlen + 1);
 			efree(*mimetype);
 			*mimetype = newtype;
 			return newlen;
@@ -785,7 +785,7 @@ SAPI_API int sapi_header_op(sapi_header_op_enum op, void *arg)
 					newlen += sizeof("Content-type: ");
 					newheader = emalloc(newlen);
 					PHP_STRLCPY(newheader, "Content-type: ", newlen, sizeof("Content-type: ")-1);
-					strlcat(newheader, mimetype, newlen);
+					strncat(newheader, mimetype, newlen);
 					sapi_header.header = newheader;
 					sapi_header.header_len = (uint32_t)(newlen - 1);
 					efree(header_line);
