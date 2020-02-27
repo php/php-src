@@ -112,6 +112,12 @@ BCMath:
   . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
     the returned numbers may have omitted trailing decimal zeroes.
 
+DOM:
+  . As of PHP 7.3.16, the value of the $childNodes property of DOMDocument,
+    DOMNode, DOMProcessingInstruction, DOMComment, DOMText, DOMCdataSection and
+    DOMNotation is now an empty DOMNodeList instead of NULL, according to the
+    W3C and WHATWG standards and the PHP manual.
+
 IMAP:
   rsh/ssh logins are disabled by default. Use imap.enable_insecure_rsh if you want
   to enable them. Note that the IMAP library does not filter mailbox names before
