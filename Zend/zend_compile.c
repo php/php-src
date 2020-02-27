@@ -505,7 +505,7 @@ static int lookup_cv(zend_string *name) /* {{{ */{
 	while (i < op_array->last_var) {
 		if (ZSTR_H(op_array->vars[i]) == hash_value
 		 && zend_string_equals(op_array->vars[i], name)) {
-			return (int)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, i);
+			return EX_NUM_TO_VAR(i);
 		}
 		i++;
 	}
@@ -517,7 +517,7 @@ static int lookup_cv(zend_string *name) /* {{{ */{
 	}
 
 	op_array->vars[i] = zend_string_copy(name);
-	return (int)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, i);
+	return EX_NUM_TO_VAR(i);
 }
 /* }}} */
 

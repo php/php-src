@@ -593,7 +593,7 @@ static void emit_live_range_raw(
 
 	ZEND_ASSERT(start < end);
 	range = &op_array->live_range[op_array->last_live_range - 1];
-	range->var = (uint32_t) (intptr_t) ZEND_CALL_VAR_NUM(NULL, op_array->last_var + var_num);
+	range->var = EX_NUM_TO_VAR(op_array->last_var + var_num);
 	range->var |= kind;
 	range->start = start;
 	range->end = end;
@@ -698,8 +698,7 @@ static void emit_live_range(
 			/* COPY_TMP has a split live-range: One from the definition until the use in
 			 * "null" branch, and another from the start of the "non-null" branch to the
 			 * FREE opcode. */
-			uint32_t rt_var_num =
-				(uint32_t) (intptr_t) ZEND_CALL_VAR_NUM(NULL, op_array->last_var + var_num);
+			uint32_t rt_var_num = EX_NUM_TO_VAR(op_array->last_var + var_num);
 			zend_op *block_start_op = use_opline;
 
 			if (needs_live_range && !needs_live_range(op_array, orig_def_opline)) {
