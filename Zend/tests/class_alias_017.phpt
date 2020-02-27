@@ -4,12 +4,12 @@ Testing alias with get_called_class() and get_class()
 <?php
 
 class foo {
-	public function __construct() {
-		echo get_called_class(), "\n";
-	}
-	static public function test() {
-		echo get_class(), "\n";
-	}
+    public function __construct() {
+        echo get_called_class(), "\n";
+    }
+    static public function test() {
+        echo get_class(), "\n";
+    }
 }
 
 class_alias('foo', 'bar');

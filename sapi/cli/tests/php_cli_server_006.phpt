@@ -25,9 +25,9 @@ Authorization: Basic Zm9vOmJhcg==
 
 HEADER
 )) {
-	while (!feof($fp)) {
-		echo fgets($fp);
-	}
+    while (!feof($fp)) {
+        echo fgets($fp);
+    }
 }
 
 ?>

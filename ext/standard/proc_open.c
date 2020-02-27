@@ -501,6 +501,7 @@ PHP_FUNCTION(proc_open)
 	int bypass_shell = 0;
 	int blocking_pipes = 0;
 	int create_process_group = 0;
+	int create_new_console = 0;
 #else
 	char **argv = NULL;
 #endif
@@ -593,6 +594,13 @@ PHP_FUNCTION(proc_open)
 		if (item != NULL) {
 			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
 				create_process_group = 1;
+			}
+		}
+
+		item = zend_hash_str_find(Z_ARRVAL_P(other_options), "create_new_console", sizeof("create_new_console") - 1);
+		if (item != NULL) {
+			if (Z_TYPE_P(item) == IS_TRUE || ((Z_TYPE_P(item) == IS_LONG) && Z_LVAL_P(item))) {
+				create_new_console = 1;
 			}
 		}
 	}
@@ -918,7 +926,9 @@ PHP_FUNCTION(proc_open)
 	if (create_process_group) {
 		dwCreateFlags |= CREATE_NEW_PROCESS_GROUP;
 	}
-
+	if (create_new_console) {
+		dwCreateFlags |= CREATE_NEW_CONSOLE;
+	}
 	envpw = php_win32_cp_env_any_to_w(env.envp);
 	if (envpw) {
 		dwCreateFlags |= CREATE_UNICODE_ENVIRONMENT;
@@ -943,13 +953,13 @@ PHP_FUNCTION(proc_open)
 		wchar_t *cmdw2;
 
 
-		len = (sizeof(COMSPEC_NT) + sizeof(" /c ") + tmp_len + 1);
+		len = (sizeof(COMSPEC_NT) + sizeof(" /s /c ") + tmp_len + 3);
 		cmdw2 = (wchar_t *)malloc(len * sizeof(wchar_t));
 		if (!cmdw2) {
 			php_error_docref(NULL, E_WARNING, "Command conversion failed");
 			goto exit_fail;
 		}
-		ret = _snwprintf(cmdw2, len, L"%hs /c %s", COMSPEC_NT, cmdw);
+		ret = _snwprintf(cmdw2, len, L"%hs /s /c \"%s\"", COMSPEC_NT, cmdw);
 
 		if (-1 == ret) {
 			free(cmdw2);

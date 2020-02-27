@@ -43,4 +43,4 @@ int(-24)
 float(-1.5)
 
 -- Testing array_product() function with negative floats --
-float(-9.9999999E+15)
+float(-9999999900000000)

@@ -15,10 +15,10 @@ $it = new DirectoryIterator('phar://'.$fname);
 
 foreach($it as $name => $ent)
 {
-	var_dump($name);
-	var_dump($ent->getFilename());
-	var_dump($ent->isDir());
-	var_dump($ent->isDot());
+    var_dump($name);
+    var_dump($ent->getFilename());
+    var_dump($ent->isDir());
+    var_dump($ent->isDot());
 }
 
 ?>
@@ -27,49 +27,49 @@ foreach($it as $name => $ent)
 
 class MyDirectoryIterator extends DirectoryIterator
 {
-	function __construct($dir)
-	{
-		echo __METHOD__ . "\n";
-		parent::__construct($dir);
-	}
+    function __construct($dir)
+    {
+        echo __METHOD__ . "\n";
+        parent::__construct($dir);
+    }
 
-	function rewind()
-	{
-		echo __METHOD__ . "\n";
-		parent::rewind();
-	}
+    function rewind()
+    {
+        echo __METHOD__ . "\n";
+        parent::rewind();
+    }
 
-	function valid()
-	{
-		echo __METHOD__ . "\n";
-		return parent::valid();
-	}
+    function valid()
+    {
+        echo __METHOD__ . "\n";
+        return parent::valid();
+    }
 
-	function key()
-	{
-		echo __METHOD__ . "\n";
-		return parent::key();
-	}
+    function key()
+    {
+        echo __METHOD__ . "\n";
+        return parent::key();
+    }
 
-	function current()
-	{
-		echo __METHOD__ . "\n";
-		return parent::current();
-	}
+    function current()
+    {
+        echo __METHOD__ . "\n";
+        return parent::current();
+    }
 
-	function next()
-	{
-		echo __METHOD__ . "\n";
-		parent::next();
-	}
+    function next()
+    {
+        echo __METHOD__ . "\n";
+        parent::next();
+    }
 }
 
 $it = new MyDirectoryIterator('phar://'.$fname);
 
 foreach($it as $name => $ent)
 {
-	var_dump($name);
-	var_dump($ent->getFilename());
+    var_dump($name);
+    var_dump($ent->getFilename());
 }
 
 ?>

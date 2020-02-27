@@ -51,8 +51,8 @@ try {
 *** Testing array_diff_uassoc() : error conditions ***
 
 -- Testing array_diff_uassoc() function with more than expected no. of arguments --
-array_diff_uassoc() expects parameter 4 to be a valid callback, array must have exactly two members
-array_diff_uassoc() expects parameter 6 to be a valid callback, array must have exactly two members
+array_diff_uassoc(): Argument #4 must be a valid callback, array must have exactly two members
+array_diff_uassoc(): Argument #6 must be a valid callback, array must have exactly two members
 
 -- Testing array_diff_uassoc() function with less than expected no. of arguments --
 At least 3 parameters are required, 2 given

@@ -1820,50 +1820,6 @@ int php_openssl_setup_crypto(php_stream *stream,
 }
 /* }}} */
 
-static zend_array *php_openssl_capture_session_meta(SSL *ssl_handle) /* {{{ */
-{
-	zval meta_arr;
-	char *proto_str;
-	long proto = SSL_version(ssl_handle);
-	const SSL_CIPHER *cipher = SSL_get_current_cipher(ssl_handle);
-
-	switch (proto) {
-#ifdef HAVE_TLS13
-		case TLS1_3_VERSION:
-			proto_str = "TLSv1.3";
-			break;
-#endif
-#ifdef HAVE_TLS12
-		case TLS1_2_VERSION:
-			proto_str = "TLSv1.2";
-			break;
-#endif
-#ifdef HAVE_TLS11
-		case TLS1_1_VERSION:
-			proto_str = "TLSv1.1";
-			break;
-#endif
-		case TLS1_VERSION:
-			proto_str = "TLSv1";
-			break;
-#ifdef HAVE_SSL3
-		case SSL3_VERSION:
-			proto_str = "SSLv3";
-			break;
-#endif
-		default: proto_str = "UNKNOWN";
-	}
-
-	array_init(&meta_arr);
-	add_assoc_string(&meta_arr, "protocol", proto_str);
-	add_assoc_string(&meta_arr, "cipher_name", (char *) SSL_CIPHER_get_name(cipher));
-	add_assoc_long(&meta_arr, "cipher_bits", SSL_CIPHER_get_bits(cipher, NULL));
-	add_assoc_string(&meta_arr, "cipher_version", SSL_CIPHER_get_version(cipher));
-
-	return Z_ARR(meta_arr);
-}
-/* }}} */
-
 static int php_openssl_capture_peer_certs(php_stream *stream,
 		php_openssl_netstream_data_t *sslsock, X509 *peer_cert) /* {{{ */
 {
@@ -2015,24 +1971,6 @@ static int php_openssl_enable_crypto(php_stream *stream,
 				n = -1;
 			} else {
 				sslsock->ssl_active = 1;
-
-				if (PHP_STREAM_CONTEXT(stream)) {
-					zval *val;
-					if (NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream),
-						"ssl", "capture_session_meta"))
-					) {
-						 php_error(E_DEPRECATED,
-							"capture_session_meta is deprecated; its information is now available via stream_get_meta_data()"
-                        );
-					}
-
-					if (val && zend_is_true(val)) {
-						zval meta_arr;
-						ZVAL_ARR(&meta_arr, php_openssl_capture_session_meta(sslsock->ssl_handle));
-						php_stream_context_set_option(PHP_STREAM_CONTEXT(stream), "ssl", "session_meta", &meta_arr);
-						zval_ptr_dtor(&meta_arr);
-					}
-				}
 			}
 		} else if (errno == EAGAIN) {
 			n = 0;

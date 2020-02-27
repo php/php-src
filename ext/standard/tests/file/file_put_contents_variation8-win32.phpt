@@ -82,10 +82,10 @@ Warning: file_put_contents( ): Failed to open stream: Permission denied in %s on
 Failed to write data to: " "
 
 -- Filename: \0 --
-file_put_contents() expects parameter 1 to be a valid path, string given
+file_put_contents(): Argument #1 ($filename) must be a valid path, string given
 
 -- Filename: array() --
-file_put_contents() expects parameter 1 to be a valid path, array given
+file_put_contents(): Argument #1 ($filename) must be a valid path, array given
 
 -- Filename: /no/such/file/dir --
 

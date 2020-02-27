@@ -16,9 +16,9 @@
 	ZEND_PARSE_PARAMETERS_END()
 #endif
 
-/* {{{ void %EXTNAME%_test1()
+/* {{{ void test1()
  */
-PHP_FUNCTION(%EXTNAME%_test1)
+PHP_FUNCTION(test1)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -70,8 +70,8 @@ PHP_MINFO_FUNCTION(%EXTNAME%)
 /* {{{ %EXTNAME%_functions[]
  */
 static const zend_function_entry %EXTNAME%_functions[] = {
-	PHP_FE(%EXTNAME%_test1,		arginfo_%EXTNAME%_test1)
-	PHP_FE(%EXTNAME%_test2,		arginfo_%EXTNAME%_test2)
+	PHP_FE(test1,		arginfo_test1)
+	PHP_FE(test2,		arginfo_test2)
 	PHP_FE_END
 };
 /* }}} */

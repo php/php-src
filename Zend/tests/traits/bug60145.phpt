@@ -8,9 +8,9 @@ trait foo {
 }
 
 interface MyInterface {
-	use foo;
+    use foo;
 
-	public function b();
+    public function b();
 
 }
 --EXPECTF--

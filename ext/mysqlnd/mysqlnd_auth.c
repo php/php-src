@@ -804,7 +804,8 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 
 		if (server_public_key) {
 			int server_public_key_len;
-			char xor_str[passwd_len + 1];
+			ALLOCA_FLAG(use_heap);
+			char *xor_str = do_alloca(passwd_len + 1, use_heap);
 			memcpy(xor_str, passwd, passwd_len);
 			xor_str[passwd_len] = '\0';
 			mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, auth_plugin_data_len);
@@ -817,6 +818,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 			*/
 			if ((size_t) server_public_key_len - 41 <= passwd_len) {
 				/* password message is to long */
+				free_alloca(xor_str, use_heap);
 				SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
 				DBG_ERR("password is too long");
 				DBG_RETURN(NULL);
@@ -826,6 +828,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 			ret = malloc(*auth_data_len);
 			RSA_public_encrypt(passwd_len + 1, (zend_uchar *) xor_str, ret, server_public_key, RSA_PKCS1_OAEP_PADDING);
 			RSA_free(server_public_key);
+			free_alloca(xor_str, use_heap);
 		}
 	}
 
@@ -912,6 +915,12 @@ mysqlnd_caching_sha2_get_auth_data(struct st_mysqlnd_authentication_plugin * sel
 	DBG_ENTER("mysqlnd_caching_sha2_get_auth_data");
 	DBG_INF_FMT("salt(%d)=[%.*s]", auth_plugin_data_len, auth_plugin_data_len, auth_plugin_data);
 	*auth_data_len = 0;
+
+	if (auth_plugin_data_len < SCRAMBLE_LENGTH) {
+		SET_CLIENT_ERROR(conn->error_info, CR_MALFORMED_PACKET, UNKNOWN_SQLSTATE, "The server sent wrong length for scramble");
+		DBG_ERR_FMT("The server sent wrong length for scramble %u. Expected %u", auth_plugin_data_len, SCRAMBLE_LENGTH);
+		DBG_RETURN(NULL);
+	}
 
 	DBG_INF("First auth step: send hashed password");
 	/* copy scrambled pass*/
@@ -1017,10 +1026,11 @@ mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
 
 	if (server_public_key) {
 		int server_public_key_len;
-		char xor_str[passwd_len + 1];
+		ALLOCA_FLAG(use_heap)
+		char *xor_str = do_alloca(passwd_len + 1, use_heap);
 		memcpy(xor_str, passwd, passwd_len);
 		xor_str[passwd_len] = '\0';
-		mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, auth_plugin_data_len);
+		mysqlnd_xor_string(xor_str, passwd_len, (char *) auth_plugin_data, SCRAMBLE_LENGTH);
 
 		server_public_key_len = RSA_size(server_public_key);
 		/*
@@ -1030,6 +1040,7 @@ mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
 		*/
 		if ((size_t) server_public_key_len - 41 <= passwd_len) {
 			/* password message is to long */
+			free_alloca(xor_str, use_heap);
 			SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "password is too long");
 			DBG_ERR("password is too long");
 			DBG_RETURN(0);
@@ -1037,6 +1048,7 @@ mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
 
 		*crypted = emalloc(server_public_key_len);
 		RSA_public_encrypt(passwd_len + 1, (zend_uchar *) xor_str, *crypted, server_public_key, RSA_PKCS1_OAEP_PADDING);
+		free_alloca(xor_str, use_heap);
 		DBG_RETURN(server_public_key_len);
 	}
 	DBG_RETURN(0);

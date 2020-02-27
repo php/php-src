@@ -194,7 +194,7 @@ int dom_document_encoding_write(dom_object *obj, zval *newval)
 		return FAILURE;
 	}
 
-	handler = xmlFindCharEncodingHandler(Z_STRVAL_P(newval));
+	handler = xmlFindCharEncodingHandler(ZSTR_VAL(str));
 
     if (handler != NULL) {
 		xmlCharEncCloseFunc(handler);
@@ -828,7 +828,7 @@ PHP_METHOD(domdocument, getElementsByTagName)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	php_dom_create_interator(return_value, DOM_NODELIST);
+	php_dom_create_iterator(return_value, DOM_NODELIST);
 	namednode = Z_DOMOBJ_P(return_value);
 	local = xmlCharStrndup(name, name_len);
 	dom_namednode_iter(intern, 0, namednode, NULL, local, NULL);
@@ -1043,7 +1043,7 @@ PHP_METHOD(domdocument, getElementsByTagNameNS)
 
 	DOM_GET_OBJ(docp, id, xmlDocPtr, intern);
 
-	php_dom_create_interator(return_value, DOM_NODELIST);
+	php_dom_create_iterator(return_value, DOM_NODELIST);
 	namednode = Z_DOMOBJ_P(return_value);
 	local = xmlCharStrndup(name, name_len);
 	nsuri = xmlCharStrndup(uri, uri_len);

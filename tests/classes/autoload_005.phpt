@@ -8,9 +8,9 @@ ZE2 Autoload from destructor
 <?php
 
 spl_autoload_register(function ($class_name) {
-	var_dump(class_exists($class_name, false));
-	require_once(__DIR__ . '/' . $class_name . '.inc');
-	echo 'autoload(' . $class_name . ")\n";
+    var_dump(class_exists($class_name, false));
+    require_once(__DIR__ . '/' . $class_name . '.inc');
+    echo 'autoload(' . $class_name . ")\n";
 });
 
 var_dump(class_exists('autoload_derived', false));

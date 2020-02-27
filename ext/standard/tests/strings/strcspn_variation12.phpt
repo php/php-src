@@ -43,22 +43,22 @@ $mask_array = array(
 
 //defining array of start values
 $start_array = array(
-		    0,
-		    1,
-		    2,
-		    -1,
-		    2147483647,  // max positive integer
-		    -2147483648  // min negative integer
+            0,
+            1,
+            2,
+            -1,
+            2147483647,  // max positive integer
+            -2147483648  // min negative integer
                    );
 
 //defining array of len values
 $len_array = array(
-		    0,
-		    1,
-		    2,
-		    -1,
-		    2147483647,  // max positive integer
-		    -2147483648  // min negative integer
+            0,
+            1,
+            2,
+            -1,
+            2147483647,  // max positive integer
+            -2147483648  // min negative integer
                    );
 
 

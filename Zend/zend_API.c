@@ -207,8 +207,6 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(int min_
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, zend_expected_type expected_type, zval *arg) /* {{{ */
 {
-	const char *space;
-	const char *class_name;
 	static const char * const expected_error[] = {
 		Z_EXPECTED_TYPES(Z_EXPECTED_TYPE_STR)
 		NULL
@@ -217,38 +215,56 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, z
 	if (EG(exception)) {
 		return;
 	}
-	class_name = get_active_class_name(&space);
-	zend_type_error("%s%s%s() expects parameter %d to be %s, %s given",
-		class_name, space, get_active_function_name(), num, expected_error[expected_type], zend_zval_type_name(arg));
+
+	zend_argument_type_error(num, "must be %s, %s given", expected_error[expected_type], zend_zval_type_name(arg));
 }
 /* }}} */
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, const char *name, zval *arg) /* {{{ */
 {
-	const char *space;
-	const char *class_name;
-
 	if (EG(exception)) {
 		return;
 	}
-	class_name = get_active_class_name(&space);
-	zend_type_error("%s%s%s() expects parameter %d to be %s, %s given",
-		class_name, space, get_active_function_name(), num, name, zend_zval_type_name(arg));
+
+	zend_argument_type_error(num, "must be of type %s, %s given", name, zend_zval_type_name(arg));
 }
 /* }}} */
 
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *error) /* {{{ */
 {
-	const char *space;
-	const char *class_name;
-
 	if (EG(exception)) {
 		return;
 	}
-	class_name = get_active_class_name(&space);
-	zend_type_error("%s%s%s() expects parameter %d to be a valid callback, %s",
-		class_name, space, get_active_function_name(), num, error);
+
+	zend_argument_type_error(num, "must be a valid callback, %s", error);
 	efree(error);
+}
+/* }}} */
+
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error(zend_class_entry *error_ce, uint32_t arg_num, const char *format, ...) /* {{{ */
+{
+	const char *space;
+	const char *class_name;
+	const char *arg_name;
+	char *message = NULL;
+	if (EG(exception)) {
+		return;
+	}
+
+	class_name = get_active_class_name(&space);
+	arg_name = get_active_function_arg_name(arg_num);
+
+	va_list va;
+	va_start(va, format);
+	zend_vspprintf(&message, 0, format, va);
+	va_end(va);
+
+	zend_throw_error(error_ce, "%s%s%s(): Argument #%d%s%s%s %s",
+		class_name, space, get_active_function_name(),
+		arg_num, arg_name ? " ($" : "", arg_name ? arg_name : "", arg_name ? ")" : "",
+		message
+    );
+	efree(message);
 }
 /* }}} */
 
@@ -268,23 +284,13 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pc
 	*pce = zend_lookup_class(Z_STR_P(arg));
 	if (ce_base) {
 		if ((!*pce || !instanceof_function(*pce, ce_base))) {
-			const char *space;
-			const char *class_name = get_active_class_name(&space);
-
-			zend_type_error("%s%s%s() expects parameter %d to be a class name derived from %s, '%s' given",
-				class_name, space, get_active_function_name(), num,
-				ZSTR_VAL(ce_base->name), Z_STRVAL_P(arg));
+			zend_argument_type_error(num, "must be a class name derived from %s, '%s' given", ZSTR_VAL(ce_base->name), Z_STRVAL_P(arg));
 			*pce = NULL;
 			return 0;
 		}
 	}
 	if (!*pce) {
-		const char *space;
-		const char *class_name = get_active_class_name(&space);
-
-		zend_type_error("%s%s%s() expects parameter %d to be a valid class name, '%s' given",
-			class_name, space, get_active_function_name(), num,
-			Z_STRVAL_P(arg));
+		zend_argument_type_error(num, "must be a valid class name, '%s' given", Z_STRVAL_P(arg));
 		return 0;
 	}
 	return 1;
@@ -522,6 +528,16 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			}
 			break;
 
+		case 'n':
+			{
+				zval **p = va_arg(*va, zval **);
+
+				if (!zend_parse_arg_number(arg, p, check_null)) {
+					return "number";
+				}
+			}
+			break;
+
 		case 's':
 			{
 				char **p = va_arg(*va, char **);
@@ -537,7 +553,8 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				char **p = va_arg(*va, char **);
 				size_t *pl = va_arg(*va, size_t *);
 				if (!zend_parse_arg_path(arg, p, pl, check_null)) {
-					return "a valid path";
+					zend_spprintf(error, 0, "a valid path, %s given", zend_zval_type_name(arg));
+					return "";
 				}
 			}
 			break;
@@ -546,7 +563,8 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 			{
 				zend_string **str = va_arg(*va, zend_string **);
 				if (!zend_parse_arg_path_str(arg, str, check_null)) {
-					return "a valid path";
+					zend_spprintf(error, 0, "a valid path, %s given", zend_zval_type_name(arg));
+					return "";
 				}
 			}
 			break;
@@ -643,7 +661,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				}
 				if (!try_convert_to_string(arg)) {
 					*pce = NULL;
-					return "valid class name";
+					return "a valid class name";
 				}
 
 				if ((lookup = zend_lookup_class(Z_STR_P(arg))) == NULL) {
@@ -653,14 +671,14 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				}
 				if (ce_base) {
 					if ((!*pce || !instanceof_function(*pce, ce_base))) {
-						zend_spprintf(error, 0, "to be a class name derived from %s, '%s' given",
+						zend_spprintf(error, 0, "a class name derived from %s, '%s' given",
 							ZSTR_VAL(ce_base->name), Z_STRVAL_P(arg));
 						*pce = NULL;
 						return "";
 					}
 				}
 				if (!*pce) {
-					zend_spprintf(error, 0, "to be a valid class name, '%s' given",
+					zend_spprintf(error, 0, "a valid class name, '%s' given",
 						Z_STRVAL_P(arg));
 					return "";
 				}
@@ -687,11 +705,11 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				}
 
 				if (is_callable_error) {
-					zend_spprintf(error, 0, "to be a valid callback, %s", is_callable_error);
+					zend_spprintf(error, 0, "a valid callback, %s", is_callable_error);
 					efree(is_callable_error);
 					return "";
 				} else {
-					return "valid callback";
+					return "a valid callback";
 				}
 			}
 
@@ -727,19 +745,16 @@ static int zend_parse_arg(int arg_num, zval *arg, va_list *va, const char **spec
 			return FAILURE;
 		}
 		if (!(flags & ZEND_PARSE_PARAMS_QUIET) && (*expected_type || error)) {
-			const char *space;
-			const char *class_name = get_active_class_name(&space);
-
 			if (error) {
-				zend_type_error("%s%s%s() expects parameter %d %s",
-						class_name, space, get_active_function_name(), arg_num, error);
+				zend_argument_type_error(arg_num, "must be %s", error);
 				efree(error);
 			} else {
-				zend_type_error("%s%s%s() expects parameter %d to be %s, %s given",
-						class_name, space, get_active_function_name(), arg_num, expected_type,
-						zend_zval_type_name(arg));
+				zend_argument_type_error(arg_num, "must be of type %s, %s given", expected_type, zend_zval_type_name(arg));
 			}
+		} else if (error) {
+			efree(error);
 		}
+
 		return FAILURE;
 	}
 
@@ -793,7 +808,7 @@ static int zend_parse_va_args(int num_args, const char *type_spec, va_list *va, 
 			case 'f': case 'A':
 			case 'H': case 'p':
 			case 'S': case 'P':
-			case 'L':
+			case 'L': case 'n':
 				max_num_args++;
 				break;
 
@@ -2028,9 +2043,9 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		} else {
 			internal_function->fn_flags = ZEND_ACC_PUBLIC;
 		}
+
 		if (ptr->arg_info) {
 			zend_internal_function_info *info = (zend_internal_function_info*)ptr->arg_info;
-
 			internal_function->arg_info = (zend_internal_arg_info*)ptr->arg_info+1;
 			internal_function->num_args = ptr->num_args;
 			/* Currently you cannot denote that the function can accept less arguments than num_args */
@@ -2058,10 +2073,14 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 				internal_function->fn_flags |= ZEND_ACC_HAS_RETURN_TYPE;
 			}
 		} else {
+			zend_error(E_CORE_WARNING, "Missing arginfo for %s%s%s()",
+				 scope ? ZSTR_VAL(scope->name) : "", scope ? "::" : "", ptr->fname);
+
 			internal_function->arg_info = NULL;
 			internal_function->num_args = 0;
 			internal_function->required_num_args = 0;
 		}
+
 		zend_set_function_arg_flags((zend_function*)internal_function);
 		if (ptr->flags & ZEND_ACC_ABSTRACT) {
 			if (scope) {
@@ -2650,6 +2669,7 @@ ZEND_API int zend_disable_function(char *function_name, size_t function_name_len
 		zend_free_internal_arg_info(func);
 	    func->fn_flags &= ~(ZEND_ACC_VARIADIC | ZEND_ACC_HAS_TYPE_HINTS | ZEND_ACC_HAS_RETURN_TYPE);
 		func->num_args = 0;
+		func->required_num_args = 0;
 		func->arg_info = NULL;
 		func->handler = ZEND_FN(display_disabled_function);
 		return SUCCESS;
@@ -2963,12 +2983,7 @@ get_function_via_handler:
 					if (strict_class &&
 					    (!fcc->function_handler->common.scope ||
 					     !instanceof_function(ce_org, fcc->function_handler->common.scope))) {
-						if (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-							if (fcc->function_handler->common.function_name) {
-								zend_string_release_ex(fcc->function_handler->common.function_name, 0);
-							}
-							zend_free_trampoline(fcc->function_handler);
-						}
+						zend_release_fcall_info_cache(fcc);
 					} else {
 						retval = 1;
 						call_via_handler = (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;

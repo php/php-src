@@ -75,7 +75,8 @@ const struct mbfl_convert_vtbl vtbl_ucs4_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_ucs4_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_ucs4 = {
@@ -84,7 +85,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_ucs4 = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_ucs4be,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_ucs4be_wchar = {
@@ -93,7 +95,8 @@ const struct mbfl_convert_vtbl vtbl_ucs4be_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_ucs4be_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_ucs4be = {
@@ -102,7 +105,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_ucs4be = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_ucs4be,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_ucs4le_wchar = {
@@ -111,7 +115,8 @@ const struct mbfl_convert_vtbl vtbl_ucs4le_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_ucs4le_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_ucs4le = {
@@ -120,7 +125,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_ucs4le = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_ucs4le,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 
@@ -139,7 +145,7 @@ int mbfl_filt_conv_ucs4_wchar(int c, mbfl_convert_filter *filter)
 		if (endian) {
 			n = c & 0xff;
 		} else {
-			n = (c & 0xff) << 24;
+			n = (c & 0xffu) << 24;
 		}
 		filter->cache = n;
 		filter->status++;
@@ -164,7 +170,7 @@ int mbfl_filt_conv_ucs4_wchar(int c, mbfl_convert_filter *filter)
 		break;
 	default:
 		if (endian) {
-			n = (c & 0xff) << 24;
+			n = (c & 0xffu) << 24;
 		} else {
 			n = c & 0xff;
 		}
@@ -195,7 +201,7 @@ int mbfl_filt_conv_ucs4be_wchar(int c, mbfl_convert_filter *filter)
 
 	if (filter->status == 0) {
 		filter->status = 1;
-		n = (c & 0xff) << 24;
+		n = (c & 0xffu) << 24;
 		filter->cache = n;
 	} else if (filter->status == 1) {
 		filter->status = 2;
@@ -251,7 +257,7 @@ int mbfl_filt_conv_ucs4le_wchar(int c, mbfl_convert_filter *filter)
 		filter->cache |= n;
 	} else {
 		filter->status = 0;
-		n = ((c & 0xff) << 24) | filter->cache;
+		n = ((c & 0xffu) << 24) | filter->cache;
 		CK((*filter->output_function)(n, filter->data));
 	}
 	return c;

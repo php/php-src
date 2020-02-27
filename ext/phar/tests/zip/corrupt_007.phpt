@@ -5,9 +5,9 @@ Phar: corrupted zip (truncated filename record)
 --FILE--
 <?php
 try {
-	new PharData(__DIR__ . '/files/truncfilename.zip');
+    new PharData(__DIR__ . '/files/truncfilename.zip');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
 --EXPECTF--

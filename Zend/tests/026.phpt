@@ -4,8 +4,8 @@ Trying assign value to property when an object is not returned in a function
 <?php
 
 class foo {
-	public function a() {
-	}
+    public function a() {
+    }
 }
 
 $test = new foo;

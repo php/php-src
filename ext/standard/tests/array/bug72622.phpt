@@ -4,11 +4,11 @@ Bug #72622 (array_walk + array_replace_recursive create references from nothing)
 <?php
 
 function walk (array $arr) {
-	array_walk($arr, function (&$val, $name) {
+    array_walk($arr, function (&$val, $name) {
 
-	});
+    });
 
-	return $arr;
+    return $arr;
 }
 
 $arr3 = ['foo' => 'foo'];

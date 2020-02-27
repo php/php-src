@@ -4,10 +4,10 @@ errmsg: class declarations may not be nested
 <?php
 
 class test {
-	function foo() {
-		class test2 {
-		}
-	}
+    function foo() {
+        class test2 {
+        }
+    }
 }
 
 echo "Done\n";

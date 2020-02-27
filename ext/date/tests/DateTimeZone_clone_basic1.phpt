@@ -18,11 +18,11 @@ var_dump($orig);
 var_dump($clone);
 
 if ($clone != $orig) {
-	echo "TEST FAILED : objects not equal\n";
+    echo "TEST FAILED : objects not equal\n";
 }else if ($clone === $orig) {
-	echo "TEST FAILED : objects identical\n";
+    echo "TEST FAILED : objects identical\n";
 } else {
-	echo "TEST PASSED : Objects equal but not indetical\n";
+    echo "TEST PASSED : Objects equal but not indetical\n";
 }
 
 ?>

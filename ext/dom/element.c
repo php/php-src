@@ -552,7 +552,7 @@ PHP_METHOD(domelement, getElementsByTagName)
 
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
 
-	php_dom_create_interator(return_value, DOM_NODELIST);
+	php_dom_create_iterator(return_value, DOM_NODELIST);
 	namednode = Z_DOMOBJ_P(return_value);
 	local = xmlCharStrndup(name, name_len);
 	dom_namednode_iter(intern, 0, namednode, NULL, local, NULL);
@@ -977,7 +977,7 @@ PHP_METHOD(domelement, getElementsByTagNameNS)
 
 	DOM_GET_OBJ(elemp, id, xmlNodePtr, intern);
 
-	php_dom_create_interator(return_value, DOM_NODELIST);
+	php_dom_create_iterator(return_value, DOM_NODELIST);
 	namednode = Z_DOMOBJ_P(return_value);
 	local = xmlCharStrndup(name, name_len);
 	nsuri = xmlCharStrndup(uri, uri_len);

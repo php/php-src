@@ -5,24 +5,23 @@ Reflection inheritance
 
 class ReflectionClassEx extends ReflectionClass
 {
-	public $bla;
+    public $bla;
 
-	function getMethodNames()
-	{
-		$res = array();
-		foreach($this->getMethods() as $m)
-		{
-			$res[] = $m->class . '::' . $m->name;
-		}
-		return $res;
-	}
+    function getMethodNames()
+    {
+        $res = array();
+        foreach($this->getMethods() as $m)
+        {
+            $res[] = $m->class . '::' . $m->name;
+        }
+        return $res;
+    }
 }
 
 $r = new ReflectionClassEx('ReflectionClassEx');
 
 $exp = array (
   'UMLClass::__clone',
-  'UMLClass::export',
   'UMLClass::__construct',
   'UMLClass::__toString',
   'UMLClass::getName',
@@ -62,10 +61,10 @@ $res = $r->getMethodNames();
 
 foreach($exp as $m)
 {
-	if (!in_array($m, $exp))
-	{
-		$miss[] = $m;
-	}
+    if (!in_array($m, $exp))
+    {
+        $miss[] = $m;
+    }
 }
 
 var_dump($miss);

@@ -4,15 +4,15 @@ Bug #76667 (Segfault with divide-assign op and __get + __set)
 <?php
 
 class T {
-	public function __get($k)
-	{
-		return $undefined->$k;
-	}
+    public function __get($k)
+    {
+        return $undefined->$k;
+    }
 
-	public function __set($k, $v)
-	{
-		return $this->$v /= 0;
-	}
+    public function __set($k, $v)
+    {
+        return $this->$v /= 0;
+    }
 };
 
 $x = new T;

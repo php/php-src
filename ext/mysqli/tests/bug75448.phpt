@@ -11,9 +11,11 @@ require_once('skipifconnectfailure.inc');
 require_once 'connect.inc';
 $link = mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 mysqli_close($link);
-$stmt = mysqli_prepare($link, 'SELECT VERSION()');
-var_dump($stmt);
-?>
---EXPECTF--
-Warning: mysqli_prepare(): Couldn't fetch mysqli in %s on line %d
-bool(false)
+
+try {
+    mysqli_prepare($link, 'SELECT VERSION()');
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+--EXPECT--
+mysqli object is already closed

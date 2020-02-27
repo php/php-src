@@ -34,16 +34,16 @@ $code = <<<CODE
 <?php
 
 foreach(["test", "таст"] as \$fn) {
-	file_put_contents("\$fn.txt", "");
+    file_put_contents("\$fn.txt", "");
 }
 
 var_dump(getcwd());
 if (\$dh = opendir(getcwd())) {
-	while ((\$file = readdir(\$dh)) !== false) {
-		if ("." == \$file || ".." == \$file) continue;
-		var_dump(\$file);
-	}
-	closedir(\$dh);
+    while ((\$file = readdir(\$dh)) !== false) {
+        if ("." == \$file || ".." == \$file) continue;
+        var_dump(\$file);
+    }
+    closedir(\$dh);
 }
 CODE;
 $code_fn = "code.php";
@@ -53,7 +53,7 @@ print(shell_exec(getenv('TEST_PHP_EXECUTABLE') . " -n -d default_charset=cp1251 
 
 chdir($old_cwd);
 
-/* --CLEAN-- section were the right place, but it won't accept default_charset ATM, it seems. */
+/*--CLEAN-- section were the right place, but it won't accept default_charset ATM, it seems. */
 $dir_basename = "тест";
 $prefix = __DIR__ . DIRECTORY_SEPARATOR . "bug75063-cp1251";
 $d0 = $prefix . DIRECTORY_SEPARATOR . $dir_basename;

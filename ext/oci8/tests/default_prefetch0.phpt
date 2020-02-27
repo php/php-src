@@ -26,11 +26,11 @@ oci8_test_sql_execute($c, $stmtarray);
 $select_sql = "select * from default_prefetch_tab";
 
 if (!($s = oci_parse($c, $select_sql))) {
-	die("oci_parse(select) failed!\n");
+    die("oci_parse(select) failed!\n");
 }
 
 if (!oci_execute($s)) {
-	die("oci_execute(select) failed!\n");
+    die("oci_execute(select) failed!\n");
 }
 
 var_dump(oci_fetch($s));

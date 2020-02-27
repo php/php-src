@@ -31,7 +31,7 @@ print "COUNT_NORMAL: should be 1, is ".count("string")."\n";
 print "COUNT_NORMAL: should be 2, is ".count(array("a", array("b")))."\n";
 
 $arr = array('a'=>array(NULL, NULL, NULL), 1=>array(NULL=>1, 1=>NULL),
-	array(array(array(array(array(NULL))))));
+    array(array(array(array(array(NULL))))));
 print "-- Testing really cool arrays --\n";
 print "COUNT_NORMAL: should be 3, is ".count($arr, COUNT_NORMAL)."\n";
 print "COUNT_RECURSIVE: should be 13, is ".count($arr, COUNT_RECURSIVE)."\n";
@@ -47,7 +47,7 @@ $count_array = array(
   array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,
          1 => -2.344, array()),
   array( TRUE => TRUE, FALSE => FALSE, "" => "", " " => " ",
-	 NULL => NULL, "\x000" => "\x000", "\000" => "\000"),
+     NULL => NULL, "\x000" => "\x000", "\000" => "\000"),
   array( NULL, 1.23 => "Hi", "string" => "hello",
          array("" => "World", "-2.34" => "a", "0" => "b"))
 );

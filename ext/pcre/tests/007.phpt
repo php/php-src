@@ -10,10 +10,10 @@ if (@preg_match('/./u', '') === false) {
 <?php
 
 function evil($x) {
-	global $txt;
-	$txt[3] = "\xFF";
-	var_dump($x);
-	return $x[0];
+    global $txt;
+    $txt[3] = "\xFF";
+    var_dump($x);
+    return $x[0];
 }
 
 $txt = "ola123";

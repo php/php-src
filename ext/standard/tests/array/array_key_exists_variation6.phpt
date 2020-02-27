@@ -27,17 +27,17 @@ $array = array ('null' => null,
 
 //iterate through original array
 foreach($array as $name => $input) {
-	$iterator = 1;
-	echo "\n-- Key in \$search array is : $name --\n";
-	$search[$input] = 'test';
+    $iterator = 1;
+    echo "\n-- Key in \$search array is : $name --\n";
+    $search[$input] = 'test';
 
-	//iterate through array again to see which values are considered equal
-	foreach($array as $key) {
-		echo "Iteration $iterator:  ";
-		var_dump(array_key_exists($key, $search));
-		$iterator++;
-	}
-	$search = null;
+    //iterate through array again to see which values are considered equal
+    foreach($array as $key) {
+        echo "Iteration $iterator:  ";
+        var_dump(array_key_exists($key, $search));
+        $iterator++;
+    }
+    $search = null;
 }
 
 echo "Done";

@@ -3,19 +3,19 @@ Unsetting and recreating private properties.
 --FILE--
 <?php
 class C {
-	private $p = 'test';
-	function unsetPrivate() {
-		unset($this->p);
-	}
-	function setPrivate() {
-		$this->p = 'changed';
-	}
+    private $p = 'test';
+    function unsetPrivate() {
+        unset($this->p);
+    }
+    function setPrivate() {
+        $this->p = 'changed';
+    }
 }
 
 class D extends C {
-	function setP() {
-		$this->p = 'changed in D';
-	}
+    function setP() {
+        $this->p = 'changed in D';
+    }
 }
 
 echo "Unset and recreate a superclass's private property:\n";

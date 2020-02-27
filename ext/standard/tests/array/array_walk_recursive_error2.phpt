@@ -23,33 +23,33 @@ echo "*** Testing array_walk_recursive() : error conditions - callback parameter
 
 // expected: Missing argument Warning
 try {
-	var_dump( array_walk_recursive($input, "callback1") );
+    var_dump( array_walk_recursive($input, "callback1") );
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 try {
-	var_dump( array_walk_recursive($input, "callback2", 4) );
+    var_dump( array_walk_recursive($input, "callback2", 4) );
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 // expected: Warning is suppressed
 try {
-	var_dump( @array_walk_recursive($input, "callback1") );
+    var_dump( @array_walk_recursive($input, "callback1") );
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 try {
-	var_dump( @array_walk_recursive($input, "callback2", 4) );
+    var_dump( @array_walk_recursive($input, "callback2", 4) );
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "-- Testing array_walk_recursive() function with too many callback parameters --\n";
 try {
-	var_dump( array_walk_recursive($input, "callback1", 20, 10) );
+    var_dump( array_walk_recursive($input, "callback1", 20, 10) );
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "Done";

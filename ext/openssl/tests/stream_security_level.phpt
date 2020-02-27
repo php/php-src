@@ -18,33 +18,33 @@ $certFile = __DIR__ . DIRECTORY_SEPARATOR . 'stream_security_level.pem.tmp';
 $cacertFile = __DIR__ . DIRECTORY_SEPARATOR . 'stream_security_level-ca.pem.tmp';
 
 $serverCode = <<<'CODE'
-	$serverUri = "ssl://127.0.0.1:64322";
-	$serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
-	$serverCtx = stream_context_create(['ssl' => [
-		'local_cert' => '%s'
-	]]);
+    $serverUri = "ssl://127.0.0.1:64322";
+    $serverFlags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN;
+    $serverCtx = stream_context_create(['ssl' => [
+        'local_cert' => '%s'
+    ]]);
 
-	$server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
-	phpt_notify();
+    $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
+    phpt_notify();
 
-	@stream_socket_accept($server, 1);
+    @stream_socket_accept($server, 1);
 CODE;
 $serverCode = sprintf($serverCode, $certFile);
 
 $clientCode = <<<'CODE'
-	$serverUri = "ssl://127.0.0.1:64322";
-	$clientFlags = STREAM_CLIENT_CONNECT;
-	$clientCtx = stream_context_create(['ssl' => [
-		'security_level' => %d,
-		'verify_peer' => true,
-		'cafile' => '%s',
-		'verify_peer_name' => false
-	]]);
+    $serverUri = "ssl://127.0.0.1:64322";
+    $clientFlags = STREAM_CLIENT_CONNECT;
+    $clientCtx = stream_context_create(['ssl' => [
+        'security_level' => %d,
+        'verify_peer' => true,
+        'cafile' => '%s',
+        'verify_peer_name' => false
+    ]]);
 
-	phpt_wait();
-	$client = stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx);
+    phpt_wait();
+    $client = stream_socket_client($serverUri, $errno, $errstr, 1, $clientFlags, $clientCtx);
 
-	var_dump($client);
+    var_dump($client);
 CODE;
 $clientCode = sprintf($clientCode, $securityLevel, $cacertFile);
 

@@ -22,6 +22,7 @@
 #include <stdio.h>
 
 #include "common_enum.h"
+#include "common_arginfo.h"
 
 extern "C" {
 #include <zend_interfaces.h>
@@ -280,15 +281,12 @@ static PHP_METHOD(IntlIterator, valid)
 	RETURN_BOOL(ii->iterator->funcs->valid(ii->iterator) == SUCCESS);
 }
 
-ZEND_BEGIN_ARG_INFO_EX(ainfo_se_void, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
 static const zend_function_entry IntlIterator_class_functions[] = {
-	PHP_ME(IntlIterator,	current,	ainfo_se_void,			ZEND_ACC_PUBLIC)
-	PHP_ME(IntlIterator,	key,		ainfo_se_void,			ZEND_ACC_PUBLIC)
-	PHP_ME(IntlIterator,	next,		ainfo_se_void,			ZEND_ACC_PUBLIC)
-	PHP_ME(IntlIterator,	rewind,		ainfo_se_void,			ZEND_ACC_PUBLIC)
-	PHP_ME(IntlIterator,	valid,		ainfo_se_void,			ZEND_ACC_PUBLIC)
+	PHP_ME(IntlIterator,	current,	arginfo_class_IntlIterator_current,		ZEND_ACC_PUBLIC)
+	PHP_ME(IntlIterator,	key,		arginfo_class_IntlIterator_key,			ZEND_ACC_PUBLIC)
+	PHP_ME(IntlIterator,	next,		arginfo_class_IntlIterator_next,		ZEND_ACC_PUBLIC)
+	PHP_ME(IntlIterator,	rewind,		arginfo_class_IntlIterator_rewind,		ZEND_ACC_PUBLIC)
+	PHP_ME(IntlIterator,	valid,		arginfo_class_IntlIterator_valid,		ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 

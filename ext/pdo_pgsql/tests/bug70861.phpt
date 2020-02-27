@@ -15,7 +15,7 @@ $db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, true);
 
 try {
-	@$db->query("SET bytea_output = 'escape'");
+    @$db->query("SET bytea_output = 'escape'");
 } catch (Exception $e) {
 }
 
@@ -23,10 +23,10 @@ $db->query('DROP TABLE IF EXISTS test_blob_crash CASCADE');
 $db->query('CREATE TABLE test_blob_crash (id SERIAL NOT NULL, blob1 BYTEA)');
 
 class HelloWrapper {
-	public function stream_open() { return true; }
-	public function stream_eof() { return true; }
-	public function stream_read() { return NULL; }
-	public function stream_stat() { return array(); }
+    public function stream_open() { return true; }
+    public function stream_eof() { return true; }
+    public function stream_read() { return NULL; }
+    public function stream_stat() { return array(); }
 }
 stream_wrapper_register("hello", "HelloWrapper");
 

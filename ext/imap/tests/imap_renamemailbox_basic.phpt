@@ -21,7 +21,7 @@ require_once(__DIR__.'/imap_include.inc');
 $stream_id = setup_test_mailbox('', 1);
 
 if (!is_resource($stream_id)) {
-	exit("TEST FAILED: Unable to create test mailbox\n");
+    exit("TEST FAILED: Unable to create test mailbox\n");
 }
 
 $newbox = $default_mailbox . "." . $mailbox_prefix;

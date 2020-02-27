@@ -12,7 +12,7 @@ $x =& $test->x;
 $test2 = clone $test;
 unset($test);
 try {
-	$x = "foo";
+    $x = "foo";
 } catch (TypeError $e) { echo $e->getMessage(), "\n"; }
 var_dump($test2->x);
 

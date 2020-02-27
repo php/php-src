@@ -84,22 +84,22 @@ $string_ascii = 'abc def';
 $string_mb = base64_decode('44K/44OT44Ol44Os44O844OG44Kj44Oz44Kw44O744Oe44K344O844Oz44O744Kr44Oz44OR44OL44O8');
 
 foreach($encoding as $enc) {
-	echo "\n-- Iteration $iterator: $enc --\n";
+    echo "\n-- Iteration $iterator: $enc --\n";
 
-	echo "-- ASCII String --\n";
-	if(mb_strlen($string_ascii, $enc)) {
-		echo "Encoding $enc recognised\n";
-	} else {
-		echo "Encoding $enc not recognised\n";
-	}
+    echo "-- ASCII String --\n";
+    if(mb_strlen($string_ascii, $enc)) {
+        echo "Encoding $enc recognised\n";
+    } else {
+        echo "Encoding $enc not recognised\n";
+    }
 
-	echo "-- Multibyte String --\n";
-	if(mb_strlen($string_mb, $enc)){
-		echo "Encoding $enc recognised\n";
-	} else {
-		echo "Encoding $enc not recognised\n";
-	}
-	$iterator++;
+    echo "-- Multibyte String --\n";
+    if(mb_strlen($string_mb, $enc)){
+        echo "Encoding $enc recognised\n";
+    } else {
+        echo "Encoding $enc not recognised\n";
+    }
+    $iterator++;
 }
 
 echo "Done";

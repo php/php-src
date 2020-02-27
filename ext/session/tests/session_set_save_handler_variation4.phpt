@@ -23,9 +23,9 @@ ob_start();
 echo "*** Testing session_set_save_handler() : variation ***\n";
 
 function noisy_gc($maxlifetime) {
-	echo("GC [".$maxlifetime."]\n");
-	echo gc($maxlifetime)." deleted\n";
-	return true;
+    echo("GC [".$maxlifetime."]\n");
+    echo gc($maxlifetime)." deleted\n";
+    return true;
 }
 
 require_once "save_handler.inc";

@@ -23,8 +23,8 @@ PHP_MINIT_FUNCTION(file);
 PHP_MSHUTDOWN_FUNCTION(file);
 
 PHP_FUNCTION(tempnam);
-PHP_NAMED_FUNCTION(php_if_tmpfile);
-PHP_NAMED_FUNCTION(php_if_fopen);
+PHP_FUNCTION(tmpfile);
+PHP_FUNCTION(fopen);
 PHPAPI PHP_FUNCTION(fclose);
 PHP_FUNCTION(popen);
 PHP_FUNCTION(pclose);
@@ -61,8 +61,8 @@ PHP_FUNCTION(realpath);
 #ifdef HAVE_FNMATCH
 PHP_FUNCTION(fnmatch);
 #endif
-PHP_NAMED_FUNCTION(php_if_ftruncate);
-PHP_NAMED_FUNCTION(php_if_fstat);
+PHP_FUNCTION(ftruncate);
+PHP_FUNCTION(fstat);
 PHP_FUNCTION(sys_get_temp_dir);
 
 PHP_MINIT_FUNCTION(user_streams);

@@ -20,11 +20,11 @@ echo "*** Testing vsprintf() : hexa formats and non-hexa values ***\n";
 
 // defining array of different hexa formats
 $formats =
-  '%x %+x %-x
-   %lx %Lx %4x %-4x
-   %10.4x %-10.4x %.4x 
-   %\'#2x %\'2x %\'$2x %\'_2x
-   %3$x %4$x %1$x %2$x';
+    '%x %+x %-x
+    %lx %Lx %4x %-4x
+    %10.4x %-10.4x %.4x
+    %\'#2x %\'2x %\'$2x %\'_2x
+    %3$x %4$x %1$x %2$x';
 
 // Arrays of non hexa values for the format defined in $format.
 // Each sub array contains non hexa values which correspond to each format in $format
@@ -83,37 +83,37 @@ echo "Done";
 *** Testing vsprintf() : hexa formats and non-hexa values ***
 
 -- Iteration 1 --
-string(124) "2 0 a
-   1e240 x fffffffffffffb2e 4d2 
+string(127) "2 0 a
+    1e240 x fffffffffffffb2e 4d2 
                           
-   3039 c fffffffffffffff4 fffffffffffe1dc0
-   a 1e240 2 0"
+    3039 c fffffffffffffff4 fffffffffffe1dc0
+    a 1e240 2 0"
 
 -- Iteration 2 --
-string(163) "2 fffffffffffffffe 2
-   1e240 x ffffffffff439a5b bc65a5
+string(166) "2 fffffffffffffffe 2
+    1e240 x ffffffffff439a5b bc65a5
                           
-   bc61b4 127ae7 ffffffffff4732f9 ffffffffff439ede
-   2 1e240 2 fffffffffffffffe"
+    bc61b4 127ae7 ffffffffff4732f9 ffffffffff439ede
+    2 1e240 2 fffffffffffffffe"
 
 -- Iteration 3 --
-string(89) "0 0 0
-   7b x ffffffffffffff85 7b  
+string(92) "0 0 0
+    7b x ffffffffffffff85 7b  
                           
-   4d2 0 $0 _0
-   0 7b 0 0"
+    4d2 0 $0 _0
+    0 7b 0 0"
 
 -- Iteration 4 --
-string(74) "1 1 1
-   1 x    1 1   
+string(77) "1 1 1
+    1 x    1 1   
                           
-   #1 1 $1 _1
-   1 1 1 1"
+    #1 1 $1 _1
+    1 1 1 1"
 
 -- Iteration 5 --
-string(74) "1 1 0
-   1 x    0 1   
+string(77) "1 1 0
+    1 x    0 1   
                           
-   #0 1 $1 _0
-   0 1 1 1"
+    #0 1 $1 _0
+    0 1 1 1"
 Done

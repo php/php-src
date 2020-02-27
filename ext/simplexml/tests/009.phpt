@@ -29,9 +29,9 @@ $sxe = simplexml_load_string(<<<EOF
 EOF
 );
 foreach($sxe->children() as $name=>$val) {
-	var_dump($name);
-	var_dump(get_class($val));
-	var_dump(trim($val));
+    var_dump($name);
+    var_dump(get_class($val));
+    var_dump(trim($val));
 }
 ?>
 --EXPECT--

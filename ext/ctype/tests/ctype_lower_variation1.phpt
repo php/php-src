@@ -24,9 +24,9 @@ unset ($unset_var);
 // get a class
 class classA
 {
-	public function __toString() {
-		return "class";
-	}
+    public function __toString() {
+        return "class";
+    }
 }
 
 // heredoc string
@@ -89,9 +89,9 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of ctype_lower()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump( ctype_lower($input) );
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump( ctype_lower($input) );
+    $iterator++;
 };
 
 fclose($fp);

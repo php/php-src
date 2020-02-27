@@ -4,13 +4,13 @@ ZE2 A private method can only be called inside the class
 <?php
 
 class pass {
-	private static function show() {
-		echo "Call show()\n";
-	}
+    private static function show() {
+        echo "Call show()\n";
+    }
 
-	public static function do_show() {
-		pass::show();
-	}
+    public static function do_show() {
+        pass::show();
+    }
 }
 
 pass::do_show();

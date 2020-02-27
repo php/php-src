@@ -11,9 +11,9 @@ require_once('skipif.inc');
 $rng = __DIR__.'/foo.rng';
 $xml = <<< XML
 <?xml version="1.0"?>
-<apple> 
-  <pear>Pear</pear> 
-  <pear>Pear</pear> 
+<apple>
+  <pear>Pear</pear>
+  <pear>Pear</pear>
 </apple>
 XML;
 $doc = new DOMDocument();

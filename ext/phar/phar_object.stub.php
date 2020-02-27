@@ -96,7 +96,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
      */
     public function offsetExists($entry) {}
 
-    /** 
+    /**
      * @param string $entry
      * @return PharFileInfo
      */
@@ -130,7 +130,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     /** @return void */
     public function setSignatureAlgorithm(int $algorithm, string $privatekey = UNKNOWN) {}
 
-    /** 
+    /**
      * @param resource $newstub
      * @return bool
      */
@@ -142,50 +142,39 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     /** @return void */
     public function stopBuffering() {}
 
-    /** @return string */
-    final public static function apiVersion() {}
+    final public static function apiVersion(): string {}
 
-    /** @return bool */
-    final public static function canCompress(int $method = 0) {}
+    final public static function canCompress(int $method = 0): bool {}
 
-    /** @return bool */
-    final public static function canWrite() {}
+    final public static function canWrite(): bool {}
 
-    /** @return string */
-    final public static function createDefaultStub(string $index = UNKNOWN, string $webindex = UNKNOWN) {}
+    final public static function createDefaultStub(
+        string $index = UNKNOWN, string $webindex = UNKNOWN): string {}
 
-    /** @return array */
-    final public static function getSupportedCompression() {}
+    final public static function getSupportedCompression(): array {}
 
-    /** @return array */
-    final public static function getSupportedSignatures() {}
+    final public static function getSupportedSignatures(): array {}
 
-    /** @return void */
-    final public static function interceptFileFuncs() {}
+    final public static function interceptFileFuncs(): void {}
 
-    /** @return bool */
-    final public static function isValidPharFilename(string $filename, bool $executable = true) {}
+    final public static function isValidPharFilename(
+        string $filename, bool $executable = true): bool {}
 
-    /** @return bool */
-    final public static function loadPhar(string $filename, ?string $alias = null) {}
+    final public static function loadPhar(string $filename, ?string $alias = null): bool {}
 
-    /** @return bool */
-    final public static function mapPhar(?string $alias = null, int $offset = 0) {}
+    final public static function mapPhar(?string $alias = null, int $offset = 0): bool {}
 
-    /** @return string */
-    final public static function running(bool $retphar = true) {}
+    final public static function running(bool $retphar = true): string {}
 
-    /** @return void */
-    final public static function mount(string $inphar, string $externalfile) {}
+    final public static function mount(string $inphar, string $externalfile): void {}
 
-    /** @return void */
-    final public static function mungServer(array $munglist) {}
+    final public static function mungServer(array $munglist): void {}
 
-    /** @return bool */
-    final public static function unlinkArchive(string $archive) {}
+    final public static function unlinkArchive(string $archive): bool {}
 
-    /** @return void */
-    final public static function webPhar(?string $alias = null, ?string $index = null, string $f404 = UNKNOWN, array $mimetypes = [], $rewrites = UNKNOWN) {}
+    final public static function webPhar(
+        ?string $alias = null, ?string $index = null, string $f404 = UNKNOWN,
+        array $mimetypes = [], $rewrites = UNKNOWN): void {}
 }
 
 class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAccess
@@ -318,7 +307,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     /** @return void */
     public function setSignatureAlgorithm(int $algorithm, string $privatekey = UNKNOWN) {}
 
-    /** 
+    /**
      * @param resource $newstub
      * @return bool
      */
@@ -330,50 +319,39 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     /** @return void */
     public function stopBuffering() {}
 
-    /** @return string */
-    final public static function apiVersion() {}
+    final public static function apiVersion(): string {}
 
-    /** @return bool */
-    final public static function canCompress(int $method = 0) {}
+    final public static function canCompress(int $method = 0): bool {}
 
-    /** @return bool */
-    final public static function canWrite() {}
+    final public static function canWrite(): bool {}
 
-    /** @return string */
-    final public static function createDefaultStub(string $index = UNKNOWN, string $webindex = UNKNOWN) {}
+    final public static function createDefaultStub(
+        string $index = UNKNOWN, string $webindex = UNKNOWN): string {}
 
-    /** @return array */
-    final public static function getSupportedCompression() {}
+    final public static function getSupportedCompression(): array {}
 
-    /** @return array */
-    final public static function getSupportedSignatures() {}
+    final public static function getSupportedSignatures(): array {}
 
-    /** @return void */
-    final public static function interceptFileFuncs() {}
+    final public static function interceptFileFuncs(): void {}
 
-    /** @return bool */
-    final public static function isValidPharFilename(string $filename, bool $executable = true) {}
+    final public static function isValidPharFilename(
+        string $filename, bool $executable = true): bool {}
 
-    /** @return bool */
-    final public static function loadPhar(string $filename, ?string $alias = null) {}
+    final public static function loadPhar(string $filename, ?string $alias = null): bool {}
 
-    /** @return bool */
-    final public static function mapPhar(?string $alias = null, int $offset = 0) {}
+    final public static function mapPhar(?string $alias = null, int $offset = 0): bool {}
 
-    /** @return string */
-    final public static function running(bool $retphar = true) {}
+    final public static function running(bool $retphar = true): string {}
 
-    /** @return void */
-    final public static function mount(string $inphar, string $externalfile) {}
+    final public static function mount(string $inphar, string $externalfile): void {}
 
-    /** @return void */
-    final public static function mungServer(array $munglist) {}
+    final public static function mungServer(array $munglist): void {}
 
-    /** @return bool */
-    final public static function unlinkArchive(string $archive) {}
+    final public static function unlinkArchive(string $archive): bool {}
 
-    /** @return void */
-    final public static function webPhar(?string $alias = null, ?string $index = null, string $f404 = UNKNOWN, array $mimetypes = [], $rewrites = UNKNOWN) {}
+    final public static function webPhar(
+        ?string $alias = null, ?string $index = null, string $f404 = UNKNOWN,
+        array $mimetypes = [], $rewrites = UNKNOWN): void {}
 }
 
 class PharFileInfo extends SplFileInfo

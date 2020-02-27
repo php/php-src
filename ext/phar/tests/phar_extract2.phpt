@@ -24,13 +24,13 @@ $phar->extractTo(__DIR__ . '/extract2');
 $out = array();
 
 foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__ . '/extract2', 0x00003000), RecursiveIteratorIterator::CHILD_FIRST) as $path => $file) {
-	$extracted[] = $path;
+    $extracted[] = $path;
 }
 
 sort($extracted);
 
 foreach ($extracted as $out) {
-	echo "$out\n";
+    echo "$out\n";
 }
 
 ?>

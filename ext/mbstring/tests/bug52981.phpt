@@ -6,10 +6,10 @@ Bug #52981 (Unicode properties are outdated (from Unicode 3.2))
 <?php
 function test($str)
 {
-	$upper = mb_strtoupper($str, 'UTF-8');
-	$len = strlen($upper);
-	for ($i = 0; $i < $len; ++$i) echo dechex(ord($upper[$i])) . ' ';
-	echo "\n";
+    $upper = mb_strtoupper($str, 'UTF-8');
+    $len = strlen($upper);
+    for ($i = 0; $i < $len; ++$i) echo dechex(ord($upper[$i])) . ' ';
+    echo "\n";
 }
 
 // OK

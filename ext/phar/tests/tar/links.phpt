@@ -9,9 +9,9 @@ phar.require_hash=0
 $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.tar';
 copy(__DIR__ . '/files/links.tar', $fname);
 try {
-	$p = new PharData($fname);
+    $p = new PharData($fname);
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 var_dump($p['testit/link']->getContent());
 var_dump($p['testit/hard']->getContent());

@@ -154,6 +154,7 @@ PHP_RSHUTDOWN_FUNCTION(mb_regex)
 		ZVAL_UNDEF(&MBREX(search_str));
 	}
 	MBREX(search_pos) = 0;
+	MBREX(search_re) = NULL;
 
 	if (MBREX(search_regs) != NULL) {
 		onig_region_free(MBREX(search_regs), 1);
@@ -1389,7 +1390,9 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	char *arg_pattern = NULL, *arg_options = NULL;
 	size_t arg_pattern_len, arg_options_len;
 	int err;
-	size_t n, i, pos, len, beg, end;
+	size_t n, i, pos, len;
+	/* Stored as int* in the OnigRegion struct */
+	int beg, end;
 	OnigOptionType option;
 	OnigUChar *str;
 	OnigSyntaxType *syntax;
@@ -1403,6 +1406,11 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	if (arg_options) {
 		option = 0;
 		_php_mb_regex_init_options(arg_options, arg_options_len, &option, &syntax, NULL);
+	}
+
+	if (MBREX(search_regs)) {
+		onig_region_free(MBREX(search_regs), 1);
+		MBREX(search_regs) = NULL;
 	}
 
 	if (arg_pattern) {
@@ -1430,9 +1438,6 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		RETURN_FALSE;
 	}
 
-	if (MBREX(search_regs)) {
-		onig_region_free(MBREX(search_regs), 1);
-	}
 	MBREX(search_regs) = onig_region_new();
 
 	err = _php_mb_onig_search(MBREX(search_re), str, str + len, str + pos, str  + len, MBREX(search_regs), 0);
@@ -1582,7 +1587,9 @@ PHP_FUNCTION(mb_ereg_search_init)
    Get matched substring of the last time */
 PHP_FUNCTION(mb_ereg_search_getregs)
 {
-	size_t n, i, len, beg, end;
+	size_t n, i, len;
+	/* Stored as int* in the OnigRegion struct */
+	int beg, end;
 	OnigUChar *str;
 
 	if (zend_parse_parameters_none() == FAILURE) {

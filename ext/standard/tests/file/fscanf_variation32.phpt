@@ -29,11 +29,11 @@ $bool_types = array (
 );
 
 $octal_formats = array(  "%o",
-			 "%ho", "%lo", "%Lo",
-			 " %o", "%o ", "% o",
-			 "\t%o", "\n%o", "%4o",
-			 "%30o", "%[0-7]", "%*o"
- 		 );
+             "%ho", "%lo", "%Lo",
+             " %o", "%o ", "% o",
+             "\t%o", "\n%o", "%4o",
+             "%30o", "%[0-7]", "%*o"
+         );
 
 $counter = 1;
 

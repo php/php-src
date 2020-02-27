@@ -97,7 +97,7 @@ for($index = 0; $index < count($values); $index ++) {
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function with unexpected values for haystack and needle ***
 -- Iteration 1 --
 int(0)
@@ -127,20 +127,20 @@ bool(false)
 int(0)
 bool(false)
 -- Iteration 10 --
-TypeError: strrpos() expects parameter 1 to be string, array given
-TypeError: strrpos() expects parameter 1 to be string, array given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 11 --
-TypeError: strrpos() expects parameter 1 to be string, array given
-TypeError: strrpos() expects parameter 1 to be string, array given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 12 --
-TypeError: strrpos() expects parameter 1 to be string, array given
-TypeError: strrpos() expects parameter 1 to be string, array given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 13 --
-TypeError: strrpos() expects parameter 1 to be string, array given
-TypeError: strrpos() expects parameter 1 to be string, array given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 14 --
-TypeError: strrpos() expects parameter 1 to be string, array given
-TypeError: strrpos() expects parameter 1 to be string, array given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, array given
 -- Iteration 15 --
 int(0)
 bool(false)
@@ -169,8 +169,8 @@ ValueError: Offset not contained in string
 int(0)
 ValueError: Offset not contained in string
 -- Iteration 24 --
-TypeError: strrpos() expects parameter 1 to be string, resource given
-TypeError: strrpos() expects parameter 1 to be string, resource given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, resource given
+TypeError: strrpos(): Argument #1 ($haystack) must be of type string, resource given
 -- Iteration 25 --
 int(0)
 ValueError: Offset not contained in string

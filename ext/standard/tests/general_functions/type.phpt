@@ -4,7 +4,7 @@ gettype(), settype() and friends
 <?php
 
 function foo($errno, $errstr, $errfile, $errline) {
-	var_dump($errstr);
+    var_dump($errstr);
 }
 
 set_error_handler("foo");
@@ -17,43 +17,43 @@ $var1 = "another string";
 $var2 = array(2,3,4);
 
 $array = array(
-	array(1,2,3),
-	$var1,
-	$var2,
-	1,
-	2.0,
-	NULL,
-	false,
-	"some string",
-	$fp,
-	$fp1,
-	new stdclass,
+    array(1,2,3),
+    $var1,
+    $var2,
+    1,
+    2.0,
+    NULL,
+    false,
+    "some string",
+    $fp,
+    $fp1,
+    new stdclass,
 );
 
 $types = array(
-	"null",
-	"integer",
-	"double",
-	"boolean",
-	"resource",
-	"array",
-	"object",
-	"string"
-	);
+    "null",
+    "integer",
+    "double",
+    "boolean",
+    "resource",
+    "array",
+    "object",
+    "string"
+    );
 
 foreach ($array as $var) {
-	var_dump(gettype($var));
+    var_dump(gettype($var));
 }
 
 foreach ($types as $type) {
-	foreach ($array as $var) {
-		try {
-			var_dump(settype($var, $type));
-		} catch (Error $e) {
-			echo "Error: ", $e->getMessage(), "\n";
-		}
-		var_dump($var);
-	}
+    foreach ($array as $var) {
+        try {
+            var_dump(settype($var, $type));
+        } catch (Error $e) {
+            echo "Error: ", $e->getMessage(), "\n";
+        }
+        var_dump($var);
+    }
 }
 
 echo "Done\n";

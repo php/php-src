@@ -65,7 +65,7 @@ function test_realfile($file, $tounlink) {
    $res = unlink($tounlink);
    if ($res === true) {
       if (file_exists($tounlink) === false) {
-      	echo "file removed\n";
+        echo "file removed\n";
       }
       else {
         echo "FAILED: file not removed\n";

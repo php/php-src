@@ -6,11 +6,11 @@ array_splice() function precerve foreach by reference iterator pointer
 $done = 0;
 $a = [0,1,2,3,4];
 foreach($a as &$v) {
-	echo "$v\n";
-	if (!$done && $v == 3) {
-		$done = 1;
-		array_splice($a, 1, 2);
-	}
+    echo "$v\n";
+    if (!$done && $v == 3) {
+        $done = 1;
+        array_splice($a, 1, 2);
+    }
 }
 echo "\n";
 
@@ -18,11 +18,11 @@ echo "\n";
 $done = 0;
 $a = [0,1,2,3,4];
 foreach($a as &$v) {
-	echo "$v\n";
-	if (!$done && $v == 0) {
-		$done = 1;
-		array_splice($a, 2, 2);
-	}
+    echo "$v\n";
+    if (!$done && $v == 0) {
+        $done = 1;
+        array_splice($a, 2, 2);
+    }
 }
 echo "\n";
 
@@ -30,11 +30,11 @@ echo "\n";
 $done = 0;
 $a = [0,1,2,3,4];
 foreach($a as &$v) {
-	echo "$v\n";
-	if (!$done && $v == 2) {
-		$done = 1;
-		array_splice($a, 1, 3);
-	}
+    echo "$v\n";
+    if (!$done && $v == 2) {
+        $done = 1;
+        array_splice($a, 1, 3);
+    }
 }
 echo "\n";
 
@@ -44,11 +44,11 @@ $replacement = ['x', 'y', 'z'];
 $done = 0;
 $a = [0,1,2,3,4];
 foreach($a as &$v) {
-	echo "$v\n";
-	if (!$done && $v == 3) {
-		$done = 1;
-		array_splice($a, 1, 2, $replacement);
-	}
+    echo "$v\n";
+    if (!$done && $v == 3) {
+        $done = 1;
+        array_splice($a, 1, 2, $replacement);
+    }
 }
 echo "\n";
 
@@ -56,11 +56,11 @@ echo "\n";
 $done = 0;
 $a = [0,1,2,3,4];
 foreach($a as &$v) {
-	echo "$v\n";
-	if (!$done && $v == 0) {
-		$done = 1;
-		array_splice($a, 2, 2, $replacement);
-	}
+    echo "$v\n";
+    if (!$done && $v == 0) {
+        $done = 1;
+        array_splice($a, 2, 2, $replacement);
+    }
 }
 echo "\n";
 
@@ -68,11 +68,11 @@ echo "\n";
 $done = 0;
 $a = [0,1,2,3,4];
 foreach($a as &$v) {
-	echo "$v\n";
-	if (!$done && $v == 2) {
-		$done = 1;
-		array_splice($a, 1, 3, $replacement);
-	}
+    echo "$v\n";
+    if (!$done && $v == 2) {
+        $done = 1;
+        array_splice($a, 1, 3, $replacement);
+    }
 }
 echo "\n";
 ?>

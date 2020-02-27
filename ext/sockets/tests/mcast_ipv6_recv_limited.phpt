@@ -58,8 +58,8 @@ $br = socket_bind($s, '::0', 3000) or die("err");
 var_dump($br);
 
 $so = socket_set_option($s, $level, MCAST_JOIN_GROUP, array(
-	"group"	=> $mcastaddr,
-	"interface" => $interface,
+    "group"	=> $mcastaddr,
+    "interface" => $interface,
 )) or die("err");
 var_dump($so);
 
@@ -76,33 +76,33 @@ var_dump($r);
 $i = 0;
 checktimeout($s, 500);
 while (($str = socket_read($s, 3000, 500)) !== FALSE) {
-	$i++;
-	echo "$i> ", $str, "\n";
+    $i++;
+    echo "$i> ", $str, "\n";
 
 if ($i == 1) {
-	echo "leaving group\n";
-	$so = socket_set_option($s, $level, MCAST_LEAVE_GROUP, array(
-		"group"	=> $mcastaddr,
-		"interface" => $interface,
-	));
-	var_dump($so);
-	$r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, 3000);
-	var_dump($r);
-	$r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "::1", 3000);
-	var_dump($r);
+    echo "leaving group\n";
+    $so = socket_set_option($s, $level, MCAST_LEAVE_GROUP, array(
+        "group"	=> $mcastaddr,
+        "interface" => $interface,
+    ));
+    var_dump($so);
+    $r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, 3000);
+    var_dump($r);
+    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "::1", 3000);
+    var_dump($r);
 }
 if ($i == 2) {
-	echo "re-joining group\n";
-	$so = socket_set_option($s, $level, MCAST_JOIN_GROUP, array(
-		"group"	=> $mcastaddr,
-		"interface" => $interface,
-	));
-	var_dump($so);
-	$r = socket_sendto($sends1, $m = "mcast packet", strlen($m), 0, $mcastaddr, 3000);
-	var_dump($r);
+    echo "re-joining group\n";
+    $so = socket_set_option($s, $level, MCAST_JOIN_GROUP, array(
+        "group"	=> $mcastaddr,
+        "interface" => $interface,
+    ));
+    var_dump($so);
+    $r = socket_sendto($sends1, $m = "mcast packet", strlen($m), 0, $mcastaddr, 3000);
+    var_dump($r);
 }
 if ($i == 3) {
-	break;
+    break;
 }
 
 }

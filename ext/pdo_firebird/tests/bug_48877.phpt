@@ -8,7 +8,7 @@ PDO_Firebird: bug 48877 The "bindValue" and "bindParam" do not work for PDO Fire
 require("testdb.inc");
 
 $value = '2';
-        
+
 @$dbh->exec('DROP TABLE testz');
 $dbh->exec('CREATE TABLE testz (A integer)');
 $dbh->exec("INSERT INTO testz VALUES ('1')");

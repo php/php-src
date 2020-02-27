@@ -71,20 +71,20 @@ function getdbmsoutput_do($c)
 
 function getdbmsoutput_do2($c)
 {
-	$orignumlines = $numlines = 100;
-	$s = oci_parse($c, "begin dbms_output.get_lines(:lines, :numlines); end;");
-	$r = oci_bind_by_name($s, ":numlines", $numlines);
-	$res = array();
-	while ($numlines >= $orignumlines) {
-		oci_bind_array_by_name($s, ":lines", $lines,  $numlines, 255, SQLT_CHR);
-		oci_execute($s);
-		if ($numlines == 0) {
-			break;
-		}
-		$res = array_merge($res, array_slice($lines, 0, $numlines));
-		unset($lines);
-	}
-	return $res;
+    $orignumlines = $numlines = 100;
+    $s = oci_parse($c, "begin dbms_output.get_lines(:lines, :numlines); end;");
+    $r = oci_bind_by_name($s, ":numlines", $numlines);
+    $res = array();
+    while ($numlines >= $orignumlines) {
+        oci_bind_array_by_name($s, ":lines", $lines,  $numlines, 255, SQLT_CHR);
+        oci_execute($s);
+        if ($numlines == 0) {
+            break;
+        }
+        $res = array_merge($res, array_slice($lines, 0, $numlines));
+        unset($lines);
+    }
+    return $res;
 }
 
 function getdbmsoutput_pl($c)
@@ -124,7 +124,7 @@ var_dump(getdbmsoutput_pl($c));
 // Clean up
 
 $stmtarray = array(
-	"drop procedure dbmsoutput_proc"
+    "drop procedure dbmsoutput_proc"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

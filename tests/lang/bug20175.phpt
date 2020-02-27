@@ -16,18 +16,18 @@ print zend_version()."\n";
 $foo_count = 0;
 
 function foo_global() {
-	global $foo_count;
-	echo "foo_global()\n";
-	return 'foo:' . ++$foo_count;
+    global $foo_count;
+    echo "foo_global()\n";
+    return 'foo:' . ++$foo_count;
 }
 
 function foo_static() {
-	static $foo_value;
-	echo "foo_static()\n";
-	if (!isset($foo_value)) {
-		$foo_value = foo_global();
-	}
-	return $foo_value;
+    static $foo_value;
+    echo "foo_static()\n";
+    if (!isset($foo_value)) {
+        $foo_value = foo_global();
+    }
+    return $foo_value;
 }
 
 /* Part 2:
@@ -40,18 +40,18 @@ function foo_static() {
 $bar_count = 0;
 
 function bar_global() {
-	global $bar_count;
-	echo "bar_global()\n";
-	return 'bar:' . ++$bar_count;
+    global $bar_count;
+    echo "bar_global()\n";
+    return 'bar:' . ++$bar_count;
 }
 
 function bar_static() {
-	static $bar_value;
-	echo "bar_static()\n";
-	if (!isset($bar_value)) {
-		$bar_value = &bar_global();
-	}
-	return $bar_value;
+    static $bar_value;
+    echo "bar_static()\n";
+    if (!isset($bar_value)) {
+        $bar_value = &bar_global();
+    }
+    return $bar_value;
 }
 
 /* Part 3: TO BE DISCUSSED
@@ -66,19 +66,19 @@ $wow_count = 0;
 $wow_name = '';
 
 function &wow_global() {
-	global $wow_count, $wow_name;
-	echo "wow_global()\n";
-	$wow_name = 'wow:' . ++$wow_count;
-	return $wow_name;
+    global $wow_count, $wow_name;
+    echo "wow_global()\n";
+    $wow_name = 'wow:' . ++$wow_count;
+    return $wow_name;
 }
 
 function wow_static() {
-	static $wow_value;
-	echo "wow_static()\n";
-	if (!isset($wow_value)) {
-		$wow_value = &wow_global();
-	}
-	return $wow_value;
+    static $wow_value;
+    echo "wow_static()\n";
+    if (!isset($wow_value)) {
+        $wow_value = &wow_global();
+    }
+    return $wow_value;
 }*/
 
 /* Part 4:
@@ -93,29 +93,29 @@ function wow_static() {
  */
 $oop_global = 0;
 class oop_class {
-	var $oop_name;
+    var $oop_name;
 
-	function __construct() {
-		global $oop_global;
-		echo "oop_class()\n";
-		$this->oop_name = 'oop:' . ++$oop_global;
-	}
+    function __construct() {
+        global $oop_global;
+        echo "oop_class()\n";
+        $this->oop_name = 'oop:' . ++$oop_global;
+    }
 }
 
 class oop_test {
-	static $oop_value;
+    static $oop_value;
 
-	function __construct() {
-		echo "oop_test()\n";
-	}
+    function __construct() {
+        echo "oop_test()\n";
+    }
 
-	function oop_static() {
-		echo "oop_static()\n";
-		if (!isset(self::$oop_value)) {
-			self::$oop_value = new oop_class;
-		}
-		echo self::$oop_value->oop_name;
-	}
+    function oop_static() {
+        echo "oop_static()\n";
+        if (!isset(self::$oop_value)) {
+            self::$oop_value = new oop_class;
+        }
+        echo self::$oop_value->oop_name;
+    }
 }
 
 print foo_static()."\n";

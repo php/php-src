@@ -3,9 +3,9 @@ ob_start(): Ensure unerasable buffer cannot be accessed or erased by ob_get_clea
 --FILE--
 <?php
 function callback($string) {
-	static $callback_invocations;
-	$callback_invocations++;
-	return "[callback:$callback_invocations]$string\n";
+    static $callback_invocations;
+    $callback_invocations++;
+    return "[callback:$callback_invocations]$string\n";
 }
 
 ob_start('callback', 0, false);

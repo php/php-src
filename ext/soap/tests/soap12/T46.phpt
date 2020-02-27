@@ -18,7 +18,7 @@ $HTTP_RAW_POST_DATA = <<<EOF
         <varFloat xsi:type="xsd:float">0.005</varFloat>
         <varString xsi:type="xsd:string">hello world</varString>
         <varArray enc:itemType="xsd:string" enc:arraySize="3"
-		          xmlns:enc="http://www.w3.org/2003/05/soap-encoding">
+                  xmlns:enc="http://www.w3.org/2003/05/soap-encoding">
           <item xsi:type="xsd:string">red</item>
           <item xsi:type="xsd:string">blue</item>
           <item xsi:type="xsd:string">green</item>

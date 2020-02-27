@@ -21,7 +21,7 @@ $files['d'] = array('cont' => 'd', 'meta' => array('hi'=>'there','foo'=>'bar'));
 include 'files/phar_test.inc';
 
 foreach($files as $name => $cont) {
-	var_dump(file_get_contents($pname.'/'.$name));
+    var_dump(file_get_contents($pname.'/'.$name));
 }
 
 $phar = new Phar($fname);
@@ -32,7 +32,7 @@ $phar['c']->setMetadata(array(25, 'foo'=>'bar'));
 $phar['d']->setMetadata(true);
 
 foreach($files as $name => $cont) {
-	var_dump($phar[$name]->getMetadata());
+    var_dump($phar[$name]->getMetadata());
 }
 $phar->stopBuffering();
 
@@ -41,11 +41,11 @@ unset($phar);
 $phar = new Phar($fname);
 
 foreach($files as $name => $cont) {
-	var_dump(file_get_contents($pname.'/'.$name));
+    var_dump(file_get_contents($pname.'/'.$name));
 }
 
 foreach($files as $name => $cont) {
-	var_dump($phar[$name]->getMetadata());
+    var_dump($phar[$name]->getMetadata());
 }
 ?>
 --CLEAN--

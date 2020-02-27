@@ -3,23 +3,23 @@ Test decoct() - basic function test decoct()
 --FILE--
 <?php
 $values = array(10,
-				3950.5,
-				3.9505e3,
-				03,
-				0x5F,
-				"10",
-				"3950.5",
-				"3.9505e3",
-				"039",
-				"0x5F",
-				true,
-				false,
-				null,
-				);
+                3950.5,
+                3.9505e3,
+                03,
+                0x5F,
+                "10",
+                "3950.5",
+                "3.9505e3",
+                "039",
+                "0x5F",
+                true,
+                false,
+                null,
+                );
 
 for ($i = 0; $i < count($values); $i++) {
-	$res = decoct($values[$i]);
-	var_dump($res);
+    $res = decoct($values[$i]);
+    var_dump($res);
 }
 ?>
 --EXPECT--

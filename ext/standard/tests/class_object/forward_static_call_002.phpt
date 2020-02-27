@@ -5,13 +5,13 @@ forward_static_call() from outside of a class method.
 
 class A
 {
-	public static function test() {
-		echo "A\n";
-	}
+    public static function test() {
+        echo "A\n";
+    }
 }
 
 function test() {
-	forward_static_call(array('A', 'test'));
+    forward_static_call(array('A', 'test'));
 }
 
 test();

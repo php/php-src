@@ -43,10 +43,10 @@ $valid_ints = array(
 );
 // various char formats
 $char_formats = array( "%c",
-		       "%hc", "%lc", "%Lc",
-		       " %c", "%c ", "% c",
-		       "\t%c", "\n%c", "%4c",
-		       "%30c", "%[a-bA-B@#$&]", "%*c");
+               "%hc", "%lc", "%Lc",
+               " %c", "%c ", "% c",
+               "\t%c", "\n%c", "%4c",
+               "%30c", "%[a-bA-B@#$&]", "%*c");
 
 $counter = 1;
 

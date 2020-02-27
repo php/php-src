@@ -17,7 +17,7 @@ spl_autoload_register(function($class) {
 
 $test = new Test;
 
-$test->prop = 42; 
+$test->prop = 42;
 var_dump($test->prop);
 var_dump($test->method(42));
 
@@ -68,7 +68,7 @@ int(42)
 int(42)
 int(42)
 Cannot assign stdClass to property Test::$prop of type X|Y|Z|int
-Argument 1 passed to Test::method() must be of type X|Y|Z|int, instance of stdClass given, called in %s on line %d
+Test::method(): Argument #1 ($arg) must be of type X|Y|Z|int, stdClass given, called in %s on line %d
 object(X)#4 (0) {
 }
 object(X)#6 (0) {

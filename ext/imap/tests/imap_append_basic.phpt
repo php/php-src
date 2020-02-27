@@ -18,7 +18,7 @@ require_once(__DIR__.'/imap_include.inc');
 echo "Create a new mailbox for test\n";
 $imap_stream = setup_test_mailbox("", 0);
 if (!is_resource($imap_stream)) {
-	exit("TEST FAILED: Unable to create test mailbox\n");
+    exit("TEST FAILED: Unable to create test mailbox\n");
 }
 
 $mb_details = imap_mailboxmsginfo($imap_stream);

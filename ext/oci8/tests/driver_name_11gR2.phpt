@@ -40,7 +40,7 @@ echo "Done\n";
 
 function get_attr($conn)
 {
-	$sel_stmt = "select client_driver
+    $sel_stmt = "select client_driver
         from v\$session_connect_info sci, v\$session s
         where sci.client_driver is not null
           and sci.sid = s.sid

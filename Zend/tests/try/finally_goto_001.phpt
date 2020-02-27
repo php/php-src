@@ -3,8 +3,8 @@ jmp into a finally block 01
 --FILE--
 <?php
 function foo() {
-	goto test;
-	try {
+    goto test;
+    try {
     } finally {
 test:
     }

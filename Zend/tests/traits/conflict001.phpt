@@ -17,8 +17,8 @@ trait THello2 {
 }
 
 class TraitsTest {
-	use THello1;
-	use THello2;
+    use THello1;
+    use THello2;
 }
 ?>
 --EXPECTF--

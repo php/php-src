@@ -16,11 +16,11 @@ echo "*** Testing vsprintf() : string formats and non-string values ***\n";
 
 // defining array of string formats
 $formats =
-  '%s %+s %-s
-   %ls %4s %-4s
-   %10.4s %-10.4s %04s %04.4s
-   %\'#2s %\'2s %\'$2s %\'_2s
-   %3$s %4$s %1$s %2$s';
+    '%s %+s %-s
+    %ls %4s %-4s
+    %10.4s %-10.4s %04s %04.4s
+    %\'#2s %\'2s %\'$2s %\'_2s
+    %3$s %4$s %1$s %2$s';
 
 // Arrays of non string values for the format defined in $format.
 // Each sub array contains non string values which correspond to each format in $format
@@ -71,18 +71,18 @@ foreach($args_array as $args) {
 *** Testing vsprintf() : string formats and non-string values ***
 
 -- Iteration 1 --
-string(173) "2.2 0.2 10.2
-   123456.234 -1234.6789 1234.6789
-         2123 2765       -27654321000 2123
-   12345.78 12.000000011111 -12.00000111111 -123456.234
-   10.2 123456.234 2.2 0.2"
+string(177) "2.2 0.2 10.2
+    123456.234 -1234.6789 1234.6789
+          2123 2765       -27654321000 2123
+    12345.78 12.000000011111 -12.00000111111 -123456.234
+    10.2 123456.234 2.2 0.2"
 
 -- Iteration 2 --
-string(129) "2 -2 2
-   123456 -12346789 12346789
-         1232 2000       -40000 2221
-   12345780 1211111 -12111111 -12345634
-   2 123456 2 -2"
+string(133) "2 -2 2
+    123456 -12346789 12346789
+          1232 2000       -40000 2221
+    12345780 1211111 -12111111 -12345634
+    2 123456 2 -2"
 
 -- Iteration 3 --
 
@@ -121,15 +121,15 @@ Warning: Array to string conversion in %s on line %d
 Warning: Array to string conversion in %s on line %d
 
 Warning: Array to string conversion in %s on line %d
-string(128) "Array Array Array
-   Array Array Array
-         Arra Arra       Array Arra
-   Array Array Array Array
-   Array Array Array Array"
+string(132) "Array Array Array
+    Array Array Array
+          Arra Arra       Array Arra
+    Array Array Array Array
+    Array Array Array Array"
 
 -- Iteration 4 --
-string(78) "1 1 
-   1      1   
-            1            0001 0000
-   #0 1 $1 _0
-    1 1 1"
+string(82) "1 1 
+    1      1   
+             1            0001 0000
+    #0 1 $1 _0
+     1 1 1"

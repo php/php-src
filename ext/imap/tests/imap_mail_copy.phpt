@@ -23,7 +23,7 @@ require_once(__DIR__.'/imap_include.inc');
 
 echo "Test with IMAP server\n";
 $stream_id = imap_open($default_mailbox, $username, $password) or
-	die("Cannot connect to mailbox $default_mailbox: " . imap_last_error());
+    die("Cannot connect to mailbox $default_mailbox: " . imap_last_error());
 
 var_dump(imap_mail_copy($stream_id));
 var_dump(imap_mail_copy($stream_id,-1));

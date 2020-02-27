@@ -69,9 +69,9 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of escapeshellarg()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(escapeshellarg($input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(escapeshellarg($input));
+    $iterator++;
 };
 ?>
 --EXPECT--

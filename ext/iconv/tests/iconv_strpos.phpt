@@ -8,19 +8,19 @@ iconv.internal_charset=ISO-8859-1
 <?php
 function foo($haystk, $needle, $offset, $to_charset = false, $from_charset = false)
 {
-	if ($from_charset !== false) {
-		$haystk = iconv($from_charset, $to_charset, $haystk);
-	}
-	try {
-	    var_dump(strpos($haystk, $needle, $offset));
-	} catch (ValueError $exception) {
-	    echo $exception->getMessage() . "\n";
-	}
-	if ($to_charset !== false) {
-		var_dump(iconv_strpos($haystk, $needle, $offset, $to_charset));
-	} else {
-		var_dump(iconv_strpos($haystk, $needle, $offset));
-	}
+    if ($from_charset !== false) {
+        $haystk = iconv($from_charset, $to_charset, $haystk);
+    }
+    try {
+        var_dump(strpos($haystk, $needle, $offset));
+    } catch (ValueError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
+    if ($to_charset !== false) {
+        var_dump(iconv_strpos($haystk, $needle, $offset, $to_charset));
+    } else {
+        var_dump(iconv_strpos($haystk, $needle, $offset));
+    }
 }
 foo("abecdbcdabef", "bcd", -1);
 foo("abecdbcdabef", "bcd", -7);

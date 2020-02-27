@@ -76,12 +76,19 @@ static inline spl_fixedarray_object *spl_fixed_array_from_obj(zend_object *obj) 
 
 #define Z_SPLFIXEDARRAY_P(zv)  spl_fixed_array_from_obj(Z_OBJ_P((zv)))
 
+static inline void spl_fixedarray_init_elems(spl_fixedarray *array, size_t from, size_t to) {
+	for (size_t i = from; i < to; i++) {
+		ZVAL_NULL(&array->elements[i]);
+	}
+}
+
 static void spl_fixedarray_init(spl_fixedarray *array, zend_long size) /* {{{ */
 {
 	if (size > 0) {
 		array->size = 0; /* reset size in case ecalloc() fails */
-		array->elements = ecalloc(size, sizeof(zval));
+		array->elements = safe_emalloc(size, sizeof(zval), 0);
 		array->size = size;
+		spl_fixedarray_init_elems(array, 0, size);
 	} else {
 		array->elements = NULL;
 		array->size = 0;
@@ -116,7 +123,7 @@ static void spl_fixedarray_resize(spl_fixedarray *array, zend_long size) /* {{{ 
 		}
 	} else if (size > array->size) {
 		array->elements = safe_erealloc(array->elements, size, sizeof(zval), 0);
-		memset(array->elements + array->size, '\0', sizeof(zval) * (size - array->size));
+		spl_fixedarray_init_elems(array, array->size, size);
 	} else { /* size < array->size */
 		zend_long i;
 
@@ -161,12 +168,8 @@ static HashTable* spl_fixedarray_object_get_properties(zend_object *obj) /* {{{{
 		zend_long j = zend_hash_num_elements(ht);
 
 		for (i = 0; i < intern->array.size; i++) {
-			if (!Z_ISUNDEF(intern->array.elements[i])) {
-				zend_hash_index_update(ht, i, &intern->array.elements[i]);
-				Z_TRY_ADDREF(intern->array.elements[i]);
-			} else {
-				zend_hash_index_update(ht, i, &EG(uninitialized_zval));
-			}
+			zend_hash_index_update(ht, i, &intern->array.elements[i]);
+			Z_TRY_ADDREF(intern->array.elements[i]);
 		}
 		if (j > intern->array.size) {
 			for (i = intern->array.size; i < j; ++i) {
@@ -323,8 +326,6 @@ static inline zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_o
 	if (index < 0 || index >= intern->array.size) {
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
 		return NULL;
-	} else if (Z_ISUNDEF(intern->array.elements[index])) {
-		return NULL;
 	} else {
 		return &intern->array.elements[index];
 	}
@@ -392,9 +393,7 @@ static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_o
 		zend_throw_exception(spl_ce_RuntimeException, "Index invalid or out of range", 0);
 		return;
 	} else {
-		if (!Z_ISUNDEF(intern->array.elements[index])) {
-			zval_ptr_dtor(&(intern->array.elements[index]));
-		}
+		zval_ptr_dtor(&(intern->array.elements[index]));
 		ZVAL_COPY_DEREF(&intern->array.elements[index], value);
 	}
 }
@@ -440,7 +439,7 @@ static inline void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_o
 		return;
 	} else {
 		zval_ptr_dtor(&(intern->array.elements[index]));
-		ZVAL_UNDEF(&intern->array.elements[index]);
+		ZVAL_NULL(&intern->array.elements[index]);
 	}
 }
 /* }}} */
@@ -459,7 +458,6 @@ static void spl_fixedarray_object_unset_dimension(zend_object *object, zval *off
 	}
 
 	spl_fixedarray_object_unset_dimension_helper(intern, offset);
-
 }
 /* }}} */
 
@@ -477,16 +475,10 @@ static inline int spl_fixedarray_object_has_dimension_helper(spl_fixedarray_obje
 	if (index < 0 || index >= intern->array.size) {
 		retval = 0;
 	} else {
-		if (Z_ISUNDEF(intern->array.elements[index])) {
-			retval = 0;
-		} else if (check_empty) {
-			if (zend_is_true(&intern->array.elements[index])) {
-				retval = 1;
-			} else {
-				retval = 0;
-			}
-		} else { /* != NULL and !check_empty */
-			retval = 1;
+		if (check_empty) {
+			retval = zend_is_true(&intern->array.elements[index]);
+		} else {
+			retval = Z_TYPE(intern->array.elements[index]) != IS_NULL;
 		}
 	}
 
@@ -628,12 +620,8 @@ SPL_METHOD(SplFixedArray, toArray)
 
 		array_init(return_value);
 		for (; i < intern->array.size; i++) {
-			if (!Z_ISUNDEF(intern->array.elements[i])) {
-				zend_hash_index_update(Z_ARRVAL_P(return_value), i, &intern->array.elements[i]);
-				Z_TRY_ADDREF(intern->array.elements[i]);
-			} else {
-				zend_hash_index_update(Z_ARRVAL_P(return_value), i, &EG(uninitialized_zval));
-			}
+			zend_hash_index_update(Z_ARRVAL_P(return_value), i, &intern->array.elements[i]);
+			Z_TRY_ADDREF(intern->array.elements[i]);
 		}
 	} else {
 		RETURN_EMPTY_ARRAY();

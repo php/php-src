@@ -10,16 +10,16 @@ phar.readonly=0
 --FILE--
 <?php
 try {
-	chdir(__DIR__);
-	$phar = new Phar(__DIR__ . '/buildfromiterator10.phar');
-	$dir = new RecursiveDirectoryIterator('.');
-	$iter = new RecursiveIteratorIterator($dir);
-	$a = $phar->buildFromIterator(new RegexIterator($iter, '/_\d{3}\.phpt$/'), __DIR__ . DIRECTORY_SEPARATOR);
-	asort($a);
-	var_dump($a);
+    chdir(__DIR__);
+    $phar = new Phar(__DIR__ . '/buildfromiterator10.phar');
+    $dir = new RecursiveDirectoryIterator('.');
+    $iter = new RecursiveIteratorIterator($dir);
+    $a = $phar->buildFromIterator(new RegexIterator($iter, '/_\d{3}\.phpt$/'), __DIR__ . DIRECTORY_SEPARATOR);
+    asort($a);
+    var_dump($a);
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
 ?>
 --CLEAN--

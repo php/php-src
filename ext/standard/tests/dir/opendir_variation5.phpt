@@ -57,10 +57,10 @@ $dir_handle2 = opendir($child_dir_path); // try to open, expected failure
 var_dump( $dir_handle2 ); // dump it
 
 if (is_resource($dir_handle1)) {
-	closedir($dir_handle1);
+    closedir($dir_handle1);
 }
 if (is_resource($dir_handle2)) {
-	closedir($dir_handle2);
+    closedir($dir_handle2);
 }
 ?>
 --CLEAN--

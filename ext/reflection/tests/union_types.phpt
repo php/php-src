@@ -14,7 +14,7 @@ function dumpType(ReflectionUnionType $rt) {
         echo "  Allows Null: " . ($type->allowsNull() ? "true" : "false") . "\n";
     }
 }
- 
+
 function test1(): X|Y|int|float|false|null { }
 function test2(): X|iterable|bool { }
 

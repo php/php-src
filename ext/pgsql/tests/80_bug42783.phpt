@@ -11,7 +11,7 @@ require_once('config.inc');
 
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {
-	die ("Could not connect to the server");
+    die ("Could not connect to the server");
 }
 
 pg_query("CREATE TABLE php_test (id SERIAL PRIMARY KEY, time TIMESTAMP NOT NULL DEFAULT now())");

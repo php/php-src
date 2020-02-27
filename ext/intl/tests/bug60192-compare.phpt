@@ -7,9 +7,9 @@ Bug #60192 (SegFault when Collator not constructed properly)
 --FILE--
 <?php
 class Collator2 extends Collator{
-	public function __construct() {
-		// omitting parent::__construct($someLocale);
-	}
+    public function __construct() {
+        // omitting parent::__construct($someLocale);
+    }
 }
 
 $c = new Collator2();

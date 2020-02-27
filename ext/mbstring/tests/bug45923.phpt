@@ -7,15 +7,15 @@ Bug #45923 (mb_st[r]ripos() offset not handled correctly)
 
 function section($func, $haystack, $needle)
 {
-	echo "\n------- $func -----------\n\n";
-	foreach(array(0, 3, 6, 9, 11, 12, -1, -3, -6, -20) as $offset) {
-		echo "> Offset: $offset\n";
-		try {
-		    var_dump($func($haystack,$needle,$offset));
-		} catch (ValueError $exception) {
-		    echo $exception->getMessage() . "\n";
-		}
-	}
+    echo "\n------- $func -----------\n\n";
+    foreach([0, 3, 6, 9, 11, 12, -1, -3, -6, -20] as $offset) {
+        echo "> Offset: $offset\n";
+        try {
+            var_dump($func($haystack, $needle, $offset));
+        } catch (\ValueError $e) {
+            echo $e->getMessage() . \PHP_EOL;
+        }
+    }
 }
 
 section('strpos'     , "abc abc abc"  , "abc");
@@ -30,7 +30,7 @@ section('mb_strrpos' , "●○◆ ●○◆ ●○◆", "●○◆");
 section('strripos'   , "abc abc abc"  , "abc");
 section('mb_strripos', "●○◆ ●○◆ ●○◆", "●○◆");
 ?>
---EXPECTF--
+--EXPECT--
 ------- strpos -----------
 
 > Offset: 0
@@ -67,9 +67,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 > Offset: -1
 bool(false)
 > Offset: -3
@@ -77,9 +75,7 @@ int(8)
 > Offset: -6
 int(8)
 > Offset: -20
-
-Warning: mb_strpos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 
 ------- stripos -----------
 
@@ -117,9 +113,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 > Offset: -1
 bool(false)
 > Offset: -3
@@ -127,9 +121,7 @@ int(8)
 > Offset: -6
 int(8)
 > Offset: -20
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 
 ------- strrpos -----------
 
@@ -167,9 +159,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+Offset not contained in string
 > Offset: -1
 int(8)
 > Offset: -3
@@ -177,9 +167,7 @@ int(8)
 > Offset: -6
 int(4)
 > Offset: -20
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+Offset not contained in string
 
 ------- strripos -----------
 
@@ -217,9 +205,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+Offset not contained in string
 > Offset: -1
 int(8)
 > Offset: -3
@@ -227,6 +213,4 @@ int(8)
 > Offset: -6
 int(4)
 > Offset: -20
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+Offset not contained in string

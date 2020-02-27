@@ -15,54 +15,54 @@ class C implements I2 {}
 $classNames = array('A', 'B', 'C', 'I1', 'I2');
 
 foreach ($classNames as $className) {
-	$rcs[$className] = new ReflectionClass($className);
+    $rcs[$className] = new ReflectionClass($className);
 }
 
 foreach ($rcs as $childName => $child) {
-	foreach ($rcs as $parentName => $parent) {
-		echo "Does " . $childName . " implement " . $parentName . "? \n";
-		echo "   - Using object argument: ";
-		try {
-			var_dump($child->implementsInterface($parent));
-		} catch (Exception $e) {
-			echo $e->getMessage() . "\n";
-		}
-		echo "   - Using string argument: ";
-		try {
-			var_dump($child->implementsInterface($parentName));
-		} catch (Exception $e) {
-			echo $e->getMessage() . "\n";
-		}
-	}
+    foreach ($rcs as $parentName => $parent) {
+        echo "Does " . $childName . " implement " . $parentName . "? \n";
+        echo "   - Using object argument: ";
+        try {
+            var_dump($child->implementsInterface($parent));
+        } catch (Exception $e) {
+            echo $e->getMessage() . "\n";
+        }
+        echo "   - Using string argument: ";
+        try {
+            var_dump($child->implementsInterface($parentName));
+        } catch (Exception $e) {
+            echo $e->getMessage() . "\n";
+        }
+    }
 }
 
 
 
 echo "\n\nTest bad arguments:\n";
 try {
-	var_dump($rcs['A']->implementsInterface());
+    var_dump($rcs['A']->implementsInterface());
 } catch (TypeError $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	var_dump($rcs['A']->implementsInterface('C', 'C'));
+    var_dump($rcs['A']->implementsInterface('C', 'C'));
 } catch (TypeError $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	var_dump($rcs['A']->implementsInterface(null));
+    var_dump($rcs['A']->implementsInterface(null));
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	var_dump($rcs['A']->implementsInterface('ThisClassDoesNotExist'));
+    var_dump($rcs['A']->implementsInterface('ThisClassDoesNotExist'));
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	var_dump($rcs['A']->implementsInterface(2));
+    var_dump($rcs['A']->implementsInterface(2));
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
 --EXPECTF--

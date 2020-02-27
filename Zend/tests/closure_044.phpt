@@ -8,10 +8,10 @@ Closure 044: Scope/bounding combination invariants; non static closures
 $nonstaticUnscoped = function () { var_dump(isset(A::$priv)); var_dump(isset($this)); };
 
 class A {
-	private static $priv = 7;
-	function getClosure() {
-		return function() { var_dump(isset(A::$priv)); var_dump(isset($this)); };
-	}
+    private static $priv = 7;
+    function getClosure() {
+        return function() { var_dump(isset(A::$priv)); var_dump(isset($this)); };
+    }
 }
 
 $a = new A();

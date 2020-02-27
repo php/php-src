@@ -8,7 +8,7 @@ if (!extension_loaded('gd')) die('skip ext/gd not available');
 <?php
 $im = imagecreatetruecolor(1, 1);
 
-try { 
+try {
     var_dump(imagesetstyle($im, array()));
 }
 catch (\Error $ex) {

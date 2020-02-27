@@ -4,11 +4,11 @@ ReflectionNamedType::getName() and ReflectionNamedType::__toString()
 <?php
 
 function testInternalTypes(?Traversable $traversable): ?string {
-	return 'test';
+    return 'test';
 }
 
 function testUserDefinedTypes(?Test $traversable): ?Test {
-	return new Test;
+    return new Test;
 }
 
 $function = new ReflectionFunction('testInternalTypes');

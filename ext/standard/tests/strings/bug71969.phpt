@@ -3,13 +3,13 @@ Bug #71969 (str_replace returns an incorrect resulting array after a foreach by 
 --FILE--
 <?php
 $a = array(
-	array("one" => array("a"=>"0000", "b"=>"1111")),
+    array("one" => array("a"=>"0000", "b"=>"1111")),
 );
 
 //foreach by reference, changing the array value
 foreach($a as &$record)
 {
-	$record["one"]["a"] = "2222";
+    $record["one"]["a"] = "2222";
 }
 var_dump(str_replace("2", "3", $a));
 ?>

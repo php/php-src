@@ -274,7 +274,9 @@ PHP_FUNCTION(token_get_all)
 		zend_clear_exception();
 	}
 
-	if (!success) RETURN_FALSE;
+	if (!success) {
+		RETURN_THROWS();
+	}
 }
 /* }}} */
 

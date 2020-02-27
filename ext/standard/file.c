@@ -351,8 +351,8 @@ PHP_FUNCTION(flock)
 
 	act = operation & 3;
 	if (act < 1 || act > 3) {
-		php_error_docref(NULL, E_WARNING, "Illegal operation argument");
-		RETURN_FALSE;
+		zend_value_error("Illegal operation argument");
+		RETURN_THROWS();
 	}
 
 	if (wouldblock) {
@@ -745,8 +745,8 @@ PHP_FUNCTION(file)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT)) {
-		php_error_docref(NULL, E_WARNING, "'" ZEND_LONG_FMT "' flag is not supported", flags);
-		RETURN_FALSE;
+		zend_value_error("'" ZEND_LONG_FMT "' flag is not supported", flags);
+		RETURN_THROWS();
 	}
 
 	use_include_path = flags & PHP_FILE_USE_INCLUDE_PATH;
@@ -850,7 +850,7 @@ PHP_FUNCTION(tempnam)
 
 /* {{{ proto resource tmpfile(void)
    Create a temporary file that will be deleted automatically after use */
-PHP_NAMED_FUNCTION(php_if_tmpfile)
+PHP_FUNCTION(tmpfile)
 {
 	php_stream *stream;
 
@@ -868,7 +868,7 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
 
 /* {{{ proto resource fopen(string filename, string mode [, bool use_include_path [, resource context]])
    Open a file or a URL and return a file pointer */
-PHP_NAMED_FUNCTION(php_if_fopen)
+PHP_FUNCTION(fopen)
 {
 	char *filename, *mode;
 	size_t filename_len, mode_len;
@@ -1040,8 +1040,8 @@ PHPAPI PHP_FUNCTION(fgets)
 		efree(buf);
 	} else if (argc > 1) {
 		if (len <= 0) {
-			php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
-			RETURN_FALSE;
+			zend_value_error("Length parameter must be greater than 0");
+			RETURN_THROWS();
 		}
 
 		str = zend_string_alloc(len, 0);
@@ -1483,7 +1483,7 @@ PHP_FUNCTION(unlink)
 
 /* {{{ proto bool ftruncate(resource fp, int size)
    Truncate file to 'size' length */
-PHP_NAMED_FUNCTION(php_if_ftruncate)
+PHP_FUNCTION(ftruncate)
 {
 	zval *fp;
 	zend_long size;
@@ -1495,8 +1495,8 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (size < 0) {
-		php_error_docref(NULL, E_WARNING, "Negative size is not supported");
-		RETURN_FALSE;
+		zend_value_error("Negative size is not supported");
+		RETURN_THROWS();
 	}
 
 	PHP_STREAM_TO_ZVAL(stream, fp);
@@ -1512,7 +1512,7 @@ PHP_NAMED_FUNCTION(php_if_ftruncate)
 
 /* {{{ proto array fstat(resource fp)
    Stat() on a filehandle */
-PHP_NAMED_FUNCTION(php_if_fstat)
+PHP_FUNCTION(fstat)
 {
 	zval *fp;
 	zval stat_dev, stat_ino, stat_mode, stat_nlink, stat_uid, stat_gid, stat_rdev,
@@ -1750,8 +1750,8 @@ PHPAPI PHP_FUNCTION(fread)
 	PHP_STREAM_TO_ZVAL(stream, res);
 
 	if (len <= 0) {
-		php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
-		RETURN_FALSE;
+		zend_value_error("Length parameter must be greater than 0");
+		RETURN_THROWS();
 	}
 
 	str = php_stream_read_to_str(stream, len);
@@ -1829,8 +1829,8 @@ PHP_FUNCTION(fputcsv)
 	if (delimiter_str != NULL) {
 		/* Make sure that there is at least one character in string */
 		if (delimiter_str_len < 1) {
-			php_error_docref(NULL, E_WARNING, "delimiter must be a character");
-			RETURN_FALSE;
+			zend_value_error("delimiter must be a character");
+			RETURN_THROWS();
 		} else if (delimiter_str_len > 1) {
 			php_error_docref(NULL, E_NOTICE, "delimiter must be a single character");
 		}
@@ -1841,8 +1841,8 @@ PHP_FUNCTION(fputcsv)
 
 	if (enclosure_str != NULL) {
 		if (enclosure_str_len < 1) {
-			php_error_docref(NULL, E_WARNING, "enclosure must be a character");
-			RETURN_FALSE;
+			zend_value_error("enclosure must be a character");
+			RETURN_THROWS();
 		} else if (enclosure_str_len > 1) {
 			php_error_docref(NULL, E_NOTICE, "enclosure must be a single character");
 		}
@@ -1967,8 +1967,8 @@ PHP_FUNCTION(fgetcsv)
 		if (delimiter_str != NULL) {
 			/* Make sure that there is at least one character in string */
 			if (delimiter_str_len < 1) {
-				php_error_docref(NULL, E_WARNING, "delimiter must be a character");
-				RETURN_FALSE;
+				zend_value_error("delimiter must be a character");
+				RETURN_THROWS();
 			} else if (delimiter_str_len > 1) {
 				php_error_docref(NULL, E_NOTICE, "delimiter must be a single character");
 			}
@@ -1979,8 +1979,8 @@ PHP_FUNCTION(fgetcsv)
 
 		if (enclosure_str != NULL) {
 			if (enclosure_str_len < 1) {
-				php_error_docref(NULL, E_WARNING, "enclosure must be a character");
-				RETURN_FALSE;
+				zend_value_error("enclosure must be a character");
+				RETURN_THROWS();
 			} else if (enclosure_str_len > 1) {
 				php_error_docref(NULL, E_NOTICE, "enclosure must be a single character");
 			}
@@ -2004,8 +2004,8 @@ PHP_FUNCTION(fgetcsv)
 		if (len_zv != NULL && Z_TYPE_P(len_zv) != IS_NULL) {
 			len = zval_get_long(len_zv);
 			if (len < 0) {
-				php_error_docref(NULL, E_WARNING, "Length parameter may not be negative");
-				RETURN_FALSE;
+				zend_value_error("Length parameter may not be negative");
+				RETURN_THROWS();
 			} else if (len == 0) {
 				len = -1;
 			}

@@ -8,9 +8,9 @@ ob_start(): non-static method as static callbacks.
 */
 
 Class C {
-	function h($string) {
-		return $string;
-	}
+    function h($string) {
+        return $string;
+    }
 }
 
 function checkAndClean() {

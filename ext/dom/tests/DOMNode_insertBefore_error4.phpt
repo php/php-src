@@ -30,7 +30,7 @@ $ref_node = $dom->createElement('newnode2');
 try {
     $parent_node->insertBefore($new_node, $ref_node);
 } catch(DOMException $e) {
-	echo $e->getMessage();
+    echo $e->getMessage();
 }
 
 ?>

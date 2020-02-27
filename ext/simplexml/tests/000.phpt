@@ -9,12 +9,12 @@ $sxe = simplexml_load_file(__DIR__.'/000.xml');
 
 function test($what)
 {
-	global $sxe;
-	echo "===$what\n";
-	eval("var_dump(isset(\$$what));");
-	eval("var_dump((bool)\$$what);");
-	eval("if (isset(\$$what)) var_dump(count(\$$what));");
-	eval("var_dump(\$$what);");
+    global $sxe;
+    echo "===$what\n";
+    eval("var_dump(isset(\$$what));");
+    eval("var_dump((bool)\$$what);");
+    eval("if (isset(\$$what)) var_dump(count(\$$what));");
+    eval("var_dump(\$$what);");
 }
 
 test('sxe');

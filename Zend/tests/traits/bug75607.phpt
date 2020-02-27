@@ -5,17 +5,17 @@ Bug #75607 (Comparison of initial static properties failing)
 
 trait T1
 {
-	public static $prop1 = 1;
+    public static $prop1 = 1;
 }
 
 class Base
 {
-	public static $prop1 = 1;
+    public static $prop1 = 1;
 }
 
 class Child extends base
 {
-	use T1;
+    use T1;
 }
 
 echo "DONE";

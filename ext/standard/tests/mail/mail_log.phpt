@@ -9,7 +9,7 @@ date_default_timezone_set("UTC");
 
 $logfile = ini_get("mail.log");
 if (file_exists($logfile)) {
-	unlink($logfile);
+    unlink($logfile);
 }
 touch($logfile);
 clearstatcache();

@@ -33,7 +33,7 @@ $ftruncate_result = ftruncate($file_handle, $truncate_offset);
 
 if (false === $ftruncate_result) {
     // NOTE: unlink() is deliberately repeated - If this test runs out of disk space attempting to reserve space for this temporary file,
-    // then the --CLEAN-- script can't be run (if we don't delete the file),
+    // then the--CLEAN-- script can't be run (if we don't delete the file),
     // because there wouldn't be any free disk space to save a new php file.
     fclose($file_handle);
     unlink($fn);

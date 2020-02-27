@@ -36,47 +36,47 @@ $file_handle = fopen(__FILE__, 'r');
 //array of values to iterate over
 $values = array(
 
-		  // int data
+          // int data
 /*1*/	  0,
-		  1,
-		  12345,
-		  -2345,
+          1,
+          12345,
+          -2345,
 
-		  // float data
+          // float data
 /*5*/	  10.5,
-		  -10.5,
-		  10.1234567e10,
-		  10.7654321E-10,
-		  .5,
+          -10.5,
+          10.1234567e10,
+          10.7654321E-10,
+          .5,
 
-		  // null data
+          // null data
 /*10*/	  NULL,
-		  null,
+          null,
 
-		  // boolean data
+          // boolean data
 /*12*/	  true,
-		  false,
-		  TRUE,
-		  FALSE,
+          false,
+          TRUE,
+          FALSE,
 
-		  // empty data
+          // empty data
 /*16*/	  "",
-		  '',
+          '',
 
-		  // string data
+          // string data
 /*18*/	  "string",
-		  'string',
+          'string',
 
-		  // object data
+          // object data
 /*20*/	  new sample(),
 
-		  // undefined data
+          // undefined data
 /*21*/	  @$undefined_var,
 
-		  // unset data
+          // unset data
 /*22*/	  @$unset_var,
 
-		  // resource data
+          // resource data
 /*23*/	  $file_handle
 );
 
@@ -91,9 +91,9 @@ $counter = 1;
 foreach( $values as $value ) {
   fprintf($fp, "\n-- Iteration %d --\n",$counter);
   try {
-  	vfprintf($fp, $format, $value);
+    vfprintf($fp, $format, $value);
   } catch (\ValueError $e) {
-	fwrite($fp, $e->getMessage() . "\n");
+    fwrite($fp, $e->getMessage() . "\n");
   }
   $counter++;
 }

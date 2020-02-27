@@ -28,8 +28,8 @@ date_default_timezone_set("Asia/Calcutta");
 //array of values to iterate over
 $inputs = array(
       'Preferred date and time representation' => "%c",
-	  'Preferred date representation' => "%x",
-	  'Preferred time representation' => "%X",
+      'Preferred date representation' => "%x",
+      'Preferred time representation' => "%X",
 );
 
 // loop through each element of the array for timestamp

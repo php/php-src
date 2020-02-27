@@ -52,10 +52,10 @@ PHP_FUNCTION(time_sleep_until);
 #endif
 PHP_FUNCTION(flush);
 #ifdef HAVE_INET_NTOP
-PHP_NAMED_FUNCTION(zif_inet_ntop);
+PHP_FUNCTION(inet_ntop);
 #endif
 #ifdef HAVE_INET_PTON
-PHP_NAMED_FUNCTION(php_inet_pton);
+PHP_FUNCTION(inet_pton);
 #endif
 PHP_FUNCTION(ip2long);
 PHP_FUNCTION(long2ip);
@@ -94,7 +94,6 @@ PHP_FUNCTION(ini_set);
 PHP_FUNCTION(ini_restore);
 PHP_FUNCTION(get_include_path);
 PHP_FUNCTION(set_include_path);
-PHP_FUNCTION(restore_include_path);
 
 PHP_FUNCTION(print_r);
 PHP_FUNCTION(fprintf);
@@ -109,7 +108,7 @@ PHP_FUNCTION(getservbyport);
 PHP_FUNCTION(getprotobyname);
 PHP_FUNCTION(getprotobynumber);
 
-PHP_NAMED_FUNCTION(php_if_crc32);
+PHP_FUNCTION(crc32);
 
 PHP_FUNCTION(register_tick_function);
 PHP_FUNCTION(unregister_tick_function);

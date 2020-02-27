@@ -9,12 +9,12 @@ assert.bail = 0
 <?php
 function a($file, $line, $unused, $desc)
 {
-	        echo "assertion failed - a - $line,\"$desc\"\n";
+            echo "assertion failed - a - $line,\"$desc\"\n";
 }
 
 function b($file, $line, $unused, $desc)
 {
-	        echo "assertion failed - b - $line,\"$desc\"\n";
+            echo "assertion failed - b - $line,\"$desc\"\n";
 }
 
 assert_options(ASSERT_ACTIVE,1);

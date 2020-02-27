@@ -29,11 +29,11 @@ var_dump(Phar::loadPhar($fname1, 'copy'));
 $a = new Phar($fname1);
 try
 {
-	var_dump(Phar::loadPhar($fname2, 'copy'));
+    var_dump(Phar::loadPhar($fname2, 'copy'));
 }
 catch (Exception $e)
 {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 ?>

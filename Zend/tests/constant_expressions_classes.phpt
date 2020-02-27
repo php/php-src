@@ -20,11 +20,11 @@ $classlist = [
 ];
 
 spl_autoload_register(function ($class) use ($classlist) {
-	if (isset($classlist[$class])) {
-		eval($classlist[$class]);
-	} else {
-		die("Cannot autoload $class\n");
-	}
+    if (isset($classlist[$class])) {
+        eval($classlist[$class]);
+    } else {
+        die("Cannot autoload $class\n");
+    }
 });
 
 printf("B::HW = %s\n", B::HW);

@@ -4,15 +4,15 @@ Bug #71245 (file_get_contents() ignores "header" context option if it's a refere
 <?php
 $headers = ['Host: okey.com'];
 $httpContext = [
-	'http' => [
-		'protocol_version'	=> '1.1',
-		'method'			=> 'GET',
-		'header'			=> &$headers,
-		'follow_location'	=> 0,
-		'max_redirects'		=> 0,
-		'ignore_errors'		=> true,
-		'timeout'			=> 60,
-	],
+    'http' => [
+        'protocol_version'	=> '1.1',
+        'method'			=> 'GET',
+        'header'			=> &$headers,
+        'follow_location'	=> 0,
+        'max_redirects'		=> 0,
+        'ignore_errors'		=> true,
+        'timeout'			=> 60,
+    ],
 ];
 $context = stream_context_create($httpContext);
 $headers = ["Host: bad.com"];

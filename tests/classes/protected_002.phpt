@@ -4,22 +4,22 @@ ZE2 A protected method cannot be called in another class
 <?php
 
 class pass {
-	protected static function show() {
-		echo "Call pass::show()\n";
-	}
+    protected static function show() {
+        echo "Call pass::show()\n";
+    }
 
-	public static function do_show() {
-		pass::show();
-	}
+    public static function do_show() {
+        pass::show();
+    }
 }
 
 pass::do_show();
 
 class fail {
-	public static function show() {
-		echo "Call fail::show()\n";
-		pass::show();
-	}
+    public static function show() {
+        echo "Call fail::show()\n";
+        pass::show();
+    }
 }
 
 fail::show();

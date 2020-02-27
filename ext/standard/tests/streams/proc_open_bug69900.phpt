@@ -14,7 +14,7 @@ $in = fopen("php://stdin", "rb", false, stream_context_create(array("pipe" => ar
 
 while(!feof($in)){
 $s = fgets($in);
-	fwrite(STDOUT, $s);
+    fwrite(STDOUT, $s);
 }
 
 ?>';
@@ -27,19 +27,19 @@ $process = proc_open(PHP_BINARY.' -n -f ' . $fl, $descriptorspec, $pipes, NULL, 
 
 $moreThanLimit = 0;
 for($i = 0; $i < 10; $i++){
-	fwrite($pipes[0], "hello$i\r\n");
-	fflush($pipes[0]);
+    fwrite($pipes[0], "hello$i\r\n");
+    fflush($pipes[0]);
 
-	$t0 = microtime(1);
-	$s = fgets($pipes[1]);
-	$t1 = microtime(1);
+    $t0 = microtime(1);
+    $s = fgets($pipes[1]);
+    $t1 = microtime(1);
 
-	echo $s;
+    echo $s;
 
-	$dt_ms = ($t1 - $t0)*1000;
-	if ($dt_ms > $max_ms) {
+    $dt_ms = ($t1 - $t0)*1000;
+    if ($dt_ms > $max_ms) {
         $moreThanLimit++;
-	}
+    }
 }
 
 fclose($pipes[0]);

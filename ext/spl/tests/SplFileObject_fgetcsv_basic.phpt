@@ -4,10 +4,10 @@ SplFileObject::fgetcsv default path
 <?php
 $fp = fopen('SplFileObject__fgetcsv1.csv', 'w+');
 fputcsv($fp, array(
-	'field1',
-	'field2',
-	'field3',
-	5
+    'field1',
+    'field2',
+    'field3',
+    5
 ));
 fclose($fp);
 

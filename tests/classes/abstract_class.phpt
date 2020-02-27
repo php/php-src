@@ -4,13 +4,13 @@ ZE2 An abstract class cannot be instantiated
 <?php
 
 abstract class fail {
-	abstract function show();
+    abstract function show();
 }
 
 class pass extends fail {
-	function show() {
-		echo "Call to function show()\n";
-	}
+    function show() {
+        echo "Call to function show()\n";
+    }
 }
 
 $t2 = new pass();

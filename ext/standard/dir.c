@@ -74,8 +74,10 @@ static zend_class_entry *dir_class_entry_ptr;
 				RETURN_THROWS(); \
 			} \
 		} else { \
-			if (!DIRG(default_dir) || \
-				(dirp = (php_stream *)zend_fetch_resource(DIRG(default_dir), "Directory", php_file_le_stream())) == NULL) { \
+			if (!DIRG(default_dir)) { \
+				zend_type_error("No resource supplied"); \
+				RETURN_THROWS(); \
+			} else if ((dirp = (php_stream *)zend_fetch_resource(DIRG(default_dir), "Directory", php_file_le_stream())) == NULL) { \
 				RETURN_THROWS(); \
 			} \
 		} \
@@ -88,7 +90,7 @@ static zend_class_entry *dir_class_entry_ptr;
 static const zend_function_entry php_dir_class_functions[] = {
 	PHP_FALIAS(close,	closedir,		arginfo_class_Directory_close)
 	PHP_FALIAS(rewind,	rewinddir,		arginfo_class_Directory_rewind)
-	PHP_NAMED_FE(read,  php_if_readdir, arginfo_class_Directory_read)
+	PHP_FALIAS(read,	readdir,		arginfo_class_Directory_read)
 	PHP_FE_END
 };
 
@@ -383,7 +385,7 @@ PHP_FUNCTION(rewinddir)
 
 /* {{{ proto string|false readdir([resource dir_handle])
    Read directory entry from dir_handle */
-PHP_NAMED_FUNCTION(php_if_readdir)
+PHP_FUNCTION(readdir)
 {
 	zval *id = NULL, *tmp, *myself;
 	php_stream *dirp;

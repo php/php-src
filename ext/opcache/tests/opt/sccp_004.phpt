@@ -11,18 +11,18 @@ opcache.preload=
 --FILE--
 <?php
 function foo(int $x) {
-	$a = [1,2,3];
-	$a[2] = $x;
-	$i = 1;
-	$c = $i < 2;
-	if ($c) {
-		$k = 2 * $i;
-		$a[$k] = $i;
+    $a = [1,2,3];
+    $a[2] = $x;
+    $i = 1;
+    $c = $i < 2;
+    if ($c) {
+        $k = 2 * $i;
+        $a[$k] = $i;
 //		$a[$k]++;
-		echo isset($a[$k]);
+        echo isset($a[$k]);
 //		$a[$k] += 5;
-	}
-	echo $a[2];
+    }
+    echo $a[2];
 }
 ?>
 --EXPECTF--
@@ -35,6 +35,6 @@ foo: ; (lines=4, args=1, vars=1, tmps=0)
     ; (after optimizer)
     ; %ssccp_004.php:2-15
 L0 (2):     CV0($x) = RECV 1
-L1 (11):    ECHO bool(true)
-L2 (14):    ECHO int(1)
+L1 (11):    ECHO string("1")
+L2 (14):    ECHO string("1")
 L3 (15):    RETURN null

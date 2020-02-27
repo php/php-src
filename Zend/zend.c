@@ -962,7 +962,7 @@ void zend_register_standard_ini_entries(void) /* {{{ */
 }
 /* }}} */
 
-static zend_class_entry *resolve_type_name(zend_string *type_name) { 
+static zend_class_entry *resolve_type_name(zend_string *type_name) {
 	zend_string *lc_type_name = zend_string_tolower(type_name);
 	zend_class_entry *ce = zend_hash_find_ptr(CG(class_table), lc_type_name);
 

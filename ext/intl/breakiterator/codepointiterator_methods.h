@@ -17,6 +17,6 @@
 
 #include <php.h>
 
-PHP_FUNCTION(cpbi_get_last_code_point);
+PHP_METHOD(IntlCodePointBreakIterator, getLastCodePoint);
 
 #endif

@@ -21,9 +21,9 @@ var_dump( array_map( function($a, $b) { return array($a, $b); }, $array1, $array
 
 echo "-- anonymous function with two parameters and passing one array --\n";
 try {
-	var_dump( array_map( function($a, $b) { return array($a, $b); }, $array1));
+    var_dump( array_map( function($a, $b) { return array($a, $b); }, $array1));
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "-- anonymous function with NULL parameter --\n";

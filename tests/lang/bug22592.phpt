@@ -3,7 +3,7 @@ Bug #22592 (cascading assignments to strings with curly braces broken)
 --FILE--
 <?php
 function error_hdlr($errno, $errstr) {
-	echo "[$errstr]\n";
+    echo "[$errstr]\n";
 }
 
 set_error_handler('error_hdlr');

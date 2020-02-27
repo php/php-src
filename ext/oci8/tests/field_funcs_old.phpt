@@ -14,41 +14,41 @@ require __DIR__.'/create_table.inc';
 $insert_sql = "INSERT INTO ".$schema."".$table_name." (id, value) VALUES (1,1)";
 
 if (!($s = ociparse($c, $insert_sql))) {
-	die("ociparse(insert) failed!\n");
+    die("ociparse(insert) failed!\n");
 }
 
 for ($i = 0; $i<3; $i++) {
-	if (!ociexecute($s)) {
-		die("ociexecute(insert) failed!\n");
-	}
+    if (!ociexecute($s)) {
+        die("ociexecute(insert) failed!\n");
+    }
 }
 
 if (!ocicommit($c)) {
-	die("ocicommit() failed!\n");
+    die("ocicommit() failed!\n");
 }
 
 $select_sql = "SELECT * FROM ".$schema."".$table_name."";
 
 if (!($s = ociparse($c, $select_sql))) {
-	die("ociparse(select) failed!\n");
+    die("ociparse(select) failed!\n");
 }
 
 if (!ociexecute($s)) {
-	die("ociexecute(select) failed!\n");
+    die("ociexecute(select) failed!\n");
 }
 
 ocifetchinto($s, $row, OCI_NUM + OCI_RETURN_NULLS + OCI_RETURN_LOBS);
 var_dump($row);
 
 foreach ($row as $num => $field) {
-	$num++;
-	var_dump(ocicolumnisnull($s, $num));
-	var_dump(ocicolumnname($s, $num));
-	var_dump(ocicolumntype($s, $num));
-	var_dump(ocicolumntyperaw($s, $num));
-	var_dump(ocicolumnscale($s, $num));
-	var_dump(ocicolumnprecision($s, $num));
-	var_dump(ocicolumnsize($s, $num));
+    $num++;
+    var_dump(ocicolumnisnull($s, $num));
+    var_dump(ocicolumnname($s, $num));
+    var_dump(ocicolumntype($s, $num));
+    var_dump(ocicolumntyperaw($s, $num));
+    var_dump(ocicolumnscale($s, $num));
+    var_dump(ocicolumnprecision($s, $num));
+    var_dump(ocicolumnsize($s, $num));
 }
 
 

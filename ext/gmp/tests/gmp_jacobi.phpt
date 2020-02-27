@@ -6,7 +6,7 @@ gmp_jacobi() basic tests
 <?php
 
 for ($i = -1; $i < 10; $i++) {
-	var_dump(gmp_strval(gmp_jacobi(($i*$i)-1, 3)));
+    var_dump(gmp_strval(gmp_jacobi(($i*$i)-1, 3)));
 }
 
 var_dump(gmp_strval(gmp_jacobi(7, 23)));

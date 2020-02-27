@@ -31,7 +31,7 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 	UChar	              *ustr_id    = NULL;
 	int32_t               ustr_id_len = 0;
 	UTransliterator       *utrans;
-	UParseError           parse_error   = {0, -1};
+	UParseError           parse_error;
 
 	intl_error_reset( NULL );
 
@@ -136,7 +136,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 	UChar		    *ustr_rules    = NULL;
 	int32_t         ustr_rules_len = 0;
 	zend_long       direction      = TRANSLITERATOR_FORWARD;
-	UParseError     parse_error    = {0, -1};
+	UParseError     parse_error;
 	UTransliterator *utrans;
 	UChar           id[] = {0x52, 0x75, 0x6C, 0x65, 0x73, 0x54, 0x72,
 					       0x61, 0x6E, 0x73, 0x50, 0x48, 0x50, 0}; /* RulesTransPHP */

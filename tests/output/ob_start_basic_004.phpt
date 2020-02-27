@@ -10,10 +10,10 @@ opcache.optimization_level=0
 */
 // In HEAD, $chunk_size value of 1 should not have any special behaviour (http://marc.info/?l=php-internals&m=123476465621346&w=2).
 function callback($string) {
-	global $callback_invocations;
-	$callback_invocations++;
-	$len = strlen($string);
-	return "f[call:$callback_invocations; len:$len]$string\n";
+    global $callback_invocations;
+    $callback_invocations++;
+    $len = strlen($string);
+    return "f[call:$callback_invocations; len:$len]$string\n";
 }
 
 for ($cs=-1; $cs<10; $cs++) {

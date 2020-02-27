@@ -4,9 +4,9 @@ ZE2 An abstract class cannot be instantiated
 <?php
 
 abstract class base {
-	function show() {
-		echo "base\n";
-	}
+    function show() {
+        echo "base\n";
+    }
 }
 
 class derived extends base {

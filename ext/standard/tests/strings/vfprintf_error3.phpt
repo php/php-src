@@ -43,6 +43,6 @@ unlink( $file );
 ?>
 --EXPECT--
 -- Testing vfprintf() function with wrong variable types as argument --
-vfprintf() expects parameter 2 to be string, array given
+vfprintf(): Argument #2 ($format) must be of type string, array given
 int(9)
 string(9) "Foo  fake"

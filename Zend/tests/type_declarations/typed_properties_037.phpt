@@ -3,7 +3,7 @@ Test typed properties var_dump uninitialized
 --FILE--
 <?php
 $foo = new class {
-	public int $bar = 10, $qux;
+    public int $bar = 10, $qux;
 };
 
 var_dump($foo);

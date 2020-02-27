@@ -63,8 +63,8 @@ Warning: rmdir(%s/mkdir_variation2/): %s on line %d
 bool(false)
 
 *** Testing mkdir() and rmdir() for binary safe functionality ***
-mkdir() expects parameter 1 to be a valid path, string given
-rmdir() expects parameter 1 to be a valid path, string given
+mkdir(): Argument #1 ($pathname) must be a valid path, string given
+rmdir(): Argument #1 ($dirname) must be a valid path, string given
 
 *** Testing mkdir() with miscellaneous input ***
 bool(true)

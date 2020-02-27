@@ -35,16 +35,24 @@ $needle_mb = base64_decode('44CC');
  * 60 is larger than *BYTE* count for $string_mb
  */
 for ($i = -10; $i <= 60; $i += 10) {
-	echo "\n**-- Offset is: $i --**\n";
-	echo "-- ASCII String --\n";
-	var_dump(mb_strripos($string_ascii, $needle_ascii, $i));
-	echo "--Multibyte String --\n";
-	var_dump(mb_strripos($string_mb, $needle_mb, $i, 'UTF-8'));
+    echo "\n**-- Offset is: $i --**\n";
+    echo "-- ASCII String --\n";
+    try {
+        var_dump(mb_strripos($string_ascii, $needle_ascii, $i));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+
+    echo "--Multibyte String --\n";
+    try {
+        var_dump(mb_strripos($string_mb, $needle_mb, $i, 'UTF-8'));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 }
 
-echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_strripos() : usage variations ***
 
 **-- Offset is: -10 --**
@@ -73,41 +81,24 @@ int(20)
 
 **-- Offset is: 30 --**
 -- ASCII String --
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+Offset not contained in string
 --Multibyte String --
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+Offset not contained in string
 
 **-- Offset is: 40 --**
 -- ASCII String --
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+Offset not contained in string
 --Multibyte String --
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+Offset not contained in string
 
 **-- Offset is: 50 --**
 -- ASCII String --
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+Offset not contained in string
 --Multibyte String --
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+Offset not contained in string
 
 **-- Offset is: 60 --**
 -- ASCII String --
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+Offset not contained in string
 --Multibyte String --
-
-Warning: mb_strripos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
-Done
+Offset not contained in string

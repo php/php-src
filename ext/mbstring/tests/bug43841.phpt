@@ -17,50 +17,49 @@ function_exists('mb_strrpos') or die("skip mb_strrpos() is not available in this
  */
 
 $offsets = array(-25, -24, -13, -12);
-$string_mb =
-base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvv
-JfvvJjvvJnjgII=');
-$needle = base64_decode('44CC');
+// Japanese string in UTF-8
+$string_mb = "日本語テキストです。01234５６７８９。";
+$needle = "。";
 
 foreach ($offsets as $i) {
-	echo "\n-- Offset is $i --\n";
-	echo "Multibyte String:\n";
-	var_dump( mb_strrpos($string_mb, $needle, $i, 'UTF-8') );
-	echo "ASCII String:\n";
-	echo "mb_strrpos:\n";
-	var_dump(mb_strrpos('This is na English ta', 'a', $i));
-	echo "strrpos:\n";
-	try {
-	    var_dump(strrpos('This is na English ta', 'a', $i));
-	} catch (ValueError $exception) {
-	    echo $exception->getMessage() . "\n";
-	}
+    echo "\n-- Offset is $i --\n";
+    echo "Multibyte String:\n";
+    try {
+        var_dump( mb_strrpos($string_mb, $needle, $i, 'UTF-8') );
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    echo "ASCII String:\n";
+    echo "mb_strrpos:\n";
+    try {
+        var_dump(mb_strrpos('This is na English ta', 'a', $i));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    echo "strrpos:\n";
+    try {
+        var_dump(strrpos('This is na English ta', 'a', $i));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 }
 ?>
---EXPECTF--
+--EXPECT--
 -- Offset is -25 --
 Multibyte String:
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+Offset not contained in string
 ASCII String:
 mb_strrpos:
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+Offset not contained in string
 strrpos:
 Offset not contained in string
 
 -- Offset is -24 --
 Multibyte String:
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+Offset not contained in string
 ASCII String:
 mb_strrpos:
-
-Warning: mb_strrpos(): Offset is greater than the length of haystack string in %s on line %d
-bool(false)
+Offset not contained in string
 strrpos:
 Offset not contained in string
 

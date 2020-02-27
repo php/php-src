@@ -18,16 +18,16 @@ $dn = "$base";
 $filter = "(objectclass=person)";
 
 var_dump(
-	$result = ldap_search($link, $dn, $filter, array('sn')),
-	ldap_get_entries($link, $result)
+    $result = ldap_search($link, $dn, $filter, array('sn')),
+    ldap_get_entries($link, $result)
 );
 var_dump(
-	$result = ldap_search($link, $dn, $filter, array('sn'), 1, 1, 1, LDAP_DEREF_ALWAYS),
-	ldap_get_entries($link, $result)
+    $result = ldap_search($link, $dn, $filter, array('sn'), 1, 1, 1, LDAP_DEREF_ALWAYS),
+    ldap_get_entries($link, $result)
 );
 var_dump(
-	$result = ldap_search($link, $dn, $filter, array('sn')),
-	ldap_get_entries($link, $result)
+    $result = ldap_search($link, $dn, $filter, array('sn')),
+    ldap_get_entries($link, $result)
 );
 ?>
 --CLEAN--

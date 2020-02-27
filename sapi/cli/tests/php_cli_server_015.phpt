@@ -30,9 +30,9 @@ Host: {$host}
 
 HEADER
 )) {
-	while (!feof($fp)) {
-		$output .= fgets($fp);
-	}
+    while (!feof($fp)) {
+        $output .= fgets($fp);
+    }
 }
 echo $output;
 @unlink($dir . "/syntax_error.php");

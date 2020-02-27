@@ -45,20 +45,20 @@ echo "Done";
  * @param array $regs
  */
 function base64_encode_var_dump($regs) {
-	if ($regs) {
-		echo "array(" . count($regs) . ") {\n";
-		foreach ($regs as $key => $value) {
-			echo "  [$key]=>\n  ";
-			if (is_string($value)) {
-				var_dump(base64_encode($value));
-			} else {
-				var_dump($value);
-			}
-		}
-		echo "}\n";
-	} else {
-		echo "NULL\n";
-	}
+    if ($regs) {
+        echo "array(" . count($regs) . ") {\n";
+        foreach ($regs as $key => $value) {
+            echo "  [$key]=>\n  ";
+            if (is_string($value)) {
+                var_dump(base64_encode($value));
+            } else {
+                var_dump($value);
+            }
+        }
+        echo "}\n";
+    } else {
+        echo "NULL\n";
+    }
 }
 ?>
 --EXPECT--

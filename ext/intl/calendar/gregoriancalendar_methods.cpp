@@ -60,7 +60,7 @@ static void _php_intlgregcal_constructor_body(
 	if (ZEND_NUM_ARGS() > 6 ||
 			zend_get_parameters_array_ex(ZEND_NUM_ARGS(), args) == FAILURE) {
 		zend_argument_count_error("Too many arguments");
-		return;
+		RETURN_THROWS();
 	}
 
 	for (variant = ZEND_NUM_ARGS();
@@ -68,7 +68,7 @@ static void _php_intlgregcal_constructor_body(
 		variant--) {}
 	if (variant == 4) {
 		zend_argument_count_error("No variant with 4 arguments (excluding trailing NULLs)");
-		return;
+		RETURN_THROWS();
 	}
 
 	// argument parsing

@@ -11,13 +11,13 @@ const e = ["string" => [1]]["string"][0];
 var_dump(b, c, e);
 
 function test ($a = d[1][0]) {
-	var_dump($a);
+    var_dump($a);
 }
 
 test();
 
 class foo {
-	const bar = [1][0];
+    const bar = [1][0];
 }
 
 var_dump(foo::bar);

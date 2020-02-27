@@ -10,23 +10,23 @@ opcache.optimization_level=-1
 <?php
 
 function wp_slash( $value ) {
-	if ( is_array( $value ) ) {
-		foreach ( $value as $k => $v ) {
-			if ( is_array( $v ) ) {
-				$value[$k] = wp_slash( $v );
-			} else {
-				$value[$k] = addslashes( $v );
-			}
-		}
-	} else {
-		$value = addslashes( $value );
-	}
+    if ( is_array( $value ) ) {
+        foreach ( $value as $k => $v ) {
+            if ( is_array( $v ) ) {
+                $value[$k] = wp_slash( $v );
+            } else {
+                $value[$k] = addslashes( $v );
+            }
+        }
+    } else {
+        $value = addslashes( $value );
+    }
 
-	return $value;
+    return $value;
 }
 
 function addslashes_gpc($gpc) {
-	return wp_slash($gpc);
+    return wp_slash($gpc);
 }
 
 var_dump(addslashes_gpc(array(array("test"))));

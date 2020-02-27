@@ -29,17 +29,17 @@ $enc = mb_http_input('P');
 
 // check
 if (empty($ini)) {
-	// Must be pass
-	if ($enc === 'pass') {
-		echo "OK\n";
-	}
-	else {
-		echo "NG\n";
-	}
+    // Must be pass
+    if ($enc === 'pass') {
+        echo "OK\n";
+    }
+    else {
+        echo "NG\n";
+    }
 }
 else {
-	// Some encoding
-	echo "This heppens when php.ini-dist is not used\n";
+    // Some encoding
+    echo "This heppens when php.ini-dist is not used\n";
 }
 
 ?>

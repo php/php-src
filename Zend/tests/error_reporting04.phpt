@@ -6,8 +6,8 @@ testing @ and error_reporting - 4
 error_reporting(E_ALL & ~E_DEPRECATED);
 
 function foo() {
-	echo $undef;
-	error_reporting(E_ALL);
+    echo $undef;
+    error_reporting(E_ALL);
 }
 
 

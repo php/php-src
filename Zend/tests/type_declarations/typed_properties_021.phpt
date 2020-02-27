@@ -3,7 +3,7 @@ Test typed properties delay type check on constant
 --FILE--
 <?php
 class Foo {
-	public int $bar = BAR::BAZ;
+    public int $bar = BAR::BAZ;
 }
 
 try {

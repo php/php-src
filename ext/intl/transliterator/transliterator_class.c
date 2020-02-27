@@ -15,6 +15,7 @@
 #include "transliterator_class.h"
 #include "php_intl.h"
 #include "transliterator_methods.h"
+#include "transliterator_arginfo.h"
 #include "intl_error.h"
 #include "intl_convert.h"
 #include "intl_data.h"
@@ -254,44 +255,18 @@ static zval *Transliterator_write_property( zend_object *object, zend_string *na
 }
 /* }}} */
 
-/*
- * 'Transliterator' class registration structures & functions
- */
-
-/* {{{ Transliterator methods arguments info */
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_trans_void, 0, 0, 0 )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_trans_create, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, id )
-	ZEND_ARG_INFO( 0, direction )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_trans_create_from_rules, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, rules )
-	ZEND_ARG_INFO( 0, direction )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_trans_me_transliterate, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, subject )
-	ZEND_ARG_INFO( 0, start )
-	ZEND_ARG_INFO( 0, end )
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ Transliterator_class_functions
  * Every 'Transliterator' class method has an entry in this table
  */
 static const zend_function_entry Transliterator_class_functions[] = {
-	PHP_ME( Transliterator,			__construct,						ainfo_trans_void,				ZEND_ACC_PRIVATE | ZEND_ACC_FINAL )
-	PHP_ME_MAPPING( create,			transliterator_create,				ainfo_trans_create,				ZEND_ACC_STATIC |ZEND_ACC_PUBLIC )
-	PHP_ME_MAPPING( createFromRules,transliterator_create_from_rules,	ainfo_trans_create_from_rules,	ZEND_ACC_STATIC | ZEND_ACC_PUBLIC )
-	PHP_ME_MAPPING( createInverse,	transliterator_create_inverse,		ainfo_trans_void,				ZEND_ACC_PUBLIC )
-	PHP_ME_MAPPING( listIDs,		transliterator_list_ids,			ainfo_trans_void,				ZEND_ACC_STATIC | ZEND_ACC_PUBLIC )
-	PHP_ME_MAPPING( transliterate,	transliterator_transliterate,		ainfo_trans_me_transliterate,	ZEND_ACC_PUBLIC )
-	PHP_ME_MAPPING( getErrorCode,	transliterator_get_error_code,		ainfo_trans_void,				ZEND_ACC_PUBLIC )
-	PHP_ME_MAPPING( getErrorMessage,transliterator_get_error_message,	ainfo_trans_void,				ZEND_ACC_PUBLIC )
+	PHP_ME( Transliterator,			__construct,						arginfo_class_Transliterator___construct,		ZEND_ACC_PRIVATE | ZEND_ACC_FINAL )
+	PHP_ME_MAPPING( create,			transliterator_create,				arginfo_class_Transliterator_create,			ZEND_ACC_STATIC |ZEND_ACC_PUBLIC )
+	PHP_ME_MAPPING( createFromRules,transliterator_create_from_rules,	arginfo_class_Transliterator_createFromRules,	ZEND_ACC_STATIC | ZEND_ACC_PUBLIC )
+	PHP_ME_MAPPING( createInverse,	transliterator_create_inverse,		arginfo_class_Transliterator_createInverse,		ZEND_ACC_PUBLIC )
+	PHP_ME_MAPPING( listIDs,		transliterator_list_ids,			arginfo_class_Transliterator_listIDs,			ZEND_ACC_STATIC | ZEND_ACC_PUBLIC )
+	PHP_ME_MAPPING( transliterate,	transliterator_transliterate,		arginfo_class_Transliterator_transliterate,		ZEND_ACC_PUBLIC )
+	PHP_ME_MAPPING( getErrorCode,	transliterator_get_error_code,		arginfo_class_Transliterator_getErrorCode,		ZEND_ACC_PUBLIC )
+	PHP_ME_MAPPING( getErrorMessage,transliterator_get_error_message,	arginfo_class_Transliterator_getErrorMessage,	ZEND_ACC_PUBLIC )
 	PHP_FE_END
 };
 /* }}} */

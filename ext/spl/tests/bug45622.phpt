@@ -4,7 +4,7 @@ SPL: Bug #45622 (isset($arrayObject->p) misbehaves with ArrayObject::ARRAY_AS_PR
 <?php
 
 class C extends ArrayObject {
-	public $p = 'object property';
+    public $p = 'object property';
 }
 
 $ao = new C(array('p'=>'array element'));

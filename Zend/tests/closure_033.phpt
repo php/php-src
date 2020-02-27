@@ -4,15 +4,15 @@ Closure 033: Dynamic closure property and private function
 <?php
 
 class Test {
-	public $func;
-	function __construct() {
-		$this->func = function() {
-			echo __METHOD__ . "()\n";
-		};
-	}
-	private function func() {
-		echo __METHOD__ . "()\n";
-	}
+    public $func;
+    function __construct() {
+        $this->func = function() {
+            echo __METHOD__ . "()\n";
+        };
+    }
+    private function func() {
+        echo __METHOD__ . "()\n";
+    }
 }
 
 $o = new Test;

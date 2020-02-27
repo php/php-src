@@ -48,7 +48,7 @@ class fooIterator extends \RecursiveFilterIterator
   {
     public Function __destruct ()
       {
-		eval("class A extends NotExists {}");
+        eval("class A extends NotExists {}");
 
         /* CRASH */
       }

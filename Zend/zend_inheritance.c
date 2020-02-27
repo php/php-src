@@ -333,6 +333,28 @@ static zend_bool zend_type_contains_traversable(zend_type type) {
 	return 0;
 }
 
+static zend_bool zend_type_permits_self(
+		zend_type type, zend_class_entry *scope, zend_class_entry *self) {
+	if (ZEND_TYPE_FULL_MASK(type) & MAY_BE_OBJECT) {
+		return 1;
+	}
+
+	/* Any types that may satisfy self must have already been loaded at this point
+	 * (as a parent or interface), so we never need to register delayed variance obligations
+	 * for this case. */
+	zend_type *single_type;
+	ZEND_TYPE_FOREACH(type, single_type) {
+		if (ZEND_TYPE_HAS_NAME(*single_type)) {
+			zend_string *name = resolve_class_name(scope, ZEND_TYPE_NAME(*single_type));
+			zend_class_entry *ce = lookup_class(self, name, /* register_unresolved */ 0);
+			if (ce && unlinked_instanceof(self, ce)) {
+				return 1;
+			}
+		}
+	} ZEND_TYPE_FOREACH_END();
+	return 0;
+}
+
 /* Unresolved means that class declarations that are currently not available are needed to
  * determine whether the inheritance is valid or not. At runtime UNRESOLVED should be treated
  * as an ERROR. */
@@ -406,13 +428,22 @@ static inheritance_status zend_perform_covariant_type_check(
 	if (added_types) {
 		// TODO: Make "iterable" an alias of "array|Traversable" instead,
 		// so these special cases will be handled automatically.
-		if (added_types == MAY_BE_ITERABLE
+		if ((added_types & MAY_BE_ITERABLE)
 				&& (proto_type_mask & MAY_BE_ARRAY)
 				&& zend_type_contains_traversable(proto_type)) {
 			/* Replacing array|Traversable with iterable is okay */
-		} else if (added_types == MAY_BE_ARRAY && (proto_type_mask & MAY_BE_ITERABLE)) {
+			added_types &= ~MAY_BE_ITERABLE;
+		}
+		if ((added_types & MAY_BE_ARRAY) && (proto_type_mask & MAY_BE_ITERABLE)) {
 			/* Replacing iterable with array is okay */
-		} else {
+			added_types &= ~MAY_BE_ARRAY;
+		}
+		if ((added_types & MAY_BE_STATIC)
+				&& zend_type_permits_self(proto_type, proto_scope, fe_scope)) {
+			/* Replacing type that accepts self with static is okay */
+			added_types &= ~MAY_BE_STATIC;
+		}
+		if (added_types) {
 			/* Otherwise adding new types is illegal */
 			return INHERITANCE_ERROR;
 		}
@@ -495,16 +526,9 @@ static inheritance_status zend_do_perform_arg_type_hint_check(
 static inheritance_status zend_do_perform_implementation_check(
 		const zend_function *fe, const zend_function *proto) /* {{{ */
 {
-	uint32_t i, num_args;
+	uint32_t i, num_args, proto_num_args, fe_num_args;
 	inheritance_status status, local_status;
-
-	/* If it's a user function then arg_info == NULL means we don't have any parameters but
-	 * we still need to do the arg number checks.  We are only willing to ignore this for internal
-	 * functions because extensions don't always define arg_info.
-	 */
-	if (!proto->common.arg_info && proto->common.type != ZEND_USER_FUNCTION) {
-		return INHERITANCE_SUCCESS;
-	}
+	zend_bool proto_is_variadic, fe_is_variadic;
 
 	/* Checks for constructors only if they are declared in an interface,
 	 * or explicitly marked as abstract
@@ -516,9 +540,8 @@ static inheritance_status zend_do_perform_implementation_check(
 	/* If the prototype method is private do not enforce a signature */
 	ZEND_ASSERT(!(proto->common.fn_flags & ZEND_ACC_PRIVATE));
 
-	/* check number of arguments */
-	if (proto->common.required_num_args < fe->common.required_num_args
-		|| proto->common.num_args > fe->common.num_args) {
+	/* The number of required arguments cannot increase. */
+	if (proto->common.required_num_args < fe->common.required_num_args) {
 		return INHERITANCE_ERROR;
 	}
 
@@ -528,35 +551,36 @@ static inheritance_status zend_do_perform_implementation_check(
 		return INHERITANCE_ERROR;
 	}
 
-	if ((proto->common.fn_flags & ZEND_ACC_VARIADIC)
-		&& !(fe->common.fn_flags & ZEND_ACC_VARIADIC)) {
+	proto_is_variadic = (proto->common.fn_flags & ZEND_ACC_VARIADIC) != 0;
+	fe_is_variadic = (fe->common.fn_flags & ZEND_ACC_VARIADIC) != 0;
+
+	/* A variadic function cannot become non-variadic */
+	if (proto_is_variadic && !fe_is_variadic) {
 		return INHERITANCE_ERROR;
 	}
 
-	/* For variadic functions any additional (optional) arguments that were added must be
-	 * checked against the signature of the variadic argument, so in this case we have to
-	 * go through all the parameters of the function and not just those present in the
-	 * prototype. */
-	num_args = proto->common.num_args;
-	if (proto->common.fn_flags & ZEND_ACC_VARIADIC) {
-		num_args++;
-        if (fe->common.num_args >= proto->common.num_args) {
-			num_args = fe->common.num_args;
-			if (fe->common.fn_flags & ZEND_ACC_VARIADIC) {
-				num_args++;
-			}
-		}
-	}
+	/* The variadic argument is not included in the stored argument count. */
+	proto_num_args = proto->common.num_args + proto_is_variadic;
+	fe_num_args = fe->common.num_args + fe_is_variadic;
+	num_args = MAX(proto_num_args, fe_num_args);
 
 	status = INHERITANCE_SUCCESS;
 	for (i = 0; i < num_args; i++) {
-		zend_arg_info *fe_arg_info = &fe->common.arg_info[i];
-
-		zend_arg_info *proto_arg_info;
-		if (i < proto->common.num_args) {
-			proto_arg_info = &proto->common.arg_info[i];
-		} else {
-			proto_arg_info = &proto->common.arg_info[proto->common.num_args];
+		zend_arg_info *proto_arg_info =
+			i < proto_num_args ? &proto->common.arg_info[i] :
+			proto_is_variadic ? &proto->common.arg_info[proto_num_args - 1] : NULL;
+		zend_arg_info *fe_arg_info =
+			i < fe_num_args ? &fe->common.arg_info[i] :
+			fe_is_variadic ? &fe->common.arg_info[fe_num_args - 1] : NULL;
+		if (!proto_arg_info) {
+			/* A new (optional) argument has been added, which is fine. */
+			continue;
+		}
+		if (!fe_arg_info) {
+			/* An argument has been removed. This is considered illegal, because arity checks
+			 * work based on a model where passing more than the declared number of parameters
+			 * to a function is an error. */
+			return INHERITANCE_ERROR;
 		}
 
 		local_status = zend_do_perform_arg_type_hint_check(fe, fe_arg_info, proto, proto_arg_info);
@@ -1160,7 +1184,7 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 
 	/* Inherit interfaces */
 	if (parent_ce->num_interfaces) {
-		if (!(ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES)) {
+		if (!ce->num_interfaces) {
 			zend_do_inherit_interfaces(ce, parent_ce);
 		} else {
 			uint32_t i;
@@ -2209,8 +2233,10 @@ typedef struct {
 	union {
 		zend_class_entry *dependency_ce;
 		struct {
-			const zend_function *parent_fn;
-			const zend_function *child_fn;
+			/* Traits may use temporary on-stack functions during inheritance checks,
+			 * so use copies of functions here as well. */
+			zend_function parent_fn;
+			zend_function child_fn;
 		};
 		struct {
 			const zend_property_info *parent_prop;
@@ -2262,8 +2288,17 @@ static void add_compatibility_obligation(
 	HashTable *obligations = get_or_init_obligations_for_class(ce);
 	variance_obligation *obligation = emalloc(sizeof(variance_obligation));
 	obligation->type = OBLIGATION_COMPATIBILITY;
-	obligation->child_fn = child_fn;
-	obligation->parent_fn = parent_fn;
+	/* Copy functions, because they may be stack-allocated in the case of traits. */
+	if (child_fn->common.type == ZEND_INTERNAL_FUNCTION) {
+		memcpy(&obligation->child_fn, child_fn, sizeof(zend_internal_function));
+	} else {
+		memcpy(&obligation->child_fn, child_fn, sizeof(zend_op_array));
+	}
+	if (parent_fn->common.type == ZEND_INTERNAL_FUNCTION) {
+		memcpy(&obligation->parent_fn, parent_fn, sizeof(zend_internal_function));
+	} else {
+		memcpy(&obligation->parent_fn, parent_fn, sizeof(zend_op_array));
+	}
 	zend_hash_next_index_insert_ptr(obligations, obligation);
 }
 
@@ -2292,13 +2327,13 @@ static int check_variance_obligation(zval *zv) {
 		}
 	} else if (obligation->type == OBLIGATION_COMPATIBILITY) {
 		inheritance_status status = zend_do_perform_implementation_check(
-			obligation->child_fn, obligation->parent_fn);
+			&obligation->child_fn, &obligation->parent_fn);
 		if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
 			if (EXPECTED(status == INHERITANCE_UNRESOLVED)) {
 				return ZEND_HASH_APPLY_KEEP;
 			}
 			ZEND_ASSERT(status == INHERITANCE_ERROR);
-			emit_incompatible_method_error(obligation->child_fn, obligation->parent_fn, status);
+			emit_incompatible_method_error(&obligation->child_fn, &obligation->parent_fn, status);
 		}
 		/* Either the compatibility check was successful or only threw a warning. */
 	} else {
@@ -2365,10 +2400,10 @@ static void report_variance_errors(zend_class_entry *ce) {
 			/* Just used to populate the delayed_autoloads table,
 			 * which will be used when printing the "unresolved" error. */
 			inheritance_status status = zend_do_perform_implementation_check(
-				obligation->child_fn, obligation->parent_fn);
+				&obligation->child_fn, &obligation->parent_fn);
 			ZEND_ASSERT(status == INHERITANCE_UNRESOLVED);
 			emit_incompatible_method_error(
-				obligation->child_fn, obligation->parent_fn, status);
+				&obligation->child_fn, &obligation->parent_fn, status);
 		} else if (obligation->type == OBLIGATION_PROPERTY_COMPATIBILITY) {
 			emit_incompatible_property_error(obligation->child_prop, obligation->parent_prop);
 		} else {
@@ -2448,10 +2483,10 @@ ZEND_API int zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_nam
 		}
 		zend_do_inheritance(ce, parent);
 	}
-	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
+	if (ce->num_traits) {
 		zend_do_bind_traits(ce);
 	}
-	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
+	if (interfaces) {
 		zend_do_implement_interfaces(ce, interfaces);
 	}
 	if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {

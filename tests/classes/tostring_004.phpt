@@ -28,9 +28,9 @@ try {
 
 echo "\n\nObject with bad __toString():\n";
 class badToString {
-	function __toString() {
-		return 0;
-	}
+    function __toString() {
+        return 0;
+    }
 }
 
 $obj = new badToString;
@@ -53,7 +53,7 @@ try {
 --EXPECT--
 Object with no __toString():
 Try 1:
-printf() expects parameter 1 to be string, object given
+printf(): Argument #1 ($format) must be of type string, object given
 
 
 Try 2:

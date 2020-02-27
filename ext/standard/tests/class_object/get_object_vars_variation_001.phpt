@@ -9,7 +9,7 @@ get_object_vars() - ensure statics are not shown
  */
 
 Class A {
-	public static $var = 'hello';
+    public static $var = 'hello';
 }
 
 $a = new A;

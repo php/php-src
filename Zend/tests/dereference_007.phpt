@@ -6,19 +6,19 @@ Trying to write on method return
 error_reporting(E_ALL);
 
 class foo {
-	public $x = array();
+    public $x = array();
 
-	public function b() {
-		return $this->x;
-	}
+    public function b() {
+        return $this->x;
+    }
 
-	public function c() {
-		return $x;
-	}
+    public function c() {
+        return $x;
+    }
 
-	static public function d() {
+    static public function d() {
 
-	}
+    }
 }
 
 $foo = new foo;

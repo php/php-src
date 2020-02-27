@@ -4,15 +4,15 @@ class constants as default function arguments
 <?php
 
 class test {
-	const val = 1;
+    const val = 1;
 }
 
 function foo($v = test::val) {
-	var_dump($v);
+    var_dump($v);
 }
 
 function bar($b = NoSuchClass::val) {
-	var_dump($b);
+    var_dump($b);
 }
 
 foo();

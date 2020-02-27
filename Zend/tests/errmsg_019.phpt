@@ -4,8 +4,8 @@ errmsg: __destruct() cannot take arguments
 <?php
 
 class test {
-	function __destruct($var) {
-	}
+    function __destruct($var) {
+    }
 }
 
 echo "Done\n";

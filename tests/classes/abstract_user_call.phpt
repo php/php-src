@@ -5,15 +5,15 @@ ZE2 An abstrcat method cannot be called indirectly
 
 abstract class test_base
 {
-	abstract function func();
+    abstract function func();
 }
 
 class test extends test_base
 {
-	function func()
-	{
-		echo __METHOD__ . "()\n";
-	}
+    function func()
+    {
+        echo __METHOD__ . "()\n";
+    }
 }
 
 $o = new test;
@@ -29,4 +29,4 @@ try {
 ?>
 --EXPECT--
 test::func()
-call_user_func() expects parameter 1 to be a valid callback, cannot call abstract method test_base::func()
+call_user_func(): Argument #1 ($function) must be a valid callback, cannot call abstract method test_base::func()

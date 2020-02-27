@@ -34,7 +34,7 @@ for($i = -1; $i < 10; $i++) {
     echo "-- Compression level $i --\n";
     $output = gzdeflate($data, $i);
     var_dump(md5($output));
-	var_dump(strcmp(gzinflate($output), $data));
+    var_dump(strcmp(gzinflate($output), $data));
 }
 
 // Compressing a smaller string
@@ -42,7 +42,7 @@ for($i = -1; $i < 10; $i++) {
     echo "-- Compression level $i --\n";
     $output = gzdeflate($smallstring, $i);
     var_dump(bin2hex($output));
-	var_dump(strcmp(gzinflate($output), $smallstring));
+    var_dump(strcmp(gzinflate($output), $smallstring));
 }
 
 // Calling gzdeflate() with just mandatory arguments

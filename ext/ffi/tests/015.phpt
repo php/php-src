@@ -7,52 +7,52 @@ ffi.enable=1
 --FILE--
 <?php
 try {
-	FFI::cdef("struct DIR; static struct DIR dir;");
-	echo "ok\n";
+    FFI::cdef("struct DIR; static struct DIR dir;");
+    echo "ok\n";
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 try {
-	FFI::cdef("struct DIR; static struct DIR *ptr;");
-	echo "ok\n";
+    FFI::cdef("struct DIR; static struct DIR *ptr;");
+    echo "ok\n";
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 try {
-	FFI::cdef("struct DIR; typedef struct DIR DIR; static DIR dir;");
-	echo "ok\n";
+    FFI::cdef("struct DIR; typedef struct DIR DIR; static DIR dir;");
+    echo "ok\n";
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 try {
-	FFI::cdef("struct DIR; typedef struct DIR DIR; static DIR *ptr;");
-	echo "ok\n";
+    FFI::cdef("struct DIR; typedef struct DIR DIR; static DIR *ptr;");
+    echo "ok\n";
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 try {
-	FFI::cdef("struct DIR; static struct DIR foo();");
-	echo "ok\n";
+    FFI::cdef("struct DIR; static struct DIR foo();");
+    echo "ok\n";
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 try {
-	FFI::cdef("struct DIR; static struct DIR* foo();");
-	echo "ok\n";
+    FFI::cdef("struct DIR; static struct DIR* foo();");
+    echo "ok\n";
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 try {
-	FFI::cdef("struct DIR; static void foo(struct DIR);");
-	echo "ok\n";
+    FFI::cdef("struct DIR; static void foo(struct DIR);");
+    echo "ok\n";
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 try {
-	FFI::cdef("struct DIR; static void foo(struct DIR*);");
-	echo "ok\n";
+    FFI::cdef("struct DIR; static void foo(struct DIR*);");
+    echo "ok\n";
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage()."\n";
+    echo get_class($e) . ": " . $e->getMessage()."\n";
 }
 ?>
 ok

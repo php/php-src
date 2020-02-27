@@ -248,7 +248,7 @@ if (VS_TOOLSET && VCVERS >= 1914) {
 
 ADD_SOURCES("main", "main.c snprintf.c spprintf.c getopt.c fopen_wrappers.c \
 	php_scandir.c php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
-	strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c network.c \
+	strlcat.c reentrancy.c php_variables.c php_ticks.c network.c \
 	php_open_temporary_file.c output.c internal_functions.c \
 	php_syslog.c");
 ADD_FLAG("CFLAGS_BD_MAIN", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
@@ -327,7 +327,7 @@ if (CLANG_TOOLSET) {
 		"-Wno-unused-command-line-argument -Wno-unused-function -Wno-ignored-pragma-optimize");
 	}
 
-	ARG_ENABLE("sanitizer", "Enable address sanitizer extension", "no");
+	ARG_ENABLE("sanitizer", "Enable ASan and UBSan extensions", "no");
 	if (PHP_SANITIZER == "yes") {
 		if (COMPILER_NUMERIC_VERSION < 500) {
 			ERROR("Clang at least 5.0.0 required for sanitation plugins");

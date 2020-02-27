@@ -35,16 +35,16 @@ echo "==========================================================================
 echo "============================================================================\n";
 
 try {
-	$phar->setDefaultStub(str_repeat('a', 400));
-	$phar->stopBuffering();
-	var_dump(strlen($phar->getStub()));
+    $phar->setDefaultStub(str_repeat('a', 400));
+    $phar->stopBuffering();
+    var_dump(strlen($phar->getStub()));
 
-	$phar->setDefaultStub(str_repeat('a', 401));
-	$phar->stopBuffering();
-	var_dump(strlen($phar->getStub()));
+    $phar->setDefaultStub(str_repeat('a', 401));
+    $phar->stopBuffering();
+    var_dump(strlen($phar->getStub()));
 
 } catch(Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 ?>

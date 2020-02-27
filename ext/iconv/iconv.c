@@ -2052,7 +2052,7 @@ PHP_FUNCTION(iconv_substr)
 	err = _php_iconv_substr(&retval, ZSTR_VAL(str), ZSTR_LEN(str), offset, length, charset);
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset);
 
-	if (err == PHP_ICONV_ERR_SUCCESS && ZSTR_LEN(str) >= 0 && retval.s != NULL) {
+	if (err == PHP_ICONV_ERR_SUCCESS && retval.s != NULL) {
 		RETURN_NEW_STR(retval.s);
 	}
 	smart_str_free(&retval);

@@ -1276,7 +1276,7 @@ PHP_FUNCTION(implode)
 
 	if (pieces == NULL) {
 		if (arg1_array == NULL) {
-			zend_type_error("Argument must be an array");
+			zend_type_error("%s(): Argument #1 ($pieces) must be of type array, string given", get_active_function_name());
 			RETURN_THROWS();
 		}
 
@@ -1284,7 +1284,7 @@ PHP_FUNCTION(implode)
 		pieces = arg1_array;
 	} else {
 		if (arg1_str == NULL) {
-			zend_type_error("The first argument must be a string");
+			zend_type_error("%s(): Argument #1 ($glue) must be of type string, array given", get_active_function_name());
 			RETURN_THROWS();
 		}
 	}
@@ -4659,7 +4659,7 @@ PHP_FUNCTION(strip_tags)
 	}
 
 	buf = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
-	ZSTR_LEN(buf) = php_strip_tags_ex(ZSTR_VAL(buf), ZSTR_LEN(str), NULL, allowed_tags, allowed_tags_len, 0);
+	ZSTR_LEN(buf) = php_strip_tags_ex(ZSTR_VAL(buf), ZSTR_LEN(str), allowed_tags, allowed_tags_len, 0);
 	smart_str_free(&tags_ss);
 	RETURN_NEW_STR(buf);
 }
@@ -4869,9 +4869,9 @@ int php_tag_find(char *tag, size_t len, const char *set) {
 }
 /* }}} */
 
-PHPAPI size_t php_strip_tags(char *rbuf, size_t len, uint8_t *stateptr, const char *allow, size_t allow_len) /* {{{ */
+PHPAPI size_t php_strip_tags(char *rbuf, size_t len, const char *allow, size_t allow_len) /* {{{ */
 {
-	return php_strip_tags_ex(rbuf, len, stateptr, allow, allow_len, 0);
+	return php_strip_tags_ex(rbuf, len, allow, allow_len, 0);
 }
 /* }}} */
 
@@ -4895,7 +4895,7 @@ PHPAPI size_t php_strip_tags(char *rbuf, size_t len, uint8_t *stateptr, const ch
 	swm: Added ability to strip <?xml tags without assuming it PHP
 	code.
 */
-PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, uint8_t *stateptr, const char *allow, size_t allow_len, zend_bool allow_tag_spaces)
+PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, const char *allow, size_t allow_len, zend_bool allow_tag_spaces)
 {
 	char *tbuf, *tp, *rp, c, lc;
 	const char *buf, *p, *end;
@@ -4918,18 +4918,6 @@ PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, uint8_t *stateptr, const
 		tp = tbuf;
 	} else {
 		tbuf = tp = NULL;
-	}
-
-	if (stateptr) {
-		state = *stateptr;
-		switch (state) {
-			case 1: goto state_1;
-			case 2: goto state_2;
-			case 3: goto state_3;
-			case 4: goto state_4;
-			default:
-				break;
-		}
 	}
 
 state_0:
@@ -5099,7 +5087,7 @@ state_2:
 				break;
 			}
 
-			if (!br && lc != '\"' && *(p-1) == '?') {
+			if (!br && p >= buf + 1 && lc != '\"' && *(p-1) == '?') {
 				in_q = state = 0;
 				tp = tbuf;
 				p++;
@@ -5108,7 +5096,7 @@ state_2:
 			break;
 		case '"':
 		case '\'':
-			if (*(p-1) != '\\') {
+			if (p >= buf + 1 && *(p-1) != '\\') {
 				if (lc == c) {
 					lc = '\0';
 				} else if (lc != '\\') {
@@ -5225,8 +5213,6 @@ finish:
 	if (allow_free) {
 		efree(allow_free);
 	}
-	if (stateptr)
-		*stateptr = state;
 
 	return (size_t)(rp - rbuf);
 }

@@ -16,11 +16,11 @@ echo "*** Testing vprintf() : string formats and non-string values ***\n";
 
 // defining array of string formats
 $formats =
-  '%s %+s %-s 
-   %ls %Ls %4s %-4s
-   %10.4s %-10.4s %04s %04.4s
-   %\'#2s %\'2s %\'$2s %\'_2s
-   %3$s %4$s %1$s %2$s';
+    '%s %+s %-s
+    %ls %Ls %4s %-4s
+    %10.4s %-10.4s %04s %04.4s
+    %\'#2s %\'2s %\'$2s %\'_2s
+    %3$s %4$s %1$s %2$s';
 
 // Arrays of non string values for the format defined in $format.
 // Each sub array contains non string values which correspond to each format in $format
@@ -73,20 +73,20 @@ foreach($args_array as $args) {
 *** Testing vprintf() : string formats and non-string values ***
 
 -- Iteration 1 --
-2.2 0.2 10.2 
-   123456.234 s -1234.6789 1234.6789
-         2123 2765       -27654321000 1234
-   12.000000011111 -12.00000111111 -123456.234 3.33
-   10.2 123456.234 2.2 0.2
-int(172)
+2.2 0.2 10.2
+    123456.234 s -1234.6789 1234.6789
+          2123 2765       -27654321000 1234
+    12.000000011111 -12.00000111111 -123456.234 3.33
+    10.2 123456.234 2.2 0.2
+int(175)
 
 -- Iteration 2 --
-2 -2 2 
-   123456 s -12346789 12346789
-         1232 2000       -40000 2221
-   12345780 1211111 -12111111 -12345634
-   2 123456 2 -2
-int(132)
+2 -2 2
+    123456 s -12346789 12346789
+          1232 2000       -40000 2221
+    12345780 1211111 -12111111 -12345634
+    2 123456 2 -2
+int(135)
 
 -- Iteration 3 --
 
@@ -125,17 +125,17 @@ Warning: Array to string conversion in %s on line %d
 Warning: Array to string conversion in %s on line %d
 
 Warning: Array to string conversion in %s on line %d
-Array Array Array 
-   Array s Array Array
-         Arra Arra       Array Arra
-   Array Array Array Array
-   Array Array Array Array
-int(131)
+Array Array Array
+    Array s Array Array
+          Arra Arra       Array Arra
+    Array Array Array Array
+    Array Array Array Array
+int(134)
 
 -- Iteration 4 --
-1 1  
-   1 s      1   
-            1            0001 0000
-   #0 1 $1 _0
-    1 1 1
-int(81)
+1 1 
+    1 s      1   
+             1            0001 0000
+    #0 1 $1 _0
+     1 1 1
+int(84)

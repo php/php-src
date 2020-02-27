@@ -245,21 +245,21 @@ function gen_xml($val, $key, $prefix)
     global $xml_fd;
     print "gen_xml(prefix=$prefix)\n";
     if (is_array($val)) {
-	if (preg_match('/^\d+$/', $key)) {
-	    if ($key == 1) {
-		print substr($prefix, 0, -1) . "\n";
-	    }
-	    array_walk_recursive($val, "gen_xml", "$prefix@");
-	}
-	else {
-	    array_walk_recursive($val, "gen_xml", "$prefix$key/");
-	}
+    if (preg_match('/^\d+$/', $key)) {
+        if ($key == 1) {
+        print substr($prefix, 0, -1) . "\n";
+        }
+        array_walk_recursive($val, "gen_xml", "$prefix@");
     }
     else {
-	    if (strlen($val) > 0)
-		print "$prefix$key=$val\n";
-	    else
-		print "$prefix$key\n";
+        array_walk_recursive($val, "gen_xml", "$prefix$key/");
+    }
+    }
+    else {
+        if (strlen($val) > 0)
+        print "$prefix$key=$val\n";
+        else
+        print "$prefix$key\n";
     }
     print "gen_xml(prefix=$prefix) end\n";
 }

@@ -15,9 +15,9 @@ function callback1() {
   return 1;
 }
 try {
-	var_dump( array_map('callback1') );
+    var_dump( array_map('callback1') );
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "\n-- Testing array_map() function with less no. of arrays than callback function arguments --\n";
@@ -26,9 +26,9 @@ function callback2($p, $q) {
   return $p * $q;
 }
 try {
-	var_dump( array_map('callback2', $arr1) );
+    var_dump( array_map('callback2', $arr1) );
 } catch (Throwable $e) {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 echo "\n-- Testing array_map() function with more no. of arrays than callback function arguments --\n";

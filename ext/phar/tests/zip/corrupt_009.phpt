@@ -5,9 +5,9 @@ Phar: corrupted zip (extra field way too long)
 --FILE--
 <?php
 try {
-	new PharData(__DIR__ . '/files/extralen_toolong.zip');
+    new PharData(__DIR__ . '/files/extralen_toolong.zip');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
 --EXPECTF--

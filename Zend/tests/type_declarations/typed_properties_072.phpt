@@ -2,13 +2,13 @@
 Typed property must cast when used with __get()
 --FILE--
 <?php
-  
-class Test {
-	public int $val;
 
-	public function __get($name) {
-		return "42";
-	}
+class Test {
+    public int $val;
+
+    public function __get($name) {
+        return "42";
+    }
 }
 
 $test = new Test;

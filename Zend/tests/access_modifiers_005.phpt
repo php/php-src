@@ -4,8 +4,8 @@ using multiple access modifiers (final methods)
 <?php
 
 class test {
-	final final function foo() {
-	}
+    final final function foo() {
+    }
 }
 
 echo "Done\n";

@@ -59,40 +59,46 @@ typedef struct _zend_fcall_info_cache {
 
 #define ZEND_NS_NAME(ns, name)			ns "\\" name
 
+/* ZEND_FN/ZEND_MN are inlined below to prevent pre-scan macro expansion,
+ * which causes issues if the function name is also a macro name. */
 #define ZEND_FN(name) zif_##name
 #define ZEND_MN(name) zim_##name
+
 #define ZEND_NAMED_FUNCTION(name)		void ZEND_FASTCALL name(INTERNAL_FUNCTION_PARAMETERS)
-#define ZEND_FUNCTION(name)				ZEND_NAMED_FUNCTION(ZEND_FN(name))
-#define ZEND_METHOD(classname, name)	ZEND_NAMED_FUNCTION(ZEND_MN(classname##_##name))
+#define ZEND_FUNCTION(name)				ZEND_NAMED_FUNCTION(zif_##name)
+#define ZEND_METHOD(classname, name)	ZEND_NAMED_FUNCTION(zim_##classname##_##name)
 
 #define ZEND_FENTRY(zend_name, name, arg_info, flags)	{ #zend_name, name, arg_info, (uint32_t) (sizeof(arg_info)/sizeof(struct _zend_internal_arg_info)-1), flags },
 
 #define ZEND_RAW_FENTRY(zend_name, name, arg_info, flags)   { zend_name, name, arg_info, (uint32_t) (sizeof(arg_info)/sizeof(struct _zend_internal_arg_info)-1), flags },
+
+/* Same as ZEND_NAMED_FE */
 #define ZEND_RAW_NAMED_FE(zend_name, name, arg_info) ZEND_RAW_FENTRY(#zend_name, name, arg_info, 0)
 
-#define ZEND_NAMED_FE(zend_name, name, arg_info)	ZEND_FENTRY(zend_name, name, arg_info, 0)
-#define ZEND_FE(name, arg_info)						ZEND_FENTRY(name, ZEND_FN(name), arg_info, 0)
-#define ZEND_DEP_FE(name, arg_info)                 ZEND_FENTRY(name, ZEND_FN(name), arg_info, ZEND_ACC_DEPRECATED)
-#define ZEND_FALIAS(name, alias, arg_info)			ZEND_FENTRY(name, ZEND_FN(alias), arg_info, 0)
-#define ZEND_DEP_FALIAS(name, alias, arg_info)		ZEND_FENTRY(name, ZEND_FN(alias), arg_info, ZEND_ACC_DEPRECATED)
+#define ZEND_NAMED_FE(zend_name, name, arg_info)	ZEND_RAW_FENTRY(#zend_name, name, arg_info, 0)
+#define ZEND_FE(name, arg_info)						ZEND_RAW_FENTRY(#name, zif_##name, arg_info, 0)
+#define ZEND_DEP_FE(name, arg_info)                 ZEND_RAW_FENTRY(#name, zif_##name, arg_info, ZEND_ACC_DEPRECATED)
+#define ZEND_FALIAS(name, alias, arg_info)			ZEND_RAW_FENTRY(#name, zif_##alias, arg_info, 0)
+#define ZEND_DEP_FALIAS(name, alias, arg_info)		ZEND_RAW_FENTRY(#name, zif_##alias, arg_info, ZEND_ACC_DEPRECATED)
 #define ZEND_NAMED_ME(zend_name, name, arg_info, flags)	ZEND_FENTRY(zend_name, name, arg_info, flags)
-#define ZEND_ME(classname, name, arg_info, flags)	ZEND_FENTRY(name, ZEND_MN(classname##_##name), arg_info, flags)
-#define ZEND_DEP_ME(classname, name, arg_info, flags) ZEND_ME(classname, name, arg_info, flags | ZEND_ACC_DEPRECATED)
-#define ZEND_ABSTRACT_ME(classname, name, arg_info)	ZEND_FENTRY(name, NULL, arg_info, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-#define ZEND_MALIAS(classname, name, alias, arg_info, flags) \
-                                                    ZEND_FENTRY(name, ZEND_MN(classname##_##alias), arg_info, flags)
-#define ZEND_ME_MAPPING(name, func_name, arg_types, flags) ZEND_NAMED_ME(name, ZEND_FN(func_name), arg_types, flags)
+#define ZEND_ME(classname, name, arg_info, flags)	ZEND_RAW_FENTRY(#name, zim_##classname##_##name, arg_info, flags)
+#define ZEND_DEP_ME(classname, name, arg_info, flags) ZEND_RAW_FENTRY(#name, zim_##classname##_##name, arg_info, flags | ZEND_ACC_DEPRECATED)
+#define ZEND_ABSTRACT_ME(classname, name, arg_info)	ZEND_RAW_FENTRY(#name, NULL, arg_info, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+#define ZEND_MALIAS(classname, name, alias, arg_info, flags) ZEND_RAW_FENTRY(#name, zim_##classname##_##alias, arg_info, flags)
+#define ZEND_ME_MAPPING(name, func_name, arg_types, flags) ZEND_RAW_FENTRY(#name, zif_##func_name, arg_types, flags)
 
 #define ZEND_NS_FENTRY(ns, zend_name, name, arg_info, flags)		ZEND_RAW_FENTRY(ZEND_NS_NAME(ns, #zend_name), name, arg_info, flags)
 
 #define ZEND_NS_RAW_FENTRY(ns, zend_name, name, arg_info, flags)	ZEND_RAW_FENTRY(ZEND_NS_NAME(ns, zend_name), name, arg_info, flags)
+
+/* Same as ZEND_NS_NAMED_FE */
 #define ZEND_NS_RAW_NAMED_FE(ns, zend_name, name, arg_info)			ZEND_NS_RAW_FENTRY(ns, #zend_name, name, arg_info, 0)
 
-#define ZEND_NS_NAMED_FE(ns, zend_name, name, arg_info)	ZEND_NS_FENTRY(ns, zend_name, name, arg_info, 0)
-#define ZEND_NS_FE(ns, name, arg_info)					ZEND_NS_FENTRY(ns, name, ZEND_FN(name), arg_info, 0)
-#define ZEND_NS_DEP_FE(ns, name, arg_info)				ZEND_NS_FENTRY(ns, name, ZEND_FN(name), arg_info, ZEND_ACC_DEPRECATED)
-#define ZEND_NS_FALIAS(ns, name, alias, arg_info)		ZEND_NS_FENTRY(ns, name, ZEND_FN(alias), arg_info, 0)
-#define ZEND_NS_DEP_FALIAS(ns, name, alias, arg_info)	ZEND_NS_FENTRY(ns, name, ZEND_FN(alias), arg_info, ZEND_ACC_DEPRECATED)
+#define ZEND_NS_NAMED_FE(ns, zend_name, name, arg_info)	ZEND_NS_RAW_FENTRY(ns, #zend_name, name, arg_info, 0)
+#define ZEND_NS_FE(ns, name, arg_info)					ZEND_NS_RAW_FENTRY(ns, #name, zif_##name, arg_info, 0)
+#define ZEND_NS_DEP_FE(ns, name, arg_info)				ZEND_NS_RAW_FENTRY(ns, #name, zif_##name, arg_info, ZEND_ACC_DEPRECATED)
+#define ZEND_NS_FALIAS(ns, name, alias, arg_info)		ZEND_NS_RAW_FENTRY(ns, #name, zif_##alias, arg_info, 0)
+#define ZEND_NS_DEP_FALIAS(ns, name, alias, arg_info)	ZEND_NS_RAW_FENTRY(ns, #name, zif_##alias, arg_info, ZEND_ACC_DEPRECATED)
 
 #define ZEND_FE_END            { NULL, NULL, NULL, 0, 0 }
 
@@ -1124,17 +1130,19 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 #define FAST_ZPP 1
 
 #define Z_EXPECTED_TYPES(_) \
-	_(Z_EXPECTED_LONG,		"int") \
-	_(Z_EXPECTED_BOOL,		"bool") \
-	_(Z_EXPECTED_STRING,	"string") \
-	_(Z_EXPECTED_ARRAY,		"array") \
-	_(Z_EXPECTED_FUNC,		"valid callback") \
-	_(Z_EXPECTED_RESOURCE,	"resource") \
+	_(Z_EXPECTED_LONG,		"of type int") \
+	_(Z_EXPECTED_BOOL,		"of type bool") \
+	_(Z_EXPECTED_STRING,	"of type string") \
+	_(Z_EXPECTED_ARRAY,		"of type array") \
+	_(Z_EXPECTED_FUNC,		"a valid callback") \
+	_(Z_EXPECTED_RESOURCE,	"of type resource") \
 	_(Z_EXPECTED_PATH,		"a valid path") \
-	_(Z_EXPECTED_OBJECT,	"object") \
-	_(Z_EXPECTED_DOUBLE,	"float") \
-	_(Z_EXPECTED_NUMBER,	"int or float") \
-	_(Z_EXPECTED_STRING_OR_ARRAY, "string or array") \
+	_(Z_EXPECTED_OBJECT,	"of type object") \
+	_(Z_EXPECTED_DOUBLE,	"of type float") \
+	_(Z_EXPECTED_NUMBER,	"of type int|float") \
+	_(Z_EXPECTED_STRING_OR_ARRAY, "of type string|array") \
+
+#define Z_EXPECTED_TYPE
 
 #define Z_EXPECTED_TYPE_ENUM(id, str) id,
 #define Z_EXPECTED_TYPE_STR(id, str)  str,
@@ -1149,6 +1157,11 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(int min_
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, zend_expected_type expected_type, zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, const char *name, zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *error);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error(zend_class_entry *error_ce, uint32_t arg_num, const char *format, ...);
+#define zend_argument_type_error(arg_num, ...) \
+	zend_argument_error(zend_ce_type_error, arg_num, __VA_ARGS__)
+#define zend_argument_value_error(arg_num, ...) \
+	zend_argument_error(zend_ce_value_error, arg_num, __VA_ARGS__)
 
 #define ZPP_ERROR_OK             0
 #define ZPP_ERROR_FAILURE        1
@@ -1384,7 +1397,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *e
 #define Z_PARAM_LONG_OR_NULL(dest, is_null) \
 	Z_PARAM_LONG_EX(dest, is_null, 1, 0)
 
-/* no old equivalent */
+/* old "n" */
 #define Z_PARAM_NUMBER_EX(dest, check_null) \
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!zend_parse_arg_number(_arg, &dest, check_null))) { \

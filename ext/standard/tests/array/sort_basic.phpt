@@ -21,9 +21,9 @@ echo "*** Testing sort() : basic functionality ***\n";
 
 // associative array containing unsorted string values
 $unsorted_strings = array(
-	"l" => "lemon", "o" => "orange",
-	"O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
-	"b" => "banana",
+    "l" => "lemon", "o" => "orange",
+    "O" => "Orange", "O1" => "Orange1", "o2" => "orange2", "O3" => "Orange3", "o20" => "orange20",
+    "b" => "banana",
 );
 
 // array with default keys containing unsorted numeric values

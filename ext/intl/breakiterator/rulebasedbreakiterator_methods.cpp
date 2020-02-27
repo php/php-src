@@ -95,7 +95,7 @@ U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, __construct)
 	zend_restore_error_handling(&error_handling);
 }
 
-U_CFUNC PHP_FUNCTION(rbbi_get_rules)
+U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRules)
 {
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
@@ -120,7 +120,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rules)
 	RETVAL_STR(u8str);
 }
 
-U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)
+U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatus)
 {
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
@@ -134,7 +134,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status)
 	RETURN_LONG(fetch_rbbi(bio)->getRuleStatus());
 }
 
-U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
+U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec)
 {
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;
@@ -172,7 +172,7 @@ U_CFUNC PHP_FUNCTION(rbbi_get_rule_status_vec)
 	delete[] rules;
 }
 
-U_CFUNC PHP_FUNCTION(rbbi_get_binary_rules)
+U_CFUNC PHP_METHOD(IntlRuleBasedBreakIterator, getBinaryRules)
 {
 	BREAKITER_METHOD_INIT_VARS;
 	object = ZEND_THIS;

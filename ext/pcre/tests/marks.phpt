@@ -4,7 +4,7 @@ Test support for PCRE marks
 <?php
 
 $regex = <<<'REGEX'
-/ 
+/
     _ (a) (*MARK:A_MARK) _
   | _ (b) _
   | _ (c) (*MARK:C_MARK) _

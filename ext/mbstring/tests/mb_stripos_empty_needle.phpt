@@ -24,10 +24,18 @@ echo "\n-- ASCII string with in range negative offset --\n";
 var_dump(mb_stripos($string_ascii, '', -2));
 
 echo "\n-- ASCII string with out of bound positive offset --\n";
-var_dump(mb_stripos($string_ascii, '', 150));
+try {
+    var_dump(mb_stripos($string_ascii, '', 150));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "\n-- ASCII string with out of bound negative offset --\n";
-var_dump(mb_stripos($string_ascii, '', -150));
+try {
+    var_dump(mb_stripos($string_ascii, '', -150));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 
 echo "\n-- Multi-byte string without offset --\n";
@@ -40,13 +48,21 @@ echo "\n-- Multi-byte string with in range negative offset --\n";
 var_dump(mb_stripos($string_mb, '', -2));
 
 echo "\n-- Multi-byte string with out of bound positive offset --\n";
-var_dump(mb_stripos($string_mb, '', 150));
+try {
+    var_dump(mb_stripos($string_mb, '', 150));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 echo "\n-- Multi-byte string with out of bound negative offset --\n";
-var_dump(mb_stripos($string_mb, '', -150));
+try {
+    var_dump(mb_stripos($string_mb, '', -150));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 -- ASCII string without offset --
 int(0)
 
@@ -57,14 +73,10 @@ int(2)
 int(5)
 
 -- ASCII string with out of bound positive offset --
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 
 -- ASCII string with out of bound negative offset --
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 
 -- Multi-byte string without offset --
 int(0)
@@ -76,11 +88,7 @@ int(2)
 int(19)
 
 -- Multi-byte string with out of bound positive offset --
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string
 
 -- Multi-byte string with out of bound negative offset --
-
-Warning: mb_stripos(): Offset not contained in string in %s on line %d
-bool(false)
+Offset not contained in string

@@ -39,11 +39,11 @@ $testpassword = 'testuser';
 require(__DIR__."/conn_attr.inc");
 
 function select_fn($conn) {
-	$s = oci_parse($conn,"select * from view_ed");
-	oci_execute($s);
-	while ($row = oci_fetch_row($s)) {
-		var_dump($row);
-	}
+    $s = oci_parse($conn,"select * from view_ed");
+    oci_execute($s);
+    while ($row = oci_fetch_row($s)) {
+        var_dump($row);
+    }
 }
 /* Create a editon MYEDITION
    create a view view_ed in MYEDITION1.

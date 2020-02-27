@@ -6,9 +6,9 @@ Test json_decode() function : JSON_THROW_ON_ERROR flag
 <?php
 
 try {
-	var_dump(json_decode("{", false, 512, JSON_THROW_ON_ERROR));
+    var_dump(json_decode("{", false, 512, JSON_THROW_ON_ERROR));
 } catch (JsonException $e) {
-	var_dump($e);
+    var_dump($e);
 }
 
 ?>

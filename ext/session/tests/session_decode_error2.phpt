@@ -18,7 +18,7 @@ $data = "foo|a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}guff|R:1;blah|R:1;";
 
 var_dump(session_start());
 for($index = 0; $index < strlen($data); $index++) {
-	if(session_status() != PHP_SESSION_ACTIVE) { session_start(); }
+    if(session_status() != PHP_SESSION_ACTIVE) { session_start(); }
     echo "\n-- Iteration $index --\n";
     $encoded = substr($data, 0, $index);
     var_dump(session_decode($encoded));

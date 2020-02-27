@@ -17,9 +17,9 @@ mb_ereg_search_init($test_str);
 
 $positions = array( 5, 20, 21, 25, 0, -5, -20, -30);
 foreach($positions as $pos) {
-	echo("\n* Position: $pos :\n");
-	var_dump(mb_ereg_search_setpos($pos));
-	var_dump(mb_ereg_search_getpos());
+    echo("\n* Position: $pos :\n");
+    var_dump(mb_ereg_search_setpos($pos));
+    var_dump(mb_ereg_search_getpos());
 }
 ?>
 --EXPECTF--

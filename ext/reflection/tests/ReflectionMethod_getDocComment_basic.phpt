@@ -25,7 +25,7 @@ class A {
 
      * My Doc Comment for A::finalStatPubf
      */
-	final static public function finalStatPubf() {}
+    final static public function finalStatPubf() {}
 
 }
 

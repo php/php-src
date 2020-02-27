@@ -25,8 +25,8 @@ jobs:
             --enable-fpm \
             --with-pdo-mysql=mysqlnd \
             --with-mysqli=mysqlnd \
-            --with-pgsql \
-            --with-pdo-pgsql \
+            --with-pgsql=/usr/local/opt/libpq \
+            --with-pdo-pgsql=/usr/local/opt/libpq \
             --with-pdo-sqlite \
             --without-pear \
             --enable-gd \
@@ -65,6 +65,7 @@ jobs:
             --enable-zend-test \
             --enable-intl \
             --with-mhash \
+            --with-sodium \
             --enable-werror \
             --with-config-file-path=/etc \
             --with-config-file-scan-dir=/etc/php.d

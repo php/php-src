@@ -19,7 +19,7 @@ if (is_resource($broker)) {
     $requestDict = enchant_broker_request_dict($broker, $dicts[0]['lang_tag']);
 
     if ($requestDict) {
-    	echo("OK\n");
+        echo("OK\n");
         $dictSuggest = enchant_dict_suggest($requestDict,$sugs);
 
         if (is_array($dictSuggest)) {
@@ -29,7 +29,7 @@ if (is_resource($broker)) {
         }
 
     } else {
-	echo("broker request dict failed\n");
+    echo("broker request dict failed\n");
 
     }
 

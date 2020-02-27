@@ -101,7 +101,7 @@ fclose($file_handle);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : with unexpected values for format argument ***
 
  -- Iteration 1 --
@@ -132,19 +132,19 @@ string(13) "1.07654321E-9"
 string(3) "0.5"
 
  -- Iteration 10 --
-vsprintf() expects parameter 1 to be string, array given
+vsprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 11 --
-vsprintf() expects parameter 1 to be string, array given
+vsprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 12 --
-vsprintf() expects parameter 1 to be string, array given
+vsprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 13 --
-vsprintf() expects parameter 1 to be string, array given
+vsprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 14 --
-vsprintf() expects parameter 1 to be string, array given
+vsprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 15 --
 string(0) ""
@@ -180,5 +180,5 @@ string(0) ""
 string(0) ""
 
  -- Iteration 26 --
-vsprintf() expects parameter 1 to be string, resource given
+vsprintf(): Argument #1 ($format) must be of type string, resource given
 Done

@@ -20,7 +20,7 @@ $stmt = $db->prepare('INSERT INTO test values (1, ?, ?, ?)');
 $data = array("one", "two", "three");
 
 foreach ($data as $i => $v) {
-	$stmt->bindValue($i+1, $v);
+    $stmt->bindValue($i+1, $v);
 }
 $stmt->execute();
 

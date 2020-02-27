@@ -125,6 +125,30 @@ PHP 8.0 UPGRADE NOTES
     warning.
   . Uncaught exceptions now go through "clean shutdown", which means that
     destructors will be called after an uncaught exception.
+  . Compile time fatal error "Only variables can be passed by reference" has been
+    delayed until run-time and converted to "Cannot pass parameter by reference"
+    exception.
+  . Some "Only variables should be passed by reference" notices have been converted
+    to "Cannot pass parameter by reference" exception.
+  . The generated name for anonymous classes has changed. It will now include
+    the name of the first parent or interface:
+
+        new class extends ParentClass {};
+        // -> ParentClass@anonymous
+        new class implements FirstInterface, SecondInterface {};
+        // -> FirstInterface@anonymous
+        new class {};
+        // -> class@anonymous
+
+    The name shown above is still followed by a null byte and and a unique
+    suffix.
+  . Declaring a required parameter after an optional one is deprecated. As an
+    exception, declaring a parameter of the form "Type $param = null" before
+    a required one continues to be allowed, because this pattern was sometimes
+    used to achieve nullable types in older PHP versions.
+
+        function test($a = [], $b) {}       // Deprecated
+        function test(Foo $a = null, $b) {} // Allowed
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
@@ -217,8 +241,8 @@ PHP 8.0 UPGRADE NOTES
   . A non-string pattern argument to mb_ereg_replace() will now be interpreted
     as a string instead of an ASCII codepoint. The previous behavior may be
     restored with an explicit call to chr().
-  . The needle argument for mb_strpos(), mb_strrpos(), mb_stripos(), mb_strripos(), mb_strstr() and mb_stristr()
-    can now be empty.
+  . The needle argument for mb_strpos(), mb_strrpos(), mb_stripos(), mb_strripos(),
+    mb_strstr(), mb_stristr(), mb_strrchr() and mb_strrichr() can now be empty.
   . The $is_hex parameter, which was not used internally, has been removed from
     mb_decode_numericentity().
   . The legacy behaviour of passing the encoding as the third argument instead of an offset for the mb_strrpos
@@ -261,6 +285,7 @@ PHP 8.0 UPGRADE NOTES
     representation of the type, and is no longer deprecated. In particular the
     result will include a nullability indicator for nullable types. The format
     of the return value is not stable and may change between PHP versions.
+  . Reflection export() methods have been removed.
 
 - Socket:
   . The deprecated AI_IDN_ALLOW_UNASSIGNED and AI_IDN_USE_STD3_ASCII_RULES
@@ -286,7 +311,8 @@ PHP 8.0 UPGRADE NOTES
     string. Previously non-string needles were interpreted as an ASCII code
     point. An explicit call to chr() can be used to restore the previous
     behavior.
-  . The needle argument for strpos(), strrpos(), stripos(), strripos(), strstr() and stristr() can now be empty.
+  . The needle argument for strpos(), strrpos(), stripos(), strripos(), strstr(),
+    stristr() and strrchr() can now be empty.
   . The length argument for substr(), substr_count(), substr_compare(), and
     iconv_substr() can now be null. Null values will behave as if no length
     argument was provided and will therefore return the remainder of the string
@@ -303,6 +329,7 @@ PHP 8.0 UPGRADE NOTES
   . convert_cyr_string() has been removed.
   . money_format() has been removed.
   . ezmlm_hash() has been removed.
+  . restore_include_path() has been removed.
   . get_magic_quotes_gpc() and get_magic_quotes_gpc_runtime() has been removed.
   . FILTER_SANITIZE_MAGIC_QUOTES has been removed.
   . Calling implode() with parameters in a reverse order ($pieces, $glue) is no
@@ -315,6 +342,10 @@ PHP 8.0 UPGRADE NOTES
         http://example.com/foo?# => query = "",   fragment = ""
 
     Previously all cases resulted in query and fragment being null.
+  . var_dump() and debug_zval_dump() will now print floating-point numbers
+    using serialize_precision rather than precision. In a default configuration,
+    this means that floating-point numbers are now printed with full accuracy
+    by these debugging functions.
 
 - tidy:
   . The $use_include_path parameter, which was not used internally, has been
@@ -351,6 +382,34 @@ PHP 8.0 UPGRADE NOTES
   . Added WeakMap.
     RFC: https://wiki.php.net/rfc/weak_maps
   . Added ValueError class.
+  . Any number of function parameters may now be replaced by a variadic
+    argument, as long as the types are compatible. For example, the following
+    code is now allowed:
+
+        class A {
+            public function method(int $many, string $parameters, $here) {}
+        }
+        class B extends A {
+            public function method(...$everything) {}
+        }
+  . "static" (as in "late static binding") can now be used as a return type:
+
+        class Test {
+            public function create(): static {
+                return new static();
+            }
+        }
+
+    RFC: https://wiki.php.net/rfc/static_return_type
+  . It is now possible to fetch the class name of an object using
+    `$object::class`. The result is the same as `get_class($object)`.
+    RFC: https://wiki.php.net/rfc/class_name_literal_on_object
+  . New and instanceof can now be used with arbitrary expressions, using
+    `new (expression)(...$args)` and `$obj instanceof (expression)`.
+    RFC: https://wiki.php.net/rfc/variable_syntax_tweaks
+  . Some consistency fixes to variable syntax have been applied, for example
+    writing `Foo::BAR::$baz` is now allowed.
+    RFC: https://wiki.php.net/rfc/variable_syntax_tweaks
 
 - Date:
   . Added DateTime::createFromInterface() and
@@ -359,6 +418,10 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 3. Changes in SAPI modules
 ========================================
+
+- CGI and FPM will now use CONTEXT_DOCUMENT_ROOT to scan for .user.ini files,
+  if it is defined. Otherwise, DOCUMENT_ROOT will be used as before. This
+  improves support for Apache mod_userdir and mod_alias.
 
 ========================================
 4. Deprecated Functionality
@@ -371,6 +434,11 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 6. New Functions
 ========================================
+
+- PCRE:
+  . Added preg_last_error_msg(), which returns a human-readable message for
+    the last PCRE error. It complements preg_last_error(), which returns an
+    integer enum instead.
 
 - SQLite3:
   . Add SQLite3::setAuthorizer() and respective class constants to set a
@@ -421,6 +489,11 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 12. Windows Support
 ========================================
+
+- Standard:
+  . Program execution functions (proc_open(), exec(), popen() etc.) using the
+    shell now consistently execute `%comspec% /s /c "$commandline"`, which has
+    the same effect as executing `$commandline` (without additional quotes).
 
 - php-test-pack:
   . The test runner has been renamed from run-test.php to run-tests.php, to

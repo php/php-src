@@ -3,7 +3,7 @@ Bug #72920 (Accessing a private constant using constant() creates an exception A
 --FILE--
 <?php
 class Foo {
-	private const C1 = "a";
+    private const C1 = "a";
 }
 
 try {

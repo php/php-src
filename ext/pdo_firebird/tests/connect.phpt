@@ -4,10 +4,10 @@ PDO_Firebird: connect/disconnect
 <?php require('skipif.inc'); ?>
 --FILE--
 <?php
-	require("testdb.inc");
+    require("testdb.inc");
 
-	unset($dbh);
-	echo "done\n";
+    unset($dbh);
+    echo "done\n";
 
 ?>
 --EXPECT--

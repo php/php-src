@@ -18,10 +18,10 @@ class XML_Parser
 {
 
     function PIHandler($parser, $target, $data)
-	{
-		echo "Target: " . $target. "\n";
-		echo "Data: " . $data . "\n";
-	}
+    {
+        echo "Target: " . $target. "\n";
+        echo "Data: " . $data . "\n";
+    }
 
     function parse($data)
     {

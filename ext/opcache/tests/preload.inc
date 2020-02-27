@@ -3,39 +3,39 @@ function f1() {
 }
 
 if (isset($rt)) {
-	function f2() {
-	}
+    function f2() {
+    }
 }
 
 interface a {
-	function foo();
-	function bar();
+    function foo();
+    function bar();
 }
 interface b {
-	function foo();
+    function foo();
 }
 
 abstract class c {
-	function bar() { }
+    function bar() { }
 }
 
 class x extends c implements a, b {
-	function foo() { }
+    function foo() { }
 }
 
 trait T1 {
-	static function foo() {
-		var_dump(__METHOD__);
-	}
+    static function foo() {
+        var_dump(__METHOD__);
+    }
 }
 trait T2 {
-	use T1;
-	static function bar() {
-		var_dump(__METHOD__);
-	}
+    use T1;
+    static function bar() {
+        var_dump(__METHOD__);
+    }
 }
 class Y {
-	use T2;
+    use T2;
 }
 
 class Z {
@@ -50,9 +50,9 @@ function get_anon() {
 }
 
 if (!isset($rt)) {
-	eval("class Foo {}");
+    eval("class Foo {}");
 
-	class Bar extends Foo {}
+    class Bar extends Foo {}
 
-	eval("function f3() {} ");
+    eval("function f3() {} ");
 }

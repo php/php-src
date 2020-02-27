@@ -17,14 +17,14 @@ $a = $reader->setParserProperty(XMLReader::LOADDTD, false);
 $b = $reader->getParserProperty(XMLReader::LOADDTD);
 
 if (!$a && !$b) {
-	echo "ok\n";
+    echo "ok\n";
 }
 
 $a = $reader->setParserProperty(XMLReader::SUBST_ENTITIES, true);
 $b = $reader->getParserProperty(XMLReader::SUBST_ENTITIES);
 
 if ($a && $b) {
-	echo "ok\n";
+    echo "ok\n";
 }
 // Only go through
 while ($reader->read());

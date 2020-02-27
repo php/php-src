@@ -5,7 +5,7 @@ string offset 003
 // Test negative string offsets
 
 function foo($x) {
-	var_dump($x);
+    var_dump($x);
 }
 
 $str = "abcdef";

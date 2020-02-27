@@ -10,12 +10,12 @@ if (!defined('PASSWORD_ARGON2ID')) die('skip password_hash not built with Argon2
 $password = "the password for testing 12345!";
 
 $algos = [
-	PASSWORD_ARGON2I,
-	'argon2i',
-	2,
-	PASSWORD_ARGON2ID,
-	'argon2id',
-	3,
+    PASSWORD_ARGON2I,
+    'argon2i',
+    2,
+    PASSWORD_ARGON2ID,
+    'argon2id',
+    3,
 ];
 foreach ($algos as $algo) {
   $hash = password_hash($password, $algo);

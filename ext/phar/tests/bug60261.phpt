@@ -7,9 +7,9 @@ Bug #60261 (phar dos null pointer)
 
 try {
     $nx = new Phar();
-	$nx->getLinkTarget();
+    $nx->getLinkTarget();
 } catch (TypeError $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 
 ?>

@@ -19,52 +19,52 @@ obscure_filename
 echo "*** Testing tempnam() with invalid/non-existing directory names ***\n";
 /* An array of names, which will be passed as a dir name */
 $names_arr = array(
-	/* Invalid args */
-	-1,
-	TRUE,
-	FALSE,
-	NULL,
-	"",
-	" ",
-	"\0",
-	array(),
+    /* Invalid args */
+    -1,
+    TRUE,
+    FALSE,
+    NULL,
+    "",
+    " ",
+    "\0",
+    array(),
 
-	/* Non-existing dirs */
-	"/no/such/file/dir",
-	"php"
+    /* Non-existing dirs */
+    "/no/such/file/dir",
+    "php"
 );
 
 for( $i=0; $i<count($names_arr); $i++ ) {
-	echo "-- Iteration $i --\n";
-	try {
+    echo "-- Iteration $i --\n";
+    try {
         $file_name = tempnam($names_arr[$i], "tempnam_variation3.tmp");
     } catch (TypeError $e) {
         echo $e->getMessage(), "\n";
         continue;
     }
 
-	if( file_exists($file_name) ){
+    if( file_exists($file_name) ){
 
-		echo "File name is => ";
-		print($file_name);
-		echo "\n";
+        echo "File name is => ";
+        print($file_name);
+        echo "\n";
 
-		echo "File permissions are => ";
-		printf("%o", fileperms($file_name) );
-		echo "\n";
+        echo "File permissions are => ";
+        printf("%o", fileperms($file_name) );
+        echo "\n";
 
-		echo "File created in => ";
-		$file_dir = dirname($file_name);
-		if (realpath($file_dir) == realpath(sys_get_temp_dir()) || realpath($file_dir."\\") == realpath(sys_get_temp_dir())) {
-			echo "temp dir\n";
-		} else {
-			echo "unknown location\n";
-		}
-	} else {
-		echo "-- File is not created --\n";
-	}
+        echo "File created in => ";
+        $file_dir = dirname($file_name);
+        if (realpath($file_dir) == realpath(sys_get_temp_dir()) || realpath($file_dir."\\") == realpath(sys_get_temp_dir())) {
+            echo "temp dir\n";
+        } else {
+            echo "unknown location\n";
+        }
+    } else {
+        echo "-- File is not created --\n";
+    }
 
-	unlink($file_name);
+    unlink($file_name);
 }
 ?>
 --EXPECTF--
@@ -100,9 +100,9 @@ File name is => %s%et%s
 File permissions are => 100666
 File created in => temp dir
 -- Iteration 6 --
-tempnam() expects parameter 1 to be a valid path, string given
+tempnam(): Argument #1 ($dir) must be a valid path, string given
 -- Iteration 7 --
-tempnam() expects parameter 1 to be a valid path, array given
+tempnam(): Argument #1 ($dir) must be a valid path, array given
 -- Iteration 8 --
 
 Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7-win32.php on line %d

@@ -37,3 +37,5 @@ function preg_quote(string $str, ?string $delim_char = null): string {}
 function preg_grep(string $regex, array $input, int $flags = 0): array|false {}
 
 function preg_last_error(): int {}
+
+function preg_last_error_msg(): string {}

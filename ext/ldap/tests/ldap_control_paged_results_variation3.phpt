@@ -18,13 +18,13 @@ $dn = "$base";
 $filter = "(cn=user*)";
 $cookie = '';
 var_dump(
-	ldap_control_paged_result($link, 2, true, $cookie),
-	$result = ldap_search($link, $dn, $filter, array('cn')),
-	ldap_get_entries($link, $result),
-	ldap_control_paged_result_response($link, $result, $cookie),
-	ldap_control_paged_result($link, 20, true, $cookie),
-	$result = ldap_search($link, $dn, $filter, array('cn')),
-	ldap_get_entries($link, $result)
+    ldap_control_paged_result($link, 2, true, $cookie),
+    $result = ldap_search($link, $dn, $filter, array('cn')),
+    ldap_get_entries($link, $result),
+    ldap_control_paged_result_response($link, $result, $cookie),
+    ldap_control_paged_result($link, 20, true, $cookie),
+    $result = ldap_search($link, $dn, $filter, array('cn')),
+    ldap_get_entries($link, $result)
 );
 ?>
 --CLEAN--

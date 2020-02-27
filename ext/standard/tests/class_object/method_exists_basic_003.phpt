@@ -9,7 +9,7 @@ method_exists() on non-existent class, with __autoload().
  */
 
 spl_autoload_register(function ($name) {
-	echo "In autoload($name)\n";
+    echo "In autoload($name)\n";
 });
 
 var_dump(method_exists('UndefC', 'func'));

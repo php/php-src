@@ -1,7 +1,7 @@
 --TEST--
 Test pow() function : usage variations - different data types as $exp argument
 --INI--
-precision = 14
+serialize_precision = 14
 --FILE--
 <?php
 /* Prototype  : number pow  ( number $base  , number $exp  )

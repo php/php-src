@@ -16,7 +16,6 @@
 #include "fpm_children.h"
 #include "fpm_scoreboard.h"
 #include "fpm_status.h"
-#include "fpm_stdio.h"
 #include "fpm_request.h"
 #include "fpm_log.h"
 
@@ -200,7 +199,6 @@ void fpm_request_end(void) /* {{{ */
 #endif
 	proc->memory = memory;
 	fpm_scoreboard_proc_release(proc);
-	fpm_stdio_flush_child();
 }
 /* }}} */
 

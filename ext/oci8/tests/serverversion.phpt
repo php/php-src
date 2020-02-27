@@ -8,10 +8,10 @@ oci_server_version()
 require __DIR__."/connect.inc";
 
 if (!empty($dbase)) {
-	var_dump($c = oci_connect($user, $password, $dbase));
+    var_dump($c = oci_connect($user, $password, $dbase));
 }
 else {
-	var_dump($c = oci_connect($user, $password));
+    var_dump($c = oci_connect($user, $password));
 }
 
 $v = oci_server_version($c);

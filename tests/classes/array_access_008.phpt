@@ -4,27 +4,27 @@ ZE2 ArrayAccess and ASSIGN_OP operators (.=)
 <?php
 
 class Peoples implements ArrayAccess {
-	public $person;
+    public $person;
 
-	function __construct() {
-		$this->person = array(array('name'=>'Foo'));
-	}
+    function __construct() {
+        $this->person = array(array('name'=>'Foo'));
+    }
 
-	function offsetExists($index) {
-		return array_key_exists($this->person, $index);
-	}
+    function offsetExists($index) {
+        return array_key_exists($this->person, $index);
+    }
 
-	function offsetGet($index) {
-		return $this->person[$index];
-	}
+    function offsetGet($index) {
+        return $this->person[$index];
+    }
 
-	function offsetSet($index, $value) {
-		$this->person[$index] = $value;
-	}
+    function offsetSet($index, $value) {
+        $this->person[$index] = $value;
+    }
 
-	function offsetUnset($index) {
-		unset($this->person[$index]);
-	}
+    function offsetUnset($index) {
+        unset($this->person[$index]);
+    }
 }
 
 $people = new Peoples;

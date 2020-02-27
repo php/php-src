@@ -6,13 +6,13 @@ Testing array dereference on method calls
 error_reporting(E_ALL);
 
 class  foo {
-	public function bar() {
-		$x = array();
-		$x[] = 3;
-		$x[] = array(1, 5);
-		$x[] = new foo;
-		return $x;
-	}
+    public function bar() {
+        $x = array();
+        $x[] = 3;
+        $x[] = array(1, 5);
+        $x[] = new foo;
+        return $x;
+    }
 }
 
 $foo = new foo;

@@ -31,7 +31,11 @@ function print_node($node)
   }
   print "\nNum Children: " . $child_count;
   if($child_count <= 1){
-    print "\nNode Content: " . $node->nodeValue;
+    if (strlen(trim($node->nodeValue))) {
+      print "\nNode Content: " . $node->nodeValue;
+    } else {
+      print "\nNode Content:";
+    }
   }
   print "\n\n";
 }

@@ -1424,6 +1424,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 	char *str_key;
 	zend_class_entry *ce = p_obj->c;
 	phar_archive_object *phar_obj = p_obj->p;
+	php_stream_statbuf ssb;
 
 	value = iter->funcs->get_current_data(iter);
 
@@ -1691,6 +1692,16 @@ after_open_fp:
 		php_stream_copy_to_stream_ex(fp, p_obj->fp, PHP_STREAM_COPY_ALL, &contents_len);
 		data->internal_file->uncompressed_filesize = data->internal_file->compressed_filesize =
 			php_stream_tell(p_obj->fp) - data->internal_file->offset;
+		if (php_stream_stat(fp, &ssb) != -1) {
+			data->internal_file->flags = ssb.sb.st_mode & PHAR_ENT_PERM_MASK ;
+		} else {
+#ifndef _WIN32
+			mode_t mask;
+			mask = umask(0);
+			umask(mask);
+			data->internal_file->flags &= ~mask;
+#endif
+		}
 	}
 
 	if (close_fp) {
@@ -4188,7 +4199,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 			if ('\\' == filename[cnt]) {
 				filename[cnt] = '/';
 			}
-		} while (cnt++ <= filename_len);
+		} while (cnt++ < filename_len);
 	}
 #endif
 
@@ -5058,6 +5069,7 @@ PHP_METHOD(PharFileInfo, compress)
 PHP_METHOD(PharFileInfo, decompress)
 {
 	char *error;
+	char *compression_type;
 	PHAR_ENTRY_OBJECT();
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -5108,12 +5120,24 @@ PHP_METHOD(PharFileInfo, decompress)
 		/* re-populate after copy-on-write */
 		entry_obj->entry = zend_hash_str_find_ptr(&phar->manifest, entry_obj->entry->filename, entry_obj->entry->filename_len);
 	}
-	if (!entry_obj->entry->fp) {
-		if (FAILURE == phar_open_archive_fp(entry_obj->entry->phar)) {
-			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot decompress entry \"%s\", phar error: Cannot open phar archive \"%s\" for reading", entry_obj->entry->filename, entry_obj->entry->phar->fname);
+	switch (entry_obj->entry->flags & PHAR_ENT_COMPRESSION_MASK) {
+		case PHAR_ENT_COMPRESSED_GZ:
+			compression_type = "gzip";
+			break;
+		case PHAR_ENT_COMPRESSED_BZ2:
+			compression_type = "bz2";
+			break;
+		default:
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
+				"Cannot decompress file compressed with unknown compression type");
 			RETURN_THROWS();
-		}
-		entry_obj->entry->fp_type = PHAR_FP;
+	}
+	/* decompress this file indirectly */
+	if (SUCCESS != phar_open_entry_fp(entry_obj->entry, &error, 1)) {
+		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0,
+			"Phar error: Cannot decompress %s-compressed file \"%s\" in phar \"%s\": %s", compression_type, entry_obj->entry->filename, entry_obj->entry->phar->fname, error);
+		efree(error);
+		return;
 	}
 
 	entry_obj->entry->old_flags = entry_obj->entry->flags;

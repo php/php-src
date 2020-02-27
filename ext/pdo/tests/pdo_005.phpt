@@ -23,20 +23,20 @@ $stmt = $db->prepare('SELECT id, val, val2 from test');
 
 class TestBase
 {
-	public $id;
-	protected $val;
-	private $val2;
+    public $id;
+    protected $val;
+    private $val2;
 }
 
 class TestDerived extends TestBase
 {
-	protected $row;
+    protected $row;
 
-	public function __construct(&$row)
-	{
-		echo __METHOD__ . "($row,{$this->id})\n";
-		$this->row = $row++;
-	}
+    public function __construct(&$row)
+    {
+        echo __METHOD__ . "($row,{$this->id})\n";
+        $this->row = $row++;
+    }
 }
 
 $stmt->execute();

@@ -18,11 +18,11 @@ $p[$iname] = "foobar\n";
 
 try
 {
-	$p[$ename] = "foobar\n";
+    $p[$ename] = "foobar\n";
 }
 catch(Exception $e)
 {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 include($pname . $iname);

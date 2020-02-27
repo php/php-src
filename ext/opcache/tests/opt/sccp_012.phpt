@@ -13,16 +13,16 @@ opcache.preload=
 function foo() {
     $o = new stdClass();
     $o->foo = 0;
-	$i = 1;
-	$c = $i < 2;
-	if ($c) {
-		$k = 2 * $i;
-		$o->foo = $i;
-		echo $o->foo;
-	}
-	$o->foo += 2;
-	$o->foo++;
-	echo $o->foo;
+    $i = 1;
+    $c = $i < 2;
+    if ($c) {
+        $k = 2 * $i;
+        $o->foo = $i;
+        echo $o->foo;
+    }
+    $o->foo += 2;
+    $o->foo++;
+    echo $o->foo;
 }
 ?>
 --EXPECTF--
@@ -34,6 +34,6 @@ L0 (17):    RETURN int(1)
 foo: ; (lines=3, args=0, vars=0, tmps=0)
     ; (after optimizer)
     ; %ssccp_012.php:2-15
-L0 (10):    ECHO int(1)
-L1 (14):    ECHO int(4)
+L0 (10):    ECHO string("1")
+L1 (14):    ECHO string("4")
 L2 (15):    RETURN null

@@ -33,12 +33,12 @@ try {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk() : built-in function as callback ***
 -- With 'pow' built-in function --
 bool(true)
 -- With 'min' built-in function --
 bool(true)
 -- With 'echo' language construct --
-array_walk() expects parameter 2 to be a valid callback, function 'echo' not found or invalid function name
+array_walk(): Argument #2 ($funcname) must be a valid callback, function 'echo' not found or invalid function name
 Done

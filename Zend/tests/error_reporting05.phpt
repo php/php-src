@@ -6,12 +6,12 @@ testing @ and error_reporting - 5
 error_reporting(E_ALL);
 
 class test {
-	function __get($name) {
-		return $undef_name;
-	}
-	function __set($name, $value) {
-		return $undef_value;
-	}
+    function __get($name) {
+        return $undef_name;
+    }
+    function __set($name, $value) {
+        return $undef_value;
+    }
 }
 
 $test = new test;

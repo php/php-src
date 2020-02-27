@@ -8,8 +8,9 @@ if (!extension_loaded("com_dotnet")){ echo "skip COM/.Net support not present"; 
 <?php
 $dict = new COM("Scripting.Dictionary");
 
+$reflection = new ReflectionObject($dict);
 ob_start();
-ReflectionObject::export($dict);
+echo $reflection;
 ob_get_clean();
 
 echo 'done';

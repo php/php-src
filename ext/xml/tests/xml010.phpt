@@ -8,7 +8,7 @@ if (! @xml_parser_create_ns('ISO-8859-1')) { die("skip xml_parser_create_ns is n
 --FILE--
 <?php
 function start_elem($parser,$name,$attribs) {
-	print "$name ";
+    print "$name ";
 
     foreach($attribs as $key => $value) {
         print "$key = $value ";

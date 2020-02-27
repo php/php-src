@@ -16,10 +16,10 @@ date_default_timezone_set("Asia/Calcutta");
 //array of values to iterate over
 $inputs = array(
 
-	//octal values
-	'hexadcimal 0x5' => 0x5,
-	'hexadcimal 0xCAFE' => 0xCAFE,
-	'octal -0xCAFE' => -0xCAFE,
+    //octal values
+    'hexadcimal 0x5' => 0x5,
+    'hexadcimal 0xCAFE' => 0xCAFE,
+    'octal -0xCAFE' => -0xCAFE,
 );
 
 // loop through each element of the array for timestamp

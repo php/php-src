@@ -10,12 +10,12 @@ opcache.optimization_level=-1
 --FILE--
 <?php
 function foo() {
-	$a = new stdClass;
-	$b = $a;
-	$a->x = 5;
-	$b->x = 42;
-	echo $a->x;
-	echo "\n";
+    $a = new stdClass;
+    $b = $a;
+    $a->x = 5;
+    $b->x = 42;
+    echo $a->x;
+    echo "\n";
 }
 foo();
 ?>

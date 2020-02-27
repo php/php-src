@@ -4,7 +4,7 @@ ReflectionObject::__toString() : very basic test with dynamic properties
 <?php
 
 class Foo  {
-	public $bar = 1;
+    public $bar = 1;
 }
 $f = new foo;
 $f->dynProp = 'hello';

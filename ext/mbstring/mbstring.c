@@ -2029,6 +2029,7 @@ PHP_FUNCTION(mb_str_split)
 
 		mbfl_convert_filter_delete(decoder);
 		mbfl_convert_filter_delete(filter);
+		mbfl_memory_device_clear(&device);
 		return;
 	}
 
@@ -2079,6 +2080,22 @@ PHP_FUNCTION(mb_strlen)
 }
 /* }}} */
 
+static void handle_strpos_error(size_t error) {
+	switch (error) {
+	case MBFL_ERROR_NOT_FOUND:
+		break;
+	case MBFL_ERROR_ENCODING:
+		php_error_docref(NULL, E_WARNING, "Conversion error");
+		break;
+	case MBFL_ERROR_OFFSET:
+		zend_value_error("Offset not contained in string");
+		break;
+	default:
+		zend_value_error("Unknown error in mb_strpos");
+		break;
+	}
+}
+
 /* {{{ proto int mb_strpos(string haystack, string needle [, int offset [, string encoding]])
    Find position of first occurrence of a string within another */
 PHP_FUNCTION(mb_strpos)
@@ -2099,37 +2116,11 @@ PHP_FUNCTION(mb_strpos)
 		RETURN_FALSE;
 	}
 
-	if (offset != 0) {
-		size_t slen = mbfl_strlen(&haystack);
-		if (offset < 0) {
-			offset += slen;
-		}
-		if (offset < 0 || offset > slen) {
-			php_error_docref(NULL, E_WARNING, "Offset not contained in string");
-			RETURN_FALSE;
-		}
-	}
-
 	n = mbfl_strpos(&haystack, &needle, offset, reverse);
 	if (!mbfl_is_error(n)) {
 		RETVAL_LONG(n);
 	} else {
-		switch (-n) {
-		case 1:
-			break;
-		case 2:
-			php_error_docref(NULL, E_WARNING, "Needle has not positive length");
-			break;
-		case 4:
-			php_error_docref(NULL, E_WARNING, "Unknown encoding or conversion error");
-			break;
-		case 8:
-			php_error_docref(NULL, E_NOTICE, "Argument is empty");
-			break;
-		default:
-			php_error_docref(NULL, E_WARNING, "Unknown error in mb_strpos");
-			break;
-		}
+		handle_strpos_error(n);
 		RETVAL_FALSE;
 	}
 }
@@ -2153,19 +2144,11 @@ PHP_FUNCTION(mb_strrpos)
 		RETURN_FALSE;
 	}
 
-	if (offset != 0) {
-		size_t haystack_char_len = mbfl_strlen(&haystack);
-		if ((offset > 0 && offset > haystack_char_len) ||
-			(offset < 0 && -offset > haystack_char_len)) {
-			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
-			RETURN_FALSE;
-		}
-	}
-
 	n = mbfl_strpos(&haystack, &needle, offset, 1);
 	if (!mbfl_is_error(n)) {
 		RETVAL_LONG(n);
 	} else {
+		handle_strpos_error(n);
 		RETVAL_FALSE;
 	}
 }
@@ -2189,6 +2172,7 @@ PHP_FUNCTION(mb_stripos)
 	if (!mbfl_is_error(n)) {
 		RETVAL_LONG(n);
 	} else {
+		handle_strpos_error(n);
 		RETVAL_FALSE;
 	}
 }
@@ -2212,6 +2196,7 @@ PHP_FUNCTION(mb_strripos)
 	if (!mbfl_is_error(n)) {
 		RETVAL_LONG(n);
 	} else {
+		handle_strpos_error(n);
 		RETVAL_FALSE;
 	}
 }
@@ -2279,13 +2264,6 @@ PHP_FUNCTION(mb_strrchr)
 	haystack.no_language = needle.no_language = MBSTRG(language);
 	haystack.encoding = needle.encoding = php_mb_get_encoding(enc_name);
 	if (!haystack.encoding) {
-		RETURN_FALSE;
-	}
-
-	if (haystack.len == 0) {
-		RETURN_FALSE;
-	}
-	if (needle.len == 0) {
 		RETURN_FALSE;
 	}
 
@@ -2714,25 +2692,15 @@ MBSTRING_API char *php_mb_convert_encoding_ex(const char *input, size_t length, 
 /* }}} */
 
 /* {{{ MBSTRING_API char *php_mb_convert_encoding() */
-MBSTRING_API char *php_mb_convert_encoding(const char *input, size_t length, const char *_to_encoding, const char *_from_encodings, size_t *output_len)
+MBSTRING_API char *php_mb_convert_encoding(const char *input, size_t length, const mbfl_encoding *to_encoding, const char *_from_encodings, size_t *output_len)
 {
-	const mbfl_encoding *from_encoding, *to_encoding;
+	const mbfl_encoding *from_encoding;
 
 	if (output_len) {
 		*output_len = 0;
 	}
 	if (!input) {
 		return NULL;
-	}
-	/* new encoding */
-	if (_to_encoding && strlen(_to_encoding)) {
-		to_encoding = mbfl_name2encoding(_to_encoding);
-		if (!to_encoding) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", _to_encoding);
-			return NULL;
-		}
-	} else {
-		to_encoding = MBSTRG(current_internal_encoding);
 	}
 
 	/* pre-conversion encoding */
@@ -2766,7 +2734,7 @@ MBSTRING_API char *php_mb_convert_encoding(const char *input, size_t length, con
 }
 /* }}} */
 
-MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, const char *_to_encoding, const char *_from_encodings)
+MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, const mbfl_encoding *to_encoding, const char *_from_encodings)
 {
 	HashTable *output, *chash;
 	zend_long idx;
@@ -2789,7 +2757,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 	ZEND_HASH_FOREACH_KEY_VAL(input, idx, key, entry) {
 		/* convert key */
 		if (key) {
-			ckey = php_mb_convert_encoding(ZSTR_VAL(key), ZSTR_LEN(key), _to_encoding, _from_encodings, &ckey_len);
+			ckey = php_mb_convert_encoding(ZSTR_VAL(key), ZSTR_LEN(key), to_encoding, _from_encodings, &ckey_len);
 			key = zend_string_init(ckey, ckey_len, 0);
 			efree(ckey);
 		}
@@ -2797,7 +2765,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 		ZEND_ASSERT(entry);
 		switch(Z_TYPE_P(entry)) {
 			case IS_STRING:
-				cval = php_mb_convert_encoding(Z_STRVAL_P(entry), Z_STRLEN_P(entry), _to_encoding, _from_encodings, &cval_len);
+				cval = php_mb_convert_encoding(Z_STRVAL_P(entry), Z_STRLEN_P(entry), to_encoding, _from_encodings, &cval_len);
 				ZVAL_STRINGL(&entry_tmp, cval, cval_len);
 				efree(cval);
 				break;
@@ -2809,7 +2777,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 				ZVAL_COPY(&entry_tmp, entry);
 				break;
 			case IS_ARRAY:
-				chash = php_mb_convert_encoding_recursive(Z_ARRVAL_P(entry), _to_encoding, _from_encodings);
+				chash = php_mb_convert_encoding_recursive(Z_ARRVAL_P(entry), to_encoding, _from_encodings);
 				if (chash) {
 					ZVAL_ARR(&entry_tmp, chash);
 				} else {
@@ -2843,17 +2811,22 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 PHP_FUNCTION(mb_convert_encoding)
 {
 	zval *input;
-	char *arg_new;
-	size_t new_len;
 	zval *arg_old = NULL;
 	size_t size, l, n;
 	char *_from_encodings = NULL, *ret, *s_free = NULL;
+	zend_string *to_encoding_name;
+	const mbfl_encoding *to_encoding;
 
 	zval *hash_entry;
 	HashTable *target_hash;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs|z", &input, &arg_new, &new_len, &arg_old) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zS|z", &input, &to_encoding_name, &arg_old) == FAILURE) {
 		RETURN_THROWS();
+	}
+
+	to_encoding = php_mb_get_encoding(to_encoding_name);
+	if (!to_encoding) {
+		RETURN_FALSE;
 	}
 
 	if (Z_TYPE_P(input) != IS_STRING && Z_TYPE_P(input) != IS_ARRAY) {
@@ -2879,7 +2852,7 @@ PHP_FUNCTION(mb_convert_encoding)
 
 					if ( _from_encodings) {
 						l = strlen(_from_encodings);
-						n = strlen(ZSTR_VAL(encoding_str));
+						n = ZSTR_LEN(encoding_str);
 						_from_encodings = erealloc(_from_encodings, l+n+2);
 						memcpy(_from_encodings + l, ",", 1);
 						memcpy(_from_encodings + l + 1, ZSTR_VAL(encoding_str), ZSTR_LEN(encoding_str) + 1);
@@ -2907,7 +2880,7 @@ PHP_FUNCTION(mb_convert_encoding)
 
 	if (Z_TYPE_P(input) == IS_STRING) {
 		/* new encoding */
-		ret = php_mb_convert_encoding(Z_STRVAL_P(input), Z_STRLEN_P(input), arg_new, _from_encodings, &size);
+		ret = php_mb_convert_encoding(Z_STRVAL_P(input), Z_STRLEN_P(input), to_encoding, _from_encodings, &size);
 		if (ret != NULL) {
 			// TODO: avoid reallocation ???
 			RETVAL_STRINGL(ret, size);		/* the string is already strdup()'ed */
@@ -2920,7 +2893,7 @@ PHP_FUNCTION(mb_convert_encoding)
 		}
 	} else {
 		HashTable *tmp;
-		tmp = php_mb_convert_encoding_recursive(Z_ARRVAL_P(input), arg_new, _from_encodings);
+		tmp = php_mb_convert_encoding_recursive(Z_ARRVAL_P(input), to_encoding, _from_encodings);
 		RETURN_ARR(tmp);
 	}
 
@@ -4467,7 +4440,7 @@ static inline zend_long php_mb_ord(const char *str, size_t str_len, zend_string 
 
 	no_enc = enc->no_encoding;
 	if (php_mb_is_unsupported_no_encoding(no_enc)) {
-		php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", ZSTR_VAL(enc_name));
+		php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc->name);
 		return -1;
 	}
 
@@ -4827,26 +4800,6 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 
 		if (!needle.val) {
 			break;
-		}
-
- 		if (offset != 0) {
- 			size_t haystack_char_len = mbfl_strlen(&haystack);
-
- 			if (mode) {
-				if ((offset > 0 && (size_t)offset > haystack_char_len) ||
-					(offset < 0 && (size_t)(-offset) > haystack_char_len)) {
- 					php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
- 					break;
- 				}
- 			} else {
-				if (offset < 0) {
-					offset += (zend_long)haystack_char_len;
-				}
-				if (offset < 0 || (size_t)offset > haystack_char_len) {
- 					php_error_docref(NULL, E_WARNING, "Offset not contained in string");
- 					break;
- 				}
- 			}
 		}
 
 		n = mbfl_strpos(&haystack, &needle, offset, mode);

@@ -10,23 +10,23 @@ phar.require_hash=0
 
 try
 {
-	$pharconfig = 0;
+    $pharconfig = 0;
 
-	require_once 'files/phar_oo_test.inc';
+    require_once 'files/phar_oo_test.inc';
 
-	$phar = new Phar($fname);
-	$phar->setInfoClass('SplFileObject');
+    $phar = new Phar($fname);
+    $phar->setInfoClass('SplFileObject');
 
-	$phar['f.php'] = 'hi';
-	var_dump(isset($phar['f.php']));
-	echo $phar['f.php'];
-	echo "\n";
-	unset($phar['f.php']);
-	var_dump(isset($phar['f.php']));
+    $phar['f.php'] = 'hi';
+    var_dump(isset($phar['f.php']));
+    echo $phar['f.php'];
+    echo "\n";
+    unset($phar['f.php']);
+    var_dump(isset($phar['f.php']));
 }
 catch (BadMethodCallException $e)
 {
-	echo "Exception: " . $e->getMessage() . "\n";
+    echo "Exception: " . $e->getMessage() . "\n";
 }
 
 ?>

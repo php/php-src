@@ -17,7 +17,7 @@ var_dump($tz);
 try {
 var_dump(clone $tz);
 } catch (Exception $e) {
-	var_dump(get_class($e), $e->getMessage());
+    var_dump(get_class($e), $e->getMessage());
 }
 
 ?>

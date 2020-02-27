@@ -38,16 +38,7 @@ array(4) {
   [0]=>
   &string(2) "v1"
   [1]=>
-  &array(4) {
-    ["k1"]=>
-    &string(2) "v1"
-    ["k2"]=>
-    string(2) "v2"
-    [0]=>
-    &string(2) "v1"
-    [1]=>
-    *RECURSION*
-  }
+  *RECURSION*
 }
 array(4) {
   ["k1"]=>
@@ -91,16 +82,7 @@ array(4) {
   [0]=>
   &string(2) "v1"
   [1]=>
-  &array(4) {
-    ["k1"]=>
-    &string(2) "v1"
-    ["k2"]=>
-    string(2) "v2"
-    [0]=>
-    &string(2) "v1"
-    [1]=>
-    *RECURSION*
-  }
+  *RECURSION*
 }
 array(4) {
   [0]=>
@@ -141,16 +123,7 @@ array(4) {
   [0]=>
   &string(2) "v1"
   [1]=>
-  &array(4) {
-    ["k1"]=>
-    &string(2) "v1"
-    ["k2"]=>
-    string(2) "v2"
-    [0]=>
-    &string(2) "v1"
-    [1]=>
-    *RECURSION*
-  }
+  *RECURSION*
 }
 array(4) {
   [0]=>

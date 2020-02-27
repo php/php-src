@@ -73,7 +73,7 @@ static const zend_function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_exec,			arginfo_pcntl_exec)
 	PHP_FE(pcntl_alarm,			arginfo_pcntl_alarm)
 	PHP_FE(pcntl_get_last_error,	arginfo_pcntl_get_last_error)
-	PHP_FALIAS(pcntl_errno, pcntl_get_last_error,	arginfo_pcntl_get_last_error)
+	PHP_FALIAS(pcntl_errno, pcntl_get_last_error,	arginfo_pcntl_errno)
 	PHP_FE(pcntl_strerror,		arginfo_pcntl_strerror)
 #ifdef HAVE_GETPRIORITY
 	PHP_FE(pcntl_getpriority,	arginfo_pcntl_getpriority)

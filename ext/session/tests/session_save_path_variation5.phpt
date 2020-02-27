@@ -27,7 +27,7 @@ chdir($directory);
 ini_set('open_basedir', '.');
 // Delete the existing directory
 if (file_exists($sessions) === TRUE) {
-	@rmdir($sessions);
+    @rmdir($sessions);
 }
 
 var_dump(mkdir($sessions));

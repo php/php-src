@@ -21,23 +21,23 @@ echo $p2[str_repeat('a', 100) . '/b']->getContent() . "\n";
 echo $p2[str_repeat('a', 155) . '/' . str_repeat('b', 100)]->getContent() . "\n";
 
 try {
-	$p2[str_repeat('a', 400)] = 'yuck';
+    $p2[str_repeat('a', 400)] = 'yuck';
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-	$p2 = new PharData($fname3);
-	$p2[str_repeat('a', 101)] = 'yuck';
+    $p2 = new PharData($fname3);
+    $p2[str_repeat('a', 101)] = 'yuck';
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try {
-	$p2 = new PharData($fname4);
-	$p2[str_repeat('b', 160) . '/' . str_repeat('a', 90)] = 'yuck';
+    $p2 = new PharData($fname4);
+    $p2[str_repeat('b', 160) . '/' . str_repeat('a', 90)] = 'yuck';
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
 --CLEAN--

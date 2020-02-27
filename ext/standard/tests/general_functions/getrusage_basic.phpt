@@ -15,7 +15,7 @@ echo "Simple testcase for getrusage() function\n";
 $dat = getrusage();
 
 if (!is_array($dat)) {
-	echo "TEST FAILED : getrusage should return an array\n";
+    echo "TEST FAILED : getrusage should return an array\n";
 }
 
 // echo the fields which are common to all platforms
