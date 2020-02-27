@@ -1611,11 +1611,11 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 		RETURN_THROWS();
 	}
 	if (hash_len >= 0xffffffff) {
-		zend_argument_error(sodium_exception_ce, 1, "must be less than the maximum allowed value");
+		zend_argument_error(sodium_exception_ce, 1, "is too long");
 		RETURN_THROWS();
 	}
 	if (passwd_len >= 0xffffffff) {
-		zend_argument_error(sodium_exception_ce, 2, "must be shorter than the maximum allowed length");
+		zend_argument_error(sodium_exception_ce, 2, "is too long");
 		RETURN_THROWS();
 	}
 	if (opslimit <= 0) {
@@ -1698,7 +1698,7 @@ PHP_FUNCTION(sodium_crypto_pwhash_str)
 		RETURN_THROWS();
 	}
 	if (passwd_len >= 0xffffffff) {
-		zend_argument_error(sodium_exception_ce, 1, "must be shorter than the maximum allowed length");
+		zend_argument_error(sodium_exception_ce, 1, "is too long");
 		RETURN_THROWS();
 	}
 	if (passwd_len <= 0) {
@@ -1736,8 +1736,6 @@ PHP_FUNCTION(sodium_crypto_pwhash_str_needs_rehash)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sll",
 									&hash_str, &hash_str_len, &opslimit, &memlimit) == FAILURE) {
-		// TODO: what's this error message here?
-		zend_throw_exception(sodium_exception_ce, "a PHP string is required", 0);
 		RETURN_THROWS();
 	}
 	if (crypto_pwhash_str_needs_rehash(hash_str, opslimit, memlimit) == 0) {
@@ -1761,7 +1759,7 @@ PHP_FUNCTION(sodium_crypto_pwhash_str_verify)
 		RETURN_THROWS();
 	}
 	if (passwd_len >= 0xffffffff) {
-		zend_argument_error(sodium_exception_ce, 2, "must be shorter than the maximum allowed length");
+		zend_argument_error(sodium_exception_ce, 2, "is too long");
 		RETURN_THROWS();
 	}
 	if (passwd_len <= 0) {
@@ -2014,7 +2012,7 @@ PHP_FUNCTION(sodium_crypto_aead_aes256gcm_decrypt)
 		RETURN_FALSE;
 	}
 	if (ciphertext_len - crypto_aead_aes256gcm_ABYTES > 16ULL * ((1ULL << 32) - 2ULL)) {
-		zend_argument_error(sodium_exception_ce, 1, "must be shorter than the maximum allowed length");
+		zend_argument_error(sodium_exception_ce, 1, "is too long");
 		RETURN_THROWS();
 	}
 	msg_len = ciphertext_len;
@@ -2892,7 +2890,7 @@ PHP_FUNCTION(sodium_compare)
 		RETURN_THROWS();
 	}
 	if (len1 != len2) {
-		zend_argument_error(sodium_exception_ce, 1, "and argument #2 ($string_2) to have the same size");
+		zend_argument_error(sodium_exception_ce, 1, "and argument #2 ($string_2) must have the same size");
 		RETURN_THROWS();
 	} else {
 		RETURN_LONG(sodium_compare((const unsigned char *) buf1,
@@ -3106,7 +3104,7 @@ PHP_FUNCTION(sodium_pad)
 		RETURN_THROWS();
 	}
 	if (blocksize > SIZE_MAX) {
-		zend_argument_error(sodium_exception_ce, 2, "must be less than or equal to the maximum allowed value");
+		zend_argument_error(sodium_exception_ce, 2, "is too large");
 		RETURN_THROWS();
 	}
 	xpadlen = blocksize - 1U;
@@ -3179,7 +3177,7 @@ PHP_FUNCTION(sodium_unpad)
 		RETURN_THROWS();
 	}
 	if (blocksize > SIZE_MAX) {
-		zend_argument_error(sodium_exception_ce, 2, "must be less than or equal to the maximum allowed value");
+		zend_argument_error(sodium_exception_ce, 2, "is too large");
 		RETURN_THROWS();
 	}
 	if (padded_len < blocksize) {
@@ -3291,7 +3289,7 @@ PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_push)
 	state = (unsigned char *) Z_STRVAL(*state_zv);
 	state_len = Z_STRLEN(*state_zv);
 	if (state_len != sizeof (crypto_secretstream_xchacha20poly1305_state)) {
-		zend_argument_error(sodium_exception_ce, 1, "to have a correct length");
+		zend_argument_error(sodium_exception_ce, 1, "must have a correct length");
 		RETURN_THROWS();
 	}
 	if (msg_len > crypto_secretstream_xchacha20poly1305_MESSAGEBYTES_MAX ||
