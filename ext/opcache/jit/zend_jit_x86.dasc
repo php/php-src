@@ -2718,7 +2718,7 @@ static int zend_jit_load_reg(dasm_State **Dst, zend_jit_addr src, zend_jit_addr 
 static int zend_jit_store_var(dasm_State **Dst, uint32_t info, int var, zend_reg reg)
 {
 	zend_jit_addr src = ZEND_ADDR_REG(reg);
-	zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, var));
+	zend_jit_addr dst = ZEND_ADDR_MEM_ZVAL(ZREG_FP, EX_NUM_TO_VAR(var));
 
 	return zend_jit_spill_store(Dst, src, dst, info, 1);
 }
@@ -2751,7 +2751,7 @@ static int zend_jit_store_var_if_necessary_ex(dasm_State **Dst, int var, zend_ji
 
 static int zend_jit_load_var(dasm_State **Dst, uint32_t info, int var, zend_reg reg)
 {
-	zend_jit_addr src = ZEND_ADDR_MEM_ZVAL(ZREG_FP, (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, var));
+	zend_jit_addr src = ZEND_ADDR_MEM_ZVAL(ZREG_FP, EX_NUM_TO_VAR(var));
 	zend_jit_addr dst = ZEND_ADDR_REG(reg);
 
 	return zend_jit_load_reg(Dst, src, dst, info);
@@ -6971,7 +6971,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 
 		if (func) {
 			for (i = call_info->num_args; i < func->op_array.last_var; i++) {
-				uint32_t n = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
+				uint32_t n = EX_NUM_TO_VAR(i);
 				|	SET_Z_TYPE_INFO RX + n, IS_UNDEF
 			}
 		}
@@ -7189,7 +7189,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		|	// zend_vm_stack_free_args(call);
 		if (func) {
 			for (i = 0; i < call_info->num_args; i++ ) {
-				uint32_t offset = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
+				uint32_t offset = EX_NUM_TO_VAR(i);
 				|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_RX, offset), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 0, 1, 0, opline
 			}
 		} else {
@@ -7909,8 +7909,7 @@ static int zend_jit_free_compiled_variables(dasm_State **Dst, const zend_op *opl
 					const zend_op *opline = op_array->opcodes + ssa->cfg.blocks[j].start + ssa->cfg.blocks[j].len - 1;
 
 					if (opline->opcode == ZEND_RETURN) {
-						if (opline->op1_type == IS_CV &&
-						    opline->op1.var == (uint32_t)(uintptr_t)(ZEND_CALL_VAR_NUM(NULL, i))) {
+						if (opline->op1_type == IS_CV && opline->op1.var == EX_NUM_TO_VAR(i)) {
 							info |= MAY_BE_RCN;
 							break;
 						}
@@ -7921,7 +7920,7 @@ static int zend_jit_free_compiled_variables(dasm_State **Dst, const zend_op *opl
 #endif
 
 		if (info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-			uint32_t offset = (uint32_t)(uintptr_t)ZEND_CALL_VAR_NUM(NULL, i);
+			uint32_t offset = EX_NUM_TO_VAR(i);
 			| ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_FP, offset), info, 1, 1, 0, opline
 		}
 	}
