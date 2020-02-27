@@ -2103,6 +2103,7 @@ static zend_long zend_mm_find_leaks(zend_mm_heap *heap, zend_mm_chunk *p, uint32
 			}
 		}
 		p = p->next;
+		i = ZEND_MM_FIRST_PAGE;
 	} while (p != heap->main_chunk);
 	return count;
 }
