@@ -169,6 +169,9 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 	int first = 1;
 
 	fprintf(stderr, " [");
+	if (info & MAY_BE_GUARD) {
+		fprintf(stderr, "!");
+	}
 	if (info & MAY_BE_UNDEF) {
 		if (first) first = 0; else fprintf(stderr, ", ");
 		fprintf(stderr, "undef");
@@ -329,7 +332,7 @@ static void zend_dump_ssa_var_info(const zend_ssa *ssa, int ssa_var_num, uint32_
 		dump_flags);
 }
 
-static void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa, int ssa_var_num, zend_uchar var_type, int var_num, uint32_t dump_flags)
+void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa, int ssa_var_num, zend_uchar var_type, int var_num, uint32_t dump_flags)
 {
 	if (ssa_var_num >= 0) {
 		fprintf(stderr, "#%d.", ssa_var_num);
@@ -402,21 +405,16 @@ static void zend_dump_range_constraint(const zend_op_array *op_array, const zend
 	}
 }
 
-void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const void *data)
+void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const zend_ssa *ssa, const zend_ssa_op *ssa_op)
 {
 	const char *name = zend_get_opcode_name(opline->opcode);
 	uint32_t flags = zend_get_opcode_flags(opline->opcode);
 	uint32_t n = 0;
-	const zend_ssa *ssa = NULL;
 
-	if (dump_flags & ZEND_DUMP_SSA) {
-		ssa = (const zend_ssa*)data;
-	}
-
-	if (!ssa || !ssa->ops || ssa->ops[opline - op_array->opcodes].result_use < 0) {
+	if (!ssa_op || ssa_op->result_use < 0) {
 		if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
-			if (ssa && ssa->ops && ssa->ops[opline - op_array->opcodes].result_def >= 0) {
-				int ssa_var_num = ssa->ops[opline - op_array->opcodes].result_def;
+			if (ssa_op && ssa_op->result_def >= 0) {
+				int ssa_var_num = ssa_op->result_def;
 				zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->result_type, EX_VAR_TO_NUM(opline->result.var), dump_flags);
 			} else {
 				zend_dump_var(op_array, opline->result_type, EX_VAR_TO_NUM(opline->result.var));
@@ -582,12 +580,12 @@ void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, cons
 	if (opline->op1_type == IS_CONST) {
 		zend_dump_const(CRT_CONSTANT(opline->op1));
 	} else if (opline->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
-		if (ssa && ssa->ops) {
-			int ssa_var_num = ssa->ops[opline - op_array->opcodes].op1_use;
+		if (ssa_op) {
+			int ssa_var_num = ssa_op->op1_use;
 			if (ssa_var_num >= 0) {
 				fprintf(stderr, " ");
 				zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->op1_type, EX_VAR_TO_NUM(opline->op1.var), dump_flags);
-			} else if (ssa->ops[opline - op_array->opcodes].op1_def < 0) {
+			} else if (ssa_op->op1_def < 0) {
 				fprintf(stderr, " ");
 				zend_dump_var(op_array, opline->op1_type, EX_VAR_TO_NUM(opline->op1.var));
 			}
@@ -595,8 +593,8 @@ void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, cons
 			fprintf(stderr, " ");
 			zend_dump_var(op_array, opline->op1_type, EX_VAR_TO_NUM(opline->op1.var));
 		}
-		if (ssa && ssa->ops) {
-			int ssa_var_num = ssa->ops[opline - op_array->opcodes].op1_def;
+		if (ssa_op) {
+			int ssa_var_num = ssa_op->op1_def;
 			if (ssa_var_num >= 0) {
 				fprintf(stderr, " -> ");
 				zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->op1_type, EX_VAR_TO_NUM(opline->op1.var), dump_flags);
@@ -643,12 +641,12 @@ void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, cons
 			zend_dump_const(op);
 		}
 	} else if (opline->op2_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
-		if (ssa && ssa->ops) {
-			int ssa_var_num = ssa->ops[opline - op_array->opcodes].op2_use;
+		if (ssa_op) {
+			int ssa_var_num = ssa_op->op2_use;
 			if (ssa_var_num >= 0) {
 				fprintf(stderr, " ");
 				zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->op2_type, EX_VAR_TO_NUM(opline->op2.var), dump_flags);
-			} else if (ssa->ops[opline - op_array->opcodes].op2_def < 0) {
+			} else if (ssa_op->op2_def < 0) {
 				fprintf(stderr, " ");
 				zend_dump_var(op_array, opline->op2_type, EX_VAR_TO_NUM(opline->op2.var));
 			}
@@ -656,8 +654,8 @@ void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, cons
 			fprintf(stderr, " ");
 			zend_dump_var(op_array, opline->op2_type, EX_VAR_TO_NUM(opline->op2.var));
 		}
-		if (ssa && ssa->ops) {
-			int ssa_var_num = ssa->ops[opline - op_array->opcodes].op2_def;
+		if (ssa_op) {
+			int ssa_var_num = ssa_op->op2_def;
 			if (ssa_var_num >= 0) {
 				fprintf(stderr, " -> ");
 				zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->op2_type, EX_VAR_TO_NUM(opline->op2.var), dump_flags);
@@ -697,10 +695,10 @@ void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, cons
 	} else if (opline->result_type & IS_SMART_BRANCH_JMPNZ) {
 		fprintf(stderr, " jmpnz");
 #endif
-	} else if (ssa && ssa->ops && ssa->ops[opline - op_array->opcodes].result_use >= 0) {
+	} else if (ssa_op && ssa_op->result_use >= 0) {
 		if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
-			if (ssa && ssa->ops) {
-				int ssa_var_num = ssa->ops[opline - op_array->opcodes].result_use;
+			if (ssa_op) {
+				int ssa_var_num = ssa_op->result_use;
 				if (ssa_var_num >= 0) {
 					fprintf(stderr, " ");
 					zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->result_type, EX_VAR_TO_NUM(opline->result.var), dump_flags);
@@ -709,8 +707,8 @@ void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, cons
 				fprintf(stderr, " ");
 				zend_dump_var(op_array, opline->result_type, EX_VAR_TO_NUM(opline->result.var));
 			}
-			if (ssa && ssa->ops) {
-				int ssa_var_num = ssa->ops[opline - op_array->opcodes].result_def;
+			if (ssa_op) {
+				int ssa_var_num = ssa_op->result_def;
 				if (ssa_var_num >= 0) {
 					fprintf(stderr, " -> ");
 					zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->result_type, EX_VAR_TO_NUM(opline->result.var), dump_flags);
@@ -723,6 +721,8 @@ void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, cons
 static void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const void *data)
 {
 	int len = 0;
+	const zend_ssa *ssa =NULL;
+	zend_ssa_op *ssa_op = NULL;
 
 	if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
 		len = fprintf(stderr, "%04u:", (uint32_t)(opline - op_array->opcodes));
@@ -731,7 +731,14 @@ static void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_bl
 	}
 	fprintf(stderr, "%*c", 12-len, ' ');
 
-	zend_dump_op(op_array, b, opline, dump_flags, data);
+	if (dump_flags & ZEND_DUMP_SSA) {
+		ssa = (const zend_ssa*)data;
+		if (ssa && ssa->ops) {
+			ssa_op = &ssa->ops[opline - op_array->opcodes];
+		}
+	}
+
+	zend_dump_op(op_array, b, opline, dump_flags, ssa, ssa_op);
 	fprintf(stderr, "\n");
 }
 

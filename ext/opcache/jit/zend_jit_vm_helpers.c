@@ -620,24 +620,24 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				op2_type = Z_TYPE_P(Z_REFVAL_P(zv)) | IS_TRACE_REFERENCE;
 			}
 		}
-		if ((
-			opline->opcode == ZEND_ASSIGN_DIM ||
+		if (opline->opcode == ZEND_ASSIGN_DIM ||
 			opline->opcode == ZEND_ASSIGN_OBJ ||
 			opline->opcode == ZEND_ASSIGN_STATIC_PROP ||
 			opline->opcode == ZEND_ASSIGN_DIM_OP ||
 			opline->opcode == ZEND_ASSIGN_OBJ_OP ||
 			opline->opcode == ZEND_ASSIGN_STATIC_PROP_OP ||
 			opline->opcode == ZEND_ASSIGN_OBJ_REF ||
-			opline->opcode == ZEND_ASSIGN_STATIC_PROP_REF) &&
-				((opline+1)->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV))) {
-			zval *zv = EX_VAR((opline+1)->op1.var);
-			op3_type = Z_TYPE_P(zv);
-			if (op3_type == IS_INDIRECT) {
-				zv = Z_INDIRECT_P(zv);
+			opline->opcode == ZEND_ASSIGN_STATIC_PROP_REF) {
+			if ((opline+1)->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV)) {
+				zval *zv = EX_VAR((opline+1)->op1.var);
 				op3_type = Z_TYPE_P(zv);
-			}
-			if (op3_type == IS_REFERENCE) {
-				op3_type = Z_TYPE_P(Z_REFVAL_P(zv)) | IS_TRACE_REFERENCE;
+				if (op3_type == IS_INDIRECT) {
+					zv = Z_INDIRECT_P(zv);
+					op3_type = Z_TYPE_P(zv);
+				}
+				if (op3_type == IS_REFERENCE) {
+					op3_type = Z_TYPE_P(Z_REFVAL_P(zv)) | IS_TRACE_REFERENCE;
+				}
 			}
 		}
 
@@ -868,7 +868,6 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 	}
 
 	TRACE_END(ZEND_JIT_TRACE_END, stop, opline);
-	((zend_jit_trace_start_rec*)trace_buffer)->len = idx;
 
 #ifdef HAVE_GCC_GLOBAL_REGS
 	if (stop != ZEND_JIT_TRACE_STOP_HALT) {

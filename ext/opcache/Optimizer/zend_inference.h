@@ -26,6 +26,7 @@
 /* Bitmask for type inference (zend_ssa_var_info.type) */
 #include "zend_type_info.h"
 
+#define MAY_BE_GUARD                (1<<28) /* needs type guard */
 #define MAY_BE_IN_REG               (1<<29) /* value allocated in CPU register */
 
 //TODO: remome MAY_BE_RC1, MAY_BE_RCN???
@@ -37,23 +38,26 @@
 	|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE)
 
 #define DEFINE_SSA_OP_HAS_RANGE(opN) \
-	static zend_always_inline zend_bool _ssa_##opN##_has_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	static zend_always_inline zend_bool _ssa_##opN##_has_range_ex(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT(opline->opN); \
 			return (Z_TYPE_P(zv) == IS_LONG || Z_TYPE_P(zv) == IS_TRUE || Z_TYPE_P(zv) == IS_FALSE || Z_TYPE_P(zv) == IS_NULL); \
 		} else { \
 			return (opline->opN##_type != IS_UNUSED && \
-		        ssa->ops && \
 		        ssa->var_info && \
-		        ssa->ops[opline - op_array->opcodes].opN##_use >= 0 && \
-			    ssa->var_info[ssa->ops[opline - op_array->opcodes].opN##_use].has_range); \
+		        ssa_op->opN##_use >= 0 && \
+			    ssa->var_info[ssa_op->opN##_use].has_range); \
 		} \
 		return 0; \
+	} \
+	static zend_always_inline zend_bool _ssa_##opN##_has_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	{ \
+		return _ssa_##opN##_has_range_ex(op_array, ssa, opline, ssa->ops + (opline - op_array->opcodes)); \
 	}
 
 #define DEFINE_SSA_OP_MIN_RANGE(opN) \
-	static zend_always_inline zend_long _ssa_##opN##_min_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	static zend_always_inline zend_long _ssa_##opN##_min_range_ex(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT(opline->opN); \
@@ -67,17 +71,20 @@
 				return 0; \
 			} \
 		} else if (opline->opN##_type != IS_UNUSED && \
-		    ssa->ops && \
 		    ssa->var_info && \
-		    ssa->ops[opline - op_array->opcodes].opN##_use >= 0 && \
-		    ssa->var_info[ssa->ops[opline - op_array->opcodes].opN##_use].has_range) { \
-			return ssa->var_info[ssa->ops[opline - op_array->opcodes].opN##_use].range.min; \
+		    ssa_op->opN##_use >= 0 && \
+		    ssa->var_info[ssa_op->opN##_use].has_range) { \
+			return ssa->var_info[ssa_op->opN##_use].range.min; \
 		} \
 		return ZEND_LONG_MIN; \
+	} \
+	static zend_always_inline zend_long _ssa_##opN##_min_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	{ \
+		return _ssa_##opN##_min_range_ex(op_array, ssa, opline, ssa->ops + (opline - op_array->opcodes)); \
 	}
 
 #define DEFINE_SSA_OP_MAX_RANGE(opN) \
-	static zend_always_inline zend_long _ssa_##opN##_max_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	static zend_always_inline zend_long _ssa_##opN##_max_range_ex(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT(opline->opN); \
@@ -91,17 +98,20 @@
 				return 0; \
 			} \
 		} else if (opline->opN##_type != IS_UNUSED && \
-		    ssa->ops && \
 		    ssa->var_info && \
-		    ssa->ops[opline - op_array->opcodes].opN##_use >= 0 && \
-		    ssa->var_info[ssa->ops[opline - op_array->opcodes].opN##_use].has_range) { \
-			return ssa->var_info[ssa->ops[opline - op_array->opcodes].opN##_use].range.max; \
+		    ssa_op->opN##_use >= 0 && \
+		    ssa->var_info[ssa_op->opN##_use].has_range) { \
+			return ssa->var_info[ssa_op->opN##_use].range.max; \
 		} \
 		return ZEND_LONG_MAX; \
+	} \
+	static zend_always_inline zend_long _ssa_##opN##_max_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	{ \
+		return _ssa_##opN##_max_range_ex(op_array, ssa, opline, ssa->ops + (opline - op_array->opcodes)); \
 	}
 
 #define DEFINE_SSA_OP_RANGE_UNDERFLOW(opN) \
-	static zend_always_inline char _ssa_##opN##_range_underflow(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	static zend_always_inline char _ssa_##opN##_range_underflow_ex(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT(opline->opN); \
@@ -109,17 +119,20 @@
 				return 0; \
 			} \
 		} else if (opline->opN##_type != IS_UNUSED && \
-		    ssa->ops && \
 		    ssa->var_info && \
-		    ssa->ops[opline - op_array->opcodes].opN##_use >= 0 && \
-		    ssa->var_info[ssa->ops[opline - op_array->opcodes].opN##_use].has_range) { \
-			return ssa->var_info[ssa->ops[opline - op_array->opcodes].opN##_use].range.underflow; \
+		    ssa_op->opN##_use >= 0 && \
+		    ssa->var_info[ssa_op->opN##_use].has_range) { \
+			return ssa->var_info[ssa_op->opN##_use].range.underflow; \
 		} \
 		return 1; \
+	} \
+	static zend_always_inline char _ssa_##opN##_range_underflow(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	{ \
+		return _ssa_##opN##_range_underflow_ex(op_array, ssa, opline, ssa->ops + (opline - op_array->opcodes)); \
 	}
 
 #define DEFINE_SSA_OP_RANGE_OVERFLOW(opN) \
-	static zend_always_inline char _ssa_##opN##_range_overflow(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	static zend_always_inline char _ssa_##opN##_range_overflow_ex(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT(opline->opN); \
@@ -127,13 +140,16 @@
 				return 0; \
 			} \
 		} else if (opline->opN##_type != IS_UNUSED && \
-		    ssa->ops && \
 		    ssa->var_info && \
-		    ssa->ops[opline - op_array->opcodes].opN##_use >= 0 && \
-		    ssa->var_info[ssa->ops[opline - op_array->opcodes].opN##_use].has_range) { \
-			return ssa->var_info[ssa->ops[opline - op_array->opcodes].opN##_use].range.overflow; \
+		    ssa_op->opN##_use >= 0 && \
+		    ssa->var_info[ssa_op->opN##_use].has_range) { \
+			return ssa->var_info[ssa_op->opN##_use].range.overflow; \
 		} \
 		return 1; \
+	} \
+	static zend_always_inline char _ssa_##opN##_range_overflow(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	{ \
+		return _ssa_##opN##_range_overflow_ex(op_array, ssa, opline, ssa->ops + (opline - op_array->opcodes)); \
 	}
 
 DEFINE_SSA_OP_HAS_RANGE(op1)
@@ -157,6 +173,17 @@ DEFINE_SSA_OP_RANGE_OVERFLOW(op2)
 #define OP2_MAX_RANGE()         (_ssa_op2_max_range (op_array, ssa, opline))
 #define OP2_RANGE_UNDERFLOW()   (_ssa_op2_range_underflow (op_array, ssa, opline))
 #define OP2_RANGE_OVERFLOW()    (_ssa_op2_range_overflow (op_array, ssa, opline))
+
+#define OP1_HAS_RANGE_EX()       (_ssa_op1_has_range_ex (op_array, ssa, opline, ssa_op))
+#define OP1_MIN_RANGE_EX()       (_ssa_op1_min_range_ex (op_array, ssa, opline, ssa_op))
+#define OP1_MAX_RANGE_EX()       (_ssa_op1_max_range_ex (op_array, ssa, opline, ssa_op))
+#define OP1_RANGE_UNDERFLOW_EX() (_ssa_op1_range_underflow_ex (op_array, ssa, opline, ssa_op))
+#define OP1_RANGE_OVERFLOW_EX()  (_ssa_op1_range_overflow_ex (op_array, ssa, opline, ssa_op))
+#define OP2_HAS_RANGE_EX()       (_ssa_op2_has_range_ex (op_array, ssa, opline, ssa_op))
+#define OP2_MIN_RANGE_EX()       (_ssa_op2_min_range_ex (op_array, ssa, opline, ssa_op))
+#define OP2_MAX_RANGE_EX()       (_ssa_op2_max_range_ex (op_array, ssa, opline, ssa_op))
+#define OP2_RANGE_UNDERFLOW_EX() (_ssa_op2_range_underflow_ex (op_array, ssa, opline, ssa_op))
+#define OP2_RANGE_OVERFLOW_EX()  (_ssa_op2_range_overflow_ex (op_array, ssa, opline, ssa_op))
 
 static zend_always_inline uint32_t _const_op_type(const zval *zv) {
 	if (Z_TYPE_P(zv) == IS_CONSTANT_AST) {
@@ -204,19 +231,27 @@ static zend_always_inline uint32_t get_ssa_var_info(const zend_ssa *ssa, int ssa
 }
 
 #define DEFINE_SSA_OP_INFO(opN) \
-	static zend_always_inline uint32_t _ssa_##opN##_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	static zend_always_inline uint32_t _ssa_##opN##_info_ex(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
 	{																		\
 		if (opline->opN##_type == IS_CONST) {							\
 			return _const_op_type(CRT_CONSTANT(opline->opN)); \
 		} else { \
-			return get_ssa_var_info(ssa, ssa->ops ? ssa->ops[opline - op_array->opcodes].opN##_use : -1); \
+			return get_ssa_var_info(ssa, ssa->var_info ? ssa_op->opN##_use : -1); \
 		} \
+	} \
+	static zend_always_inline uint32_t _ssa_##opN##_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
+	{ \
+		return _ssa_##opN##_info_ex(op_array, ssa, opline, ssa->ops + (opline - op_array->opcodes)); \
 	}
 
 #define DEFINE_SSA_OP_DEF_INFO(opN) \
+	static zend_always_inline uint32_t _ssa_##opN##_def_info_ex(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
+	{ \
+		return get_ssa_var_info(ssa, ssa->var_info ? ssa_op->opN##_def : -1); \
+	} \
 	static zend_always_inline uint32_t _ssa_##opN##_def_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
 	{ \
-		return get_ssa_var_info(ssa, ssa->ops ? ssa->ops[opline - op_array->opcodes].opN##_def : -1); \
+		return _ssa_##opN##_def_info_ex(op_array, ssa, opline, ssa->ops + (opline - op_array->opcodes)); \
 	}
 
 
@@ -237,6 +272,17 @@ DEFINE_SSA_OP_DEF_INFO(result)
 #define OP1_DATA_DEF_INFO()     (_ssa_op1_def_info(op_array, ssa, (opline+1)))
 #define OP2_DATA_DEF_INFO()     (_ssa_op2_def_info(op_array, ssa, (opline+1)))
 #define RES_INFO()              (_ssa_result_def_info(op_array, ssa, opline))
+
+#define OP1_INFO_EX()           (_ssa_op1_info_ex(op_array, ssa, opline, ssa_op))
+#define OP2_INFO_EX()           (_ssa_op2_info_ex(op_array, ssa, opline, ssa_op))
+#define OP1_DATA_INFO_EX()      (_ssa_op1_info_ex(op_array, ssa, (opline+1), (ssa_op+1)))
+#define OP2_DATA_INFO_EX()      (_ssa_op2_info_ex(op_array, ssa, (opline+1), (ssa_op+1)))
+#define RES_USE_INFO_EX()       (_ssa_result_info_ex(op_array, ssa, opline, ssa_op))
+#define OP1_DEF_INFO_EX()       (_ssa_op1_def_info_ex(op_array, ssa, opline, ssa_op))
+#define OP2_DEF_INFO_EX()       (_ssa_op2_def_info_ex(op_array, ssa, opline, ssa_op))
+#define OP1_DATA_DEF_INFO_EX()  (_ssa_op1_def_info_ex(op_array, ssa, (opline+1), (ssa_op+1)))
+#define OP2_DATA_DEF_INFO_EX()  (_ssa_op2_def_info_ex(op_array, ssa, (opline+1), (ssa_op+1)))
+#define RES_INFO_EX()           (_ssa_result_def_info_ex(op_array, ssa, opline, ssa_op))
 
 static zend_always_inline zend_bool zend_add_will_overflow(zend_long a, zend_long b) {
 	return (b > 0 && a > ZEND_LONG_MAX - b)
@@ -274,7 +320,16 @@ void zend_func_return_info(const zend_op_array   *op_array,
                            int                    widening,
                            zend_ssa_var_info     *ret);
 
+int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa);
 int zend_may_throw(const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa);
+
+int zend_update_type_info(const zend_op_array *op_array,
+                          zend_ssa            *ssa,
+                          const zend_script   *script,
+                          zend_op             *opline,
+                          zend_ssa_op         *ssa_op,
+                          const zend_op      **ssa_opcodes,
+                          zend_long            optimization_level);
 
 END_EXTERN_C()
 

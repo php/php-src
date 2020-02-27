@@ -292,7 +292,6 @@ typedef struct _zend_jit_trace_start_rec {
 	uint8_t  level;  /* recursive return level for ZEND_JIT_TRACE_START */
 	const zend_op_array *op_array;
 	const zend_op *opline;
-	uint32_t len;
 } zend_jit_trace_start_rec;
 
 #define ZEND_JIT_TRACE_START_REC_SIZE 2
@@ -302,6 +301,8 @@ typedef struct _zend_jit_trace_exit_info {
 	uint32_t       stack_size;
 	uint32_t       stack_offset;
 } zend_jit_trace_exit_info;
+
+typedef int32_t zend_jit_trace_stack;
 
 typedef struct _zend_jit_trace_info {
 	uint32_t                  id;            /* trace id */
@@ -315,7 +316,7 @@ typedef struct _zend_jit_trace_info {
 	uint32_t                  stack_map_size;
 	const void               *code_start;    /* address of native code */
 	zend_jit_trace_exit_info *exit_info;     /* address of native code */
-	uint8_t                  *stack_map;
+	zend_jit_trace_stack     *stack_map;
 	//uint32_t    loop_offset;
 } zend_jit_trace_info;
 
@@ -325,8 +326,11 @@ struct _zend_jit_trace_stack_frame {
 	zend_jit_trace_stack_frame *call;
 	zend_jit_trace_stack_frame *prev;
 	const zend_function        *func;
-	int8_t                      return_value_used;
-	uint8_t                     stack[1];
+	union {
+		int8_t                  return_value_used;
+		int                     return_ssa_var;
+	};
+	zend_jit_trace_stack        stack[1];
 };
 
 typedef struct _zend_jit_globals {

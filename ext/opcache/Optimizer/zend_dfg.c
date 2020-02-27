@@ -20,6 +20,236 @@
 #include "zend_compile.h"
 #include "zend_dfg.h"
 
+static zend_always_inline void _zend_dfg_add_use_def_op(const zend_op_array *op_array, const zend_op *opline, uint32_t build_flags, zend_bitset use, zend_bitset def) /* {{{ */
+{
+	uint32_t var_num;
+	const zend_op *next;
+
+	if (opline->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+		var_num = EX_VAR_TO_NUM(opline->op1.var);
+		if (!zend_bitset_in(def, var_num)) {
+			zend_bitset_incl(use, var_num);
+		}
+	}
+	if (((opline->op2_type & (IS_VAR|IS_TMP_VAR)) != 0
+	  && opline->opcode != ZEND_FE_FETCH_R
+	  && opline->opcode != ZEND_FE_FETCH_RW)
+	 || (opline->op2_type == IS_CV)) {
+		var_num = EX_VAR_TO_NUM(opline->op2.var);
+		if (!zend_bitset_in(def, var_num)) {
+			zend_bitset_incl(use, var_num);
+		}
+	}
+	if ((build_flags & ZEND_SSA_USE_CV_RESULTS)
+	 && opline->result_type == IS_CV
+	 && opline->opcode != ZEND_RECV) {
+		var_num = EX_VAR_TO_NUM(opline->result.var);
+		if (!zend_bitset_in(def, var_num)) {
+			zend_bitset_incl(use, var_num);
+		}
+	}
+
+	switch (opline->opcode) {
+		case ZEND_ASSIGN:
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op2_type == IS_CV) {
+				zend_bitset_incl(def, EX_VAR_TO_NUM(opline->op2.var));
+			}
+			if (opline->op1_type == IS_CV) {
+add_op1_def:
+				zend_bitset_incl(def, EX_VAR_TO_NUM(opline->op1.var));
+			}
+			break;
+		case ZEND_ASSIGN_REF:
+			if (opline->op2_type == IS_CV) {
+				zend_bitset_incl(def, EX_VAR_TO_NUM(opline->op2.var));
+				//NEW_SSA_VAR(opline->op2.var)
+			}
+			if (opline->op1_type == IS_CV) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_ASSIGN_DIM:
+		case ZEND_ASSIGN_OBJ:
+			next = opline + 1;
+			if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+				var_num = EX_VAR_TO_NUM(next->op1.var);
+				if (!zend_bitset_in(def, var_num)) {
+					zend_bitset_incl(use, var_num);
+				}
+				if (build_flags & ZEND_SSA_RC_INFERENCE && next->op1_type == IS_CV) {
+					zend_bitset_incl(def, var_num);
+				}
+			}
+			if (opline->op1_type == IS_CV) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_ASSIGN_OBJ_REF:
+			next = opline + 1;
+			if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+				var_num = EX_VAR_TO_NUM(next->op1.var);
+				if (!zend_bitset_in(def, var_num)) {
+					zend_bitset_incl(use, var_num);
+				}
+				if (next->op1_type == IS_CV) {
+					zend_bitset_incl(def, var_num);
+				}
+			}
+			if (opline->op1_type == IS_CV) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_ASSIGN_STATIC_PROP:
+			next = opline + 1;
+			if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+				var_num = EX_VAR_TO_NUM(next->op1.var);
+				if (!zend_bitset_in(def, var_num)) {
+					zend_bitset_incl(use, var_num);
+				}
+#if 0
+				if ((build_flags & ZEND_SSA_RC_INFERENCE) && next->op1_type == IS_CV) {
+					zend_bitset_incl(def, var_num);
+				}
+#endif
+			}
+			break;
+		case ZEND_ASSIGN_STATIC_PROP_REF:
+			next = opline + 1;
+			if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+				var_num = EX_VAR_TO_NUM(next->op1.var);
+				if (!zend_bitset_in(def, var_num)) {
+					zend_bitset_incl(use, var_num);
+				}
+				if (next->op1_type == IS_CV) {
+					zend_bitset_incl(def, var_num);
+				}
+			}
+			break;
+		case ZEND_ASSIGN_STATIC_PROP_OP:
+			next = opline + 1;
+			if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+				var_num = EX_VAR_TO_NUM(next->op1.var);
+				if (!zend_bitset_in(def, var_num)) {
+					zend_bitset_incl(use, var_num);
+				}
+			}
+			break;
+		case ZEND_ASSIGN_DIM_OP:
+		case ZEND_ASSIGN_OBJ_OP:
+			next = opline + 1;
+			if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+				var_num = EX_VAR_TO_NUM(next->op1.var);
+				if (!zend_bitset_in(def, var_num)) {
+					zend_bitset_incl(use, var_num);
+				}
+			}
+			if (opline->op1_type == IS_CV) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_ASSIGN_OP:
+		case ZEND_PRE_INC:
+		case ZEND_PRE_DEC:
+		case ZEND_POST_INC:
+		case ZEND_POST_DEC:
+		case ZEND_BIND_GLOBAL:
+		case ZEND_BIND_STATIC:
+		case ZEND_SEND_VAR_NO_REF:
+		case ZEND_SEND_VAR_NO_REF_EX:
+		case ZEND_SEND_VAR_EX:
+		case ZEND_SEND_FUNC_ARG:
+		case ZEND_SEND_REF:
+		case ZEND_SEND_UNPACK:
+		case ZEND_FE_RESET_RW:
+		case ZEND_MAKE_REF:
+		case ZEND_PRE_INC_OBJ:
+		case ZEND_PRE_DEC_OBJ:
+		case ZEND_POST_INC_OBJ:
+		case ZEND_POST_DEC_OBJ:
+		case ZEND_UNSET_DIM:
+		case ZEND_UNSET_OBJ:
+		case ZEND_FETCH_DIM_W:
+		case ZEND_FETCH_DIM_RW:
+		case ZEND_FETCH_DIM_FUNC_ARG:
+		case ZEND_FETCH_DIM_UNSET:
+		case ZEND_FETCH_LIST_W:
+			if (opline->op1_type == IS_CV) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_SEND_VAR:
+		case ZEND_CAST:
+		case ZEND_QM_ASSIGN:
+		case ZEND_JMP_SET:
+		case ZEND_COALESCE:
+		case ZEND_FE_RESET_R:
+			if ((build_flags & ZEND_SSA_RC_INFERENCE) && opline->op1_type == IS_CV) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_ADD_ARRAY_UNPACK:
+			var_num = EX_VAR_TO_NUM(opline->result.var);
+			if (!zend_bitset_in(def, var_num)) {
+				zend_bitset_incl(use, var_num);
+			}
+			break;
+		case ZEND_ADD_ARRAY_ELEMENT:
+			var_num = EX_VAR_TO_NUM(opline->result.var);
+			if (!zend_bitset_in(def, var_num)) {
+				zend_bitset_incl(use, var_num);
+			}
+			/* break missing intentionally */
+		case ZEND_INIT_ARRAY:
+			if (((build_flags & ZEND_SSA_RC_INFERENCE)
+						|| (opline->extended_value & ZEND_ARRAY_ELEMENT_REF))
+					&& opline->op1_type == IS_CV) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_YIELD:
+			if (opline->op1_type == IS_CV
+					&& ((op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)
+						|| (build_flags & ZEND_SSA_RC_INFERENCE))) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_UNSET_CV:
+			goto add_op1_def;
+		case ZEND_VERIFY_RETURN_TYPE:
+			if (opline->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV)) {
+				goto add_op1_def;
+			}
+			break;
+		case ZEND_FE_FETCH_R:
+		case ZEND_FE_FETCH_RW:
+#if 0
+			if (opline->op2_type != IS_CV) {
+				op2_use = -1; /* not used */
+			}
+#endif
+			zend_bitset_incl(def, EX_VAR_TO_NUM(opline->op2.var));
+			break;
+		case ZEND_BIND_LEXICAL:
+			if ((opline->extended_value & ZEND_BIND_REF) || (build_flags & ZEND_SSA_RC_INFERENCE)) {
+				zend_bitset_incl(def, EX_VAR_TO_NUM(opline->op2.var));
+			}
+			break;
+		default:
+			break;
+	}
+
+	if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
+		zend_bitset_incl(def, EX_VAR_TO_NUM(opline->result.var));
+	}
+}
+/* }}} */
+
+void zend_dfg_add_use_def_op(const zend_op_array *op_array, const zend_op *opline, uint32_t build_flags, zend_bitset use, zend_bitset def) /* {{{ */
+{
+	_zend_dfg_add_use_def_op(op_array, opline, build_flags, use, def);
+}
+/* }}} */
+
 int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg *dfg, uint32_t build_flags) /* {{{ */
 {
 	int set_size;
@@ -27,7 +257,6 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 	int blocks_count = cfg->blocks_count;
 	zend_bitset tmp, def, use, in, out;
 	int k;
-	uint32_t var_num;
 	int j;
 
 	set_size = dfg->size;
@@ -40,162 +269,19 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 	/* Collect "def" and "use" sets */
 	for (j = 0; j < blocks_count; j++) {
 		zend_op *opline, *end;
+		zend_bitset b_use, b_def;
+
 		if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0) {
 			continue;
 		}
 
 		opline = op_array->opcodes + blocks[j].start;
 		end = opline + blocks[j].len;
+		b_use = DFG_BITSET(use, set_size, j);
+		b_def = DFG_BITSET(def, set_size, j);
 		for (; opline < end; opline++) {
 			if (opline->opcode != ZEND_OP_DATA) {
-				zend_op *next = opline + 1;
-				if (next < end && next->opcode == ZEND_OP_DATA) {
-					if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
-						var_num = EX_VAR_TO_NUM(next->op1.var);
-						if (next->op1_type == IS_CV && (opline->opcode == ZEND_ASSIGN_OBJ_REF
-								|| opline->opcode == ZEND_ASSIGN_STATIC_PROP_REF)) {
-							DFG_SET(use, set_size, j, var_num);
-							DFG_SET(def, set_size, j, var_num);
-						} else {
-							if (!DFG_ISSET(def, set_size, j, var_num)) {
-								DFG_SET(use, set_size, j, var_num);
-							}
-						}
-					}
-					if (next->op2_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
-						var_num = EX_VAR_TO_NUM(next->op2.var);
-						if (!DFG_ISSET(def, set_size, j, var_num)) {
-							DFG_SET(use, set_size, j, var_num);
-						}
-					}
-				}
-				if (opline->op1_type == IS_CV) {
-					var_num = EX_VAR_TO_NUM(opline->op1.var);
-					switch (opline->opcode) {
-					case ZEND_ADD_ARRAY_ELEMENT:
-					case ZEND_INIT_ARRAY:
-						if ((build_flags & ZEND_SSA_RC_INFERENCE)
-								|| (opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
-							goto op1_def;
-						}
-						goto op1_use;
-					case ZEND_FE_RESET_R:
-					case ZEND_SEND_VAR:
-					case ZEND_CAST:
-					case ZEND_QM_ASSIGN:
-					case ZEND_JMP_SET:
-					case ZEND_COALESCE:
-						if (build_flags & ZEND_SSA_RC_INFERENCE) {
-							goto op1_def;
-						}
-						goto op1_use;
-					case ZEND_YIELD:
-						if ((build_flags & ZEND_SSA_RC_INFERENCE)
-								|| (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE)) {
-							goto op1_def;
-						}
-						goto op1_use;
-					case ZEND_UNSET_CV:
-					case ZEND_ASSIGN:
-					case ZEND_ASSIGN_REF:
-					case ZEND_ASSIGN_OBJ_REF:
-					case ZEND_BIND_GLOBAL:
-					case ZEND_BIND_STATIC:
-					case ZEND_SEND_VAR_EX:
-					case ZEND_SEND_FUNC_ARG:
-					case ZEND_SEND_REF:
-					case ZEND_SEND_VAR_NO_REF:
-					case ZEND_SEND_VAR_NO_REF_EX:
-					case ZEND_FE_RESET_RW:
-					case ZEND_ASSIGN_OP:
-					case ZEND_ASSIGN_DIM_OP:
-					case ZEND_ASSIGN_OBJ_OP:
-					case ZEND_ASSIGN_STATIC_PROP_OP:
-					case ZEND_PRE_INC:
-					case ZEND_PRE_DEC:
-					case ZEND_POST_INC:
-					case ZEND_POST_DEC:
-					case ZEND_ASSIGN_DIM:
-					case ZEND_ASSIGN_OBJ:
-					case ZEND_UNSET_DIM:
-					case ZEND_UNSET_OBJ:
-					case ZEND_FETCH_DIM_W:
-					case ZEND_FETCH_DIM_RW:
-					case ZEND_FETCH_DIM_FUNC_ARG:
-					case ZEND_FETCH_DIM_UNSET:
-					case ZEND_FETCH_LIST_W:
-					case ZEND_VERIFY_RETURN_TYPE:
-					case ZEND_PRE_INC_OBJ:
-					case ZEND_PRE_DEC_OBJ:
-					case ZEND_POST_INC_OBJ:
-					case ZEND_POST_DEC_OBJ:
-op1_def:
-						/* `def` always come along with dtor or separation,
-						 * thus the origin var info might be also `use`d in the feature(CG) */
-						DFG_SET(use, set_size, j, var_num);
-						DFG_SET(def, set_size, j, var_num);
-						break;
-					default:
-op1_use:
-						if (!DFG_ISSET(def, set_size, j, var_num)) {
-							DFG_SET(use, set_size, j, var_num);
-						}
-					}
-				} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-					var_num = EX_VAR_TO_NUM(opline->op1.var);
-					if (!DFG_ISSET(def, set_size, j, var_num)) {
-						DFG_SET(use, set_size, j, var_num);
-					}
-					if (opline->opcode == ZEND_VERIFY_RETURN_TYPE) {
-						DFG_SET(def, set_size, j, var_num);
-					}
-				}
-				if (opline->op2_type == IS_CV) {
-					var_num = EX_VAR_TO_NUM(opline->op2.var);
-					switch (opline->opcode) {
-						case ZEND_ASSIGN:
-							if (build_flags & ZEND_SSA_RC_INFERENCE) {
-								goto op2_def;
-							}
-							goto op2_use;
-						case ZEND_BIND_LEXICAL:
-							if ((build_flags & ZEND_SSA_RC_INFERENCE) || (opline->extended_value & ZEND_BIND_REF)) {
-								goto op2_def;
-							}
-							goto op2_use;
-						case ZEND_ASSIGN_REF:
-						case ZEND_FE_FETCH_R:
-						case ZEND_FE_FETCH_RW:
-op2_def:
-							// FIXME: include into "use" too ...?
-							DFG_SET(use, set_size, j, var_num);
-							DFG_SET(def, set_size, j, var_num);
-							break;
-						default:
-op2_use:
-							if (!DFG_ISSET(def, set_size, j, var_num)) {
-								DFG_SET(use, set_size, j, var_num);
-							}
-							break;
-					}
-				} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
-					var_num = EX_VAR_TO_NUM(opline->op2.var);
-					if (opline->opcode == ZEND_FE_FETCH_R || opline->opcode == ZEND_FE_FETCH_RW) {
-						DFG_SET(def, set_size, j, var_num);
-					} else {
-						if (!DFG_ISSET(def, set_size, j, var_num)) {
-							DFG_SET(use, set_size, j, var_num);
-						}
-					}
-				}
-				if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
-					var_num = EX_VAR_TO_NUM(opline->result.var);
-					if ((build_flags & ZEND_SSA_USE_CV_RESULTS)
-					 && opline->result_type == IS_CV) {
-						DFG_SET(use, set_size, j, var_num);
-					}
-					DFG_SET(def, set_size, j, var_num);
-				}
+				_zend_dfg_add_use_def_op(op_array, opline, build_flags, b_use, b_def);
 			}
 		}
 	}

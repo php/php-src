@@ -147,17 +147,22 @@ static zend_bool zend_long_is_power_of_two(zend_long x)
 	return (x > 0) && !(x & (x - 1));
 }
 
-#define OP_RANGE(line, opN) \
+#define OP_RANGE_EX(ssa_op, opN) \
 	(((opline->opN##_type & (IS_TMP_VAR|IS_VAR|IS_CV)) && \
-	  ssa->ops && \
-	  ssa->var_info && \
-	  ssa->ops[line].opN##_use >= 0 && \
-	  ssa->var_info[ssa->ops[line].opN##_use].has_range) ? \
-	 &ssa->var_info[ssa->ops[line].opN##_use].range : NULL)
+	  (ssa_op)->opN##_use >= 0 && \
+	  ssa->var_info[(ssa_op)->opN##_use].has_range) ? \
+	 &ssa->var_info[(ssa_op)->opN##_use].range : NULL)
+
+#define OP_RANGE(line, opN) \
+	(ssa->var_info ? OP_RANGE_EX(ssa->ops + (line), opN) : NULL)
 
 #define OP1_RANGE()      OP_RANGE(opline - op_array->opcodes, op1)
 #define OP2_RANGE()      OP_RANGE(opline - op_array->opcodes, op2)
 #define OP1_DATA_RANGE() OP_RANGE(opline - op_array->opcodes + 1, op1)
+
+#define OP1_RANGE_EX()      OP_RANGE_EX(ssa_op, op1)
+#define OP2_RANGE_EX()      OP_RANGE_EX(ssa_op, op2)
+#define OP1_DATA_RANGE_EX() OP_RANGE_EX(ssa_op + 1, op1)
 
 #include "dynasm/dasm_x86.h"
 #include "jit/zend_jit_x86.h"
@@ -429,9 +434,8 @@ static void *dasm_link_and_encode(dasm_State             **dasm_state,
 	return entry;
 }
 
-static int zend_may_overflow(const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa)
+static int zend_may_overflow_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa)
 {
-	uint32_t num;
 	int res;
 
 	if (!ssa->ops || !ssa->var_info) {
@@ -440,21 +444,18 @@ static int zend_may_overflow(const zend_op *opline, const zend_op_array *op_arra
 	switch (opline->opcode) {
 		case ZEND_PRE_INC:
 		case ZEND_POST_INC:
-			num = opline - op_array->opcodes;
-			res = ssa->ops[num].op1_def;
+			res = ssa_op->op1_def;
 			return (res < 0 ||
 				!ssa->var_info[res].has_range ||
 				ssa->var_info[res].range.overflow);
 		case ZEND_PRE_DEC:
 		case ZEND_POST_DEC:
-			num = opline - op_array->opcodes;
-			res = ssa->ops[num].op1_def;
+			res = ssa_op->op1_def;
 			return (res < 0 ||
 				!ssa->var_info[res].has_range ||
 				ssa->var_info[res].range.underflow);
 		case ZEND_ADD:
-			num = opline - op_array->opcodes;
-			res = ssa->ops[num].result_def;
+			res = ssa_op->result_def;
 			if (res < 0 ||
 			    !ssa->var_info[res].has_range) {
 				return 1;
@@ -462,11 +463,11 @@ static int zend_may_overflow(const zend_op *opline, const zend_op_array *op_arra
 			if (ssa->var_info[res].range.underflow) {
 				zend_long op1_min, op2_min;
 
-				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+				if (!OP1_HAS_RANGE_EX() || !OP2_HAS_RANGE_EX()) {
 					return 1;
 				}
-				op1_min = OP1_MIN_RANGE();
-				op2_min = OP2_MIN_RANGE();
+				op1_min = OP1_MIN_RANGE_EX();
+				op2_min = OP2_MIN_RANGE_EX();
 				if (zend_add_will_overflow(op1_min, op2_min)) {
 					return 1;
 				}
@@ -474,19 +475,18 @@ static int zend_may_overflow(const zend_op *opline, const zend_op_array *op_arra
 			if (ssa->var_info[res].range.overflow) {
 				zend_long op1_max, op2_max;
 
-				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+				if (!OP1_HAS_RANGE_EX() || !OP2_HAS_RANGE_EX()) {
 					return 1;
 				}
-				op1_max = OP1_MAX_RANGE();
-				op2_max = OP2_MAX_RANGE();
+				op1_max = OP1_MAX_RANGE_EX();
+				op2_max = OP2_MAX_RANGE_EX();
 				if (zend_add_will_overflow(op1_max, op2_max)) {
 					return 1;
 				}
 			}
 			return 0;
 		case ZEND_SUB:
-			num = opline - op_array->opcodes;
-			res = ssa->ops[num].result_def;
+			res = ssa_op->result_def;
 			if (res < 0 ||
 			    !ssa->var_info[res].has_range) {
 				return 1;
@@ -494,11 +494,11 @@ static int zend_may_overflow(const zend_op *opline, const zend_op_array *op_arra
 			if (ssa->var_info[res].range.underflow) {
 				zend_long op1_min, op2_max;
 
-				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+				if (!OP1_HAS_RANGE_EX() || !OP2_HAS_RANGE_EX()) {
 					return 1;
 				}
-				op1_min = OP1_MIN_RANGE();
-				op2_max = OP2_MAX_RANGE();
+				op1_min = OP1_MIN_RANGE_EX();
+				op2_max = OP2_MAX_RANGE_EX();
 				if (zend_sub_will_overflow(op1_min, op2_max)) {
 					return 1;
 				}
@@ -506,27 +506,25 @@ static int zend_may_overflow(const zend_op *opline, const zend_op_array *op_arra
 			if (ssa->var_info[res].range.overflow) {
 				zend_long op1_max, op2_min;
 
-				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+				if (!OP1_HAS_RANGE_EX() || !OP2_HAS_RANGE_EX()) {
 					return 1;
 				}
-				op1_max = OP1_MAX_RANGE();
-				op2_min = OP2_MIN_RANGE();
+				op1_max = OP1_MAX_RANGE_EX();
+				op2_min = OP2_MIN_RANGE_EX();
 				if (zend_sub_will_overflow(op1_max, op2_min)) {
 					return 1;
 				}
 			}
 			return 0;
 		case ZEND_MUL:
-			num = opline - op_array->opcodes;
-			res = ssa->ops[num].result_def;
+			res = ssa_op->result_def;
 			return (res < 0 ||
 				!ssa->var_info[res].has_range ||
 				ssa->var_info[res].range.underflow ||
 				ssa->var_info[res].range.overflow);
 		case ZEND_ASSIGN_OP:
 			if (opline->extended_value == ZEND_ADD) {
-				num = opline - op_array->opcodes;
-				res = ssa->ops[num].op1_def;
+				res = ssa_op->op1_def;
 				if (res < 0 ||
 				    !ssa->var_info[res].has_range) {
 					return 1;
@@ -534,11 +532,11 @@ static int zend_may_overflow(const zend_op *opline, const zend_op_array *op_arra
 				if (ssa->var_info[res].range.underflow) {
 					zend_long op1_min, op2_min;
 
-					if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+					if (!OP1_HAS_RANGE_EX() || !OP2_HAS_RANGE_EX()) {
 						return 1;
 					}
-					op1_min = OP1_MIN_RANGE();
-					op2_min = OP2_MIN_RANGE();
+					op1_min = OP1_MIN_RANGE_EX();
+					op2_min = OP2_MIN_RANGE_EX();
 					if (zend_add_will_overflow(op1_min, op2_min)) {
 						return 1;
 					}
@@ -546,19 +544,18 @@ static int zend_may_overflow(const zend_op *opline, const zend_op_array *op_arra
 				if (ssa->var_info[res].range.overflow) {
 					zend_long op1_max, op2_max;
 
-					if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+					if (!OP1_HAS_RANGE_EX() || !OP2_HAS_RANGE_EX()) {
 						return 1;
 					}
-					op1_max = OP1_MAX_RANGE();
-					op2_max = OP2_MAX_RANGE();
+					op1_max = OP1_MAX_RANGE_EX();
+					op2_max = OP2_MAX_RANGE_EX();
 					if (zend_add_will_overflow(op1_max, op2_max)) {
 						return 1;
 					}
 				}
 				return 0;
 			} else if (opline->extended_value == ZEND_SUB) {
-				num = opline - op_array->opcodes;
-				res = ssa->ops[num].op1_def;
+				res = ssa_op->op1_def;
 				if (res < 0 ||
 				    !ssa->var_info[res].has_range) {
 					return 1;
@@ -566,11 +563,11 @@ static int zend_may_overflow(const zend_op *opline, const zend_op_array *op_arra
 				if (ssa->var_info[res].range.underflow) {
 					zend_long op1_min, op2_max;
 
-					if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+					if (!OP1_HAS_RANGE_EX() || !OP2_HAS_RANGE_EX()) {
 						return 1;
 					}
-					op1_min = OP1_MIN_RANGE();
-					op2_max = OP2_MAX_RANGE();
+					op1_min = OP1_MIN_RANGE_EX();
+					op2_max = OP2_MAX_RANGE_EX();
 					if (zend_sub_will_overflow(op1_min, op2_max)) {
 						return 1;
 					}
@@ -578,19 +575,18 @@ static int zend_may_overflow(const zend_op *opline, const zend_op_array *op_arra
 				if (ssa->var_info[res].range.overflow) {
 					zend_long op1_max, op2_min;
 
-					if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
+					if (!OP1_HAS_RANGE_EX() || !OP2_HAS_RANGE_EX()) {
 						return 1;
 					}
-					op1_max = OP1_MAX_RANGE();
-					op2_min = OP2_MIN_RANGE();
+					op1_max = OP1_MAX_RANGE_EX();
+					op2_min = OP2_MIN_RANGE_EX();
 					if (zend_sub_will_overflow(op1_max, op2_min)) {
 						return 1;
 					}
 				}
 				return 0;
 			} else if (opline->extended_value == ZEND_MUL) {
-				num = opline - op_array->opcodes;
-				res = ssa->ops[num].op1_def;
+				res = ssa_op->op1_def;
 				return (res < 0 ||
 					!ssa->var_info[res].has_range ||
 					ssa->var_info[res].range.underflow ||
@@ -599,6 +595,11 @@ static int zend_may_overflow(const zend_op *opline, const zend_op_array *op_arra
 		default:
 			return 1;
 	}
+}
+
+static int zend_may_overflow(const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa)
+{
+	return zend_may_overflow_ex(opline, &ssa->ops[opline - op_array->opcodes], op_array, ssa);
 }
 
 static int zend_jit_build_cfg(const zend_op_array *op_array, zend_cfg *cfg)
