@@ -10,10 +10,6 @@ require_once("dom_test.inc");
 
 $dom = new DOMDocument;
 $dom->loadXML('<test><mark/><mark /><mark /></test>');
-if(!$dom) {
-  echo "Error while parsing the document\n";
-  exit;
-}
 
 $element = $dom->documentElement;
 $element->append(

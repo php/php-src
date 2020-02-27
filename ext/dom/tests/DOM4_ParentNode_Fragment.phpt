@@ -8,10 +8,6 @@ require_once("dom_test.inc");
 
 $dom = new DOMDocument;
 $dom->loadXML('<test></test>');
-if(!$dom) {
-  echo "Error while parsing the document\n";
-  exit;
-}
 
 $fragment = $dom->createDocumentFragment();
 $fragment->appendChild($dom->createTextNode('foo'));

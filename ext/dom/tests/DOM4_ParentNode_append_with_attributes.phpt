@@ -8,10 +8,6 @@ require_once("dom_test.inc");
 
 $dom = new DOMDocument;
 $dom->loadXML('<test attr-one="21"/>');
-if(!$dom) {
-  echo "Error while parsing the document\n";
-  exit;
-}
 
 $replacement = $dom->createAttribute('attr-one');
 $replacement->value ='42';

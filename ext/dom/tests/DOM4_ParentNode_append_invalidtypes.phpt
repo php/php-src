@@ -8,10 +8,6 @@ require_once("dom_test.inc");
 
 $dom = new DOMDocument;
 $dom->loadXML('<test />');
-if(!$dom) {
-  echo "Error while parsing the document\n";
-  exit;
-}
 
 try {
     $dom->documentElement->append(array());

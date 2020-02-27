@@ -8,10 +8,6 @@ require_once("dom_test.inc");
 
 $dom = new DOMDocument;
 $dom->loadXML('<test><one>first</one><two>second</two></test>');
-if(!$dom) {
-  echo "Error while parsing the document\n";
-  exit;
-}
 
 $element = $dom->documentElement;
 print_node($element->firstChild);
