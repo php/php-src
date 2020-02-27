@@ -31,6 +31,9 @@ PHP                                                                        NEWS
     (Jakub Zelenka)
   . Fixed bug #79014 (PHP-FPM & Primary script unknown). (Jakub Zelenka)
 
+- MySQLi:
+  . Fixed bug #64032 (mysqli reports different client_version). (cmb)
+
 - PCRE:
   . Fixed bug #79188 (Memory corruption in preg_replace/preg_replace_callback
     and unicode). (Nikita)
