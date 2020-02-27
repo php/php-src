@@ -5594,7 +5594,7 @@ PHP_FUNCTION(str_pad)
 	}
 
 	if (pad_str_len == 0) {
-		zend_argument_value_error(3, "must be non-empty string");
+		zend_argument_value_error(3, "must be a non-empty string");
 		RETURN_THROWS();
 	}
 

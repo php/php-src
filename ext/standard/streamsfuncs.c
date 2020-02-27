@@ -968,7 +968,7 @@ PHP_FUNCTION(stream_context_get_options)
 
 	context = decode_context_param(zcontext);
 	if (!context) {
-		zend_argument_type_error(1, "to be a valid stream/context");
+		zend_argument_type_error(1, "must be a valid stream/context");
 		RETURN_THROWS();
 	}
 
@@ -993,7 +993,7 @@ PHP_FUNCTION(stream_context_set_option)
 
 		/* figure out where the context is coming from exactly */
 		if (!(context = decode_context_param(zcontext))) {
-			zend_argument_type_error(1, "to be a valid stream/context");
+			zend_argument_type_error(1, "must be a valid stream/context");
 			RETURN_THROWS();
 		}
 
@@ -1012,7 +1012,7 @@ PHP_FUNCTION(stream_context_set_option)
 
 		/* figure out where the context is coming from exactly */
 		if (!(context = decode_context_param(zcontext))) {
-			zend_argument_type_error(1, "to be a valid stream/context");
+			zend_argument_type_error(1, "must be a valid stream/context");
 			RETURN_THROWS();
 		}
 
@@ -1035,7 +1035,7 @@ PHP_FUNCTION(stream_context_set_params)
 
 	context = decode_context_param(zcontext);
 	if (!context) {
-		zend_argument_type_error(1, "to be a valid stream/context");
+		zend_argument_type_error(1, "must be a valid stream/context");
 		RETURN_THROWS();
 	}
 
@@ -1056,7 +1056,7 @@ PHP_FUNCTION(stream_context_get_params)
 
 	context = decode_context_param(zcontext);
 	if (!context) {
-		zend_argument_type_error(1, "to be a valid stream/context");
+		zend_argument_type_error(1, "must be a valid stream/context");
 		RETURN_THROWS();
 	}
 

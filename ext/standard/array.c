@@ -6291,7 +6291,7 @@ PHP_FUNCTION(array_key_exists)
 			RETVAL_BOOL(zend_hash_index_exists(ht, Z_RES_HANDLE_P(key)));
 			break;
 		default:
-			zend_argument_type_error(1, "to be a valid array offset type");
+			zend_argument_type_error(1, "must be a valid array offset type");
 			break;
 	}
 }
