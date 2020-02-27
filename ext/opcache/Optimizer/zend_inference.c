@@ -2626,10 +2626,10 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			}
 			if ((t1 & (MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG) {
 				if (!ssa_var_info[ssa_ops[i].op1_use].has_range ||
-				     (opline->opcode == ZEND_PRE_DEC &&
+				     (opline->opcode == ZEND_POST_DEC &&
 				      (ssa_var_info[ssa_ops[i].op1_use].range.underflow ||
 				       ssa_var_info[ssa_ops[i].op1_use].range.min == ZEND_LONG_MIN)) ||
-				      (opline->opcode == ZEND_PRE_INC &&
+				      (opline->opcode == ZEND_POST_INC &&
 				       (ssa_var_info[ssa_ops[i].op1_use].range.overflow ||
 				        ssa_var_info[ssa_ops[i].op1_use].range.max == ZEND_LONG_MAX))) {
 					/* may overflow */
