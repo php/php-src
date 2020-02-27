@@ -69,6 +69,12 @@ PHP 7.4 UPGRADE NOTES
     a warning and always return false. Previously all DateInterval objects were
     considered equal, unless they had properties.
 
+DOM:
+  . As of PHP 7.4.4, the value of the $childNodes property of DOMDocument,
+    DOMNode, DOMProcessingInstruction, DOMComment, DOMText, DOMCdataSection and
+    DOMNotation is now an empty DOMNodeList instead of NULL, according to the
+    W3C and WHATWG standards and the PHP manual.
+
 - Intl:
   . The default parameter value of idn_to_ascii() and idn_to_utf8() is now
     INTL_IDNA_VARIANT_UTS46 instead of the deprecated INTL_IDNA_VARIANT_2003.
