@@ -249,8 +249,9 @@ void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc)
 			parentNode->children = newchild;
 		}
 
-		newchild->prev = prevsib;
 		parentNode->last = fragment->last;
+
+		newchild->prev = prevsib;
 
 		dom_parent_node_assign_parent(newchild, parentNode, fragment);
 
@@ -282,9 +283,10 @@ void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc)
 
 	if (newchild) {
 		parentNode->children = newchild;
-		newchild->prev = prevsib;
 		fragment->last->next = nextsib;
 		nextsib->prev = fragment->last;
+
+		newchild->prev = prevsib;
 
 		dom_parent_node_assign_parent(newchild, parentNode, fragment);
 
@@ -319,6 +321,7 @@ void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc)
 	if (newchild) {
 		fragment->last->next = prevsib->next;
 		prevsib->next = newchild;
+
 		newchild->prev = prevsib;
 
 
@@ -351,9 +354,10 @@ void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc)
 		} else {
 			prevsib->next = newchild;
 		}
-		newchild->prev = prevsib;
 		fragment->last->next = nextsib;
 		nextsib->prev = fragment->last;
+
+		newchild->prev = prevsib;
 
 		dom_parent_node_assign_parent(newchild, parentNode, fragment);
 
