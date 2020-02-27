@@ -1026,7 +1026,7 @@ static const entity_ht *unescape_inverse_map(int all, int flags)
  * unicode code points */
 static entity_table_opt determine_entity_table(int all, int doctype)
 {
-	entity_table_opt retval = {NULL};
+	entity_table_opt retval = {0};
 
 	assert(!(doctype == ENT_HTML_DOC_XML1 && all));
 
