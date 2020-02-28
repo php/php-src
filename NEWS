@@ -56,6 +56,10 @@ PHP                                                                        NEWS
   . Fixed bug #79315 (ZipArchive::addFile doesn't honor start/length
     parameters). (Remi)
 
+- Opcache:
+  . Fixed bug #79252 (preloading causes php-fpm to segfault during exit).
+    (Nikita)
+
 20 Feb 2020, PHP 7.4.3
 
 - Core:
