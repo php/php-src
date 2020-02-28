@@ -34,6 +34,10 @@ PHP                                                                        NEWS
 - PDO_ODBC:
   . Fixed bug #79038 (PDOStatement::nextRowset() leaks column values). (cmb)
 
+- Reflection:
+  . Fixed bug #79062 (Property with heredoc default value returns false for
+    getDocComment). (Nikita)
+
 - SQLite3:
   . Fixed bug #79294 (::columnType() may fail after SQLite3Stmt::reset()). (cmb)
 
