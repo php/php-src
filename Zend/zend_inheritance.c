@@ -1531,7 +1531,9 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 	ce->ce_flags |= ZEND_ACC_RESOLVED_INTERFACES;
 
 	i = num_parent_interfaces;
-	for (; i < ce->num_interfaces; i++) {
+	/* Note that new interfaces can be added during this loop due to interface inheritance.
+	 * Use num_interfaces rather than ce->num_interfaces to not re-process the new ones. */
+	for (; i < num_interfaces; i++) {
 		do_interface_implementation(ce, ce->interfaces[i]);
 	}
 }
