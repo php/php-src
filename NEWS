@@ -85,6 +85,8 @@ PHP                                                                        NEWS
     message with traits). (villfa)
   . Implement ReflectionProperty::hasDefaultValue and
     Reflection::getDefaultValue (beberlei)
+  . Fixed bug #64592 (ReflectionClass::getMethods() returns methods out of
+    scope). (Nikita)
 
 - Session:
   . Fixed bug #78624 (session_gc return value for user defined session

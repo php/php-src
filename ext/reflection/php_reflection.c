@@ -4056,6 +4056,10 @@ ZEND_METHOD(reflection_class, getMethod)
 /* {{{ _addmethod */
 static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, zend_long filter)
 {
+	if ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) && mptr->common.scope != ce) {
+		return;
+	}
+
 	if (mptr->common.fn_flags & filter) {
 		zval method;
 		reflection_method_factory(ce, mptr, NULL, &method);
