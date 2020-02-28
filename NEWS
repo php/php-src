@@ -24,6 +24,10 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #79254 (getenv() w/o arguments not showing changes). (cmb)
 
+- Zip:
+  . Fixed bug #79315 (ZipArchive::addFile doesn't honor start/length
+    parameters). (Remi)
+
 20 Feb 2020, PHP 7.3.15
 
 - Core:
