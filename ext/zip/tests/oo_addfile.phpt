@@ -34,7 +34,7 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
     ])) {
         echo "failed\n";
     } else {
-        echo "OK";
+        echo "OK\n";
     }
     $zip->close();
 } else {
