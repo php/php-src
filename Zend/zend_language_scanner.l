@@ -2434,6 +2434,7 @@ skip_escape_conversion:
 
 	if (is_heredoc && !SCNG(heredoc_scan_ahead)) {
 		zend_lex_state current_state;
+		zend_string *saved_doc_comment = CG(doc_comment);
 		int heredoc_nesting_level = 1;
 		int first_token = 0;
 		int error = 0;
@@ -2444,6 +2445,7 @@ skip_escape_conversion:
 		SCNG(heredoc_indentation) = 0;
 		SCNG(heredoc_indentation_uses_spaces) = 0;
 		LANG_SCNG(on_event) = NULL;
+		CG(doc_comment) = NULL;
 
 		zend_ptr_stack_reverse_apply(&current_state.heredoc_label_stack, copy_heredoc_label_stack);
 
@@ -2493,6 +2495,7 @@ skip_escape_conversion:
 		zend_restore_lexical_state(&current_state);
 		SCNG(heredoc_scan_ahead) = 0;
 		CG(increment_lineno) = 0;
+		CG(doc_comment) = saved_doc_comment;
 
 		if (PARSER_MODE() && error) {
 			RETURN_TOKEN(T_ERROR);

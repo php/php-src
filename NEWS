@@ -38,6 +38,10 @@ PHP                                                                        NEWS
 - MySQLi:
   . Fixed bug #64032 (mysqli reports different client_version). (cmb)
 
+- Opcache:
+  . Fixed bug #79252 (preloading causes php-fpm to segfault during exit).
+    (Nikita)
+
 - PCRE:
   . Fixed bug #79188 (Memory corruption in preg_replace/preg_replace_callback
     and unicode). (Nikita)
@@ -47,6 +51,10 @@ PHP                                                                        NEWS
 
 - PDO_ODBC:
   . Fixed bug #79038 (PDOStatement::nextRowset() leaks column values). (cmb)
+
+- Reflection:
+  . Fixed bug #79062 (Property with heredoc default value returns false for
+    getDocComment). (Nikita)
 
 - SQLite3:
   . Fixed bug #79294 (::columnType() may fail after SQLite3Stmt::reset()). (cmb)
@@ -59,10 +67,6 @@ PHP                                                                        NEWS
 - Zip:
   . Fixed bug #79315 (ZipArchive::addFile doesn't honor start/length
     parameters). (Remi)
-
-- Opcache:
-  . Fixed bug #79252 (preloading causes php-fpm to segfault during exit).
-    (Nikita)
 
 20 Feb 2020, PHP 7.4.3
 
