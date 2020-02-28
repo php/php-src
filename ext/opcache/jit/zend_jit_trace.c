@@ -630,6 +630,41 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const
 	return 0;
 }
 
+static int zend_jit_trace_copy_ssa_var_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op **tssa_opcodes, zend_ssa *tssa, int ssa_var)
+{
+	int def;
+	zend_ssa_op *op;
+	zend_ssa_var_info *info;
+
+	def = tssa->vars[ssa_var].definition;
+	if (def >= 0) {
+		op = ssa->ops + (tssa_opcodes[def] - op_array->opcodes);
+		if (tssa->ops[def].op1_def == ssa_var) {
+			info = ssa->var_info + op->op1_def;
+		} else if (tssa->ops[def].op2_def == ssa_var) {
+			info = ssa->var_info + op->op2_def;
+		} else if (tssa->ops[def].result_def == ssa_var) {
+			info = ssa->var_info + op->result_def;
+		} else {
+			assert(0);
+		}
+
+		if (info->has_range) {
+			if (tssa->var_info[ssa_var].has_range) {
+				tssa->var_info[ssa_var].range.min = MAX(tssa->var_info[ssa_var].range.min, info->range.min);
+				tssa->var_info[ssa_var].range.max = MIN(tssa->var_info[ssa_var].range.max, info->range.max);
+				tssa->var_info[ssa_var].range.underflow = tssa->var_info[ssa_var].range.underflow && info->range.underflow;
+				tssa->var_info[ssa_var].range.overflow = tssa->var_info[ssa_var].range.overflow && info->range.overflow;
+			} else {
+				tssa->var_info[ssa_var].has_range = 1;
+				tssa->var_info[ssa_var].range = info->range;
+			}
+		}
+		return 1;
+	}
+	return 0;
+}
+
 static int zend_jit_trace_restrict_ssa_var_info(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op **tssa_opcodes, zend_ssa *tssa, int ssa_var)
 {
 	int def;
@@ -1275,6 +1310,18 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				default:
 					break;
 			}
+			if (ssa->var_info) {
+				/* Add statically inferred ranges */
+				if (ssa_ops[idx].op1_def >= 0) {
+					zend_jit_trace_copy_ssa_var_range(op_array, ssa, ssa_opcodes, tssa, ssa_ops[idx].op1_def);
+				}
+				if (ssa_ops[idx].op2_def >= 0) {
+					zend_jit_trace_copy_ssa_var_range(op_array, ssa, ssa_opcodes, tssa, ssa_ops[idx].op2_def);
+				}
+				if (ssa_ops[idx].result_def >= 0) {
+					zend_jit_trace_copy_ssa_var_range(op_array, ssa, ssa_opcodes, tssa, ssa_ops[idx].result_def);
+				}
+			}
 			if (zend_update_type_info(op_array, tssa, script, (zend_op*)opline, ssa_ops + idx, ssa_opcodes, optimization_level) == FAILURE) {
 				// TODO:
 				assert(0);
@@ -1296,6 +1343,18 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			while (len > 1) {
 				opline++;
 				if (opline->opcode != ZEND_OP_DATA) {
+					if (ssa->var_info) {
+						/* Add statically inferred ranges */
+						if (ssa_ops[idx].op1_def >= 0) {
+							zend_jit_trace_copy_ssa_var_range(op_array, ssa, ssa_opcodes, tssa, ssa_ops[idx].op1_def);
+						}
+						if (ssa_ops[idx].op2_def >= 0) {
+							zend_jit_trace_copy_ssa_var_range(op_array, ssa, ssa_opcodes, tssa, ssa_ops[idx].op2_def);
+						}
+						if (ssa_ops[idx].result_def >= 0) {
+							zend_jit_trace_copy_ssa_var_range(op_array, ssa, ssa_opcodes, tssa, ssa_ops[idx].result_def);
+						}
+					}
 					if (zend_update_type_info(op_array, tssa, script, (zend_op*)opline, ssa_ops + idx, ssa_opcodes, optimization_level) == FAILURE) {
 						// TODO:
 						assert(0);
