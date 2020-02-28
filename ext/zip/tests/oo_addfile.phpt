@@ -20,13 +20,17 @@ if (!$zip->open($file)) {
 if (!$zip->addFile($dirname . 'utils.inc', 'test.php')) {
 	echo "failed\n";
 }
+if (!$zip->addFile($dirname . 'utils.inc', 'mini.txt', 12, 34)) {
+	echo "failed\n";
+}
 if ($zip->status == ZIPARCHIVE::ER_OK) {
 	if (!verify_entries($zip, [
 		"bar",
 		"foobar/",
 		"foobar/baz",
 		"entry1.txt",
-		"test.php"
+		"test.php",
+		"mini.txt"
 	])) {
 		echo "failed\n";
 	} else {
@@ -36,7 +40,14 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 } else {
 	echo "failed\n";
 }
+if (!$zip->open($file)) {
+	exit('failed');
+}
+var_dump(strlen($zip->getFromName('test.php')) == filesize($dirname . 'utils.inc'));
+var_dump(strlen($zip->getFromName('mini.txt')) == 34);
 @unlink($file);
 ?>
 --EXPECT--
 OK
+bool(true)
+bool(true)
