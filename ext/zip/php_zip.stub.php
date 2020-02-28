@@ -58,13 +58,16 @@ class ZipArchive
     public function getStatusString() {}
 
     /** @return bool */
-    public function addEmptyDir(string $dirname) {}
+    public function addEmptyDir(string $dirname, int $flags = 0) {}
 
     /** @return bool */
-    public function addFromString(string $name, string $content) {}
+    public function addFromString(string $name, string $content, int $flags = ZipArchive::FL_OVERWRITE) {}
 
     /** @return bool */
-    public function addFile(string $filepath, string $entryname = UNKNOWN, int $start = 0, int $length = 0) {}
+    public function addFile(string $filepath, string $entryname = UNKNOWN, int $start = 0, int $length = 0, int $flags = ZipArchive::FL_OVERWRITE) {}
+
+    /** @return bool */
+    public function replaceFile(string $filepath, string $index, int $start = 0, int $length = 0, int $flags = 0) {}
 
     /** @return array|false */
     public function addGlob(string $pattern, int $flags = 0, $options = UNKNOWN) {}
