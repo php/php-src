@@ -558,7 +558,7 @@ PHP_FUNCTION(sodium_add)
 	val = (unsigned char *) Z_STRVAL(*val_zv);
 	val_len = Z_STRLEN(*val_zv);
 	if (val_len != addv_len) {
-		zend_argument_error(sodium_exception_ce, 1, "and argument #2 ($string_2) must have the same size");
+		zend_argument_error(sodium_exception_ce, 1, "and argument #2 ($string_2) must have the same length");
 		RETURN_THROWS();
 	}
 	sodium_add(val, addv, val_len);
@@ -578,7 +578,7 @@ PHP_FUNCTION(sodium_memcmp)
 		RETURN_THROWS();
 	}
 	if (len1 != len2) {
-		zend_argument_error(sodium_exception_ce, 1, "and argument #2 ($string_2) must have the same size");
+		zend_argument_error(sodium_exception_ce, 1, "and argument #2 ($string_2) must have the same length");
 		RETURN_THROWS();
 	}
 	RETURN_LONG(sodium_memcmp(buf1, buf2, len1));
@@ -1611,7 +1611,7 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 		RETURN_THROWS();
 	}
 	if (hash_len >= 0xffffffff) {
-		zend_argument_error(sodium_exception_ce, 1, "is too long");
+		zend_argument_error(sodium_exception_ce, 1, "is too large");
 		RETURN_THROWS();
 	}
 	if (passwd_len >= 0xffffffff) {
@@ -2890,7 +2890,7 @@ PHP_FUNCTION(sodium_compare)
 		RETURN_THROWS();
 	}
 	if (len1 != len2) {
-		zend_argument_error(sodium_exception_ce, 1, "and argument #2 ($string_2) must have the same size");
+		zend_argument_error(sodium_exception_ce, 1, "and argument #2 ($string_2) must have the same length");
 		RETURN_THROWS();
 	} else {
 		RETURN_LONG(sodium_compare((const unsigned char *) buf1,
