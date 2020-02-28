@@ -39,6 +39,9 @@ DOMDocument Object
     [preserveWhiteSpace] => 1
     [recover] => 
     [substituteEntities] => 
+    [firstElementChild] => (object value omitted)
+    [lastElementChild] => (object value omitted)
+    [childElementCount] => 1
     [nodeName] => #document
     [nodeValue] => 
     [nodeType] => 9

@@ -19,6 +19,8 @@
 #define DOM_FE_H
 
 extern const zend_function_entry php_dom_domexception_class_functions[];
+extern const zend_function_entry php_dom_parent_node_class_functions[];
+extern const zend_function_entry php_dom_child_node_class_functions[];
 extern const zend_function_entry php_dom_domimplementation_class_functions[];
 extern const zend_function_entry php_dom_documentfragment_class_functions[];
 extern const zend_function_entry php_dom_document_class_functions[];
@@ -75,6 +77,8 @@ PHP_METHOD(domimplementation, getFeature);
 /* domdocumentfragment methods */
 PHP_METHOD(domdocumentfragment, __construct);
 PHP_METHOD(domdocumentfragment, appendXML);
+PHP_METHOD(domdocumentfragment, append);
+PHP_METHOD(domdocumentfragment, prepend);
 
 /* domdocument methods */
 PHP_METHOD(domdocument, createElement);
@@ -102,6 +106,8 @@ PHP_METHOD(domdocument, saveXML);
 PHP_METHOD(domdocument, validate);
 PHP_METHOD(domdocument, xinclude);
 PHP_METHOD(domdocument, registerNodeClass);
+PHP_METHOD(domdocument, append);
+PHP_METHOD(domdocument, prepend);
 
 #if defined(LIBXML_HTML_ENABLED)
 PHP_METHOD(domdocument, loadHTML);
@@ -152,6 +158,10 @@ PHP_METHOD(domcharacterdata, appendData);
 PHP_METHOD(domcharacterdata, insertData);
 PHP_METHOD(domcharacterdata, deleteData);
 PHP_METHOD(domcharacterdata, replaceData);
+PHP_METHOD(domcharacterdata, remove);
+PHP_METHOD(domcharacterdata, after);
+PHP_METHOD(domcharacterdata, before);
+PHP_METHOD(domcharacterdata, replaceWith);
 
 /* domattr methods */
 PHP_METHOD(domattr, isId);
@@ -177,6 +187,12 @@ PHP_METHOD(domelement, setIdAttribute);
 PHP_METHOD(domelement, setIdAttributeNS);
 PHP_METHOD(domelement, setIdAttributeNode);
 PHP_METHOD(domelement, __construct);
+PHP_METHOD(domelement, remove);
+PHP_METHOD(domelement, after);
+PHP_METHOD(domelement, before);
+PHP_METHOD(domelement, append);
+PHP_METHOD(domelement, prepend);
+PHP_METHOD(domelement, replaceWith);
 
 /* domtext methods */
 PHP_METHOD(domtext, splitText);

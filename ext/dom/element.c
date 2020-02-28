@@ -51,6 +51,12 @@ const zend_function_entry php_dom_element_class_functions[] = { /* {{{ */
 	PHP_ME(domelement, setIdAttributeNS, arginfo_class_DOMElement_setIdAttributeNS, ZEND_ACC_PUBLIC)
 	PHP_ME(domelement, setIdAttributeNode, arginfo_class_DOMElement_setIdAttributeNode, ZEND_ACC_PUBLIC)
 	PHP_ME(domelement, __construct, arginfo_class_DOMElement___construct, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, remove, arginfo_class_DOMChildNode_remove, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, after, arginfo_class_DOMChildNode_after, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, before, arginfo_class_DOMChildNode_before, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, replaceWith, arginfo_class_DOMChildNode_replaceWith, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, append, arginfo_class_DOMParentNode_append, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, prepend, arginfo_class_DOMParentNode_prepend, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -1182,5 +1188,127 @@ PHP_METHOD(domelement, setIdAttributeNode)
 	RETURN_NULL();
 }
 /* }}} end dom_element_set_id_attribute_node */
+
+/* {{{ proto void DOMElement::remove();
+URL:
+Since:
+*/
+PHP_METHOD(domelement, remove)
+{
+	zval *id;
+	xmlNodePtr child;
+	dom_object *intern;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(child, id, xmlNodePtr, intern);
+
+	dom_child_node_remove(intern);
+}
+/* }}} end DOMElement::remove */
+
+PHP_METHOD(domelement, after)
+{
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_after(intern, args, argc);
+}
+
+PHP_METHOD(domelement, before)
+{
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_before(intern, args, argc);
+}
+
+/* {{{ proto void domelement::append(string|DOMNode ...$nodes)
+URL: https://dom.spec.whatwg.org/#dom-parentnode-append
+Since: DOM Living Standard (DOM4)
+*/
+PHP_METHOD(domelement, append)
+{
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_append(intern, args, argc);
+}
+/* }}} end DOMElement::append */
+
+/* {{{ proto void domelement::prepend(string|DOMNode ...$nodes)
+URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
+Since: DOM Living Standard (DOM4)
+*/
+PHP_METHOD(domelement, prepend)
+{
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_prepend(intern, args, argc);
+}
+/* }}} end DOMElement::prepend */
+
+/* {{{ proto void domelement::replaceWith(string|DOMNode ...$nodes)
+URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
+Since: DOM Living Standard (DOM4)
+*/
+PHP_METHOD(domelement, replaceWith)
+{
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_after(intern, args, argc);
+	dom_child_node_remove(intern);
+}
+/* }}} end DOMElement::prepend */
 
 #endif
