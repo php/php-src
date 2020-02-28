@@ -52,7 +52,11 @@ PHP                                                                        NEWS
   . Fixed bug #79265 (Improper injection of Host header when using fopen for
     http requests). (Miguel Xavier Penha Neto)
 
-?? ??? ????, PHP 7.4.3
+- Zip:
+  . Fixed bug #79315 (ZipArchive::addFile doesn't honor start/length
+    parameters). (Remi)
+
+20 Feb 2020, PHP 7.4.3
 
 - Core:
   . Fixed bug #79146 (cscript can fail to run on some systems). (clarodeus)
