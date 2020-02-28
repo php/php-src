@@ -87,6 +87,8 @@ PHP                                                                        NEWS
     Reflection::getDefaultValue (beberlei)
   . Fixed bug #64592 (ReflectionClass::getMethods() returns methods out of
     scope). (Nikita)
+  . Fixed bug #77325 (ReflectionClassConstant::$class returns wrong class when
+    extending). (Nikita)
 
 - Session:
   . Fixed bug #78624 (session_gc return value for user defined session
