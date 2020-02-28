@@ -30,10 +30,11 @@ $tester = new FPM\Tester($cfg, $code);
 $tester->start();
 $tester->expectLogStartNotices();
 $tester->request()->expectEmptyBody();
-$tester->terminate();
 $lines = $tester->getLogLines(2);
 var_dump($lines[0] === str_repeat('a', 1021)  . "\0f\n");
 var_dump($lines[1] === "abc\n");
+$tester->terminate();
+$tester->expectLogTerminatingNotices();
 $tester->close();
 
 ?>
