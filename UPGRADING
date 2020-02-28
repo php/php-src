@@ -415,6 +415,10 @@ PHP 8.0 UPGRADE NOTES
   . Added DateTime::createFromInterface() and
     DateTimeImmutable::createFromInterface().
 
+- dom:
+  . Introduce DOMParentNode and DOMChildNode with new traversal and manipulation APIs
+    RFC: https://wiki.php.net/rfc/dom_living_standard_api
+
 ========================================
 3. Changes in SAPI modules
 ========================================
