@@ -7587,6 +7587,53 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 	}
 }
 
+static int zend_jit_init_fcall_guard(dasm_State **Dst, const zend_op *opline, const zend_function *func)
+{
+	int32_t exit_point;
+	const void *exit_addr;
+
+	if (func->type == ZEND_INTERNAL_FUNCTION) {
+#ifdef ZEND_WIN32
+		// TODO: ASLR may cause different addresses in different workers ???
+		return 0
+#endif
+	} else if (func->type == ZEND_USER_FUNCTION) {
+		if (!(func->common.fn_flags & ZEND_ACC_IMMUTABLE)) {
+			// TODO: We don't have op_array to insert a guard ???
+			return 0;
+		}
+	} else {
+		ZEND_ASSERT(0);
+		return 0;
+	}
+
+//	exit_point = zend_jit_trace_get_exit_point(opline+1, opline+1, NULL);
+	exit_point = zend_jit_trace_get_exit_point(opline, NULL, NULL);
+	exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+	if (!exit_addr) {
+		return 0;
+	}
+
+//	zend_jit_stop_reuse_ip();
+//	|	LOAD_IP_ADDR opline
+
+	|	// call = EX(call);
+	|	mov r1, EX->call
+	|   .if X64
+	|| 		if (!IS_SIGNED_32BIT(fbc)) {
+	|  			mov64 r0, func
+	|			cmp aword EX:r1->func, r0
+	||		} else {
+	|  			cmp aword EX:r1->func, func
+	||		}
+	|	.else
+	|		cmp aword EX:r1->func, func
+	|	.endif
+	|	jne &exit_addr
+
+	return 1;
+}
+
 static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t b, const zend_op_array *op_array, zend_ssa *ssa, int call_level, zend_jit_trace_rec *trace)
 {
 	zend_func_info *info = ZEND_FUNC_INFO(op_array);

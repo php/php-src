@@ -2556,6 +2556,52 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						goto done;
 #endif
+//					case ZEND_INIT_NS_FCALL_BY_NAME:
+					case ZEND_INIT_METHOD_CALL:
+					case ZEND_INIT_DYNAMIC_CALL:
+						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw_ex(opline, ssa_op, op_array, ssa), p + 1)) {
+							goto jit_failure;
+						}
+						if ((p+1)->op == ZEND_JIT_TRACE_INIT_CALL) {
+							if (!zend_jit_init_fcall_guard(&dasm_state, opline, (p+1)->func)) {
+								goto jit_failure;
+							}
+						}
+						goto done;
+					case ZEND_INIT_STATIC_METHOD_CALL:
+						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw_ex(opline, ssa_op, op_array, ssa), p + 1)) {
+							goto jit_failure;
+						}
+						if ((opline->op1_type != IS_CONST
+						  || opline->op2_type != IS_CONST)
+						 && (p+1)->op == ZEND_JIT_TRACE_INIT_CALL) {
+							if (!zend_jit_init_fcall_guard(&dasm_state, opline, (p+1)->func)) {
+								goto jit_failure;
+							}
+						}
+						goto done;
+					case ZEND_INIT_USER_CALL:
+						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw_ex(opline, ssa_op, op_array, ssa), p + 1)) {
+							goto jit_failure;
+						}
+						if (opline->op2_type != IS_CONST
+						 && (p+1)->op == ZEND_JIT_TRACE_INIT_CALL) {
+							if (!zend_jit_init_fcall_guard(&dasm_state, opline, (p+1)->func)) {
+								goto jit_failure;
+							}
+						}
+						goto done;
+					case ZEND_NEW:
+						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw_ex(opline, ssa_op, op_array, ssa), p + 1)) {
+							goto jit_failure;
+						}
+						if (opline->op1_type != IS_CONST
+						 && (p+1)->op == ZEND_JIT_TRACE_INIT_CALL) {
+							if (!zend_jit_init_fcall_guard(&dasm_state, opline, (p+1)->func)) {
+								goto jit_failure;
+							}
+						}
+						goto done;
 					default:
 						break;
 				}
