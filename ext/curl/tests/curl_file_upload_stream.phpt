@@ -1,9 +1,10 @@
 --TEST--
 CURL file uploading from stream
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
 <?php
-if (curl_version()['version_number'] < 0x73800) die('skip requires curl >= 7.56.0');
+include 'skipif.inc';
+if (!CURL_FILE_AS_STREAM) die('skip CURLFile does not support streams');
+?>
 --FILE--
 <?php
 include 'server.inc';

@@ -1,7 +1,10 @@
 --TEST--
 FR #77711 (CURLFile should support UNICODE filenames)
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php
+include 'skipif.inc';
+if (!CURL_FILE_AS_STREAM) die('skip CURLFile does not support streams');
+?>
 --FILE--
 <?php
 include 'server.inc';

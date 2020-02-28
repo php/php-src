@@ -1,7 +1,10 @@
 --TEST--
 curl_copy_handle() allows to post CURLFile multiple times
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php
+include 'skipif.inc';
+if (!CURL_FILE_AS_STREAM) die('skip CURLFile does not support streams');
+?>
 --FILE--
 <?php
 include 'server.inc';

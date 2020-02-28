@@ -1404,6 +1404,12 @@ PHP_MINIT_FUNCTION(curl)
 
 	REGISTER_CURL_CONSTANT(CURLOPT_SAFE_UPLOAD);
 
+#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */ && defined(CURL_FILE_AS_STREAM)
+	REGISTER_BOOL_CONSTANT("CURL_FILE_AS_STREAM", 1, CONST_CS | CONST_PERSISTENT);
+#else
+	REGISTER_BOOL_CONSTANT("CURL_FILE_AS_STREAM", 0, CONST_CS | CONST_PERSISTENT);
+#endif
+
 #ifdef PHP_CURL_NEED_OPENSSL_TSL
 	if (!CRYPTO_get_id_callback()) {
 		int i, c = CRYPTO_num_locks();
@@ -2105,7 +2111,7 @@ void _php_setup_easy_copy_handlers(php_curl *ch, php_curl *source)
 	(*source->clone)++;
 }
 
-#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
+#if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */ && defined(CURL_FILE_AS_STREAM)
 static size_t read_cb(char *buffer, size_t size, size_t nitems, void *arg) /* {{{ */
 {
 	struct mime_data_cb_arg *cb_arg = (struct mime_data_cb_arg *) arg;
@@ -2235,7 +2241,11 @@ static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields
 					return FAILURE;
 				}
 				if ((form_error = curl_mime_name(part, ZSTR_VAL(string_key))) != CURLE_OK
+#ifdef CURL_FILE_AS_STREAM
 					|| (form_error = curl_mime_data_cb(part, -1, read_cb, seek_cb, free_cb, cb_arg)) != CURLE_OK
+#else
+					|| (form_error = curl_mime_filedata(part, ZSTR_VAL(postval))) != CURLE_OK
+#endif
 					|| (form_error = curl_mime_filename(part, filename ? filename : ZSTR_VAL(postval))) != CURLE_OK
 					|| (form_error = curl_mime_type(part, type ? type : "application/octet-stream")) != CURLE_OK) {
 					error = form_error;
