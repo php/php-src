@@ -16,4 +16,4 @@ setlocale(LC_NUMERIC, "de_DE.UTF-8", "de_DE", "de", "german", "ge", "de_DE.ISO-8
 echo (float)"3.14", "\n";
 ?>
 --EXPECT--
-3,14
+3.14

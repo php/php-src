@@ -114,7 +114,7 @@ again:
 			php_printf("%sint(" ZEND_LONG_FMT ")\n", COMMON, Z_LVAL_P(struc));
 			break;
 		case IS_DOUBLE:
-			php_printf("%sfloat(%.*G)\n", COMMON, (int) PG(serialize_precision), Z_DVAL_P(struc));
+			php_printf_unchecked("%sfloat(%.*H)\n", COMMON, (int) PG(serialize_precision), Z_DVAL_P(struc));
 			break;
 		case IS_STRING:
 			php_printf("%sstring(%zd) \"", COMMON, Z_STRLEN_P(struc));
@@ -295,7 +295,7 @@ again:
 		php_printf("%sint(" ZEND_LONG_FMT ")\n", COMMON, Z_LVAL_P(struc));
 		break;
 	case IS_DOUBLE:
-		php_printf("%sfloat(%.*G)\n", COMMON, (int) PG(serialize_precision), Z_DVAL_P(struc));
+		php_printf_unchecked("%sfloat(%.*H)\n", COMMON, (int) PG(serialize_precision), Z_DVAL_P(struc));
 		break;
 	case IS_STRING:
 		php_printf("%sstring(%zd) \"", COMMON, Z_STRLEN_P(struc));

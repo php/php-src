@@ -912,6 +912,25 @@ PHPAPI size_t php_printf(const char *format, ...)
 }
 /* }}} */
 
+/* {{{ php_printf_unchecked
+ */
+PHPAPI size_t php_printf_unchecked(const char *format, ...)
+{
+	va_list args;
+	size_t ret;
+	char *buffer;
+	size_t size;
+
+	va_start(args, format);
+	size = vspprintf(&buffer, 0, format, args);
+	ret = PHPWRITE(buffer, size);
+	efree(buffer);
+	va_end(args);
+
+	return ret;
+}
+/* }}} */
+
 static zend_string *escape_html(const char *buffer, size_t buffer_len) {
 	zend_string *result = php_escape_html_entities_ex(
 		(const unsigned char *) buffer, buffer_len, 0, ENT_COMPAT,

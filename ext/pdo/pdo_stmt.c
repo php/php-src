@@ -230,15 +230,8 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	}
 
 	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR && param->max_value_len <= 0 && !Z_ISNULL_P(parameter)) {
-		if (Z_TYPE_P(parameter) == IS_DOUBLE) {
-			char *p;
-			int len = zend_spprintf_unchecked(&p, 0, "%.*H", (int) EG(precision), Z_DVAL_P(parameter));
-			ZVAL_STRINGL(parameter, p, len);
-			efree(p);
-		} else {
-			if (!try_convert_to_string(parameter)) {
-				return 0;
-			}
+		if (!try_convert_to_string(parameter)) {
+			return 0;
 		}
 	} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_INT && (Z_TYPE_P(parameter) == IS_FALSE || Z_TYPE_P(parameter) == IS_TRUE)) {
 		convert_to_long(parameter);
