@@ -23,15 +23,15 @@ echo "Done\n";
 --EXPECT--
 array(1) {
   [0]=>
-  float(2,1)
+  float(2.1)
 }
 array(1) {
   [0]=>
-  float(0,15)
+  float(0.15)
 }
 array(1) {
   [0]=>
-  float(123,13452345)
+  float(123.13452345)
 }
 array(2) {
   [0]=>

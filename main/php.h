@@ -309,8 +309,8 @@ ssize_t pread(int, void *, size_t, off64_t);
 BEGIN_EXTERN_C()
 void phperror(char *error);
 PHPAPI size_t php_write(void *buf, size_t size);
-PHPAPI size_t php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1,
-		2);
+PHPAPI size_t php_printf(const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 1, 2);
+PHPAPI size_t php_printf_unchecked(const char *format, ...);
 PHPAPI int php_get_module_initialized(void);
 #ifdef HAVE_SYSLOG_H
 #include "php_syslog.h"

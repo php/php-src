@@ -605,20 +605,6 @@ try_again:
 }
 /* }}} */
 
-ZEND_API void ZEND_FASTCALL _convert_to_cstring(zval *op) /* {{{ */
-{
-	if (Z_TYPE_P(op) == IS_DOUBLE) {
-		zend_string *str;
-		double dval = Z_DVAL_P(op);
-
-		str = zend_strpprintf_unchecked(0, "%.*H", (int) EG(precision), dval);
-		ZVAL_NEW_STR(op, str);
-	} else {
-		_convert_to_string(op);
-	}
-}
-/* }}} */
-
 ZEND_API void ZEND_FASTCALL _convert_to_string(zval *op) /* {{{ */
 {
 try_again:
@@ -648,8 +634,8 @@ try_again:
 			zend_string *str;
 			double dval = Z_DVAL_P(op);
 
-			str = zend_strpprintf(0, "%.*G", (int) EG(precision), dval);
-			/* %G already handles removing trailing zeros from the fractional part, yay */
+			str = zend_strpprintf_unchecked(0, "%.*H", (int) EG(precision), dval);
+
 			ZVAL_NEW_STR(op, str);
 			break;
 		}
@@ -953,7 +939,7 @@ try_again:
 			return zend_long_to_str(Z_LVAL_P(op));
 		}
 		case IS_DOUBLE: {
-			return zend_strpprintf(0, "%.*G", (int) EG(precision), Z_DVAL_P(op));
+			return zend_strpprintf_unchecked(0, "%.*H", (int) EG(precision), Z_DVAL_P(op));
 		}
 		case IS_ARRAY:
 			zend_error(E_WARNING, "Array to string conversion");

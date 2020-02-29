@@ -257,7 +257,6 @@ ZEND_API int ZEND_FASTCALL increment_function(zval *op1);
 ZEND_API int ZEND_FASTCALL decrement_function(zval *op2);
 
 ZEND_API void ZEND_FASTCALL convert_scalar_to_number(zval *op);
-ZEND_API void ZEND_FASTCALL _convert_to_cstring(zval *op);
 ZEND_API void ZEND_FASTCALL _convert_to_string(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_long(zval *op);
 ZEND_API void ZEND_FASTCALL convert_to_double(zval *op);
@@ -340,7 +339,6 @@ static zend_always_inline zend_bool try_convert_to_string(zval *op) {
 #define _zval_get_double_func(op) zval_get_double_func(op)
 #define _zval_get_string_func(op) zval_get_string_func(op)
 
-#define convert_to_cstring(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_cstring((op)); }
 #define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op)); }
 
 
