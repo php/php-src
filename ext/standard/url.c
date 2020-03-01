@@ -280,7 +280,21 @@ PHPAPI php_url *php_url_parse_ex(char const *str, size_t length)
 	}
 
 	ret->host = zend_string_init(s, (p-s), 0);
-	php_replace_controlchars_ex(ZSTR_VAL(ret->host), ZSTR_LEN(ret->host));
+	char *host_str = ZSTR_VAL(ret->host);
+	size_t host_len = ZSTR_LEN(ret->host);
+
+	/* check for control characters and marks host as invalid if present */
+	unsigned char *current = (unsigned char *)host_str;
+	unsigned char *last = current + host_len;
+	while (current < last) {
+		if (iscntrl(*current)) {
+			php_url_free(ret);
+			return NULL;
+		}
+		current++;
+	}
+
+	php_replace_controlchars_ex(host_str, host_len);
 
 	if (e == ue) {
 		return ret;
