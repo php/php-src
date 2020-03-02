@@ -1983,6 +1983,10 @@ static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields
 			char *type = NULL, *filename = NULL;
 #if LIBCURL_VERSION_NUM >= 0x073800 /* 7.56.0 */
 			struct mime_data_cb_arg *cb_arg;
+			php_stream *stream;
+			php_stream_statbuf ssb;
+			size_t filesize = -1;
+			curl_seek_callback seekfunc = seek_cb;
 #endif
 
 			prop = zend_read_property(curl_CURLFile_class, current, "name", sizeof("name")-1, 0, &rv);
@@ -2008,9 +2012,17 @@ static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields
 				zval_ptr_dtor(&ch->postfields);
 				ZVAL_COPY(&ch->postfields, zpostfields);
 
+				if ((stream = php_stream_open_wrapper(ZSTR_VAL(postval), "rb", STREAM_MUST_SEEK, NULL))) {
+					if (!stream->readfilters.head && !php_stream_stat(stream, &ssb)) {
+						filesize = ssb.sb.st_size;
+					}
+				} else {
+					seekfunc = NULL;
+				}
+
 				cb_arg = emalloc(sizeof *cb_arg);
 				cb_arg->filename = zend_string_copy(postval);
-				cb_arg->stream = NULL;
+				cb_arg->stream = stream;
 
 				part = curl_mime_addpart(mime);
 				if (part == NULL) {
@@ -2018,7 +2030,7 @@ static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields
 					return FAILURE;
 				}
 				if ((form_error = curl_mime_name(part, ZSTR_VAL(string_key))) != CURLE_OK
-					|| (form_error = curl_mime_data_cb(part, -1, read_cb, seek_cb, free_cb, cb_arg)) != CURLE_OK
+					|| (form_error = curl_mime_data_cb(part, filesize, read_cb, seekfunc, free_cb, cb_arg)) != CURLE_OK
 					|| (form_error = curl_mime_filename(part, filename ? filename : ZSTR_VAL(postval))) != CURLE_OK
 					|| (form_error = curl_mime_type(part, type ? type : "application/octet-stream")) != CURLE_OK) {
 					error = form_error;
