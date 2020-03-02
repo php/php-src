@@ -248,13 +248,6 @@ static struct IStreamVtbl php_istream_vtbl = {
 
 static void istream_destructor(php_istream *stm)
 {
-	if (stm->res) {
-		zend_resource *res = stm->res;
-		stm->res = NULL;
-		zend_list_delete(res);
-		return;
-	}
-
 	if (stm->refcount > 0) {
 		CoDisconnectObject((IUnknown*)stm, 0);
 	}
@@ -268,7 +261,6 @@ static void istream_destructor(php_istream *stm)
 PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream)
 {
 	php_istream *stm = (php_istream*)CoTaskMemAlloc(sizeof(*stm));
-	zval *tmp;
 
 	if (stm == NULL)
 		return NULL;
@@ -280,8 +272,7 @@ PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream)
 	stm->stream = stream;
 
 	GC_ADDREF(stream->res);
-	tmp = zend_list_insert(stm, le_istream);
-	stm->res = Z_RES_P(tmp);
+	stm->res = zend_register_resource(stm, le_istream);
 
 	return (IStream*)stm;
 }

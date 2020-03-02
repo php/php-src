@@ -17,6 +17,7 @@ PHP                                                                        NEWS
   . Fixed bug #79248 (Traversing empty VT_ARRAY throws com_exception). (cmb)
   . Fixed bug #79299 (com_print_typeinfo prints duplicate variables). (Litiano
     Moura)
+  . Fixed bug #79332 (php_istreams are never freed). (cmb)
 
 - CURL:
   . Fixed bug #79019 (Copied cURL handles upload empty file). (cmb)
