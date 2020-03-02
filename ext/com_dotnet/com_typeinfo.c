@@ -624,8 +624,8 @@ int php_com_process_typeinfo(ITypeInfo *typeinfo, HashTable *id_to_name, int pri
 					ZVAL_STRINGL(&tmp, ansiname, ansinamelen);
 					zend_hash_index_update(id_to_name, func->memid, &tmp);
 					// TODO: avoid reallocation???
-					efree(ansiname);
 				}
+				efree(ansiname);
 			}
 			ITypeInfo_ReleaseFuncDesc(typeinfo, func);
 		}
