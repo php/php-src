@@ -130,5 +130,10 @@ PHP                                                                        NEWS
   . Add ZipArchive::setMtimeName and ZipArchive::setMtimeIndex methods. (Remi)
   . Add ZipArchive::setProgressCallback method (since libzip 1.3.0). (Remi)
   . Add ZipArchive::setCancelCallback method (since libzip 1.6.0). (Remi)
+  . Add optional "flags" parameter to ZipArchive::addEmptyDir, addFile and
+    addFromString methods. (Remi)
+  . Add "flags" options to ZipArchive::addGlob and addPattern methods
+    keeping previous behavior having FL_OVERWRITE by default. (Remi)
+  . Add ZipArchive::replaceFile() method
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
