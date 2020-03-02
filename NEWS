@@ -18,6 +18,7 @@ PHP                                                                        NEWS
   . Fixed bug #79299 (com_print_typeinfo prints duplicate variables). (Litiano
     Moura)
   . Fixed bug #79332 (php_istreams are never freed). (cmb)
+  . Fixed bug #79333 (com_print_typeinfo() leaks memory). (cmb)
 
 - CURL:
   . Fixed bug #79019 (Copied cURL handles upload empty file). (cmb)
