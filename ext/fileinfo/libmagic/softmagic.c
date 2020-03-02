@@ -1907,11 +1907,25 @@ file_strncmp16(const char *a, const char *b, size_t len, uint32_t flags)
 public void
 convert_libmagic_pattern(zval *pattern, char *val, size_t len, uint32_t options)
 {
-	int i, j=0;
+	int i, j;
 	zend_string *t;
 
-	t = zend_string_alloc(len * 2 + 4, 0);
+	for (i = j = 0; i < len; i++) {
+		switch (val[i]) {
+			case '~':
+				j += 2;
+				break;
+			case '\0':
+				j += 4;
+				break;
+			default:
+				j++;
+				break;
+		}
+	}
+	t = zend_string_alloc(j + 4, 0);
 
+	j = 0;
 	ZSTR_VAL(t)[j++] = '~';
 
 	for (i = 0; i < len; i++, j++) {
