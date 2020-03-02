@@ -4228,55 +4228,6 @@ ZEND_API void zend_restore_error_handling(zend_error_handling *saved) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_string* zend_find_alias_name(zend_class_entry *ce, zend_string *name) /* {{{ */
-{
-	zend_trait_alias *alias, **alias_ptr;
-
-	if ((alias_ptr = ce->trait_aliases)) {
-		alias = *alias_ptr;
-		while (alias) {
-			if (alias->alias && zend_string_equals_ci(alias->alias, name)) {
-				return alias->alias;
-			}
-			alias_ptr++;
-			alias = *alias_ptr;
-		}
-	}
-
-	return name;
-}
-/* }}} */
-
-ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_function *f) /* {{{ */
-{
-	zend_function *func;
-	HashTable *function_table;
-	zend_string *name;
-
-	if (f->common.type != ZEND_USER_FUNCTION ||
-	    (f->op_array.refcount && *(f->op_array.refcount) < 2) ||
-	    !f->common.scope ||
-	    !f->common.scope->trait_aliases) {
-		return f->common.function_name;
-	}
-
-	function_table = &ce->function_table;
-	ZEND_HASH_FOREACH_STR_KEY_PTR(function_table, name, func) {
-		if (func == f) {
-			if (!name) {
-				return f->common.function_name;
-			}
-			if (ZSTR_LEN(name) == ZSTR_LEN(f->common.function_name) &&
-			    !strncasecmp(ZSTR_VAL(name), ZSTR_VAL(f->common.function_name), ZSTR_LEN(f->common.function_name))) {
-				return f->common.function_name;
-			}
-			return zend_find_alias_name(f->common.scope, name);
-		}
-	} ZEND_HASH_FOREACH_END();
-	return f->common.function_name;
-}
-/* }}} */
-
 ZEND_API ZEND_COLD const char *zend_get_object_type(const zend_class_entry *ce) /* {{{ */
 {
 	if(ce->ce_flags & ZEND_ACC_TRAIT) {
