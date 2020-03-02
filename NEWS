@@ -14,6 +14,7 @@ PHP                                                                        NEWS
   . Fixed bug #79248 (Traversing empty VT_ARRAY throws com_exception). (cmb)
   . Fixed bug #79299 (com_print_typeinfo prints duplicate variables). (Litiano
     Moura)
+  . Fixed bug #79332 (php_istreams are never freed). (cmb)
 
 - DOM:
   . Fixed bug #77569: (Write Access Violation in DomImplementation). (Nikita,
