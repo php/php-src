@@ -575,9 +575,6 @@ static zend_always_inline int zend_forbid_dynamic_call(const char *func_name)
 	return SUCCESS;
 }
 
-ZEND_API zend_string *zend_find_alias_name(zend_class_entry *ce, zend_string *name);
-ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_function *f);
-
 ZEND_API ZEND_COLD const char *zend_get_object_type(const zend_class_entry *ce);
 
 ZEND_API zend_bool zend_is_iterable(zval *iterable);

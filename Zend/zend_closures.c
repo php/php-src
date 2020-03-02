@@ -702,6 +702,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 			}
 			memset(ptr, 0, func->op_array.cache_size);
 		}
+		zend_string_addref(closure->func.op_array.function_name);
 		if (closure->func.op_array.refcount) {
 			(*closure->func.op_array.refcount)++;
 		}

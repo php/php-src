@@ -1210,9 +1210,7 @@ static void reflection_method_factory(zend_class_entry *ce, zend_function *metho
 		ZVAL_OBJ(&intern->obj, Z_OBJ_P(closure_object));
 	}
 
-	ZVAL_STR_COPY(reflection_prop_name(object),
-		(method->common.scope && method->common.scope->trait_aliases)
-			? zend_resolve_method_name(ce, method) : method->common.function_name);
+	ZVAL_STR_COPY(reflection_prop_name(object), method->common.function_name);
 	ZVAL_STR_COPY(reflection_prop_class(object), method->common.scope->name);
 }
 /* }}} */

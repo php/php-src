@@ -115,6 +115,9 @@ static zend_always_inline zend_function *zend_duplicate_function(zend_function *
 		if (func->op_array.refcount) {
 			(*func->op_array.refcount)++;
 		}
+		if (EXPECTED(func->op_array.function_name)) {
+			zend_string_addref(func->op_array.function_name);
+		}
 		if (is_interface
 		 || EXPECTED(!func->op_array.static_variables)) {
 			/* reuse the same op_array structure */
@@ -1577,7 +1580,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 }
 /* }}} */
 
-static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_string *key, zend_function *fn, HashTable **overridden) /* {{{ */
+static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_string *key, zend_function *fn, HashTable **overridden) /* {{{ */
 {
 	zend_function *existing_fn = NULL;
 	zend_function *new_fn;
@@ -1622,11 +1625,11 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 			/* two traits can't define the same non-abstract method */
 #if 1
 			zend_error_noreturn(E_COMPILE_ERROR, "Trait method %s has not been applied, because there are collisions with other trait methods on %s",
-				name, ZSTR_VAL(ce->name));
+				ZSTR_VAL(name), ZSTR_VAL(ce->name));
 #else		/* TODO: better error message */
 			zend_error_noreturn(E_COMPILE_ERROR, "Trait method %s::%s has not been applied as %s::%s, because of collision with %s::%s",
 				ZSTR_VAL(fn->common.scope->name), ZSTR_VAL(fn->common.function_name),
-				ZSTR_VAL(ce->name), name,
+				ZSTR_VAL(ce->name), ZSTR_VAL(name),
 				ZSTR_VAL(existing_fn->common.scope->name), ZSTR_VAL(existing_fn->common.function_name));
 #endif
 		} else {
@@ -1647,6 +1650,9 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 		new_fn->op_array.fn_flags |= ZEND_ACC_TRAIT_CLONE;
 		new_fn->op_array.fn_flags &= ~ZEND_ACC_IMMUTABLE;
 	}
+
+	/* Reassign method name, in case it is an alias. */
+	new_fn->common.function_name = name;
 	function_add_ref(new_fn);
 	fn = zend_hash_update_ptr(&ce->function_table, key, new_fn);
 	zend_add_magic_methods(ce, key, fn);
@@ -1695,7 +1701,7 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 				}
 
 				lcname = zend_string_tolower(alias->alias);
-				zend_add_trait_method(ce, ZSTR_VAL(alias->alias), lcname, &fn_copy, overridden);
+				zend_add_trait_method(ce, alias->alias, lcname, &fn_copy, overridden);
 				zend_string_release_ex(lcname, 0);
 
 				/* Record the trait from which this alias was resolved. */
@@ -1747,7 +1753,7 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 			}
 		}
 
-		zend_add_trait_method(ce, ZSTR_VAL(fn->common.function_name), fnname, &fn_copy, overridden);
+		zend_add_trait_method(ce, fn->common.function_name, fnname, &fn_copy, overridden);
 	}
 }
 /* }}} */

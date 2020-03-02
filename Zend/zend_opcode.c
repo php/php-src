@@ -447,6 +447,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		efree(ZEND_MAP_PTR(op_array->run_time_cache));
 	}
 
+	if (op_array->function_name) {
+		zend_string_release_ex(op_array->function_name, 0);
+	}
+
 	if (!op_array->refcount || --(*op_array->refcount) > 0) {
 		return;
 	}
@@ -476,9 +480,6 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	}
 	efree(op_array->opcodes);
 
-	if (op_array->function_name) {
-		zend_string_release_ex(op_array->function_name, 0);
-	}
 	if (op_array->doc_comment) {
 		zend_string_release_ex(op_array->doc_comment, 0);
 	}

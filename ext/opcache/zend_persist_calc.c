@@ -171,14 +171,18 @@ static void zend_persist_type_calc(zend_type *type)
 
 static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 {
+	if (op_array->function_name) {
+		zend_string *old_name = op_array->function_name;
+		ADD_INTERNED_STRING(op_array->function_name);
+		/* Remember old function name, so it can be released multiple times if shared. */
+		if (op_array->function_name != old_name
+				&& !zend_shared_alloc_get_xlat_entry(&op_array->function_name)) {
+			zend_shared_alloc_register_xlat_entry(&op_array->function_name, old_name);
+		}
+    }
+
 	if (op_array->scope && zend_shared_alloc_get_xlat_entry(op_array->opcodes)) {
 		/* already stored */
-		if (op_array->function_name) {
-			zend_string *new_name = zend_shared_alloc_get_xlat_entry(op_array->function_name);
-			if (new_name) {
-				op_array->function_name = new_name;
-			}
-		}
 		ADD_SIZE(ZEND_ALIGNED_SIZE(zend_extensions_op_array_persist_calc(op_array)));
 		return;
 	}
@@ -210,16 +214,6 @@ static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 
 	zend_shared_alloc_register_xlat_entry(op_array->opcodes, op_array->opcodes);
 	ADD_SIZE(sizeof(zend_op) * op_array->last);
-
-	if (op_array->function_name) {
-		zend_string *old_name = op_array->function_name;
-		if (!zend_shared_alloc_get_xlat_entry(old_name)) {
-			ADD_INTERNED_STRING(op_array->function_name);
-			if (!zend_shared_alloc_get_xlat_entry(op_array->function_name)) {
-				zend_shared_alloc_register_xlat_entry(old_name, op_array->function_name);
-			}
-		}
-    }
 
 	if (op_array->filename) {
 		ADD_STRING(op_array->filename);
@@ -307,6 +301,12 @@ static void zend_persist_class_method_calc(zval *zv)
 		zend_shared_alloc_register_xlat_entry(op_array, Z_PTR_P(zv));
 		if (!ZCG(is_immutable_class)) {
 			ADD_ARENA_SIZE(sizeof(void*));
+		}
+	} else {
+		zend_string *old_function_name =
+			zend_shared_alloc_get_xlat_entry(&old_op_array->function_name);
+		if (old_function_name) {
+			zend_string_release_ex(old_function_name, 0);
 		}
 	}
 }

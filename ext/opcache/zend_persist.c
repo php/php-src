@@ -311,6 +311,16 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		EG(current_execute_data) = orig_execute_data;
 	}
 
+	if (op_array->function_name) {
+		zend_string *old_name = op_array->function_name;
+		zend_accel_store_interned_string(op_array->function_name);
+		/* Remember old function name, so it can be released multiple times if shared. */
+		if (op_array->function_name != old_name
+				&& !zend_shared_alloc_get_xlat_entry(&op_array->function_name)) {
+			zend_shared_alloc_register_xlat_entry(&op_array->function_name, old_name);
+		}
+	}
+
 	if (op_array->scope) {
 		zend_class_entry *scope = zend_shared_alloc_get_xlat_entry(op_array->scope);
 
@@ -336,10 +346,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			if (op_array->literals) {
 				op_array->literals = zend_shared_alloc_get_xlat_entry(op_array->literals);
 				ZEND_ASSERT(op_array->literals != NULL);
-			}
-			if (op_array->function_name && !IS_ACCEL_INTERNED(op_array->function_name)) {
-				op_array->function_name = zend_shared_alloc_get_xlat_entry(op_array->function_name);
-				ZEND_ASSERT(op_array->function_name != NULL);
 			}
 			if (op_array->filename) {
 				op_array->filename = zend_shared_alloc_get_xlat_entry(op_array->filename);
@@ -502,10 +508,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		ZEND_MAP_PTR_INIT(op_array->run_time_cache, NULL);
 	}
 
-	if (op_array->function_name && !IS_ACCEL_INTERNED(op_array->function_name)) {
-		zend_accel_store_interned_string(op_array->function_name);
-	}
-
 	if (op_array->filename) {
 		/* do not free! PHP has centralized filename storage, compiler will free it */
 		zend_accel_memdup_string(op_array->filename);
@@ -631,6 +633,12 @@ static void zend_persist_class_method(zval *zv)
 		Z_PTR_P(zv) = old_op_array;
 		if (op_array->refcount && --(*op_array->refcount) == 0) {
 			efree(op_array->refcount);
+		}
+
+		zend_string *old_function_name =
+			zend_shared_alloc_get_xlat_entry(&old_op_array->function_name);
+		if (old_function_name) {
+			zend_string_release_ex(old_function_name, 0);
 		}
 		return;
 	}
