@@ -276,7 +276,11 @@ done:
 /* }}} */
 
 static int php_zip_add_file(struct zip *za, const char *filename, size_t filename_len,
-	char *entry_name, size_t entry_name_len, zip_uint64_t offset_start, zip_uint64_t offset_len, zip_flags_t flags) /* {{{ */
+	char *entry_name, size_t entry_name_len, /* unused if replace >= 0 */
+	zip_uint64_t offset_start, zip_uint64_t offset_len,
+	zend_long replace, /* index to replace, add new file if < 0 */
+	zip_flags_t flags
+) /* {{{ */
 {
 	struct zip_source *zs;
 	char resolved_path[MAXPATHLEN];
@@ -300,13 +304,22 @@ static int php_zip_add_file(struct zip *za, const char *filename, size_t filenam
 	if (!zs) {
 		return -1;
 	}
-	if (zip_file_add(za, entry_name, zs, flags) < 0) {
-		zip_source_free(zs);
-		return -1;
-	} else {
+	// Replace
+	if (replace >= 0) {
+		if (zip_file_replace(za, replace, zs, flags) < 0) {
+			zip_source_free(zs);
+			return -1;
+		}
 		zip_error_clear(za);
 		return 1;
 	}
+	// Add
+	if (zip_file_add(za, entry_name, zs, flags) < 0) {
+		zip_source_free(zs);
+		return -1;
+	}
+	zip_error_clear(za);
+	return 1;
 }
 /* }}} */
 
@@ -1705,7 +1718,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 				}
 
 				if (php_zip_add_file(intern, Z_STRVAL_P(zval_file), Z_STRLEN_P(zval_file),
-					entry_name, entry_name_len, 0, 0, zip_flags) < 0) {
+					entry_name, entry_name_len, 0, 0, -1, zip_flags) < 0) {
 					zend_array_destroy(Z_ARR_P(return_value));
 					RETURN_FALSE;
 				}
@@ -1764,7 +1777,44 @@ static ZIPARCHIVE_METHOD(addFile)
 	}
 
 	if (php_zip_add_file(intern, ZSTR_VAL(filename), ZSTR_LEN(filename),
-			entry_name, entry_name_len, offset_start, offset_len, flags) < 0) {
+			entry_name, entry_name_len, offset_start, offset_len, -1, flags) < 0) {
+		RETURN_FALSE;
+	} else {
+		RETURN_TRUE;
+	}
+}
+/* }}} */
+
+/* {{{ proto bool ZipArchive::replaceFile(string filepath, int index[, int start [, int length [, int flags = 0]]])
+Add a file in a Zip archive using its path and the name to use. */
+static ZIPARCHIVE_METHOD(replaceFile)
+{
+	struct zip *intern;
+	zval *self = ZEND_THIS;
+	zend_long index;
+	zend_long offset_start = 0, offset_len = 0;
+	zend_string *filename;
+	zend_long flags = ZIP_FL_OVERWRITE;
+
+	ZIP_FROM_OBJECT(intern, self);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Pl|lll",
+			&filename, &index, &offset_start, &offset_len, &flags) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (ZSTR_LEN(filename) == 0) {
+		php_error_docref(NULL, E_NOTICE, "Empty string as filename");
+		RETURN_FALSE;
+	}
+
+	if (index < 0) {
+		php_error_docref(NULL, E_NOTICE, "Invalid negative index");
+		RETURN_FALSE;
+	}
+
+	if (php_zip_add_file(intern, ZSTR_VAL(filename), ZSTR_LEN(filename),
+			NULL, 0, offset_start, offset_len, index, flags) < 0) {
 		RETURN_FALSE;
 	} else {
 		RETURN_TRUE;
@@ -2946,6 +2996,7 @@ static const zend_function_entry zip_class_functions[] = {
 	ZIPARCHIVE_ME(addPattern,			arginfo_class_ZipArchive_addPattern, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(renameIndex,			arginfo_class_ZipArchive_renameIndex, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(renameName,			arginfo_class_ZipArchive_renameName, ZEND_ACC_PUBLIC)
+	ZIPARCHIVE_ME(replaceFile,			arginfo_class_ZipArchive_replaceFile, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(setArchiveComment,	arginfo_class_ZipArchive_setArchiveComment, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(getArchiveComment,	arginfo_class_ZipArchive_getArchiveComment, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(setCommentIndex,		arginfo_class_ZipArchive_setCommentIndex, ZEND_ACC_PUBLIC)
