@@ -15,6 +15,7 @@ PHP                                                                        NEWS
   . Fixed bug #79299 (com_print_typeinfo prints duplicate variables). (Litiano
     Moura)
   . Fixed bug #79332 (php_istreams are never freed). (cmb)
+  . Fixed bug #79333 (com_print_typeinfo() leaks memory). (cmb)
 
 - DOM:
   . Fixed bug #77569: (Write Access Violation in DomImplementation). (Nikita,
