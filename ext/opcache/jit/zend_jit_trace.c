@@ -731,6 +731,38 @@ static int find_return_ssa_var(zend_jit_trace_rec *p, zend_ssa_op *ssa_op)
 	}
 }
 
+static int is_checked_guard(const zend_ssa *tssa, const zend_op **ssa_opcodes, uint32_t var)
+{
+	if ((tssa->var_info[var].type & MAY_BE_ANY) == MAY_BE_LONG) {
+		uint32_t idx = tssa->vars[var].definition;
+
+		if (idx >= 0) {
+			if (tssa->ops[idx].op1_def == var) {
+				const zend_op *opline = ssa_opcodes[idx];
+				if (opline->opcode == ZEND_PRE_DEC
+				 || opline->opcode == ZEND_PRE_INC
+				 || opline->opcode == ZEND_POST_DEC
+				 || opline->opcode == ZEND_POST_INC) {
+					return 1;
+				}
+			}
+			if (tssa->ops[idx].op1_def == var) {
+				const zend_op *opline = ssa_opcodes[idx];
+				if (opline->opcode == ZEND_ADD
+				 || opline->opcode == ZEND_SUB
+				 || opline->opcode == ZEND_MUL
+				 || opline->opcode == ZEND_PRE_DEC
+				 || opline->opcode == ZEND_PRE_INC
+				 || opline->opcode == ZEND_POST_DEC
+				 || opline->opcode == ZEND_POST_INC) {
+					return 1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
 static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uint32_t parent_trace, uint32_t exit_num, zend_script *script, const zend_op_array **op_arrays, int *num_op_arrays_ptr)
 {
 	zend_ssa *tssa;
@@ -1546,6 +1578,9 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					}
 					if ((t1 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF)) != (t & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_REF))) {
 						ssa_var_info[phi->sources[1]].type = MAY_BE_GUARD | (t & t1);
+						if (is_checked_guard(tssa, ssa_opcodes, phi->sources[1])) {
+							ssa_var_info[phi->ssa_var].type = t & ~MAY_BE_GUARD;
+						}
 					}
 				}
 			}
