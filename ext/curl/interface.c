@@ -2229,18 +2229,17 @@ static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields
 				zval_ptr_dtor(&ch->postfields);
 				ZVAL_COPY(&ch->postfields, zpostfields);
 
-				cb_arg = emalloc(sizeof *cb_arg);
-				cb_arg->filename = zend_string_copy(postval);
-				cb_arg->stream = NULL;
-
 				if ((stream = php_stream_open_wrapper(ZSTR_VAL(postval), "rb", STREAM_MUST_SEEK, NULL))) {
 					if (!stream->readfilters.head && !php_stream_stat(stream, &ssb)) {
 						filesize = ssb.sb.st_size;
 					}
-					php_stream_close(stream);
 				} else {
 					seekfunc = NULL;
 				}
+
+				cb_arg = emalloc(sizeof *cb_arg);
+				cb_arg->filename = zend_string_copy(postval);
+				cb_arg->stream = stream;
 
 				part = curl_mime_addpart(mime);
 				if (part == NULL) {
