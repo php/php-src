@@ -2806,6 +2806,11 @@ done:
 					call->stack[i] = IS_UNKNOWN;
 				}
 			}
+			if (p->fake) {
+				if (!zend_jit_init_fcall_guard(&dasm_state, NULL, p->func)) {
+					goto jit_failure;
+				}
+			}
 		} else if (p->op == ZEND_JIT_TRACE_DO_ICALL) {
 			call = frame->call;
 			if (call) {
