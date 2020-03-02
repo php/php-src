@@ -2234,7 +2234,7 @@ static inline int build_mime_structure_from_hash(php_curl *ch, zval *zpostfields
 				cb_arg->stream = NULL;
 
 				if ((stream = php_stream_open_wrapper(ZSTR_VAL(postval), "rb", STREAM_MUST_SEEK, NULL))) {
-					if (!php_stream_stat(stream, &ssb)) {
+					if (!stream->readfilters.head && !php_stream_stat(stream, &ssb)) {
 						filesize = ssb.sb.st_size;
 					}
 					php_stream_close(stream);
