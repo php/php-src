@@ -1616,6 +1616,15 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 				i * sizeof(zend_jit_trace_stack));
 		}
 	}
+	while (i < op_array->last_var) {
+		if (!(ssa->var_info[i].type & MAY_BE_GUARD)
+		 && has_concrete_type(ssa->var_info[i].type)) {
+			stack[i] = concrete_type(ssa->var_info[i].type);
+		} else {
+			stack[i] = IS_UNKNOWN;
+		}
+		i++;
+	}
 	while (i < op_array->last_var + op_array->T) {
 		stack[i] = IS_UNKNOWN;
 		i++;
@@ -1676,6 +1685,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						ssa->var_info[i].type = info & ~MAY_BE_GUARD;
+						stack[i] = concrete_type(info);
 					}
 				}
 			}
@@ -1691,6 +1701,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						goto jit_failure;
 					}
 					ssa->var_info[phi->sources[0]].type = info & ~MAY_BE_GUARD;
+					stack[i] = concrete_type(info);
 				}
 				phi = phi->next;
 			}
