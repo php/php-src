@@ -126,7 +126,7 @@ struct _zend_class_entry {
 	HashTable function_table;
 	HashTable properties_info;
 	HashTable constants_table;
-
+	
 	struct _zend_property_info **properties_info_table;
 
 	zend_function *constructor;
