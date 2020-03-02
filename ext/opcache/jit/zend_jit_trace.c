@@ -2615,7 +2615,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 done:
 			/* TODO: reset types on abstract stack,
 			   this should be replaced by type inference */
-			if (opline->result_type & (IS_TMP_VAR|IS_VAR|IS_CV)) {
+			if (ssa_op->result_def >= 0) {
 				if (opline->opcode == ZEND_QM_ASSIGN) {
 					if (opline->op1_type == IS_CONST) {
 						SET_RES_STACK_VAR_TYPE(Z_TYPE_P(RT_CONSTANT(opline, opline->op1)));
@@ -2654,7 +2654,7 @@ done:
 					RESET_RES_STACK_VAR_TYPE();
 				}
 			}
-			if (opline->op1_type == IS_CV) {
+			if (ssa_op->op1_def >= 0) {
 				if (opline->opcode == ZEND_ASSIGN) {
 					if (!(OP1_INFO_EX() & MAY_BE_REF)
 					 || STACK_VAR_TYPE(opline->op1.var) != IS_UNKNOWN) {
@@ -2671,55 +2671,18 @@ done:
 					} else {
 						RESET_OP1_STACK_VAR_TYPE();
 					}
-				} else if (opline->opcode == ZEND_ASSIGN_REF
-				 || opline->opcode == ZEND_ASSIGN_DIM
-				 || opline->opcode == ZEND_ASSIGN_OBJ
-				 || opline->opcode == ZEND_ASSIGN_STATIC_PROP
-				 || opline->opcode == ZEND_ASSIGN_OBJ_REF
-				 || opline->opcode == ZEND_ASSIGN_STATIC_PROP_REF
-				 || opline->opcode == ZEND_ASSIGN_OP
-				 || opline->opcode == ZEND_ASSIGN_DIM_OP
-				 || opline->opcode == ZEND_ASSIGN_OBJ_OP
-				 || opline->opcode == ZEND_ASSIGN_STATIC_PROP_OP
-				 || opline->opcode == ZEND_PRE_INC
-				 || opline->opcode == ZEND_PRE_DEC
-				 || opline->opcode == ZEND_POST_INC
-				 || opline->opcode == ZEND_POST_DEC
-				 || opline->opcode == ZEND_PRE_INC_OBJ
-				 || opline->opcode == ZEND_PRE_DEC_OBJ
-				 || opline->opcode == ZEND_POST_INC_OBJ
-				 || opline->opcode == ZEND_POST_DEC_OBJ
-				 || opline->opcode == ZEND_UNSET_CV
-				 || opline->opcode == ZEND_UNSET_DIM
-				 || opline->opcode == ZEND_UNSET_OBJ
-				 || opline->opcode == ZEND_FETCH_DIM_W
-				 || opline->opcode == ZEND_FETCH_DIM_RW
-				 || opline->opcode == ZEND_FETCH_DIM_FUNC_ARG
-				 || opline->opcode == ZEND_FETCH_DIM_UNSET
-				 || opline->opcode == ZEND_FETCH_LIST_W
-				 || opline->opcode == ZEND_SEND_VAR_EX
-				 || opline->opcode == ZEND_SEND_FUNC_ARG
-				 || opline->opcode == ZEND_SEND_REF
-				 || opline->opcode == ZEND_SEND_UNPACK
-				 || opline->opcode == ZEND_FE_RESET_RW
-				 || opline->opcode == ZEND_MAKE_REF
-				 || opline->opcode == ZEND_BIND_GLOBAL
-				 || opline->opcode == ZEND_BIND_STATIC) {
+				} else if (opline->opcode != ZEND_SEND_VAR
+				 && opline->opcode != ZEND_CAST
+				 && opline->opcode != ZEND_QM_ASSIGN
+				 && opline->opcode != ZEND_JMP_SET
+				 && opline->opcode != ZEND_COALESCE
+				 && opline->opcode != ZEND_FE_RESET_R) {
 					RESET_OP1_STACK_VAR_TYPE();
-				} else if (opline->opcode == ZEND_ADD_ARRAY_ELEMENT
-				 || opline->opcode == ZEND_INIT_ARRAY) {
-					if (opline->extended_value & ZEND_ARRAY_ELEMENT_REF) {
-						RESET_OP1_STACK_VAR_TYPE();
-					}
 				}
 			}
-			if (opline->op2_type == IS_CV) {
-				if (opline->opcode == ZEND_ASSIGN_REF) {
+			if (ssa_op->op2_def >= 0) {
+				if (opline->opcode != ZEND_ASSIGN) {
 					RESET_OP2_STACK_VAR_TYPE();
-				} else if (opline->opcode == ZEND_BIND_LEXICAL) {
-					if (opline->extended_value & ZEND_BIND_REF) {
-						RESET_OP2_STACK_VAR_TYPE();
-					}
 				}
 			}
 			ssa_op += zend_jit_trace_op_len(opline);
