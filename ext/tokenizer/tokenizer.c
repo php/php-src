@@ -237,7 +237,12 @@ PHP_METHOD(PhpToken, getTokenName)
 	if (Z_LVAL_P(id_zval) < 256) {
 		RETURN_INTERNED_STR(ZSTR_CHAR(Z_LVAL_P(id_zval)));
 	} else {
-		RETURN_STRING(get_token_type_name(Z_LVAL_P(id_zval)));
+		const char *token_name = get_token_type_name(Z_LVAL_P(id_zval));
+		if (!token_name) {
+			RETURN_NULL();
+		}
+
+		RETURN_STRING(token_name);
 	}
 }
 
@@ -531,6 +536,10 @@ PHP_FUNCTION(token_name)
 		Z_PARAM_LONG(type)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETVAL_STRING(get_token_type_name(type));
+	const char *token_name = get_token_type_name(type);
+	if (!token_name) {
+		token_name = "UNKNOWN";
+	}
+	RETURN_STRING(token_name);
 }
 /* }}} */

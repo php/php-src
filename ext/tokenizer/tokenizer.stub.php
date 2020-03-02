@@ -15,5 +15,5 @@ class PhpToken {
 
     public function isIgnorable(): bool;
 
-    public function getTokenName(): string;
+    public function getTokenName(): ?string;
 }

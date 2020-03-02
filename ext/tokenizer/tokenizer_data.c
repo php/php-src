@@ -306,6 +306,6 @@ char *get_token_type_name(int token_type)
 		case T_BAD_CHARACTER: return "T_BAD_CHARACTER";
 
 	}
-	return "UNKNOWN";
+	return NULL;
 }
 

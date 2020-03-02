@@ -70,6 +70,10 @@ try {
     echo $e->getMessage(), "\n";
 }
 
+echo "\nName of unknown token:\n";
+$token = new PhpToken(100000, "foo");
+var_dump($token->getTokenName());
+
 ?>
 --EXPECT--
 [ 0] T_OPEN_TAG                 ignorable
@@ -110,3 +114,6 @@ Typed property PhpToken::$id must not be accessed before initialization
 Typed property PhpToken::$text must not be accessed before initialization
 Typed property PhpToken::$id must not be accessed before initialization
 Typed property PhpToken::$text must not be accessed before initialization
+
+Name of unknown token:
+NULL
