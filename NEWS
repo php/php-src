@@ -22,6 +22,8 @@ PHP                                                                        NEWS
 
 - CURL:
   . Fixed bug #79019 (Copied cURL handles upload empty file). (cmb)
+  . Fixed bug #79013 (Content-Length missing when posting a curlFile with
+    curl). (cmb)
 
 - DOM:
   . Fixed bug #77569: (Write Access Violation in DomImplementation). (Nikita,
