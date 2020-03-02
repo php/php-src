@@ -5644,9 +5644,15 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, const zend_op *opline, zend_
 					}
 					break;
 				case ZEND_IS_NOT_EQUAL:
-				case ZEND_IS_NOT_IDENTICAL:
 					if (exit_addr) {
 						| je &exit_addr
+					} else {
+						| je => target_label
+					}
+					break;
+				case ZEND_IS_NOT_IDENTICAL:
+					if (exit_addr) {
+						| jne &exit_addr
 					} else {
 						| je => target_label
 					}
@@ -5697,9 +5703,15 @@ static int zend_jit_cmp_long_long(dasm_State **Dst, const zend_op *opline, zend_
 					}
 					break;
 				case ZEND_IS_NOT_EQUAL:
-				case ZEND_IS_NOT_IDENTICAL:
 					if (exit_addr) {
 						| jne &exit_addr
+					} else {
+						| jne => target_label
+					}
+					break;
+				case ZEND_IS_NOT_IDENTICAL:
+					if (exit_addr) {
+						| je &exit_addr
 					} else {
 						| jne => target_label
 					}
@@ -5822,7 +5834,6 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 					}
 					break;
 				case ZEND_IS_NOT_EQUAL:
-				case ZEND_IS_NOT_IDENTICAL:
 					| jp >1
 					if (exit_addr) {
 						| je &exit_addr
@@ -5830,6 +5841,16 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 						| je => target_label
 					}
 					|1:
+					break;
+				case ZEND_IS_NOT_IDENTICAL:
+					if (exit_addr) {
+						| jne &exit_addr
+						| jp &exit_addr
+					} else {
+						| jp >1
+						| je => target_label
+						|1:
+					}
 					break;
 				case ZEND_IS_SMALLER:
 					if (swap) {
@@ -5882,10 +5903,19 @@ static int zend_jit_cmp_double_common(dasm_State **Dst, const zend_op *opline, z
 					|1:
 					break;
 				case ZEND_IS_NOT_EQUAL:
-				case ZEND_IS_NOT_IDENTICAL:
 					if (exit_addr) {
 						| jne &exit_addr
 						| jp &exit_addr
+					} else {
+						| jne => target_label
+						| jp => target_label
+					}
+					break;
+				case ZEND_IS_NOT_IDENTICAL:
+					if (exit_addr) {
+						|1:
+						| je &exit_addr
+						|1:
 					} else {
 						| jne => target_label
 						| jp => target_label
