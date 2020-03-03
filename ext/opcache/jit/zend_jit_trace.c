@@ -1597,30 +1597,48 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	frame->func = (const zend_function*)op_array;
 	frame->return_value_used = -1;
 	stack = frame->stack;
-	i = 0;
-	if (parent_trace) {
-		i = MIN(zend_jit_traces[parent_trace].exit_info[exit_num].stack_size,
-			op_array->last_var + op_array->T);
-		if (i) {
-			memcpy(stack,
-				zend_jit_traces[parent_trace].stack_map +
-				zend_jit_traces[parent_trace].exit_info[exit_num].stack_offset,
-				i * sizeof(zend_jit_trace_stack));
+
+	if (trace_buffer->start == ZEND_JIT_TRACE_START_ENTER) {
+		i = 0;
+		while (i < op_array->last_var) {
+			if (!(ssa->var_info[i].type & MAY_BE_GUARD)
+			 && has_concrete_type(ssa->var_info[i].type)) {
+				stack[i] = concrete_type(ssa->var_info[i].type);
+			} else if (i < op_array->num_args) {
+				stack[i] = IS_UNKNOWN;
+			} else {
+				stack[i] = IS_UNDEF;
+			}
+			i++;
+		}
+	} else {
+		int parent_vars_count = 0;
+		zend_jit_trace_stack *parent_stack = NULL;
+
+		i = 0;
+		if (parent_trace) {
+			parent_vars_count = MIN(zend_jit_traces[parent_trace].exit_info[exit_num].stack_size,
+				op_array->last_var + op_array->T);
+			if (parent_vars_count) {
+				parent_stack =
+					zend_jit_traces[parent_trace].stack_map +
+					zend_jit_traces[parent_trace].exit_info[exit_num].stack_offset;
+			}
+		}
+		while (i < op_array->last_var + op_array->T) {
+			if (!(ssa->var_info[i].type & MAY_BE_GUARD)
+			 && has_concrete_type(ssa->var_info[i].type)) {
+				stack[i] = concrete_type(ssa->var_info[i].type);
+			} else if (i < parent_vars_count
+			 && (zend_uchar)parent_stack[i] != IS_UNKNOWN) {
+				stack[i] = parent_stack[i];
+			} else {
+				stack[i] = IS_UNKNOWN;
+			}
+			i++;
 		}
 	}
-	while (i < op_array->last_var) {
-		if (!(ssa->var_info[i].type & MAY_BE_GUARD)
-		 && has_concrete_type(ssa->var_info[i].type)) {
-			stack[i] = concrete_type(ssa->var_info[i].type);
-		} else {
-			stack[i] = IS_UNKNOWN;
-		}
-		i++;
-	}
-	while (i < op_array->last_var + op_array->T) {
-		stack[i] = IS_UNKNOWN;
-		i++;
-	}
+
 	opline = ((zend_jit_trace_start_rec*)p)->opline;
 	name = zend_jit_trace_name(op_array, opline->lineno);
 	p += ZEND_JIT_TRACE_START_REC_SIZE;
@@ -2684,6 +2702,8 @@ done:
 				call->prev = NULL;
 				call->func = (const zend_function*)op_array;
 				top = zend_jit_trace_call_frame(top, op_array);
+				i = 0;
+				// TODO: ???
 				for (i = 0; i < op_array->last_var + op_array->T; i++) {
 					call->stack[i] = IS_UNKNOWN;
 				}
@@ -2713,6 +2733,7 @@ done:
 				frame->func = (const zend_function*)op_array;
 				frame->return_value_used = -1;
 				stack = frame->stack;
+				// TODO: ???
 				for (i = 0; i < op_array->last_var + op_array->T; i++) {
 					stack[i] = IS_UNKNOWN;
 				}
@@ -2736,7 +2757,8 @@ done:
 			frame->call = call;
 			top = zend_jit_trace_call_frame(top, p->op_array);
 			if (p->func->type == ZEND_USER_FUNCTION) {
-				for (i = 0; i < p->op_array->last_var +p-> op_array->T; i++) {
+				// TODO: ???
+				for (i = 0; i < p->op_array->last_var + p->op_array->T; i++) {
 					call->stack[i] = IS_UNKNOWN;
 				}
 			}
