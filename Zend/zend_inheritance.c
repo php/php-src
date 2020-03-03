@@ -1690,9 +1690,9 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 		while (alias) {
 			/* Scope unset or equal to the function we compare to, and the alias applies to fn */
 			if (alias->alias != NULL
-				&& (!aliases[i] || fn->common.scope == aliases[i])
-				&& ZSTR_LEN(alias->trait_method.method_name) == ZSTR_LEN(fnname)
-				&& (zend_binary_strcasecmp(ZSTR_VAL(alias->trait_method.method_name), ZSTR_LEN(alias->trait_method.method_name), ZSTR_VAL(fnname), ZSTR_LEN(fnname)) == 0)) {
+				&& fn->common.scope == aliases[i]
+				&& zend_string_equals_ci(alias->trait_method.method_name, fnname)
+			) {
 				fn_copy = *fn;
 
 				/* if it is 0, no modifieres has been changed */
@@ -1703,15 +1703,6 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 				lcname = zend_string_tolower(alias->alias);
 				zend_add_trait_method(ce, alias->alias, lcname, &fn_copy, overridden);
 				zend_string_release_ex(lcname, 0);
-
-				/* Record the trait from which this alias was resolved. */
-				if (!aliases[i]) {
-					aliases[i] = fn->common.scope;
-				}
-				if (!alias->trait_method.class_name) {
-					/* TODO: try to avoid this assignment (it's necessary only for reflection) */
-					alias->trait_method.class_name = zend_string_copy(fn->common.scope->name);
-				}
 			}
 			alias_ptr++;
 			alias = *alias_ptr;
@@ -1732,20 +1723,10 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 			while (alias) {
 				/* Scope unset or equal to the function we compare to, and the alias applies to fn */
 				if (alias->alias == NULL && alias->modifiers != 0
-					&& (!aliases[i] || fn->common.scope == aliases[i])
-					&& (ZSTR_LEN(alias->trait_method.method_name) == ZSTR_LEN(fnname))
-					&& (zend_binary_strcasecmp(ZSTR_VAL(alias->trait_method.method_name), ZSTR_LEN(alias->trait_method.method_name), ZSTR_VAL(fnname), ZSTR_LEN(fnname)) == 0)) {
-
+					&& fn->common.scope == aliases[i]
+					&& zend_string_equals_ci(alias->trait_method.method_name, fnname)
+				) {
 					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags ^ (fn->common.fn_flags & ZEND_ACC_PPP_MASK));
-
-					/** Record the trait from which this alias was resolved. */
-					if (!aliases[i]) {
-						aliases[i] = fn->common.scope;
-					}
-					if (!alias->trait_method.class_name) {
-						/* TODO: try to avoid this assignment (it's necessary only for reflection) */
-						alias->trait_method.class_name = zend_string_copy(fn->common.scope->name);
-					}
 				}
 				alias_ptr++;
 				alias = *alias_ptr;
@@ -1862,9 +1843,11 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 		aliases = ecalloc(i, sizeof(zend_class_entry*));
 		i = 0;
 		while (ce->trait_aliases[i]) {
-			/** For all aliases with an explicit class name, resolve the class now. */
-			if (ce->trait_aliases[i]->trait_method.class_name) {
-				cur_method_ref = &ce->trait_aliases[i]->trait_method;
+			zend_trait_alias *cur_alias = ce->trait_aliases[i];
+			cur_method_ref = &ce->trait_aliases[i]->trait_method;
+			lcname = zend_string_tolower(cur_method_ref->method_name);
+			if (cur_method_ref->class_name) {
+				/* For all aliases with an explicit class name, resolve the class now. */
 				trait = zend_fetch_class(cur_method_ref->class_name, ZEND_FETCH_CLASS_TRAIT|ZEND_FETCH_CLASS_NO_AUTOLOAD);
 				if (!trait) {
 					zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(cur_method_ref->class_name));
@@ -1872,13 +1855,47 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 				zend_check_trait_usage(ce, trait, traits);
 				aliases[i] = trait;
 
-				/** And, ensure that the referenced method is resolvable, too. */
-				lcname = zend_string_tolower(cur_method_ref->method_name);
+				/* And, ensure that the referenced method is resolvable, too. */
 				if (!zend_hash_exists(&trait->function_table, lcname)) {
 					zend_error_noreturn(E_COMPILE_ERROR, "An alias was defined for %s::%s but this method does not exist", ZSTR_VAL(trait->name), ZSTR_VAL(cur_method_ref->method_name));
 				}
-				zend_string_release_ex(lcname, 0);
+			} else {
+				/* Find out which trait this method refers to. */
+				trait = NULL;
+				for (j = 0; j < ce->num_traits; j++) {
+					if (traits[j]) {
+						if (zend_hash_exists(&traits[j]->function_table, lcname)) {
+							if (!trait) {
+								trait = traits[j];
+								continue;
+							}
+
+							// TODO: This is ambiguous! The first trait is assumed.
+							break;
+						}
+					}
+				}
+
+				/* Non-absolute method reference refers to method that does not exist. */
+				if (!trait) {
+					if (cur_alias->alias) {
+						zend_error_noreturn(E_COMPILE_ERROR,
+							"An alias (%s) was defined for method %s(), but this method does not exist",
+							ZSTR_VAL(cur_alias->alias),
+							ZSTR_VAL(cur_alias->trait_method.method_name));
+					} else {
+						zend_error_noreturn(E_COMPILE_ERROR,
+							"The modifiers of the trait method %s() are changed, but this method does not exist. Error",
+							ZSTR_VAL(cur_alias->trait_method.method_name));
+					}
+				}
+
+				aliases[i] = trait;
+
+				/* TODO: try to avoid this assignment (it's necessary only for reflection) */
+				cur_method_ref->class_name = zend_string_copy(trait->name);
 			}
+			zend_string_release_ex(lcname, 0);
 			i++;
 		}
 	}
@@ -2066,56 +2083,6 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 }
 /* }}} */
 
-static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce, zend_class_entry **aliases) /* {{{ */
-{
-	int i = 0;
-	zend_trait_alias* cur_alias;
-	zend_string* lc_method_name;
-
-	if (ce->trait_aliases) {
-		while (ce->trait_aliases[i]) {
-			cur_alias = ce->trait_aliases[i];
-			/** The trait for this alias has not been resolved, this means, this
-				alias was not applied. Abort with an error. */
-			if (!aliases[i]) {
-				if (cur_alias->alias) {
-					/** Plain old inconsistency/typo/bug */
-					zend_error_noreturn(E_COMPILE_ERROR,
-							   "An alias (%s) was defined for method %s(), but this method does not exist",
-							   ZSTR_VAL(cur_alias->alias),
-							   ZSTR_VAL(cur_alias->trait_method.method_name));
-				} else {
-					/** Here are two possible cases:
-						1) this is an attempt to modify the visibility
-						   of a method introduce as part of another alias.
-						   Since that seems to violate the DRY principle,
-						   we check against it and abort.
-						2) it is just a plain old inconsitency/typo/bug
-						   as in the case where alias is set. */
-
-					lc_method_name = zend_string_tolower(
-						cur_alias->trait_method.method_name);
-					if (zend_hash_exists(&ce->function_table,
-										 lc_method_name)) {
-						zend_string_release_ex(lc_method_name, 0);
-						zend_error_noreturn(E_COMPILE_ERROR,
-								   "The modifiers for the trait alias %s() need to be changed in the same statement in which the alias is defined. Error",
-								   ZSTR_VAL(cur_alias->trait_method.method_name));
-					} else {
-						zend_string_release_ex(lc_method_name, 0);
-						zend_error_noreturn(E_COMPILE_ERROR,
-								   "The modifiers of the trait method %s() are changed, but this method does not exist. Error",
-								   ZSTR_VAL(cur_alias->trait_method.method_name));
-
-					}
-				}
-			}
-			i++;
-		}
-	}
-}
-/* }}} */
-
 static void zend_do_bind_traits(zend_class_entry *ce) /* {{{ */
 {
 	HashTable **exclude_tables;
@@ -2152,9 +2119,6 @@ static void zend_do_bind_traits(zend_class_entry *ce) /* {{{ */
 
 	/* first care about all methods to be flattened into the class */
 	zend_do_traits_method_binding(ce, traits, exclude_tables, aliases);
-
-	/* Aliases which have not been applied indicate typos/bugs. */
-	zend_do_check_for_inconsistent_traits_aliasing(ce, aliases);
 
 	if (aliases) {
 		efree(aliases);
