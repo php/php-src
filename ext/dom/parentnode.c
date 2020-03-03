@@ -167,6 +167,7 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 				newNode = dom_object_get_node(newNodeObj);
 
 				if (newNode->doc != documentNode) {
+					xmlFree(fragment);
 					php_dom_throw_error(WRONG_DOCUMENT_ERR, stricterror);
 					return NULL;
 				}
