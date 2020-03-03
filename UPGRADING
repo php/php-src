@@ -149,6 +149,20 @@ PHP 8.0 UPGRADE NOTES
 
         function test($a = [], $b) {}       // Deprecated
         function test(Foo $a = null, $b) {} // Allowed
+  . Non-absolute trait method references in trait alias adaptations are now
+    required to be unambiguous:
+
+        class X {
+            use T1, T2 {
+               func as otherFunc;
+            }
+            function func() {}
+        }
+
+    If both T1::func() and T2::func() exist, this code was previously silently
+    accepted, and func as assumed to refer to T1::func. Now it will generate a
+    fatal error instead, and either T1::func or T2::func needs to be written
+    explicitly.
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
