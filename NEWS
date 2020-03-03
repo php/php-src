@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-?? ??? ????, PHP 7.4.4
+05 Mar 2020, PHP 7.4.4RC1
 
 - Core:
   . Fixed bug #79244 (php crashes during parsing INI file). (Laruence)
