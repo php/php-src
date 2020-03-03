@@ -10,9 +10,11 @@ trait T {
 class C {
     use T;
 
+    /* For backwards-compatiblity reasons, visibility is not enforced here. */
     private function method(int $a, string $b) {}
 }
 
 ?>
---EXPECTF--
-Fatal error: Access level to C::method() must be public (as in class T) in %s on line %d
+===DONE===
+--EXPECT--
+===DONE===

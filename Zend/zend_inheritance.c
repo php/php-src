@@ -805,7 +805,7 @@ static void perform_delayable_implementation_check(
 	}
 }
 
-static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(zend_function *child, zend_function *parent, zend_class_entry *ce, zval *child_zv, zend_bool check_only, zend_bool checked) /* {{{ */
+static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(zend_function *child, zend_function *parent, zend_class_entry *ce, zval *child_zv, zend_bool check_visibility, zend_bool check_only, zend_bool checked) /* {{{ */
 {
 	uint32_t child_flags;
 	uint32_t parent_flags = parent->common.fn_flags;
@@ -888,7 +888,8 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(z
 	}
 
 	/* Prevent derived classes from restricting access that was available in parent classes (except deriving from non-abstract ctors) */
-	if (!checked && (child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK)) {
+	if (!checked && check_visibility
+			&& (child_flags & ZEND_ACC_PPP_MASK) > (parent_flags & ZEND_ACC_PPP_MASK)) {
 		if (check_only) {
 			return INHERITANCE_ERROR;
 		}
@@ -907,9 +908,9 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(z
 }
 /* }}} */
 
-static zend_never_inline void do_inheritance_check_on_method(zend_function *child, zend_function *parent, zend_class_entry *ce, zval *child_zv) /* {{{ */
+static zend_never_inline void do_inheritance_check_on_method(zend_function *child, zend_function *parent, zend_class_entry *ce, zval *child_zv, zend_bool check_visibility) /* {{{ */
 {
-	do_inheritance_check_on_method_ex(child, parent, ce, child_zv, 0, 0);
+	do_inheritance_check_on_method_ex(child, parent, ce, child_zv, check_visibility, 0, 0);
 }
 /* }}} */
 
@@ -926,9 +927,10 @@ static zend_always_inline void do_inherit_method(zend_string *key, zend_function
 		}
 
 		if (checked) {
-			do_inheritance_check_on_method_ex(func, parent, ce, child, 0, checked);
+			do_inheritance_check_on_method_ex(
+				func, parent, ce, child, /* check_visibility */ 1, 0, checked);
 		} else {
-			do_inheritance_check_on_method(func, parent, ce, child);
+			do_inheritance_check_on_method(func, parent, ce, child, /* check_visibility */ 1);
 		}
 	} else {
 
@@ -1592,7 +1594,11 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 
 		/* Abstract method signatures from the trait must be satisfied. */
 		if (fn->common.fn_flags & ZEND_ACC_ABSTRACT) {
-			do_inheritance_check_on_method(existing_fn, fn, ce, NULL);
+			/* "abstract private" methods in traits were not available prior to PHP 8.
+			 * As such, "abstract protected" was sometimes used to indicate trait requirements,
+			 * even though the "implementing" method was private. Do not check visibility
+			 * requirements to maintain backwards-compatibility with such usage. */
+			do_inheritance_check_on_method(existing_fn, fn, ce, NULL, /* check_visibility */ 0);
 			return;
 		}
 
@@ -1614,7 +1620,7 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 		} else {
 			/* inherited members are overridden by members inserted by traits */
 			/* check whether the trait method fulfills the inheritance requirements */
-			do_inheritance_check_on_method(fn, existing_fn, ce, NULL);
+			do_inheritance_check_on_method(fn, existing_fn, ce, NULL, /* check_visibility */ 1);
 		}
 	}
 
@@ -2475,7 +2481,8 @@ static inheritance_status zend_can_early_bind(zend_class_entry *ce, zend_class_e
 		if (zv) {
 			zend_function *child_func = Z_FUNC_P(zv);
 			inheritance_status status =
-				do_inheritance_check_on_method_ex(child_func, parent_func, ce, NULL, 1, 0);
+				do_inheritance_check_on_method_ex(
+					child_func, parent_func, ce, NULL, /* check_visibility */ 1, 1, 0);
 
 			if (UNEXPECTED(status != INHERITANCE_SUCCESS)) {
 				return status;
