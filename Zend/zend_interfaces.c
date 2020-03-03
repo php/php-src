@@ -426,13 +426,6 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 }
 /* }}} */
 
-/* {{{ zend_implement_arrayaccess */
-static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_entry *class_type)
-{
-	return SUCCESS;
-}
-/* }}}*/
-
 /* {{{ zend_user_serialize */
 ZEND_API int zend_user_serialize(zval *object, unsigned char **buffer, size_t *buf_len, zend_serialize_data *data)
 {
@@ -526,13 +519,6 @@ static int zend_implement_serializable(zend_class_entry *interface, zend_class_e
 }
 /* }}}*/
 
-/* {{{ zend_implement_countable */
-static int zend_implement_countable(zend_class_entry *interface, zend_class_entry *class_type)
-{
-	return SUCCESS;
-}
-/* }}}*/
-
 /* {{{ function tables */
 static const zend_function_entry zend_funcs_aggregate[] = {
 	ZEND_ABSTRACT_ME(iterator, getIterator, arginfo_class_IteratorAggregate_getIterator)
@@ -586,13 +572,15 @@ ZEND_API void zend_register_interfaces(void)
 	REGISTER_MAGIC_INTERFACE(iterator, Iterator);
 	REGISTER_MAGIC_IMPLEMENT(iterator, traversable);
 
-	REGISTER_MAGIC_INTERFACE(arrayaccess, ArrayAccess);
-
 	REGISTER_MAGIC_INTERFACE(serializable, Serializable);
 
-	REGISTER_MAGIC_INTERFACE(countable, Countable);
-
 	zend_class_entry ce;
+	INIT_CLASS_ENTRY(ce, "ArrayAccess", zend_funcs_arrayaccess);
+	zend_ce_arrayaccess = zend_register_internal_interface(&ce);
+
+	INIT_CLASS_ENTRY(ce, "Countable", zend_funcs_countable);
+	zend_ce_countable = zend_register_internal_interface(&ce);
+
 	INIT_CLASS_ENTRY(ce, "Stringable", zend_funcs_stringable);
 	zend_ce_stringable = zend_register_internal_interface(&ce);
 }
