@@ -305,9 +305,7 @@ static zend_always_inline uint32_t zend_jit_trace_type_to_info(zend_uchar type)
 		stack[EX_VAR_TO_NUM(_var)] = _type; \
 	} while (0)
 
-#define USE_TSSA_GUARDS 1
-#if USE_TSSA_GUARDS
-# define CHECK_OP_TRACE_TYPE(_var, _ssa_var, op_info, op_type) do { \
+#define CHECK_OP_TRACE_TYPE(_var, _ssa_var, op_info, op_type) do { \
 		if (op_type != IS_UNKNOWN) { \
 			if ((op_info & MAY_BE_GUARD) != 0 \
 			 && op_type != STACK_VAR_TYPE(_var)) { \
@@ -320,21 +318,6 @@ static zend_always_inline uint32_t zend_jit_trace_type_to_info(zend_uchar type)
 			SET_STACK_VAR_TYPE(_var, op_type); \
 		} \
 	} while (0)
-#else
-# define CHECK_OP_TRACE_TYPE(_var, _ssa_var, op_info, op_type) do { \
-		if (op_type != IS_UNKNOWN) { \
-			if ((op_info & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << op_type) \
-			 && op_type != STACK_VAR_TYPE(_var)) { \
-				if (!zend_jit_type_guard(&dasm_state, opline, _var, op_type)) { \
-					goto jit_failure; \
-				} \
-			} \
-			SET_STACK_VAR_TYPE(_var, op_type); \
-			op_info = zend_jit_trace_type_to_info_ex(op_type, op_info); \
-			ssa->var_info[_ssa_var].type = op_info; \
-		} \
-	} while (0)
-#endif
 
 #define USE_OP_TRACE_TYPE(_type, _var, op_info) do { \
 		if (_type & (IS_TMP_VAR|IS_VAR|IS_CV)) { \
@@ -1185,7 +1168,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			}
 
 			switch (opline->opcode) {
-#if USE_TSSA_GUARDS
 				case ZEND_ASSIGN_DIM_OP:
 				case ZEND_ASSIGN_DIM:
 					if (tssa->ops[idx+1].op1_use >= 0 && op3_type != IS_UNKNOWN) {
@@ -1252,21 +1234,18 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						}
 					}
 					break;
-#endif
 				case ZEND_SEND_VAL:
 				case ZEND_SEND_VAL_EX:
 				case ZEND_SEND_VAR:
 				case ZEND_SEND_VAR_EX:
 				case ZEND_SEND_VAR_NO_REF:
 				case ZEND_SEND_VAR_NO_REF_EX:
-#if USE_TSSA_GUARDS
 					if (tssa->ops[idx].op1_use >= 0 && op1_type != IS_UNKNOWN) {
 						zend_ssa_var_info *info = &ssa_var_info[ssa_ops[idx].op1_use];
 						if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << op1_type)) {
 							info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(op1_type, info->type);
 						}
 					}
-#endif
 					/* Propagate argument type */
 					if (frame->call
 					 && frame->call->func->type == ZEND_USER_FUNCTION
@@ -1302,14 +1281,12 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					}
 					break;
 				case ZEND_RETURN:
-#if USE_TSSA_GUARDS
 					if (tssa->ops[idx].op1_use >= 0 && op1_type != IS_UNKNOWN) {
 						zend_ssa_var_info *info = &ssa_var_info[ssa_ops[idx].op1_use];
 						if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << op1_type)) {
 							info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(op1_type, info->type);
 						}
 					}
-#endif
 					/* Propagate return value types */
 					if (opline->op1_type == IS_UNUSED) {
 						return_value_info.type = MAY_BE_NULL;
@@ -1534,7 +1511,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 		}
 	}
 
-#if USE_TSSA_GUARDS
 	if (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP) {
 		/* Propagate guards through Phi sources */
 		zend_ssa_phi *phi = tssa->blocks[1].phis;
@@ -1569,7 +1545,6 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			phi = phi->next;
 		}
 	}
-#endif
 
 	if (UNEXPECTED(ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_TRACE_TSSA)) {
 		zend_jit_dump_trace(trace_buffer, tssa, first_ssa_var);
@@ -1683,10 +1658,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	 || trace_buffer->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL
 	 || trace_buffer->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
 
-#if USE_TSSA_GUARDS
 		if (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP) {
 			/* Check loop-invariant varaible types */
-#if 1
 			for (i = 0; i < op_array->last_var + op_array->T; i++) {
 				uint32_t info = ssa->var_info[i].type;
 
@@ -1706,25 +1679,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					}
 				}
 			}
-#else
-			zend_ssa_phi *phi = ssa->blocks[1].phis;
-
-			while (phi) {
-				uint32_t info = ssa->var_info[phi->sources[0]].type;
-
-				if ((info & MAY_BE_GUARD) != 0
-				 && (ssa->var_info[phi->ssa_var].type & MAY_BE_GUARD) == 0) {
-					if (!zend_jit_type_guard(&dasm_state, opline, EX_NUM_TO_VAR(phi->var), concrete_type(info))) {
-						goto jit_failure;
-					}
-					ssa->var_info[phi->sources[0]].type = info & ~MAY_BE_GUARD;
-					stack[i] = concrete_type(info);
-				}
-				phi = phi->next;
-			}
-#endif
 		}
-#endif
 
 		zend_jit_label(&dasm_state, 0); /* start of of trace loop */
 
