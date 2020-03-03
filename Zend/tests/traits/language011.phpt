@@ -18,7 +18,7 @@ trait World {
 
 
 class MyClass {
-   use Hello, World { sayHello as sayWorld; }
+   use Hello, World { World::sayHello as sayWorld; }
 }
 
 $o = new MyClass();
