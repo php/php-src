@@ -12,6 +12,8 @@ PHP                                                                        NEWS
     renamed). (Nikita)
   . Fixed bug #70839 (Converting optional argument to variadic forbidden by LSP
     checks). (Nikita)
+  . Fixed bug #69084 (Unclear error message when not implementing a renamed
+    abstract trait function). (Nikita)
 
 - CURL:
   . Bumped required libcurl version to 7.29.0. (cmb)
