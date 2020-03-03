@@ -605,6 +605,7 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const
 	int var, use;
 	zend_ssa_op *op;
 	zend_ssa_var_info *info;
+	unsigned int no_val;
 
 	if (tssa->vars[ssa_var].phi_use_chain) {
 		// TODO: this may be incorrect ???
@@ -614,16 +615,21 @@ static int zend_jit_trace_copy_ssa_var_info(const zend_op_array *op_array, const
 	}
 	use = tssa->vars[var].use_chain;
 	if (use >= 0) {
+		ZEND_ASSERT((tssa_opcodes[use] - op_array->opcodes) < op_array->last);
 		op = ssa->ops + (tssa_opcodes[use] - op_array->opcodes);
 		if (tssa->ops[use].op1_use == var) {
+			no_val = ssa->vars[op->op1_use].no_val;
 			info = ssa->var_info + op->op1_use;
 		} else if (tssa->ops[use].op2_use == var) {
+			no_val = ssa->vars[op->op2_use].no_val;
 			info = ssa->var_info + op->op2_use;
 		} else if (tssa->ops[use].result_use == var) {
+			no_val = ssa->vars[op->result_use].no_val;
 			info = ssa->var_info + op->result_use;
 		} else {
 			assert(0);
 		}
+		tssa->vars[ssa_var].no_val = no_val;
 		memcpy(&tssa->var_info[ssa_var], info, sizeof(zend_ssa_var_info));
 		return 1;
 	}
@@ -635,19 +641,26 @@ static int zend_jit_trace_copy_ssa_var_range(const zend_op_array *op_array, cons
 	int def;
 	zend_ssa_op *op;
 	zend_ssa_var_info *info;
+	unsigned int no_val;
 
 	def = tssa->vars[ssa_var].definition;
 	if (def >= 0) {
+		ZEND_ASSERT((tssa_opcodes[def] - op_array->opcodes) < op_array->last);
 		op = ssa->ops + (tssa_opcodes[def] - op_array->opcodes);
 		if (tssa->ops[def].op1_def == ssa_var) {
+			no_val = ssa->vars[op->op1_def].no_val;
 			info = ssa->var_info + op->op1_def;
 		} else if (tssa->ops[def].op2_def == ssa_var) {
+			no_val = ssa->vars[op->op2_def].no_val;
 			info = ssa->var_info + op->op2_def;
 		} else if (tssa->ops[def].result_def == ssa_var) {
+			no_val = ssa->vars[op->result_def].no_val;
 			info = ssa->var_info + op->result_def;
 		} else {
 			assert(0);
 		}
+
+		tssa->vars[ssa_var].no_val = no_val;
 
 		if (info->has_range) {
 			if (tssa->var_info[ssa_var].has_range) {
@@ -673,6 +686,7 @@ static int zend_jit_trace_restrict_ssa_var_info(const zend_op_array *op_array, c
 
 	def = tssa->vars[ssa_var].definition;
 	if (def >= 0) {
+		ZEND_ASSERT((tssa_opcodes[def] - op_array->opcodes) < op_array->last);
 		op = ssa->ops + (tssa_opcodes[def] - op_array->opcodes);
 		if (tssa->ops[def].op1_def == ssa_var) {
 			info = ssa->var_info + op->op1_def;
@@ -773,7 +787,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 	const zend_op *opline;
 	const zend_op **ssa_opcodes;
 	zend_jit_trace_rec *p;
-	int i, v, idx, len, use, ssa_ops_count, vars_count, ssa_vars_count, frame_count;
+	int i, v, idx, len, ssa_ops_count, vars_count, ssa_vars_count, frame_count;
 	int *var;
 	uint32_t build_flags = ZEND_SSA_RC_INFERENCE | ZEND_SSA_USE_CV_RESULTS;
 	uint32_t optimization_level = ZCG(accel_directives).optimization_level;
@@ -1050,33 +1064,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 		idx--;
 	}
 
-	/* 4. Mark false dependencies */
-	// TODO: Trace may miss uses ???
-	for (i = 0; i < ssa_vars_count; i++) {
-		ssa_vars[i].no_val = 1; /* mark as unused */
-		use = ssa_vars[i].use_chain;
-		while (use >= 0) {
-			if (!zend_ssa_is_no_val_use(ssa_opcodes[use], &ssa_ops[use], i)) {
-				ssa_vars[i].no_val = 0; /* used directly */
-				break;
-			}
-			use = zend_ssa_next_use(ssa_ops, i, use);
-		}
-	}
-	if (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP) {
-		zend_ssa_phi *phi = tssa->blocks[1].phis;
-
-		while (phi) {
-			i = phi->ssa_var;
-			if (!ssa_vars[i].no_val) {
-				ssa_vars[phi->sources[0]].no_val = 0;
-				ssa_vars[phi->sources[1]].no_val = 0;
-			}
-			phi = phi->next;
-		}
-	}
-
-	/* 5. Type inference */
+	/* 4. Type inference */
 	op_array = trace_buffer->op_array;
 	jit_extension =
 		(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
