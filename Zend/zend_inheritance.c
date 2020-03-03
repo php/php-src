@@ -1697,7 +1697,7 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 
 				/* if it is 0, no modifieres has been changed */
 				if (alias->modifiers) {
-					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags ^ (fn->common.fn_flags & ZEND_ACC_PPP_MASK));
+					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags & ~ZEND_ACC_PPP_MASK);
 				}
 
 				lcname = zend_string_tolower(alias->alias);
@@ -1712,8 +1712,7 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 
 	if (exclude_table == NULL || zend_hash_find(exclude_table, fnname) == NULL) {
 		/* is not in hashtable, thus, function is not to be excluded */
-		/* And how about ZEND_OVERLOADED_FUNCTION? */
-		memcpy(&fn_copy, fn, fn->type == ZEND_USER_FUNCTION? sizeof(zend_op_array) : sizeof(zend_internal_function));
+		memcpy(&fn_copy, fn, fn->type == ZEND_USER_FUNCTION ? sizeof(zend_op_array) : sizeof(zend_internal_function));
 
 		/* apply aliases which have not alias name, just setting visibility */
 		if (ce->trait_aliases) {
@@ -1726,7 +1725,7 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 					&& fn->common.scope == aliases[i]
 					&& zend_string_equals_ci(alias->trait_method.method_name, fnname)
 				) {
-					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags ^ (fn->common.fn_flags & ZEND_ACC_PPP_MASK));
+					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags & ~ZEND_ACC_PPP_MASK);
 				}
 				alias_ptr++;
 				alias = *alias_ptr;
