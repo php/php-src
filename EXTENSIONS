@@ -37,7 +37,7 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           cli
 PRIMARY MAINTAINER:  Marcus Börger <helly@php.net>, Edin Kadribasic <edink@php.net>
-MAINTENANCE:         Unknown
+MAINTENANCE:         Xinchen Hui <laruence@php.net> (2013 - 2020)
 STATUS:              Working
 SINCE:               4.3.0
 -------------------------------------------------------------------------------
@@ -385,7 +385,7 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           opcache
 PRIMARY MAINTAINER:  Dmitry Stogov <dmitry@php.net> (2013 - 2018)
-                     Xinchen Hui <laruence@php.net> (2013 - 2018)
+                     Xinchen Hui <laruence@php.net> (2013 - 2020)
                      Nikita Popov <nikic@php.net> (2016 - 2020)
 MAINTENANCE:         Maintained
 STATUS:              Working
