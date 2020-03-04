@@ -292,7 +292,7 @@ static int zend_jit_disasm(const char    *name,
 		}
 	}
 
-	zend_hash_sort(&labels, (compare_func_t)zend_jit_cmp_labels, 0);
+	zend_hash_sort(&labels, zend_jit_cmp_labels, 0);
 
 	/* label numbering */
 	n = 0; m = 0;

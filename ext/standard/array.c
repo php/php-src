@@ -132,10 +132,8 @@ PHP_MSHUTDOWN_FUNCTION(array) /* {{{ */
 }
 /* }}} */
 
-static int php_array_key_compare(const void *a, const void *b) /* {{{ */
+static int php_array_key_compare(Bucket *f, Bucket *s) /* {{{ */
 {
-	Bucket *f = (Bucket *) a;
-	Bucket *s = (Bucket *) b;
 	zend_uchar t;
 	zend_long l1, l2;
 	double d;
@@ -173,17 +171,14 @@ static int php_array_key_compare(const void *a, const void *b) /* {{{ */
 }
 /* }}} */
 
-static int php_array_reverse_key_compare(const void *a, const void *b) /* {{{ */
+static int php_array_reverse_key_compare(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_key_compare(b, a);
 }
 /* }}} */
 
-static int php_array_key_compare_numeric(const void *a, const void *b) /* {{{ */
+static int php_array_key_compare_numeric(Bucket *f, Bucket *s) /* {{{ */
 {
-	Bucket *f = (Bucket *) a;
-	Bucket *s = (Bucket *) b;
-
 	if (f->key == NULL && s->key == NULL) {
 		return (zend_long)f->h > (zend_long)s->h ? 1 : -1;
 	} else {
@@ -203,16 +198,14 @@ static int php_array_key_compare_numeric(const void *a, const void *b) /* {{{ */
 }
 /* }}} */
 
-static int php_array_reverse_key_compare_numeric(const void *a, const void *b) /* {{{ */
+static int php_array_reverse_key_compare_numeric(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_key_compare_numeric(b, a);
 }
 /* }}} */
 
-static int php_array_key_compare_string_case(const void *a, const void *b) /* {{{ */
+static int php_array_key_compare_string_case(Bucket *f, Bucket *s) /* {{{ */
 {
-	Bucket *f = (Bucket *) a;
-	Bucket *s = (Bucket *) b;
 	const char *s1, *s2;
 	size_t l1, l2;
 	char buf1[MAX_LENGTH_OF_LONG + 1];
@@ -236,16 +229,14 @@ static int php_array_key_compare_string_case(const void *a, const void *b) /* {{
 }
 /* }}} */
 
-static int php_array_reverse_key_compare_string_case(const void *a, const void *b) /* {{{ */
+static int php_array_reverse_key_compare_string_case(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_key_compare_string_case(b, a);
 }
 /* }}} */
 
-static int php_array_key_compare_string(const void *a, const void *b) /* {{{ */
+static int php_array_key_compare_string(Bucket *f, Bucket *s) /* {{{ */
 {
-	Bucket *f = (Bucket *) a;
-	Bucket *s = (Bucket *) b;
 	const char *s1, *s2;
 	size_t l1, l2;
 	char buf1[MAX_LENGTH_OF_LONG + 1];
@@ -269,16 +260,14 @@ static int php_array_key_compare_string(const void *a, const void *b) /* {{{ */
 }
 /* }}} */
 
-static int php_array_reverse_key_compare_string(const void *a, const void *b) /* {{{ */
+static int php_array_reverse_key_compare_string(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_key_compare_string(b, a);
 }
 /* }}} */
 
-static int php_array_key_compare_string_natural_general(const void *a, const void *b, int fold_case) /* {{{ */
+static int php_array_key_compare_string_natural_general(Bucket *f, Bucket *s, int fold_case) /* {{{ */
 {
-	Bucket *f = (Bucket *) a;
-	Bucket *s = (Bucket *) b;
 	const char *s1, *s2;
 	size_t l1, l2;
 	char buf1[MAX_LENGTH_OF_LONG + 1];
@@ -302,34 +291,32 @@ static int php_array_key_compare_string_natural_general(const void *a, const voi
 }
 /* }}} */
 
-static int php_array_key_compare_string_natural_case(const void *a, const void *b) /* {{{ */
+static int php_array_key_compare_string_natural_case(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_key_compare_string_natural_general(a, b, 1);
 }
 /* }}} */
 
-static int php_array_reverse_key_compare_string_natural_case(const void *a, const void *b) /* {{{ */
+static int php_array_reverse_key_compare_string_natural_case(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_key_compare_string_natural_general(b, a, 1);
 }
 /* }}} */
 
-static int php_array_key_compare_string_natural(const void *a, const void *b) /* {{{ */
+static int php_array_key_compare_string_natural(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_key_compare_string_natural_general(a, b, 0);
 }
 /* }}} */
 
-static int php_array_reverse_key_compare_string_natural(const void *a, const void *b) /* {{{ */
+static int php_array_reverse_key_compare_string_natural(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_key_compare_string_natural_general(b, a, 0);
 }
 /* }}} */
 
-static int php_array_key_compare_string_locale(const void *a, const void *b) /* {{{ */
+static int php_array_key_compare_string_locale(Bucket *f, Bucket *s) /* {{{ */
 {
-	Bucket *f = (Bucket *) a;
-	Bucket *s = (Bucket *) b;
 	const char *s1, *s2;
 	char buf1[MAX_LENGTH_OF_LONG + 1];
 	char buf2[MAX_LENGTH_OF_LONG + 1];
@@ -348,30 +335,16 @@ static int php_array_key_compare_string_locale(const void *a, const void *b) /* 
 }
 /* }}} */
 
-static int php_array_reverse_key_compare_string_locale(const void *a, const void *b) /* {{{ */
+static int php_array_reverse_key_compare_string_locale(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_key_compare_string_locale(b, a);
 }
 /* }}} */
 
-/* Numbers are always smaller than strings int this function as it
- * anyway doesn't make much sense to compare two different data types.
- * This keeps it consistent and simple.
- *
- * This is not correct any more, depends on what compare_func is set to.
- */
-static int php_array_data_compare(const void *a, const void *b) /* {{{ */
+static int php_array_data_compare(Bucket *f, Bucket *s) /* {{{ */
 {
-	Bucket *f;
-	Bucket *s;
-	zval *first;
-	zval *second;
-
-	f = (Bucket *) a;
-	s = (Bucket *) b;
-
-	first = &f->val;
-	second = &s->val;
+	zval *first = &f->val;
+	zval *second = &s->val;
 
 	if (UNEXPECTED(Z_TYPE_P(first) == IS_INDIRECT)) {
 		first = Z_INDIRECT_P(first);
@@ -383,24 +356,16 @@ static int php_array_data_compare(const void *a, const void *b) /* {{{ */
 }
 /* }}} */
 
-static int php_array_reverse_data_compare(const void *a, const void *b) /* {{{ */
+static int php_array_reverse_data_compare(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_data_compare(a, b) * -1;
 }
 /* }}} */
 
-static int php_array_data_compare_numeric(const void *a, const void *b) /* {{{ */
+static int php_array_data_compare_numeric(Bucket *f, Bucket *s) /* {{{ */
 {
-	Bucket *f;
-	Bucket *s;
-	zval *first;
-	zval *second;
-
-	f = (Bucket *) a;
-	s = (Bucket *) b;
-
-	first = &f->val;
-	second = &s->val;
+	zval *first = &f->val;
+	zval *second = &s->val;
 
 	if (UNEXPECTED(Z_TYPE_P(first) == IS_INDIRECT)) {
 		first = Z_INDIRECT_P(first);
@@ -413,24 +378,16 @@ static int php_array_data_compare_numeric(const void *a, const void *b) /* {{{ *
 }
 /* }}} */
 
-static int php_array_reverse_data_compare_numeric(const void *a, const void *b) /* {{{ */
+static int php_array_reverse_data_compare_numeric(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_data_compare_numeric(b, a);
 }
 /* }}} */
 
-static int php_array_data_compare_string_case(const void *a, const void *b) /* {{{ */
+static int php_array_data_compare_string_case(Bucket *f, Bucket *s) /* {{{ */
 {
-	Bucket *f;
-	Bucket *s;
-	zval *first;
-	zval *second;
-
-	f = (Bucket *) a;
-	s = (Bucket *) b;
-
-	first = &f->val;
-	second = &s->val;
+	zval *first = &f->val;
+	zval *second = &s->val;
 
 	if (UNEXPECTED(Z_TYPE_P(first) == IS_INDIRECT)) {
 		first = Z_INDIRECT_P(first);
@@ -443,24 +400,16 @@ static int php_array_data_compare_string_case(const void *a, const void *b) /* {
 }
 /* }}} */
 
-static int php_array_reverse_data_compare_string_case(const void *a, const void *b) /* {{{ */
+static int php_array_reverse_data_compare_string_case(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_data_compare_string_case(b, a);
 }
 /* }}} */
 
-static int php_array_data_compare_string(const void *a, const void *b) /* {{{ */
+static int php_array_data_compare_string(Bucket *f, Bucket *s) /* {{{ */
 {
-	Bucket *f;
-	Bucket *s;
-	zval *first;
-	zval *second;
-
-	f = (Bucket *) a;
-	s = (Bucket *) b;
-
-	first = &f->val;
-	second = &s->val;
+	zval *first = &f->val;
+	zval *second = &s->val;
 
 	if (UNEXPECTED(Z_TYPE_P(first) == IS_INDIRECT)) {
 		first = Z_INDIRECT_P(first);
@@ -473,16 +422,14 @@ static int php_array_data_compare_string(const void *a, const void *b) /* {{{ */
 }
 /* }}} */
 
-static int php_array_reverse_data_compare_string(const void *a, const void *b) /* {{{ */
+static int php_array_reverse_data_compare_string(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_data_compare_string(b, a);
 }
 /* }}} */
 
-static int php_array_natural_general_compare(const void *a, const void *b, int fold_case) /* {{{ */
+static int php_array_natural_general_compare(Bucket *f, Bucket *s, int fold_case) /* {{{ */
 {
-	Bucket *f = (Bucket *) a;
-	Bucket *s = (Bucket *) b;
 	zend_string *tmp_str1, *tmp_str2;
 	zend_string *str1 = zval_get_tmp_string(&f->val, &tmp_str1);
 	zend_string *str2 = zval_get_tmp_string(&s->val, &tmp_str2);
@@ -495,42 +442,34 @@ static int php_array_natural_general_compare(const void *a, const void *b, int f
 }
 /* }}} */
 
-static int php_array_natural_compare(const void *a, const void *b) /* {{{ */
+static int php_array_natural_compare(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_natural_general_compare(a, b, 0);
 }
 /* }}} */
 
-static int php_array_reverse_natural_compare(const void *a, const void *b) /* {{{ */
+static int php_array_reverse_natural_compare(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_natural_general_compare(b, a, 0);
 }
 /* }}} */
 
-static int php_array_natural_case_compare(const void *a, const void *b) /* {{{ */
+static int php_array_natural_case_compare(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_natural_general_compare(a, b, 1);
 }
 /* }}} */
 
-static int php_array_reverse_natural_case_compare(const void *a, const void *b) /* {{{ */
+static int php_array_reverse_natural_case_compare(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_natural_general_compare(b, a, 1);
 }
 /* }}} */
 
-static int php_array_data_compare_string_locale(const void *a, const void *b) /* {{{ */
+static int php_array_data_compare_string_locale(Bucket *f, Bucket *s) /* {{{ */
 {
-	Bucket *f;
-	Bucket *s;
-	zval *first;
-	zval *second;
-
-	f = (Bucket *) a;
-	s = (Bucket *) b;
-
-	first = &f->val;
-	second = &s->val;
+	zval *first = &f->val;
+	zval *second = &s->val;
 
 	if (UNEXPECTED(Z_TYPE_P(first) == IS_INDIRECT)) {
 		first = Z_INDIRECT_P(first);
@@ -543,13 +482,13 @@ static int php_array_data_compare_string_locale(const void *a, const void *b) /*
 }
 /* }}} */
 
-static int php_array_reverse_data_compare_string_locale(const void *a, const void *b) /* {{{ */
+static int php_array_reverse_data_compare_string_locale(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_data_compare_string_locale(b, a);
 }
 /* }}} */
 
-static compare_func_t php_get_key_compare_func(zend_long sort_type, int reverse) /* {{{ */
+static bucket_compare_func_t php_get_key_compare_func(zend_long sort_type, int reverse) /* {{{ */
 {
 	switch (sort_type & ~PHP_SORT_FLAG_CASE) {
 		case PHP_SORT_NUMERIC:
@@ -613,7 +552,7 @@ static compare_func_t php_get_key_compare_func(zend_long sort_type, int reverse)
 }
 /* }}} */
 
-static compare_func_t php_get_data_compare_func(zend_long sort_type, int reverse) /* {{{ */
+static bucket_compare_func_t php_get_data_compare_func(zend_long sort_type, int reverse) /* {{{ */
 {
 	switch (sort_type & ~PHP_SORT_FLAG_CASE) {
 		case PHP_SORT_NUMERIC:
@@ -683,7 +622,7 @@ PHP_FUNCTION(krsort)
 {
 	zval *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
-	compare_func_t cmp;
+	bucket_compare_func_t cmp;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
@@ -705,7 +644,7 @@ PHP_FUNCTION(ksort)
 {
 	zval *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
-	compare_func_t cmp;
+	bucket_compare_func_t cmp;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
@@ -860,7 +799,7 @@ PHP_FUNCTION(asort)
 {
 	zval *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
-	compare_func_t cmp;
+	bucket_compare_func_t cmp;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
@@ -882,7 +821,7 @@ PHP_FUNCTION(arsort)
 {
 	zval *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
-	compare_func_t cmp;
+	bucket_compare_func_t cmp;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
@@ -904,7 +843,7 @@ PHP_FUNCTION(sort)
 {
 	zval *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
-	compare_func_t cmp;
+	bucket_compare_func_t cmp;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
@@ -926,7 +865,7 @@ PHP_FUNCTION(rsort)
 {
 	zval *array;
 	zend_long sort_type = PHP_SORT_REGULAR;
-	compare_func_t cmp;
+	bucket_compare_func_t cmp;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY_EX(array, 0, 1)
@@ -942,15 +881,10 @@ PHP_FUNCTION(rsort)
 }
 /* }}} */
 
-static int php_array_user_compare(const void *a, const void *b) /* {{{ */
+static int php_array_user_compare(Bucket *f, Bucket *s) /* {{{ */
 {
-	Bucket *f;
-	Bucket *s;
 	zval args[2];
 	zval retval;
-
-	f = (Bucket *) a;
-	s = (Bucket *) b;
 
 	ZVAL_COPY(&args[0], &f->val);
 	ZVAL_COPY(&args[1], &s->val);
@@ -1003,7 +937,7 @@ static int php_array_user_compare(const void *a, const void *b) /* {{{ */
 	BG(user_compare_fci) = old_user_compare_fci; \
 	BG(user_compare_fci_cache) = old_user_compare_fci_cache; \
 
-static void php_usort(INTERNAL_FUNCTION_PARAMETERS, compare_func_t compare_func, zend_bool renumber) /* {{{ */
+static void php_usort(INTERNAL_FUNCTION_PARAMETERS, bucket_compare_func_t compare_func, zend_bool renumber) /* {{{ */
 {
 	zval *array;
 	zend_array *arr;
@@ -1051,16 +985,11 @@ PHP_FUNCTION(uasort)
 }
 /* }}} */
 
-static int php_array_user_key_compare(const void *a, const void *b) /* {{{ */
+static int php_array_user_key_compare(Bucket *f, Bucket *s) /* {{{ */
 {
-	Bucket *f;
-	Bucket *s;
 	zval args[2];
 	zval retval;
 	zend_long result;
-
-	f = (Bucket *) a;
-	s = (Bucket *) b;
 
 	if (f->key == NULL) {
 		ZVAL_LONG(&args[0], f->h);
@@ -4559,7 +4488,7 @@ PHP_FUNCTION(array_unique)
 	struct bucketindex *arTmp, *cmpdata, *lastkept;
 	unsigned int i;
 	zend_long sort_type = PHP_SORT_STRING;
-	compare_func_t cmp;
+	bucket_compare_func_t cmp;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ARRAY(array)
@@ -4627,11 +4556,11 @@ PHP_FUNCTION(array_unique)
 	}
 	ZVAL_UNDEF(&arTmp[i].b.val);
 	zend_sort((void *) arTmp, i, sizeof(struct bucketindex),
-			cmp, (swap_func_t)array_bucketindex_swap);
+			(compare_func_t) cmp, (swap_func_t)array_bucketindex_swap);
 	/* go through the sorted array and delete duplicates from the copy */
 	lastkept = arTmp;
 	for (cmpdata = arTmp + 1; Z_TYPE(cmpdata->b.val) != IS_UNDEF; cmpdata++) {
-		if (cmp(lastkept, cmpdata)) {
+		if (cmp(&lastkept->b, &cmpdata->b)) {
 			lastkept = cmpdata;
 		} else {
 			if (lastkept->i > cmpdata->i) {
@@ -4787,8 +4716,8 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	zend_fcall_info_cache *fci_key_cache = NULL, *fci_data_cache;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
-	int (*intersect_key_compare_func)(const void *, const void *);
-	int (*intersect_data_compare_func)(const void *, const void *);
+	bucket_compare_func_t intersect_key_compare_func;
+	bucket_compare_func_t intersect_data_compare_func;
 
 	if (behavior == INTERSECT_NORMAL) {
 		intersect_key_compare_func = php_array_key_compare_string;
@@ -4907,10 +4836,12 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		if (hash->nNumOfElements > 1) {
 			if (behavior == INTERSECT_NORMAL) {
 				zend_sort((void *) lists[i], hash->nNumOfElements,
-						sizeof(Bucket), intersect_data_compare_func, (swap_func_t)zend_hash_bucket_swap);
+						sizeof(Bucket), (compare_func_t) intersect_data_compare_func,
+						(swap_func_t)zend_hash_bucket_swap);
 			} else if (behavior & INTERSECT_ASSOC) { /* triggered also when INTERSECT_KEY */
 				zend_sort((void *) lists[i], hash->nNumOfElements,
-						sizeof(Bucket), intersect_key_compare_func, (swap_func_t)zend_hash_bucket_swap);
+						sizeof(Bucket), (compare_func_t) intersect_key_compare_func,
+						(swap_func_t)zend_hash_bucket_swap);
 			}
 		}
 	}
@@ -5192,8 +5123,8 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	zend_fcall_info_cache *fci_key_cache = NULL, *fci_data_cache;
 	PHP_ARRAY_CMP_FUNC_VARS;
 
-	int (*diff_key_compare_func)(const void *, const void *);
-	int (*diff_data_compare_func)(const void *, const void *);
+	bucket_compare_func_t diff_key_compare_func;
+	bucket_compare_func_t diff_data_compare_func;
 
 	if (behavior == DIFF_NORMAL) {
 		diff_key_compare_func = php_array_key_compare_string;
@@ -5312,10 +5243,12 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 		if (hash->nNumOfElements > 1) {
 			if (behavior == DIFF_NORMAL) {
 				zend_sort((void *) lists[i], hash->nNumOfElements,
-						sizeof(Bucket), diff_data_compare_func, (swap_func_t)zend_hash_bucket_swap);
+						sizeof(Bucket), (compare_func_t) diff_data_compare_func,
+						(swap_func_t)zend_hash_bucket_swap);
 			} else if (behavior & DIFF_ASSOC) { /* triggered also when DIFF_KEY */
 				zend_sort((void *) lists[i], hash->nNumOfElements,
-						sizeof(Bucket), diff_key_compare_func, (swap_func_t)zend_hash_bucket_swap);
+						sizeof(Bucket), (compare_func_t) diff_key_compare_func,
+						(swap_func_t)zend_hash_bucket_swap);
 			}
 		}
 	}
@@ -5676,7 +5609,7 @@ PHP_FUNCTION(array_multisort)
 	int				sort_order = PHP_SORT_ASC;
 	int				sort_type  = PHP_SORT_REGULAR;
 	int				i, k, n;
-	compare_func_t  *func;
+	bucket_compare_func_t *func;
 
 	ZEND_PARSE_PARAMETERS_START(1, -1)
 		Z_PARAM_VARIADIC('+', args, argc)
@@ -5687,7 +5620,7 @@ PHP_FUNCTION(array_multisort)
 	for (i = 0; i < MULTISORT_LAST; i++) {
 		parse_state[i] = 0;
 	}
-	func = ARRAYG(multisort_func) = (compare_func_t*)ecalloc(argc, sizeof(compare_func_t));
+	func = ARRAYG(multisort_func) = ecalloc(argc, sizeof(bucket_compare_func_t));
 
 	/* Here we go through the input arguments and parse them. Each one can
 	 * be either an array or a sort flag which follows an array. If not

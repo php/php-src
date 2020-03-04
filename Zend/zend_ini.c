@@ -171,14 +171,8 @@ ZEND_API int zend_copy_ini_directives(void) /* {{{ */
 /* }}} */
 #endif
 
-static int ini_key_compare(const void *a, const void *b) /* {{{ */
+static int ini_key_compare(Bucket *f, Bucket *s) /* {{{ */
 {
-	const Bucket *f;
-	const Bucket *s;
-
-	f = (const Bucket *) a;
-	s = (const Bucket *) b;
-
 	if (!f->key && !s->key) { /* both numeric */
 		if (f->h > s->h) {
 			return -1;

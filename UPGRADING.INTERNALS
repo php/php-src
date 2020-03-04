@@ -14,6 +14,7 @@ PHP 8.0 INTERNALS UPGRADE NOTES
   k. The 'I' length modifier
   l. Some VM instructions switched to IS_TMP_VAR result instead of IS_VAR
   m. All internal functions must have arginfo
+  n. zend_hash_sort compare function signature change
 
 2. Build system changes
   a. Abstract
@@ -101,6 +102,13 @@ PHP 8.0 INTERNALS UPGRADE NOTES
 
   m. All internal functions and methods are now required to specify arginfo
      information, otherwise warnings will be thrown on startup.
+
+  n. The zend_hash_sort and zend_hash_minmax APIs now accept a comparison
+     function with the following signature:
+
+         typedef int (*bucket_compare_func_t)(Bucket *a, Bucket *b);
+
+     Previously compare_func_t was used, which accepted void pointers.
 
 ========================
 2. Build system changes
