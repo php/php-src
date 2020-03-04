@@ -9,6 +9,8 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts("zip");
 
 ?>
+--CONFLICTS--
+bug71509
 --FILE--
 <?PHP
 // וצה
