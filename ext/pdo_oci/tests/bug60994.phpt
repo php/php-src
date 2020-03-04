@@ -92,12 +92,10 @@ echo 'size of string4 is ', strlen($string4), ' bytes, ', mb_strlen($string4), '
 echo 'size of stream4 is ', strlen($stream4), ' bytes, ', mb_strlen($stream4), ' chars.', PHP_EOL;
 echo 'beg  of stream4 is ', $start4, PHP_EOL;
 echo 'end  of stream4 is ', $ending4, PHP_EOL;
---XFAIL--
-Fails due to Bug 60994
 --EXPECT--
 Test 1:  j
-size of string1 is 1000006 bytes, 1000006 chars.
-size of stream1 is 1000006 bytes, 1000006 chars.
+size of string1 is 8193 bytes, 8193 chars.
+size of stream1 is 8193 bytes, 8193 chars.
 beg  of stream1 is abcjjjjjjj
 end  of stream1 is jjjjjjjxyz
 

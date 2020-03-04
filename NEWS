@@ -33,6 +33,9 @@ PHP                                                                        NEWS
   . Fixed bug #79188 (Memory corruption in preg_replace/preg_replace_callback
     and unicode). (Nikita)
 
+- PDO_OCI:
+  . Fixed bug #60994 (Reading a multibyte CLOB caps at 8192 characters). (Randy Stark)
+
 - PDO_ODBC:
   . Fixed bug #79038 (PDOStatement::nextRowset() leaks column values). (cmb)
 
