@@ -267,9 +267,14 @@ typedef struct _zend_jit_trace_rec {
 			uint8_t op2_type;/* recorded zval op2_type for ZEND_JIT_TRACE_VM */
 			uint8_t op3_type;/* recorded zval for op_data.op1_type for ZEND_JIT_TRACE_VM */
 		};
-		uint8_t   recursive; /* part of recursive return sequence for ZEND_JIT_TRACE_BACK */
-		int8_t    return_value_used; /* for ZEND_JIT_TRACE_ENTER */
-		uint8_t   fake; /* for ZEND_JIT_TRACE_INIT_FCALL */
+		struct {
+			union {
+				uint8_t   recursive; /* part of recursive return sequence for ZEND_JIT_TRACE_BACK */
+				int8_t    return_value_used; /* for ZEND_JIT_TRACE_ENTER */
+				uint8_t   fake; /* for ZEND_JIT_TRACE_INIT_FCALL */
+			};
+			uint8_t first_ssa_var; /* may be used for ZEND_JIT_TRACE_ENTER and ZEND_JIT_TRACE_BACK */
+		};
 		struct {
 			uint8_t  start;  /* ZEND_JIT_TRACE_START_MASK for ZEND_JIT_TRACE_START/END */
 			uint8_t  stop;   /* zend_jit_trace_stop for ZEND_JIT_TRACE_START/END */
