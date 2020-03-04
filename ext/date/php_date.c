@@ -2390,10 +2390,7 @@ static int date_object_compare_timezone(zval *tz1, zval *tz2) /* {{{ */
 	o1 = Z_PHPTIMEZONE_P(tz1);
 	o2 = Z_PHPTIMEZONE_P(tz2);
 
-	if (!o1->initialized || !o2->initialized) {
-		php_error_docref(NULL, E_WARNING, "Trying to compare an incomplete DateTimeZone object");
-		return 1;
-	}
+	ZEND_ASSERT(o1->initialized && o2->initialized);
 
 	if (o1->type != o2->type) {
 		php_error_docref(NULL, E_WARNING, "Trying to compare different kinds of DateTimeZone objects");
