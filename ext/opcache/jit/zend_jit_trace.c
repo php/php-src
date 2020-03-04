@@ -2612,12 +2612,28 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					goto jit_failure;
 				}
 			}
+
 done:
+#if 0
+			// TODO: call level calculation doesn't work for traces ???
+			switch (opline->opcode) {
+				case ZEND_DO_FCALL:
+				case ZEND_DO_ICALL:
+				case ZEND_DO_UCALL:
+				case ZEND_DO_FCALL_BY_NAME:
+					call_level--;
+			}
+#endif
+
 			/* Keep information about known types on abstract stack */
 			if (ssa_op->result_def >= 0) {
 				zend_uchar type = IS_UNKNOWN;
 
-				if (!(ssa->var_info[ssa_op->result_def].type & MAY_BE_GUARD)
+				if ((opline->result_type & (IS_SMART_BRANCH_JMPZ|IS_SMART_BRANCH_JMPNZ)) != 0
+				 || send_result) {
+					/* we didn't set result variable */
+					type = IS_UNKNOWN;
+				} else if (!(ssa->var_info[ssa_op->result_def].type & MAY_BE_GUARD)
 				 && has_concrete_type(ssa->var_info[ssa_op->result_def].type)) {
 					type = concrete_type(ssa->var_info[ssa_op->result_def].type);
 				} else if (opline->opcode == ZEND_QM_ASSIGN) {
@@ -2674,21 +2690,79 @@ done:
 				}
 				SET_OP2_STACK_VAR_TYPE(type);
 			}
-			ssa_op += zend_jit_trace_op_len(opline);
+
+			switch (opline->opcode) {
+				case ZEND_ASSIGN_DIM:
+				case ZEND_ASSIGN_OBJ:
+				case ZEND_ASSIGN_STATIC_PROP:
+				case ZEND_ASSIGN_DIM_OP:
+				case ZEND_ASSIGN_OBJ_OP:
+				case ZEND_ASSIGN_STATIC_PROP_OP:
+				case ZEND_ASSIGN_OBJ_REF:
+				case ZEND_ASSIGN_STATIC_PROP_REF:
+					/* OP_DATA */
+					ssa_op++;
+					opline++;
+					if (ssa_op->op1_def >= 0) {
+						zend_uchar type = IS_UNKNOWN;
+
+						if (!(ssa->var_info[ssa_op->op1_def].type & MAY_BE_GUARD)
+						 && has_concrete_type(ssa->var_info[ssa_op->op1_def].type)) {
+							type = concrete_type(ssa->var_info[ssa_op->op1_def].type);
+						} else if ((opline-1)->opcode == ZEND_ASSIGN_DIM
+						 || (opline-1)->opcode == ZEND_ASSIGN_OBJ
+						 || (opline-1)->opcode == ZEND_ASSIGN_STATIC_PROP) {
+							/* keep old value */
+							type = STACK_VAR_TYPE(opline->op1.var);
+						}
+						SET_OP1_STACK_VAR_TYPE(type);
+                    }
+					ssa_op++;
+					break;
+				case ZEND_RECV_INIT:
+				    ssa_op++;
+					opline++;
+					while (opline->opcode == ZEND_RECV_INIT) {
+						if (ssa_op->result_def >= 0) {
+							zend_uchar type = IS_UNKNOWN;
+
+							if (!(ssa->var_info[ssa_op->result_def].type & MAY_BE_GUARD)
+							 && has_concrete_type(ssa->var_info[ssa_op->result_def].type)) {
+								type = concrete_type(ssa->var_info[ssa_op->result_def].type);
+							}
+							SET_RES_STACK_VAR_TYPE(type);
+						}
+						ssa_op++;
+						opline++;
+					}
+					break;
+				case ZEND_BIND_GLOBAL:
+					ssa_op++;
+					opline++;
+					while (opline->opcode == ZEND_BIND_GLOBAL) {
+						if (ssa_op->op1_def >= 0) {
+							zend_uchar type = IS_UNKNOWN;
+
+							if (!(ssa->var_info[ssa_op->op1_def].type & MAY_BE_GUARD)
+							 && has_concrete_type(ssa->var_info[ssa_op->op1_def].type)) {
+								type = concrete_type(ssa->var_info[ssa_op->op1_def].type);
+							}
+							SET_OP1_STACK_VAR_TYPE(type);
+						}
+						ssa_op++;
+						opline++;
+					}
+					break;
+				default:
+					ssa_op += zend_jit_trace_op_len(opline);
+					break;
+			}
+
 			if (send_result) {
 				ssa_op++;
 				send_result = 0;
 			}
-#if 0
-			// TODO: call level calculation doesn't work for traces ???
-			switch (opline->opcode) {
-				case ZEND_DO_FCALL:
-				case ZEND_DO_ICALL:
-				case ZEND_DO_UCALL:
-				case ZEND_DO_FCALL_BY_NAME:
-					call_level--;
-			}
-#endif
+
 		} else if (p->op == ZEND_JIT_TRACE_ENTER) {
 			op_array = (zend_op_array*)p->op_array;
 			jit_extension =
