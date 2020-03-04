@@ -76,6 +76,20 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SimpleXMLElement_count arginfo_class_SimpleXMLElement_getName
 
+#define arginfo_class_SimpleXMLElement_rewind arginfo_class_SimpleXMLElement_getName
+
+#define arginfo_class_SimpleXMLElement_valid arginfo_class_SimpleXMLElement_getName
+
+#define arginfo_class_SimpleXMLElement_current arginfo_class_SimpleXMLElement_getName
+
+#define arginfo_class_SimpleXMLElement_key arginfo_class_SimpleXMLElement_getName
+
+#define arginfo_class_SimpleXMLElement_next arginfo_class_SimpleXMLElement_getName
+
+#define arginfo_class_SimpleXMLElement_hasChildren arginfo_class_SimpleXMLElement_getName
+
+#define arginfo_class_SimpleXMLElement_getChildren arginfo_class_SimpleXMLElement_getName
+
 
 ZEND_FUNCTION(simplexml_load_file);
 ZEND_FUNCTION(simplexml_load_string);
@@ -93,6 +107,13 @@ ZEND_METHOD(SimpleXMLElement, addAttribute);
 ZEND_METHOD(SimpleXMLElement, getName);
 ZEND_METHOD(SimpleXMLElement, __toString);
 ZEND_METHOD(SimpleXMLElement, count);
+ZEND_METHOD(SimpleXMLElement, rewind);
+ZEND_METHOD(SimpleXMLElement, valid);
+ZEND_METHOD(SimpleXMLElement, current);
+ZEND_METHOD(SimpleXMLElement, key);
+ZEND_METHOD(SimpleXMLElement, next);
+ZEND_METHOD(SimpleXMLElement, hasChildren);
+ZEND_METHOD(SimpleXMLElement, getChildren);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -118,5 +139,17 @@ static const zend_function_entry class_SimpleXMLElement_methods[] = {
 	ZEND_ME(SimpleXMLElement, getName, arginfo_class_SimpleXMLElement_getName, ZEND_ACC_PUBLIC)
 	ZEND_ME(SimpleXMLElement, __toString, arginfo_class_SimpleXMLElement___toString, ZEND_ACC_PUBLIC)
 	ZEND_ME(SimpleXMLElement, count, arginfo_class_SimpleXMLElement_count, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, rewind, arginfo_class_SimpleXMLElement_rewind, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, valid, arginfo_class_SimpleXMLElement_valid, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, current, arginfo_class_SimpleXMLElement_current, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, key, arginfo_class_SimpleXMLElement_key, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, next, arginfo_class_SimpleXMLElement_next, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, hasChildren, arginfo_class_SimpleXMLElement_hasChildren, ZEND_ACC_PUBLIC)
+	ZEND_ME(SimpleXMLElement, getChildren, arginfo_class_SimpleXMLElement_getChildren, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_SimpleXMLIterator_methods[] = {
 	ZEND_FE_END
 };
