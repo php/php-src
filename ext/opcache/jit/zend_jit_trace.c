@@ -2794,8 +2794,13 @@ done:
 				top = zend_jit_trace_call_frame(top, op_array);
 				i = 0;
 				while (i < p->op_array->num_args) {
-					// TODO: initialize using SSA ???
-					call->stack[i] = IS_UNKNOWN;
+					/* Initialize abstract stack using SSA */
+					if (!(ssa->var_info[p->first_ssa_var + i].type & MAY_BE_GUARD)
+					 && has_concrete_type(ssa->var_info[p->first_ssa_var + i].type)) {
+						call->stack[i] = concrete_type(ssa->var_info[p->first_ssa_var + i].type);
+					} else {
+						call->stack[i] = IS_UNKNOWN;
+					}
 					i++;
 				}
 				while (i < p->op_array->last_var) {
@@ -2833,8 +2838,13 @@ done:
 				frame->return_value_used = -1;
 				stack = frame->stack;
 				for (i = 0; i < op_array->last_var + op_array->T; i++) {
-					// TODO: initialize using SSA ???
-					stack[i] = IS_UNKNOWN;
+					/* Initialize abstract stack using SSA */
+					if (!(ssa->var_info[p->first_ssa_var + i].type & MAY_BE_GUARD)
+					 && has_concrete_type(ssa->var_info[p->first_ssa_var + i].type)) {
+						stack[i] = concrete_type(ssa->var_info[p->first_ssa_var + i].type);
+					} else {
+						stack[i] = IS_UNKNOWN;
+					}
 				}
 			}
 			JIT_G(current_frame) = frame;
@@ -2858,7 +2868,7 @@ done:
 			if (p->func->type == ZEND_USER_FUNCTION) {
 				i = 0;
 				while (i < p->op_array->num_args) {
-					// TODO: initialize using SSA ???
+					/* Types of arguments are going to be stored in abstract stack when proseccin SEV onstruction */
 					call->stack[i] = IS_UNKNOWN;
 					i++;
 				}
