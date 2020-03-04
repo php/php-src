@@ -2800,9 +2800,18 @@ done:
 				call->func = (const zend_function*)op_array;
 				top = zend_jit_trace_call_frame(top, op_array);
 				i = 0;
-				// TODO: ???
-				for (i = 0; i < op_array->last_var + op_array->T; i++) {
+				while (i < p->op_array->num_args) {
+					// TODO: initialize using SSA ???
 					call->stack[i] = IS_UNKNOWN;
+					i++;
+				}
+				while (i < p->op_array->last_var) {
+					call->stack[i] = IS_UNDEF;
+					i++;
+				}
+				while (i < p->op_array->last_var + p->op_array->T) {
+					call->stack[i] = IS_UNKNOWN;
+					i++;
 				}
 			} else {
 				ZEND_ASSERT(&call->func->op_array == op_array);
@@ -2830,8 +2839,8 @@ done:
 				frame->func = (const zend_function*)op_array;
 				frame->return_value_used = -1;
 				stack = frame->stack;
-				// TODO: ???
 				for (i = 0; i < op_array->last_var + op_array->T; i++) {
+					// TODO: initialize using SSA ???
 					stack[i] = IS_UNKNOWN;
 				}
 			}
@@ -2854,9 +2863,19 @@ done:
 			frame->call = call;
 			top = zend_jit_trace_call_frame(top, p->op_array);
 			if (p->func->type == ZEND_USER_FUNCTION) {
-				// TODO: ???
-				for (i = 0; i < p->op_array->last_var + p->op_array->T; i++) {
+				i = 0;
+				while (i < p->op_array->num_args) {
+					// TODO: initialize using SSA ???
 					call->stack[i] = IS_UNKNOWN;
+					i++;
+				}
+				while (i < p->op_array->last_var) {
+					call->stack[i] = IS_UNDEF;
+					i++;
+				}
+				while (i < p->op_array->last_var + p->op_array->T) {
+					call->stack[i] = IS_UNKNOWN;
+					i++;
 				}
 			}
 			if (p->fake) {
