@@ -2453,15 +2453,15 @@ ZEND_API void zend_hash_bucket_swap(Bucket *p, Bucket *q)
 	zend_ulong h;
 	zend_string *key;
 
-	ZVAL_COPY_VALUE(&val, &p->val);
+	val = p->val;
 	h = p->h;
 	key = p->key;
 
-	ZVAL_COPY_VALUE(&p->val, &q->val);
+	p->val = q->val;
 	p->h = q->h;
 	p->key = q->key;
 
-	ZVAL_COPY_VALUE(&q->val, &val);
+	q->val = val;
 	q->h = h;
 	q->key = key;
 }
@@ -2470,9 +2470,9 @@ ZEND_API void zend_hash_bucket_renum_swap(Bucket *p, Bucket *q)
 {
 	zval val;
 
-	ZVAL_COPY_VALUE(&val, &p->val);
-	ZVAL_COPY_VALUE(&p->val, &q->val);
-	ZVAL_COPY_VALUE(&q->val, &val);
+	val = p->val;
+	p->val = q->val;
+	q->val = val;
 }
 
 ZEND_API void zend_hash_bucket_packed_swap(Bucket *p, Bucket *q)
@@ -2480,13 +2480,13 @@ ZEND_API void zend_hash_bucket_packed_swap(Bucket *p, Bucket *q)
 	zval val;
 	zend_ulong h;
 
-	ZVAL_COPY_VALUE(&val, &p->val);
+	val = p->val;
 	h = p->h;
 
-	ZVAL_COPY_VALUE(&p->val, &q->val);
+	p->val = q->val;
 	p->h = q->h;
 
-	ZVAL_COPY_VALUE(&q->val, &val);
+	q->val = val;
 	q->h = h;
 }
 
@@ -2498,28 +2498,34 @@ ZEND_API void ZEND_FASTCALL zend_hash_sort_ex(HashTable *ht, sort_func_t sort, b
 	IS_CONSISTENT(ht);
 	HT_ASSERT_RC1(ht);
 
-	if (!(ht->nNumOfElements>1) && !(renumber && ht->nNumOfElements>0)) { /* Doesn't require sorting */
+	if (!(ht->nNumOfElements>1) && !(renumber && ht->nNumOfElements>0)) {
+		/* Doesn't require sorting */
 		return;
 	}
 
 	if (HT_IS_WITHOUT_HOLES(ht)) {
-		i = ht->nNumUsed;
+		/* Store original order of elements in extra space to allow stable sorting. */
+		for (i = 0; i < ht->nNumUsed; i++) {
+			Z_EXTRA(ht->arData[i].val) = i;
+		}
 	} else {
+		/* Remove holes and store original order. */
 		for (j = 0, i = 0; j < ht->nNumUsed; j++) {
 			p = ht->arData + j;
 			if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 			if (i != j) {
 				ht->arData[i] = *p;
 			}
+			Z_EXTRA(ht->arData[i].val) = i;
 			i++;
 		}
+		ht->nNumUsed = i;
 	}
 
-	sort((void *)ht->arData, i, sizeof(Bucket), (compare_func_t) compar,
+	sort((void *)ht->arData, ht->nNumUsed, sizeof(Bucket), (compare_func_t) compar,
 			(swap_func_t)(renumber? zend_hash_bucket_renum_swap :
 				((HT_FLAGS(ht) & HASH_FLAG_PACKED) ? zend_hash_bucket_packed_swap : zend_hash_bucket_swap)));
 
-	ht->nNumUsed = i;
 	ht->nInternalPointer = 0;
 
 	if (renumber) {

@@ -437,9 +437,19 @@ PHP 8.0 UPGRADE NOTES
     respect the inherited locale without an explicit setlocale() call. An
     explicit setlocale() call is now always required if you wish to change any
     locale component from the default.
-  . Remove deprecated DES fallback in crypt(). If an unknown salt format is
+  . Removed deprecated DES fallback in crypt(). If an unknown salt format is
     passed to crypt(), the function will fail with *0 instead of falling back
     to a weak DES hash now.
+  . The result of sorting functions may have changed, if the array contains
+    equal-comparing elements.
+  . Sort comparison functions return true/false will now throw a deprecation
+    warning and should be replaced with an implementation return an integer
+    smaller than, equal to, or greater than zero.
+
+        // Replace
+        usort($array, fn($a, $b) => $a > $b);
+        // With
+        usort($array, fn($a, $b) => $a <=> $b);
 
 - Sysvmsg:
   . msg_get_queue() will now return an SysvMessageQueue object rather than a
@@ -583,6 +593,10 @@ PHP 8.0 UPGRADE NOTES
     attaches stdin, stdout and stderr to the same PTY:
 
         $proc = proc_open($command, [['pty'], ['pty'], ['pty']], $pipes);
+
+  . Sorting functions are now stable, which means that equal-comparing elements
+    will retain their original order.
+    RFC: https://wiki.php.net/rfc/stable_sorting
 
 - Zip:
   . Extension updated to version 1.19.0
