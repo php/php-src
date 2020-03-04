@@ -680,6 +680,8 @@ static zval *date_period_read_property(zval *object, zval *member, int type, voi
 static zval *date_period_write_property(zval *object, zval *member, zval *value, void **cache_slot);
 static zval *date_period_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot);
 
+static int date_object_compare_timezone(zval *tz1, zval *tz2);
+
 /* {{{ Module struct */
 zend_module_entry date_module_entry = {
 	STANDARD_MODULE_HEADER_EX,
@@ -2152,6 +2154,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_timezone.offset = XtOffsetOf(php_timezone_obj, std);
 	date_object_handlers_timezone.free_obj = date_object_free_storage_timezone;
 	date_object_handlers_timezone.clone_obj = date_object_clone_timezone;
+	date_object_handlers_timezone.compare_objects = date_object_compare_timezone;
 	date_object_handlers_timezone.get_properties_for = date_object_get_properties_for_timezone;
 	date_object_handlers_timezone.get_gc = date_object_get_gc_timezone;
 	date_object_handlers_timezone.get_debug_info = date_object_get_debug_info_timezone;
@@ -2378,6 +2381,31 @@ static zend_object *date_object_clone_timezone(zval *this_ptr) /* {{{ */
 	}
 
 	return &new_obj->std;
+} /* }}} */
+
+static int date_object_compare_timezone(zval *tz1, zval *tz2) /* {{{ */
+{
+	php_timezone_obj *o1, *o2;
+
+	o1 = Z_PHPTIMEZONE_P(tz1);
+	o2 = Z_PHPTIMEZONE_P(tz2);
+
+	ZEND_ASSERT(o1->initialized && o2->initialized);
+
+	if (o1->type != o2->type) {
+		php_error_docref(NULL, E_WARNING, "Trying to compare different kinds of DateTimeZone objects");
+		return 1;
+	}
+
+	switch (o1->type) {
+		case TIMELIB_ZONETYPE_OFFSET:
+			return o1->tzi.utc_offset == o2->tzi.utc_offset ? 0 : 1;
+		case TIMELIB_ZONETYPE_ABBR:
+			return strcmp(o1->tzi.z.abbr, o2->tzi.z.abbr) ? 1 : 0;
+		case TIMELIB_ZONETYPE_ID:
+			return strcmp(o1->tzi.tz->name, o2->tzi.tz->name) ? 1 : 0;
+		EMPTY_SWITCH_DEFAULT_CASE();
+	}
 } /* }}} */
 
 static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv)

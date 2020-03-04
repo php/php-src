@@ -13,6 +13,7 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #79396 (DateTime hour incorrect during DST jump forward). (Nate
     Brunette)
+  . Fixed bug #74940 (DateTimeZone loose comparison always true). (cmb)
 
 - FPM:
   . Implement request #77062 (Allow numeric [UG]ID in FPM listen.{owner,group})
