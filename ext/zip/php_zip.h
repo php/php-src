@@ -59,13 +59,14 @@ typedef struct _ze_zip_object {
 	char *filename;
 	int filename_len;
 	int buffers_cnt;
-	zend_object zo;
+	zip_int64_t last_id;
 #ifdef HAVE_PROGRESS_CALLBACK
 	zval progress_callback;
 #endif
 #ifdef HAVE_CANCEL_CALLBACK
 	zval cancel_callback;
 #endif
+	zend_object zo;
 } ze_zip_object;
 
 static inline ze_zip_object *php_zip_fetch_object(zend_object *obj) {
