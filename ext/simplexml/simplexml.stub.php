@@ -8,7 +8,7 @@ function simplexml_load_string(string $data, ?string $class_name = SimpleXMLElem
 
 function simplexml_import_dom(DOMNode $node, ?string $class_name = SimpleXMLElement::class): ?SimpleXMLElement {}
 
-class SimpleXMLElement implements Stringable
+class SimpleXMLElement implements Stringable, Countable, RecursiveIterator
 {
     /** @return array|false */
     public function xpath(string $path) {}
@@ -52,4 +52,29 @@ class SimpleXMLElement implements Stringable
 
     /** @return int */
     public function count() {}
+
+    /** @return void */
+    public function rewind() {}
+
+    /** @return bool */
+    public function valid() {}
+
+    /** @return ?SimpleXMLElement */
+    public function current() {}
+
+    /** @return string|false */
+    public function key() {}
+
+    /** @return void */
+    public function next() {}
+
+    /** @return bool */
+    public function hasChildren() {}
+
+    /** @return ?SimpleXMLElement */
+    public function getChildren() {}
+}
+
+class SimpleXMLIterator extends SimpleXMLElement
+{
 }

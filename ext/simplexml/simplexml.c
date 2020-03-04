@@ -31,9 +31,11 @@
 #include "simplexml_arginfo.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
-#include "sxe.h"
+#include "ext/spl/spl_iterators.h"
 
 zend_class_entry *sxe_class_entry = NULL;
+PHP_SXE_API zend_class_entry *ce_SimpleXMLIterator;
+PHP_SXE_API zend_class_entry *ce_SimpleXMLElement;
 
 PHP_SXE_API zend_class_entry *sxe_get_element_class_entry(void) /* {{{ */
 {
@@ -2024,6 +2026,138 @@ SXE_METHOD(count)
 }
 /* }}} */
 
+
+/* {{{ proto void SimpleXMLElement::rewind()
+ Rewind to first element */
+SXE_METHOD(rewind)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	php_sxe_rewind_iterator(Z_SXEOBJ_P(ZEND_THIS));
+}
+/* }}} */
+
+/* {{{ proto bool SimpleXMLElement::valid()
+ Check whether iteration is valid */
+SXE_METHOD(valid)
+{
+	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETURN_BOOL(!Z_ISUNDEF(sxe->iter.data));
+}
+/* }}} */
+
+/* {{{ proto SimpleXMLElement SimpleXMLElement::current()
+ Get current element */
+SXE_METHOD(current)
+{
+	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
+	zval *data;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (Z_ISUNDEF(sxe->iter.data)) {
+		return; /* return NULL */
+	}
+
+	data = &sxe->iter.data;
+	ZVAL_COPY_DEREF(return_value, data);
+}
+/* }}} */
+
+/* {{{ proto string SimpleXMLElement::key()
+ Get name of current child element */
+SXE_METHOD(key)
+{
+	xmlNodePtr curnode;
+	php_sxe_object *intern;
+	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (Z_ISUNDEF(sxe->iter.data)) {
+		RETURN_FALSE;
+	}
+
+	intern = Z_SXEOBJ_P(&sxe->iter.data);
+	if (intern != NULL && intern->node != NULL) {
+		curnode = (xmlNodePtr)((php_libxml_node_ptr *)intern->node)->node;
+		RETURN_STRINGL((char*)curnode->name, xmlStrlen(curnode->name));
+	}
+
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto void SimpleXMLElement::next()
+ Move to next element */
+SXE_METHOD(next)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	php_sxe_move_forward_iterator(Z_SXEOBJ_P(ZEND_THIS));
+}
+/* }}} */
+
+/* {{{ proto bool SimpleXMLElement::hasChildren()
+ Check whether element has children (elements) */
+SXE_METHOD(hasChildren)
+{
+	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
+	php_sxe_object *child;
+	xmlNodePtr      node;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (Z_ISUNDEF(sxe->iter.data) || sxe->iter.type == SXE_ITER_ATTRLIST) {
+		RETURN_FALSE;
+	}
+	child = Z_SXEOBJ_P(&sxe->iter.data);
+
+	GET_NODE(child, node);
+	if (node) {
+		node = node->children;
+	}
+	while (node && node->type != XML_ELEMENT_NODE) {
+		node = node->next;
+	}
+	RETURN_BOOL(node ? 1 : 0);
+}
+/* }}} */
+
+/* {{{ proto SimpleXMLElement SimpleXMLElement::getChildren()
+ Get child element iterator */
+SXE_METHOD(getChildren)
+{
+	php_sxe_object *sxe = Z_SXEOBJ_P(ZEND_THIS);
+	zval *data;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (Z_ISUNDEF(sxe->iter.data) || sxe->iter.type == SXE_ITER_ATTRLIST) {
+		return; /* return NULL */
+	}
+
+	data = &sxe->iter.data;
+	ZVAL_COPY_DEREF(return_value, data);
+}
+
 static zend_object_handlers sxe_object_handlers;
 
 /* {{{ sxe_object_clone()
@@ -2617,13 +2751,14 @@ ZEND_GET_MODULE(simplexml)
  */
 PHP_MINIT_FUNCTION(simplexml)
 {
-	zend_class_entry sxe;
+	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(sxe, "SimpleXMLElement", class_SimpleXMLElement_methods);
-	sxe.create_object = sxe_object_new;
-	sxe_class_entry = zend_register_internal_class(&sxe);
+	INIT_CLASS_ENTRY(ce, "SimpleXMLElement", class_SimpleXMLElement_methods);
+	sxe_class_entry = zend_register_internal_class(&ce);
+	sxe_class_entry->create_object = sxe_object_new;
 	sxe_class_entry->get_iterator = php_sxe_get_iterator;
-	zend_class_implements(sxe_class_entry, 3, zend_ce_traversable, zend_ce_countable, zend_ce_stringable);
+	zend_class_implements(sxe_class_entry, 3,
+		zend_ce_countable, zend_ce_stringable, spl_ce_RecursiveIterator);
 
 	memcpy(&sxe_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sxe_object_handlers.offset = XtOffsetOf(php_sxe_object, zo);
@@ -2650,9 +2785,13 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_class_entry->serialize = zend_class_serialize_deny;
 	sxe_class_entry->unserialize = zend_class_unserialize_deny;
 
-	php_libxml_register_export(sxe_class_entry, simplexml_export_node);
+	/* TODO: Why do we have two variables for this? */
+	ce_SimpleXMLElement = sxe_class_entry;
 
-	PHP_MINIT(sxe)(INIT_FUNC_ARGS_PASSTHRU);
+	INIT_CLASS_ENTRY(ce, "SimpleXMLIterator", NULL);
+	ce_SimpleXMLIterator = zend_register_internal_class_ex(&ce, ce_SimpleXMLElement);
+
+	php_libxml_register_export(sxe_class_entry, simplexml_export_node);
 
 	return SUCCESS;
 }
