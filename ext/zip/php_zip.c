@@ -1794,7 +1794,7 @@ static ZIPARCHIVE_METHOD(replaceFile)
 	zend_long index;
 	zend_long offset_start = 0, offset_len = 0;
 	zend_string *filename;
-	zend_long flags = ZIP_FL_OVERWRITE;
+	zend_long flags = 0;
 
 	ZIP_FROM_OBJECT(intern, self);
 
