@@ -132,7 +132,32 @@ PHP_MSHUTDOWN_FUNCTION(array) /* {{{ */
 }
 /* }}} */
 
-static int php_array_key_compare(Bucket *f, Bucket *s) /* {{{ */
+#define RETURN_STABLE_SORT(a, b, result) do { \
+	int _result = (result); \
+	if (_result) { \
+		return _result; \
+	} \
+	if (Z_EXTRA((a)->val) > Z_EXTRA((b)->val)) { \
+		return 1; \
+	} else if (Z_EXTRA((a)->val) < Z_EXTRA((b)->val)) { \
+		return -1; \
+	} else { \
+		return 0; \
+	} \
+} while (0)
+
+#define DEFINE_SORT_VARIANTS(name) \
+	static int php_array_reverse_##name##_unstable(Bucket *a, Bucket *b) { \
+		return php_array_##name##_unstable(a, b) * -1; \
+	} \
+	static int php_array_##name(Bucket *a, Bucket *b) { \
+		RETURN_STABLE_SORT(a, b, php_array_##name##_unstable(a, b)); \
+	} \
+	static int php_array_reverse_##name(Bucket *a, Bucket *b) { \
+		RETURN_STABLE_SORT(a, b, php_array_reverse_##name##_unstable(a, b)); \
+	} \
+
+static int php_array_key_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	zend_uchar t;
 	zend_long l1, l2;
@@ -171,13 +196,7 @@ static int php_array_key_compare(Bucket *f, Bucket *s) /* {{{ */
 }
 /* }}} */
 
-static int php_array_reverse_key_compare(Bucket *a, Bucket *b) /* {{{ */
-{
-	return php_array_key_compare(b, a);
-}
-/* }}} */
-
-static int php_array_key_compare_numeric(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_key_compare_numeric_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	if (f->key == NULL && s->key == NULL) {
 		return (zend_long)f->h > (zend_long)s->h ? 1 : -1;
@@ -198,13 +217,7 @@ static int php_array_key_compare_numeric(Bucket *f, Bucket *s) /* {{{ */
 }
 /* }}} */
 
-static int php_array_reverse_key_compare_numeric(Bucket *a, Bucket *b) /* {{{ */
-{
-	return php_array_key_compare_numeric(b, a);
-}
-/* }}} */
-
-static int php_array_key_compare_string_case(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_key_compare_string_case_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	const char *s1, *s2;
 	size_t l1, l2;
@@ -229,13 +242,7 @@ static int php_array_key_compare_string_case(Bucket *f, Bucket *s) /* {{{ */
 }
 /* }}} */
 
-static int php_array_reverse_key_compare_string_case(Bucket *a, Bucket *b) /* {{{ */
-{
-	return php_array_key_compare_string_case(b, a);
-}
-/* }}} */
-
-static int php_array_key_compare_string(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_key_compare_string_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	const char *s1, *s2;
 	size_t l1, l2;
@@ -257,12 +264,6 @@ static int php_array_key_compare_string(Bucket *f, Bucket *s) /* {{{ */
 		l2 = buf2 + sizeof(buf2) - 1 - s2;
 	}
 	return zend_binary_strcmp(s1, l1, s2, l2);
-}
-/* }}} */
-
-static int php_array_reverse_key_compare_string(Bucket *a, Bucket *b) /* {{{ */
-{
-	return php_array_key_compare_string(b, a);
 }
 /* }}} */
 
@@ -293,29 +294,29 @@ static int php_array_key_compare_string_natural_general(Bucket *f, Bucket *s, in
 
 static int php_array_key_compare_string_natural_case(Bucket *a, Bucket *b) /* {{{ */
 {
-	return php_array_key_compare_string_natural_general(a, b, 1);
+	RETURN_STABLE_SORT(a, b, php_array_key_compare_string_natural_general(a, b, 1));
 }
 /* }}} */
 
 static int php_array_reverse_key_compare_string_natural_case(Bucket *a, Bucket *b) /* {{{ */
 {
-	return php_array_key_compare_string_natural_general(b, a, 1);
+	RETURN_STABLE_SORT(a, b, php_array_key_compare_string_natural_general(b, a, 1));
 }
 /* }}} */
 
 static int php_array_key_compare_string_natural(Bucket *a, Bucket *b) /* {{{ */
 {
-	return php_array_key_compare_string_natural_general(a, b, 0);
+	RETURN_STABLE_SORT(a, b, php_array_key_compare_string_natural_general(a, b, 0));
 }
 /* }}} */
 
 static int php_array_reverse_key_compare_string_natural(Bucket *a, Bucket *b) /* {{{ */
 {
-	return php_array_key_compare_string_natural_general(b, a, 0);
+	RETURN_STABLE_SORT(a, b, php_array_key_compare_string_natural_general(b, a, 0));
 }
 /* }}} */
 
-static int php_array_key_compare_string_locale(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_key_compare_string_locale_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	const char *s1, *s2;
 	char buf1[MAX_LENGTH_OF_LONG + 1];
@@ -335,13 +336,7 @@ static int php_array_key_compare_string_locale(Bucket *f, Bucket *s) /* {{{ */
 }
 /* }}} */
 
-static int php_array_reverse_key_compare_string_locale(Bucket *a, Bucket *b) /* {{{ */
-{
-	return php_array_key_compare_string_locale(b, a);
-}
-/* }}} */
-
-static int php_array_data_compare(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_data_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval *first = &f->val;
 	zval *second = &s->val;
@@ -356,13 +351,7 @@ static int php_array_data_compare(Bucket *f, Bucket *s) /* {{{ */
 }
 /* }}} */
 
-static int php_array_reverse_data_compare(Bucket *a, Bucket *b) /* {{{ */
-{
-	return php_array_data_compare(a, b) * -1;
-}
-/* }}} */
-
-static int php_array_data_compare_numeric(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_data_compare_numeric_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval *first = &f->val;
 	zval *second = &s->val;
@@ -378,13 +367,7 @@ static int php_array_data_compare_numeric(Bucket *f, Bucket *s) /* {{{ */
 }
 /* }}} */
 
-static int php_array_reverse_data_compare_numeric(Bucket *a, Bucket *b) /* {{{ */
-{
-	return php_array_data_compare_numeric(b, a);
-}
-/* }}} */
-
-static int php_array_data_compare_string_case(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_data_compare_string_case_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval *first = &f->val;
 	zval *second = &s->val;
@@ -400,13 +383,7 @@ static int php_array_data_compare_string_case(Bucket *f, Bucket *s) /* {{{ */
 }
 /* }}} */
 
-static int php_array_reverse_data_compare_string_case(Bucket *a, Bucket *b) /* {{{ */
-{
-	return php_array_data_compare_string_case(b, a);
-}
-/* }}} */
-
-static int php_array_data_compare_string(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_data_compare_string_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval *first = &f->val;
 	zval *second = &s->val;
@@ -419,12 +396,6 @@ static int php_array_data_compare_string(Bucket *f, Bucket *s) /* {{{ */
 	}
 
 	return string_compare_function(first, second);
-}
-/* }}} */
-
-static int php_array_reverse_data_compare_string(Bucket *a, Bucket *b) /* {{{ */
-{
-	return php_array_data_compare_string(b, a);
 }
 /* }}} */
 
@@ -442,31 +413,19 @@ static int php_array_natural_general_compare(Bucket *f, Bucket *s, int fold_case
 }
 /* }}} */
 
-static int php_array_natural_compare(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_natural_compare_unstable(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_natural_general_compare(a, b, 0);
 }
 /* }}} */
 
-static int php_array_reverse_natural_compare(Bucket *a, Bucket *b) /* {{{ */
-{
-	return php_array_natural_general_compare(b, a, 0);
-}
-/* }}} */
-
-static int php_array_natural_case_compare(Bucket *a, Bucket *b) /* {{{ */
+static int php_array_natural_case_compare_unstable(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_natural_general_compare(a, b, 1);
 }
 /* }}} */
 
-static int php_array_reverse_natural_case_compare(Bucket *a, Bucket *b) /* {{{ */
-{
-	return php_array_natural_general_compare(b, a, 1);
-}
-/* }}} */
-
-static int php_array_data_compare_string_locale(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_data_compare_string_locale_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval *first = &f->val;
 	zval *second = &s->val;
@@ -482,11 +441,18 @@ static int php_array_data_compare_string_locale(Bucket *f, Bucket *s) /* {{{ */
 }
 /* }}} */
 
-static int php_array_reverse_data_compare_string_locale(Bucket *a, Bucket *b) /* {{{ */
-{
-	return php_array_data_compare_string_locale(b, a);
-}
-/* }}} */
+DEFINE_SORT_VARIANTS(key_compare);
+DEFINE_SORT_VARIANTS(key_compare_numeric);
+DEFINE_SORT_VARIANTS(key_compare_string_case);
+DEFINE_SORT_VARIANTS(key_compare_string);
+DEFINE_SORT_VARIANTS(key_compare_string_locale);
+DEFINE_SORT_VARIANTS(data_compare);
+DEFINE_SORT_VARIANTS(data_compare_numeric);
+DEFINE_SORT_VARIANTS(data_compare_string_case);
+DEFINE_SORT_VARIANTS(data_compare_string);
+DEFINE_SORT_VARIANTS(data_compare_string_locale);
+DEFINE_SORT_VARIANTS(natural_compare);
+DEFINE_SORT_VARIANTS(natural_case_compare);
 
 static bucket_compare_func_t php_get_key_compare_func(zend_long sort_type, int reverse) /* {{{ */
 {
@@ -609,6 +575,70 @@ static bucket_compare_func_t php_get_data_compare_func(zend_long sort_type, int 
 				return php_array_reverse_data_compare;
 			} else {
 				return php_array_data_compare;
+			}
+			break;
+	}
+	return NULL;
+}
+/* }}} */
+
+static bucket_compare_func_t php_get_data_compare_func_unstable(zend_long sort_type, int reverse) /* {{{ */
+{
+	switch (sort_type & ~PHP_SORT_FLAG_CASE) {
+		case PHP_SORT_NUMERIC:
+			if (reverse) {
+				return php_array_reverse_data_compare_numeric_unstable;
+			} else {
+				return php_array_data_compare_numeric_unstable;
+			}
+			break;
+
+		case PHP_SORT_STRING:
+			if (sort_type & PHP_SORT_FLAG_CASE) {
+				if (reverse) {
+					return php_array_reverse_data_compare_string_case_unstable;
+				} else {
+					return php_array_data_compare_string_case_unstable;
+				}
+			} else {
+				if (reverse) {
+					return php_array_reverse_data_compare_string_unstable;
+				} else {
+					return php_array_data_compare_string_unstable;
+				}
+			}
+			break;
+
+		case PHP_SORT_NATURAL:
+			if (sort_type & PHP_SORT_FLAG_CASE) {
+				if (reverse) {
+					return php_array_reverse_natural_case_compare_unstable;
+				} else {
+					return php_array_natural_case_compare_unstable;
+				}
+			} else {
+				if (reverse) {
+					return php_array_reverse_natural_compare_unstable;
+				} else {
+					return php_array_natural_compare_unstable;
+				}
+			}
+			break;
+
+		case PHP_SORT_LOCALE_STRING:
+			if (reverse) {
+				return php_array_reverse_data_compare_string_locale_unstable;
+			} else {
+				return php_array_data_compare_string_locale_unstable;
+			}
+			break;
+
+		case PHP_SORT_REGULAR:
+		default:
+			if (reverse) {
+				return php_array_reverse_data_compare_unstable;
+			} else {
+				return php_array_data_compare_unstable;
 			}
 			break;
 	}
@@ -881,7 +911,7 @@ PHP_FUNCTION(rsort)
 }
 /* }}} */
 
-static int php_array_user_compare(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_user_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval args[2];
 	zval retval;
@@ -904,6 +934,12 @@ static int php_array_user_compare(Bucket *f, Bucket *s) /* {{{ */
 		zval_ptr_dtor(&args[0]);
 		return 0;
 	}
+}
+/* }}} */
+
+static int php_array_user_compare(Bucket *a, Bucket *b) /* {{{ */
+{
+	RETURN_STABLE_SORT(a, b, php_array_user_compare_unstable(a, b));
 }
 /* }}} */
 
@@ -985,7 +1021,7 @@ PHP_FUNCTION(uasort)
 }
 /* }}} */
 
-static int php_array_user_key_compare(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_user_key_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval args[2];
 	zval retval;
@@ -1017,6 +1053,12 @@ static int php_array_user_key_compare(Bucket *f, Bucket *s) /* {{{ */
 	zval_ptr_dtor(&args[1]);
 
 	return ZEND_NORMALIZE_BOOL(result);
+}
+/* }}} */
+
+static int php_array_user_key_compare(Bucket *a, Bucket *b) /* {{{ */
+{
+	RETURN_STABLE_SORT(a, b, php_array_user_key_compare_unstable(a, b));
 }
 /* }}} */
 
@@ -4662,12 +4704,12 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 			/* array_intersect() */
 			req_args = 2;
 			param_spec = "+";
-			intersect_data_compare_func = php_array_data_compare_string;
+			intersect_data_compare_func = php_array_data_compare_string_unstable;
 		} else if (data_compare_type == INTERSECT_COMP_DATA_USER) {
 			/* array_uintersect() */
 			req_args = 3;
 			param_spec = "+f";
-			intersect_data_compare_func = php_array_user_compare;
+			intersect_data_compare_func = php_array_user_compare_unstable;
 		} else {
 			ZEND_ASSERT(0 && "Invalid data_compare_type");
 			return;
@@ -4692,30 +4734,30 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 			/* array_intersect_assoc() or array_intersect_key() */
 			req_args = 2;
 			param_spec = "+";
-			intersect_key_compare_func = php_array_key_compare_string;
-			intersect_data_compare_func = php_array_data_compare_string;
+			intersect_key_compare_func = php_array_key_compare_string_unstable;
+			intersect_data_compare_func = php_array_data_compare_string_unstable;
 		} else if (data_compare_type == INTERSECT_COMP_DATA_USER && key_compare_type == INTERSECT_COMP_KEY_INTERNAL) {
 			/* array_uintersect_assoc() */
 			req_args = 3;
 			param_spec = "+f";
-			intersect_key_compare_func = php_array_key_compare_string;
-			intersect_data_compare_func = php_array_user_compare;
+			intersect_key_compare_func = php_array_key_compare_string_unstable;
+			intersect_data_compare_func = php_array_user_compare_unstable;
 			fci_data = &fci1;
 			fci_data_cache = &fci1_cache;
 		} else if (data_compare_type == INTERSECT_COMP_DATA_INTERNAL && key_compare_type == INTERSECT_COMP_KEY_USER) {
 			/* array_intersect_uassoc() or array_intersect_ukey() */
 			req_args = 3;
 			param_spec = "+f";
-			intersect_key_compare_func = php_array_user_key_compare;
-			intersect_data_compare_func = php_array_data_compare_string;
+			intersect_key_compare_func = php_array_user_key_compare_unstable;
+			intersect_data_compare_func = php_array_data_compare_string_unstable;
 			fci_key = &fci1;
 			fci_key_cache = &fci1_cache;
 		} else if (data_compare_type == INTERSECT_COMP_DATA_USER && key_compare_type == INTERSECT_COMP_KEY_USER) {
 			/* array_uintersect_uassoc() */
 			req_args = 4;
 			param_spec = "+ff";
-			intersect_key_compare_func = php_array_user_key_compare;
-			intersect_data_compare_func = php_array_user_compare;
+			intersect_key_compare_func = php_array_user_key_compare_unstable;
+			intersect_data_compare_func = php_array_user_compare_unstable;
 			fci_data = &fci1;
 			fci_data_cache = &fci1_cache;
 			fci_key = &fci2;
@@ -5063,18 +5105,18 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 	bucket_compare_func_t diff_data_compare_func;
 
 	if (behavior == DIFF_NORMAL) {
-		diff_key_compare_func = php_array_key_compare_string;
+		diff_key_compare_func = php_array_key_compare_string_unstable;
 
 		if (data_compare_type == DIFF_COMP_DATA_INTERNAL) {
 			/* array_diff */
 			req_args = 2;
 			param_spec = "+";
-			diff_data_compare_func = php_array_data_compare_string;
+			diff_data_compare_func = php_array_data_compare_string_unstable;
 		} else if (data_compare_type == DIFF_COMP_DATA_USER) {
 			/* array_udiff */
 			req_args = 3;
 			param_spec = "+f";
-			diff_data_compare_func = php_array_user_compare;
+			diff_data_compare_func = php_array_user_compare_unstable;
 		} else {
 			ZEND_ASSERT(0 && "Invalid data_compare_type");
 			return;
@@ -5099,30 +5141,30 @@ static void php_array_diff(INTERNAL_FUNCTION_PARAMETERS, int behavior, int data_
 			/* array_diff_assoc() or array_diff_key() */
 			req_args = 2;
 			param_spec = "+";
-			diff_key_compare_func = php_array_key_compare_string;
-			diff_data_compare_func = php_array_data_compare_string;
+			diff_key_compare_func = php_array_key_compare_string_unstable;
+			diff_data_compare_func = php_array_data_compare_string_unstable;
 		} else if (data_compare_type == DIFF_COMP_DATA_USER && key_compare_type == DIFF_COMP_KEY_INTERNAL) {
 			/* array_udiff_assoc() */
 			req_args = 3;
 			param_spec = "+f";
-			diff_key_compare_func = php_array_key_compare_string;
-			diff_data_compare_func = php_array_user_compare;
+			diff_key_compare_func = php_array_key_compare_string_unstable;
+			diff_data_compare_func = php_array_user_compare_unstable;
 			fci_data = &fci1;
 			fci_data_cache = &fci1_cache;
 		} else if (data_compare_type == DIFF_COMP_DATA_INTERNAL && key_compare_type == DIFF_COMP_KEY_USER) {
 			/* array_diff_uassoc() or array_diff_ukey() */
 			req_args = 3;
 			param_spec = "+f";
-			diff_key_compare_func = php_array_user_key_compare;
-			diff_data_compare_func = php_array_data_compare_string;
+			diff_key_compare_func = php_array_user_key_compare_unstable;
+			diff_data_compare_func = php_array_data_compare_string_unstable;
 			fci_key = &fci1;
 			fci_key_cache = &fci1_cache;
 		} else if (data_compare_type == DIFF_COMP_DATA_USER && key_compare_type == DIFF_COMP_KEY_USER) {
 			/* array_udiff_uassoc() */
 			req_args = 4;
 			param_spec = "+ff";
-			diff_key_compare_func = php_array_user_key_compare;
-			diff_data_compare_func = php_array_user_compare;
+			diff_key_compare_func = php_array_user_key_compare_unstable;
+			diff_data_compare_func = php_array_user_compare_unstable;
 			fci_data = &fci1;
 			fci_data_cache = &fci1_cache;
 			fci_key = &fci2;
@@ -5572,7 +5614,7 @@ PHP_FUNCTION(array_multisort)
 			/* We see the next array, so we update the sort flags of
 			 * the previous array and reset the sort flags. */
 			if (i > 0) {
-				ARRAYG(multisort_func)[num_arrays - 1] = php_get_data_compare_func(sort_type, sort_order != PHP_SORT_ASC);
+				ARRAYG(multisort_func)[num_arrays - 1] = php_get_data_compare_func_unstable(sort_type, sort_order != PHP_SORT_ASC);
 				sort_order = PHP_SORT_ASC;
 				sort_type = PHP_SORT_REGULAR;
 			}
@@ -5625,7 +5667,7 @@ PHP_FUNCTION(array_multisort)
 		}
 	}
 	/* Take care of the last array sort flags. */
-	ARRAYG(multisort_func)[num_arrays - 1] = php_get_data_compare_func(sort_type, sort_order != PHP_SORT_ASC);
+	ARRAYG(multisort_func)[num_arrays - 1] = php_get_data_compare_func_unstable(sort_type, sort_order != PHP_SORT_ASC);
 
 	/* Make sure the arrays are of the same size. */
 	array_size = zend_hash_num_elements(Z_ARRVAL_P(arrays[0]));
