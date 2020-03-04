@@ -140,5 +140,6 @@ PHP                                                                        NEWS
   . Add "flags" options to ZipArchive::addGlob and addPattern methods
     keeping previous behavior having FL_OVERWRITE by default. (Remi)
   . Add ZipArchive::replaceFile() method
+  . Add lastId property to ZipArchive
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
