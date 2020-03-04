@@ -141,10 +141,6 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 	if (EXPECTED(!ce->get_iterator)) {
 		ce->get_iterator = parent->get_iterator;
 	}
-	if (parent->iterator_funcs_ptr) {
-		/* Must be initialized through iface->interface_gets_implemented() */
-		ZEND_ASSERT(ce->iterator_funcs_ptr);
-	}
 	if (EXPECTED(!ce->__get)) {
 		ce->__get = parent->__get;
 	}
@@ -1185,19 +1181,6 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 	ce->parent = parent_ce;
 	ce->ce_flags |= ZEND_ACC_RESOLVED_PARENT;
 
-	/* Inherit interfaces */
-	if (parent_ce->num_interfaces) {
-		if (!ce->num_interfaces) {
-			zend_do_inherit_interfaces(ce, parent_ce);
-		} else {
-			uint32_t i;
-
-			for (i = 0; i < parent_ce->num_interfaces; i++) {
-				do_implement_interface(ce, parent_ce->interfaces[i]);
-			}
-		}
-	}
-
 	/* Inherit properties */
 	if (parent_ce->default_properties_count) {
 		zval *src, *dst, *end;
@@ -1378,6 +1361,10 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 	do_inherit_parent_constructor(ce);
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
+		if (parent_ce->num_interfaces) {
+			zend_do_inherit_interfaces(ce, parent_ce);
+		}
+
 		if (ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 			ce->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
 		}
@@ -1533,7 +1520,9 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 	ce->interfaces = interfaces;
 	ce->ce_flags |= ZEND_ACC_RESOLVED_INTERFACES;
 
-	i = num_parent_interfaces;
+	for (i = 0; i < num_parent_interfaces; i++) {
+		do_implement_interface(ce, ce->interfaces[i]);
+	}
 	/* Note that new interfaces can be added during this loop due to interface inheritance.
 	 * Use num_interfaces rather than ce->num_interfaces to not re-process the new ones. */
 	for (; i < num_interfaces; i++) {
@@ -2459,6 +2448,8 @@ ZEND_API int zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_nam
 	}
 	if (interfaces) {
 		zend_do_implement_interfaces(ce, interfaces);
+	} else if (parent && parent->num_interfaces) {
+		zend_do_inherit_interfaces(ce, parent);
 	}
 	if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 		zend_verify_abstract_class(ce);
@@ -2542,6 +2533,9 @@ zend_bool zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce,
 			}
 		}
 		zend_do_inheritance_ex(ce, parent_ce, status == INHERITANCE_SUCCESS);
+		if (parent_ce && parent_ce->num_interfaces) {
+			zend_do_inherit_interfaces(ce, parent_ce);
+		}
 		zend_build_properties_info_table(ce);
 		if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 			zend_verify_abstract_class(ce);
