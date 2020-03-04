@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(936, "ansi");
 
 ?>
+--CONFLICTS--
+file_cp936
 --INI--
 internal_encoding=cp936
 --FILE--

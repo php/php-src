@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(1256, "ansi");
 
 ?>
+--CONFLICTS--
+file_cp1256
 --INI--
 internal_encoding=cp1256
 --FILE--

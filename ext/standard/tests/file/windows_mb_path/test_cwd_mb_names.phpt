@@ -12,6 +12,8 @@ skip_if_no_required_exts();
 
 
 ?>
+--CONFLICTS--
+dir_mb
 --FILE--
 <?php
 

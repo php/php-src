@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(1255, "ansi");
 
 ?>
+--CONFLICTS--
+dir_cp1255
 --INI--
 internal_encoding=cp1255
 --FILE--

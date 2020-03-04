@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(932, "ansi");
 
 ?>
+--CONFLICTS--
+file_cp932
 --INI--
 internal_encoding=cp932
 --FILE--

@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(1256, "ansi");
 
 ?>
+--CONFLICTS--
+dir_cp1256
 --INI--
 default_charset=cp1256
 --FILE--

@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(932, "oem");
 
 ?>
+--CONFLICTS--
+dir_cp932
 --INI--
 default_charset=cp932
 --FILE--

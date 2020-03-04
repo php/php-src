@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(857, "oem");
 
 ?>
+--CONFLICTS--
+file_cp1254
 --INI--
 default_charset=cp1254
 --FILE--

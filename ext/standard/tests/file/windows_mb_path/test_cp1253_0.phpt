@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(1253, "ansi");
 
 ?>
+--CONFLICTS--
+file_cp1253
 --INI--
 internal_encoding=cp1253
 --FILE--
