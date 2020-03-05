@@ -20,17 +20,17 @@
 extern const zend_function_entry php_xsl_xsltprocessor_class_functions[];
 extern zend_class_entry *xsl_xsltprocessor_class_entry;
 
-PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet);
-PHP_FUNCTION(xsl_xsltprocessor_transform_to_doc);
-PHP_FUNCTION(xsl_xsltprocessor_transform_to_uri);
-PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml);
-PHP_FUNCTION(xsl_xsltprocessor_set_parameter);
-PHP_FUNCTION(xsl_xsltprocessor_get_parameter);
-PHP_FUNCTION(xsl_xsltprocessor_remove_parameter);
-PHP_FUNCTION(xsl_xsltprocessor_has_exslt_support);
-PHP_FUNCTION(xsl_xsltprocessor_register_php_functions);
-PHP_FUNCTION(xsl_xsltprocessor_set_profiling);
-PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs);
-PHP_FUNCTION(xsl_xsltprocessor_get_security_prefs);
+PHP_METHOD(XSLTProcessor, importStylesheet);
+PHP_METHOD(XSLTProcessor, transformToDoc);
+PHP_METHOD(XSLTProcessor, transformToUri);
+PHP_METHOD(XSLTProcessor, transformToXml);
+PHP_METHOD(XSLTProcessor, setParameter);
+PHP_METHOD(XSLTProcessor, getParameter);
+PHP_METHOD(XSLTProcessor, removeParameter);
+PHP_METHOD(XSLTProcessor, hasExsltSupport);
+PHP_METHOD(XSLTProcessor, registerPHPFunctions);
+PHP_METHOD(XSLTProcessor, setProfiling);
+PHP_METHOD(XSLTProcessor, setSecurityPrefs);
+PHP_METHOD(XSLTProcessor, getSecurityPrefs);
 
 #endif
