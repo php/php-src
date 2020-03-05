@@ -368,6 +368,8 @@ PHP 8.0 UPGRADE NOTES
     option), whereas formerly it was treated as directory name. This means that
     if no trailing directory separator is given, the following character is
     no longer stripped from the filename.
+  . ZipArchive::OPSYS_Z_CPM have been removed, should use ZipArchive::OPSYS_CPM
+    (this name was a typo).
 
 - Zlib:
   . gzgetss() has been removed.
@@ -421,6 +423,12 @@ PHP 8.0 UPGRADE NOTES
   . Introduce DOMParentNode and DOMChildNode with new traversal and manipulation APIs
     RFC: https://wiki.php.net/rfc/dom_living_standard_api
 
+- Zip:
+  . Extension updated to version 1.18
+  . New ZipArchive::lastId property to get index value of last added entry.
+  . Error can be checked after an archive is closed using ZipArchive::status,
+    ZipArchive::statusSys properties or ZipArchive::getStatusString() method.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -436,6 +444,13 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 5. Changed Functions
 ========================================
+
+- Zip
+ . ZipArchive::addGlob and ZipArchive::addPattern methods accept a "flags"
+   value in the "options" array argument.
+ . ZipArchive::addEmptyDir, ZipArchive::addFile and aZipArchive::addFromString
+   methods have a new "flags" argument. This allow to manage name encoding
+   (ZipArchive::FL_ENC_*) and entry replacement (ZipArchive::FL_OVERWRITE)
 
 ========================================
 6. New Functions
@@ -456,6 +471,13 @@ PHP 8.0 UPGRADE NOTES
   . Added fdiv() method, which performs a floating-point division under
     IEEE 754 semantics. Division by zero is considered well-defined and
     will return one of Inf, -Inf or NaN.
+
+- Zip:
+  . ZipArchive::setMtimeName and ZipArchive::setMtimeIndex to set the
+    modification time of an entry.
+  . ZipArchive::setProgressCallback to provide updates during archive close.
+  . ZipArchive::setCancelCallback to allow cancellation during archive close.
+  . ZipArchive::replaceFile to replace an entry content.
 
 ========================================
 7. New Classes and Interfaces
