@@ -24,7 +24,7 @@ object(myZip)#1 (%d) {
     int(1)
   }
   ["lastId"]=>
-  int(0)
+  int(-1)
   ["status"]=>
   int(0)
   ["statusSys"]=>

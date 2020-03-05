@@ -139,7 +139,10 @@ PHP                                                                        NEWS
     addFromString methods. (Remi)
   . Add "flags" options to ZipArchive::addGlob and addPattern methods
     keeping previous behavior having FL_OVERWRITE by default. (Remi)
-  . Add ZipArchive::replaceFile() method
-  . Add lastId property to ZipArchive
+  . Add ZipArchive::replaceFile() method. (Remi)
+  . Add lastId property to ZipArchive. (Remi)
+  . ZipArchive::status and ZipArchive::statusSys properties and
+    ZipArchive::getStatusString() method stay valid after the archive
+    is closed. (Remi)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

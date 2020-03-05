@@ -27,6 +27,8 @@ var_dump($zip->registerCancelCallback(function () {
 var_dump($zip->addFromString(PHP_BINARY, 'entry #1'));
 
 var_dump($zip->close());
+var_dump($zip->status == ZipArchive::ER_CANCELLED);
+var_dump($zip->getStatusString());
 @unlink($file);
 ?>
 Done
@@ -36,4 +38,6 @@ bool(true)
 
 Warning: ZipArchive::close(): Operation cancelled in %s
 bool(false)
+bool(true)
+string(19) "Operation cancelled"
 Done
