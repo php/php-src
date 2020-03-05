@@ -1644,7 +1644,7 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 {
 	zval *self = ZEND_THIS;
 	char *path = ".";
-	char *remove_path = NULL, *save_remove_path;
+	char *remove_path = NULL;
 	char *add_path = NULL;
 	size_t  add_path_len, remove_path_len = 0, path_len = 1;
 	zend_long remove_all_path = 0;
@@ -1676,15 +1676,6 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 		RETURN_FALSE;
 	}
 
-	save_remove_path = remove_path;
-	if (remove_path && remove_path_len > 1) {
-		size_t real_len = strlen(remove_path);
-		if ((real_len > 1) && ((remove_path[real_len - 1] == '/') || (remove_path[real_len - 1] == '\\'))) {
-			remove_path = estrndup(remove_path, real_len - 1);
-			remove_path_len -= 1;
-		}
-	}
-
 	if (type == 1) {
 		found = php_zip_glob(ZSTR_VAL(pattern), ZSTR_LEN(pattern), glob_flags, return_value);
 	} else {
@@ -1707,8 +1698,13 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 					file_stripped = ZSTR_VAL(basename);
 					file_stripped_len = ZSTR_LEN(basename);
 				} else if (remove_path && strstr(Z_STRVAL_P(zval_file), remove_path) != NULL) {
-					file_stripped = Z_STRVAL_P(zval_file) + remove_path_len;
-					file_stripped_len = Z_STRLEN_P(zval_file) - remove_path_len;
+					if (IS_SLASH(Z_STRVAL_P(zval_file)[remove_path_len])) {
+						file_stripped = Z_STRVAL_P(zval_file) + remove_path_len + 1;
+						file_stripped_len = Z_STRLEN_P(zval_file) - remove_path_len - 1;
+					} else {
+						file_stripped = Z_STRVAL_P(zval_file) + remove_path_len;
+						file_stripped_len = Z_STRLEN_P(zval_file) - remove_path_len;
+					}
 				} else {
 					file_stripped = Z_STRVAL_P(zval_file);
 					file_stripped_len = Z_STRLEN_P(zval_file);
@@ -1740,9 +1736,6 @@ static void php_zip_add_from_pattern(INTERNAL_FUNCTION_PARAMETERS, int type) /* 
 				}
 			}
 		}
-	}
-	if (remove_path != save_remove_path) {
-		efree(remove_path);
 	}
 }
 /* }}} */

@@ -25,7 +25,7 @@ if (!$zip->open($file)) {
         exit('failed');
 }
 $dir = realpath($dirname);
-$options = array('add_path' => 'baz', 'remove_path' => $dir);
+$options = array('add_path' => 'baz/', 'remove_path' => $dir);
 if (!$zip->addPattern('/\.txt$/', $dir, $options)) {
 	echo "failed 1\n";
 }
@@ -44,8 +44,8 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
             "foobar/",
             "foobar/baz",
             "entry1.txt",
-            "baz" . DIRECTORY_SEPARATOR . "foo.txt",
-            "baz" . DIRECTORY_SEPARATOR . "bar.txt"
+            "baz/foo.txt",
+            "baz/bar.txt"
         ])) {
             echo "failed\n";
         } else {
