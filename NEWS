@@ -19,6 +19,9 @@ PHP                                                                        NEWS
 - FTP:
   . Fixed bug #55857 (ftp_size on large files). (cmb)
 
+- Standard:
+  . Fixed bug #70362 (Can't copy() large 'data://' with open_basedir). (cmb)
+
 ?? ??? ????, PHP 7.3.20
 
 - Core:
