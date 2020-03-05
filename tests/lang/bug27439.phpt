@@ -67,10 +67,10 @@ echo "===DONE===";
 123
 Warning: Undefined property: test::$foobar in %s on line %d
 
-Warning: Invalid argument supplied for foreach() in %s on line %d
+Warning: foreach() argument must be of type array|object, null given in %s on line %d
 
-Warning: Invalid argument supplied for foreach() in %s on line %d
+Warning: foreach() argument must be of type array|object, string given in %s on line %d
 
-Warning: Invalid argument supplied for foreach() in %s on line %d
+Warning: foreach() argument must be of type array|object, string given in %s on line %d
 123
 ===DONE===
