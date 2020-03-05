@@ -25,7 +25,7 @@ if (!$zip->open($file)) {
         exit('failed');
 }
 $dir = realpath($dirname);
-$options = array('add_path' => 'baz', 'remove_path' => $dir);
+$options = array('add_path' => 'baz/', 'remove_path' => $dir);
 if (!$zip->addPattern('/\.txt$/', $dir, $options)) {
 	echo "failed 1\n";
 }

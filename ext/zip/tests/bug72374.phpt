@@ -9,16 +9,19 @@ if(!extension_loaded('zip')) die('skip');
 $dirname = dirname(__FILE__) . '/';
 include $dirname . 'utils.inc';
 
-$dirname = $dirname . 'bug72374/';
+$dirname = $dirname . 'bug72374';
 mkdir($dirname);
-$file = $dirname . 'some-foo.txt';
-touch($file);
+$file1 = $dirname . '/some-foo.txt';
+touch($file1);
+$file2 = $dirname . '/some-bar.txt';
+touch($file2);
 
 $zip = new ZipArchive();
-$zip->open($dirname . 'test.zip', ZipArchive::CREATE | ZipArchive::OVERWRITE);
-$zip->addGlob($file, 0, array('remove_path' => $dirname . 'some-'));
-$zip->addGlob($file, 0, array('remove_path' => $dirname));
-verify_entries($zip, ['foo.txt', '/some-foo.txt']);
+$zip->open($dirname . '/test.zip', ZipArchive::CREATE | ZipArchive::OVERWRITE);
+$zip->addGlob($file1, 0, array('remove_path' => $dirname . '/some-'));
+$zip->addGlob($file1, 0, array('remove_path' => $dirname . '/'));
+$zip->addGlob($file2, 0, array('remove_path' => $dirname));
+verify_entries($zip, ['foo.txt', 'some-foo.txt', 'some-bar.txt']);
 $zip->close();
 ?>
 --CLEAN--
@@ -26,7 +29,7 @@ $zip->close();
 $dirname = dirname(__FILE__) . '/';
 include $dirname . 'utils.inc';
 
-$dirname = $dirname . 'bug72374/';
+$dirname = $dirname . 'bug72374';
 rmdir_rf($dirname);
 ?>
 --EXPECT--
