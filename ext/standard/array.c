@@ -134,7 +134,7 @@ PHP_MSHUTDOWN_FUNCTION(array) /* {{{ */
 
 #define RETURN_STABLE_SORT(a, b, result) do { \
 	int _result = (result); \
-	if (_result) { \
+	if (EXPECTED(_result)) { \
 		return _result; \
 	} \
 	if (Z_EXTRA((a)->val) > Z_EXTRA((b)->val)) { \
@@ -336,7 +336,7 @@ static int php_array_key_compare_string_locale_unstable(Bucket *f, Bucket *s) /*
 }
 /* }}} */
 
-static int php_array_data_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
+static inline int php_array_data_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval *first = &f->val;
 	zval *second = &s->val;
