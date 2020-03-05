@@ -179,6 +179,13 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 				newNodeObj->document = document;
 				xmlSetTreeDoc(newNode, documentNode);
 
+				if (newNode->type == XML_ATTRIBUTE_NODE) {
+					xmlFree(fragment);
+
+					php_dom_throw_error(HIERARCHY_REQUEST_ERR, stricterror);
+					return NULL;
+				}
+
 				if (!xmlAddChild(fragment, newNode)) {
 					xmlFree(fragment);
 
