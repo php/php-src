@@ -1185,6 +1185,12 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 		return;
 	}
 
+	while (intern->llist->count > 0) {
+		zval tmp;
+		spl_ptr_llist_pop(intern->llist, &tmp);
+		zval_ptr_dtor(&tmp);
+	}
+
 	s = p = (const unsigned char*)buf;
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 
