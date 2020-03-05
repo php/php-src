@@ -132,32 +132,40 @@ PHP_MSHUTDOWN_FUNCTION(array) /* {{{ */
 }
 /* }}} */
 
+static zend_never_inline ZEND_COLD int stable_sort_fallback(Bucket *a, Bucket *b) {
+	if (Z_EXTRA(a->val) > Z_EXTRA(b->val)) {
+		return 1;
+	} else if (Z_EXTRA(a->val) < Z_EXTRA(b->val)) {
+		return -1;
+	} else {
+		return 0;
+	}
+}
+
 #define RETURN_STABLE_SORT(a, b, result) do { \
 	int _result = (result); \
 	if (EXPECTED(_result)) { \
 		return _result; \
 	} \
-	if (Z_EXTRA((a)->val) > Z_EXTRA((b)->val)) { \
-		return 1; \
-	} else if (Z_EXTRA((a)->val) < Z_EXTRA((b)->val)) { \
-		return -1; \
-	} else { \
-		return 0; \
-	} \
+	return stable_sort_fallback((a), (b)); \
 } while (0)
 
+/* Generate inlined unstable and stable variants, and non-inlined reversed variants. */
 #define DEFINE_SORT_VARIANTS(name) \
-	static int php_array_reverse_##name##_unstable(Bucket *a, Bucket *b) { \
+	static zend_never_inline int php_array_##name##_unstable(Bucket *a, Bucket *b) { \
+		return php_array_##name##_unstable_i(a, b); \
+	} \
+	static zend_never_inline int php_array_##name(Bucket *a, Bucket *b) { \
+		RETURN_STABLE_SORT(a, b, php_array_##name##_unstable_i(a, b)); \
+	} \
+	static zend_never_inline int php_array_reverse_##name##_unstable(Bucket *a, Bucket *b) { \
 		return php_array_##name##_unstable(a, b) * -1; \
 	} \
-	static int php_array_##name(Bucket *a, Bucket *b) { \
-		RETURN_STABLE_SORT(a, b, php_array_##name##_unstable(a, b)); \
-	} \
-	static int php_array_reverse_##name(Bucket *a, Bucket *b) { \
+	static zend_never_inline int php_array_reverse_##name(Bucket *a, Bucket *b) { \
 		RETURN_STABLE_SORT(a, b, php_array_reverse_##name##_unstable(a, b)); \
 	} \
 
-static int php_array_key_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
+static zend_always_inline int php_array_key_compare_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
 	zend_uchar t;
 	zend_long l1, l2;
@@ -196,7 +204,7 @@ static int php_array_key_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
 }
 /* }}} */
 
-static int php_array_key_compare_numeric_unstable(Bucket *f, Bucket *s) /* {{{ */
+static zend_always_inline int php_array_key_compare_numeric_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
 	if (f->key == NULL && s->key == NULL) {
 		return (zend_long)f->h > (zend_long)s->h ? 1 : -1;
@@ -217,7 +225,7 @@ static int php_array_key_compare_numeric_unstable(Bucket *f, Bucket *s) /* {{{ *
 }
 /* }}} */
 
-static int php_array_key_compare_string_case_unstable(Bucket *f, Bucket *s) /* {{{ */
+static zend_always_inline int php_array_key_compare_string_case_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
 	const char *s1, *s2;
 	size_t l1, l2;
@@ -242,7 +250,7 @@ static int php_array_key_compare_string_case_unstable(Bucket *f, Bucket *s) /* {
 }
 /* }}} */
 
-static int php_array_key_compare_string_unstable(Bucket *f, Bucket *s) /* {{{ */
+static zend_always_inline int php_array_key_compare_string_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
 	const char *s1, *s2;
 	size_t l1, l2;
@@ -316,7 +324,7 @@ static int php_array_reverse_key_compare_string_natural(Bucket *a, Bucket *b) /*
 }
 /* }}} */
 
-static int php_array_key_compare_string_locale_unstable(Bucket *f, Bucket *s) /* {{{ */
+static zend_always_inline int php_array_key_compare_string_locale_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
 	const char *s1, *s2;
 	char buf1[MAX_LENGTH_OF_LONG + 1];
@@ -336,7 +344,7 @@ static int php_array_key_compare_string_locale_unstable(Bucket *f, Bucket *s) /*
 }
 /* }}} */
 
-static inline int php_array_data_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
+static zend_always_inline int php_array_data_compare_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval *first = &f->val;
 	zval *second = &s->val;
@@ -351,7 +359,7 @@ static inline int php_array_data_compare_unstable(Bucket *f, Bucket *s) /* {{{ *
 }
 /* }}} */
 
-static int php_array_data_compare_numeric_unstable(Bucket *f, Bucket *s) /* {{{ */
+static zend_always_inline int php_array_data_compare_numeric_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval *first = &f->val;
 	zval *second = &s->val;
@@ -367,7 +375,7 @@ static int php_array_data_compare_numeric_unstable(Bucket *f, Bucket *s) /* {{{ 
 }
 /* }}} */
 
-static int php_array_data_compare_string_case_unstable(Bucket *f, Bucket *s) /* {{{ */
+static zend_always_inline int php_array_data_compare_string_case_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval *first = &f->val;
 	zval *second = &s->val;
@@ -383,7 +391,7 @@ static int php_array_data_compare_string_case_unstable(Bucket *f, Bucket *s) /* 
 }
 /* }}} */
 
-static int php_array_data_compare_string_unstable(Bucket *f, Bucket *s) /* {{{ */
+static zend_always_inline int php_array_data_compare_string_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval *first = &f->val;
 	zval *second = &s->val;
@@ -413,19 +421,19 @@ static int php_array_natural_general_compare(Bucket *f, Bucket *s, int fold_case
 }
 /* }}} */
 
-static int php_array_natural_compare_unstable(Bucket *a, Bucket *b) /* {{{ */
+static zend_always_inline int php_array_natural_compare_unstable_i(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_natural_general_compare(a, b, 0);
 }
 /* }}} */
 
-static int php_array_natural_case_compare_unstable(Bucket *a, Bucket *b) /* {{{ */
+static zend_always_inline int php_array_natural_case_compare_unstable_i(Bucket *a, Bucket *b) /* {{{ */
 {
 	return php_array_natural_general_compare(a, b, 1);
 }
 /* }}} */
 
-static int php_array_data_compare_string_locale_unstable(Bucket *f, Bucket *s) /* {{{ */
+static int php_array_data_compare_string_locale_unstable_i(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval *first = &f->val;
 	zval *second = &s->val;
@@ -911,7 +919,7 @@ PHP_FUNCTION(rsort)
 }
 /* }}} */
 
-static int php_array_user_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
+static inline int php_array_user_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval args[2];
 	zval retval;
@@ -1021,7 +1029,7 @@ PHP_FUNCTION(uasort)
 }
 /* }}} */
 
-static int php_array_user_key_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
+static inline int php_array_user_key_compare_unstable(Bucket *f, Bucket *s) /* {{{ */
 {
 	zval args[2];
 	zval retval;
