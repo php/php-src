@@ -1669,7 +1669,7 @@ PHP_FUNCTION(copy)
 		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (php_check_open_basedir(source)) {
+	if (php_stream_locate_url_wrapper(source, NULL, 0) == &php_plain_files_wrapper && php_check_open_basedir(source)) {
 		RETURN_FALSE;
 	}
 
