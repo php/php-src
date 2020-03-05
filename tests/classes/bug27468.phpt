@@ -13,5 +13,5 @@ echo 'OK';
 --EXPECTF--
 Warning: Undefined property: foo::$x in %s on line %d
 
-Warning: Invalid argument supplied for foreach() in %sbug27468.php on line 4
+Warning: foreach() argument must be of type array|object, null given in %sbug27468.php on line 4
 OK

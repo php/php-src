@@ -58,7 +58,7 @@ for ($sxe->rewind(); $sxe->valid(); $sxe->next()) {
 
 ?>
 --EXPECTF--
-Warning: Invalid argument supplied for foreach() in %ssxe_003.php on line %d
+Warning: foreach() argument must be of type array|object, null given in %ssxe_003.php on line %d
 ===RESET===
 bool(true)
 string(5) "elem1"
