@@ -7,7 +7,7 @@ $it = new ArrayIterator(array_fill(0,2,'X'), 1 );
 
 function badsort($a, $b) {
         $GLOBALS['it']->unserialize($GLOBALS['it']->serialize());
-        return TRUE;
+        return 0;
 }
 
 $it->uksort('badsort');

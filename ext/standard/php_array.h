@@ -46,6 +46,7 @@ PHPAPI zend_long php_count_recursive(HashTable *ht);
 
 ZEND_BEGIN_MODULE_GLOBALS(array)
 	bucket_compare_func_t *multisort_func;
+	zend_bool compare_deprecation_thrown;
 ZEND_END_MODULE_GLOBALS(array)
 
 #define ARRAYG(v) ZEND_MODULE_GLOBALS_ACCESSOR(array, v)
