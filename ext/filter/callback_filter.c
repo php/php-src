@@ -22,7 +22,7 @@ void php_filter_callback(PHP_INPUT_FILTER_PARAM_DECL)
 	zval args[1];
 	int status;
 
-	if (!option_array || !zend_is_callable(option_array, IS_CALLABLE_CHECK_NO_ACCESS, NULL)) {
+	if (!option_array || !zend_is_callable(option_array, 0, NULL)) {
 		php_error_docref(NULL, E_WARNING, "First argument is expected to be a valid callback");
 		zval_ptr_dtor(value);
 		ZVAL_NULL(value);

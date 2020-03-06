@@ -327,7 +327,6 @@ ZEND_API int zend_disable_class(char *class_name, size_t class_name_length);
 ZEND_API ZEND_COLD void zend_wrong_param_count(void);
 
 #define IS_CALLABLE_CHECK_SYNTAX_ONLY (1<<0)
-#define IS_CALLABLE_CHECK_NO_ACCESS   (1<<1)
 #define IS_CALLABLE_CHECK_SILENT      (1<<3)
 
 ZEND_API void zend_release_fcall_info_cache(zend_fcall_info_cache *fcc);

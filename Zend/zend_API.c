@@ -2956,7 +2956,6 @@ static zend_always_inline int zend_is_callable_check_func(int check_flags, zval 
 			}
 		}
 		if (!(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC) &&
-		    !(check_flags & IS_CALLABLE_CHECK_NO_ACCESS) &&
 		    (fcc->calling_scope &&
 		     ((fcc->object && fcc->calling_scope->__call) ||
 		      (!fcc->object && fcc->calling_scope->__callstatic)))) {
@@ -3024,8 +3023,7 @@ get_function_via_handler:
 				}
 			}
 			if (retval
-			 && !(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC)
-			 && !(check_flags & IS_CALLABLE_CHECK_NO_ACCESS)) {
+			 && !(fcc->function_handler->common.fn_flags & ZEND_ACC_PUBLIC)) {
 				scope = zend_get_executed_scope();
 				if (fcc->function_handler->common.scope != scope) {
 					if ((fcc->function_handler->common.fn_flags & ZEND_ACC_PRIVATE)
