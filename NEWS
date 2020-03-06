@@ -14,6 +14,8 @@ PHP                                                                        NEWS
     checks). (Nikita)
   . Fixed bug #69084 (Unclear error message when not implementing a renamed
     abstract trait function). (Nikita)
+  . Fixed bug #62609 (Allow implementing Traversable on abstract classes).
+    (Nikita)
 
 - CURL:
   . Bumped required libcurl version to 7.29.0. (cmb)

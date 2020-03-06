@@ -293,6 +293,11 @@ static int zend_implement_traversable(zend_class_entry *interface, zend_class_en
 	if (class_type->get_iterator || (class_type->parent && class_type->parent->get_iterator)) {
 		return SUCCESS;
 	}
+	/* Abstract class can implement Traversable only, in which case the extending class must
+	 * implement Iterator or IteratorAggregate. */
+	if (class_type->ce_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) {
+		return SUCCESS;
+	}
 	if (class_type->num_interfaces) {
 		ZEND_ASSERT(class_type->ce_flags & ZEND_ACC_RESOLVED_INTERFACES);
 		for (i = 0; i < class_type->num_interfaces; i++) {
