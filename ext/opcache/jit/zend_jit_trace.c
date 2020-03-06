@@ -2561,6 +2561,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						goto done;
 #endif
 //					case ZEND_INIT_NS_FCALL_BY_NAME:
+						// TODO: we may need a guard after INIT_NS_FCALL???
 					case ZEND_INIT_METHOD_CALL:
 					case ZEND_INIT_DYNAMIC_CALL:
 						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw_ex(opline, ssa_op, op_array, ssa), p + 1)) {

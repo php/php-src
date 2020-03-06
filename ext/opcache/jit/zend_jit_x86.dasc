@@ -8324,17 +8324,26 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, const zend
 
 		ZEND_ASSERT(arg_num <= MAX_ARG_FLAG_NUM);
 
-		|	mov r0, EX:RX->func
-		|	test dword [r0 + offsetof(zend_function, quick_arg_flags)], mask
-
-		if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE) {
+		if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE
+		 && JIT_G(current_frame)
+		 && JIT_G(current_frame)->call
+		 && JIT_G(current_frame)->call->func) {
+			if (ARG_MUST_BE_SENT_BY_REF(JIT_G(current_frame)->call->func, arg_num)) {
+				/* Don't generate code that always throws exception */
+				return 0;
+			}
+		} else if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE) {
 			int32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL);
 			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 			if (!exit_addr) {
 				return 0;
 			}
+			|	mov r0, EX:RX->func
+			|	test dword [r0 + offsetof(zend_function, quick_arg_flags)], mask
 			|	jnz	&exit_addr
 		} else {
+			|	mov r0, EX:RX->func
+			|	test dword [r0 + offsetof(zend_function, quick_arg_flags)], mask
 			|	jnz	>1
 			|.cold_code
 			|1:
@@ -8460,26 +8469,65 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 		|	mov RX, EX->call
 	}
 
-	if (opline->opcode == ZEND_SEND_VAR_EX || opline->opcode == ZEND_SEND_VAR_NO_REF_EX) {
-		uint32_t mask = (ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF) << ((arg_num + 3) * 2);
+	if (opline->opcode == ZEND_SEND_VAR_EX) {
+		if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE
+		 && JIT_G(current_frame)
+		 && JIT_G(current_frame)->call
+		 && JIT_G(current_frame)->call->func) {
+			if (ARG_SHOULD_BE_SENT_BY_REF(JIT_G(current_frame)->call->func, arg_num)) {
+				if (!zend_jit_send_ref(Dst, opline, op_array, op1_info, 0)) {
+					return 0;
+				}
+				return 1;
+			}
+		} else {
+			uint32_t mask = (ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF) << ((arg_num + 3) * 2);
 
-		|	mov r0, EX:RX->func
-		if (arg_num <= MAX_ARG_FLAG_NUM) {
+			|	mov r0, EX:RX->func
 			|	test dword [r0 + offsetof(zend_function, quick_arg_flags)], mask
 			|	jnz	>1
-		} else {
-			ZEND_ASSERT(0);
-		}
-
-		|.cold_code
-		|1:
-
-		if (opline->opcode == ZEND_SEND_VAR_EX) {
+			|.cold_code
+			|1:
 			if (!zend_jit_send_ref(Dst, opline, op_array, op1_info, 1)) {
 				return 0;
 			}
 			|	jmp >7
-		} else if (opline->opcode == ZEND_SEND_VAR_NO_REF_EX) {
+			|.code
+		}
+	} else if (opline->opcode == ZEND_SEND_VAR_NO_REF_EX) {
+		if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE
+		 && JIT_G(current_frame)
+		 && JIT_G(current_frame)->call
+		 && JIT_G(current_frame)->call->func) {
+			if (ARG_SHOULD_BE_SENT_BY_REF(JIT_G(current_frame)->call->func, arg_num)) {
+
+				|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_R1, ZREG_R2
+
+				if (!ARG_MAY_BE_SENT_BY_REF(JIT_G(current_frame)->call->func, arg_num)) {
+					if (!(op1_info & MAY_BE_REF)) {
+						/* Don't generate code that always throws exception */
+						return 0;
+					} else {
+						int32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL);
+						const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+						if (!exit_addr) {
+							return 0;
+						}
+						|	cmp cl, IS_REFERENCE
+						|	jne &exit_addr
+					}
+				}
+				return 1;
+			}
+		} else {
+			uint32_t mask = (ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF) << ((arg_num + 3) * 2);
+
+			|	mov r0, EX:RX->func
+			|	test dword [r0 + offsetof(zend_function, quick_arg_flags)], mask
+			|	jnz	>1
+			|.cold_code
+			|1:
+
 			mask = ZEND_SEND_PREFER_REF << ((arg_num + 3) * 2);
 
 			|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_R1, ZREG_R2
@@ -8505,11 +8553,9 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 				}
 				|	jmp >7
 			}
-		} else {
-			ZEND_ASSERT(0);
-		}
 
-		|.code
+			|.code
+		}
 	}
 
 	if (op1_info & MAY_BE_UNDEF) {
