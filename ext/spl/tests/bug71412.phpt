@@ -9,6 +9,6 @@ Method [ <internal:SPL, ctor> public method __construct ] {
 
   - Parameters [2] {
     Parameter #0 [ <optional> $array ]
-    Parameter #1 [ <optional> $flags ]
+    Parameter #1 [ <optional> int $flags ]
   }
 }
