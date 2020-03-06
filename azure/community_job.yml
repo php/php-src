@@ -75,7 +75,7 @@ jobs:
     - script: |
         git clone https://github.com/amphp/amp.git --branch=master --depth=1
         cd amp
-        php7.3 /usr/bin/composer install --no-progress --ignore-platform-reqs
+        php /usr/bin/composer install --no-progress --ignore-platform-reqs
         export USE_ZEND_ALLOC=0
         sed -i 's/$exit = true/$exit = false/g' vendor/phpunit/phpunit/src/TextUI/Command.php
         php vendor/bin/phpunit
