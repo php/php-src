@@ -1828,7 +1828,7 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 
 #define UPDATE_SSA_TYPE(_type, _var)									\
 	do {																\
-		uint32_t __type = (_type);										\
+		uint32_t __type = (_type) & ~MAY_BE_GUARD;						\
 		int __var = (_var);												\
 		if (__type & MAY_BE_REF) {										\
 			__type |= MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF; \
