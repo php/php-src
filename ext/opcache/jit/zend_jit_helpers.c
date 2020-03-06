@@ -1184,7 +1184,7 @@ static zend_always_inline zend_bool zend_jit_verify_type_common(zval *arg, const
 
 builtin_types:
 	type_mask = ZEND_TYPE_FULL_MASK(arg_info->type);
-	if ((type_mask & MAY_BE_CALLABLE) && zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL)) {
+	if ((type_mask & MAY_BE_CALLABLE) && zend_is_callable(arg, 0, NULL)) {
 		return 1;
 	}
 	if ((type_mask & MAY_BE_ITERABLE) && zend_is_iterable(arg)) {
