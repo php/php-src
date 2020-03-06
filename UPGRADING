@@ -363,11 +363,6 @@ PHP 8.0 UPGRADE NOTES
     objects instead of resources.
 
 - Zip:
-  . The remove_path option of ZipArchive::addGlob() and ::addPattern() is now
-    treated as arbitrary string prefix (for consistency with the add_path
-    option), whereas formerly it was treated as directory name. This means that
-    if no trailing directory separator is given, the following character is
-    no longer stripped from the filename.
   . ZipArchive::OPSYS_Z_CPM have been removed, should use ZipArchive::OPSYS_CPM
     (this name was a typo).
 
@@ -428,6 +423,9 @@ PHP 8.0 UPGRADE NOTES
   . New ZipArchive::lastId property to get index value of last added entry.
   . Error can be checked after an archive is closed using ZipArchive::status,
     ZipArchive::statusSys properties or ZipArchive::getStatusString() method.
+  . The remove_path option of ZipArchive::addGlob() and ::addPattern() is now
+    treated as arbitrary string prefix (for consistency with the add_path
+    option), whereas formerly it was treated as directory name.
 
 ========================================
 3. Changes in SAPI modules
