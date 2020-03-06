@@ -2303,27 +2303,31 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXIT_SPEC_HANDLER
 	USE_OPLINE
 
 	SAVE_OPLINE();
+
+	zend_string *message = NULL;
+	int exit_status = 0;
 	if (opline->op1_type != IS_UNUSED) {
 		zval *ptr = get_zval_ptr(opline->op1_type, opline->op1, BP_VAR_R);
 
 		do {
 			if (Z_TYPE_P(ptr) == IS_LONG) {
-				EG(exit_status) = Z_LVAL_P(ptr);
+				exit_status = Z_LVAL_P(ptr);
 			} else {
 				if ((opline->op1_type & (IS_VAR|IS_CV)) && Z_ISREF_P(ptr)) {
 					ptr = Z_REFVAL_P(ptr);
 					if (Z_TYPE_P(ptr) == IS_LONG) {
-						EG(exit_status) = Z_LVAL_P(ptr);
+						exit_status = Z_LVAL_P(ptr);
 						break;
 					}
 				}
-				zend_print_zval(ptr, 0);
+				message = zval_get_string(ptr);
 			}
 		} while (0);
 		FREE_OP(opline->op1_type, opline->op1.var);
 	}
-	zend_bailout();
-	ZEND_VM_NEXT_OPCODE(); /* Never reached */
+
+	zend_throw_unwind_exit(message, exit_status);
+	HANDLE_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BEGIN_SILENCE_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
