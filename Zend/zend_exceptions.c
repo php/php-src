@@ -41,6 +41,9 @@ ZEND_API zend_class_entry *zend_ce_value_error;
 ZEND_API zend_class_entry *zend_ce_arithmetic_error;
 ZEND_API zend_class_entry *zend_ce_division_by_zero_error;
 
+/* Internal pseudo-exception that is not exposed to userland. */
+static zend_class_entry zend_ce_unwind_exit;
+
 ZEND_API void (*zend_throw_exception_hook)(zval *ex);
 
 static zend_object_handlers default_exception_handlers;
@@ -81,6 +84,12 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 	if (exception == add_previous || !add_previous || !exception) {
 		return;
 	}
+
+	if (zend_is_unwind_exit(add_previous)) {
+		OBJ_RELEASE(add_previous);
+		return;
+	}
+
 	ZVAL_OBJ(&pv, add_previous);
 	if (!instanceof_function(Z_OBJCE(pv), zend_ce_throwable)) {
 		zend_error_noreturn(E_CORE_ERROR, "Previous exception must implement Throwable");
@@ -803,6 +812,8 @@ void zend_register_default_exception(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce, "DivisionByZeroError", class_DivisionByZeroError_methods);
 	zend_ce_division_by_zero_error = zend_register_internal_class_ex(&ce, zend_ce_arithmetic_error);
 	zend_ce_division_by_zero_error->create_object = zend_default_exception_new;
+
+	INIT_CLASS_ENTRY(zend_ce_unwind_exit, "UnwindExit", NULL);
 }
 /* }}} */
 
@@ -898,10 +909,11 @@ static void zend_error_va(int type, const char *file, uint32_t lineno, const cha
 /* }}} */
 
 /* This function doesn't return if it uses E_ERROR */
-ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {{{ */
+ZEND_API ZEND_COLD int zend_exception_error(zend_object *ex, int severity) /* {{{ */
 {
 	zval exception, rv;
 	zend_class_entry *ce_exception;
+	int result = FAILURE;
 
 	ZVAL_OBJ(&exception, ex);
 	ce_exception = ex->ce;
@@ -961,11 +973,15 @@ ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {
 
 		zend_string_release_ex(str, 0);
 		zend_string_release_ex(file, 0);
+	} else if (ce_exception == &zend_ce_unwind_exit) {
+		/* We successfully unwound, nothing more to do */
+		result = SUCCESS;
 	} else {
 		zend_error(severity, "Uncaught exception '%s'", ZSTR_VAL(ce_exception->name));
 	}
 
 	OBJ_RELEASE(ex);
+	return result;
 }
 /* }}} */
 
@@ -987,3 +1003,16 @@ ZEND_API ZEND_COLD void zend_throw_exception_object(zval *exception) /* {{{ */
 	zend_throw_exception_internal(exception);
 }
 /* }}} */
+
+ZEND_API ZEND_COLD void zend_throw_unwind_exit()
+{
+	ZEND_ASSERT(!EG(exception));
+	EG(exception) = zend_objects_new(&zend_ce_unwind_exit);
+	EG(opline_before_exception) = EG(current_execute_data)->opline;
+	EG(current_execute_data)->opline = EG(exception_op);
+}
+
+ZEND_API zend_bool zend_is_unwind_exit(zend_object *ex)
+{
+	return ex->ce == &zend_ce_unwind_exit;
+}
