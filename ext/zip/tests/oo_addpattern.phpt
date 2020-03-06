@@ -44,8 +44,8 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
             "foobar/",
             "foobar/baz",
             "entry1.txt",
-            "baz" . DIRECTORY_SEPARATOR . "foo.txt",
-            "baz" . DIRECTORY_SEPARATOR . "bar.txt"
+            "baz/foo.txt",
+            "baz/bar.txt"
         ])) {
             echo "failed\n";
         } else {
