@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #79364 (When copy empty array, next key is unspecified). (cmb)
   . Fixed bug #78210 (Invalid pointer address). (cmb, Nikita)
 
+- SimpleXML:
+  . Fixed bug #61597 (SXE properties may lack attributes and content). (cmb)
+
 - Spl:
   . Fixed bug #75673 (SplStack::unserialize() behavior). (cmb)
 
