@@ -5257,6 +5257,14 @@ ZEND_METHOD(reflection_property, isProtected)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionProperty::isFinal()
+   Returns whether this property is final */
+ZEND_METHOD(reflection_property, isFinal)
+{
+	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_FINAL);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionProperty::isStatic()
    Returns whether this property is static */
 ZEND_METHOD(reflection_property, isStatic)
@@ -5286,7 +5294,7 @@ ZEND_METHOD(reflection_property, getModifiers)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	uint32_t keep_flags = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC;
+	uint32_t keep_flags = ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC | ZEND_ACC_FINAL;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -6360,6 +6368,7 @@ static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, isPublic, arginfo_class_ReflectionProperty_isPublic, 0)
 	ZEND_ME(reflection_property, isPrivate, arginfo_class_ReflectionProperty_isPrivate, 0)
 	ZEND_ME(reflection_property, isProtected, arginfo_class_ReflectionProperty_isProtected, 0)
+	ZEND_ME(reflection_property, isFinal, arginfo_class_ReflectionProperty_isFinal, 0)
 	ZEND_ME(reflection_property, isStatic, arginfo_class_ReflectionProperty_isStatic, 0)
 	ZEND_ME(reflection_property, isDefault, arginfo_class_ReflectionProperty_isDefault, 0)
 	ZEND_ME(reflection_property, getModifiers, arginfo_class_ReflectionProperty_getModifiers, 0)

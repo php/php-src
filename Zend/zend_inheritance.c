@@ -2052,7 +2052,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 				}
 			}
 
-			/* property not found, so lets add it */
+			/* property not found, so let's add it */
 			if (flags & ZEND_ACC_STATIC) {
 				prop_value = &traits[i]->default_static_members_table[property_info->offset];
 				ZEND_ASSERT(Z_TYPE_P(prop_value) != IS_INDIRECT);

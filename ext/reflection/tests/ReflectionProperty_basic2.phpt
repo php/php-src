@@ -27,7 +27,7 @@ class TestClass {
      * This property has a comment.
      */
     protected $prot = 4;
-    private $priv = "keepOut";
+    final private string $priv = "keepOut";
 }
 
 reflectProperty("TestClass", "pub");
@@ -93,7 +93,7 @@ Reflecting on property TestClass::priv
 isDefault():
 bool(true)
 getModifiers():
-int(4)
+int(36)
 getDeclaringClass():
 object(ReflectionClass)#%d (1) {
   ["name"]=>

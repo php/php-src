@@ -1524,6 +1524,9 @@ simple_list:
 			} else if (ast->attr & ZEND_ACC_PRIVATE) {
 				smart_str_appends(str, "private ");
 			}
+			if (ast->attr & ZEND_ACC_FINAL) {
+				smart_str_appends(str, "final ");
+			}
 			if (ast->attr & ZEND_ACC_STATIC) {
 				smart_str_appends(str, "static ");
 			}

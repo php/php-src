@@ -374,6 +374,18 @@ static ZEND_COLD zend_never_inline void zend_bad_property_name(void) /* {{{ */
 }
 /* }}} */
 
+static ZEND_COLD zend_never_inline void zend_final_property_assignment_error(zend_class_entry *ce, zend_string *property_name) /* {{{ */
+{
+	zend_throw_error(NULL, "Cannot modify final property %s::$%s after initialization", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
+}
+/* }}} */
+
+static ZEND_COLD zend_never_inline void zend_final_property_unset_error(zend_class_entry *ce, zend_string *property_name) /* {{{ */
+{
+	zend_throw_error(NULL, "Cannot unset final property %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
+}
+/* }}} */
+
 static zend_always_inline uintptr_t zend_get_property_offset(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot, zend_property_info **info_ptr) /* {{{ */
 {
 	zval *zv;
@@ -430,7 +442,7 @@ dynamic:
 					goto dynamic;
 				} else {
 wrong:
-					/* Information was available, but we were denied access.  Error out. */
+					/* Information was available, but we were denied access. Error out. */
 					if (!silent) {
 						zend_bad_property_access(property_info, ce, member);
 					}
@@ -521,7 +533,7 @@ dynamic:
 					goto dynamic;
 				} else {
 wrong:
-					/* Information was available, but we were denied access.  Error out. */
+					/* Information was available, but we were denied access. Error out. */
 					if (!silent) {
 						zend_bad_property_access(property_info, ce, member);
 					}
@@ -805,7 +817,13 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 		variable_ptr = OBJ_PROP(zobj, property_offset);
+
 		if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
+			if (UNEXPECTED(Z_PROP_FLAG_P(variable_ptr) != IS_PROP_UNINIT && prop_info && prop_info->flags & ZEND_ACC_FINAL)) {
+				zend_final_property_assignment_error(zobj->ce, name);
+				goto exit;
+			}
+
 			Z_TRY_ADDREF_P(value);
 
 			if (UNEXPECTED(prop_info)) {
@@ -823,7 +841,7 @@ found:
 			goto exit;
 		}
 		if (Z_PROP_FLAG_P(variable_ptr) == IS_PROP_UNINIT) {
-			/* Writes to uninitializde typed properties bypass __set(). */
+			/* Writes to uninitialized typed properties bypass __set(). */
 			Z_PROP_FLAG_P(variable_ptr) = 0;
 			goto write_std_property;
 		}
@@ -836,6 +854,12 @@ found:
 				zobj->properties = zend_array_dup(zobj->properties);
 			}
 			if ((variable_ptr = zend_hash_find(zobj->properties, name)) != NULL) {
+				if (UNEXPECTED(prop_info && prop_info->flags & ZEND_ACC_FINAL)) {
+					zend_final_property_assignment_error(zobj->ce, name);
+					variable_ptr = &EG(error_zval);
+					goto exit;
+				}
+
 				Z_TRY_ADDREF_P(value);
 				goto found;
 			}
@@ -867,6 +891,7 @@ found:
 		}
 	} else {
 		ZEND_ASSERT(!IS_WRONG_PROPERTY_OFFSET(property_offset));
+
 write_std_property:
 		Z_TRY_ADDREF_P(value);
 		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
@@ -1014,9 +1039,9 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 
 	if (EXPECTED(IS_VALID_PROPERTY_OFFSET(property_offset))) {
 		retval = OBJ_PROP(zobj, property_offset);
+
 		if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
-			if (EXPECTED(!zobj->ce->__get) ||
-			    UNEXPECTED((*zend_get_property_guard(zobj, name)) & IN_GET)) {
+			if (EXPECTED(!zobj->ce->__get) || UNEXPECTED((*zend_get_property_guard(zobj, name)) & IN_GET)) {
 				if (UNEXPECTED(type == BP_VAR_RW || type == BP_VAR_R)) {
 					if (UNEXPECTED(prop_info)) {
 						zend_throw_error(NULL,
@@ -1048,6 +1073,7 @@ ZEND_API zval *zend_std_get_property_ptr_ptr(zend_object *zobj, zend_string *nam
 		}
 		if (EXPECTED(!zobj->ce->__get) ||
 		    UNEXPECTED((*zend_get_property_guard(zobj, name)) & IN_GET)) {
+
 			if (UNEXPECTED(!zobj->properties)) {
 				rebuild_object_properties(zobj);
 			}
@@ -1077,8 +1103,12 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 		zval *slot = OBJ_PROP(zobj, property_offset);
 
 		if (Z_TYPE_P(slot) != IS_UNDEF) {
-			if (UNEXPECTED(Z_ISREF_P(slot)) &&
-					(ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(slot)))) {
+			if (UNEXPECTED(prop_info && prop_info->flags & ZEND_ACC_FINAL)) {
+				zend_final_property_unset_error(zobj->ce, name);
+				return;
+			}
+
+			if (UNEXPECTED(Z_ISREF_P(slot)) && (ZEND_DEBUG || ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(slot)))) {
 				if (prop_info) {
 					ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(slot), prop_info);
 				}
@@ -1114,7 +1144,7 @@ ZEND_API void zend_std_unset_property(zend_object *zobj, zend_string *name, void
 	if (zobj->ce->__unset) {
 		uint32_t *guard = zend_get_property_guard(zobj, name);
 		if (!((*guard) & IN_UNSET)) {
-			/* have unseter - try with it! */
+			/* have unsetter - try with it! */
 			(*guard) |= IN_UNSET; /* prevent circular unsetting */
 			zend_std_call_unsetter(zobj, name);
 			(*guard) &= ~IN_UNSET;
@@ -1501,6 +1531,14 @@ undeclared_property:
 
 	ret = CE_STATIC_MEMBERS(ce) + property_info->offset;
 	ZVAL_DEINDIRECT(ret);
+
+	if (UNEXPECTED((type == BP_VAR_RW || type == BP_VAR_W) && property_info->flags & ZEND_ACC_FINAL && Z_TYPE_P(ret) != IS_UNDEF)) {
+		zend_throw_error(NULL, "Cannot modify final static property %s::$%s after initialization",
+			ZSTR_VAL(property_info->ce->name),
+        	zend_get_unmangled_property_name(property_name)
+        );
+        return NULL;
+	}
 
 	if (UNEXPECTED((type == BP_VAR_R || type == BP_VAR_RW)
 				&& Z_TYPE_P(ret) == IS_UNDEF && ZEND_TYPE_IS_SET(property_info->type))) {

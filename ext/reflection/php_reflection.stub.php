@@ -385,6 +385,9 @@ class ReflectionProperty implements Reflector
     public function isProtected() {}
 
     /** @return bool */
+    public function isFinal() {}
+
+    /** @return bool */
     public function isStatic() {}
 
     /** @return bool */

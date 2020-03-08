@@ -17,6 +17,8 @@ function reflectProperty($class, $property) {
     var_dump($propInfo->isPrivate());
     echo "isProtected():\n";
     var_dump($propInfo->isProtected());
+    echo "isFinal():\n";
+    var_dump($propInfo->isFinal());
     echo "isStatic():\n";
     var_dump($propInfo->isStatic());
     $instance = new $class();
@@ -34,7 +36,7 @@ class TestClass {
     public $pub;
     static public $stat = "static property";
     protected $prot = 4;
-    private $priv = "keepOut";
+    final private string $priv = "keepOut";
 }
 
 reflectProperty("TestClass", "pub");
@@ -58,6 +60,8 @@ isPrivate():
 bool(false)
 isProtected():
 bool(false)
+isFinal():
+bool(false)
 isStatic():
 bool(false)
 getValue():
@@ -79,6 +83,8 @@ bool(true)
 isPrivate():
 bool(false)
 isProtected():
+bool(false)
+isFinal():
 bool(false)
 isStatic():
 bool(true)
@@ -102,6 +108,8 @@ isPrivate():
 bool(false)
 isProtected():
 bool(true)
+isFinal():
+bool(false)
 isStatic():
 bool(false)
 
@@ -120,6 +128,8 @@ isPrivate():
 bool(true)
 isProtected():
 bool(false)
+isFinal():
+bool(true)
 isStatic():
 bool(false)
 
