@@ -1506,8 +1506,6 @@ static ZIPARCHIVE_METHOD(close)
 	if (err) {
 #if LIBZIP_VERSION_MAJOR == 1 && LIBZIP_VERSION_MINOR == 3 && LIBZIP_VERSION_MICRO == 1
 		php_error_docref(NULL, E_WARNING, "zip_close have failed");
-		ze_obj->err_zip = 0;
-		ze_obj->err_sys = 0;
 #else
 		php_error_docref(NULL, E_WARNING, "%s", zip_strerror(intern));
 		/* Save error for property reader */
@@ -1525,6 +1523,9 @@ static ZIPARCHIVE_METHOD(close)
 		#endif
 		zip_discard(intern);
 #endif
+	} else {
+		ze_obj->err_zip = 0;
+		ze_obj->err_sys = 0;
 	}
 
 	efree(ze_obj->filename);
