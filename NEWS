@@ -3,6 +3,10 @@ PHP                                                                        NEWS
 
 ?? ??? ????, PHP 7.4.5
 
+- SOAP:
+  . Fixed bug #79357 (SOAP request segfaults when any request parameter is
+    missing). (Nikita)
+
 - Spl:
   . Fixed bug #75673 (SplStack::unserialize() behavior). (cmb)
 
