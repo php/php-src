@@ -4,7 +4,7 @@ SQLite3::loadExtension with empty extension test
 Jelle Lampaert
 #Belgian Testfest 2009
 --INI--
-sqlite3.extension_dir={TMP}
+sqlite3.extension_dir="{TMP}"
 --SKIPIF--
 <?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
