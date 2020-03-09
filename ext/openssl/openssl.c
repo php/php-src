@@ -16,6 +16,7 @@
    |          Pierre-Alain Joye <pierre@php.net>                          |
    |          Marc Delling <delling@silpion.de> (PKCS12 functions)        |
    |          Jakub Zelenka <bukka@php.net>                               |
+   |          Eliot Lear <lear@ofcourseimright.com>                       |
    +----------------------------------------------------------------------+
  */
 
@@ -53,6 +54,7 @@
 #include <openssl/rand.h>
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
+#include <openssl/cms.h>
 
 /* Common */
 #include <time.h>
@@ -113,6 +115,16 @@ enum php_openssl_cipher_type {
 	PHP_OPENSSL_CIPHER_AES_256_CBC,
 
 	PHP_OPENSSL_CIPHER_DEFAULT = PHP_OPENSSL_CIPHER_RC2_40
+};
+
+/* Add some encoding rules.  This is normally handled through filters
+ * in the OpenSSL code, but we will do that part as if we were one
+ * of the OpenSSL binaries along the lines of -outform {DER|CMS|PEM}
+ */
+enum php_openssl_encoding {
+	ENCODING_DER,
+	ENCODING_SMIME,
+	ENCODING_PEM,
 };
 
 /* {{{ openssl_module_entry
@@ -1075,6 +1087,15 @@ PHP_MINIT_FUNCTION(openssl)
 	REGISTER_LONG_CONSTANT("PKCS7_BINARY", PKCS7_BINARY, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PKCS7_NOSIGS", PKCS7_NOSIGS, CONST_CS|CONST_PERSISTENT);
 
+	REGISTER_LONG_CONSTANT("OPENSSL_CMS_DETACHED", CMS_DETACHED, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_CMS_TEXT", CMS_TEXT, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_CMS_NOINTERN", CMS_NOINTERN, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_CMS_NOVERIFY", CMS_NOVERIFY, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_CMS_NOCERTS", CMS_NOCERTS, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_CMS_NOATTR", CMS_NOATTR, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_CMS_BINARY", CMS_BINARY, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_CMS_NOSIGS", CMS_NOSIGS, CONST_CS|CONST_PERSISTENT);
+
 	REGISTER_LONG_CONSTANT("OPENSSL_PKCS1_PADDING", RSA_PKCS1_PADDING, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_SSLV23_PADDING", RSA_SSLV23_PADDING, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("OPENSSL_NO_PADDING", RSA_NO_PADDING, CONST_CS|CONST_PERSISTENT);
@@ -1117,6 +1138,11 @@ PHP_MINIT_FUNCTION(openssl)
 	/* SNI support included */
 	REGISTER_LONG_CONSTANT("OPENSSL_TLSEXT_SERVER_NAME", 1, CONST_CS|CONST_PERSISTENT);
 #endif
+
+	/* Register encodings */
+	REGISTER_LONG_CONSTANT("OPENSSL_ENCODING_DER",ENCODING_DER,CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_ENCODING_SMIME",ENCODING_SMIME,CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("OPENSSL_ENCODING_PEM",ENCODING_PEM,CONST_CS|CONST_PERSISTENT);
 
 	/* Determine default SSL configuration file */
 	config_filename = getenv("OPENSSL_CONF");
@@ -4777,22 +4803,17 @@ PHP_FUNCTION(openssl_pkcs7_verify)
 		php_openssl_store_errors();
 		goto clean_exit;
 	}
-
 	if (datafilename) {
-
 		if (php_openssl_open_base_dir_chk(datafilename)) {
 			goto clean_exit;
 		}
-
 		dataout = BIO_new_file(datafilename, PHP_OPENSSL_BIO_MODE_W(PKCS7_BINARY));
 		if (dataout == NULL) {
 			php_openssl_store_errors();
 			goto clean_exit;
 		}
 	}
-
 	if (p7bfilename) {
-
 		if (php_openssl_open_base_dir_chk(p7bfilename)) {
 			goto clean_exit;
 		}
@@ -5308,6 +5329,748 @@ clean_exit:
 /* }}} */
 
 /* }}} */
+
+/* {{{ CMS S/MIME functions taken from PKCS#7 functions */
+
+/* {{{ proto bool openssl_cms_verify(string filename, int flags [, string signerscerts [, array cainfo [, string extracerts [, string content [, string pk7]]]], string sigfile, int encoding])
+   Verifies that the data block is intact, the signer is who they say they are, and returns the CERTs of the signers */
+PHP_FUNCTION(openssl_cms_verify)
+{
+	X509_STORE * store = NULL;
+	zval * cainfo = NULL;
+	STACK_OF(X509) *signers= NULL;
+	STACK_OF(X509) *others = NULL;
+	CMS_ContentInfo * cms = NULL;
+	BIO * in = NULL, * datain = NULL, * dataout = NULL, * p7bout  = NULL;
+	BIO *certout = NULL, *sigbio = NULL;
+	zend_long flags = 0;
+	char * filename;
+	size_t filename_len;
+	char * extracerts = NULL;
+	size_t extracerts_len = 0;
+	char * signersfilename = NULL;
+	size_t signersfilename_len = 0;
+	char * datafilename = NULL;
+	size_t datafilename_len = 0;
+	char * p7bfilename = NULL;
+	size_t p7bfilename_len = 0;
+	char * sigfile = NULL;
+	size_t sigfile_len = 0;
+	zend_long encoding = ENCODING_SMIME;
+
+	RETVAL_FALSE;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pl|p!ap!p!p!p!l", &filename, &filename_len,
+				&flags, &signersfilename, &signersfilename_len, &cainfo,
+				&extracerts, &extracerts_len, &datafilename, &datafilename_len,
+				&p7bfilename, &p7bfilename_len,
+				&sigfile, &sigfile_len, &encoding) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	if (php_openssl_open_base_dir_chk(filename)) {
+		goto clean_exit;
+	}
+	in = BIO_new_file(filename, PHP_OPENSSL_BIO_MODE_R(flags));
+	if (in == NULL) {
+		php_openssl_store_errors();
+		goto clean_exit;
+	}
+	if (sigfile && (flags & CMS_DETACHED)) {
+		sigbio = BIO_new_file(sigfile, PHP_OPENSSL_BIO_MODE_R(flags));
+		if (encoding == ENCODING_SMIME)  {
+			php_error_docref(NULL, E_WARNING,
+					 "Detached signatures not possible with S/MIME encoding");
+			goto clean_exit;
+		}
+	} else  {
+		sigbio = in;	/* non-detached signature */
+	}
+
+	switch (encoding) {
+		case ENCODING_PEM:
+			cms = PEM_read_bio_CMS(sigbio, NULL, 0, NULL);
+				datain = in;
+				break;
+			case ENCODING_DER:
+				cms = d2i_CMS_bio(sigbio, NULL);
+				datain = in;
+				break;
+			case ENCODING_SMIME:
+				cms = SMIME_read_CMS(sigbio, &datain);
+				break;
+			default:
+				php_error_docref(NULL, E_WARNING, "Unknown encoding");
+				goto clean_exit;
+	}
+	if (cms == NULL) {
+		php_openssl_store_errors();
+		goto clean_exit;
+	}
+	if (encoding != ENCODING_SMIME && !(flags & CMS_DETACHED)) {
+		datain = NULL; /* when not detached, don't pass a real BIO */
+	}
+
+	if (extracerts) {
+		others = php_openssl_load_all_certs_from_file(extracerts);
+		if (others == NULL) {
+			goto clean_exit;
+		}
+	}
+
+	store = php_openssl_setup_verify(cainfo);
+
+	if (!store) {
+		goto clean_exit;
+	}
+
+	if (datafilename) {
+
+		if (php_openssl_open_base_dir_chk(datafilename)) {
+			goto clean_exit;
+		}
+
+		dataout = BIO_new_file(datafilename, PHP_OPENSSL_BIO_MODE_W(CMS_BINARY));
+		if (dataout == NULL) {
+			php_openssl_store_errors();
+			goto clean_exit;
+		}
+	}
+
+	if (p7bfilename) {
+
+		if (php_openssl_open_base_dir_chk(p7bfilename)) {
+			goto clean_exit;
+		}
+
+		p7bout = BIO_new_file(p7bfilename, PHP_OPENSSL_BIO_MODE_W(CMS_BINARY));
+		if (p7bout == NULL) {
+			php_openssl_store_errors();
+			goto clean_exit;
+		}
+	}
+#if DEBUG_SMIME
+	zend_printf("Calling CMS verify\n");
+#endif
+	if (CMS_verify(cms, others, store, datain, dataout, (unsigned int)flags)) {
+		RETVAL_TRUE;
+
+		if (signersfilename) {
+			if (php_openssl_open_base_dir_chk(signersfilename)) {
+				goto clean_exit;
+			}
+
+			certout = BIO_new_file(signersfilename, PHP_OPENSSL_BIO_MODE_W(CMS_BINARY));
+			if (certout) {
+				int i;
+				signers = CMS_get0_signers(cms);
+				if (signers != NULL) {
+
+					for (i = 0; i < sk_X509_num(signers); i++) {
+						if (!PEM_write_bio_X509(certout, sk_X509_value(signers, i))) {
+							php_openssl_store_errors();
+							RETVAL_FALSE;
+							php_error_docref(NULL, E_WARNING, "Failed to write signer %d", i);
+						}
+					}
+
+					sk_X509_free(signers);
+				} else {
+					RETVAL_FALSE;
+					php_openssl_store_errors();
+				}
+			} else {
+				php_openssl_store_errors();
+				php_error_docref(NULL, E_WARNING, "Signature OK, but cannot open %s for writing", signersfilename);
+				RETVAL_FALSE;
+			}
+
+			if (p7bout) {
+				PEM_write_bio_CMS(p7bout, cms);
+			}
+		}
+	} else {
+		php_openssl_store_errors();
+		RETVAL_FALSE;
+	}
+clean_exit:
+	BIO_free(p7bout);
+	if (store) {
+		X509_STORE_free(store);
+	}
+	if (datain != in) {
+		BIO_free(datain);
+	}
+	if (sigbio != in) {
+		BIO_free(sigbio);
+	}
+	BIO_free(in);
+	BIO_free(dataout);
+	BIO_free(certout);
+	if (cms) {
+		CMS_ContentInfo_free(cms);
+	}
+	if (others) {
+		sk_X509_pop_free(others, X509_free);
+	}
+}
+/* }}} */
+
+/* {{{ proto bool openssl_cms_encrypt(string infile, string outfile, mixed recipcerts, array headers [, int flags [,int encoding [, int cipher]]])
+   Encrypts the message in the file named infile with the certificates in recipcerts and output the result to the file named outfile */
+PHP_FUNCTION(openssl_cms_encrypt)
+{
+	zval * zrecipcerts, * zheaders = NULL;
+	STACK_OF(X509) * recipcerts = NULL;
+	BIO * infile = NULL, * outfile = NULL;
+	zend_long flags = 0;
+	zend_long encoding = ENCODING_SMIME;
+	CMS_ContentInfo * cms = NULL;
+	zval * zcertval;
+	X509 * cert;
+	const EVP_CIPHER *cipher = NULL;
+	zend_long cipherid = PHP_OPENSSL_CIPHER_DEFAULT;
+	zend_string * strindex;
+	char * infilename = NULL;
+	size_t infilename_len;
+	char * outfilename = NULL;
+	size_t outfilename_len;
+	int need_final = 0;
+
+	RETVAL_FALSE;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ppza!|lll", &infilename, &infilename_len,
+				  &outfilename, &outfilename_len, &zrecipcerts, &zheaders, &flags, &encoding, &cipherid) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+
+	if (php_openssl_open_base_dir_chk(infilename) || php_openssl_open_base_dir_chk(outfilename)) {
+		return;
+	}
+
+	infile = BIO_new_file(infilename, PHP_OPENSSL_BIO_MODE_R(flags));
+	if (infile == NULL) {
+		php_openssl_store_errors();
+		goto clean_exit;
+	}
+
+	outfile = BIO_new_file(outfilename, PHP_OPENSSL_BIO_MODE_W(flags));
+	if (outfile == NULL) {
+		php_openssl_store_errors();
+		goto clean_exit;
+	}
+
+	recipcerts = sk_X509_new_null();
+
+	/* get certs */
+	if (Z_TYPE_P(zrecipcerts) == IS_ARRAY) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(zrecipcerts), zcertval) {
+			zend_resource *certresource;
+
+			cert = php_openssl_x509_from_zval(zcertval, 0, &certresource);
+			if (cert == NULL) {
+				goto clean_exit;
+			}
+
+			if (certresource != NULL) {
+				/* we shouldn't free this particular cert, as it is a resource.
+					make a copy and push that on the stack instead */
+				cert = X509_dup(cert);
+				if (cert == NULL) {
+					php_openssl_store_errors();
+					goto clean_exit;
+				}
+			}
+			sk_X509_push(recipcerts, cert);
+		} ZEND_HASH_FOREACH_END();
+	} else {
+		/* a single certificate */
+		zend_resource *certresource;
+
+		cert = php_openssl_x509_from_zval(zrecipcerts, 0, &certresource);
+		if (cert == NULL) {
+			goto clean_exit;
+		}
+
+		if (certresource != NULL) {
+			/* we shouldn't free this particular cert, as it is a resource.
+				make a copy and push that on the stack instead */
+			cert = X509_dup(cert);
+			if (cert == NULL) {
+				php_openssl_store_errors();
+				goto clean_exit;
+			}
+		}
+		sk_X509_push(recipcerts, cert);
+	}
+
+	/* sanity check the cipher */
+	cipher = php_openssl_get_evp_cipher_from_algo(cipherid);
+	if (cipher == NULL) {
+		/* shouldn't happen */
+		php_error_docref(NULL, E_WARNING, "Failed to get cipher");
+		goto clean_exit;
+	}
+
+	cms = CMS_encrypt(recipcerts, infile, (EVP_CIPHER*)cipher, (unsigned int)flags);
+
+	if (cms == NULL) {
+		php_openssl_store_errors();
+		goto clean_exit;
+	}
+
+	if (flags & CMS_PARTIAL && !(flags & CMS_STREAM)) {
+		need_final=1;
+	}
+
+	/* tack on extra headers */
+	if (zheaders && encoding == ENCODING_SMIME) {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zheaders), strindex, zcertval) {
+			zend_string *str = zval_try_get_string(zcertval);
+			if (UNEXPECTED(!str)) {
+				goto clean_exit;
+			}
+			if (strindex) {
+				BIO_printf(outfile, "%s: %s\n", ZSTR_VAL(strindex), ZSTR_VAL(str));
+			} else {
+				BIO_printf(outfile, "%s\n", ZSTR_VAL(str));
+			}
+			zend_string_release(str);
+		} ZEND_HASH_FOREACH_END();
+	}
+
+	(void)BIO_reset(infile);
+
+	switch (encoding) {
+		case ENCODING_SMIME:
+			if (!SMIME_write_CMS(outfile, cms, infile, (int)flags)) {
+				php_openssl_store_errors();
+					goto clean_exit;
+			}
+			break;
+		case ENCODING_DER:
+			if (need_final) {
+				if (CMS_final(cms, infile, NULL, (unsigned int) flags) != 1) {
+					php_openssl_store_errors();
+					goto clean_exit;
+				}
+			}
+			if (i2d_CMS_bio(outfile, cms) != 1) {
+				php_openssl_store_errors();
+				goto clean_exit;
+			}
+			break;
+		case ENCODING_PEM:
+			if (need_final) {
+				if (CMS_final(cms, infile, NULL, (unsigned int) flags) != 1) {
+					php_openssl_store_errors();
+					goto clean_exit;
+				}
+			}
+			if (flags & CMS_STREAM) {
+				if (PEM_write_bio_CMS_stream(outfile, cms, infile, flags) == 0) {
+					php_openssl_store_errors();
+					goto clean_exit;
+				}
+			} else {
+				if (PEM_write_bio_CMS(outfile, cms) == 0) {
+					php_openssl_store_errors();
+					goto clean_exit;
+				}
+			}
+			break;
+		default:
+			php_error_docref(NULL, E_WARNING, "Unknown OPENSSL encoding");
+			goto clean_exit;
+	}
+
+	RETVAL_TRUE;
+
+clean_exit:
+	if (cms) {
+		CMS_ContentInfo_free(cms);
+	}
+	BIO_free(infile);
+	BIO_free(outfile);
+	if (recipcerts) {
+		sk_X509_pop_free(recipcerts, X509_free);
+	}
+}
+/* }}} */
+
+/* {{{ proto bool openssl_cms_read(string P7B, array &certs)
+   Exports the CMS file to an array of PEM certificates */
+PHP_FUNCTION(openssl_cms_read)
+{
+	zval * zout = NULL, zcert;
+	char *p7b;
+	size_t p7b_len;
+	STACK_OF(X509) *certs = NULL;
+	STACK_OF(X509_CRL) *crls = NULL;
+	BIO * bio_in = NULL, * bio_out = NULL;
+	CMS_ContentInfo * cms = NULL;
+	int i;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz", &p7b, &p7b_len,
+				&zout) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETVAL_FALSE;
+
+	PHP_OPENSSL_CHECK_SIZE_T_TO_INT(p7b_len, p7b);
+
+	bio_in = BIO_new(BIO_s_mem());
+	if (bio_in == NULL) {
+		goto clean_exit;
+	}
+
+	if (0 >= BIO_write(bio_in, p7b, (int)p7b_len)) {
+		php_openssl_store_errors();
+		goto clean_exit;
+	}
+
+	cms = PEM_read_bio_CMS(bio_in, NULL, NULL, NULL);
+	if (cms == NULL) {
+		php_openssl_store_errors();
+		goto clean_exit;
+	}
+
+	switch (OBJ_obj2nid(CMS_get0_type(cms))) {
+		case NID_pkcs7_signed:
+		case NID_pkcs7_signedAndEnveloped:
+			certs = CMS_get1_certs(cms);
+			crls = CMS_get1_crls(cms);
+			break;
+		default:
+			break;
+	}
+
+	zout = zend_try_array_init(zout);
+	if (!zout) {
+		goto clean_exit;
+	}
+
+	if (certs != NULL) {
+		for (i = 0; i < sk_X509_num(certs); i++) {
+			X509* ca = sk_X509_value(certs, i);
+
+			bio_out = BIO_new(BIO_s_mem());
+			if (bio_out && PEM_write_bio_X509(bio_out, ca)) {
+				BUF_MEM *bio_buf;
+				BIO_get_mem_ptr(bio_out, &bio_buf);
+				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
+				add_index_zval(zout, i, &zcert);
+				BIO_free(bio_out);
+			}
+		}
+	}
+
+	if (crls != NULL) {
+		for (i = 0; i < sk_X509_CRL_num(crls); i++) {
+			X509_CRL* crl = sk_X509_CRL_value(crls, i);
+
+			bio_out = BIO_new(BIO_s_mem());
+			if (bio_out && PEM_write_bio_X509_CRL(bio_out, crl)) {
+				BUF_MEM *bio_buf;
+				BIO_get_mem_ptr(bio_out, &bio_buf);
+				ZVAL_STRINGL(&zcert, bio_buf->data, bio_buf->length);
+				add_index_zval(zout, i, &zcert);
+				BIO_free(bio_out);
+			}
+		}
+	}
+
+	RETVAL_TRUE;
+
+clean_exit:
+	BIO_free(bio_in);
+	if (cms != NULL) {
+		CMS_ContentInfo_free(cms);
+	}
+}
+/* }}} */
+
+/* {{{ proto bool openssl_cms_sign(string infile, string outfile, mixed signcert, mixed signkey, array headers [, int flags, int encoding [, string extracertsfilename]])
+   Signs the MIME message in the file named infile with signcert/signkey and output the result to file name outfile. headers lists plain text headers to exclude from the signed portion of the message, and should include to, from and subject as a minimum */
+
+PHP_FUNCTION(openssl_cms_sign)
+{
+	zval * zcert, * zprivkey, * zheaders;
+	zval * hval;
+	X509 * cert = NULL;
+	EVP_PKEY * privkey = NULL;
+	zend_long flags = 0;
+	zend_long encoding = ENCODING_SMIME;
+	CMS_ContentInfo * cms = NULL;
+	BIO * infile = NULL, * outfile = NULL;
+	STACK_OF(X509) *others = NULL;
+	zend_resource *certresource = NULL, *keyresource = NULL;
+	zend_string * strindex;
+	char * infilename;
+	size_t infilename_len;
+	char * outfilename;
+	size_t outfilename_len;
+	char * extracertsfilename = NULL;
+	size_t extracertsfilename_len;
+	int need_final = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ppzza!|llp!",
+				&infilename, &infilename_len, &outfilename, &outfilename_len,
+				&zcert, &zprivkey, &zheaders, &flags, &encoding, &extracertsfilename,
+				&extracertsfilename_len) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETVAL_FALSE;
+
+	if (extracertsfilename) {
+		others = php_openssl_load_all_certs_from_file(extracertsfilename);
+		if (others == NULL) {
+			goto clean_exit;
+		}
+	}
+
+	privkey = php_openssl_evp_from_zval(zprivkey, 0, "", 0, 0, &keyresource);
+	if (privkey == NULL) {
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "Error getting private key");
+		}
+		goto clean_exit;
+	}
+
+	cert = php_openssl_x509_from_zval(zcert, 0, &certresource);
+	if (cert == NULL) {
+		php_error_docref(NULL, E_WARNING, "Error getting cert");
+		goto clean_exit;
+	}
+
+	if (php_openssl_open_base_dir_chk(infilename) || php_openssl_open_base_dir_chk(outfilename)) {
+		goto clean_exit;
+	}
+
+	if ((encoding & ENCODING_SMIME) && (flags & CMS_DETACHED)) {
+		php_error_docref(NULL,
+				 E_WARNING, "Detached signatures not possible with S/MIME encoding");
+		goto clean_exit;
+	}
+
+	/* a CMS struct will not be complete if either CMS_PARTIAL or CMS_STREAM is set.
+	 * However, CMS_PARTIAL requires a CMS_final call whereas CMS_STREAM requires
+	 * a different write routine below.  There may be a more efficient way to do this
+	 * with function pointers, but the readability goes down.
+	 * References: CMS_sign(3SSL), CMS_final(3SSL)
+	 */
+
+	if (flags & CMS_PARTIAL && !(flags & CMS_STREAM)) {
+		need_final=1;
+	}
+
+	infile = BIO_new_file(infilename, PHP_OPENSSL_BIO_MODE_R(flags));
+	if (infile == NULL) {
+		php_openssl_store_errors();
+		php_error_docref(NULL, E_WARNING, "Error opening input file %s!", infilename);
+		goto clean_exit;
+	}
+
+	outfile = BIO_new_file(outfilename, PHP_OPENSSL_BIO_MODE_W(CMS_BINARY));
+	if (outfile == NULL) {
+		php_openssl_store_errors();
+		php_error_docref(NULL, E_WARNING, "Error opening output file %s!", outfilename);
+		goto clean_exit;
+	}
+
+	cms = CMS_sign(cert, privkey, others, infile, (unsigned int)flags);
+	if (cms == NULL) {
+		php_openssl_store_errors();
+		php_error_docref(NULL, E_WARNING, "Error creating CMS structure!");
+		goto clean_exit;
+	}
+	if (BIO_reset(infile) != 0) {
+		php_openssl_store_errors();
+		goto clean_exit;
+	}
+
+	/* tack on extra headers */
+	if (zheaders && encoding == ENCODING_SMIME) {
+		int ret;
+
+		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(zheaders), strindex, hval) {
+			zend_string *str = zval_try_get_string(hval);
+			if (UNEXPECTED(!str)) {
+				goto clean_exit;
+			}
+			if (strindex) {
+				ret = BIO_printf(outfile, "%s: %s\n", ZSTR_VAL(strindex), ZSTR_VAL(str));
+			} else {
+				ret = BIO_printf(outfile, "%s\n", ZSTR_VAL(str));
+			}
+			zend_string_release(str);
+			if (ret < 0) {
+				php_openssl_store_errors();
+			}
+		} ZEND_HASH_FOREACH_END();
+	}
+	/* writing the signed data depends on the encoding */
+	switch (encoding) {
+		case ENCODING_SMIME:
+			if (!SMIME_write_CMS(outfile, cms, infile, (int)flags)) {
+				php_openssl_store_errors();
+					goto clean_exit;
+			}
+			break;
+		case ENCODING_DER:
+			if (need_final) {
+				if (CMS_final(cms, infile, NULL, (unsigned int) flags) != 1) {
+					php_openssl_store_errors();
+					goto clean_exit;
+				}
+			}
+			if (i2d_CMS_bio(outfile, cms) != 1) {
+				php_openssl_store_errors();
+				goto clean_exit;
+			}
+			break;
+		case ENCODING_PEM:
+			if (need_final) {
+				if (CMS_final(cms, infile, NULL, (unsigned int) flags) != 1) {
+					php_openssl_store_errors();
+					goto clean_exit;
+				}
+			}
+			if (flags & CMS_STREAM) {
+				if (PEM_write_bio_CMS_stream(outfile, cms, infile, flags) == 0) {
+					php_openssl_store_errors();
+					goto clean_exit;
+				}
+			} else {
+				if (PEM_write_bio_CMS(outfile, cms) == 0) {
+					php_openssl_store_errors();
+					goto clean_exit;
+				}
+			}
+			break;
+		default:
+			php_error_docref(NULL, E_WARNING, "Unknown OPENSSL encoding");
+			goto clean_exit;
+	}
+	RETVAL_TRUE;
+
+clean_exit:
+	if (cms) {
+		CMS_ContentInfo_free(cms);
+	}
+	BIO_free(infile);
+	BIO_free(outfile);
+	if (others) {
+		sk_X509_pop_free(others, X509_free);
+	}
+	EVP_PKEY_free(privkey);
+	if (cert && certresource == NULL) {
+		X509_free(cert);
+	}
+}
+/* }}} */
+
+/* {{{ proto bool openssl_cms_decrypt(string infilename, string outfilename, mixed recipcert [, mixed recipkey [, int encoding])
+   Decrypts the S/MIME message in the file name infilename and output the results to the file name outfilename.  recipcert is a CERT for one of the recipients. recipkey specifies the private key matching recipcert, if recipcert does not include the key */
+
+PHP_FUNCTION(openssl_cms_decrypt)
+{
+	zval * recipcert, * recipkey = NULL;
+	X509 * cert = NULL;
+	EVP_PKEY * key = NULL;
+	zend_resource *certresval, *keyresval;
+	zend_long encoding = ENCODING_SMIME;
+	BIO * in = NULL, * out = NULL, * datain = NULL;
+	CMS_ContentInfo * cms = NULL;
+	char * infilename;
+	size_t infilename_len;
+	char * outfilename;
+	size_t outfilename_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ppz|zl", &infilename, &infilename_len,
+				&outfilename, &outfilename_len, &recipcert,
+				&recipkey, &encoding) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	RETVAL_FALSE;
+
+	cert = php_openssl_x509_from_zval(recipcert, 0, &certresval);
+	if (cert == NULL) {
+		php_error_docref(NULL, E_WARNING, "Unable to coerce parameter 3 to x509 cert");
+		goto clean_exit;
+	}
+
+	key = php_openssl_evp_from_zval(recipkey ? recipkey : recipcert, 0, "", 0, 0, &keyresval);
+	if (key == NULL) {
+		if (!EG(exception)) {
+			php_error_docref(NULL, E_WARNING, "Unable to get private key");
+		}
+		goto clean_exit;
+	}
+
+	if (php_openssl_open_base_dir_chk(infilename) || php_openssl_open_base_dir_chk(outfilename)) {
+		goto clean_exit;
+	}
+
+	in = BIO_new_file(infilename, PHP_OPENSSL_BIO_MODE_R(CMS_BINARY));
+	if (in == NULL) {
+		php_openssl_store_errors();
+		goto clean_exit;
+	}
+	out = BIO_new_file(outfilename, PHP_OPENSSL_BIO_MODE_W(CMS_BINARY));
+	if (out == NULL) {
+		php_openssl_store_errors();
+		goto clean_exit;
+	}
+
+	switch (encoding) {
+		case ENCODING_DER:
+			cms = d2i_CMS_bio(in, NULL);
+			break;
+		case ENCODING_PEM:
+                        cms = PEM_read_bio_CMS(in, NULL, 0, NULL);
+			break;
+		case ENCODING_SMIME:
+			cms = SMIME_read_CMS(in, &datain);
+			break;
+		default:
+			php_error_docref(NULL, E_WARNING,
+					 "Unknown OPENSSL encoding");
+			goto clean_exit;
+	}
+
+	if (cms == NULL) {
+		php_openssl_store_errors();
+		goto clean_exit;
+	}
+	if (CMS_decrypt(cms, key, cert, NULL, out, 0)) {
+		RETVAL_TRUE;
+	} else {
+		php_openssl_store_errors();
+	}
+clean_exit:
+	if (cms) {
+		CMS_ContentInfo_free(cms);
+	}
+	BIO_free(datain);
+	BIO_free(in);
+	BIO_free(out);
+	if (cert && certresval == NULL) {
+		X509_free(cert);
+	}
+	if (key && keyresval == NULL) {
+		EVP_PKEY_free(key);
+	}
+}
+/* }}} */
+
+/* }}} */
+
+
 
 /* {{{ proto bool openssl_private_encrypt(string data, string &crypted, mixed key [, int padding])
    Encrypts data with private key */
