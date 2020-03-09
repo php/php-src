@@ -1503,26 +1503,26 @@ static ZIPARCHIVE_METHOD(close)
 	ze_obj = Z_ZIP_P(self);
 
 	err = zip_close(intern);
-
-	/* Save error for property reader */
-#if LIBZIP_VERSION_MAJOR < 1
-	zip_error_get(obj->za, &ze_obj->err_zip, &ze_obj->err_sys);
-#else
-	{
-	zip_error_t *ziperr;
-
-	ziperr = zip_get_error(intern);
-	ze_obj->err_zip = zip_error_code_zip(ziperr);
-	ze_obj->err_sys = zip_error_code_system(ziperr);
-	zip_error_fini(ziperr);
-	}
-#endif
-
 	if (err) {
 #if LIBZIP_VERSION_MAJOR == 1 && LIBZIP_VERSION_MINOR == 3 && LIBZIP_VERSION_MICRO == 1
 		php_error_docref(NULL, E_WARNING, "zip_close have failed");
+		ze_obj->err_zip = 0;
+		ze_obj->err_sys = 0;
 #else
 		php_error_docref(NULL, E_WARNING, "%s", zip_strerror(intern));
+		/* Save error for property reader */
+		#if LIBZIP_VERSION_MAJOR < 1
+			zip_error_get(intern, &ze_obj->err_zip, &ze_obj->err_sys);
+		#else
+			{
+			zip_error_t *ziperr;
+
+			ziperr = zip_get_error(intern);
+			ze_obj->err_zip = zip_error_code_zip(ziperr);
+			ze_obj->err_sys = zip_error_code_system(ziperr);
+			zip_error_fini(ziperr);
+			}
+		#endif
 		zip_discard(intern);
 #endif
 	}
