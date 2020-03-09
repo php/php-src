@@ -6,7 +6,7 @@ Bug #32330 (session_destroy, "Failed to initialize storage module", custom sessi
 session.use_trans_sid=0
 session.use_cookies=1
 session.name=sid
-session.save_path={TMP}
+session.save_path="{TMP}"
 session.gc_probability=1
 session.gc_divisor=1
 session.save_handler=files
