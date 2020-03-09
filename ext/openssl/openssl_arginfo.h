@@ -196,6 +196,49 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_pkcs7_read, 0, 2, _IS_BO
 	ZEND_ARG_INFO(1, certs)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_cms_verify, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, signerscerts, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, cainfo, IS_ARRAY, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, extracerts, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, content, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pk7, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, sigfile, IS_STRING, 1, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, encoding, "OPENSSL_ENCODING_SMIME")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_cms_encrypt, 0, 4, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, infile, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, outfile, IS_STRING, 0)
+	ZEND_ARG_INFO(0, recipcerts)
+	ZEND_ARG_TYPE_INFO(0, headers, IS_ARRAY, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_LONG, 0, "OPENSSL_ENCODING_SMIME")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, cipher, IS_LONG, 0, "OPENSSL_CIPHER_RC2_40")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_cms_sign, 0, 5, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, infile, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, outfile, IS_STRING, 0)
+	ZEND_ARG_INFO(0, signcert)
+	ZEND_ARG_INFO(0, signkey)
+	ZEND_ARG_TYPE_INFO(0, headers, IS_ARRAY, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_LONG, 0, "OPENSSL_ENCODING_SMIME")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, extracertsfilename, IS_STRING, 1, "null")
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_cms_decrypt, 0, 4, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, infilename, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, outfilename, IS_STRING, 0)
+	ZEND_ARG_INFO(0, recipcert)
+	ZEND_ARG_INFO(0, recipkey)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encoding, IS_LONG, 0, "OPENSSL_ENCODING_SMIME")
+ZEND_END_ARG_INFO()
+
+#define arginfo_openssl_cms_read arginfo_openssl_pkcs7_read
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_private_encrypt, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_INFO(1, crypted)
@@ -353,6 +396,11 @@ ZEND_FUNCTION(openssl_pkcs7_encrypt);
 ZEND_FUNCTION(openssl_pkcs7_sign);
 ZEND_FUNCTION(openssl_pkcs7_decrypt);
 ZEND_FUNCTION(openssl_pkcs7_read);
+ZEND_FUNCTION(openssl_cms_verify);
+ZEND_FUNCTION(openssl_cms_encrypt);
+ZEND_FUNCTION(openssl_cms_sign);
+ZEND_FUNCTION(openssl_cms_decrypt);
+ZEND_FUNCTION(openssl_cms_read);
 ZEND_FUNCTION(openssl_private_encrypt);
 ZEND_FUNCTION(openssl_private_decrypt);
 ZEND_FUNCTION(openssl_public_encrypt);
@@ -416,6 +464,11 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(openssl_pkcs7_sign, arginfo_openssl_pkcs7_sign)
 	ZEND_FE(openssl_pkcs7_decrypt, arginfo_openssl_pkcs7_decrypt)
 	ZEND_FE(openssl_pkcs7_read, arginfo_openssl_pkcs7_read)
+	ZEND_FE(openssl_cms_verify, arginfo_openssl_cms_verify)
+	ZEND_FE(openssl_cms_encrypt, arginfo_openssl_cms_encrypt)
+	ZEND_FE(openssl_cms_sign, arginfo_openssl_cms_sign)
+	ZEND_FE(openssl_cms_decrypt, arginfo_openssl_cms_decrypt)
+	ZEND_FE(openssl_cms_read, arginfo_openssl_cms_read)
 	ZEND_FE(openssl_private_encrypt, arginfo_openssl_private_encrypt)
 	ZEND_FE(openssl_private_decrypt, arginfo_openssl_private_decrypt)
 	ZEND_FE(openssl_public_encrypt, arginfo_openssl_public_encrypt)

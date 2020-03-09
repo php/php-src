@@ -129,6 +129,26 @@ function openssl_pkcs7_decrypt(string $infilename, string $outfilename, $recipce
 
 function openssl_pkcs7_read(string $infilename, &$certs): bool {}
 
+function openssl_cms_verify(string $filename, int $flags = 0, ?string $signerscerts = null, ?array $cainfo = null, ?string $extracerts = null, ?string $content = null, ?string $pk7 = null, ?string $sigfile = null, $encoding = OPENSSL_ENCODING_SMIME): bool {}
+
+/** @param resource|string|array $recipcerts */
+function openssl_cms_encrypt(string $infile, string $outfile, $recipcerts, ?array $headers, int $flags = 0, int $encoding = OPENSSL_ENCODING_SMIME,  int $cipher = OPENSSL_CIPHER_RC2_40): bool {}
+
+/**
+ * @param resource|string $signcert
+ * @param resource|string|array $signkey
+ */
+function openssl_cms_sign(string $infile, string $outfile, $signcert, $signkey, ?array $headers, int $flags = 0, int $encoding = OPENSSL_ENCODING_SMIME, ?string $extracertsfilename = null): bool {}
+
+/**
+ * @param resource|string $recipcert
+ * @param resource|string|array $recipkey
+ */
+function openssl_cms_decrypt(string $infilename, string $outfilename, $recipcert, $recipkey, int $encoding = OPENSSL_ENCODING_SMIME): bool {}
+
+function openssl_cms_read(string $infilename, &$certs): bool {}
+
+
 /** @param resource|string|array $key */
 function openssl_private_encrypt(string $data, &$crypted, $key, int $padding = OPENSSL_PKCS1_PADDING): bool {}
 
