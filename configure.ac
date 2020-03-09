@@ -440,6 +440,7 @@ resolv.h \
 strings.h \
 syslog.h \
 sysexits.h \
+sys/auxv.h \
 sys/ioctl.h \
 sys/file.h \
 sys/mman.h \
