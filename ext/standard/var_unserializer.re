@@ -600,7 +600,7 @@ string_key:
 		}
 
 		if (UNEXPECTED(info)) {
-			if (!zend_verify_prop_assignable_by_ref(info, data, /* strict */ 1)) {
+			if (!zend_verify_prop_assignable_by_ref(info, data, /* strict */ 1, 0)) {
 				zval_ptr_dtor(data);
 				ZVAL_UNDEF(data);
 				zval_dtor(&key);

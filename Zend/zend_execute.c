@@ -555,7 +555,7 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 
 static zend_never_inline zval* zend_assign_to_typed_property_reference(zend_property_info *prop_info, zval *prop, zval *value_ptr EXECUTE_DATA_DC)
 {
-	if (!zend_verify_prop_assignable_by_ref(prop_info, value_ptr, EX_USES_STRICT_TYPES())) {
+	if (!zend_verify_prop_assignable_by_ref(prop_info, value_ptr, EX_USES_STRICT_TYPES(), 1)) {
 		return &EG(uninitialized_zval);
 	}
 	if (Z_ISREF_P(prop)) {
@@ -1645,29 +1645,6 @@ static ZEND_COLD void zend_throw_final_property_incdec_error(zend_property_info 
 	}
 }
 
-static ZEND_COLD void zend_throw_final_property_incdec_ref_error(zend_reference *ref, zend_property_info *error_prop OPLINE_DC) {
-	if (ZEND_IS_INCREMENT(opline->opcode)) {
-		zend_throw_error(NULL, "Cannot increment a reference held by final property %s::$%s",
-			ZSTR_VAL(error_prop->ce->name), zend_get_unmangled_property_name(error_prop->name)
-		);
-	} else {
-		zend_throw_error(NULL, "Cannot decrement a reference held by final property %s::$%s",
-			ZSTR_VAL(error_prop->ce->name), zend_get_unmangled_property_name(error_prop->name)
-		);
-	}
-}
-
-static zend_property_info *zend_get_final_property_reference(zend_reference *ref)
-{
-	zend_property_info *prop;
-	ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) {
-		if (prop->flags & ZEND_ACC_FINAL) {
-			return prop;
-		}
-	} ZEND_REF_FOREACH_TYPE_SOURCES_END();
-	return NULL;
-}
-
 static void zend_incdec_typed_ref(zend_reference *ref, zval *copy OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval tmp;
@@ -1685,14 +1662,8 @@ static void zend_incdec_typed_ref(zend_reference *ref, zval *copy OPLINE_DC EXEC
 		decrement_function(var_ptr);
 	}
 
-	zend_property_info *error_prop = zend_get_final_property_reference(ref);
-	if (UNEXPECTED(error_prop)) {
-		zend_throw_final_property_incdec_ref_error(ref, error_prop OPLINE_CC);
-		zval_ptr_dtor(var_ptr);
-		ZVAL_COPY_VALUE(var_ptr, copy);
-		ZVAL_UNDEF(copy);
-	} else if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(copy) == IS_LONG) {
-		error_prop = zend_get_prop_not_accepting_double(ref);
+	if (UNEXPECTED(Z_TYPE_P(var_ptr) == IS_DOUBLE) && Z_TYPE_P(copy) == IS_LONG) {
+		zend_property_info *error_prop = error_prop = zend_get_prop_not_accepting_double(ref);
 		if (UNEXPECTED(error_prop)) {
 			zend_long val = zend_throw_incdec_ref_error(ref, error_prop OPLINE_CC);
 			ZVAL_LONG(var_ptr, val);
@@ -3239,7 +3210,7 @@ ZEND_API zval* zend_assign_to_typed_ref(zval *variable_ptr, zval *value, zend_uc
 	return variable_ptr;
 }
 
-ZEND_API zend_bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, zend_bool strict) {
+ZEND_API zend_bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_property_info *prop_info, zval *orig_val, zend_bool strict, zend_bool check_final) {
 	zval *val = orig_val;
 
 	if (Z_ISREF_P(val) && ZEND_REF_HAS_TYPE_SOURCES(Z_REF_P(val))) {
@@ -3247,7 +3218,7 @@ ZEND_API zend_bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_propert
 
 		val = Z_REFVAL_P(val);
 
-		if (prop_info && prop_info->flags & ZEND_ACC_FINAL && Z_PROP_FLAG_P(val) != IS_PROP_UNINIT) {
+		if (check_final &&prop_info && prop_info->flags & ZEND_ACC_FINAL && Z_PROP_FLAG_P(val) != IS_PROP_UNINIT) {
 			zend_throw_error(NULL, "Cannot modify final property %s::$%s by reference after initialization",
 				ZSTR_VAL(prop_info->ce->name), zend_get_unmangled_property_name(prop_info->name)
 			);
@@ -3275,7 +3246,7 @@ ZEND_API zend_bool ZEND_FASTCALL zend_verify_prop_assignable_by_ref(zend_propert
 	} else {
 		ZVAL_DEREF(val);
 
-		if (prop_info && prop_info->flags & ZEND_ACC_FINAL && Z_PROP_FLAG_P(val) != IS_PROP_UNINIT) {
+		if (check_final &&prop_info && prop_info->flags & ZEND_ACC_FINAL && Z_PROP_FLAG_P(val) != IS_PROP_UNINIT) {
 			zend_throw_error(NULL, "Cannot modify final property %s::$%s by reference after initialization",
 				ZSTR_VAL(prop_info->ce->name), zend_get_unmangled_property_name(prop_info->name)
 			);

@@ -23,7 +23,6 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
-// Uninitialized typed properties can't be unset
 unset($foo->property2);
 unset($foo->property2);
 

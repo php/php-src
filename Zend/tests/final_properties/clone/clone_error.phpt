@@ -1,5 +1,5 @@
 --TEST--
-Test that final properties can't be modified after cloning
+Test that initialized final properties can't be modified after cloning
 --FILE--
 <?php
 

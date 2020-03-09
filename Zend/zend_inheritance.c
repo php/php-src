@@ -1014,6 +1014,16 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 				child_info->offset = parent_info->offset;
 			}
 
+			if (UNEXPECTED(child_info->flags & ZEND_ACC_FINAL && !(parent_info->flags & ZEND_ACC_FINAL))) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot redeclare non-final property %s::$%s as final %s::$%s",
+					ZSTR_VAL(parent_info->ce->name),
+					ZSTR_VAL(key),
+					ZSTR_VAL(ce->name),
+					ZSTR_VAL(key)
+				);
+			}
+
 			if (UNEXPECTED(ZEND_TYPE_IS_SET(parent_info->type))) {
 				inheritance_status status = property_types_compatible(parent_info, child_info);
 				if (status == INHERITANCE_ERROR) {

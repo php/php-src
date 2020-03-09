@@ -1,18 +1,24 @@
 --TEST--
-Test that final properties can be overwritten by non-final properties
+Test that non-final properties can override final properties
 --FILE--
 <?php
 
 class Foo
 {
-    final protected static int $property1;
-    final protected int $property2;
+    final private static int $property1;
+    final private int $property2;
+
+    final protected static int $property3;
+    final protected int $property4;
 }
 
 class Bar extends Foo
 {
-    protected static int $property1;
-    protected int $property2;
+    final private static int $property1;
+    final private int $property2;
+
+    protected static int $property3;
+    protected int $property4;
 }
 
 ?>

@@ -6,11 +6,12 @@ Test that final properties can be cloned
 class Foo
 {
     final public int $property1;
-    final public string $property2 = "";
+    final public int $property2;
+    final public string $property3 = "";
 }
 
 $foo = new Foo();
-$foo->property1 = 1;
+$foo->property2 = 2;
 var_dump($foo);
 $bar = clone $foo;
 var_dump($bar);
@@ -19,13 +20,17 @@ var_dump($bar);
 --EXPECTF--
 object(Foo)#1 (2) {
   ["property1"]=>
-  int(1)
+  uninitialized(int)
   ["property2"]=>
+  int(2)
+  ["property3"]=>
   string(0) ""
 }
 object(Foo)#2 (2) {
   ["property1"]=>
-  int(1)
+  uninitialized(int)
   ["property2"]=>
+  int(2)
+  ["property3"]=>
   string(0) ""
 }

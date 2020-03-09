@@ -6512,15 +6512,23 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 						value_type = Z_TYPE_INFO_P(value);
 						if (EXPECTED(value_type != IS_UNDEF)
 						 && EXPECTED(zend_check_property_access(Z_OBJ_P(array), p->key, 0) == SUCCESS)) {
-							if ((value_type & Z_TYPE_MASK) != IS_REFERENCE) {
-								zend_property_info *prop_info =
-									zend_get_typed_property_info_for_slot(Z_OBJ_P(array), value);
-								if (UNEXPECTED(prop_info)) {
+						 	zend_property_info *prop_info = zend_get_typed_property_info_for_slot(Z_OBJ_P(array), value);
+							if (UNEXPECTED(prop_info)) {
+								if (UNEXPECTED(prop_info->flags & ZEND_ACC_FINAL)) {
+									zend_throw_error(NULL, "Cannot acquire reference on final property %s::$%s",
+										ZSTR_VAL(prop_info->ce->name), zend_get_unmangled_property_name(prop_info->name)
+									);
+									UNDEF_RESULT();
+									HANDLE_EXCEPTION();
+                                }
+
+								if ((value_type & Z_TYPE_MASK) != IS_REFERENCE) {
 									ZVAL_NEW_REF(value, value);
 									ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(value), prop_info);
 									value_type = IS_REFERENCE_EX;
 								}
 							}
+
 							break;
 						}
 					} else if (EXPECTED(Z_OBJCE_P(array)->default_properties_count == 0)
