@@ -401,7 +401,6 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 							xparam->inputs.addr,
 							xparam->inputs.addrlen);
 					if (xparam->outputs.returncode == -1) {
-						fprintf(stderr, "sockerr %d\n", WSAGetLastError());
 						char *err = php_socket_strerror(php_socket_errno(), NULL, 0);
 						php_error_docref(NULL, E_WARNING,
 						   	"%s\n", err);
