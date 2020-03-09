@@ -4087,7 +4087,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CONST_HANDLER(
 			}
 		}
 	} else {
-		zend_error(E_WARNING, "Invalid argument supplied for foreach()");
+		zend_error(E_WARNING, "foreach() argument must be of type array|object, %s given", zend_get_type_by_const(Z_TYPE_P(array_ptr)));
 		ZVAL_UNDEF(EX_VAR(opline->result.var));
 		Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
 
@@ -33308,7 +33308,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GET_CLASS_SPEC_UNUSED_UNUSED_H
 				if (IS_UNUSED == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
 					ZVAL_UNDEFINED_OP1();
 				}
-				zend_type_error("Argument 1 ($object) passed to get_class() must be of type object, %s given", zend_get_type_by_const(Z_TYPE_P(op1)));
+				zend_type_error("get_class(): Argument #1 ($object) must be of type object, %s given", zend_get_type_by_const(Z_TYPE_P(op1)));
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			}
 			break;
