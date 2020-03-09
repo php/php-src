@@ -503,12 +503,10 @@ PHP_METHOD(domxpath, evaluate)
 /* {{{ proto void dom_xpath_register_php_functions() */
 PHP_METHOD(domxpath, registerPhpFunctions)
 {
-	zval *id;
+	zval *id = ZEND_THIS;
 	dom_xpath_object *intern;
 	zval *array_value, *entry, new_string;
 	zend_string *name;
-
-	DOM_GET_THIS(id);
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "a",  &array_value) == SUCCESS) {
 		intern = Z_XPATHOBJ_P(id);

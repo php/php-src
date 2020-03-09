@@ -745,13 +745,12 @@ PHP_FUNCTION(xsl_xsltprocessor_transform_to_xml)
 PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 {
 
-	zval *id;
+	zval *id = ZEND_THIS;
 	zval *array_value, *entry, new_string;
 	xsl_object *intern;
 	char *namespace;
 	size_t namespace_len;
 	zend_string *string_key, *name, *value;
-	DOM_GET_THIS(id);
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "sa", &namespace, &namespace_len, &array_value) == SUCCESS) {
 		intern = Z_XSL_P(id);
@@ -790,14 +789,12 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 */
 PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 {
-	zval *id;
+	zval *id = ZEND_THIS;
 	char *namespace;
 	size_t namespace_len = 0;
 	zval *value;
 	zend_string *name;
 	xsl_object *intern;
-
-	DOM_GET_THIS(id);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sS", &namespace, &namespace_len, &name) == FAILURE) {
 		RETURN_THROWS();
@@ -815,13 +812,11 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 */
 PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 {
-	zval *id;
+	zval *id = ZEND_THIS;
 	size_t namespace_len = 0;
 	char *namespace;
 	zend_string *name;
 	xsl_object *intern;
-
-	DOM_GET_THIS(id);
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sS", &namespace, &namespace_len, &name) == FAILURE) {
 		RETURN_THROWS();
@@ -839,12 +834,10 @@ PHP_FUNCTION(xsl_xsltprocessor_remove_parameter)
 */
 PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 {
-	zval *id;
+	zval *id = ZEND_THIS;
 	xsl_object *intern;
 	zval *array_value, *entry, new_string;
 	zend_string *name;
-
-	DOM_GET_THIS(id);
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "a",  &array_value) == SUCCESS) {
 		intern = Z_XSL_P(id);
@@ -878,11 +871,10 @@ PHP_FUNCTION(xsl_xsltprocessor_register_php_functions)
 /* {{{ proto bool xsl_xsltprocessor_set_profiling(string filename) */
 PHP_FUNCTION(xsl_xsltprocessor_set_profiling)
 {
-	zval *id;
+	zval *id = ZEND_THIS;
 	xsl_object *intern;
 	char *filename = NULL;
 	size_t filename_len;
-	DOM_GET_THIS(id);
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p!", &filename, &filename_len) == SUCCESS) {
 		intern = Z_XSL_P(id);
@@ -904,11 +896,10 @@ PHP_FUNCTION(xsl_xsltprocessor_set_profiling)
 /* {{{ proto int xsl_xsltprocessor_set_security_prefs(int securityPrefs) */
 PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs)
 {
-	zval *id;
+	zval *id = ZEND_THIS;
 	xsl_object *intern;
 	zend_long securityPrefs, oldSecurityPrefs;
 
-	DOM_GET_THIS(id);
  	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &securityPrefs) == FAILURE) {
 		RETURN_THROWS();
 	}
@@ -924,10 +915,9 @@ PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs)
 /* {{{ proto int xsl_xsltprocessor_get_security_prefs() */
 PHP_FUNCTION(xsl_xsltprocessor_get_security_prefs)
 {
-	zval *id;
+	zval *id = ZEND_THIS;
 	xsl_object *intern;
 
-	DOM_GET_THIS(id);
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "") == SUCCESS) {
 		intern = Z_XSL_P(id);
 		RETURN_LONG(intern->securityPrefs);
