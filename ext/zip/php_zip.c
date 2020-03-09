@@ -258,6 +258,13 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t 
 		php_stream_write(stream, b, n);
 	}
 
+	if (stream->wrapper->wops->stream_metadata) {
+		struct utimbuf ut;
+
+		ut.modtime = ut.actime = sb.mtime;
+		stream->wrapper->wops->stream_metadata(stream->wrapper, fullpath, PHP_STREAM_META_TOUCH, &ut, NULL);
+	}
+
 	php_stream_close(stream);
 	n = zip_fclose(zf);
 

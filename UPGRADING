@@ -449,6 +449,7 @@ PHP 8.0 UPGRADE NOTES
  . ZipArchive::addEmptyDir, ZipArchive::addFile and aZipArchive::addFromString
    methods have a new "flags" argument. This allow to manage name encoding
    (ZipArchive::FL_ENC_*) and entry replacement (ZipArchive::FL_OVERWRITE)
+ . ZipArchive::extractTo now restore file modification time.
 
 ========================================
 6. New Functions

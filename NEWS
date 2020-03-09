@@ -146,5 +146,7 @@ PHP                                                                        NEWS
   . ZipArchive::status and ZipArchive::statusSys properties and
     ZipArchive::getStatusString() method stay valid after the archive
     is closed. (Remi)
+  . Fixed bug #50678 (files extracted by ZipArchive class lost their
+    original modified time). (Remi)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
