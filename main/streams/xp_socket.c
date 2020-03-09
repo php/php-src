@@ -272,6 +272,12 @@ static inline int sock_recvfrom(php_netstream_data_t *sock, char *buf, size_t bu
 		socklen_t sl = sizeof(sa);
 		ret = recvfrom(sock->socket, buf, XP_SOCK_BUF_SIZE(buflen), flags, (struct sockaddr*)&sa, &sl);
 		ret = (ret == SOCK_CONN_ERR) ? -1 : ret;
+#ifdef PHP_WIN32
+		/* POSIX discards excess bytes without signalling failure; emulate this on Windows */
+		if (ret == -1 && WSAGetLastError() == WSAEMSGSIZE) {
+			ret = buflen;
+		}
+#endif
 		if (sl) {
 			php_network_populate_name_from_sockaddr((struct sockaddr*)&sa, sl,
 					textaddr, addr, addrlen);
@@ -395,6 +401,7 @@ static int php_sockop_set_option(php_stream *stream, int option, int value, void
 							xparam->inputs.addr,
 							xparam->inputs.addrlen);
 					if (xparam->outputs.returncode == -1) {
+						fprintf(stderr, "sockerr %d\n", WSAGetLastError());
 						char *err = php_socket_strerror(php_socket_errno(), NULL, 0);
 						php_error_docref(NULL, E_WARNING,
 						   	"%s\n", err);
