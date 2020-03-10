@@ -773,7 +773,7 @@ call_getter:
 			}
 
 			if (UNEXPECTED(prop_info)) {
-				zend_verify_prop_assignable_by_ref(prop_info, retval, (zobj->ce->__get->common.fn_flags & ZEND_ACC_STRICT_TYPES) != 0, 0);
+				zend_verify_prop_assignable_by_ref(prop_info, retval, (zobj->ce->__get->common.fn_flags & ZEND_ACC_STRICT_TYPES) != 0);
 			}
 
 			OBJ_RELEASE(zobj);
@@ -821,6 +821,7 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 		if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
 			if (UNEXPECTED(Z_PROP_FLAG_P(variable_ptr) != IS_PROP_UNINIT && prop_info && prop_info->flags & ZEND_ACC_FINAL)) {
 				zend_final_property_assignment_error(zobj->ce, name);
+				variable_ptr = &EG(error_zval);
 				goto exit;
 			}
 

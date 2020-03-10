@@ -24,4 +24,4 @@ try {
 
 ?>
 --EXPECT--
-Cannot acquire reference on final property Foo::$property1
+Cannot acquire reference to final property Foo::$property1

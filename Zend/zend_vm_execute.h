@@ -20681,7 +20681,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 						 	zend_property_info *prop_info = zend_get_typed_property_info_for_slot(Z_OBJ_P(array), value);
 							if (UNEXPECTED(prop_info)) {
 								if (UNEXPECTED(prop_info->flags & ZEND_ACC_FINAL)) {
-									zend_throw_error(NULL, "Cannot acquire reference on final property %s::$%s",
+									zend_throw_error(NULL, "Cannot acquire reference to final property %s::$%s",
 										ZSTR_VAL(prop_info->ce->name), zend_get_unmangled_property_name(prop_info->name)
 									);
 									UNDEF_RESULT();

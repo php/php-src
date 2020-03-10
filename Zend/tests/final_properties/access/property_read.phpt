@@ -50,4 +50,4 @@ string(3) "Bar"
 Typed static property Foo::$property3 must not be accessed before initialization
 string(3) "Foo"
 string(3) "Baz"
-Cannot acquire reference on final property Foo::$property2
+Cannot acquire reference to final property Foo::$property2

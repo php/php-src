@@ -38,6 +38,6 @@ try {
 
 ?>
 --EXPECT--
-Cannot modify final property Foo::$property1 by reference after initialization
-Cannot modify final property Foo::$property1 by reference after initialization
-Cannot acquire reference on final property Foo::$property1
+Cannot assign to final property Foo::$property1 by reference
+Cannot assign to final property Foo::$property1 by reference
+Cannot acquire reference to final property Foo::$property1

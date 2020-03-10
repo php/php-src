@@ -6399,8 +6399,8 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast, uint32_t flags) /
 		} else if (flags & ZEND_ACC_FINAL) {
 			zend_error_noreturn(E_COMPILE_ERROR,
 				"Final property %s::$%s must have a type",
-        		ZSTR_VAL(ce->name), ZSTR_VAL(name)
-        	);
+				ZSTR_VAL(ce->name), ZSTR_VAL(name)
+			);
 		}
 
 		/* Doc comment has been appended as last element in ZEND_AST_PROP_ELEM ast */

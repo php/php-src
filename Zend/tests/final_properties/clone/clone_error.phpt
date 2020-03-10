@@ -35,4 +35,4 @@ try {
 --EXPECT--
 Cannot modify final property Foo::$property1 after initialization
 Cannot modify final property Foo::$property2 after initialization
-Cannot acquire reference on final property Foo::$property2
+Cannot acquire reference to final property Foo::$property2
