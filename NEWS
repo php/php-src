@@ -119,6 +119,8 @@ PHP                                                                        NEWS
     filter). (kkopachev)
   . Fixed bug #78385 (parse_url() does not include 'query' when question mark
     is the last char). (Islam Israfilov)
+  . Fixed bug #75902 (str_replace should warn when misused with nested arrays).
+    (Nikita)
   . Made quoting of cmd execution functions consistent. (cmb)
 
 - tidy:
