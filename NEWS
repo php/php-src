@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.17
 
+- Core:
+  . Fixed bug #79364 (When copy empty array, next key is unspecified). (cmb)
+
 - Spl:
   . Fixed bug #75673 (SplStack::unserialize() behavior). (cmb)
 
