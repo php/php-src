@@ -19,4 +19,7 @@ $add->Host->addAttribute('enable', 'true');
 
 ?>
 --EXPECTF--
-Warning: SimpleXMLElement::addAttribute(): Unable to locate parent Element in %s on line %d
+Fatal error: Uncaught Error: Call to a member function addAttribute() on null in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

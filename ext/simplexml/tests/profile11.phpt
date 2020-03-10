@@ -29,5 +29,4 @@ object(SimpleXMLElement)#%d (1) {
 }
 string(5) "Hello"
 string(5) "World"
-object(SimpleXMLElement)#%d (0) {
-}
+NULL

@@ -20,9 +20,7 @@ iterate($xml->unknown);
 echo "Done\n";
 ?>
 --EXPECTF--
-SimpleXMLElement Object
-(
-)
+Warning: Trying to get property 'item' of non-object in %s on line %d
 
 Warning: foreach() argument must be of type array|object, null given in %sbug38347.php on line 6
 Done

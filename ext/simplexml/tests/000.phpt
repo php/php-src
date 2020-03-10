@@ -166,8 +166,7 @@ object(SimpleXMLElement)#%d (2) {
 ===sxe->elem1[0]->elem2->bla
 bool(false)
 bool(false)
-object(SimpleXMLElement)#%d (0) {
-}
+NULL
 ===sxe->elem1[0]["attr1"]
 bool(true)
 bool(true)
@@ -179,8 +178,7 @@ object(SimpleXMLElement)#%d (1) {
 ===sxe->elem1[0]->attr1
 bool(false)
 bool(false)
-object(SimpleXMLElement)#%d (0) {
-}
+NULL
 ===sxe->elem1[1]
 bool(true)
 bool(true)
@@ -228,17 +226,28 @@ object(SimpleXMLElement)#%d (0) {
 ===sxe->elem22
 bool(false)
 bool(false)
-object(SimpleXMLElement)#%d (0) {
-}
+NULL
 ===sxe->elem22->elem222
 bool(false)
+
+Warning: Trying to get property 'elem222' of non-object in %s on line %d
 bool(false)
+
+Warning: Trying to get property 'elem222' of non-object in %s on line %d
 NULL
 ===sxe->elem22->attr22
 bool(false)
+
+Warning: Trying to get property 'attr22' of non-object in %s on line %d
 bool(false)
+
+Warning: Trying to get property 'attr22' of non-object in %s on line %d
 NULL
 ===sxe->elem22["attr22"]
 bool(false)
+
+Warning: Trying to access array offset on value of type null in %s on line %d
 bool(false)
+
+Warning: Trying to access array offset on value of type null in %s on line %d
 NULL

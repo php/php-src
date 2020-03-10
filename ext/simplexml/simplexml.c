@@ -346,8 +346,7 @@ long_dim:
 					_node_as_zval(sxe, node, rv, SXE_ITER_NONE, NULL, sxe->iter.nsprefix, sxe->iter.isprefix);
 				}
 			} else {
-				/* In BP_VAR_IS mode only return a proper node if it actually exists. */
-				if (type != BP_VAR_IS || sxe_find_element_by_name(sxe, node->children, (xmlChar *) name)) {
+				if (sxe_find_element_by_name(sxe, node->children, (xmlChar *) name)) {
 					_node_as_zval(sxe, node, rv, SXE_ITER_ELEMENT, name, sxe->iter.nsprefix, sxe->iter.isprefix);
 				}
 			}
