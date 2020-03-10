@@ -708,7 +708,7 @@ static int find_return_ssa_var(zend_jit_trace_rec *p, zend_ssa_op *ssa_op)
 			if (p->opline->opcode == ZEND_DO_UCALL
 			 || p->opline->opcode == ZEND_DO_FCALL_BY_NAME
 			 || p->opline->opcode == ZEND_DO_FCALL) {
-				if (p->opline->result_type == IS_UNUSED) {
+				if (p->opline->result_type != IS_UNUSED) {
 					return ssa_op->result_def;
 				}
 			}
