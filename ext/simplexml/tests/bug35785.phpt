@@ -12,15 +12,9 @@ $xml = simplexml_load_string("<root></root>");
 var_dump(isset($xml->bla->posts));
 $xml->bla->posts[0]->name = "FooBar";
 echo $xml->asXML();
-$xml = simplexml_load_string("<root></root>");
-$xml->bla->posts[]->name = "FooBar";
-echo $xml->asXML();
 ?>
---EXPECT--
-<?xml version="1.0"?>
-<root><bla><posts><name>FooBar</name></posts></bla></root>
-bool(false)
-<?xml version="1.0"?>
-<root><bla><posts><name>FooBar</name></posts></bla></root>
-<?xml version="1.0"?>
-<root><bla><posts><name>FooBar</name></posts></bla></root>
+--EXPECTF--
+Fatal error: Uncaught Error: Attempt to assign property 'name' of non-object in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

@@ -15,14 +15,6 @@ try {
     echo $e->getMessage(), "\n";
 }
 
-$arr[][] = 2;
-
-try {
-    $arr[][]->bar = 2;
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
-
 ?>
 --EXPECTF--
 Warning: Undefined variable: arr in %s on line %d
@@ -62,5 +54,16 @@ Warning: Trying to access array offset on value of type null in %s on line %d
 Warning: Trying to access array offset on value of type null in %s on line %d
 
 Warning: Trying to get property 'foo' of non-object in %s on line %d
+
+Warning: Undefined variable: arr in %s on line %d
+
+Warning: Trying to access array offset on value of type null in %s on line %d
+
+Warning: Trying to access array offset on value of type null in %s on line %d
+
+Warning: Trying to access array offset on value of type null in %s on line %d
+
+Warning: Trying to access array offset on value of type null in %s on line %d
+
+Warning: Trying to access array offset on value of type null in %s on line %d
 Attempt to assign property 'foo' of non-object
-Attempt to assign property 'bar' of non-object
