@@ -9945,8 +9945,10 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, const zen
 	zval *zv = RT_CONSTANT(opline, opline->op2);
 	zend_jit_addr res_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, opline->result.var);
 
-	|	cmp dword EX->This.u2.num_args, arg_num
-	|	jae >5
+	if (zend_jit_trigger != ZEND_JIT_ON_HOT_TRACE) {
+		|	cmp dword EX->This.u2.num_args, arg_num
+		|	jae >5
+	}
 	|	ZVAL_COPY_CONST res_addr, -1, -1, zv, r0
 	if (Z_REFCOUNTED_P(zv)) {
 	|	ADDREF_CONST zv, r0
