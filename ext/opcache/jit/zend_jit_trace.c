@@ -1325,7 +1325,23 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			if (ssa->var_info) {
 				/* Add statically inferred restrictions */
 				if (ssa_ops[idx].op1_def >= 0) {
-					zend_jit_trace_restrict_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, ssa_ops[idx].op1_def);
+					if ((opline->opcode == ZEND_SEND_VAR_EX
+					  || opline->opcode == ZEND_FETCH_DIM_FUNC_ARG
+					  || opline->opcode == ZEND_FETCH_OBJ_FUNC_ARG)
+					 && frame
+					 && frame->call
+					 && frame->call->func
+					 && !ARG_SHOULD_BE_SENT_BY_REF(frame->call->func, opline->op2.num)) {
+						ssa_var_info[ssa_ops[idx].op1_def] = ssa_var_info[ssa_ops[idx].op1_use];
+						if (opline->opcode == ZEND_SEND_VAR_EX) {
+							ssa_var_info[ssa_ops[idx].op1_def].type &= ~MAY_BE_GUARD;
+						}
+						if (ssa_var_info[ssa_ops[idx].op1_def].type & MAY_BE_RC1) {
+							ssa_var_info[ssa_ops[idx].op1_def].type |= MAY_BE_RCN;
+						}
+					} else {
+						zend_jit_trace_restrict_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, ssa_ops[idx].op1_def);
+					}
 				}
 				if (ssa_ops[idx].op2_def >= 0) {
 					zend_jit_trace_restrict_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, ssa_ops[idx].op2_def);
