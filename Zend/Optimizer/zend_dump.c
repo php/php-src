@@ -609,12 +609,14 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 				fprintf(stderr, " (ref)");
 			}
 		}
-		if ((ZEND_VM_EXT_DIM_WRITE|ZEND_VM_EXT_FETCH_REF) & flags) {
+		if ((ZEND_VM_EXT_DIM_WRITE|ZEND_VM_EXT_OBJ_W_CONTAINER|ZEND_VM_EXT_FETCH_REF) & flags) {
 			uint32_t obj_flags = opline->extended_value & ZEND_FETCH_OBJ_FLAGS;
 			if (obj_flags == ZEND_FETCH_REF) {
 				fprintf(stderr, " (ref)");
 			} else if (obj_flags == ZEND_FETCH_DIM_WRITE) {
 				fprintf(stderr, " (dim write)");
+			} else if (obj_flags == ZEND_FETCH_OBJ_W_CONTAINER) {
+				fprintf(stderr, " (obj container)");
 			}
 		}
 	}

@@ -51,19 +51,25 @@ Warning: Undefined variable $x in %s on line %d
 Attempt to assign property "a" on null
 
 Warning: Undefined variable $x in %s on line %d
-Attempt to modify property "a" on null
+
+Warning: Attempt to read property "a" on null in %s on line %d
+Attempt to assign property "b" on null
 
 Warning: Undefined variable $x in %s on line %d
 Attempt to increment/decrement property "a" on null
 
 Warning: Undefined variable $x in %s on line %d
-Attempt to modify property "a" on null
+
+Warning: Attempt to read property "a" on null in %s on line %d
+Attempt to increment/decrement property "b" on null
 
 Warning: Undefined variable $x in %s on line %d
 Attempt to assign property "a" on null
 
 Warning: Undefined variable $x in %s on line %d
-Attempt to modify property "a" on null
+
+Warning: Attempt to read property "a" on null in %s on line %d
+Attempt to assign property "b" on null
 
 Warning: Undefined variable $x in %s on line %d
 

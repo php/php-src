@@ -1,14 +1,10 @@
 --TEST--
-Bug #41351 (Invalid opcode with foreach ($a[] as $b)) - 2
+Assigning to a property of a new offset
 --FILE--
 <?php
 
-$a = array();
+$arr[][]->bar = 2;
 
-foreach($a[]['test'] as $b) {
-}
-
-echo "Done\n";
 ?>
 --EXPECTF--
 Fatal error: Uncaught Error: Cannot use [] for reading in %s:%d

@@ -70,8 +70,8 @@ Init: 1, op: im: done
 Init: 1, op: is: 1
 Init: 1, op: us: done
 Init: 0, op: r: Typed property Test::$prop must not be accessed before initialization
-Init: 0, op: w: Cannot indirectly modify readonly property Test::$prop
+Init: 0, op: w: Typed property Test::$prop must not be accessed before initialization
 Init: 0, op: rw: Typed property Test::$prop must not be accessed before initialization
-Init: 0, op: im: Cannot indirectly modify readonly property Test::$prop
+Init: 0, op: im: Typed property Test::$prop must not be accessed before initialization
 Init: 0, op: is: 0
 Init: 0, op: us: done
