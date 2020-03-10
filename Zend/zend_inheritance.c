@@ -1612,15 +1612,10 @@ static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_
 		} else if (UNEXPECTED((existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT)
 				&& !(existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT))) {
 			/* two traits can't define the same non-abstract method */
-#if 1
-			zend_error_noreturn(E_COMPILE_ERROR, "Trait method %s has not been applied, because there are collisions with other trait methods on %s",
-				ZSTR_VAL(name), ZSTR_VAL(ce->name));
-#else		/* TODO: better error message */
 			zend_error_noreturn(E_COMPILE_ERROR, "Trait method %s::%s has not been applied as %s::%s, because of collision with %s::%s",
 				ZSTR_VAL(fn->common.scope->name), ZSTR_VAL(fn->common.function_name),
 				ZSTR_VAL(ce->name), ZSTR_VAL(name),
 				ZSTR_VAL(existing_fn->common.scope->name), ZSTR_VAL(existing_fn->common.function_name));
-#endif
 		} else {
 			/* inherited members are overridden by members inserted by traits */
 			/* check whether the trait method fulfills the inheritance requirements */
