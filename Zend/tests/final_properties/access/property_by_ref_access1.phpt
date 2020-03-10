@@ -1,5 +1,5 @@
 --TEST--
-Test that declared final properties can't be accessed by reference
+Test that final properties can't be accessed by reference
 --FILE--
 <?php
 

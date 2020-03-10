@@ -1,5 +1,5 @@
 --TEST--
-Test that declared final properties can't be mutated
+Test that final properties can't be mutated
 --XFAIL--
 Unsetting array items doesn't work yet
 --FILE--

@@ -1,5 +1,5 @@
 --TEST--
-Test that declared final properties can't be unset
+Test that final properties can't be unset
 --FILE--
 <?php
 

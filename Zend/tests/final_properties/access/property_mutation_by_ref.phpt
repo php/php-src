@@ -1,5 +1,5 @@
 --TEST--
-Test that declared final properties can't be mutated by reference
+Test that final properties can't be mutated by reference
 --FILE--
 <?php
 

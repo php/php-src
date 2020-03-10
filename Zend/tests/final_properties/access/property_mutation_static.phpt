@@ -1,5 +1,5 @@
 --TEST--
-Test that declared final static properties can't be mutated
+Test that final static properties can't be mutated
 --XFAIL--
 Unsetting array items and accessing objects aren't prevented
 --FILE--

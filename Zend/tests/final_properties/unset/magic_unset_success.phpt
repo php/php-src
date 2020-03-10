@@ -1,7 +1,5 @@
 --TEST--
 Test that the __unset() magic method is successful
---XFAIL--
-Unsetting is currently not possible because of "Cannot modify final property Foo::$properties by reference after initialization"
 --FILE--
 <?php
 
@@ -37,5 +35,4 @@ var_dump($foo->properties);
 
 ?>
 --EXPECT--
-array(0) {
-}
+NULL
