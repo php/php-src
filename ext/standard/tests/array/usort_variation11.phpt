@@ -43,45 +43,45 @@ echo "okey";
 
 ?>
 --EXPECTF--
-Deprecated: usort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: usort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: uksort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: uksort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: uasort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: uasort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: usort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: usort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: uksort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: uksort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: uasort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: uasort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: usort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: usort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: uksort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: uksort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: uasort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: uasort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: usort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: usort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: uksort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: uksort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: uasort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: uasort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: usort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: usort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: uksort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: uksort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: uasort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: uasort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: usort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: usort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: uksort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: uksort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: uasort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: uasort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: usort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: usort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: uksort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: uksort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 
-Deprecated: uasort(): Returning bool from comparison function is deprecated, return one of -1, 0 or 1 instead in %s on line %d
+Deprecated: uasort(): Returning bool from comparison function is deprecated, return an integer less than, equal to, or larger than zero in %s on line %d
 okey

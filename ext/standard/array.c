@@ -943,7 +943,7 @@ static inline int php_array_user_compare_unstable(Bucket *f, Bucket *s) /* {{{ *
 		if (!ARRAYG(compare_deprecation_thrown)) {
 			php_error_docref(NULL, E_DEPRECATED,
 				"Returning bool from comparison function is deprecated, "
-				"return one of -1, 0 or 1 instead");
+				"return an integer less than, equal to, or larger than zero");
 			ARRAYG(compare_deprecation_thrown) = 1;
 		}
 
@@ -1087,7 +1087,7 @@ static inline int php_array_user_key_compare_unstable(Bucket *f, Bucket *s) /* {
 		if (!ARRAYG(compare_deprecation_thrown)) {
 			php_error_docref(NULL, E_DEPRECATED,
 				"Returning bool from comparison function is deprecated, "
-				"return one of -1, 0 or 1 instead");
+				"return an integer less than, equal to, or larger than zero");
 			ARRAYG(compare_deprecation_thrown) = 1;
 		}
 
