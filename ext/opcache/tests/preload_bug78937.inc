@@ -7,8 +7,16 @@ spl_autoload_register(function($class) {
 function foo() {
     return new class extends AnonDep {};
 }
-function bar() {
-	class Foo extends FooDep {
-	}
-    return new Foo;
+function bar($bool) {
+    if ($bool) {
+        class Foo extends FooDep {
+            public $id = 1;
+        }
+        return new Foo;
+    } else {
+        class Foo extends FooDep2 {
+            public $id = 2;
+        }
+        return new Foo;
+    }
 }

@@ -3904,10 +3904,18 @@ static void preload_ensure_opcode_deps_loadable(zend_function *func) {
 					zend_error(E_ERROR, "Anonymous class linking during preloading failed");
 				}
 			}
+		} else if (opline->opcode == ZEND_DECLARE_CLASS) {
+			zval *lcname = RT_CONSTANT(opline, opline->op1);
+			zend_string *rtd_key = Z_STR_P(lcname + 1);
+			zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), rtd_key);
+			if (ce) {
+				zend_string *parent_lcname = opline->op2_type == IS_CONST
+					? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL;
+				if (zend_do_link_class(ce, parent_lcname) == FAILURE) {
+					zend_error(E_ERROR, "Dynamic class linking during preloading failed");
+				}
+			}
 		}
-		/* TODO: For non-anonymous dynamically declared classes we would have to preload the
-		 * class under the RTD key and then make sure the hash bucket gets reset to the RTD
-		 * key after the request. */
 	}
 }
 

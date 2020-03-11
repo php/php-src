@@ -1081,6 +1081,16 @@ ZEND_API int do_bind_class(zval *lcname, zend_string *lc_parent_name) /* {{{ */
 
 	/* Register the derived class */
 	ce = (zend_class_entry*)Z_PTR_P(zv);
+	if (ce->ce_flags & ZEND_ACC_LINKED) {
+		/* The class is already linked, only register the name. */
+		ZEND_ASSERT(ce->ce_flags & ZEND_ACC_PRELOADED);
+		zv = zend_hash_add_ptr(EG(class_table), Z_STR_P(lcname), ce);
+		if (UNEXPECTED(!zv)) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+		}
+		return SUCCESS;
+	}
+
 	zv = zend_hash_set_bucket_key(EG(class_table), (Bucket*)zv, Z_STR_P(lcname));
 	if (UNEXPECTED(!zv)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));

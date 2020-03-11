@@ -12,16 +12,16 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 ?>
 --FILE--
 <?php
-class FooDep {
-}
 var_dump(foo());
-var_dump(bar());
+var_dump(bar(true));
 ?>
 --EXPECTF--
 Loading AnonDep
-
-Warning: Can't preload unlinked class Foo: Unknown parent FooDep in %spreload_bug78937.inc on line 11
+Loading FooDep
+Loading FooDep2
 object(class@anonymous)#1 (0) {
 }
-
-Fatal error: Class foo wasn't preloaded in %spreload_bug78937.inc on line 11
+object(Foo)#1 (1) {
+  ["id"]=>
+  int(1)
+}
