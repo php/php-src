@@ -1112,29 +1112,6 @@ static zend_always_inline zend_bool zend_check_type(
 	return zend_check_type_slow(type, arg, ref, cache_slot, scope, is_return_type, is_internal);
 }
 
-ZEND_API int zend_check_arg_types(zend_function *zf, uint32_t arg_count, zval **arg)
-{
-	zend_arg_info *cur_arg_info;
-
-	/* We need cache for class_entry pointers */
-	void **cache_slot = (void**) ecalloc(arg_count, sizeof(void*));
-
-	ZEND_ASSERT(arg_count <= zf->common.num_args);
-
-	for(uint32_t i=0; i<arg_count; i++) {
-		cur_arg_info = &zf->common.arg_info[i];
-		if (ZEND_TYPE_IS_SET(cur_arg_info->type)
-			&& UNEXPECTED(!zend_check_type(cur_arg_info->type, arg[i], cache_slot, zf->common.scope, 0, 0))) {
-			efree(cache_slot);
-			return 0;
-		}
-	}
-
-	efree(cache_slot);
-
-	return 1;
-}
-
 static zend_always_inline int zend_verify_recv_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, void **cache_slot)
 {
 	zend_arg_info *cur_arg_info;

@@ -197,12 +197,12 @@ static int zend_std_call_op_handler(zend_uchar opcode, zval *result, zval *op1, 
 
 	EG(fake_scope) = NULL;
 
-	/* __bitwiseNot is a unary operator and only have one argument */
-	if (opcode == ZEND_BW_NOT) {
+	/* Unary operator handlers have only one argument */
+	if (op2 == NULL) {
 		fci.param_count = 1;
 		zval params[1] = {*op1};
 		fci.params = params;
-	} else { /* op handlers like __add are called with two operands op1, op2 */
+	} else { /* binary op handlers like __add are called with two operands op1, op2 */
 		fci.param_count = 2;
 		zval params[2] = {*op1, *op2};
 		fci.params = params;
@@ -280,7 +280,7 @@ static int zend_std_call_op_handler(zend_uchar opcode, zval *result, zval *op1, 
 		/* Check if function exists, check on other operand if possible */
 		if (fcic.function_handler == NULL)
 		{
-			if(zobj == Z_OBJ_P(op1) && Z_TYPE_P(op2) == IS_OBJECT) {
+			if(zobj == Z_OBJ_P(op1) && op2 != NULL && Z_TYPE_P(op2) == IS_OBJECT) {
 retry:
 				zobj = Z_OBJ_P(op2);
 				ce = Z_OBJCE_P(op2);
@@ -294,27 +294,6 @@ retry:
 			zval_ptr_dtor(&fci.function_name);
 			return FAILURE;
 		}
-
-
-		/* Check if the given types are supported by the given handler signature */
-		if(opcode != ZEND_BW_NOT) {
-			zval* arr[2] = {op1, op2};
-			if (!zend_check_arg_types(fcic.function_handler, 2, arr))
-			{
-				if (zobj == Z_OBJ_P(op1) && Z_TYPE_P(op2) == IS_OBJECT) {
-					goto retry;
-				} else {
-					zend_type_error("The operand handlers do not support the given operand types!");
-				}
-			}
-		} else {
-			zval* arr[1] = {op1};
-			if (!zend_check_arg_types(fcic.function_handler, 1, arr))
-			{
-					zend_type_error("The operand handlers do not support the given operand types!");
-			}
-		}
-
 
 		fcic.called_scope = ce;
 		fcic.object = zobj;
