@@ -647,6 +647,11 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_throw_non_object_erro
 	}
 }
 
+static zend_never_inline ZEND_COLD void zend_final_property_assignment_error(zend_class_entry *ce, const char *property_name)
+{
+	zend_throw_error(NULL, "Cannot modify final property %s::$%s after initialization", ZSTR_VAL(ce->name), property_name);
+}
+
 static ZEND_COLD void zend_verify_type_error_common(
 		const zend_function *zf, const zend_arg_info *arg_info,
 		void **cache_slot, zval *value,
@@ -949,6 +954,11 @@ zend_bool zend_never_inline zend_verify_property_type(zend_property_info *info, 
 static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *info, zval *property_val, zval *value EXECUTE_DATA_DC)
 {
 	zval tmp;
+
+	if (UNEXPECTED(info->flags & ZEND_ACC_FINAL && Z_PROP_FLAG_P(property_val) != IS_PROP_UNINIT)) {
+		zend_final_property_assignment_error(info->ce, zend_get_unmangled_property_name(info->name));
+		return &EG(uninitialized_zval);
+	}
 
 	ZVAL_DEREF(value);
 	ZVAL_COPY(&tmp, value);
@@ -1344,6 +1354,11 @@ static zend_never_inline void zend_binary_assign_op_typed_ref(zend_reference *re
 static zend_never_inline void zend_binary_assign_op_typed_prop(zend_property_info *prop_info, zval *zptr, zval *value OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval z_copy;
+
+	if (UNEXPECTED(prop_info->flags & ZEND_ACC_FINAL)) {
+		zend_final_property_assignment_error(prop_info->ce, zend_get_unmangled_property_name(prop_info->name));
+		return;
+	}
 
 	zend_binary_op(&z_copy, zptr, value OPLINE_CC);
 	if (EXPECTED(zend_verify_property_type(prop_info, &z_copy, EX_USES_STRICT_TYPES()))) {
