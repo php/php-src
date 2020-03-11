@@ -1054,6 +1054,7 @@ END_EXTERN_C()
 #define ZEND_OR_FUNC_NAME			"__bitwiseor"
 #define ZEND_AND_FUNC_NAME			"__bitwiseand"
 #define ZEND_XOR_FUNC_NAME			"__bitwisexor"
+#define ZEND_NOT_FUNC_NAME			"__bitwisenot"
 
 
 /* The following constants may be combined in CG(compiler_options)

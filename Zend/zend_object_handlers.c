@@ -194,15 +194,22 @@ static int zend_std_call_op_handler(zend_uchar opcode, zval *result, zval *op1, 
 	zend_class_entry *orig_fake_scope = EG(fake_scope);
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcic;
-	zval params[2] = {*op1, *op2};
 
 	EG(fake_scope) = NULL;
 
-	/* op handlers like __add are called with two operands op1, op2 */
+	/* __bitwiseNot is a unary operator and only have one argument */
+	if (opcode == ZEND_BW_NOT) {
+		fci.param_count = 1;
+		zval params[1] = {*op1};
+		fci.params = params;
+	} else { /* op handlers like __add are called with two operands op1, op2 */
+		fci.param_count = 2;
+		zval params[2] = {*op1, *op2};
+		fci.params = params;
+	}
+
 	fci.size = sizeof(fci);
 	fci.retval = result;
-	fci.param_count = 2;
-	fci.params = params;
 	fci.no_separation = 1;
 	//ZVAL_UNDEF(&fci.function_name); /* Unused */
 
@@ -261,6 +268,10 @@ static int zend_std_call_op_handler(zend_uchar opcode, zval *result, zval *op1, 
 			fcic.function_handler = ce->__bitwiseXor;
 			ZVAL_STRING(&fci.function_name, "__bitwiseXor");
 			break;
+		case ZEND_BW_NOT:
+			fcic.function_handler = ce->__bitwiseNot;
+			ZVAL_STRING(&fci.function_name, "__bitwiseNot");
+			break;
 		default:
 			return FAILURE;
 			break;
@@ -286,16 +297,24 @@ retry:
 
 
 		/* Check if the given types are supported by the given handler signature */
-
-		zval* arr[2] = {op1, op2};
-		if (!zend_check_arg_types(fcic.function_handler, 2, arr))
-		{
-			if (zobj == Z_OBJ_P(op1) && Z_TYPE_P(op2) == IS_OBJECT) {
-				goto retry;
-			} else {
-				zend_type_error("The operand handlers do not support the given operand types!");
+		if(opcode != ZEND_BW_NOT) {
+			zval* arr[2] = {op1, op2};
+			if (!zend_check_arg_types(fcic.function_handler, 2, arr))
+			{
+				if (zobj == Z_OBJ_P(op1) && Z_TYPE_P(op2) == IS_OBJECT) {
+					goto retry;
+				} else {
+					zend_type_error("The operand handlers do not support the given operand types!");
+				}
+			}
+		} else {
+			zval* arr[1] = {op1};
+			if (!zend_check_arg_types(fcic.function_handler, 1, arr))
+			{
+					zend_type_error("The operand handlers do not support the given operand types!");
 			}
 		}
+
 
 		fcic.called_scope = ce;
 		fcic.object = zobj;
@@ -305,7 +324,7 @@ retry:
 
 		/** The operand handler can either return PHP_OPERAND_NOT_SUPPORTED */
 		if (Z_TYPE_P(result) == IS_NULL) {
-			if(zobj == Z_OBJ_P(op1) && Z_TYPE_P(op2) == IS_OBJECT) {
+			if(zobj == Z_OBJ_P(op1) && op2 != NULL && Z_TYPE_P(op2) == IS_OBJECT) {
 				goto retry;
 			} else {
 				zend_type_error("The operand handlers do not support the given operand types!");

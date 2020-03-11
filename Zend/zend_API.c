@@ -2015,6 +2015,10 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), "__bitwiseXor");
 		}
+	} else if (name_len == sizeof(ZEND_NOT_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_NOT_FUNC_NAME, sizeof(ZEND_NOT_FUNC_NAME) - 1)) {
+		if (fptr->common.num_args != 1) {
+			zend_error(error_type, "Method %s::%s() must take exactly 1 arguments", ZSTR_VAL(ce->name), "__bitwiseNot");
+		}
 	}
 }
 /* }}} */

@@ -154,6 +154,7 @@ struct _zend_class_entry {
 	zend_function *__bitwiseOr;
 	zend_function *__bitwiseAnd;
 	zend_function *__bitwiseXor;
+	zend_function *__bitwiseNot;
 
 	zend_function *serialize_func;
 	zend_function *unserialize_func;
