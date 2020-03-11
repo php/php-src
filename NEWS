@@ -4,6 +4,7 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #79364 (When copy empty array, next key is unspecified). (cmb)
+  . Fixed bug #78210 (Invalid pointer address). (cmb, Nikita)
 
 - Spl:
   . Fixed bug #75673 (SplStack::unserialize() behavior). (cmb)
