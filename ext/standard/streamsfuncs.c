@@ -354,7 +354,7 @@ PHP_FUNCTION(stream_socket_sendto)
 		}
 	}
 
-	RETURN_LONG(php_stream_xport_sendto(stream, data, datalen, (int)flags, target_addr ? &sa : NULL, sl));
+	RETURN_LONG(php_stream_xport_sendto(stream, data, datalen, (int)flags, target_addr_len ? &sa : NULL, sl));
 }
 /* }}} */
 
