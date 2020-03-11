@@ -1383,6 +1383,14 @@ void dom_normalize (xmlNodePtr nodep)
 						break;
 					}
 				}
+				strContent = xmlNodeGetContent(child);
+				if (*strContent == '\0') {
+					nextp = child->next;
+					xmlUnlinkNode(child);
+					php_libxml_node_free_resource(child);
+					child = nextp;
+					continue;
+				}
 				break;
 			case XML_ELEMENT_NODE:
 				dom_normalize (child);
