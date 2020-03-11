@@ -3882,51 +3882,100 @@ static zend_class_entry *preload_load_prop_type(zend_property_info *prop, zend_s
 	return ce;
 }
 
+static void preload_ensure_opcode_deps_loadable(zend_function *func) {
+	zend_op_array *op_array = (zend_op_array *) func;
+	uint32_t i;
+
+	if (func->type != ZEND_USER_FUNCTION) {
+		return;
+	}
+
+	for (i = 0; i < op_array->last; i++) {
+		zend_op *opline = &op_array->opcodes[i];
+		if (opline->opcode == ZEND_DECLARE_ANON_CLASS) {
+			zend_string *rtd_key = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+			zend_class_entry *ce = zend_hash_find_ptr(EG(class_table), rtd_key);
+			if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
+				zend_string *parent_lcname = opline->op2_type == IS_CONST
+					? Z_STR_P(RT_CONSTANT(opline, opline->op2)) : NULL;
+				/* TODO: Set file and line. We cannot set in_compilation, because that would
+				 * prevent autoloading. */
+				if (zend_do_link_class(ce, parent_lcname) == FAILURE) {
+					zend_error(E_ERROR, "Anonymous class linking during preloading failed");
+				}
+			}
+		}
+		/* TODO: For non-anonymous dynamically declared classes we would have to preload the
+		 * class under the RTD key and then make sure the hash bucket gets reset to the RTD
+		 * key after the request. */
+	}
+}
+
 static void preload_ensure_classes_loadable() {
 	/* Run this in a loop, because additional classes may be loaded while updating constants etc. */
-	uint32_t checked_classes_idx = 0;
-	while (1) {
-		zend_class_entry *ce;
-		uint32_t num_classes = zend_hash_num_elements(EG(class_table));
-		if (num_classes == checked_classes_idx) {
-			return;
+	uint32_t checked_classes_idx = 0, checked_functions_idx = 0;
+	zend_bool retry = 1;
+	while (retry) {
+		uint32_t num_classes, num_functions;
+		retry = 0;
+
+		num_functions = zend_hash_num_elements(EG(function_table));
+		if (num_functions != checked_functions_idx) {
+			zend_function *func;
+			ZEND_HASH_FOREACH_PTR(EG(function_table), func) {
+				preload_ensure_opcode_deps_loadable(func);
+			} ZEND_HASH_FOREACH_END();
+
+			retry = 1;
+			checked_functions_idx = num_functions;
 		}
 
-		ZEND_HASH_REVERSE_FOREACH_PTR(EG(class_table), ce) {
-			if (ce->type == ZEND_INTERNAL_CLASS || _idx == checked_classes_idx) {
-				break;
-			}
-
-			if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
-				/* Only require that already linked classes are loadable, we'll properly check
-				 * things when linking additional classes. */
-				continue;
-			}
-
-			if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
-				if (preload_update_class_constants(ce) == FAILURE) {
-					zend_error_noreturn(E_ERROR,
-						"Failed to resolve initializers of class %s during preloading",
-						ZSTR_VAL(ce->name));
+		num_classes = zend_hash_num_elements(EG(class_table));
+		if (num_classes != checked_classes_idx) {
+			zend_class_entry *ce;
+			ZEND_HASH_REVERSE_FOREACH_PTR(EG(class_table), ce) {
+				if (ce->type == ZEND_INTERNAL_CLASS || _idx == checked_classes_idx) {
+					break;
 				}
-				ZEND_ASSERT(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED);
-			}
 
-			if (!(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
-				if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
-					zend_property_info *prop;
-					ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
-						if (ZEND_TYPE_IS_NAME(prop->type)) {
-							zend_class_entry *ce =
-								preload_load_prop_type(prop, ZEND_TYPE_NAME(prop->type));
-							prop->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(prop->type));
-						}
-					} ZEND_HASH_FOREACH_END();
+				if (!(ce->ce_flags & ZEND_ACC_LINKED)) {
+					/* Only require that already linked classes are loadable, we'll properly check
+					 * things when linking additional classes. */
+					continue;
 				}
-				ce->ce_flags |= ZEND_ACC_PROPERTY_TYPES_RESOLVED;
-			}
-		} ZEND_HASH_FOREACH_END();
-		checked_classes_idx = num_classes;
+
+				if (!(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
+					if (preload_update_class_constants(ce) == FAILURE) {
+						zend_error_noreturn(E_ERROR,
+							"Failed to resolve initializers of class %s during preloading",
+							ZSTR_VAL(ce->name));
+					}
+					ZEND_ASSERT(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED);
+				}
+
+				if (!(ce->ce_flags & ZEND_ACC_PROPERTY_TYPES_RESOLVED)) {
+					if (ce->ce_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+						zend_property_info *prop;
+						ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop) {
+							if (ZEND_TYPE_IS_NAME(prop->type)) {
+								zend_class_entry *ce =
+									preload_load_prop_type(prop, ZEND_TYPE_NAME(prop->type));
+								prop->type = ZEND_TYPE_ENCODE_CE(ce, ZEND_TYPE_ALLOW_NULL(prop->type));
+							}
+						} ZEND_HASH_FOREACH_END();
+					}
+					ce->ce_flags |= ZEND_ACC_PROPERTY_TYPES_RESOLVED;
+				}
+
+				zend_function *func;
+				ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
+					preload_ensure_opcode_deps_loadable(func);
+				} ZEND_HASH_FOREACH_END();
+			} ZEND_HASH_FOREACH_END();
+
+			retry = 1;
+			checked_classes_idx = num_classes;
+		}
 	}
 }
 

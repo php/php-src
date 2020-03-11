@@ -14,14 +14,14 @@ if (PHP_OS_FAMILY == 'Windows') die('skip Preloading is not supported on Windows
 <?php
 include(__DIR__ . "/preload_bug78937.inc");
 var_dump(foo());
+var_dump(bar());
 ?>
 --EXPECTF--
-Warning: Can't preload unlinked class Foo: Unknown parent Bar in %spreload_bug78937.inc on line 6
+Loading AnonDep
 
-Warning: Can't preload unlinked class class@anonymous: Unknown parent Bar in %spreload_bug78937.inc on line 3
-
-Fatal error: Uncaught Error: Class 'Bar' not found in %spreload_bug78937.inc:3
-Stack trace:
-#0 %sbug78937_3.php(3): foo()
-#1 {main}
-  thrown in %spreload_bug78937.inc on line 3
+Warning: Can't preload unlinked class Foo: Unknown parent FooDep in %spreload_bug78937.inc on line 11
+object(class@anonymous)#2 (0) {
+}
+Loading FooDep
+object(Foo)#2 (0) {
+}
