@@ -1049,11 +1049,11 @@ END_EXTERN_C()
 #define ZEND_POW_FUNC_NAME			"__pow"
 #define ZEND_CONCAT_FUNC_NAME		"__concat"
 #define ZEND_MOD_FUNC_NAME			"__mod"
-#define ZEND_SHIFT_LEFT_FUNC_NAME	"__sl"
-#define ZEND_SHIFT_RIGHT_FUNC_NAME	"__sr"
-#define ZEND_OR_FUNC_NAME			"__or"
-#define ZEND_AND_FUNC_NAME			"__and"
-#define ZEND_XOR_FUNC_NAME			"__xor"
+#define ZEND_SHIFT_LEFT_FUNC_NAME	"__shiftleft"
+#define ZEND_SHIFT_RIGHT_FUNC_NAME	"__shiftright"
+#define ZEND_OR_FUNC_NAME			"__bitwiseor"
+#define ZEND_AND_FUNC_NAME			"__bitwiseand"
+#define ZEND_XOR_FUNC_NAME			"__bitwisexor"
 
 
 /* The following constants may be combined in CG(compiler_options)

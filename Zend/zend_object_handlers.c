@@ -242,24 +242,24 @@ static int zend_std_call_op_handler(zend_uchar opcode, zval *result, zval *op1, 
 			ZVAL_STRING(&fci.function_name, ZEND_CONCAT_FUNC_NAME);
 			break;
 		case ZEND_SL:
-			fcic.function_handler = ce->__sl;
-			ZVAL_STRING(&fci.function_name, ZEND_SHIFT_LEFT_FUNC_NAME);
+			fcic.function_handler = ce->__shiftLeft;
+			ZVAL_STRING(&fci.function_name, "__shiftLeft");
 			break;
 		case ZEND_SR:
-			fcic.function_handler = ce->__sr;
-			ZVAL_STRING(&fci.function_name, ZEND_SHIFT_RIGHT_FUNC_NAME);
+			fcic.function_handler = ce->__shiftRight;
+			ZVAL_STRING(&fci.function_name, "__shiftRight");
 			break;
 		case ZEND_BW_OR:
-			fcic.function_handler = ce->__or;
-			ZVAL_STRING(&fci.function_name, ZEND_OR_FUNC_NAME);
+			fcic.function_handler = ce->__bitwiseOr;
+			ZVAL_STRING(&fci.function_name, "__bitwiseOr");
 			break;
 		case ZEND_BW_AND:
-			fcic.function_handler = ce->__and;
-			ZVAL_STRING(&fci.function_name, ZEND_AND_FUNC_NAME);
+			fcic.function_handler = ce->__bitwiseAnd;
+			ZVAL_STRING(&fci.function_name, "__bitwiseAnd");
 			break;
 		case ZEND_BW_XOR:
-			fcic.function_handler = ce->__xor;
-			ZVAL_STRING(&fci.function_name, ZEND_XOR_FUNC_NAME);
+			fcic.function_handler = ce->__bitwiseXor;
+			ZVAL_STRING(&fci.function_name, "__bitwiseXor");
 			break;
 		default:
 			return FAILURE;

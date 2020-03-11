@@ -6114,20 +6114,20 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 		zend_check_magic_method_attr(fn_flags, "__mod", 1);
 		ce->__mod = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, ZEND_SHIFT_LEFT_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__sl", 1);
-		ce->__sl = (zend_function *) op_array;
+		zend_check_magic_method_attr(fn_flags, "__shiftLeft", 1);
+		ce->__shiftLeft = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, ZEND_SHIFT_RIGHT_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__sr", 1);
-		ce->__sr = (zend_function *) op_array;
+		zend_check_magic_method_attr(fn_flags, "__shiftRight", 1);
+		ce->__shiftRight = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, ZEND_OR_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__or", 1);
-		ce->__or = (zend_function *) op_array;
+		zend_check_magic_method_attr(fn_flags, "__bitwiseOr", 1);
+		ce->__bitwiseOr = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, ZEND_AND_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__and", 1);
-		ce->__and = (zend_function *) op_array;
+		zend_check_magic_method_attr(fn_flags, "__bitwiseAnd", 1);
+		ce->__bitwiseAnd = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, ZEND_XOR_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__xor", 1);
-		ce->__xor = (zend_function *) op_array;
+		zend_check_magic_method_attr(fn_flags, "__bitwiseXor", 1);
+		ce->__bitwiseXor = (zend_function *) op_array;
 	}
 
 	zend_string_release_ex(lcname, 0);

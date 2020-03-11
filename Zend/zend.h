@@ -149,11 +149,11 @@ struct _zend_class_entry {
 	zend_function *__div;
 	zend_function *__concat;
 	zend_function *__mod;
-	zend_function *__sl;
-	zend_function *__sr;
-	zend_function *__or;
-	zend_function *__and;
-	zend_function *__xor;
+	zend_function *__shiftLeft;
+	zend_function *__shiftRight;
+	zend_function *__bitwiseOr;
+	zend_function *__bitwiseAnd;
+	zend_function *__bitwiseXor;
 
 	zend_function *serialize_func;
 	zend_function *unserialize_func;

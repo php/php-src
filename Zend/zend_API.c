@@ -1997,23 +1997,23 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 		}
 	} else if (name_len == sizeof(ZEND_SHIFT_LEFT_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_SHIFT_LEFT_FUNC_NAME, sizeof(ZEND_SHIFT_LEFT_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
-			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_SHIFT_LEFT_FUNC_NAME);
+			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), "__shiftLeft");
 		}
 	} else if (name_len == sizeof(ZEND_SHIFT_RIGHT_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_SHIFT_RIGHT_FUNC_NAME, sizeof(ZEND_SHIFT_RIGHT_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
-			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_SHIFT_RIGHT_FUNC_NAME);
+			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), "__shiftRight");
 		}
 	} else if (name_len == sizeof(ZEND_OR_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_OR_FUNC_NAME, sizeof(ZEND_OR_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
-			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_OR_FUNC_NAME);
+			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), "__bitwiseOr");
 		}
 	} else if (name_len == sizeof(ZEND_AND_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_AND_FUNC_NAME, sizeof(ZEND_AND_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
-			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_AND_FUNC_NAME);
+			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), "__bitwiseAnd");
 		}
 	} else if (name_len == sizeof(ZEND_XOR_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_XOR_FUNC_NAME, sizeof(ZEND_XOR_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
-			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_XOR_FUNC_NAME);
+			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), "__bitwiseXor");
 		}
 	}
 }
