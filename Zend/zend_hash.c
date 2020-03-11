@@ -2055,7 +2055,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		target->nTableMask = HT_MIN_MASK;
 		target->nNumUsed = 0;
 		target->nNumOfElements = 0;
-		target->nNextFreeElement = 0;
+		target->nNextFreeElement = source->nNextFreeElement;
 		target->nInternalPointer = 0;
 		target->nTableSize = HT_MIN_SIZE;
 		HT_SET_DATA_ADDR(target, &uninitialized_bucket);

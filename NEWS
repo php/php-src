@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 
 ?? ??? ????, PHP 7.4.5
 
+- Core:
+  . Fixed bug #79364 (When copy empty array, next key is unspecified). (cmb)
+
 - SOAP:
   . Fixed bug #79357 (SOAP request segfaults when any request parameter is
     missing). (Nikita)
