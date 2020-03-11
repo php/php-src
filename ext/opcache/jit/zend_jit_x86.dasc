@@ -7652,7 +7652,7 @@ static int zend_jit_init_fcall_guard(dasm_State **Dst, const zend_op *opline, co
 		|	mov r1, aword EX:r1->func
 		|   .if X64
 		|| 		if (!IS_SIGNED_32BIT(opcodes)) {
-		|  			mov64 r0, opcodes
+		|  			mov64 r0, ((ptrdiff_t)opcodes)
 		|			cmp aword [r1 + offsetof(zend_op_array, opcodes)], r0
 		||		} else {
 		|  			cmp aword [r1 + offsetof(zend_op_array, opcodes)], opcodes
@@ -7665,8 +7665,8 @@ static int zend_jit_init_fcall_guard(dasm_State **Dst, const zend_op *opline, co
 		|	// call = EX(call);
 		|	mov r1, EX->call
 		|   .if X64
-		|| 		if (!IS_SIGNED_32BIT(fbc)) {
-		|  			mov64 r0, func
+		|| 		if (!IS_SIGNED_32BIT(func)) {
+		|  			mov64 r0, ((ptrdiff_t)func)
 		|			cmp aword EX:r1->func, r0
 		||		} else {
 		|  			cmp aword EX:r1->func, func
