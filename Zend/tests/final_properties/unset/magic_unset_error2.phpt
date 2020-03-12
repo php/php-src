@@ -1,7 +1,5 @@
 --TEST--
 Test that the __unset() magic method results in an exception
---XFAIL--
-Unsetting array items is not prevented
 --FILE--
 <?php
 
@@ -40,7 +38,11 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
-unset($foo->property2);
+try {
+    unset($foo->property2);
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 try {
     unset($foo->properties);
@@ -55,5 +57,7 @@ var_dump($foo->properties);
 Cannot modify final property Foo::$properties after initialization
 Cannot modify final property Foo::$properties after initialization
 Cannot unset final property Foo::$properties
-array(0) {
+array(1) {
+  ["property1"]=>
+  NULL
 }

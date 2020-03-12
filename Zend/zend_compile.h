@@ -907,9 +907,10 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_FETCH_TYPE_MASK	0xe
 
 /* Only one of these can ever be in use */
-#define ZEND_FETCH_REF			1
-#define ZEND_FETCH_DIM_WRITE	2
-#define ZEND_FETCH_OBJ_FLAGS	3
+#define ZEND_FETCH_REF				1
+#define ZEND_FETCH_DIM_WRITE		2
+#define ZEND_FETCH_DIM_UNSET_FLAG	3
+#define ZEND_FETCH_OBJ_FLAGS		3
 
 #define ZEND_ISEMPTY			(1<<0)
 

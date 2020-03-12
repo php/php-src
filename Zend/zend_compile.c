@@ -2653,6 +2653,8 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 	opline = zend_delayed_compile_var(&var_node, var_ast, type, 0);
 	if (opline && type == BP_VAR_W && (opline->opcode == ZEND_FETCH_STATIC_PROP_W || opline->opcode == ZEND_FETCH_OBJ_W)) {
 		opline->extended_value |= ZEND_FETCH_DIM_WRITE;
+	} else if (opline && type == BP_VAR_UNSET && (opline->opcode == ZEND_FETCH_STATIC_PROP_UNSET || opline->opcode == ZEND_FETCH_OBJ_UNSET)) {
+		opline->extended_value |= ZEND_FETCH_DIM_UNSET_FLAG;
 	}
 
 	zend_separate_if_call_and_write(&var_node, var_ast, type);

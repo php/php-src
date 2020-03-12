@@ -955,13 +955,14 @@ static zend_never_inline zval* zend_assign_to_typed_prop(zend_property_info *inf
 {
 	zval tmp;
 
-	if (UNEXPECTED(info->flags & ZEND_ACC_FINAL && Z_PROP_FLAG_P(property_val) != IS_PROP_UNINIT)) {
-		zend_final_property_assignment_error(info->ce, zend_get_unmangled_property_name(info->name));
-		return &EG(uninitialized_zval);
-	}
-
 	ZVAL_DEREF(value);
 	ZVAL_COPY(&tmp, value);
+
+	if (UNEXPECTED(info->flags & ZEND_ACC_FINAL && Z_PROP_FLAG_P(&tmp) != IS_PROP_UNINIT)) {
+		zend_final_property_assignment_error(info->ce, zend_get_unmangled_property_name(info->name));
+		zval_ptr_dtor(&tmp);
+		return &EG(uninitialized_zval);
+	}
 
 	if (UNEXPECTED(!i_zend_verify_property_type(info, &tmp, EX_USES_STRICT_TYPES()))) {
 		zval_ptr_dtor(&tmp);
@@ -2723,8 +2724,7 @@ static zend_never_inline zend_bool zend_handle_fetch_obj_flags(
 				ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(ptr), prop_info);
 			}
 			break;
-		case ZEND_FETCH_DIM_UNSET:
-		case ZEND_FETCH_DIM_RW:
+		case ZEND_FETCH_DIM_UNSET_FLAG:
 			if (!prop_info) {
 				prop_info = zend_object_fetch_property_type_info(obj, ptr);
 				if (!prop_info) {

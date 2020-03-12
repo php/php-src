@@ -1,7 +1,5 @@
 --TEST--
 Test that final properties can't be mutated
---XFAIL--
-Unsetting array items doesn't work yet
 --FILE--
 <?php
 
@@ -10,12 +8,12 @@ class Foo
     final public int $property1;
     final protected string $property2 = "Foo";
     final public array $property3;
-    final public stdclass $property4;
+    final public stdClass $property4;
 
     public function __construct()
     {
         $this->property1 = 1;
-        $this->property4 = new stdclass();
+        $this->property4 = new stdClass();
     }
 
     public function getProperty1(): int
@@ -60,6 +58,12 @@ try {
 $foo->property3[] = 1;
 
 try {
+    $foo->property3[] = 1;
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+try {
     $foo->property3["foo"] = 1;
 } catch (Error $exception) {
     echo $exception->getMessage() . "\n";
@@ -71,6 +75,14 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
+try {
+    unset($foo->property3["foo"]);
+} catch (Error $exception) {
+    echo $exception->getMessage() . "\n";
+}
+
+var_dump($foo->property3);
+
 $foo->property4->foo = "foo";
 
 ?>
@@ -79,3 +91,9 @@ Cannot modify final property Foo::$property1 after initialization
 Cannot modify final property Foo::$property2 after initialization
 Cannot modify final property Foo::$property3 after initialization
 Cannot modify final property Foo::$property3 after initialization
+Cannot modify final property Foo::$property3 after initialization
+Cannot modify final property Foo::$property3 after initialization
+array(1) {
+  [0]=>
+  int(1)
+}

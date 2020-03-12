@@ -1,14 +1,12 @@
 --TEST--
 Test that final static properties can't be mutated by combined assignment operators
---XFAIL--
-??= doesn't work
 --FILE--
 <?php
 
 class Foo
 {
     final public static int $property1 = 1;
-    final public static string $property2 = "";
+    final public static ?string $property2;
 }
 
 $foo = new Foo();
@@ -73,14 +71,16 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
+Foo::$property2 ??= null;
+
 try {
-    Foo::$property2 .= "foo";
+    Foo::$property2 ??= "foo";
 } catch (Error $exception) {
     echo $exception->getMessage() . "\n";
 }
 
 try {
-    Foo::$property2 ??= "foo";
+    Foo::$property2 .= "foo";
 } catch (Error $exception) {
     echo $exception->getMessage() . "\n";
 }
@@ -103,4 +103,4 @@ Cannot modify final static property Foo::$property1 after initialization
 Cannot modify final static property Foo::$property2 after initialization
 Cannot modify final static property Foo::$property2 after initialization
 int(1)
-string(0) ""
+NULL
