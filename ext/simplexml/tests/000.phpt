@@ -51,7 +51,37 @@ object(SimpleXMLElement)#%d (3) {
   ["elem1"]=>
   array(2) {
     [0]=>
-    string(36) "There is some text.Here is some more"
+    object(SimpleXMLElement)#%d (3) {
+      ["@attributes"]=>
+      array(2) {
+        ["attr1"]=>
+        string(5) "first"
+        ["attr2"]=>
+        string(6) "second"
+      }
+      ["comment"]=>
+      object(SimpleXMLElement)#%d (0) {
+      }
+      ["elem2"]=>
+      object(SimpleXMLElement)#%d (2) {
+        ["@attributes"]=>
+        array(2) {
+          ["att25"]=>
+          string(2) "25"
+          ["att42"]=>
+          string(2) "42"
+        }
+        ["elem3"]=>
+        object(SimpleXMLElement)#%d (1) {
+          ["elem4"]=>
+          object(SimpleXMLElement)#%d (1) {
+            ["test"]=>
+            object(SimpleXMLElement)#%d (0) {
+            }
+          }
+        }
+      }
+    }
     [1]=>
     object(SimpleXMLElement)#%d (1) {
       ["@attributes"]=>

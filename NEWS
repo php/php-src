@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . Fixed bug #79364 (When copy empty array, next key is unspecified). (cmb)
   . Fixed bug #78210 (Invalid pointer address). (cmb, Nikita)
 
+- SimpleXML:
+  . Fixed bug #61597 (SXE properties may lack attributes and content). (cmb)
+
 - SOAP:
   . Fixed bug #79357 (SOAP request segfaults when any request parameter is
     missing). (Nikita)

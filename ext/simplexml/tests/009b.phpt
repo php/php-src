@@ -28,8 +28,29 @@ object(SimpleXMLElement)#%d (3) {
     string(5) "elem1"
   }
   ["elem1"]=>
-  string(10) "Bla bla 1."
+  object(SimpleXMLElement)#%d (3) {
+    ["@attributes"]=>
+    array(1) {
+      ["attr1"]=>
+      string(5) "first"
+    }
+    ["comment"]=>
+    object(SimpleXMLElement)#%d (0) {
+    }
+    ["elem2"]=>
+    string(35) "
+   Here we have some text data.
+  "
+  }
   ["elem11"]=>
-  string(10) "Bla bla 2."
+  object(SimpleXMLElement)#%d (2) {
+    ["@attributes"]=>
+    array(1) {
+      ["attr2"]=>
+      string(6) "second"
+    }
+    [0]=>
+    string(10) "Bla bla 2."
+  }
 }
 ===DONE===

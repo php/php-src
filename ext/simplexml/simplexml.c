@@ -981,7 +981,7 @@ static void _get_base_node_value(php_sxe_object *sxe_ref, xmlNodePtr node, zval 
 	php_sxe_object *subnode;
 	xmlChar        *contents;
 
-	if (node->children && node->children->type == XML_TEXT_NODE && !xmlIsBlankNode(node->children)) {
+	if ((!node->properties || node->type == XML_ENTITY_DECL) && node->children && node->children->type == XML_TEXT_NODE && !xmlIsBlankNode(node->children)) {
 		contents = xmlNodeListGetString(node->doc, node->children, 1);
 		if (contents) {
 			ZVAL_STRING(value, (char *)contents);
