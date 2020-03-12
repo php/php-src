@@ -315,7 +315,7 @@ static int convert_case_filter(int c, void *void_data)
 
 	/* Handle invalid characters early, as we assign special meaning to
 	 * codepoints above 0xffffff. */
-	if (UNEXPECTED(c > 0xffffff)) {
+	if (UNEXPECTED((unsigned) c > 0xffffff)) {
 		(*data->next_filter->filter_function)(c, data->next_filter);
 		return 0;
 	}
