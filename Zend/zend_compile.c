@@ -1075,6 +1075,7 @@ ZEND_API int do_bind_class(zval *lcname, zend_string *lc_parent_name) /* {{{ */
 			return FAILURE;
 		} else {
 			do {
+				ZEND_ASSERT(EG(current_execute_data)->func->op_array.fn_flags & ZEND_ACC_PRELOADED);
 				if (zend_preload_autoload
 				  && zend_preload_autoload(EG(current_execute_data)->func->op_array.filename) == SUCCESS) {
 					zv = zend_hash_find_ex(EG(class_table), Z_STR_P(rtd_key), 1);
@@ -1082,7 +1083,6 @@ ZEND_API int do_bind_class(zval *lcname, zend_string *lc_parent_name) /* {{{ */
 						break;
 					}
 				}
-				ZEND_ASSERT(EG(current_execute_data)->func->op_array.fn_flags & ZEND_ACC_PRELOADED);
 				zend_error_noreturn(E_ERROR, "Class %s wasn't preloaded", Z_STRVAL_P(lcname));
 				return FAILURE;
 			} while (0);
