@@ -1963,13 +1963,21 @@ static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_
 				ZVAL_STRING(&zv, dateobj->time->tz_info->name);
 				break;
 			case TIMELIB_ZONETYPE_OFFSET: {
-				zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
+				zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00:00")-1, 0);
 				int utc_offset = dateobj->time->z;
 
-				ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
-					utc_offset < 0 ? '-' : '+',
-					abs(utc_offset / 3600),
-					abs(((utc_offset % 3600) / 60)));
+				if ((utc_offset / 60) != 0) {
+					ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00:00"), "%c%02d:%02d:%02d",
+						utc_offset < 0 ? '-' : '+',
+						abs(utc_offset / 3600),
+						abs(((utc_offset % 3600) / 60)),
+						abs(utc_offset / 60));
+				} else {
+					ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00:00"), "%c%02d:%02d",
+						utc_offset < 0 ? '-' : '+',
+						abs(utc_offset / 3600),
+						abs(((utc_offset % 3600) / 60)));
+				}
 
 				ZVAL_NEW_STR(&zv, tmpstr);
 				}
@@ -2031,13 +2039,21 @@ static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv)
 			ZVAL_STRING(zv, tzobj->tzi.tz->name);
 			break;
 		case TIMELIB_ZONETYPE_OFFSET: {
-			zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
+			zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00:00")-1, 0);
 			timelib_sll utc_offset = tzobj->tzi.utc_offset;
 
-			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
-				utc_offset < 0 ? '-' : '+',
-				abs((int)(utc_offset / 3600)),
-				abs((int)(utc_offset % 3600) / 60));
+			if ((utc_offset / 60) != 0) {
+				ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00:00"), "%c%02d:%02d:%02d",
+					utc_offset < 0 ? '-' : '+',
+					abs((int)(utc_offset / 3600)),
+					abs((int)(utc_offset % 3600) / 60),
+					abs((int)(utc_offset / 60)));
+			} else {
+				ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00:00"), "%c%02d:%02d",
+					utc_offset < 0 ? '-' : '+',
+					abs((int)(utc_offset / 3600)),
+					abs((int)(utc_offset % 3600) / 60));
+			}
 
 			ZVAL_NEW_STR(zv, tmpstr);
 			}

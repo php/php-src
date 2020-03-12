@@ -763,8 +763,52 @@ static timelib_long timelib_parse_tz_cor(char **ptr)
 				tmp = strtol(begin, NULL, 10);
 				return sHOUR(tmp / 100) + sMIN(tmp % 100);
 			}
-		case 5: /* HH:MM */
-			tmp = sHOUR(strtol(begin, NULL, 10)) + sMIN(strtol(begin + 3, NULL, 10));
+		case 5: /* HH:MM, H:M:S */
+			if (begin[1] == ':') {
+				/* H:M:S */
+				tmp = sHOUR(strtol(begin, NULL, 10)) + sMIN(strtol(begin + 2, NULL, 10)) +
+				      strtol(begin + 4, NULL, 10);
+			} else {
+				/* HH:MM */
+				tmp = sHOUR(strtol(begin, NULL, 10)) + sMIN(strtol(begin + 3, NULL, 10));
+			}
+			return tmp;
+		case 6: /* HHMMSS, HH:M:S, H:MM:S, H:M:SS */
+		case 7: /* H:MM:SS, HH:M:SS, HH:MM:S */
+		case 8: /* HH:MM:SS */
+			if (begin[1] == ':') {
+				/* 6: H:MM:S, H:M:SS */
+				/* 7: H:MM:SS */
+				if (begin[3] == ':') {
+					/* 6: H:M:SS */
+					tmp = sHOUR(strtol(begin, NULL, 10)) + sMIN(strtol(begin + 2, NULL, 10)) +
+					      strtol(begin + 4, NULL, 10);
+				} else {
+					/* 6: H:MM:S */
+					/* 7: H:MM:SS */
+					tmp = sHOUR(strtol(begin, NULL, 10)) + sMIN(strtol(begin + 2, NULL, 10)) +
+					      strtol(begin + 5, NULL, 10);
+				}
+			} else if (begin[2] == ':') {
+				/* 6: HH:M:S */
+				/* 7: HH:M:SS, HH:MM:S */
+				/* 8: HH:MM:SS */
+				if (begin[4] == ':') {
+					/* 6: HH:M:S */
+					/* 7: HH:M:SS */
+					tmp = sHOUR(strtol(begin, NULL, 10)) + sMIN(strtol(begin + 3, NULL, 10)) +
+					      strtol(begin + 5, NULL, 10);
+				} else {
+					/* 7: HH:MM:S */
+					/* 8: HH:MM:SS */
+					tmp = sHOUR(strtol(begin, NULL, 10)) + sMIN(strtol(begin + 3, NULL, 10)) +
+					      strtol(begin + 6, NULL, 10);
+				}
+			} else {
+				/* 6: HHMMSS */
+				tmp = strtol(begin, NULL, 10);
+				return sHOUR(tmp / 10000) + sMIN((tmp / 100) % 100) + (tmp % 100);
+			}
 			return tmp;
 	}
 	return 0;
@@ -899,7 +943,7 @@ second = minute | "60";
 secondlz = minutelz | "60";
 meridian = ([AaPp] "."? [Mm] "."?) [\000\t ];
 tz = "("? [A-Za-z]{1,6} ")"? | [A-Z][a-z]+([_/-][A-Za-z]+)+;
-tzcorrection = "GMT"? [+-] hour24 ":"? minute?;
+tzcorrection = "GMT"? [+-] hour24 ":" minute ":" second | "GMT"? [+-] hour24 minute second | "GMT"? [+-] hour24 ":"? minute?;
 
 daysuf = "st" | "nd" | "rd" | "th";
 
