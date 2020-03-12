@@ -4246,6 +4246,10 @@ static int preload_autoload(zend_string *filename)
 {
     zend_persistent_script *persistent_script;
 	zend_op_array *op_array;
+	zend_execute_data *old_execute_data;
+	zend_class_entry *old_fake_scope;
+	zend_bool do_bailout = 0;
+	int ret = SUCCESS;
 
 	if (zend_hash_exists(&EG(included_files), filename)) {
 		return FAILURE;
@@ -4256,18 +4260,55 @@ static int preload_autoload(zend_string *filename)
 		return FAILURE;
 	}
 
+	zend_hash_add_empty_element(&EG(included_files), filename);
+
+	if (persistent_script->ping_auto_globals_mask) {
+		zend_accel_set_auto_globals(persistent_script->ping_auto_globals_mask);
+	}
+
 	op_array = zend_accel_load_script(persistent_script, 1);
 	if (!op_array) {
 		return FAILURE;
 	}
 
-	// TODO: we may need to execute this in some special context ???
-	zend_execute(op_array, NULL);
+	/* Execute in global context */
+	old_execute_data = EG(current_execute_data);
+	EG(current_execute_data) = NULL;
+	old_fake_scope = EG(fake_scope);
+	EG(fake_scope) = NULL;
+	zend_exception_save();
+
+	zend_try {
+		zend_execute(op_array, NULL);
+	} zend_catch {
+		do_bailout = 1;
+	} zend_end_try();
+
+	if (EG(exception)) {
+		ret = FAILURE;
+	}
+
+	zend_exception_restore();
+	EG(fake_scope) = old_fake_scope;
+	EG(current_execute_data) = old_execute_data;
+	while (old_execute_data) {
+		if (old_execute_data->func && (ZEND_CALL_INFO(old_execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
+			if (old_execute_data->symbol_table == &EG(symbol_table)) {
+				zend_attach_symbol_table(old_execute_data);
+			}
+			break;
+		}
+		old_execute_data = old_execute_data->prev_execute_data;
+	}
 
 	destroy_op_array(op_array);
 	efree_size(op_array, sizeof(zend_op_array));
 
-	return SUCCESS;
+	if (do_bailout) {
+		zend_bailout();
+	}
+
+	return ret;
 }
 
 static int accel_preload(const char *config)
