@@ -4244,7 +4244,7 @@ static void preload_load(void)
 
 static int preload_autoload(zend_string *filename)
 {
-    zend_persistent_script *persistent_script;
+	zend_persistent_script *persistent_script;
 	zend_op_array *op_array;
 	zend_execute_data *old_execute_data;
 	zend_class_entry *old_fake_scope;
