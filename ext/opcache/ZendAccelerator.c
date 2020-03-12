@@ -4242,6 +4242,34 @@ static void preload_load(void)
 	}
 }
 
+static int preload_autoload(zend_string *filename)
+{
+    zend_persistent_script *persistent_script;
+	zend_op_array *op_array;
+
+	if (zend_hash_exists(&EG(included_files), filename)) {
+		return FAILURE;
+	}
+
+	persistent_script = zend_accel_hash_find(&ZCSG(hash), filename);
+	if (!persistent_script) {
+		return FAILURE;
+	}
+
+	op_array = zend_accel_load_script(persistent_script, 1);
+	if (!op_array) {
+		return FAILURE;
+	}
+
+	// TODO: we may need to execute this in some special context ???
+	zend_execute(op_array, NULL);
+
+	destroy_op_array(op_array);
+	efree_size(op_array, sizeof(zend_op_array));
+
+	return SUCCESS;
+}
+
 static int accel_preload(const char *config)
 {
 	zend_file_handle file_handle;
@@ -4534,6 +4562,8 @@ static int accel_preload(const char *config)
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 
 		zend_shared_alloc_destroy_xlat_table();
+
+		zend_preload_autoload = preload_autoload;
 	} else {
 		CG(map_ptr_last) = orig_map_ptr_last;
 	}

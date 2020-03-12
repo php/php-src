@@ -1072,11 +1072,21 @@ ZEND_API int do_bind_class(zval *lcname, zend_string *lc_parent_name) /* {{{ */
 		ce = zend_hash_find_ptr(EG(class_table), Z_STR_P(lcname));
 		if (ce) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
+			return FAILURE;
 		} else {
-			ZEND_ASSERT(EG(current_execute_data)->func->op_array.fn_flags & ZEND_ACC_PRELOADED);
-			zend_error_noreturn(E_ERROR, "Class %s wasn't preloaded", Z_STRVAL_P(lcname));
+			do {
+				if (zend_preload_autoload
+				  && zend_preload_autoload(EG(current_execute_data)->func->op_array.filename) == SUCCESS) {
+					zv = zend_hash_find_ex(EG(class_table), Z_STR_P(rtd_key), 1);
+					if (EXPECTED(zv != NULL)) {
+						break;
+					}
+				}
+				ZEND_ASSERT(EG(current_execute_data)->func->op_array.fn_flags & ZEND_ACC_PRELOADED);
+				zend_error_noreturn(E_ERROR, "Class %s wasn't preloaded", Z_STRVAL_P(lcname));
+				return FAILURE;
+			} while (0);
 		}
-		return FAILURE;
 	}
 
 	/* Register the derived class */

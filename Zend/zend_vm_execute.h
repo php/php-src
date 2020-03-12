@@ -2449,8 +2449,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_ANON_CLASS_SPEC_HANDLE
 		zv = zend_hash_find_ex(EG(class_table), rtd_key, 1);
 		if (UNEXPECTED(zv == NULL)) {
 			SAVE_OPLINE();
-			ZEND_ASSERT(EX(func)->op_array.fn_flags & ZEND_ACC_PRELOADED);
-			zend_error_noreturn(E_ERROR, "Anonymous class wasn't preloaded");
+			do {
+				if (zend_preload_autoload
+				  && zend_preload_autoload(EX(func)->op_array.filename) == SUCCESS) {
+					zv = zend_hash_find_ex(EG(class_table), rtd_key, 1);
+					if (EXPECTED(zv != NULL)) {
+						break;
+					}
+				}
+				ZEND_ASSERT(EX(func)->op_array.fn_flags & ZEND_ACC_PRELOADED);
+				zend_error_noreturn(E_ERROR, "Anonymous class wasn't preloaded");
+			} while (0);
 		}
 		ZEND_ASSERT(zv != NULL);
 		ce = Z_CE_P(zv);
