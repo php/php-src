@@ -2367,8 +2367,6 @@ PHP_FUNCTION(curl_copy_handle)
 	}
 #endif
 
-	Z_ADDREF_P(zid);
-
 	ZVAL_RES(return_value, zend_register_resource(dupch, le_curl));
 	dupch->res = Z_RES_P(return_value);
 }
