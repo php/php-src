@@ -1628,6 +1628,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	frame->prev = NULL;
 	frame->func = (const zend_function*)op_array;
 	frame->return_value_used = -1;
+	frame->nested = 0;
 	stack = frame->stack;
 
 	if (trace_buffer->start == ZEND_JIT_TRACE_START_ENTER) {
@@ -2820,6 +2821,7 @@ done:
 				call->call = NULL;
 				call->prev = NULL;
 				call->func = (const zend_function*)op_array;
+				call->nested = 0;
 				top = zend_jit_trace_call_frame(top, op_array);
 				i = 0;
 				while (i < p->op_array->num_args) {
@@ -2865,6 +2867,7 @@ done:
 				frame->prev = NULL;
 				frame->func = (const zend_function*)op_array;
 				frame->return_value_used = -1;
+				frame->nested = 0;
 				stack = frame->stack;
 				for (i = 0; i < op_array->last_var + op_array->T; i++) {
 					/* Initialize abstract stack using SSA */
@@ -2892,6 +2895,7 @@ done:
 			call->call = NULL;
 			call->prev = frame->call;
 			call->func = p->func;
+			call->nested = 1;
 			frame->call = call;
 			top = zend_jit_trace_call_frame(top, p->op_array);
 			if (p->func->type == ZEND_USER_FUNCTION) {

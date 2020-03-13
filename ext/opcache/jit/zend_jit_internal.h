@@ -332,7 +332,10 @@ struct _zend_jit_trace_stack_frame {
 	zend_jit_trace_stack_frame *prev;
 	const zend_function        *func;
 	union {
-		int8_t                  return_value_used;
+		struct {
+			int8_t              return_value_used;
+			int8_t              nested;
+		};
 		int                     return_ssa_var;
 	};
 	zend_jit_trace_stack        stack[1];

@@ -8268,15 +8268,21 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|2:
 		}
 
-		|	// zend_vm_stack_free_call_frame(call);
-		|	test byte [RX + offsetof(zend_execute_data, This.u1.type_info) + 2], (ZEND_CALL_ALLOCATED >> 16)
-		|	jnz >1
-		|.cold_code
-		|1:
-		|	mov FCARG1a, RX
-		|	EXT_CALL zend_jit_free_call_frame, r0
-		|	jmp >1
-		|.code
+		if (zend_jit_trigger != ZEND_JIT_ON_HOT_TRACE ||
+		    !JIT_G(current_frame) ||
+		    !JIT_G(current_frame)->call ||
+		    !JIT_G(current_frame)->call->nested) {
+
+			|	// zend_vm_stack_free_call_frame(call);
+			|	test byte [RX + offsetof(zend_execute_data, This.u1.type_info) + 2], (ZEND_CALL_ALLOCATED >> 16)
+			|	jnz >1
+			|.cold_code
+			|1:
+			|	mov FCARG1a, RX
+			|	EXT_CALL zend_jit_free_call_frame, r0
+			|	jmp >1
+			|.code
+		}
 		|	MEM_OP2_1_ZTS mov, aword, executor_globals, vm_stack_top, RX, r0
 		|1:
 
