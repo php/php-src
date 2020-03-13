@@ -56,6 +56,7 @@ PHP                                                                        NEWS
   . Removed deprecated ldap_sort. (mcmic)
 
 - MBString:
+  . Fixed bug #76999 (mb_regex_set_options() return current options). (cmb)
   . Removed the unused $is_hex parameter from mb_decode_numericentity(). (cmb)
 
 - MySQLi:
