@@ -1970,78 +1970,104 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 	} else if (name_len == sizeof(ZEND_ADD_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_ADD_FUNC_NAME, sizeof(ZEND_ADD_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_ADD_FUNC_NAME);
+		} else if (fptr->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			zend_error(error_type, "Method %s::%s() can not declare argument typehints", ZSTR_VAL(ce->name), ZEND_ADD_FUNC_NAME);
 		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
 			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_ADD_FUNC_NAME);
 		}
 	} else if (name_len == sizeof(ZEND_SUB_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_SUB_FUNC_NAME, sizeof(ZEND_SUB_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_SUB_FUNC_NAME);
+		} else if (fptr->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			zend_error(error_type, "Method %s::%s() can not declare argument typehints", ZSTR_VAL(ce->name), ZEND_SUB_FUNC_NAME);
 		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
 			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_SUB_FUNC_NAME);
 		}
 	} else if (name_len == sizeof(ZEND_MUL_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_MUL_FUNC_NAME, sizeof(ZEND_MUL_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_MUL_FUNC_NAME);
+		} else if (fptr->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			zend_error(error_type, "Method %s::%s() can not declare argument typehints", ZSTR_VAL(ce->name), ZEND_MUL_FUNC_NAME);
 		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
 			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_MUL_FUNC_NAME);
 		}
 	} else if (name_len == sizeof(ZEND_DIV_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_DIV_FUNC_NAME, sizeof(ZEND_DIV_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_DIV_FUNC_NAME);
+		} else if (fptr->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			zend_error(error_type, "Method %s::%s() can not declare argument typehints", ZSTR_VAL(ce->name), ZEND_DIV_FUNC_NAME);
 		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
 			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_DIV_FUNC_NAME);
 		}
 	} else if (name_len == sizeof(ZEND_POW_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_POW_FUNC_NAME, sizeof(ZEND_POW_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_POW_FUNC_NAME);
+		} else if (fptr->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			zend_error(error_type, "Method %s::%s() can not declare argument typehints", ZSTR_VAL(ce->name), ZEND_POW_FUNC_NAME);
 		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
 			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_POW_FUNC_NAME);
 		}
 	} else if (name_len == sizeof(ZEND_MOD_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_MOD_FUNC_NAME, sizeof(ZEND_MOD_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_MOD_FUNC_NAME);
+		} else if (fptr->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			zend_error(error_type, "Method %s::%s() can not declare argument typehints", ZSTR_VAL(ce->name), ZEND_MOD_FUNC_NAME);
 		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
 			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_MOD_FUNC_NAME);
 		}
 	} else if (name_len == sizeof(ZEND_CONCAT_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_CONCAT_FUNC_NAME, sizeof(ZEND_CONCAT_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_CONCAT_FUNC_NAME);
+		} else if (fptr->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			zend_error(error_type, "Method %s::%s() can not declare argument typehints", ZSTR_VAL(ce->name), ZEND_CONCAT_FUNC_NAME);
 		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
 			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_CONCAT_FUNC_NAME);
 		}
 	} else if (name_len == sizeof(ZEND_SHIFT_LEFT_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_SHIFT_LEFT_FUNC_NAME, sizeof(ZEND_SHIFT_LEFT_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), "__shiftLeft");
+		} else if (fptr->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			zend_error(error_type, "Method %s::%s() can not declare argument typehints", ZSTR_VAL(ce->name), "__shiftLeft");
 		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
 			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), "__shiftLeft");
 		}
 	} else if (name_len == sizeof(ZEND_SHIFT_RIGHT_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_SHIFT_RIGHT_FUNC_NAME, sizeof(ZEND_SHIFT_RIGHT_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), "__shiftRight");
+		} else if (fptr->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			zend_error(error_type, "Method %s::%s() can not declare argument typehints", ZSTR_VAL(ce->name), "__shiftRight");
 		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
 			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), "__shiftRight");
 		}
 	} else if (name_len == sizeof(ZEND_OR_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_OR_FUNC_NAME, sizeof(ZEND_OR_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), "__bitwiseOr");
+		} else if (fptr->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			zend_error(error_type, "Method %s::%s() can not declare argument typehints", ZSTR_VAL(ce->name), "__bitwiseOr");
 		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
 			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), "__bitwiseOr");
 		}
 	} else if (name_len == sizeof(ZEND_AND_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_AND_FUNC_NAME, sizeof(ZEND_AND_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), "__bitwiseAnd");
+		} else if (fptr->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			zend_error(error_type, "Method %s::%s() can not declare argument typehints", ZSTR_VAL(ce->name), ZEND_ADD_FUNC_NAME);
 		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
 			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), "__bitwisAnd");
 		}
 	} else if (name_len == sizeof(ZEND_XOR_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_XOR_FUNC_NAME, sizeof(ZEND_XOR_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), "__bitwiseXor");
+		} else if (fptr->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			zend_error(error_type, "Method %s::%s() can not declare argument typehints.", ZSTR_VAL(ce->name), "__bitwiseXor");
 		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
 			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), "__bitwiseXor");
 		}
 	} else if (name_len == sizeof(ZEND_NOT_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_NOT_FUNC_NAME, sizeof(ZEND_NOT_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 1) {
 			zend_error(error_type, "Method %s::%s() must take exactly 1 arguments", ZSTR_VAL(ce->name), "__bitwiseNot");
+		} else if (fptr->common.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			zend_error(error_type, "Method %s::%s() can not declare argument typehints.", ZSTR_VAL(ce->name), "__bitwiseNot");
 		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
 			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), "__bitwiseNot");
 		}
@@ -2406,6 +2432,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		if (clone && (clone->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 			zend_error_noreturn(E_CORE_ERROR, "%s::%s() cannot declare a return type", ZSTR_VAL(scope->name), ZSTR_VAL(clone->common.function_name));
 		}
+
 		efree((char*)lc_class_name);
 	}
 	return SUCCESS;
