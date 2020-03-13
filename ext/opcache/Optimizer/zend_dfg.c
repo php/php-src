@@ -105,11 +105,9 @@ add_op1_def:
 				if (!zend_bitset_in(def, var_num)) {
 					zend_bitset_incl(use, var_num);
 				}
-#if 0
 				if ((build_flags & ZEND_SSA_RC_INFERENCE) && next->op1_type == IS_CV) {
 					zend_bitset_incl(def, var_num);
 				}
-#endif
 			}
 			break;
 		case ZEND_ASSIGN_STATIC_PROP_REF:

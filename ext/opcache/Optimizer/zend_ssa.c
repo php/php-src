@@ -621,14 +621,12 @@ add_op1_def:
 			if (next->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 				ssa_ops[k + 1].op1_use = var[EX_VAR_TO_NUM(next->op1.var)];
 				//USE_SSA_VAR(op_array->last_var + next->op1.var);
-#if 0
 				if ((build_flags & ZEND_SSA_RC_INFERENCE) && next->op1_type == IS_CV) {
 					ssa_ops[k + 1].op1_def = ssa_vars_count;
 					var[EX_VAR_TO_NUM(next->op1.var)] = ssa_vars_count;
 					ssa_vars_count++;
 					//NEW_SSA_VAR(next->op1.var)
 				}
-#endif
 			}
 			break;
 		case ZEND_ASSIGN_STATIC_PROP_REF:

@@ -2409,12 +2409,10 @@ static zend_always_inline int _zend_update_type_info(
 			if (ssa_op->op1_def >= 0) {
 				tmp = t1;
 				if ((t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT)) &&
-				    (opline->op1_type == IS_CV) &&
 				    (opline->extended_value == IS_ARRAY ||
 				     opline->extended_value == IS_OBJECT)) {
 					tmp |= MAY_BE_RCN;
 				} else if ((t1 & MAY_BE_STRING) &&
-				    (opline->op1_type == IS_CV) &&
 				    opline->extended_value == IS_STRING) {
 					tmp |= MAY_BE_RCN;
 				}
@@ -2454,7 +2452,7 @@ static zend_always_inline int _zend_update_type_info(
 		case ZEND_COPY_TMP:
 			if (ssa_op->op1_def >= 0) {
 				tmp = t1;
-				if ((t1 & (MAY_BE_RC1|MAY_BE_REF)) && (opline->op1_type == IS_CV)) {
+				if (t1 & (MAY_BE_RC1|MAY_BE_REF)) {
 					tmp |= MAY_BE_RCN;
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
@@ -2729,7 +2727,7 @@ static zend_always_inline int _zend_update_type_info(
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
 			}
-			if ((opline+1)->op1_type == IS_CV && (ssa_op+1)->op1_def >= 0) {
+			if ((ssa_op+1)->op1_def >= 0) {
 				opline++;
 				ssa_op++;
 				tmp = OP1_INFO_EX();
@@ -2763,14 +2761,27 @@ static zend_always_inline int _zend_update_type_info(
 					UPDATE_SSA_OBJ_TYPE(ce, 1, ssa_op->result_def);
 				}
 			}
-			if ((opline+1)->op1_type == IS_CV) {
+			if ((ssa_op+1)->op1_def >= 0) {
 				opline++;
 				ssa_op++;
 				tmp = OP1_INFO_EX();
-				if (tmp & (MAY_BE_ANY | MAY_BE_REF)) {
-					if (tmp & MAY_BE_RC1) {
-						tmp |= MAY_BE_RCN;
-					}
+				if (tmp & MAY_BE_RC1) {
+					tmp |= MAY_BE_RCN;
+				}
+				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
+			}
+			break;
+		case ZEND_ASSIGN_STATIC_PROP:
+			if (ssa_op->result_def >= 0) {
+				tmp = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF | MAY_BE_RC1 | MAY_BE_RCN;
+				UPDATE_SSA_TYPE(tmp, ssa_op->result_def);
+			}
+			if ((ssa_op+1)->op1_def >= 0) {
+				opline++;
+				ssa_op++;
+				tmp = OP1_INFO_EX();
+				if (tmp & MAY_BE_RC1) {
+					tmp |= MAY_BE_RCN;
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
 			}
@@ -2798,12 +2809,10 @@ static zend_always_inline int _zend_update_type_info(
 			}
 			break;
 		case ZEND_ASSIGN:
-			if (opline->op2_type == IS_CV && ssa_op->op2_def >= 0) {
+			if (ssa_op->op2_def >= 0) {
 				tmp = t2;
-				if (tmp & (MAY_BE_ANY | MAY_BE_REF)) {
-					if (tmp & MAY_BE_RC1) {
-						tmp |= MAY_BE_RCN;
-					}
+				if (tmp & MAY_BE_RC1) {
+					tmp |= MAY_BE_RCN;
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->op2_def);
 			}
@@ -2918,7 +2927,7 @@ static zend_always_inline int _zend_update_type_info(
 		case ZEND_SEND_VAR:
 			if (ssa_op->op1_def >= 0) {
 				tmp = t1;
-				if ((t1 & (MAY_BE_RC1|MAY_BE_REF)) && (opline->op1_type == IS_CV)) {
+				if (t1 & (MAY_BE_RC1|MAY_BE_REF)) {
 					tmp |= MAY_BE_RCN;
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
@@ -3102,7 +3111,7 @@ static zend_always_inline int _zend_update_type_info(
 			break;
 		case ZEND_INIT_ARRAY:
 		case ZEND_ADD_ARRAY_ELEMENT:
-			if (opline->op1_type == IS_CV && ssa_op->op1_def >= 0) {
+			if (ssa_op->op1_def >= 0) {
 				if (opline->extended_value & ZEND_ARRAY_ELEMENT_REF) {
 					tmp = (MAY_BE_REF | t1) & ~(MAY_BE_UNDEF|MAY_BE_RC1|MAY_BE_RCN);
 					if (t1 & MAY_BE_UNDEF) {
@@ -3190,10 +3199,8 @@ static zend_always_inline int _zend_update_type_info(
 				tmp = t1;
 				if (opline->opcode == ZEND_FE_RESET_RW) {
 					tmp |= MAY_BE_REF;
-				} else {
-					if ((t1 & MAY_BE_RC1) && opline->op1_type != IS_TMP_VAR) {
-						tmp |= MAY_BE_RCN;
-					}
+				} else if (t1 & MAY_BE_RC1) {
+					tmp |= MAY_BE_RCN;
 				}
 				UPDATE_SSA_TYPE(tmp, ssa_op->op1_def);
 				COPY_SSA_OBJ_TYPE(ssa_op->op1_use, ssa_op->op1_def);
