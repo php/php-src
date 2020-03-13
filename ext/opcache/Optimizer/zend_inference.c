@@ -3299,6 +3299,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						|| opline->opcode == ZEND_FETCH_LIST_W) {
 					j = ssa_vars[ssa_ops[i].result_def].use_chain;
 					while (j >= 0) {
+						ZEND_ASSERT(j == i + 1 && "Use must be in next opline");
 						switch (op_array->opcodes[j].opcode) {
 							case ZEND_FETCH_DIM_W:
 							case ZEND_FETCH_DIM_RW:
@@ -3354,6 +3355,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 							EMPTY_SWITCH_DEFAULT_CASE()
 						}
 						j = zend_ssa_next_use(ssa_ops, ssa_ops[i].result_def, j);
+						ZEND_ASSERT(j < 0 && "There should only be one use");
 					}
 				}
 				if ((tmp & MAY_BE_ARRAY) && (tmp & MAY_BE_ARRAY_KEY_ANY)) {
