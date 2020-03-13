@@ -7,10 +7,11 @@ FFI 301: FFI loading on Windows
 ffi.enable=1
 --FILE--
 <?php
+require_once('utils.inc');
 $fn = __DIR__ . "/300-win32.h";
 $cont = str_replace(
 		"PHP_DLL_NAME",
-		"php" . PHP_MAJOR_VERSION . (PHP_ZTS ? "ts" : "") . (PHP_DEBUG ? "_debug" : "") . ".dll",
+		ffi_get_php_dll_name(),
 		file_get_contents("$fn.in")
 	);
 file_put_contents($fn, $cont);
