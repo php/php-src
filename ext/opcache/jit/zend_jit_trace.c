@@ -259,7 +259,7 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 			/* unsupported */
 			return 1;
 		case ZEND_DO_FCALL:
-			/* potentialy polimorhic call */
+			/* potentially polymorphic call */
 			return 1;
 #if 0
 		case ZEND_DO_UCALL:
