@@ -1848,18 +1848,13 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 				}														\
 			}															\
 			if (ssa_var_info[__var].type != __type) { 					\
+				if (ssa_var_info[__var].type & ~__type) {				\
+					emit_type_narrowing_warning(op_array, ssa, __var);	\
+					return FAILURE;										\
+				}														\
+				ssa_var_info[__var].type = __type;						\
 				if (update_worklist) { 									\
-					if (ssa_var_info[__var].type & ~__type) {			\
-						emit_type_narrowing_warning(op_array, ssa, __var);\
-						return FAILURE;									\
-					}													\
-					ssa_var_info[__var].type = __type;					\
 					add_usages(op_array, ssa, worklist, __var);			\
-				} else {												\
-					if (ssa_var_info[__var].type & ~__type) {			\
-						return FAILURE;									\
-					}													\
-					ssa_var_info[__var].type = __type;					\
 				}														\
 			}															\
 			/*zend_bitset_excl(worklist, var);*/						\
