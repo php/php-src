@@ -243,7 +243,7 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 			return 1;
 		case ZEND_NEW:
 			if (opline->extended_value == 0 && (opline+1)->opcode == ZEND_DO_FCALL) {
-				/* NEW may skip constructor without argumnts */
+				/* NEW may skip constructor without arguments */
 				return 1;
 			}
 			break;
