@@ -6590,6 +6590,20 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, const zen
 		}
 	}
 
+	if ((op1_info & (MAY_BE_REF|MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG &&
+	    (op2_info & (MAY_BE_REF|MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_LONG) {
+		if (!zend_jit_cmp_long_long(Dst, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
+			return 0;
+		}
+		return 1;
+	} else if ((op1_info & (MAY_BE_REF|MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_DOUBLE &&
+	           (op2_info & (MAY_BE_REF|MAY_BE_ANY|MAY_BE_UNDEF)) == MAY_BE_DOUBLE) {
+		if (!zend_jit_cmp_double_double(Dst, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
+			return 0;
+		}
+		return 1;
+	}
+
 	if ((op1_info & MAY_BE_UNDEF) && (op2_info & MAY_BE_UNDEF)) {
 		op1_info |= MAY_BE_NULL;
 		op2_info |= MAY_BE_NULL;
@@ -6854,16 +6868,6 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, const zen
 			} else if (not_identical_label != (uint32_t)-1) {
 				|	jmp =>not_identical_label
 			}
-		}
-	} else if ((op1_info & MAY_BE_ANY) == MAY_BE_LONG &&
-	           (op2_info & MAY_BE_ANY) == MAY_BE_LONG) {
-		if (!zend_jit_cmp_long_long(Dst, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
-			return 0;
-		}
-	} else if ((op1_info & MAY_BE_ANY) == MAY_BE_DOUBLE &&
-	           (op2_info & MAY_BE_ANY) == MAY_BE_DOUBLE) {
-		if (!zend_jit_cmp_double_double(Dst, opline, op1_addr, op2_addr, res_addr, smart_branch_opcode, target_label, target_label2, exit_addr)) {
-			return 0;
 		}
 	} else {
 		if (opline->op1_type == IS_CONST) {
