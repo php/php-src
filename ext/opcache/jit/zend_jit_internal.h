@@ -311,7 +311,7 @@ typedef int32_t zend_jit_trace_stack;
 
 typedef struct _zend_jit_trace_info {
 	uint32_t                  id;            /* trace id */
-	uint32_t                  root;          /* root trace id or sekf id for root traces */
+	uint32_t                  root;          /* root trace id or self id for root traces */
 	uint32_t                  parent;        /* parent trace id or 0 for root traces */
 	uint32_t                  link;          /* link trace id or self id for loop) */
 	uint32_t                  exit_count;    /* number of side exits */
