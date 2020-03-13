@@ -264,7 +264,7 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 #if 0
 		case ZEND_DO_UCALL:
 		case ZEND_DO_FCALL_BY_NAME:
-			/* monomorthic call */
+			/* monomorphic call */
 			// TODO: recompilation may change traget ???
 			return 0;
 #endif
