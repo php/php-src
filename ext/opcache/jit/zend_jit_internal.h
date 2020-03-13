@@ -183,7 +183,7 @@ int  ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(BAD_FUNC,          "bad function call") \
 	_(HALT,              "exit from interpreter") \
 	_(COMPILER_ERROR,    "JIT compilation error") \
-	/* no recoverable error (blacklist innediately) */ \
+	/* no recoverable error (blacklist immediately) */ \
 	_(NO_SHM,            "insufficient shared memory") \
 	_(TOO_MANY_TRACES,   "too many traces") \
 	_(TOO_MANY_CHILDREN, "too many side traces") \
