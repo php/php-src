@@ -2627,9 +2627,9 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							if (!zend_jit_label(&dasm_state, jit_return_label)) {
 								goto jit_failure;
 							}
-						    if (!zend_jit_leave_frame(&dasm_state)) {
+							if (!zend_jit_leave_frame(&dasm_state)) {
 								goto jit_failure;
-						    }
+							}
 							for (j = 0 ; j < op_array->last_var; j++) {
 								uint32_t info = zend_ssa_cv_info(opline, op_array, ssa, j);
 
