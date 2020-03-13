@@ -1850,8 +1850,7 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 			if (ssa_var_info[__var].type != __type) { 					\
 				if (update_worklist) { 									\
 					if (ssa_var_info[__var].type & ~__type) {			\
-						handle_type_narrowing(op_array, ssa, worklist,	\
-							__var, ssa_var_info[__var].type, __type);	\
+						emit_type_narrowing_warning(op_array, ssa, __var);\
 						return FAILURE;									\
 					}													\
 					ssa_var_info[__var].type = __type;					\
@@ -1933,87 +1932,12 @@ static void add_usages(const zend_op_array *op_array, zend_ssa *ssa, zend_bitset
 	}
 }
 
-static void reset_dependent_vars(const zend_op_array *op_array, zend_ssa *ssa, zend_bitset worklist, int var)
+static void emit_type_narrowing_warning(const zend_op_array *op_array, zend_ssa *ssa, int var)
 {
-	zend_ssa_op *ssa_ops = ssa->ops;
-	zend_ssa_var *ssa_vars = ssa->vars;
-	zend_ssa_var_info *ssa_var_info = ssa->var_info;
-	zend_ssa_phi *p;
-	int use;
-
-	p = ssa_vars[var].phi_use_chain;
-	while (p) {
-		if (ssa_var_info[p->ssa_var].type) {
-			ssa_var_info[p->ssa_var].type = 0;
-			zend_bitset_incl(worklist, p->ssa_var);
-			reset_dependent_vars(op_array, ssa, worklist, p->ssa_var);
-		}
-		p = zend_ssa_next_use_phi(ssa, var, p);
-	}
-	use = ssa_vars[var].use_chain;
-	while (use >= 0) {
-		if (ssa_ops[use].op1_def >= 0 && ssa_var_info[ssa_ops[use].op1_def].type) {
-			ssa_var_info[ssa_ops[use].op1_def].type = 0;
-			zend_bitset_incl(worklist, ssa_ops[use].op1_def);
-			reset_dependent_vars(op_array, ssa, worklist, ssa_ops[use].op1_def);
-		}
-		if (ssa_ops[use].op2_def >= 0 && ssa_var_info[ssa_ops[use].op2_def].type) {
-			ssa_var_info[ssa_ops[use].op2_def].type = 0;
-			zend_bitset_incl(worklist, ssa_ops[use].op2_def);
-			reset_dependent_vars(op_array, ssa, worklist, ssa_ops[use].op2_def);
-		}
-		if (ssa_ops[use].result_def >= 0 && ssa_var_info[ssa_ops[use].result_def].type) {
-			ssa_var_info[ssa_ops[use].result_def].type = 0;
-			zend_bitset_incl(worklist, ssa_ops[use].result_def);
-			reset_dependent_vars(op_array, ssa, worklist, ssa_ops[use].result_def);
-		}
-		if (op_array->opcodes[use+1].opcode == ZEND_OP_DATA) {
-			if (ssa_ops[use+1].op1_def >= 0 && ssa_var_info[ssa_ops[use+1].op1_def].type) {
-				ssa_var_info[ssa_ops[use+1].op1_def].type = 0;
-				zend_bitset_incl(worklist, ssa_ops[use+1].op1_def);
-				reset_dependent_vars(op_array, ssa, worklist, ssa_ops[use+1].op1_def);
-			}
-			if (ssa_ops[use+1].op2_def >= 0 && ssa_var_info[ssa_ops[use+1].op2_def].type) {
-				ssa_var_info[ssa_ops[use+1].op2_def].type = 0;
-				zend_bitset_incl(worklist, ssa_ops[use+1].op2_def);
-				reset_dependent_vars(op_array, ssa, worklist, ssa_ops[use+1].op2_def);
-			}
-			if (ssa_ops[use+1].result_def >= 0 && ssa_var_info[ssa_ops[use+1].result_def].type) {
-				ssa_var_info[ssa_ops[use+1].result_def].type = 0;
-				zend_bitset_incl(worklist, ssa_ops[use+1].result_def);
-				reset_dependent_vars(op_array, ssa, worklist, ssa_ops[use+1].result_def);
-			}
-		}
-		use = zend_ssa_next_use(ssa_ops, var, use);
-	}
-#ifdef SYM_RANGE
-	/* Process symbolic control-flow constraints */
-	p = ssa->vars[var].sym_use_chain;
-	while (p) {
-		ssa_var_info[p->ssa_var].type = 0;
-		zend_bitset_incl(worklist, p->ssa_var);
-		reset_dependent_vars(op_array, ssa, worklist, p->ssa_var);
-		p = p->sym_use_chain;
-	}
-#endif
-}
-
-static void handle_type_narrowing(const zend_op_array *op_array, zend_ssa *ssa, zend_bitset worklist, int var, uint32_t old_type, uint32_t new_type)
-{
-	if (1) {
-		/* Right now, this is always a bug */
-		int def_op_num = ssa->vars[var].definition;
-		const zend_op *def_opline = def_op_num >= 0 ? &op_array->opcodes[def_op_num] : NULL;
-		const char *def_op_name = def_opline ? zend_get_opcode_name(def_opline->opcode) : "PHI";
-		zend_error(E_WARNING, "Narrowing occurred during type inference of %s. Please file a bug report on bugs.php.net", def_op_name);
-	} else {
-		/* if new_type set resets some bits from old_type set
-		 * We have completely recalculate types of some dependent SSA variables
-		 * (this may occurs mainly because of incremental inter-precudure
-		 * type inference)
-		 */
-		reset_dependent_vars(op_array, ssa, worklist, var);
-	}
+	int def_op_num = ssa->vars[var].definition;
+	const zend_op *def_opline = def_op_num >= 0 ? &op_array->opcodes[def_op_num] : NULL;
+	const char *def_op_name = def_opline ? zend_get_opcode_name(def_opline->opcode) : "PHI";
+	zend_error(E_WARNING, "Narrowing occurred during type inference of %s. Please file a bug report on bugs.php.net", def_op_name);
 }
 
 uint32_t zend_array_element_type(uint32_t t1, int write, int insert)
@@ -3389,8 +3313,10 @@ static zend_always_inline int _zend_update_type_info(
 						zend_uchar opcode;
 
 						if (!ssa_opcodes) {
+							ZEND_ASSERT(j == (opline - op_array->opcodes) + 1 && "Use must be in next opline");
 							opcode = op_array->opcodes[j].opcode;
 						} else {
+							ZEND_ASSERT(ssa_opcodes[j] == opline + 1 && "Use must be in next opline");
 							opcode = ssa_opcodes[j]->opcode;
 						}
 						switch (opcode) {
@@ -3448,6 +3374,7 @@ static zend_always_inline int _zend_update_type_info(
 							EMPTY_SWITCH_DEFAULT_CASE()
 						}
 						j = zend_ssa_next_use(ssa->ops, ssa_op->result_def, j);
+						ZEND_ASSERT(j < 0 && "There should only be one use");
 					}
 				}
 				if ((tmp & MAY_BE_ARRAY) && (tmp & MAY_BE_ARRAY_KEY_ANY)) {

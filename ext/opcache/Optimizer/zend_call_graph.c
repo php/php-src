@@ -279,7 +279,7 @@ void zend_analyze_call_graph(zend_arena **arena, zend_script *script, zend_call_
 }
 /* }}} */
 
-zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info *info, zend_op_array *op_array) /* {{{ */
+zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info *info, const zend_op_array *op_array) /* {{{ */
 {
 	zend_call_info **map, *call;
 	if (!info->callee_info) {
