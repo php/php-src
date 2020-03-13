@@ -722,6 +722,34 @@ static int find_return_ssa_var(zend_jit_trace_rec *p, zend_ssa_op *ssa_op)
 	}
 }
 
+static int find_call_num_args(zend_jit_trace_rec *p)
+{
+	while (1) {
+		if (p->op == ZEND_JIT_TRACE_VM) {
+			if (p->opline->opcode == ZEND_INIT_FCALL
+			 || p->opline->opcode == ZEND_INIT_FCALL_BY_NAME
+			 || p->opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME
+			 || p->opline->opcode == ZEND_INIT_DYNAMIC_CALL
+			 || p->opline->opcode == ZEND_INIT_USER_CALL
+			 || p->opline->opcode == ZEND_NEW
+			 || p->opline->opcode == ZEND_INIT_METHOD_CALL
+			 || p->opline->opcode == ZEND_INIT_STATIC_METHOD_CALL) {
+				if (p->opline->extended_value <= 127) {
+					return p->opline->extended_value;
+				} else {
+					return -1;
+				}
+			}
+			return -1;
+		} else if (p->op == ZEND_JIT_TRACE_OP1_TYPE || p->op == ZEND_JIT_TRACE_OP2_TYPE) {
+			/*skip */
+		} else {
+			return -1;
+		}
+		p--;
+	}
+}
+
 static int is_checked_guard(const zend_ssa *tssa, const zend_op **ssa_opcodes, uint32_t var, uint32_t phi_var)
 {
 	if ((tssa->var_info[phi_var].type & MAY_BE_ANY) == MAY_BE_LONG) {
@@ -1629,6 +1657,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	frame->func = (const zend_function*)op_array;
 	frame->return_value_used = -1;
 	frame->nested = 0;
+	frame->num_args = -1;
 	stack = frame->stack;
 
 	if (trace_buffer->start == ZEND_JIT_TRACE_START_ENTER) {
@@ -2822,6 +2851,7 @@ done:
 				call->prev = NULL;
 				call->func = (const zend_function*)op_array;
 				call->nested = 0;
+				call->num_args = -1; // TODO: should be possible to get the real number ???
 				top = zend_jit_trace_call_frame(top, op_array);
 				i = 0;
 				while (i < p->op_array->num_args) {
@@ -2868,6 +2898,7 @@ done:
 				frame->func = (const zend_function*)op_array;
 				frame->return_value_used = -1;
 				frame->nested = 0;
+				frame->num_args = -1;
 				stack = frame->stack;
 				for (i = 0; i < op_array->last_var + op_array->T; i++) {
 					/* Initialize abstract stack using SSA */
@@ -2896,6 +2927,7 @@ done:
 			call->prev = frame->call;
 			call->func = p->func;
 			call->nested = 1;
+			call->num_args = find_call_num_args(p-1);
 			frame->call = call;
 			top = zend_jit_trace_call_frame(top, p->op_array);
 			if (p->func->type == ZEND_USER_FUNCTION) {

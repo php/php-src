@@ -7821,6 +7821,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 	const zend_function *func = NULL;
 	uint32_t i;
 	zend_jit_addr res_addr;
+	uint32_t call_num_args = 0;
 	zend_bool unknown_num_args = 0;
 
 	if (RETURN_VALUE_USED(opline)) {
@@ -7852,11 +7853,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		/* resolve function ar run time */
 	} else if (func->type == ZEND_USER_FUNCTION) {
 		ZEND_ASSERT(opline->opcode != ZEND_DO_ICALL);
-		if (call_info->num_args > func->op_array.num_args) {
-			unknown_num_args = 1;
-		}
+		call_num_args = call_info->num_args;
 	} else if (func->type == ZEND_INTERNAL_FUNCTION) {
 		ZEND_ASSERT(opline->opcode != ZEND_DO_UCALL);
+		call_num_args = call_info->num_args;
 #if ZEND_DEBUG
 		if (func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			// TODO: Mow most internal functions have type hints ???
@@ -7873,14 +7873,26 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 #ifndef ZEND_WIN32
 			// TODO: ASLR may cause different addresses in different workers ???
 			func = trace->func;
-			unknown_num_args = 1;
+			if (JIT_G(current_frame) &&
+			    JIT_G(current_frame)->call &&
+			    JIT_G(current_frame)->call->num_args >= 0) {
+				call_num_args = JIT_G(current_frame)->call->num_args;
+			} else {
+				unknown_num_args = 1;
+			}
 #endif
 // TODO: it should be possible to reuse known user function as well ???
 		} else if (trace->op == ZEND_JIT_TRACE_ENTER) {
 			ZEND_ASSERT(trace->func->type == ZEND_USER_FUNCTION);
 			if (zend_accel_in_shm(trace->func->op_array.opcodes)) {
 				func = trace->func;
-				unknown_num_args = 1;
+				if (JIT_G(current_frame) &&
+				    JIT_G(current_frame)->call &&
+				    JIT_G(current_frame)->call->num_args >= 0) {
+					call_num_args = JIT_G(current_frame)->call->num_args;
+				} else {
+					unknown_num_args = 1;
+				}
 			}
 		}
 	}
@@ -7973,8 +7985,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	mov aword EX:RX->return_value, 0
 		}
 
-		if (func && !unknown_num_args) {
-			for (i = call_info->num_args; i < func->op_array.last_var; i++) {
+		if (func
+		 && !unknown_num_args
+		 && call_num_args <= func->op_array.num_args) {
+			for (i = call_num_args; i < func->op_array.last_var; i++) {
 				uint32_t n = EX_NUM_TO_VAR(i);
 				|	SET_Z_TYPE_INFO RX + n, IS_UNDEF
 			}
@@ -8013,13 +8027,16 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		|	mov FP, RX
 
 		|	// opline = op_array->opcodes;
-		if (func && !unknown_num_args) {
+		if (func
+		 && !unknown_num_args
+		 && call_num_args <= func->op_array.num_args) {
 			uint32_t num_args;
 
-			if (func->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) {
+			if ((func->op_array.fn_flags & ZEND_ACC_HAS_TYPE_HINTS) != 0
+			  && call_info) {
 				num_args = skip_valid_arguments(op_array, ssa, call_info);
 			} else {
-				num_args = call_info->num_args;
+				num_args = call_num_args;
 			}
 			if (func && zend_accel_in_shm(func->op_array.opcodes)) {
 				|	LOAD_IP_ADDR (func->op_array.opcodes + num_args)
@@ -8054,6 +8071,25 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				|	jmp =>num_args
 #endif
 				return 1;
+			}
+		} else if (func
+		 && !unknown_num_args
+		 && call_num_args > func->op_array.num_args) {
+			if (func && zend_accel_in_shm(func->op_array.opcodes)) {
+				|	LOAD_IP_ADDR (func->op_array.opcodes)
+			} else if (GCC_GLOBAL_REGS) {
+				|	mov IP, aword [r0 + offsetof(zend_op_array, opcodes)]
+			} else {
+				|	mov FCARG1a, aword [r0 + offsetof(zend_op_array, opcodes)]
+				|	mov aword EX->opline, FCARG1a
+			}
+			if (!GCC_GLOBAL_REGS) {
+				|	mov FCARG1a, FP
+			}
+			|	EXT_CALL zend_jit_copy_extra_args_helper, r0
+			for (i = call_num_args; i < func->op_array.last_var; i++) {
+				uint32_t n = EX_NUM_TO_VAR(i);
+				|	SET_Z_TYPE_INFO FP + n, IS_UNDEF
 			}
 		} else {
 			|	// opline = op_array->opcodes
@@ -8243,7 +8279,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 
 		|	// zend_vm_stack_free_args(call);
 		if (func && call_info && !unknown_num_args) {
-			for (i = 0; i < call_info->num_args; i++ ) {
+			for (i = 0; i < call_num_args; i++ ) {
 				uint32_t offset = EX_NUM_TO_VAR(i);
 				|	ZVAL_PTR_DTOR ZEND_ADDR_MEM_ZVAL(ZREG_RX, offset), MAY_BE_ANY|MAY_BE_RC1|MAY_BE_RCN, 0, 1, 0, opline
 			}

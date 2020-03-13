@@ -335,6 +335,7 @@ struct _zend_jit_trace_stack_frame {
 		struct {
 			int8_t              return_value_used;
 			int8_t              nested;
+			int8_t              num_args;
 		};
 		int                     return_ssa_var;
 	};
