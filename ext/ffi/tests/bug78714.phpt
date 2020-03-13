@@ -6,13 +6,9 @@ Bug #78714 (funcs returning pointer can't use call convention spec)
 ffi.enable=1
 --FILE--
 <?php
+require_once('utils.inc');
 $def = 'char * __cdecl get_zend_version(void);';
-if (substr(PHP_OS, 0, 3) != 'WIN') {
-    $ffi = FFI::cdef($def);
-} else {
-    $dll = 'php7' . (PHP_ZTS ? 'ts' : '') . (PHP_DEBUG ? '_debug' : '') . '.dll';
-    $ffi = FFI::cdef($def, $dll);
-}
+$ffi = ffi_cdef($def, ffi_get_php_dll_name());
 echo substr(FFI::string($ffi->get_zend_version()), 0, 4) . "\n";
 ?>
 --EXPECT--

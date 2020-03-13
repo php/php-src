@@ -7,6 +7,7 @@ if (!extension_loaded('zend-test')) die('skip zend-test extension not available'
 ?>
 --FILE--
 <?php
+require_once('utils.inc');
 $header = <<<HEADER
 struct bug79096 {
 	uint64_t a;
@@ -22,8 +23,7 @@ if (PHP_OS_FAMILY !== 'Windows') {
     try {
         $ffi = FFI::cdef($header, 'php_zend_test.dll');
     } catch (FFI\Exception $ex) {
-        $dll = $dll = 'php7' . (PHP_ZTS ? 'ts' : '') . (PHP_DEBUG ? '_debug' : '') . '.dll';
-        $ffi = FFI::cdef($header, $dll);
+        $ffi = FFI::cdef($header, ffi_get_php_dll_name());
     }
 }
 
