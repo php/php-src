@@ -43,18 +43,28 @@ if test "$PHP_OPCACHE" != "no"; then
     ZEND_JIT_SRC="jit/zend_jit.c jit/zend_jit_vm_helpers.c"
 
     dnl Find out which ABI we are using.
-    echo 'int i;' > conftest.$ac_ext
-    if AC_TRY_EVAL(ac_compile); then
-      case `/usr/bin/file conftest.o` in
-        *"Mach-O 64-bit"*)
+    AC_RUN_IFELSE([AC_LANG_SOURCE([[
+      int main(void) {
+        return sizeof(void*) == 4;
+      }
+    ]])],[
+      ac_cv_32bit_build=no
+    ],[
+      ac_cv_32bit_build=yes
+    ],[
+      ac_cv_32bit_build=no
+    ])
+
+    if test "$ac_cv_32bit_build" = "no"; then
+      case $host_alias in
+        *x86_64-*-darwin*)
           DASM_FLAGS="-D X64APPLE=1 -D X64=1"
         ;;
-        *64-bit*)
+        *x86_64*)
           DASM_FLAGS="-D X64=1"
         ;;
       esac
     fi
-    rm -rf conftest*
 
     if test "$enable_zts" = "yes"; then
       DASM_FLAGS="$DASM_FLAGS -D ZTS=1"

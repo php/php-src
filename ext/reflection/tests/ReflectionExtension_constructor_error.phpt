@@ -28,4 +28,4 @@ try {
 --EXPECTF--
 Ok - ReflectionExtension::__construct() expects exactly %d parameter, %d given
 Ok - ReflectionExtension::__construct() expects exactly %d parameter, %d given
-Ok - ReflectionExtension::__construct() expects parameter 1 to be string, array given
+Ok - ReflectionExtension::__construct(): Argument #1 ($name) must be of type string, array given

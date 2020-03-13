@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(857, "oem");
 
 ?>
+--CONFLICTS--
+dir_cp1254
 --INI--
 internal_encoding=cp1254
 --FILE--

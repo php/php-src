@@ -25,6 +25,7 @@
 #include "zend_exceptions.h"
 
 #include "php_spl.h"
+#include "spl_fixedarray_arginfo.h"
 #include "spl_functions.h"
 #include "spl_engine.h"
 #include "spl_fixedarray.h"
@@ -1000,48 +1001,23 @@ zend_object_iterator *spl_fixedarray_get_iterator(zend_class_entry *ce, zval *ob
 }
 /* }}} */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_splfixedarray_construct, 0, 0, 0)
-	ZEND_ARG_INFO(0, size)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_fixedarray_offsetGet, 0, 0, 1)
-	ZEND_ARG_INFO(0, index)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_fixedarray_offsetSet, 0, 0, 2)
-	ZEND_ARG_INFO(0, index)
-	ZEND_ARG_INFO(0, newval)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_fixedarray_setSize, 0)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_fixedarray_fromArray, 0, 0, 1)
-	ZEND_ARG_INFO(0, array)
-	ZEND_ARG_INFO(0, save_indexes)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_splfixedarray_void, 0)
-ZEND_END_ARG_INFO()
-
 static const zend_function_entry spl_funcs_SplFixedArray[] = { /* {{{ */
-	SPL_ME(SplFixedArray, __construct,     arginfo_splfixedarray_construct,ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, __wakeup,        arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, count,           arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, toArray,         arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, fromArray,       arginfo_fixedarray_fromArray,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	SPL_ME(SplFixedArray, getSize,         arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, setSize,         arginfo_fixedarray_setSize,     ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, offsetExists,    arginfo_fixedarray_offsetGet,   ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, offsetGet,       arginfo_fixedarray_offsetGet,   ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, offsetSet,       arginfo_fixedarray_offsetSet,   ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, offsetUnset,     arginfo_fixedarray_offsetGet,   ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, rewind,          arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, current,         arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, key,             arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, next,            arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
-	SPL_ME(SplFixedArray, valid,           arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, __construct,     arginfo_class_SplFixedArray___construct,		ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, __wakeup,        arginfo_class_SplFixedArray___wakeup,		ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, count,           arginfo_class_SplFixedArray_count,			ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, toArray,         arginfo_class_SplFixedArray_toArray,			ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, fromArray,       arginfo_class_SplFixedArray_fromArray,		ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	SPL_ME(SplFixedArray, getSize,         arginfo_class_SplFixedArray_getSize,			ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, setSize,         arginfo_class_SplFixedArray_setSize,			ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, offsetExists,    arginfo_class_SplFixedArray_offsetExists,	ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, offsetGet,       arginfo_class_SplFixedArray_offsetGet,		ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, offsetSet,       arginfo_class_SplFixedArray_offsetSet,		ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, offsetUnset,     arginfo_class_SplFixedArray_offsetUnset,		ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, rewind,          arginfo_class_SplFixedArray_rewind,			ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, current,         arginfo_class_SplFixedArray_current,			ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, key,             arginfo_class_SplFixedArray_key,				ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, next,            arginfo_class_SplFixedArray_next,			ZEND_ACC_PUBLIC)
+	SPL_ME(SplFixedArray, valid,           arginfo_class_SplFixedArray_valid,			ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */

@@ -29,6 +29,7 @@
 #include "php_com_dotnet.h"
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
+#include "com_persist_arginfo.h"
 
 /* {{{ expose php_stream as a COM IStream */
 
@@ -246,13 +247,6 @@ static struct IStreamVtbl php_istream_vtbl = {
 
 static void istream_destructor(php_istream *stm)
 {
-	if (stm->res) {
-		zend_resource *res = stm->res;
-		stm->res = NULL;
-		zend_list_delete(res);
-		return;
-	}
-
 	if (stm->refcount > 0) {
 		CoDisconnectObject((IUnknown*)stm, 0);
 	}
@@ -266,7 +260,6 @@ static void istream_destructor(php_istream *stm)
 PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream)
 {
 	php_istream *stm = (php_istream*)CoTaskMemAlloc(sizeof(*stm));
-	zval *tmp;
 
 	if (stm == NULL)
 		return NULL;
@@ -278,8 +271,7 @@ PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream)
 	stm->stream = stream;
 
 	GC_ADDREF(stream->res);
-	tmp = zend_list_insert(stm, le_istream);
-	stm->res = Z_RES_P(tmp);
+	stm->res = zend_register_resource(stm, le_istream);
 
 	return (IStream*)stm;
 }
@@ -336,6 +328,10 @@ CPH_METHOD(GetCurFileName)
 	OLECHAR *olename = NULL;
 	CPH_FETCH();
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	CPH_NO_OBJ();
 
 	res = get_persist_file(helper);
@@ -374,15 +370,15 @@ CPH_METHOD(SaveToFile)
 	OLECHAR *olefilename = NULL;
 	CPH_FETCH();
 
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "p!|b",
+				&filename, &filename_len, &remember)) {
+		RETURN_THROWS();
+	}
+
 	CPH_NO_OBJ();
 
 	res = get_persist_file(helper);
 	if (helper->ipf) {
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "p!|b",
-					&filename, &filename_len, &remember)) {
-			RETURN_THROWS();
-		}
-
 		if (filename) {
 			fullpath = expand_filepath(filename, NULL);
 			if (!fullpath) {
@@ -436,16 +432,15 @@ CPH_METHOD(LoadFromFile)
 	OLECHAR *olefilename;
 	CPH_FETCH();
 
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "p|l",
+				&filename, &filename_len, &flags)) {
+		RETURN_THROWS();
+	}
+
 	CPH_NO_OBJ();
 
 	res = get_persist_file(helper);
 	if (helper->ipf) {
-
-		if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "p|l",
-					&filename, &filename_len, &flags)) {
-			RETURN_THROWS();
-		}
-
 		if (!(fullpath = expand_filepath(filename, NULL))) {
 			RETURN_FALSE;
 		}
@@ -479,6 +474,10 @@ CPH_METHOD(GetMaxStreamSize)
 	ULARGE_INTEGER size;
 	CPH_FETCH();
 
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	CPH_NO_OBJ();
 
 	res = get_persist_stream_init(helper);
@@ -509,6 +508,10 @@ CPH_METHOD(InitNew)
 {
 	HRESULT res;
 	CPH_FETCH();
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	CPH_NO_OBJ();
 
@@ -671,14 +674,14 @@ CPH_METHOD(__construct)
 
 
 static const zend_function_entry com_persist_helper_methods[] = {
-	CPH_ME(__construct, NULL)
-	CPH_ME(GetCurFileName, NULL)
-	CPH_ME(SaveToFile, NULL)
-	CPH_ME(LoadFromFile, NULL)
-	CPH_ME(GetMaxStreamSize, NULL)
-	CPH_ME(InitNew, NULL)
-	CPH_ME(LoadFromStream, NULL)
-	CPH_ME(SaveToStream, NULL)
+	CPH_ME(__construct, arginfo_class_COMPersistHelper___construct)
+	CPH_ME(GetCurFileName, arginfo_class_COMPersistHelper_GetCurFileName)
+	CPH_ME(SaveToFile, arginfo_class_COMPersistHelper_SaveToFile)
+	CPH_ME(LoadFromFile, arginfo_class_COMPersistHelper_LoadFromFile)
+	CPH_ME(GetMaxStreamSize, arginfo_class_COMPersistHelper_GetMaxStreamSize)
+	CPH_ME(InitNew, arginfo_class_COMPersistHelper_InitNew)
+	CPH_ME(LoadFromStream, arginfo_class_COMPersistHelper_LoadFromStream)
+	CPH_ME(SaveToStream, arginfo_class_COMPersistHelper_SaveToStream)
 	PHP_FE_END
 };
 

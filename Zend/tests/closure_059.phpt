@@ -33,6 +33,6 @@ try {
     echo "Exception: " . $e->getMessage() . "\n";
 }
 --EXPECTF--
-Exception: Argument 1 passed to {closure}() must be an instance of A, instance of B %s
-Exception: Argument 1 passed to {closure}() must be an instance of A, instance of B %s
-Exception: Argument 1 passed to {closure}() must be an instance of A, instance of B %s
+Exception: {closure}(): Argument #1 ($a) must be of type A, B given, called in %s on line %d
+Exception: {closure}(): Argument #1 ($a) must be of type A, B given
+Exception: {closure}(): Argument #1 ($a) must be of type A, B given

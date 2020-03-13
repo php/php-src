@@ -12,6 +12,8 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts("mbstring");
 
 ?>
+--CONFLICTS--
+file_cp1251
 --FILE--
 <?php
 /*

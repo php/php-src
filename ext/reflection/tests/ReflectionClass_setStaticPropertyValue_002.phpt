@@ -49,4 +49,4 @@ ReflectionClass::setStaticPropertyValue() expects exactly 2 parameters, 0 given
 ReflectionClass::setStaticPropertyValue() expects exactly 2 parameters, 1 given
 Class C does not have a property named 
 Class C does not have a property named 1.5
-ReflectionClass::setStaticPropertyValue() expects parameter 1 to be string, array given
+ReflectionClass::setStaticPropertyValue(): Argument #1 ($name) must be of type string, array given

@@ -47,6 +47,6 @@ float(NAN)
 
 Notice: A non well formed numeric value encountered in %s on line %d
 float(NAN)
-float(1.570796327)
+float(1.5707963267948966)
 float(0)
-float(1.570796327)
+float(1.5707963267948966)

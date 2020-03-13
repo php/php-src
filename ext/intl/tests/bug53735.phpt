@@ -25,6 +25,8 @@ var_dump($f->format(0.26));
 --EXPECTF--
 string(%d) "5,50 kr%A"
 string(%d) "5,50 kr%A"
+
+Notice: A non well formed numeric value encountered in %s on line %d
 string(%d) "5,00 kr%A"
 string(5) "23,25"
 string(3) "26%"

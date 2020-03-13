@@ -49,14 +49,14 @@ var_dump( array_search("one", $array_search_obj->array_var) );
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sub-arrays with array_search() ***
 int(4)
 string(5) "three"
 int(5)
 
 *** Testing objects with array_search() ***
-array_search() expects parameter 2 to be array, object given
-array_search() expects parameter 2 to be array, object given
+array_search(): Argument #2 ($haystack) must be of type array, object given
+array_search(): Argument #2 ($haystack) must be of type array, object given
 int(1)
 Done

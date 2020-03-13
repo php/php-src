@@ -64,6 +64,6 @@ try {
 --EXPECT--
 Hello World!
 ===NONE===
-Method NoneTest::__toString() must return a string value
+Return value of NoneTest::__toString() must be of type string, none returned
 ===THROW===
 This is an error!

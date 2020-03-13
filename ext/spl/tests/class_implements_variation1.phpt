@@ -184,7 +184,9 @@ Error: 2 - class_implements(): Class  does not exist and could not be loaded, %s
 bool(false)
 
 --instance of classWithToString--
-array(0) {
+array(1) {
+  ["Stringable"]=>
+  string(10) "Stringable"
 }
 
 --instance of classWithoutToString--

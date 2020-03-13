@@ -270,7 +270,7 @@ static zend_always_inline zend_jit_addr _zend_jit_decode_op(zend_uchar op_type, 
 #define OP2_ADDR() \
 	OP_ADDR(opline, op2_type, op2)
 #define RES_ADDR() \
-	OP_ADDR(opline, op2_type, op2)
+	OP_ADDR(opline, result_type, result)
 #define OP1_DATA_ADDR() \
 	OP_ADDR(opline + 1, op1_type, op1)
 

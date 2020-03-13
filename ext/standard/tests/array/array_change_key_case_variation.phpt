@@ -23,8 +23,8 @@ var_dump( array_change_key_case( array("ONE" => 1, "one" => 1, "One" => 2), 5 ) 
 
 echo "end\n";
 ?>
---EXPECTF--
-array_change_key_case() expects parameter 2 to be int, string given
+--EXPECT--
+array_change_key_case(): Argument #2 ($case) must be of type int, string given
 array(4) {
   ["ONE"]=>
   int(1)

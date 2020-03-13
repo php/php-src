@@ -47,11 +47,11 @@ float(%s)
     int(0)
   }
 }
-microtime() expects parameter 1 to be bool, array given
+microtime(): Argument #1 ($get_as_float) must be of type bool, array given
 
 --> bad arg: object(stdClass)#%d (0) {
 }
-microtime() expects parameter 1 to be bool, object given
+microtime(): Argument #1 ($get_as_float) must be of type bool, object given
 
 --> bad arg: int(1)
 float(%s)

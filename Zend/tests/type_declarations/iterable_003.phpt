@@ -29,4 +29,4 @@ array(0) {
 }
 object(Generator)#2 (0) {
 }
-Return value of baz() must be iterable, int returned
+Return value of baz() must be of type iterable, int returned

@@ -62,7 +62,7 @@ bool(false)
 NULL
 
 Arg value is Array
-preg_match_all() expects parameter 1 to be string, array given
+preg_match_all(): Argument #1 ($pattern) must be of type string, array given
 NULL
 
 Arg value is /[a-zA-Z]/
@@ -80,5 +80,5 @@ array(1) {
     string(1) "t"
   }
 }
-preg_match_all() expects parameter 1 to be string, object given
+preg_match_all(): Argument #1 ($pattern) must be of type string, object given
 NULL

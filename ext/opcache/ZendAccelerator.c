@@ -4303,10 +4303,82 @@ static void preload_load(void)
 		EG(persistent_classes_count)   = EG(class_table)->nNumUsed;
 	}
 	if (CG(map_ptr_last) != ZCSG(map_ptr_last)) {
+		size_t old_map_ptr_last = CG(map_ptr_last);
 		CG(map_ptr_last) = ZCSG(map_ptr_last);
 		CG(map_ptr_size) = ZEND_MM_ALIGNED_SIZE_EX(CG(map_ptr_last) + 1, 4096);
 		ZEND_MAP_PTR_SET_REAL_BASE(CG(map_ptr_base), perealloc(ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base)), CG(map_ptr_size) * sizeof(void*), 1));
+		memset((void **) ZEND_MAP_PTR_REAL_BASE(CG(map_ptr_base)) + old_map_ptr_last, 0,
+			(CG(map_ptr_last) - old_map_ptr_last) * sizeof(void *));
 	}
+}
+
+static int preload_autoload(zend_string *filename)
+{
+	zend_persistent_script *persistent_script;
+	zend_op_array *op_array;
+	zend_execute_data *old_execute_data;
+	zend_class_entry *old_fake_scope;
+	zend_bool do_bailout = 0;
+	int ret = SUCCESS;
+
+	if (zend_hash_exists(&EG(included_files), filename)) {
+		return FAILURE;
+	}
+
+	persistent_script = zend_accel_hash_find(&ZCSG(hash), filename);
+	if (!persistent_script) {
+		return FAILURE;
+	}
+
+	zend_hash_add_empty_element(&EG(included_files), filename);
+
+	if (persistent_script->ping_auto_globals_mask) {
+		zend_accel_set_auto_globals(persistent_script->ping_auto_globals_mask);
+	}
+
+	op_array = zend_accel_load_script(persistent_script, 1);
+	if (!op_array) {
+		return FAILURE;
+	}
+
+	/* Execute in global context */
+	old_execute_data = EG(current_execute_data);
+	EG(current_execute_data) = NULL;
+	old_fake_scope = EG(fake_scope);
+	EG(fake_scope) = NULL;
+	zend_exception_save();
+
+	zend_try {
+		zend_execute(op_array, NULL);
+	} zend_catch {
+		do_bailout = 1;
+	} zend_end_try();
+
+	if (EG(exception)) {
+		ret = FAILURE;
+	}
+
+	zend_exception_restore();
+	EG(fake_scope) = old_fake_scope;
+	EG(current_execute_data) = old_execute_data;
+	while (old_execute_data) {
+		if (old_execute_data->func && (ZEND_CALL_INFO(old_execute_data) & ZEND_CALL_HAS_SYMBOL_TABLE)) {
+			if (old_execute_data->symbol_table == &EG(symbol_table)) {
+				zend_attach_symbol_table(old_execute_data);
+			}
+			break;
+		}
+		old_execute_data = old_execute_data->prev_execute_data;
+	}
+
+	destroy_op_array(op_array);
+	efree_size(op_array, sizeof(zend_op_array));
+
+	if (do_bailout) {
+		zend_bailout();
+	}
+
+	return ret;
 }
 
 static int accel_preload(const char *config)
@@ -4603,6 +4675,8 @@ static int accel_preload(const char *config)
 		HANDLE_UNBLOCK_INTERRUPTIONS();
 
 		zend_shared_alloc_destroy_xlat_table();
+
+		zend_preload_autoload = preload_autoload;
 	} else {
 		CG(map_ptr_last) = orig_map_ptr_last;
 	}

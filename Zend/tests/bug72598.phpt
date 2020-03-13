@@ -17,10 +17,10 @@ new class {
 };
 ?>
 --EXPECTF--
-Warning: Parameter 1 to ref() expected to be a reference, value given in %sbug72598.php on line 11
+Warning: ref(): Argument #1 ($ref) must be passed by reference, value given in %s on line %d
 object(class@anonymous)#1 (0) {
 }
 
-Warning: Parameter 1 to ref() expected to be a reference, value given in %sbug72598.php on line 11
+Warning: ref(): Argument #1 ($ref) must be passed by reference, value given in %s on line %d
 object(class@anonymous)#1 (0) {
 }

@@ -48,4 +48,22 @@ function print_node_list($nodelist)
   }
 }
 
+function print_node_compact($node, $spaces)
+{
+    if ($node->nodeType == 3) {
+        print str_repeat(" ", $spaces) . trim($node->nodeValue) . "\n";
+    } else {
+        print str_repeat(" ", $spaces) . "<" . $node->nodeName . ">\n";
+        print_node_list_compact($node->childNodes, $spaces + 2);
+        print str_repeat(" ", $spaces) . "</" . $node->nodeName . ">\n";
+    }
+}
+
+function print_node_list_compact($nodelist, $spaces = 0)
+{
+  foreach ($nodelist as $node) {
+    print_node_compact($node, $spaces);
+  }
+}
+
 ?>

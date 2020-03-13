@@ -157,7 +157,7 @@ int(0)
 int(0)
 
 -- Iteration 20 --
-hexdec() expects parameter 1 to be string, array given
+hexdec(): Argument #1 ($hex_string) must be of type string, array given
 
 -- Iteration 21 --
 
@@ -181,4 +181,4 @@ int(0)
 int(0)
 
 -- Iteration 26 --
-hexdec() expects parameter 1 to be string, resource given
+hexdec(): Argument #1 ($hex_string) must be of type string, resource given

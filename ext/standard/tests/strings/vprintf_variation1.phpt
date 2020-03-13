@@ -103,7 +103,7 @@ foreach($values as $value) {
 fclose($file_handle);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vprintf() : with unexpected values for format argument ***
 
  -- Iteration 1 --
@@ -143,19 +143,19 @@ int(13)
 int(3)
 
  -- Iteration 10 --
-vprintf() expects parameter 1 to be string, array given
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 11 --
-vprintf() expects parameter 1 to be string, array given
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 12 --
-vprintf() expects parameter 1 to be string, array given
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 13 --
-vprintf() expects parameter 1 to be string, array given
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 14 --
-vprintf() expects parameter 1 to be string, array given
+vprintf(): Argument #1 ($format) must be of type string, array given
 
  -- Iteration 15 --
 
@@ -202,4 +202,4 @@ int(0)
 int(0)
 
  -- Iteration 26 --
-vprintf() expects parameter 1 to be string, resource given
+vprintf(): Argument #1 ($format) must be of type string, resource given

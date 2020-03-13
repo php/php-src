@@ -1,7 +1,5 @@
 <?php
 
-/* ext/spl/php_spl.c */
-
 function class_implements($what, bool $autoload = true): array|false {}
 
 function class_parents($instance, bool $autoload = true): array|false {}
@@ -27,7 +25,6 @@ function spl_object_hash(object $obj): string {}
 
 function spl_object_id(object $obj): int {}
 
-/* ext/spl/spl_iterators.c */
 function iterator_apply(Traversable $iterator, callable $function, ?array $args = null): int {}
 
 function iterator_count(Traversable $iterator): int {}

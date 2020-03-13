@@ -15,4 +15,4 @@ try {
 
 ?>
 --EXPECTF--
-string(%d) "Argument 3 passed to test() must be of the type array, int given, called in %s on line %d"
+string(%d) "test(): Argument #3 ($args) must be of type array, int given, called in %s on line %d"

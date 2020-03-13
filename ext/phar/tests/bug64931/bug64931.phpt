@@ -47,10 +47,10 @@ try {
 <?php
 @unlink(__DIR__."/bug64931.phar");
 ?>
---EXPECTF--
+--EXPECT--
 Test
 CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
 CAUGHT: Cannot create any files in magic ".phar" directory
-CAUGHT: Phar::addFromString() expects parameter 1 to be a valid path, string given
+CAUGHT: Phar::addFromString(): Argument #1 ($localname) must be a valid path, string given

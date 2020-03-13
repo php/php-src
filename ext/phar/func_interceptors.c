@@ -1100,7 +1100,7 @@ static struct _phar_orig_functions {
 	zif_handler orig_lstat;
 	zif_handler orig_readfile;
 	zif_handler orig_stat;
-} phar_orig_functions = {NULL};
+} phar_orig_functions = {0};
 
 void phar_save_orig_functions(void) /* {{{ */
 {

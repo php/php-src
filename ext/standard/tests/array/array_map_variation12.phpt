@@ -35,7 +35,7 @@ try {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() : built-in function ***
 -- with built-in function 'pow' and two parameters --
 array(3) {
@@ -49,5 +49,5 @@ array(3) {
 -- with built-in function 'pow' and one parameter --
 pow() expects exactly 2 parameters, 1 given
 -- with language construct --
-array_map() expects parameter 1 to be a valid callback, function 'echo' not found or invalid function name
+array_map(): Argument #1 ($callback) must be a valid callback, function 'echo' not found or invalid function name
 Done

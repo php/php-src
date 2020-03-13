@@ -9,7 +9,7 @@ namespace HTML
     {
         function text($text);
         function attributes(array $attributes = null);
-        function textArea(array $attributes = null, $value);
+        function textArea(?array $attributes, $value);
     }
 
     trait TextUTF8
@@ -19,7 +19,7 @@ namespace HTML
 
     trait TextArea
     {
-        function textArea(array $attributes = null, $value) {}
+        function textArea(?array $attributes, $value) {}
         abstract function attributes(array $attributes = null);
         abstract function text($text);
     }

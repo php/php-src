@@ -64,7 +64,8 @@ const struct mbfl_convert_vtbl vtbl_eucjp2004_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_jis2004_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_eucjp2004 = {
@@ -73,5 +74,6 @@ const struct mbfl_convert_vtbl vtbl_wchar_eucjp2004 = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_jis2004,
-	mbfl_filt_conv_jis2004_flush
+	mbfl_filt_conv_jis2004_flush,
+	NULL,
 };

@@ -21,8 +21,8 @@
 PHPAPI void make_digest(char *md5str, const unsigned char *digest);
 PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, int len);
 
-PHP_NAMED_FUNCTION(php_if_md5);
-PHP_NAMED_FUNCTION(php_if_md5_file);
+PHP_FUNCTION(md5);
+PHP_FUNCTION(md5_file);
 
 #include "ext/standard/basic_functions.h"
 

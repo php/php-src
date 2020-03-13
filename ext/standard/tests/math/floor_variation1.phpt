@@ -98,25 +98,25 @@ float(1)
 float(0)
 
 -- Iteration 7 --
-floor() expects parameter 1 to be int or float, string given
+floor(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 8 --
-floor() expects parameter 1 to be int or float, string given
+floor(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 9 --
-floor() expects parameter 1 to be int or float, array given
+floor(): Argument #1 ($number) must be of type int|float, array given
 
 -- Iteration 10 --
-floor() expects parameter 1 to be int or float, string given
+floor(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 11 --
-floor() expects parameter 1 to be int or float, string given
+floor(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 12 --
-floor() expects parameter 1 to be int or float, string given
+floor(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 13 --
-floor() expects parameter 1 to be int or float, object given
+floor(): Argument #1 ($number) must be of type int|float, object given
 
 -- Iteration 14 --
 float(0)
@@ -125,4 +125,4 @@ float(0)
 float(0)
 
 -- Iteration 16 --
-floor() expects parameter 1 to be int or float, resource given
+floor(): Argument #1 ($number) must be of type int|float, resource given

@@ -208,19 +208,11 @@ static int collator_icu_compare_function(zval *result, zval *op1, zval *op2)
 /* {{{ collator_compare_func
  * Taken from PHP7 source (array_data_compare).
  */
-static int collator_compare_func( const void* a, const void* b )
+static int collator_compare_func(Bucket *f, Bucket *s)
 {
-	Bucket *f;
-	Bucket *s;
 	zval result;
-	zval *first;
-	zval *second;
-
-	f = (Bucket *) a;
-	s = (Bucket *) b;
-
-	first = &f->val;
-	second = &s->val;
+	zval *first = &f->val;
+	zval *second = &s->val;
 
 	if( INTL_G(compare_func)( &result, first, second) == FAILURE )
 		return 0;

@@ -1276,7 +1276,7 @@ PHP_FUNCTION(implode)
 
 	if (pieces == NULL) {
 		if (arg1_array == NULL) {
-			zend_type_error("Argument must be an array");
+			zend_type_error("%s(): Argument #1 ($pieces) must be of type array, string given", get_active_function_name());
 			RETURN_THROWS();
 		}
 
@@ -1284,7 +1284,7 @@ PHP_FUNCTION(implode)
 		pieces = arg1_array;
 	} else {
 		if (arg1_str == NULL) {
-			zend_type_error("The first argument must be a string");
+			zend_type_error("%s(): Argument #1 ($glue) must be of type string, array given", get_active_function_name());
 			RETURN_THROWS();
 		}
 	}
@@ -4341,15 +4341,12 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 		/* For each subject entry, convert it to string, then perform replacement
 		   and add the result to the return_value array. */
 		ZEND_HASH_FOREACH_KEY_VAL(subject_ht, num_key, string_key, subject_entry) {
+			zend_string *tmp_subject_str;
 			ZVAL_DEREF(subject_entry);
-			if (Z_TYPE_P(subject_entry) != IS_ARRAY && Z_TYPE_P(subject_entry) != IS_OBJECT) {
-				zend_string *tmp_subject_str;
-				subject_str = zval_get_tmp_string(subject_entry, &tmp_subject_str);
-				count += php_str_replace_in_subject(search, replace, subject_str, &result, case_sensitivity);
-				zend_tmp_string_release(tmp_subject_str);
-			} else {
-				ZVAL_COPY(&result, subject_entry);
-			}
+			subject_str = zval_get_tmp_string(subject_entry, &tmp_subject_str);
+			count += php_str_replace_in_subject(search, replace, subject_str, &result, case_sensitivity);
+			zend_tmp_string_release(tmp_subject_str);
+
 			/* Add to return array */
 			if (string_key) {
 				zend_hash_add_new(Z_ARRVAL_P(return_value), string_key, &result);

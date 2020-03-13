@@ -28,5 +28,5 @@ require_once('skipifconnectfailure.inc');
     print "done!";
 ?>
 --EXPECTF--
-Warning: mysqli_embedded_connect() expects parameter 1 to be mysqli, null given in %s on line %d
+Warning: mysqli_embedded_connect(): Argument #1 must be of type mysqli, null given in %s on line %d
 done!

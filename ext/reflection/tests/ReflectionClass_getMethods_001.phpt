@@ -122,19 +122,5 @@ array(2) {
   }
 }
 Reflecting on class subprivf: 
-array(2) {
-  [0]=>
-  object(ReflectionMethod)#%d (2) {
-    ["name"]=>
-    string(1) "f"
-    ["class"]=>
-    string(5) "privf"
-  }
-  [1]=>
-  object(ReflectionMethod)#%d (2) {
-    ["name"]=>
-    string(1) "s"
-    ["class"]=>
-    string(5) "privf"
-  }
+array(0) {
 }

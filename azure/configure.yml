@@ -55,6 +55,7 @@ steps:
         --with-ldap-sasl \
         --with-password-argon2 \
         --with-mhash \
+        --with-sodium \
         --enable-werror \
         --with-config-file-path=/etc \
         --with-config-file-scan-dir=/etc/php.d

@@ -23,5 +23,5 @@ try {
 --EXPECTF--
 bool(true)
 bool(false)
-TypeError: FFI::isNull() expects parameter 1 to be FFI\CData, null given
-FFI\Exception: FFI\Cdata is not a pointer
+TypeError: FFI::isNull(): Argument #1 ($ptr) must be of type FFI\CData, null given
+FFI\Exception: Cannot instantiate FFI\CData of zero size

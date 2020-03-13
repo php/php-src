@@ -65,13 +65,13 @@ Illegal operation argument
 --- Iteration 3 ---
 Illegal operation argument
 --- Iteration 4 ---
-flock() expects parameter 2 to be int, array given
+flock(): Argument #2 ($operation) must be of type int, array given
 --- Iteration 5 ---
-flock() expects parameter 2 to be int, array given
+flock(): Argument #2 ($operation) must be of type int, array given
 --- Iteration 6 ---
-flock() expects parameter 2 to be int, string given
+flock(): Argument #2 ($operation) must be of type int, string given
 --- Iteration 7 ---
-flock() expects parameter 2 to be int, string given
+flock(): Argument #2 ($operation) must be of type int, string given
 --- Iteration 8 ---
-flock() expects parameter 2 to be int, string given
+flock(): Argument #2 ($operation) must be of type int, string given
 flock(): supplied resource is not a valid stream resource

@@ -1000,7 +1000,7 @@ static int php_userstreamop_set_option(php_stream *stream, int option, int value
 		case PHP_STREAM_TRUNCATE_SUPPORTED:
 			if (zend_is_callable_ex(&func_name,
 					Z_ISUNDEF(us->object)? NULL : Z_OBJ(us->object),
-					IS_CALLABLE_CHECK_SILENT, NULL, NULL, NULL))
+					0, NULL, NULL, NULL))
 				ret = PHP_STREAM_OPTION_RETURN_OK;
 			else
 				ret = PHP_STREAM_OPTION_RETURN_ERR;

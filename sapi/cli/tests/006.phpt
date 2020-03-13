@@ -165,6 +165,12 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
       }
       - Return [ int ]
     }
+    Function [ <internal:pcre> function preg_last_error_msg ] {
+
+      - Parameters [0] {
+      }
+      - Return [ string ]
+    }
   }
 }
 

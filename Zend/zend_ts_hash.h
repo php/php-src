@@ -73,9 +73,9 @@ ZEND_API void zend_ts_hash_copy(TsHashTable *target, TsHashTable *source, copy_c
 ZEND_API void zend_ts_hash_copy_to_hash(HashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor);
 ZEND_API void zend_ts_hash_merge(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, int overwrite);
 ZEND_API void zend_ts_hash_merge_ex(TsHashTable *target, TsHashTable *source, copy_ctor_func_t pCopyConstructor, merge_checker_func_t pMergeSource, void *pParam);
-ZEND_API void zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, compare_func_t compare_func, int renumber);
+ZEND_API void zend_ts_hash_sort(TsHashTable *ht, sort_func_t sort_func, bucket_compare_func_t compare_func, int renumber);
 ZEND_API int zend_ts_hash_compare(TsHashTable *ht1, TsHashTable *ht2, compare_func_t compar, zend_bool ordered);
-ZEND_API zval *zend_ts_hash_minmax(TsHashTable *ht, compare_func_t compar, int flag);
+ZEND_API zval *zend_ts_hash_minmax(TsHashTable *ht, bucket_compare_func_t compar, int flag);
 
 ZEND_API int zend_ts_hash_num_elements(TsHashTable *ht);
 

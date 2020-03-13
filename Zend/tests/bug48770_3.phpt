@@ -24,7 +24,7 @@ class B extends A {
     public function func($str) {
         call_user_func_array(array($this, 'self::func2'), array($str));
         call_user_func_array(array($this, 'self::func3'), array($str));
-        
+
         try {
             call_user_func_array(array($this, 'self::inexistent'), array($str));
         } catch (\TypeError $e) {
@@ -52,4 +52,4 @@ $c->func('This should work!');
 --EXPECT--
 string(27) "B::func2: This should work!"
 string(27) "B::func3: This should work!"
-call_user_func_array() expects parameter 1 to be a valid callback, class 'B' does not have a method 'inexistent'
+call_user_func_array(): Argument #1 ($function) must be a valid callback, class 'B' does not have a method 'inexistent'

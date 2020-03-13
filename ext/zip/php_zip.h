@@ -31,7 +31,7 @@ extern zend_module_entry zip_module_entry;
 #define ZIP_OVERWRITE ZIP_TRUNCATE
 #endif
 
-#define PHP_ZIP_VERSION "1.17.1"
+#define PHP_ZIP_VERSION "1.18.0"
 
 #define ZIP_OPENBASEDIR_CHECKPATH(filename) php_check_open_basedir(filename)
 
@@ -59,13 +59,16 @@ typedef struct _ze_zip_object {
 	char *filename;
 	int filename_len;
 	int buffers_cnt;
-	zend_object zo;
+	zip_int64_t last_id;
+	int err_zip;
+	int err_sys;
 #ifdef HAVE_PROGRESS_CALLBACK
 	zval progress_callback;
 #endif
 #ifdef HAVE_CANCEL_CALLBACK
 	zval cancel_callback;
 #endif
+	zend_object zo;
 } ze_zip_object;
 
 static inline ze_zip_object *php_zip_fetch_object(zend_object *obj) {

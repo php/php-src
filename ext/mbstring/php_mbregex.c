@@ -1390,7 +1390,9 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 	char *arg_pattern = NULL, *arg_options = NULL;
 	size_t arg_pattern_len, arg_options_len;
 	int err;
-	size_t n, i, pos, len, beg, end;
+	size_t n, i, pos, len;
+	/* Stored as int* in the OnigRegion struct */
+	int beg, end;
 	OnigOptionType option;
 	OnigUChar *str;
 	OnigSyntaxType *syntax;
@@ -1585,7 +1587,9 @@ PHP_FUNCTION(mb_ereg_search_init)
    Get matched substring of the last time */
 PHP_FUNCTION(mb_ereg_search_getregs)
 {
-	size_t n, i, len, beg, end;
+	size_t n, i, len;
+	/* Stored as int* in the OnigRegion struct */
+	int beg, end;
 	OnigUChar *str;
 
 	if (zend_parse_parameters_none() == FAILURE) {

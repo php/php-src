@@ -53,7 +53,7 @@ int(2)
 object(foo)#%d (0) {
 }
 
-Fatal error: Uncaught TypeError: Argument 1 passed to typehint() must be an instance of foo, int given in %s:%d
+Fatal error: Uncaught TypeError: typehint(): Argument #1 ($a) must be of type foo, int given in %s:%d
 Stack trace:
 #0 [internal function]: typehint(1, 1)
 #1 %s(%d): array_walk(Array, 'typehint')

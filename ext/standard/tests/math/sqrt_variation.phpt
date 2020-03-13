@@ -36,19 +36,19 @@ for ($i = 0; $i < count($values); $i++) {
 ?>
 --EXPECTF--
 *** Testing sqrt() : usage variations ***
-float(4.7958315233127)
+float(4.795831523312719)
 float(NAN)
 float(4.8425200051213)
 float(NAN)
-float(4.7958315233127)
-float(4.7958315233127)
-float(4.7958315233127)
+float(4.795831523312719)
+float(4.795831523312719)
+float(4.795831523312719)
 float(4.8425200051213)
 float(4.8425200051213)
-float(31.622776601684)
+float(31.622776601683793)
 
 Notice: A non well formed numeric value encountered in %s on line %d
-float(31.622776601684)
+float(31.622776601683793)
 float(0)
 float(1)
 float(0)

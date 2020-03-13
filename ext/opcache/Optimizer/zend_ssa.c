@@ -32,16 +32,30 @@ static zend_bool dominates(const zend_basic_block *blocks, int a, int b) {
 	return a == b;
 }
 
-static zend_bool dominates_other_predecessors(
-		const zend_cfg *cfg, const zend_basic_block *block, int check, int exclude) {
+static zend_bool will_rejoin(
+		const zend_cfg *cfg, const zend_dfg *dfg, const zend_basic_block *block,
+		int other_successor, int exclude, int var) {
 	int i;
 	for (i = 0; i < block->predecessors_count; i++) {
 		int predecessor = cfg->predecessors[block->predecessor_offset + i];
-		if (predecessor != exclude && !dominates(cfg->blocks, check, predecessor)) {
-			return 0;
+		if (predecessor == exclude) {
+			continue;
+		}
+
+		/* The variable is changed in this predecessor,
+		 * so we will not rejoin with the original value. */
+		// TODO: This should not be limited to the direct predecessor block.
+		if (DFG_ISSET(dfg->def, dfg->size, predecessor, var)) {
+			continue;
+		}
+
+		/* The other successor dominates this predecessor,
+		 * so we will get the original value from it. */
+		if (dominates(cfg->blocks, other_successor, predecessor)) {
+			return 1;
 		}
 	}
-	return 1;
+	return 0;
 }
 
 static zend_bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa *ssa, int from, int to, int var) /* {{{ */
@@ -68,11 +82,11 @@ static zend_bool needs_pi(const zend_op_array *op_array, zend_dfg *dfg, zend_ssa
 		return 1;
 	}
 
-	/* Check that the other successor of the from block does not dominate all other predecessors.
-	 * If it does, we'd probably end up annihilating a positive+negative pi assertion. */
+	/* Check whether we will rejoin with the original value coming from the other successor,
+	 * in which case the pi node will not have an effect. */
 	other_successor = from_block->successors[0] == to
 		? from_block->successors[1] : from_block->successors[0];
-	return !dominates_other_predecessors(&ssa->cfg, to_block, other_successor, from);
+	return !will_rejoin(&ssa->cfg, dfg, to_block, other_successor, from, var);
 }
 /* }}} */
 
@@ -252,6 +266,14 @@ static void place_essa_pis(
 				bt = blocks[j].successors[0];
 				bf = blocks[j].successors[1];
 				break;
+			case ZEND_COALESCE:
+				if (opline->op1_type == IS_CV) {
+					int var = EX_VAR_TO_NUM(opline->op1.var);
+					if ((pi = add_pi(arena, op_array, dfg, ssa, j, blocks[j].successors[0], var))) {
+						pi_not_type_mask(pi, MAY_BE_NULL);
+					}
+				}
+				continue;
 			default:
 				continue;
 		}

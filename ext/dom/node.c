@@ -53,36 +53,12 @@ const zend_function_entry php_dom_node_class_functions[] = { /* {{{ */
 };
 /* }}} */
 
-static void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
-{
-	xmlNsPtr nsptr, nsdftptr, curns, prevns = NULL;
-
-	if (nodep->type == XML_ELEMENT_NODE) {
-		/* Following if block primarily used for inserting nodes created via createElementNS */
-		if (nodep->nsDef != NULL) {
-			curns = nodep->nsDef;
-			while (curns) {
-				nsdftptr = curns->next;
-				if (curns->href != NULL) {
-					if((nsptr = xmlSearchNsByHref(doc, nodep->parent, curns->href)) &&
-						(curns->prefix == NULL || xmlStrEqual(nsptr->prefix, curns->prefix))) {
-						curns->next = NULL;
-						if (prevns == NULL) {
-							nodep->nsDef = nsdftptr;
-						} else {
-							prevns->next = nsdftptr;
-						}
-						dom_set_old_ns(doc, curns);
-						curns = prevns;
-					}
-				}
-				prevns = curns;
-				curns = nsdftptr;
-			}
-		}
-		xmlReconciliateNs(doc, nodep);
-	}
-}
+const zend_function_entry php_dom_child_node_class_functions[] = { /* {{{ */
+	PHP_ABSTRACT_ME(DOMChildNode, remove, arginfo_class_DOMChildNode_remove)
+	PHP_ABSTRACT_ME(DOMChildNode, after, arginfo_class_DOMChildNode_after)
+	PHP_ABSTRACT_ME(DOMChildNode, before, arginfo_class_DOMChildNode_before)
+	PHP_FE_END
+};
 /* }}} */
 
 /* {{{ nodeName	string
@@ -327,17 +303,12 @@ int dom_node_child_nodes_read(dom_object *obj, zval *retval)
 		return FAILURE;
 	}
 
-	if (dom_node_children_valid(nodep) == FAILURE) {
-		ZVAL_NULL(retval);
-	} else {
-		php_dom_create_interator(retval, DOM_NODELIST);
-		intern = Z_DOMOBJ_P(retval);
-		dom_namednode_iter(obj, XML_ELEMENT_NODE, intern, NULL, NULL, NULL);
-	}
+	php_dom_create_iterator(retval, DOM_NODELIST);
+	intern = Z_DOMOBJ_P(retval);
+	dom_namednode_iter(obj, XML_ELEMENT_NODE, intern, NULL, NULL, NULL);
 
 	return SUCCESS;
 }
-
 /* }}} */
 
 /* {{{ firstChild DomNode
@@ -458,6 +429,72 @@ int dom_node_next_sibling_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
+/* {{{ previousElementSibling	DomNode
+readonly=yes
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-640FB3C8
+Since:
+*/
+int dom_node_previous_element_sibling_read(dom_object *obj, zval *retval)
+{
+	xmlNode *nodep, *prevsib;
+
+	nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		return FAILURE;
+	}
+
+	prevsib = nodep->prev;
+
+	while (prevsib && prevsib->type != XML_ELEMENT_NODE) {
+		prevsib = prevsib->prev;
+	}
+
+	if (!prevsib) {
+		ZVAL_NULL(retval);
+		return SUCCESS;
+	}
+
+	php_dom_create_object(prevsib, retval, obj);
+	return SUCCESS;
+}
+
+/* }}} */
+
+/* {{{ nextElementSibling	DomNode
+readonly=yes
+URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6AC54C2F
+Since:
+*/
+int dom_node_next_element_sibling_read(dom_object *obj, zval *retval)
+{
+	xmlNode *nodep, *nextsib;
+
+	nodep = dom_object_get_node(obj);
+
+	if (nodep == NULL) {
+		php_dom_throw_error(INVALID_STATE_ERR, 0);
+		return FAILURE;
+	}
+
+	nextsib = nodep->next;
+
+	while (nextsib != NULL && nextsib->type != XML_ELEMENT_NODE) {
+		nextsib = nextsib->next;
+	}
+
+	if (!nextsib) {
+		ZVAL_NULL(retval);
+		return SUCCESS;
+	}
+
+	php_dom_create_object(nextsib, retval, obj);
+	return SUCCESS;
+}
+
+/* }}} */
+
 /* {{{ attributes	DomNamedNodeMap
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-84CF096
@@ -474,7 +511,7 @@ int dom_node_attributes_read(dom_object *obj, zval *retval)
 	}
 
 	if (nodep->type == XML_ELEMENT_NODE) {
-		php_dom_create_interator(retval, DOM_NAMEDNODEMAP);
+		php_dom_create_iterator(retval, DOM_NAMEDNODEMAP);
 		intern = Z_DOMOBJ_P(retval);
 		dom_namednode_iter(obj, XML_ATTRIBUTE_NODE, intern, NULL, NULL, NULL);
 	} else {

@@ -254,6 +254,7 @@ NO_PROC_OPEN_ERROR;
         'auto_append_file=',
         'ignore_repeated_errors=0',
         'precision=14',
+        'serialize_precision=-1',
         'memory_limit=128M',
         'log_errors_max_len=0',
         'opcache.fast_shutdown=0',
@@ -1428,7 +1429,8 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
                 "TEST_PHP_URI" => $sockUri,
             ],
             [
-                "suppress_errors" => TRUE
+                "suppress_errors" => TRUE,
+                'create_new_console' => TRUE,
             ]
         );
         if ($proc === FALSE) {

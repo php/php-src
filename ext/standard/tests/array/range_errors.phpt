@@ -105,15 +105,15 @@ Step exceeds the specified range
 
 -- Testing other conditions --
 Step exceeds the specified range
-range() expects parameter 3 to be int or float, string given
+range(): Argument #3 ($step) must be of type int|float, string given
 Step exceeds the specified range
 
 Notice: A non well formed numeric value encountered in %s on line %d
 Step exceeds the specified range
 
 -- Testing Invalid steps --
-range() expects parameter 3 to be int or float, string given
+range(): Argument #3 ($step) must be of type int|float, string given
 Step exceeds the specified range
 Step exceeds the specified range
-range() expects parameter 3 to be int or float, string given
-range() expects parameter 3 to be int or float, string given
+range(): Argument #3 ($step) must be of type int|float, string given
+range(): Argument #3 ($step) must be of type int|float, string given

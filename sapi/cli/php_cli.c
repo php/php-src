@@ -173,11 +173,8 @@ const opt_struct OPTIONS[] = {
 	{'-', 0, NULL} /* end of args */
 };
 
-static int module_name_cmp(const void *a, const void *b) /* {{{ */
+static int module_name_cmp(Bucket *f, Bucket *s) /* {{{ */
 {
-	Bucket *f = (Bucket *) a;
-	Bucket *s = (Bucket *) b;
-
 	return strcasecmp(((zend_module_entry *)Z_PTR(f->val))->name,
 				  ((zend_module_entry *)Z_PTR(s->val))->name);
 }

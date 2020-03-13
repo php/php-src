@@ -46,8 +46,8 @@ string(3) "foo"
 
 Warning: get_class() called without object from outside a class in %s on line %d
 bool(false)
-get_class() expects parameter 1 to be object, string given
+get_class(): Argument #1 ($object) must be of type object, string given
 string(3) "foo"
 string(4) "foo2"
-get_class() expects parameter 1 to be object, null given
+get_class(): Argument #1 ($object) must be of type object, null given
 Done

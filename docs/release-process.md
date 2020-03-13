@@ -202,6 +202,8 @@
     ssh lists.php.net
     sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester/mod moderator-email-address
     ```
+ 6. For RCs, post tweet with release announcement (and link to news article on
+    php.net) ([@official_php](https://twitter.com/official_php))  
 
 ## Rolling a stable release
 
@@ -425,6 +427,9 @@
     sections for each pre-release.
 
 ## Prime the selection of the Release Managers of the next version
+
+This should be done by one of the release managers of the latest release
+branch:
 
  1. About three months before the scheduled release of the first alpha of the
     next minor or major release, issue a call for volunteers on

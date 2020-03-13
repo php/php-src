@@ -119,7 +119,7 @@ assert(0 && ($a = function &(array &...$a) {
     }
 }));
 
-assert(0 && ($a = function () {
+assert(0 && ($a = function (): ?static {
     declare(C=1) { echo 1; }
     $x = '\'"`$a';
     $x = "'\"`$a";
@@ -160,7 +160,7 @@ Warning: assert(): assert(0 && ($a = function () {
     $y = clone $x;
     yield 1 => 2;
     yield from $x;
-})) failed in %sexpect_015.php on line %d
+})) failed in %s on line %d
 
 Warning: assert(): assert(0 && ($a = function &(array &$a, ?X $b = null) use($c, &$d): ?X {
     abstract class A extends B implements C, D {
@@ -202,7 +202,7 @@ Warning: assert(): assert(0 && ($a = function &(array &$a, ?X $b = null) use($c,
 
     }
 
-})) failed in %sexpect_015.php on line %d
+})) failed in %s on line %d
 
 Warning: assert(): assert(0 && ($a = function &(array &$a, X $b = null, int|float $c) use($c, &$d): X {
     final class A {
@@ -242,7 +242,7 @@ Warning: assert(): assert(0 && ($a = function &(array &$a, X $b = null, int|floa
 
     }
 
-})) failed in %sexpect_015.php on line %d
+})) failed in %s on line %d
 
 Warning: assert(): assert(0 && ($a = function &(?array &$a, X $b = null) use($c, &$d): X {
     class A {
@@ -255,7 +255,7 @@ Warning: assert(): assert(0 && ($a = function &(?array &$a, X $b = null) use($c,
         use T3;
     }
 
-})) failed in %sexpect_015.php on line %d
+})) failed in %s on line %d
 
 Warning: assert(): assert(0 && ($a = function &(array &...$a) {
     declare(A = 1, B = 2);
@@ -268,9 +268,9 @@ Warning: assert(): assert(0 && ($a = function &(array &...$a) {
     } finally {
         echo 3;
     }
-})) failed in %sexpect_015.php on line %d
+})) failed in %s on line %d
 
-Warning: assert(): assert(0 && ($a = function () {
+Warning: assert(): assert(0 && ($a = function (): ?static {
     declare(C = 1) {
         echo 1;
     }
@@ -296,4 +296,4 @@ Warning: assert(): assert(0 && ($a = function () {
     if ($a) {
     } else {
     }
-})) failed in %sexpect_015.php on line %d
+})) failed in %s on line %d

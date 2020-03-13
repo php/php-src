@@ -39,7 +39,7 @@ PHP_FUNCTION( numfmt_format )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oz|l",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "On|l",
 		&object, NumberFormatter_ce_ptr,  &number, &type ) == FAILURE )
 	{
 		RETURN_THROWS();
@@ -47,12 +47,6 @@ PHP_FUNCTION( numfmt_format )
 
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
-
-	if(Z_TYPE_P(number) != IS_ARRAY) {
-		convert_scalar_to_number_ex(number);
-	} else {
-		convert_to_long(number);
-	}
 
 	if(type == FORMAT_TYPE_DEFAULT) {
 		switch(Z_TYPE_P(number)) {

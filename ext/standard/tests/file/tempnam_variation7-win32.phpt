@@ -100,9 +100,9 @@ File name is => %s%et%s
 File permissions are => 100666
 File created in => temp dir
 -- Iteration 6 --
-tempnam() expects parameter 1 to be a valid path, string given
+tempnam(): Argument #1 ($dir) must be a valid path, string given
 -- Iteration 7 --
-tempnam() expects parameter 1 to be a valid path, array given
+tempnam(): Argument #1 ($dir) must be a valid path, array given
 -- Iteration 8 --
 
 Notice: tempnam(): file created in the system's temporary directory in %stempnam_variation7-win32.php on line %d

@@ -42,7 +42,7 @@ array(1) {
 }
 ------ Calling by_ref() with unreferenced argument ------
 
-Warning: Parameter 1 to by_ref() expected to be a reference, value given in %s on line %d
+Warning: by_ref(): Argument #1 ($arg) must be passed by reference, value given in %s on line %d
 array(1) {
   [0]=>
   string(8) "original"

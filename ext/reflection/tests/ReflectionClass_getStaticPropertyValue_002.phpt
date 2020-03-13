@@ -43,4 +43,4 @@ ReflectionClass::getStaticPropertyValue() expects at most 2 parameters, 3 given
 ReflectionClass::getStaticPropertyValue() expects at least 1 parameter, 0 given
 Class C does not have a property named 
 string(3) "def"
-ReflectionClass::getStaticPropertyValue() expects parameter 1 to be string, array given
+ReflectionClass::getStaticPropertyValue(): Argument #1 ($name) must be of type string, array given

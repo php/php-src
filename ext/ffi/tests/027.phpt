@@ -81,7 +81,7 @@ FFI\ParserException: '[*]' not allowed in other than function prototype scope at
 FFI\ParserException: '[*]' not allowed in other than function prototype scope at line 1
 FFI\ParserException: '[*]' not allowed in other than function prototype scope at line 1
 ok
-int(0)
+FFI\Exception: Cannot instantiate FFI\CData of zero size
 FFI\ParserException: '[]' not allowed at line 1
 FFI\ParserException: '[]' not allowed at line 1
 ok

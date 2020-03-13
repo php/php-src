@@ -78,4 +78,4 @@ string(5) "query"
 11:Error: file_put_contents(phar://%s): Failed to open stream: phar error: invalid path "%s" contains illegal character
 12:Error: file_put_contents(phar://%s): Failed to open stream: phar error: invalid path "%s" contains illegal character
 13:Error: file_put_contents(phar://%s): Failed to open stream: phar error: invalid path "%s" contains illegal character
-Exception: Phar::offsetSet() expects parameter 1 to be a valid path, string given
+Exception: Phar::offsetSet(): Argument #1 ($entry) must be a valid path, string given

@@ -67,6 +67,8 @@ ZEND_API ZEND_COLD void zend_verify_arg_error(
 ZEND_API ZEND_COLD void zend_verify_return_error(
 		const zend_function *zf, void **cache_slot, zval *value);
 ZEND_API zend_bool zend_verify_ref_array_assignable(zend_reference *ref);
+ZEND_API zend_bool zend_value_instanceof_static(zval *zv);
+
 
 #define ZEND_REF_TYPE_SOURCES(ref) \
 	(ref)->sources
@@ -285,6 +287,8 @@ static zend_always_inline void zend_vm_stack_free_call_frame(zend_execute_data *
 /* services */
 ZEND_API const char *get_active_class_name(const char **space);
 ZEND_API const char *get_active_function_name(void);
+ZEND_API const char *get_active_function_arg_name(uint32_t arg_num);
+ZEND_API const char *get_function_arg_name(const zend_function *func, uint32_t arg_num);
 ZEND_API const char *zend_get_executed_filename(void);
 ZEND_API zend_string *zend_get_executed_filename_ex(void);
 ZEND_API uint32_t zend_get_executed_lineno(void);

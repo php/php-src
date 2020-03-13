@@ -8,14 +8,10 @@ class Reflection
 {
     /** @return string[] */
     public static function getModifierNames(int $modifiers) {}
-
-    public static function export(Reflector $reflector, bool $return = false) {}
 }
 
-interface Reflector
+interface Reflector extends Stringable
 {
-    /** @return string */
-    public function __toString();
 }
 
 abstract class ReflectionFunctionAbstract implements Reflector
@@ -103,10 +99,7 @@ class ReflectionFunction extends ReflectionFunctionAbstract
     /** @param string|Closure $name */
     public function __construct($name) {}
 
-    /** @return string */
-    public function __toString() {}
-
-    public static function export($name, bool $return = false) {}
+    public function __toString(): string {}
 
     /** @return bool */
     public function isDisabled() {}
@@ -147,10 +140,7 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     /** @param object|string $class_or_method */
     public function __construct($class_or_method, string $name = UNKNOWN) {}
 
-    /** @return string */
-    public function __toString() {}
-
-    public static function export($class, $name, bool $return = false) {}
+    public function __toString(): string {}
 
     /** @return bool */
     public function isPublic() {}
@@ -200,13 +190,10 @@ class ReflectionClass implements Reflector
 {
     final private function __clone() {}
 
-    public static function export($argument, bool $return = false) {}
-
     /** @param object|string $argument */
     public function __construct($argument) {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 
     /** @return string|false */
     public function getName() {}
@@ -366,21 +353,16 @@ class ReflectionClass implements Reflector
 class ReflectionObject extends ReflectionClass
 {
     public function __construct(object $argument) {}
-
-    public static function export($argument, bool $return = false) {}
 }
 
 class ReflectionProperty implements Reflector
 {
     final private function __clone() {}
 
-    public static function export($class, $name, bool $return = false) {}
-
     /** @param string|object $class */
     public function __construct($class, string $name) {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 
     /** @return string|false */
     public function getName() {}
@@ -436,13 +418,10 @@ class ReflectionClassConstant implements Reflector
 {
     final private function __clone() {}
 
-    public static function export($class, $name, bool $return = false) {}
-
     /** @return string|object */
     public function __construct($class, string $name) {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 
     /** @return string|false */
     public function getName() {}
@@ -472,16 +451,13 @@ class ReflectionParameter implements Reflector
 {
     final private function __clone() {}
 
-    public static function export($function, $parameter, bool $return = false) {}
-
     /**
      * @param string|array|object
      * @param int|string
      */
     public function __construct($function,  $parameter) {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 
     /** @return string|false */
     public function getName() {}
@@ -537,15 +513,14 @@ class ReflectionParameter implements Reflector
     public function isVariadic() {}
 }
 
-abstract class ReflectionType
+abstract class ReflectionType implements Stringable
 {
     final private function __clone() {}
 
     /** @return bool */
     public function allowsNull() {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 }
 
 class ReflectionNamedType extends ReflectionType
@@ -566,12 +541,9 @@ class ReflectionExtension implements Reflector
 {
     final private function __clone() {}
 
-    public static function export($name, bool $return = false) {}
-
     public function __construct(string $name) {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 
     /** @return string|false */
     public function getName() {}
@@ -611,12 +583,9 @@ class ReflectionZendExtension implements Reflector
 {
     final private function __clone() {}
 
-    public static function export($name, bool $return = false) {}
-
     public function __construct(string $name) {}
 
-    /** @return string */
-    public function __toString() {}
+    public function __toString(): string {}
 
     /** @return string */
     public function getName() {}

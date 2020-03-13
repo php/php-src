@@ -90,7 +90,7 @@ for($index = 0; $index < count($from_arr); $index++) {
 
 fclose($file_handle);  //closing the file handle
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtr() function: with unexpected inputs for 'from' ***
 -- Iteration 1 --
 string(6) "a12atm"
@@ -125,7 +125,7 @@ string(6) "012atm"
 -- Iteration 16 --
 string(6) "012ttm"
 -- Iteration 17 --
-strtr() expects parameter 2 to be string or array, resource given
+strtr(): Argument #2 ($from) must be of type string|array, resource given
 -- Iteration 18 --
 string(6) "012atm"
 -- Iteration 19 --

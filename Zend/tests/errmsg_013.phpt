@@ -1,5 +1,5 @@
 --TEST--
-errmsg: default value for parameters with array type can only be an array or NULL
+errmsg: default value for parameters with array type can only be an array or null
 --FILE--
 <?php
 

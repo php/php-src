@@ -22,7 +22,6 @@ $r = new ReflectionClassEx('ReflectionClassEx');
 
 $exp = array (
   'UMLClass::__clone',
-  'UMLClass::export',
   'UMLClass::__construct',
   'UMLClass::__toString',
   'UMLClass::getName',

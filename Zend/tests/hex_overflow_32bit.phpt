@@ -1,7 +1,7 @@
 --TEST--
 testing integer overflow (32bit)
 --INI--
-precision=14
+serialize_precision=14
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only"); ?>
 --FILE--

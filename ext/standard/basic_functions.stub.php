@@ -47,6 +47,8 @@ function output_add_rewrite_var(string $name, string $value): bool {}
 
 function stream_wrapper_register(string $protocol, string $classname, int $flags = 0): bool {}
 
+function stream_register_wrapper(string $protocol, string $classname, int $flags = 0): bool {}
+
 function stream_wrapper_unregister(string $protocol): bool {}
 
 function stream_wrapper_restore(string $protocol): bool {}
@@ -61,6 +63,9 @@ function ksort(array &$arg, int $sort_flags = SORT_REGULAR): bool {}
 
 /** @param mixed $var */
 function count($var, int $mode = COUNT_NORMAL): int {}
+
+/** @param mixed $var */
+function sizeof($var, int $mode = COUNT_NORMAL): int {}
 
 function natsort(array &$arg): bool {}
 
@@ -94,6 +99,9 @@ function reset(array|object &$arg) {}
 
 /** @return mixed */
 function current(array|object $arg) {}
+
+/** @return mixed */
+function pos(array|object $arg) {}
 
 function key(array|object $arg): int|string|null {}
 
@@ -230,6 +238,9 @@ function array_map(?callable $callback, array $arr1, array ...$arrays): array {}
 /** @param mixed $key */
 function array_key_exists($key, array $search): bool {}
 
+/** @param mixed $key */
+function key_exists($key, array $search): bool {}
+
 function array_chunk(array $arg, int $size, bool $preserve_keys = false): array {}
 
 function array_combine(array $keys, array $values): array {}
@@ -305,6 +316,8 @@ function register_shutdown_function($function, ...$args): ?bool {}
 
 function highlight_file(string $filename, bool $return = false): string|bool|null {}
 
+function show_source(string $filename, bool $return = false): string|bool|null {}
+
 function php_strip_whitespace(string $filename): string {}
 
 function highlight_string(string $string, bool $return = false): string|bool|null {}
@@ -315,13 +328,13 @@ function ini_get_all(?string $extension = null, bool $details = true): array|fal
 
 function ini_set(string $varname, string $value): string|false {}
 
+function ini_alter(string $varname, string $value): string|false {}
+
 function ini_restore(string $varname): void {}
 
 function set_include_path(string $include_path): string|false {}
 
 function get_include_path(): string|false {}
-
-function restore_include_path(): void {}
 
 /** @param mixed $var */
 function print_r($var, bool $return = false): string|bool {}
@@ -402,9 +415,13 @@ function gethostbynamel(string $hostname): array|false {}
 #if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 function dns_check_record(string $hostname, string $type = "MX"): bool {}
 
+function checkdnsrr(string $hostname, string $type = "MX"): bool {}
+
 function dns_get_record(string $hostname, int $type = DNS_ANY, &$authns = null, &$addtl = null, bool $raw = false): array|false {}
 
 function dns_get_mx(string $hostname, &$mxhosts, &$weight = null): bool {}
+
+function getmxrr(string $hostname, &$mxhosts, &$weight = null): bool {}
 #endif
 
 /* net.c */
@@ -529,6 +546,8 @@ function trim(string $str, string $character_mask = " \n\r\t\v\0"): string {}
 
 function rtrim(string $str, string $character_mask = " \n\r\t\v\0"): string {}
 
+function chop(string $str, string $character_mask = " \n\r\t\v\0"): string {}
+
 function ltrim(string $str, string $character_mask = " \n\r\t\v\0"): string {}
 
 function wordwrap(string $str, int $width = 75, string $break = "\n", bool $cut = false): string {}
@@ -536,6 +555,8 @@ function wordwrap(string $str, int $width = 75, string $break = "\n", bool $cut 
 function explode(string $separator, string $str, int $limit = PHP_INT_MAX): array {}
 
 function implode(string|array $glue, array $pieces = UNKNOWN): string {}
+
+function join(string|array $glue, array $pieces = UNKNOWN): string {}
 
 function strtok(string $str, string $token = UNKNOWN): string|false {}
 
@@ -554,6 +575,8 @@ function stristr(string $haystack, string $needle, bool $before_needle = false):
 function strstr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
 function str_contains(string $haystack, string $needle): bool {}
+
+function strchr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
 function strpos(string $haystack, string $needle, int $offset = 0): int|false {}
 
@@ -698,6 +721,9 @@ class Directory
 function opendir(string $path, $context = UNKNOWN) {}
 
 /** @param resource $context */
+function getdir(string $path, $context = UNKNOWN): Directory|false {}
+
+/** @param resource $context */
 function dir(string $path, $context = UNKNOWN): Directory|false {}
 
 /** @param resource $dir_handle */
@@ -812,6 +838,9 @@ function fflush($handle): bool {}
 
 /** @param resource $handle */
 function fwrite($handle, string $content, int $max_length = UNKNOWN): int|false {}
+
+/** @param resource $handle */
+function fputs($handle, string $content, int $max_length = UNKNOWN): int|false {}
 
 /** @param resource|null $context */
 function mkdir(string $pathname, int $mode = 0777, bool $recursive = false, $context = null): bool {}
@@ -1020,11 +1049,11 @@ function mail(string $to, string $subject, string $message, string|array $additi
 
 function abs(int|float $number): int|float {}
 
-function ceil(float $number): float {}
+function ceil(int|float $number): float {}
 
-function floor(float $number): float {}
+function floor(int|float $number): float {}
 
-function round($number, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): float {}
+function round(int|float $number, int $precision = 0, int $mode = PHP_ROUND_HALF_UP): float {}
 
 function sin(float $number): float {}
 
@@ -1159,9 +1188,15 @@ function quoted_printable_encode(string $str): string {}
 
 function mt_srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
 
+function srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
+
+function rand(int $min = 0, int $max = PHP_INT_MAX): int {}
+
 function mt_rand(int $min = 0, int $max = PHP_INT_MAX): int {}
 
 function mt_getrandmax(): int {}
+
+function getrandmax(): int {}
 
 /* random.c */
 
@@ -1278,13 +1313,22 @@ function stream_supports_lock($stream): bool {}
 function stream_set_write_buffer($stream, int $buffer): int {}
 
 /** @param resource $stream */
+function set_file_buffer($stream, int $buffer): int {}
+
+/** @param resource $stream */
 function stream_set_read_buffer($stream, int $buffer): int {}
 
 /** @param resource $stream */
 function stream_set_blocking($stream, bool $mode): bool {}
 
 /** @param resource $stream */
+function socket_set_blocking($stream, bool $mode): bool {}
+
+/** @param resource $stream */
 function stream_get_meta_data($stream): array {}
+
+/** @param resource $stream */
+function socket_get_status($stream): array {}
 
 /** @param resource $handle */
 function stream_get_line($handle, int $max_length, string $ending = ""): string|false {}
@@ -1312,6 +1356,9 @@ function stream_set_chunk_size($stream, int $size): int {}
 #if HAVE_SYS_TIME_H || defined(PHP_WIN32)
 /** @param resource $socket */
 function stream_set_timeout($socket, int $seconds, int $microseconds = 0): bool {}
+
+/** @param resource $socket */
+function socket_set_timeout($socket, int $seconds, int $microseconds = 0): bool {}
 #endif
 
 /* type.c */
@@ -1326,6 +1373,9 @@ function intval($value, int $base = 10): int {}
 
 /** @param mixed $value */
 function floatval($value): float {}
+
+/** @param mixed $value */
+function doubleval($value): float {}
 
 /** @param mixed $value */
 function boolval($value): bool {}
@@ -1346,7 +1396,19 @@ function is_bool($value): bool {}
 function is_int($value): bool {}
 
 /** @param mixed $value */
+function is_integer($value): bool {}
+
+/** @param mixed $value */
+function is_long($value): bool {}
+
+/** @param mixed $value */
 function is_float($value): bool {}
+
+/** @param mixed $value */
+function is_double($value): bool {}
+
+/** @param mixed $value */
+function is_real($value): bool {}
 
 /** @param mixed $value */
 function is_numeric($value): bool {}

@@ -30,7 +30,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapFault___construct, 0, 0, 2)
 	ZEND_ARG_INFO(0, headerfault)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapFault___toString, 0, 0, 0)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SoapFault___toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapVar___construct, 0, 0, 2)
@@ -72,7 +72,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapServer_setObject, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SoapServer_getFunctions arginfo_class_SoapFault___toString
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapServer_getFunctions, 0, 0, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapServer_addFunction, 0, 0, 1)
 	ZEND_ARG_INFO(0, functions)
@@ -97,17 +98,17 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapClient___soapCall, 0, 0, 2)
 	ZEND_ARG_INFO(0, output_headers)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SoapClient___getFunctions arginfo_class_SoapFault___toString
+#define arginfo_class_SoapClient___getFunctions arginfo_class_SoapServer_getFunctions
 
-#define arginfo_class_SoapClient___getTypes arginfo_class_SoapFault___toString
+#define arginfo_class_SoapClient___getTypes arginfo_class_SoapServer_getFunctions
 
-#define arginfo_class_SoapClient___getLastRequest arginfo_class_SoapFault___toString
+#define arginfo_class_SoapClient___getLastRequest arginfo_class_SoapServer_getFunctions
 
-#define arginfo_class_SoapClient___getLastResponse arginfo_class_SoapFault___toString
+#define arginfo_class_SoapClient___getLastResponse arginfo_class_SoapServer_getFunctions
 
-#define arginfo_class_SoapClient___getLastRequestHeaders arginfo_class_SoapFault___toString
+#define arginfo_class_SoapClient___getLastRequestHeaders arginfo_class_SoapServer_getFunctions
 
-#define arginfo_class_SoapClient___getLastResponseHeaders arginfo_class_SoapFault___toString
+#define arginfo_class_SoapClient___getLastResponseHeaders arginfo_class_SoapServer_getFunctions
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapClient___doRequest, 0, 0, 4)
 	ZEND_ARG_TYPE_INFO(0, request, IS_STRING, 0)
@@ -122,7 +123,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapClient___setCookie, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_SoapClient___getCookies arginfo_class_SoapFault___toString
+#define arginfo_class_SoapClient___getCookies arginfo_class_SoapServer_getFunctions
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SoapClient___setSoapHeaders, 0, 0, 0)
 	ZEND_ARG_INFO(0, soapheaders)

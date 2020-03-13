@@ -20,6 +20,6 @@ curl_setopt($ch, -10, 0);
 ?>
 --EXPECTF--
 *** curl_setopt() call with incorrect parameters
-curl_setopt() expects parameter 2 to be int, string given
+curl_setopt(): Argument #2 ($option) must be of type int, string given
 
 Warning: curl_setopt(): Invalid curl configuration option in %scurl_setopt_error.php on line %d

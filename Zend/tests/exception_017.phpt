@@ -28,7 +28,7 @@ Error: Cannot call abstract method C::foo() in %s:%d
 Stack trace:
 #0 {main}
 
-TypeError: Argument 1 passed to foo() must be callable, string given, called in %s on line %d and defined in %s:%d
+TypeError: foo(): Argument #1 ($x) must be of type callable, string given, called in %s:%d
 Stack trace:
 #0 %s(%d): foo('C::foo')
 #1 {main}

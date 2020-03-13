@@ -60,6 +60,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_wrapper_register, 0, 2, _
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_stream_register_wrapper arginfo_stream_wrapper_register
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_wrapper_unregister, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, protocol, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -82,6 +84,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_count, 0, 1, IS_LONG, 0)
 	ZEND_ARG_INFO(0, var)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_sizeof arginfo_count
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_natsort, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(1, arg, IS_ARRAY, 0)
@@ -119,6 +123,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_current, 0, 0, 1)
 	ZEND_ARG_TYPE_MASK(0, arg, MAY_BE_ARRAY|MAY_BE_OBJECT)
 ZEND_END_ARG_INFO()
+
+#define arginfo_pos arginfo_current
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_key, 0, 1, MAY_BE_LONG|MAY_BE_STRING|MAY_BE_NULL)
 	ZEND_ARG_TYPE_MASK(0, arg, MAY_BE_ARRAY|MAY_BE_OBJECT)
@@ -347,6 +353,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_key_exists, 0, 2, _IS_BOOL
 	ZEND_ARG_TYPE_INFO(0, search, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_key_exists arginfo_array_key_exists
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_chunk, 0, 2, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, arg, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 0)
@@ -463,6 +471,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_highlight_file, 0, 1, MAY_BE_STR
 	ZEND_ARG_TYPE_INFO(0, return, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_show_source arginfo_highlight_file
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_php_strip_whitespace, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -486,6 +496,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_ini_set, 0, 2, MAY_BE_STRING|MAY
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_ini_alter arginfo_ini_set
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ini_restore, 0, 1, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, varname, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -495,8 +507,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_set_include_path, 0, 1, MAY_BE_S
 ZEND_END_ARG_INFO()
 
 #define arginfo_get_include_path arginfo_ob_get_flush
-
-#define arginfo_restore_include_path arginfo_flush
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_print_r, 0, 1, MAY_BE_STRING|MAY_BE_BOOL)
 	ZEND_ARG_INFO(0, var)
@@ -626,6 +636,10 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#define arginfo_checkdnsrr arginfo_dns_check_record
+#endif
+
+#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_dns_get_record, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, hostname, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
@@ -641,6 +655,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_dns_get_mx, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(1, mxhosts)
 	ZEND_ARG_INFO(1, weight)
 ZEND_END_ARG_INFO()
+#endif
+
+#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#define arginfo_getmxrr arginfo_dns_get_mx
 #endif
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_net_get_interfaces, 0, 0, MAY_BE_ARRAY|MAY_BE_FALSE)
@@ -825,6 +843,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_rtrim arginfo_trim
 
+#define arginfo_chop arginfo_trim
+
 #define arginfo_ltrim arginfo_trim
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_wordwrap, 0, 1, IS_STRING, 0)
@@ -844,6 +864,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_implode, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_MASK(0, glue, MAY_BE_STRING|MAY_BE_ARRAY)
 	ZEND_ARG_TYPE_INFO(0, pieces, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_join arginfo_implode
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strtok, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
@@ -881,6 +903,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_str_contains, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_strchr arginfo_stristr
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_strpos, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
@@ -1088,10 +1112,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_opendir, 0, 0, 1)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_dir, 0, 1, Directory, MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_getdir, 0, 1, Directory, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
+
+#define arginfo_dir arginfo_getdir
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_closedir, 0, 0, IS_VOID, 0)
 	ZEND_ARG_INFO(0, dir_handle)
@@ -1260,6 +1286,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_fwrite, 0, 2, MAY_BE_LONG|MAY_BE
 	ZEND_ARG_TYPE_INFO(0, content, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, max_length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_fputs arginfo_fwrite
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mkdir, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, pathname, IS_STRING, 0)
@@ -1589,49 +1617,51 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_abs, 0, 1, MAY_BE_LONG|MAY_BE_DO
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ceil, 0, 1, IS_DOUBLE, 0)
-	ZEND_ARG_TYPE_INFO(0, number, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_MASK(0, number, MAY_BE_LONG|MAY_BE_DOUBLE)
 ZEND_END_ARG_INFO()
 
 #define arginfo_floor arginfo_ceil
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_round, 0, 1, IS_DOUBLE, 0)
-	ZEND_ARG_INFO(0, number)
+	ZEND_ARG_TYPE_MASK(0, number, MAY_BE_LONG|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_INFO(0, precision, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_sin arginfo_ceil
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sin, 0, 1, IS_DOUBLE, 0)
+	ZEND_ARG_TYPE_INFO(0, number, IS_DOUBLE, 0)
+ZEND_END_ARG_INFO()
 
-#define arginfo_cos arginfo_ceil
+#define arginfo_cos arginfo_sin
 
-#define arginfo_tan arginfo_ceil
+#define arginfo_tan arginfo_sin
 
-#define arginfo_asin arginfo_ceil
+#define arginfo_asin arginfo_sin
 
-#define arginfo_acos arginfo_ceil
+#define arginfo_acos arginfo_sin
 
-#define arginfo_atan arginfo_ceil
+#define arginfo_atan arginfo_sin
 
-#define arginfo_atanh arginfo_ceil
+#define arginfo_atanh arginfo_sin
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_atan2, 0, 2, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, y, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, x, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_sinh arginfo_ceil
+#define arginfo_sinh arginfo_sin
 
-#define arginfo_cosh arginfo_ceil
+#define arginfo_cosh arginfo_sin
 
-#define arginfo_tanh arginfo_ceil
+#define arginfo_tanh arginfo_sin
 
-#define arginfo_asinh arginfo_ceil
+#define arginfo_asinh arginfo_sin
 
-#define arginfo_acosh arginfo_ceil
+#define arginfo_acosh arginfo_sin
 
-#define arginfo_expm1 arginfo_ceil
+#define arginfo_expm1 arginfo_sin
 
-#define arginfo_log1p arginfo_ceil
+#define arginfo_log1p arginfo_sin
 
 #define arginfo_pi arginfo_lcg_value
 
@@ -1653,25 +1683,25 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pow, 0, 0, 2)
 	ZEND_ARG_INFO(0, exp)
 ZEND_END_ARG_INFO()
 
-#define arginfo_exp arginfo_ceil
+#define arginfo_exp arginfo_sin
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_log, 0, 1, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, number, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, base, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_log10 arginfo_ceil
+#define arginfo_log10 arginfo_sin
 
-#define arginfo_sqrt arginfo_ceil
+#define arginfo_sqrt arginfo_sin
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_hypot, 0, 2, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, x, IS_DOUBLE, 0)
 	ZEND_ARG_TYPE_INFO(0, y, IS_DOUBLE, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_deg2rad arginfo_ceil
+#define arginfo_deg2rad arginfo_sin
 
-#define arginfo_rad2deg arginfo_ceil
+#define arginfo_rad2deg arginfo_sin
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_bindec, 0, 1, MAY_BE_LONG|MAY_BE_DOUBLE)
 	ZEND_ARG_TYPE_INFO(0, binary_string, IS_STRING, 0)
@@ -1804,12 +1834,18 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mt_srand, 0, 0, IS_VOID, 0)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mt_rand, 0, 0, IS_LONG, 0)
+#define arginfo_srand arginfo_mt_srand
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_rand, 0, 0, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, min, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, max, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_mt_rand arginfo_rand
+
 #define arginfo_mt_getrandmax arginfo_ob_get_level
+
+#define arginfo_getrandmax arginfo_ob_get_level
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_random_bytes, 0, 1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
@@ -1964,6 +2000,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_set_write_buffer, 0, 2, I
 	ZEND_ARG_TYPE_INFO(0, buffer, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_set_file_buffer arginfo_stream_set_write_buffer
+
 #define arginfo_stream_set_read_buffer arginfo_stream_set_write_buffer
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_set_blocking, 0, 2, _IS_BOOL, 0)
@@ -1971,9 +2009,13 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_set_blocking, 0, 2, _IS_B
 	ZEND_ARG_TYPE_INFO(0, mode, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_socket_set_blocking arginfo_stream_set_blocking
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_get_meta_data, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_INFO(0, stream)
 ZEND_END_ARG_INFO()
+
+#define arginfo_socket_get_status arginfo_stream_get_meta_data
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_stream_get_line, 0, 2, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, handle)
@@ -2011,6 +2053,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_set_timeout, 0, 2, _IS_BO
 ZEND_END_ARG_INFO()
 #endif
 
+#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#define arginfo_socket_set_timeout arginfo_stream_set_timeout
+#endif
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_gettype, 0, 1, IS_STRING, 0)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
@@ -2029,6 +2075,8 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_floatval, 0, 1, IS_DOUBLE, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
+#define arginfo_doubleval arginfo_floatval
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_boolval, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
@@ -2045,7 +2093,15 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_is_int arginfo_boolval
 
+#define arginfo_is_integer arginfo_boolval
+
+#define arginfo_is_long arginfo_boolval
+
 #define arginfo_is_float arginfo_boolval
+
+#define arginfo_is_double arginfo_boolval
+
+#define arginfo_is_real arginfo_boolval
 
 #define arginfo_is_numeric arginfo_boolval
 

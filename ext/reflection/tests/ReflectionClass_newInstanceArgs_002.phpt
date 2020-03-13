@@ -16,7 +16,7 @@ var_dump($a);
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: ReflectionClass::newInstanceArgs() expects parameter 1 to be array, string given in %s:%d
+Fatal error: Uncaught TypeError: ReflectionClass::newInstanceArgs(): Argument #1 ($args) must be of type array, string given in %s:%d
 Stack trace:
 #0 %s(%d): ReflectionClass->newInstanceArgs('x')
 #1 {main}

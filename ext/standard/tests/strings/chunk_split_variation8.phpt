@@ -83,6 +83,6 @@ string(129) "This's heredoc string with 	 and
 It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
 chunk_split():::"
 -- Iteration 7 --
-chunk_split() expects parameter 2 to be int, float given
+chunk_split(): Argument #2 ($chunklen) must be of type int, float given
 -- Iteration 8 --
 Chunk length should be greater than zero

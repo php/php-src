@@ -38,4 +38,4 @@ Too many arguments
 Too many arguments
 No variant with 4 arguments (excluding trailing NULLs)
 No variant with 4 arguments (excluding trailing NULLs)
-IntlGregorianCalendar::__construct() expects parameter 6 to be int, array given
+IntlGregorianCalendar::__construct(): Argument #6 must be of type int, array given

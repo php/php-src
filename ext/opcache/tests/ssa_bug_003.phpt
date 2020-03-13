@@ -36,5 +36,5 @@ try {
 
 ?>
 --EXPECT--
-Error: Return value of test1() must be callable, string returned
-Error: Return value of test2() must be an instance of Foo, instance of stdClass returned
+Error: Return value of test1() must be of type callable, string returned
+Error: Return value of test2() must be of type Foo, stdClass returned

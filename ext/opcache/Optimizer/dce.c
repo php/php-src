@@ -416,7 +416,7 @@ static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 
 	if (free_var >= 0) {
 		opline->opcode = ZEND_FREE;
-		opline->op1.var = (uintptr_t) ZEND_CALL_VAR_NUM(NULL, ssa->vars[free_var].var);
+		opline->op1.var = EX_NUM_TO_VAR(ssa->vars[free_var].var);
 		opline->op1_type = free_var_type;
 
 		ssa_op->op1_use = free_var;

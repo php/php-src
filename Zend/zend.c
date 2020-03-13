@@ -81,6 +81,7 @@ ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
 ZEND_API zend_string *(*zend_resolve_path)(const char *filename, size_t filename_len);
 ZEND_API int (*zend_post_startup_cb)(void) = NULL;
 ZEND_API void (*zend_post_shutdown_cb)(void) = NULL;
+ZEND_API int (*zend_preload_autoload)(zend_string *filename) = NULL;
 
 void (*zend_on_timeout)(int seconds);
 
@@ -1528,12 +1529,7 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 	va_list va;
 	char *message = NULL;
 
-	if (exception_ce) {
-		if (!instanceof_function(exception_ce, zend_ce_error)) {
-			zend_error(E_NOTICE, "Error exceptions must be derived from Error");
-			exception_ce = zend_ce_error;
-		}
-	} else {
+	if (!exception_ce) {
 		exception_ce = zend_ce_error;
 	}
 

@@ -40,7 +40,7 @@ PHPAPI void make_digest_ex(char *md5str, const unsigned char *digest, int len) /
 
 /* {{{ proto string md5(string str, [ bool raw_output])
    Calculate the md5 hash of a string */
-PHP_NAMED_FUNCTION(php_if_md5)
+PHP_FUNCTION(md5)
 {
 	zend_string *arg;
 	zend_bool raw_output = 0;
@@ -68,7 +68,7 @@ PHP_NAMED_FUNCTION(php_if_md5)
 
 /* {{{ proto string md5_file(string filename [, bool raw_output])
    Calculate the md5 hash of given filename */
-PHP_NAMED_FUNCTION(php_if_md5_file)
+PHP_FUNCTION(md5_file)
 {
 	char          *arg;
 	size_t           arg_len;

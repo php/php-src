@@ -136,13 +136,13 @@ IntlException: Constructor failed in %s on line %d
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 'msgfmt_create: message formatter creation failed: U_ILLEGAL_ARGUMENT_ERROR'
 
-TypeError: MessageFormatter::__construct() expects parameter 1 to be string, array given in %s on line %d
+TypeError: MessageFormatter::__construct(): Argument #1 ($locale) must be of type string, array given in %s on line %d
 'U_ZERO_ERROR'
 
-TypeError: MessageFormatter::create() expects parameter 1 to be string, array given in %s on line %d
+TypeError: MessageFormatter::create(): Argument #1 ($locale) must be of type string, array given in %s on line %d
 'U_ZERO_ERROR'
 
-TypeError: msgfmt_create() expects parameter 1 to be string, array given in %s on line %d
+TypeError: msgfmt_create(): Argument #1 ($locale) must be of type string, array given in %s on line %d
 'U_ZERO_ERROR'
 
 IntlException: Constructor failed in %s on line %d

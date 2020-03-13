@@ -71,10 +71,10 @@ bool(false)
 
 Warning: intlcal_get_minimum(): intlcal_get_minimum: invalid field in %s on line %d
 bool(false)
-error: 0, intlcal_get_least_maximum() expects parameter 1 to be IntlCalendar, int given
+error: 0, intlcal_get_least_maximum(): Argument #1 ($calendar) must be of type IntlCalendar, int given
 
-error: 0, intlcal_get_maximum() expects parameter 1 to be IntlCalendar, int given
+error: 0, intlcal_get_maximum(): Argument #1 ($calendar) must be of type IntlCalendar, int given
 
-error: 0, intlcal_get_greatest_minimum() expects parameter 1 to be IntlCalendar, int given
+error: 0, intlcal_get_greatest_minimum(): Argument #1 ($calendar) must be of type IntlCalendar, int given
 
-error: 0, intlcal_get_minimum() expects parameter 1 to be IntlCalendar, int given
+error: 0, intlcal_get_minimum(): Argument #1 ($calendar) must be of type IntlCalendar, int given

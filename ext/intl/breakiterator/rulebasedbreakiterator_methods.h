@@ -19,12 +19,12 @@
 
 PHP_METHOD(IntlRuleBasedBreakIterator, __construct);
 
-PHP_FUNCTION(rbbi_get_rules);
+PHP_METHOD(IntlRuleBasedBreakIterator, getRules);
 
-PHP_FUNCTION(rbbi_get_rule_status);
+PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatus);
 
-PHP_FUNCTION(rbbi_get_rule_status_vec);
+PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec);
 
-PHP_FUNCTION(rbbi_get_binary_rules);
+PHP_METHOD(IntlRuleBasedBreakIterator, getBinaryRules);
 
 #endif

@@ -13,16 +13,9 @@ foreach($a as &$record)
 }
 var_dump(str_replace("2", "3", $a));
 ?>
---EXPECT--
+--EXPECTF--
+Warning: Array to string conversion in %s on line %d
 array(1) {
   [0]=>
-  array(1) {
-    ["one"]=>
-    array(2) {
-      ["a"]=>
-      string(4) "2222"
-      ["b"]=>
-      string(4) "1111"
-    }
-  }
+  string(5) "Array"
 }

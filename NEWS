@@ -12,6 +12,10 @@ PHP                                                                        NEWS
     renamed). (Nikita)
   . Fixed bug #70839 (Converting optional argument to variadic forbidden by LSP
     checks). (Nikita)
+  . Fixed bug #69084 (Unclear error message when not implementing a renamed
+    abstract trait function). (Nikita)
+  . Fixed bug #62609 (Allow implementing Traversable on abstract classes).
+    (Nikita)
 
 - CURL:
   . Bumped required libcurl version to 7.29.0. (cmb)
@@ -42,6 +46,8 @@ PHP                                                                        NEWS
 
 - JIT:
   . Fixed bug #77857 (Wrong result if executed with JIT). (Laruence)
+  . Fixed bug #79255 (PHP cannot be compiled with enable JIT).
+    (Laruence, Dmitry)
 
 - LDAP:
   . Removed deprecated ldap_sort. (mcmic)
@@ -83,6 +89,13 @@ PHP                                                                        NEWS
     message with traits). (villfa)
   . Implement ReflectionProperty::hasDefaultValue and
     Reflection::getDefaultValue (beberlei)
+  . Fixed bug #64592 (ReflectionClass::getMethods() returns methods out of
+    scope). (Nikita)
+  . Fixed bug #77325 (ReflectionClassConstant::$class returns wrong class when
+    extending). (Nikita)
+  . Fixed bug #69180 (Reflection does not honor trait conflict resolution /
+    method aliasing). (Nikita)
+  . Fixed bug #74939 (Nested traits' aliased methods are lowercased). (Nikita)
 
 - Session:
   . Fixed bug #78624 (session_gc return value for user defined session
@@ -106,6 +119,9 @@ PHP                                                                        NEWS
     filter). (kkopachev)
   . Fixed bug #78385 (parse_url() does not include 'query' when question mark
     is the last char). (Islam Israfilov)
+  . Fixed bug #75902 (str_replace should warn when misused with nested arrays).
+    (Nikita)
+  . Made quoting of cmd execution functions consistent. (cmb)
 
 - tidy:
   . Removed the unused $use_include_path parameter from tidy_repair_string().
@@ -119,9 +135,20 @@ PHP                                                                        NEWS
     (cmb)
 
 - Zip:
-  . Fixed bug #72374 (remove_path strips first char of filename). (tyage)
+  . Fixed bug #72374 (remove_path strips first char of filename). (tyage, Remi)
   . Add ZipArchive::setMtimeName and ZipArchive::setMtimeIndex methods. (Remi)
   . Add ZipArchive::setProgressCallback method (since libzip 1.3.0). (Remi)
   . Add ZipArchive::setCancelCallback method (since libzip 1.6.0). (Remi)
+  . Add optional "flags" parameter to ZipArchive::addEmptyDir, addFile and
+    addFromString methods. (Remi)
+  . Add "flags" options to ZipArchive::addGlob and addPattern methods
+    keeping previous behavior having FL_OVERWRITE by default. (Remi)
+  . Add ZipArchive::replaceFile() method. (Remi)
+  . Add lastId property to ZipArchive. (Remi)
+  . ZipArchive::status and ZipArchive::statusSys properties and
+    ZipArchive::getStatusString() method stay valid after the archive
+    is closed. (Remi)
+  . Fixed bug #50678 (files extracted by ZipArchive class lost their
+    original modified time). (Remi)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

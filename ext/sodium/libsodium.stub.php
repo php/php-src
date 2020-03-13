@@ -170,7 +170,7 @@ function sodium_memzero(string &$reference): void {}
 
 function sodium_pad(string $string, int $length): string {}
 
-function sodium_unpad(string $string, int $length): string {}
+function sodium_unpad(string $string, int $block_size): string {}
 
 function sodium_bin2hex(string $string): string {}
 

@@ -21,7 +21,7 @@ var_dump(intltz_to_date_time_zone(1));
 Warning: IntlTimeZone::toDateTimeZone(): intltz_to_date_time_zone: DateTimeZone constructor threw exception in %s on line %d
 string(66) "DateTimeZone::__construct(): Unknown or bad timezone (Etc/Unknown)"
 
-Fatal error: Uncaught TypeError: intltz_to_date_time_zone() expects parameter 1 to be IntlTimeZone, int given in %s:%d
+Fatal error: Uncaught TypeError: intltz_to_date_time_zone(): Argument #1 ($tz) must be of type IntlTimeZone, int given in %s:%d
 Stack trace:
 #0 %s(%d): intltz_to_date_time_zone(1)
 #1 {main}

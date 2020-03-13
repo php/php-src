@@ -91,7 +91,7 @@ array(3) {
   ["f2"]=>
   float(3.33)
   [3]=>
-  float(4.8999992284)
+  float(4.89999922839999)
 }
 -- Iteration 5 --
 array(3) {
