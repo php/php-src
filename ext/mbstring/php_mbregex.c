@@ -1691,8 +1691,8 @@ static void _php_mb_regex_set_options(OnigOptionType options, OnigSyntaxType *sy
    Set or get the default options for mbregex functions */
 PHP_FUNCTION(mb_regex_set_options)
 {
-	OnigOptionType opt;
-	OnigSyntaxType *syntax;
+	OnigOptionType opt, prev_opt;
+	OnigSyntaxType *syntax, *prev_syntax;
 	char *string = NULL;
 	size_t string_len;
 	char buf[16];
@@ -1705,7 +1705,9 @@ PHP_FUNCTION(mb_regex_set_options)
 		opt = 0;
 		syntax = NULL;
 		_php_mb_regex_init_options(string, string_len, &opt, &syntax, NULL);
-		_php_mb_regex_set_options(opt, syntax, NULL, NULL);
+		_php_mb_regex_set_options(opt, syntax, &prev_opt, &prev_syntax);
+		opt = prev_opt;
+		syntax = prev_syntax;
 	} else {
 		opt = MBREX(regex_default_options);
 		syntax = MBREX(regex_default_syntax);
