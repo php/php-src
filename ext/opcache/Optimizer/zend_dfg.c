@@ -222,6 +222,7 @@ add_op1_def:
 		case ZEND_FE_FETCH_R:
 		case ZEND_FE_FETCH_RW:
 #if 0
+			/* This special case was handled above the switch */
 			if (opline->op2_type != IS_CV) {
 				op2_use = -1; /* not used */
 			}
