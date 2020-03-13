@@ -7629,7 +7629,7 @@ static int zend_jit_init_fcall_guard(dasm_State **Dst, const zend_op *opline, co
 	if (func->type == ZEND_INTERNAL_FUNCTION) {
 #ifdef ZEND_WIN32
 		// TODO: ASLR may cause different addresses in different workers ???
-		return 0
+		return 0;
 #endif
 	} else if (func->type == ZEND_USER_FUNCTION) {
 		if (!zend_accel_in_shm(func->op_array.opcodes)) {
