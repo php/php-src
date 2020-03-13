@@ -1849,8 +1849,7 @@ static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
 			}															\
 			if (ssa_var_info[__var].type != __type) { 					\
 				if (ssa_var_info[__var].type & ~__type) {				\
-					emit_type_narrowing_warning(op_array, ssa, worklist,\
-						__var, ssa_var_info[__var].type, __type);		\
+					emit_type_narrowing_warning(op_array, ssa, __var);	\
 					return FAILURE;										\
 				}														\
 				ssa_var_info[__var].type = __type;						\
@@ -1924,7 +1923,7 @@ static void add_usages(const zend_op_array *op_array, zend_ssa *ssa, zend_bitset
 	}
 }
 
-static void emit_type_narrowing_warning(const zend_op_array *op_array, zend_ssa *ssa, zend_bitset worklist, int var, uint32_t old_type, uint32_t new_type)
+static void emit_type_narrowing_warning(const zend_op_array *op_array, zend_ssa *ssa, int var)
 {
 	int def_op_num = ssa->vars[var].definition;
 	const zend_op *def_opline = def_op_num >= 0 ? &op_array->opcodes[def_op_num] : NULL;
