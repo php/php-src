@@ -162,7 +162,7 @@ int  ZEND_FASTCALL zend_jit_check_constant(const zval *key);
 	_(RECURSIVE_RET,     "recursive return") \
 	_(RETURN,            "return") \
 	_(LINK,              "link to another trace") \
-	/* comiplation and linking successful */ \
+	/* compilation and linking successful */ \
 	_(COMPILED,          "compiled") \
 	_(ALREADY_DONE,      "already prcessed") \
 	/* failures */ \
