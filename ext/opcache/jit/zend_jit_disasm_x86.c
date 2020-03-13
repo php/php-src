@@ -137,6 +137,10 @@ static void zend_jit_disasm_add_symbol(const char *name,
 				}
 			} else {
 				ZEND_ASSERT(sym->addr == node->addr);
+				if (strcmp(name, node->name) == 0 && sym->end < node->end) {
+					/* reduce size of the existing symbol */
+					node->end = sym->end;
+				}
 				free(sym);
 				return;
 			}
@@ -397,6 +401,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_int_extend_stack_helper);
 	REGISTER_HELPER(zend_jit_leave_nested_func_helper);
 	REGISTER_HELPER(zend_jit_leave_top_func_helper);
+	REGISTER_HELPER(zend_jit_leave_func_helper);
 	REGISTER_HELPER(zend_jit_symtable_find);
 	REGISTER_HELPER(zend_jit_hash_index_lookup_rw);
 	REGISTER_HELPER(zend_jit_hash_index_lookup_w);
@@ -448,6 +453,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_pre_dec);
 	REGISTER_HELPER(zend_runtime_jit);
 	REGISTER_HELPER(zend_jit_hot_func);
+	REGISTER_HELPER(zend_jit_check_constant);
 #undef  REGISTER_HELPER
 
 #ifndef _WIN32
