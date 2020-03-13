@@ -320,7 +320,7 @@ typedef struct _zend_jit_trace_info {
 	uint32_t                  exit_counters; /* offset in exit counters array */
 	uint32_t                  stack_map_size;
 	const void               *code_start;    /* address of native code */
-	zend_jit_trace_exit_info *exit_info;     /* address of native code */
+	zend_jit_trace_exit_info *exit_info;     /* info about side exits */
 	zend_jit_trace_stack     *stack_map;
 	//uint32_t    loop_offset;
 } zend_jit_trace_info;
