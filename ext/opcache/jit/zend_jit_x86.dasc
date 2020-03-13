@@ -7860,7 +7860,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 #if ZEND_DEBUG
 		if (func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
 			// TODO: Mow most internal functions have type hints ???
-//???			goto fallback;
+			if (!trace) {
+				goto fallback;
+			}
 		}
 #endif
 	} else {
@@ -7881,7 +7883,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				unknown_num_args = 1;
 			}
 #endif
-// TODO: it should be possible to reuse known user function as well ???
 		} else if (trace->op == ZEND_JIT_TRACE_ENTER) {
 			ZEND_ASSERT(trace->func->type == ZEND_USER_FUNCTION);
 			if (zend_accel_in_shm(trace->func->op_array.opcodes)) {
@@ -8358,7 +8359,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 	}
 
 	return 1;
-#if 0
+#if ZEND_DEBUG
 fallback:
 	/* fallback to subroutine threading */
 	if (trace) {
