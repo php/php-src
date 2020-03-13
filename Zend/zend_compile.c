@@ -1832,6 +1832,19 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 		ce->serialize_func = NULL;
 		ce->unserialize_func = NULL;
 		ce->__debugInfo = NULL;
+		ce->__add = NULL;
+		ce->__sub = NULL;
+		ce->__mul = NULL;
+		ce->__div = NULL;
+		ce->__pow = NULL;
+		ce->__mod = NULL;
+		ce->__concat = NULL;
+		ce->__shiftLeft = NULL;
+		ce->__shiftRight = NULL;
+		ce->__bitwiseAnd = NULL;
+		ce->__bitwiseOr = NULL;
+		ce->__bitwiseXor = NULL;
+		ce->__bitwiseNot = NULL;
 		if (ce->type == ZEND_INTERNAL_CLASS) {
 			ce->info.internal.module = NULL;
 			ce->info.internal.builtin_functions = NULL;

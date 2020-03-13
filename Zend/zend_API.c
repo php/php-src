@@ -1970,54 +1970,80 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
 	} else if (name_len == sizeof(ZEND_ADD_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_ADD_FUNC_NAME, sizeof(ZEND_ADD_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_ADD_FUNC_NAME);
+		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
+			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_ADD_FUNC_NAME);
 		}
 	} else if (name_len == sizeof(ZEND_SUB_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_SUB_FUNC_NAME, sizeof(ZEND_SUB_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_SUB_FUNC_NAME);
+		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
+			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_SUB_FUNC_NAME);
 		}
 	} else if (name_len == sizeof(ZEND_MUL_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_MUL_FUNC_NAME, sizeof(ZEND_MUL_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_MUL_FUNC_NAME);
+		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
+			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_MUL_FUNC_NAME);
 		}
 	} else if (name_len == sizeof(ZEND_DIV_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_DIV_FUNC_NAME, sizeof(ZEND_DIV_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_DIV_FUNC_NAME);
+		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
+			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_DIV_FUNC_NAME);
 		}
 	} else if (name_len == sizeof(ZEND_POW_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_POW_FUNC_NAME, sizeof(ZEND_POW_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_POW_FUNC_NAME);
+		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
+			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_POW_FUNC_NAME);
 		}
 	} else if (name_len == sizeof(ZEND_MOD_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_MOD_FUNC_NAME, sizeof(ZEND_MOD_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_MOD_FUNC_NAME);
+		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
+			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_MOD_FUNC_NAME);
 		}
 	} else if (name_len == sizeof(ZEND_CONCAT_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_CONCAT_FUNC_NAME, sizeof(ZEND_CONCAT_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), ZEND_CONCAT_FUNC_NAME);
+		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
+			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), ZEND_CONCAT_FUNC_NAME);
 		}
 	} else if (name_len == sizeof(ZEND_SHIFT_LEFT_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_SHIFT_LEFT_FUNC_NAME, sizeof(ZEND_SHIFT_LEFT_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), "__shiftLeft");
+		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
+			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), "__shiftLeft");
 		}
 	} else if (name_len == sizeof(ZEND_SHIFT_RIGHT_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_SHIFT_RIGHT_FUNC_NAME, sizeof(ZEND_SHIFT_RIGHT_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), "__shiftRight");
+		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
+			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), "__shiftRight");
 		}
 	} else if (name_len == sizeof(ZEND_OR_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_OR_FUNC_NAME, sizeof(ZEND_OR_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), "__bitwiseOr");
+		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
+			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), "__bitwiseOr");
 		}
 	} else if (name_len == sizeof(ZEND_AND_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_AND_FUNC_NAME, sizeof(ZEND_AND_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), "__bitwiseAnd");
+		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
+			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), "__bitwisAnd");
 		}
 	} else if (name_len == sizeof(ZEND_XOR_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_XOR_FUNC_NAME, sizeof(ZEND_XOR_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 2) {
 			zend_error(error_type, "Method %s::%s() must take exactly 2 arguments", ZSTR_VAL(ce->name), "__bitwiseXor");
+		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
+			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), "__bitwiseXor");
 		}
 	} else if (name_len == sizeof(ZEND_NOT_FUNC_NAME) - 1 && !memcmp(lcname, ZEND_NOT_FUNC_NAME, sizeof(ZEND_NOT_FUNC_NAME) - 1)) {
 		if (fptr->common.num_args != 1) {
 			zend_error(error_type, "Method %s::%s() must take exactly 1 arguments", ZSTR_VAL(ce->name), "__bitwiseNot");
+		} else if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 1) || QUICK_ARG_SHOULD_BE_SENT_BY_REF(fptr, 2)) {
+			zend_error(error_type, "Method %s::%s() cannot take arguments by reference", ZSTR_VAL(ce->name), "__bitwiseNot");
 		}
 	}
 }
@@ -2033,6 +2059,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	HashTable *target_function_table = function_table;
 	int error_type;
 	zend_function *ctor = NULL, *dtor = NULL, *clone = NULL, *__get = NULL, *__set = NULL, *__unset = NULL, *__isset = NULL, *__call = NULL, *__callstatic = NULL, *__tostring = NULL, *__debugInfo = NULL, *serialize_func = NULL, *unserialize_func = NULL;
+	zend_function *__add = NULL, *__sub = NULL, *__mul = NULL, *__div = NULL, *__pow = NULL, *__concat = NULL, *__mod = NULL, *__bitwiseAnd = NULL, *__bitwiseOr = NULL, *__bitwiseXor = NULL, *__bitwiseNot = NULL, *__shiftLeft = NULL, *__shiftRight = NULL; 
 	zend_string *lowercase_name;
 	size_t fname_len;
 	const char *lc_class_name = NULL;
@@ -2228,6 +2255,32 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 				scope->ce_flags |= ZEND_ACC_USE_GUARDS;
 			} else if (zend_string_equals_literal(lowercase_name, ZEND_DEBUGINFO_FUNC_NAME)) {
 				__debugInfo = reg_function;
+			} else if (zend_string_equals_literal(lowercase_name, ZEND_ADD_FUNC_NAME)) {
+				__add = reg_function;
+			} else if (zend_string_equals_literal(lowercase_name, ZEND_SUB_FUNC_NAME)) {
+				__sub = reg_function;
+			} else if (zend_string_equals_literal(lowercase_name, ZEND_MUL_FUNC_NAME)) {
+				__mul = reg_function;
+			} else if (zend_string_equals_literal(lowercase_name, ZEND_DIV_FUNC_NAME)) {
+				__div = reg_function;
+			} else if (zend_string_equals_literal(lowercase_name, ZEND_POW_FUNC_NAME)) {
+				__pow = reg_function;
+			} else if (zend_string_equals_literal(lowercase_name, ZEND_MOD_FUNC_NAME)) {
+				__mod = reg_function;
+			} else if (zend_string_equals_literal(lowercase_name, ZEND_CONCAT_FUNC_NAME)) {
+				__concat = reg_function;
+			} else if (zend_string_equals_literal(lowercase_name, ZEND_AND_FUNC_NAME)) {
+				__bitwiseAnd = reg_function;
+			} else if (zend_string_equals_literal(lowercase_name, ZEND_OR_FUNC_NAME)) {
+				__bitwiseOr = reg_function;
+			} else if (zend_string_equals_literal(lowercase_name, ZEND_XOR_FUNC_NAME)) {
+				__bitwiseXor = reg_function;
+			} else if (zend_string_equals_literal(lowercase_name, ZEND_NOT_FUNC_NAME)) {
+				__bitwiseNot = reg_function;
+			} else if (zend_string_equals_literal(lowercase_name, ZEND_SHIFT_LEFT_FUNC_NAME)) {
+				__shiftLeft = reg_function;
+			} else if (zend_string_equals_literal(lowercase_name, ZEND_SHIFT_RIGHT_FUNC_NAME)) {
+				__shiftRight = reg_function;
 			} else {
 				reg_function = NULL;
 			}
@@ -2270,6 +2323,19 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		scope->__debugInfo = __debugInfo;
 		scope->serialize_func = serialize_func;
 		scope->unserialize_func = unserialize_func;
+		scope->__add = __add;
+		scope->__sub = __sub;
+		scope->__mul = __mul;
+		scope->__div = __div;
+		scope->__pow = __pow;
+		scope->__mod = __mod;
+		scope->__bitwiseAnd = __bitwiseAnd;
+		scope->__bitwiseOr = __bitwiseOr;
+		scope->__bitwiseXor = __bitwiseXor;
+		scope->__bitwiseNot = __bitwiseNot;
+		scope->__concat = __concat;
+		scope->__shiftLeft = __shiftLeft;
+		scope->__shiftRight = __shiftRight;
 		if (ctor) {
 			ctor->common.fn_flags |= ZEND_ACC_CTOR;
 			if (ctor->common.fn_flags & ZEND_ACC_STATIC) {
