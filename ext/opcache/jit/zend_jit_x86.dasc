@@ -9139,17 +9139,23 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 			|	mov FCARG2a, FP
 		}
 		|	EXT_CALL zend_jit_leave_func_helper, r0
-		// TODO: try to avoid this check ???
-		if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
-			|	cmp IP, zend_jit_halt_op
-			|	je ->trace_halt
-		} else if (GCC_GLOBAL_REGS) {
-			|	test IP, IP
-			|	je ->trace_halt
-		} else {
-			|	test eax, eax
-			|	jl ->trace_halt
+
+		if (zend_jit_trigger != ZEND_JIT_ON_HOT_TRACE ||
+		    !JIT_G(current_frame) ||
+		    !JIT_G(current_frame)->nested) {
+			// TODO: try to avoid this check ???
+			if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
+				|	cmp IP, zend_jit_halt_op
+				|	je ->trace_halt
+			} else if (GCC_GLOBAL_REGS) {
+				|	test IP, IP
+				|	je ->trace_halt
+			} else {
+				|	test eax, eax
+				|	jl ->trace_halt
+			}
 		}
+
 		if (!GCC_GLOBAL_REGS) {
 			|	// execute_data = EG(current_execute_data)
 			|	MEM_OP2_2_ZTS mov, FP, aword, executor_globals, current_execute_data, r0
