@@ -32,6 +32,7 @@
 #include "spl_functions.h"
 #include "spl_engine.h"
 #include "spl_observer.h"
+#include "spl_observer_arginfo.h"
 #include "spl_iterators.h"
 #include "spl_array.h"
 #include "spl_exceptions.h"
@@ -41,30 +42,15 @@ SPL_METHOD(SplSubject, attach);
 SPL_METHOD(SplSubject, detach);
 SPL_METHOD(SplSubject, notify);
 
-ZEND_BEGIN_ARG_INFO(arginfo_SplObserver_update, 0)
-	ZEND_ARG_OBJ_INFO(0, subject, SplSubject, 0)
-ZEND_END_ARG_INFO();
-
 static const zend_function_entry spl_funcs_SplObserver[] = {
-	SPL_ABSTRACT_ME(SplObserver, update,   arginfo_SplObserver_update)
+	SPL_ABSTRACT_ME(SplObserver, update,   arginfo_class_SplObserver_update)
 	PHP_FE_END
 };
 
-ZEND_BEGIN_ARG_INFO(arginfo_SplSubject_attach, 0)
-	ZEND_ARG_OBJ_INFO(0, observer, SplObserver, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO(arginfo_SplSubject_void, 0)
-ZEND_END_ARG_INFO();
-
-/*ZEND_BEGIN_ARG_INFO_EX(arginfo_SplSubject_notify, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, ignore, SplObserver, 1)
-ZEND_END_ARG_INFO();*/
-
 static const zend_function_entry spl_funcs_SplSubject[] = {
-	SPL_ABSTRACT_ME(SplSubject,  attach,   arginfo_SplSubject_attach)
-	SPL_ABSTRACT_ME(SplSubject,  detach,   arginfo_SplSubject_attach)
-	SPL_ABSTRACT_ME(SplSubject,  notify,   arginfo_SplSubject_void)
+	SPL_ABSTRACT_ME(SplSubject,  attach,   arginfo_class_SplSubject_attach)
+	SPL_ABSTRACT_ME(SplSubject,  detach,   arginfo_class_SplSubject_detach)
+	SPL_ABSTRACT_ME(SplSubject,  notify,   arginfo_class_SplSubject_notify)
 	PHP_FE_END
 };
 
@@ -942,62 +928,34 @@ SPL_METHOD(SplObjectStorage, __unserialize)
 	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
 }
 
-ZEND_BEGIN_ARG_INFO(arginfo_Object, 0)
-	ZEND_ARG_INFO(0, object)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_attach, 0, 0, 1)
-	ZEND_ARG_INFO(0, object)
-	ZEND_ARG_INFO(0, data)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO(arginfo_Serialized, 0)
-	ZEND_ARG_INFO(0, serialized)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO(arginfo_setInfo, 0)
-	ZEND_ARG_INFO(0, info)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO(arginfo_getHash, 0)
-	ZEND_ARG_INFO(0, object)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_offsetGet, 0, 0, 1)
-	ZEND_ARG_INFO(0, object)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_splobject_void, 0)
-ZEND_END_ARG_INFO()
-
 static const zend_function_entry spl_funcs_SplObjectStorage[] = {
-	SPL_ME(SplObjectStorage,  attach,      arginfo_attach,        0)
-	SPL_ME(SplObjectStorage,  detach,      arginfo_Object,        0)
-	SPL_ME(SplObjectStorage,  contains,    arginfo_Object,        0)
-	SPL_ME(SplObjectStorage,  addAll,      arginfo_Object,        0)
-	SPL_ME(SplObjectStorage,  removeAll,   arginfo_Object,        0)
-	SPL_ME(SplObjectStorage,  removeAllExcept,   arginfo_Object,  0)
-	SPL_ME(SplObjectStorage,  getInfo,     arginfo_splobject_void,0)
-	SPL_ME(SplObjectStorage,  setInfo,     arginfo_setInfo,       0)
-	SPL_ME(SplObjectStorage,  getHash,     arginfo_getHash,       0)
+	SPL_ME(SplObjectStorage,  attach,      arginfo_class_SplObjectStorage_attach,        0)
+	SPL_ME(SplObjectStorage,  detach,      arginfo_class_SplObjectStorage_detach,        0)
+	SPL_ME(SplObjectStorage,  contains,    arginfo_class_SplObjectStorage_contains,        0)
+	SPL_ME(SplObjectStorage,  addAll,      arginfo_class_SplObjectStorage_addAll,        0)
+	SPL_ME(SplObjectStorage,  removeAll,   arginfo_class_SplObjectStorage_removeAll,        0)
+	SPL_ME(SplObjectStorage,  removeAllExcept,   arginfo_class_SplObjectStorage_removeAllExcept,  0)
+	SPL_ME(SplObjectStorage,  getInfo,     arginfo_class_SplObjectStorage_getInfo,0)
+	SPL_ME(SplObjectStorage,  setInfo,     arginfo_class_SplObjectStorage_setInfo,       0)
+	SPL_ME(SplObjectStorage,  getHash,     arginfo_class_SplObjectStorage_getHash,       0)
 	/* Countable */
-	SPL_ME(SplObjectStorage,  count,       arginfo_splobject_void,0)
+	SPL_ME(SplObjectStorage,  count,       arginfo_class_SplObjectStorage_count,0)
 	/* Iterator */
-	SPL_ME(SplObjectStorage,  rewind,      arginfo_splobject_void,0)
-	SPL_ME(SplObjectStorage,  valid,       arginfo_splobject_void,0)
-	SPL_ME(SplObjectStorage,  key,         arginfo_splobject_void,0)
-	SPL_ME(SplObjectStorage,  current,     arginfo_splobject_void,0)
-	SPL_ME(SplObjectStorage,  next,        arginfo_splobject_void,0)
+	SPL_ME(SplObjectStorage,  rewind,      arginfo_class_SplObjectStorage_rewind,0)
+	SPL_ME(SplObjectStorage,  valid,       arginfo_class_SplObjectStorage_valid,0)
+	SPL_ME(SplObjectStorage,  key,         arginfo_class_SplObjectStorage_key,0)
+	SPL_ME(SplObjectStorage,  current,     arginfo_class_SplObjectStorage_current,0)
+	SPL_ME(SplObjectStorage,  next,        arginfo_class_SplObjectStorage_next,0)
 	/* Serializable */
-	SPL_ME(SplObjectStorage,  unserialize, arginfo_Serialized,    0)
-	SPL_ME(SplObjectStorage,  serialize,   arginfo_splobject_void,0)
-	SPL_ME(SplObjectStorage,  __unserialize, arginfo_Serialized,    0)
-	SPL_ME(SplObjectStorage,  __serialize,   arginfo_splobject_void,0)
+	SPL_ME(SplObjectStorage,  unserialize, arginfo_class_SplObjectStorage_unserialize,    0)
+	SPL_ME(SplObjectStorage,  serialize,   arginfo_class_SplObjectStorage_serialize,0)
+	SPL_ME(SplObjectStorage,  __unserialize, arginfo_class_SplObjectStorage___unserialize,    0)
+	SPL_ME(SplObjectStorage,  __serialize,   arginfo_class_SplObjectStorage___serialize,0)
 	/* ArrayAccess */
-	SPL_MA(SplObjectStorage, offsetExists, SplObjectStorage, contains, arginfo_offsetGet, 0)
-	SPL_MA(SplObjectStorage, offsetSet,    SplObjectStorage, attach,   arginfo_attach, 0)
-	SPL_MA(SplObjectStorage, offsetUnset,  SplObjectStorage, detach,   arginfo_offsetGet, 0)
-	SPL_ME(SplObjectStorage, offsetGet,    arginfo_offsetGet,     0)
+	SPL_MA(SplObjectStorage, offsetExists, SplObjectStorage, contains, arginfo_class_SplObjectStorage_offsetExists, 0)
+	SPL_MA(SplObjectStorage, offsetSet,    SplObjectStorage, attach,   arginfo_class_SplObjectStorage_offsetSet, 0)
+	SPL_MA(SplObjectStorage, offsetUnset,  SplObjectStorage, detach,   arginfo_class_SplObjectStorage_offsetUnset, 0)
+	SPL_ME(SplObjectStorage, offsetGet,    arginfo_class_SplObjectStorage_offsetGet,     0)
 	PHP_FE_END
 };
 
@@ -1276,41 +1234,20 @@ SPL_METHOD(MultipleIterator, key)
 }
 /* }}} */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_MultipleIterator_attachIterator, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
-	ZEND_ARG_INFO(0, infos)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_MultipleIterator_detachIterator, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_MultipleIterator_containsIterator, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_MultipleIterator_setflags, 0, 0, 1)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO();
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_MultipleIterator_construct, 0, 0, 0)
-        ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO();
-
 static const zend_function_entry spl_funcs_MultipleIterator[] = {
-	SPL_ME(MultipleIterator,  __construct,            arginfo_MultipleIterator_construct,         0)
-	SPL_ME(MultipleIterator,  getFlags,               arginfo_splobject_void,                     0)
-	SPL_ME(MultipleIterator,  setFlags,               arginfo_MultipleIterator_setflags,          0)
-	SPL_ME(MultipleIterator,  attachIterator,         arginfo_MultipleIterator_attachIterator,    0)
-	SPL_MA(MultipleIterator,  detachIterator,         SplObjectStorage, detach,   arginfo_MultipleIterator_detachIterator,   0)
-	SPL_MA(MultipleIterator,  containsIterator,       SplObjectStorage, contains, arginfo_MultipleIterator_containsIterator, 0)
-	SPL_MA(MultipleIterator,  countIterators,         SplObjectStorage, count,    arginfo_splobject_void,                    0)
+	SPL_ME(MultipleIterator,  __construct,            arginfo_class_MultipleIterator___construct,		0)
+	SPL_ME(MultipleIterator,  getFlags,               arginfo_class_MultipleIterator_getFlags,			0)
+	SPL_ME(MultipleIterator,  setFlags,               arginfo_class_MultipleIterator_setFlags,          0)
+	SPL_ME(MultipleIterator,  attachIterator,         arginfo_class_MultipleIterator_attachIterator,    0)
+	SPL_MA(MultipleIterator,  detachIterator,         SplObjectStorage, detach,   arginfo_class_MultipleIterator_detachIterator,	0)
+	SPL_MA(MultipleIterator,  containsIterator,       SplObjectStorage, contains, arginfo_class_MultipleIterator_containsIterator,	0)
+	SPL_MA(MultipleIterator,  countIterators,         SplObjectStorage, count,    arginfo_class_MultipleIterator_countIterators,	0)
 	/* Iterator */
-	SPL_ME(MultipleIterator,  rewind,                 arginfo_splobject_void,                     0)
-	SPL_ME(MultipleIterator,  valid,                  arginfo_splobject_void,                     0)
-	SPL_ME(MultipleIterator,  key,                    arginfo_splobject_void,                     0)
-	SPL_ME(MultipleIterator,  current,                arginfo_splobject_void,                     0)
-	SPL_ME(MultipleIterator,  next,                   arginfo_splobject_void,                     0)
+	SPL_ME(MultipleIterator,  rewind,                 arginfo_class_MultipleIterator_rewind,			0)
+	SPL_ME(MultipleIterator,  valid,                  arginfo_class_MultipleIterator_valid,				0)
+	SPL_ME(MultipleIterator,  key,                    arginfo_class_MultipleIterator_key,				0)
+	SPL_ME(MultipleIterator,  current,                arginfo_class_MultipleIterator_current,			0)
+	SPL_ME(MultipleIterator,  next,                   arginfo_class_MultipleIterator_next,				0)
 	PHP_FE_END
 };
 
