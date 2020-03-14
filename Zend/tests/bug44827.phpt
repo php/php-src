@@ -1,11 +1,18 @@
 --TEST--
-Bug #44827 (define() allows :: in constant names)
+Bug #44827 (define() allows :: in constant names when it shouldn't)
 --FILE--
 <?php
-define('foo::bar', 1);
-define('::', 1);
+
+try {
+    define('foo::bar', 1);
+}
+catch (\Throwable $e) {
+    echo $e;
+}
+
 ?>
 --EXPECTF--
-Warning: Class constants cannot be defined or redefined in %sbug44827.php on line %d
-
-Warning: Class constants cannot be defined or redefined in %sbug44827.php on line %d
+ValueError: Class constants cannot be defined or redefined in %s:%d
+Stack trace:
+#0 %s(%d): define('foo::bar', 1)
+#1 {main}

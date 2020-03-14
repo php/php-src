@@ -6,12 +6,16 @@ sebs@php.net
 Testfest Munich 2009
 --FILE--
 <?php
-define('::', true);
 try {
-    var_dump(constant('::'));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
+    define('::', true);
 }
+catch (Error $ex) {
+    echo '[' . get_type($ex) . '] ' . $ex->getMessage() . "\n");
+}
+catch (\Throwable $ex) {
+   die('ERROR = ' . $ex);
+}
+
 ?>
 --EXPECTF--
 Warning: Class constants cannot be defined or redefined in %s on line %d

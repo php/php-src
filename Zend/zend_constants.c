@@ -506,7 +506,7 @@ ZEND_API int zend_register_constant(zend_constant *c)
 		|| (!persistent && zend_get_special_const(ZSTR_VAL(name), ZSTR_LEN(name)))
 		|| zend_hash_add_constant(EG(zend_constants), name, c) == NULL
 	) {
-		zend_error(E_NOTICE,"Constant %s already defined", ZSTR_VAL(name));
+		zend_value_error("Constant %s already defined", ZSTR_VAL(name));
 		zend_string_release(c->name);
 		if (!persistent) {
 			zval_ptr_dtor_nogc(&c->value);

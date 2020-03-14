@@ -6,12 +6,9 @@ Defining constant twice with two different forms
 define('a', 2);
 const a = 1;
 
-
-if (defined('a')) {
-    print a;
-}
-
 ?>
 --EXPECTF--
-Notice: Constant a already defined in %s on line %d
-2
+Fatal error: Uncaught ValueError: Constant a already defined in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

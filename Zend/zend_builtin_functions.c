@@ -633,13 +633,12 @@ ZEND_FUNCTION(define)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (zend_memnstr(ZSTR_VAL(name), "::", sizeof("::") - 1, ZSTR_VAL(name) + ZSTR_LEN(name))) {
-		zend_error(E_WARNING, "Class constants cannot be defined or redefined");
+		zend_value_error("Class constants cannot be defined or redefined");
 		RETURN_FALSE;
 	}
 
 	if (non_cs) {
-		zend_error(E_WARNING,
-			"define(): Declaration of case-insensitive constants is no longer supported");
+		zend_value_error("define(): Declaration of case-insensitive constants is no longer supported");
 		RETURN_FALSE;
 	}
 
@@ -673,7 +672,7 @@ ZEND_FUNCTION(define)
 			}
 			/* no break */
 		default:
-			zend_error(E_WARNING, "Constants may only evaluate to scalar values, arrays or resources");
+			zend_type_error("Constants may only evaluate to scalar values, arrays or resources");
 			zval_ptr_dtor(&val_free);
 			RETURN_FALSE;
 	}
