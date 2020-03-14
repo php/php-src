@@ -6,18 +6,12 @@ sebs@php.net
 Testfest Munich 2009
 --FILE--
 <?php
-try {
-    define('::', true);
-}
-catch (Error $ex) {
-    echo '[' . get_type($ex) . '] ' . $ex->getMessage() . "\n");
-}
-catch (\Throwable $ex) {
-   die('ERROR = ' . $ex);
-}
+
+require __DIR__ . '/../../Zend/tests/constants_helpers.inc';
+
+tchelper_define('::', true);
 
 ?>
---EXPECTF--
-Warning: Class constants cannot be defined or redefined in %s on line %d
-
-Fatal error: Class '' not found in %s on line %d
+--EXPECT--
+>> define("::", boolean);
+ValueError :: Class constants cannot be defined or redefined
