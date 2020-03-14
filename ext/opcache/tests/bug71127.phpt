@@ -10,9 +10,11 @@ opcache.optimization_level=0x7FFFBFFF
 <?php
 $file = __DIR__ . "/bug71127.inc";
 
-file_put_contents($file, "<?php define('FOO', 'bad'); echo FOO;?>");
+require_once __DIR__ . '/../../../Zend/tests/constants_helpers.inc';
 
-define("FOO", "okey");
+file_put_contents($file, "<?php tchelper_define('FOO', 'bad'); echo FOO;?>");
+
+tchelper_define("FOO", "okey");
 
 include($file);
 ?>
@@ -20,6 +22,11 @@ include($file);
 <?php
 @unlink(__DIR__ . "/bug71127.inc");
 ?>
---EXPECTF--
-Notice: Constant FOO already defined in %sbug71127.inc on line %d
+--EXPECT--
+>> define("FOO", string);
+true
+
+>> define("FOO", string);
+ValueError :: Constant FOO already defined
+
 okey
