@@ -1422,8 +1422,8 @@ session.gc_maxlifetime = 1440
 ;       (see session.save_path above), then garbage collection does *not*
 ;       happen automatically.  You will need to do your own garbage
 ;       collection through a shell script, cron entry, or some other method.
-;       For example, the following script would is the equivalent of
-;       setting session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
+;       For example, the following script is the equivalent of setting
+;       session.gc_maxlifetime to 1440 (1440 seconds = 24 minutes):
 ;          find /path/to/sessions -cmin +24 -type f | xargs rm
 
 ; Check HTTP Referer to invalidate externally stored URLs containing ids.
