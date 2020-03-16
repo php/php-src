@@ -95,7 +95,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MultipleIterator_attachIterator, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MultipleIterator_detachIterator, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, iterator, IS_OBJECT, 0)
+	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_MultipleIterator_containsIterator arginfo_class_MultipleIterator_detachIterator

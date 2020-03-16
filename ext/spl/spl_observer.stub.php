@@ -71,7 +71,7 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
     /** @return void */
     public function unserialize(string $serialized) {}
 
-    /** @return string|null */
+    /** @return string */
     public function serialize() {}
 
     /**
@@ -82,7 +82,7 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
 
     /**
      * @param object $object
-     * @return string
+     * @return mixed
      */
     public function offsetGet($object) {}
 
@@ -127,10 +127,10 @@ class MultipleIterator implements Iterator
     public function attachIterator(Iterator $iterator, $info = null) {}
 
     /** @return void */
-    public function detachIterator(object $iterator) {}
+    public function detachIterator(Iterator $iterator) {}
 
     /** @return bool */
-    public function containsIterator(object $iterator) {}
+    public function containsIterator(Iterator $iterator) {}
 
     /** @return int */
     public function countIterators() {}
