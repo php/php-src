@@ -719,12 +719,7 @@ SPL_METHOD(SplObjectStorage, serialize)
 	/* done */
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
-	if (buf.s) {
-		RETURN_NEW_STR(buf.s);
-	} else {
-		RETURN_NULL();
-	}
-
+	RETURN_NEW_STR(buf.s);
 } /* }}} */
 
 /* {{{ proto void SplObjectStorage::unserialize(string serialized)
@@ -1046,6 +1041,35 @@ SPL_METHOD(MultipleIterator, attachIterator)
 }
 /* }}} */
 
+/* {{{ proto void MultipleIterator::detachIterator(Iterator iterator)
+ Detaches an iterator */
+SPL_METHOD(MultipleIterator, detachIterator)
+{
+	zval *iterator;
+	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &iterator, zend_ce_iterator) == FAILURE) {
+		RETURN_THROWS();
+	}
+	spl_object_storage_detach(intern, iterator);
+
+	zend_hash_internal_pointer_reset_ex(&intern->storage, &intern->pos);
+	intern->index = 0;
+} /* }}} */
+
+/* {{{ proto bool MultipleIterator::containsIterator(Iterator iterator)
+ Determine whether the iterator exists */
+SPL_METHOD(MultipleIterator, containsIterator)
+{
+	zval *iterator;
+	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "O", &iterator, zend_ce_iterator) == FAILURE) {
+		RETURN_THROWS();
+	}
+	RETURN_BOOL(spl_object_storage_contains(intern, iterator));
+} /* }}} */
+
 /* {{{ proto void MultipleIterator::rewind()
    Rewind all attached iterator instances */
 SPL_METHOD(MultipleIterator, rewind)
@@ -1239,8 +1263,8 @@ static const zend_function_entry spl_funcs_MultipleIterator[] = {
 	SPL_ME(MultipleIterator,  getFlags,               arginfo_class_MultipleIterator_getFlags,			0)
 	SPL_ME(MultipleIterator,  setFlags,               arginfo_class_MultipleIterator_setFlags,          0)
 	SPL_ME(MultipleIterator,  attachIterator,         arginfo_class_MultipleIterator_attachIterator,    0)
-	SPL_MA(MultipleIterator,  detachIterator,         SplObjectStorage, detach,   arginfo_class_MultipleIterator_detachIterator,	0)
-	SPL_MA(MultipleIterator,  containsIterator,       SplObjectStorage, contains, arginfo_class_MultipleIterator_containsIterator,	0)
+	SPL_ME(MultipleIterator,  detachIterator,         arginfo_class_MultipleIterator_detachIterator,	0)
+	SPL_ME(MultipleIterator,  containsIterator,       arginfo_class_MultipleIterator_containsIterator,	0)
 	SPL_MA(MultipleIterator,  countIterators,         SplObjectStorage, count,    arginfo_class_MultipleIterator_countIterators,	0)
 	/* Iterator */
 	SPL_ME(MultipleIterator,  rewind,                 arginfo_class_MultipleIterator_rewind,			0)
