@@ -44,6 +44,8 @@ PHP                                                                        NEWS
   . Fixed bug #79294 (::columnType() may fail after SQLite3Stmt::reset()). (cmb)
 
 - Standard:
+  . Fixed bug #79329 (get_headers() silently truncates after a null byte). 
+    (CVE-2020-7066) (cmb)
   . Fixed bug #79254 (getenv() w/o arguments not showing changes). (cmb)
   . Fixed bug #79265 (Improper injection of Host header when using fopen for
     http requests). (Miguel Xavier Penha Neto)
