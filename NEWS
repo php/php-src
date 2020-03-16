@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug #79396 (DateTime hour incorrect during DST jump forward). (Nate
     Brunette)
 
+- Iconv:
+  . Fixed bug #79200 (Some iconv functions cut Windows-1258). (cmb)
+
 - SimpleXML:
   . Fixed bug #61597 (SXE properties may lack attributes and content). (cmb)
 
