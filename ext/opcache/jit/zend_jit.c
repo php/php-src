@@ -463,11 +463,11 @@ static int zend_may_overflow_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 			if (ssa->var_info[res].range.underflow) {
 				zend_long op1_min, op2_min;
 
-				if (!OP1_HAS_RANGE_EX() || !OP2_HAS_RANGE_EX()) {
+				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
 					return 1;
 				}
-				op1_min = OP1_MIN_RANGE_EX();
-				op2_min = OP2_MIN_RANGE_EX();
+				op1_min = OP1_MIN_RANGE();
+				op2_min = OP2_MIN_RANGE();
 				if (zend_add_will_overflow(op1_min, op2_min)) {
 					return 1;
 				}
@@ -475,11 +475,11 @@ static int zend_may_overflow_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 			if (ssa->var_info[res].range.overflow) {
 				zend_long op1_max, op2_max;
 
-				if (!OP1_HAS_RANGE_EX() || !OP2_HAS_RANGE_EX()) {
+				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
 					return 1;
 				}
-				op1_max = OP1_MAX_RANGE_EX();
-				op2_max = OP2_MAX_RANGE_EX();
+				op1_max = OP1_MAX_RANGE();
+				op2_max = OP2_MAX_RANGE();
 				if (zend_add_will_overflow(op1_max, op2_max)) {
 					return 1;
 				}
@@ -494,11 +494,11 @@ static int zend_may_overflow_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 			if (ssa->var_info[res].range.underflow) {
 				zend_long op1_min, op2_max;
 
-				if (!OP1_HAS_RANGE_EX() || !OP2_HAS_RANGE_EX()) {
+				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
 					return 1;
 				}
-				op1_min = OP1_MIN_RANGE_EX();
-				op2_max = OP2_MAX_RANGE_EX();
+				op1_min = OP1_MIN_RANGE();
+				op2_max = OP2_MAX_RANGE();
 				if (zend_sub_will_overflow(op1_min, op2_max)) {
 					return 1;
 				}
@@ -506,11 +506,11 @@ static int zend_may_overflow_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 			if (ssa->var_info[res].range.overflow) {
 				zend_long op1_max, op2_min;
 
-				if (!OP1_HAS_RANGE_EX() || !OP2_HAS_RANGE_EX()) {
+				if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
 					return 1;
 				}
-				op1_max = OP1_MAX_RANGE_EX();
-				op2_min = OP2_MIN_RANGE_EX();
+				op1_max = OP1_MAX_RANGE();
+				op2_min = OP2_MIN_RANGE();
 				if (zend_sub_will_overflow(op1_max, op2_min)) {
 					return 1;
 				}
@@ -532,11 +532,11 @@ static int zend_may_overflow_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 				if (ssa->var_info[res].range.underflow) {
 					zend_long op1_min, op2_min;
 
-					if (!OP1_HAS_RANGE_EX() || !OP2_HAS_RANGE_EX()) {
+					if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
 						return 1;
 					}
-					op1_min = OP1_MIN_RANGE_EX();
-					op2_min = OP2_MIN_RANGE_EX();
+					op1_min = OP1_MIN_RANGE();
+					op2_min = OP2_MIN_RANGE();
 					if (zend_add_will_overflow(op1_min, op2_min)) {
 						return 1;
 					}
@@ -544,11 +544,11 @@ static int zend_may_overflow_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 				if (ssa->var_info[res].range.overflow) {
 					zend_long op1_max, op2_max;
 
-					if (!OP1_HAS_RANGE_EX() || !OP2_HAS_RANGE_EX()) {
+					if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
 						return 1;
 					}
-					op1_max = OP1_MAX_RANGE_EX();
-					op2_max = OP2_MAX_RANGE_EX();
+					op1_max = OP1_MAX_RANGE();
+					op2_max = OP2_MAX_RANGE();
 					if (zend_add_will_overflow(op1_max, op2_max)) {
 						return 1;
 					}
@@ -563,11 +563,11 @@ static int zend_may_overflow_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 				if (ssa->var_info[res].range.underflow) {
 					zend_long op1_min, op2_max;
 
-					if (!OP1_HAS_RANGE_EX() || !OP2_HAS_RANGE_EX()) {
+					if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
 						return 1;
 					}
-					op1_min = OP1_MIN_RANGE_EX();
-					op2_max = OP2_MAX_RANGE_EX();
+					op1_min = OP1_MIN_RANGE();
+					op2_max = OP2_MAX_RANGE();
 					if (zend_sub_will_overflow(op1_min, op2_max)) {
 						return 1;
 					}
@@ -575,11 +575,11 @@ static int zend_may_overflow_ex(const zend_op *opline, const zend_ssa_op *ssa_op
 				if (ssa->var_info[res].range.overflow) {
 					zend_long op1_max, op2_min;
 
-					if (!OP1_HAS_RANGE_EX() || !OP2_HAS_RANGE_EX()) {
+					if (!OP1_HAS_RANGE() || !OP2_HAS_RANGE()) {
 						return 1;
 					}
-					op1_max = OP1_MAX_RANGE_EX();
-					op2_min = OP2_MIN_RANGE_EX();
+					op1_max = OP1_MAX_RANGE();
+					op2_min = OP2_MIN_RANGE();
 					if (zend_sub_will_overflow(op1_max, op2_min)) {
 						return 1;
 					}

@@ -842,6 +842,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 {
 	uint32_t line;
 	zend_op *opline;
+	zend_ssa_op *ssa_op;
 	zend_long op1_min, op2_min, op1_max, op2_max;
 
 	if (ssa->vars[var].definition_phi) {
@@ -981,6 +982,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 	}
 	line = ssa->vars[var].definition;
 	opline = op_array->opcodes + line;
+	ssa_op = &ssa->ops[line];
 
 	tmp->underflow = 0;
 	tmp->overflow = 0;
@@ -995,14 +997,14 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 		case ZEND_BW_OR:
 		case ZEND_BW_AND:
 		case ZEND_BW_XOR:
-			if (ssa->ops[line].result_def == var) {
+			if (ssa_op->result_def == var) {
 				return zend_inference_calc_binary_op_range(
-					op_array, ssa, opline, &ssa->ops[line], opline->opcode, tmp);
+					op_array, ssa, opline, ssa_op, opline->opcode, tmp);
 			}
 			break;
 
 		case ZEND_BW_NOT:
-			if (ssa->ops[line].result_def == var) {
+			if (ssa_op->result_def == var) {
 				if (OP1_HAS_RANGE()) {
 					if (OP1_RANGE_UNDERFLOW() ||
 					    OP1_RANGE_OVERFLOW()) {
@@ -1019,8 +1021,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			}
 			break;
 		case ZEND_CAST:
-			if (ssa->ops[line].op1_def == var) {
-				if (ssa->ops[line].op1_def >= 0) {
+			if (ssa_op->op1_def == var) {
+				if (ssa_op->op1_def >= 0) {
 					if (OP1_HAS_RANGE()) {
 						tmp->underflow = OP1_RANGE_UNDERFLOW();
 						tmp->min = OP1_MIN_RANGE();
@@ -1029,7 +1031,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 						return 1;
 					}
 				}
-			} else if (ssa->ops[line].result_def == var) {
+			} else if (ssa_op->result_def == var) {
 				if (opline->extended_value == IS_LONG) {
 					if (OP1_HAS_RANGE()) {
 						tmp->min = OP1_MIN_RANGE();
@@ -1046,7 +1048,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 		case ZEND_BOOL:
 		case ZEND_JMPZ_EX:
 		case ZEND_JMPNZ_EX:
-			if (ssa->ops[line].result_def == var) {
+			if (ssa_op->result_def == var) {
 				if (OP1_HAS_RANGE()) {
 					op1_min = OP1_MIN_RANGE();
 					op1_max = OP1_MAX_RANGE();
@@ -1061,7 +1063,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			}
 			break;
 		case ZEND_BOOL_NOT:
-			if (ssa->ops[line].result_def == var) {
+			if (ssa_op->result_def == var) {
 				if (OP1_HAS_RANGE()) {
 					op1_min = OP1_MIN_RANGE();
 					op1_max = OP1_MAX_RANGE();
@@ -1076,7 +1078,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			}
 			break;
 		case ZEND_BOOL_XOR:
-			if (ssa->ops[line].result_def == var) {
+			if (ssa_op->result_def == var) {
 				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
 					op1_min = OP1_MIN_RANGE();
 					op2_min = OP2_MIN_RANGE();
@@ -1105,7 +1107,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			break;
 		case ZEND_IS_IDENTICAL:
 		case ZEND_IS_EQUAL:
-			if (ssa->ops[line].result_def == var) {
+			if (ssa_op->result_def == var) {
 				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
 					op1_min = OP1_MIN_RANGE();
 					op2_min = OP2_MIN_RANGE();
@@ -1126,7 +1128,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			break;
 		case ZEND_IS_NOT_IDENTICAL:
 		case ZEND_IS_NOT_EQUAL:
-			if (ssa->ops[line].result_def == var) {
+			if (ssa_op->result_def == var) {
 				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
 					op1_min = OP1_MIN_RANGE();
 					op2_min = OP2_MIN_RANGE();
@@ -1146,7 +1148,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			}
 			break;
 		case ZEND_IS_SMALLER:
-			if (ssa->ops[line].result_def == var) {
+			if (ssa_op->result_def == var) {
 				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
 					op1_min = OP1_MIN_RANGE();
 					op2_min = OP2_MIN_RANGE();
@@ -1164,7 +1166,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			}
 			break;
 		case ZEND_IS_SMALLER_OR_EQUAL:
-			if (ssa->ops[line].result_def == var) {
+			if (ssa_op->result_def == var) {
 				if (OP1_HAS_RANGE() && OP2_HAS_RANGE()) {
 					op1_min = OP1_MIN_RANGE();
 					op2_min = OP2_MIN_RANGE();
@@ -1185,8 +1187,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 		case ZEND_JMP_SET:
 		case ZEND_COALESCE:
 		case ZEND_COPY_TMP:
-			if (ssa->ops[line].op1_def == var) {
-				if (ssa->ops[line].op1_def >= 0) {
+			if (ssa_op->op1_def == var) {
+				if (ssa_op->op1_def >= 0) {
 					if (OP1_HAS_RANGE()) {
 						tmp->underflow = OP1_RANGE_UNDERFLOW();
 						tmp->min = OP1_MIN_RANGE();
@@ -1196,7 +1198,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					}
 				}
 			}
-			if (ssa->ops[line].result_def == var) {
+			if (ssa_op->result_def == var) {
 				if (OP1_HAS_RANGE()) {
 					tmp->min = OP1_MIN_RANGE();
 					tmp->max = OP1_MAX_RANGE();
@@ -1207,15 +1209,15 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			}
 			break;
 		case ZEND_ASSERT_CHECK:
-			if (ssa->ops[line].result_def == var) {
+			if (ssa_op->result_def == var) {
 				tmp->min = 0;
 				tmp->max = 1;
 				return 1;
 			}
 			break;
 		case ZEND_SEND_VAR:
-			if (ssa->ops[line].op1_def == var) {
-				if (ssa->ops[line].op1_def >= 0) {
+			if (ssa_op->op1_def == var) {
+				if (ssa_op->op1_def >= 0) {
 					if (OP1_HAS_RANGE()) {
 						tmp->underflow = OP1_RANGE_UNDERFLOW();
 						tmp->min = OP1_MIN_RANGE();
@@ -1227,7 +1229,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			}
 			break;
 		case ZEND_PRE_INC:
-			if (ssa->ops[line].op1_def == var || ssa->ops[line].result_def == var) {
+			if (ssa_op->op1_def == var || ssa_op->result_def == var) {
 				if (OP1_HAS_RANGE()) {
 					tmp->min = OP1_MIN_RANGE();
 					tmp->max = OP1_MAX_RANGE();
@@ -1246,7 +1248,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			}
 			break;
 		case ZEND_PRE_DEC:
-			if (ssa->ops[line].op1_def == var || ssa->ops[line].result_def == var) {
+			if (ssa_op->op1_def == var || ssa_op->result_def == var) {
 				if (OP1_HAS_RANGE()) {
 					tmp->min = OP1_MIN_RANGE();
 					tmp->max = OP1_MAX_RANGE();
@@ -1265,13 +1267,13 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			}
 			break;
 		case ZEND_POST_INC:
-			if (ssa->ops[line].op1_def == var || ssa->ops[line].result_def == var) {
+			if (ssa_op->op1_def == var || ssa_op->result_def == var) {
 				if (OP1_HAS_RANGE()) {
 					tmp->min = OP1_MIN_RANGE();
 					tmp->max = OP1_MAX_RANGE();
 					tmp->underflow = OP1_RANGE_UNDERFLOW();
 					tmp->overflow = OP1_RANGE_OVERFLOW();
-					if (ssa->ops[line].result_def == var) {
+					if (ssa_op->result_def == var) {
 						return 1;
 					}
 					if (tmp->max < ZEND_LONG_MAX) {
@@ -1287,13 +1289,13 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			}
 			break;
 		case ZEND_POST_DEC:
-			if (ssa->ops[line].op1_def == var || ssa->ops[line].result_def == var) {
+			if (ssa_op->op1_def == var || ssa_op->result_def == var) {
 				if (OP1_HAS_RANGE()) {
 					tmp->min = OP1_MIN_RANGE();
 					tmp->max = OP1_MAX_RANGE();
 					tmp->underflow = OP1_RANGE_UNDERFLOW();
 					tmp->overflow = OP1_RANGE_OVERFLOW();
-					if (ssa->ops[line].result_def == var) {
+					if (ssa_op->result_def == var) {
 						return 1;
 					}
 					if (tmp->min > ZEND_LONG_MIN) {
@@ -1310,7 +1312,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			break;
 		case ZEND_UNSET_DIM:
 		case ZEND_UNSET_OBJ:
-			if (ssa->ops[line].op1_def == var) {
+			if (ssa_op->op1_def == var) {
 				/* If op1 is scalar, UNSET_DIM and UNSET_OBJ have no effect, so we can keep
 				 * the previous ranges. */
 				if (OP1_HAS_RANGE()) {
@@ -1323,7 +1325,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			}
 			break;
 		case ZEND_ASSIGN:
-			if (ssa->ops[line].op1_def == var || ssa->ops[line].op2_def == var || ssa->ops[line].result_def == var) {
+			if (ssa_op->op1_def == var || ssa_op->op2_def == var || ssa_op->result_def == var) {
 				if (OP2_HAS_RANGE()) {
 					tmp->min = OP2_MIN_RANGE();
 					tmp->max = OP2_MAX_RANGE();
@@ -1335,9 +1337,10 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			break;
 		case ZEND_ASSIGN_DIM:
 		case ZEND_ASSIGN_OBJ:
-			if (ssa->ops[line+1].op1_def == var) {
+			if (ssa_op->op1_def == var) {
 				if ((opline+1)->opcode == ZEND_OP_DATA) {
 					opline++;
+					ssa_op++;
 					tmp->min = OP1_MIN_RANGE();
 					tmp->max = OP1_MAX_RANGE();
 					tmp->underflow = OP1_RANGE_UNDERFLOW();
@@ -1349,9 +1352,9 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 		case ZEND_ASSIGN_OP:
 			if (opline->extended_value != ZEND_CONCAT
 			 && opline->extended_value != ZEND_POW) {
-				if (ssa->ops[line].op1_def == var || ssa->ops[line].result_def == var) {
+				if (ssa_op->op1_def == var || ssa_op->result_def == var) {
 					return zend_inference_calc_binary_op_range(
-						op_array, ssa, opline, &ssa->ops[line],
+						op_array, ssa, opline, ssa_op,
 						opline->extended_value, tmp);
 				}
 			}
@@ -1360,8 +1363,9 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 		case ZEND_ASSIGN_OBJ_OP:
 		case ZEND_ASSIGN_STATIC_PROP_OP:
 			if ((opline+1)->opcode == ZEND_OP_DATA) {
-				if (ssa->ops[line+1].op1_def == var) {
+				if ((ssa_op+1)->op1_def == var) {
 					opline++;
+					ssa_op++;
 					if (OP1_HAS_RANGE()) {
 						tmp->min = OP1_MIN_RANGE();
 						tmp->max = OP1_MAX_RANGE();
@@ -1379,7 +1383,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			     ((opline-1)->extended_value == ZEND_ADD ||
 			      (opline-1)->extended_value == ZEND_SUB ||
 			      (opline-1)->extended_value == ZEND_MUL))) {
-				if (ssa->ops[line].op1_def == var) {
+				if (ssa_op->op1_def == var) {
 					if (OP1_HAS_RANGE()) {
 						tmp->min = OP1_MIN_RANGE();
 						tmp->max = OP1_MAX_RANGE();
@@ -1393,7 +1397,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			break;
 		case ZEND_RECV:
 		case ZEND_RECV_INIT:
-			if (ssa->ops[line].result_def == var) {
+			if (ssa_op->result_def == var) {
 				zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
 
 				if (func_info &&
@@ -1422,7 +1426,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 			}
 			break;
 		case ZEND_STRLEN:
-			if (ssa->ops[line].result_def == var) {
+			if (ssa_op->result_def == var) {
 #if SIZEOF_ZEND_LONG == 4
 				/* The length of a string is a non-negative integer. However, on 32-bit
 				 * platforms overflows into negative lengths may occur, so it's better
@@ -1448,7 +1452,7 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 		case ZEND_DO_ICALL:
 		case ZEND_DO_UCALL:
 		case ZEND_DO_FCALL_BY_NAME:
-			if (ssa->ops[line].result_def == var) {
+			if (ssa_op->result_def == var) {
 				zend_func_info *func_info = ZEND_FUNC_INFO(op_array);
 				zend_call_info *call_info;
 				if (!func_info || !func_info->call_map) {
@@ -4377,8 +4381,8 @@ int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_
 				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
 		case ZEND_DIV:
 		case ZEND_MOD:
-			if (!OP2_HAS_RANGE_EX() ||
-				(OP2_MIN_RANGE_EX() <= 0 && OP2_MAX_RANGE_EX() >= 0)) {
+			if (!OP2_HAS_RANGE() ||
+				(OP2_MIN_RANGE() <= 0 && OP2_MAX_RANGE() >= 0)) {
 				/* Division by zero */
 				return 1;
 			}
@@ -4392,8 +4396,8 @@ int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_
 		case ZEND_SR:
 			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
 				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
-				!OP2_HAS_RANGE_EX() ||
-				OP2_MIN_RANGE_EX() < 0;
+				!OP2_HAS_RANGE() ||
+				OP2_MIN_RANGE() < 0;
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
 			return (t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
@@ -4445,8 +4449,8 @@ int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_
 					(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
 			} else if (opline->extended_value == ZEND_DIV ||
 				opline->extended_value == ZEND_MOD) {
-				if (!OP2_HAS_RANGE_EX() ||
-					(OP2_MIN_RANGE_EX() <= 0 && OP2_MAX_RANGE_EX() >= 0)) {
+				if (!OP2_HAS_RANGE() ||
+					(OP2_MIN_RANGE() <= 0 && OP2_MAX_RANGE() >= 0)) {
 					/* Division by zero */
 					return 1;
 				}
@@ -4461,8 +4465,8 @@ int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_
 				opline->extended_value == ZEND_SR) {
 				return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
 					(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
-					!OP2_HAS_RANGE_EX() ||
-					OP2_MIN_RANGE_EX() < 0;
+					!OP2_HAS_RANGE() ||
+					OP2_MIN_RANGE() < 0;
 			} else if (opline->extended_value == ZEND_CONCAT) {
 				return (t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
 					(t2 & (MAY_BE_ARRAY|MAY_BE_OBJECT));

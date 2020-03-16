@@ -38,7 +38,7 @@
 	|MAY_BE_ARRAY_OF_ARRAY|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE)
 
 #define DEFINE_SSA_OP_HAS_RANGE(opN) \
-	static zend_always_inline zend_bool _ssa_##opN##_has_range_ex(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
+	static zend_always_inline zend_bool _ssa_##opN##_has_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT(opline->opN); \
@@ -51,13 +51,9 @@
 		} \
 		return 0; \
 	} \
-	static zend_always_inline zend_bool _ssa_##opN##_has_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
-	{ \
-		return _ssa_##opN##_has_range_ex(op_array, ssa, opline, ssa->ops + (opline - op_array->opcodes)); \
-	}
 
 #define DEFINE_SSA_OP_MIN_RANGE(opN) \
-	static zend_always_inline zend_long _ssa_##opN##_min_range_ex(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
+	static zend_always_inline zend_long _ssa_##opN##_min_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT(opline->opN); \
@@ -78,13 +74,9 @@
 		} \
 		return ZEND_LONG_MIN; \
 	} \
-	static zend_always_inline zend_long _ssa_##opN##_min_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
-	{ \
-		return _ssa_##opN##_min_range_ex(op_array, ssa, opline, ssa->ops + (opline - op_array->opcodes)); \
-	}
 
 #define DEFINE_SSA_OP_MAX_RANGE(opN) \
-	static zend_always_inline zend_long _ssa_##opN##_max_range_ex(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
+	static zend_always_inline zend_long _ssa_##opN##_max_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT(opline->opN); \
@@ -105,13 +97,9 @@
 		} \
 		return ZEND_LONG_MAX; \
 	} \
-	static zend_always_inline zend_long _ssa_##opN##_max_range(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
-	{ \
-		return _ssa_##opN##_max_range_ex(op_array, ssa, opline, ssa->ops + (opline - op_array->opcodes)); \
-	}
 
 #define DEFINE_SSA_OP_RANGE_UNDERFLOW(opN) \
-	static zend_always_inline char _ssa_##opN##_range_underflow_ex(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
+	static zend_always_inline char _ssa_##opN##_range_underflow(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT(opline->opN); \
@@ -126,13 +114,9 @@
 		} \
 		return 1; \
 	} \
-	static zend_always_inline char _ssa_##opN##_range_underflow(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
-	{ \
-		return _ssa_##opN##_range_underflow_ex(op_array, ssa, opline, ssa->ops + (opline - op_array->opcodes)); \
-	}
 
 #define DEFINE_SSA_OP_RANGE_OVERFLOW(opN) \
-	static zend_always_inline char _ssa_##opN##_range_overflow_ex(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
+	static zend_always_inline char _ssa_##opN##_range_overflow(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op) \
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT(opline->opN); \
@@ -147,10 +131,6 @@
 		} \
 		return 1; \
 	} \
-	static zend_always_inline char _ssa_##opN##_range_overflow(const zend_op_array *op_array, const zend_ssa *ssa, const zend_op *opline) \
-	{ \
-		return _ssa_##opN##_range_overflow_ex(op_array, ssa, opline, ssa->ops + (opline - op_array->opcodes)); \
-	}
 
 DEFINE_SSA_OP_HAS_RANGE(op1)
 DEFINE_SSA_OP_MIN_RANGE(op1)
@@ -163,27 +143,16 @@ DEFINE_SSA_OP_MAX_RANGE(op2)
 DEFINE_SSA_OP_RANGE_UNDERFLOW(op2)
 DEFINE_SSA_OP_RANGE_OVERFLOW(op2)
 
-#define OP1_HAS_RANGE()         (_ssa_op1_has_range (op_array, ssa, opline))
-#define OP1_MIN_RANGE()         (_ssa_op1_min_range (op_array, ssa, opline))
-#define OP1_MAX_RANGE()         (_ssa_op1_max_range (op_array, ssa, opline))
-#define OP1_RANGE_UNDERFLOW()   (_ssa_op1_range_underflow (op_array, ssa, opline))
-#define OP1_RANGE_OVERFLOW()    (_ssa_op1_range_overflow (op_array, ssa, opline))
-#define OP2_HAS_RANGE()         (_ssa_op2_has_range (op_array, ssa, opline))
-#define OP2_MIN_RANGE()         (_ssa_op2_min_range (op_array, ssa, opline))
-#define OP2_MAX_RANGE()         (_ssa_op2_max_range (op_array, ssa, opline))
-#define OP2_RANGE_UNDERFLOW()   (_ssa_op2_range_underflow (op_array, ssa, opline))
-#define OP2_RANGE_OVERFLOW()    (_ssa_op2_range_overflow (op_array, ssa, opline))
-
-#define OP1_HAS_RANGE_EX()       (_ssa_op1_has_range_ex (op_array, ssa, opline, ssa_op))
-#define OP1_MIN_RANGE_EX()       (_ssa_op1_min_range_ex (op_array, ssa, opline, ssa_op))
-#define OP1_MAX_RANGE_EX()       (_ssa_op1_max_range_ex (op_array, ssa, opline, ssa_op))
-#define OP1_RANGE_UNDERFLOW_EX() (_ssa_op1_range_underflow_ex (op_array, ssa, opline, ssa_op))
-#define OP1_RANGE_OVERFLOW_EX()  (_ssa_op1_range_overflow_ex (op_array, ssa, opline, ssa_op))
-#define OP2_HAS_RANGE_EX()       (_ssa_op2_has_range_ex (op_array, ssa, opline, ssa_op))
-#define OP2_MIN_RANGE_EX()       (_ssa_op2_min_range_ex (op_array, ssa, opline, ssa_op))
-#define OP2_MAX_RANGE_EX()       (_ssa_op2_max_range_ex (op_array, ssa, opline, ssa_op))
-#define OP2_RANGE_UNDERFLOW_EX() (_ssa_op2_range_underflow_ex (op_array, ssa, opline, ssa_op))
-#define OP2_RANGE_OVERFLOW_EX()  (_ssa_op2_range_overflow_ex (op_array, ssa, opline, ssa_op))
+#define OP1_HAS_RANGE()       (_ssa_op1_has_range (op_array, ssa, opline, ssa_op))
+#define OP1_MIN_RANGE()       (_ssa_op1_min_range (op_array, ssa, opline, ssa_op))
+#define OP1_MAX_RANGE()       (_ssa_op1_max_range (op_array, ssa, opline, ssa_op))
+#define OP1_RANGE_UNDERFLOW() (_ssa_op1_range_underflow (op_array, ssa, opline, ssa_op))
+#define OP1_RANGE_OVERFLOW()  (_ssa_op1_range_overflow (op_array, ssa, opline, ssa_op))
+#define OP2_HAS_RANGE()       (_ssa_op2_has_range (op_array, ssa, opline, ssa_op))
+#define OP2_MIN_RANGE()       (_ssa_op2_min_range (op_array, ssa, opline, ssa_op))
+#define OP2_MAX_RANGE()       (_ssa_op2_max_range (op_array, ssa, opline, ssa_op))
+#define OP2_RANGE_UNDERFLOW() (_ssa_op2_range_underflow (op_array, ssa, opline, ssa_op))
+#define OP2_RANGE_OVERFLOW()  (_ssa_op2_range_overflow (op_array, ssa, opline, ssa_op))
 
 static zend_always_inline uint32_t _const_op_type(const zval *zv) {
 	if (Z_TYPE_P(zv) == IS_CONSTANT_AST) {
