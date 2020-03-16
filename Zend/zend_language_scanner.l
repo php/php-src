@@ -1497,6 +1497,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 <ST_IN_SCRIPTING>"("{TABS_AND_SPACES}"real"{TABS_AND_SPACES}")" {
 	if (PARSER_MODE()) {
 		zend_throw_exception(zend_ce_parse_error, "The (real) cast has been removed, use (float) instead", 0);
+		RETURN_TOKEN(T_ERROR);
 	}
 	RETURN_TOKEN(T_DOUBLE_CAST);
 }
