@@ -667,7 +667,7 @@ PHP_FUNCTION(get_headers)
 	php_stream_context *context;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_STRING(url, url_len)
+		Z_PARAM_PATH(url, url_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(format)
 		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
