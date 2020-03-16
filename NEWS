@@ -4,10 +4,20 @@ PHP                                                                        NEWS
 
 - Core:
   . Fixed bug #79364 (When copy empty array, next key is unspecified). (cmb)
+  . Fixed bug #79329 (get_headers() silently truncates after a null byte) 
+    (CVE-2020-7066) (cmb)
   . Fixed bug #78210 (Invalid pointer address). (cmb, Nikita)
 
 - CURL:
   . Fixed bug #79199 (curl_copy_handle() memory leak). (cmb)
+
+- EXIF:
+  . Fixed bug #79282 (Use-of-uninitialized-value in exif) (CVE-2020-7064)
+    (Nikita)
+
+- MBstring:
+  . Fixed bug #79371 (mb_strtolower (UTF-32LE): stack-buffer-overflow at 
+    php_unicode_tolower_full) (CVE-2020-7065) (cmb)
 
 - SimpleXML:
   . Fixed bug #61597 (SXE properties may lack attributes and content). (cmb)
