@@ -2335,7 +2335,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 						}
 						break;
 					default:
-						if (zend_may_throw(opline, op_array, ssa)) {
+						if (zend_may_throw(opline, ssa_op, op_array, ssa)) {
 							return 0;
 						}
 						break;

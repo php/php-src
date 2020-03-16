@@ -4254,7 +4254,7 @@ void zend_inference_check_recursive_dependencies(zend_op_array *op_array)
 	free_alloca(worklist, use_heap);
 }
 
-int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa)
+int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t t1 = OP1_INFO_EX();
 	uint32_t t2 = OP2_INFO_EX();
@@ -4365,7 +4365,7 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 			return 0;
 		case ZEND_BIND_GLOBAL:
 			if ((opline+1)->opcode == ZEND_BIND_GLOBAL) {
-				return zend_may_throw_ex(opline + 1, ssa_op + 1, op_array, ssa);
+				return zend_may_throw(opline + 1, ssa_op + 1, op_array, ssa);
 			}
 			return 0;
 		case ZEND_ADD:
@@ -4588,9 +4588,4 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 		default:
 			return 1;
 	}
-}
-
-int zend_may_throw(const zend_op *opline, const zend_op_array *op_array, zend_ssa *ssa)
-{
-	return zend_may_throw_ex(opline, &ssa->ops[opline - op_array->opcodes], op_array, ssa);
 }

@@ -7523,7 +7523,8 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 		skip = 1;
 		while (opline != end) {
 			if (!skip) {
-				if (zend_may_throw(opline, op_array, ssa)) {
+				zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
+				if (zend_may_throw(opline, ssa_op, op_array, ssa)) {
 					return 1;
 				}
 			}
@@ -7610,7 +7611,8 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, cons
 						return 1;
 				}
 			} else {
-				if (zend_may_throw(opline, op_array, ssa)) {
+				zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
+				if (zend_may_throw(opline, ssa_op, op_array, ssa)) {
 					return 1;
 				}
 			}
@@ -8363,14 +8365,14 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 fallback:
 	/* fallback to subroutine threading */
 	if (trace) {
-		return zend_jit_trace_handler(Dst, op_array, opline, zend_may_throw(opline, op_array, ssa), trace);
+		return zend_jit_trace_handler(Dst, op_array, opline, /* may_throw */ 1, trace);
 	}
 	if (opline->opcode == ZEND_DO_FCALL ||
 	    opline->opcode == ZEND_DO_UCALL ||
 	    opline->opcode == ZEND_DO_FCALL_BY_NAME ){
 		return zend_jit_call(Dst, opline, next_block);
 	} else {
-		return zend_jit_handler(Dst, opline, zend_may_throw(opline, op_array, ssa));
+		return zend_jit_handler(Dst, opline, /* may_throw */ 1);
 	}
 #endif
 }

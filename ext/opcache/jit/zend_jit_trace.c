@@ -1903,7 +1903,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op2_info, OP2_RANGE_EX(), OP2_REG_ADDR(),
 								res_use_info, res_info, res_addr,
 								send_result,
-								zend_may_throw_ex(opline, ssa_op, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -1959,7 +1959,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								res_use_info, res_info, res_addr,
 								send_result,
 								(res_info & MAY_BE_LONG) && (res_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow_ex(opline, ssa_op, op_array, ssa),
-								zend_may_throw_ex(opline, ssa_op, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						if ((res_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_LONG|MAY_BE_GUARD)) {
@@ -2007,7 +2007,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						res_info = RES_INFO_EX();
 						if (!zend_jit_concat(&dasm_state, opline, op_array,
 								op1_info, op2_info, res_info, send_result,
-								zend_may_throw_ex(opline, ssa_op, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2056,7 +2056,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op1_info, op1_def_info, OP1_RANGE_EX(),
 								op2_info, OP2_RANGE_EX(),
 								(op1_def_info & MAY_BE_LONG) && (op1_def_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow_ex(opline, ssa_op, op_array, ssa),
-								zend_may_throw_ex(opline, ssa_op, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						if ((op1_def_info & (MAY_BE_ANY|MAY_BE_GUARD)) == (MAY_BE_LONG|MAY_BE_GUARD)) {
@@ -2085,7 +2085,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (!zend_jit_assign_dim_op(&dasm_state, opline, op_array,
 								op1_info, op1_def_info, op2_info,
 								op1_data_info, OP1_DATA_RANGE(),
-								zend_may_throw_ex(opline, ssa_op, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2101,7 +2101,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						CHECK_OP1_DATA_TRACE_TYPE();
 						if (!zend_jit_assign_dim(&dasm_state, opline, op_array,
 								op1_info, op2_info, op1_data_info,
-								zend_may_throw_ex(opline, ssa_op, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2134,7 +2134,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op1_def_info, OP1_DEF_REG_ADDR(),
 								op2_info, op2_addr, op2_def_addr,
 								res_info, res_addr,
-								zend_may_throw_ex(opline, ssa_op, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2261,7 +2261,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op1_info, OP1_REG_ADDR(),
 								op2_info, OP2_REG_ADDR(),
 								RES_REG_ADDR(),
-								zend_may_throw_ex(opline, ssa_op, op_array, ssa),
+								zend_may_throw(opline, ssa_op, op_array, ssa),
 								smart_branch_opcode, -1, -1, exit_addr)) {
 							goto jit_failure;
 						}
@@ -2293,7 +2293,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 								op1_info, OP1_REG_ADDR(),
 								op2_info, OP2_REG_ADDR(),
 								RES_REG_ADDR(),
-								zend_may_throw_ex(opline, ssa_op, op_array, ssa),
+								zend_may_throw(opline, ssa_op, op_array, ssa),
 								smart_branch_opcode, -1, -1, exit_addr)) {
 							goto jit_failure;
 						}
@@ -2392,7 +2392,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (!zend_jit_bool_jmpznz(&dasm_state, opline, op_array,
 								op1_info, OP1_REG_ADDR(), RES_REG_ADDR(),
 								-1, -1,
-								zend_may_throw_ex(opline, ssa_op, op_array, ssa),
+								zend_may_throw(opline, ssa_op, op_array, ssa),
 								opline->opcode, NULL)) {
 							goto jit_failure;
 						}
@@ -2456,7 +2456,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						if (!zend_jit_bool_jmpznz(&dasm_state, opline, op_array,
 								op1_info, OP1_REG_ADDR(), res_addr,
 								-1, -1,
-								zend_may_throw_ex(opline, ssa_op, op_array, ssa),
+								zend_may_throw(opline, ssa_op, op_array, ssa),
 								smart_branch_opcode, exit_addr)) {
 							goto jit_failure;
 						}
@@ -2509,7 +2509,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						if (!zend_jit_isset_isempty_dim(&dasm_state, opline, op_array,
 								op1_info, op2_info,
-								zend_may_throw_ex(opline, ssa_op, op_array, ssa),
+								zend_may_throw(opline, ssa_op, op_array, ssa),
 								smart_branch_opcode, -1, -1,
 								exit_addr)) {
 							goto jit_failure;
@@ -2542,7 +2542,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						if (!zend_jit_fetch_obj_read(&dasm_state, opline, op_array,
 								op1_info, ce,
-								zend_may_throw_ex(opline, ssa_op, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2579,7 +2579,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						while (1) {
 							if (!zend_jit_recv_init(&dasm_state, opline, op_array,
 									(opline + 1)->opcode != ZEND_RECV_INIT,
-									zend_may_throw_ex(opline, ssa_op, op_array, ssa))) {
+									zend_may_throw(opline, ssa_op, op_array, ssa))) {
 								goto jit_failure;
 							}
 							if ((opline+1)->opcode == ZEND_RECV_INIT) {
@@ -2597,7 +2597,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op1_info = OP1_INFO_EX();
 						USE_OP1_TRACE_TYPE();
 						if (!zend_jit_free(&dasm_state, opline, op_array, op1_info,
-								zend_may_throw_ex(opline, ssa_op, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2622,7 +2622,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						// TODO: we may need a guard after INIT_NS_FCALL???
 					case ZEND_INIT_METHOD_CALL:
 					case ZEND_INIT_DYNAMIC_CALL:
-						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw_ex(opline, ssa_op, op_array, ssa), p + 1)) {
+						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw(opline, ssa_op, op_array, ssa), p + 1)) {
 							goto jit_failure;
 						}
 						if ((p+1)->op == ZEND_JIT_TRACE_INIT_CALL) {
@@ -2632,7 +2632,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						goto done;
 					case ZEND_INIT_STATIC_METHOD_CALL:
-						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw_ex(opline, ssa_op, op_array, ssa), p + 1)) {
+						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw(opline, ssa_op, op_array, ssa), p + 1)) {
 							goto jit_failure;
 						}
 						if ((opline->op1_type != IS_CONST
@@ -2644,7 +2644,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						goto done;
 					case ZEND_INIT_USER_CALL:
-						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw_ex(opline, ssa_op, op_array, ssa), p + 1)) {
+						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw(opline, ssa_op, op_array, ssa), p + 1)) {
 							goto jit_failure;
 						}
 						if (opline->op2_type != IS_CONST
@@ -2655,7 +2655,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						goto done;
 					case ZEND_NEW:
-						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw_ex(opline, ssa_op, op_array, ssa), p + 1)) {
+						if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw(opline, ssa_op, op_array, ssa), p + 1)) {
 							goto jit_failure;
 						}
 						if (opline->op1_type != IS_CONST
@@ -2671,7 +2671,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 			}
 
 			if (opline->opcode != ZEND_NOP && opline->opcode != ZEND_JMP) {
-				if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw_ex(opline, ssa_op, op_array, ssa), p + 1)) {
+				if (!zend_jit_trace_handler(&dasm_state, op_array, opline, zend_may_throw(opline, ssa_op, op_array, ssa), p + 1)) {
 					goto jit_failure;
 				}
 			}

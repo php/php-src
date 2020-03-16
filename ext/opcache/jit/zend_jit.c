@@ -2149,6 +2149,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 		}
 		end = ssa->cfg.blocks[b].start + ssa->cfg.blocks[b].len - 1;
 		for (i = ssa->cfg.blocks[b].start; i <= end; i++) {
+			zend_ssa_op *ssa_op = &ssa->ops[i];
 			opline = op_array->opcodes + i;
 			switch (opline->opcode) {
 				case ZEND_INIT_FCALL:
@@ -2231,7 +2232,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								op2_info, OP2_RANGE(), OP2_REG_ADDR(),
 								res_use_info, RES_INFO(), res_addr,
 								send_result,
-								zend_may_throw(opline, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2272,7 +2273,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								res_use_info, res_info, res_addr,
 								send_result,
 								(res_info & MAY_BE_LONG) && (res_info & MAY_BE_DOUBLE) && zend_may_overflow(opline, op_array, ssa),
-								zend_may_throw(opline, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2302,7 +2303,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_concat(&dasm_state, opline, op_array,
 								op1_info, op2_info, RES_INFO(), send_result,
-								zend_may_throw(opline, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2352,7 +2353,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								op1_info, op1_def_info, OP1_RANGE(),
 								op2_info, OP2_RANGE(),
 								(op1_def_info & MAY_BE_LONG) && (op1_def_info & MAY_BE_DOUBLE) && zend_may_overflow(opline, op_array, ssa),
-								zend_may_throw(opline, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2371,7 +2372,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if (!zend_jit_assign_dim_op(&dasm_state, opline, op_array,
 								OP1_INFO(), OP1_DEF_INFO(), OP2_INFO(),
 								OP1_DATA_INFO(), OP1_DATA_RANGE(),
-								zend_may_throw(opline, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2384,7 +2385,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_assign_dim(&dasm_state, opline, op_array,
 								OP1_INFO(), OP2_INFO(), OP1_DATA_INFO(),
-								zend_may_throw(opline, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2415,7 +2416,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								OP1_DEF_INFO(), OP1_DEF_REG_ADDR(),
 								OP2_INFO(), op2_addr, op2_def_addr,
 								res_info, res_addr,
-								zend_may_throw(opline, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2521,7 +2522,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								OP1_INFO(), OP1_REG_ADDR(),
 								OP2_INFO(), OP2_REG_ADDR(),
 								res_addr,
-								zend_may_throw(opline, op_array, ssa),
+								zend_may_throw(opline, ssa_op, op_array, ssa),
 								smart_branch_opcode, target_label, target_label2,
 								NULL)) {
 							goto jit_failure;
@@ -2549,7 +2550,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 								OP1_INFO(), OP1_REG_ADDR(),
 								OP2_INFO(), OP2_REG_ADDR(),
 								RES_REG_ADDR(),
-								zend_may_throw(opline, op_array, ssa),
+								zend_may_throw(opline, ssa_op, op_array, ssa),
 								smart_branch_opcode, target_label, target_label2,
 								NULL)) {
 							goto jit_failure;
@@ -2649,7 +2650,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if (!zend_jit_bool_jmpznz(&dasm_state, opline, op_array,
 								OP1_INFO(), OP1_REG_ADDR(), RES_REG_ADDR(),
 								-1, -1,
-								zend_may_throw(opline, op_array, ssa),
+								zend_may_throw(opline, ssa_op, op_array, ssa),
 								opline->opcode, NULL)) {
 							goto jit_failure;
 						}
@@ -2676,7 +2677,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						if (!zend_jit_bool_jmpznz(&dasm_state, opline, op_array,
 								OP1_INFO(), OP1_REG_ADDR(), res_addr,
 								ssa->cfg.blocks[b].successors[0], ssa->cfg.blocks[b].successors[1],
-								zend_may_throw(opline, op_array, ssa),
+								zend_may_throw(opline, ssa_op, op_array, ssa),
 								opline->opcode, NULL)) {
 							goto jit_failure;
 						}
@@ -2688,7 +2689,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_fetch_dim_read(&dasm_state, opline, op_array,
 								OP1_INFO(), OP2_INFO(), RES_INFO(),
-								zend_may_throw(opline, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2717,7 +2718,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_isset_isempty_dim(&dasm_state, opline, op_array,
 								OP1_INFO(), OP2_INFO(),
-								zend_may_throw(opline, op_array, ssa),
+								zend_may_throw(opline, ssa_op, op_array, ssa),
 								smart_branch_opcode, target_label, target_label2,
 								NULL)) {
 							goto jit_failure;
@@ -2751,7 +2752,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						if (!zend_jit_fetch_obj_read(&dasm_state, opline, op_array,
 								op1_info, ce,
-								zend_may_throw(opline, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2773,14 +2774,14 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					case ZEND_RECV_INIT:
 						if (!zend_jit_recv_init(&dasm_state, opline, op_array,
 								(opline + 1)->opcode != ZEND_RECV_INIT,
-								zend_may_throw(opline, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
 					case ZEND_FREE:
 					case ZEND_FE_FREE:
 						if (!zend_jit_free(&dasm_state, opline, op_array, OP1_INFO(),
-								zend_may_throw(opline, op_array, ssa))) {
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 						goto done;
@@ -2831,7 +2832,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					if (opline == op_array->opcodes ||
 					    opline->opcode != op_array->opcodes[i-1].opcode) {
 						/* repeatable opcodes */
-						if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa))) {
+						if (!zend_jit_handler(&dasm_state, opline,
+								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
 					}
@@ -2882,7 +2884,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					is_terminated = 1;
 					break;
 				case ZEND_JMPZNZ:
-					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa)) ||
+					if (!zend_jit_handler(&dasm_state, opline,
+							zend_may_throw(opline, ssa_op, op_array, ssa)) ||
 					    !zend_jit_cond_jmp(&dasm_state, OP_JMP_ADDR(opline, opline->op2), ssa->cfg.blocks[b].successors[1]) ||
 					    !zend_jit_jmp(&dasm_state, ssa->cfg.blocks[b].successors[0])) {
 						goto jit_failure;
@@ -2909,7 +2912,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 				case ZEND_ASSERT_CHECK:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
-					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa)) ||
+					if (!zend_jit_handler(&dasm_state, opline,
+							zend_may_throw(opline, ssa_op, op_array, ssa)) ||
 					    !zend_jit_cond_jmp(&dasm_state, opline + 1, ssa->cfg.blocks[b].successors[0])) {
 						goto jit_failure;
 					}
@@ -2954,7 +2958,8 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					}
 					break;
 				default:
-					if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa))) {
+					if (!zend_jit_handler(&dasm_state, opline,
+							zend_may_throw(opline, ssa_op, op_array, ssa))) {
 						goto jit_failure;
 					}
 			}
