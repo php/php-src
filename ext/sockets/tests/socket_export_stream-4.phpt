@@ -30,34 +30,34 @@ function test($stream, $sock) {
 
 echo "normal\n";
 $sock0 = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-socket_bind($sock0, '0.0.0.0', 58380);
+socket_bind($sock0, '0.0.0.0');
 $stream0 = socket_export_stream($sock0);
 test($stream0, $sock0);
 
 echo "\nunset stream\n";
 $sock1 = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-socket_bind($sock1, '0.0.0.0', 58381);
+socket_bind($sock1, '0.0.0.0');
 $stream1 = socket_export_stream($sock1);
 unset($stream1);
 test(null, $sock1);
 
 echo "\nunset socket\n";
 $sock2 = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-socket_bind($sock2, '0.0.0.0', 58382);
+socket_bind($sock2, '0.0.0.0');
 $stream2 = socket_export_stream($sock2);
 unset($sock2);
 test($stream2, null);
 
 echo "\nclose stream\n";
 $sock3 = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-socket_bind($sock3, '0.0.0.0', 58383);
+socket_bind($sock3, '0.0.0.0');
 $stream3 = socket_export_stream($sock3);
 fclose($stream3);
 test($stream3, $sock3);
 
 echo "\nclose socket\n";
 $sock4 = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-socket_bind($sock4, '0.0.0.0', 58484);
+socket_bind($sock4, '0.0.0.0');
 $stream4 = socket_export_stream($sock4);
 socket_close($sock4);
 test($stream4, $sock4);
