@@ -3692,6 +3692,11 @@ static void exif_process_TIFF_in_JPEG(image_info_type *ImageInfo, char *CharBuf,
 {
 	unsigned exif_value_2a, offset_of_ifd;
 
+	if (length < 2) {
+		exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_WARNING, "Missing TIFF alignment marker");
+		return;
+	}
+
 	/* set the thumbnail stuff to nothing so we can test to see if they get set up */
 	if (memcmp(CharBuf, "II", 2) == 0) {
 		ImageInfo->motorola_intel = 0;
@@ -3844,7 +3849,7 @@ static int exif_scan_JPEG_header(image_info_type *ImageInfo)
 			return FALSE;
 		}
 
-		sn = exif_file_sections_add(ImageInfo, marker, itemlen+1, NULL);
+		sn = exif_file_sections_add(ImageInfo, marker, itemlen, NULL);
 		Data = ImageInfo->file.list[sn].data;
 
 		/* Store first two pre-read bytes. */
