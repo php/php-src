@@ -7802,9 +7802,10 @@ static uint32_t skip_valid_arguments(const zend_op_array *op_array, zend_ssa *ss
 
 		if (ZEND_TYPE_IS_SET(arg_info->type)) {
 			if (ZEND_TYPE_IS_ONLY_MASK(arg_info->type)) {
+				zend_op *opline = call_info->arg_info[num_args].opline;
+				zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
 				uint32_t type_mask = ZEND_TYPE_PURE_MASK(arg_info->type);
-				uint32_t info = _ssa_op1_info(op_array, ssa, call_info->arg_info[num_args].opline);
-				if ((info & (MAY_BE_ANY|MAY_BE_UNDEF)) & ~type_mask) {
+				if ((OP1_INFO() & (MAY_BE_ANY|MAY_BE_UNDEF)) & ~type_mask) {
 					break;
 				}
 			} else {
@@ -10505,6 +10506,7 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 			ZEND_ASSERT(0);
 		}
 	} else {
+		zend_ssa_op *ssa_op = &ssa->ops[opline - op_array->opcodes];
 		uint32_t op1_info = OP1_INFO();
 		zend_jit_addr op1_addr = OP1_ADDR();
 		int	b = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value) - op_array->opcodes];
@@ -10739,7 +10741,7 @@ static zend_bool zend_jit_may_reuse_reg(const zend_op_array *op_array, zend_ssa 
 	return 0;
 }
 
-static zend_bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, int var)
+static zend_bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, const zend_ssa_op *ssa_op, int var)
 {
 	uint32_t op1_info, op2_info;
 
@@ -10837,7 +10839,8 @@ static zend_bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa 
 	}
 
 	if (ssa->vars[var].definition >= 0) {
-		if (!zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + ssa->vars[var].definition, var)) {
+		uint32_t def = ssa->vars[var].definition;
+		if (!zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + def, ssa->ops + def, var)) {
 			return 0;
 		}
 	}
@@ -10847,7 +10850,7 @@ static zend_bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa 
 
 		do {
 			if (!zend_ssa_is_no_val_use(op_array->opcodes + use, ssa->ops + use, var) &&
-			    !zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + use, var)) {
+			    !zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + use, ssa->ops + use, var)) {
 				return 0;
 			}
 			use = zend_ssa_next_use(ssa->ops, var, use);
@@ -10873,6 +10876,7 @@ static zend_bool zend_needs_extra_reg_for_const(const zend_op_array *op_array, c
 static zend_regset zend_jit_get_scratch_regset(const zend_op_array *op_array, zend_ssa *ssa, uint32_t line, int current_var)
 {
 	const zend_op *opline = op_array->opcodes + line;
+	const zend_ssa_op *ssa_op = ssa->ops + line;
 	uint32_t op1_info, op2_info, res_info;
 	zend_regset regset = ZEND_REGSET_SCRATCH;
 
