@@ -1379,11 +1379,8 @@ static void* dasm_labels[zend_lb_MAX];
 |			IF_GC_MAY_NOT_LEAK FCARG1a, eax, >4
 |			// gc_possible_root(Z_COUNTED_P(z))
 |			EXT_CALL gc_possible_root, r0
-||			if (cold && ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) != 0) {
-|				jmp >4
-|.code
-||			}
-||		} else if (cold && ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) != 0) {
+||		}
+||		if (cold && ((op_info) & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) != 0) {
 |			jmp >4
 |.code
 ||		}
