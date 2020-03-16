@@ -771,6 +771,7 @@ static php_iconv_err_t _php_iconv_strlen(size_t *pretval, const char *str, size_
 		if (out_left == sizeof(buf)) {
 			break;
 		} else {
+			ZEND_ASSERT((sizeof(buf) - out_left) % GENERIC_SUPERSET_NBYTES == 0);
 			cnt += (sizeof(buf) - out_left) / GENERIC_SUPERSET_NBYTES;
 		}
 	}
