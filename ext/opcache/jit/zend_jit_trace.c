@@ -530,7 +530,7 @@ static int zend_jit_trace_add_phis(zend_jit_trace_rec *trace_buffer, uint32_t ss
 			level++;
 		} else if (p->op == ZEND_JIT_TRACE_BACK) {
 			if (level == 0) {
-				// Phi for recursive calls and returns are not supporte yet ???
+				// Phi for recursive calls and returns are not supported yet ???
 				assert(0);
 			} else {
 				level--;
@@ -865,7 +865,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			}
 		} else if (p->op == ZEND_JIT_TRACE_BACK) {
 			if (level == 0) {
-				stack_bottom += zend_jit_trace_frame_size(op_array);;
+				stack_bottom += zend_jit_trace_frame_size(op_array);
 				jit_extension =
 					(zend_jit_op_array_trace_extension*)ZEND_FUNC_INFO(op_array);
 				ssa = &jit_extension->func_info.ssa;
@@ -1131,7 +1131,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 	}
 
 	if (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP) {
-		/* Propagae initial value through Phi functions */
+		/* Propagate initial value through Phi functions */
 		zend_ssa_phi *phi = tssa->blocks[1].phis;
 
 		while (phi) {
@@ -1449,7 +1449,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			}
 			frame->call = call->prev;
 			call->prev = frame;
-			call->return_ssa_var = find_return_ssa_var(p - 1, ssa_ops + (idx -1));
+			call->return_ssa_var = find_return_ssa_var(p - 1, ssa_ops + (idx - 1));
 			frame = call;
 
 			level++;

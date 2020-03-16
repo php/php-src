@@ -528,7 +528,7 @@ static int zend_jit_trace_record_fake_init_call(zend_execute_data *call, zend_ji
  * +--------+----------+----------+----------++----------+----------+----------+
  *
  * loop:       LOOP if "cycle" and level == 0, otherwise INNER_LOOP
- * INNER_LOOP: abort recording and start new one (wit for loop)
+ * INNER_LOOP: abort recording and start new one (wait for loop)
  * COMPILED:   abort recording (wait while side exit creates outer loop)
  * unroll:     continue recording while unroll limit reached
  * rec-call:   RECURSIVE_CALL if "cycle" and level > N, otherwise continue
@@ -583,7 +583,6 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 	TRACE_START(ZEND_JIT_TRACE_START, start, &EX(func)->op_array);
 	((zend_jit_trace_start_rec*)trace_buffer)->opline = opline;
 	is_toplevel = EX(func)->op_array.function_name == NULL;
-
 
 	if (prev_call) {
 		idx = zend_jit_trace_record_fake_init_call(prev_call, trace_buffer, idx);
