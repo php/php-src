@@ -553,6 +553,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 	size_t offset;
 	int idx, count;
 	uint8_t  trace_flags, op1_type, op2_type, op3_type;
+	zend_class_entry *ce1, *ce2;
 	int backtrack_recursion = -1;
 	int backtrack_ret_recursion = -1;
 	int backtrack_ret_recursion_level = 0;
@@ -595,6 +596,7 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 			break;
 		}
 
+		ce1 = ce2 = NULL;
 		op1_type = op2_type = op3_type = IS_UNKNOWN;
 		if ((opline->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV))
 		 &&	(opline->opcode != ZEND_ROPE_ADD && opline->opcode != ZEND_ROPE_END)) {
@@ -605,7 +607,11 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				op1_type = Z_TYPE_P(zv);
 			}
 			if (op1_type == IS_REFERENCE) {
-				op1_type = Z_TYPE_P(Z_REFVAL_P(zv)) | IS_TRACE_REFERENCE;
+				zv = Z_REFVAL_P(zv);
+				op1_type = Z_TYPE_P(zv) | IS_TRACE_REFERENCE;
+			}
+			if (Z_TYPE_P(zv) == IS_OBJECT) {
+					ce1 = Z_OBJCE_P(zv);
 			}
 		}
 		if (opline->op2_type & (IS_TMP_VAR|IS_VAR|IS_CV)) {
@@ -616,7 +622,11 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 				op2_type = Z_TYPE_P(zv);
 			}
 			if (op2_type == IS_REFERENCE) {
-				op2_type = Z_TYPE_P(Z_REFVAL_P(zv)) | IS_TRACE_REFERENCE;
+				zv = Z_REFVAL_P(zv);
+				op2_type = Z_TYPE_P(zv) | IS_TRACE_REFERENCE;
+			}
+			if (Z_TYPE_P(zv) == IS_OBJECT) {
+					ce2 = Z_OBJCE_P(zv);
 			}
 		}
 		if (opline->opcode == ZEND_ASSIGN_DIM ||
@@ -635,29 +645,20 @@ zend_jit_trace_stop ZEND_FASTCALL zend_jit_trace_execute(zend_execute_data *ex, 
 					op3_type = Z_TYPE_P(zv);
 				}
 				if (op3_type == IS_REFERENCE) {
-					op3_type = Z_TYPE_P(Z_REFVAL_P(zv)) | IS_TRACE_REFERENCE;
+					zv = Z_REFVAL_P(zv);
+					op3_type = Z_TYPE_P(zv) | IS_TRACE_REFERENCE;
 				}
 			}
 		}
 
 		TRACE_RECORD_VM(ZEND_JIT_TRACE_VM, opline, op1_type, op2_type, op3_type);
 
-		if (opline->op1_type & (IS_TMP_VAR|IS_VAR|IS_CV)) {
-			zval *var = EX_VAR(opline->op1.var);
-			uint8_t type = Z_TYPE_P(var);
-
-			if (type == IS_OBJECT) {
-				TRACE_RECORD_TYPE(ZEND_JIT_TRACE_OP1_TYPE, Z_OBJCE_P(var));
-			}
+		if (ce1) {
+			TRACE_RECORD_TYPE(ZEND_JIT_TRACE_OP1_TYPE, ce1);
 		}
 
-		if (opline->op2_type & (IS_TMP_VAR|IS_VAR|IS_CV)) {
-			zval *var = EX_VAR(opline->op2.var);
-			uint8_t type = Z_TYPE_P(var);
-
-			if (type == IS_OBJECT) {
-				TRACE_RECORD_TYPE(ZEND_JIT_TRACE_OP2_TYPE, Z_OBJCE_P(var));
-			}
+		if (ce2) {
+			TRACE_RECORD_TYPE(ZEND_JIT_TRACE_OP2_TYPE, ce2);
 		}
 
 		switch (opline->opcode) {
