@@ -26,6 +26,10 @@ PHP                                                                        NEWS
   . Fixed bug #79311 (enchant_dict_suggest() fails on big endian architecture).
     (cmb)
 
+- EXIF:
+  . Fixed bug #79282 (Use-of-uninitialized-value in exif). (CVE-2020-7064)
+    (Nikita)
+
 - MySQLi:
   . Fixed bug #64032 (mysqli reports different client_version). (cmb)
 
