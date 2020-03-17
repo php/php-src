@@ -1276,7 +1276,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						uint32_t info;
 
 						if (opline->op1_type == IS_CONST) {
-							info = zend_jit_trace_type_to_info(Z_TYPE_P(RT_CONSTANT(opline, opline->op1)));
+							info = _const_op_type(RT_CONSTANT(opline, opline->op1));
 						} else {
 							ZEND_ASSERT(ssa_ops[idx].op1_use >= 0);
 							info = ssa_var_info[ssa_ops[idx].op1_use].type & ~MAY_BE_GUARD;
@@ -1314,7 +1314,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					if (opline->op1_type == IS_UNUSED) {
 						return_value_info.type = MAY_BE_NULL;
 					} else if (opline->op1_type == IS_CONST) {
-						return_value_info.type = zend_jit_trace_type_to_info(Z_TYPE_P(RT_CONSTANT(opline, opline->op1)));
+						return_value_info.type = _const_op_type(RT_CONSTANT(opline, opline->op1));
 					} else {
 						ZEND_ASSERT(ssa_ops[idx].op1_use >= 0);
 						return_value_info = ssa_var_info[ssa_ops[idx].op1_use];
@@ -1351,7 +1351,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			if (opline->opcode == ZEND_RECV_INIT
 			 && !(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 				/* RECV_INIT always copy the constant */
-				ssa_var_info[ssa_ops[idx].result_def].type = zend_jit_trace_type_to_info(Z_TYPE_P(RT_CONSTANT(opline, opline->op2)));
+				ssa_var_info[ssa_ops[idx].result_def].type = _const_op_type(RT_CONSTANT(opline, opline->op2));
 			} else {
 				if (zend_update_type_info(op_array, tssa, script, (zend_op*)opline, ssa_ops + idx, ssa_opcodes, optimization_level) == FAILURE) {
 					// TODO:
@@ -1405,7 +1405,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					if (opline->opcode == ZEND_RECV_INIT
 					 && !(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)) {
 						/* RECV_INIT always copy the constant */
-						ssa_var_info[ssa_ops[idx].result_def].type = zend_jit_trace_type_to_info(Z_TYPE_P(RT_CONSTANT(opline, opline->op2)));
+						ssa_var_info[ssa_ops[idx].result_def].type = _const_op_type(RT_CONSTANT(opline, opline->op2));
 					} else {
 						if (zend_update_type_info(op_array, tssa, script, (zend_op*)opline, ssa_ops + idx, ssa_opcodes, optimization_level) == FAILURE) {
 							// TODO:
