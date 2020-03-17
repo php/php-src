@@ -2,13 +2,13 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2020, PHP 7.2.29
 
-- Core: 
-  . Fixed bug #79329 (get_headers() silently truncates after a null byte) 
-    (CVE-2020-7066) (cmb)
-
 - EXIF:
-  . Fixed bug #79282 (Use-of-uninitialized-value in exif) (CVE-2020-7064) 
+  . Fixed bug #79282 (Use-of-uninitialized-value in exif). (CVE-2020-7064) 
     (Nikita)
+
+- Standard: 
+  . Fixed bug #79329 (get_headers() silently truncates after a null byte) 
+    (CVE-2020-7066). (cmb)
 
 20 Feb 2020, PHP 7.2.28
 
