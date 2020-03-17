@@ -2711,7 +2711,10 @@ done:
 						type = STACK_VAR_TYPE(opline->op1.var);
 					}
 				} else if (opline->opcode == ZEND_ASSIGN) {
-					if (opline->op2_type != IS_CONST) {
+					if (opline->op2_type != IS_CONST
+					 && ssa_op->op1_use >= 0
+					 /* assignment to typed reference may cause conversion */
+					 && (ssa->var_info[ssa_op->op1_use].type & MAY_BE_REF) == 0) {
 						/* copy */
 						type = STACK_VAR_TYPE(opline->op2.var);
 					}
