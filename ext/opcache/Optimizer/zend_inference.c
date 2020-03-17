@@ -2525,14 +2525,8 @@ static zend_always_inline int _zend_update_type_info(
 				}
 			} else if (opline->opcode == ZEND_ASSIGN_OBJ_OP) {
 				if (opline->op1_type == IS_CV) {
-					if (!(orig & MAY_BE_REF)) {
-						if (orig & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
-							orig &= ~(MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE);
-							orig |= MAY_BE_OBJECT | MAY_BE_RC1 | MAY_BE_RCN;
-						}
-						if (orig & MAY_BE_OBJECT) {
-							orig |= (MAY_BE_RC1|MAY_BE_RCN);
-						}
+					if (orig & MAY_BE_OBJECT) {
+						orig |= (MAY_BE_RC1|MAY_BE_RCN);
 					}
 					UPDATE_SSA_TYPE(orig, ssa_op->op1_def);
 					COPY_SSA_OBJ_TYPE(ssa_op->op1_use, ssa_op->op1_def);
@@ -2741,10 +2735,6 @@ static zend_always_inline int _zend_update_type_info(
 		case ZEND_ASSIGN_OBJ:
 			if (opline->op1_type == IS_CV) {
 				tmp = t1;
-				if (t1 & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
-					tmp &= ~(MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE);
-					tmp |= MAY_BE_OBJECT | MAY_BE_RC1 | MAY_BE_RCN;
-				}
 				if (tmp & MAY_BE_OBJECT) {
 					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				}
@@ -2791,10 +2781,6 @@ static zend_always_inline int _zend_update_type_info(
 		case ZEND_POST_DEC_OBJ:
 			if (opline->op1_type == IS_CV) {
 				tmp = t1;
-				if (t1 & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
-					tmp &= ~(MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE);
-					tmp |= MAY_BE_OBJECT | MAY_BE_RC1 | MAY_BE_RCN;
-				}
 				if (tmp & MAY_BE_OBJECT) {
 					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				}
@@ -2870,10 +2856,6 @@ static zend_always_inline int _zend_update_type_info(
 		case ZEND_ASSIGN_OBJ_REF:
 			if (opline->op1_type == IS_CV) {
 				tmp = t1;
-				if (t1 & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
-					tmp &= ~(MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE);
-					tmp |= MAY_BE_OBJECT | MAY_BE_RC1 | MAY_BE_RCN;
-				}
 				if (tmp & MAY_BE_OBJECT) {
 					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				}
