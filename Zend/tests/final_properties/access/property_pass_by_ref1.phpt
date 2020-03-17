@@ -1,5 +1,5 @@
 --TEST--
-Test that final properties can't be passed by ref
+Test that final properties can't be passed by reference
 --XFAIL--
 Incorrect error message in case of static properties ("Cannot modify final static property ...")
 --FILE--
@@ -42,6 +42,6 @@ try {
 ?>
 --EXPECT--
 Cannot acquire reference to final property Foo::$property1
+Cannot acquire reference to final property Foo::$property1
 Cannot acquire reference to final property Foo::$property2
-Cannot acquire reference to final property Foo::$property3
-Cannot acquire reference to final property Foo::$property4
+Cannot acquire reference to final property Foo::$property2

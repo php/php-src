@@ -71,6 +71,7 @@ try {
     echo $exception->getMessage() . "\n";
 }
 
+// $property2 must be initialized to null, otherwise the subsequent ??= would do nothing
 Foo::$property2 ??= null;
 
 try {

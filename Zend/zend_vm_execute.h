@@ -859,7 +859,7 @@ static zend_never_inline ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static
 
 	SAVE_OPLINE();
 
-	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~(type == BP_VAR_UNSET ? ZEND_FETCH_DIM_UNSET_FLAG : ZEND_FETCH_OBJ_FLAGS), type, opline->extended_value & (type == BP_VAR_UNSET ? ZEND_FETCH_DIM_UNSET_FLAG : ZEND_FETCH_OBJ_FLAGS) OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
+	if (UNEXPECTED(zend_fetch_static_property_address(&prop, NULL, opline->extended_value & ~ZEND_FETCH_OBJ_FLAGS, type, opline->extended_value & ZEND_FETCH_OBJ_FLAGS OPLINE_CC EXECUTE_DATA_CC) != SUCCESS)) {
 		ZEND_ASSERT(EG(exception) || (type == BP_VAR_IS));
 		prop = &EG(uninitialized_zval);
 	}

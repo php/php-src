@@ -819,7 +819,7 @@ ZEND_API zval *zend_std_write_property(zend_object *zobj, zend_string *name, zva
 		variable_ptr = OBJ_PROP(zobj, property_offset);
 
 		if (Z_TYPE_P(variable_ptr) != IS_UNDEF) {
-			if (UNEXPECTED(Z_PROP_FLAG_P(variable_ptr) != IS_PROP_UNINIT && prop_info && prop_info->flags & ZEND_ACC_FINAL)) {
+			if (UNEXPECTED(prop_info && prop_info->flags & ZEND_ACC_FINAL && Z_PROP_FLAG_P(variable_ptr) != IS_PROP_UNINIT)) {
 				zend_final_property_assignment_error(zobj->ce, name);
 				variable_ptr = &EG(error_zval);
 				goto exit;
