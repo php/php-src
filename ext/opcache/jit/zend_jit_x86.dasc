@@ -4963,6 +4963,8 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
                                        zend_jit_addr   res_addr)
 /* Labels: 1,2,3,4,5,8 */
 {
+	int done = 0;
+
 	//ZEND_ASSERT(Z_MODE(var_addr) == IS_MEM_ZVAL);
 	if (var_info & MAY_BE_REF) {
 		if (Z_MODE(var_addr) != IS_REG || Z_REG(var_addr) != ZREG_FCARG1a) {
@@ -4996,68 +4998,74 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
 		|1:
 	}
 	if (var_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-		int in_cold = 0;
-
 		ZEND_ASSERT(Z_REG(var_addr) != ZREG_R0);
-		if (var_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-			|	IF_ZVAL_REFCOUNTED var_addr, >1
-			|.cold_code
-			|1:
-			in_cold = 1;
-		}
-		|	// TODO: support for object->set
-		|	// TODO: support for assignment to itself
-		|	GET_ZVAL_PTR r0, var_addr
-		|	GC_DELREF r0
 		if (RC_MAY_BE_1(var_info)) {
-			if (RC_MAY_BE_N(var_info)) {
-				|	jnz >4
+			int in_cold = 0;
+
+			if (var_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+				|	IF_ZVAL_REFCOUNTED var_addr, >1
+				|.cold_code
+				|1:
+				in_cold = 1;
 			}
+			|	GET_ZVAL_PTR r0, var_addr
 			|	mov aword T1, r0 // save
 			if (!zend_jit_simple_assign(Dst, opline, op_array, var_addr, var_info, var_def_info, val_type, val, val_addr, val_info, res_addr, in_cold)) {
 				return 0;
 			}
 			|	mov FCARG1a, aword T1 // restore
-			if (val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-				|	cmp dword [FCARG1a], 0
+			|	GC_DELREF FCARG1a
+			if (RC_MAY_BE_N(var_info) && (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0) {
+				|	jnz >4
+			} else {
 				|	jnz >8
 			}
 			|	ZVAL_DTOR_FUNC var_info, opline
-			|	jmp >8
-			|4:
-		}
-		if (RC_MAY_BE_N(var_info)) {
-			if (Z_REG(var_addr) == ZREG_FP) {
-				|	GET_ZVAL_PTR FCARG1a, var_addr
-				|	IF_GC_MAY_NOT_LEAK FCARG1a, eax, >5
-			} else if (Z_REG(var_addr) != ZREG_FCARG1a) {
-				|	GET_ZVAL_PTR FCARG1a, var_addr
-				|	IF_GC_MAY_NOT_LEAK FCARG1a, eax, >5
-				|	mov T1, Ra(Z_REG(var_addr)) // save
-			} else {
-				|	GET_ZVAL_PTR r0, var_addr
-				|	IF_GC_MAY_NOT_LEAK r0, eax, >5
-				|	mov T1, Ra(Z_REG(var_addr)) // save
-				|	GET_ZVAL_PTR FCARG1a, var_addr
-			}
-			|	EXT_CALL gc_possible_root, r0
-			if (Z_REG(var_addr) != ZREG_FP) {
-				|	mov Ra(Z_REG(var_addr)), T1 // restore
+			if (RC_MAY_BE_N(var_info) && (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) != 0) {
+				|	jmp >8
+				|4:
+				|	IF_GC_MAY_NOT_LEAK FCARG1a, eax, >8
+				|	EXT_CALL gc_possible_root, r0
 			}
 			if (in_cold) {
-				|	jmp >5
+				|	jmp >8
 				|.code
+			} else {
+				done = 1;
 			}
-	    } else if (in_cold) {
-			ZEND_ASSERT(RC_MAY_BE_1(var_info));
-			|.code
+		} else /* if (RC_MAY_BE_N(var_info)) */ {
+			if (var_info & ((MAY_BE_ANY|MAY_BE_UNDEF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+				|	IF_NOT_ZVAL_REFCOUNTED var_addr, >5
+			}
+			|	GET_ZVAL_PTR r0, var_addr
+			|	GC_DELREF r0
+			if (var_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
+				if (Z_REG(var_addr) == ZREG_FP) {
+					|	GET_ZVAL_PTR FCARG1a, var_addr
+					|	IF_GC_MAY_NOT_LEAK FCARG1a, eax, >5
+				} else if (Z_REG(var_addr) != ZREG_FCARG1a) {
+					|	GET_ZVAL_PTR FCARG1a, var_addr
+					|	IF_GC_MAY_NOT_LEAK FCARG1a, eax, >5
+					|	mov T1, Ra(Z_REG(var_addr)) // save
+				} else {
+					|	GET_ZVAL_PTR r0, var_addr
+					|	IF_GC_MAY_NOT_LEAK r0, eax, >5
+					|	mov T1, Ra(Z_REG(var_addr)) // save
+					|	GET_ZVAL_PTR FCARG1a, var_addr
+				}
+				|	EXT_CALL gc_possible_root, r0
+				if (Z_REG(var_addr) != ZREG_FP) {
+					|	mov Ra(Z_REG(var_addr)), T1 // restore
+				}
+			}
+			|5:
 	    }
-		|5:
 	}
 
-	if (!zend_jit_simple_assign(Dst, opline, op_array, var_addr, var_info, var_def_info, val_type, val, val_addr, val_info, res_addr, 0)) {
+	if (!done && !zend_jit_simple_assign(Dst, opline, op_array, var_addr, var_info, var_def_info, val_type, val, val_addr, val_info, res_addr, 0)) {
 		return 0;
 	}
+
 	|8:
 
 	return 1;
