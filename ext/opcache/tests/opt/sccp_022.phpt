@@ -24,7 +24,7 @@ $_main: ; (lines=1, args=0, vars=0, tmps=0)
     ; %ssccp_022.php:1-10
 L0 (10):    RETURN int(1)
 
-foo: ; (lines=11, args=1, vars=2, tmps=1)
+foo: ; (lines=10, args=1, vars=2, tmps=1)
     ; (after optimizer)
     ; %ssccp_022.php:2-8
 L0 (2):     CV0($x) = RECV 1
@@ -35,6 +35,5 @@ L4 (4):     OP_DATA int(5)
 L5 (5):     ECHO string("5")
 L6 (6):     ASSIGN_OBJ CV1($a) string("foo")
 L7 (6):     OP_DATA int(5)
-L8 (7):     T2 = FETCH_DIM_R CV1($a) int(1)
-L9 (7):     ECHO T2
-L10 (8):    RETURN null
+L8 (7):     T2 = FETCH_DIM_R null int(1)
+L9 (8):     RETURN null
