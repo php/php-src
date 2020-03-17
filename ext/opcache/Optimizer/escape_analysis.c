@@ -216,8 +216,6 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 				}
 				break;
 			case ZEND_ASSIGN_DIM:
-			case ZEND_ASSIGN_OBJ:
-			case ZEND_ASSIGN_OBJ_REF:
 				if (OP1_INFO() & (MAY_BE_UNDEF | MAY_BE_NULL | MAY_BE_FALSE)) {
 					/* implicit object/array allocation */
 					return 1;

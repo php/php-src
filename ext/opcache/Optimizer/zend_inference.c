@@ -2554,12 +2554,6 @@ static zend_always_inline int _zend_update_type_info(
 						tmp |= MAY_BE_NULL;
 					}
 				} else if (opline->opcode == ZEND_ASSIGN_OBJ_OP) {
-					if (orig & (MAY_BE_ANY - (MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_OBJECT))) {
-						/* null and false (and empty string) are implicitly converted to object,
-						 * anything else results in a null return value. */
-						tmp |= MAY_BE_NULL;
-					}
-
 					/* The return value must also satisfy the property type */
 					if (prop_info) {
 						tmp &= zend_fetch_prop_type(script, prop_info, NULL);

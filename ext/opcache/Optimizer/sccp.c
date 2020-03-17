@@ -1201,11 +1201,6 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 					return;
 				}
 
-				/* If $a in $a->foo=$c is UNDEF, treat it like NULL. There is no warning. */
-				if ((var_info->type & MAY_BE_ANY) == 0) {
-					op1 = &EG(uninitialized_zval);
-				}
-
 				if (IS_BOT(op1)) {
 					SET_RESULT_BOT(result);
 					SET_RESULT_BOT(op1);
