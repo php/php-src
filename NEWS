@@ -41,6 +41,9 @@ PHP                                                                        NEWS
   . Removed deprecated png2wbmp() and jpeg2wbmp(). (cmb)
   . Added imagegetinterpolation(). (cmb)
 
+- Iconv:
+  . Dropped support for iconv without proper errno setting. (cmb)
+
 - Intl:
   . Removed deprecated INTL_IDNA_VARIANT_2003. (cmb)
 

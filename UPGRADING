@@ -215,6 +215,10 @@ PHP 8.0 UPGRADE NOTES
   . gmp_random() has been removed. One of gmp_random_range() or
     gmp_random_bits() should be used instead.
 
+- Iconv:
+  . iconv() implementations which do not properly set errno in case of errors,
+    are no longer supported.
+
 - Intl:
   . The deprecated constant INTL_IDNA_VARIANT_2003 has been removed.
     RFC: https://wiki.php.net/rfc/deprecate-and-remove-intl_idna_variant_2003

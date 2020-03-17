@@ -143,16 +143,11 @@ int main() {
 }
     ]])],[
       AC_MSG_RESULT(yes)
-      PHP_DEFINE([ICONV_SUPPORTS_ERRNO],1,[ext/iconv])
-      AC_DEFINE([ICONV_SUPPORTS_ERRNO],1,[Whether iconv supports error no or not])
     ],[
       AC_MSG_RESULT(no)
-      PHP_DEFINE([ICONV_SUPPORTS_ERRNO],0,[ext/iconv])
-      AC_DEFINE([ICONV_SUPPORTS_ERRNO],0,[Whether iconv supports error no or not])
+      AC_MSG_ERROR(iconv does not support errno)
     ],[
-      AC_MSG_RESULT(no, cross-compiling)
-      PHP_DEFINE([ICONV_SUPPORTS_ERRNO],0,[ext/iconv])
-      AC_DEFINE([ICONV_SUPPORTS_ERRNO],0,[Whether iconv supports error no or not])
+      AC_MSG_RESULT(yes, cross-compiling)
     ])
 
     AC_MSG_CHECKING([if iconv supports //IGNORE])
