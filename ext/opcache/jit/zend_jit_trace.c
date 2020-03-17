@@ -1717,7 +1717,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 
 	// TODO: register allocation ???
 
-	dasm_growpc(&dasm_state, 1); /* trace needs just one global lable for loop */
+	dasm_growpc(&dasm_state, 1); /* trace needs just one global label for loop */
 
 	zend_jit_align_func(&dasm_state);
 	if (!parent_trace) {
@@ -1741,7 +1741,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	 || trace_buffer->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
 
 		if (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP) {
-			/* Check loop-invariant varaible types */
+			/* Check loop-invariant variable types */
 			for (i = 0; i < op_array->last_var + op_array->T; i++) {
 				uint32_t info = ssa->var_info[i].type;
 
@@ -1880,7 +1880,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (frame->call) {
 								uint8_t res_type = p->op1_type;
 								if (res_type & IS_TRACE_REFERENCE) {
-									res_type = IS_UNKNOWN;;
+									res_type = IS_UNKNOWN;
 								}
 								if (res_type != IS_UNKNOWN) {
 									zend_jit_trace_send_type(opline+1, frame->call, res_type);
@@ -1935,7 +1935,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							 && frame->call->func->type == ZEND_USER_FUNCTION) {
 								uint8_t res_type = p->op1_type;
 								if (res_type & IS_TRACE_REFERENCE) {
-									res_type = IS_UNKNOWN;;
+									res_type = IS_UNKNOWN;
 								}
 								if (res_type != IS_UNKNOWN) {
 									zend_jit_trace_send_type(opline+1, frame->call, res_type);
@@ -1992,7 +1992,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							 && frame->call->func->type == ZEND_USER_FUNCTION) {
 								uint8_t res_type = p->op1_type;
 								if (res_type & IS_TRACE_REFERENCE) {
-									res_type = IS_UNKNOWN;;
+									res_type = IS_UNKNOWN;
 								}
 								if (res_type != IS_UNKNOWN) {
 									zend_jit_trace_send_type(opline+1, frame->call, res_type);
