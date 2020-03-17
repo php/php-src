@@ -147,7 +147,7 @@ int main() {
       AC_MSG_RESULT(no)
       AC_MSG_ERROR(iconv does not support errno)
     ],[
-      AC_MSG_RESULT(no, cross-compiling)
+      AC_MSG_RESULT(yes, cross-compiling)
     ])
 
     AC_MSG_CHECKING([if iconv supports //IGNORE])
