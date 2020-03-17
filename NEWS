@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-?? ??? ????, PHP 7.4.4RC1
+19 Mar 2020, PHP 7.4.4
 
 - Core:
   . Fixed bug #79329 (get_headers() silently truncates after a null byte)
