@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-05 Mar 2020, PHP 7.3.16RC1
+19 Mar 2020, PHP 7.3.16
 
 - Core:
   . Fixed bug #63206 (restore_error_handler does not restore previous errors
