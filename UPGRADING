@@ -450,7 +450,7 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/dom_living_standard_api
 
 - Zip:
-  . Extension updated to version 1.18
+  . Extension updated to version 1.18.1
   . New ZipArchive::lastId property to get index value of last added entry.
   . Error can be checked after an archive is closed using ZipArchive::status,
     ZipArchive::statusSys properties or ZipArchive::getStatusString() method.
@@ -475,8 +475,13 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 
 - Zip
- . ZipArchive::addGlob and ZipArchive::addPattern methods accept a "flags"
-   value in the "options" array argument.
+ . ZipArchive::addGlob and ZipArchive::addPattern methods accept more
+   values in the "options" array argument:
+   . flags
+   . comp_method
+   . comp_flags
+   . env_method
+   . enc_pasword
  . ZipArchive::addEmptyDir, ZipArchive::addFile and aZipArchive::addFromString
    methods have a new "flags" argument. This allow to manage name encoding
    (ZipArchive::FL_ENC_*) and entry replacement (ZipArchive::FL_OVERWRITE)

@@ -153,5 +153,7 @@ PHP                                                                        NEWS
     is closed. (Remi)
   . Fixed bug #50678 (files extracted by ZipArchive class lost their
     original modified time). (Remi)
+  . Implemented FR #77960 (add compression / encryption options for
+    ZipArchive::addGlob and ZipArchive::addPattern). (Remi)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
