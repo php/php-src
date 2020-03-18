@@ -2717,6 +2717,9 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 	}
 	ptr = zobj->handlers->get_property_ptr_ptr(zobj, name, type, cache_slot);
 	if (NULL == ptr) {
+		if (flags == ZEND_FETCH_OBJ_IS_R || flags == ZEND_FETCH_DIM_WRITE) {
+			type |= BP_VAR_OBJ_IS_R;
+		}
 		ptr = zobj->handlers->read_property(zobj, name, type, cache_slot, result);
 		if (ptr == result) {
 			if (UNEXPECTED(Z_ISREF_P(ptr) && Z_REFCOUNT_P(ptr) == 1)) {

@@ -2638,6 +2638,21 @@ static inline void zend_emit_assign_znode(zend_ast *var_ast, znode *value_node) 
 }
 /* }}} */
 
+static zend_bool is_prop_write_fetch(zend_op *opline, uint32_t type) {
+	if (type != BP_VAR_W && type != BP_VAR_RW && type != BP_VAR_UNSET) {
+		return 0;
+	}
+	if (!opline) {
+		return 0;
+	}
+	return opline->opcode == ZEND_FETCH_OBJ_W
+		|| opline->opcode == ZEND_FETCH_OBJ_RW
+		|| opline->opcode == ZEND_FETCH_OBJ_UNSET
+		|| opline->opcode == ZEND_FETCH_STATIC_PROP_W
+		|| opline->opcode == ZEND_FETCH_STATIC_PROP_RW
+		|| opline->opcode == ZEND_FETCH_STATIC_PROP_UNSET;
+}
+
 static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 {
 	if (ast->attr == ZEND_DIM_ALTERNATIVE_SYNTAX) {
@@ -2653,6 +2668,8 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 	opline = zend_delayed_compile_var(&var_node, var_ast, type, 0);
 	if (opline && type == BP_VAR_W && (opline->opcode == ZEND_FETCH_STATIC_PROP_W || opline->opcode == ZEND_FETCH_OBJ_W)) {
 		opline->extended_value |= ZEND_FETCH_DIM_WRITE;
+	} else if (is_prop_write_fetch(opline, type)) {
+		opline->extended_value |= ZEND_FETCH_OBJ_IS_R;
 	}
 
 	zend_separate_if_call_and_write(&var_node, var_ast, type);
@@ -2704,6 +2721,9 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 		CG(active_op_array)->fn_flags |= ZEND_ACC_USES_THIS;
 	} else {
 		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, 0);
+		if (is_prop_write_fetch(opline, type)) {
+			opline->extended_value |= ZEND_FETCH_OBJ_IS_R;
+		}
 		zend_separate_if_call_and_write(&obj_node, obj_ast, type);
 	}
 	zend_compile_expr(&prop_node, prop_ast);

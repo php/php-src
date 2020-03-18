@@ -15,5 +15,6 @@ $a = new A;
 test($a->dummy);
 ?>
 --EXPECTF--
+Notice: Indirect modification of overloaded property A::$dummy has no effect in %s on line %d
 object(stdClass)#%d (0) {
 }

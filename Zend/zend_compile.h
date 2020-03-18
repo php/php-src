@@ -877,12 +877,15 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 #define ZEND_ARRAY_SYNTAX_SHORT 3 /* [] */
 
 /* var status for backpatching */
-#define BP_VAR_R			0
-#define BP_VAR_W			1
-#define BP_VAR_RW			2
-#define BP_VAR_IS			3
-#define BP_VAR_FUNC_ARG		4
-#define BP_VAR_UNSET		5
+#define BP_VAR_R			(1 << 0)
+#define BP_VAR_W			(1 << 1)
+#define BP_VAR_RW			(1 << 2)
+#define BP_VAR_IS			(1 << 3)
+#define BP_VAR_FUNC_ARG		(1 << 4)
+#define BP_VAR_UNSET		(1 << 5)
+/* Combined with BP_VAR_W, BP_VAR_RW, BP_VAR_UNSET,
+ * indicates that it should be interpreted as a read if the value is an object. */
+#define BP_VAR_OBJ_IS_R		(1 << 6)
 
 #define ZEND_INTERNAL_FUNCTION		1
 #define ZEND_USER_FUNCTION			2
@@ -909,6 +912,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 /* Only one of these can ever be in use */
 #define ZEND_FETCH_REF			1
 #define ZEND_FETCH_DIM_WRITE	2
+#define ZEND_FETCH_OBJ_IS_R		3
 #define ZEND_FETCH_OBJ_FLAGS	3
 
 #define ZEND_ISEMPTY			(1<<0)

@@ -21,7 +21,8 @@ try {
 var_dump($foo);
 
 ?>
---EXPECT--
+--EXPECTF--
+Notice: Indirect modification of overloaded property foo::$i has no effect in %s on line %d
 Cannot assign by reference to overloaded object
 object(foo)#1 (1) {
   ["var":"foo":private]=>

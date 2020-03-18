@@ -750,9 +750,8 @@ call_getter:
 
 			if (Z_TYPE_P(rv) != IS_UNDEF) {
 				retval = rv;
-				if (!Z_ISREF_P(rv) &&
-				    (type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET)) {
-					if (UNEXPECTED(Z_TYPE_P(rv) != IS_OBJECT)) {
+				if (!Z_ISREF_P(rv) && (type & (BP_VAR_W|BP_VAR_RW|BP_VAR_UNSET))) {
+					if (Z_TYPE_P(rv) != IS_OBJECT || !(type & BP_VAR_OBJ_IS_R)) {
 						zend_error(E_NOTICE, "Indirect modification of overloaded property %s::$%s has no effect", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(name));
 					}
 				}
