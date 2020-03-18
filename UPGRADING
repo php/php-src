@@ -459,6 +459,9 @@ PHP 8.0 UPGRADE NOTES
     defines a __toString() method.
     RFC: https://wiki.php.net/rfc/stringable
   . Traits can now define abstract private methods.
+    RFC: https://wiki.php.net/rfc/abstract_trait_method_validation
+  . `throw` can now be used as an expression.
+    RFC: https://wiki.php.net/rfc/throw_expression
 
 - Date:
   . Added DateTime::createFromInterface() and

@@ -4557,7 +4557,7 @@ void zend_compile_echo(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-void zend_compile_throw(zend_ast *ast) /* {{{ */
+void zend_compile_throw(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
 
@@ -4565,6 +4565,9 @@ void zend_compile_throw(zend_ast *ast) /* {{{ */
 	zend_compile_expr(&expr_node, expr_ast);
 
 	zend_emit_op(NULL, ZEND_THROW, &expr_node, NULL);
+
+	result->op_type = IS_CONST;
+	ZVAL_BOOL(&result->u.constant, 1);
 }
 /* }}} */
 
@@ -8741,9 +8744,6 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 		case ZEND_AST_ECHO:
 			zend_compile_echo(ast);
 			break;
-		case ZEND_AST_THROW:
-			zend_compile_throw(ast);
-			break;
 		case ZEND_AST_BREAK:
 		case ZEND_AST_CONTINUE:
 			zend_compile_break_continue(ast);
@@ -8953,6 +8953,9 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_ARROW_FUNC:
 			zend_compile_func_decl(result, ast, 0);
 			return;
+		case ZEND_AST_THROW:
+			zend_compile_throw(result, ast);
+			break;
 		default:
 			ZEND_ASSERT(0 /* not supported */);
 	}
