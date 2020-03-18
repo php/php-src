@@ -2211,7 +2211,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 			break;
 
 		default:
-			_DO_THROW("The parameter class is expected to be either a string, an array(class, method) or a callable object");
+			zend_argument_error(reflection_exception_ptr, 1, "must be either a string, an array(class, method) or a callable object, %s given", zend_zval_type_name(reference));
 			RETURN_THROWS();
 	}
 
@@ -2876,8 +2876,7 @@ ZEND_METHOD(reflection_method, __construct)
 		}
 
 		if ((tmp = strstr(name_str, "::")) == NULL) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Invalid method name %s", name_str);
+			zend_argument_error(reflection_exception_ptr, 1, "must be a valid method name");
 			RETURN_THROWS();
 		}
 		classname = &ztmp;
@@ -2918,7 +2917,7 @@ ZEND_METHOD(reflection_method, __construct)
 			if (classname == &ztmp) {
 				zval_ptr_dtor_str(&ztmp);
 			}
-			_DO_THROW("The parameter class is expected to be either a string or an object");
+			zend_argument_error(reflection_exception_ptr, 1, "must be of type object|string, %s given", zend_zval_type_name(classname));
 			RETURN_THROWS();
 	}
 
@@ -3457,7 +3456,7 @@ ZEND_METHOD(reflection_class_constant, __construct)
 			break;
 
 		default:
-			_DO_THROW("The parameter class is expected to be either a string or an object");
+			zend_argument_error(reflection_exception_ptr, 1, "must be of type object|string, %s given", zend_zval_type_name(classname));
 			RETURN_THROWS();
 	}
 
@@ -4924,8 +4923,7 @@ ZEND_METHOD(reflection_class, isSubclassOf)
 			}
 			/* no break */
 		default:
-			zend_throw_exception_ex(reflection_exception_ptr, 0,
-					"Parameter one must either be a string or a ReflectionClass object");
+			zend_argument_error(reflection_exception_ptr, 1, "must be of type ReflectionClass|string, %s given", zend_zval_type_name(class_name));
 			RETURN_THROWS();
 	}
 
@@ -4967,8 +4965,7 @@ ZEND_METHOD(reflection_class, implementsInterface)
 			}
 			/* no break */
 		default:
-			zend_throw_exception_ex(reflection_exception_ptr, 0,
-					"Parameter one must either be a string or a ReflectionClass object");
+			zend_argument_error(reflection_exception_ptr, 1, "must be of type ReflectionClass|string, %s given", zend_zval_type_name(interface));
 			RETURN_THROWS();
 	}
 
@@ -5155,7 +5152,7 @@ ZEND_METHOD(reflection_property, __construct)
 			break;
 
 		default:
-			_DO_THROW("The parameter class is expected to be either a string or an object");
+			zend_argument_error(reflection_exception_ptr, 1, "must be of type object|string, %s given", zend_zval_type_name(classname));
 			RETURN_THROWS();
 	}
 
@@ -6144,7 +6141,7 @@ ZEND_METHOD(reflection_reference, fromArrayElement)
 	} else if (Z_TYPE_P(key) == IS_STRING) {
 		item = zend_symtable_find(ht, Z_STR_P(key));
 	} else {
-		zend_type_error("Key must be array or string");
+		zend_argument_type_error(2, "must be of type string|int, %s given", zend_zval_type_name(key));
 		RETURN_THROWS();
 	}
 

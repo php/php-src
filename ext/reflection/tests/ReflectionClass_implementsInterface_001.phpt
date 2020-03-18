@@ -65,7 +65,7 @@ try {
     echo $e->getMessage() . "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 Does A implement A? 
    - Using object argument: A is not an interface
    - Using string argument: A is not an interface
@@ -146,6 +146,6 @@ Does I2 implement I2?
 Test bad arguments:
 ReflectionClass::implementsInterface() expects exactly 1 parameter, 0 given
 ReflectionClass::implementsInterface() expects exactly 1 parameter, 2 given
-Parameter one must either be a string or a ReflectionClass object
+ReflectionClass::implementsInterface(): Argument #1 ($interface) must be of type ReflectionClass|string, null given
 Interface ThisClassDoesNotExist does not exist
-Parameter one must either be a string or a ReflectionClass object
+ReflectionClass::implementsInterface(): Argument #1 ($interface) must be of type ReflectionClass|string, int given
