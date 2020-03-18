@@ -51,25 +51,19 @@ Warning: Undefined variable: x in %s on line %d
 Attempt to assign property 'a' of non-object
 
 Warning: Undefined variable: x in %s on line %d
-
-Warning: Trying to get property 'a' of non-object in %s on line %d
-Attempt to assign property 'b' of non-object
+Attempt to modify property 'a' of non-object
 
 Warning: Undefined variable: x in %s on line %d
 Attempt to increment/decrement property 'a' of non-object
 
 Warning: Undefined variable: x in %s on line %d
-
-Warning: Trying to get property 'a' of non-object in %s on line %d
-Attempt to increment/decrement property 'b' of non-object
+Attempt to modify property 'a' of non-object
 
 Warning: Undefined variable: x in %s on line %d
 Attempt to assign property 'a' of non-object
 
 Warning: Undefined variable: x in %s on line %d
-
-Warning: Trying to get property 'a' of non-object in %s on line %d
-Attempt to assign property 'b' of non-object
+Attempt to modify property 'a' of non-object
 
 Warning: Undefined variable: x in %s on line %d
 

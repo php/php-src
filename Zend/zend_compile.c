@@ -2703,13 +2703,7 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 		}
 		CG(active_op_array)->fn_flags |= ZEND_ACC_USES_THIS;
 	} else {
-		/* In $a->b->c = $d, fetch $a->b for read and only ->c for write.
-		 * We will never modify $a->b itself, only the object it holds. */
-		if (type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_FUNC_ARG) {
-			opline = zend_delayed_compile_var(&obj_node, obj_ast, BP_VAR_R, 0);
-		} else {
-			opline = zend_delayed_compile_var(&obj_node, obj_ast, type, 0);
-		}
+		opline = zend_delayed_compile_var(&obj_node, obj_ast, type, 0);
 		zend_separate_if_call_and_write(&obj_node, obj_ast, type);
 	}
 	zend_compile_expr(&prop_node, prop_ast);

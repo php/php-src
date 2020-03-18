@@ -53,29 +53,15 @@ Attempt to modify property 'a' of non-object
 
 Warning: Undefined variable: null in %s on line %d
 NULL
-
-Warning: Undefined variable: null in %s on line %d
-
-Warning: Trying to get property 'a' of non-object in %s on line %d
-Attempt to assign property 'b' of non-object
+Attempt to modify property 'a' of non-object
 
 Warning: Undefined variable: null in %s on line %d
 NULL
-
-Warning: Undefined variable: null in %s on line %d
-
-Warning: Trying to get property 'a' of non-object in %s on line %d
-
-Warning: Trying to access array offset on value of type null in %s on line %d
-Attempt to assign property 'b' of non-object
+Attempt to modify property 'a' of non-object
 
 Warning: Undefined variable: null in %s on line %d
 NULL
-
-Warning: Undefined variable: null in %s on line %d
-
-Warning: Trying to get property 'a' of non-object in %s on line %d
-Attempt to modify property 'b' of non-object
+Attempt to modify property 'a' of non-object
 
 Warning: Undefined variable: null in %s on line %d
 NULL

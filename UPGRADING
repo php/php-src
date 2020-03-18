@@ -44,8 +44,8 @@ PHP 8.0 UPGRADE NOTES
   . Removed ability to use array_key_exists() with objects. Use one of isset()
     or property_exists() instead.
   . Made the behavior of array_key_exists() regarding the type of the key
-    parameter consistent with isset() and normal array access. All key types
-    now use the usual coercions and array/object keys throw a TypeError.
+    parameter consistent with isset() and normal array access. All key types now use
+    the usual coercions and array/object keys throw a TypeError.
   . Any array that has a number n as its first numeric key will use n+1 for
     its next implicit key. Even if n is negative.
     RFC: https://wiki.php.net/rfc/negative_array_index
@@ -304,19 +304,6 @@ PHP 8.0 UPGRADE NOTES
     result will include a nullability indicator for nullable types. The format
     of the return value is not stable and may change between PHP versions.
   . Reflection export() methods have been removed.
-
-- SimpleXML:
-  . It is no longer possible to perform deep initialization of SimpleXMLElement
-    objects:
-
-        $x = simplexml_load_string("<root></root>");
-        $x->a->b->c = 'Test';
-        // Error: Attempt to assign property 'c' of non-object
-
-    The addChild() and addAttribute() APIs should be used instead. It is still
-    possible to modify already existing nodes by direct property assignment,
-    only the creation of multiple levels of nodes in one assignment is no longer
-    supported.
 
 - Socket:
   . The deprecated AI_IDN_ALLOW_UNASSIGNED and AI_IDN_USE_STD3_ASCII_RULES
