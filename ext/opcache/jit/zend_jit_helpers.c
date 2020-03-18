@@ -1098,33 +1098,39 @@ static void ZEND_FASTCALL zend_jit_free_call_frame(zend_execute_data *call)
 	zend_vm_stack_free_call_frame(call);
 }
 
-static zval* ZEND_FASTCALL zend_jit_new_ref_helper(zval *value)
+static zend_reference* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_string *varname, void **cache_slot)
 {
-	zend_reference *ref = (zend_reference*)emalloc(sizeof(zend_reference));
-	GC_SET_REFCOUNT(ref, 1);
-	GC_TYPE_INFO(ref) = IS_REFERENCE;
-	ref->sources.ptr = NULL;
-	ZVAL_COPY_VALUE(&ref->val, value);
-	Z_REF_P(value) = ref;
-	Z_TYPE_INFO_P(value) = IS_REFERENCE_EX;
+	zval *value;
+	uintptr_t idx;
+	zend_reference *ref;
 
-	return value;
-}
+	/* We store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
+	idx = (uintptr_t)CACHED_PTR_EX(cache_slot) - 1;
+	if (EXPECTED(idx < EG(symbol_table).nNumUsed * sizeof(Bucket))) {
+		Bucket *p = (Bucket*)((char*)EG(symbol_table).arData + idx);
 
-static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execute_data, zval *varname, uint32_t cache_slot)
-{
-	uint32_t idx;
-	zval *value = zend_hash_find(&EG(symbol_table), Z_STR_P(varname));
+		if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
+	        (EXPECTED(p->key == varname) ||
+	         (EXPECTED(p->h == ZSTR_H(varname)) &&
+	          EXPECTED(p->key != NULL) &&
+	          EXPECTED(zend_string_equal_content(p->key, varname))))) {
 
+			value = (zval*)p; /* value = &p->val; */
+			goto check_indirect;
+		}
+	}
+
+	value = zend_hash_find_ex(&EG(symbol_table), varname, 1);
 	if (UNEXPECTED(value == NULL)) {
-		value = zend_hash_add_new(&EG(symbol_table), Z_STR_P(varname), &EG(uninitialized_zval));
+		value = zend_hash_add_new(&EG(symbol_table), varname, &EG(uninitialized_zval));
 		idx = (char*)value - (char*)EG(symbol_table).arData;
 		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
-		CACHE_PTR(cache_slot, (void*)(uintptr_t)(idx + 1));
+		CACHE_PTR_EX(cache_slot, (void*)(idx + 1));
 	} else {
 		idx = (char*)value - (char*)EG(symbol_table).arData;
 		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
-		CACHE_PTR(cache_slot, (void*)(uintptr_t)(idx + 1));
+		CACHE_PTR_EX(cache_slot, (void*)(idx + 1));
+check_indirect:
 		/* GLOBAL variable may be an INDIRECT pointer to CV */
 		if (UNEXPECTED(Z_TYPE_P(value) == IS_INDIRECT)) {
 			value = Z_INDIRECT_P(value);
@@ -1135,10 +1141,14 @@ static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execu
 	}
 
 	if (UNEXPECTED(!Z_ISREF_P(value))) {
-		return zend_jit_new_ref_helper(value);
+		ZVAL_MAKE_REF_EX(value, 2);
+		ref = Z_REF_P(value);
+	} else {
+		ref = Z_REF_P(value);
+		GC_ADDREF(ref);
 	}
 
-	return value;
+	return ref;
 }
 
 static zend_always_inline zend_bool zend_jit_verify_type_common(zval *arg, const zend_op_array *op_array, zend_arg_info *arg_info, void **cache_slot)

@@ -9767,13 +9767,13 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, c
 static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info)
 {
 	zend_jit_addr op1_addr = OP1_ADDR();
-	zval *varname = RT_CONSTANT(opline, opline->op2);
+	zend_string *varname = Z_STR_P(RT_CONSTANT(opline, opline->op2));
 
-	//idx = (uint32_t)(uintptr_t)CACHED_PTR(opline->extended_value) - 1;
+	|	// idx = (uint32_t)(uintptr_t)CACHED_PTR(opline->extended_value) - 1;
 	|	mov	r0, EX->run_time_cache
 	|	mov r0, aword [r0 + opline->extended_value]
 	|	sub r0, 1
-	//if (EXPECTED(idx < EG(symbol_table).nNumUsed * sizeof(Bucket)))
+	|	// if (EXPECTED(idx < EG(symbol_table).nNumUsed * sizeof(Bucket)))
 	|.if X64
 		|	MEM_OP2_2_ZTS movsxd, r1, dword, executor_globals, symbol_table.nNumUsed, r1
 		|	shl r1, 5
@@ -9783,129 +9783,64 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, const z
 	|.endif
 	|	cmp r0, r1
 	|	jae >9
-	//Bucket *p = (Bucket*)((char*)EG(symbol_table).arData + idx);
+	|	// Bucket *p = (Bucket*)((char*)EG(symbol_table).arData + idx);
 	|	MEM_OP2_2_ZTS add, r0, aword, executor_globals, symbol_table.arData, r1
-	|	IF_Z_TYPE r0, IS_UNDEF, >9
-	//	(EXPECTED(p->key == Z_STR_P(varname))
-	|	ADDR_OP2_2 cmp, aword [r0 + offsetof(Bucket, key)], Z_PTR_P(varname), r1
-	|	jne >1
-	|.cold_code
-	|1:
-	//(EXPECTED(p->h == ZSTR_H(Z_STR_P(varname)))
-	|	ADDR_OP2_2 cmp, aword [r0 + offsetof(Bucket, h)], ZSTR_H(Z_STR_P(varname)), r1
+	|	IF_NOT_Z_TYPE r0, IS_REFERENCE, >9
+	|	// (EXPECTED(p->key == varname))
+	|	ADDR_OP2_2 cmp, aword [r0 + offsetof(Bucket, key)], varname, r1
 	|	jne >9
-	//EXPECTED(p->key != NULL)
-	|	mov r1, [r0 + offsetof(Bucket, key)]
-	|	test r1, r1
-	|	jz >9
-	//EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(varname))
-	|	ADDR_OP2_2 cmp, aword [r1 + offsetof(zend_string, len)], Z_STRLEN_P(varname), r2
-	|	jne >9
-	//EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(varname), Z_STRLEN_P(varname)) == 0)
-	|	add r1, offsetof(zend_string, val)
-	|	mov T1, r0
-	|.if X64
-		|	mov CARG1, r1
-		|	LOAD_ADDR CARG2, Z_STRVAL_P(varname)
-		|	mov CARG3, Z_STRLEN_P(varname)
-		|	EXT_CALL memcmp, r0
-	|.else
-		|	sub r4, 4
-		|	push Z_STRLEN_P(varname)
-		|	push Z_STRVAL_P(varname)
-		|	push r1
-		|	call &memcmp
-		|	add r4, 16
-	|.endif
-	|	test al, al
-	|	mov r0, aword T1
-	|	jnz >9
-	|	jmp >2
-	|.code
-	|2:
-	// if (UNEXPECTED(Z_TYPE_P(value) == IS_INDIRECT))
-	|	mov cl, byte [r0 + 8]
-	|	cmp cl, IS_INDIRECT
-	|	je >1
-	|.cold_code
-	|1:
-	//value = Z_INDIRECT_P(value)
-	|	mov r0, [r0]
-	|	mov cl, byte [r0 + 8]
-	|	test cl, cl // cmp cl, IS_UNDEF
-	|	jne >2
-	|	SET_Z_TYPE_INFO r0, IS_NULL
-	|.code
-	|2:
-	|	cmp cl, IS_REFERENCE
-	|	jne >8
-	|1:
-	if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-		//stash this for later use
-	|	mov r2, r0
-	}
 	|	GET_Z_PTR r0, r0
 	|	GC_ADDREF r0
-	//if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)))
+	|1:
 	if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
-		if (op1_info & (MAY_BE_ANY - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-		|	IF_ZVAL_REFCOUNTED op1_addr, >2
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+			|	// if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)))
+			|	IF_ZVAL_REFCOUNTED op1_addr, >2
+			|.cold_code
+			|2:
 		}
-		|.cold_code
-		//zval_dtor_func(Z_COUNTED_P(variable_ptr))
-		|2:
-		//if (EXPECTED(variable_ptr != value))
-		|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
-		|	cmp FCARG1a, r2
-		|	je >4
-		|	GET_Z_PTR FCARG1a, FCARG1a
+		|	// zend_refcounted *garbage = Z_COUNTED_P(variable_ptr);
+		|	GET_ZVAL_PTR FCARG1a, op1_addr
+		|	// ZVAL_REF(variable_ptr, ref)
+		|	SET_ZVAL_PTR op1_addr, r0
+		|	SET_ZVAL_TYPE_INFO op1_addr, IS_REFERENCE_EX
+		|	// if (GC_DELREF(garbage) == 0)
 		|	GC_DELREF FCARG1a
-		if (op1_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
-		|	jnz >3
+		if (op1_info & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) {
+			|	jnz >3
+		} else {
+			|	jnz >5
 		}
-		|	mov aword T1, r0 // save
 		|	ZVAL_DTOR_FUNC op1_info, opline
-		|	mov r0, aword T1 // restore
 		|	jmp >5
-		if (op1_info & (MAY_BE_ARRAY|MAY_BE_OBJECT)) {
-		|3:
-		// GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr)
-		|	IF_GC_MAY_NOT_LEAK FCARG1a, edx, >5
-		|	mov aword T1, r0 //save
-		|	EXT_CALL gc_possible_root, r1
-		|	mov r0, aword T1 // restore
-		|	jmp >5
+		if (op1_info & (MAY_BE_REF|MAY_BE_ARRAY|MAY_BE_OBJECT)) {
+			|3:
+			|	// GC_ZVAL_CHECK_POSSIBLE_ROOT(variable_ptr)
+			|	IF_GC_MAY_NOT_LEAK FCARG1a, edx, >5
+			|	EXT_CALL gc_possible_root, r1
+			|	jmp >5
 		}
-		|4:
-		|	GET_Z_PTR FCARG1a, FCARG1a
-		|	GC_DELREF FCARG1a
-		|	jmp >5
-		|.code
+		if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+			|.code
+		}
+	}
+
+	if (op1_info & ((MAY_BE_ANY|MAY_BE_UNDEF) - (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
+		|	// ZVAL_REF(variable_ptr, ref)
+		|	SET_ZVAL_PTR op1_addr, r0
+		|	SET_ZVAL_TYPE_INFO op1_addr, IS_REFERENCE_EX
 	}
 	|5:
-	//ZVAL_REF(variable_ptr, ref)
-	|	SET_ZVAL_PTR op1_addr, r0
-	|	SET_ZVAL_TYPE_INFO op1_addr, IS_REFERENCE_EX
 	//END of handler
 
 	|.cold_code
-	|8:
-	|	mov FCARG1a, r0
-	|	EXT_CALL zend_jit_new_ref_helper, r0
-	|	jmp <1
 	|9:
-	|	mov FCARG1a, FP
-	|	LOAD_ADDR FCARG2a, (ptrdiff_t)varname
-	|.if X64
-		|	mov CARG3, opline->extended_value
-	|.else
-		|	sub r4, 12
-		|	push opline->extended_value
-	|.endif
+	|	LOAD_ADDR FCARG1a, (ptrdiff_t)varname
+	|	mov	FCARG2a, EX->run_time_cache
+	if (opline->extended_value) {
+		|	add FCARG2a, opline->extended_value
+	}
 	|	EXT_CALL zend_jit_fetch_global_helper, r0
-	|.if not(X64)
-	|	add r4, 12
-	|.endif
 	|	jmp <1
 	|.code
 
