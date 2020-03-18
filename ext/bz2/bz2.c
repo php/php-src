@@ -379,7 +379,7 @@ static PHP_FUNCTION(bzopen)
 		}
 
 		if (CHECK_ZVAL_NULL_PATH(file)) {
-			zend_type_error("Filename must not contain null bytes");
+			zend_argument_type_error(1, "must not contain null bytes");
 			RETURN_THROWS();
 		}
 
@@ -430,7 +430,7 @@ static PHP_FUNCTION(bzopen)
 
 		stream = php_stream_bz2open_from_BZFILE(bz, mode, stream);
 	} else {
-		zend_type_error("First parameter has to be string or file-resource");
+		zend_argument_type_error(1, "must be of type string or file-resource, %s given", zend_zval_type_name(file));
 		RETURN_THROWS();
 	}
 

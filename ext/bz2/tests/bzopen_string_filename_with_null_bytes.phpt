@@ -7,17 +7,17 @@ bzopen(): throw TypeError if filename contains null bytes
 
 try {
     bzopen("file\0", "w");
-} catch (\TypeError $e) {
+} catch (TypeError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 
 try {
     bzopen("file\0", "r");
-} catch (\TypeError $e) {
+} catch (TypeError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Filename must not contain null bytes
-Filename must not contain null bytes
+bzopen(): Argument #1 ($file) must not contain null bytes
+bzopen(): Argument #1 ($file) must not contain null bytes

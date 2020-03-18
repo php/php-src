@@ -197,7 +197,7 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 			} else {
 				xmlFree(fragment);
 
-				zend_type_error("Invalid argument type must be either DOMNode or string");
+				zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_type_name(&nodes[i]));
 				return NULL;
 			}
 		} else if (Z_TYPE(nodes[i]) == IS_STRING) {
@@ -213,7 +213,7 @@ xmlNode* dom_zvals_to_fragment(php_libxml_ref_obj *document, xmlNode *contextNod
 		} else {
 			xmlFree(fragment);
 
-			zend_type_error("Invalid argument type must be either DOMNode or string");
+			zend_argument_type_error(i + 1, "must be of type DOMNode|string, %s given", zend_zval_type_name(&nodes[i]));
 
 			return NULL;
 		}

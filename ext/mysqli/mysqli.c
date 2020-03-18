@@ -1272,7 +1272,7 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 					 * single value is an array. Also we'd have to make that one
 					 * argument passed by reference.
 					 */
-					zend_throw_exception(zend_ce_exception, "Parameter ctor_params must be an array", 0);
+					zend_argument_error(zend_ce_exception, 3, "must be of type array, %s given", zend_zval_type_name(ctor_params));
 					RETURN_THROWS();
 				}
 			}

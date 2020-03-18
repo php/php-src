@@ -3885,7 +3885,7 @@ PHP_FUNCTION(imageaffine)
 	src = php_gd_libgdimageptr_from_zval_p(IM);
 
 	if ((nelems = zend_hash_num_elements(Z_ARRVAL_P(z_affine))) != 6) {
-		zend_value_error("Affine array must have six elements");
+		zend_argument_value_error(2, "must have 6 elements");
 		RETURN_THROWS();
 	}
 
@@ -3902,7 +3902,7 @@ PHP_FUNCTION(imageaffine)
 					affine[i] = zval_get_double(zval_affine_elem);
 					break;
 				default:
-					zend_type_error("Invalid type for element %i", i);
+					zend_argument_type_error(3, "contains invalid type for element %i", i);
 					RETURN_THROWS();
 			}
 		}
@@ -3970,7 +3970,7 @@ PHP_FUNCTION(imageaffinematrixget)
 		case GD_AFFINE_SCALE: {
 			double x, y;
 			if (!options || Z_TYPE_P(options) != IS_ARRAY) {
-				zend_type_error("Array expected as options when using translate or scale");
+				zend_argument_type_error(1, "must be of type array when using translate or scale");
 				RETURN_THROWS();
 			}
 
@@ -4002,7 +4002,7 @@ PHP_FUNCTION(imageaffinematrixget)
 			double angle;
 
 			if (!options) {
-				zend_type_error("Number is expected as option when using rotate or shear");
+				zend_argument_type_error(2, "must be of type int|double when using rotate or shear");
 				RETURN_THROWS();
 			}
 
@@ -4019,7 +4019,7 @@ PHP_FUNCTION(imageaffinematrixget)
 		}
 
 		default:
-			zend_value_error("Invalid type for element " ZEND_LONG_FMT, type);
+			zend_argument_value_error(1, "must be a valid element type");
 			RETURN_THROWS();
 	}
 
@@ -4068,7 +4068,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 					m1[i] = zval_get_double(tmp);
 					break;
 				default:
-					zend_type_error("Matrix 1 contains invalid type for element %i", i);
+					zend_argument_type_error(1, "contains invalid type for element %i", i);
 					RETURN_THROWS();
 			}
 		}
@@ -4085,7 +4085,7 @@ PHP_FUNCTION(imageaffinematrixconcat)
 					m2[i] = zval_get_double(tmp);
 					break;
 				default:
-					zend_type_error("Matrix 2 contains invalid type for element %i", i);
+					zend_argument_type_error(2, "contains invalid type for element %i", i);
 					RETURN_THROWS();
 			}
 		}
@@ -4299,7 +4299,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			close_stream = 0;
 		} else if (Z_TYPE_P(to_zval) == IS_STRING) {
 			if (CHECK_ZVAL_NULL_PATH(to_zval)) {
-				zend_type_error("Invalid 2nd parameter, filename must not contain null bytes");
+				zend_argument_type_error(2, "must not contain null bytes");
 				RETURN_THROWS();
 			}
 

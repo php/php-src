@@ -6640,7 +6640,7 @@ PHP_OPENSSL_API zend_string* php_openssl_random_pseudo_bytes(zend_long buffer_le
 		|| ZEND_LONG_INT_OVFL(buffer_length)
 #endif
 			) {
-		zend_throw_exception(zend_ce_error, "Length must be greater than 0", 0);
+		zend_argument_error(NULL, 1, "must be greater than 0");
 		return NULL;
 	}
 	buffer = zend_string_alloc(buffer_length, 0);

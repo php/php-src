@@ -15,4 +15,4 @@ try {
     echo "OK! {$e->getMessage()}";
 }
 --EXPECT--
-OK! Invalid argument type must be either DOMNode or string
+OK! DOMElement::append(): Argument #1 must be of type DOMNode|string, array given

@@ -293,11 +293,11 @@ MySQLPDOTest::skip();
     print "done!";
 ?>
 --EXPECTF--
-[002] invalid data source name, [n/a] n/a
-[003] invalid data source name, [n/a] n/a
-[004] invalid data source name, [n/a] n/a
-[005] invalid data source name, [n/a] n/a
-[006] invalid data source name, [n/a] n/a
+[002] PDO::__construct(): Argument #1 ($dsn) must be a valid data source name, [n/a] n/a
+[003] PDO::__construct(): Argument #1 ($dsn) must be a valid data source name, [n/a] n/a
+[004] PDO::__construct(): Argument #1 ($dsn) must be a valid data source name, [n/a] n/a
+[005] PDO::__construct(): Argument #1 ($dsn) must be a valid data source name, [n/a] n/a
+[006] PDO::__construct(): Argument #1 ($dsn) must be a valid data source name, [n/a] n/a
 [007] could not find driver, [n/a] n/a
 [009] SQLSTATE[%s] [1045] Access denied for user 'dont%s'@'%s' (using password: YES), [n/a] n/a
 [017] DSN=%s, SQLSTATE[%s] [%d] %s
