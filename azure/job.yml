@@ -11,6 +11,8 @@ jobs:
       vmImage: 'ubuntu-18.04'
     steps:
     - template: apt.yml
+    - script: |
+        sudo service mysql status
     - template: configure.yml
       parameters:
         configurationParameters: ${{ parameters.configurationParameters }}
