@@ -39,6 +39,6 @@ try {
 Test bad arguments:
 ReflectionClass::isSubclassOf() expects exactly 1 parameter, 0 given
 ReflectionClass::isSubclassOf() expects exactly 1 parameter, 2 given
-Parameter one must either be a string or a ReflectionClass object
+ReflectionClass::isSubclassOf(): Argument #1 ($class) must be of type ReflectionClass|string, null given
 Class ThisClassDoesNotExist does not exist
-Parameter one must either be a string or a ReflectionClass object
+ReflectionClass::isSubclassOf(): Argument #1 ($class) must be of type ReflectionClass|string, int given

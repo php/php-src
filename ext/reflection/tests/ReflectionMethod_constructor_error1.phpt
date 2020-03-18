@@ -65,17 +65,17 @@ try {
 ?>
 --EXPECTF--
 Wrong type of argument (bool):
-ReflectionException: Invalid method name 1 in %s
+ReflectionException: ReflectionMethod::__construct(): Argument #1 ($class_or_method) must be a valid method name in %s:%d
 Stack trace:
 #0 %s ReflectionMethod->__construct('1')
 #1 {main}
 Wrong type of argument (int):
-ReflectionException: Invalid method name 3 in %s
+ReflectionException: ReflectionMethod::__construct(): Argument #1 ($class_or_method) must be a valid method name in %s:%d
 Stack trace:
 #0 %s ReflectionMethod->__construct('3')
 #1 {main}
 Wrong type of argument (bool, string):
-ReflectionException: The parameter class is expected to be either a string or an object in %s
+ReflectionException: ReflectionMethod::__construct(): Argument #1 ($class_or_method) must be of type object|string, bool given in %s:%d
 Stack trace:
 #0 %s ReflectionMethod->__construct(true, 'foo')
 #1 {main}
@@ -85,7 +85,7 @@ Stack trace:
 #0 %s ReflectionMethod->__construct('TestClass', '1')
 #1 {main}
 No method given:
-ReflectionException: Invalid method name TestClass in %s
+ReflectionException: ReflectionMethod::__construct(): Argument #1 ($class_or_method) must be a valid method name in %s:%d
 Stack trace:
 #0 %s ReflectionMethod->__construct('TestClass')
 #1 {main}

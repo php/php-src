@@ -27,13 +27,13 @@ foreach ($a as $key=>$val) {
 echo "Done\n";
 ?>
 --EXPECT--
-string(20) "Invalid method name "
-string(21) "Invalid method name 1"
+string(91) "ReflectionMethod::__construct(): Argument #1 ($class_or_method) must be a valid method name"
+string(91) "ReflectionMethod::__construct(): Argument #1 ($class_or_method) must be a valid method name"
 string(21) "Class  does not exist"
 string(22) "Class a does not exist"
 string(21) "Class  does not exist"
 string(22) "Class a does not exist"
 string(21) "Class  does not exist"
-string(66) "The parameter class is expected to be either a string or an object"
+string(104) "ReflectionMethod::__construct(): Argument #1 ($class_or_method) must be of type object|string, int given"
 string(21) "Class  does not exist"
 Done
