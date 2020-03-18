@@ -43,10 +43,10 @@ catch (\Error $e) {
 *** Testing hash() : error conditions ***
 
 -- Testing hash_hmac_file() function with invalid hash algorithm --
-Unknown hashing algorithm: foo
+hash_hmac_file(): Argument #1 ($algo) must be a valid hashing algorithm
 
 -- Testing hash_hmac_file() function with non-cryptographic hash algorithm --
-Non-cryptographic hashing algorithm: crc32
+hash_hmac_file(): Argument #1 ($algo) must be a cryptographic hashing algorithm
 
 -- Testing hash_hmac_file() function with bad path --
-Invalid path
+hash_hmac_file(): Argument #2 ($data) must be a valid path

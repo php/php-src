@@ -57,14 +57,14 @@ catch (\Error $e) {
 *** Testing hash_pbkdf2() : error conditions ***
 
 -- Testing hash_pbkdf2() function with invalid hash algorithm --
-Unknown hashing algorithm: foo
+hash_pbkdf2(): Argument #1 ($algo) must be a valid hashing algorithm
 
 -- Testing hash_pbkdf2() function with non-cryptographic hash algorithm --
-Non-cryptographic hashing algorithm: crc32
+hash_pbkdf2(): Argument #1 ($algo) must be a cryptographic hashing algorithm
 
 -- Testing hash_pbkdf2() function with invalid iterations --
-Iterations must be a positive integer: 0
-Iterations must be a positive integer: -1
+hash_pbkdf2(): Argument #4 ($iterations) must be greater than 0
+hash_pbkdf2(): Argument #4 ($iterations) must be greater than 0
 
 -- Testing hash_pbkdf2() function with invalid length --
-Length must be greater than or equal to 0: -1
+hash_pbkdf2(): Argument #5 ($length) must be greater than or equal to 0
