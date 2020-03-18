@@ -1664,6 +1664,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	frame->return_value_used = -1;
 	frame->nested = 0;
 	frame->num_args = -1;
+	frame->last_send_by_ref = -1;
 	stack = frame->stack;
 
 	if (trace_buffer->start == ZEND_JIT_TRACE_START_ENTER) {
@@ -2230,6 +2231,17 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							if (op1_type != IS_UNKNOWN) {
 								zend_jit_trace_send_type(opline, frame->call, op1_type);
 							}
+						}
+						goto done;
+					case ZEND_CHECK_FUNC_ARG:
+						if (opline->op2.num > MAX_ARG_FLAG_NUM
+						 && (!JIT_G(current_frame)
+						  || !JIT_G(current_frame)->call
+						  || !JIT_G(current_frame)->call->func)) {
+							break;
+						}
+						if (!zend_jit_check_func_arg(&dasm_state, opline, op_array)) {
+							goto jit_failure;
 						}
 						goto done;
 					case ZEND_DO_UCALL:
@@ -2861,6 +2873,7 @@ done:
 				call->func = (const zend_function*)op_array;
 				call->nested = 0;
 				call->num_args = -1; // TODO: should be possible to get the real number ???
+				call->last_send_by_ref = -1;
 				top = zend_jit_trace_call_frame(top, op_array);
 				i = 0;
 				while (i < p->op_array->num_args) {
@@ -2908,6 +2921,7 @@ done:
 				frame->return_value_used = -1;
 				frame->nested = 0;
 				frame->num_args = -1;
+				frame->last_send_by_ref = -1;
 				stack = frame->stack;
 				for (i = 0; i < op_array->last_var + op_array->T; i++) {
 					/* Initialize abstract stack using SSA */
@@ -2937,6 +2951,7 @@ done:
 			call->func = p->func;
 			call->nested = 1;
 			call->num_args = find_call_num_args(p-1);
+			call->last_send_by_ref = p->fake ? -1 : 0;
 			frame->call = call;
 			top = zend_jit_trace_call_frame(top, p->op_array);
 			if (p->func->type == ZEND_USER_FUNCTION) {

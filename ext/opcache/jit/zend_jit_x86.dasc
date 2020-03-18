@@ -8728,6 +8728,63 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 	return 1;
 }
 
+static int zend_jit_check_func_arg(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array)
+{
+	uint32_t arg_num = opline->op2.num;
+
+	if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE
+	 && JIT_G(current_frame)
+	 && JIT_G(current_frame)->call
+	 && JIT_G(current_frame)->call->func) {
+		if (ARG_SHOULD_BE_SENT_BY_REF(JIT_G(current_frame)->call->func, arg_num)) {
+			if (JIT_G(current_frame)->call->last_send_by_ref != 1) {
+				JIT_G(current_frame)->call->last_send_by_ref = 1;
+				|	// ZEND_ADD_CALL_FLAG(EX(call), ZEND_CALL_SEND_ARG_BY_REF);
+				||	if (reuse_ip) {
+				|		or dword [RX + offsetof(zend_execute_data, This.u1.type_info)], ZEND_CALL_SEND_ARG_BY_REF
+				||	} else {
+				|		mov r0, EX->call
+				|		or dword [r0 + offsetof(zend_execute_data, This.u1.type_info)], ZEND_CALL_SEND_ARG_BY_REF
+				||	}
+			}
+		} else {
+			if (JIT_G(current_frame)->call->last_send_by_ref != 0) {
+				JIT_G(current_frame)->call->last_send_by_ref = 0;
+				|	// ZEND_DEL_CALL_FLAG(EX(call), ZEND_CALL_SEND_ARG_BY_REF);
+				||	if (reuse_ip) {
+				|		and dword [RX + offsetof(zend_execute_data, This.u1.type_info)], ~ZEND_CALL_SEND_ARG_BY_REF
+				||	} else {
+				|		mov r0, EX->call
+				|		and dword [r0 + offsetof(zend_execute_data, This.u1.type_info)], ~ZEND_CALL_SEND_ARG_BY_REF
+				||	}
+			}
+		}
+	} else {
+		// if (QUICK_ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
+		uint32_t mask = (ZEND_SEND_BY_REF|ZEND_SEND_PREFER_REF) << ((arg_num + 3) * 2);
+
+		if (!reuse_ip) {
+			zend_jit_start_reuse_ip();
+			|	// call = EX(call);
+			|	mov RX, EX->call
+		}
+		|	mov r0, EX:RX->func
+		|	test dword [r0 + offsetof(zend_function, quick_arg_flags)], mask
+		|	jnz	>1
+		|.cold_code
+		|1:
+		|	// ZEND_ADD_CALL_FLAG(EX(call), ZEND_CALL_SEND_ARG_BY_REF);
+		|	or dword [RX + offsetof(zend_execute_data, This.u1.type_info)], ZEND_CALL_SEND_ARG_BY_REF
+		|	jmp >1
+		|.code
+		|	// ZEND_DEL_CALL_FLAG(EX(call), ZEND_CALL_SEND_ARG_BY_REF);
+		|	and dword [RX + offsetof(zend_execute_data, This.u1.type_info)], ~ZEND_CALL_SEND_ARG_BY_REF
+		|1:
+	}
+
+	return 1;
+}
+
 static int zend_jit_smart_true(dasm_State **Dst, const zend_op *opline, int jmp, zend_uchar smart_branch_opcode, uint32_t target_label, uint32_t target_label2)
 {
 	if (smart_branch_opcode) {

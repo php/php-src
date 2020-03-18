@@ -2480,6 +2480,14 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_CHECK_FUNC_ARG:
+						if (opline->op2.num > MAX_ARG_FLAG_NUM) {
+							break;
+						}
+						if (!zend_jit_check_func_arg(&dasm_state, opline, op_array)) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_DO_UCALL:
 						is_terminated = 1;
 						/* break missing intentionally */
