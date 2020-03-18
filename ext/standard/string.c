@@ -5963,7 +5963,7 @@ PHP_FUNCTION(strpbrk)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ZSTR_LEN(char_list)) {
-		zend_argument_value_error(2, "must be a non-empty list");
+		zend_argument_value_error(2, "must be a non-empty string");
 		RETURN_THROWS();
 	}
 
