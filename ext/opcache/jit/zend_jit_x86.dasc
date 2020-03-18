@@ -10340,7 +10340,7 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, const zend_op *opline, cons
 	if ((op1_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)- MAY_BE_OBJECT))  && zend_jit_trigger != ZEND_JIT_ON_HOT_TRACE) {
 		|7:
 		if (opline->opcode == ZEND_FETCH_OBJ_R) {
-			|	SAVE_VALID_OPLINE opline, r0
+			|	SAVE_VALID_OPLINE opline, r1
 			if (op1_info & MAY_BE_UNDEF) {
 				if (op1_info & MAY_BE_ANY) {
 					|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >1
