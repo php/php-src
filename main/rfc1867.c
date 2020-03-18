@@ -616,7 +616,7 @@ static void *php_ap_memstr(char *haystack, int haystacklen, char *needle, int ne
 }
 
 /* read until a boundary condition */
-static int multipart_buffer_read(multipart_buffer *self, char *buf, size_t bytes, int *end)
+static size_t multipart_buffer_read(multipart_buffer *self, char *buf, size_t bytes, int *end)
 {
 	size_t len, max;
 	char *bound;
@@ -655,7 +655,7 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf, size_t bytes
 		self->buf_begin += len;
 	}
 
-	return (int)len;
+	return len;
 }
 
 /*
@@ -665,7 +665,7 @@ static int multipart_buffer_read(multipart_buffer *self, char *buf, size_t bytes
 static char *multipart_buffer_read_body(multipart_buffer *self, size_t *len)
 {
 	char buf[FILLUNIT], *out=NULL;
-	int total_bytes=0, read_bytes=0;
+	size_t total_bytes=0, read_bytes=0;
 
 	while((read_bytes = multipart_buffer_read(self, buf, sizeof(buf), NULL))) {
 		out = erealloc(out, total_bytes + read_bytes + 1);
