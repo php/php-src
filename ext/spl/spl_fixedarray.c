@@ -342,8 +342,7 @@ static zval *spl_fixedarray_object_read_dimension(zval *object, zval *offset, in
 
 	intern = Z_SPLFIXEDARRAY_P(object);
 
-	if (type == BP_VAR_IS && !spl_fixedarray_object_has_dimension(object, offset, 1)) {
-		ZVAL_UNDEF(rv);
+	if (type == BP_VAR_IS && !spl_fixedarray_object_has_dimension(object, offset, 0)) {
 		return &EG(uninitialized_zval);
 	}
 
