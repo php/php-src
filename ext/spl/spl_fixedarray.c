@@ -336,25 +336,16 @@ static inline zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_o
 }
 /* }}} */
 
+static int spl_fixedarray_object_has_dimension(zval *object, zval *offset, int check_empty);
+
 static zval *spl_fixedarray_object_read_dimension(zval *object, zval *offset, int type, zval *rv) /* {{{ */
 {
 	spl_fixedarray_object *intern;
 
 	intern = Z_SPLFIXEDARRAY_P(object);
 
-	if (type == BP_VAR_IS && intern->fptr_offset_has) {
-		SEPARATE_ARG_IF_REF(offset);
-		zend_call_method_with_1_params(object, intern->std.ce, &intern->fptr_offset_has, "offsetexists", rv, offset);
-		if (UNEXPECTED(Z_ISUNDEF_P(rv))) {
-			zval_ptr_dtor(offset);
-			return NULL;
-		}
-		if (!i_zend_is_true(rv)) {
-			zval_ptr_dtor(offset);
-			zval_ptr_dtor(rv);
-			return &EG(uninitialized_zval);
-		}
-		zval_ptr_dtor(rv);
+	if (type == BP_VAR_IS && !spl_fixedarray_object_has_dimension(object, offset, 0)) {
+		return &EG(uninitialized_zval);
 	}
 
 	if (intern->fptr_offset_get) {
