@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 14 May 2020, PHP 7.3.18
 
 - Core:
+  . Fixed bug #78875 (Long filenames cause OOM and temp files are not cleaned). 
+    (CVE-2019-11048) (cmb)
   . Fixed bug #79434 (PHP 7.3 and PHP-7.4 crash with NULL-pointer dereference
     on !CS constant). (Nikita)
   . Fixed bug #79477 (casting object into array creates references). (Nikita)
