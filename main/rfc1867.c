@@ -692,7 +692,8 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 	char *boundary, *s = NULL, *boundary_end = NULL, *start_arr = NULL, *array_index = NULL;
 	char *lbuf = NULL, *abuf = NULL;
 	zend_string *temp_filename = NULL;
-	int boundary_len = 0, cancel_upload = 0, is_arr_upload = 0, array_len = 0;
+	int boundary_len = 0, cancel_upload = 0, is_arr_upload = 0;
+	size_t array_len = 0;
 	int64_t total_bytes = 0, max_file_size = 0;
 	int skip_upload = 0, anonindex = 0, is_anonymous;
 	HashTable *uploaded_files = NULL;
@@ -1126,7 +1127,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 			is_arr_upload =	(start_arr = strchr(param,'[')) && (param[strlen(param)-1] == ']');
 
 			if (is_arr_upload) {
-				array_len = (int)strlen(start_arr);
+				array_len = strlen(start_arr);
 				if (array_index) {
 					efree(array_index);
 				}
