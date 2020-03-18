@@ -132,13 +132,13 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 
 	ops = php_hash_fetch_ops(algo);
 	if (!ops) {
-		php_error_docref(NULL, E_WARNING, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be a valid hashing algorithm");
+		RETURN_THROWS();
 	}
 	if (isfilename) {
 		if (CHECK_NULL_PATH(data, data_len)) {
-			php_error_docref(NULL, E_WARNING, "Invalid path");
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must be a valid path");
+			RETURN_THROWS();
 		}
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
 		if (!stream) {
@@ -1065,8 +1065,8 @@ PHP_FUNCTION(mhash_keygen_s2k)
 
 	bytes = (int)l_bytes;
 	if (bytes <= 0){
-		php_error_docref(NULL, E_WARNING, "The byte parameter must be greater than 0");
-		RETURN_FALSE;
+		zend_argument_value_error(4, "must be a greater than 0");
+		RETURN_THROWS();
 	}
 
 	salt_len = MIN(salt_len, SALT_SIZE);
