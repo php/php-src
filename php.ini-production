@@ -1415,7 +1415,8 @@ session.cookie_domain =
 session.cookie_httponly =
 
 ; Add SameSite attribute to cookie to help mitigate Cross-Site Request Forgery (CSRF/XSRF)
-; Current valid values are "Lax" or "Strict"
+; Current valid values are "Strict", "Lax" or "None". When using "None",
+; make sure to include the quotes, as `none` is interpreted like `false` in ini files.
 ; https://tools.ietf.org/html/draft-west-first-party-cookies-07
 session.cookie_samesite =
 
