@@ -336,6 +336,8 @@ static inline zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_o
 }
 /* }}} */
 
+static int spl_fixedarray_object_has_dimension(zval *object, zval *offset, int check_empty);
+
 static zval *spl_fixedarray_object_read_dimension(zval *object, zval *offset, int type, zval *rv) /* {{{ */
 {
 	spl_fixedarray_object *intern;
