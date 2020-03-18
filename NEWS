@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - CURL:
   . Fixed bug #79199 (curl_copy_handle() memory leak). (cmb)
 
+- Date:
+  . Fixed bug #79396 (DateTime hour incorrect during DST jump forward). (Nate
+    Brunette)
+
 - SimpleXML:
   . Fixed bug #61597 (SXE properties may lack attributes and content). (cmb)
 
