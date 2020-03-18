@@ -779,6 +779,8 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(array_udiff_uassoc,												arginfo_array_udiff_uassoc)
 	PHP_FE(array_sum,														arginfo_array_sum)
 	PHP_FE(array_product,													arginfo_array_product)
+	PHP_FE(array_every,														arginfo_array_every)
+	PHP_FE(array_any,														arginfo_array_any)
 	PHP_FE(array_filter,													arginfo_array_filter)
 	PHP_FE(array_map,														arginfo_array_map)
 	PHP_FE(array_chunk,														arginfo_array_chunk)
