@@ -137,7 +137,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 	}
 	if (isfilename) {
 		if (CHECK_NULL_PATH(data, data_len)) {
-			zend_argument_value_error(1, "must be a valid path");
+			zend_argument_type_error(1, "must be a valid path");
 			RETURN_THROWS();
 		}
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
@@ -254,18 +254,14 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 	}
 
 	ops = php_hash_fetch_ops(algo);
-	if (!ops) {
-		zend_throw_error(NULL, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
-		RETURN_THROWS();
-	}
-	else if (!ops->is_crypto) {
-		zend_throw_error(NULL, "Non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
+	if (!ops || !ops->is_crypto) {
+		zend_argument_value_error(1, "must be a valid cryptographic hashing algorithm");
 		RETURN_THROWS();
 	}
 
 	if (isfilename) {
 		if (CHECK_NULL_PATH(data, data_len)) {
-			zend_throw_error(NULL, "Invalid path");
+			zend_argument_type_error(2, "must be a valid path");
 			RETURN_THROWS();
 		}
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
@@ -361,18 +357,18 @@ PHP_FUNCTION(hash_init)
 
 	ops = php_hash_fetch_ops(algo);
 	if (!ops) {
-		zend_throw_error(NULL, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
+		zend_argument_value_error(1, "must be a valid hashing algorithm");
 		RETURN_THROWS();
 	}
 
 	if (options & PHP_HASH_HMAC) {
 		if (!ops->is_crypto) {
-			zend_throw_error(NULL, "HMAC requested with a non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
+			zend_argument_value_error(1, "must be a cryptographic hashing algorithm if HMAC is requested");
 			RETURN_THROWS();
 		}
 		if (!key || (ZSTR_LEN(key) == 0)) {
 			/* Note: a zero length key is no key at all */
-			zend_throw_error(NULL, "HMAC requested without a key");
+			zend_argument_value_error(3, "cannot be empty when HMAC is requested");
 			RETURN_THROWS();
 		}
 	}
@@ -649,28 +645,23 @@ PHP_FUNCTION(hash_hkdf)
 	}
 
 	ops = php_hash_fetch_ops(algo);
-	if (!ops) {
-		zend_throw_error(NULL, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
-		RETURN_THROWS();
-	}
-
-	if (!ops->is_crypto) {
-		zend_throw_error(NULL, "Non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
+	if (!ops || !ops->is_crypto) {
+		zend_argument_value_error(1, "must be a valid cryptographic hashing algorithm");
 		RETURN_THROWS();
 	}
 
 	if (ZSTR_LEN(ikm) == 0) {
-		zend_throw_error(NULL, "Input keying material cannot be empty");
+		zend_argument_value_error(2, "cannot be empty");
 		RETURN_THROWS();
 	}
 
 	if (length < 0) {
-		zend_throw_error(NULL, "Length must be greater than or equal to 0: " ZEND_LONG_FMT, length);
+		zend_argument_value_error(3, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	} else if (length == 0) {
 		length = ops->digest_size;
 	} else if (length > (zend_long) (ops->digest_size * 255)) {
-		zend_throw_error(NULL, "Length must be less than or equal to %zd: " ZEND_LONG_FMT, ops->digest_size * 255, length);
+		zend_argument_value_error(3, "must be less than or equal to %zd", ops->digest_size * 255);
 		RETURN_THROWS();
 	}
 
@@ -749,27 +740,23 @@ PHP_FUNCTION(hash_pbkdf2)
 	}
 
 	ops = php_hash_fetch_ops(algo);
-	if (!ops) {
-		zend_throw_error(NULL, "Unknown hashing algorithm: %s", ZSTR_VAL(algo));
-		RETURN_THROWS();
-	}
-	else if (!ops->is_crypto) {
-		zend_throw_error(NULL, "Non-cryptographic hashing algorithm: %s", ZSTR_VAL(algo));
-		RETURN_THROWS();
-	}
-
-	if (iterations <= 0) {
-		zend_throw_error(NULL, "Iterations must be a positive integer: " ZEND_LONG_FMT, iterations);
-		RETURN_THROWS();
-	}
-
-	if (length < 0) {
-		zend_throw_error(NULL, "Length must be greater than or equal to 0: " ZEND_LONG_FMT, length);
+	if (!ops || !ops->is_crypto) {
+		zend_argument_value_error(1, "must be a valid cryptographic hashing algorithm");
 		RETURN_THROWS();
 	}
 
 	if (salt_len > INT_MAX - 4) {
-		zend_throw_error(NULL, "Supplied salt is too long, max of INT_MAX - 4 bytes: %zd supplied", salt_len);
+		zend_argument_value_error(3, "must be less than or equal to INT_MAX - 4 bytes");
+		RETURN_THROWS();
+	}
+
+	if (iterations <= 0) {
+		zend_argument_value_error(4, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (length < 0) {
+		zend_argument_value_error(5, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -875,12 +862,12 @@ PHP_FUNCTION(hash_equals)
 
 	/* We only allow comparing string to prevent unexpected results. */
 	if (Z_TYPE_P(known_zval) != IS_STRING) {
-		zend_type_error("Expected known_string to be a string, %s given", zend_zval_type_name(known_zval));
+		zend_argument_type_error(1, "must be of type string, %s given", zend_zval_type_name(known_zval));
 		RETURN_THROWS();
 	}
 
 	if (Z_TYPE_P(user_zval) != IS_STRING) {
-		zend_type_error("Expected user_string to be a string, %s given", zend_zval_type_name(user_zval));
+		zend_argument_type_error(2, "must be of type string, %s given", zend_zval_type_name(user_zval));
 		RETURN_THROWS();
 	}
 

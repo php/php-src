@@ -33,7 +33,7 @@ catch (\Error $e) {
 *** Testing hash_hmac() : error conditions ***
 
 -- Testing hash_hmac() function with invalid hash algorithm --
-Unknown hashing algorithm: foo
+hash_hmac(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hmac() function with non-cryptographic hash algorithm --
-Non-cryptographic hashing algorithm: crc32
+hash_hmac(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
