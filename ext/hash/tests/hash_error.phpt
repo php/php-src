@@ -11,13 +11,15 @@ Hash: hash() function : error conditions
 echo "*** Testing hash() : error conditions ***\n";
 
 echo "\n-- Testing hash() function with invalid hash algorithm --\n";
-var_dump(hash('foo', ''));
+try {
+    hash('foo', '');
+} catch (ValueError $exception) {
+    echo $exception->getMessage() . "\n";
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing hash() : error conditions ***
 
 -- Testing hash() function with invalid hash algorithm --
-
-Warning: hash(): Unknown hashing algorithm: foo in %s on line %d
-bool(false)
+hash(): Argument #1 ($algo) must be a valid hashing algorithm
