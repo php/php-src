@@ -72,7 +72,7 @@ var_dump($session->max_oids);
 SNMP::__construct() expects at least 3 parameters, 2 given
 SNMP::__construct(): Argument #4 must be of type int, string given
 SNMP::__construct(): Argument #5 must be of type int, string given
-Unknown SNMP protocol version
+SNMP::__construct(): Argument #1 ($version) must be a valid SNMP protocol version
 Exception handling
 
 Warning: SNMP::get(): Invalid object identifier: .1.3.6.1.2.1.1.1..0 in %s on line %d

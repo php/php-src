@@ -1540,7 +1540,7 @@ PHP_METHOD(snmp, __construct)
 		case SNMP_VERSION_3:
 			break;
 		default:
-			zend_throw_exception(zend_ce_exception, "Unknown SNMP protocol version", 0);
+			zend_argument_value_error(zend_ce_exception, 1, "must be a valid SNMP protocol version");
 			RETURN_THROWS();
 	}
 

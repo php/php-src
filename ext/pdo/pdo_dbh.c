@@ -225,7 +225,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 		snprintf(alt_dsn, sizeof(alt_dsn), "pdo.dsn.%s", data_source);
 		if (FAILURE == cfg_get_string(alt_dsn, &ini_dsn)) {
-			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name");
+			zend_argument_error(php_pdo_get_exception(), 1, "must be a valid data source name");
 			RETURN_THROWS();
 		}
 
@@ -242,12 +242,12 @@ static PHP_METHOD(PDO, dbh_constructor)
 		/* the specified URI holds connection details */
 		data_source = dsn_from_uri(data_source + sizeof("uri:")-1, alt_dsn, sizeof(alt_dsn));
 		if (!data_source) {
-			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source URI");
+			zend_argument_error(php_pdo_get_exception(), 1, "must be a valid data source URI");
 			RETURN_THROWS();
 		}
 		colon = strchr(data_source, ':');
 		if (!colon) {
-			zend_throw_exception_ex(php_pdo_get_exception(), 0, "invalid data source name (via URI)");
+			zend_argument_error(php_pdo_get_exception(), 1, "must be a valid data source name (via URI)");
 			RETURN_THROWS();
 		}
 	}

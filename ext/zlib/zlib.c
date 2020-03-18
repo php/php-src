@@ -819,7 +819,7 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 			} break;
 
 			default:
-				zend_type_error("Dictionary must be of type zero-terminated string or array, got %s", zend_get_type_by_const(Z_TYPE_P(option_buffer)));
+				zend_argument_type_error(2, "must be of type zero-terminated string or array, %s given", zend_get_type_by_const(Z_TYPE_P(option_buffer)));
 				return 0;
 		}
 	}

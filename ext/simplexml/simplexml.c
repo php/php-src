@@ -2282,15 +2282,15 @@ SXE_METHOD(__construct)
 	}
 
 	if (ZEND_SIZE_T_INT_OVFL(data_len)) {
-		zend_throw_exception(zend_ce_exception, "Data is too long", 0);
+		zend_argument_error(zend_ce_exception, 1, "is too long");
 		RETURN_THROWS();
 	}
 	if (ZEND_SIZE_T_INT_OVFL(ns_len)) {
-		zend_throw_exception(zend_ce_exception, "Namespace is too long", 0);
+		zend_argument_error(zend_ce_exception, 4, "is too long");
 		RETURN_THROWS();
 	}
 	if (ZEND_LONG_EXCEEDS_INT(options)) {
-		zend_throw_exception(zend_ce_exception, "Invalid options", 0);
+		zend_argument_error(zend_ce_exception, 2, "is invalid");
 		RETURN_THROWS();
 	}
 
