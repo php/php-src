@@ -4245,6 +4245,7 @@ int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_
 				case ZEND_SEND_REF:
 				case ZEND_UNSET_CV:
 				case ZEND_ISSET_ISEMPTY_CV:
+				case ZEND_MAKE_REF:
 					break;
 				default:
 					/* undefined variable warning */
@@ -4269,6 +4270,7 @@ int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_
 				case ZEND_SEND_REF:
 				case ZEND_SEPARATE:
 				case ZEND_END_SILENCE:
+				case ZEND_MAKE_REF:
 					break;
 				default:
 					/* destructor may be called */
