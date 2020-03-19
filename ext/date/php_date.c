@@ -3573,6 +3573,7 @@ static void php_date_time_set(zval *object, zend_long h, zend_long i, zend_long 
 	dateobj->time->s = s;
 	dateobj->time->us = ms;
 	timelib_update_ts(dateobj->time, NULL);
+	timelib_update_from_sse(dateobj->time);
 } /* }}} */
 
 /* {{{ proto DateTime date_time_set(DateTime object, int hour, int minute[, int second[, int microseconds]])
