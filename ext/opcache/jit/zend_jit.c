@@ -2803,6 +2803,15 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_STRLEN:
+						op1_info = OP1_INFO();
+						if ((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) != MAY_BE_STRING) {
+							break;
+						}
+						if (!zend_jit_strlen(&dasm_state, opline, op_array, op1_info)) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_SWITCH_LONG:
 					case ZEND_SWITCH_STRING:
 						if (!zend_jit_switch(&dasm_state, opline, op_array, ssa)) {
