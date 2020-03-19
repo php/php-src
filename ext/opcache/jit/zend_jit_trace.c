@@ -1242,6 +1242,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_JMPZNZ:
 				case ZEND_JMPZ_EX:
 				case ZEND_JMPNZ_EX:
+				case ZEND_ECHO:
 					if (tssa->ops[idx].op1_use >= 0 && op1_type != IS_UNKNOWN) {
 						zend_ssa_var_info *info = &ssa_var_info[ssa_ops[idx].op1_use];
 						if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << op1_type)) {
@@ -2624,11 +2625,12 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						goto done;
 					case ZEND_ECHO:
-						if (opline->op1_type != IS_CONST
-						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op1)) != IS_STRING) {
+						op1_info = OP1_INFO();
+						CHECK_OP1_TRACE_TYPE();
+						if ((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) != MAY_BE_STRING) {
 							break;
 						}
-						if (!zend_jit_echo(&dasm_state, opline, op_array)) {
+						if (!zend_jit_echo(&dasm_state, opline, op_array, op1_info)) {
 							goto jit_failure;
 						}
 						goto done;

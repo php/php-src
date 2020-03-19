@@ -2795,11 +2795,11 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						goto done;
 					case ZEND_ECHO:
-						if (opline->op1_type != IS_CONST
-						 || Z_TYPE_P(RT_CONSTANT(opline, opline->op1)) != IS_STRING) {
+						op1_info = OP1_INFO();
+						if ((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) != MAY_BE_STRING) {
 							break;
 						}
-						if (!zend_jit_echo(&dasm_state, opline, op_array)) {
+						if (!zend_jit_echo(&dasm_state, opline, op_array, op1_info)) {
 							goto jit_failure;
 						}
 						goto done;

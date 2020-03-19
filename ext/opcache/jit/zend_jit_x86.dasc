@@ -10459,31 +10459,57 @@ static int zend_jit_free(dasm_State **Dst, const zend_op *opline, const zend_op_
 	return 1;
 }
 
-static int zend_jit_echo(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array)
+static int zend_jit_echo(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array, uint32_t op1_info)
 {
 	zval *zv;
 	size_t len;
 
-	ZEND_ASSERT(opline->op1_type == IS_CONST);
-	zv = RT_CONSTANT(opline, opline->op1);
-	ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
-	len = Z_STRLEN_P(zv);
+	if (opline->op1_type == IS_CONST) {
+		zv = RT_CONSTANT(opline, opline->op1);
+		ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
+		len = Z_STRLEN_P(zv);
 
-	if (len > 0) {
-		const char *str = Z_STRVAL_P(zv);
+		if (len > 0) {
+			const char *str = Z_STRVAL_P(zv);
+
+			|	SAVE_VALID_OPLINE opline, r0
+			|.if X64
+				|	LOAD_ADDR CARG1, str
+				|	LOAD_ADDR CARG2, len
+				|	EXT_CALL zend_write, r0
+			|.else
+				|	sub r4, 8
+				|	push len
+				|	push str
+				|	EXT_CALL zend_write, r0
+				|	add r4, 16
+			|.endif
+			if (!zend_jit_check_exception(Dst)) {
+				return 0;
+			}
+		}
+	} else {
+		zend_jit_addr op1_addr = OP1_ADDR();
+
+		ZEND_ASSERT((op1_info & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)) == MAY_BE_STRING);
 
 		|	SAVE_VALID_OPLINE opline, r0
+		|	GET_ZVAL_PTR r0, op1_addr
 		|.if X64
-			|	LOAD_ADDR CARG1, str
-			|	LOAD_ADDR CARG2, len
-			|	EXT_CALL zend_write, r0
+		|	lea CARG1, aword [r0 + offsetof(zend_string, val)]
+		|	mov CARG2, aword [r0 + offsetof(zend_string, len)]
+		|	EXT_CALL zend_write, r0
 		|.else
-			|	sub r4, 8
-			|	push len
-			|	push str
-			|	EXT_CALL zend_write, r0
-			|	add r4, 16
+		|	sub r4, 8
+		|	push aword [r0 + offsetof(zend_string, len)]
+		|	add r0, offsetof(zend_string, val)
+		|	push r0
+		|	EXT_CALL zend_write, r0
+		|	add r4, 16
 		|.endif
+		if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
+			|	ZVAL_PTR_DTOR op1_addr, op1_info, 0, 0, opline
+		}
 		if (!zend_jit_check_exception(Dst)) {
 			return 0;
 		}
