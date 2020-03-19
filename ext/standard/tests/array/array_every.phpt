@@ -14,9 +14,21 @@ function is_int_ex($item)
 
 echo "\n*** Testing not enough or wrong arguments ***\n";
 
-var_dump(array_every());
-var_dump(array_every(true));
-var_dump(array_every([]));
+try {
+    var_dump(array_every());
+} catch (Throwable $e) {
+    echo "Exception: " . $e->getMessage() . "\n";
+}
+try {
+    var_dump(array_every(true));
+} catch (Throwable $e) {
+    echo "Exception: " . $e->getMessage() . "\n";
+}
+try {
+    var_dump(array_every([]));
+} catch (Throwable $e) {
+    echo "Exception: " . $e->getMessage() . "\n";
+}
 
 echo "\n*** Testing basic functionality ***\n";
 
@@ -51,15 +63,9 @@ echo "\nDone";
 ?> 
 --EXPECTF--
 *** Testing not enough or wrong arguments ***
-
-Warning: array_every() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: array_every() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: array_every() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
+Exception: array_every() expects exactly 2 parameters, 0 given
+Exception: array_every() expects exactly 2 parameters, 1 given
+Exception: array_every() expects exactly 2 parameters, 1 given
 
 *** Testing basic functionality ***
 bool(true)

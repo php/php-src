@@ -14,9 +14,21 @@ function is_int_ex($nr)
 
 echo "\n*** Testing not enough or wrong arguments ***\n";
 
-var_dump(array_any());
-var_dump(array_any(true));
-var_dump(array_any([]));
+try {
+    var_dump(array_any());
+} catch (Throwable $e) {
+    echo "Exception: " . $e->getMessage() . "\n";
+}
+try {
+    var_dump(array_any(true));
+} catch (Throwable $e) {
+    echo "Exception: " . $e->getMessage() . "\n";
+}
+try {
+    var_dump(array_any([]));
+} catch (Throwable $e) {
+    echo "Exception: " . $e->getMessage() . "\n";
+}
 
 echo "\n*** Testing basic functionality ***\n";
 
@@ -46,17 +58,10 @@ var_dump(array_any(array(), 'is_int_ex'));
 echo "\nDone";
 ?> 
 --EXPECTF--
-
 *** Testing not enough or wrong arguments ***
-
-Warning: array_any() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: array_any() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: array_any() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
+Exception: array_any() expects exactly 2 parameters, 0 given
+Exception: array_any() expects exactly 2 parameters, 1 given
+Exception: array_any() expects exactly 2 parameters, 1 given
 
 *** Testing basic functionality ***
 bool(false)
