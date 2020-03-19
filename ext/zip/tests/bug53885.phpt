@@ -3,7 +3,6 @@ Bug #53885 (ZipArchive segfault with FL_UNCHANGED on empty archive)
 --SKIPIF--
 <?php
 if(!extension_loaded('zip')) die('skip');
-if(version_compare(ZipArchive::LIBZIP_VERSION, '1.6', '>=')) die('skip libzip too recent');
 ?>
 --FILE--
 <?php
