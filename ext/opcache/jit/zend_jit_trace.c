@@ -1263,6 +1263,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				case ZEND_SEND_VAR_EX:
 				case ZEND_SEND_VAR_NO_REF:
 				case ZEND_SEND_VAR_NO_REF_EX:
+				case ZEND_SEND_FUNC_ARG:
 					if (tssa->ops[idx].op1_use >= 0 && op1_type != IS_UNKNOWN) {
 						zend_ssa_var_info *info = &ssa_var_info[ssa_ops[idx].op1_use];
 						if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << op1_type)) {
@@ -1481,7 +1482,8 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						ssa_var_info[v].type = MAY_BE_UNDEF;
 					}
 				}
-				if (i < op_array->num_args) {
+				if (!(op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS)
+				 && i < op_array->num_args) {
 					/* Propagate argument type */
 					ssa_var_info[v].type &= frame->stack[i];
 				}
@@ -2202,6 +2204,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_SEND_VAR_EX:
 					case ZEND_SEND_VAR_NO_REF:
 					case ZEND_SEND_VAR_NO_REF_EX:
+					case ZEND_SEND_FUNC_ARG:
 						if ((opline->opcode == ZEND_SEND_VAR_EX
 						  || opline->opcode == ZEND_SEND_VAR_NO_REF_EX)
 						 && opline->op2.num > MAX_ARG_FLAG_NUM) {
@@ -2223,7 +2226,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						if (frame->call
 						 && frame->call->func->type == ZEND_USER_FUNCTION) {
-							if (opline->opcode == ZEND_SEND_VAR_EX
+							if ((opline->opcode == ZEND_SEND_VAR_EX
+							  || opline->opcode == ZEND_SEND_FUNC_ARG)
 							 && ARG_SHOULD_BE_SENT_BY_REF(frame->call->func, opline->op2.num)) {
 								// TODO: this may require invalidation, if caller is changed ???
 								goto done;

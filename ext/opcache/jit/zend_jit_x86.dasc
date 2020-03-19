@@ -8636,6 +8636,28 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 
 			|.code
 		}
+	} else if (opline->opcode == ZEND_SEND_FUNC_ARG) {
+		if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE
+		 && JIT_G(current_frame)
+		 && JIT_G(current_frame)->call
+		 && JIT_G(current_frame)->call->func) {
+			if (ARG_SHOULD_BE_SENT_BY_REF(JIT_G(current_frame)->call->func, arg_num)) {
+				if (!zend_jit_send_ref(Dst, opline, op_array, op1_info, 0)) {
+					return 0;
+				}
+				return 1;
+			}
+		} else {
+			|	test dword [RX + offsetof(zend_execute_data, This.u1.type_info)], ZEND_CALL_SEND_ARG_BY_REF
+			|	jnz	>1
+			|.cold_code
+			|1:
+			if (!zend_jit_send_ref(Dst, opline, op_array, op1_info, 1)) {
+				return 0;
+			}
+			|	jmp >7
+			|.code
+		}
 	}
 
 	if (op1_info & MAY_BE_UNDEF) {
@@ -8677,7 +8699,7 @@ static int zend_jit_send_var(dasm_State **Dst, const zend_op *opline, const zend
 				return 0;
 			}
 		}
-	} else if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
+	} else {
 		if (op1_info & MAY_BE_REF) {
 			if (opline->op1_type == IS_CV) {
 				zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
