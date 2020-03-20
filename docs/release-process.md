@@ -297,6 +297,8 @@
 
     e.g. `ChangeLog-7.php` from the `NEWS` file
 
+    * You may want to try `php-web/bin/news2html` to automate this task.
+
     * Go over the list and put every element on one line.
     * Check for `&`, `<` and `>` and escape them if necessary.
     * Remove all the names at the ends of lines.
@@ -312,13 +314,12 @@
 
         V. `s/FR #\([0-9]\+\)/FR <?php bugl(\1); ?>/`
 
-    * You may want to try `php-web/bin/news2html` to automate this task.
-
  6. Add a short notice to phpweb stating that there is a new release, and
     highlight the major important things (security fixes) and when it is
     important to upgrade.
 
     * Call `php bin/createNewsEntry` in your local phpweb checkout.
+    * Use the "frontpage" and "releases" category.
     * Add the content for the news entry.
 
  7. Commit and push all the changes to their respective git repos
