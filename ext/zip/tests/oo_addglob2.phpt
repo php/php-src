@@ -32,7 +32,7 @@ if (!$zip->addGlob($dirname . 'foo.*', GLOB_BRACE, $options)) {
 $options = [
 	'remove_all_path' => true,
 	'comp_method' => ZipArchive::CM_STORE,
-	'comp_password' => 5,
+	'comp_flags' => 5,
 	'enc_method' => ZipArchive::EM_AES_256,
 	'enc_password' => 'secret',
 ];
