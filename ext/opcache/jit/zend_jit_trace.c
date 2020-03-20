@@ -1249,6 +1249,16 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 						}
 					}
 					break;
+				case ZEND_CAST:
+					if (tssa->ops[idx].op1_use >= 0 && op1_type != IS_UNKNOWN) {
+						if (opline->extended_value == op1_type) {
+							zend_ssa_var_info *info = &ssa_var_info[ssa_ops[idx].op1_use];
+							if ((info->type & (MAY_BE_ANY|MAY_BE_UNDEF)) != (1 << op1_type)) {
+								info->type = MAY_BE_GUARD | zend_jit_trace_type_to_info_ex(op1_type, info->type);
+							}
+						}
+					}
+					break;
 				case ZEND_ASSIGN:
 					if (tssa->ops[idx].op2_use >= 0 && op2_type != IS_UNKNOWN) {
 						zend_ssa_var_info *info = &ssa_var_info[ssa_ops[idx].op2_use];
@@ -2136,6 +2146,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_CAST:
+						if (opline->extended_value != op1_type) {
+							break;
+						}
+						/* break missing intentionally */
 					case ZEND_QM_ASSIGN:
 						op1_addr = OP1_REG_ADDR();
 						if (ra
