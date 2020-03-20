@@ -331,17 +331,66 @@ struct _zend_jit_trace_stack_frame {
 	zend_jit_trace_stack_frame *call;
 	zend_jit_trace_stack_frame *prev;
 	const zend_function        *func;
-	union {
-		struct {
-			int8_t              return_value_used;
-			int8_t              nested;
-			int8_t              num_args;
-			int8_t				last_send_by_ref;
-		};
-		int                     return_ssa_var;
-	};
+	uint32_t                    _info;
 	zend_jit_trace_stack        stack[1];
 };
+
+#define TRACE_FRAME_SHIFT_NUM_ARGS           16
+#define TRACE_FRAME_MAX_NUM_ARGS             32767
+
+#define TRACE_FRAME_MASK_NUM_ARGS            0xffff0000
+#define TRACE_FRAME_MASK_NESTED              0x00000001
+#define TRACE_FRAME_MASK_LAST_SEND_BY_REF    0x00000002
+#define TRACE_FRAME_MASK_LAST_SEND_BY_VAL    0x00000004
+#define TRACE_FRAME_MASK_RETURN_VALUE_USED   0x00000008
+#define TRACE_FRAME_MASK_RETURN_VALUE_UNUSED 0x00000010
+
+
+#define TRACE_FRAME_INIT(frame, _func, nested, num_args) do { \
+		zend_jit_trace_stack_frame *_frame = (frame); \
+		_frame->call = NULL; \
+		_frame->prev = NULL; \
+		_frame->func = (const zend_function*)_func; \
+		_frame->_info = (uint32_t)((((int)(num_args)) << TRACE_FRAME_SHIFT_NUM_ARGS) & TRACE_FRAME_MASK_NUM_ARGS); \
+		if (nested) { \
+			_frame->_info |= TRACE_FRAME_MASK_NESTED; \
+		}; \
+	} while (0)
+
+#define TRACE_FRAME_RETURN_SSA_VAR(frame) \
+	((int)(frame)->_info)
+#define TRACE_FRAME_NUM_ARGS(frame) \
+	((int)((frame)->_info) >> TRACE_FRAME_SHIFT_NUM_ARGS)
+#define TRACE_FRAME_IS_NESTED(frame) \
+	((frame)->_info & TRACE_FRAME_MASK_NESTED)
+#define TRACE_FRAME_IS_LAST_SEND_BY_REF(frame) \
+	((frame)->_info & TRACE_FRAME_MASK_LAST_SEND_BY_REF)
+#define TRACE_FRAME_IS_LAST_SEND_BY_VAL(frame) \
+	((frame)->_info & TRACE_FRAME_MASK_LAST_SEND_BY_VAL)
+#define TRACE_FRAME_IS_RETURN_VALUE_USED(frame) \
+	((frame)->_info & TRACE_FRAME_MASK_RETURN_VALUE_USED)
+#define TRACE_FRAME_IS_RETURN_VALUE_UNUSED(frame) \
+	((frame)->_info & TRACE_FRAME_MASK_RETURN_VALUE_UNUSED)
+
+#define TRACE_FRAME_SET_RETURN_SSA_VAR(frame, var) do { \
+		(frame)->_info = var; \
+	} while (0)
+#define TRACE_FRAME_SET_LAST_SEND_BY_REF(frame) do { \
+		(frame)->_info |= TRACE_FRAME_MASK_LAST_SEND_BY_REF; \
+		(frame)->_info &= ~TRACE_FRAME_MASK_LAST_SEND_BY_VAL; \
+	} while (0)
+#define TRACE_FRAME_SET_LAST_SEND_BY_VAL(frame) do { \
+		(frame)->_info |= TRACE_FRAME_MASK_LAST_SEND_BY_VAL; \
+		(frame)->_info &= ~TRACE_FRAME_MASK_LAST_SEND_BY_REF; \
+	} while (0)
+#define TRACE_FRAME_SET_RETURN_VALUE_USED(frame) do { \
+		(frame)->_info |= TRACE_FRAME_MASK_RETURN_VALUE_USED; \
+		(frame)->_info &= ~TRACE_FRAME_MASK_RETURN_VALUE_UNUSED; \
+	} while (0)
+#define TRACE_FRAME_SET_RETURN_VALUE_UNUSED(frame) do { \
+		(frame)->_info |= TRACE_FRAME_MASK_RETURN_VALUE_UNUSED; \
+		(frame)->_info &= ~TRACE_FRAME_MASK_RETURN_VALUE_USED; \
+	} while (0)
 
 typedef struct _zend_jit_globals {
 	zend_jit_trace_stack_frame *current_frame;

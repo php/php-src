@@ -7881,8 +7881,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			func = trace->func;
 			if (JIT_G(current_frame) &&
 			    JIT_G(current_frame)->call &&
-			    JIT_G(current_frame)->call->num_args >= 0) {
-				call_num_args = JIT_G(current_frame)->call->num_args;
+			    TRACE_FRAME_NUM_ARGS(JIT_G(current_frame)->call) >= 0) {
+				call_num_args = TRACE_FRAME_NUM_ARGS(JIT_G(current_frame)->call);
 			} else {
 				unknown_num_args = 1;
 			}
@@ -7893,8 +7893,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 				func = trace->func;
 				if (JIT_G(current_frame) &&
 				    JIT_G(current_frame)->call &&
-				    JIT_G(current_frame)->call->num_args >= 0) {
-					call_num_args = JIT_G(current_frame)->call->num_args;
+				    TRACE_FRAME_NUM_ARGS(JIT_G(current_frame)->call) >= 0) {
+					call_num_args = TRACE_FRAME_NUM_ARGS(JIT_G(current_frame)->call);
 				} else {
 					unknown_num_args = 1;
 				}
@@ -8319,7 +8319,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		if (zend_jit_trigger != ZEND_JIT_ON_HOT_TRACE ||
 		    !JIT_G(current_frame) ||
 		    !JIT_G(current_frame)->call ||
-		    !JIT_G(current_frame)->call->nested) {
+		    !TRACE_FRAME_IS_NESTED(JIT_G(current_frame)->call)) {
 
 			|	// zend_vm_stack_free_call_frame(call);
 			|	test byte [RX + offsetof(zend_execute_data, This.u1.type_info) + 2], (ZEND_CALL_ALLOCATED >> 16)
@@ -8759,8 +8759,8 @@ static int zend_jit_check_func_arg(dasm_State **Dst, const zend_op *opline, cons
 	 && JIT_G(current_frame)->call
 	 && JIT_G(current_frame)->call->func) {
 		if (ARG_SHOULD_BE_SENT_BY_REF(JIT_G(current_frame)->call->func, arg_num)) {
-			if (JIT_G(current_frame)->call->last_send_by_ref != 1) {
-				JIT_G(current_frame)->call->last_send_by_ref = 1;
+			if (!TRACE_FRAME_IS_LAST_SEND_BY_REF(JIT_G(current_frame)->call)) {
+				TRACE_FRAME_SET_LAST_SEND_BY_REF(JIT_G(current_frame)->call);
 				|	// ZEND_ADD_CALL_FLAG(EX(call), ZEND_CALL_SEND_ARG_BY_REF);
 				||	if (reuse_ip) {
 				|		or dword [RX + offsetof(zend_execute_data, This.u1.type_info)], ZEND_CALL_SEND_ARG_BY_REF
@@ -8770,8 +8770,8 @@ static int zend_jit_check_func_arg(dasm_State **Dst, const zend_op *opline, cons
 				||	}
 			}
 		} else {
-			if (JIT_G(current_frame)->call->last_send_by_ref != 0) {
-				JIT_G(current_frame)->call->last_send_by_ref = 0;
+			if (!TRACE_FRAME_IS_LAST_SEND_BY_VAL(JIT_G(current_frame)->call)) {
+				TRACE_FRAME_SET_LAST_SEND_BY_VAL(JIT_G(current_frame)->call);
 				|	// ZEND_DEL_CALL_FLAG(EX(call), ZEND_CALL_SEND_ARG_BY_REF);
 				||	if (reuse_ip) {
 				|		and dword [RX + offsetof(zend_execute_data, This.u1.type_info)], ~ZEND_CALL_SEND_ARG_BY_REF
@@ -9269,7 +9269,7 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 
 		if (zend_jit_trigger != ZEND_JIT_ON_HOT_TRACE ||
 		    !JIT_G(current_frame) ||
-		    !JIT_G(current_frame)->nested) {
+		    !TRACE_FRAME_IS_NESTED(JIT_G(current_frame))) {
 			// TODO: try to avoid this check ???
 			if (zend_jit_vm_kind == ZEND_VM_KIND_HYBRID) {
 				|	cmp IP, zend_jit_halt_op
@@ -9411,7 +9411,13 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, const zend_o
 	ZEND_ASSERT(!(op1_info & MAY_BE_UNDEF));
 
 	if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE && JIT_G(current_frame)) {
-		return_value_used = JIT_G(current_frame)->return_value_used;
+		if (TRACE_FRAME_IS_RETURN_VALUE_USED(JIT_G(current_frame))) {
+			return_value_used = 1;
+		} else if (TRACE_FRAME_IS_RETURN_VALUE_UNUSED(JIT_G(current_frame))) {
+			return_value_used = 0;
+		} else {
+			return_value_used = -1;
+		}
 	} else {
 		return_value_used = -1;
 	}
