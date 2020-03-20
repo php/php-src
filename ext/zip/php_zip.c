@@ -1487,7 +1487,6 @@ static ZIPARCHIVE_METHOD(open)
 		ze_obj->filename = NULL;
 	}
 
-#if LIBZIP_VERSION_MAJOR > 1 || LIBZIP_VERSION_MAJOR == 1 && LIBZIP_VERSION_MINOR >= 6
 	/* reduce BC break introduce in libzip 1.6.0
 	   "Do not accept empty files as valid zip archives any longer" */
 
@@ -1497,10 +1496,10 @@ static ZIPARCHIVE_METHOD(open)
 
 		/* exists and is empty */
 		if (VCWD_STAT(resolved_path, &st) == 0 && st.st_size == 0) {
+			php_error_docref(NULL, E_DEPRECATED, "Using empty file as ZipArchive is deprecated");
 			flags |= ZIP_TRUNCATE;
 		}
 	}
-#endif
 
 	intern = zip_open(resolved_path, flags, &err);
 	if (!intern || err) {

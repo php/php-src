@@ -457,6 +457,11 @@ PHP 8.0 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Zip:
+  . Using empty file as ZipArchive is deprecated. Libzip 1.6.0
+    do not accept empty files as valid zip archives any longer.
+    Existing workaround will be removed in next version.
+
 ========================================
 5. Changed Functions
 ========================================
