@@ -185,6 +185,47 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 		ce->__debugInfo = parent->__debugInfo;
 	}
 
+	if (EXPECTED(!ce->__add)) {
+		ce->__add = parent->__add;
+	}
+	if (EXPECTED(!ce->__sub)) {
+		ce->__sub = parent->__sub;
+	}
+	if (EXPECTED(!ce->__mul)) {
+		ce->__mul = parent->__mul;
+	}
+	if (EXPECTED(!ce->__div)) {
+		ce->__div = parent->__div;
+	}
+	if (EXPECTED(!ce->__pow)) {
+		ce->__pow = parent->__pow;
+	}
+	if (EXPECTED(!ce->__mod)) {
+		ce->__mod = parent->__mod;
+	}
+	if (EXPECTED(!ce->__concat)) {
+		ce->__concat = parent->__concat;
+	}
+	if (EXPECTED(!ce->__shiftLeft)) {
+		ce->__shiftLeft = parent->__shiftLeft;
+	}
+	if (EXPECTED(!ce->__shiftRight)) {
+		ce->__shiftRight = parent->__shiftRight;
+	}
+	if (EXPECTED(!ce->__bitwiseAnd)) {
+		ce->__bitwiseAnd = parent->__bitwiseAnd;
+	}
+	if (EXPECTED(!ce->__bitwiseOr)) {
+		ce->__bitwiseOr = parent->__bitwiseOr;
+	}
+	if (EXPECTED(!ce->__bitwiseXor)) {
+		ce->__bitwiseXor = parent->__bitwiseXor;
+	}
+	if (EXPECTED(!ce->__bitwiseNot)) {
+		ce->__bitwiseNot = parent->__bitwiseNot;
+	}
+
+
 	if (ce->constructor) {
 		if (parent->constructor && UNEXPECTED(parent->constructor->common.fn_flags & ZEND_ACC_FINAL)) {
 			zend_error_noreturn(E_ERROR, "Cannot override final %s::%s() with %s::%s()",
