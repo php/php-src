@@ -60,8 +60,11 @@ timelib_rel_time *timelib_diff(timelib_time *one, timelib_time *two)
 	memcpy(&one_backup, one, sizeof(one_backup));
 	memcpy(&two_backup, two, sizeof(two_backup));
 
-    timelib_apply_localtime(one, 0);
-    timelib_apply_localtime(two, 0);
+	/* Time to gmt when tz is different */
+    if(one->z != two->z){
+        timelib_apply_localtime(one, 0);
+        timelib_apply_localtime(two, 0);
+    }
 
 	rt->y = two->y - one->y;
 	rt->m = two->m - one->m;
