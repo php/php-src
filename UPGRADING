@@ -437,7 +437,7 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/dom_living_standard_api
 
 - Zip:
-  . Extension updated to version 1.18.1
+  . Extension updated to version 1.18.2
   . New ZipArchive::lastId property to get index value of last added entry.
   . Error can be checked after an archive is closed using ZipArchive::status,
     ZipArchive::statusSys properties or ZipArchive::getStatusString() method.
