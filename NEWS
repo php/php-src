@@ -24,7 +24,10 @@ PHP                                                                        NEWS
 - Spl:
   . Fixed bug #75673 (SplStack::unserialize() behavior). (cmb)
 
-?? ??? ????, PHP 7.4.4
+- Zip:
+  . Fixed Bug #79296 (ZipArchive::open fails on empty file). (Remi)
+
+19 Mar 2020, PHP 7.4.4
 
 - Core:
   . Fixed bug #79244 (php crashes during parsing INI file). (Laruence)
