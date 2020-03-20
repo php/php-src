@@ -293,7 +293,9 @@
     instead of the release xml.
 
  4. Update `php-qa/include/release-qa.php` and add the next version as an
-    QARELEASE (prepare for next RC).
+    QARELEASE (prepare for next RC). Keep `active => true` until there will be
+    no more QA releases. Setting the release number to 0 is sufficient to
+    remove the old QA release from the available QA releases list.
 
  5. Update the ChangeLog file for the given major version
 
