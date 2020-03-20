@@ -291,7 +291,7 @@ retry:
 				continue;
 			}
 
-			zend_error(E_NOTICE, "You have to implement the %s function in class %s to use this operator with an object!",
+			zend_error(E_NOTICE, "You have to implement the %s function in class %s to use this operator with an object",
 					   Z_STRVAL(fci.function_name), ZSTR_VAL(ce->name));
 			zval_ptr_dtor(&fci.function_name);
 			return FAILURE;
@@ -308,7 +308,16 @@ retry:
 			if(zobj == Z_OBJ_P(op1) && op2 != NULL && Z_TYPE_P(op2) == IS_OBJECT) {
 				goto retry;
 			} else {
-				zend_type_error("The operand handlers do not support the given operand types!");
+				if(op2 != NULL) { /* binary operators */
+					zend_type_error("The operand handlers %s do not support the given operand types combination (%s and %s given)",
+					Z_STRVAL(fci.function_name),
+					Z_TYPE_P(op1) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(op1)->name) : zend_zval_type_name(op1),
+					Z_TYPE_P(op2) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(op2)->name) : zend_zval_type_name(op2));
+				} else { /* unary operators */
+					zend_type_error("The operand handler %s do not support the given operand type (%s given)",
+					Z_STRVAL(fci.function_name),
+					Z_TYPE_P(op1) == IS_OBJECT ? ZSTR_VAL(Z_OBJCE_P(op1)->name) : zend_zval_type_name(op1));
+				}
 			}
 		}
 

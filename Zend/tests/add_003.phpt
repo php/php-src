@@ -20,9 +20,13 @@ var_dump($c);
 echo "Done\n";
 ?>
 --EXPECTF--
+Notice: You have to implement the __add function in class stdClass to use this operator with an object in %sadd_003.php on line %d
+
 Notice: Object of class stdClass could not be converted to number in %sadd_003.php on line %d
 
 Exception: Unsupported operand types
+
+Notice: You have to implement the __add function in class stdClass to use this operator with an object in %sadd_003.php on line %d
 
 Notice: Object of class stdClass could not be converted to number in %s on line %d
 
