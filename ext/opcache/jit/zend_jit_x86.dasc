@@ -7740,8 +7740,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 
 	if (!func
 	 && trace
-	 && trace->op == ZEND_JIT_TRACE_INIT_CALL
-	 && (opline->opcode == ZEND_INIT_FCALL || opline->opcode == ZEND_INIT_FCALL_BY_NAME)) {
+	 && trace->op == ZEND_JIT_TRACE_INIT_CALL) {
 		/* TODO: add guard ??? */
 		func = (zend_function*)trace->func;
 	}
@@ -7774,12 +7773,16 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 
 			if (opline->opcode == ZEND_INIT_FCALL) {
 				|	LOAD_ADDR FCARG1a, Z_STR_P(zv);
+				|	EXT_CALL zend_jit_find_func_helper, r0
 			} else if (opline->opcode == ZEND_INIT_FCALL_BY_NAME) {
 				|	LOAD_ADDR FCARG1a, Z_STR_P(zv + 1);
+				|	EXT_CALL zend_jit_find_func_helper, r0
+			} else if (opline->opcode == ZEND_INIT_NS_FCALL_BY_NAME) {
+				|	LOAD_ADDR FCARG1a, zv;
+				|	EXT_CALL zend_jit_find_ns_func_helper, r0
 			} else {
 				ZEND_ASSERT(0);
 			}
-			|	EXT_CALL zend_jit_find_func_helper, r0
 			|	// CACHE_PTR(opline->result.num, fbc);
 			|	mov r1,	EX->run_time_cache
 			|	mov aword [r1 + opline->result.num], r0

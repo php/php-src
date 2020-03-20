@@ -2437,6 +2437,7 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						goto done;
 					case ZEND_INIT_FCALL:
 					case ZEND_INIT_FCALL_BY_NAME:
+					case ZEND_INIT_NS_FCALL_BY_NAME:
 						if (!zend_jit_init_fcall(&dasm_state, opline, b, op_array, ssa, call_level, NULL)) {
 							goto jit_failure;
 						}

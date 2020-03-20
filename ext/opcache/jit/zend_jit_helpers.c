@@ -66,6 +66,24 @@ static zend_function* ZEND_FASTCALL zend_jit_find_func_helper(zend_string *name)
 	return fbc;
 }
 
+static zend_function* ZEND_FASTCALL zend_jit_find_ns_func_helper(zval *func_name)
+{
+	zval *func = zend_hash_find_ex(EG(function_table), Z_STR_P(func_name + 1), 1);
+	zend_function *fbc;
+
+	if (func == NULL) {
+		func = zend_hash_find_ex(EG(function_table), Z_STR_P(func_name + 2), 1);
+		if (UNEXPECTED(func == NULL)) {
+			return NULL;
+		}
+	}
+	fbc = Z_FUNC_P(func);
+	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+		fbc = _zend_jit_init_func_run_time_cache(&fbc->op_array);
+	}
+	return fbc;
+}
+
 static zend_execute_data* ZEND_FASTCALL zend_jit_extend_stack_helper(uint32_t used_stack, zend_function *fbc)
 {
 	zend_execute_data *call = (zend_execute_data*)zend_vm_stack_extend(used_stack);
