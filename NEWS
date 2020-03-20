@@ -19,6 +19,9 @@ PHP                                                                        NEWS
 - Spl:
   . Fixed bug #75673 (SplStack::unserialize() behavior). (cmb)
 
+- Zip:
+  . Fixed Bug #79296 (ZipArchive::open fails on empty file). (Remi)
+
 19 Mar 2020, PHP 7.3.16
 
 - Core:
