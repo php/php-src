@@ -2101,6 +2101,25 @@ static int zend_jit_mod_by_zero_stub(dasm_State **Dst)
 	return 1;
 }
 
+static int zend_jit_invalid_this_stub(dasm_State **Dst)
+{
+	|->invalid_this:
+	|	UNDEF_OPLINE_RESULT
+	|.if X64
+		|	xor CARG1, CARG1
+		|	LOAD_ADDR CARG2, "Using $this when not in object context"
+		|	EXT_CALL zend_throw_error, r0
+	|.else
+		|	sub r4, 8
+		|	push "Using $this when not in object context"
+		|	push 0
+		|	EXT_CALL zend_throw_error, r0
+		|	add r4, 16
+	|.endif
+	|	jmp ->exception_handler
+	return 1;
+}
+
 static int zend_jit_double_one_stub(dasm_State **Dst)
 {
 	|->one:
@@ -2433,6 +2452,7 @@ static const zend_jit_stub zend_jit_stubs[] = {
 	JIT_STUB(undefined_function),
 	JIT_STUB(negative_shift),
 	JIT_STUB(mod_by_zero),
+	JIT_STUB(invalid_this),
 	JIT_STUB(trace_halt),
 	JIT_STUB(trace_exit),
 	JIT_STUB(trace_escape),
@@ -10550,6 +10570,43 @@ static int zend_jit_strlen(dasm_State **Dst, const zend_op *opline, const zend_o
 			|	ZVAL_PTR_DTOR op1_addr, op1_info, 0, 0, opline
 		}
 	}
+	return 1;
+}
+
+static int zend_jit_fetch_this(dasm_State **Dst, const zend_op *opline, const zend_op_array *op_array)
+{
+	zend_jit_addr res_addr = RES_ADDR();
+
+	if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE) {
+		if (!JIT_G(current_frame) ||
+		    !TRACE_FRAME_IS_THIS_CHECKED(JIT_G(current_frame))) {
+
+			int32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL);
+			const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
+
+			|	cmp byte EX->This.u1.v.type, IS_OBJECT
+			|	jne &exit_addr
+
+			if (JIT_G(current_frame)) {
+				TRACE_FRAME_SET_THIS_CHECKED(JIT_G(current_frame));
+			}
+		}
+	} else {
+
+		|	cmp byte EX->This.u1.v.type, IS_OBJECT
+		|	jne >1
+		|.cold_code
+		|1:
+		|	SAVE_VALID_OPLINE opline, r0
+		|	jmp ->invalid_this
+		|.code
+	}
+
+	|	mov r0, aword EX->This.value.ptr
+	|	SET_ZVAL_PTR res_addr, r0
+	|	SET_ZVAL_TYPE_INFO res_addr, IS_OBJECT_EX
+	|	GC_ADDREF r0
+
 	return 1;
 }
 

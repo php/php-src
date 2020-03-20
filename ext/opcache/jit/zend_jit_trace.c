@@ -2632,6 +2632,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_FETCH_THIS:
+						if (!zend_jit_fetch_this(&dasm_state, opline, op_array)) {
+							goto jit_failure;
+						}
+						goto done;
 #if 0
 					case ZEND_SWITCH_LONG:
 					case ZEND_SWITCH_STRING:

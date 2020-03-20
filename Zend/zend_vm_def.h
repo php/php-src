@@ -970,10 +970,6 @@ ZEND_VM_COLD_HELPER(zend_this_not_in_object_context_helper, ANY, ANY)
 
 	SAVE_OPLINE();
 	zend_throw_error(NULL, "Using $this when not in object context");
-	if ((opline+1)->opcode == ZEND_OP_DATA) {
-		FREE_UNFETCHED_OP_DATA();
-	}
-	FREE_UNFETCHED_OP2();
 	UNDEF_RESULT();
 	HANDLE_EXCEPTION();
 }

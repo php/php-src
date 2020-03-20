@@ -344,6 +344,7 @@ struct _zend_jit_trace_stack_frame {
 #define TRACE_FRAME_MASK_LAST_SEND_BY_VAL    0x00000004
 #define TRACE_FRAME_MASK_RETURN_VALUE_USED   0x00000008
 #define TRACE_FRAME_MASK_RETURN_VALUE_UNUSED 0x00000010
+#define TRACE_FRAME_MASK_THIS_CHECKED        0x00000020
 
 
 #define TRACE_FRAME_INIT(frame, _func, nested, num_args) do { \
@@ -371,6 +372,8 @@ struct _zend_jit_trace_stack_frame {
 	((frame)->_info & TRACE_FRAME_MASK_RETURN_VALUE_USED)
 #define TRACE_FRAME_IS_RETURN_VALUE_UNUSED(frame) \
 	((frame)->_info & TRACE_FRAME_MASK_RETURN_VALUE_UNUSED)
+#define TRACE_FRAME_IS_THIS_CHECKED(frame) \
+	((frame)->_info & TRACE_FRAME_MASK_THIS_CHECKED)
 
 #define TRACE_FRAME_SET_RETURN_SSA_VAR(frame, var) do { \
 		(frame)->_info = var; \
@@ -390,6 +393,9 @@ struct _zend_jit_trace_stack_frame {
 #define TRACE_FRAME_SET_RETURN_VALUE_UNUSED(frame) do { \
 		(frame)->_info |= TRACE_FRAME_MASK_RETURN_VALUE_UNUSED; \
 		(frame)->_info &= ~TRACE_FRAME_MASK_RETURN_VALUE_USED; \
+	} while (0)
+#define TRACE_FRAME_SET_THIS_CHECKED(frame) do { \
+		(frame)->_info |= TRACE_FRAME_MASK_THIS_CHECKED; \
 	} while (0)
 
 typedef struct _zend_jit_globals {

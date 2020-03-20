@@ -2812,6 +2812,11 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_FETCH_THIS:
+						if (!zend_jit_fetch_this(&dasm_state, opline, op_array)) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_SWITCH_LONG:
 					case ZEND_SWITCH_STRING:
 						if (!zend_jit_switch(&dasm_state, opline, op_array, ssa)) {

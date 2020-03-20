@@ -746,10 +746,6 @@ static zend_never_inline ZEND_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_th
 
 	SAVE_OPLINE();
 	zend_throw_error(NULL, "Using $this when not in object context");
-	if ((opline+1)->opcode == ZEND_OP_DATA) {
-		FREE_UNFETCHED_OP((opline+1)->op1_type, (opline+1)->op1.var);
-	}
-	FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
 	UNDEF_RESULT();
 	HANDLE_EXCEPTION();
 }
