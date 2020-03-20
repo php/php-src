@@ -7741,14 +7741,22 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 	if (!func
 	 && trace
 	 && trace->op == ZEND_JIT_TRACE_INIT_CALL) {
-		/* TODO: add guard ??? */
+#ifdef _WIN32
+		/* ASLR */
+		if (trace->func->type != ZEND_INTERNAL_FUNCTION) {
+			func = (zend_function*)trace->func;
+		}
+#else
 		func = (zend_function*)trace->func;
+#endif
 	}
 
 #ifdef _WIN32
 	if (0) {
 #else
-	if (func && func->type == ZEND_INTERNAL_FUNCTION) {
+	if (opline->opcode == ZEND_INIT_FCALL
+	 && func
+	 && func->type == ZEND_INTERNAL_FUNCTION) {
 #endif
 		/* load constant address later */
 	} else if (func && op_array == &func->op_array) {
@@ -7762,7 +7770,10 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		|	jz >1
 		|.cold_code
 		|1:
-		if (func && func->type == ZEND_USER_FUNCTION && (func->op_array.fn_flags & ZEND_ACC_IMMUTABLE)) {
+		if (opline->opcode == ZEND_INIT_FCALL
+		 && func
+		 && func->type == ZEND_USER_FUNCTION
+		 && (func->op_array.fn_flags & ZEND_ACC_IMMUTABLE)) {
 			|	LOAD_ADDR FCARG1a, func
 			|	EXT_CALL zend_jit_init_func_run_time_cache_helper, r0
 			|	mov r1,	EX->run_time_cache
@@ -7786,11 +7797,42 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 			|	// CACHE_PTR(opline->result.num, fbc);
 			|	mov r1,	EX->run_time_cache
 			|	mov aword [r1 + opline->result.num], r0
-			|	test r0, r0
-			|	jnz >3
 			if (zend_jit_trigger == ZEND_JIT_ON_HOT_TRACE) {
+				if (!func || opline->opcode == ZEND_INIT_FCALL) {
+					|	test r0, r0
+					|	jnz >3
+				} else if (func->type == ZEND_USER_FUNCTION
+					 && !(func->common.fn_flags & ZEND_ACC_IMMUTABLE)) {
+					const zend_op *opcodes = func->op_array.opcodes;
+
+					|   .if X64
+					|| 		if (!IS_SIGNED_32BIT(opcodes)) {
+					|  			mov64 r1, ((ptrdiff_t)opcodes)
+					|			cmp aword [r0 + offsetof(zend_op_array, opcodes)], r1
+					||		} else {
+					|  			cmp aword [r0 + offsetof(zend_op_array, opcodes)], opcodes
+					||		}
+					|	.else
+					|		cmp aword [r0 + offsetof(zend_op_array, opcodes)], opcodes
+					|	.endif
+					|	jz >3
+				} else {
+					|   .if X64
+					|| 		if (!IS_SIGNED_32BIT(func)) {
+					|  			mov64 r1, ((ptrdiff_t)func)
+					|			cmp r0, r1
+					||		} else {
+					|  			cmp r0, func
+					||		}
+					|	.else
+					|		cmp r0, func
+					|	.endif
+					|	jz >3
+				}
 				|	jmp &exit_addr
 			} else {
+				|	test r0, r0
+				|	jnz >3
 				|	// SAVE_OPLINE();
 				|	SAVE_VALID_OPLINE opline, r0
 				|	jmp ->undefined_function
