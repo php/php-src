@@ -5,6 +5,10 @@ Bug #76422 ftruncate fails on files > 2GB
 if (PHP_INT_SIZE < 8) {
     die('skip.. only valid for 64-bit');
 }
+if (disk_free_space(__DIR__) <= 4.1 * 1024 * 1024 * 1024 ) {
+    // Add a bit of extra overhead for other processes, temporary files created while running tests, etc.
+    die('skip.. This test requires over 4GB of free disk space on this disk partition');
+}
 ?>
 --FILE--
 <?php
