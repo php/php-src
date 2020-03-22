@@ -71,7 +71,7 @@ PHP_MINFO_FUNCTION(%EXTNAME%)
  */
 static const zend_function_entry %EXTNAME%_functions[] = {
 	PHP_FE(test1,		arginfo_test1)
-	PHP_FE(test2,		arginfo_test2)
+	PHP_FE(%EXTNAME%_test2,		arginfo_test2)
 	PHP_FE_END
 };
 /* }}} */

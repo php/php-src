@@ -331,7 +331,8 @@ function copy_sources() {
     $files = [
             'skeleton.c'		=> $options['ext'] . '.c',
             'skeleton.stub.php'	=> $options['ext'] . '.stub.php',
-            'php_skeleton.h'	=> 'php_' . $options['ext'] . '.h'
+            'php_skeleton.h'	=> 'php_' . $options['ext'] . '.h',
+            'skeleton_arginfo.h' => $options['ext'] . '_arginfo.h'
             ];
 
     foreach ($files as $src_file => $dst_file) {
