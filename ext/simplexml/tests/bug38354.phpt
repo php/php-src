@@ -12,7 +12,7 @@ $xml = simplexml_load_string(
 );
 
 foreach ($xml->xpath("//*") as $element) {
-	var_dump($element->asXML());
+    var_dump($element->asXML());
 }
 
 echo "Done\n";

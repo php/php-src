@@ -74,21 +74,21 @@ function runtest($fileURIs) {
       // create the file to test write
       $h = fopen($fileURI, 'w', true);
       if ($h !== false) {
-	      fwrite($h, $writeData);
-	      fclose($h);
+          fwrite($h, $writeData);
+          fclose($h);
 
-	      $h = fopen($absFile, 'r');
-	      if ($h !== false) {
-	         if (fread($h, 4096) != $writeData) {
-	            echo "contents not correct\n";
-	         }
-	         else {
-	            echo "test passed\n";
-	         }
-	         fclose($h);
-	      }
-	      unlink($absFile);
-	   }
+          $h = fopen($absFile, 'r');
+          if ($h !== false) {
+             if (fread($h, 4096) != $writeData) {
+                echo "contents not correct\n";
+             }
+             else {
+                echo "test passed\n";
+             }
+             fclose($h);
+          }
+          unlink($absFile);
+       }
    }
 }
 

@@ -23,8 +23,8 @@ date_default_timezone_set("Asia/Calcutta");
 
 //array of values to iterate over
 $inputs = array(
-	  'The ISO 8601:1988 week number' => "%V",
-	  'Weekday as decimal' => "%u",
+      'The ISO 8601:1988 week number' => "%V",
+      'Weekday as decimal' => "%u",
 );
 
 // loop through each element of the array for timestamp

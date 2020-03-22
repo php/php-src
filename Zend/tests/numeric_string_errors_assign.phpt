@@ -143,7 +143,7 @@ int(0)
 Notice: A non well formed numeric value encountered in %s on line %d
 
 Notice: A non well formed numeric value encountered in %s on line %d
-float(0.89473684210526)
+float(0.8947368421052632)
 
 Warning: A non-numeric value encountered in %s on line %d
 
@@ -156,7 +156,7 @@ float(NAN)
 Notice: A non well formed numeric value encountered in %s on line %d
 
 Notice: A non well formed numeric value encountered in %s on line %d
-float(3.0910586430935E+39)
+float(3.0910586430935376E+39)
 
 Warning: A non-numeric value encountered in %s on line %d
 

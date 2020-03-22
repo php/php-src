@@ -16,10 +16,10 @@ echo "\n*** Testing Miscellaneous input data ***\n";
 /*  If replace has fewer values than search, then an empty
     string is used for the rest of replacement values */
 var_dump( str_replace(array("a", "a", "b"),
-		      array("q", "q"),
-		      "aaabb", $count
-		     )
-	);
+              array("q", "q"),
+              "aaabb", $count
+             )
+    );
 var_dump($count);
 var_dump( str_replace(array("a", "a", "b"),
                       array("q", "q"),
@@ -200,8 +200,8 @@ array(2) {
 int(1)
 
 -- Testing Resources --
-str_replace() expects parameter 3 to be string or array, resource given
-str_replace() expects parameter 3 to be string or array, resource given
+str_replace(): Argument #3 ($subject) must be of type string|array, resource given
+str_replace(): Argument #3 ($subject) must be of type string|array, resource given
 
 -- Testing a longer and heredoc string --
 string(623) "FOUNDghijklmnopqrstuvwxyz0123456789FOUNDghijklmnopqrstuvwxyz0123456789

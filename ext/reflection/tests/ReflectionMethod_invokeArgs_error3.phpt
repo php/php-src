@@ -15,10 +15,10 @@ class TestClass {
     public static function staticMethod() {
         echo "Called staticMethod()\n";
         try {
-	        var_dump($this);
-		} catch (Throwable $e) {
-			echo "Exception: " . $e->getMessage() . "\n";
-		}
+            var_dump($this);
+        } catch (Throwable $e) {
+            echo "Exception: " . $e->getMessage() . "\n";
+        }
     }
 
     private static function privateMethod() {

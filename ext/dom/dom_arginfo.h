@@ -1,5 +1,20 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMChildNode_remove, 0, 0, IS_VOID, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_DOMChildNode_before, 0, 0, IS_VOID, 0)
+	ZEND_ARG_VARIADIC_INFO(0, nodes)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_DOMChildNode_after arginfo_class_DOMChildNode_before
+
+#define arginfo_class_DOMChildNode_replaceWith arginfo_class_DOMChildNode_before
+
+#define arginfo_class_DOMParentNode_append arginfo_class_DOMChildNode_before
+
+#define arginfo_class_DOMParentNode_prepend arginfo_class_DOMChildNode_before
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMNode_appendChild, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, newChild, DOMNode, 0)
 ZEND_END_ARG_INFO()
@@ -322,10 +337,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DOMImplementation_hasFeature arginfo_class_DOMNode_isSupported
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMImplementation_createDocumentType, 0, 0, 3)
-	ZEND_ARG_INFO(0, qualifiedName)
-	ZEND_ARG_INFO(0, publicId)
-	ZEND_ARG_INFO(0, systemId)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMImplementation_createDocumentType, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, qualifiedName, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, publicId, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, systemId, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMImplementation_createDocument, 0, 0, 0)

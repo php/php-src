@@ -12,6 +12,9 @@ var_dump(defined("PHP_VERSION"));
 var_dump(constant("PHP_VERSION"));
 var_dump(call_user_func("strlen"));
 var_dump(is_string("xxx"));
+var_dump(is_string());
+
+?>
 --EXPECTF--
 bool(false)
 bool(true)
@@ -29,4 +32,7 @@ Warning: call_user_func() has been disabled for security reasons in %sbug69315.p
 NULL
 
 Warning: is_string() has been disabled for security reasons in %sbug69315.php on line %d
+NULL
+
+Warning: is_string() has been disabled for security reasons in %s on line %d
 NULL

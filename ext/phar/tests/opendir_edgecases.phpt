@@ -55,7 +55,7 @@ include $pname . '/foo';
 <?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 <?php rmdir(__DIR__ . '/poo');
 --EXPECTF--
-opendir() expects parameter 1 to be a valid path, array given
+opendir(): Argument #1 ($path) must be a valid path, array given
 .
 ..
 foo

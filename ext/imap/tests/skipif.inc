@@ -10,7 +10,7 @@ $retries = 0; // don't retry connect on failure
 
 $mbox = @imap_open($mailbox, $username, $password, $options, $retries);
 if (!$mbox) {
-	die("skip could not connect to mailbox $mailbox");
+    die("skip could not connect to mailbox $mailbox");
 }
 imap_close($mbox);
 ?>

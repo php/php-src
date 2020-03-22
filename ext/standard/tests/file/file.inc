@@ -309,7 +309,7 @@ function create_files( $file_path,
 
 /*
  Function: function create_links( $file_path,
-		       $filename,
+               $filename,
                        $link_count = 1,
                        $link_type = "soft",
                        $link_size = 1024,

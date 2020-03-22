@@ -29,13 +29,13 @@ $inputs = array('SJIS' => $sjis_string,
                 'EUC_JP' => $euc_jp_string);
 
 foreach ($inputs as $lang => $input) {
-	echo "\nLanguage: $lang\n";
-	echo "-- Base 64: --\n";
-	mb_internal_encoding($lang);
-	$outEncoding = $lang;
-	var_dump(mb_encode_mimeheader($input, $outEncoding, 'B'));
-	echo "-- Quoted-Printable --\n";
-	var_dump(mb_encode_mimeheader($input, $outEncoding, 'Q'));
+    echo "\nLanguage: $lang\n";
+    echo "-- Base 64: --\n";
+    mb_internal_encoding($lang);
+    $outEncoding = $lang;
+    var_dump(mb_encode_mimeheader($input, $outEncoding, 'B'));
+    echo "-- Quoted-Printable --\n";
+    var_dump(mb_encode_mimeheader($input, $outEncoding, 'Q'));
 }
 
 echo "Done";

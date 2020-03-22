@@ -11,10 +11,10 @@ $xml = <<<HERE
 HERE;
 
 function dump($elems) {
-	foreach ($elems as $elem) {
-		var_dump($elem->nodeName);
-		dump($elem->childNodes);
-	}
+    foreach ($elems as $elem) {
+        var_dump($elem->nodeName);
+        dump($elem->childNodes);
+    }
 }
 
 $dom = new DOMDocument();

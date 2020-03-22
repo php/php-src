@@ -3,8 +3,8 @@ ReflectionClass::__toString() - array constants
 --FILE--
 <?php
 Class A {
-	const A = 8;
-	const B = ["a", "b"];
+    const A = 8;
+    const B = ["a", "b"];
 }
 echo new ReflectionClass("A"), "\n";
 ?>

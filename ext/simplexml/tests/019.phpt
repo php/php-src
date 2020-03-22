@@ -34,29 +34,29 @@ EOF
 );
 
 foreach($sxe->children() as $name => $data) {
-	var_dump($name);
-	var_dump(trim($data));
+    var_dump($name);
+    var_dump(trim($data));
 }
 
 echo "===CLONE===\n";
 
 foreach(clone $sxe->children() as $name => $data) {
-	var_dump($name);
-	var_dump(trim($data));
+    var_dump($name);
+    var_dump(trim($data));
 }
 
 echo "===ELEMENT===\n";
 
 foreach($sxe->elem11->children() as $name => $data) {
-	var_dump($name);
-	var_dump(trim($data));
+    var_dump($name);
+    var_dump(trim($data));
 }
 
 echo "===COMMENT===\n";
 
 foreach($sxe->elem1->children() as $name => $data) {
-	var_dump($name);
-	var_dump(trim($data));
+    var_dump($name);
+    var_dump(trim($data));
 }
 
 ?>

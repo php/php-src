@@ -26,8 +26,8 @@ $rbbi = new IntlRuleBasedBreakIterator($rules);
 $rbbi->setText('sdfkjsdf88á.... ,;');
 
 do {
-	echo "pos        : {$rbbi->current()}\n",
-		 "rule status: {$rbbi->getRuleStatus()}\n";
+    echo "pos        : {$rbbi->current()}\n",
+         "rule status: {$rbbi->getRuleStatus()}\n";
 } while ($rbbi->next() != IntlBreakIterator::DONE);
 
 ?>

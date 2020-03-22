@@ -4,7 +4,7 @@ proc_open() with invalid pipes
 <?php
 
 for ($i = 3; $i<= 5; $i++) {
-	$spec[$i] = array('pipe', 'w');
+    $spec[$i] = array('pipe', 'w');
 }
 
 $php = getenv("TEST_PHP_EXECUTABLE");

@@ -30,7 +30,7 @@ if (is_resource($broker)) {
         }
 
     } else {
-	echo("broker request dict failed\n");
+    echo("broker request dict failed\n");
 
     }
 

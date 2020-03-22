@@ -13,7 +13,7 @@ print_r($ar);
 
 foreach($ar as $v)
 {
-	var_dump($v);
+    var_dump($v);
 }
 
 ?>

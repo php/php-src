@@ -32,10 +32,10 @@ $resource_types = array (
 );
 
 $char_formats = array( "%c",
-		       "%hc", "%lc", "%Lc",
-		       " %c", "%c ", "% c",
-		       "\t%c", "\n%c", "%4c",
-		       "%30c", "%[a-zA-Z@#$&0-9]", "%*c");
+               "%hc", "%lc", "%Lc",
+               " %c", "%c ", "% c",
+               "\t%c", "\n%c", "%4c",
+               "%30c", "%[a-zA-Z@#$&0-9]", "%*c");
 
 $counter = 1;
 

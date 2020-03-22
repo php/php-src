@@ -4,10 +4,10 @@ Bug #70083 (Use after free with assign by ref to overloaded objects)
 <?php
 
 class foo {
-	private $var;
-	function __get($e) {
-		return $this;
-	}
+    private $var;
+    function __get($e) {
+        return $this;
+    }
 }
 
 function &noref() { $foo = 1; return $foo; }

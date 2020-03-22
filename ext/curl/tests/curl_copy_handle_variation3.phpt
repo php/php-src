@@ -28,8 +28,8 @@ curl_close($ch2);
 ?>
 --EXPECTF--
 bool(true)
-string(%d) "АБВ.txt|application/octet-stream"
-string(%d) "АБВ.txt|application/octet-stream"
+string(%d) "АБВ.txt|application/octet-stream|5"
+string(%d) "АБВ.txt|application/octet-stream|5"
 --CLEAN--
 <?php
 @unlink(__DIR__ . '/АБВ.txt');

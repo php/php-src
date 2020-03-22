@@ -4,7 +4,7 @@ __clone cannot declare a return type
 <?php
 
 class Foo {
-	function __clone() : Foo {}
+    function __clone() : Foo {}
 }
 --EXPECTF--
 Fatal error: %s::%s() cannot declare a return type in %s on line %d

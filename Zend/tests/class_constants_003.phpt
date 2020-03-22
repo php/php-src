@@ -6,7 +6,7 @@ class constants as default function arguments and dynamically loaded classes
 $class_data = <<<DATA
 <?php
 class test {
-	const val = 1;
+    const val = 1;
 }
 ?>
 DATA;
@@ -15,7 +15,7 @@ $filename = __DIR__."/cc003.dat";
 file_put_contents($filename, $class_data);
 
 function foo($v = test::val) {
-	var_dump($v);
+    var_dump($v);
 }
 
 include $filename;

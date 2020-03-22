@@ -14,9 +14,9 @@ if (!function_exists('zend_create_unterminated_string')) die('skip ext/test requ
 include_once(__DIR__ . '/urls.inc');
 
 foreach ($urls as $url) {
-	echo "\n--> $url: ";
-	$str = zend_create_unterminated_string($url);
-	var_dump(parse_url($str));
+    echo "\n--> $url: ";
+    $str = zend_create_unterminated_string($url);
+    var_dump(parse_url($str));
     zend_terminate_string($str);
 }
 

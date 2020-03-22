@@ -32,16 +32,16 @@ file_put_contents($file, '<?php
 ob_start();
 
 function find_cookie_header() {
-	$headers = headers_list();
-	$target  = "Set-Cookie: PHPSESSID=";
-	foreach ($headers as $h) {
-		if (strstr($h, $target) !== FALSE) {
-			echo $h."\n";
-			return TRUE;
-		}
-	}
-	var_dump($headers);
-	return FALSE;
+    $headers = headers_list();
+    $target  = "Set-Cookie: PHPSESSID=";
+    foreach ($headers as $h) {
+        if (strstr($h, $target) !== FALSE) {
+            echo $h."\n";
+            return TRUE;
+        }
+    }
+    var_dump($headers);
+    return FALSE;
 }
 
 var_dump(session_start());

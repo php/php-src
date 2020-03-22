@@ -49,11 +49,11 @@ $valid_ints = array(
 );
 // various hexa formats
 $hexa_formats = array(  "%x",
-			"%xx", "%lx", "%Lx",
-			" %x", "%x ", "% x",
-		        "\t%x", "\n%x", "%4x",
-		        "%30x", "%[0-9A-Fa-f]", "%*x"
-		);
+            "%xx", "%lx", "%Lx",
+            " %x", "%x ", "% x",
+                "\t%x", "\n%x", "%4x",
+                "%30x", "%[0-9A-Fa-f]", "%*x"
+        );
 
 $counter = 1;
 

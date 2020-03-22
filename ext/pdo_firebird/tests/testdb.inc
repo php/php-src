@@ -1,7 +1,7 @@
 <?php
 
 // Test defaults, assumes the following:
-// 
+//
 // Username: 	SYSDBA
 // Password:	phpfi
 // Database:	<nothing>

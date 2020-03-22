@@ -33,6 +33,6 @@ var_dump( fgets($fp, $len) ); // return length - 1 always, expect false
 --EXPECT--
 *** Testing error conditions ***
 -- Testing fgets() with invalid length arguments --
-Length parameter must be greater than 0
-Length parameter must be greater than 0
+fgets(): Argument #2 ($length) must be greater than 0
+fgets(): Argument #2 ($length) must be greater than 0
 bool(false)

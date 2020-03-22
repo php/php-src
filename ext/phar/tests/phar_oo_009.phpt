@@ -19,7 +19,7 @@ $f = $phar['a.csv'];
 $f->setFlags(SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE);
 foreach($f as $k => $v)
 {
-	echo "$k=>$v\n";
+    echo "$k=>$v\n";
 }
 
 ?>
@@ -29,7 +29,7 @@ foreach($f as $k => $v)
 $f->setFlags(SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE | SplFileObject::READ_CSV);
 foreach($f as $k => $v)
 {
-	echo "$k=>" . join('|', $v) . "\n";
+    echo "$k=>" . join('|', $v) . "\n";
 }
 
 ?>

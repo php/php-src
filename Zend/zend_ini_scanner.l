@@ -141,13 +141,14 @@ ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 	ZVAL_NEW_STR(retval, zend_string_init(str, len, ZEND_SYSTEM_INI))
 
 
-#define RETURN_TOKEN(type, str, len) {                       \
-	if (SCNG(scanner_mode) == ZEND_INI_SCANNER_TYPED) {      \
-		zend_ini_copy_typed_value(ini_lval, type, str, len); \
-	} else {                                                 \
-		zend_ini_copy_value(ini_lval, str, len);             \
-	}                                                        \
-	return type;                                             \
+#define RETURN_TOKEN(type, str, len) {                             \
+	if (SCNG(scanner_mode) == ZEND_INI_SCANNER_TYPED &&            \
+		(YYSTATE == STATE(ST_VALUE) || YYSTATE == STATE(ST_RAW))) {\
+		zend_ini_copy_typed_value(ini_lval, type, str, len);       \
+	} else {                                                       \
+		zend_ini_copy_value(ini_lval, str, len);                   \
+	}                                                              \
+	return type;                                                   \
 }
 
 static inline int convert_to_number(zval *retval, const char *str, const int str_len)

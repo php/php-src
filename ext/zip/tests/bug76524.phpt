@@ -9,7 +9,7 @@ if(!extension_loaded('zip')) die('skip');
 
 $i = 0;
 do {
-	$filename = __DIR__ . "/nonexistent" . ($i++) . ".zip";
+    $filename = __DIR__ . "/nonexistent" . ($i++) . ".zip";
 } while (file_exists($filename));
 
 $zip = new ZipArchive();

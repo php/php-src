@@ -13,7 +13,7 @@ steps:
                               locales \
                               language-pack-de \
                               libglib2.0-dev:i386 \
-                              openssl:i386 \
+                              libssl-dev:i386 \
                               zlib1g-dev:i386 \
                               libxml2-dev:i386 \
                               libgmp-dev:i386 \
@@ -40,6 +40,7 @@ steps:
                               libreadline-dev:i386 \
                               libffi-dev:i386 \
                               libfreetype6-dev:i386 \
+                              libsodium-dev:i386 \
                               postgresql \
                               postgresql-contrib \
                               ${{ parameters.packages }}

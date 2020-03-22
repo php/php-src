@@ -37,7 +37,7 @@ function test(string $type, array $values) {
         } catch (TypeError $e) {
             $msg = $e->getMessage();
             $msg = strstr($msg, ', called in', true);
-            $msg = str_replace('1 passed to {closure}()', '...', $msg);
+            $msg = str_replace('{closure}(): Argument #1 ($arg)', 'Argument ...', $msg);
             echo $msg;
         }
         echo "\n";

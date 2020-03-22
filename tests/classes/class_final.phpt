@@ -4,9 +4,9 @@ ZE2 A final class cannot be inherited
 <?php
 
 final class base {
-	function show() {
-		echo "base\n";
-	}
+    function show() {
+        echo "base\n";
+    }
 }
 
 $t = new base();

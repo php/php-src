@@ -6,30 +6,30 @@ opcache.optimization_level=0
 <?php
 
 try {
-	$a = 1;
-	$a %= 0;
+    $a = 1;
+    $a %= 0;
 } catch (Error $e) { var_dump($a); }
 
 try {
-	$a = 1;
-	$a >>= -1;
+    $a = 1;
+    $a >>= -1;
 } catch (Error $e) { var_dump($a); }
 
 try {
-	$a = 1;
-	$a <<= -1;
+    $a = 1;
+    $a <<= -1;
 } catch (Error $e) { var_dump($a); }
 
 set_error_handler(function($type, $msg) { throw new Exception($msg); });
 
 try {
-	$a = [];
-	$a .= "foo";
+    $a = [];
+    $a .= "foo";
 } catch (Throwable $e) { var_dump($a); }
 
 try {
-	$a = "foo";
-	$a .= [];
+    $a = "foo";
+    $a .= [];
 } catch (Throwable $e) { var_dump($a); }
 
 $x = new stdClass;

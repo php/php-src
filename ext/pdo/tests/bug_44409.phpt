@@ -19,20 +19,20 @@ $db->exec("INSERT INTO test (dat) VALUES ('Data from DB')");
 
 class bug44409 implements Serializable
 {
-	public function __construct()
-	{
-		printf("Method called: %s()\n", __METHOD__);
-	}
+    public function __construct()
+    {
+        printf("Method called: %s()\n", __METHOD__);
+    }
 
-	public function serialize()
-	{
-		return "any data from serizalize()";
-	}
+    public function serialize()
+    {
+        return "any data from serizalize()";
+    }
 
-	public function unserialize($dat)
-	{
-		printf("Method called: %s(%s)\n", __METHOD__, var_export($dat, true));
-	}
+    public function unserialize($dat)
+    {
+        printf("Method called: %s(%s)\n", __METHOD__, var_export($dat, true));
+    }
 }
 
 $stmt = $db->query("SELECT * FROM test");

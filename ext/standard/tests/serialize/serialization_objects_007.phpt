@@ -14,13 +14,13 @@ Ensure __autoload is called twice if unserialize_callback_func is defined.
  */
 
 spl_autoload_register(function ($name) {
-	echo "in autoload($name)\n";
+    echo "in autoload($name)\n";
 });
 
 ini_set('unserialize_callback_func','check');
 
 function check($name) {
-	echo "in check($name)\n";
+    echo "in check($name)\n";
 }
 
 $o = unserialize('O:3:"FOO":0:{}');

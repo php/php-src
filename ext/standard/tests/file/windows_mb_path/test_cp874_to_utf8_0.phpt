@@ -19,27 +19,27 @@ skip_if_no_required_exts();
 include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $names = array( /* cp874 */
-	"à»ç¹á¿éÁ·Õè·´ÊÍº1",
-	"à»ç¹á¿éÁ·Õè·´ÊÍº2",
-	"à»ç¹á¿éÁ·Õè·´ÊÍº3",
-	"à»ç¹á¿éÁ·Õè·´ÊÍº4",
-	"à»ç¹á¿éÁ·Õè·´ÊÍº5",
-	"à»ç¹á¿éÁ·Õè·´ÊÍº6",
-	"à»ç¹á¿éÁ·Õè·´ÊÍº7",
-	"à»ç¹á¿éÁ·Õè·´ÊÍº8",
-	"à»ç¹á¿éÁ·Õè·´ÊÍº8 10",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº1",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº2",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº3",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº4",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº5",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº6",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº7",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº8",
+    "à»ç¹á¿éÁ·Õè·´ÊÍº8 10",
 );
 
 $i = 0;
 foreach ($names as $name) {
-	$pathw = __DIR__ . DIRECTORY_SEPARATOR . iconv('cp874', 'utf-8', $name) . ".txt";
+    $pathw = __DIR__ . DIRECTORY_SEPARATOR . iconv('cp874', 'utf-8', $name) . ".txt";
 
-	file_put_contents($pathw, "hello" . $i++);
+    file_put_contents($pathw, "hello" . $i++);
 
-	get_basename_with_cp($pathw, 65001);
-	var_dump(file_get_contents($pathw));
+    get_basename_with_cp($pathw, 65001);
+    var_dump(file_get_contents($pathw));
 
-	unlink($pathw);
+    unlink($pathw);
 }
 
 ?>

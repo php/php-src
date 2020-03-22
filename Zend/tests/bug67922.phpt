@@ -4,9 +4,9 @@ Bug #67922: Member function not found when dereferencing in write-context
 <?php
 
 class C {
-	public function test() {
-		return new stdClass;
-	}
+    public function test() {
+        return new stdClass;
+    }
 }
 
 $b = new stdClass;

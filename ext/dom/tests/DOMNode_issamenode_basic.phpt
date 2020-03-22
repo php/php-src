@@ -18,16 +18,16 @@ if(!$dom) {
 
 $node = $dom->documentElement;
 if($node->isSameNode($node))
-	echo "EXPECTING SAME NODE, PASSED\n" ;
+    echo "EXPECTING SAME NODE, PASSED\n" ;
 else
-	echo "EXPECTING SAME NODE, FAILED\n" ;
+    echo "EXPECTING SAME NODE, FAILED\n" ;
 
 $nodelist=$dom->getElementsByTagName('tbody') ;
 
 if($nodelist->item(0)->isSameNode($node))
-	echo "EXPECTING NOT SAME NODE, FAILED\n" ;
+    echo "EXPECTING NOT SAME NODE, FAILED\n" ;
 else
-	echo "EXPECTING NOT SAME NODE, PASSED\n" ;
+    echo "EXPECTING NOT SAME NODE, PASSED\n" ;
 
 ?>
 --EXPECT--

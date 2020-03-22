@@ -4,19 +4,19 @@ ZE2 A private method cannot be called in a derived class
 <?php
 
 class pass {
-	private static function show() {
-		echo "Call show()\n";
-	}
+    private static function show() {
+        echo "Call show()\n";
+    }
 
-	public static function do_show() {
-		pass::show();
-	}
+    public static function do_show() {
+        pass::show();
+    }
 }
 
 class fail extends pass {
-	static function do_show() {
-		fail::show();
-	}
+    static function do_show() {
+        fail::show();
+    }
 }
 
 pass::do_show();

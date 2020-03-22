@@ -3,8 +3,8 @@ Test typed properties type applies to all props in group
 --FILE--
 <?php
 class Foo {
-	public int $bar,
-				$qux;
+    public int $bar,
+                $qux;
 }
 
 $reflector = new ReflectionClass(Foo::class);

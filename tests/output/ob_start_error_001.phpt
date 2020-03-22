@@ -8,7 +8,7 @@ Test wrong number of arguments and wrong arg types for ob_start()
 */
 
 function justPrint($str) {
-	return $str;
+    return $str;
 }
 
 $arg_1 = "justPrint";

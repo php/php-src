@@ -4,9 +4,9 @@ Bug #70215 (Segfault when invoke is static)
 <?php
 
 class A {
-	public static function __invoke() {
-		echo __CLASS__;
-	}
+    public static function __invoke() {
+        echo __CLASS__;
+    }
 }
 
 class B extends A { }

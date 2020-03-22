@@ -36,19 +36,19 @@ class myIterator implements Iterator
     }
 }
 try {
-	chdir(__DIR__);
-	$phar = new Phar(__DIR__ . '/buildfromiterator4.phar');
-	var_dump($phar->buildFromIterator(new myIterator(
-		array(
-			'a' => basename(__FILE__, 'php') . 'phpt',
-			// demonstrate that none of these are added
-			'.phar/stub.php' => basename(__FILE__, 'php') . 'phpt',
-			'.phar/alias.txt' => basename(__FILE__, 'php') . 'phpt',
-			'.phar/oops' => basename(__FILE__, 'php') . 'phpt',
-		))));
+    chdir(__DIR__);
+    $phar = new Phar(__DIR__ . '/buildfromiterator4.phar');
+    var_dump($phar->buildFromIterator(new myIterator(
+        array(
+            'a' => basename(__FILE__, 'php') . 'phpt',
+            // demonstrate that none of these are added
+            '.phar/stub.php' => basename(__FILE__, 'php') . 'phpt',
+            '.phar/alias.txt' => basename(__FILE__, 'php') . 'phpt',
+            '.phar/oops' => basename(__FILE__, 'php') . 'phpt',
+        ))));
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
 ?>
 --CLEAN--

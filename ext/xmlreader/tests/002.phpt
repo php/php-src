@@ -14,13 +14,13 @@ if ($reader->open('')) exit();
 
 $reader = new XMLReader();
 if (!$reader->open($filename)) {
-	$reader->close();
-	exit();
+    $reader->close();
+    exit();
 }
 
 // Only go through
 while ($reader->read()) {
-	echo $reader->name."\n";
+    echo $reader->name."\n";
 }
 $reader->close();
 unlink($filename);

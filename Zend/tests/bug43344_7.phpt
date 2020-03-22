@@ -4,7 +4,7 @@ Bug #43344.7 (Wrong error message for undefined namespace constant)
 <?php
 namespace Foo;
 function f($a=namespace\bar) {
-	return $a;
+    return $a;
 }
 echo f()."\n";
 ?>

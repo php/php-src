@@ -23,9 +23,9 @@ mkdir($dir);
 
 file_put_contents($test_file,
 "<?php
-	var_dump(__DIR__);
-	var_dump(__FILE__);
-	var_dump(__DIR__ === __DIR__);");
+    var_dump(__DIR__);
+    var_dump(__FILE__);
+    var_dump(__DIR__ === __DIR__);");
 
 $php = getenv('TEST_PHP_EXECUTABLE');
 

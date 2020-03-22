@@ -6,11 +6,11 @@ Bug #64960 (Segfault in gc_zval_possible_root)
 ob_end_flush();
 
 class ExceptionHandler {
-	public function __invoke (Exception $e)
-	{
-		// this triggers the custom error handler
-		ob_end_clean();
-	}
+    public function __invoke (Exception $e)
+    {
+        // this triggers the custom error handler
+        ob_end_clean();
+    }
 }
 
 // this must be a class, closure does not trigger segfault
@@ -19,10 +19,10 @@ set_exception_handler(new ExceptionHandler());
 // exception must be thrown from error handler.
 set_error_handler(function()
 {
-	$e = new Exception;
-	$e->_trace = debug_backtrace();
+    $e = new Exception;
+    $e->_trace = debug_backtrace();
 
-	throw $e;
+    throw $e;
 });
 
 // trigger error handler

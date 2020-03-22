@@ -70,9 +70,9 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of base_convert()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(base_convert($input, 10, 8));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump(base_convert($input, 10, 8));
+    $iterator++;
 };
 fclose($fp);
 ?>

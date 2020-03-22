@@ -5,17 +5,17 @@ Bug #70436: Use After Free Vulnerability in unserialize()
 
 class obj implements Serializable
 {
-	var $data;
+    var $data;
 
-	function serialize()
-	{
-		return serialize($this->data);
-	}
+    function serialize()
+    {
+        return serialize($this->data);
+    }
 
-	function unserialize($data)
-	{
-		$this->data = unserialize($data);
-	}
+    function unserialize($data)
+    {
+        $this->data = unserialize($data);
+    }
 }
 
 $fakezval = ptr2str(1122334455);
@@ -34,14 +34,14 @@ var_dump($data);
 
 function ptr2str($ptr)
 {
-	$out = '';
+    $out = '';
 
-	for ($i = 0; $i < 8; $i++) {
-		$out .= chr($ptr & 0xff);
-		$ptr >>= 8;
-	}
+    for ($i = 0; $i < 8; $i++) {
+        $out .= chr($ptr & 0xff);
+        $ptr >>= 8;
+    }
 
-	return $out;
+    return $out;
 }
 ?>
 DONE

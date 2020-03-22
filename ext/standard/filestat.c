@@ -353,7 +353,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 				option = PHP_STREAM_META_GROUP_NAME;
 				value = Z_STRVAL_P(group);
 			} else {
-				zend_type_error("Parameter 2 should be string or int, %s given", zend_zval_type_name(group));
+				zend_argument_type_error(2, "must be of type string|int, %s given", zend_zval_type_name(group));
 				RETURN_THROWS();
 			}
 			if(wrapper->wops->stream_metadata(wrapper, filename, option, value, NULL)) {
@@ -382,7 +382,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 			RETURN_FALSE;
 		}
 	} else {
-		zend_type_error("Parameter 2 should be string or int, %s given", zend_zval_type_name(group));
+		zend_argument_type_error(2, "must be of type string|int, %s given", zend_zval_type_name(group));
 		RETURN_THROWS();
 	}
 
@@ -1074,12 +1074,12 @@ FileFunction(PHP_FN(file_exists), FS_EXISTS)
 
 /* {{{ proto array lstat(string filename)
    Give information about a file or symbolic link */
-FileFunction(php_if_lstat, FS_LSTAT)
+FileFunction(PHP_FN(lstat), FS_LSTAT)
 /* }}} */
 
 /* {{{ proto array stat(string filename)
    Give information about a file */
-FileFunction(php_if_stat, FS_STAT)
+FileFunction(PHP_FN(stat), FS_STAT)
 /* }}} */
 
 /* {{{ proto bool realpath_cache_size()

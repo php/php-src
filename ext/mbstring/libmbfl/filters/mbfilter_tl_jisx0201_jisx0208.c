@@ -297,5 +297,6 @@ const struct mbfl_convert_vtbl vtbl_tl_jisx0201_jisx0208 = {
 	mbfl_filt_tl_jisx0201_jisx0208_init,
 	mbfl_filt_tl_jisx0201_jisx0208_cleanup,
 	mbfl_filt_tl_jisx0201_jisx0208,
-	mbfl_filt_tl_jisx0201_jisx0208_flush
+	mbfl_filt_tl_jisx0201_jisx0208_flush,
+	NULL,
 };

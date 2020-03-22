@@ -26,6 +26,8 @@
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
 
+#include "mysqli_arginfo.h"
+
 /* Define these in the PHP7 tree to make merging easy process */
 #define ZSTR_DUPLICATE (1<<0)
 #define ZSTR_AUTOFREE  (1<<1)
@@ -175,16 +177,14 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql)
 PHP_METHOD(mysqli_warning, next)
 {
 	MYSQLI_WARNING 	*w;
-	zval  			*mysqli_warning;
-	mysqli_object *obj = Z_MYSQLI_P(getThis());
+	mysqli_object *obj = Z_MYSQLI_P(ZEND_THIS);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	if (obj->ptr) {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
-										 &mysqli_warning, mysqli_warning_class_entry) == FAILURE) {
-			RETURN_THROWS();
-		}
-
-		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, mysqli_warning, "mysqli_warning", MYSQLI_STATUS_VALID);
+		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, ZEND_THIS, "mysqli_warning", MYSQLI_STATUS_VALID);
 
 		if (w && w->next) {
 			w = w->next;
@@ -320,8 +320,8 @@ PHP_METHOD(mysqli_warning, __construct)
 
 /* {{{ mysqli_warning_methods */
 const zend_function_entry mysqli_warning_methods[] = {
-	PHP_ME(mysqli_warning, __construct,		NULL, ZEND_ACC_PROTECTED)
-	PHP_ME(mysqli_warning, next, 			NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(mysqli_warning, __construct,	arginfo_class_mysqli_warning___construct, ZEND_ACC_PROTECTED)
+	PHP_ME(mysqli_warning, next, arginfo_class_mysqli_warning_next, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */

@@ -20,21 +20,21 @@ $p = new Phar($fname);
 
 try
 {
-	$p['a'] = 'hi';
-	$p->startBuffering();
-	$p->copy('a', 'b');
-	echo file_get_contents($p['b']->getPathName());
-	$p['a']->compress(Phar::GZ);
-	$p['b']->setMetadata('a');
-	$p->copy('b', 'c');
-	$p->stopBuffering();
-	echo file_get_contents($p['c']->getPathName());
-	copy($fname, $fname2);
-	$p->copy('a', $ename);
+    $p['a'] = 'hi';
+    $p->startBuffering();
+    $p->copy('a', 'b');
+    echo file_get_contents($p['b']->getPathName());
+    $p['a']->compress(Phar::GZ);
+    $p['b']->setMetadata('a');
+    $p->copy('b', 'c');
+    $p->stopBuffering();
+    echo file_get_contents($p['c']->getPathName());
+    copy($fname, $fname2);
+    $p->copy('a', $ename);
 }
 catch(Exception $e)
 {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ini_set('phar.readonly',1);
 $p2 = new Phar($fname2);

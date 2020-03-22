@@ -10,8 +10,8 @@ opcache.file_update_protection=0
 --FILE--
 <?php
 function foo($v) {
-	global $a;
-	return $a[$v];
+    global $a;
+    return $a[$v];
 }
 $a = array(PHP_VERSION => 1);
 var_dump(foo(PHP_VERSION));

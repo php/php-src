@@ -3,13 +3,13 @@ $this in catch
 --FILE--
 <?php
 class C {
-	function foo() {
-		try {
-			throw new Exception();
-		} catch (Exception $this) {
-		}
-		var_dump($this);
-	}
+    function foo() {
+        try {
+            throw new Exception();
+        } catch (Exception $this) {
+        }
+        var_dump($this);
+    }
 }
 $obj = new C;
 $obj->foo();

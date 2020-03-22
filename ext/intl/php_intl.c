@@ -31,6 +31,7 @@
 #include "collator/collator_locale.h"
 #include "collator/collator_create.h"
 #include "collator/collator_error.h"
+#include "collator/collator_arginfo.h"
 
 #include "converter/converter.h"
 
@@ -40,6 +41,7 @@
 #include "formatter/formatter_format.h"
 #include "formatter/formatter_main.h"
 #include "formatter/formatter_parse.h"
+#include "formatter/formatter_arginfo.h"
 
 #include "grapheme/grapheme.h"
 #include "grapheme/grapheme_arginfo.h"
@@ -68,6 +70,7 @@
 #include "dateformat/dateformat_format_object.h"
 #include "dateformat/dateformat_parse.h"
 #include "dateformat/dateformat_data.h"
+#include "dateformat/dateformat_arginfo.h"
 
 #include "resourcebundle/resourcebundle_class.h"
 #include "resourcebundle/resourcebundle_arginfo.h"
@@ -75,6 +78,7 @@
 #include "transliterator/transliterator.h"
 #include "transliterator/transliterator_class.h"
 #include "transliterator/transliterator_methods.h"
+#include "transliterator/transliterator_arginfo.h"
 
 #include "timezone/timezone_class.h"
 #include "timezone/timezone_methods.h"
@@ -83,6 +87,7 @@
 #include "calendar/calendar_class.h"
 #include "calendar/calendar_methods.h"
 #include "calendar/gregoriancalendar_methods.h"
+#include "calendar/calendar_arginfo.h"
 
 #include "breakiterator/breakiterator_class.h"
 #include "breakiterator/breakiterator_iterators.h"
@@ -97,8 +102,10 @@
 # include "spoofchecker/spoofchecker_main.h"
 
 #include "msgformat/msgformat.h"
+#include "msgformat/msgformat_arginfo.h"
 #include "common/common_error.h"
 #include "common/common_enum.h"
+#include "common/common_arginfo.h"
 
 #include <unicode/uloc.h>
 #include <unicode/uclean.h>
@@ -126,351 +133,6 @@ const char *intl_locale_get_default( void )
 	return INTL_G(default_locale);
 }
 
-/* {{{ Arguments info */
-ZEND_BEGIN_ARG_INFO_EX(collator_static_0_args, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(collator_static_1_arg, 0, 0, 1)
-	ZEND_ARG_INFO(0, arg1)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(collator_0_args, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(collator_1_arg, 0, 0, 2)
-	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
-	ZEND_ARG_INFO(0, arg1)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(collator_2_args, 0, 0, 3)
-	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
-	ZEND_ARG_INFO(0, arg1)
-	ZEND_ARG_INFO(0, arg2)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(collator_sort_args, 0, 0, 2)
-	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
-	ZEND_ARG_ARRAY_INFO(1, arr, 0)
-	ZEND_ARG_INFO(0, sort_flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(collator_sort_with_sort_keys_args, 0, 0, 2)
-	ZEND_ARG_OBJ_INFO(0, coll, Collator, 0)
-	ZEND_ARG_ARRAY_INFO(1, arr, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_arginfo, 0, 0, 2)
-	ZEND_ARG_INFO(0, formatter)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(0, type)
-	ZEND_ARG_INFO(1, position)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_currency_arginfo, 0, 0, 3)
-	ZEND_ARG_INFO(0, formatter)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(1, currency)
-	ZEND_ARG_INFO(1, position)
-ZEND_END_ARG_INFO()
-
-#define intl_0_args collator_static_0_args
-#define intl_1_arg collator_static_1_arg
-
-ZEND_BEGIN_ARG_INFO_EX(datefmt_parse_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, formatter)
-	ZEND_ARG_INFO(0, string)
-	ZEND_ARG_INFO(1, position)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_create, 0, 0, 2)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, style)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_get_error_code, 0, 0, 1)
-	ZEND_ARG_INFO(0, nf)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_format, 0, 0, 2)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, num)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_format_currency, 0, 0, 3)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, num)
-	ZEND_ARG_INFO(0, currency)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_get_attribute, 0, 0, 2)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, attr)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_set_attribute, 0, 0, 3)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, attr)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_set_symbol, 0, 0, 3)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, attr)
-	ZEND_ARG_INFO(0, symbol)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_set_pattern, 0, 0, 2)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_numfmt_get_locale, 0, 0, 1)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, type)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_create, 0, 0, 2)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_get_error_code, 0, 0, 1)
-	ZEND_ARG_INFO(0, nf)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_get_error_message, 0, 0, 1)
-	ZEND_ARG_INFO(0, coll)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_format, 0, 0, 2)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, args)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_format_message, 0, 0, 3)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, args)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_parse, 0, 0, 2)
-	ZEND_ARG_INFO(0, nf)
-	ZEND_ARG_INFO(0, source)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_parse_message, 0, 0, 3)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, pattern)
-	ZEND_ARG_INFO(0, source)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_set_pattern, 0, 0, 2)
-	ZEND_ARG_INFO(0, mf)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msgfmt_get_locale, 0, 0, 1)
-	ZEND_ARG_INFO(0, mf)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_set_pattern, 0, 0, 2)
-	ZEND_ARG_INFO(0, mf)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_set_timezone, 0, 0, 2)
-	ZEND_ARG_INFO(0, mf)
-	ZEND_ARG_INFO(0, timezone)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_set_calendar, 0, 0, 2)
-	ZEND_ARG_INFO(0, mf)
-	ZEND_ARG_INFO(0, calendar)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_format, 0, 0, 0)
-	ZEND_ARG_INFO(0, args)
-	ZEND_ARG_INFO(0, array)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_format_object, 0, 0, 1)
-	ZEND_ARG_INFO(0, object)
-	ZEND_ARG_INFO(0, format)
-	ZEND_ARG_INFO(0, locale)
-ZEND_END_ARG_INFO()
-
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_datefmt_create, 0, 0, 3)
-	ZEND_ARG_INFO(0, locale)
-	ZEND_ARG_INFO(0, date_type)
-	ZEND_ARG_INFO(0, time_type)
-	ZEND_ARG_INFO(0, timezone_str)
-	ZEND_ARG_INFO(0, calendar)
-	ZEND_ARG_INFO(0, pattern)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_void, 0, 0, 0 )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_create, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, id )
-	ZEND_ARG_INFO( 0, direction )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_create_from_rules, 0, 0, 1 )
-	ZEND_ARG_INFO( 0, rules )
-	ZEND_ARG_INFO( 0, direction )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_create_inverse, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, orig_trans, Transliterator, 0 )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_transliterate, 0, 0, 2 )
-	ZEND_ARG_INFO( 0, trans )
-	ZEND_ARG_INFO( 0, subject )
-	ZEND_ARG_INFO( 0, start )
-	ZEND_ARG_INFO( 0, end )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( arginfo_transliterator_error, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, trans, Transliterator, 0 )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_create_instance, 0, 0, 0 )
-	ZEND_ARG_INFO( 0, timeZone )
-	ZEND_ARG_INFO( 0, locale )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_only_cal, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_void, 0, 0, 0 )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_field, 0, 0, 2 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
-	ZEND_ARG_INFO( 0, field )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_dow, 0, 0, 2 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
-	ZEND_ARG_INFO( 0, dayOfWeek )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_other_cal, 0, 0, 2 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
-	ZEND_ARG_OBJ_INFO( 0, otherCalendar, IntlCalendar, 0 )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_date, 0, 0, 2 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
-	ZEND_ARG_INFO( 0, date )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_date_optional, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
-	ZEND_ARG_INFO( 0, date )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_get_keyword_values_for_locale, 0, 0, 3)
-	ZEND_ARG_INFO( 0, key )
-	ZEND_ARG_INFO( 0, locale )
-	ZEND_ARG_INFO( 0, commonlyUsed )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_add, 0, 0, 3 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
-	ZEND_ARG_INFO( 0, field )
-	ZEND_ARG_INFO( 0, amount )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_set_time_zone, 0, 0, 2 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
-	ZEND_ARG_INFO( 0, timeZone )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_set, 0, 0, 3 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
-	ZEND_ARG_INFO( 0, fieldOrYear )
-	ZEND_ARG_INFO( 0, valueOrMonth )
-	ZEND_ARG_INFO( 0, dayOfMonth )
-	ZEND_ARG_INFO( 0, hour )
-	ZEND_ARG_INFO( 0, minute )
-	ZEND_ARG_INFO( 0, second )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_roll, 0, 0, 2 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
-	ZEND_ARG_INFO( 0, field )
-	ZEND_ARG_INFO( 0, amountOrUpOrDown )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_clear, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
-	ZEND_ARG_INFO( 0, field )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_field_difference, 0, 0, 3 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
-	ZEND_ARG_INFO( 0, when )
-	ZEND_ARG_INFO( 0, field )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_get_locale, 0, 0, 2 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
-	ZEND_ARG_INFO( 0, localeType )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_set_lenient, 0, 0, 2 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
-	ZEND_ARG_INFO( 0, isLenient )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_set_minimal_days_in_first_week, 0, 0, 2 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
-	ZEND_ARG_INFO( 0, numberOfDays )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_cal_from_date_time, 0, 0, 1)
-	ZEND_ARG_INFO(0, dateTime)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_cal_wall_time_option, 0, 0, 2 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlCalendar, 0 )
-	ZEND_ARG_INFO( 0, wallTimeOption )
-ZEND_END_ARG_INFO()
-
-/* Gregorian Calendar */
-ZEND_BEGIN_ARG_INFO_EX( ainfo_gregcal_create_instance, 0, 0, 0 )
-	ZEND_ARG_INFO(0, timeZoneOrYear)
-	ZEND_ARG_INFO(0, localeOrMonth)
-	ZEND_ARG_INFO(0, dayOfMonth)
-	ZEND_ARG_INFO(0, hour)
-	ZEND_ARG_INFO(0, minute)
-	ZEND_ARG_INFO(0, second)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_gregcal_is_leap_year, 0, 0, 2 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlGregorianCalendar, 0 )
-	ZEND_ARG_INFO( 0, year )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_gregcal_only_gregcal, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlGregorianCalendar, 0 )
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_gregcal_set_gregorian_change, 0, 0, 2 )
-	ZEND_ARG_OBJ_INFO( 0, calendar, IntlGregorianCalendar, 0 )
-	ZEND_ARG_INFO( 0, date )
-ZEND_END_ARG_INFO()
-
-/* }}} */
-
 /* {{{ intl_functions
  *
  * Every user visible function must have an entry in intl_functions[].
@@ -478,37 +140,37 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry intl_functions[] = {
 
 	/* collator functions */
-	PHP_FE( collator_create, collator_static_1_arg )
-	PHP_FE( collator_compare, collator_2_args )
-	PHP_FE( collator_get_attribute, collator_1_arg )
-	PHP_FE( collator_set_attribute, collator_2_args )
-	PHP_FE( collator_get_strength, collator_0_args )
-	PHP_FE( collator_set_strength, collator_1_arg )
-	PHP_FE( collator_sort, collator_sort_args )
-	PHP_FE( collator_sort_with_sort_keys, collator_sort_with_sort_keys_args )
-	PHP_FE( collator_asort, collator_sort_args )
-	PHP_FE( collator_get_locale, collator_1_arg )
-	PHP_FE( collator_get_error_code, collator_0_args )
-	PHP_FE( collator_get_error_message, collator_0_args )
-	PHP_FE( collator_get_sort_key, collator_1_arg )
+	PHP_FE( collator_create, arginfo_collator_create )
+	PHP_FE( collator_compare, arginfo_collator_compare )
+	PHP_FE( collator_get_attribute, arginfo_collator_get_attribute )
+	PHP_FE( collator_set_attribute, arginfo_collator_set_attribute )
+	PHP_FE( collator_get_strength, arginfo_collator_get_strength )
+	PHP_FE( collator_set_strength, arginfo_collator_set_strength )
+	PHP_FE( collator_sort, arginfo_collator_sort )
+	PHP_FE( collator_sort_with_sort_keys, arginfo_collator_sort_with_sort_keys )
+	PHP_FE( collator_asort, arginfo_collator_asort )
+	PHP_FE( collator_get_locale, arginfo_collator_get_locale )
+	PHP_FE( collator_get_error_code, arginfo_collator_get_error_code )
+	PHP_FE( collator_get_error_message, arginfo_collator_get_error_message )
+	PHP_FE( collator_get_sort_key, arginfo_collator_get_sort_key )
 
 	/* formatter functions */
 	PHP_FE( numfmt_create, arginfo_numfmt_create )
 	PHP_FE( numfmt_format, arginfo_numfmt_format )
-	PHP_FE( numfmt_parse, numfmt_parse_arginfo )
+	PHP_FE( numfmt_parse, arginfo_numfmt_parse )
 	PHP_FE( numfmt_format_currency, arginfo_numfmt_format_currency )
-	PHP_FE( numfmt_parse_currency, numfmt_parse_currency_arginfo )
+	PHP_FE( numfmt_parse_currency, arginfo_numfmt_parse_currency )
 	PHP_FE( numfmt_set_attribute, arginfo_numfmt_set_attribute )
 	PHP_FE( numfmt_get_attribute, arginfo_numfmt_get_attribute )
-	PHP_FE( numfmt_set_text_attribute, arginfo_numfmt_set_attribute )
-	PHP_FE( numfmt_get_text_attribute, arginfo_numfmt_get_attribute )
+	PHP_FE( numfmt_set_text_attribute, arginfo_numfmt_set_text_attribute )
+	PHP_FE( numfmt_get_text_attribute, arginfo_numfmt_get_text_attribute )
 	PHP_FE( numfmt_set_symbol, arginfo_numfmt_set_symbol )
-	PHP_FE( numfmt_get_symbol, arginfo_numfmt_get_attribute )
+	PHP_FE( numfmt_get_symbol, arginfo_numfmt_get_symbol )
 	PHP_FE( numfmt_set_pattern, arginfo_numfmt_set_pattern )
-	PHP_FE( numfmt_get_pattern, arginfo_numfmt_get_error_code )
+	PHP_FE( numfmt_get_pattern, arginfo_numfmt_get_pattern )
 	PHP_FE( numfmt_get_locale, arginfo_numfmt_get_locale )
 	PHP_FE( numfmt_get_error_code, arginfo_numfmt_get_error_code )
-	PHP_FE( numfmt_get_error_message, arginfo_numfmt_get_error_code )
+	PHP_FE( numfmt_get_error_message, arginfo_numfmt_get_error_message )
 
 	/* normalizer functions */
 	PHP_FE( normalizer_normalize, arginfo_normalizer_normalize )
@@ -551,25 +213,25 @@ static const zend_function_entry intl_functions[] = {
 
 	/* IntlDateFormatter functions */
 	PHP_FE( datefmt_create, arginfo_datefmt_create )
-	PHP_FE( datefmt_get_datetype, arginfo_msgfmt_get_locale )
-	PHP_FE( datefmt_get_timetype, arginfo_msgfmt_get_locale )
-	PHP_FE( datefmt_get_calendar, arginfo_msgfmt_get_locale )
-	PHP_FE( datefmt_get_calendar_object, arginfo_msgfmt_get_locale )
+	PHP_FE( datefmt_get_datetype, arginfo_datefmt_get_datetype )
+	PHP_FE( datefmt_get_timetype, arginfo_datefmt_get_timetype )
+	PHP_FE( datefmt_get_calendar, arginfo_datefmt_get_calendar )
+	PHP_FE( datefmt_get_calendar_object, arginfo_datefmt_get_calendar_object )
 	PHP_FE( datefmt_set_calendar, arginfo_datefmt_set_calendar )
-	PHP_FE( datefmt_get_locale, arginfo_msgfmt_get_locale )
-	PHP_FE( datefmt_get_timezone_id, arginfo_msgfmt_get_locale )
-	PHP_FE( datefmt_get_timezone, arginfo_msgfmt_get_locale )
+	PHP_FE( datefmt_get_locale, arginfo_datefmt_get_locale )
+	PHP_FE( datefmt_get_timezone_id, arginfo_datefmt_get_timezone_id )
+	PHP_FE( datefmt_get_timezone, arginfo_datefmt_get_timezone )
 	PHP_FE( datefmt_set_timezone, arginfo_datefmt_set_timezone )
-	PHP_FE( datefmt_get_pattern, arginfo_msgfmt_get_locale )
+	PHP_FE( datefmt_get_pattern, arginfo_datefmt_get_pattern )
 	PHP_FE( datefmt_set_pattern, arginfo_datefmt_set_pattern )
-	PHP_FE( datefmt_is_lenient, arginfo_msgfmt_get_locale )
-	PHP_FE( datefmt_set_lenient, arginfo_msgfmt_get_locale )
+	PHP_FE( datefmt_is_lenient, arginfo_datefmt_is_lenient )
+	PHP_FE( datefmt_set_lenient, arginfo_datefmt_set_lenient )
 	PHP_FE( datefmt_format, arginfo_datefmt_format )
 	PHP_FE( datefmt_format_object, arginfo_datefmt_format_object )
-	PHP_FE( datefmt_parse, datefmt_parse_args )
-	PHP_FE( datefmt_localtime , datefmt_parse_args )
-	PHP_FE( datefmt_get_error_code, arginfo_msgfmt_get_error_code )
-	PHP_FE( datefmt_get_error_message, arginfo_msgfmt_get_error_message )
+	PHP_FE( datefmt_parse, arginfo_datefmt_parse )
+	PHP_FE( datefmt_localtime , arginfo_datefmt_localtime )
+	PHP_FE( datefmt_get_error_code, arginfo_datefmt_get_error_code )
+	PHP_FE( datefmt_get_error_message, arginfo_datefmt_get_error_message )
 
 	/* grapheme functions */
 	PHP_FE( grapheme_strlen, arginfo_grapheme_strlen )
@@ -597,11 +259,11 @@ static const zend_function_entry intl_functions[] = {
 	/* Transliterator functions */
 	PHP_FE( transliterator_create, arginfo_transliterator_create )
 	PHP_FE( transliterator_create_from_rules, arginfo_transliterator_create_from_rules )
-	PHP_FE( transliterator_list_ids, arginfo_transliterator_void )
+	PHP_FE( transliterator_list_ids, arginfo_transliterator_list_ids )
 	PHP_FE( transliterator_create_inverse, arginfo_transliterator_create_inverse)
 	PHP_FE( transliterator_transliterate, arginfo_transliterator_transliterate )
-	PHP_FE( transliterator_get_error_code, arginfo_transliterator_error )
-	PHP_FE( transliterator_get_error_message, arginfo_transliterator_error )
+	PHP_FE( transliterator_get_error_code, arginfo_transliterator_get_error_code )
+	PHP_FE( transliterator_get_error_message, arginfo_transliterator_get_error_message )
 
 	/* TimeZone functions */
 	PHP_FE( intltz_create_time_zone, arginfo_intltz_create_time_zone )
@@ -627,62 +289,62 @@ static const zend_function_entry intl_functions[] = {
 	PHP_FE( intltz_get_error_code, arginfo_intltz_get_error_code )
 	PHP_FE( intltz_get_error_message, arginfo_intltz_get_error_message )
 
-	PHP_FE( intlcal_create_instance, ainfo_cal_create_instance )
-	PHP_FE( intlcal_get_keyword_values_for_locale, ainfo_cal_get_keyword_values_for_locale )
-	PHP_FE( intlcal_get_now, ainfo_cal_void )
-	PHP_FE( intlcal_get_available_locales, ainfo_cal_void )
-	PHP_FE( intlcal_get, ainfo_cal_field )
-	PHP_FE( intlcal_get_time, ainfo_cal_only_cal )
-	PHP_FE( intlcal_set_time, ainfo_cal_date )
-	PHP_FE( intlcal_add, ainfo_cal_add )
-	PHP_FE( intlcal_set_time_zone, ainfo_cal_set_time_zone )
-	PHP_FE( intlcal_after, ainfo_cal_other_cal )
-	PHP_FE( intlcal_before, ainfo_cal_other_cal )
-	PHP_FE( intlcal_set, ainfo_cal_set )
-	PHP_FE( intlcal_roll, ainfo_cal_roll )
-	PHP_FE( intlcal_clear, ainfo_cal_clear )
-	PHP_FE( intlcal_field_difference, ainfo_cal_field_difference )
-	PHP_FE( intlcal_get_actual_maximum, ainfo_cal_field )
-	PHP_FE( intlcal_get_actual_minimum, ainfo_cal_field )
-	PHP_FE( intlcal_get_day_of_week_type, ainfo_cal_dow )
-	PHP_FE( intlcal_get_first_day_of_week, ainfo_cal_only_cal )
-	PHP_FE( intlcal_get_greatest_minimum, ainfo_cal_field )
-	PHP_FE( intlcal_get_least_maximum, ainfo_cal_field )
-	PHP_FE( intlcal_get_locale, ainfo_cal_get_locale )
-	PHP_FE( intlcal_get_maximum, ainfo_cal_field )
-	PHP_FE( intlcal_get_minimal_days_in_first_week, ainfo_cal_only_cal )
-	PHP_FE( intlcal_get_minimum, ainfo_cal_field )
-	PHP_FE( intlcal_get_time_zone, ainfo_cal_only_cal )
-	PHP_FE( intlcal_get_type, ainfo_cal_only_cal )
-	PHP_FE( intlcal_get_weekend_transition, ainfo_cal_dow )
-	PHP_FE( intlcal_in_daylight_time, ainfo_cal_only_cal )
-	PHP_FE( intlcal_is_equivalent_to, ainfo_cal_other_cal )
-	PHP_FE( intlcal_is_lenient, ainfo_cal_only_cal )
-	PHP_FE( intlcal_is_set, ainfo_cal_field )
-	PHP_FE( intlcal_is_weekend, ainfo_cal_date_optional )
-	PHP_FE( intlcal_set_first_day_of_week, ainfo_cal_dow )
-	PHP_FE( intlcal_set_lenient, ainfo_cal_set_lenient )
-	PHP_FE( intlcal_set_minimal_days_in_first_week, ainfo_cal_set_minimal_days_in_first_week )
-	PHP_FE( intlcal_equals, ainfo_cal_other_cal )
-	PHP_FE( intlcal_from_date_time, ainfo_cal_from_date_time )
-	PHP_FE( intlcal_to_date_time, ainfo_cal_only_cal )
-	PHP_FE( intlcal_get_repeated_wall_time_option, ainfo_cal_only_cal )
-	PHP_FE( intlcal_get_skipped_wall_time_option, ainfo_cal_only_cal )
-	PHP_FE( intlcal_set_repeated_wall_time_option, ainfo_cal_wall_time_option )
-	PHP_FE( intlcal_set_skipped_wall_time_option, ainfo_cal_wall_time_option )
-	PHP_FE( intlcal_get_error_code, ainfo_cal_only_cal )
-	PHP_FE( intlcal_get_error_message, ainfo_cal_only_cal )
+	PHP_FE( intlcal_create_instance, arginfo_intlcal_create_instance )
+	PHP_FE( intlcal_get_keyword_values_for_locale, arginfo_intlcal_get_keyword_values_for_locale )
+	PHP_FE( intlcal_get_now, arginfo_intlcal_get_now )
+	PHP_FE( intlcal_get_available_locales, arginfo_intlcal_get_available_locales )
+	PHP_FE( intlcal_get, arginfo_intlcal_get )
+	PHP_FE( intlcal_get_time, arginfo_intlcal_get_time )
+	PHP_FE( intlcal_set_time, arginfo_intlcal_set_time )
+	PHP_FE( intlcal_add, arginfo_intlcal_add )
+	PHP_FE( intlcal_set_time_zone, arginfo_intlcal_set_time_zone )
+	PHP_FE( intlcal_after, arginfo_intlcal_after )
+	PHP_FE( intlcal_before, arginfo_intlcal_before )
+	PHP_FE( intlcal_set, arginfo_intlcal_set )
+	PHP_FE( intlcal_roll, arginfo_intlcal_roll )
+	PHP_FE( intlcal_clear, arginfo_intlcal_clear )
+	PHP_FE( intlcal_field_difference, arginfo_intlcal_field_difference )
+	PHP_FE( intlcal_get_actual_maximum, arginfo_intlcal_get_actual_maximum )
+	PHP_FE( intlcal_get_actual_minimum, arginfo_intlcal_get_actual_minimum )
+	PHP_FE( intlcal_get_day_of_week_type, arginfo_intlcal_get_day_of_week_type )
+	PHP_FE( intlcal_get_first_day_of_week, arginfo_intlcal_get_first_day_of_week )
+	PHP_FE( intlcal_get_greatest_minimum, arginfo_intlcal_get_greatest_minimum )
+	PHP_FE( intlcal_get_least_maximum, arginfo_intlcal_get_least_maximum )
+	PHP_FE( intlcal_get_locale, arginfo_intlcal_get_locale )
+	PHP_FE( intlcal_get_maximum, arginfo_intlcal_get_maximum )
+	PHP_FE( intlcal_get_minimal_days_in_first_week, arginfo_intlcal_get_minimal_days_in_first_week )
+	PHP_FE( intlcal_get_minimum, arginfo_intlcal_get_minimum )
+	PHP_FE( intlcal_get_time_zone, arginfo_intlcal_get_time_zone )
+	PHP_FE( intlcal_get_type, arginfo_intlcal_get_type )
+	PHP_FE( intlcal_get_weekend_transition, arginfo_intlcal_get_weekend_transition )
+	PHP_FE( intlcal_in_daylight_time, arginfo_intlcal_in_daylight_time )
+	PHP_FE( intlcal_is_equivalent_to, arginfo_intlcal_is_equivalent_to )
+	PHP_FE( intlcal_is_lenient, arginfo_intlcal_is_lenient )
+	PHP_FE( intlcal_is_set, arginfo_intlcal_is_set )
+	PHP_FE( intlcal_is_weekend, arginfo_intlcal_is_weekend )
+	PHP_FE( intlcal_set_first_day_of_week, arginfo_intlcal_set_first_day_of_week )
+	PHP_FE( intlcal_set_lenient, arginfo_intlcal_set_lenient )
+	PHP_FE( intlcal_set_minimal_days_in_first_week, arginfo_intlcal_set_minimal_days_in_first_week )
+	PHP_FE( intlcal_equals, arginfo_intlcal_equals )
+	PHP_FE( intlcal_from_date_time, arginfo_intlcal_from_date_time )
+	PHP_FE( intlcal_to_date_time, arginfo_intlcal_to_date_time )
+	PHP_FE( intlcal_get_repeated_wall_time_option, arginfo_intlcal_get_repeated_wall_time_option )
+	PHP_FE( intlcal_get_skipped_wall_time_option, arginfo_intlcal_get_skipped_wall_time_option )
+	PHP_FE( intlcal_set_repeated_wall_time_option, arginfo_intlcal_set_repeated_wall_time_option )
+	PHP_FE( intlcal_set_skipped_wall_time_option, arginfo_intlcal_set_skipped_wall_time_option )
+	PHP_FE( intlcal_get_error_code, arginfo_intlcal_get_error_code )
+	PHP_FE( intlcal_get_error_message, arginfo_intlcal_get_error_message )
 
-	PHP_FE( intlgregcal_create_instance, ainfo_gregcal_create_instance )
-	PHP_FE( intlgregcal_set_gregorian_change, ainfo_gregcal_set_gregorian_change )
-	PHP_FE( intlgregcal_get_gregorian_change, ainfo_gregcal_only_gregcal )
-	PHP_FE( intlgregcal_is_leap_year, ainfo_gregcal_is_leap_year )
+	PHP_FE( intlgregcal_create_instance, arginfo_intlgregcal_create_instance )
+	PHP_FE( intlgregcal_set_gregorian_change, arginfo_intlgregcal_set_gregorian_change )
+	PHP_FE( intlgregcal_get_gregorian_change, arginfo_intlgregcal_get_gregorian_change )
+	PHP_FE( intlgregcal_is_leap_year, arginfo_intlgregcal_is_leap_year )
 
 	/* common functions */
-	PHP_FE( intl_get_error_code, intl_0_args )
-	PHP_FE( intl_get_error_message, intl_0_args )
-	PHP_FE( intl_is_failure, intl_1_arg )
-	PHP_FE( intl_error_name, intl_1_arg )
+	PHP_FE( intl_get_error_code, arginfo_intl_get_error_code )
+	PHP_FE( intl_get_error_message, arginfo_intl_get_error_message )
+	PHP_FE( intl_is_failure, arginfo_intl_is_failure )
+	PHP_FE( intl_error_name, arginfo_intl_error_name )
 
 	PHP_FE_END
 };

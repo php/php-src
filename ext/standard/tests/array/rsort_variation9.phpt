@@ -15,22 +15,22 @@ echo "*** Testing rsort() : variation ***\n";
 
 // Associative arrays
 $various_arrays = array(
-	// numeric assoc. only array
-	array(5 => 55, 6 => 66, 2 => 22, 3 => 33, 1 => 11),
+    // numeric assoc. only array
+    array(5 => 55, 6 => 66, 2 => 22, 3 => 33, 1 => 11),
 
-	// two-dimensional assoc. and default key array
-	array("fruits"  => array("a" => "orange", "b" => "banana", "c" => "apple"),
-     	  "numbers" => array(1, 2, 3, 4, 5, 6),
-     	  "holes"   => array("first", 5 => "second", "third")),
+    // two-dimensional assoc. and default key array
+    array("fruits"  => array("a" => "orange", "b" => "banana", "c" => "apple"),
+          "numbers" => array(1, 2, 3, 4, 5, 6),
+          "holes"   => array("first", 5 => "second", "third")),
 
-	// numeric assoc. and default key array
-	array(1, 1, 8 => 1,  4 => 1, 19, 3 => 13),
+    // numeric assoc. and default key array
+    array(1, 1, 8 => 1,  4 => 1, 19, 3 => 13),
 
-	// mixed assoc. array
-	array('bar' => 'baz', "foo" => 1),
+    // mixed assoc. array
+    array('bar' => 'baz', "foo" => 1),
 
-	// assoc. only multi-dimensional array
-	array('a' => 1,'b' => array('e' => 2,'f' => 3),'c' => array('g' => 4),'d' => 5),
+    // assoc. only multi-dimensional array
+    array('a' => 1,'b' => array('e' => 2,'f' => 3),'c' => array('g' => 4),'d' => 5),
 );
 
 $count = 1;

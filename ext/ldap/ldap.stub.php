@@ -10,19 +10,13 @@ function ldap_connect(string $hostname = UNKNOWN, int $port = 389, string $walle
 function ldap_connect(string $hostname = UNKNOWN, int $port = 389) {}
 #endif
 
-/**
- * @param resource $link_identifier
- */
+/** @param resource $link_identifier */
 function ldap_unbind($link_identifier): bool {}
 
-/**
- * @param resource $link_identifier
- */
+/** @param resource $link_identifier */
 function ldap_close($link_identifier): bool {}
 
-/**
- * @param resource $link_identifier
- */
+/** @param resource $link_identifier */
 function ldap_bind($link_identifier, string $bind_rdn = UNKNOWN, string $bind_password = UNKNOWN): bool {}
 
 /**
@@ -32,9 +26,7 @@ function ldap_bind($link_identifier, string $bind_rdn = UNKNOWN, string $bind_pa
 function ldap_bind_ext($link_identifier, string $bind_rdn = UNKNOWN, string $bind_password = UNKNOWN, array $servercontrols = []) {}
 
 #ifdef HAVE_LDAP_SASL
-/**
- * @param resource $link
- */
+/** @param resource $link */
 function ldap_sasl_bind($link, string $binddn = UNKNOWN, string $password = UNKNOWN, string $sasl_mech = UNKNOWN, string $sasl_realm = UNKNOWN, string $sasl_authc_id = UNKNOWN, string $sasl_authz_id = UNKNOWN, string $props = UNKNOWN): bool {}
 #endif
 
@@ -62,9 +54,7 @@ function ldap_list($link_identifier, $base_dn, $filter, array $attributes = [], 
  */
 function ldap_search($link_identifier, $base_dn, $filter, array $attributes = [], int $attrsonly = 0, int $sizelimit = -1, int $timelimit = -1, int $deref = LDAP_DEREF_NEVER, array $servercontrols = []) {}
 
-/**
- * @param resource $link_identifier
- */
+/** @param resource $link_identifier */
 function ldap_free_result($link_identifier): bool {}
 
 
@@ -116,13 +106,13 @@ function ldap_get_attributes($link_identifier, $result_entry_identifier): array 
  * @param resource $link_identifier
  * @param resource $result_entry_identifier
  */
-function ldap_get_values($link_identifier, $result_entry_identifier, string $attribute): array|false {}
+function ldap_get_values_len($link_identifier, $result_entry_identifier, string $attribute): array|false {}
 
 /**
  * @param resource $link_identifier
  * @param resource $result_entry_identifier
  */
-function ldap_get_values_len($link_identifier, $result_entry_identifier, string $attribute): array|false {}
+function ldap_get_values($link_identifier, $result_entry_identifier, string $attribute): array|false {}
 
 /**
  * @param resource $link_identifier
@@ -152,19 +142,10 @@ function ldap_delete($link_identifier, string $dn, array $servercontrols = []): 
  */
 function ldap_delete_ext($link_identifier, string $dn, array $servercontrols = []) {}
 
-/**
- * @param resource $link_identifier
- */
-function ldap_modify($link_identifier, string $dn, array $entry, array $servercontrols = []): bool {}
-
-/**
- * @param resource $link_identifier
- */
+/** @param resource $link_identifier */
 function ldap_modify_batch($link_identifier, string $dn, array $modifications_info, array $servercontrols = []): bool {}
 
-/**
- * @param resource $link_identifier
- */
+/** @param resource $link_identifier */
 function ldap_mod_add($link_identifier, string $dn, array $entry, array $servercontrols = []): bool {}
 
 /**
@@ -173,11 +154,11 @@ function ldap_mod_add($link_identifier, string $dn, array $entry, array $serverc
  */
 function ldap_mod_add_ext($link_identifier, string $dn, array $entry, array $servercontrols = []) {}
 
-
-/**
- * @param resource $link_identifier
- */
+/** @param resource $link_identifier */
 function ldap_mod_replace($link_identifier, string $dn, array $entry, array $servercontrols = []): bool {}
+
+/** @param resource $link_identifier */
+function ldap_modify($link_identifier, string $dn, array $entry, array $servercontrols = []): bool {}
 
 /**
  * @param resource $link_identifier
@@ -185,9 +166,7 @@ function ldap_mod_replace($link_identifier, string $dn, array $entry, array $ser
  */
 function ldap_mod_replace_ext($link_identifier, string $dn, array $entry, array $servercontrols = []) {}
 
-/**
- * @param resource $link_identifier
- */
+/** @param resource $link_identifier */
 function ldap_mod_del($link_identifier, string $dn, array $entry, array $servercontrols = []): bool {}
 
 /**
@@ -196,14 +175,10 @@ function ldap_mod_del($link_identifier, string $dn, array $entry, array $serverc
  */
 function ldap_mod_del_ext($link_identifier, string $dn, array $entry, array $servercontrols = []) {}
 
-/**
- * @param resource $link
- */
+/** @param resource $link */
 function ldap_errno($link): int {}
 
-/**
- * @param resource $link
- */
+/** @param resource $link */
 function ldap_error($link): string {}
 
 function ldap_err2str(int $errno): string {}
@@ -213,9 +188,7 @@ function ldap_compare($link_identifier, string $dn, string $attribute, string $v
 
 
 #ifdef LDAP_CONTROL_PAGEDRESULTS
-/**
- * @param resource $link
- */
+/** @param resource $link */
 function ldap_control_paged_result($link, int $pagesize, bool $iscritical = false, string $cookie = ''): bool {}
 
 /**
@@ -226,9 +199,7 @@ function ldap_control_paged_result_response($link, $result, &$cookie = null, &$e
 #endif
 
 #if (LDAP_API_VERSION > 2000) || HAVE_NSLDAP || HAVE_ORALDAP
-/**
- * @param resource $link_identifier
- */
+/** @param resource $link_identifier */
 function ldap_rename($link_identifier, string $dn, string $newrdn, string $newparent, bool $deleteoldrdn, array $servercontrols = []): bool {}
 
 /**
@@ -238,14 +209,10 @@ function ldap_rename($link_identifier, string $dn, string $newrdn, string $newpa
 function ldap_rename_ext($link_identifier, string $dn, string $newrdn, string $newparent, bool $deleteoldrdn, array $servercontrols = []) {}
 
 
-/**
- * @param resource $link_identifier
- */
+/** @param resource $link_identifier */
 function ldap_get_option($link_identifier, int $option, &$retval = null): bool {}
 
-/**
- * @param ?resource $link_identifier
- */
+/** @param ?resource $link_identifier */
 function ldap_set_option($link_identifier, int $option, $newval): bool {}
 
 /**

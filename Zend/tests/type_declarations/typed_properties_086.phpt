@@ -4,9 +4,9 @@ Test typed properties with integer keys
 <?php
 
 class T {
-	// Class must have at least one property. Property must have a type.
-	// Empty class or untyped property removes segfault
-	public int $i;
+    // Class must have at least one property. Property must have a type.
+    // Empty class or untyped property removes segfault
+    public int $i;
 }
 
 $t = new T;

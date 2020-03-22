@@ -25,14 +25,14 @@ echo $phar->getAlias() . "\n";
 $b = $phar;
 $phar = new Phar(__DIR__ . '/notphar.phar');
 try {
-	$phar->setAlias('test');
+    $phar->setAlias('test');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-	$b = new Phar(__DIR__ . '/nope.phar', 0, 'test');
+    $b = new Phar(__DIR__ . '/nope.phar', 0, 'test');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
 --CLEAN--

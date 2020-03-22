@@ -13,4 +13,4 @@ foreach($var['nosuchkey'] as $v) {
 --EXPECTF--
 Warning: Illegal string offset 'nosuchkey' in %sbug29566.php on line %d
 
-Warning: Invalid argument supplied for foreach() in %sbug29566.php on line %d
+Warning: foreach() argument must be of type array|object, string given in %sbug29566.php on line %d

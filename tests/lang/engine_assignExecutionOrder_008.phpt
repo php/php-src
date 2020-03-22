@@ -51,7 +51,7 @@ echo $a[$i->p[0]->p=f()][++$i->p[0]->p];
 unset($i);
 
 Class C {
-	static $p;
+    static $p;
 }
 
 echo "\n" . 'C::$p=f(): ';

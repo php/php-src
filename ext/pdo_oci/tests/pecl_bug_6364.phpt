@@ -32,7 +32,7 @@ var_dump($out_param1);
 var_dump($out_param2);
 
 foreach ($dbh->query("select * from bug_6364_t") as $row) {
-	var_dump($row);
+    var_dump($row);
 }
 
 print "Done\n";

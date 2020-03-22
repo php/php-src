@@ -3,10 +3,10 @@ Bug #68976 Use After Free Vulnerability in unserialize()
 --FILE--
 <?php
 class evilClass {
-	public $name;
-	function __wakeup() {
-		unset($this->name);
-	}
+    public $name;
+    function __wakeup() {
+        unset($this->name);
+    }
 }
 
 $fakezval = pack(

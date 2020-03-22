@@ -20,61 +20,61 @@
  */
 class Phar extends PHP_Archive implements RecursiveIterator
 {
-	function getSignature()
-	{
-		return false;
-	}
+    function getSignature()
+    {
+        return false;
+    }
 
-	function getAlias()
-	{
-		return false;
-	}
+    function getAlias()
+    {
+        return false;
+    }
 
-	function rewind()
-	{
-	}
+    function rewind()
+    {
+    }
 
-	function valid()
-	{
-		return false;
-	}
+    function valid()
+    {
+        return false;
+    }
 
-	function current()
-	{
-	}
+    function current()
+    {
+    }
 
-	function key()
-	{
-	}
+    function key()
+    {
+    }
 
-	function next()
-	{
-	}
+    function next()
+    {
+    }
 
-	function hasChildren()
-	{
-		return false;
-	}
+    function hasChildren()
+    {
+        return false;
+    }
 
-	function getChildren()
-	{
-	}
+    function getChildren()
+    {
+    }
 
-	function hasMetadata()
-	{
-	}
+    function hasMetadata()
+    {
+    }
 
-	function getMetadata()
-	{
-	}
+    function getMetadata()
+    {
+    }
 
-	function getStub()
-	{
-	}
+    function getStub()
+    {
+    }
 
-	function setStub()
-	{
-	}
+    function setStub()
+    {
+    }
 }
 
 ?>

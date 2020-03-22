@@ -22,23 +22,23 @@ $dirs = array("a", "ソ", "ゾ", "şŞıİğĞ", "多国語", "王", "汚れて�
 
 mkdir($prefix);
 foreach ($dirs as $d) {
-	mkdir($prefix . $d);
+    mkdir($prefix . $d);
 }
 
 $directory = dir($prefix);
 while (false !== ($content = $directory->read())) {
-	if ("." == $content || ".." == $content) continue;
+    if ("." == $content || ".." == $content) continue;
 
         printf("Returned (%s)\n", $content);
         printf("Encoding: %s\n", mb_detect_encoding($content));
         if ($content != get_basename_with_cp($prefix . $content, 65001, false)) {
-		echo "Verification failed!\n";
-	}
-	echo "\n";
+        echo "Verification failed!\n";
+    }
+    echo "\n";
 }
 
 foreach ($dirs as $d) {
-	rmdir($prefix . $d);
+    rmdir($prefix . $d);
 }
 rmdir($prefix);
 

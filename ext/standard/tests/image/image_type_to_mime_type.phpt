@@ -6,22 +6,22 @@ image_type_to_mime_type()
 ?>
 --FILE--
 <?php
-	// Note: SWC requires zlib
-	$dir = opendir(__DIR__) or die('cannot open directory: '.__DIR__);
-	$result = array();
-	$files  = array();
-	while (($file = readdir($dir)) !== FALSE) {
-		if (preg_match('/^test.+pix\./',$file) && $file != "test13pix.swf") {
-			$files[] = $file;
-		}
-	}
-	closedir($dir);
-	sort($files);
-	foreach($files as $file) {
-		$result[$file] = getimagesize(__DIR__."/$file");
-		$result[$file] = image_type_to_mime_type($result[$file][2]);
-	}
-	var_dump($result);
+    // Note: SWC requires zlib
+    $dir = opendir(__DIR__) or die('cannot open directory: '.__DIR__);
+    $result = array();
+    $files  = array();
+    while (($file = readdir($dir)) !== FALSE) {
+        if (preg_match('/^test.+pix\./',$file) && $file != "test13pix.swf") {
+            $files[] = $file;
+        }
+    }
+    closedir($dir);
+    sort($files);
+    foreach($files as $file) {
+        $result[$file] = getimagesize(__DIR__."/$file");
+        $result[$file] = image_type_to_mime_type($result[$file][2]);
+    }
+    var_dump($result);
 ?>
 --EXPECT--
 array(16) {

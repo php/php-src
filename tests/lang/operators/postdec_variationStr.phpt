@@ -24,7 +24,7 @@ int(64)
 --- testing: '-44' ---
 int(-45)
 --- testing: '1.2' ---
-float(0.2)
+float(0.19999999999999996)
 --- testing: '-7.7' ---
 float(-8.7)
 --- testing: 'abc' ---

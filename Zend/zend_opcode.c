@@ -447,6 +447,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		efree(ZEND_MAP_PTR(op_array->run_time_cache));
 	}
 
+	if (op_array->function_name) {
+		zend_string_release_ex(op_array->function_name, 0);
+	}
+
 	if (!op_array->refcount || --(*op_array->refcount) > 0) {
 		return;
 	}
@@ -476,9 +480,6 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	}
 	efree(op_array->opcodes);
 
-	if (op_array->function_name) {
-		zend_string_release_ex(op_array->function_name, 0);
-	}
 	if (op_array->doc_comment) {
 		zend_string_release_ex(op_array->doc_comment, 0);
 	}
@@ -593,7 +594,7 @@ static void emit_live_range_raw(
 
 	ZEND_ASSERT(start < end);
 	range = &op_array->live_range[op_array->last_live_range - 1];
-	range->var = (uint32_t) (intptr_t) ZEND_CALL_VAR_NUM(NULL, op_array->last_var + var_num);
+	range->var = EX_NUM_TO_VAR(op_array->last_var + var_num);
 	range->var |= kind;
 	range->start = start;
 	range->end = end;
@@ -698,8 +699,7 @@ static void emit_live_range(
 			/* COPY_TMP has a split live-range: One from the definition until the use in
 			 * "null" branch, and another from the start of the "non-null" branch to the
 			 * FREE opcode. */
-			uint32_t rt_var_num =
-				(uint32_t) (intptr_t) ZEND_CALL_VAR_NUM(NULL, op_array->last_var + var_num);
+			uint32_t rt_var_num = EX_NUM_TO_VAR(op_array->last_var + var_num);
 			zend_op *block_start_op = use_opline;
 
 			if (needs_live_range && !needs_live_range(op_array, orig_def_opline)) {
@@ -1035,15 +1035,15 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		if (opline->op1_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op1);
 		} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op1.var);
+			opline->op1.var = EX_NUM_TO_VAR(op_array->last_var + opline->op1.var);
 		}
 		if (opline->op2_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op2);
 		} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->op2.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op2.var);
+			opline->op2.var = EX_NUM_TO_VAR(op_array->last_var + opline->op2.var);
 		}
 		if (opline->result_type & (IS_VAR|IS_TMP_VAR)) {
-			opline->result.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->result.var);
+			opline->result.var = EX_NUM_TO_VAR(op_array->last_var + opline->result.var);
 		}
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;

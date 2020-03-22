@@ -8,17 +8,17 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	require('table.inc');
-	if (!$res = mysqli_query($link, "SELECT id FROM test ORDER BY id LIMIT 1")) {
-		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	}
+    require('table.inc');
+    if (!$res = mysqli_query($link, "SELECT id FROM test ORDER BY id LIMIT 1")) {
+        printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
 
-	print "a\n";
+    print "a\n";
     var_dump(mysqli_free_result($res));
 
-	print "b\n";
+    print "b\n";
     try {
         mysqli_free_result($res);
     } catch (Error $exception) {
@@ -29,24 +29,24 @@ require_once('skipifconnectfailure.inc');
         printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
     }
 
-	print "c\n";
-	var_dump(mysqli_store_result($link));
-	var_dump(mysqli_error($link));
-	print "[005]\n";
+    print "c\n";
+    var_dump(mysqli_store_result($link));
+    var_dump(mysqli_error($link));
+    print "[005]\n";
 
     mysqli_free_result($res);
 
-	if (!$res = mysqli_query($link, "SELECT id FROM test ORDER BY id LIMIT 1")) {
-		printf("[006] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-	}
-	print "d\n";
-	var_dump(mysqli_use_result($link));
-	var_dump(mysqli_error($link));
-	print "[007]\n";
-	var_dump(mysqli_free_result($res));
+    if (!$res = mysqli_query($link, "SELECT id FROM test ORDER BY id LIMIT 1")) {
+        printf("[006] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
+    }
+    print "d\n";
+    var_dump(mysqli_use_result($link));
+    var_dump(mysqli_error($link));
+    print "[007]\n";
+    var_dump(mysqli_free_result($res));
 
-	mysqli_close($link);
-	print "done!";
+    mysqli_close($link);
+    print "done!";
 ?>
 --CLEAN--
 <?php

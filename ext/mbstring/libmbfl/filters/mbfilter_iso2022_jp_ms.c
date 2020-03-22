@@ -66,7 +66,8 @@ const struct mbfl_convert_vtbl vtbl_2022jpms_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_2022jpms_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_2022jpms = {
@@ -75,7 +76,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_2022jpms = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_2022jpms,
-	mbfl_filt_conv_any_2022jpms_flush
+	mbfl_filt_conv_any_2022jpms_flush,
+	NULL,
 };
 
 #define CK(statement)	do { if ((statement) < 0) return (-1); } while (0)

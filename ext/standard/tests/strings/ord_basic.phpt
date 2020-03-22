@@ -24,9 +24,9 @@ var_dump(ord("Hello"));
 
 // Make sure all valid ascii chars round trip
 for ($i = 0; $i < 255; $i++) {
-	if (ord(chr($i)) != $i) {
-		exit("TEST FAILED: $i does not round trip\n");
-	}
+    if (ord(chr($i)) != $i) {
+        exit("TEST FAILED: $i does not round trip\n");
+    }
 }
 
 ?>

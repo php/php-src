@@ -21,7 +21,7 @@ $files = array();
 $files['a'] = 'a';
 
 foreach ($files as $n => $file) {
-	$tar->addFile($n, $file);
+    $tar->addFile($n, $file);
 }
 
 $tar->close();

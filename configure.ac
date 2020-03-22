@@ -397,6 +397,7 @@ resolv.h \
 strings.h \
 syslog.h \
 sysexits.h \
+sys/auxv.h \
 sys/ioctl.h \
 sys/file.h \
 sys/mman.h \
@@ -693,20 +694,6 @@ end:
 
 if test "$ac_cv__asm_goto" = yes; then
   AC_DEFINE(HAVE_ASM_GOTO,1,[Define if asm goto support])
-fi
-
-dnl Check for variable length array support.
-AC_CACHE_CHECK([whether compiler supports VLA], ac_cv__compiler_c99_vla,
-[AC_RUN_IFELSE([AC_LANG_SOURCE([[
- #include <stdlib.h>
- int main(void) {
-         int i[rand()%10];
-	 return 0;
- }
- ]])],[ac_cv__compiler_c99_vla=yes], [ac_cv__compiler_c99_vla=no], [ac_cv__compiler_c99_vla=no])])
-
-if test "$ac_cv__compiler_c99_vla" = yes; then
-	AC_DEFINE(HAVE_COMPILER_C99_VLA, 1, [Compiler supports VLA])
 fi
 
 dnl Check valgrind support.
@@ -1453,7 +1440,7 @@ PHP_ADD_SOURCES(TSRM, TSRM.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c \
        fopen_wrappers.c alloca.c  php_scandir.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
-       strlcat.c explicit_bzero.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
+       strlcat.c explicit_bzero.c reentrancy.c php_variables.c php_ticks.c \
        network.c php_open_temporary_file.c \
        output.c getopt.c php_syslog.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 

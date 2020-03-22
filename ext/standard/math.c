@@ -623,7 +623,7 @@ PHP_FUNCTION(log)
 	}
 
 	if (base <= 0.0) {
-		zend_value_error("Base must be greater than 0");
+		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 

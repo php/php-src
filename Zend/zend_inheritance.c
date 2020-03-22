@@ -115,6 +115,9 @@ static zend_always_inline zend_function *zend_duplicate_function(zend_function *
 		if (func->op_array.refcount) {
 			(*func->op_array.refcount)++;
 		}
+		if (EXPECTED(func->op_array.function_name)) {
+			zend_string_addref(func->op_array.function_name);
+		}
 		if (is_interface
 		 || EXPECTED(!func->op_array.static_variables)) {
 			/* reuse the same op_array structure */
@@ -137,10 +140,6 @@ static void do_inherit_parent_constructor(zend_class_entry *ce) /* {{{ */
 	/* Inherit special functions if needed */
 	if (EXPECTED(!ce->get_iterator)) {
 		ce->get_iterator = parent->get_iterator;
-	}
-	if (parent->iterator_funcs_ptr) {
-		/* Must be initialized through iface->interface_gets_implemented() */
-		ZEND_ASSERT(ce->iterator_funcs_ptr);
 	}
 	if (EXPECTED(!ce->__get)) {
 		ce->__get = parent->__get;
@@ -333,6 +332,28 @@ static zend_bool zend_type_contains_traversable(zend_type type) {
 	return 0;
 }
 
+static zend_bool zend_type_permits_self(
+		zend_type type, zend_class_entry *scope, zend_class_entry *self) {
+	if (ZEND_TYPE_FULL_MASK(type) & MAY_BE_OBJECT) {
+		return 1;
+	}
+
+	/* Any types that may satisfy self must have already been loaded at this point
+	 * (as a parent or interface), so we never need to register delayed variance obligations
+	 * for this case. */
+	zend_type *single_type;
+	ZEND_TYPE_FOREACH(type, single_type) {
+		if (ZEND_TYPE_HAS_NAME(*single_type)) {
+			zend_string *name = resolve_class_name(scope, ZEND_TYPE_NAME(*single_type));
+			zend_class_entry *ce = lookup_class(self, name, /* register_unresolved */ 0);
+			if (ce && unlinked_instanceof(self, ce)) {
+				return 1;
+			}
+		}
+	} ZEND_TYPE_FOREACH_END();
+	return 0;
+}
+
 /* Unresolved means that class declarations that are currently not available are needed to
  * determine whether the inheritance is valid or not. At runtime UNRESOLVED should be treated
  * as an ERROR. */
@@ -406,13 +427,22 @@ static inheritance_status zend_perform_covariant_type_check(
 	if (added_types) {
 		// TODO: Make "iterable" an alias of "array|Traversable" instead,
 		// so these special cases will be handled automatically.
-		if (added_types == MAY_BE_ITERABLE
+		if ((added_types & MAY_BE_ITERABLE)
 				&& (proto_type_mask & MAY_BE_ARRAY)
 				&& zend_type_contains_traversable(proto_type)) {
 			/* Replacing array|Traversable with iterable is okay */
-		} else if (added_types == MAY_BE_ARRAY && (proto_type_mask & MAY_BE_ITERABLE)) {
+			added_types &= ~MAY_BE_ITERABLE;
+		}
+		if ((added_types & MAY_BE_ARRAY) && (proto_type_mask & MAY_BE_ITERABLE)) {
 			/* Replacing iterable with array is okay */
-		} else {
+			added_types &= ~MAY_BE_ARRAY;
+		}
+		if ((added_types & MAY_BE_STATIC)
+				&& zend_type_permits_self(proto_type, proto_scope, fe_scope)) {
+			/* Replacing type that accepts self with static is okay */
+			added_types &= ~MAY_BE_STATIC;
+		}
+		if (added_types) {
 			/* Otherwise adding new types is illegal */
 			return INHERITANCE_ERROR;
 		}
@@ -498,14 +528,6 @@ static inheritance_status zend_do_perform_implementation_check(
 	uint32_t i, num_args, proto_num_args, fe_num_args;
 	inheritance_status status, local_status;
 	zend_bool proto_is_variadic, fe_is_variadic;
-
-	/* If it's a user function then arg_info == NULL means we don't have any parameters but
-	 * we still need to do the arg number checks.  We are only willing to ignore this for internal
-	 * functions because extensions don't always define arg_info.
-	 */
-	if (!proto->common.arg_info && proto->common.type != ZEND_USER_FUNCTION) {
-		return INHERITANCE_SUCCESS;
-	}
 
 	/* Checks for constructors only if they are declared in an interface,
 	 * or explicitly marked as abstract
@@ -1159,19 +1181,6 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 	ce->parent = parent_ce;
 	ce->ce_flags |= ZEND_ACC_RESOLVED_PARENT;
 
-	/* Inherit interfaces */
-	if (parent_ce->num_interfaces) {
-		if (!(ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES)) {
-			zend_do_inherit_interfaces(ce, parent_ce);
-		} else {
-			uint32_t i;
-
-			for (i = 0; i < parent_ce->num_interfaces; i++) {
-				do_implement_interface(ce, parent_ce->interfaces[i]);
-			}
-		}
-	}
-
 	/* Inherit properties */
 	if (parent_ce->default_properties_count) {
 		zval *src, *dst, *end;
@@ -1352,6 +1361,10 @@ ZEND_API void zend_do_inheritance_ex(zend_class_entry *ce, zend_class_entry *par
 	do_inherit_parent_constructor(ce);
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
+		if (parent_ce->num_interfaces) {
+			zend_do_inherit_interfaces(ce, parent_ce);
+		}
+
 		if (ce->ce_flags & ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 			ce->ce_flags |= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS;
 		}
@@ -1507,8 +1520,12 @@ static void zend_do_implement_interfaces(zend_class_entry *ce, zend_class_entry 
 	ce->interfaces = interfaces;
 	ce->ce_flags |= ZEND_ACC_RESOLVED_INTERFACES;
 
-	i = num_parent_interfaces;
-	for (; i < ce->num_interfaces; i++) {
+	for (i = 0; i < num_parent_interfaces; i++) {
+		do_implement_interface(ce, ce->interfaces[i]);
+	}
+	/* Note that new interfaces can be added during this loop due to interface inheritance.
+	 * Use num_interfaces rather than ce->num_interfaces to not re-process the new ones. */
+	for (; i < num_interfaces; i++) {
 		do_interface_implementation(ce, ce->interfaces[i]);
 	}
 }
@@ -1552,7 +1569,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 }
 /* }}} */
 
-static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_string *key, zend_function *fn, HashTable **overridden) /* {{{ */
+static void zend_add_trait_method(zend_class_entry *ce, zend_string *name, zend_string *key, zend_function *fn, HashTable **overridden) /* {{{ */
 {
 	zend_function *existing_fn = NULL;
 	zend_function *new_fn;
@@ -1595,15 +1612,10 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 		} else if (UNEXPECTED((existing_fn->common.scope->ce_flags & ZEND_ACC_TRAIT)
 				&& !(existing_fn->common.fn_flags & ZEND_ACC_ABSTRACT))) {
 			/* two traits can't define the same non-abstract method */
-#if 1
-			zend_error_noreturn(E_COMPILE_ERROR, "Trait method %s has not been applied, because there are collisions with other trait methods on %s",
-				name, ZSTR_VAL(ce->name));
-#else		/* TODO: better error message */
 			zend_error_noreturn(E_COMPILE_ERROR, "Trait method %s::%s has not been applied as %s::%s, because of collision with %s::%s",
 				ZSTR_VAL(fn->common.scope->name), ZSTR_VAL(fn->common.function_name),
-				ZSTR_VAL(ce->name), name,
+				ZSTR_VAL(ce->name), ZSTR_VAL(name),
 				ZSTR_VAL(existing_fn->common.scope->name), ZSTR_VAL(existing_fn->common.function_name));
-#endif
 		} else {
 			/* inherited members are overridden by members inserted by traits */
 			/* check whether the trait method fulfills the inheritance requirements */
@@ -1622,6 +1634,9 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 		new_fn->op_array.fn_flags |= ZEND_ACC_TRAIT_CLONE;
 		new_fn->op_array.fn_flags &= ~ZEND_ACC_IMMUTABLE;
 	}
+
+	/* Reassign method name, in case it is an alias. */
+	new_fn->common.function_name = name;
 	function_add_ref(new_fn);
 	fn = zend_hash_update_ptr(&ce->function_table, key, new_fn);
 	zend_add_magic_methods(ce, key, fn);
@@ -1659,28 +1674,19 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 		while (alias) {
 			/* Scope unset or equal to the function we compare to, and the alias applies to fn */
 			if (alias->alias != NULL
-				&& (!aliases[i] || fn->common.scope == aliases[i])
-				&& ZSTR_LEN(alias->trait_method.method_name) == ZSTR_LEN(fnname)
-				&& (zend_binary_strcasecmp(ZSTR_VAL(alias->trait_method.method_name), ZSTR_LEN(alias->trait_method.method_name), ZSTR_VAL(fnname), ZSTR_LEN(fnname)) == 0)) {
+				&& fn->common.scope == aliases[i]
+				&& zend_string_equals_ci(alias->trait_method.method_name, fnname)
+			) {
 				fn_copy = *fn;
 
 				/* if it is 0, no modifieres has been changed */
 				if (alias->modifiers) {
-					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags ^ (fn->common.fn_flags & ZEND_ACC_PPP_MASK));
+					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags & ~ZEND_ACC_PPP_MASK);
 				}
 
 				lcname = zend_string_tolower(alias->alias);
-				zend_add_trait_method(ce, ZSTR_VAL(alias->alias), lcname, &fn_copy, overridden);
+				zend_add_trait_method(ce, alias->alias, lcname, &fn_copy, overridden);
 				zend_string_release_ex(lcname, 0);
-
-				/* Record the trait from which this alias was resolved. */
-				if (!aliases[i]) {
-					aliases[i] = fn->common.scope;
-				}
-				if (!alias->trait_method.class_name) {
-					/* TODO: try to avoid this assignment (it's necessary only for reflection) */
-					alias->trait_method.class_name = zend_string_copy(fn->common.scope->name);
-				}
 			}
 			alias_ptr++;
 			alias = *alias_ptr;
@@ -1690,8 +1696,7 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 
 	if (exclude_table == NULL || zend_hash_find(exclude_table, fnname) == NULL) {
 		/* is not in hashtable, thus, function is not to be excluded */
-		/* And how about ZEND_OVERLOADED_FUNCTION? */
-		memcpy(&fn_copy, fn, fn->type == ZEND_USER_FUNCTION? sizeof(zend_op_array) : sizeof(zend_internal_function));
+		memcpy(&fn_copy, fn, fn->type == ZEND_USER_FUNCTION ? sizeof(zend_op_array) : sizeof(zend_internal_function));
 
 		/* apply aliases which have not alias name, just setting visibility */
 		if (ce->trait_aliases) {
@@ -1701,20 +1706,10 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 			while (alias) {
 				/* Scope unset or equal to the function we compare to, and the alias applies to fn */
 				if (alias->alias == NULL && alias->modifiers != 0
-					&& (!aliases[i] || fn->common.scope == aliases[i])
-					&& (ZSTR_LEN(alias->trait_method.method_name) == ZSTR_LEN(fnname))
-					&& (zend_binary_strcasecmp(ZSTR_VAL(alias->trait_method.method_name), ZSTR_LEN(alias->trait_method.method_name), ZSTR_VAL(fnname), ZSTR_LEN(fnname)) == 0)) {
-
-					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags ^ (fn->common.fn_flags & ZEND_ACC_PPP_MASK));
-
-					/** Record the trait from which this alias was resolved. */
-					if (!aliases[i]) {
-						aliases[i] = fn->common.scope;
-					}
-					if (!alias->trait_method.class_name) {
-						/* TODO: try to avoid this assignment (it's necessary only for reflection) */
-						alias->trait_method.class_name = zend_string_copy(fn->common.scope->name);
-					}
+					&& fn->common.scope == aliases[i]
+					&& zend_string_equals_ci(alias->trait_method.method_name, fnname)
+				) {
+					fn_copy.common.fn_flags = alias->modifiers | (fn->common.fn_flags & ~ZEND_ACC_PPP_MASK);
 				}
 				alias_ptr++;
 				alias = *alias_ptr;
@@ -1722,7 +1717,7 @@ static void zend_traits_copy_functions(zend_string *fnname, zend_function *fn, z
 			}
 		}
 
-		zend_add_trait_method(ce, ZSTR_VAL(fn->common.function_name), fnname, &fn_copy, overridden);
+		zend_add_trait_method(ce, fn->common.function_name, fnname, &fn_copy, overridden);
 	}
 }
 /* }}} */
@@ -1831,9 +1826,11 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 		aliases = ecalloc(i, sizeof(zend_class_entry*));
 		i = 0;
 		while (ce->trait_aliases[i]) {
-			/** For all aliases with an explicit class name, resolve the class now. */
-			if (ce->trait_aliases[i]->trait_method.class_name) {
-				cur_method_ref = &ce->trait_aliases[i]->trait_method;
+			zend_trait_alias *cur_alias = ce->trait_aliases[i];
+			cur_method_ref = &ce->trait_aliases[i]->trait_method;
+			lcname = zend_string_tolower(cur_method_ref->method_name);
+			if (cur_method_ref->class_name) {
+				/* For all aliases with an explicit class name, resolve the class now. */
 				trait = zend_fetch_class(cur_method_ref->class_name, ZEND_FETCH_CLASS_TRAIT|ZEND_FETCH_CLASS_NO_AUTOLOAD);
 				if (!trait) {
 					zend_error_noreturn(E_COMPILE_ERROR, "Could not find trait %s", ZSTR_VAL(cur_method_ref->class_name));
@@ -1841,13 +1838,51 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce, zend_class_e
 				zend_check_trait_usage(ce, trait, traits);
 				aliases[i] = trait;
 
-				/** And, ensure that the referenced method is resolvable, too. */
-				lcname = zend_string_tolower(cur_method_ref->method_name);
+				/* And, ensure that the referenced method is resolvable, too. */
 				if (!zend_hash_exists(&trait->function_table, lcname)) {
 					zend_error_noreturn(E_COMPILE_ERROR, "An alias was defined for %s::%s but this method does not exist", ZSTR_VAL(trait->name), ZSTR_VAL(cur_method_ref->method_name));
 				}
-				zend_string_release_ex(lcname, 0);
+			} else {
+				/* Find out which trait this method refers to. */
+				trait = NULL;
+				for (j = 0; j < ce->num_traits; j++) {
+					if (traits[j]) {
+						if (zend_hash_exists(&traits[j]->function_table, lcname)) {
+							if (!trait) {
+								trait = traits[j];
+								continue;
+							}
+
+							zend_error_noreturn(E_COMPILE_ERROR,
+								"An alias was defined for method %s(), which exists in both %s and %s. Use %s::%s or %s::%s to resolve the ambiguity",
+								ZSTR_VAL(cur_method_ref->method_name),
+								ZSTR_VAL(trait->name), ZSTR_VAL(traits[j]->name),
+								ZSTR_VAL(trait->name), ZSTR_VAL(cur_method_ref->method_name),
+								ZSTR_VAL(traits[j]->name), ZSTR_VAL(cur_method_ref->method_name));
+						}
+					}
+				}
+
+				/* Non-absolute method reference refers to method that does not exist. */
+				if (!trait) {
+					if (cur_alias->alias) {
+						zend_error_noreturn(E_COMPILE_ERROR,
+							"An alias (%s) was defined for method %s(), but this method does not exist",
+							ZSTR_VAL(cur_alias->alias),
+							ZSTR_VAL(cur_alias->trait_method.method_name));
+					} else {
+						zend_error_noreturn(E_COMPILE_ERROR,
+							"The modifiers of the trait method %s() are changed, but this method does not exist. Error",
+							ZSTR_VAL(cur_alias->trait_method.method_name));
+					}
+				}
+
+				aliases[i] = trait;
+
+				/* TODO: try to avoid this assignment (it's necessary only for reflection) */
+				cur_method_ref->class_name = zend_string_copy(trait->name);
 			}
+			zend_string_release_ex(lcname, 0);
 			i++;
 		}
 	}
@@ -2035,56 +2070,6 @@ static void zend_do_traits_property_binding(zend_class_entry *ce, zend_class_ent
 }
 /* }}} */
 
-static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce, zend_class_entry **aliases) /* {{{ */
-{
-	int i = 0;
-	zend_trait_alias* cur_alias;
-	zend_string* lc_method_name;
-
-	if (ce->trait_aliases) {
-		while (ce->trait_aliases[i]) {
-			cur_alias = ce->trait_aliases[i];
-			/** The trait for this alias has not been resolved, this means, this
-				alias was not applied. Abort with an error. */
-			if (!aliases[i]) {
-				if (cur_alias->alias) {
-					/** Plain old inconsistency/typo/bug */
-					zend_error_noreturn(E_COMPILE_ERROR,
-							   "An alias (%s) was defined for method %s(), but this method does not exist",
-							   ZSTR_VAL(cur_alias->alias),
-							   ZSTR_VAL(cur_alias->trait_method.method_name));
-				} else {
-					/** Here are two possible cases:
-						1) this is an attempt to modify the visibility
-						   of a method introduce as part of another alias.
-						   Since that seems to violate the DRY principle,
-						   we check against it and abort.
-						2) it is just a plain old inconsitency/typo/bug
-						   as in the case where alias is set. */
-
-					lc_method_name = zend_string_tolower(
-						cur_alias->trait_method.method_name);
-					if (zend_hash_exists(&ce->function_table,
-										 lc_method_name)) {
-						zend_string_release_ex(lc_method_name, 0);
-						zend_error_noreturn(E_COMPILE_ERROR,
-								   "The modifiers for the trait alias %s() need to be changed in the same statement in which the alias is defined. Error",
-								   ZSTR_VAL(cur_alias->trait_method.method_name));
-					} else {
-						zend_string_release_ex(lc_method_name, 0);
-						zend_error_noreturn(E_COMPILE_ERROR,
-								   "The modifiers of the trait method %s() are changed, but this method does not exist. Error",
-								   ZSTR_VAL(cur_alias->trait_method.method_name));
-
-					}
-				}
-			}
-			i++;
-		}
-	}
-}
-/* }}} */
-
 static void zend_do_bind_traits(zend_class_entry *ce) /* {{{ */
 {
 	HashTable **exclude_tables;
@@ -2121,9 +2106,6 @@ static void zend_do_bind_traits(zend_class_entry *ce) /* {{{ */
 
 	/* first care about all methods to be flattened into the class */
 	zend_do_traits_method_binding(ce, traits, exclude_tables, aliases);
-
-	/* Aliases which have not been applied indicate typos/bugs. */
-	zend_do_check_for_inconsistent_traits_aliasing(ce, aliases);
 
 	if (aliases) {
 		efree(aliases);
@@ -2460,11 +2442,13 @@ ZEND_API int zend_do_link_class(zend_class_entry *ce, zend_string *lc_parent_nam
 		}
 		zend_do_inheritance(ce, parent);
 	}
-	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_TRAITS) {
+	if (ce->num_traits) {
 		zend_do_bind_traits(ce);
 	}
-	if (ce->ce_flags & ZEND_ACC_IMPLEMENT_INTERFACES) {
+	if (interfaces) {
 		zend_do_implement_interfaces(ce, interfaces);
+	} else if (parent && parent->num_interfaces) {
+		zend_do_inherit_interfaces(ce, parent);
 	}
 	if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 		zend_verify_abstract_class(ce);
@@ -2548,6 +2532,9 @@ zend_bool zend_try_early_bind(zend_class_entry *ce, zend_class_entry *parent_ce,
 			}
 		}
 		zend_do_inheritance_ex(ce, parent_ce, status == INHERITANCE_SUCCESS);
+		if (parent_ce && parent_ce->num_interfaces) {
+			zend_do_inherit_interfaces(ce, parent_ce);
+		}
 		zend_build_properties_info_table(ce);
 		if ((ce->ce_flags & (ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) == ZEND_ACC_IMPLICIT_ABSTRACT_CLASS) {
 			zend_verify_abstract_class(ce);

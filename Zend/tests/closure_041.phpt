@@ -8,29 +8,29 @@ Closure 041: Rebinding: preservation of previous scope when not given as arg unl
  * to having a bound instance. */
 
 $staticUnscoped = static function () {
-	echo "scoped to A: "; var_dump(isset(A::$priv));
-	echo "bound: ", isset($this)?get_class($this):"no";
+    echo "scoped to A: "; var_dump(isset(A::$priv));
+    echo "bound: ", isset($this)?get_class($this):"no";
 };
 
 $nonstaticUnscoped = function () {
-	echo "scoped to A: "; var_dump(isset(A::$priv));
-	echo "bound: ", isset($this)?get_class($this):"no";
+    echo "scoped to A: "; var_dump(isset(A::$priv));
+    echo "bound: ", isset($this)?get_class($this):"no";
 };
 
 class A {
-	private static $priv = 7;
-	function getClosure() {
-		return function () {
-			echo "scoped to A: "; var_dump(isset(A::$priv));
-			echo "bound: ", isset($this)?get_class($this):"no";
-		};
-	}
-	function getStaticClosure() {
-		return static function () {
-			echo "scoped to A: "; var_dump(isset(A::$priv));
-			echo "bound: ", isset($this)?get_class($this):"no";
-		};
-	}
+    private static $priv = 7;
+    function getClosure() {
+        return function () {
+            echo "scoped to A: "; var_dump(isset(A::$priv));
+            echo "bound: ", isset($this)?get_class($this):"no";
+        };
+    }
+    function getStaticClosure() {
+        return static function () {
+            echo "scoped to A: "; var_dump(isset(A::$priv));
+            echo "bound: ", isset($this)?get_class($this):"no";
+        };
+    }
 }
 class B extends A {}
 

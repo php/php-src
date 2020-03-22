@@ -4,26 +4,26 @@ Bug #71914 (Reference is lost in "switch")
 <?php
 
 function bug(&$value) {
-	switch ($value) {
-	case "xxxx":
-		$value = true;
-		break;
-	}
+    switch ($value) {
+    case "xxxx":
+        $value = true;
+        break;
+    }
 }
 
 function returnArray() {
-	$array = array();
-	$array["str"]  = "xxxx";
-	return $array;
+    $array = array();
+    $array["str"]  = "xxxx";
+    return $array;
 }
 
 class Foo {
-	public $array = array("str" => "xxxx");
+    public $array = array("str" => "xxxx");
 }
 
 function test($arr, &$dummy) {
-	bug($arr["str"]);
-	var_dump($arr["str"]);
+    bug($arr["str"]);
+    var_dump($arr["str"]);
 }
 
 $foo = new Foo();

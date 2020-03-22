@@ -13,20 +13,20 @@ var_dump($it->valid());
 
 try
 {
-	var_dump($it->key());
+    var_dump($it->key());
 }
 catch(BadMethodCallException $e)
 {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 try
 {
-	var_dump($it->current());
+    var_dump($it->current());
 }
 catch(BadMethodCallException $e)
 {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 var_dump($it->valid());

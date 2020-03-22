@@ -66,6 +66,24 @@ static zend_function* ZEND_FASTCALL zend_jit_find_func_helper(zend_string *name)
 	return fbc;
 }
 
+static zend_function* ZEND_FASTCALL zend_jit_find_ns_func_helper(zval *func_name)
+{
+	zval *func = zend_hash_find_ex(EG(function_table), Z_STR_P(func_name + 1), 1);
+	zend_function *fbc;
+
+	if (func == NULL) {
+		func = zend_hash_find_ex(EG(function_table), Z_STR_P(func_name + 2), 1);
+		if (UNEXPECTED(func == NULL)) {
+			return NULL;
+		}
+	}
+	fbc = Z_FUNC_P(func);
+	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
+		fbc = _zend_jit_init_func_run_time_cache(&fbc->op_array);
+	}
+	return fbc;
+}
+
 static zend_execute_data* ZEND_FASTCALL zend_jit_extend_stack_helper(uint32_t used_stack, zend_function *fbc)
 {
 	zend_execute_data *call = (zend_execute_data*)zend_vm_stack_extend(used_stack);
@@ -1098,33 +1116,39 @@ static void ZEND_FASTCALL zend_jit_free_call_frame(zend_execute_data *call)
 	zend_vm_stack_free_call_frame(call);
 }
 
-static zval* ZEND_FASTCALL zend_jit_new_ref_helper(zval *value)
+static zend_reference* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_string *varname, void **cache_slot)
 {
-	zend_reference *ref = (zend_reference*)emalloc(sizeof(zend_reference));
-	GC_SET_REFCOUNT(ref, 1);
-	GC_TYPE_INFO(ref) = IS_REFERENCE;
-	ref->sources.ptr = NULL;
-	ZVAL_COPY_VALUE(&ref->val, value);
-	Z_REF_P(value) = ref;
-	Z_TYPE_INFO_P(value) = IS_REFERENCE_EX;
+	zval *value;
+	uintptr_t idx;
+	zend_reference *ref;
 
-	return value;
-}
+	/* We store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
+	idx = (uintptr_t)CACHED_PTR_EX(cache_slot) - 1;
+	if (EXPECTED(idx < EG(symbol_table).nNumUsed * sizeof(Bucket))) {
+		Bucket *p = (Bucket*)((char*)EG(symbol_table).arData + idx);
 
-static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execute_data, zval *varname, uint32_t cache_slot)
-{
-	uint32_t idx;
-	zval *value = zend_hash_find(&EG(symbol_table), Z_STR_P(varname));
+		if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
+	        (EXPECTED(p->key == varname) ||
+	         (EXPECTED(p->h == ZSTR_H(varname)) &&
+	          EXPECTED(p->key != NULL) &&
+	          EXPECTED(zend_string_equal_content(p->key, varname))))) {
 
+			value = (zval*)p; /* value = &p->val; */
+			goto check_indirect;
+		}
+	}
+
+	value = zend_hash_find_ex(&EG(symbol_table), varname, 1);
 	if (UNEXPECTED(value == NULL)) {
-		value = zend_hash_add_new(&EG(symbol_table), Z_STR_P(varname), &EG(uninitialized_zval));
-		idx = ((char*)value - (char*)EG(symbol_table).arData) / sizeof(Bucket);
+		value = zend_hash_add_new(&EG(symbol_table), varname, &EG(uninitialized_zval));
+		idx = (char*)value - (char*)EG(symbol_table).arData;
 		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
-		CACHE_PTR(cache_slot, (void*)(uintptr_t)(idx + 1));
+		CACHE_PTR_EX(cache_slot, (void*)(idx + 1));
 	} else {
-		idx = ((char*)value - (char*)EG(symbol_table).arData) / sizeof(Bucket);
+		idx = (char*)value - (char*)EG(symbol_table).arData;
 		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
-		CACHE_PTR(cache_slot, (void*)(uintptr_t)(idx + 1));
+		CACHE_PTR_EX(cache_slot, (void*)(idx + 1));
+check_indirect:
 		/* GLOBAL variable may be an INDIRECT pointer to CV */
 		if (UNEXPECTED(Z_TYPE_P(value) == IS_INDIRECT)) {
 			value = Z_INDIRECT_P(value);
@@ -1135,13 +1159,17 @@ static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execu
 	}
 
 	if (UNEXPECTED(!Z_ISREF_P(value))) {
-		return zend_jit_new_ref_helper(value);
+		ZVAL_MAKE_REF_EX(value, 2);
+		ref = Z_REF_P(value);
+	} else {
+		ref = Z_REF_P(value);
+		GC_ADDREF(ref);
 	}
 
-	return value;
+	return ref;
 }
 
-static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot)
+static zend_always_inline zend_bool zend_jit_verify_type_common(zval *arg, const zend_op_array *op_array, zend_arg_info *arg_info, void **cache_slot)
 {
 	uint32_t type_mask;
 
@@ -1162,7 +1190,7 @@ static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_arra
 					*cache_slot = ce;
 				}
 				if (instanceof_function(Z_OBJCE_P(arg), ce)) {
-					return;
+					return 1;
 				}
 				cache_slot++;
 			} ZEND_TYPE_LIST_FOREACH_END();
@@ -1177,24 +1205,40 @@ static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_arra
 				*cache_slot = (void *) ce;
 			}
 			if (instanceof_function(Z_OBJCE_P(arg), ce)) {
-				return;
+				return 1;
 			}
 		}
 	}
 
 builtin_types:
 	type_mask = ZEND_TYPE_FULL_MASK(arg_info->type);
-	if ((type_mask & MAY_BE_CALLABLE) && zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL)) {
-		return;
+	if ((type_mask & MAY_BE_CALLABLE) && zend_is_callable(arg, 0, NULL)) {
+		return 1;
 	}
 	if ((type_mask & MAY_BE_ITERABLE) && zend_is_iterable(arg)) {
-		return;
+		return 1;
+	}
+	if ((type_mask & MAY_BE_STATIC) && zend_value_instanceof_static(arg)) {
+		return 1;
 	}
 	if (zend_verify_scalar_type_hint(type_mask, arg, ZEND_ARG_USES_STRICT_TYPES(), /* is_internal */ 0)) {
-		return;
+		return 1;
 	}
+	return 0;
+}
 
-	zend_verify_arg_error((zend_function*)op_array, arg_info, arg_num, cache_slot, arg);
+static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, const zend_op_array *op_array, uint32_t arg_num, zend_arg_info *arg_info, void **cache_slot)
+{
+	if (UNEXPECTED(!zend_jit_verify_type_common(arg, op_array, arg_info, cache_slot))) {
+		zend_verify_arg_error((zend_function*)op_array, arg_info, arg_num, cache_slot, arg);
+	}
+}
+
+static void ZEND_FASTCALL zend_jit_verify_return_slow(zval *arg, const zend_op_array *op_array, zend_arg_info *arg_info, void **cache_slot)
+{
+	if (UNEXPECTED(!zend_jit_verify_type_common(arg, op_array, arg_info, cache_slot))) {
+		zend_verify_return_error((zend_function*)op_array, cache_slot, arg);
+	}
 }
 
 static void ZEND_FASTCALL zend_jit_zval_copy_deref_helper(zval *dst, zval *src)
@@ -1476,4 +1520,16 @@ static zval * ZEND_FASTCALL zend_jit_prepare_assign_dim_ref(zval *ref) {
 		ZVAL_ARR(val, zend_new_array(8));
 	}
 	return val;
+}
+
+static void ZEND_FASTCALL zend_jit_pre_inc(zval *var_ptr, zval *ret)
+{
+	increment_function(var_ptr);
+	ZVAL_COPY(ret, var_ptr);
+}
+
+static void ZEND_FASTCALL zend_jit_pre_dec(zval *var_ptr, zval *ret)
+{
+	decrement_function(var_ptr);
+	ZVAL_COPY(ret, var_ptr);
 }

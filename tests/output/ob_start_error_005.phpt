@@ -9,10 +9,10 @@ ob_start(): ensure buffers can't be added from within callback.
 */
 
 function f($str) {
-	ob_start();
-	echo "hello";
-	ob_end_flush();
-	return $str;
+    ob_start();
+    echo "hello";
+    ob_end_flush();
+    return $str;
 }
 
 

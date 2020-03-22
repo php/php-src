@@ -102,7 +102,7 @@ echo "Done";
 
 -- Iteration 1 --
 
-Fatal error: Uncaught TypeError: Expected parameter 1 to be an array, int given in %s:%d
+Fatal error: Uncaught TypeError: array_merge(): Argument #1 must be of type array, int given in %s:%d
 Stack trace:
 #0 %s(%d): array_merge(0, Array)
 #1 {main}

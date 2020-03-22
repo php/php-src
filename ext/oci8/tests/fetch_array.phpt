@@ -14,17 +14,17 @@ require __DIR__.'/create_table.inc';
 $insert_sql = "INSERT INTO ".$schema."".$table_name." (id, value) VALUES (1,1)";
 
 if (!($s = oci_parse($c, $insert_sql))) {
-	die("oci_parse(insert) failed!\n");
+    die("oci_parse(insert) failed!\n");
 }
 
 for ($i = 0; $i<3; $i++) {
-	if (!oci_execute($s)) {
-		die("oci_execute(insert) failed!\n");
-	}
+    if (!oci_execute($s)) {
+        die("oci_execute(insert) failed!\n");
+    }
 }
 
 if (!oci_commit($c)) {
-	die("oci_commit() failed!\n");
+    die("oci_commit() failed!\n");
 }
 
 echo "Test 1\n";
@@ -32,68 +32,68 @@ echo "Test 1\n";
 $select_sql = "SELECT * FROM ".$schema."".$table_name."";
 
 if (!($s = oci_parse($c, $select_sql))) {
-	die("oci_parse(select) failed!\n");
+    die("oci_parse(select) failed!\n");
 }
 
 if (!oci_execute($s)) {
-	die("oci_execute(select) failed!\n");
+    die("oci_execute(select) failed!\n");
 }
 while ($row = oci_fetch_array($s)) {
-	var_dump($row);
+    var_dump($row);
 }
 
 echo "Test 2\n";
 
 if (!oci_execute($s)) {
-	die("oci_execute(select) failed!\n");
+    die("oci_execute(select) failed!\n");
 }
 while ($row = oci_fetch_array($s, OCI_NUM)) {
-	var_dump($row);
+    var_dump($row);
 }
 
 echo "Test 3\n";
 
 if (!oci_execute($s)) {
-	die("oci_execute(select) failed!\n");
+    die("oci_execute(select) failed!\n");
 }
 while ($row = oci_fetch_array($s, OCI_ASSOC)) {
-	var_dump($row);
+    var_dump($row);
 }
 
 echo "Test 4\n";
 
 if (!oci_execute($s)) {
-	die("oci_execute(select) failed!\n");
+    die("oci_execute(select) failed!\n");
 }
 while ($row = oci_fetch_array($s, OCI_BOTH)) {
-	var_dump($row);
+    var_dump($row);
 }
 
 echo "Test 5\n";
 
 if (!oci_execute($s)) {
-	die("oci_execute(select) failed!\n");
+    die("oci_execute(select) failed!\n");
 }
 while ($row = oci_fetch_array($s, OCI_RETURN_LOBS)) {
-	var_dump($row);
+    var_dump($row);
 }
 
 echo "Test 6\n";
 
 if (!oci_execute($s)) {
-	die("oci_execute(select) failed!\n");
+    die("oci_execute(select) failed!\n");
 }
 while ($row = oci_fetch_array($s, OCI_RETURN_NULLS)) {
-	var_dump($row);
+    var_dump($row);
 }
 
 echo "Test 7\n";
 
 if (!oci_execute($s)) {
-	die("oci_execute(select) failed!\n");
+    die("oci_execute(select) failed!\n");
 }
 while ($row = oci_fetch_array($s, OCI_NUM+OCI_RETURN_NULLS)) {
-	var_dump($row);
+    var_dump($row);
 }
 
 require __DIR__.'/drop_table.inc';

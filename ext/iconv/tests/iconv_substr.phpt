@@ -7,26 +7,26 @@ iconv.internal_charset=ISO-8859-1
 --FILE--
 <?php
 function hexdump($str) {
-	$len = strlen($str);
-	for ($i = 0; $i < $len; ++$i) {
-		printf("%02x", ord($str[$i]));
-	}
-	print "\n";
+    $len = strlen($str);
+    for ($i = 0; $i < $len; ++$i) {
+        printf("%02x", ord($str[$i]));
+    }
+    print "\n";
 }
 
 function foo($str, $offset, $len, $charset) {
-	hexdump(substr($str, $offset, $len));
-	hexdump(iconv_substr($str, $offset, $len, $charset));
+    hexdump(substr($str, $offset, $len));
+    hexdump(iconv_substr($str, $offset, $len, $charset));
 }
 
 function bar($str, $offset, $len = false) {
-	if (is_bool($len)) {
-		var_dump(substr($str, $offset));
-		var_dump(iconv_substr($str, $offset));
-	} else {
-		var_dump(substr($str, $offset, $len));
-		var_dump(iconv_substr($str, $offset, $len));
-	}
+    if (is_bool($len)) {
+        var_dump(substr($str, $offset));
+        var_dump(iconv_substr($str, $offset));
+    } else {
+        var_dump(substr($str, $offset, $len));
+        var_dump(iconv_substr($str, $offset, $len));
+    }
 }
 
 foo("abcdefghijklmnopqrstuvwxyz", 5, 7, "ASCII");

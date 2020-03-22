@@ -25,16 +25,16 @@ $inputs = array(NULL, null, false, FALSE, "", '', @$undefined_var,
 
 $iterator = 1;
 foreach($inputs as $input) {
-	if(@is_array($mb_regs)){
-		$mb_regs = '';
-	}
-	echo "\n-- Iteration $iterator --\n";
-	echo "Without \$regs arg:\n";
-	var_dump( mb_ereg($input, 'hello, world') );
-	echo "With \$regs arg:\n";
-	var_dump(mb_ereg($input, 'hello, world', $mb_regs));
-	var_dump($mb_regs);
-	$iterator++;
+    if(@is_array($mb_regs)){
+        $mb_regs = '';
+    }
+    echo "\n-- Iteration $iterator --\n";
+    echo "Without \$regs arg:\n";
+    var_dump( mb_ereg($input, 'hello, world') );
+    echo "With \$regs arg:\n";
+    var_dump(mb_ereg($input, 'hello, world', $mb_regs));
+    var_dump($mb_regs);
+    $iterator++;
 };
 ?>
 --EXPECTF--

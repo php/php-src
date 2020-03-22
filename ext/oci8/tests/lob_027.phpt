@@ -39,15 +39,15 @@ oci_commit($c);
 
 for ($i = 5; $i >= 0; $i--) {
 
-	$select_sql = "SELECT blob FROM ".$schema.$table_name." FOR UPDATE";
-	$s = oci_parse($c, $select_sql);
-	oci_execute($s, OCI_DEFAULT);
+    $select_sql = "SELECT blob FROM ".$schema.$table_name." FOR UPDATE";
+    $s = oci_parse($c, $select_sql);
+    oci_execute($s, OCI_DEFAULT);
 
-	$row = oci_fetch_array($s);
-	var_dump($row['BLOB']->load());
-	var_dump($row['BLOB']->truncate(($i-1)*10));
+    $row = oci_fetch_array($s);
+    var_dump($row['BLOB']->load());
+    var_dump($row['BLOB']->truncate(($i-1)*10));
 
-	oci_commit($c);
+    oci_commit($c);
 }
 
 $select_sql = "SELECT blob FROM ".$schema.$table_name." FOR UPDATE";

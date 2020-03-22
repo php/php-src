@@ -13,8 +13,8 @@ require(__DIR__.'/connect.inc');
 // Initialization
 
 $stmtarray = array(
-	"drop table commit_002_tab",
-	"create table commit_002_tab
+    "drop table commit_002_tab",
+    "create table commit_002_tab
      ( x int constraint commit_002_tab_check_x check ( x > 0 ) deferrable initially immediate,
        y int constraint commit_002_tab_check_y check ( y > 0 ) deferrable initially deferred)"
 );
@@ -54,7 +54,7 @@ if (!$r) {
 // Clean up
 
 $stmtarray = array(
-	"drop table commit_002_tab"
+    "drop table commit_002_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

@@ -90,26 +90,26 @@ fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtr() function: with unexpected inputs for 'replace_pairs' ***
 
 -- Iteration 1 --
-If two arguments are passed, the second argument must be an array
+strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 2 --
-If two arguments are passed, the second argument must be an array
+strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 3 --
-If two arguments are passed, the second argument must be an array
+strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 4 --
-If two arguments are passed, the second argument must be an array
+strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 5 --
-If two arguments are passed, the second argument must be an array
+strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 6 --
-If two arguments are passed, the second argument must be an array
+strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 7 --
 string(6) "012atm"
@@ -121,32 +121,32 @@ string(6) "012atm"
 string(6) "122atm"
 
 -- Iteration 10 --
-If two arguments are passed, the second argument must be an array
+strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 11 --
-If two arguments are passed, the second argument must be an array
+strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 12 --
-If two arguments are passed, the second argument must be an array
+strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 13 --
-If two arguments are passed, the second argument must be an array
+strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 14 --
-If two arguments are passed, the second argument must be an array
+strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 15 --
-If two arguments are passed, the second argument must be an array
+strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 16 --
-If two arguments are passed, the second argument must be an array
+strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 17 --
-strtr() expects parameter 2 to be string or array, resource given
+strtr(): Argument #2 ($from) must be of type string|array, resource given
 
 -- Iteration 18 --
-If two arguments are passed, the second argument must be an array
+strtr(): Argument #2 ($from) must be of type array, string given
 
 -- Iteration 19 --
-If two arguments are passed, the second argument must be an array
+strtr(): Argument #2 ($from) must be of type array, string given
 *** Done ***

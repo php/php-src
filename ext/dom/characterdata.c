@@ -37,6 +37,10 @@ const zend_function_entry php_dom_characterdata_class_functions[] = {
 	PHP_ME(domcharacterdata, insertData, arginfo_class_DOMCharacterData_insertData, ZEND_ACC_PUBLIC)
 	PHP_ME(domcharacterdata, deleteData, arginfo_class_DOMCharacterData_deleteData, ZEND_ACC_PUBLIC)
 	PHP_ME(domcharacterdata, replaceData, arginfo_class_DOMCharacterData_replaceData, ZEND_ACC_PUBLIC)
+	PHP_ME(domcharacterdata, remove, arginfo_class_DOMChildNode_remove, ZEND_ACC_PUBLIC)
+	PHP_ME(domcharacterdata, after, arginfo_class_DOMChildNode_after, ZEND_ACC_PUBLIC)
+	PHP_ME(domcharacterdata, before, arginfo_class_DOMChildNode_before, ZEND_ACC_PUBLIC)
+	PHP_ME(domcharacterdata, replaceWith, arginfo_class_DOMChildNode_replaceWith, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
@@ -360,5 +364,105 @@ PHP_METHOD(domcharacterdata, replaceData)
 	RETURN_TRUE;
 }
 /* }}} end dom_characterdata_replace_data */
+
+PHP_METHOD(domcharacterdata, remove)
+{
+	zval *id = ZEND_THIS;
+	xmlNodePtr children, child;
+	dom_object *intern;
+	int stricterror;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	DOM_GET_OBJ(child, id, xmlNodePtr, intern);
+
+	if (dom_node_children_valid(child) == FAILURE) {
+		RETURN_NULL();
+	}
+
+	stricterror = dom_get_strict_error(intern->document);
+
+	if (dom_node_is_read_only(child) == SUCCESS ||
+		(child->parent != NULL && dom_node_is_read_only(child->parent) == SUCCESS)) {
+		php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, stricterror);
+		RETURN_NULL();
+	}
+
+	if (!child->parent) {
+		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+		RETURN_NULL();
+	}
+
+	children = child->parent->children;
+	if (!children) {
+		php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+		RETURN_NULL();
+	}
+
+	while (children) {
+		if (children == child) {
+			xmlUnlinkNode(child);
+			RETURN_NULL();
+		}
+		children = children->next;
+	}
+
+	php_dom_throw_error(NOT_FOUND_ERR, stricterror);
+	RETURN_NULL();
+}
+
+PHP_METHOD(domcharacterdata, after)
+{
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_after(intern, args, argc);
+}
+
+PHP_METHOD(domcharacterdata, before)
+{
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_before(intern, args, argc);
+}
+
+PHP_METHOD(domcharacterdata, replaceWith)
+{
+	int argc;
+	zval *args, *id;
+	dom_object *intern;
+	xmlNode *context;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "+", &args, &argc) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	id = ZEND_THIS;
+	DOM_GET_OBJ(context, id, xmlNodePtr, intern);
+
+	dom_parent_node_after(intern, args, argc);
+	dom_child_node_remove(intern);
+}
 
 #endif

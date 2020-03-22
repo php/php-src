@@ -1058,7 +1058,6 @@ ZEND_FUNCTION(get_class_methods)
 	zend_class_entry *ce = NULL;
 	zend_class_entry *scope;
 	zend_function *mptr;
-	zend_string *key;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &klass) == FAILURE) {
 		RETURN_THROWS();
@@ -1077,8 +1076,7 @@ ZEND_FUNCTION(get_class_methods)
 	array_init(return_value);
 	scope = zend_get_executed_scope();
 
-	ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, key, mptr) {
-
+	ZEND_HASH_FOREACH_PTR(&ce->function_table, mptr) {
 		if ((mptr->common.fn_flags & ZEND_ACC_PUBLIC)
 		 || (scope &&
 			 (((mptr->common.fn_flags & ZEND_ACC_PROTECTED) &&
@@ -1086,15 +1084,8 @@ ZEND_FUNCTION(get_class_methods)
 		   || ((mptr->common.fn_flags & ZEND_ACC_PRIVATE) &&
 			   scope == mptr->common.scope)))
 		) {
-			if (mptr->type == ZEND_USER_FUNCTION &&
-				(!mptr->op_array.refcount || *mptr->op_array.refcount > 1) &&
-				 key && !same_name(key, mptr->common.function_name)) {
-				ZVAL_STR_COPY(&method_name, zend_find_alias_name(mptr->common.scope, key));
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
-			} else {
-				ZVAL_STR_COPY(&method_name, mptr->common.function_name);
-				zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
-			}
+			ZVAL_STR_COPY(&method_name, mptr->common.function_name);
+			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &method_name);
 		}
 	} ZEND_HASH_FOREACH_END();
 }
@@ -1388,8 +1379,7 @@ ZEND_FUNCTION(set_error_handler)
 	if (Z_TYPE_P(error_handler) != IS_NULL) { /* NULL == unset */
 		if (!zend_is_callable(error_handler, 0, NULL)) {
 			zend_string *error_handler_name = zend_get_callable_name(error_handler);
-			zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
-					   get_active_function_name(), error_handler_name?ZSTR_VAL(error_handler_name):"unknown");
+			zend_error(E_WARNING, "%s(): Argument #1 ($error_handler) must be a valid callback", get_active_function_name());
 			zend_string_release_ex(error_handler_name, 0);
 			return;
 		}
@@ -1397,10 +1387,10 @@ ZEND_FUNCTION(set_error_handler)
 
 	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
 		ZVAL_COPY(return_value, &EG(user_error_handler));
-
-		zend_stack_push(&EG(user_error_handlers_error_reporting), &EG(user_error_handler_error_reporting));
-		zend_stack_push(&EG(user_error_handlers), &EG(user_error_handler));
 	}
+
+	zend_stack_push(&EG(user_error_handlers_error_reporting), &EG(user_error_handler_error_reporting));
+	zend_stack_push(&EG(user_error_handlers), &EG(user_error_handler));
 
 	if (Z_TYPE_P(error_handler) == IS_NULL) { /* unset user-defined handler */
 		ZVAL_UNDEF(&EG(user_error_handler));
@@ -1453,8 +1443,7 @@ ZEND_FUNCTION(set_exception_handler)
 	if (Z_TYPE_P(exception_handler) != IS_NULL) { /* NULL == unset */
 		if (!zend_is_callable(exception_handler, 0, NULL)) {
 		zend_string *exception_handler_name = zend_get_callable_name(exception_handler);
-			zend_error(E_WARNING, "%s() expects the argument (%s) to be a valid callback",
-					   get_active_function_name(), exception_handler_name?ZSTR_VAL(exception_handler_name):"unknown");
+			zend_error(E_WARNING, "%s(): Argument #1 ($exception_handler) must be a valid callback", get_active_function_name());
 			zend_string_release_ex(exception_handler_name, 0);
 			return;
 		}
@@ -1462,9 +1451,9 @@ ZEND_FUNCTION(set_exception_handler)
 
 	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
 		ZVAL_COPY(return_value, &EG(user_exception_handler));
-
-		zend_stack_push(&EG(user_exception_handlers), &EG(user_exception_handler));
 	}
+
+	zend_stack_push(&EG(user_exception_handlers), &EG(user_exception_handler));
 
 	if (Z_TYPE_P(exception_handler) == IS_NULL) { /* unset user-defined handler */
 		ZVAL_UNDEF(&EG(user_exception_handler));
@@ -1957,16 +1946,9 @@ ZEND_FUNCTION(debug_print_backtrace)
 		object = (Z_TYPE(call->This) == IS_OBJECT) ? Z_OBJ(call->This) : NULL;
 
 		if (call->func) {
-			zend_string *zend_function_name;
-
 			func = call->func;
-			if (func->common.scope && func->common.scope->trait_aliases) {
-				zend_function_name = zend_resolve_method_name(object ? object->ce : func->common.scope, func);
-			} else {
-				zend_function_name = func->common.function_name;
-			}
-			if (zend_function_name != NULL) {
-				function_name = ZSTR_VAL(zend_function_name);
+			if (func->common.function_name) {
+				function_name = ZSTR_VAL(func->common.function_name);
 			} else {
 				function_name = NULL;
 			}
@@ -2186,11 +2168,7 @@ ZEND_API void zend_fetch_debug_backtrace(zval *return_value, int skip_last, int 
 
 		if (call && call->func) {
 			func = call->func;
-			function_name = (func->common.scope &&
-							 func->common.scope->trait_aliases) ?
-				zend_resolve_method_name(
-					(object ? object->ce : func->common.scope), func) :
-				func->common.function_name;
+			function_name = func->common.function_name;
 		} else {
 			func = NULL;
 			function_name = NULL;

@@ -32,8 +32,8 @@ echo "Done\n";
 ?>
 --EXPECTF--
 *** Testing error conditions ***
-Offset not contained in string
-Offset not contained in string
+substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+substr_count(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 Warning: substr_count(): Invalid length value in %s on line %d
 bool(false)

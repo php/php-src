@@ -4,14 +4,14 @@ Bug #26737 (Protected and private variables are not saved on serialization when 
 <?php
 class foo
 {
-	private $private = 'private';
-	protected $protected = 'protected';
-	public $public = 'public';
+    private $private = 'private';
+    protected $protected = 'protected';
+    public $public = 'public';
 
-	public function __sleep()
-	{
-		return array('private', 'protected', 'public', 'no_such');
-	}
+    public function __sleep()
+    {
+        return array('private', 'protected', 'public', 'no_such');
+    }
 }
 $foo = new foo();
 $data = serialize($foo);

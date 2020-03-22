@@ -8,17 +8,17 @@ require_once('skipifconnectfailure.inc');
 ?>
 --FILE--
 <?php
-	require_once("connect.inc");
+    require_once("connect.inc");
 
-	require('table.inc');
+    require('table.inc');
 
-	var_dump(mysqli_sqlstate($link));
-	mysqli_query($link, "SELECT unknown_column FROM test");
-	var_dump(mysqli_sqlstate($link));
-	mysqli_free_result(mysqli_query($link, "SELECT id FROM test"));
-	var_dump(mysqli_sqlstate($link));
+    var_dump(mysqli_sqlstate($link));
+    mysqli_query($link, "SELECT unknown_column FROM test");
+    var_dump(mysqli_sqlstate($link));
+    mysqli_free_result(mysqli_query($link, "SELECT id FROM test"));
+    var_dump(mysqli_sqlstate($link));
 
-	mysqli_close($link);
+    mysqli_close($link);
 
     try {
         mysqli_sqlstate($link);
@@ -26,7 +26,7 @@ require_once('skipifconnectfailure.inc');
         echo $exception->getMessage() . "\n";
     }
 
-	print "done!";
+    print "done!";
 ?>
 --CLEAN--
 <?php

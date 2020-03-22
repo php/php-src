@@ -72,13 +72,13 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of abs()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	try {
-		var_dump(abs($input));
-	} catch (TypeError $e) {
-		echo $e->getMessage(), "\n";
-	}
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(abs($input));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 
 fclose($fp);
@@ -105,25 +105,25 @@ int(1)
 int(0)
 
 -- Iteration 7 --
-abs() expects parameter 1 to be int or float, string given
+abs(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 8 --
-abs() expects parameter 1 to be int or float, string given
+abs(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 9 --
-abs() expects parameter 1 to be int or float, array given
+abs(): Argument #1 ($number) must be of type int|float, array given
 
 -- Iteration 10 --
-abs() expects parameter 1 to be int or float, string given
+abs(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 11 --
-abs() expects parameter 1 to be int or float, string given
+abs(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 12 --
-abs() expects parameter 1 to be int or float, string given
+abs(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 13 --
-abs() expects parameter 1 to be int or float, object given
+abs(): Argument #1 ($number) must be of type int|float, object given
 
 -- Iteration 14 --
 int(0)
@@ -132,4 +132,4 @@ int(0)
 int(0)
 
 -- Iteration 16 --
-abs() expects parameter 1 to be int or float, resource given
+abs(): Argument #1 ($number) must be of type int|float, resource given

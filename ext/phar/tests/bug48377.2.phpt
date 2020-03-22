@@ -12,9 +12,9 @@ $fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.zip';
 $phar = new PharData($fname);
 $phar['x'] = 'hi';
 try {
-	$phar->convertToData(Phar::ZIP, Phar::NONE, 'phar.zip');
+    $phar->convertToData(Phar::ZIP, Phar::NONE, 'phar.zip');
 } catch (BadMethodCallException $e) {
-	echo $e->getMessage(),"\n";
+    echo $e->getMessage(),"\n";
 }
 ?>
 --CLEAN--

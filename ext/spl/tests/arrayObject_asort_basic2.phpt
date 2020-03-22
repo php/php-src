@@ -11,10 +11,10 @@ SPL: Test ArrayObject::asort() function : basic functionality with object based 
 
 echo "*** Testing ArrayObject::asort() : basic functionality ***\n";
 Class C {
-	public $prop1 = 'x';
-	public $prop2 = 'z';
-	private $prop3 = 'a';
-	public $prop4 = 'x';
+    public $prop1 = 'x';
+    public $prop2 = 'z';
+    private $prop3 = 'a';
+    public $prop4 = 'x';
 }
 
 $c = new C;

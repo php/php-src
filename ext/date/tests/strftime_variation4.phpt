@@ -18,7 +18,7 @@ $timestamp = mktime(8, 8, 8, 8, 8, 2008);
 $inputs = array(
       'Abbreviated month name' => "%b",
       'Full month name' => "%B",
-	  'Month as decimal' => "%m",
+      'Month as decimal' => "%m",
 );
 
 // loop through each element of the array for timestamp

@@ -10,7 +10,7 @@ fclose($fd);
 
 for ($flags = 0; $flags <= 32; $flags++) {
     try {
-	    var_dump(file($filepath, $flags));
+        var_dump(file($filepath, $flags));
     } catch (\ValueError $e) {
         echo $e->getMessage() . \PHP_EOL;
     }

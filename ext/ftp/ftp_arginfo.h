@@ -182,6 +182,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_ftp_close arginfo_ftp_cdup
 
+#define arginfo_ftp_quit arginfo_ftp_cdup
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_ftp_set_option, 0, 3, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)

@@ -46,13 +46,9 @@ typedef struct {
 	HashPosition pos[2];
 } phpdbg_intersect_ptr;
 
-static int phpdbg_array_data_compare(const void *a, const void *b) {
-	Bucket *f, *s;
+static int phpdbg_array_data_compare(Bucket *f, Bucket *s) {
 	int result;
 	zval *first, *second;
-
-	f = *((Bucket **) a);
-	s = *((Bucket **) b);
 
 	first = &f->val;
 	second = &s->val;
@@ -72,8 +68,8 @@ static void phpdbg_array_intersect_init(phpdbg_intersect_ptr *info, HashTable *h
 	info->ht[0] = ht1;
 	info->ht[1] = ht2;
 
-	zend_hash_sort(info->ht[0], (compare_func_t) phpdbg_array_data_compare, 0);
-	zend_hash_sort(info->ht[1], (compare_func_t) phpdbg_array_data_compare, 0);
+	zend_hash_sort(info->ht[0], phpdbg_array_data_compare, 0);
+	zend_hash_sort(info->ht[1], phpdbg_array_data_compare, 0);
 
 	zend_hash_internal_pointer_reset_ex(info->ht[0], &info->pos[0]);
 	zend_hash_internal_pointer_reset_ex(info->ht[1], &info->pos[1]);

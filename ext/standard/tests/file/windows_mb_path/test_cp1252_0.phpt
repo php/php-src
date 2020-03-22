@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(437, "oem");
 
 ?>
+--CONFLICTS--
+file
 --INI--
 internal_encoding=cp1252
 --FILE--

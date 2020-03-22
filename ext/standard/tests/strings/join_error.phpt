@@ -26,5 +26,5 @@ echo "Done\n";
 *** Testing join() : error conditions ***
 
 -- Testing join() with less than expected no. of arguments --
-Argument must be an array
+join(): Argument #1 ($pieces) must be of type array, string given
 Done

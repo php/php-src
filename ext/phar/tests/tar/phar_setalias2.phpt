@@ -21,7 +21,7 @@ $files['b'] = 'b';
 $files['c'] = 'c';
 
 foreach ($files as $n => $file) {
-	$phar[$n] = $file;
+    $phar[$n] = $file;
 }
 
 $phar->stopBuffering();
@@ -33,9 +33,9 @@ $b = $phar;
 $phar = new Phar(__DIR__ . '/notphar.phar');
 
 try {
-	$phar->setAlias('test');
+    $phar->setAlias('test');
 } catch (Exception $e) {
-	echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 
 ?>

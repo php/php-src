@@ -12,62 +12,62 @@ file_put_contents($filename, $xmlstring);
 
 $reader = new XMLReader();
 if (!$reader->open($filename)) {
-	exit();
+    exit();
 }
 
 // Only go through
 while ($reader->read()) {
-	if ($reader->nodeType != XMLREADER::END_ELEMENT) {
-		if ($reader->nodeType == XMLREADER::ELEMENT && $reader->hasAttributes) {
-			$attr = $reader->moveToFirstAttribute();
-			echo $reader->name . ": ";
-			echo $reader->value . "\n";
+    if ($reader->nodeType != XMLREADER::END_ELEMENT) {
+        if ($reader->nodeType == XMLREADER::ELEMENT && $reader->hasAttributes) {
+            $attr = $reader->moveToFirstAttribute();
+            echo $reader->name . ": ";
+            echo $reader->value . "\n";
 
-			if ($reader->getAttribute($reader->name) == $reader->value) {
-				echo "1st attr (num) failed\n";
-			}
+            if ($reader->getAttribute($reader->name) == $reader->value) {
+                echo "1st attr (num) failed\n";
+            }
 
 
-			$attr = $reader->moveToNextAttribute();
-			echo $reader->name . ": ";
-			echo $reader->value . "\n";
+            $attr = $reader->moveToNextAttribute();
+            echo $reader->name . ": ";
+            echo $reader->value . "\n";
 
-			if ($reader->getAttribute($reader->name) == $reader->value) {
-				echo "2nd attr (idx) failed\n";
-			}
+            if ($reader->getAttribute($reader->name) == $reader->value) {
+                echo "2nd attr (idx) failed\n";
+            }
 
-			// Named attribute
-			$attr = $reader->moveToAttribute('num');
-			echo $reader->name . ": ";
-			echo $reader->value . "\n";
+            // Named attribute
+            $attr = $reader->moveToAttribute('num');
+            echo $reader->name . ": ";
+            echo $reader->value . "\n";
 
-			if ($reader->getAttribute('num') == $reader->value) {
-				echo "attr num failed\n";
-			}
+            if ($reader->getAttribute('num') == $reader->value) {
+                echo "attr num failed\n";
+            }
 
-			$attr = $reader->moveToAttribute('idx');
-			echo $reader->name . ": ";
-			echo $reader->value . "\n";
+            $attr = $reader->moveToAttribute('idx');
+            echo $reader->name . ": ";
+            echo $reader->value . "\n";
 
-			if ($reader->getAttribute('idx') == $reader->value) {
-				echo "attr idx failed\n";
-			}
+            if ($reader->getAttribute('idx') == $reader->value) {
+                echo "attr idx failed\n";
+            }
 
-			// Numeric positions of attributes
-			$attr = $reader->moveToAttributeNo(0);
-			echo $reader->name . ": ";
-			echo $reader->value . "\n";
+            // Numeric positions of attributes
+            $attr = $reader->moveToAttributeNo(0);
+            echo $reader->name . ": ";
+            echo $reader->value . "\n";
 
-			if ($reader->getAttributeNo(0) == $reader->value) {
-				echo "attr 0 failed\n";
-			}
+            if ($reader->getAttributeNo(0) == $reader->value) {
+                echo "attr 0 failed\n";
+            }
 
-			$attr = $reader->moveToAttributeNo(1);
-			echo $reader->name . ": ";
-			echo $reader->value . "\n";
+            $attr = $reader->moveToAttributeNo(1);
+            echo $reader->name . ": ";
+            echo $reader->value . "\n";
 
-		}
-	}
+        }
+    }
 }
 $reader->close();
 unlink($filename);

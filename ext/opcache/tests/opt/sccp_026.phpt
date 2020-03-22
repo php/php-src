@@ -15,7 +15,7 @@ function test($var) {
         return;
     }
 
-    var_dump($username); 
+    var_dump($username);
 }
 ?>
 --EXPECTF--

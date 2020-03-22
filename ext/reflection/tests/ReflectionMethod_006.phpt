@@ -7,14 +7,14 @@ Steve Seear <stevseea@php.net>
 <?php
 
 try {
-	new ReflectionMethod();
+    new ReflectionMethod();
 } catch (TypeError $re) {
-	echo "Ok - ".$re->getMessage().PHP_EOL;
+    echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 try {
-	new ReflectionMethod('a', 'b', 'c');
+    new ReflectionMethod('a', 'b', 'c');
 } catch (TypeError $re) {
-	echo "Ok - ".$re->getMessage().PHP_EOL;
+    echo "Ok - ".$re->getMessage().PHP_EOL;
 }
 
 ?>

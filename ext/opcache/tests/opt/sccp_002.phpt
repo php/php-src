@@ -11,15 +11,15 @@ opcache.preload=
 --FILE--
 <?php
 function foo(int $x) {
-	$a = [$x];
-	$i = 1;
-	$c = $i < 2;
-	if ($c) {
-		$k = 2 * $i;
-		$a[$k] = $i;
-		echo $a[$k];
-	}
-	echo $a[2];
+    $a = [$x];
+    $i = 1;
+    $c = $i < 2;
+    if ($c) {
+        $k = 2 * $i;
+        $a[$k] = $i;
+        echo $a[$k];
+    }
+    echo $a[2];
 }
 ?>
 --EXPECTF--

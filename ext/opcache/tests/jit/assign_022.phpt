@@ -11,11 +11,11 @@ opcache.jit_buffer_size=1M
 --FILE--
 <?php
 function foo() {
-	$a = array(1);
-	$a[0] = $undef;
-	for($i=0; $i<6; $i++) {
-		$undef = 1;
-	}
+    $a = array(1);
+    $a[0] = $undef;
+    for($i=0; $i<6; $i++) {
+        $undef = 1;
+    }
 }
 foo();
 echo "ok\n";

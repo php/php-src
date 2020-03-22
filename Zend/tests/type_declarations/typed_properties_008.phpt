@@ -3,11 +3,11 @@ Test typed properties inheritance (missing info)
 --FILE--
 <?php
 class Foo {
-	public int $qux;
+    public int $qux;
 }
 
 class Bar extends Foo {
-	public $qux;
+    public $qux;
 }
 ?>
 --EXPECTF--

@@ -3,29 +3,29 @@ User-space streams: stream_truncate()
 --FILE--
 <?php
 class test_wrapper_base {
-	public $mode;
-	function stream_open($path, $mode, $openedpath) {
-		return true;
-	}
-	function stream_eof() {
-		return false;
-	}
+    public $mode;
+    function stream_open($path, $mode, $openedpath) {
+        return true;
+    }
+    function stream_eof() {
+        return false;
+    }
 }
 class test_wrapper extends test_wrapper_base {
-	function stream_truncate($new_size) {
-		echo "truncation with new_size=$new_size\n";
-		return true;
-	}
+    function stream_truncate($new_size) {
+        echo "truncation with new_size=$new_size\n";
+        return true;
+    }
 }
 class test_wrapper_bad extends test_wrapper_base {
-	function stream_truncate($new_size) {
-		echo "truncation with new_size=$new_size\n";
-		return "kkk";
-	}
+    function stream_truncate($new_size) {
+        echo "truncation with new_size=$new_size\n";
+        return "kkk";
+    }
 }
 function test($name, $fd, $dest_size) {
-	echo "------ $name: -------\n";
-	var_dump(ftruncate($fd, $dest_size));
+    echo "------ $name: -------\n";
+    var_dump(ftruncate($fd, $dest_size));
 }
 var_dump(stream_wrapper_register('test', 'test_wrapper'));
 var_dump(stream_wrapper_register('test2', 'test_wrapper_base'));

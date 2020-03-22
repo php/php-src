@@ -13,8 +13,8 @@ require(__DIR__.'/connect.inc');
 // Initialization
 
 $stmtarray = array(
-	"drop table lob_002_tab",
-	"create table lob_002_tab (id number, b1 BLOB)",
+    "drop table lob_002_tab",
+    "create table lob_002_tab (id number, b1 BLOB)",
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -47,7 +47,7 @@ var_dump(strlen($row[0]));
 // Cleanup
 
 $stmtarray = array(
-	"drop table lob_002_tab"
+    "drop table lob_002_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -60,13 +60,13 @@ object(OCI-Lob)#%d (1) {
 }
 int(0)
 
-Warning: OCI-Lob::write() expects parameter 2 to be int%s string given in %slob_002.php on line %d
+Warning: OCI-Lob::write(): Argument #2 must be of type int%s string given in %slob_002.php on line %d
 NULL
 int(4)
 int(40000)
 int(40004)
 
-Warning: OCI-Lob::seek() expects parameter 1 to be int%s string given in %slob_002.php on line %d
+Warning: OCI-Lob::seek(): Argument #1 must be of type int%s string given in %slob_002.php on line %d
 NULL
 bool(false)
 int(40004)

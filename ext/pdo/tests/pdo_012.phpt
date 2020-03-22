@@ -25,10 +25,10 @@ var_dump($stmt->fetchAll());
 
 class Test
 {
-	function __construct($name = 'N/A')
-	{
-		echo __METHOD__ . "($name)\n";
-	}
+    function __construct($name = 'N/A')
+    {
+        echo __METHOD__ . "($name)\n";
+    }
 }
 
 unset($stmt);

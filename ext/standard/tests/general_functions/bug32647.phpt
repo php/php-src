@@ -10,8 +10,8 @@ function foo()
 
 class bar
 {
-	function barfoo ()
-	{ echo "bar!\n"; }
+    function barfoo ()
+    { echo "bar!\n"; }
 }
 
 unset($obj);

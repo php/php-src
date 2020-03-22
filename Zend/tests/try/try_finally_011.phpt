@@ -3,10 +3,10 @@ Try finally (segfault with empty break)
 --FILE--
 <?php
 function foo () {
-	try {
-		break;
-	} finally {
-	}
+    try {
+        break;
+    } finally {
+    }
 }
 
 foo();

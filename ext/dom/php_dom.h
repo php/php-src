@@ -109,6 +109,7 @@ void node_list_unlink(xmlNodePtr node);
 int dom_check_qname(char *qname, char **localname, char **prefix, int uri_len, int name_len);
 xmlNsPtr dom_get_ns(xmlNodePtr node, char *uri, int *errorcode, char *prefix);
 void dom_set_old_ns(xmlDoc *doc, xmlNs *ns);
+void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep);
 xmlNsPtr dom_get_nsdecl(xmlNode *node, xmlChar *localName);
 void dom_normalize (xmlNodePtr nodep);
 xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *local, int *cur, int index);
@@ -117,13 +118,19 @@ int dom_hierarchy(xmlNodePtr parent, xmlNodePtr child);
 int dom_has_feature(char *feature, char *version);
 int dom_node_is_read_only(xmlNodePtr node);
 int dom_node_children_valid(xmlNodePtr node);
-void php_dom_create_interator(zval *return_value, int ce_type);
+void php_dom_create_iterator(zval *return_value, int ce_type);
 void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xmlHashTablePtr ht, xmlChar *local, xmlChar *ns);
 xmlNodePtr create_notation(const xmlChar *name, const xmlChar *ExternalID, const xmlChar *SystemID);
 xmlNode *php_dom_libxml_hash_iter(xmlHashTable *ht, int index);
 xmlNode *php_dom_libxml_notation_iter(xmlHashTable *ht, int index);
 zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 void dom_set_doc_classmap(php_libxml_ref_obj *document, zend_class_entry *basece, zend_class_entry *ce);
+
+void dom_parent_node_prepend(dom_object *context, zval *nodes, int nodesc);
+void dom_parent_node_append(dom_object *context, zval *nodes, int nodesc);
+void dom_parent_node_after(dom_object *context, zval *nodes, int nodesc);
+void dom_parent_node_before(dom_object *context, zval *nodes, int nodesc);
+void dom_child_node_remove(dom_object *context);
 
 #define REGISTER_DOM_CLASS(ce, name, parent_ce, funcs, entry) \
 INIT_CLASS_ENTRY(ce, name, funcs); \

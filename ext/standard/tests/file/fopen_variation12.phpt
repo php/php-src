@@ -15,33 +15,33 @@ testme();
 
 
 function testme() {
-	$tmpfile = basename(__FILE__, ".php") . ".tmp";
-	$h = fopen($tmpfile, "w", true);
-	fwrite($h, "This is the test file");
-	fclose($h);
+    $tmpfile = basename(__FILE__, ".php") . ".tmp";
+    $h = fopen($tmpfile, "w", true);
+    fwrite($h, "This is the test file");
+    fclose($h);
 
 
-	$h = @fopen($tmpfile, "r");
-	if ($h === false) {
-	   echo "Not created in working dir\n";
-	}
-	else {
-	   echo "created in working dir\n";
-	   fclose($h);
-	   unlink($tmpfile);
-	}
+    $h = @fopen($tmpfile, "r");
+    if ($h === false) {
+       echo "Not created in working dir\n";
+    }
+    else {
+       echo "created in working dir\n";
+       fclose($h);
+       unlink($tmpfile);
+    }
 
 
-	$scriptDirFile = __DIR__.'/'.$tmpfile;
-	$h = @fopen($scriptDirFile, "r");
-	if ($h === false) {
-	   echo "Not created in script dir\n";
-	}
-	else {
-	   echo "created in script dir\n";
-	   fclose($h);
-	   unlink($scriptDirFile);
-	}
+    $scriptDirFile = __DIR__.'/'.$tmpfile;
+    $h = @fopen($scriptDirFile, "r");
+    if ($h === false) {
+       echo "Not created in script dir\n";
+    }
+    else {
+       echo "created in script dir\n";
+       fclose($h);
+       unlink($scriptDirFile);
+    }
 }
 ?>
 --EXPECT--

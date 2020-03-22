@@ -16,4 +16,9 @@ var_dump(preg_match_all($regex, $subject, 'test'));
 echo "Done";
 ?>
 --EXPECTF--
-Fatal error: Only variables can be passed by reference in %spreg_match_all_error3.php on line %d
+*** Testing preg_match_all() : error conditions ***
+
+Fatal error: Uncaught Error: Cannot pass parameter 3 by reference in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d

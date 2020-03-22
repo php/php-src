@@ -1201,11 +1201,6 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 					return;
 				}
 
-				/* If $a in $a->foo=$c is UNDEF, treat it like NULL. There is no warning. */
-				if ((var_info->type & MAY_BE_ANY) == 0) {
-					op1 = &EG(uninitialized_zval);
-				}
-
 				if (IS_BOT(op1)) {
 					SET_RESULT_BOT(result);
 					SET_RESULT_BOT(op1);
@@ -2335,7 +2330,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 						}
 						break;
 					default:
-						if (zend_may_throw(opline, op_array, ssa)) {
+						if (zend_may_throw(opline, ssa_op, op_array, ssa)) {
 							return 0;
 						}
 						break;

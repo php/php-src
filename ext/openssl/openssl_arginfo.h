@@ -128,14 +128,20 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_openssl_pkey_get_public arginfo_openssl_x509_read
 
+#define arginfo_openssl_get_publickey arginfo_openssl_x509_read
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_pkey_free, 0, 1, IS_VOID, 0)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
+
+#define arginfo_openssl_free_key arginfo_openssl_pkey_free
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_get_private, 0, 0, 1)
 	ZEND_ARG_INFO(0, key)
 	ZEND_ARG_TYPE_INFO(0, passphrase, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_openssl_get_privatekey arginfo_openssl_pkey_get_private
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_openssl_pkey_get_details, 0, 1, MAY_BE_ARRAY|MAY_BE_FALSE)
 	ZEND_ARG_INFO(0, key)

@@ -15,7 +15,7 @@ $phar['sub/top.txt'] = 'there';
 $phar['another.file.txt'] = 'wowee';
 $newphar = new Phar($fname);
 foreach (new RecursiveIteratorIterator($newphar) as $path => $obj) {
-	var_dump($obj->getPathName());
+    var_dump($obj->getPathName());
 }
 ?>
 --CLEAN--

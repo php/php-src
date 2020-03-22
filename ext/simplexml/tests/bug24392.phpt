@@ -6,7 +6,7 @@ Bug #24392 (empty namespaces causing confusion)
 <?php
 $s = simplexml_load_file(__DIR__.'/bug24392.xml');
 foreach ($s->item as $item) {
-	echo $item->title . "\n";
+    echo $item->title . "\n";
 }
 ?>
 --EXPECT--

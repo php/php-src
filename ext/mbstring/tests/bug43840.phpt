@@ -24,19 +24,19 @@ $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXv
 $needle = base64_decode('44CC');
 
 foreach($offsets as $i) {
-	echo "\n-- Offset is $i --\n";
-	echo "--Multibyte String:--\n";
-	try {
-	    var_dump( mb_strpos($string_mb, $needle, $i, 'UTF-8') );
-	} catch (\ValueError $e) {
-	    echo $e->getMessage() . \PHP_EOL;
-	}
-	echo"--ASCII String:--\n";
-	try {
-	    var_dump(mb_strpos('This is na English ta', 'a', $i));
-	} catch (\ValueError $e) {
-	    echo $e->getMessage() . \PHP_EOL;
-	}
+    echo "\n-- Offset is $i --\n";
+    echo "--Multibyte String:--\n";
+    try {
+        var_dump( mb_strpos($string_mb, $needle, $i, 'UTF-8') );
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    echo"--ASCII String:--\n";
+    try {
+        var_dump(mb_strpos('This is na English ta', 'a', $i));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
 }
 ?>
 --EXPECT--

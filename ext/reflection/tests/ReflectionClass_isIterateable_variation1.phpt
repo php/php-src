@@ -9,8 +9,8 @@ class BasicClass {}
 
 function dump_iterateable($obj)
 {
-	$reflection = new ReflectionClass($obj);
-	var_dump($reflection->isIterateable());
+    $reflection = new ReflectionClass($obj);
+    var_dump($reflection->isIterateable());
 }
 
 $basicClass = new BasicClass();

@@ -13,12 +13,12 @@ require_once('skipif.inc');
 $xml = <<< EOXML
 <?xml version="1.0" encoding="utf-8"?>
 <courses>
-	<!-- Hello World! -->
-	<aNode>
-		<childNode>
-			<childlessNode />
-		</childNode>
-	</aNode>
+    <!-- Hello World! -->
+    <aNode>
+        <childNode>
+            <childlessNode />
+        </childNode>
+    </aNode>
 </courses>
 EOXML;
 
@@ -34,5 +34,5 @@ var_dump($result == $dom->saveXML());
 
 unlink($filename);
 --EXPECT--
-int(151)
+int(181)
 bool(true)

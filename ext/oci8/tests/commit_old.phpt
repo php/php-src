@@ -14,13 +14,13 @@ require __DIR__.'/create_table.inc';
 $insert_sql = "INSERT INTO ".$schema.$table_name." (id, value) VALUES (1,1)";
 
 if (!($s = ociparse($c, $insert_sql))) {
-	die("ociparse(insert) failed!\n");
+    die("ociparse(insert) failed!\n");
 }
 
 for ($i = 0; $i<3; $i++) {
-	if (!ociexecute($s, OCI_DEFAULT)) {
-		die("ociexecute(insert) failed!\n");
-	}
+    if (!ociexecute($s, OCI_DEFAULT)) {
+        die("ociexecute(insert) failed!\n");
+    }
 }
 
 var_dump(ocirollback($c));
@@ -28,18 +28,18 @@ var_dump(ocirollback($c));
 $select_sql = "SELECT * FROM ".$schema.$table_name."";
 
 if (!($select = ociparse($c, $select_sql))) {
-	die("ociparse(select) failed!\n");
+    die("ociparse(select) failed!\n");
 }
 
 if (!oci_execute($select)) {
-	die("ociexecute(select) failed!\n");
+    die("ociexecute(select) failed!\n");
 }
 var_dump(ocifetchstatement($select, $all));
 var_dump($all);
 
 /* ocifetchstatement */
 if (!ociexecute($s)) {
-	die("ociexecute(select) failed!\n");
+    die("ociexecute(select) failed!\n");
 }
 
 $insert_sql = "INSERT INTO ".$schema.$table_name." (id, value) VALUES (1,1)";
@@ -57,7 +57,7 @@ for ($i = 0; $i<3; $i++) {
 var_dump(ocicommit($c));
 
 if (!ociexecute($select)) {
-	die("ociexecute(select) failed!\n");
+    die("ociexecute(select) failed!\n");
 }
 var_dump(ocifetchstatement($select, $all));
 var_dump($all);

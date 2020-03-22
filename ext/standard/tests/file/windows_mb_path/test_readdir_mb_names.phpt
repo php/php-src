@@ -9,6 +9,8 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 skip_if_no_required_exts();
 
 ?>
+--CONFLICTS--
+mb_names
 --FILE--
 <?php
 
@@ -47,7 +49,7 @@ if (is_dir($dirw)) {
         closedir($dh);
     }
 } else {
-	echo "is_dir failed\n";
+    echo "is_dir failed\n";
 }
 set_active_cp($old_cp);
 

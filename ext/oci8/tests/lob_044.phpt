@@ -13,8 +13,8 @@ require(__DIR__.'/connect.inc');
 // Initialization
 
 $stmtarray = array(
-	"drop table lob_044_tab",
-	"create table lob_044_tab (blob BLOB)",
+    "drop table lob_044_tab",
+    "create table lob_044_tab (blob BLOB)",
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -51,7 +51,7 @@ var_dump($row[0]->read(10000));
 // Clean up
 
 $stmtarray = array(
-	"drop table lob_044_tab"
+    "drop table lob_044_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

@@ -20,9 +20,9 @@ $tests = array(
 
 foreach ($tests as $test) {
     $a = htmlentities($test, ENT_QUOTES | ENT_SUBSTITUTE, "EUC-JP");
-	var_dump($a, bin2hex($a));
+    var_dump($a, bin2hex($a));
     $a = htmlspecialchars($test, ENT_QUOTES | ENT_SUBSTITUTE, "EUC-JP");
-	var_dump($a, bin2hex($a));
+    var_dump($a, bin2hex($a));
     echo "\n";
 }
 ?>

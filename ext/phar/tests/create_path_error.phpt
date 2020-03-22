@@ -21,7 +21,7 @@ var_dump(file_get_contents($pname . '/b.php'));
 
 function error_handler($errno, $errmsg)
 {
-	echo "Error: $errmsg";
+    echo "Error: $errmsg";
 }
 
 set_error_handler('error_handler');
@@ -39,24 +39,24 @@ $checks = array(
 );
 foreach($checks as $check)
 {
-	$count++;
-	echo "$count:";
-	file_put_contents($pname . '/' . $check, "error");
-	echo "\n";
+    $count++;
+    echo "$count:";
+    file_put_contents($pname . '/' . $check, "error");
+    echo "\n";
 }
 
 $phar = new Phar($fname);
 $checks = array("a\0");
 foreach($checks as $check)
 {
-	try
-	{
-		$phar[$check] = 'error';
-	}
-	catch (TypeError $e)
-	{
-		echo 'Exception: ' . $e->getMessage() . "\n";
-	}
+    try
+    {
+        $phar[$check] = 'error';
+    }
+    catch (TypeError $e)
+    {
+        echo 'Exception: ' . $e->getMessage() . "\n";
+    }
 }
 
 ?>
@@ -78,4 +78,4 @@ string(5) "query"
 11:Error: file_put_contents(phar://%s): Failed to open stream: phar error: invalid path "%s" contains illegal character
 12:Error: file_put_contents(phar://%s): Failed to open stream: phar error: invalid path "%s" contains illegal character
 13:Error: file_put_contents(phar://%s): Failed to open stream: phar error: invalid path "%s" contains illegal character
-Exception: Phar::offsetSet() expects parameter 1 to be a valid path, string given
+Exception: Phar::offsetSet(): Argument #1 ($entry) must be a valid path, string given

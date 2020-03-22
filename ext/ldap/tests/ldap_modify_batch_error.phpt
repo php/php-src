@@ -13,11 +13,11 @@ require "connect.inc";
 $link = ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version);
 
 $addGivenName = array(
-	array(
-		"attrib"	=> "givenName",
-		"modtype"	=> LDAP_MODIFY_BATCH_ADD,
-		"values"	=> array("Jack")
-	)
+    array(
+        "attrib"	=> "givenName",
+        "modtype"	=> LDAP_MODIFY_BATCH_ADD,
+        "values"	=> array("Jack")
+    )
 );
 
 // DN not found
@@ -28,34 +28,34 @@ var_dump(ldap_modify_batch($link, "weirdAttribute=val", $addGivenName));
 
 // prepare
 $entry = array(
-	"objectClass"	=> array(
-		"top",
-		"dcObject",
-		"organization"),
-	"dc"			=> "my-domain",
-	"o"				=> "my-domain",
+    "objectClass"	=> array(
+        "top",
+        "dcObject",
+        "organization"),
+    "dc"			=> "my-domain",
+    "o"				=> "my-domain",
 );
 
 ldap_add($link, "dc=my-domain,$base", $entry);
 
 // invalid domain
 $mods = array(
-	array(
-		"attrib"	=> "dc",
-		"modtype"	=> LDAP_MODIFY_BATCH_REPLACE,
-		"values"	=> array("Wrong Domain")
-	)
+    array(
+        "attrib"	=> "dc",
+        "modtype"	=> LDAP_MODIFY_BATCH_REPLACE,
+        "values"	=> array("Wrong Domain")
+    )
 );
 
 var_dump(ldap_modify_batch($link, "dc=my-domain,$base", $mods));
 
 // invalid attribute
 $mods = array(
-	array(
-		"attrib"	=> "weirdAttribute",
-		"modtype"	=> LDAP_MODIFY_BATCH_ADD,
-		"values"	=> array("weirdVal", "anotherWeirdval")
-	)
+    array(
+        "attrib"	=> "weirdAttribute",
+        "modtype"	=> LDAP_MODIFY_BATCH_ADD,
+        "values"	=> array("weirdVal", "anotherWeirdval")
+    )
 );
 
 var_dump(ldap_modify_batch($link, "dc=my-domain,$base", $mods));

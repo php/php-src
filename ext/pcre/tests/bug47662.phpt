@@ -5,7 +5,7 @@ Bug #47662 (support more than 127 named subpatterns)
 
 $regex = '@';
 for($bar=0; $bar<129; $bar++) {
-	$regex .= '((?P<x'.$bar.'>))';
+    $regex .= '((?P<x'.$bar.'>))';
 }
 
 $regex .= 'fo+bar@';

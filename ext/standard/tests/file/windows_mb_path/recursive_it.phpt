@@ -15,7 +15,7 @@ $need_len = 1024;
 //$need_len = 259;
 $dir = __DIR__;
 while ($need_len - strlen($dir) > 32) {
-	$dir .= DIRECTORY_SEPARATOR . str_repeat("a", 32);
+    $dir .= DIRECTORY_SEPARATOR . str_repeat("a", 32);
 }
 $dir .= DIRECTORY_SEPARATOR . str_repeat("a", $need_len - strlen($dir));
 mkdir($dir, 0700, true);
@@ -26,34 +26,34 @@ file_put_contents($fl, "");
 
 $start = substr($dir, 0, strpos($dir, DIRECTORY_SEPARATOR, strlen(__DIR__)+1));
 $iter = new RecursiveIteratorIterator(
-	new RecursiveDirectoryIterator(
-		$start,
-		FilesystemIterator::SKIP_DOTS
-	),
-	RecursiveIteratorIterator::CHILD_FIRST
+    new RecursiveDirectoryIterator(
+        $start,
+        FilesystemIterator::SKIP_DOTS
+    ),
+    RecursiveIteratorIterator::CHILD_FIRST
 );
 
 foreach ($iter as $item) {
-	if (!$item->isDir()) {
-		var_dump($item->getPathname());
-	}
+    if (!$item->isDir()) {
+        var_dump($item->getPathname());
+    }
 }
 
 $iter->rewind();
 foreach ($iter as $item) {
-	if ($item->isDir()) {
-		rmdir($item->getPathname());
-	} else {
-		unlink($item->getPathname());
-	}
+    if ($item->isDir()) {
+        rmdir($item->getPathname());
+    } else {
+        unlink($item->getPathname());
+    }
 }
 rmdir($start);
 var_dump(file_exists($start));
 
 /*unlink($fl);
 do {
-	rmdir($dir);
-	$dir = dirname($dir);
+    rmdir($dir);
+    $dir = dirname($dir);
 } while (__DIR__ != $dir);*/
 
 ?>

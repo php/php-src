@@ -4,9 +4,9 @@ Bug #42233 (extract(): scandic characters not allowed as variable name)
 <?php
 
 $test = array(
-	'a'     => '1',
-	'æ'     => '2',
-	'æøåäö' => '3',
+    'a'     => '1',
+    'æ'     => '2',
+    'æøåäö' => '3',
 );
 
 var_dump($test);

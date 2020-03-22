@@ -30,27 +30,27 @@ int fprintf(FILE *, const char *, ...);
 $ffi = FFI::cdef($header, 'libc.so.6');
 
 try {
-	$ffi->time();
+    $ffi->time();
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage() . "\n";
+    echo get_class($e) . ": " . $e->getMessage() . "\n";
 }
 
 try {
-	$ffi->time(null, null);
+    $ffi->time(null, null);
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage() . "\n";
+    echo get_class($e) . ": " . $e->getMessage() . "\n";
 }
 
 try {
-	$ffi->fprintf($ffi->stdout);
+    $ffi->fprintf($ffi->stdout);
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage() . "\n";
+    echo get_class($e) . ": " . $e->getMessage() . "\n";
 }
 
 try {
-	$ffi->fprintf($ffi->stdout, 123, "Hello %s\n", "World");
+    $ffi->fprintf($ffi->stdout, 123, "Hello %s\n", "World");
 } catch (Throwable $e) {
-	echo get_class($e) . ": " . $e->getMessage() . "\n";
+    echo get_class($e) . ": " . $e->getMessage() . "\n";
 }
 ?>
 --EXPECT--

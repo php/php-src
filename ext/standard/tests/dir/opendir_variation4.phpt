@@ -64,10 +64,10 @@ clean_dh($dh);
  * and to ensure directory is not in use at CLEAN section so can me removed
  */
 function clean_dh($dh){
-	if (is_resource($dh)) {
-		closedir($dh);
-	}
-	unset($dh);
+    if (is_resource($dh)) {
+        closedir($dh);
+    }
+    unset($dh);
 }
 ?>
 --CLEAN--

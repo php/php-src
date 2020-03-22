@@ -20,7 +20,7 @@ $php_executable = getenv('TEST_PHP_EXECUTABLE');
 $script = __DIR__ . "/expect.sh";
 
 if (extension_loaded("readline")) {
-	$expect_script = <<<SCRIPT
+    $expect_script = <<<SCRIPT
 
 set php_executable [lindex \$argv 0]
 
@@ -38,7 +38,7 @@ exit
 SCRIPT;
 
 } else {
-	$expect_script = <<<SCRIPT
+    $expect_script = <<<SCRIPT
 
 set php_executable [lindex \$argv 0]
 

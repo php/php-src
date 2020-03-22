@@ -353,7 +353,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_pad, 0, 2, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, length, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_sodium_unpad arginfo_sodium_pad
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sodium_unpad, 0, 2, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, string, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, block_size, IS_LONG, 0)
+ZEND_END_ARG_INFO()
 
 #define arginfo_sodium_bin2hex arginfo_sodium_crypto_kx_seed_keypair
 

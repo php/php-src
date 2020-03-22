@@ -1881,7 +1881,12 @@ MYSQLND_CLASS_METHODS_START(mysqlnd_res)
 	MYSQLND_METHOD(mysqlnd_res, free_result),
 	MYSQLND_METHOD(mysqlnd_res, free_result_internal),
 	MYSQLND_METHOD(mysqlnd_res, free_result_contents_internal),
-	mysqlnd_result_meta_init
+	mysqlnd_result_meta_init,
+	NULL, /* unused1 */
+	NULL, /* unused2 */
+	NULL, /* unused3 */
+	NULL, /* unused4 */
+	NULL  /* unused5 */
 MYSQLND_CLASS_METHODS_END;
 
 

@@ -8,7 +8,7 @@ include_path=.
 class MyAutoLoader {
 
         static function autoLoad($className) {
-        	echo __METHOD__ . "($className)\n";
+            echo __METHOD__ . "($className)\n";
         }
 }
 

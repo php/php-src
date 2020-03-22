@@ -32,16 +32,16 @@ socket_set_option($s, IPPROTO_IPV6, IPV6_RECVPKTINFO, 1) or die("err");
 socket_set_option($s, IPPROTO_IPV6, IPV6_RECVTCLASS, 1) or die("err");
 
 $r = socket_sendmsg($sends1, [
-	"name" => [ "addr" => "::1", "port" => 3003],
-	"iov" => ["test ", "thing", "\n"],
-	"control" => [[
-		"level" => IPPROTO_IPV6,
-		"type" => IPV6_PKTINFO,
-		"data" => [
-			'addr' => '::1',
+    "name" => [ "addr" => "::1", "port" => 3003],
+    "iov" => ["test ", "thing", "\n"],
+    "control" => [[
+        "level" => IPPROTO_IPV6,
+        "type" => IPV6_PKTINFO,
+        "data" => [
+            'addr' => '::1',
             'ifindex' => 1 /* we're assuming loopback is 1. Is this a safe assumption? */
-		],
-	]]
+        ],
+    ]]
 ], 0);
 var_dump($r);
 checktimeout($s, 500);
@@ -50,7 +50,7 @@ $data = [
     "name" => ["family" => AF_INET6, "addr" => "::1"],
     "buffer_size" => 2000,
     "controllen" => socket_cmsg_space(IPPROTO_IPV6, IPV6_PKTINFO) +
-			socket_cmsg_space(IPPROTO_IPV6, IPV6_TCLASS),
+            socket_cmsg_space(IPPROTO_IPV6, IPV6_TCLASS),
 ];
 if (!socket_recvmsg($s, $data, 0)) die("recvmsg");
 print_r($data);

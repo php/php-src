@@ -24,9 +24,9 @@ unset ($unset_var);
 // get a class
 class classA
 {
-	public function __toString() {
-		return "myClass";
-	}
+    public function __toString() {
+        return "myClass";
+    }
 }
 
 // heredoc string

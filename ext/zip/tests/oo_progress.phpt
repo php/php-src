@@ -17,13 +17,13 @@ $file = $dirname . '__tmp_oo_progress.zip';
 
 $zip = new ZipArchive;
 if (!$zip->open($file, ZIPARCHIVE::CREATE)) {
-	exit('failed');
+    exit('failed');
 }
 
 var_dump($zip->registerProgressCallback(0.5, function ($r) {
-	// Only check start/end as intermediate is not reliable
-	if ($r == 0.0) echo "start\n";
-	if ($r == 1.0) echo "end\n";
+    // Only check start/end as intermediate is not reliable
+    if ($r == 0.0) echo "start\n";
+    if ($r == 1.0) echo "end\n";
 }));
 var_dump($zip->addFromString('foo', 'entry #1'));
 

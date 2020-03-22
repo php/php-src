@@ -5,9 +5,9 @@ Bug #72888 (Segfault on clone on splFileObject)
 $x = new SplFileObject(__FILE__);
 
 try {
-	$y=clone $x;
+    $y=clone $x;
 } catch (Error $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 var_dump($y);
 ?>

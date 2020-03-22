@@ -92,13 +92,13 @@ $valid_objects = array(
 /* Loop to check for above objects with var_export() */
 echo "\n*** Output for objects ***\n";
 foreach($valid_objects as $key => $obj) {
-	echo "\n-- Iteration: $key --\n";
-	var_export( $obj );
-	echo "\n";
-	var_export( $obj, FALSE);
-	echo "\n";
-	var_dump( var_export( $obj, TRUE) );
-	echo "\n";
+    echo "\n-- Iteration: $key --\n";
+    var_export( $obj );
+    echo "\n";
+    var_export( $obj, FALSE);
+    echo "\n";
+    var_dump( var_export( $obj, TRUE) );
+    echo "\n";
 }
 ?>
 --EXPECT--

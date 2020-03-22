@@ -22,9 +22,9 @@ ob_start();
  */
 
 function noisy_gc($maxlifetime) {
-	echo("GC [".$maxlifetime."]\n");
-	echo gc($maxlifetime)." deleted\n";
-	return true;
+    echo("GC [".$maxlifetime."]\n");
+    echo gc($maxlifetime)." deleted\n";
+    return true;
 }
 
 echo "*** Testing session_set_save_handler() : variation ***\n";

@@ -6,9 +6,9 @@ SPL: FixedArray: adding new elements
 $a = new SplFixedArray(10);
 
 try {
-	$a[] = 1;
+    $a[] = 1;
 } catch (Exception $e) {
-	var_dump($e->getMessage());
+    var_dump($e->getMessage());
 }
 
 ?>

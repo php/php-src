@@ -20,7 +20,7 @@ mkdir($tmpDir);
 // mounted volume
 $volume = trim(exec('mountvol C: /L'));
 exec(sprintf('mountvol "%s" %s', $tmpDir, $volume));
-var_dump(readlink($tmpDir)); 
+var_dump(readlink($tmpDir));
 exec(sprintf('mountvol "%s" /D', $tmpDir));
 
 mkdir($tmpDir . '\\test\\directory', 0777, true);
@@ -35,7 +35,7 @@ rmdir($link);
 // junction to a directory
 $link = $tmpDir . '\\test\\directory_junction';
 $target = $tmpDir . '\\test\\directory';
-exec(sprintf('mklink /J "%s" "%s"', $link, $target)); 
+exec(sprintf('mklink /J "%s" "%s"', $link, $target));
 var_dump(readlink($link));
 rmdir($link);
 
@@ -56,7 +56,7 @@ fclose($fh);
 
 // symlink to a file (absolute and relative)
 $link = $tmpDir . '\\test\\file_symlink';
-exec(sprintf('mklink "%s" "%s"', $link, $filename)); 
+exec(sprintf('mklink "%s" "%s"', $link, $filename));
 var_dump(readlink($link));
 unlink($link);
 exec(sprintf('mklink "%s" directory\\a.php', $link));
@@ -64,7 +64,7 @@ var_dump(readlink($link));
 unlink($link);
 
 // unexpected behaviour
-echo "\n*** Unexpected behaviour when not a reparse point\n"; 
+echo "\n*** Unexpected behaviour when not a reparse point\n";
 var_dump(readlink($tmpDir . '\\test\\directory'));
 var_dump(readlink($filename));
 

@@ -60,12 +60,12 @@ class TestClass
 class DerivedClass extends TestClass {}
 
 interface TestInterface {
-	public function int();
-	public function __clone();
+    public function int();
+    public function __clone();
 }
 
 abstract class AbstractClass {
-	public abstract function foo();
+    public abstract function foo();
 }
 
 
@@ -81,7 +81,7 @@ echo "ReflectionMethod::getModifiers() modifiers:\n";
 printf("0x%08x\n", $a->getModifiers());
 
 ?>
---EXPECTF--
+--EXPECT--
 Modifiers for method TestClass::foo():
 0x00000001
 
@@ -156,10 +156,6 @@ Modifiers for method TestClass::foo():
 
 Modifiers for method TestClass::stat():
 0x00000011
-
-
-Modifiers for method TestClass::priv():
-0x00000004
 
 
 Modifiers for method TestClass::prot():

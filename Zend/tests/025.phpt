@@ -4,9 +4,9 @@ Testing dynamic calls
 <?php
 
 class foo {
-	static public function a() {
-		print "ok\n";
-	}
+    static public function a() {
+        print "ok\n";
+    }
 }
 
 $a = 'a';

@@ -1,12 +1,12 @@
 --TEST--
-Typed references must be kept track of and always be only the intersection of the types currently holding that reference
+Typed references must be kept track of and always be only the intersection of the type currently holding that reference
 --FILE--
 <?php
 
 $a = new class {
-	public ?iterable $it = [];
-	public ?array $a;
-	public ?Traversable $t;
+    public ?iterable $it = [];
+    public ?array $a;
+    public ?Traversable $t;
 };
 
 $ref = &$a->it;
@@ -15,7 +15,7 @@ $a->a = &$ref;
 var_dump($ref);
 
 try {
-	$a->t = &$ref;
+    $a->t = &$ref;
 } catch (TypeError $e) { var_dump($e->getMessage()); }
 var_dump($ref);
 
@@ -23,7 +23,7 @@ $a->it = [1]; // type is still assignable
 var_dump($ref);
 
 try {
-	$ref = new ArrayIterator();
+    $ref = new ArrayIterator();
 } catch (TypeError $e) { var_dump($e->getMessage()); }
 var_dump($ref instanceof ArrayIterator);
 
@@ -34,7 +34,7 @@ $ref = null;
 $a->t = &$ref;
 
 try {
-	$ref = [];
+    $ref = [];
 } catch (TypeError $e) { var_dump($e->getMessage()); }
 var_dump($ref instanceof ArrayIterator);
 

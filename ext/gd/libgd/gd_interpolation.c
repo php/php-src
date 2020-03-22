@@ -1771,8 +1771,8 @@ gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int 
 			const gdFixed f_j = gd_itofx((int)j - (int)new_width/2);
 			const gdFixed f_m = gd_mulfx(f_j,f_sin) + gd_mulfx(f_i,f_cos) + f_0_5 + f_H;
 			const gdFixed f_n = gd_mulfx(f_j,f_cos) - gd_mulfx(f_i,f_sin) + f_0_5 + f_W;
-			const unsigned int m = gd_fxtoi(f_m);
-			const unsigned int n = gd_fxtoi(f_n);
+			const int m = gd_fxtoi(f_m);
+			const int n = gd_fxtoi(f_n);
 
 			if ((m >= 0) && (m < src_h - 1) && (n >= 0) && (n < src_w - 1)) {
 				const gdFixed f_f = f_m - gd_itofx(m);

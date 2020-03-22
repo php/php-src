@@ -4,7 +4,7 @@ Test typed properties float widen at runtime
 <?php
 
 class Foo {
-	public float $bar = 1.1;
+    public float $bar = 1.1;
 }
 
 $foo = new Foo;

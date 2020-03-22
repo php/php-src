@@ -10,4 +10,4 @@ try {
 
 ?>
 --EXPECT--
-The length must be greater than or equal to zero
+substr_compare(): Argument #4 ($length) must be greater than or equal to 0

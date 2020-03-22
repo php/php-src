@@ -9,12 +9,12 @@ ffi.enable=1
 $type = FFI::type("int*");
 
 function foo($ptr) {
-	global $type;
-	//$buf = FFI::new("int*[1]"); /* this loses type and crash */
-	$buf = FFI::new(FFI::arrayType($type, [1]));
-	$buf[0] = $ptr;
-	//...
-	return $buf[0];
+    global $type;
+    //$buf = FFI::new("int*[1]"); /* this loses type and crash */
+    $buf = FFI::new(FFI::arrayType($type, [1]));
+    $buf[0] = $ptr;
+    //...
+    return $buf[0];
 }
 
 $int = FFI::new("int");

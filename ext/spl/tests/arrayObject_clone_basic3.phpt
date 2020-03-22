@@ -3,7 +3,7 @@ SPL: Cloning nested ArrayObjects.
 --FILE--
 <?php
 class C {
-	public $p = 'C::p.orig';
+    public $p = 'C::p.orig';
 }
 
 $wrappedObject = new C;

@@ -29,13 +29,13 @@ class object_class {
   public $value4 = 30;
 
   private function foo1() {
-	echo "function foo1\n";
+    echo "function foo1\n";
   }
   protected function foo2() {
-	echo "function foo2\n";
+    echo "function foo2\n";
   }
   public function foo3() {
-	echo "function foo3\n";
+    echo "function foo3\n";
   }
   public $array_var  = array( "key1" => 1, "key2 " => 3);
 

@@ -32,7 +32,7 @@ var_dump(oci_define_by_name($stmt, ""));
 oci_execute($stmt);
 
 while (oci_fetch($stmt)) {
-	var_dump($string);
+    var_dump($string);
 }
 
 // Cleanup

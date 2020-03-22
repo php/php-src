@@ -15,7 +15,7 @@ $file = __DIR__ . "hash_file.txt";
 $key = 'secret';
 
 echo "\n-- Testing hash_hmac_file() function with invalid hash algorithm --\n";
-try { 
+try {
     var_dump(hash_hmac_file('foo', $file, $key, TRUE));
 }
 catch (\Error $e) {

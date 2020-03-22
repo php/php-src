@@ -10,19 +10,19 @@ Test wrong number of arguments for microtime()
 echo "\n-- Bad Arg types --\n";
 
 $bad_args = array(null,
-				  1.5,
-				  "hello",
-				  array('k'=>'v', array(0)),
-				  new stdClass,
-				  1);
+                  1.5,
+                  "hello",
+                  array('k'=>'v', array(0)),
+                  new stdClass,
+                  1);
 foreach ($bad_args as $bad_arg) {
-	echo "\n--> bad arg: ";
-	var_dump($bad_arg);
-	try {
-		var_dump(microtime($bad_arg));
-	} catch (TypeError $e) {
-		echo $e->getMessage(), "\n";
-	}
+    echo "\n--> bad arg: ";
+    var_dump($bad_arg);
+    try {
+        var_dump(microtime($bad_arg));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 
 ?>
@@ -47,11 +47,11 @@ float(%s)
     int(0)
   }
 }
-microtime() expects parameter 1 to be bool, array given
+microtime(): Argument #1 ($get_as_float) must be of type bool, array given
 
 --> bad arg: object(stdClass)#%d (0) {
 }
-microtime() expects parameter 1 to be bool, object given
+microtime(): Argument #1 ($get_as_float) must be of type bool, object given
 
 --> bad arg: int(1)
 float(%s)

@@ -25,13 +25,13 @@ $a->extractTo(__DIR__ . '/extract');
 $out = array();
 
 foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(__DIR__ . '/extract', 0x00003000), RecursiveIteratorIterator::CHILD_FIRST) as $p => $b) {
-	$out[] = $p;
+    $out[] = $p;
 }
 
 sort($out);
 
 foreach ($out as $b) {
-	echo "$b\n";
+    echo "$b\n";
 }
 
 $a->extractTo(__DIR__ . '/extract1', 'file1.txt');
@@ -45,9 +45,9 @@ var_dump(file_get_contents(__DIR__ . '/extract1-2/file2.txt'));
 var_dump(is_dir(__DIR__ . '/extract1-2/one/level'));
 
 try {
-	$a->extractTo(__DIR__ . '/whatever', 134);
+    $a->extractTo(__DIR__ . '/whatever', 134);
 } catch (Exception $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 
 try {
@@ -57,29 +57,29 @@ try {
 }
 
 try {
-	$a->extractTo('');
+    $a->extractTo('');
 } catch (Exception $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 
 file_put_contents(__DIR__ . '/oops', 'I is file');
 
 try {
-	$a->extractTo(__DIR__ . '/oops', 'file1.txt');
+    $a->extractTo(__DIR__ . '/oops', 'file1.txt');
 } catch (Exception $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 
 try {
-	$a->extractTo(__DIR__ . '/oops1', array(array(), 'file1.txt'));
+    $a->extractTo(__DIR__ . '/oops1', array(array(), 'file1.txt'));
 } catch (Exception $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 
 try {
-	$a->extractTo(__DIR__ . '/extract', 'file1.txt');
+    $a->extractTo(__DIR__ . '/extract', 'file1.txt');
 } catch (Exception $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 
 file_put_contents(__DIR__ . '/extract/file1.txt', 'first');
@@ -89,17 +89,17 @@ $a->extractTo(__DIR__ . '/extract', 'file1.txt', true);
 var_dump(file_get_contents(__DIR__ . '/extract/file1.txt'));
 
 try {
-	$a->extractTo(str_repeat('a', 20000), 'file1.txt');
+    $a->extractTo(str_repeat('a', 20000), 'file1.txt');
 } catch (Exception $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 
 $a[str_repeat('a', 20000)] = 'long';
 
 try {
-	$a->extractTo(__DIR__ . '/extract', str_repeat('a', 20000));
+    $a->extractTo(__DIR__ . '/extract', str_repeat('a', 20000));
 } catch (Exception $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 
 ?>
@@ -142,7 +142,7 @@ string(3) "hi3"
 string(3) "hi2"
 bool(false)
 Invalid argument, expected a filename (string) or array of filenames
-Phar::extractTo() expects parameter 1 to be a valid path, array given
+Phar::extractTo(): Argument #1 ($pathto) must be a valid path, array given
 Invalid argument, extraction path must be non-zero length
 Unable to use path "%soops" for extraction, it is a file, must be a directory
 Invalid argument, array of filenames to extract contains non-string value

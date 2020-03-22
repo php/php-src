@@ -85,6 +85,7 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #include "fpm_request.h"
 #include "fpm_status.h"
 #include "fpm_signals.h"
+#include "fpm_stdio.h"
 #include "fpm_conf.h"
 #include "fpm_php.h"
 #include "fpm_log.h"
@@ -183,11 +184,8 @@ static php_cgi_globals_struct php_cgi_globals;
 #define CGIG(v) (php_cgi_globals.v)
 #endif
 
-static int module_name_cmp(const void *a, const void *b) /* {{{ */
+static int module_name_cmp(Bucket *f, Bucket *s) /* {{{ */
 {
-	Bucket *f = (Bucket *) a;
-	Bucket *s = (Bucket *) b;
-
 	return strcasecmp(	((zend_module_entry *) Z_PTR(f->val))->name,
 						((zend_module_entry *) Z_PTR(s->val))->name);
 }
@@ -1968,6 +1966,8 @@ fastcgi_request_done:
 			SG(request_info).path_translated = NULL;
 
 			php_request_shutdown((void *) 0);
+
+			fpm_stdio_flush_child();
 
 			requests++;
 			if (UNEXPECTED(max_requests && (requests == max_requests))) {

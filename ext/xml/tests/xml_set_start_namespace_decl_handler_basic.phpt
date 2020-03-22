@@ -34,14 +34,14 @@ xml_parser_free( $parser );
 echo "Done\n";
 
 function Namespace_Start_Handler( $parser, $prefix, $uri ) {
-	echo "Namespace_Start_Handler called\n";
- 	echo "...Prefix: ". $prefix . "\n";
- 	echo "...Uri: ". $uri . "\n";
+    echo "Namespace_Start_Handler called\n";
+    echo "...Prefix: ". $prefix . "\n";
+    echo "...Uri: ". $uri . "\n";
 }
 
 function Namespace_End_Handler($parser, $prefix) {
-	echo "Namespace_End_Handler called\n";
- 	echo "...Prefix: ". $prefix . "\n\n";
+    echo "Namespace_End_Handler called\n";
+    echo "...Prefix: ". $prefix . "\n\n";
 }
 
 function DefaultHandler( $parser, $data ) {

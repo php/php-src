@@ -36,50 +36,50 @@ $file_handle = fopen(__FILE__, 'r');
 //array of values to iterate over
 $values = array(
 
-		  // int data
+          // int data
 /*1*/	  0,
-		  1,
-		  12345,
-		  -2345,
+          1,
+          12345,
+          -2345,
 
-		  // float data
+          // float data
 /*5*/	  10.5,
-		  -10.5,
-		  10.1234567e10,
-		  10.7654321E-10,
-		  .5,
+          -10.5,
+          10.1234567e10,
+          10.7654321E-10,
+          .5,
 
-		  // array data
+          // array data
 /*10*/	  array(),
-		  array(0),
-		  array(1),
-		  array(1,2),
-		  array('color' => 'red', 'item' => 'pen'),
+          array(0),
+          array(1),
+          array(1,2),
+          array('color' => 'red', 'item' => 'pen'),
 
-		  // null data
+          // null data
 /*15*/	  NULL,
-		  null,
+          null,
 
-		  // boolean data
+          // boolean data
 /*17*/	  true,
-		  false,
-		  TRUE,
-		  FALSE,
+          false,
+          TRUE,
+          FALSE,
 
-		  // empty data
+          // empty data
 /*21*/	  "",
-		  '',
+          '',
 
-		  // object data
+          // object data
 /*23*/	  new sample(),
 
-		  // undefined data
+          // undefined data
 /*24*/	  @$undefined_var,
 
-		  // unset data
+          // unset data
 /*25*/	  @$unset_var,
 
-		  // resource data
+          // resource data
 /*26*/	  $file_handle
 );
 
@@ -109,7 +109,7 @@ echo "\n";
 unlink($data_file);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vfprintf() : with unexpected values for format argument ***
 
 *** Testing vprintf() with with unexpected values for format argument ***
@@ -133,19 +133,19 @@ unlink($data_file);
 -- Iteration 9 --
 0.5
 -- Iteration 10 --
-vfprintf() expects parameter 2 to be string, array given
+vfprintf(): Argument #2 ($format) must be of type string, array given
 
 -- Iteration 11 --
-vfprintf() expects parameter 2 to be string, array given
+vfprintf(): Argument #2 ($format) must be of type string, array given
 
 -- Iteration 12 --
-vfprintf() expects parameter 2 to be string, array given
+vfprintf(): Argument #2 ($format) must be of type string, array given
 
 -- Iteration 13 --
-vfprintf() expects parameter 2 to be string, array given
+vfprintf(): Argument #2 ($format) must be of type string, array given
 
 -- Iteration 14 --
-vfprintf() expects parameter 2 to be string, array given
+vfprintf(): Argument #2 ($format) must be of type string, array given
 
 -- Iteration 15 --
 
@@ -170,4 +170,4 @@ object
 -- Iteration 25 --
 
 -- Iteration 26 --
-vfprintf() expects parameter 2 to be string, resource given
+vfprintf(): Argument #2 ($format) must be of type string, resource given

@@ -27,11 +27,11 @@ $sequences = array (0,     4, // out of range
                     );
 
 foreach($sequences as $msg_no) {
-	echo "\n-- \$msg_no is $msg_no --\n";
-	var_dump($overview = imap_fetchheader($stream_id, $msg_no));
-	if (!$overview) {
-		echo imap_last_error() . "\n";
-	}
+    echo "\n-- \$msg_no is $msg_no --\n";
+    var_dump($overview = imap_fetchheader($stream_id, $msg_no));
+    if (!$overview) {
+        echo imap_last_error() . "\n";
+    }
 }
 
 // clear error stack

@@ -26,6 +26,7 @@
 #include "spl_engine.h"
 #include "spl_iterators.h"
 #include "spl_heap.h"
+#include "spl_heap_arginfo.h"
 #include "spl_exceptions.h"
 
 #define PTR_HEAP_BLOCK_SIZE 64
@@ -1125,69 +1126,48 @@ zend_object_iterator *spl_pqueue_get_iterator(zend_class_entry *ce, zval *object
 }
 /* }}} */
 
-ZEND_BEGIN_ARG_INFO(arginfo_heap_insert, 0)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_heap_compare, 0)
-	ZEND_ARG_INFO(0, value1)
-	ZEND_ARG_INFO(0, value2)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_pqueue_insert, 0)
-	ZEND_ARG_INFO(0, value)
-	ZEND_ARG_INFO(0, priority)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_pqueue_setflags, 0)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_splheap_void, 0)
-ZEND_END_ARG_INFO()
-
 static const zend_function_entry spl_funcs_SplMinHeap[] = {
-	SPL_ME(SplMinHeap, compare, arginfo_heap_compare, ZEND_ACC_PROTECTED)
+	SPL_ME(SplMinHeap, compare, arginfo_class_SplMinHeap_compare, ZEND_ACC_PROTECTED)
 	PHP_FE_END
 };
 static const zend_function_entry spl_funcs_SplMaxHeap[] = {
-	SPL_ME(SplMaxHeap, compare, arginfo_heap_compare, ZEND_ACC_PROTECTED)
+	SPL_ME(SplMaxHeap, compare, arginfo_class_SplMaxHeap_compare, ZEND_ACC_PROTECTED)
 	PHP_FE_END
 };
 
 static const zend_function_entry spl_funcs_SplPriorityQueue[] = {
-	SPL_ME(SplPriorityQueue, compare,               arginfo_heap_compare,    ZEND_ACC_PUBLIC)
-	SPL_ME(SplPriorityQueue, insert,                arginfo_pqueue_insert,   ZEND_ACC_PUBLIC)
-	SPL_ME(SplPriorityQueue, setExtractFlags,       arginfo_pqueue_setflags, ZEND_ACC_PUBLIC)
-	SPL_ME(SplPriorityQueue, getExtractFlags,       arginfo_splheap_void,    ZEND_ACC_PUBLIC)
-	SPL_ME(SplPriorityQueue, top,                   arginfo_splheap_void,    ZEND_ACC_PUBLIC)
-	SPL_ME(SplPriorityQueue, extract,               arginfo_splheap_void,    ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap,          count,                 arginfo_splheap_void,    ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap,          isEmpty,               arginfo_splheap_void,    ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap,          rewind,                arginfo_splheap_void,    ZEND_ACC_PUBLIC)
-	SPL_ME(SplPriorityQueue, current,               arginfo_splheap_void,    ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap,          key,                   arginfo_splheap_void,    ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap,          next,                  arginfo_splheap_void,    ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap,          valid,                 arginfo_splheap_void,    ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap,          recoverFromCorruption, arginfo_splheap_void,    ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap,          isCorrupted,           arginfo_splheap_void,    ZEND_ACC_PUBLIC)
+	SPL_ME(SplPriorityQueue, compare,               arginfo_class_SplPriorityQueue_compare,			ZEND_ACC_PUBLIC)
+	SPL_ME(SplPriorityQueue, insert,                arginfo_class_SplPriorityQueue_insert,			ZEND_ACC_PUBLIC)
+	SPL_ME(SplPriorityQueue, setExtractFlags,       arginfo_class_SplPriorityQueue_setExtractFlags,	ZEND_ACC_PUBLIC)
+	SPL_ME(SplPriorityQueue, getExtractFlags,       arginfo_class_SplPriorityQueue_getExtractFlags,	ZEND_ACC_PUBLIC)
+	SPL_ME(SplPriorityQueue, top,                   arginfo_class_SplPriorityQueue_top,				ZEND_ACC_PUBLIC)
+	SPL_ME(SplPriorityQueue, extract,               arginfo_class_SplPriorityQueue_extract,			ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap,          count,                 arginfo_class_SplPriorityQueue_count,			ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap,          isEmpty,               arginfo_class_SplPriorityQueue_isEmpty,			ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap,          rewind,                arginfo_class_SplPriorityQueue_rewind,			ZEND_ACC_PUBLIC)
+	SPL_ME(SplPriorityQueue, current,               arginfo_class_SplPriorityQueue_current,			ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap,          key,                   arginfo_class_SplPriorityQueue_key,				ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap,          next,                  arginfo_class_SplPriorityQueue_next,			ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap,          valid,                 arginfo_class_SplPriorityQueue_valid,			ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap,          recoverFromCorruption, arginfo_class_SplPriorityQueue_recoverFromCorruption, ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap,          isCorrupted,           arginfo_class_SplPriorityQueue_isCorrupted,		ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
 static const zend_function_entry spl_funcs_SplHeap[] = {
-	SPL_ME(SplHeap, extract,               arginfo_splheap_void, ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, insert,                arginfo_heap_insert, ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, top,                   arginfo_splheap_void, ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, count,                 arginfo_splheap_void, ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, isEmpty,               arginfo_splheap_void, ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, rewind,                arginfo_splheap_void, ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, current,               arginfo_splheap_void, ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, key,                   arginfo_splheap_void, ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, next,                  arginfo_splheap_void, ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, valid,                 arginfo_splheap_void, ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, recoverFromCorruption, arginfo_splheap_void, ZEND_ACC_PUBLIC)
-	SPL_ME(SplHeap, isCorrupted,           arginfo_splheap_void, ZEND_ACC_PUBLIC)
-	ZEND_FENTRY(compare, NULL, arginfo_heap_compare, ZEND_ACC_PROTECTED|ZEND_ACC_ABSTRACT)
+	SPL_ME(SplHeap, extract,               arginfo_class_SplHeap_extract,				ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap, insert,                arginfo_class_SplHeap_insert,				ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap, top,                   arginfo_class_SplHeap_top,					ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap, count,                 arginfo_class_SplHeap_count,					ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap, isEmpty,               arginfo_class_SplHeap_isEmpty,				ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap, rewind,                arginfo_class_SplHeap_rewind,				ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap, current,               arginfo_class_SplHeap_current,				ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap, key,                   arginfo_class_SplHeap_key,					ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap, next,                  arginfo_class_SplHeap_next,					ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap, valid,                 arginfo_class_SplHeap_valid,					ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap, recoverFromCorruption, arginfo_class_SplHeap_recoverFromCorruption, ZEND_ACC_PUBLIC)
+	SPL_ME(SplHeap, isCorrupted,           arginfo_class_SplHeap_isCorrupted,			ZEND_ACC_PUBLIC)
+	ZEND_FENTRY(compare, NULL, arginfo_class_SplHeap_compare, ZEND_ACC_PROTECTED|ZEND_ACC_ABSTRACT)
 	PHP_FE_END
 };
 /* }}} */

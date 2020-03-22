@@ -12,8 +12,8 @@ require(__DIR__.'/connect.inc');
 // Initialization
 
 $stmtarray = array(
-	"drop table bug36403_tab",
-	"create table bug36403_tab (c1 number, col2 number, column3 number, col4 number)"
+    "drop table bug36403_tab",
+    "create table bug36403_tab (c1 number, col2 number, column3 number, col4 number)"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -25,7 +25,7 @@ echo "Test 1\n";
 $s = oci_parse($c, "select * from bug36403_tab");
 oci_execute($s, OCI_DESCRIBE_ONLY);
 for ($i = oci_num_fields($s); $i > 0; $i--) {
-	echo oci_field_name($s, $i) . "\n";
+    echo oci_field_name($s, $i) . "\n";
 }
 
 echo "Test 2\n";
@@ -37,7 +37,7 @@ $row = oci_fetch_array($s);
 // Clean up
 
 $stmtarray = array(
-	"drop table bug36403_tab"
+    "drop table bug36403_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

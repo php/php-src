@@ -3,19 +3,19 @@ Pass same variable by ref and by value.
 --FILE--
 <?php
 function valRef($x, &$y) {
-	var_dump($x, $y);
-	var_dump(func_num_args());
-	$x = 'changed.x';
-	$y = 'changed.y';
-	var_dump(func_num_args());
+    var_dump($x, $y);
+    var_dump(func_num_args());
+    $x = 'changed.x';
+    $y = 'changed.y';
+    var_dump(func_num_args());
 }
 
 function refVal(&$x, $y) {
-	var_dump($x, $y);
-	var_dump(func_num_args());
-	$x = 'changed.x';
-	$y = 'changed.y';
-	var_dump(func_num_args());
+    var_dump($x, $y);
+    var_dump(func_num_args());
+    $x = 'changed.x';
+    $y = 'changed.y';
+    var_dump(func_num_args());
 }
 
 

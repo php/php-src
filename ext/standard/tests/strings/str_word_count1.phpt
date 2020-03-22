@@ -21,10 +21,10 @@ var_dump($a);
 ?>
 --EXPECTF--
 int(0)
-Invalid format value -1
+str_word_count(): Argument #2 ($format) must be a valid format value
 
 Warning: Undefined variable: a in %s on line %d
-Invalid format value -1
+str_word_count(): Argument #2 ($format) must be a valid format value
 
 Warning: Undefined variable: a in %s on line %d
 NULL

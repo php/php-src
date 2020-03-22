@@ -6,27 +6,27 @@ xmlrpc_encode() Simple test encode array
 <?php
 
 $params = array(
-	"one" => "red",
-	"two" => "blue",
-	"three" => "green"
+    "one" => "red",
+    "two" => "blue",
+    "three" => "green"
 );
 
 $response = xmlrpc_encode($params);
 echo $response;
 
 $params = array(
-	"red",
-	"blue",
-	"green"
+    "red",
+    "blue",
+    "green"
 );
 
 $response = xmlrpc_encode($params);
 echo $response;
 
 $params = array(
-	0 => "red",
-	1 => "blue",
-	3 => "green"
+    0 => "red",
+    1 => "blue",
+    3 => "green"
 );
 
 $response = xmlrpc_encode($params);

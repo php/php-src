@@ -22,16 +22,16 @@ $supported_hash_al = array(
 $data = "This is the test of the mhash extension...";
 
 foreach ($supported_hash_al as $hash=>$wanted) {
-	$result = mhash(constant($hash), $data);
-	if (bin2hex($result)==$wanted) {
-		echo "$hash\nok\n";
-	} else {
-		echo "$hash: ";
-		var_dump($wanted);
-		echo "$hash: ";
-		var_dump(bin2hex($result));
-	}
-	echo "\n";
+    $result = mhash(constant($hash), $data);
+    if (bin2hex($result)==$wanted) {
+        echo "$hash\nok\n";
+    } else {
+        echo "$hash: ";
+        var_dump($wanted);
+        echo "$hash: ";
+        var_dump(bin2hex($result));
+    }
+    echo "\n";
 }
 ?>
 --EXPECT--

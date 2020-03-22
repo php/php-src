@@ -307,7 +307,7 @@ static inline zend_bool can_elide_return_type_check(
 	}
 
 	/* These types are not represented exactly */
-	if (ZEND_TYPE_FULL_MASK(info->type) & (MAY_BE_CALLABLE|MAY_BE_ITERABLE)) {
+	if (ZEND_TYPE_FULL_MASK(info->type) & (MAY_BE_CALLABLE|MAY_BE_ITERABLE|MAY_BE_STATIC)) {
 		return 0;
 	}
 
@@ -989,6 +989,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		int v;
 		int remove_nops = 0;
 		zend_op *opline;
+		zend_ssa_op *ssa_op;
 		zval tmp;
 
 #if ZEND_DEBUG_DFA
@@ -1044,6 +1045,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			}
 
 			opline = op_array->opcodes + op_1;
+			ssa_op = &ssa->ops[op_1];
 
 			/* Convert LONG constants to DOUBLE */
 			if (ssa->var_info[v].use_as_double) {

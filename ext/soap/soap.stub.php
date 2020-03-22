@@ -18,8 +18,7 @@ class SoapFault extends Exception
 {
     function __construct($faultcode, string $faultstring, ?string $faultactor = null, $detail = null, ?string $faultname = null, $headerfault = null);
 
-    /** @return string */
-    function __toString();
+    function __toString(): string;
 }
 
 class SoapVar

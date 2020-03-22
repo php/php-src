@@ -25,15 +25,15 @@ $db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_NUM);
 $jsonb = $db->quote(json_encode(['a' => 1]));
 
 foreach ([false, true] as $emulate) {
-	$db->setAttribute(PDO::ATTR_EMULATE_PREPARES, $emulate);
+    $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, $emulate);
 
-	$stmt = $db->prepare("SELECT {$jsonb}::jsonb ?? ?");
-	$stmt->execute(['b']);
-	var_dump($stmt->fetch());
+    $stmt = $db->prepare("SELECT {$jsonb}::jsonb ?? ?");
+    $stmt->execute(['b']);
+    var_dump($stmt->fetch());
 
-	$stmt = $db->prepare("SELECT {$jsonb}::jsonb ???");
-	$stmt->execute(['a']);
-	var_dump($stmt->fetch());
+    $stmt = $db->prepare("SELECT {$jsonb}::jsonb ???");
+    $stmt->execute(['a']);
+    var_dump($stmt->fetch());
 }
 
 ?>

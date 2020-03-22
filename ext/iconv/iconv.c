@@ -377,9 +377,6 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 	char *out_p;
 	size_t out_left = 0;
 	size_t buf_growth = 128;
-#if !ICONV_SUPPORTS_ERRNO
-	size_t prev_in_left = in_left;
-#endif
 
 	if (in_p != NULL) {
 		while (in_left > 0) {
@@ -389,7 +386,6 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 			out_p = ZSTR_VAL((d)->s) + ZSTR_LEN((d)->s);
 
 			if (iconv(cd, (char **)&in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
-#if ICONV_SUPPORTS_ERRNO
 				switch (errno) {
 					case EINVAL:
 						return PHP_ICONV_ERR_ILLEGAL_CHAR;
@@ -403,15 +399,7 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 					default:
 						return PHP_ICONV_ERR_UNKNOWN;
 				}
-#else
-				if (prev_in_left == in_left) {
-					return PHP_ICONV_ERR_UNKNOWN;
-				}
-#endif
 			}
-#if !ICONV_SUPPORTS_ERRNO
-			prev_in_left = in_left;
-#endif
 			ZSTR_LEN((d)->s) += (buf_growth - out_left);
 			buf_growth <<= 1;
 		}
@@ -426,15 +414,9 @@ static php_iconv_err_t _php_iconv_appendl(smart_str *d, const char *s, size_t l,
 				ZSTR_LEN((d)->s) += (buf_growth - out_left);
 				break;
 			} else {
-#if ICONV_SUPPORTS_ERRNO
 				if (errno != E2BIG) {
 					return PHP_ICONV_ERR_UNKNOWN;
 				}
-#else
-				if (out_left != 0) {
-					return PHP_ICONV_ERR_UNKNOWN;
-				}
-#endif
 			}
 			ZSTR_LEN((d)->s) += (buf_growth - out_left);
 			buf_growth <<= 1;
@@ -473,71 +455,6 @@ static int _php_check_ignore(const char *charset)
  */
 PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, zend_string **out, const char *out_charset, const char *in_charset)
 {
-#if !ICONV_SUPPORTS_ERRNO
-	size_t in_size, out_size, out_left;
-	char *out_p;
-	iconv_t cd;
-	size_t result;
-	zend_string *out_buffer;
-
-	*out = NULL;
-
-	/*
-	  This is not the right way to get output size...
-	  This is not space efficient for large text.
-	  This is also problem for encoding like UTF-7/UTF-8/ISO-2022 which
-	  a single char can be more than 4 bytes.
-	  I added 15 extra bytes for safety. <yohgaki@php.net>
-	*/
-	out_size = in_len * sizeof(int) + 15;
-	out_left = out_size;
-
-	in_size = in_len;
-
-	cd = iconv_open(out_charset, in_charset);
-
-	if (cd == (iconv_t)(-1)) {
-		return PHP_ICONV_ERR_UNKNOWN;
-	}
-
-	out_buffer = zend_string_alloc(out_size, 0);
-	out_p = ZSTR_VAL(out_buffer);
-
-	result = iconv(cd, (const char **) &in_p, &in_size, (char **) &out_p, &out_left);
-
-	if (result == (size_t)(-1)) {
-		zend_string_efree(out_buffer);
-		return PHP_ICONV_ERR_UNKNOWN;
-	}
-
-	if (out_left < 8) {
-		size_t pos = out_p - ZSTR_VAL(out_buffer);
-		out_buffer = zend_string_extend(out_buffer, out_size + 8, 0);
-		out_p = ZSTR_VAL(out_buffer) + pos;
-		out_size += 7;
-		out_left += 7;
-	}
-
-	/* flush the shift-out sequences */
-	result = iconv(cd, NULL, NULL, &out_p, &out_left);
-
-	if (result == (size_t)(-1)) {
-		zend_string_efree(out_buffer);
-		return PHP_ICONV_ERR_UNKNOWN;
-	}
-
-	ZSTR_VAL(out_buffer)[out_size - out_left] = '\0';
-	ZSTR_LEN(out_buffer) = out_size - out_left;
-
-	iconv_close(cd);
-
-	*out = out_buffer;
-	return PHP_ICONV_ERR_SUCCESS;
-
-#else
-	/*
-	  iconv supports errno. Handle it better way.
-	*/
 	iconv_t cd;
 	size_t in_left, out_size, out_left;
 	char *out_p;
@@ -642,7 +559,6 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 	ZSTR_LEN(out_buf) = out_size;
 	*out = out_buf;
 	return retval;
-#endif
 }
 /* }}} */
 
@@ -668,15 +584,11 @@ static php_iconv_err_t _php_iconv_strlen(size_t *pretval, const char *str, size_
 	cd = iconv_open(GENERIC_SUPERSET_NAME, enc);
 
 	if (cd == (iconv_t)(-1)) {
-#if ICONV_SUPPORTS_ERRNO
 		if (errno == EINVAL) {
 			return PHP_ICONV_ERR_WRONG_CHARSET;
 		} else {
 			return PHP_ICONV_ERR_CONVERTER;
 		}
-#else
-		return PHP_ICONV_ERR_UNKNOWN;
-#endif
 	}
 
 	errno = 0;
@@ -700,7 +612,6 @@ static php_iconv_err_t _php_iconv_strlen(size_t *pretval, const char *str, size_
 		cnt -= out_left / GENERIC_SUPERSET_NBYTES;
 	}
 
-#if ICONV_SUPPORTS_ERRNO
 	switch (errno) {
 		case EINVAL:
 			err = PHP_ICONV_ERR_ILLEGAL_CHAR;
@@ -719,9 +630,6 @@ static php_iconv_err_t _php_iconv_strlen(size_t *pretval, const char *str, size_
 			err = PHP_ICONV_ERR_UNKNOWN;
 			break;
 	}
-#else
-	*pretval = cnt;
-#endif
 
 	iconv_close(cd);
 
@@ -789,15 +697,11 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 	cd1 = iconv_open(GENERIC_SUPERSET_NAME, enc);
 
 	if (cd1 == (iconv_t)(-1)) {
-#if ICONV_SUPPORTS_ERRNO
 		if (errno == EINVAL) {
 			return PHP_ICONV_ERR_WRONG_CHARSET;
 		} else {
 			return PHP_ICONV_ERR_CONVERTER;
 		}
-#else
-		return PHP_ICONV_ERR_UNKNOWN;
-#endif
 	}
 
 	cd2 = (iconv_t)NULL;
@@ -822,15 +726,11 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 
 				if (cd2 == (iconv_t)(-1)) {
 					cd2 = (iconv_t)NULL;
-#if ICONV_SUPPORTS_ERRNO
 					if (errno == EINVAL) {
 						err = PHP_ICONV_ERR_WRONG_CHARSET;
 					} else {
 						err = PHP_ICONV_ERR_CONVERTER;
 					}
-#else
-					err = PHP_ICONV_ERR_UNKNOWN;
-#endif
 					break;
 				}
 			}
@@ -843,7 +743,6 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 
 	}
 
-#if ICONV_SUPPORTS_ERRNO
 	switch (errno) {
 		case EINVAL:
 			err = PHP_ICONV_ERR_ILLEGAL_CHAR;
@@ -856,7 +755,6 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 		case E2BIG:
 			break;
 	}
-#endif
 	if (err == PHP_ICONV_ERR_SUCCESS) {
 		if (cd2 != (iconv_t)NULL) {
 			_php_iconv_appendl(pretval, NULL, 0, cd2);
@@ -919,15 +817,11 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 		if (ndl_buf != NULL) {
 			zend_string_efree(ndl_buf);
 		}
-#if ICONV_SUPPORTS_ERRNO
 		if (errno == EINVAL) {
 			return PHP_ICONV_ERR_WRONG_CHARSET;
 		} else {
 			return PHP_ICONV_ERR_CONVERTER;
 		}
-#else
-		return PHP_ICONV_ERR_UNKNOWN;
-#endif
 	}
 
 	ndl_buf_p = ZSTR_VAL(ndl_buf);
@@ -943,7 +837,6 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 
 		if (iconv(cd, (char **)&in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
 			if (prev_in_left == in_left) {
-#if ICONV_SUPPORTS_ERRNO
 				switch (errno) {
 					case EINVAL:
 						err = PHP_ICONV_ERR_ILLEGAL_CHAR;
@@ -960,7 +853,6 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 						err = PHP_ICONV_ERR_UNKNOWN;
 						break;
 				}
-#endif
 				break;
 			}
 		}
@@ -1106,29 +998,21 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 
 	cd_pl = iconv_open(ICONV_ASCII_ENCODING, enc);
 	if (cd_pl == (iconv_t)(-1)) {
-#if ICONV_SUPPORTS_ERRNO
 		if (errno == EINVAL) {
 			err = PHP_ICONV_ERR_WRONG_CHARSET;
 		} else {
 			err = PHP_ICONV_ERR_CONVERTER;
 		}
-#else
-		err = PHP_ICONV_ERR_UNKNOWN;
-#endif
 		goto out;
 	}
 
 	cd = iconv_open(out_charset, enc);
 	if (cd == (iconv_t)(-1)) {
-#if ICONV_SUPPORTS_ERRNO
 		if (errno == EINVAL) {
 			err = PHP_ICONV_ERR_WRONG_CHARSET;
 		} else {
 			err = PHP_ICONV_ERR_CONVERTER;
 		}
-#else
-		err = PHP_ICONV_ERR_UNKNOWN;
-#endif
 		goto out;
 	}
 
@@ -1190,7 +1074,6 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 					out_left = out_size - out_reserved;
 
 					if (iconv(cd, (char **)&in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
-#if ICONV_SUPPORTS_ERRNO
 						switch (errno) {
 							case EINVAL:
 								err = PHP_ICONV_ERR_ILLEGAL_CHAR;
@@ -1211,28 +1094,15 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 								err = PHP_ICONV_ERR_UNKNOWN;
 								goto out;
 						}
-#else
-						if (prev_in_left == in_left) {
-							err = PHP_ICONV_ERR_UNKNOWN;
-							goto out;
-						}
-#endif
 					}
 
 					out_left += out_reserved;
 
 					if (iconv(cd, NULL, NULL, (char **) &out_p, &out_left) == (size_t)-1) {
-#if ICONV_SUPPORTS_ERRNO
 						if (errno != E2BIG) {
 							err = PHP_ICONV_ERR_UNKNOWN;
 							goto out;
 						}
-#else
-						if (out_left != 0) {
-							err = PHP_ICONV_ERR_UNKNOWN;
-							goto out;
-						}
-#endif
 					} else {
 						break;
 					}
@@ -1281,9 +1151,6 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 				ini_in_p = in_p;
 
 				for (out_size = (char_cnt - 2); out_size > 0;) {
-#if !ICONV_SUPPORTS_ERRNO
-					size_t prev_out_left;
-#endif
 
 					nbytes_required = 0;
 
@@ -1291,7 +1158,6 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 					out_left = out_size;
 
 					if (iconv(cd, (char **)&in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
-#if ICONV_SUPPORTS_ERRNO
 						switch (errno) {
 							case EINVAL:
 								err = PHP_ICONV_ERR_ILLEGAL_CHAR;
@@ -1312,28 +1178,12 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 								err = PHP_ICONV_ERR_UNKNOWN;
 								goto out;
 						}
-#else
-						if (prev_in_left == in_left) {
-							err = PHP_ICONV_ERR_UNKNOWN;
-							goto out;
-						}
-#endif
 					}
-#if !ICONV_SUPPORTS_ERRNO
-					prev_out_left = out_left;
-#endif
 					if (iconv(cd, NULL, NULL, (char **) &out_p, &out_left) == (size_t)-1) {
-#if ICONV_SUPPORTS_ERRNO
 						if (errno != E2BIG) {
 							err = PHP_ICONV_ERR_UNKNOWN;
 							goto out;
 						}
-#else
-						if (out_left == prev_out_left) {
-							err = PHP_ICONV_ERR_UNKNOWN;
-							goto out;
-						}
-#endif
 					}
 
 					for (p = (unsigned char *)buf; p < (unsigned char *)out_p; p++) {
@@ -1419,15 +1269,11 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 	cd_pl = iconv_open(enc, ICONV_ASCII_ENCODING);
 
 	if (cd_pl == (iconv_t)(-1)) {
-#if ICONV_SUPPORTS_ERRNO
 		if (errno == EINVAL) {
 			err = PHP_ICONV_ERR_WRONG_CHARSET;
 		} else {
 			err = PHP_ICONV_ERR_CONVERTER;
 		}
-#else
-		err = PHP_ICONV_ERR_UNKNOWN;
-#endif
 		goto out;
 	}
 
@@ -1602,15 +1448,11 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 							scan_stat = 12;
 							break;
 						} else {
-#if ICONV_SUPPORTS_ERRNO
 							if (errno == EINVAL) {
 								err = PHP_ICONV_ERR_WRONG_CHARSET;
 							} else {
 								err = PHP_ICONV_ERR_CONVERTER;
 							}
-#else
-							err = PHP_ICONV_ERR_UNKNOWN;
-#endif
 							goto out;
 						}
 					}
@@ -2052,7 +1894,7 @@ PHP_FUNCTION(iconv_substr)
 	err = _php_iconv_substr(&retval, ZSTR_VAL(str), ZSTR_LEN(str), offset, length, charset);
 	_php_iconv_show_error(err, GENERIC_SUPERSET_NAME, charset);
 
-	if (err == PHP_ICONV_ERR_SUCCESS && ZSTR_LEN(str) >= 0 && retval.s != NULL) {
+	if (err == PHP_ICONV_ERR_SUCCESS && retval.s != NULL) {
 		RETURN_NEW_STR(retval.s);
 	}
 	smart_str_free(&retval);
@@ -2579,7 +2421,6 @@ static int php_iconv_stream_filter_append_bucket(
 
 		while (tcnt > 0) {
 			if (iconv(self->cd, &pt, &tcnt, &pd, &ocnt) == (size_t)-1) {
-#if ICONV_SUPPORTS_ERRNO
 				switch (errno) {
 					case EILSEQ:
 						php_error_docref(NULL, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): invalid multibyte sequence", self->from_charset, self->to_charset);
@@ -2636,12 +2477,6 @@ static int php_iconv_stream_filter_append_bucket(
 						php_error_docref(NULL, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): unknown error", self->from_charset, self->to_charset);
 						goto out_failure;
 				}
-#else
-				if (ocnt == prev_ocnt) {
-					php_error_docref(NULL, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): unknown error", self->from_charset, self->to_charset);
-					goto out_failure;
-				}
-#endif
 			}
 			prev_ocnt = ocnt;
 		}
@@ -2652,7 +2487,6 @@ static int php_iconv_stream_filter_append_bucket(
 	while (icnt > 0) {
 		if ((ps == NULL ? iconv(self->cd, NULL, NULL, &pd, &ocnt):
 					iconv(self->cd, (char **)&ps, &icnt, &pd, &ocnt)) == (size_t)-1) {
-#if ICONV_SUPPORTS_ERRNO
 			switch (errno) {
 				case EILSEQ:
 					php_error_docref(NULL, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): invalid multibyte sequence", self->from_charset, self->to_charset);
@@ -2704,12 +2538,6 @@ static int php_iconv_stream_filter_append_bucket(
 					php_error_docref(NULL, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): unknown error", self->from_charset, self->to_charset);
 					goto out_failure;
 			}
-#else
-			if (ocnt == prev_ocnt) {
-				php_error_docref(NULL, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): unknown error", self->from_charset, self->to_charset);
-				goto out_failure;
-			}
-#endif
 		} else {
 			if (ps == NULL) {
 				break;

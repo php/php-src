@@ -11,14 +11,14 @@ opcache.preload=
 --FILE--
 <?php
 class A {
-	function t($obj) {
-		$a = "A";
+    function t($obj) {
+        $a = "A";
         $b = "self";
         $c = 1;
         echo ($obj instanceof $a);
         echo ($obj instanceof $b);
         echo ($obj instanceof $c);
-	}
+    }
 }
 ?>
 --EXPECTF--

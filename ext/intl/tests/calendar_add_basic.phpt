@@ -22,8 +22,8 @@ $intlcal->add(IntlCalendar::FIELD_MINUTE, 6);
 intlcal_add($intlcal, IntlCalendar::FIELD_SECOND, 7);
 
 var_dump(
-	(float)$time2*1000,
-	$intlcal->getTime());
+    (float)$time2*1000,
+    $intlcal->getTime());
 
 ?>
 --EXPECT--

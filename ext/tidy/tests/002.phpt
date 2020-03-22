@@ -4,8 +4,8 @@ tidy_parse_string()
 <?php if (!extension_loaded("tidy")) print "skip"; ?>
 --FILE--
 <?php
-    	$a = tidy_parse_string("<HTML></HTML>");
-		echo tidy_get_output($a);
+        $a = tidy_parse_string("<HTML></HTML>");
+        echo tidy_get_output($a);
 
 ?>
 --EXPECT--

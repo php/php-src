@@ -1,5 +1,5 @@
 --TEST--
-The default value must be legal for one of the types in the union
+The default value must be legal for one of the type in the union
 --FILE--
 <?php
 

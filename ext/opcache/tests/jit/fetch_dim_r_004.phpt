@@ -11,8 +11,8 @@ opcache.jit_buffer_size=1M
 --FILE--
 <?php
 function foo($n) {
-	$a = "ABCDEF";
-	var_dump($a[$n]);
+    $a = "ABCDEF";
+    var_dump($a[$n]);
 }
 foo(0);
 foo(2);

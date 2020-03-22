@@ -6,20 +6,20 @@ mb_ereg() and invalid arguments
 <?php
 
 $a = array(
-	array(1,2,3),
-	array("", "", ""),
-	array(array(), 1, ""),
-	array(1, array(), ""),
-	array(1, "", array()),
-	);
+    array(1,2,3),
+    array("", "", ""),
+    array(array(), 1, ""),
+    array(1, array(), ""),
+    array(1, "", array()),
+    );
 
 foreach ($a as $args) {
-	try {
-		var_dump(mb_ereg($args[0], $args[1], $args[2]));
-	} catch (TypeError $e) {
-		echo $e->getMessage(), "\n";
-	}
-	var_dump($args);
+    try {
+        var_dump(mb_ereg($args[0], $args[1], $args[2]));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    var_dump($args);
 }
 ?>
 --EXPECTF--
@@ -45,7 +45,7 @@ array(3) {
   array(0) {
   }
 }
-mb_ereg() expects parameter 1 to be string, array given
+mb_ereg(): Argument #1 ($pattern) must be of type string, array given
 array(3) {
   [0]=>
   array(0) {
@@ -55,7 +55,7 @@ array(3) {
   [2]=>
   &string(0) ""
 }
-mb_ereg() expects parameter 2 to be string, array given
+mb_ereg(): Argument #2 ($string) must be of type string, array given
 array(3) {
   [0]=>
   int(1)

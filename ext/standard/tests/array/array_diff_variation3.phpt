@@ -80,7 +80,7 @@ $values = array(
 "binary" => array(
        // binary data
        b"binary",
-	   (binary)"binary"),
+       (binary)"binary"),
 
 /*9*/
 "undefined" => array(

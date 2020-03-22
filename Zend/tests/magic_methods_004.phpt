@@ -4,9 +4,9 @@ Testing __unset() with protected visibility
 <?php
 
 class foo {
-	protected function __unset($a) {
-		print "unset\n";
-	}
+    protected function __unset($a) {
+        print "unset\n";
+    }
 }
 
 ?>

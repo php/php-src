@@ -4,38 +4,38 @@ IteratorAggregate::getIterator bad return type
 <?php
 
 class bad1 implements IteratorAggregate {
-	function getIterator() {
-		return null;
-	}
+    function getIterator() {
+        return null;
+    }
 }
 
 class bad2 implements IteratorAggregate {
-	function getIterator() {
-		return new stdClass;
-	}
+    function getIterator() {
+        return new stdClass;
+    }
 }
 
 class bad3 implements IteratorAggregate {
-	function getIterator() {
-		return 1;
-	}
+    function getIterator() {
+        return 1;
+    }
 }
 
 class bad4 implements IteratorAggregate {
-	function getIterator() {
-		return array(1,2,3);
-	}
+    function getIterator() {
+        return array(1,2,3);
+    }
 }
 
 
 function f($className) {
-	try {
-		foreach (new $className as $k=>$v) {
-			echo "$k => $v\n";
-		}
-	} catch (Exception $e) {
-			echo $e->getLine() . ": " . $e->getMessage() ."\n";
-	}
+    try {
+        foreach (new $className as $k=>$v) {
+            echo "$k => $v\n";
+        }
+    } catch (Exception $e) {
+            echo $e->getLine() . ": " . $e->getMessage() ."\n";
+    }
 }
 
 f("bad1");

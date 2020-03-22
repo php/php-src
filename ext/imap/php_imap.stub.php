@@ -27,6 +27,8 @@ function imap_headers($stream_id): array|false {}
 /** @param resource $stream_id */
 function imap_headerinfo($stream_id, int $msg_no, int $from_length = 0, int $subject_length = 0, string $default_host = UNKNOWN): stdClass|false {}
 
+function imap_header($stream_id, int $msg_no, int $from_length = 0, int $subject_length = 0, string $default_host = UNKNOWN): stdClass|false {}
+
 function imap_rfc822_parse_headers(string $headers, string $default_host = 'UNKNOWN'): \stdClass {}
 
 function imap_rfc822_write_address(string $mailbox, string $host, string $personal): string|false {}
@@ -35,6 +37,9 @@ function imap_rfc822_parse_adrlist(string $address_string, string $default_host)
 
 /** @param resource $stream_id */
 function imap_body($stream_id, int $msg_no, int $options = 0): string|false {}
+
+/** @param resource $stream_id */
+function imap_fetchtext($stream_id, int $msg_no, int $options = 0): string|false {}
 
 /**
  * @param resource $stream_id
@@ -86,51 +91,45 @@ function imap_check($stream_id): stdClass|false {}
 /** @param resource $stream_id */
 function imap_listscan($stream_id, string $ref, string $pattern, string $content): array|false {}
 
-/**
- * @param resource $stream_id
- */
+/** @param resource $stream_id */
+function imap_scan($stream_id, string $ref, string $pattern, string $content): array|false {}
+
+/** @param resource $stream_id */
+function imap_scanmailbox($stream_id, string $ref, string $pattern, string $content): array|false {}
+
+/** @param resource $stream_id */
 function imap_mail_copy($stream_id, string $msglist, string $mailbox, int $options = 0): bool {}
 
-/**
- * @param resource $stream_id
- */
+/** @param resource $stream_id */
 function imap_mail_move($stream_id, string $sequence, string $mailbox, int $options = 0): bool {}
 
 function imap_mail_compose(array $envelope, array $body): string|false {}
 
-/**
- * @param resource $stream_id
- */
+/** @param resource $stream_id */
 function imap_createmailbox($stream_id, string $mailbox): bool {}
 
-/**
- * @param resource $stream_id
- */
+/** @param resource $stream_id */
+function imap_create($stream_id, string $mailbox): bool {}
+
+/** @param resource $stream_id */
 function imap_renamemailbox($stream_id, string $old_name, string $new_name): bool {}
 
-/**
- * @param resource $stream_id
- */
+/** @param resource $stream_id */
+function imap_rename($stream_id, string $old_name, string $new_name): bool {}
+
+/** @param resource $stream_id */
 function imap_deletemailbox($stream_id, string $mailbox): bool {}
 
-/**
- * @param resource $stream_id
- */
+/** @param resource $stream_id */
 function imap_subscribe($stream_id, string $mailbox): bool {}
 
-/**
- * @param resource $stream_id
- */
+/** @param resource $stream_id */
 function imap_unsubscribe($stream_id, string $mailbox): bool {}
 
-/**
- * @param resource $stream_id
- */
+/** @param resource $stream_id */
 function imap_append($stream_id, string $folder, string $message, string $options = UNKNOWN, string $internal_date = UNKNOWN): bool {}
 
-/**
- * @param resource $stream_id
- */
+/** @param resource $stream_id */
 function imap_ping($stream_id): bool {}
 
 function imap_base64(string $text): string|false {}
@@ -150,24 +149,17 @@ function imap_utf8(string $mime_encoded_text): string {}
  */
 function imap_status($stream_id, string $mailbox, int $options) {}
 
-/**
- * @param resource $stream_id
- */
+/** @param resource $stream_id */
 function imap_mailboxmsginfo($stream_id): \stdClass {}
 
-/**
- * @param resource $stream_id
- */
+/** @param resource $stream_id */
 function imap_setflag_full($stream_id, string $sequence, string $flag, int $options = 0): bool {}
 
-/**
- * @param resource $stream_id
- */
+/** @param resource $stream_id */
 function imap_clearflag_full($stream_id, string $sequence, string $flag, int $options = 0): bool {}
 
 /** @param resource $stream_id */
 function imap_sort($stream_id, int $criteria, int $reverse, int $options = 0, string $search_criteria = UNKNOWN, string $charset = UNKNOWN): array|false {}
-
 
 /** @param resource $stream_id */
 function imap_uid($stream_id, int $msg_no): int|false {}
@@ -179,7 +171,13 @@ function imap_msgno($stream_id, int $unique_msg_id): int|false {}
 function imap_list($stream_id, string $ref, string $pattern): array|false {}
 
 /** @param resource $stream_id */
+function imap_listmailbox($stream_id, string $ref, string $pattern): array|false {}
+
+/** @param resource $stream_id */
 function imap_lsub($stream_id, string $ref, string $pattern): array|false {}
+
+/** @param resource $stream_id */
+function imap_listsubscribed($stream_id, string $ref, string $pattern): array|false {}
 
 /** @param resource $stream_id */
 function imap_getsubscribed($stream_id, string $ref, string $pattern): array|false {}
@@ -223,14 +221,10 @@ function imap_get_quota($stream_id, string $qroot): array|false {}
 /** @param resource $stream_id */
 function imap_get_quotaroot($stream_id, string $mbox): array|false {}
 
-/**
- * @param resource $stream_id
- */
+/** @param resource $stream_id */
 function imap_set_quota($stream_id, string $qroot, int $mailbox_size): bool {}
 
-/**
- * @param resource $stream_id
- */
+/** @param resource $stream_id */
 function imap_setacl($stream_id, string $mailbox, string $id, string $rights): bool {}
 
 /** @param resource $stream_id */

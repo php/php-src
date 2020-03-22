@@ -1,5 +1,28 @@
 <?php
 
+interface DOMChildNode
+{
+    public function remove(): void;
+
+    /** @var ...DOMNode|string $nodes */
+    public function before(... $nodes): void;
+
+    /** @var ...DOMNode|string $nodes */
+    public function after(...$nodes): void;
+
+    /** @var ...DOMNode|string $nodes */
+    public function replaceWith(...$nodes): void;
+}
+
+interface DOMParentNode
+{
+    /** @var ...DOMNode|string $nodes */
+    public function append(...$nodes): void;
+
+    /** @var ...DOMNode|string $nodes */
+    public function prepend(...$nodes): void;
+}
+
 class DOMNode {
     /** @return DOMNode|false */
     public function appendChild(DOMNode $newChild) {}
@@ -63,7 +86,7 @@ class DOMCdataSection {
     public function __construct(string $value) {}
 }
 
-class DOMCharacterData {
+class DOMCharacterData implements DOMChildNode {
     /** @return bool */
     public function appendData(string $data) {}
 
@@ -84,7 +107,7 @@ class DOMComment {
     public function __construct(string $value = "") {}
 }
 
-class DOMDocument {
+class DOMDocument implements DOMParentNode {
     public function __construct(string $version = "1.0", string $encoding = UNKNOWN) {}
 
     /** @return DOMAttr|false */
@@ -185,14 +208,14 @@ class DOMDocument {
     public function adoptNode(DOMNode $source) {}
 }
 
-class DOMDocumentFragment {
+class DOMDocumentFragment implements DOMParentNode {
     public function __construct() {}
 
     /** @return bool */
     public function appendXML(string $data) {}
 }
 
-class DOMElement {
+class DOMElement implements DOMParentNode, DOMChildNode {
     public function __construct(string $name, ?string $value = null, string $uri = "") {}
 
     /** @return string */
@@ -261,7 +284,8 @@ class DOMImplementation {
     public function hasFeature(string $feature, string $version) {}
 
     /** @return DOMDocumentType|false */
-    public function createDocumentType($qualifiedName, $publicId, $systemId) {}
+    public function createDocumentType(
+        string $qualifiedName, string $publicId = "", string $systemId = "") {}
 
     /** @return DOMDocument|false */
     public function createDocument(string $namespaceURI = "", string $qualifiedName = "", DOMDocumentType $doctype = UNKNOWN) {}

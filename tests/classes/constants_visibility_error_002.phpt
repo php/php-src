@@ -3,7 +3,7 @@ Class protected constant visibility error
 --FILE--
 <?php
 class A {
-	protected const protectedConst = 'protectedConst';
+    protected const protectedConst = 'protectedConst';
 }
 
 var_dump(A::protectedConst);

@@ -9,12 +9,12 @@ $containers = array();
 class ObjectOne {
     protected $_guid = 0;
     public function __construct() {
-		global $containers;
-		$this->guid = 1;
+        global $containers;
+        $this->guid = 1;
         $containers[spl_object_hash($this)] = $this;
     }
     public function __destruct() {
-		global $containers;
+        global $containers;
         $containers[spl_object_hash($this)] = NULL;
     }
 }

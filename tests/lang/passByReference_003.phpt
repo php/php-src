@@ -3,13 +3,13 @@ Implicit initialisation when passing by reference
 --FILE--
 <?php
 function passbyVal($val) {
-	echo "\nInside passbyVal call:\n";
-	var_dump($val);
+    echo "\nInside passbyVal call:\n";
+    var_dump($val);
 }
 
 function passbyRef(&$ref) {
-	echo "\nInside passbyRef call:\n";
-	var_dump($ref);
+    echo "\nInside passbyRef call:\n";
+    var_dump($ref);
 }
 
 echo "\nPassing undefined by value\n";

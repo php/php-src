@@ -24,14 +24,14 @@ error_reporting(E_ERROR);
 
 foreach ($longVals as $longVal) {
    foreach($otherVals as $otherVal) {
-	   echo "--- testing: $longVal | $otherVal ---\n";
+       echo "--- testing: $longVal | $otherVal ---\n";
       var_dump($longVal|$otherVal);
    }
 }
 
 foreach ($otherVals as $otherVal) {
    foreach($longVals as $longVal) {
-	   echo "--- testing: $otherVal | $longVal ---\n";
+       echo "--- testing: $otherVal | $longVal ---\n";
       var_dump($otherVal|$longVal);
    }
 }

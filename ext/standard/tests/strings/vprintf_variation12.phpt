@@ -20,9 +20,9 @@ echo "*** Testing vprintf() : octal formats and non-octal values ***\n";
 
 // defining array of octal formats
 $formats =
-  '%o %+o %-o 
+  '%o %+o %-o
    %lo %Lo %4o %-4o
-   %10.4o %-10.4o %.4o 
+   %10.4o %-10.4o %.4o
    %\'#2o %\'2o %\'$2o %\'_2o
    %3$o %4$o %1$o %2$o';
 
@@ -83,41 +83,41 @@ foreach($args_array as $args) {
 *** Testing vprintf() : octal formats and non-octal values ***
 
 -- Iteration 1 --
-2 0 12 
+2 0 12
    361100 o 37777775456 2322
-                          
+                         
    30071 14 37777777764 37777416700
    12 361100 2 0
-int(116)
+int(114)
 
 -- Iteration 2 --
-2 37777777776 2 
+2 37777777776 2
    361100 o 37720715133 57062645
-                          
+                         
    57060664 4475347 37721631371 37720717336
    2 361100 2 37777777776
-int(146)
+int(144)
 
 -- Iteration 3 --
-0 0 0 
+0 0 0
    173 o 37777777605 173 
-                          
+                         
    2322 0 $0 _0
    0 173 0 0
-int(88)
+int(86)
 
 -- Iteration 4 --
-1 1 1 
+1 1 1
    1 o    1 1   
-                          
+                         
    #1 1 $1 _1
    1 1 1 1
-int(75)
+int(73)
 
 -- Iteration 5 --
-1 1 0 
+1 1 0
    1 o    0 1   
-                          
+                         
    #0 1 $1 _0
    0 1 1 1
-int(75)
+int(73)

@@ -23,8 +23,8 @@ socket_bind($sock, '0.0.0.0', 58393);
 $stream = socket_export_stream($sock);
 var_dump($stream);
 $so = socket_set_option($sock, IPPROTO_IP, MCAST_JOIN_GROUP, array(
-	"group"	=> '224.0.0.23',
-	"interface" => "lo",
+    "group"	=> '224.0.0.23',
+    "interface" => "lo",
 ));
 var_dump($so);
 

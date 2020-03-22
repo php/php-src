@@ -19,27 +19,27 @@ if ($msg = check_local_infile_support($link, $engine))
 mysqli.allow_local_infile=0
 --FILE--
 <?php
-	require_once("connect.inc");
-	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-		printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
-	}
-	if (!$link->query("DROP TABLE IF EXISTS test")) {
-		printf("[002] [%d] %s\n", $link->errno, $link->error);
-	}
-	if (!$link->query("CREATE TABLE test (dump1 INT UNSIGNED NOT NULL PRIMARY KEY) ENGINE=" . $engine)) {
-		printf("[003] [%d] %s\n", $link->errno, $link->error);
-	}
-	if (FALSE == file_put_contents('bug77956.data', "waa? meukee!"))
-		printf("[004] Failed to create CVS file\n");
-	if (!$link->query("SELECT 1 FROM DUAL"))
-		printf("[005] [%d] %s\n", $link->errno, $link->error);
-	if (!$link->query("LOAD DATA LOCAL INFILE 'bug77956.data' INTO TABLE test")) {
-		printf("[006] [%d] %s\n", $link->errno, $link->error);
-		echo "done";
-	} else {
-		echo "bug";
-	}
-	$link->close();
+    require_once("connect.inc");
+    if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+        printf("[001] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+    }
+    if (!$link->query("DROP TABLE IF EXISTS test")) {
+        printf("[002] [%d] %s\n", $link->errno, $link->error);
+    }
+    if (!$link->query("CREATE TABLE test (dump1 INT UNSIGNED NOT NULL PRIMARY KEY) ENGINE=" . $engine)) {
+        printf("[003] [%d] %s\n", $link->errno, $link->error);
+    }
+    if (FALSE == file_put_contents('bug77956.data', "waa? meukee!"))
+        printf("[004] Failed to create CVS file\n");
+    if (!$link->query("SELECT 1 FROM DUAL"))
+        printf("[005] [%d] %s\n", $link->errno, $link->error);
+    if (!$link->query("LOAD DATA LOCAL INFILE 'bug77956.data' INTO TABLE test")) {
+        printf("[006] [%d] %s\n", $link->errno, $link->error);
+        echo "done";
+    } else {
+        echo "bug";
+    }
+    $link->close();
 ?>
 --CLEAN--
 <?php

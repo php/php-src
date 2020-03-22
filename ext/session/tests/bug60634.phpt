@@ -16,15 +16,15 @@ function open($save_path, $session_name) {
 }
 
 function close() {
-	die("close: goodbye cruel world\n");
+    die("close: goodbye cruel world\n");
 }
 
 function read($id) {
-	return '';
+    return '';
 }
 
 function write($id, $session_data) {
-	die("write: goodbye cruel world\n");
+    die("write: goodbye cruel world\n");
 }
 
 function destroy($id) {

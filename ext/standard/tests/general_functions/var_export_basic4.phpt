@@ -33,13 +33,13 @@ $valid_strings = array(
 /* Loop to check for above strings with var_export() */
 echo "\n*** Output for strings ***\n";
 foreach($valid_strings as $key => $str) {
-	echo "\n-- Iteration: $key --\n";
-	var_export( $str );
-	echo "\n";
-	var_export( $str, FALSE);
-	echo "\n";
-	var_dump( var_export( $str, TRUE) );
-	echo "\n";
+    echo "\n-- Iteration: $key --\n";
+    var_export( $str );
+    echo "\n";
+    var_export( $str, FALSE);
+    echo "\n";
+    var_dump( var_export( $str, TRUE) );
+    echo "\n";
 }
 
 ?>

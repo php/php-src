@@ -29,7 +29,7 @@ class obj implements arrayaccess {
 }
 
 function x() {
-	return new obj;
+    return new obj;
 }
 var_dump(x()['two']);
 

@@ -459,7 +459,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 			} else {
 				ZVAL_EMPTY_ARRAY(&retval);
 			}
-			php_dom_create_interator(return_value, DOM_NODELIST);
+			php_dom_create_iterator(return_value, DOM_NODELIST);
 			nodeobj = Z_DOMOBJ_P(return_value);
 			dom_xpath_iter(&retval, nodeobj);
 			break;
@@ -503,12 +503,10 @@ PHP_METHOD(domxpath, evaluate)
 /* {{{ proto void dom_xpath_register_php_functions() */
 PHP_METHOD(domxpath, registerPhpFunctions)
 {
-	zval *id;
+	zval *id = ZEND_THIS;
 	dom_xpath_object *intern;
 	zval *array_value, *entry, new_string;
 	zend_string *name;
-
-	DOM_GET_THIS(id);
 
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "a",  &array_value) == SUCCESS) {
 		intern = Z_XPATHOBJ_P(id);

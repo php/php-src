@@ -11,8 +11,8 @@ require(__DIR__.'/skipif.inc');
 require __DIR__."/connect.inc";
 
 $ora_sql = "DROP TYPE
-						".$type_name."
-		   ";
+                        ".$type_name."
+           ";
 
 $statement = OCIParse($c,$ora_sql);
 @OCIExecute($statement);

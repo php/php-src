@@ -9,22 +9,22 @@ class strtoupper_filter extends php_user_filter
 {
         function filter($in, $out, &$consumed, $closing)
         {
-		while($bucket=stream_bucket_make_writeable($in)) {
-			$bucket->data = strtoupper($bucket->data);
-			$consumed += $bucket->datalen;
-			stream_bucket_append($out, $bucket);
-			stream_bucket_append($out, $bucket);
+        while($bucket=stream_bucket_make_writeable($in)) {
+            $bucket->data = strtoupper($bucket->data);
+            $consumed += $bucket->datalen;
+            stream_bucket_append($out, $bucket);
+            stream_bucket_append($out, $bucket);
                 }
-		return PSFS_PASS_ON;
+        return PSFS_PASS_ON;
         }
-	function onCreate()
-	{
-		echo "fffffffffff\n";
-	}
-	function onClose()
-	{
-		echo "hello\n";
-	}
+    function onCreate()
+    {
+        echo "fffffffffff\n";
+    }
+    function onClose()
+    {
+        echo "hello\n";
+    }
 }
 
 stream_filter_register("strtoupper", "strtoupper_filter");

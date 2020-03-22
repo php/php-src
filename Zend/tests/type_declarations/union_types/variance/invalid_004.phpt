@@ -7,7 +7,7 @@ class A {
 }
 class B extends A {
     public B $prop;
-} 
+}
 ?>
 --EXPECTF--
 Fatal error: Type of B::$prop must be X|B (as in class A) in %s on line %d

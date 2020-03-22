@@ -14,9 +14,9 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
-	case 'oci': $from = 'from dual'; break;
-	case 'firebird': $from = 'from rdb$database'; break;
-	default: $from = ''; break;
+    case 'oci': $from = 'from dual'; break;
+    case 'firebird': $from = 'from rdb$database'; break;
+    default: $from = ''; break;
 }
 $statement = $db->prepare("SELECT NULL AS null_value, 0 AS zero, 1 AS one $from");
 $statement->execute();

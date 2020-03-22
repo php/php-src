@@ -41,11 +41,11 @@ $utf8_string[] = $tmp;
 
 
 function base64_encode_array($input) {
-	foreach ($input as $var) {
-		if (is_scalar($var))
-			$ret[] = base64_encode($var);
-	}
-	return $ret;
+    foreach ($input as $var) {
+        if (is_scalar($var))
+            $ret[] = base64_encode($var);
+    }
+    return $ret;
 }
 
 echo "\n-- Convert to JIS --\n";

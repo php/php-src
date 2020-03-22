@@ -12,19 +12,19 @@ mysqli.max_persistent = 0
 mysqli.reconnect = Off
 --FILE--
 <?php
-	include ("connect.inc");
+    include ("connect.inc");
 
-	$link = mysqli_init();
-	if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
-		printf("[002] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
-	}
+    $link = mysqli_init();
+    if (!my_mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)) {
+        printf("[002] Connect failed, [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
+    }
 
-	$japanese_so = pack('H4', '835c');
-	$link->set_charset('sjis');
-	var_dump($link->real_escape_string($japanese_so) === $japanese_so);
-	mysqli_close($link);
+    $japanese_so = pack('H4', '835c');
+    $link->set_charset('sjis');
+    var_dump($link->real_escape_string($japanese_so) === $japanese_so);
+    mysqli_close($link);
 
-	print "done!";
+    print "done!";
 ?>
 --EXPECT--
 bool(true)

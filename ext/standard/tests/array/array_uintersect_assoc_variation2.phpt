@@ -23,9 +23,9 @@ unset ($unset_var);
 // define some classes
 class classWithToString
 {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString
@@ -104,76 +104,76 @@ foreach($inputs as $key =>$value) {
 *** Testing array_uintersect_assoc() : usage variation ***
 
 --int 0--
-Expected parameter 2 to be an array, int given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, int given
 
 --int 1--
-Expected parameter 2 to be an array, int given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, int given
 
 --int 12345--
-Expected parameter 2 to be an array, int given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, int given
 
 --int -12345--
-Expected parameter 2 to be an array, int given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, int given
 
 --float 10.5--
-Expected parameter 2 to be an array, float given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, float given
 
 --float -10.5--
-Expected parameter 2 to be an array, float given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, float given
 
 --float 12.3456789000e10--
-Expected parameter 2 to be an array, float given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, float given
 
 --float -12.3456789000e10--
-Expected parameter 2 to be an array, float given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, float given
 
 --float .5--
-Expected parameter 2 to be an array, float given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, float given
 
 --uppercase NULL--
-Expected parameter 2 to be an array, null given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, null given
 
 --lowercase null--
-Expected parameter 2 to be an array, null given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, null given
 
 --lowercase true--
-Expected parameter 2 to be an array, bool given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, bool given
 
 --lowercase false--
-Expected parameter 2 to be an array, bool given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, bool given
 
 --uppercase TRUE--
-Expected parameter 2 to be an array, bool given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, bool given
 
 --uppercase FALSE--
-Expected parameter 2 to be an array, bool given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, bool given
 
 --empty string DQ--
-Expected parameter 2 to be an array, string given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 --empty string SQ--
-Expected parameter 2 to be an array, string given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 --string DQ--
-Expected parameter 2 to be an array, string given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 --string SQ--
-Expected parameter 2 to be an array, string given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 --mixed case string--
-Expected parameter 2 to be an array, string given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 --heredoc--
-Expected parameter 2 to be an array, string given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 --instance of classWithToString--
-Expected parameter 2 to be an array, object given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, object given
 
 --instance of classWithoutToString--
-Expected parameter 2 to be an array, object given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, object given
 
 --undefined var--
-Expected parameter 2 to be an array, null given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, null given
 
 --unset var--
-Expected parameter 2 to be an array, null given
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, null given

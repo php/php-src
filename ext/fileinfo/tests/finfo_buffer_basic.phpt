@@ -13,27 +13,27 @@ Test finfo_buffer() function : basic functionality
 $magicFile = __DIR__ . DIRECTORY_SEPARATOR . 'magic';
 
 $options = array(
-	FILEINFO_NONE,
-	FILEINFO_MIME,
+    FILEINFO_NONE,
+    FILEINFO_MIME,
 );
 
 $buffers = array(
-	"Regular string here",
-	"\177ELF",
-	"\000\000\0001\000\000\0000\000\000\0000\000\000\0002\000\000\0000\000\000\0000\000\000\0003",
-	"\x55\x7A\x6E\x61",
-	"id=ImageMagick",
-	"RIFFüîò^BAVI LISTv",
+    "Regular string here",
+    "\177ELF",
+    "\000\000\0001\000\000\0000\000\000\0000\000\000\0002\000\000\0000\000\000\0000\000\000\0003",
+    "\x55\x7A\x6E\x61",
+    "id=ImageMagick",
+    "RIFFüîò^BAVI LISTv",
 );
 
 echo "*** Testing finfo_buffer() : basic functionality ***\n";
 
 foreach( $options as $option ) {
-	$finfo = finfo_open( $option, $magicFile );
-	foreach( $buffers as $string ) {
-		var_dump( finfo_buffer( $finfo, $string, $option ) );
-	}
-	finfo_close( $finfo );
+    $finfo = finfo_open( $option, $magicFile );
+    foreach( $buffers as $string ) {
+        var_dump( finfo_buffer( $finfo, $string, $option ) );
+    }
+    finfo_close( $finfo );
 }
 
 ?>

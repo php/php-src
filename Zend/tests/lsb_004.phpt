@@ -4,9 +4,9 @@ ZE2 Late Static Binding testing get_called_class()
 <?php
 
 class TestClass {
-	public static function getClassName() {
-		return get_called_class();
-	}
+    public static function getClassName() {
+        return get_called_class();
+    }
 }
 
 class ChildClass extends TestClass {}

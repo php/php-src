@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(950, "ansi");
 
 ?>
+--CONFLICTS--
+dir_big5
 --INI--
 internal_encoding=big5
 --FILE--

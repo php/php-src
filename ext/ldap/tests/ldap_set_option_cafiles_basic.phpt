@@ -10,18 +10,18 @@ require "connect.inc";
 $link = ldap_connect($host, $port);
 
 foreach([
-	LDAP_OPT_X_TLS_CACERTDIR,
-	LDAP_OPT_X_TLS_CACERTFILE,
-	LDAP_OPT_X_TLS_CERTFILE,
-	LDAP_OPT_X_TLS_KEYFILE,
-	LDAP_OPT_X_TLS_CRLFILE,
-	LDAP_OPT_X_TLS_DHFILE,
+    LDAP_OPT_X_TLS_CACERTDIR,
+    LDAP_OPT_X_TLS_CACERTFILE,
+    LDAP_OPT_X_TLS_CERTFILE,
+    LDAP_OPT_X_TLS_KEYFILE,
+    LDAP_OPT_X_TLS_CRLFILE,
+    LDAP_OPT_X_TLS_DHFILE,
 ] as $option) {
-	$result = ldap_set_option($link, $option, '/foo/bar');
-	var_dump($result);
+    $result = ldap_set_option($link, $option, '/foo/bar');
+    var_dump($result);
 
-	ldap_get_option($link, $option, $optionval);
-	var_dump($optionval);
+    ldap_get_option($link, $option, $optionval);
+    var_dump($optionval);
 }
 ?>
 --EXPECT--

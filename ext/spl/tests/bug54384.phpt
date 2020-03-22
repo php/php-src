@@ -4,12 +4,12 @@ Bug #54384: Several SPL classes crash when the parent constructor is not called
 <?php
 
 function test($f) {
-	try {
-		$f();
-		echo "ran normally (unexpected)\n\n";
-	} catch (LogicException $e) {
-		echo "exception (expected)\n";
-	}
+    try {
+        $f();
+        echo "ran normally (unexpected)\n\n";
+    } catch (LogicException $e) {
+        echo "exception (expected)\n";
+    }
 }
 
 echo "IteratorIterator... ";
@@ -17,8 +17,8 @@ class IteratorIteratorTest extends IteratorIterator {
     function __construct(){}
 }
 test( function() {
-	$o = new IteratorIteratorTest;
-	$o->rewind();
+    $o = new IteratorIteratorTest;
+    $o->rewind();
 } );
 
 echo "FilterIterator... ";
@@ -27,8 +27,8 @@ class FilterIteratorTest extends FilterIterator {
     function accept(){}
 }
 test( function() {
-	$o = new FilterIteratorTest;
-	$o->rewind();
+    $o = new FilterIteratorTest;
+    $o->rewind();
 } );
 
 echo "RecursiveFilterIterator... ";

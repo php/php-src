@@ -1,96 +1,62 @@
 <?php
 
-class FFI
+final class FFI
 {
-    /** @return ?FFI */
-    static function cdef(string $code = UNKNOWN, string $lib = UNKNOWN) {}
+    static function cdef(string $code = UNKNOWN, string $lib = UNKNOWN): ?FFI {}
 
-    /** @return ?FFI */
-    static function load(string $filename) {}
+    static function load(string $filename): ?FFI {}
 
-    /** @return ?FFI */
-    static function scope(string $scope_name) {}
+    static function scope(string $scope_name): ?FFI {}
+
+    /** @param FFI\CType|string $type */
+    static function new($type, bool $owned = true, bool $persistent = false): ?FFI\CData {}
+
+    /** @prefer-ref $ptr */
+    static function free(FFI\CData $ptr): void {}
 
     /**
      * @param FFI\CType|string $type
-     * @return ?FFI\CData
-     */
-    static function new($type, bool $owned = true, bool $persistent = false) {}
-
-    /** 
      * @prefer-ref $ptr
-     * @return void
      */
-    static function free(FFI\CData $ptr) {}
+    static function cast($type, $ptr): ?FFI\CData {}
 
-    /** 
-     * @param FFI\CType|string $type
-     * @prefer-ref $ptr
-     * @return ?FFI\CData
-     */
-    static function cast($type, $ptr) {}
+    static function type(string $type): ?FFI\CType {}
 
-    /** @return ?FFI\CType */
-    static function type(string $type) {}
+    /** @prefer-ref $ptr */
+    static function typeof(FFI\CData $ptr): ?FFI\CType {}
 
-    /**
-     * @prefer-ref $ptr
-     * @return FFI\CType
-     */
-    static function typeof(FFI\CData $ptr) {}
+    static function arrayType(FFI\CType $type, array $dims): ?FFI\CType {}
 
-    /** @return ?FFI\CType */
-    static function arrayType(FFI\CType $type, array $dims) {}
+    /** @prefer-ref $ptr */
+    static function addr(FFI\CData $ptr): FFI\CData {}
 
-    /**
-     * @prefer-ref $ptr
-     * @return FFI\CData
-     */
-    static function addr(FFI\CData $ptr) {}
+    /** @prefer-ref $ptr */
+    static function sizeof(object $ptr): ?int {}
 
-    /**
-     * @prefer-ref $ptr
-     * @return ?int
-     */
-    static function sizeof(object $ptr) {}
-
-    /**
-     * @prefer-ref $ptr
-     * @return ?int
-     */
-    static function alignof(object $ptr) {}
+    /** @prefer-ref $ptr */
+    static function alignof(object $ptr): ?int {}
 
     /**
      * @prefer-ref $dst
      * @prefer-ref $src
      * @param string|FFI\CData $dst
-     * @return void
      */
-    static function memcpy(FFI\CData $dst, $src, int $size) {}
+    static function memcpy(FFI\CData $dst, $src, int $size): void {}
 
     /**
      * @prefer-ref $ptr1
      * @param string|FFI\CData $ptr1
      * @prefer-ref $ptr2
      * @param string|FFI\CData $ptr2
-     * @return ?int
      */
-    static function memcmp($ptr1, $ptr2, int $size) {}
+    static function memcmp($ptr1, $ptr2, int $size): ?int {}
 
-    /**
-     * @prefer-ref $ptr
-     * @return void
-     */
-    static function memset(FFI\CData $ptr, int $ch, int $size) {}
+    /** @prefer-ref $ptr */
+    static function memset(FFI\CData $ptr, int $ch, int $size): void {}
 
-    /**
-     * @prefer-ref $ptr
-     * @return ?string
-     */
-    static function string(FFI\CData $ptr, int $size = UNKNOWN) {}
+    /** @prefer-ref $ptr */
+    static function string(FFI\CData $ptr, int $size = UNKNOWN): ?string {}
 
-    /**
-     * @prefer-ref $ptr
-     */
-    static function isNull(FFI\CData $ptr) {}
+    /** @prefer-ref $ptr */
+    static function isNull(FFI\CData $ptr): bool {}
 }

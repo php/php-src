@@ -174,14 +174,14 @@ static const zend_function_entry imap_functions[] = {
 	PHP_FE(imap_getsubscribed,						arginfo_imap_getsubscribed)
 	PHP_FE(imap_getmailboxes,						arginfo_imap_getmailboxes)
 
-	PHP_FALIAS(imap_header,			imap_headerinfo,	arginfo_imap_headerinfo)
-	PHP_FALIAS(imap_listmailbox,	imap_list,			arginfo_imap_list)
-	PHP_FALIAS(imap_scanmailbox,	imap_listscan,		arginfo_imap_listscan)
-	PHP_FALIAS(imap_listsubscribed,	imap_lsub,			arginfo_imap_lsub)
-	PHP_FALIAS(imap_fetchtext,		imap_body,			arginfo_imap_body)
-	PHP_FALIAS(imap_scan,			imap_listscan,		arginfo_imap_listscan)
-	PHP_FALIAS(imap_create,			imap_createmailbox,	arginfo_imap_createmailbox)
-	PHP_FALIAS(imap_rename,			imap_renamemailbox,	arginfo_imap_renamemailbox)
+	PHP_FALIAS(imap_header,			imap_headerinfo,	arginfo_imap_header)
+	PHP_FALIAS(imap_listmailbox,	imap_list,			arginfo_imap_listmailbox)
+	PHP_FALIAS(imap_scanmailbox,	imap_listscan,		arginfo_imap_scanmailbox)
+	PHP_FALIAS(imap_listsubscribed,	imap_lsub,			arginfo_imap_listsubscribed)
+	PHP_FALIAS(imap_fetchtext,		imap_body,			arginfo_imap_fetchtext)
+	PHP_FALIAS(imap_scan,			imap_listscan,		arginfo_imap_scan)
+	PHP_FALIAS(imap_create,			imap_createmailbox,	arginfo_imap_create)
+	PHP_FALIAS(imap_rename,			imap_renamemailbox,	arginfo_imap_rename)
 	PHP_FE_END
 };
 /* }}} */

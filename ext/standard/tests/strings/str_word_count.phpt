@@ -87,10 +87,10 @@ array(6) {
   string(5) "today"
 }
 int(6)
-Invalid format value 3
-Invalid format value 123
-Invalid format value -1
-Invalid format value 999999999
+str_word_count(): Argument #2 ($format) must be a valid format value
+str_word_count(): Argument #2 ($format) must be a valid format value
+str_word_count(): Argument #2 ($format) must be a valid format value
+str_word_count(): Argument #2 ($format) must be a valid format value
 string(53) "Hello friend, you're
     looking          good today!"
 int(5)

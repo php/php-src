@@ -13,7 +13,7 @@ trait THello {
 }
 
 class TraitsTest {
-	use THello { THello::a as b; }
+    use THello { THello::a as b; }
 }
 
 $test = new TraitsTest();

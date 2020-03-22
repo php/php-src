@@ -31,8 +31,8 @@ $bool_types = array (
 $string_formats = array( "%s",
                          "%hs", "%ls", "%Ls",
                          " %s", "%s ", "% s",
-			 "\t%s", "\n%s", "%4s",
-			 "%30s", "%[a-zA-Z0-9]", "%*s");
+             "\t%s", "\n%s", "%4s",
+             "%30s", "%[a-zA-Z0-9]", "%*s");
 
 $counter = 1;
 

@@ -6,15 +6,15 @@ testing @ and error_reporting - 9
 error_reporting(E_ALL & ~E_DEPRECATED);
 
 function bar() {
-	echo @$blah;
-	echo $undef2;
+    echo @$blah;
+    echo $undef2;
 }
 
 function foo() {
-	echo @$undef;
-	error_reporting(E_ALL);
-	echo $blah;
-	return bar();
+    echo @$undef;
+    error_reporting(E_ALL);
+    echo $blah;
+    return bar();
 }
 
 @foo();

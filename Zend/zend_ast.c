@@ -1571,6 +1571,7 @@ simple_list:
 			switch (ast->attr & ~ZEND_TYPE_NULLABLE) {
 				case IS_ARRAY:    APPEND_STR("array");
 				case IS_CALLABLE: APPEND_STR("callable");
+				case IS_STATIC:   APPEND_STR("static");
 				EMPTY_SWITCH_DEFAULT_CASE();
 			}
 			break;

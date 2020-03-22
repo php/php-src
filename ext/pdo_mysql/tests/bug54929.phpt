@@ -16,14 +16,14 @@ $pdodb = PDOTest::test_factory(__DIR__ . '/common.phpt');
 
 
 function testQuery($query) {
-	global $pdodb;
-	$stmt = $pdodb->prepare($query);
+    global $pdodb;
+    $stmt = $pdodb->prepare($query);
 
-	if (!$stmt->execute(array("foo"))) {
-		var_dump($stmt->errorInfo());
-	} else{
-		var_dump($stmt->fetch(PDO::FETCH_ASSOC));
-	}
+    if (!$stmt->execute(array("foo"))) {
+        var_dump($stmt->errorInfo());
+    } else{
+        var_dump($stmt->fetch(PDO::FETCH_ASSOC));
+    }
 }
 
 testQuery("/* ' */ select ? as f1 /* ' */");

@@ -16,57 +16,57 @@
  */
 class RecursiveDualIterator extends DualIterator implements RecursiveIterator
 {
-	private $ref;
+    private $ref;
 
-	/** construct iterator from two RecursiveIterator instances
-	 *
-	 * @param lhs   Left  Hand Side Iterator
-	 * @param rhs   Right Hand Side Iterator
-	 * @param flags iteration flags
-	 */
-	function __construct(RecursiveIterator $lhs, RecursiveIterator $rhs,
-				$flags = 0x33 /*DualIterator::DEFAULT_FLAGS*/)
-	{
-		parent::__construct($lhs, $rhs, $flags);
-	}
+    /** construct iterator from two RecursiveIterator instances
+     *
+     * @param lhs   Left  Hand Side Iterator
+     * @param rhs   Right Hand Side Iterator
+     * @param flags iteration flags
+     */
+    function __construct(RecursiveIterator $lhs, RecursiveIterator $rhs,
+                $flags = 0x33 /*DualIterator::DEFAULT_FLAGS*/)
+    {
+        parent::__construct($lhs, $rhs, $flags);
+    }
 
-	/** @return whether both LHS and RHS have children
-	 */
-	function hasChildren()
-	{
-		return $this->getLHS()->hasChildren() && $this->getRHS()->hasChildren();
-	}
+    /** @return whether both LHS and RHS have children
+     */
+    function hasChildren()
+    {
+        return $this->getLHS()->hasChildren() && $this->getRHS()->hasChildren();
+    }
 
-	/** @return new RecursiveDualIterator (late binding) for the two inner
-	 * iterators current children.
-	 */
-	function getChildren()
-	{
-		if (empty($this->ref))
-		{
-			$this->ref = new ReflectionClass($this);
-		}
-		return $this->ref->newInstance(
-					$this->getLHS()->getChildren(), $this->getRHS()->getChildren(), $this->getFlags());
-	}
+    /** @return new RecursiveDualIterator (late binding) for the two inner
+     * iterators current children.
+     */
+    function getChildren()
+    {
+        if (empty($this->ref))
+        {
+            $this->ref = new ReflectionClass($this);
+        }
+        return $this->ref->newInstance(
+                    $this->getLHS()->getChildren(), $this->getRHS()->getChildren(), $this->getFlags());
+    }
 
-	/** @return whether both inner iterators are valid, have same hasChildren()
-	 * state and identical current and key values or both are non valid.
-	 */
-	function areIdentical()
-	{
-		return $this->getLHS()->hasChildren() === $this->getRHS()->hasChildren()
-			&& parent::areIdentical();
-	}
+    /** @return whether both inner iterators are valid, have same hasChildren()
+     * state and identical current and key values or both are non valid.
+     */
+    function areIdentical()
+    {
+        return $this->getLHS()->hasChildren() === $this->getRHS()->hasChildren()
+            && parent::areIdentical();
+    }
 
-	/** @return whether both inner iterators are valid, have same hasChildren()
-	 * state and equal current and key values or both are invalid.
-	 */
-	function areEqual()
-	{
-		return $this->getLHS()->hasChildren() === $this->getRHS()->hasChildren()
-			&& parent::areEqual();
-	}
+    /** @return whether both inner iterators are valid, have same hasChildren()
+     * state and equal current and key values or both are invalid.
+     */
+    function areEqual()
+    {
+        return $this->getLHS()->hasChildren() === $this->getRHS()->hasChildren()
+            && parent::areEqual();
+    }
 }
 
 ?>

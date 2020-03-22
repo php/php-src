@@ -25,7 +25,7 @@ require_once('lcmess.inc');
 
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {
-	die ("Could not connect to the server");
+    die ("Could not connect to the server");
 }
 
 _set_lc_messages();
@@ -46,7 +46,7 @@ var_dump($row);
 pg_free_result($res);
 if ($row[0] == 'f')
 {
-	var_dump(pg_last_notice($dbh));
+    var_dump(pg_last_notice($dbh));
 }
 
 pg_close($dbh);

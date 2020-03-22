@@ -352,7 +352,7 @@ PHP_FUNCTION(stream_socket_sendto)
 		}
 	}
 
-	RETURN_LONG(php_stream_xport_sendto(stream, data, datalen, (int)flags, target_addr ? &sa : NULL, sl));
+	RETURN_LONG(php_stream_xport_sendto(stream, data, datalen, (int)flags, target_addr_len ? &sa : NULL, sl));
 }
 /* }}} */
 
@@ -383,7 +383,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 	}
 
 	if (to_read <= 0) {
-		zend_value_error("Length parameter must be greater than 0");
+		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
@@ -789,10 +789,10 @@ PHP_FUNCTION(stream_select)
 	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
 	if (!secnull) {
 		if (sec < 0) {
-			zend_value_error("The seconds parameter must be greater than 0");
+			zend_argument_value_error(4, "must be greater than or equal to 0");
 			RETURN_THROWS();
 		} else if (usec < 0) {
-			zend_value_error("The microseconds parameter must be greater than 0");
+			zend_argument_value_error(4, "must be greater than or equal to 0");
 			RETURN_THROWS();
 		}
 
@@ -968,7 +968,7 @@ PHP_FUNCTION(stream_context_get_options)
 
 	context = decode_context_param(zcontext);
 	if (!context) {
-		zend_type_error("Invalid stream/context parameter");
+		zend_argument_type_error(1, "must be a valid stream/context");
 		RETURN_THROWS();
 	}
 
@@ -993,7 +993,7 @@ PHP_FUNCTION(stream_context_set_option)
 
 		/* figure out where the context is coming from exactly */
 		if (!(context = decode_context_param(zcontext))) {
-			zend_type_error("Invalid stream/context parameter");
+			zend_argument_type_error(1, "must be a valid stream/context");
 			RETURN_THROWS();
 		}
 
@@ -1012,7 +1012,7 @@ PHP_FUNCTION(stream_context_set_option)
 
 		/* figure out where the context is coming from exactly */
 		if (!(context = decode_context_param(zcontext))) {
-			zend_type_error("Invalid stream/context parameter");
+			zend_argument_type_error(1, "must be a valid stream/context");
 			RETURN_THROWS();
 		}
 
@@ -1035,7 +1035,7 @@ PHP_FUNCTION(stream_context_set_params)
 
 	context = decode_context_param(zcontext);
 	if (!context) {
-		zend_type_error("Invalid stream/context parameter");
+		zend_argument_type_error(1, "must be a valid stream/context");
 		RETURN_THROWS();
 	}
 
@@ -1056,7 +1056,7 @@ PHP_FUNCTION(stream_context_get_params)
 
 	context = decode_context_param(zcontext);
 	if (!context) {
-		zend_type_error("Invalid stream/context parameter");
+		zend_argument_type_error(1, "must be a valid stream/context");
 		RETURN_THROWS();
 	}
 
@@ -1294,7 +1294,7 @@ PHP_FUNCTION(stream_get_line)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (max_length < 0) {
-		zend_value_error("The maximum allowed length must be greater than or equal to zero");
+		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 	if (!max_length) {
@@ -1430,7 +1430,7 @@ PHP_FUNCTION(stream_set_chunk_size)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (csize <= 0) {
-		zend_value_error("The chunk size must be a positive integer, " ZEND_LONG_FMT " given", csize);
+		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 	/* stream.chunk_size is actually a size_t, but php_stream_set_option
@@ -1438,7 +1438,7 @@ PHP_FUNCTION(stream_set_chunk_size)
 	 * In any case, values larger than INT_MAX for a chunk size make no sense.
 	 */
 	if (csize > INT_MAX) {
-		zend_value_error("The chunk size cannot be larger than %d", INT_MAX);
+		zend_argument_value_error(2, "is too large");
 		RETURN_THROWS();
 	}
 

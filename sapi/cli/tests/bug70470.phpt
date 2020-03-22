@@ -12,7 +12,7 @@ php_cli_server_start("var_dump(getAllheaders());");
 $fp = fsockopen(PHP_CLI_SERVER_HOSTNAME, PHP_CLI_SERVER_PORT, $errno, $errmsg, 0.5);
 
 if (!$fp) {
-	die("connect failed: " . $errmsg);
+    die("connect failed: " . $errmsg);
 }
 
 fwrite($fp, "GET / HTTP/1.1\r\n");
@@ -26,7 +26,7 @@ fflush($fp);
 usleep(200000);
 fwrite($fp, "se\r\n\r\n");
 while (!feof($fp)) {
-	echo fgets($fp);
+    echo fgets($fp);
 }
 fclose($fp);
 ?>

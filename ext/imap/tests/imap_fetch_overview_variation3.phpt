@@ -38,13 +38,13 @@ $options = array ('1',
 $iterator = 1;
 imap_check($stream_id);
 foreach($options as $option) {
-	echo "\nTesting with option value:";
-	var_dump($option);
-	$overview = imap_fetch_overview($stream_id, $msg_uid, $option);
-	if ($overview) {
+    echo "\nTesting with option value:";
+    var_dump($option);
+    $overview = imap_fetch_overview($stream_id, $msg_uid, $option);
+    if ($overview) {
                 echo "imap_fetch_overview() returns an object\n";
         }
-	$iterator++;
+    $iterator++;
 }
 
 ?>

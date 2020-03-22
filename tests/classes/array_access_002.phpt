@@ -4,24 +4,24 @@ ZE2 ArrayAccess::offsetSet without return
 <?php
 class ObjectOne implements ArrayAccess {
 
-	public $a = array('1st', 1, 2=>'3rd', '4th'=>4);
+    public $a = array('1st', 1, 2=>'3rd', '4th'=>4);
 
-	function offsetExists($index) {
-		echo __METHOD__ . "($index)\n";
-		return array_key_exists($index, $this->a);
-	}
-	function offsetGet($index) {
-		echo __METHOD__ . "($index)\n";
-		return $this->a[$index];
-	}
-	function offsetSet($index, $newval) {
-		echo __METHOD__ . "($index,$newval)\n";
-		/*return*/ $this->a[$index] = $newval;
-	}
-	function offsetUnset($index) {
-		echo __METHOD__ . "($index)\n";
-		unset($this->a[$index]);
-	}
+    function offsetExists($index) {
+        echo __METHOD__ . "($index)\n";
+        return array_key_exists($index, $this->a);
+    }
+    function offsetGet($index) {
+        echo __METHOD__ . "($index)\n";
+        return $this->a[$index];
+    }
+    function offsetSet($index, $newval) {
+        echo __METHOD__ . "($index,$newval)\n";
+        /*return*/ $this->a[$index] = $newval;
+    }
+    function offsetUnset($index) {
+        echo __METHOD__ . "($index)\n";
+        unset($this->a[$index]);
+    }
 }
 
 $obj = new ObjectOne;

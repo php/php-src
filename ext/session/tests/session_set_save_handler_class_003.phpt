@@ -19,22 +19,22 @@ ob_start();
 echo "*** Testing session_set_save_handler() : inheritance ***\n";
 
 class MySession3 extends SessionHandler {
-	public $i = 0;
-	public function open($path, $name) {
-		++$this->i;
-		return parent::open($path, $name);
-	}
-	public function read($key) {
-		++$this->i;
-		return parent::read($key);
-	}
+    public $i = 0;
+    public function open($path, $name) {
+        ++$this->i;
+        return parent::open($path, $name);
+    }
+    public function read($key) {
+        ++$this->i;
+        return parent::read($key);
+    }
 }
 
 class MySession4 extends MySession3 {
-	public function write($id, $data) {
-		$this->i = "hai";
-		return parent::write($id, $data);
-	}
+    public function write($id, $data) {
+        $this->i = "hai";
+        return parent::write($id, $data);
+    }
 }
 
 $handler = new MySession3;

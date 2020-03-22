@@ -12,9 +12,9 @@ $a = new Phar($fname);
 $a['index.php'] = '<?php
 $a = opendir("dir");
 if ($a) {
-	while (false !== ($e = readdir($a))) {
-		echo $e;
-	}
+    while (false !== ($e = readdir($a))) {
+        echo $e;
+    }
 }
 ?>';
 $a['dir/file1.txt'] = 'hi';

@@ -125,6 +125,44 @@ PHP 8.0 UPGRADE NOTES
     warning.
   . Uncaught exceptions now go through "clean shutdown", which means that
     destructors will be called after an uncaught exception.
+  . Compile time fatal error "Only variables can be passed by reference" has been
+    delayed until run-time and converted to "Cannot pass parameter by reference"
+    exception.
+  . Some "Only variables should be passed by reference" notices have been converted
+    to "Cannot pass parameter by reference" exception.
+  . The generated name for anonymous classes has changed. It will now include
+    the name of the first parent or interface:
+
+        new class extends ParentClass {};
+        // -> ParentClass@anonymous
+        new class implements FirstInterface, SecondInterface {};
+        // -> FirstInterface@anonymous
+        new class {};
+        // -> class@anonymous
+
+    The name shown above is still followed by a null byte and and a unique
+    suffix.
+  . Declaring a required parameter after an optional one is deprecated. As an
+    exception, declaring a parameter of the form "Type $param = null" before
+    a required one continues to be allowed, because this pattern was sometimes
+    used to achieve nullable types in older PHP versions.
+
+        function test($a = [], $b) {}       // Deprecated
+        function test(Foo $a = null, $b) {} // Allowed
+  . Non-absolute trait method references in trait alias adaptations are now
+    required to be unambiguous:
+
+        class X {
+            use T1, T2 {
+               func as otherFunc;
+            }
+            function func() {}
+        }
+
+    If both T1::func() and T2::func() exist, this code was previously silently
+    accepted, and func as assumed to refer to T1::func. Now it will generate a
+    fatal error instead, and either T1::func or T2::func needs to be written
+    explicitly.
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
@@ -176,6 +214,10 @@ PHP 8.0 UPGRADE NOTES
 - GMP:
   . gmp_random() has been removed. One of gmp_random_range() or
     gmp_random_bits() should be used instead.
+
+- Iconv:
+  . iconv() implementations which do not properly set errno in case of errors,
+    are no longer supported.
 
 - Intl:
   . The deprecated constant INTL_IDNA_VARIANT_2003 has been removed.
@@ -261,6 +303,7 @@ PHP 8.0 UPGRADE NOTES
     representation of the type, and is no longer deprecated. In particular the
     result will include a nullability indicator for nullable types. The format
     of the return value is not stable and may change between PHP versions.
+  . Reflection export() methods have been removed.
 
 - Socket:
   . The deprecated AI_IDN_ALLOW_UNASSIGNED and AI_IDN_USE_STD3_ASCII_RULES
@@ -304,6 +347,7 @@ PHP 8.0 UPGRADE NOTES
   . convert_cyr_string() has been removed.
   . money_format() has been removed.
   . ezmlm_hash() has been removed.
+  . restore_include_path() has been removed.
   . get_magic_quotes_gpc() and get_magic_quotes_gpc_runtime() has been removed.
   . FILTER_SANITIZE_MAGIC_QUOTES has been removed.
   . Calling implode() with parameters in a reverse order ($pieces, $glue) is no
@@ -316,6 +360,10 @@ PHP 8.0 UPGRADE NOTES
         http://example.com/foo?# => query = "",   fragment = ""
 
     Previously all cases resulted in query and fragment being null.
+  . var_dump() and debug_zval_dump() will now print floating-point numbers
+    using serialize_precision rather than precision. In a default configuration,
+    this means that floating-point numbers are now printed with full accuracy
+    by these debugging functions.
 
 - tidy:
   . The $use_include_path parameter, which was not used internally, has been
@@ -333,11 +381,8 @@ PHP 8.0 UPGRADE NOTES
     objects instead of resources.
 
 - Zip:
-  . The remove_path option of ZipArchive::addGlob() and ::addPattern() is now
-    treated as arbitrary string prefix (for consistency with the add_path
-    option), whereas formerly it was treated as directory name. This means that
-    if no trailing directory separator is given, the following character is
-    no longer stripped from the filename.
+  . ZipArchive::OPSYS_Z_CPM have been removed, should use ZipArchive::OPSYS_CPM
+    (this name was a typo).
 
 - Zlib:
   . gzgetss() has been removed.
@@ -362,11 +407,43 @@ PHP 8.0 UPGRADE NOTES
         class B extends A {
             public function method(...$everything) {}
         }
+  . "static" (as in "late static binding") can now be used as a return type:
 
+        class Test {
+            public function create(): static {
+                return new static();
+            }
+        }
+
+    RFC: https://wiki.php.net/rfc/static_return_type
+  . It is now possible to fetch the class name of an object using
+    `$object::class`. The result is the same as `get_class($object)`.
+    RFC: https://wiki.php.net/rfc/class_name_literal_on_object
+  . New and instanceof can now be used with arbitrary expressions, using
+    `new (expression)(...$args)` and `$obj instanceof (expression)`.
+    RFC: https://wiki.php.net/rfc/variable_syntax_tweaks
+  . Some consistency fixes to variable syntax have been applied, for example
+    writing `Foo::BAR::$baz` is now allowed.
+    RFC: https://wiki.php.net/rfc/variable_syntax_tweaks
+  . Added Stringable.
+    RFC: https://wiki.php.net/rfc/stringable
 
 - Date:
   . Added DateTime::createFromInterface() and
     DateTimeImmutable::createFromInterface().
+
+- dom:
+  . Introduce DOMParentNode and DOMChildNode with new traversal and manipulation APIs
+    RFC: https://wiki.php.net/rfc/dom_living_standard_api
+
+- Zip:
+  . Extension updated to version 1.18.2
+  . New ZipArchive::lastId property to get index value of last added entry.
+  . Error can be checked after an archive is closed using ZipArchive::status,
+    ZipArchive::statusSys properties or ZipArchive::getStatusString() method.
+  . The remove_path option of ZipArchive::addGlob() and ::addPattern() is now
+    treated as arbitrary string prefix (for consistency with the add_path
+    option), whereas formerly it was treated as directory name.
 
 ========================================
 3. Changes in SAPI modules
@@ -380,13 +457,36 @@ PHP 8.0 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
+- Zip:
+  . Using empty file as ZipArchive is deprecated. Libzip 1.6.0
+    do not accept empty files as valid zip archives any longer.
+    Existing workaround will be removed in next version.
+
 ========================================
 5. Changed Functions
 ========================================
 
+- Zip
+ . ZipArchive::addGlob and ZipArchive::addPattern methods accept more
+   values in the "options" array argument:
+   . flags
+   . comp_method
+   . comp_flags
+   . env_method
+   . enc_pasword
+ . ZipArchive::addEmptyDir, ZipArchive::addFile and aZipArchive::addFromString
+   methods have a new "flags" argument. This allow to manage name encoding
+   (ZipArchive::FL_ENC_*) and entry replacement (ZipArchive::FL_OVERWRITE)
+ . ZipArchive::extractTo now restore file modification time.
+
 ========================================
 6. New Functions
 ========================================
+
+- PCRE:
+  . Added preg_last_error_msg(), which returns a human-readable message for
+    the last PCRE error. It complements preg_last_error(), which returns an
+    integer enum instead.
 
 - SQLite3:
   . Add SQLite3::setAuthorizer() and respective class constants to set a
@@ -395,9 +495,19 @@ PHP 8.0 UPGRADE NOTES
     PR: https://github.com/php/php-src/pull/4797
 
 - Standard:
-  . Added fdiv() method, which performs a floating-point division under
+  . Added str_contains($haystack, $needle) function, which checks whether
+    $haystack contains $needle as a sub-string. It is equivalent to writing
+    strpos($haystack, $needle) !== false.
+  . Added fdiv() function, which performs a floating-point division under
     IEEE 754 semantics. Division by zero is considered well-defined and
     will return one of Inf, -Inf or NaN.
+
+- Zip:
+  . ZipArchive::setMtimeName and ZipArchive::setMtimeIndex to set the
+    modification time of an entry.
+  . ZipArchive::setProgressCallback to provide updates during archive close.
+  . ZipArchive::setCancelCallback to allow cancellation during archive close.
+  . ZipArchive::replaceFile to replace an entry content.
 
 ========================================
 7. New Classes and Interfaces
@@ -422,6 +532,9 @@ PHP 8.0 UPGRADE NOTES
   . The function imagegetinterpolation() to get the current interpolation method
     has been added.
 
+- MBString:
+  . The Unicode data tables have been updated to version 13.0.0.
+
 ========================================
 10. New Global Constants
 ========================================
@@ -437,6 +550,11 @@ PHP 8.0 UPGRADE NOTES
 ========================================
 12. Windows Support
 ========================================
+
+- Standard:
+  . Program execution functions (proc_open(), exec(), popen() etc.) using the
+    shell now consistently execute `%comspec% /s /c "$commandline"`, which has
+    the same effect as executing `$commandline` (without additional quotes).
 
 - php-test-pack:
   . The test runner has been renamed from run-test.php to run-tests.php, to

@@ -13,11 +13,11 @@ var_dump(
 
 // Invalid
 var_dump(
-	mb_chr(0xd800, "typo"),
-	mb_chr(0xd800, "pass"),
-	mb_chr(0xd800, "jis"),
-	mb_chr(0xd800, "cp50222"),
-	mb_chr(0xd800, "utf-7")
+    mb_chr(0xd800, "typo"),
+    mb_chr(0xd800, "pass"),
+    mb_chr(0xd800, "jis"),
+    mb_chr(0xd800, "cp50222"),
+    mb_chr(0xd800, "utf-7")
 );
 ?>
 --EXPECTF--
