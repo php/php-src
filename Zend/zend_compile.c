@@ -7447,23 +7447,26 @@ void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 				}
 			}
 		} else if (opcode == ZEND_CONCAT) {
-			/* convert constant operands to strings at compile-time */
-			if (left_node.op_type == IS_CONST) {
-				if (Z_TYPE(left_node.u.constant) == IS_ARRAY) {
-					zend_emit_op_tmp(&left_node, ZEND_CAST, &left_node, NULL)->extended_value = IS_STRING;
-				} else {
-					convert_to_string(&left_node.u.constant);
+			/* Only do optimization if none of the operands are objects (they can have overloaded concat operator) */
+			if(!(left_node.op_type == IS_OBJECT || right_node.op_type == IS_OBJECT)) {
+				/* convert constant operands to strings at compile-time */
+				if (left_node.op_type == IS_CONST) {
+					if (Z_TYPE(left_node.u.constant) == IS_ARRAY) {
+						zend_emit_op_tmp(&left_node, ZEND_CAST, &left_node, NULL)->extended_value = IS_STRING;
+					} else {
+						convert_to_string(&left_node.u.constant);
+					}
 				}
-			}
-			if (right_node.op_type == IS_CONST) {
-				if (Z_TYPE(right_node.u.constant) == IS_ARRAY) {
-					zend_emit_op_tmp(&right_node, ZEND_CAST, &right_node, NULL)->extended_value = IS_STRING;
-				} else {
-					convert_to_string(&right_node.u.constant);
+				if (right_node.op_type == IS_CONST) {
+					if (Z_TYPE(right_node.u.constant) == IS_ARRAY) {
+						zend_emit_op_tmp(&right_node, ZEND_CAST, &right_node, NULL)->extended_value = IS_STRING;
+					} else {
+						convert_to_string(&right_node.u.constant);
+					}
 				}
-			}
-			if (left_node.op_type == IS_CONST && right_node.op_type == IS_CONST) {
-				opcode = ZEND_FAST_CONCAT;
+				if (left_node.op_type == IS_CONST && right_node.op_type == IS_CONST) {
+					opcode = ZEND_FAST_CONCAT;
+				}
 			}
 		}
 		zend_emit_op_tmp(result, opcode, &left_node, &right_node);
