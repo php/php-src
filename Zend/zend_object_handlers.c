@@ -179,6 +179,8 @@ ZEND_API HashTable *zend_std_get_debug_info(zend_object *object, int *is_temp) /
 
 static int zend_std_call_op_handler(zend_uchar opcode, zval *result, zval *op1, zval *op2) /* {{{ */
 {
+	zend_bool is_retry = 0;
+
 	zend_class_entry *ce;
 	zend_object *zobj;
 	if(Z_TYPE_P(op1) == IS_OBJECT) {
@@ -282,12 +284,13 @@ static int zend_std_call_op_handler(zend_uchar opcode, zval *result, zval *op1, 
 		/* Check if function exists, check on other operand if possible */
 		if (fcic.function_handler == NULL)
 		{
-			if(zobj == Z_OBJ_P(op1) && op2 != NULL && Z_TYPE_P(op2) == IS_OBJECT) {
+			if(zobj == Z_OBJ_P(op1) && op2 != NULL && Z_TYPE_P(op2) == IS_OBJECT && !is_retry) {
 retry:
 				zobj = Z_OBJ_P(op2);
 				ce = Z_OBJCE_P(op2);
 				zval_ptr_dtor(&fci.function_name);
 				/* Retry checking if other operand has method */
+				is_retry = 1;
 				continue;
 			}
 
@@ -305,7 +308,7 @@ retry:
 
 		/** The operand handler can either return PHP_OPERAND_NOT_SUPPORTED */
 		if (Z_TYPE_P(result) == IS_NULL) {
-			if(zobj == Z_OBJ_P(op1) && op2 != NULL && Z_TYPE_P(op2) == IS_OBJECT) {
+			if(zobj == Z_OBJ_P(op1) && op2 != NULL && Z_TYPE_P(op2) == IS_OBJECT && !is_retry) {
 				goto retry;
 			} else {
 				if(op2 != NULL) { /* binary operators */
