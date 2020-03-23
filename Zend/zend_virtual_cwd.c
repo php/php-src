@@ -65,10 +65,6 @@
 # include <winnt.h>
 #endif
 
-#ifndef HAVE_REALPATH
-#define realpath(x,y) strcpy(y,x)
-#endif
-
 #define VIRTUAL_CWD_DEBUG 0
 
 #include "TSRM.h"

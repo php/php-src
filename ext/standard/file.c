@@ -2293,7 +2293,6 @@ out:
 }
 /* }}} */
 
-#if HAVE_REALPATH || defined(ZTS)
 /* {{{ proto string|false realpath(string path)
    Return the resolved path */
 PHP_FUNCTION(realpath)
@@ -2322,7 +2321,6 @@ PHP_FUNCTION(realpath)
 	}
 }
 /* }}} */
-#endif
 
 /* See http://www.w3.org/TR/html4/intro/sgmltut.html#h-3.2.2 */
 #define PHP_META_HTML401_CHARS "-_.:"
