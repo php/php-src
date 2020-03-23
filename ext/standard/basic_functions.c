@@ -597,9 +597,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_FALIAS(socket_get_status, stream_get_meta_data,						arginfo_socket_get_status)
 
-#if HAVE_REALPATH || defined(ZTS)
 	PHP_FE(realpath,														arginfo_realpath)
-#endif
 
 #ifdef HAVE_FNMATCH
 	PHP_FE(fnmatch,															arginfo_fnmatch)

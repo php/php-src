@@ -582,7 +582,6 @@ nl_langinfo \
 poll \
 ptsname \
 putenv \
-realpath \
 rand_r \
 scandir \
 setitimer \

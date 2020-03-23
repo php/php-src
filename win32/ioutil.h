@@ -630,7 +630,6 @@ __forceinline static int php_win32_ioutil_link(const char *target, const char *l
 	return ret;
 }/*}}}*/
 
-#define HAVE_REALPATH 1
 PW32IO char *realpath(const char *path, char *resolved);
 
 __forceinline static char *php_win32_ioutil_realpath_ex0(const char *path, char *resolved, PBY_HANDLE_FILE_INFORMATION info)

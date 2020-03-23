@@ -1284,7 +1284,6 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
 }
 /* }}} */
 
-#if HAVE_REALPATH || defined(ZTS)
 /* {{{ proto string SplFileInfo::getRealPath()
    Return the resolved path */
 SPL_METHOD(SplFileInfo, getRealPath)
@@ -1325,7 +1324,6 @@ SPL_METHOD(SplFileInfo, getRealPath)
 	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
-#endif
 
 /* {{{ proto SplFileObject SplFileInfo::openFile([string mode = 'r' [, bool use_include_path  [, resource context]]])
    Open the current file */
@@ -1900,9 +1898,7 @@ static const zend_function_entry spl_SplFileInfo_functions[] = {
 	SPL_ME(SplFileInfo,       isDir,         arginfo_class_SplFileInfo_isDir, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       isLink,        arginfo_class_SplFileInfo_isLink, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getLinkTarget, arginfo_class_SplFileInfo_getLinkTarget, ZEND_ACC_PUBLIC)
-#if HAVE_REALPATH || defined(ZTS)
 	SPL_ME(SplFileInfo,       getRealPath,   arginfo_class_SplFileInfo_getRealPath, ZEND_ACC_PUBLIC)
-#endif
 	SPL_ME(SplFileInfo,       getFileInfo,   arginfo_class_SplFileInfo_getFileInfo, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getPathInfo,   arginfo_class_SplFileInfo_getPathInfo, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       openFile,      arginfo_class_SplFileInfo_openFile,         ZEND_ACC_PUBLIC)

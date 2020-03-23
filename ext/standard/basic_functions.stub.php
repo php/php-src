@@ -877,9 +877,7 @@ function fputcsv($handle, array $fields, string $delimiter = ",", string $enclos
 /** @param resource $handle */
 function fgetcsv($handle, $length = UNKNOWN, string $delimiter = ",", string $enclosure = '"', string $escape = "\\"): array|false {}
 
-#if HAVE_REALPATH || defined(ZTS)
 function realpath(string $path): string|false {}
-#endif
 
 #ifdef HAVE_FNMATCH
 function fnmatch(string $pattern, string $filename, int $flags = 0): bool {}

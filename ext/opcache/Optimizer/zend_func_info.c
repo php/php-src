@@ -321,9 +321,7 @@ static const func_info_t func_infos[] = {
 	F1("stream_resolve_include_path",  MAY_BE_FALSE | MAY_BE_STRING),
 	F1("get_headers",                  MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
 	F1("socket_get_status",            MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
-#if HAVE_REALPATH || defined(ZTS)
 	F1("realpath",                     MAY_BE_FALSE | MAY_BE_STRING),
-#endif
 	F1("fsockopen",                    MAY_BE_FALSE | MAY_BE_RESOURCE),
 	FN("pfsockopen",                   MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F1("pack",                         MAY_BE_FALSE | MAY_BE_STRING),

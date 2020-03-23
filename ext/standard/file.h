@@ -55,9 +55,7 @@ PHP_FUNCTION(get_meta_tags);
 PHP_FUNCTION(flock);
 PHP_FUNCTION(fd_set);
 PHP_FUNCTION(fd_isset);
-#if HAVE_REALPATH || defined(ZTS)
 PHP_FUNCTION(realpath);
-#endif
 #ifdef HAVE_FNMATCH
 PHP_FUNCTION(fnmatch);
 #endif
