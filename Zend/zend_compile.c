@@ -5037,19 +5037,26 @@ static zend_bool should_use_jumptable(zend_ast_list *cases, zend_uchar jumptable
 	}
 }
 
-void zend_compile_switch(zend_ast *ast) /* {{{ */
+void zend_compile_switch(znode *result, zend_ast *ast) /* {{{ */
 {
 	zend_ast *expr_ast = ast->child[0];
 	zend_ast_list *cases = zend_ast_get_list(ast->child[1]);
 
 	uint32_t i;
 	zend_bool has_default_case = 0;
+	zend_bool is_switch_expr = (ast->attr & ZEND_SWITCH_EXPRESSION) != 0;
 
 	znode expr_node, case_node;
 	zend_op *opline;
 	uint32_t *jmpnz_opnums, opnum_default_jmp, opnum_switch = (uint32_t)-1;
 	zend_uchar jumptable_type;
 	HashTable *jumptable = NULL;
+
+	// If the switch expression has no cases the result is never set
+	if (result != NULL) {
+		result->op_type = IS_CONST;
+		ZVAL_NULL(&result->u.constant);
+	}
 
 	zend_compile_expr(&expr_node, expr_ast);
 
@@ -5114,6 +5121,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 	}
 
 	opnum_default_jmp = zend_emit_jump(0);
+	zend_bool is_first_case = 1;
 
 	for (i = 0; i < cases->children; ++i) {
 		zend_ast *case_ast = cases->child[i];
@@ -5146,7 +5154,23 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 			}
 		}
 
-		zend_compile_stmt(stmt_ast);
+		if (is_switch_expr) {
+			znode cond_stmt_node;
+			zend_compile_expr(&cond_stmt_node, stmt_ast);
+
+			if (is_first_case) {
+				zend_emit_op_tmp(result, ZEND_QM_ASSIGN, &cond_stmt_node, NULL);
+				is_first_case = 0;
+			} else {
+				zend_op *opline_qm_assign = zend_emit_op(NULL, ZEND_QM_ASSIGN, &cond_stmt_node, NULL);
+				SET_NODE(opline_qm_assign->result, result);
+			}
+
+			zend_ast *break_ast = zend_ast_create(ZEND_AST_BREAK, NULL);
+			zend_compile_break_continue(break_ast);
+		} else {
+			zend_compile_stmt(stmt_ast);
+		}
 	}
 
 	if (!has_default_case) {
@@ -5155,6 +5179,20 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 		if (jumptable) {
 			opline = &CG(active_op_array)->opcodes[opnum_switch];
 			opline->extended_value = get_next_op_number();
+		}
+
+		// Generate default case for switch expression
+		if (is_switch_expr) {
+			zval exception_name;
+			ZVAL_STRING(&exception_name, "InvalidArgumentException");
+			zend_ast *exception_name_ast = zend_ast_create_zval(&exception_name);
+
+			zend_ast *exception_args_ast = zend_ast_create_list(0, ZEND_AST_ARG_LIST);
+			zend_ast *new_exception_ast = zend_ast_create(ZEND_AST_NEW, exception_name_ast, exception_args_ast);
+			zend_ast *throw_ast = zend_ast_create(ZEND_AST_THROW, new_exception_ast);
+			zend_compile_throw(throw_ast);
+
+			zval_ptr_dtor(&exception_name);
 		}
 	}
 
@@ -8782,7 +8820,7 @@ void zend_compile_stmt(zend_ast *ast) /* {{{ */
 			zend_compile_if(ast);
 			break;
 		case ZEND_AST_SWITCH:
-			zend_compile_switch(ast);
+			zend_compile_switch(NULL, ast);
 			break;
 		case ZEND_AST_TRY:
 			zend_compile_try(ast);
@@ -8965,6 +9003,9 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_ARROW_FUNC:
 			zend_compile_func_decl(result, ast, 0);
 			return;
+		case ZEND_AST_SWITCH:
+			zend_compile_switch(result, ast);
+			break;
 		default:
 			ZEND_ASSERT(0 /* not supported */);
 	}
