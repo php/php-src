@@ -137,7 +137,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 	}
 	if (isfilename) {
 		if (CHECK_NULL_PATH(data, data_len)) {
-			zend_argument_value_error(1, "must be a valid path");
+			zend_argument_type_error(1, "must be a valid path");
 			RETURN_THROWS();
 		}
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
@@ -254,18 +254,14 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 	}
 
 	ops = php_hash_fetch_ops(algo);
-	if (!ops) {
-		zend_argument_value_error(1, "must be a valid hashing algorithm");
-		RETURN_THROWS();
-	}
-	else if (!ops->is_crypto) {
-		zend_argument_value_error(1, "must be a cryptographic hashing algorithm");
+	if (!ops || !ops->is_crypto) {
+		zend_argument_value_error(1, "must be a valid cryptographic hashing algorithm");
 		RETURN_THROWS();
 	}
 
 	if (isfilename) {
 		if (CHECK_NULL_PATH(data, data_len)) {
-			zend_argument_value_error(2, "must be a valid path");
+			zend_argument_type_error(2, "must be a valid path");
 			RETURN_THROWS();
 		}
 		stream = php_stream_open_wrapper_ex(data, "rb", REPORT_ERRORS, NULL, FG(default_context));
@@ -367,7 +363,7 @@ PHP_FUNCTION(hash_init)
 
 	if (options & PHP_HASH_HMAC) {
 		if (!ops->is_crypto) {
-			zend_argument_value_error(2, "must not request HMAC with a non-cryptographic hashing algorithm");
+			zend_argument_value_error(1, "must be a cryptographic hashing algorithm if HMAC is requested");
 			RETURN_THROWS();
 		}
 		if (!key || (ZSTR_LEN(key) == 0)) {
@@ -649,13 +645,8 @@ PHP_FUNCTION(hash_hkdf)
 	}
 
 	ops = php_hash_fetch_ops(algo);
-	if (!ops) {
-		zend_argument_value_error(1, "must be a valid hashing algorithm");
-		RETURN_THROWS();
-	}
-
-	if (!ops->is_crypto) {
-		zend_argument_value_error(1, "must be a cryptographic hashing algorithm");
+	if (!ops || !ops->is_crypto) {
+		zend_argument_value_error(1, "must be a valid cryptographic hashing algorithm");
 		RETURN_THROWS();
 	}
 
@@ -749,12 +740,8 @@ PHP_FUNCTION(hash_pbkdf2)
 	}
 
 	ops = php_hash_fetch_ops(algo);
-	if (!ops) {
-		zend_argument_value_error(1, "must be a valid hashing algorithm");
-		RETURN_THROWS();
-	}
-	else if (!ops->is_crypto) {
-		zend_argument_value_error(1, "must be a cryptographic hashing algorithm");
+	if (!ops || !ops->is_crypto) {
+		zend_argument_value_error(1, "must be a valid cryptographic hashing algorithm");
 		RETURN_THROWS();
 	}
 

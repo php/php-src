@@ -34,7 +34,7 @@ echo "\n-- Testing hash_hmac_file() function with bad path --\n";
 try {
     var_dump(hash_hmac_file('md5', $file.chr(0).$file, $key, TRUE));
 }
-catch (\Error $e) {
+catch (TypeError $e) {
     echo $e->getMessage() . "\n";
 }
 
@@ -43,10 +43,10 @@ catch (\Error $e) {
 *** Testing hash() : error conditions ***
 
 -- Testing hash_hmac_file() function with invalid hash algorithm --
-hash_hmac_file(): Argument #1 ($algo) must be a valid hashing algorithm
+hash_hmac_file(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hmac_file() function with non-cryptographic hash algorithm --
-hash_hmac_file(): Argument #1 ($algo) must be a cryptographic hashing algorithm
+hash_hmac_file(): Argument #1 ($algo) must be a valid cryptographic hashing algorithm
 
 -- Testing hash_hmac_file() function with bad path --
 hash_hmac_file(): Argument #2 ($data) must be a valid path

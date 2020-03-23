@@ -44,7 +44,7 @@ catch (\Error $e) {
 hash_init(): Argument #1 ($algo) must be a valid hashing algorithm
 
 -- Testing hash_init() function with HASH_HMAC and non-cryptographic algorithms --
-hash_init(): Argument #2 ($options) must not request HMAC with a non-cryptographic hashing algorithm
+hash_init(): Argument #1 ($algo) must be a cryptographic hashing algorithm if HMAC is requested
 
 -- Testing hash_init() function with HASH_HMAC and no key --
 hash_init(): Argument #3 ($key) cannot be empty when HMAC is requested
