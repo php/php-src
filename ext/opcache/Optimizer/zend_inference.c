@@ -4207,7 +4207,7 @@ void zend_inference_check_recursive_dependencies(zend_op_array *op_array)
 	memset(worklist, 0, sizeof(zend_ulong) * worklist_len);
 	call_info = info->callee_info;
 	while (call_info) {
-		if (call_info->recursive &&
+		if (call_info->recursive && call_info->caller_call_opline &&
 		    info->ssa.ops[call_info->caller_call_opline - op_array->opcodes].result_def >= 0) {
 			zend_bitset_incl(worklist, info->ssa.ops[call_info->caller_call_opline - op_array->opcodes].result_def);
 		}
