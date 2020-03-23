@@ -724,6 +724,7 @@ static php_iconv_err_t _php_iconv_strlen(size_t *pretval, const char *str, size_
 	size_t out_left;
 
 	size_t cnt;
+	int more;
 
 	*pretval = (size_t)-1;
 
@@ -743,23 +744,21 @@ static php_iconv_err_t _php_iconv_strlen(size_t *pretval, const char *str, size_
 
 	errno = 0;
 	out_left = 0;
+	more = nbytes > 0;
 
-	for (in_p = str, in_left = nbytes, cnt = 0; in_left > 0; cnt+=2) {
-		size_t prev_in_left;
+	for (in_p = str, in_left = nbytes, cnt = 0; more;) {
 		out_p = buf;
 		out_left = sizeof(buf);
 
-		prev_in_left = in_left;
+		more = in_left > 0;
 
-		if (iconv(cd, (char **)&in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
-			if (prev_in_left == in_left) {
-				break;
-			}
+		iconv(cd, more ? (char **)&in_p : NULL, more ? &in_left : NULL, (char **) &out_p, &out_left);
+		if (out_left == sizeof(buf)) {
+			break;
+		} else {
+			ZEND_ASSERT((sizeof(buf) - out_left) % GENERIC_SUPERSET_NBYTES == 0);
+			cnt += (sizeof(buf) - out_left) / GENERIC_SUPERSET_NBYTES;
 		}
-	}
-
-	if (out_left > 0) {
-		cnt -= out_left / GENERIC_SUPERSET_NBYTES;
 	}
 
 #if ICONV_SUPPORTS_ERRNO
@@ -810,6 +809,7 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 
 	size_t cnt;
 	size_t total_len;
+	int more;
 
 	err = _php_iconv_strlen(&total_len, str, nbytes, enc);
 	if (err != PHP_ICONV_ERR_SUCCESS) {
@@ -864,18 +864,17 @@ static php_iconv_err_t _php_iconv_substr(smart_str *pretval,
 
 	cd2 = (iconv_t)NULL;
 	errno = 0;
+	more = nbytes > 0 && len > 0;
 
-	for (in_p = str, in_left = nbytes, cnt = 0; in_left > 0 && len > 0; ++cnt) {
-		size_t prev_in_left;
+	for (in_p = str, in_left = nbytes, cnt = 0; more; ++cnt) {
 		out_p = buf;
 		out_left = sizeof(buf);
 
-		prev_in_left = in_left;
+		more = in_left > 0 && len > 0;
 
-		if (iconv(cd1, (char **)&in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
-			if (prev_in_left == in_left) {
-				break;
-			}
+		iconv(cd1, more ? (char **)&in_p : NULL, more ? &in_left : NULL, (char **) &out_p, &out_left);
+		if (out_left == sizeof(buf)) {
+			break;
 		}
 
 		if ((zend_long)cnt >= offset) {
@@ -963,6 +962,8 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 	size_t ndl_buf_left;
 
 	size_t match_ofs;
+	int more;
+	size_t iconv_ret;
 
 	*pretval = (size_t)-1;
 
@@ -995,37 +996,38 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 	ndl_buf_p = ZSTR_VAL(ndl_buf);
 	ndl_buf_left = ZSTR_LEN(ndl_buf);
 	match_ofs = (size_t)-1;
+	more = haystk_nbytes > 0;
 
-	for (in_p = haystk, in_left = haystk_nbytes, cnt = 0; in_left > 0; ++cnt) {
-		size_t prev_in_left;
+	for (in_p = haystk, in_left = haystk_nbytes, cnt = 0; more; ++cnt) {
 		out_p = buf;
 		out_left = sizeof(buf);
 
-		prev_in_left = in_left;
+		more = in_left > 0;
 
-		if (iconv(cd, (char **)&in_p, &in_left, (char **) &out_p, &out_left) == (size_t)-1) {
-			if (prev_in_left == in_left) {
+		iconv_ret = iconv(cd, more ? (char **)&in_p : NULL, more ? &in_left : NULL, (char **) &out_p, &out_left);
+		if (out_left == sizeof(buf)) {
+			break;
+		}
 #if ICONV_SUPPORTS_ERRNO
-				switch (errno) {
-					case EINVAL:
-						err = PHP_ICONV_ERR_ILLEGAL_CHAR;
-						break;
+		if (iconv_ret == (size_t)-1) {
+			switch (errno) {
+				case EINVAL:
+					err = PHP_ICONV_ERR_ILLEGAL_CHAR;
+					break;
 
-					case EILSEQ:
-						err = PHP_ICONV_ERR_ILLEGAL_SEQ;
-						break;
+				case EILSEQ:
+					err = PHP_ICONV_ERR_ILLEGAL_SEQ;
+					break;
 
-					case E2BIG:
-						break;
+				case E2BIG:
+					break;
 
-					default:
-						err = PHP_ICONV_ERR_UNKNOWN;
-						break;
-				}
-#endif
-				break;
+				default:
+					err = PHP_ICONV_ERR_UNKNOWN;
+					break;
 			}
 		}
+#endif
 		if (offset >= 0) {
 			if (cnt >= (size_t)offset) {
 				if (_php_iconv_memequal(buf, ndl_buf_p, sizeof(buf))) {
@@ -1995,6 +1997,13 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 
 	if (next_pos != NULL) {
 		*next_pos = p1;
+	}
+
+	if (cd != (iconv_t)(-1)) {
+		_php_iconv_appendl(pretval, NULL, 0, cd);
+	}
+	if (cd_pl != (iconv_t)(-1)) {
+		_php_iconv_appendl(pretval, NULL, 0, cd_pl);
 	}
 
 	smart_str_0(pretval);
