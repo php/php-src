@@ -14,7 +14,7 @@ class SplFileInfo
     public function getExtension() {}
 
     /** @return string */
-    public function getBasename(string $suffix = UNKNOWN) {}
+    public function getBasename(string $suffix = "") {}
 
     /** @return string|false */
     public function getPathname() {}
@@ -71,7 +71,7 @@ class SplFileInfo
     public function getRealPath() {}
 
     /** @return SplFileInfo */
-    public function getFileInfo(string $class_name = SplFileInfo::class) {}
+    public function getFileInfo(string $class_name = UNKNOWN) {}
 
     /** @return SplFileInfo|null */
     public function getPathInfo(string $class_name = UNKNOWN) {}
@@ -104,7 +104,7 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator
     public function getExtension() {}
 
     /** @return string */
-    public function getBasename(string $suffix = UNKNOWN) {}
+    public function getBasename(string $suffix = "") {}
 
     /** @return bool */
     public function isDot() {}
@@ -132,7 +132,7 @@ class DirectoryIterator extends SplFileInfo implements SeekableIterator
 
 class FilesystemIterator extends DirectoryIterator
 {
-    public function __construct(string $path, int $flags = FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::URRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS) {}
+    public function __construct(string $path, int $flags = FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS) {}
 
     /** @return void */
     public function rewind() {}
@@ -204,7 +204,7 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
     /** @return int|false */
     public function fputcsv(array $fields, string $delimiter = ',', string $enclosure = '"', string $escape = "\\") {}
 
-    /** @return void */
+    /** @return null|false */
     public function setCsvControl(string $delimiter = ",", string $enclosure = "\"", string $escape = "\\") {}
 
     /** @return array */
