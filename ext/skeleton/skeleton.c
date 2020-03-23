@@ -26,9 +26,9 @@ PHP_FUNCTION(test1)
 }
 /* }}} */
 
-/* {{{ string %EXTNAME%_test2( [ string $var ] )
+/* {{{ string test2( [ string $var ] )
  */
-PHP_FUNCTION(%EXTNAME%_test2)
+PHP_FUNCTION(test2)
 {
 	char *var = "World";
 	size_t var_len = sizeof("World") - 1;
