@@ -470,7 +470,7 @@ static spl_filesystem_object *spl_filesystem_object_create_info(spl_filesystem_o
 	return intern;
 } /* }}} */
 
-static spl_filesystem_object *spl_filesystem_object_create_type(int ht, spl_filesystem_object *source, int type, zend_class_entry *ce, zval *return_value) /* {{{ */
+static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, spl_filesystem_object *source, int type, zend_class_entry *ce, zval *return_value) /* {{{ */
 {
 	spl_filesystem_object *intern;
 	zend_bool use_include_path = 0;
@@ -542,7 +542,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int ht, spl_file
 				intern->u.file.open_mode = "r";
 				intern->u.file.open_mode_len = 1;
 
-				if (ht && zend_parse_parameters(ht, "|sbr",
+				if (num_args && zend_parse_parameters(num_args, "|sbr",
 							&intern->u.file.open_mode, &intern->u.file.open_mode_len,
 							&use_include_path, &intern->u.file.zcontext) == FAILURE) {
 					zend_restore_error_handling(&error_handling);
@@ -700,8 +700,6 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 	zend_long flags;
 	zend_error_handling error_handling;
 
-	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling);
-
 	if (SPL_HAS_FLAG(ctor_flags, DIT_CTOR_FLAGS)) {
 		flags = SPL_FILE_DIR_KEY_AS_PATHNAME|SPL_FILE_DIR_CURRENT_AS_FILEINFO;
 		parsed = zend_parse_parameters(ZEND_NUM_ARGS(), "p|l", &path, &len, &flags);
@@ -716,23 +714,23 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 		flags |= SPL_FILE_DIR_UNIXPATHS;
 	}
 	if (parsed == FAILURE) {
-		zend_restore_error_handling(&error_handling);
 		return;
 	}
+
 	if (!len) {
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Directory name must not be empty.");
-		zend_restore_error_handling(&error_handling);
 		return;
 	}
 
 	intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	if (intern->_path) {
 		/* object is already initialized */
-		zend_restore_error_handling(&error_handling);
 		php_error_docref(NULL, E_WARNING, "Directory object is already initialized");
 		return;
 	}
 	intern->flags = flags;
+
+	zend_replace_error_handling(EH_THROW, spl_ce_UnexpectedValueException, &error_handling);
 #ifdef HAVE_GLOB
 	if (SPL_HAS_FLAG(ctor_flags, DIT_CTOR_GLOB) && strstr(path, "glob://") != path) {
 		spprintf(&path, 0, "glob://%s", path);
@@ -1101,7 +1099,6 @@ SPL_METHOD(FilesystemIterator, current)
 	} else {
 		ZVAL_OBJ(return_value, Z_OBJ_P(ZEND_THIS));
 		Z_ADDREF_P(return_value);
-		/*RETURN_STRING(intern->u.dir.entry.d_name, 1);*/
 	}
 }
 /* }}} */
