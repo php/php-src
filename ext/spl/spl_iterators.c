@@ -486,56 +486,55 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 	zend_error_handling error_handling;
 	zval caching_it, aggregate_retval;
 
-	zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
-
 	switch (rit_type) {
 		case RIT_RecursiveTreeIterator: {
 			zval caching_it_flags, *user_caching_it_flags = NULL;
 			mode = RIT_SELF_FIRST;
 			flags = RTIT_BYPASS_KEY;
 
-			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "o|lzl", &iterator, &flags, &user_caching_it_flags, &mode) == SUCCESS) {
-				if (instanceof_function(Z_OBJCE_P(iterator), zend_ce_aggregate)) {
-					zend_call_method_with_0_params(Z_OBJ_P(iterator), Z_OBJCE_P(iterator), &Z_OBJCE_P(iterator)->iterator_funcs_ptr->zf_new_iterator, "getiterator", &aggregate_retval);
-					iterator = &aggregate_retval;
-				} else {
-					Z_ADDREF_P(iterator);
-				}
-
-				if (user_caching_it_flags) {
-					ZVAL_COPY(&caching_it_flags, user_caching_it_flags);
-				} else {
-					ZVAL_LONG(&caching_it_flags, CIT_CATCH_GET_CHILD);
-				}
-				spl_instantiate_arg_ex2(spl_ce_RecursiveCachingIterator, &caching_it, iterator, &caching_it_flags);
-				zval_ptr_dtor(&caching_it_flags);
-
-				zval_ptr_dtor(iterator);
-				iterator = &caching_it;
-			} else {
-				iterator = NULL;
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|lzl", &iterator, &flags, &user_caching_it_flags, &mode) == FAILURE) {
+				RETURN_THROWS();
 			}
+
+			zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
+			if (instanceof_function(Z_OBJCE_P(iterator), zend_ce_aggregate)) {
+				zend_call_method_with_0_params(Z_OBJ_P(iterator), Z_OBJCE_P(iterator), &Z_OBJCE_P(iterator)->iterator_funcs_ptr->zf_new_iterator, "getiterator", &aggregate_retval);
+				iterator = &aggregate_retval;
+			} else {
+				Z_ADDREF_P(iterator);
+			}
+
+			if (user_caching_it_flags) {
+				ZVAL_COPY(&caching_it_flags, user_caching_it_flags);
+			} else {
+				ZVAL_LONG(&caching_it_flags, CIT_CATCH_GET_CHILD);
+			}
+			spl_instantiate_arg_ex2(spl_ce_RecursiveCachingIterator, &caching_it, iterator, &caching_it_flags);
+			zval_ptr_dtor(&caching_it_flags);
+
+			zval_ptr_dtor(iterator);
+			iterator = &caching_it;
 			break;
 		}
 		case RIT_RecursiveIteratorIterator:
 		default: {
 			mode = RIT_LEAVES_ONLY;
 			flags = 0;
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|ll", &iterator, &mode, &flags) == FAILURE) {
+				RETURN_THROWS();
+			}
 
-			if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "o|ll", &iterator, &mode, &flags) == SUCCESS) {
-				if (instanceof_function(Z_OBJCE_P(iterator), zend_ce_aggregate)) {
-					zend_call_method_with_0_params(Z_OBJ_P(iterator), Z_OBJCE_P(iterator), &Z_OBJCE_P(iterator)->iterator_funcs_ptr->zf_new_iterator, "getiterator", &aggregate_retval);
-					iterator = &aggregate_retval;
-				} else {
-					Z_ADDREF_P(iterator);
-				}
+			zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
+			if (instanceof_function(Z_OBJCE_P(iterator), zend_ce_aggregate)) {
+				zend_call_method_with_0_params(Z_OBJ_P(iterator), Z_OBJCE_P(iterator), &Z_OBJCE_P(iterator)->iterator_funcs_ptr->zf_new_iterator, "getiterator", &aggregate_retval);
+				iterator = &aggregate_retval;
 			} else {
-				iterator = NULL;
+				Z_ADDREF_P(iterator);
 			}
 			break;
 		}
 	}
-	if (!iterator || !instanceof_function(Z_OBJCE_P(iterator), spl_ce_RecursiveIterator)) {
+	if (!instanceof_function(Z_OBJCE_P(iterator), spl_ce_RecursiveIterator)) {
 		if (iterator) {
 			zval_ptr_dtor(iterator);
 		}
