@@ -1251,7 +1251,8 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 
 			call = ctx->call_map[opline - ctx->scdf.op_array->opcodes];
-			if (IS_TOP(op1) || !call || call->caller_call_opline->opcode != ZEND_DO_ICALL) {
+			if (IS_TOP(op1) || !call || !call->caller_call_opline
+					|| call->caller_call_opline->opcode != ZEND_DO_ICALL) {
 				return;
 			}
 
