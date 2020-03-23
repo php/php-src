@@ -522,6 +522,17 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 				break;
 			}
 
+			char *open_mode = "r";
+			size_t open_mode_len = 1;
+			zval *resource = NULL;
+
+			if (zend_parse_parameters(num_args, "|sbr",
+				&open_mode, &open_mode_len, &use_include_path, &resource) == FAILURE
+			) {
+				zend_restore_error_handling(&error_handling);
+				return NULL;
+			}
+
 			intern = spl_filesystem_from_obj(spl_filesystem_object_new_ex(ce));
 
 			ZVAL_OBJ(return_value, &intern->std);
@@ -530,7 +541,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 
 			if (ce->constructor->common.scope != spl_ce_SplFileObject) {
 				ZVAL_STRINGL(&arg1, source->file_name, source->file_name_len);
-				ZVAL_STRINGL(&arg2, "r", 1);
+				ZVAL_STRINGL(&arg2, open_mode, open_mode_len);
 				zend_call_method_with_2_params(Z_OBJ_P(return_value), ce, &ce->constructor, "__construct", NULL, &arg1, &arg2);
 				zval_ptr_dtor(&arg1);
 				zval_ptr_dtor(&arg2);
@@ -540,19 +551,9 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 				intern->_path = spl_filesystem_object_get_path(source, &intern->_path_len);
 				intern->_path = estrndup(intern->_path, intern->_path_len);
 
-				intern->u.file.open_mode = "r";
-				intern->u.file.open_mode_len = 1;
-
-				if (num_args && zend_parse_parameters(num_args, "|sbr",
-							&intern->u.file.open_mode, &intern->u.file.open_mode_len,
-							&use_include_path, &intern->u.file.zcontext) == FAILURE) {
-					zend_restore_error_handling(&error_handling);
-					intern->u.file.open_mode = NULL;
-					intern->file_name = NULL;
-					zval_ptr_dtor(return_value);
-					ZVAL_NULL(return_value);
-					return NULL;
-				}
+				intern->u.file.open_mode = open_mode;
+				intern->u.file.open_mode_len = open_mode_len;
+				intern->u.file.zcontext = resource;
 
 				if (spl_filesystem_file_open(intern, use_include_path, 0) == FAILURE) {
 					zend_restore_error_handling(&error_handling);
