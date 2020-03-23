@@ -197,7 +197,7 @@ void dasm_put(Dst_DECL, int start, ...)
       switch (action) {
       case DASM_DISP:
 	if (n == 0) { if (mrm < 0) mrm = p[-2]; if ((mrm&7) != 5) break; }
-      case DASM_IMM_DB: if (((n+128)&-256) == 0) goto ob;
+      case DASM_IMM_DB: if ((((unsigned)n+128)&-256) == 0) goto ob;
       case DASM_REL_A: /* Assumes ptrdiff_t is int. !x64 */
       case DASM_IMM_D: ofs += 4; break;
       case DASM_IMM_S: CK(((n+128)&-256) == 0, RANGE_I); goto ob;
@@ -397,7 +397,7 @@ int dasm_encode(Dst_DECL, void *buffer)
 	  if (((n+128) & -256) != 0) goto wd; else mm[-1] -= 0x40;
 	}
 	case DASM_IMM_S: case DASM_IMM_B: wb: dasmb(n); break;
-	case DASM_IMM_DB: if (((n+128)&-256) == 0) {
+	case DASM_IMM_DB: if ((((unsigned)n+128)&-256) == 0) {
 	    db: if (!mark) mark = cp; mark[-2] += 2; mark = NULL; goto wb;
 	  } else mark = NULL;
 	case DASM_IMM_D: wd: dasmd(n); break;
