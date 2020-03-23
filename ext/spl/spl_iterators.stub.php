@@ -69,7 +69,7 @@ class RecursiveIteratorIterator implements OuterIterator
     /** @return int */
     public function getDepth() {}
 
-    /** @return RecursiveIterator */
+    /** @return RecursiveIterator|null */
     public function getSubIterator(int $level = UNKNOWN) {}
 
     /** @return RecursiveIterator */
@@ -81,7 +81,7 @@ class RecursiveIteratorIterator implements OuterIterator
     /** @return void */
     public function endIteration() {}
 
-    /** @return bool|null */
+    /** @return bool */
     public function callHasChildren() {}
 
     /** @return RecursiveIterator|null */
@@ -282,24 +282,6 @@ class RecursiveCachingIterator extends CachingIterator implements RecursiveItera
 {
     public function __construct(Iterator $iterator, int $flags = self::CALL_TOSTRING) {}
 
-    /** @return void */
-    public function rewind() {}
-
-    /** @return bool */
-    public function valid() {}
-
-    /** @return mixed */
-    public function key() {}
-
-    /** @return mixed */
-    public function current() {}
-
-    /** @return void */
-    public function next() {}
-
-    /** @return Iterator|null */
-    public function getInnerIterator() {}
-
     /** @return bool */
     public function hasChildren() {}
 
@@ -415,12 +397,11 @@ class RecursiveRegexIterator extends RegexIterator implements RecursiveIterator
 
 class RecursiveTreeIterator extends RecursiveIteratorIterator
 {
-    /**
-     * @param RecursiveIterator|IteratorAggregate $iterator
-     * @param int $caching_it_flags
-     */
-    public function __construct($iterator, int $flags = self::BYPASS_KEY, $caching_it_flags = CachingIterator::CATCH_GET_CHILD,
-                                int $mode = self::SELF_FIRST) {}
+    /** @param RecursiveIterator|IteratorAggregate $iterator */
+    public function __construct(
+        $iterator, int $flags = self::BYPASS_KEY, int $caching_it_flags = CachingIterator::CATCH_GET_CHILD,
+        int $mode = self::SELF_FIRST
+    ) {}
 
     /** @return void */
     public function rewind() {}
@@ -428,10 +409,10 @@ class RecursiveTreeIterator extends RecursiveIteratorIterator
     /** @return bool */
     public function valid() {}
 
-    /** @return string */
+    /** @return mixed */
     public function key() {}
 
-    /** @return string|null */
+    /** @return mixed */
     public function current() {}
 
     /** @return void */

@@ -483,11 +483,12 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 
 	switch (rit_type) {
 		case RIT_RecursiveTreeIterator: {
-			zval caching_it_flags, *user_caching_it_flags = NULL;
+			zval caching_it_flags;
+			zend_long user_caching_it_flags = CIT_CATCH_GET_CHILD;
 			mode = RIT_SELF_FIRST;
 			flags = RTIT_BYPASS_KEY;
 
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|lzl", &iterator, &flags, &user_caching_it_flags, &mode) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "o|lll", &iterator, &flags, &user_caching_it_flags, &mode) == FAILURE) {
 				RETURN_THROWS();
 			}
 
@@ -499,14 +500,9 @@ static void spl_recursive_it_it_construct(INTERNAL_FUNCTION_PARAMETERS, zend_cla
 				Z_ADDREF_P(iterator);
 			}
 
-			if (user_caching_it_flags) {
-				ZVAL_COPY(&caching_it_flags, user_caching_it_flags);
-			} else {
-				ZVAL_LONG(&caching_it_flags, CIT_CATCH_GET_CHILD);
-			}
+			ZVAL_LONG(&caching_it_flags, user_caching_it_flags);
 			spl_instantiate_arg_ex2(spl_ce_RecursiveCachingIterator, &caching_it, iterator, &caching_it_flags);
 			zval_ptr_dtor(&caching_it_flags);
-
 			zval_ptr_dtor(iterator);
 			iterator = &caching_it;
 			break;
@@ -770,7 +766,7 @@ SPL_METHOD(RecursiveIteratorIterator, callHasChildren)
 	}
 
 	if (!object->iterators) {
-		RETURN_NULL();
+		RETURN_FALSE;
 	}
 
 	SPL_FETCH_SUB_ELEMENT(ce, object, ce);
@@ -1434,10 +1430,10 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 			break;
 		}
 		case DIT_AppendIterator:
-			zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
 			if (zend_parse_parameters_none() == FAILURE) {
 				return NULL;
 			}
+			zend_replace_error_handling(EH_THROW, spl_ce_InvalidArgumentException, &error_handling);
 			spl_instantiate(spl_ce_ArrayIterator, &intern->u.append.zarrayit);
 			zend_call_method_with_0_params(Z_OBJ(intern->u.append.zarrayit), spl_ce_ArrayIterator, &spl_ce_ArrayIterator->constructor, "__construct", NULL);
 			intern->u.append.iterator = spl_ce_ArrayIterator->get_iterator(spl_ce_ArrayIterator, &intern->u.append.zarrayit, 0);

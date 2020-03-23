@@ -197,18 +197,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_RecursiveCachingIterator___construct arginfo_class_CachingIterator___construct
 
-#define arginfo_class_RecursiveCachingIterator_rewind arginfo_class_EmptyIterator_current
-
-#define arginfo_class_RecursiveCachingIterator_valid arginfo_class_EmptyIterator_current
-
-#define arginfo_class_RecursiveCachingIterator_key arginfo_class_EmptyIterator_current
-
-#define arginfo_class_RecursiveCachingIterator_current arginfo_class_EmptyIterator_current
-
-#define arginfo_class_RecursiveCachingIterator_next arginfo_class_EmptyIterator_current
-
-#define arginfo_class_RecursiveCachingIterator_getInnerIterator arginfo_class_EmptyIterator_current
-
 #define arginfo_class_RecursiveCachingIterator_hasChildren arginfo_class_EmptyIterator_current
 
 #define arginfo_class_RecursiveCachingIterator_getChildren arginfo_class_EmptyIterator_current
@@ -296,7 +284,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveTreeIterator___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, iterator)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
-	ZEND_ARG_INFO(0, caching_it_flags)
+	ZEND_ARG_TYPE_INFO(0, caching_it_flags, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
