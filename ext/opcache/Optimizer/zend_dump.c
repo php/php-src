@@ -603,10 +603,10 @@ void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, cons
 	} else {
 		uint32_t op1_flags = ZEND_VM_OP1_FLAGS(flags);
 		if (ZEND_VM_OP_JMP_ADDR == (op1_flags & ZEND_VM_OP_MASK)) {
-			if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
-				fprintf(stderr, " %04u", (uint32_t)(OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes));
-			} else if (b) {
+			if (b) {
 				fprintf(stderr, " BB%d", b->successors[n++]);
+			} else if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+				fprintf(stderr, " %04u", (uint32_t)(OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes));
 			} else {
 				fprintf(stderr, " L%u", (uint32_t)(OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes));
 			}
@@ -628,10 +628,10 @@ void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, cons
 				} else {
 					fprintf(stderr, " " ZEND_LONG_FMT ":", num_key);
 				}
-				if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
-					fprintf(stderr, " %04u,", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv)));
-				} else if (b) {
+				if (b) {
 					fprintf(stderr, " BB%d,", b->successors[n++]);
+				} else if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+					fprintf(stderr, " %04u,", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv)));
 				} else {
 					fprintf(stderr, " L%u,", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv)));
 				}
@@ -665,10 +665,10 @@ void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, cons
 		uint32_t op2_flags = ZEND_VM_OP2_FLAGS(flags);
 		if (ZEND_VM_OP_JMP_ADDR == (op2_flags & ZEND_VM_OP_MASK)) {
 			if (opline->opcode != ZEND_CATCH || !(opline->extended_value & ZEND_LAST_CATCH)) {
-				if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
-					fprintf(stderr, " %04u", (uint32_t)(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes));
-				} else if (b) {
+				if (b) {
 					fprintf(stderr, " BB%d", b->successors[n++]);
+				} else if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+					fprintf(stderr, " %04u", (uint32_t)(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes));
 				} else {
 					fprintf(stderr, " L%u", (uint32_t)(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes));
 				}
@@ -679,10 +679,10 @@ void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, cons
 	}
 
 	if (ZEND_VM_EXT_JMP_ADDR == (flags & ZEND_VM_EXT_MASK)) {
-		if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
-			fprintf(stderr, " %04u", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
-		} else if (b) {
+		if (b) {
 			fprintf(stderr, " BB%d", b->successors[n++]);
+		} else if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+			fprintf(stderr, " %04u", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
 		} else {
 			fprintf(stderr, " L%u", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
 		}
@@ -725,11 +725,14 @@ static void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_bl
 	zend_ssa_op *ssa_op = NULL;
 
 	if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
-		len = fprintf(stderr, "%04u:", (uint32_t)(opline - op_array->opcodes));
+		len = fprintf(stderr, "%04u", (uint32_t)(opline - op_array->opcodes));
+		fprintf(stderr, "%*c", 5-len, ' ');
 	} else if (!b) {
 		len = fprintf(stderr, "L%u (%u):", (uint32_t)(opline - op_array->opcodes), opline->lineno);
+		fprintf(stderr, "%*c", 12-len, ' ');
+	} else {
+		fprintf(stderr, "%*c", 12-len, ' ');
 	}
-	fprintf(stderr, "%*c", 12-len, ' ');
 
 	if (dump_flags & ZEND_DUMP_SSA) {
 		ssa = (const zend_ssa*)data;
@@ -747,6 +750,9 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 	zend_basic_block *b = cfg->blocks + n;
 
 	fprintf(stderr, "BB%d:", n);
+	if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+		fprintf(stderr, "\n     ;");
+	}
 	if (b->flags & ZEND_BB_START) {
 		fprintf(stderr, " start");
 	}
@@ -800,6 +806,9 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 		int *p = cfg->predecessors + b->predecessor_offset;
 		int *end = p + b->predecessors_count;
 
+		if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+			fprintf(stderr, " ");
+		}
 		fprintf(stderr, "    ; from=(BB%d", *p);
 		for (p++; p < end; p++) {
 			fprintf(stderr, ", BB%d", *p);
@@ -809,6 +818,9 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 
 	if (b->successors_count > 0) {
 		int s;
+		if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+			fprintf(stderr, " ");
+		}
 		fprintf(stderr, "    ; to=(BB%d", b->successors[0]);
 		for (s = 1; s < b->successors_count; s++) {
 			fprintf(stderr, ", BB%d", b->successors[s]);
@@ -817,16 +829,28 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 	}
 
 	if (b->idom >= 0) {
+		if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+			fprintf(stderr, " ");
+		}
 		fprintf(stderr, "    ; idom=BB%d\n", b->idom);
 	}
 	if (b->level >= 0) {
+		if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+			fprintf(stderr, " ");
+		}
 		fprintf(stderr, "    ; level=%d\n", b->level);
 	}
 	if (b->loop_header >= 0) {
+		if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+			fprintf(stderr, " ");
+		}
 		fprintf(stderr, "    ; loop_header=%d\n", b->loop_header);
 	}
 	if (b->children >= 0) {
 		int j = b->children;
+		if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+			fprintf(stderr, " ");
+		}
 		fprintf(stderr, "    ; children=(BB%d", j);
 		j = cfg->blocks[j].next_child;
 		while (j >= 0) {
@@ -846,7 +870,11 @@ static void zend_dump_block_header(const zend_cfg *cfg, const zend_op_array *op_
 		do {
 			int j;
 
-			fprintf(stderr, "        ");
+			if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+				fprintf(stderr, "     ");
+			} else {
+				fprintf(stderr, "        ");
+			}
 			zend_dump_ssa_var(op_array, ssa, p->ssa_var, 0, p->var, dump_flags);
 			if (p->pi < 0) {
 				fprintf(stderr, " = Phi(");
@@ -917,7 +945,11 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 
 	fprintf(stderr, "\n");
 	zend_dump_op_array_name(op_array);
-	fprintf(stderr, ": ; (lines=%d, args=%d",
+	fprintf(stderr, ":");
+	if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+		fprintf(stderr, "\n    ");
+	}
+	fprintf(stderr, " ; (lines=%d, args=%d",
 		op_array->last,
 		op_array->num_args);
 	if (func_info && func_info->num_args >= 0) {
@@ -976,7 +1008,13 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 	}
 	fprintf(stderr, ")\n");
 	if (msg) {
+		if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+			fprintf(stderr, " ");
+		}
 		fprintf(stderr, "    ; (%s)\n", msg);
+	}
+	if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+		fprintf(stderr, " ");
 	}
 	fprintf(stderr, "    ; %s:%u-%u\n", op_array->filename->val, op_array->line_start, op_array->line_end);
 
@@ -984,6 +1022,9 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 		uint32_t j;
 
 		for (j = 0; j < MIN(op_array->num_args, func_info->num_args ); j++) {
+			if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+				fprintf(stderr, " ");
+			}
 			fprintf(stderr, "    ; arg %d ", j);
 			zend_dump_type_info(func_info->arg_info[j].info.type, func_info->arg_info[j].info.ce, func_info->arg_info[j].info.is_instanceof, dump_flags);
 			zend_dump_range(&func_info->arg_info[j].info.range);
@@ -992,6 +1033,9 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 	}
 
 	if (func_info) {
+		if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+			fprintf(stderr, " ");
+		}
 		fprintf(stderr, "    ; return ");
 		zend_dump_type_info(func_info->return_info.type, func_info->return_info.ce, func_info->return_info.is_instanceof, dump_flags);
 		zend_dump_range(&func_info->return_info.range);
@@ -1000,6 +1044,9 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 
 	if (ssa && ssa->var_info) {
 		for (i = 0; i < op_array->last_var; i++) {
+			if (dump_flags & ZEND_DUMP_NUMERIC_OPLINES) {
+				fprintf(stderr, " ");
+			}
 			fprintf(stderr, "    ; ");
 			zend_dump_ssa_var(op_array, ssa, i, IS_CV, i, dump_flags);
 			fprintf(stderr, "\n");

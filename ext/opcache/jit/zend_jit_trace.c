@@ -24,6 +24,27 @@ static const void **zend_jit_exit_groups = NULL;
 #define ZEND_JIT_EXIT_NUM      zend_jit_traces[0].exit_count
 #define ZEND_JIT_EXIT_COUNTERS zend_jit_traces[0].exit_counters
 
+#define ZEND_JIT_TRACE_STOP_DESCRIPTION(name, description) \
+	description,
+
+static const char * zend_jit_trace_stop_description[] = {
+	ZEND_JIT_TRACE_STOP(ZEND_JIT_TRACE_STOP_DESCRIPTION)
+};
+
+static zend_always_inline const char *zend_jit_trace_star_desc(uint8_t trace_flags)
+{
+	if (trace_flags & ZEND_JIT_TRACE_START_LOOP) {
+		return "loop";
+	} else if (trace_flags & ZEND_JIT_TRACE_START_ENTER) {
+		return "enter";
+	} else if (trace_flags & ZEND_JIT_TRACE_START_RETURN) {
+		return "return";
+	} else {
+		ZEND_ASSERT(0);
+		return "???";
+	}
+}
+
 static int zend_jit_trace_startup(void)
 {
 	zend_jit_traces = (zend_jit_trace_info*)zend_shared_alloc(sizeof(zend_jit_trace_info) * ZEND_JIT_TRACE_MAX_TRACES);
@@ -424,7 +445,7 @@ static zend_ssa *zend_jit_trace_build_ssa(const zend_op_array *op_array, zend_sc
 			}
 
 			if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_SSA) {
-				zend_dump_op_array(op_array, ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA, "JIT", ssa);
+				zend_dump_op_array(op_array, ZEND_DUMP_NUMERIC_OPLINES|ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA, "JIT", ssa);
 			}
 			return ssa;
 		} while (0);
@@ -1620,8 +1641,24 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 	}
 
 	if (UNEXPECTED(ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_TRACE_TSSA)) {
+		fprintf(stderr, "---- TRACE %d TSSA start (%s) %s() %s:%d\n",
+			ZEND_JIT_TRACE_NUM,
+			zend_jit_trace_star_desc(trace_buffer->start),
+			trace_buffer->op_array->function_name ?
+				ZSTR_VAL(trace_buffer->op_array->function_name) : "$main",
+			ZSTR_VAL(trace_buffer->op_array->filename),
+			((zend_jit_trace_start_rec*)trace_buffer)->opline->lineno);
 		zend_jit_dump_trace(trace_buffer, tssa);
-		fprintf(stderr, "---- TRACE analysed\n");
+		if (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LINK) {
+			uint32_t link_to = zend_jit_find_trace(EG(current_execute_data)->opline->handler);;
+			fprintf(stderr, "---- TRACE %d TSSA stop (link to %d)\n",
+				ZEND_JIT_TRACE_NUM,
+				link_to);
+		} else {
+			fprintf(stderr, "---- TRACE %d TSSA stop (%s)\n",
+				ZEND_JIT_TRACE_NUM,
+				zend_jit_trace_stop_description[trace_buffer->stop]);
+		}
 	}
 
 	return tssa;
@@ -3267,13 +3304,6 @@ static zend_bool zend_jit_trace_is_bad_root(const zend_op *opline, zend_jit_trac
 	return 0;
 }
 
-#define ZEND_JIT_TRACE_STOP_DESCRIPTION(name, description) \
-	description,
-
-static const char * zend_jit_trace_stop_description[] = {
-	ZEND_JIT_TRACE_STOP(ZEND_JIT_TRACE_STOP_DESCRIPTION)
-};
-
 static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa)
 {
 	zend_jit_trace_rec *p = trace_buffer;
@@ -3452,20 +3482,6 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 			break;
 		}
 		p++;
-	}
-}
-
-static zend_always_inline const char *zend_jit_trace_star_desc(uint8_t trace_flags)
-{
-	if (trace_flags & ZEND_JIT_TRACE_START_LOOP) {
-		return "loop";
-	} else if (trace_flags & ZEND_JIT_TRACE_START_ENTER) {
-		return "enter";
-	} else if (trace_flags & ZEND_JIT_TRACE_START_RETURN) {
-		return "return";
-	} else {
-		ZEND_ASSERT(0);
-		return "???";
 	}
 }
 
