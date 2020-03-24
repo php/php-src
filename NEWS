@@ -24,6 +24,10 @@ PHP                                                                        NEWS
   . Fixed bug #79393 (Null coalescing operator failing with SplFixedArray).
     (cmb)
 
+- Standard:
+  . Fixed bug #79410 (system() swallows last chunk if it is exactly 4095 bytes
+    without newline). (Christian Schneider)
+
 - Zip:
   . Fixed Bug #79296 (ZipArchive::open fails on empty file). (Remi)
 
