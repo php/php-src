@@ -158,7 +158,7 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value)
 		}
 		if (bufl) {
 			/* output remaining data in buffer */
-			if (type == 1) {
+			if (type == 1 && buf != b) {
 				PHPWRITE(buf, bufl);
 				if (php_output_get_level() < 1) {
 					sapi_flush();
