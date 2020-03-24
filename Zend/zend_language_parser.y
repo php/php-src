@@ -262,7 +262,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> attribute_arguments attribute_decl attribute attributes
 
 %type <num> returns_ref function fn is_reference is_variadic variable_modifiers
-%type <num> method_modifiers non_empty_member_modifiers member_modifier
+%type <num> method_modifiers non_empty_member_modifiers member_modifier optional_visibility_modifier
 %type <num> class_modifiers class_modifier use_type backup_fn_flags
 
 %type <ptr> backup_lex_pos
@@ -684,11 +684,22 @@ attributed_parameter:
 	|	parameter				{ $$ = $1; }
 ;
 
+optional_visibility_modifier:
+		%empty					{ $$ = 0; }
+	|	T_PUBLIC				{ $$ = ZEND_ACC_PUBLIC; }
+	|	T_PROTECTED				{ $$ = ZEND_ACC_PROTECTED; }
+	|	T_PRIVATE				{ $$ = ZEND_ACC_PRIVATE; }
+;
+
 parameter:
-		optional_type_without_static is_reference is_variadic T_VARIABLE
-			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2 | $3, $1, $4, NULL, NULL); }
-	|	optional_type_without_static is_reference is_variadic T_VARIABLE '=' expr
-			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2 | $3, $1, $4, $6, NULL); }
+		optional_visibility_modifier optional_type_without_static
+		is_reference is_variadic T_VARIABLE backup_doc_comment
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, NULL,
+					NULL, $6 ? zend_ast_create_zval_from_str($6) : NULL); }
+	|	optional_visibility_modifier optional_type_without_static
+		is_reference is_variadic T_VARIABLE backup_doc_comment '=' expr
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, $8,
+					NULL, $6 ? zend_ast_create_zval_from_str($6) : NULL); }
 ;
 
 
@@ -1078,10 +1089,11 @@ inline_function:
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2 | $13, $1, $3,
 				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0),
 				  $5, $7, $11, $8, NULL); CG(extra_fn_flags) = $9; }
-	|	fn returns_ref '(' parameter_list ')' return_type backup_doc_comment T_DOUBLE_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags
-			{ $$ = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, $2 | $12, $1, $7,
-				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0), $4, NULL,
-				  zend_ast_create(ZEND_AST_RETURN, $11), $6, NULL);
+	|	fn returns_ref backup_doc_comment '(' parameter_list ')' return_type
+		T_DOUBLE_ARROW backup_fn_flags backup_lex_pos expr backup_fn_flags
+			{ $$ = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, $2 | $12, $1, $3,
+				  zend_string_init("{closure}", sizeof("{closure}") - 1, 0), $5, NULL,
+				  zend_ast_create(ZEND_AST_RETURN, $11), $7, NULL);
 				  ((zend_ast_decl *) $$)->lex_pos = $10;
 				  CG(extra_fn_flags) = $9; }
 ;

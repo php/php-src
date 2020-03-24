@@ -2870,6 +2870,22 @@ ZEND_METHOD(ReflectionParameter, isVariadic)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionParameter::isPromoted()
+   Returns this constructor parameter has been promoted to a property */
+ZEND_METHOD(ReflectionParameter, isPromoted)
+{
+	reflection_object *intern;
+	parameter_reference *param;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	RETVAL_BOOL(ZEND_ARG_IS_PROMOTED(param->arg_info));
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionType::allowsNull()
   Returns whether parameter MAY be null */
 ZEND_METHOD(ReflectionType, allowsNull)
@@ -5458,6 +5474,14 @@ ZEND_METHOD(ReflectionProperty, isDefault)
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 	RETURN_BOOL(ref->prop != NULL);
+}
+/* }}} */
+
+/* {{{ proto public bool ReflectionProperty::isPromoted()
+   Returns whether this property has been promoted from a constructor */
+ZEND_METHOD(ReflectionProperty, isPromoted)
+{
+	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_PROMOTED);
 }
 /* }}} */
 

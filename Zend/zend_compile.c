@@ -5787,9 +5787,12 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 		zend_ast *var_ast = param_ast->child[1];
 		zend_ast *default_ast = param_ast->child[2];
 		zend_ast *attributes_ast = param_ast->child[3];
+		zend_ast *doc_comment_ast = param_ast->child[4];
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(var_ast));
 		zend_bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
 		zend_bool is_variadic = (param_ast->attr & ZEND_PARAM_VARIADIC) != 0;
+		uint32_t visibility =
+			param_ast->attr & (ZEND_ACC_PUBLIC|ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE);
 
 		znode var_node, default_node;
 		zend_uchar opcode;
@@ -5862,16 +5865,16 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 
 		if (type_ast) {
 			uint32_t default_type = default_ast ? Z_TYPE(default_node.u.constant) : IS_UNDEF;
+			zend_bool force_nullable = default_type == IS_NULL && !visibility;
 
 			op_array->fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
-			arg_info->type = zend_compile_typename(
-				type_ast, default_type == IS_NULL, /* use_arena */ 0);
+			arg_info->type = zend_compile_typename(type_ast, force_nullable, /* use_arena */ 0);
 
 			if (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_VOID) {
 				zend_error_noreturn(E_COMPILE_ERROR, "void cannot be used as a parameter type");
 			}
 
-			if (default_type > IS_NULL && default_type != IS_CONSTANT_AST
+			if (default_type != IS_UNDEF && default_type != IS_CONSTANT_AST && !force_nullable
 					&& !zend_is_valid_default_value(arg_info->type, &default_node.u.constant)) {
 				zend_string *type_str = zend_type_to_string(arg_info->type);
 				zend_error_noreturn(E_COMPILE_ERROR,
@@ -5891,10 +5894,61 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 				zend_alloc_cache_slots(zend_type_get_num_classes(arg_info->type));
 		}
 
-		ZEND_TYPE_FULL_MASK(arg_info->type) |= _ZEND_ARG_INFO_FLAGS(is_ref, is_variadic);
+		uint32_t arg_info_flags = _ZEND_ARG_INFO_FLAGS(is_ref, is_variadic)
+			| (visibility ? _ZEND_IS_PROMOTED_BIT : 0);
+		ZEND_TYPE_FULL_MASK(arg_info->type) |= arg_info_flags;
 		if (opcode == ZEND_RECV) {
 			opline->op2.num = type_ast ?
 				ZEND_TYPE_FULL_MASK(arg_info->type) : MAY_BE_ANY;
+		}
+
+		if (visibility) {
+			zend_op_array *op_array = CG(active_op_array);
+			zend_class_entry *scope = op_array->scope;
+			zend_bool is_ctor =
+				scope && zend_string_equals_literal_ci(op_array->function_name, "__construct");
+			if (!is_ctor) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot declare promoted property outside a constructor");
+			}
+			if ((op_array->fn_flags & ZEND_ACC_ABSTRACT)
+					|| (scope->ce_flags & ZEND_ACC_INTERFACE)) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot declare promoted property in an abstract constructor");
+			}
+			if (is_variadic) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot declare variadic promoted property");
+			}
+			if (zend_hash_exists(&scope->properties_info, name)) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Cannot redeclare %s::$%s",
+					ZSTR_VAL(scope->name), ZSTR_VAL(name));
+			}
+			if (ZEND_TYPE_FULL_MASK(arg_info->type) & MAY_BE_CALLABLE) {
+				zend_string *str = zend_type_to_string(arg_info->type);
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Property %s::$%s cannot have type %s",
+					ZSTR_VAL(scope->name), ZSTR_VAL(name), ZSTR_VAL(str));
+			}
+
+			/* Always use uninitialized as the default. */
+			zval default_value;
+			ZVAL_UNDEF(&default_value);
+
+			/* Recompile the type, as it has different memory management requirements. */
+			zend_type type = ZEND_TYPE_INIT_NONE(0);
+			if (type_ast) {
+				type = zend_compile_typename(type_ast, /* force_allow_null */ 0, /* use_arena */ 1);
+			}
+
+			zend_string *doc_comment =
+				doc_comment_ast ? zend_string_copy(zend_ast_get_str(doc_comment_ast)) : NULL;
+			zend_property_info *prop = zend_declare_typed_property(
+				scope, name, &default_value, visibility | ZEND_ACC_PROMOTED, doc_comment, type);
+			if (attributes_ast) {
+				zend_compile_attributes(
+					&prop->attributes, attributes_ast, 0, ZEND_ATTRIBUTE_TARGET_PROPERTY);
+			}
 		}
 	}
 
@@ -5907,6 +5961,29 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 		op_array->num_args--;
 	}
 	zend_set_function_arg_flags((zend_function*)op_array);
+
+	for (i = 0; i < list->children; i++) {
+		zend_ast *param_ast = list->child[i];
+		zend_bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
+		uint32_t visibility =
+			param_ast->attr & (ZEND_ACC_PUBLIC|ZEND_ACC_PROTECTED|ZEND_ACC_PRIVATE);
+		if (!visibility) {
+			continue;
+		}
+
+		/* Emit $this->prop = $prop for promoted properties. */
+		zend_string *name = zend_ast_get_str(param_ast->child[1]);
+		znode name_node, value_node;
+		name_node.op_type = IS_CONST;
+		ZVAL_STR_COPY(&name_node.u.constant, name);
+		value_node.op_type = IS_CV;
+		value_node.u.op.var = lookup_cv(name);
+
+		zend_op *opline = zend_emit_op(NULL,
+			is_ref ? ZEND_ASSIGN_OBJ_REF : ZEND_ASSIGN_OBJ, NULL, &name_node);
+		opline->extended_value = zend_alloc_cache_slots(3);
+		zend_emit_op_data(&value_node);
+	}
 }
 /* }}} */
 

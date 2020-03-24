@@ -413,6 +413,8 @@ class ReflectionProperty implements Reflector
     /** @return bool */
     public function isDefault() {}
 
+    public function isPromoted(): bool {}
+
     /** @return int */
     public function getModifiers() {}
 
@@ -552,6 +554,8 @@ class ReflectionParameter implements Reflector
 
     /** @return bool */
     public function isVariadic() {}
+
+    public function isPromoted(): bool {}
 
     /** @return ReflectionAttribute[] */
     public function getAttributes(?string $name = null, int $flags = 0): array {}
