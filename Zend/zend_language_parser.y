@@ -262,7 +262,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> attribute_arguments attribute_decl attribute attributes
 
 %type <num> returns_ref function fn is_reference is_variadic variable_modifiers
-%type <num> method_modifiers non_empty_member_modifiers member_modifier
+%type <num> method_modifiers non_empty_member_modifiers member_modifier optional_visibility_modifier
 %type <num> class_modifiers class_modifier use_type backup_fn_flags
 
 %type <ptr> backup_lex_pos
@@ -684,11 +684,20 @@ attributed_parameter:
 	|	parameter				{ $$ = $1; }
 ;
 
+optional_visibility_modifier:
+		%empty					{ $$ = 0; }
+	|	T_PUBLIC				{ $$ = ZEND_ACC_PUBLIC; }
+	|	T_PROTECTED				{ $$ = ZEND_ACC_PROTECTED; }
+	|	T_PRIVATE				{ $$ = ZEND_ACC_PRIVATE; }
+;
+
 parameter:
-		optional_type_without_static is_reference is_variadic T_VARIABLE
-			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2 | $3, $1, $4, NULL, NULL); }
-	|	optional_type_without_static is_reference is_variadic T_VARIABLE '=' expr
-			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $2 | $3, $1, $4, $6, NULL); }
+		optional_visibility_modifier optional_type_without_static
+		is_reference is_variadic T_VARIABLE
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, NULL); }
+	|	optional_visibility_modifier optional_type_without_static
+		is_reference is_variadic T_VARIABLE '=' expr
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, $7); }
 ;
 
 
