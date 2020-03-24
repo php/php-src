@@ -635,7 +635,7 @@ struct oci_lob_self {
 	OCILobLocator *lob;
 	oci_lob_env   *E;
 	ub4 offset;
-	ub2 csid;
+	ub1 csfrm;
 };
 
 static size_t oci_blob_write(php_stream *stream, const char *buf, size_t count)
@@ -668,13 +668,13 @@ static size_t oci_blob_read(php_stream *stream, char *buf, size_t count)
 	sword r = OCILobRead2(self->E->svc, self->E->err, self->lob,
 		&byte_amt, &char_amt, (oraub8) self->offset, buf,
 		(oraub8) count, OCI_ONE_PIECE,
-		NULL, NULL, 0, SQLCS_IMPLICIT);
+		NULL, NULL, 0, self->csfrm);
 
 	if (r != OCI_SUCCESS && r != OCI_NEED_DATA) {
 		return (size_t)-1;
 	}
 
-	self->offset += self->csid == 0 ? byte_amt : char_amt;
+	self->offset += self->csfrm == 0 ? byte_amt : char_amt;
 	if (byte_amt < count) {
 		stream->eof = 1;
 	}
@@ -768,7 +768,7 @@ static php_stream *oci_create_lob_stream(zval *dbh, pdo_stmt_t *stmt, OCILobLoca
 	self->E->svc = self->S->H->svc;
 	self->E->err = self->S->err;
 
-	OCILobCharSetId(self->S->H->env, self->S->err, self->lob, &self->csid);
+	OCILobCharSetForm(self->S->H->env, self->S->err, self->lob, &self->csfrm);
 
 	stm = php_stream_alloc(&oci_blob_stream_ops, self, 0, "r+b");
 
