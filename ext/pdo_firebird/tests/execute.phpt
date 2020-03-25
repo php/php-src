@@ -1,58 +1,54 @@
 --TEST--
 PDO_Firebird: prepare/execute/binding
 --SKIPIF--
-<?php include("skipif.inc"); ?>
-<?php function_exists("ibase_query") or die("skip"); ?>
---INI--
-ibase.timestampformat=%Y-%m-%d %H:%M:%S
+<?php require('skipif.inc'); ?>
 --FILE--
-<?php /* $Id$ */
+<?php
+    require("testdb.inc");
 
-	require("testdb.inc");
-    
-	$db = new PDO("firebird:dbname=$test_base",$user,$password) or die;
+    var_dump($dbh->getAttribute(PDO::ATTR_CONNECTION_STATUS));
 
-	var_dump($db->getAttribute(PDO::ATTR_CONNECTION_STATUS));
+    $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    $dbh->setAttribute(PDO::FB_ATTR_TIMESTAMP_FORMAT, '%Y-%m-%d %H:%M:%S');
 
-	$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
+    @$dbh->exec('DROP TABLE ddl');
+    $dbh->exec("CREATE TABLE ddl (id SMALLINT NOT NULL PRIMARY KEY, text VARCHAR(32),
+        datetime TIMESTAMP DEFAULT '2000-02-12' NOT NULL)");
+    $dbh->exec("INSERT INTO ddl (id,text) VALUES (1,'bla')");
 
-	$db->exec("CREATE TABLE ddl (id SMALLINT NOT NULL PRIMARY KEY, text VARCHAR(32),
-		datetime TIMESTAMP DEFAULT '2000-02-12' NOT NULL)");
-	$db->exec("INSERT INTO ddl (id,text) VALUES (1,'bla')");
-	
-	$s = $db->prepare("SELECT * FROM ddl WHERE id=? FOR UPDATE");
+    $s = $dbh->prepare("SELECT * FROM ddl WHERE id=? FOR UPDATE");
 
-	$id = 0;
-	$s->bindParam(1,$id);
-	$var = null;
-	$s->bindColumn("TEXT",$var);
-	$id = 1;
-	$s->execute();
-	$s->setAttribute(PDO::ATTR_CURSOR_NAME, "c");
-	
-	var_dump($id);
+    $id = 0;
+    $s->bindParam(1,$id);
+    $var = null;
+    $s->bindColumn("TEXT",$var);
+    $id = 1;
+    $s->execute();
+    $s->setAttribute(PDO::ATTR_CURSOR_NAME, "c");
 
-	var_dump($s->fetch());
+    var_dump($id);
 
-	var_dump($var);
-	
-	var_dump($db->exec("UPDATE ddl SET id=2 WHERE CURRENT OF c"));
+    var_dump($s->fetch());
 
-	var_dump($s->fetch());
-	
-	unset($s);	
-	unset($db);
-	echo "done\n";
-	
+    var_dump($var);
+
+    var_dump($dbh->exec("UPDATE ddl SET id=2 WHERE CURRENT OF c"));
+
+    var_dump($s->fetch());
+
+    unset($s);
+    unset($dbh);
+    echo "done\n";
+
 ?>
 --EXPECT--
 bool(true)
 int(1)
 array(6) {
   ["ID"]=>
-  string(1) "1"
+  int(1)
   [0]=>
-  string(1) "1"
+  int(1)
   ["TEXT"]=>
   string(3) "bla"
   [1]=>

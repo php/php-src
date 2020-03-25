@@ -7,14 +7,14 @@ phar.readonly=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
 
 // sanity check with a virgin phar.zip
 $phar = new Phar($fname);
 var_dump($phar->getAlias());
 unset($phar);
 
-copy(dirname(__FILE__) . '/files/metadata.phar.zip', $fname);
+copy(__DIR__ . '/files/metadata.phar.zip', $fname);
 
 // existing phar.zip, no alias set
 $phar = new Phar($fname);
@@ -42,10 +42,9 @@ $phar->setAlias('pinocchio');
 var_dump($phar->getAlias());
 
 ?>
-===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
@@ -56,4 +55,3 @@ string(13) "jiminycricket"
 Cannot set alias ".phar/alias.txt" directly in phar "%sgetalias.phar.zip", use setAlias
 string(13) "jiminycricket"
 string(9) "pinocchio"
-===DONE===

@@ -1,14 +1,12 @@
 --TEST--
 ZE2 A final class cannot be inherited
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 
 final class base {
-	function show() {
-		echo "base\n";
-	}
+    function show() {
+        echo "base\n";
+    }
 }
 
 $t = new base();

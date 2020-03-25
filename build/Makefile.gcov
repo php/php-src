@@ -1,0 +1,64 @@
+#
+# GCOV
+#
+
+LTP = lcov
+LTP_GENHTML = genhtml
+
+LCOV_EXCLUDES = \
+	'$(top_srcdir)/ext/bcmath/libbcmath/*' \
+	'$(top_srcdir)/ext/date/lib/*' \
+	'$(top_srcdir)/ext/fileinfo/libmagic/*' \
+	'$(top_srcdir)/ext/gd/libgd/*' \
+	'$(top_srcdir)/ext/hash/sha3/*' \
+	'$(top_srcdir)/ext/mbstring/libmbfl/*' \
+	'$(top_srcdir)/ext/opcache/jit/libudis86/*' \
+	'$(top_srcdir)/ext/pcre/pcre2lib/*' \
+	'$(top_srcdir)/ext/xmlrpc/libxmlrpc/*'
+
+GCOVR_EXCLUDES = \
+	'ext/bcmath/libbcmath/.*' \
+	'ext/date/lib/.*' \
+	'ext/fileinfo/libmagic/.*' \
+	'ext/gd/libgd/.*' \
+	'ext/hash/sha3/.*' \
+	'ext/mbstring/libmbfl/.*' \
+	'ext/opcache/jit/libudis86/.*' \
+	'ext/pcre/pcre2lib/.*' \
+	'ext/xmlrpc/libxmlrpc/.*'
+
+lcov: lcov-html
+
+php_lcov.info:
+	@echo "Generating lcov data for $@"
+	$(LTP) --capture --no-external --directory . --output-file $@
+	@echo "Stripping bundled libraries from $@"
+	$(LTP) --output-file $@ --remove $@ '*/<stdout>' $(LCOV_EXCLUDES)
+
+lcov-html: php_lcov.info
+	@echo "Generating lcov HTML"
+	$(LTP_GENHTML) --legend --output-directory lcov_html/ --title "PHP Code Coverage" php_lcov.info
+
+lcov-clean:
+	rm -f php_lcov.info
+	rm -rf lcov_html/
+
+lcov-clean-data:
+	@find . -name \*.gcda -o -name \*.da -o -name \*.bbg? | xargs rm -f
+
+gcovr-html:
+	@echo "Generating gcovr HTML"
+	@rm -rf gcovr_html/
+	@mkdir gcovr_html
+	gcovr -sr . -o gcovr_html/index.html --html --html-details \
+		--exclude-directories 'ext/date/lib$$' \
+		$(foreach lib, $(GCOVR_EXCLUDES), -e $(lib))
+
+gcovr-xml:
+	@echo "Generating gcovr XML"
+	@rm -f gcovr.xml
+	gcovr -sr . -o gcovr.xml --xml \
+		--exclude-directories 'ext/date/lib$$' \
+		$(foreach lib, $(GCOVR_EXCLUDES), -e $(lib))
+
+.PHONY: gcovr-html lcov-html php_lcov.info

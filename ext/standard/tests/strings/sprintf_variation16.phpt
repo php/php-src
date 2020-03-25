@@ -3,13 +3,13 @@ Test sprintf() function : usage variations - string formats with float values
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
 echo "*** Testing sprintf() : string formats with float values ***\n";
 
-// array of float values 
+// array of float values
 $float_values = array(
   -2147483649,
   2147483648,
@@ -29,9 +29,9 @@ $float_values = array(
 );
 
 // array of string formats
-$string_formats = array( 
-  "%s", "%hs", "%ls", 
-  "%Ls"," %s", "%s ", 
+$string_formats = array(
+  "%s", "%hs", "%ls",
+  "%Ls"," %s", "%s ",
   "\t%s", "\n%s", "%4s",
   "%30s", "%[a-zA-Z0-9]", "%*s"
 );
@@ -39,7 +39,7 @@ $string_formats = array(
 $count = 1;
 foreach($float_values as $float_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($string_formats as $format) {
     var_dump( sprintf($format, $float_value) );
   }
@@ -48,7 +48,7 @@ foreach($float_values as $float_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : string formats with float values ***
 
 -- Iteration 1 --

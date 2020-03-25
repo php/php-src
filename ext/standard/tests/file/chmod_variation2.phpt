@@ -11,7 +11,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 
 define("PERMISSIONS_MASK", 0777);
 
-$script_directory = dirname(__FILE__);
+$script_directory = __DIR__;
 chdir($script_directory);
 $test_dirname = basename(__FILE__, ".php") . "testdir";
 mkdir($test_dirname);
@@ -32,7 +32,7 @@ var_dump(chmod($filepath, 0777));
 var_dump(chmod("./$test_dirname/bad_dir/../../$filename", 0755));
 clearstatcache();
 printf("%o\n", fileperms($filepath) & PERMISSIONS_MASK);
- 
+
 echo "\nchmod() on a linked file\n";
 $linkname = "somelink";
 var_dump(symlink($filepath, $linkname));

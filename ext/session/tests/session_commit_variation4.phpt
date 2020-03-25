@@ -39,25 +39,24 @@ var_dump(ini_get('session.use_strict_mode'));
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_commit() : variation ***
 string(1) "0"
 string(0) ""
 bool(true)
 string(4) "test"
-NULL
+bool(true)
 string(4) "test"
 bool(true)
 string(1) "0"
 string(4) "test"
-NULL
+bool(true)
 string(4) "test"
 bool(true)
 string(4) "test"
-NULL
+bool(true)
 string(4) "test"
 bool(true)
 bool(true)
 string(1) "0"
 Done
-

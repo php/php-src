@@ -19,48 +19,48 @@ ob_start();
 echo "*** Testing session_set_save_handler() function: class with validate_sid ***\n";
 
 class MySession2 extends SessionHandler {
-	public $path;
+    public $path;
 
-	public function open($path, $name) {
-		if (!$path) {
-			$path = sys_get_temp_dir();
-		}
-		$this->path = $path . '/u_sess_' . $name;
-		return true;
-	}
+    public function open($path, $name) {
+        if (!$path) {
+            $path = sys_get_temp_dir();
+        }
+        $this->path = $path . '/u_sess_' . $name;
+        return true;
+    }
 
-	public function close() {
-		return true;
-	}
+    public function close() {
+        return true;
+    }
 
-	public function read($id) {
-		return @file_get_contents($this->path . $id);
-	}
+    public function read($id) {
+        return (string)@file_get_contents($this->path . $id);
+    }
 
-	public function write($id, $data) {
-		return file_put_contents($this->path . $id, $data)===FALSE ? FALSE : TRUE ;
-	}
+    public function write($id, $data) {
+        return file_put_contents($this->path . $id, $data)===FALSE ? FALSE : TRUE ;
+    }
 
-	public function destroy($id) {
-		@unlink($this->path . $id);
-	}
+    public function destroy($id) {
+        @unlink($this->path . $id);
+    }
 
-	public function gc($maxlifetime) {
-		foreach (glob($this->path . '*') as $filename) {
-			if (filemtime($filename) + $maxlifetime < time()) {
-				@unlink($filename);
-			}
-		}
-		return true;
-	}
+    public function gc($maxlifetime) {
+        foreach (glob($this->path . '*') as $filename) {
+            if (filemtime($filename) + $maxlifetime < time()) {
+                @unlink($filename);
+            }
+        }
+        return true;
+    }
 
-	public function create_sid() {
-		return 'my_sid';
-	}
+    public function create_sid() {
+        return pathinfo(__FILE__)['filename'];
+    }
 
-	public function validate_sid($id) {
-		return 'my_sid'===$id;
-	}
+    public function validate_sid($id) {
+        return pathinfo(__FILE__)['filename']===$id;
+    }
 }
 
 $handler = new MySession2;
@@ -76,13 +76,12 @@ session_unset();
 
 session_start();
 var_dump($_SESSION);
-
-session_write_close();
-session_unset();
-
---EXPECTF--
+--CLEAN--
+<?php
+@unlink(session_save_path().'/u_sess_PHPSESSIDsession_set_save_handler_class_018');
+--EXPECT--
 *** Testing session_set_save_handler() function: class with validate_sid ***
-string(%d) "my_sid"
+string(34) "session_set_save_handler_class_018"
 string(4) "user"
 array(1) {
   ["foo"]=>

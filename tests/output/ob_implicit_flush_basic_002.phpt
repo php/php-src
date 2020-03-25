@@ -3,9 +3,9 @@ Test ob_implicit_flush() function : ensure implicit flushing does not apply to u
 --FILE--
 <?php
 /* Prototype  : proto void ob_implicit_flush([int flag])
- * Description: Turn implicit flush on/off and is equivalent to calling flush() after every output call 
+ * Description: Turn implicit flush on/off and is equivalent to calling flush() after every output call
  * Source code: main/output.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ob_implicit_flush() : ensure implicit flushing does not apply to user buffers. ***\n";
@@ -24,6 +24,6 @@ ob_end_clean();
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ob_implicit_flush() : ensure implicit flushing does not apply to user buffers. ***
 Done

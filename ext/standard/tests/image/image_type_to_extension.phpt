@@ -1,9 +1,8 @@
 --TEST--
 image_type_to_extension()
 --SKIPIF--
-<?php 
-	if (!function_exists('image_type_to_extension')) die('skip image_type_to_extension() not available'); 
-	require_once('skipif_imagetype.inc');
+<?php
+    require_once('skipif_imagetype.inc');
 ?>
 --FILE--
 <?php
@@ -23,18 +22,15 @@ image_type_to_extension()
         "IMAGETYPE_IFF"      => IMAGETYPE_IFF,
         "IMAGETYPE_WBMP"     => IMAGETYPE_WBMP,
         "IMAGETYPE_JPEG2000" => IMAGETYPE_JPEG2000,
-        "IMAGETYPE_XBM"      => IMAGETYPE_XBM
+        "IMAGETYPE_XBM"      => IMAGETYPE_XBM,
+        "IMAGETYPE_WEBP"     => IMAGETYPE_WEBP
     );
     foreach($constants as $name => $constant) {
         printf("Constant: %s\n\tWith dot: %s\n\tWithout dot: %s\n", $name, image_type_to_extension($constant), image_type_to_extension($constant, false));
     }
 
-	var_dump(image_type_to_extension(-1, array()));
-	var_dump(image_type_to_extension(new stdclass));
-	var_dump(image_type_to_extension(1000000, NULL));
-	var_dump(image_type_to_extension());
-	var_dump(image_type_to_extension(0));
-	var_dump(image_type_to_extension(0, 0, 0));
+    var_dump(image_type_to_extension(1000000, NULL));
+    var_dump(image_type_to_extension(0));
 ?>
 Done
 --EXPECTF--
@@ -86,18 +82,9 @@ Constant: IMAGETYPE_JPEG2000
 Constant: IMAGETYPE_XBM
 	With dot: .xbm
 	Without dot: xbm
-
-Warning: image_type_to_extension() expects parameter 2 to be boolean, array given in %s on line %d
+Constant: IMAGETYPE_WEBP
+	With dot: .webp
+	Without dot: webp
 bool(false)
-
-Warning: image_type_to_extension() expects parameter 1 to be integer, object given in %s on line %d
-bool(false)
-bool(false)
-
-Warning: image_type_to_extension() expects at least 1 parameter, 0 given in %s on line %d
-bool(false)
-bool(false)
-
-Warning: image_type_to_extension() expects at most 2 parameters, 3 given in %s on line %d
 bool(false)
 Done

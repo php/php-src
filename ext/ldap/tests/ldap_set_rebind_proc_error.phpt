@@ -10,7 +10,7 @@ Patrick Allaert <patrickallaert@php.net>
 		die("skip ldap_set_rebind_proc() does not exist");
 	}
 	require "connect.inc";
-	$link = fsockopen($host, $port);
+	$link = @fsockopen($host, $port);
 	if (!$link) {
 		die("skip no server listening");
 	}
@@ -33,18 +33,8 @@ function rebind_proc ($ds, $ldap_url) {
 }
 
 $link = ldap_connect($host, $port);
-var_dump(ldap_set_rebind_proc($link));
-var_dump(ldap_set_rebind_proc($link, "rebind_proc", "Additional data"));
 var_dump(ldap_set_rebind_proc($link, "rebind_proc_inexistent"));
 ?>
-===DONE===
 --EXPECTF--
-Warning: ldap_set_rebind_proc() expects exactly 2 parameters, 1 given in %s on line %d
-bool(false)
-
-Warning: ldap_set_rebind_proc() expects exactly 2 parameters, 3 given in %s on line %d
-bool(false)
-
 Warning: ldap_set_rebind_proc(): Two arguments expected for 'rebind_proc_inexistent' to be a valid callback in %s on line %d
 bool(false)
-===DONE===

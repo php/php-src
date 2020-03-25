@@ -3,6 +3,7 @@ Test session_name() function : variation
 --INI--
 session.save_path=
 session.name=PHPSESSID
+session.save_handler=files
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -10,10 +11,10 @@ session.name=PHPSESSID
 
 ob_start();
 
-/* 
+/*
  * Prototype : string session_name([string $name])
  * Description : Get and/or set the current session name
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_name() : variation ***\n";
@@ -59,4 +60,3 @@ string(1) "	"
 bool(true)
 string(1) "	"
 Done
-

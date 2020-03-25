@@ -6,8 +6,8 @@ Bug #47049 (SoapClient::__soapCall causes a segmentation fault)
 soap.wsdl_cache_enabled=0
 --FILE--
 <?php
-$client = new SoapClient(dirname(__FILE__) . '/bug47049.wsdl',
-	array('trace' => 1 , 'exceptions' => 0));
+$client = new SoapClient(__DIR__ . '/bug47049.wsdl',
+    array('trace' => 1 , 'exceptions' => 0));
 $host = array('uuid' => 'foo');
 $software_list = array(array('name' => 'package', 'version' => '1.2.3', 'state' => 'installed'));
 $updates = array();

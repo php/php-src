@@ -8,50 +8,34 @@ if (!function_exists('ftok')){ print 'skip'; }
 --FILE--
 <?php
 
-$key = ftok(dirname(__FILE__)."/003.phpt", 'q');
-
-var_dump(shm_detach());
-var_dump(shm_detach(1,1));
+$key = ftok(__DIR__."/003.phpt", 'q');
 
 $s = shm_attach($key);
 
 var_dump(shm_detach($s));
-var_dump(shm_detach($s));
-shm_remove($s);
-
-var_dump(shm_detach(0));
-var_dump(shm_detach(1));
-var_dump(shm_detach(-1));
+try {
+    var_dump(shm_detach($s));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    shm_remove($s);
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done\n";
 ?>
 --CLEAN--
 <?php
 
-$key = ftok(dirname(__FILE__)."/003.phpt", 'q');
+$key = ftok(__DIR__."/003.phpt", 'q');
 $s = shm_attach($key);
 shm_remove($s);
 
 ?>
---EXPECTF--	
-Warning: shm_detach() expects exactly 1 parameter, 0 given in %s003.php on line %d
-NULL
-
-Warning: shm_detach() expects exactly 1 parameter, 2 given in %s003.php on line %d
-NULL
+--EXPECT--
 bool(true)
-
-Warning: shm_detach(): supplied resource is not a valid sysvshm resource in %s003.php on line %d
-bool(false)
-
-Warning: shm_remove(): supplied resource is not a valid sysvshm resource in %s003.php on line %d
-
-Warning: shm_detach() expects parameter 1 to be resource, integer given in %s003.php on line %d
-NULL
-
-Warning: shm_detach() expects parameter 1 to be resource, integer given in %s003.php on line %d
-NULL
-
-Warning: shm_detach() expects parameter 1 to be resource, integer given in %s003.php on line %d
-NULL
+shm_detach(): supplied resource is not a valid sysvshm resource
+shm_remove(): supplied resource is not a valid sysvshm resource
 Done

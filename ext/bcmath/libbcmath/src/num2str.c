@@ -11,7 +11,7 @@
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.  (COPYING.LIB)
+    Lesser General Public License for more details.  (LICENSE)
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to:
@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -41,8 +40,9 @@
 /* Convert a numbers to a string.  Base 10 only.*/
 
 zend_string
-*bc_num2str (num)
+*bc_num2str_ex (num, scale)
       bc_num num;
+	  int scale;
 {
 	zend_string *str;
 	char *sptr;
@@ -50,9 +50,9 @@ zend_string
 	int  index, signch;
 
 	/* Allocate the string memory. */
-	signch = ( num->n_sign == PLUS ? 0 : 1 );  /* Number of sign chars. */
-	if (num->n_scale > 0)
-		str = zend_string_alloc(num->n_len + num->n_scale + signch + 1, 0);
+	signch = num->n_sign != PLUS;  /* Number of sign chars. */
+	if (scale > 0)
+		str = zend_string_alloc(num->n_len + scale + signch + 1, 0);
 	else
 		str = zend_string_alloc(num->n_len + signch, 0);
 	if (str == NULL) bc_out_of_memory();
@@ -67,11 +67,13 @@ zend_string
 		*sptr++ = BCD_CHAR(*nptr++);
 
 	/* Now the fraction. */
-	if (num->n_scale > 0)
+	if (scale > 0)
 	{
 		*sptr++ = '.';
-		for (index=0; index<num->n_scale; index++)
+		for (index=0; index<scale && index<num->n_scale; index++)
 			*sptr++ = BCD_CHAR(*nptr++);
+		for (index = num->n_scale; index<scale; index++)
+			*sptr++ = BCD_CHAR(0);
 	}
 
 	/* Terminate the string and return it! */

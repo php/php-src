@@ -3,8 +3,8 @@ PDO PgSQL Bug #62498 (pdo_pgsql inefficient when getColumnMeta() is used), 32-bi
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+require __DIR__ . '/config.inc';
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 if (PHP_INT_SIZE > 4) die("skip relevant for 32-bit only");
 ?>
@@ -12,8 +12,8 @@ if (PHP_INT_SIZE > 4) die("skip relevant for 32-bit only");
 <?php
 echo "Begin test...\n";
 
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute (\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
 // create the table

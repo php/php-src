@@ -4,19 +4,19 @@ get_parent_class() tests
 <?php
 
 interface i {
-	function test();
+    function test();
 }
 
 class foo implements i {
-	function test() {
-		var_dump(get_parent_class());
-	}
+    function test() {
+        var_dump(get_parent_class());
+    }
 }
 
 class bar extends foo {
-	function test_bar() {
-		var_dump(get_parent_class());
-	}
+    function test_bar() {
+        var_dump(get_parent_class());
+    }
 }
 
 $bar = new bar;
@@ -41,7 +41,7 @@ var_dump(get_parent_class(1));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 bool(false)
 bool(false)
 string(3) "foo"

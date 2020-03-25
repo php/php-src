@@ -5,8 +5,8 @@ openssl_open() tests
 --FILE--
 <?php
 $data = "openssl_open() test";
-$pub_key = "file://" . dirname(__FILE__) . "/public.key";
-$priv_key = "file://" . dirname(__FILE__) . "/private_rsa_1024.key";
+$pub_key = "file://" . __DIR__ . "/public.key";
+$priv_key = "file://" . __DIR__ . "/private_rsa_1024.key";
 $wrong = "wrong";
 
 openssl_seal($data, $sealed, $ekeys, array($pub_key, $pub_key, $pub_key));
@@ -22,7 +22,7 @@ var_dump($output4);
 --EXPECTF--
 string(19) "openssl_open() test"
 
-Warning: openssl_open(): unable to coerce parameter 4 into a private key in %s on line %d
+Warning: openssl_open(): Unable to coerce parameter 4 into a private key in %s on line %d
 NULL
 string(19) "openssl_open() test"
 NULL

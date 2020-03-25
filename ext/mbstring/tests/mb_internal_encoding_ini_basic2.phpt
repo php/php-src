@@ -19,11 +19,9 @@ echo mb_internal_encoding()."\n";
 echo ini_get('mbstring.internal_encoding')."\n";
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing INI mbstring.internal_encoding : basic functionality ***
 ISO-8859-7
 ISO-8859-7
 UTF-8
 ISO-8859-7
-===DONE===

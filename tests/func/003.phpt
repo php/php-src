@@ -1,7 +1,7 @@
 --TEST--
 General function test
 --FILE--
-<?php 
+<?php
 
 function a()
 {
@@ -89,10 +89,10 @@ echo "$result\n";
 
 function andi($i, $j)
 {
-	for ($k=$i ; $k<=$j ; $k++) {
-		if ($k >5) continue;
-		echo "$k\n";
-	}
+    for ($k=$i ; $k<=$j ; $k++) {
+        if ($k >5) continue;
+        echo "$k\n";
+    }
 }
 
 andi (3,10);
@@ -288,4 +288,3 @@ factorial(4) = 24
 3
 4
 5
-

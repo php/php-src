@@ -23,11 +23,11 @@ print "wanted=Sunday            00:00:00\n\n";
 --EXPECT--
 TZ=America/Jujuy  - Is it OK for this to be 2 AM, rather than 1
 AM as per most DST transitions?
-tStamp=Monday 1990-10-15 17:17:17 WART 0
-result=Monday 1990-10-22 00:00:00 WART 0
+tStamp=Monday 1990-10-15 17:17:17 -04 0
+result=Monday 1990-10-22 00:00:00 -04 0
 wanted=Monday            00:00:00
 
 TZ=Asia/Tbilisi - Is it OK for this to be 2 AM?
-tStamp=Sunday 2005-03-20 17:17:17 GET 0
-result=Sunday 2005-03-27 00:00:00 GET 0
+tStamp=Sunday 2005-03-20 17:17:17 +03 0
+result=Sunday 2005-03-27 00:00:00 +03 0
 wanted=Sunday            00:00:00

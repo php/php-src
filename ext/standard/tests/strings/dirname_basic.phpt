@@ -16,18 +16,18 @@ $file_paths = array (
   "/foo/bar/",
   "foo/bar/",
   "/bar/",
-  
+
   /* path with only files and trailing slashes*/
   "/foo/bar.gz",
   "foo/bar.gz",
   "bar.gz",
   "bar.gz/",
-  "/bar.gz",  
+  "/bar.gz",
   "/bar.gz/",
   "/foo/bar.gz/",
   "foo/bar.gz/",
-  "/bar.gz/",  
- 
+  "/bar.gz/",
+
   /* path with file extension and trailing slashes */
   "/.gz",
   ".gz",
@@ -49,7 +49,7 @@ function check_dirname( $paths ) {
    $noOfPaths = count($paths);
    for( ; $loop_counter < $noOfPaths; $loop_counter++ ) {
      echo "\n--Iteration ";
-     echo $loop_counter + 1; 
+     echo $loop_counter + 1;
      echo " --\n";
      var_dump( dirname($paths[$loop_counter]) );
    }
@@ -60,7 +60,6 @@ check_dirname( $file_paths );
 
 echo "Done\n";
 ?>
-
 --EXPECTREGEX--
 \*\*\* Testing basic operations \*\*\*
 

@@ -50,8 +50,8 @@ extern "C" {
  */
 typedef struct _simplestring {
    char* str;         /* string buf               */
-   int len;           /* length of string/buf     */
-   int size;          /* size of allocated buffer */
+   size_t len;           /* length of string/buf     */
+   size_t size;          /* size of allocated buffer */
 } simplestring;
 /******/
 

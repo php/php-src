@@ -8,8 +8,8 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
-$fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '2.phar.gz';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname2 = __DIR__ . '/' . basename(__FILE__, '.php') . '2.phar.gz';
 $pname = 'phar://' . $fname;
 $file = '<?php __HALT_COMPILER(); ?>';
 
@@ -32,38 +32,33 @@ $unc2 = $gz->decompress();
 echo $unc2->getPath() . "\n";
 $unc3 = $gz->decompress('hooba.phar');
 echo $unc3->getPath() . "\n";
-$gz->decompress(array());
 $zip = $phar->convertToData(Phar::ZIP);
 ini_set('phar.readonly', 1);
 try {
-$gz->decompress();
+    $gz->decompress();
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 try {
-$zip->decompress();
+    $zip->decompress();
 } catch (Exception $e) {
-echo $e->getMessage() . "\n";
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.zip');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.hooba.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.gz');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar.gz');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar');
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.zip');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.hooba.phar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.gz');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.phar.gz');
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '2.phar');
 ?>
 --EXPECTF--
 int(4096)
 %sphar_decompress2.phar
 %sphar_decompress.phar
 %sphar_decompress.hooba.phar
-
-Warning: Phar::decompress() expects parameter 1 to be %string, array given in %sphar_decompress.php on line %d
 Cannot decompress phar archive, phar is read-only
 Cannot decompress zip-based archives with whole-archive compression
-===DONE===

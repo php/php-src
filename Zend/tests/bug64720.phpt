@@ -10,7 +10,7 @@ class Stat {
         }
         return self::$requests[1];
     }
-    
+
     public function __destruct() {
         unset(self::$requests[1]);
     }
@@ -44,9 +44,6 @@ $foo = new Foo();
 $bar = new Bar();
 $bar->test();
 ?>
---EXPECTF--
-Fatal error: Uncaught Error: Access to undeclared static property: Stat::$requests in %sbug64720.php:12
-Stack trace:
-#0 [internal function]: Stat->__destruct()
-#1 {main}
-  thrown in %sbug64720.php on line 12
+OK
+--EXPECT--
+OK

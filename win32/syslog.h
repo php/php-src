@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Author: Sterling Hughes <sterling@php.net>                           |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef SYSLOG_H
 #define	SYSLOG_H
@@ -73,6 +69,7 @@
 extern void closelog(void);
 extern void openlog(const char *, int, int);
 extern void syslog(int, const char *, ...);
+extern void vsyslog(int, const char *, va_list ap);
 
 
 #endif							/* SYSLOG_H */

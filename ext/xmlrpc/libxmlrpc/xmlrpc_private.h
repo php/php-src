@@ -166,7 +166,7 @@ const char* type_to_str(XMLRPC_VALUE_TYPE type, XMLRPC_VECTOR_TYPE vtype);
 /*----------------------------------------------------------------------------
  * Macros
  */
-#define my_free(thing)  if(thing) {free(thing); thing = 0;}
+#define my_free(thing)  if(thing) {efree(thing); thing = 0;}
 
 
 #ifdef __cplusplus
@@ -175,4 +175,3 @@ const char* type_to_str(XMLRPC_VALUE_TYPE type, XMLRPC_VECTOR_TYPE vtype);
 
 
 #endif /* XMLRPC_PRIVATE_ALREADY_INCLUDED */
-

@@ -6,47 +6,55 @@ Passing assignments by reference
 function f(&$a) {
   var_dump($a);
   $a = "a.changed";
-} 
+}
 
 echo "\n\n---> Pass constant assignment by reference:\n";
-f($a="a.original");
-var_dump($a); 
+try {
+	f($a="a.original");
+	var_dump($a);
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() ."\n";
+}
 
 echo "\n\n---> Pass variable assignment by reference:\n";
-unset($a);
-$a = "a.original";
-f($b = $a);
-var_dump($a); 
+try {
+	unset($a);
+	$a = "a.original";
+	f($b = $a);
+	var_dump($a);
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() ."\n";
+}
 
 echo "\n\n---> Pass reference assignment by reference:\n";
-unset($a, $b);
-$a = "a.original";
-f($b =& $a);
-var_dump($a); 
+try {
+	unset($a, $b);
+	$a = "a.original";
+	f($b =& $a);
+	var_dump($a);
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() ."\n";
+}
 
 echo "\n\n---> Pass concat assignment by reference:\n";
-unset($a, $b);
-$b = "b.original";
-$a = "a.original";
-f($b .= $a);
-var_dump($a); 
+try {
+	unset($a, $b);
+	$b = "b.original";
+	$a = "a.original";
+	f($b .= $a);
+	var_dump($a);
+} catch (Throwable $e) {
+	echo "Exception: " . $e->getMessage() ."\n";
+}
 
 ?>
---EXPECTF--
-
-
+--EXPECT--
 ---> Pass constant assignment by reference:
-
-Notice: Only variables should be passed by reference in %s on line 9
-string(10) "a.original"
-string(10) "a.original"
+Exception: Cannot pass parameter 1 by reference
 
 
 ---> Pass variable assignment by reference:
-
-Notice: Only variables should be passed by reference in %s on line 15
-string(10) "a.original"
-string(10) "a.original"
+Exception: Cannot pass parameter 1 by reference
 
 
 ---> Pass reference assignment by reference:
@@ -55,7 +63,4 @@ string(9) "a.changed"
 
 
 ---> Pass concat assignment by reference:
-
-Notice: Only variables should be passed by reference in %s on line 28
-string(20) "b.originala.original"
-string(10) "a.original"
+Exception: Cannot pass parameter 1 by reference

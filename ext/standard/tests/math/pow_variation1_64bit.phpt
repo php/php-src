@@ -38,7 +38,7 @@ $inputs = array(
 /*1*/  0,
        1,
        12345,
-       -2345,       
+       -2345,
        PHP_INT_MAX,
 
        // float data
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*17*/ "",
        '',
@@ -67,10 +67,10 @@ $inputs = array(
 /*20*/ "abcxyz",
        'abcxyz',
        $heredoc,
-       
+
        // object data
-/*23*/ new classA(),       
-       
+/*23*/ new classA(),
+
        // undefined data
 /*24*/ @$undefined_var,
 
@@ -84,13 +84,16 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of pow()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(pow($input, 3));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(pow($input, 3));
+    } catch (Error $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 ?>
-===Done===
 --EXPECTF--
 *** Testing pow() : usage variations ***
 
@@ -107,7 +110,7 @@ int(1881365963625)
 int(-12895213625)
 
 -- Iteration 5 --
-float(7.8463771692334E+56)
+float(7.846377169233351E+56)
 
 -- Iteration 6 --
 float(1157.625)
@@ -116,10 +119,10 @@ float(1157.625)
 float(-1157.625)
 
 -- Iteration 8 --
-float(1.8816763717892E+33)
+float(1.8816763717891549E+33)
 
 -- Iteration 9 --
-float(1.8816763717892E-27)
+float(1.8816763717891545E-27)
 
 -- Iteration 10 --
 float(0.125)
@@ -153,7 +156,7 @@ Warning: A non-numeric value encountered in %s on line %d
 int(0)
 
 -- Iteration 19 --
-int(0)
+Unsupported operand types
 
 -- Iteration 20 --
 
@@ -172,7 +175,7 @@ int(0)
 
 -- Iteration 23 --
 
-Notice: Object of class classA could not be converted to int in %s on line %d
+Notice: Object of class classA could not be converted to number in %s on line %d
 int(1)
 
 -- Iteration 24 --
@@ -183,4 +186,3 @@ int(0)
 
 -- Iteration 26 --
 %s
-===Done===

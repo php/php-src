@@ -14,8 +14,6 @@ foreach (new RecursiveIteratorIterator(new Phar($phar, null, 'stuboflength1041.p
     var_dump($item->getFileName());
 }
 ?>
-===DONE===
 --EXPECT--
 string(5) "a.php"
 string(5) "b.php"
-===DONE===

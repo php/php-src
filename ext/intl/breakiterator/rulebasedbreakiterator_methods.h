@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -21,12 +19,12 @@
 
 PHP_METHOD(IntlRuleBasedBreakIterator, __construct);
 
-PHP_FUNCTION(rbbi_get_rules);
+PHP_METHOD(IntlRuleBasedBreakIterator, getRules);
 
-PHP_FUNCTION(rbbi_get_rule_status);
+PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatus);
 
-PHP_FUNCTION(rbbi_get_rule_status_vec);
+PHP_METHOD(IntlRuleBasedBreakIterator, getRuleStatusVec);
 
-PHP_FUNCTION(rbbi_get_binary_rules);
+PHP_METHOD(IntlRuleBasedBreakIterator, getBinaryRules);
 
 #endif

@@ -15,31 +15,31 @@ echo "*** Testing strtok() : with miscellaneous inputs ***\n";
 
 // defining arrays for input strings and tokens
 $string_array = array(
-   		       "HELLO WORLD",
- 		       "hello world",
-   		       "_HELLO_WORLD_",
-		       "/thello/t/wor/ttld",
-		       "hel/lo/t/world",
+               "HELLO WORLD",
+               "hello world",
+               "_HELLO_WORLD_",
+               "/thello/t/wor/ttld",
+               "hel/lo/t/world",
                        "one:$:two:!:three:#:four",
-		       "\rhello/r/wor\rrld",
-	               chr(0),
+               "\rhello/r/wor\rrld",
+                   chr(0),
                        chr(0).chr(0),
                        chr(0).'hello'.chr(0),
                        'hello'.chr(0).'world'
- 		     );
-$token_array = array( 
-		      "wr",
-		      "hello world",
-		      "__",
+             );
+$token_array = array(
+              "wr",
+              "hello world",
+              "__",
                       "t/",
-		      '/t',
-		      ":",
-		      "\r",
-		      "\0",
-		      "\0",
-		      "\0",
-		      "\0",
- 		    );
+              '/t',
+              ":",
+              "\r",
+              "\0",
+              "\0",
+              "\0",
+              "\0",
+            );
 
 // loop through each element of the array and check the working of strtok()
 // when supplied with different string and token values
@@ -47,17 +47,17 @@ $token_array = array(
 $counter =1;
 foreach( $string_array as $string )  {
   echo "\n--- Iteration $counter ---\n";
-  var_dump( strtok($string, $token_array[$counter-1]) ); 
+  var_dump( strtok($string, $token_array[$counter-1]) );
   for( $count = 1; $count <=5; $count++ )  {
     var_dump( strtok($token_array[$counter-1]) );
   }
   $counter++;
-}		      
-		      
+}
+
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtok() : with miscellaneous inputs ***
 
 --- Iteration 1 ---

@@ -1,11 +1,11 @@
 --TEST--
-Test array_udiff_assoc() function : variation 
+Test array_udiff_assoc() function : variation
 --FILE--
 <?php
 /* Prototype  : array array_udiff_assoc(array arr1, array arr2 [, array ...], callback key_comp_func)
- * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys are compared by user supplied function. 
+ * Description: Returns the entries of arr1 that have values which are not present in any of the others arguments but do additional checks whether the keys are equal. Keys are compared by user supplied function.
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_udiff_assoc() : variation - testing with multiple array arguments ***\n";
@@ -24,8 +24,7 @@ var_dump( array_udiff_assoc($arr1, $arr2, $arr3, $arr4, $key_compare_function) )
 
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_udiff_assoc() : variation - testing with multiple array arguments ***
 array(2) {
   [4]=>
@@ -33,4 +32,3 @@ array(2) {
   ["0.5"]=>
   int(5)
 }
-===DONE===

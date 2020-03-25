@@ -10,7 +10,7 @@ require_once('skipif.inc');
 $xml = <<< EOXML
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <courses>
-	<!-- Hello World! -->
+    <!-- Hello World! -->
 </courses>
 EOXML;
 
@@ -21,18 +21,17 @@ var_dump($root->hasChildNodes());
 $children = $root->childNodes;
 
 for ($index = 0; $index < $children->length; $index++) {
-	echo "--- child $index ---\n";
-	$current = $children->item($index);
-	echo get_class($current), "\n";
-	var_dump($current->textContent);
+    echo "--- child $index ---\n";
+    $current = $children->item($index);
+    echo get_class($current), "\n";
+    var_dump($current->textContent);
 }
-
---EXPECTF--
+--EXPECT--
 bool(true)
 --- child 0 ---
 DOMText
-string(2) "
-	"
+string(5) "
+    "
 --- child 1 ---
 DOMComment
 string(14) " Hello World! "
@@ -40,4 +39,3 @@ string(14) " Hello World! "
 DOMText
 string(1) "
 "
-

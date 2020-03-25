@@ -7,14 +7,13 @@ phar.readonly=0
 open_basedir=
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (version_compare(PHP_VERSION, "5.3", "<")) die("skip PHP 5.3+ required"); ?>
 --FILE_EXTERNAL--
 files/write6.phar
 --CLEAN--
 <?php
-unlink(dirname(__FILE__) . '/copyonwrite6/file1');
-unlink(dirname(__FILE__) . '/copyonwrite6/file2');
-rmdir(dirname(__FILE__) . '/copyonwrite6');
+unlink(__DIR__ . '/copyonwrite6/file1');
+unlink(__DIR__ . '/copyonwrite6/file2');
+rmdir(__DIR__ . '/copyonwrite6');
 ?>
 --EXPECTF--
 array(2) {

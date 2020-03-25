@@ -48,7 +48,7 @@ var_dump($retval[0]);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(1) {
   [50]=>
   string(4) "0.29"

@@ -2,7 +2,6 @@
 Phar object: entry & openFile()
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --INI--
 phar.require_hash=0
 --FILE--
@@ -14,20 +13,19 @@ $phar = new Phar($fname);
 $phar->setInfoClass();
 foreach($phar as $name => $ent)
 {
-	var_dump($ent->getFilename());
-	if ($ent->isDir()) {
-		var_dump('DIR');
-	} else {
-		var_dump($ent->openFile()->fgets());
-		include $ent->getPathName();
-	}
+    var_dump($ent->getFilename());
+    if ($ent->isDir()) {
+        var_dump('DIR');
+    } else {
+        var_dump($ent->openFile()->fgets());
+        include $ent->getPathName();
+    }
 }
 
 ?>
-===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/files/phar_oo_003.phar.php');
+<?php
+unlink(__DIR__ . '/files/phar_oo_003.phar.php');
 __halt_compiler();
 ?>
 --EXPECTF--
@@ -42,4 +40,3 @@ This is b.php
 string(5) "e.php"
 string(32) "<?php echo "This is e.php\n"; ?>"
 This is e.php
-===DONE===

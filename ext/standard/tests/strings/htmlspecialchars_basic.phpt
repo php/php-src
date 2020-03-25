@@ -1,5 +1,5 @@
 --TEST--
-Test htmlspecialchars() function : basic functionality 
+Test htmlspecialchars() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string htmlspecialchars  ( string $string  [, int $quote_style  [, string $charset  [, bool $double_encode  ]]] )
@@ -55,7 +55,6 @@ echo  "Test 28: " . htmlspecialchars ($s1, ENT_NOQUOTES, "ISO-8859-1", true);
 echo  "Test 29: " . htmlspecialchars ($s2, ENT_NOQUOTES, "ISO-8859-1", true);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing htmlspecialchars() : basic functionality ***
 Basic tests
@@ -94,4 +93,3 @@ Test 27: "300 &lt; 400"
 Try with double decode TRUE
 Test 28: &amp;quot;&amp;amp;xyz&amp;gt;abc&amp;quot;
 Test 29: &amp;quot;&amp;amp;123&amp;lt;456&amp;quot;
-===DONE===

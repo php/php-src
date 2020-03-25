@@ -3,7 +3,7 @@ BZ2 with strings
 --SKIPIF--
 <?php if (!extension_loaded("bz2")) print "skip"; ?>
 --FILE--
-<?php // $Id$
+<?php
 
 error_reporting(E_ALL);
 
@@ -21,7 +21,6 @@ $tests = <<<TESTS
  \$blaat === \$blaat2
 TESTS;
 
-include(dirname(__FILE__) . '/../../../tests/quicktester.inc');
-
+include(__DIR__ . '/../../../tests/quicktester.inc');
 --EXPECT--
 OK

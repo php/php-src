@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -21,5 +19,8 @@
 
 PHP_FUNCTION( normalizer_normalize );
 PHP_FUNCTION( normalizer_is_normalized );
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+PHP_FUNCTION( normalizer_get_raw_decomposition );
+#endif
 
 #endif // NORMALIZER_NORMALIZE_H

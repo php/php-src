@@ -3,9 +3,9 @@ get_object_vars() - ensure references are preserved
 --FILE--
 <?php
 /* Prototype  : proto array get_object_vars(object obj)
- * Description: Returns an array of object properties 
+ * Description: Returns an array of object properties
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 $obj = new stdClass;
@@ -23,7 +23,7 @@ $arr['val'] = 'changed.val';
 
 var_dump($arr, $obj, $a);
 ?>
---EXPECTF--
+--EXPECT--
 array(0) {
 }
 array(2) {

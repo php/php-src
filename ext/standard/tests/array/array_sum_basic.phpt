@@ -1,9 +1,9 @@
 --TEST--
-Test array_sum() function : basic functionality 
+Test array_sum() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : mixed array_sum(array &input)
- * Description: Returns the sum of the array entries 
+ * Description: Returns the sum of the array entries
  * Source code: ext/standard/array.c
 */
 
@@ -26,7 +26,7 @@ var_dump( array_sum($input) );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_sum() : basic functionality ***
 -- array_sum() with integer array entries --
 int(15)

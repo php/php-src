@@ -1,9 +1,9 @@
 --TEST--
-SPL: Cloning nested ArrayObjects. 
+SPL: Cloning nested ArrayObjects.
 --FILE--
 <?php
 class C {
-	public $p = 'C::p.orig';
+    public $p = 'C::p.orig';
 }
 
 $wrappedObject = new C;
@@ -21,7 +21,7 @@ $clonedOuterArrayObject['new.coAO'] = 'new element added to $clonedOuterArrayObj
 
 var_dump($wrappedObject, $innerArrayObject, $outerArrayObject, $clonedOuterArrayObject);
 ?>
---EXPECTF--
+--EXPECT--
 object(C)#1 (5) {
   ["p"]=>
   string(9) "C::p.orig"

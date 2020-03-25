@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_unix.c,v 1.25.2.1 2008/12/13 03:18:23 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -398,7 +396,7 @@ int fpm_unix_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	}
 
 #ifdef HAVE_PRCTL
-	if (0 > prctl(PR_SET_DUMPABLE, 1, 0, 0, 0)) {
+	if (wp->config->process_dumpable && 0 > prctl(PR_SET_DUMPABLE, 1, 0, 0, 0)) {
 		zlog(ZLOG_SYSERROR, "[pool %s] failed to prctl(PR_SET_DUMPABLE)", wp->config->name);
 	}
 #endif
@@ -536,7 +534,7 @@ int fpm_unix_init_main() /* {{{ */
 						exit(FPM_EXIT_SOFTWARE);
 					} else {
 						if (readval == 1) {
-							zlog(ZLOG_DEBUG, "I received a valid acknoledge from the master process, I can exit without error");
+							zlog(ZLOG_DEBUG, "I received a valid acknowledge from the master process, I can exit without error");
 							fpm_cleanups_run(FPM_CLEANUP_PARENT_EXIT);
 							exit(FPM_EXIT_OK);
 						} else {
@@ -579,4 +577,3 @@ int fpm_unix_init_main() /* {{{ */
 	return 0;
 }
 /* }}} */
-

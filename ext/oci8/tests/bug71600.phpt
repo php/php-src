@@ -3,18 +3,18 @@ Bug #71600 (oci_fetch_all result in segfault when select more than 8 columns)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => true);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
-		
+require(__DIR__.'/connect.inc');
+
 // Initialize
 
 $stmtarray = array(
-         "create table bug71600_tab (col1 number, col2 number, col3 number, 
-                                     col4 number, col5 number, col6 number, 
+         "create table bug71600_tab (col1 number, col2 number, col3 number,
+                                     col4 number, col5 number, col6 number,
                                      col7 number, col8 number, col9 number)",
          "insert into bug71600_tab values(1, 2, 3, 4, 5, 6, 7, 8, 9)",
          "insert into bug71600_tab values(11, 12, 13, 14, 15, 16, 17, 18, 19)"
@@ -23,7 +23,7 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 // Run test
-	
+
 $sql = "select col1,col2,col3,col4,col5,col6,col7,col8,col9 from bug71600_tab";
 
 echo "Test 1\n";
@@ -78,9 +78,7 @@ $stmtarray = array(
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
---EXPECT--	
+--EXPECT--
 Test 1
 Executing SELECT statament...
 Fetching data by columns...
@@ -93,4 +91,3 @@ Fetching data by rows...
 2 Records Found
 0|1|9
 1|11|19
-===DONE===

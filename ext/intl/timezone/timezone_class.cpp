@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -32,10 +30,13 @@ extern "C" {
 #define USE_TIMEZONE_POINTER 1
 #include "timezone_class.h"
 #include "timezone_methods.h"
+#include "timezone_arginfo.h"
 #include <zend_exceptions.h>
 #include <zend_interfaces.h>
 #include <ext/date/php_date.h>
 }
+
+using icu::Calendar;
 
 /* {{{ Global variables */
 U_CDECL_BEGIN
@@ -83,8 +84,8 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 		 * so we must mess with DateTimeZone structure ourselves */
 		tzobj->initialized	  = 1;
 		tzobj->type			  = TIMELIB_ZONETYPE_OFFSET;
-		//convert offset from milliseconds to minutes
-		tzobj->tzi.utc_offset = -1 * timeZone->getRawOffset() / (60 * 1000);
+		//convert offset from milliseconds to seconds
+		tzobj->tzi.utc_offset = timeZone->getRawOffset() / 1000;
 	} else {
 		zend_string *u8str;
 		/* Call the constructor! */
@@ -96,7 +97,7 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 			goto error;
 		}
 		ZVAL_STR(&arg, u8str);
-		zend_call_method_with_1_params(ret, NULL, NULL, "__construct", NULL, &arg);
+		zend_call_method_with_1_params(Z_OBJ_P(ret), NULL, &Z_OBJCE_P(ret)->constructor, "__construct", NULL, &arg);
 		if (EG(exception)) {
 			spprintf(&message, 0,
 				"%s: DateTimeZone constructor threw exception", func);
@@ -152,7 +153,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR, message, 1);
 				efree(message);
 			}
-			zval_dtor(&local_zv_tz);
+			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		timeZone = to->utimezone->clone();
@@ -162,7 +163,7 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 				intl_errors_set(outside_error, U_MEMORY_ALLOCATION_ERROR, message, 1);
 				efree(message);
 			}
-			zval_dtor(&local_zv_tz);
+			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 	} else if (Z_TYPE_P(zv_timezone) == IS_OBJECT &&
@@ -170,14 +171,17 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 
 		php_timezone_obj *tzobj = Z_PHPTIMEZONE_P(zv_timezone);
 
-		zval_dtor(&local_zv_tz);
+		zval_ptr_dtor_str(&local_zv_tz);
 		return timezone_convert_datetimezone(tzobj->type, tzobj, 0,
 			outside_error, func);
 	} else {
 		UnicodeString	id,
 						gottenId;
 		UErrorCode		status = U_ZERO_ERROR; /* outside_error may be NULL */
-		convert_to_string_ex(zv_timezone);
+		if (!try_convert_to_string(zv_timezone)) {
+			zval_ptr_dtor_str(&local_zv_tz);
+			return NULL;
+		}
 		if (intl_stringFromChar(id, Z_STRVAL_P(zv_timezone), Z_STRLEN_P(zv_timezone),
 				&status) == FAILURE) {
 			spprintf(&message, 0, "%s: Time zone identifier given is not a "
@@ -186,50 +190,50 @@ U_CFUNC TimeZone *timezone_process_timezone_argument(zval *zv_timezone,
 				intl_errors_set(outside_error, status, message, 1);
 				efree(message);
 			}
-			zval_dtor(&local_zv_tz);
+			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		timeZone = TimeZone::createTimeZone(id);
 		if (timeZone == NULL) {
-			spprintf(&message, 0, "%s: could not create time zone", func);
+			spprintf(&message, 0, "%s: Could not create time zone", func);
 			if (message) {
 				intl_errors_set(outside_error, U_MEMORY_ALLOCATION_ERROR, message, 1);
 				efree(message);
 			}
-			zval_dtor(&local_zv_tz);
+			zval_ptr_dtor_str(&local_zv_tz);
 			return NULL;
 		}
 		if (timeZone->getID(gottenId) != id) {
-			spprintf(&message, 0, "%s: no such time zone: '%s'",
+			spprintf(&message, 0, "%s: No such time zone: '%s'",
 				func, Z_STRVAL_P(zv_timezone));
 			if (message) {
 				intl_errors_set(outside_error, U_ILLEGAL_ARGUMENT_ERROR, message, 1);
 				efree(message);
 			}
-			zval_dtor(&local_zv_tz);
+			zval_ptr_dtor_str(&local_zv_tz);
 			delete timeZone;
 			return NULL;
 		}
 	}
 
-	zval_dtor(&local_zv_tz);
+	zval_ptr_dtor_str(&local_zv_tz);
 
 	return timeZone;
 }
 /* }}} */
 
 /* {{{ clone handler for TimeZone */
-static zend_object *TimeZone_clone_obj(zval *object)
+static zend_object *TimeZone_clone_obj(zend_object *object)
 {
 	TimeZone_object		*to_orig,
 						*to_new;
 	zend_object			*ret_val;
 	intl_error_reset(NULL);
 
-	to_orig = Z_INTL_TIMEZONE_P(object);
+	to_orig = php_intl_timezone_fetch_object(object);
 	intl_error_reset(TIMEZONE_ERROR_P(to_orig));
 
-	ret_val = TimeZone_ce_ptr->create_object(Z_OBJCE_P(object));
+	ret_val = TimeZone_ce_ptr->create_object(object->ce);
 	to_new  = php_intl_timezone_fetch_object(ret_val);
 
 	zend_objects_clone_members(&to_new->zo, &to_orig->zo);
@@ -265,6 +269,9 @@ static int TimeZone_compare_objects(zval *object1, zval *object2)
 {
 	TimeZone_object		*to1,
 						*to2;
+
+	ZEND_COMPARE_OBJECTS_FALLBACK(object1, object2);
+
 	to1 = Z_INTL_TIMEZONE_P(object1);
 	to2 = Z_INTL_TIMEZONE_P(object2);
 
@@ -283,7 +290,7 @@ static int TimeZone_compare_objects(zval *object1, zval *object2)
 /* }}} */
 
 /* {{{ get_debug_info handler for TimeZone */
-static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp)
+static HashTable *TimeZone_get_debug_info(zend_object *object, int *is_temp)
 {
 	zval			zv;
 	TimeZone_object	*to;
@@ -295,10 +302,9 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp)
 
 	*is_temp = 1;
 
-	ALLOC_HASHTABLE(debug_info);
-	zend_hash_init(debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
+	debug_info = zend_new_array(8);
 
-	to = Z_INTL_TIMEZONE_P(object);
+	to = php_intl_timezone_fetch_object(object);
 	tz = to->utimezone;
 
 	if (tz == NULL) {
@@ -385,110 +391,37 @@ static zend_object *TimeZone_object_create(zend_class_entry *ce)
 }
 /* }}} */
 
-/* {{{ TimeZone methods arguments info */
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_idarg, 0, 0, 1)
-	ZEND_ARG_INFO(0, zoneId)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_fromDateTimeZone, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, otherTimeZone, IntlTimeZone, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_createEnumeration, 0, 0, 0)
-	ZEND_ARG_INFO(0, countryOrRawOffset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_countEquivalentIDs, 0, 0, 1)
-	ZEND_ARG_INFO(0, zoneId)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_createTimeZoneIDEnumeration, 0, 0, 1)
-	ZEND_ARG_INFO(0, zoneType)
-	ZEND_ARG_INFO(0, region)
-	ZEND_ARG_INFO(0, rawOffset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_getCanonicalID, 0, 0, 1)
-	ZEND_ARG_INFO(0, zoneId)
-	ZEND_ARG_INFO(1, isSystemID)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_getEquivalentID, 0, 0, 2)
-	ZEND_ARG_INFO(0, zoneId)
-	ZEND_ARG_INFO(0, index)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_getOffset, 0, 0, 4)
-	ZEND_ARG_INFO(0, date)
-	ZEND_ARG_INFO(0, local)
-	ZEND_ARG_INFO(1, rawOffset)
-	ZEND_ARG_INFO(1, dstOffset)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_hasSameRules, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, otherTimeZone, IntlTimeZone, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_getDisplayName, 0, 0, 0)
-	ZEND_ARG_INFO(0, isDaylight)
-	ZEND_ARG_INFO(0, style)
-	ZEND_ARG_INFO(0, locale)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_void, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-#if U_ICU_VERSION_MAJOR_NUM >= 52
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_getWindowsID, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, timezone)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_getIDForWindowsID, 0, ZEND_RETURN_VALUE, 1)
-	ZEND_ARG_INFO(0, timezone)
-	ZEND_ARG_INFO(0, region)
-ZEND_END_ARG_INFO()
-#endif
-
-/* }}} */
-
 /* {{{ TimeZone_class_functions
  * Every 'IntlTimeZone' class method has an entry in this table
  */
-static zend_function_entry TimeZone_class_functions[] = {
-	PHP_ME(IntlTimeZone,				__construct,					ainfo_tz_void,				ZEND_ACC_PRIVATE)
-	PHP_ME_MAPPING(createTimeZone,		intltz_create_time_zone,		ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_ME_MAPPING(fromDateTimeZone,	intltz_from_date_time_zone,		ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_ME_MAPPING(createDefault,		intltz_create_default,			ainfo_tz_void,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_ME_MAPPING(getGMT,				intltz_get_gmt,					ainfo_tz_void,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-#if U_ICU_VERSION_MAJOR_NUM >= 49
-	PHP_ME_MAPPING(getUnknown,			intltz_get_unknown,				ainfo_tz_void,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-#endif
-	PHP_ME_MAPPING(createEnumeration,	intltz_create_enumeration,		ainfo_tz_createEnumeration,	ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_ME_MAPPING(countEquivalentIDs,	intltz_count_equivalent_ids,	ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
-	PHP_ME_MAPPING(createTimeZoneIDEnumeration, intltz_create_time_zone_id_enumeration, ainfo_tz_createTimeZoneIDEnumeration, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-#endif
-	PHP_ME_MAPPING(getCanonicalID,		intltz_get_canonical_id,		ainfo_tz_getCanonicalID,	ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
-	PHP_ME_MAPPING(getRegion,			intltz_get_region,				ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-#endif
-	PHP_ME_MAPPING(getTZDataVersion,	intltz_get_tz_data_version,		ainfo_tz_void,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_ME_MAPPING(getEquivalentID,		intltz_get_equivalent_id,		ainfo_tz_getEquivalentID,	ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+static const zend_function_entry TimeZone_class_functions[] = {
+	PHP_ME(IntlTimeZone,				__construct,					arginfo_class_IntlTimeZone___construct,					ZEND_ACC_PRIVATE)
+	PHP_ME_MAPPING(createTimeZone,		intltz_create_time_zone,		arginfo_class_IntlTimeZone_createTimeZone,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(fromDateTimeZone,	intltz_from_date_time_zone,		arginfo_class_IntlTimeZone_fromDateTimeZone,			ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(createDefault,		intltz_create_default,			arginfo_class_IntlTimeZone_createDefault,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(getGMT,				intltz_get_gmt,					arginfo_class_IntlTimeZone_getGMT,						ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(getUnknown,			intltz_get_unknown,				arginfo_class_IntlTimeZone_getUnknown,					ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(createEnumeration,	intltz_create_enumeration,		arginfo_class_IntlTimeZone_createEnumeration,			ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(countEquivalentIDs,	intltz_count_equivalent_ids,	arginfo_class_IntlTimeZone_countEquivalentIDs,			ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(createTimeZoneIDEnumeration, intltz_create_time_zone_id_enumeration, arginfo_class_IntlTimeZone_createTimeZoneIDEnumeration, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(getCanonicalID,		intltz_get_canonical_id,		arginfo_class_IntlTimeZone_getCanonicalID,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(getRegion,			intltz_get_region,				arginfo_class_IntlTimeZone_getRegion,					ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(getTZDataVersion,	intltz_get_tz_data_version,		arginfo_class_IntlTimeZone_getTZDataVersion,			ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(getEquivalentID,		intltz_get_equivalent_id,		arginfo_class_IntlTimeZone_getEquivalentID,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 
-	PHP_ME_MAPPING(getID,				intltz_get_id,					ainfo_tz_void,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(useDaylightTime,		intltz_use_daylight_time,		ainfo_tz_void,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getOffset,			intltz_get_offset,				ainfo_tz_getOffset,			ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getRawOffset,		intltz_get_raw_offset,			ainfo_tz_void,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(hasSameRules,		intltz_has_same_rules,			ainfo_tz_hasSameRules,		ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getDisplayName,		intltz_get_display_name,		ainfo_tz_getDisplayName,	ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getDSTSavings,		intltz_get_dst_savings,			ainfo_tz_void,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(toDateTimeZone,		intltz_to_date_time_zone,		ainfo_tz_void,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getErrorCode,		intltz_get_error_code,			ainfo_tz_void,				ZEND_ACC_PUBLIC)
-	PHP_ME_MAPPING(getErrorMessage,		intltz_get_error_message,		ainfo_tz_void,				ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getID,				intltz_get_id,					arginfo_class_IntlTimeZone_getID,						ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(useDaylightTime,		intltz_use_daylight_time,		arginfo_class_IntlTimeZone_useDaylightTime,				ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getOffset,			intltz_get_offset,				arginfo_class_IntlTimeZone_getOffset,					ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getRawOffset,		intltz_get_raw_offset,			arginfo_class_IntlTimeZone_getRawOffset,				ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(hasSameRules,		intltz_has_same_rules,			arginfo_class_IntlTimeZone_hasSameRules,				ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getDisplayName,		intltz_get_display_name,		arginfo_class_IntlTimeZone_getDisplayName,				ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getDSTSavings,		intltz_get_dst_savings,			arginfo_class_IntlTimeZone_getDSTSavings,				ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(toDateTimeZone,		intltz_to_date_time_zone,		arginfo_class_IntlTimeZone_toDateTimeZone,				ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getErrorCode,		intltz_get_error_code,			arginfo_class_IntlTimeZone_getErrorCode,				ZEND_ACC_PUBLIC)
+	PHP_ME_MAPPING(getErrorMessage,		intltz_get_error_message,		arginfo_class_IntlTimeZone_getErrorMessage,				ZEND_ACC_PUBLIC)
 #if U_ICU_VERSION_MAJOR_NUM >= 52
-	PHP_ME_MAPPING(getWindowsID,		intltz_get_windows_id,			ainfo_tz_getWindowsID,		ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	PHP_ME_MAPPING(getIDForWindowsID,	intltz_get_id_for_windows_id,		ainfo_tz_getIDForWindowsID,	ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(getWindowsID,		intltz_get_windows_id,			arginfo_class_IntlTimeZone_getWindowsID,		ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
+	PHP_ME_MAPPING(getIDForWindowsID,	intltz_get_id_for_windows_id,	arginfo_class_IntlTimeZone_getIDForWindowsID,	ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 #endif
 	PHP_FE_END
 };
@@ -507,16 +440,16 @@ U_CFUNC void timezone_register_IntlTimeZone_class(void)
 	TimeZone_ce_ptr = zend_register_internal_class(&ce);
 	if (!TimeZone_ce_ptr) {
 		//can't happen now without bigger problems before
-		php_error_docref0(NULL, E_ERROR,
+		php_error_docref(NULL, E_ERROR,
 			"IntlTimeZone: class registration has failed.");
 		return;
 	}
 
-	memcpy(&TimeZone_handlers, zend_get_std_object_handlers(),
+	memcpy(&TimeZone_handlers, &std_object_handlers,
 		sizeof TimeZone_handlers);
 	TimeZone_handlers.offset = XtOffsetOf(TimeZone_object, zo);
 	TimeZone_handlers.clone_obj = TimeZone_clone_obj;
-	TimeZone_handlers.compare_objects = TimeZone_compare_objects;
+	TimeZone_handlers.compare = TimeZone_compare_objects;
 	TimeZone_handlers.get_debug_info = TimeZone_get_debug_info;
 	TimeZone_handlers.dtor_obj = TimeZone_objects_dtor;
 	TimeZone_handlers.free_obj = TimeZone_objects_free;
@@ -530,20 +463,16 @@ U_CFUNC void timezone_register_IntlTimeZone_class(void)
 	TIMEZONE_DECL_LONG_CONST("DISPLAY_SHORT", TimeZone::SHORT);
 	TIMEZONE_DECL_LONG_CONST("DISPLAY_LONG", TimeZone::LONG);
 
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 44
 	TIMEZONE_DECL_LONG_CONST("DISPLAY_SHORT_GENERIC", TimeZone::SHORT_GENERIC);
 	TIMEZONE_DECL_LONG_CONST("DISPLAY_LONG_GENERIC", TimeZone::LONG_GENERIC);
 	TIMEZONE_DECL_LONG_CONST("DISPLAY_SHORT_GMT", TimeZone::SHORT_GMT);
 	TIMEZONE_DECL_LONG_CONST("DISPLAY_LONG_GMT", TimeZone::LONG_GMT);
 	TIMEZONE_DECL_LONG_CONST("DISPLAY_SHORT_COMMONLY_USED", TimeZone::SHORT_COMMONLY_USED);
 	TIMEZONE_DECL_LONG_CONST("DISPLAY_GENERIC_LOCATION", TimeZone::GENERIC_LOCATION);
-#endif
 
-#if U_ICU_VERSION_MAJOR_NUM * 10 + U_ICU_VERSION_MINOR_NUM >= 48
 	TIMEZONE_DECL_LONG_CONST("TYPE_ANY", UCAL_ZONE_TYPE_ANY);
 	TIMEZONE_DECL_LONG_CONST("TYPE_CANONICAL", UCAL_ZONE_TYPE_CANONICAL);
 	TIMEZONE_DECL_LONG_CONST("TYPE_CANONICAL_LOCATION", UCAL_ZONE_TYPE_CANONICAL_LOCATION);
-#endif
 
 	/* Declare 'IntlTimeZone' class properties */
 

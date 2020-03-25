@@ -5,14 +5,14 @@ SPL: RegexIterator::SPLIT, USE_KEY
 
 class MyRegexIterator extends RegexIterator
 {
-	function show()
-	{
-		foreach($this as $k => $v)
-		{
-			var_dump($k);
-			var_dump($v);
-		}
-	}
+    function show()
+    {
+        foreach($this as $k => $v)
+        {
+            var_dump($k);
+            var_dump($v);
+        }
+    }
 }
 
 $ar = new ArrayIterator(array('1'=>0,'1,2'=>1,'1,2,3'=>2,0=>3,'FooBar'=>4,','=>5,',,'=>6));
@@ -23,8 +23,6 @@ $it->show();
 var_dump($ar);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 string(3) "1,2"
 array(2) {
@@ -59,4 +57,3 @@ object(ArrayIterator)#%d (1) {
     int(6)
   }
 }
-===DONE===

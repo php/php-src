@@ -5,7 +5,7 @@ Test chunk_split() function : usage variations - different strings for 'ending' 
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
  * Description: Returns split line
  * Source code: ext/standard/string.c
- * Alias to functions: none 
+ * Alias to functions: none
 */
 
 /*
@@ -26,7 +26,7 @@ $chunklen = 6E+0;
 
 //different values for 'ending'
 $values = array (
-  "",  //empty 
+  "",  //empty
   " ",  //space
   "a",  //single char
   "ENDING",  //regular string
@@ -43,7 +43,7 @@ for($count = 0; $count < count($values); $count++) {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing chunk_split() : different values for 'ending' with heredoc 'str'***
 -- Iteration 1 --
 string(113) "This is heredoc string with 	 and 

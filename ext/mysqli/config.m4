@@ -1,7 +1,3 @@
-dnl
-dnl $Id$
-dnl config.m4 for extension mysqli
-
 dnl ext/pdo_mysql/config.m4 also depends on this macro.
 AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
   for i in  \
@@ -29,21 +25,20 @@ AC_DEFUN([PHP_MYSQL_SOCKET_SEARCH], [
   fi
 ])
 
-PHP_ARG_WITH(mysqli, for MySQLi support,
-[  --with-mysqli[=FILE]      Include MySQLi support.  FILE is the path
-                          to mysql_config.  If no value or mysqlnd is passed 
-                          as FILE, the MySQL native driver will be used])
-
-PHP_ARG_ENABLE(embedded_mysqli, whether to enable embedded MySQLi support,
-[  --enable-embedded-mysqli  
-                          MYSQLi: Enable embedded support
-                          Note: Does not work with MySQL native driver!], no, no)
+PHP_ARG_WITH([mysqli],
+  [for MySQLi support],
+  [AS_HELP_STRING([[--with-mysqli[=FILE]]],
+    [Include MySQLi support. FILE is the path to mysql_config. If no value or
+    mysqlnd is passed as FILE, the MySQL native driver will be used])])
 
 dnl ext/pdo_mysql/config.m4 also depends on this configure option.
-PHP_ARG_WITH(mysql-sock, for specified location of the MySQL UNIX socket,
-[  --with-mysql-sock[=SOCKPATH]
-                          MySQLi/PDO_MYSQL: Location of the MySQL unix socket pointer.
-                          If unspecified, the default locations are searched], no, no)
+PHP_ARG_WITH([mysql-sock],
+  [for specified location of the MySQL UNIX socket],
+  [AS_HELP_STRING([[--with-mysql-sock[=SOCKPATH]]],
+    [MySQLi/PDO_MYSQL: Location of the MySQL unix socket pointer. If unspecified,
+    the default locations are searched])],
+  [no],
+  [no])
 
 if test "$PHP_MYSQLI" = "yes" || test "$PHP_MYSQLI" = "mysqlnd"; then
   dnl This needs to be set in any extension which wishes to use mysqlnd
@@ -54,18 +49,13 @@ elif test "$PHP_MYSQLI" != "no"; then
   MYSQL_CONFIG=$PHP_MYSQLI
 
   MYSQL_LIB_NAME='mysqlclient'
-  if test "$PHP_EMBEDDED_MYSQLI" = "yes"; then
-    AC_DEFINE(HAVE_EMBEDDED_MYSQLI, 1, [embedded MySQL support enabled])
-    MYSQL_LIB_CFG='--libmysqld-libs'
-    dnl mysqlnd doesn't support embedded, so we have to add some extra stuff
-    mysqli_extra_sources="mysqli_embedded.c"
-  elif test "$enable_maintainer_zts" = "yes"; then
+  if test "$enable_zts" = "yes"; then
     MYSQL_LIB_CFG='--libs_r'
     MYSQL_LIB_NAME='mysqlclient_r'
   else
     MYSQL_LIB_CFG='--libs'
   fi
-  
+
   if test -x "$MYSQL_CONFIG" && $MYSQL_CONFIG $MYSQL_LIB_CFG > /dev/null 2>&1; then
     MYSQLI_INCLINE=`$MYSQL_CONFIG --cflags | $SED -e "s/'//g"`
     MYSQLI_LIBLINE=`$MYSQL_CONFIG $MYSQL_LIB_CFG | $SED -e "s/'//g"`
@@ -118,7 +108,7 @@ if test "$PHP_MYSQLI" != "no"; then
 
   mysqli_sources="mysqli.c mysqli_api.c mysqli_prop.c mysqli_nonapi.c \
                   mysqli_fe.c mysqli_report.c mysqli_driver.c mysqli_warning.c \
-                  mysqli_exception.c mysqli_result_iterator.c $mysqli_extra_sources"
+                  mysqli_exception.c mysqli_result_iterator.c"
   PHP_NEW_EXTENSION(mysqli, $mysqli_sources, $ext_shared,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_SUBST(MYSQLI_SHARED_LIBADD)
   PHP_INSTALL_HEADERS([ext/mysqli/php_mysqli_structs.h])

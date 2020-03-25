@@ -49,7 +49,6 @@ $s3[$o2] = $o2;
 var_dump($s3[$o1] === $s3[$o2]);
 
 ?>
-===DONE===
 --EXPECT--
 some_value
 caught
@@ -57,4 +56,3 @@ caught
 object(stdClass)#2 (0) {
 }
 bool(true)
-===DONE===

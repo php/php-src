@@ -3,29 +3,29 @@ SPL: ArrayObject: ensure a wrapped object's magic methods for property access ar
 --FILE--
 <?php
 class UsesMagic {
-	public $a = 1;
-	public $b = 2;
-	public $c = 3;
+    public $a = 1;
+    public $b = 2;
+    public $c = 3;
 
-	private $priv = 'secret';
-	
-	function __get($name) { 
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __set($name, $value) { 
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __isset($name) { 
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	function __unset($name) { 
-		$args = func_get_args();
-		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
-	}
-	
+    private $priv = 'secret';
+
+    function __get($name) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __set($name, $value) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __isset($name) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+    function __unset($name) {
+        $args = func_get_args();
+        echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
+    }
+
 }
 
 $obj = new UsesMagic;

@@ -1,6 +1,5 @@
 --TEST--
 Hint on closure with lexical vars
-
 --FILE--
 <?php
 $foo = "bar";
@@ -12,6 +11,5 @@ $test = function() use($foo) : Closure {
 
 $callable = $test();
 var_dump($callable());
-
---EXPECTF--
+--EXPECT--
 string(3) "bar"

@@ -14,37 +14,39 @@ if (!$TEST_EXPERIMENTAL)
 ?>
 --FILE--
 <?php
-	/* NOTE: tests is a stub, but function is deprecated, as long as it does not crash when invoking it... */
-	require_once("connect.inc");
+    /* NOTE: tests is a stub, but function is deprecated, as long as it does not crash when invoking it... */
+    require_once("connect.inc");
 
-	$tmp    = NULL;
-	$link   = NULL;
+    $tmp    = NULL;
+    $link   = NULL;
 
-	if (NULL !== ($tmp = @mysqli_send_query()))
-		printf("[001] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
+    if (NULL !== ($tmp = @mysqli_send_query()))
+        printf("[001] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (NULL !== ($tmp = @mysqli_send_query($link)))
-		printf("[002] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
+    if (NULL !== ($tmp = @mysqli_send_query($link)))
+        printf("[002] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
-		printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
-			$host, $user, $db, $port, $socket);
-	}
+    if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+        printf("[003] Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
+            $host, $user, $db, $port, $socket);
+    }
 
-	$query = array();
-	if (NULL !== ($tmp = @mysqli_send_query($link, $query)))
-		printf("[004] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
+    $query = array();
+    if (NULL !== ($tmp = @mysqli_send_query($link, $query)))
+        printf("[004] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!is_int($tmp = mysqli_send_query($link, 'SELECT 1')))
-		printf("[005] Expecting integer/any value, got %s/%s\n", gettype($tmp), $tmp);
+    if (!is_int($tmp = mysqli_send_query($link, 'SELECT 1')))
+        printf("[005] Expecting integer/any value, got %s/%s\n", gettype($tmp), $tmp);
 
-	mysqli_close($link);
+    mysqli_close($link);
 
-	if (NULL !== ($tmp = mysqli_send_query($link, 'SELECT 1')))
-		printf("[006] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
-
-	print "done!";
+    try {
+        mysqli_send_query($link, 'SELECT 1');
+    } catch (Error $exception) {
+        echo $exception->getMessage() . "\n";
+    }
+    print "done!";
 ?>
 --EXPECTF--
-Warning: mysqli_send_query(): Couldn't fetch mysqli in %s on line %d
+mysqli object is already closed
 done!

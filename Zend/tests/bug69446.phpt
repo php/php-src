@@ -1,14 +1,16 @@
 --TEST--
 Bug #69446 (GC leak relating to removal of nested data after dtors run)
+--INI--
+zend.enable_gc = 1
 --FILE--
 <?php
 $bar = NULL;
 class bad {
-	public function __destruct() {
-		global $bar;
-		$bar = $this;
-		$bar->y = new stdClass;
-	}
+    public function __destruct() {
+        global $bar;
+        $bar = $this;
+        $bar->y = new stdClass;
+    }
 }
 
 $foo = new stdClass;

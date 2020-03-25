@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Derick Rethans
+ * Copyright (c) 2015-2019 Derick Rethans
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,15 +26,15 @@
    | Schlyter, who wrote this in December 1992                            |
  */
 
+#include "timelib.h"
 #include <stdio.h>
 #include <math.h>
-#include "timelib.h"
 
 #define days_since_2000_Jan_0(y,m,d) \
 	(367L*(y)-((7*((y)+(((m)+9)/12)))/4)+((275*(m))/9)+(d)-730530L)
 
 #ifndef PI
- #define PI        3.1415926535897932384
+# define PI        3.1415926535897932384
 #endif
 
 #define RADEG     ( 180.0 / PI )
@@ -230,7 +230,8 @@ int timelib_astro_rise_set_altitude(timelib_time *t_loc, double lon, double lat,
 	t_loc->i = t_loc->s = 0;
 	timelib_update_ts(t_loc, NULL);
 
-	/* Calculate TS belonging to UTC 00:00 of the current day */
+	/* Calculate TS belonging to UTC 00:00 of the current day, for input into
+	 * the algorithm */
 	t_utc = timelib_time_ctor();
 	t_utc->y = t_loc->y;
 	t_utc->m = t_loc->m;
@@ -239,8 +240,8 @@ int timelib_astro_rise_set_altitude(timelib_time *t_loc, double lon, double lat,
 	timelib_update_ts(t_utc, NULL);
 
 	/* Compute d of 12h local mean solar time */
-	timestamp = t_loc->sse;
-	d = timelib_ts_to_juliandate(timestamp) - lon/360.0;
+	timestamp = t_utc->sse;
+	d = timelib_ts_to_j2000(timestamp) + 2 - lon/360.0;
 
 	/* Compute local sidereal time of this moment */
 	sidtime = astro_revolution(astro_GMST0(d) + 180.0 + lon);
@@ -295,14 +296,18 @@ int timelib_astro_rise_set_altitude(timelib_time *t_loc, double lon, double lat,
 	return rc;
 }
 
-double timelib_ts_to_juliandate(timelib_sll ts)
+double timelib_ts_to_julianday(timelib_sll ts)
 {
 	double tmp;
 
-	tmp = ts;
-	tmp /= 86400;
-	tmp += 2440587.5;
-	tmp -= 2451543;
+	tmp = (double) ts;
+	tmp /= (double) 86400;
+	tmp += (double) 2440587.5;
 
 	return tmp;
+}
+
+double timelib_ts_to_j2000(timelib_sll ts)
+{
+	return timelib_ts_to_julianday(ts) - 2451545;
 }

@@ -4,7 +4,7 @@ Bug #65066 (Cli server not responsive when responding with 422 http status code)
 allow_url_fopen=1
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -26,9 +26,9 @@ Host: {$host}
 
 HEADER
 )) {
-	while (!feof($fp)) {
-		echo fgets($fp);
-	}
+    while (!feof($fp)) {
+        echo fgets($fp);
+    }
 }
 ?>
 --EXPECTF--

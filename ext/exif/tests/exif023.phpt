@@ -7,7 +7,7 @@ output_handler=
 zlib.output_compression=0
 --FILE--
 <?php
-var_dump(exif_read_data(dirname(__FILE__).'/image023.tiff'));
+var_dump(exif_read_data(__DIR__.'/image023.tiff'));
 ?>
 --EXPECTF--
 array(45) {
@@ -1679,5 +1679,5 @@ array(45) {
     string(4) "53/1"
   }
 }
---CREDIT--
+--CREDITS--
 Eric Stewart <ericleestewart@gmail.com>

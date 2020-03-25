@@ -5,7 +5,6 @@ gmp_intval() tests
 --FILE--
 <?php
 
-var_dump(gmp_intval(1,1));
 var_dump(gmp_intval(""));
 var_dump(gmp_intval(1.0001));
 var_dump(gmp_intval("1.0001"));
@@ -24,9 +23,7 @@ var_dump(gmp_intval($g));
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: gmp_intval() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
+--EXPECTF--
 int(0)
 int(1)
 int(1)

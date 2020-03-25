@@ -3,7 +3,7 @@ Test array_push() function : usage variations - Pass different data types as $va
 --FILE--
 <?php
 /* Prototype  : int array_push(array $stack, mixed $var [, mixed $...])
- * Description: Pushes elements onto the end of the array 
+ * Description: Pushes elements onto the end of the array
  * Source code: ext/standard/array.c
  */
 
@@ -61,7 +61,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -71,7 +71,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -98,7 +98,7 @@ fclose($fp);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_push() : usage variations ***
 
 -- Iteration 1 --

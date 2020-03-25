@@ -20,7 +20,7 @@ bool(true)
 
 Notice: Undefined offset: 2 in %s on line %d
 
-Fatal error: Uncaught Error: Function name must be a string in %s:%d
+Fatal error: Uncaught Error: Value of type null is not callable in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

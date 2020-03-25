@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +10,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Zeev Suraski <zeev@zend.com>                                 |
+   | Author: Zeev Suraski <zeev@php.net>                                  |
    +----------------------------------------------------------------------+
  */
 
@@ -41,7 +39,7 @@ static const char* registry_keys[] = {
 };
 
 static int OpenPhpRegistryKey(char* sub_key, HKEY *hKey)
-{
+{/*{{{*/
 	const char **key_name = registry_keys;
 
 	if (sub_key) {
@@ -73,10 +71,10 @@ static int OpenPhpRegistryKey(char* sub_key, HKEY *hKey)
 		}
 	}
 	return 0;
-}
+}/*}}}*/
 
 static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_len, HashTable *parent_ht)
-{
+{/*{{{*/
 	DWORD keys, values, max_key, max_name, max_value;
 	int ret = 0;
 	HashTable *ht = NULL;
@@ -168,19 +166,19 @@ static int LoadDirectory(HashTable *directories, HKEY key, char *path, int path_
 		}
 	}
 	return ret;
-}
+}/*}}}*/
 
 static void delete_internal_hashtable(zval *zv)
-{
+{/*{{{*/
 	HashTable *ht = (HashTable *)Z_PTR_P(zv);
 	zend_hash_destroy(ht);
 	free(ht);
-}
+}/*}}}*/
 
 #define RegNotifyFlags (REG_NOTIFY_CHANGE_NAME | REG_NOTIFY_CHANGE_ATTRIBUTES | REG_NOTIFY_CHANGE_LAST_SET)
 
 void UpdateIniFromRegistry(char *path)
-{
+{/*{{{*/
 	char *p, *orig_path;
 	int path_len;
 
@@ -277,12 +275,12 @@ void UpdateIniFromRegistry(char *path)
 	}
 
 	efree(orig_path);
-}
+}/*}}}*/
 
 #define PHPRC_REGISTRY_NAME "IniFilePath"
 
 char *GetIniPathFromRegistry()
-{
+{/*{{{*/
 	char *reg_location = NULL;
 	HKEY hKey;
 
@@ -298,13 +296,4 @@ char *GetIniPathFromRegistry()
 		RegCloseKey(hKey);
 	}
 	return reg_location;
-}
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */
+}/*}}}*/

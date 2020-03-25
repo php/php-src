@@ -5,15 +5,15 @@ Bug #34548 (Method append() in class extended from ArrayObject crashes PHP)
 
 class Collection extends ArrayObject
 {
-	public function add($dataArray)
-	{
-		foreach($dataArray as $value) $this->append($value);
-	}
+    public function add($dataArray)
+    {
+        foreach($dataArray as $value) $this->append($value);
+    }
 
-	public function offsetSet($index, $value)
-	{
-		parent::offsetSet($index, $value);
-	}
+    public function offsetSet($index, $value)
+    {
+        parent::offsetSet($index, $value);
+    }
 }
 
 $data1=array('one', 'two', 'three');
@@ -26,7 +26,7 @@ print_r($foo->getArrayCopy());
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 Array
 (
     [0] => one

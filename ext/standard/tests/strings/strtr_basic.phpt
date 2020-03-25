@@ -27,7 +27,7 @@ var_dump( strtr('test strtr', 'test', 'TEST') );
 var_dump( strtr($heredoc_str, "test", "TEST") );
 
 //$from and $to are of different lengths, extra chars in the longer one are ignored
-var_dump( strtr("test strtr", "test", "TESTz") ); 
+var_dump( strtr("test strtr", "test", "TESTz") );
 var_dump( strtr('test strtr', 'testz', 'TEST') );
 var_dump( strtr($heredoc_str, "test", "TESTz") );
 
@@ -37,7 +37,7 @@ var_dump( strtr('test strtr', $trans2_arr) );
 var_dump( strtr($heredoc_str, $trans1_arr) );
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtr() : basic functionality ***
 string(10) "TesT sTrTr"
 string(10) "TesT sTrTr"

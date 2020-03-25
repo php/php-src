@@ -29,14 +29,14 @@ $arrays = array (
   array(0x7FFFFFFF, -0x80000000, 017777777777, -020000000000 ),
   array(-.6700000E+3, -4.10003E+3, 1e-5, -1E+5, 000002.00 )
 );
-/* loop through $arrays to print the last element of each sub-array */ 
+/* loop through $arrays to print the last element of each sub-array */
 echo "*** Testing end() on different arrays ***\n";
 $counter = 1;
 foreach ($arrays as $sub_array){
   echo "-- Iteration $counter --\n";
   var_dump( end($sub_array) );
   /* ensure that internal pointer is moved to last element */
-  var_dump( current($sub_array) ); 
+  var_dump( current($sub_array) );
   $counter++;
 }
 
@@ -50,19 +50,19 @@ var_dump( end($test_array[1]) );
 echo "\n*** Testing end() when array elements are deleted ***\n";
 $array_test = array("a", "b", "d", 7, "u" => "U", -4, "-.008" => "neg.008");
 
-// remove first element from array 
+// remove first element from array
 echo "\n-- Remove first element from array --\n";
 unset($array_test[0]);
 var_dump( end($array_test) );
 
-// remove last element from array, rewind and check end() 
+// remove last element from array, rewind and check end()
 echo "\n-- Remove last element from array --\n";
 unset($array_test['-.008']);
 var_dump( end($array_test) );
 reset( $array_test );
 var_dump( end($array_test) );
 
-// remove any element  !first, !last, rewind and check end() 
+// remove any element  !first, !last, rewind and check end()
 echo "\n-- Remove any element from array apart from first and last element --\n";
 unset($array_test[7]);
 var_dump( end($array_test) );
@@ -99,27 +99,12 @@ echo "\n*** Testing end() on resource type ***\n";
 $file_handle = fopen(__FILE__, "r");
 
 //directory type resource
-$dir_handle = opendir( dirname(__FILE__) );
+$dir_handle = opendir( __DIR__ );
 
 //store resources in array
 $resources = array($file_handle, $dir_handle);
 var_dump( end($resources) );
 var_dump( current($resources) );
-
-echo "\n*** Testing error conditions ***\n";
-/* checking for unexpected number of arguments */
-var_dump( end() );
-var_dump( end($array[0], $array[0]) );
-
-/* checking for unexpected type of arguments */
-$var=1;
-$var1="string";
-var_dump( end($var) );
-var_dump( end($var1) );
-
-/* checking null array */
-$null_array = array();
-var_dump( end($null_array) );
 
 echo "Done\n";
 
@@ -219,19 +204,4 @@ array(2) {
 *** Testing end() on resource type ***
 resource(%d) of type (stream)
 resource(%d) of type (stream)
-
-*** Testing error conditions ***
-
-Warning: end() expects exactly 1 parameter, 0 given in %s on line %d
-NULL
-
-Warning: end() expects exactly 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: end() expects parameter 1 to be array, integer given in %s on line %d
-NULL
-
-Warning: end() expects parameter 1 to be array, string given in %s on line %d
-NULL
-bool(false)
 Done

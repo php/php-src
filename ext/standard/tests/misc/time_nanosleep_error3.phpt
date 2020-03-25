@@ -1,8 +1,7 @@
 --TEST--
 time_nanosleep — Delay for a number of seconds and nanoseconds
 --SKIPIF--
-<?php 
-if (strpos(strtoupper(PHP_OS), 'WIN') !== false) die("skip Test is not valid for Windows");
+<?php
 if (!function_exists('time_nanosleep')) die("skip");
 ?>
 --CREDITS--
@@ -10,8 +9,12 @@ if (!function_exists('time_nanosleep')) die("skip");
 --FILE--
 <?php
 
-$nano = time_nanosleep(-2, 1000);
+time_nanosleep(-2, 1000);
 
 ?>
 --EXPECTF--
-Warning: time_nanosleep(): The seconds value must be greater than 0 in %stime_nanosleep_error3.php on line %d
+Fatal error: Uncaught ValueError: time_nanosleep(): Argument #1 ($seconds) must be greater than or equal to 0 in %s:%d
+Stack trace:
+#0 %s(%d): time_nanosleep(-2, 1000)
+#1 {main}
+  thrown in %s on line %d

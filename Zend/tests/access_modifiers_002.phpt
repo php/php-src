@@ -4,10 +4,10 @@ using multiple access modifiers (attributes)
 <?php
 
 class test {
-	static public public static final public final $var;
+    static public public static final public final $var;
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Multiple access type modifiers are not allowed in %s on line %d

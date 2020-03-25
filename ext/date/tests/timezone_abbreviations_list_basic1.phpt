@@ -1,5 +1,5 @@
 --TEST--
-Test timezone_abbreviations_list() function : basic functionality 
+Test timezone_abbreviations_list() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : array timezone_abbreviations_list  ( void  )
@@ -10,7 +10,7 @@ Test timezone_abbreviations_list() function : basic functionality
 
 echo "*** Testing timezone_abbreviations_list() : basic functionality ***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("GMT");
 
 $abbr = timezone_abbreviations_list();
@@ -19,27 +19,17 @@ var_dump( gettype($abbr) );
 var_dump( count($abbr) );
 
 echo "\n-- Format a sample entry --\n";
-var_dump( $abbr["acst"] );	
+var_dump( $abbr["acst"] );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing timezone_abbreviations_list() : basic functionality ***
 string(5) "array"
-int(%d)
+int(144)
 
 -- Format a sample entry --
-array(11) {
+array(6) {
   [0]=>
-  array(3) {
-    ["dst"]=>
-    bool(true)
-    ["offset"]=>
-    int(-14400)
-    ["timezone_id"]=>
-    string(18) "America/Porto_Acre"
-  }
-  [1]=>
   array(3) {
     ["dst"]=>
     bool(false)
@@ -48,43 +38,7 @@ array(11) {
     ["timezone_id"]=>
     string(18) "Australia/Adelaide"
   }
-  [2]=>
-  array(3) {
-    ["dst"]=>
-    bool(true)
-    ["offset"]=>
-    int(-14400)
-    ["timezone_id"]=>
-    string(16) "America/Eirunepe"
-  }
-  [3]=>
-  array(3) {
-    ["dst"]=>
-    bool(true)
-    ["offset"]=>
-    int(-14400)
-    ["timezone_id"]=>
-    string(18) "America/Rio_Branco"
-  }
-  [4]=>
-  array(3) {
-    ["dst"]=>
-    bool(true)
-    ["offset"]=>
-    int(-14400)
-    ["timezone_id"]=>
-    string(11) "Brazil/Acre"
-  }
-  [5]=>
-  array(3) {
-    ["dst"]=>
-    bool(false)
-    ["offset"]=>
-    int(34200)
-    ["timezone_id"]=>
-    string(13) "Asia/Jayapura"
-  }
-  [6]=>
+  [1]=>
   array(3) {
     ["dst"]=>
     bool(false)
@@ -93,7 +47,7 @@ array(11) {
     ["timezone_id"]=>
     string(21) "Australia/Broken_Hill"
   }
-  [7]=>
+  [2]=>
   array(3) {
     ["dst"]=>
     bool(false)
@@ -102,7 +56,7 @@ array(11) {
     ["timezone_id"]=>
     string(16) "Australia/Darwin"
   }
-  [8]=>
+  [3]=>
   array(3) {
     ["dst"]=>
     bool(false)
@@ -111,7 +65,7 @@ array(11) {
     ["timezone_id"]=>
     string(15) "Australia/North"
   }
-  [9]=>
+  [4]=>
   array(3) {
     ["dst"]=>
     bool(false)
@@ -120,7 +74,7 @@ array(11) {
     ["timezone_id"]=>
     string(15) "Australia/South"
   }
-  [10]=>
+  [5]=>
   array(3) {
     ["dst"]=>
     bool(false)
@@ -130,4 +84,3 @@ array(11) {
     string(20) "Australia/Yancowinna"
   }
 }
-===DONE===

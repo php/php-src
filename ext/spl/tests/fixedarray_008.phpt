@@ -13,11 +13,11 @@ $a[2] = $a;
 $a[2][0] = 3;
 
 foreach ($a as $x) {
-	if (is_object($x)) {
-		var_dump($x[0]);
-	} else {
-		var_dump($x);
-	}	
+    if (is_object($x)) {
+        var_dump($x[0]);
+    } else {
+        var_dump($x);
+    }
 }
 
 var_dump($a->getSize());

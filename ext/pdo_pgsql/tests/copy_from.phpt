@@ -1,16 +1,16 @@
 --TEST--
 PDO PgSQL pgsqlCopyFromArray and pgsqlCopyFromFile
 --SKIPIF--
-<?php # vim:se ft=php:
+<?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_pgsql')) die('skip not loaded');
-require dirname(__FILE__) . '/config.inc';
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
+require __DIR__ . '/config.inc';
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
 PDOTest::skip();
 ?>
 --FILE--
 <?php
-require dirname(__FILE__) . '/../../../ext/pdo/tests/pdo_test.inc';
-$db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
+require __DIR__ . '/../../../ext/pdo/tests/pdo_test.inc';
+$db = PDOTest::test_factory(__DIR__ . '/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
 
@@ -22,11 +22,11 @@ $tableRows = array();
 $tableRowsWithDifferentNullValues = array();
 
 for($i=0;$i<3;$i++) {
-	$firstParameter = $i;
-	$secondParameter = "test insert {$i}";
-	$tableRows[] = "{$firstParameter}\t{$secondParameter}\t\\N";
-	$tableRowsWithDifferentNullValues[] = "{$firstParameter};{$secondParameter};NULL";
-	$tableRowsWithDifferentNullValuesAndSelectedFields[] = "{$firstParameter};NULL";
+    $firstParameter = $i;
+    $secondParameter = "test insert {$i}";
+    $tableRows[] = "{$firstParameter}\t{$secondParameter}\t\\N";
+    $tableRowsWithDifferentNullValues[] = "{$firstParameter};{$secondParameter};NULL";
+    $tableRowsWithDifferentNullValuesAndSelectedFields[] = "{$firstParameter};NULL";
 }
 $filename = 'test_pgsqlCopyFromFile.csv';
 $filenameWithDifferentNullValues = 'test_pgsqlCopyFromFileWithDifferentNullValues.csv';
@@ -42,7 +42,7 @@ var_dump($db->pgsqlCopyFromArray('test',$tableRows));
 
 $stmt = $db->query("select * from test");
 foreach($stmt as $r) {
-	var_dump($r);
+    var_dump($r);
 }
 $db->rollback();
 
@@ -51,7 +51,7 @@ $db->beginTransaction();
 var_dump($db->pgsqlCopyFromArray('test',$tableRowsWithDifferentNullValues,";","NULL"));
 $stmt = $db->query("select * from test");
 foreach($stmt as $r) {
-	var_dump($r);
+    var_dump($r);
 }
 $db->rollback();
 
@@ -60,16 +60,16 @@ $db->beginTransaction();
 var_dump($db->pgsqlCopyFromArray('test',$tableRowsWithDifferentNullValuesAndSelectedFields,";","NULL",'a,c'));
 $stmt = $db->query("select * from test");
 foreach($stmt as $r) {
-	var_dump($r);
+    var_dump($r);
 }
 $db->rollback();
 
 echo "Testing pgsqlCopyFromArray() with error\n";
 $db->beginTransaction();
 try {
-	var_dump($db->pgsqlCopyFromArray('test_error',$tableRowsWithDifferentNullValuesAndSelectedFields,";","NULL",'a,c'));
+    var_dump($db->pgsqlCopyFromArray('test_error',$tableRowsWithDifferentNullValuesAndSelectedFields,";","NULL",'a,c'));
 } catch (Exception $e) {
-	echo "Exception: {$e->getMessage()}\n";
+    echo "Exception: {$e->getMessage()}\n";
 }
 $db->rollback();
 
@@ -79,7 +79,7 @@ var_dump($db->pgsqlCopyFromFile('test',$filename));
 
 $stmt = $db->query("select * from test");
 foreach($stmt as $r) {
-	var_dump($r);
+    var_dump($r);
 }
 $db->rollback();
 
@@ -88,7 +88,7 @@ $db->beginTransaction();
 var_dump($db->pgsqlCopyFromFile('test',$filenameWithDifferentNullValues,";","NULL"));
 $stmt = $db->query("select * from test");
 foreach($stmt as $r) {
-	var_dump($r);
+    var_dump($r);
 }
 $db->rollback();
 
@@ -97,31 +97,31 @@ $db->beginTransaction();
 var_dump($db->pgsqlCopyFromFile('test',$filenameWithDifferentNullValuesAndSelectedFields,";","NULL",'a,c'));
 $stmt = $db->query("select * from test");
 foreach($stmt as $r) {
-	var_dump($r);
+    var_dump($r);
 }
 $db->rollback();
 
 echo "Testing pgsqlCopyFromFile() with error\n";
 $db->beginTransaction();
 try {
-	var_dump($db->pgsqlCopyFromFile('test_error',$filenameWithDifferentNullValuesAndSelectedFields,";","NULL",'a,c'));
+    var_dump($db->pgsqlCopyFromFile('test_error',$filenameWithDifferentNullValuesAndSelectedFields,";","NULL",'a,c'));
 } catch (Exception $e) {
-	echo "Exception: {$e->getMessage()}\n";
+    echo "Exception: {$e->getMessage()}\n";
 }
 $db->rollback();
 
 echo "Testing pgsqlCopyFromFile() with non existing file\n";
 $db->beginTransaction();
 try {
-	var_dump($db->pgsqlCopyFromFile('test',"nonexisting/foo.csv",";","NULL",'a,c'));
+    var_dump($db->pgsqlCopyFromFile('test',"nonexisting/foo.csv",";","NULL",'a,c'));
 } catch (Exception $e) {
-	echo "Exception: {$e->getMessage()}\n";
+    echo "Exception: {$e->getMessage()}\n";
 }
 $db->rollback();
 
-// Clean up 
+// Clean up
 foreach (array($filename, $filenameWithDifferentNullValues, $filenameWithDifferentNullValuesAndSelectedFields) as $f) {
-	@unlink($f);
+    @unlink($f);
 }
 ?>
 --EXPECTF--
@@ -259,7 +259,7 @@ array(6) {
   NULL
 }
 Testing pgsqlCopyFromArray() with error
-Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %s "test_error" %s
+Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %stest_error%s
 Testing pgsqlCopyFromFile() with default parameters
 bool(true)
 array(6) {
@@ -393,7 +393,6 @@ array(6) {
   NULL
 }
 Testing pgsqlCopyFromFile() with error
-Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %s "test_error" %s
+Exception: SQLSTATE[42P01]: Undefined table: 7 %s:  %stest_error%s
 Testing pgsqlCopyFromFile() with non existing file
 Exception: SQLSTATE[HY000]: General error: 7 Unable to open the file
-

@@ -17,7 +17,5 @@ if (strtolower(PHP_OS) != 'darwin') {
 $grp = posix_getgrgid(-1);
 var_dump($grp['name']);
 ?>
-===DONE===
 --EXPECT--
 string(7) "nogroup"
-===DONE===

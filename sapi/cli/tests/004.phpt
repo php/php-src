@@ -1,11 +1,8 @@
 --TEST--
 show information about function
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
-if (!extension_loaded("reflection")) {
-	die("skip reflection extension required");
-}
+<?php
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -18,16 +15,17 @@ var_dump(`$php -n --rf phpinfo`);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(45) "Exception: Function unknown() does not exist
 "
 string(42) "Exception: Function echo() does not exist
 "
-string(119) "Function [ <internal:standard> function phpinfo ] {
+string(143) "Function [ <internal:standard> function phpinfo ] {
 
   - Parameters [1] {
-    Parameter #0 [ <optional> $what ]
+    Parameter #0 [ <optional> int $what ]
   }
+  - Return [ bool ]
 }
 
 "

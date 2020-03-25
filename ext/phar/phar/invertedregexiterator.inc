@@ -16,12 +16,12 @@
  */
 class InvertedRegexIterator extends RegexIterator
 {
-	/** @return !RegexIterator::accept()
-	 */
-	function accept()
-	{
-		return !RegexIterator::accept();
-	}
+    /** @return !RegexIterator::accept()
+     */
+    function accept()
+    {
+        return !RegexIterator::accept();
+    }
 }
 
 ?>

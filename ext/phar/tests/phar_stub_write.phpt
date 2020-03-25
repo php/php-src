@@ -7,9 +7,9 @@ phar.require_hash=0
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$stub = b'<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
+$stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>';
 $file = $stub;
 
 $files = array();
@@ -41,10 +41,9 @@ var_dump($phar->getStub() == $stub);
 var_dump($phar->getStub() == $sexp);
 
 ?>
-===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 __HALT_COMPILER();
 ?>
 --EXPECT--
@@ -61,4 +60,3 @@ bool(false)
 bool(true)
 bool(false)
 bool(true)
-===DONE===

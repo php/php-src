@@ -3,13 +3,13 @@ SPL: Bug#45614 (ArrayIterator can show 1st private prop of wrapped object)
 --FILE--
 <?php
 class C {
-	private $priv1 = 'secret1';
-	private $priv2 = 'secret2';
-	public $pub1 = 'public1';
-	public $pub2 = 'public2';
-	public $pub3 = 'public3';
-	public $pub4 = 'public4';
-} 
+    private $priv1 = 'secret1';
+    private $priv2 = 'secret2';
+    public $pub1 = 'public1';
+    public $pub2 = 'public2';
+    public $pub3 = 'public3';
+    public $pub4 = 'public4';
+}
 
 function showFirstTwoItems($it) {
   echo str_replace("\0", '\0', $it->key()) . " => " . $it->current() .

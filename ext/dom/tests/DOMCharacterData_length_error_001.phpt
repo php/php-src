@@ -10,8 +10,5 @@ Jason Bouffard <jbouffard1@yahoo.com>
 $character_data = new DOMCharacterData();
 print $character_data->length;
 ?>
-===DONE===
 --EXPECTF--
 Warning: main(): Invalid State Error in %s
-===DONE===
-	

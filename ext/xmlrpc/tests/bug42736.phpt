@@ -6,9 +6,9 @@ Bug #42736 (xmlrpc_server_call_method() crashes)
 <?php
 
 class SOAP_Array {
-	public function get($id){
-		return $this->add($id);
-	}
+    public function get($id){
+        return $this->add($id);
+    }
 }
 
 $xml = xmlrpc_server_create();
@@ -16,9 +16,9 @@ $xml = xmlrpc_server_create();
 $Myrequest = '<?xml version="1.0" encoding="UTF-8"?><methodCall><methodName>GetProducts</methodName><params><param><value><dateTime.iso8601>20060922T14:26:19</dateTime.iso8601></value></param></params></methodCall>';
 
 class MyClass {
-	function GetProducts($dummy, $time){
-		return array('faultString' => $time);
-	}
+    function GetProducts($dummy, $time){
+        return array('faultString' => $time);
+    }
 }
 $myclass =  new MyClass();
 xmlrpc_server_register_method($xml, 'GetProducts', array($myclass, 'GetProducts'));
@@ -28,7 +28,7 @@ var_dump($response);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(402) "<?xml version="1.0" encoding="iso-8859-1"?>
 <methodResponse>
 <params>

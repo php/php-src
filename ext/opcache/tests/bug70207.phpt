@@ -10,11 +10,13 @@ opcache.file_update_protection=0
 --FILE--
 <?php
 function bar() {
-	return "bar";
+    return "bar";
 }
 function foo() {
     try { return bar(); }
-    finally { @fclose(null); }
+    finally {
+        @fopen("non-existent", 'r');
+    }
 }
 
 var_dump(foo());

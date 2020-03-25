@@ -1,5 +1,7 @@
 --TEST--
 Bug #71818 (Memory leak when array altered in destructor)
+--INI--
+zend.enable_gc = 1
 --FILE--
 <?php
 class MemoryLeak
@@ -17,7 +19,7 @@ class MemoryLeak
     private $things = [];
 }
 
-ini_set('memory_limit', '10M');
+ini_set('memory_limit', '20M');
 
 for ($i = 0; $i < 100000; ++$i) {
     $obj = new MemoryLeak();

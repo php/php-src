@@ -11,10 +11,10 @@ $handler = "inifile";
 include "test.inc";
 
 $dba = dba_open($db_filename, "n", $handler)
-	or die;
+    or die;
 for ($i = 0; $i < 3; ++$i) {
-	echo "insert $i:";
-	var_dump(dba_insert("a", $i, $dba));
+    echo "insert $i:";
+    var_dump(dba_insert("a", $i, $dba));
 }
 
 echo "exists:";
@@ -27,9 +27,8 @@ echo "delete:";
 var_dump(dba_delete("a", $dba));
 
 ?>
-===DONE===
 --CLEAN--
-<?php 
+<?php
 include "clean.inc";
 ?>
 --EXPECT--
@@ -40,4 +39,3 @@ exists:bool(true)
 delete:bool(true)
 exists:bool(false)
 delete:bool(false)
-===DONE===

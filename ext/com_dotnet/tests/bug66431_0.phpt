@@ -8,7 +8,7 @@ if (!extension_loaded("com_dotnet")){ echo "skip COM/.Net support not present"; 
 <?php
 
 $text= "Xin chào cộng đồng PHP";
-$fpath = str_replace("/", "\\", dirname(__FILE__) . "/bug66431.txt");
+$fpath = str_replace("/", "\\", __DIR__ . "/bug66431.txt");
 
 $fso = new COM("Scripting.FileSystemObject");
 $fh = $fso->OpenTextFile($fpath, 2, true);
@@ -22,16 +22,15 @@ $result = ($check_text == $text);
 var_dump($result);
 
 if (!$result) {
-	echo "Expected: '$check_text'\n";
-	echo "Have: '$text'\n";
+    echo "Expected: '$check_text'\n";
+    echo "Have: '$text'\n";
 }
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
-$fpath = str_replace("/", "\\", dirname(__FILE__) . "/bug66431.txt");
+$fpath = str_replace("/", "\\", __DIR__ . "/bug66431.txt");
 
 if (file_exists($fpath)) {
 	unlink($fpath);
@@ -39,4 +38,3 @@ if (file_exists($fpath)) {
 ?>
 --EXPECT--
 bool(true)
-===DONE===

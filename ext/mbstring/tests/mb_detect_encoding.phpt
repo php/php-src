@@ -7,9 +7,6 @@ mbstring.language=Japanese
 --FILE--
 <?php
 // TODO: Add more tests
-//$debug = true; // Uncomment this line to view error/warning/notice message in *.out file
-ini_set('include_path', dirname(__FILE__));
-include_once('common.inc');
 
 // SJIS string (BASE64 encoded)
 $sjis = base64_decode('k/qWe4zqg2WDTINYg2eCxYK3gUIwMTIzNIJUglWCVoJXgliBQg==');
@@ -23,7 +20,7 @@ $euc_jp = '日本語テキストです。01234５６７８９。';
 echo "== BASIC TEST ==\n";
 $s = $sjis;
 $s = mb_detect_encoding($s, 'SJIS');
-print("SJIS: $s\n"); 
+print("SJIS: $s\n");
 
 $s = $jis;
 $s = mb_detect_encoding($s, 'JIS');
@@ -39,7 +36,7 @@ print("EUC-JP: $s\n");
 
 
 
-// Using Encoding List Array 
+// Using Encoding List Array
 echo "== ARRAY ENCODING LIST ==\n";
 
 $a = array(0=>'UTF-8',1=>'EUC-JP', 2=>'SJIS', 3=>'JIS');
@@ -55,10 +52,10 @@ print("EUC-JP: $s\n");
 
 $s = $sjis;
 $s = mb_detect_encoding($s, $a);
-print("SJIS: $s\n"); 
+print("SJIS: $s\n");
 
 
-// Using Detect Order 
+// Using Detect Order
 echo "== DETECT ORDER ==\n";
 
 mb_detect_order('auto');
@@ -66,15 +63,15 @@ mb_detect_order('auto');
 
 $s = $jis;
 $s = mb_detect_encoding($s);
-print("JIS: $s\n"); 
+print("JIS: $s\n");
 
 $s = $euc_jp;
 $s = mb_detect_encoding($s);
-print("EUC-JP: $s\n"); 
+print("EUC-JP: $s\n");
 
 $s = $sjis;
 $s = mb_detect_encoding($s);
-print("SJIS: $s\n"); 
+print("SJIS: $s\n");
 
 
 // Invalid(?) Parameters
@@ -90,14 +87,8 @@ $s = $euc_jp;
 $s = mb_detect_encoding($s, 'BAD');
 print("BAD: $s\n"); // BAD
 
-$s = $euc_jp;
-$s = mb_detect_encoding();
-print("MP: $s\n"); // Missing parameter
-
-
 ?>
-
---EXPECT--
+--EXPECTF--
 == BASIC TEST ==
 SJIS: SJIS
 JIS: JIS
@@ -114,8 +105,6 @@ SJIS: SJIS
 == INVALID PARAMETER ==
 INT: EUC-JP
 EUC-JP: EUC-JP
-ERR: Warning
-BAD: EUC-JP
-ERR: Warning
-MP: 
 
+Warning: mb_detect_encoding(): Illegal argument in %s on line %d
+BAD: EUC-JP

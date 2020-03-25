@@ -1,5 +1,5 @@
 --TEST--
-Test imap_8bit() function : basic functionality 
+Test imap_8bit() function : basic functionality
 --SKIPIF--
 <?php
 extension_loaded('imap') or die('skip imap extension not available in this build');
@@ -21,7 +21,6 @@ var_dump(imap_8bit("String with tab at end \t"));
 var_dump(imap_8bit("\x00\x01\x02\x03\x04\xfe\xff\x0a\x0d"));
 
 ?>
-===Done===
 --EXPECT--
 *** Testing imap_8bit() : basic functionality ***
 string(28) "String with CRLF at end=20
@@ -30,4 +29,3 @@ string(25) "String with space at end "
 string(33) "String with tabs =09=09 in middle"
 string(26) "String with tab at end =09"
 string(27) "=00=01=02=03=04=FE=FF=0A=0D"
-===Done===

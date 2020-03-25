@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -226,33 +224,11 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 	}
 
 	/* Try object's handlers. */
-	if( Z_OBJ_HT_P(obj)->get )
-	{
-		zstr = Z_OBJ_HT_P(obj)->get( obj, rv );
-
-		switch( Z_TYPE_P( zstr ) )
-		{
-			case IS_OBJECT:
-				{
-					/* Bail out. */
-					zval_ptr_dtor( zstr );
-					COLLATOR_CONVERT_RETURN_FAILED( obj );
-				} break;
-
-			case IS_STRING:
-				break;
-
-			default:
-				{
-					convert_to_string( zstr );
-				} break;
-		}
-	}
-	else if( Z_OBJ_HT_P(obj)->cast_object )
+	if( Z_OBJ_HT_P(obj)->cast_object )
 	{
 		zstr = rv;
 
-		if( Z_OBJ_HT_P(obj)->cast_object( obj, zstr, IS_STRING ) == FAILURE )
+		if( Z_OBJ_HT_P(obj)->cast_object( Z_OBJ_P(obj), zstr, IS_STRING ) == FAILURE )
 		{
 			/* cast_object failed => bail out. */
 			zval_ptr_dtor( zstr );
@@ -275,7 +251,7 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 		php_error( E_WARNING, "Error casting object to string in collator_convert_object_to_string()" );
 
 	/* Cleanup zstr to hold utf16 string. */
-	zval_dtor( zstr );
+	zval_ptr_dtor_str( zstr );
 
 	/* Set string. */
 	ZVAL_STRINGL( zstr, (char*)ustr, UBYTES(ustr_len));
@@ -382,18 +358,17 @@ zval* collator_convert_string_to_number_if_possible( zval* str, zval *rv )
 zval* collator_make_printable_zval( zval* arg, zval *rv)
 {
 	zval arg_copy;
-	int use_copy = 0;
 	zval* str    = NULL;
 
 	if( Z_TYPE_P(arg) != IS_STRING )
 	{
 
-		use_copy = zend_make_printable_zval(arg, &arg_copy);
+		int use_copy = zend_make_printable_zval(arg, &arg_copy);
 
 		if( use_copy )
 		{
 			str = collator_convert_zstr_utf8_to_utf16( &arg_copy, rv );
-			zval_dtor( &arg_copy );
+			zval_ptr_dtor_str( &arg_copy );
 		}
 		else
 		{
@@ -445,11 +420,3 @@ zval* collator_normalize_sort_argument( zval* arg, zval *rv )
 	return n_arg;
 }
 /* }}} */
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

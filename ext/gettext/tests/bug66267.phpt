@@ -27,22 +27,21 @@ $domain = 'domain';
 $loc = ["de_DE", "fr_FR", "en_US"];
 
 foreach ($loc as $l) {
-	putenv("LC_ALL=$l");
-	setlocale(LC_ALL, $l);
+    putenv("LC_ALL=$l");
+    setlocale(LC_ALL, $l);
 
-	$path = realpath(dirname(__FILE__) . DIRECTORY_SEPARATOR . "66265");
-	bindtextdomain($domain, $path);
-	bind_textdomain_codeset($domain, "UTF-8");
-	textdomain($domain);
+    $path = realpath(__DIR__ . DIRECTORY_SEPARATOR . "66265");
+    bindtextdomain($domain, $path);
+    bind_textdomain_codeset($domain, "UTF-8");
+    textdomain($domain);
 
-	echo 'LC_ALL=', getenv('LC_ALL'), "\n";
-	echo 'hello=', _('hello'), "\n";
-	echo "\n";
+    echo 'LC_ALL=', getenv('LC_ALL'), "\n";
+    echo 'hello=', _('hello'), "\n";
+    echo "\n";
 }
 
 ?>
-==DONE==
---EXPECTF--
+--EXPECT--
 LC_ALL=de_DE
 hello=hallo
 
@@ -51,6 +50,4 @@ hello=salut
 
 LC_ALL=en_US
 hello=hello
-
-==DONE==
 

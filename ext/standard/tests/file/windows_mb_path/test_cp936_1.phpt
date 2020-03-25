@@ -1,8 +1,8 @@
 --TEST--
-Test mkdir/rmdir cp936 path 
+Test mkdir/rmdir cp936 path
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(936, "oem");
 
 ?>
+--CONFLICTS--
+dir_cp936
 --INI--
 internal_encoding=cp936
 --FILE--
@@ -19,7 +21,7 @@ internal_encoding=cp936
 #vim: set encoding=cp936
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "測試多字節路徑"; // cp936 string
 $prefix = create_data("dir_cp936", $item . "5", 936);
@@ -39,8 +41,7 @@ var_dump(rmdir($subpath));
 remove_data("dir_cp936");
 
 ?>
-===DONE===
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(true)
 bool(true)
@@ -51,4 +52,3 @@ bool(true)
 string(%d) "%s\測試多字節路徑5\測試多字節路徑4"
 Active code page: %d
 bool(true)
-===DONE===

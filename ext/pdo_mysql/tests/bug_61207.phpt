@@ -2,14 +2,14 @@
 PDO MySQL Bug #61207 (PDO::nextRowset() after a multi-statement query doesn't always work)
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 
 ?>
 --FILE--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
+require_once(__DIR__ . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 $db = MySQLPDOTest::factory();
 
 $db->query('DROP TABLE IF EXISTS test');
@@ -26,9 +26,9 @@ $handle1->execute();
 $i = 1;
 print("Handle 1:\n");
 do {
-	print('Rowset ' . $i++ . "\n");
-	if ($handle1->columnCount() > 0)
-		print("Results detected\n");
+    print('Rowset ' . $i++ . "\n");
+    if ($handle1->columnCount() > 0)
+        print("Results detected\n");
 } while($handle1->nextRowset());
 
 $handle2 = $db->prepare('select * from test where id = ?;
@@ -42,9 +42,9 @@ $handle2->execute();
 $i = 1;
 print("Handle 2:\n");
 do {
-	print('Rowset ' . $i++ . "\n");
-	if ($handle2->columnCount() > 0)
-		print("Results detected\n");
+    print('Rowset ' . $i++ . "\n");
+    if ($handle2->columnCount() > 0)
+        print("Results detected\n");
 } while($handle2->nextRowset());
 
 $handle3 = $db->prepare('update test set id = 2 where id = ?;
@@ -58,9 +58,9 @@ $handle3->execute();
 $i = 1;
 print("Handle 3:\n");
 do {
-	print('Rowset ' . $i++ . "\n");
-	if ($handle3->columnCount() > 0)
-		print("Results detected\n");
+    print('Rowset ' . $i++ . "\n");
+    if ($handle3->columnCount() > 0)
+        print("Results detected\n");
 } while($handle3->nextRowset());
 
 $handle4 = $db->prepare('insert into test(id) values(3);
@@ -75,16 +75,16 @@ $handle4->execute();
 $i = 1;
 print("Handle 4:\n");
 do {
-	print('Rowset ' . $i++ . "\n");
-	if ($handle1->columnCount() > 0)
-		print("Results detected\n");
+    print('Rowset ' . $i++ . "\n");
+    if ($handle1->columnCount() > 0)
+        print("Results detected\n");
 } while($handle1->nextRowset());
 
 $db->query("DROP TABLE test");
 ?>
 --CLEAN--
 <?php
-require dirname(__FILE__) . '/mysql_pdo_test.inc';
+require __DIR__ . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
 --EXPECT--

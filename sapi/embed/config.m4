@@ -1,10 +1,9 @@
-dnl
-dnl $Id$
-dnl
-
-PHP_ARG_ENABLE(embed,,
-[  --enable-embed[=TYPE]     EXPERIMENTAL: Enable building of embedded SAPI library
-                          TYPE is either 'shared' or 'static'. [TYPE=shared]], no, no)
+PHP_ARG_ENABLE([embed],,
+  [AS_HELP_STRING([[--enable-embed[=TYPE]]],
+    [EXPERIMENTAL: Enable building of embedded SAPI library TYPE is either
+    'shared' or 'static'. [TYPE=shared]])],
+  [no],
+  [no])
 
 AC_MSG_CHECKING([for embedded SAPI library support])
 
@@ -30,4 +29,3 @@ if test "$PHP_EMBED" != "no"; then
 else
   AC_MSG_RESULT(no)
 fi
-

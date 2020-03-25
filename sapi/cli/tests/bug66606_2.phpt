@@ -4,7 +4,7 @@ Bug #66606 (Sets HTTP_CONTENT_TYPE but not CONTENT_TYPE) - POST request
 allow_url_fopen=1
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -28,14 +28,14 @@ Content-Length: 3
 a=b
 HEADER
 )) {
-	while (!feof($fp)) {
-		echo fgets($fp);
-	}
+    while (!feof($fp)) {
+        echo fgets($fp);
+    }
 }
 
 fclose($fp);
 ?>
---EXPECTF--	
+--EXPECTF--
 HTTP/1.1 200 OK
 Host: %s
 Date: %s

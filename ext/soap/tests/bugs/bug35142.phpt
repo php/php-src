@@ -8,11 +8,11 @@ soap.wsdl_cache_enabled=0
 <?php
 ini_set("soap.wsdl_cache_enabled",0);
 $timestamp = "2005-11-08T11:22:07+03:00";
-$wsdl = dirname(__FILE__)."/bug35142.wsdl";
+$wsdl = __DIR__."/bug35142.wsdl";
 
 function PostEvents($x) {
-	var_dump($x);
-	exit();
+    var_dump($x);
+    exit();
   return $x;
 }
 
@@ -25,18 +25,18 @@ class TestSoapClient extends SoapClient {
   }
 
   function __doRequest($request, $location, $action, $version, $one_way = 0) {
-		echo "$request\n";
+        echo "$request\n";
     $this->server->handle($request);
     return $response;
   }
 
 }
 
-$soapClient = new TestSoapClient($wsdl, 
-	array('trace' => 1, 'exceptions' => 0,
-		'classmap' => array('logOnEvent' => 'LogOnEvent',
-			'logOffEvent' => 'LogOffEvent',
-			'events' => 'IVREvents')));
+$soapClient = new TestSoapClient($wsdl,
+    array('trace' => 1, 'exceptions' => 0,
+        'classmap' => array('logOnEvent' => 'LogOnEvent',
+            'logOffEvent' => 'LogOffEvent',
+            'events' => 'IVREvents')));
 
 $logOnEvent = new LogOnEvent(34567, $timestamp);
 $logOffEvents[] = new LogOffEvent(34567, $timestamp, "Smoked");

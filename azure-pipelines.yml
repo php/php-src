@@ -1,0 +1,89 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - PHP-7.4
+      - master
+  paths:
+    exclude:
+      - docs/*
+      - NEWS
+      - UPGRADING
+      - UPGRADING.INTERNALS
+
+jobs:
+  - template: azure/job.yml
+    parameters:
+      configurationName: DEBUG_NTS
+      configurationParameters: '--enable-debug --disable-zts'
+  - template: azure/job.yml
+    parameters:
+      configurationName: RELEASE_ZTS
+      configurationParameters: '--disable-debug --enable-zts'
+  - template: azure/i386/job.yml
+    parameters:
+      configurationName: I386_DEBUG_ZTS
+      configurationParameters: '--enable-debug --enable-zts'
+  - template: azure/macos/job.yml
+    parameters:
+      configurationName: MACOS_DEBUG_NTS
+      configurationParameters: '--enable-debug --disable-zts'
+  - ${{ if eq(variables['Build.Reason'], 'Schedule') }}:
+    - template: azure/job.yml
+      parameters:
+        configurationName: DEBUG_ZTS
+        configurationParameters: '--enable-debug --enable-zts'
+    - template: azure/job.yml
+      parameters:
+        configurationName: RELEASE_NTS
+        configurationParameters: '--disable-debug --disable-zts'
+    - template: azure/i386/job.yml
+      parameters:
+        configurationName: I386_DEBUG_NTS
+        configurationParameters: '--enable-debug --disable-zts'
+    - template: azure/i386/job.yml
+      parameters:
+        configurationName: I386_RELEASE_NTS
+        configurationParameters: '--disable-debug --disable-zts'
+    - template: azure/i386/job.yml
+      parameters:
+        configurationName: I386_RELEASE_ZTS
+        configurationParameters: '--disable-debug --enable-zts'
+    - template: azure/macos/job.yml
+      parameters:
+        configurationName: MACOS_DEBUG_ZTS
+        configurationParameters: '--enable-debug --enable-zts'
+    - template: azure/macos/job.yml
+      parameters:
+        configurationName: MACOS_RELEASE_NTS
+        configurationParameters: '--disable-debug --disable-zts'
+    - template: azure/macos/job.yml
+      parameters:
+        configurationName: MACOS_RELEASE_ZTS
+        configurationParameters: '--disable-debug --enable-zts'
+    - template: azure/job.yml
+      parameters:
+        configurationName: DEBUG_ZTS_ASAN_UBSAN
+        configurationParameters: >-
+            --enable-debug --enable-zts
+            CFLAGS='-fsanitize=undefined,address -DZEND_TRACK_ARENA_ALLOC'
+            LDFLAGS='-fsanitize=undefined,address'
+        runTestsParameters: --asan
+        timeoutInMinutes: 150
+    - template: azure/msan_job.yml
+      parameters:
+        configurationName: DEBUG_ZTS_MSAN
+        configurationParameters: '--enable-debug --enable-zts'
+        runTestsParameters: --asan
+    - template: azure/community_job.yml
+      parameters:
+        configurationName: COMMUNITY
+        configurationParameters: >-
+            --enable-debug --enable-zts
+            CFLAGS='-fsanitize=undefined,address -fno-sanitize-recover -DZEND_TRACK_ARENA_ALLOC'
+            LDFLAGS='-fsanitize=undefined,address'
+    - template: azure/coverage_job.yml
+      parameters:
+        configurationName: COVERAGE_DEBUG_ZTS
+        configurationParameters: '--enable-debug --disable-zts'
+        timeoutInMinutes: 90

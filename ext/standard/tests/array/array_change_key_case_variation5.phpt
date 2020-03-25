@@ -3,7 +3,7 @@ Test array_change_key_case() function : usage variations - position of internal 
 --FILE--
 <?php
 /* Prototype  : array array_change_key_case(array $input [, int $case])
- * Description: Retuns an array with all string keys lowercased [or uppercased] 
+ * Description: Returns an array with all string keys lowercased [or uppercased]
  * Source code: ext/standard/array.c
  */
 
@@ -25,8 +25,7 @@ echo key($input) . " => " . current ($input) . "\n";
 
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing array_change_key_case() : usage variations ***
 
 -- Call array_change_key_case() --

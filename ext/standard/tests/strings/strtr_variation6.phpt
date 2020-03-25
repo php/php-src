@@ -8,8 +8,8 @@ Test strtr() function : usage variations - unexpected inputs for 'from' argument
  * Source code: ext/standard/string.c
 */
 
-/* Test strtr() function: with unexpected inputs for 'from' 
- *  and expected type for 'str' & 'to' arguments 
+/* Test strtr() function: with unexpected inputs for 'from'
+ *  and expected type for 'str' & 'to' arguments
 */
 
 echo "*** Testing strtr() function: with unexpected inputs for 'from' ***\n";
@@ -22,7 +22,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "sample object";
-  } 
+  }
 }
 
 //getting the resource
@@ -34,41 +34,41 @@ $str = "012atm";
 // array of values for 'from'
 $from_arr =  array (
 
-		  // integer values
+          // integer values
 /*1*/	  0,
-		  1,
-		  -2,
-		
-		  // float values
+          1,
+          -2,
+
+          // float values
 /*4*/	  10.5,
-		  -20.5,
-		  10.1234567e10,
-		
-		  // array values
+          -20.5,
+          10.1234567e10,
+
+          // array values
 /*7*/	  array(),
-		  array(0),
-		  array(1, 2),
-		
-		  // boolean values
+          array(0),
+          array(1, 2),
+
+          // boolean values
 /*10*/	  true,
-		  false,
-		  TRUE,
-		  FALSE,
-		
-		  // null vlaues
+          false,
+          TRUE,
+          FALSE,
+
+          // null values
 /*14*/	  NULL,
-		  null,
-		
-		  // objects
+          null,
+
+          // objects
 /*16*/	  new sample(),
-		
-		  // resource
+
+          // resource
 /*17*/	  $file_handle,
-		
-		  // undefined variable
+
+          // undefined variable
 /*18*/	  @$undefined_var,
-		
-		  // unset variable
+
+          // unset variable
 /*19*/	  @$unset_var
 );
 
@@ -80,14 +80,17 @@ $count = 1;
 for($index = 0; $index < count($from_arr); $index++) {
   echo "-- Iteration $count --\n";
   $from = $from_arr[$index];
-  var_dump( strtr($str, $from, $to) );
-  $count ++;
+  try {
+    var_dump(strtr($str, $from, $to));
+  } catch (TypeError $exception) {
+    echo $exception->getMessage() . "\n";
+  }
+  $count++;
 }
 
 fclose($file_handle);  //closing the file handle
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strtr() function: with unexpected inputs for 'from' ***
 -- Iteration 1 --
 string(6) "a12atm"
@@ -102,17 +105,11 @@ string(6) "m1tatm"
 -- Iteration 6 --
 string(6) "tm0atm"
 -- Iteration 7 --
-
-Notice: Array to string conversion in %s on line %d
-string(6) "0120tm"
+strtr(): Argument #2 ($from) must be of type string, array given
 -- Iteration 8 --
-
-Notice: Array to string conversion in %s on line %d
-string(6) "0120tm"
+strtr(): Argument #2 ($from) must be of type string, array given
 -- Iteration 9 --
-
-Notice: Array to string conversion in %s on line %d
-string(6) "0120tm"
+strtr(): Argument #2 ($from) must be of type string, array given
 -- Iteration 10 --
 string(6) "0a2atm"
 -- Iteration 11 --
@@ -128,9 +125,8 @@ string(6) "012atm"
 -- Iteration 16 --
 string(6) "012ttm"
 -- Iteration 17 --
-string(6) "012atm"
+strtr(): Argument #2 ($from) must be of type string|array, resource given
 -- Iteration 18 --
 string(6) "012atm"
 -- Iteration 19 --
 string(6) "012atm"
-===DONE===

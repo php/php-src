@@ -2,8 +2,6 @@
 rfc1867 malicious input
 --INI--
 file_uploads=1
-error_reporting=E_ALL&~E_NOTICE
-comment=debug builds show some additional E_NOTICE errors
 upload_max_filesize=1024
 --POST_RAW--
 Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
@@ -18,7 +16,7 @@ Content-Type: text/plain-file1
 var_dump($_FILES);
 var_dump($_POST);
 ?>
---EXPECTF--
+--EXPECT--
 array(0) {
 }
 array(0) {

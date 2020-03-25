@@ -5,13 +5,13 @@ exception handler tests - 3
 
 class test {
 
-	function foo () {
-		set_exception_handler(array($this, "bar"));
-	}
+    function foo () {
+        set_exception_handler(array($this, "bar"));
+    }
 
-	function bar($e) {
-		var_dump(get_class($e)." thrown!");
-	}
+    function bar($e) {
+        var_dump(get_class($e)." thrown!");
+    }
 }
 
 $a = new test;
@@ -20,5 +20,5 @@ throw new Exception();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 string(17) "Exception thrown!"

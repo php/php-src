@@ -3,9 +3,9 @@ Test gmdate() function : usage variation - Passing Year format options to format
 --FILE--
 <?php
 /* Prototype  : string gmdate(string format [, long timestamp])
- * Description: Format a GMT date/time 
+ * Description: Format a GMT date/time
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing gmdate() : usage variation ***\n";
@@ -35,7 +35,6 @@ var_dump( gmdate('y') );
 var_dump( gmdate('y', $timestamp) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gmdate() : usage variation ***
 
@@ -57,4 +56,3 @@ string(4) "2008"
 -- Testing gmdate() function with 2 digit representation year format --
 string(2) "%d"
 string(2) "08"
-===DONE===

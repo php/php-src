@@ -99,5 +99,5 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test_insert_id_var"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 DONE

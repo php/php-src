@@ -7,10 +7,10 @@ Test session_commit() function : basic functionality
 
 ob_start();
 
-/* 
+/*
  * Prototype : bool session_commit(void)
  * Description : Write session data and end session
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_commit() : basic functionality ***\n";
@@ -27,12 +27,12 @@ var_dump($_SESSION);
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_commit() : basic functionality ***
 bool(true)
 array(0) {
 }
-NULL
+bool(true)
 array(0) {
 }
 bool(true)
@@ -42,4 +42,3 @@ bool(true)
 array(0) {
 }
 Done
-

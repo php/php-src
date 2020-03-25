@@ -16,7 +16,7 @@ echo "*** Testing mkdir() and rmdir() for different permissions ***\n";
 
 $context = stream_context_create();
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $counter = 1;
 
 for($mode = 0000; $mode <= 0777; $mode++) {
@@ -38,7 +38,7 @@ echo "\n*** Testing mkdir() and rmdir() for binary safe functionality ***\n";
 var_dump( mkdir("$file_path/tempx000/") );
 var_dump( rmdir("$file_path/tempx000/") );
 
-echo "\n*** Testing mkdir() with miscelleneous input ***\n";
+echo "\n*** Testing mkdir() with miscellaneous input ***\n";
 /* changing mode of mkdir to prevent creating sub-directory under it */
 var_dump( chmod("$file_path/mkdir私はガラスを食べられます/", 0000) );
 /* creating sub-directory test1 under mkdir, expected: false */
@@ -49,9 +49,9 @@ echo "Done\n";
 ?>
 --CLEAN--
 <?php
-rmdir(dirname(__FILE__)."/mkdir私はガラスを食べられます/test/");
-rmdir(dirname(__FILE__)."/mkdir私はガラスを食べられます/test1/");
-rmdir(dirname(__FILE__)."/mkdir私はガラスを食べられます/");
+rmdir(__DIR__."/mkdir私はガラスを食べられます/test/");
+rmdir(__DIR__."/mkdir私はガラスを食べられます/test1/");
+rmdir(__DIR__."/mkdir私はガラスを食べられます/");
 ?>
 --EXPECTF--
 *** Testing mkdir() and rmdir() for different permissions ***
@@ -1606,7 +1606,7 @@ bool(false)
 bool(true)
 bool(true)
 
-*** Testing mkdir() with miscelleneous input ***
+*** Testing mkdir() with miscellaneous input ***
 bool(true)
 bool(true)
 bool(true)

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -33,7 +31,7 @@ PHP_METHOD(Spoofchecker, isSuspicious)
 	SPOOFCHECKER_METHOD_INIT_VARS;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|z", &text, &text_len, &error_code)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
@@ -46,7 +44,7 @@ PHP_METHOD(Spoofchecker, isSuspicious)
 	}
 
 	if (error_code) {
-		zval_dtor(error_code);
+		zval_ptr_dtor(error_code);
 		ZVAL_LONG(error_code, ret);
 	}
 	RETVAL_BOOL(ret != 0);
@@ -66,7 +64,7 @@ PHP_METHOD(Spoofchecker, areConfusable)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "ss|z", &s1, &s1_len,
 										 &s2, &s2_len, &error_code)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
@@ -81,7 +79,7 @@ PHP_METHOD(Spoofchecker, areConfusable)
 	}
 
 	if (error_code) {
-		zval_dtor(error_code);
+		zval_ptr_dtor(error_code);
 		ZVAL_LONG(error_code, ret);
 	}
 	RETVAL_BOOL(ret != 0);
@@ -98,7 +96,7 @@ PHP_METHOD(Spoofchecker, setAllowedLocales)
 	SPOOFCHECKER_METHOD_INIT_VARS;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s", &locales, &locales_len)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
@@ -121,7 +119,7 @@ PHP_METHOD(Spoofchecker, setChecks)
 	SPOOFCHECKER_METHOD_INIT_VARS;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l", &checks)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
@@ -134,11 +132,32 @@ PHP_METHOD(Spoofchecker, setChecks)
 }
 /* }}} */
 
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
+#if U_ICU_VERSION_MAJOR_NUM >= 58
+/* {{{ proto void Spoofchecker::setRestrictionLevel( int $restriction_level )
+ * Set the loosest restriction level allowed for strings.
  */
+PHP_METHOD(Spoofchecker, setRestrictionLevel)
+{
+	zend_long level;
+	SPOOFCHECKER_METHOD_INIT_VARS;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l", &level)) {
+		RETURN_THROWS();
+	}
+
+	SPOOFCHECKER_METHOD_FETCH_OBJECT;
+
+	if (USPOOF_ASCII != level &&
+			USPOOF_SINGLE_SCRIPT_RESTRICTIVE != level &&
+			USPOOF_HIGHLY_RESTRICTIVE != level &&
+			USPOOF_MODERATELY_RESTRICTIVE != level &&
+			USPOOF_MINIMALLY_RESTRICTIVE != level &&
+			USPOOF_UNRESTRICTIVE != level) {
+		php_error_docref(NULL, E_WARNING, "Invalid restriction level value");
+		return;
+	}
+
+	uspoof_setRestrictionLevel(co->uspoof, (URestrictionLevel)level);
+}
+/* }}} */
+#endif

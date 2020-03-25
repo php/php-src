@@ -9,9 +9,9 @@ soap.wsdl_cache_enabled=0
 ini_set("soap.wsdl_cache_enabled", 0);
 
 class fp {
-	public function get_it($opt="zzz") {
-		return $opt;
-	}
+    public function get_it($opt="zzz") {
+        return $opt;
+    }
 }
 
 class LocalSoapClient extends SoapClient {
@@ -32,7 +32,7 @@ class LocalSoapClient extends SoapClient {
 
 }
 
-$cl = new LocalSoapClient(dirname(__FILE__).'/bug34643.wsdl', array("trace"=>1));
+$cl = new LocalSoapClient(__DIR__.'/bug34643.wsdl', array("trace"=>1));
 print_r($cl->__getFunctions());
 echo $cl->get_it("aaa")."\n";
 echo $cl->get_it()."\n";

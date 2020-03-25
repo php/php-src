@@ -1,5 +1,14 @@
 --TEST--
 Test simple watchpoint with replace
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE == 4) {
+    die("xfail There may be flaws in the implementation of watchpoints that cause failures");
+}
+if (getenv('SKIP_ASAN')) {
+    die("skip intentionally causes segfaults");
+}
+?>
 --PHPDBG--
 b 6
 r
@@ -24,8 +33,7 @@ New value: 2
 prompt> [Breaking on watchpoint $a[0]]
 Old value: 2
 New value: 3
->00008: $a = [0 => 3, 1 => 4];
- 00009: 
+>00009: 
 prompt> [$a[0] has been removed, removing watchpoint]
 [Script ended normally]
 prompt> 

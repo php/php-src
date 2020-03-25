@@ -1,0 +1,33 @@
+parameters:
+  packages: ''
+
+steps:
+  - script: |
+      brew install pkg-config \
+                   autoconf \
+                   bison \
+                   re2c
+    displayName: 'Install Build Tools'
+  - script: |
+      brew install openssl@1.1 \
+                   krb5 \
+                   bzip2 \
+                   enchant \
+                   libffi \
+                   libpng \
+                   webp \
+                   freetype \
+                   intltool \
+                   icu4c \
+                   libiconv \
+                   zlib \
+                   t1lib \
+                   gd \
+                   libzip \
+                   gmp \
+                   tidyp \
+                   libxml2 \
+                   libxslt \
+                   postgresql
+      brew link icu4c gettext --force
+    displayName: 'Install Build Dependencies'

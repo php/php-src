@@ -5,7 +5,7 @@ ocifetchinto()
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 // Initialize
 
@@ -22,19 +22,19 @@ oci8_test_sql_execute($c, $stmtarray);
 // Run Test
 
 if (!($s = oci_parse($c, "select * from fetch_into_tab"))) {
-	die("oci_parse(select) failed!\n");
+    die("oci_parse(select) failed!\n");
 }
 
 /* ocifetchinto */
 if (!oci_execute($s)) {
-	die("oci_execute(select) failed!\n");
+    die("oci_execute(select) failed!\n");
 }
 var_dump(ocifetchinto($s, $all));
 var_dump($all);
 
 /* ocifetchinto */
 if (!oci_execute($s)) {
-	die("oci_execute(select) failed!\n");
+    die("oci_execute(select) failed!\n");
 }
 var_dump(ocifetchinto($s, $all, OCI_NUM+OCI_ASSOC+OCI_RETURN_NULLS+OCI_RETURN_LOBS));
 var_dump($all);
@@ -49,7 +49,7 @@ oci8_test_sql_execute($c, $stmtarray);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(2)
 array(2) {
   [0]=>

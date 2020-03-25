@@ -4,7 +4,7 @@ getprotobyname function basic test
 edgarsandi - <edgar.r.sandi@gmail.com>
 --FILE--
 <?php
-	var_dump(getprotobyname('tcp'));
+    var_dump(getprotobyname('tcp'));
 ?>
 --EXPECT--
 int(6)

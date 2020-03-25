@@ -18,7 +18,7 @@ trait aa {
         unset($this->container[$offset]);
     }
     public function &offsetGet($offset) {
-	$result = null;
+    $result = null;
         if (isset($this->container[$offset])) {
             $result = &$this->container[$offset];
         }
@@ -36,4 +36,3 @@ $o['x'] = 1;
 echo $o['x'], "\n";
 --EXPECT--
 2
-

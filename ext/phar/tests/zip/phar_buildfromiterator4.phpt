@@ -36,19 +36,18 @@ class myIterator implements Iterator
     }
 }
 try {
-	chdir(dirname(__FILE__));
-	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator.phar.zip');
-	var_dump($phar->buildFromIterator(new myIterator(array('a' => basename(__FILE__, 'php') . 'phpt'))));
-	var_dump($phar->isFileFormat(Phar::ZIP));
+    chdir(__DIR__);
+    $phar = new Phar(__DIR__ . '/buildfromiterator.phar.zip');
+    var_dump($phar->buildFromIterator(new myIterator(array('a' => basename(__FILE__, 'php') . 'phpt'))));
+    var_dump($phar->isFileFormat(Phar::ZIP));
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/buildfromiterator.phar.zip');
+<?php
+unlink(__DIR__ . '/buildfromiterator.phar.zip');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
@@ -63,4 +62,3 @@ array(1) {
   string(%d) "%sphar_buildfromiterator4.phpt"
 }
 bool(true)
-===DONE===

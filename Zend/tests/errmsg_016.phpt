@@ -4,11 +4,11 @@ errmsg: __isset() must take exactly 1 argument
 <?php
 
 class test {
-	function __isset() {
-	}
+    function __isset() {
+    }
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Method test::__isset() must take exactly 1 argument in %s on line %d

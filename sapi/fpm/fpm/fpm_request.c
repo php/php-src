@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_request.c,v 1.9.2.1 2008/11/15 00:57:24 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 #ifdef HAVE_TIMES
 #include <sys/times.h>
@@ -26,7 +24,7 @@
 static const char *requests_stages[] = {
 	[FPM_REQUEST_ACCEPTING]       = "Idle",
 	[FPM_REQUEST_READING_HEADERS] = "Reading headers",
-	[FPM_REQUEST_INFO]            = "Getting request informations",
+	[FPM_REQUEST_INFO]            = "Getting request information",
 	[FPM_REQUEST_EXECUTING]       = "Running",
 	[FPM_REQUEST_END]             = "Ending",
 	[FPM_REQUEST_FINISHED]        = "Finishing",
@@ -223,7 +221,7 @@ void fpm_request_finished() /* {{{ */
 }
 /* }}} */
 
-void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now, int terminate_timeout, int slowlog_timeout) /* {{{ */
+void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now, int terminate_timeout, int slowlog_timeout, int track_finished) /* {{{ */
 {
 	struct fpm_scoreboard_proc_s proc, *proc_p;
 
@@ -245,7 +243,7 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 	}
 #endif
 
-	if (proc.request_stage > FPM_REQUEST_ACCEPTING && proc.request_stage < FPM_REQUEST_END) {
+	if (proc.request_stage > FPM_REQUEST_ACCEPTING && ((proc.request_stage < FPM_REQUEST_END) || track_finished)) {
 		char purified_script_filename[sizeof(proc.script_filename)];
 		struct timeval tv;
 
@@ -262,8 +260,9 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 
 			fpm_trace_signal(child->pid);
 
-			zlog(ZLOG_WARNING, "[pool %s] child %d, script '%s' (request: \"%s %s\") executing too slow (%d.%06d sec), logging",
+			zlog(ZLOG_WARNING, "[pool %s] child %d, script '%s' (request: \"%s %s%s%s\") executing too slow (%d.%06d sec), logging",
 				child->wp->config->name, (int) child->pid, purified_script_filename, proc.request_method, proc.request_uri,
+				(proc.query_string[0] ? "?" : ""), proc.query_string,
 				(int) tv.tv_sec, (int) tv.tv_usec);
 		}
 		else
@@ -272,8 +271,9 @@ void fpm_request_check_timed_out(struct fpm_child_s *child, struct timeval *now,
 			str_purify_filename(purified_script_filename, proc.script_filename, sizeof(proc.script_filename));
 			fpm_pctl_kill(child->pid, FPM_PCTL_TERM);
 
-			zlog(ZLOG_WARNING, "[pool %s] child %d, script '%s' (request: \"%s %s\") execution timed out (%d.%06d sec), terminating",
+			zlog(ZLOG_WARNING, "[pool %s] child %d, script '%s' (request: \"%s %s%s%s\") execution timed out (%d.%06d sec), terminating",
 				child->wp->config->name, (int) child->pid, purified_script_filename, proc.request_method, proc.request_uri,
+				(proc.query_string[0] ? "?" : ""), proc.query_string,
 				(int) tv.tv_sec, (int) tv.tv_usec);
 		}
 	}

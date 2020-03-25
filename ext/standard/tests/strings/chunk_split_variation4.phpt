@@ -1,5 +1,5 @@
 --TEST--
-Test chunk_split() function : usage variations - different heredoc strings as 'str' argument 
+Test chunk_split() function : usage variations - different heredoc strings as 'str' argument
 --FILE--
 <?php
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
@@ -9,7 +9,7 @@ Test chunk_split() function : usage variations - different heredoc strings as 's
 */
 
 /*
-* Passing different heredoc strings as 'str' argument to the chunk_split() 
+* Passing different heredoc strings as 'str' argument to the chunk_split()
 * with 'chunklen' 4 and default value of 'ending' that is "\r\n"
 */
 
@@ -81,10 +81,10 @@ foreach($heredoc_arr as $str) {
   var_dump( chunk_split( $str, $chunklen) );
   $count++;
 };
- 
+
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing chunk_split() : heredoc strings as 'str' argument ***
 -- Iteration 1 --
 string(2) "

@@ -14,8 +14,8 @@ interface f extends d {}
 class g extends b {}
 
 function dump_modifiers($class) {
-	$obj = new ReflectionClass($class);
-	var_dump($obj->getModifiers());
+    $obj = new ReflectionClass($class);
+    var_dump($obj->getModifiers());
 }
 
 dump_modifiers('a');
@@ -29,9 +29,9 @@ dump_modifiers('g');
 ?>
 --EXPECT--
 int(0)
-int(32)
-int(4)
 int(64)
-int(524288)
-int(524352)
+int(32)
+int(0)
+int(0)
+int(0)
 int(0)

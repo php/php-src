@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -19,11 +17,15 @@
 #ifndef PHP_WIN32_IPC_H
 #define PHP_WIN32_IPC_H 1
 
-#include "php.h"
+#ifdef PHP_EXPORTS
+# define PHP_WIN32_IPC_API __declspec(dllexport)
+#else
+# define PHP_WIN32_IPC_API __declspec(dllimport)
+#endif
 
 typedef int key_t;
 
-PHPAPI key_t ftok(const char *path, int id);
+PHP_WIN32_IPC_API key_t ftok(const char *path, int id);
 
 
 #endif /* PHP_WIN32_IPC_H */

@@ -3,7 +3,7 @@ Test array_key_exists() function : usage variations - referenced variables
 --FILE--
 <?php
 /* Prototype  : bool array_key_exists(mixed $key, array $search)
- * Description: Checks if the given key or index exists in the array 
+ * Description: Checks if the given key or index exists in the array
  * Source code: ext/standard/array.c
  * Alias to functions: key_exists
  */
@@ -22,8 +22,7 @@ var_dump(array_key_exists('one', $search));
 
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing array_key_exists() : usage variations ***
 
 -- $search is a reference to $array --

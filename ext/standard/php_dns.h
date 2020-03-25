@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,23 +16,27 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef PHP_DNS_H
 #define PHP_DNS_H
 
 #if defined(HAVE_DNS_SEARCH)
 #define php_dns_search(res, dname, class, type, answer, anslen) \
-    	((int)dns_search(res, dname, class, type, answer, anslen, (struct sockaddr *)&from, &fromsize))
+    	((int)dns_search(res, dname, class, type, (char *) answer, anslen, (struct sockaddr *)&from, &fromsize))
 #define php_dns_free_handle(res) \
 		dns_free(res)
 
 #elif defined(HAVE_RES_NSEARCH)
 #define php_dns_search(res, dname, class, type, answer, anslen) \
 			res_nsearch(res, dname, class, type, answer, anslen);
+#if HAVE_RES_NDESTROY
+#define php_dns_free_handle(res) \
+			res_ndestroy(res); \
+			php_dns_free_res(res)
+#else
 #define php_dns_free_handle(res) \
 			res_nclose(res); \
 			php_dns_free_res(res)
+#endif
 
 #elif defined(HAVE_RES_SEARCH)
 #define php_dns_search(res, dname, class, type, answer, anslen) \
@@ -59,7 +61,7 @@ PHP_FUNCTION(gethostbynamel);
 PHP_FUNCTION(gethostname);
 #endif
 
-#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE)))
+#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 PHP_FUNCTION(dns_check_record);
 
 # if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
@@ -68,7 +70,7 @@ PHP_FUNCTION(dns_get_record);
 PHP_MINIT_FUNCTION(dns);
 # endif
 
-#endif /* defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !(defined(__BEOS__) || defined(NETWARE))) */
+#endif /* defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC */
 
 #ifndef INT16SZ
 #define INT16SZ		2

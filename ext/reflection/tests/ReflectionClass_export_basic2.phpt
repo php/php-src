@@ -1,16 +1,16 @@
 --TEST--
-ReflectionClass::export() - ensure inherited private props are hidden.
+ReflectionClass::__toString() - ensure inherited private props are hidden.
 --FILE--
 <?php
 Class c {
-	private $a;
-	static private $b;
+    private $a;
+    static private $b;
 }
 
 class d extends c {}
 
-ReflectionClass::export("c");
-ReflectionClass::export("d");
+echo new ReflectionClass("c"), "\n";
+echo new ReflectionClass("d"), "\n";
 ?>
 --EXPECTF--
 Class [ <user> class c ] {

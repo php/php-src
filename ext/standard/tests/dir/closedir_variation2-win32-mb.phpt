@@ -1,9 +1,15 @@
 --TEST--
 Test closedir() function : usage variations - close directory handle twice
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
+}
+?>
 --FILE--
 <?php
 /* Prototype  : void closedir([resource $dir_handle])
- * Description: Close directory connection identified by the dir_handle 
+ * Description: Close directory connection identified by the dir_handle
  * Source code: ext/standard/dir.c
  * Alias to functions: close
  */
@@ -15,7 +21,7 @@ Test closedir() function : usage variations - close directory handle twice
 echo "*** Testing closedir() : usage variations ***\n";
 
 //create temporary directory for test, removed in CLEAN section
-$directory = dirname(__FILE__) . "/私はガラスを食べられますclosedir_variation2";
+$directory = __DIR__ . "/私はガラスを食べられますclosedir_variation2";
 mkdir($directory);
 
 $dh = opendir($directory);
@@ -26,14 +32,17 @@ echo "Directory Handle: ";
 var_dump($dh);
 
 echo "\n-- Close directory handle second time: --\n";
-var_dump(closedir($dh));
+try {
+    var_dump(closedir($dh));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 echo "Directory Handle: ";
 var_dump($dh);
 ?>
-===DONE===
 --CLEAN--
 <?php
-$directory = dirname(__FILE__) . "/私はガラスを食べられますclosedir_variation2";
+$directory = __DIR__ . "/私はガラスを食べられますclosedir_variation2";
 rmdir($directory);
 ?>
 --EXPECTF--
@@ -44,8 +53,5 @@ NULL
 Directory Handle: resource(%d) of type (Unknown)
 
 -- Close directory handle second time: --
-
-Warning: closedir(): %s is not a valid Directory resource in %s on line %d
-bool(false)
+closedir(): %s is not a valid Directory resource
 Directory Handle: resource(%d) of type (Unknown)
-===DONE===

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,6 +20,7 @@
 #define PHPDBG_CMD_H
 
 #include "TSRM.h"
+#include "zend_generators.h"
 
 /* {{{ Command and Parameter */
 enum {
@@ -82,10 +81,6 @@ struct _phpdbg_param {
 	(v)->top = NULL; \
 } while(0)
 
-#ifndef YYSTYPE
-#define YYSTYPE phpdbg_param_t
-#endif
-
 #define PHPDBG_ASYNC_SAFE 1
 
 typedef int (*phpdbg_command_handler_t)(const phpdbg_param_t*);
@@ -113,6 +108,7 @@ struct _phpdbg_command_t {
 
 typedef struct {
 	int num;
+	zend_generator *generator;
 	zend_execute_data *execute_data;
 } phpdbg_frame_t;
 /* }}} */

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Stanislav Malyshev <stas@zend.com>                          |
-   |          Dmitry Stogov <dmitry@zend.com>                             |
+   |          Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -31,7 +31,7 @@
 #include "zend_execute.h"
 #include "zend_vm.h"
 
-void zend_optimizer_nop_removal(zend_op_array *op_array)
+void zend_optimizer_nop_removal(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *end, *opline;
 	uint32_t new_count, i, shift;
@@ -66,37 +66,7 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 				zend_op *new_opline = op_array->opcodes + new_count;
 
 				*new_opline = *opline;
-				switch (new_opline->opcode) {
-					case ZEND_JMP:
-					case ZEND_FAST_CALL:
-						ZEND_SET_OP_JMP_ADDR(new_opline, new_opline->op1, ZEND_OP1_JMP_ADDR(opline));
-						break;
-					case ZEND_JMPZNZ:
-						new_opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
-						/* break missing intentionally */
-					case ZEND_JMPZ:
-					case ZEND_JMPNZ:
-					case ZEND_JMPZ_EX:
-					case ZEND_JMPNZ_EX:
-					case ZEND_FE_RESET_R:
-					case ZEND_FE_RESET_RW:
-					case ZEND_JMP_SET:
-					case ZEND_COALESCE:
-					case ZEND_ASSERT_CHECK:
-						ZEND_SET_OP_JMP_ADDR(new_opline, new_opline->op2, ZEND_OP2_JMP_ADDR(opline));
-						break;
-					case ZEND_CATCH:
-						if (!opline->result.num) {
-							new_opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
-						}
-						break;
-					case ZEND_DECLARE_ANON_CLASS:
-					case ZEND_DECLARE_ANON_INHERITED_CLASS:
-					case ZEND_FE_FETCH_R:
-					case ZEND_FE_FETCH_RW:
-						new_opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
-						break;
-				}
+				zend_optimizer_migrate_jump(op_array, new_opline, opline);
 			}
 			new_count++;
 		}
@@ -108,39 +78,7 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 
 		/* update JMPs */
 		for (opline = op_array->opcodes; opline<end; opline++) {
-			switch (opline->opcode) {
-				case ZEND_JMP:
-				case ZEND_FAST_CALL:
-					ZEND_SET_OP_JMP_ADDR(opline, opline->op1, ZEND_OP1_JMP_ADDR(opline) - shiftlist[ZEND_OP1_JMP_ADDR(opline) - op_array->opcodes]);
-					break;
-				case ZEND_JMPZNZ:
-					opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) - shiftlist[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)]);
-					/* break missing intentionally */
-				case ZEND_JMPZ:
-				case ZEND_JMPNZ:
-				case ZEND_JMPZ_EX:
-				case ZEND_JMPNZ_EX:
-				case ZEND_FE_RESET_R:
-				case ZEND_FE_RESET_RW:
-				case ZEND_JMP_SET:
-				case ZEND_COALESCE:
-				case ZEND_ASSERT_CHECK:
-					ZEND_SET_OP_JMP_ADDR(opline, opline->op2, ZEND_OP2_JMP_ADDR(opline) - shiftlist[ZEND_OP2_JMP_ADDR(opline) - op_array->opcodes]);
-					break;
-				case ZEND_DECLARE_ANON_CLASS:
-				case ZEND_DECLARE_ANON_INHERITED_CLASS:
-				case ZEND_FE_FETCH_R:
-				case ZEND_FE_FETCH_RW:
-				case ZEND_CATCH:
-					opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) - shiftlist[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)]);
-					break;
-			}
-		}
-
-		/* update brk/cont array */
-		for (j = 0; j < op_array->last_live_range; j++) {
-			op_array->live_range[j].start -= shiftlist[op_array->live_range[j].start];
-			op_array->live_range[j].end   -= shiftlist[op_array->live_range[j].end];
+			zend_optimizer_shift_jump(op_array, opline, shiftlist);
 		}
 
 		/* update try/catch array */
@@ -154,12 +92,13 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 		}
 
 		/* update early binding list */
-		if (op_array->early_binding != (uint32_t)-1) {
-			uint32_t *opline_num = &op_array->early_binding;
+		if (op_array->fn_flags & ZEND_ACC_EARLY_BINDING) {
+			uint32_t *opline_num = &ctx->script->first_early_binding_opline;
 
+			ZEND_ASSERT(op_array == &ctx->script->main_op_array);
 			do {
 				*opline_num -= shiftlist[*opline_num];
-				opline_num = &ZEND_RESULT(&op_array->opcodes[*opline_num]).opline_num;
+				opline_num = &op_array->opcodes[*opline_num].result.opline_num;
 			} while (*opline_num != (uint32_t)-1);
 		}
 	}

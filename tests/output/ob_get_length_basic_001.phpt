@@ -2,10 +2,10 @@
 Test return type and value, as well as basic behaviour, of ob_get_length()
 --FILE--
 <?php
-/* 
+/*
  * proto int ob_get_length(void)
  * Function is implemented in main/output.c
-*/ 
+*/
 
 echo "No output buffers\n";
 var_dump(ob_get_length());
@@ -25,7 +25,7 @@ ob_end_flush();
 echo "No output buffers\n";
 var_dump(ob_get_length());
 ?>
---EXPECTF--
+--EXPECT--
 No output buffers
 bool(false)
 int(0)

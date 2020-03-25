@@ -1,15 +1,13 @@
 --TEST--
 ZE2 object cloning, 2
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 class test {
-	public $p1 = 1;
-	public $p2 = 2;
-	public $p3;
-	public function __clone() {
-	}
+    public $p1 = 1;
+    public $p2 = 2;
+    public $p3;
+    public function __clone() {
+    }
 };
 
 $obj = new test;

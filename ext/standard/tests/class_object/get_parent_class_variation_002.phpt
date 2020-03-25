@@ -3,17 +3,17 @@ Test get_parent_class() function : usage variations  - unexpected argument type.
 --FILE--
 <?php
 /* Prototype  : proto string get_parent_class([mixed object])
- * Description: Retrieves the parent class name for object or class or current scope. 
+ * Description: Retrieves the parent class name for object or class or current scope.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-function __autoload($className) {
-	echo "In __autoload($className)\n";
-}
+spl_autoload_register(function ($className) {
+    echo "In autoload($className)\n";
+});
 
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+function test_error_handler($err_no, $err_msg, $filename, $linenum) {
+    echo "Error: $err_no - $err_msg\n";
 }
 set_error_handler('test_error_handler');
 
@@ -77,16 +77,16 @@ $values = array(
 // loop through each element of the array for object
 
 foreach($values as $value) {
-      echo "\nArg value $value \n";
+      echo "\nArg value " . (is_object($value) ? get_class($value) : $value) . " \n";
       var_dump( get_parent_class($value) );
 };
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing get_parent_class() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(68)
-Error: 8 - Undefined variable: unset_var, %s(71)
+Error: 2 - Undefined variable: undefined_var
+Error: 2 - Undefined variable: unset_var
 
 Arg value 0 
 bool(false)
@@ -114,23 +114,23 @@ bool(false)
 
 Arg value 0.5 
 bool(false)
-Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
+Error: 2 - Array to string conversion
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
+Error: 2 - Array to string conversion
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
+Error: 2 - Array to string conversion
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
+Error: 2 - Array to string conversion
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %sget_parent_class_variation_002.php(%d)
+Error: 2 - Array to string conversion
 
 Arg value Array 
 bool(false)
@@ -160,15 +160,14 @@ Arg value
 bool(false)
 
 Arg value string 
-In __autoload(string)
+In autoload(string)
 bool(false)
 
 Arg value String 
-In __autoload(String)
+In autoload(String)
 bool(false)
-Error: 4096 - Object of class stdClass could not be converted to string, %s(77)
 
-Arg value  
+Arg value stdClass 
 bool(false)
 
 Arg value  

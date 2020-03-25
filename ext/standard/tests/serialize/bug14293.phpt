@@ -1,19 +1,19 @@
 --TEST--
 Bug #14293 (serialize() and __sleep())
 --FILE--
-<?php 
+<?php
 class t
 {
-	function __construct()
-	{
-		$this->a = 'hello';
-	}
+    function __construct()
+    {
+        $this->a = 'hello';
+    }
 
-	function __sleep()
-	{
-		echo "__sleep called\n";
-		return array('a','b');
-	}	
+    function __sleep()
+    {
+        echo "__sleep called\n";
+        return array('a','b');
+    }
 }
 
 $t = new t();

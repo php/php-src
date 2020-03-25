@@ -39,9 +39,7 @@ var_dump(next($a));
 current_variation5($a);
 
 ?>
-===DONE===
-<?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 *** Testing current() : usage variations ***
 
 -- Function: reference parameter --
@@ -55,4 +53,3 @@ string(3) "yes"
 string(5) "maybe"
 string(5) "maybe"
 string(2) "no"
-===DONE===

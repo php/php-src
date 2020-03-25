@@ -4,27 +4,25 @@ property_exists() tests
 <?php
 
 class foo {
-	public $pp1 = 1;
-	private $pp2 = 2;
-	protected $pp3 = 3;
+    public $pp1 = 1;
+    private $pp2 = 2;
+    protected $pp3 = 3;
 
-	function bar() {
-		var_dump(property_exists("foo","pp1"));
-		var_dump(property_exists("foo","pp2"));
-		var_dump(property_exists("foo","pp3"));
-	}
+    function bar() {
+        var_dump(property_exists("foo","pp1"));
+        var_dump(property_exists("foo","pp2"));
+        var_dump(property_exists("foo","pp3"));
+    }
 }
 
 class bar extends foo {
-	function test() {
-		var_dump(property_exists("foo","pp1"));
-		var_dump(property_exists("foo","pp2"));
-		var_dump(property_exists("foo","pp3"));
-	}
+    function test() {
+        var_dump(property_exists("foo","pp1"));
+        var_dump(property_exists("foo","pp2"));
+        var_dump(property_exists("foo","pp3"));
+    }
 }
 
-var_dump(property_exists());
-var_dump(property_exists(""));
 var_dump(property_exists("foo","pp1"));
 var_dump(property_exists("foo","pp2"));
 var_dump(property_exists("foo","pp3"));
@@ -52,12 +50,7 @@ $bar->test();
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Warning: property_exists() expects exactly 2 parameters, 0 given in %s on line %d
-NULL
-
-Warning: property_exists() expects exactly 2 parameters, 1 given in %s on line %d
-NULL
+--EXPECTF--
 bool(true)
 bool(true)
 bool(true)

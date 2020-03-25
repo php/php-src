@@ -4,11 +4,11 @@ Bug #24063 (serialize() missing 0 after the . on scientific notation)
 serialize_precision=100
 precision=12
 --FILE--
-<?php 
+<?php
 $v = 1;
 for ($i = 1; $i < 10; $i++) {
-	$v /= 10;
-	echo "{$v} ".unserialize(serialize($v))."\n";
+    $v /= 10;
+    echo "{$v} ".unserialize(serialize($v))."\n";
 }
 ?>
 --EXPECT--

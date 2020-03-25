@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Authors: Gustavo Lopes    <cataphract@php.net>                       |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -71,7 +67,7 @@ int php_string_to_if_index(const char *val, unsigned *out)
 	ind = if_nametoindex(val);
 	if (ind == 0) {
 		php_error_docref(NULL, E_WARNING,
-			"no interface with name \"%s\" could be found", val);
+			"No interface with name \"%s\" could be found", val);
 		return FAILURE;
 	} else {
 		*out = ind;
@@ -79,7 +75,7 @@ int php_string_to_if_index(const char *val, unsigned *out)
 	}
 #else
 	php_error_docref(NULL, E_WARNING,
-			"this platform does not support looking up an interface by "
+			"This platform does not support looking up an interface by "
 			"name, an integer interface index must be supplied instead");
 	return FAILURE;
 #endif
@@ -92,7 +88,7 @@ static int php_get_if_index_from_zval(zval *val, unsigned *out)
 	if (Z_TYPE_P(val) == IS_LONG) {
 		if (Z_LVAL_P(val) < 0 || (zend_ulong)Z_LVAL_P(val) > UINT_MAX) {
 			php_error_docref(NULL, E_WARNING,
-				"the interface index cannot be negative or larger than %u;"
+				"The interface index cannot be negative or larger than %u;"
 				" given " ZEND_LONG_FMT, UINT_MAX, Z_LVAL_P(val));
 			ret = FAILURE;
 		} else {
@@ -100,12 +96,10 @@ static int php_get_if_index_from_zval(zval *val, unsigned *out)
 			ret = SUCCESS;
 		}
 	} else {
-		if (Z_REFCOUNTED_P(val)) {
-			Z_ADDREF_P(val);
-		}
-		convert_to_string_ex(val);
-		ret = php_string_to_if_index(Z_STRVAL_P(val), out);
-		zval_ptr_dtor(val);
+		zend_string *tmp_str;
+		zend_string *str = zval_get_tmp_string(val, &tmp_str);
+		ret = php_string_to_if_index(ZSTR_VAL(str), out);
+		zend_tmp_string_release(tmp_str);
 	}
 
 	return ret;
@@ -130,20 +124,18 @@ static int php_get_address_from_array(const HashTable *ht, const char *key,
 	php_socket *sock, php_sockaddr_storage *ss, socklen_t *ss_len)
 {
 	zval *val;
+	zend_string *str, *tmp_str;
 
 	if ((val = zend_hash_str_find(ht, key, strlen(key))) == NULL) {
-		php_error_docref(NULL, E_WARNING, "no key \"%s\" passed in optval", key);
+		php_error_docref(NULL, E_WARNING, "No key \"%s\" passed in optval", key);
 		return FAILURE;
 	}
-	if (Z_REFCOUNTED_P(val)) {
-		Z_ADDREF_P(val);
-	}
-	convert_to_string_ex(val);
-	if (!php_set_inet46_addr(ss, ss_len, Z_STRVAL_P(val), sock)) {
-		zval_ptr_dtor(val);
+	str = zval_get_tmp_string(val, &tmp_str);
+	if (!php_set_inet46_addr(ss, ss_len, ZSTR_VAL(str), sock)) {
+		zend_tmp_string_release(tmp_str);
 		return FAILURE;
 	}
-	zval_ptr_dtor(val);
+	zend_tmp_string_release(tmp_str);
 	return SUCCESS;
 }
 
@@ -229,7 +221,7 @@ mcast_req_fun:
 #endif
 	default:
 		php_error_docref(NULL, E_WARNING,
-			"unexpected option in php_do_mcast_opt (level %d, option %d). "
+			"Unexpected option in php_do_mcast_opt (level %d, option %d). "
 			"This is a bug.", level, optname);
 		return FAILURE;
 	}
@@ -469,8 +461,9 @@ static int _php_mcast_join_leave(
 			sizeof(greq));
 #else
 	if (sock->type == AF_INET) {
-		struct ip_mreq mreq = {0};
+		struct ip_mreq mreq;
 		struct in_addr addr;
+		memset(&mreq, 0, sizeof(struct ip_mreq));
 
 		assert(group_len == sizeof(struct sockaddr_in));
 
@@ -489,7 +482,8 @@ static int _php_mcast_join_leave(
 	}
 #if HAVE_IPV6
 	else if (sock->type == AF_INET6) {
-		struct ipv6_mreq mreq = {0};
+		struct ipv6_mreq mreq;
+		memset(&mreq, 0, sizeof(struct ipv6_mreq));
 
 		assert(group_len == sizeof(struct sockaddr_in6));
 
@@ -627,7 +621,7 @@ static int _php_source_op_to_ipv4_op(enum source_op sop)
 
 #endif /* HAS_MCAST_EXT */
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 int php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struct in_addr *out_addr)
 {
 	MIB_IPADDRTABLE *addr_table;
@@ -652,6 +646,7 @@ retry:
 		goto retry;
 	}
 	if (retval != NO_ERROR) {
+		efree(addr_table);
 		php_error_docref(NULL, E_WARNING,
 			"GetIpAddrTable failed with error %lu", retval);
 		return FAILURE;
@@ -660,9 +655,11 @@ retry:
 		MIB_IPADDRROW r = addr_table->table[i];
 		if (r.dwIndex == if_index) {
 			out_addr->s_addr = r.dwAddr;
+			efree(addr_table);
 			return SUCCESS;
 		}
 	}
+	efree(addr_table);
 	php_error_docref(NULL, E_WARNING,
 		"No interface with index %u was found", if_index);
 	return FAILURE;
@@ -692,6 +689,7 @@ retry:
 		goto retry;
 	}
 	if (retval != NO_ERROR) {
+		efree(addr_table);
 		php_error_docref(NULL, E_WARNING,
 			"GetIpAddrTable failed with error %lu", retval);
 		return FAILURE;
@@ -700,9 +698,11 @@ retry:
 		MIB_IPADDRROW r = addr_table->table[i];
 		if (r.dwAddr == addr->s_addr) {
 			*if_index = r.dwIndex;
+			efree(addr_table);
 			return SUCCESS;
 		}
 	}
+	efree(addr_table);
 
 	{
 		char addr_str[17] = {0};
@@ -792,28 +792,27 @@ int php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, unsigned *i
 	for (p = if_conf.ifc_buf;
 		 p < if_conf.ifc_buf + if_conf.ifc_len;
 		 p += entry_len) {
-		struct ifreq *cur_req;
-
-		/* let's hope the pointer is aligned */
-		cur_req = (struct ifreq*) p;
+		/* p may be misaligned on macos. */
+		struct ifreq cur_req;
+		memcpy(&cur_req, p, sizeof(struct ifreq));
 
 #ifdef HAVE_SOCKADDR_SA_LEN
-		entry_len = cur_req->ifr_addr.sa_len + sizeof(cur_req->ifr_name);
+		entry_len = cur_req.ifr_addr.sa_len + sizeof(cur_req.ifr_name);
 #else
 		/* if there's no sa_len, assume the ifr_addr field is a sockaddr */
-		entry_len = sizeof(struct sockaddr) + sizeof(cur_req->ifr_name);
+		entry_len = sizeof(struct sockaddr) + sizeof(cur_req.ifr_name);
 #endif
-		entry_len = MAX(entry_len, sizeof(*cur_req));
+		entry_len = MAX(entry_len, sizeof(cur_req));
 
-		if ((((struct sockaddr*)&cur_req->ifr_addr)->sa_family == AF_INET) &&
-				(((struct sockaddr_in*)&cur_req->ifr_addr)->sin_addr.s_addr ==
+		if ((((struct sockaddr*)&cur_req.ifr_addr)->sa_family == AF_INET) &&
+				(((struct sockaddr_in*)&cur_req.ifr_addr)->sin_addr.s_addr ==
 					addr->s_addr)) {
 #if defined(SIOCGIFINDEX)
-			if (ioctl(php_sock->bsd_socket, SIOCGIFINDEX, (char*)cur_req)
+			if (ioctl(php_sock->bsd_socket, SIOCGIFINDEX, (char*)&cur_req)
 					== -1) {
 #elif defined(HAVE_IF_NAMETOINDEX)
 			unsigned index_tmp;
-			if ((index_tmp = if_nametoindex(cur_req->ifr_name)) == 0) {
+			if ((index_tmp = if_nametoindex(cur_req.ifr_name)) == 0) {
 #else
 #error Neither SIOCGIFINDEX nor if_nametoindex are available
 #endif
@@ -823,7 +822,7 @@ int php_add4_to_if_index(struct in_addr *addr, php_socket *php_sock, unsigned *i
 				goto err;
 			} else {
 #if defined(SIOCGIFINDEX)
-				*if_index = cur_req->ifr_ifindex;
+				*if_index = cur_req.ifr_ifindex;
 #else
 				*if_index = index_tmp;
 #endif

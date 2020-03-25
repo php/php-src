@@ -20,5 +20,5 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Throws DOMException for offset too large

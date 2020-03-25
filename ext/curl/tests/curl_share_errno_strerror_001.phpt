@@ -5,10 +5,6 @@ curl_share_errno and curl_share_strerror basic test
 if (!extension_loaded("curl")) {
 	    exit("skip curl extension not loaded");
 }
-$curl_version = curl_version();
-if ($curl_version['version_number'] < 0x070c00) {
-	exit("skip: test works only with curl >= 7.12.0");
-}
 ?>
 --FILE--
 <?php
@@ -23,7 +19,7 @@ $errno = curl_share_errno($sh);
 echo $errno . PHP_EOL;
 echo curl_share_strerror($errno) . PHP_EOL;
 ?>
---EXPECTF--
+--EXPECT--
 0
 No error
 1

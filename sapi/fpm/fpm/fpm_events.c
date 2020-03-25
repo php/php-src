@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_events.c,v 1.21.2.2 2008/12/13 03:21:18 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"
@@ -36,6 +34,7 @@
 #define fpm_event_set_timeout(ev, now) timeradd(&(now), &(ev)->frequency, &(ev)->timeout);
 
 static void fpm_event_cleanup(int which, void *arg);
+static void fpm_postponed_children_bury(struct fpm_event_s *ev, short which, void *arg);
 static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg);
 static struct fpm_event_s *fpm_event_queue_isset(struct fpm_event_queue_s *queue, struct fpm_event_s *ev);
 static int fpm_event_queue_add(struct fpm_event_queue_s **queue, struct fpm_event_s *ev);
@@ -45,11 +44,18 @@ static void fpm_event_queue_destroy(struct fpm_event_queue_s **queue);
 static struct fpm_event_module_s *module;
 static struct fpm_event_queue_s *fpm_event_queue_timer = NULL;
 static struct fpm_event_queue_s *fpm_event_queue_fd = NULL;
+static struct fpm_event_s children_bury_timer;
 
 static void fpm_event_cleanup(int which, void *arg) /* {{{ */
 {
 	fpm_event_queue_destroy(&fpm_event_queue_timer);
 	fpm_event_queue_destroy(&fpm_event_queue_fd);
+}
+/* }}} */
+
+static void fpm_postponed_children_bury(struct fpm_event_s *ev, short which, void *arg) /* {{{ */
+{
+	fpm_children_bury();
 }
 /* }}} */
 
@@ -74,7 +80,12 @@ static void fpm_got_signal(struct fpm_event_s *ev, short which, void *arg) /* {{
 		switch (c) {
 			case 'C' :                  /* SIGCHLD */
 				zlog(ZLOG_DEBUG, "received SIGCHLD");
-				fpm_children_bury();
+				/* epoll_wait() may report signal fd before read events for a finished child
+				 * in the same bunch of events. Prevent immediate free of the child structure
+				 * and so the fpm_event_s instance. Otherwise use after free happens during
+				 * attempt to process following read event. */
+				fpm_event_set_timer(&children_bury_timer, 0, &fpm_postponed_children_bury, NULL);
+				fpm_event_add(&children_bury_timer, 0);
 				break;
 			case 'I' :                  /* SIGINT  */
 				zlog(ZLOG_DEBUG, "received SIGINT");
@@ -422,17 +433,16 @@ void fpm_event_loop(int err) /* {{{ */
 		/* trigger timers */
 		q = fpm_event_queue_timer;
 		while (q) {
+			struct fpm_event_queue_s *next = q->next;
 			fpm_clock_get(&now);
 			if (q->ev) {
 				if (timercmp(&now, &q->ev->timeout, >) || timercmp(&now, &q->ev->timeout, ==)) {
-					fpm_event_fire(q->ev);
-					/* sanity check */
-					if (fpm_globals.parent_pid != getpid()) {
-						return;
-					}
-					if (q->ev->flags & FPM_EV_PERSIST) {
-						fpm_event_set_timeout(q->ev, now);
-					} else { /* delete the event */
+					struct fpm_event_s *ev = q->ev;
+					if (ev->flags & FPM_EV_PERSIST) {
+						fpm_event_set_timeout(ev, now);
+					} else {
+						/* Delete the event. Make sure this happens before it is fired,
+						 * so that the event callback may register the same timer again. */
 						q2 = q;
 						if (q->prev) {
 							q->prev->next = q->next;
@@ -446,13 +456,18 @@ void fpm_event_loop(int err) /* {{{ */
 								fpm_event_queue_timer->prev = NULL;
 							}
 						}
-						q = q->next;
 						free(q2);
-						continue;
+					}
+
+					fpm_event_fire(ev);
+
+					/* sanity check */
+					if (fpm_globals.parent_pid != getpid()) {
+						return;
 					}
 				}
 			}
-			q = q->next;
+			q = next;
 		}
 	}
 }
@@ -537,4 +552,3 @@ int fpm_event_del(struct fpm_event_s *ev) /* {{{ */
 	return 0;
 }
 /* }}} */
-

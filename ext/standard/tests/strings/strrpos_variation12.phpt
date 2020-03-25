@@ -7,8 +7,8 @@ Test strrpos() function : usage variations - checking binary safe with 'haystack
  * Source code: ext/standard/string.c
 */
 
-/* Test strrpos() function with null terminated strings for 'haystack' argument 
- *  in order to check the binary safe 
+/* Test strrpos() function with null terminated strings for 'haystack' argument
+ *  in order to check the binary safe
 */
 
 echo "*** Test strrpos() function: binary safe ***\n";
@@ -28,7 +28,7 @@ for($index = 0; $index < count($haystacks); $index++ ) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Test strrpos() function: binary safe ***
 int(5)
 int(5)

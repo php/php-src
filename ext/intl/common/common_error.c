@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -28,6 +26,10 @@
  */
 PHP_FUNCTION( intl_get_error_code )
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	RETURN_LONG( intl_error_get_code( NULL ) );
 }
 /* }}} */
@@ -37,6 +39,10 @@ PHP_FUNCTION( intl_get_error_code )
  */
 PHP_FUNCTION( intl_get_error_message )
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
 	RETURN_STR(intl_error_get_message( NULL ));
 }
 /* }}} */
@@ -54,10 +60,7 @@ PHP_FUNCTION( intl_is_failure )
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "l",
 		&err_code ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intl_is_failure: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL( U_FAILURE( err_code ) );
@@ -76,10 +79,7 @@ PHP_FUNCTION( intl_error_name )
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "l",
 		&err_code ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"intl_error_name: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	RETURN_STRING( (char*)u_errorName( err_code ) );
@@ -241,9 +241,7 @@ void intl_expose_icu_error_codes( INIT_FUNC_ARGS )
 	INTL_EXPOSE_CONST( U_IDNA_VERIFICATION_ERROR );
 	INTL_EXPOSE_CONST( U_IDNA_LABEL_TOO_LONG_ERROR );
 	INTL_EXPOSE_CONST( U_IDNA_ZERO_LENGTH_LABEL_ERROR );
-#if U_ICU_VERSION_MAJOR_NUM > 3 || U_ICU_VERSION_MAJOR_NUM == 3 && U_ICU_VERSION_MINOR_NUM >= 8
 	INTL_EXPOSE_CONST( U_IDNA_DOMAIN_NAME_TOO_LONG_ERROR );
-#endif
 	INTL_EXPOSE_CONST( U_IDNA_ERROR_LIMIT );
 
 	/* Aliases for StringPrep */
@@ -256,12 +254,3 @@ void intl_expose_icu_error_codes( INIT_FUNC_ARGS )
 	#undef INTL_EXPOSE_CONST
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

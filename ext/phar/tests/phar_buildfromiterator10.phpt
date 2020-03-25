@@ -10,30 +10,27 @@ phar.readonly=0
 --FILE--
 <?php
 try {
-	chdir(dirname(__FILE__));
-	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator10.phar');
-	$dir = new RecursiveDirectoryIterator('.');
-	$iter = new RecursiveIteratorIterator($dir);
-	$a = $phar->buildFromIterator(new RegexIterator($iter, '/_\d{3}\.phpt$/'), dirname(__FILE__) . DIRECTORY_SEPARATOR);
-	asort($a);
-	var_dump($a);
+    chdir(__DIR__);
+    $phar = new Phar(__DIR__ . '/buildfromiterator10.phar');
+    $dir = new RecursiveDirectoryIterator('.');
+    $iter = new RecursiveIteratorIterator($dir);
+    $a = $phar->buildFromIterator(new RegexIterator($iter, '/_\d{3}\.phpt$/'), __DIR__ . DIRECTORY_SEPARATOR);
+    asort($a);
+    var_dump($a);
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/buildfromiterator10.phar');
+<?php
+unlink(__DIR__ . '/buildfromiterator10.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
-array(35) {
+array(34) {
   ["phar_ctx_001.phpt"]=>
   string(%d) "%sphar_ctx_001.phpt"
-  ["phar_get_supported_signatures_001.phpt"]=>
-  string(%d) "%sphar_get_supported_signatures_001.phpt"
   ["phar_get_supported_signatures_002.phpt"]=>
   string(%d) "%sphar_get_supported_signatures_002.phpt"
   ["phar_oo_001.phpt"]=>
@@ -101,4 +98,3 @@ array(35) {
   ["zip/corrupt_010.phpt"]=>
   string(%d) "%szip%ccorrupt_010.phpt"
 }
-===DONE===

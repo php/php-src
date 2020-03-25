@@ -2,7 +2,7 @@
 No router, no script
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -28,9 +28,9 @@ Content-Length: 3
 a=b
 HEADER
 )) {
-	while (!feof($fp)) {
-		$output .= fgets($fp);
-	}
+    while (!feof($fp)) {
+        $output .= fgets($fp);
+    }
 }
 
 echo preg_replace("/<style>(.*?)<\/style>/s", "<style>AAA</style>", $output), "\n";
@@ -50,9 +50,9 @@ Host: {$host}
 
 HEADER
 )) {
-	while (!feof($fp)) {
-		$output .= fgets($fp);
-	}
+    while (!feof($fp)) {
+        $output .= fgets($fp);
+    }
 }
 
 echo preg_replace("/<style>(.*?)<\/style>/s", "<style>AAA</style>", $output), "\n";
@@ -71,16 +71,15 @@ Host: {$host}
 
 HEADER
 )) {
-	while (!feof($fp)) {
-		$output .= fgets($fp);
-	}
+    while (!feof($fp)) {
+        $output .= fgets($fp);
+    }
 }
 
 echo preg_replace("/<style>(.*?)<\/style>/s", "<style>AAA</style>", $output), "\n";
 fclose($fp);
 ?>
 --EXPECTF--
-
 HTTP/1.1 404 Not Found
 Host: %s
 Date: %s
@@ -108,4 +107,3 @@ Content-Length: %d
 
 <!doctype html><html><head><title>404 Not Found</title><style>AAA</style>
 </head><body><h1>Not Found</h1><p>The requested resource <code class="url">/main/foo/bar</code> was not found on this server.</p></body></html>
-

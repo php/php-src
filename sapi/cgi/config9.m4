@@ -1,22 +1,13 @@
-dnl
-dnl $Id$
-dnl
+PHP_ARG_ENABLE([cgi],,
+  [AS_HELP_STRING([--disable-cgi],
+    [Disable building CGI version of PHP])],
+  [yes],
+  [no])
 
-PHP_ARG_ENABLE(cgi,,
-[  --disable-cgi           Disable building CGI version of PHP], yes, no)
-
-dnl
-dnl CGI setup
-dnl
+dnl CGI setup.
 AC_MSG_CHECKING(for CGI build)
 if test "$PHP_CGI" != "no"; then
     AC_MSG_RESULT(yes)
-    AC_MSG_CHECKING([for socklen_t in sys/socket.h])
-    AC_EGREP_HEADER([socklen_t], [sys/socket.h],
-      [AC_MSG_RESULT([yes])
-       AC_DEFINE([HAVE_SOCKLEN_T], [1],
-        [Define if the socklen_t typedef is in sys/socket.h])],
-      AC_MSG_RESULT([no]))
 
     AC_MSG_CHECKING([for sun_len in sys/un.h])
     AC_EGREP_HEADER([sun_len], [sys/un.h],
@@ -27,9 +18,9 @@ if test "$PHP_CGI" != "no"; then
 
     AC_MSG_CHECKING([whether cross-process locking is required by accept()])
     case "`uname -sr`" in
-      IRIX\ 5.* | SunOS\ 5.* | UNIX_System_V\ 4.0)	
+      IRIX\ 5.* | SunOS\ 5.* | UNIX_System_V\ 4.0)
         AC_MSG_RESULT([yes])
-        AC_DEFINE([USE_LOCKING], [1], 
+        AC_DEFINE([USE_LOCKING], [1],
           [Define if cross-process locking is required by accept()])
       ;;
       *)
@@ -39,7 +30,7 @@ if test "$PHP_CGI" != "no"; then
 
     PHP_ADD_MAKEFILE_FRAGMENT($abs_srcdir/sapi/cgi/Makefile.frag)
 
-    dnl Set filename
+    dnl Set filename.
     case $host_alias in
       *cygwin* )
         SAPI_CGI_PATH=sapi/cgi/php-cgi.exe
@@ -49,7 +40,7 @@ if test "$PHP_CGI" != "no"; then
         ;;
     esac
 
-    dnl Select SAPI
+    dnl Select SAPI.
     PHP_SELECT_SAPI(cgi, program, cgi_main.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, '$(SAPI_CGI_PATH)')
 
     case $host_alias in
@@ -64,15 +55,15 @@ if test "$PHP_CGI" != "no"; then
         BUILD_CGI="\$(CC) \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(NATIVE_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_CGI_OBJS:.lo=.o) \$(PHP_FRAMEWORKS) \$(EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_CGI_PATH)"
       ;;
       *)
-        BUILD_CGI="\$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS) \$(PHP_BINARY_OBJS) \$(PHP_FASTCGI_OBJS) \$(PHP_CGI_OBJS) \$(EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_CGI_PATH)"
+        BUILD_CGI="\$(LIBTOOL) --mode=link \$(CC) -export-dynamic \$(CFLAGS_CLEAN) \$(EXTRA_CFLAGS) \$(EXTRA_LDFLAGS_PROGRAM) \$(LDFLAGS) \$(PHP_RPATHS) \$(PHP_GLOBAL_OBJS:.lo=.o) \$(PHP_BINARY_OBJS:.lo=.o) \$(PHP_FASTCGI_OBJS:.lo=.o) \$(PHP_CGI_OBJS:.lo=.o) \$(EXTRA_LIBS) \$(ZEND_EXTRA_LIBS) -o \$(SAPI_CGI_PATH)"
       ;;
     esac
 
-    dnl Expose to Makefile
+    dnl Expose to Makefile.
     PHP_SUBST(SAPI_CGI_PATH)
     PHP_SUBST(BUILD_CGI)
 
     PHP_OUTPUT(sapi/cgi/php-cgi.1)
 else
-  AC_MSG_RESULT(yes)
+  AC_MSG_RESULT(no)
 fi

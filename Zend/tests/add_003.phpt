@@ -1,5 +1,5 @@
 --TEST--
-adding arrays to objects 
+adding arrays to objects
 --FILE--
 <?php
 
@@ -9,9 +9,9 @@ $o = new stdclass;
 $o->prop = "value";
 
 try {
-	var_dump($o + $a);
+    var_dump($o + $a);
 } catch (Error $e) {
-	echo "\nException: " . $e->getMessage() . "\n";
+    echo "\nException: " . $e->getMessage() . "\n";
 }
 
 $c = $o + $a;
@@ -19,12 +19,12 @@ var_dump($c);
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Notice: Object of class stdClass could not be converted to int in %sadd_003.php on line %d
+--EXPECTF--
+Notice: Object of class stdClass could not be converted to number in %sadd_003.php on line %d
 
 Exception: Unsupported operand types
 
-Notice: Object of class stdClass could not be converted to int in %s on line %d
+Notice: Object of class stdClass could not be converted to number in %s on line %d
 
 Fatal error: Uncaught Error: Unsupported operand types in %s:%d
 Stack trace:

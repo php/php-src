@@ -19,10 +19,10 @@ $arg2 = array(021,0347);
 $arg3 = array(021,0347,0567);
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_basic8.txt';
+$data_file = __DIR__ . '/vfprintf_basic8.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
-   
+
 vfprintf($fp, $format1,$arg1);
 fprintf($fp, "\n");
 
@@ -37,10 +37,8 @@ print_r(file_get_contents($data_file));
 
 unlink($data_file);
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : basic functionality - using octal format ***
 21
 21 347
 21 347 567
-===DONE===

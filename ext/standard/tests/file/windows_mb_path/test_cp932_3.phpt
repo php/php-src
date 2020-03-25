@@ -2,7 +2,7 @@
 cp932 cmd test
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(932, "ansi");
 
 ?>
+--CONFLICTS--
+file_cp932
 --INI--
 internal_encoding=cp932
 --FILE--
@@ -19,7 +21,7 @@ internal_encoding=cp932
 #vim: set encoding=cp932
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc"; 
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 
 $item = "テストマルチバイト・パス77"; // cp932 string
@@ -34,10 +36,8 @@ system("dir /b " . $fn);
 remove_data("file_cp932");
 
 ?>
-===DONE===
---EXPECTF--	
+--EXPECTF--
 string(%d) "%s\テストマルチバイト・パス77"
 bool(true)
 bool(true)
 テストマルチバイト・パス77
-===DONE===

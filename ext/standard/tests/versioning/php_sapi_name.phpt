@@ -4,6 +4,5 @@ php_sapi_name test
 <?php
 
 var_dump(php_sapi_name());
-
 --EXPECTF--
-%unicode|string%(3) "c%ci"
+string(3) "c%ci"

@@ -1,4 +1,3 @@
-// $Id$
 // vim:ft=javascript
 
 ARG_WITH("xmlrpc", "XMLRPC-EPI support", "no");
@@ -13,10 +12,9 @@ if (PHP_XMLRPC != "no") {
 		ADD_SOURCES(configure_module_dirname + "/libxmlrpc", "base64.c simplestring.c xml_to_dandarpc.c \
 		xmlrpc_introspection.c encodings.c system_methods.c xml_to_xmlrpc.c \
 		queue.c xml_element.c xmlrpc.c xml_to_soap.c", "xmlrpc");
-
+		AC_DEFINE("HAVE_XMLRPC_BUNDLED", 1);
 	} else {
 		WARNING("xmlrpc support can't be enabled, libraries or headers are missing")
 		PHP_XMLRPC = "no";
 	}
 }
-

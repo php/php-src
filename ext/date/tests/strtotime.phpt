@@ -10,7 +10,7 @@ $d[] = strtotime("@1121373041");
 $d[] = strtotime("@1121373041 CEST");
 
 foreach($d as $date) {
-	echo date(DATE_ISO8601, $date), "\n";
+    echo date(DATE_ISO8601, $date), "\n";
 }
 ?>
 --EXPECT--

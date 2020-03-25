@@ -3,7 +3,7 @@ Test array_key_exists() function : usage variations - Pass different data types 
 --FILE--
 <?php
 /* Prototype  : bool array_key_exists(mixed $key, array $search)
- * Description: Checks if the given key or index exists in the array 
+ * Description: Checks if the given key or index exists in the array
  * Source code: ext/standard/array.c
  * Alias to functions: key_exists
  */
@@ -15,7 +15,7 @@ Test array_key_exists() function : usage variations - Pass different data types 
 echo "*** Testing array_key_exists() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$search = array ('zero', 'key' => 'val', 'two');
+$search = array ('zero', 'key' => 'val', 'two', 10 => 'value');
 
 //get an unset variable
 $unset_var = 10;
@@ -62,7 +62,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -72,7 +72,7 @@ $inputs = array(
 /*19*/ "key",
        'key',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -90,7 +90,11 @@ $inputs = array(
 $iterator = 1;
 foreach($inputs as $input) {
   echo "\n-- Iteration $iterator --\n";
-  var_dump( array_key_exists($input, $search) );
+  try {
+      var_dump( array_key_exists($input, $search) );
+  } catch (TypeError $exception) {
+      echo $exception->getMessage() . "\n";
+  }
   $iterator++;
 };
 
@@ -98,7 +102,6 @@ fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_key_exists() : usage variations ***
 
@@ -115,29 +118,19 @@ bool(false)
 bool(false)
 
 -- Iteration 5 --
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+bool(true)
 
 -- Iteration 6 --
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
 bool(false)
 
 -- Iteration 7 --
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
 bool(false)
 
 -- Iteration 8 --
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+bool(true)
 
 -- Iteration 9 --
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+bool(true)
 
 -- Iteration 10 --
 bool(false)
@@ -146,24 +139,16 @@ bool(false)
 bool(false)
 
 -- Iteration 12 --
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+bool(true)
 
 -- Iteration 13 --
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+bool(true)
 
 -- Iteration 14 --
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+bool(true)
 
 -- Iteration 15 --
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+bool(true)
 
 -- Iteration 16 --
 bool(false)
@@ -172,9 +157,7 @@ bool(false)
 bool(false)
 
 -- Iteration 18 --
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+Illegal offset type
 
 -- Iteration 19 --
 bool(true)
@@ -186,9 +169,7 @@ bool(true)
 bool(true)
 
 -- Iteration 22 --
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+Illegal offset type
 
 -- Iteration 23 --
 bool(false)
@@ -198,6 +179,6 @@ bool(false)
 
 -- Iteration 25 --
 
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 bool(false)
 Done

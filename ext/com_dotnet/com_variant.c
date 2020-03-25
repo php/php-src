@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Author: Wez Furlong <wez@thebrainroom.com>                           |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -176,7 +172,6 @@ PHP_COM_DOTNET_API void php_com_variant_from_zval(VARIANT *v, zval *z, int codep
 			break;
 
 		case IS_RESOURCE:
-		case IS_CONSTANT:
 		case IS_CONSTANT_AST:
 		default:
 			V_VT(v) = VT_NULL;
@@ -455,8 +450,7 @@ PHP_FUNCTION(com_variant_create_instance)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(),
 		"z!|ll", &zvalue, &vt, &codepage)) {
-			php_com_throw_exception(E_INVALIDARG, "Invalid arguments");
-			return;
+			RETURN_THROWS();
 	}
 
 	php_com_initialize();
@@ -493,7 +487,7 @@ PHP_FUNCTION(com_variant_create_instance)
 
 				werr = php_win32_error_to_msg(res);
 				spprintf(&msg, 0, "Variant type conversion failed: %s", werr);
-				LocalFree(werr);
+				php_win32_error_msg_free(werr);
 
 				php_com_throw_exception(res, msg);
 				efree(msg);
@@ -517,7 +511,7 @@ PHP_FUNCTION(variant_set)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(),
 			"Oz!", &zobj, php_com_variant_class_entry, &zvalue)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	obj = CDNO_FETCH(zobj);
@@ -595,7 +589,7 @@ static void variant_binary_operation(enum variant_binary_opcode op, INTERNAL_FUN
 		php_com_variant_from_zval(vright, zright, codepage);
 
 	} else {
-		return;
+		RETURN_THROWS();
 	}
 
 	switch (op) {
@@ -781,7 +775,7 @@ static void variant_unary_operation(enum variant_unary_opcode op, INTERNAL_FUNCT
 		vleft = &left_val;
 		php_com_variant_from_zval(vleft, zleft, codepage);
 	} else {
-		return;
+		RETURN_THROWS();
 	}
 
 	switch (op) {
@@ -879,7 +873,7 @@ PHP_FUNCTION(variant_round)
 		vleft = &left_val;
 		php_com_variant_from_zval(vleft, zleft, codepage);
 	} else {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (SUCCEEDED(VarRound(vleft, (int)decimals, &vres))) {
@@ -939,7 +933,7 @@ PHP_FUNCTION(variant_cmp)
 		php_com_variant_from_zval(vright, zright, codepage);
 
 	} else {
-		return;
+		RETURN_THROWS();
 	}
 
 	ZVAL_LONG(return_value, VarCmp(vleft, vright, (LCID)lcid, (ULONG)flags));
@@ -961,7 +955,7 @@ PHP_FUNCTION(variant_date_to_timestamp)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(),
 		"O", &zleft, php_com_variant_class_entry)) {
-		return;
+		RETURN_THROWS();
 	}
 	obj = CDNO_FETCH(zleft);
 
@@ -1000,7 +994,7 @@ PHP_FUNCTION(variant_date_from_timestamp)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l",
 			&timestamp)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (timestamp < 0) {
@@ -1012,13 +1006,13 @@ PHP_FUNCTION(variant_date_from_timestamp)
 	tzset();
 	ttstamp = timestamp;
 	tmv = localtime(&ttstamp);
-#if ZEND_ENABLE_ZVAL_LONG64
+
 	/* Invalid after 23:59:59, December 31, 3000, UTC */
 	if (!tmv) {
 		php_error_docref(NULL, E_WARNING, "Invalid timestamp " ZEND_LONG_FMT, timestamp);
 		RETURN_FALSE;
 	}
-#endif
+
 	memset(&systime, 0, sizeof(systime));
 
 	systime.wDay = tmv->tm_mday;
@@ -1046,7 +1040,7 @@ PHP_FUNCTION(variant_get_type)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(),
 		"O", &zobj, php_com_variant_class_entry)) {
-		return;
+		RETURN_THROWS();
 	}
 	obj = CDNO_FETCH(zobj);
 
@@ -1065,7 +1059,7 @@ PHP_FUNCTION(variant_set_type)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(),
 		"Ol", &zobj, php_com_variant_class_entry, &vt)) {
-		return;
+		RETURN_THROWS();
 	}
 	obj = CDNO_FETCH(zobj);
 
@@ -1081,7 +1075,7 @@ PHP_FUNCTION(variant_set_type)
 
 		werr = php_win32_error_to_msg(res);
 		spprintf(&msg, 0, "Variant type conversion failed: %s", werr);
-		LocalFree(werr);
+		php_win32_error_msg_free(werr);
 
 		php_com_throw_exception(res, msg);
 		efree(msg);
@@ -1101,7 +1095,7 @@ PHP_FUNCTION(variant_cast)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(),
 		"Ol", &zobj, php_com_variant_class_entry, &vt)) {
-		return;
+		RETURN_THROWS();
 	}
 	obj = CDNO_FETCH(zobj);
 
@@ -1115,7 +1109,7 @@ PHP_FUNCTION(variant_cast)
 
 		werr = php_win32_error_to_msg(res);
 		spprintf(&msg, 0, "Variant type conversion failed: %s", werr);
-		LocalFree(werr);
+		php_win32_error_msg_free(werr);
 
 		php_com_throw_exception(res, msg);
 		efree(msg);
@@ -1124,4 +1118,3 @@ PHP_FUNCTION(variant_cast)
 	VariantClear(&vres);
 }
 /* }}} */
-

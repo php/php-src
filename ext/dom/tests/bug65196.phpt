@@ -19,8 +19,6 @@ $frag2->appendChild($dom->createElement('div'));
 $frag2->appendChild($dom->createElement('div'));
 var_dump($dom->saveHTML($frag2));
 ?>
-===DONE===
 --EXPECT--
 string(0) ""
 string(46) "<div><span></span></div><div></div><div></div>"
-===DONE===

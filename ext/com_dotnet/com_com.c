@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Author: Wez Furlong  <wez@thebrainroom.com>                          |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -52,6 +48,8 @@ PHP_FUNCTION(com_create_instance)
 		RPC_C_AUTHN_LEVEL_DEFAULT, RPC_C_IMP_LEVEL_IMPERSONATE,
 		&authid, EOAC_NONE
 	};
+	zend_long cp = GetACP();
+	const struct php_win32_cp *cp_it;
 
 	php_com_initialize();
 	obj = CDNO_FETCH(object);
@@ -59,15 +57,20 @@ PHP_FUNCTION(com_create_instance)
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
 			ZEND_NUM_ARGS(), "s|s!ls",
 			&module_name, &module_name_len, &server_name, &server_name_len,
-			&obj->code_page, &typelib_name, &typelib_name_len) &&
-		FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
+			&cp, &typelib_name, &typelib_name_len) &&
+		FAILURE == zend_parse_parameters(
 			ZEND_NUM_ARGS(), "sa|ls",
-			&module_name, &module_name_len, &server_params, &obj->code_page,
+			&module_name, &module_name_len, &server_params, &cp,
 			&typelib_name, &typelib_name_len)) {
-
-		php_com_throw_exception(E_INVALIDARG, "Could not create COM object - invalid arguments!");
-		return;
+		RETURN_THROWS();
 	}
+
+	cp_it = php_win32_cp_get_by_id((DWORD)cp);
+	if (!cp_it) {
+		php_com_throw_exception(E_INVALIDARG, "Could not create COM object - invalid codepage!");
+		RETURN_THROWS();
+	}
+	obj->code_page = (int)cp;
 
 	if (server_name) {
 		ctx = CLSCTX_REMOTE_SERVER;
@@ -107,14 +110,13 @@ PHP_FUNCTION(com_create_instance)
 
 		if (NULL != (tmp = zend_hash_str_find(Z_ARRVAL_P(server_params),
 				"Flags", sizeof("Flags")-1))) {
-			convert_to_long_ex(tmp);
-			ctx = (CLSCTX)Z_LVAL_P(tmp);
+			ctx = (CLSCTX)zval_get_long(tmp);
 		}
 	}
 
 	if (server_name && !COMG(allow_dcom)) {
 		php_com_throw_exception(E_ERROR, "DCOM has been disabled by your administrator [com.allow_dcom=0]");
-		return;
+		RETURN_THROWS();
 	}
 
 	moniker = php_com_string_to_olestring(module_name, module_name_len, obj->code_page);
@@ -225,11 +227,11 @@ PHP_FUNCTION(com_create_instance)
 
 		werr = php_win32_error_to_msg(res);
 		spprintf(&msg, 0, "Failed to create COM object `%s': %s", module_name, werr);
-		LocalFree(werr);
+		php_win32_error_msg_free(werr);
 
 		php_com_throw_exception(res, msg);
 		efree(msg);
-		return;
+		RETURN_THROWS();
 	}
 
 	/* we got the object and it lives ! */
@@ -261,13 +263,13 @@ PHP_FUNCTION(com_create_instance)
 			if (SUCCEEDED(ITypeLib_GetDocumentation(TL, -1, &name, NULL, NULL, NULL))) {
 				typelib_name = php_com_olestring_to_string(name, &typelib_name_len, obj->code_page);
 
-				if (NULL != zend_ts_hash_str_add_ptr(&php_com_typelibraries, typelib_name, typelib_name_len, TL)) {
+				if (NULL != php_com_cache_typelib(TL, typelib_name, typelib_name_len)) {
 					php_com_import_typelib(TL, mode, obj->code_page);
 
 					/* add a reference for the hash */
 					ITypeLib_AddRef(TL);
 				}
-
+				efree(typelib_name);
 			} else {
 				/* try it anyway */
 				php_com_import_typelib(TL, mode, obj->code_page);
@@ -296,8 +298,7 @@ PHP_FUNCTION(com_get_active_object)
 	php_com_initialize();
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|l",
 				&module_name, &module_name_len, &code_page)) {
-		php_com_throw_exception(E_INVALIDARG, "Invalid arguments!");
-		return;
+		RETURN_THROWS();
 	}
 
 	module = php_com_string_to_olestring(module_name, module_name_len, (int)code_page);
@@ -383,7 +384,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 			case DISP_E_TYPEMISMATCH:
 				desc = php_win32_error_to_msg(hr);
 				spprintf(&msg, 0, "Parameter %d: %s", arg_err, desc);
-				LocalFree(desc);
+				php_win32_error_msg_free(desc);
 				break;
 
 			case DISP_E_BADPARAMCOUNT:
@@ -399,7 +400,7 @@ HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
 			default:
 				desc = php_win32_error_to_msg(hr);
 				spprintf(&msg, 0, "Error [0x%08x] %s", hr, desc);
-				LocalFree(desc);
+				php_win32_error_msg_free(desc);
 				break;
 		}
 
@@ -479,11 +480,10 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 	hr = php_com_get_id_of_name(obj, f->function_name->val, f->function_name->len, &dispid);
 
 	if (FAILED(hr)) {
-		char *winerr = NULL;
 		char *msg = NULL;
-		winerr = php_win32_error_to_msg(hr);
+		char *winerr = php_win32_error_to_msg(hr);
 		spprintf(&msg, 0, "Unable to lookup `%s': %s", f->function_name->val, winerr);
-		LocalFree(winerr);
+		php_win32_error_msg_free(winerr);
 		php_com_throw_exception(hr, msg);
 		efree(msg);
 		return FAILURE;
@@ -496,7 +496,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 
 	if (f->arg_info) {
 		for (i = 0; i < nargs; i++) {
-			if (f->arg_info[nargs - i - 1].pass_by_reference) {
+			if (ZEND_ARG_SEND_MODE(&f->arg_info[nargs - i - 1])) {
 				byref_count++;
 			}
 		}
@@ -505,7 +505,7 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 	if (byref_count) {
 		byref_vals = (VARIANT*)safe_emalloc(sizeof(VARIANT), byref_count, 0);
 		for (j = 0, i = 0; i < nargs; i++) {
-			if (f->arg_info[nargs - i - 1].pass_by_reference) {
+			if (ZEND_ARG_SEND_MODE(&f->arg_info[nargs - i - 1])) {
 				/* put the value into byref_vals instead */
 				php_com_variant_from_zval(&byref_vals[j], &args[nargs - i - 1], obj->code_page);
 
@@ -552,8 +552,12 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 		if (f && f->arg_info) {
 			for (i = 0, j = 0; i < nargs; i++) {
 				/* if this was byref, update the zval */
-				if (f->arg_info[nargs - i - 1].pass_by_reference) {
-					SEPARATE_ZVAL_IF_NOT_REF(&args[nargs - i - 1]);
+				if (ZEND_ARG_SEND_MODE(&f->arg_info[nargs - i - 1])) {
+					zval *arg = &args[nargs - i - 1];
+
+					ZVAL_DEREF(arg);
+					zval_ptr_dtor(arg);
+					ZVAL_NULL(arg);
 
 					/* if the variant is pointing at the byref_vals, we need to map
 					 * the pointee value as a zval; otherwise, the value is pointing
@@ -561,14 +565,12 @@ int php_com_do_invoke_byref(php_com_dotnet_object *obj, zend_internal_function *
 					if (V_VT(&vargs[i]) & VT_BYREF) {
 						if (vargs[i].byref == &V_UINT(&byref_vals[j])) {
 							/* copy that value */
-							php_com_zval_from_variant(&args[nargs - i - 1], &byref_vals[j],
-								obj->code_page);
+							php_com_zval_from_variant(arg, &byref_vals[j], obj->code_page);
 						}
 					} else {
 						/* not sure if this can ever happen; the variant we marked as BYREF
 						 * is no longer BYREF - copy its value */
-						php_com_zval_from_variant(&args[nargs - i - 1], &vargs[i],
-							obj->code_page);
+						php_com_zval_from_variant(arg, &vargs[i], obj->code_page);
 					}
 					VariantClear(&byref_vals[j]);
 					j++;
@@ -640,15 +642,14 @@ int php_com_do_invoke(php_com_dotnet_object *obj, char *name, size_t namelen,
 {
 	DISPID dispid;
 	HRESULT hr;
-	char *winerr = NULL;
 	char *msg = NULL;
 
 	hr = php_com_get_id_of_name(obj, name, namelen, &dispid);
 
 	if (FAILED(hr)) {
-		winerr = php_win32_error_to_msg(hr);
+		char *winerr = php_win32_error_to_msg(hr);
 		spprintf(&msg, 0, "Unable to lookup `%s': %s", name, winerr);
-		LocalFree(winerr);
+		php_win32_error_msg_free(winerr);
 		php_com_throw_exception(hr, msg);
 		efree(msg);
 		return FAILURE;
@@ -665,7 +666,7 @@ PHP_FUNCTION(com_create_guid)
 	OLECHAR *guid_string;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	php_com_initialize();
@@ -698,7 +699,7 @@ PHP_FUNCTION(com_event_sink)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "Oo|z/",
 			&object, php_com_variant_class_entry, &sinkobject, &sink)) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	php_com_initialize();
@@ -759,7 +760,7 @@ PHP_FUNCTION(com_print_typeinfo)
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "z/|s!b", &arg1, &ifacename,
 				&ifacelen, &wantsink)) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	php_com_initialize();
@@ -791,7 +792,7 @@ PHP_FUNCTION(com_message_pump)
 	DWORD result;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &timeoutms) == FAILURE)
-		RETURN_FALSE;
+		RETURN_THROWS();
 
 	php_com_initialize();
 	result = MsgWaitForMultipleObjects(0, NULL, FALSE, (DWORD)timeoutms, QS_ALLINPUT);
@@ -822,7 +823,12 @@ PHP_FUNCTION(com_load_typelib)
 	int cached = 0;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &name, &namelen, &cs)) {
-		return;
+		RETURN_THROWS();
+	}
+
+	if (!cs) {
+		php_error_docref(NULL, E_WARNING, "Declaration of case-insensitive constants is no longer supported");
+		RETURN_FALSE;
 	}
 
 	RETVAL_FALSE;
@@ -841,14 +847,3 @@ PHP_FUNCTION(com_load_typelib)
 	}
 }
 /* }}} */
-
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

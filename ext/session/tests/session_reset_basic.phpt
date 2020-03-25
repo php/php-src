@@ -5,6 +5,7 @@ Test session_reset() function : basic functionality
 --INI--
 session.save_path=
 session.name=PHPSESSID
+session.save_handler=files
 --FILE--
 <?php
 
@@ -34,7 +35,7 @@ var_dump($_SESSION); // Should only have 'foo'
 echo "Done".PHP_EOL;
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_abort() : basic functionality ***
 array(2) {
   ["foo"]=>

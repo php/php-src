@@ -38,7 +38,7 @@ foreach($file_content_types as $file_content_type) {
   foreach($file_modes as $file_mode) {
     echo "-- Opening file in $file_mode --\n";
 
-    $filename = dirname(__FILE__)."/fwrite_variation4.tmp"; // this is name of the file
+    $filename = __DIR__."/fwrite_variation4.tmp"; // this is name of the file
 
     $file_handle = fopen($filename, $file_mode);
     if(!$file_handle) {
@@ -49,7 +49,7 @@ foreach($file_content_types as $file_content_type) {
     $data_to_be_written="";
     fill_buffer($data_to_be_written,$file_content_type,1024);  //get the data of size 1024
 
-    /*  Write the data into the file, verify it by checking the file pointer position, eof position, 
+    /*  Write the data into the file, verify it by checking the file pointer position, eof position,
         filesize & by displaying the content */
     // write data to the file
     var_dump( ftell($file_handle) );
@@ -70,7 +70,7 @@ foreach($file_content_types as $file_content_type) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fwrite() various  operations ***
 
 -- Testing fwrite() with file having content of type numeric --

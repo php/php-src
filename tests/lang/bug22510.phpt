@@ -1,79 +1,77 @@
 --TEST--
 Bug #22510 (segfault among complex references)
---INI--
-error_reporting=E_ALL | E_DEPRECATED
 --FILE--
 <?php
-class foo 
+class foo
 {
-	public $list = array();
+    public $list = array();
 
-	function finalize() {
-		print __CLASS__."::".__FUNCTION__."\n";
-		$cl = &$this->list;
-	}
+    function finalize() {
+        print __CLASS__."::".__FUNCTION__."\n";
+        $cl = &$this->list;
+    }
 
-	function &method1() {
-		print __CLASS__."::".__FUNCTION__."\n";
-		return @$this->foo;
-	}
+    function &method1() {
+        print __CLASS__."::".__FUNCTION__."\n";
+        return @$this->foo;
+    }
 
-	function &method2() {
-		print __CLASS__."::".__FUNCTION__."\n";
-		return $this->foo;
-	}
+    function &method2() {
+        print __CLASS__."::".__FUNCTION__."\n";
+        return $this->foo;
+    }
 
-	function method3() {
-		print __CLASS__."::".__FUNCTION__."\n";
-		return @$this->foo;
-	}
+    function method3() {
+        print __CLASS__."::".__FUNCTION__."\n";
+        return @$this->foo;
+    }
 }
 
-class bar 
+class bar
 {
-	function run1() {
-		print __CLASS__."::".__FUNCTION__."\n";
-		$this->instance = new foo();
-		$this->instance->method1($this);
-		$this->instance->method1($this);
-	}
+    function run1() {
+        print __CLASS__."::".__FUNCTION__."\n";
+        $this->instance = new foo();
+        $this->instance->method1($this);
+        $this->instance->method1($this);
+    }
 
-	function run2() {
-		print __CLASS__."::".__FUNCTION__."\n";
-		$this->instance = new foo();
-		$this->instance->method2($this);
-		$this->instance->method2($this);
-	}
+    function run2() {
+        print __CLASS__."::".__FUNCTION__."\n";
+        $this->instance = new foo();
+        $this->instance->method2($this);
+        $this->instance->method2($this);
+    }
 
-	function run3() {
-		print __CLASS__."::".__FUNCTION__."\n";
-		$this->instance = new foo();
-		$this->instance->method3($this);
-		$this->instance->method3($this);
-	}
+    function run3() {
+        print __CLASS__."::".__FUNCTION__."\n";
+        $this->instance = new foo();
+        $this->instance->method3($this);
+        $this->instance->method3($this);
+    }
 }
 
 function ouch(&$bar) {
-	print __FUNCTION__."\n";
-	@$a = $a;
-	$bar->run1();
+    print __FUNCTION__."\n";
+    @$a = $a;
+    $bar->run1();
 }
 
 function ok1(&$bar) {
-	print __FUNCTION__."\n";
-	$bar->run1();
+    print __FUNCTION__."\n";
+    $bar->run1();
 }
 
 function ok2(&$bar) {
-	print __FUNCTION__."\n";
-	@$a = $a; 
-	$bar->run2();
+    print __FUNCTION__."\n";
+    @$a = $a;
+    $bar->run2();
 }
 
 function ok3(&$bar) {
-	print __FUNCTION__."\n";
-	@$a = $a;
-	$bar->run3();
+    print __FUNCTION__."\n";
+    @$a = $a;
+    $bar->run3();
 }
 
 $foo = new bar();

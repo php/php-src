@@ -23,22 +23,21 @@ $hex_values   = array (0x9, 0xA, 0xB, 0xC, 0xD, 0x20);
 echo "\n-- Octal Values --\n";
 $iterator = 1;
 foreach($octal_values as $c) {
-	echo "-- Iteration $iterator --\n";
-	var_dump(ctype_space($c));
-	$iterator++;
+    echo "-- Iteration $iterator --\n";
+    var_dump(ctype_space($c));
+    $iterator++;
 }
 
 echo "\n-- Hexadecimal Values --\n";
 $iterator = 1;
 foreach($hex_values as $c) {
-	echo "-- Iteration $iterator --\n";
-	var_dump(ctype_space($c));
-	$iterator++;
+    echo "-- Iteration $iterator --\n";
+    var_dump(ctype_space($c));
+    $iterator++;
 }
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_space() : usage variations ***
 
 -- Octal Values --
@@ -68,4 +67,3 @@ bool(true)
 bool(true)
 -- Iteration 6 --
 bool(true)
-===DONE===

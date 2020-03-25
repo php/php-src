@@ -1,11 +1,11 @@
 --TEST--
-Test array_fill_keys() function : variation of parameter 
+Test array_fill_keys() function : variation of parameter
 --FILE--
 <?php
 /* Prototype  : proto array array_fill_keys(array keys, mixed val)
- * Description: Create an array using the elements of the first parameter as keys each initialized to val 
+ * Description: Create an array using the elements of the first parameter as keys each initialized to val
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /* Testing with unexpected argument types */
@@ -83,7 +83,7 @@ array(1) {
 
 -- Testing array_fill_keys() function with unset var --
 
-Notice: Undefined variable: unset_var in %sarray_fill_keys_variation4.php on line %d
+Warning: Undefined variable: unset_var in %s on line %d
 array(1) {
   ["one"]=>
   NULL

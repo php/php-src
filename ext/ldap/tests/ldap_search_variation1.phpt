@@ -19,11 +19,10 @@ insert_dummy_data($link, $base);
 $dn = "$base";
 $filter = "(dc=*)";
 var_dump(
-	$result = ldap_search($link, "o=test,$base", "(o=*)", array('o')),
-	ldap_get_entries($link, $result)
+    $result = ldap_search($link, "o=test,$base", "(o=*)", array('o')),
+    ldap_get_entries($link, $result)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -53,4 +52,3 @@ array(2) {
     string(%d) "o=test,%s"
   }
 }
-===DONE===

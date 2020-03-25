@@ -1,11 +1,11 @@
 --TEST--
-Test array_reduce() function : variation - object callbacks 
+Test array_reduce() function : variation - object callbacks
 --FILE--
 <?php
 /* Prototype  : mixed array_reduce(array input, mixed callback [, int initial])
- * Description: Iteratively reduce the array to a single value via the callback. 
+ * Description: Iteratively reduce the array to a single value via the callback.
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_reduce() : variation - object callbacks ***\n";
@@ -24,8 +24,7 @@ echo "\n--- Instance method callback ---\n";
 var_dump(array_reduce($array, array(new A(), "adder2")));
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_reduce() : variation - object callbacks ***
 
 --- Static method callback ---
@@ -33,4 +32,3 @@ int(1)
 
 --- Instance method callback ---
 int(1)
-===DONE===

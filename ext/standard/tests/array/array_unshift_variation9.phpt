@@ -9,7 +9,7 @@ Test array_unshift() function : usage variations - heredoc strings for 'var' arg
 
 /*
  * Testing the functionality of array_unshift() by passing different
- * heredoc strings for $var argument that is prepended to the array 
+ * heredoc strings for $var argument that is prepended to the array
  * passed through $array argument
 */
 
@@ -18,13 +18,13 @@ echo "*** Testing array_unshift() : heredoc strings for \$var argument ***\n";
 // heredoc with empty value
 $empty_string = <<<EOT
 EOT;
-  
+
 // heredoc with blank line
 $blank_line = <<<EOT
 
 
 EOT;
-  
+
 // heredoc with multiline string
 $multiline_string = <<<EOT
 hello world
@@ -77,7 +77,7 @@ foreach($vars as $var) {
   // returns element count in the resulting array after arguments are pushed to
   // beginning of the given array
   var_dump( array_unshift($temp_array, $var) );
-  
+
   // dump the resulting array
   var_dump($temp_array);
 
@@ -86,7 +86,7 @@ foreach($vars as $var) {
   // beginning of the given array
   $temp_array = $array;
   var_dump( array_unshift($temp_array, $var, "hello", 'world') );
-  
+
   // dump the resulting array
   var_dump($temp_array);
   $iterator++;
@@ -94,7 +94,7 @@ foreach($vars as $var) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_unshift() : heredoc strings for $var argument ***
 -- Iteration 1 --
 int(5)

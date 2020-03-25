@@ -7,25 +7,25 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 class TestHeader1 extends SoapHeader {
-	function __construct($data) {
-		parent::__construct("http://testuri.org", "Test1", $data);
-	}
+    function __construct($data) {
+        parent::__construct("http://testuri.org", "Test1", $data);
+    }
 }
 
 class TestHeader2 extends SoapHeader {
-	function __construct($data) {
-		parent::__construct("http://testuri.org", "Test2", $data);
-	}
+    function __construct($data) {
+        parent::__construct("http://testuri.org", "Test2", $data);
+    }
 }
 
 function test() {
-	global $server;
-	$server->addSoapHeader(new TestHeader1("Hello Header!"));
-	$server->addSoapHeader(new TestHeader2("Hello Header!"));
-	return "Hello Body!";
+    global $server;
+    $server->addSoapHeader(new TestHeader1("Hello Header!"));
+    $server->addSoapHeader(new TestHeader2("Hello Header!"));
+    return "Hello Body!";
 }
 
-$server = new soapserver(dirname(__FILE__)."/server025.wsdl");
+$server = new soapserver(__DIR__."/server025.wsdl");
 $server->addfunction("test");
 
 $HTTP_RAW_POST_DATA = <<<EOF

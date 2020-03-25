@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -30,6 +28,9 @@
 
 #include "ext/standard/url.h"
 
+/* needed for ssize_t definition */
+#include <sys/types.h>
+
 struct php_zip_stream_data_t {
 	struct zip *za;
 	struct zip_file *zf;
@@ -42,7 +43,7 @@ struct php_zip_stream_data_t {
 
 
 /* {{{ php_zip_ops_read */
-static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count)
+static ssize_t php_zip_ops_read(php_stream *stream, char *buf, size_t count)
 {
 	ssize_t n = 0;
 	STREAM_DATA_FROM_STREAM();
@@ -62,7 +63,7 @@ static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count)
 			php_error_docref(NULL, E_WARNING, "Zip stream error: %s", zip_error_strerror(err));
 			zip_error_fini(err);
 #endif
-			return 0;
+			return -1;
 		}
 		/* cast count to signed value to avoid possibly negative n
 		 * being cast to unsigned value */
@@ -72,15 +73,15 @@ static size_t php_zip_ops_read(php_stream *stream, char *buf, size_t count)
 			self->cursor += n;
 		}
 	}
-	return (n < 1 ? 0 : (size_t)n);
+	return n;
 }
 /* }}} */
 
 /* {{{ php_zip_ops_write */
-static size_t php_zip_ops_write(php_stream *stream, const char *buf, size_t count)
+static ssize_t php_zip_ops_write(php_stream *stream, const char *buf, size_t count)
 {
 	if (!stream) {
-		return 0;
+		return -1;
 	}
 
 	return count;
@@ -158,7 +159,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 	fragment++;
 
 	if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname)) {
-		zend_string_release(file_basename);
+		zend_string_release_ex(file_basename, 0);
 		return -1;
 	}
 
@@ -167,7 +168,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 		memset(ssb, 0, sizeof(php_stream_statbuf));
 		if (zip_stat(za, fragment, ZIP_FL_NOCASE, &sb) != 0) {
 			zip_close(za);
-			zend_string_release(file_basename);
+			zend_string_release_ex(file_basename, 0);
 			return -1;
 		}
 		zip_close(za);
@@ -191,12 +192,12 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 #endif
 		ssb->sb.st_ino = -1;
 	}
-	zend_string_release(file_basename);
+	zend_string_release_ex(file_basename, 0);
 	return 0;
 }
 /* }}} */
 
-php_stream_ops php_stream_zipio_ops = {
+const php_stream_ops php_stream_zipio_ops = {
 	php_zip_ops_write, php_zip_ops_read,
 	php_zip_ops_close, php_zip_ops_flush,
 	"zip",
@@ -303,12 +304,20 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 	fragment++;
 
 	if (ZIP_OPENBASEDIR_CHECKPATH(file_dirname)) {
-		zend_string_release(file_basename);
+		zend_string_release_ex(file_basename, 0);
 		return NULL;
 	}
 
 	za = zip_open(file_dirname, ZIP_CREATE, &err);
 	if (za) {
+		zval *tmpzval;
+
+		if (context && NULL != (tmpzval = php_stream_context_get_option(context, "zip", "password"))) {
+			if (Z_TYPE_P(tmpzval) != IS_STRING || zip_set_default_password(za, Z_STRVAL_P(tmpzval))) {
+				php_error_docref(NULL, E_WARNING, "Can't set zip password");
+			}
+		}
+
 		zf = zip_fopen(za, fragment, 0);
 		if (zf) {
 			self = emalloc(sizeof(*self));
@@ -327,7 +336,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 		}
 	}
 
-	zend_string_release(file_basename);
+	zend_string_release_ex(file_basename, 0);
 
 	if (!stream) {
 		return NULL;
@@ -337,7 +346,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 }
 /* }}} */
 
-static php_stream_wrapper_ops zip_stream_wops = {
+static const php_stream_wrapper_ops zip_stream_wops = {
 	php_stream_zip_opener,
 	NULL,	/* close */
 	NULL,	/* fstat */
@@ -348,10 +357,10 @@ static php_stream_wrapper_ops zip_stream_wops = {
 	NULL,	/* rename */
 	NULL,	/* mkdir */
 	NULL,	/* rmdir */
-	NULL
+	NULL	/* metadata */
 };
 
-php_stream_wrapper php_stream_zip_wrapper = {
+const php_stream_wrapper php_stream_zip_wrapper = {
 	&zip_stream_wops,
 	NULL,
 	0 /* is_url */

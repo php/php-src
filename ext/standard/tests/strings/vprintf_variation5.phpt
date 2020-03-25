@@ -3,7 +3,7 @@ Test vprintf() function : usage variations - float formats with float values
 --FILE--
 <?php
 /* Prototype  : string vprintf(string format, array args)
- * Description: Output a formatted string 
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -45,7 +45,7 @@ $args_array = array(
 // and with float values from the above $args_array array
 $counter = 1;
 foreach($formats as $format) {
-  echo "\n-- Iteration $counter --\n";   
+  echo "\n-- Iteration $counter --\n";
   $result = vprintf($format, $args_array[$counter-1]);
   echo "\n";
   var_dump($result);
@@ -53,7 +53,6 @@ foreach($formats as $format) {
 }
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : int formats with float values ***
 
@@ -88,4 +87,3 @@ int(15)
 -- Iteration 8 --
 1.110000 2.220000 3.330000 4.440000
 int(35)
-===DONE===

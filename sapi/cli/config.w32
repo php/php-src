@@ -1,5 +1,4 @@
 // vim:ft=javascript
-// $Id$
 
 ARG_ENABLE('cli', 'Build CLI version of PHP', 'yes');
 ARG_ENABLE('crt-debug', 'Enable CRT memory dumps for debugging sent to STDERR', 'no');
@@ -23,5 +22,5 @@ if (PHP_CLI == "yes") {
 if (PHP_CLI_WIN32 == "yes") {
 	SAPI('cli_win32', 'cli_win32.c php_cli_process_title.c ps_title.c', 'php-win.exe', '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
 	ADD_FLAG("LDFLAGS_CLI_WIN32", "/stack:67108864");
+	ADD_FLAG("LIBS_CLI_WIN32", "shell32.lib");
 }
-

@@ -40,8 +40,7 @@ echo "\n";
 var_dump($result);
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing printf() : basic functionality - using string format ***
 
 -- Calling printf() with no arguments --
@@ -59,4 +58,3 @@ int(27)
 -- Calling printf() with string three arguments --
 arg1 argument arg2 argument arg3 argument
 int(41)
-===DONE===

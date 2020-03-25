@@ -1,5 +1,5 @@
 --TEST--
-Test usage of ReflectionProperty methods __toString(), export(), getName(), isPublic(), isPrivate(), isProtected(), isStatic(), getValue() and setValue().
+Test usage of ReflectionProperty methods __toString(), getName(), isPublic(), isPrivate(), isProtected(), isStatic(), getValue() and setValue().
 --FILE--
 <?php
 
@@ -9,10 +9,6 @@ function reflectProperty($class, $property) {
     echo "Reflecting on property $class::$property\n\n";
     echo "__toString():\n";
     var_dump($propInfo->__toString());
-    echo "export():\n";
-    var_dump(ReflectionProperty::export($class, $property, true));
-    echo "export():\n";
-    var_dump(ReflectionProperty::export($class, $property, false));
     echo "getName():\n";
     var_dump($propInfo->getName());
     echo "isPublic():\n";
@@ -47,20 +43,13 @@ reflectProperty("TestClass", "prot");
 reflectProperty("TestClass", "priv");
 
 ?>
---EXPECT--
+--EXPECTF--
 **********************************
 Reflecting on property TestClass::pub
 
 __toString():
 string(35) "Property [ <default> public $pub ]
 "
-export():
-string(35) "Property [ <default> public $pub ]
-"
-export():
-Property [ <default> public $pub ]
-
-NULL
 getName():
 string(3) "pub"
 isPublic():
@@ -83,13 +72,6 @@ Reflecting on property TestClass::stat
 __toString():
 string(33) "Property [ public static $stat ]
 "
-export():
-string(33) "Property [ public static $stat ]
-"
-export():
-Property [ public static $stat ]
-
-NULL
 getName():
 string(4) "stat"
 isPublic():
@@ -112,13 +94,6 @@ Reflecting on property TestClass::prot
 __toString():
 string(39) "Property [ <default> protected $prot ]
 "
-export():
-string(39) "Property [ <default> protected $prot ]
-"
-export():
-Property [ <default> protected $prot ]
-
-NULL
 getName():
 string(4) "prot"
 isPublic():
@@ -137,13 +112,6 @@ Reflecting on property TestClass::priv
 __toString():
 string(37) "Property [ <default> private $priv ]
 "
-export():
-string(37) "Property [ <default> private $priv ]
-"
-export():
-Property [ <default> private $priv ]
-
-NULL
 getName():
 string(4) "priv"
 isPublic():
@@ -156,5 +124,3 @@ isStatic():
 bool(false)
 
 **********************************
-
-

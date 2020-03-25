@@ -1,12 +1,12 @@
 --TEST--
 SQLite3::prepare Bound Variable Blob test
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 
-require_once(dirname(__FILE__) . '/new_db.inc');
-require_once(dirname(__FILE__) . '/stream_test.inc');
+require_once(__DIR__ . '/new_db.inc');
+require_once(__DIR__ . '/stream_test.inc');
 define('TIMENOW', time());
 
 echo "Creating Table\n";
@@ -30,7 +30,7 @@ echo "SELECTING results\n";
 $results = $db->query("SELECT id, quote(data) AS data FROM test ORDER BY id ASC");
 while ($result = $results->fetchArray(SQLITE3_NUM))
 {
-	var_dump($result);
+    var_dump($result);
 }
 $results->finalize();
 

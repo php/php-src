@@ -5,7 +5,7 @@ ocisetprefetch()
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 $stmtarray = array(
     "drop table prefetch_old_tab",
@@ -20,19 +20,19 @@ oci8_test_sql_execute($c, $stmtarray);
 // Run Test
 
 if (!ocicommit($c)) {
-	die("ocicommit() failed!\n");
+    die("ocicommit() failed!\n");
 }
 
 $select_sql = "select * from prefetch_old_tab";
 
 if (!($s = ociparse($c, $select_sql))) {
-	die("ociparse(select) failed!\n");
+    die("ociparse(select) failed!\n");
 }
 
 var_dump(ocisetprefetch($s, 10));
 
 if (!ociexecute($s)) {
-	die("ociexecute(select) failed!\n");
+    die("ociexecute(select) failed!\n");
 }
 
 var_dump(ocifetch($s));
@@ -46,7 +46,7 @@ $stmtarray = array(
 );
 
 oci8_test_sql_execute($c, $stmtarray);
-	
+
 echo "Done\n";
 ?>
 --EXPECT--

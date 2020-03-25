@@ -1,15 +1,15 @@
 --TEST--
 Test function gzseek() by calling it with SEEK_CUR when writing
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
 <?php
 $f = "gzseek_variation5.gz";
-$h = gzopen($f, 'w'); 
+$h = gzopen($f, 'w');
 $str1 = "This is the first line.";
 $str2 = "This is the second line.";
 gzwrite($h, $str1);
@@ -29,7 +29,6 @@ echo gzread($h, strlen($str2))."\n";
 gzclose($h);
 unlink($f);
 ?>
-===DONE===
 --EXPECT--
 tell=23
 tell=43
@@ -39,4 +38,3 @@ reading the output file
 This is the first line.
 string(40) "0000000000000000000000000000000000000000"
 This is the second line.
-===DONE===

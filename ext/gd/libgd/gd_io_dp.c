@@ -152,6 +152,9 @@ static int dynamicSeek (struct gdIOCtx *ctx, const int pos)
 	dynamicPtr *dp;
 	dpIOCtx *dctx;
 
+	if (pos < 0) {
+		return FALSE;
+	}
 	dctx = (dpIOCtx *) ctx;
 	dp = dctx->dp;
 
@@ -237,7 +240,7 @@ static int dynamicGetbuf (gdIOCtxPtr ctx, void *buf, int len)
 	if (remain >= len) {
 		rlen = len;
 	} else {
-		if (remain == 0) {
+		if (remain <= 0) {
 			return EOF;
 		}
 		rlen = remain;

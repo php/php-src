@@ -1,5 +1,3 @@
-
-	/* $Id: fpm_shm.c,v 1.3 2008/05/24 17:38:47 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin, Jerome Loyet */
 
 #include <sys/mman.h>

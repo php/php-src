@@ -16,12 +16,12 @@ EOF;
 class SoapFaultTest
 {
     public function test1() {
-    	//  Test #1
+        //  Test #1
         return 'Test #1 exception with some special chars: Äßö';
     }
-    public function test2() {    
+    public function test2() {
         //  Test #2
-	//throw new SoapFault('Server', 'Test #2 exception with some special chars: Äßö');
+    //throw new SoapFault('Server', 'Test #2 exception with some special chars: Äßö');
         throw new Exception('Test #2 exception with some special chars: Äßö');
     }
 }
@@ -32,9 +32,9 @@ $server = new SoapServer(null, array(
 $server->setClass('SoapFaultTest');
 
 try {
-	$server->handle($request1);
+    $server->handle($request1);
 } catch (Exception $e) {
-	$server->fault("Sender", $e->getMessage());
+    $server->fault("Sender", $e->getMessage());
 }
 try {
         $server->handle($request2);
@@ -47,4 +47,3 @@ try {
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ns1="http://127.0.0.1:8080/test/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><SOAP-ENV:Body><ns1:test1Response><return xsi:type="xsd:string">Test #1 exception with some special chars: ÃÃÃ¶</return></ns1:test1Response></SOAP-ENV:Body></SOAP-ENV:Envelope>
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"><SOAP-ENV:Body><SOAP-ENV:Fault><faultcode>Sender</faultcode><faultstring>Test #2 exception with some special chars: ÃÃÃ¶</faultstring></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>
-

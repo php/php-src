@@ -7,8 +7,8 @@ Test stripos() function : usage variations - unexpected inputs for 'needle' argu
  * Source code: ext/standard/string.c
 */
 
-/* Test stripos() function with unexpected inputs for 'needle' and 
- *  an expected type of input for 'haystack' argument 
+/* Test stripos() function with unexpected inputs for 'needle' and
+ *  an expected type of input for 'haystack' argument
 */
 
 echo "*** Testing stripos() function with unexpected values for needle ***\n";
@@ -21,7 +21,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "object";
-  } 
+  }
 }
 
 //getting the resource
@@ -65,7 +65,7 @@ $needles =  array (
   "",
   '',
 
-  // null vlaues
+  // null values
   NULL,
   null,
 
@@ -83,7 +83,11 @@ $needles =  array (
 $counter = 1;
 for($index = 0; $index < count($needles); $index ++) {
   echo "\n-- Iteration $counter --\n";
-  var_dump( stripos($haystack, $needles[$index]) );
+  try {
+    var_dump( stripos($haystack, $needles[$index]) );
+  } catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $counter ++;
 }
 
@@ -91,14 +95,14 @@ fclose($file_handle);  //closing the file handle
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stripos() function with unexpected values for needle ***
 
 -- Iteration 1 --
-bool(false)
+int(7)
 
 -- Iteration 2 --
-bool(false)
+int(9)
 
 -- Iteration 3 --
 bool(false)
@@ -107,10 +111,10 @@ bool(false)
 bool(false)
 
 -- Iteration 5 --
-bool(false)
+int(16)
 
 -- Iteration 6 --
-bool(false)
+int(21)
 
 -- Iteration 7 --
 bool(false)
@@ -119,70 +123,56 @@ bool(false)
 bool(false)
 
 -- Iteration 9 --
-bool(false)
+int(17)
 
 -- Iteration 10 --
-
-Warning: stripos(): needle is not a string or an integer in %s on line %d
-bool(false)
+stripos(): Argument #2 ($needle) must be of type string, array given
 
 -- Iteration 11 --
-
-Warning: stripos(): needle is not a string or an integer in %s on line %d
-bool(false)
+stripos(): Argument #2 ($needle) must be of type string, array given
 
 -- Iteration 12 --
-
-Warning: stripos(): needle is not a string or an integer in %s on line %d
-bool(false)
+stripos(): Argument #2 ($needle) must be of type string, array given
 
 -- Iteration 13 --
-
-Warning: stripos(): needle is not a string or an integer in %s on line %d
-bool(false)
+stripos(): Argument #2 ($needle) must be of type string, array given
 
 -- Iteration 14 --
-
-Warning: stripos(): needle is not a string or an integer in %s on line %d
-bool(false)
+stripos(): Argument #2 ($needle) must be of type string, array given
 
 -- Iteration 15 --
-bool(false)
+int(9)
 
 -- Iteration 16 --
-bool(false)
+int(0)
 
 -- Iteration 17 --
-bool(false)
+int(9)
 
 -- Iteration 18 --
-bool(false)
+int(0)
 
 -- Iteration 19 --
-
-Notice: Object of class sample could not be converted to int in %s on line %d
-bool(false)
+int(64)
 
 -- Iteration 20 --
-bool(false)
+int(0)
 
 -- Iteration 21 --
-bool(false)
+int(0)
 
 -- Iteration 22 --
-bool(false)
+int(0)
 
 -- Iteration 23 --
-bool(false)
+int(0)
 
 -- Iteration 24 --
-
-Warning: stripos(): needle is not a string or an integer in %s on line %d
-%s
+stripos(): Argument #2 ($needle) must be of type string, resource given
 
 -- Iteration 25 --
-bool(false)
+int(0)
 
 -- Iteration 26 --
-bool(false)
+int(0)
 *** Done ***

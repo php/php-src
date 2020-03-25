@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -19,6 +17,6 @@
 
 #include <php.h>
 
-PHP_FUNCTION(cpbi_get_last_code_point);
+PHP_METHOD(IntlCodePointBreakIterator, getLastCodePoint);
 
 #endif

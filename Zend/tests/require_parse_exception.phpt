@@ -42,6 +42,7 @@ var_dump("\u{ffffff}");');
 
 ?>
 --EXPECT--
+Deprecated: Directive 'allow_url_include' is deprecated in Unknown on line 0
 syntax error, unexpected end of file on line 2
 syntax error, unexpected end of file on line 3
 syntax error, unexpected end of file, expecting '(' on line 2

@@ -1,18 +1,18 @@
 --TEST--
 SQLite3::prepare number of rows
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc');
+<?php require_once(__DIR__ . '/skipif.inc');
 // Create an instance of the ReflectionMethod class
 try {
 	$method = new ReflectionMethod('sqlite3result', 'numRows');
 } catch (ReflectionException $e) {
-	die("skip");
+	die("skip SQLite3Result::numRows method does not exist");
 }
 ?>
 --FILE--
 <?php
 
-require_once(dirname(__FILE__) . '/new_db.inc');
+require_once(__DIR__ . '/new_db.inc');
 define('TIMENOW', time());
 
 echo "Creating Table\n";
@@ -32,7 +32,7 @@ echo "Closing database\n";
 var_dump($db->close());
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Creating Table
 bool(true)
 INSERT into table

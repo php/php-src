@@ -14,28 +14,28 @@ $method = 'aes-256-ccm';
 $tests = openssl_get_cipher_tests($method);
 
 foreach ($tests as $idx => $test) {
-	echo "TEST $idx\n";
-	$pt = openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
-		$test['iv'], $test['tag'], $test['aad']);
-	var_dump($test['pt'] === $pt);
+    echo "TEST $idx\n";
+    $pt = openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
+        $test['iv'], $test['tag'], $test['aad']);
+    var_dump($test['pt'] === $pt);
 }
 
 // no IV
 var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
-	NULL, $test['tag'], $test['aad']));
+    NULL, $test['tag'], $test['aad']));
 // failed because no AAD
 var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
-	$test['iv'], $test['tag']));
+    $test['iv'], $test['tag']));
 // failed because wrong tag
 var_dump(openssl_decrypt($test['ct'], $method, $test['key'], OPENSSL_RAW_DATA,
-	$test['iv'], str_repeat('x', 10), $test['aad']));
+    $test['iv'], str_repeat('x', 10), $test['aad']));
 
 ?>
 --EXPECTF--
 TEST 0
 bool(true)
 
-Warning: openssl_decrypt(): Setting of IV length for AEAD mode failed, the expected length is 12 bytes in %s on line %d
+Warning: openssl_decrypt(): Setting of IV length for AEAD mode failed in %s on line %d
 bool(false)
 bool(false)
 bool(false)

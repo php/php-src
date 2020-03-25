@@ -3,7 +3,7 @@ Test uasort() function : usage variations - anonymous function as 'cmp_function'
 --FILE--
 <?php
 /* Prototype  : bool uasort(array $array_arg, string $cmp_function)
- * Description: Sort an array with a user-defined comparison function and maintain index association 
+ * Description: Sort an array with a user-defined comparison function and maintain index association
  * Source code: ext/standard/array.c
 */
 
@@ -15,21 +15,31 @@ Test uasort() function : usage variations - anonymous function as 'cmp_function'
 
 echo "*** Testing uasort() : anonymous function as 'cmp_function' ***\n";
 
-$cmp_function = 'if($value1 == $value2) {return 0;} else if($value1 > $value2) {return 1;} else{return -1;}';
+$cmp_function = function($value1, $value2) {
+    if ($value1 == $value2) { return 0; }
+    else if ($value1 > $value2) { return 1; }
+    else { return -1; }
+};
 
 $array_arg = array(0 => 100, 1 => 3, 2 => -70, 3 => 24, 4 => 90);
 echo "-- Anonymous 'cmp_function' with parameters passed by value --\n";
-var_dump( uasort($array_arg, create_function('$value1, $value2',$cmp_function) ) );
+var_dump( uasort($array_arg, $cmp_function) );
 var_dump($array_arg);
+
+$cmp_function = function(&$value1, &$value2) {
+    if ($value1 == $value2) { return 0; }
+    else if ($value1 > $value2) { return 1; }
+    else { return -1; }
+};
 
 $array_arg = array("b" => "Banana", "m" => "Mango", "a" => "Apple", "p" => "Pineapple");
 echo "-- Anonymous 'cmp_function' with parameters passed by reference --\n";
-var_dump( uasort($array_arg, create_function('&$value1, &$value2', $cmp_function) ) );
+var_dump( uasort($array_arg, $cmp_function ) );
 var_dump($array_arg);
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing uasort() : anonymous function as 'cmp_function' ***
 -- Anonymous 'cmp_function' with parameters passed by value --
 bool(true)

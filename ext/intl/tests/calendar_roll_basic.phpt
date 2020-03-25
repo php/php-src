@@ -23,12 +23,10 @@ var_dump($intlcal->get(IntlCalendar::FIELD_DAY_OF_MONTH)); //1
 
 
 ?>
-==DONE==
 --EXPECT--
 bool(true)
 int(1)
 int(1)
 bool(true)
 int(1)
-int(1)
-==DONE==
+int(1)

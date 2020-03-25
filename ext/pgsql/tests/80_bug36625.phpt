@@ -8,13 +8,13 @@ require_once('skipif.inc');
 <?php
 
 require_once('config.inc');
-	
+
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {
-	die ('Could not connect to the server');
+    die ('Could not connect to the server');
 }
 
-$tracefile = dirname(__FILE__) . '/trace.tmp';
+$tracefile = __DIR__ . '/trace.tmp';
 
 @unlink($tracefile);
 var_dump(file_exists($tracefile));
@@ -27,9 +27,9 @@ pg_close($dbh);
 $found = 0;
 function search_trace_file($line)
 {
-	if (strpos($line, '"select 1"') !== false || strpos($line, "'select 1'") !== false) {
-		$GLOBALS['found']++;
-	}
+    if (strpos($line, '"select 1"') !== false || strpos($line, "'select 1'") !== false) {
+        $GLOBALS['found']++;
+    }
 }
 
 $trace = file($tracefile);
@@ -40,11 +40,10 @@ var_dump(file_exists($tracefile));
 @unlink($tracefile);
 
 ?>
-===DONE===
 --CLEAN--
 <?php
 
-$tracefile = dirname(__FILE__) . '/trace.tmp';
+$tracefile = __DIR__ . '/trace.tmp';
 
 unlink($tracefile);
 
@@ -54,4 +53,3 @@ bool(false)
 resource(%d) of type (pgsql result)
 bool(true)
 bool(true)
-===DONE===

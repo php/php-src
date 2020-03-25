@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Derick Rethans
+ * Copyright (c) 2015-2019 Derick Rethans
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,18 +23,7 @@
  */
 
 #include "timelib.h"
-
-#include <stdio.h>
-
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
-
-#ifdef HAVE_STRING_H
-#include <string.h>
-#else
-#include <strings.h>
-#endif
+#include "timelib_private.h"
 
 static int month_tab_leap[12] = { -1, 30, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
 static int month_tab[12] =      { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
@@ -59,12 +48,17 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 
 	if (ts >= 0) {
 		tmp_days = days + 1;
+	} else {
+		tmp_days = days;
+	}
 
-		if (tmp_days >= DAYS_PER_LYEAR_PERIOD || tmp_days <= -DAYS_PER_LYEAR_PERIOD) {
-			cur_year += YEARS_PER_LYEAR_PERIOD * (tmp_days / DAYS_PER_LYEAR_PERIOD);
-			tmp_days -= DAYS_PER_LYEAR_PERIOD * (tmp_days / DAYS_PER_LYEAR_PERIOD);
-		}
+	if (tmp_days > DAYS_PER_LYEAR_PERIOD || tmp_days <= -DAYS_PER_LYEAR_PERIOD) {
+		cur_year += YEARS_PER_LYEAR_PERIOD * (tmp_days / DAYS_PER_LYEAR_PERIOD);
+		tmp_days -= DAYS_PER_LYEAR_PERIOD * (tmp_days / DAYS_PER_LYEAR_PERIOD);
+	}
+	TIMELIB_DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
 
+	if (ts >= 0) {
 		while (tmp_days >= DAYS_PER_LYEAR) {
 			cur_year++;
 			if (timelib_is_leap(cur_year)) {
@@ -72,33 +66,17 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 			} else {
 				tmp_days -= DAYS_PER_YEAR;
 			}
+			TIMELIB_DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
 		}
 	} else {
-		tmp_days = days;
-
-		/* Guess why this might be for, it has to do with a pope ;-). It's also
-		 * only valid for Great Brittain and it's colonies. It needs fixing for
-		 * other locales. *sigh*, why is this crap so complex! */
-		/*
-		if (ts <= TIMELIB_LL_CONST(-6857352000)) {
-			tmp_days -= 11;
-		}
-		*/
-
 		while (tmp_days <= 0) {
-			if (tmp_days < -1460970) {
-				cur_year -= 4000;
-				TIMELIB_DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
-				tmp_days += 1460970;
+			cur_year--;
+			if (timelib_is_leap(cur_year)) {
+				tmp_days += DAYS_PER_LYEAR;
 			} else {
-				cur_year--;
-				TIMELIB_DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
-				if (timelib_is_leap(cur_year)) {
-					tmp_days += DAYS_PER_LYEAR;
-				} else {
-					tmp_days += DAYS_PER_YEAR;
-				}
+				tmp_days += DAYS_PER_YEAR;
 			}
+			TIMELIB_DEBUG(printf("tmp_days=%lld, year=%lld\n", tmp_days, cur_year););
 		}
 		remainder += SECS_PER_DAY;
 	}
@@ -118,7 +96,7 @@ void timelib_unixtime2gmt(timelib_time* tm, timelib_sll ts)
 	}
 	TIMELIB_DEBUG(printf("A: ts=%lld, year=%lld, month=%lld, day=%lld,", ts, cur_year, i + 1, tmp_days - months[i]););
 
-	/* That was the date, now we do the tiiiime */
+	/* That was the date, now we do the time */
 	hours = remainder / 3600;
 	minutes = (remainder - hours * 3600) / 60;
 	seconds = remainder % 60;
@@ -149,7 +127,7 @@ void timelib_update_from_sse(timelib_time *tm)
 	switch (tm->zone_type) {
 		case TIMELIB_ZONETYPE_ABBR:
 		case TIMELIB_ZONETYPE_OFFSET: {
-			timelib_unixtime2gmt(tm, tm->sse - (tm->z * 60) + (tm->dst * 3600));
+			timelib_unixtime2gmt(tm, tm->sse + tm->z + (tm->dst * 3600));
 
 			goto cleanup;
 		}
@@ -187,8 +165,9 @@ void timelib_unixtime2local(timelib_time *tm, timelib_sll ts)
 			int z = tm->z;
 			signed int dst = tm->dst;
 
-			timelib_unixtime2gmt(tm, ts - (tm->z * 60) + (tm->dst * 3600));
+			timelib_unixtime2gmt(tm, ts + tm->z + (tm->dst * 3600));
 
+			tm->sse = ts;
 			tm->z = z;
 			tm->dst = dst;
 			break;
@@ -272,7 +251,7 @@ void timelib_set_timezone(timelib_time *t, timelib_tzinfo *tz)
 
 /* Converts the time stored in the struct to localtime if localtime = true,
  * otherwise it converts it to gmttime. This is only done when necessary
- * ofcourse. */
+ * of course. */
 int timelib_apply_localtime(timelib_time *t, unsigned int localtime)
 {
 	if (localtime) {

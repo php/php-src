@@ -14,13 +14,13 @@ session.save_handler=files
 error_reporting(E_ALL);
 
 class TFoo {
-	public $c;
-	function __construct($c) {
-		$this->c = $c;
-	}
-	function inc() {
-		$this->c++;
-	}
+    public $c;
+    function __construct($c) {
+        $this->c = $c;
+    }
+    function inc() {
+        $this->c++;
+    }
 }
 
 session_id("abtest");
@@ -46,7 +46,6 @@ var_dump($_SESSION);
 session_destroy();
 ?>
 --EXPECTF--
-
 array(2) {
   ["o1"]=>
   &object(TFoo)#%d (1) {
@@ -71,4 +70,3 @@ array(2) {
     int(44)
   }
 }
-

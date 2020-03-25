@@ -2,12 +2,12 @@
 Bug #60477: Segfault after two multipart/form-data POST requestes
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
 include "php_cli_server.inc";
-php_cli_server_start('echo done, "\n";', null);
+php_cli_server_start('echo "done\n";', null);
 
 list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
 $port = intval($port)?:80;
@@ -33,9 +33,9 @@ Content-Type: application/x-www-form-urlencoded
 a=b
 HEADER
 )) {
-	while (!feof($fp)) {
-		$output .= fgets($fp);
-	}
+    while (!feof($fp)) {
+        $output .= fgets($fp);
+    }
 }
 
 fclose($fp);
@@ -52,9 +52,9 @@ Content-Type: application/x-www-form-urlencoded
 a=b
 HEADER
 )) {
-	while (!feof($fp)) {
-		$output .= fgets($fp);
-	}
+    while (!feof($fp)) {
+        $output .= fgets($fp);
+    }
 }
 
 echo preg_replace("/<style>(.*?)<\/style>/s", "<style>AAA</style>", $output), "\n";
@@ -62,7 +62,6 @@ fclose($fp);
 
 ?>
 --EXPECTF--
-
 HTTP/1.1 200 OK
 Host: %s
 Date: %s

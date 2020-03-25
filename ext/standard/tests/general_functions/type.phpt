@@ -4,7 +4,7 @@ gettype(), settype() and friends
 <?php
 
 function foo($errno, $errstr, $errfile, $errline) {
-	var_dump($errstr);
+    var_dump($errstr);
 }
 
 set_error_handler("foo");
@@ -17,44 +17,48 @@ $var1 = "another string";
 $var2 = array(2,3,4);
 
 $array = array(
-	array(1,2,3),
-	$var1,
-	$var2,
-	1,
-	2.0,
-	NULL,
-	false,
-	"some string",
-	$fp,
-	$fp1,
-	new stdclass,
+    array(1,2,3),
+    $var1,
+    $var2,
+    1,
+    2.0,
+    NULL,
+    false,
+    "some string",
+    $fp,
+    $fp1,
+    new stdclass,
 );
 
 $types = array(
-	"null",
-	"integer",
-	"double",
-	"boolean",
-	"resource",
-	"array",
-	"object",
-	"string"
-	);
+    "null",
+    "integer",
+    "double",
+    "boolean",
+    "resource",
+    "array",
+    "object",
+    "string"
+    );
 
 foreach ($array as $var) {
-	var_dump(gettype($var));
+    var_dump(gettype($var));
 }
 
 foreach ($types as $type) {
-	foreach ($array as $var) {
-		var_dump(settype($var, $type));
-		var_dump($var);
-	}
+    foreach ($array as $var) {
+        try {
+            var_dump(settype($var, $type));
+        } catch (Error $e) {
+            echo "Error: ", $e->getMessage(), "\n";
+        }
+        var_dump($var);
+    }
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(5) "array"
 string(6) "string"
 string(5) "array"
@@ -63,7 +67,7 @@ string(6) "double"
 string(4) "NULL"
 string(7) "boolean"
 string(6) "string"
-string(12) "unknown type"
+string(17) "resource (closed)"
 string(8) "resource"
 string(6) "object"
 bool(true)
@@ -156,8 +160,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 array(3) {
   [0]=>
   int(1)
@@ -166,11 +169,9 @@ array(3) {
   [2]=>
   int(3)
 }
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 string(14) "another string"
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 array(3) {
   [0]=>
   int(2)
@@ -179,29 +180,21 @@ array(3) {
   [2]=>
   int(4)
 }
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 int(1)
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 float(2)
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 NULL
-string(42) "settype(): Cannot convert to resource type"
+Error: Cannot convert to resource type
 bool(false)
-bool(false)
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 string(11) "some string"
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 resource(%d) of type (Unknown)
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 resource(%d) of type (stream)
-string(42) "settype(): Cannot convert to resource type"
-bool(false)
+Error: Cannot convert to resource type
 object(stdClass)#%d (0) {
 }
 bool(true)
@@ -265,11 +258,11 @@ array(0) {
 }
 bool(true)
 object(stdClass)#%d (3) {
-  [0]=>
+  ["0"]=>
   int(1)
-  [1]=>
+  ["1"]=>
   int(2)
-  [2]=>
+  ["2"]=>
   int(3)
 }
 bool(true)
@@ -279,11 +272,11 @@ object(stdClass)#%d (1) {
 }
 bool(true)
 object(stdClass)#%d (3) {
-  [0]=>
+  ["0"]=>
   int(2)
-  [1]=>
+  ["1"]=>
   int(3)
-  [2]=>
+  ["2"]=>
   int(4)
 }
 bool(true)
@@ -344,7 +337,6 @@ bool(true)
 string(14) "Resource id #%d"
 bool(true)
 string(14) "Resource id #%d"
-string(57) "Object of class stdClass could not be converted to string"
-bool(true)
-string(6) "Object"
+Error: Object of class stdClass could not be converted to string
+string(0) ""
 Done

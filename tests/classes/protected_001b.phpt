@@ -1,18 +1,16 @@
 --TEST--
 ZE2 A protected method can only be called inside the class
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 
 class pass {
-	protected function fail() {
-		echo "Call fail()\n";
-	}
+    protected function fail() {
+        echo "Call fail()\n";
+    }
 
-	public function good() {
-		$this->fail();
-	}
+    public function good() {
+        $this->fail();
+    }
 }
 
 $t = new pass();

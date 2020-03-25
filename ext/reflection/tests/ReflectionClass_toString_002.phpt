@@ -6,27 +6,25 @@ Steve Seear <stevseea@php.net>
 --FILE--
 <?php
 Class A {
-	function f() {}
+    function f() {}
 }
 Class B extends A {
-	function f() {}
+    function f() {}
 }
 Class C extends B {
 
 }
 Class D extends C {
-	function f() {}
+    function f() {}
 }
 foreach (array('A', 'B', 'C', 'D') as $class) {
-	echo "\n\n----( Reflection class $class: )----\n";
-	$rc = new ReflectionClass($class);
-	echo $rc;
+    echo "\n\n----( Reflection class $class: )----\n";
+    $rc = new ReflectionClass($class);
+    echo $rc;
 }
 
 ?>
 --EXPECTF--
-
-
 ----( Reflection class A: )----
 Class [ <user> class A ] {
   @@ %s 2-4

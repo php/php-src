@@ -5,7 +5,7 @@ oci_define_by_name()
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 // Initialize
 
@@ -32,7 +32,7 @@ var_dump(oci_define_by_name($stmt, ""));
 oci_execute($stmt);
 
 while (oci_fetch($stmt)) {
-	var_dump($string);
+    var_dump($string);
 }
 
 // Cleanup

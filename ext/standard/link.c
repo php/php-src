@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -16,19 +14,23 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #include "php.h"
 #include "php_filestat.h"
 #include "php_globals.h"
 
-#ifdef HAVE_SYMLINK
+#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+
+#ifdef PHP_WIN32
+#include <WinBase.h>
+#endif
 
 #include <stdlib.h>
 #if HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+#ifndef PHP_WIN32
 #include <sys/stat.h>
+#endif
 #include <string.h>
 #if HAVE_PWD_H
 #ifdef PHP_WIN32
@@ -50,18 +52,26 @@
 #include "php_link.h"
 #include "php_string.h"
 
-/* {{{ proto string readlink(string filename)
+#ifndef VOLUME_NAME_NT
+#define VOLUME_NAME_NT 0x2
+#endif
+
+#ifndef VOLUME_NAME_DOS
+#define VOLUME_NAME_DOS 0x0
+#endif
+
+/* {{{ proto string|false readlink(string filename)
    Return the target of a symbolic link */
 PHP_FUNCTION(readlink)
 {
 	char *link;
 	size_t link_len;
 	char buff[MAXPATHLEN];
-	int ret;
+	ssize_t ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &link, &link_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(link, link_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (php_check_open_basedir(link)) {
 		RETURN_FALSE;
@@ -70,17 +80,21 @@ PHP_FUNCTION(readlink)
 	ret = php_sys_readlink(link, buff, MAXPATHLEN-1);
 
 	if (ret == -1) {
+#ifdef PHP_WIN32
+		php_error_docref(NULL, E_WARNING, "readlink failed to read the symbolic link (%s), error %d)", link, GetLastError());
+#else
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+#endif
 		RETURN_FALSE;
 	}
 	/* Append NULL to the end of the string */
 	buff[ret] = '\0';
 
-	RETURN_STRING(buff);
+	RETURN_STRINGL(buff, ret);
 }
 /* }}} */
 
-/* {{{ proto int linkinfo(string filename)
+/* {{{ proto int|false linkinfo(string filename)
    Returns the st_dev field of the UNIX C stat structure describing the link */
 PHP_FUNCTION(linkinfo)
 {
@@ -90,9 +104,9 @@ PHP_FUNCTION(linkinfo)
 	zend_stat_t sb;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &link, &link_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_PATH(link, link_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	dirname = estrndup(link, link_len);
 	php_dirname(dirname, link_len);
@@ -106,7 +120,7 @@ PHP_FUNCTION(linkinfo)
 	if (ret == -1) {
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		efree(dirname);
-		RETURN_LONG(-1L);
+		RETURN_LONG(Z_L(-1));
 	}
 
 	efree(dirname);
@@ -114,7 +128,7 @@ PHP_FUNCTION(linkinfo)
 }
 /* }}} */
 
-/* {{{ proto int symlink(string target, string link)
+/* {{{ proto bool symlink(string target, string link)
    Create a symbolic link */
 PHP_FUNCTION(symlink)
 {
@@ -126,9 +140,10 @@ PHP_FUNCTION(symlink)
 	char dirname[MAXPATHLEN];
 	size_t len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_PATH(topath, topath_len)
+		Z_PARAM_PATH(frompath, frompath_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!expand_filepath(frompath, source_p)) {
 		php_error_docref(NULL, E_WARNING, "No such file or directory");
@@ -161,7 +176,7 @@ PHP_FUNCTION(symlink)
 	/* For the source, an expanded path must be used (in ZTS an other thread could have changed the CWD).
 	 * For the target the exact string given by the user must be used, relative or not, existing or not.
 	 * The target is relative to the link itself, not to the CWD. */
-	ret = symlink(topath, source_p);
+	ret = php_sys_symlink(topath, source_p);
 
 	if (ret == -1) {
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
@@ -172,7 +187,7 @@ PHP_FUNCTION(symlink)
 }
 /* }}} */
 
-/* {{{ proto int link(string target, string link)
+/* {{{ proto bool link(string target, string link)
    Create a hard link */
 PHP_FUNCTION(link)
 {
@@ -182,9 +197,10 @@ PHP_FUNCTION(link)
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "pp", &topath, &topath_len, &frompath, &frompath_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_PATH(topath, topath_len)
+		Z_PARAM_PATH(frompath, frompath_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!expand_filepath(frompath, source_p) || !expand_filepath(topath, dest_p)) {
 		php_error_docref(NULL, E_WARNING, "No such file or directory");
@@ -207,9 +223,9 @@ PHP_FUNCTION(link)
 	}
 
 #ifndef ZTS
-	ret = link(topath, frompath);
+	ret = php_sys_link(topath, frompath);
 #else
-	ret = link(dest_p, source_p);
+	ret = php_sys_link(dest_p, source_p);
 #endif
 	if (ret == -1) {
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
@@ -221,12 +237,3 @@ PHP_FUNCTION(link)
 /* }}} */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

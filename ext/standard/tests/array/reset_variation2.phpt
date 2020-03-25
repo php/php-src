@@ -3,7 +3,7 @@ Test reset() function : usage variations - unset first element
 --FILE--
 <?php
 /* Prototype  : mixed reset(array $array_arg)
- * Description: Set array argument's internal pointer to the first element and return it 
+ * Description: Set array argument's internal pointer to the first element and return it
  * Source code: ext/standard/array.c
  */
 
@@ -22,8 +22,7 @@ echo "\n-- Unset First element in array and check reset() --\n";
 unset($array[0]);
 var_dump(reset($array));
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing reset() : usage variations ***
 
 -- Initial Position: --
@@ -31,4 +30,3 @@ a => 0
 
 -- Unset First element in array and check reset() --
 string(1) "b"
-===DONE===

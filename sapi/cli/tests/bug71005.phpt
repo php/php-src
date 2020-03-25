@@ -2,7 +2,7 @@
 Bug #71005 (Segfault in php_cli_server_dispatch_router())
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -30,13 +30,13 @@ Host: {$host}
 
 HEADER
 )) {
-	while (!feof($fp)) {
-		echo fgets($fp);
-	}
+    while (!feof($fp)) {
+        echo fgets($fp);
+    }
 }
 
 ?>
---EXPECTF--	
+--EXPECTF--
 HTTP/1.1 200 OK
 Host: %s
 Date: %s

@@ -7,7 +7,8 @@ phar.readonly=0
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (php_sapi_name() != "cli") die("skip CLI only"); ?>
+--CONFLICTS--
+server
 --FILE--
 <?php
 $stub = "<?php header('Content-Type: text/plain;');
@@ -20,13 +21,13 @@ $p->setStub($stub);
 unset($p);
 
 include "php_cli_server.inc";
-php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1');
+php_cli_server_start('-d opcache.enable=1 -d opcache.enable_cli=1 -d extension=phar.'.PHP_SHLIB_SUFFIX);
 echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/issue0149.phar.php');
 echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/issue0149.phar.php');
 echo file_get_contents('http://' . PHP_CLI_SERVER_ADDRESS . '/issue0149.phar.php');
 ?>
 --CLEAN--
-<?php 
+<?php
 @unlink(__DIR__ . '/issue0149.phar.php');
 ?>
 --EXPECT--

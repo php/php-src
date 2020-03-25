@@ -2,18 +2,18 @@
 Test imap_fetchbody() function : basic functionality
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
-/* Prototype  : string imap_fetchbody(resource $stream_id, int $msg_no, string $section 
+/* Prototype  : string imap_fetchbody(resource $stream_id, int $msg_no, string $section
  *           [, int $options])
- * Description: Get a specific body section 
+ * Description: Get a specific body section
  * Source code: ext/imap/php_imap.c
  */
 
 echo "*** Testing imap_fetchbody() : basic functionality ***\n";
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
 // Initialise all required variables
 
@@ -27,26 +27,26 @@ $options = array ('FT_UID' => FT_UID, 'FT_PEEK' => FT_PEEK, 'FT_INTERNAL' => FT_
 // Calling imap_fetchbody() with all possible arguments
 echo "\n-- All possible arguments --\n";
 foreach ($options as $key => $option) {
-	echo "-- Option is $key --\n";
-	switch ($key) {
+    echo "-- Option is $key --\n";
+    switch ($key) {
 
-		case 'FT_UID';
-		$msg_uid = imap_uid($stream_id, $msg_no);
-		var_dump( imap_fetchbody($stream_id, $msg_uid, $section, $option) );
-		break;
-		
-		case 'FT_PEEK';
-		var_dump( imap_fetchbody($stream_id, $msg_no, $section, $option) );
-		$overview = imap_fetch_overview($stream_id, 1);
-		echo "Seen Flag: ";
-		var_dump( $overview[0]->seen );
-		break;
-		
-		case 'FT_INTERNAL';
-		var_dump( imap_fetchbody($stream_id, $msg_no, $section, $option) );
-		break;
+        case 'FT_UID';
+        $msg_uid = imap_uid($stream_id, $msg_no);
+        var_dump( imap_fetchbody($stream_id, $msg_uid, $section, $option) );
+        break;
 
-	}
+        case 'FT_PEEK';
+        var_dump( imap_fetchbody($stream_id, $msg_no, $section, $option) );
+        $overview = imap_fetch_overview($stream_id, 1);
+        echo "Seen Flag: ";
+        var_dump( $overview[0]->seen );
+        break;
+
+        case 'FT_INTERNAL';
+        var_dump( imap_fetchbody($stream_id, $msg_no, $section, $option) );
+        break;
+
+    }
 }
 
 // Calling imap_fetchbody() with mandatory arguments
@@ -56,10 +56,9 @@ $overview = imap_fetch_overview($stream_id, 1);
 echo "Seen Flag: ";
 var_dump( $overview[0]->seen );
 ?>
-===DONE===
 --CLEAN--
 <?php
-require_once(dirname(__FILE__).'/clean.inc');
+require_once(__DIR__.'/clean.inc');
 ?>
 --EXPECTF--
 *** Testing imap_fetchbody() : basic functionality ***
@@ -68,14 +67,13 @@ Create a temporary mailbox and add 1 msgs
 
 -- All possible arguments --
 -- Option is FT_UID --
-%unicode|string%(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
+string(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
 -- Option is FT_PEEK --
-%unicode|string%(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
+string(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
 Seen Flag: int(%d)
 -- Option is FT_INTERNAL --
-%unicode|string%(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
+string(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
 
 -- Mandatory arguments --
-%unicode|string%(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
+string(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
 Seen Flag: int(%d)
-===DONE===

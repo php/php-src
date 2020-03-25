@@ -11,7 +11,7 @@
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.  (COPYING.LIB)
+    Lesser General Public License for more details.  (LICENSE)
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to:
@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -40,7 +39,7 @@
 
 /* Convert strings to bc numbers.  Base 10 only.*/
 
-void
+int
 bc_str2num (bc_num *num, char *str, int scale)
 {
   int digits, strscale;
@@ -57,13 +56,13 @@ bc_str2num (bc_num *num, char *str, int scale)
   zero_int = FALSE;
   if ( (*ptr == '+') || (*ptr == '-'))  ptr++;  /* Sign */
   while (*ptr == '0') ptr++;			/* Skip leading zeros. */
-  while (isdigit((int)*ptr)) ptr++, digits++;	/* digits */
+  while (*ptr >= '0' && *ptr <= '9') ptr++, digits++;	/* digits */
   if (*ptr == '.') ptr++;			/* decimal point */
-  while (isdigit((int)*ptr)) ptr++, strscale++;	/* digits */
+  while (*ptr >= '0' && *ptr <= '9') ptr++, strscale++;	/* digits */
   if ((*ptr != '\0') || (digits+strscale == 0))
     {
       *num = bc_copy_num (BCG(_zero_));
-      return;
+      return *ptr == '\0';
     }
 
   /* Adjust numbers and allocate storage and initialize fields. */
@@ -105,5 +104,9 @@ bc_str2num (bc_num *num, char *str, int scale)
       for (;strscale > 0; strscale--)
 	*nptr++ = CH_VAL(*ptr++);
     }
-}
 
+  if (bc_is_zero (*num))
+    (*num)->n_sign = PLUS;
+
+  return 1;
+}

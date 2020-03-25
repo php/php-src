@@ -7,7 +7,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string format, array args)
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -48,15 +48,14 @@ $args_array = array(
 // and with octal values from the above $args_array array
 $counter = 1;
 foreach($formats as $format) {
-  echo "\n-- Iteration $counter --\n";   
+  echo "\n-- Iteration $counter --\n";
   var_dump( vsprintf($format, $args_array[$counter-1]) );
   $counter++;
 }
 
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : hexa formats with hexa values ***
 
 -- Iteration 1 --

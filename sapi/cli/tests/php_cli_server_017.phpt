@@ -2,7 +2,7 @@
 Implement Req #60850 (Built in web server does not set $_SERVER['SCRIPT_FILENAME'] when using router)
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -27,9 +27,9 @@ Host: {$host}
 
 HEADER
 )) {
-	while (!feof($fp)) {
-		echo fgets($fp);
-	}
+    while (!feof($fp)) {
+        echo fgets($fp);
+    }
 }
 
 fclose($fp);

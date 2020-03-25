@@ -64,7 +64,9 @@ const mbfl_encoding mbfl_encoding_euc_kr = {
 	"EUC-KR",
 	(const char *(*)[])&mbfl_encoding_euc_kr_aliases,
 	mblen_table_euckr,
-	MBFL_ENCTYPE_MBCS
+	MBFL_ENCTYPE_MBCS,
+	&vtbl_euckr_wchar,
+	&vtbl_wchar_euckr
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_euckr = {
@@ -80,7 +82,8 @@ const struct mbfl_convert_vtbl vtbl_euckr_wchar = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_euckr_wchar,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 const struct mbfl_convert_vtbl vtbl_wchar_euckr = {
@@ -89,7 +92,8 @@ const struct mbfl_convert_vtbl vtbl_wchar_euckr = {
 	mbfl_filt_conv_common_ctor,
 	mbfl_filt_conv_common_dtor,
 	mbfl_filt_conv_wchar_euckr,
-	mbfl_filt_conv_common_flush
+	mbfl_filt_conv_common_flush,
+	NULL,
 };
 
 
@@ -219,9 +223,7 @@ mbfl_filt_conv_wchar_euckr(int c, mbfl_convert_filter *filter)
 			CK((*filter->output_function)(s & 0xff, filter->data));
 		}
 	} else {
-		if (filter->illegal_mode != MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE) {
-			CK(mbfl_filt_conv_illegal_output(c, filter));
-		}
+		CK(mbfl_filt_conv_illegal_output(c, filter));
 	}
 
 	return c;

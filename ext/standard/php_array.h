@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,14 +10,12 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    |          Rasmus Lerdorf <rasmus@php.net>                             |
    |          Andrei Zmievski <andrei@php.net>                            |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #ifndef PHP_ARRAY_H
 #define PHP_ARRAY_H
@@ -69,6 +65,8 @@ PHP_FUNCTION(array_merge_recursive);
 PHP_FUNCTION(array_replace);
 PHP_FUNCTION(array_replace_recursive);
 PHP_FUNCTION(array_keys);
+PHP_FUNCTION(array_key_first);
+PHP_FUNCTION(array_key_last);
 PHP_FUNCTION(array_values);
 PHP_FUNCTION(array_count_values);
 PHP_FUNCTION(array_column);
@@ -107,7 +105,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src);
 PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src);
 PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src);
 PHPAPI int php_multisort_compare(const void *a, const void *b);
-PHPAPI zend_long php_count_recursive(zval *array, zend_long mode);
+PHPAPI zend_long php_count_recursive(HashTable *ht);
 
 #define PHP_SORT_REGULAR            0
 #define PHP_SORT_NUMERIC            1
@@ -125,7 +123,7 @@ PHPAPI zend_long php_count_recursive(zval *array, zend_long mode);
 #define ARRAY_FILTER_USE_KEY	2
 
 ZEND_BEGIN_MODULE_GLOBALS(array)
-	compare_func_t *multisort_func;
+	bucket_compare_func_t *multisort_func;
 ZEND_END_MODULE_GLOBALS(array)
 
 #define ARRAYG(v) ZEND_MODULE_GLOBALS_ACCESSOR(array, v)

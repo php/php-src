@@ -4,68 +4,67 @@ Duplicate of zend test tests/classes/iterators_002.phpt without expected output 
 <?php
 class c_iter implements Iterator {
 
-	private $obj;
-	private $num = 0;
+    private $obj;
+    private $num = 0;
 
-	function __construct($obj) {
-		echo __METHOD__ . "\n";
-		$this->obj = $obj;
-	}
-	function rewind() {
-		echo __METHOD__ . "\n";
-		$this->num = 0;
-	}
-	function valid() {
-		$more = $this->num < $this->obj->max;
-		echo __METHOD__ . ' = ' .($more ? 'true' : 'false') . "\n";
-		return $more;
-	}
-	function current() {
-		echo __METHOD__ . "\n";
-		return $this->num;
-	}
-	function next() {
-		echo __METHOD__ . "\n";
-		$this->num++;
-	}
-	function key() {
-		echo __METHOD__ . "\n";
-		switch($this->num) {
-			case 0: return "1st";
-			case 1: return "2nd";
-			case 2: return "3rd";
-			default: return "???";
-		}
-	}
-	function __destruct() {
-	}
+    function __construct($obj) {
+        echo __METHOD__ . "\n";
+        $this->obj = $obj;
+    }
+    function rewind() {
+        echo __METHOD__ . "\n";
+        $this->num = 0;
+    }
+    function valid() {
+        $more = $this->num < $this->obj->max;
+        echo __METHOD__ . ' = ' .($more ? 'true' : 'false') . "\n";
+        return $more;
+    }
+    function current() {
+        echo __METHOD__ . "\n";
+        return $this->num;
+    }
+    function next() {
+        echo __METHOD__ . "\n";
+        $this->num++;
+    }
+    function key() {
+        echo __METHOD__ . "\n";
+        switch($this->num) {
+            case 0: return "1st";
+            case 1: return "2nd";
+            case 2: return "3rd";
+            default: return "???";
+        }
+    }
+    function __destruct() {
+    }
 }
-	
+
 class c implements IteratorAggregate {
 
-	public $max = 3;
+    public $max = 3;
 
-	function getIterator() {
-		echo __METHOD__ . "\n";
-		return new c_iter($this);
-	}
-	function __destruct() {
-	}
+    function getIterator() {
+        echo __METHOD__ . "\n";
+        return new c_iter($this);
+    }
+    function __destruct() {
+    }
 }
 
 $t = new c();
 
 foreach($t as $k => $v) {
-	foreach($t as $w) {
-		echo "double:$v:$w\n";
-		break;
-	}
+    foreach($t as $w) {
+        echo "double:$v:$w\n";
+        break;
+    }
 }
 
 unset($t);
 
 ?>
-===DONE===
 --EXPECT--
 c::getIterator
 c_iter::__construct
@@ -101,4 +100,3 @@ c_iter::current
 double:2:0
 c_iter::next
 c_iter::valid = false
-===DONE===

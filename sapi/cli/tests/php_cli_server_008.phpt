@@ -2,7 +2,7 @@
 SERVER_PROTOCOL header availability
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -24,9 +24,9 @@ Host: {$host}
 
 HEADER
 )) {
-	while (!feof($fp)) {
-		echo fgets($fp);
-	}
+    while (!feof($fp)) {
+        echo fgets($fp);
+    }
 }
 
 fclose($fp);
@@ -44,9 +44,9 @@ Host: {$host}
 
 HEADER
 )) {
-	while (!feof($fp)) {
-		echo fgets($fp);
-	}
+    while (!feof($fp)) {
+        echo fgets($fp);
+    }
 }
 
 fclose($fp);

@@ -1,9 +1,15 @@
 --TEST--
 Test scandir() function : usage variations - different file names
+--SKIPIF--
+<?php
+if (substr(PHP_OS, 0, 3) != 'WIN') {
+  die("skip Valid only on Windows");
+}
+?>
 --FILE--
 <?php
 /* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path 
+ * Description: List files & directories inside the specified path
  * Source code: ext/standard/dir.c
  */
 
@@ -14,7 +20,7 @@ Test scandir() function : usage variations - different file names
 
 echo "*** Testing scandir() : usage variations ***\n";
 
-$dir_path = dirname(__FILE__) . "/私はガラスを食べられますscandir_variation8/";
+$dir_path = __DIR__ . "/私はガラスを食べられますscandir_variation8/";
 mkdir($dir_path);
 
 // heredoc string
@@ -36,7 +42,7 @@ $inputs = array(
        12.3456789000e10,
        12.3456789000E-10,
        .5,
-       
+
        // empty data
 /*10*/ "",
        array(),
@@ -49,11 +55,11 @@ $inputs = array(
 
 $iterator = 1;
 foreach($inputs as $key => $input) {
-	echo "\n-- Iteration $iterator --\n";
-	$handle = "fp{$iterator}";
-	var_dump( $$handle = @fopen($dir_path . "/私はガラスを食べられます$input.tmp", 'w') );
-	fclose($$handle);
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    $handle = "fp{$iterator}";
+    var_dump( $$handle = @fopen($dir_path . "/私はガラスを食べられます$input.tmp", 'w') );
+    fclose($$handle);
+    $iterator++;
 };
 
 echo "\n-- Call to scandir() --\n";
@@ -61,14 +67,13 @@ var_dump($content = scandir($dir_path));
 
 // remove all files in directory so can remove directory in CLEAN section
 foreach ($content as $file_name) {
-	// suppress errors as won't be able to remove "." and ".." entries
-	@unlink($dir_path . $file_name);
+    // suppress errors as won't be able to remove "." and ".." entries
+    @unlink($dir_path . $file_name);
 }
 ?>
-===DONE===
 --CLEAN--
 <?php
-$dir_path = dirname(__FILE__) . "/私はガラスを食べられますscandir_variation8";
+$dir_path = __DIR__ . "/私はガラスを食べられますscandir_variation8";
 rmdir($dir_path);
 ?>
 --EXPECTF--
@@ -151,4 +156,3 @@ array(16) {
   [15]=>
   string(51) "私はガラスを食べられますsingle_file.tmp"
 }
-===DONE===

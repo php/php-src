@@ -1,12 +1,14 @@
 --TEST--
 Bug #71323: Output of stream_get_meta_data can be falsified by its input
+--INI--
+allow_url_fopen=1
 --FILE--
 <?php
 $file = 'data:text/plain;z=y;uri=eviluri;mediatype=wut?;mediatype2=hello,somedata';
 $meta = stream_get_meta_data(fopen($file, "r"));
 var_dump($meta);
 ?>
---EXPECTF--
+--EXPECT--
 array(10) {
   ["mediatype"]=>
   string(10) "text/plain"

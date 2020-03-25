@@ -3,12 +3,12 @@ fetching cursor from a statement
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 // Initialize
 
@@ -30,13 +30,13 @@ $stmt = ociparse($c, $sql);
 ociexecute($stmt);
 
 while ($result = ocifetchinto($stmt, $data, OCI_ASSOC)) {
-	ociexecute($data["CURS"]);
-	ocifetchinto($data["CURS"], $subdata, OCI_ASSOC);
-	var_dump($subdata);
-	var_dump(ocicancel($data["CURS"]));
-	ocifetchinto($data["CURS"], $subdata, OCI_ASSOC);
-	var_dump($subdata);
-	var_dump(ocicancel($data["CURS"]));
+    ociexecute($data["CURS"]);
+    ocifetchinto($data["CURS"], $subdata, OCI_ASSOC);
+    var_dump($subdata);
+    var_dump(ocicancel($data["CURS"]));
+    ocifetchinto($data["CURS"], $subdata, OCI_ASSOC);
+    var_dump($subdata);
+    var_dump(ocicancel($data["CURS"]));
 }
 
 // Cleanup

@@ -1,13 +1,13 @@
 --TEST--
-is_a() and is_subclass_of() shouldn't call __autoload
+is_a() and is_subclass_of() shouldn't call autoloader
 --INI--
 error_reporting=14335
 --FILE--
 <?php
-function __autoload($name) {
-	echo("AUTOLOAD '$name'\n");
-	eval("class $name {}");
-}
+spl_autoload_register(function ($name) {
+    echo("AUTOLOAD '$name'\n");
+    eval("class $name {}");
+});
 
 class BASE {
 }

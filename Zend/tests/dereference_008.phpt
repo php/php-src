@@ -6,11 +6,11 @@ Testing array dereference with dynamic method name and references
 error_reporting(E_ALL);
 
 class foo {
-	public $x = array(1);
-		
-	public function &b() {
-		return $this->x;
-	}
+    public $x = array(1);
+
+    public function &b() {
+        return $this->x;
+    }
 }
 
 $foo = new foo;

@@ -42,7 +42,7 @@ $args_array = array(
 );
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_variation5.txt';
+$data_file = __DIR__ . '/vfprintf_variation5.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
@@ -62,7 +62,6 @@ echo "\n";
 unlink($data_file);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : int formats with float values ***
 
@@ -82,5 +81,3 @@ unlink($data_file);
 %-5678.567800 f
 -- Iteration 8 --
 1.110000 2.220000 3.330000 4.440000
-===DONE===
-

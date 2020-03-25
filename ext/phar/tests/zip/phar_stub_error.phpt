@@ -8,7 +8,7 @@ phar.readonly=0
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.zip';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.zip';
 
 $phar = new Phar($fname);
 $phar->setStub($stub = '<?php echo "first stub\n"; __HALT_COMPILER(); ?>' . "\r\n");
@@ -22,11 +22,11 @@ var_dump($phar->getStub() == $stub);
 $newstub = '<?php echo "second stub\n"; _x_HALT_COMPILER(); ?>';
 try
 {
-	$phar->setStub($newstub);
+    $phar->setStub($newstub);
 }
 catch(exception $e)
 {
-	echo 'Exception: ' . $e->getMessage() . "\n";
+    echo 'Exception: ' . $e->getMessage() . "\n";
 }
 var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
@@ -35,10 +35,9 @@ var_dump($phar->getStub());
 var_dump($phar->getStub() == $stub);
 
 ?>
-===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.zip');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
@@ -52,4 +51,3 @@ bool(true)
 string(50) "<?php echo "first stub\n"; __HALT_COMPILER(); ?>
 "
 bool(true)
-===DONE===

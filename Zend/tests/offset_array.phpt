@@ -17,14 +17,22 @@ $fp = fopen(__FILE__, "r");
 var_dump($arr[$fp]);
 
 $obj = new stdClass;
-var_dump($arr[$obj]);
+try {
+    var_dump($arr[$obj]);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 $arr1 = Array(1,2,3);
-var_dump($arr[$arr1]);
+try {
+    var_dump($arr[$arr1]);
+} catch (Error $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(2)
 int(1)
 
@@ -36,12 +44,8 @@ NULL
 int(2)
 int(1)
 
-Notice: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %s on line %d
 int(%d)
-
-Warning: Illegal offset type in %s on line %d
-NULL
-
-Warning: Illegal offset type in %s on line %d
-NULL
+Illegal offset type
+Illegal offset type
 Done

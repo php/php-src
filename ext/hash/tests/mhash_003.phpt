@@ -1,9 +1,7 @@
 --TEST--
-mhash_keygen_s2k() test
+MHash: mhash_keygen_s2k() test
 --SKIPIF--
-<?php
-	include "skip_mhash.inc";
-?>
+<?php if(!function_exists('mhash')) { die('skip mhash compatibility layer not available'); } ?>
 --FILE--
 <?php
 
@@ -22,18 +20,18 @@ $supported_hash_al = array(
 );
 
 foreach ($supported_hash_al as $hash=>$wanted) {
-	$passwd = str_repeat($hash, 10);
-	$salt = str_repeat($hash, 2);
-	$result = mhash_keygen_s2k(constant($hash), $passwd, $salt, 100);
-	if (!strcmp(bin2hex($result), $wanted)) {
-		echo "$hash\nok\n";
-	} else {
-		echo "$hash: ";
-		var_dump($wanted);
-		echo "$hash: ";
-		var_dump(bin2hex($result));
-	}
-	echo "\n";
+    $passwd = str_repeat($hash, 10);
+    $salt = str_repeat($hash, 2);
+    $result = mhash_keygen_s2k(constant($hash), $passwd, $salt, 100);
+    if (!strcmp(bin2hex($result), $wanted)) {
+        echo "$hash\nok\n";
+    } else {
+        echo "$hash: ";
+        var_dump($wanted);
+        echo "$hash: ";
+        var_dump(bin2hex($result));
+    }
+    echo "\n";
 }
 ?>
 --EXPECT--

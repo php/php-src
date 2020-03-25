@@ -8,7 +8,7 @@ iconv.internal_charset=iso-8859-1
 <?php
 $headers = <<<HERE
 Return-Path: <internals-return-5651-***=***.example.com@lists.php.net>
-Received: from pb1.pair.com (pb1.pair.com [16.92.131.4]) by ***.example.com 
+Received: from pb1.pair.com (pb1.pair.com [16.92.131.4]) by ***.example.com
     (8.12.10/8.12.10/1970-09-30) with SMTP id hALLmpea023899 for
     <***@***.example.com>; Sat, 22 Jan 1970 06:48:51 +0900 (JST)
     (envelope-from
@@ -25,7 +25,7 @@ Delivered-To: ezmlm-scan-internals@lists.php.net
 Delivered-To: ezmlm-internals@lists.php.net
 Date: Thu, 1 Jan 1970 00:00:00 -0000 (GMT)
 From: *** *** *** <***@***.example.com>
-X-X-Sender: ***@***.example.com 
+X-X-Sender: ***@***.example.com
 To: internals@lists.php.net
 Message-Id: <Pine.LNX.4.58.************@***.example.com>
 MIME-Version: 1.0
@@ -86,4 +86,3 @@ array(17) {
   ["X-UIDL"]=>
   string(20) "@eH!!h2:!!EOS!!A_c"!"
 }
-

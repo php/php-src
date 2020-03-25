@@ -36,8 +36,7 @@ namespace Baz {
     echo "\nDone\n";
 }
 ?>
---EXPECTF--
-
+--EXPECT--
 string(14) "Foo\Bar\ClassA"
 string(14) "Foo\Bar\ClassB"
 string(14) "Foo\Bar\ClassC"

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -18,8 +16,11 @@
 #define CODEPOINTITERATOR_INTERNAL_H
 
 #include <unicode/brkiter.h>
+#include <unicode/unistr.h>
 
-using U_ICU_NAMESPACE::BreakIterator;
+using icu::BreakIterator;
+using icu::CharacterIterator;
+using icu::UnicodeString;
 
 namespace PHP {
 

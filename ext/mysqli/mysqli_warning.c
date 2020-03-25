@@ -1,8 +1,6 @@
 /*
   +----------------------------------------------------------------------+
-  | PHP Version 7                                                        |
-  +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) The PHP Group                                          |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -28,6 +26,8 @@
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
 
+#include "mysqli_arginfo.h"
+
 /* Define these in the PHP7 tree to make merging easy process */
 #define ZSTR_DUPLICATE (1<<0)
 #define ZSTR_AUTOFREE  (1<<1)
@@ -42,8 +42,8 @@ void php_clear_warnings(MYSQLI_WARNING *w)
 
 	while (w) {
 		n = w;
-		zval_dtor(&(w->reason));
-		zval_dtor(&(w->sqlstate));
+		zval_ptr_dtor_str(&(w->reason));
+		zval_ptr_dtor_str(&(w->sqlstate));
 		w = w->next;
 		efree(n);
 	}
@@ -144,8 +144,7 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql)
 
 		/* 1. Here comes the error no */
 		entry = zend_hash_get_current_data(Z_ARRVAL(row));
-		convert_to_long_ex(entry);
-		errno = Z_LVAL_P(entry);
+		errno = zval_get_long(entry);
 		zend_hash_move_forward(Z_ARRVAL(row));
 
 		/* 2. Here comes the reason */
@@ -178,16 +177,14 @@ MYSQLI_WARNING * php_get_warnings(MYSQLND_CONN_DATA * mysql)
 PHP_METHOD(mysqli_warning, next)
 {
 	MYSQLI_WARNING 	*w;
-	zval  			*mysqli_warning;
-	mysqli_object *obj = Z_MYSQLI_P(getThis());
+	mysqli_object *obj = Z_MYSQLI_P(ZEND_THIS);
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
 
 	if (obj->ptr) {
-		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O",
-										 &mysqli_warning, mysqli_warning_class_entry) == FAILURE) {
-			return;
-		}
-
-		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, mysqli_warning, "mysqli_warning", MYSQLI_STATUS_VALID);
+		MYSQLI_FETCH_RESOURCE(w, MYSQLI_WARNING *, ZEND_THIS, "mysqli_warning", MYSQLI_STATUS_VALID);
 
 		if (w && w->next) {
 			w = w->next;
@@ -200,49 +197,62 @@ PHP_METHOD(mysqli_warning, next)
 /* }}} */
 
 /* {{{ property mysqli_warning_message */
-static
-zval *mysqli_warning_message(mysqli_object *obj, zval *retval)
+static int mysqli_warning_message(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MYSQLI_WARNING *w;
 
 	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
-		return NULL;
+		if (!quiet) {
+			zend_throw_error(NULL, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));
+		}
+
+		return FAILURE;
 	}
 
 	w = (MYSQLI_WARNING *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 	ZVAL_COPY(retval, &w->reason);
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property mysqli_warning_sqlstate */
-static
-zval *mysqli_warning_sqlstate(mysqli_object *obj, zval *retval)
+static int mysqli_warning_sqlstate(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MYSQLI_WARNING *w;
 
 	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
-		return NULL;
+		if (!quiet) {
+			zend_throw_error(NULL, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));
+		}
+
+		return FAILURE;
 	}
 
 	w = (MYSQLI_WARNING *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 	ZVAL_COPY(retval, &w->sqlstate);
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ property mysqli_warning_error */
-static
-zval *mysqli_warning_errno(mysqli_object *obj, zval *retval)
+static int mysqli_warning_errno(mysqli_object *obj, zval *retval, zend_bool quiet)
 {
 	MYSQLI_WARNING *w;
 
 	if (!obj->ptr || !((MYSQLI_RESOURCE *)(obj->ptr))->ptr) {
-		return NULL;
+		if (!quiet) {
+			zend_throw_error(NULL, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));
+		}
+
+		return FAILURE;
 	}
+
 	w = (MYSQLI_WARNING *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 	ZVAL_LONG(retval, w->errorno);
-	return retval;
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -257,11 +267,8 @@ PHP_METHOD(mysqli_warning, __construct)
 	MYSQLI_WARNING  *w;
 	MYSQLI_RESOURCE *mysqli_resource;
 
-	if (ZEND_NUM_ARGS() != 1) {
-		WRONG_PARAM_COUNT;
-	}
-	if (zend_parse_parameters(1, "o", &z)==FAILURE) {
-		return;
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &z) == FAILURE) {
+		RETURN_THROWS();
 	}
 	obj = Z_MYSQLI_P(z);
 
@@ -294,7 +301,7 @@ PHP_METHOD(mysqli_warning, __construct)
 			RETURN_FALSE;
 		}
 	} else {
-		php_error_docref(NULL, E_WARNING, "invalid class argument");
+		php_error_docref(NULL, E_WARNING, "Invalid class argument");
 		RETURN_FALSE;
 	}
 
@@ -313,8 +320,8 @@ PHP_METHOD(mysqli_warning, __construct)
 
 /* {{{ mysqli_warning_methods */
 const zend_function_entry mysqli_warning_methods[] = {
-	PHP_ME(mysqli_warning, __construct,		NULL, ZEND_ACC_PROTECTED)
-	PHP_ME(mysqli_warning, next, 			NULL, ZEND_ACC_PUBLIC)
+	PHP_ME(mysqli_warning, __construct,	arginfo_class_mysqli_warning___construct, ZEND_ACC_PROTECTED)
+	PHP_ME(mysqli_warning, next, arginfo_class_mysqli_warning_next, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -327,13 +334,3 @@ const mysqli_property_entry mysqli_warning_property_entries[] = {
 	{NULL, 0, NULL, NULL}
 };
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

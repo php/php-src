@@ -1,27 +1,36 @@
-dnl
-dnl $Id$
-dnl
+PHP_ARG_WITH([openssl],
+  [for OpenSSL support],
+  [AS_HELP_STRING([--with-openssl],
+    [Include OpenSSL support (requires OpenSSL >= 1.0.1)])])
 
-PHP_ARG_WITH(openssl, for OpenSSL support,
-[  --with-openssl[=DIR]      Include OpenSSL support (requires OpenSSL >= 1.0.1)])
+PHP_ARG_WITH([kerberos],
+  [for Kerberos support],
+  [AS_HELP_STRING([--with-kerberos],
+    [OPENSSL: Include Kerberos support])],
+  [no],
+  [no])
 
-PHP_ARG_WITH(kerberos, for Kerberos support,
-[  --with-kerberos[=DIR]     OPENSSL: Include Kerberos support], no, no)
-
-PHP_ARG_WITH(system-ciphers, whether to use system default cipher list instead of hardcoded value,
-[  --with-system-ciphers   OPENSSL: Use system default cipher list instead of hardcoded value], no, no)
+PHP_ARG_WITH([system-ciphers],
+  [whether to use system default cipher list instead of hardcoded value],
+  [AS_HELP_STRING([--with-system-ciphers],
+    [OPENSSL: Use system default cipher list instead of hardcoded value])],
+  [no],
+  [no])
 
 if test "$PHP_OPENSSL" != "no"; then
   PHP_NEW_EXTENSION(openssl, openssl.c xp_ssl.c, $ext_shared)
   PHP_SUBST(OPENSSL_SHARED_LIBADD)
 
   if test "$PHP_KERBEROS" != "no"; then
-    PHP_SETUP_KERBEROS(OPENSSL_SHARED_LIBADD)
+    PKG_CHECK_MODULES([KERBEROS], [krb5-gssapi krb5])
+
+    PHP_EVAL_INCLINE($KERBEROS_CFLAGS)
+    PHP_EVAL_LIBLINE($KERBEROS_LIBS, OPENSSL_SHARED_LIBADD)
   fi
 
   AC_CHECK_FUNCS([RAND_egd])
 
-  PHP_SETUP_OPENSSL(OPENSSL_SHARED_LIBADD, 
+  PHP_SETUP_OPENSSL(OPENSSL_SHARED_LIBADD,
   [
     AC_DEFINE(HAVE_OPENSSL_EXT,1,[ ])
   ], [

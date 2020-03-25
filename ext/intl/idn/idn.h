@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 2009 The PHP Group                                     |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,7 +13,6 @@
    | Author: Pierre A. Joye <pierre@php.net>                              |
    +----------------------------------------------------------------------+
  */
-/* $Id$ s*/
 
 #ifndef IDN_IDN_H
 #define IDN_IDN_H

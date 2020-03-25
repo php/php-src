@@ -3,8 +3,8 @@ Test array_diff_assoc() function : usage variations - compare integers, floats a
 --FILE--
 <?php
 /* Prototype  : array array_diff_assoc(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of arr1 that have values which are not present 
- * in any of the others arguments but do additional checks whether the keys are equal 
+ * Description: Returns the entries of arr1 that have values which are not present
+ * in any of the others arguments but do additional checks whether the keys are equal
  * Source code: ext/standard/array.c
  */
 
@@ -47,8 +47,7 @@ var_dump(array_diff_assoc($arr_default_int, $arr_float, $arr_string, $arr_string
 
 echo "Done";
 ?>
---EXPECTF--
-
+--EXPECT--
 *** Testing array_diff_assoc() : usage variations ***
 -- Result of comparing integers and floating point numbers: --
 array(1) {

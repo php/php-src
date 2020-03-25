@@ -3,12 +3,11 @@ SimpleXML: Simple document
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 
-var_dump(simplexml_load_file(dirname(__FILE__).'/sxe.xml'));
+var_dump(simplexml_load_file(__DIR__.'/sxe.xml'));
 
 ?>
-===DONE===
 --EXPECTF--
 object(SimpleXMLElement)#%d (2) {
   ["@attributes"]=>
@@ -40,4 +39,3 @@ object(SimpleXMLElement)#%d (2) {
     }
   }
 }
-===DONE===

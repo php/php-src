@@ -3,7 +3,7 @@ Test vprintf() function : basic functionality - string format
 --FILE--
 <?php
 /* Prototype  : int vprintf(string $format , array $args)
- * Description: Output a formatted string 
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -30,7 +30,6 @@ echo "\n";
 var_dump($result);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : basic functionality - using string format ***
 one
@@ -39,5 +38,3 @@ one two
 int(7)
 one two three
 int(13)
-===DONE===
-

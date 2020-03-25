@@ -1,5 +1,5 @@
 --TEST--
-Test DateTimeZone::getOffset() function : basic functionality 
+Test DateTimeZone::getOffset() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : int DateTimeZone::getOffset  ( DateTime $datetime  )
@@ -10,7 +10,7 @@ Test DateTimeZone::getOffset() function : basic functionality
 
 echo "*** Testing DateTimeZone::getOffset() : basic functionality ***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("GMT");
 
 $tz1 = new DateTimeZone("Europe/London");
@@ -24,10 +24,8 @@ $tz3 = new DateTimeZone("America/Los_Angeles");
 var_dump( $tz3->getOffset($date) );
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing DateTimeZone::getOffset() : basic functionality ***
 %rint\(0\)|int\(3600\)%r
 %rint\(-18000\)|int\(-14400\)%r
 %rint\(-28800\)|int\(-25200\)%r
-===DONE===

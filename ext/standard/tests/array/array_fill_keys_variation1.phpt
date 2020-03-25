@@ -1,11 +1,11 @@
 --TEST--
-Test array_fill_keys() function : variation of parameter 
+Test array_fill_keys() function : variation of parameter
 --FILE--
 <?php
 /* Prototype  : proto array array_fill_keys(array keys, mixed val)
- * Description: Create an array using the elements of the first parameter as keys each initialized to val 
+ * Description: Create an array using the elements of the first parameter as keys each initialized to val
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 
@@ -59,7 +59,7 @@ array(4) {
 
 -- Testing array_fill_keys() function with mixed array --
 
-Notice: Array to string conversion in %sarray_fill_keys_variation1.php on line %d
+Warning: Array to string conversion in %s on line %d
 array(7) {
   ["Resource id #%d"]=>
   string(6) "simple"

@@ -52,7 +52,7 @@ $file_paths = array (
   /* path with spaces */
   " ",
   ' ',
-  
+
   /* empty paths */
   "",
   '',
@@ -60,7 +60,7 @@ $file_paths = array (
 );
 
 foreach ($file_paths as $file_path) {
-	var_dump(basename($file_path));
+    var_dump(basename($file_path));
 }
 
 ?>

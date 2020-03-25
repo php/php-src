@@ -1,12 +1,12 @@
 --TEST--
 SPL: SimpleXMLIterator and overridden iterator methods()
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded('simplexml')) print 'skip';
 if (!extension_loaded("libxml")) print "skip LibXML not present";
 ?>
 --FILE--
-<?php 
+<?php
 
 $xml =<<<EOF
 <?xml version='1.0'?>
@@ -37,54 +37,53 @@ EOF;
 
 class SXETest extends SimpleXMLIterator
 {
-	function rewind()
-	{
-		echo __METHOD__ . "\n";
-		return parent::rewind();
-	}
-	function valid()
-	{
-		echo __METHOD__ . "\n";
-		return parent::valid();
-	}
-	function current()
-	{
-		echo __METHOD__ . "\n";
-		return parent::current();
-	}
-	function key()
-	{
-		echo __METHOD__ . "\n";
-		return parent::key();
-	}
-	function next()
-	{
-		echo __METHOD__ . "\n";
-		return parent::next();
-	}
-	function hasChildren()
-	{
-		echo __METHOD__ . "\n";
-		return parent::hasChildren();
-	}
-	function getChildren()
-	{
-		echo __METHOD__ . "\n";
-		return parent::getChildren();
-	}
+    function rewind()
+    {
+        echo __METHOD__ . "\n";
+        return parent::rewind();
+    }
+    function valid()
+    {
+        echo __METHOD__ . "\n";
+        return parent::valid();
+    }
+    function current()
+    {
+        echo __METHOD__ . "\n";
+        return parent::current();
+    }
+    function key()
+    {
+        echo __METHOD__ . "\n";
+        return parent::key();
+    }
+    function next()
+    {
+        echo __METHOD__ . "\n";
+        return parent::next();
+    }
+    function hasChildren()
+    {
+        echo __METHOD__ . "\n";
+        return parent::hasChildren();
+    }
+    function getChildren()
+    {
+        echo __METHOD__ . "\n";
+        return parent::getChildren();
+    }
 }
 
-$sxe = new SXETest((binary)$xml);
+$sxe = new SXETest($xml);
 $rit = new RecursiveIteratorIterator($sxe, RecursiveIteratorIterator::SELF_FIRST);
 
 foreach($rit as $data) {
-	var_dump(get_class($data));
-	var_dump(trim($data));
+    var_dump(get_class($data));
+    var_dump(trim($data));
 }
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 SXETest::rewind
 SXETest::valid
 SXETest::hasChildren
@@ -142,4 +141,3 @@ SXETest::valid
 SXETest::next
 SXETest::valid
 SXETest::valid
-===DONE===

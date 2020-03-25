@@ -1,5 +1,5 @@
 --TEST--
-Test date_format() function : basic functionality  
+Test date_format() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : public string DateTime::format  ( string $format  )
@@ -7,8 +7,8 @@ Test date_format() function : basic functionality
  * Source code: ext/date/php_date.c
  * Alias to functions: date_format
  */
- 
-//Set the default time zone 
+
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing date_format() : basic functionality - formatting coinstants ***\n";
@@ -27,7 +27,6 @@ var_dump( $date->format( DateTime::RSS) ) ;
 var_dump( $date->format( DateTime::W3C) ) ;
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing date_format() : basic functionality - formatting coinstants ***
 string(25) "2005-07-14T22:30:41+01:00"
@@ -41,4 +40,3 @@ string(31) "Thu, 14 Jul 2005 22:30:41 +0100"
 string(25) "2005-07-14T22:30:41+01:00"
 string(31) "Thu, 14 Jul 2005 22:30:41 +0100"
 string(25) "2005-07-14T22:30:41+01:00"
-===DONE===

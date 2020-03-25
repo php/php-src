@@ -5,7 +5,7 @@ Test ctype_alpha() function : usage variations - different integers
 --FILE--
 <?php
 /* Prototype  : bool ctype_alpha(mixed $c)
- * Description: Checks for alphabetic character(s) 
+ * Description: Checks for alphabetic character(s)
  * Source code: ext/ctype/ctype.c
  */
 
@@ -19,15 +19,14 @@ echo "*** Testing ctype_alpha() : usage variations ***\n";
 $orig = setlocale(LC_CTYPE, "C");
 
 for ($i = 0; $i < 256; $i++) {
-	if (ctype_alpha($i)) {
-		echo "character code $i is alphabetic\n";
-	}
+    if (ctype_alpha($i)) {
+        echo "character code $i is alphabetic\n";
+    }
 }
 
 setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_alpha() : usage variations ***
 character code 65 is alphabetic
 character code 66 is alphabetic
@@ -81,4 +80,3 @@ character code 119 is alphabetic
 character code 120 is alphabetic
 character code 121 is alphabetic
 character code 122 is alphabetic
-===DONE===

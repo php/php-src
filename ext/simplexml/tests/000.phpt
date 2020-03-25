@@ -3,18 +3,18 @@ SimpleXML: var_dump()
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 
-$sxe = simplexml_load_file(dirname(__FILE__).'/000.xml');
+$sxe = simplexml_load_file(__DIR__.'/000.xml');
 
 function test($what)
 {
-	global $sxe;
-	echo "===$what\n";
-	eval("var_dump(isset(\$$what));");
-	eval("var_dump((bool)\$$what);");
-	eval("var_dump(count(\$$what));");
-	eval("var_dump(\$$what);");
+    global $sxe;
+    echo "===$what\n";
+    eval("var_dump(isset(\$$what));");
+    eval("var_dump((bool)\$$what);");
+    eval("if (isset(\$$what)) var_dump(count(\$$what));");
+    eval("var_dump(\$$what);");
 }
 
 test('sxe');
@@ -22,7 +22,7 @@ test('sxe->elem1');
 test('sxe->elem1[0]');
 test('sxe->elem1[0]->elem2');
 test('sxe->elem1[0]->elem2->bla');
-if (!ini_get("unicode_semantics")) test('sxe->elem1[0]["attr1"]');
+test('sxe->elem1[0]["attr1"]');
 test('sxe->elem1[0]->attr1');
 test('sxe->elem1[1]');
 test('sxe->elem1[2]');
@@ -35,8 +35,6 @@ test('sxe->elem22->attr22');
 test('sxe->elem22["attr22"]');
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 ===sxe
 bool(true)
@@ -51,7 +49,37 @@ object(SimpleXMLElement)#%d (3) {
   ["elem1"]=>
   array(2) {
     [0]=>
-    string(36) "There is some text.Here is some more"
+    object(SimpleXMLElement)#%d (3) {
+      ["@attributes"]=>
+      array(2) {
+        ["attr1"]=>
+        string(5) "first"
+        ["attr2"]=>
+        string(6) "second"
+      }
+      ["comment"]=>
+      object(SimpleXMLElement)#%d (0) {
+      }
+      ["elem2"]=>
+      object(SimpleXMLElement)#%d (2) {
+        ["@attributes"]=>
+        array(2) {
+          ["att25"]=>
+          string(2) "25"
+          ["att42"]=>
+          string(2) "42"
+        }
+        ["elem3"]=>
+        object(SimpleXMLElement)#%d (1) {
+          ["elem4"]=>
+          object(SimpleXMLElement)#%d (1) {
+            ["test"]=>
+            object(SimpleXMLElement)#%d (0) {
+            }
+          }
+        }
+      }
+    }
     [1]=>
     object(SimpleXMLElement)#%d (1) {
       ["@attributes"]=>
@@ -168,7 +196,6 @@ object(SimpleXMLElement)#%d (2) {
 ===sxe->elem1[0]->elem2->bla
 bool(false)
 bool(false)
-int(0)
 object(SimpleXMLElement)#%d (0) {
 }
 ===sxe->elem1[0]["attr1"]
@@ -182,7 +209,6 @@ object(SimpleXMLElement)#%d (1) {
 ===sxe->elem1[0]->attr1
 bool(false)
 bool(false)
-int(0)
 object(SimpleXMLElement)#%d (0) {
 }
 ===sxe->elem1[1]
@@ -201,7 +227,6 @@ object(SimpleXMLElement)#%d (1) {
 ===sxe->elem1[2]
 bool(false)
 bool(false)
-int(0)
 NULL
 ===sxe->elem11
 bool(true)
@@ -233,22 +258,17 @@ object(SimpleXMLElement)#%d (0) {
 ===sxe->elem22
 bool(false)
 bool(false)
-int(0)
 object(SimpleXMLElement)#%d (0) {
 }
 ===sxe->elem22->elem222
 bool(false)
 bool(false)
-int(0)
 NULL
 ===sxe->elem22->attr22
 bool(false)
 bool(false)
-int(0)
 NULL
 ===sxe->elem22["attr22"]
 bool(false)
 bool(false)
-int(0)
 NULL
-===DONE===

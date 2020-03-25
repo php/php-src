@@ -6,14 +6,14 @@ Bug #64438 proc_open hangs with stdin/out with 4097+ bytes
 error_reporting(E_ALL);
 
 if (substr(PHP_OS, 0, 3) == 'WIN') {
-	$cmd = PHP_BINARY . ' -n -r "fwrite(STDOUT, $in = file_get_contents(\'php://stdin\')); fwrite(STDERR, $in);"';
+    $cmd = PHP_BINARY . ' -n -r "fwrite(STDOUT, $in = file_get_contents(\'php://stdin\')); fwrite(STDERR, $in);"';
 } else {
-	$cmd = PHP_BINARY . ' -n -r \'fwrite(STDOUT, $in = file_get_contents("php://stdin")); fwrite(STDERR, $in);\'';
+    $cmd = PHP_BINARY . ' -n -r \'fwrite(STDOUT, $in = file_get_contents("php://stdin")); fwrite(STDERR, $in);\'';
 }
 $descriptors = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w'));
 $stdin = str_repeat('*', 4097);
 
-$options = array_merge(array('suppress_errors' => true, 'binary_pipes' => true, 'bypass_shell' => false));
+$options = array_merge(array('suppress_errors' => true, 'bypass_shell' => false));
 $process = proc_open($cmd, $descriptors, $pipes, getcwd(), array(), $options);
 
 foreach ($pipes as $pipe) {
@@ -25,6 +25,7 @@ $stdinOffset = 0;
 
 unset($pipes[0]);
 
+$pipeEvents = [];
 while ($pipes || $writePipes) {
     $r = $pipes;
     $w = $writePipes;
@@ -38,7 +39,7 @@ while ($pipes || $writePipes) {
 
     }
     if ($w) {
-        $written = fwrite($writePipes[0], (binary)substr($stdin, $stdinOffset), 8192);
+        $written = fwrite($writePipes[0], substr($stdin, $stdinOffset), 8192);
         if (false !== $written) {
             $stdinOffset += $written;
         }
@@ -51,20 +52,33 @@ while ($pipes || $writePipes) {
     foreach ($r as $pipe) {
         $type = array_search($pipe, $pipes);
         $data = fread($pipe, 8192);
-        var_dump($data);
         if (false === $data || feof($pipe)) {
+            $pipeEvents[(int)$pipe][] = "Closing pipe";
             fclose($pipe);
             unset($pipes[$type]);
+        } else {
+            $pipeEvents[(int)$pipe][] = "Read " . strlen($data) . " bytes";
         }
     }
 }
 
-?>
-===DONE===
---EXPECTF--
-string(4097) "%s"
-string(4097) "%s"
-string(0) ""
-string(0) ""
-===DONE===
+var_dump($pipeEvents);
 
+?>
+--EXPECTF--
+array(2) {
+  [%d]=>
+  array(2) {
+    [0]=>
+    string(15) "Read 4097 bytes"
+    [1]=>
+    string(12) "Closing pipe"
+  }
+  [%d]=>
+  array(2) {
+    [0]=>
+    string(15) "Read 4097 bytes"
+    [1]=>
+    string(12) "Closing pipe"
+  }
+}

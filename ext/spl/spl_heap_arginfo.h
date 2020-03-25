@@ -1,0 +1,75 @@
+/* This is a generated file, edit the .stub.php file instead. */
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplPriorityQueue_compare, 0, 0, 2)
+	ZEND_ARG_INFO(0, priority1)
+	ZEND_ARG_INFO(0, priority2)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplPriorityQueue_insert, 0, 0, 2)
+	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_INFO(0, priority)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplPriorityQueue_setExtractFlags, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplPriorityQueue_top, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_SplPriorityQueue_extract arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplPriorityQueue_count arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplPriorityQueue_isEmpty arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplPriorityQueue_rewind arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplPriorityQueue_current arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplPriorityQueue_key arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplPriorityQueue_next arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplPriorityQueue_valid arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplPriorityQueue_recoverFromCorruption arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplPriorityQueue_isCorrupted arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplPriorityQueue_getExtractFlags arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplHeap_extract arginfo_class_SplPriorityQueue_top
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplHeap_insert, 0, 0, 1)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_SplHeap_top arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplHeap_count arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplHeap_isEmpty arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplHeap_rewind arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplHeap_current arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplHeap_key arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplHeap_next arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplHeap_valid arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplHeap_recoverFromCorruption arginfo_class_SplPriorityQueue_top
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplHeap_compare, 0, 0, 2)
+	ZEND_ARG_INFO(0, value1)
+	ZEND_ARG_INFO(0, value2)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_SplHeap_isCorrupted arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplMinHeap_compare arginfo_class_SplHeap_compare
+
+#define arginfo_class_SplMaxHeap_compare arginfo_class_SplHeap_compare

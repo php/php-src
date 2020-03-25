@@ -1,0 +1,60 @@
+--TEST--
+PDO_DBLIB: PDO::DBLIB_ATTR_SKIP_EMPTY_ROWSETS for skip junk resultsets on SET NOCOUNT expression
+--SKIPIF--
+<?php
+if (!extension_loaded('pdo_dblib')) die('skip not loaded');
+require __DIR__ . '/config.inc';
+?>
+--FILE--
+<?php
+require __DIR__ . '/config.inc';
+
+$sql = '
+    SET NOCOUNT ON
+    SELECT 0 AS [result]
+';
+
+var_dump($db->getAttribute(PDO::DBLIB_ATTR_SKIP_EMPTY_ROWSETS));
+
+$stmt = $db->query($sql);
+var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+var_dump($stmt->nextRowset());
+var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+$stmt->closeCursor();
+
+
+$db->setAttribute(PDO::DBLIB_ATTR_SKIP_EMPTY_ROWSETS, true);
+var_dump($db->getAttribute(PDO::DBLIB_ATTR_SKIP_EMPTY_ROWSETS));
+
+$stmt = $db->query($sql);
+var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+var_dump($stmt->nextRowset());
+var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
+$stmt->closeCursor();
+var_dump($db->getAttribute(PDO::DBLIB_ATTR_SKIP_EMPTY_ROWSETS));
+
+?>
+--EXPECT--
+bool(false)
+array(0) {
+}
+bool(true)
+array(1) {
+  [0]=>
+  array(1) {
+    ["result"]=>
+    int(0)
+  }
+}
+bool(true)
+array(1) {
+  [0]=>
+  array(1) {
+    ["result"]=>
+    int(0)
+  }
+}
+bool(false)
+array(0) {
+}
+bool(true)

@@ -7,7 +7,7 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = "<?php __HALT_COMPILER(); ?>";
 
@@ -18,16 +18,14 @@ $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
 include 'files/phar_test.inc';
 
 $fp = fopen($pname . '/b/new.php', 'wb');
-fwrite($fp, b'extra');
+fwrite($fp, 'extra');
 fclose($fp);
 include $pname . '/b/c.php';
 include $pname . '/b/new.php';
 ?>
 
-===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECT--
 This is b/c
 extra
-===DONE===

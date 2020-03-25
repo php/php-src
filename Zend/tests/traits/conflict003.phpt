@@ -27,5 +27,5 @@ class Talker {
 }
 
 ?>
---EXPECTF--	
-Fatal error: Trait method smallTalk has not been applied, because there are collisions with other trait methods on Talker in %s on line %d
+--EXPECTF--
+Fatal error: Trait method B::smallTalk has not been applied as Talker::smallTalk, because of collision with A::smallTalk in %s on line %d

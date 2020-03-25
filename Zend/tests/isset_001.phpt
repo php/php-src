@@ -8,13 +8,13 @@ print "- isset ---\n";
 $var_name = 'unexisting';
 
 if (isset($$var_name)) {
-	print "error\n";
+    print "error\n";
 }
 
 $test = 'var_name';
 
 if (isset($$$test)) {
-	print "error\n";
+    print "error\n";
 }
 
 print "- unset ---\n";

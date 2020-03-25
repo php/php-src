@@ -4,26 +4,26 @@ ZE2 Late Static Binding and Singleton
 <?php
 abstract class Singleton
 {
-	static private $instances = array();
-	static private $nextInstanceId = 0;
-	private $instanceId = NULL;
-	static final public function getInstance()
-	{
-		$caller = get_called_class();
-		if (!isset(self::$instances[$caller])) {
-			self::$instances[$caller] = new $caller;
-			self::$instances[$caller]->instanceId = self::$nextInstanceId++;
-		}
-		return self::$instances[$caller];
-	}
-	public final function getInstanceId()
-	{
-		return $this->instanceId;
-	}
-	public final function identify()
-	{
-		var_dump($this);
-	}
+    static private $instances = array();
+    static private $nextInstanceId = 0;
+    private $instanceId = NULL;
+    static final public function getInstance()
+    {
+        $caller = get_called_class();
+        if (!isset(self::$instances[$caller])) {
+            self::$instances[$caller] = new $caller;
+            self::$instances[$caller]->instanceId = self::$nextInstanceId++;
+        }
+        return self::$instances[$caller];
+    }
+    public final function getInstanceId()
+    {
+        return $this->instanceId;
+    }
+    public final function identify()
+    {
+        var_dump($this);
+    }
 }
 
 class Foo extends Singleton {
@@ -54,7 +54,6 @@ $x->identify();
 $y->identify();
 $z->identify();
 ?>
-===DONE===
 --EXPECTF--
 object(Foo)#%d (1) {
   ["instanceId":"Singleton":private]=>
@@ -92,4 +91,3 @@ object(Baz)#%d (1) {
   ["instanceId":"Singleton":private]=>
   int(2)
 }
-===DONE===

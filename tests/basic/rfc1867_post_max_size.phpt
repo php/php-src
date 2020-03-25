@@ -2,8 +2,6 @@
 rfc1867 post_max_size
 --INI--
 post_max_size=1
-error_reporting=E_ALL&~E_NOTICE
-comment=debug builds show some additional E_NOTICE errors
 --POST_RAW--
 Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
 -----------------------------20896060251896012921717172737

@@ -6,7 +6,7 @@ var_dump(unserialize('a:2:{i:0;O:9:"exception":1:{s:16:"'."\0".'Exception'."\0".
 var_dump(unserialize('a:2:{i:0;O:9:"exception":1:{s:16:"'."\0".'Exception'."\0".'trace";s:4:"test";}i:1;r:3;}'));
 ?>
 --EXPECTF--
-array(1) {
+array(2) {
   [0]=>
   object(Exception)#%d (6) {
     ["message":protected]=>
@@ -22,21 +22,9 @@ array(1) {
     ["previous":"Exception":private]=>
     NULL
   }
+  [1]=>
+  string(4) "test"
 }
-array(1) {
-  [0]=>
-  object(Exception)#%d (6) {
-    ["message":protected]=>
-    string(0) ""
-    ["string":"Exception":private]=>
-    string(0) ""
-    ["code":protected]=>
-    int(0)
-    ["file":protected]=>
-    string(%d) "%s"
-    ["line":protected]=>
-    int(3)
-    ["previous":"Exception":private]=>
-    NULL
-  }
-}
+
+Notice: unserialize(): Error at offset %d of %d bytes in %sbug70963.php on line 3
+bool(false)

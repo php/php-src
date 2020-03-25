@@ -4,9 +4,9 @@ foreach() (and other) variables aren't leaked on premature close
 <?php
 
 function gen(array $array) {
-	foreach ($array as $value) {
-		yield $value;
-	}
+    foreach ($array as $value) {
+        yield $value;
+    }
 }
 
 $gen = gen(['Foo', 'Bar']);

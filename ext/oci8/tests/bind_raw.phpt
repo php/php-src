@@ -3,19 +3,19 @@ bind RAW field
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require dirname(__FILE__)."/connect.inc";
+require __DIR__."/connect.inc";
 
 $stmt = oci_parse($c, "create table phptestrawtable( id number(10), fileimage raw(1000))");
 oci_execute($stmt);
 
 $stmt = oci_parse ($c, "insert into phptestrawtable (id, fileimage) values (:id, :fileimage)");
 $i=1;
-$fileimage = file_get_contents( dirname(__FILE__)."/test.gif");
+$fileimage = file_get_contents( __DIR__."/test.gif");
 $fileimage = substr($fileimage, 0, 300);
 
 oci_bind_by_name( $stmt, ":id", $i, -1);

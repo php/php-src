@@ -3,7 +3,7 @@ Test uasort() function : usage variations - sort different numeric values
 --FILE--
 <?php
 /* Prototype  : bool uasort(array $array_arg, string $cmp_function)
- * Description: Sort an array with a user-defined comparison function and maintain index association 
+ * Description: Sort an array with a user-defined comparison function and maintain index association
  * Source code: ext/standard/array.c
 */
 
@@ -67,7 +67,7 @@ var_dump($empty_array);
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing uasort() : different numeric arrays as 'array_arg' ***
 -- Sorting Integer array --
 bool(true)

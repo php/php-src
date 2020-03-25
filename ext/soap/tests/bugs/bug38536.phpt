@@ -36,7 +36,7 @@ EOF;
 }
 
 ini_set("soap.wsdl_cache_enabled", 0);
-$SOAPObject = new LocalSoapClient(dirname(__FILE__).'/bug38536.wsdl');
+$SOAPObject = new LocalSoapClient(__DIR__.'/bug38536.wsdl');
 print_r($SOAPObject->test());
 ?>
 --EXPECT--

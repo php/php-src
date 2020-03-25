@@ -16,6 +16,6 @@ $dom->saveXML();
 echo $dom->saveXML();
 
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0"?>
 <!--test-comment-more-data-->

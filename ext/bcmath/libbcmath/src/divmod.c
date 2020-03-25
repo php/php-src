@@ -11,7 +11,7 @@
     This library is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.  (COPYING.LIB)
+    Lesser General Public License for more details.  (LICENSE)
 
     You should have received a copy of the GNU Lesser General Public
     License along with this library; if not, write to:
@@ -31,7 +31,6 @@
 
 #include <config.h>
 #include <stdio.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdarg.h>
@@ -59,7 +58,7 @@ bc_divmod (bc_num num1, bc_num num2, bc_num *quot, bc_num *rem, int scale)
   bc_init_num(&temp);
 
   /* Calculate it. */
-  bc_divide (num1, num2, &temp, scale);
+  bc_divide (num1, num2, &temp, 0);
   if (quot)
     quotient = bc_copy_num (temp);
   bc_multiply (temp, num2, &temp, rscale);
@@ -84,4 +83,3 @@ bc_modulo (bc_num num1, bc_num num2, bc_num *result, int scale)
 {
   return bc_divmod (num1, num2, NULL, result, scale);
 }
-

@@ -27,7 +27,6 @@ ob_end_flush();
 echo $str1, $str2;
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing ob_start() : closures as output handlers ***
 Output (1): Output (2): Test
@@ -36,4 +35,3 @@ Test
 With newlines
 Output (2): Test
 With newlines
-===DONE===

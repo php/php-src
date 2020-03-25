@@ -1,5 +1,14 @@
 --TEST--
 Test detection of inline string manipulations on zval watch
+--SKIPIF--
+<?php
+if (PHP_INT_SIZE == 4) {
+    die("xfail There may be flaws in the implementation of watchpoints that cause failures");
+}
+if (getenv('SKIP_ASAN')) {
+    die("skip intentionally causes segfaults");
+}
+?>
 --INI--
 opcache.optimization_level=0
 --PHPDBG--
@@ -26,8 +35,7 @@ New value: aa
 prompt> [Breaking on watchpoint $a]
 Old value: aa
 New value: ab
->00005: $a[1] = "b";
- 00006: 
+>00006: 
 prompt> [$a has been removed, removing watchpoint]
 [Script ended normally]
 prompt> 

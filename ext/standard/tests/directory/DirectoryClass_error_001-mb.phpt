@@ -10,22 +10,41 @@ mkdir($d);
 echo "\n--> Try all methods with bad handle:\n";
 $d = new Directory($d);
 $d->handle = "Havoc!";
-var_dump($d->read());
-var_dump($d->rewind());
-var_dump($d->close());
+try {
+    var_dump($d->read());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump($d->rewind());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
+try {
+    var_dump($d->close());
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 
 echo "\n--> Try all methods with no handle:\n";
 $d = new Directory($d);
 unset($d->handle);
-var_dump($d->read());
-var_dump($d->rewind());
-var_dump($d->close());
 
-echo "\n--> Try all methods with wrong number of args:\n";
-$d = new Directory($d);
-var_dump($d->read(1,2));
-var_dump($d->rewind(1,2));
-var_dump($d->close(1,2));
+try {
+    var_dump($d->read());
+} catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
+try {
+    var_dump($d->rewind());
+} catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
+try {
+    var_dump($d->close());
+} catch (\Error $e) {
+    echo $e->getMessage() . "\n";
+}
 
 ?>
 --CLEAN--
@@ -34,36 +53,13 @@ $d = getcwd().PATH_SEPARATOR."私はガラスを食べられます";
 rmdir($d);
 
 ?>
---EXPECTF--
+--EXPECT--
 --> Try all methods with bad handle:
-
-Warning: Directory::read(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
-
-Warning: Directory::rewind(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
-
-Warning: Directory::close(): supplied argument is not a valid Directory resource in %s on line %d
-bool(false)
+Directory::read(): supplied argument is not a valid Directory resource
+Directory::rewind(): supplied argument is not a valid Directory resource
+Directory::close(): supplied argument is not a valid Directory resource
 
 --> Try all methods with no handle:
-
-Warning: Directory::read(): Unable to find my handle property in %s on line %d
-bool(false)
-
-Warning: Directory::rewind(): Unable to find my handle property in %s on line %d
-bool(false)
-
-Warning: Directory::close(): Unable to find my handle property in %s on line %d
-bool(false)
-
---> Try all methods with wrong number of args:
-
-Warning: Directory::read() expects at most 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: Directory::rewind() expects at most 1 parameter, 2 given in %s on line %d
-NULL
-
-Warning: Directory::close() expects at most 1 parameter, 2 given in %s on line %d
-NULL
+Unable to find my handle property
+Unable to find my handle property
+Unable to find my handle property

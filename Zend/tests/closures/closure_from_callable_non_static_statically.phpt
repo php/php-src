@@ -17,4 +17,4 @@ try {
 
 ?>
 --EXPECT--
-Failed to create closure from callable: non-static method A::method() should not be called statically
+Failed to create closure from callable: non-static method A::method() cannot be called statically

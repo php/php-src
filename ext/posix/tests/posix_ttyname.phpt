@@ -7,8 +7,8 @@ Source code: ext/posix/posix.c
 Falko Menge, mail at falko-menge dot de
 PHP Testfest Berlin 2009-05-10
 --SKIPIF--
-<?php 
-	if (!extension_loaded('posix')) { 
+<?php
+	if (!extension_loaded('posix')) {
         die('SKIP - POSIX extension not available');
     }
 ?>
@@ -18,9 +18,7 @@ PHP Testfest Berlin 2009-05-10
     var_dump(posix_ttyname(STDERR));
     var_dump(posix_ttyname(STDOUT));
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 bool(false)
-===DONE===

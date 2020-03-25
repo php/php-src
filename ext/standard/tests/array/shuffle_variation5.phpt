@@ -3,12 +3,12 @@ Test shuffle() function : usage variation - arrays with diff heredoc strings
 --FILE--
 <?php
 /* Prototype  : bool shuffle(array $array_arg)
- * Description: Randomly shuffle the contents of an array 
+ * Description: Randomly shuffle the contents of an array
  * Source code: ext/standard/array.c
 */
 
 /*
-* Test behaviour of shuffle() when an array of heredoc strings is passed to 
+* Test behaviour of shuffle() when an array of heredoc strings is passed to
 * 'array_arg' argument of the function
 */
 
@@ -64,15 +64,15 @@ $heredoc_asso_array = array(
 
 // test shuffle() with array containing heredoc strings as values
 echo "\n-- with array of heredoc strings --\n";
-var_dump( shuffle($heredoc_array) );  
+var_dump( shuffle($heredoc_array) );
 echo "\nThe output array is:\n";
-var_dump( $heredoc_array );  
+var_dump( $heredoc_array );
 
-// test shuffle() with array containing heredoc strings as its keys 
+// test shuffle() with array containing heredoc strings as its keys
 echo "\n-- with array having heredoc strings as keys --\n";
-var_dump( shuffle($heredoc_asso_array) );  
+var_dump( shuffle($heredoc_asso_array) );
 echo "\nThe output array is:\n";
-var_dump( $heredoc_asso_array );  
+var_dump( $heredoc_asso_array );
 
 echo "Done";
 ?>
@@ -117,4 +117,3 @@ array\(6\) {
   string\(8\) "[heredoc 1-5]*"
 }
 Done
-

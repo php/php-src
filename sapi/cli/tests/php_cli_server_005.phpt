@@ -2,7 +2,7 @@
 Post a file
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -41,13 +41,13 @@ Content-Length: {$post_len}
 {$post_data}
 HEADER
 )) {
-	while (!feof($fp)) {
-		echo fgets($fp);
-	}
+    while (!feof($fp)) {
+        echo fgets($fp);
+    }
 }
 
 ?>
---EXPECTF--	
+--EXPECTF--
 HTTP/1.1 200 OK
 Host: %s
 Date: %s

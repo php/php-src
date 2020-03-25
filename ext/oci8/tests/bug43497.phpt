@@ -1,15 +1,15 @@
 --TEST--
 Bug #43497 (OCI8 XML/getClobVal aka temporary LOBs leak UGA memory)
 --SKIPIF--
-<?php 
+<?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
 ?>
 --FILE--
 <?php
 
-require dirname(__FILE__).'/connect.inc';
+require __DIR__.'/connect.inc';
 
 function sessionid($c)  // determines and returns current session ID
 {
@@ -18,8 +18,8 @@ function sessionid($c)  // determines and returns current session ID
     $stmt = oci_parse($c, $query);
 
     if (oci_execute($stmt, OCI_DEFAULT)) {
-		$row = oci_fetch($stmt);
-		return oci_result($stmt, 1);
+        $row = oci_fetch($stmt);
+        return oci_result($stmt, 1);
     }
 
     return null;
@@ -33,10 +33,10 @@ function templobs($c, $sid)  // returns number of temporary LOBs
     $stmt = oci_parse($c, $query);
 
     if (oci_execute($stmt, OCI_DEFAULT)) {
-		$row = oci_fetch($stmt);
-		$val = oci_result($stmt, 1);
-		oci_free_statement($stmt);
-		return $val;
+        $row = oci_fetch($stmt);
+        $val = oci_result($stmt, 1);
+        oci_free_statement($stmt);
+        return $val;
     }
     return null;
 }
@@ -47,14 +47,14 @@ function readxmltab_ex($c)
 {
     $stmt = oci_parse($c, "select extract(xml, '/').getclobval() from bug43497_tab");
 
-	$cntchk = 0;
-	if (oci_execute($stmt)) {
-		while ($result = oci_fetch_array($stmt, OCI_NUM)) {
-			$result[0]->free();   // cleanup properly
-			++$cntchk;
-		}
-	}
-	echo "Loop count check = $cntchk\n";
+    $cntchk = 0;
+    if (oci_execute($stmt)) {
+        while ($result = oci_fetch_array($stmt, OCI_NUM)) {
+            $result[0]->free();   // cleanup properly
+            ++$cntchk;
+        }
+    }
+    echo "Loop count check = $cntchk\n";
 }
 
 // Read all XML data using explicit LOB locator but without freeing the temp lobs
@@ -62,13 +62,13 @@ function readxmltab_ex_nofree($c)
 {
     $stmt = oci_parse($c, "select extract(xml, '/').getclobval() from bug43497_tab");
 
-	$cntchk = 0;
-	if (oci_execute($stmt)) {
-		while ($result = oci_fetch_array($stmt, OCI_NUM)) {
-			++$cntchk;
-		}
-	}
-	echo "Loop count check = $cntchk\n";
+    $cntchk = 0;
+    if (oci_execute($stmt)) {
+        while ($result = oci_fetch_array($stmt, OCI_NUM)) {
+            ++$cntchk;
+        }
+    }
+    echo "Loop count check = $cntchk\n";
 }
 
 // Read all XML data using implicit LOB locator
@@ -76,18 +76,18 @@ function readxmltab_im($c)
 {
     $stmt = oci_parse($c, "select extract(xml, '/').getclobval() from bug43497_tab");
 
-	$cntchk = 0;
-	if (oci_execute($stmt)) {
-		while ($result = oci_fetch_array($stmt, OCI_NUM+OCI_RETURN_LOBS)) {
-			++$cntchk;
-		}
-	}
-	echo "Loop count check = $cntchk\n";
+    $cntchk = 0;
+    if (oci_execute($stmt)) {
+        while ($result = oci_fetch_array($stmt, OCI_NUM+OCI_RETURN_LOBS)) {
+            ++$cntchk;
+        }
+    }
+    echo "Loop count check = $cntchk\n";
 }
 
 function createxmltab($c)  // create table w/ field of XML type
 {
-	@dropxmltab($c);
+    @dropxmltab($c);
     $stmt = oci_parse($c, "create table bug43497_tab (id number primary key, xml xmltype)");
     oci_execute($stmt);
 }
@@ -101,31 +101,31 @@ function dropxmltab($c)  // delete table
 
 function fillxmltab($c)
 {
-	for ($id = 1; $id <= 100; $id++) {
-		
-		// create an XML element string with random data		
-		$s = "<data>";
-		for ($j = 0; $j < 128; $j++) {
-			$s .= rand();		
-		}
-		$s .= "</data>\n";		
-		for ($j = 0; $j < 4; $j++) {
-			$s .= $s;
-		}		
-		$data = "<?xml version=\"1.0\"?><records>" . $s . "</records>";
-		
-		// insert XML data into database
-		
-		$stmt = oci_parse($c, "insert into bug43497_tab(id, xml) values (:id, sys.xmltype.createxml(:xml))");
-		oci_bind_by_name($stmt, ":id", $id);
-		$clob = oci_new_descriptor($c, OCI_D_LOB);
-		oci_bind_by_name($stmt, ":xml", $clob, -1, OCI_B_CLOB);
-		$clob->writetemporary($data);
-		oci_execute($stmt);
-		
-		$clob->close();
-		$clob->free();
-	}
+    for ($id = 1; $id <= 100; $id++) {
+
+        // create an XML element string with random data
+        $s = "<data>";
+        for ($j = 0; $j < 128; $j++) {
+            $s .= rand();
+        }
+        $s .= "</data>\n";
+        for ($j = 0; $j < 4; $j++) {
+            $s .= $s;
+        }
+        $data = "<?xml version=\"1.0\"?><records>" . $s . "</records>";
+
+        // insert XML data into database
+
+        $stmt = oci_parse($c, "insert into bug43497_tab(id, xml) values (:id, sys.xmltype.createxml(:xml))");
+        oci_bind_by_name($stmt, ":id", $id);
+        $clob = oci_new_descriptor($c, OCI_D_LOB);
+        oci_bind_by_name($stmt, ":xml", $clob, -1, OCI_B_CLOB);
+        $clob->writetemporary($data);
+        oci_execute($stmt);
+
+        $clob->close();
+        $clob->free();
+    }
 }
 
 

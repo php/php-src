@@ -6,11 +6,7 @@ require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('connect.inc');
 
-if ($IS_MYSQLND && !version_compare(PHP_VERSION, '5.4.12-dev', ">=")) {
-	die("SKIP Available in mysqlnd as of PHP 5.4.12-dev");
-}
-
-if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
+if (!$link = @my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 	die(sprintf("SKIP Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 		$host, $user, $db, $port, $socket));
 }
@@ -54,70 +50,71 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'%
 ?>
 --FILE--
 <?php
-	require_once('connect.inc');
-	require_once('table.inc');
+    require_once('connect.inc');
+    require_once('table.inc');
 
-	/* default */
-	if (!$link = my_mysqli_connect($host, 'expiretest', "", $db, $port, $socket)) {
-		printf("[001] Cannot connect [%d] %s\n",
-			mysqli_connect_errno(), mysqli_connect_error());
-	} else {
-		$link->query("SELECT id FROM test WHERE id = 1");
-		printf("[002] Connect should fail, [%d] %s\n", $link->errno, $link->error);
-	}
+    /* default */
+    if (!$link = my_mysqli_connect($host, 'expiretest', "", $db, $port, $socket)) {
+        printf("[001] Cannot connect [%d] %s\n",
+            mysqli_connect_errno(), mysqli_connect_error());
+    } else {
+        $link->query("SELECT id FROM test WHERE id = 1");
+        printf("[002] Connect should fail, [%d] %s\n", $link->errno, $link->error);
+    }
+    /* explicitly requesting default */
+    $link = mysqli_init();
+    $link->options(MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS, 0);
+    if (!my_mysqli_real_connect($link, $host, 'expiretest', "", $db, $port, $socket)) {
+        printf("[003] Cannot connect [%d] %s\n",
+            mysqli_connect_errno(), mysqli_connect_error());
+    } else {
+        $link->query("SELECT id FROM test WHERE id = 1");
+        printf("[004] Connect should fail, [%d] %s\n", $link->errno, $link->error);
+    }
 
-	/* explicitly requesting default */
-	$link = mysqli_init();
-	$link->options(MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS, 0);
-	if (!my_mysqli_real_connect($link, $host, 'expiretest', "", $db, $port, $socket)) {
-		printf("[003] Cannot connect [%d] %s\n",
-			mysqli_connect_errno(), mysqli_connect_error());
-	} else {
-		$link->query("SELECT id FROM test WHERE id = 1");
-		printf("[004] Connect should fail, [%d] %s\n", $link->errno, $link->error);
-	}
+    /* allow connect */
+    $link = mysqli_init();
+    $link->options(MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS, 1);
+    if (!my_mysqli_real_connect($link, $host, 'expiretest', "", $db, $port, $socket)) {
+        printf("[005] Cannot connect [%d] %s\n",
+            mysqli_connect_errno(), mysqli_connect_error());
+    } else {
+        $link->query("SELECT id FROM test WHERE id = 1");
+        printf("[006] Connect allowed, query fail, [%d] %s\n", $link->errno, $link->error);
+        $link->close();
+    }
 
-	/* allow connect */
-	$link = mysqli_init();
-	$link->options(MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS, 1);
-	if (!my_mysqli_real_connect($link, $host, 'expiretest', "", $db, $port, $socket)) {
-		printf("[005] Cannot connect [%d] %s\n",
-			mysqli_connect_errno(), mysqli_connect_error());
-	} else {
-		$link->query("SELECT id FROM test WHERE id = 1");
-		printf("[006] Connect allowed, query fail, [%d] %s\n", $link->errno, $link->error);
-		$link->close();
-	}
-
-	/* allow connect, fix pw */
-	$link = mysqli_init();
-	$link->options(MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS, 1);
-	if (!my_mysqli_real_connect($link, $host, 'expiretest', "", $db, $port, $socket)) {
-		printf("[007] Cannot connect [%d] %s\n",
-			mysqli_connect_errno(), mysqli_connect_error());
-	} else {
-		$link->query("SET PASSWORD=PASSWORD('expiretest')");
-		printf("[008] Connect allowed, pw set, [%d] %s\n", $link->errno, $link->error);
-		if ($res = $link->query("SELECT id FROM test WHERE id = 1"))
-			var_dump($res->fetch_assoc());
-		$link->close();
-	}
-
-
-	/* check login */
-	if (!$link = my_mysqli_connect($host, 'expiretest', "expiretest", $db, $port, $socket)) {
-		printf("[001] Cannot connect [%d] %s\n",
-			mysqli_connect_errno(), mysqli_connect_error());
-	} else {
-		$link->query("SELECT id FROM test WHERE id = 1");
-		if ($res = $link->query("SELECT id FROM test WHERE id = 1"))
-			var_dump($res->fetch_assoc());
-		$link->close();
-	}
+    /* allow connect, fix pw */
+    $link = mysqli_init();
+    $link->options(MYSQLI_OPT_CAN_HANDLE_EXPIRED_PASSWORDS, 1);
+    if (!my_mysqli_real_connect($link, $host, 'expiretest', "", $db, $port, $socket)) {
+        printf("[007] Cannot connect [%d] %s\n",
+            mysqli_connect_errno(), mysqli_connect_error());
+    } else {
+        if (!$link->query("SET PASSWORD='expiretest'")) {
+            $link->query("SET PASSWORD=PASSWORD('expiretest')");
+        }
+        printf("[008] Connect allowed, pw set, [%d] %s\n", $link->errno, $link->error);
+        if ($res = $link->query("SELECT id FROM test WHERE id = 1"))
+            var_dump($res->fetch_assoc());
+        $link->close();
+    }
 
 
+    /* check login */
+    if (!$link = my_mysqli_connect($host, 'expiretest', "expiretest", $db, $port, $socket)) {
+        printf("[001] Cannot connect [%d] %s\n",
+            mysqli_connect_errno(), mysqli_connect_error());
+    } else {
+        $link->query("SELECT id FROM test WHERE id = 1");
+        if ($res = $link->query("SELECT id FROM test WHERE id = 1"))
+            var_dump($res->fetch_assoc());
+        $link->close();
+    }
 
-	print "done!";
+
+
+    print "done!";
 ?>
 --CLEAN--
 <?php
@@ -126,11 +123,10 @@ if (!mysqli_query($link, sprintf("GRANT SELECT ON TABLE %s.test TO expiretest@'%
 	mysqli_query($link, 'DROP USER expiretest@localhost');
 ?>
 --EXPECTF--
-
-Warning: mysqli_real_connect(): (HY000/1862): %s in %s on line %d
+Warning: mysqli%sconnect(): (HY000/1862): %s in %s on line %d
 [001] Cannot connect [1862] %s
 
-Warning: mysqli_real_connect(): (HY000/1862): %s in %s on line %d
+Warning: mysqli%sconnect(): (HY000/1862): %s in %s on line %d
 [003] Cannot connect [1862] %s
 [006] Connect allowed, query fail, [1820] %s
 [008] Connect allowed, pw set, [0%A

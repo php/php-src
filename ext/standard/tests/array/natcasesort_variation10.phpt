@@ -27,8 +27,7 @@ echo key($array_arg) . " => " . current ($array_arg) . "\n";
 
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing natcasesort() : usage variations ***
 
 -- Initial Position of Internal Pointer: --

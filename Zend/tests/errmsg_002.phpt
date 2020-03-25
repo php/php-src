@@ -4,11 +4,11 @@ errmsg: function cannot be declared private
 <?php
 
 abstract class test {
-	abstract private function foo() {
-	}
+    abstract private function foo() {
+    }
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Abstract function test::foo() cannot be declared private in %s on line %d

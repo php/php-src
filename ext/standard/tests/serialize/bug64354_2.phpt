@@ -16,9 +16,9 @@ spl_autoload_register(
 
 try {
     var_dump(unserialize('a:2:{i:0;O:1:"A":0:{}i:1;O:1:"B":0:{}}'));
-} catch (Exception $e) { 
+} catch (Exception $e) {
     var_dump($e->getMessage());
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(6) "Failed"

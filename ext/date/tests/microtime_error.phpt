@@ -2,41 +2,31 @@
 Test wrong number of arguments for microtime()
 --FILE--
 <?php
-/* 
+/*
  * proto mixed microtime([bool get_as_float])
  * Function is implemented in ext/standard/microtime.c
-*/ 
-
-$opt_arg_0 = true;
-$extra_arg = 1;
-
-echo "\n-- Too many arguments --\n";
-var_dump(microtime($opt_arg_0, $extra_arg));
-
+*/
 
 echo "\n-- Bad Arg types --\n";
 
 $bad_args = array(null,
-				  1.5,
-				  "hello",
-				  array('k'=>'v', array(0)),
-				  new stdClass,
-				  1);
+                  1.5,
+                  "hello",
+                  array('k'=>'v', array(0)),
+                  new stdClass,
+                  1);
 foreach ($bad_args as $bad_arg) {
-	echo "\n--> bad arg: ";
-	var_dump($bad_arg);
-	var_dump(microtime($bad_arg));
+    echo "\n--> bad arg: ";
+    var_dump($bad_arg);
+    try {
+        var_dump(microtime($bad_arg));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 }
 
 ?>
-===DONE===
 --EXPECTF--
-
--- Too many arguments --
-
-Warning: microtime() expects at most 1 parameter, 2 given in %s on line 11
-NULL
-
 -- Bad Arg types --
 
 --> bad arg: NULL
@@ -57,16 +47,11 @@ float(%s)
     int(0)
   }
 }
-
-Warning: microtime() expects parameter 1 to be boolean, array given in %s on line 25
-NULL
+microtime(): Argument #1 ($get_as_float) must be of type bool, array given
 
 --> bad arg: object(stdClass)#%d (0) {
 }
-
-Warning: microtime() expects parameter 1 to be boolean, object given in %s on line 25
-NULL
+microtime(): Argument #1 ($get_as_float) must be of type bool, object given
 
 --> bad arg: int(1)
 float(%s)
-===DONE===

@@ -13,39 +13,38 @@ precision=14
 echo "*** Testing round() : basic functionality ***\n";
 
 $values = array(123456789,
-				123.456789,
-				-4.5679123,
-				1.23E4,
-				-4.567E3,
-				0x234567,
-				067777777,
-				"1.234567", 
-				"2.3456789e8");
-					
+                123.456789,
+                -4.5679123,
+                1.23E4,
+                -4.567E3,
+                0x234567,
+                067777777,
+                "1.234567",
+                "2.3456789e8");
+
 $precision = array(2,
-				8,
-				0x3,
-				04,
-				3.6,
-				"2",
-				"04",
-				"3.6",
-				"2.1e1",				
-				null,
-				true,
-				false);					
+                8,
+                0x3,
+                04,
+                3.6,
+                "2",
+                "04",
+                "3.6",
+                "2.1e1",
+                null,
+                true,
+                false);
 
 for ($i = 0; $i < count($values); $i++) {
-	echo "round: $values[$i]\n";
-	for ($j = 0; $j < count($precision); $j++) {
-		$res = round($values[$i], $precision[$j]);
-		echo "...with precision $precision[$j]-> ";
-		var_dump($res);
-	}	
+    echo "round: $values[$i]\n";
+    for ($j = 0; $j < count($precision); $j++) {
+        $res = round($values[$i], $precision[$j]);
+        echo "...with precision $precision[$j]-> ";
+        var_dump($res);
+    }
 }
 ?>
-===Done===
---EXPECTF--
+--EXPECT--
 *** Testing round() : basic functionality ***
 round: 123456789
 ...with precision 2-> float(123456789)
@@ -164,4 +163,3 @@ round: 2.3456789e8
 ...with precision -> float(234567890)
 ...with precision 1-> float(234567890)
 ...with precision -> float(234567890)
-===Done===

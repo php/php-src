@@ -3,15 +3,15 @@ Bug #61362 (Exception::getTraceAsString, Exception::__toString not able to handl
 --FILE--
 <?php
 function test($arg){
-	throw new Exception();
+    throw new Exception();
 }
 
 try {
-	test('тест');
+    test('тест');
 }
 catch(Exception $e) {
-	echo $e->getTraceAsString(), "\n";
-	echo (string)$e;
+    echo $e->getTraceAsString(), "\n";
+    echo (string)$e;
 }
 ?>
 --EXPECTF--

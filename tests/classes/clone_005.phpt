@@ -16,4 +16,4 @@ class test extends base {
 
 ?>
 --EXPECTF--
-Fatal error: Cannot override final method base::__clone() in %sclone_005.php on line %d
+Fatal error: Cannot override final method base::__clone() in %sclone_005.php on line 11

@@ -5,9 +5,10 @@ Multicast support: IPv4 receive options
 if (!extension_loaded('sockets')) {
     die('skip sockets extension not available.');
 }
+if (getenv('SKIP_ONLINE_TESTS')) die('skip online test');
 $s = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 $br = socket_bind($s, '0.0.0.0', 3000);
-$so = socket_set_option($s, IPPROTO_IP, MCAST_JOIN_GROUP, array(
+$so = @socket_set_option($s, IPPROTO_IP, MCAST_JOIN_GROUP, array(
 	"group"	=> '224.0.0.23',
 	"interface" => 'lo',
 ));
@@ -42,8 +43,8 @@ $br = socket_bind($s, '0.0.0.0', 3000);
 var_dump($br);
 
 $so = socket_set_option($s, $level, MCAST_JOIN_GROUP, array(
-	"group"	=> $mcastaddr,
-	"interface" => $interface,
+    "group"	=> $mcastaddr,
+    "interface" => $interface,
 ));
 var_dump($so);
 
@@ -53,101 +54,101 @@ var_dump($r);
 $i = 0;
 checktimeout($s, 500);
 while (($str = socket_read($s, 3000)) !== FALSE) {
-	$i++;
-	echo "$i> ", $str, "\n";
+    $i++;
+    echo "$i> ", $str, "\n";
 
 if ($i == 1) {
-	echo "leaving group\n";
-	$so = socket_set_option($s, $level, MCAST_LEAVE_GROUP, array(
-		"group"	=> $mcastaddr,
-		"interface" => $interface,
-	));
-	var_dump($so);
-	$r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, 3000);
-	var_dump($r);
-	$r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "127.0.0.1", 3000);
-	var_dump($r);
+    echo "leaving group\n";
+    $so = socket_set_option($s, $level, MCAST_LEAVE_GROUP, array(
+        "group"	=> $mcastaddr,
+        "interface" => $interface,
+    ));
+    var_dump($so);
+    $r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, 3000);
+    var_dump($r);
+    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "127.0.0.1", 3000);
+    var_dump($r);
 }
 if ($i == 2) {
-	echo "re-joining group\n";
-	$so = socket_set_option($s, $level, MCAST_JOIN_GROUP, array(
-		"group"	=> $mcastaddr,
-		"interface" => $interface,
-	));
-	var_dump($so);
-	$r = socket_sendto($sends2, $m = "ignored mcast packet (different interface)", strlen($m), 0, $mcastaddr, 3000);
-	var_dump($r);
-	$r = socket_sendto($sends1, $m = "mcast packet", strlen($m), 0, $mcastaddr, 3000);
-	var_dump($r);
+    echo "re-joining group\n";
+    $so = socket_set_option($s, $level, MCAST_JOIN_GROUP, array(
+        "group"	=> $mcastaddr,
+        "interface" => $interface,
+    ));
+    var_dump($so);
+    $r = socket_sendto($sends2, $m = "ignored mcast packet (different interface)", strlen($m), 0, $mcastaddr, 3000);
+    var_dump($r);
+    $r = socket_sendto($sends1, $m = "mcast packet", strlen($m), 0, $mcastaddr, 3000);
+    var_dump($r);
 }
 if ($i == 3) {
-	echo "blocking source\n";
-	$so = socket_set_option($s, $level, MCAST_BLOCK_SOURCE, array(
-		"group"	=> $mcastaddr,
-		"interface" => $interface,
-		"source" => $sblock,
-	));
-	var_dump($so);
-	$r = socket_sendto($sends1, $m = "ignored packet (blocked source)", strlen($m), 0, $mcastaddr, 3000);
-	var_dump($r);
-	$r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "127.0.0.1", 3000);
-	var_dump($r);
+    echo "blocking source\n";
+    $so = socket_set_option($s, $level, MCAST_BLOCK_SOURCE, array(
+        "group"	=> $mcastaddr,
+        "interface" => $interface,
+        "source" => $sblock,
+    ));
+    var_dump($so);
+    $r = socket_sendto($sends1, $m = "ignored packet (blocked source)", strlen($m), 0, $mcastaddr, 3000);
+    var_dump($r);
+    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "127.0.0.1", 3000);
+    var_dump($r);
 }
 if ($i == 4) {
-	echo "unblocking source\n";
-	$so = socket_set_option($s, $level, MCAST_UNBLOCK_SOURCE, array(
-		"group"	=> $mcastaddr,
-		"interface" => $interface,
-		"source" => $sblock,
-	));
-	var_dump($so);
-	$r = socket_sendto($sends1, $m = "mcast packet from 127.0.0.1", strlen($m), 0, $mcastaddr, 3000);
-	var_dump($r);
+    echo "unblocking source\n";
+    $so = socket_set_option($s, $level, MCAST_UNBLOCK_SOURCE, array(
+        "group"	=> $mcastaddr,
+        "interface" => $interface,
+        "source" => $sblock,
+    ));
+    var_dump($so);
+    $r = socket_sendto($sends1, $m = "mcast packet from 127.0.0.1", strlen($m), 0, $mcastaddr, 3000);
+    var_dump($r);
 }
 if ($i == 5) {
-	echo "leaving group\n";
-	$so = socket_set_option($s, $level, MCAST_LEAVE_GROUP, array(
-		"group"	=> $mcastaddr,
-		"interface" => $interface,
-	));
-	var_dump($so);
-	$r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, 3000);
-	var_dump($r);
-	$r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "127.0.0.1", 3000);
-	var_dump($r);
+    echo "leaving group\n";
+    $so = socket_set_option($s, $level, MCAST_LEAVE_GROUP, array(
+        "group"	=> $mcastaddr,
+        "interface" => $interface,
+    ));
+    var_dump($so);
+    $r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, 3000);
+    var_dump($r);
+    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "127.0.0.1", 3000);
+    var_dump($r);
 }
 if ($i == 6) {
-	echo "joining source group\n";
-	$so = socket_set_option($s, $level, MCAST_JOIN_SOURCE_GROUP, array(
-		"group"	=> $mcastaddr,
-		"interface" => $interface,
-		"source" => $sblock,
-	));
-	var_dump($so);
-	$r = socket_sendto($sends1, $m = "mcast packet from 127.0.0.1", strlen($m), 0, $mcastaddr, 3000);
-	var_dump($r);
+    echo "joining source group\n";
+    $so = socket_set_option($s, $level, MCAST_JOIN_SOURCE_GROUP, array(
+        "group"	=> $mcastaddr,
+        "interface" => $interface,
+        "source" => $sblock,
+    ));
+    var_dump($so);
+    $r = socket_sendto($sends1, $m = "mcast packet from 127.0.0.1", strlen($m), 0, $mcastaddr, 3000);
+    var_dump($r);
 }
 if ($i == 7) {
-	echo "leaving source group\n";
-	$so = socket_set_option($s, $level, MCAST_LEAVE_SOURCE_GROUP, array(
-		"group"	=> $mcastaddr,
-		"interface" => $interface,
-		"source" => $sblock,
-	));
-	var_dump($so);
-	$r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, 3000);
-	var_dump($r);
-	$r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "127.0.0.1", 3000);
-	var_dump($r);
+    echo "leaving source group\n";
+    $so = socket_set_option($s, $level, MCAST_LEAVE_SOURCE_GROUP, array(
+        "group"	=> $mcastaddr,
+        "interface" => $interface,
+        "source" => $sblock,
+    ));
+    var_dump($so);
+    $r = socket_sendto($sends1, $m = "ignored mcast packet", strlen($m), 0, $mcastaddr, 3000);
+    var_dump($r);
+    $r = socket_sendto($sends1, $m = "unicast packet", strlen($m), 0, "127.0.0.1", 3000);
+    var_dump($r);
 }
 if ($i == 8) {
 /*	echo "rjsg\n";
-	$so = socket_set_option($s, $level, MCAST_JOIN_GROUP, array(
-		"group"	=> $mcastaddr,
-		"interface" => $interface,
-	));
-	var_dump($so);*/
-	break;
+    $so = socket_set_option($s, $level, MCAST_JOIN_GROUP, array(
+        "group"	=> $mcastaddr,
+        "interface" => $interface,
+    ));
+    var_dump($so);*/
+    break;
 }
 
 }

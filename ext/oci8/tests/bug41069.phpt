@@ -1,57 +1,57 @@
 --TEST--
 Bug #41069 (Oracle crash with certain data over a DB-link when prefetch memory limit used - Oracle bug 6039623)
 --SKIPIF--
-<?php 
+<?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 if (empty($dbase)) die ("skip requires network connection alias for DB link loopback");
 if ($test_drcp) die("skip DRCP does not support shared database links");
 ?>
 --INI--
 oci8.default_prefetch=5
 --FILE--
-	<?php
+    <?php
 
-	require(dirname(__FILE__).'/connect.inc');
+    require(__DIR__.'/connect.inc');
 
 // Initialization
 
 $stmtarray = array(
-	"alter session set nls_date_format = 'MM/DD/YYYY'",
+    "alter session set nls_date_format = 'MM/DD/YYYY'",
 
-	"drop database link bug41069_dblink",
+    "drop database link bug41069_dblink",
 
-	"drop table bug41069_tab",
+    "drop table bug41069_tab",
 
-	"create shared database link bug41069_dblink authenticated by $user identified by $password using '$dbase'",
+    "create shared database link bug41069_dblink authenticated by $user identified by $password using '$dbase'",
 
-	"create table bug41069_tab
-	(
-		c1  number(20),
-		c2  varchar2(60 byte),
-		c3  varchar2(1000 byte),
-		c4  varchar2(255 byte),
-		c5  varchar2(2 byte),
-		c6  varchar2(1 byte),
-		c7  varchar2(255 byte),
-		c8  varchar2(50 byte),
-		c9  date,
-		c10 date,
-		c12 number(20),
-		c13 varchar2(20 byte),
-		c15 varchar2(50 byte)
-	 )",
+    "create table bug41069_tab
+    (
+        c1  number(20),
+        c2  varchar2(60 byte),
+        c3  varchar2(1000 byte),
+        c4  varchar2(255 byte),
+        c5  varchar2(2 byte),
+        c6  varchar2(1 byte),
+        c7  varchar2(255 byte),
+        c8  varchar2(50 byte),
+        c9  date,
+        c10 date,
+        c12 number(20),
+        c13 varchar2(20 byte),
+        c15 varchar2(50 byte)
+     )",
 
-	"insert into bug41069_tab (c1, c2, c5, c6, c9, c10, c12, c15)	values
-	(111, 'aaaaaaa', 'b', 'c', '01/17/2008', '01/07/2017', 2222, 'zzzzzzzzzz')",
+    "insert into bug41069_tab (c1, c2, c5, c6, c9, c10, c12, c15)	values
+    (111, 'aaaaaaa', 'b', 'c', '01/17/2008', '01/07/2017', 2222, 'zzzzzzzzzz')",
 
-	"insert into bug41069_tab (c1, c2, c3, c4, c5, c6, c7, c9, c10, c12, c13, c15) values
-	(112, 'aaaaaaa', 'bbbbbbbb', 'ccccccc', 'd', 'e', 'rrrrrrr', '04/16/2007', '04/16/2007', 2223, 'xxxxxxxx', 'zzzzzzzz')",
+    "insert into bug41069_tab (c1, c2, c3, c4, c5, c6, c7, c9, c10, c12, c13, c15) values
+    (112, 'aaaaaaa', 'bbbbbbbb', 'ccccccc', 'd', 'e', 'rrrrrrr', '04/16/2007', '04/16/2007', 2223, 'xxxxxxxx', 'zzzzzzzz')",
 
-	"insert into bug41069_tab (c1, c2, c3, c4, c5, c6, c7, c9, c10, c12, c15)	values
-	(113, 'aaaaaaa', 'bbbbbbbbbb', 'cccccc', 'e', 'f', 'dddd', '12/04/2006', '12/04/2006', 2224, 'zzzzzzz')"
+    "insert into bug41069_tab (c1, c2, c3, c4, c5, c6, c7, c9, c10, c12, c15)	values
+    (113, 'aaaaaaa', 'bbbbbbbbbb', 'cccccc', 'e', 'f', 'dddd', '12/04/2006', '12/04/2006', 2224, 'zzzzzzz')"
 );
-						 
+
 oci8_test_sql_execute($c, $stmtarray);
 
 
@@ -74,8 +74,8 @@ var_dump($results);
 $c = oci_new_connect($user, $password, $dbase);
 
 $stmtarray = array(
-	"drop database link bug41069_dblink",
-	"drop table bug41069_tab"
+    "drop database link bug41069_dblink",
+    "drop table bug41069_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);

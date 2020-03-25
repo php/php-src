@@ -70,7 +70,7 @@ $needle = array(
   "456HEE",  //numerics + chars
   $haystack  //haystack as needle
 );
- 
+
 /* loop through to get the position of the needle in haystack string */
 $count = 1;
 for($index=0; $index<count($needle); $index++) {
@@ -81,7 +81,7 @@ for($index=0; $index<count($needle); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stripos() function: with double quoted strings ***
 -- Iteration 1 --
 int(2)
@@ -117,20 +117,20 @@ int(9)
 int(8)
 bool(false)
 -- Iteration 12 --
-int(8)
-bool(false)
+int(0)
+int(11)
 -- Iteration 13 --
-int(8)
-bool(false)
+int(0)
+int(12)
 -- Iteration 14 --
-int(8)
-bool(false)
+int(0)
+int(13)
 -- Iteration 15 --
-int(8)
-bool(false)
+int(0)
+int(14)
 -- Iteration 16 --
-bool(false)
-bool(false)
+int(0)
+int(15)
 -- Iteration 17 --
 int(10)
 int(47)

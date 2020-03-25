@@ -16,6 +16,8 @@ $DB = new DB();
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Fatal error: Access level to DB::__construct() must be public (as in class mysqli) in %s%ebug38003.php on line %d
-
+--EXPECTF--
+Fatal error: Uncaught Error: Call to private DB::__construct() from invalid context in %s
+Stack trace:
+#0 {main}
+  thrown in %s

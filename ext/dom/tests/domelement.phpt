@@ -67,9 +67,9 @@ $node->setAttribute('idatt', 'n1');
 $node->setIdAttribute('idatt', TRUE);
 
 for ($x = 0; $x < $mylen; $x++) {
-	$current = $myelements->item($x);
-	$current->setAttributeNS('urn::dummyns', 'newns:idatt', 'n'.($x+2))."\n";
-	$current->setIdAttributeNS('urn::dummyns', 'idatt', TRUE);
+    $current = $myelements->item($x);
+    $current->setAttributeNS('urn::dummyns', 'newns:idatt', 'n'.($x+2))."\n";
+    $current->setIdAttributeNS('urn::dummyns', 'idatt', TRUE);
 }
 
 echo 'Element Name: '.(($elem = $dom->getElementByID('n1'))?$elem->localName:'Not Found')."\n";
@@ -79,13 +79,12 @@ echo 'Element Name: '.(($elem = $dom->getElementByID('n1'))?$elem->localName:'No
 
 echo 'Element Name: '.(($elem = $dom->getElementByID('n3'))?$elem->nodeName:'Not Found')."\n";
 for ($x = 0; $x < $mylen; $x++) {
-	$node = $myelements->item($x);
-	$node->setIdAttributeNS('urn::dummyns', 'idatt', FALSE);
+    $node = $myelements->item($x);
+    $node->setIdAttributeNS('urn::dummyns', 'idatt', FALSE);
 }
 echo 'Element Name: '.(($elem = $dom->getElementByID('n3'))?$elem->nodeName:'Not Found')."\n";
 ?>
 --EXPECT--
-
 Tag Name: chapter
 Chapter: 1
 Attribute num exists?: Yes

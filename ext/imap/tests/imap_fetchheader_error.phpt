@@ -2,12 +2,12 @@
 Test imap_fetchheader() function : error conditions - incorrect number of args
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once(__DIR__.'/skipif.inc');
 ?>
 --FILE--
 <?php
 /* Prototype  : string imap_fetchheader(resource $stream_id, int $msg_no [, int $options])
- * Description: Get the full unfiltered header for a message 
+ * Description: Get the full unfiltered header for a message
  * Source code: ext/imap/php_imap.c
  */
 
@@ -16,7 +16,7 @@ require_once(dirname(__FILE__).'/skipif.inc');
  */
 
 echo "*** Testing imap_fetchheader() : error conditions ***\n";
-require_once(dirname(__FILE__).'/imap_include.inc');
+require_once(__DIR__.'/imap_include.inc');
 
 //Test imap_fetchheader with one more than the expected number of arguments
 echo "\n-- Testing imap_fetchheader() function with more than expected no. of arguments --\n";
@@ -33,7 +33,6 @@ var_dump( imap_fetchheader($stream_id) );
 
 imap_close($stream_id);
 ?>
-===DONE===
 --EXPECTF--
 *** Testing imap_fetchheader() : error conditions ***
 
@@ -46,4 +45,3 @@ NULL
 
 Warning: imap_fetchheader() expects at least 2 parameters, 1 given in %s on line %d
 NULL
-===DONE===

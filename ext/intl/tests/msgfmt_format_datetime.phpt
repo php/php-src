@@ -16,13 +16,14 @@ $fmt = <<<EOD
 EOD;
 
 $dt = new DateTime("2012-05-06 18:00:42", new DateTimeZone("Europe/Lisbon"));
+$dti = new DateTimeImmutable("2012-05-06 18:00:42", new DateTimeZone("Europe/Lisbon"));
 
 $mf = new MessageFormatter('en_US', $fmt);
 
 var_dump($mf->format(array($dt)));
+var_dump($mf->format(array($dti)));
 
 ?>
-==DONE==
 --EXPECTF--
 string(%s) "May %d, 2012 %d:%d:42 %s"
-==DONE==
+string(%s) "May %d, 2012 %d:%d:42 %s"

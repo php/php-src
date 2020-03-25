@@ -10,14 +10,11 @@ Patrick Allaert <patrickallaert@php.net>
 require "connect.inc";
 
 $link = ldap_connect($host, $port);
-var_dump(ldap_first_attribute($link));
-var_dump(ldap_first_attribute($link, $link));
+try {
+    var_dump(ldap_first_attribute($link, $link));
+} catch (TypeError $e) {
+    echo $e->getMessage(), "\n";
+}
 ?>
-===DONE===
---EXPECTF--
-Warning: ldap_first_attribute() expects %s 2 parameters, 1 given in %s on line %d
-NULL
-
-Warning: ldap_first_attribute(): supplied resource is not a valid ldap result entry resource in %s on line %d
-bool(false)
-===DONE===
+--EXPECT--
+ldap_first_attribute(): supplied resource is not a valid ldap result entry resource

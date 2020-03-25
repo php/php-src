@@ -21,7 +21,7 @@ while($it->valid()) {
 }
 asort($list);
 foreach ($list as $item) {
-	echo $item . "\n";
+    echo $item . "\n";
 }
 ?>
 --CLEAN--
@@ -41,7 +41,6 @@ function rrmdir($dir) {
 $targetDir = __DIR__.DIRECTORY_SEPARATOR . "depth01";
 rrmdir($targetDir);
 ?>
-
 --EXPECTF--
 depth1
 depth1

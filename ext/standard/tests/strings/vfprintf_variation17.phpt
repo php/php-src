@@ -16,9 +16,9 @@ echo "*** Testing vfprintf() : scientific formats and scientific values ***\n";
 
 // defining array of scientific formats
 $formats = array(
-  '%e %+e %-e', 
+  '%e %+e %-e',
   '%le %Le %4e %-4e',
-  '%10.4e %-10.4e %.4e', 
+  '%10.4e %-10.4e %.4e',
   '%\'#20e %\'20e %\'$20e %\'_20e',
   '%3$e %4$e %1$e %2$e'
 );
@@ -34,10 +34,10 @@ $args_array = array(
 );
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_variation17.txt';
+$data_file = __DIR__ . '/vfprintf_variation17.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
-   
+
 // looping to test vfprintf() with different scientific formats from the above $format array
 // and with signed and other types of  values from the above $args_array array
 $counter = 1;
@@ -51,9 +51,8 @@ fclose($fp);
 print_r(file_get_contents($data_file));
 echo "\n";
 
-unlink($data_file); 
+unlink($data_file);
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : scientific formats and scientific values ***
 
@@ -67,4 +66,3 @@ unlink($data_file);
 #########1.000000e+1 1.000000e+2 $$$$$$$$-1.000000e+3 _________1.000000e+2
 -- Iteration 5 --
 1.000000e+3 2.000000e+3 3.000000e+3 4.000000e+3
-===DONE===

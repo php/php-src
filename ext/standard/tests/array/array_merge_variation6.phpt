@@ -3,7 +3,7 @@ Test array_merge() function : usage variations - string keys
 --FILE--
 <?php
 /* Prototype  : array array_merge(array $arr1, array $arr2 [, array $...])
- * Description: Merges elements from passed arrays into one array 
+ * Description: Merges elements from passed arrays into one array
  * Source code: ext/standard/array.c
  */
 
@@ -23,8 +23,7 @@ var_dump(array_merge($arr2, $arr1));
 
 echo "Done";
 ?>
-
---EXPECTF--
+--EXPECT--
 *** Testing array_merge() : usage variations ***
 array(5) {
   ["zero"]=>

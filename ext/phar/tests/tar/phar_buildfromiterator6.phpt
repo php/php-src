@@ -36,18 +36,17 @@ class myIterator implements Iterator
     }
 }
 try {
-	chdir(dirname(__FILE__));
-	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator.phar.tar');
-	var_dump($phar->buildFromIterator(new myIterator(array(basename(__FILE__, 'php') . 'phpt'))));
+    chdir(__DIR__);
+    $phar = new Phar(__DIR__ . '/buildfromiterator.phar.tar');
+    var_dump($phar->buildFromIterator(new myIterator(array(basename(__FILE__, 'php') . 'phpt'))));
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/buildfromiterator.phar.tar');
+<?php
+unlink(__DIR__ . '/buildfromiterator.phar.tar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
@@ -57,4 +56,3 @@ current
 key
 %s(24) "UnexpectedValueException"
 Iterator myIterator returned an invalid key (must return a string)
-===DONE===

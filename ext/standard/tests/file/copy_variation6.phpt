@@ -12,11 +12,11 @@ if(substr(PHP_OS, 0, 3) == "WIN")
      Returns TRUE on success or FALSE on failure.
 */
 
-/* Test copy() function: Trying to create copy of source file 
+/* Test copy() function: Trying to create copy of source file
      into different destination dir paths given in various notations */
 
 echo "*** Test copy() function: copying file across directories ***\n";
-$base_dir = dirname(__FILE__)."/copy_variation6";
+$base_dir = __DIR__."/copy_variation6";
 mkdir($base_dir);
 
 $sub_dir = $base_dir."/copy_variation6_sub";
@@ -25,7 +25,7 @@ mkdir($sub_dir);
 $dirname_with_blank = $sub_dir."/copy variation6";
 mkdir($dirname_with_blank);
 
-$src_file_name = dirname(__FILE__)."/copy_variation6.tmp";
+$src_file_name = __DIR__."/copy_variation6.tmp";
 fclose( fopen($src_file_name, "w") );
 
 echo "Size of source file => ";
@@ -39,7 +39,7 @@ $dests = array(
   "$sub_dir/../copy_copy_variation6.tmp",
   "$sub_dir/../copy_variation6_sub/copy_copy_variation6.tmp",
   "$sub_dir/..///../copy_copy_variation6.tmp",
-  "$sub_dir/..///../*",
+  "$sub_dir///../*",
   "$dirname_with_blank/copy_copy_variation6.tmp"
 );
 
@@ -78,7 +78,6 @@ rmdir($base_dir);
 
 echo "*** Done ***\n";
 ?>
-
 --EXPECTF--
 *** Test copy() function: copying file across directories ***
 Size of source file => int(0)
@@ -129,7 +128,7 @@ Size of destination file => int(0)
 -- Iteration 7 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name is => %s/copy_variation6/copy_variation6_sub/..///../*
+Destination file name is => %s/copy_variation6/copy_variation6_sub///../*
 Size of source file => int(0)
 Size of destination file => int(0)
 

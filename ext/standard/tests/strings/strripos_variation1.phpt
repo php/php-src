@@ -12,56 +12,56 @@ Test strripos() function : usage variations - double quoted strings for 'haystac
 echo "*** Testing strripos() function: with double quoted strings ***\n";
 $haystack = "Hello,\t\n\0\n  $&!#%()*<=>?@hello123456he \x234 \101 ";
 $needles = array(
-		  //regular strings
-/*1*/	  "l",  
-		  "L",
-		  "HELLO",
-		  "hEllo",
-		
-		  //escape characters
-/*5*/	  "\t",  
-		  "\T",  //invalid input
-		  "     ",
-		  "\n",
-		  "\N",  //invalid input
-		  "
+          //regular strings
+/*1*/	  "l",
+          "L",
+          "HELLO",
+          "hEllo",
+
+          //escape characters
+/*5*/	  "\t",
+          "\T",  //invalid input
+          "     ",
+          "\n",
+          "\N",  //invalid input
+          "
 ",  //new line
-		
-		  //nulls
-/*11*/	  "\0",  
-		  NULL,
-		  null,
-		
-		  //boolean false
-/*14*/	  FALSE,  
-		  false,
-		
-		  //empty string
+
+          //nulls
+/*11*/	  "\0",
+          NULL,
+          null,
+
+          //boolean false
+/*14*/	  FALSE,
+          false,
+
+          //empty string
 /*16*/	  "",
-		
-		  //special chars
-/*17*/	  " ",  
-		  "$",
-		  " $",
-		  "&",
-		  "!#", 
-		  "()",
-		  "<=>", 
-		  ">",  
-		  "=>",
-		  "?",
-		  "@",
-		  "@hEllo",
-		
-/*29*/	  "12345", //decimal numeric string  
-		  "\x23",  //hexadecimal numeric string
-		  "#",  //respective ASCII char of \x23
-		  "\101",  //octal numeric string
-		  "A",  //respective ASCII char of \101
-		  "456HEE",  //numerics + chars
-		  $haystack  //haystack as needle  
+
+          //special chars
+/*17*/	  " ",
+          "$",
+          " $",
+          "&",
+          "!#",
+          "()",
+          "<=>",
+          ">",
+          "=>",
+          "?",
+          "@",
+          "@hEllo",
+
+/*29*/	  "12345", //decimal numeric string
+          "\x23",  //hexadecimal numeric string
+          "#",  //respective ASCII char of \x23
+          "\101",  //octal numeric string
+          "A",  //respective ASCII char of \101
+          "456HEE",  //numerics + chars
+          $haystack  //haystack as needle
 );
- 
+
 /* loop through to get the position of the needle in haystack string */
 $count = 1;
 foreach ($needles as $needle) {
@@ -73,8 +73,7 @@ foreach ($needles as $needle) {
   $count++;
 }
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strripos() function: with double quoted strings ***
 -- Iteration 1 --
 int(28)
@@ -132,30 +131,30 @@ int(8)
 bool(false)
 int(8)
 -- Iteration 12 --
-int(8)
-int(8)
-bool(false)
-int(8)
+int(44)
+int(44)
+int(44)
+int(43)
 -- Iteration 13 --
-int(8)
-int(8)
-bool(false)
-int(8)
+int(44)
+int(44)
+int(44)
+int(43)
 -- Iteration 14 --
-int(8)
-int(8)
-bool(false)
-int(8)
+int(44)
+int(44)
+int(44)
+int(43)
 -- Iteration 15 --
-int(8)
-int(8)
-bool(false)
-int(8)
+int(44)
+int(44)
+int(44)
+int(43)
 -- Iteration 16 --
-bool(false)
-bool(false)
-bool(false)
-bool(false)
+int(44)
+int(44)
+int(44)
+int(43)
 -- Iteration 17 --
 int(43)
 int(43)
@@ -251,4 +250,3 @@ int(0)
 bool(false)
 bool(false)
 int(0)
-===DONE===

@@ -1,8 +1,5 @@
 --TEST--
-Test is_callable() function : usage variations - on objects 
---INI--
-precision=14
-error_reporting = E_ALL & ~E_NOTICE | E_STRICT
+Test is_callable() function : usage variations - on objects
 --FILE--
 <?php
 /* Prototype: bool is_callable ( mixed $var [, bool $syntax_only [, string &$callable_name]] );
@@ -11,7 +8,7 @@ error_reporting = E_ALL & ~E_NOTICE | E_STRICT
 */
 
 /* Prototype: void check_iscallable_objects( $methods );
-   Description: use is_callable() on given $method to check if the array 
+   Description: use is_callable() on given $method to check if the array
                 contains a valid method name;
                 returns true if valid function name, false otherwise
 */
@@ -35,11 +32,11 @@ echo "\n*** Testing is_callable() on objects ***\n";
 class object_class
 {
   public $value = 100;
-  
+
   /* static method */
   static public function foo() {
   }
-  
+
   public function foo1() {
   }
   /* function name with mixed string and integer */
@@ -50,7 +47,7 @@ class object_class
   }
   /* function name having boolean value */
   public function TRUE() {
-  }  
+  }
 
   protected function foo2() {
   }
@@ -127,8 +124,7 @@ foreach($objects as $object) {
 }
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing is_callable() on objects ***
 
 ** Testing behavior of is_callable() on static methods **
@@ -210,12 +206,12 @@ object_class::func
 bool(false)
 object_class::func
 -- Innerloop iteration 10 of Outerloop iteration 1 --
+bool(false)
 bool(true)
-bool(true)
-bool(true)
+bool(false)
 bool(true)
 object_class::foo1
-bool(true)
+bool(false)
 object_class::foo1
 --- Outerloop iteration 2 ---
 -- Innerloop iteration 1 of Outerloop iteration 2 --
@@ -291,12 +287,12 @@ no_member_class::func
 bool(false)
 no_member_class::func
 -- Innerloop iteration 10 of Outerloop iteration 2 --
+bool(false)
 bool(true)
-bool(true)
-bool(true)
+bool(false)
 bool(true)
 object_class::foo1
-bool(true)
+bool(false)
 object_class::foo1
 --- Outerloop iteration 3 ---
 -- Innerloop iteration 1 of Outerloop iteration 3 --
@@ -372,12 +368,12 @@ contains_object_class::func
 bool(true)
 contains_object_class::func
 -- Innerloop iteration 10 of Outerloop iteration 3 --
+bool(false)
 bool(true)
-bool(true)
-bool(true)
+bool(false)
 bool(true)
 object_class::foo1
-bool(true)
+bool(false)
 object_class::foo1
 --- Outerloop iteration 4 ---
 -- Innerloop iteration 1 of Outerloop iteration 4 --
@@ -453,12 +449,12 @@ contains_object_class::func
 bool(true)
 contains_object_class::func
 -- Innerloop iteration 10 of Outerloop iteration 4 --
+bool(false)
 bool(true)
-bool(true)
-bool(true)
+bool(false)
 bool(true)
 object_class::foo1
-bool(true)
+bool(false)
 object_class::foo1
 --- Outerloop iteration 5 ---
 -- Innerloop iteration 1 of Outerloop iteration 5 --
@@ -534,12 +530,12 @@ object_class::func
 bool(false)
 object_class::func
 -- Innerloop iteration 10 of Outerloop iteration 5 --
+bool(false)
 bool(true)
-bool(true)
-bool(true)
+bool(false)
 bool(true)
 object_class::foo1
-bool(true)
+bool(false)
 object_class::foo1
 --- Outerloop iteration 6 ---
 -- Innerloop iteration 1 of Outerloop iteration 6 --
@@ -615,12 +611,12 @@ no_member_class::func
 bool(false)
 no_member_class::func
 -- Innerloop iteration 10 of Outerloop iteration 6 --
+bool(false)
 bool(true)
-bool(true)
-bool(true)
+bool(false)
 bool(true)
 object_class::foo1
-bool(true)
+bool(false)
 object_class::foo1
 --- Outerloop iteration 7 ---
 -- Innerloop iteration 1 of Outerloop iteration 7 --
@@ -696,12 +692,12 @@ object_class::func
 bool(false)
 object_class::func
 -- Innerloop iteration 10 of Outerloop iteration 7 --
+bool(false)
 bool(true)
-bool(true)
-bool(true)
+bool(false)
 bool(true)
 object_class::foo1
-bool(true)
+bool(false)
 object_class::foo1
 --- Outerloop iteration 8 ---
 -- Innerloop iteration 1 of Outerloop iteration 8 --
@@ -777,11 +773,10 @@ Array
 bool(false)
 Array
 -- Innerloop iteration 10 of Outerloop iteration 8 --
+bool(false)
 bool(true)
-bool(true)
-bool(true)
-bool(true)
-object_class::foo1
+bool(false)
 bool(true)
 object_class::foo1
-===DONE===
+bool(false)
+object_class::foo1

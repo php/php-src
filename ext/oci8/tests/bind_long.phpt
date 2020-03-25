@@ -3,12 +3,12 @@ bind LONG field
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require(dirname(__FILE__)."/connect.inc");
+require(__DIR__."/connect.inc");
 
 $stmt = oci_parse($c, "drop table phptestlng");
 @oci_execute($stmt);
@@ -20,7 +20,7 @@ echo "Test 1\n";
 
 $stmt = oci_parse ($c, "insert into phptestlng (id, filetxt) values (:id, :filetxt)");
 $i=1;
-$filetxt1 = file_get_contents( dirname(__FILE__)."/test.txt");
+$filetxt1 = file_get_contents( __DIR__."/test.txt");
 $filetxt = str_replace("\r", "", $filetxt1);
 
 oci_bind_by_name( $stmt, ":id", $i, -1);

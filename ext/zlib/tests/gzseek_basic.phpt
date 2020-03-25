@@ -1,15 +1,15 @@
 --TEST--
 Test function gzseek() by calling it with its expected arguments when reading
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
 <?php
-$f = dirname(__FILE__)."/004.txt.gz";
-$h = gzopen($f, 'r'); 
+$f = __DIR__."/004.txt.gz";
+$h = gzopen($f, 'r');
 
 echo "move to the 50th byte\n";
 var_dump(gzseek( $h, 50 ) );
@@ -30,7 +30,6 @@ echo "tell=".gztell($h)."\n";
 var_dump(gzread($h, 10));
 gzclose($h);
 ?>
-===DONE===
 --EXPECT--
 move to the 50th byte
 int(0)
@@ -46,4 +45,3 @@ move backward to the 20th byte
 int(0)
 tell=20
 string(10) "hrough fee"
-===DONE===

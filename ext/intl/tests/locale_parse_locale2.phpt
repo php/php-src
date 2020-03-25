@@ -1,8 +1,7 @@
 --TEST--
 locale_parse_locale() icu >= 4.8
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip'; ?>
+<?php if( !extension_loaded( 'intl' ) ) print 'skip intl extension not loaded'; ?>
 --FILE--
 <?php
 
@@ -64,7 +63,7 @@ function ut_main()
         'de-419-DE',
         'a-DE',
         'ar-a-aaa-b-bbb-a-ccc',
-	'x-AAAAAA',
+    'x-AAAAAA',
     );
 
 
@@ -102,7 +101,7 @@ uk-ua_CALIFORNIA@currency=;currency=GRN:
 language : 'uk' , region : 'UA' , variant0 : 'CALIFORNIA' ,
 ---------------------
 root:
-language : 'root' ,
+%s
 ---------------------
 uk@currency=EURO:
 language : 'uk' ,

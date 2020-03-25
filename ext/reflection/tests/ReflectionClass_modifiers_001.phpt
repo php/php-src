@@ -14,31 +14,31 @@ interface I {}
 $classes = array("A", "B", "C", "D", "I");
 
 foreach ($classes as $class) {
-	$rc = new ReflectionClass($class);
-	var_dump($rc->isFinal());
-	var_dump($rc->isInterface());
-	var_dump($rc->isAbstract());
-	var_dump($rc->getModifiers());
+    $rc = new ReflectionClass($class);
+    var_dump($rc->isFinal());
+    var_dump($rc->isInterface());
+    var_dump($rc->isAbstract());
+    var_dump($rc->getModifiers());
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 bool(true)
+int(64)
+bool(false)
+bool(false)
+bool(false)
+int(0)
+bool(false)
+bool(false)
+bool(false)
+int(0)
+bool(true)
+bool(false)
+bool(false)
 int(32)
 bool(false)
-bool(false)
-bool(false)
-int(0)
-bool(false)
-bool(false)
-bool(false)
-int(0)
 bool(true)
 bool(false)
-bool(false)
-int(4)
-bool(false)
-bool(true)
-bool(false)
-int(64)
+int(0)

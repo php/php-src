@@ -26,7 +26,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 /* creating link to a file in different dir with the same name as the file */
 echo "\n*** Create hard link in different directory with same filename ***\n";
 // temp file used
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $filename = "$file_path/symlink_link_linkinfo_is_link_variation8.tmp";
 // temp link name used
 $dirname = "$file_path/symlink_link_linkinfo_is_link1_variation8";

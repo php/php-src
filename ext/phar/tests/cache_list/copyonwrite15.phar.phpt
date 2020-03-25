@@ -8,7 +8,7 @@ phar.readonly=0
 <?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE_EXTERNAL--
 files/write15.phar
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(true)
 ok

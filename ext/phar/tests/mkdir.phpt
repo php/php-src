@@ -6,7 +6,7 @@ phar: mkdir/rmdir edge cases
 phar.readonly=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 Phar::interceptFileFuncs();
 mkdir('phar://');
@@ -25,10 +25,9 @@ $a->addEmptyDir('.phar');
 echo $e->getMessage(),"\n";
 }
 ?>
-===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
@@ -44,4 +43,3 @@ Warning: rmdir(): phar error: cannot remove directory "" in phar "foo.phar", dir
 
 Warning: rmdir(): phar error: cannot remove directory "a" in phar "%smkdir.phar.php", phar error: path "a" exists and is a not a directory in %smkdir.php on line %d
 Cannot create a directory in magic ".phar" directory
-===DONE===

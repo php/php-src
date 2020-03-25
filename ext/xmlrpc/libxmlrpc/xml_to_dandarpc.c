@@ -30,9 +30,6 @@
 
 */
 
-#ifdef _WIN32
-#include "xmlrpc_win32.h"
-#endif
 #include <string.h>
 #include <stdlib.h>
 #include "xml_to_dandarpc.h"
@@ -180,21 +177,21 @@ xml_element* DANDARPC_to_xml_element_worker(XMLRPC_REQUEST request, XMLRPC_VALUE
       xml_element* elem_val = xml_elem_new();
       const char* pAttrType = NULL;
 
-      xml_element_attr* attr_type = bNoAddType ? NULL : malloc(sizeof(xml_element_attr));
+      xml_element_attr* attr_type = bNoAddType ? NULL : emalloc(sizeof(xml_element_attr));
 
       if(attr_type) {
-         attr_type->key = strdup(ATTR_TYPE);
+         attr_type->key = estrdup(ATTR_TYPE);
          attr_type->val = 0;
          Q_PushTail(&elem_val->attrs, attr_type);
       }
 
-      elem_val->name = (type == xmlrpc_vector) ? strdup(ATTR_VECTOR) : strdup(ATTR_SCALAR);
+      elem_val->name = (type == xmlrpc_vector) ? estrdup(ATTR_VECTOR) : estrdup(ATTR_SCALAR);
 
       if(id && *id) {
-         xml_element_attr* attr_id = malloc(sizeof(xml_element_attr));
+         xml_element_attr* attr_id = emalloc(sizeof(xml_element_attr));
          if(attr_id) {
-            attr_id->key = strdup(ATTR_ID);
-            attr_id->val = strdup(id);
+            attr_id->key = estrdup(ATTR_ID);
+            attr_id->val = estrdup(id);
             Q_PushTail(&elem_val->attrs, attr_id);
          }
       }
@@ -265,7 +262,7 @@ xml_element* DANDARPC_to_xml_element_worker(XMLRPC_REQUEST request, XMLRPC_VALUE
             break;
       }
       if(pAttrType && attr_type && !bNoAddType) {
-         attr_type->val = strdup(pAttrType);
+         attr_type->val = estrdup(pAttrType);
       }
       root = elem_val;
    }
@@ -282,9 +279,9 @@ xml_element* DANDARPC_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
    if(request) {
       XMLRPC_REQUEST_TYPE request_type = XMLRPC_RequestGetRequestType(request);
       const char* pStr = NULL;
-      xml_element_attr* version = malloc(sizeof(xml_element_attr));
-      version->key = strdup(ATTR_VERSION);
-      version->val = strdup(VAL_VERSION_0_9);
+      xml_element_attr* version = emalloc(sizeof(xml_element_attr));
+      version->key = estrdup(ATTR_VERSION);
+      version->val = estrdup(VAL_VERSION_0_9);
 
       wrapper = xml_elem_new();
 
@@ -295,11 +292,11 @@ xml_element* DANDARPC_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
          pStr = ELEM_METHODCALL;
       }
       if(pStr) {
-         wrapper->name = strdup(pStr);
+         wrapper->name = estrdup(pStr);
       }
 
       root = xml_elem_new();
-      root->name = strdup(ELEM_ROOT);
+      root->name = estrdup(ELEM_ROOT);
       Q_PushTail(&root->attrs, version);
       Q_PushTail(&root->children, wrapper);
 
@@ -307,7 +304,7 @@ xml_element* DANDARPC_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
 
       if(pStr) {
          xml_element* method = xml_elem_new();
-         method->name = strdup(ELEM_METHODNAME);
+         method->name = estrdup(ELEM_METHODNAME);
          simplestring_add(&method->text, pStr);
          Q_PushTail(&wrapper->children, method);
       }
@@ -316,4 +313,3 @@ xml_element* DANDARPC_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
    }
    return root;
 }
-

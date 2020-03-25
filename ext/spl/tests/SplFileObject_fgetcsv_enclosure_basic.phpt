@@ -4,10 +4,10 @@ SplFileObject::fgetcsv with alternative delimiter
 <?php
 $fp = fopen('SplFileObject__fgetcsv4.csv', 'w+');
 fputcsv($fp, array(
-	'field1',
-	'field2',
-	'field3',
-	5
+    'field1',
+    'field2',
+    'field3',
+    5
 ), ',', '"');
 fclose($fp);
 
@@ -18,7 +18,7 @@ var_dump($fo->fgetcsv(',', '"'));
 <?php
 unlink('SplFileObject__fgetcsv4.csv');
 ?>
---EXPECTF--
+--EXPECT--
 array(4) {
   [0]=>
   string(6) "field1"

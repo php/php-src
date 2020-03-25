@@ -1,7 +1,5 @@
 --TEST--
 Test strip_tags() function : usage variations - heredoc strings
---INI--
-short_open_tag = on
 --FILE--
 <?php
 /* Prototype  : string strip_tags(string $str [, string $allowable_tags])
@@ -77,7 +75,7 @@ for($index =0; $index < count($res_heredoc_strings); $index ++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
 string(0) ""

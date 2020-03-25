@@ -4,17 +4,17 @@ Testing get_declared_traits() inside namespace
 <?php
 
 namespace test {
-	class a { }
-	interface b { }
-	trait c { }
-	abstract class d { }
-	final class e { }
-	var_dump(get_declared_traits());
+    class a { }
+    interface b { }
+    trait c { }
+    abstract class d { }
+    final class e { }
+    var_dump(get_declared_traits());
 }
 
 ?>
---EXPECT--
-array(1) {
-  [0]=>
+--EXPECTF--
+array(%d) {%A
+  [%d]=>
   string(6) "test\c"
 }

@@ -2,7 +2,7 @@
 Bug #29890 (crash if error handler fails)
 --FILE--
 <?php
-function customErrorHandler($fErrNo,$fErrStr,$fErrFile,$fErrLine,$fClass) {
+function customErrorHandler($fErrNo,$fErrStr,$fErrFile,$fErrLine) {
 echo "error :".$fErrStr."\n";
 }
 

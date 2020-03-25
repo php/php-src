@@ -36,18 +36,17 @@ class myIterator implements Iterator
     }
 }
 try {
-	chdir(dirname(__FILE__));
-	$phar = new Phar(dirname(__FILE__) . '/buildfromiterator5.phar');
-	var_dump($phar->buildFromIterator(new myIterator(array('a' => new stdClass))));
+    chdir(__DIR__);
+    $phar = new Phar(__DIR__ . '/buildfromiterator5.phar');
+    var_dump($phar->buildFromIterator(new myIterator(array('a' => new stdClass))));
 } catch (Exception $e) {
-	var_dump(get_class($e));
-	echo $e->getMessage() . "\n";
+    var_dump(get_class($e));
+    echo $e->getMessage() . "\n";
 }
 ?>
-===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/buildfromiterator5.phar');
+<?php
+unlink(__DIR__ . '/buildfromiterator5.phar');
 __HALT_COMPILER();
 ?>
 --EXPECTF--
@@ -56,4 +55,3 @@ valid
 current
 %s(24) "UnexpectedValueException"
 Iterator myIterator returned an invalid value (must return a string)
-===DONE===

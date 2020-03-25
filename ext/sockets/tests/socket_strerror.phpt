@@ -14,14 +14,11 @@ fa@php.net
 ?>
 --FILE--
 <?php
-    $s_s = socket_strerror();
     for ($i=0;$i<=132;$i++) {
         var_dump(socket_strerror($i));
     }
 ?>
 --EXPECTF--
-
-Warning: socket_strerror() expects exactly 1 parameter, 0 given in %s on line %i
 string(7) "Success"
 string(23) "Operation not permitted"
 string(25) "No such file or directory"

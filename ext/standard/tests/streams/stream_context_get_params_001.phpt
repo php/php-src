@@ -25,97 +25,97 @@ var_dump(stream_context_get_options($ctx));
 --EXPECTF--
 resource(%d) of type (stream-context)
 array(1) {
-  [%u|b%"options"]=>
+  ["options"]=>
   array(0) {
   }
 }
 bool(true)
 array(1) {
-  [%u|b%"options"]=>
+  ["options"]=>
   array(1) {
-    [%u|b%"foo"]=>
+    ["foo"]=>
     array(1) {
-      [%u|b%"bar"]=>
-      %unicode|string%(3) "baz"
+      ["bar"]=>
+      string(3) "baz"
     }
   }
 }
 bool(true)
 array(2) {
-  [%u|b%"notification"]=>
-  %unicode|string%(28) "stream_notification_callback"
-  [%u|b%"options"]=>
+  ["notification"]=>
+  string(28) "stream_notification_callback"
+  ["options"]=>
   array(1) {
-    [%u|b%"foo"]=>
+    ["foo"]=>
     array(1) {
-      [%u|b%"bar"]=>
-      %unicode|string%(3) "baz"
+      ["bar"]=>
+      string(3) "baz"
     }
   }
 }
 bool(true)
 array(2) {
-  [%u|b%"notification"]=>
+  ["notification"]=>
   array(2) {
     [0]=>
-    %unicode|string%(6) "stream"
+    string(6) "stream"
     [1]=>
-    %unicode|string%(21) "notification_callback"
+    string(21) "notification_callback"
   }
-  [%u|b%"options"]=>
+  ["options"]=>
   array(1) {
-    [%u|b%"foo"]=>
+    ["foo"]=>
     array(1) {
-      [%u|b%"bar"]=>
-      %unicode|string%(3) "baz"
+      ["bar"]=>
+      string(3) "baz"
     }
   }
 }
 array(2) {
-  [%u|b%"notification"]=>
+  ["notification"]=>
   array(2) {
     [0]=>
-    %unicode|string%(6) "stream"
+    string(6) "stream"
     [1]=>
-    %unicode|string%(21) "notification_callback"
+    string(21) "notification_callback"
   }
-  [%u|b%"options"]=>
+  ["options"]=>
   array(1) {
-    [%u|b%"foo"]=>
+    ["foo"]=>
     array(1) {
-      [%u|b%"bar"]=>
-      %unicode|string%(3) "baz"
+      ["bar"]=>
+      string(3) "baz"
     }
   }
 }
 array(1) {
-  [%u|b%"foo"]=>
+  ["foo"]=>
   array(1) {
-    [%u|b%"bar"]=>
-    %unicode|string%(3) "baz"
+    ["bar"]=>
+    string(3) "baz"
   }
 }
 array(2) {
-  [%u|b%"notification"]=>
+  ["notification"]=>
   array(2) {
     [0]=>
-    %unicode|string%(6) "stream"
+    string(6) "stream"
     [1]=>
-    %unicode|string%(21) "notification_callback"
+    string(21) "notification_callback"
   }
-  [%u|b%"options"]=>
+  ["options"]=>
   array(1) {
-    [%u|b%"foo"]=>
+    ["foo"]=>
     array(1) {
-      [%u|b%"bar"]=>
-      %unicode|string%(3) "baz"
+      ["bar"]=>
+      string(3) "baz"
     }
   }
 }
 array(1) {
-  [%u|b%"foo"]=>
+  ["foo"]=>
   array(1) {
-    [%u|b%"bar"]=>
-    %unicode|string%(3) "baz"
+    ["bar"]=>
+    string(3) "baz"
   }
 }

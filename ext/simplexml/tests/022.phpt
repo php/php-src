@@ -3,7 +3,7 @@ SimpleXML: Attributes inside foreach
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 
 $xml =<<<EOF
 <?xml version='1.0'?>
@@ -21,12 +21,11 @@ var_dump($sxe->content->file);
 echo "===FOREACH===\n";
 foreach($sxe->content->file as $file)
 {
-	var_dump($file);
-	var_dump($file['glob']);
+    var_dump($file);
+    var_dump($file['glob']);
 }
 
 ?>
-===DONE===
 --EXPECTF--
 ===CONTENT===
 object(SimpleXMLElement)#%d (1) {
@@ -59,4 +58,3 @@ object(SimpleXMLElement)#%d (1) {
   [0]=>
   string(11) "slide_*.xml"
 }
-===DONE===

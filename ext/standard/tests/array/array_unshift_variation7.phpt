@@ -9,7 +9,7 @@ Test array_unshift() function : usage variations - double quoted strings for 'va
 
 /*
  * Testing the functionality of array_unshift() by passing different
- * double quoted strings for $var argument that is prepended to the array 
+ * double quoted strings for $var argument that is prepended to the array
  * passed through $array argument
 */
 
@@ -37,7 +37,7 @@ foreach($vars as $var) {
   // returns element count in the resulting array after arguments are pushed to
   // beginning of the given array
   var_dump( array_unshift($temp_array, $var) );
-  
+
 // dump the resulting array
   var_dump($temp_array);
 
@@ -46,7 +46,7 @@ foreach($vars as $var) {
   // beginning of the given array
   $temp_array = $array;
   var_dump( array_unshift($temp_array, $var, "hello", 'world') );
-  
+
   // dump the resulting array
   var_dump($temp_array);
   $iterator++;
@@ -54,7 +54,7 @@ foreach($vars as $var) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_unshift() : double quoted strings for $var argument ***
 -- Iteration 1 --
 int(5)

@@ -3,7 +3,7 @@ Test array_intersect() function : usage variations - unexpected values for 'arr1
 --FILE--
 <?php
 /* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments 
+ * Description: Returns the entries of arr1 that have values which are present in all the other arguments
  * Source code: ext/standard/array.c
 */
 
@@ -19,7 +19,7 @@ echo "*** Testing array_intersect() : Passing non-array values to \$arr1 argumen
 $arr2 = array(1, 2);
 
 // array to be passed to optional argument
-$arr3 = array(1, 2, "one" => 1, "two" => 2); 
+$arr3 = array(1, 2, "one" => 1, "two" => 2);
 
 // get an unset variable
 $unset_var = 10;
@@ -70,7 +70,7 @@ $arrays = array(
        // empty data
 /*16*/ "",
        '',
- 
+
        // string data
 /*18*/ "string",
        'string',
@@ -89,17 +89,25 @@ $arrays = array(
 /*24*/ $fp
 );
 
-// loop through each sub-array within $arrrays to check the behavior of array_intersect()
+// loop through each sub-array within $arrays to check the behavior of array_intersect()
 $iterator = 1;
 foreach($arrays as $unexpected_value) {
-  echo "\n-- Iterator $iterator --";
-  
-  // Calling array_intersect() with default arguments
-  var_dump( array_intersect($unexpected_value,$arr2) );
+    echo "\n-- Iterator $iterator --";
 
-  // Calling array_intersect() with more arguments
-  var_dump( array_intersect($unexpected_value, $arr2, $arr3) );
-  $iterator++;
+    // Calling array_intersect() with default arguments
+    try {
+        var_dump( array_intersect($unexpected_value,$arr2) );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+
+    // Calling array_intersect() with more arguments
+    try {
+        var_dump( array_intersect($unexpected_value, $arr2, $arr3) );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 }
 
 // close the file resource used
@@ -107,174 +115,78 @@ fclose($fp);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect() : Passing non-array values to $arr1 argument ***
 
--- Iterator 1 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 1 --array_intersect(): Argument #1 ($arr1) must be of type array, int given
+array_intersect(): Argument #1 ($arr1) must be of type array, int given
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 2 --array_intersect(): Argument #1 ($arr1) must be of type array, int given
+array_intersect(): Argument #1 ($arr1) must be of type array, int given
 
--- Iterator 2 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 3 --array_intersect(): Argument #1 ($arr1) must be of type array, int given
+array_intersect(): Argument #1 ($arr1) must be of type array, int given
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 4 --array_intersect(): Argument #1 ($arr1) must be of type array, int given
+array_intersect(): Argument #1 ($arr1) must be of type array, int given
 
--- Iterator 3 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 5 --array_intersect(): Argument #1 ($arr1) must be of type array, float given
+array_intersect(): Argument #1 ($arr1) must be of type array, float given
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 6 --array_intersect(): Argument #1 ($arr1) must be of type array, float given
+array_intersect(): Argument #1 ($arr1) must be of type array, float given
 
--- Iterator 4 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 7 --array_intersect(): Argument #1 ($arr1) must be of type array, float given
+array_intersect(): Argument #1 ($arr1) must be of type array, float given
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 8 --array_intersect(): Argument #1 ($arr1) must be of type array, float given
+array_intersect(): Argument #1 ($arr1) must be of type array, float given
 
--- Iterator 5 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 9 --array_intersect(): Argument #1 ($arr1) must be of type array, float given
+array_intersect(): Argument #1 ($arr1) must be of type array, float given
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 10 --array_intersect(): Argument #1 ($arr1) must be of type array, null given
+array_intersect(): Argument #1 ($arr1) must be of type array, null given
 
--- Iterator 6 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 11 --array_intersect(): Argument #1 ($arr1) must be of type array, null given
+array_intersect(): Argument #1 ($arr1) must be of type array, null given
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 12 --array_intersect(): Argument #1 ($arr1) must be of type array, bool given
+array_intersect(): Argument #1 ($arr1) must be of type array, bool given
 
--- Iterator 7 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 13 --array_intersect(): Argument #1 ($arr1) must be of type array, bool given
+array_intersect(): Argument #1 ($arr1) must be of type array, bool given
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 14 --array_intersect(): Argument #1 ($arr1) must be of type array, bool given
+array_intersect(): Argument #1 ($arr1) must be of type array, bool given
 
--- Iterator 8 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 15 --array_intersect(): Argument #1 ($arr1) must be of type array, bool given
+array_intersect(): Argument #1 ($arr1) must be of type array, bool given
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 16 --array_intersect(): Argument #1 ($arr1) must be of type array, string given
+array_intersect(): Argument #1 ($arr1) must be of type array, string given
 
--- Iterator 9 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 17 --array_intersect(): Argument #1 ($arr1) must be of type array, string given
+array_intersect(): Argument #1 ($arr1) must be of type array, string given
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 18 --array_intersect(): Argument #1 ($arr1) must be of type array, string given
+array_intersect(): Argument #1 ($arr1) must be of type array, string given
 
--- Iterator 10 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 19 --array_intersect(): Argument #1 ($arr1) must be of type array, string given
+array_intersect(): Argument #1 ($arr1) must be of type array, string given
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 20 --array_intersect(): Argument #1 ($arr1) must be of type array, string given
+array_intersect(): Argument #1 ($arr1) must be of type array, string given
 
--- Iterator 11 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 21 --array_intersect(): Argument #1 ($arr1) must be of type array, object given
+array_intersect(): Argument #1 ($arr1) must be of type array, object given
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 22 --array_intersect(): Argument #1 ($arr1) must be of type array, null given
+array_intersect(): Argument #1 ($arr1) must be of type array, null given
 
--- Iterator 12 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 23 --array_intersect(): Argument #1 ($arr1) must be of type array, null given
+array_intersect(): Argument #1 ($arr1) must be of type array, null given
 
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
--- Iterator 13 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
--- Iterator 14 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
--- Iterator 15 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
--- Iterator 16 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
--- Iterator 17 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
--- Iterator 18 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
--- Iterator 19 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
--- Iterator 20 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
--- Iterator 21 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
--- Iterator 22 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
--- Iterator 23 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
--- Iterator 24 --
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
-
-Warning: array_intersect(): Argument #1 is not an array in %s on line %d
-NULL
+-- Iterator 24 --array_intersect(): Argument #1 ($arr1) must be of type array, resource given
+array_intersect(): Argument #1 ($arr1) must be of type array, resource given
 Done

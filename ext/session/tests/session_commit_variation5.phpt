@@ -49,22 +49,21 @@ string(0) ""
 bool(true)
 string(32) "%s"
 bool(true)
-NULL
+bool(true)
+bool(true)
+string(32) "%s"
+bool(true)
 bool(true)
 string(32) "%s"
 bool(true)
 bool(true)
 string(32) "%s"
-NULL
-bool(true)
-string(32) "%s"
 bool(true)
 bool(true)
 string(32) "%s"
-NULL
+bool(true)
 bool(true)
 string(32) "%s"
 bool(true)
 bool(true)
 Done
-

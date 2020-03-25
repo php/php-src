@@ -16,7 +16,7 @@ var_dump($x);
 ?>
 --EXPECTF--
 object(PDOStatement)#%d (1) {
-  [%u|b%"queryString"]=>
+  ["queryString"]=>
   NULL
 }
 

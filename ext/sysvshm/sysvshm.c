@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Author: Christian Cartus <cartus@atrior.de>                          |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 /* This has been built and tested on Linux 2.2.14
  *
@@ -35,50 +31,15 @@
 #include <errno.h>
 
 #include "php_sysvshm.h"
+#include "sysvshm_arginfo.h"
+#include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str.h"
 #include "php_ini.h"
 
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_attach, 0, 0, 1)
-	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, memsize)
-	ZEND_ARG_INFO(0, perm)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_detach, 0, 0, 1)
-	ZEND_ARG_INFO(0, shm_identifier)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_has_var, 0, 0, 2)
-	ZEND_ARG_INFO(0, id)
-	ZEND_ARG_INFO(0, variable_key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_remove, 0, 0, 1)
-	ZEND_ARG_INFO(0, shm_identifier)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_put_var, 0, 0, 3)
-	ZEND_ARG_INFO(0, shm_identifier)
-	ZEND_ARG_INFO(0, variable_key)
-	ZEND_ARG_INFO(0, variable)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_get_var, 0, 0, 2)
-	ZEND_ARG_INFO(0, id)
-	ZEND_ARG_INFO(0, variable_key)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_remove_var, 0, 0, 2)
-	ZEND_ARG_INFO(0, id)
-	ZEND_ARG_INFO(0, variable_key)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 /* {{{ sysvshm_functions[]
  */
-const zend_function_entry sysvshm_functions[] = {
+static const zend_function_entry sysvshm_functions[] = {
 	PHP_FE(shm_attach,		arginfo_shm_attach)
 	PHP_FE(shm_remove,		arginfo_shm_detach)
 	PHP_FE(shm_detach, 		arginfo_shm_remove)
@@ -100,7 +61,7 @@ zend_module_entry sysvshm_module_entry = {
 	NULL,
 	NULL,
 	NULL,
-	NULL,
+	PHP_MINFO(sysvshm),
 	PHP_SYSVSHM_VERSION,
 	STANDARD_MODULE_PROPERTIES
 };
@@ -114,7 +75,7 @@ ZEND_GET_MODULE(sysvshm)
 
 #define SHM_FETCH_RESOURCE(shm_ptr, z_ptr) do { \
 	if ((shm_ptr = (sysvshm_shm *)zend_fetch_resource(Z_RES_P(z_ptr), PHP_SHM_RSRC_NAME, php_sysvshm.le_shm)) == NULL) { \
-		RETURN_FALSE; \
+		RETURN_THROWS(); \
 	} \
 } while (0)
 
@@ -147,6 +108,16 @@ PHP_MINIT_FUNCTION(sysvshm)
 }
 /* }}} */
 
+/* {{{ PHP_MINFO_FUNCTION
+ */
+PHP_MINFO_FUNCTION(sysvshm)
+{
+	php_info_print_table_start();
+	php_info_print_table_row(2, "sysvshm support", "enabled");
+	php_info_print_table_end();
+}
+/* }}} */
+
 /* {{{ proto int shm_attach(int key [, int memsize [, int perm]])
    Creates or open a shared memory segment */
 PHP_FUNCTION(shm_attach)
@@ -157,7 +128,7 @@ PHP_FUNCTION(shm_attach)
 	zend_long shm_key, shm_id, shm_size = php_sysvshm.init_mem, shm_flag = 0666;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "l|ll", &shm_key, &shm_size, &shm_flag)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (shm_size < 1) {
@@ -170,19 +141,19 @@ PHP_FUNCTION(shm_attach)
 	/* get the id from a specified key or create new shared memory */
 	if ((shm_id = shmget(shm_key, 0, 0)) < 0) {
 		if (shm_size < (zend_long)sizeof(sysvshm_chunk_head)) {
-			php_error_docref(NULL, E_WARNING, "failed for key 0x" ZEND_XLONG_FMT ": memorysize too small", shm_key);
+			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": memorysize too small", shm_key);
 			efree(shm_list_ptr);
 			RETURN_FALSE;
 		}
 		if ((shm_id = shmget(shm_key, shm_size, shm_flag | IPC_CREAT | IPC_EXCL)) < 0) {
-			php_error_docref(NULL, E_WARNING, "failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
+			php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
 			efree(shm_list_ptr);
 			RETURN_FALSE;
 		}
 	}
 
 	if ((shm_ptr = shmat(shm_id, NULL, 0)) == (void *) -1) {
-		php_error_docref(NULL, E_WARNING, "failed for key 0x" ZEND_LONG_FMT ": %s", shm_key, strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Failed for key 0x" ZEND_XLONG_FMT ": %s", shm_key, strerror(errno));
 		efree(shm_list_ptr);
 		RETURN_FALSE;
 	}
@@ -213,7 +184,7 @@ PHP_FUNCTION(shm_detach)
 	sysvshm_shm *shm_list_ptr;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shm_id)) {
-		return;
+		RETURN_THROWS();
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 	RETURN_BOOL(SUCCESS == zend_list_close(Z_RES_P(shm_id)));
@@ -228,12 +199,12 @@ PHP_FUNCTION(shm_remove)
 	sysvshm_shm *shm_list_ptr;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "r", &shm_id)) {
-		return;
+		RETURN_THROWS();
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 
 	if (shmctl(shm_list_ptr->id, IPC_RMID, NULL) < 0) {
-		php_error_docref(NULL, E_WARNING, "failed for key 0x%x, id " ZEND_LONG_FMT ": %s", shm_list_ptr->key, Z_LVAL_P(shm_id), strerror(errno));
+		php_error_docref(NULL, E_WARNING, "Failed for key 0x%x, id " ZEND_LONG_FMT ": %s", shm_list_ptr->key, Z_LVAL_P(shm_id), strerror(errno));
 		RETURN_FALSE;
 	}
 
@@ -253,7 +224,7 @@ PHP_FUNCTION(shm_put_var)
 	php_serialize_data_t var_hash;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rlz", &shm_id, &shm_key, &arg_var)) {
-		return;
+		RETURN_THROWS();
 	}
 
 	/* setup string-variable and serialize */
@@ -264,7 +235,7 @@ PHP_FUNCTION(shm_put_var)
 	shm_list_ptr = zend_fetch_resource(Z_RES_P(shm_id), PHP_SHM_RSRC_NAME, php_sysvshm.le_shm);
 	if (!shm_list_ptr) {
 		smart_str_free(&shm_var);
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* insert serialized variable into shared memory */
@@ -274,7 +245,7 @@ PHP_FUNCTION(shm_put_var)
 	smart_str_free(&shm_var);
 
 	if (ret == -1) {
-		php_error_docref(NULL, E_WARNING, "not enough shared memory left");
+		php_error_docref(NULL, E_WARNING, "Not enough shared memory left");
 		RETURN_FALSE;
 	}
 	RETURN_TRUE;
@@ -294,7 +265,7 @@ PHP_FUNCTION(shm_get_var)
 	php_unserialize_data_t var_hash;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &shm_id, &shm_key)) {
-		return;
+		RETURN_THROWS();
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 
@@ -303,7 +274,7 @@ PHP_FUNCTION(shm_get_var)
 	shm_varpos = php_check_shm_data((shm_list_ptr->ptr), shm_key);
 
 	if (shm_varpos < 0) {
-		php_error_docref(NULL, E_WARNING, "variable key " ZEND_LONG_FMT " doesn't exist", shm_key);
+		php_error_docref(NULL, E_WARNING, "Variable key " ZEND_LONG_FMT " doesn't exist", shm_key);
 		RETURN_FALSE;
 	}
 	shm_var = (sysvshm_chunk*) ((char *)shm_list_ptr->ptr + shm_varpos);
@@ -311,7 +282,7 @@ PHP_FUNCTION(shm_get_var)
 
 	PHP_VAR_UNSERIALIZE_INIT(var_hash);
 	if (php_var_unserialize(return_value, (const unsigned char **) &shm_data, (unsigned char *) shm_data + shm_var->length, &var_hash) != 1) {
-		php_error_docref(NULL, E_WARNING, "variable data in shared memory is corrupted");
+		php_error_docref(NULL, E_WARNING, "Variable data in shared memory is corrupted");
 		RETVAL_FALSE;
 	}
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
@@ -327,7 +298,7 @@ PHP_FUNCTION(shm_has_var)
 	sysvshm_shm *shm_list_ptr;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &shm_id, &shm_key)) {
-		return;
+		RETURN_THROWS();
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 	RETURN_BOOL(php_check_shm_data(shm_list_ptr->ptr, shm_key) >= 0);
@@ -343,14 +314,14 @@ PHP_FUNCTION(shm_remove_var)
 	sysvshm_shm *shm_list_ptr;
 
 	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &shm_id, &shm_key)) {
-		return;
+		RETURN_THROWS();
 	}
 	SHM_FETCH_RESOURCE(shm_list_ptr, shm_id);
 
 	shm_varpos = php_check_shm_data((shm_list_ptr->ptr), shm_key);
 
 	if (shm_varpos < 0) {
-		php_error_docref(NULL, E_WARNING, "variable key " ZEND_LONG_FMT " doesn't exist", shm_key);
+		php_error_docref(NULL, E_WARNING, "Variable key " ZEND_LONG_FMT " doesn't exist", shm_key);
 		RETURN_FALSE;
 	}
 	php_remove_shm_data((shm_list_ptr->ptr), shm_varpos);
@@ -435,12 +406,3 @@ static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
 /* }}} */
 
 #endif /* HAVE_SYSVSHM */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

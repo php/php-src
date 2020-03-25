@@ -6,6 +6,8 @@ Bug #26862 (ob_flush() before output_reset_rewrite_vars() results in data loss)
 html_errors=0
 session.use_trans_sid=0
 session.save_handler=files
+session.trans_sid_tags="a=href,area=href,frame=src,form="
+url_rewriter.tags="a=href,area=href,frame=src,form="
 --FILE--
 <?php
 session_start();

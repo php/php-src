@@ -1,7 +1,7 @@
 --TEST--
 PDO ODBC "long" columns
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo_odbc')) print 'skip not loaded';
 // make sure there is an ODBC driver and a DSN, or the test will fail
 include 'ext/pdo/tests/pdo_test.inc';
@@ -35,10 +35,10 @@ if (!isset($config['ENV']['PDOTEST_DSN']) || $config['ENV']['PDOTEST_DSN']===fal
 //       -otherwise, you'll have to open MS Access, create a database, then load that file in this Window to map it to a DSN
 // 7. set the environment variable PDOTEST_DSN="odbc:<system dsn from step 5>" ex: SET PDOTEST_DSN=odbc:accdb12
 //         -note: on Windows, " is included in environment variable
-// 
+//
 // easy way to compile:
 // configure --disable-all --enable-cli --enable-zts --enable-pdo --with-pdo-odbc --enable-debug
-// configure --disable-all --eanble-cli --enable-pdo --with-pdo-odbc=unixODBC,/usr,/usr --with-unixODBC=/usr --enable-debug
+// configure --disable-all --enable-cli --enable-pdo --with-pdo-odbc=unixODBC,/usr,/usr --with-unixODBC=/usr --enable-debug
 //
 
 require 'ext/pdo/tests/pdo_test.inc';
@@ -46,11 +46,11 @@ $db = PDOTest::test_factory('ext/pdo_odbc/tests/common.phpt');
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_SILENT);
 
 if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data CLOB)')) {
-	if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data longtext)')) {
-		if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data varchar(4000))')) {
-			die("BORK: don't know how to create a long column here:\n" . implode(", ", $db->errorInfo()));
-		}
-	}
+    if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data longtext)')) {
+        if (false === $db->exec('CREATE TABLE TEST (id INT NOT NULL PRIMARY KEY, data varchar(4000))')) {
+            die("BORK: don't know how to create a long column here:\n" . implode(", ", $db->errorInfo()));
+        }
+    }
 }
 
 $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -61,36 +61,35 @@ $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 $sizes = array(32, 53, 64, 79, 128, 253, 254, 255, 256, 257, 258, 1022, 1023, 1024, 1025, 1026, 510, 511, 512, 513, 514, 1278, 1279, 1280, 1281, 1282, 2046, 2047, 2048, 2049, 2050, 1534, 1535, 1536, 1537, 1538, 3070, 3071, 3072, 3073, 3074, 3998, 3999, 4000);
 
 function alpha_repeat($len) {
-	// use the alphabet instead of 'i' characters to make sure the blocks don't overlap when they are reassembled
-	$out = "";
-	while (strlen($out) < $len) {
-		$out .= "abcdefghijklmnopqrstuvwxyz";
-	}
-	return substr($out, 0, $len);
+    // use the alphabet instead of 'i' characters to make sure the blocks don't overlap when they are reassembled
+    $out = "";
+    while (strlen($out) < $len) {
+        $out .= "abcdefghijklmnopqrstuvwxyz";
+    }
+    return substr($out, 0, $len);
 }
 
 // don't use Prepared Statements. that fails on MS SQL server (works with Access, MyODBC), which is a separate failure, feature/code-path from what
 // this test does - nice to be able to test using MS SQL server
 foreach ($sizes as $num) {
-	$text = alpha_repeat($num);
-	$db->exec("INSERT INTO TEST VALUES($num, '$text')");
+    $text = alpha_repeat($num);
+    $db->exec("INSERT INTO TEST VALUES($num, '$text')");
 }
 
 // verify data
-foreach ($db->query('SELECT id, data from TEST') as $row) {
-	$expect = alpha_repeat($row[0]);
-	if (strcmp($expect, $row[1])) {
-		echo "Failed on size $row[id]:\n";
-		printf("Expected %d bytes, got %d\n", strlen($expect), strlen($row['data']));
-		echo ($expect) . "\n";
-		echo ($row['data']) . "\n";
-	} else {
-		echo "Passed on size $row[id]\n";
-	}
+foreach ($db->query('SELECT id, data from TEST ORDER BY LEN(data) ASC') as $row) {
+    $expect = alpha_repeat($row[0]);
+    if (strcmp($expect, $row[1])) {
+        echo "Failed on size $row[id]:\n";
+        printf("Expected %d bytes, got %d\n", strlen($expect), strlen($row['data']));
+        echo ($expect) . "\n";
+        echo ($row['data']) . "\n";
+    } else {
+        echo "Passed on size $row[id]\n";
+    }
 }
 
 echo "Finished\n";
-
 --EXPECT--
 Passed on size 32
 Passed on size 53
@@ -103,31 +102,31 @@ Passed on size 255
 Passed on size 256
 Passed on size 257
 Passed on size 258
-Passed on size 1022
-Passed on size 1023
-Passed on size 1024
-Passed on size 1025
-Passed on size 1026
 Passed on size 510
 Passed on size 511
 Passed on size 512
 Passed on size 513
 Passed on size 514
+Passed on size 1022
+Passed on size 1023
+Passed on size 1024
+Passed on size 1025
+Passed on size 1026
 Passed on size 1278
 Passed on size 1279
 Passed on size 1280
 Passed on size 1281
 Passed on size 1282
-Passed on size 2046
-Passed on size 2047
-Passed on size 2048
-Passed on size 2049
-Passed on size 2050
 Passed on size 1534
 Passed on size 1535
 Passed on size 1536
 Passed on size 1537
 Passed on size 1538
+Passed on size 2046
+Passed on size 2047
+Passed on size 2048
+Passed on size 2049
+Passed on size 2050
 Passed on size 3070
 Passed on size 3071
 Passed on size 3072
@@ -137,4 +136,3 @@ Passed on size 3998
 Passed on size 3999
 Passed on size 4000
 Finished
-

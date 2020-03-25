@@ -26,7 +26,7 @@ prompt> halloarray(2) {
     [4]=>
     int(1)
     [5]=>
-    int(3)
+    int(2)
     [8]=>
     int(2)
   }
@@ -55,4 +55,3 @@ $a->b();
 $a->b('ha');
 
 var_dump(phpdbg_end_oplog(["functions" => true]));
-

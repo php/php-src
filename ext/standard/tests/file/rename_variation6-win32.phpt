@@ -4,7 +4,9 @@ Test rename() function: usage variations-6
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') die('skip..  for Windows');
 if (!function_exists("symlink")) die("skip symlinks are not supported");
-$ret = exec('mklink rename_variation13tmp.lnk ' . __FILE__ .' 2>&1', $out);
+$fn = "rename_variation6tmp.lnk";
+$ret = exec("mklink $fn " . __FILE__ .' 2>&1', $out);
+@unlink($fn);
 if (strpos($ret, 'privilege')) {
 	die('skip. SeCreateSymbolicLinkPrivilege not enable for this user.');
 }
@@ -32,7 +34,7 @@ var_dump(file_exists($tmp_file));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: readlink(): %s in %s on line %d
 bool(false)
 string(%d) "%srename_variation6-win32.php.tmp"

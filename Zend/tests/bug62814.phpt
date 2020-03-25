@@ -17,4 +17,4 @@ class C extends B {
 
 ?>
 --EXPECTF--
-Fatal error: Access level to C::test() must be protected (as in class B) or weaker in %s on line %d
+Fatal error: Access level to C::test() must be protected (as in class B) or weaker in %s on line 12

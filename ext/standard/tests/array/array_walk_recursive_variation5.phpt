@@ -3,7 +3,7 @@ Test array_walk_recursive() function : usage variations - 'input' argument conta
 --FILE--
 <?php
 /* Prototype  : bool array_walk_recursive(array $input, string $funcname [, mixed $userdata])
- * Description: Apply a user function to every member of an array 
+ * Description: Apply a user function to every member of an array
  * Source code: ext/standard/array.c
 */
 
@@ -40,7 +40,7 @@ var_dump( array_walk_recursive($input, "callback"));
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk_recursive() : array with references ***
 int(0)
 int(10)

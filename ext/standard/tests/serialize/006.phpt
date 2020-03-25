@@ -2,19 +2,19 @@
 serialize()/unserialize() with exotic letters
 --FILE--
 <?php
-	$åäöÅÄÖ = array('åäöÅÄÖ' => 'åäöÅÄÖ');
+    $åäöÅÄÖ = array('åäöÅÄÖ' => 'åäöÅÄÖ');
 
-	class ÜberKööliäå 
-	{
-		public $åäöÅÄÖüÜber = 'åäöÅÄÖ';
-	}
-  
+    class ÜberKööliäå
+    {
+        public $åäöÅÄÖüÜber = 'åäöÅÄÖ';
+    }
+
     $foo = new Überkööliäå();
-  
-	var_dump(serialize($foo));
-	var_dump(unserialize(serialize($foo)));
-	var_dump(serialize($åäöÅÄÖ));
-	var_dump(unserialize(serialize($åäöÅÄÖ)));
+
+    var_dump(serialize($foo));
+    var_dump(unserialize(serialize($foo)));
+    var_dump(serialize($åäöÅÄÖ));
+    var_dump(unserialize(serialize($åäöÅÄÖ)));
 ?>
 --EXPECT--
 string(55) "O:11:"ÜberKööliäå":1:{s:11:"åäöÅÄÖüÜber";s:6:"åäöÅÄÖ";}"

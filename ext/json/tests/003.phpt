@@ -22,20 +22,17 @@ var_dump(json_last_error(), json_last_error_msg());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(1) {
   [0]=>
-  &array(1) {
-    [0]=>
-    *RECURSION*
-  }
+  *RECURSION*
 }
 
 bool(false)
 int(6)
 string(%d) "Recursion detected"
 
-string(8) "[[null]]"
+string(6) "[null]"
 int(6)
 string(%d) "Recursion detected"
 Done

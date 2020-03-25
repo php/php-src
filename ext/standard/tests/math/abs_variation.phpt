@@ -45,7 +45,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -55,7 +55,7 @@ $inputs = array(
 /*19*/ "abs",
        'abs',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 
@@ -72,15 +72,18 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of abs()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(abs($input) );
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(abs($input));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 
 fclose($fp);
 ?>
-===Done===
---EXPECTF--
+--EXPECT--
 *** Testing abs() : usage variations ***
 
 -- Iteration 1 --
@@ -102,27 +105,25 @@ int(1)
 int(0)
 
 -- Iteration 7 --
-int(0)
+abs(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 8 --
-int(0)
+abs(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 9 --
-bool(false)
+abs(): Argument #1 ($number) must be of type int|float, array given
 
 -- Iteration 10 --
-int(0)
+abs(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 11 --
-int(0)
+abs(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 12 --
-int(0)
+abs(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 13 --
-
-Notice: Object of class classA could not be converted to int in %s on line %d
-int(1)
+abs(): Argument #1 ($number) must be of type int|float, object given
 
 -- Iteration 14 --
 int(0)
@@ -131,5 +132,4 @@ int(0)
 int(0)
 
 -- Iteration 16 --
-int(%d)
-===Done===
+abs(): Argument #1 ($number) must be of type int|float, resource given

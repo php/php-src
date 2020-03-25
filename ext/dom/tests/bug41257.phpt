@@ -6,7 +6,7 @@ Bug #41257 (lookupNamespaceURI does not work as expected)
 <?php
 
 $doc = new DOMDocument();
-$doc->load(dirname(__FILE__)."/nsdoc.xml");
+$doc->load(__DIR__."/nsdoc.xml");
 
 $root = $doc->documentElement;
 

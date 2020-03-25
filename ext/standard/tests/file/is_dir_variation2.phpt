@@ -15,7 +15,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 /* Testing is_dir() with dir, soft & hard link to dir,
      and with file, soft & hard link to file */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "*** Testing is_dir() with dir and links to dir ***\n";
 echo "-- With dir --\n";
@@ -24,14 +24,14 @@ mkdir($dirname);
 var_dump( is_dir($dirname) );
 clearstatcache();
 
-echo "-- With symlink --\n"; 
+echo "-- With symlink --\n";
 symlink($file_path."/is_dir_variation2", $file_path."/is_dir_variation2_symlink");
-var_dump( is_dir($file_path."/is_dir_variation2_symlink") );  //is_dir() resolves symlinks 
+var_dump( is_dir($file_path."/is_dir_variation2_symlink") );  //is_dir() resolves symlinks
 clearstatcache();
 
 echo "-- With hardlink --";
 link($file_path."/is_dir_variation2", $file_path."/is_dir_variation2_link"); //Not permitted to create hard-link to a dir
-var_dump( is_dir($file_path."/is_dir_variation2_link") ); 
+var_dump( is_dir($file_path."/is_dir_variation2_link") );
 clearstatcache();
 
 echo "\n*** Testing is_dir() with file and links to a file ***\n";
@@ -41,7 +41,7 @@ fclose( fopen($filename, "w") );
 var_dump( is_dir($filename) );
 clearstatcache();
 
-echo "-- With symlink --\n"; 
+echo "-- With symlink --\n";
 symlink($file_path."/is_dir_variation2.tmp", $file_path."/is_dir_variation2_symlink.tmp");
 var_dump( is_dir($file_path."/is_dir_variation2_symlink.tmp") );
 clearstatcache();
@@ -55,7 +55,7 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 if(file_exists($file_path."/is_dir_variation2_symlink")) {
   unlink($file_path."/is_dir_variation2_symlink");
 }

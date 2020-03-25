@@ -7,7 +7,6 @@ Felix De Vliegher <felix.devliegher@gmail.com>
 $standard = new ReflectionExtension('standard');
 var_dump($standard->getClassNames());
 ?>
-==DONE==
 --EXPECTF--
 array(4) {
   [0]=>
@@ -19,4 +18,3 @@ array(4) {
   [3]=>
   %s(14) "AssertionError"
 }
-==DONE==

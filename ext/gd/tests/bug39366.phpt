@@ -17,5 +17,5 @@ imagesavealpha($rotate, true);
 $c = imagecolorat($rotate,5,5);
 printf("%X\n", $c);
 ?>
---EXPECTF--
+--EXPECT--
 32FF0000

@@ -1,10 +1,11 @@
-#ifdef HAVE_LIBWEBP
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
 #include "gd.h"
 #include "gdhelpers.h"
+
+#ifdef HAVE_LIBWEBP
 #include "webp/decode.h"
 #include "webp/encode.h"
 
@@ -120,6 +121,14 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quantization)
 		quantization = 80;
 	}
 
+	if (overflow2(gdImageSX(im), 4)) {
+		return;
+	}
+
+	if (overflow2(gdImageSX(im) * 4, gdImageSY(im))) {
+		return;
+	}
+
 	argb = (uint8_t *)gdMalloc(gdImageSX(im) * 4 * gdImageSY(im));
 	if (!argb) {
 		return;
@@ -138,7 +147,7 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quantization)
 			}
 			*(p++) = gdTrueColorGetRed(c);
 			*(p++) = gdTrueColorGetGreen(c);
-			*(p++) = gdTrueColorGetBlue(c); 
+			*(p++) = gdTrueColorGetBlue(c);
 			*(p++) = a;
 		}
 	}

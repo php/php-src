@@ -1,5 +1,7 @@
 --TEST--
 Bug #71745 FILTER_FLAG_NO_RES_RANGE does not cover whole 127.0.0.0/8 range
+--SKIPIF--
+<?php if (!extension_loaded('filter')) die('skip filter extension not loaded'); ?>
 --FILE--
 <?php
 //https://tools.ietf.org/html/rfc6890#section-2.1
@@ -18,10 +20,10 @@ $privateRanges['172.16.0.0/12'] = array('172.16.0.0', '172.31.0.0');
 $privateRanges['192.168.0.0/16'] = array('192.168.0.0', '192.168.255.255');
 
 foreach ($privateRanges as $key => $range) {
-	list($min, $max) = $range;
-	var_dump($key);
-	var_dump(filter_var($min, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE));
-	var_dump(filter_var($max, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE));
+    list($min, $max) = $range;
+    var_dump($key);
+    var_dump(filter_var($min, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE));
+    var_dump(filter_var($max, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE));
 }
 
 $reservedRanges = array();
@@ -72,21 +74,20 @@ $reservedRanges['203.0.113.0/24'] = array('203.0.113.0', '203.0.113.255');
 $reservedRanges['240.0.0.0/4'] = array('224.0.0.0', '255.255.255.255');
 
 foreach ($reservedRanges as $key => $range) {
-	list($min, $max) = $range;
-	var_dump($key);
-	var_dump(filter_var($min, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_RES_RANGE));
-	var_dump(filter_var($max, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_RES_RANGE));
+    list($min, $max) = $range;
+    var_dump($key);
+    var_dump(filter_var($min, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_RES_RANGE));
+    var_dump(filter_var($max, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_RES_RANGE));
 }
 
-
-
+?>
 --EXPECT--
 string(10) "10.0.0.0/8"
 bool(false)
 bool(false)
 string(14) "168.254.0.0/16"
-bool(false)
-bool(false)
+string(11) "169.254.0.0"
+string(15) "169.254.255.255"
 string(13) "172.16.0.0/12"
 bool(false)
 bool(false)
@@ -97,11 +98,11 @@ string(9) "0.0.0.0/8"
 bool(false)
 bool(false)
 string(10) "10.0.0.0/8"
-bool(false)
-bool(false)
+string(8) "10.0.0.0"
+string(14) "10.255.255.255"
 string(12) "10.64.0.0/10"
-bool(false)
-bool(false)
+string(10) "100.64.0.0"
+string(15) "100.127.255.255"
 string(11) "127.0.0.0/8"
 bool(false)
 bool(false)
@@ -109,32 +110,32 @@ string(14) "169.254.0.0/16"
 bool(false)
 bool(false)
 string(13) "172.16.0.0/12"
-bool(false)
-bool(false)
+string(10) "172.16.0.0"
+string(10) "172.31.0.0"
 string(12) "192.0.0.0/24"
-bool(false)
-bool(false)
+string(9) "192.0.0.0"
+string(11) "192.0.0.255"
 string(12) "192.0.0.0/29"
-bool(false)
-bool(false)
+string(9) "192.0.0.0"
+string(9) "192.0.0.7"
 string(12) "192.0.2.0/24"
-bool(false)
-bool(false)
+string(9) "192.0.2.0"
+string(11) "192.0.2.255"
 string(13) "198.18.0.0/15"
-bool(false)
-bool(false)
+string(10) "198.18.0.0"
+string(14) "198.19.255.255"
 string(15) "198.51.100.0/24"
-bool(false)
-bool(false)
+string(12) "198.51.100.0"
+string(14) "198.51.100.255"
 string(14) "192.88.99.0/24"
-bool(false)
-bool(false)
+string(11) "192.88.99.0"
+string(13) "192.88.99.255"
 string(14) "192.168.0.0/16"
-bool(false)
-bool(false)
+string(11) "192.168.0.0"
+string(15) "192.168.255.255"
 string(14) "203.0.113.0/24"
-bool(false)
-bool(false)
+string(11) "203.0.113.0"
+string(13) "203.0.113.255"
 string(11) "240.0.0.0/4"
-bool(false)
+string(9) "224.0.0.0"
 bool(false)

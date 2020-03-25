@@ -8,10 +8,8 @@ Bug #68817 (Null pointer deference)
 var_dump(json_decode('[""]'));
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   string(0) ""
 }
-===DONE===

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -23,5 +21,8 @@ PHP_METHOD(Spoofchecker, isSuspicious);
 PHP_METHOD(Spoofchecker, areConfusable);
 PHP_METHOD(Spoofchecker, setAllowedLocales);
 PHP_METHOD(Spoofchecker, setChecks);
+#if U_ICU_VERSION_MAJOR_NUM >= 58
+PHP_METHOD(Spoofchecker, setRestrictionLevel);
+#endif
 
 #endif // SPOOFCHECKER_MAIN_H

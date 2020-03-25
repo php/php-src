@@ -3,7 +3,7 @@ Test vprintf() function : basic functionality - bool format
 --FILE--
 <?php
 /* Prototype  : string vprintf(string $format , array $args)
- * Description: Output a formatted string 
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -31,7 +31,6 @@ echo "\n";
 var_dump($result);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : basic functionality - using bool format ***
 1
@@ -40,4 +39,3 @@ int(1)
 int(3)
 1 0 1
 int(5)
-===DONE===

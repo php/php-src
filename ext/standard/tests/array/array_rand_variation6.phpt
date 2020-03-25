@@ -3,7 +3,7 @@ Test array_rand() function : usage variation - with heredoc string as key in the
 --FILE--
 <?php
 /* Prototype  : mixed array_rand(array $input [, int $num_req])
- * Description: Return key/keys for random entry/entries in the array 
+ * Description: Return key/keys for random entry/entries in the array
  * Source code: ext/standard/array.c
 */
 
@@ -101,4 +101,3 @@ array\(6\) {
   string\([0-9]*\) "[a-z \n \t \0 0-9  ]*"
 }
 Done
-

@@ -39,7 +39,7 @@ $inputs = array(
 
        // int data
 /*1*/  'int' => array(
-	   0,
+       0,
        1,
        12345,
        -2345,
@@ -67,13 +67,13 @@ $inputs = array(
        TRUE,
        FALSE,
        ),
-       
+
        // empty data
 /*5*/ 'empty string' => array(
        "",
        '',
        ),
-       
+
 /*6*/ 'empty array' => array(
        ),
 
@@ -83,7 +83,7 @@ $inputs = array(
        'string',
        $heredoc,
        ),
-       
+
        // object data
 /*8*/ 'object' => array(
        new classA(),
@@ -107,17 +107,16 @@ $inputs = array(
 // loop through each element of $inputs to check the behavior of natcasesort()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump( natcasesort($input) );
-	var_dump($input);
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    var_dump( natcasesort($input) );
+    var_dump($input);
+    $iterator++;
 };
 
 fclose($fp);
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing natcasesort() : usage variation ***
 

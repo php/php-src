@@ -2,17 +2,16 @@
 getComment
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
 <?php
-$dirname = dirname(__FILE__) . '/';
+$dirname = __DIR__ . '/';
 $file = $dirname . 'test_with_comment.zip';
 include $dirname . 'utils.inc';
 $zip = new ZipArchive;
 if (!$zip->open($file)) {
-	exit('failed');
+    exit('failed');
 }
 echo $zip->getArchiveComment() . "\n";
 
@@ -21,7 +20,6 @@ echo $zip->getCommentName('foo') . "\n";
 echo $zip->getCommentIndex($idx);
 
 echo $zip->getCommentName('') . "\n";
-echo $zip->getCommentName() . "\n";
 
 $zip->close();
 
@@ -31,6 +29,3 @@ Zip archive comment
 foo comment
 foo comment
 Notice: ZipArchive::getCommentName(): Empty string as entry name in %s on line %d
-
-
-Warning: ZipArchive::getCommentName() expects at least 1 parameter, 0 given in %s on line %d

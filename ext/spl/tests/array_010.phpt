@@ -61,8 +61,6 @@ unset($obj['8th']);
 var_dump($obj->getArrayCopy());
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 array(4) {
   [0]=>
@@ -141,4 +139,3 @@ array(4) {
   [6]=>
   string(9) "changed 6"
 }
-===DONE===

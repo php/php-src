@@ -3,22 +3,22 @@ Test is_bool() function
 --FILE--
 <?php
 /* Prototype: bool is_bool ( mixed $var );
- * Description: Finds whether the given variable is a boolean  
+ * Description: Finds whether the given variable is a boolean
  */
 
 echo "*** Testing is_bool() with valid boolean values ***\n";
-// different valid  boolean vlaues 
+// different valid  boolean values
 $valid_bools = array(
   TRUE,
   FALSE,
   true,
   false,
 );
-/* loop to check that is_bool() recognizes different 
+/* loop to check that is_bool() recognizes different
    bool values, expected output: bool(true) */
 $loop_counter = 1;
 foreach ($valid_bools as $bool_val ) {
-  echo "-- Iteration $loop_counter --\n"; $loop_counter++; 
+  echo "-- Iteration $loop_counter --\n"; $loop_counter++;
   var_dump( is_bool($bool_val) );
 }
 
@@ -26,7 +26,7 @@ echo "\n*** Testing is_bool() on non boolean values ***\n";
 
 // get a resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 
 // unset variable
 $unset_bool1 = true;
@@ -36,7 +36,7 @@ unset ($unset_bool1);
 unset ($unset_bool2);
 unset ($unset_var);
 
-// other types in a array 
+// other types in a array
 $not_bool_types = array (
   /* integers */
   0,
@@ -98,7 +98,7 @@ $not_bool_types = array (
   /* nulls */
   null,
   NULL,
-  
+
   /* arrays */
   array(),
   array(0),
@@ -114,26 +114,19 @@ $not_bool_types = array (
   array(1 => "One", "two" => 2),
 
   /* unset bool vars and undefined var */
-  @$unset_bool1, 
-  @$unset_bool2, 
-  @$unset_var, 
+  @$unset_bool1,
+  @$unset_bool2,
+  @$unset_var,
   @$undefined_var
 );
-/* loop through the $not_bool_types to see working of 
+/* loop through the $not_bool_types to see working of
    is_bool() on non bull types, expected output: bool(false) */
 $loop_counter = 1;
 foreach ($not_bool_types as $type ) {
-  echo "-- Iteration $loop_counter --\n"; $loop_counter++; 
+  echo "-- Iteration $loop_counter --\n"; $loop_counter++;
   var_dump( is_bool($type) );
 }
 
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_dump( is_bool() );
-
-//arguments more than expected 
-var_dump( is_bool(TRUE, FALSE) );
- 
 echo "Done\n";
 
 // close resources
@@ -282,13 +275,5 @@ bool(false)
 -- Iteration 64 --
 bool(false)
 -- Iteration 65 --
-bool(false)
-
-*** Testing error conditions ***
-
-Warning: is_bool() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: is_bool() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 Done

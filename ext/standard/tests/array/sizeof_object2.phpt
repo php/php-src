@@ -15,11 +15,11 @@ echo "--- Testing sizeof() with objects which doesn't implement Countable interf
 
 // class without member
 class test
-{ 
+{
   // no members
 }
 
-// class with only members and with out member functions 
+// class with only members and with out member functions
 class test1
 {
   public $member1;
@@ -33,7 +33,7 @@ class test1
 // class with only member functions
 class test2
 {
-  // no data members 
+  // no data members
 
   public function display()
   {
@@ -53,7 +53,7 @@ abstract class abstract_class
 {
   public $member1;
   private $member2;
- 
+
   abstract protected function display();
 }
 
@@ -83,7 +83,7 @@ for($i = 0; $i < count($objects); $i++)
   echo "Default Mode: ";
   var_dump( sizeof($var) );
   echo "\n";
-  
+
   echo "COUNT_NORMAL Mode: ";
   var_dump( sizeof($var, COUNT_NORMAL) );
   echo "\n";
@@ -91,7 +91,7 @@ for($i = 0; $i < count($objects); $i++)
   echo "COUNT_RECURSIVE Mode: ";
   var_dump( sizeof($var, COUNT_RECURSIVE) );
   echo "\n";
- 
+
   $counter++;
 }
 
@@ -101,38 +101,68 @@ echo "Done";
 *** Testing sizeof() : object functionality ***
 --- Testing sizeof() with objects which doesn't implement Countable interface ---
 -- Iteration 1 --
-Default Mode: int(1)
+Default Mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
-COUNT_NORMAL Mode: int(1)
+COUNT_NORMAL Mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
-COUNT_RECURSIVE Mode: int(1)
+COUNT_RECURSIVE Mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
 -- Iteration 2 --
-Default Mode: int(1)
+Default Mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
-COUNT_NORMAL Mode: int(1)
+COUNT_NORMAL Mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
-COUNT_RECURSIVE Mode: int(1)
+COUNT_RECURSIVE Mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
 -- Iteration 3 --
-Default Mode: int(1)
+Default Mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
-COUNT_NORMAL Mode: int(1)
+COUNT_NORMAL Mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
-COUNT_RECURSIVE Mode: int(1)
+COUNT_RECURSIVE Mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
 -- Iteration 4 --
-Default Mode: int(1)
+Default Mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
-COUNT_NORMAL Mode: int(1)
+COUNT_NORMAL Mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
-COUNT_RECURSIVE Mode: int(1)
+COUNT_RECURSIVE Mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
 -- Iteration 5 --
-Default Mode: int(1)
+Default Mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
-COUNT_NORMAL Mode: int(1)
+COUNT_NORMAL Mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
-COUNT_RECURSIVE Mode: int(1)
+COUNT_RECURSIVE Mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
 Done

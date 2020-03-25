@@ -10,54 +10,54 @@ Test error handling when persistent connection is passed to oci_error()
 // was fixed and the behavior of oci_error() for all connections types
 // was made consistent.
 
-require(dirname(__FILE__).'/details.inc');
+require(__DIR__.'/details.inc');
 
 // Test parse error for normal connection
 
 if (!empty($dbase)) {
-	$c1 = oci_connect($user,$password,$dbase);
+    $c1 = oci_connect($user,$password,$dbase);
 }
 else {
-	$c1 = oci_connect($user,$password);
+    $c1 = oci_connect($user,$password);
 }
 
 $s = @oci_parse($c1, "select ' from dual");
 if (!$s) {
-	echo "Normal connection: Parse error\n";
-	$m = oci_error($c1);
-	var_dump($m);
+    echo "Normal connection: Parse error\n";
+    $m = oci_error($c1);
+    var_dump($m);
 }
 
 // Test parse error for new connection
 
 if (!empty($dbase)) {
-	$c2 = oci_new_connect($user,$password,$dbase);
+    $c2 = oci_new_connect($user,$password,$dbase);
 }
 else {
-	$c2 = oci_new_connect($user,$password);
+    $c2 = oci_new_connect($user,$password);
 }
 
 $s = @oci_parse($c2, "select ' from dual");
 if (!$s) {
-	echo "New connection: Parse error\n";
-	$m = oci_error($c2);
-	var_dump($m);
+    echo "New connection: Parse error\n";
+    $m = oci_error($c2);
+    var_dump($m);
 }
 
 // Test parse error for persistent connection
 
 if (!empty($dbase)) {
-	$c3 = oci_pconnect($user,$password,$dbase);
+    $c3 = oci_pconnect($user,$password,$dbase);
 }
 else {
-	$c3 = oci_pconnect($user,$password);
+    $c3 = oci_pconnect($user,$password);
 }
 
 $s = @oci_parse($c3, "select ' from dual");
 if (!$s) {
-	echo "Persistent connection: Parse error\n";
-	$m = oci_error($c3);
-	var_dump($m);
+    echo "Persistent connection: Parse error\n";
+    $m = oci_error($c3);
+    var_dump($m);
 }
 
 // Verify that passing no connection doesn't affect future calls

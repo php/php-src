@@ -35,13 +35,11 @@ var_dump(dgettext($domain, $overflown));
 
 var_dump(textdomain($overflown));
 ?>
-==DONE==
 --EXPECTF--
-
-Warning: bindtextdomain(): domain passed too long in %s on line %d
+Warning: bindtextdomain(): Domain passed too long in %s on line %d
 bool(false)
 
-Warning: dngettext(): domain passed too long in %s on line %d
+Warning: dngettext(): Domain passed too long in %s on line %d
 bool(false)
 
 Warning: dngettext(): msgid1 passed too long in %s on line %d
@@ -59,13 +57,13 @@ bool(false)
 Warning: ngettext(): msgid2 passed too long in %s on line %d
 bool(false)
 
-Warning: dcgettext(): domain passed too long in %s on line %d
+Warning: dcgettext(): Domain passed too long in %s on line %d
 bool(false)
 
 Warning: dcgettext(): msgid passed too long in %s on line %d
 bool(false)
 
-Warning: dcngettext(): domain passed too long in %s on line %d
+Warning: dcngettext(): Domain passed too long in %s on line %d
 bool(false)
 
 Warning: dcngettext(): msgid1 passed too long in %s on line %d
@@ -74,12 +72,11 @@ bool(false)
 Warning: dcngettext(): msgid2 passed too long in %s on line %d
 bool(false)
 
-Warning: dgettext(): domain passed too long in %s on line %d
+Warning: dgettext(): Domain passed too long in %s on line %d
 bool(false)
 
 Warning: dgettext(): msgid passed too long in %s on line %d
 bool(false)
 
-Warning: textdomain(): domain passed too long in %s on line %d
+Warning: textdomain(): Domain passed too long in %s on line %d
 bool(false)
-==DONE==

@@ -10,8 +10,8 @@ function foo()
 
 class bar
 {
-	function barfoo ()
-	{ echo "bar!\n"; }
+    function barfoo ()
+    { echo "bar!\n"; }
 }
 
 unset($obj);
@@ -30,11 +30,11 @@ register_shutdown_function(array($obj,'barfoo'));      // Valid
 
 ?>
 --EXPECTF--
-Notice: Undefined variable: obj in %s on line %d
+Warning: Undefined variable: obj in %s on line %d
 
 Warning: register_shutdown_function(): Invalid shutdown callback 'Array' passed in %s on line %d
 
-Notice: Undefined variable: obj in %s on line %d
+Warning: Undefined variable: obj in %s on line %d
 
 Warning: register_shutdown_function(): Invalid shutdown callback 'Array' passed in %s on line %d
 
@@ -46,13 +46,8 @@ Warning: register_shutdown_function(): Invalid shutdown callback 'Array' passed 
 
 Warning: register_shutdown_function(): Invalid shutdown callback 'bar' passed in %s on line %d
 
-Deprecated: Non-static method bar::barfoo() should not be called statically in %sbug32647.php on line %d
+Warning: register_shutdown_function(): Invalid shutdown callback 'bar::barfoo' passed in %sbug32647.php on line %d
 
 Warning: register_shutdown_function(): Invalid shutdown callback 'bar::foobar' passed in %sbug32647.php on line %d
 foo!
-
-Deprecated: Non-static method bar::barfoo() should not be called statically in Unknown on line 0
-
-Deprecated: Non-static method bar::barfoo() should not be called statically in Unknown on line 0
-bar!
 bar!

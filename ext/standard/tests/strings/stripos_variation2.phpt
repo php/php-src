@@ -83,7 +83,7 @@ for($index=0; $index<count($needle); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stripos() function: with single quoted strings ***
 -- Iteration 1 --
 int(2)
@@ -119,20 +119,20 @@ bool(false)
 int(10)
 int(10)
 -- Iteration 12 --
-bool(false)
-bool(false)
+int(0)
+int(11)
 -- Iteration 13 --
-bool(false)
-bool(false)
+int(0)
+int(12)
 -- Iteration 14 --
-bool(false)
-bool(false)
+int(0)
+int(13)
 -- Iteration 15 --
-bool(false)
-bool(false)
+int(0)
+int(14)
 -- Iteration 16 --
-bool(false)
-bool(false)
+int(0)
+int(15)
 -- Iteration 17 --
 int(14)
 int(51)
@@ -218,7 +218,7 @@ bool(false)
 bool(false)
 bool(false)
 -- Iteration 45 --
-int(26)
+bool(false)
 bool(false)
 -- Iteration 46 --
 int(0)

@@ -7,7 +7,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string format, array args)
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -19,12 +19,12 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 echo "*** Testing vsprintf() : octal formats and non-octal values ***\n";
 
 // defining array of octal formats
-$formats = 
-  '%o %+o %-o 
-   %lo %Lo %4o %-4o
-   %10.4o %-10.4o %.4o 
-   %\'#2o %\'2o %\'$2o %\'_2o
-   %3$o %4$o %1$o %2$o';
+$formats =
+    '%o %+o %-o
+    %lo %Lo %4o %-4o
+    %10.4o %-10.4o %.4o
+    %\'#2o %\'2o %\'$2o %\'_2o
+    %3$o %4$o %1$o %2$o';
 
 // Arrays of non octal values for the format defined in $format.
 // Each sub array contains non octal values which correspond to each format in $format
@@ -64,9 +64,9 @@ $args_array = array(
          true, false, TRUE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
- 
+
 // looping to test vsprintf() with different octal formats from the above $format array
 // and with non-octal values from the above $args_array array
 $counter = 1;
@@ -78,41 +78,41 @@ foreach($args_array as $args) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : octal formats and non-octal values ***
 
 -- Iteration 1 --
-string(149) "2 0 12 
-   361100 o 1777777777777777775456 2322
+string(151) "2 0 12
+    361100 o 1777777777777777775456 2322
                           
-   30071 14 1777777777777777777764 1777777777777777416700
-   12 361100 2 0"
+    30071 14 1777777777777777777764 1777777777777777416700
+    12 361100 2 0"
 
 -- Iteration 2 --
-string(201) "2 1777777777777777777776 2 
-   361100 o 1777777777777720715133 57062645
+string(203) "2 1777777777777777777776 2
+    361100 o 1777777777777720715133 57062645
                           
-   57060664 4475347 1777777777777721631371 1777777777777720717336
-   2 361100 2 1777777777777777777776"
+    57060664 4475347 1777777777777721631371 1777777777777720717336
+    2 361100 2 1777777777777777777776"
 
 -- Iteration 3 --
-string(99) "0 0 0 
-   173 o 1777777777777777777605 173 
+string(101) "0 0 0
+    173 o 1777777777777777777605 173 
                           
-   2322 0 $0 _0
-   0 173 0 0"
+    2322 0 $0 _0
+    0 173 0 0"
 
 -- Iteration 4 --
-string(75) "1 1 1 
-   1 o    1 1   
+string(77) "1 1 1
+    1 o    1 1   
                           
-   #1 1 $1 _1
-   1 1 1 1"
+    #1 1 $1 _1
+    1 1 1 1"
 
 -- Iteration 5 --
-string(75) "1 1 0 
-   1 o    0 1   
+string(77) "1 1 0
+    1 o    0 1   
                           
-   #0 1 $1 _0
-   0 1 1 1"
+    #0 1 $1 _0
+    0 1 1 1"
 Done

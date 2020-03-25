@@ -1,43 +1,43 @@
 --TEST--
 COM: General variant tests
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present";
 if (4 != PHP_INT_SIZE) print "skip x86 only"; ?>
 --FILE--
-<?php // $Id$
+<?php
 error_reporting(E_ALL);
 
 $v = new VARIANT();
 if (VT_EMPTY != variant_get_type($v)) {
-	echo "VT_EMPTY: bork\n";
+    echo "VT_EMPTY: bork\n";
 }
 
 $values = array(VT_I4 => 42, VT_R8 => 3.5, VT_BSTR => "hello", VT_BOOL => false);
 $binary_ops = array('add', 'cat', 'sub', 'mul', 'and', 'div',
-	'eqv', 'idiv', 'imp', 'mod', 'or', 'pow', 'xor');
+    'eqv', 'idiv', 'imp', 'mod', 'or', 'pow', 'xor');
 
 foreach ($values as $t => $val) {
-	$v = new VARIANT($val);
-	if ($t != variant_get_type($v)) {
-		printf("Bork: [%d] %d: %s\n", $t, variant_get_type($v), $val);
-		print $v . "\n";
-	}
-	$results = array();
+    $v = new VARIANT($val);
+    if ($t != variant_get_type($v)) {
+        printf("Bork: [%d] %d: %s\n", $t, variant_get_type($v), $val);
+        print $v . "\n";
+    }
+    $results = array();
 
-	foreach ($values as $op2) {
-		echo "--\n";
-		foreach ($binary_ops as $op) {
-			try {
-				echo "$op: " . call_user_func('variant_' . $op, $v, $op2) . "\n";
-			} catch (com_exception $e) {
-				echo "$op:\n";
-				echo "\tvariant_$op($v, $op2)\n";
-				echo "\texception " . $e->getMessage();
-				printf("\tcode %08x\n\n", $e->getCode());
-			}
-		}
-	}
+    foreach ($values as $op2) {
+        echo "--\n";
+        foreach ($binary_ops as $op) {
+            try {
+                echo "$op: " . call_user_func('variant_' . $op, $v, $op2) . "\n";
+            } catch (com_exception $e) {
+                echo "$op:\n";
+                echo "\tvariant_$op($v, $op2)\n";
+                echo "\texception " . $e->getMessage();
+                printf("\tcode %08x\n\n", $e->getCode());
+            }
+        }
+    }
 }
 
 echo "OK!";

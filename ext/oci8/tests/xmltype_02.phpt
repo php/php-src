@@ -3,19 +3,19 @@ Basic XMLType test #2
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 if (!extension_loaded("simplexml")) die ("skip no simplexml extension");
-?> 
+?>
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/connect.inc');
+require(__DIR__.'/connect.inc');
 
 // Initialization
 
 $stmtarray = array(
-	"drop table xmltype_02_tab",
-	"create table xmltype_02_tab (warehouse_id number, warehouse_spec xmltype)",
+    "drop table xmltype_02_tab",
+    "create table xmltype_02_tab (warehouse_id number, warehouse_spec xmltype)",
 );
 
 oci8_test_sql_execute($c, $stmtarray);
@@ -48,8 +48,8 @@ $xml =<<<EOF
 EOF;
 
 echo "Test 1 Insert new XML data using a temporary CLOB\n";
-$s = oci_parse($c, 
-    "insert into xmltype_02_tab (warehouse_id, warehouse_spec) 
+$s = oci_parse($c,
+    "insert into xmltype_02_tab (warehouse_id, warehouse_spec)
      values (:id, XMLType(:clob))");
 oci_bind_by_name($s, ':id', $id);
 $lob = oci_new_descriptor($c, OCI_D_LOB);
@@ -69,7 +69,7 @@ var_dump($row);
 
 echo "Test 2 Manipulate the data using SimpleXML\n";
 
-$sx = simplexml_load_string((binary)$row[0]->load());
+$sx = simplexml_load_string($row[0]->load());
 $row[0]->free();
 var_dump($sx);
 
@@ -101,14 +101,12 @@ $row[0]->free();
 // Clean up
 
 $stmtarray = array(
-	"drop table xmltype_02_tab"
+    "drop table xmltype_02_tab"
 );
 
 oci8_test_sql_execute($c, $stmtarray);
 
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Test 1 Insert new XML data using a temporary CLOB
 array(1) {
@@ -178,4 +176,3 @@ string(%d) "<?xml version="1.0"?>
 %sVClearance>10</VClearance>
 </Warehouse>
 "
-===DONE===

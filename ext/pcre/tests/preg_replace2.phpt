@@ -9,8 +9,6 @@ if (@preg_match('/./u', '') === false) {
 --FILE--
 <?php
 
-var_dump(preg_replace('', array(), ''));
-
 var_dump(preg_replace(array('/\da(.)/ui', '@..@'), '$1', '12Abc'));
 var_dump(preg_replace(array('/\da(.)/ui', '@(.)@'), '$1', array('x','a2aA', '1av2Ab')));
 
@@ -18,12 +16,8 @@ var_dump(preg_replace(array('/\da(.)/ui', '@(.)@'), '$1', array('x','a2aA', '1av
 var_dump(preg_replace(array('/[\w]+/'), array('$'), array('xyz', 'bdbd')));
 var_dump(preg_replace(array('/\s+/', '~[b-d]~'), array('$'), array('x y', 'bd bc')));
 
-echo "==done==\n";
-
 ?>
---EXPECTF--
-Warning: preg_replace(): Parameter mismatch, pattern is a string while replacement is an array in %spreg_replace2.php on line 3
-bool(false)
+--EXPECT--
 string(1) "c"
 array(3) {
   [0]=>
@@ -45,4 +39,3 @@ array(2) {
   [1]=>
   string(1) "$"
 }
-==done==

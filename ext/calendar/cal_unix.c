@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +15,6 @@
    |          Hartmut Holzgraefe        <hholzgra@php.net>                |
    +----------------------------------------------------------------------+
  */
-/* $Id: */
 
 #include "php.h"
 #include "php_calendar.h"
@@ -32,13 +29,14 @@ PHP_FUNCTION(unixtojd)
 	struct tm *ta, tmbuf;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &ts) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!ts) {
 		ts = time(NULL);
 	} else if (ts < 0) {
-		RETURN_FALSE;
+		zend_value_error("Timestamp must not be negative");
+		RETURN_THROWS();
 	}
 
 	if (!(ta = php_localtime_r(&ts, &tmbuf))) {
@@ -56,23 +54,15 @@ PHP_FUNCTION(jdtounix)
 	zend_long uday;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &uday) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 	uday -= 2440588 /* J.D. of 1.1.1970 */;
 
-	if (uday < 0 || uday > 24755) { /* before beginning of unix epoch or behind end of unix epoch */
-		RETURN_FALSE;
+	if (uday < 0 || uday > 24755) {
+		zend_value_error("jday must be within the Unix epoch");
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(uday * 24 * 3600);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

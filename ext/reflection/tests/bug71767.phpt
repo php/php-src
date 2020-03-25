@@ -16,7 +16,7 @@ class Foo {
         /** wrong docblock */
         $arg
     ) {
-        
+
     }
 }
 
@@ -37,7 +37,7 @@ echo $reflectionClosure->getDocComment() . PHP_EOL;
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 /** Correct docblock */
 /** Correct docblock */
 /** Correct docblock */

@@ -6,7 +6,7 @@ Phar::loadPhar ignoring alias
 phar.require_hash=0
 --FILE--
 <?php
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 $file = '<?php include "' . $pname . '/a.php"; __HALT_COMPILER(); ?>';
 
@@ -32,12 +32,11 @@ $p['.phar/test'];
 echo $e->getMessage(),"\n";
 }
 ?>
-===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
+<?php
+unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 ?>
---EXPECTF--
+--EXPECT--
 This is a
 This is b
 This is b/c
@@ -45,4 +44,3 @@ This is b/d
 This is e
 bool(false)
 Cannot directly get any files or directories in magic ".phar" directory
-===DONE===

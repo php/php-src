@@ -1,11 +1,8 @@
 --TEST--
 show information about class
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
-if (!extension_loaded("reflection")) {
-    die("skip reflection extension required");
-}
+<?php
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -18,7 +15,7 @@ var_dump(`"$php" -n --rc exception`);
 
 echo "Done\n";
 ?>
---EXPECTF-- 
+--EXPECT--
 string(40) "Exception: Class unknown does not exist
 "
 string(183) "Class [ <internal:Core> class stdClass ] {
@@ -40,7 +37,7 @@ string(183) "Class [ <internal:Core> class stdClass ] {
 }
 
 "
-string(1607) "Class [ <internal:Core> class Exception implements Throwable ] {
+string(2008) "Class [ <internal:Core> class Exception implements Throwable, Stringable ] {
 
   - Constants [0] {
   }
@@ -63,42 +60,73 @@ string(1607) "Class [ <internal:Core> class Exception implements Throwable ] {
 
   - Methods [11] {
     Method [ <internal:Core> final private method __clone ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Core, ctor> public method __construct ] {
 
       - Parameters [3] {
-        Parameter #0 [ <optional> $message ]
-        Parameter #1 [ <optional> $code ]
-        Parameter #2 [ <optional> $previous ]
+        Parameter #0 [ <optional> string $message ]
+        Parameter #1 [ <optional> int $code ]
+        Parameter #2 [ <optional> ?Throwable $previous ]
       }
     }
 
     Method [ <internal:Core> public method __wakeup ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getMessage ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getCode ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getFile ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getLine ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getTrace ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getPrevious ] {
+
+      - Parameters [0] {
+      }
     }
 
     Method [ <internal:Core, prototype Throwable> final public method getTraceAsString ] {
+
+      - Parameters [0] {
+      }
     }
 
-    Method [ <internal:Core, prototype Throwable> public method __toString ] {
+    Method [ <internal:Core, prototype Stringable> public method __toString ] {
+
+      - Parameters [0] {
+      }
+      - Return [ string ]
     }
   }
 }

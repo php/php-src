@@ -5,13 +5,13 @@ Bug #50762 (in WSDL mode Soap Header handler function only being called if defin
 --FILE--
 <?php
 class testSoap {
-	private $auth;
-	public function authToken($token){
-		$this->auth=true;
-	}
-	public function testHeader($param){
-		return 'header handler ' . ($this->auth ? 'called' : 'not called');
-	}
+    private $auth;
+    public function authToken($token){
+        $this->auth=true;
+    }
+    public function testHeader($param){
+        return 'header handler ' . ($this->auth ? 'called' : 'not called');
+    }
 }
 
 class LocalSoapClient extends SoapClient {
@@ -19,7 +19,7 @@ class LocalSoapClient extends SoapClient {
   function __construct($wsdl, $options) {
     parent::__construct($wsdl, $options);
     $this->server = new SoapServer($wsdl, $options);
-	$this->server->setObject(new testSoap());
+    $this->server->setObject(new testSoap());
   }
 
   function __doRequest($request, $location, $action, $version, $one_way = 0) {
@@ -32,12 +32,12 @@ class LocalSoapClient extends SoapClient {
 
 }
 
-$cl = new LocalSoapClient(dirname(__FILE__).'/bug50762.wsdl', array('cache_wsdl'=>WSDL_CACHE_NONE, 'trace'=>true));
+$cl = new LocalSoapClient(__DIR__.'/bug50762.wsdl', array('cache_wsdl'=>WSDL_CACHE_NONE, 'trace'=>true));
 
 class authToken{
-	public function __construct($token){
-		$this->authToken=$token;
-	}
+    public function __construct($token){
+        $this->authToken=$token;
+    }
 }
 
 $cl->__setSoapHeaders(array(new SoapHeader('http://sova.pronto.ru/', 'authToken', new authToken('tokendata'))));

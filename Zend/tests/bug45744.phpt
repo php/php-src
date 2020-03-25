@@ -4,14 +4,14 @@ Bug #45744 (Case sensitive callback behaviour)
 <?php
 class Foo {
     public function __construct(array $data) {
-		var_dump(array_map(array($this, 'callback'), $data));
+        var_dump(array_map(array($this, 'callback'), $data));
     }
-    
+
     private function callback($value) {
         if (!is_array($value)) {
             return stripslashes($value);
         }
-	return array_map(array($this, 'callback'), $value);
+    return array_map(array($this, 'callback'), $value);
     }
 }
 
@@ -22,9 +22,9 @@ new Bar(array());
 
 class Foo2 {
     public function __construct(array $data) {
-		var_dump(array_map(array($this, 'callBack'), $data));
+        var_dump(array_map(array($this, 'callBack'), $data));
     }
-    
+
     private function callBack($value) {
     }
 }

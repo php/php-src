@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -21,44 +19,44 @@
 
 PHP_METHOD(BreakIterator, __construct);
 
-PHP_FUNCTION(breakiter_create_word_instance);
+PHP_METHOD(BreakIterator, createWordInstance);
 
-PHP_FUNCTION(breakiter_create_line_instance);
+PHP_METHOD(BreakIterator, createLineInstance);
 
-PHP_FUNCTION(breakiter_create_character_instance);
+PHP_METHOD(BreakIterator, createCharacterInstance);
 
-PHP_FUNCTION(breakiter_create_sentence_instance);
+PHP_METHOD(BreakIterator, createSentenceInstance);
 
-PHP_FUNCTION(breakiter_create_title_instance);
+PHP_METHOD(BreakIterator, createTitleInstance);
 
-PHP_FUNCTION(breakiter_create_code_point_instance);
+PHP_METHOD(BreakIterator, createCodePointInstance);
 
-PHP_FUNCTION(breakiter_get_text);
+PHP_METHOD(BreakIterator, getText);
 
-PHP_FUNCTION(breakiter_set_text);
+PHP_METHOD(BreakIterator, setText);
 
-PHP_FUNCTION(breakiter_first);
+PHP_METHOD(BreakIterator, first);
 
-PHP_FUNCTION(breakiter_last);
+PHP_METHOD(BreakIterator, last);
 
-PHP_FUNCTION(breakiter_previous);
+PHP_METHOD(BreakIterator, previous);
 
-PHP_FUNCTION(breakiter_next);
+PHP_METHOD(BreakIterator, next);
 
-PHP_FUNCTION(breakiter_current);
+PHP_METHOD(BreakIterator, current);
 
-PHP_FUNCTION(breakiter_following);
+PHP_METHOD(BreakIterator, following);
 
-PHP_FUNCTION(breakiter_preceding);
+PHP_METHOD(BreakIterator, preceding);
 
-PHP_FUNCTION(breakiter_is_boundary);
+PHP_METHOD(BreakIterator, isBoundary);
 
-PHP_FUNCTION(breakiter_get_locale);
+PHP_METHOD(BreakIterator, getLocale);
 
-PHP_FUNCTION(breakiter_get_parts_iterator);
+PHP_METHOD(BreakIterator, getPartsIterator);
 
-PHP_FUNCTION(breakiter_get_error_code);
+PHP_METHOD(BreakIterator, getErrorCode);
 
-PHP_FUNCTION(breakiter_get_error_message);
+PHP_METHOD(BreakIterator, getErrorMessage);
 
 #endif

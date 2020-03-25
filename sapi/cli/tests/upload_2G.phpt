@@ -8,10 +8,16 @@ if (PHP_INT_SIZE < 8) {
 	die("skip need PHP_INT_SIZE>=8");
 }
 
+if (!file_exists('/proc/meminfo')) {
+	die('skip Cannot check free RAM from /proc/meminfo on this platform');
+}
+
+$free_ram = 0;
 if ($f = fopen("/proc/meminfo","r")) {
 	while (!feof($f)) {
-		if (!strncmp($line = fgets($f), "MemFree", 7)) {
-			if (substr($line,8)/1024/1024 > 3) {
+		if (preg_match('/MemFree[^\d]*(\d+)/i', fgets($f), $m)) {
+			$free_ram = max($free_ram, $m[1]/1024/1024);
+			if ($free_ram > 3) {
 				$enough_free_ram = true;
 			}
 		}
@@ -19,11 +25,15 @@ if ($f = fopen("/proc/meminfo","r")) {
 }
 
 if (empty($enough_free_ram)) {
-	die("skip need +3G free RAM");
+	die(sprintf("skip need +3G free RAM, but only %01.2f available", $free_ram));
 }
 
 if (getenv('TRAVIS')) {
     die("skip Fails intermittently on travis");
+}
+
+if (getenv('SKIP_PERF_SENSITIVE')) {
+    die("skip Test may be very slow if PHP is instrumented");
 }
 ?>
 --FILE--
@@ -33,8 +43,8 @@ echo "Test\n";
 
 include "php_cli_server.inc";
 
-php_cli_server_start("var_dump(\$_FILES);", false,
-	"-d post_max_size=3G -d upload_max_filesize=3G");
+php_cli_server_start("var_dump(\$_FILES);", null,
+    ["-d", "post_max_size=3G", "-d", "upload_max_filesize=3G"]);
 
 list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
 $port = intval($port)?:80;
@@ -64,13 +74,13 @@ EOF
 
 $data = str_repeat("0123456789", 10000);
 for ($i = 0; $i < $length; $i += 10000 * 10) {
-	fwrite($fp, $data) or die("write failed @ ($i)");
+    fwrite($fp, $data) or die("write failed @ ($i)");
 }
 
 fwrite($fp, $post) or die("write post failed");
 
 while (!feof($fp)) {
-	$output .= fgets($fp);
+    $output .= fgets($fp);
 }
 echo $output;
 fclose($fp);
@@ -78,7 +88,6 @@ fclose($fp);
 Done
 --EXPECTF--
 Test
-
 HTTP/1.1 200 OK
 Host: %s
 Date: %s

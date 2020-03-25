@@ -11,10 +11,10 @@ opcache.optimization_level=-1
 
 echo "array key hash" . ":" . PHP_EOL;
 $array = array(
-	"1" => "one",
-	"2" => "two",
-	"one" => 1,
-	"two" => 2,
+    "1" => "one",
+    "2" => "two",
+    "one" => 1,
+    "two" => 2,
 );
 
 unset($array["one"]);
@@ -24,9 +24,9 @@ print_r($array);
 
 echo "function define" . ":" . PHP_EOL;
 if (!function_exists("dummy")) {
-	function dummy() {
-		var_dump(__FUNCTION__);
-	}
+    function dummy() {
+        var_dump(__FUNCTION__);
+    }
 }
 
 dummy();
@@ -35,22 +35,22 @@ $dummy = function () { var_dump("lambda" . "dummy"); };
 $dummy();
 
 if (!class_exists("A")) {
-	class A {
-		public static $name = "A";
-		public static function say($n = "name") {
-			var_dump(static::$name);
-		}
-	}
+    class A {
+        public static $name = "A";
+        public static function say($n = "name") {
+            var_dump(static::$name);
+        }
+    }
 }
 
 class B extends A {
-	public static $name = "B";
+    public static $name = "B";
 }
 
 if (!class_exists("C")) {
-	class C extends B {
-		public static $name = "C";
-	}
+    class C extends B {
+        public static $name = "C";
+    }
 }
 
 A::say();
@@ -60,28 +60,28 @@ B::say();
 C::say();
 
 function get_eol_define() {
-	define("MY_EOL", PHP_EOL);
+    define("MY_EOL", PHP_EOL);
 }
 get_eol_define();
 define("EOL", MY_EOL);
 
-echo "constants define" . ":" . EOL; 
+echo "constants define" . ":" . EOL;
 
 echo "define " . "TEST" . EOL;
 define("TEST", "TEST");
 
 class E {
-	public static $E="EP";
-	const E="E";
-	const TEST="NULL";
+    public static $E="EP";
+    const E="E";
+    const TEST="NULL";
 }
 
 class F {
-	const F="F";
-	public static $E="FEP";
-	const E="FE";
-	const TEST="FALSE";
-	public static $F = "FP";
+    const F="F";
+    public static $E="FEP";
+    const E="FE";
+    const TEST="FALSE";
+    public static $F = "FP";
 }
 
 var_dump(TEST);   	//"TEST"
@@ -97,25 +97,25 @@ var_dumP(F::$E);    //"FEP"
 echo "propertes and methods" . EOL;
 
 class CH {
-	const H = "H";
-	public function h() {
-		var_dump(self::H);
-	}
+    const H = "H";
+    public function h() {
+        var_dump(self::H);
+    }
 }
 
 class CI {
-	const H = "I";
-	public function h() {
-		var_dump(self::H);
-	}
+    const H = "I";
+    public function h() {
+        var_dump(self::H);
+    }
 }
 
 function change(&$obj) {
-	$obj = new CH;
+    $obj = new CH;
 }
 
 function geti() {
-	return new CI;
+    return new CI;
 }
 
 $h = new CH;
@@ -150,7 +150,7 @@ var_dump($h::H);
 var_dump(CH::H);
 
 echo "-->I" . PHP_EOL;
-$h = geti(); 
+$h = geti();
 $h->H();
 var_dump($h::H);
 var_dump(CI::H);

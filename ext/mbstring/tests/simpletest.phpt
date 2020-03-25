@@ -18,7 +18,7 @@ $s2 = "この文字が連結されているはず。";
 echo "echo: ".$s1.$s2."\n";
 print("print: ".$s1.$s2."\n");
 printf("printf: %s%s\n",$s1, $s2);
-echo sprintf("sprintf: %s%s\n",$s1, $s2); 
+echo sprintf("sprintf: %s%s\n",$s1, $s2);
 
 // Assign to var
 $s3 = $s1.$s2."\n";
@@ -31,4 +31,3 @@ print: マルチバイト関数が使えます。この文字が連結されているはず。
 printf: マルチバイト関数が使えます。この文字が連結されているはず。
 sprintf: マルチバイト関数が使えます。この文字が連結されているはず。
 echo: マルチバイト関数が使えます。この文字が連結されているはず。
-

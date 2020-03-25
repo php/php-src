@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -14,8 +12,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifndef INTL_CONVERTCPP_H
 #define INTL_CONVERTCPP_H
 
@@ -25,6 +21,8 @@
 
 #include <unicode/unistr.h>
 #include <zend_types.h>
+
+using icu::UnicodeString;
 
 int intl_stringFromChar(UnicodeString &ret, char *str, size_t str_len, UErrorCode *status);
 

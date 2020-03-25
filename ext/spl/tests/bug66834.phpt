@@ -4,49 +4,49 @@ SPL: Bug #66834
 <?php
 
 // overrides both offsetExists and offsetGet
-class ArrayObjectBoth extends ArrayObject 
+class ArrayObjectBoth extends ArrayObject
 {
-	public function offsetExists($offset) {
-		var_dump('Called: '.__METHOD__);
-		return parent::offsetExists($offset);
-	}
+    public function offsetExists($offset) {
+        var_dump('Called: '.__METHOD__);
+        return parent::offsetExists($offset);
+    }
 
-	public function offsetGet($offset) {
-		var_dump('Called: '.__METHOD__);
-		return parent::offsetGet($offset);
-	}
+    public function offsetGet($offset) {
+        var_dump('Called: '.__METHOD__);
+        return parent::offsetGet($offset);
+    }
 }
 
 // overrides only offsetExists
-class ArrayObjectExists extends ArrayObject 
+class ArrayObjectExists extends ArrayObject
 {
-	public function offsetExists($offset) {
-		var_dump('Called: '.__METHOD__);
-		return parent::offsetExists($offset);
-	}
+    public function offsetExists($offset) {
+        var_dump('Called: '.__METHOD__);
+        return parent::offsetExists($offset);
+    }
 }
 
 // overrides only offsetGet
-class ArrayObjectGet extends ArrayObject 
+class ArrayObjectGet extends ArrayObject
 {
-	public function offsetGet($offset) {
-		var_dump('Called: '.__METHOD__);
-		return parent::offsetGet($offset);
-	}
+    public function offsetGet($offset) {
+        var_dump('Called: '.__METHOD__);
+        return parent::offsetGet($offset);
+    }
 }
 
 // overrides only offsetGet and offsetSet
 class ArrayObjectGetSet extends ArrayObject
 {
-	public function offsetGet($offset)
-	{
-		return parent::offsetGet(str_rot13($offset));
-	}
+    public function offsetGet($offset)
+    {
+        return parent::offsetGet(str_rot13($offset));
+    }
 
-	public function offsetSet($offset, $value)
-	{
-		return parent::offsetSet(str_rot13($offset), $value);
-	}
+    public function offsetSet($offset, $value)
+    {
+        return parent::offsetSet(str_rot13($offset), $value);
+    }
 }
 
 $values = ['foo' => '', 'bar' => null, 'baz' => 42];

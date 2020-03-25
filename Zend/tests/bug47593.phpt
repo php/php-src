@@ -7,12 +7,12 @@ namespace test;
 const TEST = 11;
 
 class foo {
-	public function xyz() {
-	}
+    public function xyz() {
+    }
 }
 
 interface baz {
-}	
+}
 
 function bar() {
 }

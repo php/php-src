@@ -7,7 +7,7 @@ Test strrchr() function : usage variations - heredoc string containing blank lin
  * Source code: ext/standard/string.c
 */
 
-/* Test strrchr() function by passing heredoc string containing 
+/* Test strrchr() function by passing heredoc string containing
  *  blank-line for haystack and with various needles
 */
 
@@ -32,7 +32,7 @@ foreach($needles as $needle) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrchr() function: with heredoc strings ***
 bool(false)
 bool(false)

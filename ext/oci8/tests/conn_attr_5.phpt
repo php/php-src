@@ -3,7 +3,7 @@ Set and get connection attributes with scope end.
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require(__DIR__.'/skipif.inc');
 
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
 if ($test_drcp) die("skip output might vary with DRCP");
@@ -17,9 +17,9 @@ if (!(isset($matches[0]) && $matches[1] >= 10)) {
 <?php
 
 $testuser     = 'testuser_attr_5';  // Used in conn_attr.inc
-$testpassword = 'testuser'; 
+$testpassword = 'testuser';
 
-require(dirname(__FILE__)."/conn_attr.inc");
+require(__DIR__."/conn_attr.inc");
 
 echo"**Test - Set and get values for the attributes with scope end ************\n";
 
@@ -37,7 +37,6 @@ function set_scope() {
     set_attr($conn2,'ACTION',50);
     $conn3 = get_conn(2);
     set_attr($conn3,'MODULE',50);
-    
 }
 
 function get_scope() {
@@ -52,7 +51,7 @@ function get_scope() {
 clean_up($c);
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 **Test - Set and get values for the attributes with scope end ************
 Testing with oci_connect()
 Value of CLIENT_INFO has been set successfully

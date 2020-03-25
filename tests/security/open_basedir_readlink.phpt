@@ -2,8 +2,8 @@
 Test open_basedir configuration
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip no symlinks on Windows');
+if(PHP_OS_FAMILY === "Windows") {
+    die('skip not for Windows');
 }
 ?>
 --FILE--
@@ -70,4 +70,3 @@ bool(false)
 Warning: readlink(): open_basedir restriction in effect. File(%s/test/ok/symlink.txt) is not within the allowed path(s): (.) in %s on line %d
 bool(false)
 *** Finished testing open_basedir configuration [readlink] ***
-

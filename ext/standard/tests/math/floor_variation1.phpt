@@ -39,7 +39,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /* 7*/ "",
        '',
@@ -49,7 +49,7 @@ $inputs = array(
 /*10*/ "abcxyz",
        'abcxyz}',
        $heredoc,
-       
+
        // object data
 /*13*/ new classA(),
 
@@ -66,14 +66,17 @@ $inputs = array(
 // loop through each element of $inputs to check the behaviour of floor()
 $iterator = 1;
 foreach($inputs as $input) {
-	echo "\n-- Iteration $iterator --\n";
-	var_dump(floor($input));
-	$iterator++;
+    echo "\n-- Iteration $iterator --\n";
+    try {
+        var_dump(floor($input));
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
+    $iterator++;
 };
 fclose($fp);
 ?>
-===Done===
---EXPECTF--
+--EXPECT--
 *** Testing floor() : usage variations ***
 
 -- Iteration 1 --
@@ -95,27 +98,25 @@ float(1)
 float(0)
 
 -- Iteration 7 --
-float(0)
+floor(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 8 --
-float(0)
+floor(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 9 --
-bool(false)
+floor(): Argument #1 ($number) must be of type int|float, array given
 
 -- Iteration 10 --
-float(0)
+floor(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 11 --
-float(0)
+floor(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 12 --
-float(0)
+floor(): Argument #1 ($number) must be of type int|float, string given
 
 -- Iteration 13 --
-
-Notice: Object of class classA could not be converted to int in %s on line %d
-float(1)
+floor(): Argument #1 ($number) must be of type int|float, object given
 
 -- Iteration 14 --
 float(0)
@@ -124,5 +125,4 @@ float(0)
 float(0)
 
 -- Iteration 16 --
-float(%f)
-===Done===
+floor(): Argument #1 ($number) must be of type int|float, resource given

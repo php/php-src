@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) Zend Technologies Ltd. (http://www.zend.com)           |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,25 +12,22 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
    +----------------------------------------------------------------------+
-   | Authors: Andi Gutmans <andi@zend.com>                                |
-   |          Zeev Suraski <zeev@zend.com>                                |
+   | Authors: Andi Gutmans <andi@php.net>                                 |
+   |          Zeev Suraski <zeev@php.net>                                 |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
 
 #include "zend_extensions.h"
 
 ZEND_API zend_llist zend_extensions;
 ZEND_API uint32_t zend_extension_flags = 0;
+ZEND_API int zend_op_array_extension_handles = 0;
 static int last_resource_number;
 
 int zend_load_extension(const char *path)
 {
 #if ZEND_EXTENSIONS_SUPPORT
 	DL_HANDLE handle;
-	zend_extension *new_extension;
-	zend_extension_version_info *extension_version_info;
 
 	handle = DL_LOAD(path);
 	if (!handle) {
@@ -43,6 +40,22 @@ int zend_load_extension(const char *path)
 #endif
 		return FAILURE;
 	}
+	return zend_load_extension_handle(handle, path);
+#else
+	fprintf(stderr, "Extensions are not supported on this platform.\n");
+/* See http://support.microsoft.com/kb/190351 */
+#ifdef ZEND_WIN32
+	fflush(stderr);
+#endif
+	return FAILURE;
+#endif
+}
+
+int zend_load_extension_handle(DL_HANDLE handle, const char *path)
+{
+#if ZEND_EXTENSIONS_SUPPORT
+	zend_extension *new_extension;
+	zend_extension_version_info *extension_version_info;
 
 	extension_version_info = (zend_extension_version_info *) DL_FETCH_SYMBOL(handle, "extension_version_info");
 	if (!extension_version_info) {
@@ -61,7 +74,6 @@ int zend_load_extension(const char *path)
 		DL_UNLOAD(handle);
 		return FAILURE;
 	}
-
 
 	/* allow extension to proclaim compatibility with any Zend version */
 	if (extension_version_info->zend_extension_api_no != ZEND_EXTENSION_API_NO &&(!new_extension->api_no_check || new_extension->api_no_check(ZEND_EXTENSION_API_NO) != SUCCESS)) {
@@ -108,14 +120,6 @@ int zend_load_extension(const char *path)
 		fprintf(stderr, "Cannot load %s - it was already loaded\n", new_extension->name);
 /* See http://support.microsoft.com/kb/190351 */
 #ifdef ZEND_WIN32
-		fflush(stderr);
-#endif
-		DL_UNLOAD(handle);
-		return FAILURE;
-	} else if (zend_get_extension(new_extension->name)) {
-		fprintf(stderr, "Cannot load %s - extension already loaded\n", new_extension->name);
-/* See http://support.microsoft.com/kb/190351 */
-#ifdef PHP_WIN32
 		fflush(stderr);
 #endif
 		DL_UNLOAD(handle);
@@ -195,6 +199,7 @@ int zend_startup_extensions_mechanism()
 {
 	/* Startup extensions mechanism */
 	zend_llist_init(&zend_extensions, sizeof(zend_extension), (void (*)(void *)) zend_extension_dtor, 1);
+	zend_op_array_extension_handles = 0;
 	last_resource_number = 0;
 	return SUCCESS;
 }
@@ -254,6 +259,10 @@ ZEND_API int zend_get_resource_handle(zend_extension *extension)
 	}
 }
 
+ZEND_API int zend_get_op_array_extension_handle(void)
+{
+	return zend_op_array_extension_handles++;
+}
 
 ZEND_API zend_extension *zend_get_extension(const char *extension_name)
 {
@@ -320,11 +329,3 @@ ZEND_API size_t zend_extensions_op_array_persist(zend_op_array *op_array, void *
 	}
 	return 0;
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

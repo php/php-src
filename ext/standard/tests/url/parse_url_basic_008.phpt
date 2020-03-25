@@ -1,26 +1,26 @@
 --TEST--
-Test parse_url() function: Parse a load of URLs without specifying PHP_URL_QUERY as the URL component 
+Test parse_url() function: Parse a load of URLs without specifying PHP_URL_QUERY as the URL component
 --FILE--
 <?php
 /* Prototype  : proto mixed parse_url(string url, [int url_component])
- * Description: Parse a URL and return its components 
+ * Description: Parse a URL and return its components
  * Source code: ext/standard/url.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
  * Parse a load of URLs without specifying PHP_URL_QUERY as the URL component
  */
-include_once(dirname(__FILE__) . '/urls.inc');
+include_once(__DIR__ . '/urls.inc');
 
 foreach ($urls as $url) {
-	echo "--> $url   : ";
-	var_dump(parse_url($url, PHP_URL_QUERY));
+    echo "--> $url   : ";
+    var_dump(parse_url($url, PHP_URL_QUERY));
 }
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 --> 64.246.30.37   : NULL
 --> http://64.246.30.37   : NULL
 --> http://64.246.30.37/   : NULL
@@ -38,10 +38,10 @@ echo "Done";
 --> http://www.php.net:80   : NULL
 --> http://www.php.net:80/   : NULL
 --> http://www.php.net/index.php   : NULL
---> www.php.net/?   : NULL
---> www.php.net:80/?   : NULL
---> http://www.php.net/?   : NULL
---> http://www.php.net:80/?   : NULL
+--> www.php.net/?   : string(0) ""
+--> www.php.net:80/?   : string(0) ""
+--> http://www.php.net/?   : string(0) ""
+--> http://www.php.net:80/?   : string(0) ""
 --> http://www.php.net:80/index.php   : NULL
 --> http://www.php.net:80/foo/bar/index.php   : NULL
 --> http://www.php.net:80/this/is/a/very/deep/directory/structure/and/file.php   : NULL
@@ -52,9 +52,9 @@ echo "Done";
 --> http://www.php.net:80/this/../a/../deep/directory/   : NULL
 --> http://www.php.net:80/this/is/a/very/deep/directory/../file.php   : NULL
 --> http://www.php.net:80/index.php   : NULL
---> http://www.php.net:80/index.php?   : NULL
+--> http://www.php.net:80/index.php?   : string(0) ""
 --> http://www.php.net:80/#foo   : NULL
---> http://www.php.net:80/?#   : NULL
+--> http://www.php.net:80/?#   : string(0) ""
 --> http://www.php.net:80/?test=1   : string(6) "test=1"
 --> http://www.php.net/?test=1&   : string(7) "test=1&"
 --> http://www.php.net:80/?&   : string(1) "&"
@@ -68,6 +68,7 @@ echo "Done";
 --> http://secret:@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(31) "test=1&test2=char&test3=mixesCI"
 --> http://:hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(31) "test=1&test2=char&test3=mixesCI"
 --> http://secret:hideout@www.php.net/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(31) "test=1&test2=char&test3=mixesCI"
+--> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(31) "test=1&test2=char&test3=mixesCI"
 --> http://secret:hid:out@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : string(31) "test=1&test2=char&test3=mixesCI"
 --> nntp://news.php.net   : NULL
 --> ftp://ftp.gnu.org/gnu/glic/glibc.tar.gz   : NULL
@@ -88,16 +89,17 @@ echo "Done";
 --> scheme:   : NULL
 --> foo+bar://baz@bang/bla   : NULL
 --> gg:9130731   : NULL
+--> http://user:@pass@host/path?argument?value#etc   : string(14) "argument?value"
 --> http://10.10.10.10/:80   : NULL
---> http://x:?   : NULL
+--> http://x:?   : string(0) ""
 --> x:blah.com   : NULL
 --> x:/blah.com   : NULL
 --> x://::abc/?   : bool(false)
---> http://::?   : NULL
+--> http://::?   : string(0) ""
 --> http://::#   : NULL
 --> x://::6.5   : NULL
---> http://?:/   : NULL
---> http://@?:/   : NULL
+--> http://?:/   : bool(false)
+--> http://@?:/   : bool(false)
 --> file:///:   : NULL
 --> file:///a:/   : NULL
 --> file:///ab:/   : NULL
@@ -123,7 +125,4 @@ echo "Done";
 --> http://:?   : bool(false)
 --> http://blah.com:123456   : bool(false)
 --> http://blah.com:abcdef   : bool(false)
---> http://secret@hideout@www.php.net:80/index.php?test=1&test2=char&test3=mixesCI#some_page_ref123   : bool(false)
---> http://user:@pass@host/path?argument?value#etc   : bool(false)
---> http://foo.com\@bar.com   : bool(false)
 Done

@@ -53,32 +53,6 @@ public function setSelf(self $s) { }
 
 }
 
-class Foo5 extends Base {
-
-public function setSelf(parent $s) { }
-
-}
-
-class Bar5 extends Foo5 {
-
-public function setSelf(parent $s) { }
-
-}
-
-abstract class Foo6 extends Base {
-
-abstract public function setSelf(parent $s);
-
-}
-
-class Bar6 extends Foo6 {
-
-public function setSelf(Foo6 $s) { }
-
-}
+?>
 --EXPECTF--
-Warning: Declaration of Bar4::setSelf(Bar4 $s) should be compatible with Foo4::setSelf(Foo4 $s) in %sbug60573.php on line %d
-
-Warning: Declaration of Bar5::setSelf(Foo5 $s) should be compatible with Foo5::setSelf(Base $s) in %sbug60573.php on line %d
-
-Fatal error: Declaration of Bar6::setSelf(Foo6 $s) must be compatible with Foo6::setSelf(Base $s) in %sbug60573.php on line %d
+Fatal error: Declaration of Bar4::setSelf(Bar4 $s) must be compatible with Foo4::setSelf(Foo4 $s) in %s on line %d

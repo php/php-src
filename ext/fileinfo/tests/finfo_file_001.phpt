@@ -1,7 +1,7 @@
 --TEST--
 finfo_file(): Testing file names
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 
@@ -24,5 +24,5 @@ Warning: finfo_file(): Empty filename or path in %s on line %d
 bool(false)
 string(9) "directory"
 
-Warning: finfo_file(&): failed to open stream: No such file or directory in %s on line %d
+Warning: finfo_file(&): Failed to open stream: No such file or directory in %s on line %d
 bool(false)

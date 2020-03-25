@@ -626,6 +626,7 @@ static char * gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, 
 {
 	unsigned char *pixel = NULL;
 	int *tpixel = NULL;
+	int opixel;
 	int x, y, row, col, pc, pcr;
 
 	tweencolor_t *tc_elem;
@@ -658,6 +659,8 @@ static char * gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, 
 				} else {
 					return "Unsupported ft_pixel_mode";
 				}
+				if (level == 0)  /* if background */
+					continue;
 				if ((fg >= 0) && (im->trueColor)) {
 					/* Consider alpha in the foreground color itself to be an
 					 * upper bound on how opaque things get, when truecolor is
@@ -681,7 +684,13 @@ static char * gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, 
 					}
 				} else {
 					if (im->alphaBlendingFlag) {
-						*tpixel = gdAlphaBlend(*tpixel, (level << 24) + (fg & 0xFFFFFF));
+						opixel = *tpixel;
+						if (gdTrueColorGetAlpha(opixel) != gdAlphaTransparent) {
+							*tpixel = gdAlphaBlend (opixel,
+							                        (level << 24) + (fg & 0xFFFFFF));
+						} else {
+							*tpixel = (level << 24) + (fg & 0xFFFFFF);
+						}
 					} else {
 						*tpixel = (level << 24) + (fg & 0xFFFFFF);
 					}
@@ -747,9 +756,9 @@ static char * gdft_draw_bitmap (gdCache_head_t *tc_cache, gdImage * im, int fg, 
 }
 
 static int
-gdroundupdown (FT_F26Dot6 v1, int updown)
+gdroundupdown (FT_F26Dot6 v1, int roundup)
 {
-	return (!updown) ? (v1 < 0 ? ((v1 - 63) >> 6) : v1 >> 6) : (v1 > 0 ? ((v1 + 63) >> 6) : v1 >> 6);
+	return (!roundup) ? v1 >> 6 : (v1 + 63) >> 6;
 }
 
 void gdFontCacheShutdown()
@@ -819,8 +828,6 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 	double cos_a = cos (angle);
 	int len, i = 0, ch;
 	int x1 = 0, y1 = 0;
-	int xb = x, yb = y;
-	int yd = 0;
 	font_t *font;
 	fontkey_t fontkey;
 	char *next;
@@ -981,9 +988,6 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 			  penf.y = (penf.y - 32) & -64;		/* round to next pixel row */
 			  x1 = (int)(- penf.y * sin_a + 32) / 64;
 			  y1 = (int)(- penf.y * cos_a + 32) / 64;
-			  xb = x + x1;
-			  yb = y + y1;
-			  yd = 0;
 			  pen.x = pen.y = 0;
 			  previous = 0;		/* clear kerning flag */
 			  continue;
@@ -1073,31 +1077,32 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 		/* retrieve kerning distance and move pen position */
 		if (use_kerning && previous && glyph_index) {
 			FT_Get_Kerning(face, previous, glyph_index, ft_kerning_default, &delta);
-			pen.x += delta.x;
+			pen.x += (int)(delta.x * cos_a);
+			pen.y -= (int)(delta.x * sin_a);
 			penf.x += delta.x;
 		}
 
-		/* load glyph image into the slot (erase previous one) */
-		if (FT_Load_Glyph(face, glyph_index, render_mode)) {
-			if (tmpstr) {
-				gdFree(tmpstr);
-			}
-			gdCacheDelete(tc_cache);
-			gdMutexUnlock(gdFontCacheMutex);
-			return "Problem loading glyph";
-		}
-
-		/* transform glyph image */
-		if (FT_Get_Glyph(slot, &image)) {
-			if (tmpstr) {
-				gdFree(tmpstr);
-			}
-			gdCacheDelete(tc_cache);
-			gdMutexUnlock(gdFontCacheMutex);
-			return "Problem loading glyph";
-		}
-
 		if (brect) { /* only if need brect */
+			/* load glyph image into the slot (erase previous one) */
+			if (FT_Load_Glyph(face, glyph_index, render_mode | FT_LOAD_IGNORE_TRANSFORM)) {
+				if (tmpstr) {
+					gdFree(tmpstr);
+				}
+				gdCacheDelete(tc_cache);
+				gdMutexUnlock(gdFontCacheMutex);
+				return "Problem loading glyph";
+			}
+
+			/* transform glyph image */
+			if (FT_Get_Glyph(slot, &image)) {
+				if (tmpstr) {
+					gdFree(tmpstr);
+				}
+				gdCacheDelete(tc_cache);
+				gdMutexUnlock(gdFontCacheMutex);
+				return "Problem loading glyph";
+			}
+
 			FT_Glyph_Get_CBox(image, ft_glyph_bbox_gridfit, &glyph_bbox);
 			glyph_bbox.xMin += penf.x;
 			glyph_bbox.yMin += penf.y;
@@ -1107,17 +1112,11 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 				glyph_bbox.xMax += slot->metrics.horiAdvance;
 			}
 			if (!i) { /* if first character, init BB corner values */
-				yd = slot->metrics.height - slot->metrics.horiBearingY;
 				bbox.xMin = glyph_bbox.xMin;
 				bbox.yMin = glyph_bbox.yMin;
 				bbox.xMax = glyph_bbox.xMax;
 				bbox.yMax = glyph_bbox.yMax;
 			} else {
-				FT_Pos desc;
-
-				if ( (desc = (slot->metrics.height - slot->metrics.horiBearingY)) > yd) {
-					yd = desc;
-				}
 				if (bbox.xMin > glyph_bbox.xMin) {
 					bbox.xMin = glyph_bbox.xMin;
 				}
@@ -1134,7 +1133,35 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 			i++;
 		}
 
+		/* increment (unrotated) pen position */
+		penf.x += slot->metrics.horiAdvance;
+
 		if (render) {
+			if (!brect || angle != 0) {
+				/* reload the rotated glyph (for bbox we needed FT_LOAD_IGNORE_TRANSFORM - bbox is rotated later) */
+				FT_Done_Glyph(image);
+
+				/* load glyph image into the slot (erase previous one) */
+				if (FT_Load_Glyph(face, glyph_index, render_mode)) {
+					if (tmpstr) {
+						gdFree(tmpstr);
+					}
+					gdCacheDelete(tc_cache);
+					gdMutexUnlock(gdFontCacheMutex);
+					return "Problem loading glyph";
+				}
+
+				/* transform glyph image */
+				if (FT_Get_Glyph(slot, &image)) {
+					if (tmpstr) {
+						gdFree(tmpstr);
+					}
+					gdCacheDelete(tc_cache);
+					gdMutexUnlock(gdFontCacheMutex);
+					return "Problem loading glyph";
+				}
+			}
+
 			if (image->format != ft_glyph_format_bitmap && FT_Glyph_To_Bitmap(&image, ft_render_mode_normal, 0, 1)) {
 				FT_Done_Glyph(image);
 				if (tmpstr) {
@@ -1157,8 +1184,6 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 		pen.x += image->advance.x >> 10;
 		pen.y -= image->advance.y >> 10;
 
-		penf.x += slot->metrics.horiAdvance;
-
 		FT_Done_Glyph(image);
 	}
 
@@ -1167,36 +1192,25 @@ gdImageStringFTEx (gdImage * im, int *brect, int fg, char *fontlist, double ptsi
 		double d1 = sin (angle + 0.78539816339744830962);
 		double d2 = sin (angle - 0.78539816339744830962);
 
-		/* make the center of rotation at (0, 0) */
-		FT_BBox normbox;
-
-		normbox.xMin = 0;
-		normbox.yMin = 0;
-		normbox.xMax = bbox.xMax - bbox.xMin;
-		normbox.yMax = bbox.yMax - bbox.yMin;
-
-		brect[0] = brect[2] = brect[4] = brect[6] = (int)  (yd * sin_a);
-		brect[1] = brect[3] = brect[5] = brect[7] = (int)(- yd * cos_a);
-
-		/* rotate bounding rectangle */
-		brect[0] += (int) (normbox.xMin * cos_a - normbox.yMin * sin_a);
-		brect[1] += (int) (normbox.xMin * sin_a + normbox.yMin * cos_a);
-		brect[2] += (int) (normbox.xMax * cos_a - normbox.yMin * sin_a);
-		brect[3] += (int) (normbox.xMax * sin_a + normbox.yMin * cos_a);
-		brect[4] += (int) (normbox.xMax * cos_a - normbox.yMax * sin_a);
-		brect[5] += (int) (normbox.xMax * sin_a + normbox.yMax * cos_a);
-		brect[6] += (int) (normbox.xMin * cos_a - normbox.yMax * sin_a);
-		brect[7] += (int) (normbox.xMin * sin_a + normbox.yMax * cos_a);
+		/* rotate bounding rectangle (at 0, 0) */
+		brect[0] = (int) (bbox.xMin * cos_a - bbox.yMin * sin_a);
+		brect[1] = (int) (bbox.xMin * sin_a + bbox.yMin * cos_a);
+		brect[2] = (int) (bbox.xMax * cos_a - bbox.yMin * sin_a);
+		brect[3] = (int) (bbox.xMax * sin_a + bbox.yMin * cos_a);
+		brect[4] = (int) (bbox.xMax * cos_a - bbox.yMax * sin_a);
+		brect[5] = (int) (bbox.xMax * sin_a + bbox.yMax * cos_a);
+		brect[6] = (int) (bbox.xMin * cos_a - bbox.yMax * sin_a);
+		brect[7] = (int) (bbox.xMin * sin_a + bbox.yMax * cos_a);
 
 		/* scale, round and offset brect */
-		brect[0] = xb + gdroundupdown(brect[0], d2 > 0);
-		brect[1] = yb - gdroundupdown(brect[1], d1 < 0);
-		brect[2] = xb + gdroundupdown(brect[2], d1 > 0);
-		brect[3] = yb - gdroundupdown(brect[3], d2 > 0);
-		brect[4] = xb + gdroundupdown(brect[4], d2 < 0);
-		brect[5] = yb - gdroundupdown(brect[5], d1 > 0);
-		brect[6] = xb + gdroundupdown(brect[6], d1 < 0);
-		brect[7] = yb - gdroundupdown(brect[7], d2 < 0);
+		brect[0] = x + gdroundupdown(brect[0], d2 > 0);
+		brect[1] = y - gdroundupdown(brect[1], d1 < 0);
+		brect[2] = x + gdroundupdown(brect[2], d1 > 0);
+		brect[3] = y - gdroundupdown(brect[3], d2 > 0);
+		brect[4] = x + gdroundupdown(brect[4], d2 < 0);
+		brect[5] = y - gdroundupdown(brect[5], d1 > 0);
+		brect[6] = x + gdroundupdown(brect[6], d1 < 0);
+		brect[7] = y - gdroundupdown(brect[7], d2 < 0);
 	}
 
 	if (tmpstr) {

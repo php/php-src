@@ -1,44 +1,43 @@
 --TEST--
-Test finfo_buffer() function : basic functionality 
+Test finfo_buffer() function : basic functionality
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 /* Prototype  : string finfo_buffer(resource finfo, char *string [, int options [, resource context]])
- * Description: Return infromation about a string buffer. 
+ * Description: Return information about a string buffer.
  * Source code: ext/fileinfo/fileinfo.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-$magicFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'magic';
+$magicFile = __DIR__ . DIRECTORY_SEPARATOR . 'magic';
 
 $options = array(
-	FILEINFO_NONE,
-	FILEINFO_MIME,
+    FILEINFO_NONE,
+    FILEINFO_MIME,
 );
 
 $buffers = array(
-	"Regular string here",
-	"\177ELF",
-	"\000\000\0001\000\000\0000\000\000\0000\000\000\0002\000\000\0000\000\000\0000\000\000\0003",
-	"\x55\x7A\x6E\x61",
-	"id=ImageMagick",
-	"RIFFüîò^BAVI LISTv",
+    "Regular string here",
+    "\177ELF",
+    "\000\000\0001\000\000\0000\000\000\0000\000\000\0002\000\000\0000\000\000\0000\000\000\0003",
+    "\x55\x7A\x6E\x61",
+    "id=ImageMagick",
+    "RIFFüîò^BAVI LISTv",
 );
 
 echo "*** Testing finfo_buffer() : basic functionality ***\n";
 
 foreach( $options as $option ) {
-	$finfo = finfo_open( $option, $magicFile );
-	foreach( $buffers as $string ) {
-		var_dump( finfo_buffer( $finfo, $string, $option ) );
-	}
-	finfo_close( $finfo );
+    $finfo = finfo_open( $option, $magicFile );
+    foreach( $buffers as $string ) {
+        var_dump( finfo_buffer( $finfo, $string, $option ) );
+    }
+    finfo_close( $finfo );
 }
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing finfo_buffer() : basic functionality ***
 string(36) "ASCII text, with no line terminators"
 string(3) "ELF"
@@ -52,4 +51,3 @@ string(40) "application/octet-stream; charset=binary"
 string(28) "text/plain; charset=us-ascii"
 string(28) "text/plain; charset=us-ascii"
 string(25) "text/plain; charset=utf-8"
-===DONE===

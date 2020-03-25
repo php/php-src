@@ -11,8 +11,8 @@ require 'server.inc';
 function do_test($header) {
     $options = [
         'http' => [
-			'method' => 'POST',
-			'header' => $header,
+            'method' => 'POST',
+            'header' => $header,
             'follow_location' => true,
         ],
     ];
@@ -20,9 +20,9 @@ function do_test($header) {
     $ctx = stream_context_create($options);
 
     $responses = [
-		"data://text/plain,HTTP/1.1 201\r\nLocation: /foo\r\n\r\n",
-		"data://text/plain,HTTP/1.1 200\r\nConnection: close\r\n\r\n",
-	];
+        "data://text/plain,HTTP/1.1 201\r\nLocation: /foo\r\n\r\n",
+        "data://text/plain,HTTP/1.1 200\r\nConnection: close\r\n\r\n",
+    ];
     $pid = http_server('tcp://127.0.0.1:12342', $responses, $output);
 
     $fd = fopen('http://127.0.0.1:12342/', 'rb', false, $ctx);

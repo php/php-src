@@ -20,25 +20,25 @@ var_dump($sockets);
 
 stream_set_blocking($sockets[1], 0);
 
-$eol = b'<EOL>';
+$eol = '<EOL>';
 
-fwrite($sockets[0], b"line start");
+fwrite($sockets[0], "line start");
 var_dump(stream_get_line($sockets[1], 8192, $eol)); // Does not returns incomplete line (EOL not found)
 var_dump(stream_get_line($sockets[1], 8192, $eol));
-fwrite($sockets[0], b", line end");
-fwrite($sockets[0], b", $eol");
+fwrite($sockets[0], ", line end");
+fwrite($sockets[0], ", $eol");
 var_dump(stream_get_line($sockets[1], 8192, $eol)); // Returns full line (EOL found)
 var_dump(stream_get_line($sockets[1], 8192, $eol)); // Nothing to read
 var_dump(stream_get_line($sockets[1], 8192, $eol));
 
-fwrite($sockets[0], b"incomplete line");
-var_dump(stream_get_line($sockets[1], strlen(b"incomplete line"), $eol)); // EOL not found but $length has been read, return incomplete line
+fwrite($sockets[0], "incomplete line");
+var_dump(stream_get_line($sockets[1], strlen("incomplete line"), $eol)); // EOL not found but $length has been read, return incomplete line
 
-fwrite($sockets[0], b"incomplete line");
+fwrite($sockets[0], "incomplete line");
 var_dump(stream_get_line($sockets[1], 8192, $eol)); // Does not returns incomplete line (EOL not found)
-var_dump(fread($sockets[1], strlen(b"incomplete line"))); // Returns buffer readden by stream_get_line
+var_dump(fread($sockets[1], strlen("incomplete line"))); // Returns buffer readden by stream_get_line
 
-fwrite($sockets[0], b"end of file");
+fwrite($sockets[0], "end of file");
 var_dump(stream_get_line($sockets[1], 8192, $eol)); // Does not returns incomplete line (EOL not found)
 
 fclose($sockets[0]);

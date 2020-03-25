@@ -1,7 +1,7 @@
 --TEST--
 PDO Common: PDO::FETCH_FUNC and statement overloading
 --SKIPIF--
-<?php # vim:ft=php
+<?php
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
@@ -10,28 +10,28 @@ PDOTest::skip();
 ?>
 --FILE--
 <?php
-if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
+if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.__DIR__ . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, val VARCHAR(10), grp VARCHAR(10))');
-$db->exec('INSERT INTO test VALUES(1, \'A\', \'Group1\')'); 
-$db->exec('INSERT INTO test VALUES(2, \'B\', \'Group1\')'); 
-$db->exec('INSERT INTO test VALUES(3, \'C\', \'Group2\')'); 
-$db->exec('INSERT INTO test VALUES(4, \'D\', \'Group2\')'); 
+$db->exec('INSERT INTO test VALUES(1, \'A\', \'Group1\')');
+$db->exec('INSERT INTO test VALUES(2, \'B\', \'Group1\')');
+$db->exec('INSERT INTO test VALUES(3, \'C\', \'Group2\')');
+$db->exec('INSERT INTO test VALUES(4, \'D\', \'Group2\')');
 
 class DerivedStatement extends PDOStatement
 {
-	private function __construct($name, $db)
-	{
-		$this->name = $name;
-		echo __METHOD__ . "($name)\n";
-	}
+    private function __construct($name, $db)
+    {
+        $this->name = $name;
+        echo __METHOD__ . "($name)\n";
+    }
 
-	function reTrieve($id, $val) {
-		echo __METHOD__ . "($id,$val)\n";
-		return array($id=>$val);
-	}
+    function reTrieve($id, $val) {
+        echo __METHOD__ . "($id,$val)\n";
+        return array($id=>$val);
+    }
 }
 
 $select1 = $db->prepare('SELECT grp, id FROM test');
@@ -40,24 +40,24 @@ $derived = $db->prepare('SELECT id, val FROM test', array(PDO::ATTR_STATEMENT_CL
 
 class Test1
 {
-	public function __construct($id, $val)
-	{
-		echo __METHOD__ . "($id,$val)\n";
-		$this->id = $id;
-		$this->val = $val;
-	}
+    public function __construct($id, $val)
+    {
+        echo __METHOD__ . "($id,$val)\n";
+        $this->id = $id;
+        $this->val = $val;
+    }
 
-	static public function factory($id, $val)
-	{
-		echo __METHOD__ . "($id,$val)\n";
-		return new self($id, $val);
-	}
+    static public function factory($id, $val)
+    {
+        echo __METHOD__ . "($id,$val)\n";
+        return new self($id, $val);
+    }
 }
 
 function test($id,$val='N/A')
 {
-	echo __METHOD__ . "($id,$val)\n";
-	return array($id=>$val);
+    echo __METHOD__ . "($id,$val)\n";
+    return array($id=>$val);
 }
 
 $f = new Test1(0,0);

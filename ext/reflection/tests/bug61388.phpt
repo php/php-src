@@ -14,16 +14,16 @@ print_r($reflObj->getProperties(ReflectionProperty::IS_PUBLIC));
 --EXPECT--
 Array
 (
-    [0] => ReflectionProperty Object
-        (
-            [name] => test
-            [class] => ArrayObject
-        )
-
 )
 Array
 (
     [0] => ReflectionProperty Object
+        (
+            [name] => 0
+            [class] => stdClass
+        )
+
+    [1] => ReflectionProperty Object
         (
             [name] => oo
             [class] => stdClass

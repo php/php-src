@@ -3,7 +3,7 @@ SimpleXML: Simple Inheritance
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 
 class simplexml_inherited extends SimpleXMLElement
 {
@@ -29,7 +29,6 @@ EOF;
 var_dump(simplexml_load_string($xml, 'simplexml_inherited'));
 
 ?>
-===DONE===
 --EXPECTF--
 object(simplexml_inherited)#%d (2) {
   ["@attributes"]=>
@@ -61,4 +60,3 @@ object(simplexml_inherited)#%d (2) {
     }
   }
 }
-===DONE===

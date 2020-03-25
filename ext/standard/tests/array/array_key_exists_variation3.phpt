@@ -3,7 +3,7 @@ Test array_key_exists() function : usage variations - floats and casting to ints
 --FILE--
 <?php
 /* Prototype  : bool array_key_exists(mixed $key, array $search)
- * Description: Checks if the given key or index exists in the array 
+ * Description: Checks if the given key or index exists in the array
  * Source code: ext/standard/array.c
  * Alias to functions: key_exists
  */
@@ -21,40 +21,37 @@ $search = array ('zero', 'one', 'two');
 
 $iterator = 1;
 foreach($keys as $key) {
-	echo "\n-- Iteration $iterator --\n";
-	echo "Pass float as \$key:\n";
-	var_dump(array_key_exists($key, $search));
-	echo "Cast float to int:\n";
-	var_dump(array_key_exists((int)$key, $search));
+    echo "\n-- Iteration $iterator --\n";
+    echo "Pass float as \$key:\n";
+    try {
+        var_dump(array_key_exists($key, $search));
+    } catch (TypeError $exception) {
+        echo $exception->getMessage() . "\n";
+    }
+    echo "Cast float to int:\n";
+    var_dump(array_key_exists((int)$key, $search));
 }
 
 echo "Done";
 ?>
-
 --EXPECTF--
 *** Testing array_key_exists() : usage variations ***
 
 -- Iteration 1 --
 Pass float as $key:
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+bool(true)
 Cast float to int:
 bool(true)
 
 -- Iteration 1 --
 Pass float as $key:
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+bool(true)
 Cast float to int:
 bool(true)
 
 -- Iteration 1 --
 Pass float as $key:
-
-Warning: array_key_exists(): The first argument should be either a string or an integer in %s on line %d
-bool(false)
+bool(true)
 Cast float to int:
 bool(true)
 Done

@@ -15,10 +15,10 @@ $ids = array('num'=>'1234');
 echo pg_delete($db, $table_name, $ids, PGSQL_DML_STRING)."\n";
 echo pg_delete($db, $table_name, $ids, PGSQL_DML_STRING|PGSQL_DML_ESCAPE)."\n";
 if (!pg_delete($db, $table_name, $ids)) {
-	echo "Error\n";
+    echo "Error\n";
 }
 else {
-	echo "Ok\n";
+    echo "Ok\n";
 }
 ?>
 --EXPECT--

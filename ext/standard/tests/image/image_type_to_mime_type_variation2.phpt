@@ -3,7 +3,7 @@ Test image_type_to_mime_type() function : usage variations  - Pass decimal, octa
 --FILE--
 <?php
 /* Prototype  : string image_type_to_mime_type(int imagetype)
- * Description: Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype 
+ * Description: Get Mime-Type for image-type returned by getimagesize, exif_read_data, exif_thumbnail, exif_imagetype
  * Source code: ext/standard/image.c
  */
 
@@ -16,13 +16,13 @@ $values =  array (
   1,
   12345,
   -12345,
-  
+
   //Octal values
   02,
   010,
   030071,
   -030071,
-  
+
   //Hexadecimal values
   0x0,
   0x1,
@@ -38,7 +38,6 @@ foreach($values as $value) {
       $iterator++;
 };
 ?>
-===DONE===
 --EXPECT--
 *** Testing image_type_to_mime_type() : usage variations ***
 
@@ -77,4 +76,3 @@ string(24) "application/octet-stream"
 
 -- Iteration 12 --
 string(24) "application/octet-stream"
-===DONE===

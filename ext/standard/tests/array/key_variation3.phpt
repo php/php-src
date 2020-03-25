@@ -3,7 +3,7 @@ Test key() function : usage variations
 --FILE--
 <?php
 /* Prototype  : mixed key(array $array_arg)
- * Description: Return the key of the element currently pointed to by the internal array pointer 
+ * Description: Return the key of the element currently pointed to by the internal array pointer
  * Source code: ext/standard/array.c
  */
 
@@ -30,8 +30,7 @@ var_dump(key($array1));
 echo "\$array2: ";
 var_dump(key($array2));
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing key() : usage variations ***
 
 -- Initial position of internal pointer --
@@ -40,4 +39,3 @@ int(0)
 -- Position after calling next() --
 $array1: int(1)
 $array2: int(1)
-===DONE===

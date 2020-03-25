@@ -1,9 +1,9 @@
 --TEST--
-Test array_filter() function : usage variations - Callback function with different return values 
+Test array_filter() function : usage variations - Callback function with different return values
 --FILE--
 <?php
 /* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback. 
+ * Description: Filters elements from the array via the callback.
  * Source code: ext/standard/array.c
 */
 
@@ -59,7 +59,7 @@ var_dump( array_filter($input, 'callback5') );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_filter() : usage variations - callback function with different return values***
 callback function with int return value
 array(9) {

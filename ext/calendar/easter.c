@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +15,6 @@
    |          Hartmut Holzgraefe        <hholzgra@php.net>                |
    +----------------------------------------------------------------------+
  */
-/* $Id: */
 
 #include "php.h"
 #include "php_calendar.h"
@@ -48,12 +45,12 @@ static void _cal_easter(INTERNAL_FUNCTION_PARAMETERS, zend_long gm)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(),
 		"|ll", &year, &method) == FAILURE) {
-			return;
+			RETURN_THROWS();
 	}
 
 	if (gm && (year<1970 || year>2037)) {				/* out of range for timestamps */
-		php_error_docref(NULL, E_WARNING, "This function is only valid for years between 1970 and 2037 inclusive");
-		RETURN_FALSE;
+		zend_value_error("This function is only valid for years between 1970 and 2037 inclusive");
+		RETURN_THROWS();
 	}
 
 	golden = (year % 19) + 1;					/* the Golden number */
@@ -133,10 +130,3 @@ PHP_FUNCTION(easter_days)
 	_cal_easter(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- */

@@ -20,7 +20,6 @@ echo "*** Testing gd_info() : variation ***\n";
 
 var_dump(gd_info());
 ?>
-===DONE===
 --EXPECTF--
 *** Testing gd_info() : variation ***
 array(%d) {
@@ -44,7 +43,8 @@ array(%d) {
   bool(%s)
   ["WebP Support"]=>
   bool(%s)
+  ["BMP Support"]=>
+  bool%a
   ["JIS-mapped Japanese Font Support"]=>
   bool(%s)
 }
-===DONE===

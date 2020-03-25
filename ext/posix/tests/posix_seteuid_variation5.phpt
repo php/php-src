@@ -1,8 +1,8 @@
 --TEST--
 Test function posix_seteuid() by substituting argument 1 with int values.
 --SKIPIF--
-<?php 
-        if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+<?php
+        if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
         if(posix_geteuid() == 0) print "skip - Cannot run test as root.";
 ?>
 --CREDITS--
@@ -28,7 +28,7 @@ foreach ( $variation_array as $var ) {
   var_dump(posix_seteuid( $var  ) );
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Test substituting argument 1 with int values ***
 bool(false)
 bool(false)

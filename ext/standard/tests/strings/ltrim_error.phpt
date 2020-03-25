@@ -1,5 +1,5 @@
 --TEST--
-Test ltrim() function : error conditions 
+Test ltrim() function : error conditions
 --FILE--
 <?php
 
@@ -11,14 +11,6 @@ Test ltrim() function : error conditions
 
 echo "*** Testing ltrim() : error conditions ***\n";
 
-echo "\n-- Testing ltrim() function with no arguments --\n";
-var_dump( ltrim() );
-
-echo "\n-- Testing ltrim() function with more than expected no. of arguments --\n";
-$extra_arg = 10;
-var_dump( ltrim("Hello World",  "Heo", $extra_arg) );
-
-
 $hello = "  Hello World\n";
 echo "\n-- Test ltrim function with various invalid charlists\n";
 var_dump(ltrim($hello, "..a"));
@@ -27,19 +19,8 @@ var_dump(ltrim($hello, "z..a"));
 var_dump(ltrim($hello, "a..b..c"));
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing ltrim() : error conditions ***
-
--- Testing ltrim() function with no arguments --
-
-Warning: ltrim() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-
--- Testing ltrim() function with more than expected no. of arguments --
-
-Warning: ltrim() expects at most 2 parameters, 3 given in %s on line %d
-NULL
 
 -- Test ltrim function with various invalid charlists
 
@@ -58,4 +39,3 @@ string(14) "  Hello World
 Warning: ltrim(): Invalid '..'-range in %s on line %d
 string(14) "  Hello World
 "
-===DONE===

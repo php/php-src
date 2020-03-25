@@ -3,17 +3,17 @@ Test method_exists() function : usage variations  - unexpected type for arg 1
 --FILE--
 <?php
 /* Prototype  : proto bool method_exists(object object, string method)
- * Description: Checks if the class method exists 
+ * Description: Checks if the class method exists
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
-function __autoload($className) {
-	echo "In __autoload($className)\n";
-}
+spl_autoload_register(function ($className) {
+    echo "In autoload($className)\n";
+});
 
-function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
-	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
+function test_error_handler($err_no, $err_msg, $filename, $linenum) {
+    echo "Error: $err_no - $err_msg\n";
 }
 set_error_handler('test_error_handler');
 
@@ -83,10 +83,10 @@ foreach($values as $value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing method_exists() : usage variations ***
-Error: 8 - Undefined variable: undefined_var, %s(68)
-Error: 8 - Undefined variable: unset_var, %s(71)
+Error: 2 - Undefined variable: undefined_var
+Error: 2 - Undefined variable: unset_var
 
 Arg value 0 
 bool(false)
@@ -114,23 +114,23 @@ bool(false)
 
 Arg value 0.5 
 bool(false)
-Error: 8 - Array to string conversion, %smethod_exists_variation_001.php(%d)
+Error: 2 - Array to string conversion
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %smethod_exists_variation_001.php(%d)
+Error: 2 - Array to string conversion
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %smethod_exists_variation_001.php(%d)
+Error: 2 - Array to string conversion
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %smethod_exists_variation_001.php(%d)
+Error: 2 - Array to string conversion
 
 Arg value Array 
 bool(false)
-Error: 8 - Array to string conversion, %smethod_exists_variation_001.php(%d)
+Error: 2 - Array to string conversion
 
 Arg value Array 
 bool(false)
@@ -160,11 +160,11 @@ Arg value
 bool(false)
 
 Arg value string 
-In __autoload(string)
+In autoload(string)
 bool(false)
 
 Arg value String 
-In __autoload(String)
+In autoload(String)
 bool(false)
 
 Arg value  

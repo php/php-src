@@ -4,13 +4,13 @@ SPL: FixedArray: accessing uninitialized array
 <?php
 
 try {
-	$a = new SplFixedArray('');
+    $a = new SplFixedArray('');
 } catch (TypeError $iae) {
-	echo "Ok - ".$iae->getMessage().PHP_EOL;
+    echo "Ok - ".$iae->getMessage().PHP_EOL;
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
-Ok - SplFixedArray::__construct() expects parameter 1 to be integer, string given
+--EXPECT--
+Ok - SplFixedArray::__construct(): Argument #1 ($size) must be of type int, string given
 Done

@@ -45,7 +45,7 @@ $args_array = array(
 );
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_variation13_64bit.txt';
+$data_file = __DIR__ . '/vfprintf_variation13_64bit.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
@@ -65,7 +65,6 @@ echo "\n";
 unlink($data_file);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vfprintf() : hexa formats with hexa values ***
 
@@ -85,4 +84,3 @@ ffffffffffffffff 1 22
 %34 x
 -- Iteration 8 --
 1 2 3 4
-===DONE===

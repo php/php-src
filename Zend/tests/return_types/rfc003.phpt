@@ -1,6 +1,5 @@
 --TEST--
 RFC example: cannot return null with a return type declaration
-
 --FILE--
 <?php
 function foo(): DateTime {
@@ -8,9 +7,8 @@ function foo(): DateTime {
 }
 
 foo();
-
 --EXPECTF--
-Fatal error: Uncaught TypeError: Return value of foo() must be an instance of DateTime, null returned in %s:%d
+Fatal error: Uncaught TypeError: Return value of foo() must be of type DateTime, null returned in %s:%d
 Stack trace:
 #0 %s(%d): foo()
 #1 {main}

@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -41,35 +39,26 @@ PHP_FUNCTION( numfmt_format )
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Oz|l",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "On|l",
 		&object, NumberFormatter_ce_ptr,  &number, &type ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"numfmt_format: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
 	FORMATTER_METHOD_FETCH_OBJECT;
 
 	if(type == FORMAT_TYPE_DEFAULT) {
-		if(Z_TYPE_P(number) == IS_STRING) {
-			convert_scalar_to_number_ex(number);
+		switch(Z_TYPE_P(number)) {
+			case IS_LONG:
+				/* take INT32 on 32-bit, int64 on 64-bit */
+				type = (sizeof(zend_long) == 8)?FORMAT_TYPE_INT64:FORMAT_TYPE_INT32;
+				break;
+			case IS_DOUBLE:
+				type = FORMAT_TYPE_DOUBLE;
+				break;
+			EMPTY_SWITCH_DEFAULT_CASE();
 		}
-
-		if(Z_TYPE_P(number) == IS_LONG) {
-			/* take INT32 on 32-bit, int64 on 64-bit */
-			type = (sizeof(zend_long) == 8)?FORMAT_TYPE_INT64:FORMAT_TYPE_INT32;
-		} else if(Z_TYPE_P(number) == IS_DOUBLE) {
-			type = FORMAT_TYPE_DOUBLE;
-		} else {
-			type = FORMAT_TYPE_INT32;
-		}
-	}
-
-	if(Z_TYPE_P(number) != IS_DOUBLE && Z_TYPE_P(number) != IS_LONG) {
-		convert_scalar_to_number(number );
 	}
 
 	switch(type) {
@@ -150,10 +139,7 @@ PHP_FUNCTION( numfmt_format_currency )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Ods",
 		&object, NumberFormatter_ce_ptr,  &number, &currency, &currency_len ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"numfmt_format_currency: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object. */
@@ -193,12 +179,3 @@ PHP_FUNCTION( numfmt_format_currency )
 }
 
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

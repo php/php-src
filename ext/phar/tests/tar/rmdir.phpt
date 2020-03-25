@@ -7,8 +7,8 @@ phar.readonly=0
 phar.require_hash=0
 --FILE--
 <?php
-include dirname(__FILE__) . '/files/tarmaker.php.inc';
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
+include __DIR__ . '/files/tarmaker.php.inc';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.tar';
 $alias = 'phar://' . $fname;
 
 $tar = new tarmaker($fname, 'none');
@@ -21,7 +21,7 @@ $files = array();
 $files['a/x'] = 'a';
 
 foreach ($files as $n => $file) {
-	$tar->addFile($n, $file);
+    $tar->addFile($n, $file);
 }
 $tar->mkdir('a');
 
@@ -36,7 +36,7 @@ unlink($alias . '/a/x');
 var_dump(rmdir($alias . '/a'));
 ?>
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.tar'); ?>
 --EXPECTF--
 a
 

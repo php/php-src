@@ -7,7 +7,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string format, array args)
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -20,9 +20,9 @@ echo "*** Testing vsprintf() : unsigned formats and unsigned values ***\n";
 
 // defining array of unsigned formats
 $formats = array(
-  '%u %+u %-u', 
+  '%u %+u %-u',
   '%lu %Lu %4u %-4u',
-  '%10.4u %-10.4u %.4u', 
+  '%10.4u %-10.4u %.4u',
   '%\'#2u %\'2u %\'$2u %\'_2u',
   '%3$u %4$u %1$u %2$u'
 );
@@ -36,7 +36,7 @@ $args_array = array(
   array(1, 0, 00, "10_"),
   array(3, 4, 1, 2)
 );
- 
+
 // looping to test vsprintf() with different unsigned formats from the above $format array
 // and with signed and other types of  values from the above $args_array array
 $counter = 1;
@@ -48,7 +48,7 @@ foreach($formats as $format) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : unsigned formats and unsigned values ***
 
 -- Iteration 1 --

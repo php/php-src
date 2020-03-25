@@ -4,7 +4,7 @@ Bug #23104 (Hash position not reset for constant arrays)
 <?php
 function foo($bar = array("a", "b", "c"))
 {
-	var_dump(current($bar));
+    var_dump(current($bar));
 }
 foo();
 ?>

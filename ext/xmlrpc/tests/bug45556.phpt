@@ -13,9 +13,9 @@ $server = xmlrpc_server_create ();
 function foo() { return 11111; }
 
 class bar {
-	static public function test() {
-		return 'foo';
-	}
+    static public function test() {
+        return 'foo';
+    }
 }
 
 xmlrpc_server_register_introspection_callback($server, 'foobar');
@@ -29,6 +29,6 @@ xmlrpc_server_call_method ($server, $request, NULL, $options);
 --EXPECTF--
 Warning: xmlrpc_server_call_method(): Invalid callback 'foobar' passed in %s on line %d
 
-Warning: xmlrpc_server_call_method(): xml parse error: [line 1, column 1, message: Invalid document end] Unable to add introspection data returned from bar::test() in %s on line %d
+Warning: xmlrpc_server_call_method(): XML parse error: [line 1, column 1, message: Invalid document end] Unable to add introspection data returned from bar::test() in %s on line %d
 
 Warning: xmlrpc_server_call_method(): Invalid callback 'foo::bar' passed in %s on line %d

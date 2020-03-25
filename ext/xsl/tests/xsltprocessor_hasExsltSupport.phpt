@@ -9,5 +9,5 @@ Rodrigo Prado de Jesus <royopa [at] gmail [dot] com>
 $proc = new XSLTProcessor();
 var_dump($proc->hasExsltSupport());
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

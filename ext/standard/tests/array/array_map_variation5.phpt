@@ -61,8 +61,8 @@ $arrays = array (
        array(11 => new classA(), "unset" => @$unset_var, "resource" => $fp),
 
        // array with mixed values
-/*11*/ array(1 => 'hello', 2 => new classA(), 222 => "fruit", 
-             'resource' => $fp, "int" => 133, "float" => 444.432, 
+/*11*/ array(1 => 'hello', 2 => new classA(), 222 => "fruit",
+             'resource' => $fp, "int" => 133, "float" => 444.432,
              "unset" => @$unset_var, "heredoc" => $heredoc)
 );
 
@@ -114,7 +114,7 @@ array(4) {
   ["f2"]=>
   float(3.33)
   [3]=>
-  float(4.8999992284)
+  float(4.89999922839999)
   ["f4"]=>
   float(33333333.3333)
 }

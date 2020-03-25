@@ -4,7 +4,7 @@ Test strcspn() function : usage variations - with heredoc strings, varying start
 <?php
 /* Prototype  : proto int strcspn(string str, string mask [, int start [, int len]])
  * Description: Finds length of initial segment consisting entirely of characters not found in mask.
-                If start or/and length is provided works like strcspn(substr($s,$start,$len),$bad_chars) 
+                If start or/and length is provided works like strcspn(substr($s,$start,$len),$bad_chars)
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
@@ -57,40 +57,40 @@ $heredoc_strings = array(
                    $heredoc_with_newline_and_tabs,
                    $heredoc_with_alphanumerics,
                    $heredoc_with_embedded_nulls,
-   		   $heredoc_with_hexa_octal
- 		   );
+           $heredoc_with_hexa_octal
+           );
 
 // defining array of mask strings
 $mask_array = array(
-		    "",
-		    '',
-		    "\n\trsti \l",
-		    "\t",
-		    "t\ ",
-		    " \t",
+            "",
+            '',
+            "\n\trsti \l",
+            "\t",
+            "t\ ",
+            " \t",
                     "\t\i\100\xaa"
                    );
 
 // definig array of start values
 $start_array = array(
-		    0,
-		    1,
-		    2,
-		    -1,
-		    2147483647,  // max positive integer
-		    -2147483648,  // min negative integer
+            0,
+            1,
+            2,
+            -1,
+            2147483647,  // max positive integer
+            -2147483648,  // min negative integer
                    );
-		
+
 // defining array of len values
 $len_array = array(
-		    0,
-		    1,
-		    2,
-		    -1,
-		    2147483647,  // max positive integer
-		    -2147483648,  // min negative integer
+            0,
+            1,
+            2,
+            -1,
+            2147483647,  // max positive integer
+            -2147483648,  // min negative integer
                    );
-		
+
 
 // loop through each element of the arrays for all arguments
 
@@ -100,7 +100,7 @@ foreach($heredoc_strings as $str) {
   foreach($mask_array as $mask) {
     foreach($start_array as $start) {
       foreach($len_array as $len) {
-        var_dump( strcspn($str,$mask,$start,$len) ); 
+        var_dump( strcspn($str,$mask,$start,$len) );
       }
     }
   }
@@ -109,7 +109,7 @@ foreach($heredoc_strings as $str) {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strcspn() : with different start and len values ***
 
 -- Iteration 1 --

@@ -36,6 +36,7 @@
 /* includes */
 #include "xml_element.h"
 #include <time.h> /* for time_t */
+#include <php.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -449,6 +450,3 @@ const char*  XMLRPC_GetVersionString(void);
 #endif
 
 #endif /* not XMLRPC_ALREADY_INCLUDED */
-
-
-

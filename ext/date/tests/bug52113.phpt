@@ -23,6 +23,7 @@ $unser = DateInterval::__set_state(array(
    'h' => 4,
    'i' => 3,
    's' => 2,
+   'f' => 0.876543,
    'invert' => 1,
    'days' => 2400,
 ));
@@ -31,8 +32,8 @@ $p = new DatePeriod($start, $diff_un, 2);
 var_dump($unser, $p);
 
 ?>
---EXPECT--
-object(DateInterval)#3 (15) {
+--EXPECTF--
+object(DateInterval)#%d (16) {
   ["y"]=>
   int(0)
   ["m"]=>
@@ -45,6 +46,8 @@ object(DateInterval)#3 (15) {
   int(0)
   ["s"]=>
   int(0)
+  ["f"]=>
+  float(0)
   ["weekday"]=>
   int(0)
   ["weekday_behavior"]=>
@@ -64,7 +67,7 @@ object(DateInterval)#3 (15) {
   ["have_special_relative"]=>
   int(0)
 }
-string(320) "O:12:"DateInterval":15:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h";i:4;s:1:"i";i:0;s:1:"s";i:0;s:7:"weekday";i:0;s:16:"weekday_behavior";i:0;s:17:"first_last_day_of";i:0;s:6:"invert";i:0;s:4:"days";i:0;s:12:"special_type";i:0;s:14:"special_amount";i:0;s:21:"have_weekday_relative";i:0;s:21:"have_special_relative";i:0;}"
+string(332) "O:12:"DateInterval":16:{s:1:"y";i:0;s:1:"m";i:0;s:1:"d";i:0;s:1:"h";i:4;s:1:"i";i:0;s:1:"s";i:0;s:1:"f";d:0;s:7:"weekday";i:0;s:16:"weekday_behavior";i:0;s:17:"first_last_day_of";i:0;s:6:"invert";i:0;s:4:"days";i:0;s:12:"special_type";i:0;s:14:"special_amount";i:0;s:21:"have_weekday_relative";i:0;s:21:"have_special_relative";i:0;}"
 DateInterval::__set_state(array(
    'y' => 0,
    'm' => 0,
@@ -72,6 +75,7 @@ DateInterval::__set_state(array(
    'h' => 4,
    'i' => 0,
    's' => 0,
+   'f' => 0.0,
    'weekday' => 0,
    'weekday_behavior' => 0,
    'first_last_day_of' => 0,
@@ -81,7 +85,7 @@ DateInterval::__set_state(array(
    'special_amount' => 0,
    'have_weekday_relative' => 0,
    'have_special_relative' => 0,
-))object(DateInterval)#5 (15) {
+))object(DateInterval)#%d (16) {
   ["y"]=>
   int(0)
   ["m"]=>
@@ -94,6 +98,8 @@ DateInterval::__set_state(array(
   int(0)
   ["s"]=>
   int(0)
+  ["f"]=>
+  float(0)
   ["weekday"]=>
   int(0)
   ["weekday_behavior"]=>
@@ -113,9 +119,9 @@ DateInterval::__set_state(array(
   ["have_special_relative"]=>
   int(0)
 }
-object(DatePeriod)#6 (6) {
+object(DatePeriod)#%d (6) {
   ["start"]=>
-  object(DateTime)#4 (3) {
+  object(DateTime)#%d (3) {
     ["date"]=>
     string(26) "2003-01-02 08:00:00.000000"
     ["timezone_type"]=>
@@ -128,7 +134,7 @@ object(DatePeriod)#6 (6) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#7 (15) {
+  object(DateInterval)#%d (16) {
     ["y"]=>
     int(0)
     ["m"]=>
@@ -141,6 +147,8 @@ object(DatePeriod)#6 (6) {
     int(0)
     ["s"]=>
     int(0)
+    ["f"]=>
+    float(0)
     ["weekday"]=>
     int(0)
     ["weekday_behavior"]=>
@@ -165,7 +173,7 @@ object(DatePeriod)#6 (6) {
   ["include_start_date"]=>
   bool(true)
 }
-object(DateInterval)#8 (15) {
+object(DateInterval)#%d (16) {
   ["y"]=>
   int(7)
   ["m"]=>
@@ -178,6 +186,8 @@ object(DateInterval)#8 (15) {
   int(3)
   ["s"]=>
   int(2)
+  ["f"]=>
+  float(0.876543)
   ["weekday"]=>
   int(-1)
   ["weekday_behavior"]=>
@@ -197,9 +207,9 @@ object(DateInterval)#8 (15) {
   ["have_special_relative"]=>
   int(0)
 }
-object(DatePeriod)#9 (6) {
+object(DatePeriod)#%d (6) {
   ["start"]=>
-  object(DateTime)#6 (3) {
+  object(DateTime)#%d (3) {
     ["date"]=>
     string(26) "2003-01-02 08:00:00.000000"
     ["timezone_type"]=>
@@ -212,7 +222,7 @@ object(DatePeriod)#9 (6) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#7 (15) {
+  object(DateInterval)#%d (16) {
     ["y"]=>
     int(0)
     ["m"]=>
@@ -225,6 +235,8 @@ object(DatePeriod)#9 (6) {
     int(0)
     ["s"]=>
     int(0)
+    ["f"]=>
+    float(0)
     ["weekday"]=>
     int(0)
     ["weekday_behavior"]=>

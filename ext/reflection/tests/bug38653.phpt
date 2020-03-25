@@ -4,9 +4,9 @@ Bug #38653 (memory leak in ReflectionClass::getConstant())
 <?php
 
 class foo {
-	    const cons = 10;
-	    const cons1 = "";
-	    const cons2 = "test";
+        const cons = 10;
+        const cons1 = "";
+        const cons2 = "test";
 }
 
 class bar extends foo {
@@ -20,7 +20,7 @@ var_dump($foo->getConstant("no such const"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--
 int(10)
 string(0) ""
 string(4) "test"

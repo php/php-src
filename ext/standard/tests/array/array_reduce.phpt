@@ -36,8 +36,8 @@ $initial = null;
 var_dump(array_reduce($array, 'reduce_null', $initial), $initial);
 
 echo "\nDone";
-?> 
---EXPECTF--
+?>
+--EXPECT--
 *** Testing array_reduce() to integer ***
 int(61)
 int(42)

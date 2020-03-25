@@ -3,7 +3,7 @@ Test array_intersect() function : usage variations - assoc array with diff keys 
 --FILE--
 <?php
 /* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments 
+ * Description: Returns the entries of arr1 that have values which are present in all the other arguments
  * Source code: ext/standard/array.c
 */
 
@@ -60,7 +60,7 @@ $arrays = array (
 // array to be passsed to $arr2 argument
 $arr2 = array(1, "float", "f4", "hello", 2.2, 'color', "string", "pen\n", 11);
 
-// loop through each sub-array within $arrrays to check the behavior of array_intersect()
+// loop through each sub-array within $arrays to check the behavior of array_intersect()
 $iterator = 1;
 foreach($arrays as $arr1) {
   echo "-- Iterator $iterator --\n";
@@ -76,7 +76,7 @@ foreach($arrays as $arr1) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect() : assoc array with diff keys to $arr1 argument ***
 -- Iterator 1 --
 array(0) {

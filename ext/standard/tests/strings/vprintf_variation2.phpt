@@ -3,7 +3,7 @@ Test vprintf() function : usage variations - unexpected values for args argument
 --FILE--
 <?php
 /* Prototype  : string vprintf(string format, array args)
- * Description: Output a formatted string 
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -36,47 +36,47 @@ $file_handle = fopen(__FILE__, 'r');
 //array of values to iterate over
 $values = array(
 
-		  // int data
+          // int data
 /*1*/	  0,
-		  1,
-		  12345,
-		  -2345,
-		
-		  // float data
+          1,
+          12345,
+          -2345,
+
+          // float data
 /*5*/	  10.5,
-		  -10.5,
-		  10.1234567e10,
-		  10.7654321E-10,
-		  .5,
-		
-		  // null data
+          -10.5,
+          10.1234567e10,
+          10.7654321E-10,
+          .5,
+
+          // null data
 /*10*/	  NULL,
-		  null,
-		
-		  // boolean data
+          null,
+
+          // boolean data
 /*12*/	  true,
-		  false,
-		  TRUE,
-		  FALSE,
-		
-		  // empty data
+          false,
+          TRUE,
+          FALSE,
+
+          // empty data
 /*16*/	  "",
-		  '',
-		
-		  // string data
+          '',
+
+          // string data
 /*18*/	  "string",
-		  'string',
-		
-		  // object data
+          'string',
+
+          // object data
 /*20*/	  new sample(),
-		
-		  // undefined data
+
+          // undefined data
 /*21*/	  @$undefined_var,
-		
-		  // unset data
+
+          // unset data
 /*22*/	  @$unset_var,
-		
-		  // resource data
+
+          // resource data
 /*23*/		  $file_handle
 );
 
@@ -84,9 +84,13 @@ $values = array(
 $counter = 1;
 foreach($values as $value) {
   echo "\n-- Iteration $counter --\n";
-  $result = vprintf($format,$value);
-  echo "\n";
-  var_dump($result);
+  try {
+    $result = vprintf($format,$value);
+    echo "\n";
+    var_dump($result);
+  } catch (\ValueError $e) {
+    echo $e->getMessage(), "\n";
+  }
   $counter++;
 };
 
@@ -94,7 +98,6 @@ foreach($values as $value) {
 fclose($file_handle);
 
 ?>
-===DONE===
 --EXPECTF--
 *** Testing vprintf() : with unexpected values for args argument ***
 
@@ -135,16 +138,10 @@ int(13)
 int(3)
 
 -- Iteration 10 --
-
-Warning: vprintf(): Too few arguments in %s on line %d
-
-bool(false)
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 11 --
-
-Warning: vprintf(): Too few arguments in %s on line %d
-
-bool(false)
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 12 --
 1
@@ -179,24 +176,14 @@ string
 int(6)
 
 -- Iteration 20 --
-
-Warning: vprintf(): Too few arguments in %s on line %d
-
-bool(false)
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 21 --
-
-Warning: vprintf(): Too few arguments in %s on line %d
-
-bool(false)
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 22 --
-
-Warning: vprintf(): Too few arguments in %s on line %d
-
-bool(false)
+The arguments array must contain 1 items, 0 given
 
 -- Iteration 23 --
 Resource id #%d
 int(%d)
-===DONE===

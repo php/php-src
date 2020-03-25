@@ -32,18 +32,17 @@ bool(true)
 
 Warning: error_log(): open_basedir restriction in effect. File(%s/test/bad/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: error_log(%s/test/bad/bad.txt): failed to open stream: %s in %s on line %d
+Warning: error_log(%s/test/bad/bad.txt): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: error_log(): open_basedir restriction in effect. File(%s/test/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: error_log(%s/test/bad.txt): failed to open stream: %s in %s on line %d
+Warning: error_log(%s/test/bad.txt): Failed to open stream: %s in %s on line %d
 bool(false)
 
 Warning: error_log(): open_basedir restriction in effect. File(%s/bad.txt) is not within the allowed path(s): (.) in %s on line %d
 
-Warning: error_log(%s/bad.txt): failed to open stream: %s in %s on line %d
+Warning: error_log(%s/bad.txt): Failed to open stream: %s in %s on line %d
 bool(false)
 bool(true)
 *** Finished testing open_basedir configuration [error_log] ***
-

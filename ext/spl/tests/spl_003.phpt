@@ -2,6 +2,11 @@
 SPL: class_parents() and class_implements()
 --FILE--
 <?php
+
+spl_autoload_register(function ($cname) {
+    var_dump($cname);
+});
+
 class a{}
 class b extends a{}
 class c extends b{}
@@ -24,13 +29,7 @@ var_dump(class_implements(new a),
          class_implements("bbb", 0)
 );
 
-function __autoload($cname) {
-    var_dump($cname);
-}
-
 ?>
-===DONE===
-<?php exit(0); ?>
 --EXPECTF--
 Warning: class_parents(): Class foo does not exist in %sspl_003.php on line %d
 string(3) "foo"
@@ -71,4 +70,3 @@ array(0) {
 }
 bool(false)
 bool(false)
-===DONE===

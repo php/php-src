@@ -6,11 +6,11 @@ if (!extension_loaded('zip')) {
 
 $fp = fopen('zip://' . dirname(__FILE__) . '/test.zip#test', 'r');
 if (!$fp) {
-	exit("cannot open\n");
+    exit("cannot open\n");
 }
 while (!feof($fp)) {
-	$contents .= fread($fp, 2);
-	echo "$contents\n";
+    $contents .= fread($fp, 2);
+    echo "$contents\n";
 }
 
 fclose($fp);
@@ -25,11 +25,9 @@ $fp = $z->getStream('test');
 var_dump($fp);
 if(!$fp) exit("\n");
 while (!feof($fp)) {
-	$contents .= fread($fp, 2);
+    $contents .= fread($fp, 2);
 }
 
 fclose($fp);
 file_put_contents('t',$contents);
 echo "done.\n";
-
-

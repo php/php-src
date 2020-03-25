@@ -1,11 +1,9 @@
 --TEST--
 Test rename() with a dir for multibyte filenames
-
 --SKIPIF--
-
 <?php
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 
 skip_if_not_win();
@@ -14,13 +12,13 @@ skip_if_no_required_exts();
 
 
 ?>
-
+--CONFLICTS--
+file2_mb
 --FILE--
-
 <?php
 
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 
 $prefix = create_data("file2_mb");
@@ -59,8 +57,6 @@ set_active_cp($old_cp);
 remove_data("file2_mb");
 
 ?>
-===DONE===
-
 --EXPECTF--
 Active code page: 65001
 bool(true)
@@ -71,4 +67,3 @@ string(27) "測試多字節路徑17.txt"
 bool(true)
 bool(true)
 Active code page: %d
-===DONE===

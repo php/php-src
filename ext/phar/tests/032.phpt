@@ -20,10 +20,9 @@ echo $e->getMessage();
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-unlink(dirname(__FILE__) . '/files/032.phar.php');
+<?php
+unlink(__DIR__ . '/files/032.phar.php');
 __halt_compiler();
 ?>
 --EXPECTF--
-
 phar "%s032.phar.php" does not have a signature===DONE===

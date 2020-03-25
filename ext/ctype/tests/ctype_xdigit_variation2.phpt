@@ -5,7 +5,7 @@ Test ctype_xdigit() function : usage variations - different integers
 --FILE--
 <?php
 /* Prototype  : bool ctype_xdigit(mixed $c)
- * Description: Checks for character(s) representing a hexadecimal digit 
+ * Description: Checks for character(s) representing a hexadecimal digit
  * Source code: ext/ctype/ctype.c
  */
 
@@ -16,18 +16,17 @@ Test ctype_xdigit() function : usage variations - different integers
 
 echo "*** Testing ctype_xdigit() : usage variations ***\n";
 
-$orig = setlocale(LC_CTYPE, "C"); 
+$orig = setlocale(LC_CTYPE, "C");
 
 for($c = 1; $c < 256; $c++) {
-	if (ctype_xdigit($c)) {
-		echo "character code $c is a hexadecimal 'digit'\n";
-	}
+    if (ctype_xdigit($c)) {
+        echo "character code $c is a hexadecimal 'digit'\n";
+    }
 }
 
-setlocale(LC_CTYPE, $orig); 
+setlocale(LC_CTYPE, $orig);
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_xdigit() : usage variations ***
 character code 48 is a hexadecimal 'digit'
 character code 49 is a hexadecimal 'digit'
@@ -51,4 +50,3 @@ character code 99 is a hexadecimal 'digit'
 character code 100 is a hexadecimal 'digit'
 character code 101 is a hexadecimal 'digit'
 character code 102 is a hexadecimal 'digit'
-===DONE===

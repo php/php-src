@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Bytecode Visualisation                                  |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Dmitry Stogov <dmitry@zend.com>                             |
+   | Authors: Dmitry Stogov <dmitry@php.net>                              |
    +----------------------------------------------------------------------+
 */
 
@@ -25,7 +25,30 @@
 #include "zend_call_graph.h"
 #include "zend_dump.h"
 
-static void zend_dump_const(const zval *zv)
+void zend_dump_ht(HashTable *ht)
+{
+	zend_ulong index;
+	zend_string *key;
+	zval *val;
+	int first = 1;
+
+	ZEND_HASH_FOREACH_KEY_VAL(ht, index, key, val) {
+		if (first) {
+			first = 0;
+		} else {
+			fprintf(stderr, ", ");
+		}
+		if (key) {
+			fprintf(stderr, "\"%s\"", ZSTR_VAL(key));
+		} else {
+			fprintf(stderr, ZEND_LONG_FMT, index);
+		}
+		fprintf(stderr, " =>");
+		zend_dump_const(val);
+	} ZEND_HASH_FOREACH_END();
+}
+
+void zend_dump_const(const zval *zv)
 {
 	switch (Z_TYPE_P(zv)) {
 		case IS_NULL:
@@ -95,10 +118,6 @@ static void zend_dump_unused_op(const zend_op *opline, znode_op op, uint32_t fla
 		if (op.num != (uint32_t)-1) {
 			fprintf(stderr, " try-catch(%u)", op.num);
 		}
-	} else if (ZEND_VM_OP_LIVE_RANGE == (flags & ZEND_VM_OP_MASK)) {
-		if (opline->extended_value & ZEND_FREE_ON_RETURN) {
-			fprintf(stderr, " live-range(%u)", op.num);
-		}
 	} else if (ZEND_VM_OP_THIS == (flags & ZEND_VM_OP_MASK)) {
 		fprintf(stderr, " THIS");
 	} else if (ZEND_VM_OP_NEXT == (flags & ZEND_VM_OP_MASK)) {
@@ -107,6 +126,10 @@ static void zend_dump_unused_op(const zend_op *opline, znode_op op, uint32_t fla
 		zend_dump_class_fetch_type(op.num);
 	} else if (ZEND_VM_OP_CONSTRUCTOR == (flags & ZEND_VM_OP_MASK)) {
 		fprintf(stderr, " CONSTRUCTOR");
+	} else if (ZEND_VM_OP_CONST_FETCH == (flags & ZEND_VM_OP_MASK)) {
+		if (op.num & IS_CONSTANT_UNQUALIFIED_IN_NAMESPACE) {
+			fprintf(stderr, " (unqualified-in-namespace)");
+		}
 	}
 }
 
@@ -116,7 +139,7 @@ void zend_dump_var(const zend_op_array *op_array, zend_uchar var_type, int var_n
 		fprintf(stderr, "CV%d($%s)", var_num, op_array->vars[var_num]->val);
 	} else if (var_type == IS_VAR) {
 		fprintf(stderr, "V%d", var_num);
-	} else if (var_type == IS_TMP_VAR) {
+	} else if ((var_type & (IS_VAR|IS_TMP_VAR)) == IS_TMP_VAR) {
 		fprintf(stderr, "T%d", var_num);
 	} else {
 		fprintf(stderr, "X%d", var_num);
@@ -146,6 +169,9 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 	int first = 1;
 
 	fprintf(stderr, " [");
+	if (info & MAY_BE_GUARD) {
+		fprintf(stderr, "!");
+	}
 	if (info & MAY_BE_UNDEF) {
 		if (first) first = 0; else fprintf(stderr, ", ");
 		fprintf(stderr, "undef");
@@ -288,10 +314,6 @@ static void zend_dump_type_info(uint32_t info, zend_class_entry *ce, int is_inst
 			fprintf(stderr, "resource");
 		}
 	}
-	if (info & MAY_BE_ERROR) {
-		if (first) first = 0; else fprintf(stderr, ", ");
-		fprintf(stderr, "error");
-	}
 //TODO: this is useful only for JIT???
 	if (info & MAY_BE_IN_REG) {
 		if (first) first = 0; else fprintf(stderr, ", ");
@@ -310,7 +332,7 @@ static void zend_dump_ssa_var_info(const zend_ssa *ssa, int ssa_var_num, uint32_
 		dump_flags);
 }
 
-static void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa, int ssa_var_num, zend_uchar var_type, int var_num, uint32_t dump_flags)
+void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa, int ssa_var_num, zend_uchar var_type, int var_num, uint32_t dump_flags)
 {
 	if (ssa_var_num >= 0) {
 		fprintf(stderr, "#%d.", ssa_var_num);
@@ -320,8 +342,11 @@ static void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa
 	zend_dump_var(op_array, (var_num < op_array->last_var ? IS_CV : var_type), var_num);
 
 	if (ssa_var_num >= 0 && ssa->vars) {
-		if (ssa_var_num >= 0 && ssa->vars[ssa_var_num].no_val) {
+		if (ssa->vars[ssa_var_num].no_val) {
 			fprintf(stderr, " NOVAL");
+		}
+		if (ssa->vars[ssa_var_num].escape_state == ESCAPE_STATE_NO_ESCAPE) {
+			fprintf(stderr, " NOESC");
 		}
 		if (ssa->var_info) {
 			zend_dump_ssa_var_info(ssa, ssa_var_num, dump_flags);
@@ -380,27 +405,16 @@ static void zend_dump_range_constraint(const zend_op_array *op_array, const zend
 	}
 }
 
-static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const void *data)
+void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const zend_ssa *ssa, const zend_ssa_op *ssa_op)
 {
 	const char *name = zend_get_opcode_name(opline->opcode);
 	uint32_t flags = zend_get_opcode_flags(opline->opcode);
 	uint32_t n = 0;
-	int len = 0;
-	const zend_ssa *ssa = NULL;
 
-	if (dump_flags & ZEND_DUMP_SSA) {
-		ssa = (const zend_ssa*)data;
-	}
-
-	if (!b) {
-		len = fprintf(stderr, "L%u:", (uint32_t)(opline - op_array->opcodes));
-	}
-	fprintf(stderr, "%*c", 8-len, ' ');
-
-	if (!ssa || !ssa->ops || ssa->ops[opline - op_array->opcodes].result_use < 0) {
+	if (!ssa_op || ssa_op->result_use < 0) {
 		if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
-			if (ssa && ssa->ops && ssa->ops[opline - op_array->opcodes].result_def >= 0) {
-				int ssa_var_num = ssa->ops[opline - op_array->opcodes].result_def;
+			if (ssa_op && ssa_op->result_def >= 0) {
+				int ssa_var_num = ssa_op->result_def;
 				zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->result_type, EX_VAR_TO_NUM(opline->result.var), dump_flags);
 			} else {
 				zend_dump_var(op_array, opline->result_type, EX_VAR_TO_NUM(opline->result.var));
@@ -417,24 +431,8 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 
 	if (ZEND_VM_EXT_NUM == (flags & ZEND_VM_EXT_MASK)) {
 		fprintf(stderr, " %u", opline->extended_value);
-	} else if (ZEND_VM_EXT_DIM_OBJ == (flags & ZEND_VM_EXT_MASK)) {
-		if (opline->extended_value == ZEND_ASSIGN_DIM) {
-			fprintf(stderr, " (dim)");
-		} else if (opline->extended_value == ZEND_ASSIGN_OBJ) {
-			fprintf(stderr, " (obj)");
-		}
-	} else if (ZEND_VM_EXT_CLASS_FETCH == (flags & ZEND_VM_EXT_MASK)) {
-		zend_dump_class_fetch_type(opline->extended_value);
-	} else if (ZEND_VM_EXT_CONST_FETCH == (flags & ZEND_VM_EXT_MASK)) {
-		if (opline->extended_value & IS_CONSTANT_UNQUALIFIED) {
-				fprintf(stderr, " (unqualified)");
-		}
-		if (opline->extended_value & IS_CONSTANT_CLASS) {
-				fprintf(stderr, " (__class__)");
-		}
-		if (opline->extended_value & IS_CONSTANT_IN_NAMESPACE) {
-				fprintf(stderr, " (in-namespace)");
-		}
+	} else if (ZEND_VM_EXT_OP == (flags & ZEND_VM_EXT_MASK)) {
+		fprintf(stderr, " (%s)", zend_get_opcode_name(opline->extended_value) + 5);
 	} else if (ZEND_VM_EXT_TYPE == (flags & ZEND_VM_EXT_MASK)) {
 		switch (opline->extended_value) {
 			case IS_NULL:
@@ -477,6 +475,43 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				fprintf(stderr, " (\?\?\?)");
 				break;
 		}
+	} else if (ZEND_VM_EXT_TYPE_MASK == (flags & ZEND_VM_EXT_MASK)) {
+		switch (opline->extended_value) {
+			case (1<<IS_NULL):
+				fprintf(stderr, " (null)");
+				break;
+			case (1<<IS_FALSE):
+				fprintf(stderr, " (false)");
+				break;
+			case (1<<IS_TRUE):
+				fprintf(stderr, " (true)");
+				break;
+			case (1<<IS_LONG):
+				fprintf(stderr, " (long)");
+				break;
+			case (1<<IS_DOUBLE):
+				fprintf(stderr, " (double)");
+				break;
+			case (1<<IS_STRING):
+				fprintf(stderr, " (string)");
+				break;
+			case (1<<IS_ARRAY):
+				fprintf(stderr, " (array)");
+				break;
+			case (1<<IS_OBJECT):
+				fprintf(stderr, " (object)");
+				break;
+			case (1<<IS_RESOURCE):
+				fprintf(stderr, " (resource)");
+				break;
+			case ((1<<IS_FALSE)|(1<<IS_TRUE)):
+				fprintf(stderr, " (bool)");
+				break;
+			default:
+				fprintf(stderr, " TYPE");
+				zend_dump_type_info(opline->extended_value, NULL, 0, dump_flags);
+				break;
+		}
 	} else if (ZEND_VM_EXT_EVAL == (flags & ZEND_VM_EXT_MASK)) {
 		switch (opline->extended_value) {
 			case ZEND_EVAL:
@@ -501,35 +536,25 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	} else if (ZEND_VM_EXT_SRC == (flags & ZEND_VM_EXT_MASK)) {
 		if (opline->extended_value == ZEND_RETURNS_VALUE) {
 			fprintf(stderr, " (value)");
-		} else if (opline->extended_value == ZEND_RETURNS_FUNCTION) {
+		} else if (opline->extended_value & ZEND_RETURNS_FUNCTION) {
 			fprintf(stderr, " (function)");
 		}
 	} else {
 		if (ZEND_VM_EXT_VAR_FETCH & flags) {
-			switch (opline->extended_value & ZEND_FETCH_TYPE_MASK) {
-				case ZEND_FETCH_GLOBAL:
-					fprintf(stderr, " (global)");
-					break;
-				case ZEND_FETCH_LOCAL:
-					fprintf(stderr, " (local)");
-					break;
-				case ZEND_FETCH_GLOBAL_LOCK:
-					fprintf(stderr, " (global+lock)");
-					break;
+			if (opline->extended_value & ZEND_FETCH_GLOBAL) {
+				fprintf(stderr, " (global)");
+			} else if (opline->extended_value & ZEND_FETCH_LOCAL) {
+				fprintf(stderr, " (local)");
+			} else if (opline->extended_value & ZEND_FETCH_GLOBAL_LOCK) {
+				fprintf(stderr, " (global+lock)");
 			}
 		}
 		if (ZEND_VM_EXT_ISSET & flags) {
-		    if (opline->extended_value & ZEND_QUICK_SET) {
-				fprintf(stderr, " (quick)");
-		    }
-			if (opline->extended_value & ZEND_ISSET) {
+			if (!(opline->extended_value & ZEND_ISEMPTY)) {
 				fprintf(stderr, " (isset)");
-			} else if (opline->extended_value & ZEND_ISEMPTY) {
+			} else {
 				fprintf(stderr, " (empty)");
 			}
-		}
-		if (ZEND_VM_EXT_ARG_NUM & flags) {
-			fprintf(stderr, " %u", opline->extended_value & ZEND_FETCH_ARG_MASK);
 		}
 		if (ZEND_VM_EXT_ARRAY_INIT & flags) {
 			fprintf(stderr, " %u", opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT);
@@ -542,17 +567,25 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				fprintf(stderr, " (ref)");
 			}
 		}
+		if ((ZEND_VM_EXT_DIM_WRITE|ZEND_VM_EXT_FETCH_REF) & flags) {
+			uint32_t obj_flags = opline->extended_value & ZEND_FETCH_OBJ_FLAGS;
+			if (obj_flags == ZEND_FETCH_REF) {
+				fprintf(stderr, " (ref)");
+			} else if (obj_flags == ZEND_FETCH_DIM_WRITE) {
+				fprintf(stderr, " (dim write)");
+			}
+		}
 	}
 
 	if (opline->op1_type == IS_CONST) {
-		zend_dump_const(CRT_CONSTANT_EX(op_array, opline->op1, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
+		zend_dump_const(CRT_CONSTANT(opline->op1));
 	} else if (opline->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
-		if (ssa && ssa->ops) {
-			int ssa_var_num = ssa->ops[opline - op_array->opcodes].op1_use;
+		if (ssa_op) {
+			int ssa_var_num = ssa_op->op1_use;
 			if (ssa_var_num >= 0) {
 				fprintf(stderr, " ");
 				zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->op1_type, EX_VAR_TO_NUM(opline->op1.var), dump_flags);
-			} else if (ssa->ops[opline - op_array->opcodes].op1_def < 0) {
+			} else if (ssa_op->op1_def < 0) {
 				fprintf(stderr, " ");
 				zend_dump_var(op_array, opline->op1_type, EX_VAR_TO_NUM(opline->op1.var));
 			}
@@ -560,8 +593,8 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			fprintf(stderr, " ");
 			zend_dump_var(op_array, opline->op1_type, EX_VAR_TO_NUM(opline->op1.var));
 		}
-		if (ssa && ssa->ops) {
-			int ssa_var_num = ssa->ops[opline - op_array->opcodes].op1_def;
+		if (ssa_op) {
+			int ssa_var_num = ssa_op->op1_def;
 			if (ssa_var_num >= 0) {
 				fprintf(stderr, " -> ");
 				zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->op1_type, EX_VAR_TO_NUM(opline->op1.var), dump_flags);
@@ -573,7 +606,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			if (b) {
 				fprintf(stderr, " BB%d", b->successors[n++]);
 			} else {
-				fprintf(stderr, " L%u", (uint32_t)(OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes));
+				fprintf(stderr, " %04u", (uint32_t)(OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes));
 			}
 		} else {
 			zend_dump_unused_op(opline, opline->op1, op1_flags);
@@ -581,14 +614,35 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	}
 
 	if (opline->op2_type == IS_CONST) {
-		zend_dump_const(CRT_CONSTANT_EX(op_array, opline->op2, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
+		zval *op = CRT_CONSTANT(opline->op2);
+		if (opline->opcode == ZEND_SWITCH_LONG || opline->opcode == ZEND_SWITCH_STRING) {
+			HashTable *jumptable = Z_ARRVAL_P(op);
+			zend_string *key;
+			zend_ulong num_key;
+			zval *zv;
+			ZEND_HASH_FOREACH_KEY_VAL(jumptable, num_key, key, zv) {
+				if (key) {
+					fprintf(stderr, " \"%s\":", ZSTR_VAL(key));
+				} else {
+					fprintf(stderr, " " ZEND_LONG_FMT ":", num_key);
+				}
+				if (b) {
+					fprintf(stderr, " BB%d,", b->successors[n++]);
+				} else {
+					fprintf(stderr, " %04u,", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv)));
+				}
+			} ZEND_HASH_FOREACH_END();
+			fprintf(stderr, " default:");
+		} else {
+			zend_dump_const(op);
+		}
 	} else if (opline->op2_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
-		if (ssa && ssa->ops) {
-			int ssa_var_num = ssa->ops[opline - op_array->opcodes].op2_use;
+		if (ssa_op) {
+			int ssa_var_num = ssa_op->op2_use;
 			if (ssa_var_num >= 0) {
 				fprintf(stderr, " ");
 				zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->op2_type, EX_VAR_TO_NUM(opline->op2.var), dump_flags);
-			} else if (ssa->ops[opline - op_array->opcodes].op2_def < 0) {
+			} else if (ssa_op->op2_def < 0) {
 				fprintf(stderr, " ");
 				zend_dump_var(op_array, opline->op2_type, EX_VAR_TO_NUM(opline->op2.var));
 			}
@@ -596,8 +650,8 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			fprintf(stderr, " ");
 			zend_dump_var(op_array, opline->op2_type, EX_VAR_TO_NUM(opline->op2.var));
 		}
-		if (ssa && ssa->ops) {
-			int ssa_var_num = ssa->ops[opline - op_array->opcodes].op2_def;
+		if (ssa_op) {
+			int ssa_var_num = ssa_op->op2_def;
 			if (ssa_var_num >= 0) {
 				fprintf(stderr, " -> ");
 				zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->op2_type, EX_VAR_TO_NUM(opline->op2.var), dump_flags);
@@ -606,10 +660,12 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	} else {
 		uint32_t op2_flags = ZEND_VM_OP2_FLAGS(flags);
 		if (ZEND_VM_OP_JMP_ADDR == (op2_flags & ZEND_VM_OP_MASK)) {
-			if (b) {
-				fprintf(stderr, " BB%d", b->successors[n++]);
-			} else {
-				fprintf(stderr, " L%u", (uint32_t)(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes));
+			if (opline->opcode != ZEND_CATCH || !(opline->extended_value & ZEND_LAST_CATCH)) {
+				if (b) {
+					fprintf(stderr, " BB%d", b->successors[n++]);
+				} else {
+					fprintf(stderr, " %04u", (uint32_t)(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes));
+				}
 			}
 		} else {
 			zend_dump_unused_op(opline, opline->op2, op2_flags);
@@ -617,20 +673,24 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	}
 
 	if (ZEND_VM_EXT_JMP_ADDR == (flags & ZEND_VM_EXT_MASK)) {
-		if (opline->opcode != ZEND_CATCH || !opline->result.num) {
-			if (b) {
-				fprintf(stderr, " BB%d", b->successors[n++]);
-			} else {
-				fprintf(stderr, " L%u", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
-			}
+		if (b) {
+			fprintf(stderr, " BB%d", b->successors[n++]);
+		} else {
+			fprintf(stderr, " %04u", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
 		}
 	}
 	if (opline->result_type == IS_CONST) {
-		zend_dump_const(CRT_CONSTANT_EX(op_array, opline->result, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
-	} else if (ssa && ssa->ops && ssa->ops[opline - op_array->opcodes].result_use >= 0) {
+		zend_dump_const(CRT_CONSTANT(opline->result));
+#if 0
+	} else if (opline->result_type & IS_SMART_BRANCH_JMPZ) {
+		fprintf(stderr, " jmpz");
+	} else if (opline->result_type & IS_SMART_BRANCH_JMPNZ) {
+		fprintf(stderr, " jmpnz");
+#endif
+	} else if (ssa_op && ssa_op->result_use >= 0) {
 		if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
-			if (ssa && ssa->ops) {
-				int ssa_var_num = ssa->ops[opline - op_array->opcodes].result_use;
+			if (ssa_op) {
+				int ssa_var_num = ssa_op->result_use;
 				if (ssa_var_num >= 0) {
 					fprintf(stderr, " ");
 					zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->result_type, EX_VAR_TO_NUM(opline->result.var), dump_flags);
@@ -639,8 +699,8 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				fprintf(stderr, " ");
 				zend_dump_var(op_array, opline->result_type, EX_VAR_TO_NUM(opline->result.var));
 			}
-			if (ssa && ssa->ops) {
-				int ssa_var_num = ssa->ops[opline - op_array->opcodes].result_def;
+			if (ssa_op) {
+				int ssa_var_num = ssa_op->result_def;
 				if (ssa_var_num >= 0) {
 					fprintf(stderr, " -> ");
 					zend_dump_ssa_var(op_array, ssa, ssa_var_num, opline->result_type, EX_VAR_TO_NUM(opline->result.var), dump_flags);
@@ -648,17 +708,41 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			}
 		}
 	}
+}
+
+static void zend_dump_op_line(const zend_op_array *op_array, const zend_basic_block *b, const zend_op *opline, uint32_t dump_flags, const void *data)
+{
+	int len = 0;
+	const zend_ssa *ssa = NULL;
+	zend_ssa_op *ssa_op = NULL;
+
+	len = fprintf(stderr, "%04u", (uint32_t)(opline - op_array->opcodes));
+	fprintf(stderr, "%*c", 5-len, ' ');
+
+	if (dump_flags & ZEND_DUMP_SSA) {
+		ssa = (const zend_ssa*)data;
+		if (ssa && ssa->ops) {
+			ssa_op = &ssa->ops[opline - op_array->opcodes];
+		}
+	}
+
+	zend_dump_op(op_array, b, opline, dump_flags, ssa, ssa_op);
 	fprintf(stderr, "\n");
 }
 
 static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags)
 {
 	zend_basic_block *b = cfg->blocks + n;
-	int printed = 0;
 
-	fprintf(stderr, "BB%d:", n);
+	if (n > 0) {
+		fprintf(stderr, "\n");
+	}
+	fprintf(stderr, "BB%d:\n     ;", n);
 	if (b->flags & ZEND_BB_START) {
 		fprintf(stderr, " start");
+	}
+	if (b->flags & ZEND_BB_RECV_ENTRY) {
+		fprintf(stderr, " recv");
 	}
 	if (b->flags & ZEND_BB_FOLLOW) {
 		fprintf(stderr, " follow");
@@ -669,7 +753,7 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 	if (b->flags & ZEND_BB_EXIT) {
 		fprintf(stderr, " exit");
 	}
-	if (b->flags & ZEND_BB_ENTRY) {
+	if (b->flags & (ZEND_BB_ENTRY|ZEND_BB_RECV_ENTRY)) {
 		fprintf(stderr, " entry");
 	}
 	if (b->flags & ZEND_BB_TRY) {
@@ -684,14 +768,11 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 	if (b->flags & ZEND_BB_FINALLY_END) {
 		fprintf(stderr, " finally_end");
 	}
-	if (b->flags & ZEND_BB_GEN_VAR) {
-		fprintf(stderr, " gen_var");
-	}
-	if (b->flags & ZEND_BB_KILL_VAR) {
-		fprintf(stderr, " kill_var");
-	}
-	if (!(dump_flags & ZEND_DUMP_HIDE_UNREACHABLE) & !(b->flags & ZEND_BB_REACHABLE)) {
+	if (!(dump_flags & ZEND_DUMP_HIDE_UNREACHABLE) && !(b->flags & ZEND_BB_REACHABLE)) {
 		fprintf(stderr, " unreachable");
+	}
+	if (b->flags & ZEND_BB_UNREACHABLE_FREE) {
+		fprintf(stderr, " unreachable_free");
 	}
 	if (b->flags & ZEND_BB_LOOP_HEADER) {
 		fprintf(stderr, " loop_header");
@@ -710,36 +791,34 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 		int *p = cfg->predecessors + b->predecessor_offset;
 		int *end = p + b->predecessors_count;
 
-		fprintf(stderr, "    ; from=(BB%d", *p);
+		fprintf(stderr, "     ; from=(BB%d", *p);
 		for (p++; p < end; p++) {
 			fprintf(stderr, ", BB%d", *p);
 		}
 		fprintf(stderr, ")\n");
 	}
 
-	if (b->successors[0] != -1) {
-		fprintf(stderr, "    ; to=(BB%d", b->successors[0]);
-		printed = 1;
-		if (b->successors[1] != -1) {
-			fprintf(stderr, ", BB%d", b->successors[1]);
+	if (b->successors_count > 0) {
+		int s;
+		fprintf(stderr, "     ; to=(BB%d", b->successors[0]);
+		for (s = 1; s < b->successors_count; s++) {
+			fprintf(stderr, ", BB%d", b->successors[s]);
 		}
-	}
-	if (printed) {
 		fprintf(stderr, ")\n");
 	}
 
 	if (b->idom >= 0) {
-		fprintf(stderr, "    ; idom=BB%d\n", b->idom);
+		fprintf(stderr, "     ; idom=BB%d\n", b->idom);
 	}
 	if (b->level >= 0) {
-		fprintf(stderr, "    ; level=%d\n", b->level);
+		fprintf(stderr, "     ; level=%d\n", b->level);
 	}
 	if (b->loop_header >= 0) {
-		fprintf(stderr, "    ; loop_header=%d\n", b->level);
+		fprintf(stderr, "     ; loop_header=%d\n", b->loop_header);
 	}
 	if (b->children >= 0) {
 		int j = b->children;
-		fprintf(stderr, "    ; children=(BB%d", j);
+		fprintf(stderr, "     ; children=(BB%d", j);
 		j = cfg->blocks[j].next_child;
 		while (j >= 0) {
 			fprintf(stderr, ", BB%d", j);
@@ -758,7 +837,7 @@ static void zend_dump_block_header(const zend_cfg *cfg, const zend_op_array *op_
 		do {
 			int j;
 
-			fprintf(stderr, "        ");
+			fprintf(stderr, "     ");
 			zend_dump_ssa_var(op_array, ssa, p->ssa_var, 0, p->var, dump_flags);
 			if (p->pi < 0) {
 				fprintf(stderr, " = Phi(");
@@ -785,7 +864,7 @@ static void zend_dump_block_header(const zend_cfg *cfg, const zend_op_array *op_
 	}
 }
 
-static void zend_dump_op_array_name(const zend_op_array *op_array)
+void zend_dump_op_array_name(const zend_op_array *op_array)
 {
 	zend_func_info *func_info = NULL;
 
@@ -829,7 +908,7 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 
 	fprintf(stderr, "\n");
 	zend_dump_op_array_name(op_array);
-	fprintf(stderr, ": ; (lines=%d, args=%d",
+	fprintf(stderr, ":\n     ; (lines=%d, args=%d",
 		op_array->last,
 		op_array->num_args);
 	if (func_info && func_info->num_args >= 0) {
@@ -857,6 +936,12 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 	if (func_flags & ZEND_FUNC_NO_LOOPS) {
 		fprintf(stderr, ", no_loops");
 	}
+	if (func_flags & ZEND_FUNC_HAS_EXTENDED_STMT) {
+		fprintf(stderr, ", extended_stmt");
+	}
+	if (func_flags & ZEND_FUNC_HAS_EXTENDED_FCALL) {
+		fprintf(stderr, ", extended_fcall");
+	}
 //TODO: this is useful only for JIT???
 #if 0
 	if (info->flags & ZEND_JIT_FUNC_NO_IN_MEM_CVS) {
@@ -882,15 +967,15 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 	}
 	fprintf(stderr, ")\n");
 	if (msg) {
-		fprintf(stderr, "    ; (%s)\n", msg);
+		fprintf(stderr, "     ; (%s)\n", msg);
 	}
-	fprintf(stderr, "    ; %s:%u-%u\n", op_array->filename->val, op_array->line_start, op_array->line_end);
+	fprintf(stderr, "     ; %s:%u-%u\n", op_array->filename->val, op_array->line_start, op_array->line_end);
 
 	if (func_info && func_info->num_args > 0) {
 		uint32_t j;
 
 		for (j = 0; j < MIN(op_array->num_args, func_info->num_args ); j++) {
-			fprintf(stderr, "    ; arg %d ", j);
+			fprintf(stderr, "     ; arg %d ", j);
 			zend_dump_type_info(func_info->arg_info[j].info.type, func_info->arg_info[j].info.ce, func_info->arg_info[j].info.is_instanceof, dump_flags);
 			zend_dump_range(&func_info->arg_info[j].info.range);
 			fprintf(stderr, "\n");
@@ -898,7 +983,7 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 	}
 
 	if (func_info) {
-		fprintf(stderr, "    ; return ");
+		fprintf(stderr, "     ; return ");
 		zend_dump_type_info(func_info->return_info.type, func_info->return_info.ce, func_info->return_info.is_instanceof, dump_flags);
 		zend_dump_range(&func_info->return_info.range);
 		fprintf(stderr, "\n");
@@ -906,7 +991,7 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 
 	if (ssa && ssa->var_info) {
 		for (i = 0; i < op_array->last_var; i++) {
-			fprintf(stderr, "    ; ");
+			fprintf(stderr, "     ; ");
 			zend_dump_ssa_var(op_array, ssa, i, IS_CV, i, dump_flags);
 			fprintf(stderr, "\n");
 		}
@@ -926,25 +1011,19 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 				opline = op_array->opcodes + b->start;
 				end = opline + b->len;
 				while (opline < end) {
-					zend_dump_op(op_array, b, opline, dump_flags, data);
+					zend_dump_op_line(op_array, b, opline, dump_flags, data);
 					opline++;
 				}
 			}
 		}
-		if (op_array->last_live_range) {
+		if (op_array->last_live_range && (dump_flags & ZEND_DUMP_LIVE_RANGES)) {
 			fprintf(stderr, "LIVE RANGES:\n");
 			for (i = 0; i < op_array->last_live_range; i++) {
-				if (cfg->split_at_live_ranges) {
-					fprintf(stderr, "        %u: BB%u - BB%u ",
-						EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
-						cfg->map[op_array->live_range[i].start],
-						cfg->map[op_array->live_range[i].end]);
-				} else {
-					fprintf(stderr, "        %u: L%u - L%u ",
-						EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
-						op_array->live_range[i].start,
-						op_array->live_range[i].end);
-				}
+				fprintf(stderr,
+					"     %u: %04u - %04u ",
+					EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
+					op_array->live_range[i].start,
+					op_array->live_range[i].end);
 				switch (op_array->live_range[i].var & ZEND_LIVE_MASK) {
 					case ZEND_LIVE_TMPVAR:
 						fprintf(stderr, "(tmp/var)\n");
@@ -957,6 +1036,9 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 						break;
 					case ZEND_LIVE_ROPE:
 						fprintf(stderr, "(rope)\n");
+						break;
+					case ZEND_LIVE_NEW:
+						fprintf(stderr, "(new)\n");
 						break;
 				}
 			}
@@ -991,13 +1073,14 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 		const zend_op *end = opline + op_array->last;
 
 		while (opline < end) {
-			zend_dump_op(op_array, NULL, opline, dump_flags, data);
+			zend_dump_op_line(op_array, NULL, opline, dump_flags, data);
 			opline++;
 		}
-		if (op_array->last_live_range) {
+		if (op_array->last_live_range && (dump_flags & ZEND_DUMP_LIVE_RANGES)) {
 			fprintf(stderr, "LIVE RANGES:\n");
 			for (i = 0; i < op_array->last_live_range; i++) {
-				fprintf(stderr, "        %u: L%u - L%u ",
+				fprintf(stderr,
+					"     %u: %04u - %04u ",
 					EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
 					op_array->live_range[i].start,
 					op_array->live_range[i].end);
@@ -1014,28 +1097,36 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 					case ZEND_LIVE_ROPE:
 						fprintf(stderr, "(rope)\n");
 						break;
+					case ZEND_LIVE_NEW:
+						fprintf(stderr, "(new)\n");
+						break;
 				}
 			}
 		}
 		if (op_array->last_try_catch) {
 			fprintf(stderr, "EXCEPTION TABLE:\n");
 			for (i = 0; i < op_array->last_try_catch; i++) {
-				fprintf(stderr, "        L%u",
+				fprintf(stderr,
+					"     %04u",
 					op_array->try_catch_array[i].try_op);
+
 				if (op_array->try_catch_array[i].catch_op) {
-					fprintf(stderr, ", L%u",
+					fprintf(stderr,
+						", %04u",
 						op_array->try_catch_array[i].catch_op);
 				} else {
 					fprintf(stderr, ", -");
 				}
 				if (op_array->try_catch_array[i].finally_op) {
-					fprintf(stderr, ", L%u",
+					fprintf(stderr,
+						", %04u",
 						op_array->try_catch_array[i].finally_op);
 				} else {
 					fprintf(stderr, ", -");
 				}
 				if (op_array->try_catch_array[i].finally_end) {
-					fprintf(stderr, ", L%u\n",
+					fprintf(stderr,
+						", %04u",
 						op_array->try_catch_array[i].finally_end);
 				} else {
 					fprintf(stderr, ", -\n");
@@ -1167,11 +1258,3 @@ void zend_dump_phi_placement(const zend_op_array *op_array, const zend_ssa *ssa)
 		}
 	}
 }
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * indent-tabs-mode: t
- * End:
- */

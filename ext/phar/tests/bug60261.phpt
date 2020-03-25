@@ -7,11 +7,11 @@ Bug #60261 (phar dos null pointer)
 
 try {
     $nx = new Phar();
-	$nx->getLinkTarget();
+    $nx->getLinkTarget();
 } catch (TypeError $e) {
-	echo $e->getMessage(), "\n";
+    echo $e->getMessage(), "\n";
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Phar::__construct() expects at least 1 parameter, 0 given

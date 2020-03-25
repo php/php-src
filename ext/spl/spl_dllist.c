@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,8 +13,6 @@
    | Authors: Etienne Kneuss <colder@php.net>                             |
    +----------------------------------------------------------------------+
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -34,6 +30,7 @@
 #include "spl_engine.h"
 #include "spl_iterators.h"
 #include "spl_dllist.h"
+#include "spl_dllist_arginfo.h"
 #include "spl_exceptions.h"
 
 zend_object_handlers spl_handler_SplDoublyLinkedList;
@@ -41,16 +38,18 @@ PHPAPI zend_class_entry  *spl_ce_SplDoublyLinkedList;
 PHPAPI zend_class_entry  *spl_ce_SplQueue;
 PHPAPI zend_class_entry  *spl_ce_SplStack;
 
-#define SPL_LLIST_DELREF(elem) if(!--(elem)->rc) { \
+#define SPL_LLIST_RC(elem) Z_EXTRA((elem)->data)
+
+#define SPL_LLIST_DELREF(elem) if (!--SPL_LLIST_RC(elem)) { \
 	efree(elem); \
 }
 
-#define SPL_LLIST_CHECK_DELREF(elem) if((elem) && !--(elem)->rc) { \
+#define SPL_LLIST_CHECK_DELREF(elem) if ((elem) && !--SPL_LLIST_RC(elem)) { \
 	efree(elem); \
 }
 
-#define SPL_LLIST_ADDREF(elem) (elem)->rc++
-#define SPL_LLIST_CHECK_ADDREF(elem) if(elem) (elem)->rc++
+#define SPL_LLIST_ADDREF(elem) SPL_LLIST_RC(elem)++
+#define SPL_LLIST_CHECK_ADDREF(elem) if (elem) SPL_LLIST_RC(elem)++
 
 #define SPL_DLLIST_IT_DELETE 0x00000001 /* Delete flag makes the iterator delete the current element on next */
 #define SPL_DLLIST_IT_LIFO   0x00000002 /* LIFO flag makes the iterator traverse the structure as a LastInFirstOut */
@@ -64,7 +63,6 @@ PHPAPI zend_class_entry  *spl_ce_SplStack;
 typedef struct _spl_ptr_llist_element {
 	struct _spl_ptr_llist_element *prev;
 	struct _spl_ptr_llist_element *next;
-	int                            rc;
 	zval                           data;
 } spl_ptr_llist_element;
 
@@ -196,10 +194,10 @@ static void spl_ptr_llist_unshift(spl_ptr_llist *llist, zval *data) /* {{{ */
 {
 	spl_ptr_llist_element *elem = emalloc(sizeof(spl_ptr_llist_element));
 
-	elem->rc   = 1;
 	elem->prev = NULL;
 	elem->next = llist->head;
 	ZVAL_COPY_VALUE(&elem->data, data);
+	SPL_LLIST_RC(elem) = 1;
 
 	if (llist->head) {
 		llist->head->prev = elem;
@@ -220,10 +218,10 @@ static void spl_ptr_llist_push(spl_ptr_llist *llist, zval *data) /* {{{ */
 {
 	spl_ptr_llist_element *elem = emalloc(sizeof(spl_ptr_llist_element));
 
-	elem->rc   = 1;
 	elem->prev = llist->tail;
 	elem->next = NULL;
 	ZVAL_COPY_VALUE(&elem->data, data);
+	SPL_LLIST_RC(elem) = 1;
 
 	if (llist->tail) {
 		llist->tail->next = elem;
@@ -259,6 +257,7 @@ static void spl_ptr_llist_pop(spl_ptr_llist *llist, zval *ret) /* {{{ */
 	llist->count--;
 	ZVAL_COPY(ret, &tail->data);
 
+	tail->prev = NULL;
 	if (llist->dtor) {
 		llist->dtor(tail);
 	}
@@ -312,6 +311,7 @@ static void spl_ptr_llist_shift(spl_ptr_llist *llist, zval *ret) /* {{{ */
 	llist->count--;
 	ZVAL_COPY(ret, &head->data);
 
+	head->next = NULL;
 	if (llist->dtor) {
 		llist->dtor(head);
 	}
@@ -367,13 +367,13 @@ static void spl_dllist_object_free_storage(zend_object *object) /* {{{ */
 
 zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 
-static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zval *orig, int clone_orig) /* {{{ */
+static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zend_object *orig, int clone_orig) /* {{{ */
 {
 	spl_dllist_object *intern;
 	zend_class_entry  *parent = class_type;
 	int                inherited = 0;
 
-	intern = ecalloc(1, sizeof(spl_dllist_object) + zend_object_properties_size(parent));
+	intern = zend_object_alloc(sizeof(spl_dllist_object), parent);
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
@@ -382,7 +382,7 @@ static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zval 
 	intern->traverse_position = 0;
 
 	if (orig) {
-		spl_dllist_object *other = Z_SPLDLLIST_P(orig);
+		spl_dllist_object *other = spl_dllist_from_obj(orig);
 		intern->ce_get_iterator = other->ce_get_iterator;
 
 		if (clone_orig) {
@@ -457,13 +457,9 @@ static zend_object *spl_dllist_object_new(zend_class_entry *class_type) /* {{{ *
 }
 /* }}} */
 
-static zend_object *spl_dllist_object_clone(zval *zobject) /* {{{ */
+static zend_object *spl_dllist_object_clone(zend_object *old_object) /* {{{ */
 {
-	zend_object        *old_object;
-	zend_object        *new_object;
-
-	old_object  = Z_OBJ_P(zobject);
-	new_object = spl_dllist_object_new_ex(old_object->ce, zobject, 1);
+	zend_object *new_object = spl_dllist_object_new_ex(old_object->ce, old_object, 1);
 
 	zend_objects_clone_members(new_object, old_object);
 
@@ -471,9 +467,9 @@ static zend_object *spl_dllist_object_clone(zval *zobject) /* {{{ */
 }
 /* }}} */
 
-static int spl_dllist_object_count_elements(zval *object, zend_long *count) /* {{{ */
+static int spl_dllist_object_count_elements(zend_object *object, zend_long *count) /* {{{ */
 {
-	spl_dllist_object *intern = Z_SPLDLLIST_P(object);
+	spl_dllist_object *intern = spl_dllist_from_obj(object);
 
 	if (intern->fptr_count) {
 		zval rv;
@@ -492,9 +488,9 @@ static int spl_dllist_object_count_elements(zval *object, zend_long *count) /* {
 }
 /* }}} */
 
-static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp) /* {{{{ */
+static HashTable* spl_dllist_object_get_debug_info(zend_object *obj, int *is_temp) /* {{{{ */
 {
-	spl_dllist_object     *intern  = Z_SPLDLLIST_P(obj);
+	spl_dllist_object     *intern  = spl_dllist_from_obj(obj);
 	spl_ptr_llist_element *current = intern->llist->head, *next;
 	zval tmp, dllist_array;
 	zend_string *pnstr;
@@ -506,14 +502,13 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp) /* {
 		rebuild_object_properties(&intern->std);
 	}
 
-	ALLOC_HASHTABLE(debug_info);
-	zend_hash_init(debug_info, 1, NULL, ZVAL_PTR_DTOR, 0);
+	debug_info = zend_new_array(1);
 	zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
 	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1);
 	ZVAL_LONG(&tmp, intern->flags);
 	zend_hash_add(debug_info, pnstr, &tmp);
-	zend_string_release(pnstr);
+	zend_string_release_ex(pnstr, 0);
 
 	array_init(&dllist_array);
 
@@ -531,15 +526,15 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp) /* {
 
 	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "dllist", sizeof("dllist")-1);
 	zend_hash_add(debug_info, pnstr, &dllist_array);
-	zend_string_release(pnstr);
+	zend_string_release_ex(pnstr, 0);
 
 	return debug_info;
 }
 /* }}}} */
 
-static HashTable *spl_dllist_object_get_gc(zval *obj, zval **gc_data, int *gc_data_count) /* {{{ */
+static HashTable *spl_dllist_object_get_gc(zend_object *obj, zval **gc_data, int *gc_data_count) /* {{{ */
 {
-	spl_dllist_object *intern  = Z_SPLDLLIST_P(obj);
+	spl_dllist_object *intern = spl_dllist_from_obj(obj);
 	spl_ptr_llist_element *current = intern->llist->head;
 	int i = 0;
 
@@ -567,13 +562,11 @@ SPL_METHOD(SplDoublyLinkedList, push)
 	spl_dllist_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	intern = Z_SPLDLLIST_P(getThis());
+	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	spl_ptr_llist_push(intern->llist, value);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -585,13 +578,11 @@ SPL_METHOD(SplDoublyLinkedList, unshift)
 	spl_dllist_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	intern = Z_SPLDLLIST_P(getThis());
+	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	spl_ptr_llist_unshift(intern->llist, value);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -602,15 +593,15 @@ SPL_METHOD(SplDoublyLinkedList, pop)
 	spl_dllist_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	intern = Z_SPLDLLIST_P(getThis());
+	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	spl_ptr_llist_pop(intern->llist, return_value);
 
 	if (Z_ISUNDEF_P(return_value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't pop from an empty datastructure", 0);
-		RETURN_NULL();
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -622,15 +613,15 @@ SPL_METHOD(SplDoublyLinkedList, shift)
 	spl_dllist_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	intern = Z_SPLDLLIST_P(getThis());
+	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	spl_ptr_llist_shift(intern->llist, return_value);
 
 	if (Z_ISUNDEF_P(return_value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't shift from an empty datastructure", 0);
-		RETURN_NULL();
+		RETURN_THROWS();
 	}
 }
 /* }}} */
@@ -643,19 +634,18 @@ SPL_METHOD(SplDoublyLinkedList, top)
 	spl_dllist_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	intern = Z_SPLDLLIST_P(getThis());
+	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	value = spl_ptr_llist_last(intern->llist);
 
 	if (value == NULL || Z_ISUNDEF_P(value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't peek at an empty datastructure", 0);
-		return;
+		RETURN_THROWS();
 	}
 
-	ZVAL_DEREF(value);
-	ZVAL_COPY(return_value, value);
+	ZVAL_COPY_DEREF(return_value, value);
 }
 /* }}} */
 
@@ -667,19 +657,18 @@ SPL_METHOD(SplDoublyLinkedList, bottom)
 	spl_dllist_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	intern = Z_SPLDLLIST_P(getThis());
+	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	value  = spl_ptr_llist_first(intern->llist);
 
 	if (value == NULL || Z_ISUNDEF_P(value)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Can't peek at an empty datastructure", 0);
-		return;
+		RETURN_THROWS();
 	}
 
-	ZVAL_DEREF(value);
-	ZVAL_COPY(return_value, value);
+	ZVAL_COPY_DEREF(return_value, value);
 }
 /* }}} */
 
@@ -688,10 +677,10 @@ SPL_METHOD(SplDoublyLinkedList, bottom)
 SPL_METHOD(SplDoublyLinkedList, count)
 {
 	zend_long count;
-	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
+	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	count = spl_ptr_llist_count(intern->llist);
@@ -706,15 +695,15 @@ SPL_METHOD(SplDoublyLinkedList, isEmpty)
 	zend_long count;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	spl_dllist_object_count_elements(getThis(), &count);
+	spl_dllist_object_count_elements(Z_OBJ_P(ZEND_THIS), &count);
 	RETURN_BOOL(count == 0);
 }
 /* }}} */
 
-/* {{{ proto int SplDoublyLinkedList::setIteratorMode(int flags)
+/* {{{ proto int SplDoublyLinkedList::setIteratorMode(int mode)
  Set the mode of iteration */
 SPL_METHOD(SplDoublyLinkedList, setIteratorMode)
 {
@@ -722,18 +711,18 @@ SPL_METHOD(SplDoublyLinkedList, setIteratorMode)
 	spl_dllist_object *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	intern = Z_SPLDLLIST_P(getThis());
+	intern = Z_SPLDLLIST_P(ZEND_THIS);
 
 	if (intern->flags & SPL_DLLIST_IT_FIX
 		&& (intern->flags & SPL_DLLIST_IT_LIFO) != (value & SPL_DLLIST_IT_LIFO)) {
 		zend_throw_exception(spl_ce_RuntimeException, "Iterators' LIFO/FIFO modes for SplStack/SplQueue objects are frozen", 0);
-		return;
+		RETURN_THROWS();
 	}
 
-	intern->flags = value & SPL_DLLIST_IT_MASK;
+	intern->flags = (value & SPL_DLLIST_IT_MASK) | (intern->flags & SPL_DLLIST_IT_FIX);
 
 	RETURN_LONG(intern->flags);
 }
@@ -746,10 +735,10 @@ SPL_METHOD(SplDoublyLinkedList, getIteratorMode)
 	spl_dllist_object *intern;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	intern = Z_SPLDLLIST_P(getThis());
+	intern = Z_SPLDLLIST_P(ZEND_THIS);
 
 	RETURN_LONG(intern->flags);
 }
@@ -764,10 +753,10 @@ SPL_METHOD(SplDoublyLinkedList, offsetExists)
 	zend_long               index;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zindex) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	intern = Z_SPLDLLIST_P(getThis());
+	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	index  = spl_offset_convert_to_long(zindex);
 
 	RETURN_BOOL(index >= 0 && index < intern->llist->count);
@@ -783,15 +772,15 @@ SPL_METHOD(SplDoublyLinkedList, offsetGet)
 	spl_ptr_llist_element *element;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zindex) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	intern = Z_SPLDLLIST_P(getThis());
+	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	index  = spl_offset_convert_to_long(zindex);
 
 	if (index < 0 || index >= intern->llist->count) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
@@ -799,8 +788,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetGet)
 	if (element != NULL) {
 		zval *value = &element->data;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	} else {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0);
 	}
@@ -814,10 +802,10 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 	spl_dllist_object     *intern;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &zindex, &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	intern = Z_SPLDLLIST_P(getThis());
+	intern = Z_SPLDLLIST_P(ZEND_THIS);
 
 	if (Z_TYPE_P(zindex) == IS_NULL) {
 		/* $obj[] = ... */
@@ -831,7 +819,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 
 		if (index < 0 || index >= intern->llist->count) {
 			zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0);
-			return;
+			RETURN_THROWS();
 		}
 
 		element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
@@ -854,7 +842,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 		} else {
 			zval_ptr_dtor(value);
 			zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0);
-			return;
+			RETURN_THROWS();
 		}
 	}
 } /* }}} */
@@ -870,16 +858,16 @@ SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 	spl_ptr_llist         *llist;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &zindex) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	intern = Z_SPLDLLIST_P(getThis());
+	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	index  = spl_offset_convert_to_long(zindex);
 	llist  = intern->llist;
 
 	if (index < 0 || index >= intern->llist->count) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset out of range", 0);
-		return;
+		RETURN_THROWS();
 	}
 
 	element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
@@ -920,7 +908,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetUnset)
 		SPL_LLIST_DELREF(element);
 	} else {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid", 0);
-		return;
+		RETURN_THROWS();
 	}
 } /* }}} */
 
@@ -1040,10 +1028,10 @@ static void spl_dllist_it_move_forward(zend_object_iterator *iter) /* {{{ */
    Return current array key */
 SPL_METHOD(SplDoublyLinkedList, key)
 {
-	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
+	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(intern->traverse_position);
@@ -1054,10 +1042,10 @@ SPL_METHOD(SplDoublyLinkedList, key)
    Move to next entry */
 SPL_METHOD(SplDoublyLinkedList, prev)
 {
-	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
+	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_dllist_it_helper_move_forward(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags ^ SPL_DLLIST_IT_LIFO);
@@ -1068,10 +1056,10 @@ SPL_METHOD(SplDoublyLinkedList, prev)
    Move to next entry */
 SPL_METHOD(SplDoublyLinkedList, next)
 {
-	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
+	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_dllist_it_helper_move_forward(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags);
@@ -1082,10 +1070,10 @@ SPL_METHOD(SplDoublyLinkedList, next)
    Check whether the datastructure contains more entries */
 SPL_METHOD(SplDoublyLinkedList, valid)
 {
-	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
+	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	RETURN_BOOL(intern->traverse_pointer != NULL);
@@ -1096,25 +1084,25 @@ SPL_METHOD(SplDoublyLinkedList, valid)
    Rewind the datastructure back to the start */
 SPL_METHOD(SplDoublyLinkedList, rewind)
 {
-	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
+	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	spl_dllist_it_helper_rewind(&intern->traverse_pointer, &intern->traverse_position, intern->llist, intern->flags);
 }
 /* }}} */
 
-/* {{{ proto mixed|NULL SplDoublyLinkedList::current()
+/* {{{ proto mixed SplDoublyLinkedList::current()
    Return current datastructure entry */
 SPL_METHOD(SplDoublyLinkedList, current)
 {
-	spl_dllist_object     *intern  = Z_SPLDLLIST_P(getThis());
+	spl_dllist_object     *intern  = Z_SPLDLLIST_P(ZEND_THIS);
 	spl_ptr_llist_element *element = intern->traverse_pointer;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (element == NULL || Z_ISUNDEF(element->data)) {
@@ -1122,8 +1110,7 @@ SPL_METHOD(SplDoublyLinkedList, current)
 	} else {
 		zval *value = &element->data;
 
-		ZVAL_DEREF(value);
-		ZVAL_COPY(return_value, value);
+		ZVAL_COPY_DEREF(return_value, value);
 	}
 }
 /* }}} */
@@ -1132,14 +1119,14 @@ SPL_METHOD(SplDoublyLinkedList, current)
  Serializes storage */
 SPL_METHOD(SplDoublyLinkedList, serialize)
 {
-	spl_dllist_object     *intern   = Z_SPLDLLIST_P(getThis());
+	spl_dllist_object     *intern   = Z_SPLDLLIST_P(ZEND_THIS);
 	smart_str              buf      = {0};
 	spl_ptr_llist_element *current  = intern->llist->head, *next;
 	zval                   flags;
 	php_serialize_data_t   var_hash;
 
 	if (zend_parse_parameters_none() == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PHP_VAR_SERIALIZE_INIT(var_hash);
@@ -1147,7 +1134,6 @@ SPL_METHOD(SplDoublyLinkedList, serialize)
 	/* flags */
 	ZVAL_LONG(&flags, intern->flags);
 	php_var_serialize(&buf, &flags, &var_hash);
-	zval_ptr_dtor(&flags);
 
 	/* elements */
 	while (current) {
@@ -1164,19 +1150,14 @@ SPL_METHOD(SplDoublyLinkedList, serialize)
 	/* done */
 	PHP_VAR_SERIALIZE_DESTROY(var_hash);
 
-	if (buf.s) {
-		RETURN_NEW_STR(buf.s);
-	} else {
-		RETURN_NULL();
-	}
-
+	RETURN_NEW_STR(buf.s);
 } /* }}} */
 
 /* {{{ proto void SplDoublyLinkedList::unserialize(string serialized)
  Unserializes storage */
 SPL_METHOD(SplDoublyLinkedList, unserialize)
 {
-	spl_dllist_object *intern = Z_SPLDLLIST_P(getThis());
+	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
 	zval *flags, *elem;
 	char *buf;
 	size_t buf_len;
@@ -1184,11 +1165,17 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 	php_unserialize_data_t var_hash;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &buf, &buf_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (buf_len == 0) {
 		return;
+	}
+
+	while (intern->llist->count > 0) {
+		zval tmp;
+		spl_ptr_llist_pop(intern->llist, &tmp);
+		zval_ptr_dtor(&tmp);
 	}
 
 	s = p = (const unsigned char*)buf;
@@ -1224,8 +1211,70 @@ SPL_METHOD(SplDoublyLinkedList, unserialize)
 error:
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
 	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Error at offset %zd of %zd bytes", ((char*)p - buf), buf_len);
-	return;
+	RETURN_THROWS();
 
+} /* }}} */
+
+/* {{{ proto array SplDoublyLinkedList::__serialize() */
+SPL_METHOD(SplDoublyLinkedList, __serialize)
+{
+	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
+	spl_ptr_llist_element *current = intern->llist->head;
+	zval tmp;
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	array_init(return_value);
+
+	/* flags */
+	ZVAL_LONG(&tmp, intern->flags);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+
+	/* elements */
+	array_init_size(&tmp, intern->llist->count);
+	while (current) {
+		zend_hash_next_index_insert(Z_ARRVAL(tmp), &current->data);
+		Z_TRY_ADDREF(current->data);
+		current = current->next;
+	}
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+
+	/* members */
+	ZVAL_ARR(&tmp, zend_std_get_properties(&intern->std));
+	Z_TRY_ADDREF(tmp);
+	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &tmp);
+} /* }}} */
+
+/* {{{ proto void SplDoublyLinkedList::__unserialize(array serialized) */
+SPL_METHOD(SplDoublyLinkedList, __unserialize) {
+	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
+	HashTable *data;
+	zval *flags_zv, *storage_zv, *members_zv, *elem;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &data) == FAILURE) {
+		RETURN_THROWS();
+	}
+
+	flags_zv = zend_hash_index_find(data, 0);
+	storage_zv = zend_hash_index_find(data, 1);
+	members_zv = zend_hash_index_find(data, 2);
+	if (!flags_zv || !storage_zv || !members_zv ||
+			Z_TYPE_P(flags_zv) != IS_LONG || Z_TYPE_P(storage_zv) != IS_ARRAY ||
+			Z_TYPE_P(members_zv) != IS_ARRAY) {
+		zend_throw_exception(spl_ce_UnexpectedValueException,
+			"Incomplete or ill-typed serialization data", 0);
+		RETURN_THROWS();
+	}
+
+	intern->flags = (int) Z_LVAL_P(flags_zv);
+
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(storage_zv), elem) {
+		spl_ptr_llist_push(intern->llist, elem);
+	} ZEND_HASH_FOREACH_END();
+
+	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
 } /* }}} */
 
 /* {{{ proto void SplDoublyLinkedList::add(mixed index, mixed newval)
@@ -1238,20 +1287,18 @@ SPL_METHOD(SplDoublyLinkedList, add)
 	zend_long                  index;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &zindex, &value) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
-	intern = Z_SPLDLLIST_P(getThis());
+	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	index  = spl_offset_convert_to_long(zindex);
 
 	if (index < 0 || index > intern->llist->count) {
 		zend_throw_exception(spl_ce_OutOfRangeException, "Offset invalid or out of range", 0);
-		return;
+		RETURN_THROWS();
 	}
 
-	if (Z_REFCOUNTED_P(value)) {
-		Z_ADDREF_P(value);
-	}
+	Z_TRY_ADDREF_P(value);
 	if (index == intern->llist->count) {
 		/* If index is the last entry+1 then we do a push because we're not inserting before any entry */
 		spl_ptr_llist_push(intern->llist, value);
@@ -1263,7 +1310,7 @@ SPL_METHOD(SplDoublyLinkedList, add)
 		element = spl_ptr_llist_offset(intern->llist, index, intern->flags & SPL_DLLIST_IT_LIFO);
 
 		ZVAL_COPY_VALUE(&elem->data, value);
-		elem->rc   = 1;
+		SPL_LLIST_RC(elem) = 1;
 		/* connect to the neighbours */
 		elem->next = element;
 		elem->prev = element->prev;
@@ -1285,7 +1332,7 @@ SPL_METHOD(SplDoublyLinkedList, add)
 } /* }}} */
 
 /* {{{ iterator handler table */
-zend_object_iterator_funcs spl_dllist_it_funcs = {
+static const zend_object_iterator_funcs spl_dllist_it_funcs = {
 	spl_dllist_it_dtor,
 	spl_dllist_it_valid,
 	spl_dllist_it_get_current_data,
@@ -1309,7 +1356,8 @@ zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object
 
 	zend_iterator_init((zend_object_iterator*)iterator);
 
-	ZVAL_COPY(&iterator->intern.it.data, object);
+	Z_ADDREF_P(object);
+	ZVAL_OBJ(&iterator->intern.it.data, Z_OBJ_P(object));
 	iterator->intern.it.funcs    = &spl_dllist_it_funcs;
 	iterator->intern.ce          = ce;
 	iterator->traverse_position  = dllist_object->traverse_position;
@@ -1323,67 +1371,44 @@ zend_object_iterator *spl_dllist_get_iterator(zend_class_entry *ce, zval *object
 }
 /* }}} */
 
-/*  Function/Class/Method definitions */
-ZEND_BEGIN_ARG_INFO(arginfo_dllist_setiteratormode, 0)
-	ZEND_ARG_INFO(0, flags)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dllist_push, 0)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dllist_offsetGet, 0, 0, 1)
-	ZEND_ARG_INFO(0, index)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dllist_offsetSet, 0, 0, 2)
-	ZEND_ARG_INFO(0, index)
-	ZEND_ARG_INFO(0, newval)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dllist_void, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO(arginfo_dllist_serialized, 0)
-	ZEND_ARG_INFO(0, serialized)
-ZEND_END_ARG_INFO();
-
 static const zend_function_entry spl_funcs_SplQueue[] = {
-	SPL_MA(SplQueue, enqueue, SplDoublyLinkedList, push,  arginfo_dllist_push, ZEND_ACC_PUBLIC)
-	SPL_MA(SplQueue, dequeue, SplDoublyLinkedList, shift, arginfo_dllist_void, ZEND_ACC_PUBLIC)
+	SPL_MA(SplQueue, enqueue, SplDoublyLinkedList, push,  arginfo_class_SplQueue_enqueue, ZEND_ACC_PUBLIC)
+	SPL_MA(SplQueue, dequeue, SplDoublyLinkedList, shift, arginfo_class_SplQueue_dequeue, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
 static const zend_function_entry spl_funcs_SplDoublyLinkedList[] = {
-	SPL_ME(SplDoublyLinkedList, pop,             arginfo_dllist_void,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, shift,           arginfo_dllist_void,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, push,            arginfo_dllist_push,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, unshift,         arginfo_dllist_push,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, top,             arginfo_dllist_void,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, bottom,          arginfo_dllist_void,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, isEmpty,         arginfo_dllist_void,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, setIteratorMode, arginfo_dllist_setiteratormode, ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, getIteratorMode, arginfo_dllist_void,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, pop,             arginfo_class_SplDoublyLinkedList_pop,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, shift,           arginfo_class_SplDoublyLinkedList_shift,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, push,            arginfo_class_SplDoublyLinkedList_push,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, unshift,         arginfo_class_SplDoublyLinkedList_unshift,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, top,             arginfo_class_SplDoublyLinkedList_top,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, bottom,          arginfo_class_SplDoublyLinkedList_bottom,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, isEmpty,         arginfo_class_SplDoublyLinkedList_isEmpty,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, setIteratorMode, arginfo_class_SplDoublyLinkedList_setIteratorMode, ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, getIteratorMode, arginfo_class_SplDoublyLinkedList_getIteratorMode,            ZEND_ACC_PUBLIC)
 	/* Countable */
-	SPL_ME(SplDoublyLinkedList, count,           arginfo_dllist_void,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, count,           arginfo_class_SplDoublyLinkedList_count,            ZEND_ACC_PUBLIC)
 	/* ArrayAccess */
-	SPL_ME(SplDoublyLinkedList, offsetExists,    arginfo_dllist_offsetGet,       ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, offsetGet,       arginfo_dllist_offsetGet,       ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, offsetSet,       arginfo_dllist_offsetSet,       ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, offsetUnset,     arginfo_dllist_offsetGet,       ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, offsetExists,    arginfo_class_SplDoublyLinkedList_offsetExists,       ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, offsetGet,       arginfo_class_SplDoublyLinkedList_offsetGet,       ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, offsetSet,       arginfo_class_SplDoublyLinkedList_offsetSet,       ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, offsetUnset,     arginfo_class_SplDoublyLinkedList_offsetUnset,       ZEND_ACC_PUBLIC)
 
-	SPL_ME(SplDoublyLinkedList, add,             arginfo_dllist_offsetSet,       ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, add,             arginfo_class_SplDoublyLinkedList_add,       ZEND_ACC_PUBLIC)
 
 	/* Iterator */
-	SPL_ME(SplDoublyLinkedList, rewind,          arginfo_dllist_void,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, current,         arginfo_dllist_void,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, key,             arginfo_dllist_void,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, next,            arginfo_dllist_void,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, prev,            arginfo_dllist_void,            ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList, valid,           arginfo_dllist_void,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, rewind,          arginfo_class_SplDoublyLinkedList_rewind,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, current,         arginfo_class_SplDoublyLinkedList_current,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, key,             arginfo_class_SplDoublyLinkedList_key,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, next,            arginfo_class_SplDoublyLinkedList_next,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, prev,            arginfo_class_SplDoublyLinkedList_prev,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList, valid,           arginfo_class_SplDoublyLinkedList_valid,            ZEND_ACC_PUBLIC)
 	/* Serializable */
-	SPL_ME(SplDoublyLinkedList,  unserialize,    arginfo_dllist_serialized,      ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList,  serialize,      arginfo_dllist_void,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList,  unserialize,    arginfo_class_SplDoublyLinkedList_unserialize,      ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList,  serialize,      arginfo_class_SplDoublyLinkedList_serialize,            ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList,  __unserialize,    arginfo_class_SplDoublyLinkedList___unserialize,    ZEND_ACC_PUBLIC)
+	SPL_ME(SplDoublyLinkedList,  __serialize,      arginfo_class_SplDoublyLinkedList___serialize,          ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -1391,7 +1416,7 @@ static const zend_function_entry spl_funcs_SplDoublyLinkedList[] = {
 PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 {
 	REGISTER_SPL_STD_CLASS_EX(SplDoublyLinkedList, spl_dllist_object_new, spl_funcs_SplDoublyLinkedList);
-	memcpy(&spl_handler_SplDoublyLinkedList, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&spl_handler_SplDoublyLinkedList, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplDoublyLinkedList.offset = XtOffsetOf(spl_dllist_object, std);
 	spl_handler_SplDoublyLinkedList.clone_obj = spl_dllist_object_clone;
@@ -1422,12 +1447,3 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 	return SUCCESS;
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
- */

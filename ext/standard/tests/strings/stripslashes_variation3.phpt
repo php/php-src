@@ -25,25 +25,25 @@ This is line 2 \tof "heredoc" string
 EOT;
 // initialising the string array
 
-$str_array = array( 
+$str_array = array(
                     // string with newline character
                     "\n",
-		    "\\n",
+            "\\n",
                     "Hello \nworld",
                     "Hello \\nworld",
                     '\n',
-		    '\\n',
+            '\\n',
                     'Hello \nworld',
                     'Hello \\nworld',
                     $heredoc_string_with_newline,
- 
+
                     // string with tab character
- 		    "\t",
-		    "\\t",
+            "\t",
+            "\\t",
                     "Hello \tworld",
                     "Hello \\tworld",
- 		    '\t',
-		    '\\t',
+            '\t',
+            '\\t',
                     'Hello \tworld',
                     'Hello \\tworld',
                     $heredoc_string_with_tab
@@ -59,7 +59,7 @@ foreach( $str_array as $str )  {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stripslashes() : with strings containing newline and tab characters ***
 
 -- Iteration 1 --

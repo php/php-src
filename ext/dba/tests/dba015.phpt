@@ -1,16 +1,16 @@
 --TEST--
 DBA with persistent connections
 --SKIPIF--
-<?php 
+<?php
 $handler = "flatfile";
-require_once(dirname(__FILE__) .'/skipif.inc');
+require_once(__DIR__ .'/skipif.inc');
 die("info $HND handler used");
 ?>
 --FILE--
 <?php
 
 $handler = "flatfile";
-require_once(dirname(__FILE__) .'/test.inc');
+require_once(__DIR__ .'/test.inc');
 echo "database handler: $handler\n";
 
 echo "Test 1\n";
@@ -48,10 +48,9 @@ echo dba_fetch("key1", $db_file1), "\n";
 echo dba_fetch("key2", $db_file1), "\n";
 
 ?>
-===DONE===
 --CLEAN--
-<?php 
-	require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+	require(__DIR__ .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: flatfile
@@ -71,4 +70,3 @@ resource(%d) of type (Unknown)
 Test 6 - query after closing 2nd resource
 This is a test insert 1
 This is a test insert 2
-===DONE===

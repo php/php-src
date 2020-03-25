@@ -6,8 +6,8 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : string vprintf(string $format , aaray $args)
- * Description: Output a formatted string 
+/* Prototype  : string vprintf(string $format , array $args)
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -35,7 +35,6 @@ echo "\n";
 var_dump($result);
 
 ?>
-===DONE===
 --EXPECT--
 *** Testing vprintf() : basic functionality - using unsigned format ***
 4294966185
@@ -44,4 +43,3 @@ int(10)
 int(21)
 4294966185 4293732729 4292621864
 int(32)
-===DONE===

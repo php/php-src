@@ -7,17 +7,17 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 --FILE--
 <?php
 /* Prototype: bool is_int ( mixed $var );
- * Description: Finds whether the given variable is an integer  
+ * Description: Finds whether the given variable is an integer
  */
 
 echo "*** Testing is_int(), is_integer() & is_long()  with valid integer values ***\n";
-// different valid  integer vlaues 
+// different valid  integer values
 $valid_ints = array(
   0,
   1,
   -1,
   -2147483648, // max negative integer value
-  -2147483647, 
+  -2147483647,
   2147483647,  // max positive integer value
   2147483640,
   0x123B,      // integer as hexadecimal
@@ -32,11 +32,11 @@ $valid_ints = array(
   -020000000000, // max negative integer as octal
   017777777777,  // max positive integer as octal
 );
-/* loop to check that is_int() recognizes different 
+/* loop to check that is_int() recognizes different
    integer values, expected output: bool(true) */
 $loop_counter = 1;
 foreach ($valid_ints as $int_val ) {
-   echo "--Iteration $loop_counter--\n"; $loop_counter++;   
+   echo "--Iteration $loop_counter--\n"; $loop_counter++;
    var_dump( is_int($int_val) );
    var_dump( is_integer($int_val) );
    var_dump( is_long($int_val) );
@@ -46,22 +46,22 @@ echo "\n*** Testing is_int(), is_integer() & is_long() with  non integer values 
 
 // resource type variable
 $fp = fopen (__FILE__, "r");
-$dfp = opendir ( dirname(__FILE__) );
+$dfp = opendir ( __DIR__ );
 // unset variable
 
 $unset_var = 10;
 unset ($unset_var);
 
-// other types in a array 
+// other types in a array
 $not_int_types = array (
   /* float values */
   -2147483649, // float value
   2147483648,  // float value
   -0x80000001, // float value, beyond max negative int
   0x800000001, // float value, beyond max positive int
-  020000000001, // float value, beyond max positive int 
-  -020000000001, // float value, beyond max negative int 
-  0.0,  
+  020000000001, // float value, beyond max positive int
+  -020000000001, // float value, beyond max negative int
+  0.0,
   -0.1,
   1.0,
   1e5,
@@ -70,14 +70,14 @@ $not_int_types = array (
   -1E9,
   10.0000000000000000005,
   10.5e+5,
- 
+
   /* objects */
   new stdclass,
 
   /* resources */
   $fp,
   $dfp,
-  
+
   /* arrays */
   array(),
   array(0),
@@ -91,7 +91,7 @@ $not_int_types = array (
   array(FALSE),
   array(1,2,3,4),
   array(1 => "One", "two" => 2),
-  
+
   /* strings */
   "",
   '',
@@ -119,30 +119,19 @@ $not_int_types = array (
   FALSE,
 
   /* undefined and unset vars */
-  @$unset_var, 
+  @$unset_var,
   @$undefined_var
 );
-/* loop through the $not_int_types to see working of 
+/* loop through the $not_int_types to see working of
    is_int() on non integer types, expected output: bool(false) */
 $loop_counter = 1;
 foreach ($not_int_types as $type ) {
-   echo "--Iteration $loop_counter--\n"; $loop_counter++;   
+   echo "--Iteration $loop_counter--\n"; $loop_counter++;
    var_dump( is_int($type) );
    var_dump( is_integer($type) );
    var_dump( is_long($type) );
 }
 
-echo "\n*** Testing error conditions ***\n";
-//Zero argument
-var_dump( is_int() );
-var_dump( is_integer() );
-var_dump( is_long() );
-
-//arguments more than expected 
-var_dump( is_int(TRUE, FALSE) );
-var_dump( is_integer(TRUE, FALSE) );
-var_dump( is_long(TRUE, FALSE) );
- 
 echo "Done\n";
 
 // close the resources
@@ -441,25 +430,5 @@ bool(false)
 --Iteration 54--
 bool(false)
 bool(false)
-bool(false)
-
-*** Testing error conditions ***
-
-Warning: is_int() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: is_integer() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: is_long() expects exactly 1 parameter, 0 given in %s on line %d
-bool(false)
-
-Warning: is_int() expects exactly 1 parameter, 2 given in %s on line %d
-bool(false)
-
-Warning: is_integer() expects exactly 1 parameter, 2 given in %s on line %d
-bool(false)
-
-Warning: is_long() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 Done

@@ -9,10 +9,10 @@ session.auto_start=1
 
 ob_start();
 
-/* 
+/*
  * Prototype : bool session_commit(void)
  * Description : Write session data and end session
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_commit() : variation ***\n";
@@ -26,14 +26,13 @@ var_dump(session_destroy());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_commit() : variation ***
 array(0) {
 }
-NULL
+bool(true)
 array(0) {
 }
 bool(true)
 bool(true)
 Done
-

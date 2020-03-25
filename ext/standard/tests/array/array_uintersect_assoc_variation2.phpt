@@ -1,11 +1,11 @@
 --TEST--
-Test array_uintersect_assoc() function : usage variation 
+Test array_uintersect_assoc() function : usage variation
 --FILE--
 <?php
 /* Prototype  : array array_uintersect_assoc(array arr1, array arr2 [, array ...], callback data_compare_func)
  * Description: U
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_uintersect_assoc() : usage variation ***\n";
@@ -23,9 +23,9 @@ unset ($unset_var);
 // define some classes
 class classWithToString
 {
-	public function __toString() {
-		return "Class A object";
-	}
+    public function __toString() {
+        return "Class A object";
+    }
 }
 
 class classWithoutToString
@@ -91,137 +91,89 @@ $inputs = array(
 // loop through each element of the array for arr2
 
 foreach($inputs as $key =>$value) {
-      echo "\n--$key--\n";
-      var_dump( array_uintersect_assoc($arr1, $value, $data_compare_function) );
+    echo "\n--$key--\n";
+    try {
+        var_dump( array_uintersect_assoc($arr1, $value, $data_compare_function) );
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
 };
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_uintersect_assoc() : usage variation ***
 
 --int 0--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, int given
 
 --int 1--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, int given
 
 --int 12345--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, int given
 
 --int -12345--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, int given
 
 --float 10.5--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, float given
 
 --float -10.5--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, float given
 
 --float 12.3456789000e10--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, float given
 
 --float -12.3456789000e10--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, float given
 
 --float .5--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, float given
 
 --uppercase NULL--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, null given
 
 --lowercase null--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, null given
 
 --lowercase true--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, bool given
 
 --lowercase false--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, bool given
 
 --uppercase TRUE--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, bool given
 
 --uppercase FALSE--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, bool given
 
 --empty string DQ--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 --empty string SQ--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 --string DQ--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 --string SQ--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 --mixed case string--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 --heredoc--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, string given
 
 --instance of classWithToString--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, object given
 
 --instance of classWithoutToString--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, object given
 
 --undefined var--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, null given
 
 --unset var--
-
-Warning: array_uintersect_assoc(): Argument #2 is not an array in %sarray_uintersect_assoc_variation2.php on line %d
-NULL
-===DONE===
+array_uintersect_assoc(): Argument #2 ($arr2) must be of type array, null given

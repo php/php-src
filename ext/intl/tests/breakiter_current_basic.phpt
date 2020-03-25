@@ -18,11 +18,9 @@ var_dump($bi->current());
 var_dump($bi->next());
 var_dump($bi->current());
 ?>
-==DONE==
 --EXPECT--
 int(0)
 int(0)
 int(0)
 int(3)
 int(3)
-==DONE==

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,7 +13,6 @@
    | Author: Hartmut Holzgraefe <hholzgra@php.net>                        |
    +----------------------------------------------------------------------+
  */
-/* $Id$ */
 
 #include "php.h"
 #include <stdlib.h>
@@ -102,21 +99,21 @@ PHP_FUNCTION(levenshtein)
 	switch (argc) {
 		case 2: /* just two strings: use maximum performance version */
 			if (zend_parse_parameters(2, "ss", &str1, &str1_len, &str2, &str2_len) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			distance = reference_levdist(str1, str1_len, str2, str2_len, 1, 1, 1);
 			break;
 
 		case 5: /* more general version: calc cost by ins/rep/del weights */
 			if (zend_parse_parameters(5, "sslll", &str1, &str1_len, &str2, &str2_len, &cost_ins, &cost_rep, &cost_del) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			distance = reference_levdist(str1, str1_len, str2, str2_len, cost_ins, cost_rep, cost_del);
 			break;
 
 		case 3: /* most general version: calc cost by user-supplied function */
 			if (zend_parse_parameters(3, "sss", &str1, &str1_len, &str2, &str2_len, &callback_name, &callback_len) == FAILURE) {
-				return;
+				RETURN_THROWS();
 			}
 			distance = custom_levdist(str1, str2, callback_name);
 			break;
@@ -132,12 +129,3 @@ PHP_FUNCTION(levenshtein)
 	RETURN_LONG(distance);
 }
 /* }}} */
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

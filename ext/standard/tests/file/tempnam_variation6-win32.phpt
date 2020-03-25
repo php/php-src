@@ -6,7 +6,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 <?php
 if(substr(PHP_OS, 0, 3) != "WIN")
   die("skip Windows Only");
-?> 
+?>
 --FILE--
 <?php
 /* Prototype:  string tempnam ( string $dir, string $prefix );
@@ -15,7 +15,7 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 
 /* Trying to create unique files by passing previously created unique file name as prefix */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "\n*** Test tempnam(): by passing previously created filenames ***\n";
 $file_name = "tempnam_variation6.tmp";
@@ -27,10 +27,10 @@ for($i=1; $i<=3; $i++) {
     echo "File name is => ";
     print($file_name);
     echo "\n";
-    
+
     echo "File created in => ";
     $file_dir = dirname($file_name);
-        
+
     if ($file_dir == sys_get_temp_dir()) {
        echo "temp dir\n";
     }
@@ -39,7 +39,7 @@ for($i=1; $i<=3; $i++) {
     }
     else {
        echo "unknown location\n";
-    }    
+    }
  }
 
   unlink($file_name);

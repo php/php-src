@@ -1,7 +1,7 @@
 --TEST--
 Bug #41523 (strtotime('0000-00-00 00:00:00') is parsed as 1999-11-30) (32 bit)
 --SKIPIF--
-<?php echo PHP_INT_SIZE == 8 ? "skip 32-bit only" : "OK"; ?>
+<?php if (PHP_INT_SIZE == 8) die("skip 32-bit only"); ?>
 --FILE--
 <?php
 date_default_timezone_set("UTC");

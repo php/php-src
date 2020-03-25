@@ -11,8 +11,8 @@ assert.bail=true
 --FILE--
 <?php
 $doc = new DOMDocument();
-$result = $doc->loadHTMLFile(dirname(__FILE__) . "/ffff/test.html");
-assert('$result === false');
+$result = $doc->loadHTMLFile(__DIR__ . "/ffff/test.html");
+assert($result === false);
 ?>
 --EXPECTF--
 %r(PHP ){0,1}%rWarning: DOMDocument::loadHTMLFile(): I/O warning : failed to load external entity %s

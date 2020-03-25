@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,11 +32,18 @@ enum {
 	P_LOG
 };
 
-PHPDBG_API int phpdbg_print(int severity, int fd, const char *tag, const char *xmlfmt, const char *strfmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 5, 6);
-PHPDBG_API int phpdbg_xml_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
-PHPDBG_API int phpdbg_log_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
-PHPDBG_API int phpdbg_out_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
-PHPDBG_API int phpdbg_rlog_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
+/* phpdbg uses lots of custom format specifiers, so we disable format checks by default. */
+#if defined(PHPDBG_CHECK_FORMAT_STRINGS)
+# define PHPDBG_ATTRIBUTE_FORMAT(type, idx, first) PHP_ATTRIBUTE_FORMAT(type, idx, first)
+#else
+# define PHPDBG_ATTRIBUTE_FORMAT(type, idx, first)
+#endif
+
+PHPDBG_API int phpdbg_print(int severity, int fd, const char *tag, const char *xmlfmt, const char *strfmt, ...) PHPDBG_ATTRIBUTE_FORMAT(printf, 5, 6);
+PHPDBG_API int phpdbg_xml_internal(int fd, const char *fmt, ...) PHPDBG_ATTRIBUTE_FORMAT(printf, 2, 3);
+PHPDBG_API int phpdbg_log_internal(int fd, const char *fmt, ...) PHPDBG_ATTRIBUTE_FORMAT(printf, 2, 3);
+PHPDBG_API int phpdbg_out_internal(int fd, const char *fmt, ...) PHPDBG_ATTRIBUTE_FORMAT(printf, 2, 3);
+PHPDBG_API int phpdbg_rlog_internal(int fd, const char *fmt, ...) PHPDBG_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 #define phpdbg_error(tag, xmlfmt, strfmt, ...)              phpdbg_print(P_ERROR  , PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
 #define phpdbg_notice(tag, xmlfmt, strfmt, ...)             phpdbg_print(P_NOTICE , PHPDBG_G(io)[PHPDBG_STDOUT].fd, tag,  xmlfmt, strfmt, ##__VA_ARGS__)
@@ -59,9 +64,6 @@ PHPDBG_API int phpdbg_rlog_internal(int fd, const char *fmt, ...) PHP_ATTRIBUTE_
 #define phpdbg_out_ex(out, fmt, ...) phpdbg_out_internal(out, fmt, ##__VA_ARGS__)
 
 #define phpdbg_rlog(fd, fmt, ...) phpdbg_rlog_internal(fd, fmt, ##__VA_ARGS__)
-
-#define phpdbg_xml_asprintf(buf, ...) _phpdbg_xml_asprintf(buf, ##__VA_ARGS__)
-PHPDBG_API int _phpdbg_xml_asprintf(char **buf, const char *format, zend_bool escape_xml, ...);
 
 #define phpdbg_asprintf(buf, ...) _phpdbg_asprintf(buf, ##__VA_ARGS__)
 PHPDBG_API int _phpdbg_asprintf(char **buf, const char *format, ...);

@@ -9,7 +9,7 @@ Test is_dir() function: usage variations - dir/subdir
 
 /* Testing is_dir() with base and sub dirs */
 
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 
 echo "-- Testing is_dir() with an empty dir --\n";
 $dirname = $file_path."/is_dir_variation1";
@@ -27,12 +27,12 @@ echo "\n*** Done ***";
 ?>
 --CLEAN--
 <?php
-$file_path = dirname(__FILE__);
+$file_path = __DIR__;
 $dir_name = $file_path."/is_dir_variation1";
 rmdir($dir_name."/is_dir_variation1_sub");
 rmdir($dir_name);
 ?>
---EXPECTF--
+--EXPECT--
 -- Testing is_dir() with an empty dir --
 bool(true)
 -- Testing is_dir() with a subdir in base dir --

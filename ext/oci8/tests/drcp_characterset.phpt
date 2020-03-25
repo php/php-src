@@ -5,7 +5,7 @@ DRCP: oci_pconnect() and oci_connect() with different character sets
 --FILE--
 <?php
 
-require dirname(__FILE__)."/details.inc";
+require __DIR__."/details.inc";
 
 // Create connections with oci_connect and oci_pconnect with UTF8 as Charset
 
@@ -31,17 +31,17 @@ var_dump($p2);
 //character sets
 
 if((int)$c1 === (int)$c2)
-	echo "First and third connections share a resource: NOT OK\n";
+    echo "First and third connections share a resource: NOT OK\n";
 else
-	echo "First and third  connections are different: OK\n";
+    echo "First and third  connections are different: OK\n";
 
 // The two connections p1 and p2 should not share resources as they use different
 //character sets
 
 if((int)$p1 === (int)$p2)
-	echo "Second and fourth connections share a resource: NOT OK\n";
+    echo "Second and fourth connections share a resource: NOT OK\n";
 else
-	echo "Second and fourth connections are different: OK\n";
+    echo "Second and fourth connections are different: OK\n";
 
 // Close all the connections
 oci_close($c1);

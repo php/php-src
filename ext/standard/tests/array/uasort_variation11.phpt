@@ -3,7 +3,7 @@ Test uasort() function : usage variations - different associative arrays
 --FILE--
 <?php
 /* Prototype  : bool uasort(array $array_arg, string $cmp_function)
- * Description: Sort an array with a user-defined comparison function and maintain index association 
+ * Description: Sort an array with a user-defined comparison function and maintain index association
  * Source code: ext/standard/array.c
 */
 
@@ -19,7 +19,7 @@ echo "*** Testing uasort() : sorting different associative arrays ***\n";
  * Return value : 0 - if both values are same
  *                1 - if value1 is greater than value2
  *               -1 - if value1 is less than value2
- * Description : compares value1 and value2 
+ * Description : compares value1 and value2
  */
 function cmp($value1, $value2)
 {
@@ -47,7 +47,7 @@ var_dump($array_arg);
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing uasort() : sorting different associative arrays ***
 -- Array with duplicate keys --
 bool(true)

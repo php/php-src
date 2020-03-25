@@ -9,7 +9,7 @@ class Test
         echo __METHOD__ . "($msg)\n";
         throw new Exception($msg);
     }
-    
+
     function __destruct() {
         echo __METHOD__ . "\n";
     }
@@ -26,8 +26,6 @@ catch (Exception $e)
 }
 
 ?>
-===DONE===
 --EXPECT--
 Test::__construct(Hello)
 Caught Exception(Hello)
-===DONE===

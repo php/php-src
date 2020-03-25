@@ -4,24 +4,24 @@ Bug #51822 (Segfault with strange __destruct() for static class variables)
 <?php
 class DestructableObject
 {
-	public function __destruct()
-	{
-		echo "2\n";
-	}	
+    public function __destruct()
+    {
+        echo "2\n";
+    }
 }
 
 class DestructorCreator
 {
-	public function __destruct()
-	{
-		$this->test = new DestructableObject;	
-		echo "1\n";
-	}
+    public function __destruct()
+    {
+        $this->test = new DestructableObject;
+        echo "1\n";
+    }
 }
 
 class Test
 {
-	public static $mystatic;
+    public static $mystatic;
 }
 
 // Uncomment this to avoid segfault
@@ -30,7 +30,7 @@ class Test
 $x = new Test();
 
 if (!isset(Test::$mystatic))
-	Test::$mystatic = new DestructorCreator();
+    Test::$mystatic = new DestructorCreator();
 
 echo "bla\n";
 ?>

@@ -3,59 +3,59 @@ Bug #42134 (Collection error for invalid collection name)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+require(__DIR__.'/skipif.inc');
+?>
 --FILE--
 <?php
 
-require(dirname(__FILE__).'/details.inc');
+require(__DIR__.'/details.inc');
 
 // Test collection creation error for normal connection
 
 if (!empty($dbase)) {
-	$c = oci_connect($user,$password,$dbase);
+    $c = oci_connect($user,$password,$dbase);
 }
 else {
-	$c = oci_connect($user,$password);
+    $c = oci_connect($user,$password);
 }
 
 $collection = oci_new_collection($c, "ABC");
 if (!$collection) {
-	echo "Normal connection: New Collection error\n";
-	$m = oci_error($c);
-	var_dump($m);
+    echo "Normal connection: New Collection error\n";
+    $m = oci_error($c);
+    var_dump($m);
 }
 
 // Test collection creation error for new connection
 
 if (!empty($dbase)) {
-	$c = oci_new_connect($user,$password,$dbase);
+    $c = oci_new_connect($user,$password,$dbase);
 }
 else {
-	$c = oci_new_connect($user,$password);
+    $c = oci_new_connect($user,$password);
 }
 
 $collection = oci_new_collection($c, "DEF");
 if (!$collection) {
-	echo "New connection: New Collection error\n";
-	$m = oci_error($c);
-	var_dump($m);
+    echo "New connection: New Collection error\n";
+    $m = oci_error($c);
+    var_dump($m);
 }
 
 // Test collection creation error for persistent connection
 
 if (!empty($dbase)) {
-	$c = oci_pconnect($user,$password,$dbase);
+    $c = oci_pconnect($user,$password,$dbase);
 }
 else {
-	$c = oci_pconnect($user,$password);
+    $c = oci_pconnect($user,$password);
 }
 
 $collection = oci_new_collection($c, "GHI");
 if (!$collection) {
-	echo "Persistent connection: New Collection error\n";
-	$m = oci_error($c);
-	var_dump($m);
+    echo "Persistent connection: New Collection error\n";
+    $m = oci_error($c);
+    var_dump($m);
 }
 
 echo "Done\n";

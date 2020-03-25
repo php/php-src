@@ -31,7 +31,9 @@ NULL
 Notice: Undefined index: epic_magic in %sbug62978.php on line %d
 NULL
 
-Notice: Undefined variable: c in %sbug62978.php on line %d
+Warning: Undefined variable: c in %s on line %d
+
+Warning: Trying to access array offset on value of type null in %s on line %d
 NULL
 
 Notice: Undefined index: epic_magic in %sbug62978.php on line %d
@@ -44,7 +46,7 @@ Notice: Undefined index: epic_magic in %sbug62978.php on line %d
 NULL
 bool(false)
 
-Notice: Resource ID#%d used as offset, casting to integer (%d) in %sbug62978.php on line %d
+Warning: Resource ID#%d used as offset, casting to integer (%d) in %sbug62978.php on line %d
 
 Notice: Undefined offset: %d in %sbug62978.php on line %d
 NULL

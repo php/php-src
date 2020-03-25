@@ -2,7 +2,7 @@
 Bug #60159 (Router returns false, but POST is not passed to requested resource)
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -28,9 +28,9 @@ Content-Length: 3
 a=b
 HEADER
 )) {
-	while (!feof($fp)) {
-		echo fgets($fp);
-	}
+    while (!feof($fp)) {
+        echo fgets($fp);
+    }
 }
 
 fclose($fp);

@@ -9,22 +9,18 @@ $xml = simplexml_load_string("<root></root>");
 $xml->bla->posts->name = "FooBar";
 echo $xml->asXML();
 $xml = simplexml_load_string("<root></root>");
-$count = count($xml->bla->posts);
-var_dump($count);
-$xml->bla->posts[$count]->name = "FooBar";
+var_dump(isset($xml->bla->posts));
+$xml->bla->posts[0]->name = "FooBar";
 echo $xml->asXML();
 $xml = simplexml_load_string("<root></root>");
 $xml->bla->posts[]->name = "FooBar";
 echo $xml->asXML();
 ?>
-===DONE===
-<?php exit(0); __halt_compiler(); ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0"?>
 <root><bla><posts><name>FooBar</name></posts></bla></root>
-int(0)
+bool(false)
 <?xml version="1.0"?>
 <root><bla><posts><name>FooBar</name></posts></bla></root>
 <?xml version="1.0"?>
 <root><bla><posts><name>FooBar</name></posts></bla></root>
-===DONE===

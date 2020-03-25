@@ -14,17 +14,15 @@ $xml_str = <<<EOD
 </c_fpobel>
 EOD;
 
-$xml = simplexml_load_string ($xml_str) ;
+$xml = simplexml_load_string($xml_str);
 
 $val = 1;
 
 var_dump($val);
-$zml->pos["act_idx"] = $val;
-var_dump($val) ;
+$xml->pos["act_idx"] = $val;
+var_dump($val);
 
 ?>
-===DONE===
---EXPECT--	
+--EXPECT--
 int(1)
 int(1)
-===DONE===

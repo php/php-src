@@ -3,7 +3,7 @@ Bug #18556 (Setting locale to 'tr_TR' lowercases class names)
 --FILE--
 <?php
 $g_lang = 'tr_TR';
-putenv("LANG=$g_lang"); 
+putenv("LANG=$g_lang");
 setlocale(LC_ALL, $g_lang);
 
 class InfoBlob {
@@ -23,8 +23,8 @@ echo "\n";
 setlocale(LC_ALL, "tr_TR.utf8");
 foreach(get_declared_classes() as $class)
 {
-	if(!class_exists($class))
-		echo "$class No Longer Exists!\n";
+    if(!class_exists($class))
+        echo "$class No Longer Exists!\n";
 
 }
 echo "Done.\n";

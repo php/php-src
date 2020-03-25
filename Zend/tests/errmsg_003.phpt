@@ -4,10 +4,10 @@ errmsg: cannot reassign $this (by ref)
 <?php
 
 class test {
-	function foo() {
-		$a = new test;
-		$this = &$a;
-	}
+    function foo() {
+        $a = new test;
+        $this = &$a;
+    }
 }
 
 $t = new test;
@@ -15,5 +15,5 @@ $t->foo();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Cannot re-assign $this in %s on line %d

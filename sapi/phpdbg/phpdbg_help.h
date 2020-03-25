@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,4 +43,6 @@ typedef struct _phpdbg_help_text_t {
 } phpdbg_help_text_t;
 
 extern phpdbg_help_text_t phpdbg_help_text[];
+
+extern void phpdbg_do_help_cmd(char *type);
 #endif /* PHPDBG_HELP_H */

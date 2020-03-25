@@ -11,6 +11,8 @@ if(!function_exists('imagecreatetruecolor')) {
 ?>
 --FILE--
 <?php
+require  __DIR__ . '/func.inc';
+
 /* Prototype  : int imagecolorallocate(resource im, int red, int green, int blue)
  * Description:  Allocate a color for an image
  * Source code: ext/gd/gd.c
@@ -18,12 +20,12 @@ if(!function_exists('imagecreatetruecolor')) {
 echo "*** Testing imagecolorallocate() : usage variations ***\n";
 
 $values = array(
-      //Decimal integera data  
+      //Decimal integera data
       "Decimal 256" => 256,
-      
+
       // octal integer data
       "Octal 0400" => 0400,
-     
+
       // hexa-decimal integer data
       "Hexa-decimal 0x100" => 0x100
 );
@@ -34,23 +36,40 @@ foreach($values as $key => $value) {
       //Need to be created every time to get expected return value
       $im_palette = imagecreate(200, 200);
       $im_true_color = imagecreatetruecolor(200, 200);
-      var_dump( imagecolorallocate($im_palette, $value, $value, $value) );
-      var_dump( imagecolorallocate($im_true_color, $value, $value, $value) );
+
+      trycatch_dump(
+          fn() => imagecolorallocate($im_palette, $value, 0, 0),
+          fn() => imagecolorallocate($im_true_color, $value, 0, 0),
+          fn() => imagecolorallocate($im_palette, 0, $value, 0),
+          fn() => imagecolorallocate($im_true_color, 0, $value, 0),
+          fn() => imagecolorallocate($im_palette, 0, 0, $value),
+          fn() => imagecolorallocate($im_true_color, 0, 0, $value)
+      );
 };
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing imagecolorallocate() : usage variations ***
 
 --Decimal 256--
-int(0)
-int(16843008)
+!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
 
 --Octal 0400--
-int(0)
-int(16843008)
+!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
 
 --Hexa-decimal 0x100--
-int(0)
-int(16843008)
-===DONE===
+!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)

@@ -1,8 +1,6 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) The PHP Group                                          |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -15,10 +13,6 @@
    | Author: Vlad Krupin <phpdevel@echospace.com>                         |
    +----------------------------------------------------------------------+
 */
-
-/* $Id$ */
-
-#define IS_EXT_MODULE
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -38,6 +32,7 @@
 #include "php_pspell.h"
 #include <pspell.h>
 #include "ext/standard/info.h"
+#include "pspell_arginfo.h"
 
 #define PSPELL_FAST 1L
 #define PSPELL_NORMAL 2L
@@ -71,110 +66,6 @@ static PHP_FUNCTION(pspell_config_dict_dir);
 static PHP_FUNCTION(pspell_config_data_dir);
 static PHP_FUNCTION(pspell_config_repl);
 static PHP_FUNCTION(pspell_config_save_repl);
-
-/* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new, 0, 0, 1)
-	ZEND_ARG_INFO(0, language)
-	ZEND_ARG_INFO(0, spelling)
-	ZEND_ARG_INFO(0, jargon)
-	ZEND_ARG_INFO(0, encoding)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new_personal, 0, 0, 2)
-	ZEND_ARG_INFO(0, personal)
-	ZEND_ARG_INFO(0, language)
-	ZEND_ARG_INFO(0, spelling)
-	ZEND_ARG_INFO(0, jargon)
-	ZEND_ARG_INFO(0, encoding)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_new_config, 0, 0, 1)
-	ZEND_ARG_INFO(0, config)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_check, 0, 0, 2)
-	ZEND_ARG_INFO(0, pspell)
-	ZEND_ARG_INFO(0, word)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_suggest, 0, 0, 2)
-	ZEND_ARG_INFO(0, pspell)
-	ZEND_ARG_INFO(0, word)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_store_replacement, 0, 0, 3)
-	ZEND_ARG_INFO(0, pspell)
-	ZEND_ARG_INFO(0, misspell)
-	ZEND_ARG_INFO(0, correct)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_add_to_personal, 0, 0, 2)
-	ZEND_ARG_INFO(0, pspell)
-	ZEND_ARG_INFO(0, word)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_add_to_session, 0, 0, 2)
-	ZEND_ARG_INFO(0, pspell)
-	ZEND_ARG_INFO(0, word)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_clear_session, 0, 0, 1)
-	ZEND_ARG_INFO(0, pspell)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_save_wordlist, 0, 0, 1)
-	ZEND_ARG_INFO(0, pspell)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_create, 0, 0, 1)
-	ZEND_ARG_INFO(0, language)
-	ZEND_ARG_INFO(0, spelling)
-	ZEND_ARG_INFO(0, jargon)
-	ZEND_ARG_INFO(0, encoding)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_runtogether, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, runtogether)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_mode, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, mode)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_ignore, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, ignore)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_personal, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, personal)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_dict_dir, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, directory)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_data_dir, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, directory)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_repl, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, repl)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pspell_config_save_repl, 0, 0, 2)
-	ZEND_ARG_INFO(0, conf)
-	ZEND_ARG_INFO(0, save)
-ZEND_END_ARG_INFO()
-/* }}} */
 
 /* {{{ pspell_functions[]
  */
@@ -283,7 +174,7 @@ static PHP_FUNCTION(pspell_new)
 
 	if (zend_parse_parameters(argc, "s|sssl", &language, &language_len, &spelling, &spelling_len,
 		&jargon, &jargon_len, &encoding, &encoding_len, &mode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	config = new_pspell_config();
@@ -380,7 +271,7 @@ static PHP_FUNCTION(pspell_new_personal)
 
 	if (zend_parse_parameters(argc, "ps|sssl", &personal, &personal_len, &language, &language_len,
 		&spelling, &spelling_len, &jargon, &jargon_len, &encoding, &encoding_len, &mode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	config = new_pspell_config();
@@ -472,7 +363,7 @@ static PHP_FUNCTION(pspell_new_config)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &conf) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -501,7 +392,7 @@ static PHP_FUNCTION(pspell_check)
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &scin, &word, &word_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -526,7 +417,7 @@ static PHP_FUNCTION(pspell_suggest)
 	const char *sug;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &scin, &word, &word_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -557,7 +448,7 @@ static PHP_FUNCTION(pspell_store_replacement)
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lss", &scin, &miss, &miss_len, &corr, &corr_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -582,7 +473,7 @@ static PHP_FUNCTION(pspell_add_to_personal)
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &scin, &word, &word_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -612,7 +503,7 @@ static PHP_FUNCTION(pspell_add_to_session)
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &scin, &word, &word_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -640,7 +531,7 @@ static PHP_FUNCTION(pspell_clear_session)
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &scin) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -663,7 +554,7 @@ static PHP_FUNCTION(pspell_save_wordlist)
 	PspellManager *manager;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &scin) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_MANAGER;
@@ -699,7 +590,7 @@ static PHP_FUNCTION(pspell_config_create)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|sss", &language, &language_len, &spelling, &spelling_len,
 		&jargon, &jargon_len, &encoding, &encoding_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	config = new_pspell_config();
@@ -757,7 +648,7 @@ static PHP_FUNCTION(pspell_config_runtogether)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lb", &conf, &runtogether) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -768,7 +659,7 @@ static PHP_FUNCTION(pspell_config_runtogether)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_mode(int conf, long mode)
+/* {{{ proto bool pspell_config_mode(int conf, int mode)
    Select mode for config (PSPELL_FAST, PSPELL_NORMAL or PSPELL_BAD_SPELLERS) */
 static PHP_FUNCTION(pspell_config_mode)
 {
@@ -776,7 +667,7 @@ static PHP_FUNCTION(pspell_config_mode)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &conf, &mode) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -803,7 +694,7 @@ static PHP_FUNCTION(pspell_config_ignore)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &conf, &ignore) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -823,7 +714,7 @@ static void pspell_config_path(INTERNAL_FUNCTION_PARAMETERS, char *option)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lp", &conf, &value, &value_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -871,7 +762,7 @@ static PHP_FUNCTION(pspell_config_repl)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lp", &conf, &repl, &repl_len) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -897,7 +788,7 @@ static PHP_FUNCTION(pspell_config_save_repl)
 	PspellConfig *config;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lb", &conf, &save) == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	PSPELL_FETCH_CONFIG;
@@ -919,12 +810,3 @@ static PHP_MINFO_FUNCTION(pspell)
 /* }}} */
 
 #endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: sw=4 ts=4 fdm=marker
- * vim<600: sw=4 ts=4
- */

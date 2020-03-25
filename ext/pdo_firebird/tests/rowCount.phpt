@@ -1,14 +1,11 @@
 --TEST--
 PDO_Firebird: rowCount
 --SKIPIF--
-<?php extension_loaded("pdo_firebird") or die("skip"); ?>
-<?php function_exists("ibase_query") or die("skip"); ?>
+<?php require('skipif.inc'); ?>
 --FILE--
-<?php /* $Id$ */
+<?php
 
 require("testdb.inc");
-
-$dbh = new PDO("firebird:dbname=$test_base",$user,$password) or die;
 
 @$dbh->exec('DROP TABLE testz');
 $dbh->exec('CREATE TABLE testz (A VARCHAR(10))');

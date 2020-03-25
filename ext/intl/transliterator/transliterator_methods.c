@@ -1,7 +1,5 @@
 /*
    +----------------------------------------------------------------------+
-   | PHP Version 7                                                        |
-   +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
@@ -33,7 +31,7 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 	UChar	              *ustr_id    = NULL;
 	int32_t               ustr_id_len = 0;
 	UTransliterator       *utrans;
-	UParseError           parse_error   = {0, -1};
+	UParseError           parse_error;
 
 	intl_error_reset( NULL );
 
@@ -53,7 +51,7 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 	{
 		intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) );
 		intl_error_set_custom_msg( NULL, "String conversion of id to UTF-16 failed", 0 );
-		zval_dtor( object );
+		zval_ptr_dtor( object );
 		return FAILURE;
 	}
 
@@ -79,7 +77,7 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 			intl_error_set_custom_msg( NULL, buf, /* copy message */ 1 );
 			efree( buf );
 		}
-		zval_dtor( object );
+		zval_ptr_dtor( object );
 		return FAILURE;
 	}
 
@@ -90,7 +88,7 @@ static int create_transliterator( char *str_id, size_t str_id_len, zend_long dir
 		intl_error_set_code( NULL, TRANSLITERATOR_ERROR_CODE( to ) );
 		intl_error_set_custom_msg( NULL,
 			"transliterator_create: internal constructor call failed", 0 );
-		zval_dtor( object );
+		zval_ptr_dtor( object );
 		return FAILURE;
 	}
 
@@ -115,9 +113,7 @@ PHP_FUNCTION( transliterator_create )
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|l",
 		&str_id, &str_id_len, &direction ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"transliterator_create: bad arguments", 0 );
-		RETURN_NULL();
+		RETURN_THROWS();
 	}
 
 	object = return_value;
@@ -140,7 +136,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 	UChar		    *ustr_rules    = NULL;
 	int32_t         ustr_rules_len = 0;
 	zend_long       direction      = TRANSLITERATOR_FORWARD;
-	UParseError     parse_error    = {0, -1};
+	UParseError     parse_error;
 	UTransliterator *utrans;
 	UChar           id[] = {0x52, 0x75, 0x6C, 0x65, 0x73, 0x54, 0x72,
 					       0x61, 0x6E, 0x73, 0x50, 0x48, 0x50, 0}; /* RulesTransPHP */
@@ -149,9 +145,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 	if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|l",
 		&str_rules, &str_rules_len, &direction ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"transliterator_create_from_rules: bad arguments", 0 );
-		RETURN_NULL();
+		RETURN_THROWS();
 	}
 
 	if( ( direction != TRANSLITERATOR_FORWARD ) && (direction != TRANSLITERATOR_REVERSE ) )
@@ -192,7 +186,7 @@ PHP_FUNCTION( transliterator_create_from_rules )
 			intl_errors_set_custom_msg( INTL_DATA_ERROR_P( to ), msg, 1 );
 			efree( msg );
 		}
-		zval_dtor( return_value );
+		zval_ptr_dtor( return_value );
 		RETURN_NULL();
     }
 	transliterator_object_construct( object, utrans, TRANSLITERATOR_ERROR_CODE_P( to ) );
@@ -214,9 +208,7 @@ PHP_FUNCTION( transliterator_create_inverse )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Transliterator_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"transliterator_create_inverse: bad arguments", 0 );
-		RETURN_NULL();
+		RETURN_THROWS();
 	}
 
 	TRANSLITERATOR_METHOD_FETCH_OBJECT;
@@ -250,12 +242,7 @@ PHP_FUNCTION( transliterator_list_ids )
 
 	if( zend_parse_parameters_none() == FAILURE )
 	{
-		/* seems to be the convention in this lib to return false instead of
-		 * null on bad parameter types, except on constructors and factory
-		 * methods */
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"transliterator_list_ids: bad arguments", 0 );
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	en = utrans_openIDs( &status );
@@ -281,7 +268,7 @@ PHP_FUNCTION( transliterator_list_ids )
 	intl_error_set_code( NULL, status );
 	if( U_FAILURE( status ) )
 	{
-		zval_dtor( return_value );
+		zend_array_destroy( Z_ARR_P(return_value) );
 		RETVAL_FALSE;
 		intl_error_set_custom_msg( NULL, "transliterator_list_ids: "
 			"Failed to build array of registered transliterators", 0 );
@@ -317,9 +304,7 @@ PHP_FUNCTION( transliterator_transliterate )
 		if( zend_parse_parameters( ZEND_NUM_ARGS(), "zs|ll",
 			&arg1, &str, &str_len, &start, &limit ) == FAILURE )
 		{
-			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-				"transliterator_transliterate: bad arguments", 0 );
-			RETURN_FALSE;
+			RETURN_THROWS();
 		}
 
 		if( Z_TYPE_P( arg1 ) == IS_OBJECT &&
@@ -330,9 +315,8 @@ PHP_FUNCTION( transliterator_transliterate )
 		else
 		{ /* not a transliterator object as first argument */
 			int res;
-			if(Z_TYPE_P( arg1 ) != IS_STRING )
-			{
-				convert_to_string( arg1 );
+			if( !try_convert_to_string( arg1 ) ) {
+				RETURN_THROWS();
 			}
 			object = &tmp_object;
 			res = create_transliterator( Z_STRVAL_P( arg1 ), Z_STRLEN_P( arg1 ),
@@ -340,7 +324,7 @@ PHP_FUNCTION( transliterator_transliterate )
 			if( res == FAILURE )
 			{
 				zend_string *message = intl_error_get_message( NULL );
-				php_error_docref0( NULL, E_WARNING, "Could not create "
+				php_error_docref(NULL, E_WARNING, "Could not create "
 					"transliterator with ID \"%s\" (%s)", Z_STRVAL_P( arg1 ), ZSTR_VAL(message) );
 				zend_string_free( message );
 				ZVAL_UNDEF(&tmp_object);
@@ -352,9 +336,7 @@ PHP_FUNCTION( transliterator_transliterate )
 	else if( zend_parse_parameters( ZEND_NUM_ARGS(), "s|ll",
 		&str, &str_len, &start, &limit ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"transliterator_transliterate: bad arguments", 0 );
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	if( limit < -1 )
@@ -480,10 +462,7 @@ PHP_FUNCTION( transliterator_get_error_code )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Transliterator_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"transliterator_get_error_code: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	/* Fetch the object (without resetting its last error code ). */
@@ -508,10 +487,7 @@ PHP_FUNCTION( transliterator_get_error_message )
 	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "O",
 		&object, Transliterator_ce_ptr ) == FAILURE )
 	{
-		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
-			"transliterator_get_error_message: unable to parse input params", 0 );
-
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 
@@ -525,13 +501,3 @@ PHP_FUNCTION( transliterator_get_error_message )
 	RETURN_STR( message );
 }
 /* }}} */
-
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */

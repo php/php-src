@@ -36,55 +36,55 @@ $file_handle = fopen(__FILE__, 'r');
 //array of values to iterate over
 $values = array(
 
-		  // int data
+          // int data
 /*1*/	  0,
-		  1,
-		  12345,
-		  -2345,
-		
-		  // float data
+          1,
+          12345,
+          -2345,
+
+          // float data
 /*5*/	  10.5,
-		  -10.5,
-		  10.1234567e10,
-		  10.7654321E-10,
-		  .5,
-		
-		  // array data
+          -10.5,
+          10.1234567e10,
+          10.7654321E-10,
+          .5,
+
+          // array data
 /*10*/	  array(),
-		  array(0),
-		  array(1),
-		  array(1,2),
-		  array('color' => 'red', 'item' => 'pen'),
-		
-		  // null data
+          array(0),
+          array(1),
+          array(1,2),
+          array('color' => 'red', 'item' => 'pen'),
+
+          // null data
 /*15*/	  NULL,
-		  null,
-		
-		  // boolean data
+          null,
+
+          // boolean data
 /*17*/	  true,
-		  false,
-		  TRUE,
-		  FALSE,
-		
-		  // empty data
+          false,
+          TRUE,
+          FALSE,
+
+          // empty data
 /*21*/	  "",
-		  '',
-		
-		  // object data
+          '',
+
+          // object data
 /*23*/	  new sample(),
-		
-		  // undefined data
+
+          // undefined data
 /*24*/	  @$undefined_var,
-		
-		  // unset data
+
+          // unset data
 /*25*/	  @$unset_var,
-		 
-		  // resource data
+
+          // resource data
 /*26*/	  $file_handle
 );
 
 /* creating dumping file */
-$data_file = dirname(__FILE__) . '/vfprintf_variation20.txt';
+$data_file = __DIR__ . '/vfprintf_variation20.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
 
@@ -92,8 +92,13 @@ fprintf($fp, "\n*** Testing vprintf() with with unexpected values for format arg
 
 $counter = 1;
 foreach( $values as $value ) {
-  fprintf( $fp, "\n-- Iteration %d --\n",$counter);
-  vfprintf($fp, $value, $args);
+  fprintf($fp, "\n-- Iteration %d --\n", $counter);
+
+  try {
+    vfprintf($fp, $value, $args);
+  } catch (TypeError $exception) {
+    fprintf($fp, "%s\n", $exception->getMessage());
+  }
   $counter++;
 }
 
@@ -104,19 +109,8 @@ echo "\n";
 unlink($data_file);
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing vfprintf() : with unexpected values for format argument ***
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
-
-Notice: Array to string conversion in %s on line %d
 
 *** Testing vprintf() with with unexpected values for format argument ***
 
@@ -139,15 +133,20 @@ Notice: Array to string conversion in %s on line %d
 -- Iteration 9 --
 0.5
 -- Iteration 10 --
-Array
+vfprintf(): Argument #2 ($format) must be of type string, array given
+
 -- Iteration 11 --
-Array
+vfprintf(): Argument #2 ($format) must be of type string, array given
+
 -- Iteration 12 --
-Array
+vfprintf(): Argument #2 ($format) must be of type string, array given
+
 -- Iteration 13 --
-Array
+vfprintf(): Argument #2 ($format) must be of type string, array given
+
 -- Iteration 14 --
-Array
+vfprintf(): Argument #2 ($format) must be of type string, array given
+
 -- Iteration 15 --
 
 -- Iteration 16 --
@@ -171,5 +170,4 @@ object
 -- Iteration 25 --
 
 -- Iteration 26 --
-Resource id #%d
-===DONE===
+vfprintf(): Argument #2 ($format) must be of type string, resource given

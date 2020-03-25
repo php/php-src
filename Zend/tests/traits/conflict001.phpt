@@ -17,9 +17,9 @@ trait THello2 {
 }
 
 class TraitsTest {
-	use THello1;
-	use THello2;
+    use THello1;
+    use THello2;
 }
 ?>
---EXPECTF--	
-Fatal error: Trait method hello has not been applied, because there are collisions with other trait methods on TraitsTest in %s on line %d
+--EXPECTF--
+Fatal error: Trait method THello2::hello has not been applied as TraitsTest::hello, because of collision with THello1::hello in %s on line %d

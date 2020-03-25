@@ -9,13 +9,13 @@ if (PHP_INT_SIZE != 4) {
 --FILE--
 <?php
 /* Prototype  : string sprintf(string $format [, mixed $arg1 [, mixed ...]])
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
 echo "*** Testing sprintf() : octal formats with integer values ***\n";
 
-// array of integer values 
+// array of integer values
 $integer_values = array(
   0,
   1,
@@ -48,7 +48,7 @@ $octal_formats = array(
 $count = 1;
 foreach($integer_values as $integer_value) {
   echo "\n-- Iteration $count --\n";
-  
+
   foreach($octal_formats as $format) {
     var_dump( sprintf($format, $integer_value) );
   }
@@ -57,7 +57,7 @@ foreach($integer_values as $integer_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : octal formats with integer values ***
 
 -- Iteration 1 --

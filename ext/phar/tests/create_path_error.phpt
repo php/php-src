@@ -2,14 +2,13 @@
 Phar: create with illegal path
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --INI--
 phar.readonly=0
 phar.require_hash=1
 --FILE--
 <?php
 
-$fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
+$fname = __DIR__ . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
 
 @unlink($fname);
@@ -22,14 +21,14 @@ var_dump(file_get_contents($pname . '/b.php'));
 
 function error_handler($errno, $errmsg)
 {
-	echo "Error: $errmsg";
+    echo "Error: $errmsg";
 }
 
 set_error_handler('error_handler');
 
 $count = 0;
 $checks = array(
-    '/', '.', '../', 'a/..', 'a/', 'b//a.php', 
+    '/', '.', '../', 'a/..', 'a/', 'b//a.php',
     "Font\xE5\x84\xB7\xE9\xBB\x91pro.ttf", //two valid multi-byte characters
     "\xF0\x9F\x98\x8D.ttf", // valid 4 byte char - smiling face with heart-shaped eyes
     "Font\xE9\xBBpro.ttf", //Invalid multi-byte character - missing last byte
@@ -40,45 +39,43 @@ $checks = array(
 );
 foreach($checks as $check)
 {
-	$count++;
-	echo "$count:";
-	file_put_contents($pname . '/' . $check, "error");
-	echo "\n";
+    $count++;
+    echo "$count:";
+    file_put_contents($pname . '/' . $check, "error");
+    echo "\n";
 }
 
 $phar = new Phar($fname);
 $checks = array("a\0");
 foreach($checks as $check)
 {
-	try
-	{
-		$phar[$check] = 'error';
-	}
-	catch(Exception $e)
-	{
-		echo 'Exception: ' . $e->getMessage() . "\n";
-	}
+    try
+    {
+        $phar[$check] = 'error';
+    }
+    catch (TypeError $e)
+    {
+        echo 'Exception: ' . $e->getMessage() . "\n";
+    }
 }
 
 ?>
-===DONE===
 --CLEAN--
-<?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
+<?php unlink(__DIR__ . '/' . basename(__FILE__, '.clean.php') . '.phar.php'); ?>
 --EXPECTF--
 string(5) "query"
 string(5) "query"
-1:Error: file_put_contents(phar://%s//): failed to open stream: phar error: file "" in phar "%s" cannot be empty
-2:Error: file_put_contents(phar://%s/.): failed to open stream: phar error: file "" in phar "%s" cannot be empty
-3:Error: file_put_contents(phar://%s/../): failed to open stream: phar error: file "" in phar "%s" cannot be empty
-4:Error: file_put_contents(phar://%s/a/..): failed to open stream: phar error: file "" in phar "%s" cannot be empty
+1:Error: file_put_contents(phar://%s//): Failed to open stream: phar error: file "" in phar "%s" cannot be empty
+2:Error: file_put_contents(phar://%s/.): Failed to open stream: phar error: file "" in phar "%s" cannot be empty
+3:Error: file_put_contents(phar://%s/../): Failed to open stream: phar error: file "" in phar "%s" cannot be empty
+4:Error: file_put_contents(phar://%s/a/..): Failed to open stream: phar error: file "" in phar "%s" cannot be empty
 5:
 6:
 7:
 8:
-9:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-10:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-11:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-12:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-13:Error: file_put_contents(phar://%s): failed to open stream: phar error: invalid path "%s" contains illegal character
-Error: Phar::offsetSet() expects parameter 1 to be a valid path, string given===DONE===
-
+9:Error: file_put_contents(phar://%s): Failed to open stream: phar error: invalid path "%s" contains illegal character
+10:Error: file_put_contents(phar://%s): Failed to open stream: phar error: invalid path "%s" contains illegal character
+11:Error: file_put_contents(phar://%s): Failed to open stream: phar error: invalid path "%s" contains illegal character
+12:Error: file_put_contents(phar://%s): Failed to open stream: phar error: invalid path "%s" contains illegal character
+13:Error: file_put_contents(phar://%s): Failed to open stream: phar error: invalid path "%s" contains illegal character
+Exception: Phar::offsetSet(): Argument #1 ($entry) must be a valid path, string given

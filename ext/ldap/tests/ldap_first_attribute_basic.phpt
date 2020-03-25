@@ -15,10 +15,9 @@ insert_dummy_data($link, $base);
 $result = ldap_search($link, "$base", "(objectclass=organization)", array("objectClass"));
 $entry = ldap_first_entry($link, $result);
 var_dump(
-	ldap_first_attribute($link, $entry)
+    ldap_first_attribute($link, $entry)
 );
 ?>
-===DONE===
 --CLEAN--
 <?php
 include "connect.inc";
@@ -28,4 +27,3 @@ remove_dummy_data($link, $base);
 ?>
 --EXPECT--
 string(11) "objectClass"
-===DONE===

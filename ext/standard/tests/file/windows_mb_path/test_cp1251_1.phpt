@@ -1,8 +1,8 @@
 --TEST--
-Test mkdir/rmdir CP1251 path 
+Test mkdir/rmdir CP1251 path
 --SKIPIF--
 <?php
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 skip_if_not_win();
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
@@ -10,6 +10,8 @@ skip_if_no_required_exts();
 skip_if_wrong_cp(1251, "ansi");
 
 ?>
+--CONFLICTS--
+dir_cp1251
 --INI--
 default_charset=cp1251
 --FILE--
@@ -19,7 +21,7 @@ default_charset=cp1251
 #vim: set encoding=cp1251
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
+include __DIR__ . DIRECTORY_SEPARATOR . "util.inc";
 
 $item = "привет"; // cp1251 string
 $prefix = create_data("dir_cp1251", $item . "3", 1251);
@@ -39,8 +41,7 @@ var_dump(rmdir($subpath));
 remove_data("dir_cp1251");
 
 ?>
-===DONE===
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(true)
 bool(true)
@@ -51,4 +52,3 @@ bool(true)
 string(%d) "%s\привет3\привет4"
 Active code page: %d
 bool(true)
-===DONE===

@@ -9,7 +9,7 @@ Test htmlspecialchars() function
 /* retrieving htmlspecialchars from the ANSI character table */
 echo "*** Retrieving htmlspecialchars for 256 characters ***\n";
 for($i=0; $i<256; $i++)
-var_dump( bin2hex( htmlspecialchars(b"chr($i)") ) );
+var_dump( bin2hex( htmlspecialchars("chr($i)") ) );
 
 /* giving NULL as the argument */
 echo "\n*** Testing htmlspecialchars() with NULL as first, second and third argument ***\n";
@@ -34,13 +34,6 @@ var_dump( htmlspecialchars($str) );
 var_dump( htmlspecialchars($str, ENT_QUOTES) );
 var_dump( htmlspecialchars($str, ENT_NOQUOTES) );
 var_dump( htmlspecialchars($str, ENT_COMPAT) );
-
-echo "\n*** Testing error conditions ***\n";
-/* zero argument */
-var_dump( htmlspecialchars() );
-
-/* giving arguments more than expected */
-var_dump( htmlspecialchars("<br>",ENT_QUOTES,'iso-8859-1', "test2") );
 
 echo "Done\n"
 ?>
@@ -321,11 +314,4 @@ string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
 string(46) "A &#039;quote&#039; is &lt;b&gt;bold&lt;/b&gt;"
 string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
 string(36) "A 'quote' is &lt;b&gt;bold&lt;/b&gt;"
-
-*** Testing error conditions ***
-
-Warning: htmlspecialchars() expects at least 1 parameter, 0 given in %s on line %d
-NULL
-string(10) "&lt;br&gt;"
 Done
-
