@@ -1,17 +1,5 @@
 <?php
 
-class SplQueue extends SplDoublyLinkedList
-{
-    /**
-     * @param mixed $value
-     * @return bool
-     */
-    public function enqueue($value) {}
-
-    /** @return mixed */
-    public function dequeue() {}
-}
-
 class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializable
 {
     /**
@@ -35,7 +23,7 @@ class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializa
 
     /**
      * @param mixed $value
-     * @return void
+     * @return bool
      */
     public function unshift($value) {}
 
@@ -51,14 +39,14 @@ class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializa
     /** @return bool */
     public function isEmpty() {}
 
-    /** @return void */
+    /** @return int */
     public function setIteratorMode(int $mode) {}
 
     /** @return int */
     public function getIteratorMode() {}
 
     /**
-     * @param mixed $index
+     * @param int $index
      * @return bool
      */
     public function offsetExists($index) {}
@@ -111,6 +99,18 @@ class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializa
 
     /** @return void */
     public function __unserialize(array $data) {}
+}
+
+class SplQueue extends SplDoublyLinkedList
+{
+    /**
+     * @param mixed $value
+     * @return bool
+     */
+    public function enqueue($value) {}
+
+    /** @return mixed */
+    public function dequeue() {}
 }
 
 class SplStack extends SplDoublyLinkedList
