@@ -774,7 +774,7 @@ static int find_call_num_args(zend_jit_trace_rec *p)
 static int is_checked_guard(const zend_ssa *tssa, const zend_op **ssa_opcodes, uint32_t var, uint32_t phi_var)
 {
 	if ((tssa->var_info[phi_var].type & MAY_BE_ANY) == MAY_BE_LONG) {
-		uint32_t idx = tssa->vars[var].definition;
+		int idx = tssa->vars[var].definition;
 
 		if (idx >= 0) {
 			if (tssa->ops[idx].op1_def == var) {
