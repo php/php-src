@@ -1866,6 +1866,44 @@ PHP_FUNCTION(str_contains)
 }
 /* }}} */
 
+/* {{{ proto boolean str_starts_with(string haystack, string needle)
+   Checks if haystack strats with needle */
+PHP_FUNCTION(str_starts_with) {
+    zend_string *haystack, *needle;
+
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_STR(haystack)
+        Z_PARAM_STR(needle)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (needle->len > haystack->len) {
+        RETURN_FALSE;
+    }
+
+    RETURN_BOOL(memcmp(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(needle)) == 0);
+}
+
+/* {{{ proto boolean str_ends_with(string haystack, string needle)
+   Checks if haystack ends with needle */
+PHP_FUNCTION(str_ends_with) {
+    zend_string *haystack, *needle;
+    int i, j;
+
+    ZEND_PARSE_PARAMETERS_START(2, 2)
+        Z_PARAM_STR(haystack)
+        Z_PARAM_STR(needle)
+    ZEND_PARSE_PARAMETERS_END();
+
+    if (needle->len > haystack->len) {
+        RETURN_FALSE;
+    }
+
+    for (i = haystack->len - 1, j = needle->len - 1; j >= 0; i--, j--) 
+        if (haystack->val[i] != needle->val[j]) 
+            RETURN_FALSE;
+    RETURN_TRUE;
+}
+
 /* {{{ proto string strchr(string haystack, string needle)
    An alias for strstr */
 /* }}} */

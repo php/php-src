@@ -40,6 +40,8 @@ PHP_FUNCTION(dirname);
 PHP_FUNCTION(pathinfo);
 PHP_FUNCTION(strstr);
 PHP_FUNCTION(str_contains);
+PHP_FUNCTION(str_starts_with);
+PHP_FUNCTION(str_ends_with);
 PHP_FUNCTION(strpos);
 PHP_FUNCTION(stripos);
 PHP_FUNCTION(strrpos);
