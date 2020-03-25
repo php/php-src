@@ -1641,13 +1641,24 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 	}
 
 	if (UNEXPECTED(ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_TRACE_TSSA)) {
-		fprintf(stderr, "---- TRACE %d TSSA start (%s) %s() %s:%d\n",
-			ZEND_JIT_TRACE_NUM,
-			zend_jit_trace_star_desc(trace_buffer->start),
-			trace_buffer->op_array->function_name ?
-				ZSTR_VAL(trace_buffer->op_array->function_name) : "$main",
-			ZSTR_VAL(trace_buffer->op_array->filename),
-			((zend_jit_trace_start_rec*)trace_buffer)->opline->lineno);
+		if (parent_trace) {
+			fprintf(stderr, "---- TRACE %d TSSA start (side trace %d/%d) %s() %s:%d\n",
+				ZEND_JIT_TRACE_NUM,
+				parent_trace,
+				exit_num,
+				trace_buffer->op_array->function_name ?
+					ZSTR_VAL(trace_buffer->op_array->function_name) : "$main",
+				ZSTR_VAL(trace_buffer->op_array->filename),
+				((zend_jit_trace_start_rec*)trace_buffer)->opline->lineno);
+		} else {
+			fprintf(stderr, "---- TRACE %d TSSA start (%s) %s() %s:%d\n",
+				ZEND_JIT_TRACE_NUM,
+				zend_jit_trace_star_desc(trace_buffer->start),
+				trace_buffer->op_array->function_name ?
+					ZSTR_VAL(trace_buffer->op_array->function_name) : "$main",
+				ZSTR_VAL(trace_buffer->op_array->filename),
+				((zend_jit_trace_start_rec*)trace_buffer)->opline->lineno);
+		}
 		zend_jit_dump_trace(trace_buffer, tssa);
 		if (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LINK) {
 			uint32_t link_to = zend_jit_find_trace(EG(current_execute_data)->opline->handler);;
