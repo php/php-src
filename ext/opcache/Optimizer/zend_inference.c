@@ -1787,12 +1787,25 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 				}
 			} WHILE_WORKLIST_END();
 
-			/* Add all SCC entry variables into worklist for narrowing */
+			/* initialize missing ranges */
 			for (j = scc_var[scc]; j >= 0; j = next_scc_var[j]) {
 				if (!ssa->var_info[j].has_range) {
 					zend_inference_init_range(op_array, ssa, j, 1, ZEND_LONG_MIN, ZEND_LONG_MAX, 1);
-				} else if (ssa->vars[j].definition_phi &&
-				           ssa->vars[j].definition_phi->pi < 0) {
+					FOR_EACH_VAR_USAGE(j, ADD_SCC_VAR);
+				}
+			}
+
+			/* widening (second round) */
+			WHILE_WORKLIST(worklist, worklist_len, j) {
+				if (zend_ssa_range_widening(op_array, ssa, j, scc)) {
+					FOR_EACH_VAR_USAGE(j, ADD_SCC_VAR);
+				}
+			} WHILE_WORKLIST_END();
+
+			/* Add all SCC entry variables into worklist for narrowing */
+			for (j = scc_var[scc]; j >= 0; j = next_scc_var[j]) {
+				if (ssa->vars[j].definition_phi
+				 && ssa->vars[j].definition_phi->pi < 0) {
 					/* narrowing Phi functions first */
 					zend_ssa_range_narrowing(op_array, ssa, j, scc);
 				}
