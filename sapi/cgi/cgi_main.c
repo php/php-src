@@ -63,6 +63,7 @@
 #include "fopen_wrappers.h"
 #include "http_status_codes.h"
 #include "ext/standard/php_standard.h"
+#include "ext/standard/dl_arginfo.h"
 #include "ext/standard/url.h"
 
 #ifdef PHP_WIN32
@@ -83,6 +84,7 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 #include "php_getopt.h"
 
 #include "fastcgi.h"
+#include "cgi_main_arginfo.h"
 
 #if defined(PHP_WIN32) && defined(HAVE_OPENSSL)
 # include "openssl/applink.c"
@@ -1006,12 +1008,6 @@ static sapi_module_struct cgi_sapi_module = {
 };
 /* }}} */
 
-/* {{{ arginfo ext/standard/dl.c */
-ZEND_BEGIN_ARG_INFO(arginfo_dl, 0)
-	ZEND_ARG_INFO(0, extension_filename)
-ZEND_END_ARG_INFO()
-/* }}} */
-
 static const zend_function_entry additional_functions[] = {
 	ZEND_FE(dl, arginfo_dl)
 	PHP_FE_END
@@ -1704,21 +1700,10 @@ PHP_FUNCTION(apache_response_headers) /* {{{ */
 }
 /* }}} */
 
-ZEND_BEGIN_ARG_INFO(arginfo_no_args, 0)
-ZEND_END_ARG_INFO()
-
-static const zend_function_entry cgi_functions[] = {
-	PHP_FE(apache_child_terminate, arginfo_no_args)
-	PHP_FE(apache_request_headers, arginfo_no_args)
-	PHP_FE(apache_response_headers, arginfo_no_args)
-	PHP_FALIAS(getallheaders, apache_request_headers, arginfo_no_args)
-	PHP_FE_END
-};
-
 static zend_module_entry cgi_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"cgi-fcgi",
-	cgi_functions,
+	ext_functions,
 	PHP_MINIT(cgi),
 	PHP_MSHUTDOWN(cgi),
 	NULL,

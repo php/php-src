@@ -91,9 +91,11 @@
 
 #include "php_http_parser.h"
 #include "php_cli_server.h"
+#include "php_cli_server_arginfo.h"
 #include "mime_type_map.h"
 
 #include "php_cli_process_title.h"
+#include "php_cli_process_title_arginfo.h"
 
 #define OUTPUT_NOT_CHECKED -1
 #define OUTPUT_IS_TTY 1
@@ -479,15 +481,12 @@ zend_module_entry cli_server_module_entry = {
 };
 /* }}} */
 
-ZEND_BEGIN_ARG_INFO(arginfo_no_args, 0)
-ZEND_END_ARG_INFO()
-
 const zend_function_entry server_additional_functions[] = {
-	PHP_FE(cli_set_process_title,        arginfo_cli_set_process_title)
-	PHP_FE(cli_get_process_title,        arginfo_cli_get_process_title)
-	PHP_FE(apache_request_headers, arginfo_no_args)
-	PHP_FE(apache_response_headers, arginfo_no_args)
-	PHP_FALIAS(getallheaders, apache_request_headers, arginfo_no_args)
+	PHP_FE(cli_set_process_title,	arginfo_cli_set_process_title)
+	PHP_FE(cli_get_process_title,	arginfo_cli_get_process_title)
+	PHP_FE(apache_request_headers,	arginfo_apache_request_headers)
+	PHP_FE(apache_response_headers,	arginfo_apache_response_headers)
+	PHP_FALIAS(getallheaders, apache_request_headers, arginfo_getallheaders)
 	PHP_FE_END
 };
 
