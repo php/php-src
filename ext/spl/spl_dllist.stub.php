@@ -17,13 +17,13 @@ class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializa
 
     /**
      * @param mixed $value
-     * @return bool
+     * @return void
      */
     public function push($value) {}
 
     /**
      * @param mixed $value
-     * @return bool
+     * @return void
      */
     public function unshift($value) {}
 
@@ -105,7 +105,7 @@ class SplQueue extends SplDoublyLinkedList
 {
     /**
      * @param mixed $value
-     * @return bool
+     * @return void
      */
     public function enqueue($value) {}
 
