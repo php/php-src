@@ -54,6 +54,7 @@
 #include "php_main.h"
 #include "fopen_wrappers.h"
 #include "ext/standard/php_standard.h"
+#include "ext/standard/dl_arginfo.h"
 #include "cli.h"
 #ifdef PHP_WIN32
 #include <io.h>
@@ -78,6 +79,7 @@
 
 #include "ps_title.h"
 #include "php_cli_process_title.h"
+#include "php_cli_process_title_arginfo.h"
 
 #ifndef PHP_WIN32
 # define php_select(m, r, w, e, t)	select(m, r, w, e, t)
@@ -455,12 +457,6 @@ static sapi_module_struct cli_sapi_module = {
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
-/* }}} */
-
-/* {{{ arginfo ext/standard/dl.c */
-ZEND_BEGIN_ARG_INFO(arginfo_dl, 0)
-	ZEND_ARG_INFO(0, extension_filename)
-ZEND_END_ARG_INFO()
 /* }}} */
 
 static const zend_function_entry additional_functions[] = {

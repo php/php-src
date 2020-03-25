@@ -16,6 +16,7 @@
 
 #include "php_embed.h"
 #include "ext/standard/php_standard.h"
+#include "ext/standard/dl_arginfo.h"
 
 #ifdef PHP_WIN32
 #include <io.h>
@@ -140,12 +141,6 @@ EMBED_SAPI_API sapi_module_struct php_embed_module = {
 
 	STANDARD_SAPI_MODULE_PROPERTIES
 };
-/* }}} */
-
-/* {{{ arginfo ext/standard/dl.c */
-ZEND_BEGIN_ARG_INFO(arginfo_dl, 0)
-	ZEND_ARG_INFO(0, extension_filename)
-ZEND_END_ARG_INFO()
 /* }}} */
 
 static const zend_function_entry additional_functions[] = {
