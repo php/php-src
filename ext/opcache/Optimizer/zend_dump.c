@@ -734,6 +734,9 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 {
 	zend_basic_block *b = cfg->blocks + n;
 
+	if (n > 0) {
+		fprintf(stderr, "\n");
+	}
 	fprintf(stderr, "BB%d:\n     ;", n);
 	if (b->flags & ZEND_BB_START) {
 		fprintf(stderr, " start");
