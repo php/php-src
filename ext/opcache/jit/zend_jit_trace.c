@@ -513,7 +513,7 @@ static zend_always_inline int zend_jit_trace_op_len(const zend_op *opline)
 	}
 }
 
-static int zend_jit_trace_add_phis(zend_jit_trace_rec *trace_buffer, uint32_t ssa_vars_count, zend_ssa *tssa, int *var)
+static int zend_jit_trace_add_phis(zend_jit_trace_rec *trace_buffer, uint32_t ssa_vars_count, zend_ssa *tssa, zend_jit_trace_stack *stack)
 {
 	const zend_op_array *op_array;
 	zend_jit_trace_rec *p;
@@ -575,13 +575,13 @@ static int zend_jit_trace_add_phis(zend_jit_trace_rec *trace_buffer, uint32_t ss
 				ZEND_MM_ALIGNED_SIZE(sizeof(int) * 2) +
 				sizeof(void*) * 2);
 			phi->sources = (int*)(((char*)phi) + ZEND_MM_ALIGNED_SIZE(sizeof(zend_ssa_phi)));
-			phi->sources[0] = var[k];
+			phi->sources[0] = stack[k];
 			phi->sources[1] = -1;
 			phi->use_chains = (zend_ssa_phi**)(((char*)phi->sources) + ZEND_MM_ALIGNED_SIZE(sizeof(int) * 2));
 			phi->pi = -1;
 			phi->var = k;
 			phi->ssa_var = ssa_vars_count;
-			var[k] = ssa_vars_count;
+			stack[k] = ssa_vars_count;
 			ssa_vars_count++;
 			phi->block = 1;
 			if (prev) {
@@ -814,7 +814,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 	const zend_op **ssa_opcodes;
 	zend_jit_trace_rec *p;
 	int i, v, idx, len, ssa_ops_count, vars_count, ssa_vars_count;
-	int *var;
+	zend_jit_trace_stack *stack;
 	uint32_t build_flags = ZEND_SSA_RC_INFERENCE | ZEND_SSA_USE_CV_RESULTS;
 	uint32_t optimization_level = ZCG(accel_directives).optimization_level;
 	int call_level, level, num_op_arrays;
@@ -955,15 +955,15 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 	} else {
 		ssa_vars_count = op_array->last_var + op_array->T;
 	}
-	var = frame->stack;
+	stack = frame->stack;
 	for (i = 0; i < ssa_vars_count; i++) {
-		var[i] = i;
+		stack[i] = i;
 	}
 
 	if (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP) {
 		// TODO: For tracing, it's possible, to create pseudo Phi functions
 		//       at the end of loop, without this additional pass (like LuaJIT) ???
-		ssa_vars_count = zend_jit_trace_add_phis(trace_buffer, ssa_vars_count, tssa, var);
+		ssa_vars_count = zend_jit_trace_add_phis(trace_buffer, ssa_vars_count, tssa, stack);
 	}
 
 	p = trace_buffer + ZEND_JIT_TRACE_START_REC_SIZE;
@@ -973,37 +973,37 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 		if (p->op == ZEND_JIT_TRACE_VM) {
 			opline = p->opline;
 			ssa_opcodes[idx] = opline;
-			ssa_vars_count = zend_ssa_rename_op(op_array, opline, idx, build_flags, ssa_vars_count, ssa_ops, var);
+			ssa_vars_count = zend_ssa_rename_op(op_array, opline, idx, build_flags, ssa_vars_count, ssa_ops, stack);
 			idx++;
 			len = zend_jit_trace_op_len(p->opline);
 			while (len > 1) {
 				opline++;
 				ssa_opcodes[idx] = opline;
 				if (opline->opcode != ZEND_OP_DATA) {
-					ssa_vars_count = zend_ssa_rename_op(op_array, opline, idx, build_flags, ssa_vars_count, ssa_ops, var);
+					ssa_vars_count = zend_ssa_rename_op(op_array, opline, idx, build_flags, ssa_vars_count, ssa_ops, stack);
 				}
 				idx++;
 				len--;
 			}
 		} else if (p->op == ZEND_JIT_TRACE_ENTER) {
 			frame = zend_jit_trace_call_frame(frame, op_array);
-			var = frame->stack;
+			stack = frame->stack;
 			op_array = p->op_array;
 			level++;
 			ZEND_ASSERT(ssa_vars_count < 0xff);
 			p->first_ssa_var = ssa_vars_count;
 			for (i = 0; i < op_array->last_var; i++) {
-				var[i] = ssa_vars_count++;
+				stack[i] = ssa_vars_count++;
 			}
 		} else if (p->op == ZEND_JIT_TRACE_BACK) {
 			op_array = p->op_array;
 			frame = zend_jit_trace_ret_frame(frame, op_array);
-			var = frame->stack;
+			stack = frame->stack;
 			if (level == 0) {
 				ZEND_ASSERT(ssa_vars_count <= 0xff);
 				p->first_ssa_var = ssa_vars_count;
 				for (i = 0; i < op_array->last_var + op_array->T; i++) {
-					var[i] = ssa_vars_count++;
+					stack[i] = ssa_vars_count++;
 				}
 			} else {
 				level--;
@@ -1042,7 +1042,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 		zend_ssa_phi *phi = tssa->blocks[1].phis;
 
 		while (phi) {
-			phi->sources[1] = var[phi->var];
+			phi->sources[1] = stack[phi->var];
 			ssa_vars[phi->ssa_var].var = phi->var;
 			ssa_vars[phi->ssa_var].definition_phi = phi;
 			ssa_vars[phi->sources[0]].phi_use_chain = phi;
