@@ -10927,7 +10927,7 @@ static zend_bool zend_jit_may_reuse_reg(const zend_op_array *op_array, zend_ssa 
 	return 0;
 }
 
-static zend_bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa *ssa, zend_op *opline, const zend_ssa_op *ssa_op, int var)
+static zend_bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zend_ssa *ssa, const zend_op *opline, const zend_ssa_op *ssa_op)
 {
 	uint32_t op1_info, op2_info;
 
@@ -10993,7 +10993,7 @@ static zend_bool zend_jit_opline_supports_reg(const zend_op_array *op_array, zen
 	return 0;
 }
 
-static zend_bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa, int var)
+static zend_bool zend_jit_var_supports_reg(zend_ssa *ssa, int var)
 {
 	if (ssa->vars[var].no_val) {
 		/* we don't need the value */
@@ -11024,9 +11024,18 @@ static zend_bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa 
 		return 0;
 	}
 
+	return 1;
+}
+
+static zend_bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa *ssa, int var)
+{
+	if (!zend_jit_var_supports_reg(ssa, var)) {
+		return 0;
+	}
+
 	if (ssa->vars[var].definition >= 0) {
 		uint32_t def = ssa->vars[var].definition;
-		if (!zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + def, ssa->ops + def, var)) {
+		if (!zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + def, ssa->ops + def)) {
 			return 0;
 		}
 	}
@@ -11036,7 +11045,7 @@ static zend_bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa 
 
 		do {
 			if (!zend_ssa_is_no_val_use(op_array->opcodes + use, ssa->ops + use, var) &&
-			    !zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + use, ssa->ops + use, var)) {
+			    !zend_jit_opline_supports_reg(op_array, ssa, op_array->opcodes + use, ssa->ops + use)) {
 				return 0;
 			}
 			use = zend_ssa_next_use(ssa->ops, var, use);
