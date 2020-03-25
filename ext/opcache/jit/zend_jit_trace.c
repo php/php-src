@@ -445,7 +445,7 @@ static zend_ssa *zend_jit_trace_build_ssa(const zend_op_array *op_array, zend_sc
 			}
 
 			if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_SSA) {
-				zend_dump_op_array(op_array, ZEND_DUMP_NUMERIC_OPLINES|ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA, "JIT", ssa);
+				zend_dump_op_array(op_array, ZEND_DUMP_HIDE_UNREACHABLE|ZEND_DUMP_RC_INFERENCE|ZEND_DUMP_SSA, "JIT", ssa);
 			}
 			return ssa;
 		} while (0);
@@ -3360,7 +3360,7 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 			fprintf(stderr, "%04d%*c",
 				(int)(opline - op_array->opcodes),
 				level, ' ');
-			zend_dump_op(op_array, NULL, opline, ZEND_DUMP_NUMERIC_OPLINES|ZEND_DUMP_RC_INFERENCE, tssa, (tssa && tssa->ops) ? tssa->ops + idx : NULL);
+			zend_dump_op(op_array, NULL, opline, ZEND_DUMP_RC_INFERENCE, tssa, (tssa && tssa->ops) ? tssa->ops + idx : NULL);
 
 			op1_type = p->op1_type;
 			op2_type = p->op2_type;
@@ -3404,7 +3404,7 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 				fprintf(stderr, "%04d%*c;",
 					(int)(opline - op_array->opcodes),
 					level, ' ');
-				zend_dump_op(op_array, NULL, opline, ZEND_DUMP_NUMERIC_OPLINES|ZEND_DUMP_RC_INFERENCE, tssa, (tssa && tssa->ops) ? tssa->ops + idx : NULL);
+				zend_dump_op(op_array, NULL, opline, ZEND_DUMP_RC_INFERENCE, tssa, (tssa && tssa->ops) ? tssa->ops + idx : NULL);
 				idx++;
 				len--;
 				fprintf(stderr, "\n");
