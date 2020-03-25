@@ -91,7 +91,7 @@ static size_t strip_trailing_whitespace(char *buf, size_t bufl) {
 	return bufl;
 }
 
-static void handle_line(int type, zval *array, char *buf, size_t bufl) {
+static size_t handle_line(int type, zval *array, char *buf, size_t bufl) {
 	if (type == 1) {
 		PHPWRITE(buf, bufl);
 		if (php_output_get_level() < 1) {
@@ -101,6 +101,7 @@ static void handle_line(int type, zval *array, char *buf, size_t bufl) {
 		bufl = strip_trailing_whitespace(buf, bufl);
 		add_next_index_stringl(array, buf, bufl);
 	}
+	return bufl;
 }
 
 /* {{{ php_exec
@@ -160,13 +161,13 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value)
 				bufl += b - buf;
 			}
 
-			handle_line(type, array, buf, bufl);
+			bufl = handle_line(type, array, buf, bufl);
 			b = buf;
 		}
 		if (bufl) {
 			if (buf != b) {
 				/* Process remaining output */
-				handle_line(type, array, buf, bufl);
+				bufl = handle_line(type, array, buf, bufl);
 			}
 
 			/* Return last line from the shell command */
