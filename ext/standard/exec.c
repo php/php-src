@@ -81,6 +81,28 @@ PHP_MINIT_FUNCTION(exec)
 }
 /* }}} */
 
+static size_t strip_trailing_whitespace(char *buf, size_t bufl) {
+	size_t l = bufl;
+	while (l-- > 0 && isspace(((unsigned char *)buf)[l]));
+	if (l != (bufl - 1)) {
+		bufl = l + 1;
+		buf[bufl] = '\0';
+	}
+	return bufl;
+}
+
+static void handle_line(int type, zval *array, char *buf, size_t bufl) {
+	if (type == 1) {
+		PHPWRITE(buf, bufl);
+		if (php_output_get_level() < 1) {
+			sapi_flush();
+		}
+	} else if (type == 2) {
+		bufl = strip_trailing_whitespace(buf, bufl);
+		add_next_index_stringl(array, buf, bufl);
+	}
+}
+
 /* {{{ php_exec
  * If type==0, only last line of output is returned (exec)
  * If type==1, all lines will be printed and last lined returned (system)
@@ -92,7 +114,6 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value)
 {
 	FILE *fp;
 	char *buf;
-	size_t l = 0;
 	int pclose_return;
 	char *b, *d=NULL;
 	php_stream *stream;
@@ -139,45 +160,17 @@ PHPAPI int php_exec(int type, char *cmd, zval *array, zval *return_value)
 				bufl += b - buf;
 			}
 
-			if (type == 1) {
-				PHPWRITE(buf, bufl);
-				if (php_output_get_level() < 1) {
-					sapi_flush();
-				}
-			} else if (type == 2) {
-				/* strip trailing whitespaces */
-				l = bufl;
-				while (l-- > 0 && isspace(((unsigned char *)buf)[l]));
-				if (l != (bufl - 1)) {
-					bufl = l + 1;
-					buf[bufl] = '\0';
-				}
-				add_next_index_stringl(array, buf, bufl);
-			}
+			handle_line(type, array, buf, bufl);
 			b = buf;
 		}
 		if (bufl) {
-			/* output remaining data in buffer */
-			if (type == 1 && buf != b) {
-				PHPWRITE(buf, bufl);
-				if (php_output_get_level() < 1) {
-					sapi_flush();
-				}
-			}
-			/* strip trailing whitespaces if we have not done so already */
-			if ((type == 2 && buf != b) || type != 2) {
-				l = bufl;
-				while (l-- > 0 && isspace(((unsigned char *)buf)[l]));
-				if (l != (bufl - 1)) {
-					bufl = l + 1;
-					buf[bufl] = '\0';
-				}
-				if (type == 2) {
-					add_next_index_stringl(array, buf, bufl);
-				}
+			if (buf != b) {
+				/* Process remaining output */
+				handle_line(type, array, buf, bufl);
 			}
 
 			/* Return last line from the shell command */
+			bufl = strip_trailing_whitespace(buf, bufl);
 			RETVAL_STRINGL(buf, bufl);
 		} else { /* should return NULL, but for BC we return "" */
 			RETVAL_EMPTY_STRING();
