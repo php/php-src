@@ -427,6 +427,8 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/variable_syntax_tweaks
   . Added Stringable.
     RFC: https://wiki.php.net/rfc/stringable
+  . Added type casting in array destructuring expressions.
+    RFC: https://wiki.php.net/rfc/typecast_array_desctructuring
 
 - Date:
   . Added DateTime::createFromInterface() and

@@ -2809,6 +2809,25 @@ static zend_bool zend_propagate_list_refs(zend_ast *ast) { /* {{{ */
 }
 /* }}} */
 
+void zend_compile_cast(znode *result, zend_ast *ast) /* {{{ */
+{
+	zend_ast *expr_ast = ast->child[0];
+	znode expr_node;
+	zend_op *opline;
+
+	zend_compile_expr(&expr_node, expr_ast);
+
+	if (ast->attr == _IS_BOOL) {
+		opline = zend_emit_op_tmp(result, ZEND_BOOL, &expr_node, NULL);
+	} else if (ast->attr == IS_NULL) {
+		zend_error(E_COMPILE_ERROR, "The (unset) cast is no longer supported");
+	} else {
+		opline = zend_emit_op_tmp(result, ZEND_CAST, &expr_node, NULL);
+		opline->extended_value = ast->attr;
+	}
+}
+/* }}} */
+
 static void zend_compile_list_assign(
 		znode *result, zend_ast *ast, znode *expr_node, zend_bool old_style) /* {{{ */
 {
@@ -2824,6 +2843,7 @@ static void zend_compile_list_assign(
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
+		zend_ast *cast_ast = NULL;
 		zend_ast *var_ast, *key_ast;
 		znode fetch_result, dim_node;
 		zend_op *opline;
@@ -2867,6 +2887,11 @@ static void zend_compile_list_assign(
 			Z_TRY_ADDREF(expr_node->u.constant);
 		}
 
+		if (var_ast->kind == ZEND_AST_CAST) {
+			cast_ast = var_ast;
+			var_ast = var_ast->child[0];
+		}
+
 		zend_verify_list_assign_target(var_ast, old_style);
 
 		opline = zend_emit_op(&fetch_result,
@@ -2884,6 +2909,11 @@ static void zend_compile_list_assign(
 		} else if (elem_ast->attr) {
 			zend_emit_assign_ref_znode(var_ast, &fetch_result);
 		} else {
+			zend_emit_assign_znode(var_ast, &fetch_result);
+		}
+
+		if (cast_ast) {
+			zend_compile_cast(&fetch_result, cast_ast);
 			zend_emit_assign_znode(var_ast, &fetch_result);
 		}
 	}
@@ -7690,25 +7720,6 @@ void zend_compile_pre_incdec(znode *result, zend_ast *ast) /* {{{ */
 		zend_compile_var(&var_node, var_ast, BP_VAR_RW, 0);
 		zend_emit_op_tmp(result, ast->kind == ZEND_AST_PRE_INC ? ZEND_PRE_INC : ZEND_PRE_DEC,
 			&var_node, NULL);
-	}
-}
-/* }}} */
-
-void zend_compile_cast(znode *result, zend_ast *ast) /* {{{ */
-{
-	zend_ast *expr_ast = ast->child[0];
-	znode expr_node;
-	zend_op *opline;
-
-	zend_compile_expr(&expr_node, expr_ast);
-
-	if (ast->attr == _IS_BOOL) {
-		opline = zend_emit_op_tmp(result, ZEND_BOOL, &expr_node, NULL);
-	} else if (ast->attr == IS_NULL) {
-		zend_error(E_COMPILE_ERROR, "The (unset) cast is no longer supported");
-	} else {
-		opline = zend_emit_op_tmp(result, ZEND_CAST, &expr_node, NULL);
-		opline->extended_value = ast->attr;
 	}
 }
 /* }}} */
