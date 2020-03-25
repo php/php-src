@@ -567,8 +567,6 @@ SPL_METHOD(SplDoublyLinkedList, push)
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	spl_ptr_llist_push(intern->llist, value);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -585,8 +583,6 @@ SPL_METHOD(SplDoublyLinkedList, unshift)
 
 	intern = Z_SPLDLLIST_P(ZEND_THIS);
 	spl_ptr_llist_unshift(intern->llist, value);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
