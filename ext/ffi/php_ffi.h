@@ -200,7 +200,7 @@ typedef struct _zend_ffi_val {
 		uint64_t        u64;
 		int64_t         i64;
 		zend_ffi_double d;
-		char            ch;
+		signed char     ch;
 		struct {
 			const char *str;
 			size_t      len;
