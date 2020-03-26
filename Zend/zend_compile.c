@@ -4981,41 +4981,62 @@ void zend_compile_if(zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+static uint32_t count_switch_conds(zend_ast_list *cases)
+{
+	uint32_t num_conds = 0;
+
+	for (uint32_t i = 0; i < cases->children; i++) {
+		zend_ast *case_ast = cases->child[i];
+		if (case_ast->child[0] == NULL) {
+			continue;
+		}
+
+		zend_ast_list *conds = zend_ast_get_list(case_ast->child[0]);
+		num_conds += conds->children;
+	}
+
+	return num_conds;
+}
+
 static zend_uchar determine_switch_jumptable_type(zend_ast_list *cases) {
 	uint32_t i;
 	zend_uchar common_type = IS_UNDEF;
 	for (i = 0; i < cases->children; i++) {
 		zend_ast *case_ast = cases->child[i];
-		zend_ast **cond_ast = &case_ast->child[0];
 		zval *cond_zv;
 		if (!case_ast->child[0]) {
 			/* Skip default clause */
 			continue;
 		}
 
-		zend_eval_const_expr(cond_ast);
-		if ((*cond_ast)->kind != ZEND_AST_ZVAL) {
-			/* Non-constant case */
-			return IS_UNDEF;
-		}
+		zend_ast_list *conds = zend_ast_get_list(case_ast->child[0]);
+		for (uint32_t j = 0; j < conds->children; j++) {
+			zend_ast **cond_ast = &conds->child[j];
 
-		cond_zv = zend_ast_get_zval(case_ast->child[0]);
-		if (Z_TYPE_P(cond_zv) != IS_LONG && Z_TYPE_P(cond_zv) != IS_STRING) {
-			/* We only optimize switched on integers and strings */
-			return IS_UNDEF;
-		}
+			zend_eval_const_expr(cond_ast);
+			if ((*cond_ast)->kind != ZEND_AST_ZVAL) {
+				/* Non-constant case */
+				return IS_UNDEF;
+			}
 
-		if (common_type == IS_UNDEF) {
-			common_type = Z_TYPE_P(cond_zv);
-		} else if (common_type != Z_TYPE_P(cond_zv)) {
-			/* Non-uniform case types */
-			return IS_UNDEF;
-		}
+			cond_zv = zend_ast_get_zval(*cond_ast);
+			if (Z_TYPE_P(cond_zv) != IS_LONG && Z_TYPE_P(cond_zv) != IS_STRING) {
+				/* We only optimize switched on integers and strings */
+				return IS_UNDEF;
+			}
 
-		if (Z_TYPE_P(cond_zv) == IS_STRING
-				&& is_numeric_string(Z_STRVAL_P(cond_zv), Z_STRLEN_P(cond_zv), NULL, NULL, 0)) {
-			/* Numeric strings cannot be compared with a simple hash lookup */
-			return IS_UNDEF;
+			if (common_type == IS_UNDEF) {
+				common_type = Z_TYPE_P(cond_zv);
+			} else if (common_type != Z_TYPE_P(cond_zv)) {
+				/* Non-uniform case types */
+				return IS_UNDEF;
+			}
+
+			if (Z_TYPE_P(cond_zv) == IS_STRING
+					&& is_numeric_string(Z_STRVAL_P(cond_zv), Z_STRLEN_P(cond_zv), NULL, NULL, 0)) {
+				/* Numeric strings cannot be compared with a simple hash lookup */
+				return IS_UNDEF;
+			}
 		}
 	}
 
@@ -5083,13 +5104,14 @@ void zend_compile_switch(znode *result, zend_ast *ast) /* {{{ */
 		opnum_switch = opline - CG(active_op_array)->opcodes;
 	}
 
-	jmpnz_opnums = safe_emalloc(sizeof(uint32_t), cases->children, 0);
+	uint32_t num_conds = count_switch_conds(cases);
+	uint32_t cond_count = 0;
+	jmpnz_opnums = safe_emalloc(sizeof(uint32_t), num_conds, 0);
 	for (i = 0; i < cases->children; ++i) {
 		zend_ast *case_ast = cases->child[i];
-		zend_ast *cond_ast = case_ast->child[0];
 		znode cond_node;
 
-		if (!cond_ast) {
+		if (case_ast->child[0] == NULL) {
 			if (has_default_case) {
 				CG(zend_lineno) = case_ast->lineno;
 				zend_error_noreturn(E_COMPILE_ERROR,
@@ -5099,50 +5121,63 @@ void zend_compile_switch(znode *result, zend_ast *ast) /* {{{ */
 			continue;
 		}
 
-		zend_compile_expr(&cond_node, cond_ast);
+		zend_ast_list *conds = zend_ast_get_list(case_ast->child[0]);
+		for (uint32_t j = 0; j < conds->children; j++) {
+			zend_ast *cond_ast = conds->child[j];
+			zend_compile_expr(&cond_node, cond_ast);
 
-		if (expr_node.op_type == IS_CONST
-			&& Z_TYPE(expr_node.u.constant) == IS_FALSE) {
-			jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPZ, &cond_node, 0);
-		} else if (expr_node.op_type == IS_CONST
-			&& Z_TYPE(expr_node.u.constant) == IS_TRUE) {
-			jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPNZ, &cond_node, 0);
-		} else {
-			opline = zend_emit_op(NULL,
-				(expr_node.op_type & (IS_VAR|IS_TMP_VAR)) ? ZEND_CASE : ZEND_IS_EQUAL,
-				&expr_node, &cond_node);
-			SET_NODE(opline->result, &case_node);
-			if (opline->op1_type == IS_CONST) {
-				Z_TRY_ADDREF_P(CT_CONSTANT(opline->op1));
+			if (expr_node.op_type == IS_CONST
+				&& Z_TYPE(expr_node.u.constant) == IS_FALSE) {
+				jmpnz_opnums[cond_count] = zend_emit_cond_jump(ZEND_JMPZ, &cond_node, 0);
+			} else if (expr_node.op_type == IS_CONST
+				&& Z_TYPE(expr_node.u.constant) == IS_TRUE) {
+				jmpnz_opnums[cond_count] = zend_emit_cond_jump(ZEND_JMPNZ, &cond_node, 0);
+			} else {
+				opline = zend_emit_op(NULL,
+					(expr_node.op_type & (IS_VAR|IS_TMP_VAR)) ? ZEND_CASE : ZEND_IS_EQUAL,
+					&expr_node, &cond_node);
+				SET_NODE(opline->result, &case_node);
+				if (opline->op1_type == IS_CONST) {
+					Z_TRY_ADDREF_P(CT_CONSTANT(opline->op1));
+				}
+
+				jmpnz_opnums[cond_count] = zend_emit_cond_jump(ZEND_JMPNZ, &case_node, 0);
 			}
 
-			jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPNZ, &case_node, 0);
+			cond_count++;
 		}
 	}
 
 	opnum_default_jmp = zend_emit_jump(0);
 	zend_bool is_first_case = 1;
+	cond_count = 0;
 
 	for (i = 0; i < cases->children; ++i) {
 		zend_ast *case_ast = cases->child[i];
-		zend_ast *cond_ast = case_ast->child[0];
 		zend_ast *stmt_ast = case_ast->child[1];
 
-		if (cond_ast) {
-			zend_update_jump_target_to_next(jmpnz_opnums[i]);
+		if (case_ast->child[0] != NULL) {
+			zend_ast_list *conds = zend_ast_get_list(case_ast->child[0]);
 
-			if (jumptable) {
-				zval *cond_zv = zend_ast_get_zval(cond_ast);
-				zval jmp_target;
-				ZVAL_LONG(&jmp_target, get_next_op_number());
+			for (uint32_t j = 0; j < conds->children; j++) {
+				zend_ast *cond_ast = conds->child[j];
+				zend_update_jump_target_to_next(jmpnz_opnums[cond_count]);
 
-				ZEND_ASSERT(Z_TYPE_P(cond_zv) == jumptable_type);
-				if (Z_TYPE_P(cond_zv) == IS_LONG) {
-					zend_hash_index_add(jumptable, Z_LVAL_P(cond_zv), &jmp_target);
-				} else {
-					ZEND_ASSERT(Z_TYPE_P(cond_zv) == IS_STRING);
-					zend_hash_add(jumptable, Z_STR_P(cond_zv), &jmp_target);
+				if (jumptable) {
+					zval *cond_zv = zend_ast_get_zval(cond_ast);
+					zval jmp_target;
+					ZVAL_LONG(&jmp_target, get_next_op_number());
+
+					ZEND_ASSERT(Z_TYPE_P(cond_zv) == jumptable_type);
+					if (Z_TYPE_P(cond_zv) == IS_LONG) {
+						zend_hash_index_add(jumptable, Z_LVAL_P(cond_zv), &jmp_target);
+					} else {
+						ZEND_ASSERT(Z_TYPE_P(cond_zv) == IS_STRING);
+						zend_hash_add(jumptable, Z_STR_P(cond_zv), &jmp_target);
+					}
 				}
+
+				cond_count++;
 			}
 		} else {
 			zend_update_jump_target_to_next(opnum_default_jmp);

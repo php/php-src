@@ -258,7 +258,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> isset_variable type return_type type_expr type_without_static
 %type <ast> identifier type_expr_without_static union_type_without_static
 %type <ast> inline_function union_type
-%type <ast> switch_expr_case_list non_empty_switch_expr_case_list switch_expr_case
+%type <ast> case_cond_list switch_expr_case_list non_empty_switch_expr_case_list switch_expr_case
 
 %type <num> returns_ref function fn is_reference is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier
@@ -585,10 +585,17 @@ switch_case_list:
 
 case_list:
 		%empty { $$ = zend_ast_create_list(0, ZEND_AST_SWITCH_LIST); }
-	|	case_list T_CASE expr case_separator inner_statement_list
+	|	case_list T_CASE case_cond_list case_separator inner_statement_list
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, $3, $5)); }
 	|	case_list T_DEFAULT case_separator inner_statement_list
 			{ $$ = zend_ast_list_add($1, zend_ast_create(ZEND_AST_SWITCH_CASE, NULL, $4)); }
+;
+
+case_cond_list:
+		expr
+			{ $$ = zend_ast_create_list(1, ZEND_AST_SWITCH_CASE_COND_LIST, $1); }
+	|	case_cond_list ',' expr
+			{ $$ = zend_ast_list_add($1, $3); }
 ;
 
 case_separator:
@@ -609,7 +616,7 @@ non_empty_switch_expr_case_list:
 ;
 
 switch_expr_case:
-		expr T_DOUBLE_ARROW expr
+		case_cond_list T_DOUBLE_ARROW expr
 			{ $$ = zend_ast_create(ZEND_AST_SWITCH_CASE, $1, $3); }
 	|	T_DEFAULT T_DOUBLE_ARROW expr
 			{ $$ = zend_ast_create(ZEND_AST_SWITCH_CASE, NULL, $3); }

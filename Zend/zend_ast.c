@@ -1862,7 +1862,7 @@ simple_list:
 			zend_ast_export_indent(str, indent);
 			if (ast->child[0]) {
 				smart_str_appends(str, "case ");
-				zend_ast_export_ex(str, ast->child[0], 0, indent);
+				zend_ast_export_list(str, (zend_ast_list*)ast->child[0], 1, 0, indent);
 				smart_str_appends(str, ":\n");
 			} else {
 				smart_str_appends(str, "default:\n");
