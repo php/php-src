@@ -2367,21 +2367,30 @@ ZEND_FUNCTION(autoload_classmap)
 	zend_string *class_id;
 	zval *class_path;
 	zend_string *lc_name;
+	zend_bool skip_lowercasing = 0;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &map) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ARRAY_HT(map)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(skip_lowercasing)
+	ZEND_PARSE_PARAMETERS_END();
 	
 	if (EG(autoload_classmap) == NULL) {
 		ALLOC_HASHTABLE(EG(autoload_classmap));
 		zend_hash_init(EG(autoload_classmap), map->nTableSize, NULL, NULL, 0);
 	}
 	
-	ZEND_HASH_FOREACH_STR_KEY_VAL(map, class_id, class_path) {
-		lc_name = zend_string_tolower(class_id);
-		zend_hash_add_or_update(EG(autoload_classmap), lc_name, class_path, HASH_ADD);
-		zend_string_release_ex(lc_name, 0);
-	} ZEND_HASH_FOREACH_END();
+	/* userland can save on processing by passing a lowercase list */
+	if (skip_lowercasing) {
+		zend_hash_merge(EG(autoload_classmap), map, NULL, 1);
+	}
+	else {
+		ZEND_HASH_FOREACH_STR_KEY_VAL(map, class_id, class_path) {
+			lc_name = zend_string_tolower(class_id);
+			zend_hash_add_or_update(EG(autoload_classmap), lc_name, class_path, HASH_ADD);
+			zend_string_release_ex(lc_name, 0);
+		} ZEND_HASH_FOREACH_END();
+	}
 	
 	RETURN_TRUE;
 }

@@ -181,6 +181,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_autoload_classmap, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, map, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, skip_lowercasing, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
 #if ZEND_DEBUG && defined(ZTS)

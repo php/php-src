@@ -1,5 +1,5 @@
 --TEST--
-Tests autoloading from a classmap does not interupt autoloader if it is not ste
+Tests autoloading from a classmap does not interupt autoloader if it is not set
 --FILE--
 <?php
 

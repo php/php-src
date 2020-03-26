@@ -99,7 +99,7 @@ function extension_loaded(string $extension_name): bool {}
 
 function get_extension_funcs(string $extension_name): array|false {}
 
-function autoload_classmap(array $map): bool { }
+function autoload_classmap(array $map, bool $skip_lowercasing = false): bool { }
 
 #if ZEND_DEBUG && defined(ZTS)
 function zend_thread_id(): int {}
