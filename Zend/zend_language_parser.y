@@ -633,7 +633,7 @@ alt_if_stmt:
 ;
 
 parameter_list:
-		non_empty_parameter_list { $$ = $1; }
+		non_empty_parameter_list possible_comma { $$ = $1; }
 	|	%empty	{ $$ = zend_ast_create_list(0, ZEND_AST_PARAM_LIST); }
 ;
 
