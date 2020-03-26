@@ -50,7 +50,7 @@ class MySessionHandler implements SessionHandlerInterface, SessionIdInterface, S
 
     public function validateId($key)
     {
-        return false;
+        return true;
     }
 }
 
