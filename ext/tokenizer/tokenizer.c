@@ -29,6 +29,7 @@
 #include "zend_language_scanner.h"
 #include "zend_language_scanner_defs.h"
 #include <zend_language_parser.h>
+#include "zend_interfaces.h"
 
 #define zendtext   LANG_SCNG(yy_text)
 #define zendleng   LANG_SCNG(yy_leng)
@@ -87,17 +88,17 @@ static zval *php_token_get_id(zval *obj) {
 	return id;
 }
 
-static zval *php_token_get_text(zval *obj) {
-	zval *text = OBJ_PROP_NUM(Z_OBJ_P(obj), 1);
-	if (Z_ISUNDEF_P(text)) {
+static zend_string *php_token_get_text(zval *obj) {
+	zval *text_zval = OBJ_PROP_NUM(Z_OBJ_P(obj), 1);
+	if (Z_ISUNDEF_P(text_zval)) {
 		zend_throw_error(NULL,
 			"Typed property PhpToken::$text must not be accessed before initialization");
 		return NULL;
 	}
 
-	ZVAL_DEREF(text);
-	ZEND_ASSERT(Z_TYPE_P(text) == IS_STRING);
-	return text;
+	ZVAL_DEREF(text_zval);
+	ZEND_ASSERT(Z_TYPE_P(text_zval) == IS_STRING);
+	return Z_STR_P(text_zval);
 }
 
 static zend_bool tokenize_common(
@@ -170,14 +171,15 @@ PHP_METHOD(PhpToken, is)
 
 		RETURN_BOOL(Z_LVAL_P(id_zval) == Z_LVAL_P(kind));
 	} else if (Z_TYPE_P(kind) == IS_STRING) {
-		zval *text_zval = php_token_get_text(ZEND_THIS);
-		if (!text_zval) {
+		zend_string *text = php_token_get_text(ZEND_THIS);
+		if (!text) {
 			RETURN_THROWS();
 		}
 
-		RETURN_BOOL(zend_string_equals(Z_STR_P(text_zval), Z_STR_P(kind)));
+		RETURN_BOOL(zend_string_equals(text, Z_STR_P(kind)));
 	} else if (Z_TYPE_P(kind) == IS_ARRAY) {
-		zval *id_zval = NULL, *text_zval = NULL, *entry;
+		zval *id_zval = NULL, *entry;
+		zend_string *text = NULL;
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(kind), entry) {
 			ZVAL_DEREF(entry);
 			if (Z_TYPE_P(entry) == IS_LONG) {
@@ -191,13 +193,13 @@ PHP_METHOD(PhpToken, is)
 					RETURN_TRUE;
 				}
 			} else if (Z_TYPE_P(entry) == IS_STRING) {
-				if (!text_zval) {
-					text_zval = php_token_get_text(ZEND_THIS);
-					if (!text_zval) {
+				if (!text) {
+					text = php_token_get_text(ZEND_THIS);
+					if (!text) {
 						RETURN_THROWS();
 					}
 				}
-				if (zend_string_equals(Z_STR_P(text_zval), Z_STR_P(entry))) {
+				if (zend_string_equals(text, Z_STR_P(entry))) {
 					RETURN_TRUE;
 				}
 			} else {
@@ -246,12 +248,25 @@ PHP_METHOD(PhpToken, getTokenName)
 	}
 }
 
+PHP_METHOD(PhpToken, __toString)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_string *text = php_token_get_text(ZEND_THIS);
+	if (!text) {
+		RETURN_THROWS();
+	}
+
+	RETURN_STR_COPY(text);
+}
+
 static const zend_function_entry php_token_methods[] = {
 	PHP_ME(PhpToken, getAll, arginfo_class_PhpToken_getAll, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME(PhpToken, __construct, arginfo_class_PhpToken___construct, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	PHP_ME(PhpToken, is, arginfo_class_PhpToken_is, ZEND_ACC_PUBLIC)
 	PHP_ME(PhpToken, isIgnorable, arginfo_class_PhpToken_isIgnorable, ZEND_ACC_PUBLIC)
 	PHP_ME(PhpToken, getTokenName, arginfo_class_PhpToken_getTokenName, ZEND_ACC_PUBLIC)
+	PHP_ME(PhpToken, __toString, arginfo_class_PhpToken___toString, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 
@@ -269,6 +284,7 @@ PHP_MINIT_FUNCTION(tokenizer)
 
 	INIT_CLASS_ENTRY(ce, "PhpToken", php_token_methods);
 	php_token_ce = zend_register_internal_class(&ce);
+	zend_class_implements(php_token_ce, 1, zend_ce_stringable);
 
 	name = zend_string_init("id", sizeof("id") - 1, 1);
 	zend_declare_typed_property(php_token_ce, name, &default_val, ZEND_ACC_PUBLIC, NULL,
