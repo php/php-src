@@ -11,6 +11,8 @@ if test "$PHP_SODIUM" != "no"; then
 
   AC_DEFINE(HAVE_LIBSODIUMLIB, 1, [ ])
 
-  PHP_NEW_EXTENSION(sodium, libsodium.c sodium_pwhash.c, $ext_shared)
+  dnl Add -Wno-type-limits as this may arise on 32bits platforms
+  SODIUM_COMPILER_FLAGS="$LIBSODIUM_CFLAGS -Wno-type-limits"
+  PHP_NEW_EXTENSION(sodium, libsodium.c sodium_pwhash.c, $ext_shared, , $SODIUM_COMPILER_FLAGS)
   PHP_SUBST(SODIUM_SHARED_LIBADD)
 fi
