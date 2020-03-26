@@ -462,6 +462,8 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/abstract_trait_method_validation
   . `throw` can now be used as an expression.
     RFC: https://wiki.php.net/rfc/throw_expression
+  . An optional trailing comma is now allowed in parameter lists.
+    RFC: https://wiki.php.net/rfc/trailing_comma_in_parameter_list
 
 - Date:
   . Added DateTime::createFromInterface() and
