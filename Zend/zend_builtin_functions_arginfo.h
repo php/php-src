@@ -179,6 +179,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_extension_funcs, 0, 1, MAY_B
 	ZEND_ARG_TYPE_INFO(0, extension_name, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_autoload_classmap, 0, 1, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, map, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
 #if ZEND_DEBUG && defined(ZTS)
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_zend_thread_id, 0, 0, IS_LONG, 0)
 ZEND_END_ARG_INFO()

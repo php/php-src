@@ -4080,7 +4080,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 
 #define ZEND_FAKE_OP_ARRAY ((zend_op_array*)(zend_intptr_t)-1)
 
-static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval *inc_filename, int type) /* {{{ */
+zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval *inc_filename, int type) /* {{{ */
 {
 	zend_op_array *new_op_array = NULL;
 	zval tmp_inc_filename;

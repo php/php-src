@@ -48,6 +48,7 @@ ZEND_API int zend_eval_string(const char *str, zval *retval_ptr, const char *str
 ZEND_API int zend_eval_stringl(const char *str, size_t str_len, zval *retval_ptr, const char *string_name);
 ZEND_API int zend_eval_string_ex(const char *str, zval *retval_ptr, const char *string_name, int handle_exceptions);
 ZEND_API int zend_eval_stringl_ex(const char *str, size_t str_len, zval *retval_ptr, const char *string_name, int handle_exceptions);
+zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval *inc_filename, int type);
 
 /* export zend_pass_function to allow comparisons against it */
 extern ZEND_API const zend_internal_function zend_pass_function;

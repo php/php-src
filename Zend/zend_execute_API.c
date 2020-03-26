@@ -141,6 +141,7 @@ void init_executor(void) /* {{{ */
 
 	EG(in_autoload) = NULL;
 	EG(autoload_func) = NULL;
+	EG(autoload_classmap) = NULL;
 	EG(error_handling) = EH_NORMAL;
 	EG(flags) = EG_FLAGS_INITIAL;
 
@@ -408,6 +409,11 @@ void shutdown_executor(void) /* {{{ */
 		if (EG(in_autoload)) {
 			zend_hash_destroy(EG(in_autoload));
 			FREE_HASHTABLE(EG(in_autoload));
+		}
+		
+		if (EG(autoload_classmap)) {
+			zend_hash_destroy(EG(autoload_classmap));
+			FREE_HASHTABLE(EG(autoload_classmap));
 		}
 
 		if (EG(ht_iterators) != EG(ht_iterators_slots)) {
@@ -904,12 +910,23 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 		return NULL;
 	}
 
+	if (EG(autoload_classmap) != NULL) {
+		zval* classmap_found = zend_hash_find(EG(autoload_classmap), lc_name);
+
+		if (classmap_found != NULL) {
+			zend_include_or_eval(classmap_found, ZEND_REQUIRE_ONCE);
+			return zend_hash_find_ptr(EG(class_table), lc_name);
+		}
+		else {
+			zend_error(E_NOTICE, "Cannot find %s in the autoload classmap", ZSTR_VAL(lc_name));
+		}
+	}
+	
 	if (!EG(autoload_func)) {
 		if (!key) {
 			zend_string_release_ex(lc_name, 0);
 		}
 		return NULL;
-
 	}
 
 	/* Verify class name before passing it to __autoload() */
