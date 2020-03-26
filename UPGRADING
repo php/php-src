@@ -372,6 +372,9 @@ PHP 8.0 UPGRADE NOTES
   . SplDoublyLinkedList::push() now returns void instead of true
   . SplDoublyLinkedList::unshift() now returns void instead of true
   . SplQueue::enqueue() now returns void instead of true
+  . spl_autoload_register() will now always throw a TypeError on invalid
+    arguments, therefore the second argument $do_throw is ignored and a
+    notice will be emitted if it is set to false.
 
 - Standard:
   . assert() will no longer evaluate string arguments, instead they will be

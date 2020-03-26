@@ -21,7 +21,7 @@ function main_autoload($class_name) {
     eval("class B {const foo = 1;}");
 }
 
-spl_autoload_register('main_autoload', false);
+spl_autoload_register('main_autoload');
 
 $classA = new ReflectionClass("A");
 $props = $classA->getProperties();

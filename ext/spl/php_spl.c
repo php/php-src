@@ -508,86 +508,46 @@ PHP_FUNCTION(spl_autoload_call)
 PHP_FUNCTION(spl_autoload_register)
 {
 	zend_string *func_name;
-	char *error = NULL;
 	zend_string *lc_name;
-	zval *zcallable = NULL;
 	zend_bool do_throw = 1;
 	zend_bool prepend  = 0;
 	zend_function *spl_func_ptr;
 	autoload_func_info alfi;
 	zend_object *obj_ptr;
+	zend_fcall_info fci = {0};
 	zend_fcall_info_cache fcc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z!bb", &zcallable, &do_throw, &prepend) == FAILURE) {
-		RETURN_THROWS();
+	ZEND_PARSE_PARAMETERS_START(0, 3)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_FUNC_OR_NULL(fci, fcc)
+		Z_PARAM_BOOL(do_throw)
+		Z_PARAM_BOOL(prepend)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (!do_throw) {
+		php_error_docref(NULL, E_NOTICE, "Argument #2 ($do_throw) has been ignored, "
+			"spl_autoload_register() will always throw");
 	}
 
-	if (zcallable) {
-		if (!zend_is_callable_ex(zcallable, NULL, 0, &func_name, &fcc, &error)) {
-			alfi.ce = fcc.calling_scope;
-			alfi.func_ptr = fcc.function_handler;
-			obj_ptr = fcc.object;
-			if (Z_TYPE_P(zcallable) == IS_ARRAY) {
-				if (!obj_ptr && alfi.func_ptr && !(alfi.func_ptr->common.fn_flags & ZEND_ACC_STATIC)) {
-					if (do_throw) {
-						zend_throw_exception_ex(spl_ce_LogicException, 0, "Passed array specifies a non static method but no object (%s)", error);
-					}
-					if (error) {
-						efree(error);
-					}
-					zend_string_release_ex(func_name, 0);
-					RETURN_FALSE;
-				} else if (do_throw) {
-					zend_throw_exception_ex(spl_ce_LogicException, 0, "Passed array does not specify %s %smethod (%s)", alfi.func_ptr ? "a callable" : "an existing", !obj_ptr ? "static " : "", error);
-				}
-				if (error) {
-					efree(error);
-				}
-				zend_string_release_ex(func_name, 0);
-				RETURN_FALSE;
-			} else if (Z_TYPE_P(zcallable) == IS_STRING) {
-				if (do_throw) {
-					zend_throw_exception_ex(spl_ce_LogicException, 0, "Function '%s' not %s (%s)", ZSTR_VAL(func_name), alfi.func_ptr ? "callable" : "found", error);
-				}
-				if (error) {
-					efree(error);
-				}
-				zend_string_release_ex(func_name, 0);
-				RETURN_FALSE;
-			} else {
-				if (do_throw) {
-					zend_throw_exception_ex(spl_ce_LogicException, 0, "Illegal value passed (%s)", error);
-				}
-				if (error) {
-					efree(error);
-				}
-				zend_string_release_ex(func_name, 0);
-				RETURN_FALSE;
-			}
-		} else if (fcc.function_handler->type == ZEND_INTERNAL_FUNCTION &&
-				   fcc.function_handler->internal_function.handler == zif_spl_autoload_call) {
-			if (do_throw) {
-				zend_throw_exception_ex(spl_ce_LogicException, 0, "Function spl_autoload_call() cannot be registered");
-			}
-			if (error) {
-				efree(error);
-			}
-			zend_string_release_ex(func_name, 0);
-			RETURN_FALSE;
-		}
+	/* If first arg is not null */
+	if (ZEND_FCI_INITIALIZED(fci)) {
 		alfi.ce = fcc.calling_scope;
 		alfi.func_ptr = fcc.function_handler;
 		obj_ptr = fcc.object;
-		if (error) {
-			efree(error);
+
+		if (fcc.function_handler->type == ZEND_INTERNAL_FUNCTION &&
+			fcc.function_handler->internal_function.handler == zif_spl_autoload_call) {
+			zend_argument_value_error(1, "must not be the spl_autoload_call() function");
+			RETURN_THROWS();
 		}
 
-		if (Z_TYPE_P(zcallable) == IS_OBJECT) {
-			ZVAL_COPY(&alfi.closure, zcallable);
-
+		/* fci.function_name contains the callable zval */
+		func_name = zend_get_callable_name(&fci.function_name);
+		if (Z_TYPE(fci.function_name) == IS_OBJECT) {
+			ZVAL_COPY(&alfi.closure, &fci.function_name);
 			lc_name = zend_string_alloc(ZSTR_LEN(func_name) + sizeof(uint32_t), 0);
 			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(func_name), ZSTR_LEN(func_name));
-			memcpy(ZSTR_VAL(lc_name) + ZSTR_LEN(func_name), &Z_OBJ_HANDLE_P(zcallable), sizeof(uint32_t));
+			memcpy(ZSTR_VAL(lc_name) + ZSTR_LEN(func_name), &Z_OBJ_HANDLE(fci.function_name), sizeof(uint32_t));
 			ZSTR_VAL(lc_name)[ZSTR_LEN(lc_name)] = '\0';
 		} else {
 			ZVAL_UNDEF(&alfi.closure);
@@ -599,7 +559,7 @@ PHP_FUNCTION(spl_autoload_register)
 				lc_name = zend_string_tolower(func_name);
 			}
 		}
-		zend_string_release_ex(func_name, 0);
+		zend_string_release(func_name);
 
 		if (SPL_G(autoload_functions) && zend_hash_exists(SPL_G(autoload_functions), lc_name)) {
 			if (!Z_ISUNDEF(alfi.closure)) {
