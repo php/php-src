@@ -1142,7 +1142,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 				my_ulonglong llval;
 				char tmp[22];
 				switch (field_len[i]) {
-					case 8:llvaal = (my_ulonglong)  bit_uint8korr(row[i]);break;
+					case 8:llval = (my_ulonglong)  bit_uint8korr(row[i]);break;
 					case 7:llval = (my_ulonglong)  bit_uint7korr(row[i]);break;
 					case 6:llval = (my_ulonglong)  bit_uint6korr(row[i]);break;
 					case 5:llval = (my_ulonglong)  bit_uint5korr(row[i]);break;
