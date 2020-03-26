@@ -2,7 +2,7 @@
 Bug #79332 (php_istreams are never freed)
 --SKIPIF--
 <?php
-if (!extension_loaded('com_dotnet')) die('com_dotnet extension not available');
+if (!extension_loaded('com_dotnet')) die('skip com_dotnet extension not available');
 ?>
 --FILE--
 <?php
