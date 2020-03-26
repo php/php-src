@@ -915,7 +915,9 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, zend_string *
 
 		if (classmap_found != NULL) {
 			zend_include_or_eval(classmap_found, ZEND_REQUIRE_ONCE);
-			return zend_hash_find_ptr(EG(class_table), lc_name);
+			ce = zend_hash_find_ptr(EG(class_table), lc_name);
+			zend_string_release_ex(lc_name, 0);
+			return ce;
 		}
 		else {
 			zend_error(E_NOTICE, "Cannot find %s in the autoload classmap", ZSTR_VAL(lc_name));
