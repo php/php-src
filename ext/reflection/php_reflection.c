@@ -1187,13 +1187,13 @@ static void reflection_type_factory(zend_type type, zval *object, zend_bool lega
 	reflection_object *intern;
 	type_reference *reference;
 	zend_bool is_union = is_union_type(type);
+	zend_bool is_mixed = ZEND_TYPE_PURE_MASK(type) == MAY_BE_ANY;
 
-	reflection_instantiate(
-		is_union ? reflection_union_type_ptr : reflection_named_type_ptr, object);
+	reflection_instantiate(is_union && !is_mixed ? reflection_union_type_ptr : reflection_named_type_ptr, object);
 	intern = Z_REFLECTION_P(object);
 	reference = (type_reference*) emalloc(sizeof(type_reference));
 	reference->type = type;
-	reference->legacy_behavior = legacy_behavior && !is_union;
+	reference->legacy_behavior = legacy_behavior && !is_union && !is_mixed;
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_TYPE;
 

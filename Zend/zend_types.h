@@ -257,7 +257,7 @@ typedef struct {
 	{ NULL, (_type_mask) }
 
 #define ZEND_TYPE_INIT_CODE(code, allow_null, extra_flags) \
-	ZEND_TYPE_INIT_MASK(((code) == _IS_BOOL ? MAY_BE_BOOL : (1 << (code))) \
+	ZEND_TYPE_INIT_MASK(((code) == _IS_BOOL ? MAY_BE_BOOL : ((code) == IS_MIXED ? MAY_BE_ANY : (1 << (code)))) \
 		| ((allow_null) ? _ZEND_TYPE_NULLABLE_BIT : 0) | (extra_flags))
 
 #define ZEND_TYPE_INIT_PTR(ptr, type_kind, allow_null, extra_flags) \
@@ -534,6 +534,7 @@ struct _zend_ast_ref {
 #define IS_ITERABLE					13
 #define IS_VOID						14
 #define IS_STATIC					15
+#define IS_MIXED					16
 
 /* internal types */
 #define IS_INDIRECT             	12
@@ -542,8 +543,8 @@ struct _zend_ast_ref {
 #define _IS_ERROR					15
 
 /* used for casts */
-#define _IS_BOOL					16
-#define _IS_NUMBER					17
+#define _IS_BOOL					17
+#define _IS_NUMBER					18
 
 static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;

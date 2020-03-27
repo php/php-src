@@ -172,6 +172,7 @@ static const struct reserved_class_name reserved_class_names[] = {
 	{ZEND_STRL("void")},
 	{ZEND_STRL("iterable")},
 	{ZEND_STRL("object")},
+	{ZEND_STRL("mixed")},
 	{NULL, 0}
 };
 
@@ -220,6 +221,7 @@ static const builtin_type_info builtin_types[] = {
 	{ZEND_STRL("void"), IS_VOID},
 	{ZEND_STRL("iterable"), IS_ITERABLE},
 	{ZEND_STRL("object"), IS_OBJECT},
+	{ZEND_STRL("mixed"), IS_MIXED},
 	{NULL, 0, IS_UNDEF}
 };
 
@@ -1166,6 +1168,7 @@ static zend_string *resolve_class_name(zend_string *name, zend_class_entry *scop
 
 zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scope) {
 	zend_string *str = NULL;
+
 	if (ZEND_TYPE_HAS_LIST(type)) {
 		zend_type *list_type;
 		ZEND_TYPE_LIST_FOREACH(ZEND_TYPE_LIST(type), list_type) {
@@ -1182,6 +1185,12 @@ zend_string *zend_type_to_string_resolved(zend_type type, zend_class_entry *scop
 	}
 
 	uint32_t type_mask = ZEND_TYPE_FULL_MASK(type);
+
+	if (type_mask == MAY_BE_ANY) {
+		str = add_type_string(str, ZSTR_KNOWN(ZEND_STR_MIXED));
+
+		return str;
+	}
 	if (type_mask & MAY_BE_STATIC) {
 		zend_string *name = ZSTR_KNOWN(ZEND_STR_STATIC);
 		if (scope) {
@@ -2296,11 +2305,14 @@ static void zend_emit_return_type_check(
 			}
 		}
 
-		if (expr && expr->op_type == IS_CONST) {
-			if (ZEND_TYPE_CONTAINS_CODE(type, Z_TYPE(expr->u.constant))) {
-				/* we don't need run-time check */
-				return;
-			}
+		if (expr && ZEND_TYPE_PURE_MASK(type) == MAY_BE_ANY) {
+			/* we don't need run-time check for mixed return type */
+			return;
+		}
+
+		if (expr && expr->op_type == IS_CONST && ZEND_TYPE_CONTAINS_CODE(type, Z_TYPE(expr->u.constant))) {
+			/* we don't need run-time check */
+			return;
 		}
 
 		opline = zend_emit_op(NULL, ZEND_VERIFY_RETURN_TYPE, expr, NULL);
@@ -5576,8 +5588,13 @@ static zend_type zend_compile_typename(
 		for (uint32_t i = 0; i < list->children; i++) {
 			zend_ast *type_ast = list->child[i];
 			zend_type single_type = zend_compile_single_typename(type_ast);
-			uint32_t type_mask_overlap =
-				ZEND_TYPE_PURE_MASK(type) & ZEND_TYPE_PURE_MASK(single_type);
+			uint32_t single_type_mask = ZEND_TYPE_PURE_MASK(single_type);
+
+			if (single_type_mask == MAY_BE_ANY) {
+				zend_error_noreturn(E_COMPILE_ERROR, "Type mixed can only be used as a standalone type");
+			}
+
+			uint32_t type_mask_overlap = ZEND_TYPE_PURE_MASK(type) & single_type_mask;
 			if (type_mask_overlap) {
 				zend_type overlap_type = ZEND_TYPE_INIT_MASK(type_mask_overlap);
 				zend_string *overlap_type_str = zend_type_to_string(overlap_type);
@@ -5652,6 +5669,10 @@ static zend_type zend_compile_typename(
 		zend_error_noreturn(E_COMPILE_ERROR,
 			"Type %s contains both iterable and Traversable, which is redundant",
 			ZSTR_VAL(type_str));
+	}
+
+	if ((type_mask == MAY_BE_ANY) && allow_null) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Type mixed cannot be nullable");
 	}
 
 	if ((type_mask & MAY_BE_OBJECT) && (ZEND_TYPE_HAS_CLASS(type) || (type_mask & MAY_BE_STATIC))) {
