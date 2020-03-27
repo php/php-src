@@ -606,8 +606,9 @@ int php_zip_glob(char *pattern, int pattern_len, zend_long flags, zval *return_v
 		add_next_index_string(return_value, globbuf.gl_pathv[n]+cwd_skip);
 	}
 
+	ret = globbuf.gl_pathc;
 	globfree(&globbuf);
-	return globbuf.gl_pathc;
+	return ret;
 #else
 	zend_throw_error(NULL, "Glob support is not available");
 	return 0;
