@@ -27,7 +27,7 @@ class B extends A {
         
         (self::class)::test();
         call_user_func(self::class . "::test");
-        call_user_func(array("self::class", "test"));
+        call_user_func(array(self::class, "test"));
     }
 }
 
