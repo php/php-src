@@ -616,7 +616,7 @@ static bucket_compare_func_t php_get_data_compare_func(zend_long sort_type, int 
 }
 /* }}} */
 
-/* {{{ proto bool krsort(array &array_arg [, int sort_flags])
+/* {{{ proto void krsort(array &array_arg [, int sort_flags])
    Sort an array by key value in reverse order */
 PHP_FUNCTION(krsort)
 {
@@ -633,12 +633,10 @@ PHP_FUNCTION(krsort)
 	cmp = php_get_key_compare_func(sort_type, 1);
 
 	zend_hash_sort(Z_ARRVAL_P(array), cmp, 0);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool ksort(array &array_arg [, int sort_flags])
+/* {{{ proto void ksort(array &array_arg [, int sort_flags])
    Sort an array by key */
 PHP_FUNCTION(ksort)
 {
@@ -655,8 +653,6 @@ PHP_FUNCTION(ksort)
 	cmp = php_get_key_compare_func(sort_type, 0);
 
 	zend_hash_sort(Z_ARRVAL_P(array), cmp, 0);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -793,7 +789,7 @@ PHP_FUNCTION(natcasesort)
 }
 /* }}} */
 
-/* {{{ proto bool asort(array &array_arg [, int sort_flags])
+/* {{{ proto void asort(array &array_arg [, int sort_flags])
    Sort an array and maintain index association */
 PHP_FUNCTION(asort)
 {
@@ -810,12 +806,10 @@ PHP_FUNCTION(asort)
 	cmp = php_get_data_compare_func(sort_type, 0);
 
 	zend_hash_sort(Z_ARRVAL_P(array), cmp, 0);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool arsort(array &array_arg [, int sort_flags])
+/* {{{ proto void arsort(array &array_arg [, int sort_flags])
    Sort an array in reverse order and maintain index association */
 PHP_FUNCTION(arsort)
 {
@@ -832,12 +826,10 @@ PHP_FUNCTION(arsort)
 	cmp = php_get_data_compare_func(sort_type, 1);
 
 	zend_hash_sort(Z_ARRVAL_P(array), cmp, 0);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool sort(array &array_arg [, int sort_flags])
+/* {{{ proto void sort(array &array_arg [, int sort_flags])
    Sort an array */
 PHP_FUNCTION(sort)
 {
@@ -854,12 +846,10 @@ PHP_FUNCTION(sort)
 	cmp = php_get_data_compare_func(sort_type, 0);
 
 	zend_hash_sort(Z_ARRVAL_P(array), cmp, 1);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool rsort(array &array_arg [, int sort_flags])
+/* {{{ proto void rsort(array &array_arg [, int sort_flags])
    Sort an array in reverse order */
 PHP_FUNCTION(rsort)
 {
@@ -876,8 +866,6 @@ PHP_FUNCTION(rsort)
 	cmp = php_get_data_compare_func(sort_type, 1);
 
 	zend_hash_sort(Z_ARRVAL_P(array), cmp, 1);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1397,7 +1385,7 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto bool array_walk(array input, string funcname [, mixed userdata])
+/* {{{ proto void array_walk(array input, string funcname [, mixed userdata])
    Apply a user function to every member of an array */
 PHP_FUNCTION(array_walk)
 {
@@ -1424,11 +1412,10 @@ PHP_FUNCTION(array_walk)
 	zend_release_fcall_info_cache(&BG(array_walk_fci_cache));
 	BG(array_walk_fci) = orig_array_walk_fci;
 	BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
-	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool array_walk_recursive(array input, string funcname [, mixed userdata])
+/* {{{ proto void array_walk_recursive(array input, string funcname [, mixed userdata])
    Apply a user function recursively to every member of an array */
 PHP_FUNCTION(array_walk_recursive)
 {
@@ -1455,7 +1442,6 @@ PHP_FUNCTION(array_walk_recursive)
 	zend_release_fcall_info_cache(&BG(array_walk_fci_cache));
 	BG(array_walk_fci) = orig_array_walk_fci;
 	BG(array_walk_fci_cache) = orig_array_walk_fci_cache;
-	RETURN_TRUE;
 }
 /* }}} */
 
