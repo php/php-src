@@ -30,13 +30,18 @@ print "$enc\n";
 print "== INVALID PARAMETER ==\n";
 
 // Note: Other than string type, PHP raises Warning
-$r = mb_internal_encoding('BAD');
-($r === false) ? print "OK_BAD_SET\n" : print "NG_BAD_SET\n";
+try {
+    $r = mb_internal_encoding('BAD_NAME');
+    print 'NG_BAD_SET' . \PHP_EOL;
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 $enc = mb_internal_encoding();
 print "$enc\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 OK_EUC-JP_SET
 EUC-JP
 OK_UTF-8_SET
@@ -44,7 +49,5 @@ UTF-8
 OK_ASCII_SET
 ASCII
 == INVALID PARAMETER ==
-
-Warning: mb_internal_encoding(): Unknown encoding "BAD" in %s on line %d
-OK_BAD_SET
+mb_internal_encoding(): Argument #1 ($encoding) must be a valid encoding, "BAD_NAME" given
 ASCII
