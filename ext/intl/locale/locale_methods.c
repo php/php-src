@@ -216,10 +216,10 @@ PHP_NAMED_FUNCTION(zif_locale_get_default)
 
 /* }}} */
 
-/* {{{ proto static string Locale::setDefault( string $locale )
+/* {{{ proto static void Locale::setDefault( string $locale )
    Set default locale */
 /* }}} */
-/* {{{ proto static string locale_set_default( string $locale )
+/* {{{ proto static void locale_set_default( string $locale )
    Set default locale */
 PHP_NAMED_FUNCTION(zif_locale_set_default)
 {
@@ -243,8 +243,6 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 	if (default_locale != NULL) {
 		zend_string_release_ex(locale_name, 0);
 	}
-
-	RETURN_TRUE;
 }
 /* }}} */
 
