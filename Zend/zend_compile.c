@@ -4506,6 +4506,13 @@ void zend_compile_return(zend_ast *ast) /* {{{ */
 	if (!expr_ast) {
 		expr_node.op_type = IS_CONST;
 		ZVAL_NULL(&expr_node.u.constant);
+	} else if (expr_ast->kind == ZEND_AST_BLOCK_EXPR && expr_ast->child[1] == NULL) {
+		expr_node.op_type = IS_CONST;
+		ZVAL_NULL(&expr_node.u.constant);
+
+		znode result;
+		zend_compile_expr(&result, expr_ast);
+		zend_do_free(&result);
 	} else if (by_ref && zend_is_variable(expr_ast)) {
 		zend_compile_var(&expr_node, expr_ast, BP_VAR_W, 1);
 	} else {
@@ -8332,6 +8339,27 @@ void zend_compile_class_name(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+void zend_compile_block_expr(znode *result, zend_ast *ast) /* {{{ */
+{
+	zend_bool result_unused = (ast->attr & ZEND_BLOCK_EXPR_RESULT_UNUSED) != 0;
+	zend_ast *statement_list = ast->child[0];
+	zend_ast *expr_ast = ast->child[1];
+
+	zend_compile_stmt(statement_list);
+
+	if (expr_ast != NULL) {
+		zend_compile_expr(result, expr_ast);
+	} else {
+		if (!result_unused) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Block expression must return a value if its result is used");
+		}
+
+		ZVAL_NULL(&result->u.constant);
+		result->op_type = IS_CONST;
+	}
+}
+/* }}} */
+
 static zend_op *zend_compile_rope_add_ex(zend_op *opline, znode *result, uint32_t num, znode *elem_node) /* {{{ */
 {
 	if (num == 0) {
@@ -8951,6 +8979,9 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_CLOSURE:
 		case ZEND_AST_ARROW_FUNC:
 			zend_compile_func_decl(result, ast, 0);
+			return;
+		case ZEND_AST_BLOCK_EXPR:
+			zend_compile_block_expr(result, ast);
 			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);

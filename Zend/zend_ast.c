@@ -1193,6 +1193,7 @@ static ZEND_COLD void zend_ast_export_stmt(smart_str *str, zend_ast *ast, int in
 			case ZEND_AST_USE_TRAIT:
 			case ZEND_AST_NAMESPACE:
 			case ZEND_AST_DECLARE:
+			case ZEND_AST_BLOCK_EXPR:
 				break;
 			default:
 				smart_str_appendc(str, ';');
@@ -1500,6 +1501,17 @@ simple_list:
 		case ZEND_AST_STMT_LIST:
 		case ZEND_AST_TRAIT_ADAPTATIONS:
 			zend_ast_export_stmt(str, ast, indent);
+			break;
+		case ZEND_AST_BLOCK_EXPR:
+			smart_str_appends(str, "{\n");
+			zend_ast_export_stmt(str, ast->child[0], indent + 1);
+			if (ast->child[1] != NULL) {
+				zend_ast_export_indent(str, indent + 1);
+				zend_ast_export_ex(str, ast->child[1], 0, indent + 1);
+				smart_str_appendc(str, '\n');
+			}
+			zend_ast_export_indent(str, indent);
+			smart_str_appendc(str, '}');
 			break;
 		case ZEND_AST_IF:
 			zend_ast_export_if_stmt(str, (zend_ast_list*)ast, indent);

@@ -1009,6 +1009,9 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 /* Attribute for ternary inside parentheses */
 #define ZEND_PARENTHESIZED_CONDITIONAL 1
 
+/* Attribute for block expression at statement level */
+#define ZEND_BLOCK_EXPR_RESULT_UNUSED 1
+
 /* For "use" AST nodes and the seen symbol table */
 #define ZEND_SYMBOL_CLASS    (1<<0)
 #define ZEND_SYMBOL_FUNCTION (1<<1)
