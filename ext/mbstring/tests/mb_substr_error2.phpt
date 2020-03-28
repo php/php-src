@@ -23,13 +23,13 @@ $start = 1;
 $length = 5;
 $encoding = 'unknown-encoding';
 
-var_dump( mb_substr($str, $start, $length, $encoding));
+try {
+    var_dump( mb_substr($str, $start, $length, $encoding));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
-echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_substr() : error conditions ***
-
-Warning: mb_substr(): Unknown encoding "unknown-encoding" in %s on line %d
-bool(false)
-Done
+mb_substr(): Argument #4 ($encoding) must be a valid encoding, "unknown-encoding" given

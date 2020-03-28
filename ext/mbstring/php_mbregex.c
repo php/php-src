@@ -855,8 +855,8 @@ PHP_FUNCTION(mb_regex_encoding)
 		mbctype = _php_mb_regex_name2mbctype(encoding);
 
 		if (mbctype == ONIG_ENCODING_UNDEF) {
-			php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", encoding);
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must be a valid encoding, \"%s\" given", encoding);
+			RETURN_THROWS();
 		}
 
 		MBREX(current_mbctype) = mbctype;
