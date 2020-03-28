@@ -5219,7 +5219,7 @@ void zend_compile_switch(znode *result, zend_ast *ast) /* {{{ */
 		// Generate default case for switch expression
 		if (is_switch_expr) {
 			zval exception_name;
-			ZVAL_STRING(&exception_name, "InvalidArgumentException");
+			ZVAL_STRING(&exception_name, "UnhandledSwitchCaseError");
 			zend_ast *exception_name_ast = zend_ast_create_zval(&exception_name);
 
 			zend_ast *exception_args_ast = zend_ast_create_list(0, ZEND_AST_ARG_LIST);

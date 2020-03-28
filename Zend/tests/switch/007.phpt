@@ -19,7 +19,7 @@ echo get_value(3) . "\n";
 1
 2
 
-Fatal error: Uncaught InvalidArgumentException in %s
+Fatal error: Uncaught UnhandledSwitchCaseError in %s
 Stack trace:
 #0 %s: get_value(3)
 #1 {main}
