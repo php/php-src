@@ -702,7 +702,7 @@ SPL_METHOD(SplFixedArray, getSize)
 }
 /* }}} */
 
-/* {{{ proto bool SplFixedArray::setSize(int size)
+/* {{{ proto void SplFixedArray::setSize(int size)
 */
 SPL_METHOD(SplFixedArray, setSize)
 {
@@ -722,7 +722,6 @@ SPL_METHOD(SplFixedArray, setSize)
 	intern = Z_SPLFIXEDARRAY_P(object);
 
 	spl_fixedarray_resize(&intern->array, size);
-	RETURN_TRUE;
 }
 /* }}} */
 

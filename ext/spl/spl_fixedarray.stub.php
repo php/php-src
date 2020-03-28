@@ -19,7 +19,7 @@ class SplFixedArray implements Iterator, ArrayAccess, Countable
     /** @return int */
     public function getSize() {}
 
-    /** @return bool */
+    /** @return void */
     public function setSize(int $size) {}
 
     /**

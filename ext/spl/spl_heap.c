@@ -602,7 +602,7 @@ SPL_METHOD(SplHeap, isEmpty)
 }
 /* }}} */
 
-/* {{{ proto bool SplHeap::insert(mixed value)
+/* {{{ proto void SplHeap::insert(mixed value)
 	   Push $value on the heap */
 SPL_METHOD(SplHeap, insert)
 {
@@ -622,8 +622,6 @@ SPL_METHOD(SplHeap, insert)
 
 	Z_TRY_ADDREF_P(value);
 	spl_ptr_heap_insert(intern->heap, value, ZEND_THIS);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -651,7 +649,7 @@ SPL_METHOD(SplHeap, extract)
 }
 /* }}} */
 
-/* {{{ proto bool SplPriorityQueue::insert(mixed value, mixed priority)
+/* {{{ proto void SplPriorityQueue::insert(mixed value, mixed priority)
 	   Push $value with the priority $priodiry on the priorityqueue */
 SPL_METHOD(SplPriorityQueue, insert)
 {
@@ -674,8 +672,6 @@ SPL_METHOD(SplPriorityQueue, insert)
 	ZVAL_COPY(&elem.priority, priority);
 
 	spl_ptr_heap_insert(intern->heap, &elem, ZEND_THIS);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -776,7 +772,7 @@ SPL_METHOD(SplPriorityQueue, getExtractFlags)
 }
 /* }}} */
 
-/* {{{ proto int SplHeap::recoverFromCorruption()
+/* {{{ proto void SplHeap::recoverFromCorruption()
  Recover from a corrupted state*/
 SPL_METHOD(SplHeap, recoverFromCorruption)
 {
@@ -789,8 +785,6 @@ SPL_METHOD(SplHeap, recoverFromCorruption)
 	intern = Z_SPLHEAP_P(ZEND_THIS);
 
 	intern->heap->flags = intern->heap->flags & ~SPL_HEAP_CORRUPTED;
-
-	RETURN_TRUE;
 }
 /* }}} */
 

@@ -12,7 +12,7 @@ class SplPriorityQueue implements Iterator, Countable
     /**
      * @param mixed $value
      * @param mixed $priority
-     * @return bool
+     * @return void
      */
     public function insert($value, $priority) {}
 
@@ -63,7 +63,7 @@ abstract class SplHeap implements Iterator, Countable
 
     /**
      * @param mixed $value
-     * @return bool
+     * @return void
      */
     public function insert($value) {}
 
@@ -91,7 +91,7 @@ abstract class SplHeap implements Iterator, Countable
     /** @return bool */
     public function valid() {}
 
-    /** @return bool */
+    /** @return void */
     public function recoverFromCorruption() {}
 
     /**

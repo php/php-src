@@ -329,9 +329,15 @@ PHP 8.0 UPGRADE NOTES
   . SplHeap::compare($a, $b) now specifies a method signature. Inheriting
     classes implementing this method will now have to use a compatible
     method signature.
-  . SplDoublyLinkedList::push() now returns void instead of true
-  . SplDoublyLinkedList::unshift() now returns void instead of true
-  . SplQueue::enqueue() now returns void instead of true
+  . The following methods now return void instead of true
+
+        SplDoublyLinkedList::push()
+        SplDoublyLinkedList::unshift()
+        SplFixedArray::setSize()
+        SplHeap::insert()
+        SplHeap::recoverFromCorruption()
+        SplPriorityQueue::insert()
+        SplQueue::enqueue()
 
 - Standard:
   . assert() will no longer evaluate string arguments, instead they will be
