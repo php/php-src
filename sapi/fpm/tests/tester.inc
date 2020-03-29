@@ -269,6 +269,26 @@ class Tester
     }
 
     /**
+     * Skip if not running as root.
+     */
+    static public function skipIfNotRoot()
+    {
+        if (getmyuid() != 0) {
+            die('skip not running as root');
+        }
+    }
+
+    /**
+     * Skip if posix extension not loaded.
+     */
+    static public function skipIfPosixNotLoaded()
+    {
+        if (!extension_loaded('posix')) {
+            die('skip posix extension not loaded');
+        }
+    }
+
+    /**
      * Tester constructor.
      *
      * @param string|array $configTemplate
@@ -666,6 +686,38 @@ class Tester
     }
 
     /**
+     * @return string
+     */
+    public function getUser()
+    {
+        return get_current_user();
+    }
+
+    /**
+     * @return string
+     */
+    public function getGroup()
+    {
+        return get_current_group();
+    }
+
+    /**
+     * @return int
+     */
+    public function getUid()
+    {
+        return getmyuid();
+    }
+
+    /**
+     * @return int
+     */
+    public function getGid()
+    {
+        return getmygid();
+    }
+
+    /**
      * Send signal to the supplied PID or the server PID.
      *
      * @param string $signal
@@ -761,6 +813,10 @@ class Tester
             'ADDR:UDS' => ['getAddr', 'uds'],
             'PORT' => ['getPort', 'ip'],
             'INCLUDE:CONF' => self::CONF_DIR . '/*.conf',
+            'USER' => ['getUser'],
+            'GROUP' => ['getGroup'],
+            'UID' => ['getUid'],
+            'GID' => ['getGid'],
         ];
         $aliases = [
             'ADDR' => 'ADDR:IPv4',
