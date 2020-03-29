@@ -25,19 +25,3 @@ class ResourceBundle implements Traversable
     /** @return string */
     public function getErrorMessage() {}
 }
-
-function resourcebundle_create(?string $locale, ?string $bundlename, bool $fallback = true): ?ResourceBundle {}
-
-/**
- * @param string|int $index
- * @return mixed
- */
-function resourcebundle_get(ResourceBundle $bundle, $index) {}
-
-function resourcebundle_count(ResourceBundle $bundle): int {}
-
-function resourcebundle_locales(string $bundlename): array|false {}
-
-function resourcebundle_get_error_code(ResourceBundle $bundle): int {}
-
-function resourcebundle_get_error_message(ResourceBundle $bundle): string {}

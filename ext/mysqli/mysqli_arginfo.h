@@ -147,12 +147,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_refresh, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, options, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_warning___construct, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, mysqli_link, IS_OBJECT, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_mysqli_warning_next arginfo_class_mysqli_character_set_name
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_result___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, mysqli_link, IS_OBJECT, 0)
 	ZEND_ARG_TYPE_INFO(0, resmode, IS_LONG, 0)

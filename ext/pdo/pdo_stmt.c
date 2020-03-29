@@ -32,7 +32,7 @@
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "php_memory_streams.h"
-#include "pdo_arginfo.h"
+#include "pdo_stmt_arginfo.h"
 
 #define PHP_STMT_GET_OBJ	\
   pdo_stmt_t *stmt = Z_PDO_STMT_P(ZEND_THIS);	\

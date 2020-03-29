@@ -1,6 +1,7 @@
 <?php
 
-class CURLFile {
+class CURLFile
+{
     public function __construct(
         string $filename,
         string $mimetype = UNKNOWN,

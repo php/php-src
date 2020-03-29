@@ -12,11 +12,3 @@ class IntlIterator implements Iterator
 
     public function valid() {}
 }
-
-function intl_get_error_code(): int {}
-
-function intl_get_error_message(): string {}
-
-function intl_is_failure(int $error_code): bool {}
-
-function intl_error_name(int $error_code): string {}

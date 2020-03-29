@@ -22,7 +22,7 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-#include "dom_arginfo.h"
+#include "document_arginfo.h"
 #include <libxml/SAX.h>
 #ifdef LIBXML_SCHEMAS_ENABLED
 #include <libxml/relaxng.h>
@@ -82,8 +82,8 @@ const zend_function_entry php_dom_document_class_functions[] = { /* {{{ */
 	PHP_ME(domdocument, relaxNGValidateSource, arginfo_class_DOMDocument_relaxNGValidateSource, ZEND_ACC_PUBLIC)
 #endif
 	PHP_ME(domdocument, registerNodeClass, arginfo_class_DOMDocument_registerNodeClass, ZEND_ACC_PUBLIC)
-	PHP_ME(domdocument, append, arginfo_class_DOMParentNode_append, ZEND_ACC_PUBLIC)
-	PHP_ME(domdocument, prepend, arginfo_class_DOMParentNode_prepend, ZEND_ACC_PUBLIC)
+	PHP_ME(domdocument, append, arginfo_class_DOMDocument_append, ZEND_ACC_PUBLIC)
+	PHP_ME(domdocument, prepend, arginfo_class_DOMDocument_prepend, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */

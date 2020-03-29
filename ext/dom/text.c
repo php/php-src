@@ -23,7 +23,7 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 #include "dom_ce.h"
-#include "dom_arginfo.h"
+#include "text_arginfo.h"
 
 /*
 * class DOMText extends DOMCharacterData

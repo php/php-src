@@ -21,6 +21,7 @@
 
 
 #include "php_intl.h"
+#include "php_intl_arginfo.h"
 #include "intl_error.h"
 #include "collator/collator_class.h"
 #include "collator/collator.h"
@@ -31,7 +32,6 @@
 #include "collator/collator_locale.h"
 #include "collator/collator_create.h"
 #include "collator/collator_error.h"
-#include "collator/collator_arginfo.h"
 
 #include "converter/converter.h"
 
@@ -41,10 +41,8 @@
 #include "formatter/formatter_format.h"
 #include "formatter/formatter_main.h"
 #include "formatter/formatter_parse.h"
-#include "formatter/formatter_arginfo.h"
 
 #include "grapheme/grapheme.h"
-#include "grapheme/grapheme_arginfo.h"
 
 #include "msgformat/msgformat.h"
 #include "msgformat/msgformat_class.h"
@@ -55,12 +53,10 @@
 #include "normalizer/normalizer.h"
 #include "normalizer/normalizer_class.h"
 #include "normalizer/normalizer_normalize.h"
-#include "normalizer/normalizer_arginfo.h"
 
 #include "locale/locale.h"
 #include "locale/locale_class.h"
 #include "locale/locale_methods.h"
-#include "locale/locale_arginfo.h"
 
 #include "dateformat/dateformat.h"
 #include "dateformat/dateformat_class.h"
@@ -70,30 +66,24 @@
 #include "dateformat/dateformat_format_object.h"
 #include "dateformat/dateformat_parse.h"
 #include "dateformat/dateformat_data.h"
-#include "dateformat/dateformat_arginfo.h"
 
 #include "resourcebundle/resourcebundle_class.h"
-#include "resourcebundle/resourcebundle_arginfo.h"
 
 #include "transliterator/transliterator.h"
 #include "transliterator/transliterator_class.h"
 #include "transliterator/transliterator_methods.h"
-#include "transliterator/transliterator_arginfo.h"
 
 #include "timezone/timezone_class.h"
 #include "timezone/timezone_methods.h"
-#include "timezone/timezone_arginfo.h"
 
 #include "calendar/calendar_class.h"
 #include "calendar/calendar_methods.h"
 #include "calendar/gregoriancalendar_methods.h"
-#include "calendar/calendar_arginfo.h"
 
 #include "breakiterator/breakiterator_class.h"
 #include "breakiterator/breakiterator_iterators.h"
 
 #include "idn/idn.h"
-#include "idn/idn_arginfo.h"
 #include "uchar/uchar.h"
 
 # include "spoofchecker/spoofchecker_class.h"
@@ -102,10 +92,8 @@
 # include "spoofchecker/spoofchecker_main.h"
 
 #include "msgformat/msgformat.h"
-#include "msgformat/msgformat_arginfo.h"
 #include "common/common_error.h"
 #include "common/common_enum.h"
-#include "common/common_arginfo.h"
 
 #include <unicode/uloc.h>
 #include <unicode/uclean.h>

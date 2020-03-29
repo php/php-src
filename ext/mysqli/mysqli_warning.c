@@ -26,7 +26,7 @@
 #include "php_mysqli_structs.h"
 #include "mysqli_priv.h"
 
-#include "mysqli_arginfo.h"
+#include "mysqli_warning_arginfo.h"
 
 /* Define these in the PHP7 tree to make merging easy process */
 #define ZSTR_DUPLICATE (1<<0)

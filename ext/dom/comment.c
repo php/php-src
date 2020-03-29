@@ -22,7 +22,7 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-#include "dom_arginfo.h"
+#include "comment_arginfo.h"
 
 /*
 * class DOMComment extends DOMCharacterData

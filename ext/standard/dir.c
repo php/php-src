@@ -23,7 +23,7 @@
 #include "php_string.h"
 #include "php_scandir.h"
 #include "basic_functions.h"
-#include "basic_functions_arginfo.h"
+#include "dir_arginfo.h"
 
 #if HAVE_UNISTD_H
 #include <unistd.h>

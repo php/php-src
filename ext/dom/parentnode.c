@@ -23,8 +23,7 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-#include "dom_arginfo.h"
-
+#include "parentnode_arginfo.h"
 
 /* {{{ DOMParentNode methods */
 const zend_function_entry php_dom_parent_node_class_functions[] = { /* {{{ */
