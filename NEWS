@@ -20,6 +20,9 @@ PHP                                                                        NEWS
   . Fixed bug #79412 (Opcache chokes and uses 100% CPU on specific script).
     (Dmitry)
 
+- Shmop:
+  . Fixed bug #79427 (Integer Overflow in shmop_open()). (cmb)
+
 - SimpleXML:
   . Fixed bug #61597 (SXE properties may lack attributes and content). (cmb)
 

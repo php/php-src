@@ -207,6 +207,11 @@ PHP_FUNCTION(shmop_open)
 		goto err;
 	}
 
+	if (shm.shm_segsz > ZEND_LONG_MAX) {
+		php_error_docref(NULL, E_WARNING, "shared memory segment too large to attach");
+		goto err;
+	}
+
 	shmop->addr = shmat(shmop->shmid, 0, shmop->shmatflg);
 	if (shmop->addr == (char*) -1) {
 		php_error_docref(NULL, E_WARNING, "unable to attach to shared memory segment '%s'", strerror(errno));
