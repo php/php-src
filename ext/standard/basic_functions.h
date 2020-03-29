@@ -19,10 +19,7 @@
 #define BASIC_FUNCTIONS_H
 
 #include <sys/stat.h>
-
-#ifdef HAVE_WCHAR_H
 #include <wchar.h>
-#endif
 
 #include "php_filestat.h"
 
@@ -219,7 +216,7 @@ typedef struct _php_basic_globals {
 	HashTable *user_filter_map;
 
 	/* file.c */
-#if defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
+#if defined(_REENTRANT)
 	mbstate_t mblen_state;
 #endif
 

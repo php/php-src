@@ -921,7 +921,7 @@ static void basic_globals_ctor(php_basic_globals *basic_globals_p) /* {{{ */
 	zend_hash_init(&BG(url_adapt_session_hosts_ht), 0, NULL, NULL, 1);
 	zend_hash_init(&BG(url_adapt_output_hosts_ht), 0, NULL, NULL, 1);
 
-#if defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
+#if defined(_REENTRANT)
 	memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)));
 #endif
 
