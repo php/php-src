@@ -1876,7 +1876,6 @@ zend_op_array *file_cache_compile_file(zend_file_handle *file_handle, int type)
 		}
 		op_array = zend_accel_load_script(persistent_script, 1);
 		if(is_should_release_outside){
-		    // void *checkpoint = zend_arena_checkpoint(arena);
 		    zend_arena_release(&arena, checkpoint);
 		}
 		return op_array;
