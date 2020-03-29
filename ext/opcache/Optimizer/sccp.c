@@ -954,6 +954,7 @@ static inline int ct_eval_func_call(
 			}
 			/* pass */
 		} else if (zend_string_equals_literal(name, "strpos")
+				|| zend_string_equals_literal(name, "str_contains")
 				|| zend_string_equals_literal(name, "version_compare")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
 					|| Z_TYPE_P(args[1]) != IS_STRING) {
