@@ -97,8 +97,8 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(strlen,			arginfo_strlen)
 	ZEND_FE(strcmp,			arginfo_strcmp)
 	ZEND_FE(strncmp,		arginfo_strncmp)
-	ZEND_FE(strcasecmp,		arginfo_strcmp)
-	ZEND_FE(strncasecmp,		arginfo_strncmp)
+	ZEND_FE(strcasecmp,		arginfo_strcasecmp)
+	ZEND_FE(strncasecmp,		arginfo_strncasecmp)
 	ZEND_FE(error_reporting,	arginfo_error_reporting)
 	ZEND_FE(define,			arginfo_define)
 	ZEND_FE(defined,		arginfo_defined)
@@ -310,25 +310,25 @@ ZEND_FUNCTION(func_get_arg)
 	}
 
 	if (requested_offset < 0) {
-		zend_error(E_WARNING, "func_get_arg():  The argument number should be >= 0");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
 	ex = EX(prev_execute_data);
 	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
-		zend_error(E_WARNING, "func_get_arg():  Called from the global scope - no function context");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "func_get_arg() cannot be called from the global scope");
+		RETURN_THROWS();
 	}
 
 	if (zend_forbid_dynamic_call("func_get_arg()") == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	arg_count = ZEND_CALL_NUM_ARGS(ex);
 
 	if ((zend_ulong)requested_offset >= arg_count) {
-		zend_error(E_WARNING, "func_get_arg():  Argument " ZEND_LONG_FMT " not passed to function", requested_offset);
-		RETURN_FALSE;
+		zend_throw_error(NULL, "func_get_arg(): Argument " ZEND_LONG_FMT " not passed to function", requested_offset);
+		RETURN_THROWS();
 	}
 
 	first_extra_arg = ex->func->op_array.num_args;
@@ -353,12 +353,12 @@ ZEND_FUNCTION(func_get_args)
 	zend_execute_data *ex = EX(prev_execute_data);
 
 	if (ZEND_CALL_INFO(ex) & ZEND_CALL_CODE) {
-		zend_error(E_WARNING, "func_get_args():  Called from the global scope - no function context");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "func_get_args() cannot be called from the global scope");
+		RETURN_THROWS();
 	}
 
 	if (zend_forbid_dynamic_call("func_get_args()") == FAILURE) {
-		RETURN_FALSE;
+		RETURN_THROWS();
 	}
 
 	arg_count = ZEND_CALL_NUM_ARGS(ex);
@@ -455,8 +455,8 @@ ZEND_FUNCTION(strncmp)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (len < 0) {
-		zend_error(E_WARNING, "Length must be greater than or equal to 0");
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(zend_binary_strncmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2), len));
@@ -492,8 +492,8 @@ ZEND_FUNCTION(strncasecmp)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (len < 0) {
-		zend_error(E_WARNING, "Length must be greater than or equal to 0");
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must be greater than or equal to 0");
+		RETURN_THROWS();
 	}
 
 	RETURN_LONG(zend_binary_strncasecmp(ZSTR_VAL(s1), ZSTR_LEN(s1), ZSTR_VAL(s2), ZSTR_LEN(s2), len));
@@ -727,8 +727,8 @@ ZEND_FUNCTION(get_class)
 		if (scope) {
 			RETURN_STR_COPY(scope->name);
 		} else {
-			zend_error(E_WARNING, "get_class() called without object from outside a class");
-			RETURN_FALSE;
+			zend_throw_error(NULL, "get_class() without arguments must be called from within a class");
+			RETURN_THROWS();
 		}
 	}
 
@@ -745,15 +745,12 @@ ZEND_FUNCTION(get_called_class)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	called_scope = zend_get_called_scope(execute_data);
-	if (called_scope) {
-		RETURN_STR_COPY(called_scope->name);
-	} else {
-		zend_class_entry *scope = zend_get_executed_scope();
-		if (!scope)  {
-			zend_error(E_WARNING, "get_called_class() called from outside a class");
-		}
+	if (!called_scope) {
+		zend_throw_error(NULL, "get_called_class() must be called from within a class");
+		RETURN_THROWS();
 	}
-	RETURN_FALSE;
+
+	RETURN_STR_COPY(called_scope->name);
 }
 /* }}} */
 
@@ -1168,8 +1165,8 @@ ZEND_FUNCTION(property_exists)
 	} else if (Z_TYPE_P(object) == IS_OBJECT) {
 		ce = Z_OBJCE_P(object);
 	} else {
-		zend_error(E_WARNING, "First parameter must either be an object or the name of an existing class");
-		RETURN_NULL();
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(object));
+		RETURN_THROWS();
 	}
 
 	property_info = zend_hash_find_ptr(&ce->properties_info, property);
@@ -1350,12 +1347,14 @@ ZEND_FUNCTION(trigger_error)
 		case E_USER_DEPRECATED:
 			break;
 		default:
-			zend_error(E_WARNING, "Invalid error type specified");
-			RETURN_FALSE;
+			zend_argument_value_error(2, "must be one of E_USER_ERROR, E_USER_WARNING, E_USER_NOTICE,"
+				" or E_USER_DEPRECATED");
+			RETURN_THROWS();
 			break;
 	}
 
 	zend_error((int)error_type, "%s", message);
+	// TODO Change to void
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1374,9 +1373,9 @@ ZEND_FUNCTION(set_error_handler)
 	if (Z_TYPE_P(error_handler) != IS_NULL) { /* NULL == unset */
 		if (!zend_is_callable(error_handler, 0, NULL)) {
 			zend_string *error_handler_name = zend_get_callable_name(error_handler);
-			zend_error(E_WARNING, "%s(): Argument #1 ($error_handler) must be a valid callback", get_active_function_name());
+			zend_argument_type_error(1, "must be a valid callback");
 			zend_string_release_ex(error_handler_name, 0);
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -1421,6 +1420,8 @@ ZEND_FUNCTION(restore_error_handler)
 		ZVAL_COPY_VALUE(&EG(user_error_handler), tmp);
 		zend_stack_del_top(&EG(user_error_handlers));
 	}
+
+	// TODO Change to void
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1438,9 +1439,9 @@ ZEND_FUNCTION(set_exception_handler)
 	if (Z_TYPE_P(exception_handler) != IS_NULL) { /* NULL == unset */
 		if (!zend_is_callable(exception_handler, 0, NULL)) {
 		zend_string *exception_handler_name = zend_get_callable_name(exception_handler);
-			zend_error(E_WARNING, "%s(): Argument #1 ($exception_handler) must be a valid callback", get_active_function_name());
+			zend_argument_type_error(1, "must be a valid callback");
 			zend_string_release_ex(exception_handler_name, 0);
-			return;
+			RETURN_THROWS();
 		}
 	}
 
@@ -1475,6 +1476,8 @@ ZEND_FUNCTION(restore_exception_handler)
 		ZVAL_COPY_VALUE(&EG(user_exception_handler), tmp);
 		zend_stack_del_top(&EG(user_exception_handlers));
 	}
+
+	// TODO Change to void
 	RETURN_TRUE;
 }
 /* }}} */
