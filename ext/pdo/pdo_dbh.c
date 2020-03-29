@@ -32,7 +32,7 @@
 #include "zend_object_handlers.h"
 #include "zend_hash.h"
 #include "zend_interfaces.h"
-#include "pdo_arginfo.h"
+#include "pdo_dbh_arginfo.h"
 
 static int pdo_dbh_attribute_set(pdo_dbh_t *dbh, zend_long attr, zval *value);
 

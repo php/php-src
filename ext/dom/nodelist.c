@@ -22,7 +22,7 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-#include "dom_arginfo.h"
+#include "nodelist_arginfo.h"
 
 /*
 * class DOMNodeList
@@ -36,7 +36,6 @@ const zend_function_entry php_dom_nodelist_class_functions[] = {
 	PHP_ME(domnodelist, count, arginfo_class_DOMNodeList_count, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
-
 
 /* {{{ length	int
 readonly=yes

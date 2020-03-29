@@ -24,7 +24,7 @@
 #if HAVE_LIBXML && HAVE_DOM
 
 #include "php_dom.h"
-#include "dom_arginfo.h"
+#include "attr_arginfo.h"
 
 /*
 * class DOMAttr extends DOMNode

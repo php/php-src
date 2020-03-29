@@ -691,29 +691,6 @@ function utf8_encode(string $data): string {}
 
 function utf8_decode(string $data): string {}
 
-/* dir.c */
-
-class Directory
-{
-    /**
-     * @param resource $dir_handle
-     * @return void
-     */
-    public function close($dir_handle = UNKNOWN) {}
-
-    /**
-     * @param resource $dir_handle
-     * @return void
-     */
-    public function rewind($dir_handle = UNKNOWN) {}
-
-    /**
-     * @param resource $dir_handle
-     * @return string|false
-     */
-    public function read($dir_handle = UNKNOWN) {}
-}
-
 /**
  * @param resource $context
  * @return resource|false
@@ -1453,18 +1430,6 @@ function rawurldecode(string $string): string {}
 
 /** @param resource $context */
 function get_headers(string $url, int $format = 0, $context = null): array|false {}
-
-/* user_filters.c */
-
-class php_user_filter {
-    public function filter($in, $out, &$consumed, $closing) {}
-
-    /** @return void */
-    public function onCreate() {}
-
-    /** @return void */
-    public function onClose() {}
-}
 
 /** @param resource $brigade */
 function stream_bucket_make_writeable($brigade): ?object {}

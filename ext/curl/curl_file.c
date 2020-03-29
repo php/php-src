@@ -22,7 +22,6 @@
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_interfaces.h"
 #include "php_curl.h"
-#include "curl_arginfo.h"
 #include "curl_file_arginfo.h"
 #if HAVE_CURL
 

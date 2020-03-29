@@ -171,14 +171,6 @@ class mysqli
     public function refresh(int $options);
 }
 
-class mysqli_warning
-{
-    public function __construct(object $mysqli_link);
-
-    /** @return bool */
-    public function next();
-}
-
 class mysqli_result
 {
      public function __construct(object $mysqli_link, int $resmode = MYSQLI_STORE_RESULT);

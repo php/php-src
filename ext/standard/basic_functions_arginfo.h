@@ -1099,14 +1099,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_utf8_decode arginfo_bin2hex
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Directory_close, 0, 0, 0)
-	ZEND_ARG_INFO(0, dir_handle)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_Directory_rewind arginfo_class_Directory_close
-
-#define arginfo_class_Directory_read arginfo_class_Directory_close
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_opendir, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, path, IS_STRING, 0)
 	ZEND_ARG_INFO(0, context)
@@ -2148,17 +2140,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_get_headers, 0, 1, MAY_BE_ARRAY|
 	ZEND_ARG_TYPE_INFO(0, format, IS_LONG, 0)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_php_user_filter_filter, 0, 0, 4)
-	ZEND_ARG_INFO(0, in)
-	ZEND_ARG_INFO(0, out)
-	ZEND_ARG_INFO(1, consumed)
-	ZEND_ARG_INFO(0, closing)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_php_user_filter_onCreate arginfo_tmpfile
-
-#define arginfo_class_php_user_filter_onClose arginfo_tmpfile
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_stream_bucket_make_writeable, 0, 1, IS_OBJECT, 1)
 	ZEND_ARG_INFO(0, brigade)
