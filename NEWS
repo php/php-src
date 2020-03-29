@@ -39,6 +39,8 @@ PHP                                                                        NEWS
 
 - Zip:
   . Fixed Bug #79296 (ZipArchive::open fails on empty file). (Remi)
+  . Fixed bug #79424 (php_zip_glob uses gl_pathc after call to globfree).
+    (Max Rees)
 
 19 Mar 2020, PHP 7.4.4
 
