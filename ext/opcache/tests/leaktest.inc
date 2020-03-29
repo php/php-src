@@ -1,0 +1,2 @@
+<?php
+$a='hello world';

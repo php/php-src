@@ -1521,7 +1521,7 @@ static void zend_file_cache_unserialize(zend_persistent_script  *script,
 	UNSERIALIZE_PTR(script->arena_mem);
 }
 
-zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle)
+zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handle,int *is_should_release_outside,zend_arena **arena_ptr,void **checkpoint_ptr)
 {
 	zend_string *full_path = file_handle->opened_path;
 	int fd;
@@ -1669,6 +1669,9 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		zend_map_ptr_extend(ZCSG(map_ptr_last));
 	} else {
 use_process_mem:
+		*is_should_release_outside = 1;
+		*arena_ptr = CG(arena);
+		*checkpoint_ptr = checkpoint;
 		buf = mem;
 		cache_it = 0;
 	}
