@@ -116,8 +116,6 @@
 #define HAVE_INET_PTON 1
 #define HAVE_INET_NTOP 1
 
-#define HAVE_MBLEN
-
 /* vs.net 2005 has a 64-bit time_t.  This will likely break
  * 3rdParty libs that were built with older compilers; switch
  * back to 32-bit */
@@ -126,8 +124,6 @@
 #endif
 
 #define _REENTRANT 1
-#define HAVE_MBRLEN 1
-#define HAVE_MBSTATE_T 1
 
 #define HAVE_GETRUSAGE
 

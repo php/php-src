@@ -573,7 +573,6 @@ inet_ntop \
 inet_pton \
 localtime_r \
 lchown \
-mbrlen \
 memmove \
 mkstemp \
 mmap \

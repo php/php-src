@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <wchar.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -107,10 +108,6 @@ php_file_globals file_globals;
 #  define _GNU_SOURCE
 # endif
 # include <fnmatch.h>
-#endif
-
-#ifdef HAVE_WCHAR_H
-# include <wchar.h>
 #endif
 
 /* }}} */

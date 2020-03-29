@@ -389,27 +389,6 @@ if test "$ac_cv_strptime_decl_fails" = "yes"; then
 fi
 
 dnl
-dnl Check for i18n capabilities
-dnl
-AC_CHECK_HEADERS([wchar.h])
-AC_CHECK_FUNCS([mblen])
-AC_CACHE_CHECK([for mbstate_t], [ac_cv_type_mbstate_t],[
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#ifdef HAVE_WCHAR_H
-# include <wchar.h>
-#endif
-]],[[
-mbstate_t a;
-]])],[
-  ac_cv_type_mbstate_t=yes
-],[
-  ac_cv_type_mbstate_t=no
-])])
-if test "$ac_cv_type_mbstate_t" = "yes"; then
-  AC_DEFINE([HAVE_MBSTATE_T], 1, [Define if your system has mbstate_t in wchar.h])
-fi
-
-dnl
 dnl Check for atomic operation API availability in Solaris
 dnl
 AC_CHECK_HEADERS([atomic.h])

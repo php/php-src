@@ -35,12 +35,8 @@ FILE_RCSID("@(#)$File: funcs.c,v 1.104 2019/05/07 02:27:11 christos Exp $")
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#if defined(HAVE_WCHAR_H)
 #include <wchar.h>
-#endif
-#if defined(HAVE_WCTYPE_H)
 #include <wctype.h>
-#endif
 #include <limits.h>
 
 #ifndef SIZE_MAX
@@ -438,7 +434,7 @@ file_getbuffer(struct magic_set *ms)
 	}
 	ms->o.pbuf = pbuf;
 
-#if defined(HAVE_WCHAR_H) && defined(HAVE_MBRTOWC) && defined(HAVE_WCWIDTH)
+#if defined(HAVE_WCWIDTH)
 	{
 		mbstate_t state;
 		wchar_t nextchar;

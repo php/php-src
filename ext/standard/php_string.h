@@ -136,12 +136,9 @@ PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2
 PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2);
 PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2);
 
-#ifndef HAVE_MBLEN
-# define php_mblen(ptr, len) 1
-# define php_mb_reset()
-#elif defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
+#if defined(_REENTRANT)
 # ifdef PHP_WIN32
-# include <wchar.h>
+#  include <wchar.h>
 # endif
 # define php_mblen(ptr, len) ((int) mbrlen(ptr, len, &BG(mblen_state)))
 # define php_mb_reset() memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)))
