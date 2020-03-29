@@ -616,10 +616,14 @@ non_empty_switch_expr_case_list:
 ;
 
 switch_expr_case:
-		case_cond_list T_DOUBLE_ARROW expr
-			{ $$ = zend_ast_create(ZEND_AST_SWITCH_CASE, $1, $3); }
-	|	T_DEFAULT T_DOUBLE_ARROW expr
-			{ $$ = zend_ast_create(ZEND_AST_SWITCH_CASE, NULL, $3); }
+		case_cond_list T_DOUBLE_ARROW expr {
+			$$ = zend_ast_create(ZEND_AST_SWITCH_CASE, $1, $3);
+			$$->attr = ZEND_SWITCH_EXPRESSION;
+		}
+	|	T_DEFAULT T_DOUBLE_ARROW expr {
+			$$ = zend_ast_create(ZEND_AST_SWITCH_CASE, NULL, $3);
+			$$->attr = ZEND_SWITCH_EXPRESSION;
+		}
 ;
 
 while_statement:

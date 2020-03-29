@@ -1851,23 +1851,39 @@ simple_list:
 			smart_str_appendc(str, '}');
 			break;
 		case ZEND_AST_SWITCH:
-			smart_str_appends(str, "switch (");
-			zend_ast_export_ex(str, ast->child[0], 0, indent);
-			smart_str_appends(str, ") {\n");
+			if (ast->attr & ZEND_SWITCH_EXPRESSION) {
+				zend_ast_export_ex(str, ast->child[0], 0, indent);
+				smart_str_appends(str, " switch {\n");
+			} else {
+				smart_str_appends(str, "switch (");
+				zend_ast_export_ex(str, ast->child[0], 0, indent);
+				smart_str_appends(str, ") {\n");
+			}
 			zend_ast_export_ex(str, ast->child[1], 0, indent + 1);
 			zend_ast_export_indent(str, indent);
 			smart_str_appendc(str, '}');
 			break;
 		case ZEND_AST_SWITCH_CASE:
 			zend_ast_export_indent(str, indent);
-			if (ast->child[0]) {
-				smart_str_appends(str, "case ");
-				zend_ast_export_list(str, (zend_ast_list*)ast->child[0], 1, 0, indent);
-				smart_str_appends(str, ":\n");
+			if (ast->attr & ZEND_SWITCH_EXPRESSION) {
+				if (ast->child[0]) {
+					zend_ast_export_list(str, (zend_ast_list*)ast->child[0], 1, 0, indent);
+					smart_str_appends(str, " => ");
+				} else {
+					smart_str_appends(str, "default => ");
+				}
+				zend_ast_export_ex(str, ast->child[1], 0, 0);
+				smart_str_appends(str, ",\n");
 			} else {
-				smart_str_appends(str, "default:\n");
+				if (ast->child[0]) {
+					smart_str_appends(str, "case ");
+					zend_ast_export_list(str, (zend_ast_list*)ast->child[0], 1, 0, indent);
+					smart_str_appends(str, ":\n");
+				} else {
+					smart_str_appends(str, "default:\n");
+				}
+				zend_ast_export_stmt(str, ast->child[1], indent + 1);
 			}
-			zend_ast_export_stmt(str, ast->child[1], indent + 1);
 			break;
 		case ZEND_AST_DECLARE:
 			smart_str_appends(str, "declare(");
