@@ -373,9 +373,10 @@ function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond)
             throw new Exception("Error in function $name: only the last parameter can be variadic");
         }
 
+        $type = $param->type ? Type::fromNode($param->type) : null;
         if ($param->default instanceof Expr\ConstFetch &&
             $param->default->name->toLowerString() === "null" &&
-            $param->type && !($param->type instanceof Node\NullableType)
+            $type && !$type->isNullable()
         ) {
             throw new Exception(
                 "Parameter $varName of function $name has null default, but is not nullable");
@@ -387,7 +388,7 @@ function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond)
             $varName,
             $sendBy,
             $param->variadic,
-            $param->type ? Type::fromNode($param->type) : null
+            $type
         );
         if (!$param->default && !$param->variadic) {
             $numRequiredArgs = $i + 1;

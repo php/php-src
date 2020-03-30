@@ -2961,8 +2961,9 @@ PHP_FUNCTION(mb_detect_encoding)
 {
 	char *str;
 	size_t str_len;
-	zend_bool strict=0;
-	zval *encoding_list = NULL;
+	zend_string *encoding_str = NULL;
+	HashTable *encoding_ht = NULL;
+	zend_bool strict = 0;
 
 	mbfl_string string;
 	const mbfl_encoding *ret;
@@ -2970,30 +2971,21 @@ PHP_FUNCTION(mb_detect_encoding)
 	size_t size;
 	zend_bool free_elist;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z!b", &str, &str_len, &encoding_list, &strict) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(encoding_str, encoding_ht)
+		Z_PARAM_BOOL(strict)
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* make encoding list */
-	if (encoding_list) {
-		switch (Z_TYPE_P(encoding_list)) {
-		case IS_ARRAY:
-			if (FAILURE == php_mb_parse_encoding_array(Z_ARRVAL_P(encoding_list), &elist, &size, 0)) {
-				RETURN_FALSE;
-			}
-			break;
-		default:
-			if (!try_convert_to_string(encoding_list)) {
-				RETURN_THROWS();
-			}
-			if (FAILURE == php_mb_parse_encoding_list(Z_STRVAL_P(encoding_list), Z_STRLEN_P(encoding_list), &elist, &size, 0)) {
-				RETURN_FALSE;
-			}
-			break;
+	if (encoding_ht) {
+		if (FAILURE == php_mb_parse_encoding_array(encoding_ht, &elist, &size, 0)) {
+			RETURN_FALSE;
 		}
-		if (size == 0) {
-			efree(elist);
-			php_error_docref(NULL, E_WARNING, "Must specify at least one encoding");
+		free_elist = 1;
+	} else if (encoding_str) {
+		if (FAILURE == php_mb_parse_encoding_list(ZSTR_VAL(encoding_str), ZSTR_LEN(encoding_str), &elist, &size, 0)) {
 			RETURN_FALSE;
 		}
 		free_elist = 1;
@@ -3003,10 +2995,15 @@ PHP_FUNCTION(mb_detect_encoding)
 		free_elist = 0;
 	}
 
+	if (size == 0) {
+		efree(elist);
+		php_error_docref(NULL, E_WARNING, "Must specify at least one encoding");
+		RETURN_FALSE;
+	}
+
 	if (ZEND_NUM_ARGS() < 3) {
 		strict = MBSTRG(strict_detection);
 	}
-
 
 	mbfl_string_init(&string);
 	string.no_language = MBSTRG(language);

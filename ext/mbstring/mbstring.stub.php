@@ -56,8 +56,7 @@ function mb_strtoupper(string $sourcestring, ?string $encoding = null): string|f
 
 function mb_strtolower(string $sourcestring, ?string $encoding = null): string|false {}
 
-/** @param array|string $encoding_list */
-function mb_detect_encoding(string $str, $encoding_list = null, bool $strict = false): string|false {}
+function mb_detect_encoding(string $str, array|string|null $encoding_list = null, bool $strict = false): string|false {}
 
 function mb_list_encodings(): array {}
 
