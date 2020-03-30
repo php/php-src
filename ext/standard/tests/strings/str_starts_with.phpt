@@ -2,7 +2,7 @@
 str_starts_with() function - unit tests for str_starts_with()
 --FILE--
 <?php
-/* Prototype: boolean str_starts_with (string $haystack string $needle);
+/* Prototype: bool str_starts_with (string $haystack string $needle);
    Description: Determine if $haystack begins with $needle
 */
 $testStr = "beginningMiddleEnd";

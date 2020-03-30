@@ -2,7 +2,7 @@
 str_ends_with() function - unit tests for str_ends_with()
 --FILE--
 <?php
-/* Prototype: boolean str_ends_with (string $haystack string $needle );
+/* Prototype: bool str_ends_with (string $haystack string $needle );
    Description: Determine if $haystack ends with $needle
 */
 $testStr = "beginningMiddleEnd";

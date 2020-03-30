@@ -1866,7 +1866,7 @@ PHP_FUNCTION(str_contains)
 }
 /* }}} */
 
-/* {{{ proto boolean str_starts_with(string haystack, string needle)
+/* {{{ proto bool str_starts_with(string haystack, string needle)
    Checks if haystack strats with needle */
 PHP_FUNCTION(str_starts_with) {
     zend_string *haystack, *needle;
@@ -1876,14 +1876,14 @@ PHP_FUNCTION(str_starts_with) {
         Z_PARAM_STR(needle)
     ZEND_PARSE_PARAMETERS_END();
 
-    if (needle->len > haystack->len) {
+    if (ZSTR_LEN(needle) > ZSTR_LEN(haystack)) {
         RETURN_FALSE;
     }
 
     RETURN_BOOL(memcmp(ZSTR_VAL(haystack), ZSTR_VAL(needle), ZSTR_LEN(needle)) == 0);
 }
 
-/* {{{ proto boolean str_ends_with(string haystack, string needle)
+/* {{{ proto bool str_ends_with(string haystack, string needle)
    Checks if haystack ends with needle */
 PHP_FUNCTION(str_ends_with) {
     zend_string *haystack, *needle;
@@ -1894,7 +1894,7 @@ PHP_FUNCTION(str_ends_with) {
         Z_PARAM_STR(needle)
     ZEND_PARSE_PARAMETERS_END();
 
-    if (needle->len > haystack->len) {
+    if (ZSTR_LEN(needle) > ZSTR_LEN(haystack)) {
         RETURN_FALSE;
     }
 
