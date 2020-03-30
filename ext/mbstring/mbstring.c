@@ -1530,13 +1530,15 @@ PHP_FUNCTION(mb_http_output)
    Sets the current detect_order or Return the current detect_order as a array */
 PHP_FUNCTION(mb_detect_order)
 {
-	zval *arg1 = NULL;
+	zend_string *order_str = NULL;
+	HashTable *order_ht = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z", &arg1) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_ARRAY_HT(order_str, order_ht)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (!arg1) {
+	if (!order_str && !order_ht) {
 		size_t i;
 		size_t n = MBSTRG(current_detect_order_list_size);
 		const mbfl_encoding **entry = MBSTRG(current_detect_order_list);
@@ -1546,22 +1548,16 @@ PHP_FUNCTION(mb_detect_order)
 			entry++;
 		}
 	} else {
-		const mbfl_encoding **list = NULL;
-		size_t size = 0;
-		switch (Z_TYPE_P(arg1)) {
-			case IS_ARRAY:
-				if (FAILURE == php_mb_parse_encoding_array(Z_ARRVAL_P(arg1), &list, &size)) {
-					RETURN_FALSE;
-				}
-				break;
-			default:
-				if (!try_convert_to_string(arg1)) {
-					RETURN_THROWS();
-				}
-				if (FAILURE == php_mb_parse_encoding_list(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), &list, &size, 0)) {
-					RETURN_FALSE;
-				}
-				break;
+		const mbfl_encoding **list;
+		size_t size;
+		if (order_ht) {
+			if (FAILURE == php_mb_parse_encoding_array(order_ht, &list, &size)) {
+				RETURN_FALSE;
+			}
+		} else {
+			if (FAILURE == php_mb_parse_encoding_list(ZSTR_VAL(order_str), ZSTR_LEN(order_str), &list, &size, 0)) {
+				RETURN_FALSE;
+			}
 		}
 
 		if (size == 0) {

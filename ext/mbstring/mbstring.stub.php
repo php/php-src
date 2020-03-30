@@ -8,7 +8,7 @@ function mb_http_input(string $type = UNKNOWN): array|string|false {}
 
 function mb_http_output(string $encoding = UNKNOWN): string|bool {}
 
-function mb_detect_order($encoding = UNKNOWN): array|bool {}
+function mb_detect_order(array|string $encoding = UNKNOWN): array|bool {}
 
 /** @param string|int $substchar */
 function mb_substitute_character($substchar = UNKNOWN): string|int|bool {}

@@ -15,7 +15,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_mb_http_output arginfo_mb_internal_encoding
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_detect_order, 0, 0, MAY_BE_ARRAY|MAY_BE_BOOL)
-	ZEND_ARG_INFO(0, encoding)
+	ZEND_ARG_TYPE_MASK(0, encoding, MAY_BE_ARRAY|MAY_BE_STRING)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_substitute_character, 0, 0, MAY_BE_STRING|MAY_BE_LONG|MAY_BE_BOOL)
