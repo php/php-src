@@ -1161,10 +1161,6 @@ ZEND_FUNCTION(property_exists)
 		RETURN_THROWS();
 	}
 
-	if (property == NULL) {
-		RETURN_FALSE;
-	}
-
 	if (Z_TYPE_P(object) == IS_STRING) {
 		ce = zend_lookup_class(Z_STR_P(object));
 		if (!ce) {
