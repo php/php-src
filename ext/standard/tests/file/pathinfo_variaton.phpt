@@ -90,7 +90,7 @@ echo "Done\n";
 --EXPECTF--
 *** Testing pathinfo() with miscellaneous input arguments ***
 
-Warning: Undefined variable: fp in %s on line %d
+Warning: Undefined variable $fp in %s on line %d
 -- Iteration 1 --
 array(3) {
   ["dirname"]=>

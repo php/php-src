@@ -170,31 +170,31 @@ var_dump($u1, $u2);
 --EXPECTF--
 ---- Pass by ref / pass by val: functions ----
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 NULL
 string(11) "Ref changed"
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 
-Warning: Undefined variable: u2 in %s on line %d
+Warning: Undefined variable $u2 in %s on line %d
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 
-Warning: Undefined variable: u2 in %s on line %d
+Warning: Undefined variable $u2 in %s on line %d
 NULL
 NULL
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 NULL
 string(11) "Ref changed"
 
-Warning: Undefined variable: u2 in %s on line %d
+Warning: Undefined variable $u2 in %s on line %d
 
-Warning: Undefined variable: u2 in %s on line %d
+Warning: Undefined variable $u2 in %s on line %d
 string(11) "Ref changed"
 NULL
 string(12) "Ref1 changed"
@@ -203,31 +203,31 @@ string(12) "Ref2 changed"
 
  ---- Pass by ref / pass by val: static method calls ----
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 NULL
 string(11) "Ref changed"
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 
-Warning: Undefined variable: u2 in %s on line %d
+Warning: Undefined variable $u2 in %s on line %d
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 
-Warning: Undefined variable: u2 in %s on line %d
+Warning: Undefined variable $u2 in %s on line %d
 NULL
 NULL
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 NULL
 string(11) "Ref changed"
 
-Warning: Undefined variable: u2 in %s on line %d
+Warning: Undefined variable $u2 in %s on line %d
 
-Warning: Undefined variable: u2 in %s on line %d
+Warning: Undefined variable $u2 in %s on line %d
 string(11) "Ref changed"
 NULL
 string(12) "Ref1 changed"
@@ -236,37 +236,37 @@ string(12) "Ref2 changed"
 
  ---- Pass by ref / pass by val: instance method calls ----
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 NULL
 string(11) "Ref changed"
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 NULL
 string(11) "Ref changed"
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 
-Warning: Undefined variable: u2 in %s on line %d
+Warning: Undefined variable $u2 in %s on line %d
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 
-Warning: Undefined variable: u2 in %s on line %d
+Warning: Undefined variable $u2 in %s on line %d
 NULL
 NULL
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 
-Warning: Undefined variable: u1 in %s on line %d
+Warning: Undefined variable $u1 in %s on line %d
 NULL
 string(11) "Ref changed"
 
-Warning: Undefined variable: u2 in %s on line %d
+Warning: Undefined variable $u2 in %s on line %d
 
-Warning: Undefined variable: u2 in %s on line %d
+Warning: Undefined variable $u2 in %s on line %d
 string(11) "Ref changed"
 NULL
 string(12) "Ref1 changed"

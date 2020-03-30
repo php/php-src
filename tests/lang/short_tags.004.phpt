@@ -29,6 +29,6 @@ This gets echoed twice
 <? $b=3; ?>
 
 
-Warning: Undefined variable: b in %s on line %d
+Warning: Undefined variable $b in %s on line %d
 
-Warning: Undefined variable: b in %s on line %d
+Warning: Undefined variable $b in %s on line %d

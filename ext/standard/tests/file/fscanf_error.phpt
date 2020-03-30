@@ -67,7 +67,7 @@ unlink($filename);
 fscanf(): supplied resource is not a valid File-Handle resource
 Different numbers of variable names and field specifiers
 
-Warning: Undefined variable: undefined_var in %s on line %d
+Warning: Undefined variable $undefined_var in %s on line %d
 array(0) {
 }
 Bad scan conversion character "

@@ -147,7 +147,7 @@ int(10)
 
 -- Value of $ref_first_var --
 
-Warning: Undefined variable: ref_first_var in %s on line %d
+Warning: Undefined variable $ref_first_var in %s on line %d
 NULL
 
 -- Value of $first_var --
@@ -166,7 +166,7 @@ int(10)
 
 -- Value of $var_3: (after unsetting var_3) --
 
-Warning: Undefined variable: var_3 in %s on line %d
+Warning: Undefined variable $var_3 in %s on line %d
 NULL
 
 -- Value of $var_2: --
@@ -177,7 +177,7 @@ int(10)
 
 -- Value of $var_1: (after unsetting variable_1) --
 
-Warning: Undefined variable: var_1 in %s on line %d
+Warning: Undefined variable $var_1 in %s on line %d
 NULL
 
 -- Value of $var_2: --

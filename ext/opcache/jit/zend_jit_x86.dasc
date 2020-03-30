@@ -3414,7 +3414,7 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, const zend_
 			|	SAVE_VALID_OPLINE opline, r0
 			if (op1_info & MAY_BE_UNDEF) {
 				|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >2
-				|	// zend_error(E_WARNING, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+				|	// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 				|	mov FCARG1d, opline->op1.var
 				|	EXT_CALL zend_jit_undefined_op_helper, r0
 				|	SET_ZVAL_TYPE_INFO op1_addr, IS_NULL
@@ -4877,7 +4877,7 @@ static int zend_jit_simple_assign(dasm_State    **Dst,
 				|.cold_code
 				|1:
 			}
-			|	// zend_error(E_WARNING, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+			|	// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 			if (Z_REG(var_addr) != ZREG_FP) {
 				|	mov aword T1, Ra(Z_REG(var_addr)) // save
 			}
@@ -6632,7 +6632,7 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, const zen
 		|	IF_Z_TYPE FCARG1a, IS_UNDEF, >1
 		|.cold_code
 		|1:
-		|	// zend_error(E_WARNING, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+		|	// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 		|	SAVE_VALID_OPLINE opline, r0
 		|	mov FCARG1d, opline->op1.var
 		|	EXT_CALL zend_jit_undefined_op_helper, r0
@@ -6647,7 +6647,7 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, const zen
 		|	IF_Z_TYPE FCARG2a, IS_UNDEF, >1
 		|.cold_code
 		|1:
-		|	// zend_error(E_WARNING, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+		|	// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 		|	SAVE_VALID_OPLINE opline, r0
 		|	mov aword T1, FCARG1a // save
 		|	mov FCARG1d, opline->op2.var
@@ -6666,7 +6666,7 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, const zen
 		|	IF_Z_TYPE FCARG1a, IS_UNDEF, >1
 		|.cold_code
 		|1:
-		|	// zend_error(E_WARNING, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+		|	// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 		|	SAVE_VALID_OPLINE opline, r0
 		|	mov FCARG1d, opline->op1.var
 		|	EXT_CALL zend_jit_undefined_op_helper, r0
@@ -6686,7 +6686,7 @@ static int zend_jit_identical(dasm_State **Dst, const zend_op *opline, const zen
 		|	IF_Z_TYPE FCARG2a, IS_UNDEF, >1
 		|.cold_code
 		|1:
-		|	// zend_error(E_WARNING, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+		|	// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 		|	SAVE_VALID_OPLINE opline, r0
 		|	mov FCARG1d, opline->op2.var
 		|	EXT_CALL zend_jit_undefined_op_helper, r0
@@ -9718,7 +9718,7 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, cons
 			|	SAVE_VALID_OPLINE opline, r0
 			if (opline->opcode != ZEND_FETCH_DIM_IS && (op1_info & MAY_BE_UNDEF)) {
 				|	IF_NOT_ZVAL_TYPE op1_addr, IS_UNDEF, >1
-				|	// zend_error(E_WARNING, "Undefined variable: %s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
+				|	// zend_error(E_WARNING, "Undefined variable $%s", ZSTR_VAL(CV_DEF_OF(EX_VAR_TO_NUM(opline->op1.var))));
 				|	mov FCARG1d, opline->op1.var
 				|	EXT_CALL zend_jit_undefined_op_helper, r0
 				|1:

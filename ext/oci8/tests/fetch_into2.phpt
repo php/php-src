@@ -53,7 +53,7 @@ echo "Done\n";
 Warning: ocifetchinto() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Notice: Undefined variable: all in %s on line %d
+Notice: Undefined variable $all in %s on line %d
 NULL
 
 Warning: ocifetchinto() expects at most 3 parameters, 4 given in %s on line %d
