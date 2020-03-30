@@ -106,5 +106,5 @@ SJIS: SJIS
 INT: EUC-JP
 EUC-JP: EUC-JP
 
-Warning: mb_detect_encoding(): Illegal argument in %s on line %d
-BAD: EUC-JP
+Warning: mb_detect_encoding(): Unknown encoding "BAD" in %s on line %d
+BAD:

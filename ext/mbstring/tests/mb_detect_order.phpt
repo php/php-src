@@ -45,7 +45,7 @@ $r = mb_detect_order($a);
 print implode(', ', mb_detect_order()) . "\n";
 
 ?>
---EXPECT--
+--EXPECTF--
 OK_AUTO
 ASCII, JIS, UTF-8, EUC-JP, SJIS
 OK_STR
@@ -53,7 +53,11 @@ SJIS, EUC-JP, JIS, UTF-8
 OK_ARRAY
 ASCII, JIS, EUC-JP, UTF-8
 == INVALID PARAMETER ==
+
+Warning: mb_detect_order(): Unknown encoding "BAD_NAME" in %s on line %d
 OK_BAD_STR
 ASCII, JIS, EUC-JP, UTF-8
+
+Warning: mb_detect_order(): Unknown encoding "BAD_NAME" in %s on line %d
 OK_BAD_ARRAY
 ASCII, JIS, EUC-JP, UTF-8

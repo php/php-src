@@ -35,7 +35,7 @@ Warning: mb_chr(): Unknown encoding "UTF-0" in %s on line %d
 
 Warning: mb_convert_case(): Unknown encoding "UTF-0" in %s on line %d
 
-Warning: mb_convert_encoding(): Illegal character encoding specified in %s on line %d
+Warning: mb_convert_encoding(): Unknown encoding "UTF-0" in %s on line %d
 
 Warning: mb_convert_kana(): Unknown encoding "UTF-0" in %s on line %d
 
@@ -74,4 +74,3 @@ Warning: mb_strwidth(): Unknown encoding "UTF-0" in %s on line %d
 Warning: mb_substr(): Unknown encoding "UTF-0" in %s on line %d
 
 Warning: mb_substr_count(): Unknown encoding "UTF-0" in %s on line %d
-
