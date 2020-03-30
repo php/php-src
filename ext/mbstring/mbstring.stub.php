@@ -49,7 +49,7 @@ function mb_strwidth(string $str, string $encoding = UNKNOWN): int|false {}
 function mb_strimwidth(string $str, int $start, int $width, string $trimmarker = UNKNOWN, string $encoding = UNKNOWN): string|false {}
 
 /** @param array|string $str */
-function mb_convert_encoding($str, string $to, $from = UNKNOWN): array|string|false {}
+function mb_convert_encoding($str, string $to, array|string $from = UNKNOWN): array|string|false {}
 
 function mb_convert_case(string $sourcestring, int $mode, ?string $encoding = null): string|false {}
 

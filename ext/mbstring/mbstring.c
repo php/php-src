@@ -2774,16 +2774,20 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 PHP_FUNCTION(mb_convert_encoding)
 {
 	zval *input;
-	zval *arg_old = NULL;
 	zend_string *to_encoding_name;
+	zend_string *from_encodings_str = NULL;
+	HashTable *from_encodings_ht = NULL;
 	const mbfl_encoding *to_encoding;
 	const mbfl_encoding **from_encodings;
 	size_t num_from_encodings;
 	zend_bool free_from_encodings;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zS|z", &input, &to_encoding_name, &arg_old) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_ZVAL(input)
+		Z_PARAM_STR(to_encoding_name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_ARRAY_HT(from_encodings_str, from_encodings_ht)
+	ZEND_PARSE_PARAMETERS_END();
 
 	to_encoding = php_mb_get_encoding(to_encoding_name);
 	if (!to_encoding) {
@@ -2796,27 +2800,13 @@ PHP_FUNCTION(mb_convert_encoding)
 		}
 	}
 
-	if (arg_old) {
-		switch (Z_TYPE_P(arg_old)) {
-			case IS_ARRAY:
-				if (php_mb_parse_encoding_array(Z_ARRVAL_P(arg_old), &from_encodings, &num_from_encodings, 0) == FAILURE) {
-					RETURN_FALSE;
-				}
-				break;
-			default:
-				if (!try_convert_to_string(arg_old)) {
-					RETURN_THROWS();
-				}
-
-				if (php_mb_parse_encoding_list(Z_STRVAL_P(arg_old), Z_STRLEN_P(arg_old), &from_encodings, &num_from_encodings, 0) == FAILURE) {
-					RETURN_FALSE;
-				}
-				break;
+	if (from_encodings_ht) {
+		if (php_mb_parse_encoding_array(from_encodings_ht, &from_encodings, &num_from_encodings, 0) == FAILURE) {
+			RETURN_FALSE;
 		}
-
-		if (!num_from_encodings) {
-			efree(from_encodings);
-			php_error_docref(NULL, E_WARNING, "Must specify at least one encoding");
+		free_from_encodings = 1;
+	} else if (from_encodings_str) {
+		if (php_mb_parse_encoding_list(ZSTR_VAL(from_encodings_str), ZSTR_LEN(from_encodings_str), &from_encodings, &num_from_encodings, 0) == FAILURE) {
 			RETURN_FALSE;
 		}
 		free_from_encodings = 1;
@@ -2824,6 +2814,12 @@ PHP_FUNCTION(mb_convert_encoding)
 		from_encodings = &MBSTRG(current_internal_encoding);
 		num_from_encodings = 1;
 		free_from_encodings = 0;
+	}
+
+	if (!num_from_encodings) {
+		efree(from_encodings);
+		php_error_docref(NULL, E_WARNING, "Must specify at least one encoding");
+		RETURN_FALSE;
 	}
 
 	if (Z_TYPE_P(input) == IS_STRING) {
