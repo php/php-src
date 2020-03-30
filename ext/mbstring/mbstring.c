@@ -441,11 +441,11 @@ php_mb_parse_encoding_list(const char *value, size_t value_length, const mbfl_en
  *  Return FAILURE if input contains any illegal encoding, otherwise SUCCESS.
  */
 static int
-php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encoding ***return_list, size_t *return_size, int persistent)
+php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encoding ***return_list, size_t *return_size)
 {
 	/* Allocate enough space to include the default detect order if "auto" is used. */
 	size_t size = zend_hash_num_elements(target_hash) + MBSTRG(default_detect_order_list_size);
-	const mbfl_encoding **list = pecalloc(size, sizeof(mbfl_encoding*), persistent);
+	const mbfl_encoding **list = ecalloc(size, sizeof(mbfl_encoding*));
 	const mbfl_encoding **entry = list;
 	zend_bool included_auto = 0;
 	size_t n = 0;
@@ -453,7 +453,7 @@ php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encoding ***retur
 	ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
 		zend_string *encoding_str = zval_try_get_string(hash_entry);
 		if (UNEXPECTED(!encoding_str)) {
-			pefree(list, persistent);
+			efree(list);
 			return FAILURE;
 		}
 
@@ -478,7 +478,7 @@ php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encoding ***retur
 				php_error_docref(NULL, E_WARNING,
 					"Unknown encoding \"%s\"", ZSTR_VAL(encoding_str));
 				zend_string_release(encoding_str);
-				pefree(list, persistent);
+				efree(list);
 				return FAILURE;
 			}
 		}
@@ -1550,7 +1550,7 @@ PHP_FUNCTION(mb_detect_order)
 		size_t size = 0;
 		switch (Z_TYPE_P(arg1)) {
 			case IS_ARRAY:
-				if (FAILURE == php_mb_parse_encoding_array(Z_ARRVAL_P(arg1), &list, &size, 0)) {
+				if (FAILURE == php_mb_parse_encoding_array(Z_ARRVAL_P(arg1), &list, &size)) {
 					RETURN_FALSE;
 				}
 				break;
@@ -2794,7 +2794,7 @@ PHP_FUNCTION(mb_convert_encoding)
 	}
 
 	if (from_encodings_ht) {
-		if (php_mb_parse_encoding_array(from_encodings_ht, &from_encodings, &num_from_encodings, 0) == FAILURE) {
+		if (php_mb_parse_encoding_array(from_encodings_ht, &from_encodings, &num_from_encodings) == FAILURE) {
 			RETURN_FALSE;
 		}
 		free_from_encodings = 1;
@@ -2980,7 +2980,7 @@ PHP_FUNCTION(mb_detect_encoding)
 
 	/* make encoding list */
 	if (encoding_ht) {
-		if (FAILURE == php_mb_parse_encoding_array(encoding_ht, &elist, &size, 0)) {
+		if (FAILURE == php_mb_parse_encoding_array(encoding_ht, &elist, &size)) {
 			RETURN_FALSE;
 		}
 		free_elist = 1;
@@ -3386,7 +3386,7 @@ PHP_FUNCTION(mb_convert_variables)
 
 	/* pre-conversion encoding */
 	if (from_enc_ht) {
-		if (php_mb_parse_encoding_array(from_enc_ht, &elist, &elistsz, 0) == FAILURE) {
+		if (php_mb_parse_encoding_array(from_enc_ht, &elist, &elistsz) == FAILURE) {
 			RETURN_FALSE;
 		}
 	} else {
