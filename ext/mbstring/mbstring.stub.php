@@ -69,8 +69,7 @@ function mb_decode_mimeheader(string $string): string|false {}
 
 function mb_convert_kana(string $str, string $option = UNKNOWN, string $encoding = UNKNOWN): string|false {}
 
-/** @param array|string $from */
-function mb_convert_variables(string $to, $from, &$var, &...$vars): string|false {}
+function mb_convert_variables(string $to, array|string $from, &$var, &...$vars): string|false {}
 
 function mb_encode_numericentity(string $string, array $convmap, string $encoding = UNKNOWN, bool $is_hex = false): string|false {}
 

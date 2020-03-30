@@ -3353,7 +3353,9 @@ static int mb_recursive_convert_variable(mbfl_buffer_converter *convd, zval *var
    Converts the string resource in variables to desired encoding */
 PHP_FUNCTION(mb_convert_variables)
 {
-	zval *args, *zfrom_enc;
+	zval *args;
+	zend_string *from_enc_str;
+	HashTable *from_enc_ht;
 	mbfl_string string, result;
 	const mbfl_encoding *from_encoding, *to_encoding;
 	mbfl_encoding_detector *identd;
@@ -3365,9 +3367,11 @@ PHP_FUNCTION(mb_convert_variables)
 	char *to_enc;
 	int recursion_error = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz+", &to_enc, &to_enc_len, &zfrom_enc, &args, &argc) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(3, -1)
+		Z_PARAM_STRING(to_enc, to_enc_len)
+		Z_PARAM_STR_OR_ARRAY_HT(from_enc_str, from_enc_ht)
+		Z_PARAM_VARIADIC('+', args, argc)
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* new encoding */
 	to_encoding = mbfl_name2encoding(to_enc);
@@ -3384,22 +3388,14 @@ PHP_FUNCTION(mb_convert_variables)
 	string.no_language = MBSTRG(language);
 
 	/* pre-conversion encoding */
-	elist = NULL;
-	elistsz = 0;
-	switch (Z_TYPE_P(zfrom_enc)) {
-		case IS_ARRAY:
-			if (php_mb_parse_encoding_array(Z_ARRVAL_P(zfrom_enc), &elist, &elistsz, 0) == FAILURE) {
-				RETURN_FALSE;
-			}
-			break;
-		default:
-			if (!try_convert_to_string(zfrom_enc)) {
-				RETURN_THROWS();
-			}
-			if (php_mb_parse_encoding_list(Z_STRVAL_P(zfrom_enc), Z_STRLEN_P(zfrom_enc), &elist, &elistsz, 0) == FAILURE) {
-				RETURN_FALSE;
-			}
-			break;
+	if (from_enc_ht) {
+		if (php_mb_parse_encoding_array(from_enc_ht, &elist, &elistsz, 0) == FAILURE) {
+			RETURN_FALSE;
+		}
+	} else {
+		if (php_mb_parse_encoding_list(ZSTR_VAL(from_enc_str), ZSTR_LEN(from_enc_str), &elist, &elistsz, 0) == FAILURE) {
+			RETURN_FALSE;
+		}
 	}
 
 	if (elistsz == 0) {
