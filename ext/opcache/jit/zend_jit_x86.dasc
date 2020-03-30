@@ -11083,15 +11083,15 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op_array *op_array, ze
 			regset = ZEND_REGSET_EMPTY;
 			break;
 		case ZEND_QM_ASSIGN:
-			if (ssa->ops[line].op1_def == current_var ||
-			    ssa->ops[line].result_def == current_var) {
+			if (ssa_op->op1_def == current_var ||
+			    ssa_op->result_def == current_var) {
 				regset = ZEND_REGSET_EMPTY;
 				break;
 			}
 			/* break missing intentionally */
 		case ZEND_SEND_VAL:
 		case ZEND_SEND_VAL_EX:
-			if (ssa->ops[line].op1_use == current_var) {
+			if (ssa_op->op1_use == current_var) {
 				regset = ZEND_REGSET(ZREG_R0);
 				break;
 			}
@@ -11107,8 +11107,8 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op_array *op_array, ze
 			}
 			break;
 		case ZEND_SEND_VAR:
-			if (ssa->ops[line].op1_use == current_var ||
-			    ssa->ops[line].op1_def == current_var) {
+			if (ssa_op->op1_use == current_var ||
+			    ssa_op->op1_def == current_var) {
 				regset = ZEND_REGSET_EMPTY;
 				break;
 			}
@@ -11126,10 +11126,10 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op_array *op_array, ze
 			}
 			break;
 		case ZEND_ASSIGN:
-			if (ssa->ops[line].op2_use == current_var ||
-			    ssa->ops[line].op2_def == current_var ||
-			    ssa->ops[line].op1_def == current_var ||
-			    ssa->ops[line].result_def == current_var) {
+			if (ssa_op->op2_use == current_var ||
+			    ssa_op->op2_def == current_var ||
+			    ssa_op->op1_def == current_var ||
+			    ssa_op->result_def == current_var) {
 				regset = ZEND_REGSET_EMPTY;
 				break;
 			}
@@ -11151,9 +11151,9 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op_array *op_array, ze
 		case ZEND_PRE_DEC:
 		case ZEND_POST_INC:
 		case ZEND_POST_DEC:
-			if (ssa->ops[line].op1_use == current_var ||
-			    ssa->ops[line].op1_def == current_var ||
-			    ssa->ops[line].result_def == current_var) {
+			if (ssa_op->op1_use == current_var ||
+			    ssa_op->op1_def == current_var ||
+			    ssa_op->result_def == current_var) {
 				regset = ZEND_REGSET_EMPTY;
 				break;
 			}
@@ -11177,8 +11177,8 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op_array *op_array, ze
 
 				regset = ZEND_REGSET_EMPTY;
 				if ((op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG)) {
-					if (ssa->ops[line].result_def != current_var &&
-					    (ssa->ops[line].op1_use != current_var || !zend_ssa_is_last_use(op_array, ssa, current_var, opline-op_array->opcodes))) {
+					if (ssa_op->result_def != current_var &&
+					    (ssa_op->op1_use != current_var || !zend_ssa_is_last_use(op_array, ssa, current_var, line))) {
 						ZEND_REGSET_INCL(regset, ZREG_R0);
 					}
 					res_info = OP1_INFO();
@@ -11188,26 +11188,26 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op_array *op_array, ze
 					}
 				}
 				if ((op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_DOUBLE)) {
-					if (ssa->ops[line].result_def != current_var) {
+					if (ssa_op->result_def != current_var) {
 						ZEND_REGSET_INCL(regset, ZREG_XMM0);
 					}
 				}
 				if ((op1_info & MAY_BE_DOUBLE) && (op2_info & MAY_BE_LONG)) {
 					if (zend_is_commutative(opline->opcode)) {
-						if (ssa->ops[line].result_def != current_var) {
+						if (ssa_op->result_def != current_var) {
 							ZEND_REGSET_INCL(regset, ZREG_XMM0);
 						}
 					} else {
 						ZEND_REGSET_INCL(regset, ZREG_XMM0);
-						if (ssa->ops[line].result_def != current_var &&
-						    (ssa->ops[line].op1_use != current_var || !zend_ssa_is_last_use(op_array, ssa, current_var, opline-op_array->opcodes))) {
+						if (ssa_op->result_def != current_var &&
+						    (ssa_op->op1_use != current_var || !zend_ssa_is_last_use(op_array, ssa, current_var, line))) {
 							ZEND_REGSET_INCL(regset, ZREG_XMM1);
 						}
 					}
 				}
 				if ((op1_info & MAY_BE_DOUBLE) && (op2_info & MAY_BE_DOUBLE)) {
-					if (ssa->ops[line].result_def != current_var &&
-					    (ssa->ops[line].op1_use != current_var || !zend_ssa_is_last_use(op_array, ssa, current_var, opline-op_array->opcodes))) {
+					if (ssa_op->result_def != current_var &&
+					    (ssa_op->op1_use != current_var || !zend_ssa_is_last_use(op_array, ssa, current_var, line))) {
 						ZEND_REGSET_INCL(regset, ZREG_XMM0);
 					}
 				}
@@ -11225,8 +11225,8 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op_array *op_array, ze
 			if (!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG)) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG))) {
 				regset = ZEND_REGSET_EMPTY;
-				if (ssa->ops[line].result_def != current_var &&
-				    (ssa->ops[line].op1_use != current_var || !zend_ssa_is_last_use(op_array, ssa, current_var, opline-op_array->opcodes))) {
+				if (ssa_op->result_def != current_var &&
+				    (ssa_op->op1_use != current_var || !zend_ssa_is_last_use(op_array, ssa, current_var, line))) {
 					ZEND_REGSET_INCL(regset, ZREG_R0);
 				}
 			}
@@ -11238,11 +11238,11 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op_array *op_array, ze
 			if (!(op1_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG)) &&
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG))) {
 				regset = ZEND_REGSET_EMPTY;
-				if (ssa->ops[line].result_def != current_var &&
-				    (ssa->ops[line].op1_use != current_var || !zend_ssa_is_last_use(op_array, ssa, current_var, opline-op_array->opcodes))) {
+				if (ssa_op->result_def != current_var &&
+				    (ssa_op->op1_use != current_var || !zend_ssa_is_last_use(op_array, ssa, current_var, line))) {
 					ZEND_REGSET_INCL(regset, ZREG_R0);
 				}
-				if (opline->op2_type != IS_CONST && ssa->ops[line].op2_use != current_var) {
+				if (opline->op2_type != IS_CONST && ssa_op->op2_use != current_var) {
 					ZEND_REGSET_INCL(regset, ZREG_R1);
 				}
 			}
@@ -11256,8 +11256,8 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op_array *op_array, ze
 				if (opline->op2_type == IS_CONST &&
 				    Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_LONG &&
 				    zend_long_is_power_of_two(Z_LVAL_P(RT_CONSTANT(opline, opline->op2)))) {
-					if (ssa->ops[line].result_def != current_var &&
-					    (ssa->ops[line].op1_use != current_var || !zend_ssa_is_last_use(op_array, ssa, current_var, opline-op_array->opcodes))) {
+					if (ssa_op->result_def != current_var &&
+					    (ssa_op->op1_use != current_var || !zend_ssa_is_last_use(op_array, ssa, current_var, line))) {
 						ZEND_REGSET_INCL(regset, ZREG_R0);
 					}
 				} else {
@@ -11280,8 +11280,8 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op_array *op_array, ze
 				regset = ZEND_REGSET_EMPTY;
 				if ((op1_info & MAY_BE_LONG) && (op2_info & MAY_BE_LONG) &&
 				    opline->op1_type != IS_CONST && opline->op2_type != IS_CONST) {
-					if (ssa->ops[line].op1_use != current_var &&
-					    ssa->ops[line].op2_use != current_var) {
+					if (ssa_op->op1_use != current_var &&
+					    ssa_op->op2_use != current_var) {
 						ZEND_REGSET_INCL(regset, ZREG_R0);
 					}
 				}
@@ -11292,8 +11292,8 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op_array *op_array, ze
 					ZEND_REGSET_INCL(regset, ZREG_XMM0);
 				}
 				if ((op1_info & MAY_BE_DOUBLE) && (op2_info & MAY_BE_DOUBLE)) {
-					if (ssa->ops[line].op1_use != current_var &&
-					    ssa->ops[line].op2_use != current_var) {
+					if (ssa_op->op1_use != current_var &&
+					    ssa_op->op2_use != current_var) {
 						ZEND_REGSET_INCL(regset, ZREG_XMM0);
 					}
 				}
