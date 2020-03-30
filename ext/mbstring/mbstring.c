@@ -4327,34 +4327,32 @@ MBSTRING_API int php_mb_check_encoding_recursive(HashTable *vars, const zend_str
    Check if the string is valid for the specified encoding */
 PHP_FUNCTION(mb_check_encoding)
 {
-	zval *input = NULL;
-	zend_string *enc = NULL;
+	zend_string *input_str = NULL, *enc = NULL;
+	HashTable *input_ht = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zS", &input, &enc) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR_OR_ARRAY_HT(input_str, input_ht)
+		Z_PARAM_STR(enc)
+	ZEND_PARSE_PARAMETERS_END();
 
-	/* FIXME: Actually check all inputs, except $_FILES file content. */
-	if (input == NULL) {
+	if (input_ht) {
+		if (!php_mb_check_encoding_recursive(input_ht, enc)) {
+			RETURN_FALSE;
+		}
+		RETURN_TRUE;
+	} else if (input_str) {
+		if (!php_mb_check_encoding(ZSTR_VAL(input_str), ZSTR_LEN(input_str), enc ? ZSTR_VAL(enc): NULL)) {
+			RETURN_FALSE;
+		}
+		RETURN_TRUE;
+	} else {
+		/* FIXME: Actually check all inputs, except $_FILES file content. */
 		if (MBSTRG(illegalchars) == 0) {
 			RETURN_TRUE;
 		}
 		RETURN_FALSE;
 	}
-
-	if (Z_TYPE_P(input) == IS_ARRAY) {
-		if (!php_mb_check_encoding_recursive(HASH_OF(input), enc)) {
-			RETURN_FALSE;
-		}
-	} else {
-		if (!try_convert_to_string(input)) {
-			RETURN_THROWS();
-		}
-		if (!php_mb_check_encoding(Z_STRVAL_P(input), Z_STRLEN_P(input), enc ? ZSTR_VAL(enc): NULL)) {
-			RETURN_FALSE;
-		}
-	}
-	RETURN_TRUE;
 }
 /* }}} */
 

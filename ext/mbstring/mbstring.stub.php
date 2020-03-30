@@ -10,6 +10,7 @@ function mb_http_output(string $encoding = UNKNOWN): string|bool {}
 
 function mb_detect_order($encoding = UNKNOWN): array|bool {}
 
+/** @param string|int $substchar */
 function mb_substitute_character($substchar = UNKNOWN): string|int|bool {}
 
 function mb_preferred_mime_name(string $encoding): string|false {}
@@ -78,7 +79,7 @@ function mb_send_mail(string $to, string $subject, string $message, $additional_
 
 function mb_get_info(string $type = UNKNOWN): array|string|int|false {}
 
-function mb_check_encoding($var = UNBEK, string $encoding = UNKNOWN): bool {}
+function mb_check_encoding(array|string $var = UNKNOWN, string $encoding = UNKNOWN): bool {}
 
 function mb_scrub(string $str, string $encoding = UNKNOWN): string|false {}
 
