@@ -1867,7 +1867,7 @@ PHP_FUNCTION(str_contains)
 /* }}} */
 
 /* {{{ proto bool str_starts_with(string haystack, string needle)
-   Checks if haystack strats with needle */
+   Checks if haystack starts with needle */
 PHP_FUNCTION(str_starts_with) {
     zend_string *haystack, *needle;
 
