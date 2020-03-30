@@ -3,7 +3,7 @@ Bug #78076	Opcache greatly increases memory usage.
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
-opcache.file_cache=/tmp/
+opcache.file_cache="{TMP}"
 opcache.file_cache_only=1
 --SKIPIF--
 --FILE--
