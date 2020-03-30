@@ -12,14 +12,12 @@ var_dump(mb_convert_encoding('foo', 'UTF-8', array("foo\0bar")));
 ?>
 --EXPECTF--
 Warning: mb_convert_encoding(): Unknown encoding "0" in %s on line %d
-string(0) ""
-
-Warning: Array to string conversion in %s on line %d
+bool(false)
 
 Warning: Array to string conversion in %s on line %d
 
 Warning: mb_convert_encoding(): Unknown encoding "Array" in %s on line %d
-string(3) "foo"
+bool(false)
 
 Warning: mb_convert_encoding(): Unknown encoding "foo" in %s on line %d
-string(3) "foo"
+bool(false)
