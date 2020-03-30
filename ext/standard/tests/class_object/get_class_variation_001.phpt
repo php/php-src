@@ -80,9 +80,9 @@ echo "Done";
 --EXPECTF--
 *** Testing get_class() : usage variations ***
 
-Warning: Undefined variable: undefined_var in %s on line %d
+Warning: Undefined variable $undefined_var in %s on line %d
 
-Warning: Undefined variable: unset_var in %s on line %d
+Warning: Undefined variable $unset_var in %s on line %d
 
 Arg value: 0 (type: integer)
 get_class(): Argument #1 ($object) must be of type object, int given

@@ -43,4 +43,4 @@ class E extends D {
 --EXPECTF--
 int(2)
 
-Warning: Undefined variable: x in %s on line %d
+Warning: Undefined variable $x in %s on line %d

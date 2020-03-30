@@ -18,5 +18,5 @@ myfunc();
 
 ?>
 --EXPECTF--
-Warning: Undefined variable: x in %s on line %d
+Warning: Undefined variable $x in %s on line %d
 '2' is expected to be 2

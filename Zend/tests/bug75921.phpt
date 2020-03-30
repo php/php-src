@@ -47,21 +47,21 @@ unset($null);
 --EXPECTF--
 Attempt to assign property 'a' of non-object
 
-Warning: Undefined variable: null in %s on line %d
+Warning: Undefined variable $null in %s on line %d
 NULL
 Attempt to modify property 'a' of non-object
 
-Warning: Undefined variable: null in %s on line %d
+Warning: Undefined variable $null in %s on line %d
 NULL
 Attempt to modify property 'a' of non-object
 
-Warning: Undefined variable: null in %s on line %d
+Warning: Undefined variable $null in %s on line %d
 NULL
 Attempt to modify property 'a' of non-object
 
-Warning: Undefined variable: null in %s on line %d
+Warning: Undefined variable $null in %s on line %d
 NULL
 Attempt to modify property 'a' of non-object
 
-Warning: Undefined variable: null in %s on line %d
+Warning: Undefined variable $null in %s on line %d
 NULL

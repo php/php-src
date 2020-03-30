@@ -367,7 +367,7 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -379,7 +379,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -391,7 +391,7 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -403,7 +403,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -415,7 +415,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -427,7 +427,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -439,7 +439,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -451,7 +451,7 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -463,7 +463,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -475,7 +475,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -487,7 +487,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -499,7 +499,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -511,7 +511,7 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -523,7 +523,7 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -535,7 +535,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -547,7 +547,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -559,7 +559,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -571,7 +571,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -583,7 +583,7 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -595,7 +595,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -607,7 +607,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -619,7 +619,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -631,7 +631,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -643,7 +643,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -655,7 +655,7 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -667,7 +667,7 @@ bool(true)
 bool(true)
 bool(false)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -679,7 +679,7 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: Undefined variable: scalar_var in %s on line %d
+Warning: Undefined variable $scalar_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -696,7 +696,7 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: Undefined variable: array_var in %s on line %d
+Warning: Undefined variable $array_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -712,18 +712,18 @@ bool(true)
 array(0) {
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(0) {
 }
 
-Warning: Undefined variable: array_var in %s on line %d
+Warning: Undefined variable $array_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -739,18 +739,18 @@ bool(true)
 array(0) {
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(0) {
 }
 
-Warning: Undefined variable: array_var in %s on line %d
+Warning: Undefined variable $array_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -766,18 +766,18 @@ bool(true)
 array(0) {
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(0) {
 }
 
-Warning: Undefined variable: array_var in %s on line %d
+Warning: Undefined variable $array_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -793,18 +793,18 @@ bool(true)
 array(0) {
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(0) {
 }
 
-Warning: Undefined variable: array_var in %s on line %d
+Warning: Undefined variable $array_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -826,13 +826,13 @@ array(3) {
   int(4)
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(3) {
   [1]=>
@@ -850,13 +850,13 @@ array(2) {
   int(4)
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(2) {
   [2]=>
@@ -870,13 +870,13 @@ array(1) {
   int(4)
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(1) {
   [3]=>
@@ -886,18 +886,18 @@ array(1) {
 array(0) {
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(0) {
 }
 
-Warning: Undefined variable: array_var in %s on line %d
+Warning: Undefined variable $array_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -917,13 +917,13 @@ array(2) {
   float(5.6)
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(2) {
   [1]=>
@@ -937,13 +937,13 @@ array(1) {
   float(5.6)
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(1) {
   [2]=>
@@ -953,18 +953,18 @@ array(1) {
 array(0) {
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(0) {
 }
 
-Warning: Undefined variable: array_var in %s on line %d
+Warning: Undefined variable $array_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -982,13 +982,13 @@ array(1) {
   string(3) "two"
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(1) {
   [2]=>
@@ -998,18 +998,18 @@ array(1) {
 array(0) {
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(0) {
 }
 
-Warning: Undefined variable: array_var in %s on line %d
+Warning: Undefined variable $array_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -1027,13 +1027,13 @@ array(1) {
   string(2) "30"
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(1) {
   ["Age"]=>
@@ -1043,18 +1043,18 @@ array(1) {
 array(0) {
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(0) {
 }
 
-Warning: Undefined variable: array_var in %s on line %d
+Warning: Undefined variable $array_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -1078,13 +1078,13 @@ array(4) {
   string(0) ""
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(4) {
   [1]=>
@@ -1106,13 +1106,13 @@ array(3) {
   string(0) ""
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(3) {
   ["One"]=>
@@ -1130,13 +1130,13 @@ array(2) {
   string(0) ""
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(2) {
   [2]=>
@@ -1150,13 +1150,13 @@ array(1) {
   string(0) ""
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(1) {
   [""]=>
@@ -1166,18 +1166,18 @@ array(1) {
 array(0) {
 }
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(false)
 
-Warning: Undefined variable: key_val in %s on line %d
+Warning: Undefined variable $key_val in %s on line %d
 bool(true)
 array(0) {
 }
 
-Warning: Undefined variable: array_var in %s on line %d
+Warning: Undefined variable $array_var in %s on line %d
 NULL
 bool(false)
 bool(false)
@@ -1195,7 +1195,7 @@ bool(true)
 bool(false)
 bool(false)
 
-Warning: Undefined variable: resource in %s on line %d
+Warning: Undefined variable $resource in %s on line %d
 NULL
 -- Iteration 2 --
 resource(%d) of type (stream)
@@ -1208,10 +1208,10 @@ bool(true)
 bool(false)
 bool(false)
 
-Warning: Undefined variable: resource in %s on line %d
+Warning: Undefined variable $resource in %s on line %d
 NULL
 
-Warning: Undefined variable: resources in %s on line %d
+Warning: Undefined variable $resources in %s on line %d
 NULL
 bool(false)
 bool(true)
@@ -1228,16 +1228,16 @@ object(Point)#%d (3) {
 bool(true)
 bool(false)
 
-Warning: Undefined variable: lable in %s on line %d
+Warning: Undefined variable $lable in %s on line %d
 bool(false)
 
-Warning: Undefined variable: lable in %s on line %d
+Warning: Undefined variable $lable in %s on line %d
 bool(true)
 
-Warning: Undefined variable: lable in %s on line %d
+Warning: Undefined variable $lable in %s on line %d
 bool(false)
 
-Warning: Undefined variable: lable in %s on line %d
+Warning: Undefined variable $lable in %s on line %d
 bool(true)
 object(Point)#%d (3) {
   ["x"]=>
@@ -1262,7 +1262,7 @@ bool(false)
 bool(false)
 bool(true)
 
-Warning: Undefined variable: point1 in %s on line %d
+Warning: Undefined variable $point1 in %s on line %d
 NULL
 bool(false)
 bool(true)
@@ -1292,7 +1292,7 @@ value of static_var before unset: 1
 bool(true)
 bool(false)
 
-Warning: Undefined variable: static_var in %s on line %d
+Warning: Undefined variable $static_var in %s on line %d
 value of static_var after unset: 
 bool(false)
 bool(true)
@@ -1301,7 +1301,7 @@ value of static_var before unset: 2
 bool(true)
 bool(false)
 
-Warning: Undefined variable: static_var in %s on line %d
+Warning: Undefined variable $static_var in %s on line %d
 value of static_var after unset: 
 bool(false)
 bool(true)
@@ -1310,7 +1310,7 @@ value of static_var before unset: 3
 bool(true)
 bool(false)
 
-Warning: Undefined variable: static_var in %s on line %d
+Warning: Undefined variable $static_var in %s on line %d
 value of static_var after unset: 
 bool(false)
 bool(true)

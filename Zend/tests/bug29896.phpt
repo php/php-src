@@ -22,6 +22,6 @@ function GenerateError2($A1)
 GenerateError2("Test2");
 ?>
 --EXPECTF--
-#0  userErrorHandler(2, Undefined variable: b, %s, %d) called at [%s:%d]
+#0  userErrorHandler(2, Undefined variable $b, %s, %d) called at [%s:%d]
 #1  GenerateError1(Test1) called at [%sbug29896.php:16]
 #2  GenerateError2(Test2) called at [%sbug29896.php:19]

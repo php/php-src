@@ -15,8 +15,8 @@ echo "made it once\n";
 crash();
 echo "ok\n";
 --EXPECTF--
-Warning: Undefined variable: i in %s on line %d
+Warning: Undefined variable $i in %s on line %d
 made it once
 
-Warning: Undefined variable: i in %s on line %d
+Warning: Undefined variable $i in %s on line %d
 ok

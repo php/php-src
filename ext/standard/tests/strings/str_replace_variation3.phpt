@@ -223,7 +223,7 @@ int(0)
 string(5) "FOUND"
 string(5) "FOUND"
 
-Warning: Undefined variable: strS in %s on line %d
+Warning: Undefined variable $strS in %s on line %d
 string(0) ""
 string(5) "FOUND"
 string(5) "FOUND"

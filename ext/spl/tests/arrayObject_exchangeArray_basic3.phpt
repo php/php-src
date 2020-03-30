@@ -83,7 +83,7 @@ array(2) {
 --> exchangeArray() with no arg:
 Exception: ArrayObject::exchangeArray() expects exactly 1 parameter, 0 given
 
-Warning: Undefined variable: copy in %s on line %d
+Warning: Undefined variable $copy in %s on line %d
 object(ArrayObject)#2 (1) {
   ["storage":"ArrayObject":private]=>
   object(C)#3 (2) {
@@ -105,7 +105,7 @@ NULL
 --> exchangeArray() with bad arg type:
 Exception:Passed variable is not an array or object
 
-Warning: Undefined variable: copy in %s on line %d
+Warning: Undefined variable $copy in %s on line %d
 object(ArrayObject)#3 (1) {
   ["storage":"ArrayObject":private]=>
   object(C)#2 (2) {

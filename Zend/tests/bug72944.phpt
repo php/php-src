@@ -7,5 +7,5 @@ define('e', 'e');
 echo "OK\n";
 ?>
 --EXPECTF--
-Warning: Undefined variable: A in %s on line %d
+Warning: Undefined variable $A in %s on line %d
 OK

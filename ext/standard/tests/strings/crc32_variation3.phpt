@@ -77,9 +77,9 @@ echo "Done";
 --EXPECTF--
 *** Testing crc32() : with different strings in double quotes ***
 
-Warning: Undefined variable: hello in %s on line %d
+Warning: Undefined variable $hello in %s on line %d
 
-Warning: Undefined variable: world in %s on line %d
+Warning: Undefined variable $world in %s on line %d
 
 -- Iteration 1 --
 int(0)
