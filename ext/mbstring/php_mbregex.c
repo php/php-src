@@ -30,6 +30,7 @@
 
 #include "php_onig_compat.h" /* must come prior to the oniguruma header */
 #include <oniguruma.h>
+#include <stdbool.h>
 #undef UChar
 
 #if ONIGURUMA_VERSION_INT < 60800
@@ -445,6 +446,40 @@ const char *php_mb_regex_get_default_mbctype(void)
 }
 /* }}} */
 
+static bool php_mb_regex_check_encoding(const char *pattern, size_t pattern_length)
+{
+	const mbfl_encoding *encoding = mbfl_name2encoding(php_mb_regex_get_mbctype());
+	mbfl_buffer_converter *converter;
+	mbfl_string string, result;
+
+	ZEND_ASSERT(encoding != NULL);
+
+	converter = mbfl_buffer_converter_new(encoding, encoding, 0);
+	ZEND_ASSERT(converter != NULL);
+
+	mbfl_buffer_converter_illegal_mode(converter, MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE);
+	mbfl_buffer_converter_illegal_substchar(converter, 0);
+
+    /* initialize strings */
+    mbfl_string_init_set(&string, mbfl_no_language_neutral, encoding);
+    mbfl_string_init(&result);
+
+    string.val = (unsigned char *) pattern;
+    string.len = pattern_length;
+
+    if (mbfl_buffer_converter_feed_result(converter, &string, &result) != NULL) {
+    	size_t illegal_chars = mbfl_buffer_illegalchars(converter);
+    	if (illegal_chars == 0 && string.len == result.len && memcmp(string.val, result.val, string.len) == 0) {
+    		mbfl_string_clear(&result);
+			mbfl_buffer_converter_delete(converter);
+    		return true;
+    	}
+    	mbfl_string_clear(&result);
+		mbfl_buffer_converter_delete(converter);
+    }
+    return false;
+}
+
 /*
  * regex cache
  */
@@ -457,7 +492,7 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, size_t p
 	OnigUChar err_str[ONIG_MAX_ERROR_MESSAGE_LEN];
 	OnigEncoding enc = MBREX(current_mbctype);
 
-	if (!php_mb_check_encoding(pattern, patlen, _php_mb_regex_mbctype2name(enc))) {
+	if (!php_mb_regex_check_encoding(pattern, patlen)) {
 		php_error_docref(NULL, E_WARNING,
 			"Pattern is not valid under %s encoding", _php_mb_regex_mbctype2name(enc));
 		return NULL;
@@ -909,11 +944,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		}
 	}
 
-	if (!php_mb_check_encoding(
-		string,
-		string_len,
-		php_mb_regex_get_mbctype()
-	)) {
+	if (!php_mb_regex_check_encoding(string, string_len)) {
 		RETURN_FALSE;
 	}
 
@@ -1050,11 +1081,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 			}
 		}
 
-		if (!php_mb_check_encoding(
-		string,
-		string_len,
-		php_mb_regex_get_mbctype()
-		)) {
+		if (!php_mb_regex_check_encoding(string, string_len)) {
 			RETURN_NULL();
 		}
 
@@ -1260,7 +1287,7 @@ PHP_FUNCTION(mb_split)
 		count--;
 	}
 
-	if (!php_mb_check_encoding(string, string_len, php_mb_regex_get_mbctype())) {
+	if (!php_mb_regex_check_encoding(string, string_len)) {
 		RETURN_FALSE;
 	}
 
@@ -1354,7 +1381,7 @@ PHP_FUNCTION(mb_ereg_match)
 		}
 	}
 
-	if (!php_mb_check_encoding(string, string_len, php_mb_regex_get_mbctype())) {
+	if (!php_mb_regex_check_encoding(string, string_len)) {
 		RETURN_FALSE;
 	}
 
@@ -1563,11 +1590,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 
 	ZVAL_STR_COPY(&MBREX(search_str), arg_str);
 
-	if (php_mb_check_encoding(
-	ZSTR_VAL(arg_str),
-	ZSTR_LEN(arg_str),
-	php_mb_regex_get_mbctype()
-	)) {
+	if (php_mb_regex_check_encoding(ZSTR_VAL(arg_str), ZSTR_LEN(arg_str))) {
 		MBREX(search_pos) = 0;
 		RETVAL_TRUE;
 	} else {
