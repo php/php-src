@@ -1047,17 +1047,9 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	OnigUChar *string_lim;
 	char *description = NULL;
 
-	const mbfl_encoding *enc;
+	const mbfl_encoding *enc = mbfl_name2encoding(php_mb_regex_get_mbctype());
+	ZEND_ASSERT(enc != NULL);
 
-	{
-		const char *current_enc_name;
-		current_enc_name = php_mb_regex_get_mbctype();
-		if (current_enc_name == NULL ||
-			(enc = mbfl_name2encoding(current_enc_name)) == NULL) {
-			php_error_docref(NULL, E_WARNING, "Unknown error");
-			RETURN_FALSE;
-		}
-	}
 	eval = 0;
 	{
 		char *option_str = NULL;
