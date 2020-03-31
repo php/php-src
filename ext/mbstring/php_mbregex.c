@@ -845,7 +845,7 @@ PHP_FUNCTION(mb_regex_encoding)
 	}
 
 	if (!encoding) {
-		const char *retval = _php_mb_regex_mbctype2name(MBREX(current_mbctype));
+		const char *retval = php_mb_regex_get_mbctype();
 
 		if (retval == NULL) {
 			RETURN_FALSE;
@@ -912,7 +912,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	if (!php_mb_check_encoding(
 		string,
 		string_len,
-		_php_mb_regex_mbctype2name(MBREX(current_mbctype))
+		php_mb_regex_get_mbctype()
 	)) {
 		RETURN_FALSE;
 	}
@@ -1020,7 +1020,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 
 	{
 		const char *current_enc_name;
-		current_enc_name = _php_mb_regex_mbctype2name(MBREX(current_mbctype));
+		current_enc_name = php_mb_regex_get_mbctype();
 		if (current_enc_name == NULL ||
 			(enc = mbfl_name2encoding(current_enc_name)) == NULL) {
 			php_error_docref(NULL, E_WARNING, "Unknown error");
@@ -1053,7 +1053,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		if (!php_mb_check_encoding(
 		string,
 		string_len,
-		_php_mb_regex_mbctype2name(MBREX(current_mbctype))
+		php_mb_regex_get_mbctype()
 		)) {
 			RETURN_NULL();
 		}
@@ -1260,8 +1260,7 @@ PHP_FUNCTION(mb_split)
 		count--;
 	}
 
-	if (!php_mb_check_encoding(string, string_len,
-			_php_mb_regex_mbctype2name(MBREX(current_mbctype)))) {
+	if (!php_mb_check_encoding(string, string_len, php_mb_regex_get_mbctype())) {
 		RETURN_FALSE;
 	}
 
@@ -1355,8 +1354,7 @@ PHP_FUNCTION(mb_ereg_match)
 		}
 	}
 
-	if (!php_mb_check_encoding(string, string_len,
-			_php_mb_regex_mbctype2name(MBREX(current_mbctype)))) {
+	if (!php_mb_check_encoding(string, string_len, php_mb_regex_get_mbctype())) {
 		RETURN_FALSE;
 	}
 
@@ -1568,7 +1566,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 	if (php_mb_check_encoding(
 	ZSTR_VAL(arg_str),
 	ZSTR_LEN(arg_str),
-	_php_mb_regex_mbctype2name(MBREX(current_mbctype))
+	php_mb_regex_get_mbctype()
 	)) {
 		MBREX(search_pos) = 0;
 		RETVAL_TRUE;
