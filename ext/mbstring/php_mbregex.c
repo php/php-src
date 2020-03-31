@@ -438,6 +438,13 @@ const char *php_mb_regex_get_mbctype(void)
 }
 /* }}} */
 
+/* {{{ php_mb_regex_get_mbctype_encoding */
+const mbfl_encoding *php_mb_regex_get_mbctype_encoding(void)
+{
+	return mbfl_name2encoding(_php_mb_regex_mbctype2name(MBREX(current_mbctype)));
+}
+/* }}} */
+
 /* {{{ php_mb_regex_get_default_mbctype */
 const char *php_mb_regex_get_default_mbctype(void)
 {
@@ -457,7 +464,7 @@ static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, size_t p
 	OnigUChar err_str[ONIG_MAX_ERROR_MESSAGE_LEN];
 	OnigEncoding enc = MBREX(current_mbctype);
 
-	if (!php_mb_check_encoding(pattern, patlen, _php_mb_regex_mbctype2name(enc))) {
+	if (!php_mb_check_encoding(pattern, patlen, php_mb_regex_get_mbctype_encoding())) {
 		php_error_docref(NULL, E_WARNING,
 			"Pattern is not valid under %s encoding", _php_mb_regex_mbctype2name(enc));
 		return NULL;
@@ -912,7 +919,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 	if (!php_mb_check_encoding(
 		string,
 		string_len,
-		php_mb_regex_get_mbctype()
+		php_mb_regex_get_mbctype_encoding()
 	)) {
 		RETURN_FALSE;
 	}
@@ -1053,7 +1060,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		if (!php_mb_check_encoding(
 		string,
 		string_len,
-		php_mb_regex_get_mbctype()
+		php_mb_regex_get_mbctype_encoding()
 		)) {
 			RETURN_NULL();
 		}
@@ -1260,7 +1267,7 @@ PHP_FUNCTION(mb_split)
 		count--;
 	}
 
-	if (!php_mb_check_encoding(string, string_len, php_mb_regex_get_mbctype())) {
+	if (!php_mb_check_encoding(string, string_len, php_mb_regex_get_mbctype_encoding())) {
 		RETURN_FALSE;
 	}
 
@@ -1354,7 +1361,7 @@ PHP_FUNCTION(mb_ereg_match)
 		}
 	}
 
-	if (!php_mb_check_encoding(string, string_len, php_mb_regex_get_mbctype())) {
+	if (!php_mb_check_encoding(string, string_len, php_mb_regex_get_mbctype_encoding())) {
 		RETURN_FALSE;
 	}
 
@@ -1566,7 +1573,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 	if (php_mb_check_encoding(
 	ZSTR_VAL(arg_str),
 	ZSTR_LEN(arg_str),
-	php_mb_regex_get_mbctype()
+	php_mb_regex_get_mbctype_encoding()
 	)) {
 		MBREX(search_pos) = 0;
 		RETVAL_TRUE;
