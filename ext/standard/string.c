@@ -1899,7 +1899,7 @@ PHP_FUNCTION(str_ends_with) {
     }
 
     k = ZSTR_LEN(haystack) - ZSTR_LEN(needle);
-    RETURN_BOOL(memcmp(&(ZSTR_VAL(haystack))[k], &(ZSTR_VAL(needle))[k], ZSTR_LEN(needle)) == 0);
+    RETURN_BOOL(memcmp(&(ZSTR_VAL(haystack))[k], ZSTR_VAL(needle), ZSTR_LEN(needle)) == 0);
 }
 
 /* {{{ proto string strchr(string haystack, string needle)
