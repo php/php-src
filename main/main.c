@@ -562,28 +562,28 @@ static PHP_INI_DISP(display_errors_mode)
 PHPAPI const char *php_get_internal_encoding() {
 	if (PG(internal_encoding) && PG(internal_encoding)[0]) {
 		return PG(internal_encoding);
-	} else if (SG(default_charset)) {
+	} else if (SG(default_charset) && SG(default_charset)[0]) {
 		return SG(default_charset);
 	}
-	return "";
+	return "UTF-8";
 }
 
 PHPAPI const char *php_get_input_encoding() {
 	if (PG(input_encoding) && PG(input_encoding)[0]) {
 		return PG(input_encoding);
-	} else if (SG(default_charset)) {
+	} else if (SG(default_charset) && SG(default_charset)[0]) {
 		return SG(default_charset);
 	}
-	return "";
+	return "UTF-8";
 }
 
 PHPAPI const char *php_get_output_encoding() {
 	if (PG(output_encoding) && PG(output_encoding)[0]) {
 		return PG(output_encoding);
-	} else if (SG(default_charset)) {
+	} else if (SG(default_charset) && SG(default_charset)[0]) {
 		return SG(default_charset);
 	}
-	return "";
+	return "UTF-8";
 }
 
 PHPAPI void (*php_internal_encoding_changed)(void) = NULL;
