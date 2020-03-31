@@ -3045,16 +3045,14 @@ PHP_FUNCTION(mb_list_encodings)
 PHP_FUNCTION(mb_encoding_aliases)
 {
 	const mbfl_encoding *encoding;
-	char *name = NULL;
-	size_t name_len;
+	zend_string *encoding_name = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &encoding_name) == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	encoding = mbfl_name2encoding(name);
+	encoding = php_mb_get_encoding(encoding_name, 1);
 	if (!encoding) {
-		zend_argument_value_error(1, "must be a valid encoding, \"%s\" given", name);
 		RETURN_THROWS();
 	}
 
@@ -3074,8 +3072,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 {
 	const mbfl_encoding *charset, *transenc;
 	mbfl_string  string, result, *ret;
-	char *charset_name = NULL;
-	size_t charset_name_len;
+	zend_string *charset_name = NULL;
 	char *trans_enc_name = NULL;
 	size_t trans_enc_name_len;
 	char *linefeed = "\r\n";
@@ -3085,7 +3082,7 @@ PHP_FUNCTION(mb_encode_mimeheader)
 	string.no_language = MBSTRG(language);
 	string.encoding = MBSTRG(current_internal_encoding);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|sssl", (char **)&string.val, &string.len, &charset_name, &charset_name_len, &trans_enc_name, &trans_enc_name_len, &linefeed, &linefeed_len, &indent) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|Sssl", (char **)&string.val, &string.len, &charset_name, &trans_enc_name, &trans_enc_name_len, &linefeed, &linefeed_len, &indent) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -3093,9 +3090,8 @@ PHP_FUNCTION(mb_encode_mimeheader)
 	transenc = &mbfl_encoding_base64;
 
 	if (charset_name != NULL) {
-		charset = mbfl_name2encoding(charset_name);
+		charset = php_mb_get_encoding(charset_name, 2);
 		if (!charset) {
-			zend_argument_value_error(2, "must be a valid encoding, \"%s\" given", charset_name);
 			RETURN_THROWS();
 		}
 	} else {
@@ -3347,6 +3343,7 @@ static int mb_recursive_convert_variable(mbfl_buffer_converter *convd, zval *var
 PHP_FUNCTION(mb_convert_variables)
 {
 	zval *args;
+	zend_string *to_enc_str;
 	zend_string *from_enc_str;
 	HashTable *from_enc_ht;
 	mbfl_string string, result;
@@ -3354,22 +3351,19 @@ PHP_FUNCTION(mb_convert_variables)
 	mbfl_encoding_detector *identd;
 	mbfl_buffer_converter *convd;
 	int n, argc;
-	size_t to_enc_len;
 	size_t elistsz;
 	const mbfl_encoding **elist;
-	char *to_enc;
 	int recursion_error = 0;
 
 	ZEND_PARSE_PARAMETERS_START(3, -1)
-		Z_PARAM_STRING(to_enc, to_enc_len)
+		Z_PARAM_STR(to_enc_str)
 		Z_PARAM_STR_OR_ARRAY_HT(from_enc_str, from_enc_ht)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* new encoding */
-	to_encoding = mbfl_name2encoding(to_enc);
+	to_encoding = php_mb_get_encoding(to_enc_str, 1);
 	if (!to_encoding) {
-		zend_argument_value_error(1, "must be a valid encoding, \"%s\" given", to_enc);
 		RETURN_THROWS();
 	}
 
@@ -3476,8 +3470,9 @@ PHP_FUNCTION(mb_convert_variables)
 static void
 php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 {
-	char *str, *encoding = NULL;
-	size_t str_len, encoding_len;
+	char *str = NULL;
+	size_t str_len;
+	zend_string *encoding = NULL;
 	zval *hash_entry;
 	HashTable *target_hash;
 	int i, *convmap, *mapelm, mapsize=0;
@@ -3485,27 +3480,21 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 	mbfl_string string, result, *ret;
 
 	if (type == 0) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sh|sb", &str, &str_len, &target_hash, &encoding, &encoding_len, &is_hex) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sh|Sb", &str, &str_len, &target_hash, &encoding, &is_hex) == FAILURE) {
 			RETURN_THROWS();
 		}
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sh|s", &str, &str_len, &target_hash, &encoding, &encoding_len) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "sh|S", &str, &str_len, &target_hash, &encoding) == FAILURE) {
 			RETURN_THROWS();
 		}
 	}
 
 	string.no_language = MBSTRG(language);
-	string.encoding = MBSTRG(current_internal_encoding);
 	string.val = (unsigned char *)str;
 	string.len = str_len;
-
-	/* encoding */
-	if (encoding && encoding_len > 0) {
-		string.encoding = mbfl_name2encoding(encoding);
-		if (!string.encoding) {
-			zend_argument_value_error(3, "must be a valid encoding, \"%s\" given", encoding);
-			RETURN_THROWS();
-		}
+	string.encoding = php_mb_get_encoding(encoding, 3);
+	if (!string.encoding) {
+		RETURN_THROWS();
 	}
 
 	if (type == 0 && is_hex) {
@@ -4216,7 +4205,6 @@ static inline int php_mb_check_encoding_impl(mbfl_buffer_converter *convd, const
 	return 0;
 }
 
-
 MBSTRING_API int php_mb_check_encoding(
 		const char *input, size_t length, const mbfl_encoding *encoding)
 {
@@ -4235,7 +4223,6 @@ MBSTRING_API int php_mb_check_encoding(
 	mbfl_buffer_converter_delete(convd);
 	return 0;
 }
-
 
 static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding *encoding)
 {
@@ -4304,7 +4291,7 @@ PHP_FUNCTION(mb_check_encoding)
 {
 	zend_string *input_str = NULL, *enc = NULL;
 	HashTable *input_ht = NULL;
-	const mbfl_encoding *encoding = MBSTRG(current_internal_encoding);
+	const mbfl_encoding *encoding;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
@@ -4312,12 +4299,13 @@ PHP_FUNCTION(mb_check_encoding)
 		Z_PARAM_STR(enc)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (enc != NULL) {
-		encoding = mbfl_name2encoding(ZSTR_VAL(enc));
-		if (!encoding || encoding == &mbfl_encoding_pass) {
-			php_error_docref(NULL, E_WARNING, "Invalid encoding \"%s\"", ZSTR_VAL(enc));
-			RETURN_FALSE;
-		}
+	encoding = php_mb_get_encoding(enc, 2);
+	if (!encoding) {
+		RETURN_THROWS();
+	}
+	if (encoding == &mbfl_encoding_pass) {
+		zend_argument_value_error(2, "cannot check \"pass\" encoding");
+		RETURN_THROWS();
 	}
 
 	if (input_ht) {
