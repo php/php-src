@@ -208,19 +208,7 @@ string(3) "foo"
 object(stdClass)#%d (0) {
 }
 int(1)
-int(0)
-object(stdClass)#%d (0) {
-}
-int(1)
-int(0)
-object(stdClass)#%d (0) {
-}
-int(1)
-int(0)
-object(stdClass)#%d (0) {
-}
-int(1)
-int(0)
+string(3) "foo"
 object(stdClass)#%d (0) {
 }
 int(1)
@@ -228,7 +216,19 @@ string(3) "foo"
 object(stdClass)#%d (0) {
 }
 int(1)
-int(0)
+string(3) "foo"
+object(stdClass)#%d (0) {
+}
+int(1)
+string(3) "foo"
+object(stdClass)#%d (0) {
+}
+int(1)
+string(3) "foo"
+object(stdClass)#%d (0) {
+}
+int(1)
+string(3) "foo"
 object(stdClass)#%d (0) {
 }
 int(1)

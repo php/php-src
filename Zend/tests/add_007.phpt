@@ -19,11 +19,7 @@ var_dump($c);
 echo "Done\n";
 ?>
 --EXPECTF--
-Warning: A non-numeric value encountered in %s on line %d
-
 Exception: Unsupported operand types
-
-Warning: A non-numeric value encountered in %s on line %d
 
 Fatal error: Uncaught Error: Unsupported operand types in %s:%d
 Stack trace:
