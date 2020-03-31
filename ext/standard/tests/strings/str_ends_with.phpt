@@ -15,9 +15,14 @@ var_dump(str_ends_with("", ""));
 var_dump(str_ends_with("", " "));
 var_dump(str_ends_with("\x00", ""));
 var_dump(str_ends_with("\x00", "\x00"));
-var_dump(str_ends_with("str", "\x00"));
-var_dump(str_ends_with("cat\x00rat", "\x00"));
-var_dump(str_ends_with("cat\x00rat", "rat"));
+var_dump(str_ends_with("a", "\x00"));
+var_dump(str_ends_with("a\x00b", "\x00"));
+var_dump(str_ends_with("a\x00b", "b"));
+var_dump(str_ends_with("a\x00bc", "\x00bc"));
+var_dump(str_ends_with("a\x00b", "d\x00b"));
+var_dump(str_ends_with("a\x00b", "a\x00z"));
+var_dump(str_ends_with("a", "\x00a"));
+var_dump(str_ends_with("a", "a\x00"));
 ?>
 --EXPECT--
 bool(true)
@@ -32,4 +37,9 @@ bool(true)
 bool(false)
 bool(false)
 bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+bool(false)
 
