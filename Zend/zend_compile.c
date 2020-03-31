@@ -353,6 +353,118 @@ static void zend_end_namespace(void) /* {{{ */ {
 }
 /* }}} */
 
+static const zend_declarables default_declarables = {
+	/* ticks */ 0,
+	/* strict_types */ 0,
+	/* declares_set */ 0
+};
+
+static void computed_namespace_declares_dtor(zval *val) {
+	if (Z_PTR_P(val) != &default_declarables) {
+		efree(Z_PTR_P(val));
+	}
+}
+
+static zend_bool declares_are_same(const zend_declarables *a, const zend_declarables *b) {
+	return a->ticks == b->ticks
+		&& a->strict_types == b->strict_types;
+}
+
+static void apply_declares(const zend_declarables *declares) {
+	if (declares->strict_types) {
+		CG(active_op_array)->fn_flags |= ZEND_ACC_STRICT_TYPES;
+	}
+}
+
+static zend_declarables *declares_from_array(HashTable *declares_ht) {
+	zend_declarables *declares = emalloc(sizeof(zend_declarables));
+	zend_string *name;
+	zval *val;
+
+	*declares = default_declarables;
+
+	/* The declares array is already fully validated at this point */
+	ZEND_HASH_FOREACH_STR_KEY_VAL(declares_ht, name, val) {
+		if (zend_string_equals_literal(name, "ticks")) {
+			declares->ticks = Z_LVAL_P(val);
+			declares->declares_set |= ZEND_DECLARE_TICKS;
+		} else if (zend_string_equals_literal(name, "strict_types")) {
+			declares->strict_types = Z_LVAL_P(val);
+			declares->declares_set |= ZEND_DECLARE_STRICT_TYPES;
+		} else {
+			ZEND_ASSERT(0);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return declares;
+}
+
+static zend_bool should_inherit_declare(
+		const zend_declarables *declares, const zend_declarables *parent_declares, int declare) {
+	return (declares->declares_set & declare) == 0
+		&& (parent_declares->declares_set & declare) != 0;
+}
+
+static void combine_declares(zend_declarables *declares, const zend_declarables *parent_declares)
+{
+	if (should_inherit_declare(declares, parent_declares, ZEND_DECLARE_TICKS)) {
+		declares->ticks = parent_declares->ticks;
+		declares->declares_set |= ZEND_DECLARE_TICKS;
+	}
+	if (should_inherit_declare(declares, parent_declares, ZEND_DECLARE_STRICT_TYPES)) {
+		declares->strict_types = parent_declares->strict_types;
+		declares->declares_set |= ZEND_DECLARE_STRICT_TYPES;
+	}
+}
+
+static const zend_declarables *compute_namespace_declares(zend_string *namespace_lc) {
+	const zend_declarables *parent_declares = NULL;
+	const char *last_ns_sep = zend_memrchr(ZSTR_VAL(namespace_lc), '\\', ZSTR_LEN(namespace_lc));
+	if (last_ns_sep) {
+		/* zend_get_namespace_declares() will also insert the parent declares in to the
+		 * computed_namespace_declare table, ensuring that the namespacei is marked as "used". */
+		zend_string *parent_ns =
+			zend_string_init(ZSTR_VAL(namespace_lc), last_ns_sep - ZSTR_VAL(namespace_lc), 0);
+		parent_declares = zend_get_namespace_declares(parent_ns);
+		zend_string_release(parent_ns);
+	}
+
+	zval *ns_declares = EG(namespace_declares)
+		? zend_hash_find(EG(namespace_declares), namespace_lc) : NULL;
+	if (ns_declares) {
+		zend_declarables *declares = declares_from_array(Z_ARRVAL_P(ns_declares));
+		if (parent_declares) {
+			combine_declares(declares, parent_declares);
+		}
+		return declares;
+	} else if (parent_declares && parent_declares != &default_declarables) {
+		zend_declarables *declares = emalloc(sizeof(zend_declarables));
+		*declares = *parent_declares;
+		return declares;
+	} else {
+		return &default_declarables;
+	}
+}
+
+ZEND_API const zend_declarables *zend_get_namespace_declares(zend_string *namespace_lc) {
+	const zend_declarables *declares;
+
+	if (!EG(computed_namespace_declares)) {
+		ALLOC_HASHTABLE(EG(computed_namespace_declares));
+		zend_hash_init(
+			EG(computed_namespace_declares), 0, NULL, computed_namespace_declares_dtor, 0);
+	}
+
+	declares = zend_hash_find_ptr(EG(computed_namespace_declares), namespace_lc);
+	if (declares) {
+		return declares;
+	}
+
+	declares = compute_namespace_declares(namespace_lc);
+	zend_hash_add_new_ptr(EG(computed_namespace_declares), namespace_lc, (void *) declares);
+	return declares;
+}
+
 void zend_file_context_begin(zend_file_context *prev_context) /* {{{ */
 {
 	*prev_context = CG(file_context);
@@ -362,8 +474,17 @@ void zend_file_context_begin(zend_file_context *prev_context) /* {{{ */
 	FC(current_namespace) = NULL;
 	FC(in_namespace) = 0;
 	FC(has_bracketed_namespaces) = 0;
-	FC(declarables).ticks = 0;
+	FC(ns_declares) = NULL;
+	FC(declarables) = default_declarables;
 	zend_hash_init(&FC(seen_symbols), 8, NULL, NULL, 0);
+
+	/* Not part of file states, as it's supposed to be available after compilation */
+	if (CG(last_namespaces)) {
+		efree(CG(last_namespaces));
+	}
+	CG(last_ns_declares) = NULL;
+	CG(last_namespaces) = NULL;
+	CG(last_num_namespaces) = 0;
 }
 /* }}} */
 
@@ -386,6 +507,9 @@ void zend_init_compiler_data_structures(void) /* {{{ */
 	CG(encoding_declared) = 0;
 	CG(memoized_exprs) = NULL;
 	CG(memoize_mode) = 0;
+	CG(last_ns_declares) = NULL;
+	CG(last_namespaces) = NULL;
+	CG(last_num_namespaces) = 0;
 }
 /* }}} */
 
@@ -444,6 +568,9 @@ void shutdown_compiler(void) /* {{{ */
 		zend_hash_destroy(CG(delayed_autoloads));
 		FREE_HASHTABLE(CG(delayed_autoloads));
 		CG(delayed_autoloads) = NULL;
+	}
+	if (CG(last_namespaces)) {
+		efree(CG(last_namespaces));
 	}
 }
 /* }}} */
@@ -5440,6 +5567,7 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			zval value_zv;
 			zend_const_expr_to_zval(&value_zv, value_ast);
 			FC(declarables).ticks = zval_get_long(&value_zv);
+			FC(declarables).declares_set |= ZEND_DECLARE_TICKS;
 			zval_ptr_dtor_nogc(&value_zv);
 		} else if (zend_string_equals_literal_ci(name, "encoding")) {
 
@@ -5465,6 +5593,9 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 			if (Z_TYPE(value_zv) != IS_LONG || (Z_LVAL(value_zv) != 0 && Z_LVAL(value_zv) != 1)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must have 0 or 1 as its value");
 			}
+
+			FC(declarables).strict_types = Z_LVAL(value_zv);
+			FC(declarables).declares_set |= ZEND_DECLARE_STRICT_TYPES;
 
 			if (Z_LVAL(value_zv) == 1) {
 				CG(active_op_array)->fn_flags |= ZEND_ACC_STRICT_TYPES;
@@ -7033,8 +7164,9 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 {
 	zend_ast *name_ast = ast->child[0];
 	zend_ast *stmt_ast = ast->child[1];
-	zend_string *name;
+	zend_string *name = NULL, *name_lc = NULL;
 	zend_bool with_bracket = stmt_ast != NULL;
+	const zend_declarables *ns_declares;
 
 	/* handle mixed syntax declaration or nested namespaces */
 	if (!FC(has_bracketed_namespaces)) {
@@ -7088,6 +7220,40 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 	}
 
 	zend_reset_import_tables();
+
+	if (name) {
+		name_lc = zend_string_tolower(name);
+		ns_declares = zend_get_namespace_declares(name_lc);
+	} else {
+		ns_declares = &default_declarables;
+	}
+
+	if (FC(ns_declares)) {
+		if (!declares_are_same(FC(ns_declares), ns_declares)) {
+			zend_error_noreturn(E_COMPILE_ERROR,
+				"Namespaced declares for namespace \"%s\" are inconsistent "
+				"with other namespaces in this file",
+				name ? ZSTR_VAL(name) : "");
+		}
+	} else {
+		FC(ns_declares) = ns_declares;
+		combine_declares(&FC(declarables), ns_declares);
+		apply_declares(&FC(declarables));
+	}
+
+	/* Collect namespace information, so opcaches can distinguish files compiled using using
+	 * different namespace_declare configurations. */
+	if (name_lc && (CG(compiler_options) & ZEND_COMPILE_COLLECT_NS_INFO)) {
+		CG(last_ns_declares) = ns_declares;
+		CG(last_namespaces) =
+			erealloc(CG(last_namespaces), (CG(last_num_namespaces) + 1) * sizeof(zend_string *));
+		CG(last_namespaces)[CG(last_num_namespaces)] = zend_string_copy(name_lc);
+		CG(last_num_namespaces)++;
+	}
+
+	if (name_lc) {
+		zend_string_release(name_lc);
+	}
 
 	FC(in_namespace) = 1;
 	if (with_bracket) {

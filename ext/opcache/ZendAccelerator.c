@@ -1747,6 +1747,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 		CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
 		CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
 		CG(compiler_options) |= ZEND_COMPILE_IGNORE_OTHER_FILES;
+		CG(compiler_options) |= ZEND_COMPILE_COLLECT_NS_INFO;
 		if (ZCG(accel_directives).file_cache) {
 			CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
 		}
@@ -1784,6 +1785,14 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 			(uint32_t)-1;
 
 	efree(op_array); /* we have valid persistent_script, so it's safe to free op_array */
+
+	/* Take ownership of namespace information */
+	new_persistent_script->ns_declares = CG(last_ns_declares);
+	new_persistent_script->namespaces = CG(last_namespaces);
+	new_persistent_script->num_namespaces = CG(last_num_namespaces);
+	CG(last_ns_declares) = NULL;
+	CG(last_namespaces) = NULL;
+	CG(last_num_namespaces) = 0;
 
     /* Fill in the ping_auto_globals_mask for the new script. If jit for auto globals is enabled we
        will have to ping the used auto global variables before execution */
@@ -2096,6 +2105,23 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 			zend_shared_alloc_unlock();
 			persistent_script = NULL;
 		}
+	}
+
+	if (persistent_script && !zend_accel_check_ns_declares_consistency(persistent_script)) {
+		/* The namespace declares for this script changed, invalidate it */
+		zend_shared_alloc_lock();
+		if (!persistent_script->corrupted) {
+			persistent_script->corrupted = 1;
+			persistent_script->timestamp = 0;
+			ZSMMG(wasted_shared_memory) += persistent_script->dynamic_members.memory_consumption;
+			if (ZSMMG(memory_exhausted)) {
+				zend_accel_restart_reason reason =
+					zend_accel_hash_is_full(&ZCSG(hash)) ? ACCEL_RESTART_HASH : ACCEL_RESTART_OOM;
+				zend_accel_schedule_restart_if_necessary(reason);
+			}
+		}
+		zend_shared_alloc_unlock();
+		persistent_script = NULL;
 	}
 
 	/* Check the second level cache */

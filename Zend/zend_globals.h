@@ -129,6 +129,12 @@ struct _zend_compiler_globals {
 	HashTable *delayed_autoloads;
 
 	uint32_t rtd_key_counter;
+
+	/* Namespace information from last compilation, only collected if
+	 * ZEND_COMPILE_COLLECT_NS_INFO is enabled. */
+	const zend_declarables *last_ns_declares;
+	zend_string **last_namespaces;
+	uint32_t last_num_namespaces;
 };
 
 
@@ -237,6 +243,9 @@ struct _zend_executor_globals {
 	HashTable weakrefs;
 
 	zend_bool exception_ignore_args;
+
+	HashTable *namespace_declares;
+	HashTable *computed_namespace_declares;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
