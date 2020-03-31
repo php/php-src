@@ -3,7 +3,7 @@ Switch expression discarding result
 --FILE--
 <?php
 
-1 switch {
+switch (1) {
     1 => print "Executed\n",
 };
 

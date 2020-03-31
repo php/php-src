@@ -4,7 +4,7 @@ Switch expression multiple conditions per case
 <?php
 
 function is_working_day($day) {
-    return $day switch {
+    return switch ($day) {
         1, 7 => false,
         2, 3, 4, 5, 6 => true,
     };

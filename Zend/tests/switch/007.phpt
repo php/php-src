@@ -4,7 +4,7 @@ Switch expression exception on unhandled case
 <?php
 
 function get_value($i) {
-    return $i switch {
+    return switch ($i) {
         1 => 1,
         2 => 2,
     };

@@ -3,11 +3,8 @@ Switch expression with no cases
 --FILE--
 <?php
 
-$x = true switch {};
+$x = switch (true) {};
 
 ?>
 --EXPECTF--
-Fatal error: Uncaught UnhandledSwitchCaseError in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+Parse error: syntax error, unexpected '}' in %s on line %d

@@ -3,9 +3,9 @@ Pretty printing for switch expression
 --FILE--
 <?php
 
-assert('foo' switch { default => false });
+assert(switch ('foo') { default => false });
 
-assert('foo' switch {
+assert(switch ('foo') {
     'foo', 'bar' => false,
     'baz' => false,
 });

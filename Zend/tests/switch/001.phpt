@@ -4,7 +4,7 @@ Basic switch expression functionality test
 <?php
 
 function wordify($x) {
-    return $x switch {
+    return switch ($x) {
         0 => 'Zero',
         1 => 'One',
         2 => 'Two',

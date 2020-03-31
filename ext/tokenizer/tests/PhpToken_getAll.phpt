@@ -54,7 +54,7 @@ array(15) {
   [3]=>
   object(PhpToken)#4 (4) {
     ["id"]=>
-    int(311)
+    int(310)
     ["text"]=>
     string(3) "foo"
     ["line"]=>
@@ -121,7 +121,7 @@ array(15) {
   [9]=>
   object(PhpToken)#10 (4) {
     ["id"]=>
-    int(325)
+    int(324)
     ["text"]=>
     string(4) "echo"
     ["line"]=>
@@ -143,7 +143,7 @@ array(15) {
   [11]=>
   object(PhpToken)#12 (4) {
     ["id"]=>
-    int(315)
+    int(314)
     ["text"]=>
     string(5) ""bar""
     ["line"]=>
@@ -224,7 +224,7 @@ array(15) {
   [3]=>
   object(PhpToken)#12 (4) {
     ["id"]=>
-    int(311)
+    int(310)
     ["text"]=>
     string(3) "foo"
     ["line"]=>
@@ -291,7 +291,7 @@ array(15) {
   [9]=>
   object(PhpToken)#6 (4) {
     ["id"]=>
-    int(325)
+    int(324)
     ["text"]=>
     string(4) "echo"
     ["line"]=>
@@ -313,7 +313,7 @@ array(15) {
   [11]=>
   object(PhpToken)#4 (4) {
     ["id"]=>
-    int(315)
+    int(314)
     ["text"]=>
     string(5) ""bar""
     ["line"]=>

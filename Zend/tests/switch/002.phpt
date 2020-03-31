@@ -4,7 +4,7 @@ Switch expression omit trailing comma
 <?php
 
 function print_bool($bool) {
-    echo $bool switch {
+    echo switch ($bool) {
         true => "true\n",
         false => "false\n"
     };

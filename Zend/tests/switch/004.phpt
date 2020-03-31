@@ -4,7 +4,7 @@ Switch expression with true as expression
 <?php
 
 function get_range($i) {
-    return true switch {
+    return switch (true) {
         $i >= 50 => '50+',
         $i >= 40 => '40-50',
         $i >= 30 => '30-40',

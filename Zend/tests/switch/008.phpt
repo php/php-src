@@ -3,16 +3,16 @@ Switch expression precedence
 --FILE--
 <?php
 
-print !true switch {
+print switch (!true) {
     false => "! has higher precedence\n"
 };
 
 $throwableInterface = Throwable::class;
-print new RuntimeException() instanceof $throwableInterface switch {
+print switch (new RuntimeException() instanceof $throwableInterface) {
     true => "instanceof has higher precedence\n"
 };
 
-print 10 ** 2 switch {
+print switch (10 ** 2) {
     100 => "** has higher precedence\n"
 };
 
