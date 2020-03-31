@@ -4222,10 +4222,6 @@ MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const c
 	const mbfl_encoding *encoding = MBSTRG(current_internal_encoding);
 	mbfl_buffer_converter *convd;
 
-	if (input == NULL) {
-		return MBSTRG(illegalchars) == 0;
-	}
-
 	if (enc != NULL) {
 		encoding = mbfl_name2encoding(enc);
 		if (!encoding || encoding == &mbfl_encoding_pass) {
