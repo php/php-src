@@ -1291,16 +1291,24 @@ static int sxe_objects_compare(zval *object1, zval *object2) /* {{{ */
 	sxe1 = Z_SXEOBJ_P(object1);
 	sxe2 = Z_SXEOBJ_P(object2);
 
-	if (sxe1->node == NULL) {
-		if (sxe2->node) {
-			return 1;
-		} else if (sxe1->document->ptr == sxe2->document->ptr) {
+	if (sxe1->node != NULL && sxe2->node != NULL) {
+		/* Both nodes set: Only support equality comparison between nodes. */
+		if (sxe1->node == sxe2->node) {
 			return 0;
 		}
-		return 1;
-	} else {
-		return !(sxe1->node == sxe2->node);
+		return ZEND_UNCOMPARABLE;
 	}
+
+	if (sxe1->node == NULL && sxe2->node == NULL) {
+		/* Both nodes not set: Only support equality comparison between documents. */
+		if (sxe1->document->ptr == sxe2->document->ptr) {
+			return 0;
+		}
+		return ZEND_UNCOMPARABLE;
+	}
+
+	/* Only one of the nodes set: Cannot compare. */
+	return ZEND_UNCOMPARABLE;
 }
 /* }}} */
 
