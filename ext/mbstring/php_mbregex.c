@@ -449,12 +449,13 @@ const char *php_mb_regex_get_default_mbctype(void)
  * regex cache
  */
 /* {{{ php_mbregex_compile_pattern */
-static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, size_t patlen, OnigOptionType options, OnigEncoding enc, OnigSyntaxType *syntax)
+static php_mb_regex_t *php_mbregex_compile_pattern(const char *pattern, size_t patlen, OnigOptionType options, OnigSyntaxType *syntax)
 {
 	int err_code = 0;
 	php_mb_regex_t *retval = NULL, *rc = NULL;
 	OnigErrorInfo err_info;
 	OnigUChar err_str[ONIG_MAX_ERROR_MESSAGE_LEN];
+	OnigEncoding enc = MBREX(current_mbctype);
 
 	if (!php_mb_check_encoding(pattern, patlen, _php_mb_regex_mbctype2name(enc))) {
 		php_error_docref(NULL, E_WARNING,
@@ -927,7 +928,7 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		goto out;
 	}
 
-	re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, options, MBREX(current_mbctype), MBREX(regex_default_syntax));
+	re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, options, MBREX(regex_default_syntax));
 	if (re == NULL) {
 		RETVAL_FALSE;
 		goto out;
@@ -1070,7 +1071,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	}
 
 	/* create regex pattern buffer */
-	re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, options, MBREX(current_mbctype), syntax);
+	re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, options, syntax);
 	if (re == NULL) {
 		RETURN_FALSE;
 	}
@@ -1265,7 +1266,7 @@ PHP_FUNCTION(mb_split)
 	}
 
 	/* create regex pattern buffer */
-	if ((re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, MBREX(regex_default_options), MBREX(current_mbctype), MBREX(regex_default_syntax))) == NULL) {
+	if ((re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, MBREX(regex_default_options), MBREX(regex_default_syntax))) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1359,7 +1360,7 @@ PHP_FUNCTION(mb_ereg_match)
 		RETURN_FALSE;
 	}
 
-	if ((re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, MBREX(current_mbctype), syntax)) == NULL) {
+	if ((re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, syntax)) == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -1415,7 +1416,7 @@ _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	if (arg_pattern) {
 		/* create regex pattern buffer */
-		if ((MBREX(search_re) = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, MBREX(current_mbctype), MBREX(regex_default_syntax))) == NULL) {
+		if ((MBREX(search_re) = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, MBREX(regex_default_syntax))) == NULL) {
 			RETURN_FALSE;
 		}
 	}
@@ -1553,7 +1554,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 
 	if (argc > 1) {
 		/* create regex pattern buffer */
-		if ((MBREX(search_re) = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, MBREX(current_mbctype), syntax)) == NULL) {
+		if ((MBREX(search_re) = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, syntax)) == NULL) {
 			RETURN_FALSE;
 		}
 	}
