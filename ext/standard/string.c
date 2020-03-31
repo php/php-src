@@ -1887,7 +1887,7 @@ PHP_FUNCTION(str_starts_with) {
    Checks if haystack ends with needle */
 PHP_FUNCTION(str_ends_with) {
     zend_string *haystack, *needle;
-    int i, j;
+    int k;
 
     ZEND_PARSE_PARAMETERS_START(2, 2)
         Z_PARAM_STR(haystack)
@@ -1898,10 +1898,8 @@ PHP_FUNCTION(str_ends_with) {
         RETURN_FALSE;
     }
 
-    for (i = haystack->len - 1, j = needle->len - 1; j >= 0; i--, j--) 
-        if (haystack->val[i] != needle->val[j]) 
-            RETURN_FALSE;
-    RETURN_TRUE;
+    k = ZSTR_LEN(haystack) - ZSTR_LEN(needle);
+    RETURN_BOOL(memcmp(&(ZSTR_VAL(haystack))[k], &(ZSTR_VAL(needle))[k], ZSTR_LEN(needle)) == 0);
 }
 
 /* {{{ proto string strchr(string haystack, string needle)
