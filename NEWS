@@ -26,6 +26,9 @@ PHP                                                                        NEWS
   . Fixed bug #79412 (Opcache chokes and uses 100% CPU on specific script).
     (Dmitry)
 
+- Session:
+  . Fixed bug #79413 (session_create_id() fails for active sessions). (cmb)
+
 - Shmop:
   . Fixed bug #79427 (Integer Overflow in shmop_open()). (cmb)
 
