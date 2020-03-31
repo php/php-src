@@ -2231,7 +2231,7 @@ static PHP_FUNCTION(session_regenerate_id)
 		RETURN_THROWS();
 	}
 	if (PS(use_strict_mode) && PS(mod)->s_validate_sid &&
-		PS(mod)->s_validate_sid(&PS(mod_data), PS(id)) == FAILURE) {
+		PS(mod)->s_validate_sid(&PS(mod_data), PS(id)) == SUCCESS) {
 		zend_string_release_ex(PS(id), 0);
 		PS(id) = PS(mod)->s_create_sid(&PS(mod_data));
 		if (!PS(id)) {
@@ -2293,7 +2293,7 @@ static PHP_FUNCTION(session_create_id)
 				break;
 			} else {
 				/* Detect collision and retry */
-				if (PS(mod)->s_validate_sid(&PS(mod_data), new_id) == FAILURE) {
+				if (PS(mod)->s_validate_sid(&PS(mod_data), new_id) == SUCCESS) {
 					zend_string_release_ex(new_id, 0);
                     new_id = NULL;
 					continue;
