@@ -1573,8 +1573,21 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		if (Z_TYPE_P(o1) == IS_OBJECT) {
 			ZEND_ASSERT(Z_TYPE_P(o2) != IS_OBJECT);
 			if (Z_OBJ_HT_P(o1)->cast_object) {
-				if (Z_OBJ_HT_P(o1)->cast_object(Z_OBJ_P(o1), &casted, ((Z_TYPE_P(o2) == IS_FALSE || Z_TYPE_P(o2) == IS_TRUE) ? _IS_BOOL : Z_TYPE_P(o2))) == FAILURE) {
-					return 1;
+				zend_uchar target_type = (Z_TYPE_P(o2) == IS_FALSE || Z_TYPE_P(o2) == IS_TRUE)
+					? _IS_BOOL : Z_TYPE_P(o2);
+				if (Z_OBJ_HT_P(o1)->cast_object(Z_OBJ_P(o1), &casted, target_type) == FAILURE) {
+					// TODO: Less crazy.
+					if (target_type == IS_LONG || target_type == IS_DOUBLE) {
+						zend_error(E_NOTICE, "Object of class %s could not be converted to %s",
+							ZSTR_VAL(Z_OBJCE_P(o1)->name), zend_get_type_by_const(target_type));
+						if (target_type == IS_LONG) {
+							ZVAL_LONG(&casted, 1);
+						} else {
+							ZVAL_DOUBLE(&casted, 1.0);
+						}
+					} else {
+						return 1;
+					}
 				}
 				int ret = zend_compare(&casted, o2);
 				zval_ptr_dtor(&casted);
@@ -1583,8 +1596,21 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		} else {
 			ZEND_ASSERT(Z_TYPE_P(o2) == IS_OBJECT);
 			if (Z_OBJ_HT_P(o2)->cast_object) {
-				if (Z_OBJ_HT_P(o2)->cast_object(Z_OBJ_P(o2), &casted, ((Z_TYPE_P(o1) == IS_FALSE || Z_TYPE_P(o1) == IS_TRUE) ? _IS_BOOL : Z_TYPE_P(o1))) == FAILURE) {
-					return -1;
+				zend_uchar target_type = (Z_TYPE_P(o1) == IS_FALSE || Z_TYPE_P(o1) == IS_TRUE)
+					? _IS_BOOL : Z_TYPE_P(o1);
+				if (Z_OBJ_HT_P(o2)->cast_object(Z_OBJ_P(o2), &casted, target_type) == FAILURE) {
+					// TODO: Less crazy.
+					if (target_type == IS_LONG || target_type == IS_DOUBLE) {
+						zend_error(E_NOTICE, "Object of class %s could not be converted to %s",
+							ZSTR_VAL(Z_OBJCE_P(o2)->name), zend_get_type_by_const(target_type));
+						if (target_type == IS_LONG) {
+							ZVAL_LONG(&casted, 1);
+						} else {
+							ZVAL_DOUBLE(&casted, 1.0);
+						}
+					} else {
+						return -1;
+					}
 				}
 				int ret = zend_compare(o1, &casted);
 				zval_ptr_dtor(&casted);
@@ -1773,13 +1799,11 @@ ZEND_API zend_string *zend_std_get_class_name(const zend_object *zobj) /* {{{ */
 
 ZEND_API int zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj, int type) /* {{{ */
 {
-	zval retval;
-	zend_class_entry *ce;
-
 	switch (type) {
-		case IS_STRING:
-			ce = readobj->ce;
+		case IS_STRING: {
+			zend_class_entry *ce = readobj->ce;
 			if (ce->__tostring) {
+				zval retval;
 				zend_call_method_with_0_params(readobj, ce, &ce->__tostring, "__tostring", &retval);
 				if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
 					ZVAL_COPY_VALUE(writeobj, &retval);
@@ -1791,29 +1815,13 @@ ZEND_API int zend_std_cast_object_tostring(zend_object *readobj, zval *writeobj,
 				}
 			}
 			return FAILURE;
+		}
 		case _IS_BOOL:
 			ZVAL_TRUE(writeobj);
 			return SUCCESS;
-		case IS_LONG:
-			ce = readobj->ce;
-			zend_error(E_NOTICE, "Object of class %s could not be converted to int", ZSTR_VAL(ce->name));
-			ZVAL_LONG(writeobj, 1);
-			return SUCCESS;
-		case IS_DOUBLE:
-			ce = readobj->ce;
-			zend_error(E_NOTICE, "Object of class %s could not be converted to float", ZSTR_VAL(ce->name));
-			ZVAL_DOUBLE(writeobj, 1);
-			return SUCCESS;
-		case _IS_NUMBER:
-			ce = readobj->ce;
-			zend_error(E_NOTICE, "Object of class %s could not be converted to number", ZSTR_VAL(ce->name));
-			ZVAL_LONG(writeobj, 1);
-			return SUCCESS;
 		default:
-			ZVAL_NULL(writeobj);
-			break;
+			return FAILURE;
 	}
-	return FAILURE;
 }
 /* }}} */
 
