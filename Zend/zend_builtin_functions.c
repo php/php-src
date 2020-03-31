@@ -664,11 +664,9 @@ ZEND_FUNCTION(define)
 			}
 			break;
 		case IS_OBJECT:
-			if (Z_OBJ_HT_P(val)->cast_object) {
-				if (Z_OBJ_HT_P(val)->cast_object(Z_OBJ_P(val), &val_free, IS_STRING) == SUCCESS) {
-					val = &val_free;
-					break;
-				}
+			if (Z_OBJ_HT_P(val)->cast_object(Z_OBJ_P(val), &val_free, IS_STRING) == SUCCESS) {
+				val = &val_free;
+				break;
 			}
 			/* no break */
 		default:

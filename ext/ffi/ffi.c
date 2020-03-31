@@ -4659,6 +4659,11 @@ static HashTable *zend_fake_get_gc(zend_object *ob, zval **table, int *n) /* {{{
 }
 /* }}} */
 
+static int zend_fake_cast_object(zend_object *obj, zval *result, int type)
+{
+	return FAILURE;
+}
+
 static ZEND_COLD zend_never_inline void zend_ffi_use_after_free(void) /* {{{ */
 {
 	zend_throw_error(zend_ffi_exception_ce, "Use after free()");
@@ -4911,7 +4916,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_handlers.unset_dimension      = zend_fake_unset_dimension;
 	zend_ffi_handlers.get_method           = zend_ffi_get_func;
 	zend_ffi_handlers.compare              = NULL;
-	zend_ffi_handlers.cast_object          = NULL;
+	zend_ffi_handlers.cast_object          = zend_fake_cast_object;
 	zend_ffi_handlers.get_debug_info       = NULL;
 	zend_ffi_handlers.get_closure          = NULL;
 	zend_ffi_handlers.get_properties       = zend_fake_get_properties;
@@ -4990,7 +4995,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_cdata_free_handlers.get_method           = zend_fake_get_method;
 	zend_ffi_cdata_free_handlers.get_class_name       = zend_ffi_cdata_get_class_name;
 	zend_ffi_cdata_free_handlers.compare              = zend_ffi_cdata_compare_objects;
-	zend_ffi_cdata_free_handlers.cast_object          = NULL;
+	zend_ffi_cdata_free_handlers.cast_object          = zend_fake_cast_object;
 	zend_ffi_cdata_free_handlers.count_elements       = NULL;
 	zend_ffi_cdata_free_handlers.get_debug_info       = zend_ffi_free_get_debug_info;
 	zend_ffi_cdata_free_handlers.get_closure          = NULL;
@@ -5020,7 +5025,7 @@ ZEND_MINIT_FUNCTION(ffi)
 	zend_ffi_ctype_handlers.get_method           = zend_fake_get_method;
 	zend_ffi_ctype_handlers.get_class_name       = zend_ffi_ctype_get_class_name;
 	zend_ffi_ctype_handlers.compare              = zend_ffi_ctype_compare_objects;
-	zend_ffi_ctype_handlers.cast_object          = NULL;
+	zend_ffi_ctype_handlers.cast_object          = zend_fake_cast_object;
 	zend_ffi_ctype_handlers.count_elements       = NULL;
 	zend_ffi_ctype_handlers.get_debug_info       = zend_ffi_ctype_get_debug_info;
 	zend_ffi_ctype_handlers.get_closure          = NULL;

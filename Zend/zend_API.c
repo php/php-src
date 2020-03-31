@@ -472,15 +472,12 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_str_weak(zval *arg, zend_string **dest
 		*dest = Z_STR_P(arg);
 	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 		zend_object *zobj = Z_OBJ_P(arg);
-
-		if (Z_OBJ_HANDLER_P(arg, cast_object)) {
-			zval obj;
-			if (zobj->handlers->cast_object(zobj, &obj, IS_STRING) == SUCCESS) {
-				OBJ_RELEASE(zobj);
-				ZVAL_COPY_VALUE(arg, &obj);
-				*dest = Z_STR_P(arg);
-				return 1;
-			}
+		zval obj;
+		if (zobj->handlers->cast_object(zobj, &obj, IS_STRING) == SUCCESS) {
+			OBJ_RELEASE(zobj);
+			ZVAL_COPY_VALUE(arg, &obj);
+			*dest = Z_STR_P(arg);
+			return 1;
 		}
 		return 0;
 	} else {
