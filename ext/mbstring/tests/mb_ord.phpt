@@ -10,6 +10,13 @@ var_dump(
     0x50aa === mb_ord("\x8f\xa1\xef", "EUC-JP-2004")
 );
 
+// Empty string
+try {
+    var_dump( mb_ord("") );
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+
 // Invalid
 try {
     var_dump( mb_ord("\u{d800}", "typo") );
@@ -36,34 +43,25 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
+
+mb_internal_encoding("utf-7");
 try {
-    var_dump( mb_ord("") );
+    var_dump( mb_ord("\u{d800}") );
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
-
-mb_internal_encoding("utf-7");
-mb_ord("");
+;
 ?>
 --EXPECTF--
 bool(true)
 bool(true)
 bool(true)
-mb_ord(): Argument #2 ($encoding) must be a valid encoding, "typo" given
-
-Warning: mb_ord(): Unsupported encoding "pass" in %s on line %d
-bool(false)
-
-Warning: mb_ord(): Unsupported encoding "JIS" in %s on line %d
-bool(false)
-
-Warning: mb_ord(): Unsupported encoding "CP50222" in %s on line %d
-bool(false)
-
-Warning: mb_ord(): Unsupported encoding "UTF-7" in %s on line %d
-bool(false)
 
 Warning: mb_ord(): Empty string in %s on line %d
 bool(false)
-
-Warning: mb_ord(): Unsupported encoding "UTF-7" in %s on line %d
+mb_ord(): Argument #2 ($encoding) must be a valid encoding, "typo" given
+mb_ord() does not support the "pass" encoding
+mb_ord() does not support the "JIS" encoding
+mb_ord() does not support the "CP50222" encoding
+mb_ord() does not support the "UTF-7" encoding
+mb_ord() does not support the "UTF-7" encoding

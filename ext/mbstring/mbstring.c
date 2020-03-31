@@ -4304,7 +4304,7 @@ PHP_FUNCTION(mb_check_encoding)
 		RETURN_THROWS();
 	}
 	if (encoding == &mbfl_encoding_pass) {
-		zend_argument_value_error(2, "cannot check \"pass\" encoding");
+		zend_value_error("mb_check_encoding() does not support the \"pass\" encoding");
 		RETURN_THROWS();
 	}
 
@@ -4342,8 +4342,8 @@ static inline zend_long php_mb_ord(const char *str, size_t str_len, zend_string 
 
 	no_enc = enc->no_encoding;
 	if (php_mb_is_unsupported_no_encoding(no_enc)) {
-		php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc->name);
-		return -1;
+		zend_value_error("mb_ord() does not support the \"%s\" encoding", enc->name);
+		return -2;
 	}
 
 	if (str_len == 0) {
@@ -4425,7 +4425,7 @@ static inline zend_string *php_mb_chr(zend_long cp, zend_string *enc_name, uint3
 
 	no_enc = enc->no_encoding;
 	if (php_mb_is_unsupported_no_encoding(no_enc)) {
-		php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", ZSTR_VAL(enc_name));
+		zend_value_error("mb_chr() does not support the \"%s\" encoding", enc->name);
 		return NULL;
 	}
 
