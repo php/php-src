@@ -1572,50 +1572,46 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		zval casted;
 		if (Z_TYPE_P(o1) == IS_OBJECT) {
 			ZEND_ASSERT(Z_TYPE_P(o2) != IS_OBJECT);
-			if (Z_OBJ_HT_P(o1)->cast_object) {
-				zend_uchar target_type = (Z_TYPE_P(o2) == IS_FALSE || Z_TYPE_P(o2) == IS_TRUE)
-					? _IS_BOOL : Z_TYPE_P(o2);
-				if (Z_OBJ_HT_P(o1)->cast_object(Z_OBJ_P(o1), &casted, target_type) == FAILURE) {
-					// TODO: Less crazy.
-					if (target_type == IS_LONG || target_type == IS_DOUBLE) {
-						zend_error(E_NOTICE, "Object of class %s could not be converted to %s",
-							ZSTR_VAL(Z_OBJCE_P(o1)->name), zend_get_type_by_const(target_type));
-						if (target_type == IS_LONG) {
-							ZVAL_LONG(&casted, 1);
-						} else {
-							ZVAL_DOUBLE(&casted, 1.0);
-						}
+			zend_uchar target_type = (Z_TYPE_P(o2) == IS_FALSE || Z_TYPE_P(o2) == IS_TRUE)
+				? _IS_BOOL : Z_TYPE_P(o2);
+			if (Z_OBJ_HT_P(o1)->cast_object(Z_OBJ_P(o1), &casted, target_type) == FAILURE) {
+				// TODO: Less crazy.
+				if (target_type == IS_LONG || target_type == IS_DOUBLE) {
+					zend_error(E_NOTICE, "Object of class %s could not be converted to %s",
+						ZSTR_VAL(Z_OBJCE_P(o1)->name), zend_get_type_by_const(target_type));
+					if (target_type == IS_LONG) {
+						ZVAL_LONG(&casted, 1);
 					} else {
-						return 1;
+						ZVAL_DOUBLE(&casted, 1.0);
 					}
+				} else {
+					return 1;
 				}
-				int ret = zend_compare(&casted, o2);
-				zval_ptr_dtor(&casted);
-				return ret;
 			}
+			int ret = zend_compare(&casted, o2);
+			zval_ptr_dtor(&casted);
+			return ret;
 		} else {
 			ZEND_ASSERT(Z_TYPE_P(o2) == IS_OBJECT);
-			if (Z_OBJ_HT_P(o2)->cast_object) {
-				zend_uchar target_type = (Z_TYPE_P(o1) == IS_FALSE || Z_TYPE_P(o1) == IS_TRUE)
-					? _IS_BOOL : Z_TYPE_P(o1);
-				if (Z_OBJ_HT_P(o2)->cast_object(Z_OBJ_P(o2), &casted, target_type) == FAILURE) {
-					// TODO: Less crazy.
-					if (target_type == IS_LONG || target_type == IS_DOUBLE) {
-						zend_error(E_NOTICE, "Object of class %s could not be converted to %s",
-							ZSTR_VAL(Z_OBJCE_P(o2)->name), zend_get_type_by_const(target_type));
-						if (target_type == IS_LONG) {
-							ZVAL_LONG(&casted, 1);
-						} else {
-							ZVAL_DOUBLE(&casted, 1.0);
-						}
+			zend_uchar target_type = (Z_TYPE_P(o1) == IS_FALSE || Z_TYPE_P(o1) == IS_TRUE)
+				? _IS_BOOL : Z_TYPE_P(o1);
+			if (Z_OBJ_HT_P(o2)->cast_object(Z_OBJ_P(o2), &casted, target_type) == FAILURE) {
+				// TODO: Less crazy.
+				if (target_type == IS_LONG || target_type == IS_DOUBLE) {
+					zend_error(E_NOTICE, "Object of class %s could not be converted to %s",
+						ZSTR_VAL(Z_OBJCE_P(o2)->name), zend_get_type_by_const(target_type));
+					if (target_type == IS_LONG) {
+						ZVAL_LONG(&casted, 1);
 					} else {
-						return -1;
+						ZVAL_DOUBLE(&casted, 1.0);
 					}
+				} else {
+					return -1;
 				}
-				int ret = zend_compare(o1, &casted);
-				zval_ptr_dtor(&casted);
-				return ret;
 			}
+			int ret = zend_compare(o1, &casted);
+			zval_ptr_dtor(&casted);
+			return ret;
 		}
 		return ZEND_UNCOMPARABLE;
 	}
