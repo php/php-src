@@ -899,7 +899,7 @@ static int _php_mb_ini_mbstring_http_input_set(const char *new_value, size_t new
 /* {{{ static PHP_INI_MH(OnUpdate_mbstring_http_input) */
 static PHP_INI_MH(OnUpdate_mbstring_http_input)
 {
-	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+	if (new_value) {
 		php_error_docref("ref.mbstring", E_DEPRECATED, "Use of mbstring.http_input is deprecated");
 	}
 
@@ -929,7 +929,7 @@ static int _php_mb_ini_mbstring_http_output_set(const char *new_value) {
 /* {{{ static PHP_INI_MH(OnUpdate_mbstring_http_output) */
 static PHP_INI_MH(OnUpdate_mbstring_http_output)
 {
-	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+	if (new_value) {
 		php_error_docref("ref.mbstring", E_DEPRECATED, "Use of mbstring.http_output is deprecated");
 	}
 
@@ -973,7 +973,7 @@ static int _php_mb_ini_mbstring_internal_encoding_set(const char *new_value, siz
 /* {{{ static PHP_INI_MH(OnUpdate_mbstring_internal_encoding) */
 static PHP_INI_MH(OnUpdate_mbstring_internal_encoding)
 {
-	if (stage & (PHP_INI_STAGE_ACTIVATE | PHP_INI_STAGE_RUNTIME)) {
+	if (new_value) {
 		php_error_docref("ref.mbstring", E_DEPRECATED, "Use of mbstring.internal_encoding is deprecated");
 	}
 
