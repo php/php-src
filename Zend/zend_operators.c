@@ -135,7 +135,7 @@ ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len) /* {
 /* }}} */
 
 /* {{{ convert_object_to_type: dst will be either ctype or UNDEF */
-#define convert_object_to_type(op, dst, ctype, conv_func)									\
+#define convert_object_to_type(op, dst, ctype)									\
 	ZVAL_UNDEF(dst);																		\
 	if (Z_OBJ_HT_P(op)->cast_object(Z_OBJ_P(op), dst, ctype) == FAILURE) {					\
 		zend_error(E_NOTICE,																\
@@ -184,7 +184,7 @@ try_again:
 			{
 				zval dst;
 
-				convert_object_to_type(op, &dst, _IS_NUMBER, convert_scalar_to_number);
+				convert_object_to_type(op, &dst, _IS_NUMBER);
 				if (check && UNEXPECTED(EG(exception))) {
 					return;
 				}
@@ -230,7 +230,7 @@ static zend_always_inline zval* _zendi_convert_scalar_to_number_ex(zval *op, zva
 			ZVAL_LONG(holder, Z_RES_HANDLE_P(op));
 			return holder;
 		case IS_OBJECT:
-			convert_object_to_type(op, holder, _IS_NUMBER, convert_scalar_to_number);
+			convert_object_to_type(op, holder, _IS_NUMBER);
 			if (UNEXPECTED(EG(exception)) ||
 			    UNEXPECTED(Z_TYPE_P(holder) != IS_LONG && Z_TYPE_P(holder) != IS_DOUBLE)) {
 				ZVAL_LONG(holder, 1);
@@ -359,7 +359,7 @@ try_again:
 			{
 				zval dst;
 
-				convert_object_to_type(op, &dst, IS_LONG, convert_to_long);
+				convert_object_to_type(op, &dst, IS_LONG);
 				zval_ptr_dtor(op);
 
 				if (Z_TYPE(dst) == IS_LONG) {
@@ -418,7 +418,7 @@ try_again:
 			{
 				zval dst;
 
-				convert_object_to_type(op, &dst, IS_DOUBLE, convert_to_double);
+				convert_object_to_type(op, &dst, IS_DOUBLE);
 				zval_ptr_dtor(op);
 
 				if (Z_TYPE(dst) == IS_DOUBLE) {
@@ -490,7 +490,7 @@ try_again:
 			{
 				zval dst;
 
-				convert_object_to_type(op, &dst, _IS_BOOL, convert_to_boolean);
+				convert_object_to_type(op, &dst, _IS_BOOL);
 				zval_ptr_dtor(op);
 
 				if (Z_TYPE_INFO(dst) == IS_FALSE || Z_TYPE_INFO(dst) == IS_TRUE) {
@@ -777,7 +777,7 @@ try_again:
 		case IS_OBJECT:
 			{
 				zval dst;
-				convert_object_to_type(op, &dst, IS_LONG, convert_to_long);
+				convert_object_to_type(op, &dst, IS_LONG);
 				if (Z_TYPE(dst) == IS_LONG) {
 					return Z_LVAL(dst);
 				} else {
@@ -827,7 +827,7 @@ try_again:
 		case IS_OBJECT:
 			{
 				zval dst;
-				convert_object_to_type(op, &dst, IS_DOUBLE, convert_to_double);
+				convert_object_to_type(op, &dst, IS_DOUBLE);
 
 				if (Z_TYPE(dst) == IS_DOUBLE) {
 					return Z_DVAL(dst);
