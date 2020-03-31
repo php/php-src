@@ -245,7 +245,7 @@ static zend_always_inline zval* _zendi_convert_scalar_to_number_ex(zval *op, zva
 /* }}} */
 
 /* {{{ _zendi_convert_scalar_to_number */
-static zend_never_inline zval* ZEND_FASTCALL _zendi_convert_scalar_to_number(zval *op, zval *holder) /* {{{ */
+static zend_never_inline zval* ZEND_FASTCALL _zendi_convert_scalar_to_number_silent(zval *op, zval *holder) /* {{{ */
 {
 	return _zendi_convert_scalar_to_number_ex(op, holder, 1);
 }
@@ -258,11 +258,11 @@ static zend_never_inline zval* ZEND_FASTCALL _zendi_convert_scalar_to_number_noi
 }
 /* }}} */
 
-#define zendi_convert_scalar_to_number(op, holder, result, silent) \
+#define zendi_convert_scalar_to_number_noisy(op, holder, result) \
 	((Z_TYPE_P(op) == IS_LONG || Z_TYPE_P(op) == IS_DOUBLE) ? (op) : \
-		(((op) == result) ? (_convert_scalar_to_number((op), silent, 1), (op)) : \
-			(silent ? _zendi_convert_scalar_to_number((op), holder) : \
-				_zendi_convert_scalar_to_number_noisy((op), holder))))
+		(((op) == result) \
+			? (_convert_scalar_to_number((op), /* silent */ 0, 1), (op)) : \
+			_zendi_convert_scalar_to_number_noisy((op), holder)))
 
 #define convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, op, op_func) \
 	do {																\
@@ -953,10 +953,10 @@ static zend_never_inline int ZEND_FASTCALL add_function_slow(zval *result, zval 
 			ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_ADD, add_function);
 
 			if (EXPECTED(op1 != op2)) {
-				op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
-				op2 = zendi_convert_scalar_to_number(op2, &op2_copy, result, 0);
+				op1 = zendi_convert_scalar_to_number_noisy(op1, &op1_copy, result);
+				op2 = zendi_convert_scalar_to_number_noisy(op2, &op2_copy, result);
 			} else {
-				op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
+				op1 = zendi_convert_scalar_to_number_noisy(op1, &op1_copy, result);
 				op2 = op1;
 			}
 			if (EG(exception)) {
@@ -1024,10 +1024,10 @@ static zend_never_inline int ZEND_FASTCALL sub_function_slow(zval *result, zval 
 			ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_SUB, sub_function);
 
 			if (EXPECTED(op1 != op2)) {
-				op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
-				op2 = zendi_convert_scalar_to_number(op2, &op2_copy, result, 0);
+				op1 = zendi_convert_scalar_to_number_noisy(op1, &op1_copy, result);
+				op2 = zendi_convert_scalar_to_number_noisy(op2, &op2_copy, result);
 			} else {
-				op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
+				op1 = zendi_convert_scalar_to_number_noisy(op1, &op1_copy, result);
 				op2 = op1;
 			}
 			if (EG(exception)) {
@@ -1098,10 +1098,10 @@ ZEND_API int ZEND_FASTCALL mul_function(zval *result, zval *op1, zval *op2) /* {
 				ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_MUL, mul_function);
 
 				if (EXPECTED(op1 != op2)) {
-					op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
-					op2 = zendi_convert_scalar_to_number(op2, &op2_copy, result, 0);
+					op1 = zendi_convert_scalar_to_number_noisy(op1, &op1_copy, result);
+					op2 = zendi_convert_scalar_to_number_noisy(op2, &op2_copy, result);
 				} else {
-					op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
+					op1 = zendi_convert_scalar_to_number_noisy(op1, &op1_copy, result);
 					op2 = op1;
 				}
 				if (EG(exception)) {
@@ -1199,10 +1199,10 @@ ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {
 				}
 
 				if (EXPECTED(op1 != op2)) {
-					op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
-					op2 = zendi_convert_scalar_to_number(op2, &op2_copy, result, 0);
+					op1 = zendi_convert_scalar_to_number_noisy(op1, &op1_copy, result);
+					op2 = zendi_convert_scalar_to_number_noisy(op2, &op2_copy, result);
 				} else {
-					op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
+					op1 = zendi_convert_scalar_to_number_noisy(op1, &op1_copy, result);
 					op2 = op1;
 				}
 
@@ -1283,10 +1283,10 @@ ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {
 				ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_DIV, div_function);
 
 				if (EXPECTED(op1 != op2)) {
-					op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
-					op2 = zendi_convert_scalar_to_number(op2, &op2_copy, result, 0);
+					op1 = zendi_convert_scalar_to_number_noisy(op1, &op1_copy, result);
+					op2 = zendi_convert_scalar_to_number_noisy(op2, &op2_copy, result);
 				} else {
-					op1 = zendi_convert_scalar_to_number(op1, &op1_copy, result, 0);
+					op1 = zendi_convert_scalar_to_number_noisy(op1, &op1_copy, result);
 					op2 = op1;
 				}
 				if (EG(exception)) {
@@ -2048,8 +2048,8 @@ ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2) /* {{{ */
 					} else if (Z_TYPE_P(op2) == IS_TRUE) {
 						return zval_is_true(op1) ? 0 : -1;
 					} else {
-						op1 = _zendi_convert_scalar_to_number(op1, &op1_copy);
-						op2 = _zendi_convert_scalar_to_number(op2, &op2_copy);
+						op1 = _zendi_convert_scalar_to_number_silent(op1, &op1_copy);
+						op2 = _zendi_convert_scalar_to_number_silent(op2, &op2_copy);
 						if (EG(exception)) {
 							return 1; /* to stop comparison of arrays */
 						}
