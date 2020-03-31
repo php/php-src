@@ -1617,7 +1617,7 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 				return ret;
 			}
 		}
-		return 1;
+		return ZEND_UNCOMPARABLE;
 	}
 
 	zobj1 = Z_OBJ_P(o1);
@@ -1627,7 +1627,7 @@ ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		return 0; /* the same object */
 	}
 	if (zobj1->ce != zobj2->ce) {
-		return 1; /* different classes */
+		return ZEND_UNCOMPARABLE; /* different classes */
 	}
 	if (!zobj1->properties && !zobj2->properties) {
 		zend_property_info *info;

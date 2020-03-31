@@ -401,6 +401,12 @@ again:
 	return result;
 }
 
+/* Indicate that two values cannot be compared. This value should be returned for both orderings
+ * of the operands. This implies that all of ==, <, <= and >, >= will return false, because we
+ * canonicalize >/>= to </<= with swapped operands. */
+// TODO: Use a different value to allow an actual distinction here.
+#define ZEND_UNCOMPARABLE 1
+
 ZEND_API int ZEND_FASTCALL zend_compare(zval *op1, zval *op2);
 
 ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2);

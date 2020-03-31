@@ -1298,7 +1298,7 @@ out:
 
 static int dbh_compare(zval *object1, zval *object2)
 {
-	return -1;
+	return ZEND_UNCOMPARABLE;
 }
 
 static HashTable *dbh_get_gc(zend_object *object, zval **gc_data, int *gc_count)

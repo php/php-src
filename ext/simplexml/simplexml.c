@@ -1297,10 +1297,10 @@ static int sxe_objects_compare(zval *object1, zval *object2) /* {{{ */
 		} else if (sxe1->document->ptr == sxe2->document->ptr) {
 			return 0;
 		}
+		return 1;
 	} else {
 		return !(sxe1->node == sxe2->node);
 	}
-	return 1;
 }
 /* }}} */
 

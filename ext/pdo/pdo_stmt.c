@@ -2165,7 +2165,7 @@ out:
 
 static int dbstmt_compare(zval *object1, zval *object2)
 {
-	return -1;
+	return ZEND_UNCOMPARABLE;
 }
 
 zend_object_handlers pdo_dbstmt_object_handlers;
@@ -2585,7 +2585,7 @@ static zend_string *row_get_classname(const zend_object *object)
 
 static int row_compare(zval *object1, zval *object2)
 {
-	return -1;
+	return ZEND_UNCOMPARABLE;
 }
 
 void pdo_row_free_storage(zend_object *std)
