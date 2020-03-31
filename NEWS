@@ -1,7 +1,7 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-?? ??? ????, PHP 7.4.5
+02 Apr 2020, PHP 7.4.5RC1
 
 - Core:
   . Fixed bug #79364 (When copy empty array, next key is unspecified). (cmb)
