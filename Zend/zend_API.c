@@ -558,7 +558,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				zval **p = va_arg(*va, zval **);
 
 				if (!zend_parse_arg_number(arg, p, check_null)) {
-					return check_null ? "number or null" : "number";
+					return check_null ? "int|float|null" : "int|float";
 				}
 			}
 			break;
@@ -672,7 +672,8 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				if (!zend_parse_arg_object(arg, p, ce, check_null)) {
 					if (ce) {
 						if (check_null) {
-							return ZSTR_VAL(ce->name);
+							zend_spprintf(error, 0, "of type ?%s, %s given", ZSTR_VAL(ce->name), zend_zval_type_name(arg));
+							return "";
 						} else {
 							return ZSTR_VAL(ce->name);
 						}
@@ -694,7 +695,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				}
 				if (!try_convert_to_string(arg)) {
 					*pce = NULL;
-					return check_null ? "a valid class name or null" : "a valid class name";
+					return ""; /* try_convert_to_string() throws an exception */
 				}
 
 				if ((lookup = zend_lookup_class(Z_STR_P(arg))) == NULL) {
@@ -704,8 +705,8 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				}
 				if (ce_base) {
 					if ((!*pce || !instanceof_function(*pce, ce_base))) {
-						zend_spprintf(error, 0, "a class name derived from %s, '%s' given",
-							ZSTR_VAL(ce_base->name), Z_STRVAL_P(arg));
+						zend_spprintf(error, 0, "a class name derived from %s%s, '%s' given",
+							ZSTR_VAL(ce_base->name), check_null ? " or null" : "", Z_STRVAL_P(arg));
 						*pce = NULL;
 						return "";
 					}
