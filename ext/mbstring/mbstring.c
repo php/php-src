@@ -5067,7 +5067,7 @@ static inline zend_string *php_mb_chr(zend_long cp, zend_string *enc_name)
 
 	no_enc = enc->no_encoding;
 	if (php_mb_is_unsupported_no_encoding(no_enc)) {
-		php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", ZSTR_VAL(enc_name));
+		php_error_docref(NULL, E_WARNING, "Unsupported encoding \"%s\"", enc->name);
 		return NULL;
 	}
 

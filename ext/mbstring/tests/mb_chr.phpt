@@ -30,11 +30,11 @@ Warning: mb_chr(): Unknown encoding "typo" in %s on line %d
 
 Warning: mb_chr(): Unsupported encoding "pass" in %s on line %d
 
-Warning: mb_chr(): Unsupported encoding "jis" in %s on line %d
+Warning: mb_chr(): Unsupported encoding "JIS" in %s on line %d
 
-Warning: mb_chr(): Unsupported encoding "cp50222" in %s on line %d
+Warning: mb_chr(): Unsupported encoding "CP50222" in %s on line %d
 
-Warning: mb_chr(): Unsupported encoding "utf-7" in %s on line %d
+Warning: mb_chr(): Unsupported encoding "UTF-7" in %s on line %d
 bool(false)
 bool(false)
 bool(false)
