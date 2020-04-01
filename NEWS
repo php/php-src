@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.18
 
+- MBString:
+  . Fixed bug #79441 (Segfault in mb_chr() if internal encoding is unsupported).
+    (Girgias)
+
 16 Apr 2020, PHP 7.3.17
 
 - Core:
