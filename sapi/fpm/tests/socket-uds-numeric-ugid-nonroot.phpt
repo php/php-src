@@ -3,6 +3,7 @@ FPM: UNIX socket owner and group settings can be numeric
 --SKIPIF--
 <?php
 include "skipif.inc";
+FPM\Tester::skipIfRoot();
 FPM\Tester::skipIfPosixNotLoaded();
 ?>
 --FILE--
