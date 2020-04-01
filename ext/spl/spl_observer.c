@@ -289,6 +289,10 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp) /* {{{ 
 	zend_string *zname;
 	HashTable *debug_info;
 
+	if (Z_OBJCE_P(obj)->__debugInfo) {
+		return zend_std_get_debug_info(obj, is_temp);
+	}
+
 	*is_temp = 1;
 
 	props = Z_OBJPROP_P(obj);

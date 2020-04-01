@@ -500,6 +500,11 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp) /* {
 	zend_string *pnstr;
 	int  i = 0;
 	HashTable *debug_info;
+
+	if (Z_OBJCE_P(obj)->__debugInfo) {
+		return zend_std_get_debug_info(obj, is_temp);
+	}
+
 	*is_temp = 1;
 
 	if (!intern->std.properties) {
