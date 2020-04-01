@@ -7259,7 +7259,8 @@ ZEND_API zend_bool zend_binary_op_produces_error(uint32_t opcode, zval *op1, zva
 		return 1;
 	}
 
-	if ((opcode == ZEND_DIV || opcode == ZEND_MOD) && zval_get_long(op2) == 0) {
+	if ((opcode == ZEND_MOD && zval_get_long(op2) == 0)
+			|| (opcode == ZEND_DIV && zval_get_double(op2) == 0.0)) {
 		/* Division by zero throws an error. */
 		return 1;
 	}
