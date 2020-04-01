@@ -440,8 +440,8 @@ static int php_mb_parse_encoding_list(const char *value, size_t value_length,
 /* {{{ static int php_mb_parse_encoding_array()
  *  Return FAILURE if input contains any illegal encoding, otherwise SUCCESS.
  */
-static int
-php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encoding ***return_list, size_t *return_size)
+static int php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encoding ***return_list,
+	size_t *return_size, uint32_t arg_num)
 {
 	/* Allocate enough space to include the default detect order if "auto" is used. */
 	size_t size = zend_hash_num_elements(target_hash) + MBSTRG(default_detect_order_list_size);
@@ -475,8 +475,7 @@ php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encoding ***retur
 				*entry++ = encoding;
 				n++;
 			} else {
-				php_error_docref(NULL, E_WARNING,
-					"Unknown encoding \"%s\"", ZSTR_VAL(encoding_str));
+				zend_argument_value_error(arg_num, "must be an array of valid encoding, \"%s\" given", ZSTR_VAL(encoding_str));
 				zend_string_release(encoding_str);
 				efree(list);
 				return FAILURE;
@@ -1551,8 +1550,8 @@ PHP_FUNCTION(mb_detect_order)
 		const mbfl_encoding **list;
 		size_t size;
 		if (order_ht) {
-			if (FAILURE == php_mb_parse_encoding_array(order_ht, &list, &size)) {
-				RETURN_FALSE;
+			if (FAILURE == php_mb_parse_encoding_array(order_ht, &list, &size, 1)) {
+				RETURN_THROWS();
 			}
 		} else {
 			if (FAILURE == php_mb_parse_encoding_list(ZSTR_VAL(order_str), ZSTR_LEN(order_str), &list, &size, 0, 1)) {
@@ -2790,8 +2789,8 @@ PHP_FUNCTION(mb_convert_encoding)
 	}
 
 	if (from_encodings_ht) {
-		if (php_mb_parse_encoding_array(from_encodings_ht, &from_encodings, &num_from_encodings) == FAILURE) {
-			RETURN_FALSE;
+		if (php_mb_parse_encoding_array(from_encodings_ht, &from_encodings, &num_from_encodings, 3) == FAILURE) {
+			RETURN_THROWS();
 		}
 		free_from_encodings = 1;
 	} else if (from_encodings_str) {
@@ -2977,8 +2976,8 @@ PHP_FUNCTION(mb_detect_encoding)
 
 	/* make encoding list */
 	if (encoding_ht) {
-		if (FAILURE == php_mb_parse_encoding_array(encoding_ht, &elist, &size)) {
-			RETURN_FALSE;
+		if (FAILURE == php_mb_parse_encoding_array(encoding_ht, &elist, &size, 2)) {
+			RETURN_THROWS();
 		}
 		free_elist = 1;
 	} else if (encoding_str) {
@@ -3377,8 +3376,8 @@ PHP_FUNCTION(mb_convert_variables)
 
 	/* pre-conversion encoding */
 	if (from_enc_ht) {
-		if (php_mb_parse_encoding_array(from_enc_ht, &elist, &elistsz) == FAILURE) {
-			RETURN_FALSE;
+		if (php_mb_parse_encoding_array(from_enc_ht, &elist, &elistsz, 2) == FAILURE) {
+			RETURN_THROWS();
 		}
 	} else {
 		if (php_mb_parse_encoding_list(ZSTR_VAL(from_enc_str), ZSTR_LEN(from_enc_str), &elist, &elistsz, 0, 2) == FAILURE) {

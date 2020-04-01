@@ -51,7 +51,7 @@ try {
 var_dump(mb_detect_order());
 
 ?>
---EXPECTF--
+--EXPECT--
 OK_AUTO
 ASCII, JIS, UTF-8, EUC-JP, SJIS
 OK_STR
@@ -70,9 +70,7 @@ array(4) {
   [3]=>
   string(5) "UTF-8"
 }
-
-Warning: mb_detect_order(): Unknown encoding "BAD_NAME" in %s on line %d
-bool(false)
+mb_detect_order(): Argument #1 ($encoding) must be an array of valid encoding, "BAD_NAME" given
 array(4) {
   [0]=>
   string(5) "ASCII"
