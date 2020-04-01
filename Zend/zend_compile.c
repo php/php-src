@@ -5786,6 +5786,11 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 			zend_error_noreturn(E_COMPILE_ERROR, "Only the last parameter can be variadic");
 		}
 
+		arg_info = &arg_infos[i];
+		arg_info->name = zend_string_copy(name);
+		arg_info->type = (zend_type) ZEND_TYPE_INIT_NONE(0);
+		arg_info->default_value = NULL;
+
 		if (is_variadic) {
 			opcode = ZEND_RECV_VARIADIC;
 			default_node.op_type = IS_UNUSED;
@@ -5796,13 +5801,12 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 					"Variadic parameter cannot have a default value");
 			}
 		} else if (default_ast) {
-			/* we cannot substitute constants here or it will break ReflectionParameter::getDefaultValueConstantName() and ReflectionParameter::isDefaultValueConstant() */
-			uint32_t cops = CG(compiler_options);
-			CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION | ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION;
+			zend_string *default_value_string = zend_new_interned_string(zend_ast_export("", default_ast, ""));
+			arg_info->default_value = zend_string_copy(default_value_string);
+
 			opcode = ZEND_RECV_INIT;
 			default_node.op_type = IS_CONST;
 			zend_const_expr_to_zval(&default_node.u.constant, default_ast);
-			CG(compiler_options) = cops;
 
 			if (!optional_param) {
 				/* Ignore parameters of the form "Type $param = null".
@@ -5822,10 +5826,6 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 					ZSTR_VAL(name), ZSTR_VAL(optional_param));
 			}
 		}
-
-		arg_info = &arg_infos[i];
-		arg_info->name = zend_string_copy(name);
-		arg_info->type = (zend_type) ZEND_TYPE_INIT_NONE(0);
 
 		if (type_ast) {
 			uint32_t default_type = default_ast ? Z_TYPE(default_node.u.constant) : IS_UNDEF;

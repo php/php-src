@@ -319,6 +319,14 @@ PHP 8.0 UPGRADE NOTES
     result will include a nullability indicator for nullable types. The format
     of the return value is not stable and may change between PHP versions.
   . Reflection export() methods have been removed.
+  . The following methods can now return information about default values of
+    parameters of internal functions:
+        ReflectionParameter::isDefaultValueAvailable()
+        ReflectionParameter::getDefaultValue()
+        ReflectionParameter::isDefaultValueConstant()
+        ReflectionParameter::getDefaultValueConstantName()
+  . The ReflectionParameter::isDefaultValueConstant() and
+    ReflectionParameter::getDefaultValueConstantName() methods have been deprecated.
 
 - Socket:
   . The deprecated AI_IDN_ALLOW_UNASSIGNED and AI_IDN_USE_STD3_ASCII_RULES

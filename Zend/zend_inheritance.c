@@ -684,57 +684,15 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 
 			if (i >= required && !ZEND_ARG_IS_VARIADIC(arg_info)) {
 				smart_str_appends(&str, " = ");
-				if (fptr->type == ZEND_USER_FUNCTION) {
-					zend_op *precv = NULL;
-					{
-						uint32_t idx  = i;
-						zend_op *op = fptr->op_array.opcodes;
-						zend_op *end = op + fptr->op_array.last;
 
-						++idx;
-						while (op < end) {
-							if ((op->opcode == ZEND_RECV || op->opcode == ZEND_RECV_INIT)
-									&& op->op1.num == (zend_ulong)idx)
-							{
-								precv = op;
-							}
-							++op;
-						}
-					}
-					if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
-						zval *zv = RT_CONSTANT(precv, precv->op2);
-
-						if (Z_TYPE_P(zv) == IS_FALSE) {
-							smart_str_appends(&str, "false");
-						} else if (Z_TYPE_P(zv) == IS_TRUE) {
-							smart_str_appends(&str, "true");
-						} else if (Z_TYPE_P(zv) == IS_NULL) {
-							smart_str_appends(&str, "NULL");
-						} else if (Z_TYPE_P(zv) == IS_STRING) {
-							smart_str_appendc(&str, '\'');
-							smart_str_appendl(&str, Z_STRVAL_P(zv), MIN(Z_STRLEN_P(zv), 10));
-							if (Z_STRLEN_P(zv) > 10) {
-								smart_str_appends(&str, "...");
-							}
-							smart_str_appendc(&str, '\'');
-						} else if (Z_TYPE_P(zv) == IS_ARRAY) {
-							smart_str_appends(&str, "Array");
-						} else if (Z_TYPE_P(zv) == IS_CONSTANT_AST) {
-							zend_ast *ast = Z_ASTVAL_P(zv);
-							if (ast->kind == ZEND_AST_CONSTANT) {
-								smart_str_append(&str, zend_ast_get_constant_name(ast));
-							} else {
-								smart_str_appends(&str, "<expression>");
-							}
-						} else {
-							zend_string *tmp_zv_str;
-							zend_string *zv_str = zval_get_tmp_string(zv, &tmp_zv_str);
-							smart_str_append(&str, zv_str);
-							zend_tmp_string_release(tmp_zv_str);
-						}
+				if (arg_info->default_value) {
+					if (fptr->type == ZEND_INTERNAL_FUNCTION) {
+						smart_str_appends(&str, ((zend_internal_arg_info*)arg_info)->default_value);
+					} else {
+						smart_str_appends(&str, ZSTR_VAL(arg_info->default_value));
 					}
 				} else {
-					smart_str_appends(&str, "NULL");
+					smart_str_appends(&str, "<default>");
 				}
 			}
 

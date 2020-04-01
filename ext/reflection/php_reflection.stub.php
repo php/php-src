@@ -509,6 +509,8 @@ class ReflectionParameter implements Reflector
     /** @return ?string */
     public function getDefaultValueConstantName() {}
 
+    public function getDefaultValueString(): string {}
+
     /** @return bool */
     public function isVariadic() {}
 }

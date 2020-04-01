@@ -41,7 +41,7 @@ Class [ <user> class Test ] {
       @@ %sbug33389.php 4 - 5
 
       - Parameters [1] {
-        Parameter #0 [ <optional> $arg = 1 ]
+        Parameter #0 [ <optional> $arg = foobar ]
       }
     }
 
@@ -49,7 +49,7 @@ Class [ <user> class Test ] {
       @@ %sbug33389.php 6 - 7
 
       - Parameters [1] {
-        Parameter #0 [ <optional> $arg = NULL ]
+        Parameter #0 [ <optional> $arg = null ]
       }
     }
 

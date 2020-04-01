@@ -19,8 +19,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Exception___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, code, IS_LONG, 0)
-	ZEND_ARG_OBJ_INFO(0, previous, Throwable, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, code, IS_LONG, 0, "0")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, previous, Throwable, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Exception___wakeup arginfo_class_Throwable_getMessage
@@ -44,11 +44,11 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ErrorException___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, message, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, code, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, severity, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, code, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, severity, IS_LONG, 0, "E_ERROR")
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, lineno, IS_LONG, 0)
-	ZEND_ARG_OBJ_INFO(0, previous, Throwable, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, lineno, IS_LONG, 0, "0")
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, previous, Throwable, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ErrorException_getSeverity arginfo_class_Throwable_getMessage
