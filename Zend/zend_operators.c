@@ -939,6 +939,16 @@ ZEND_API zend_string* ZEND_FASTCALL zval_try_get_string_func(zval *op) /* {{{ */
 }
 /* }}} */
 
+static ZEND_COLD zend_never_inline void ZEND_FASTCALL zend_binop_error(
+		const char *operator, zval *op1, zval *op2) {
+	if (EG(exception)) {
+		return;
+	}
+
+	zend_type_error("Unsupported operand types: %s %s %s",
+		zend_get_type_by_const(Z_TYPE_P(op1)), operator, zend_get_type_by_const(Z_TYPE_P(op2)));
+}
+
 static zend_never_inline void ZEND_FASTCALL add_function_array(zval *result, zval *op1, zval *op2) /* {{{ */
 {
 	if ((result == op1) && (result == op2)) {
@@ -991,9 +1001,7 @@ static zend_never_inline int ZEND_FASTCALL add_function_slow(zval *result, zval 
 	zval op1_copy, op2_copy;
 	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
 			|| UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
-		if (!EG(exception)) {
-			zend_throw_error(NULL, "Unsupported operand types");
-		}
+		zend_binop_error("+", op1, op2);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
 		}
@@ -1056,9 +1064,7 @@ static zend_never_inline int ZEND_FASTCALL sub_function_slow(zval *result, zval 
 	zval op1_copy, op2_copy;
 	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
 			|| UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
-		if (!EG(exception)) {
-			zend_throw_error(NULL, "Unsupported operand types");
-		}
+		zend_binop_error("-", op1, op2);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
 		}
@@ -1125,9 +1131,7 @@ static zend_never_inline int ZEND_FASTCALL mul_function_slow(zval *result, zval 
 	zval op1_copy, op2_copy;
 	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
 			|| UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
-		if (!EG(exception)) {
-			zend_throw_error(NULL, "Unsupported operand types");
-		}
+		zend_binop_error("*", op1, op2);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
 		}
@@ -1226,9 +1230,7 @@ ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {
 	zval op1_copy, op2_copy;
 	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
 			|| UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
-		if (!EG(exception)) {
-			zend_throw_error(NULL, "Unsupported operand types");
-		}
+		zend_binop_error("**", op1, op2);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
 		}
@@ -1306,9 +1308,7 @@ ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {
 	zval op1_copy, op2_copy;
 	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
 			|| UNEXPECTED(zendi_try_convert_scalar_to_number(op2, &op2_copy) == FAILURE)) {
-		if (!EG(exception)) {
-			zend_throw_error(NULL, "Unsupported operand types");
-		}
+		zend_binop_error("/", op1, op2);
 		if (result != op1) {
 			ZVAL_UNDEF(result);
 		}

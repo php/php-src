@@ -152,7 +152,7 @@ Warning: A non-numeric value encountered in %s on line %d
 float(1)
 
 -- Iteration 19 --
-Unsupported operand types
+Unsupported operand types: float ** array
 
 -- Iteration 20 --
 
