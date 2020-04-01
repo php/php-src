@@ -14,4 +14,4 @@ foreach($reflect->getParameters() as $key => $value) {
 ?>
 --EXPECTF--
 Parameter #0 [ <required> $test ]
-Parameter #1 [ <optional> $test2 = NULL ]
+Parameter #1 [ <optional> $test2 = null ]

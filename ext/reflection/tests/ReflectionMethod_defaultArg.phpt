@@ -25,20 +25,20 @@ Method [ <user> private method bar ] {
   @@ %s
 
   - Parameters [1] {
-    Parameter #0 [ <optional> $a = 'F' ]
+    Parameter #0 [ <optional> $a = self::class ]
   }
 }
 Method [ <user> private method bar ] {
   @@ %s
 
   - Parameters [1] {
-    Parameter #0 [ <optional> $a = 'T' ]
+    Parameter #0 [ <optional> $a = self::class ]
   }
 }
 Method [ <user> private method bar ] {
   @@ %s
 
   - Parameters [1] {
-    Parameter #0 [ <optional> $a = 'B' ]
+    Parameter #0 [ <optional> $a = self::class ]
   }
 }

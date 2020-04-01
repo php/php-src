@@ -15,8 +15,28 @@ $class = new ReflectionClass('A');
 echo $class;
 ?>
 --EXPECTF--
-Fatal error: Uncaught Error: Undefined constant 'PHP_SELF' in %s:%d
-Stack trace:
-#0 %s(%d): ReflectionClass->__toString()
-#1 {main}
-  thrown in %s on line %d
+Class [ <user> class A ] {
+  @@ %sbug74673.php 3-8
+
+  - Constants [0] {
+  }
+
+  - Static properties [0] {
+  }
+
+  - Static methods [0] {
+  }
+
+  - Properties [0] {
+  }
+
+  - Methods [1] {
+    Method [ <user> public method method ] {
+      @@ %sbug74673.php 5 - 7
+
+      - Parameters [1] {
+        Parameter #0 [ <optional> $test = PHP_SELF + 1 ]
+      }
+    }
+  }
+}

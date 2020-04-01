@@ -7,4 +7,4 @@ $r = new ReflectionParameter( 'foo', 0 );
 echo $r->__toString();
 ?>
 --EXPECT--
-Parameter #0 [ <optional> array $x = Array ]
+Parameter #0 [ <optional> array $x = ['a', 'b'] ]

@@ -35,9 +35,9 @@ ZEND_END_ARG_INFO()
 #define arginfo_phpdbg_start_oplog arginfo_phpdbg_break_next
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpdbg_end_oplog, 0, 0, IS_ARRAY, 1)
-	ZEND_ARG_TYPE_INFO(0, options, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_phpdbg_get_executable, 0, 0, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, options, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
