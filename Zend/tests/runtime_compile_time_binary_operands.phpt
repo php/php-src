@@ -153,8 +153,5 @@ if($c === 0) {
 $fl = __DIR__ . DIRECTORY_SEPARATOR . 'compare_binary_operands_temp.php';
 @unlink($fl);
 ?>
---EXPECTF--
-Fatal error: Uncaught TypeError: Unsupported operand types: int + array in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+--EXPECT--
+Failed: 0
