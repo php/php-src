@@ -17,5 +17,5 @@ trycatch_dump(
 );
 ?>
 --EXPECTF--
-!! [ValueError] Polygon must have at least 3 points
-!! [ValueError] Polygon must have at least 3 points
+!! [ValueError] imagefilledpolygon(): Argument #3 ($num_points_or_col) must be greater than or equal to 3
+!! [ValueError] imagepolygon(): Argument #3 ($num_points_or_col) must be greater than or equal to 3

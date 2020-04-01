@@ -29,9 +29,9 @@ int(0)
 int(0)
 int(0)
 int(0)
-Mode value is invalid
-Mode value is invalid
-Mode value is invalid
+count(): Argument #2 ($mode) must be a valid mode
+count(): Argument #2 ($mode) must be a valid mode
+count(): Argument #2 ($mode) must be a valid mode
 int(0)
 int(0)
 int(0)

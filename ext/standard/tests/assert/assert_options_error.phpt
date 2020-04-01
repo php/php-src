@@ -10,4 +10,4 @@ try {
 }
 ?>
 --EXPECT--
-Unknown value 1000
+assert_options(): Argument #1 ($what) must have a valid value

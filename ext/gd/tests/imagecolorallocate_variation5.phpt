@@ -63,9 +63,9 @@ int(657930)
 int(657930)
 
 --Octal -012--
-!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)
 
 --Octal 0377--
 int(16714250)
@@ -83,9 +83,9 @@ int(657930)
 int(657930)
 
 --Hexa-decimal -0xA--
-!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)
 
 --Hexa-decimal 0xFF--
 int(16714250)

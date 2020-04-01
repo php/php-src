@@ -339,7 +339,7 @@ static PHP_FUNCTION(bzread)
 	php_stream_from_zval(stream, bz);
 
 	if (len  < 0) {
-		zend_value_error("Length cannot be negative");
+		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -367,7 +367,7 @@ static PHP_FUNCTION(bzopen)
 	}
 
 	if (mode_len != 1 || (mode[0] != 'r' && mode[0] != 'w')) {
-		zend_value_error("'%s' is not a valid mode for bzopen(). Only 'w' and 'r' are supported.", mode);
+		zend_argument_value_error(2, "must be a valid mode. Only 'w' and 'r' are supported.");
 		RETURN_THROWS();
 	}
 

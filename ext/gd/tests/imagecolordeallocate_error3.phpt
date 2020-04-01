@@ -22,4 +22,4 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [ValueError] Color index 101 out of range
+!! [ValueError] imagecolordeallocate(): Argument #2 ($index) must be between 0 and 1

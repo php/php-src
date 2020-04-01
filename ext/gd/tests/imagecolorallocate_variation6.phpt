@@ -51,25 +51,25 @@ foreach($values as $key => $value) {
 *** Testing imagecolorallocate() : usage variations ***
 
 --Decimal 256--
-!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)
 
 --Octal 0400--
-!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)
 
 --Hexa-decimal 0x100--
-!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Red component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Green component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
-!! [ValueError] Blue component is out of range, must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #2 ($red) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #3 ($green) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)
+!! [ValueError] imagecolorallocate(): Argument #4 ($blue) must be between 0 and 255 (inclusive)

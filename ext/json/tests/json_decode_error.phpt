@@ -19,4 +19,4 @@ try {
 *** Testing json_decode() : error conditions ***
 
 -- Testing json_decode() function with depth below 0 --
-Depth must be greater than zero
+json_decode(): Argument #3 ($depth) must be greater than 0

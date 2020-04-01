@@ -59,7 +59,7 @@ bool(true)
 truncation with new_size=10
 bool(true)
 ------ stream_truncate negative size: -------
-Negative size is not supported
+ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 ------ stream_truncate bad return: -------
 truncation with new_size=0
 

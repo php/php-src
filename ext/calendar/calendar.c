@@ -217,7 +217,7 @@ PHP_FUNCTION(cal_info)
 
 
 	if (cal != -1 && (cal < 0 || cal >= CAL_NUM_CALS)) {
-		zend_value_error("Invalid calendar ID: " ZEND_LONG_FMT, cal);
+		zend_argument_value_error(1, "must be a valid calendar ID");
 		RETURN_THROWS();
 	}
 
@@ -239,7 +239,7 @@ PHP_FUNCTION(cal_days_in_month)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		zend_value_error("Invalid calendar ID: " ZEND_LONG_FMT, cal);
+		zend_argument_value_error(1, "must be a valid calendar ID");
 		RETURN_THROWS();
 	}
 
@@ -285,7 +285,7 @@ PHP_FUNCTION(cal_to_jd)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		zend_value_error("Invalid calendar ID: " ZEND_LONG_FMT, cal);
+		zend_argument_value_error(1, "must be a valid calendar ID");
 		RETURN_THROWS();
 	}
 
@@ -306,7 +306,7 @@ PHP_FUNCTION(cal_from_jd)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		zend_value_error("Invalid calendar ID: " ZEND_LONG_FMT, cal);
+		zend_argument_value_error(1, "must be a valid calendar ID");
 		RETURN_THROWS();
 	}
 	calendar = &cal_conversion_table[cal];

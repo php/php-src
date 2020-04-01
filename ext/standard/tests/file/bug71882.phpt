@@ -10,4 +10,4 @@ try {
 }
 ?>
 --EXPECT--
-Negative size is not supported
+ftruncate(): Argument #2 ($size) must be greater than or equal to 0

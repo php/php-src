@@ -1299,7 +1299,7 @@ PHP_METHOD(sqlite3, openBlob)
 	}
 
 	if (ZEND_NUM_ARGS() >= 4 && CHECK_NULL_PATH(dbname, dbname_len)) {
-		zend_value_error("dbname must not contain null bytes");
+		zend_argument_type_error(4, "must not contain null bytes");
 		RETURN_THROWS();
 	}
 
@@ -1405,10 +1405,13 @@ PHP_METHOD(sqlite3, backup)
 		RETURN_THROWS();
 	}
 
-	if ((ZEND_NUM_ARGS() >= 2 && CHECK_NULL_PATH(source_dbname, source_dbname_length))
-		|| (ZEND_NUM_ARGS() >= 3 && CHECK_NULL_PATH(destination_dbname, destination_dbname_length))
-	) {
-		zend_value_error("dbname must not contain null bytes");
+	if (ZEND_NUM_ARGS() >= 2 && CHECK_NULL_PATH(source_dbname, source_dbname_length)) {
+		zend_argument_type_error(2, "must not contain null bytes");
+		RETURN_THROWS();
+	}
+
+	if (ZEND_NUM_ARGS() >= 3 && CHECK_NULL_PATH(destination_dbname, destination_dbname_length)) {
+		zend_argument_type_error(3, "must not contain null bytes");
 		RETURN_THROWS();
 	}
 
