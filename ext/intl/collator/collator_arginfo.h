@@ -13,7 +13,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_sort, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(1, arr, IS_ARRAY, 0)
-	ZEND_ARG_INFO(0, sort_flag)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, sort_flag, "Collator::SORT_REGULAR")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_sortWithSortKeys, 0, 0, 1)
@@ -22,7 +22,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_asort, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(1, arr, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, sort_flag, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, sort_flag, IS_LONG, 0, "Collator::SORT_REGULAR")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Collator_getAttribute, 0, 0, 1)
@@ -86,7 +86,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_collator_sort, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, object, Collator, 0)
 	ZEND_ARG_TYPE_INFO(1, arr, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, sort_flag, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, sort_flag, IS_LONG, 0, "Collator::SORT_REGULAR")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_collator_sort_with_sort_keys, 0, 2, _IS_BOOL, 0)

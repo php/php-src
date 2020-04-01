@@ -33,8 +33,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveIteratorIterator___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, iterator, Traversable, 0)
-	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "self::LEAVES_ONLY")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_RecursiveIteratorIterator_rewind arginfo_class_EmptyIterator_current
@@ -70,7 +70,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_RecursiveIteratorIterator_nextElement arginfo_class_EmptyIterator_current
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveIteratorIterator_setMaxDepth, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, max_depth, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, max_depth, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_RecursiveIteratorIterator_getMaxDepth arginfo_class_EmptyIterator_current
@@ -130,8 +130,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_LimitIterator___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
-	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, count, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, count, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_LimitIterator_rewind arginfo_class_EmptyIterator_current
@@ -152,7 +152,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CachingIterator___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "self::CALL_TOSTRING")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_CachingIterator_rewind arginfo_class_EmptyIterator_current
@@ -242,9 +242,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RegexIterator___construct, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_TYPE_INFO(0, regex, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, preg_flags, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "self::MATCH")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, preg_flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_RegexIterator_accept arginfo_class_EmptyIterator_current
@@ -270,9 +270,9 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveRegexIterator___construct, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, iterator, RecursiveIterator, 0)
 	ZEND_ARG_TYPE_INFO(0, regex, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, preg_flags, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "self::MATCH")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, preg_flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_RecursiveRegexIterator_accept arginfo_class_EmptyIterator_current
@@ -283,9 +283,9 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_RecursiveTreeIterator___construct, 0, 0, 1)
 	ZEND_ARG_INFO(0, iterator)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, caching_it_flags, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "self::BYPASS_KEY")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, caching_it_flags, IS_LONG, 0, "CachingIterator::CATCH_GET_CHILD")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "self::SELF_FIRST")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_RecursiveTreeIterator_rewind arginfo_class_EmptyIterator_current

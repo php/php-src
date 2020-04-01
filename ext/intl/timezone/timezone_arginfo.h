@@ -10,15 +10,15 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_IntlTimeZone_createDefault arginfo_class_IntlTimeZone___construct
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_createEnumeration, 0, 0, 0)
-	ZEND_ARG_INFO(0, countryOrRawOffset)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, countryOrRawOffset, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlTimeZone_createTimeZone arginfo_class_IntlTimeZone_countEquivalentIDs
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_createTimeZoneIDEnumeration, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, zoneType, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, region, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, rawOffset, IS_LONG, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, region, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, rawOffset, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_fromDateTimeZone, 0, 0, 1)
@@ -27,13 +27,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_getCanonicalID, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, zoneId, IS_STRING, 0)
-	ZEND_ARG_INFO(1, isSystemID)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, isSystemID, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlTimeZone_getDisplayName, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, isDaylight, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, style, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, isDaylight, _IS_BOOL, 0, "false")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, style, IS_LONG, 0, "IntlTimeZone::DISPLAY_LONG")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlTimeZone_getDSTSavings arginfo_class_IntlTimeZone___construct
@@ -102,8 +102,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_intltz_create_time_zone_id_enumeration, 0, 1, IntlIterator, MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, zoneType, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, region, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, rawOffset, IS_LONG, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, region, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, rawOffset, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_intltz_from_date_time_zone, 0, 1, IntlTimeZone, 1)
@@ -112,14 +112,14 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intltz_get_canonical_id, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, zoneId, IS_STRING, 0)
-	ZEND_ARG_INFO(1, isSystemID)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, isSystemID, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intltz_get_display_name, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, tz, IntlTimeZone, 0)
-	ZEND_ARG_TYPE_INFO(0, isDaylight, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, style, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, isDaylight, _IS_BOOL, 0, "false")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, style, IS_LONG, 0, "IntlTimeZone::DISPLAY_LONG")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_intltz_get_dst_savings, 0, 1, IS_LONG, 0)

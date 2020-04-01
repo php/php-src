@@ -18,7 +18,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_tidy_parse_file, 0, 1, tidy,
 	ZEND_ARG_TYPE_INFO(0, file, IS_STRING, 0)
 	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, use_include_path, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, use_include_path, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_tidy_clean_repair, 0, 1, _IS_BOOL, 0)
@@ -35,7 +35,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_tidy_repair_file, 0, 1, MAY_BE_S
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, use_include_path, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, use_include_path, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 #define arginfo_tidy_diagnose arginfo_tidy_clean_repair
@@ -93,7 +93,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, use_include_path, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, use_include_path, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy_getOpt, 0, 0, 1)
@@ -107,7 +107,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_tidy_parseFile, 0, 1, _IS_
 	ZEND_ARG_TYPE_INFO(0, file, IS_STRING, 0)
 	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, use_include_path, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, use_include_path, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_tidy_parseString, 0, 1, _IS_BOOL, 0)
@@ -126,7 +126,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_tidy_repairFile, 0, 1, _IS
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, use_include_path, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, use_include_path, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_tidy_diagnose arginfo_class_tidy_cleanRepair

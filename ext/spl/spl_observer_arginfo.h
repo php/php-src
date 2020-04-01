@@ -15,7 +15,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObjectStorage_attach, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 0)
-	ZEND_ARG_INFO(0, info)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, info, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObjectStorage_detach, 0, 0, 1)
@@ -39,7 +39,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObjectStorage_setInfo, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObjectStorage_count, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "COUNT_NORMAL")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplObjectStorage_rewind arginfo_class_SplSubject_notify
@@ -66,7 +66,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObjectStorage_offsetSet, 0, 0, 1)
 	ZEND_ARG_INFO(0, object)
-	ZEND_ARG_INFO(0, info)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, info, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplObjectStorage_offsetUnset arginfo_class_SplObjectStorage_offsetExists
@@ -80,7 +80,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObjectStorage___unserialize, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MultipleIterator___construct, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "MultipleIterator::MIT_NEED_ALL | MultipleIterator::MIT_KEYS_NUMERIC")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_MultipleIterator_getFlags arginfo_class_SplSubject_notify
@@ -91,7 +91,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MultipleIterator_attachIterator, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
-	ZEND_ARG_INFO(0, info)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, info, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MultipleIterator_detachIterator, 0, 0, 1)
