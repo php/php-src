@@ -279,6 +279,16 @@ class Tester
     }
 
     /**
+     * Skip if running as root.
+     */
+    static public function skipIfRoot()
+    {
+        if (getmyuid() == 0) {
+            die('skip running as root');
+        }
+    }
+
+    /**
      * Skip if posix extension not loaded.
      */
     static public function skipIfPosixNotLoaded()
