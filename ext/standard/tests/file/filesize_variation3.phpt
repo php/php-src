@@ -63,5 +63,5 @@ bool(true)
 int(1200)
 bool(true)
 int(0)
-Negative size is not supported
+ftruncate(): Argument #2 ($size) must be greater than or equal to 0
 int(0)

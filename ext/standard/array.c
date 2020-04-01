@@ -704,7 +704,7 @@ PHP_FUNCTION(count)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mode != COUNT_NORMAL && mode != COUNT_RECURSIVE) {
-		zend_value_error("Mode value is invalid");
+		zend_argument_value_error(2, "must be a valid mode");
 		RETURN_THROWS();
 	}
 
@@ -2385,12 +2385,12 @@ PHP_FUNCTION(extract)
 	extract_type &= 0xff;
 
 	if (extract_type < EXTR_OVERWRITE || extract_type > EXTR_IF_EXISTS) {
-		zend_value_error("Invalid extract type");
+		zend_argument_value_error(2, "must be a valid extract type");
 		RETURN_THROWS();
 	}
 
 	if (extract_type > EXTR_SKIP && extract_type <= EXTR_PREFIX_IF_EXISTS && ZEND_NUM_ARGS() < 3) {
-		zend_value_error("Specified extract type requires the prefix parameter");
+		zend_argument_value_error(3, "is required when using this extract type");
 		RETURN_THROWS();
 	}
 

@@ -22,4 +22,4 @@ try {
 2000-04-23
 2001-04-15
 2002-03-31
-This function is only valid for years between 1970 and 2037 inclusive
+easter_date(): Argument #1 ($year) must be between 1970 and 2037 (inclusive)

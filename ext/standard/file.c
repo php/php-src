@@ -742,7 +742,7 @@ PHP_FUNCTION(file)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (flags < 0 || flags > (PHP_FILE_USE_INCLUDE_PATH | PHP_FILE_IGNORE_NEW_LINES | PHP_FILE_SKIP_EMPTY_LINES | PHP_FILE_NO_DEFAULT_CONTEXT)) {
-		zend_value_error("'" ZEND_LONG_FMT "' flag is not supported", flags);
+		zend_argument_value_error(2, "must be a valid flag value");
 		RETURN_THROWS();
 	}
 
@@ -1492,7 +1492,7 @@ PHP_FUNCTION(ftruncate)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (size < 0) {
-		zend_value_error("Negative size is not supported");
+		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 

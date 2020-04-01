@@ -850,7 +850,7 @@ PHP_FUNCTION(putenv)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (setting_len == 0 || setting[0] == '=') {
-		zend_value_error("Invalid parameter syntax");
+		zend_argument_value_error(1, "must have a valid syntax");
 		RETURN_THROWS();
 	}
 

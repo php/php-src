@@ -33,6 +33,6 @@ try {
 *** Testing Error Conditions ***
 
 Notice: A non well formed numeric value encountered in %s on line %d
-Invalid extract type
-Invalid extract type
-Specified extract type requires the prefix parameter
+extract(): Argument #2 ($extract_type) must be a valid extract type
+extract(): Argument #2 ($extract_type) must be a valid extract type
+extract(): Argument #3 ($prefix) is required when using this extract type

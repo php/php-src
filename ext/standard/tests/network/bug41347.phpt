@@ -9,4 +9,4 @@ try {
 }
 ?>
 --EXPECT--
-Host cannot be empty
+dns_check_record(): Argument #1 ($hostname) cannot be empty

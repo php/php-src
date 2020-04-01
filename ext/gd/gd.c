@@ -736,7 +736,7 @@ PHP_FUNCTION(imagesetstyle)
 
 	num_styles = zend_hash_num_elements(Z_ARRVAL_P(styles));
 	if (num_styles == 0) {
-		zend_value_error("Styles array must not be empty");
+		zend_argument_value_error(2, "cannot be empty");
 		RETURN_THROWS();
 	}
 
@@ -767,12 +767,12 @@ PHP_FUNCTION(imagecreatetruecolor)
 	}
 
 	if (x_size <= 0 || x_size >= INT_MAX) {
-		zend_value_error("Invalid width (x_size)");
+		zend_argument_value_error(1, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
 	if (y_size <= 0 || y_size >= INT_MAX) {
-		zend_value_error("Invalid height (y_size)");
+		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
@@ -819,7 +819,7 @@ PHP_FUNCTION(imagetruecolortopalette)
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
 	if (ncolors <= 0 || ZEND_LONG_INT_OVFL(ncolors)) {
-		zend_value_error("Number of colors has to be greater than zero and no more than %d", INT_MAX);
+		zend_argument_value_error(3, "must be greater than 0 and less than %d", INT_MAX);
 		RETURN_THROWS();
 	}
 
@@ -1022,9 +1022,9 @@ PHP_FUNCTION(imagelayereffect)
 }
 /* }}} */
 
-#define CHECK_RGBA_RANGE(component, name) \
+#define CHECK_RGBA_RANGE(component, name, argument_number) \
 	if (component < 0 || component > gd##name##Max) { \
-		zend_value_error(#name " component is out of range, must be between 0 and %d (inclusive)", gd##name##Max); \
+		zend_argument_value_error(argument_number, "must be between 0 and %d (inclusive)", gd##name##Max); \
 		RETURN_THROWS(); \
 	}
 
@@ -1043,10 +1043,10 @@ PHP_FUNCTION(imagecolorallocatealpha)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
-	CHECK_RGBA_RANGE(alpha, Alpha);
+	CHECK_RGBA_RANGE(red, Red, 2);
+	CHECK_RGBA_RANGE(green, Green, 3);
+	CHECK_RGBA_RANGE(blue, Blue, 4);
+	CHECK_RGBA_RANGE(alpha, Alpha, 5);
 
 	ct = gdImageColorAllocateAlpha(im, red, green, blue, alpha);
 	if (ct < 0) {
@@ -1070,10 +1070,10 @@ PHP_FUNCTION(imagecolorresolvealpha)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
-	CHECK_RGBA_RANGE(alpha, Alpha);
+	CHECK_RGBA_RANGE(red, Red, 2);
+	CHECK_RGBA_RANGE(green, Green, 3);
+	CHECK_RGBA_RANGE(blue, Blue, 4);
+	CHECK_RGBA_RANGE(alpha, Alpha, 5);
 
 	RETURN_LONG(gdImageColorResolveAlpha(im, red, green, blue, alpha));
 }
@@ -1093,10 +1093,10 @@ PHP_FUNCTION(imagecolorclosestalpha)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
-	CHECK_RGBA_RANGE(alpha, Alpha);
+	CHECK_RGBA_RANGE(red, Red, 2);
+	CHECK_RGBA_RANGE(green, Green, 3);
+	CHECK_RGBA_RANGE(blue, Blue, 4);
+	CHECK_RGBA_RANGE(alpha, Alpha, 5);
 
 	RETURN_LONG(gdImageColorClosestAlpha(im, red, green, blue, alpha));
 }
@@ -1110,16 +1110,16 @@ PHP_FUNCTION(imagecolorexactalpha)
 	zend_long red, green, blue, alpha;
 	gdImagePtr im;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ollll", &IM, gd_image_ce,  &red, &green, &blue, &alpha) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Ollll", &IM, gd_image_ce, &red, &green, &blue, &alpha) == FAILURE) {
 		RETURN_THROWS();
 	}
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
-	CHECK_RGBA_RANGE(alpha, Alpha);
+	CHECK_RGBA_RANGE(red, Red, 2);
+	CHECK_RGBA_RANGE(green, Green, 3);
+	CHECK_RGBA_RANGE(blue, Blue, 4);
+	CHECK_RGBA_RANGE(alpha, Alpha, 5);
 
 	RETURN_LONG(gdImageColorExactAlpha(im, red, green, blue, alpha));
 }
@@ -1362,12 +1362,12 @@ PHP_FUNCTION(imagecreate)
 	}
 
 	if (x_size <= 0 || x_size >= INT_MAX) {
-		zend_value_error("Invalid width (x_size)");
+		zend_argument_value_error(1, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
 	if (y_size <= 0 || y_size >= INT_MAX) {
-		zend_value_error("Invalid height (y_size)");
+		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
@@ -1601,12 +1601,12 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		}
 
 		if (width < 1) {
-			zend_value_error("Width must be at least 1");
+			zend_argument_value_error(4, "must be greater than or equal to 1");
 			RETURN_THROWS();
 		}
 
 		if (height < 1) {
-			zend_value_error("Height must be at least 1");
+			zend_argument_value_error(5, "must be greater than or equal to 1");
 			RETURN_THROWS();
 		}
 
@@ -2023,9 +2023,9 @@ PHP_FUNCTION(imagecolorallocate)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
+	CHECK_RGBA_RANGE(red, Red, 2);
+	CHECK_RGBA_RANGE(green, Green, 3);
+	CHECK_RGBA_RANGE(blue, Blue, 4);
 
 	ct = gdImageColorAllocate(im, red, green, blue);
 	if (ct < 0) {
@@ -2101,9 +2101,9 @@ PHP_FUNCTION(imagecolorclosest)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
+	CHECK_RGBA_RANGE(red, Red, 2);
+	CHECK_RGBA_RANGE(green, Green, 3);
+	CHECK_RGBA_RANGE(blue, Blue, 4);
 
 	RETURN_LONG(gdImageColorClosest(im, red, green, blue));
 }
@@ -2123,9 +2123,9 @@ PHP_FUNCTION(imagecolorclosesthwb)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
+	CHECK_RGBA_RANGE(red, Red, 2);
+	CHECK_RGBA_RANGE(green, Green, 3);
+	CHECK_RGBA_RANGE(blue, Blue, 4);
 
 	RETURN_LONG(gdImageColorClosestHWB(im, red, green, blue));
 }
@@ -2157,7 +2157,7 @@ PHP_FUNCTION(imagecolordeallocate)
 		gdImageColorDeallocate(im, col);
 		RETURN_TRUE;
 	} else {
-		zend_value_error("Color index %d out of range", col);
+		zend_argument_value_error(2, "must be between 0 and %d", gdImageColorsTotal(im));
 		RETURN_THROWS();
 	}
 }
@@ -2177,9 +2177,9 @@ PHP_FUNCTION(imagecolorresolve)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
+	CHECK_RGBA_RANGE(red, Red, 2);
+	CHECK_RGBA_RANGE(green, Green, 3);
+	CHECK_RGBA_RANGE(blue, Blue, 4);
 
 	RETURN_LONG(gdImageColorResolve(im, red, green, blue));
 }
@@ -2199,9 +2199,9 @@ PHP_FUNCTION(imagecolorexact)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
+	CHECK_RGBA_RANGE(red, Red, 2);
+	CHECK_RGBA_RANGE(green, Green, 3);
+	CHECK_RGBA_RANGE(blue, Blue, 4);
 
 	RETURN_LONG(gdImageColorExact(im, red, green, blue));
 }
@@ -2222,10 +2222,9 @@ PHP_FUNCTION(imagecolorset)
 
 	im = php_gd_libgdimageptr_from_zval_p(IM);
 
-	CHECK_RGBA_RANGE(red, Red);
-	CHECK_RGBA_RANGE(green, Green);
-	CHECK_RGBA_RANGE(blue, Blue);
-	CHECK_RGBA_RANGE(alpha, Alpha);
+	CHECK_RGBA_RANGE(red, Red, 2);
+	CHECK_RGBA_RANGE(green, Green, 3);
+	CHECK_RGBA_RANGE(blue, Blue, 4);
 
 	col = color;
 
@@ -2284,8 +2283,13 @@ PHP_FUNCTION(imagegammacorrect)
 		RETURN_THROWS();
 	}
 
-	if ( input <= 0.0 || output <= 0.0 ) {
-		zend_value_error("Gamma values must be positive");
+	if (input <= 0.0) {
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (output <= 0.0) {
+		zend_argument_value_error(3, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
@@ -2594,7 +2598,7 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 		COL = NPOINTS;
 		NPOINTS = zend_hash_num_elements(Z_ARRVAL_P(POINTS));
 		if (NPOINTS % 2 != 0) {
-			zend_value_error("Points array must have an even number of elements");
+			zend_argument_value_error(2, "must have an even number of elements");
 			RETURN_THROWS();
 		}
 		NPOINTS /= 2;
@@ -2607,7 +2611,7 @@ static void php_imagepolygon(INTERNAL_FUNCTION_PARAMETERS, int filled)
 
 	nelem = zend_hash_num_elements(Z_ARRVAL_P(POINTS));
 	if (npoints < 3) {
-		zend_value_error("Polygon must have at least 3 points");
+		zend_argument_value_error(3, "must be greater than or equal to 3");
 		RETURN_THROWS();
 	}
 
@@ -2983,8 +2987,23 @@ PHP_FUNCTION(imagecopyresized)
 	dstH = DH;
 	dstW = DW;
 
-	if (dstW <= 0 || dstH <= 0 || srcW <= 0 || srcH <= 0) {
-		zend_value_error("Invalid image dimensions");
+	if (dstW <= 0) {
+		zend_argument_value_error(3, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (dstH <= 0) {
+		zend_argument_value_error(4, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (srcW <= 0) {
+		zend_argument_value_error(5, "must be greater than 0");
+		RETURN_THROWS();
+	}
+
+	if (srcH <= 0) {
+		zend_argument_value_error(6, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
@@ -3466,14 +3485,14 @@ PHP_FUNCTION(imageconvolution)
 
 	nelem = zend_hash_num_elements(Z_ARRVAL_P(hash_matrix));
 	if (nelem != 3) {
-		zend_value_error("Convolution matrix must be a 3x3 array");
+		zend_argument_value_error(2, "must be a 3x3 array");
 		RETURN_THROWS();
 	}
 
 	for (i=0; i<3; i++) {
 		if ((var = zend_hash_index_find(Z_ARRVAL_P(hash_matrix), (i))) != NULL && Z_TYPE_P(var) == IS_ARRAY) {
 			if (zend_hash_num_elements(Z_ARRVAL_P(var)) != 3 ) {
-				zend_value_error("Convolution matrix must be a 3x3 array, matrix[%d] only has %d elements", i, zend_hash_num_elements(Z_ARRVAL_P(var)));
+				zend_argument_value_error(2, "must be a 3x3 array, matrix[%d] only has %d elements", i, zend_hash_num_elements(Z_ARRVAL_P(var)));
 				RETURN_THROWS();
 			}
 
@@ -3481,7 +3500,7 @@ PHP_FUNCTION(imageconvolution)
 				if ((var2 = zend_hash_index_find(Z_ARRVAL_P(var), j)) != NULL) {
 					matrix[i][j] = (float) zval_get_double(var2);
 				} else {
-					zend_value_error("Convolution matrix must be a 3x3 array, matrix[%d][%d] cannot be found (missing integer key)", i, j);
+					zend_argument_value_error(2, "must be a 3x3 array, matrix[%d][%d] cannot be found (missing integer key)", i, j);
 					RETURN_THROWS();
 				}
 			}
@@ -3526,7 +3545,7 @@ PHP_FUNCTION(imageflip)
 			break;
 
 		default:
-			zend_value_error("Unknown flip mode");
+			zend_argument_value_error(2, "must be a valid mode");
 			RETURN_THROWS();
 	}
 
@@ -3575,28 +3594,28 @@ PHP_FUNCTION(imagecrop)
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") -1)) != NULL) {
 		rect.x = zval_get_long(tmp);
 	} else {
-		zend_value_error("Cropping rectangle is missing x position");
+		zend_argument_value_error(2, "must have an 'x' key");
 		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
 		rect.y = zval_get_long(tmp);
 	} else {
-		zend_value_error("Cropping rectangle is missing y position");
+		zend_argument_value_error(2, "must have a 'y' key");
 		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
 		rect.width = zval_get_long(tmp);
 	} else {
-		zend_value_error("Cropping rectangle is missing width");
+		zend_argument_value_error(2, "must have a 'width' key");
 		RETURN_THROWS();
 	}
 
 	if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
 		rect.height = zval_get_long(tmp);
 	} else {
-		zend_value_error("Cropping rectangle is missing height");
+		zend_argument_value_error(2, "must have a 'height' key");
 		RETURN_THROWS();
 	}
 
@@ -3638,14 +3657,14 @@ PHP_FUNCTION(imagecropauto)
 
 		case GD_CROP_THRESHOLD:
 			if (color < 0 || (!gdImageTrueColor(im) && color >= gdImageColorsTotal(im))) {
-				zend_value_error("Color argument missing with threshold mode");
+				zend_argument_value_error(4, "must be greater than or equal to 0 when using the threshold mode");
 				RETURN_THROWS();
 			}
 			im_crop = gdImageCropThreshold(im, color, (float) threshold);
 			break;
 
 		default:
-			zend_value_error("Unknown crop mode");
+			zend_argument_value_error(2, "must be a valid mode");
 			RETURN_THROWS();
 	}
 
@@ -3762,28 +3781,28 @@ PHP_FUNCTION(imageaffine)
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "x", sizeof("x") - 1)) != NULL) {
 			rect.x = zval_get_long(tmp);
 		} else {
-			zend_value_error("Clip array is missing x position");
+			zend_argument_value_error(3, "must have an 'x' key");
 			RETURN_THROWS();
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "y", sizeof("y") - 1)) != NULL) {
 			rect.y = zval_get_long(tmp);
 		} else {
-			zend_value_error("Clip array is missing y position");
+			zend_argument_value_error(3, "must have a 'y' key");
 			RETURN_THROWS();
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "width", sizeof("width") - 1)) != NULL) {
 			rect.width = zval_get_long(tmp);
 		} else {
-			zend_value_error("Clip array is missing width");
+			zend_argument_value_error(3, "must have a 'width' key");
 			RETURN_THROWS();
 		}
 
 		if ((tmp = zend_hash_str_find(Z_ARRVAL_P(z_rect), "height", sizeof("height") - 1)) != NULL) {
 			rect.height = zval_get_long(tmp);
 		} else {
-			zend_value_error("Clip array is missing height");
+			zend_argument_value_error(3, "must have a 'height' key");
 			RETURN_THROWS();
 		}
 		pRect = &rect;
@@ -3827,14 +3846,14 @@ PHP_FUNCTION(imageaffinematrixget)
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "x", sizeof("x") - 1)) != NULL) {
 				x = zval_get_double(tmp);
 			} else {
-				zend_value_error("Options array is missing x position");
+				zend_argument_value_error(2, "must have an 'x' key");
 				RETURN_THROWS();
 			}
 
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(options), "y", sizeof("y") - 1)) != NULL) {
 				y = zval_get_double(tmp);
 			} else {
-				zend_value_error("Options array is missing y position");
+				zend_argument_value_error(2, "must have a 'y' key");
 				RETURN_THROWS();
 			}
 
@@ -3894,14 +3913,19 @@ PHP_FUNCTION(imageaffinematrixconcat)
 	zval *tmp;
 	zval *z_m1;
 	zval *z_m2;
-	int i, nelems;
+	int i;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "aa", &z_m1, &z_m2) == FAILURE)  {
 		RETURN_THROWS();
 	}
 
-	if (((nelems = zend_hash_num_elements(Z_ARRVAL_P(z_m1))) != 6) || (nelems = zend_hash_num_elements(Z_ARRVAL_P(z_m2))) != 6) {
-		zend_value_error("Affine arrays must have six elements");
+	if (zend_hash_num_elements(Z_ARRVAL_P(z_m1)) != 6) {
+		zend_argument_value_error(1, "must have 6 elements");
+		RETURN_THROWS();
+	}
+
+	if (zend_hash_num_elements(Z_ARRVAL_P(z_m2)) != 6) {
+		zend_argument_value_error(1, "must have 6 elements");
 		RETURN_THROWS();
 	}
 

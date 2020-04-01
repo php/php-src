@@ -236,12 +236,12 @@ array(3) {
   [2]=>
   string(6) "Line 3"
 }
-'24' flag is not supported
-'25' flag is not supported
-'26' flag is not supported
-'27' flag is not supported
-'28' flag is not supported
-'29' flag is not supported
-'30' flag is not supported
-'31' flag is not supported
-'32' flag is not supported
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value
+file(): Argument #2 ($flags) must be a valid flag value

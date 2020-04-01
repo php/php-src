@@ -21,7 +21,7 @@ var_dump(bzread($fd, 100000));
 ?>
 --EXPECT--
 string(0) ""
-Length cannot be negative
+bzread(): Argument #2 ($length) must be greater than or equal to 0
 string(1) "R"
 string(2) "is"
 string(251) "ing up from the heart of the desert

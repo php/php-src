@@ -16,4 +16,4 @@ trycatch_dump(
 
 ?>
 --EXPECT--
-!! [ValueError] Color argument missing with threshold mode
+!! [ValueError] imagecropauto(): Argument #4 ($color) must be greater than or equal to 0 when using the threshold mode

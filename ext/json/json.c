@@ -299,12 +299,12 @@ PHP_FUNCTION(json_decode)
 	}
 
 	if (depth <= 0) {
-		zend_value_error("Depth must be greater than zero");
+		zend_argument_value_error(3, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
 	if (depth > INT_MAX) {
-		zend_value_error("Depth must be lower than %d", INT_MAX);
+		zend_argument_value_error(3, "must be less than %d", INT_MAX);
 		RETURN_THROWS();
 	}
 
