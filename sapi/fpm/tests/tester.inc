@@ -856,7 +856,17 @@ class Tester
     {
         $port = $this->getPort($type, $pool, true);
         if ($type === 'uds') {
-            return $this->getFile($port . '.sock');
+            $address = $this->getFile($port . '.sock');
+
+            // Socket max path length is 108 on Linux and 104 on BSD,
+            // so we use the latter
+            if (strlen($address) <= 104) {
+                return $address;
+            }
+
+            return sys_get_temp_dir().'/'.
+                hash('crc32', dirname($address)).'-'.
+                basename($address);
         }
 
         return $this->getHost($type) . ':' . $port;
