@@ -33,5 +33,5 @@ if (PHP_CURL != "no") {
 	} else {
 		WARNING("curl not enabled; libraries and headers not found");
 	}
-	PHP_INSTALL_HEADERS('ext/curl/', 'php_curl.h')
+	PHP_INSTALL_HEADERS('ext/curl/', 'php_curl.h');
 }
