@@ -170,9 +170,7 @@ Warning: A non-numeric value encountered in %s on line %d
 float(1)
 
 -- Iteration 23 --
-
-Notice: Object of class classA could not be converted to number in %s on line %d
-float(20.3)
+Unsupported operand types: float ** object
 
 -- Iteration 24 --
 float(1)
