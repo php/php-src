@@ -113,9 +113,6 @@ function prepareLine($op1, $op2, $cmp, $operator) {
         $result = makeParam($cmp());
         $line .= "if (" . ($result === "(NAN)" ? "!is_nan($compare)" : "$compare !== $result") . ") { $error }";
     } catch (Error $e) {
-        if (get_class($e) == "Error") {
-            return "// exempt $op1_p $operator $op2_p from checking, it generates a compile time error";
-        }
         $msg = makeParam($e->getMessage());
         $line .= "try { $compare; $error } catch (Error \$e) { if (\$e->getMessage() !== $msg) { $error } }";
     }
