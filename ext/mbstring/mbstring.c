@@ -352,8 +352,8 @@ static const mbfl_encoding *php_mb_get_encoding(zend_string *encoding_name, uint
 /* {{{ static int php_mb_parse_encoding_list()
  *  Return FAILURE if input contains any illegal encoding, otherwise SUCCESS.
  */
-static int
-php_mb_parse_encoding_list(const char *value, size_t value_length, const mbfl_encoding ***return_list, size_t *return_size, int persistent)
+static int php_mb_parse_encoding_list(const char *value, size_t value_length,
+	const mbfl_encoding ***return_list, size_t *return_size, int persistent, uint32_t arg_num)
 {
 	if (value == NULL || value_length == 0) {
 		*return_list = NULL;
@@ -420,7 +420,7 @@ php_mb_parse_encoding_list(const char *value, size_t value_length, const mbfl_en
 					*entry++ = encoding;
 					n++;
 				} else {
-					php_error_docref(NULL, E_WARNING, "Unknown encoding \"%s\"", p1);
+					zend_argument_value_error(arg_num, "must be a list of valid encoding, \"%s\" given", p1);
 					efree(tmpstr);
 					pefree(list, persistent);
 					return FAILURE;
@@ -576,7 +576,7 @@ static size_t php_mb_zend_encoding_converter(unsigned char **to, size_t *to_leng
 
 static int php_mb_zend_encoding_list_parser(const char *encoding_list, size_t encoding_list_len, const zend_encoding ***return_list, size_t *return_size, int persistent)
 {
-	return php_mb_parse_encoding_list(encoding_list, encoding_list_len, (const mbfl_encoding ***)return_list, return_size, persistent);
+	return php_mb_parse_encoding_list(encoding_list, encoding_list_len, (const mbfl_encoding ***)return_list, return_size, persistent, 0);
 }
 
 static const zend_encoding *php_mb_zend_internal_encoding_getter(void)
@@ -869,7 +869,7 @@ static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 		return SUCCESS;
 	}
 
-	if (FAILURE == php_mb_parse_encoding_list(ZSTR_VAL(new_value), ZSTR_LEN(new_value), &list, &size, 1) || size == 0) {
+	if (FAILURE == php_mb_parse_encoding_list(ZSTR_VAL(new_value), ZSTR_LEN(new_value), &list, &size, 1, 0) || size == 0) {
 		return FAILURE;
 	}
 
@@ -885,7 +885,7 @@ static PHP_INI_MH(OnUpdate_mbstring_detect_order)
 static int _php_mb_ini_mbstring_http_input_set(const char *new_value, size_t new_value_length) {
 	const mbfl_encoding **list;
 	size_t size;
-	if (FAILURE == php_mb_parse_encoding_list(new_value, new_value_length, &list, &size, 1) || size == 0) {
+	if (FAILURE == php_mb_parse_encoding_list(new_value, new_value_length, &list, &size, 1, 0) || size == 0) {
 		return FAILURE;
 	}
 	if (MBSTRG(http_input_list)) {
@@ -1555,8 +1555,8 @@ PHP_FUNCTION(mb_detect_order)
 				RETURN_FALSE;
 			}
 		} else {
-			if (FAILURE == php_mb_parse_encoding_list(ZSTR_VAL(order_str), ZSTR_LEN(order_str), &list, &size, 0)) {
-				RETURN_FALSE;
+			if (FAILURE == php_mb_parse_encoding_list(ZSTR_VAL(order_str), ZSTR_LEN(order_str), &list, &size, 0, 1)) {
+				RETURN_THROWS();
 			}
 		}
 
@@ -2795,8 +2795,9 @@ PHP_FUNCTION(mb_convert_encoding)
 		}
 		free_from_encodings = 1;
 	} else if (from_encodings_str) {
-		if (php_mb_parse_encoding_list(ZSTR_VAL(from_encodings_str), ZSTR_LEN(from_encodings_str), &from_encodings, &num_from_encodings, 0) == FAILURE) {
-			RETURN_FALSE;
+		if (php_mb_parse_encoding_list(ZSTR_VAL(from_encodings_str), ZSTR_LEN(from_encodings_str),
+			&from_encodings, &num_from_encodings, 0, 3) == FAILURE) {
+			RETURN_THROWS();
 		}
 		free_from_encodings = 1;
 	} else {
@@ -2981,8 +2982,8 @@ PHP_FUNCTION(mb_detect_encoding)
 		}
 		free_elist = 1;
 	} else if (encoding_str) {
-		if (FAILURE == php_mb_parse_encoding_list(ZSTR_VAL(encoding_str), ZSTR_LEN(encoding_str), &elist, &size, 0)) {
-			RETURN_FALSE;
+		if (FAILURE == php_mb_parse_encoding_list(ZSTR_VAL(encoding_str), ZSTR_LEN(encoding_str), &elist, &size, 0, 2)) {
+			RETURN_THROWS();
 		}
 		free_elist = 1;
 	} else {
@@ -3380,8 +3381,8 @@ PHP_FUNCTION(mb_convert_variables)
 			RETURN_FALSE;
 		}
 	} else {
-		if (php_mb_parse_encoding_list(ZSTR_VAL(from_enc_str), ZSTR_LEN(from_enc_str), &elist, &elistsz, 0) == FAILURE) {
-			RETURN_FALSE;
+		if (php_mb_parse_encoding_list(ZSTR_VAL(from_enc_str), ZSTR_LEN(from_enc_str), &elist, &elistsz, 0, 2) == FAILURE) {
+			RETURN_THROWS();
 		}
 	}
 
