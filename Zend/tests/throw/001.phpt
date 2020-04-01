@@ -148,7 +148,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 string(13) "true && throw"
 bool(false)
 string(14) "true and throw"
@@ -167,9 +167,7 @@ string(3) "bar"
 string(11) "exception 1"
 bool(true)
 string(20) "false ? true : throw"
-
-Notice: Object of class Exception could not be converted to number in %s on line %d
-string(22) "Can only throw objects"
+string(39) "Unsupported operand types: object + int"
 string(35) "throw $exception = new Exception();"
 string(37) "throw $exception ??= new Exception();"
 string(30) "throw null ?? new Exception();"

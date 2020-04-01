@@ -26,13 +26,18 @@ $a = array(
 );
 
 foreach ($a as $var) {
-    $var++;
+    try {
+        $var++;
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
     var_dump($var);
 }
 
 echo "Done\n";
 ?>
 --EXPECTF--
+Cannot increment array
 array(3) {
   [0]=>
   int(1)
@@ -51,8 +56,10 @@ float(3.5)
 int(1)
 bool(true)
 bool(false)
+Cannot increment object
 object(stdClass)#%d (0) {
 }
+Cannot increment array
 array(0) {
 }
 float(2147483648)

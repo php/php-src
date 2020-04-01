@@ -7219,11 +7219,9 @@ ZEND_API zend_bool zend_binary_op_produces_error(uint32_t opcode, zval *op1, zva
 			/* Adding two arrays is allowed. */
 			return 0;
 		}
-		if (opcode == ZEND_ADD || opcode == ZEND_SUB || opcode == ZEND_MUL || opcode == ZEND_POW
-				|| opcode == ZEND_DIV) {
-			/* These operators throw when one of the operands is an array. */
-			return 1;
-		}
+
+		/* Numeric operators throw when one of the operands is an array. */
+		return 1;
 	}
 
 	/* While basic arithmetic operators always produce numeric string errors,

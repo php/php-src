@@ -251,20 +251,17 @@ static zend_never_inline int ZEND_FASTCALL _zendi_try_convert_scalar_to_number(z
 				}
 			}
 			return SUCCESS;
-		case IS_RESOURCE:
-			ZVAL_LONG(holder, Z_RES_HANDLE_P(op));
-			return SUCCESS;
 		case IS_OBJECT:
-			convert_object_to_type(op, holder, _IS_NUMBER);
-			if (UNEXPECTED(EG(exception))) {
+			if (Z_OBJ_HT_P(op)->cast_object(Z_OBJ_P(op), holder, _IS_NUMBER) == FAILURE
+					|| EG(exception)) {
 				return FAILURE;
 			}
-			if (UNEXPECTED(Z_TYPE_P(holder) != IS_LONG && Z_TYPE_P(holder) != IS_DOUBLE)) {
-				ZVAL_LONG(holder, 1);
-			}
+			ZEND_ASSERT(Z_TYPE_P(holder) == IS_LONG || Z_TYPE_P(holder) == IS_DOUBLE);
 			return SUCCESS;
-		default:
+		case IS_RESOURCE:
+		case IS_ARRAY:
 			return FAILURE;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
 /* }}} */
@@ -276,6 +273,59 @@ static zend_always_inline int zendi_try_convert_scalar_to_number(zval *op, zval 
 		return SUCCESS;
 	} else {
 		return _zendi_try_convert_scalar_to_number(op, holder);
+	}
+}
+/* }}} */
+
+static zend_never_inline zend_long ZEND_FASTCALL zendi_try_get_long(zval *op, zend_bool *failed) /* {{{ */
+{
+	*failed = 0;
+	switch (Z_TYPE_P(op)) {
+		case IS_NULL:
+		case IS_FALSE:
+			return 0;
+		case IS_TRUE:
+			return 1;
+		case IS_DOUBLE:
+			return zend_dval_to_lval(Z_DVAL_P(op));
+		case IS_STRING:
+			{
+				zend_uchar type;
+				zend_long lval;
+				double dval;
+				if (0 == (type = is_numeric_string(Z_STRVAL_P(op), Z_STRLEN_P(op), &lval, &dval, -1))) {
+					zend_error(E_WARNING, "A non-numeric value encountered");
+					if (UNEXPECTED(EG(exception))) {
+						*failed = 1;
+					}
+					return 0;
+				} else if (EXPECTED(type == IS_LONG)) {
+					return lval;
+				} else {
+					/* Previously we used strtol here, not is_numeric_string,
+					 * and strtol gives you LONG_MAX/_MIN on overflow.
+					 * We use use saturating conversion to emulate strtol()'s
+					 * behaviour.
+					 */
+					 return zend_dval_to_lval_cap(dval);
+				}
+			}
+		case IS_OBJECT:
+			{
+				zval dst;
+				if (Z_OBJ_HT_P(op)->cast_object(Z_OBJ_P(op), &dst, IS_LONG) == FAILURE
+						|| EG(exception)) {
+					*failed = 1;
+					return 0;
+				}
+				ZEND_ASSERT(Z_TYPE(dst) == IS_LONG);
+				return Z_LVAL(dst);
+			}
+		case IS_RESOURCE:
+		case IS_ARRAY:
+			*failed = 1;
+			return 0;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
 /* }}} */
@@ -307,9 +357,10 @@ static zend_always_inline int zendi_try_convert_scalar_to_number(zval *op, zval 
 		return SUCCESS; \
 	}
 
-#define convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, op)	\
+#define convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, opcode, sigil) \
 	do {																\
 		if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {						\
+			zend_bool failed;											\
 			if (Z_ISREF_P(op1)) {										\
 				op1 = Z_REFVAL_P(op1);									\
 				if (Z_TYPE_P(op1) == IS_LONG) {							\
@@ -317,9 +368,10 @@ static zend_always_inline int zendi_try_convert_scalar_to_number(zval *op, zval 
 					break;												\
 				}														\
 			}															\
-			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(op);					\
-			op1_lval = _zval_get_long_func_noisy(op1);					\
-			if (UNEXPECTED(EG(exception))) {							\
+			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(opcode);				\
+			op1_lval = zendi_try_get_long(op1, &failed);				\
+			if (UNEXPECTED(failed)) {									\
+				zend_binop_error(sigil, op1, op2);						\
 				if (result != op1) {									\
 					ZVAL_UNDEF(result);									\
 				}														\
@@ -331,6 +383,7 @@ static zend_always_inline int zendi_try_convert_scalar_to_number(zval *op, zval 
 	} while (0);														\
 	do {																\
 		if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {						\
+			zend_bool failed;											\
 			if (Z_ISREF_P(op2)) {										\
 				op2 = Z_REFVAL_P(op2);									\
 				if (Z_TYPE_P(op2) == IS_LONG) {							\
@@ -338,9 +391,10 @@ static zend_always_inline int zendi_try_convert_scalar_to_number(zval *op, zval 
 					break;												\
 				}														\
 			}															\
-			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(op);					\
-			op2_lval = _zval_get_long_func_noisy(op2);					\
-			if (UNEXPECTED(EG(exception))) {							\
+			ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(opcode);				\
+			op2_lval = zendi_try_get_long(op2, &failed);				\
+			if (UNEXPECTED(failed)) {									\
+				zend_binop_error(sigil, op1, op2);						\
 				if (result != op1) {									\
 					ZVAL_UNDEF(result);									\
 				}														\
@@ -843,12 +897,6 @@ ZEND_API zend_long ZEND_FASTCALL zval_get_long_func(zval *op) /* {{{ */
 }
 /* }}} */
 
-static zend_long ZEND_FASTCALL _zval_get_long_func_noisy(zval *op) /* {{{ */
-{
-	return _zval_get_long_func_ex(op, 0);
-}
-/* }}} */
-
 ZEND_API double ZEND_FASTCALL zval_get_double_func(zval *op) /* {{{ */
 {
 try_again:
@@ -1343,7 +1391,7 @@ ZEND_API int ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {
 {
 	zend_long op1_lval, op2_lval;
 
-	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_MOD);
+	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_MOD, "%");
 
 	if (op2_lval == 0) {
 		/* modulus by zero */
@@ -1482,7 +1530,8 @@ try_again:
 			if (result != op1) {
 				ZVAL_UNDEF(result);
 			}
-			zend_throw_error(NULL, "Unsupported operand types");
+			zend_type_error("Cannot perform bitwise not on %s",
+				zend_get_type_by_const(Z_TYPE_P(op1)));
 			return FAILURE;
 	}
 }
@@ -1534,9 +1583,11 @@ ZEND_API int ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, zval *op
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
+		zend_bool failed;
 		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_OR);
-		op1_lval = _zval_get_long_func_noisy(op1);
-		if (UNEXPECTED(EG(exception))) {
+		op1_lval = zendi_try_get_long(op1, &failed);
+		if (UNEXPECTED(failed)) {
+			zend_binop_error("|", op1, op2);
 			if (result != op1) {
 				ZVAL_UNDEF(result);
 			}
@@ -1546,9 +1597,11 @@ ZEND_API int ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, zval *op
 		op1_lval = Z_LVAL_P(op1);
 	}
 	if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
+		zend_bool failed;
 		ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_OR);
-		op2_lval = _zval_get_long_func_noisy(op2);
-		if (UNEXPECTED(EG(exception))) {
+		op2_lval = zendi_try_get_long(op2, &failed);
+		if (UNEXPECTED(failed)) {
+			zend_binop_error("|", op1, op2);
 			if (result != op1) {
 				ZVAL_UNDEF(result);
 			}
@@ -1612,9 +1665,11 @@ ZEND_API int ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1, zval *o
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
+		zend_bool failed;
 		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_AND);
-		op1_lval = _zval_get_long_func_noisy(op1);
-		if (UNEXPECTED(EG(exception))) {
+		op1_lval = zendi_try_get_long(op1, &failed);
+		if (UNEXPECTED(failed)) {
+			zend_binop_error("&", op1, op2);
 			if (result != op1) {
 				ZVAL_UNDEF(result);
 			}
@@ -1624,9 +1679,11 @@ ZEND_API int ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1, zval *o
 		op1_lval = Z_LVAL_P(op1);
 	}
 	if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
+		zend_bool failed;
 		ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_AND);
-		op2_lval = _zval_get_long_func_noisy(op2);
-		if (UNEXPECTED(EG(exception))) {
+		op2_lval = zendi_try_get_long(op2, &failed);
+		if (UNEXPECTED(failed)) {
+			zend_binop_error("&", op1, op2);
 			if (result != op1) {
 				ZVAL_UNDEF(result);
 			}
@@ -1690,9 +1747,11 @@ ZEND_API int ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1, zval *o
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
+		zend_bool failed;
 		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_XOR);
-		op1_lval = _zval_get_long_func_noisy(op1);
-		if (UNEXPECTED(EG(exception))) {
+		op1_lval = zendi_try_get_long(op1, &failed);
+		if (UNEXPECTED(failed)) {
+			zend_binop_error("^", op1, op2);
 			if (result != op1) {
 				ZVAL_UNDEF(result);
 			}
@@ -1702,9 +1761,11 @@ ZEND_API int ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1, zval *o
 		op1_lval = Z_LVAL_P(op1);
 	}
 	if (UNEXPECTED(Z_TYPE_P(op2) != IS_LONG)) {
+		zend_bool failed;
 		ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(ZEND_BW_XOR);
-		op2_lval = _zval_get_long_func_noisy(op2);
-		if (UNEXPECTED(EG(exception))) {
+		op2_lval = zendi_try_get_long(op2, &failed);
+		if (UNEXPECTED(failed)) {
+			zend_binop_error("^", op1, op2);
 			if (result != op1) {
 				ZVAL_UNDEF(result);
 			}
@@ -1726,7 +1787,7 @@ ZEND_API int ZEND_FASTCALL shift_left_function(zval *result, zval *op1, zval *op
 {
 	zend_long op1_lval, op2_lval;
 
-	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SL);
+	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SL, "<<");
 
 	/* prevent wrapping quirkiness on some processors where << 64 + x == << x */
 	if (UNEXPECTED((zend_ulong)op2_lval >= SIZEOF_ZEND_LONG * 8)) {
@@ -1763,7 +1824,7 @@ ZEND_API int ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *o
 {
 	zend_long op1_lval, op2_lval;
 
-	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SR);
+	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SR, ">>");
 
 	/* prevent wrapping quirkiness on some processors where >> 64 + x == >> x */
 	if (UNEXPECTED((zend_ulong)op2_lval >= SIZEOF_ZEND_LONG * 8)) {
@@ -2359,22 +2420,27 @@ try_again:
 				}
 			}
 			break;
-		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
-				zval op2;
-				int res;
-
-				ZVAL_LONG(&op2, 1);
-				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_ADD, op1, op1, &op2);
-
-				return res;
-			}
-			return FAILURE;
+		case IS_FALSE:
+		case IS_TRUE:
+			/* Do nothing. */
+			break;
 		case IS_REFERENCE:
 			op1 = Z_REFVAL_P(op1);
 			goto try_again;
-		default:
+		case IS_OBJECT:
+			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
+				zval op2;
+				ZVAL_LONG(&op2, 1);
+				if (Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_ADD, op1, op1, &op2) == SUCCESS) {
+					return SUCCESS;
+				}
+			}
+			/* break missing intentionally */
+		case IS_RESOURCE:
+		case IS_ARRAY:
+			zend_type_error("Cannot increment %s", zend_get_type_by_const(Z_TYPE_P(op1)));
 			return FAILURE;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 	return SUCCESS;
 }
@@ -2415,22 +2481,28 @@ try_again:
 					break;
 			}
 			break;
-		case IS_OBJECT:
-			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
-				zval op2;
-				int res;
-
-				ZVAL_LONG(&op2, 1);
-				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_SUB, op1, op1, &op2);
-
-				return res;
-			}
-			return FAILURE;
+		case IS_NULL:
+		case IS_FALSE:
+		case IS_TRUE:
+			/* Do nothing. */
+			break;
 		case IS_REFERENCE:
 			op1 = Z_REFVAL_P(op1);
 			goto try_again;
-		default:
+		case IS_OBJECT:
+			if (Z_OBJ_HANDLER_P(op1, do_operation)) {
+				zval op2;
+				ZVAL_LONG(&op2, 1);
+				if (Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_SUB, op1, op1, &op2) == SUCCESS) {
+					return SUCCESS;
+				}
+			}
+			/* break missing intentionally */
+		case IS_RESOURCE:
+		case IS_ARRAY:
+			zend_type_error("Cannot decrement %s", zend_get_type_by_const(Z_TYPE_P(op1)));
 			return FAILURE;
+		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 
 	return SUCCESS;

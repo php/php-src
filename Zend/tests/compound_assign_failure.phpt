@@ -34,167 +34,167 @@ try {
 
 $x = new stdClass;
 try { $x += 1; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = 1;
 try { $x += new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = "foo";
 try { $x += new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = new stdClass;
 try { $x -= 1; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = 1;
 try { $x -= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = "foo";
 try { $x -= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = new stdClass;
 try { $x *= 1; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = 1;
 try { $x *= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = "foo";
 try { $x *= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = new stdClass;
 try { $x /= 1; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = 1;
 try { $x /= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = "foo";
 try { $x /= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = new stdClass;
 try { $x %= 1; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = 1;
 try { $x %= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = "foo";
 try { $x %= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = new stdClass;
 try { $x **= 1; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = 1;
 try { $x **= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = "foo";
 try { $x **= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = new stdClass;
 try { $x ^= 1; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = 1;
 try { $x ^= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = "foo";
 try { $x ^= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = new stdClass;
 try { $x &= 1; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = 1;
 try { $x &= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = "foo";
 try { $x &= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = new stdClass;
 try { $x |= 1; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = 1;
 try { $x |= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = "foo";
 try { $x |= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = new stdClass;
 try { $x <<= 1; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = 1;
 try { $x <<= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = "foo";
 try { $x <<= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = new stdClass;
 try { $x >>= 1; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = 1;
 try { $x >>= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 $x = "foo";
 try { $x >>= new stdClass; }
-catch (Exception $e) {}
+catch (Throwable $e) {}
 var_dump($x);
 
 ?>

@@ -26,13 +26,18 @@ $a = array(
 );
 
 foreach ($a as $var) {
-    $var--;
+    try {
+        $var--;
+    } catch (TypeError $e) {
+        echo $e->getMessage(), "\n";
+    }
     var_dump($var);
 }
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
+Cannot decrement array
 array(3) {
   [0]=>
   int(1)
@@ -51,8 +56,10 @@ float(1.5)
 NULL
 bool(true)
 bool(false)
-object(stdClass)#%d (0) {
+Cannot decrement object
+object(stdClass)#1 (0) {
 }
+Cannot decrement array
 array(0) {
 }
 float(-9.223372036854776E+18)

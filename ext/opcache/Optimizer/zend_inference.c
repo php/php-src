@@ -4354,8 +4354,8 @@ int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_
 			 && (t2 & MAY_BE_ANY) == MAY_BE_ARRAY) {
 				return 0;
 			}
-			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
-				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
+				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_DIV:
 		case ZEND_MOD:
 			if (!OP2_HAS_RANGE() ||
@@ -4367,12 +4367,12 @@ int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_
 		case ZEND_SUB:
 		case ZEND_MUL:
 		case ZEND_POW:
-			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
-				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
+				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_SL:
 		case ZEND_SR:
-			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
-				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
+				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
 				!OP2_HAS_RANGE() ||
 				OP2_MIN_RANGE() < 0;
 		case ZEND_CONCAT:
@@ -4386,15 +4386,16 @@ int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_
 			 && (t2 & MAY_BE_ANY) == MAY_BE_STRING) {
 				return 0;
 			}
-			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
-				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
+				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 		case ZEND_BW_NOT:
 			return (t1 & (MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_TRUE|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
-		case ZEND_BOOL_NOT:
 		case ZEND_PRE_INC:
 		case ZEND_POST_INC:
 		case ZEND_PRE_DEC:
 		case ZEND_POST_DEC:
+			return (t1 & (MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
+		case ZEND_BOOL_NOT:
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:
 		case ZEND_JMPZNZ:
@@ -4422,8 +4423,8 @@ int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_
 				 && (t2 & MAY_BE_ANY) == MAY_BE_ARRAY) {
 					return 0;
 				}
-				return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
-					(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+				return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
+					(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 			} else if (opline->extended_value == ZEND_DIV ||
 				opline->extended_value == ZEND_MOD) {
 				if (!OP2_HAS_RANGE() ||
@@ -4431,17 +4432,17 @@ int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_
 					/* Division by zero */
 					return 1;
 				}
-				return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
-					(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+				return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
+					(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 			} else if (opline->extended_value == ZEND_SUB ||
 				opline->extended_value == ZEND_MUL ||
 				opline->extended_value == ZEND_POW) {
-				return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
-					(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+				return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
+					(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 			} else if (opline->extended_value == ZEND_SL ||
 				opline->extended_value == ZEND_SR) {
-				return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
-					(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
+				return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
+					(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
 					!OP2_HAS_RANGE() ||
 					OP2_MIN_RANGE() < 0;
 			} else if (opline->extended_value == ZEND_CONCAT) {
@@ -4454,8 +4455,8 @@ int zend_may_throw(const zend_op *opline, const zend_ssa_op *ssa_op, const zend_
 				 && (t2 & MAY_BE_ANY) == MAY_BE_STRING) {
 					return 0;
 				}
-				return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
-					(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
+				return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) ||
+					(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 			}
 			return 1;
 		case ZEND_ASSIGN:

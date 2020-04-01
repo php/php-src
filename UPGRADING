@@ -181,7 +181,14 @@ PHP 8.0 UPGRADE NOTES
   . Disabled functions are now treated exactly like non-existent functions.
     Calling a disabled function will report it as unknown, and redefining a
     disabled function is now possible.
-  . data: wrappers are no longer writable, what matches the documented behavior.
+  . data: stream wrappers are no longer writable, which matches the documented
+    behavior.
+  . The arithmetic and bitwise operators
+    +, -, *, /, **, %, <<, >>, &, |, ^, ~, ++, --
+    will now consistently throw a TypeError when one of the operands is an
+    array, resource or non-overloaded object. The only exception to this is the
+    array + array merge operation, which remains supported.
+    RFC: https://wiki.php.net/rfc/arithmetic_operator_type_checks
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
