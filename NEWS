@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 
 ?? ??? ????, PHP 7.4.6
 
+- MBString:
+  . Fixed bug #79441 (Segfault in mb_chr() if internal encoding is unsupported).
+    (Girgias)
 
 ?? ??? ????, PHP 7.4.5
 
