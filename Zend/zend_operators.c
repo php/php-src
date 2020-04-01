@@ -276,7 +276,34 @@ static zend_always_inline int zendi_try_convert_scalar_to_number(zval *op, zval 
 	}
 }
 
-#define convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, op, op_func) \
+#define ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(opcode) \
+	if (UNEXPECTED(Z_TYPE_P(op1) == IS_OBJECT) \
+		&& UNEXPECTED(Z_OBJ_HANDLER_P(op1, do_operation))) { \
+		if (EXPECTED(SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, op2))) { \
+			return SUCCESS; \
+		} \
+	}
+
+#define ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(opcode) \
+	if (UNEXPECTED(Z_TYPE_P(op2) == IS_OBJECT) \
+		&& UNEXPECTED(Z_OBJ_HANDLER_P(op2, do_operation)) \
+		&& EXPECTED(SUCCESS == Z_OBJ_HANDLER_P(op2, do_operation)(opcode, result, op1, op2))) { \
+		return SUCCESS; \
+	}
+
+#define ZEND_TRY_BINARY_OBJECT_OPERATION(opcode) \
+	ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(opcode) \
+	else \
+	ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(opcode)
+
+#define ZEND_TRY_UNARY_OBJECT_OPERATION(opcode) \
+	if (UNEXPECTED(Z_TYPE_P(op1) == IS_OBJECT) \
+		&& UNEXPECTED(Z_OBJ_HANDLER_P(op1, do_operation)) \
+		&& EXPECTED(SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, NULL))) { \
+		return SUCCESS; \
+	}
+
+#define convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, op)	\
 	do {																\
 		if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {						\
 			if (Z_ISREF_P(op1)) {										\
@@ -286,7 +313,7 @@ static zend_always_inline int zendi_try_convert_scalar_to_number(zval *op, zval 
 					break;												\
 				}														\
 			}															\
-			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(op, op_func);			\
+			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(op);					\
 			op1_lval = _zval_get_long_func_noisy(op1);					\
 			if (UNEXPECTED(EG(exception))) {							\
 				if (result != op1) {									\
@@ -959,7 +986,7 @@ static zend_never_inline int ZEND_FASTCALL add_function_slow(zval *result, zval 
 		return SUCCESS;
 	}
 
-	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_ADD, add_function);
+	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_ADD);
 
 	zval op1_copy, op2_copy;
 	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
@@ -1024,7 +1051,7 @@ static zend_never_inline int ZEND_FASTCALL sub_function_slow(zval *result, zval 
 		return SUCCESS;
 	}
 
-	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_SUB, sub_function);
+	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_SUB);
 
 	zval op1_copy, op2_copy;
 	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
@@ -1093,7 +1120,7 @@ static zend_never_inline int ZEND_FASTCALL mul_function_slow(zval *result, zval 
 		return SUCCESS;
 	}
 
-	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_MUL, mul_function);
+	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_MUL);
 
 	zval op1_copy, op2_copy;
 	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
@@ -1194,7 +1221,7 @@ ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {
 		return SUCCESS;
 	}
 
-	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_POW, pow_function);
+	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_POW);
 
 	zval op1_copy, op2_copy;
 	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
@@ -1274,7 +1301,7 @@ ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {
 		return SUCCESS;
 	}
 
-	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_DIV, div_function);
+	ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_DIV);
 
 	zval op1_copy, op2_copy;
 	if (UNEXPECTED(zendi_try_convert_scalar_to_number(op1, &op1_copy) == FAILURE)
@@ -1304,7 +1331,7 @@ ZEND_API int ZEND_FASTCALL mod_function(zval *result, zval *op1, zval *op2) /* {
 {
 	zend_long op1_lval, op2_lval;
 
-	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_MOD, mod_function);
+	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_MOD);
 
 	if (op2_lval == 0) {
 		/* modulus by zero */
@@ -1354,7 +1381,7 @@ ZEND_API int ZEND_FASTCALL boolean_xor_function(zval *result, zval *op1, zval *o
 					break;
 				}
 			}
-			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BOOL_XOR, boolean_xor_function);
+			ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BOOL_XOR);
 			op1_val = zval_is_true(op1);
 		}
 	} while (0);
@@ -1495,7 +1522,7 @@ ZEND_API int ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, zval *op
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
-		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_OR, bitwise_or_function);
+		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_OR);
 		op1_lval = _zval_get_long_func_noisy(op1);
 		if (UNEXPECTED(EG(exception))) {
 			if (result != op1) {
@@ -1573,7 +1600,7 @@ ZEND_API int ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1, zval *o
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
-		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_AND, bitwise_and_function);
+		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_AND);
 		op1_lval = _zval_get_long_func_noisy(op1);
 		if (UNEXPECTED(EG(exception))) {
 			if (result != op1) {
@@ -1651,7 +1678,7 @@ ZEND_API int ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1, zval *o
 	}
 
 	if (UNEXPECTED(Z_TYPE_P(op1) != IS_LONG)) {
-		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_XOR, bitwise_xor_function);
+		ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(ZEND_BW_XOR);
 		op1_lval = _zval_get_long_func_noisy(op1);
 		if (UNEXPECTED(EG(exception))) {
 			if (result != op1) {
@@ -1687,7 +1714,7 @@ ZEND_API int ZEND_FASTCALL shift_left_function(zval *result, zval *op1, zval *op
 {
 	zend_long op1_lval, op2_lval;
 
-	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SL, shift_left_function);
+	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SL);
 
 	/* prevent wrapping quirkiness on some processors where << 64 + x == << x */
 	if (UNEXPECTED((zend_ulong)op2_lval >= SIZEOF_ZEND_LONG * 8)) {
@@ -1724,7 +1751,7 @@ ZEND_API int ZEND_FASTCALL shift_right_function(zval *result, zval *op1, zval *o
 {
 	zend_long op1_lval, op2_lval;
 
-	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SR, shift_right_function);
+	convert_op1_op2_long(op1, op1_lval, op2, op2_lval, result, ZEND_SR);
 
 	/* prevent wrapping quirkiness on some processors where >> 64 + x == >> x */
 	if (UNEXPECTED((zend_ulong)op2_lval >= SIZEOF_ZEND_LONG * 8)) {
@@ -1770,7 +1797,7 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 	 			op1 = Z_REFVAL_P(op1);
 	 			if (Z_TYPE_P(op1) == IS_STRING) break;
 	 		}
-			ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_CONCAT, concat_function);
+			ZEND_TRY_BINARY_OBJECT_OPERATION(ZEND_CONCAT);
 			ZVAL_STR(&op1_copy, zval_get_string_func(op1));
 			if (UNEXPECTED(EG(exception))) {
 				zval_ptr_dtor_str(&op1_copy);

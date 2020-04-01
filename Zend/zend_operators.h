@@ -919,33 +919,6 @@ static zend_always_inline zend_bool fast_is_not_identical_function(zval *op1, zv
 	return !zend_is_identical(op1, op2);
 }
 
-#define ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(opcode, binary_op)                                            \
-	if (UNEXPECTED(Z_TYPE_P(op1) == IS_OBJECT)                                                      \
-		&& UNEXPECTED(Z_OBJ_HANDLER_P(op1, do_operation))) {                                               \
-		if (EXPECTED(SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, op2))) { \
-			return SUCCESS;                                                                                \
-		}                                                                                                  \
-	}
-
-#define ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(opcode)                                                       \
-	if (UNEXPECTED(Z_TYPE_P(op2) == IS_OBJECT)                                                             \
-		&& UNEXPECTED(Z_OBJ_HANDLER_P(op2, do_operation))                                                  \
-		&& EXPECTED(SUCCESS == Z_OBJ_HANDLER_P(op2, do_operation)(opcode, result, op1, op2))) {  \
-		return SUCCESS;                                                                                    \
-	}
-
-#define ZEND_TRY_BINARY_OBJECT_OPERATION(opcode, binary_op)                                                \
-	ZEND_TRY_BINARY_OP1_OBJECT_OPERATION(opcode, binary_op)                                                \
-	else                                                                                                   \
-	ZEND_TRY_BINARY_OP2_OBJECT_OPERATION(opcode)
-
-#define ZEND_TRY_UNARY_OBJECT_OPERATION(opcode)                                                            \
-	if (UNEXPECTED(Z_TYPE_P(op1) == IS_OBJECT)                                                             \
-		&& UNEXPECTED(Z_OBJ_HANDLER_P(op1, do_operation))                                                  \
-		&& EXPECTED(SUCCESS == Z_OBJ_HANDLER_P(op1, do_operation)(opcode, result, op1, NULL))) { \
-		return SUCCESS;                                                                                    \
-	}
-
 /* buf points to the END of the buffer */
 static zend_always_inline char *zend_print_ulong_to_buf(char *buf, zend_ulong num) {
 	*buf = '\0';
