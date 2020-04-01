@@ -24,13 +24,8 @@ try {
 
 ?>
 --EXPECTF--
-Warning: mb_convert_encoding(): Unknown encoding "0" in %s on line %d
-bool(false)
+mb_convert_encoding(): Argument #3 ($from) contains invalid encoding "0"
 
 Warning: Array to string conversion in %s on line %d
-
-Warning: mb_convert_encoding(): Unknown encoding "Array" in %s on line %d
-bool(false)
-
-Warning: mb_convert_encoding(): Unknown encoding "foo" in %s on line %d
-bool(false)
+mb_convert_encoding(): Argument #3 ($from) contains invalid encoding "Array"
+mb_convert_encoding(): Argument #3 ($from) contains invalid encoding "foo"

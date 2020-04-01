@@ -35,17 +35,23 @@ print implode(', ', mb_detect_order()) . "\n";
 // Set invalid encoding. Should fail.
 print "== INVALID PARAMETER ==\n";
 
-$r = mb_detect_order('BAD_NAME');
-($r === FALSE) ? print "OK_BAD_STR\n" : print "NG_BAD_STR\n";
-print implode(', ', mb_detect_order()) . "\n";
+try {
+    var_dump(mb_detect_order('BAD_NAME'));
+} catch (\ValueError $e) {
+     echo $e->getMessage() . \PHP_EOL;
+}
+var_dump(mb_detect_order());
 
 $a[] = 'BAD_NAME';
-$r = mb_detect_order($a);
-($r ===	FALSE) ? print "OK_BAD_ARRAY\n" : print "NG_BAD_ARRAY\n";
-print implode(', ', mb_detect_order()) . "\n";
+try {
+    var_dump(mb_detect_order($a));
+} catch (\ValueError $e) {
+     echo $e->getMessage() . \PHP_EOL;
+}
+var_dump(mb_detect_order());
 
 ?>
---EXPECTF--
+--EXPECT--
 OK_AUTO
 ASCII, JIS, UTF-8, EUC-JP, SJIS
 OK_STR
@@ -53,11 +59,25 @@ SJIS, EUC-JP, JIS, UTF-8
 OK_ARRAY
 ASCII, JIS, EUC-JP, UTF-8
 == INVALID PARAMETER ==
-
-Warning: mb_detect_order(): Unknown encoding "BAD_NAME" in %s on line %d
-OK_BAD_STR
-ASCII, JIS, EUC-JP, UTF-8
-
-Warning: mb_detect_order(): Unknown encoding "BAD_NAME" in %s on line %d
-OK_BAD_ARRAY
-ASCII, JIS, EUC-JP, UTF-8
+mb_detect_order(): Argument #1 ($encoding) contains invalid encoding "BAD_NAME"
+array(4) {
+  [0]=>
+  string(5) "ASCII"
+  [1]=>
+  string(3) "JIS"
+  [2]=>
+  string(6) "EUC-JP"
+  [3]=>
+  string(5) "UTF-8"
+}
+mb_detect_order(): Argument #1 ($encoding) contains invalid encoding "BAD_NAME"
+array(4) {
+  [0]=>
+  string(5) "ASCII"
+  [1]=>
+  string(3) "JIS"
+  [2]=>
+  string(6) "EUC-JP"
+  [3]=>
+  string(5) "UTF-8"
+}
