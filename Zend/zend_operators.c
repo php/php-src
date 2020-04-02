@@ -1017,6 +1017,7 @@ static zend_never_inline int ZEND_FASTCALL add_function_slow(zval *result, zval 
 	}
 
 	ZEND_ASSERT(0 && "Operation must succeed");
+	return FAILURE;
 } /* }}} */
 
 ZEND_API int ZEND_FASTCALL add_function(zval *result, zval *op1, zval *op2) /* {{{ */
@@ -1080,6 +1081,7 @@ static zend_never_inline int ZEND_FASTCALL sub_function_slow(zval *result, zval 
 	}
 
 	ZEND_ASSERT(0 && "Operation must succeed");
+	return FAILURE;
 }
 /* }}} */
 
@@ -1147,6 +1149,7 @@ static zend_never_inline int ZEND_FASTCALL mul_function_slow(zval *result, zval 
 	}
 
 	ZEND_ASSERT(0 && "Operation must succeed");
+	return FAILURE;
 }
 /* }}} */
 
@@ -1246,6 +1249,7 @@ ZEND_API int ZEND_FASTCALL pow_function(zval *result, zval *op1, zval *op2) /* {
 	}
 
 	ZEND_ASSERT(0 && "Operation must succeed");
+	return FAILURE;
 }
 /* }}} */
 
@@ -1324,6 +1328,7 @@ ZEND_API int ZEND_FASTCALL div_function(zval *result, zval *op1, zval *op2) /* {
 	}
 
 	ZEND_ASSERT(0 && "Operation must succeed");
+	return FAILURE;
 }
 /* }}} */
 
