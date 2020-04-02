@@ -351,6 +351,7 @@ static const mbfl_encoding *php_mb_get_encoding(zend_string *encoding_name, uint
 
 /* {{{ static int php_mb_parse_encoding_list()
  *  Return FAILURE if input contains any illegal encoding, otherwise SUCCESS.
+ * 	Emits a ValueError in function context and a warning in INI context, in INI context arg_num must be 0.
  */
 static int php_mb_parse_encoding_list(const char *value, size_t value_length,
 	const mbfl_encoding ***return_list, size_t *return_size, int persistent, uint32_t arg_num)
@@ -416,15 +417,20 @@ static int php_mb_parse_encoding_list(const char *value, size_t value_length,
 				}
 			} else {
 				const mbfl_encoding *encoding = mbfl_name2encoding(p1);
-				if (encoding) {
-					*entry++ = encoding;
-					n++;
-				} else {
-					zend_argument_value_error(arg_num, "contains invalid encoding \"%s\"", p1);
+				if (!encoding) {
+					/* Called from an INI setting modification */
+					if (arg_num == 0) {
+						php_error_docref("ref.mbstring", E_WARNING, "INI setting contains invalid encoding \"%s\"", p1);
+					} else {
+						zend_argument_value_error(arg_num, "contains invalid encoding \"%s\"", p1);
+					}
 					efree(tmpstr);
 					pefree(list, persistent);
 					return FAILURE;
 				}
+
+				*entry++ = encoding;
+				n++;
 			}
 			p1 = p2 + 1;
 		} while (n < size && p2 != NULL);
@@ -439,6 +445,7 @@ static int php_mb_parse_encoding_list(const char *value, size_t value_length,
 
 /* {{{ static int php_mb_parse_encoding_array()
  *  Return FAILURE if input contains any illegal encoding, otherwise SUCCESS.
+ * 	Emits a ValueError in function context and a warning in INI context, in INI context arg_num must be 0.
  */
 static int php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encoding ***return_list,
 	size_t *return_size, uint32_t arg_num)
@@ -475,7 +482,13 @@ static int php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encodi
 				*entry++ = encoding;
 				n++;
 			} else {
-				zend_argument_value_error(arg_num, "contains invalid encoding \"%s\"", ZSTR_VAL(encoding_str));
+				/* Called from an INI setting modification */
+				if (arg_num == 0) {
+					php_error_docref("ref.mbstring", E_WARNING, "INI setting contains invalid encoding \"%s\"",
+						ZSTR_VAL(encoding_str));
+				} else {
+					zend_argument_value_error(arg_num, "contains invalid encoding \"%s\"", ZSTR_VAL(encoding_str));
+				}
 				zend_string_release(encoding_str);
 				efree(list);
 				return FAILURE;

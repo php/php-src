@@ -15,19 +15,20 @@ mbstring.encoding_translation=BOOL_TRANSLATION
 mbstring.strict_detection=BOOL_STRICT_DETECTION
 --FILE--
 <?php
+// Empty as we are only testing INI settings
 ?>
 --EXPECT--
-PHP Fatal error:  (null)(): Argument #0 contains invalid encoding "DETECT_ORDER" in Unknown on line 0
+PHP Warning:  PHP Startup: INI setting contains invalid encoding "DETECT_ORDER" in Unknown on line 0
 PHP Deprecated:  PHP Startup: Use of mbstring.http_input is deprecated in Unknown on line 0
-PHP Fatal error:  (null)(): Argument #0 contains invalid encoding "HTTP_INPUT" in Unknown on line 0
+PHP Warning:  PHP Startup: INI setting contains invalid encoding "HTTP_INPUT" in Unknown on line 0
 PHP Deprecated:  PHP Startup: Use of mbstring.http_output is deprecated in Unknown on line 0
 PHP Deprecated:  PHP Startup: Use of mbstring.internal_encoding is deprecated in Unknown on line 0
 
-Fatal error: (null)(): Argument #0 contains invalid encoding "DETECT_ORDER" in Unknown on line 0
+Warning: PHP Startup: INI setting contains invalid encoding "DETECT_ORDER" in Unknown on line 0
 
 Deprecated: PHP Startup: Use of mbstring.http_input is deprecated in Unknown on line 0
 
-Fatal error: (null)(): Argument #0 contains invalid encoding "HTTP_INPUT" in Unknown on line 0
+Warning: PHP Startup: INI setting contains invalid encoding "HTTP_INPUT" in Unknown on line 0
 
 Deprecated: PHP Startup: Use of mbstring.http_output is deprecated in Unknown on line 0
 
