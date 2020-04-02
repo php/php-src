@@ -1862,6 +1862,7 @@ static int mbfl_split_output(int c, void *data)
     return 0;
 }
 
+/* TODO Document this function on php.net */
 PHP_FUNCTION(mb_str_split)
 {
 	zend_string *str, *encoding = NULL;
@@ -1879,8 +1880,8 @@ PHP_FUNCTION(mb_str_split)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (split_length <= 0) {
-		php_error_docref(NULL, E_WARNING, "The length of each segment must be greater than zero");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be greater than 0");
+		RETURN_THROWS();
 	}
 
 	/* fill mbfl_string structure */
@@ -1945,10 +1946,8 @@ PHP_FUNCTION(mb_str_split)
 				mbfl_memory_device_output,
 				NULL,
 				&device);
-		/* if something wrong with the decoded */
-		if (decoder == NULL) {
-			RETURN_FALSE;
-		}
+		/* assert that nothing is wrong with the decoder */
+		ZEND_ASSERT(decoder != NULL);
 
 		/* wchar filter */
 		mbfl_string_init(&result_string); /* mbfl_string to store chunk in the callback */
@@ -1966,11 +1965,8 @@ PHP_FUNCTION(mb_str_split)
 				mbfl_split_output,
 				NULL,
 				&params);
-		/* if something wrong with the filter */
-		if (filter == NULL){
-			mbfl_convert_filter_delete(decoder); /* this will free allocated memory for the decoded */
-			RETURN_FALSE;
-		}
+		/* assert that nothing is wrong with the filter */
+		ZEND_ASSERT(filter != NULL);
 
 		while (p < last - 1) { /* cycle each byte except last with callback function */
 			(*filter->filter_function)(*p++, filter);

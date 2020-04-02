@@ -19,7 +19,7 @@ function mb_parse_str(string $encoded_string, &$result): bool {}
 
 function mb_output_handler(string $contents, int $status): string {}
 
-function mb_str_split(string $str, int $split_length = 1, string $encoding = UNKNOWN): array|false {}
+function mb_str_split(string $str, int $split_length = 1, string $encoding = UNKNOWN): array {}
 
 function mb_strlen(string $str, string $encoding = UNKNOWN): int|false {}
 
