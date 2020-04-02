@@ -693,11 +693,13 @@ optional_visibility_modifier:
 
 parameter:
 		optional_visibility_modifier optional_type_without_static
-		is_reference is_variadic T_VARIABLE
-			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, NULL); }
+		is_reference is_variadic T_VARIABLE backup_doc_comment
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, NULL,
+					NULL, $6 ? zend_ast_create_zval_from_str($6) : NULL); }
 	|	optional_visibility_modifier optional_type_without_static
-		is_reference is_variadic T_VARIABLE '=' expr
-			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, $7); }
+		is_reference is_variadic T_VARIABLE backup_doc_comment '=' expr
+			{ $$ = zend_ast_create_ex(ZEND_AST_PARAM, $1 | $3 | $4, $2, $5, $8,
+					NULL, $6 ? zend_ast_create_zval_from_str($6) : NULL); }
 ;
 
 

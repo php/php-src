@@ -48,4 +48,4 @@ Class [ <user> class Test ] {
   }
 }
 
-bool(false)
+string(24) "/** @SomeAnnotation() */"

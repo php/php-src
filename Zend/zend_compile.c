@@ -5787,6 +5787,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 		zend_ast *var_ast = param_ast->child[1];
 		zend_ast *default_ast = param_ast->child[2];
 		zend_ast *attributes_ast = param_ast->child[3];
+		zend_ast *doc_comment_ast = param_ast->child[4];
 		zend_string *name = zval_make_interned_string(zend_ast_get_zval(var_ast));
 		zend_bool is_ref = (param_ast->attr & ZEND_PARAM_REF) != 0;
 		zend_bool is_variadic = (param_ast->attr & ZEND_PARAM_VARIADIC) != 0;
@@ -5938,8 +5939,10 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast, uint32_t fall
 				type = zend_compile_typename(type_ast, /* force_allow_null */ 0, /* use_arena */ 1);
 			}
 
+			zend_string *doc_comment =
+				doc_comment_ast ? zend_string_copy(zend_ast_get_str(doc_comment_ast)) : NULL;
 			zend_declare_typed_property(
-				scope, name, &default_value, visibility, /* doc_comment */ NULL, type);
+				scope, name, &default_value, visibility, doc_comment, type);
 		}
 	}
 
