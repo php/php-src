@@ -2165,26 +2165,41 @@ PHP_FUNCTION(mb_strripos)
 }
 /* }}} */
 
-/* {{{ proto string mb_strstr(string haystack, string needle[, bool part[, string encoding]])
-   Finds first occurrence of a string within another */
-PHP_FUNCTION(mb_strstr)
+#define MB_STRSTR 1
+#define MB_STRRCHR 2
+#define MB_STRISTR 3
+#define MB_STRRICHR 4
+/* {{{ php_mb_strstr_variants */
+static void php_mb_strstr_variants(INTERNAL_FUNCTION_PARAMETERS, unsigned int variant)
 {
+	int reverse_mode = 0;
 	size_t n;
 	mbfl_string haystack, needle, result, *ret = NULL;
-	zend_string *enc_name = NULL;
+	zend_string *encoding_name = NULL;
 	zend_bool part = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bS", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &enc_name) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bS",
+		(char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len,
+		&part, &encoding_name) == FAILURE
+	) {
 		RETURN_THROWS();
 	}
 
 	haystack.no_language = needle.no_language = MBSTRG(language);
-	haystack.encoding = needle.encoding = php_mb_get_encoding(enc_name, 4);
+	haystack.encoding = needle.encoding = php_mb_get_encoding(encoding_name, 4);
 	if (!haystack.encoding) {
 		RETURN_THROWS();
 	}
 
-	n = mbfl_strpos(&haystack, &needle, 0, 0);
+	if (variant == MB_STRRCHR || variant == MB_STRRICHR) { reverse_mode = 1; }
+
+	if (variant == MB_STRISTR || variant == MB_STRRICHR) {
+		n = php_mb_stripos(reverse_mode, (char *)haystack.val, haystack.len, (char *)needle.val,
+			needle.len, 0, needle.encoding);
+	} else {
+		n = mbfl_strpos(&haystack, &needle, 0, reverse_mode);
+	}
+
 	if (!mbfl_is_error(n)) {
 		if (part) {
 			ret = mbfl_substr(&haystack, &result, 0, n);
@@ -2208,6 +2223,13 @@ PHP_FUNCTION(mb_strstr)
 	} else {
 		RETVAL_FALSE;
 	}
+}
+
+/* {{{ proto string mb_strstr(string haystack, string needle[, bool part[, string encoding]])
+   Finds first occurrence of a string within another */
+PHP_FUNCTION(mb_strstr)
+{
+	php_mb_strstr_variants(INTERNAL_FUNCTION_PARAM_PASSTHRU, MB_STRSTR);
 }
 /* }}} */
 
@@ -2215,45 +2237,7 @@ PHP_FUNCTION(mb_strstr)
    Finds the last occurrence of a character in a string within another */
 PHP_FUNCTION(mb_strrchr)
 {
-	size_t n;
-	mbfl_string haystack, needle, result, *ret = NULL;
-	zend_string *enc_name = NULL;
-	zend_bool part = 0;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bS", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &enc_name) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	haystack.no_language = needle.no_language = MBSTRG(language);
-	haystack.encoding = needle.encoding = php_mb_get_encoding(enc_name, 4);
-	if (!haystack.encoding) {
-		RETURN_THROWS();
-	}
-
-	n = mbfl_strpos(&haystack, &needle, 0, 1);
-	if (!mbfl_is_error(n)) {
-		if (part) {
-			ret = mbfl_substr(&haystack, &result, 0, n);
-			if (ret != NULL) {
-				// TODO: avoid reallocation ???
-				RETVAL_STRINGL((char *)ret->val, ret->len);
-				efree(ret->val);
-			} else {
-				RETVAL_FALSE;
-			}
-		} else {
-			ret = mbfl_substr(&haystack, &result, n, MBFL_SUBSTR_UNTIL_END);
-			if (ret != NULL) {
-				// TODO: avoid reallocation ???
-				RETVAL_STRINGL((char *)ret->val, ret->len);
-				efree(ret->val);
-			} else {
-				RETVAL_FALSE;
-			}
-		}
-	} else {
-		RETVAL_FALSE;
-	}
+	php_mb_strstr_variants(INTERNAL_FUNCTION_PARAM_PASSTHRU, MB_STRRCHR);
 }
 /* }}} */
 
@@ -2261,45 +2245,7 @@ PHP_FUNCTION(mb_strrchr)
    Finds first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(mb_stristr)
 {
-	zend_bool part = 0;
-	size_t n;
-	mbfl_string haystack, needle, result, *ret = NULL;
-	zend_string *from_encoding = NULL;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bS", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &from_encoding) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	haystack.no_language = needle.no_language = MBSTRG(language);
-	haystack.encoding = needle.encoding = php_mb_get_encoding(from_encoding, 4);
-	if (!haystack.encoding) {
-		RETURN_THROWS();
-	}
-
-	n = php_mb_stripos(0, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, 0, needle.encoding);
-	if (mbfl_is_error(n)) {
-		RETURN_FALSE;
-	}
-
-	if (part) {
-		ret = mbfl_substr(&haystack, &result, 0, n);
-		if (ret != NULL) {
-			// TODO: avoid reallocation ???
-			RETVAL_STRINGL((char *)ret->val, ret->len);
-			efree(ret->val);
-		} else {
-			RETVAL_FALSE;
-		}
-	} else {
-		ret = mbfl_substr(&haystack, &result, n, MBFL_SUBSTR_UNTIL_END);
-		if (ret != NULL) {
-			// TODO: avoid reallocaton ???
-			RETVAL_STRINGL((char *)ret->val, ret->len);
-			efree(ret->val);
-		} else {
-			RETVAL_FALSE;
-		}
-	}
+	php_mb_strstr_variants(INTERNAL_FUNCTION_PARAM_PASSTHRU, MB_STRISTR);
 }
 /* }}} */
 
@@ -2307,47 +2253,14 @@ PHP_FUNCTION(mb_stristr)
    Finds the last occurrence of a character in a string within another, case insensitive */
 PHP_FUNCTION(mb_strrichr)
 {
-	zend_bool part = 0;
-	size_t n;
-	mbfl_string haystack, needle, result, *ret = NULL;
-	zend_string *from_encoding = NULL;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|bS", (char **)&haystack.val, &haystack.len, (char **)&needle.val, &needle.len, &part, &from_encoding) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	haystack.no_language = needle.no_language = MBSTRG(language);
-	haystack.encoding = needle.encoding = php_mb_get_encoding(from_encoding, 4);
-	if (!haystack.encoding) {
-		RETURN_THROWS();
-	}
-
-	n = php_mb_stripos(1, (char *)haystack.val, haystack.len, (char *)needle.val, needle.len, 0, needle.encoding);
-	if (mbfl_is_error(n)) {
-		RETURN_FALSE;
-	}
-
-	if (part) {
-		ret = mbfl_substr(&haystack, &result, 0, n);
-		if (ret != NULL) {
-			// TODO: avoid reallocation ???
-			RETVAL_STRINGL((char *)ret->val, ret->len);
-			efree(ret->val);
-		} else {
-			RETVAL_FALSE;
-		}
-	} else {
-		ret = mbfl_substr(&haystack, &result, n, MBFL_SUBSTR_UNTIL_END);
-		if (ret != NULL) {
-			// TODO: avoid reallocation ???
-			RETVAL_STRINGL((char *)ret->val, ret->len);
-			efree(ret->val);
-		} else {
-			RETVAL_FALSE;
-		}
-	}
+	php_mb_strstr_variants(INTERNAL_FUNCTION_PARAM_PASSTHRU, MB_STRRICHR);
 }
 /* }}} */
+
+#undef MB_STRSTR
+#undef MB_STRRCHR
+#undef MB_STRISTR
+#undef MB_STRRICHR
 
 /* {{{ proto int mb_substr_count(string haystack, string needle [, string encoding])
    Count the number of substring occurrences */
