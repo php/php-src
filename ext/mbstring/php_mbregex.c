@@ -26,6 +26,7 @@
 #include "php_mbregex.h"
 #include "mbstring.h"
 #include "libmbfl/filters/mbfilter_utf8.h"
+#include <stdbool.h>
 
 #include "php_onig_compat.h" /* must come prior to the oniguruma header */
 #include <oniguruma.h>
@@ -591,8 +592,8 @@ static size_t _php_mb_regex_get_option_string(char *str, size_t len, OnigOptionT
 /* }}} */
 
 /* {{{ _php_mb_regex_init_options */
-static void
-_php_mb_regex_init_options(const char *parg, size_t narg, OnigOptionType *option, OnigSyntaxType **syntax, int *eval)
+static bool _php_mb_regex_init_options(const char *parg, size_t narg, OnigOptionType *option,
+	OnigSyntaxType **syntax, uint32_t option_arg_num)
 {
 	size_t n;
 	char c;
@@ -651,14 +652,16 @@ _php_mb_regex_init_options(const char *parg, size_t narg, OnigOptionType *option
 					*syntax = ONIG_SYNTAX_POSIX_EXTENDED;
 					break;
 				case 'e':
-					if (eval != NULL) *eval = 1;
-					break;
+					zend_argument_value_error(option_arg_num, "option 'e' is not supported");
+					return false;
 				default:
+					// TODO Unsupported ValueError
 					break;
 			}
 		}
 		if (option != NULL) *option|=optm;
 	}
+	return true;
 }
 /* }}} */
 
@@ -900,6 +903,11 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		RETURN_THROWS();
 	}
 
+	if (arg_pattern_len == 0) {
+		zend_argument_value_error(1, "must not be empty");
+		RETURN_THROWS();
+	}
+
 	if (array != NULL) {
 		array = zend_try_array_init(array);
 		if (!array) {
@@ -912,18 +920,13 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		string_len,
 		php_mb_regex_get_mbctype_encoding()
 	)) {
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be a valid string in '%s'", php_mb_regex_get_mbctype());
+		RETURN_THROWS();
 	}
 
 	options = MBREX(regex_default_options);
 	if (icase) {
 		options |= ONIG_OPTION_IGNORECASE;
-	}
-
-	if (arg_pattern_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty pattern");
-		RETVAL_FALSE;
-		goto out;
 	}
 
 	re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, options, MBREX(regex_default_syntax));
@@ -1007,7 +1010,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	smart_str out_buf = {0};
 	smart_str eval_buf = {0};
 	smart_str *pbuf;
-	int err, eval, n;
+	int err, n;
 	OnigUChar *pos;
 	OnigUChar *string_lim;
 	char *description = NULL;
@@ -1015,7 +1018,6 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	const mbfl_encoding *enc = php_mb_regex_get_mbctype_encoding();
 	ZEND_ASSERT(enc != NULL);
 
-	eval = 0;
 	{
 		char *option_str = NULL;
 		size_t option_str_len = 0;
@@ -1039,28 +1041,25 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		}
 
 		if (!php_mb_check_encoding(string, string_len, enc)) {
-			RETURN_NULL();
+			zend_argument_value_error(3, "must be a valid string in '%s'", php_mb_regex_get_mbctype());
+			RETURN_THROWS();
 		}
 
 		if (option_str != NULL) {
-			_php_mb_regex_init_options(option_str, option_str_len, &options, &syntax, &eval);
+			/* Initialize option and in case of failure it means there is a value error */
+			if(!_php_mb_regex_init_options(option_str, option_str_len, &options, &syntax, 4)) {
+				RETURN_THROWS();
+			}
 		} else {
 			options |= MBREX(regex_default_options);
 			syntax = MBREX(regex_default_syntax);
 		}
 	}
-	if (eval) {
-		if (is_callable) {
-			php_error_docref(NULL, E_WARNING, "Option 'e' cannot be used with replacement callback");
-		} else {
-			php_error_docref(NULL, E_WARNING, "The 'e' option is no longer supported, use mb_ereg_replace_callback instead");
-		}
-		RETURN_FALSE;
-	}
 
 	/* create regex pattern buffer */
 	re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, options, syntax);
 	if (re == NULL) {
+		// Should this be considered an error instead?
 		RETURN_FALSE;
 	}
 
@@ -1122,7 +1121,9 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 					zval_ptr_dtor(&retval);
 				} else {
 					if (!EG(exception)) {
-						php_error_docref(NULL, E_WARNING, "Unable to call custom replacement function");
+						zend_throw_error(NULL, "Unable to call custom replacement function");
+						zval_ptr_dtor(&subpats);
+						RETURN_THROWS();
 					}
 				}
 				zval_ptr_dtor(&subpats);
@@ -1154,6 +1155,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	}
 	smart_str_free(&eval_buf);
 
+	// Need to investigate if failure in Oniguruma and if should throw.
 	if (err <= -2) {
 		smart_str_free(&out_buf);
 		RETVAL_FALSE;
@@ -1210,11 +1212,13 @@ PHP_FUNCTION(mb_split)
 	}
 
 	if (!php_mb_check_encoding(string, string_len, php_mb_regex_get_mbctype_encoding())) {
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be a valid string in '%s'", php_mb_regex_get_mbctype());
+		RETURN_THROWS();
 	}
 
 	/* create regex pattern buffer */
 	if ((re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, MBREX(regex_default_options), MBREX(regex_default_syntax))) == NULL) {
+		// TODO throw as invalid regex?
 		RETURN_FALSE;
 	}
 
@@ -1251,6 +1255,7 @@ PHP_FUNCTION(mb_split)
 	onig_region_free(regs, 1);
 
 	/* see if we encountered an error */
+	// ToDo investigate if this can actually/should happen ...
 	if (err <= -2) {
 		OnigUChar err_str[ONIG_MAX_ERROR_MESSAGE_LEN];
 		onig_error_code_to_str(err_str, err);
@@ -1295,7 +1300,9 @@ PHP_FUNCTION(mb_ereg_match)
 		}
 
 		if (option_str != NULL) {
-			_php_mb_regex_init_options(option_str, option_str_len, &option, &syntax, NULL);
+			if(!_php_mb_regex_init_options(option_str, option_str_len, &option, &syntax, 3)) {
+				RETURN_THROWS();
+			}
 		} else {
 			option |= MBREX(regex_default_options);
 			syntax = MBREX(regex_default_syntax);
@@ -1303,10 +1310,12 @@ PHP_FUNCTION(mb_ereg_match)
 	}
 
 	if (!php_mb_check_encoding(string, string_len, php_mb_regex_get_mbctype_encoding())) {
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must be a valid string in '%s'", php_mb_regex_get_mbctype());
+		RETURN_THROWS();
 	}
 
 	if ((re = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, syntax)) == NULL) {
+		// TODO throw as invalid regex?
 		RETURN_FALSE;
 	}
 
@@ -1362,6 +1371,7 @@ static void _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mod
 	if (arg_pattern) {
 		/* create regex pattern buffer */
 		if ((MBREX(search_re) = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, syntax)) == NULL) {
+			// TODO throw as invalid regex?
 			RETURN_FALSE;
 		}
 	}
@@ -1375,13 +1385,13 @@ static void _php_mb_regex_ereg_search_exec(INTERNAL_FUNCTION_PARAMETERS, int mod
 	}
 
 	if (MBREX(search_re) == NULL) {
-		php_error_docref(NULL, E_WARNING, "No regex given");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "No pattern was provided");
+		RETURN_THROWS();
 	}
 
 	if (str == NULL) {
-		php_error_docref(NULL, E_WARNING, "No string given");
-		RETURN_FALSE;
+		zend_throw_error(NULL, "No string was provided");
+		RETURN_THROWS();
 	}
 
 	MBREX(search_regs) = onig_region_new();
@@ -1480,8 +1490,8 @@ PHP_FUNCTION(mb_ereg_search_init)
 	}
 
 	if (arg_pattern && arg_pattern_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty pattern");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must not be empty");
+		RETURN_THROWS();
 	}
 
 	if (arg_options) {
@@ -1495,6 +1505,7 @@ PHP_FUNCTION(mb_ereg_search_init)
 	if (arg_pattern) {
 		/* create regex pattern buffer */
 		if ((MBREX(search_re) = php_mbregex_compile_pattern(arg_pattern, arg_pattern_len, option, syntax)) == NULL) {
+			// TODO throw as invalid regex?
 			RETURN_FALSE;
 		}
 	}
@@ -1510,8 +1521,12 @@ PHP_FUNCTION(mb_ereg_search_init)
 		RETVAL_TRUE;
 	} else {
 		MBREX(search_pos) = ZSTR_LEN(arg_str);
-		RETVAL_FALSE;
+		zend_argument_value_error(1, "must be a valid string in '%s'", php_mb_regex_get_mbctype());
+		RETURN_THROWS();
 	}
+
+	MBREX(search_pos) = 0;
+	RETVAL_TRUE;
 
 	if (MBREX(search_regs) != NULL) {
 		onig_region_free(MBREX(search_regs), 1);
@@ -1557,6 +1572,7 @@ PHP_FUNCTION(mb_ereg_search_getregs)
 			onig_foreach_name(MBREX(search_re), mb_regex_groups_iter, &args);
 		}
 	} else {
+		// TODO This seems to be some logical error, promote to Error
 		RETVAL_FALSE;
 	}
 }
@@ -1588,12 +1604,12 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 	}
 
 	if (position < 0 || (!Z_ISUNDEF(MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING && (size_t)position > Z_STRLEN(MBREX(search_str)))) {
-		php_error_docref(NULL, E_WARNING, "Position is out of range");
-		MBREX(search_pos) = 0;
-		RETURN_FALSE;
+		zend_argument_value_error(1, "is out of range");
+		RETURN_THROWS();
 	}
 
 	MBREX(search_pos) = position;
+	// TODO Return void
 	RETURN_TRUE;
 }
 /* }}} */
@@ -1628,7 +1644,9 @@ PHP_FUNCTION(mb_regex_set_options)
 	if (string != NULL) {
 		opt = 0;
 		syntax = NULL;
-		_php_mb_regex_init_options(string, string_len, &opt, &syntax, NULL);
+		if(!_php_mb_regex_init_options(string, string_len, &opt, &syntax, 1)) {
+			RETURN_THROWS();
+		}
 		_php_mb_regex_set_options(opt, syntax, &prev_opt, &prev_syntax);
 		opt = prev_opt;
 		syntax = prev_syntax;

@@ -7,7 +7,11 @@ if (!function_exists('mb_ereg')) die('skip mbregex support not available');
 ?>
 --FILE--
 <?php
-var_dump(mb_eregi("a", "\xf5"));
+try {
+    var_dump(mb_eregi("a", "\xf5"));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ?>
 --EXPECT--
-bool(false)
+mb_eregi(): Argument #2 ($string) must be a valid string in 'UTF-8'

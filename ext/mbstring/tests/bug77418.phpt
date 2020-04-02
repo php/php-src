@@ -8,7 +8,12 @@ if (!function_exists('mb_split')) die('skip mb_split() not available');
 --FILE--
 <?php
 mb_regex_encoding("UTF-32");
-var_dump(mb_split("\x00\x00\x00\x5c\x00\x00\x00B","000000000000000000000000000000"));
+
+try {
+    var_dump(mb_split("\x00\x00\x00\x5c\x00\x00\x00B","000000000000000000000000000000"));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 ?>
 --EXPECT--
-bool(false)
+mb_split(): Argument #2 ($string) must be a valid string in 'UCS-4'
