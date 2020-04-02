@@ -26,7 +26,7 @@ Object of class [ <user> class Foo ] {
   }
 
   - Properties [1] {
-    Property [ <default> public $bar = 1 ]
+    Property [ public $bar = 1 ]
   }
 
   - Dynamic properties [2] {

@@ -37,7 +37,7 @@ string(183) "Class [ <internal:Core> class stdClass ] {
 }
 
 "
-string(2008) "Class [ <internal:Core> class Exception implements Throwable, Stringable ] {
+string(1980) "Class [ <internal:Core> class Exception implements Throwable, Stringable ] {
 
   - Constants [0] {
   }
@@ -49,13 +49,13 @@ string(2008) "Class [ <internal:Core> class Exception implements Throwable, Stri
   }
 
   - Properties [7] {
-    Property [ <default> protected $message ]
-    Property [ <default> private $string ]
-    Property [ <default> protected $code ]
-    Property [ <default> protected $file ]
-    Property [ <default> protected $line ]
-    Property [ <default> private $trace ]
-    Property [ <default> private $previous ]
+    Property [ protected $message = '' ]
+    Property [ private $string = '' ]
+    Property [ protected $code = 0 ]
+    Property [ protected $file = NULL ]
+    Property [ protected $line = NULL ]
+    Property [ private $trace = NULL ]
+    Property [ private $previous = NULL ]
   }
 
   - Methods [11] {

@@ -29,9 +29,9 @@ Class [ <user> class c ] {
   }
 
   - Properties [3] {
-    Property [ <default> private $a = NULL ]
-    Property [ <default> public ?int $c = 42 ]
-    Property [ <default> public Foo $d ]
+    Property [ private $a = NULL ]
+    Property [ public ?int $c = 42 ]
+    Property [ public Foo $d ]
   }
 
   - Methods [0] {
@@ -51,8 +51,8 @@ Class [ <user> class d extends c ] {
   }
 
   - Properties [2] {
-    Property [ <default> public ?int $c = 42 ]
-    Property [ <default> public Foo $d ]
+    Property [ public ?int $c = 42 ]
+    Property [ public Foo $d ]
   }
 
   - Methods [0] {

@@ -48,7 +48,7 @@ reflectProperty("TestClass", "priv");
 Reflecting on property TestClass::pub
 
 __toString():
-string(42) "Property [ <default> public $pub = NULL ]
+string(32) "Property [ public $pub = NULL ]
 "
 getName():
 string(3) "pub"
@@ -92,7 +92,7 @@ string(8) "NewValue"
 Reflecting on property TestClass::prot
 
 __toString():
-string(43) "Property [ <default> protected $prot = 4 ]
+string(33) "Property [ protected $prot = 4 ]
 "
 getName():
 string(4) "prot"
@@ -110,7 +110,7 @@ bool(false)
 Reflecting on property TestClass::priv
 
 __toString():
-string(49) "Property [ <default> private $priv = 'keepOut' ]
+string(39) "Property [ private $priv = 'keepOut' ]
 "
 getName():
 string(4) "priv"
