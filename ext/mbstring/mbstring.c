@@ -2019,11 +2019,10 @@ PHP_FUNCTION(mb_strlen)
 	}
 
 	n = mbfl_strlen(&string);
-	if (!mbfl_is_error(n)) {
-		RETVAL_LONG(n);
-	} else {
-		RETVAL_FALSE;
-	}
+	/* Only way this can fail is if the conversion creation fails
+	 * this would imply some sort of memory allocation failure which is a bug */
+	ZEND_ASSERT(!mbfl_is_error(n));
+	RETVAL_LONG(n);
 }
 /* }}} */
 

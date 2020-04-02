@@ -42,7 +42,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_str_split, 0, 1, IS_ARRAY, 0)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_strlen, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_strlen, 0, 1, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 ZEND_END_ARG_INFO()
@@ -93,7 +93,10 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_mb_strcut arginfo_mb_substr
 
-#define arginfo_mb_strwidth arginfo_mb_strlen
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_strwidth, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
+	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
+ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_strimwidth, 0, 3, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, str, IS_STRING, 0)
@@ -195,7 +198,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_scrub, 0, 1, MAY_BE_STRING|MA
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_mb_ord arginfo_mb_strlen
+#define arginfo_mb_ord arginfo_mb_strwidth
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_chr, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, cp, IS_LONG, 0)
