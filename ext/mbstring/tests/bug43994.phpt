@@ -25,106 +25,76 @@ foreach($inputs as $input) {
     }
     echo "\n-- Iteration $iterator --\n";
     echo "Without \$regs arg:\n";
-    var_dump( mb_ereg($input, 'hello, world') );
+    try {
+        var_dump( mb_ereg($input, 'hello, world') );
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+
     echo "With \$regs arg:\n";
-    var_dump(mb_ereg($input, 'hello, world', $mb_regs));
+    try {
+        var_dump(mb_ereg($input, 'hello, world', $mb_regs));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+
     var_dump($mb_regs);
     $iterator++;
 };
 ?>
---EXPECTF--
+--EXPECT--
 -- Iteration 1 --
 Without $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
+mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-array(0) {
-}
+mb_ereg(): Argument #1 ($pattern) must not be empty
+NULL
 
 -- Iteration 2 --
 Without $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
+mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-array(0) {
-}
+mb_ereg(): Argument #1 ($pattern) must not be empty
+NULL
 
 -- Iteration 3 --
 Without $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
+mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-array(0) {
-}
+mb_ereg(): Argument #1 ($pattern) must not be empty
+NULL
 
 -- Iteration 4 --
 Without $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
+mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-array(0) {
-}
+mb_ereg(): Argument #1 ($pattern) must not be empty
+NULL
 
 -- Iteration 5 --
 Without $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
+mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-array(0) {
-}
+mb_ereg(): Argument #1 ($pattern) must not be empty
+NULL
 
 -- Iteration 6 --
 Without $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
+mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-array(0) {
-}
+mb_ereg(): Argument #1 ($pattern) must not be empty
+NULL
 
 -- Iteration 7 --
 Without $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
+mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-array(0) {
-}
+mb_ereg(): Argument #1 ($pattern) must not be empty
+NULL
 
 -- Iteration 8 --
 Without $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
+mb_ereg(): Argument #1 ($pattern) must not be empty
 With $regs arg:
-
-Warning: mb_ereg(): Empty pattern in %s on line %d
-bool(false)
-array(0) {
-}
+mb_ereg(): Argument #1 ($pattern) must not be empty
+NULL
