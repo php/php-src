@@ -37,8 +37,8 @@ Class [ <user> class Test ] {
   }
 
   - Properties [2] {
-    Property [ <default> public $prop2 ]
-    Property [ <default> public $prop1 ]
+    Property [ public string $prop2 ]
+    Property [ public string $prop1 ]
   }
 
   - Methods [1] {
