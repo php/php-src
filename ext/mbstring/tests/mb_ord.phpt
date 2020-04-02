@@ -50,15 +50,13 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . \PHP_EOL;
 }
-;
-?>
---EXPECTF--
-bool(true)
-bool(true)
-bool(true)
 
-Warning: mb_ord(): Empty string in %s on line %d
-bool(false)
+?>
+--EXPECT--
+bool(true)
+bool(true)
+bool(true)
+mb_ord(): Argument #1 ($str) must not be empty
 mb_ord(): Argument #2 ($encoding) must be a valid encoding, "typo" given
 mb_ord() does not support the "pass" encoding
 mb_ord() does not support the "JIS" encoding

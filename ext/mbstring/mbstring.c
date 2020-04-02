@@ -4335,6 +4335,8 @@ static inline zend_long php_mb_ord(const char *str, size_t str_len, zend_string 
 	const mbfl_encoding *enc;
 	enum mbfl_no_encoding no_enc;
 
+	ZEND_ASSERT(str_len > 0);
+
 	enc = php_mb_get_encoding(enc_name, enc_name_arg_num);
 	if (!enc) {
 		return -2;
@@ -4344,11 +4346,6 @@ static inline zend_long php_mb_ord(const char *str, size_t str_len, zend_string 
 	if (php_mb_is_unsupported_no_encoding(no_enc)) {
 		zend_value_error("mb_ord() does not support the \"%s\" encoding", enc->name);
 		return -2;
-	}
-
-	if (str_len == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty string");
-		return -1;
 	}
 
 	{
@@ -4395,6 +4392,11 @@ PHP_FUNCTION(mb_ord)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_STR(enc)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (str_len == 0) {
+		zend_argument_value_error(1, "must not be empty");
+		RETURN_THROWS();
+	}
 
 	cp = php_mb_ord(str, str_len, enc, 2);
 
