@@ -2269,23 +2269,24 @@ PHP_FUNCTION(mb_substr_count)
 		RETURN_THROWS();
 	}
 
+	if (needle.len == 0) {
+		zend_argument_value_error(2, "must not be empty");
+		RETURN_THROWS();
+	}
+
 	haystack.no_language = needle.no_language = MBSTRG(language);
 	haystack.encoding = needle.encoding = php_mb_get_encoding(enc_name, 3);
 	if (!haystack.encoding) {
 		RETURN_THROWS();
 	}
 
-	if (needle.len == 0) {
-		php_error_docref(NULL, E_WARNING, "Empty substring");
-		RETURN_FALSE;
-	}
-
 	n = mbfl_substr_count(&haystack, &needle);
-	if (!mbfl_is_error(n)) {
-		RETVAL_LONG(n);
-	} else {
-		RETVAL_FALSE;
-	}
+	/* An error can only occur if needle is empty,
+	 * an encoding error happens (which should not happen at this stage and is a bug)
+	 * or the haystack is more than sizeof(size_t) bytes
+	 * If one of these things occur this is a bug and should be flagged as such */
+	ZEND_ASSERT(!mbfl_is_error(n));
+	RETVAL_LONG(n);
 }
 /* }}} */
 

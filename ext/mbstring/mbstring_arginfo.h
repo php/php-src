@@ -78,7 +78,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_mb_strrichr arginfo_mb_strstr
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_substr_count, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_mb_substr_count, 0, 2, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)

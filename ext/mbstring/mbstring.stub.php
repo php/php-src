@@ -39,7 +39,7 @@ function mb_stristr(string $haystack, string $needle, bool $part = false, string
 
 function mb_strrichr(string $haystack, string $needle, bool $part = false, string $encoding = UNKNOWN): string|false {}
 
-function mb_substr_count(string $haystack, string $needle, string $encoding = UNKNOWN): int|false {}
+function mb_substr_count(string $haystack, string $needle, string $encoding = UNKNOWN): int {}
 
 function mb_substr(string $str, int $start, ?int $length = null, string $encoding = UNKNOWN): string|false {}
 
