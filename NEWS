@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.18
 
+- Core:
+  . Fixed bug #79434 (PHP 7.3 and PHP-7.4 crash with NULL-pointer dereference
+    on !CS constant). (Nikita)
+
 - MBString:
   . Fixed bug #79441 (Segfault in mb_chr() if internal encoding is unsupported).
     (Girgias)

@@ -9,6 +9,7 @@ namespace {
 
     var_dump(FOO); // Ok
     var_dump(foo); // Deprecated
+    var_dump(\foo); // Deprecated
 
     var_dump(NS\FOO); // Ok
     var_dump(ns\FOO); // Ok
@@ -72,10 +73,13 @@ int(42)
 
 Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "FOO" in %s on line 8
 int(42)
+
+Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "FOO" in %s on line 9
+int(42)
 int(24)
 int(24)
 
-Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "NS\FOO" in %s on line 12
+Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "NS\FOO" in %s on line 13
 int(24)
 bool(true)
 bool(true)
@@ -84,24 +88,24 @@ bool(true)
 bool(true)
 int(42)
 
-Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "FOO" in %s on line 21
+Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "FOO" in %s on line 22
 int(42)
 int(24)
 int(24)
 
-Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "NS\FOO" in %s on line 24
+Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "NS\FOO" in %s on line 25
 int(24)
 int(24)
 
-Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "NS\FOO" in %s on line 29
+Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "NS\FOO" in %s on line 30
 int(24)
 int(24)
 
-Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "NS\FOO" in %s on line 34
+Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "NS\FOO" in %s on line 35
 int(24)
 int(42)
 
-Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "FOO" in %s on line 39
+Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "FOO" in %s on line 40
 int(42)
 bool(true)
 bool(true)
@@ -110,18 +114,18 @@ bool(true)
 bool(true)
 int(42)
 
-Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "FOO" in %s on line 48
+Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "FOO" in %s on line 49
 int(42)
 int(24)
 int(24)
 
-Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "NS\FOO" in %s on line 51
+Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "NS\FOO" in %s on line 52
 int(24)
 int(42)
 
-Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "FOO" in %s on line 55
+Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "FOO" in %s on line 56
 int(42)
 int(43)
 
-Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "FOO" in %s on line 59
+Deprecated: Case-insensitive constants are deprecated. The correct casing for this constant is "FOO" in %s on line 60
 int(43)

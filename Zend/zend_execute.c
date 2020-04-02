@@ -3364,11 +3364,15 @@ static zend_always_inline int _zend_quick_get_constant(
 				is_deprecated = !zend_string_equals(c->name, Z_STR_P(access_key));
 			} else {
 check_short_name:
-				ns_sep = zend_memrchr(ZSTR_VAL(c->name), '\\', ZSTR_LEN(c->name));
-				ZEND_ASSERT(ns_sep);
 				/* Namespaces are always case-insensitive. Only compare shortname. */
-				shortname_offset = ns_sep - ZSTR_VAL(c->name) + 1;
-				shortname_len = ZSTR_LEN(c->name) - shortname_offset;
+				ns_sep = zend_memrchr(ZSTR_VAL(c->name), '\\', ZSTR_LEN(c->name));
+				if (ns_sep) {
+					shortname_offset = ns_sep - ZSTR_VAL(c->name) + 1;
+					shortname_len = ZSTR_LEN(c->name) - shortname_offset;
+				} else {
+					shortname_offset = 0;
+					shortname_len = ZSTR_LEN(c->name);
+				}
 
 				is_deprecated = memcmp(ZSTR_VAL(c->name) + shortname_offset, Z_STRVAL_P(orig_key - 1) + shortname_offset, shortname_len) != 0;
 			}
