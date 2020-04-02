@@ -1652,8 +1652,8 @@ static ZIPARCHIVE_METHOD(getStatusString)
 	} else {
 		zip_error_t err;
 
-		zip_error_init_with_code(&err, ze_obj->err_zip);
-		err.sys_err = ze_obj->err_sys; /* missing setter */
+		zip_error_init(&err);
+		zip_error_set(&err, ze_obj->err_zip, ze_obj->err_sys);
 		RETVAL_STRING(zip_error_strerror(&err));
 		zip_error_fini(&err);
 	}
