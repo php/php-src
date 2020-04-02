@@ -457,13 +457,14 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/dom_living_standard_api
 
 - Zip:
-  . Extension updated to version 1.18.2
+  . Extension updated to version 1.19.0
   . New ZipArchive::lastId property to get index value of last added entry.
   . Error can be checked after an archive is closed using ZipArchive::status,
     ZipArchive::statusSys properties or ZipArchive::getStatusString() method.
   . The remove_path option of ZipArchive::addGlob() and ::addPattern() is now
     treated as arbitrary string prefix (for consistency with the add_path
     option), whereas formerly it was treated as directory name.
+  . Optional compression / encryption features are listed in phpinfo.
 
 ========================================
 3. Changes in SAPI modules
@@ -528,6 +529,10 @@ PHP 8.0 UPGRADE NOTES
   . ZipArchive::setProgressCallback to provide updates during archive close.
   . ZipArchive::setCancelCallback to allow cancellation during archive close.
   . ZipArchive::replaceFile to replace an entry content.
+  . ZipArchive::isCompressionMethodSupported to check optional compression
+    features.
+  . ZipArchive::isEncryptionMethodSupported to check optional encryption
+    features.
 
 ========================================
 7. New Classes and Interfaces

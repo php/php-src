@@ -157,5 +157,8 @@ PHP                                                                        NEWS
     original modified time). (Remi)
   . Implemented FR #77960 (add compression / encryption options for
     ZipArchive::addGlob and ZipArchive::addPattern). (Remi)
+  . Add ZipArchive::EM_UNKNOWN and ZipArchive::EM_TRAD_PKWARE constants. (Remi)
+  . Add ZipArchive::isCompressionMethodSupported() and
+    ZipArchive::isEncryptionMethodSupported() method (libzip 1.7.0). (Remi)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
