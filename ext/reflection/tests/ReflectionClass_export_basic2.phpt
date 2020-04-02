@@ -5,6 +5,7 @@ ReflectionClass::__toString() - ensure inherited private props are hidden.
 Class c {
     private $a;
     static private $b;
+    public ?int $c = 42;
 }
 
 class d extends c {}
@@ -14,7 +15,7 @@ echo new ReflectionClass("d"), "\n";
 ?>
 --EXPECTF--
 Class [ <user> class c ] {
-  @@ %s 2-5
+  @@ %s 2-6
 
   - Constants [0] {
   }
@@ -26,8 +27,9 @@ Class [ <user> class c ] {
   - Static methods [0] {
   }
 
-  - Properties [1] {
+  - Properties [2] {
     Property [ <default> private $a ]
+    Property [ <default> public ?int $c ]
   }
 
   - Methods [0] {
@@ -35,7 +37,7 @@ Class [ <user> class c ] {
 }
 
 Class [ <user> class d extends c ] {
-  @@ %s 7-7
+  @@ %s 8-8
 
   - Constants [0] {
   }
@@ -46,7 +48,8 @@ Class [ <user> class d extends c ] {
   - Static methods [0] {
   }
 
-  - Properties [0] {
+  - Properties [1] {
+    Property [ <default> public ?int $c ]
   }
 
   - Methods [0] {

@@ -595,7 +595,8 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 	}
 	if (ZEND_TYPE_IS_SET(arg_info->type)) {
 		zend_string *type_str = zend_type_to_string(arg_info->type);
-		smart_str_append_printf(str, "%s ", ZSTR_VAL(type_str));
+		smart_str_append(str, type_str);
+		smart_str_appendc(str, ' ');
 		zend_string_release(type_str);
 	}
 	if (ZEND_ARG_SEND_MODE(arg_info)) {
@@ -842,6 +843,12 @@ static void _property_string(smart_str *str, zend_property_info *prop, const cha
 		}
 		if (prop->flags & ZEND_ACC_STATIC) {
 			smart_str_appends(str, "static ");
+		}
+		if (ZEND_TYPE_IS_SET(prop->type)) {
+			zend_string *type_str = zend_type_to_string(prop->type);
+			smart_str_append(str, type_str);
+			smart_str_appendc(str, ' ');
+			zend_string_release(type_str);
 		}
 		if (!prop_name) {
 			const char *class_name;
