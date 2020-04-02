@@ -6,6 +6,7 @@ Class c {
     private $a;
     static private $b;
     public ?int $c = 42;
+    public Foo $d;
 }
 
 class d extends c {}
@@ -15,21 +16,22 @@ echo new ReflectionClass("d"), "\n";
 ?>
 --EXPECTF--
 Class [ <user> class c ] {
-  @@ %s 2-6
+  @@ %s 2-7
 
   - Constants [0] {
   }
 
   - Static properties [1] {
-    Property [ private static $b ]
+    Property [ private static $b = NULL ]
   }
 
   - Static methods [0] {
   }
 
-  - Properties [2] {
-    Property [ <default> private $a ]
-    Property [ <default> public ?int $c ]
+  - Properties [3] {
+    Property [ <default> private $a = NULL ]
+    Property [ <default> public ?int $c = 42 ]
+    Property [ <default> public Foo $d ]
   }
 
   - Methods [0] {
@@ -37,7 +39,7 @@ Class [ <user> class c ] {
 }
 
 Class [ <user> class d extends c ] {
-  @@ %s 8-8
+  @@ %s 9-9
 
   - Constants [0] {
   }
@@ -48,8 +50,9 @@ Class [ <user> class d extends c ] {
   - Static methods [0] {
   }
 
-  - Properties [1] {
-    Property [ <default> public ?int $c ]
+  - Properties [2] {
+    Property [ <default> public ?int $c = 42 ]
+    Property [ <default> public Foo $d ]
   }
 
   - Methods [0] {

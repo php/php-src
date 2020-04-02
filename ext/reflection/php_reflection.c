@@ -584,6 +584,39 @@ static zend_op* _get_recv_op(zend_op_array *op_array, uint32_t offset)
 }
 /* }}} */
 
+static int format_default_value(smart_str *str, zval *value, zend_class_entry *scope) {
+	zval zv;
+	ZVAL_COPY(&zv, value);
+	if (UNEXPECTED(zval_update_constant_ex(&zv, scope) == FAILURE)) {
+		zval_ptr_dtor(&zv);
+		return FAILURE;
+	}
+
+	if (Z_TYPE(zv) == IS_TRUE) {
+		smart_str_appends(str, "true");
+	} else if (Z_TYPE(zv) == IS_FALSE) {
+		smart_str_appends(str, "false");
+	} else if (Z_TYPE(zv) == IS_NULL) {
+		smart_str_appends(str, "NULL");
+	} else if (Z_TYPE(zv) == IS_STRING) {
+		smart_str_appendc(str, '\'');
+		smart_str_appendl(str, Z_STRVAL(zv), MIN(Z_STRLEN(zv), 15));
+		if (Z_STRLEN(zv) > 15) {
+			smart_str_appends(str, "...");
+		}
+		smart_str_appendc(str, '\'');
+	} else if (Z_TYPE(zv) == IS_ARRAY) {
+		smart_str_appends(str, "Array");
+	} else {
+		zend_string *tmp_zv_str;
+		zend_string *zv_str = zval_get_tmp_string(&zv, &tmp_zv_str);
+		smart_str_append(str, zv_str);
+		zend_tmp_string_release(tmp_zv_str);
+	}
+	zval_ptr_dtor(&zv);
+	return SUCCESS;
+}
+
 /* {{{ _parameter_string */
 static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_arg_info *arg_info, uint32_t offset, zend_bool required, char* indent)
 {
@@ -617,36 +650,10 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 	if (fptr->type == ZEND_USER_FUNCTION && !required) {
 		zend_op *precv = _get_recv_op((zend_op_array*)fptr, offset);
 		if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
-			zval zv;
-
 			smart_str_appends(str, " = ");
-			ZVAL_COPY(&zv, RT_CONSTANT(precv, precv->op2));
-			if (UNEXPECTED(zval_update_constant_ex(&zv, fptr->common.scope) == FAILURE)) {
-				zval_ptr_dtor(&zv);
+			if (format_default_value(str, RT_CONSTANT(precv, precv->op2), fptr->common.scope) == FAILURE) {
 				return;
 			}
-			if (Z_TYPE(zv) == IS_TRUE) {
-				smart_str_appends(str, "true");
-			} else if (Z_TYPE(zv) == IS_FALSE) {
-				smart_str_appends(str, "false");
-			} else if (Z_TYPE(zv) == IS_NULL) {
-				smart_str_appends(str, "NULL");
-			} else if (Z_TYPE(zv) == IS_STRING) {
-				smart_str_appendc(str, '\'');
-				smart_str_appendl(str, Z_STRVAL(zv), MIN(Z_STRLEN(zv), 15));
-				if (Z_STRLEN(zv) > 15) {
-					smart_str_appends(str, "...");
-				}
-				smart_str_appendc(str, '\'');
-			} else if (Z_TYPE(zv) == IS_ARRAY) {
-				smart_str_appends(str, "Array");
-			} else {
-				zend_string *tmp_zv_str;
-				zend_string *zv_str = zval_get_tmp_string(&zv, &tmp_zv_str);
-				smart_str_append(str, zv_str);
-				zend_tmp_string_release(tmp_zv_str);
-			}
-			zval_ptr_dtor(&zv);
 		}
 	}
 	smart_str_appends(str, " ]");
@@ -818,6 +825,17 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 }
 /* }}} */
 
+static zval *property_get_default(zend_property_info *prop_info) {
+	zend_class_entry *ce = prop_info->ce;
+	if (prop_info->flags & ZEND_ACC_STATIC) {
+		zval *prop = &ce->default_static_members_table[prop_info->offset];
+		ZVAL_DEINDIRECT(prop);
+		return prop;
+	} else {
+		return &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
+	}
+}
+
 /* {{{ _property_string */
 static void _property_string(smart_str *str, zend_property_info *prop, const char *prop_name, char* indent)
 {
@@ -855,6 +873,14 @@ static void _property_string(smart_str *str, zend_property_info *prop, const cha
 			zend_unmangle_property_name(prop->name, &class_name, &prop_name);
 		}
 		smart_str_append_printf(str, "$%s", prop_name);
+
+		zval *default_value = property_get_default(prop);
+		if (!Z_ISUNDEF_P(default_value)) {
+			smart_str_appends(str, " = ");
+			if (format_default_value(str, default_value, prop->ce) == FAILURE) {
+				return;
+			}
+		}
 	}
 
 	smart_str_appends(str, " ]\n");
@@ -3673,7 +3699,7 @@ ZEND_METHOD(reflection_class, __construct)
 /* }}} */
 
 /* {{{ add_class_vars */
-static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value)
+static void add_class_vars(zend_class_entry *ce, zend_bool statics, zval *return_value)
 {
 	zend_property_info *prop_info;
 	zval *prop, prop_copy;
@@ -3686,14 +3712,14 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		     prop_info->ce != ce)) {
 			continue;
 		}
-		prop = NULL;
-		if (statics && (prop_info->flags & ZEND_ACC_STATIC) != 0) {
-			prop = &ce->default_static_members_table[prop_info->offset];
-			ZVAL_DEINDIRECT(prop);
-		} else if (!statics && (prop_info->flags & ZEND_ACC_STATIC) == 0) {
-			prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
+
+		zend_bool is_static = (prop_info->flags & ZEND_ACC_STATIC) != 0;
+		if (statics != is_static) {
+			continue;
 		}
-		if (!prop || (ZEND_TYPE_IS_SET(prop_info->type) && Z_ISUNDEF_P(prop))) {
+
+		prop = property_get_default(prop_info);
+		if (Z_ISUNDEF_P(prop)) {
 			continue;
 		}
 
@@ -5544,7 +5570,6 @@ ZEND_METHOD(reflection_property, hasDefaultValue)
 	property_reference *ref;
 	zend_property_info *prop_info;
 	zval *prop;
-	zend_class_entry *ce;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -5558,15 +5583,7 @@ ZEND_METHOD(reflection_property, hasDefaultValue)
 		RETURN_FALSE;
 	}
 
-	ce = prop_info->ce;
-
-	if ((prop_info->flags & ZEND_ACC_STATIC) != 0) {
-		prop = &ce->default_static_members_table[prop_info->offset];
-		ZVAL_DEINDIRECT(prop);
-	} else {
-		prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
-	}
-
+	prop = property_get_default(prop_info);
 	RETURN_BOOL(!Z_ISUNDEF_P(prop));
 }
 /* }}} */
@@ -5579,7 +5596,6 @@ ZEND_METHOD(reflection_property, getDefaultValue)
 	property_reference *ref;
 	zend_property_info *prop_info;
 	zval *prop;
-	zend_class_entry *ce;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -5593,15 +5609,7 @@ ZEND_METHOD(reflection_property, getDefaultValue)
 		return; // throw exception?
 	}
 
-	ce = prop_info->ce;
-
-	if ((prop_info->flags & ZEND_ACC_STATIC) != 0) {
-		prop = &ce->default_static_members_table[prop_info->offset];
-		ZVAL_DEINDIRECT(prop);
-	} else {
-		prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
-	}
-
+	prop = property_get_default(prop_info);
 	if (Z_ISUNDEF_P(prop)) {
 		return;
 	}
@@ -5613,7 +5621,7 @@ ZEND_METHOD(reflection_property, getDefaultValue)
 	/* this is necessary to make it able to work with default array
 	* properties, returned to user */
 	if (Z_TYPE_P(return_value) == IS_CONSTANT_AST) {
-		if (UNEXPECTED(zval_update_constant_ex(return_value, ce) != SUCCESS)) {
+		if (UNEXPECTED(zval_update_constant_ex(return_value, prop_info->ce) != SUCCESS)) {
 			RETURN_THROWS();
 		}
 	}

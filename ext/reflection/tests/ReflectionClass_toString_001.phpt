@@ -24,7 +24,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
   }
 
   - Properties [1] {
-    Property [ <default> public $name ]
+    Property [ <default> public $name = '' ]
   }
 
   - Methods [53] {

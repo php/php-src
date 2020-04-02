@@ -43,12 +43,12 @@ reflectProperty("TestClass", "prot");
 reflectProperty("TestClass", "priv");
 
 ?>
---EXPECTF--
+--EXPECT--
 **********************************
 Reflecting on property TestClass::pub
 
 __toString():
-string(35) "Property [ <default> public $pub ]
+string(42) "Property [ <default> public $pub = NULL ]
 "
 getName():
 string(3) "pub"
@@ -70,7 +70,7 @@ string(8) "NewValue"
 Reflecting on property TestClass::stat
 
 __toString():
-string(33) "Property [ public static $stat ]
+string(53) "Property [ public static $stat = 'static property' ]
 "
 getName():
 string(4) "stat"
@@ -92,7 +92,7 @@ string(8) "NewValue"
 Reflecting on property TestClass::prot
 
 __toString():
-string(39) "Property [ <default> protected $prot ]
+string(43) "Property [ <default> protected $prot = 4 ]
 "
 getName():
 string(4) "prot"
@@ -110,7 +110,7 @@ bool(false)
 Reflecting on property TestClass::priv
 
 __toString():
-string(37) "Property [ <default> private $priv ]
+string(49) "Property [ <default> private $priv = 'keepOut' ]
 "
 getName():
 string(4) "priv"

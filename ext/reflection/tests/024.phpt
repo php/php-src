@@ -29,9 +29,9 @@ Object of class [ <user> class C1 ] {
   }
 
   - Properties [3] {
-    Property [ <default> private $p1 ]
-    Property [ <default> protected $p2 ]
-    Property [ <default> public $p3 ]
+    Property [ <default> private $p1 = 1 ]
+    Property [ <default> protected $p2 = 2 ]
+    Property [ <default> public $p3 = 3 ]
   }
 
   - Dynamic properties [1] {
