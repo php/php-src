@@ -17,6 +17,6 @@ try {
     echo $e->getMessage() . \PHP_EOL;
 }
 ?>
---EXPECTF--
-mb_detect_order(): Argument #1 ($encoding) must be a list of valid encoding, "Foo" given
-mb_detect_order(): Argument #1 ($encoding) must be an array of valid encoding, "Foo" given
+--EXPECT--
+mb_detect_order(): Argument #1 ($encoding) contains invalid encoding "Foo"
+mb_detect_order(): Argument #1 ($encoding) contains invalid encoding "Foo"

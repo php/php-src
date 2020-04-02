@@ -420,7 +420,7 @@ static int php_mb_parse_encoding_list(const char *value, size_t value_length,
 					*entry++ = encoding;
 					n++;
 				} else {
-					zend_argument_value_error(arg_num, "must be a list of valid encoding, \"%s\" given", p1);
+					zend_argument_value_error(arg_num, "contains invalid encoding \"%s\"", p1);
 					efree(tmpstr);
 					pefree(list, persistent);
 					return FAILURE;
@@ -475,7 +475,7 @@ static int php_mb_parse_encoding_array(HashTable *target_hash, const mbfl_encodi
 				*entry++ = encoding;
 				n++;
 			} else {
-				zend_argument_value_error(arg_num, "must be an array of valid encoding, \"%s\" given", ZSTR_VAL(encoding_str));
+				zend_argument_value_error(arg_num, "contains invalid encoding \"%s\"", ZSTR_VAL(encoding_str));
 				zend_string_release(encoding_str);
 				efree(list);
 				return FAILURE;

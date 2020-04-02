@@ -17,17 +17,17 @@ mbstring.strict_detection=BOOL_STRICT_DETECTION
 <?php
 ?>
 --EXPECT--
-PHP Fatal error:  (null)(): Argument #0 must be a list of valid encoding, "DETECT_ORDER" given in Unknown on line 0
+PHP Fatal error:  (null)(): Argument #0 contains invalid encoding "DETECT_ORDER" in Unknown on line 0
 PHP Deprecated:  PHP Startup: Use of mbstring.http_input is deprecated in Unknown on line 0
-PHP Fatal error:  (null)(): Argument #0 must be a list of valid encoding, "HTTP_INPUT" given in Unknown on line 0
+PHP Fatal error:  (null)(): Argument #0 contains invalid encoding "HTTP_INPUT" in Unknown on line 0
 PHP Deprecated:  PHP Startup: Use of mbstring.http_output is deprecated in Unknown on line 0
 PHP Deprecated:  PHP Startup: Use of mbstring.internal_encoding is deprecated in Unknown on line 0
 
-Fatal error: (null)(): Argument #0 must be a list of valid encoding, "DETECT_ORDER" given in Unknown on line 0
+Fatal error: (null)(): Argument #0 contains invalid encoding "DETECT_ORDER" in Unknown on line 0
 
 Deprecated: PHP Startup: Use of mbstring.http_input is deprecated in Unknown on line 0
 
-Fatal error: (null)(): Argument #0 must be a list of valid encoding, "HTTP_INPUT" given in Unknown on line 0
+Fatal error: (null)(): Argument #0 contains invalid encoding "HTTP_INPUT" in Unknown on line 0
 
 Deprecated: PHP Startup: Use of mbstring.http_output is deprecated in Unknown on line 0
 

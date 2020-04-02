@@ -59,7 +59,7 @@ SJIS, EUC-JP, JIS, UTF-8
 OK_ARRAY
 ASCII, JIS, EUC-JP, UTF-8
 == INVALID PARAMETER ==
-mb_detect_order(): Argument #1 ($encoding) must be a list of valid encoding, "BAD_NAME" given
+mb_detect_order(): Argument #1 ($encoding) contains invalid encoding "BAD_NAME"
 array(4) {
   [0]=>
   string(5) "ASCII"
@@ -70,7 +70,7 @@ array(4) {
   [3]=>
   string(5) "UTF-8"
 }
-mb_detect_order(): Argument #1 ($encoding) must be an array of valid encoding, "BAD_NAME" given
+mb_detect_order(): Argument #1 ($encoding) contains invalid encoding "BAD_NAME"
 array(4) {
   [0]=>
   string(5) "ASCII"

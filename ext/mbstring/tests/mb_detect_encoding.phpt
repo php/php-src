@@ -108,4 +108,4 @@ SJIS: SJIS
 == INVALID PARAMETER ==
 INT: EUC-JP
 EUC-JP: EUC-JP
-mb_detect_encoding(): Argument #2 ($encoding_list) must be a list of valid encoding, "BAD" given
+mb_detect_encoding(): Argument #2 ($encoding_list) contains invalid encoding "BAD"
