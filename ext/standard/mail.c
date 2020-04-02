@@ -486,7 +486,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		f = php_basename(tmp, strlen(tmp), NULL, 0);
 
 		if (headers != NULL && *headers) {
-			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s\n%s", php_getuid(), ZSTR_VAL(f), headers);
+			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s\r\n%s", php_getuid(), ZSTR_VAL(f), headers);
 		} else {
 			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s", php_getuid(), ZSTR_VAL(f));
 		}
@@ -559,12 +559,12 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 			MAIL_RET(0);
 		}
 #endif
-		fprintf(sendmail, "To: %s\n", to);
-		fprintf(sendmail, "Subject: %s\n", subject);
+		fprintf(sendmail, "To: %s\r\n", to);
+		fprintf(sendmail, "Subject: %s\r\n", subject);
 		if (hdr != NULL) {
-			fprintf(sendmail, "%s\n", hdr);
+			fprintf(sendmail, "%s\r\n", hdr);
 		}
-		fprintf(sendmail, "\n%s\n", message);
+		fprintf(sendmail, "\r\n%s\r\n", message);
 		ret = pclose(sendmail);
 
 #if PHP_SIGCHILD

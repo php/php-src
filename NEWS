@@ -125,6 +125,7 @@ PHP                                                                        NEWS
     is the last char). (Islam Israfilov)
   . Fixed bug #75902 (str_replace should warn when misused with nested arrays).
     (Nikita)
+  . Fixed bug #47983 (mixed LF and CRLF line endings in mail()). (cmb)
   . Made quoting of cmd execution functions consistent. (cmb)
 
 - tidy:
