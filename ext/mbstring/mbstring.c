@@ -1663,20 +1663,20 @@ PHP_FUNCTION(mb_preferred_mime_name)
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &name, &name_len) == FAILURE) {
 		RETURN_THROWS();
+	}
+
+	no_encoding = mbfl_name2no_encoding(name);
+	if (no_encoding == mbfl_no_encoding_invalid) {
+		zend_argument_value_error(1, "must be a valid encoding, \"%s\" given", name);
+		RETURN_THROWS();
+	}
+
+	const char *preferred_name = mbfl_no2preferred_mime_name(no_encoding);
+	if (preferred_name == NULL || *preferred_name == '\0') {
+		php_error_docref(NULL, E_WARNING, "No MIME preferred name corresponding to \"%s\"", name);
+		RETVAL_FALSE;
 	} else {
-		no_encoding = mbfl_name2no_encoding(name);
-		if (no_encoding == mbfl_no_encoding_invalid) {
-			zend_argument_value_error(1, "must be a valid encoding, \"%s\" given", name);
-			RETURN_THROWS();
-		} else {
-			const char *preferred_name = mbfl_no2preferred_mime_name(no_encoding);
-			if (preferred_name == NULL || *preferred_name == '\0') {
-				php_error_docref(NULL, E_WARNING, "No MIME preferred name corresponding to \"%s\"", name);
-				RETVAL_FALSE;
-			} else {
-				RETVAL_STRING((char *)preferred_name);
-			}
-		}
+		RETVAL_STRING((char *)preferred_name);
 	}
 }
 /* }}} */
