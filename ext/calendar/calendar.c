@@ -306,7 +306,7 @@ PHP_FUNCTION(cal_from_jd)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		zend_argument_value_error(1, "must be a valid calendar ID");
+		zend_argument_value_error(2, "must be a valid calendar ID");
 		RETURN_THROWS();
 	}
 	calendar = &cal_conversion_table[cal];
