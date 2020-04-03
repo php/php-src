@@ -1584,7 +1584,7 @@ PHP_FUNCTION(mb_detect_order)
 
 static inline int php_mb_check_code_point(zend_long cp)
 {
-	if (cp <= 0 || cp >= 0x110000) {
+	if (cp < 0 || cp >= 0x110000) {
 		/* Out of Unicode range */
 		return 0;
 	}
