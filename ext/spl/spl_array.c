@@ -2005,6 +2005,7 @@ static const zend_function_entry spl_funcs_ArrayIterator[] = {
 	SPL_ME(Array, serialize,        arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, __unserialize,    arginfo_array_unserialize,      ZEND_ACC_PUBLIC)
 	SPL_ME(Array, __serialize,      arginfo_array_void,             ZEND_ACC_PUBLIC)
+	SPL_ME(Array, __debugInfo,      arginfo_array_void,             ZEND_ACC_PUBLIC)
 	/* ArrayIterator specific */
 	SPL_ME(Array, rewind,           arginfo_array_void,             ZEND_ACC_PUBLIC)
 	SPL_ME(Array, current,          arginfo_array_void,             ZEND_ACC_PUBLIC)

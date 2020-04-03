@@ -14,6 +14,12 @@ class MyDoublyLinkedList extends SplDoublyLinkedList {
     }
 }
 
+class MyObjectStorage extends SplObjectStorage {
+    public function __debugInfo() {
+        return ['child' => 42, 'parent' => count(parent::__debugInfo())];
+    }
+}
+
 class MyMultipleIterator extends MultipleIterator {
     public function __debugInfo() {
         return ['child' => 42, 'parent' => count(parent::__debugInfo())];
@@ -21,6 +27,12 @@ class MyMultipleIterator extends MultipleIterator {
 }
 
 class MyArrayObject extends ArrayObject {
+    public function __debugInfo() {
+        return ['child' => 42, 'parent' => count(parent::__debugInfo())];
+    }
+}
+
+class MyArrayIterator extends ArrayIterator {
     public function __debugInfo() {
         return ['child' => 42, 'parent' => count(parent::__debugInfo())];
     }
@@ -41,8 +53,10 @@ class MyPriorityQueue extends SplPriorityQueue {
 var_dump(
     new MyFileInfo(__FILE__),
     new MyDoublyLinkedList(),
+    new MyObjectStorage(),
     new MyMultipleIterator(),
     new MyArrayObject(),
+    new MyArrayIterator(),
     new MyMaxHeap(),
     new MyPriorityQueue(),
 );
@@ -60,6 +74,12 @@ object(MyDoublyLinkedList)#%d (2) {
   ["parent"]=>
   int(2)
 }
+object(MyObjectStorage)#%d (2) {
+  ["child"]=>
+  int(42)
+  ["parent"]=>
+  int(1)
+}
 object(MyMultipleIterator)#%d (2) {
   ["child"]=>
   int(42)
@@ -67,6 +87,12 @@ object(MyMultipleIterator)#%d (2) {
   int(1)
 }
 object(MyArrayObject)#%d (2) {
+  ["child"]=>
+  int(42)
+  ["parent"]=>
+  int(1)
+}
+object(MyArrayIterator)#%d (2) {
   ["child"]=>
   int(42)
   ["parent"]=>

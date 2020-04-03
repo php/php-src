@@ -943,6 +943,17 @@ SPL_METHOD(SplObjectStorage, __unserialize)
 	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
 }
 
+/* {{{ proto array SplObjectStorage::__debugInfo() */
+SPL_METHOD(SplObjectStorage, __debugInfo)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	RETURN_ARR(spl_object_storage_debug_info(getThis()));
+}
+/* }}} */
+
 ZEND_BEGIN_ARG_INFO(arginfo_Object, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO();
@@ -981,6 +992,7 @@ static const zend_function_entry spl_funcs_SplObjectStorage[] = {
 	SPL_ME(SplObjectStorage,  getInfo,     arginfo_splobject_void,0)
 	SPL_ME(SplObjectStorage,  setInfo,     arginfo_setInfo,       0)
 	SPL_ME(SplObjectStorage,  getHash,     arginfo_getHash,       0)
+	SPL_ME(SplObjectStorage,  __debugInfo, arginfo_splobject_void,0)
 	/* Countable */
 	SPL_ME(SplObjectStorage,  count,       arginfo_splobject_void,0)
 	/* Iterator */
@@ -1277,17 +1289,6 @@ SPL_METHOD(MultipleIterator, key)
 }
 /* }}} */
 
-/* {{{ proto array MultipleIterator::__debugInfo() */
-SPL_METHOD(MultipleIterator, __debugInfo)
-{
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-
-	RETURN_ARR(spl_object_storage_debug_info(getThis()));
-}
-/* }}} */
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_MultipleIterator_attachIterator, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_INFO(0, infos)
@@ -1310,10 +1311,10 @@ static const zend_function_entry spl_funcs_MultipleIterator[] = {
 	SPL_ME(MultipleIterator,  getFlags,               arginfo_splobject_void,                     0)
 	SPL_ME(MultipleIterator,  setFlags,               arginfo_MultipleIterator_setflags,          0)
 	SPL_ME(MultipleIterator,  attachIterator,         arginfo_MultipleIterator_attachIterator,    0)
-	SPL_ME(MultipleIterator,  __debugInfo,            arginfo_splobject_void,                     0)
 	SPL_MA(MultipleIterator,  detachIterator,         SplObjectStorage, detach,   arginfo_MultipleIterator_detachIterator,   0)
 	SPL_MA(MultipleIterator,  containsIterator,       SplObjectStorage, contains, arginfo_MultipleIterator_containsIterator, 0)
 	SPL_MA(MultipleIterator,  countIterators,         SplObjectStorage, count,    arginfo_splobject_void,                    0)
+	SPL_ME(SplObjectStorage,  __debugInfo,            arginfo_splobject_void,                     0)
 	/* Iterator */
 	SPL_ME(MultipleIterator,  rewind,                 arginfo_splobject_void,                     0)
 	SPL_ME(MultipleIterator,  valid,                  arginfo_splobject_void,                     0)
