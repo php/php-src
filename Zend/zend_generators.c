@@ -785,12 +785,10 @@ try_again:
 		return;
 	}
 
-	if (UNEXPECTED(orig_generator->flags & ZEND_GENERATOR_DO_INIT)) {
+	if (UNEXPECTED((orig_generator->flags & ZEND_GENERATOR_DO_INIT) != 0 && !Z_ISUNDEF(generator->value))) {
+		/* We must not advance Generator if we yield from a Generator being currently run */
 		orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
-		if (!Z_ISUNDEF(generator->value)) {
-			/* We must not advance Generator if we yield from a Generator being currently run */
-			return;
-		}
+		return;
 	}
 
 	if (UNEXPECTED(!Z_ISUNDEF(generator->values))) {
@@ -869,6 +867,8 @@ try_again:
 			goto try_again;
 		}
 	}
+
+	orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
 }
 /* }}} */
 
