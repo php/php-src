@@ -18,7 +18,7 @@ var_dump(str_ends_with("\x00", ""));
 var_dump(str_ends_with("\x00", "\x00"));
 var_dump(str_ends_with("a", "\x00"));
 var_dump(str_ends_with("a\x00", "\x00"));
-var_dump(str_ends_with("ab\x00c", "b\x00ic"));
+var_dump(str_ends_with("ab\x00c", "b\x00c"));
 var_dump(str_ends_with("a\x00b", "d\x00b"));
 var_dump(str_ends_with("a\x00b", "a\x00z"));
 var_dump(str_ends_with("a", "\x00a"));
