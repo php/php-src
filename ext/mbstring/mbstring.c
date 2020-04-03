@@ -2545,10 +2545,8 @@ MBSTRING_API char *php_mb_convert_encoding_ex(const char *input, size_t length, 
 
 	/* initialize converter */
 	convd = mbfl_buffer_converter_new(from_encoding, to_encoding, string.len);
-	if (convd == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to create character encoding converter");
-		return NULL;
-	}
+	/* If this assertion fails this means some memory allocation failure which is a bug */
+	ZEND_ASSERT(convd != NULL);
 
 	mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
 	mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
@@ -3342,10 +3340,9 @@ PHP_FUNCTION(mb_convert_variables)
 	convd = NULL;
 	if (from_encoding != &mbfl_encoding_pass) {
 		convd = mbfl_buffer_converter_new(from_encoding, to_encoding, 0);
-		if (convd == NULL) {
-			php_error_docref(NULL, E_WARNING, "Unable to create converter");
-			RETURN_FALSE;
-		}
+		/* If this assertion fails this means some memory allocation failure which is a bug */
+		ZEND_ASSERT(convd != NULL);
+
 		mbfl_buffer_converter_illegal_mode(convd, MBSTRG(current_filter_illegal_mode));
 		mbfl_buffer_converter_illegal_substchar(convd, MBSTRG(current_filter_illegal_substchar));
 	}
@@ -4127,10 +4124,8 @@ MBSTRING_API int php_mb_check_encoding(
 	mbfl_buffer_converter *convd;
 
 	convd = php_mb_init_convd(encoding);
-	if (convd == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to create converter");
-		return 0;
-	}
+	/* If this assertion fails this means some memory allocation failure which is a bug */
+	ZEND_ASSERT(convd != NULL);
 
 	if (php_mb_check_encoding_impl(convd, input, length, encoding)) {
 		mbfl_buffer_converter_delete(convd);
@@ -4151,10 +4146,8 @@ static int php_mb_check_encoding_recursive(HashTable *vars, const mbfl_encoding 
 	(void)(idx);
 
 	convd = php_mb_init_convd(encoding);
-	if (convd == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to create converter");
-		return 0;
-	}
+	/* If this assertion fails this means some memory allocation failure which is a bug */
+	ZEND_ASSERT(convd != NULL);
 
 	if (GC_IS_RECURSIVE(vars)) {
 		mbfl_buffer_converter_delete(convd);
@@ -4270,13 +4263,9 @@ static inline zend_long php_mb_ord(const char *str, size_t str_len, zend_string 
 		zend_long cp;
 
 		mbfl_wchar_device_init(&dev);
-		filter = mbfl_convert_filter_new(
-			enc, &mbfl_encoding_wchar,
-			mbfl_wchar_device_output, 0, &dev);
-		if (!filter) {
-			php_error_docref(NULL, E_WARNING, "Creation of filter failed");
-			return -1;
-		}
+		filter = mbfl_convert_filter_new(enc, &mbfl_encoding_wchar, mbfl_wchar_device_output, 0, &dev);
+		/* If this assertion fails this means some memory allocation failure which is a bug */
+		ZEND_ASSERT(filter != NULL);
 
 		mbfl_convert_filter_feed_string(filter, (const unsigned char *) str, str_len);
 		mbfl_convert_filter_flush(filter);
