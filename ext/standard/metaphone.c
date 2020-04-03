@@ -19,7 +19,6 @@
 */
 
 #include "php.h"
-#include "php_metaphone.h"
 
 static int metaphone(unsigned char *word, size_t word_len, zend_long max_phonemes, zend_string **phoned_word, int traditional);
 

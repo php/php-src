@@ -19,9 +19,6 @@
 
 BEGIN_EXTERN_C()
 
-PHP_FUNCTION(random_bytes);
-PHP_FUNCTION(random_int);
-
 PHP_MINIT_FUNCTION(random);
 PHP_MSHUTDOWN_FUNCTION(random);
 

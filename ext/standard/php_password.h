@@ -18,12 +18,6 @@
 #ifndef PHP_PASSWORD_H
 #define PHP_PASSWORD_H
 
-PHP_FUNCTION(password_hash);
-PHP_FUNCTION(password_verify);
-PHP_FUNCTION(password_needs_rehash);
-PHP_FUNCTION(password_get_info);
-PHP_FUNCTION(password_algos);
-
 PHP_MINIT_FUNCTION(password);
 PHP_MSHUTDOWN_FUNCTION(password);
 

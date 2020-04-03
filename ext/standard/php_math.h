@@ -26,60 +26,6 @@ PHPAPI zend_long _php_math_basetolong(zval *arg, int base);
 PHPAPI void _php_math_basetozval(zend_string *str, int base, zval *ret);
 PHPAPI zend_string * _php_math_zvaltobase(zval *arg, int base);
 
-PHP_FUNCTION(sin);
-PHP_FUNCTION(cos);
-PHP_FUNCTION(tan);
-PHP_FUNCTION(asin);
-PHP_FUNCTION(acos);
-PHP_FUNCTION(atan);
-PHP_FUNCTION(atan2);
-PHP_FUNCTION(pi);
-PHP_FUNCTION(exp);
-PHP_FUNCTION(log);
-PHP_FUNCTION(log10);
-PHP_FUNCTION(is_finite);
-PHP_FUNCTION(is_infinite);
-PHP_FUNCTION(is_nan);
-PHP_FUNCTION(pow);
-PHP_FUNCTION(sqrt);
-PHP_FUNCTION(rand);
-PHP_FUNCTION(mt_srand);
-PHP_FUNCTION(mt_rand);
-PHP_FUNCTION(mt_getrandmax);
-PHP_FUNCTION(abs);
-PHP_FUNCTION(ceil);
-PHP_FUNCTION(floor);
-PHP_FUNCTION(round);
-PHP_FUNCTION(decbin);
-PHP_FUNCTION(dechex);
-PHP_FUNCTION(decoct);
-PHP_FUNCTION(bindec);
-PHP_FUNCTION(hexdec);
-PHP_FUNCTION(octdec);
-PHP_FUNCTION(base_convert);
-PHP_FUNCTION(number_format);
-PHP_FUNCTION(fmod);
-PHP_FUNCTION(fdiv);
-PHP_FUNCTION(deg2rad);
-PHP_FUNCTION(rad2deg);
-PHP_FUNCTION(intdiv);
-
-   /*
-   WARNING: these functions are experimental: they could change their names or
-   disappear in the next version of PHP!
-   */
-PHP_FUNCTION(hypot);
-PHP_FUNCTION(expm1);
-PHP_FUNCTION(log1p);
-
-PHP_FUNCTION(sinh);
-PHP_FUNCTION(cosh);
-PHP_FUNCTION(tanh);
-
-PHP_FUNCTION(asinh);
-PHP_FUNCTION(acosh);
-PHP_FUNCTION(atanh);
-
 #include <math.h>
 
 #ifndef M_E

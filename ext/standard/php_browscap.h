@@ -20,6 +20,4 @@
 PHP_MINIT_FUNCTION(browscap);
 PHP_MSHUTDOWN_FUNCTION(browscap);
 
-PHP_FUNCTION(get_browser);
-
 #endif /* PHP_BROWSCAP_H */
