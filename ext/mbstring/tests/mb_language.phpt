@@ -20,10 +20,14 @@ echo "Confirm language was changed:\n";
 var_dump(mb_language());
 
 echo "Try changing to a non-existent language:\n";
-var_dump(mb_language('Pig Latin'));
+try {
+    var_dump(mb_language('Pig Latin'));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump(mb_language());
 ?>
---EXPECTF--
+--EXPECT--
 Checking default language:
 string(7) "neutral"
 Checking default language after ini_set:
@@ -33,7 +37,5 @@ bool(true)
 Confirm language was changed:
 string(7) "English"
 Try changing to a non-existent language:
-
-Warning: mb_language(): Unknown language "Pig Latin" in %s on line %d
-bool(false)
+mb_language(): Argument #1 ($language) must be a valid language, "Pig Latin" given
 string(7) "neutral"

@@ -1365,11 +1365,12 @@ PHP_FUNCTION(mb_language)
 	} else {
 		zend_string *ini_name = zend_string_init("mbstring.language", sizeof("mbstring.language") - 1, 0);
 		if (FAILURE == zend_alter_ini_entry(ini_name, name, PHP_INI_USER, PHP_INI_STAGE_RUNTIME)) {
-			php_error_docref(NULL, E_WARNING, "Unknown language \"%s\"", ZSTR_VAL(name));
-			RETVAL_FALSE;
-		} else {
-			RETVAL_TRUE;
+			zend_argument_value_error(1, "must be a valid language, \"%s\" given", ZSTR_VAL(name));
+			zend_string_release_ex(ini_name, 0);
+			RETURN_THROWS();
 		}
+		// TODO Make return void
+		RETVAL_TRUE;
 		zend_string_release_ex(ini_name, 0);
 	}
 }
@@ -1568,8 +1569,8 @@ PHP_FUNCTION(mb_detect_order)
 
 		if (size == 0) {
 			efree(list);
-			php_error_docref(NULL, E_WARNING, "Must specify at least one encoding");
-			RETURN_FALSE;
+			zend_argument_value_error(1, "must specify at least one encoding");
+			RETURN_THROWS();
 		}
 
 		if (MBSTRG(current_detect_order_list)) {
@@ -2481,8 +2482,8 @@ PHP_FUNCTION(mb_strimwidth)
 	}
 
 	if (from < 0 || (size_t)from > str_len) {
-		php_error_docref(NULL, E_WARNING, "Start position is out of range");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "is out of range");
+		RETURN_THROWS();
 	}
 
 	if (width < 0) {
@@ -2490,8 +2491,8 @@ PHP_FUNCTION(mb_strimwidth)
 	}
 
 	if (width < 0) {
-		php_error_docref(NULL, E_WARNING, "Width is out of range");
-		RETURN_FALSE;
+		zend_argument_value_error(3, "is out of range");
+		RETURN_THROWS();
 	}
 
 	if (trimmarker) {
@@ -2721,8 +2722,8 @@ PHP_FUNCTION(mb_convert_encoding)
 
 	if (!num_from_encodings) {
 		efree(from_encodings);
-		php_error_docref(NULL, E_WARNING, "Must specify at least one encoding");
-		RETURN_FALSE;
+		zend_argument_value_error(3, "must specify at least one encoding");
+		RETURN_THROWS();
 	}
 
 	if (input_str) {
@@ -2907,8 +2908,8 @@ PHP_FUNCTION(mb_detect_encoding)
 
 	if (size == 0) {
 		efree(elist);
-		php_error_docref(NULL, E_WARNING, "Must specify at least one encoding");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must specify at least one encoding");
+		RETURN_THROWS();
 	}
 
 	if (ZEND_NUM_ARGS() < 3) {
@@ -3301,8 +3302,8 @@ PHP_FUNCTION(mb_convert_variables)
 
 	if (elistsz == 0) {
 		efree(elist);
-		php_error_docref(NULL, E_WARNING, "Must specify at least one encoding");
-		RETURN_FALSE;
+		zend_argument_value_error(2, "must specify at least one encoding");
+		RETURN_THROWS();
 	}
 
 	if (elistsz == 1) {
