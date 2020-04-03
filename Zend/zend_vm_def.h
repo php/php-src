@@ -4453,7 +4453,6 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, JMP_ADDR, LAST_CATCH|CACHE_SLOT)
 	USE_OPLINE
 	zend_class_entry *ce, *catch_ce;
 	zend_object *exception;
-	zval *ex;
 
 	SAVE_OPLINE();
 	/* Check whether an exception has been thrown, if not, jump over code */
@@ -4486,17 +4485,18 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, JMP_ADDR, LAST_CATCH|CACHE_SLOT)
 	}
 
 	exception = EG(exception);
-	ex = EX_VAR(opline->result.var);
-	{
+	EG(exception) = NULL;
+	if (RETURN_VALUE_USED(opline)) {
 		/* Always perform a strict assignment. There is a reasonable expectation that if you
 		 * write "catch (Exception $e)" then $e will actually be instanceof Exception. As such,
 		 * we should not permit coercion to string here. */
 		zval tmp;
 		ZVAL_OBJ(&tmp, exception);
-		EG(exception) = NULL;
-		zend_assign_to_variable(ex, &tmp, IS_TMP_VAR, /* strict */ 1);
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+		zend_assign_to_variable(EX_VAR(opline->result.var), &tmp, IS_TMP_VAR, /* strict */ 1);
+	} else {
+		OBJ_RELEASE(exception);
 	}
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_HOT_HANDLER(65, ZEND_SEND_VAL, CONST|TMPVAR, NUM)

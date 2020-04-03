@@ -1993,8 +1993,10 @@ simple_list:
 		case ZEND_AST_CATCH:
 			smart_str_appends(str, "} catch (");
 			zend_ast_export_catch_name_list(str, zend_ast_get_list(ast->child[0]), indent);
-			smart_str_appends(str, " $");
-			zend_ast_export_var(str, ast->child[1], 0, indent);
+			if (ast->child[1]) {
+				smart_str_appends(str, " $");
+				zend_ast_export_var(str, ast->child[1], 0, indent);
+			}
 			smart_str_appends(str, ") {\n");
 			zend_ast_export_stmt(str, ast->child[2], indent + 1);
 			zend_ast_export_indent(str, indent);

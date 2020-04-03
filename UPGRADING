@@ -509,6 +509,9 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/throw_expression
   . An optional trailing comma is now allowed in parameter lists.
     RFC: https://wiki.php.net/rfc/trailing_comma_in_parameter_list
+  . It is now possible to write `catch (Exception)` to catch an exception
+    without storing it in a variable.
+    RFC: https://wiki.php.net/rfc/non-capturing_catches
 
 - Date:
   . Added DateTime::createFromInterface() and
