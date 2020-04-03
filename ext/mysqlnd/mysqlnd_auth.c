@@ -481,7 +481,7 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		conn->password.s = tmp;
 
 		if (conn->last_message.s) {
-			mnd_pefree(conn->last_message.s, conn->persistent);
+			mnd_efree(conn->last_message.s);
 			conn->last_message.s = NULL;
 		}
 		UPSERT_STATUS_RESET(conn->upsert_status);
