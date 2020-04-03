@@ -626,7 +626,7 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
     }
 
     $code .= "ZEND_END_ARG_INFO()";
-    return $code;
+    return $code . "\n";
 }
 
 function findEquivalentFuncInfo(array $generatedFuncInfos, $funcInfo): ?FuncInfo {
@@ -638,70 +638,80 @@ function findEquivalentFuncInfo(array $generatedFuncInfos, $funcInfo): ?FuncInfo
     return null;
 }
 
+function generateCodeWithConditions(
+        FileInfo $fileInfo, string $separator, Closure $codeGenerator): string {
+    $code = "";
+    foreach ($fileInfo->funcInfos as $funcInfo) {
+        $funcCode = $codeGenerator($funcInfo);
+        if ($funcCode === null) {
+            continue;
+        }
+
+        $code .= $separator;
+        if ($funcInfo->cond) {
+            $code .= "#if {$funcInfo->cond}\n";
+            $code .= $funcCode;
+            $code .= "#endif\n";
+        } else {
+            $code .= $funcCode;
+        }
+    }
+    return $code;
+}
+
 function generateArgInfoCode(FileInfo $fileInfo): string {
     $funcInfos = $fileInfo->funcInfos;
 
-    $code = "/* This is a generated file, edit the .stub.php file instead. */";
+    $code = "/* This is a generated file, edit the .stub.php file instead. */\n";
     $generatedFuncInfos = [];
-    foreach ($funcInfos as $funcInfo) {
-        $code .= "\n\n";
-        if ($funcInfo->cond) {
-            $code .= "#if {$funcInfo->cond}\n";
-        }
+    $code .= generateCodeWithConditions(
+        $fileInfo, "\n",
+        function(FuncInfo $funcInfo) use(&$generatedFuncInfos) {
+            /* If there already is an equivalent arginfo structure, only emit a #define */
+            if ($generatedFuncInfo = findEquivalentFuncInfo($generatedFuncInfos, $funcInfo)) {
+                $code = sprintf(
+                    "#define %s %s\n",
+                    $funcInfo->getArgInfoName(), $generatedFuncInfo->getArgInfoName()
+                );
+            } else {
+                $code = funcInfoToCode($funcInfo);
+            }
 
-        /* If there already is an equivalent arginfo structure, only emit a #define */
-        if ($generatedFuncInfo = findEquivalentFuncInfo($generatedFuncInfos, $funcInfo)) {
-            $code .= sprintf(
-                "#define %s %s",
-                $funcInfo->getArgInfoName(), $generatedFuncInfo->getArgInfoName()
-            );
-        } else {
-            $code .= funcInfoToCode($funcInfo);
+            $generatedFuncInfos[] = $funcInfo;
+            return $code;
         }
-
-        if ($funcInfo->cond) {
-            $code .= "\n#endif";
-        }
-
-        $generatedFuncInfos[] = $funcInfo;
-    }
+    );
 
     if ($fileInfo->generateFunctionEntries) {
         $code .= "\n\n";
-        foreach ($funcInfos as $funcInfo) {
+        $code .= generateCodeWithConditions($fileInfo, "", function(FuncInfo $funcInfo) {
             if ($funcInfo->className || $funcInfo->alias) {
-                continue;
+                return null;
             }
 
-            $code .= "ZEND_FUNCTION($funcInfo->name);\n";
-        }
+            return "ZEND_FUNCTION($funcInfo->name);\n";
+        });
 
         $code .= "\n\nstatic const zend_function_entry ext_functions[] = {\n";
-        foreach ($funcInfos as $funcInfo) {
+        $code .= generateCodeWithConditions($fileInfo, "", function(FuncInfo $funcInfo) {
             if ($funcInfo->className) {
-                continue;
+                return null;
             }
 
-            if ($funcInfo->cond) {
-                $code .= "#if {$funcInfo->cond}\n";
-            }
             if ($funcInfo->alias) {
-                $code .= sprintf(
+                return sprintf(
                     "\tZEND_FALIAS(%s, %s, %s)\n",
                     $funcInfo->name, $funcInfo->alias, $funcInfo->getArgInfoName()
                 );
             } else {
-                $code .= sprintf("\tZEND_FE(%s, %s)\n", $funcInfo->name, $funcInfo->getArgInfoName());
+                return sprintf("\tZEND_FE(%s, %s)\n", $funcInfo->name, $funcInfo->getArgInfoName());
             }
-            if ($funcInfo->cond) {
-                $code .= "#endif\n";
-            }
-        }
+        });
         $code .= "\tZEND_FE_END\n";
-        $code .= "};";
+        $code .= "};\n";
     }
 
-    return $code . "\n";
+    return $code;
 }
 
 function initPhpParser() {

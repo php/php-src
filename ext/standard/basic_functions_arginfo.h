@@ -2238,6 +2238,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_generate_ctrl_event
 ZEND_END_ARG_INFO()
 #endif
 
+
 ZEND_FUNCTION(set_time_limit);
 ZEND_FUNCTION(header_register_callback);
 ZEND_FUNCTION(ob_start);
@@ -2341,13 +2342,19 @@ ZEND_FUNCTION(constant);
 ZEND_FUNCTION(ip2long);
 ZEND_FUNCTION(long2ip);
 ZEND_FUNCTION(getenv);
+#if defined(HAVE_PUTENV)
 ZEND_FUNCTION(putenv);
+#endif
 ZEND_FUNCTION(getopt);
 ZEND_FUNCTION(flush);
 ZEND_FUNCTION(sleep);
 ZEND_FUNCTION(usleep);
+#if HAVE_NANOSLEEP
 ZEND_FUNCTION(time_nanosleep);
+#endif
+#if HAVE_NANOSLEEP
 ZEND_FUNCTION(time_sleep_until);
+#endif
 ZEND_FUNCTION(get_current_user);
 ZEND_FUNCTION(get_cfg_var);
 ZEND_FUNCTION(error_log);
@@ -2371,31 +2378,55 @@ ZEND_FUNCTION(print_r);
 ZEND_FUNCTION(connection_aborted);
 ZEND_FUNCTION(connection_status);
 ZEND_FUNCTION(ignore_user_abort);
+#if HAVE_GETSERVBYNAME
 ZEND_FUNCTION(getservbyname);
+#endif
+#if HAVE_GETSERVBYPORT
 ZEND_FUNCTION(getservbyport);
+#endif
+#if HAVE_GETPROTOBYNAME
 ZEND_FUNCTION(getprotobyname);
+#endif
+#if HAVE_GETPROTOBYNUMBER
 ZEND_FUNCTION(getprotobynumber);
+#endif
 ZEND_FUNCTION(register_tick_function);
 ZEND_FUNCTION(unregister_tick_function);
 ZEND_FUNCTION(is_uploaded_file);
 ZEND_FUNCTION(move_uploaded_file);
 ZEND_FUNCTION(parse_ini_file);
 ZEND_FUNCTION(parse_ini_string);
+#if ZEND_DEBUG
 ZEND_FUNCTION(config_get_hash);
+#endif
+#if defined(HAVE_GETLOADAVG)
 ZEND_FUNCTION(sys_getloadavg);
+#endif
 ZEND_FUNCTION(get_browser);
 ZEND_FUNCTION(crc32);
 ZEND_FUNCTION(crypt);
+#if HAVE_STRPTIME
 ZEND_FUNCTION(strptime);
+#endif
+#if defined(HAVE_GETHOSTNAME)
 ZEND_FUNCTION(gethostname);
+#endif
 ZEND_FUNCTION(gethostbyaddr);
 ZEND_FUNCTION(gethostbyname);
 ZEND_FUNCTION(gethostbynamel);
+#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 ZEND_FUNCTION(dns_check_record);
+#endif
+#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 ZEND_FUNCTION(dns_get_record);
+#endif
+#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 ZEND_FUNCTION(dns_get_mx);
+#endif
 ZEND_FUNCTION(net_get_interfaces);
+#if HAVE_FTOK
 ZEND_FUNCTION(ftok);
+#endif
 ZEND_FUNCTION(hrtime);
 ZEND_FUNCTION(lcg_value);
 ZEND_FUNCTION(md5);
@@ -2407,11 +2438,21 @@ ZEND_FUNCTION(getmyinode);
 ZEND_FUNCTION(getlastmod);
 ZEND_FUNCTION(sha1);
 ZEND_FUNCTION(sha1_file);
+#if defined(HAVE_SYSLOG_H)
 ZEND_FUNCTION(openlog);
+#endif
+#if defined(HAVE_SYSLOG_H)
 ZEND_FUNCTION(closelog);
+#endif
+#if defined(HAVE_SYSLOG_H)
 ZEND_FUNCTION(syslog);
+#endif
+#if defined(HAVE_INET_NTOP)
 ZEND_FUNCTION(inet_ntop);
+#endif
+#if defined(HAVE_INET_PTON)
 ZEND_FUNCTION(inet_pton);
+#endif
 ZEND_FUNCTION(metaphone);
 ZEND_FUNCTION(header);
 ZEND_FUNCTION(header_remove);
@@ -2431,7 +2472,9 @@ ZEND_FUNCTION(bin2hex);
 ZEND_FUNCTION(hex2bin);
 ZEND_FUNCTION(strspn);
 ZEND_FUNCTION(strcspn);
+#if HAVE_NL_LANGINFO
 ZEND_FUNCTION(nl_langinfo);
+#endif
 ZEND_FUNCTION(strcoll);
 ZEND_FUNCTION(trim);
 ZEND_FUNCTION(rtrim);
@@ -2497,19 +2540,25 @@ ZEND_FUNCTION(opendir);
 ZEND_FUNCTION(getdir);
 ZEND_FUNCTION(closedir);
 ZEND_FUNCTION(chdir);
+#if defined(HAVE_CHROOT) && !defined(ZTS) && ENABLE_CHROOT_FUNC
 ZEND_FUNCTION(chroot);
+#endif
 ZEND_FUNCTION(getcwd);
 ZEND_FUNCTION(rewinddir);
 ZEND_FUNCTION(readdir);
 ZEND_FUNCTION(scandir);
+#if defined(HAVE_GLOB)
 ZEND_FUNCTION(glob);
+#endif
 ZEND_FUNCTION(exec);
 ZEND_FUNCTION(system);
 ZEND_FUNCTION(passthru);
 ZEND_FUNCTION(escapeshellcmd);
 ZEND_FUNCTION(escapeshellarg);
 ZEND_FUNCTION(shell_exec);
+#if defined(HAVE_NICE)
 ZEND_FUNCTION(proc_nice);
+#endif
 ZEND_FUNCTION(flock);
 ZEND_FUNCTION(get_meta_tags);
 ZEND_FUNCTION(pclose);
@@ -2544,7 +2593,9 @@ ZEND_FUNCTION(file_put_contents);
 ZEND_FUNCTION(fputcsv);
 ZEND_FUNCTION(fgetcsv);
 ZEND_FUNCTION(realpath);
+#if defined(HAVE_FNMATCH)
 ZEND_FUNCTION(fnmatch);
+#endif
 ZEND_FUNCTION(sys_get_temp_dir);
 ZEND_FUNCTION(fileatime);
 ZEND_FUNCTION(filectime);
@@ -2566,10 +2617,16 @@ ZEND_FUNCTION(stat);
 ZEND_FUNCTION(lstat);
 ZEND_FUNCTION(chown);
 ZEND_FUNCTION(chgrp);
+#if HAVE_LCHOWN
 ZEND_FUNCTION(lchown);
+#endif
+#if HAVE_LCHOWN
 ZEND_FUNCTION(lchgrp);
+#endif
 ZEND_FUNCTION(chmod);
+#if HAVE_UTIME
 ZEND_FUNCTION(touch);
+#endif
 ZEND_FUNCTION(clearstatcache);
 ZEND_FUNCTION(disk_total_space);
 ZEND_FUNCTION(disk_free_space);
@@ -2598,10 +2655,18 @@ ZEND_FUNCTION(php_ini_loaded_file);
 ZEND_FUNCTION(iptcembed);
 ZEND_FUNCTION(iptcparse);
 ZEND_FUNCTION(levenshtein);
+#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 ZEND_FUNCTION(readlink);
+#endif
+#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 ZEND_FUNCTION(linkinfo);
+#endif
+#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 ZEND_FUNCTION(symlink);
+#endif
+#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
 ZEND_FUNCTION(link);
+#endif
 ZEND_FUNCTION(mail);
 ZEND_FUNCTION(abs);
 ZEND_FUNCTION(ceil);
@@ -2645,9 +2710,15 @@ ZEND_FUNCTION(base_convert);
 ZEND_FUNCTION(number_format);
 ZEND_FUNCTION(fmod);
 ZEND_FUNCTION(fdiv);
+#if defined(HAVE_GETTIMEOFDAY)
 ZEND_FUNCTION(microtime);
+#endif
+#if defined(HAVE_GETTIMEOFDAY)
 ZEND_FUNCTION(gettimeofday);
+#endif
+#if defined(HAVE_GETRUSAGE)
 ZEND_FUNCTION(getrusage);
+#endif
 ZEND_FUNCTION(pack);
 ZEND_FUNCTION(unpack);
 ZEND_FUNCTION(password_get_info);
@@ -2655,10 +2726,18 @@ ZEND_FUNCTION(password_hash);
 ZEND_FUNCTION(password_needs_rehash);
 ZEND_FUNCTION(password_verify);
 ZEND_FUNCTION(password_algos);
+#if defined(PHP_CAN_SUPPORT_PROC_OPEN)
 ZEND_FUNCTION(proc_open);
+#endif
+#if defined(PHP_CAN_SUPPORT_PROC_OPEN)
 ZEND_FUNCTION(proc_close);
+#endif
+#if defined(PHP_CAN_SUPPORT_PROC_OPEN)
 ZEND_FUNCTION(proc_terminate);
+#endif
+#if defined(PHP_CAN_SUPPORT_PROC_OPEN)
 ZEND_FUNCTION(proc_get_status);
+#endif
 ZEND_FUNCTION(quoted_printable_decode);
 ZEND_FUNCTION(quoted_printable_encode);
 ZEND_FUNCTION(mt_srand);
@@ -2686,8 +2765,12 @@ ZEND_FUNCTION(stream_socket_get_name);
 ZEND_FUNCTION(stream_socket_recvfrom);
 ZEND_FUNCTION(stream_socket_sendto);
 ZEND_FUNCTION(stream_socket_enable_crypto);
+#if defined(HAVE_SHUTDOWN)
 ZEND_FUNCTION(stream_socket_shutdown);
+#endif
+#if HAVE_SOCKETPAIR
 ZEND_FUNCTION(stream_socket_pair);
+#endif
 ZEND_FUNCTION(stream_copy_to_stream);
 ZEND_FUNCTION(stream_get_contents);
 ZEND_FUNCTION(stream_supports_lock);
@@ -2701,9 +2784,13 @@ ZEND_FUNCTION(stream_get_wrappers);
 ZEND_FUNCTION(stream_get_transports);
 ZEND_FUNCTION(stream_is_local);
 ZEND_FUNCTION(stream_isatty);
+#if defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_vt100_support);
+#endif
 ZEND_FUNCTION(stream_set_chunk_size);
+#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
 ZEND_FUNCTION(stream_set_timeout);
+#endif
 ZEND_FUNCTION(gettype);
 ZEND_FUNCTION(settype);
 ZEND_FUNCTION(intval);
@@ -2723,7 +2810,9 @@ ZEND_FUNCTION(is_scalar);
 ZEND_FUNCTION(is_callable);
 ZEND_FUNCTION(is_iterable);
 ZEND_FUNCTION(is_countable);
+#if defined(HAVE_GETTIMEOFDAY)
 ZEND_FUNCTION(uniqid);
+#endif
 ZEND_FUNCTION(parse_url);
 ZEND_FUNCTION(urlencode);
 ZEND_FUNCTION(urldecode);
@@ -2746,12 +2835,24 @@ ZEND_FUNCTION(unserialize);
 ZEND_FUNCTION(memory_get_usage);
 ZEND_FUNCTION(memory_get_peak_usage);
 ZEND_FUNCTION(version_compare);
+#if defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_cp_set);
+#endif
+#if defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_cp_get);
+#endif
+#if defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_cp_conv);
+#endif
+#if defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_cp_is_utf8);
+#endif
+#if defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_set_ctrl_handler);
+#endif
+#if defined(PHP_WIN32)
 ZEND_FUNCTION(sapi_windows_generate_ctrl_event);
+#endif
 
 
 static const zend_function_entry ext_functions[] = {
