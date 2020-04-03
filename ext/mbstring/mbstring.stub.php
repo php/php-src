@@ -81,7 +81,7 @@ function mb_get_info(string $type = UNKNOWN): array|string|int|false {}
 
 function mb_check_encoding(array|string $var = UNKNOWN, string $encoding = UNKNOWN): bool {}
 
-function mb_scrub(string $str, string $encoding = UNKNOWN): string|false {}
+function mb_scrub(string $str, string $encoding = UNKNOWN): string {}
 
 function mb_ord(string $str, string $encoding = UNKNOWN): int|false {}
 

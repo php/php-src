@@ -4424,14 +4424,7 @@ PHP_FUNCTION(mb_chr)
 }
 /* }}} */
 
-
-static inline char* php_mb_scrub(const char* str, size_t str_len, const mbfl_encoding *enc, size_t *ret_len)
-{
-	return php_mb_convert_encoding_ex(str, str_len, enc, enc, ret_len);
-}
-
-
-/* {{{ proto string|false mb_scrub([string str[, string encoding]]) */
+/* {{{ proto string mb_scrub([string str[, string encoding]]) */
 PHP_FUNCTION(mb_scrub)
 {
 	const mbfl_encoding *enc;
@@ -4452,11 +4445,7 @@ PHP_FUNCTION(mb_scrub)
 		RETURN_THROWS();
 	}
 
-	ret = php_mb_scrub(str, str_len, enc, &ret_len);
-
-	if (ret == NULL) {
-		RETURN_FALSE;
-	}
+	ret = php_mb_convert_encoding_ex(str, str_len, enc, enc, &ret_len);
 
 	RETVAL_STRINGL(ret, ret_len);
 	efree(ret);
