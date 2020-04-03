@@ -4486,12 +4486,16 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, JMP_ADDR, LAST_CATCH|CACHE_SLOT)
 	}
 
 	exception = EG(exception);
-	ex = EX_VAR(opline->result.var);
-	if (UNEXPECTED(Z_ISREF_P(ex))) {
-		ex = Z_REFVAL_P(ex);
+	if (RETURN_VALUE_USED(opline)) {
+		ex = EX_VAR(opline->result.var);
+		if (UNEXPECTED(Z_ISREF_P(ex))) {
+			ex = Z_REFVAL_P(ex);
+		}
+		zval_ptr_dtor(ex);
+		ZVAL_OBJ(ex, EG(exception));
+	} else {
+		OBJ_RELEASE(EG(exception));
 	}
-	zval_ptr_dtor(ex);
-	ZVAL_OBJ(ex, EG(exception));
 	if (UNEXPECTED(EG(exception) != exception)) {
 		ZVAL_UNDEF(ex);
 		HANDLE_EXCEPTION();
