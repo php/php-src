@@ -10,6 +10,7 @@ Class Closure
     /** @return ?Closure */
     function bindTo(?object $newthis, $newscope = UNKNOWN) {}
 
+    /** @return mixed */
     function call(object $newthis, ...$parameters) {}
 
     /**

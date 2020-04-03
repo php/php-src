@@ -2,8 +2,10 @@
 
 function xmlrpc_encode($value): ?string {}
 
+/** @return mixed */
 function xmlrpc_decode(string $xml, string $encoding = "iso-8859-1") {}
 
+/** @return mixed */
 function xmlrpc_decode_request(string $xml, &$method, string $encoding = "iso-8859-1") {}
 
 function xmlrpc_encode_request(?string $method, $params, array $output_options = UNKNOWN): ?string {}
@@ -21,9 +23,13 @@ function xmlrpc_server_destroy($server): bool {}
 /** @param resource $server */
 function xmlrpc_server_register_method($server, string $method_name, $function): bool {}
 
-/** @param resource $server */
+/**
+ * @param resource $server
+ * @return mixed
+ */
 function xmlrpc_server_call_method($server, string $xml, $user_data, array $output_options = UNKNOWN) {}
 
+/** @return mixed */
 function xmlrpc_parse_method_descriptions(string $xml) {}
 
 /** @param resource $server */

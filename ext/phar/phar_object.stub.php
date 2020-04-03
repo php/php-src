@@ -381,6 +381,7 @@ class PharFileInfo extends SplFileInfo
     /** @return string */
     public function getContent() {}
 
+    /** @return mixed */
     public function getMetadata() {}
 
     /** @return int */

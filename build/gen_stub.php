@@ -385,25 +385,70 @@ class FileInfo {
     }
 }
 
+class DocCommentTag {
+    /** @var string */
+    public $name;
+    /** @var ?string */
+    public $value;
+
+    public function __construct(string $name, ?string $value) {
+        $this->name = $name;
+        $this->value = $value;
+    }
+
+    public function getValue(): string {
+        if ($this->value === null) {
+            throw new Exception("@$this->name does not have a value");
+        }
+
+        return $this->value;
+    }
+
+    public function getVariableName(): string {
+        $value = $this->getValue();
+        if ($value === null || strlen($value) === 0 || $value[0] !== '$') {
+            throw new Exception("@$this->name not followed by variable name");
+        }
+
+        return substr($value, 1);
+    }
+}
+
+/** @return DocCommentTag[] */
+function parseDocComment(DocComment $comment): array {
+    $commentText = substr($comment->getText(), 2, -2);
+    $tags = [];
+    foreach (explode("\n", $commentText) as $commentLine) {
+        $regex = '/^\*\s*@([a-z-]+)(?:\s+(.+))$/';
+        if (preg_match($regex, trim($commentLine), $matches, PREG_UNMATCHED_AS_NULL)) {
+            $tags[] = new DocCommentTag($matches[1], $matches[2]);
+        }
+    }
+
+    return $tags;
+}
+
 function parseFunctionLike(
     string $name, ?string $className, Node\FunctionLike $func, ?string $cond
 ): FuncInfo {
     $comment = $func->getDocComment();
     $paramMeta = [];
     $alias = null;
+    $haveDocReturnType = false;
 
     if ($comment) {
-        $commentText = substr($comment->getText(), 2, -2);
-
-        foreach (explode("\n", $commentText) as $commentLine) {
-            if (preg_match('/^\*\s*@prefer-ref\s+\$(.+)$/', trim($commentLine), $matches)) {
-                $varName = $matches[1];
+        $tags = parseDocComment($comment);
+        foreach ($tags as $tag) {
+            if ($tag->name === 'prefer-ref') {
+                $varName = $tag->getVariableName();
                 if (!isset($paramMeta[$varName])) {
                     $paramMeta[$varName] = [];
                 }
                 $paramMeta[$varName]['preferRef'] = true;
-            } else if (preg_match('/^\*\s*@alias\s+(.+)$/', trim($commentLine), $matches)) {
-                $alias = $matches[1];
+            } else if ($tag->name === 'alias') {
+                $alias = $tag->getValue();
+            } else if ($tag->name === 'return') {
+                $haveDocReturnType = true;
             }
         }
     }
@@ -455,6 +500,10 @@ function parseFunctionLike(
     }
 
     $returnType = $func->getReturnType();
+    if ($returnType === null && !$haveDocReturnType && substr($name, 0, 2) !== '__') {
+        throw new Exception("Missing return type for function $name()");
+    }
+
     $return = new ReturnInfo(
         $func->returnsByRef(),
         $returnType ? Type::fromNode($returnType) : null);

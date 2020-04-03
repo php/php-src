@@ -91,7 +91,10 @@ function socket_clear_error($socket = UNKNOWN): void {}
  */
 function socket_import_stream($stream) {}
 
-/** @param resource $socket */
+/**
+ * @param resource $socket
+ * @return resource|false
+ */
 function socket_export_stream($socket) {}
 
 /** @param resource $socket */

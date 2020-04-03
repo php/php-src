@@ -51,7 +51,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_variant_round, 0, 2, variant, 1)
 	ZEND_ARG_TYPE_INFO(0, decimals, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_cmp, 0, 0, 2)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_variant_cmp, 0, 2, IS_LONG, 0)
 	ZEND_ARG_INFO(0, left)
 	ZEND_ARG_INFO(0, right)
 	ZEND_ARG_TYPE_INFO(0, lcid, IS_LONG, 0)
@@ -104,7 +104,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_com_message_pump, 0, 0, _IS_BOOL
 	ZEND_ARG_TYPE_INFO(0, timeoutms, IS_LONG, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_com_load_typelib, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_com_load_typelib, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, typelib_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, case_insensitive, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()

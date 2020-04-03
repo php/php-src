@@ -14,7 +14,10 @@ class DOMXPath
     /** @return bool */
     public function registerNamespace(string $prefix, string $namespaceURI) {}
 
-    /** @param string|array $restrict */
+    /**
+     * @param string|array $restrict
+     * @return bool|null
+     */
     public function registerPhpFunctions($restrict = null) {}
 }
 #endif

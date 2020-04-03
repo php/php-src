@@ -2,6 +2,7 @@
 
 class DOMImplementation
 {
+    /** @return void */
     public function getFeature(string $feature, string $version) {}
 
     /** @return bool */

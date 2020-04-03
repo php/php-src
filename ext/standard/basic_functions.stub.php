@@ -238,6 +238,7 @@ function array_sum(array $arg): int|float {}
 
 function array_product(array $arg): int|float {}
 
+/** @return mixed */
 function array_reduce(array $arg, callable $callback, $initial = null) {}
 
 function array_filter(array $arg, callable $callback = UNKNOWN, int $use_keys = 0): array {}
@@ -1457,7 +1458,7 @@ function is_object($value): bool {}
 function is_scalar($value): bool {}
 
 /** @param mixed $value */
-function is_callable($value, bool $syntax_only = false, &$callable_name = null) {}
+function is_callable($value, bool $syntax_only = false, &$callable_name = null): bool {}
 
 /** @param mixed $value */
 function is_iterable($value): bool {}
@@ -1545,7 +1546,7 @@ function sapi_windows_cp_get(string $kind = UNKNOWN): int {}
  * @param int|string $in_codepage
  * @param int|string $out_codepage
  */
-function sapi_windows_cp_conv($in_codepage, $out_codepage, string $subject) {}
+function sapi_windows_cp_conv($in_codepage, $out_codepage, string $subject): ?string {}
 
 function sapi_windows_cp_is_utf8(): bool {}
 

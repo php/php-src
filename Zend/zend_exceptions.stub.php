@@ -60,5 +60,6 @@ class ErrorException extends Exception
 {
     function __construct(string $message = UNKNOWN, int $code = 0, int $severity = E_ERROR, string $filename = UNKNOWN, int $lineno = 0, ?Throwable $previous = null) {}
 
+    /** @return int */
     final function getSeverity() {}
 }

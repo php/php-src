@@ -2103,7 +2103,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_is_scalar arginfo_boolval
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_is_callable, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_is_callable, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_INFO(0, value)
 	ZEND_ARG_TYPE_INFO(0, syntax_only, _IS_BOOL, 0)
 	ZEND_ARG_INFO(1, callable_name)
@@ -2212,7 +2212,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #if defined(PHP_WIN32)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_conv, 0, 0, 3)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_sapi_windows_cp_conv, 0, 3, IS_STRING, 1)
 	ZEND_ARG_INFO(0, in_codepage)
 	ZEND_ARG_INFO(0, out_codepage)
 	ZEND_ARG_TYPE_INFO(0, subject, IS_STRING, 0)
