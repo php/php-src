@@ -350,15 +350,38 @@ class FuncInfo {
     }
 }
 
+class ClassInfo {
+    /** @var string */
+    public $name;
+    /** @var FuncInfo[] */
+    public $funcInfos;
+
+    public function __construct(string $name, array $funcInfos) {
+        $this->name = $name;
+        $this->funcInfos = $funcInfos;
+    }
+}
+
 class FileInfo {
     /** @var FuncInfo[] */
     public $funcInfos;
+    /** @var ClassInfo[] */
+    public $classInfos;
     /** @var bool */
     public $generateFunctionEntries;
 
-    public function __construct(array $funcInfos, bool $generateFunctionEntries) {
+    public function __construct(
+            array $funcInfos, array $classInfos, bool $generateFunctionEntries) {
         $this->funcInfos = $funcInfos;
+        $this->classInfos = $classInfos;
         $this->generateFunctionEntries = $generateFunctionEntries;
+    }
+
+    public function getAllFuncInfos(): iterable {
+        yield from $this->funcInfos;
+        foreach ($this->classInfos as $classInfo) {
+            yield from $classInfo->funcInfos;
+        }
     }
 }
 
@@ -507,6 +530,7 @@ function parseStubFile(string $fileName): FileInfo {
     }
 
     $funcInfos = [];
+    $classInfos = [];
     $conds = [];
     foreach ($stmts as $stmt) {
         $cond = handlePreprocessorConditions($conds, $stmt);
@@ -521,6 +545,7 @@ function parseStubFile(string $fileName): FileInfo {
 
         if ($stmt instanceof Stmt\ClassLike) {
             $className = $stmt->name->toString();
+            $methodInfos = [];
             foreach ($stmt->stmts as $classStmt) {
                 $cond = handlePreprocessorConditions($conds, $classStmt);
                 if ($classStmt instanceof Stmt\Nop) {
@@ -531,16 +556,18 @@ function parseStubFile(string $fileName): FileInfo {
                     throw new Exception("Not implemented {$classStmt->getType()}");
                 }
 
-                $funcInfos[] = parseFunctionLike(
+                $methodInfos[] = parseFunctionLike(
                     $classStmt->name->toString(), $className, $classStmt, $cond);
             }
+
+            $classInfos[] = new ClassInfo($className, $methodInfos);
             continue;
         }
 
         throw new Exception("Unexpected node {$stmt->getType()}");
     }
 
-    return new FileInfo($funcInfos, $generateFunctionEntries);
+    return new FileInfo($funcInfos, $classInfos, $generateFunctionEntries);
 }
 
 function funcInfoToCode(FuncInfo $funcInfo): string {
@@ -638,10 +665,11 @@ function findEquivalentFuncInfo(array $generatedFuncInfos, $funcInfo): ?FuncInfo
     return null;
 }
 
+/** @param FuncInfo[] $funcInfos */
 function generateCodeWithConditions(
-        FileInfo $fileInfo, string $separator, Closure $codeGenerator): string {
+        iterable $funcInfos, string $separator, Closure $codeGenerator): string {
     $code = "";
-    foreach ($fileInfo->funcInfos as $funcInfo) {
+    foreach ($funcInfos as $funcInfo) {
         $funcCode = $codeGenerator($funcInfo);
         if ($funcCode === null) {
             continue;
@@ -665,7 +693,7 @@ function generateArgInfoCode(FileInfo $fileInfo): string {
     $code = "/* This is a generated file, edit the .stub.php file instead. */\n";
     $generatedFuncInfos = [];
     $code .= generateCodeWithConditions(
-        $fileInfo, "\n",
+        $fileInfo->getAllFuncInfos(), "\n",
         function(FuncInfo $funcInfo) use(&$generatedFuncInfos) {
             /* If there already is an equivalent arginfo structure, only emit a #define */
             if ($generatedFuncInfo = findEquivalentFuncInfo($generatedFuncInfos, $funcInfo)) {
@@ -684,8 +712,8 @@ function generateArgInfoCode(FileInfo $fileInfo): string {
 
     if ($fileInfo->generateFunctionEntries) {
         $code .= "\n\n";
-        $code .= generateCodeWithConditions($fileInfo, "", function(FuncInfo $funcInfo) {
-            if ($funcInfo->className || $funcInfo->alias) {
+        $code .= generateCodeWithConditions($fileInfo->funcInfos, "", function(FuncInfo $funcInfo) {
+            if ($funcInfo->alias) {
                 return null;
             }
 
@@ -693,11 +721,7 @@ function generateArgInfoCode(FileInfo $fileInfo): string {
         });
 
         $code .= "\n\nstatic const zend_function_entry ext_functions[] = {\n";
-        $code .= generateCodeWithConditions($fileInfo, "", function(FuncInfo $funcInfo) {
-            if ($funcInfo->className) {
-                return null;
-            }
-
+        $code .= generateCodeWithConditions($fileInfo->funcInfos, "", function(FuncInfo $funcInfo) {
             if ($funcInfo->alias) {
                 return sprintf(
                     "\tZEND_FALIAS(%s, %s, %s)\n",

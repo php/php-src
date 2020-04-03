@@ -1,248 +1,5 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli___construct, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, host, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, user, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, database, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, port, IS_LONG, 1)
-	ZEND_ARG_TYPE_INFO(0, socket, IS_STRING, 1)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_autocommit, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, mode, _IS_BOOL, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_begin_transaction, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_change_user, 0, 0, 3)
-	ZEND_ARG_TYPE_INFO(0, user, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, database, IS_STRING, 1)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_character_set_name, 0, 0, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_mysqli_close arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_commit arginfo_class_mysqli_begin_transaction
-
-#define arginfo_class_mysqli_connect arginfo_class_mysqli___construct
-
-#define arginfo_class_mysqli_dump_debug_info arginfo_class_mysqli_character_set_name
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_debug, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, debug_options, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_mysqli_get_charset arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_get_client_info arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_get_connection_stats arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_get_server_info arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_get_warnings arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_init arginfo_class_mysqli_character_set_name
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_kill, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, connection_id, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_multi_query, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_mysqli_more_results arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_next_result arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_ping arginfo_class_mysqli_character_set_name
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_poll, 0, 0, 4)
-	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
-	ZEND_ARG_TYPE_INFO(1, write, IS_ARRAY, 1)
-	ZEND_ARG_TYPE_INFO(1, error, IS_ARRAY, 0)
-	ZEND_ARG_TYPE_INFO(0, sec, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, usec, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_mysqli_prepare arginfo_class_mysqli_multi_query
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_query, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, resultmode, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_real_connect, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, host, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, user, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, database, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, port, IS_LONG, 1)
-	ZEND_ARG_TYPE_INFO(0, socket, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_real_escape_string, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, string_to_escape, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_mysqli_reap_async_query arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_escape_string arginfo_class_mysqli_real_escape_string
-
-#define arginfo_class_mysqli_real_query arginfo_class_mysqli_multi_query
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_release_savepoint, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_mysqli_rollback arginfo_class_mysqli_begin_transaction
-
-#define arginfo_class_mysqli_savepoint arginfo_class_mysqli_release_savepoint
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_select_db, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, database, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_set_charset, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, charset, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_options, 0, 0, 2)
-	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
-	ZEND_ARG_INFO(0, value)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_mysqli_set_opt arginfo_class_mysqli_options
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_ssl_set, 0, 0, 5)
-	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, cert, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, certificate_authority, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, certificate_authority_path, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, cipher, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_mysqli_stat arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_stmt_init arginfo_class_mysqli_character_set_name
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_store_result, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_mysqli_thread_safe arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_use_result arginfo_class_mysqli_character_set_name
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_refresh, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, options, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_result___construct, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, mysqli_link, IS_OBJECT, 0)
-	ZEND_ARG_TYPE_INFO(0, resmode, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_mysqli_result_close arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_result_free arginfo_class_mysqli_character_set_name
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_result_data_seek, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_mysqli_result_fetch_field arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_result_fetch_fields arginfo_class_mysqli_character_set_name
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_result_fetch_field_direct, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, field_nr, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_result_fetch_all, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, result_type, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_mysqli_result_fetch_array arginfo_class_mysqli_result_fetch_all
-
-#define arginfo_class_mysqli_result_fetch_assoc arginfo_class_mysqli_character_set_name
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_result_fetch_object, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, class_name, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, params, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_mysqli_result_fetch_row arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_result_field_seek arginfo_class_mysqli_result_fetch_field_direct
-
-#define arginfo_class_mysqli_result_free_result arginfo_class_mysqli_character_set_name
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt___construct, 0, 0, 1)
-	ZEND_ARG_OBJ_INFO(0, mysqli_link, mysqli, 0)
-	ZEND_ARG_TYPE_INFO(0, statement, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_attr_get, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, attr, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_attr_set, 0, 0, 2)
-	ZEND_ARG_TYPE_INFO(0, attr, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, mode_in, IS_LONG, 0)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_bind_param, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, types, IS_STRING, 0)
-	ZEND_ARG_VARIADIC_INFO(1, vars)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_bind_result, 0, 0, 0)
-	ZEND_ARG_VARIADIC_INFO(1, vars)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_mysqli_stmt_close arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_stmt_data_seek arginfo_class_mysqli_result_data_seek
-
-#define arginfo_class_mysqli_stmt_execute arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_stmt_fetch arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_stmt_get_warnings arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_stmt_result_metadata arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_stmt_more_results arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_stmt_next_result arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_stmt_num_rows arginfo_class_mysqli_character_set_name
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_send_long_data, 0, 0, 2)
-	ZEND_ARG_TYPE_INFO(0, param_nr, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_mysqli_stmt_free_result arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_stmt_reset arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_stmt_prepare arginfo_class_mysqli_multi_query
-
-#define arginfo_class_mysqli_stmt_store_result arginfo_class_mysqli_character_set_name
-
-#define arginfo_class_mysqli_stmt_get_result arginfo_class_mysqli_character_set_name
-
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mysqli_affected_rows, 0, 1, MAY_BE_LONG|MAY_BE_STRING)
 	ZEND_ARG_OBJ_INFO(0, mysql_link, mysqli, 0)
 ZEND_END_ARG_INFO()
@@ -653,3 +410,246 @@ ZEND_END_ARG_INFO()
 #define arginfo_mysqli_escape_string arginfo_mysqli_real_escape_string
 
 #define arginfo_mysqli_set_opt arginfo_mysqli_options
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli___construct, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, host, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, user, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, database, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, port, IS_LONG, 1)
+	ZEND_ARG_TYPE_INFO(0, socket, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_autocommit, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, mode, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_begin_transaction, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_change_user, 0, 0, 3)
+	ZEND_ARG_TYPE_INFO(0, user, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, database, IS_STRING, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_character_set_name, 0, 0, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_mysqli_close arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_commit arginfo_class_mysqli_begin_transaction
+
+#define arginfo_class_mysqli_connect arginfo_class_mysqli___construct
+
+#define arginfo_class_mysqli_dump_debug_info arginfo_class_mysqli_character_set_name
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_debug, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, debug_options, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_mysqli_get_charset arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_get_client_info arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_get_connection_stats arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_get_server_info arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_get_warnings arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_init arginfo_class_mysqli_character_set_name
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_kill, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, connection_id, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_multi_query, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_mysqli_more_results arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_next_result arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_ping arginfo_class_mysqli_character_set_name
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_poll, 0, 0, 4)
+	ZEND_ARG_TYPE_INFO(1, read, IS_ARRAY, 1)
+	ZEND_ARG_TYPE_INFO(1, write, IS_ARRAY, 1)
+	ZEND_ARG_TYPE_INFO(1, error, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO(0, sec, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, usec, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_mysqli_prepare arginfo_class_mysqli_multi_query
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_query, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, resultmode, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_real_connect, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, host, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, user, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, password, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, database, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, port, IS_LONG, 1)
+	ZEND_ARG_TYPE_INFO(0, socket, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_real_escape_string, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, string_to_escape, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_mysqli_reap_async_query arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_escape_string arginfo_class_mysqli_real_escape_string
+
+#define arginfo_class_mysqli_real_query arginfo_class_mysqli_multi_query
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_release_savepoint, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_mysqli_rollback arginfo_class_mysqli_begin_transaction
+
+#define arginfo_class_mysqli_savepoint arginfo_class_mysqli_release_savepoint
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_select_db, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, database, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_set_charset, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, charset, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_options, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_mysqli_set_opt arginfo_class_mysqli_options
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_ssl_set, 0, 0, 5)
+	ZEND_ARG_TYPE_INFO(0, key, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, cert, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, certificate_authority, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, certificate_authority_path, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, cipher, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_mysqli_stat arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_stmt_init arginfo_class_mysqli_character_set_name
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_store_result, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_mysqli_thread_safe arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_use_result arginfo_class_mysqli_character_set_name
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_refresh, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, options, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_result___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, mysqli_link, IS_OBJECT, 0)
+	ZEND_ARG_TYPE_INFO(0, resmode, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_mysqli_result_close arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_result_free arginfo_class_mysqli_character_set_name
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_result_data_seek, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_mysqli_result_fetch_field arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_result_fetch_fields arginfo_class_mysqli_character_set_name
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_result_fetch_field_direct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, field_nr, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_result_fetch_all, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, result_type, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_mysqli_result_fetch_array arginfo_class_mysqli_result_fetch_all
+
+#define arginfo_class_mysqli_result_fetch_assoc arginfo_class_mysqli_character_set_name
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_result_fetch_object, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, class_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, params, IS_ARRAY, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_mysqli_result_fetch_row arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_result_field_seek arginfo_class_mysqli_result_fetch_field_direct
+
+#define arginfo_class_mysqli_result_free_result arginfo_class_mysqli_character_set_name
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt___construct, 0, 0, 1)
+	ZEND_ARG_OBJ_INFO(0, mysqli_link, mysqli, 0)
+	ZEND_ARG_TYPE_INFO(0, statement, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_attr_get, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, attr, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_attr_set, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, attr, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, mode_in, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_bind_param, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, types, IS_STRING, 0)
+	ZEND_ARG_VARIADIC_INFO(1, vars)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_bind_result, 0, 0, 0)
+	ZEND_ARG_VARIADIC_INFO(1, vars)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_mysqli_stmt_close arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_stmt_data_seek arginfo_class_mysqli_result_data_seek
+
+#define arginfo_class_mysqli_stmt_execute arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_stmt_fetch arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_stmt_get_warnings arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_stmt_result_metadata arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_stmt_more_results arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_stmt_next_result arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_stmt_num_rows arginfo_class_mysqli_character_set_name
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_stmt_send_long_data, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, param_nr, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#define arginfo_class_mysqli_stmt_free_result arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_stmt_reset arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_stmt_prepare arginfo_class_mysqli_multi_query
+
+#define arginfo_class_mysqli_stmt_store_result arginfo_class_mysqli_character_set_name
+
+#define arginfo_class_mysqli_stmt_get_result arginfo_class_mysqli_character_set_name
