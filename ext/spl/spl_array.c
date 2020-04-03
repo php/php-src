@@ -1894,8 +1894,8 @@ SPL_METHOD(Array, __debugInfo)
 	}
 
 	ht = spl_array_get_debug_info(getThis(), &is_temp);
-	if (!is_temp && !(GC_FLAGS(ht) & GC_IMMUTABLE)) {
-		GC_ADDREF(ht);
+	if (!is_temp) {
+		ht = zend_array_dup(ht);
 	}
 
 	RETURN_ARR(ht);
