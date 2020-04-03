@@ -598,7 +598,7 @@ static char *spl_filesystem_object_get_pathname(spl_filesystem_object *intern, s
 }
 /* }}} */
 
-static HashTable *spl_filesystem_object_get_debug_info(zval *object, int *is_temp) /* {{{ */
+static zend_always_inline HashTable *spl_filesystem_object_get_debug_info(zval *object) /* {{{ */
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(object);
 	zval tmp;
@@ -607,8 +607,6 @@ static HashTable *spl_filesystem_object_get_debug_info(zval *object, int *is_tem
 	char *path;
 	size_t  path_len;
 	char stmp[2];
-
-	*is_temp = 1;
 
 	if (!intern->std.properties) {
 		rebuild_object_properties(&intern->std);
@@ -1421,6 +1419,16 @@ SPL_METHOD(SplFileInfo, getPathInfo)
 }
 /* }}} */
 
+/* {{{ proto void SplFileInfo::__debugInfo() */
+SPL_METHOD(SplFileInfo, __debugInfo)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	RETURN_ARR(spl_filesystem_object_get_debug_info(getThis()));
+} /* }}} */
+
 /* {{{  proto SplFileInfo::_bad_state_ex(void) */
 SPL_METHOD(SplFileInfo, _bad_state_ex)
 {
@@ -1947,6 +1955,7 @@ static const zend_function_entry spl_SplFileInfo_functions[] = {
 	SPL_ME(SplFileInfo,       openFile,      arginfo_info_openFile,         ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       setFileClass,  arginfo_info_optinalFileClass, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       setInfoClass,  arginfo_info_optinalFileClass, ZEND_ACC_PUBLIC)
+	SPL_ME(SplFileInfo,       __debugInfo,   arginfo_splfileinfo_void,      ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       _bad_state_ex, NULL,							ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
 	SPL_MA(SplFileInfo,       __toString, SplFileInfo, getPathname, arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
 	PHP_FE_END
@@ -3143,7 +3152,6 @@ PHP_MINIT_FUNCTION(spl_directory)
 	spl_filesystem_object_handlers.offset = XtOffsetOf(spl_filesystem_object, std);
 	spl_filesystem_object_handlers.clone_obj = spl_filesystem_object_clone;
 	spl_filesystem_object_handlers.cast_object = spl_filesystem_object_cast;
-	spl_filesystem_object_handlers.get_debug_info  = spl_filesystem_object_get_debug_info;
 	spl_filesystem_object_handlers.dtor_obj = spl_filesystem_object_destroy_object;
 	spl_filesystem_object_handlers.free_obj = spl_filesystem_object_free_storage;
 	spl_ce_SplFileInfo->serialize = zend_class_serialize_deny;

@@ -279,7 +279,7 @@ static zend_object *spl_object_storage_clone(zval *zobject)
 }
 /* }}} */
 
-static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp) /* {{{ */
+static zend_always_inline HashTable* spl_object_storage_debug_info(zval *obj) /* {{{ */
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(obj);
 	spl_SplObjectStorageElement *element;
@@ -288,8 +288,6 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp) /* {{{ 
 	zend_string *md5str;
 	zend_string *zname;
 	HashTable *debug_info;
-
-	*is_temp = 1;
 
 	props = Z_OBJPROP_P(obj);
 
@@ -1279,6 +1277,17 @@ SPL_METHOD(MultipleIterator, key)
 }
 /* }}} */
 
+/* {{{ proto array MultipleIterator::__debugInfo() */
+SPL_METHOD(MultipleIterator, __debugInfo)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	RETURN_ARR(spl_object_storage_debug_info(getThis()));
+}
+/* }}} */
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_MultipleIterator_attachIterator, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, iterator, Iterator, 0)
 	ZEND_ARG_INFO(0, infos)
@@ -1301,6 +1310,7 @@ static const zend_function_entry spl_funcs_MultipleIterator[] = {
 	SPL_ME(MultipleIterator,  getFlags,               arginfo_splobject_void,                     0)
 	SPL_ME(MultipleIterator,  setFlags,               arginfo_MultipleIterator_setflags,          0)
 	SPL_ME(MultipleIterator,  attachIterator,         arginfo_MultipleIterator_attachIterator,    0)
+	SPL_ME(MultipleIterator,  __debugInfo,            arginfo_splobject_void,                     0)
 	SPL_MA(MultipleIterator,  detachIterator,         SplObjectStorage, detach,   arginfo_MultipleIterator_detachIterator,   0)
 	SPL_MA(MultipleIterator,  containsIterator,       SplObjectStorage, contains, arginfo_MultipleIterator_containsIterator, 0)
 	SPL_MA(MultipleIterator,  countIterators,         SplObjectStorage, count,    arginfo_splobject_void,                    0)
@@ -1323,7 +1333,6 @@ PHP_MINIT_FUNCTION(spl_observer)
 	memcpy(&spl_handler_SplObjectStorage, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplObjectStorage.offset          = XtOffsetOf(spl_SplObjectStorage, std);
-	spl_handler_SplObjectStorage.get_debug_info  = spl_object_storage_debug_info;
 	spl_handler_SplObjectStorage.compare_objects = spl_object_storage_compare_objects;
 	spl_handler_SplObjectStorage.clone_obj       = spl_object_storage_clone;
 	spl_handler_SplObjectStorage.get_gc          = spl_object_storage_get_gc;
