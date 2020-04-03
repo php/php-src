@@ -17,9 +17,7 @@ var_dump(str_starts_with($testStr, "\x00"));
 var_dump(str_starts_with("\x00", ""));
 var_dump(str_starts_with("\x00", "\x00"));
 var_dump(str_starts_with("\x00a", "\x00"));
-var_dump(str_starts_with("\x00a", "a"));
-var_dump(str_starts_with("\x00ab", "\x00a"));
-var_dump(str_starts_with("\x00ab", "\x00d"));
+var_dump(str_starts_with("a\x00bc", "a\x00b"));
 var_dump(str_starts_with("a\x00b", "a\x00d"));
 var_dump(str_starts_with("a\x00b", "z\x00b"));
 var_dump(str_starts_with("a", "a\x00"));
@@ -37,9 +35,7 @@ bool(false)
 bool(true)
 bool(true)
 bool(true)
-bool(false)
 bool(true)
-bool(false)
 bool(false)
 bool(false)
 bool(false)
