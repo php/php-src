@@ -22,46 +22,17 @@
 PHP_MINIT_FUNCTION(file);
 PHP_MSHUTDOWN_FUNCTION(file);
 
-PHP_FUNCTION(tempnam);
-PHP_FUNCTION(tmpfile);
-PHP_FUNCTION(fopen);
 PHPAPI PHP_FUNCTION(fclose);
-PHP_FUNCTION(popen);
-PHP_FUNCTION(pclose);
 PHPAPI PHP_FUNCTION(feof);
 PHPAPI PHP_FUNCTION(fread);
 PHPAPI PHP_FUNCTION(fgetc);
 PHPAPI PHP_FUNCTION(fgets);
-PHP_FUNCTION(fscanf);
-PHP_FUNCTION(fgetcsv);
-PHP_FUNCTION(fputcsv);
 PHPAPI PHP_FUNCTION(fwrite);
 PHPAPI PHP_FUNCTION(fflush);
 PHPAPI PHP_FUNCTION(rewind);
 PHPAPI PHP_FUNCTION(ftell);
 PHPAPI PHP_FUNCTION(fseek);
-PHP_FUNCTION(mkdir);
-PHP_FUNCTION(rmdir);
 PHPAPI PHP_FUNCTION(fpassthru);
-PHP_FUNCTION(readfile);
-PHP_FUNCTION(umask);
-PHP_FUNCTION(rename);
-PHP_FUNCTION(unlink);
-PHP_FUNCTION(copy);
-PHP_FUNCTION(file);
-PHP_FUNCTION(file_get_contents);
-PHP_FUNCTION(file_put_contents);
-PHP_FUNCTION(get_meta_tags);
-PHP_FUNCTION(flock);
-PHP_FUNCTION(fd_set);
-PHP_FUNCTION(fd_isset);
-PHP_FUNCTION(realpath);
-#ifdef HAVE_FNMATCH
-PHP_FUNCTION(fnmatch);
-#endif
-PHP_FUNCTION(ftruncate);
-PHP_FUNCTION(fstat);
-PHP_FUNCTION(sys_get_temp_dir);
 
 PHP_MINIT_FUNCTION(user_streams);
 

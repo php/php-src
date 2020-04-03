@@ -49,7 +49,6 @@
 #include <errno.h>
 #include <ctype.h>
 
-#include "php_link.h"
 #include "php_string.h"
 
 #ifndef VOLUME_NAME_NT

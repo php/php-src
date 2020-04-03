@@ -20,7 +20,6 @@
 #define PHP_CRYPT_H
 
 PHPAPI zend_string *php_crypt(const char *password, const int pass_len, const char *salt, int salt_len, zend_bool quiet);
-PHP_FUNCTION(crypt);
 PHP_MINIT_FUNCTION(crypt);
 PHP_MSHUTDOWN_FUNCTION(crypt);
 PHP_RINIT_FUNCTION(crypt);
