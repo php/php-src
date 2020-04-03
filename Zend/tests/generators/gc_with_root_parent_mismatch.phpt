@@ -24,4 +24,4 @@ gc_collect_cycles();
 ?>
 --EXPECT--
 int(1)
-int(1)
+int(2)
