@@ -10,15 +10,15 @@ var_dump(str_ends_with($testStr, "End"));
 var_dump(str_ends_with($testStr, "end"));
 var_dump(str_ends_with($testStr, "en"));
 var_dump(str_ends_with($testStr, $testStr."a"));
+var_dump(str_ends_with("a".$testStr, $testStr));
 var_dump(str_ends_with($testStr, ""));
 var_dump(str_ends_with("", ""));
 var_dump(str_ends_with("", " "));
 var_dump(str_ends_with("\x00", ""));
 var_dump(str_ends_with("\x00", "\x00"));
 var_dump(str_ends_with("a", "\x00"));
-var_dump(str_ends_with("a\x00b", "\x00"));
-var_dump(str_ends_with("a\x00b", "b"));
-var_dump(str_ends_with("a\x00bc", "\x00bc"));
+var_dump(str_ends_with("a\x00", "\x00"));
+var_dump(str_ends_with("ab\x00c", "b\x00ic"));
 var_dump(str_ends_with("a\x00b", "d\x00b"));
 var_dump(str_ends_with("a\x00b", "a\x00z"));
 var_dump(str_ends_with("a", "\x00a"));
@@ -31,10 +31,10 @@ bool(false)
 bool(false)
 bool(true)
 bool(true)
+bool(true)
 bool(false)
 bool(true)
 bool(true)
-bool(false)
 bool(false)
 bool(true)
 bool(true)
