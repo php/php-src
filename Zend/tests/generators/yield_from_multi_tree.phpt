@@ -10,9 +10,6 @@ function from($levels) {
 }
 
 function gen($gen, $level) {
-	if ($level % 2) {
-		yield $gen->current();
-	}
 	yield from $gen;
 }
 

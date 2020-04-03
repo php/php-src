@@ -3,6 +3,9 @@ PHP                                                                        NEWS
 
 ?? ??? ????, PHP 7.4.6
 
+- Core:
+  . Fixed bug #78434 (Generator yields no items after valid() call). (Nikita)
+
 - DOM:
   . Fixed bug #78221 (DOMNode::normalize() doesn't remove empty text nodes).
     (cmb)
