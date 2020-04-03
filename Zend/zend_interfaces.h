@@ -80,4 +80,18 @@ ZEND_API int zend_class_unserialize_deny(zval *object, zend_class_entry *ce, con
 
 END_EXTERN_C()
 
+static zend_always_inline int zend_parse_arg_traversable(zval *arg, zval **dest, int check_null)
+{
+	if (EXPECTED(Z_TYPE_P(arg) == IS_ARRAY)) {
+		*dest = arg;
+	} else if (Z_TYPE_P(arg) == IS_OBJECT && EXPECTED(instanceof_function(Z_OBJCE_P(arg), zend_ce_traversable))) {
+		*dest = arg;
+	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest = NULL;
+	} else {
+		return 0;
+	}
+	return 1;
+}
+
 #endif /* ZEND_INTERFACES_H */

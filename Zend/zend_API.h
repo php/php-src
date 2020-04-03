@@ -29,7 +29,6 @@
 #include "zend_execute.h"
 #include "zend_type_info.h"
 
-
 BEGIN_EXTERN_C()
 
 typedef struct _zend_function_entry {
