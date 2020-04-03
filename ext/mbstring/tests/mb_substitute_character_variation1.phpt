@@ -123,8 +123,7 @@ fclose($fp);
 *** Testing mb_substitute_character() : usage variation ***
 
 --int 0--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+bool(true)
 
 --int 1--
 bool(true)
@@ -152,12 +151,10 @@ Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --float .5--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+bool(true)
 
 --empty array--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+bool(true)
 
 --int indexed array--
 bool(true)
@@ -169,26 +166,22 @@ bool(true)
 bool(true)
 
 --uppercase NULL--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+bool(true)
 
 --lowercase null--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+bool(true)
 
 --lowercase true--
 bool(true)
 
 --lowercase false--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+bool(true)
 
 --uppercase TRUE--
 bool(true)
 
 --uppercase FALSE--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+bool(true)
 
 --empty string DQ--
 bool(true)
@@ -197,20 +190,16 @@ bool(true)
 bool(true)
 
 --string DQ--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+bool(true)
 
 --string SQ--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+bool(true)
 
 --mixed case string--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+bool(true)
 
 --heredoc--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+bool(true)
 
 --instance of classWithToString--
 Error: 8 - Object of class classWithToString could not be converted to int, %s(%d)
@@ -221,10 +210,8 @@ Error: 8 - Object of class classWithoutToString could not be converted to int, %
 bool(true)
 
 --undefined var--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+bool(true)
 
 --unset var--
-Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
-bool(false)
+bool(true)
 ===DONE===

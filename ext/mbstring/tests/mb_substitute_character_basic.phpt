@@ -28,7 +28,7 @@ var_dump( mb_substitute_character("b") );
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing mb_substitute_character() : basic functionality ***
 int(63)
 bool(true)
@@ -37,7 +37,5 @@ bool(true)
 int(1234)
 bool(true)
 string(4) "none"
-
-Warning: mb_substitute_character(): Unknown character in %s on line %d
-bool(false)
+bool(true)
 ===DONE===
