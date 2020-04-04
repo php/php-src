@@ -8,7 +8,7 @@ echo $i->format("%d"), "\n";
 echo $i->format("%a"), "\n";
 ?>
 --EXPECTF--
-object(DateInterval)#%d (16) {
+object(DateInterval)#%d (17) {
   ["y"]=>
   int(0)
   ["m"]=>
@@ -20,6 +20,8 @@ object(DateInterval)#%d (16) {
   ["i"]=>
   int(0)
   ["s"]=>
+  int(0)
+  ["u"]=>
   int(0)
   ["f"]=>
   float(0)

@@ -330,6 +330,7 @@ static HashTable *date_object_get_gc(zend_object *object, zval **table, int *n);
 static HashTable *date_object_get_properties_for(zend_object *object, zend_prop_purpose purpose);
 static HashTable *date_object_get_gc_interval(zend_object *object, zval **table, int *n);
 static HashTable *date_object_get_properties_interval(zend_object *object);
+static HashTable *date_object_get_debug_info_interval(zend_object *object, int *is_temp);
 static HashTable *date_object_get_gc_period(zend_object *object, zval **table, int *n);
 static HashTable *date_object_get_properties_period(zend_object *object);
 static HashTable *date_object_get_properties_for_timezone(zend_object *object, zend_prop_purpose purpose);
@@ -1830,6 +1831,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_interval.read_property = date_interval_read_property;
 	date_object_handlers_interval.write_property = date_interval_write_property;
 	date_object_handlers_interval.get_properties = date_object_get_properties_interval;
+	date_object_handlers_interval.get_debug_info = date_object_get_debug_info_interval;
 	date_object_handlers_interval.get_property_ptr_ptr = date_interval_get_property_ptr_ptr;
 	date_object_handlers_interval.get_gc = date_object_get_gc_interval;
 	date_object_handlers_interval.compare = date_interval_compare_objects;
@@ -2167,45 +2169,69 @@ static HashTable *date_object_get_gc_interval(zend_object *object, zval **table,
 	return zend_std_get_properties(object);
 } /* }}} */
 
-static HashTable *date_object_get_properties_interval(zend_object *object) /* {{{ */
-{
-	HashTable *props;
-	zval zv;
-	php_interval_obj *intervalobj;
+#define DATE_INTERVAL_EXPORT_PROPERTY_LONG(n, f)            \
+	do {                                                    \
+		ZVAL_LONG(&zv, (zend_long)intervalobj->diff->f);    \
+		zend_hash_str_update(props, n, sizeof(n) - 1, &zv); \
+	} while (0)
 
-	intervalobj = php_interval_obj_from_obj(object);
-	props = zend_std_get_properties(object);
+static HashTable *date_interval_export_properties(php_interval_obj *intervalobj, HashTable *props, zend_bool debug_info)
+{
+	zval zv;
+
 	if (!intervalobj->initialized) {
 		return props;
 	}
 
-#define PHP_DATE_INTERVAL_ADD_PROPERTY(n,f) \
-	ZVAL_LONG(&zv, (zend_long)intervalobj->diff->f); \
-	zend_hash_str_update(props, n, sizeof(n)-1, &zv);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("y", y);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("m", m);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("d", d);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("h", h);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("i", i);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("s", s);
 
-	PHP_DATE_INTERVAL_ADD_PROPERTY("y", y);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("m", m);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("d", d);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("h", h);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("i", i);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("s", s);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("u", us);
+	if (debug_info) {
+		DATE_INTERVAL_EXPORT_PROPERTY_LONG("u", us);
+	}
+
 	ZVAL_DOUBLE(&zv, DATE_USECS_TO_FRACTION(intervalobj->diff->us));
 	zend_hash_str_update(props, "f", sizeof("f") - 1, &zv);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("weekday", weekday);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("weekday_behavior", weekday_behavior);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("first_last_day_of", first_last_day_of);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("invert", invert);
+
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("weekday", weekday);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("weekday_behavior", weekday_behavior);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("first_last_day_of", first_last_day_of);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("invert", invert);
+
 	if (intervalobj->diff->days != -99999) {
-		PHP_DATE_INTERVAL_ADD_PROPERTY("days", days);
+		DATE_INTERVAL_EXPORT_PROPERTY_LONG("days", days);
 	} else {
 		ZVAL_FALSE(&zv);
 		zend_hash_str_update(props, "days", sizeof("days")-1, &zv);
 	}
-	PHP_DATE_INTERVAL_ADD_PROPERTY("special_type", special.type);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("special_amount", special.amount);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("have_weekday_relative", have_weekday_relative);
-	PHP_DATE_INTERVAL_ADD_PROPERTY("have_special_relative", have_special_relative);
+
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("special_type", special.type);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("special_amount", special.amount);
+
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("have_weekday_relative", have_weekday_relative);
+	DATE_INTERVAL_EXPORT_PROPERTY_LONG("have_special_relative", have_special_relative);
+
+	return props;
+}
+
+static HashTable *date_object_get_properties_interval(zend_object *object) /* {{{ */
+{
+	return date_interval_export_properties(php_interval_obj_from_obj(object), zend_std_get_properties(object), 0);
+} /* }}} */
+
+static HashTable *date_object_get_debug_info_interval(zend_object *object, int *is_temp) /* {{{ */
+{
+	HashTable *props = zend_std_get_properties(object);
+	php_interval_obj *intervalobj = php_interval_obj_from_obj(object);
+
+	if (intervalobj->initialized) {
+		*is_temp = 1;
+		props = date_interval_export_properties(intervalobj, zend_array_dup(props), 1);
+	}
 
 	return props;
 } /* }}} */

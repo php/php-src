@@ -34,7 +34,7 @@ object(DatePeriod)#%d (6) {
   ["end"]=>
   NULL
   ["interval"]=>
-  object(DateInterval)#%d (16) {
+  object(DateInterval)#%d (17) {
     ["y"]=>
     int(0)
     ["m"]=>
@@ -46,6 +46,8 @@ object(DatePeriod)#%d (6) {
     ["i"]=>
     int(30)
     ["s"]=>
+    int(0)
+    ["u"]=>
     int(0)
     ["f"]=>
     float(0)
