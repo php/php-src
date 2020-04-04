@@ -304,6 +304,8 @@ class FuncInfo {
     public $className;
     /** @var ?string */
     public $alias;
+    /** @var bool */
+    public $isDeprecated;
     /** @var ArgInfo[] */
     public $args;
     /** @var ReturnInfo */
@@ -314,12 +316,13 @@ class FuncInfo {
     public $cond;
 
     public function __construct(
-        string $name, ?string $className, ?string $alias, array $args, ReturnInfo $return,
+        string $name, ?string $className, ?string $alias, bool $isDeprecated, array $args, ReturnInfo $return,
         int $numRequiredArgs, ?string $cond
     ) {
         $this->name = $name;
         $this->className = $className;
         $this->alias = $alias;
+        $this->isDeprecated = $isDeprecated;
         $this->args = $args;
         $this->return = $return;
         $this->numRequiredArgs = $numRequiredArgs;
@@ -419,7 +422,7 @@ function parseDocComment(DocComment $comment): array {
     $commentText = substr($comment->getText(), 2, -2);
     $tags = [];
     foreach (explode("\n", $commentText) as $commentLine) {
-        $regex = '/^\*\s*@([a-z-]+)(?:\s+(.+))$/';
+        $regex = '/^\*\s*@([a-z-]+)(?:\s+(.+))?$/';
         if (preg_match($regex, trim($commentLine), $matches, PREG_UNMATCHED_AS_NULL)) {
             $tags[] = new DocCommentTag($matches[1], $matches[2]);
         }
@@ -434,6 +437,7 @@ function parseFunctionLike(
     $comment = $func->getDocComment();
     $paramMeta = [];
     $alias = null;
+    $isDeprecated = false;
     $haveDocReturnType = false;
 
     if ($comment) {
@@ -447,6 +451,8 @@ function parseFunctionLike(
                 $paramMeta[$varName]['preferRef'] = true;
             } else if ($tag->name === 'alias') {
                 $alias = $tag->getValue();
+            } else if ($tag->name === 'deprecated') {
+                $isDeprecated = true;
             } else if ($tag->name === 'return') {
                 $haveDocReturnType = true;
             }
@@ -507,7 +513,7 @@ function parseFunctionLike(
     $return = new ReturnInfo(
         $func->returnsByRef(),
         $returnType ? Type::fromNode($returnType) : null);
-    return new FuncInfo($name, $className, $alias, $args, $return, $numRequiredArgs, $cond);
+    return new FuncInfo($name, $className, $alias, $isDeprecated, $args, $return, $numRequiredArgs, $cond);
 }
 
 function handlePreprocessorConditions(array &$conds, Stmt $stmt): ?string {
@@ -737,6 +743,7 @@ function generateCodeWithConditions(
 }
 
 function generateArgInfoCode(FileInfo $fileInfo): string {
+    $generatedDeclarations = [];
     $funcInfos = $fileInfo->funcInfos;
 
     $code = "/* This is a generated file, edit the .stub.php file instead. */\n";
@@ -761,12 +768,15 @@ function generateArgInfoCode(FileInfo $fileInfo): string {
 
     if ($fileInfo->generateFunctionEntries) {
         $code .= "\n\n";
-        $code .= generateCodeWithConditions($fileInfo->funcInfos, "", function(FuncInfo $funcInfo) {
-            if ($funcInfo->alias) {
+        $code .= generateCodeWithConditions($funcInfos, "", function(FuncInfo $funcInfo) use (&$generatedDeclarations) {
+            $name = $funcInfo->alias ?? $funcInfo->name;
+            $key = "$name|$funcInfo->cond";
+            if (isset($generatedDeclarations[$key])) {
                 return null;
             }
 
-            return "ZEND_FUNCTION($funcInfo->name);\n";
+            $generatedDeclarations[$key] = true;
+            return "ZEND_FUNCTION($name);\n";
         });
 
         $code .= "\n\nstatic const zend_function_entry ext_functions[] = {\n";
@@ -776,9 +786,13 @@ function generateArgInfoCode(FileInfo $fileInfo): string {
                     "\tZEND_FALIAS(%s, %s, %s)\n",
                     $funcInfo->name, $funcInfo->alias, $funcInfo->getArgInfoName()
                 );
-            } else {
-                return sprintf("\tZEND_FE(%s, %s)\n", $funcInfo->name, $funcInfo->getArgInfoName());
             }
+
+            if ($funcInfo->isDeprecated) {
+                return sprintf("\tZEND_DEP_FE(%s, %s)\n", $funcInfo->name, $funcInfo->getArgInfoName());
+            }
+
+            return sprintf("\tZEND_FE(%s, %s)\n", $funcInfo->name, $funcInfo->getArgInfoName());
         });
         $code .= "\tZEND_FE_END\n";
         $code .= "};\n";

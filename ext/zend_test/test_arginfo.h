@@ -35,3 +35,26 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class__ZendTestTrait_testMethod, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
+
+
+ZEND_FUNCTION(zend_test_array_return);
+ZEND_FUNCTION(zend_test_nullable_array_return);
+ZEND_FUNCTION(zend_test_void_return);
+ZEND_FUNCTION(zend_test_deprecated);
+ZEND_FUNCTION(zend_create_unterminated_string);
+ZEND_FUNCTION(zend_terminate_string);
+ZEND_FUNCTION(zend_leak_variable);
+ZEND_FUNCTION(zend_leak_bytes);
+
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
+	ZEND_FE(zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return)
+	ZEND_FE(zend_test_void_return, arginfo_zend_test_void_return)
+	ZEND_DEP_FE(zend_test_deprecated, arginfo_zend_test_deprecated)
+	ZEND_FE(zend_create_unterminated_string, arginfo_zend_create_unterminated_string)
+	ZEND_FE(zend_terminate_string, arginfo_zend_terminate_string)
+	ZEND_FE(zend_leak_variable, arginfo_zend_leak_variable)
+	ZEND_FE(zend_leak_bytes, arginfo_zend_leak_bytes)
+	ZEND_FE_END
+};

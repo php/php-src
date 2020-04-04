@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class _ZendTestClass {
     public static function is_object(): int;
 
@@ -16,6 +18,7 @@ function zend_test_nullable_array_return(): ?array {}
 
 function zend_test_void_return(): void {}
 
+/** @deprecated */
 function zend_test_deprecated(): void {}
 
 function zend_create_unterminated_string(string $str): string {}
