@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 /**
  * @return resource|false
  */

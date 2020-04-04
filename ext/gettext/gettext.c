@@ -27,38 +27,12 @@
 #include "php_gettext.h"
 #include "gettext_arginfo.h"
 
-/* {{{ php_gettext_functions[]
- */
-static const zend_function_entry php_gettext_functions[] = {
-	PHP_NAMED_FE(textdomain,		zif_textdomain,		arginfo_textdomain)
-	PHP_NAMED_FE(gettext,			zif_gettext,		arginfo_gettext)
-	/* Alias for gettext() */
-	PHP_NAMED_FE(_,					zif_gettext,		arginfo_gettext)
-	PHP_NAMED_FE(dgettext,			zif_dgettext,		arginfo_dgettext)
-	PHP_NAMED_FE(dcgettext,			zif_dcgettext,		arginfo_dcgettext)
-	PHP_NAMED_FE(bindtextdomain,	zif_bindtextdomain,	arginfo_bindtextdomain)
-#if HAVE_NGETTEXT
-	PHP_NAMED_FE(ngettext,			zif_ngettext,		arginfo_ngettext)
-#endif
-#if HAVE_DNGETTEXT
-	PHP_NAMED_FE(dngettext,			zif_dngettext,		arginfo_dngettext)
-#endif
-#if HAVE_DCNGETTEXT
-	PHP_NAMED_FE(dcngettext,		zif_dcngettext,		arginfo_dcngettext)
-#endif
-#if HAVE_BIND_TEXTDOMAIN_CODESET
-	PHP_NAMED_FE(bind_textdomain_codeset,	zif_bind_textdomain_codeset,	arginfo_bind_textdomain_codeset)
-#endif
-    PHP_FE_END
-};
-/* }}} */
-
 #include <libintl.h>
 
 zend_module_entry php_gettext_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"gettext",
-	php_gettext_functions,
+	ext_functions,
 	NULL,
 	NULL,
 	NULL,
@@ -96,7 +70,7 @@ PHP_MINFO_FUNCTION(php_gettext)
 
 /* {{{ proto string textdomain(string domain)
    Set the textdomain to "domain". Returns the current domain */
-PHP_NAMED_FUNCTION(zif_textdomain)
+PHP_FUNCTION(textdomain)
 {
 	char *domain = NULL, *domain_name, *retval;
 	size_t domain_len = 0;
@@ -121,7 +95,7 @@ PHP_NAMED_FUNCTION(zif_textdomain)
 
 /* {{{ proto string gettext(string msgid)
    Return the translation of msgid for the current domain, or msgid unaltered if a translation does not exist */
-PHP_NAMED_FUNCTION(zif_gettext)
+PHP_FUNCTION(gettext)
 {
 	char *msgstr;
 	zend_string *msgid;
@@ -143,7 +117,7 @@ PHP_NAMED_FUNCTION(zif_gettext)
 
 /* {{{ proto string dgettext(string domain_name, string msgid)
    Return the translation of msgid for domain_name, or msgid unaltered if a translation does not exist */
-PHP_NAMED_FUNCTION(zif_dgettext)
+PHP_FUNCTION(dgettext)
 {
 	char *msgstr;
 	zend_string *domain, *msgid;
@@ -167,7 +141,7 @@ PHP_NAMED_FUNCTION(zif_dgettext)
 
 /* {{{ proto string dcgettext(string domain_name, string msgid, int category)
    Return the translation of msgid for domain_name and category, or msgid unaltered if a translation does not exist */
-PHP_NAMED_FUNCTION(zif_dcgettext)
+PHP_FUNCTION(dcgettext)
 {
 	char *msgstr;
 	zend_string *domain, *msgid;
@@ -192,7 +166,7 @@ PHP_NAMED_FUNCTION(zif_dcgettext)
 
 /* {{{ proto string bindtextdomain(string domain_name, string dir)
    Bind to the text domain domain_name, looking for translations in dir. Returns the current domain */
-PHP_NAMED_FUNCTION(zif_bindtextdomain)
+PHP_FUNCTION(bindtextdomain)
 {
 	char *domain, *dir;
 	size_t domain_len, dir_len;
@@ -226,7 +200,7 @@ PHP_NAMED_FUNCTION(zif_bindtextdomain)
 #if HAVE_NGETTEXT
 /* {{{ proto string ngettext(string MSGID1, string MSGID2, int N)
    Plural version of gettext() */
-PHP_NAMED_FUNCTION(zif_ngettext)
+PHP_FUNCTION(ngettext)
 {
 	char *msgid1, *msgid2, *msgstr;
 	size_t msgid1_len, msgid2_len;
@@ -250,7 +224,7 @@ PHP_NAMED_FUNCTION(zif_ngettext)
 #if HAVE_DNGETTEXT
 /* {{{ proto string dngettext(string domain, string msgid1, string msgid2, int count)
    Plural version of dgettext() */
-PHP_NAMED_FUNCTION(zif_dngettext)
+PHP_FUNCTION(dngettext)
 {
 	char *domain, *msgid1, *msgid2, *msgstr = NULL;
 	size_t domain_len, msgid1_len, msgid2_len;
@@ -276,7 +250,7 @@ PHP_NAMED_FUNCTION(zif_dngettext)
 #if HAVE_DCNGETTEXT
 /* {{{ proto string dcngettext(string domain, string msgid1, string msgid2, int n, int category)
    Plural version of dcgettext() */
-PHP_NAMED_FUNCTION(zif_dcngettext)
+PHP_FUNCTION(dcngettext)
 {
 	char *domain, *msgid1, *msgid2, *msgstr = NULL;
 	size_t domain_len, msgid1_len, msgid2_len;
@@ -305,7 +279,7 @@ PHP_NAMED_FUNCTION(zif_dcngettext)
 
 /* {{{ proto string bind_textdomain_codeset(string domain, string codeset)
    Specify the character encoding in which the messages from the DOMAIN message catalog will be returned. */
-PHP_NAMED_FUNCTION(zif_bind_textdomain_codeset)
+PHP_FUNCTION(bind_textdomain_codeset)
 {
 	char *domain, *codeset, *retval = NULL;
 	size_t domain_len, codeset_len;

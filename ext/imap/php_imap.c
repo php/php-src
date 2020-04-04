@@ -96,96 +96,6 @@ void *fs_get(size_t size);
 ZEND_DECLARE_MODULE_GLOBALS(imap)
 static PHP_GINIT_FUNCTION(imap);
 
-
-/* {{{ imap_functions[]
- */
-static const zend_function_entry imap_functions[] = {
-	PHP_FE(imap_open,								arginfo_imap_open)
-	PHP_FE(imap_reopen,								arginfo_imap_reopen)
-	PHP_FE(imap_close,								arginfo_imap_close)
-	PHP_FE(imap_num_msg,							arginfo_imap_num_msg)
-	PHP_FE(imap_num_recent,							arginfo_imap_num_recent)
-	PHP_FE(imap_headers,							arginfo_imap_headers)
-	PHP_FE(imap_headerinfo,							arginfo_imap_headerinfo)
-	PHP_FE(imap_rfc822_parse_headers,				arginfo_imap_rfc822_parse_headers)
-	PHP_FE(imap_rfc822_write_address,				arginfo_imap_rfc822_write_address)
-	PHP_FE(imap_rfc822_parse_adrlist,				arginfo_imap_rfc822_parse_adrlist)
-	PHP_FE(imap_body,								arginfo_imap_body)
-	PHP_FE(imap_bodystruct,							arginfo_imap_bodystruct)
-	PHP_FE(imap_fetchbody,							arginfo_imap_fetchbody)
-	PHP_FE(imap_fetchmime,							arginfo_imap_fetchmime)
-	PHP_FE(imap_savebody,							arginfo_imap_savebody)
-	PHP_FE(imap_fetchheader,						arginfo_imap_fetchheader)
-	PHP_FE(imap_fetchstructure,						arginfo_imap_fetchstructure)
-	PHP_FE(imap_gc,										arginfo_imap_gc)
-	PHP_FE(imap_expunge,							arginfo_imap_expunge)
-	PHP_FE(imap_delete,								arginfo_imap_delete)
-	PHP_FE(imap_undelete,							arginfo_imap_undelete)
-	PHP_FE(imap_check,								arginfo_imap_check)
-	PHP_FE(imap_listscan,							arginfo_imap_listscan)
-	PHP_FE(imap_mail_copy,							arginfo_imap_mail_copy)
-	PHP_FE(imap_mail_move,							arginfo_imap_mail_move)
-	PHP_FE(imap_mail_compose,						arginfo_imap_mail_compose)
-	PHP_FE(imap_createmailbox,						arginfo_imap_createmailbox)
-	PHP_FE(imap_renamemailbox,						arginfo_imap_renamemailbox)
-	PHP_FE(imap_deletemailbox,						arginfo_imap_deletemailbox)
-	PHP_FE(imap_subscribe,							arginfo_imap_subscribe)
-	PHP_FE(imap_unsubscribe,						arginfo_imap_unsubscribe)
-	PHP_FE(imap_append,								arginfo_imap_append)
-	PHP_FE(imap_ping,								arginfo_imap_ping)
-	PHP_FE(imap_base64,								arginfo_imap_base64)
-	PHP_FE(imap_qprint,								arginfo_imap_qprint)
-	PHP_FE(imap_8bit,								arginfo_imap_8bit)
-	PHP_FE(imap_binary,								arginfo_imap_binary)
-	PHP_FE(imap_utf8,								arginfo_imap_utf8)
-	PHP_FE(imap_status,								arginfo_imap_status)
-	PHP_FE(imap_mailboxmsginfo,						arginfo_imap_mailboxmsginfo)
-	PHP_FE(imap_setflag_full,						arginfo_imap_setflag_full)
-	PHP_FE(imap_clearflag_full,						arginfo_imap_clearflag_full)
-	PHP_FE(imap_sort,								arginfo_imap_sort)
-	PHP_FE(imap_uid,								arginfo_imap_uid)
-	PHP_FE(imap_msgno,								arginfo_imap_msgno)
-	PHP_FE(imap_list,								arginfo_imap_list)
-	PHP_FE(imap_lsub,								arginfo_imap_lsub)
-	PHP_FE(imap_fetch_overview,						arginfo_imap_fetch_overview)
-	PHP_FE(imap_alerts,								arginfo_imap_alerts)
-	PHP_FE(imap_errors,								arginfo_imap_errors)
-	PHP_FE(imap_last_error,							arginfo_imap_last_error)
-	PHP_FE(imap_search,								arginfo_imap_search)
-	PHP_FE(imap_utf7_decode,						arginfo_imap_utf7_decode)
-	PHP_FE(imap_utf7_encode,						arginfo_imap_utf7_encode)
-#ifdef HAVE_IMAP_MUTF7
-	PHP_FE(imap_utf8_to_mutf7,						arginfo_imap_utf8_to_mutf7)
-	PHP_FE(imap_mutf7_to_utf8,						arginfo_imap_mutf7_to_utf8)
-#endif
-	PHP_FE(imap_mime_header_decode,					arginfo_imap_mime_header_decode)
-	PHP_FE(imap_thread,								arginfo_imap_thread)
-	PHP_FE(imap_timeout,								arginfo_imap_timeout)
-
-#if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
-	PHP_FE(imap_get_quota,							arginfo_imap_get_quota)
-	PHP_FE(imap_get_quotaroot,						arginfo_imap_get_quotaroot)
-	PHP_FE(imap_set_quota,							arginfo_imap_set_quota)
-	PHP_FE(imap_setacl,								arginfo_imap_setacl)
-	PHP_FE(imap_getacl,								arginfo_imap_getacl)
-#endif
-
-	PHP_FE(imap_mail,								arginfo_imap_mail)
-	PHP_FE(imap_getsubscribed,						arginfo_imap_getsubscribed)
-	PHP_FE(imap_getmailboxes,						arginfo_imap_getmailboxes)
-
-	PHP_FALIAS(imap_header,			imap_headerinfo,	arginfo_imap_header)
-	PHP_FALIAS(imap_listmailbox,	imap_list,			arginfo_imap_listmailbox)
-	PHP_FALIAS(imap_scanmailbox,	imap_listscan,		arginfo_imap_scanmailbox)
-	PHP_FALIAS(imap_listsubscribed,	imap_lsub,			arginfo_imap_listsubscribed)
-	PHP_FALIAS(imap_fetchtext,		imap_body,			arginfo_imap_fetchtext)
-	PHP_FALIAS(imap_scan,			imap_listscan,		arginfo_imap_scan)
-	PHP_FALIAS(imap_create,			imap_createmailbox,	arginfo_imap_create)
-	PHP_FALIAS(imap_rename,			imap_renamemailbox,	arginfo_imap_rename)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ imap dependencies */
 static const zend_module_dep imap_deps[] = {
 	ZEND_MOD_REQUIRED("standard")
@@ -208,7 +118,7 @@ zend_module_entry imap_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	imap_deps,
 	"imap",
-	imap_functions,
+	ext_functions,
 	PHP_MINIT(imap),
 	NULL,
 	PHP_RINIT(imap),

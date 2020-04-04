@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function filter_has_var(int $type, string $variable_name): bool {}
 
 /**

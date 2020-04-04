@@ -56,23 +56,6 @@
 #define _php_iconv_memequal(a, b, c) \
 	(memcmp(a, b, c) == 0)
 
-/* {{{ iconv_functions[]
- */
-static const zend_function_entry iconv_functions[] = {
-	PHP_RAW_NAMED_FE(iconv,php_if_iconv,				arginfo_iconv)
-	PHP_FE(iconv_get_encoding,						arginfo_iconv_get_encoding)
-	PHP_FE(iconv_set_encoding,						arginfo_iconv_set_encoding)
-	PHP_FE(iconv_strlen,							arginfo_iconv_strlen)
-	PHP_FE(iconv_substr,							arginfo_iconv_substr)
-	PHP_FE(iconv_strpos,							arginfo_iconv_strpos)
-	PHP_FE(iconv_strrpos,							arginfo_iconv_strrpos)
-	PHP_FE(iconv_mime_encode,						arginfo_iconv_mime_encode)
-	PHP_FE(iconv_mime_decode,						arginfo_iconv_mime_decode)
-	PHP_FE(iconv_mime_decode_headers,				arginfo_iconv_mime_decode_headers)
-	PHP_FE_END
-};
-/* }}} */
-
 ZEND_DECLARE_MODULE_GLOBALS(iconv)
 static PHP_GINIT_FUNCTION(iconv);
 
@@ -81,7 +64,7 @@ static PHP_GINIT_FUNCTION(iconv);
 zend_module_entry iconv_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"iconv",
-	iconv_functions,
+	ext_functions,
 	PHP_MINIT(miconv),
 	PHP_MSHUTDOWN(miconv),
 	NULL,
@@ -2249,7 +2232,7 @@ PHP_FUNCTION(iconv_mime_decode_headers)
 
 /* {{{ proto string iconv(string in_charset, string out_charset, string str)
    Returns str converted to the out_charset character set */
-PHP_NAMED_FUNCTION(php_if_iconv)
+PHP_FUNCTION(iconv)
 {
 	char *in_charset, *out_charset;
 	zend_string *in_buffer;

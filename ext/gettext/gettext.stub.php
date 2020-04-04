@@ -1,8 +1,13 @@
 <?php
 
+/** @generate-function-entries */
+
 function textdomain(?string $domain): string|false {}
 
 function gettext(string $msgid): string|false {}
+
+/** @alias gettext */
+function _(string $msgid): string|false {}
 
 function dgettext(string $domain_name, string $msgid): string|false {}
 

@@ -37,54 +37,12 @@
 static int le_ftpbuf;
 #define le_ftpbuf_name "FTP Buffer"
 
-static const zend_function_entry php_ftp_functions[] = {
-	PHP_FE(ftp_connect,			arginfo_ftp_connect)
-#ifdef HAVE_FTP_SSL
-	PHP_FE(ftp_ssl_connect,		arginfo_ftp_ssl_connect)
-#endif
-	PHP_FE(ftp_login,			arginfo_ftp_login)
-	PHP_FE(ftp_pwd,				arginfo_ftp_pwd)
-	PHP_FE(ftp_cdup,			arginfo_ftp_cdup)
-	PHP_FE(ftp_chdir,			arginfo_ftp_chdir)
-	PHP_FE(ftp_exec,			arginfo_ftp_exec)
-	PHP_FE(ftp_raw,				arginfo_ftp_raw)
-	PHP_FE(ftp_mkdir,			arginfo_ftp_mkdir)
-	PHP_FE(ftp_rmdir,			arginfo_ftp_rmdir)
-	PHP_FE(ftp_chmod,			arginfo_ftp_chmod)
-	PHP_FE(ftp_alloc,			arginfo_ftp_alloc)
-	PHP_FE(ftp_nlist,			arginfo_ftp_nlist)
-	PHP_FE(ftp_rawlist,			arginfo_ftp_rawlist)
-	PHP_FE(ftp_mlsd,			arginfo_ftp_mlsd)
-	PHP_FE(ftp_systype,			arginfo_ftp_systype)
-	PHP_FE(ftp_pasv,			arginfo_ftp_pasv)
-	PHP_FE(ftp_get,				arginfo_ftp_get)
-	PHP_FE(ftp_fget,			arginfo_ftp_fget)
-	PHP_FE(ftp_put,				arginfo_ftp_put)
-	PHP_FE(ftp_append,			arginfo_ftp_append)
-	PHP_FE(ftp_fput,			arginfo_ftp_fput)
-	PHP_FE(ftp_size,			arginfo_ftp_size)
-	PHP_FE(ftp_mdtm,			arginfo_ftp_mdtm)
-	PHP_FE(ftp_rename,			arginfo_ftp_rename)
-	PHP_FE(ftp_delete,			arginfo_ftp_delete)
-	PHP_FE(ftp_site,			arginfo_ftp_site)
-	PHP_FE(ftp_close,			arginfo_ftp_close)
-	PHP_FE(ftp_set_option,		arginfo_ftp_set_option)
-	PHP_FE(ftp_get_option,		arginfo_ftp_get_option)
-	PHP_FE(ftp_nb_fget,			arginfo_ftp_nb_fget)
-	PHP_FE(ftp_nb_get,			arginfo_ftp_nb_get)
-	PHP_FE(ftp_nb_continue,		arginfo_ftp_nb_continue)
-	PHP_FE(ftp_nb_put,			arginfo_ftp_nb_put)
-	PHP_FE(ftp_nb_fput,			arginfo_ftp_nb_fput)
-	PHP_FALIAS(ftp_quit, ftp_close, arginfo_ftp_quit)
-	PHP_FE_END
-};
-
 zend_module_entry php_ftp_module_entry = {
 	STANDARD_MODULE_HEADER_EX,
 	NULL,
 	NULL,
 	"ftp",
-	php_ftp_functions,
+	ext_functions,
 	PHP_MINIT(ftp),
 	NULL,
 	NULL,

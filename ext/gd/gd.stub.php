@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function gd_info(): array {}
 
 function imageloadfont(string $filename): int|false {}
