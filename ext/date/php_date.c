@@ -4098,16 +4098,6 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 		} \
 	} while (0);
 
-#define PHP_DATE_INTERVAL_READ_PROPERTY_DOUBLE(element, member, def) \
-	do { \
-		zval *z_arg = zend_hash_str_find(myht, element, sizeof(element) - 1); \
-		if (z_arg) { \
-			(*intobj)->diff->member = (double)zval_get_double(z_arg); \
-		} else { \
-			(*intobj)->diff->member = (double)def; \
-		} \
-	} while (0);
-
 	PHP_DATE_INTERVAL_READ_PROPERTY("y", y, timelib_sll, -1)
 	PHP_DATE_INTERVAL_READ_PROPERTY("m", m, timelib_sll, -1)
 	PHP_DATE_INTERVAL_READ_PROPERTY("d", d, timelib_sll, -1)
