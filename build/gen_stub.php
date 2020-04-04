@@ -304,6 +304,8 @@ class FuncInfo {
     public $className;
     /** @var ?string */
     public $alias;
+    /** @var bool */
+    public $isDeprecated;
     /** @var ArgInfo[] */
     public $args;
     /** @var ReturnInfo */
@@ -314,12 +316,13 @@ class FuncInfo {
     public $cond;
 
     public function __construct(
-        string $name, ?string $className, ?string $alias, array $args, ReturnInfo $return,
+        string $name, ?string $className, ?string $alias, bool $isDeprecated, array $args, ReturnInfo $return,
         int $numRequiredArgs, ?string $cond
     ) {
         $this->name = $name;
         $this->className = $className;
         $this->alias = $alias;
+        $this->isDeprecated = $isDeprecated;
         $this->args = $args;
         $this->return = $return;
         $this->numRequiredArgs = $numRequiredArgs;
@@ -434,6 +437,7 @@ function parseFunctionLike(
     $comment = $func->getDocComment();
     $paramMeta = [];
     $alias = null;
+    $isDeprecated = false;
     $haveDocReturnType = false;
 
     if ($comment) {
@@ -447,6 +451,8 @@ function parseFunctionLike(
                 $paramMeta[$varName]['preferRef'] = true;
             } else if ($tag->name === 'alias') {
                 $alias = $tag->getValue();
+            } else if ($tag->name === 'deprecated') {
+                $isDeprecated = true;
             } else if ($tag->name === 'return') {
                 $haveDocReturnType = true;
             }
@@ -507,7 +513,7 @@ function parseFunctionLike(
     $return = new ReturnInfo(
         $func->returnsByRef(),
         $returnType ? Type::fromNode($returnType) : null);
-    return new FuncInfo($name, $className, $alias, $args, $return, $numRequiredArgs, $cond);
+    return new FuncInfo($name, $className, $alias, $isDeprecated, $args, $return, $numRequiredArgs, $cond);
 }
 
 function handlePreprocessorConditions(array &$conds, Stmt $stmt): ?string {
@@ -761,12 +767,22 @@ function generateArgInfoCode(FileInfo $fileInfo): string {
 
     if ($fileInfo->generateFunctionEntries) {
         $code .= "\n\n";
-        $code .= generateCodeWithConditions($fileInfo->funcInfos, "", function(FuncInfo $funcInfo) {
+        $code .= generateCodeWithConditions($funcInfos, "", function(FuncInfo $funcInfo) use ($funcInfos) {
+            $result = "";
+
             if ($funcInfo->alias) {
-                return null;
+                foreach ($funcInfos as $info) {
+                    if ($info->name === $funcInfo->alias) {
+                        return null;
+                    }
+                }
+
+                $result .= "ZEND_FUNCTION($funcInfo->alias);\n";
             }
 
-            return "ZEND_FUNCTION($funcInfo->name);\n";
+            $result .= "ZEND_FUNCTION($funcInfo->name);\n";
+
+            return $result;
         });
 
         $code .= "\n\nstatic const zend_function_entry ext_functions[] = {\n";
@@ -776,9 +792,13 @@ function generateArgInfoCode(FileInfo $fileInfo): string {
                     "\tZEND_FALIAS(%s, %s, %s)\n",
                     $funcInfo->name, $funcInfo->alias, $funcInfo->getArgInfoName()
                 );
-            } else {
-                return sprintf("\tZEND_FE(%s, %s)\n", $funcInfo->name, $funcInfo->getArgInfoName());
             }
+
+            if ($funcInfo->isDeprecated) {
+                return sprintf("\tZEND_DEP_FE(%s, %s)\n", $funcInfo->name, $funcInfo->getArgInfoName());
+            }
+
+            return sprintf("\tZEND_FE(%s, %s)\n", $funcInfo->name, $funcInfo->getArgInfoName());
         });
         $code .= "\tZEND_FE_END\n";
         $code .= "};\n";

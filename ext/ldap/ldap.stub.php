@@ -1,6 +1,6 @@
 <?php
 
-//TODO: missing arginfo functions defined in C using
+/** @generate-function-entries */
 
 #ifdef HAVE_ORALDAP
 /** @return resource|false */
@@ -195,12 +195,16 @@ function ldap_compare($link_identifier, string $dn, string $attribute, string $v
 
 
 #ifdef LDAP_CONTROL_PAGEDRESULTS
-/** @param resource $link */
+/**
+ * @param resource $link
+ * @deprecated since 7.4
+ */
 function ldap_control_paged_result($link, int $pagesize, bool $iscritical = false, string $cookie = ''): bool {}
 
 /**
  * @param resource $link
  * @param resource $result
+ * @deprecated since 7.4
  */
 function ldap_control_paged_result_response($link, $result, &$cookie = null, &$estimated = null): bool {}
 #endif

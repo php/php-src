@@ -311,22 +311,10 @@ PHP_MINFO_FUNCTION(zend_test)
 	php_info_print_table_end();
 }
 
-static const zend_function_entry zend_test_functions[] = {
-	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
-	ZEND_FE(zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return)
-	ZEND_FE(zend_test_void_return, arginfo_zend_test_void_return)
-	ZEND_DEP_FE(zend_test_deprecated, arginfo_zend_test_deprecated)
-	ZEND_FE(zend_create_unterminated_string, arginfo_zend_create_unterminated_string)
-	ZEND_FE(zend_terminate_string, arginfo_zend_terminate_string)
-	ZEND_FE(zend_leak_bytes, arginfo_zend_leak_bytes)
-	ZEND_FE(zend_leak_variable, arginfo_zend_leak_variable)
-	ZEND_FE_END
-};
-
 zend_module_entry zend_test_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"zend-test",
-	zend_test_functions,
+	ext_functions,
 	PHP_MINIT(zend_test),
 	PHP_MSHUTDOWN(zend_test),
 	PHP_RINIT(zend_test),
