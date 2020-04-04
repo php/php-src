@@ -397,3 +397,106 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_DatePeriod___wakeup arginfo_class_DateTimeInterface_getTimezone
 
 #define arginfo_class_DatePeriod___set_state arginfo_class_DateTime___set_state
+
+
+ZEND_FUNCTION(strtotime);
+ZEND_FUNCTION(date);
+ZEND_FUNCTION(idate);
+ZEND_FUNCTION(gmdate);
+ZEND_FUNCTION(mktime);
+ZEND_FUNCTION(gmmktime);
+ZEND_FUNCTION(checkdate);
+ZEND_FUNCTION(strftime);
+ZEND_FUNCTION(gmstrftime);
+ZEND_FUNCTION(time);
+ZEND_FUNCTION(localtime);
+ZEND_FUNCTION(getdate);
+ZEND_FUNCTION(date_create);
+ZEND_FUNCTION(date_create_immutable);
+ZEND_FUNCTION(date_create_from_format);
+ZEND_FUNCTION(date_create_immutable_from_format);
+ZEND_FUNCTION(date_parse);
+ZEND_FUNCTION(date_parse_from_format);
+ZEND_FUNCTION(date_get_last_errors);
+ZEND_FUNCTION(date_format);
+ZEND_FUNCTION(date_modify);
+ZEND_FUNCTION(date_add);
+ZEND_FUNCTION(date_sub);
+ZEND_FUNCTION(date_timezone_get);
+ZEND_FUNCTION(date_timezone_set);
+ZEND_FUNCTION(date_offset_get);
+ZEND_FUNCTION(date_diff);
+ZEND_FUNCTION(date_time_set);
+ZEND_FUNCTION(date_date_set);
+ZEND_FUNCTION(date_isodate_set);
+ZEND_FUNCTION(date_timestamp_set);
+ZEND_FUNCTION(date_timestamp_get);
+ZEND_FUNCTION(timezone_open);
+ZEND_FUNCTION(timezone_name_get);
+ZEND_FUNCTION(timezone_name_from_abbr);
+ZEND_FUNCTION(timezone_offset_get);
+ZEND_FUNCTION(timezone_transitions_get);
+ZEND_FUNCTION(timezone_location_get);
+ZEND_FUNCTION(timezone_identifiers_list);
+ZEND_FUNCTION(timezone_abbreviations_list);
+ZEND_FUNCTION(timezone_version_get);
+ZEND_FUNCTION(date_interval_create_from_date_string);
+ZEND_FUNCTION(date_interval_format);
+ZEND_FUNCTION(date_default_timezone_set);
+ZEND_FUNCTION(date_default_timezone_get);
+ZEND_FUNCTION(date_sunrise);
+ZEND_FUNCTION(date_sunset);
+ZEND_FUNCTION(date_sun_info);
+
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_FE(strtotime, arginfo_strtotime)
+	ZEND_FE(date, arginfo_date)
+	ZEND_FE(idate, arginfo_idate)
+	ZEND_FE(gmdate, arginfo_gmdate)
+	ZEND_FE(mktime, arginfo_mktime)
+	ZEND_FE(gmmktime, arginfo_gmmktime)
+	ZEND_FE(checkdate, arginfo_checkdate)
+	ZEND_FE(strftime, arginfo_strftime)
+	ZEND_FE(gmstrftime, arginfo_gmstrftime)
+	ZEND_FE(time, arginfo_time)
+	ZEND_FE(localtime, arginfo_localtime)
+	ZEND_FE(getdate, arginfo_getdate)
+	ZEND_FE(date_create, arginfo_date_create)
+	ZEND_FE(date_create_immutable, arginfo_date_create_immutable)
+	ZEND_FE(date_create_from_format, arginfo_date_create_from_format)
+	ZEND_FE(date_create_immutable_from_format, arginfo_date_create_immutable_from_format)
+	ZEND_FE(date_parse, arginfo_date_parse)
+	ZEND_FE(date_parse_from_format, arginfo_date_parse_from_format)
+	ZEND_FE(date_get_last_errors, arginfo_date_get_last_errors)
+	ZEND_FE(date_format, arginfo_date_format)
+	ZEND_FE(date_modify, arginfo_date_modify)
+	ZEND_FE(date_add, arginfo_date_add)
+	ZEND_FE(date_sub, arginfo_date_sub)
+	ZEND_FE(date_timezone_get, arginfo_date_timezone_get)
+	ZEND_FE(date_timezone_set, arginfo_date_timezone_set)
+	ZEND_FE(date_offset_get, arginfo_date_offset_get)
+	ZEND_FE(date_diff, arginfo_date_diff)
+	ZEND_FE(date_time_set, arginfo_date_time_set)
+	ZEND_FE(date_date_set, arginfo_date_date_set)
+	ZEND_FE(date_isodate_set, arginfo_date_isodate_set)
+	ZEND_FE(date_timestamp_set, arginfo_date_timestamp_set)
+	ZEND_FE(date_timestamp_get, arginfo_date_timestamp_get)
+	ZEND_FE(timezone_open, arginfo_timezone_open)
+	ZEND_FE(timezone_name_get, arginfo_timezone_name_get)
+	ZEND_FE(timezone_name_from_abbr, arginfo_timezone_name_from_abbr)
+	ZEND_FE(timezone_offset_get, arginfo_timezone_offset_get)
+	ZEND_FE(timezone_transitions_get, arginfo_timezone_transitions_get)
+	ZEND_FE(timezone_location_get, arginfo_timezone_location_get)
+	ZEND_FE(timezone_identifiers_list, arginfo_timezone_identifiers_list)
+	ZEND_FE(timezone_abbreviations_list, arginfo_timezone_abbreviations_list)
+	ZEND_FE(timezone_version_get, arginfo_timezone_version_get)
+	ZEND_FE(date_interval_create_from_date_string, arginfo_date_interval_create_from_date_string)
+	ZEND_FE(date_interval_format, arginfo_date_interval_format)
+	ZEND_FE(date_default_timezone_set, arginfo_date_default_timezone_set)
+	ZEND_FE(date_default_timezone_get, arginfo_date_default_timezone_get)
+	ZEND_FE(date_sunrise, arginfo_date_sunrise)
+	ZEND_FE(date_sunset, arginfo_date_sunset)
+	ZEND_FE(date_sun_info, arginfo_date_sun_info)
+	ZEND_FE_END
+};

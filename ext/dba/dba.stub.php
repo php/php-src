@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 /** @return resource|false */
 function dba_popen($path, $mode, $handlername = UNKNOWN, ...$handler_parameters) {}
 

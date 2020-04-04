@@ -36,27 +36,4 @@ PHP_MINIT_FUNCTION(enchant);
 PHP_MSHUTDOWN_FUNCTION(enchant);
 PHP_MINFO_FUNCTION(enchant);
 
-PHP_FUNCTION(enchant_broker_init);
-PHP_FUNCTION(enchant_broker_free);
-PHP_FUNCTION(enchant_broker_get_error);
-PHP_FUNCTION(enchant_broker_set_dict_path);
-PHP_FUNCTION(enchant_broker_get_dict_path);
-PHP_FUNCTION(enchant_broker_list_dicts);
-PHP_FUNCTION(enchant_broker_request_dict);
-PHP_FUNCTION(enchant_broker_request_pwl_dict);
-PHP_FUNCTION(enchant_broker_free_dict);
-PHP_FUNCTION(enchant_broker_dict_exists);
-PHP_FUNCTION(enchant_broker_set_ordering);
-PHP_FUNCTION(enchant_broker_describe);
-
-PHP_FUNCTION(enchant_dict_check);
-PHP_FUNCTION(enchant_dict_suggest);
-PHP_FUNCTION(enchant_dict_add_to_personal);
-PHP_FUNCTION(enchant_dict_add_to_session);
-PHP_FUNCTION(enchant_dict_is_in_session);
-PHP_FUNCTION(enchant_dict_store_replacement);
-PHP_FUNCTION(enchant_dict_get_error);
-PHP_FUNCTION(enchant_dict_describe);
-PHP_FUNCTION(enchant_dict_quick_check);
-
 #endif	/* PHP_ENCHANT_H */

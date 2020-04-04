@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function variant_set(variant $variant, $value): void {}
 
 function variant_add($left, $right): variant {}
@@ -52,6 +54,9 @@ function variant_get_type(variant $variant): int {}
 function variant_set_type(variant $variant, int $type): void {}
 
 function variant_cast(variant $variant, int $type): variant {}
+
+/** @param string|array|null $server */
+function com_create_instance(string $module_name, $server = UNKNOWN, int $codepage = CP_ACP, string $typelib = ""): variant {}
 
 function com_get_active_object(string $progid, int $code_page = UNKNOWN): variant {}
 

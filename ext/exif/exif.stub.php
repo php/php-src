@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function exif_tagname(int $index): string|false {}
 
 function exif_read_data($filename, ?string $sections_needed = null, bool $sub_arrays = false, bool $read_thumbnail = false): array|false {}

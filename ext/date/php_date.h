@@ -26,48 +26,12 @@
 extern zend_module_entry date_module_entry;
 #define phpext_date_ptr &date_module_entry
 
-PHP_FUNCTION(date);
-PHP_FUNCTION(idate);
-PHP_FUNCTION(gmdate);
-PHP_FUNCTION(strtotime);
-
-PHP_FUNCTION(mktime);
-PHP_FUNCTION(gmmktime);
-
-PHP_FUNCTION(checkdate);
-PHP_FUNCTION(strftime);
-PHP_FUNCTION(gmstrftime);
-PHP_FUNCTION(time);
-PHP_FUNCTION(localtime);
-PHP_FUNCTION(getdate);
-
 /* Advanced Interface */
 PHP_METHOD(DateTime, __construct);
 PHP_METHOD(DateTime, __wakeup);
 PHP_METHOD(DateTime, __set_state);
 PHP_METHOD(DateTime, createFromImmutable);
 PHP_METHOD(DateTime, createFromInterface);
-PHP_FUNCTION(date_create);
-PHP_FUNCTION(date_create_immutable);
-PHP_FUNCTION(date_create_from_format);
-PHP_FUNCTION(date_create_immutable_from_format);
-PHP_FUNCTION(date_parse);
-PHP_FUNCTION(date_parse_from_format);
-PHP_FUNCTION(date_get_last_errors);
-PHP_FUNCTION(date_format);
-PHP_FUNCTION(date_modify);
-PHP_FUNCTION(date_add);
-PHP_FUNCTION(date_sub);
-PHP_FUNCTION(date_timezone_get);
-PHP_FUNCTION(date_timezone_set);
-PHP_FUNCTION(date_offset_get);
-PHP_FUNCTION(date_diff);
-
-PHP_FUNCTION(date_time_set);
-PHP_FUNCTION(date_date_set);
-PHP_FUNCTION(date_isodate_set);
-PHP_FUNCTION(date_timestamp_set);
-PHP_FUNCTION(date_timestamp_get);
 
 PHP_METHOD(DateTimeImmutable, __construct);
 PHP_METHOD(DateTimeImmutable, __set_state);
@@ -85,15 +49,6 @@ PHP_METHOD(DateTimeImmutable, createFromInterface);
 PHP_METHOD(DateTimeZone, __construct);
 PHP_METHOD(DateTimeZone, __wakeup);
 PHP_METHOD(DateTimeZone, __set_state);
-PHP_FUNCTION(timezone_open);
-PHP_FUNCTION(timezone_name_get);
-PHP_FUNCTION(timezone_name_from_abbr);
-PHP_FUNCTION(timezone_offset_get);
-PHP_FUNCTION(timezone_transitions_get);
-PHP_FUNCTION(timezone_location_get);
-PHP_FUNCTION(timezone_identifiers_list);
-PHP_FUNCTION(timezone_abbreviations_list);
-PHP_FUNCTION(timezone_version_get);
 
 PHP_METHOD(DateInterval, __construct);
 PHP_METHOD(DateInterval, __wakeup);
@@ -108,15 +63,6 @@ PHP_METHOD(DatePeriod, getStartDate);
 PHP_METHOD(DatePeriod, getEndDate);
 PHP_METHOD(DatePeriod, getDateInterval);
 PHP_METHOD(DatePeriod, getRecurrences);
-
-/* Options and Configuration */
-PHP_FUNCTION(date_default_timezone_set);
-PHP_FUNCTION(date_default_timezone_get);
-
-/* Astro functions */
-PHP_FUNCTION(date_sunrise);
-PHP_FUNCTION(date_sunset);
-PHP_FUNCTION(date_sun_info);
 
 PHP_RINIT_FUNCTION(date);
 PHP_RSHUTDOWN_FUNCTION(date);

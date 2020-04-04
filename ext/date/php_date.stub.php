@@ -1,7 +1,6 @@
 <?php
 
-/* TODO: Convert "uninitialized" into an exception. This will remove many
- * possibilities for false return values in here. */
+/** @generate-function-entries */
 
 function strtotime(string $time, int $now = UNKNOWN): int|false {}
 

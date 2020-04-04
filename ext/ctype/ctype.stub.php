@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function ctype_alnum($text): bool {}
 
 function ctype_alpha($text): bool {}

@@ -72,3 +72,46 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_unixtojd, 0, 0, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, timestamp, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+
+
+ZEND_FUNCTION(cal_days_in_month);
+ZEND_FUNCTION(cal_from_jd);
+ZEND_FUNCTION(cal_info);
+ZEND_FUNCTION(cal_to_jd);
+ZEND_FUNCTION(easter_date);
+ZEND_FUNCTION(easter_days);
+ZEND_FUNCTION(frenchtojd);
+ZEND_FUNCTION(gregoriantojd);
+ZEND_FUNCTION(jddayofweek);
+ZEND_FUNCTION(jdmonthname);
+ZEND_FUNCTION(jdtofrench);
+ZEND_FUNCTION(jdtogregorian);
+ZEND_FUNCTION(jdtojewish);
+ZEND_FUNCTION(jdtojulian);
+ZEND_FUNCTION(jdtounix);
+ZEND_FUNCTION(jewishtojd);
+ZEND_FUNCTION(juliantojd);
+ZEND_FUNCTION(unixtojd);
+
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_FE(cal_days_in_month, arginfo_cal_days_in_month)
+	ZEND_FE(cal_from_jd, arginfo_cal_from_jd)
+	ZEND_FE(cal_info, arginfo_cal_info)
+	ZEND_FE(cal_to_jd, arginfo_cal_to_jd)
+	ZEND_FE(easter_date, arginfo_easter_date)
+	ZEND_FE(easter_days, arginfo_easter_days)
+	ZEND_FE(frenchtojd, arginfo_frenchtojd)
+	ZEND_FE(gregoriantojd, arginfo_gregoriantojd)
+	ZEND_FE(jddayofweek, arginfo_jddayofweek)
+	ZEND_FE(jdmonthname, arginfo_jdmonthname)
+	ZEND_FE(jdtofrench, arginfo_jdtofrench)
+	ZEND_FE(jdtogregorian, arginfo_jdtogregorian)
+	ZEND_FE(jdtojewish, arginfo_jdtojewish)
+	ZEND_FE(jdtojulian, arginfo_jdtojulian)
+	ZEND_FE(jdtounix, arginfo_jdtounix)
+	ZEND_FE(jewishtojd, arginfo_jewishtojd)
+	ZEND_FE(juliantojd, arginfo_juliantojd)
+	ZEND_FE(unixtojd, arginfo_unixtojd)
+	ZEND_FE_END
+};

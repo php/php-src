@@ -215,51 +215,12 @@ void _php_curl_verify_handlers(php_curl *ch, int reporterror) /* {{{ */
 }
 /* }}} */
 
-/* {{{ curl_functions[]
- */
-static const zend_function_entry curl_functions[] = {
-	PHP_FE(curl_init,                arginfo_curl_init)
-	PHP_FE(curl_copy_handle,         arginfo_curl_copy_handle)
-	PHP_FE(curl_version,             arginfo_curl_version)
-	PHP_FE(curl_setopt,              arginfo_curl_setopt)
-	PHP_FE(curl_setopt_array,        arginfo_curl_setopt_array)
-	PHP_FE(curl_exec,                arginfo_curl_exec)
-	PHP_FE(curl_getinfo,             arginfo_curl_getinfo)
-	PHP_FE(curl_error,               arginfo_curl_error)
-	PHP_FE(curl_errno,               arginfo_curl_errno)
-	PHP_FE(curl_close,               arginfo_curl_close)
-	PHP_FE(curl_strerror,            arginfo_curl_strerror)
-	PHP_FE(curl_multi_strerror,      arginfo_curl_multi_strerror)
-	PHP_FE(curl_share_strerror,      arginfo_curl_share_strerror)
-	PHP_FE(curl_reset,               arginfo_curl_reset)
-	PHP_FE(curl_escape,              arginfo_curl_escape)
-	PHP_FE(curl_unescape,            arginfo_curl_unescape)
-	PHP_FE(curl_pause,               arginfo_curl_pause)
-	PHP_FE(curl_file_create,         arginfo_curl_file_create)
-	PHP_FE(curl_multi_init,          arginfo_curl_multi_init)
-	PHP_FE(curl_multi_add_handle,    arginfo_curl_multi_add_handle)
-	PHP_FE(curl_multi_remove_handle, arginfo_curl_multi_remove_handle)
-	PHP_FE(curl_multi_select,        arginfo_curl_multi_select)
-	PHP_FE(curl_multi_exec,          arginfo_curl_multi_exec)
-	PHP_FE(curl_multi_getcontent,    arginfo_curl_multi_getcontent)
-	PHP_FE(curl_multi_info_read,     arginfo_curl_multi_info_read)
-	PHP_FE(curl_multi_close,         arginfo_curl_multi_close)
-	PHP_FE(curl_multi_errno,         arginfo_curl_multi_errno)
-	PHP_FE(curl_multi_setopt,        arginfo_curl_multi_setopt)
-	PHP_FE(curl_share_init,          arginfo_curl_share_init)
-	PHP_FE(curl_share_close,         arginfo_curl_share_close)
-	PHP_FE(curl_share_setopt,        arginfo_curl_share_setopt)
-	PHP_FE(curl_share_errno,         arginfo_curl_share_errno)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ curl_module_entry
  */
 zend_module_entry curl_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"curl",
-	curl_functions,
+	ext_functions,
 	PHP_MINIT(curl),
 	PHP_MSHUTDOWN(curl),
 	NULL,
