@@ -34,6 +34,7 @@ function session_status(): int {}
 
 function session_register_shutdown(): void {}
 
+/** @alias session_write_close */
 function session_commit(): bool {}
 
 function session_set_save_handler($open, $close = null, $read = null, $write = null, $destroy = null, $gc = null, $create_sid = null, $validate_sid = null, $update_timestamp = null): bool {}

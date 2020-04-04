@@ -182,4 +182,5 @@ function sodium_bin2base64(string $string, int $id): string {}
 function sodium_base642bin(string $string, int $id, string $ignore  = ""): string {}
 #endif
 
+/** @alias sodium_crypto_box_publickey_from_secretkey */
 function sodium_crypto_scalarmult_base(string $key): string {}

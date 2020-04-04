@@ -12,7 +12,10 @@ function snmpwalk(string $host, string $community, $object_id, int $timeout = UN
 /** @param array|string $object_id */
 function snmprealwalk(string $host, string $community, $object_id, int $timeout = UNKNOWN, int $retries = UNKNOWN): array|bool {}
 
-/** @param array|string $object_id */
+/**
+ * @param array|string $object_id
+ * @alias snmprealwalk
+ */
 function snmpwalkoid(string $host, string $community, $object_id, int $timeout = UNKNOWN, int $retries = UNKNOWN): array|bool {}
 
 /**
@@ -30,6 +33,7 @@ function snmp_set_enum_print(int $enum_print): bool {}
 
 function snmp_set_oid_output_format(int $oid_format): bool {}
 
+/** @alias snmp_set_oid_output_format */
 function snmp_set_oid_numeric_print(int $oid_format): bool {}
 
 /** @param array|string $object_id */

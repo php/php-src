@@ -13,7 +13,10 @@ function ldap_connect(string $hostname = UNKNOWN, int $port = 389) {}
 /** @param resource $link_identifier */
 function ldap_unbind($link_identifier): bool {}
 
-/** @param resource $link_identifier */
+/**
+ * @param resource $link_identifier
+ * @alias ldap_unbind
+ */
 function ldap_close($link_identifier): bool {}
 
 /** @param resource $link_identifier */
@@ -111,6 +114,7 @@ function ldap_get_values_len($link_identifier, $result_entry_identifier, string 
 /**
  * @param resource $link_identifier
  * @param resource $result_entry_identifier
+ * @alias ldap_get_values_len
  */
 function ldap_get_values($link_identifier, $result_entry_identifier, string $attribute): array|false {}
 
@@ -157,7 +161,10 @@ function ldap_mod_add_ext($link_identifier, string $dn, array $entry, array $ser
 /** @param resource $link_identifier */
 function ldap_mod_replace($link_identifier, string $dn, array $entry, array $servercontrols = []): bool {}
 
-/** @param resource $link_identifier */
+/**
+ * @param resource $link_identifier
+ * @alias ldap_mod_replace
+ */
 function ldap_modify($link_identifier, string $dn, array $entry, array $servercontrols = []): bool {}
 
 /**

@@ -9,13 +9,22 @@
 /** @param resource $bz */
 function bzread($bz, int $length = 1024): string|false {}
 
-/** @param resource $bz */
+/**
+ * @param resource $bz
+ * @alias fwrite
+ */
 function bzwrite($bz, string $str, int $length = UNKNOWN): int|false {}
 
-/** @param resource $bz */
+/**
+ * @param resource $bz
+ * @alias fflush
+ */
 function bzflush($bz): bool {}
 
-/** @param resource $bz */
+/**
+ * @param resource $bz
+ * @alias fclose
+ */
 function bzclose($bz): bool {}
 
 /** @param resource $bz */

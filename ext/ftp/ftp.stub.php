@@ -113,7 +113,10 @@ function ftp_site($ftp, string $cmd): bool {}
 /** @param resource $ftp */
 function ftp_close($ftp): bool {}
 
-/** @param resource $ftp */
+/**
+ * @param resource $ftp
+ * @alias ftp_close
+ */
 function ftp_quit($ftp): bool {}
 
 /** @param resource $ftp */
