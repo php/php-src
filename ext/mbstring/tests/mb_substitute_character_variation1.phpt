@@ -87,6 +87,7 @@ $inputs = array(
       'uppercase FALSE' =>FALSE,
 
       // empty data
+      // FIXME Return true as they skip the IS_STRING code path
       'empty string DQ' => "",
       'empty string SQ' => '',
 
@@ -190,16 +191,20 @@ bool(true)
 bool(true)
 
 --string DQ--
-bool(true)
+Error: 2 - mb_substitute_character(): Substitute character must be 'none'|'entity'|'long' or a valid numeric string, %s(%d)
+bool(false)
 
 --string SQ--
-bool(true)
+Error: 2 - mb_substitute_character(): Substitute character must be 'none'|'entity'|'long' or a valid numeric string, %s(%d)
+bool(false)
 
 --mixed case string--
-bool(true)
+Error: 2 - mb_substitute_character(): Substitute character must be 'none'|'entity'|'long' or a valid numeric string, %s(%d)
+bool(false)
 
 --heredoc--
-bool(true)
+Error: 2 - mb_substitute_character(): Substitute character must be 'none'|'entity'|'long' or a valid numeric string, %s(%d)
+bool(false)
 
 --instance of classWithToString--
 Error: 8 - Object of class classWithToString could not be converted to int, %s(%d)

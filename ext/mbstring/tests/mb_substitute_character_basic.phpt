@@ -28,7 +28,7 @@ var_dump( mb_substitute_character("b") );
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 *** Testing mb_substitute_character() : basic functionality ***
 int(63)
 bool(true)
@@ -37,5 +37,7 @@ bool(true)
 int(1234)
 bool(true)
 string(4) "none"
-bool(true)
+
+Warning: mb_substitute_character(): Substitute character must be 'none'|'entity'|'long' or a valid numeric string in %s on line %d
+bool(false)
 ===DONE===

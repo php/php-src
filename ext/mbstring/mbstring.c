@@ -2076,39 +2076,43 @@ PHP_FUNCTION(mb_substitute_character)
 			RETURN_LONG(MBSTRG(current_filter_illegal_substchar));
 		}
 	} else {
-		RETVAL_TRUE;
-
-		switch (Z_TYPE_P(arg1)) {
-			case IS_STRING:
-				if (strncasecmp("none", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
-					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
-				} else if (strncasecmp("long", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
-					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG;
-				} else if (strncasecmp("entity", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
-					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY;
-				} else {
-					convert_to_long_ex(arg1);
-
-					if (php_mb_check_code_point(Z_LVAL_P(arg1))) {
-						MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-						MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
-					} else {
-						php_error_docref(NULL, E_WARNING, "Unknown character");
-						RETURN_FALSE;
-					}
-				}
-				break;
-			default:
-				convert_to_long_ex(arg1);
-				if (php_mb_check_code_point(Z_LVAL_P(arg1))) {
-					MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
-					MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
-				} else {
-					php_error_docref(NULL, E_WARNING, "Unknown character");
-					RETURN_FALSE;
-				}
-				break;
+		if (Z_TYPE_P(arg1) == IS_STRING) {
+			if (strncasecmp("none", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
+				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
+				RETURN_TRUE;
+			}
+			if (strncasecmp("long", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
+				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_LONG;
+				RETURN_TRUE;
+			}
+			if (strncasecmp("entity", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
+				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY;
+				RETURN_TRUE;
+			}
+			/* TODO Figure out why literal empty strings don't this code path */
+			/* As white space strings are considered valid numeric strings
+			 * Only do the empty case as it seems the most likely to happen */
+			if (Z_STRLEN_P(arg1) < 1) {
+				php_error_docref(NULL, E_WARNING,
+					"Substitute character must not be empty");
+				RETURN_FALSE;
+			}
+			if (!is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0)) {
+				php_error_docref(NULL, E_WARNING,
+					"Substitute character must be 'none'|'entity'|'long' or a valid numeric string");
+				RETURN_FALSE;
+			}
 		}
+
+		convert_to_long_ex(arg1);
+		if (!php_mb_check_code_point(Z_LVAL_P(arg1))) {
+			php_error_docref(NULL, E_WARNING, "Unknown character");
+			RETURN_FALSE;
+		}
+
+		MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_CHAR;
+		MBSTRG(current_filter_illegal_substchar) = Z_LVAL_P(arg1);
+		RETURN_TRUE;
 	}
 }
 /* }}} */
