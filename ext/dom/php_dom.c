@@ -520,11 +520,6 @@ static void dom_dtor_prop_handler(zval *zv) /* {{{ */
 	free(Z_PTR_P(zv));
 }
 
-static const zend_function_entry dom_functions[] = {
-	PHP_FE(dom_import_simplexml, arginfo_dom_import_simplexml)
-	PHP_FE_END
-};
-
 static const zend_module_dep dom_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
 	ZEND_MOD_CONFLICTS("domxml")
@@ -535,7 +530,7 @@ zend_module_entry dom_module_entry = { /* {{{ */
 	STANDARD_MODULE_HEADER_EX, NULL,
 	dom_deps,
 	"dom",
-	dom_functions,
+	ext_functions,
 	PHP_MINIT(dom),
 	PHP_MSHUTDOWN(dom),
 	NULL,

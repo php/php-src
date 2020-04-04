@@ -50,28 +50,6 @@
 #include "php_lmdb.h"
 #include "dba_arginfo.h"
 
-/* {{{ dba_functions[]
- */
-static const zend_function_entry dba_functions[] = {
-	PHP_FE(dba_open, arginfo_dba_open)
-	PHP_FE(dba_popen, arginfo_dba_popen)
-	PHP_FE(dba_close, arginfo_dba_close)
-	PHP_FE(dba_delete, arginfo_dba_delete)
-	PHP_FE(dba_exists, arginfo_dba_exists)
-	PHP_FE(dba_fetch, arginfo_dba_fetch)
-	PHP_FE(dba_insert, arginfo_dba_insert)
-	PHP_FE(dba_replace, arginfo_dba_replace)
-	PHP_FE(dba_firstkey, arginfo_dba_firstkey)
-	PHP_FE(dba_nextkey, arginfo_dba_nextkey)
-	PHP_FE(dba_optimize, arginfo_dba_optimize)
-	PHP_FE(dba_sync, arginfo_dba_sync)
-	PHP_FE(dba_handlers, arginfo_dba_handlers)
-	PHP_FE(dba_list, arginfo_dba_list)
-	PHP_FE(dba_key_split, arginfo_dba_key_split)
-	PHP_FE_END
-};
-/* }}} */
-
 PHP_MINIT_FUNCTION(dba);
 PHP_MSHUTDOWN_FUNCTION(dba);
 PHP_MINFO_FUNCTION(dba);
@@ -90,7 +68,7 @@ static PHP_GINIT_FUNCTION(dba);
 zend_module_entry dba_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"dba",
-	dba_functions,
+	ext_functions,
 	PHP_MINIT(dba),
 	PHP_MSHUTDOWN(dba),
 	NULL,

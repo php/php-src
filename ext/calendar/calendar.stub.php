@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function cal_days_in_month(int $calendar, int $month, int $year): int {}
 
 function cal_from_jd(int $jd, int $calendar): array {}

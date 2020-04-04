@@ -140,20 +140,6 @@ void finfo_resource_destructor(zend_resource *rsrc) /* {{{ */
 }
 /* }}} */
 
-
-/* {{{ fileinfo_functions[]
- */
-static const zend_function_entry fileinfo_functions[] = {
-	PHP_FE(finfo_open,		arginfo_finfo_open)
-	PHP_FE(finfo_close,		arginfo_finfo_close)
-	PHP_FE(finfo_set_flags,	arginfo_finfo_set_flags)
-	PHP_FE(finfo_file,		arginfo_finfo_file)
-	PHP_FE(finfo_buffer,	arginfo_finfo_buffer)
-	PHP_FE(mime_content_type, arginfo_mime_content_type)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(finfo)
@@ -199,7 +185,7 @@ PHP_MINIT_FUNCTION(finfo)
 zend_module_entry fileinfo_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"fileinfo",
-	fileinfo_functions,
+	ext_functions,
 	PHP_MINIT(finfo),
 	NULL,
 	NULL,

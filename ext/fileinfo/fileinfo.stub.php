@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class finfo
 {
     function __construct(int $options = FILEINFO_NONE, string $arg = "") {}

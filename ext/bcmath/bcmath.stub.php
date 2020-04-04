@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function bcadd(string $left_operand, string $right_operand, int $scale = UNKNOWN): string {}
 
 function bcsub(string $left_operand, string $right_operand, int $scale = UNKNOWN): string {}

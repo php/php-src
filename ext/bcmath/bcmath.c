@@ -33,24 +33,10 @@ ZEND_DECLARE_MODULE_GLOBALS(bcmath)
 static PHP_GINIT_FUNCTION(bcmath);
 static PHP_GSHUTDOWN_FUNCTION(bcmath);
 
-static const zend_function_entry bcmath_functions[] = {
-	PHP_FE(bcadd,									arginfo_bcadd)
-	PHP_FE(bcsub,									arginfo_bcsub)
-	PHP_FE(bcmul,									arginfo_bcmul)
-	PHP_FE(bcdiv,									arginfo_bcdiv)
-	PHP_FE(bcmod,									arginfo_bcmod)
-	PHP_FE(bcpow,									arginfo_bcpow)
-	PHP_FE(bcsqrt,									arginfo_bcsqrt)
-	PHP_FE(bcscale,									arginfo_bcscale)
-	PHP_FE(bccomp,									arginfo_bccomp)
-	PHP_FE(bcpowmod,								arginfo_bcpowmod)
-	PHP_FE_END
-};
-
 zend_module_entry bcmath_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"bcmath",
-	bcmath_functions,
+	ext_functions,
 	PHP_MINIT(bcmath),
 	PHP_MSHUTDOWN(bcmath),
 	NULL,

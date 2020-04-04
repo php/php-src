@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 /** @param resource $handle */
 function curl_close($handle): void {}
 
@@ -15,8 +17,20 @@ function curl_errno($handle): int {}
 /** @param resource $handle */
 function curl_error($handle): string {}
 
+#if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
 /** @param resource $handle */
 function curl_escape($handle, string $string): string|false {}
+
+/** @param resource $handle */
+function curl_unescape($handle, string $string): string|false {}
+
+/**
+ * @param resource $multi_handle
+ * @param mixed $value
+ */
+function curl_multi_setopt($multi_handle, int $option, $value): bool {}
+
+#endif
 
 /** @param resource $handle */
 function curl_exec($handle): string|bool {}
@@ -72,12 +86,6 @@ function curl_multi_remove_handle($multi_handle, $handle): int {}
 /** @param resource $multi_handle */
 function curl_multi_select($multi_handle, float $timeout = 1.0): int {}
 
-/**
- * @param resource $multi_handle
- * @param mixed $value
- */
-function curl_multi_setopt($multi_handle, int $option, $value): bool {}
-
 function curl_multi_strerror(int $error_number): ?string {}
 
 #if LIBCURL_VERSION_NUM >= 0x071200 /* 7.18.0 */
@@ -112,8 +120,5 @@ function curl_share_setopt($share_handle, int $option, $value): bool {}
 function curl_share_strerror(int $error_number): ?string {}
 
 function curl_strerror(int $error_number): ?string {}
-
-/** @param resource $handle */
-function curl_unescape($handle, string $string): string|false {}
 
 function curl_version(int $age = UNKNOWN): array|false {}

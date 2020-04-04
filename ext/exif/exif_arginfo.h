@@ -21,3 +21,18 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_exif_imagetype, 0, 1, MAY_BE_LONG|MAY_BE_FALSE)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+
+ZEND_FUNCTION(exif_tagname);
+ZEND_FUNCTION(exif_read_data);
+ZEND_FUNCTION(exif_thumbnail);
+ZEND_FUNCTION(exif_imagetype);
+
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_FE(exif_tagname, arginfo_exif_tagname)
+	ZEND_FE(exif_read_data, arginfo_exif_read_data)
+	ZEND_FE(exif_thumbnail, arginfo_exif_thumbnail)
+	ZEND_FE(exif_imagetype, arginfo_exif_imagetype)
+	ZEND_FE_END
+};
