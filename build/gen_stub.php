@@ -743,7 +743,6 @@ function generateCodeWithConditions(
 }
 
 function generateArgInfoCode(FileInfo $fileInfo): string {
-    $generatedDeclarations = [];
     $funcInfos = $fileInfo->funcInfos;
 
     $code = "/* This is a generated file, edit the .stub.php file instead. */\n";
@@ -768,6 +767,7 @@ function generateArgInfoCode(FileInfo $fileInfo): string {
 
     if ($fileInfo->generateFunctionEntries) {
         $code .= "\n\n";
+        $generatedDeclarations = [];
         $code .= generateCodeWithConditions($funcInfos, "", function(FuncInfo $funcInfo) use (&$generatedDeclarations) {
             $name = $funcInfo->alias ?? $funcInfo->name;
             $key = "$name|$funcInfo->cond";
