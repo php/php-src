@@ -23,6 +23,7 @@
 #include "ext/standard/info.h"
 #include "php_com_dotnet.h"
 #include "php_com_dotnet_internal.h"
+#include "com_variant_arginfo.h"
 
 /* create an automation SafeArray from a PHP array.
  * Only creates a single-dimensional array of variants.
@@ -432,7 +433,7 @@ PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar)
 }
 
 /* {{{ com_variant_create_instance - ctor for new VARIANT() */
-PHP_FUNCTION(com_variant_create_instance)
+PHP_METHOD(variant, __construct)
 {
 	/* VARTYPE == unsigned short */ zend_long vt = VT_EMPTY;
 	zend_long codepage = CP_ACP;
@@ -1118,3 +1119,8 @@ PHP_FUNCTION(variant_cast)
 	VariantClear(&vres);
 }
 /* }}} */
+
+const zend_function_entry php_com_variant_funcs[] = {
+	PHP_ME(variant, __construct, arginfo_class_variant___construct, ZEND_ACC_PUBLIC)
+	PHP_FE_END
+};

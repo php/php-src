@@ -87,7 +87,7 @@ PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string,
 
 
 /* com_com.c */
-PHP_FUNCTION(com_create_instance);
+const zend_function_entry php_com_com_funcs[];
 PHP_FUNCTION(com_event_sink);
 PHP_FUNCTION(com_create_guid);
 PHP_FUNCTION(com_print_typeinfo);
@@ -115,7 +115,7 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zval *val);
 int php_com_persist_minit(INIT_FUNC_ARGS);
 
 /* com_variant.c */
-PHP_FUNCTION(com_variant_create_instance);
+const zend_function_entry php_com_variant_funcs[];
 PHP_FUNCTION(variant_set);
 PHP_FUNCTION(variant_add);
 PHP_FUNCTION(variant_cat);
@@ -149,7 +149,7 @@ PHP_COM_DOTNET_API int php_com_zval_from_variant(zval *z, VARIANT *v, int codepa
 PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dst, VARIANT *src);
 
 /* com_dotnet.c */
-PHP_FUNCTION(com_dotnet_create_instance);
+const zend_function_entry php_com_dotnet_funcs[];
 void php_com_dotnet_rshutdown(void);
 void php_com_dotnet_mshutdown(void);
 

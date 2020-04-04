@@ -26,6 +26,7 @@
 # include "php_com_dotnet.h"
 # include "php_com_dotnet_internal.h"
 # include "Zend/zend_exceptions.h"
+# include "com_dotnet_arginfo.h"
 # include <mscoree.h>
 
 /* Since there is no official public mscorlib.h header file, and since
@@ -179,7 +180,7 @@ out:
 }
 
 /* {{{ com_dotnet_create_instance - ctor for DOTNET class */
-PHP_FUNCTION(com_dotnet_create_instance)
+PHP_METHOD(dotnet, __construct)
 {
 	zval *object = getThis();
 	php_com_dotnet_object *obj;
@@ -315,6 +316,11 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	}
 }
 /* }}} */
+
+const zend_function_entry php_com_dotnet_funcs[] = {
+	PHP_ME(dotnet, __construct, arginfo_class_dotnet___construct, ZEND_ACC_PUBLIC)
+	PHP_FE_END
+};
 
 void php_com_dotnet_mshutdown(void)
 {
