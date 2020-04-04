@@ -2186,6 +2186,7 @@ static HashTable *date_object_get_properties_interval(zend_object *object) /* {{
 	PHP_DATE_INTERVAL_ADD_PROPERTY("h", h);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("i", i);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("s", s);
+	PHP_DATE_INTERVAL_ADD_PROPERTY("u", us);
 	ZVAL_DOUBLE(&zv, (double)intervalobj->diff->us / 1000000.0);
 	zend_hash_str_update(props, "f", sizeof("f") - 1, &zv);
 	PHP_DATE_INTERVAL_ADD_PROPERTY("weekday", weekday);
@@ -3937,6 +3938,7 @@ static zval *date_interval_read_property(zend_object *object, zend_string *name,
 		GET_VALUE_FROM_STRUCT(h, "h");
 		GET_VALUE_FROM_STRUCT(i, "i");
 		GET_VALUE_FROM_STRUCT(s, "s");
+		GET_VALUE_FROM_STRUCT(us, "u");
 		if (strcmp(ZSTR_VAL(name), "f") == 0) {
 			fvalue = obj->diff->us / 1000000.0;
 			break;
@@ -3987,6 +3989,7 @@ static zval *date_interval_write_property(zend_object *object, zend_string *name
 		SET_VALUE_FROM_STRUCT(h, "h");
 		SET_VALUE_FROM_STRUCT(i, "i");
 		SET_VALUE_FROM_STRUCT(s, "s");
+		SET_VALUE_FROM_STRUCT(us, "u");
 		if (strcmp(ZSTR_VAL(name), "f") == 0) {
 			obj->diff->us = zval_get_double(value) * 1000000;
 			break;
@@ -4011,6 +4014,7 @@ static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string
 		zend_binary_strcmp("h", sizeof("h") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
 		zend_binary_strcmp("i", sizeof("i") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
 		zend_binary_strcmp("s", sizeof("s") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
+		zend_binary_strcmp("u", sizeof("u") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
 		zend_binary_strcmp("f", sizeof("f") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
 		zend_binary_strcmp("days", sizeof("days") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0 ||
 		zend_binary_strcmp("invert", sizeof("invert") - 1, ZSTR_VAL(name), ZSTR_LEN(name)) == 0) {
