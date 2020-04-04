@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function hash(string $algo, string $data, bool $raw_output = false): string|false {}
 
 function hash_file(string $algo, string $filename, bool $raw_output = false): string|false {}

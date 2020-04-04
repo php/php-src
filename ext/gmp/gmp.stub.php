@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 /** @param int|bool|string $number */
 function gmp_init($number, int $base = 0): GMP|false {}
 

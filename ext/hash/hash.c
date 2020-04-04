@@ -1302,46 +1302,12 @@ PHP_MINFO_FUNCTION(hash)
 }
 /* }}} */
 
-/* {{{ hash_functions[]
- */
-static const zend_function_entry hash_functions[] = {
-	PHP_FE(hash,									arginfo_hash)
-	PHP_FE(hash_file,								arginfo_hash_file)
-
-	PHP_FE(hash_hmac,								arginfo_hash_hmac)
-	PHP_FE(hash_hmac_file,							arginfo_hash_hmac_file)
-
-	PHP_FE(hash_init,								arginfo_hash_init)
-	PHP_FE(hash_update,								arginfo_hash_update)
-	PHP_FE(hash_update_stream,						arginfo_hash_update_stream)
-	PHP_FE(hash_update_file,						arginfo_hash_update_file)
-	PHP_FE(hash_final,								arginfo_hash_final)
-	PHP_FE(hash_copy,								arginfo_hash_copy)
-
-	PHP_FE(hash_algos,								arginfo_hash_algos)
-	PHP_FE(hash_hmac_algos,							arginfo_hash_hmac_algos)
-	PHP_FE(hash_pbkdf2,								arginfo_hash_pbkdf2)
-	PHP_FE(hash_equals,								arginfo_hash_equals)
-	PHP_FE(hash_hkdf,								arginfo_hash_hkdf)
-
-#ifdef PHP_MHASH_BC
-	PHP_FE(mhash_keygen_s2k, arginfo_mhash_keygen_s2k)
-	PHP_FE(mhash_get_block_size, arginfo_mhash_get_block_size)
-	PHP_FE(mhash_get_hash_name, arginfo_mhash_get_hash_name)
-	PHP_FE(mhash_count, arginfo_mhash_count)
-	PHP_FE(mhash, arginfo_mhash)
-#endif
-
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ hash_module_entry
  */
 zend_module_entry hash_module_entry = {
 	STANDARD_MODULE_HEADER,
 	PHP_HASH_EXTNAME,
-	hash_functions,
+	ext_functions,
 	PHP_MINIT(hash),
 	PHP_MSHUTDOWN(hash),
 	NULL, /* RINIT */

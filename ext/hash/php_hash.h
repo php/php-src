@@ -127,20 +127,6 @@ extern zend_module_entry hash_module_entry;
 #	define PHP_HASH_API
 #endif
 
-PHP_FUNCTION(hash);
-PHP_FUNCTION(hash_file);
-PHP_FUNCTION(hash_hkdf);
-PHP_FUNCTION(hash_hmac);
-PHP_FUNCTION(hash_hmac_file);
-PHP_FUNCTION(hash_init);
-PHP_FUNCTION(hash_update);
-PHP_FUNCTION(hash_update_stream);
-PHP_FUNCTION(hash_update_file);
-PHP_FUNCTION(hash_final);
-PHP_FUNCTION(hash_algos);
-PHP_FUNCTION(hash_pbkdf2);
-PHP_FUNCTION(hash_equals);
-
 extern PHP_HASH_API zend_class_entry *php_hashcontext_ce;
 PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(zend_string *algo);
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops);

@@ -78,26 +78,12 @@ static const filter_list_entry filter_list[] = {
 static unsigned int php_sapi_filter(int arg, char *var, char **val, size_t val_len, size_t *new_val_len);
 static unsigned int php_sapi_filter_init(void);
 
-/* {{{ filter_functions[]
- */
-static const zend_function_entry filter_functions[] = {
-	PHP_FE(filter_input,		arginfo_filter_input)
-	PHP_FE(filter_var,		arginfo_filter_var)
-	PHP_FE(filter_input_array,	arginfo_filter_input_array)
-	PHP_FE(filter_var_array,	arginfo_filter_var_array)
-	PHP_FE(filter_list,		arginfo_filter_list)
-	PHP_FE(filter_has_var,		arginfo_filter_has_var)
-	PHP_FE(filter_id,		arginfo_filter_id)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ filter_module_entry
  */
 zend_module_entry filter_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"filter",
-	filter_functions,
+	ext_functions,
 	PHP_MINIT(filter),
 	PHP_MSHUTDOWN(filter),
 	NULL,

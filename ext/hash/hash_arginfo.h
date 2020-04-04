@@ -116,3 +116,70 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_HashContext___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
+
+
+ZEND_FUNCTION(hash);
+ZEND_FUNCTION(hash_file);
+ZEND_FUNCTION(hash_hmac);
+ZEND_FUNCTION(hash_hmac_file);
+ZEND_FUNCTION(hash_init);
+ZEND_FUNCTION(hash_update);
+ZEND_FUNCTION(hash_update_stream);
+ZEND_FUNCTION(hash_update_file);
+ZEND_FUNCTION(hash_final);
+ZEND_FUNCTION(hash_copy);
+ZEND_FUNCTION(hash_algos);
+ZEND_FUNCTION(hash_hmac_algos);
+ZEND_FUNCTION(hash_pbkdf2);
+ZEND_FUNCTION(hash_equals);
+ZEND_FUNCTION(hash_hkdf);
+#if defined(PHP_MHASH_BC)
+ZEND_FUNCTION(mhash_get_block_size);
+#endif
+#if defined(PHP_MHASH_BC)
+ZEND_FUNCTION(mhash_get_hash_name);
+#endif
+#if defined(PHP_MHASH_BC)
+ZEND_FUNCTION(mhash_keygen_s2k);
+#endif
+#if defined(PHP_MHASH_BC)
+ZEND_FUNCTION(mhash_count);
+#endif
+#if defined(PHP_MHASH_BC)
+ZEND_FUNCTION(mhash);
+#endif
+
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_FE(hash, arginfo_hash)
+	ZEND_FE(hash_file, arginfo_hash_file)
+	ZEND_FE(hash_hmac, arginfo_hash_hmac)
+	ZEND_FE(hash_hmac_file, arginfo_hash_hmac_file)
+	ZEND_FE(hash_init, arginfo_hash_init)
+	ZEND_FE(hash_update, arginfo_hash_update)
+	ZEND_FE(hash_update_stream, arginfo_hash_update_stream)
+	ZEND_FE(hash_update_file, arginfo_hash_update_file)
+	ZEND_FE(hash_final, arginfo_hash_final)
+	ZEND_FE(hash_copy, arginfo_hash_copy)
+	ZEND_FE(hash_algos, arginfo_hash_algos)
+	ZEND_FE(hash_hmac_algos, arginfo_hash_hmac_algos)
+	ZEND_FE(hash_pbkdf2, arginfo_hash_pbkdf2)
+	ZEND_FE(hash_equals, arginfo_hash_equals)
+	ZEND_FE(hash_hkdf, arginfo_hash_hkdf)
+#if defined(PHP_MHASH_BC)
+	ZEND_FE(mhash_get_block_size, arginfo_mhash_get_block_size)
+#endif
+#if defined(PHP_MHASH_BC)
+	ZEND_FE(mhash_get_hash_name, arginfo_mhash_get_hash_name)
+#endif
+#if defined(PHP_MHASH_BC)
+	ZEND_FE(mhash_keygen_s2k, arginfo_mhash_keygen_s2k)
+#endif
+#if defined(PHP_MHASH_BC)
+	ZEND_FE(mhash_count, arginfo_mhash_count)
+#endif
+#if defined(PHP_MHASH_BC)
+	ZEND_FE(mhash, arginfo_mhash)
+#endif
+	ZEND_FE_END
+};
