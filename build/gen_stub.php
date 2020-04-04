@@ -422,7 +422,7 @@ function parseDocComment(DocComment $comment): array {
     $commentText = substr($comment->getText(), 2, -2);
     $tags = [];
     foreach (explode("\n", $commentText) as $commentLine) {
-        $regex = '/^\*\s*@([a-z-]+)(?:\s+(.+))$/';
+        $regex = '/^\*\s*@([a-z-]+)(?:\s+(.+))?$/';
         if (preg_match($regex, trim($commentLine), $matches, PREG_UNMATCHED_AS_NULL)) {
             $tags[] = new DocCommentTag($matches[1], $matches[2]);
         }
@@ -743,6 +743,7 @@ function generateCodeWithConditions(
 }
 
 function generateArgInfoCode(FileInfo $fileInfo): string {
+    $generatedDeclarations = [];
     $funcInfos = $fileInfo->funcInfos;
 
     $code = "/* This is a generated file, edit the .stub.php file instead. */\n";
@@ -767,22 +768,15 @@ function generateArgInfoCode(FileInfo $fileInfo): string {
 
     if ($fileInfo->generateFunctionEntries) {
         $code .= "\n\n";
-        $code .= generateCodeWithConditions($funcInfos, "", function(FuncInfo $funcInfo) use ($funcInfos) {
-            $result = "";
-
-            if ($funcInfo->alias) {
-                foreach ($funcInfos as $info) {
-                    if ($info->name === $funcInfo->alias) {
-                        return null;
-                    }
-                }
-
-                $result .= "ZEND_FUNCTION($funcInfo->alias);\n";
+        $code .= generateCodeWithConditions($funcInfos, "", function(FuncInfo $funcInfo) use (&$generatedDeclarations) {
+            $name = $funcInfo->alias ?? $funcInfo->name;
+            $key = "$name|$funcInfo->cond";
+            if (isset($generatedDeclarations[$key])) {
+                return null;
             }
 
-            $result .= "ZEND_FUNCTION($funcInfo->name);\n";
-
-            return $result;
+            $generatedDeclarations[$key] = true;
+            return "ZEND_FUNCTION($name);\n";
         });
 
         $code .= "\n\nstatic const zend_function_entry ext_functions[] = {\n";

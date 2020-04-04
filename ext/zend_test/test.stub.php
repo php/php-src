@@ -18,7 +18,7 @@ function zend_test_nullable_array_return(): ?array {}
 
 function zend_test_void_return(): void {}
 
-/** @deprecated since 5.0 */
+/** @deprecated */
 function zend_test_deprecated(): void {}
 
 function zend_create_unterminated_string(string $str): string {}

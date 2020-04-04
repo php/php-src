@@ -49,11 +49,8 @@ ZEND_END_ARG_INFO()
 ZEND_FUNCTION(bzopen);
 ZEND_FUNCTION(bzread);
 ZEND_FUNCTION(fwrite);
-ZEND_FUNCTION(bzwrite);
 ZEND_FUNCTION(fflush);
-ZEND_FUNCTION(bzflush);
 ZEND_FUNCTION(fclose);
-ZEND_FUNCTION(bzclose);
 ZEND_FUNCTION(bzerrno);
 ZEND_FUNCTION(bzerrstr);
 ZEND_FUNCTION(bzerror);
