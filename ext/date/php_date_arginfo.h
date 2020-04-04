@@ -366,8 +366,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_DateTimeZone___set_state arginfo_class_DateTime___set_state
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateInterval___construct, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, interval_spec, IS_STRING, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateInterval___construct, 0, 0, 0)
+	ZEND_ARG_TYPE_INFO(0, interval_spec, IS_STRING, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DateInterval_createFromDateString, 0, 0, 1)

@@ -3865,6 +3865,12 @@ static int date_interval_initialize(timelib_rel_time **rt, /*const*/ char *forma
 	int               retval = 0;
 	timelib_error_container *errors;
 
+	if (format_length == 0) {
+		#define DATE_INTERVAL_DEFAULT_FORMAT "PT0S"
+		format = DATE_INTERVAL_DEFAULT_FORMAT;
+		format_length = sizeof(DATE_INTERVAL_DEFAULT_FORMAT) - 1;
+	}
+
 	timelib_strtointerval(format, format_length, &b, &e, &p, &r, &errors);
 
 	if (errors->error_count > 0) {
@@ -4023,16 +4029,18 @@ static zval *date_interval_get_property_ptr_ptr(zend_object *object, zend_string
 */
 PHP_METHOD(DateInterval, __construct)
 {
-	zend_string *interval_string = NULL;
+	char *interval_str = NULL;
+	size_t interval_str_len = 0;
 	timelib_rel_time *reltime;
 	zend_error_handling error_handling;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(interval_string)
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING_OR_NULL(interval_str, interval_str_len)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
-	if (date_interval_initialize(&reltime, ZSTR_VAL(interval_string), ZSTR_LEN(interval_string)) == SUCCESS) {
+	if (date_interval_initialize(&reltime, interval_str, interval_str_len) == SUCCESS) {
 		php_interval_obj *diobj = Z_PHPINTERVAL_P(ZEND_THIS);
 		diobj->diff = reltime;
 		diobj->initialized = 1;
