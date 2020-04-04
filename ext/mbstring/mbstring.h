@@ -117,16 +117,15 @@ MBSTRING_API char *php_mb_safe_strrchr(const char *s, unsigned int c,
 MBSTRING_API char *php_mb_convert_encoding_ex(
 		const char *input, size_t length,
 		const mbfl_encoding *to_encoding, const mbfl_encoding *from_encoding, size_t *output_len);
-MBSTRING_API char * php_mb_convert_encoding(const char *input, size_t length,
-                                      const mbfl_encoding *to_encoding,
-                                      const char *_from_encodings,
-                                      size_t *output_len);
+MBSTRING_API char * php_mb_convert_encoding(
+		const char *input, size_t length, const mbfl_encoding *to_encoding,
+		const mbfl_encoding **from_encodings, size_t num_from_encodings, size_t *output_len);
 
 MBSTRING_API size_t php_mb_mbchar_bytes_ex(const char *s, const mbfl_encoding *enc);
 MBSTRING_API size_t php_mb_mbchar_bytes(const char *s);
 
-MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t old_haystack_len, const char *old_needle, size_t old_needle_len, zend_long offset, zend_string *from_encoding);
-MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const char *enc);
+MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t old_haystack_len, const char *old_needle, size_t old_needle_len, zend_long offset, const mbfl_encoding *encoding);
+MBSTRING_API int php_mb_check_encoding(const char *input, size_t length, const mbfl_encoding *encoding);
 
 ZEND_BEGIN_MODULE_GLOBALS(mbstring)
 	char *internal_encoding_name;

@@ -17,8 +17,6 @@
 #ifndef PHP_MAIL_H
 #define PHP_MAIL_H
 
-PHP_FUNCTION(mail);
-
 PHP_MINFO_FUNCTION(mail);
 
 PHPAPI zend_string *php_mail_build_headers(HashTable *headers);

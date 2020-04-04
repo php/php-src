@@ -61,13 +61,19 @@ function socket_sendto($socket, string $buf, int $len, int $flags, string $addr,
 /** @param resource $socket */
 function socket_get_option($socket, int $level, int $optname): array|int|false {}
 
-/** @param resource $socket */
+/**
+ * @param resource $socket
+ * @alias socket_get_option
+ */
 function socket_getopt($socket, int $level, int $optname): array|int|false {}
 
 /** @param resource $socket */
 function socket_set_option($socket, int $level, int $optname, $optval): bool {}
 
-/** @param resource $socket */
+/**
+ * @param resource $socket
+ * @alias socket_set_option
+ */
 function socket_setopt($socket, int $level, int $optname, $optval): bool {}
 
 #ifdef HAVE_SOCKETPAIR
@@ -91,7 +97,10 @@ function socket_clear_error($socket = UNKNOWN): void {}
  */
 function socket_import_stream($stream) {}
 
-/** @param resource $socket */
+/**
+ * @param resource $socket
+ * @return resource|false
+ */
 function socket_export_stream($socket) {}
 
 /** @param resource $socket */

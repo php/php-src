@@ -163,6 +163,21 @@ PHP 8.0 UPGRADE NOTES
     accepted, and func as assumed to refer to T1::func. Now it will generate a
     fatal error instead, and either T1::func or T2::func needs to be written
     explicitly.
+  . The signature of abstract methods defined in traits is now checked against
+    the implementing class method:
+
+        trait MyTrait {
+            abstract private function neededByTrait(): string;
+        }
+
+        class MyClass {
+            use MyTrait;
+
+            // Error, because of return type mismatch.
+            private function neededByTrait(): int { return 42; }
+        }
+
+    RFC: https://wiki.php.net/rfc/abstract_trait_method_validation
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
@@ -428,8 +443,10 @@ PHP 8.0 UPGRADE NOTES
   . Some consistency fixes to variable syntax have been applied, for example
     writing `Foo::BAR::$baz` is now allowed.
     RFC: https://wiki.php.net/rfc/variable_syntax_tweaks
-  . Added Stringable.
+  . Added Stringable interface, which is automatically implemented if a class
+    defines a __toString() method.
     RFC: https://wiki.php.net/rfc/stringable
+  . Traits can now define abstract private methods.
 
 - Date:
   . Added DateTime::createFromInterface() and
@@ -440,13 +457,14 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/dom_living_standard_api
 
 - Zip:
-  . Extension updated to version 1.18.2
+  . Extension updated to version 1.19.0
   . New ZipArchive::lastId property to get index value of last added entry.
   . Error can be checked after an archive is closed using ZipArchive::status,
     ZipArchive::statusSys properties or ZipArchive::getStatusString() method.
   . The remove_path option of ZipArchive::addGlob() and ::addPattern() is now
     treated as arbitrary string prefix (for consistency with the add_path
     option), whereas formerly it was treated as directory name.
+  . Optional compression / encryption features are listed in phpinfo.
 
 ========================================
 3. Changes in SAPI modules
@@ -511,10 +529,20 @@ PHP 8.0 UPGRADE NOTES
   . ZipArchive::setProgressCallback to provide updates during archive close.
   . ZipArchive::setCancelCallback to allow cancellation during archive close.
   . ZipArchive::replaceFile to replace an entry content.
+  . ZipArchive::isCompressionMethodSupported to check optional compression
+    features.
+  . ZipArchive::isEncryptionMethodSupported to check optional encryption
+    features.
 
 ========================================
 7. New Classes and Interfaces
 ========================================
+
+- Tokenizer:
+  . The new PhpToken class adds an object-based interface to the tokenizer.
+    It provides a more uniform and ergonomic representation, while being more
+    memory efficient and faster.
+    RFC: https://wiki.php.net/rfc/token_as_object
 
 ========================================
 8. Removed Extensions and SAPIs

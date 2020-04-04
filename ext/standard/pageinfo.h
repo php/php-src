@@ -17,12 +17,6 @@
 #ifndef PAGEINFO_H
 #define PAGEINFO_H
 
-PHP_FUNCTION(getmyuid);
-PHP_FUNCTION(getmygid);
-PHP_FUNCTION(getmypid);
-PHP_FUNCTION(getmyinode);
-PHP_FUNCTION(getlastmod);
-
 PHPAPI void php_statpage(void);
 PHPAPI time_t php_getlastmod(void);
 extern zend_long php_getuid(void);

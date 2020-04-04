@@ -20,7 +20,7 @@ function zend_test_deprecated(): void {}
 
 function zend_create_unterminated_string(string $str): string {}
 
-function zend_terminate_string(string &$str) {}
+function zend_terminate_string(string &$str): void {}
 
 /** @param mixed $variable */
 function zend_leak_variable($variable): void {}

@@ -285,7 +285,7 @@ static int TimeZone_compare_objects(zval *object1, zval *object2)
 		}
 	}
 
-	return 1;
+	return ZEND_UNCOMPARABLE;
 }
 /* }}} */
 

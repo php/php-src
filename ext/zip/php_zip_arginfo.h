@@ -269,3 +269,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ZipArchive_registerCancelCallback, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, callback, IS_CALLABLE, 0)
 ZEND_END_ARG_INFO()
 #endif
+
+#if defined(HAVE_METHOD_SUPPORTED)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_ZipArchive_isCompressionMethodSupported, 0, 2, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO(0, method, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, enc, _IS_BOOL, 0)
+ZEND_END_ARG_INFO()
+#endif
+
+#if defined(HAVE_METHOD_SUPPORTED)
+#define arginfo_class_ZipArchive_isEncryptionMethodSupported arginfo_class_ZipArchive_isCompressionMethodSupported
+#endif

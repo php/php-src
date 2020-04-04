@@ -83,8 +83,8 @@ echo "Done";
 ?>
 --EXPECT--
 *** Testing get_class_methods() : usage variations ***
-Error: 2 - Undefined variable: undefined_var
-Error: 2 - Undefined variable: unset_var
+Error: 2 - Undefined variable $undefined_var
+Error: 2 - Undefined variable $unset_var
 
 Arg value 0 
 NULL

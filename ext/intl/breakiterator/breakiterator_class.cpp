@@ -84,9 +84,6 @@ static int BreakIterator_compare_objects(zval *object1,
 							*bio2;
 
 	ZEND_COMPARE_OBJECTS_FALLBACK(object1, object2);
-	if (Z_TYPE_P(object1) != Z_TYPE_P(object2)) {
-		return 1; /* object and non-object */
-	}
 
 	bio1 = Z_INTL_BREAKITERATOR_P(object1);
 	bio2 = Z_INTL_BREAKITERATOR_P(object2);

@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <wchar.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -107,10 +108,6 @@ php_file_globals file_globals;
 #  define _GNU_SOURCE
 # endif
 # include <fnmatch.h>
-#endif
-
-#ifdef HAVE_WCHAR_H
-# include <wchar.h>
 #endif
 
 /* }}} */
@@ -2293,7 +2290,6 @@ out:
 }
 /* }}} */
 
-#if HAVE_REALPATH || defined(ZTS)
 /* {{{ proto string|false realpath(string path)
    Return the resolved path */
 PHP_FUNCTION(realpath)
@@ -2322,7 +2318,6 @@ PHP_FUNCTION(realpath)
 	}
 }
 /* }}} */
-#endif
 
 /* See http://www.w3.org/TR/html4/intro/sgmltut.html#h-3.2.2 */
 #define PHP_META_HTML401_CHARS "-_.:"

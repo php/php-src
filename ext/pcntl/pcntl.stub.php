@@ -50,6 +50,7 @@ function pcntl_alarm(int $seconds): int {}
 
 function pcntl_get_last_error(): int {}
 
+/** @alias pcntl_get_last_error */
 function pcntl_errno(): int {}
 
 #ifdef HAVE_GETPRIORITY

@@ -10,4 +10,5 @@ try {
 ?>
 DONE
 --EXPECTF--
-Fatal error: Unsupported operand types in %sconstant_expressions_exceptions.inc on line 2
+Exception: Unsupported operand types: array - array in %s on line %d
+DONE

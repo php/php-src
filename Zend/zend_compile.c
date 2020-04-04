@@ -6111,7 +6111,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 	}
 
 	if (op_array->fn_flags & ZEND_ACC_ABSTRACT) {
-		if (op_array->fn_flags & ZEND_ACC_PRIVATE) {
+		if ((op_array->fn_flags & ZEND_ACC_PRIVATE) && !(ce->ce_flags & ZEND_ACC_TRAIT)) {
 			zend_error_noreturn(E_COMPILE_ERROR, "%s function %s::%s() cannot be declared private",
 				in_interface ? "Interface" : "Abstract", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		}
@@ -7216,12 +7216,30 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_bool zend_binary_op_produces_numeric_string_error(uint32_t opcode, zval *op1, zval *op2) /* {{{ */
+ZEND_API zend_bool zend_binary_op_produces_error(uint32_t opcode, zval *op1, zval *op2) /* {{{ */
 {
+	if ((opcode == ZEND_CONCAT || opcode == ZEND_FAST_CONCAT)) {
+		/* Array to string warning. */
+		return Z_TYPE_P(op1) == IS_ARRAY || Z_TYPE_P(op2) == IS_ARRAY;
+	}
+
 	if (!(opcode == ZEND_ADD || opcode == ZEND_SUB || opcode == ZEND_MUL || opcode == ZEND_DIV
-		|| opcode == ZEND_POW || opcode == ZEND_MOD || opcode == ZEND_SL || opcode == ZEND_SR
-		|| opcode == ZEND_BW_OR || opcode == ZEND_BW_AND || opcode == ZEND_BW_XOR)) {
+               || opcode == ZEND_POW || opcode == ZEND_MOD || opcode == ZEND_SL || opcode == ZEND_SR
+               || opcode == ZEND_BW_OR || opcode == ZEND_BW_AND || opcode == ZEND_BW_XOR)) {
+		/* Only the numeric operations throw errors. */
 		return 0;
+	}
+
+	if (Z_TYPE_P(op1) == IS_ARRAY || Z_TYPE_P(op2) == IS_ARRAY) {
+		if (opcode == ZEND_ADD && Z_TYPE_P(op1) == IS_ARRAY && Z_TYPE_P(op2) == IS_ARRAY) {
+			/* Adding two arrays is allowed. */
+			return 0;
+		}
+		if (opcode == ZEND_ADD || opcode == ZEND_SUB || opcode == ZEND_MUL || opcode == ZEND_POW
+				|| opcode == ZEND_DIV) {
+			/* These operators throw when one of the operands is an array. */
+			return 1;
+		}
 	}
 
 	/* While basic arithmetic operators always produce numeric string errors,
@@ -7241,13 +7259,13 @@ ZEND_API zend_bool zend_binary_op_produces_numeric_string_error(uint32_t opcode,
 		return 1;
 	}
 
-	return 0;
-}
-/* }}} */
-
-ZEND_API zend_bool zend_binary_op_produces_array_conversion_error(uint32_t opcode, zval *op1, zval *op2) /* {{{ */
-{
-	if (opcode == ZEND_CONCAT && (Z_TYPE_P(op1) == IS_ARRAY || Z_TYPE_P(op2) == IS_ARRAY)) {
+	if ((opcode == ZEND_MOD && zval_get_long(op2) == 0)
+			|| (opcode == ZEND_DIV && zval_get_double(op2) == 0.0)) {
+		/* Division by zero throws an error. */
+		return 1;
+	}
+	if ((opcode == ZEND_SL || opcode == ZEND_SR) && zval_get_long(op2) < 0) {
+		/* Shift by negative number throws an error. */
 		return 1;
 	}
 
@@ -7257,26 +7275,11 @@ ZEND_API zend_bool zend_binary_op_produces_array_conversion_error(uint32_t opcod
 
 static inline zend_bool zend_try_ct_eval_binary_op(zval *result, uint32_t opcode, zval *op1, zval *op2) /* {{{ */
 {
+	if (zend_binary_op_produces_error(opcode, op1, op2)) {
+		return 0;
+	}
+
 	binary_op_type fn = get_binary_op(opcode);
-
-	/* don't evaluate division by zero at compile-time */
-	if ((opcode == ZEND_DIV || opcode == ZEND_MOD) &&
-	    zval_get_long(op2) == 0) {
-		return 0;
-	} else if ((opcode == ZEND_SL || opcode == ZEND_SR) &&
-	    zval_get_long(op2) < 0) {
-		return 0;
-	}
-
-	/* don't evaluate numeric string error-producing operations at compile-time */
-	if (zend_binary_op_produces_numeric_string_error(opcode, op1, op2)) {
-		return 0;
-	}
-	/* don't evaluate array to string conversions at compile-time */
-	if (zend_binary_op_produces_array_conversion_error(opcode, op1, op2)) {
-		return 0;
-	}
-
 	fn(result, op1, op2);
 	return 1;
 }

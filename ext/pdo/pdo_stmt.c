@@ -32,7 +32,7 @@
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 #include "php_memory_streams.h"
-#include "pdo_arginfo.h"
+#include "pdo_stmt_arginfo.h"
 
 #define PHP_STMT_GET_OBJ	\
   pdo_stmt_t *stmt = Z_PDO_STMT_P(ZEND_THIS);	\
@@ -2165,7 +2165,7 @@ out:
 
 static int dbstmt_compare(zval *object1, zval *object2)
 {
-	return -1;
+	return ZEND_UNCOMPARABLE;
 }
 
 zend_object_handlers pdo_dbstmt_object_handlers;
@@ -2585,7 +2585,7 @@ static zend_string *row_get_classname(const zend_object *object)
 
 static int row_compare(zval *object1, zval *object2)
 {
-	return -1;
+	return ZEND_UNCOMPARABLE;
 }
 
 void pdo_row_free_storage(zend_object *std)

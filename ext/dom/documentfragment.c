@@ -22,7 +22,7 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-#include "dom_arginfo.h"
+#include "documentfragment_arginfo.h"
 
 /*
 * class DOMDocumentFragment extends DOMNode
@@ -34,8 +34,8 @@
 const zend_function_entry php_dom_documentfragment_class_functions[] = {
 	PHP_ME(domdocumentfragment, __construct, arginfo_class_DOMDocumentFragment___construct, ZEND_ACC_PUBLIC)
 	PHP_ME(domdocumentfragment, appendXML, arginfo_class_DOMDocumentFragment_appendXML, ZEND_ACC_PUBLIC)
-	PHP_ME(domdocumentfragment, append, arginfo_class_DOMParentNode_append, ZEND_ACC_PUBLIC)
-	PHP_ME(domdocumentfragment, prepend, arginfo_class_DOMParentNode_prepend, ZEND_ACC_PUBLIC)
+	PHP_ME(domdocumentfragment, append, arginfo_class_DOMDocumentFragment_append, ZEND_ACC_PUBLIC)
+	PHP_ME(domdocumentfragment, prepend, arginfo_class_DOMDocumentFragment_prepend, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 

@@ -54,4 +54,4 @@ function xml_parser_free(XmlParser $parser): bool {}
 
 function xml_parser_set_option(XmlParser $parser, int $option, $value): bool {}
 
-function xml_parser_get_option(XmlParser $parser, int $option) {}
+function xml_parser_get_option(XmlParser $parser, int $option): string|int|false {}

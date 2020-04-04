@@ -104,8 +104,10 @@ class ReflectionFunction extends ReflectionFunctionAbstract
     /** @return bool */
     public function isDisabled() {}
 
+    /** @return mixed */
     public function invoke(...$args) {}
 
+    /** @return mixed */
     public function invokeArgs(array $args) {}
 
     /** @return Closure */
@@ -172,8 +174,10 @@ class ReflectionMethod extends ReflectionFunctionAbstract
     /** @return int */
     public function getModifiers() {}
 
+    /** @return mixed */
     public function invoke(?object $object = null, ...$args) {}
 
+    /** @return mixed */
     public function invokeArgs(?object $object, array $args) {}
 
     /** @return ReflectionClass */
@@ -255,6 +259,7 @@ class ReflectionClass implements Reflector
     /** @return ReflectionClassConstant[] */
     public function getReflectionConstants() {}
 
+    /** @return mixed */
     public function getConstant(string $name) {}
 
     /** @return ReflectionClassConstant|false */
@@ -314,6 +319,7 @@ class ReflectionClass implements Reflector
     /** @return ?array */
     public function getStaticProperties() {}
 
+    /** @return mixed */
     public function getStaticPropertyValue(string $name, $default = UNKNOWN) {}
 
     /** @return void */
@@ -367,6 +373,7 @@ class ReflectionProperty implements Reflector
     /** @return string|false */
     public function getName() {}
 
+    /** @return mixed */
     public function getValue(?object $object = null) {}
 
     /** @return void */
@@ -426,6 +433,7 @@ class ReflectionClassConstant implements Reflector
     /** @return string|false */
     public function getName() {}
 
+    /** @return mixed */
     public function getValue() {}
 
     /** @return bool */
@@ -501,6 +509,7 @@ class ReflectionParameter implements Reflector
     /** @return bool */
     public function isDefaultValueAvailable() {}
 
+    /** @return mixed */
     public function getDefaultValue() {}
 
     /** @return bool */

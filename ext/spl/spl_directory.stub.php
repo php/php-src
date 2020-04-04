@@ -90,6 +90,7 @@ class SplFileInfo
 
     public function __toString(): string {}
 
+    /** @return void */
     final public function _bad_state_ex() {}
 }
 

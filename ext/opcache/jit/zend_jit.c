@@ -1221,11 +1221,10 @@ static int zend_jit_compute_liveness(const zend_op_array *op_array, zend_ssa *ss
 		/* Register hinting (a cheap way for register coalescing) */
 		for (i = 0; i < ssa->vars_count; i++) {
 			if (intervals[i]) {
-				int var = intervals[i]->ssa_var;
 				int src;
 
-				if (ssa->vars[var].definition_phi) {
-					zend_ssa_phi *phi = ssa->vars[var].definition_phi;
+				if (ssa->vars[i].definition_phi) {
+					zend_ssa_phi *phi = ssa->vars[i].definition_phi;
 
 					if (phi->pi >= 0) {
 						src = phi->sources[0];
@@ -1253,10 +1252,9 @@ static int zend_jit_compute_liveness(const zend_op_array *op_array, zend_ssa *ss
 		}
 		for (i = 0; i < ssa->vars_count; i++) {
 			if (intervals[i] && !intervals[i]->hint) {
-				int var = intervals[i]->ssa_var;
 
-				if (ssa->vars[var].definition >= 0) {
-					uint32_t line = ssa->vars[var].definition;
+				if (ssa->vars[i].definition >= 0) {
+					uint32_t line = ssa->vars[i].definition;
 					const zend_op *opline = op_array->opcodes + line;
 
 					switch (opline->opcode) {
@@ -1265,8 +1263,8 @@ static int zend_jit_compute_liveness(const zend_op_array *op_array, zend_ssa *ss
 						case ZEND_POST_DEC:
 							if (ssa->ops[line].op1_use >= 0 &&
 							    intervals[ssa->ops[line].op1_use] &&
-							    (var == ssa->ops[line].op1_def ||
-							     (var == ssa->ops[line].result_def &&
+							    (i == ssa->ops[line].op1_def ||
+							     (i == ssa->ops[line].result_def &&
 							      (ssa->ops[line].op1_def < 0 ||
 							       !intervals[ssa->ops[line].op1_def])))) {
 								zend_jit_add_hint(intervals, i, ssa->ops[line].op1_use);
@@ -1275,7 +1273,7 @@ static int zend_jit_compute_liveness(const zend_op_array *op_array, zend_ssa *ss
 						case ZEND_SEND_VAR:
 						case ZEND_PRE_INC:
 						case ZEND_PRE_DEC:
-							if (var == ssa->ops[line].op1_def &&
+							if (i == ssa->ops[line].op1_def &&
 							    ssa->ops[line].op1_use >= 0 &&
 							    intervals[ssa->ops[line].op1_use]) {
 								zend_jit_add_hint(intervals, i, ssa->ops[line].op1_use);
@@ -1284,11 +1282,11 @@ static int zend_jit_compute_liveness(const zend_op_array *op_array, zend_ssa *ss
 						case ZEND_ASSIGN:
 							if (ssa->ops[line].op2_use >= 0 &&
 							    intervals[ssa->ops[line].op2_use] &&
-							    (var == ssa->ops[line].op2_def ||
-								 (var == ssa->ops[line].op1_def &&
+							    (i == ssa->ops[line].op2_def ||
+								 (i == ssa->ops[line].op1_def &&
 							      (ssa->ops[line].op2_def < 0 ||
 							       !intervals[ssa->ops[line].op2_def])) ||
-								 (var == ssa->ops[line].result_def &&
+								 (i == ssa->ops[line].result_def &&
 							      (ssa->ops[line].op2_def < 0 ||
 							       !intervals[ssa->ops[line].op2_def]) &&
 							      (ssa->ops[line].op1_def < 0 ||

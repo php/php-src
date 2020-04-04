@@ -1126,17 +1126,28 @@ static zend_always_inline zval *zend_try_array_init(zval *zv)
 #define FAST_ZPP 1
 
 #define Z_EXPECTED_TYPES(_) \
-	_(Z_EXPECTED_LONG,		"of type int") \
-	_(Z_EXPECTED_BOOL,		"of type bool") \
-	_(Z_EXPECTED_STRING,	"of type string") \
-	_(Z_EXPECTED_ARRAY,		"of type array") \
-	_(Z_EXPECTED_FUNC,		"a valid callback") \
-	_(Z_EXPECTED_RESOURCE,	"of type resource") \
-	_(Z_EXPECTED_PATH,		"a valid path") \
-	_(Z_EXPECTED_OBJECT,	"of type object") \
-	_(Z_EXPECTED_DOUBLE,	"of type float") \
-	_(Z_EXPECTED_NUMBER,	"of type int|float") \
-	_(Z_EXPECTED_STRING_OR_ARRAY, "of type string|array") \
+	_(Z_EXPECTED_LONG,				"of type int") \
+	_(Z_EXPECTED_LONG_OR_NULL,		"of type ?int") \
+	_(Z_EXPECTED_BOOL,				"of type bool") \
+	_(Z_EXPECTED_BOOL_OR_NULL,		"of type ?bool") \
+	_(Z_EXPECTED_STRING,			"of type string") \
+	_(Z_EXPECTED_STRING_OR_NULL,	"of type ?string") \
+	_(Z_EXPECTED_ARRAY,				"of type array") \
+	_(Z_EXPECTED_ARRAY_OR_NULL,		"of type ?array") \
+	_(Z_EXPECTED_FUNC,				"a valid callback") \
+	_(Z_EXPECTED_FUNC_OR_NULL,		"a valid callback or null") \
+	_(Z_EXPECTED_RESOURCE,			"of type resource") \
+	_(Z_EXPECTED_RESOURCE_OR_NULL,	"of type resource or null") \
+	_(Z_EXPECTED_PATH,				"a valid path") \
+	_(Z_EXPECTED_PATH_OR_NULL,		"a valid path or null") \
+	_(Z_EXPECTED_OBJECT,			"of type object") \
+	_(Z_EXPECTED_OBJECT_OR_NULL,	"of type ?object") \
+	_(Z_EXPECTED_DOUBLE,			"of type float") \
+	_(Z_EXPECTED_DOUBLE_OR_NULL,	"of type ?float") \
+	_(Z_EXPECTED_NUMBER,			"of type int|float") \
+	_(Z_EXPECTED_NUMBER_OR_NULL,	"of type int|float|null") \
+	_(Z_EXPECTED_STRING_OR_ARRAY,	"of type string|array") \
+	_(Z_EXPECTED_STRING_OR_ARRAY_OR_NULL, "of type string|array|null") \
 
 #define Z_EXPECTED_TYPE
 
@@ -1152,17 +1163,19 @@ ZEND_API ZEND_COLD int  ZEND_FASTCALL zend_wrong_parameters_none_error(void);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameters_count_error(int min_num_args, int max_num_args);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_type_error(int num, zend_expected_type expected_type, zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_error(int num, const char *name, zval *arg);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_null_error(int num, const char *name, zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(int num, char *error);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error(zend_class_entry *error_ce, uint32_t arg_num, const char *format, ...);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_type_error(uint32_t arg_num, const char *format, ...);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num, const char *format, ...);
 
-#define ZPP_ERROR_OK             0
-#define ZPP_ERROR_FAILURE        1
-#define ZPP_ERROR_WRONG_CALLBACK 2
-#define ZPP_ERROR_WRONG_CLASS    3
-#define ZPP_ERROR_WRONG_ARG      4
-#define ZPP_ERROR_WRONG_COUNT    5
+#define ZPP_ERROR_OK					0
+#define ZPP_ERROR_FAILURE				1
+#define ZPP_ERROR_WRONG_CALLBACK		2
+#define ZPP_ERROR_WRONG_CLASS			3
+#define ZPP_ERROR_WRONG_CLASS_OR_NULL	4
+#define ZPP_ERROR_WRONG_ARG				5
+#define ZPP_ERROR_WRONG_COUNT			6
 
 #define ZEND_PARSE_PARAMETERS_START_EX(flags, min_num_args, max_num_args) do { \
 		const int _flags = (flags); \
@@ -1214,6 +1227,8 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 					zend_wrong_callback_error(_i, _error); \
 				} else if (_error_code == ZPP_ERROR_WRONG_CLASS) { \
 					zend_wrong_parameter_class_error(_i, _error, _arg); \
+				} else if (_error_code == ZPP_ERROR_WRONG_CLASS_OR_NULL) { \
+					zend_wrong_parameter_class_or_null_error(_i, _error, _arg); \
 				} else if (_error_code == ZPP_ERROR_WRONG_ARG) { \
 					zend_wrong_parameter_type_error(_i, _expected_type, _arg); \
 				} \
@@ -1251,7 +1266,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_ARRAY_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_array(_arg, &dest, check_null, 0))) { \
-			_expected_type = Z_EXPECTED_ARRAY; \
+			_expected_type = check_null ? Z_EXPECTED_ARRAY_OR_NULL : Z_EXPECTED_ARRAY; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
@@ -1269,7 +1284,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_ARRAY_OR_OBJECT_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_array(_arg, &dest, check_null, 1))) { \
-			_expected_type = Z_EXPECTED_ARRAY; \
+			_expected_type = check_null ? Z_EXPECTED_ARRAY_OR_NULL : Z_EXPECTED_ARRAY; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
@@ -1284,7 +1299,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_BOOL_EX2(dest, is_null, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_bool(_arg, &dest, &is_null, check_null))) { \
-			_expected_type = Z_EXPECTED_BOOL; \
+			_expected_type = check_null ? Z_EXPECTED_BOOL_OR_NULL : Z_EXPECTED_BOOL; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
@@ -1313,7 +1328,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_DOUBLE_EX2(dest, is_null, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_double(_arg, &dest, &is_null, check_null))) { \
-			_expected_type = Z_EXPECTED_DOUBLE; \
+			_expected_type = check_null ? Z_EXPECTED_DOUBLE_OR_NULL : Z_EXPECTED_DOUBLE; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
@@ -1329,7 +1344,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_func(_arg, &dest_fci, &dest_fcc, check_null, &_error))) { \
 			if (!_error) { \
-				_expected_type = Z_EXPECTED_FUNC; \
+				_expected_type = check_null ? Z_EXPECTED_FUNC_OR_NULL : Z_EXPECTED_FUNC; \
 				_error_code = ZPP_ERROR_WRONG_ARG; \
 			} else { \
 				_error_code = ZPP_ERROR_WRONG_CALLBACK; \
@@ -1347,7 +1362,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_ARRAY_HT_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_array_ht(_arg, &dest, check_null, 0, separate))) { \
-			_expected_type = Z_EXPECTED_ARRAY; \
+			_expected_type = check_null ? Z_EXPECTED_ARRAY_OR_NULL : Z_EXPECTED_ARRAY; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
@@ -1362,7 +1377,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_ARRAY_OR_OBJECT_HT_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_array_ht(_arg, &dest, check_null, 1, separate))) { \
-			_expected_type = Z_EXPECTED_ARRAY; \
+			_expected_type = check_null ? Z_EXPECTED_ARRAY_OR_NULL : Z_EXPECTED_ARRAY; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
@@ -1377,7 +1392,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_LONG_EX2(dest, is_null, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_long(_arg, &dest, &is_null, check_null))) { \
-			_expected_type = Z_EXPECTED_LONG; \
+			_expected_type = check_null ? Z_EXPECTED_LONG_OR_NULL : Z_EXPECTED_LONG; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
@@ -1395,7 +1410,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_NUMBER_EX(dest, check_null) \
 	Z_PARAM_PROLOGUE(0, 0); \
 	if (UNEXPECTED(!zend_parse_arg_number(_arg, &dest, check_null))) { \
-		_expected_type = Z_EXPECTED_NUMBER; \
+		_expected_type = check_null ? Z_EXPECTED_NUMBER_OR_NULL : Z_EXPECTED_NUMBER; \
 		_error_code = ZPP_ERROR_WRONG_ARG; \
 		break; \
 	}
@@ -1410,7 +1425,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_OBJECT_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_object(_arg, &dest, NULL, check_null))) { \
-			_expected_type = Z_EXPECTED_OBJECT; \
+			_expected_type = check_null ? Z_EXPECTED_OBJECT_OR_NULL : Z_EXPECTED_OBJECT; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
@@ -1427,10 +1442,10 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 		if (UNEXPECTED(!zend_parse_arg_object(_arg, &dest, _ce, check_null))) { \
 			if (_ce) { \
 				_error = ZSTR_VAL((_ce)->name); \
-				_error_code = ZPP_ERROR_WRONG_CLASS; \
+				_error_code = check_null ? ZPP_ERROR_WRONG_CLASS_OR_NULL : ZPP_ERROR_WRONG_CLASS; \
 				break; \
 			} else { \
-				_expected_type = Z_EXPECTED_OBJECT; \
+				_expected_type = check_null ? Z_EXPECTED_OBJECT_OR_NULL : Z_EXPECTED_OBJECT; \
 				_error_code = ZPP_ERROR_WRONG_ARG; \
 				break; \
 			} \
@@ -1446,7 +1461,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_PATH_EX2(dest, dest_len, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_path(_arg, &dest, &dest_len, check_null))) { \
-			_expected_type = Z_EXPECTED_PATH; \
+			_expected_type = check_null ? Z_EXPECTED_PATH_OR_NULL : Z_EXPECTED_PATH; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
@@ -1461,7 +1476,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_PATH_STR_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_path_str(_arg, &dest, check_null))) { \
-			_expected_type = Z_EXPECTED_PATH; \
+			_expected_type = check_null ? Z_EXPECTED_PATH_OR_NULL : Z_EXPECTED_PATH; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
@@ -1476,7 +1491,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_RESOURCE_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_resource(_arg, &dest, check_null))) { \
-			_expected_type = Z_EXPECTED_RESOURCE; \
+			_expected_type = check_null ? Z_EXPECTED_RESOURCE_OR_NULL : Z_EXPECTED_RESOURCE; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
@@ -1491,7 +1506,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_STRING_EX2(dest, dest_len, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_string(_arg, &dest, &dest_len, check_null))) { \
-			_expected_type = Z_EXPECTED_STRING; \
+			_expected_type = check_null ? Z_EXPECTED_STRING_OR_NULL : Z_EXPECTED_STRING; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
@@ -1509,7 +1524,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_STR_EX2(dest, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
 		if (UNEXPECTED(!zend_parse_arg_str(_arg, &dest, check_null))) { \
-			_expected_type = Z_EXPECTED_STRING; \
+			_expected_type = check_null ? Z_EXPECTED_STRING_OR_NULL : Z_EXPECTED_STRING; \
 			_error_code = ZPP_ERROR_WRONG_ARG; \
 			break; \
 		}
@@ -1548,13 +1563,19 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_VARIADIC(spec, dest, dest_num) \
 	Z_PARAM_VARIADIC_EX(spec, dest, dest_num, 0)
 
-#define Z_PARAM_STR_OR_ARRAY_HT(dest_str, dest_ht) \
+#define Z_PARAM_STR_OR_ARRAY_HT_EX(dest_str, dest_ht, allow_null) \
 	Z_PARAM_PROLOGUE(0, 0); \
-	if (UNEXPECTED(!zend_parse_arg_str_or_array_ht(_arg, &dest_str, &dest_ht))) { \
-		_expected_type = Z_EXPECTED_STRING_OR_ARRAY; \
+	if (UNEXPECTED(!zend_parse_arg_str_or_array_ht(_arg, &dest_str, &dest_ht, allow_null))) { \
+		_expected_type = allow_null ? Z_EXPECTED_STRING_OR_ARRAY_OR_NULL : Z_EXPECTED_STRING_OR_ARRAY; \
 		_error_code = ZPP_ERROR_WRONG_ARG; \
 		break; \
 	}
+
+#define Z_PARAM_STR_OR_ARRAY_HT(dest_str, dest_ht) \
+	Z_PARAM_STR_OR_ARRAY_HT_EX(dest_str, dest_ht, 0);
+
+#define Z_PARAM_STR_OR_ARRAY_HT_OR_NULL(dest_str, dest_ht) \
+	Z_PARAM_STR_OR_ARRAY_HT_EX(dest_str, dest_ht, 1);
 
 /* End of new parameter parsing API */
 
@@ -1775,13 +1796,16 @@ static zend_always_inline void zend_parse_arg_zval_deref(zval *arg, zval **dest,
 }
 
 static zend_always_inline int zend_parse_arg_str_or_array_ht(
-		zval *arg, zend_string **dest_str, HashTable **dest_ht)
+		zval *arg, zend_string **dest_str, HashTable **dest_ht, int allow_null)
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		*dest_str = Z_STR_P(arg);
 		*dest_ht = NULL;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_ARRAY)) {
 		*dest_ht = Z_ARRVAL_P(arg);
+		*dest_str = NULL;
+	} else if (allow_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+		*dest_ht = NULL;
 		*dest_str = NULL;
 	} else {
 		*dest_ht = NULL;

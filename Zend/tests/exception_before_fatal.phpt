@@ -55,10 +55,10 @@ try {
 }
 ?>
 --EXPECT--
-string(23) "Undefined variable: foo"
-string(23) "Undefined variable: foo"
-string(23) "Undefined variable: foo"
-string(23) "Undefined variable: foo"
-string(23) "Undefined variable: foo"
-string(23) "Undefined variable: foo"
-string(23) "Undefined variable: foo"
+string(23) "Undefined variable $foo"
+string(23) "Undefined variable $foo"
+string(23) "Undefined variable $foo"
+string(23) "Undefined variable $foo"
+string(23) "Undefined variable $foo"
+string(23) "Undefined variable $foo"
+string(23) "Undefined variable $foo"

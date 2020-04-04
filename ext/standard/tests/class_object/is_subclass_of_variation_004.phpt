@@ -86,8 +86,8 @@ echo "Done";
 ?>
 --EXPECT--
 *** Testing is_subclass_of() : usage variations ***
-Error: 2 - Undefined variable: undefined_var
-Error: 2 - Undefined variable: unset_var
+Error: 2 - Undefined variable $undefined_var
+Error: 2 - Undefined variable $unset_var
 
 Arg value 0 
 bool(false)

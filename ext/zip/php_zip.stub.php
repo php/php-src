@@ -186,4 +186,12 @@ class ZipArchive
     /** @return bool */
     public function registerCancelCallback(callable $callback) {}
 #endif
+
+#ifdef HAVE_METHOD_SUPPORTED
+    /** @return bool */
+    public static function isCompressionMethodSupported(int $method, bool $enc): bool {}
+
+    /** @return bool */
+    public static function isEncryptionMethodSupported(int $method, bool $enc): bool {}
+#endif
 }

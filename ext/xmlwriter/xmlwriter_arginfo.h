@@ -104,7 +104,7 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_xmlwriter_write_raw arginfo_xmlwriter_write_cdata
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlwriter_start_document, 0, 0, 1)
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlwriter_start_document, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_OBJ_INFO(0, xmlwriter, XMLWriter, 0)
 	ZEND_ARG_TYPE_INFO(0, version, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 1)

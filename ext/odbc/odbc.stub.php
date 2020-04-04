@@ -34,6 +34,7 @@ function odbc_exec($connection_id, string $query, int $flags = UNKNOWN) {}
 /**
  * @param resource $connection_id
  * @return resource|false
+ * @alias odbc_exec
  */
 function odbc_do($connection_id, string $query, int $flags = UNKNOWN) {}
 
@@ -92,7 +93,10 @@ function odbc_field_type($result_id, int $field_number): string|false {}
 /** @param resource $result_id */
 function odbc_field_len($result_id, int $field_number): int|false {}
 
-/** @param resource $result_id */
+/**
+ * @param resource $result_id
+ * @alias odbc_field_len
+ */
 function odbc_field_precision($result_id, int $field_number): int|false {}
 
 /** @param resource $result_id */

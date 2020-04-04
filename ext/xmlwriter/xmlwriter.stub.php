@@ -50,7 +50,7 @@ function xmlwriter_text(XMLWriter $xmlwriter, string $content): bool {}
 
 function xmlwriter_write_raw(XMLWriter $xmlwriter, string $content): bool {}
 
-function xmlwriter_start_document(XMLWriter $xmlwriter, ?string $version = '1.0', ?string $encoding = null, ?string $standalone = null) {}
+function xmlwriter_start_document(XMLWriter $xmlwriter, ?string $version = '1.0', ?string $encoding = null, ?string $standalone = null): bool {}
 
 function xmlwriter_end_document(XMLWriter $xmlwriter): bool {}
 

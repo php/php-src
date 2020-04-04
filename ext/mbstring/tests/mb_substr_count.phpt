@@ -7,11 +7,20 @@ output_handler=
 --FILE--
 <?php
     mb_internal_encoding("EUC-JP");
-    var_dump(@mb_substr_count("", ""));
-    var_dump(@mb_substr_count("あ", ""));
-    var_dump(@mb_substr_count("", "あ"));
-    var_dump(@mb_substr_count("", "あ"));
-    var_dump(@mb_substr_count("", chr(0)));
+    try {
+        var_dump(mb_substr_count("", ""));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+    try {
+        var_dump(mb_substr_count("鐃緒申", ""));
+    } catch (\ValueError $e) {
+        echo $e->getMessage() . \PHP_EOL;
+    }
+
+    var_dump(mb_substr_count("", "あ"));
+    var_dump(mb_substr_count("", "あ"));
+    var_dump(mb_substr_count("", chr(0)));
 
     $a = str_repeat("abcacba", 100);
     var_dump(@mb_substr_count($a, "bca"));
@@ -32,8 +41,8 @@ output_handler=
     var_dump(@mb_substr_count($a, "bca"));
 ?>
 --EXPECT--
-bool(false)
-bool(false)
+mb_substr_count(): Argument #2 ($needle) must not be empty
+mb_substr_count(): Argument #2 ($needle) must not be empty
 int(0)
 int(0)
 int(0)

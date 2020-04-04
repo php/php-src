@@ -573,7 +573,6 @@ inet_ntop \
 inet_pton \
 localtime_r \
 lchown \
-mbrlen \
 memmove \
 mkstemp \
 mmap \
@@ -582,8 +581,6 @@ nl_langinfo \
 poll \
 ptsname \
 putenv \
-realpath \
-rand_r \
 scandir \
 setitimer \
 setenv \

@@ -40,7 +40,7 @@ function variant_not($left): variant {}
 
 function variant_round($left, int $decimals): ?variant {}
 
-function variant_cmp($left, $right, int $lcid = UNKNOWN, int $flags = 0) {}
+function variant_cmp($left, $right, int $lcid = UNKNOWN, int $flags = 0): int {}
 
 function variant_date_to_timestamp(variant $variant): ?int {}
 
@@ -63,4 +63,4 @@ function com_print_typeinfo($comobject, ?string $dispinterface = null, bool $wan
 
 function com_message_pump(int $timeoutms = 0): bool {}
 
-function com_load_typelib(string $typelib_name, bool $case_insensitive = true) {}
+function com_load_typelib(string $typelib_name, bool $case_insensitive = true): bool {}

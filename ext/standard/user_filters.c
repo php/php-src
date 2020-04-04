@@ -20,7 +20,7 @@
 #include "php_globals.h"
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/file.h"
-#include "ext/standard/basic_functions_arginfo.h"
+#include "ext/standard/user_filters_arginfo.h"
 
 #define PHP_STREAM_BRIGADE_RES_NAME	"userfilter.bucket brigade"
 #define PHP_STREAM_BUCKET_RES_NAME "userfilter.bucket"

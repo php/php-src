@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php declare(strict_types=1);
 
+use PhpParser\Comment\Doc as DocComment;
 use PhpParser\Node;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Stmt;
@@ -46,8 +47,8 @@ function processStubFile(string $stubFile) {
     $arginfoFile = str_replace('.stub.php', '', $stubFile) . '_arginfo.h';
 
     try {
-        $funcInfos = parseStubFile($stubFile);
-        $arginfoCode = generateArgInfoCode($funcInfos);
+        $fileInfo = parseStubFile($stubFile);
+        $arginfoCode = generateArgInfoCode($fileInfo);
         file_put_contents($arginfoFile, $arginfoCode);
     } catch (Exception $e) {
         echo "In $stubFile:\n{$e->getMessage()}\n";
@@ -299,6 +300,10 @@ class ReturnInfo {
 class FuncInfo {
     /** @var string */
     public $name;
+    /** @var ?string */
+    public $className;
+    /** @var ?string */
+    public $alias;
     /** @var ArgInfo[] */
     public $args;
     /** @var ReturnInfo */
@@ -309,9 +314,12 @@ class FuncInfo {
     public $cond;
 
     public function __construct(
-        string $name, array $args, ReturnInfo $return, int $numRequiredArgs, ?string $cond
+        string $name, ?string $className, ?string $alias, array $args, ReturnInfo $return,
+        int $numRequiredArgs, ?string $cond
     ) {
         $this->name = $name;
+        $this->className = $className;
+        $this->alias = $alias;
         $this->args = $args;
         $this->return = $return;
         $this->numRequiredArgs = $numRequiredArgs;
@@ -333,22 +341,114 @@ class FuncInfo {
             && $this->numRequiredArgs === $other->numRequiredArgs
             && $this->cond === $other->cond;
     }
+
+    public function getArgInfoName(): string {
+        if ($this->className) {
+            return 'arginfo_class_' . $this->className . '_' . $this->name;
+        }
+        return 'arginfo_' . $this->name;
+    }
 }
 
-function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond): FuncInfo {
+class ClassInfo {
+    /** @var string */
+    public $name;
+    /** @var FuncInfo[] */
+    public $funcInfos;
+
+    public function __construct(string $name, array $funcInfos) {
+        $this->name = $name;
+        $this->funcInfos = $funcInfos;
+    }
+}
+
+class FileInfo {
+    /** @var FuncInfo[] */
+    public $funcInfos;
+    /** @var ClassInfo[] */
+    public $classInfos;
+    /** @var bool */
+    public $generateFunctionEntries;
+
+    public function __construct(
+            array $funcInfos, array $classInfos, bool $generateFunctionEntries) {
+        $this->funcInfos = $funcInfos;
+        $this->classInfos = $classInfos;
+        $this->generateFunctionEntries = $generateFunctionEntries;
+    }
+
+    public function getAllFuncInfos(): iterable {
+        yield from $this->funcInfos;
+        foreach ($this->classInfos as $classInfo) {
+            yield from $classInfo->funcInfos;
+        }
+    }
+}
+
+class DocCommentTag {
+    /** @var string */
+    public $name;
+    /** @var ?string */
+    public $value;
+
+    public function __construct(string $name, ?string $value) {
+        $this->name = $name;
+        $this->value = $value;
+    }
+
+    public function getValue(): string {
+        if ($this->value === null) {
+            throw new Exception("@$this->name does not have a value");
+        }
+
+        return $this->value;
+    }
+
+    public function getVariableName(): string {
+        $value = $this->getValue();
+        if ($value === null || strlen($value) === 0 || $value[0] !== '$') {
+            throw new Exception("@$this->name not followed by variable name");
+        }
+
+        return substr($value, 1);
+    }
+}
+
+/** @return DocCommentTag[] */
+function parseDocComment(DocComment $comment): array {
+    $commentText = substr($comment->getText(), 2, -2);
+    $tags = [];
+    foreach (explode("\n", $commentText) as $commentLine) {
+        $regex = '/^\*\s*@([a-z-]+)(?:\s+(.+))$/';
+        if (preg_match($regex, trim($commentLine), $matches, PREG_UNMATCHED_AS_NULL)) {
+            $tags[] = new DocCommentTag($matches[1], $matches[2]);
+        }
+    }
+
+    return $tags;
+}
+
+function parseFunctionLike(
+    string $name, ?string $className, Node\FunctionLike $func, ?string $cond
+): FuncInfo {
     $comment = $func->getDocComment();
     $paramMeta = [];
+    $alias = null;
+    $haveDocReturnType = false;
 
     if ($comment) {
-        $commentText = substr($comment->getText(), 2, -2);
-
-        foreach (explode("\n", $commentText) as $commentLine) {
-            if (preg_match('/^\*\s*@prefer-ref\s+\$(.+)$/', trim($commentLine), $matches)) {
-                $varName = $matches[1];
+        $tags = parseDocComment($comment);
+        foreach ($tags as $tag) {
+            if ($tag->name === 'prefer-ref') {
+                $varName = $tag->getVariableName();
                 if (!isset($paramMeta[$varName])) {
                     $paramMeta[$varName] = [];
                 }
                 $paramMeta[$varName]['preferRef'] = true;
+            } else if ($tag->name === 'alias') {
+                $alias = $tag->getValue();
+            } else if ($tag->name === 'return') {
+                $haveDocReturnType = true;
             }
         }
     }
@@ -373,9 +473,10 @@ function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond)
             throw new Exception("Error in function $name: only the last parameter can be variadic");
         }
 
+        $type = $param->type ? Type::fromNode($param->type) : null;
         if ($param->default instanceof Expr\ConstFetch &&
             $param->default->name->toLowerString() === "null" &&
-            $param->type && !($param->type instanceof Node\NullableType)
+            $type && !$type->isNullable()
         ) {
             throw new Exception(
                 "Parameter $varName of function $name has null default, but is not nullable");
@@ -387,7 +488,7 @@ function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond)
             $varName,
             $sendBy,
             $param->variadic,
-            $param->type ? Type::fromNode($param->type) : null
+            $type
         );
         if (!$param->default && !$param->variadic) {
             $numRequiredArgs = $i + 1;
@@ -399,10 +500,14 @@ function parseFunctionLike(string $name, Node\FunctionLike $func, ?string $cond)
     }
 
     $returnType = $func->getReturnType();
+    if ($returnType === null && !$haveDocReturnType && substr($name, 0, 2) !== '__') {
+        throw new Exception("Missing return type for function $name()");
+    }
+
     $return = new ReturnInfo(
         $func->returnsByRef(),
         $returnType ? Type::fromNode($returnType) : null);
-    return new FuncInfo($name, $args, $return, $numRequiredArgs, $cond);
+    return new FuncInfo($name, $className, $alias, $args, $return, $numRequiredArgs, $cond);
 }
 
 function handlePreprocessorConditions(array &$conds, Stmt $stmt): ?string {
@@ -433,8 +538,24 @@ function handlePreprocessorConditions(array &$conds, Stmt $stmt): ?string {
     return empty($conds) ? null : implode(' && ', $conds);
 }
 
-/** @return FuncInfo[] */
-function parseStubFile(string $fileName) {
+function getFileDocComment(array $stmts): ?DocComment {
+    if (empty($stmts)) {
+        return null;
+    }
+
+    $comments = $stmts[0]->getComments();
+    if (empty($comments)) {
+        return null;
+    }
+
+    if ($comments[0] instanceof DocComment) {
+        return $comments[0];
+    }
+
+    return null;
+}
+
+function parseStubFile(string $fileName): FileInfo {
     if (!file_exists($fileName)) {
         throw new Exception("File $fileName does not exist");
     }
@@ -449,7 +570,16 @@ function parseStubFile(string $fileName) {
     $stmts = $parser->parse($code);
     $nodeTraverser->traverse($stmts);
 
+    $generateFunctionEntries = false;
+    $fileDocComment = getFileDocComment($stmts);
+    if ($fileDocComment) {
+        if (strpos($fileDocComment->getText(), '@generate-function-entries') !== false) {
+            $generateFunctionEntries = true;
+        }
+    }
+
     $funcInfos = [];
+    $classInfos = [];
     $conds = [];
     foreach ($stmts as $stmt) {
         $cond = handlePreprocessorConditions($conds, $stmt);
@@ -458,12 +588,13 @@ function parseStubFile(string $fileName) {
         }
 
         if ($stmt instanceof Stmt\Function_) {
-            $funcInfos[] = parseFunctionLike($stmt->name->toString(), $stmt, $cond);
+            $funcInfos[] = parseFunctionLike($stmt->name->toString(), null, $stmt, $cond);
             continue;
         }
 
         if ($stmt instanceof Stmt\ClassLike) {
             $className = $stmt->name->toString();
+            $methodInfos = [];
             foreach ($stmt->stmts as $classStmt) {
                 $cond = handlePreprocessorConditions($conds, $classStmt);
                 if ($classStmt instanceof Stmt\Nop) {
@@ -474,16 +605,18 @@ function parseStubFile(string $fileName) {
                     throw new Exception("Not implemented {$classStmt->getType()}");
                 }
 
-                $funcInfos[] = parseFunctionLike(
-                    'class_' . $className . '_' . $classStmt->name->toString(), $classStmt, $cond);
+                $methodInfos[] = parseFunctionLike(
+                    $classStmt->name->toString(), $className, $classStmt, $cond);
             }
+
+            $classInfos[] = new ClassInfo($className, $methodInfos);
             continue;
         }
 
         throw new Exception("Unexpected node {$stmt->getType()}");
     }
 
-    return $funcInfos;
+    return new FileInfo($funcInfos, $classInfos, $generateFunctionEntries);
 }
 
 function funcInfoToCode(FuncInfo $funcInfo): string {
@@ -493,28 +626,32 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
         if (null !== $simpleReturnType = $returnType->tryToSimpleType()) {
             if ($simpleReturnType->isBuiltin) {
                 $code .= sprintf(
-                    "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_%s, %d, %d, %s, %d)\n",
-                    $funcInfo->name, $funcInfo->return->byRef, $funcInfo->numRequiredArgs,
+                    "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(%s, %d, %d, %s, %d)\n",
+                    $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
+                    $funcInfo->numRequiredArgs,
                     $simpleReturnType->toTypeCode(), $returnType->isNullable()
                 );
             } else {
                 $code .= sprintf(
-                    "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_%s, %d, %d, %s, %d)\n",
-                    $funcInfo->name, $funcInfo->return->byRef, $funcInfo->numRequiredArgs,
+                    "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(%s, %d, %d, %s, %d)\n",
+                    $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
+                    $funcInfo->numRequiredArgs,
                     $simpleReturnType->toEscapedName(), $returnType->isNullable()
                 );
             }
         } else if (null !== $representableType = $returnType->tryToRepresentableType()) {
             if ($representableType->classType !== null) {
                 $code .= sprintf(
-                    "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(arginfo_%s, %d, %d, %s, %s)\n",
-                    $funcInfo->name, $funcInfo->return->byRef, $funcInfo->numRequiredArgs,
+                    "ZEND_BEGIN_ARG_WITH_RETURN_OBJ_TYPE_MASK_EX(%s, %d, %d, %s, %s)\n",
+                    $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
+                    $funcInfo->numRequiredArgs,
                     $representableType->classType->toEscapedName(), $representableType->toTypeMask()
                 );
             } else {
                 $code .= sprintf(
-                    "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_%s, %d, %d, %s)\n",
-                    $funcInfo->name, $funcInfo->return->byRef, $funcInfo->numRequiredArgs,
+                    "ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(%s, %d, %d, %s)\n",
+                    $funcInfo->getArgInfoName(), $funcInfo->return->byRef,
+                    $funcInfo->numRequiredArgs,
                     $representableType->toTypeMask()
                 );
             }
@@ -523,8 +660,8 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
         }
     } else {
         $code .= sprintf(
-            "ZEND_BEGIN_ARG_INFO_EX(arginfo_%s, 0, %d, %d)\n",
-            $funcInfo->name, $funcInfo->return->byRef, $funcInfo->numRequiredArgs
+            "ZEND_BEGIN_ARG_INFO_EX(%s, 0, %d, %d)\n",
+            $funcInfo->getArgInfoName(), $funcInfo->return->byRef, $funcInfo->numRequiredArgs
         );
     }
 
@@ -565,7 +702,7 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
     }
 
     $code .= "ZEND_END_ARG_INFO()";
-    return $code;
+    return $code . "\n";
 }
 
 function findEquivalentFuncInfo(array $generatedFuncInfos, $funcInfo): ?FuncInfo {
@@ -578,32 +715,76 @@ function findEquivalentFuncInfo(array $generatedFuncInfos, $funcInfo): ?FuncInfo
 }
 
 /** @param FuncInfo[] $funcInfos */
-function generateArginfoCode(array $funcInfos): string {
-    $code = "/* This is a generated file, edit the .stub.php file instead. */";
-    $generatedFuncInfos = [];
+function generateCodeWithConditions(
+        iterable $funcInfos, string $separator, Closure $codeGenerator): string {
+    $code = "";
     foreach ($funcInfos as $funcInfo) {
-        $code .= "\n\n";
+        $funcCode = $codeGenerator($funcInfo);
+        if ($funcCode === null) {
+            continue;
+        }
+
+        $code .= $separator;
         if ($funcInfo->cond) {
             $code .= "#if {$funcInfo->cond}\n";
-        }
-
-        /* If there already is an equivalent arginfo structure, only emit a #define */
-        if ($generatedFuncInfo = findEquivalentFuncInfo($generatedFuncInfos, $funcInfo)) {
-            $code .= sprintf(
-                "#define arginfo_%s arginfo_%s",
-                $funcInfo->name, $generatedFuncInfo->name
-            );
+            $code .= $funcCode;
+            $code .= "#endif\n";
         } else {
-            $code .= funcInfoToCode($funcInfo);
+            $code .= $funcCode;
         }
-
-        if ($funcInfo->cond) {
-            $code .= "\n#endif";
-        }
-
-        $generatedFuncInfos[] = $funcInfo;
     }
-    return $code . "\n";
+    return $code;
+}
+
+function generateArgInfoCode(FileInfo $fileInfo): string {
+    $funcInfos = $fileInfo->funcInfos;
+
+    $code = "/* This is a generated file, edit the .stub.php file instead. */\n";
+    $generatedFuncInfos = [];
+    $code .= generateCodeWithConditions(
+        $fileInfo->getAllFuncInfos(), "\n",
+        function(FuncInfo $funcInfo) use(&$generatedFuncInfos) {
+            /* If there already is an equivalent arginfo structure, only emit a #define */
+            if ($generatedFuncInfo = findEquivalentFuncInfo($generatedFuncInfos, $funcInfo)) {
+                $code = sprintf(
+                    "#define %s %s\n",
+                    $funcInfo->getArgInfoName(), $generatedFuncInfo->getArgInfoName()
+                );
+            } else {
+                $code = funcInfoToCode($funcInfo);
+            }
+
+            $generatedFuncInfos[] = $funcInfo;
+            return $code;
+        }
+    );
+
+    if ($fileInfo->generateFunctionEntries) {
+        $code .= "\n\n";
+        $code .= generateCodeWithConditions($fileInfo->funcInfos, "", function(FuncInfo $funcInfo) {
+            if ($funcInfo->alias) {
+                return null;
+            }
+
+            return "ZEND_FUNCTION($funcInfo->name);\n";
+        });
+
+        $code .= "\n\nstatic const zend_function_entry ext_functions[] = {\n";
+        $code .= generateCodeWithConditions($fileInfo->funcInfos, "", function(FuncInfo $funcInfo) {
+            if ($funcInfo->alias) {
+                return sprintf(
+                    "\tZEND_FALIAS(%s, %s, %s)\n",
+                    $funcInfo->name, $funcInfo->alias, $funcInfo->getArgInfoName()
+                );
+            } else {
+                return sprintf("\tZEND_FE(%s, %s)\n", $funcInfo->name, $funcInfo->getArgInfoName());
+            }
+        });
+        $code .= "\tZEND_FE_END\n";
+        $code .= "};\n";
+    }
+
+    return $code;
 }
 
 function initPhpParser() {

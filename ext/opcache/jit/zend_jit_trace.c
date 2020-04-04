@@ -774,7 +774,7 @@ static int find_call_num_args(zend_jit_trace_rec *p)
 static int is_checked_guard(const zend_ssa *tssa, const zend_op **ssa_opcodes, uint32_t var, uint32_t phi_var)
 {
 	if ((tssa->var_info[phi_var].type & MAY_BE_ANY) == MAY_BE_LONG) {
-		uint32_t idx = tssa->vars[var].definition;
+		int idx = tssa->vars[var].definition;
 
 		if (idx >= 0) {
 			if (tssa->ops[idx].op1_def == var) {
@@ -1490,6 +1490,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			i = 0;
 			v = p->first_ssa_var;
 			while (i < op_array->last_var) {
+				ssa_vars[v].var = i;
 				if (!ssa->var_info
 				 || !zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, v)) {
 					if (i < op_array->num_args) {
@@ -1529,6 +1530,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 				i = 0;
 				v = p->first_ssa_var;
 				while (i < op_array->last_var) {
+					ssa_vars[v].var = i;
 					if (!ssa->var_info
 					 || !zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, v)) {
 						ssa_var_info[v].type = MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
@@ -1537,6 +1539,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 					v++;
 				}
 				while (i < op_array->last_var + op_array->T) {
+					ssa_vars[v].var = i;
 					if (!ssa->var_info
 					 || !zend_jit_trace_copy_ssa_var_info(op_array, ssa, ssa_opcodes, tssa, v)) {
 						ssa_var_info[v].type = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY  | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;

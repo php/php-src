@@ -56,6 +56,7 @@ PHP                                                                        NEWS
   . Removed deprecated ldap_sort. (mcmic)
 
 - MBString:
+  . Fixed bug #76999 (mb_regex_set_options() return current options). (cmb)
   . Removed the unused $is_hex parameter from mb_decode_numericentity(). (cmb)
 
 - MySQLi:
@@ -124,6 +125,7 @@ PHP                                                                        NEWS
     is the last char). (Islam Israfilov)
   . Fixed bug #75902 (str_replace should warn when misused with nested arrays).
     (Nikita)
+  . Fixed bug #47983 (mixed LF and CRLF line endings in mail()). (cmb)
   . Made quoting of cmd execution functions consistent. (cmb)
 
 - tidy:
@@ -155,5 +157,8 @@ PHP                                                                        NEWS
     original modified time). (Remi)
   . Implemented FR #77960 (add compression / encryption options for
     ZipArchive::addGlob and ZipArchive::addPattern). (Remi)
+  . Add ZipArchive::EM_UNKNOWN and ZipArchive::EM_TRAD_PKWARE constants. (Remi)
+  . Add ZipArchive::isCompressionMethodSupported() and
+    ZipArchive::isEncryptionMethodSupported() method (libzip 1.7.0). (Remi)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

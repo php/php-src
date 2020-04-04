@@ -171,14 +171,6 @@ class mysqli
     public function refresh(int $options);
 }
 
-class mysqli_warning
-{
-    public function __construct(object $mysqli_link);
-
-    /** @return bool */
-    public function next();
-}
-
 class mysqli_result
 {
      public function __construct(object $mysqli_link, int $resmode = MYSQLI_STORE_RESULT);
@@ -329,6 +321,7 @@ function mysqli_error_list(mysqli $mysql_link): array {}
 
 function mysqli_stmt_execute(mysqli_stmt $mysql_stmt): bool {}
 
+/** @alias mysqli_stmt_execute */
 function mysqli_execute(mysqli_stmt $mysql_stmt): bool {}
 
 function mysqli_fetch_field(mysqli_result $mysql_result): object|false {}
@@ -521,7 +514,11 @@ function mysqli_warning_count(mysqli $mysql_link): int {}
 
 function mysqli_refresh(mysqli $mysqli_link, int $options): bool {}
 
+/** @alias mysqli_real_escape_string */
 function mysqli_escape_string(mysqli $mysqli_link, string $string_to_escape): string {}
 
-/** @param mixed $value */
+/**
+ * @param mixed $value
+ * @alias mysqli_options
+ */
 function mysqli_set_opt(mysqli $mysqli_link, int $option, $value): bool {}

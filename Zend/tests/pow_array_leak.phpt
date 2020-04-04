@@ -21,12 +21,12 @@ var_dump($x);
 
 ?>
 --EXPECT--
-Unsupported operand types
+Unsupported operand types: array ** int
 array(1) {
   [0]=>
   int(0)
 }
-Unsupported operand types
+Unsupported operand types: array ** array
 array(1) {
   [0]=>
   int(0)

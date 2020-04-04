@@ -51,8 +51,6 @@ PHPAPI php_hrtime_t php_hrtime_current(void);
 
 PHP_MINIT_FUNCTION(hrtime);
 
-PHP_FUNCTION(hrtime);
-
 END_EXTERN_C()
 
 #endif /* HRTIME_H */

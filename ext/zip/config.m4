@@ -51,6 +51,14 @@ if test "$PHP_ZIP" != "no"; then
     $LIBZIP_LIBS
   ])
 
+  PHP_CHECK_LIBRARY(zip, zip_compression_method_supported,
+  [
+    AC_DEFINE(HAVE_METHOD_SUPPORTED, 1, [Libzip >= 1.7.0 with zip_*_method_supported functions])
+  ], [
+  ], [
+    $LIBZIP_LIBS
+  ])
+
   AC_DEFINE(HAVE_ZIP,1,[ ])
 
   PHP_ZIP_SOURCES="php_zip.c zip_stream.c"

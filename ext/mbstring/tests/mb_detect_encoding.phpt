@@ -84,11 +84,14 @@ $s = mb_detect_encoding('', 'EUC-JP');
 print("EUC-JP: $s\n");  // SJIS
 
 $s = $euc_jp;
-$s = mb_detect_encoding($s, 'BAD');
-print("BAD: $s\n"); // BAD
+try {
+    var_dump(mb_detect_encoding($s, 'BAD'));
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
+--EXPECT--
 == BASIC TEST ==
 SJIS: SJIS
 JIS: JIS
@@ -105,6 +108,4 @@ SJIS: SJIS
 == INVALID PARAMETER ==
 INT: EUC-JP
 EUC-JP: EUC-JP
-
-Warning: mb_detect_encoding(): Illegal argument in %s on line %d
-BAD: EUC-JP
+mb_detect_encoding(): Argument #2 ($encoding_list) contains invalid encoding "BAD"

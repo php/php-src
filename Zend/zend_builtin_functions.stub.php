@@ -7,13 +7,17 @@ function func_num_args(): int {}
 /** @return mixed */
 function func_get_arg(int $arg_num) {}
 
-function func_get_args(): array|false {}
+function func_get_args(): array {}
 
 function strlen(string $str): int {}
 
 function strcmp(string $str1, string $str2): int {}
 
-function strncmp(string $str1, string $str2, int $len): int|false {}
+function strncmp(string $str1, string $str2, int $len): int {}
+
+function strcasecmp(string $str1, string $str2): int {}
+
+function strncasecmp(string $str1, string $str2, int $len): int {}
 
 function error_reporting($new_error_level = UNKNOWN): int {}
 
@@ -21,9 +25,9 @@ function define(string $constant_name, $value, bool $case_insensitive = false): 
 
 function defined(string $constant_name): bool {}
 
-function get_class(object $object = UNKNOWN): string|false {}
+function get_class(object $object = UNKNOWN): string {}
 
-function get_called_class(): string|false {}
+function get_called_class(): string {}
 
 function get_parent_class($object = UNKNOWN): string|false {}
 
@@ -41,7 +45,7 @@ function get_class_methods($class): ?array {}
 
 function method_exists($object_or_class, string $method): bool {}
 
-function property_exists($object_or_class, string $property_name): ?bool {}
+function property_exists($object_or_class, string $property_name): bool {}
 
 function class_exists(string $classname, bool $autoload = true): bool {}
 

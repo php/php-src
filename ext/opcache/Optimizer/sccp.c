@@ -886,13 +886,6 @@ static inline int ct_eval_func_call(
 				return FAILURE;
 			}
 			/* pass */
-		} else if (zend_string_equals_literal(name, "strpos")) {
-			if (Z_TYPE_P(args[0]) != IS_STRING
-					|| Z_TYPE_P(args[1]) != IS_STRING
-					|| !Z_STRLEN_P(args[1])) {
-				return FAILURE;
-			}
-			/* pass */
 		} else if (zend_string_equals_literal(name, "str_split")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
 					|| Z_TYPE_P(args[1]) != IS_LONG
@@ -960,7 +953,9 @@ static inline int ct_eval_func_call(
 				} ZEND_HASH_FOREACH_END();
 			}
 			/* pass */
-		} else if (zend_string_equals_literal(name, "version_compare")) {
+		} else if (zend_string_equals_literal(name, "strpos")
+				|| zend_string_equals_literal(name, "str_contains")
+				|| zend_string_equals_literal(name, "version_compare")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
 					|| Z_TYPE_P(args[1]) != IS_STRING) {
 				return FAILURE;

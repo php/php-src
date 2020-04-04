@@ -77,9 +77,9 @@ echo "Done";
 --EXPECTF--
 *** Testing is_a() : usage variations ***
 
-Warning: Undefined variable: undefined_var in %s on line %d
+Warning: Undefined variable $undefined_var in %s on line %d
 
-Warning: Undefined variable: unset_var in %s on line %d
+Warning: Undefined variable $unset_var in %s on line %d
 
 Arg value 0 
 bool(false)

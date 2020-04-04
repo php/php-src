@@ -17,9 +17,6 @@
 #ifndef PHP_UUENCODE_H
 #define PHP_UUENCODE_H
 
-PHP_FUNCTION(convert_uudecode);
-PHP_FUNCTION(convert_uuencode);
-
 PHPAPI zend_string *php_uudecode(char *src, size_t src_len);
 PHPAPI zend_string *php_uuencode(char *src, size_t src_len);
 

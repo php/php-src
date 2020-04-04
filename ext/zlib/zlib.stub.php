@@ -27,37 +27,70 @@ function gzdecode(string $data, int $max_decoded_len = 0): string|false {}
 
 function gzuncompress(string $data, int $max_decoded_len = 0): string|false {}
 
-/** @param resource $fp */
+/**
+ * @param resource $fp
+ * @alias fwrite
+ */
 function gzwrite($fp, string $str, int $length = UNKNOWN): int|false {}
 
-/** @param resource $fp */
+/**
+ * @param resource $fp
+ * @alias fwrite
+ */
 function gzputs($fp, string $str, int $length = UNKNOWN): int|false {}
 
-/** @param resource $fp */
+/**
+ * @param resource $fp
+ * @alias rewind
+ */
 function gzrewind($fp): bool {}
 
-/** @param resource $fp */
+/**
+ * @param resource $fp
+ * @alias fclose
+ */
 function gzclose($fp): bool {}
 
-/** @param resource $fp */
+/**
+ * @param resource $fp
+ * @alias feof
+ */
 function gzeof($fp): bool {}
 
-/** @param resource $fp */
+/**
+ * @param resource $fp
+ * @alias fgetc
+ */
 function gzgetc($fp): string|false {}
 
-/** @param resource $fp */
+/**
+ * @param resource $fp
+ * @alias fpassthru
+ */
 function gzpassthru($fp): int {}
 
-/** @param resource $fp */
+/**
+ * @param resource $fp
+ * @alias fseek
+ */
 function gzseek($fp, int $offset, int $whence = SEEK_SET): int {}
 
-/** @param resource $fp */
+/**
+ * @param resource $fp
+ * @alias ftell
+ */
 function gztell($fp): int|false {}
 
-/** @param resource $fp */
+/**
+ * @param resource $fp
+ * @alias fread
+ */
 function gzread($fp, int $length): string|false {}
 
-/** @param resource $fp */
+/**
+ * @param resource $fp
+ * @alias fgets
+ */
 function gzgets($fp, int $length = 1024): string|false {}
 
 /** @return resource|false */

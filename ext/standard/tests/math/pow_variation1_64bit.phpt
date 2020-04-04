@@ -156,7 +156,7 @@ Warning: A non-numeric value encountered in %s on line %d
 int(0)
 
 -- Iteration 19 --
-Unsupported operand types
+Unsupported operand types: array ** int
 
 -- Iteration 20 --
 

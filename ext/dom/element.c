@@ -22,7 +22,7 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-#include "dom_arginfo.h"
+#include "element_arginfo.h"
 
 /*
 * class DOMElement extends DOMNode
@@ -51,12 +51,12 @@ const zend_function_entry php_dom_element_class_functions[] = { /* {{{ */
 	PHP_ME(domelement, setIdAttributeNS, arginfo_class_DOMElement_setIdAttributeNS, ZEND_ACC_PUBLIC)
 	PHP_ME(domelement, setIdAttributeNode, arginfo_class_DOMElement_setIdAttributeNode, ZEND_ACC_PUBLIC)
 	PHP_ME(domelement, __construct, arginfo_class_DOMElement___construct, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, remove, arginfo_class_DOMChildNode_remove, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, after, arginfo_class_DOMChildNode_after, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, before, arginfo_class_DOMChildNode_before, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, replaceWith, arginfo_class_DOMChildNode_replaceWith, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, append, arginfo_class_DOMParentNode_append, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, prepend, arginfo_class_DOMParentNode_prepend, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, remove, arginfo_class_DOMElement_remove, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, after, arginfo_class_DOMElement_after, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, before, arginfo_class_DOMElement_before, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, replaceWith, arginfo_class_DOMElement_replaceWith, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, append, arginfo_class_DOMElement_append, ZEND_ACC_PUBLIC)
+	PHP_ME(domelement, prepend, arginfo_class_DOMElement_prepend, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */

@@ -11,5 +11,6 @@ function json_last_error_msg(): string {}
 
 interface JsonSerializable
 {
+    /** @return mixed */
     public function jsonSerialize();
 }

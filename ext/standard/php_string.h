@@ -18,81 +18,6 @@
 #ifndef PHP_STRING_H
 #define PHP_STRING_H
 
-PHP_FUNCTION(strspn);
-PHP_FUNCTION(strcspn);
-PHP_FUNCTION(str_replace);
-PHP_FUNCTION(str_ireplace);
-PHP_FUNCTION(rtrim);
-PHP_FUNCTION(trim);
-PHP_FUNCTION(ltrim);
-PHP_FUNCTION(soundex);
-PHP_FUNCTION(levenshtein);
-
-PHP_FUNCTION(count_chars);
-PHP_FUNCTION(wordwrap);
-PHP_FUNCTION(explode);
-PHP_FUNCTION(implode);
-PHP_FUNCTION(strtok);
-PHP_FUNCTION(strtoupper);
-PHP_FUNCTION(strtolower);
-PHP_FUNCTION(basename);
-PHP_FUNCTION(dirname);
-PHP_FUNCTION(pathinfo);
-PHP_FUNCTION(strstr);
-PHP_FUNCTION(str_contains);
-PHP_FUNCTION(str_starts_with);
-PHP_FUNCTION(str_ends_with);
-PHP_FUNCTION(strpos);
-PHP_FUNCTION(stripos);
-PHP_FUNCTION(strrpos);
-PHP_FUNCTION(strripos);
-PHP_FUNCTION(strrchr);
-PHP_FUNCTION(substr);
-PHP_FUNCTION(quotemeta);
-PHP_FUNCTION(ucfirst);
-PHP_FUNCTION(lcfirst);
-PHP_FUNCTION(ucwords);
-PHP_FUNCTION(strtr);
-PHP_FUNCTION(strrev);
-PHP_FUNCTION(hebrev);
-PHP_FUNCTION(sprintf);
-PHP_FUNCTION(printf);
-PHP_FUNCTION(vprintf);
-PHP_FUNCTION(vsprintf);
-PHP_FUNCTION(addcslashes);
-PHP_FUNCTION(addslashes);
-PHP_FUNCTION(stripcslashes);
-PHP_FUNCTION(stripslashes);
-PHP_FUNCTION(chr);
-PHP_FUNCTION(ord);
-PHP_FUNCTION(nl2br);
-PHP_FUNCTION(setlocale);
-PHP_FUNCTION(localeconv);
-PHP_FUNCTION(nl_langinfo);
-PHP_FUNCTION(stristr);
-PHP_FUNCTION(chunk_split);
-PHP_FUNCTION(parse_str);
-PHP_FUNCTION(str_getcsv);
-PHP_FUNCTION(bin2hex);
-PHP_FUNCTION(hex2bin);
-PHP_FUNCTION(similar_text);
-PHP_FUNCTION(strip_tags);
-PHP_FUNCTION(str_repeat);
-PHP_FUNCTION(substr_replace);
-PHP_FUNCTION(strnatcmp);
-PHP_FUNCTION(strnatcasecmp);
-PHP_FUNCTION(substr_count);
-PHP_FUNCTION(str_pad);
-PHP_FUNCTION(sscanf);
-PHP_FUNCTION(str_shuffle);
-PHP_FUNCTION(str_word_count);
-PHP_FUNCTION(str_split);
-PHP_FUNCTION(strpbrk);
-PHP_FUNCTION(substr_compare);
-PHP_FUNCTION(utf8_encode);
-PHP_FUNCTION(utf8_decode);
-PHP_FUNCTION(strcoll);
-
 #if defined(ZTS)
 PHP_MINIT_FUNCTION(localeconv);
 PHP_MSHUTDOWN_FUNCTION(localeconv);
@@ -138,12 +63,9 @@ PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2
 PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2);
 PHPAPI int string_natural_case_compare_function(zval *result, zval *op1, zval *op2);
 
-#ifndef HAVE_MBLEN
-# define php_mblen(ptr, len) 1
-# define php_mb_reset()
-#elif defined(_REENTRANT) && defined(HAVE_MBRLEN) && defined(HAVE_MBSTATE_T)
+#if defined(_REENTRANT)
 # ifdef PHP_WIN32
-# include <wchar.h>
+#  include <wchar.h>
 # endif
 # define php_mblen(ptr, len) ((int) mbrlen(ptr, len, &BG(mblen_state)))
 # define php_mb_reset() memset(&BG(mblen_state), 0, sizeof(BG(mblen_state)))
