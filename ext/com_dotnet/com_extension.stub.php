@@ -64,3 +64,21 @@ function com_print_typeinfo($comobject, ?string $dispinterface = null, bool $wan
 function com_message_pump(int $timeoutms = 0): bool {}
 
 function com_load_typelib(string $typelib_name, bool $case_insensitive = true): bool {}
+
+class variant
+{
+    public function __construct($value = null, int $type = VT_EMPTY, int $codepage = CP_ACP) {}
+}
+
+class com
+{
+    /** @param string|array|null $server_name */
+    public function __construct(string $module_name, $server_name = UNKOWN, int $codepage = CP_ACP, string $typelib = "") {}
+}
+
+#if HAVE_MSCOREE_H
+class dotnet
+{
+    public function __construct(string $assembly_name, string $datatype_name, int $codepage = CP_ACP) {}
+}
+#endif

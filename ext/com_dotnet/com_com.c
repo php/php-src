@@ -24,7 +24,6 @@
 #include "php_com_dotnet.h"
 #include "php_com_dotnet_internal.h"
 #include "Zend/zend_exceptions.h"
-#include "com_com_arginfo.h"
 
 /* {{{ com_create_instance - ctor for COM class */
 PHP_METHOD(com, __construct)
@@ -848,8 +847,3 @@ PHP_FUNCTION(com_load_typelib)
 	}
 }
 /* }}} */
-
-const zend_function_entry php_com_com_funcs[] = {
-	PHP_ME(com, __construct, arginfo_class_com___construct, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};

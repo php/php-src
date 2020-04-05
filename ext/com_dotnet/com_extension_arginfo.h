@@ -108,3 +108,24 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_com_load_typelib, 0, 1, _IS_BOOL
 	ZEND_ARG_TYPE_INFO(0, typelib_name, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, case_insensitive, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_variant___construct, 0, 0, 0)
+	ZEND_ARG_INFO(0, value)
+	ZEND_ARG_TYPE_INFO(0, type, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, codepage, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_com___construct, 0, 0, 1)
+	ZEND_ARG_TYPE_INFO(0, module_name, IS_STRING, 0)
+	ZEND_ARG_INFO(0, server_name)
+	ZEND_ARG_TYPE_INFO(0, codepage, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, typelib, IS_STRING, 0)
+ZEND_END_ARG_INFO()
+
+#if HAVE_MSCOREE_H
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_dotnet___construct, 0, 0, 2)
+	ZEND_ARG_TYPE_INFO(0, assembly_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, datatype_name, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO(0, codepage, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+#endif
