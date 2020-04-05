@@ -21,6 +21,10 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_encode_request, 0, 2, IS_
 	ZEND_ARG_TYPE_INFO(0, output_options, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_get_type, 0, 1, IS_STRING, 0)
+	ZEND_ARG_INFO(0, value)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_set_type, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_INFO(1, value)
 	ZEND_ARG_TYPE_INFO(0, type, IS_STRING, 0)

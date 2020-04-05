@@ -10,6 +10,9 @@ function xmlrpc_decode_request(string $xml, &$method, string $encoding = "iso-88
 
 function xmlrpc_encode_request(?string $method, $params, array $output_options = UNKNOWN): ?string {}
 
+/** @param mixed $value */
+function xmlrpc_get_type($value): string {}
+
 function xmlrpc_set_type(&$value, string $type): bool {}
 
 function xmlrpc_is_fault(array $arg): bool {}
