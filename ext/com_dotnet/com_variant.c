@@ -425,7 +425,7 @@ PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar)
 		return php_com_copy_variant(V_VARIANTREF(dstvar), srcvar);
 
 	default:
-		php_error_docref(NULL, E_WARNING, "variant->variant: failed to copy from 0x%x to 0x%x", V_VT(dstvar), V_VT(srcvar));
+		php_error_docref(NULL, E_WARNING, "variant->__construct: failed to copy from 0x%x to 0x%x", V_VT(dstvar), V_VT(srcvar));
 		ret = FAILURE;
 	}
 	return ret;
