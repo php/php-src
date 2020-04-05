@@ -29,3 +29,24 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_get_var, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 #define arginfo_shm_remove_var arginfo_shm_has_var
+
+
+ZEND_FUNCTION(shm_attach);
+ZEND_FUNCTION(shm_detach);
+ZEND_FUNCTION(shm_has_var);
+ZEND_FUNCTION(shm_remove);
+ZEND_FUNCTION(shm_put_var);
+ZEND_FUNCTION(shm_get_var);
+ZEND_FUNCTION(shm_remove_var);
+
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_FE(shm_attach, arginfo_shm_attach)
+	ZEND_FE(shm_detach, arginfo_shm_detach)
+	ZEND_FE(shm_has_var, arginfo_shm_has_var)
+	ZEND_FE(shm_remove, arginfo_shm_remove)
+	ZEND_FE(shm_put_var, arginfo_shm_put_var)
+	ZEND_FE(shm_get_var, arginfo_shm_get_var)
+	ZEND_FE(shm_remove_var, arginfo_shm_remove_var)
+	ZEND_FE_END
+};

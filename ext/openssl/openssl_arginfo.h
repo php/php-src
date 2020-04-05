@@ -320,3 +320,127 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_openssl_get_cert_locations, 0, 0, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
+
+
+ZEND_FUNCTION(openssl_x509_export_to_file);
+ZEND_FUNCTION(openssl_x509_export);
+ZEND_FUNCTION(openssl_x509_fingerprint);
+ZEND_FUNCTION(openssl_x509_check_private_key);
+ZEND_FUNCTION(openssl_x509_verify);
+ZEND_FUNCTION(openssl_x509_parse);
+ZEND_FUNCTION(openssl_x509_checkpurpose);
+ZEND_FUNCTION(openssl_x509_read);
+ZEND_FUNCTION(openssl_x509_free);
+ZEND_FUNCTION(openssl_pkcs12_export_to_file);
+ZEND_FUNCTION(openssl_pkcs12_export);
+ZEND_FUNCTION(openssl_pkcs12_read);
+ZEND_FUNCTION(openssl_csr_export_to_file);
+ZEND_FUNCTION(openssl_csr_export);
+ZEND_FUNCTION(openssl_csr_sign);
+ZEND_FUNCTION(openssl_csr_new);
+ZEND_FUNCTION(openssl_csr_get_subject);
+ZEND_FUNCTION(openssl_csr_get_public_key);
+ZEND_FUNCTION(openssl_pkey_new);
+ZEND_FUNCTION(openssl_pkey_export_to_file);
+ZEND_FUNCTION(openssl_pkey_export);
+ZEND_FUNCTION(openssl_pkey_get_public);
+ZEND_FUNCTION(openssl_pkey_free);
+ZEND_FUNCTION(openssl_pkey_get_private);
+ZEND_FUNCTION(openssl_pkey_get_details);
+ZEND_FUNCTION(openssl_pbkdf2);
+ZEND_FUNCTION(openssl_pkcs7_verify);
+ZEND_FUNCTION(openssl_pkcs7_encrypt);
+ZEND_FUNCTION(openssl_pkcs7_sign);
+ZEND_FUNCTION(openssl_pkcs7_decrypt);
+ZEND_FUNCTION(openssl_pkcs7_read);
+ZEND_FUNCTION(openssl_private_encrypt);
+ZEND_FUNCTION(openssl_private_decrypt);
+ZEND_FUNCTION(openssl_public_encrypt);
+ZEND_FUNCTION(openssl_public_decrypt);
+ZEND_FUNCTION(openssl_error_string);
+ZEND_FUNCTION(openssl_sign);
+ZEND_FUNCTION(openssl_verify);
+ZEND_FUNCTION(openssl_seal);
+ZEND_FUNCTION(openssl_open);
+ZEND_FUNCTION(openssl_get_md_methods);
+ZEND_FUNCTION(openssl_get_cipher_methods);
+#if defined(HAVE_EVP_PKEY_EC)
+ZEND_FUNCTION(openssl_get_curve_names);
+#endif
+ZEND_FUNCTION(openssl_digest);
+ZEND_FUNCTION(openssl_encrypt);
+ZEND_FUNCTION(openssl_decrypt);
+ZEND_FUNCTION(openssl_cipher_iv_length);
+ZEND_FUNCTION(openssl_dh_compute_key);
+ZEND_FUNCTION(openssl_pkey_derive);
+ZEND_FUNCTION(openssl_random_pseudo_bytes);
+ZEND_FUNCTION(openssl_spki_new);
+ZEND_FUNCTION(openssl_spki_verify);
+ZEND_FUNCTION(openssl_spki_export);
+ZEND_FUNCTION(openssl_spki_export_challenge);
+ZEND_FUNCTION(openssl_get_cert_locations);
+
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_FE(openssl_x509_export_to_file, arginfo_openssl_x509_export_to_file)
+	ZEND_FE(openssl_x509_export, arginfo_openssl_x509_export)
+	ZEND_FE(openssl_x509_fingerprint, arginfo_openssl_x509_fingerprint)
+	ZEND_FE(openssl_x509_check_private_key, arginfo_openssl_x509_check_private_key)
+	ZEND_FE(openssl_x509_verify, arginfo_openssl_x509_verify)
+	ZEND_FE(openssl_x509_parse, arginfo_openssl_x509_parse)
+	ZEND_FE(openssl_x509_checkpurpose, arginfo_openssl_x509_checkpurpose)
+	ZEND_FE(openssl_x509_read, arginfo_openssl_x509_read)
+	ZEND_FE(openssl_x509_free, arginfo_openssl_x509_free)
+	ZEND_FE(openssl_pkcs12_export_to_file, arginfo_openssl_pkcs12_export_to_file)
+	ZEND_FE(openssl_pkcs12_export, arginfo_openssl_pkcs12_export)
+	ZEND_FE(openssl_pkcs12_read, arginfo_openssl_pkcs12_read)
+	ZEND_FE(openssl_csr_export_to_file, arginfo_openssl_csr_export_to_file)
+	ZEND_FE(openssl_csr_export, arginfo_openssl_csr_export)
+	ZEND_FE(openssl_csr_sign, arginfo_openssl_csr_sign)
+	ZEND_FE(openssl_csr_new, arginfo_openssl_csr_new)
+	ZEND_FE(openssl_csr_get_subject, arginfo_openssl_csr_get_subject)
+	ZEND_FE(openssl_csr_get_public_key, arginfo_openssl_csr_get_public_key)
+	ZEND_FE(openssl_pkey_new, arginfo_openssl_pkey_new)
+	ZEND_FE(openssl_pkey_export_to_file, arginfo_openssl_pkey_export_to_file)
+	ZEND_FE(openssl_pkey_export, arginfo_openssl_pkey_export)
+	ZEND_FE(openssl_pkey_get_public, arginfo_openssl_pkey_get_public)
+	ZEND_FALIAS(openssl_get_publickey, openssl_pkey_get_public, arginfo_openssl_get_publickey)
+	ZEND_FE(openssl_pkey_free, arginfo_openssl_pkey_free)
+	ZEND_FALIAS(openssl_free_key, openssl_pkey_free, arginfo_openssl_free_key)
+	ZEND_FE(openssl_pkey_get_private, arginfo_openssl_pkey_get_private)
+	ZEND_FALIAS(openssl_get_privatekey, openssl_pkey_get_private, arginfo_openssl_get_privatekey)
+	ZEND_FE(openssl_pkey_get_details, arginfo_openssl_pkey_get_details)
+	ZEND_FE(openssl_pbkdf2, arginfo_openssl_pbkdf2)
+	ZEND_FE(openssl_pkcs7_verify, arginfo_openssl_pkcs7_verify)
+	ZEND_FE(openssl_pkcs7_encrypt, arginfo_openssl_pkcs7_encrypt)
+	ZEND_FE(openssl_pkcs7_sign, arginfo_openssl_pkcs7_sign)
+	ZEND_FE(openssl_pkcs7_decrypt, arginfo_openssl_pkcs7_decrypt)
+	ZEND_FE(openssl_pkcs7_read, arginfo_openssl_pkcs7_read)
+	ZEND_FE(openssl_private_encrypt, arginfo_openssl_private_encrypt)
+	ZEND_FE(openssl_private_decrypt, arginfo_openssl_private_decrypt)
+	ZEND_FE(openssl_public_encrypt, arginfo_openssl_public_encrypt)
+	ZEND_FE(openssl_public_decrypt, arginfo_openssl_public_decrypt)
+	ZEND_FE(openssl_error_string, arginfo_openssl_error_string)
+	ZEND_FE(openssl_sign, arginfo_openssl_sign)
+	ZEND_FE(openssl_verify, arginfo_openssl_verify)
+	ZEND_FE(openssl_seal, arginfo_openssl_seal)
+	ZEND_FE(openssl_open, arginfo_openssl_open)
+	ZEND_FE(openssl_get_md_methods, arginfo_openssl_get_md_methods)
+	ZEND_FE(openssl_get_cipher_methods, arginfo_openssl_get_cipher_methods)
+#if defined(HAVE_EVP_PKEY_EC)
+	ZEND_FE(openssl_get_curve_names, arginfo_openssl_get_curve_names)
+#endif
+	ZEND_FE(openssl_digest, arginfo_openssl_digest)
+	ZEND_FE(openssl_encrypt, arginfo_openssl_encrypt)
+	ZEND_FE(openssl_decrypt, arginfo_openssl_decrypt)
+	ZEND_FE(openssl_cipher_iv_length, arginfo_openssl_cipher_iv_length)
+	ZEND_FE(openssl_dh_compute_key, arginfo_openssl_dh_compute_key)
+	ZEND_FE(openssl_pkey_derive, arginfo_openssl_pkey_derive)
+	ZEND_FE(openssl_random_pseudo_bytes, arginfo_openssl_random_pseudo_bytes)
+	ZEND_FE(openssl_spki_new, arginfo_openssl_spki_new)
+	ZEND_FE(openssl_spki_verify, arginfo_openssl_spki_verify)
+	ZEND_FE(openssl_spki_export, arginfo_openssl_spki_export)
+	ZEND_FE(openssl_spki_export_challenge, arginfo_openssl_spki_export_challenge)
+	ZEND_FE(openssl_get_cert_locations, arginfo_openssl_get_cert_locations)
+	ZEND_FE_END
+};

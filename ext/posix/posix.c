@@ -50,100 +50,6 @@
 ZEND_DECLARE_MODULE_GLOBALS(posix)
 static PHP_MINFO_FUNCTION(posix);
 
-/* {{{ posix_functions[]
- */
-static const zend_function_entry posix_functions[] = {
-    /* POSIX.1, 3.3 */
-	PHP_FE(posix_kill,		arginfo_posix_kill)
-
-	/* POSIX.1, 4.1 */
-	PHP_FE(posix_getpid,	arginfo_posix_getpid)
-	PHP_FE(posix_getppid,	arginfo_posix_getppid)
-
-	/* POSIX.1,  4.2 */
-	PHP_FE(posix_getuid,	arginfo_posix_getuid)
-	PHP_FE(posix_setuid,	arginfo_posix_setuid)
-	PHP_FE(posix_geteuid,	arginfo_posix_geteuid)
-#ifdef HAVE_SETEUID
-	PHP_FE(posix_seteuid,	arginfo_posix_seteuid)
-#endif
-	PHP_FE(posix_getgid,	arginfo_posix_getgid)
-	PHP_FE(posix_setgid,	arginfo_posix_setgid)
-	PHP_FE(posix_getegid,	arginfo_posix_getegid)
-#ifdef HAVE_SETEGID
-	PHP_FE(posix_setegid,	arginfo_posix_setegid)
-#endif
-#ifdef HAVE_GETGROUPS
-	PHP_FE(posix_getgroups,	arginfo_posix_getgroups)
-#endif
-#ifdef HAVE_GETLOGIN
-	PHP_FE(posix_getlogin,	arginfo_posix_getlogin)
-#endif
-
-	/* POSIX.1, 4.3 */
-	PHP_FE(posix_getpgrp,	arginfo_posix_getpgrp)
-#ifdef HAVE_SETSID
-	PHP_FE(posix_setsid,	arginfo_posix_setsid)
-#endif
-	PHP_FE(posix_setpgid,	arginfo_posix_setpgid)
-	/* Non-Posix functions which are common */
-#ifdef HAVE_GETPGID
-	PHP_FE(posix_getpgid,	arginfo_posix_getpgid)
-#endif /* HAVE_GETPGID */
-#ifdef HAVE_GETSID
-	PHP_FE(posix_getsid,	arginfo_posix_getsid)
-#endif /* HAVE_GETSID */
-
-	/* POSIX.1, 4.4 */
-	PHP_FE(posix_uname,		arginfo_posix_uname)
-
-	/* POSIX.1, 4.5 */
-	PHP_FE(posix_times,		arginfo_posix_times)
-
-	/* POSIX.1, 4.7 */
-#ifdef HAVE_CTERMID
-	PHP_FE(posix_ctermid,	arginfo_posix_ctermid)
-#endif
-	PHP_FE(posix_ttyname,	arginfo_posix_ttyname)
-	PHP_FE(posix_isatty,	arginfo_posix_isatty)
-
-    /* POSIX.1, 5.2 */
-	PHP_FE(posix_getcwd,	arginfo_posix_getcwd)
-
-	/* POSIX.1, 5.4 */
-#ifdef HAVE_MKFIFO
-	PHP_FE(posix_mkfifo,	arginfo_posix_mkfifo)
-#endif
-#ifdef HAVE_MKNOD
-	PHP_FE(posix_mknod,		arginfo_posix_mknod)
-#endif
-
-	/* POSIX.1, 5.6 */
-	PHP_FE(posix_access,	arginfo_posix_access)
-	/* POSIX.1, 9.2 */
-	PHP_FE(posix_getgrnam,	arginfo_posix_getgrnam)
-	PHP_FE(posix_getgrgid,	arginfo_posix_getgrgid)
-	PHP_FE(posix_getpwnam,	arginfo_posix_getpwnam)
-	PHP_FE(posix_getpwuid,	arginfo_posix_getpwuid)
-
-#ifdef HAVE_GETRLIMIT
-	PHP_FE(posix_getrlimit,	arginfo_posix_getrlimit)
-#endif
-#ifdef HAVE_SETRLIMIT
-	PHP_FE(posix_setrlimit, arginfo_posix_setrlimit)
-#endif
-
-	PHP_FE(posix_get_last_error,					arginfo_posix_get_last_error)
-	PHP_FALIAS(posix_errno, posix_get_last_error,	arginfo_posix_errno)
-	PHP_FE(posix_strerror,							arginfo_posix_strerror)
-#ifdef HAVE_INITGROUPS
-	PHP_FE(posix_initgroups,	arginfo_posix_initgroups)
-#endif
-
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ PHP_MINFO_FUNCTION
  */
 static PHP_MINFO_FUNCTION(posix)
@@ -246,7 +152,7 @@ static PHP_MINIT_FUNCTION(posix)
 zend_module_entry posix_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"posix",
-	posix_functions,
+	ext_functions,
 	PHP_MINIT(posix),
 	NULL,
 	NULL,

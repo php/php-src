@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function preg_match(string $pattern, string $subject, &$subpatterns = null, int $flags = 0, int $offset = 0): int|false {}
 
 function preg_match_all(string $pattern, string $subject, &$subpatterns = null, int $flags = 0, int $offset = 0): int|false|null {}

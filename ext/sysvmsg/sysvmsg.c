@@ -33,14 +33,6 @@
 PHP_MINIT_FUNCTION(sysvmsg);
 PHP_MINFO_FUNCTION(sysvmsg);
 
-PHP_FUNCTION(msg_get_queue);
-PHP_FUNCTION(msg_remove_queue);
-PHP_FUNCTION(msg_stat_queue);
-PHP_FUNCTION(msg_set_queue);
-PHP_FUNCTION(msg_send);
-PHP_FUNCTION(msg_receive);
-PHP_FUNCTION(msg_queue_exists);
-
 typedef struct {
 	key_t key;
 	zend_long id;
@@ -61,28 +53,12 @@ struct php_msgbuf {
 /* True global resources - no need for thread safety here */
 static int le_sysvmsg;
 
-/* {{{ sysvmsg_functions[]
- *
- * Every user visible function must have an entry in sysvmsg_functions[].
- */
-static const zend_function_entry sysvmsg_functions[] = {
-	PHP_FE(msg_get_queue,				arginfo_msg_get_queue)
-	PHP_FE(msg_send,					arginfo_msg_send)
-	PHP_FE(msg_receive,					arginfo_msg_receive)
-	PHP_FE(msg_remove_queue,			arginfo_msg_remove_queue)
-	PHP_FE(msg_stat_queue,				arginfo_msg_stat_queue)
-	PHP_FE(msg_set_queue,				arginfo_msg_set_queue)
-	PHP_FE(msg_queue_exists,			arginfo_msg_queue_exists)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ sysvmsg_module_entry
  */
 zend_module_entry sysvmsg_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"sysvmsg",
-	sysvmsg_functions,
+	ext_functions,
 	PHP_MINIT(sysvmsg),
 	NULL,
 	NULL,

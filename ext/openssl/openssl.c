@@ -115,113 +115,12 @@ enum php_openssl_cipher_type {
 	PHP_OPENSSL_CIPHER_DEFAULT = PHP_OPENSSL_CIPHER_RC2_40
 };
 
-PHP_FUNCTION(openssl_get_md_methods);
-PHP_FUNCTION(openssl_get_cipher_methods);
-#ifdef HAVE_EVP_PKEY_EC
-PHP_FUNCTION(openssl_get_curve_names);
-#endif
-
-PHP_FUNCTION(openssl_digest);
-PHP_FUNCTION(openssl_encrypt);
-PHP_FUNCTION(openssl_decrypt);
-PHP_FUNCTION(openssl_cipher_iv_length);
-
-PHP_FUNCTION(openssl_dh_compute_key);
-PHP_FUNCTION(openssl_pkey_derive);
-PHP_FUNCTION(openssl_random_pseudo_bytes);
-
-/* {{{ openssl_functions[]
- */
-static const zend_function_entry openssl_functions[] = {
-	PHP_FE(openssl_get_cert_locations, arginfo_openssl_get_cert_locations)
-
-/* spki functions */
-	PHP_FE(openssl_spki_new, arginfo_openssl_spki_new)
-	PHP_FE(openssl_spki_verify, arginfo_openssl_spki_verify)
-	PHP_FE(openssl_spki_export, arginfo_openssl_spki_export)
-	PHP_FE(openssl_spki_export_challenge, arginfo_openssl_spki_export_challenge)
-
-/* public/private key functions */
-	PHP_FE(openssl_pkey_free,			arginfo_openssl_pkey_free)
-	PHP_FE(openssl_pkey_new,			arginfo_openssl_pkey_new)
-	PHP_FE(openssl_pkey_export,			arginfo_openssl_pkey_export)
-	PHP_FE(openssl_pkey_export_to_file,	arginfo_openssl_pkey_export_to_file)
-	PHP_FE(openssl_pkey_get_private,	arginfo_openssl_pkey_get_private)
-	PHP_FE(openssl_pkey_get_public,		arginfo_openssl_pkey_get_public)
-	PHP_FE(openssl_pkey_get_details,	arginfo_openssl_pkey_get_details)
-
-	PHP_FALIAS(openssl_free_key,		openssl_pkey_free, 			arginfo_openssl_free_key)
-	PHP_FALIAS(openssl_get_privatekey,	openssl_pkey_get_private,	arginfo_openssl_get_privatekey)
-	PHP_FALIAS(openssl_get_publickey,	openssl_pkey_get_public,	arginfo_openssl_get_publickey)
-
-/* x.509 cert funcs */
-	PHP_FE(openssl_x509_read,				arginfo_openssl_x509_read)
-	PHP_FE(openssl_x509_free,				arginfo_openssl_x509_free)
-	PHP_FE(openssl_x509_parse,			 	arginfo_openssl_x509_parse)
-	PHP_FE(openssl_x509_checkpurpose,		arginfo_openssl_x509_checkpurpose)
-	PHP_FE(openssl_x509_check_private_key,	arginfo_openssl_x509_check_private_key)
-	PHP_FE(openssl_x509_verify,	            arginfo_openssl_x509_verify)
-	PHP_FE(openssl_x509_export,				arginfo_openssl_x509_export)
-	PHP_FE(openssl_x509_fingerprint,			arginfo_openssl_x509_fingerprint)
-	PHP_FE(openssl_x509_export_to_file,		arginfo_openssl_x509_export_to_file)
-
-/* PKCS12 funcs */
-	PHP_FE(openssl_pkcs12_export,			arginfo_openssl_pkcs12_export)
-	PHP_FE(openssl_pkcs12_export_to_file,	arginfo_openssl_pkcs12_export_to_file)
-	PHP_FE(openssl_pkcs12_read,				arginfo_openssl_pkcs12_read)
-
-/* CSR funcs */
-	PHP_FE(openssl_csr_new,				arginfo_openssl_csr_new)
-	PHP_FE(openssl_csr_export,			arginfo_openssl_csr_export)
-	PHP_FE(openssl_csr_export_to_file,	arginfo_openssl_csr_export_to_file)
-	PHP_FE(openssl_csr_sign,			arginfo_openssl_csr_sign)
-	PHP_FE(openssl_csr_get_subject,		arginfo_openssl_csr_get_subject)
-	PHP_FE(openssl_csr_get_public_key,	arginfo_openssl_csr_get_public_key)
-
-	PHP_FE(openssl_digest,				arginfo_openssl_digest)
-	PHP_FE(openssl_encrypt,				arginfo_openssl_encrypt)
-	PHP_FE(openssl_decrypt,				arginfo_openssl_decrypt)
-	PHP_FE(openssl_cipher_iv_length,	arginfo_openssl_cipher_iv_length)
-	PHP_FE(openssl_sign,				arginfo_openssl_sign)
-	PHP_FE(openssl_verify,				arginfo_openssl_verify)
-	PHP_FE(openssl_seal,				arginfo_openssl_seal)
-	PHP_FE(openssl_open,				arginfo_openssl_open)
-
-	PHP_FE(openssl_pbkdf2,	arginfo_openssl_pbkdf2)
-
-/* for S/MIME handling */
-	PHP_FE(openssl_pkcs7_verify,		arginfo_openssl_pkcs7_verify)
-	PHP_FE(openssl_pkcs7_decrypt,		arginfo_openssl_pkcs7_decrypt)
-	PHP_FE(openssl_pkcs7_sign,			arginfo_openssl_pkcs7_sign)
-	PHP_FE(openssl_pkcs7_encrypt,		arginfo_openssl_pkcs7_encrypt)
-	PHP_FE(openssl_pkcs7_read,			arginfo_openssl_pkcs7_read)
-
-	PHP_FE(openssl_private_encrypt,		arginfo_openssl_private_encrypt)
-	PHP_FE(openssl_private_decrypt,		arginfo_openssl_private_decrypt)
-	PHP_FE(openssl_public_encrypt,		arginfo_openssl_public_encrypt)
-	PHP_FE(openssl_public_decrypt,		arginfo_openssl_public_decrypt)
-
-	PHP_FE(openssl_get_md_methods,		arginfo_openssl_get_md_methods)
-	PHP_FE(openssl_get_cipher_methods,	arginfo_openssl_get_cipher_methods)
-#ifdef HAVE_EVP_PKEY_EC
-	PHP_FE(openssl_get_curve_names,		arginfo_openssl_get_curve_names)
-#endif
-
-	PHP_FE(openssl_dh_compute_key,		arginfo_openssl_dh_compute_key)
-	PHP_FE(openssl_pkey_derive,		arginfo_openssl_pkey_derive)
-
-	PHP_FE(openssl_random_pseudo_bytes,	arginfo_openssl_random_pseudo_bytes)
-	PHP_FE(openssl_error_string, arginfo_openssl_error_string)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ openssl_module_entry
  */
 zend_module_entry openssl_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"openssl",
-	openssl_functions,
+	ext_functions,
 	PHP_MINIT(openssl),
 	PHP_MSHUTDOWN(openssl),
 	NULL,

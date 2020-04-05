@@ -1477,7 +1477,7 @@ error:
 
 /* {{{ proto int preg_match(string pattern, string subject [, array &subpatterns [, int flags [, int offset]]])
    Perform a Perl-style regular expression match */
-static PHP_FUNCTION(preg_match)
+PHP_FUNCTION(preg_match)
 {
 	php_do_pcre_match(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
@@ -1485,7 +1485,7 @@ static PHP_FUNCTION(preg_match)
 
 /* {{{ proto int preg_match_all(string pattern, string subject [, array &subpatterns [, int flags [, int offset]]])
    Perform a Perl-style global regular expression match */
-static PHP_FUNCTION(preg_match_all)
+PHP_FUNCTION(preg_match_all)
 {
 	php_do_pcre_match(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
@@ -2366,7 +2366,7 @@ static void preg_replace_common(INTERNAL_FUNCTION_PARAMETERS, int is_filter)
 
 /* {{{ proto mixed preg_replace(mixed regex, mixed replace, mixed subject [, int limit [, int &count]])
    Perform Perl-style regular expression replacement. */
-static PHP_FUNCTION(preg_replace)
+PHP_FUNCTION(preg_replace)
 {
 	preg_replace_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
@@ -2374,7 +2374,7 @@ static PHP_FUNCTION(preg_replace)
 
 /* {{{ proto mixed preg_replace_callback(mixed regex, mixed callback, mixed subject [, int limit [, int &count]])
    Perform Perl-style regular expression replacement using replacement callback. */
-static PHP_FUNCTION(preg_replace_callback)
+PHP_FUNCTION(preg_replace_callback)
 {
 	zval *regex, *replace, *subject, *zcount = NULL;
 	zend_long limit = -1, flags = 0;
@@ -2414,7 +2414,7 @@ static PHP_FUNCTION(preg_replace_callback)
 
 /* {{{ proto mixed preg_replace_callback_array(array pattern, mixed subject [, int limit [, int &count]])
    Perform Perl-style regular expression replacement using replacement callback. */
-static PHP_FUNCTION(preg_replace_callback_array)
+PHP_FUNCTION(preg_replace_callback_array)
 {
 	zval regex, zv, *replace, *subject, *pattern, *zcount = NULL;
 	zend_long limit = -1, flags = 0;
@@ -2482,7 +2482,7 @@ static PHP_FUNCTION(preg_replace_callback_array)
 
 /* {{{ proto mixed preg_filter(mixed regex, mixed replace, mixed subject [, int limit [, int &count]])
    Perform Perl-style regular expression replacement and only return matches. */
-static PHP_FUNCTION(preg_filter)
+PHP_FUNCTION(preg_filter)
 {
 	preg_replace_common(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
@@ -2490,7 +2490,7 @@ static PHP_FUNCTION(preg_filter)
 
 /* {{{ proto array preg_split(string pattern, string subject [, int limit [, int flags]])
    Split string into an array using a perl-style regular expression as a delimiter */
-static PHP_FUNCTION(preg_split)
+PHP_FUNCTION(preg_split)
 {
 	zend_string			*regex;			/* Regular expression */
 	zend_string			*subject;		/* String to match against */
@@ -2711,7 +2711,7 @@ last:
 
 /* {{{ proto string preg_quote(string str [, string delim_char])
    Quote regular expression characters plus an optional character */
-static PHP_FUNCTION(preg_quote)
+PHP_FUNCTION(preg_quote)
 {
 	zend_string *str;       		/* Input string argument */
 	zend_string	*delim = NULL;		/* Additional delimiter argument */
@@ -2848,7 +2848,7 @@ static PHP_FUNCTION(preg_quote)
 
 /* {{{ proto array preg_grep(string regex, array input [, int flags])
    Searches array and returns entries which match regex */
-static PHP_FUNCTION(preg_grep)
+PHP_FUNCTION(preg_grep)
 {
 	zend_string			*regex;			/* Regular expression */
 	zval				*input;			/* Input array */
@@ -2965,7 +2965,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 /* {{{ proto int preg_last_error()
    Returns the error code of the last regexp execution. */
-static PHP_FUNCTION(preg_last_error)
+PHP_FUNCTION(preg_last_error)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -2975,7 +2975,7 @@ static PHP_FUNCTION(preg_last_error)
 
 /* {{{ proto string preg_last_error_msg()
    Returns the error message of the last regexp execution. */
-static PHP_FUNCTION(preg_last_error_msg)
+PHP_FUNCTION(preg_last_error_msg)
 {
     ZEND_PARSE_PARAMETERS_NONE();
 
@@ -2985,25 +2985,10 @@ static PHP_FUNCTION(preg_last_error_msg)
 
 /* {{{ module definition structures */
 
-static const zend_function_entry pcre_functions[] = {
-	PHP_FE(preg_match,					arginfo_preg_match)
-	PHP_FE(preg_match_all,				arginfo_preg_match_all)
-	PHP_FE(preg_replace,				arginfo_preg_replace)
-	PHP_FE(preg_replace_callback,		arginfo_preg_replace_callback)
-	PHP_FE(preg_replace_callback_array,	arginfo_preg_replace_callback_array)
-	PHP_FE(preg_filter,					arginfo_preg_replace)
-	PHP_FE(preg_split,					arginfo_preg_split)
-	PHP_FE(preg_quote,					arginfo_preg_quote)
-	PHP_FE(preg_grep,					arginfo_preg_grep)
-	PHP_FE(preg_last_error,				arginfo_preg_last_error)
-	PHP_FE(preg_last_error_msg,			arginfo_preg_last_error_msg)
-	PHP_FE_END
-};
-
 zend_module_entry pcre_module_entry = {
 	STANDARD_MODULE_HEADER,
    "pcre",
-	pcre_functions,
+	ext_functions,
 	PHP_MINIT(pcre),
 	PHP_MSHUTDOWN(pcre),
 	PHP_RINIT(pcre),

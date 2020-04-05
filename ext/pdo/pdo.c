@@ -96,13 +96,6 @@ PHP_FUNCTION(pdo_drivers)
 /* }}} */
 
 /* {{{ pdo_functions[] */
-const zend_function_entry pdo_functions[] = {
-	PHP_FE(pdo_drivers,             arginfo_pdo_drivers)
-	PHP_FE_END
-};
-/* }}} */
-
-/* {{{ pdo_functions[] */
 static const zend_module_dep pdo_deps[] = {
 	ZEND_MOD_REQUIRED("spl")
 	ZEND_MOD_END
@@ -114,7 +107,7 @@ zend_module_entry pdo_module_entry = {
 	STANDARD_MODULE_HEADER_EX, NULL,
 	pdo_deps,
 	"PDO",
-	pdo_functions,
+	ext_functions,
 	PHP_MINIT(pdo),
 	PHP_MSHUTDOWN(pdo),
 	NULL,

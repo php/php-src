@@ -26,7 +26,6 @@
 #include "SAPI.h"
 #include "php_ini.h"
 #include "ext/standard/info.h"
-#include "ext/standard/file.h"
 #include "ext/standard/php_string.h"
 #include "php_zlib.h"
 #include "zlib_arginfo.h"
@@ -474,7 +473,7 @@ static void php_zlib_cleanup_ob_gzhandler_mess(void)
 
 /* {{{ proto string ob_gzhandler(string data, int flags)
    Legacy hack */
-static PHP_FUNCTION(ob_gzhandler)
+PHP_FUNCTION(ob_gzhandler)
 {
 	char *in_str;
 	size_t in_len;
@@ -541,7 +540,7 @@ static PHP_FUNCTION(ob_gzhandler)
 
 /* {{{ proto string zlib_get_coding_type(void)
    Returns the coding type used for output compression */
-static PHP_FUNCTION(zlib_get_coding_type)
+PHP_FUNCTION(zlib_get_coding_type)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -559,7 +558,7 @@ static PHP_FUNCTION(zlib_get_coding_type)
 
 /* {{{ proto array gzfile(string filename [, int use_include_path])
    Read and uncompress entire .gz-file into an array */
-static PHP_FUNCTION(gzfile)
+PHP_FUNCTION(gzfile)
 {
 	char *filename;
 	size_t filename_len;
@@ -600,7 +599,7 @@ static PHP_FUNCTION(gzfile)
 
 /* {{{ proto resource gzopen(string filename, string mode [, int use_include_path])
    Open a .gz-file and return a .gz-file pointer */
-static PHP_FUNCTION(gzopen)
+PHP_FUNCTION(gzopen)
 {
 	char *filename;
 	char *mode;
@@ -628,7 +627,7 @@ static PHP_FUNCTION(gzopen)
 
 /* {{{ proto int readgzfile(string filename [, int use_include_path])
    Output a .gz-file */
-static PHP_FUNCTION(readgzfile)
+PHP_FUNCTION(readgzfile)
 {
 	char *filename;
 	size_t filename_len;
@@ -657,7 +656,7 @@ static PHP_FUNCTION(readgzfile)
 /* }}} */
 
 #define PHP_ZLIB_ENCODE_FUNC(name, default_encoding) \
-static PHP_FUNCTION(name) \
+PHP_FUNCTION(name) \
 { \
 	zend_string *in, *out; \
 	zend_long level = -1; \
@@ -691,7 +690,7 @@ static PHP_FUNCTION(name) \
 }
 
 #define PHP_ZLIB_DECODE_FUNC(name, encoding) \
-static PHP_FUNCTION(name) \
+PHP_FUNCTION(name) \
 { \
 	char *in_buf, *out_buf; \
 	size_t in_len; \
@@ -1246,42 +1245,6 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(php_zlib)
 #endif
 
-/* {{{ php_zlib_functions[] */
-static const zend_function_entry php_zlib_functions[] = {
-	PHP_FE(readgzfile,						arginfo_readgzfile)
-	PHP_FALIAS(gzrewind,	rewind,			arginfo_gzrewind)
-	PHP_FALIAS(gzclose,		fclose,			arginfo_gzclose)
-	PHP_FALIAS(gzeof,		feof,			arginfo_gzeof)
-	PHP_FALIAS(gzgetc,		fgetc,			arginfo_gzgetc)
-	PHP_FALIAS(gzgets,		fgets,			arginfo_gzgets)
-	PHP_FALIAS(gzread,		fread,			arginfo_gzread)
-	PHP_FE(gzopen,							arginfo_gzopen)
-	PHP_FALIAS(gzpassthru,	fpassthru,		arginfo_gzpassthru)
-	PHP_FALIAS(gzseek,		fseek,			arginfo_gzseek)
-	PHP_FALIAS(gztell,		ftell,			arginfo_gztell)
-	PHP_FALIAS(gzwrite,		fwrite,			arginfo_gzwrite)
-	PHP_FALIAS(gzputs,		fwrite,			arginfo_gzputs)
-	PHP_FE(gzfile,							arginfo_gzfile)
-	PHP_FE(gzcompress,						arginfo_gzcompress)
-	PHP_FE(gzuncompress,					arginfo_gzuncompress)
-	PHP_FE(gzdeflate,						arginfo_gzdeflate)
-	PHP_FE(gzinflate,						arginfo_gzinflate)
-	PHP_FE(gzencode,						arginfo_gzencode)
-	PHP_FE(gzdecode,						arginfo_gzdecode)
-	PHP_FE(zlib_encode,						arginfo_zlib_encode)
-	PHP_FE(zlib_decode,						arginfo_zlib_decode)
-	PHP_FE(zlib_get_coding_type,			arginfo_zlib_get_coding_type)
-	PHP_FE(deflate_init,					arginfo_deflate_init)
-	PHP_FE(deflate_add,						arginfo_deflate_add)
-	PHP_FE(inflate_init,					arginfo_inflate_init)
-	PHP_FE(inflate_add,						arginfo_inflate_add)
-	PHP_FE(inflate_get_status,				arginfo_inflate_get_status)
-	PHP_FE(inflate_get_read_len,				arginfo_inflate_get_read_len)
-	PHP_FE(ob_gzhandler,					arginfo_ob_gzhandler)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ OnUpdate_zlib_output_compression */
 static PHP_INI_MH(OnUpdate_zlib_output_compression)
 {
@@ -1472,7 +1435,7 @@ static PHP_GINIT_FUNCTION(zlib)
 zend_module_entry php_zlib_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"zlib",
-	php_zlib_functions,
+	ext_functions,
 	PHP_MINIT(zlib),
 	PHP_MSHUTDOWN(zlib),
 	PHP_RINIT(zlib),

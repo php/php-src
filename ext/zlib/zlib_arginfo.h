@@ -119,3 +119,69 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_inflate_get_status, 0, 1, IS_LON
 ZEND_END_ARG_INFO()
 
 #define arginfo_inflate_get_read_len arginfo_inflate_get_status
+
+
+ZEND_FUNCTION(ob_gzhandler);
+ZEND_FUNCTION(zlib_get_coding_type);
+ZEND_FUNCTION(gzfile);
+ZEND_FUNCTION(gzopen);
+ZEND_FUNCTION(readgzfile);
+ZEND_FUNCTION(zlib_encode);
+ZEND_FUNCTION(zlib_decode);
+ZEND_FUNCTION(gzdeflate);
+ZEND_FUNCTION(gzencode);
+ZEND_FUNCTION(gzcompress);
+ZEND_FUNCTION(gzinflate);
+ZEND_FUNCTION(gzdecode);
+ZEND_FUNCTION(gzuncompress);
+ZEND_FUNCTION(fwrite);
+ZEND_FUNCTION(rewind);
+ZEND_FUNCTION(fclose);
+ZEND_FUNCTION(feof);
+ZEND_FUNCTION(fgetc);
+ZEND_FUNCTION(fpassthru);
+ZEND_FUNCTION(fseek);
+ZEND_FUNCTION(ftell);
+ZEND_FUNCTION(fread);
+ZEND_FUNCTION(fgets);
+ZEND_FUNCTION(deflate_init);
+ZEND_FUNCTION(deflate_add);
+ZEND_FUNCTION(inflate_init);
+ZEND_FUNCTION(inflate_add);
+ZEND_FUNCTION(inflate_get_status);
+ZEND_FUNCTION(inflate_get_read_len);
+
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_FE(ob_gzhandler, arginfo_ob_gzhandler)
+	ZEND_FE(zlib_get_coding_type, arginfo_zlib_get_coding_type)
+	ZEND_FE(gzfile, arginfo_gzfile)
+	ZEND_FE(gzopen, arginfo_gzopen)
+	ZEND_FE(readgzfile, arginfo_readgzfile)
+	ZEND_FE(zlib_encode, arginfo_zlib_encode)
+	ZEND_FE(zlib_decode, arginfo_zlib_decode)
+	ZEND_FE(gzdeflate, arginfo_gzdeflate)
+	ZEND_FE(gzencode, arginfo_gzencode)
+	ZEND_FE(gzcompress, arginfo_gzcompress)
+	ZEND_FE(gzinflate, arginfo_gzinflate)
+	ZEND_FE(gzdecode, arginfo_gzdecode)
+	ZEND_FE(gzuncompress, arginfo_gzuncompress)
+	ZEND_FALIAS(gzwrite, fwrite, arginfo_gzwrite)
+	ZEND_FALIAS(gzputs, fwrite, arginfo_gzputs)
+	ZEND_FALIAS(gzrewind, rewind, arginfo_gzrewind)
+	ZEND_FALIAS(gzclose, fclose, arginfo_gzclose)
+	ZEND_FALIAS(gzeof, feof, arginfo_gzeof)
+	ZEND_FALIAS(gzgetc, fgetc, arginfo_gzgetc)
+	ZEND_FALIAS(gzpassthru, fpassthru, arginfo_gzpassthru)
+	ZEND_FALIAS(gzseek, fseek, arginfo_gzseek)
+	ZEND_FALIAS(gztell, ftell, arginfo_gztell)
+	ZEND_FALIAS(gzread, fread, arginfo_gzread)
+	ZEND_FALIAS(gzgets, fgets, arginfo_gzgets)
+	ZEND_FE(deflate_init, arginfo_deflate_init)
+	ZEND_FE(deflate_add, arginfo_deflate_add)
+	ZEND_FE(inflate_init, arginfo_inflate_init)
+	ZEND_FE(inflate_add, arginfo_inflate_add)
+	ZEND_FE(inflate_get_status, arginfo_inflate_get_status)
+	ZEND_FE(inflate_get_read_len, arginfo_inflate_get_read_len)
+	ZEND_FE_END
+};

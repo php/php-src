@@ -201,3 +201,106 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_socket_wsaprotocol_info_release,
 	ZEND_ARG_TYPE_INFO(0, info_id, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 #endif
+
+
+ZEND_FUNCTION(socket_select);
+ZEND_FUNCTION(socket_create_listen);
+ZEND_FUNCTION(socket_accept);
+ZEND_FUNCTION(socket_set_nonblock);
+ZEND_FUNCTION(socket_set_block);
+ZEND_FUNCTION(socket_listen);
+ZEND_FUNCTION(socket_close);
+ZEND_FUNCTION(socket_write);
+ZEND_FUNCTION(socket_read);
+ZEND_FUNCTION(socket_getsockname);
+ZEND_FUNCTION(socket_getpeername);
+ZEND_FUNCTION(socket_create);
+ZEND_FUNCTION(socket_connect);
+ZEND_FUNCTION(socket_strerror);
+ZEND_FUNCTION(socket_bind);
+ZEND_FUNCTION(socket_recv);
+ZEND_FUNCTION(socket_send);
+ZEND_FUNCTION(socket_recvfrom);
+ZEND_FUNCTION(socket_sendto);
+ZEND_FUNCTION(socket_get_option);
+ZEND_FUNCTION(socket_set_option);
+#if defined(HAVE_SOCKETPAIR)
+ZEND_FUNCTION(socket_create_pair);
+#endif
+#if defined(HAVE_SHUTDOWN)
+ZEND_FUNCTION(socket_shutdown);
+#endif
+ZEND_FUNCTION(socket_last_error);
+ZEND_FUNCTION(socket_clear_error);
+ZEND_FUNCTION(socket_import_stream);
+ZEND_FUNCTION(socket_export_stream);
+ZEND_FUNCTION(socket_sendmsg);
+ZEND_FUNCTION(socket_recvmsg);
+ZEND_FUNCTION(socket_cmsg_space);
+ZEND_FUNCTION(socket_addrinfo_lookup);
+ZEND_FUNCTION(socket_addrinfo_connect);
+ZEND_FUNCTION(socket_addrinfo_bind);
+ZEND_FUNCTION(socket_addrinfo_explain);
+#if defined(PHP_WIN32)
+ZEND_FUNCTION(socket_wsaprotocol_info_export);
+#endif
+#if defined(PHP_WIN32)
+ZEND_FUNCTION(socket_wsaprotocol_info_import);
+#endif
+#if defined(PHP_WIN32)
+ZEND_FUNCTION(socket_wsaprotocol_info_release);
+#endif
+
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_FE(socket_select, arginfo_socket_select)
+	ZEND_FE(socket_create_listen, arginfo_socket_create_listen)
+	ZEND_FE(socket_accept, arginfo_socket_accept)
+	ZEND_FE(socket_set_nonblock, arginfo_socket_set_nonblock)
+	ZEND_FE(socket_set_block, arginfo_socket_set_block)
+	ZEND_FE(socket_listen, arginfo_socket_listen)
+	ZEND_FE(socket_close, arginfo_socket_close)
+	ZEND_FE(socket_write, arginfo_socket_write)
+	ZEND_FE(socket_read, arginfo_socket_read)
+	ZEND_FE(socket_getsockname, arginfo_socket_getsockname)
+	ZEND_FE(socket_getpeername, arginfo_socket_getpeername)
+	ZEND_FE(socket_create, arginfo_socket_create)
+	ZEND_FE(socket_connect, arginfo_socket_connect)
+	ZEND_FE(socket_strerror, arginfo_socket_strerror)
+	ZEND_FE(socket_bind, arginfo_socket_bind)
+	ZEND_FE(socket_recv, arginfo_socket_recv)
+	ZEND_FE(socket_send, arginfo_socket_send)
+	ZEND_FE(socket_recvfrom, arginfo_socket_recvfrom)
+	ZEND_FE(socket_sendto, arginfo_socket_sendto)
+	ZEND_FE(socket_get_option, arginfo_socket_get_option)
+	ZEND_FALIAS(socket_getopt, socket_get_option, arginfo_socket_getopt)
+	ZEND_FE(socket_set_option, arginfo_socket_set_option)
+	ZEND_FALIAS(socket_setopt, socket_set_option, arginfo_socket_setopt)
+#if defined(HAVE_SOCKETPAIR)
+	ZEND_FE(socket_create_pair, arginfo_socket_create_pair)
+#endif
+#if defined(HAVE_SHUTDOWN)
+	ZEND_FE(socket_shutdown, arginfo_socket_shutdown)
+#endif
+	ZEND_FE(socket_last_error, arginfo_socket_last_error)
+	ZEND_FE(socket_clear_error, arginfo_socket_clear_error)
+	ZEND_FE(socket_import_stream, arginfo_socket_import_stream)
+	ZEND_FE(socket_export_stream, arginfo_socket_export_stream)
+	ZEND_FE(socket_sendmsg, arginfo_socket_sendmsg)
+	ZEND_FE(socket_recvmsg, arginfo_socket_recvmsg)
+	ZEND_FE(socket_cmsg_space, arginfo_socket_cmsg_space)
+	ZEND_FE(socket_addrinfo_lookup, arginfo_socket_addrinfo_lookup)
+	ZEND_FE(socket_addrinfo_connect, arginfo_socket_addrinfo_connect)
+	ZEND_FE(socket_addrinfo_bind, arginfo_socket_addrinfo_bind)
+	ZEND_FE(socket_addrinfo_explain, arginfo_socket_addrinfo_explain)
+#if defined(PHP_WIN32)
+	ZEND_FE(socket_wsaprotocol_info_export, arginfo_socket_wsaprotocol_info_export)
+#endif
+#if defined(PHP_WIN32)
+	ZEND_FE(socket_wsaprotocol_info_import, arginfo_socket_wsaprotocol_info_import)
+#endif
+#if defined(PHP_WIN32)
+	ZEND_FE(socket_wsaprotocol_info_release, arginfo_socket_wsaprotocol_info_release)
+#endif
+	ZEND_FE_END
+};

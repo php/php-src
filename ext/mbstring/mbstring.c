@@ -182,63 +182,11 @@ static const php_mb_nls_ident_list php_mb_default_identify_list[] = {
 
 /* }}} */
 
-/* {{{ zend_function_entry mbstring_functions[] */
-static const zend_function_entry mbstring_functions[] = {
-	PHP_FE(mb_convert_case,			arginfo_mb_convert_case)
-	PHP_FE(mb_strtoupper,			arginfo_mb_strtoupper)
-	PHP_FE(mb_strtolower,			arginfo_mb_strtolower)
-	PHP_FE(mb_language,				arginfo_mb_language)
-	PHP_FE(mb_internal_encoding,	arginfo_mb_internal_encoding)
-	PHP_FE(mb_http_input,			arginfo_mb_http_input)
-	PHP_FE(mb_http_output,			arginfo_mb_http_output)
-	PHP_FE(mb_detect_order,			arginfo_mb_detect_order)
-	PHP_FE(mb_substitute_character,	arginfo_mb_substitute_character)
-	PHP_FE(mb_parse_str,			arginfo_mb_parse_str)
-	PHP_FE(mb_output_handler,		arginfo_mb_output_handler)
-	PHP_FE(mb_preferred_mime_name,	arginfo_mb_preferred_mime_name)
-	PHP_FE(mb_str_split,			arginfo_mb_str_split)
-	PHP_FE(mb_strlen,				arginfo_mb_strlen)
-	PHP_FE(mb_strpos,				arginfo_mb_strpos)
-	PHP_FE(mb_strrpos,				arginfo_mb_strrpos)
-	PHP_FE(mb_stripos,				arginfo_mb_stripos)
-	PHP_FE(mb_strripos,				arginfo_mb_strripos)
-	PHP_FE(mb_strstr,				arginfo_mb_strstr)
-	PHP_FE(mb_strrchr,				arginfo_mb_strrchr)
-	PHP_FE(mb_stristr,				arginfo_mb_stristr)
-	PHP_FE(mb_strrichr,				arginfo_mb_strrichr)
-	PHP_FE(mb_substr_count,			arginfo_mb_substr_count)
-	PHP_FE(mb_substr,				arginfo_mb_substr)
-	PHP_FE(mb_strcut,				arginfo_mb_strcut)
-	PHP_FE(mb_strwidth,				arginfo_mb_strwidth)
-	PHP_FE(mb_strimwidth,			arginfo_mb_strimwidth)
-	PHP_FE(mb_convert_encoding,		arginfo_mb_convert_encoding)
-	PHP_FE(mb_detect_encoding,		arginfo_mb_detect_encoding)
-	PHP_FE(mb_list_encodings,		arginfo_mb_list_encodings)
-	PHP_FE(mb_encoding_aliases,		arginfo_mb_encoding_aliases)
-	PHP_FE(mb_convert_kana,			arginfo_mb_convert_kana)
-	PHP_FE(mb_encode_mimeheader,	arginfo_mb_encode_mimeheader)
-	PHP_FE(mb_decode_mimeheader,	arginfo_mb_decode_mimeheader)
-	PHP_FE(mb_convert_variables,	arginfo_mb_convert_variables)
-	PHP_FE(mb_encode_numericentity,	arginfo_mb_encode_numericentity)
-	PHP_FE(mb_decode_numericentity,	arginfo_mb_decode_numericentity)
-	PHP_FE(mb_send_mail,			arginfo_mb_send_mail)
-	PHP_FE(mb_get_info,				arginfo_mb_get_info)
-	PHP_FE(mb_check_encoding,		arginfo_mb_check_encoding)
-	PHP_FE(mb_ord,					arginfo_mb_ord)
-	PHP_FE(mb_chr,					arginfo_mb_chr)
-	PHP_FE(mb_scrub,				arginfo_mb_scrub)
-#if HAVE_MBREGEX
-	PHP_MBREGEX_FUNCTION_ENTRIES
-#endif
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ zend_module_entry mbstring_module_entry */
 zend_module_entry mbstring_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"mbstring",
-	mbstring_functions,
+	ext_functions,
 	PHP_MINIT(mbstring),
 	PHP_MSHUTDOWN(mbstring),
 	PHP_RINIT(mbstring),

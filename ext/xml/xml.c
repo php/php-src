@@ -152,29 +152,6 @@ PHP_MINIT_FUNCTION(xml);
 PHP_MINFO_FUNCTION(xml);
 static PHP_GINIT_FUNCTION(xml);
 
-PHP_FUNCTION(xml_parser_create);
-PHP_FUNCTION(xml_parser_create_ns);
-PHP_FUNCTION(xml_set_object);
-PHP_FUNCTION(xml_set_element_handler);
-PHP_FUNCTION(xml_set_character_data_handler);
-PHP_FUNCTION(xml_set_processing_instruction_handler);
-PHP_FUNCTION(xml_set_default_handler);
-PHP_FUNCTION(xml_set_unparsed_entity_decl_handler);
-PHP_FUNCTION(xml_set_notation_decl_handler);
-PHP_FUNCTION(xml_set_external_entity_ref_handler);
-PHP_FUNCTION(xml_set_start_namespace_decl_handler);
-PHP_FUNCTION(xml_set_end_namespace_decl_handler);
-PHP_FUNCTION(xml_parse);
-PHP_FUNCTION(xml_get_error_code);
-PHP_FUNCTION(xml_error_string);
-PHP_FUNCTION(xml_get_current_line_number);
-PHP_FUNCTION(xml_get_current_column_number);
-PHP_FUNCTION(xml_get_current_byte_index);
-PHP_FUNCTION(xml_parser_free);
-PHP_FUNCTION(xml_parser_set_option);
-PHP_FUNCTION(xml_parser_get_option);
-PHP_FUNCTION(xml_parse_into_struct);
-
 static zend_object *xml_parser_create_object(zend_class_entry *class_type);
 static void xml_parser_free_obj(zend_object *object);
 static HashTable *xml_parser_get_gc(zend_object *object, zval **table, int *n);
@@ -205,33 +182,6 @@ void _xml_startNamespaceDeclHandler(void *, const XML_Char *, const XML_Char *);
 void _xml_endNamespaceDeclHandler(void *, const XML_Char *);
 /* }}} */
 
-/* {{{ extension definition structures */
-static const zend_function_entry xml_functions[] = {
-	PHP_FE(xml_parser_create,					arginfo_xml_parser_create)
-	PHP_FE(xml_parser_create_ns,				arginfo_xml_parser_create_ns)
-	PHP_FE(xml_set_object, 						arginfo_xml_set_object)
-	PHP_FE(xml_set_element_handler,				arginfo_xml_set_element_handler)
-	PHP_FE(xml_set_character_data_handler,		arginfo_xml_set_character_data_handler)
-	PHP_FE(xml_set_processing_instruction_handler, 	arginfo_xml_set_processing_instruction_handler)
-	PHP_FE(xml_set_default_handler, 				arginfo_xml_set_default_handler)
-	PHP_FE(xml_set_unparsed_entity_decl_handler,arginfo_xml_set_unparsed_entity_decl_handler)
-	PHP_FE(xml_set_notation_decl_handler,		arginfo_xml_set_notation_decl_handler)
-	PHP_FE(xml_set_external_entity_ref_handler,	arginfo_xml_set_external_entity_ref_handler)
-	PHP_FE(xml_set_start_namespace_decl_handler,arginfo_xml_set_start_namespace_decl_handler)
-	PHP_FE(xml_set_end_namespace_decl_handler,	arginfo_xml_set_end_namespace_decl_handler)
-	PHP_FE(xml_parse,							arginfo_xml_parse)
-	PHP_FE(xml_parse_into_struct, 				arginfo_xml_parse_into_struct)
-	PHP_FE(xml_get_error_code,					arginfo_xml_get_error_code)
-	PHP_FE(xml_error_string,					arginfo_xml_error_string)
-	PHP_FE(xml_get_current_line_number,			arginfo_xml_get_current_line_number)
-	PHP_FE(xml_get_current_column_number,		arginfo_xml_get_current_column_number)
-	PHP_FE(xml_get_current_byte_index,			arginfo_xml_get_current_byte_index)
-	PHP_FE(xml_parser_free, 					arginfo_xml_parser_free)
-	PHP_FE(xml_parser_set_option, 				arginfo_xml_parser_set_option)
-	PHP_FE(xml_parser_get_option,				arginfo_xml_parser_get_option)
-	PHP_FE_END
-};
-
 #ifdef LIBXML_EXPAT_COMPAT
 static const zend_module_dep xml_deps[] = {
 	ZEND_MOD_REQUIRED("libxml")
@@ -247,7 +197,7 @@ zend_module_entry xml_module_entry = {
     STANDARD_MODULE_HEADER,
 #endif
 	"xml",                /* extension name */
-	xml_functions,        /* extension function list */
+	ext_functions,        /* extension function list */
 	PHP_MINIT(xml),       /* extension-wide startup function */
 	NULL,                 /* extension-wide shutdown function */
 	NULL,                 /* per-request startup function */
