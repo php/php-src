@@ -87,7 +87,6 @@ $inputs = array(
       'uppercase FALSE' =>FALSE,
 
       // empty data
-      // FIXME Return true as they skip the IS_STRING code path
       'empty string DQ' => "",
       'empty string SQ' => '',
 
