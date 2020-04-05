@@ -87,12 +87,6 @@ PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string,
 
 
 /* com_com.c */
-PHP_FUNCTION(com_event_sink);
-PHP_FUNCTION(com_create_guid);
-PHP_FUNCTION(com_print_typeinfo);
-PHP_FUNCTION(com_message_pump);
-PHP_FUNCTION(com_load_typelib);
-PHP_FUNCTION(com_get_active_object);
 PHP_METHOD(com, __construct);
 
 HRESULT php_com_invoke_helper(php_com_dotnet_object *obj, DISPID id_member,
@@ -115,32 +109,6 @@ PHP_COM_DOTNET_API IDispatch *php_com_wrapper_export(zval *val);
 int php_com_persist_minit(INIT_FUNC_ARGS);
 
 /* com_variant.c */
-PHP_FUNCTION(variant_set);
-PHP_FUNCTION(variant_add);
-PHP_FUNCTION(variant_cat);
-PHP_FUNCTION(variant_sub);
-PHP_FUNCTION(variant_mul);
-PHP_FUNCTION(variant_and);
-PHP_FUNCTION(variant_div);
-PHP_FUNCTION(variant_eqv);
-PHP_FUNCTION(variant_idiv);
-PHP_FUNCTION(variant_imp);
-PHP_FUNCTION(variant_mod);
-PHP_FUNCTION(variant_or);
-PHP_FUNCTION(variant_pow);
-PHP_FUNCTION(variant_xor);
-PHP_FUNCTION(variant_abs);
-PHP_FUNCTION(variant_fix);
-PHP_FUNCTION(variant_int);
-PHP_FUNCTION(variant_neg);
-PHP_FUNCTION(variant_not);
-PHP_FUNCTION(variant_round);
-PHP_FUNCTION(variant_cmp);
-PHP_FUNCTION(variant_date_to_timestamp);
-PHP_FUNCTION(variant_date_from_timestamp);
-PHP_FUNCTION(variant_get_type);
-PHP_FUNCTION(variant_set_type);
-PHP_FUNCTION(variant_cast);
 PHP_METHOD(variant, __construct);
 
 PHP_COM_DOTNET_API void php_com_variant_from_zval_with_type(VARIANT *v, zval *z, VARTYPE type, int codepage);

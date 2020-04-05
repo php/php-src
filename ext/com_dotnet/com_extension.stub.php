@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function variant_set(variant $variant, $value): void {}
 
 function variant_add($left, $right): variant {}
