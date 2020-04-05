@@ -51,11 +51,11 @@ function mb_strimwidth(string $str, int $start, int $width, string $trimmarker =
 
 function mb_convert_encoding(array|string $str, string $to, array|string $from = UNKNOWN): array|string|false {}
 
-function mb_convert_case(string $sourcestring, int $mode, ?string $encoding = null): string|false {}
+function mb_convert_case(string $source_string, int $mode, ?string $encoding = null): string {}
 
-function mb_strtoupper(string $sourcestring, ?string $encoding = null): string|false {}
+function mb_strtoupper(string $source_string, ?string $encoding = null): string {}
 
-function mb_strtolower(string $sourcestring, ?string $encoding = null): string|false {}
+function mb_strtolower(string $source_string, ?string $encoding = null): string {}
 
 function mb_detect_encoding(string $str, array|string|null $encoding_list = null, bool $strict = false): string|false {}
 

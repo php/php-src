@@ -2760,8 +2760,8 @@ static char *mbstring_convert_case(
 		MBSTRG(current_filter_illegal_mode), MBSTRG(current_filter_illegal_substchar));
 }
 
-/* {{{ proto string mb_convert_case(string sourcestring, int mode [, string encoding])
-   Returns a case-folded version of sourcestring */
+/* {{{ proto string mb_convert_case(string source_string, int mode [, string encoding])
+   Returns a case-folded version of source_string */
 PHP_FUNCTION(mb_convert_case)
 {
 	zend_string *from_encoding = NULL;
@@ -2772,9 +2772,7 @@ PHP_FUNCTION(mb_convert_case)
 	size_t ret_len;
 	const mbfl_encoding *enc;
 
-	RETVAL_FALSE;
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|S!", &str, &str_len,
-				&case_mode, &from_encoding) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|S!", &str, &str_len, &case_mode, &from_encoding) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2784,22 +2782,23 @@ PHP_FUNCTION(mb_convert_case)
 	}
 
 	if (case_mode < 0 || case_mode > PHP_UNICODE_CASE_MODE_MAX) {
-		php_error_docref(NULL, E_WARNING, "Invalid case mode");
-		return;
+		zend_argument_value_error(2, "must be one of MB_CASE_UPPER, MB_CASE_LOWER, MB_CASE_TITLE, MB_CASE_FOLD,"
+			" MB_CASE_UPPER_SIMPLE, MB_CASE_LOWER_SIMPLE, MB_CASE_TITLE_SIMPLE, or MB_CASE_FOLD_SIMPLE");
+		RETURN_THROWS();
 	}
 
 	newstr = mbstring_convert_case(case_mode, str, str_len, &ret_len, enc);
+	/* If newstr is NULL something went wrong in mbfl and this is a bug */
+	ZEND_ASSERT(newstr != NULL);
 
-	if (newstr) {
-		// TODO: avoid reallocation ???
-		RETVAL_STRINGL(newstr, ret_len);
-		efree(newstr);
-	}
+	// TODO: avoid reallocation ???
+	RETVAL_STRINGL(newstr, ret_len);
+	efree(newstr);
 }
 /* }}} */
 
-/* {{{ proto string mb_strtoupper(string sourcestring [, string encoding])
- *  Returns a uppercased version of sourcestring
+/* {{{ proto string mb_strtoupper(string source_string [, string encoding])
+ *  Returns a upper cased version of source_string
  */
 PHP_FUNCTION(mb_strtoupper)
 {
@@ -2810,8 +2809,7 @@ PHP_FUNCTION(mb_strtoupper)
 	size_t ret_len;
 	const mbfl_encoding *enc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|S!", &str, &str_len,
-				&from_encoding) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|S!", &str, &str_len, &from_encoding) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2821,19 +2819,17 @@ PHP_FUNCTION(mb_strtoupper)
 	}
 
 	newstr = mbstring_convert_case(PHP_UNICODE_CASE_UPPER, str, str_len, &ret_len, enc);
+	/* If newstr is NULL something went wrong in mbfl and this is a bug */
+	ZEND_ASSERT(newstr != NULL);
 
-	if (newstr) {
-		// TODO: avoid reallocation ???
-		RETVAL_STRINGL(newstr, ret_len);
-		efree(newstr);
-		return;
-	}
-	RETURN_FALSE;
+	// TODO: avoid reallocation ???
+	RETVAL_STRINGL(newstr, ret_len);
+	efree(newstr);
 }
 /* }}} */
 
-/* {{{ proto string mb_strtolower(string sourcestring [, string encoding])
- *  Returns a lowercased version of sourcestring
+/* {{{ proto string mb_strtolower(string source_string [, string encoding])
+ *  Returns a lower cased version of source_string
  */
 PHP_FUNCTION(mb_strtolower)
 {
@@ -2844,8 +2840,7 @@ PHP_FUNCTION(mb_strtolower)
 	size_t ret_len;
 	const mbfl_encoding *enc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|S!", &str, &str_len,
-				&from_encoding) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|S!", &str, &str_len, &from_encoding) == FAILURE) {
 		RETURN_THROWS();
 	}
 
@@ -2855,14 +2850,12 @@ PHP_FUNCTION(mb_strtolower)
 	}
 
 	newstr = mbstring_convert_case(PHP_UNICODE_CASE_LOWER, str, str_len, &ret_len, enc);
+	/* If newstr is NULL something went wrong in mbfl and this is a bug */
+	ZEND_ASSERT(newstr != NULL);
 
-	if (newstr) {
-		// TODO: avoid reallocation ???
-		RETVAL_STRINGL(newstr, ret_len);
-		efree(newstr);
-		return;
-	}
-	RETURN_FALSE;
+	// TODO: avoid reallocation ???
+	RETVAL_STRINGL(newstr, ret_len);
+	efree(newstr);
 }
 /* }}} */
 
