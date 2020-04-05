@@ -2077,6 +2077,7 @@ PHP_FUNCTION(mb_substitute_character)
 		}
 	} else {
 		if (Z_TYPE_P(arg1) == IS_STRING) {
+			/* This also covers the empty string case */
 			if (strncasecmp("none", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
 				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_NONE;
 				RETURN_TRUE;
@@ -2088,14 +2089,6 @@ PHP_FUNCTION(mb_substitute_character)
 			if (strncasecmp("entity", Z_STRVAL_P(arg1), Z_STRLEN_P(arg1)) == 0) {
 				MBSTRG(current_filter_illegal_mode) = MBFL_OUTPUTFILTER_ILLEGAL_MODE_ENTITY;
 				RETURN_TRUE;
-			}
-			/* TODO Figure out why literal empty strings don't this code path */
-			/* As white space strings are considered valid numeric strings
-			 * Only do the empty case as it seems the most likely to happen */
-			if (Z_STRLEN_P(arg1) < 1) {
-				php_error_docref(NULL, E_WARNING,
-					"Substitute character must not be empty");
-				RETURN_FALSE;
 			}
 			if (!is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0)) {
 				php_error_docref(NULL, E_WARNING,
