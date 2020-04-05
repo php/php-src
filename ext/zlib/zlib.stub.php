@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function ob_gzhandler(string $data, int $flags): string|false {}
 
 function zlib_get_coding_type(): string|false {}

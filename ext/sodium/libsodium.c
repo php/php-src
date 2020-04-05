@@ -66,119 +66,6 @@ static zend_class_entry *sodium_exception_ce;
 # define crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_MIN crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE
 #endif
 
-static const zend_function_entry sodium_functions[] = {
-	PHP_FE(sodium_crypto_aead_aes256gcm_is_available, arginfo_sodium_crypto_aead_aes256gcm_is_available)
-#ifdef HAVE_AESGCM
-	PHP_FE(sodium_crypto_aead_aes256gcm_decrypt, arginfo_sodium_crypto_aead_aes256gcm_decrypt)
-	PHP_FE(sodium_crypto_aead_aes256gcm_encrypt, arginfo_sodium_crypto_aead_aes256gcm_encrypt)
-	PHP_FE(sodium_crypto_aead_aes256gcm_keygen, arginfo_sodium_crypto_aead_aes256gcm_keygen)
-#endif
-	PHP_FE(sodium_crypto_aead_chacha20poly1305_decrypt, arginfo_sodium_crypto_aead_chacha20poly1305_decrypt)
-	PHP_FE(sodium_crypto_aead_chacha20poly1305_encrypt, arginfo_sodium_crypto_aead_chacha20poly1305_encrypt)
-	PHP_FE(sodium_crypto_aead_chacha20poly1305_keygen, arginfo_sodium_crypto_aead_chacha20poly1305_keygen)
-	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_decrypt, arginfo_sodium_crypto_aead_chacha20poly1305_ietf_decrypt)
-	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_encrypt, arginfo_sodium_crypto_aead_chacha20poly1305_ietf_encrypt)
-	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_keygen, arginfo_sodium_crypto_aead_chacha20poly1305_ietf_keygen)
-#ifdef crypto_aead_xchacha20poly1305_IETF_NPUBBYTES
-	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_decrypt, arginfo_sodium_crypto_aead_xchacha20poly1305_ietf_decrypt)
-	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_keygen, arginfo_sodium_crypto_aead_xchacha20poly1305_ietf_keygen)
-	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_encrypt, arginfo_sodium_crypto_aead_xchacha20poly1305_ietf_encrypt)
-#endif
-	PHP_FE(sodium_crypto_auth, arginfo_sodium_crypto_auth)
-	PHP_FE(sodium_crypto_auth_keygen, arginfo_sodium_crypto_auth_keygen)
-	PHP_FE(sodium_crypto_auth_verify, arginfo_sodium_crypto_auth_verify)
-	PHP_FE(sodium_crypto_box, arginfo_sodium_crypto_box)
-	PHP_FE(sodium_crypto_box_keypair, arginfo_sodium_crypto_box_keypair)
-	PHP_FE(sodium_crypto_box_seed_keypair, arginfo_sodium_crypto_box_seed_keypair)
-	PHP_FE(sodium_crypto_box_keypair_from_secretkey_and_publickey, arginfo_sodium_crypto_box_keypair_from_secretkey_and_publickey)
-	PHP_FE(sodium_crypto_box_open, arginfo_sodium_crypto_box_open)
-	PHP_FE(sodium_crypto_box_publickey, arginfo_sodium_crypto_box_publickey)
-	PHP_FE(sodium_crypto_box_publickey_from_secretkey, arginfo_sodium_crypto_box_publickey_from_secretkey)
-	PHP_FE(sodium_crypto_box_seal, arginfo_sodium_crypto_box_seal)
-	PHP_FE(sodium_crypto_box_seal_open, arginfo_sodium_crypto_box_seal_open)
-	PHP_FE(sodium_crypto_box_secretkey, arginfo_sodium_crypto_box_secretkey)
-	PHP_FE(sodium_crypto_kx_keypair, arginfo_sodium_crypto_kx_keypair)
-	PHP_FE(sodium_crypto_kx_publickey, arginfo_sodium_crypto_kx_publickey)
-	PHP_FE(sodium_crypto_kx_secretkey, arginfo_sodium_crypto_kx_secretkey)
-	PHP_FE(sodium_crypto_kx_seed_keypair, arginfo_sodium_crypto_kx_seed_keypair)
-	PHP_FE(sodium_crypto_kx_client_session_keys, arginfo_sodium_crypto_kx_client_session_keys)
-	PHP_FE(sodium_crypto_kx_server_session_keys, arginfo_sodium_crypto_kx_server_session_keys)
-	PHP_FE(sodium_crypto_generichash, arginfo_sodium_crypto_generichash)
-	PHP_FE(sodium_crypto_generichash_keygen, arginfo_sodium_crypto_generichash_keygen)
-	PHP_FE(sodium_crypto_generichash_init, arginfo_sodium_crypto_generichash_init)
-	PHP_FE(sodium_crypto_generichash_update, arginfo_sodium_crypto_generichash_update)
-	PHP_FE(sodium_crypto_generichash_final, arginfo_sodium_crypto_generichash_final)
-	PHP_FE(sodium_crypto_kdf_derive_from_key, arginfo_sodium_crypto_kdf_derive_from_key)
-	PHP_FE(sodium_crypto_kdf_keygen, arginfo_sodium_crypto_kdf_keygen)
-#ifdef crypto_pwhash_SALTBYTES
-	PHP_FE(sodium_crypto_pwhash, arginfo_sodium_crypto_pwhash)
-	PHP_FE(sodium_crypto_pwhash_str, arginfo_sodium_crypto_pwhash_str)
-	PHP_FE(sodium_crypto_pwhash_str_verify, arginfo_sodium_crypto_pwhash_str_verify)
-#endif
-#if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
-	PHP_FE(sodium_crypto_pwhash_str_needs_rehash, arginfo_sodium_crypto_pwhash_str_needs_rehash)
-#endif
-#ifdef crypto_pwhash_scryptsalsa208sha256_SALTBYTES
-	PHP_FE(sodium_crypto_pwhash_scryptsalsa208sha256, arginfo_sodium_crypto_pwhash_scryptsalsa208sha256)
-	PHP_FE(sodium_crypto_pwhash_scryptsalsa208sha256_str, arginfo_sodium_crypto_pwhash_scryptsalsa208sha256_str)
-	PHP_FE(sodium_crypto_pwhash_scryptsalsa208sha256_str_verify, arginfo_sodium_crypto_pwhash_scryptsalsa208sha256_str_verify)
-#endif
-	PHP_FE(sodium_crypto_scalarmult, arginfo_sodium_crypto_scalarmult)
-	PHP_FE(sodium_crypto_secretbox, arginfo_sodium_crypto_secretbox)
-	PHP_FE(sodium_crypto_secretbox_keygen, arginfo_sodium_crypto_secretbox_keygen)
-	PHP_FE(sodium_crypto_secretbox_open, arginfo_sodium_crypto_secretbox_open)
-#ifdef crypto_secretstream_xchacha20poly1305_ABYTES
-	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_keygen, arginfo_sodium_crypto_secretstream_xchacha20poly1305_keygen)
-	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_init_push, arginfo_sodium_crypto_secretstream_xchacha20poly1305_init_push)
-	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_push, arginfo_sodium_crypto_secretstream_xchacha20poly1305_push)
-	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_init_pull, arginfo_sodium_crypto_secretstream_xchacha20poly1305_init_pull)
-	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_pull, arginfo_sodium_crypto_secretstream_xchacha20poly1305_pull)
-	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_rekey, arginfo_sodium_crypto_secretstream_xchacha20poly1305_rekey)
-#endif
-	PHP_FE(sodium_crypto_shorthash, arginfo_sodium_crypto_shorthash)
-	PHP_FE(sodium_crypto_shorthash_keygen, arginfo_sodium_crypto_shorthash_keygen)
-	PHP_FE(sodium_crypto_sign, arginfo_sodium_crypto_sign)
-	PHP_FE(sodium_crypto_sign_detached, arginfo_sodium_crypto_sign_detached)
-	PHP_FE(sodium_crypto_sign_ed25519_pk_to_curve25519, arginfo_sodium_crypto_sign_ed25519_pk_to_curve25519)
-	PHP_FE(sodium_crypto_sign_ed25519_sk_to_curve25519, arginfo_sodium_crypto_sign_ed25519_sk_to_curve25519)
-	PHP_FE(sodium_crypto_sign_keypair, arginfo_sodium_crypto_sign_keypair)
-	PHP_FE(sodium_crypto_sign_keypair_from_secretkey_and_publickey, arginfo_sodium_crypto_sign_keypair_from_secretkey_and_publickey)
-	PHP_FE(sodium_crypto_sign_open, arginfo_sodium_crypto_sign_open)
-	PHP_FE(sodium_crypto_sign_publickey, arginfo_sodium_crypto_sign_publickey)
-	PHP_FE(sodium_crypto_sign_secretkey, arginfo_sodium_crypto_sign_secretkey)
-	PHP_FE(sodium_crypto_sign_publickey_from_secretkey, arginfo_sodium_crypto_sign_publickey_from_secretkey)
-	PHP_FE(sodium_crypto_sign_seed_keypair, arginfo_sodium_crypto_sign_seed_keypair)
-	PHP_FE(sodium_crypto_sign_verify_detached, arginfo_sodium_crypto_sign_verify_detached)
-	PHP_FE(sodium_crypto_stream, arginfo_sodium_crypto_stream)
-	PHP_FE(sodium_crypto_stream_keygen, arginfo_sodium_crypto_stream_keygen)
-	PHP_FE(sodium_crypto_stream_xor, arginfo_sodium_crypto_stream_xor)
-
-	/* helpers */
-
-	PHP_FE(sodium_add, arginfo_sodium_add)
-	PHP_FE(sodium_compare, arginfo_sodium_compare)
-	PHP_FE(sodium_increment, arginfo_sodium_increment)
-	PHP_FE(sodium_memcmp, arginfo_sodium_memcmp)
-	PHP_FE(sodium_memzero, arginfo_sodium_memzero)
-	PHP_FE(sodium_pad, arginfo_sodium_pad)
-	PHP_FE(sodium_unpad, arginfo_sodium_unpad)
-
-	/* codecs */
-
-	PHP_FE(sodium_bin2hex, arginfo_sodium_bin2hex)
-	PHP_FE(sodium_hex2bin, arginfo_sodium_hex2bin)
-#ifdef sodium_base64_VARIANT_ORIGINAL
-	PHP_FE(sodium_bin2base64, arginfo_sodium_bin2base64)
-	PHP_FE(sodium_base642bin, arginfo_sodium_base642bin)
-#endif
-
-	/* aliases */
-
-	PHP_FALIAS(sodium_crypto_scalarmult_base, sodium_crypto_box_publickey_from_secretkey, arginfo_sodium_crypto_scalarmult_base)
-
-	PHP_FE_END
-};
-
 /* Load after the "standard" module in order to give it
  * priority in registering argon2i/argon2id password hashers.
  */
@@ -192,7 +79,7 @@ zend_module_entry sodium_module_entry = {
 	NULL,
 	sodium_deps,
 	"sodium",
-	sodium_functions,
+	ext_functions,
 	PHP_MINIT(sodium),
 	PHP_MSHUTDOWN(sodium),
 	NULL,

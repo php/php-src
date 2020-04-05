@@ -37,26 +37,12 @@
 #include "zend_smart_str.h"
 #include "php_ini.h"
 
-/* {{{ sysvshm_functions[]
- */
-static const zend_function_entry sysvshm_functions[] = {
-	PHP_FE(shm_attach,		arginfo_shm_attach)
-	PHP_FE(shm_remove,		arginfo_shm_detach)
-	PHP_FE(shm_detach, 		arginfo_shm_remove)
-	PHP_FE(shm_put_var,		arginfo_shm_put_var)
-	PHP_FE(shm_has_var,		arginfo_shm_has_var)
-	PHP_FE(shm_get_var,		arginfo_shm_get_var)
-	PHP_FE(shm_remove_var,	arginfo_shm_remove_var)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ sysvshm_module_entry
  */
 zend_module_entry sysvshm_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"sysvshm",
-	sysvshm_functions,
+	ext_functions,
 	PHP_MINIT(sysvshm),
 	NULL,
 	NULL,

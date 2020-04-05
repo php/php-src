@@ -63,21 +63,6 @@ extern zend_module_entry xmlrpc_module_entry;
 PHP_MINIT_FUNCTION(xmlrpc);
 PHP_MINFO_FUNCTION(xmlrpc);
 
-PHP_FUNCTION(xmlrpc_encode);
-PHP_FUNCTION(xmlrpc_decode);
-PHP_FUNCTION(xmlrpc_decode_request);
-PHP_FUNCTION(xmlrpc_encode_request);
-PHP_FUNCTION(xmlrpc_get_type);
-PHP_FUNCTION(xmlrpc_set_type);
-PHP_FUNCTION(xmlrpc_is_fault);
-PHP_FUNCTION(xmlrpc_server_create);
-PHP_FUNCTION(xmlrpc_server_destroy);
-PHP_FUNCTION(xmlrpc_server_register_method);
-PHP_FUNCTION(xmlrpc_server_call_method);
-PHP_FUNCTION(xmlrpc_parse_method_descriptions);
-PHP_FUNCTION(xmlrpc_server_add_introspection_data);
-PHP_FUNCTION(xmlrpc_server_register_introspection_callback);
-
 #else
 
 #define phpext_xmlrpc_ptr NULL

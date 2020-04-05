@@ -38,23 +38,7 @@
 #include <readline/history.h>
 #endif
 
-PHP_FUNCTION(readline);
-PHP_FUNCTION(readline_add_history);
-PHP_FUNCTION(readline_info);
-PHP_FUNCTION(readline_clear_history);
-#ifdef HAVE_HISTORY_LIST
-PHP_FUNCTION(readline_list_history);
-#endif
-PHP_FUNCTION(readline_read_history);
-PHP_FUNCTION(readline_write_history);
-PHP_FUNCTION(readline_completion_function);
-
 #if HAVE_RL_CALLBACK_READ_CHAR
-PHP_FUNCTION(readline_callback_handler_install);
-PHP_FUNCTION(readline_callback_read_char);
-PHP_FUNCTION(readline_callback_handler_remove);
-PHP_FUNCTION(readline_redisplay);
-PHP_FUNCTION(readline_on_new_line);
 
 static zval _prepped_callback;
 
@@ -71,33 +55,10 @@ PHP_MINFO_FUNCTION(readline);
 /* }}} */
 
 /* {{{ module stuff */
-static const zend_function_entry php_readline_functions[] = {
-	PHP_FE(readline,	   		        arginfo_readline)
-	PHP_FE(readline_info,  	            arginfo_readline_info)
-	PHP_FE(readline_add_history, 		arginfo_readline_add_history)
-	PHP_FE(readline_clear_history, 		arginfo_readline_clear_history)
-#ifdef HAVE_HISTORY_LIST
-	PHP_FE(readline_list_history, 		arginfo_readline_list_history)
-#endif
-	PHP_FE(readline_read_history, 		arginfo_readline_read_history)
-	PHP_FE(readline_write_history, 		arginfo_readline_write_history)
-	PHP_FE(readline_completion_function,arginfo_readline_completion_function)
-#if HAVE_RL_CALLBACK_READ_CHAR
-	PHP_FE(readline_callback_handler_install, arginfo_readline_callback_handler_install)
-	PHP_FE(readline_callback_read_char,			arginfo_readline_callback_read_char)
-	PHP_FE(readline_callback_handler_remove,	arginfo_readline_callback_handler_remove)
-	PHP_FE(readline_redisplay, arginfo_readline_redisplay)
-#endif
-#if HAVE_RL_ON_NEW_LINE
-	PHP_FE(readline_on_new_line, arginfo_readline_on_new_line)
-#endif
-	PHP_FE_END
-};
-
 zend_module_entry readline_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"readline",
-	php_readline_functions,
+	ext_functions,
 	PHP_MINIT(readline),
 	PHP_MSHUTDOWN(readline),
 	NULL,

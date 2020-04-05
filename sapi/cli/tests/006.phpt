@@ -98,6 +98,17 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
       }
       - Return [ array|string|null ]
     }
+    Function [ <internal:pcre> function preg_filter ] {
+
+      - Parameters [5] {
+        Parameter #0 [ <required> $regex ]
+        Parameter #1 [ <required> $replace ]
+        Parameter #2 [ <required> $subject ]
+        Parameter #3 [ <optional> int $limit ]
+        Parameter #4 [ <optional> &$count ]
+      }
+      - Return [ array|string|null ]
+    }
     Function [ <internal:pcre> function preg_replace_callback ] {
 
       - Parameters [6] {
@@ -118,17 +129,6 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
         Parameter #2 [ <optional> int $limit ]
         Parameter #3 [ <optional> &$count ]
         Parameter #4 [ <optional> int $flags ]
-      }
-      - Return [ array|string|null ]
-    }
-    Function [ <internal:pcre> function preg_filter ] {
-
-      - Parameters [5] {
-        Parameter #0 [ <required> $regex ]
-        Parameter #1 [ <required> $replace ]
-        Parameter #2 [ <required> $subject ]
-        Parameter #3 [ <optional> int $limit ]
-        Parameter #4 [ <optional> &$count ]
       }
       - Return [ array|string|null ]
     }

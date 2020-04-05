@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function openssl_x509_export_to_file($x509, string $outfilename, bool $notext = true): bool {}
 
 function openssl_x509_export($x509 , &$out, bool $notext = true): bool {}

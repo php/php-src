@@ -105,107 +105,10 @@ static PHP_MSHUTDOWN_FUNCTION(sockets);
 static PHP_MINFO_FUNCTION(sockets);
 static PHP_RSHUTDOWN_FUNCTION(sockets);
 
-PHP_FUNCTION(socket_select);
-PHP_FUNCTION(socket_create_listen);
-#ifdef HAVE_SOCKETPAIR
-PHP_FUNCTION(socket_create_pair);
-#endif
-PHP_FUNCTION(socket_accept);
-PHP_FUNCTION(socket_set_nonblock);
-PHP_FUNCTION(socket_set_block);
-PHP_FUNCTION(socket_listen);
-PHP_FUNCTION(socket_close);
-PHP_FUNCTION(socket_write);
-PHP_FUNCTION(socket_read);
-PHP_FUNCTION(socket_getsockname);
-PHP_FUNCTION(socket_getpeername);
-PHP_FUNCTION(socket_create);
-PHP_FUNCTION(socket_connect);
-PHP_FUNCTION(socket_strerror);
-PHP_FUNCTION(socket_bind);
-PHP_FUNCTION(socket_recv);
-PHP_FUNCTION(socket_send);
-PHP_FUNCTION(socket_recvfrom);
-PHP_FUNCTION(socket_sendto);
-PHP_FUNCTION(socket_get_option);
-PHP_FUNCTION(socket_set_option);
-#ifdef HAVE_SHUTDOWN
-PHP_FUNCTION(socket_shutdown);
-#endif
-PHP_FUNCTION(socket_last_error);
-PHP_FUNCTION(socket_clear_error);
-PHP_FUNCTION(socket_import_stream);
-PHP_FUNCTION(socket_export_stream);
-PHP_FUNCTION(socket_addrinfo_lookup);
-PHP_FUNCTION(socket_addrinfo_connect);
-PHP_FUNCTION(socket_addrinfo_bind);
-PHP_FUNCTION(socket_addrinfo_explain);
-#ifdef PHP_WIN32
-PHP_FUNCTION(socket_wsaprotocol_info_export);
-PHP_FUNCTION(socket_wsaprotocol_info_import);
-PHP_FUNCTION(socket_wsaprotocol_info_release);
-#endif
-
-/* {{{ sockets_functions[]
- */
-static const zend_function_entry sockets_functions[] = {
-	PHP_FE(socket_select,			arginfo_socket_select)
-	PHP_FE(socket_create,			arginfo_socket_create)
-	PHP_FE(socket_create_listen,	arginfo_socket_create_listen)
-#ifdef HAVE_SOCKETPAIR
-	PHP_FE(socket_create_pair,		arginfo_socket_create_pair)
-#endif
-	PHP_FE(socket_accept,			arginfo_socket_accept)
-	PHP_FE(socket_set_nonblock,		arginfo_socket_set_nonblock)
-	PHP_FE(socket_set_block,		arginfo_socket_set_block)
-	PHP_FE(socket_listen,			arginfo_socket_listen)
-	PHP_FE(socket_close,			arginfo_socket_close)
-	PHP_FE(socket_write,			arginfo_socket_write)
-	PHP_FE(socket_read,				arginfo_socket_read)
-	PHP_FE(socket_getsockname, 		arginfo_socket_getsockname)
-	PHP_FE(socket_getpeername, 		arginfo_socket_getpeername)
-	PHP_FE(socket_connect,			arginfo_socket_connect)
-	PHP_FE(socket_strerror,			arginfo_socket_strerror)
-	PHP_FE(socket_bind,				arginfo_socket_bind)
-	PHP_FE(socket_recv,				arginfo_socket_recv)
-	PHP_FE(socket_send,				arginfo_socket_send)
-	PHP_FE(socket_recvfrom,			arginfo_socket_recvfrom)
-	PHP_FE(socket_sendto,			arginfo_socket_sendto)
-	PHP_FE(socket_get_option,		arginfo_socket_get_option)
-	PHP_FE(socket_set_option,		arginfo_socket_set_option)
-#ifdef HAVE_SHUTDOWN
-	PHP_FE(socket_shutdown,			arginfo_socket_shutdown)
-#endif
-	PHP_FE(socket_last_error,		arginfo_socket_last_error)
-	PHP_FE(socket_clear_error,		arginfo_socket_clear_error)
-	PHP_FE(socket_import_stream,	arginfo_socket_import_stream)
-	PHP_FE(socket_export_stream,	arginfo_socket_export_stream)
-	PHP_FE(socket_sendmsg,			arginfo_socket_sendmsg)
-	PHP_FE(socket_recvmsg,			arginfo_socket_recvmsg)
-	PHP_FE(socket_cmsg_space,		arginfo_socket_cmsg_space)
-	PHP_FE(socket_addrinfo_lookup,	arginfo_socket_addrinfo_lookup)
-	PHP_FE(socket_addrinfo_connect,	arginfo_socket_addrinfo_connect)
-	PHP_FE(socket_addrinfo_bind,	arginfo_socket_addrinfo_bind)
-	PHP_FE(socket_addrinfo_explain,	arginfo_socket_addrinfo_explain)
-
-	/* for downwards compatibility */
-	PHP_FALIAS(socket_getopt, socket_get_option, arginfo_socket_getopt)
-	PHP_FALIAS(socket_setopt, socket_set_option, arginfo_socket_setopt)
-
-#ifdef PHP_WIN32
-	PHP_FE(socket_wsaprotocol_info_export, arginfo_socket_wsaprotocol_info_export)
-	PHP_FE(socket_wsaprotocol_info_import, arginfo_socket_wsaprotocol_info_import)
-	PHP_FE(socket_wsaprotocol_info_release, arginfo_socket_wsaprotocol_info_release)
-#endif
-
-	PHP_FE_END
-};
-/* }}} */
-
 zend_module_entry sockets_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"sockets",
-	sockets_functions,
+	ext_functions,
 	PHP_MINIT(sockets),
 	PHP_MSHUTDOWN(sockets),
 	NULL,

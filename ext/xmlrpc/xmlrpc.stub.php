@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function xmlrpc_encode($value): ?string {}
 
 /** @return mixed */

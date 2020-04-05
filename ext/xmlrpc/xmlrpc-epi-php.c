@@ -72,28 +72,10 @@
 
 static int le_xmlrpc_server;
 
-static const zend_function_entry xmlrpc_functions[] = {
-	PHP_FE(xmlrpc_encode,									arginfo_xmlrpc_encode)
-	PHP_FE(xmlrpc_decode,									arginfo_xmlrpc_decode)
-	PHP_FE(xmlrpc_decode_request,							arginfo_xmlrpc_decode_request)
-	PHP_FE(xmlrpc_encode_request,							arginfo_xmlrpc_encode_request)
-	PHP_FE(xmlrpc_get_type,									arginfo_xmlrpc_encode)
-	PHP_FE(xmlrpc_set_type,									arginfo_xmlrpc_set_type)
-	PHP_FE(xmlrpc_is_fault,									arginfo_xmlrpc_is_fault)
-	PHP_FE(xmlrpc_server_create,							arginfo_xmlrpc_server_create)
-	PHP_FE(xmlrpc_server_destroy,							arginfo_xmlrpc_server_destroy)
-	PHP_FE(xmlrpc_server_register_method,					arginfo_xmlrpc_server_register_method)
-	PHP_FE(xmlrpc_server_call_method,						arginfo_xmlrpc_server_call_method)
-	PHP_FE(xmlrpc_parse_method_descriptions,				arginfo_xmlrpc_parse_method_descriptions)
-	PHP_FE(xmlrpc_server_add_introspection_data,			arginfo_xmlrpc_server_add_introspection_data)
-	PHP_FE(xmlrpc_server_register_introspection_callback,	arginfo_xmlrpc_server_register_introspection_callback)
-	PHP_FE_END
-};
-
 zend_module_entry xmlrpc_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"xmlrpc",
-	xmlrpc_functions,
+	ext_functions,
 	PHP_MINIT(xmlrpc),
 	NULL,
 	NULL,

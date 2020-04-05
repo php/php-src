@@ -63,68 +63,6 @@ static int le_result, le_conn, le_pconn;
 
 #define SAFE_SQL_NTS(n) ((SQLSMALLINT) ((n)?(SQL_NTS):0))
 
-/* {{{ odbc_functions[]
- */
-static const zend_function_entry odbc_functions[] = {
-	PHP_FE(odbc_autocommit, arginfo_odbc_autocommit)
-	PHP_FE(odbc_binmode, arginfo_odbc_binmode)
-	PHP_FE(odbc_close, arginfo_odbc_close)
-	PHP_FE(odbc_close_all, arginfo_odbc_close_all)
-	PHP_FE(odbc_columns, arginfo_odbc_columns)
-	PHP_FE(odbc_commit, arginfo_odbc_commit)
-	PHP_FE(odbc_connect, arginfo_odbc_connect)
-	PHP_FE(odbc_cursor, arginfo_odbc_cursor)
-#ifdef HAVE_SQLDATASOURCES
-	PHP_FE(odbc_data_source, arginfo_odbc_data_source)
-#endif
-	PHP_FE(odbc_execute, arginfo_odbc_execute)
-	PHP_FE(odbc_error, arginfo_odbc_error)
-	PHP_FE(odbc_errormsg, arginfo_odbc_errormsg)
-	PHP_FE(odbc_exec, arginfo_odbc_exec)
-#ifdef PHP_ODBC_HAVE_FETCH_HASH
-	PHP_FE(odbc_fetch_array, arginfo_odbc_fetch_array)
-	PHP_FE(odbc_fetch_object, arginfo_odbc_fetch_object)
-#endif
-	PHP_FE(odbc_fetch_row, arginfo_odbc_fetch_row)
-	PHP_FE(odbc_fetch_into, arginfo_odbc_fetch_into)
-	PHP_FE(odbc_field_len, arginfo_odbc_field_len)
-	PHP_FE(odbc_field_scale, arginfo_odbc_field_scale)
-	PHP_FE(odbc_field_name, arginfo_odbc_field_name)
-	PHP_FE(odbc_field_type, arginfo_odbc_field_type)
-	PHP_FE(odbc_field_num, arginfo_odbc_field_num)
-	PHP_FE(odbc_free_result, arginfo_odbc_free_result)
-	PHP_FE(odbc_gettypeinfo, arginfo_odbc_gettypeinfo)
-	PHP_FE(odbc_longreadlen, arginfo_odbc_longreadlen)
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30)
-	PHP_FE(odbc_next_result, arginfo_odbc_next_result)
-#endif
-	PHP_FE(odbc_num_fields, arginfo_odbc_num_fields)
-	PHP_FE(odbc_num_rows, arginfo_odbc_num_rows)
-	PHP_FE(odbc_pconnect, arginfo_odbc_pconnect)
-	PHP_FE(odbc_prepare, arginfo_odbc_prepare)
-	PHP_FE(odbc_result, arginfo_odbc_result)
-	PHP_FE(odbc_result_all, arginfo_odbc_result_all)
-	PHP_FE(odbc_rollback, arginfo_odbc_rollback)
-	PHP_FE(odbc_setoption, arginfo_odbc_setoption)
-	PHP_FE(odbc_specialcolumns, arginfo_odbc_specialcolumns)
-	PHP_FE(odbc_statistics, arginfo_odbc_statistics)
-	PHP_FE(odbc_tables, arginfo_odbc_tables)
-	PHP_FE(odbc_primarykeys, arginfo_odbc_primarykeys)
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)    /* not supported now */
-	PHP_FE(odbc_columnprivileges, arginfo_odbc_columnprivileges)
-	PHP_FE(odbc_tableprivileges, arginfo_odbc_tableprivileges)
-#endif
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35) /* not supported */
-	PHP_FE(odbc_foreignkeys, arginfo_odbc_foreignkeys)
-	PHP_FE(odbc_procedures, arginfo_odbc_procedures)
-	PHP_FE(odbc_procedurecolumns, arginfo_odbc_procedurecolumns)
-#endif
-	PHP_FALIAS(odbc_do, odbc_exec, arginfo_odbc_do)
-	PHP_FALIAS(odbc_field_precision, odbc_field_len, arginfo_odbc_field_precision)
-	PHP_FE_END
-};
-/* }}} */
-
 PHP_ODBC_API ZEND_DECLARE_MODULE_GLOBALS(odbc)
 static PHP_GINIT_FUNCTION(odbc);
 
@@ -133,7 +71,7 @@ static PHP_GINIT_FUNCTION(odbc);
 zend_module_entry odbc_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"odbc",
-	odbc_functions,
+	ext_functions,
 	PHP_MINIT(odbc),
 	PHP_MSHUTDOWN(odbc),
 	PHP_RINIT(odbc),

@@ -46,28 +46,6 @@ static zif_handler orig_file_exists = NULL;
 static zif_handler orig_is_file = NULL;
 static zif_handler orig_is_readable = NULL;
 
-/* User functions */
-static ZEND_FUNCTION(opcache_reset);
-static ZEND_FUNCTION(opcache_invalidate);
-static ZEND_FUNCTION(opcache_is_script_cached);
-
-/* Private functions */
-static ZEND_FUNCTION(opcache_get_status);
-static ZEND_FUNCTION(opcache_compile_file);
-static ZEND_FUNCTION(opcache_get_configuration);
-
-static const zend_function_entry accel_functions[] = {
-	/* User functions */
-	ZEND_FE(opcache_reset,					arginfo_opcache_reset)
-	ZEND_FE(opcache_invalidate,				arginfo_opcache_invalidate)
-	ZEND_FE(opcache_compile_file,			arginfo_opcache_compile_file)
-	ZEND_FE(opcache_is_script_cached,		arginfo_opcache_is_script_cached)
-	/* Private functions */
-	ZEND_FE(opcache_get_configuration,		arginfo_opcache_get_configuration)
-	ZEND_FE(opcache_get_status,				arginfo_opcache_get_status)
-	ZEND_FE_END
-};
-
 static int validate_api_restriction(void)
 {
 	if (ZCG(accel_directives).restrict_api && *ZCG(accel_directives).restrict_api) {
@@ -509,7 +487,7 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 static zend_module_entry accel_module_entry = {
 	STANDARD_MODULE_HEADER,
 	ACCELERATOR_PRODUCT_NAME,
-	accel_functions,
+	ext_functions,
 	ZEND_MINIT(zend_accelerator),
 	ZEND_MSHUTDOWN(zend_accelerator),
 	accel_activate,
@@ -578,7 +556,7 @@ static int accelerator_get_scripts(zval *return_value)
 
 /* {{{ proto array accelerator_get_status([bool fetch_scripts])
    Obtain statistics information regarding code acceleration */
-static ZEND_FUNCTION(opcache_get_status)
+ZEND_FUNCTION(opcache_get_status)
 {
 	zend_long reqs;
 	zval memory_usage, statistics, scripts;
@@ -712,7 +690,7 @@ static int add_blacklist_path(zend_blacklist_entry *p, zval *return_value)
 
 /* {{{ proto array accelerator_get_configuration()
    Obtain configuration information */
-static ZEND_FUNCTION(opcache_get_configuration)
+ZEND_FUNCTION(opcache_get_configuration)
 {
 	zval directives, version, blacklist;
 
@@ -806,7 +784,7 @@ static ZEND_FUNCTION(opcache_get_configuration)
 
 /* {{{ proto void accelerator_reset()
    Request that the contents of the opcode cache to be reset */
-static ZEND_FUNCTION(opcache_reset)
+ZEND_FUNCTION(opcache_reset)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -833,7 +811,7 @@ static ZEND_FUNCTION(opcache_reset)
 
 /* {{{ proto void opcache_invalidate(string $script [, bool $force = false])
    Invalidates cached script (in necessary or forced) */
-static ZEND_FUNCTION(opcache_invalidate)
+ZEND_FUNCTION(opcache_invalidate)
 {
 	char *script_name;
 	size_t script_name_len;
@@ -854,7 +832,7 @@ static ZEND_FUNCTION(opcache_invalidate)
 	}
 }
 
-static ZEND_FUNCTION(opcache_compile_file)
+ZEND_FUNCTION(opcache_compile_file)
 {
 	char *script_name;
 	size_t script_name_len;
@@ -906,7 +884,7 @@ static ZEND_FUNCTION(opcache_compile_file)
 
 /* {{{ proto bool opcache_is_script_cached(string $script)
    Return true if the script is cached in OPCache, false if it is not cached or if OPCache is not running. */
-static ZEND_FUNCTION(opcache_is_script_cached)
+ZEND_FUNCTION(opcache_is_script_cached)
 {
 	zend_string *script_name;
 

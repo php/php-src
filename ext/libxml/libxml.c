@@ -61,14 +61,6 @@ static HashTable php_libxml_exports;
 static ZEND_DECLARE_MODULE_GLOBALS(libxml)
 static PHP_GINIT_FUNCTION(libxml);
 
-static PHP_FUNCTION(libxml_set_streams_context);
-static PHP_FUNCTION(libxml_use_internal_errors);
-static PHP_FUNCTION(libxml_get_last_error);
-static PHP_FUNCTION(libxml_clear_errors);
-static PHP_FUNCTION(libxml_get_errors);
-static PHP_FUNCTION(libxml_set_external_entity_loader);
-static PHP_FUNCTION(libxml_disable_entity_loader);
-
 static zend_class_entry *libxmlerror_class_entry;
 
 /* {{{ dynamically loadable module stuff */
@@ -90,22 +82,10 @@ static int php_libxml_post_deactivate(void);
 
 /* }}} */
 
-/* {{{ extension definition structures */
-static const zend_function_entry libxml_functions[] = {
-	PHP_FE(libxml_set_streams_context, arginfo_libxml_set_streams_context)
-	PHP_FE(libxml_use_internal_errors, arginfo_libxml_use_internal_errors)
-	PHP_FE(libxml_get_last_error, arginfo_libxml_get_last_error)
-	PHP_FE(libxml_clear_errors, arginfo_libxml_clear_errors)
-	PHP_FE(libxml_get_errors, arginfo_libxml_get_errors)
-	PHP_FE(libxml_disable_entity_loader, arginfo_libxml_disable_entity_loader)
-	PHP_FE(libxml_set_external_entity_loader, arginfo_libxml_set_external_entity_loader)
-	PHP_FE_END
-};
-
 zend_module_entry libxml_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"libxml",                /* extension name */
-	libxml_functions,        /* extension function list */
+	ext_functions,           /* extension function list */
 	PHP_MINIT(libxml),       /* extension-wide startup function */
 	PHP_MSHUTDOWN(libxml),   /* extension-wide shutdown function */
 	PHP_RINIT(libxml),       /* per-request startup function */
@@ -913,7 +893,7 @@ static PHP_MINFO_FUNCTION(libxml)
 
 /* {{{ proto void libxml_set_streams_context(resource streams_context)
    Set the streams context for the next libxml document load or write */
-static PHP_FUNCTION(libxml_set_streams_context)
+PHP_FUNCTION(libxml_set_streams_context)
 {
 	zval *arg;
 
@@ -931,7 +911,7 @@ static PHP_FUNCTION(libxml_set_streams_context)
 
 /* {{{ proto bool libxml_use_internal_errors([boolean use_errors])
    Disable libxml errors and allow user to fetch error information as needed */
-static PHP_FUNCTION(libxml_use_internal_errors)
+PHP_FUNCTION(libxml_use_internal_errors)
 {
 	xmlStructuredErrorFunc current_handler;
 	zend_bool use_errors=0, retval;
@@ -972,7 +952,7 @@ static PHP_FUNCTION(libxml_use_internal_errors)
 
 /* {{{ proto object libxml_get_last_error()
    Retrieve last error from libxml */
-static PHP_FUNCTION(libxml_get_last_error)
+PHP_FUNCTION(libxml_get_last_error)
 {
 	xmlErrorPtr error;
 
@@ -1004,7 +984,7 @@ static PHP_FUNCTION(libxml_get_last_error)
 
 /* {{{ proto object libxml_get_errors()
    Retrieve array of errors */
-static PHP_FUNCTION(libxml_get_errors)
+PHP_FUNCTION(libxml_get_errors)
 {
 
 	xmlErrorPtr error;
@@ -1046,7 +1026,7 @@ static PHP_FUNCTION(libxml_get_errors)
 
 /* {{{ proto void libxml_clear_errors()
    Clear last error from libxml */
-static PHP_FUNCTION(libxml_clear_errors)
+PHP_FUNCTION(libxml_clear_errors)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1067,7 +1047,7 @@ PHP_LIBXML_API zend_bool php_libxml_disable_entity_loader(zend_bool disable) /* 
 
 /* {{{ proto bool libxml_disable_entity_loader([boolean disable])
    Disable/Enable ability to load external entities */
-static PHP_FUNCTION(libxml_disable_entity_loader)
+PHP_FUNCTION(libxml_disable_entity_loader)
 {
 	zend_bool disable = 1;
 
@@ -1082,7 +1062,7 @@ static PHP_FUNCTION(libxml_disable_entity_loader)
 
 /* {{{ proto void libxml_set_external_entity_loader(callback resolver_function)
    Changes the default external entity loader */
-static PHP_FUNCTION(libxml_set_external_entity_loader)
+PHP_FUNCTION(libxml_set_external_entity_loader)
 {
 	zend_fcall_info			fci;
 	zend_fcall_info_cache	fcc;

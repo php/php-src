@@ -67,3 +67,38 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_xmlrpc_server_register_introspec
 	ZEND_ARG_INFO(0, server)
 	ZEND_ARG_INFO(0, function)
 ZEND_END_ARG_INFO()
+
+
+ZEND_FUNCTION(xmlrpc_encode);
+ZEND_FUNCTION(xmlrpc_decode);
+ZEND_FUNCTION(xmlrpc_decode_request);
+ZEND_FUNCTION(xmlrpc_encode_request);
+ZEND_FUNCTION(xmlrpc_get_type);
+ZEND_FUNCTION(xmlrpc_set_type);
+ZEND_FUNCTION(xmlrpc_is_fault);
+ZEND_FUNCTION(xmlrpc_server_create);
+ZEND_FUNCTION(xmlrpc_server_destroy);
+ZEND_FUNCTION(xmlrpc_server_register_method);
+ZEND_FUNCTION(xmlrpc_server_call_method);
+ZEND_FUNCTION(xmlrpc_parse_method_descriptions);
+ZEND_FUNCTION(xmlrpc_server_add_introspection_data);
+ZEND_FUNCTION(xmlrpc_server_register_introspection_callback);
+
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_FE(xmlrpc_encode, arginfo_xmlrpc_encode)
+	ZEND_FE(xmlrpc_decode, arginfo_xmlrpc_decode)
+	ZEND_FE(xmlrpc_decode_request, arginfo_xmlrpc_decode_request)
+	ZEND_FE(xmlrpc_encode_request, arginfo_xmlrpc_encode_request)
+	ZEND_FE(xmlrpc_get_type, arginfo_xmlrpc_get_type)
+	ZEND_FE(xmlrpc_set_type, arginfo_xmlrpc_set_type)
+	ZEND_FE(xmlrpc_is_fault, arginfo_xmlrpc_is_fault)
+	ZEND_FE(xmlrpc_server_create, arginfo_xmlrpc_server_create)
+	ZEND_FE(xmlrpc_server_destroy, arginfo_xmlrpc_server_destroy)
+	ZEND_FE(xmlrpc_server_register_method, arginfo_xmlrpc_server_register_method)
+	ZEND_FE(xmlrpc_server_call_method, arginfo_xmlrpc_server_call_method)
+	ZEND_FE(xmlrpc_parse_method_descriptions, arginfo_xmlrpc_parse_method_descriptions)
+	ZEND_FE(xmlrpc_server_add_introspection_data, arginfo_xmlrpc_server_add_introspection_data)
+	ZEND_FE(xmlrpc_server_register_introspection_callback, arginfo_xmlrpc_server_register_introspection_callback)
+	ZEND_FE_END
+};

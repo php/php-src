@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 /** @return resource|false */
 function msg_get_queue(int $key, int $perms = 0666) {}
 

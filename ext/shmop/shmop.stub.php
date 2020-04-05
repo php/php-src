@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 /** @return resource|false */
 function shmop_open(int $key, string $flags, int $mode, int $size) {}
 

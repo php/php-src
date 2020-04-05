@@ -54,23 +54,12 @@ union semun {
 
 #endif
 
-/* {{{ sysvsem_functions[]
- */
-static const zend_function_entry sysvsem_functions[] = {
-	PHP_FE(sem_get,			arginfo_sem_get)
-	PHP_FE(sem_acquire,		arginfo_sem_acquire)
-	PHP_FE(sem_release,		arginfo_sem_release)
-	PHP_FE(sem_remove,		arginfo_sem_remove)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ sysvsem_module_entry
  */
 zend_module_entry sysvsem_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"sysvsem",
-	sysvsem_functions,
+	ext_functions,
 	PHP_MINIT(sysvsem),
 	NULL,
 	NULL,

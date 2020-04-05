@@ -80,3 +80,54 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_xml_parser_get_option, 0, 2, MAY
 	ZEND_ARG_OBJ_INFO(0, parser, XmlParser, 0)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+
+
+ZEND_FUNCTION(xml_parser_create);
+ZEND_FUNCTION(xml_parser_create_ns);
+ZEND_FUNCTION(xml_set_object);
+ZEND_FUNCTION(xml_set_element_handler);
+ZEND_FUNCTION(xml_set_character_data_handler);
+ZEND_FUNCTION(xml_set_processing_instruction_handler);
+ZEND_FUNCTION(xml_set_default_handler);
+ZEND_FUNCTION(xml_set_unparsed_entity_decl_handler);
+ZEND_FUNCTION(xml_set_notation_decl_handler);
+ZEND_FUNCTION(xml_set_external_entity_ref_handler);
+ZEND_FUNCTION(xml_set_start_namespace_decl_handler);
+ZEND_FUNCTION(xml_set_end_namespace_decl_handler);
+ZEND_FUNCTION(xml_parse);
+ZEND_FUNCTION(xml_parse_into_struct);
+ZEND_FUNCTION(xml_get_error_code);
+ZEND_FUNCTION(xml_error_string);
+ZEND_FUNCTION(xml_get_current_line_number);
+ZEND_FUNCTION(xml_get_current_column_number);
+ZEND_FUNCTION(xml_get_current_byte_index);
+ZEND_FUNCTION(xml_parser_free);
+ZEND_FUNCTION(xml_parser_set_option);
+ZEND_FUNCTION(xml_parser_get_option);
+
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_FE(xml_parser_create, arginfo_xml_parser_create)
+	ZEND_FE(xml_parser_create_ns, arginfo_xml_parser_create_ns)
+	ZEND_FE(xml_set_object, arginfo_xml_set_object)
+	ZEND_FE(xml_set_element_handler, arginfo_xml_set_element_handler)
+	ZEND_FE(xml_set_character_data_handler, arginfo_xml_set_character_data_handler)
+	ZEND_FE(xml_set_processing_instruction_handler, arginfo_xml_set_processing_instruction_handler)
+	ZEND_FE(xml_set_default_handler, arginfo_xml_set_default_handler)
+	ZEND_FE(xml_set_unparsed_entity_decl_handler, arginfo_xml_set_unparsed_entity_decl_handler)
+	ZEND_FE(xml_set_notation_decl_handler, arginfo_xml_set_notation_decl_handler)
+	ZEND_FE(xml_set_external_entity_ref_handler, arginfo_xml_set_external_entity_ref_handler)
+	ZEND_FE(xml_set_start_namespace_decl_handler, arginfo_xml_set_start_namespace_decl_handler)
+	ZEND_FE(xml_set_end_namespace_decl_handler, arginfo_xml_set_end_namespace_decl_handler)
+	ZEND_FE(xml_parse, arginfo_xml_parse)
+	ZEND_FE(xml_parse_into_struct, arginfo_xml_parse_into_struct)
+	ZEND_FE(xml_get_error_code, arginfo_xml_get_error_code)
+	ZEND_FE(xml_error_string, arginfo_xml_error_string)
+	ZEND_FE(xml_get_current_line_number, arginfo_xml_get_current_line_number)
+	ZEND_FE(xml_get_current_column_number, arginfo_xml_get_current_column_number)
+	ZEND_FE(xml_get_current_byte_index, arginfo_xml_get_current_byte_index)
+	ZEND_FE(xml_parser_free, arginfo_xml_parser_free)
+	ZEND_FE(xml_parser_set_option, arginfo_xml_parser_set_option)
+	ZEND_FE(xml_parser_get_option, arginfo_xml_parser_get_option)
+	ZEND_FE_END
+};

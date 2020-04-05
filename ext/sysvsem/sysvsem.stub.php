@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 /**
  * @todo use bool for $auto_release
  * @return resource|false

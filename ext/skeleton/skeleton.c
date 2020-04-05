@@ -67,21 +67,12 @@ PHP_MINFO_FUNCTION(%EXTNAME%)
 }
 /* }}} */
 
-/* {{{ %EXTNAME%_functions[]
- */
-static const zend_function_entry %EXTNAME%_functions[] = {
-	PHP_FE(test1,		arginfo_test1)
-	PHP_FE(test2,		arginfo_test2)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ %EXTNAME%_module_entry
  */
 zend_module_entry %EXTNAME%_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"%EXTNAME%",					/* Extension name */
-	%EXTNAME%_functions,			/* zend_function_entry */
+	ext_functions,					/* zend_function_entry */
 	NULL,							/* PHP_MINIT - Module initialization */
 	NULL,							/* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(%EXTNAME%),			/* PHP_RINIT - Request initialization */

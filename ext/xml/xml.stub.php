@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function xml_parser_create(string $encoding = UNKNOWN): XmlParser|false {}
 
 function xml_parser_create_ns(string $encoding = UNKNOWN, string $sep = ':'): XmlParser|false {}

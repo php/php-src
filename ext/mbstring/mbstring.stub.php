@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function mb_language(string $language = UNKNOWN): string|bool {}
 
 function mb_internal_encoding(string $encoding = UNKNOWN): string|bool {}
