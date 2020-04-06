@@ -20,6 +20,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplDoublyLinkedList_bottom arginfo_class_SplDoublyLinkedList_pop
 
+#define arginfo_class_SplDoublyLinkedList___debugInfo arginfo_class_SplDoublyLinkedList_pop
+
 #define arginfo_class_SplDoublyLinkedList_count arginfo_class_SplDoublyLinkedList_pop
 
 #define arginfo_class_SplDoublyLinkedList_isEmpty arginfo_class_SplDoublyLinkedList_pop

@@ -33,6 +33,9 @@ class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializa
     /** @return mixed */
     public function bottom() {}
 
+    /** @return array */
+    public function __debugInfo() {}
+
     /** @return int */
     public function count() {}
 

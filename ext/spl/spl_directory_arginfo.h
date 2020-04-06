@@ -70,6 +70,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_SplFileInfo___toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_SplFileInfo___debugInfo arginfo_class_SplFileInfo_getPath
+
 #define arginfo_class_SplFileInfo__bad_state_ex arginfo_class_SplFileInfo_getPath
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DirectoryIterator___construct, 0, 0, 1)

@@ -54,6 +54,9 @@ class SplPriorityQueue implements Iterator, Countable
 
     /** @return int */
     public function getExtractFlags() {}
+
+    /** @return array */
+    public function __debugInfo() {}
 }
 
 abstract class SplHeap implements Iterator, Countable
@@ -103,6 +106,9 @@ abstract class SplHeap implements Iterator, Countable
 
     /** @return bool */
     public function isCorrupted() {}
+
+    /** @return array */
+    public function __debugInfo() {}
 }
 
 class SplMinHeap extends SplHeap

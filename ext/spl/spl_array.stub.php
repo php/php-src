@@ -104,6 +104,9 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
 
     /** @return string */
     public function getIteratorClass() {}
+
+    /** @return array */
+    public function __debugInfo() {}
 }
 
 class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Countable
@@ -213,6 +216,9 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Coun
 
     /** @return void */
     public function seek(int $position) {}
+
+    /** @return array */
+    public function __debugInfo() {}
 }
 
 class RecursiveArrayIterator extends ArrayIterator implements RecursiveIterator

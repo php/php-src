@@ -74,6 +74,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayObject_getIteratorClass arginfo_class_ArrayObject_getArrayCopy
 
+#define arginfo_class_ArrayObject___debugInfo arginfo_class_ArrayObject_getArrayCopy
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayIterator___construct, 0, 0, 0)
 	ZEND_ARG_INFO(0, array)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
@@ -130,6 +132,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayIterator_seek, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, position, IS_LONG, 0)
 ZEND_END_ARG_INFO()
+
+#define arginfo_class_ArrayIterator___debugInfo arginfo_class_ArrayObject_getArrayCopy
 
 #define arginfo_class_RecursiveArrayIterator_hasChildren arginfo_class_ArrayObject_getArrayCopy
 

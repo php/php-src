@@ -107,6 +107,9 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
 
     /** @return void */
     public function __unserialize(array $data) {}
+
+    /** @return array */
+    public function __debugInfo() {}
 }
 
 class MultipleIterator implements Iterator
@@ -149,4 +152,7 @@ class MultipleIterator implements Iterator
 
     /** @return void */
     public function next() {}
+
+    /** @return array */
+    public function __debugInfo() {}
 }

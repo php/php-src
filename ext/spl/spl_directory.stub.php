@@ -90,6 +90,9 @@ class SplFileInfo
 
     public function __toString(): string {}
 
+    /** @return array */
+    public function __debugInfo() {}
+
     /** @return void */
     final public function _bad_state_ex() {}
 }

@@ -79,6 +79,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObjectStorage___unserialize, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, data, IS_ARRAY, 0)
 ZEND_END_ARG_INFO()
 
+#define arginfo_class_SplObjectStorage___debugInfo arginfo_class_SplSubject_notify
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_MultipleIterator___construct, 0, 0, 0)
 	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -111,3 +113,5 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_MultipleIterator_current arginfo_class_SplSubject_notify
 
 #define arginfo_class_MultipleIterator_next arginfo_class_SplSubject_notify
+
+#define arginfo_class_MultipleIterator___debugInfo arginfo_class_SplSubject_notify

@@ -39,6 +39,8 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplPriorityQueue_getExtractFlags arginfo_class_SplPriorityQueue_top
 
+#define arginfo_class_SplPriorityQueue___debugInfo arginfo_class_SplPriorityQueue_top
+
 #define arginfo_class_SplHeap_extract arginfo_class_SplPriorityQueue_top
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplHeap_insert, 0, 0, 1)
@@ -69,6 +71,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplHeap_compare, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplHeap_isCorrupted arginfo_class_SplPriorityQueue_top
+
+#define arginfo_class_SplHeap___debugInfo arginfo_class_SplPriorityQueue_top
 
 #define arginfo_class_SplMinHeap_compare arginfo_class_SplHeap_compare
 

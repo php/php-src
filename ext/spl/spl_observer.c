@@ -262,7 +262,7 @@ static zend_object *spl_object_storage_clone(zend_object *old_object)
 }
 /* }}} */
 
-static HashTable* spl_object_storage_debug_info(zend_object *obj, int *is_temp) /* {{{ */
+static inline HashTable* spl_object_storage_debug_info(zend_object *obj) /* {{{ */
 {
 	spl_SplObjectStorage *intern = spl_object_storage_from_obj(obj);
 	spl_SplObjectStorageElement *element;
@@ -271,8 +271,6 @@ static HashTable* spl_object_storage_debug_info(zend_object *obj, int *is_temp) 
 	zend_string *md5str;
 	zend_string *zname;
 	HashTable *debug_info;
-
-	*is_temp = 1;
 
 	props = obj->handlers->get_properties(obj);
 
@@ -923,6 +921,17 @@ SPL_METHOD(SplObjectStorage, __unserialize)
 	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
 }
 
+/* {{{ proto array SplObjectStorage::__debugInfo() */
+SPL_METHOD(SplObjectStorage, __debugInfo)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	RETURN_ARR(spl_object_storage_debug_info(Z_OBJ_P(ZEND_THIS)));
+}
+/* }}} */
+
 static const zend_function_entry spl_funcs_SplObjectStorage[] = {
 	SPL_ME(SplObjectStorage,  attach,      arginfo_class_SplObjectStorage_attach,        0)
 	SPL_ME(SplObjectStorage,  detach,      arginfo_class_SplObjectStorage_detach,        0)
@@ -933,6 +942,7 @@ static const zend_function_entry spl_funcs_SplObjectStorage[] = {
 	SPL_ME(SplObjectStorage,  getInfo,     arginfo_class_SplObjectStorage_getInfo,0)
 	SPL_ME(SplObjectStorage,  setInfo,     arginfo_class_SplObjectStorage_setInfo,       0)
 	SPL_ME(SplObjectStorage,  getHash,     arginfo_class_SplObjectStorage_getHash,       0)
+	SPL_ME(SplObjectStorage,  __debugInfo, arginfo_class_SplObjectStorage___debugInfo, 0)
 	/* Countable */
 	SPL_ME(SplObjectStorage,  count,       arginfo_class_SplObjectStorage_count,0)
 	/* Iterator */
@@ -1266,6 +1276,7 @@ static const zend_function_entry spl_funcs_MultipleIterator[] = {
 	SPL_ME(MultipleIterator,  detachIterator,         arginfo_class_MultipleIterator_detachIterator,	0)
 	SPL_ME(MultipleIterator,  containsIterator,       arginfo_class_MultipleIterator_containsIterator,	0)
 	SPL_MA(MultipleIterator,  countIterators,         SplObjectStorage, count,    arginfo_class_MultipleIterator_countIterators,	0)
+	SPL_MA(MultipleIterator, __debugInfo,             SplObjectStorage, __debugInfo, arginfo_class_MultipleIterator___debugInfo,	0)
 	/* Iterator */
 	SPL_ME(MultipleIterator,  rewind,                 arginfo_class_MultipleIterator_rewind,			0)
 	SPL_ME(MultipleIterator,  valid,                  arginfo_class_MultipleIterator_valid,				0)
@@ -1285,7 +1296,6 @@ PHP_MINIT_FUNCTION(spl_observer)
 	memcpy(&spl_handler_SplObjectStorage, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplObjectStorage.offset          = XtOffsetOf(spl_SplObjectStorage, std);
-	spl_handler_SplObjectStorage.get_debug_info  = spl_object_storage_debug_info;
 	spl_handler_SplObjectStorage.compare         = spl_object_storage_compare_objects;
 	spl_handler_SplObjectStorage.clone_obj       = spl_object_storage_clone;
 	spl_handler_SplObjectStorage.get_gc          = spl_object_storage_get_gc;

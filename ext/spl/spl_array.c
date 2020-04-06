@@ -824,7 +824,7 @@ static HashTable *spl_array_get_properties_for(zend_object *object, zend_prop_pu
 	return ht;
 } /* }}} */
 
-static HashTable* spl_array_get_debug_info(zend_object *obj, int *is_temp) /* {{{ */
+static inline HashTable* spl_array_get_debug_info(zend_object *obj) /* {{{ */
 {
 	zval *storage;
 	zend_string *zname;
@@ -836,11 +836,9 @@ static HashTable* spl_array_get_debug_info(zend_object *obj, int *is_temp) /* {{
 	}
 
 	if (intern->ar_flags & SPL_ARRAY_IS_SELF) {
-		*is_temp = 0;
-		return intern->std.properties;
+		return zend_array_dup(intern->std.properties);
 	} else {
 		HashTable *debug_info;
-		*is_temp = 1;
 
 		debug_info = zend_new_array(zend_hash_num_elements(intern->std.properties) + 1);
 		zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
@@ -1893,6 +1891,16 @@ SPL_METHOD(Array, __unserialize)
 }
 /* }}} */
 
+/* {{{ proto void Array::__debugInfo() */
+SPL_METHOD(Array, __debugInfo)
+{
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+
+	RETURN_ARR(spl_array_get_debug_info(Z_OBJ_P(ZEND_THIS)));
+} /* }}} */
+
 static const zend_function_entry spl_funcs_ArrayObject[] = {
 	SPL_ME(Array, __construct,      arginfo_class_ArrayObject___construct,		ZEND_ACC_PUBLIC)
 	SPL_ME(Array, offsetExists,     arginfo_class_ArrayObject_offsetExists,		ZEND_ACC_PUBLIC)
@@ -1914,6 +1922,7 @@ static const zend_function_entry spl_funcs_ArrayObject[] = {
 	SPL_ME(Array, serialize,        arginfo_class_ArrayObject_serialize,		ZEND_ACC_PUBLIC)
 	SPL_ME(Array, __unserialize,    arginfo_class_ArrayObject___unserialize,	ZEND_ACC_PUBLIC)
 	SPL_ME(Array, __serialize,      arginfo_class_ArrayObject___serialize,		ZEND_ACC_PUBLIC)
+	SPL_ME(Array, __debugInfo,      arginfo_class_ArrayObject___debugInfo,		ZEND_ACC_PUBLIC)
 	/* ArrayObject specific */
 	SPL_ME(Array, getIterator,      arginfo_class_ArrayObject_getIterator,		ZEND_ACC_PUBLIC)
 	SPL_ME(Array, exchangeArray,    arginfo_class_ArrayObject_exchangeArray,	ZEND_ACC_PUBLIC)
@@ -1943,6 +1952,7 @@ static const zend_function_entry spl_funcs_ArrayIterator[] = {
 	SPL_ME(Array, serialize,        arginfo_class_ArrayIterator_serialize,			ZEND_ACC_PUBLIC)
 	SPL_ME(Array, __unserialize,    arginfo_class_ArrayIterator___unserialize,		ZEND_ACC_PUBLIC)
 	SPL_ME(Array, __serialize,      arginfo_class_ArrayIterator___serialize,		ZEND_ACC_PUBLIC)
+	SPL_ME(Array, __debugInfo,      arginfo_class_ArrayIterator___debugInfo,		ZEND_ACC_PUBLIC)
 	/* ArrayIterator specific */
 	SPL_ME(Array, rewind,           arginfo_class_ArrayIterator_rewind,				ZEND_ACC_PUBLIC)
 	SPL_ME(Array, current,          arginfo_class_ArrayIterator_current,			ZEND_ACC_PUBLIC)
@@ -1980,7 +1990,6 @@ PHP_MINIT_FUNCTION(spl_array)
 	spl_handler_ArrayObject.count_elements = spl_array_object_count_elements;
 
 	spl_handler_ArrayObject.get_properties_for = spl_array_get_properties_for;
-	spl_handler_ArrayObject.get_debug_info = spl_array_get_debug_info;
 	spl_handler_ArrayObject.get_gc = spl_array_get_gc;
 	spl_handler_ArrayObject.read_property = spl_array_read_property;
 	spl_handler_ArrayObject.write_property = spl_array_write_property;
