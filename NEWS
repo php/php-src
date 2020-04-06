@@ -26,6 +26,9 @@ PHP                                                                        NEWS
   . Fixed bug #79497 (stream_socket_client() throws an unknown error sometimes
     with <1s timeout). (Joe Cai)
 
+PCRE:
+  . Upgraded to PCRE2 10.34. (cmb)
+
 - SPL:
   . Fixed bug #69264 (__debugInfo() ignored while extending SPL classes). (cmb)
   . Fixed bug #67369 (ArrayObject serialization drops the iterator class).
