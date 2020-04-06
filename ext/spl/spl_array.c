@@ -822,7 +822,7 @@ static HashTable *spl_array_get_properties_for(zval *object, zend_prop_purpose p
 	return ht;
 } /* }}} */
 
-static zend_always_inline HashTable* spl_array_get_debug_info(zval *obj, int *is_temp) /* {{{ */
+static zend_always_inline HashTable* spl_array_get_debug_info(zval *obj) /* {{{ */
 {
 	zval *storage;
 	zend_string *zname;
@@ -834,11 +834,9 @@ static zend_always_inline HashTable* spl_array_get_debug_info(zval *obj, int *is
 	}
 
 	if (intern->ar_flags & SPL_ARRAY_IS_SELF) {
-		*is_temp = 0;
-		return intern->std.properties;
+		return zend_array_dup(intern->std.properties);
 	} else {
 		HashTable *debug_info;
-		*is_temp = 1;
 
 		debug_info = zend_new_array(zend_hash_num_elements(intern->std.properties) + 1);
 		zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
@@ -1887,18 +1885,12 @@ SPL_METHOD(Array, __unserialize)
 SPL_METHOD(Array, __debugInfo)
 {
 	HashTable *ht;
-	int is_temp;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	ht = spl_array_get_debug_info(getThis(), &is_temp);
-	if (!is_temp) {
-		ht = zend_array_dup(ht);
-	}
-
-	RETURN_ARR(ht);
+	RETURN_ARR(spl_array_get_debug_info(getThis()));
 } /* }}} */
 
 /* {{{ arginfo and function table */
