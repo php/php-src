@@ -279,7 +279,7 @@ static zend_object *spl_object_storage_clone(zval *zobject)
 }
 /* }}} */
 
-static zend_always_inline HashTable* spl_object_storage_debug_info(zval *obj) /* {{{ */
+static inline HashTable* spl_object_storage_debug_info(zval *obj) /* {{{ */
 {
 	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(obj);
 	spl_SplObjectStorageElement *element;

@@ -822,7 +822,7 @@ static HashTable *spl_array_get_properties_for(zval *object, zend_prop_purpose p
 	return ht;
 } /* }}} */
 
-static zend_always_inline HashTable* spl_array_get_debug_info(zval *obj) /* {{{ */
+static inline HashTable* spl_array_get_debug_info(zval *obj) /* {{{ */
 {
 	zval *storage;
 	zend_string *zname;

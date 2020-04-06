@@ -598,7 +598,7 @@ static char *spl_filesystem_object_get_pathname(spl_filesystem_object *intern, s
 }
 /* }}} */
 
-static zend_always_inline HashTable *spl_filesystem_object_get_debug_info(zval *object) /* {{{ */
+static inline HashTable *spl_filesystem_object_get_debug_info(zval *object) /* {{{ */
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(object);
 	zval tmp;

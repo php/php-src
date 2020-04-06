@@ -501,7 +501,7 @@ static int spl_heap_object_count_elements(zval *object, zend_long *count) /* {{{
 }
 /* }}} */
 
-static zend_always_inline HashTable* spl_heap_object_get_debug_info(zend_class_entry *ce, zval *obj) { /* {{{ */
+static inline HashTable* spl_heap_object_get_debug_info(zend_class_entry *ce, zval *obj) { /* {{{ */
 	spl_heap_object *intern = Z_SPLHEAP_P(obj);
 	zval tmp, heap_array;
 	zend_string *pnstr;

@@ -492,7 +492,7 @@ static int spl_dllist_object_count_elements(zval *object, zend_long *count) /* {
 }
 /* }}} */
 
-static zend_always_inline HashTable* spl_dllist_object_get_debug_info(zval *obj) /* {{{{ */
+static inline HashTable* spl_dllist_object_get_debug_info(zval *obj) /* {{{{ */
 {
 	spl_dllist_object     *intern  = Z_SPLDLLIST_P(obj);
 	spl_ptr_llist_element *current = intern->llist->head, *next;
