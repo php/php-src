@@ -85,7 +85,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionGenerator_getExecutingFile arginfo_class_ReflectionFunctionAbstract___clone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionGenerator_getTrace, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, options, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, options, IS_LONG, 0, "DEBUG_BACKTRACE_PROVIDE_OBJECT")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionGenerator_getFunction arginfo_class_ReflectionFunctionAbstract___clone
@@ -124,7 +124,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionMethod_getModifiers arginfo_class_ReflectionFunctionAbstract___clone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionMethod_invoke, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, object, IS_OBJECT, 1, "null")
 	ZEND_ARG_VARIADIC_INFO(0, args)
 ZEND_END_ARG_INFO()
 
@@ -178,7 +178,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionClass_getMethod arginfo_class_ReflectionClass_hasMethod
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_getMethods, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, filter, IS_LONG, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, filter, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClass_hasProperty arginfo_class_ReflectionClass_hasMethod
@@ -226,7 +226,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionClass_newInstanceWithoutConstructor arginfo_class_ReflectionFunctionAbstract___clone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionClass_newInstanceArgs, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, args, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, args, IS_ARRAY, 0, "[]")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ReflectionClass_getParentClass arginfo_class_ReflectionFunctionAbstract___clone
@@ -283,7 +283,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ReflectionProperty_getName arginfo_class_ReflectionFunctionAbstract___clone
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionProperty_getValue, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, object, IS_OBJECT, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, object, IS_OBJECT, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ReflectionProperty_setValue, 0, 0, 1)

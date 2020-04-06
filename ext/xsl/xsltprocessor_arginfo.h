@@ -6,7 +6,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_transformToDoc, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, document, IS_OBJECT, 0)
-	ZEND_ARG_TYPE_INFO(0, return_class, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, return_class, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_XSLTProcessor_transformToUri, 0, 0, 2)

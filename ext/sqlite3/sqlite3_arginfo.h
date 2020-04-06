@@ -2,8 +2,8 @@
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, encryption_key, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, encryption_key, IS_STRING, 0, "\'\'")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SQLite3_open arginfo_class_SQLite3___construct
@@ -36,8 +36,8 @@ ZEND_END_ARG_INFO()
 #if SQLITE_VERSION_NUMBER >= 3006011
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3_backup, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, destination_db, SQLite3, 0)
-	ZEND_ARG_TYPE_INFO(0, source_dbname, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, destination_dbname, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, source_dbname, IS_STRING, 0, "\"main\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, destination_dbname, IS_STRING, 0, "\"main\"")
 ZEND_END_ARG_INFO()
 #endif
 
@@ -53,21 +53,21 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3_querySingle, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, query, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, entire_row, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, entire_row, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3_createFunction, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_INFO(0, callback)
-	ZEND_ARG_TYPE_INFO(0, argument_count, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, argument_count, IS_LONG, 0, "-1")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3_createAggregate, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, name, IS_STRING, 0)
 	ZEND_ARG_INFO(0, step_callback)
 	ZEND_ARG_INFO(0, final_callback)
-	ZEND_ARG_TYPE_INFO(0, argument_count, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, argument_count, IS_LONG, 0, "-1")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3_createCollation, 0, 0, 2)
@@ -79,16 +79,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3_openBlob, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, table, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, column, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, rowid, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, dbname, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, dbname, IS_STRING, 0, "\"main\"")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "SQLITE3_OPEN_READONLY")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3_enableExceptions, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, enableExceptions, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enableExceptions, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3_enableExtendedResultCodes, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, enable, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, enable, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3_setAuthorizer, 0, 0, 1)
@@ -119,7 +119,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_SQLite3Stmt_execute arginfo_class_SQLite3_close
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3Stmt_getSQL, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, expanded, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, expanded, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SQLite3Stmt_paramCount arginfo_class_SQLite3_close
@@ -139,7 +139,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_SQLite3Result_columnType arginfo_class_SQLite3Result_columnName
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SQLite3Result_fetchArray, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mode, IS_LONG, 0, "SQLITE3_BOTH")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_SQLite3Result_reset arginfo_class_SQLite3_close
