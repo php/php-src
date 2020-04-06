@@ -425,14 +425,14 @@ PHP_COM_DOTNET_API int php_com_copy_variant(VARIANT *dstvar, VARIANT *srcvar)
 		return php_com_copy_variant(V_VARIANTREF(dstvar), srcvar);
 
 	default:
-		php_error_docref(NULL, E_WARNING, "variant->variant: failed to copy from 0x%x to 0x%x", V_VT(dstvar), V_VT(srcvar));
+		php_error_docref(NULL, E_WARNING, "variant->__construct: failed to copy from 0x%x to 0x%x", V_VT(dstvar), V_VT(srcvar));
 		ret = FAILURE;
 	}
 	return ret;
 }
 
 /* {{{ com_variant_create_instance - ctor for new VARIANT() */
-PHP_FUNCTION(com_variant_create_instance)
+PHP_METHOD(variant, __construct)
 {
 	/* VARTYPE == unsigned short */ zend_long vt = VT_EMPTY;
 	zend_long codepage = CP_ACP;
@@ -446,14 +446,14 @@ PHP_FUNCTION(com_variant_create_instance)
 		return;
 	}
 
-	obj = CDNO_FETCH(object);
-
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(),
 		"z!|ll", &zvalue, &vt, &codepage)) {
 			RETURN_THROWS();
 	}
 
 	php_com_initialize();
+	obj = CDNO_FETCH(object);
+
 	if (ZEND_NUM_ARGS() == 3) {
 		obj->code_page = (int)codepage;
 	}

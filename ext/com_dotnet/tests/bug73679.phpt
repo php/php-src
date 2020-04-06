@@ -17,6 +17,6 @@ echo $stack->Pop() . $stack->Pop();
 --EXPECTF--
 Fatal error: Uncaught com_exception: Could not create .Net object - invalid codepage! in %sbug73679.php:%d
 Stack trace:
-#0 %sbug73679.php(%d): dotnet->dotnet('mscorlib', 'System.Collecti...', -2200000000)
+#0 %sbug73679.php(%d): dotnet->__construct('mscorlib', 'System.Collecti...', -2200000000)
 #1 {main}
   thrown in %sbug73679.php on line %d

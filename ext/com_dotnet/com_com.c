@@ -26,7 +26,7 @@
 #include "Zend/zend_exceptions.h"
 
 /* {{{ com_create_instance - ctor for COM class */
-PHP_FUNCTION(com_create_instance)
+PHP_METHOD(com, __construct)
 {
 	zval *object = getThis();
 	zval *server_params = NULL;
@@ -51,9 +51,6 @@ PHP_FUNCTION(com_create_instance)
 	zend_long cp = GetACP();
 	const struct php_win32_cp *cp_it;
 
-	php_com_initialize();
-	obj = CDNO_FETCH(object);
-
 	if (FAILURE == zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET,
 			ZEND_NUM_ARGS(), "s|s!ls",
 			&module_name, &module_name_len, &server_name, &server_name_len,
@@ -64,6 +61,9 @@ PHP_FUNCTION(com_create_instance)
 			&typelib_name, &typelib_name_len)) {
 		RETURN_THROWS();
 	}
+
+	php_com_initialize();
+	obj = CDNO_FETCH(object);
 
 	cp_it = php_win32_cp_get_by_id((DWORD)cp);
 	if (!cp_it) {

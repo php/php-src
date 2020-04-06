@@ -179,7 +179,7 @@ out:
 }
 
 /* {{{ com_dotnet_create_instance - ctor for DOTNET class */
-PHP_FUNCTION(com_dotnet_create_instance)
+PHP_METHOD(dotnet, __construct)
 {
 	zval *object = getThis();
 	php_com_dotnet_object *obj;
@@ -194,6 +194,13 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	IUnknown *unk = NULL;
 	zend_long cp = GetACP();
 	const struct php_win32_cp *cp_it;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l",
+			&assembly_name, &assembly_name_len,
+			&datatype_name, &datatype_name_len,
+			&cp)) {
+		RETURN_THROWS();
+	}
 
 	php_com_initialize();
 	stuff = (struct dotnet_runtime_stuff*)COMG(dotnet_runtime_stuff);
@@ -236,13 +243,6 @@ PHP_FUNCTION(com_dotnet_create_instance)
 	}
 
 	obj = CDNO_FETCH(object);
-
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "ss|l",
-			&assembly_name, &assembly_name_len,
-			&datatype_name, &datatype_name_len,
-			&cp)) {
-		RETURN_THROWS();
-	}
 
 	cp_it = php_win32_cp_get_by_id((DWORD)cp);
 	if (!cp_it) {
