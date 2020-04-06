@@ -7,6 +7,9 @@ PHP                                                                        NEWS
   . Fixed bug #79441 (Segfault in mb_chr() if internal encoding is unsupported).
     (Girgias)
 
+- SPL:
+  . Fixed bug #69264 (__debugInfo() ignored while extending SPL classes). (cmb)
+
 ?? ??? ????, PHP 7.4.5
 
 - Core:
