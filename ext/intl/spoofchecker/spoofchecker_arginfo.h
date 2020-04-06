@@ -5,13 +5,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker_isSuspicious, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, text, IS_STRING, 0)
-	ZEND_ARG_INFO(1, error)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, error, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker_areConfusable, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, s1, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO(0, s2, IS_STRING, 0)
-	ZEND_ARG_INFO(1, error)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, error, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Spoofchecker_setAllowedLocales, 0, 0, 1)

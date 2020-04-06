@@ -1,9 +1,9 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___construct, 0, 0, 0)
-	ZEND_ARG_INFO(0, input)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, iterator_class, IS_STRING, 0)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, input, "[]")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, iterator_class, IS_STRING, 0, "ArrayIterator::class")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject_offsetExists, 0, 0, 1)
@@ -35,7 +35,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject_setFlags, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject_asort, 0, 0, 0)
-	ZEND_ARG_INFO(0, sort_flags)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, sort_flags, "SORT_REGULAR")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayObject_ksort arginfo_class_ArrayObject_asort
@@ -77,8 +77,8 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ArrayObject___debugInfo arginfo_class_ArrayObject_getArrayCopy
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayIterator___construct, 0, 0, 0)
-	ZEND_ARG_INFO(0, array)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, array, "[]")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayIterator_offsetExists arginfo_class_ArrayObject_offsetExists

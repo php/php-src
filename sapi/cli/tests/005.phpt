@@ -37,7 +37,7 @@ string(183) "Class [ <internal:Core> class stdClass ] {
 }
 
 "
-string(1980) "Class [ <internal:Core> class Exception implements Throwable, Stringable ] {
+string(2003) "Class [ <internal:Core> class Exception implements Throwable, Stringable ] {
 
   - Constants [0] {
   }
@@ -68,9 +68,9 @@ string(1980) "Class [ <internal:Core> class Exception implements Throwable, Stri
     Method [ <internal:Core, ctor> public method __construct ] {
 
       - Parameters [3] {
-        Parameter #0 [ <optional> string $message ]
-        Parameter #1 [ <optional> int $code ]
-        Parameter #2 [ <optional> ?Throwable $previous ]
+        Parameter #0 [ <optional> string $message = <default> ]
+        Parameter #1 [ <optional> int $code = 0 ]
+        Parameter #2 [ <optional> ?Throwable $previous = null ]
       }
     }
 

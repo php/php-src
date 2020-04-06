@@ -12,6 +12,6 @@ foreach($reflect->getParameters() as $key => $value) {
     echo new ReflectionParameter('ReflectionParameterTest', $key), "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 Parameter #0 [ <required> $test ]
 Parameter #1 [ <optional> $test2 = NULL ]

@@ -2,8 +2,8 @@
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "FilesystemIterator::SKIP_DOTS | FilesystemIterator::UNIX_PATHS")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, alias, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar___destruct, 0, 0, 0)
@@ -49,8 +49,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_decompress, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_convertToExecutable, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, format, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, compression_type, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, format, IS_LONG, 0, "9021976")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, compression_type, IS_LONG, 0, "9021976")
 	ZEND_ARG_TYPE_INFO(0, file_ext, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -73,8 +73,8 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_extractTo, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, pathto, IS_STRING, 0)
-	ZEND_ARG_INFO(0, files)
-	ZEND_ARG_TYPE_INFO(0, overwrite, _IS_BOOL, 0)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, files, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, overwrite, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Phar_getAlias arginfo_class_Phar___destruct
@@ -121,7 +121,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_setAlias, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_setDefaultStub, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, index, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, index, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO(0, webindex, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
@@ -136,7 +136,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_Phar_setStub, 0, 0, 1)
 	ZEND_ARG_INFO(0, newstub)
-	ZEND_ARG_INFO(0, maxlen)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, maxlen, "-1")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_Phar_startBuffering arginfo_class_Phar___destruct
@@ -147,7 +147,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_apiVersion, 0, 0, IS_
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_canCompress, 0, 0, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, method, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, method, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_canWrite, 0, 0, _IS_BOOL, 0)
@@ -168,21 +168,21 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_isValidPharFilename, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, executable, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, executable, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_loadPhar, 0, 1, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, alias, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_mapPhar, 0, 0, _IS_BOOL, 0)
-	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, alias, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 0, "0")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_running, 0, 0, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, retphar, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, retphar, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_mount, 0, 2, IS_VOID, 0)
@@ -199,18 +199,18 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_unlinkArchive, 0, 1, 
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_Phar_webPhar, 0, 0, IS_VOID, 0)
-	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 1)
-	ZEND_ARG_TYPE_INFO(0, index, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, alias, IS_STRING, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, index, IS_STRING, 1, "null")
 	ZEND_ARG_TYPE_INFO(0, f404, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, mimetypes, IS_ARRAY, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, mimetypes, IS_ARRAY, 0, "[]")
 	ZEND_ARG_INFO(0, rewrites)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PharData___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, flags, IS_LONG, 0)
-	ZEND_ARG_TYPE_INFO(0, alias, IS_STRING, 1)
-	ZEND_ARG_INFO(0, fileformat)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, flags, IS_LONG, 0, "FilesystemIterator::SKIP_DOTS | FilesystemIterator::UNIX_PATHS")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, alias, IS_STRING, 1, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, fileformat, "0")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharData___destruct arginfo_class_Phar___destruct
@@ -352,7 +352,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_PharFileInfo_hasMetadata arginfo_class_Phar___destruct
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PharFileInfo_isCompressed, 0, 0, 0)
-	ZEND_ARG_INFO(0, compression_type)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, compression_type, "9021976")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_PharFileInfo_isCRCChecked arginfo_class_Phar___destruct

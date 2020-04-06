@@ -4,8 +4,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar___construct, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_createInstance, 0, 0, 0)
-	ZEND_ARG_INFO(0, timeZone)
-	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timeZone, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_equals, 0, 0, 1)
@@ -27,12 +27,12 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_IntlCalendar_before arginfo_class_IntlCalendar_equals
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_clear, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, field, IS_LONG, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, field, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_fromDateTime, 0, 0, 1)
 	ZEND_ARG_INFO(0, dateTime)
-	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_get, 0, 0, 1)
@@ -100,7 +100,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_IntlCalendar_isLenient arginfo_class_IntlCalendar___construct
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_isWeekend, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, date, IS_DOUBLE, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, date, IS_DOUBLE, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlCalendar_roll, 0, 0, 2)

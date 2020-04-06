@@ -1,7 +1,7 @@
 /* This is a generated file, edit the .stub.php file instead. */
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlBreakIterator_createCharacterInstance, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlBreakIterator_createCodePointInstance, 0, 0, 0)
@@ -34,7 +34,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlBreakIterator_getLocale, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlBreakIterator_getPartsIterator, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, key_type, IS_STRING, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, key_type, IS_STRING, 0, "IntlPartsIterator::KEY_SEQUENTIAL")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlBreakIterator_getText arginfo_class_IntlBreakIterator_createCodePointInstance
@@ -44,7 +44,7 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_IntlBreakIterator_last arginfo_class_IntlBreakIterator_createCodePointInstance
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlBreakIterator_next, 0, 0, 0)
-	ZEND_ARG_TYPE_INFO(0, offset, IS_LONG, 1)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, offset, IS_LONG, 1, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlBreakIterator_preceding arginfo_class_IntlBreakIterator_following
@@ -57,7 +57,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlRuleBasedBreakIterator___construct, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, rules, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, areCompiled, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, areCompiled, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlRuleBasedBreakIterator_getBinaryRules arginfo_class_IntlBreakIterator_createCodePointInstance

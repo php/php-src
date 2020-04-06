@@ -3,15 +3,15 @@
 #if defined(LIBXML_XPATH_ENABLED)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMXPath___construct, 0, 0, 1)
 	ZEND_ARG_OBJ_INFO(0, doc, DOMDocument, 0)
-	ZEND_ARG_TYPE_INFO(0, registerNodeNS, _IS_BOOL, 0)
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, registerNodeNS, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 #endif
 
 #if defined(LIBXML_XPATH_ENABLED)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMXPath_evaluate, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, expr, IS_STRING, 0)
-	ZEND_ARG_OBJ_INFO(0, context, DOMNode, 1)
-	ZEND_ARG_TYPE_INFO(0, registerNodeNS, _IS_BOOL, 0)
+	ZEND_ARG_OBJ_INFO_WITH_DEFAULT_VALUE(0, context, DOMNode, 1, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, registerNodeNS, _IS_BOOL, 0, "true")
 ZEND_END_ARG_INFO()
 #endif
 
@@ -28,6 +28,6 @@ ZEND_END_ARG_INFO()
 
 #if defined(LIBXML_XPATH_ENABLED)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_DOMXPath_registerPhpFunctions, 0, 0, 0)
-	ZEND_ARG_INFO(0, restrict)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, restrict, "null")
 ZEND_END_ARG_INFO()
 #endif

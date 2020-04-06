@@ -678,7 +678,14 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 
 			if (i >= required && !ZEND_ARG_IS_VARIADIC(arg_info)) {
 				smart_str_appends(&str, " = ");
-				if (fptr->type == ZEND_USER_FUNCTION) {
+
+				if (fptr->type == ZEND_INTERNAL_FUNCTION) {
+					if (((zend_internal_arg_info*)arg_info)->default_value) {
+						smart_str_appends(&str, ((zend_internal_arg_info*)arg_info)->default_value);
+					} else {
+						smart_str_appends(&str, "<default>");
+					}
+				} else {
 					zend_op *precv = NULL;
 					{
 						uint32_t idx  = i;
@@ -727,8 +734,6 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 							zend_tmp_string_release(tmp_zv_str);
 						}
 					}
-				} else {
-					smart_str_appends(&str, "NULL");
 				}
 			}
 

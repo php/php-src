@@ -131,7 +131,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Method [ <internal:Reflection> public method getMethods ] {
 
       - Parameters [1] {
-        Parameter #0 [ <optional> ?int $filter ]
+        Parameter #0 [ <optional> ?int $filter = null ]
       }
     }
 
@@ -152,7 +152,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Method [ <internal:Reflection> public method getProperties ] {
 
       - Parameters [1] {
-        Parameter #0 [ <optional> ?int $filter ]
+        Parameter #0 [ <optional> ?int $filter = null ]
       }
     }
 
@@ -259,7 +259,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Method [ <internal:Reflection> public method newInstance ] {
 
       - Parameters [1] {
-        Parameter #0 [ <optional> ...$args ]
+        Parameter #0 [ <optional> ...$args = <default> ]
       }
     }
 
@@ -272,7 +272,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
     Method [ <internal:Reflection> public method newInstanceArgs ] {
 
       - Parameters [1] {
-        Parameter #0 [ <optional> array $args ]
+        Parameter #0 [ <optional> array $args = [] ]
       }
     }
 
@@ -299,7 +299,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector, String
 
       - Parameters [2] {
         Parameter #0 [ <required> string $name ]
-        Parameter #1 [ <optional> $default ]
+        Parameter #1 [ <optional> $default = <default> ]
       }
     }
 

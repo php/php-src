@@ -4,9 +4,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDateFormatter___construct, 0, 0, 3)
 	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
 	ZEND_ARG_TYPE_INFO(0, datetype, IS_LONG, 0)
 	ZEND_ARG_TYPE_INFO(0, timetype, IS_LONG, 0)
-	ZEND_ARG_INFO(0, timezone)
-	ZEND_ARG_INFO(0, calendar)
-	ZEND_ARG_TYPE_INFO(0, pattern, IS_STRING, 0)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, timezone, "null")
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, calendar, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, pattern, IS_STRING, 0, "\"\"")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlDateFormatter_create arginfo_class_IntlDateFormatter___construct
@@ -54,13 +54,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDateFormatter_formatObject, 0, 0, 1)
 	ZEND_ARG_INFO(0, object)
-	ZEND_ARG_INFO(0, format)
-	ZEND_ARG_TYPE_INFO(0, locale, IS_STRING, 1)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, format, "null")
+	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, locale, IS_STRING, 1, "null")
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_IntlDateFormatter_parse, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, value, IS_STRING, 0)
-	ZEND_ARG_INFO(1, position)
+	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(1, position, "null")
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_IntlDateFormatter_localtime arginfo_class_IntlDateFormatter_parse
