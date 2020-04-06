@@ -8571,6 +8571,9 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		unknown_num_args = 1;
 	}
 
+	/* TODO: Only do this for named args */
+	unknown_num_args = 1;
+
 	if (info) {
 		call_info = info->callee_info;
 		while (call_info && call_info->caller_call_opline != opline) {
@@ -10002,7 +10005,7 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 {
 	/* ZEND_CALL_FAKE_CLOSURE handled on slow path to eliminate check for ZEND_CALL_CLOSURE on fast path */
 	|	mov FCARG1d, dword [FP + offsetof(zend_execute_data, This.u1.type_info)]
-	|	test FCARG1d, (ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_FAKE_CLOSURE)
+	|	test FCARG1d, (ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_FAKE_CLOSURE)
 	if (trace && trace->op != ZEND_JIT_TRACE_END) {
 		|	jnz >1
 		|.cold_code
@@ -11023,6 +11026,7 @@ static int zend_jit_recv(dasm_State **Dst, const zend_op *opline, const zend_op_
 				|	ADDR_OP2_2 mov, aword EX->opline, opline, r0
 			}
 			|	mov FCARG1a, FP
+			|	mov FCARG2d, arg_num
 			|	EXT_CALL zend_missing_arg_error, r0
 			|	jmp ->exception_handler
 			|.code

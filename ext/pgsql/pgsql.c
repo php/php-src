@@ -2589,6 +2589,7 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 			fci.retval = &retval;
 			fci.params = NULL;
 			fci.param_count = 0;
+			fci.named_params = NULL;
 
 			if (ctor_params && Z_TYPE_P(ctor_params) != IS_NULL) {
 				if (zend_fcall_info_args(&fci, ctor_params) == FAILURE) {

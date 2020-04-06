@@ -57,6 +57,9 @@ ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t
 	} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
 		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 	}
+	if (UNEXPECTED(call_info & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
+		zend_array_destroy(EX(extra_named_params));
+	}
 
 	old_execute_data = execute_data;
 	execute_data = EX(prev_execute_data);

@@ -234,6 +234,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_error(int error_code,
 		case ZPP_ERROR_WRONG_STRING_OR_CLASS_OR_NULL:
 			zend_wrong_parameter_string_or_class_or_null_error(num, name, arg);
 			break;
+		case ZPP_ERROR_UNEXPECTED_EXTRA_NAMED:
+			zend_unexpected_extra_named_error();
+			break;
 		default:
 			ZEND_ASSERT(error_code != ZPP_ERROR_OK);
 	}
@@ -305,6 +308,14 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(uint32_t num, ch
 	efree(error);
 }
 /* }}} */
+
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_unexpected_extra_named_error(void)
+{
+	const char *space;
+	const char *class_name = get_active_class_name(&space);
+	zend_argument_count_error("%s%s%s() does not accept unknown named parameters",
+		class_name, space, get_active_function_name());
+}
 
 static ZEND_COLD void ZEND_FASTCALL zend_argument_error_variadic(zend_class_entry *error_ce, uint32_t arg_num, const char *format, va_list va) /* {{{ */
 {
@@ -950,6 +961,11 @@ static int zend_parse_va_args(uint32_t num_args, const char *type_spec, va_list 
 				}
 				/* mark the beginning of varargs */
 				post_varargs = max_num_args;
+
+				if (ZEND_CALL_INFO(EG(current_execute_data)) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+					zend_unexpected_extra_named_error();
+					return FAILURE;
+				}
 				break;
 
 			default:
@@ -3305,6 +3321,7 @@ ZEND_API int zend_fcall_info_init(zval *callable, uint32_t check_flags, zend_fca
 	fci->retval = NULL;
 	fci->param_count = 0;
 	fci->params = NULL;
+	fci->named_params = NULL;
 
 	return SUCCESS;
 }

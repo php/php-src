@@ -662,6 +662,7 @@ ZEND_METHOD(Exception, __toString)
 		fci.retval = &trace;
 		fci.param_count = 0;
 		fci.params = NULL;
+		fci.named_params = NULL;
 
 		zend_call_function(&fci, NULL);
 

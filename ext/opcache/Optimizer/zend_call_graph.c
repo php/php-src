@@ -124,8 +124,12 @@ int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_f
 			case ZEND_SEND_VAR_NO_REF_EX:
 			case ZEND_SEND_USER:
 				if (call_info) {
-					uint32_t num = opline->op2.num;
+					if (opline->op2_type == IS_CONST) {
+						call_info->named_args = 1;
+						break;
+					}
 
+					uint32_t num = opline->op2.num;
 					if (num > 0) {
 						num--;
 					}

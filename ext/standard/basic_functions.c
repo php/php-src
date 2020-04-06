@@ -1549,7 +1549,7 @@ PHP_FUNCTION(call_user_func)
 
 	ZEND_PARSE_PARAMETERS_START(1, -1)
 		Z_PARAM_FUNC(fci, fci_cache)
-		Z_PARAM_VARIADIC('*', fci.params, fci.param_count)
+		Z_PARAM_VARIADIC_WITH_NAMED(fci.params, fci.param_count, fci.named_params)
 	ZEND_PARSE_PARAMETERS_END();
 
 	fci.retval = &retval;
@@ -1567,16 +1567,17 @@ PHP_FUNCTION(call_user_func)
    Warning: This function is special-cased by zend_compile.c and so is usually bypassed */
 PHP_FUNCTION(call_user_func_array)
 {
-	zval *params, retval;
+	zval retval;
+	HashTable *params;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_FUNC(fci, fci_cache)
-		Z_PARAM_ARRAY(params)
+		Z_PARAM_ARRAY_HT(params)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zend_fcall_info_args(&fci, params);
+	fci.named_params = params;
 	fci.retval = &retval;
 
 	if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(retval) != IS_UNDEF) {
@@ -1585,8 +1586,6 @@ PHP_FUNCTION(call_user_func_array)
 		}
 		ZVAL_COPY_VALUE(return_value, &retval);
 	}
-
-	zend_fcall_info_args_clear(&fci, 1);
 }
 /* }}} */
 

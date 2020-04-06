@@ -782,6 +782,20 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					opline->extended_value = cache_size;
 					cache_size += sizeof(void *);
 					break;
+				case ZEND_SEND_VAL:
+				case ZEND_SEND_VAL_EX:
+				case ZEND_SEND_VAR:
+				case ZEND_SEND_VAR_EX:
+				case ZEND_SEND_VAR_NO_REF:
+				case ZEND_SEND_VAR_NO_REF_EX:
+				case ZEND_SEND_REF:
+				case ZEND_SEND_FUNC_ARG:
+				case ZEND_CHECK_FUNC_ARG:
+					if (opline->op2_type == IS_CONST) {
+						opline->result.num = cache_size;
+						cache_size += 2 * sizeof(void *);
+					}
+					break;
 			}
 			opline++;
 		}

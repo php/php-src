@@ -464,6 +464,7 @@ static void xml_call_handler(xml_parser *parser, zval *handler, zend_function *f
 		fci.retval = retval;
 		fci.param_count = argc;
 		fci.params = argv;
+		fci.named_params = NULL;
 
 		result = zend_call_function(&fci, NULL);
 		if (result == FAILURE) {

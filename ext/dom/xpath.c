@@ -150,6 +150,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 	xmlXPathFreeObject(obj);
 
 	fci.object = NULL;
+	fci.named_params = NULL;
 	fci.retval = &retval;
 
 	if (!zend_make_callable(&fci.function_name, &callable)) {

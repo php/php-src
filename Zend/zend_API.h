@@ -47,6 +47,11 @@ typedef struct _zend_fcall_info {
 	zval *params;
 	zend_object *object;
 	uint32_t param_count;
+	/* This hashtable can also contain positional arguments (with integer keys),
+	 * which will be appended to the normal params[]. This makes it easier to
+	 * integrate APIs like call_user_func_array(). The usual restriction that
+	 * there may not be position arguments after named arguments applies. */
+	HashTable *named_params;
 } zend_fcall_info;
 
 typedef struct _zend_fcall_info_cache {
@@ -500,10 +505,13 @@ ZEND_API void add_property_zval_ex(zval *arg, const char *key, size_t key_len, z
 #define add_property_zval(__arg, __key, __value) add_property_zval_ex(__arg, __key, strlen(__key), __value)
 
 
-ZEND_API int _call_user_function_ex(zval *object, zval *function_name, zval *retval_ptr, uint32_t param_count, zval params[]);
+ZEND_API int _call_user_function_impl(zval *object, zval *function_name, zval *retval_ptr, uint32_t param_count, zval params[], HashTable *named_params);
 
-#define call_user_function(_unused, object, function_name, retval_ptr, param_count, params) \
-	_call_user_function_ex(object, function_name, retval_ptr, param_count, params)
+#define call_user_function(function_table, object, function_name, retval_ptr, param_count, params) \
+	_call_user_function_impl(object, function_name, retval_ptr, param_count, params, NULL)
+
+#define call_user_function_named(function_table, object, function_name, retval_ptr, param_count, params, named_params) \
+	_call_user_function_impl(object, function_name, retval_ptr, param_count, params, named_params)
 
 ZEND_API extern const zend_fcall_info empty_fcall_info;
 ZEND_API extern const zend_fcall_info_cache empty_fcall_info_cache;
@@ -569,14 +577,14 @@ ZEND_API int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci
  * called_scope must be provided for instance and static method calls. */
 ZEND_API void zend_call_known_function(
 		zend_function *fn, zend_object *object, zend_class_entry *called_scope, zval *retval_ptr,
-		uint32_t param_count, zval *params);
+		uint32_t param_count, zval *params, HashTable *named_params);
 
 /* Call the provided zend_function instance method on an object. */
 static zend_always_inline void zend_call_known_instance_method(
 		zend_function *fn, zend_object *object, zval *retval_ptr,
 		uint32_t param_count, zval *params)
 {
-	zend_call_known_function(fn, object, object->ce, retval_ptr, param_count, params);
+	zend_call_known_function(fn, object, object->ce, retval_ptr, param_count, params, NULL);
 }
 
 static zend_always_inline void zend_call_known_instance_method_with_0_params(
@@ -1241,6 +1249,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_class_or_null_error(u
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_string_or_class_error(uint32_t num, const char *name, zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_parameter_string_or_class_or_null_error(uint32_t num, const char *name, zval *arg);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(uint32_t num, char *error);
+ZEND_API ZEND_COLD void ZEND_FASTCALL zend_unexpected_extra_named_error(void);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_error(zend_class_entry *error_ce, uint32_t arg_num, const char *format, ...);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_type_error(uint32_t arg_num, const char *format, ...);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num, const char *format, ...);
@@ -1254,6 +1263,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define ZPP_ERROR_WRONG_COUNT                   6
 #define ZPP_ERROR_WRONG_STRING_OR_CLASS         7
 #define ZPP_ERROR_WRONG_STRING_OR_CLASS_OR_NULL 8
+#define ZPP_ERROR_UNEXPECTED_EXTRA_NAMED        9
 
 #define ZEND_PARSE_PARAMETERS_START_EX(flags, min_num_args, max_num_args) do { \
 		const int _flags = (flags); \
@@ -1701,10 +1711,30 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 			dest = NULL; \
 			dest_num = 0; \
 		} \
+		if (UNEXPECTED(ZEND_CALL_INFO(execute_data) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) { \
+			_error_code = ZPP_ERROR_UNEXPECTED_EXTRA_NAMED; \
+			break; \
+		} \
 	} while (0);
 
 #define Z_PARAM_VARIADIC(spec, dest, dest_num) \
 	Z_PARAM_VARIADIC_EX(spec, dest, dest_num, 0)
+
+#define Z_PARAM_VARIADIC_WITH_NAMED(dest, dest_num, dest_named) do { \
+		int _num_varargs = _num_args - _i; \
+		if (EXPECTED(_num_varargs > 0)) { \
+			dest = _real_arg + 1; \
+			dest_num = _num_varargs; \
+		} else { \
+			dest = NULL; \
+			dest_num = 0; \
+		} \
+		if (ZEND_CALL_INFO(execute_data) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) { \
+			dest_named = execute_data->extra_named_params; \
+		} else { \
+			dest_named = NULL; \
+		} \
+	} while (0);
 
 #define Z_PARAM_STR_OR_ARRAY_HT_EX(dest_str, dest_ht, allow_null) \
 	Z_PARAM_PROLOGUE(0, 0); \
