@@ -27,6 +27,7 @@
 #include "ext/standard/info.h"
 #include "php_mbregex.h"
 #include "mbstring.h"
+#include "libmbfl/filters/mbfilter_utf8.h"
 
 #include "php_onig_compat.h" /* must come prior to the oniguruma header */
 #include <oniguruma.h>
@@ -50,6 +51,7 @@ ZEND_EXTERN_MODULE_GLOBALS(mbstring)
 struct _zend_mb_regex_globals {
 	OnigEncoding default_mbctype;
 	OnigEncoding current_mbctype;
+	const mbfl_encoding *current_mbctype_mbfl_encoding;
 	HashTable ht_rc;
 	zval search_str;
 	zval *search_str_val;
@@ -73,6 +75,7 @@ static int _php_mb_regex_globals_ctor(zend_mb_regex_globals *pglobals)
 {
 	pglobals->default_mbctype = ONIG_ENCODING_UTF8;
 	pglobals->current_mbctype = ONIG_ENCODING_UTF8;
+	pglobals->current_mbctype_mbfl_encoding = &mbfl_encoding_utf8;
 	ZVAL_UNDEF(&pglobals->search_str);
 	pglobals->search_re = (php_mb_regex_t*)NULL;
 	pglobals->search_pos = 0;
@@ -148,6 +151,7 @@ PHP_RINIT_FUNCTION(mb_regex)
 PHP_RSHUTDOWN_FUNCTION(mb_regex)
 {
 	MBREX(current_mbctype) = MBREX(default_mbctype);
+	MBREX(current_mbctype_mbfl_encoding) = mbfl_name2encoding(php_mb_regex_get_default_mbctype());
 
 	if (!Z_ISUNDEF(MBREX(search_str))) {
 		zval_ptr_dtor(&MBREX(search_str));
@@ -415,6 +419,7 @@ int php_mb_regex_set_mbctype(const char *encname)
 		return FAILURE;
 	}
 	MBREX(current_mbctype) = mbctype;
+	MBREX(current_mbctype_mbfl_encoding) = mbfl_name2encoding(encname);
 	return SUCCESS;
 }
 /* }}} */
@@ -441,7 +446,7 @@ const char *php_mb_regex_get_mbctype(void)
 /* {{{ php_mb_regex_get_mbctype_encoding */
 const mbfl_encoding *php_mb_regex_get_mbctype_encoding(void)
 {
-	return mbfl_name2encoding(_php_mb_regex_mbctype2name(MBREX(current_mbctype)));
+	return MBREX(current_mbctype_mbfl_encoding);
 }
 /* }}} */
 
@@ -845,7 +850,6 @@ PHP_FUNCTION(mb_regex_encoding)
 {
 	char *encoding = NULL;
 	size_t encoding_len;
-	OnigEncoding mbctype;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &encoding, &encoding_len) == FAILURE) {
 		RETURN_THROWS();
@@ -853,21 +857,16 @@ PHP_FUNCTION(mb_regex_encoding)
 
 	if (!encoding) {
 		const char *retval = php_mb_regex_get_mbctype();
+		ZEND_ASSERT(retval != NULL);
 
-		if (retval == NULL) {
-			RETURN_FALSE;
-		}
-
-		RETURN_STRING((char *)retval);
+		RETURN_STRING(retval);
 	} else {
-		mbctype = _php_mb_regex_name2mbctype(encoding);
-
-		if (mbctype == ONIG_ENCODING_UNDEF) {
+		if (php_mb_regex_set_mbctype(encoding) == FAILURE) {
 			zend_argument_value_error(1, "must be a valid encoding, \"%s\" given", encoding);
 			RETURN_THROWS();
 		}
 
-		MBREX(current_mbctype) = mbctype;
+		/* TODO Make function return previous encoding? */
 		RETURN_TRUE;
 	}
 }
@@ -1023,17 +1022,9 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 	OnigUChar *string_lim;
 	char *description = NULL;
 
-	const mbfl_encoding *enc;
+	const mbfl_encoding *enc = php_mb_regex_get_mbctype_encoding();
+	ZEND_ASSERT(enc != NULL);
 
-	{
-		const char *current_enc_name;
-		current_enc_name = php_mb_regex_get_mbctype();
-		if (current_enc_name == NULL ||
-			(enc = mbfl_name2encoding(current_enc_name)) == NULL) {
-			php_error_docref(NULL, E_WARNING, "Unknown error");
-			RETURN_FALSE;
-		}
-	}
 	eval = 0;
 	{
 		char *option_str = NULL;
@@ -1057,11 +1048,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 			}
 		}
 
-		if (!php_mb_check_encoding(
-		string,
-		string_len,
-		php_mb_regex_get_mbctype_encoding()
-		)) {
+		if (!php_mb_check_encoding(string, string_len, enc)) {
 			RETURN_NULL();
 		}
 
