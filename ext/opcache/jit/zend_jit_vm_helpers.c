@@ -28,6 +28,7 @@
 #include "Optimizer/zend_func_info.h"
 #include "Optimizer/zend_call_graph.h"
 #include "zend_jit.h"
+#include "zend_jit_x86.h"
 #include "zend_jit_internal.h"
 
 #ifdef HAVE_GCC_GLOBAL_REGS

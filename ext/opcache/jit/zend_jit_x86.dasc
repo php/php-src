@@ -2326,16 +2326,62 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 {
 	|->trace_exit:
 	|
-	|	// TODO: Save CPU registers ???
+	|	// Save CPU registers
+	|.if X64
+	|	sub r4, 16*8+16*8-8 /* CPU regs + SSE regs */
+	|	mov aword [r4+11*8], r11
+	|	mov aword [r4+10*8], r10
+	|	mov aword [r4+9*8], r9
+	|	mov aword [r4+8*8], r8
+	|	mov aword [r4+7*8], rdi
+	|	mov aword [r4+6*8], rsi
+	|	mov aword [r4+2*8], rdx
+	|	mov aword [r4+1*8], rcx
+	|	mov aword [r4+0*8], rax
+	|	mov FCARG1a, aword [r4+16*8+16*8-8] // exit_num = POP
+	|	mov FCARG2a, r4
+	|	movsd qword [r4+16*8+15*8], xmm15
+	|	movsd qword [r4+16*8+14*8], xmm14
+	|	movsd qword [r4+16*8+13*8], xmm13
+	|	movsd qword [r4+16*8+12*8], xmm12
+	|	movsd qword [r4+16*8+11*8], xmm11
+	|	movsd qword [r4+16*8+10*8], xmm10
+	|	movsd qword [r4+16*8+9*8], xmm9
+	|	movsd qword [r4+16*8+8*8], xmm8
+	|	movsd qword [r4+16*8+7*8], xmm7
+	|	movsd qword [r4+16*8+6*8], xmm6
+	|	movsd qword [r4+16*8+5*8], xmm5
+	|	movsd qword [r4+16*8+4*8], xmm4
+	|	movsd qword [r4+16*8+3*8], xmm3
+	|	movsd qword [r4+16*8+2*8], xmm2
+	|	movsd qword [r4+16*8+1*8], xmm1
+	|	movsd qword [r4+16*8+0*8], xmm0
+	|.else
+	|	sub r4, 8*4+8*8-4 /* CPU regs + SSE regs */
+	|	mov aword [r4+2*4], edx
+	|	mov aword [r4+1*4], ecx
+	|	mov aword [r4+0*4], eax
+	|	mov FCARG1a, aword [r4+8*4+8*8-4] // exit_num = POP
+	|	mov FCARG2a, r4
+	|	movsd qword [r4+8*4+7*8], xmm7
+	|	movsd qword [r4+8*4+6*8], xmm6
+	|	movsd qword [r4+8*4+5*8], xmm5
+	|	movsd qword [r4+8*4+4*8], xmm4
+	|	movsd qword [r4+8*4+3*8], xmm3
+	|	movsd qword [r4+8*4+2*8], xmm2
+	|	movsd qword [r4+8*4+1*8], xmm1
+	|	movsd qword [r4+8*4+0*8], xmm0
+	|.endif
 	|
-	|	// trace_num = EG(reserved)[zend_func_info_rid]
-	|	MEM_OP2_2_ZTS mov, FCARG1a, aword, executor_globals, reserved[zend_func_info_rid], r0
-	|	// exit_num = POP
-	|	pop FCARG2a
 	|	// EX(opline) = opline
 	|	SAVE_OPLINE
 	|	// zend_jit_trace_exit(trace_num, exit_num)
 	|	EXT_CALL zend_jit_trace_exit, r0
+	|.if X64
+	|	add r4, 16*8+16*8 /* CPU regs + SSE regs */
+	|.else
+	|	add r4, 8*4+8*8 /* CPU regs + SSE regs */
+	|.endif
 	|	// execute_data = EG(current_excute_data)
 	|	MEM_OP2_2_ZTS mov, FP, aword, executor_globals, current_execute_data, r0
 	|	test eax, eax

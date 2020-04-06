@@ -65,6 +65,16 @@ typedef enum _zend_reg {
 	ZREG_NUM
 } zend_reg;
 
+typedef struct _zend_jit_registers_buf {
+#if defined(__x86_64__) || defined(_WIN64)
+	uint64_t r[16];
+	double xmm[16];
+#else
+	uint32_t r[8];
+	double xmm[8];
+#endif
+} zend_jit_registers_buf;
+
 #define	ZREG_RAX ZREG_R0
 #define	ZREG_RCX ZREG_R1
 #define	ZREG_RDX ZREG_R2

@@ -33,6 +33,7 @@
 #include "Optimizer/zend_call_graph.h"
 #include "Optimizer/zend_dump.h"
 
+#include "jit/zend_jit_x86.h"
 #include "jit/zend_jit_internal.h"
 
 #ifdef ZTS
@@ -165,7 +166,6 @@ static zend_bool zend_long_is_power_of_two(zend_long x)
 #define OP1_DATA_RANGE_EX() OP_RANGE_EX(ssa_op + 1, op1)
 
 #include "dynasm/dasm_x86.h"
-#include "jit/zend_jit_x86.h"
 #include "jit/zend_jit_helpers.c"
 #include "jit/zend_jit_disasm_x86.c"
 #ifndef _WIN32

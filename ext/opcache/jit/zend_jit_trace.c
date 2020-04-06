@@ -3879,8 +3879,9 @@ blacklist:
 	return (stop == ZEND_JIT_TRACE_STOP_HALT) ? -1 : 0;
 }
 
-int ZEND_FASTCALL zend_jit_trace_exit(uint32_t trace_num, uint32_t exit_num)
+int ZEND_FASTCALL zend_jit_trace_exit(uint32_t exit_num, zend_jit_registers_buf *regs)
 {
+	uint32_t trace_num = (uint32_t)(uintptr_t)EG(reserved)[zend_func_info_rid];
 	zend_execute_data *execute_data = EG(current_execute_data);
 	const zend_op *opline;
 	zend_jit_trace_info *t = &zend_jit_traces[trace_num];
