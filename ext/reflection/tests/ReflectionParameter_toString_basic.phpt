@@ -16,4 +16,4 @@ foreach($params as $key => $value) {
 --EXPECT--
 Parameter #0 [ <required> $test ]
 Parameter #1 [ <optional> $test2 = NULL ]
-Parameter #2 [ <optional> ...$test3 ]
+Parameter #2 [ <optional> ...$test3 =  ]

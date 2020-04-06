@@ -11,13 +11,13 @@ function ReflectionParameterTest($test1=array(), $test2 = CONST_TEST_1, $test3 =
 $reflect = new ReflectionFunction('ReflectionParameterTest');
 foreach($reflect->getParameters() as $param) {
     if($param->getName() == 'test1') {
-        var_dump($param->isDefaultValueConstant());
+        var_dump(@$param->isDefaultValueConstant());
     }
     if($param->getName() == 'test2') {
-        var_dump($param->isDefaultValueConstant());
+        var_dump(@$param->isDefaultValueConstant());
     }
-    if($param->isDefaultValueAvailable() && $param->isDefaultValueConstant()) {
-        var_dump($param->getDefaultValueConstantName());
+    if($param->isDefaultValueAvailable() && @$param->isDefaultValueConstant()) {
+        var_dump(@$param->getDefaultValueConstantName());
     }
 }
 
@@ -36,8 +36,8 @@ $method = new ReflectionMethod('Foo', 'baz');
 $params = $method->getParameters();
 
 foreach ($params as $param) {
-    if ($param->isDefaultValueConstant()) {
-        var_dump($param->getDefaultValueConstantName());
+    if (@$param->isDefaultValueConstant()) {
+        var_dump(@$param->getDefaultValueConstantName());
     }
 }
 ?>

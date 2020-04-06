@@ -70,9 +70,9 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
       - Parameters [5] {
         Parameter #0 [ <required> string $pattern ]
         Parameter #1 [ <required> string $subject ]
-        Parameter #2 [ <optional> &$subpatterns ]
-        Parameter #3 [ <optional> int $flags ]
-        Parameter #4 [ <optional> int $offset ]
+        Parameter #2 [ <optional> &$subpatterns = null ]
+        Parameter #3 [ <optional> int $flags = 0 ]
+        Parameter #4 [ <optional> int $offset = 0 ]
       }
       - Return [ int|false ]
     }
@@ -81,9 +81,9 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
       - Parameters [5] {
         Parameter #0 [ <required> string $pattern ]
         Parameter #1 [ <required> string $subject ]
-        Parameter #2 [ <optional> &$subpatterns ]
-        Parameter #3 [ <optional> int $flags ]
-        Parameter #4 [ <optional> int $offset ]
+        Parameter #2 [ <optional> &$subpatterns = null ]
+        Parameter #3 [ <optional> int $flags = 0 ]
+        Parameter #4 [ <optional> int $offset = 0 ]
       }
       - Return [ int|false|null ]
     }
@@ -93,8 +93,8 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
         Parameter #0 [ <required> $regex ]
         Parameter #1 [ <required> $replace ]
         Parameter #2 [ <required> $subject ]
-        Parameter #3 [ <optional> int $limit ]
-        Parameter #4 [ <optional> &$count ]
+        Parameter #3 [ <optional> int $limit = -1 ]
+        Parameter #4 [ <optional> &$count = null ]
       }
       - Return [ array|string|null ]
     }
@@ -104,8 +104,8 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
         Parameter #0 [ <required> $regex ]
         Parameter #1 [ <required> $replace ]
         Parameter #2 [ <required> $subject ]
-        Parameter #3 [ <optional> int $limit ]
-        Parameter #4 [ <optional> &$count ]
+        Parameter #3 [ <optional> int $limit = -1 ]
+        Parameter #4 [ <optional> &$count = null ]
       }
       - Return [ array|string|null ]
     }
@@ -115,9 +115,9 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
         Parameter #0 [ <required> $regex ]
         Parameter #1 [ <required> $callback ]
         Parameter #2 [ <required> $subject ]
-        Parameter #3 [ <optional> int $limit ]
-        Parameter #4 [ <optional> &$count ]
-        Parameter #5 [ <optional> int $flags ]
+        Parameter #3 [ <optional> int $limit = -1 ]
+        Parameter #4 [ <optional> &$count = null ]
+        Parameter #5 [ <optional> int $flags = 0 ]
       }
       - Return [ array|string|null ]
     }
@@ -126,9 +126,9 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
       - Parameters [5] {
         Parameter #0 [ <required> array $pattern ]
         Parameter #1 [ <required> $subject ]
-        Parameter #2 [ <optional> int $limit ]
-        Parameter #3 [ <optional> &$count ]
-        Parameter #4 [ <optional> int $flags ]
+        Parameter #2 [ <optional> int $limit = -1 ]
+        Parameter #3 [ <optional> &$count = null ]
+        Parameter #4 [ <optional> int $flags = 0 ]
       }
       - Return [ array|string|null ]
     }
@@ -137,8 +137,8 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
       - Parameters [4] {
         Parameter #0 [ <required> string $pattern ]
         Parameter #1 [ <required> string $subject ]
-        Parameter #2 [ <optional> int $limit ]
-        Parameter #3 [ <optional> int $flags ]
+        Parameter #2 [ <optional> int $limit = -1 ]
+        Parameter #3 [ <optional> int $flags = 0 ]
       }
       - Return [ array|false ]
     }
@@ -146,7 +146,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
 
       - Parameters [2] {
         Parameter #0 [ <required> string $str ]
-        Parameter #1 [ <optional> ?string $delim_char ]
+        Parameter #1 [ <optional> ?string $delim_char = null ]
       }
       - Return [ string ]
     }
@@ -155,7 +155,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
       - Parameters [3] {
         Parameter #0 [ <required> string $regex ]
         Parameter #1 [ <required> array $input ]
-        Parameter #2 [ <optional> int $flags ]
+        Parameter #2 [ <optional> int $flags = 0 ]
       }
       - Return [ array|false ]
     }
