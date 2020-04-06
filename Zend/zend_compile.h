@@ -374,12 +374,14 @@ typedef struct _zend_class_constant {
 typedef struct _zend_internal_arg_info {
 	const char *name;
 	zend_type type;
+	const char *default_value;
 } zend_internal_arg_info;
 
 /* arg_info for user functions */
 typedef struct _zend_arg_info {
 	zend_string *name;
 	zend_type type;
+	zend_string *default_value;
 } zend_arg_info;
 
 /* the following structure repeats the layout of zend_internal_arg_info,
@@ -390,6 +392,7 @@ typedef struct _zend_arg_info {
 typedef struct _zend_internal_function_info {
 	zend_uintptr_t required_num_args;
 	zend_type type;
+	const char *default_value;
 } zend_internal_function_info;
 
 struct _zend_op_array {

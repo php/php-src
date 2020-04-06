@@ -4,7 +4,10 @@
 use PhpParser\Comment\Doc as DocComment;
 use PhpParser\Node;
 use PhpParser\Node\Expr;
+use PhpParser\Node\Name;
 use PhpParser\Node\Stmt;
+use PhpParser\PrettyPrinter\Standard;
+use PhpParser\PrettyPrinterAbstract;
 
 error_reporting(E_ALL);
 
@@ -13,6 +16,13 @@ try {
 } catch (Exception $e) {
     echo "{$e->getMessage()}\n";
     exit(1);
+}
+
+class CustomPrettyPrinter extends Standard
+{
+    protected function pName_FullyQualified(Name\FullyQualified $node) {
+        return implode('\\', $node->parts);
+    }
 }
 
 if ($argc >= 2) {
@@ -252,19 +262,23 @@ class ArgInfo {
     public $isVariadic;
     /** @var Type|null */
     public $type;
+    /** @var string|null */
+    public $defaultValue;
 
-    public function __construct(string $name, int $sendBy, bool $isVariadic, ?Type $type) {
+    public function __construct(string $name, int $sendBy, bool $isVariadic, ?Type $type, ?string $defaultValue) {
         $this->name = $name;
         $this->sendBy = $sendBy;
         $this->isVariadic = $isVariadic;
         $this->type = $type;
+        $this->defaultValue = $defaultValue;
     }
 
     public function equals(ArgInfo $other): bool {
         return $this->name === $other->name
             && $this->sendBy === $other->sendBy
             && $this->isVariadic === $other->isVariadic
-            && Type::equals($this->type, $other->type);
+            && Type::equals($this->type, $other->type)
+            && $this->defaultValue === $other->defaultValue;
     }
 
     public function getSendByString(): string {
@@ -277,6 +291,18 @@ class ArgInfo {
             return "ZEND_SEND_PREFER_REF";
         }
         throw new Exception("Invalid sendBy value");
+    }
+
+    public function hasDefaultValue(): bool {
+        return $this->defaultValue !== null && $this->defaultValue !== "UNKNOWN";
+    }
+
+    public function getDefaultValueString(): string {
+        if ($this->hasDefaultValue()) {
+            return '"' . addslashes($this->defaultValue) . '"';
+        }
+
+        return "NULL";
     }
 }
 
@@ -432,7 +458,7 @@ function parseDocComment(DocComment $comment): array {
 }
 
 function parseFunctionLike(
-    string $name, ?string $className, Node\FunctionLike $func, ?string $cond
+    PrettyPrinterAbstract $prettyPinter, string $name, ?string $className, Node\FunctionLike $func, ?string $cond
 ): FuncInfo {
     $comment = $func->getDocComment();
     $paramMeta = [];
@@ -494,7 +520,8 @@ function parseFunctionLike(
             $varName,
             $sendBy,
             $param->variadic,
-            $type
+            $type,
+            $param->default ? $prettyPinter->prettyPrintExpr($param->default) : null
         );
         if (!$param->default && !$param->variadic) {
             $numRequiredArgs = $i + 1;
@@ -572,6 +599,7 @@ function parseStubFile(string $fileName): FileInfo {
     $parser = new PhpParser\Parser\Php7($lexer);
     $nodeTraverser = new PhpParser\NodeTraverser;
     $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\NameResolver);
+    $prettyPrinter = new CustomPrettyPrinter();
 
     $stmts = $parser->parse($code);
     $nodeTraverser->traverse($stmts);
@@ -594,7 +622,7 @@ function parseStubFile(string $fileName): FileInfo {
         }
 
         if ($stmt instanceof Stmt\Function_) {
-            $funcInfos[] = parseFunctionLike($stmt->name->toString(), null, $stmt, $cond);
+            $funcInfos[] = parseFunctionLike($prettyPrinter, $stmt->name->toString(), null, $stmt, $cond);
             continue;
         }
 
@@ -612,7 +640,7 @@ function parseStubFile(string $fileName): FileInfo {
                 }
 
                 $methodInfos[] = parseFunctionLike(
-                    $classStmt->name->toString(), $className, $classStmt, $cond);
+                    $prettyPrinter, $classStmt->name->toString(), $className, $classStmt, $cond);
             }
 
             $classInfos[] = new ClassInfo($className, $methodInfos);
@@ -673,20 +701,23 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
 
     foreach ($funcInfo->args as $argInfo) {
         $argKind = $argInfo->isVariadic ? "ARG_VARIADIC" : "ARG";
+        $argDefaultKind = $argInfo->hasDefaultValue() ? "_WITH_DEFAULT_VALUE" : "";
         $argType = $argInfo->type;
         if ($argType !== null) {
             if (null !== $simpleArgType = $argType->tryToSimpleType()) {
                 if ($simpleArgType->isBuiltin) {
                     $code .= sprintf(
-                        "\tZEND_%s_TYPE_INFO(%s, %s, %s, %d)\n",
-                        $argKind, $argInfo->getSendByString(), $argInfo->name,
-                        $simpleArgType->toTypeCode(), $argType->isNullable()
+                        "\tZEND_%s_TYPE_INFO%s(%s, %s, %s, %d%s)\n",
+                        $argKind, $argDefaultKind, $argInfo->getSendByString(), $argInfo->name,
+                        $simpleArgType->toTypeCode(), $argType->isNullable(),
+                        $argInfo->hasDefaultValue() ? ", " . $argInfo->getDefaultValueString() : ""
                     );
                 } else {
                     $code .= sprintf(
-                        "\tZEND_%s_OBJ_INFO(%s, %s, %s, %d)\n",
-                        $argKind, $argInfo->getSendByString(), $argInfo->name,
-                        $simpleArgType->toEscapedName(), $argType->isNullable()
+                        "\tZEND_%s_OBJ_INFO%s(%s, %s, %s, %d%s)\n",
+                        $argKind,$argDefaultKind, $argInfo->getSendByString(), $argInfo->name,
+                        $simpleArgType->toEscapedName(), $argType->isNullable(),
+                        $argInfo->hasDefaultValue() ? ", " . $argInfo->getDefaultValueString() : ""
                     );
                 }
             } else if (null !== $representableType = $argType->tryToRepresentableType()) {
@@ -694,16 +725,20 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
                     throw new Exception('Unimplemented');
                 }
                 $code .= sprintf(
-                    "\tZEND_%s_TYPE_MASK(%s, %s, %s)\n",
+                    "\tZEND_%s_TYPE_MASK(%s, %s, %s, %s)\n",
                     $argKind, $argInfo->getSendByString(), $argInfo->name,
-                    $representableType->toTypeMask()
+                    $representableType->toTypeMask(),
+                    $argInfo->getDefaultValueString()
                 );
             } else {
                 throw new Exception('Unimplemented');
             }
         } else {
             $code .= sprintf(
-                "\tZEND_%s_INFO(%s, %s)\n", $argKind, $argInfo->getSendByString(), $argInfo->name);
+                "\tZEND_%s_INFO%s(%s, %s%s)\n",
+                $argKind, $argDefaultKind, $argInfo->getSendByString(), $argInfo->name,
+                $argInfo->hasDefaultValue() ? ", " . $argInfo->getDefaultValueString() : ""
+            );
         }
     }
 
