@@ -346,12 +346,11 @@ PHP_FUNCTION(hash_init)
 {
 	zend_string *algo, *key = NULL;
 	zend_long options = 0;
-	int argc = ZEND_NUM_ARGS();
 	void *context;
 	const php_hash_ops *ops;
 	php_hashcontext_object *hash;
 
-	if (zend_parse_parameters(argc, "S|lS", &algo, &options, &key) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|lS", &algo, &options, &key) == FAILURE) {
 		RETURN_THROWS();
 	}
 
