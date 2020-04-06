@@ -48,9 +48,15 @@ static zend_object_handlers closure_handlers;
 ZEND_METHOD(Closure, __invoke) /* {{{ */
 {
 	zend_function *func = EX(func);
-	zval *arguments = ZEND_CALL_ARG(execute_data, 1);
+	zval *args;
+	uint32_t num_args;
+	HashTable *named_args;
 
-	if (call_user_function(CG(function_table), NULL, ZEND_THIS, return_value, ZEND_NUM_ARGS(), arguments) == FAILURE) {
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC_WITH_NAMED(args, num_args, named_args)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (call_user_function_named(CG(function_table), NULL, ZEND_THIS, return_value, num_args, args, named_args) == FAILURE) {
 		RETVAL_FALSE;
 	}
 
@@ -122,9 +128,10 @@ ZEND_METHOD(Closure, call)
 	fci.param_count = 0;
 	fci.params = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o*", &newthis, &fci.params, &fci.param_count) == FAILURE) {
-		RETURN_THROWS();
-	}
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_OBJECT(newthis)
+		Z_PARAM_VARIADIC_WITH_NAMED(fci.params, fci.param_count, fci.named_params)
+	ZEND_PARSE_PARAMETERS_END();
 
 	closure = (zend_closure *) Z_OBJ_P(ZEND_THIS);
 
@@ -246,6 +253,7 @@ static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 
 	fcc.function_handler = (EX(func)->internal_function.fn_flags & ZEND_ACC_STATIC) ?
 		EX(func)->internal_function.scope->__callstatic : EX(func)->internal_function.scope->__call;
+	fci.named_params = NULL;
 	fci.params = params;
 	fci.param_count = 2;
 	ZVAL_STR(&fci.params[0], EX(func)->common.function_name);

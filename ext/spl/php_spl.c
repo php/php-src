@@ -437,7 +437,7 @@ static zend_class_entry *spl_perform_autoload(zend_string *class_name, zend_stri
 
 		zval param;
 		ZVAL_STR(&param, class_name);
-		zend_call_known_function(func, alfi->obj, alfi->ce, NULL, 1, &param);
+		zend_call_known_function(func, alfi->obj, alfi->ce, NULL, 1, &param, NULL);
 		if (EG(exception)) {
 			break;
 		}

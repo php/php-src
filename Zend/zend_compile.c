@@ -3285,15 +3285,48 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
-uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
+static uint32_t zend_get_arg_num(zend_function *fn, zend_string *arg_name) {
+	// TODO: Caching?
+	if (fn->type == ZEND_USER_FUNCTION) {
+		for (uint32_t i = 0; i < fn->common.num_args; i++) {
+			zend_arg_info *arg_info = &fn->op_array.arg_info[i];
+			if (zend_string_equals(arg_info->name, arg_name)) {
+				return i + 1;
+			}
+		}
+	} else {
+		for (uint32_t i = 0; i < fn->common.num_args; i++) {
+			zend_internal_arg_info *arg_info = &fn->internal_function.arg_info[i];
+			size_t len = strlen(arg_info->name);
+			if (len == ZSTR_LEN(arg_name) && !memcmp(arg_info->name, ZSTR_VAL(arg_name), len)) {
+				return i + 1;
+			}
+		}
+	}
+
+	/* Either an invalid argument name, or collected into a variadic argument. */
+	return (uint32_t) -1;
+}
+
+uint32_t zend_compile_args(
+		zend_ast *ast, zend_function *fbc, bool *may_have_extra_named_args) /* {{{ */
 {
 	zend_ast_list *args = zend_ast_get_list(ast);
 	uint32_t i;
 	zend_bool uses_arg_unpack = 0;
 	uint32_t arg_count = 0; /* number of arguments not including unpacks */
 
+	/* Whether named arguments are used syntactically, to enforce language level limitations.
+	 * May not actually use named argument passing. */
+	zend_bool uses_named_args = 0;
+	/* Whether there may be any undef arguments due to the use of named arguments. */
+	zend_bool may_have_undef = 0;
+	/* Whether there may be any extra named arguments collected into a variadic. */
+	*may_have_extra_named_args = 0;
+
 	for (i = 0; i < args->children; ++i) {
 		zend_ast *arg = args->child[i];
+		zend_string *arg_name = NULL;
 		uint32_t arg_num = i + 1;
 
 		znode arg_node;
@@ -3301,6 +3334,11 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 		zend_uchar opcode;
 
 		if (arg->kind == ZEND_AST_UNPACK) {
+			if (uses_named_args) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot combine named arguments and argument unpacking");
+			}
+
 			uses_arg_unpack = 1;
 			fbc = NULL;
 
@@ -3308,15 +3346,57 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 			opline = zend_emit_op(NULL, ZEND_SEND_UNPACK, &arg_node, NULL);
 			opline->op2.num = arg_count;
 			opline->result.var = EX_NUM_TO_VAR(arg_count - 1);
+
+			/* Unpack may contain named arguments. */
+			may_have_undef = 1;
+			if (!fbc || (fbc->common.fn_flags & ZEND_ACC_VARIADIC)) {
+				*may_have_extra_named_args = 1;
+			}
 			continue;
 		}
 
-		if (uses_arg_unpack) {
-			zend_error_noreturn(E_COMPILE_ERROR,
-				"Cannot use positional argument after argument unpacking");
+		if (arg->kind == ZEND_AST_NAMED_ARG) {
+			if (uses_arg_unpack) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot combine named arguments and argument unpacking");
+			}
+
+			uses_named_args = 1;
+			arg_name = zval_make_interned_string(zend_ast_get_zval(arg->child[0]));
+			arg = arg->child[1];
+
+			if (fbc) {
+				arg_num = zend_get_arg_num(fbc, arg_name);
+				if (arg_num == arg_count + 1) {
+					/* Using named arguments, but passing in order. */
+					arg_name = NULL;
+					arg_count++;
+				} else {
+					// TODO: We could track which arguments were passed, even if out of order.
+					may_have_undef = 1;
+					if (arg_num == (uint32_t) -1 && (fbc->common.fn_flags & ZEND_ACC_VARIADIC)) {
+						*may_have_extra_named_args = 1;
+					}
+				}
+			} else {
+				arg_num = (uint32_t) -1;
+				may_have_undef = 1;
+				*may_have_extra_named_args = 1;
+			}
+		} else {
+			if (uses_arg_unpack) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use positional argument after argument unpacking");
+			}
+
+			if (uses_named_args) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Cannot use positional argument after named argument");
+			}
+
+			arg_count++;
 		}
 
-		arg_count++;
 		if (zend_is_call(arg)) {
 			zend_compile_var(&arg_node, arg, BP_VAR_R, 0);
 			if (arg_node.op_type & (IS_CONST|IS_TMP_VAR)) {
@@ -3327,7 +3407,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 					opcode = ZEND_SEND_VAL;
 				}
 			} else {
-				if (fbc) {
+				if (fbc && arg_num != (uint32_t) -1) {
 					if (ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
 						opcode = ZEND_SEND_VAR_NO_REF;
 					} else if (ARG_MAY_BE_SENT_BY_REF(fbc, arg_num)) {
@@ -3340,7 +3420,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 				}
 			}
 		} else if (zend_is_variable(arg) && !zend_ast_is_short_circuited(arg)) {
-			if (fbc) {
+			if (fbc && arg_num != (uint32_t) -1) {
 				if (ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num)) {
 					zend_compile_var(&arg_node, arg, BP_VAR_W, 1);
 					opcode = ZEND_SEND_REF;
@@ -3363,7 +3443,14 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 						}
 					}
 					opline = zend_emit_op(NULL, ZEND_CHECK_FUNC_ARG, NULL, NULL);
-					opline->op2.num = arg_num;
+					if (arg_name) {
+						opline->op2_type = IS_CONST;
+						zend_string_addref(arg_name);
+						opline->op2.constant = zend_add_literal_string(&arg_name);
+						opline->result.num = zend_alloc_cache_slots(2);
+					} else {
+						opline->op2.num = arg_num;
+					}
 					zend_compile_var(&arg_node, arg, BP_VAR_FUNC_ARG, 1);
 					opcode = ZEND_SEND_FUNC_ARG;
 				} while (0);
@@ -3372,7 +3459,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 			zend_compile_expr(&arg_node, arg);
 			if (arg_node.op_type == IS_VAR) {
 				/* pass ++$a or something similar */
-				if (fbc) {
+				if (fbc && arg_num != (uint32_t) -1) {
 					if (ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
 						opcode = ZEND_SEND_VAR_NO_REF;
 					} else if (ARG_MAY_BE_SENT_BY_REF(fbc, arg_num)) {
@@ -3384,7 +3471,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 					opcode = ZEND_SEND_VAR_NO_REF_EX;
 				}
 			} else if (arg_node.op_type == IS_CV) {
-				if (fbc) {
+				if (fbc && arg_num != (uint32_t) -1) {
 					if (ARG_SHOULD_BE_SENT_BY_REF(fbc, arg_num)) {
 						opcode = ZEND_SEND_REF;
 					} else {
@@ -3395,7 +3482,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 				}
 			} else {
 				/* Delay "Only variables can be passed by reference" error to execution */
-				if (fbc && !ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
+				if (fbc && arg_num != (uint32_t) -1 && !ARG_MUST_BE_SENT_BY_REF(fbc, arg_num)) {
 					opcode = ZEND_SEND_VAL;
 				} else {
 					opcode = ZEND_SEND_VAL_EX;
@@ -3404,8 +3491,19 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 		}
 
 		opline = zend_emit_op(NULL, opcode, &arg_node, NULL);
-		opline->op2.opline_num = arg_num;
-		opline->result.var = EX_NUM_TO_VAR(arg_num - 1);
+		if (arg_name) {
+			opline->op2_type = IS_CONST;
+			zend_string_addref(arg_name);
+			opline->op2.constant = zend_add_literal_string(&arg_name);
+			opline->result.num = zend_alloc_cache_slots(2);
+		} else {
+			opline->op2.opline_num = arg_num;
+			opline->result.var = EX_NUM_TO_VAR(arg_num - 1);
+		}
+	}
+
+	if (may_have_undef) {
+		zend_emit_op(NULL, ZEND_CHECK_UNDEF_ARGS, NULL, NULL);
 	}
 
 	return arg_count;
@@ -3443,8 +3541,9 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 	zend_op *opline;
 	uint32_t opnum_init = get_next_op_number() - 1;
 	uint32_t arg_count;
+	bool may_have_extra_named_args;
 
-	arg_count = zend_compile_args(args_ast, fbc);
+	arg_count = zend_compile_args(args_ast, fbc, &may_have_extra_named_args);
 
 	zend_do_extended_fcall_begin();
 
@@ -3456,6 +3555,9 @@ void zend_compile_call_common(znode *result, zend_ast *args_ast, zend_function *
 	}
 
 	opline = zend_emit_op(result, zend_get_call_op(opline, fbc), NULL, NULL);
+	if (may_have_extra_named_args) {
+		opline->extended_value = ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS;
+	}
 	zend_do_extended_fcall_end();
 }
 /* }}} */
@@ -3520,11 +3622,12 @@ void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_a
 }
 /* }}} */
 
-static inline zend_bool zend_args_contain_unpack(zend_ast_list *args) /* {{{ */
+static inline zend_bool zend_args_contain_unpack_or_named(zend_ast_list *args) /* {{{ */
 {
 	uint32_t i;
 	for (i = 0; i < args->children; ++i) {
-		if (args->child[i]->kind == ZEND_AST_UNPACK) {
+		zend_ast *arg = args->child[i];
+		if (arg->kind == ZEND_AST_UNPACK || arg->kind == ZEND_AST_NAMED_ARG) {
 			return 1;
 		}
 	}
@@ -3774,6 +3877,7 @@ int zend_compile_func_cufa(znode *result, zend_ast_list *args, zend_string *lcna
 	}
 	zend_compile_expr(&arg_node, args->child[1]);
 	zend_emit_op(NULL, ZEND_SEND_ARRAY, &arg_node, NULL);
+	zend_emit_op(NULL, ZEND_CHECK_UNDEF_ARGS, NULL, NULL);
 	zend_emit_op(result, ZEND_DO_FCALL, NULL, NULL);
 
 	return SUCCESS;
@@ -4080,7 +4184,7 @@ int zend_try_compile_special_func(znode *result, zend_string *lcname, zend_ast_l
 		return FAILURE;
 	}
 
-	if (zend_args_contain_unpack(args)) {
+	if (zend_args_contain_unpack_or_named(args)) {
 		return FAILURE;
 	}
 
@@ -6111,13 +6215,33 @@ static void zend_compile_attributes(HashTable **attributes, zend_ast *ast, uint3
 		if (args) {
 			ZEND_ASSERT(args->kind == ZEND_AST_ARG_LIST);
 
+			zend_bool uses_named_args = 0;
 			for (j = 0; j < args->children; j++) {
-				if (args->child[j]->kind == ZEND_AST_UNPACK) {
+				zend_ast *arg_ast = args->child[j];
+
+				if (arg_ast->kind == ZEND_AST_UNPACK) {
 					zend_error_noreturn(E_COMPILE_ERROR,
 						"Cannot use unpacking in attribute argument list");
 				}
 
-				zend_const_expr_to_zval(&attr->argv[j], args->child[j]);
+				if (arg_ast->kind == ZEND_AST_NAMED_ARG) {
+					attr->args[j].name = zend_string_copy(zend_ast_get_str(arg_ast->child[0]));
+					arg_ast = arg_ast->child[1];
+					uses_named_args = 1;
+
+					for (uint32_t k = 0; k < j; k++) {
+						if (attr->args[k].name &&
+								zend_string_equals(attr->args[k].name, attr->args[j].name)) {
+							zend_error_noreturn(E_COMPILE_ERROR, "Duplicate named parameter $%s",
+								ZSTR_VAL(attr->args[j].name));
+						}
+					}
+				} else if (uses_named_args) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Cannot use positional argument after named argument");
+				}
+
+				zend_const_expr_to_zval(&attr->args[j].value, arg_ast);
 			}
 		}
 	}

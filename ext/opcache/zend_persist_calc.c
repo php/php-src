@@ -165,7 +165,10 @@ static void zend_persist_attributes_calc(HashTable *attributes)
 			ADD_INTERNED_STRING(attr->lcname);
 
 			for (i = 0; i < attr->argc; i++) {
-				zend_persist_zval_calc(&attr->argv[i]);
+				if (attr->args[i].name) {
+					ADD_INTERNED_STRING(attr->args[i].name);
+				}
+				zend_persist_zval_calc(&attr->args[i].value);
 			}
 		} ZEND_HASH_FOREACH_END();
 	}

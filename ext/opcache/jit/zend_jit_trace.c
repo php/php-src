@@ -3538,6 +3538,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						goto done;
 					case ZEND_SEND_VAL:
 					case ZEND_SEND_VAL_EX:
+						if (opline->op2_type == IS_CONST) {
+							/* Named parameters not supported in JIT */
+							break;
+						}
 						if (opline->opcode == ZEND_SEND_VAL_EX
 						 && opline->op2.num > MAX_ARG_FLAG_NUM) {
 							break;
@@ -3562,6 +3566,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						goto done;
 					case ZEND_SEND_REF:
+						if (opline->op2_type == IS_CONST) {
+							/* Named parameters not supported in JIT */
+							break;
+						}
 						op1_info = OP1_INFO();
 						if (!zend_jit_send_ref(&dasm_state, opline, op_array,
 								op1_info, 0)) {
@@ -3573,6 +3581,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 					case ZEND_SEND_VAR_NO_REF:
 					case ZEND_SEND_VAR_NO_REF_EX:
 					case ZEND_SEND_FUNC_ARG:
+						if (opline->op2_type == IS_CONST) {
+							/* Named parameters not supported in JIT */
+							break;
+						}
 						if ((opline->opcode == ZEND_SEND_VAR_EX
 						  || opline->opcode == ZEND_SEND_VAR_NO_REF_EX)
 						 && opline->op2.num > MAX_ARG_FLAG_NUM) {
@@ -3609,6 +3621,10 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						goto done;
 					case ZEND_CHECK_FUNC_ARG:
+						if (opline->op2_type == IS_CONST) {
+							/* Named parameters not supported in JIT */
+							break;
+						}
 						if (opline->op2.num > MAX_ARG_FLAG_NUM
 						 && (!JIT_G(current_frame)
 						  || !JIT_G(current_frame)->call
@@ -3616,6 +3632,11 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 							break;
 						}
 						if (!zend_jit_check_func_arg(&dasm_state, opline, op_array)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_CHECK_UNDEF_ARGS:
+						if (!zend_jit_check_undef_args(&dasm_state, opline)) {
 							goto jit_failure;
 						}
 						goto done;

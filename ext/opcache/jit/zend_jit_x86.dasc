@@ -8567,7 +8567,8 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 #endif
 	}
 
-	if ((opline-1)->opcode == ZEND_SEND_UNPACK|| (opline-1)->opcode == ZEND_SEND_ARRAY) {
+	if ((opline-1)->opcode == ZEND_SEND_UNPACK || (opline-1)->opcode == ZEND_SEND_ARRAY ||
+			(opline-1)->opcode == ZEND_CHECK_UNDEF_ARGS) {
 		unknown_num_args = 1;
 	}
 
@@ -8620,6 +8621,10 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			}
 		}
 	}
+
+	bool may_have_extra_named_params =
+		opline->extended_value == ZEND_FCALL_MAY_HAVE_EXTRA_NAMED_PARAMS &&
+		(!func || func->common.fn_flags & ZEND_ACC_VARIADIC);
 
 	if (!reuse_ip) {
 		zend_jit_start_reuse_ip();
@@ -9025,6 +9030,17 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 			|	mov FCARG1a, RX
 			|	EXT_CALL zend_jit_vm_stack_free_args_helper, r0
 		}
+		if (may_have_extra_named_params) {
+			|	test byte [RX + offsetof(zend_execute_data, This.u1.type_info) + 3], (ZEND_CALL_HAS_EXTRA_NAMED_PARAMS >> 24)
+			|	jnz >1
+			|.cold_code
+			|1:
+			|	mov FCARG1a, aword [RX + offsetof(zend_execute_data, extra_named_params)]
+			|	EXT_CALL zend_free_extra_named_params, r0
+			|	jmp >2
+			|.code
+			|2:
+		}
 
 		|8:
 		if (opline->opcode == ZEND_DO_FCALL) {
@@ -9179,6 +9195,24 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, const zend
 	} else {
 		|	ZVAL_COPY_VALUE arg_addr, MAY_BE_ANY, op1_addr, op1_info, ZREG_R0, ZREG_R2
 	}
+
+	return 1;
+}
+
+static int zend_jit_check_undef_args(dasm_State **Dst, const zend_op *opline)
+{
+	|	mov FCARG1a, EX->call
+	|	test byte [FCARG1a + offsetof(zend_execute_data, This.u1.type_info) + 3], (ZEND_CALL_MAY_HAVE_UNDEF >> 24)
+	|	jnz >1
+	|.cold_code
+	|1:
+	|	SAVE_VALID_OPLINE opline, r0
+	|	EXT_CALL zend_handle_undef_args, r0
+	|	test r0, r0
+	|	jnz ->exception_handler
+	|	jmp >2
+	|.code
+	|2:
 
 	return 1;
 }
@@ -10002,7 +10036,7 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, const ze
 {
 	/* ZEND_CALL_FAKE_CLOSURE handled on slow path to eliminate check for ZEND_CALL_CLOSURE on fast path */
 	|	mov FCARG1d, dword [FP + offsetof(zend_execute_data, This.u1.type_info)]
-	|	test FCARG1d, (ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_FAKE_CLOSURE)
+	|	test FCARG1d, (ZEND_CALL_TOP|ZEND_CALL_HAS_SYMBOL_TABLE|ZEND_CALL_FREE_EXTRA_ARGS|ZEND_CALL_ALLOCATED|ZEND_CALL_HAS_EXTRA_NAMED_PARAMS|ZEND_CALL_FAKE_CLOSURE)
 	if (trace && trace->op != ZEND_JIT_TRACE_END) {
 		|	jnz >1
 		|.cold_code

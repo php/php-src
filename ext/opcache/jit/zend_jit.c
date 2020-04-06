@@ -2521,6 +2521,10 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						goto done;
 					case ZEND_SEND_VAL:
 					case ZEND_SEND_VAL_EX:
+						if (opline->op2_type == IS_CONST) {
+							/* Named parameters not supported in JIT (yet) */
+							break;
+						}
 						if (opline->opcode == ZEND_SEND_VAL_EX
 						 && opline->op2.num > MAX_ARG_FLAG_NUM) {
 							break;
@@ -2531,6 +2535,10 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						goto done;
 					case ZEND_SEND_REF:
+						if (opline->op2_type == IS_CONST) {
+							/* Named parameters not supported in JIT (yet) */
+							break;
+						}
 						if (!zend_jit_send_ref(&dasm_state, opline, op_array,
 								OP1_INFO(), 0)) {
 							goto jit_failure;
@@ -2541,6 +2549,10 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 					case ZEND_SEND_VAR_NO_REF:
 					case ZEND_SEND_VAR_NO_REF_EX:
 					case ZEND_SEND_FUNC_ARG:
+						if (opline->op2_type == IS_CONST) {
+							/* Named parameters not supported in JIT (yet) */
+							break;
+						}
 						if ((opline->opcode == ZEND_SEND_VAR_EX
 						  || opline->opcode == ZEND_SEND_VAR_NO_REF_EX)
 						 && opline->op2.num > MAX_ARG_FLAG_NUM) {
@@ -2560,10 +2572,19 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 						}
 						goto done;
 					case ZEND_CHECK_FUNC_ARG:
+						if (opline->op2_type == IS_CONST) {
+							/* Named parameters not supported in JIT (yet) */
+							break;
+						}
 						if (opline->op2.num > MAX_ARG_FLAG_NUM) {
 							break;
 						}
 						if (!zend_jit_check_func_arg(&dasm_state, opline, op_array)) {
+							goto jit_failure;
+						}
+						goto done;
+					case ZEND_CHECK_UNDEF_ARGS:
+						if (!zend_jit_check_undef_args(&dasm_state, opline)) {
 							goto jit_failure;
 						}
 						goto done;

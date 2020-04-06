@@ -3671,7 +3671,7 @@ ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_ar
 }
 /* }}} */
 
-static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call, uint32_t passed_args, uint32_t additional_args) /* {{{ */
+zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call, uint32_t passed_args, uint32_t additional_args) /* {{{ */
 {
 	zend_execute_data *new_call;
 	int used_stack = (EG(vm_stack_top) - (zval*)call) + additional_args;
@@ -3704,16 +3704,6 @@ static zend_execute_data *zend_vm_stack_copy_call_frame(zend_execute_data *call,
 	}
 
 	return new_call;
-}
-/* }}} */
-
-static zend_always_inline void zend_vm_stack_extend_call_frame(zend_execute_data **call, uint32_t passed_args, uint32_t additional_args) /* {{{ */
-{
-	if (EXPECTED((uint32_t)(EG(vm_stack_end) - EG(vm_stack_top)) > additional_args)) {
-		EG(vm_stack_top) += additional_args;
-	} else {
-		*call = zend_vm_stack_copy_call_frame(*call, passed_args, additional_args);
-	}
 }
 /* }}} */
 
@@ -3786,12 +3776,16 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 					case ZEND_SEND_VAR_NO_REF_EX:
 					case ZEND_SEND_USER:
 						if (level == 0) {
-							ZEND_CALL_NUM_ARGS(call) = opline->op2.num;
+							/* For named args, the number of arguments is up to date. */
+							if (opline->op2_type != IS_CONST) {
+								ZEND_CALL_NUM_ARGS(call) = opline->op2.num;
+							}
 							do_exit = 1;
 						}
 						break;
 					case ZEND_SEND_ARRAY:
 					case ZEND_SEND_UNPACK:
+					case ZEND_CHECK_UNDEF_ARGS:
 						if (level == 0) {
 							do_exit = 1;
 						}
@@ -3835,6 +3829,9 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 
 			if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
 				OBJ_RELEASE(Z_OBJ(call->This));
+			}
+			if (ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+				zend_free_extra_named_params(call->extra_named_params);
 			}
 			if (call->func->common.fn_flags & ZEND_ACC_CLOSURE) {
 				zend_object_release(ZEND_CLOSURE_OBJECT(call->func));
@@ -4335,6 +4332,226 @@ static zend_never_inline int ZEND_FASTCALL zend_quick_check_constant(
 {
 	return _zend_quick_get_constant(key, 0, 1 OPLINE_CC EXECUTE_DATA_CC);
 } /* }}} */
+
+static zend_always_inline uint32_t zend_get_arg_offset_by_name(
+		zend_function *fbc, zend_string *arg_name, void **cache_slot) {
+	if (EXPECTED(*cache_slot == fbc)) {
+		return *(uintptr_t *)(cache_slot + 1);
+	}
+
+	// TODO: Use a hash table?
+	uint32_t num_args = fbc->common.num_args;
+	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION)
+			|| EXPECTED(fbc->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
+		for (uint32_t i = 0; i < num_args; i++) {
+			zend_arg_info *arg_info = &fbc->op_array.arg_info[i];
+			if (zend_string_equals(arg_name, arg_info->name)) {
+				*cache_slot = fbc;
+				*(uintptr_t *)(cache_slot + 1) = i;
+				return i;
+			}
+		}
+	} else {
+		for (uint32_t i = 0; i < num_args; i++) {
+			zend_internal_arg_info *arg_info = &fbc->internal_function.arg_info[i];
+			size_t len = strlen(arg_info->name);
+			if (len == ZSTR_LEN(arg_name) && !memcmp(arg_info->name, ZSTR_VAL(arg_name), len)) {
+				*cache_slot = fbc;
+				*(uintptr_t *)(cache_slot + 1) = i;
+				return i;
+			}
+		}
+	}
+
+	if (fbc->common.fn_flags & ZEND_ACC_VARIADIC) {
+		*cache_slot = fbc;
+		*(uintptr_t *)(cache_slot + 1) = fbc->common.num_args;
+		return fbc->common.num_args;
+	}
+
+	return (uint32_t) -1;
+}
+
+zval * ZEND_FASTCALL zend_handle_named_arg(
+		zend_execute_data **call_ptr, zend_string *arg_name,
+		uint32_t *arg_num_ptr, void **cache_slot) {
+	zend_execute_data *call = *call_ptr;
+	zend_function *fbc = call->func;
+	uint32_t arg_offset = zend_get_arg_offset_by_name(fbc, arg_name, cache_slot);
+	if (UNEXPECTED(arg_offset == (uint32_t) -1)) {
+		zend_throw_error(NULL, "Unknown named parameter $%s", ZSTR_VAL(arg_name));
+		return NULL;
+	}
+
+	zval *arg;
+	if (UNEXPECTED(arg_offset == fbc->common.num_args)) {
+		/* Unknown named parameter that will be collected into a variadic. */
+		if (!(ZEND_CALL_INFO(call) & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS)) {
+			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_HAS_EXTRA_NAMED_PARAMS);
+			call->extra_named_params = zend_new_array(0);
+		}
+
+		arg = zend_hash_add_empty_element(call->extra_named_params, arg_name);
+		if (!arg) {
+			zend_throw_error(NULL, "Named parameter $%s overwrites previous argument",
+				ZSTR_VAL(arg_name));
+			return NULL;
+		}
+		*arg_num_ptr = arg_offset + 1;
+		return arg;
+	}
+
+	uint32_t current_num_args = ZEND_CALL_NUM_ARGS(call);
+	// TODO: We may wish to optimize the arg_offset == current_num_args case,
+	// which is probably common (if the named parameters are in order of declaration).
+	if (arg_offset >= current_num_args) {
+		uint32_t new_num_args = arg_offset + 1;
+		ZEND_CALL_NUM_ARGS(call) = new_num_args;
+
+		uint32_t num_extra_args = new_num_args - current_num_args;
+		zend_vm_stack_extend_call_frame(call_ptr, current_num_args, num_extra_args);
+		call = *call_ptr;
+
+		arg = ZEND_CALL_VAR_NUM(call, arg_offset);
+		if (num_extra_args > 1) {
+			zval *zv = ZEND_CALL_VAR_NUM(call, current_num_args);
+			do {
+				ZVAL_UNDEF(zv);
+				zv++;
+			} while (zv != arg);
+			ZEND_ADD_CALL_FLAG(call, ZEND_CALL_MAY_HAVE_UNDEF);
+		}
+	} else {
+		arg = ZEND_CALL_VAR_NUM(call, arg_offset);
+		if (UNEXPECTED(!Z_ISUNDEF_P(arg))) {
+			zend_throw_error(NULL, "Named parameter $%s overwrites previous argument",
+				ZSTR_VAL(arg_name));
+			return NULL;
+		}
+	}
+
+	*arg_num_ptr = arg_offset + 1;
+	return arg;
+}
+
+static void start_fake_frame(zend_execute_data *call, const zend_op *opline) {
+	zend_execute_data *prev_execute_data = EG(current_execute_data);
+	call->prev_execute_data = prev_execute_data;
+	call->opline = opline;
+	EG(current_execute_data) = call;
+}
+
+static void end_fake_frame(zend_execute_data *call) {
+	zend_execute_data *prev_execute_data = call->prev_execute_data;
+	EG(current_execute_data) = prev_execute_data;
+	call->prev_execute_data = NULL;
+	if (UNEXPECTED(EG(exception)) && ZEND_USER_CODE(prev_execute_data->func->common.type)) {
+		zend_rethrow_exception(prev_execute_data);
+	}
+}
+
+ZEND_API int ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *call) {
+	zend_function *fbc = call->func;
+	if (fbc->type == ZEND_USER_FUNCTION) {
+		uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
+		for (uint32_t i = 0; i < num_args; i++) {
+			zval *arg = ZEND_CALL_VAR_NUM(call, i);
+			if (!Z_ISUNDEF_P(arg)) {
+				continue;
+			}
+
+			zend_op_array *op_array = &fbc->op_array;
+			zend_op *opline = &op_array->opcodes[i];
+			if (EXPECTED(opline->opcode == ZEND_RECV_INIT)) {
+				zval *default_value = RT_CONSTANT(opline, opline->op2);
+				if (Z_OPT_TYPE_P(default_value) == IS_CONSTANT_AST) {
+					void *run_time_cache = RUN_TIME_CACHE(op_array);
+					zval *cache_val =
+						(zval *) ((char *) run_time_cache + Z_CACHE_SLOT_P(default_value));
+
+					if (Z_TYPE_P(cache_val) != IS_UNDEF) {
+						/* We keep in cache only not refcounted values */
+						ZVAL_COPY_VALUE(arg, cache_val);
+					} else {
+						/* Update constant inside a temporary zval, to make sure the CONSTANT_AST
+						 * value is not accessible through back traces. */
+						zval tmp;
+						ZVAL_COPY(&tmp, default_value);
+						start_fake_frame(call, opline);
+						int ret = zval_update_constant_ex(&tmp, fbc->op_array.scope);
+						end_fake_frame(call);
+						if (UNEXPECTED(ret == FAILURE)) {
+							zval_ptr_dtor_nogc(&tmp);
+							return FAILURE;
+						}
+						ZVAL_COPY_VALUE(arg, &tmp);
+						if (!Z_REFCOUNTED(tmp)) {
+							ZVAL_COPY_VALUE(cache_val, &tmp);
+						}
+					}
+				} else {
+					ZVAL_COPY(arg, default_value);
+				}
+			} else {
+				ZEND_ASSERT(opline->opcode == ZEND_RECV);
+				start_fake_frame(call, opline);
+				zend_argument_error(zend_ce_argument_count_error, i + 1, "not passed");
+				end_fake_frame(call);
+			}
+		}
+
+		return SUCCESS;
+	} else {
+		if (fbc->common.fn_flags & ZEND_ACC_USER_ARG_INFO) {
+			/* Magic function, let it deal with it. */
+			return SUCCESS;
+		}
+
+		uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
+		for (uint32_t i = 0; i < num_args; i++) {
+			zval *arg = ZEND_CALL_VAR_NUM(call, i);
+			if (!Z_ISUNDEF_P(arg)) {
+				continue;
+			}
+
+			zend_internal_arg_info *arg_info = &fbc->internal_function.arg_info[i];
+			if (i < fbc->common.required_num_args) {
+				start_fake_frame(call, NULL);
+				zend_argument_error(zend_ce_argument_count_error, i + 1, "not passed");
+				end_fake_frame(call);
+				return FAILURE;
+			}
+
+			zval default_value;
+			if (zend_get_default_from_internal_arg_info(&default_value, arg_info) == FAILURE) {
+				start_fake_frame(call, NULL);
+				zend_argument_error(zend_ce_argument_count_error, i + 1,
+					"must be passed explicitly, because the default value is not known");
+				end_fake_frame(call);
+				return FAILURE;
+			}
+
+			if (Z_TYPE(default_value) == IS_CONSTANT_AST) {
+				start_fake_frame(call, NULL);
+				int ret = zval_update_constant_ex(&default_value, fbc->common.scope);
+				end_fake_frame(call);
+				if (ret == FAILURE) {
+					return FAILURE;
+				}
+			}
+
+			ZVAL_COPY_VALUE(arg, &default_value);
+		}
+	}
+
+	return SUCCESS;
+}
+
+ZEND_API void ZEND_FASTCALL zend_free_extra_named_params(zend_array *extra_named_params)
+{
+	/* Extra named params may be shared. */
+	zend_array_release(extra_named_params);
+}
 
 #if defined(ZEND_VM_IP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
 /* Special versions of functions that sets EX(opline) before calling zend_vm_stack_extend() */

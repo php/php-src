@@ -8,4 +8,4 @@ $foo = 'bar';
 var_dump(new namespace::$foo);
 ?>
 --EXPECTF--
-Parse error: syntax error, unexpected token "namespace" in %s on line %d
+Parse error: syntax error, unexpected token "namespace", expecting ":" in %s on line %d

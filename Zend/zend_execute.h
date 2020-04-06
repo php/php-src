@@ -291,6 +291,21 @@ static zend_always_inline void zend_vm_stack_free_call_frame(zend_execute_data *
 	zend_vm_stack_free_call_frame_ex(ZEND_CALL_INFO(call), call);
 }
 
+zend_execute_data *zend_vm_stack_copy_call_frame(
+	zend_execute_data *call, uint32_t passed_args, uint32_t additional_args);
+
+static zend_always_inline void zend_vm_stack_extend_call_frame(
+	zend_execute_data **call, uint32_t passed_args, uint32_t additional_args)
+{
+	if (EXPECTED((uint32_t)(EG(vm_stack_end) - EG(vm_stack_top)) > additional_args)) {
+		EG(vm_stack_top) += additional_args;
+	} else {
+		*call = zend_vm_stack_copy_call_frame(*call, passed_args, additional_args);
+	}
+}
+
+ZEND_API void ZEND_FASTCALL zend_free_extra_named_params(zend_array *extra_named_params);
+
 /* services */
 ZEND_API const char *get_active_class_name(const char **space);
 ZEND_API const char *get_active_function_name(void);
@@ -332,6 +347,11 @@ ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode
 ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table);
 ZEND_API void zend_free_compiled_variables(zend_execute_data *execute_data);
 ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num);
+
+zval * ZEND_FASTCALL zend_handle_named_arg(
+		zend_execute_data **call_ptr, zend_string *arg_name,
+		uint32_t *arg_num_ptr, void **cache_slot);
+ZEND_API int ZEND_FASTCALL zend_handle_undef_args(zend_execute_data *call);
 
 #define CACHE_ADDR(num) \
 	((void**)((char*)EX(run_time_cache) + (num)))

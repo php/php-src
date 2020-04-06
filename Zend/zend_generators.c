@@ -127,6 +127,9 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		}
 		/* always free the CV's, in the symtable are only not-free'd IS_INDIRECT's */
 		zend_free_compiled_variables(execute_data);
+		if (EX_CALL_INFO() & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+			zend_free_extra_named_params(execute_data->extra_named_params);
+		}
 
 		if (EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
@@ -311,6 +314,11 @@ static HashTable *zend_generator_get_gc(zend_object *object, zval **table, int *
 	}
 	if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
 		zend_get_gc_buffer_add_obj(gc_buffer, ZEND_CLOSURE_OBJECT(EX(func)));
+	}
+	if (EX_CALL_INFO() & ZEND_CALL_HAS_EXTRA_NAMED_PARAMS) {
+		zval extra_named_params;
+		ZVAL_ARR(&extra_named_params, EX(extra_named_params));
+		zend_get_gc_buffer_add_zval(gc_buffer, &extra_named_params);
 	}
 
 	if (execute_data->opline != op_array->opcodes) {

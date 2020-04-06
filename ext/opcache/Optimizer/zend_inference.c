@@ -4354,13 +4354,8 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 		case ZEND_JMP:
 		case ZEND_CHECK_VAR:
 		case ZEND_MAKE_REF:
-		case ZEND_SEND_VAR:
 		case ZEND_BEGIN_SILENCE:
 		case ZEND_END_SILENCE:
-		case ZEND_SEND_VAL:
-		case ZEND_SEND_REF:
-		case ZEND_SEND_VAR_EX:
-		case ZEND_SEND_FUNC_ARG:
 		case ZEND_FREE:
 		case ZEND_SEPARATE:
 		case ZEND_TYPE_CHECK:
@@ -4375,10 +4370,17 @@ int zend_may_throw_ex(const zend_op *opline, const zend_ssa_op *ssa_op, const ze
 		case ZEND_FUNC_NUM_ARGS:
 		case ZEND_FUNC_GET_ARGS:
 		case ZEND_COPY_TMP:
-		case ZEND_CHECK_FUNC_ARG:
 		case ZEND_CASE_STRICT:
 		case ZEND_JMP_NULL:
 			return 0;
+		case ZEND_SEND_VAR:
+		case ZEND_SEND_VAL:
+		case ZEND_SEND_REF:
+		case ZEND_SEND_VAR_EX:
+		case ZEND_SEND_FUNC_ARG:
+		case ZEND_CHECK_FUNC_ARG:
+			/* May throw for named params. */
+			return opline->op2_type == IS_CONST;
 		case ZEND_INIT_FCALL:
 			/* can't throw, because call is resolved at compile time */
 			return 0;

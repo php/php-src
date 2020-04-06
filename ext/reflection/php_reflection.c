@@ -1796,18 +1796,19 @@ ZEND_METHOD(ReflectionFunctionAbstract, getStaticVariables)
 ZEND_METHOD(ReflectionFunction, invoke)
 {
 	zval retval;
-	zval *params = NULL;
-	int result, num_args = 0;
+	zval *params;
+	int result, num_args;
+	HashTable *named_params;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	reflection_object *intern;
 	zend_function *fptr;
 
-	GET_REFLECTION_OBJECT_PTR(fptr);
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC_WITH_NAMED(params, num_args, named_params)
+	ZEND_PARSE_PARAMETERS_END();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &params, &num_args) == FAILURE) {
-		RETURN_THROWS();
-	}
+	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	fci.size = sizeof(fci);
 	ZVAL_UNDEF(&fci.function_name);
@@ -1815,6 +1816,7 @@ ZEND_METHOD(ReflectionFunction, invoke)
 	fci.retval = &retval;
 	fci.param_count = num_args;
 	fci.params = params;
+	fci.named_params = named_params;
 
 	fcc.function_handler = fptr;
 	fcc.called_scope = NULL;
@@ -1846,36 +1848,26 @@ ZEND_METHOD(ReflectionFunction, invoke)
 ZEND_METHOD(ReflectionFunction, invokeArgs)
 {
 	zval retval;
-	zval *params, *val;
 	int result;
-	int i, argc;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	reflection_object *intern;
 	zend_function *fptr;
-	zval *param_array;
+	HashTable *params;
 
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a", &param_array) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "h", &params) == FAILURE) {
 		RETURN_THROWS();
 	}
-
-	argc = zend_hash_num_elements(Z_ARRVAL_P(param_array));
-
-	params = safe_emalloc(sizeof(zval), argc, 0);
-	argc = 0;
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(param_array), val) {
-		ZVAL_COPY(&params[argc], val);
-		argc++;
-	} ZEND_HASH_FOREACH_END();
 
 	fci.size = sizeof(fci);
 	ZVAL_UNDEF(&fci.function_name);
 	fci.object = NULL;
 	fci.retval = &retval;
-	fci.param_count = argc;
-	fci.params = params;
+	fci.param_count = 0;
+	fci.params = NULL;
+	fci.named_params = params;
 
 	fcc.function_handler = fptr;
 	fcc.called_scope = NULL;
@@ -1887,11 +1879,6 @@ ZEND_METHOD(ReflectionFunction, invokeArgs)
 	}
 
 	result = zend_call_function(&fci, &fcc);
-
-	for (i = 0; i < argc; i++) {
-		zval_ptr_dtor(&params[i]);
-	}
-	efree(params);
 
 	if (result == FAILURE) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
@@ -3127,14 +3114,14 @@ ZEND_METHOD(ReflectionMethod, getClosure)
 static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 {
 	zval retval;
-	zval *params = NULL, *val, *object;
+	zval *params = NULL, *object;
+	HashTable *named_params = NULL;
 	reflection_object *intern;
 	zend_function *mptr;
-	int i, argc = 0, result;
+	int argc = 0, result;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
 	zend_class_entry *obj_ce;
-	zval *param_array;
 
 	GET_REFLECTION_OBJECT_PTR(mptr);
 
@@ -3155,22 +3142,14 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 	}
 
 	if (variadic) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o!*", &object, &params, &argc) == FAILURE) {
-			RETURN_THROWS();
-		}
+		ZEND_PARSE_PARAMETERS_START(1, -1)
+			Z_PARAM_OBJECT_OR_NULL(object)
+			Z_PARAM_VARIADIC_WITH_NAMED(params, argc, named_params)
+		ZEND_PARSE_PARAMETERS_END();
 	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o!a", &object, &param_array) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "o!h", &object, &named_params) == FAILURE) {
 			RETURN_THROWS();
 		}
-
-		argc = zend_hash_num_elements(Z_ARRVAL_P(param_array));
-
-		params = safe_emalloc(sizeof(zval), argc, 0);
-		argc = 0;
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(param_array), val) {
-			ZVAL_COPY(&params[argc], val);
-			argc++;
-		} ZEND_HASH_FOREACH_END();
 	}
 
 	/* In case this is a static method, we shouldn't pass an object_ptr
@@ -3207,6 +3186,7 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 	fci.retval = &retval;
 	fci.param_count = argc;
 	fci.params = params;
+	fci.named_params = named_params;
 
 	fcc.function_handler = mptr;
 	fcc.called_scope = intern->ce;
@@ -3220,13 +3200,6 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 	}
 
 	result = zend_call_function(&fci, &fcc);
-
-	if (!variadic) {
-		for (i = 0; i < argc; i++) {
-			zval_ptr_dtor(&params[i]);
-		}
-		efree(params);
-	}
 
 	if (result == FAILURE) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
@@ -4676,8 +4649,9 @@ ZEND_METHOD(ReflectionClass, newInstance)
 
 	/* Run the constructor if there is one */
 	if (constructor) {
-		zval *params = NULL;
-		int i, num_args = 0;
+		zval *params;
+		int num_args;
+		HashTable *named_params;
 
 		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
@@ -4685,20 +4659,13 @@ ZEND_METHOD(ReflectionClass, newInstance)
 			RETURN_NULL();
 		}
 
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "*", &params, &num_args) == FAILURE) {
-			zval_ptr_dtor(return_value);
-			RETURN_THROWS();
-		}
+		ZEND_PARSE_PARAMETERS_START(0, -1)
+			Z_PARAM_VARIADIC_WITH_NAMED(params, num_args, named_params)
+		ZEND_PARSE_PARAMETERS_END();
 
-		for (i = 0; i < num_args; i++) {
-			Z_TRY_ADDREF(params[i]);
-		}
-
-		zend_call_known_instance_method(constructor, Z_OBJ_P(return_value), NULL, num_args, params);
-
-		for (i = 0; i < num_args; i++) {
-			zval_ptr_dtor(&params[i]);
-		}
+		zend_call_known_function(
+			constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value), NULL,
+			num_args, params, named_params);
 
 		if (EG(exception)) {
 			zend_object_store_ctor_failed(Z_OBJ_P(return_value));
@@ -4734,11 +4701,10 @@ ZEND_METHOD(ReflectionClass, newInstanceWithoutConstructor)
 /* {{{ Returns an instance of this class */
 ZEND_METHOD(ReflectionClass, newInstanceArgs)
 {
-	zval *val;
 	reflection_object *intern;
 	zend_class_entry *ce, *old_scope;
-	int i, argc = 0;
-	HashTable *args;
+	int argc = 0;
+	HashTable *args = NULL;
 	zend_function *constructor;
 
 	GET_REFLECTION_OBJECT_PTR(ce);
@@ -4747,8 +4713,8 @@ ZEND_METHOD(ReflectionClass, newInstanceArgs)
 		RETURN_THROWS();
 	}
 
-	if (ZEND_NUM_ARGS() > 0) {
-		argc = args->nNumOfElements;
+	if (args) {
+		argc = zend_hash_num_elements(args);
 	}
 
 	if (UNEXPECTED(object_init_ex(return_value, ce) != SUCCESS)) {
@@ -4762,31 +4728,14 @@ ZEND_METHOD(ReflectionClass, newInstanceArgs)
 
 	/* Run the constructor if there is one */
 	if (constructor) {
-		zval *params = NULL;
-
 		if (!(constructor->common.fn_flags & ZEND_ACC_PUBLIC)) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0, "Access to non-public constructor of class %s", ZSTR_VAL(ce->name));
 			zval_ptr_dtor(return_value);
 			RETURN_NULL();
 		}
 
-		if (argc) {
-			params = safe_emalloc(sizeof(zval), argc, 0);
-			argc = 0;
-			ZEND_HASH_FOREACH_VAL(args, val) {
-				ZVAL_COPY(&params[argc], val);
-				argc++;
-			} ZEND_HASH_FOREACH_END();
-		}
-
-		zend_call_known_instance_method(constructor, Z_OBJ_P(return_value), NULL, argc, params);
-
-		if (params) {
-			for (i = 0; i < argc; i++) {
-				zval_ptr_dtor(&params[i]);
-			}
-			efree(params);
-		}
+		zend_call_known_function(
+			constructor, Z_OBJ_P(return_value), Z_OBJCE_P(return_value), NULL, 0, NULL, args);
 
 		if (EG(exception)) {
 			zend_object_store_ctor_failed(Z_OBJ_P(return_value));
@@ -6273,12 +6222,17 @@ ZEND_METHOD(ReflectionAttribute, getArguments)
 			RETURN_THROWS();
 		}
 
-		add_next_index_zval(return_value, &tmp);
+		if (attr->data->args[i].name) {
+			/* We ensured at compile-time that there are no duplicate parameter names. */
+			zend_hash_add_new(Z_ARRVAL_P(return_value), attr->data->args[i].name, &tmp);
+		} else {
+			add_next_index_zval(return_value, &tmp);
+		}
 	}
 }
 /* }}} */
 
-static int call_attribute_constructor(zend_class_entry *ce, zend_object *obj, zval *args, uint32_t argc) /* {{{ */
+static int call_attribute_constructor(zend_class_entry *ce, zend_object *obj, zval *args, uint32_t argc, HashTable *named_params) /* {{{ */
 {
 	zend_function *ctor = ce->constructor;
 	ZEND_ASSERT(ctor != NULL);
@@ -6288,7 +6242,8 @@ static int call_attribute_constructor(zend_class_entry *ce, zend_object *obj, zv
 		return FAILURE;
 	}
 
-	zend_call_known_instance_method(ctor, obj, NULL, argc, args);
+	zend_call_known_function(ctor, obj, obj->ce, NULL, argc, args, named_params);
+
 	if (EG(exception)) {
 		zend_object_store_ctor_failed(obj);
 		return FAILURE;
@@ -6298,7 +6253,8 @@ static int call_attribute_constructor(zend_class_entry *ce, zend_object *obj, zv
 }
 /* }}} */
 
-static void attribute_ctor_cleanup(zval *obj, zval *args, uint32_t argc) /* {{{ */
+static void attribute_ctor_cleanup(
+		zval *obj, zval *args, uint32_t argc, HashTable *named_params) /* {{{ */
 {
 	if (obj) {
 		zval_ptr_dtor(obj);
@@ -6312,6 +6268,10 @@ static void attribute_ctor_cleanup(zval *obj, zval *args, uint32_t argc) /* {{{ 
 		}
 
 		efree(args);
+	}
+
+	if (named_params) {
+		zend_array_destroy(named_params);
 	}
 }
 /* }}} */
@@ -6327,8 +6287,7 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 	zval obj;
 
 	zval *args = NULL;
-	uint32_t count;
-	uint32_t argc = 0;
+	HashTable *named_params = NULL;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -6385,31 +6344,40 @@ ZEND_METHOD(ReflectionAttribute, newInstance)
 		RETURN_THROWS();
 	}
 
-	count = attr->data->argc;
+	uint32_t argc = 0;
+	if (attr->data->argc) {
+		args = emalloc(attr->data->argc * sizeof(zval));
 
-	if (count) {
-		args = emalloc(count * sizeof(zval));
-
-		for (argc = 0; argc < attr->data->argc; argc++) {
-			if (FAILURE == zend_get_attribute_value(&args[argc], attr->data, argc, attr->scope)) {
-				attribute_ctor_cleanup(&obj, args, argc);
+		for (uint32_t i = 0; i < attr->data->argc; i++) {
+			zval val;
+			if (FAILURE == zend_get_attribute_value(&val, attr->data, i, attr->scope)) {
+				attribute_ctor_cleanup(&obj, args, i, named_params);
 				RETURN_THROWS();
+			}
+			if (attr->data->args[i].name) {
+				if (!named_params) {
+					named_params = zend_new_array(0);
+				}
+				zend_hash_add_new(named_params, attr->data->args[i].name, &val);
+			} else {
+				ZVAL_COPY_VALUE(&args[i], &val);
+				argc++;
 			}
 		}
 	}
 
 	if (ce->constructor) {
-		if (FAILURE == call_attribute_constructor(ce, Z_OBJ(obj), args, argc)) {
-			attribute_ctor_cleanup(&obj, args, argc);
+		if (FAILURE == call_attribute_constructor(ce, Z_OBJ(obj), args, argc, named_params)) {
+			attribute_ctor_cleanup(&obj, args, argc, named_params);
 			RETURN_THROWS();
 		}
-	} else if (argc) {
-		attribute_ctor_cleanup(&obj, args, argc);
+	} else if (argc || named_params) {
+		attribute_ctor_cleanup(&obj, args, argc, named_params);
 		zend_throw_error(NULL, "Attribute class %s does not have a constructor, cannot pass arguments", ZSTR_VAL(ce->name));
 		RETURN_THROWS();
 	}
 
-	attribute_ctor_cleanup(NULL, args, argc);
+	attribute_ctor_cleanup(NULL, args, argc, named_params);
 
 	RETURN_COPY_VALUE(&obj);
 }

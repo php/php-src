@@ -1385,6 +1385,7 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 			fci.retval = &retval;
 			fci.param_count = 2;
 			fci.params = argv;
+			fci.named_params = NULL;
 
 			ch->in_callback = 1;
 			error = zend_call_function(&fci, &t->fci_cache);
@@ -1431,6 +1432,7 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 			fci.retval = &retval;
 			fci.param_count = 3;
 			fci.params = argv;
+			fci.named_params = NULL;
 
 			ch->in_callback = 1;
 			error = zend_call_function(&fci, &t->fci_cache);
@@ -1483,6 +1485,7 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 			fci.retval = &retval;
 			fci.param_count = 5;
 			fci.params = argv;
+			fci.named_params = NULL;
 
 			ch->in_callback = 1;
 			error = zend_call_function(&fci, &t->fci_cache);
@@ -1538,6 +1541,7 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 			fci.retval = &retval;
 			fci.param_count = 3;
 			fci.params = argv;
+			fci.named_params = NULL;
 
 			ch->in_callback = 1;
 			error = zend_call_function(&fci, &t->fci_cache);
@@ -1599,6 +1603,7 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 			fci.retval = &retval;
 			fci.param_count = 2;
 			fci.params = argv;
+			fci.named_params = NULL;
 
 			ch->in_callback = 1;
 			error = zend_call_function(&fci, &t->fci_cache);

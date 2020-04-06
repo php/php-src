@@ -640,6 +640,8 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/inheritance_private_methods
   . Added support for nullsafe operator (`?->`).
     RFC: https://wiki.php.net/rfc/nullsafe_operator
+  . Added support for named arguments.
+    RFC: https://wiki.php.net/rfc/named_params
 
 - Date:
   . Added DateTime::createFromInterface() and
