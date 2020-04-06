@@ -1404,7 +1404,7 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, zend_ss
 		while (it) {
 			if (current->range.start != zend_interval_end(it)) {
 				freeUntilPos[it->reg] = 0;
-			} else if (zend_jit_may_reuse_reg(op_array, ssa, current->range.start, current->ssa_var, it->ssa_var)) {
+			} else if (zend_jit_may_reuse_reg(op_array->opcodes + current->range.start, ssa->ops + current->range.start, ssa, current->ssa_var, it->ssa_var)) {
 				if (!ZEND_REGSET_IN(*hints, it->reg) &&
 				    /* TODO: Avoid most often scratch registers. Find a better way ??? */
 				    (!current->used_as_hint ||
@@ -1460,7 +1460,10 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, zend_ss
 			line++;
 		}
 		while (line <= range->end) {
-			regset = zend_jit_get_scratch_regset(op_array, ssa, line, current->ssa_var);
+			regset = zend_jit_get_scratch_regset(
+				op_array->opcodes + line,
+				ssa->ops + line,
+				op_array, ssa, current->ssa_var);
 			ZEND_REGSET_FOREACH(regset, reg) {
 				if (line < freeUntilPos[reg]) {
 					freeUntilPos[reg] = line;
