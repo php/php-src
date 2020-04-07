@@ -946,6 +946,89 @@ optimize_const_unary_op:
 	}
 }
 
+static uint32_t count_unterminated_init_calls(zend_op_array *op_array, zend_basic_block *b)
+{
+	zend_op *op = op_array->opcodes + b->start;
+	zend_op *end = op + b->len;
+	uint32_t num_init_call = 0;
+	uint32_t num_do_call = 0;
+	for (; op < end; op++) {
+		if (op->opcode == ZEND_INIT_FCALL
+			|| op->opcode == ZEND_INIT_FCALL_BY_NAME
+			|| op->opcode == ZEND_INIT_NS_FCALL_BY_NAME
+			|| op->opcode == ZEND_INIT_DYNAMIC_CALL
+			|| op->opcode == ZEND_INIT_USER_CALL
+			|| op->opcode == ZEND_NEW
+			|| op->opcode == ZEND_INIT_METHOD_CALL
+			|| op->opcode == ZEND_INIT_STATIC_METHOD_CALL) {
+			num_init_call++;
+		}
+
+		if (op->opcode == ZEND_DO_FCALL
+			|| op->opcode == ZEND_DO_FCALL_BY_NAME
+			|| op->opcode == ZEND_DO_ICALL
+			|| op->opcode == ZEND_DO_UCALL) {
+			num_do_call++;
+		}
+	}
+
+	return num_do_call - num_init_call;
+}
+
+static void make_unterminated_init_call_nop(zend_cfg *cfg, zend_op_array *op_array, zend_basic_block *removed_b)
+{
+	zend_basic_block *blocks = cfg->blocks;
+	uint32_t num_init_calls_to_delete = count_unterminated_init_calls(op_array, removed_b);
+	if (num_init_calls_to_delete <= 0) {
+		return;
+	}
+
+	zend_bool nesting = 0;
+	uint32_t num_init_calls_deleted = 0;
+	for (zend_basic_block *b = removed_b - 1; b >= blocks; b--) {
+		zend_op *op = op_array->opcodes + b->start + b->len;
+		zend_op *start = op - b->len;
+		for (; op >= start; op--) {
+			zend_bool is_init_call = op->opcode == ZEND_INIT_FCALL
+				|| op->opcode == ZEND_INIT_FCALL_BY_NAME
+				|| op->opcode == ZEND_INIT_NS_FCALL_BY_NAME
+				|| op->opcode == ZEND_INIT_DYNAMIC_CALL
+				|| op->opcode == ZEND_INIT_USER_CALL
+				|| op->opcode == ZEND_NEW
+				|| op->opcode == ZEND_INIT_METHOD_CALL
+				|| op->opcode == ZEND_INIT_STATIC_METHOD_CALL;
+
+			zend_bool is_do_call = op->opcode == ZEND_DO_FCALL
+				|| op->opcode == ZEND_DO_FCALL_BY_NAME
+				|| op->opcode == ZEND_DO_ICALL
+				|| op->opcode == ZEND_DO_UCALL;
+
+			zend_bool is_send_value = op->opcode == ZEND_SEND_VAL
+				|| op->opcode == ZEND_SEND_VAL_EX
+				|| op->opcode == ZEND_SEND_VAR
+				|| op->opcode == ZEND_SEND_VAR_EX
+				|| op->opcode == ZEND_SEND_VAR_NO_REF
+				|| op->opcode == ZEND_SEND_VAR_NO_REF_EX
+				|| op->opcode == ZEND_SEND_FUNC_ARG;
+
+			if (nesting == 0 && is_init_call) {
+				MAKE_NOP(op);
+				num_init_calls_deleted++;
+
+				if (num_init_calls_deleted >= num_init_calls_to_delete) {
+					return;
+				}
+			} else if (nesting == 0 && is_send_value) {
+				MAKE_NOP(op);
+			} else if (is_init_call) {
+				nesting--;
+			} else if (is_do_call) {
+				nesting++;
+			}
+		}
+	}
+}
+
 /* Rebuild plain (optimized) op_array from CFG */
 static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
@@ -991,6 +1074,8 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 					literal_dtor(&ZEND_OP2_LITERAL(op));
 				}
 			}
+
+			make_unterminated_init_call_nop(cfg, op_array, b);
 		}
 	}
 
