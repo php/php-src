@@ -1,5 +1,5 @@
 --TEST--
-preg_match() single line match with multi-line input
+preg_match() single line match with latin input
 --FILE--
 <?php
 /* Prototype  : int preg_match  ( string $pattern  , string $subject  [, array &$matches  [, int $flags  [, int $offset  ]]] )
