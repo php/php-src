@@ -308,33 +308,36 @@ typedef struct _zend_jit_trace_exit_info {
 } zend_jit_trace_exit_info;
 
 typedef union _zend_jit_trace_stack {
-	int32_t      __ssa_var;
-	uint32_t     __info;
+	int32_t      ssa_var;
+	uint32_t     info;
 	struct {
-		uint8_t  __type;
-		int8_t   __reg;
-		uint16_t __flags;
+		uint8_t  type;
+		int8_t   reg;
+		uint16_t flags;
 	};
 } zend_jit_trace_stack;
 
 #define STACK_VAR(_stack, _slot) \
-	(_stack)[_slot].__ssa_var
+	(_stack)[_slot].ssa_var
 #define STACK_INFO(_stack, _slot) \
-	(_stack)[_slot].__info
+	(_stack)[_slot].info
 #define STACK_TYPE(_stack, _slot) \
-	(_stack)[_slot].__type
+	(_stack)[_slot].type
 #define STACK_REG(_stack, _slot) \
-	(_stack)[_slot].__reg
+	(_stack)[_slot].reg
 #define SET_STACK_VAR(_stack, _slot, _ssa_var) do { \
-		(_stack)[_slot].__ssa_var = _ssa_var; \
+		(_stack)[_slot].ssa_var = _ssa_var; \
 	} while (0)
 #define SET_STACK_INFO(_stack, _slot, _info) do { \
-		(_stack)[_slot].__info = _info; \
+		(_stack)[_slot].info = _info; \
 	} while (0)
 #define SET_STACK_TYPE(_stack, _slot, _type) do { \
-		(_stack)[_slot].__type = _type; \
-		(_stack)[_slot].__reg = ZREG_NONE; \
-		(_stack)[_slot].__flags = 0; \
+		(_stack)[_slot].type = _type; \
+		(_stack)[_slot].reg = ZREG_NONE; \
+		(_stack)[_slot].flags = 0; \
+	} while (0)
+#define SET_STACK_REG(_stack, _slot, _reg) do { \
+		(_stack)[_slot].reg = _reg; \
 	} while (0)
 
 typedef struct _zend_jit_trace_info {
