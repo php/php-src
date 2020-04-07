@@ -172,7 +172,11 @@ static inline zend_bool is_closure_invoke(zend_class_entry *ce, zend_string *lcn
 
 static zval *_default_load_name(zval *object) /* {{{ */
 {
-	return zend_hash_find_ex_ind(Z_OBJPROP_P(object), ZSTR_KNOWN(ZEND_STR_NAME), 1);
+	zval *name = reflection_prop_name(object);
+	if (Z_ISUNDEF_P(name)) {
+		return NULL;
+	}
+	return name;
 }
 /* }}} */
 
