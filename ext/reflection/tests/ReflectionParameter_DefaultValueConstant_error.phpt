@@ -17,9 +17,6 @@ foreach($reflect->getParameters() as $param) {
     }
 }
 ?>
---EXPECTF--
-Deprecated: Function ReflectionParameter::getDefaultValueConstantName() is deprecated in %s on line %d
+--EXPECT--
 Internal error: Failed to retrieve the default value
-
-Deprecated: Function ReflectionParameter::getDefaultValueConstantName() is deprecated in %s on line %d
 CONST_TEST_1

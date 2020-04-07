@@ -7,7 +7,7 @@ $method = $class->getMethod('setTime');
 
 foreach ($method->getParameters() as $parameter) {
     try {
-        var_dump(@$parameter->getDefaultValueConstantName());
+        var_dump($parameter->getDefaultValueConstantName());
     } catch (ReflectionException $exception) {
         echo $exception->getMessage() . "\n";
     }
@@ -20,7 +20,7 @@ $method = $class->getMethod('getTransitions');
 
 foreach ($method->getParameters() as $parameter) {
     try {
-        var_dump(@$parameter->getDefaultValueConstantName());
+        var_dump($parameter->getDefaultValueConstantName());
     } catch (ReflectionException $exception) {
         echo $exception->getMessage() . "\n";
     }
@@ -33,7 +33,7 @@ $method = $class->getMethod('listIdentifiers');
 
 foreach ($method->getParameters() as $parameter) {
     try {
-        var_dump(@$parameter->getDefaultValueConstantName());
+        var_dump($parameter->getDefaultValueConstantName());
     } catch (ReflectionException $exception) {
         echo $exception->getMessage() . "\n";
     }

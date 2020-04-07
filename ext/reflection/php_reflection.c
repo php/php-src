@@ -642,8 +642,8 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 		? ((zend_internal_arg_info*)arg_info)->name : ZSTR_VAL(arg_info->name));
 
 	if (!required) {
-		smart_str_appends(str, " = ");
 		if (fptr->type == ZEND_INTERNAL_FUNCTION) {
+			smart_str_appends(str, " = ");
 			if (((zend_internal_arg_info*)arg_info)->default_value) {
 				smart_str_appends(str, ((zend_internal_arg_info*)arg_info)->default_value);
 			} else {
@@ -652,6 +652,7 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 		} else {
 			zend_op *precv = _get_recv_op((zend_op_array*)fptr, offset);
 			if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
+				smart_str_appends(str, " = ");
 				if (format_default_value(str, RT_CONSTANT(precv, precv->op2), fptr->common.scope) == FAILURE) {
 					return;
 				}
@@ -2692,9 +2693,6 @@ ZEND_METHOD(reflection_parameter, isDefaultValueAvailable)
 	}
 
 	GET_REFLECTION_OBJECT_PTR(param);
-	if (!param) {
-		RETURN_THROWS();
-	}
 
 	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
 		RETURN_BOOL(param->arg_info && ((zend_internal_arg_info*) (param->arg_info))->default_value);
@@ -2729,15 +2727,14 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 			RETURN_THROWS();
 		}
 
-		ZVAL_COPY(return_value, &default_value_zval);
-		zval_dtor(&default_value_zval);
+		RETVAL_COPY_VALUE(&default_value_zval);
 	} else {
 		zend_op *precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, param);
 		if (!precv) {
 			RETURN_THROWS();
 		}
 
-		ZVAL_COPY(return_value, RT_CONSTANT(precv, precv->op2));
+		RETVAL_COPY(RT_CONSTANT(precv, precv->op2));
 	}
 
 	if (Z_TYPE_P(return_value) == IS_CONSTANT_AST) {
@@ -6531,8 +6528,8 @@ static const zend_function_entry reflection_parameter_functions[] = {
 	ZEND_ME(reflection_parameter, isOptional, arginfo_class_ReflectionParameter_isOptional, 0)
 	ZEND_ME(reflection_parameter, isDefaultValueAvailable, arginfo_class_ReflectionParameter_isDefaultValueAvailable, 0)
 	ZEND_ME(reflection_parameter, getDefaultValue, arginfo_class_ReflectionParameter_getDefaultValue, 0)
-	ZEND_ME(reflection_parameter, isDefaultValueConstant, arginfo_class_ReflectionParameter_isDefaultValueConstant, ZEND_ACC_DEPRECATED)
-	ZEND_ME(reflection_parameter, getDefaultValueConstantName, arginfo_class_ReflectionParameter_getDefaultValueConstantName, ZEND_ACC_DEPRECATED)
+	ZEND_ME(reflection_parameter, isDefaultValueConstant, arginfo_class_ReflectionParameter_isDefaultValueConstant, 0)
+	ZEND_ME(reflection_parameter, getDefaultValueConstantName, arginfo_class_ReflectionParameter_getDefaultValueConstantName, 0)
 	ZEND_ME(reflection_parameter, isVariadic, arginfo_class_ReflectionParameter_isVariadic, 0)
 	PHP_FE_END
 };
