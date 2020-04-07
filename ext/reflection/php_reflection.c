@@ -610,6 +610,11 @@ static int format_default_value(smart_str *str, zval *value, zend_class_entry *s
 	return SUCCESS;
 }
 
+static inline zend_bool has_internal_arg_info(const zend_function *fptr) {
+	return fptr->type == ZEND_INTERNAL_FUNCTION
+		&& !(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO);
+}
+
 /* {{{ _parameter_string */
 static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_arg_info *arg_info, uint32_t offset, zend_bool required, char* indent)
 {
@@ -631,11 +636,8 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 	if (ZEND_ARG_IS_VARIADIC(arg_info)) {
 		smart_str_appends(str, "...");
 	}
-	smart_str_append_printf(str, "$%s",
-		(fptr->type == ZEND_INTERNAL_FUNCTION &&
-		 !(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) ?
-		((zend_internal_arg_info*)arg_info)->name :
-		ZSTR_VAL(arg_info->name));
+	smart_str_append_printf(str, "$%s", has_internal_arg_info(fptr)
+		? ((zend_internal_arg_info*)arg_info)->name : ZSTR_VAL(arg_info->name));
 
 	if (fptr->type == ZEND_USER_FUNCTION && !required) {
 		zend_op *precv = _get_recv_op((zend_op_array*)fptr, offset);
@@ -1139,15 +1141,10 @@ static void reflection_parameter_factory(zend_function *fptr, zval *closure_obje
 	}
 
 	prop_name = reflection_prop_name(object);
-	if (arg_info->name) {
-		if (fptr->type == ZEND_INTERNAL_FUNCTION &&
-		    !(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
-			ZVAL_STRING(prop_name, ((zend_internal_arg_info*)arg_info)->name);
-		} else {
-			ZVAL_STR_COPY(prop_name, arg_info->name);
-		}
+	if (has_internal_arg_info(fptr)) {
+		ZVAL_STRING(prop_name, ((zend_internal_arg_info*)arg_info)->name);
 	} else {
-		ZVAL_NULL(prop_name);
+		ZVAL_STR_COPY(prop_name, arg_info->name);
 	}
 }
 /* }}} */
@@ -1443,10 +1440,15 @@ ZEND_METHOD(reflection_function, __toString)
    Returns this function's name */
 ZEND_METHOD(reflection_function, getName)
 {
+	reflection_object *intern;
+	zend_function *fptr;
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
-	_default_get_name(ZEND_THIS, return_value);
+
+	GET_REFLECTION_OBJECT_PTR(fptr);
+	RETURN_STR_COPY(fptr->common.function_name);
 }
 /* }}} */
 
@@ -2254,8 +2256,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 			goto failure;
 		}
 
-		if (fptr->type == ZEND_INTERNAL_FUNCTION &&
-		    !(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
+		if (has_internal_arg_info(fptr)) {
 			for (i = 0; i < num_args; i++) {
 				if (arg_info[i].name) {
 					if (strcmp(((zend_internal_arg_info*)arg_info)[i].name, Z_STRVAL_P(parameter)) == 0) {
@@ -2295,15 +2296,10 @@ ZEND_METHOD(reflection_parameter, __construct)
 	}
 
 	prop_name = reflection_prop_name(object);
-	if (arg_info[position].name) {
-		if (fptr->type == ZEND_INTERNAL_FUNCTION &&
-		    !(fptr->common.fn_flags & ZEND_ACC_USER_ARG_INFO)) {
-			ZVAL_STRING(prop_name, ((zend_internal_arg_info*)arg_info)[position].name);
-		} else {
-			ZVAL_STR_COPY(prop_name, arg_info[position].name);
-		}
+	if (has_internal_arg_info(fptr)) {
+		ZVAL_STRING(prop_name, ((zend_internal_arg_info*)arg_info)[position].name);
 	} else {
-		ZVAL_NULL(prop_name);
+		ZVAL_STR_COPY(prop_name, arg_info[position].name);
 	}
 	return;
 
@@ -2340,10 +2336,19 @@ ZEND_METHOD(reflection_parameter, __toString)
    Returns this parameters's name */
 ZEND_METHOD(reflection_parameter, getName)
 {
+	reflection_object *intern;
+	parameter_reference *param;
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
-	_default_get_name(ZEND_THIS, return_value);
+
+	GET_REFLECTION_OBJECT_PTR(param);
+	if (has_internal_arg_info(param->fptr)) {
+		RETURN_STRING(((zend_internal_arg_info *) param->arg_info)->name);
+	} else {
+		RETURN_STR_COPY(param->arg_info->name);
+	}
 }
 /* }}} */
 
@@ -3862,10 +3867,15 @@ ZEND_METHOD(reflection_class, __toString)
    Returns the class' name */
 ZEND_METHOD(reflection_class, getName)
 {
+	reflection_object *intern;
+	zend_class_entry *ce;
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
-	_default_get_name(ZEND_THIS, return_value);
+
+	GET_REFLECTION_OBJECT_PTR(ce);
+	RETURN_STR_COPY(ce->name);
 }
 /* }}} */
 
@@ -5217,10 +5227,15 @@ ZEND_METHOD(reflection_property, __toString)
    Returns the class' name */
 ZEND_METHOD(reflection_property, getName)
 {
+	reflection_object *intern;
+	property_reference *ref;
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
-	_default_get_name(ZEND_THIS, return_value);
+
+	GET_REFLECTION_OBJECT_PTR(ref);
+	RETURN_STR_COPY(ref->unmangled_name);
 }
 /* }}} */
 
@@ -5657,10 +5672,15 @@ ZEND_METHOD(reflection_extension, __toString)
    Returns this extension's name */
 ZEND_METHOD(reflection_extension, getName)
 {
+	reflection_object *intern;
+	zend_module_entry *module;
+
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
-	_default_get_name(ZEND_THIS, return_value);
+
+	GET_REFLECTION_OBJECT_PTR(module);
+	RETURN_STRING(module->name);
 }
 /* }}} */
 

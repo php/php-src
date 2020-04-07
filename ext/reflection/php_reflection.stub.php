@@ -60,7 +60,7 @@ abstract class ReflectionFunctionAbstract implements Reflector
     /** @return string|false */
     public function getFileName() {}
 
-    /** @return string|false */
+    /** @return string */
     public function getName() {}
 
     /** @return string */
@@ -199,7 +199,7 @@ class ReflectionClass implements Reflector
 
     public function __toString(): string {}
 
-    /** @return string|false */
+    /** @return string */
     public function getName() {}
 
     /** @return bool */
@@ -370,7 +370,7 @@ class ReflectionProperty implements Reflector
 
     public function __toString(): string {}
 
-    /** @return string|false */
+    /** @return string */
     public function getName() {}
 
     /** @return mixed */
@@ -467,7 +467,7 @@ class ReflectionParameter implements Reflector
 
     public function __toString(): string {}
 
-    /** @return string|false */
+    /** @return string */
     public function getName() {}
 
     /** @return bool */
@@ -554,7 +554,7 @@ class ReflectionExtension implements Reflector
 
     public function __toString(): string {}
 
-    /** @return string|false */
+    /** @return string */
     public function getName() {}
 
     /** @return ?string */
