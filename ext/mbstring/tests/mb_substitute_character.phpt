@@ -41,4 +41,5 @@ string(4) "82a0"
 bool(true)
 string(6) "entity"
 string(20) "262378323636303b82a0"
-bool(true)
+ERR: Warning
+bool(false)
