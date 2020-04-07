@@ -2167,9 +2167,10 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		if (reg_function->common.arg_info && reg_function->common.num_args) {
 			uint32_t i;
 			for (i = 0; i < reg_function->common.num_args; i++) {
-				if (ZEND_TYPE_IS_SET(reg_function->common.arg_info[i].type)) {
+				zend_arg_info *arg_info = &reg_function->common.arg_info[i];
+				ZEND_ASSERT(arg_info->name && "Parameter must have a name");
+				if (ZEND_TYPE_IS_SET(arg_info->type)) {
 				    reg_function->common.fn_flags |= ZEND_ACC_HAS_TYPE_HINTS;
-					break;
 				}
 			}
 		}

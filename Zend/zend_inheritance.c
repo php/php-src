@@ -670,16 +670,10 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 			}
 
 			smart_str_appendc(&str, '$');
-
-			if (arg_info->name) {
-				if (fptr->type == ZEND_INTERNAL_FUNCTION) {
-					smart_str_appends(&str, ((zend_internal_arg_info*)arg_info)->name);
-				} else {
-					smart_str_appendl(&str, ZSTR_VAL(arg_info->name), ZSTR_LEN(arg_info->name));
-				}
+			if (fptr->type == ZEND_INTERNAL_FUNCTION) {
+				smart_str_appends(&str, ((zend_internal_arg_info*)arg_info)->name);
 			} else {
-				smart_str_appends(&str, "param");
-				smart_str_append_unsigned(&str, i);
+				smart_str_appendl(&str, ZSTR_VAL(arg_info->name), ZSTR_LEN(arg_info->name));
 			}
 
 			if (i >= required && !ZEND_ARG_IS_VARIADIC(arg_info)) {
