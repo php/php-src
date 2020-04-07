@@ -3,6 +3,10 @@ PHP                                                                        NEWS
 
 ?? ??? ????, PHP 7.4.6
 
+- DOM:
+  . Fixed bug #78221 (DOMNode::normalize() doesn't remove empty text nodes).
+    (cmb)
+
 - MBString:
   . Fixed bug #79441 (Segfault in mb_chr() if internal encoding is unsupported).
     (Girgias)
