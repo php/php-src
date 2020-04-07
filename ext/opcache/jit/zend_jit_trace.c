@@ -1594,7 +1594,7 @@ static zend_ssa *zend_jit_trace_build_tssa(zend_jit_trace_rec *trace_buffer, uin
 			top = zend_jit_trace_call_frame(top, p->op_array);
 			if (p->func->type == ZEND_USER_FUNCTION) {
 				for (i = 0; i < p->op_array->last_var + p->op_array->T; i++) {
-					SET_STACK_TYPE(call->stack, i, IS_UNKNOWN);
+					SET_STACK_INFO(call->stack, i, -1);
 				}
 			}
 		} else if (p->op == ZEND_JIT_TRACE_DO_ICALL) {
