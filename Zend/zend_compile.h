@@ -27,6 +27,57 @@
 
 #include "zend_llist.h"
 
+#include "zend_stack.h"
+#include "zend_ptr_stack.h"
+#include "zend_multibyte.h"
+#include "zend_arena.h"
+
+typedef enum {
+	ON_TOKEN,
+	ON_FEEDBACK,
+	ON_STOP
+} zend_php_scanner_event;
+
+typedef struct _zend_lex_state {
+	unsigned int yy_leng;
+	unsigned char *yy_start;
+	unsigned char *yy_text;
+	unsigned char *yy_cursor;
+	unsigned char *yy_marker;
+	unsigned char *yy_limit;
+	int yy_state;
+	zend_stack state_stack;
+	zend_ptr_stack heredoc_label_stack;
+
+	zend_file_handle *in;
+	uint32_t lineno;
+	zend_string *filename;
+
+	/* original (unfiltered) script */
+	unsigned char *script_org;
+	size_t script_org_size;
+
+	/* filtered script */
+	unsigned char *script_filtered;
+	size_t script_filtered_size;
+
+	/* input/output filters */
+	zend_encoding_filter input_filter;
+	zend_encoding_filter output_filter;
+	const zend_encoding *script_encoding;
+
+	/* hooks */
+	void (*on_event)(zend_php_scanner_event event, int token, int line, void *context);
+	void *on_event_context;
+
+	zend_ast *ast;
+	zend_arena *ast_arena;
+} zend_lex_state;
+
+ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state);
+ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state);
+ZEND_API int zend_prepare_string_for_scanning(zval *str, const char *filename);
+
 #define SET_UNUSED(op)  op ## _type = IS_UNUSED
 
 #define MAKE_NOP(opline) do { \
@@ -381,7 +432,7 @@ typedef struct _zend_internal_arg_info {
 typedef struct _zend_arg_info {
 	zend_string *name;
 	zend_type type;
-	zend_string *default_value;
+	void *_unused;
 } zend_arg_info;
 
 /* the following structure repeats the layout of zend_internal_arg_info,

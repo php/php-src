@@ -124,11 +124,6 @@ $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/pdo builddir=ext/pdo top_
   -f ext/pdo/Makefile.frag \
   ext/pdo/pdo_sql_parser.c
 
-echo "genfiles: Generating reflection extension lexer files"
-$MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/reflection builddir=ext/reflection top_srcdir=. \
-  -f ext/reflection/Makefile.frag \
-  ext/reflection/php_reflection.c
-
 echo "genfiles: Generating standard extension lexer files"
 $MAKE RE2C="$RE2C" RE2C_FLAGS="$RE2C_FLAGS" srcdir=ext/standard builddir=ext/standard top_srcdir=. \
   -f ext/standard/Makefile.frag \
