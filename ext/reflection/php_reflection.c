@@ -170,24 +170,13 @@ static inline zend_bool is_closure_invoke(zend_class_entry *ce, zend_string *lcn
 		&& zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME);
 }
 
-static zval *_default_load_name(zval *object) /* {{{ */
+static void _default_get_name(zval *object, zval *return_value) /* {{{ */
 {
 	zval *name = reflection_prop_name(object);
 	if (Z_ISUNDEF_P(name)) {
-		return NULL;
-	}
-	return name;
-}
-/* }}} */
-
-static void _default_get_name(zval *object, zval *return_value) /* {{{ */
-{
-	zval *value;
-
-	if ((value = _default_load_name(object)) == NULL) {
 		RETURN_FALSE;
 	}
-	ZVAL_COPY(return_value, value);
+	ZVAL_COPY(return_value, name);
 }
 /* }}} */
 
@@ -3243,22 +3232,18 @@ ZEND_METHOD(reflection_function, isVariadic)
    Returns whether this function is defined in namespace */
 ZEND_METHOD(reflection_function, inNamespace)
 {
-	zval *name;
-	const char *backslash;
+	reflection_object *intern;
+	zend_function *fptr;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
-	if ((name = _default_load_name(ZEND_THIS)) == NULL) {
-		RETURN_FALSE;
-	}
-	if (Z_TYPE_P(name) == IS_STRING
-		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRLEN_P(name)))
-		&& backslash > Z_STRVAL_P(name))
-	{
-		RETURN_TRUE;
-	}
-	RETURN_FALSE;
+
+	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	zend_string *name = fptr->common.function_name;
+	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
+	RETURN_BOOL(backslash && backslash > ZSTR_VAL(name));
 }
 /* }}} */
 
@@ -3266,20 +3251,19 @@ ZEND_METHOD(reflection_function, inNamespace)
    Returns the name of namespace where this function is defined */
 ZEND_METHOD(reflection_function, getNamespaceName)
 {
-	zval *name;
-	const char *backslash;
+	reflection_object *intern;
+	zend_function *fptr;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
-	if ((name = _default_load_name(ZEND_THIS)) == NULL) {
-		RETURN_FALSE;
-	}
-	if (Z_TYPE_P(name) == IS_STRING
-		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRLEN_P(name)))
-		&& backslash > Z_STRVAL_P(name))
-	{
-		RETURN_STRINGL(Z_STRVAL_P(name), backslash - Z_STRVAL_P(name));
+
+	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	zend_string *name = fptr->common.function_name;
+	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
+	if (backslash && backslash > ZSTR_VAL(name)) {
+		RETURN_STRINGL(ZSTR_VAL(name), backslash - ZSTR_VAL(name));
 	}
 	RETURN_EMPTY_STRING();
 }
@@ -3289,22 +3273,21 @@ ZEND_METHOD(reflection_function, getNamespaceName)
    Returns the short name of the function (without namespace part) */
 ZEND_METHOD(reflection_function, getShortName)
 {
-	zval *name;
-	const char *backslash;
+	reflection_object *intern;
+	zend_function *fptr;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
-	if ((name = _default_load_name(ZEND_THIS)) == NULL) {
-		RETURN_FALSE;
+
+	GET_REFLECTION_OBJECT_PTR(fptr);
+
+	zend_string *name = fptr->common.function_name;
+	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
+	if (backslash && backslash > ZSTR_VAL(name)) {
+		RETURN_STRINGL(backslash + 1, ZSTR_LEN(name) - (backslash - ZSTR_VAL(name) + 1));
 	}
-	if (Z_TYPE_P(name) == IS_STRING
-		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRLEN_P(name)))
-		&& backslash > Z_STRVAL_P(name))
-	{
-		RETURN_STRINGL(backslash + 1, Z_STRLEN_P(name) - (backslash - Z_STRVAL_P(name) + 1));
-	}
-	ZVAL_COPY_DEREF(return_value, name);
+	RETURN_STR_COPY(name);
 }
 /* }}} */
 
@@ -5074,22 +5057,18 @@ ZEND_METHOD(reflection_class, getExtensionName)
    Returns whether this class is defined in namespace */
 ZEND_METHOD(reflection_class, inNamespace)
 {
-	zval *name;
-	const char *backslash;
+	reflection_object *intern;
+	zend_class_entry *ce;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
-	if ((name = _default_load_name(ZEND_THIS)) == NULL) {
-		RETURN_FALSE;
-	}
-	if (Z_TYPE_P(name) == IS_STRING
-		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRLEN_P(name)))
-		&& backslash > Z_STRVAL_P(name))
-	{
-		RETURN_TRUE;
-	}
-	RETURN_FALSE;
+
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	zend_string *name = ce->name;
+	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
+	RETURN_BOOL(backslash && backslash > ZSTR_VAL(name));
 }
 /* }}} */
 
@@ -5097,20 +5076,19 @@ ZEND_METHOD(reflection_class, inNamespace)
    Returns the name of namespace where this class is defined */
 ZEND_METHOD(reflection_class, getNamespaceName)
 {
-	zval *name;
-	const char *backslash;
+	reflection_object *intern;
+	zend_class_entry *ce;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
-	if ((name = _default_load_name(ZEND_THIS)) == NULL) {
-		RETURN_FALSE;
-	}
-	if (Z_TYPE_P(name) == IS_STRING
-		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRLEN_P(name)))
-		&& backslash > Z_STRVAL_P(name))
-	{
-		RETURN_STRINGL(Z_STRVAL_P(name), backslash - Z_STRVAL_P(name));
+
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	zend_string *name = ce->name;
+	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
+	if (backslash && backslash > ZSTR_VAL(name)) {
+		RETURN_STRINGL(ZSTR_VAL(name), backslash - ZSTR_VAL(name));
 	}
 	RETURN_EMPTY_STRING();
 }
@@ -5120,22 +5098,21 @@ ZEND_METHOD(reflection_class, getNamespaceName)
    Returns the short name of the class (without namespace part) */
 ZEND_METHOD(reflection_class, getShortName)
 {
-	zval *name;
-	const char *backslash;
+	reflection_object *intern;
+	zend_class_entry *ce;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
-	if ((name = _default_load_name(ZEND_THIS)) == NULL) {
-		RETURN_FALSE;
+
+	GET_REFLECTION_OBJECT_PTR(ce);
+
+	zend_string *name = ce->name;
+	const char *backslash = zend_memrchr(ZSTR_VAL(name), '\\', ZSTR_LEN(name));
+	if (backslash && backslash > ZSTR_VAL(name)) {
+		RETURN_STRINGL(backslash + 1, ZSTR_LEN(name) - (backslash - ZSTR_VAL(name) + 1));
 	}
-	if (Z_TYPE_P(name) == IS_STRING
-		&& (backslash = zend_memrchr(Z_STRVAL_P(name), '\\', Z_STRLEN_P(name)))
-		&& backslash > Z_STRVAL_P(name))
-	{
-		RETURN_STRINGL(backslash + 1, Z_STRLEN_P(name) - (backslash - Z_STRVAL_P(name) + 1));
-	}
-	ZVAL_COPY_DEREF(return_value, name);
+	RETURN_STR_COPY(name);
 }
 /* }}} */
 
@@ -5330,7 +5307,7 @@ ZEND_METHOD(reflection_property, getValue)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	zval *object = NULL, *name;
+	zval *object = NULL;
 	zval *member_p = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|o!", &object) == FAILURE) {
@@ -5340,9 +5317,9 @@ ZEND_METHOD(reflection_property, getValue)
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (!(prop_get_flags(ref) & ZEND_ACC_PUBLIC) && intern->ignore_visibility == 0) {
-		name = _default_load_name(ZEND_THIS);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Cannot access non-public member %s::$%s", ZSTR_VAL(intern->ce->name), Z_STRVAL_P(name));
+			"Cannot access non-public member %s::$%s",
+			ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->unmangled_name));
 		RETURN_THROWS();
 	}
 
@@ -5384,16 +5361,16 @@ ZEND_METHOD(reflection_property, setValue)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	zval *object, *name;
+	zval *object;
 	zval *value;
 	zval *tmp;
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (!(prop_get_flags(ref) & ZEND_ACC_PUBLIC) && intern->ignore_visibility == 0) {
-		name = _default_load_name(ZEND_THIS);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Cannot access non-public member %s::$%s", ZSTR_VAL(intern->ce->name), Z_STRVAL_P(name));
+			"Cannot access non-public member %s::$%s",
+			ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->unmangled_name));
 		RETURN_THROWS();
 	}
 
@@ -5421,7 +5398,7 @@ ZEND_METHOD(reflection_property, isInitialized)
 {
 	reflection_object *intern;
 	property_reference *ref;
-	zval *object = NULL, *name;
+	zval *object = NULL;
 	zval *member_p = NULL;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|o!", &object) == FAILURE) {
@@ -5431,9 +5408,9 @@ ZEND_METHOD(reflection_property, isInitialized)
 	GET_REFLECTION_OBJECT_PTR(ref);
 
 	if (!(prop_get_flags(ref) & ZEND_ACC_PUBLIC) && intern->ignore_visibility == 0) {
-		name = _default_load_name(getThis());
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Cannot access non-public member %s::$%s", ZSTR_VAL(intern->ce->name), Z_STRVAL_P(name));
+			"Cannot access non-public member %s::$%s",
+			ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->unmangled_name));
 		RETURN_THROWS();
 	}
 

@@ -63,7 +63,7 @@ abstract class ReflectionFunctionAbstract implements Reflector
     /** @return string|false */
     public function getName() {}
 
-    /** @return string|false */
+    /** @return string */
     public function getNamespaceName() {}
 
     /** @return int */
@@ -75,7 +75,7 @@ abstract class ReflectionFunctionAbstract implements Reflector
     /** @return ReflectionParameter[] */
     public function getParameters() {}
 
-    /** @return string|false */
+    /** @return string */
     public function getShortName() {}
 
     /** @return int|false */
@@ -349,10 +349,10 @@ class ReflectionClass implements Reflector
     /** @return bool */
     public function inNamespace() {}
 
-    /** @return string|false */
+    /** @return string */
     public function getNamespaceName() {}
 
-    /** @return string|false */
+    /** @return string */
     public function getShortName() {}
 }
 
