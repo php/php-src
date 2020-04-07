@@ -122,7 +122,8 @@ fclose($fp);
 *** Testing mb_substitute_character() : usage variation ***
 
 --int 0--
-bool(true)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
+bool(false)
 
 --int 1--
 bool(true)
@@ -150,10 +151,12 @@ Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --float .5--
-bool(true)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
+bool(false)
 
 --empty array--
-bool(true)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
+bool(false)
 
 --int indexed array--
 bool(true)
@@ -165,22 +168,26 @@ bool(true)
 bool(true)
 
 --uppercase NULL--
-bool(true)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
+bool(false)
 
 --lowercase null--
-bool(true)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
+bool(false)
 
 --lowercase true--
 bool(true)
 
 --lowercase false--
-bool(true)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
+bool(false)
 
 --uppercase TRUE--
 bool(true)
 
 --uppercase FALSE--
-bool(true)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
+bool(false)
 
 --empty string DQ--
 bool(true)
@@ -189,16 +196,20 @@ bool(true)
 bool(true)
 
 --string DQ--
-bool(true)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
+bool(false)
 
 --string SQ--
-bool(true)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
+bool(false)
 
 --mixed case string--
-bool(true)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
+bool(false)
 
 --heredoc--
-bool(true)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
+bool(false)
 
 --instance of classWithToString--
 Error: 8 - Object of class classWithToString could not be converted to int, %s(%d)
@@ -209,7 +220,9 @@ Error: 8 - Object of class classWithoutToString could not be converted to int, %
 bool(true)
 
 --undefined var--
-bool(true)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
+bool(false)
 
 --unset var--
-bool(true)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
+bool(false)
