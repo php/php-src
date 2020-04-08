@@ -573,6 +573,7 @@ static zend_op* _get_recv_op(zend_op_array *op_array, uint32_t offset)
 		}
 		++op;
 	}
+	ZEND_ASSERT(0 && "Failed to find op");
 	return NULL;
 }
 /* }}} */
@@ -1356,6 +1357,19 @@ static int get_default_via_ast(zval *default_value_zval, const char *default_val
 	return SUCCESS;
 }
 
+static zend_string *try_parse_string(const char *str, size_t len, char quote) {
+	if (len == 0) {
+		return ZSTR_EMPTY_ALLOC();
+	}
+
+	for (size_t i = 0; i < len; i++) {
+		if (str[i] == '\\' || str[i] == quote) {
+			return NULL;
+		}
+	}
+	return zend_string_init(str, len, 0);
+}
+
 /* {{{ _reflection_param_get_default_arg_info */
 static int _reflection_param_get_default_arg_info(zend_internal_arg_info *arg_info, zval *default_value_zval)
 {
@@ -1380,16 +1394,27 @@ static int _reflection_param_get_default_arg_info(zend_internal_arg_info *arg_in
 			&& !memcmp(default_value, "false", sizeof("false")-1)) {
 		ZVAL_FALSE(default_value_zval);
 		return SUCCESS;
-	} else if (default_value_len == sizeof("\"\"")-1
-			&& (!memcmp(default_value, "\"\"", sizeof("\"\"")-1)
-				|| !memcmp(default_value, "''", sizeof("''")-1))) {
-		ZVAL_EMPTY_STRING(default_value_zval);
+	} else if (default_value_len >= 2
+			&& (default_value[0] == '\'' || default_value[0] == '"')
+			&& default_value[default_value_len - 1] == default_value[0]) {
+		zend_string *str = try_parse_string(
+			default_value + 1, default_value_len - 2, default_value[0]);
+		if (str) {
+			ZVAL_STR(default_value_zval, str);
+			return SUCCESS;
+		}
+	} else if (default_value_len == sizeof("[]")-1
+			&& !memcmp(default_value, "[]", sizeof("[]")-1)) {
+		ZVAL_EMPTY_ARRAY(default_value_zval);
 		return SUCCESS;
 	} else if (ZEND_HANDLE_NUMERIC_STR(default_value, default_value_len, lval)) {
 		ZVAL_LONG(default_value_zval, lval);
 		return SUCCESS;
 	}
 
+#if 0
+	fprintf(stderr, "Evaluating %s via AST\n", default_value);
+#endif
 	return get_default_via_ast(default_value_zval, default_value);
 }
 
