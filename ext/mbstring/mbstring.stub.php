@@ -27,7 +27,7 @@ function mb_strlen(string $str, string $encoding = UNKNOWN): int {}
 
 function mb_strpos(string $haystack, string $needle, int $offset = 0, string $encoding = UNKNOWN): int|false {}
 
-function mb_strrpos(string $haystack, string $needle, $offset = UNBEK, string $encoding = UNKNOWN): int|false {}
+function mb_strrpos(string $haystack, string $needle, int $offset = 0, string $encoding = UNKNOWN): int|false {}
 
 function mb_stripos(string $haystack, string $needle, int $offset = 0, string $encoding = UNKNOWN): int|false {}
 

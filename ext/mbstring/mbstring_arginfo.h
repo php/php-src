@@ -54,12 +54,7 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_strpos, 0, 2, MAY_BE_LONG|MAY
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_mb_strrpos, 0, 2, MAY_BE_LONG|MAY_BE_FALSE)
-	ZEND_ARG_TYPE_INFO(0, haystack, IS_STRING, 0)
-	ZEND_ARG_TYPE_INFO(0, needle, IS_STRING, 0)
-	ZEND_ARG_INFO(0, offset)
-	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_mb_strrpos arginfo_mb_strpos
 
 #define arginfo_mb_stripos arginfo_mb_strpos
 
