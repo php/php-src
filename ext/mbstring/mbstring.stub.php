@@ -43,13 +43,13 @@ function mb_strrichr(string $haystack, string $needle, bool $part = false, strin
 
 function mb_substr_count(string $haystack, string $needle, string $encoding = UNKNOWN): int {}
 
-function mb_substr(string $str, int $start, ?int $length = null, string $encoding = UNKNOWN): string|false {}
+function mb_substr(string $str, int $start, ?int $length = null, string $encoding = UNKNOWN): string {}
 
 function mb_strcut(string $str, int $start, ?int $length = null, string $encoding = UNKNOWN): string|false {}
 
-function mb_strwidth(string $str, string $encoding = UNKNOWN): int|false {}
+function mb_strwidth(string $str, string $encoding = UNKNOWN): int {}
 
-function mb_strimwidth(string $str, int $start, int $width, string $trimmarker = UNKNOWN, string $encoding = UNKNOWN): string|false {}
+function mb_strimwidth(string $str, int $start, int $width, string $trim_marker = UNKNOWN, string $encoding = UNKNOWN): string {}
 
 function mb_convert_encoding(array|string $str, string $to, array|string $from = UNKNOWN): array|string|false {}
 
@@ -63,19 +63,19 @@ function mb_detect_encoding(string $str, array|string|null $encoding_list = null
 
 function mb_list_encodings(): array {}
 
-function mb_encoding_aliases(string $encoding): array|false {}
+function mb_encoding_aliases(string $encoding): array {}
 
-function mb_encode_mimeheader(string $str, string $charset = UNKNOWN, string $transfer = UNKNOWN, string $linefeed = UNKNOWN, int $indent = 0): string|false {}
+function mb_encode_mimeheader(string $str, string $charset = UNKNOWN, string $transfer = UNKNOWN, string $linefeed = UNKNOWN, int $indent = 0): string {}
 
-function mb_decode_mimeheader(string $string): string|false {}
+function mb_decode_mimeheader(string $string): string {}
 
-function mb_convert_kana(string $str, string $option = UNKNOWN, string $encoding = UNKNOWN): string|false {}
+function mb_convert_kana(string $str, string $option = UNKNOWN, string $encoding = UNKNOWN): string {}
 
 function mb_convert_variables(string $to, array|string $from, &$var, &...$vars): string|false {}
 
-function mb_encode_numericentity(string $string, array $convmap, string $encoding = UNKNOWN, bool $is_hex = false): string|false {}
+function mb_encode_numericentity(string $string, array $convmap, string $encoding = UNKNOWN, bool $is_hex = false): string {}
 
-function mb_decode_numericentity(string $string, array $convmap, string $encoding = UNKNOWN): string|false {}
+function mb_decode_numericentity(string $string, array $convmap, string $encoding = UNKNOWN): string {}
 
 function mb_send_mail(string $to, string $subject, string $message, $additional_headers = UNKNOWN, string $additional_parameters = UNKNOWN): bool {}
 

@@ -1336,12 +1336,8 @@ PHP_FUNCTION(mb_internal_encoding)
 		RETURN_THROWS();
 	}
 	if (name == NULL) {
-		name = MBSTRG(current_internal_encoding) ? MBSTRG(current_internal_encoding)->name: NULL;
-		if (name != NULL) {
-			RETURN_STRING(name);
-		} else {
-			RETURN_FALSE;
-		}
+		ZEND_ASSERT(MBSTRG(current_internal_encoding));
+		RETURN_STRING(MBSTRG(current_internal_encoding)->name);
 	} else {
 		encoding = mbfl_name2encoding(name);
 		if (!encoding) {
@@ -1350,6 +1346,7 @@ PHP_FUNCTION(mb_internal_encoding)
 		} else {
 			MBSTRG(current_internal_encoding) = encoding;
 			MBSTRG(internal_encoding_set) = 1;
+			/* TODO Return old encoding */
 			RETURN_TRUE;
 		}
 	}
@@ -1426,6 +1423,7 @@ PHP_FUNCTION(mb_http_input)
 				}
 			}
 			if (!list) {
+				// TODO should return empty string?
 				RETURN_FALSE;
 			}
 			RETVAL_STRING(list);
@@ -1433,11 +1431,13 @@ PHP_FUNCTION(mb_http_input)
 			retname = 0;
 			break;
 		default:
+			// TODO ValueError
 			result = MBSTRG(http_input_identify);
 			break;
 		}
 	}
 
+	// FIXME this bloc seems useless except for default switch case
 	if (retname) {
 		if (result) {
 			RETVAL_STRING(result->name);
@@ -1461,12 +1461,8 @@ PHP_FUNCTION(mb_http_output)
 	}
 
 	if (name == NULL) {
-		name = MBSTRG(current_http_output_encoding) ? MBSTRG(current_http_output_encoding)->name: NULL;
-		if (name != NULL) {
-			RETURN_STRING(name);
-		} else {
-			RETURN_FALSE;
-		}
+		ZEND_ASSERT(MBSTRG(current_http_output_encoding));
+		RETURN_STRING(MBSTRG(current_http_output_encoding)->name);
 	} else {
 		encoding = mbfl_name2encoding(name);
 		if (!encoding) {
@@ -1475,6 +1471,7 @@ PHP_FUNCTION(mb_http_output)
 		} else {
 			MBSTRG(http_output_set) = 1;
 			MBSTRG(current_http_output_encoding) = encoding;
+			/* TODO Return previous encoding? */
 			RETURN_TRUE;
 		}
 	}
@@ -2153,24 +2150,19 @@ static void php_mb_strstr_variants(INTERNAL_FUNCTION_PARAMETERS, unsigned int va
 	if (!mbfl_is_error(n)) {
 		if (part) {
 			ret = mbfl_substr(&haystack, &result, 0, n);
-			if (ret != NULL) {
-				// TODO: avoid reallocation ???
-				RETVAL_STRINGL((char *)ret->val, ret->len);
-				efree(ret->val);
-			} else {
-				RETVAL_FALSE;
-			}
+			ZEND_ASSERT(ret != NULL);
+			// TODO: avoid reallocation ???
+			RETVAL_STRINGL((char *)ret->val, ret->len);
+			efree(ret->val);
 		} else {
 			ret = mbfl_substr(&haystack, &result, n, MBFL_SUBSTR_UNTIL_END);
-			if (ret != NULL) {
-				// TODO: avoid reallocation ???
-				RETVAL_STRINGL((char *)ret->val, ret->len);
-				efree(ret->val);
-			} else {
-				RETVAL_FALSE;
-			}
+			ZEND_ASSERT(ret != NULL);
+			// TODO: avoid reallocation ???
+			RETVAL_STRINGL((char *)ret->val, ret->len);
+			efree(ret->val);
 		}
 	} else {
+		// FIXME use handle_strpos_error(n)
 		RETVAL_FALSE;
 	}
 }
@@ -2301,9 +2293,7 @@ PHP_FUNCTION(mb_substr)
 	}
 
 	ret = mbfl_substr(&string, &result, real_from, real_len);
-	if (NULL == ret) {
-		RETURN_FALSE;
-	}
+	ZEND_ASSERT(ret != NULL);
 
 	// TODO: avoid reallocation ???
 	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
@@ -2355,13 +2345,12 @@ PHP_FUNCTION(mb_strcut)
 	}
 
 	if (from > string.len) {
+		// TODO Out of bounds ValueError
 		RETURN_FALSE;
 	}
 
 	ret = mbfl_strcut(&string, &result, from, len);
-	if (ret == NULL) {
-		RETURN_FALSE;
-	}
+	ZEND_ASSERT(ret != NULL);
 
 	// TODO: avoid reallocation ???
 	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
@@ -2388,11 +2377,8 @@ PHP_FUNCTION(mb_strwidth)
 	}
 
 	n = mbfl_strwidth(&string);
-	if (!mbfl_is_error(n)) {
-		RETVAL_LONG(n);
-	} else {
-		RETVAL_FALSE;
-	}
+	ZEND_ASSERT(n >= 0);
+	RETVAL_LONG(n);
 }
 /* }}} */
 
@@ -2449,10 +2435,7 @@ PHP_FUNCTION(mb_strimwidth)
 	}
 
 	ret = mbfl_strimwidth(&string, &marker, &result, from, width);
-
-	if (ret == NULL) {
-		RETURN_FALSE;
-	}
+	ZEND_ASSERT(ret != NULL);
 	// TODO: avoid reallocation ???
 	RETVAL_STRINGL((char *)ret->val, ret->len); /* the string is already strdup()'ed */
 	efree(ret->val);
@@ -2968,13 +2951,10 @@ PHP_FUNCTION(mb_encode_mimeheader)
 
 	mbfl_string_init(&result);
 	ret = mbfl_mime_header_encode(&string, &result, charset, transenc, linefeed, indent);
-	if (ret != NULL) {
-		// TODO: avoid reallocation ???
-		RETVAL_STRINGL((char *)ret->val, ret->len);	/* the string is already strdup()'ed */
-		efree(ret->val);
-	} else {
-		RETVAL_FALSE;
-	}
+	ZEND_ASSERT(ret != NULL);
+	// TODO: avoid reallocation ???
+	RETVAL_STRINGL((char *)ret->val, ret->len);	/* the string is already strdup()'ed */
+	efree(ret->val);
 }
 /* }}} */
 
@@ -2993,13 +2973,10 @@ PHP_FUNCTION(mb_decode_mimeheader)
 
 	mbfl_string_init(&result);
 	ret = mbfl_mime_header_decode(&string, &result, MBSTRG(current_internal_encoding));
-	if (ret != NULL) {
-		// TODO: avoid reallocation ???
-		RETVAL_STRINGL((char *)ret->val, ret->len);	/* the string is already strdup()'ed */
-		efree(ret->val);
-	} else {
-		RETVAL_FALSE;
-	}
+	ZEND_ASSERT(ret != NULL);
+	// TODO: avoid reallocation ???
+	RETVAL_STRINGL((char *)ret->val, ret->len);	/* the string is already strdup()'ed */
+	efree(ret->val);
 }
 /* }}} */
 
@@ -3090,13 +3067,10 @@ PHP_FUNCTION(mb_convert_kana)
 	}
 
 	ret = mbfl_ja_jp_hantozen(&string, &result, opt);
-	if (ret != NULL) {
-		// TODO: avoid reallocation ???
-		RETVAL_STRINGL((char *)ret->val, ret->len);		/* the string is already strdup()'ed */
-		efree(ret->val);
-	} else {
-		RETVAL_FALSE;
-	}
+	ZEND_ASSERT(ret != NULL);
+	// TODO: avoid reallocation ???
+	RETVAL_STRINGL((char *)ret->val, ret->len);		/* the string is already strdup()'ed */
+	efree(ret->val);
 }
 /* }}} */
 
@@ -3372,13 +3346,10 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 	mapsize /= 4;
 
 	ret = mbfl_html_numeric_entity(&string, &result, convmap, mapsize, type);
-	if (ret != NULL) {
-		// TODO: avoid reallocation ???
-		RETVAL_STRINGL((char *)ret->val, ret->len);
-		efree(ret->val);
-	} else {
-		RETVAL_FALSE;
-	}
+	ZEND_ASSERT(ret != NULL);
+	// TODO: avoid reallocation ???
+	RETVAL_STRINGL((char *)ret->val, ret->len);
+	efree(ret->val);
 	efree((void *)convmap);
 }
 /* }}} */
@@ -4016,6 +3987,7 @@ PHP_FUNCTION(mb_get_info)
 			RETVAL_STRING("Off");
 		}
 	} else {
+		// TODO Convert to ValueError
 		RETURN_FALSE;
 	}
 }
