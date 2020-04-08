@@ -30,6 +30,7 @@ typedef struct _zend_lex_state {
 	int yy_state;
 	zend_stack state_stack;
 	zend_ptr_stack heredoc_label_stack;
+	zend_stack nest_location_stack; /* for syntax error reporting */
 
 	zend_file_handle *in;
 	uint32_t lineno;
@@ -62,6 +63,12 @@ typedef struct _zend_heredoc_label {
 	int indentation;
 	zend_bool indentation_uses_spaces;
 } zend_heredoc_label;
+
+/* Track locations of unclosed {, [, (, etc. for better syntax error reporting */
+typedef struct _zend_nest_location {
+	char text;
+	int  lineno;
+} zend_nest_location;
 
 BEGIN_EXTERN_C()
 ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state);
