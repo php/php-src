@@ -106,7 +106,6 @@ if (!$IS_MYSQLND)
                 // either there is no result (no SELECT) or there is an error
                 if (mysqli_errno($link) > 0) {
                     $saved_errors[$thread_id] = mysqli_errno($link);
-                    printf("[003] '%s' caused %d\n", $links[$thread_id]['query'],	mysqli_errno($link));
                 }
             }
         }
@@ -115,10 +114,13 @@ if (!$IS_MYSQLND)
 
     // Checking if all lines are still usable
     foreach ($links as $thread_id => $link) {
-        if (isset($saved_errors[$thread_id]) &&
-            $saved_errors[$thread_id] != mysqli_errno($link['link'])) {
-            printf("[004] Error state not saved for query '%s', %d != %d\n", $link['query'],
+        if (isset($saved_errors[$thread_id])) {
+            printf("[003] '%s' caused %d\n",
+                $links[$thread_id]['query'], $saved_errors[$thread_id]);
+            if ($saved_errors[$thread_id] != mysqli_errno($link['link'])) {
+                printf("[004] Error state not saved for query '%s', %d != %d\n", $link['query'],
                     $saved_errors[$thread_id], mysqli_errno($link['link']));
+            }
         }
 
         if (!$res = mysqli_query($link['link'], 'SELECT * FROM test WHERE id = 100'))
