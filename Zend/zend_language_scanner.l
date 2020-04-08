@@ -653,6 +653,42 @@ ZEND_API zend_op_array *compile_file(zend_file_handle *file_handle, int type)
 	return op_array;
 }
 
+ZEND_API zend_ast *zend_compile_string_to_ast(
+		zend_string *code, zend_arena **ast_arena, const char *filename) {
+	zval code_zv;
+	zend_bool original_in_compilation;
+	zend_lex_state original_lex_state;
+	zend_ast *ast;
+
+	ZVAL_STR_COPY(&code_zv, code);
+
+	original_in_compilation = CG(in_compilation);
+	CG(in_compilation) = 1;
+
+	zend_save_lexical_state(&original_lex_state);
+	if (zend_prepare_string_for_scanning(&code_zv, filename) == SUCCESS) {
+		CG(ast) = NULL;
+		CG(ast_arena) = zend_arena_create(1024 * 32);
+		LANG_SCNG(yy_state) = yycINITIAL;
+
+		if (zendparse() != 0) {
+			zend_ast_destroy(CG(ast));
+			zend_arena_destroy(CG(ast_arena));
+			CG(ast) = NULL;
+		}
+	}
+
+	/* restore_lexical_state changes CG(ast) and CG(ast_arena) */
+	ast = CG(ast);
+	*ast_arena = CG(ast_arena);
+
+	zend_restore_lexical_state(&original_lex_state);
+	CG(in_compilation) = original_in_compilation;
+
+	zval_dtor(&code_zv);
+
+	return ast;
+}
 
 zend_op_array *compile_filename(int type, zval *filename)
 {

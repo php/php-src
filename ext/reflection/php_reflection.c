@@ -31,8 +31,6 @@
 
 #include "zend.h"
 #include "zend_API.h"
-#include "zend_language_scanner.h"
-#include "zend_language_scanner_defs.h"
 #include "zend_exceptions.h"
 #include "zend_operators.h"
 #include "zend_constants.h"
@@ -1330,13 +1328,8 @@ static int _reflection_param_get_default_arg_info(zend_function *fptr, zend_inte
 		return FAILURE;
 	}
 
-	zval code_zv;
-	zend_bool original_in_compilation;
-	uint32_t original_compiler_options;
-	zend_lex_state original_lex_state;
 	zend_ast *ast;
 	zend_arena *ast_arena;
-	int success = FAILURE;
 
 	smart_str code = {0};
 	smart_str_appends(&code, "<?php ");
@@ -1344,53 +1337,29 @@ static int _reflection_param_get_default_arg_info(zend_function *fptr, zend_inte
 	smart_str_appendc(&code, ';');
 	smart_str_0(&code);
 
-	ZVAL_STR_COPY(&code_zv, code.s);
+	ast = zend_compile_string_to_ast(code.s, &ast_arena, "");
 	smart_str_free(&code);
 
-	original_in_compilation = CG(in_compilation);
-	original_compiler_options = CG(compiler_options);
-	zend_save_lexical_state(&original_lex_state);
+	if (!ast) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Internal error: Failed to retrieve the default value");
+		return FAILURE;
+	}
 
-	CG(in_compilation) = 1;
+	zend_ast_list *statement_list = zend_ast_get_list(ast);
+	zend_ast *const_expression_ast = statement_list->child[0];
+
+	zend_arena *original_ast_arena = CG(ast_arena);
+	uint32_t original_compiler_options = CG(compiler_options);
+	CG(ast_arena) = ast_arena;
 	CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION | ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION;
-
-	if (zend_prepare_string_for_scanning(&code_zv, "") == SUCCESS) {
-		CG(ast) = NULL;
-		CG(ast_arena) = zend_arena_create(1024 * 32);
-		LANG_SCNG(yy_state) = yycINITIAL;
-
-		if (zendparse() != 0) {
-			zend_ast_destroy(CG(ast));
-			zend_arena_destroy(CG(ast_arena));
-			CG(ast) = NULL;
-		}
-	}
-
-	ast = CG(ast);
-	ast_arena = CG(ast_arena);
-
-	if (ast) {
-		zend_ast_list *statement_list = zend_ast_get_list(ast);
-		zend_ast *const_expression_ast = statement_list->child[0];
-		if (const_expression_ast) {
-			zend_const_expr_to_zval(default_value_zval, const_expression_ast);
-			success = SUCCESS;
-		}
-	}
-
-	zend_restore_lexical_state(&original_lex_state);
+	zend_const_expr_to_zval(default_value_zval, const_expression_ast);
+	CG(ast_arena) = original_ast_arena;
 	CG(compiler_options) = original_compiler_options;
-	CG(in_compilation) = original_in_compilation;
 
-	zval_dtor(&code_zv);
 	zend_ast_destroy(ast);
 	zend_arena_destroy(ast_arena);
 
-	if (success == FAILURE) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Internal error: Failed to retrieve the default value");
-	}
-
-	return success;
+	return SUCCESS;
 }
 
 /* {{{ Preventing __clone from being called */
