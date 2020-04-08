@@ -29,8 +29,8 @@ foreach ($method->getParameters() as $parameter) {
 --EXPECT--
 Internal error: Failed to retrieve the default value
 Internal error: Failed to retrieve the default value
-NULL
-NULL
+bool(false)
+bool(false)
 ----------
 bool(true)
-NULL
+bool(false)

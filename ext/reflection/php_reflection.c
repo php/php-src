@@ -558,8 +558,7 @@ static void _class_const_string(smart_str *str, char *name, zend_class_constant 
 }
 /* }}} */
 
-/* {{{ _get_recv_opcode */
-static zend_op* _get_recv_op(zend_op_array *op_array, uint32_t offset)
+static zend_op *get_recv_op(zend_op_array *op_array, uint32_t offset)
 {
 	zend_op *op = op_array->opcodes;
 	zend_op *end = op + op_array->last;
@@ -576,7 +575,15 @@ static zend_op* _get_recv_op(zend_op_array *op_array, uint32_t offset)
 	ZEND_ASSERT(0 && "Failed to find op");
 	return NULL;
 }
-/* }}} */
+
+static zval *get_default_from_recv(zend_op_array *op_array, uint32_t offset) {
+	zend_op *recv = get_recv_op(op_array, offset);
+	if (!recv || recv->opcode != ZEND_RECV_INIT) {
+		return NULL;
+	}
+
+	return RT_CONSTANT(recv, recv->op2);
+}
 
 static int format_default_value(smart_str *str, zval *value, zend_class_entry *scope) {
 	zval zv;
@@ -649,10 +656,10 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 				smart_str_appends(str, "<default>");
 			}
 		} else {
-			zend_op *precv = _get_recv_op((zend_op_array*)fptr, offset);
-			if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
+			zval *default_value = get_default_from_recv((zend_op_array*)fptr, offset);
+			if (default_value) {
 				smart_str_appends(str, " = ");
-				if (format_default_value(str, RT_CONSTANT(precv, precv->op2), fptr->common.scope) == FAILURE) {
+				if (format_default_value(str, default_value, fptr->common.scope) == FAILURE) {
 					return;
 				}
 			}
@@ -1285,42 +1292,6 @@ static void reflection_class_constant_factory(zend_string *name_str, zend_class_
 }
 /* }}} */
 
-/* {{{ _reflection_param_get_default_param */
-static parameter_reference *_reflection_param_get_default_param(INTERNAL_FUNCTION_PARAMETERS)
-{
-	reflection_object *intern;
-	parameter_reference *param;
-
-	intern = Z_REFLECTION_P(ZEND_THIS);
-	if (intern->ptr == NULL) {
-		if (EG(exception) && EG(exception)->ce == reflection_exception_ptr) {
-			return NULL;
-		}
-		zend_throw_error(NULL, "Internal error: Failed to retrieve the reflection object");
-		return NULL;
-	}
-
-	param = intern->ptr;
-
-	return param;
-}
-/* }}} */
-
-/* {{{ _reflection_param_get_default_precv */
-static zend_op *_reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAMETERS, parameter_reference *param)
-{
-	zend_op *precv;
-
-	precv = _get_recv_op((zend_op_array*)param->fptr, param->offset);
-	if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2_type == IS_UNUSED) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Internal error: Failed to retrieve the default value");
-		return NULL;
-	}
-
-	return precv;
-}
-/* }}} */
-
 static int get_default_via_ast(zval *default_value_zval, const char *default_value) {
 	zend_ast *ast;
 	zend_arena *ast_arena;
@@ -1335,7 +1306,6 @@ static int get_default_via_ast(zval *default_value_zval, const char *default_val
 	smart_str_free(&code);
 
 	if (!ast) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Internal error: Failed to retrieve the default value");
 		return FAILURE;
 	}
 
@@ -1370,12 +1340,10 @@ static zend_string *try_parse_string(const char *str, size_t len, char quote) {
 	return zend_string_init(str, len, 0);
 }
 
-/* {{{ _reflection_param_get_default_arg_info */
-static int _reflection_param_get_default_arg_info(zend_internal_arg_info *arg_info, zval *default_value_zval)
+static int get_default_from_arg_info(zval *default_value_zval, zend_internal_arg_info *arg_info)
 {
 	const char *default_value = arg_info->default_value;
 	if (!default_value) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Internal error: Failed to retrieve the default value");
 		return FAILURE;
 	}
 
@@ -1416,6 +1384,20 @@ static int _reflection_param_get_default_arg_info(zend_internal_arg_info *arg_in
 	fprintf(stderr, "Evaluating %s via AST\n", default_value);
 #endif
 	return get_default_via_ast(default_value_zval, default_value);
+}
+
+static int get_parameter_default(zval *result, parameter_reference *param) {
+	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
+		return get_default_from_arg_info(result, (zend_internal_arg_info*) param->arg_info);
+	} else {
+		zval *default_value = get_default_from_recv((zend_op_array *) param->fptr, param->offset);
+		if (!default_value) {
+			return FAILURE;
+		}
+
+		ZVAL_COPY(result, default_value);
+		return SUCCESS;
+	}
 }
 
 /* {{{ Preventing __clone from being called */
@@ -2711,7 +2693,6 @@ ZEND_METHOD(reflection_parameter, isDefaultValueAvailable)
 {
 	reflection_object *intern;
 	parameter_reference *param;
-	zend_op *precv;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -2720,13 +2701,10 @@ ZEND_METHOD(reflection_parameter, isDefaultValueAvailable)
 	GET_REFLECTION_OBJECT_PTR(param);
 
 	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
-		RETURN_BOOL(param->arg_info && ((zend_internal_arg_info*) (param->arg_info))->default_value);
+		RETURN_BOOL(((zend_internal_arg_info*) (param->arg_info))->default_value);
 	} else {
-		precv = _get_recv_op((zend_op_array*)param->fptr, param->offset);
-		if (!precv || precv->opcode != ZEND_RECV_INIT || precv->op2_type == IS_UNUSED) {
-			RETURN_FALSE;
-		}
-		RETURN_TRUE;
+		zval *default_value = get_default_from_recv((zend_op_array *)param->fptr, param->offset);
+		RETURN_BOOL(default_value != NULL);
 	}
 }
 /* }}} */
@@ -2735,31 +2713,19 @@ ZEND_METHOD(reflection_parameter, isDefaultValueAvailable)
    Returns the default value of this parameter or throws an exception */
 ZEND_METHOD(reflection_parameter, getDefaultValue)
 {
+	reflection_object *intern;
 	parameter_reference *param;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	param = _reflection_param_get_default_param(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-	if (!param) {
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	if (get_parameter_default(return_value, param) == FAILURE) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+			"Internal error: Failed to retrieve the default value");
 		RETURN_THROWS();
-	}
-
-	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
-		zval default_value_zval;
-		if (_reflection_param_get_default_arg_info((zend_internal_arg_info*) (param->arg_info), &default_value_zval) == FAILURE) {
-			RETURN_THROWS();
-		}
-
-		RETVAL_COPY_VALUE(&default_value_zval);
-	} else {
-		zend_op *precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, param);
-		if (!precv) {
-			RETURN_THROWS();
-		}
-
-		RETVAL_COPY(RT_CONSTANT(precv, precv->op2));
 	}
 
 	if (Z_TYPE_P(return_value) == IS_CONSTANT_AST) {
@@ -2772,42 +2738,27 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
    Returns whether the default value of this parameter is constant */
 ZEND_METHOD(reflection_parameter, isDefaultValueConstant)
 {
+	reflection_object *intern;
 	parameter_reference *param;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	param = _reflection_param_get_default_param(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-	if (!param) {
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	zval default_value;
+	if (get_parameter_default(&default_value, param) == FAILURE) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+			"Internal error: Failed to retrieve the default value");
 		RETURN_THROWS();
 	}
 
-	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
-		zval default_value_zval;
-		if (_reflection_param_get_default_arg_info((zend_internal_arg_info*) (param->arg_info), &default_value_zval) == FAILURE) {
-			RETURN_THROWS();
-		}
-
-		if (Z_TYPE(default_value_zval) == IS_CONSTANT_AST) {
-			zend_ast *ast = Z_ASTVAL(default_value_zval);
-			zval_dtor(&default_value_zval);
-			if (ast->kind == ZEND_AST_CONSTANT || ast->kind == ZEND_AST_CONSTANT_CLASS) {
-				RETURN_TRUE;
-			} else {
-				RETURN_FALSE;
-			}
-		}
+	if (Z_TYPE(default_value) == IS_CONSTANT_AST) {
+		zend_ast *ast = Z_ASTVAL(default_value);
+		RETVAL_BOOL(ast->kind == ZEND_AST_CONSTANT || ast->kind == ZEND_AST_CONSTANT_CLASS);
+		zval_ptr_dtor_nogc(&default_value);
 	} else {
-		zend_op *precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, param);
-		if (precv && Z_TYPE_P(RT_CONSTANT(precv, precv->op2)) == IS_CONSTANT_AST) {
-			zend_ast *ast = Z_ASTVAL_P(RT_CONSTANT(precv, precv->op2));
-
-			if (ast->kind == ZEND_AST_CONSTANT || ast->kind == ZEND_AST_CONSTANT_CLASS) {
-				RETURN_TRUE;
-			}
-		}
-
 		RETURN_FALSE;
 	}
 }
@@ -2817,46 +2768,36 @@ ZEND_METHOD(reflection_parameter, isDefaultValueConstant)
    Returns the default value's constant name if default value is constant or null */
 ZEND_METHOD(reflection_parameter, getDefaultValueConstantName)
 {
+	reflection_object *intern;
 	parameter_reference *param;
-	zend_ast *ast = NULL;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
 
-	param = _reflection_param_get_default_param(INTERNAL_FUNCTION_PARAM_PASSTHRU);
-	if (!param) {
+	GET_REFLECTION_OBJECT_PTR(param);
+
+	zval default_value;
+	if (get_parameter_default(&default_value, param) == FAILURE) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0,
+			"Internal error: Failed to retrieve the default value");
 		RETURN_THROWS();
 	}
 
-	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
-		zval default_value_zval;
-		if (_reflection_param_get_default_arg_info((zend_internal_arg_info*) (param->arg_info), &default_value_zval) == FAILURE) {
-			RETURN_THROWS();
-		}
+	if (Z_TYPE(default_value) != IS_CONSTANT_AST) {
+		zval_ptr_dtor_nogc(&default_value);
+		RETURN_NULL();
+	}
 
-		if (Z_TYPE(default_value_zval) == IS_CONSTANT_AST) {
-			ast = Z_ASTVAL(default_value_zval);
-			zval_dtor(&default_value_zval);
-		}
+	zend_ast *ast = Z_ASTVAL(default_value);
+	if (ast->kind == ZEND_AST_CONSTANT) {
+		RETVAL_STR_COPY(zend_ast_get_constant_name(ast));
+	} else if (ast->kind == ZEND_AST_CONSTANT_CLASS) {
+		RETVAL_STRINGL("__CLASS__", sizeof("__CLASS__")-1);
 	} else {
-		zend_op * precv = _reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAM_PASSTHRU, param);
-		if (precv && Z_TYPE_P(RT_CONSTANT(precv, precv->op2)) == IS_CONSTANT_AST) {
-			ast = Z_ASTVAL_P(RT_CONSTANT(precv, precv->op2));
-		}
+		RETVAL_NULL();
 	}
-
-	if (ast) {
-		if (ast->kind == ZEND_AST_CONSTANT) {
-			RETURN_STR_COPY(zend_ast_get_constant_name(ast));
-		}
-
-		if (ast->kind == ZEND_AST_CONSTANT_CLASS) {
-			RETURN_STRINGL("__CLASS__", sizeof("__CLASS__")-1);
-		}
-	}
-
-	RETURN_NULL();
+	zval_ptr_dtor_nogc(&default_value);
 }
 
 /* {{{ proto public bool ReflectionParameter::isVariadic()
