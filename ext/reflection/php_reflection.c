@@ -1320,20 +1320,13 @@ static zend_op *_reflection_param_get_default_precv(INTERNAL_FUNCTION_PARAMETERS
 }
 /* }}} */
 
-/* {{{ _reflection_param_get_default_arg_info */
-static int _reflection_param_get_default_arg_info(zend_function *fptr, zend_internal_arg_info *arg_info, zval *default_value_zval)
-{
-	if (!arg_info || arg_info->default_value == NULL) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0, "Internal error: Failed to retrieve the default value");
-		return FAILURE;
-	}
-
+static int get_default_via_ast(zval *default_value_zval, const char *default_value) {
 	zend_ast *ast;
 	zend_arena *ast_arena;
 
 	smart_str code = {0};
 	smart_str_appends(&code, "<?php ");
-	smart_str_appends(&code, arg_info->default_value);
+	smart_str_appends(&code, default_value);
 	smart_str_appendc(&code, ';');
 	smart_str_0(&code);
 
@@ -1351,6 +1344,7 @@ static int _reflection_param_get_default_arg_info(zend_function *fptr, zend_inte
 	zend_arena *original_ast_arena = CG(ast_arena);
 	uint32_t original_compiler_options = CG(compiler_options);
 	CG(ast_arena) = ast_arena;
+	/* Disable constant substitution, to make getDefaultValueConstant() work. */
 	CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION | ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION;
 	zend_const_expr_to_zval(default_value_zval, const_expression_ast);
 	CG(ast_arena) = original_ast_arena;
@@ -1360,6 +1354,43 @@ static int _reflection_param_get_default_arg_info(zend_function *fptr, zend_inte
 	zend_arena_destroy(ast_arena);
 
 	return SUCCESS;
+}
+
+/* {{{ _reflection_param_get_default_arg_info */
+static int _reflection_param_get_default_arg_info(zend_internal_arg_info *arg_info, zval *default_value_zval)
+{
+	const char *default_value = arg_info->default_value;
+	if (!default_value) {
+		zend_throw_exception_ex(reflection_exception_ptr, 0, "Internal error: Failed to retrieve the default value");
+		return FAILURE;
+	}
+
+	/* Avoid going through the full AST machinery for some simple and common cases. */
+	size_t default_value_len = strlen(default_value);
+	zend_ulong lval;
+	if (default_value_len == sizeof("null")-1
+			&& !memcmp(default_value, "null", sizeof("null")-1)) {
+		ZVAL_NULL(default_value_zval);
+		return SUCCESS;
+	} else if (default_value_len == sizeof("true")-1
+			&& !memcmp(default_value, "true", sizeof("true")-1)) {
+		ZVAL_TRUE(default_value_zval);
+		return SUCCESS;
+	} else if (default_value_len == sizeof("false")-1
+			&& !memcmp(default_value, "false", sizeof("false")-1)) {
+		ZVAL_FALSE(default_value_zval);
+		return SUCCESS;
+	} else if (default_value_len == sizeof("\"\"")-1
+			&& (!memcmp(default_value, "\"\"", sizeof("\"\"")-1)
+				|| !memcmp(default_value, "''", sizeof("''")-1))) {
+		ZVAL_EMPTY_STRING(default_value_zval);
+		return SUCCESS;
+	} else if (ZEND_HANDLE_NUMERIC_STR(default_value, default_value_len, lval)) {
+		ZVAL_LONG(default_value_zval, lval);
+		return SUCCESS;
+	}
+
+	return get_default_via_ast(default_value_zval, default_value);
 }
 
 /* {{{ Preventing __clone from being called */
@@ -2692,7 +2723,7 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 
 	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
 		zval default_value_zval;
-		if (_reflection_param_get_default_arg_info(param->fptr, (zend_internal_arg_info*) (param->arg_info), &default_value_zval) == FAILURE) {
+		if (_reflection_param_get_default_arg_info((zend_internal_arg_info*) (param->arg_info), &default_value_zval) == FAILURE) {
 			RETURN_THROWS();
 		}
 
@@ -2729,7 +2760,7 @@ ZEND_METHOD(reflection_parameter, isDefaultValueConstant)
 
 	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
 		zval default_value_zval;
-		if (_reflection_param_get_default_arg_info(param->fptr, (zend_internal_arg_info*) (param->arg_info), &default_value_zval) == FAILURE) {
+		if (_reflection_param_get_default_arg_info((zend_internal_arg_info*) (param->arg_info), &default_value_zval) == FAILURE) {
 			RETURN_THROWS();
 		}
 
@@ -2775,7 +2806,7 @@ ZEND_METHOD(reflection_parameter, getDefaultValueConstantName)
 
 	if (param->fptr->type == ZEND_INTERNAL_FUNCTION) {
 		zval default_value_zval;
-		if (_reflection_param_get_default_arg_info(param->fptr, (zend_internal_arg_info*) (param->arg_info), &default_value_zval) == FAILURE) {
+		if (_reflection_param_get_default_arg_info((zend_internal_arg_info*) (param->arg_info), &default_value_zval) == FAILURE) {
 			RETURN_THROWS();
 		}
 
