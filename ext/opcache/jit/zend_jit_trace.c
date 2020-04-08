@@ -335,8 +335,8 @@ static zend_always_inline uint32_t zend_jit_trace_type_to_info(zend_uchar type)
 				} \
 				op_info &= ~MAY_BE_GUARD; \
 				ssa->var_info[_ssa_var].type &= op_info; \
+				SET_STACK_VAR_TYPE(_var, op_type); \
 			} \
-			SET_STACK_VAR_TYPE(_var, op_type); \
 		} \
 	} while (0)
 
