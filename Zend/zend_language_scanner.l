@@ -192,6 +192,7 @@ void startup_scanner(void)
 	CG(doc_comment) = NULL;
 	CG(extra_fn_flags) = 0;
 	zend_stack_init(&SCNG(state_stack), sizeof(int));
+	zend_stack_init(&SCNG(nest_location_stack), sizeof(zend_nest_location));
 	zend_ptr_stack_init(&SCNG(heredoc_label_stack));
 	SCNG(heredoc_scan_ahead) = 0;
 }
@@ -205,6 +206,7 @@ void shutdown_scanner(void)
 	CG(parse_error) = 0;
 	RESET_DOC_COMMENT();
 	zend_stack_destroy(&SCNG(state_stack));
+	zend_stack_destroy(&SCNG(nest_location_stack));
 	zend_ptr_stack_clean(&SCNG(heredoc_label_stack), (void (*)(void *)) &heredoc_label_dtor, 1);
 	zend_ptr_stack_destroy(&SCNG(heredoc_label_stack));
 	SCNG(heredoc_scan_ahead) = 0;
@@ -222,6 +224,9 @@ ZEND_API void zend_save_lexical_state(zend_lex_state *lex_state)
 
 	lex_state->state_stack = SCNG(state_stack);
 	zend_stack_init(&SCNG(state_stack), sizeof(int));
+
+	lex_state->nest_location_stack = SCNG(nest_location_stack);
+	zend_stack_init(&SCNG(nest_location_stack), sizeof(zend_nest_location));
 
 	lex_state->heredoc_label_stack = SCNG(heredoc_label_stack);
 	zend_ptr_stack_init(&SCNG(heredoc_label_stack));
@@ -257,6 +262,9 @@ ZEND_API void zend_restore_lexical_state(zend_lex_state *lex_state)
 
 	zend_stack_destroy(&SCNG(state_stack));
 	SCNG(state_stack) = lex_state->state_stack;
+
+	zend_stack_destroy(&SCNG(nest_location_stack));
+	SCNG(nest_location_stack) = lex_state->nest_location_stack;
 
 	zend_ptr_stack_clean(&SCNG(heredoc_label_stack), (void (*)(void *)) &heredoc_label_dtor, 1);
 	zend_ptr_stack_destroy(&SCNG(heredoc_label_stack));
@@ -1250,6 +1258,63 @@ static void copy_heredoc_label_stack(void *void_heredoc_label)
 	zend_ptr_stack_push(&SCNG(heredoc_label_stack), (void *) new_heredoc_label);
 }
 
+/* Check that { }, [ ], ( ) are nested correctly */
+static void report_bad_nesting(char opening, int opening_lineno, char closing)
+{
+	char   buf[256];
+	size_t used = 0;
+
+	used = snprintf(buf, sizeof(buf), "Unclosed '%c'", opening);
+
+	if (opening_lineno != CG(zend_lineno)) {
+		used += snprintf(buf + used, sizeof(buf) - used, " on line %d", opening_lineno);
+	}
+
+	if (closing) { 	/* 'closing' will be 0 if at end of file */
+		used += snprintf(buf + used, sizeof(buf) - used, " does not match '%c'", closing);
+	}
+
+	zend_throw_exception(zend_ce_parse_error, buf, 0);
+}
+
+static void enter_nesting(char opening)
+{
+	zend_nest_location nest_loc = {opening, CG(zend_lineno)};
+	zend_stack_push(&SCNG(nest_location_stack), &nest_loc);
+}
+
+static int exit_nesting(char closing)
+{
+	if (zend_stack_is_empty(&SCNG(nest_location_stack))) {
+		zend_throw_exception_ex(zend_ce_parse_error, 0, "Unmatched '%c'", closing);
+		return -1;
+	}
+
+	zend_nest_location *nest_loc = zend_stack_top(&SCNG(nest_location_stack));
+	char opening = nest_loc->text;
+
+	if ((opening == '{' && closing != '}') ||
+	    (opening == '[' && closing != ']') ||
+	    (opening == '(' && closing != ')')) {
+		report_bad_nesting(opening, nest_loc->lineno, closing);
+		return -1;
+	}
+
+	zend_stack_del_top(&SCNG(nest_location_stack));
+	return 0;
+}
+
+static int check_nesting_at_end()
+{
+	if (!zend_stack_is_empty(&SCNG(nest_location_stack))) {
+		zend_nest_location *nest_loc = zend_stack_top(&SCNG(nest_location_stack));
+		report_bad_nesting(nest_loc->text, nest_loc->lineno, 0);
+		return -1;
+	}
+
+	return 0;
+}
+
 #define PARSER_MODE() \
 	EXPECTED(elem != NULL)
 
@@ -1277,6 +1342,22 @@ static void copy_heredoc_label_stack(void *void_heredoc_label)
 		goto emit_token; \
 	} while (0)
 
+#define RETURN_EXIT_NESTING_TOKEN(_token) do { \
+		if (exit_nesting(_token) && PARSER_MODE()) { \
+			RETURN_TOKEN(T_ERROR); \
+		} else { \
+			RETURN_TOKEN(_token); \
+		} \
+	} while(0)
+
+#define RETURN_END_TOKEN do { \
+		if (check_nesting_at_end() && PARSER_MODE()) { \
+			RETURN_TOKEN(T_ERROR); \
+		} else { \
+			RETURN_TOKEN(END); \
+		} \
+	} while (0)
+
 int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem)
 {
 int token;
@@ -1297,7 +1378,7 @@ BNUM	"0b"[01]+(_[01]+)*
 LABEL	[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff]*
 WHITESPACE [ \n\r\t]+
 TABS_AND_SPACES [ \t]*
-TOKENS [;:,.\[\]()|^&+-/*=%!~$<>?@]
+TOKENS [;:,.|^&+-/*=%!~$<>?@]
 ANY_CHAR [^]
 NEWLINE ("\r"|"\n"|"\r\n")
 
@@ -1770,6 +1851,16 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_SR);
 }
 
+<ST_IN_SCRIPTING>"]"|")" {
+	/* Check that ] and ) match up properly with a preceding [ or ( */
+	RETURN_EXIT_NESTING_TOKEN(yytext[0]);
+}
+
+<ST_IN_SCRIPTING>"["|"(" {
+	enter_nesting(yytext[0]);
+	RETURN_TOKEN(yytext[0]);
+}
+
 <ST_IN_SCRIPTING>{TOKENS} {
 	RETURN_TOKEN(yytext[0]);
 }
@@ -1777,22 +1868,23 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_IN_SCRIPTING>"{" {
 	yy_push_state(ST_IN_SCRIPTING);
+	enter_nesting('{');
 	RETURN_TOKEN('{');
 }
 
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"${" {
 	yy_push_state(ST_LOOKING_FOR_VARNAME);
+	enter_nesting('{');
 	RETURN_TOKEN(T_DOLLAR_OPEN_CURLY_BRACES);
 }
-
 
 <ST_IN_SCRIPTING>"}" {
 	RESET_DOC_COMMENT();
 	if (!zend_stack_is_empty(&SCNG(state_stack))) {
 		yy_pop_state();
 	}
-	RETURN_TOKEN('}');
+	RETURN_EXIT_NESTING_TOKEN('}');
 }
 
 
@@ -2088,7 +2180,7 @@ string:
 
 <INITIAL>{ANY_CHAR} {
 	if (YYCURSOR > YYLIMIT) {
-		RETURN_TOKEN(END);
+		RETURN_END_TOKEN;
 	}
 
 inline_char_handler:
@@ -2165,7 +2257,7 @@ inline_char_handler:
 	RETURN_TOKEN(']');
 }
 
-<ST_VAR_OFFSET>{TOKENS}|[{}"`] {
+<ST_VAR_OFFSET>{TOKENS}|[[(){}"`] {
 	/* Only '[' or '-' can be valid, but returning other tokens will allow a more explicit parse error */
 	RETURN_TOKEN(yytext[0]);
 }
@@ -2569,6 +2661,7 @@ skip_escape_conversion:
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
 	yy_push_state(ST_IN_SCRIPTING);
 	yyless(1);
+	enter_nesting('{');
 	RETURN_TOKEN(T_CURLY_OPEN);
 }
 
@@ -2593,7 +2686,7 @@ skip_escape_conversion:
 	}
 
 	if (YYCURSOR > YYLIMIT) {
-		RETURN_TOKEN(END);
+		RETURN_END_TOKEN;
 	}
 	if (yytext[0] == '\\' && YYCURSOR < YYLIMIT) {
 		YYCURSOR++;
@@ -2640,7 +2733,7 @@ double_quotes_scan_done:
 
 <ST_BACKQUOTE>{ANY_CHAR} {
 	if (YYCURSOR > YYLIMIT) {
-		RETURN_TOKEN(END);
+		RETURN_END_TOKEN;
 	}
 	if (yytext[0] == '\\' && YYCURSOR < YYLIMIT) {
 		YYCURSOR++;
@@ -2689,7 +2782,7 @@ double_quotes_scan_done:
 	int newline = 0, indentation = 0, spacing = 0;
 
 	if (YYCURSOR > YYLIMIT) {
-		RETURN_TOKEN(END);
+		RETURN_END_TOKEN;
 	}
 
 	YYCURSOR--;
@@ -2813,7 +2906,7 @@ heredoc_scan_done:
 	int newline = 0, indentation = 0, spacing = -1;
 
 	if (YYCURSOR > YYLIMIT) {
-		RETURN_TOKEN(END);
+		RETURN_END_TOKEN;
 	}
 
 	YYCURSOR--;
@@ -2901,7 +2994,7 @@ nowdoc_scan_done:
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{ANY_CHAR} {
 	if (YYCURSOR > YYLIMIT) {
-		RETURN_TOKEN(END);
+		RETURN_END_TOKEN;
 	}
 
 	RETURN_TOKEN(T_BAD_CHARACTER);

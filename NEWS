@@ -18,6 +18,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #79462 (method_exists and property_exists incoherent behavior).
     (cmb)
+  . Fixed bug #79368 ("Unexpected end of file" is not an acceptable error
+    message). (Alex Dowad)
 
 - CURL:
   . Bumped required libcurl version to 7.29.0. (cmb)

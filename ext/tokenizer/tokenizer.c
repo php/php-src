@@ -392,6 +392,8 @@ static zend_bool tokenize(zval *return_value, zend_string *source, zend_class_en
 	array_init(return_value);
 
 	while ((token_type = lex_scan(&token, NULL))) {
+		ZEND_ASSERT(token_type != T_ERROR);
+
 		add_token(
 			return_value, token_type, zendtext, zendleng, token_line,
 			token_class, &interned_strings);
@@ -408,7 +410,7 @@ static zend_bool tokenize(zval *return_value, zend_string *source, zend_class_en
 				&& --need_tokens == 0
 			) {
 				/* fetch the rest into a T_INLINE_HTML */
-				if (zendcursor != zendlimit) {
+				if (zendcursor < zendlimit) {
 					add_token(
 						return_value, T_INLINE_HTML, zendcursor, zendlimit - zendcursor,
 						token_line, token_class, &interned_strings);
