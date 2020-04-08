@@ -650,7 +650,13 @@ static void timelib_set_relative(char **ptr, timelib_sll amount, int behavior, S
 		case TIMELIB_MINUTE:   s->time->relative.i += amount * relunit->multiplier; break;
 		case TIMELIB_HOUR:     s->time->relative.h += amount * relunit->multiplier; break;
 		case TIMELIB_DAY:      s->time->relative.d += amount * relunit->multiplier; break;
-		case TIMELIB_MONTH:    s->time->relative.m += amount * relunit->multiplier; break;
+		case TIMELIB_MONTH:
+			s->time->relative.m += amount * relunit->multiplier;
+			if ((amount == 0 && behavior == 1) || (amount == 1 && behavior == 0)) {
+				/* "this month" or "next month" mean we now have the date */
+				s->time->have_date = 1;
+			}
+			break;
 		case TIMELIB_YEAR:     s->time->relative.y += amount * relunit->multiplier; break;
 
 		case TIMELIB_WEEKDAY:
