@@ -1,7 +1,7 @@
 <?php
-define ("PHP_CLI_SERVER_HOSTNAME", "localhost");
-define ("PHP_CLI_SERVER_PORT", 8964);
-define ("PHP_CLI_SERVER_ADDRESS", PHP_CLI_SERVER_HOSTNAME.":".PHP_CLI_SERVER_PORT);
+define("PHP_CLI_SERVER_HOSTNAME", "localhost");
+define("PHP_CLI_SERVER_PORT", 8964);
+define("PHP_CLI_SERVER_ADDRESS", PHP_CLI_SERVER_HOSTNAME.":".PHP_CLI_SERVER_PORT);
 
 function php_cli_server_start(
 	?string $code = 'echo "Hello world";',
@@ -96,4 +96,14 @@ php_cli_server_start_error:
 
     return $handle;
 }
+
+function php_cli_server_connect() {
+    $timeout = 1.0;
+    $fp = fsockopen(PHP_CLI_SERVER_HOSTNAME, PHP_CLI_SERVER_PORT, $errno, $errstr, $timeout);
+    if (!$fp) {
+        die("connect failed");
+    }
+    return $fp;
+}
+
 ?>
