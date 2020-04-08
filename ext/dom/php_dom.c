@@ -1358,6 +1358,14 @@ xmlNode *dom_get_elements_by_tag_name_ns_raw(xmlNodePtr nodep, char *ns, char *l
 /* }}} */
 /* }}} end dom_element_get_elements_by_tag_name_ns_raw */
 
+static inline zend_bool is_empty_node(xmlNodePtr nodep)
+{
+	xmlChar	*strContent = xmlNodeGetContent(nodep);
+	zend_bool ret = strContent == NULL || *strContent == '\0';
+	xmlFree(strContent);
+	return ret;
+}
+
 /* {{{ void dom_normalize (xmlNodePtr nodep) */
 void dom_normalize (xmlNodePtr nodep)
 {
@@ -1383,8 +1391,7 @@ void dom_normalize (xmlNodePtr nodep)
 						break;
 					}
 				}
-				strContent = xmlNodeGetContent(child);
-				if (*strContent == '\0') {
+				if (is_empty_node(child)) {
 					nextp = child->next;
 					xmlUnlinkNode(child);
 					php_libxml_node_free_resource(child);
