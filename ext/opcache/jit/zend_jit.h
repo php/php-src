@@ -84,6 +84,7 @@
 #define ZEND_JIT_DEBUG_TRACE_BLACKLIST (1<<17)
 #define ZEND_JIT_DEBUG_TRACE_BYTECODE  (1<<18)
 #define ZEND_JIT_DEBUG_TRACE_TSSA      (1<<19)
+#define ZEND_JIT_DEBUG_TRACE_EXIT_INFO (1<<20)
 
 ZEND_EXT_API int  zend_jit_op_array(zend_op_array *op_array, zend_script *script);
 ZEND_EXT_API int  zend_jit_script(zend_script *script);

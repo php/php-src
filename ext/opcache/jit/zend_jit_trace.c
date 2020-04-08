@@ -457,6 +457,7 @@ static zend_ssa *zend_jit_trace_build_ssa(const zend_op_array *op_array, zend_sc
 }
 
 static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa);
+static void zend_jit_dump_exit_info(zend_jit_trace_info *t);
 
 static zend_always_inline int zend_jit_trace_op_len(const zend_op *opline)
 {
@@ -3168,7 +3169,7 @@ static zend_jit_trace_stop zend_jit_compile_root_trace(zend_jit_trace_rec *trace
 {
 	zend_jit_trace_stop ret;
 	const void *handler;
-	zend_jit_trace_info *t;
+	zend_jit_trace_info *t = NULL;
 	zend_jit_trace_exit_info exit_info[ZEND_JIT_TRACE_MAX_EXITS];
 
 	zend_shared_alloc_lock();
@@ -3259,6 +3260,12 @@ exit:
 	}
 
 	zend_shared_alloc_unlock();
+
+	if ((ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_TRACE_EXIT_INFO) != 0
+	 && ret == ZEND_JIT_TRACE_STOP_COMPILED
+	 && t->exit_count > 0) {
+		zend_jit_dump_exit_info(t);
+	}
 
 	return ret;
 }
@@ -3496,6 +3503,47 @@ static void zend_jit_dump_trace(zend_jit_trace_rec *trace_buffer, zend_ssa *tssa
 			break;
 		}
 		p++;
+	}
+}
+
+static void zend_jit_dump_exit_info(zend_jit_trace_info *t)
+{
+	int i, j;
+
+	fprintf(stderr, "---- TRACE %d exit info\n", t->id);
+	for (i = 0; i < t->exit_count; i++) {
+		uint32_t stack_size = t->exit_info[i].stack_size;
+		zend_jit_trace_stack *stack = t->stack_map + t->exit_info[i].stack_offset;
+
+		fprintf(stderr, "     exit_%d:", i);
+		if (t->exit_info[i].opline) {
+			// TODO: print exit opline number ???
+			//fprintf(stderr, " %04d/", t->exit_info[i].opline - op_array->opcodes);
+			fprintf(stderr, " XXXX/");
+		} else {
+			fprintf(stderr, " ----/");
+		}
+		if (t->exit_info[i].stack_size) {
+			fprintf(stderr, "%04d/%d", t->exit_info[i].stack_offset, t->exit_info[i].stack_size);
+		} else {
+			fprintf(stderr, "----/0");
+		}
+		for (j = 0; j < stack_size; j++) {
+			zend_uchar type = STACK_TYPE(stack, j);
+			if (type != IS_UNKNOWN) {
+				// TODO: print CV insted of X ???
+				fprintf(stderr, " X%d:", j);
+				if (type == IS_UNDEF) {
+					fprintf(stderr, "undef");
+				} else {
+					fprintf(stderr, "%s", zend_get_type_by_const(type));
+					if (STACK_REG(stack, j) != ZREG_NONE) {
+						fprintf(stderr, "(%s)", zend_reg_name[STACK_REG(stack, j)]);
+					}
+				}
+			}
+		}
+		fprintf(stderr, "\n");
 	}
 }
 
@@ -3770,6 +3818,12 @@ exit:
 	}
 
 	zend_shared_alloc_unlock();
+
+	if ((ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_TRACE_EXIT_INFO) != 0
+	 && ret == ZEND_JIT_TRACE_STOP_COMPILED
+	 && t->exit_count > 0) {
+		zend_jit_dump_exit_info(t);
+	}
 
 	return ret;
 }
