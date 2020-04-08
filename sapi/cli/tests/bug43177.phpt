@@ -35,15 +35,10 @@ php_cli_server_start(<<<'SCRIPT'
 SCRIPT
 );
 
-list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
-$port = intval($port)?:80;
+$host = PHP_CLI_SERVER_HOSTNAME;
 
 foreach(array("parse", "fatal", "fatal2", "compile") as $url) {
-    $fp = fsockopen($host, $port, $errno, $errstr, 0.5);
-    if (!$fp) {
-        die("connect failed");
-    }
-
+    $fp = php_cli_server_connect();
     if(fwrite($fp, <<<HEADER
 GET /$url HTTP/1.1
 Host: {$host}

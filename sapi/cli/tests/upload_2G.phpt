@@ -46,15 +46,11 @@ include "php_cli_server.inc";
 php_cli_server_start("var_dump(\$_FILES);", null,
     ["-d", "post_max_size=3G", "-d", "upload_max_filesize=3G"]);
 
-list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
-$port = intval($port)?:80;
 $length = 2150000000;
 $output = "";
 
-$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
-if (!$fp) {
-  die("connect failed");
-}
+$host = PHP_CLI_SERVER_HOSTNAME;
+$fp = php_cli_server_connect();
 
 $prev = "----123
 Content-Type: text/plain; charset=UTF-8
