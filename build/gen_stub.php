@@ -458,7 +458,7 @@ function parseDocComment(DocComment $comment): array {
 }
 
 function parseFunctionLike(
-    PrettyPrinterAbstract $prettyPinter, string $name, ?string $className, Node\FunctionLike $func, ?string $cond
+    PrettyPrinterAbstract $prettyPrinter, string $name, ?string $className, Node\FunctionLike $func, ?string $cond
 ): FuncInfo {
     $comment = $func->getDocComment();
     $paramMeta = [];
@@ -521,7 +521,7 @@ function parseFunctionLike(
             $sendBy,
             $param->variadic,
             $type,
-            $param->default ? $prettyPinter->prettyPrintExpr($param->default) : null
+            $param->default ? $prettyPrinter->prettyPrintExpr($param->default) : null
         );
         if (!$param->default && !$param->variadic) {
             $numRequiredArgs = $i + 1;
