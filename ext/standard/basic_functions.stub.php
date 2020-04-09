@@ -801,7 +801,7 @@ function feof($handle): bool {}
 function fgetc($handle): string|false {}
 
 /** @param resource $handle */
-function fgets($handle, int $length = 1024): string|false {}
+function fgets($handle, int $length = UNKNOWN): string|false {}
 
 /** @param resource $handle */
 function fread($handle, int $length): string|false {}
