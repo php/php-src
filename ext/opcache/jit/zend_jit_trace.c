@@ -1720,47 +1720,6 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 	TRACE_FRAME_INIT(frame, op_array, 0, -1);
 	stack = frame->stack;
 
-	if (trace_buffer->start == ZEND_JIT_TRACE_START_ENTER) {
-		i = 0;
-		while (i < op_array->last_var) {
-			if (!(ssa->var_info[i].type & MAY_BE_GUARD)
-			 && has_concrete_type(ssa->var_info[i].type)) {
-				SET_STACK_TYPE(stack, i, concrete_type(ssa->var_info[i].type));
-			} else if (i < op_array->num_args) {
-				SET_STACK_TYPE(stack, i, IS_UNKNOWN);
-			} else {
-				SET_STACK_TYPE(stack, i, IS_UNDEF);
-			}
-			i++;
-		}
-	} else {
-		int parent_vars_count = 0;
-		zend_jit_trace_stack *parent_stack = NULL;
-
-		i = 0;
-		if (parent_trace) {
-			parent_vars_count = MIN(zend_jit_traces[parent_trace].exit_info[exit_num].stack_size,
-				op_array->last_var + op_array->T);
-			if (parent_vars_count) {
-				parent_stack =
-					zend_jit_traces[parent_trace].stack_map +
-					zend_jit_traces[parent_trace].exit_info[exit_num].stack_offset;
-			}
-		}
-		while (i < op_array->last_var + op_array->T) {
-			if (!(ssa->var_info[i].type & MAY_BE_GUARD)
-			 && has_concrete_type(ssa->var_info[i].type)) {
-				SET_STACK_TYPE(stack, i, concrete_type(ssa->var_info[i].type));
-			} else if (i < parent_vars_count
-			 && STACK_TYPE(parent_stack, i) != IS_UNKNOWN) {
-				SET_STACK_TYPE(stack, i, STACK_TYPE(parent_stack, i));
-			} else {
-				SET_STACK_TYPE(stack, i, IS_UNKNOWN);
-			}
-			i++;
-		}
-	}
-
 	opline = ((zend_jit_trace_start_rec*)p)->opline;
 	name = zend_jit_trace_name(op_array, opline->lineno);
 	p += ZEND_JIT_TRACE_START_REC_SIZE;
@@ -1794,32 +1753,62 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 		}
 	}
 
+	if (1) {
+		int last_var;
+		int parent_vars_count = 0;
+		zend_jit_trace_stack *parent_stack = NULL;
+
+		if (parent_trace) {
+			parent_vars_count = MIN(zend_jit_traces[parent_trace].exit_info[exit_num].stack_size,
+				op_array->last_var + op_array->T);
+			if (parent_vars_count) {
+				parent_stack =
+					zend_jit_traces[parent_trace].stack_map +
+					zend_jit_traces[parent_trace].exit_info[exit_num].stack_offset;
+			}
+		}
+
+		last_var = op_array->last_var;
+		if (trace_buffer->start != ZEND_JIT_TRACE_START_ENTER) {
+			last_var += op_array->T;
+		}
+
+		for (i = 0; i < last_var; i++) {
+			uint32_t info = ssa->var_info[i].type;
+
+			if (!(info & MAY_BE_GUARD) && has_concrete_type(info)) {
+				SET_STACK_TYPE(stack, i, concrete_type(info));
+			} else if (i < parent_vars_count
+			 && STACK_TYPE(parent_stack, i) != IS_UNKNOWN) {
+				/* This must be already handled by trace type inference */
+				ZEND_ASSERT(0);
+				SET_STACK_TYPE(stack, i, STACK_TYPE(parent_stack, i));
+			} else if ((info & MAY_BE_GUARD) != 0
+			 && trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP
+			 && (ssa->vars[i].use_chain != -1
+			  || (ssa->vars[i].phi_use_chain
+			   && !(ssa->var_info[ssa->vars[i].phi_use_chain->ssa_var].type & MAY_BE_GUARD)))) {
+				/* Check loop-invariant variable type */
+				if (!zend_jit_type_guard(&dasm_state, opline, EX_NUM_TO_VAR(i), concrete_type(info))) {
+					goto jit_failure;
+				}
+				info &= ~MAY_BE_GUARD;
+				ssa->var_info[i].type = info;
+				SET_STACK_TYPE(stack, i, concrete_type(info));
+			} else if (trace_buffer->start == ZEND_JIT_TRACE_START_ENTER
+			 && i >= op_array->num_args) {
+				/* This must be already handled by trace type inference */
+				ZEND_ASSERT(0);
+				SET_STACK_TYPE(stack, i, IS_UNDEF);
+			} else {
+				SET_STACK_TYPE(stack, i, IS_UNKNOWN);
+			}
+		}
+	}
+
 	if (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP
 	 || trace_buffer->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_CALL
 	 || trace_buffer->stop == ZEND_JIT_TRACE_STOP_RECURSIVE_RET) {
-
-		if (trace_buffer->stop == ZEND_JIT_TRACE_STOP_LOOP) {
-			/* Check loop-invariant variable types */
-			for (i = 0; i < op_array->last_var + op_array->T; i++) {
-				uint32_t info = ssa->var_info[i].type;
-
-				ZEND_ASSERT(ssa->vars[i].definition == -1);
-				ZEND_ASSERT(ssa->vars[i].definition_phi == NULL);
-				ZEND_ASSERT(ssa->vars[i].var == i);
-
-				if (info & MAY_BE_GUARD) {
-					if (ssa->vars[i].use_chain != -1
-					 || (ssa->vars[i].phi_use_chain
-					  && !(ssa->var_info[ssa->vars[i].phi_use_chain->ssa_var].type & MAY_BE_GUARD))) {
-						if (!zend_jit_type_guard(&dasm_state, opline, EX_NUM_TO_VAR(i), concrete_type(info))) {
-							goto jit_failure;
-						}
-						ssa->var_info[i].type = info & ~MAY_BE_GUARD;
-						SET_STACK_TYPE(stack, i, concrete_type(info));
-					}
-				}
-			}
-		}
 
 		zend_jit_label(&dasm_state, 0); /* start of of trace loop */
 
