@@ -30,6 +30,7 @@
 #include "zend_closures.h"
 #include "zend_inheritance.h"
 #include "zend_ini.h"
+#include "zend_smart_str.h"
 
 #include <stdarg.h>
 
@@ -4309,3 +4310,101 @@ ZEND_API zend_bool zend_is_countable(zval *countable) /* {{{ */
 	}
 }
 /* }}} */
+
+static int get_default_via_ast(zval *default_value_zval, const char *default_value) {
+	zend_ast *ast;
+	zend_arena *ast_arena;
+
+	smart_str code = {0};
+	smart_str_appends(&code, "<?php ");
+	smart_str_appends(&code, default_value);
+	smart_str_appendc(&code, ';');
+	smart_str_0(&code);
+
+	ast = zend_compile_string_to_ast(code.s, &ast_arena, "");
+	smart_str_free(&code);
+
+	if (!ast) {
+		return FAILURE;
+	}
+
+	zend_ast_list *statement_list = zend_ast_get_list(ast);
+	zend_ast *const_expression_ast = statement_list->child[0];
+
+	zend_arena *original_ast_arena = CG(ast_arena);
+	uint32_t original_compiler_options = CG(compiler_options);
+	zend_file_context original_file_context;
+	CG(ast_arena) = ast_arena;
+	/* Disable constant substitution, to make getDefaultValueConstant() work. */
+	CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION | ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION;
+	zend_file_context_begin(&original_file_context);
+	zend_const_expr_to_zval(default_value_zval, const_expression_ast);
+	CG(ast_arena) = original_ast_arena;
+	CG(compiler_options) = original_compiler_options;
+	zend_file_context_end(&original_file_context);
+
+	zend_ast_destroy(ast);
+	zend_arena_destroy(ast_arena);
+
+	return SUCCESS;
+}
+
+static zend_string *try_parse_string(const char *str, size_t len, char quote) {
+	if (len == 0) {
+		return ZSTR_EMPTY_ALLOC();
+	}
+
+	for (size_t i = 0; i < len; i++) {
+		if (str[i] == '\\' || str[i] == quote) {
+			return NULL;
+		}
+	}
+	return zend_string_init(str, len, 0);
+}
+
+ZEND_API int zend_get_default_from_internal_arg_info(
+		zval *default_value_zval, zend_internal_arg_info *arg_info)
+{
+	const char *default_value = arg_info->default_value;
+	if (!default_value) {
+		return FAILURE;
+	}
+
+	/* Avoid going through the full AST machinery for some simple and common cases. */
+	size_t default_value_len = strlen(default_value);
+	zend_ulong lval;
+	if (default_value_len == sizeof("null")-1
+			&& !memcmp(default_value, "null", sizeof("null")-1)) {
+		ZVAL_NULL(default_value_zval);
+		return SUCCESS;
+	} else if (default_value_len == sizeof("true")-1
+			&& !memcmp(default_value, "true", sizeof("true")-1)) {
+		ZVAL_TRUE(default_value_zval);
+		return SUCCESS;
+	} else if (default_value_len == sizeof("false")-1
+			&& !memcmp(default_value, "false", sizeof("false")-1)) {
+		ZVAL_FALSE(default_value_zval);
+		return SUCCESS;
+	} else if (default_value_len >= 2
+			&& (default_value[0] == '\'' || default_value[0] == '"')
+			&& default_value[default_value_len - 1] == default_value[0]) {
+		zend_string *str = try_parse_string(
+			default_value + 1, default_value_len - 2, default_value[0]);
+		if (str) {
+			ZVAL_STR(default_value_zval, str);
+			return SUCCESS;
+		}
+	} else if (default_value_len == sizeof("[]")-1
+			&& !memcmp(default_value, "[]", sizeof("[]")-1)) {
+		ZVAL_EMPTY_ARRAY(default_value_zval);
+		return SUCCESS;
+	} else if (ZEND_HANDLE_NUMERIC_STR(default_value, default_value_len, lval)) {
+		ZVAL_LONG(default_value_zval, lval);
+		return SUCCESS;
+	}
+
+#if 0
+	fprintf(stderr, "Evaluating %s via AST\n", default_value);
+#endif
+	return get_default_via_ast(default_value_zval, default_value);
+}
