@@ -3834,7 +3834,7 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 ZEND_METHOD(reflection_class, getStaticPropertyValue)
 {
 	reflection_object *intern;
-	zend_class_entry *ce;
+	zend_class_entry *ce, *old_scope;
 	zend_string *name;
 	zval *prop, *def_value = NULL;
 
@@ -3847,7 +3847,12 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 		return;
 	}
+
+	old_scope = EG(fake_scope);
+	EG(fake_scope) = ce;
 	prop = zend_std_get_static_property(ce, name, 1);
+	EG(fake_scope) = old_scope;
+
 	if (!prop) {
 		if (def_value) {
 			ZVAL_COPY(return_value, def_value);
