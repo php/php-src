@@ -3014,7 +3014,7 @@ done:
 			break;
 		} else if (p->op == ZEND_JIT_TRACE_INIT_CALL) {
 			call = top;
-			TRACE_FRAME_INIT(call, p->func, 1, find_call_num_args(p-1));
+			TRACE_FRAME_INIT(call, p->func, 1, !p->fake ? find_call_num_args(p-1) : -1);
 			call->prev = frame->call;
 			if (!p->fake) {
 				TRACE_FRAME_SET_LAST_SEND_BY_VAL(call);
