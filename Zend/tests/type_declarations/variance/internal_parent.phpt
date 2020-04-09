@@ -9,4 +9,4 @@ class Test extends DateTime {
 
 ?>
 --EXPECTF--
-Fatal error: Could not check compatibility between Test::createFromFormat($format, $time, ?Wrong $timezone = NULL) and DateTime::createFromFormat(string $format, string $time, ?DateTimeZone $timezone = null), because class Wrong is not available in %s on line %d
+Fatal error: Could not check compatibility between Test::createFromFormat($format, $time, ?Wrong $timezone = null) and DateTime::createFromFormat(string $format, string $time, ?DateTimeZone $timezone = null), because class Wrong is not available in %s on line %d

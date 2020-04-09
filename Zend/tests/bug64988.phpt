@@ -26,4 +26,4 @@ $o = new Smooth1();
 echo "okey";
 ?>
 --EXPECTF--
-Fatal error: Declaration of Smooth1::insert(array $data) must be compatible with Noisy1::insert(array $data, $option1 = NULL) in %s on line %d
+Fatal error: Declaration of Smooth1::insert(array $data) must be compatible with Noisy1::insert(array $data, $option1 = null) in %s on line %d
