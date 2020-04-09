@@ -13,4 +13,4 @@ class Sub extends Base {
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of & Sub::test() must be compatible with & Base::test($foo, array $bar, $option = NULL, $extra = 'llllllllll...') in %s on line %d
+Fatal error: Declaration of & Sub::test() must be compatible with & Base::test($foo, array $bar, $option = null, $extra = 'llllllllll...') in %s on line %d
