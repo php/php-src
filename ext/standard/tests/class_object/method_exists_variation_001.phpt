@@ -78,7 +78,11 @@ $values = array(
 
 foreach($values as $value) {
       echo "\nArg value $value \n";
-      var_dump( method_exists($value, $method) );
+      try {
+        var_dump( method_exists($value, $method) );
+      } catch (TypeError $e) {
+        echo $e->getMessage(), PHP_EOL;
+      }
 };
 
 echo "Done";
@@ -89,69 +93,69 @@ Error: 2 - Undefined variable $undefined_var
 Error: 2 - Undefined variable $unset_var
 
 Arg value 0 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 Arg value 1 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 Arg value 12345 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 Arg value -2345 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, int given
 
 Arg value 10.5 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 Arg value -10.5 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 Arg value 101234567000 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 Arg value 1.07654321E-9 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
 
 Arg value 0.5 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, float given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
 Error: 2 - Array to string conversion
 
 Arg value Array 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, array given
 
 Arg value  
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 Arg value  
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 Arg value 1 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, bool given
 
 Arg value  
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, bool given
 
 Arg value 1 
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, bool given
 
 Arg value  
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, bool given
 
 Arg value  
 bool(false)
@@ -168,8 +172,8 @@ In autoload(String)
 bool(false)
 
 Arg value  
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
 
 Arg value  
-bool(false)
+method_exists(): Argument #1 ($object_or_class) must be of type object|string, null given
 Done

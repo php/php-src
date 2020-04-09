@@ -1107,7 +1107,8 @@ ZEND_FUNCTION(method_exists)
 			RETURN_FALSE;
 		}
 	} else {
-		RETURN_FALSE;
+		zend_argument_type_error(1, "must be of type object|string, %s given", zend_zval_type_name(klass));
+		RETURN_THROWS();
 	}
 
 	lcname = zend_string_tolower(method_name);

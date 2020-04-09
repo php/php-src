@@ -16,6 +16,8 @@ PHP                                                                        NEWS
     abstract trait function). (Nikita)
   . Fixed bug #62609 (Allow implementing Traversable on abstract classes).
     (Nikita)
+  . Fixed bug #79462 (method_exists and property_exists incoherent behavior).
+    (cmb)
 
 - CURL:
   . Bumped required libcurl version to 7.29.0. (cmb)
