@@ -36,56 +36,56 @@ array(9) {
   [1]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(8) "__wakeup"
+    string(7) "getName"
     ["class"]=>
     string(12) "DateTimeZone"
   }
   [2]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(11) "__set_state"
+    string(9) "getOffset"
     ["class"]=>
     string(12) "DateTimeZone"
   }
   [3]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(7) "getName"
+    string(14) "getTransitions"
     ["class"]=>
     string(12) "DateTimeZone"
   }
   [4]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(9) "getOffset"
+    string(11) "getLocation"
     ["class"]=>
     string(12) "DateTimeZone"
   }
   [5]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(14) "getTransitions"
+    string(17) "listAbbreviations"
     ["class"]=>
     string(12) "DateTimeZone"
   }
   [6]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(11) "getLocation"
+    string(15) "listIdentifiers"
     ["class"]=>
     string(12) "DateTimeZone"
   }
   [7]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(17) "listAbbreviations"
+    string(8) "__wakeup"
     ["class"]=>
     string(12) "DateTimeZone"
   }
   [8]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(15) "listIdentifiers"
+    string(11) "__set_state"
     ["class"]=>
     string(12) "DateTimeZone"
   }

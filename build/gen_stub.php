@@ -6,6 +6,7 @@ use PhpParser\Node;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Name;
 use PhpParser\Node\Stmt;
+use PhpParser\Node\Stmt\Class_;
 use PhpParser\PrettyPrinter\Standard;
 use PhpParser\PrettyPrinterAbstract;
 
@@ -206,7 +207,7 @@ class Type {
                 $classType = $type;
             } else {
                 // We can only represent a single class type.
-                return false;
+                return null;
             }
         }
         return new RepresentableType($classType, $builtinTypes);
@@ -306,6 +307,33 @@ class ArgInfo {
     }
 }
 
+class FunctionName {
+    /** @var string|null */
+    public $className;
+    /** @var string */
+    public $name;
+
+    public function __construct(?string $className, string $name)
+    {
+        $this->className = $className;
+        $this->name = $name;
+    }
+
+    public function getDeclaration(): string
+    {
+        if ($this->className) {
+            return "ZEND_METHOD($this->className, $this->name);\n";
+        }
+
+        return "ZEND_FUNCTION($this->name);\n";
+    }
+
+    public function __toString()
+    {
+        return $this->className ? "$this->className::$this->name" : $this->name;
+    }
+}
+
 class ReturnInfo {
     /** @var bool */
     public $byRef;
@@ -324,11 +352,11 @@ class ReturnInfo {
 }
 
 class FuncInfo {
-    /** @var string */
+    /** @var FunctionName */
     public $name;
-    /** @var ?string */
-    public $className;
-    /** @var ?string */
+    /** @var int */
+    public $flags;
+    /** @var FunctionName|null */
     public $alias;
     /** @var bool */
     public $isDeprecated;
@@ -342,11 +370,17 @@ class FuncInfo {
     public $cond;
 
     public function __construct(
-        string $name, ?string $className, ?string $alias, bool $isDeprecated, array $args, ReturnInfo $return,
-        int $numRequiredArgs, ?string $cond
+        FunctionName $name,
+        int $flags,
+        ?FunctionName $alias,
+        bool $isDeprecated,
+        array $args,
+        ReturnInfo $return,
+        int $numRequiredArgs,
+        ?string $cond
     ) {
         $this->name = $name;
-        $this->className = $className;
+        $this->flags = $flags;
         $this->alias = $alias;
         $this->isDeprecated = $isDeprecated;
         $this->args = $args;
@@ -372,10 +406,99 @@ class FuncInfo {
     }
 
     public function getArgInfoName(): string {
-        if ($this->className) {
-            return 'arginfo_class_' . $this->className . '_' . $this->name;
+        if ($this->name->className) {
+            return 'arginfo_class_' . $this->name->className . '_' . $this->name->name;
         }
-        return 'arginfo_' . $this->name;
+        return 'arginfo_' . $this->name->name;
+    }
+
+    public function getDeclarationKey(): string
+    {
+        $name = $this->alias ?? $this->name;
+
+        return "$name|$this->cond";
+    }
+
+    public function getDeclaration(): string
+    {
+        if ($this->flags & Class_::MODIFIER_ABSTRACT) {
+            return "";
+        }
+
+        $name = $this->alias ?? $this->name;
+
+        return $name->getDeclaration();
+    }
+
+    public function getFunctionEntry(): string {
+        if ($this->name->className) {
+            if ($this->alias) {
+                if ($this->alias->className) {
+                    return sprintf(
+                        "\tZEND_MALIAS(%s, %s, %s, %s, %s)\n",
+                        $this->alias->className, $this->name, $this->alias->name, $this->getArgInfoName(), $this->getFlagsAsString()
+                    );
+                } else {
+                    return sprintf(
+                        "\tZEND_ME_MAPPING(%s, %s, %s, %s)\n",
+                        $this->name->name, $this->alias->name, $this->getArgInfoName(), $this->getFlagsAsString()
+                    );
+                }
+            } else {
+                if ($this->flags & Class_::MODIFIER_ABSTRACT) {
+                    return sprintf(
+                        "\tZEND_ABSTRACT_ME(%s, %s, %s)\n",
+                        $this->name->className, $this->name->name, $this->getArgInfoName()
+                    );
+                }
+
+                return sprintf(
+                    "\tZEND_ME(%s, %s, %s, %s)\n",
+                    $this->name->className, $this->name->name, $this->getArgInfoName(), $this->getFlagsAsString()
+                );
+            }
+        } else {
+            if ($this->alias) {
+                return sprintf(
+                    "\tZEND_FALIAS(%s, %s, %s)\n",
+                    $this->name, $this->alias->name, $this->getArgInfoName()
+                );
+            }
+
+            if ($this->isDeprecated) {
+                return sprintf("\tZEND_DEP_FE(%s, %s)\n", $this->name, $this->getArgInfoName());
+            }
+
+            return sprintf("\tZEND_FE(%s, %s)\n", $this->name, $this->getArgInfoName());
+        }
+    }
+
+    private function getFlagsAsString(): string
+    {
+        $flags = "ZEND_ACC_PUBLIC";
+        if ($this->flags & Class_::MODIFIER_PROTECTED) {
+            $flags = "ZEND_ACC_PROTECTED";
+        } elseif ($this->flags & Class_::MODIFIER_PRIVATE) {
+            $flags = "ZEND_ACC_PRIVATE";
+        }
+
+        if ($this->flags & Class_::MODIFIER_STATIC) {
+            $flags .= "|ZEND_ACC_STATIC";
+        }
+
+        if ($this->flags & Class_::MODIFIER_FINAL) {
+            $flags .= "|ZEND_ACC_FINAL";
+        }
+
+        if ($this->flags & Class_::MODIFIER_ABSTRACT) {
+            $flags .= "|ZEND_ACC_ABSTRACT";
+        }
+
+        if ($this->isDeprecated) {
+            $flags .= "|ZEND_ACC_DEPRECATED";
+        }
+
+        return $flags;
     }
 }
 
@@ -406,6 +529,9 @@ class FileInfo {
         $this->generateFunctionEntries = $generateFunctionEntries;
     }
 
+    /**
+     * @return iterable<FuncInfo>
+     */
     public function getAllFuncInfos(): iterable {
         yield from $this->funcInfos;
         foreach ($this->classInfos as $classInfo) {
@@ -417,7 +543,7 @@ class FileInfo {
 class DocCommentTag {
     /** @var string */
     public $name;
-    /** @var ?string */
+    /** @var string|null */
     public $value;
 
     public function __construct(string $name, ?string $value) {
@@ -458,7 +584,11 @@ function parseDocComment(DocComment $comment): array {
 }
 
 function parseFunctionLike(
-    PrettyPrinterAbstract $prettyPrinter, string $name, ?string $className, Node\FunctionLike $func, ?string $cond
+    PrettyPrinterAbstract $prettyPrinter,
+    FunctionName $name,
+    int $flags,
+    Node\FunctionLike $func,
+    ?string $cond
 ): FuncInfo {
     $comment = $func->getDocComment();
     $paramMeta = [];
@@ -476,7 +606,12 @@ function parseFunctionLike(
                 }
                 $paramMeta[$varName]['preferRef'] = true;
             } else if ($tag->name === 'alias') {
-                $alias = $tag->getValue();
+                $aliasParts = explode("::", $tag->getValue());
+                if (count($aliasParts) === 1) {
+                    $alias = new FunctionName(null, $aliasParts[0]);
+                } else {
+                    $alias = new FunctionName($aliasParts[0], $aliasParts[1]);
+                }
             } else if ($tag->name === 'deprecated') {
                 $isDeprecated = true;
             } else if ($tag->name === 'return') {
@@ -533,14 +668,25 @@ function parseFunctionLike(
     }
 
     $returnType = $func->getReturnType();
-    if ($returnType === null && !$haveDocReturnType && substr($name, 0, 2) !== '__') {
+    if ($returnType === null && !$haveDocReturnType && strpos($name->name, '__') !== 0) {
         throw new Exception("Missing return type for function $name()");
     }
 
     $return = new ReturnInfo(
         $func->returnsByRef(),
-        $returnType ? Type::fromNode($returnType) : null);
-    return new FuncInfo($name, $className, $alias, $isDeprecated, $args, $return, $numRequiredArgs, $cond);
+        $returnType ? Type::fromNode($returnType) : null
+    );
+
+    return new FuncInfo(
+        $name,
+        $flags,
+        $alias,
+        $isDeprecated,
+        $args,
+        $return,
+        $numRequiredArgs,
+        $cond
+    );
 }
 
 function handlePreprocessorConditions(array &$conds, Stmt $stmt): ?string {
@@ -622,7 +768,14 @@ function parseStubFile(string $fileName): FileInfo {
         }
 
         if ($stmt instanceof Stmt\Function_) {
-            $funcInfos[] = parseFunctionLike($prettyPrinter, $stmt->name->toString(), null, $stmt, $cond);
+            $funcInfos[] = parseFunctionLike(
+                $prettyPrinter,
+                new FunctionName(null, $stmt->name->toString()),
+                0,
+                $stmt,
+                $cond
+            );
+
             continue;
         }
 
@@ -639,8 +792,22 @@ function parseStubFile(string $fileName): FileInfo {
                     throw new Exception("Not implemented {$classStmt->getType()}");
                 }
 
+                $flags = $classStmt->flags;
+                if ($stmt instanceof Stmt\Interface_) {
+                    $flags |= Class_::MODIFIER_ABSTRACT;
+                }
+
+                if ($flags & Class_::MODIFIER_ABSTRACT && !($flags & Class_::MODIFIER_PUBLIC)) {
+                    throw new Exception("Abstract non-public methods are not supported");
+                }
+
                 $methodInfos[] = parseFunctionLike(
-                    $prettyPrinter, $classStmt->name->toString(), $className, $classStmt, $cond);
+                    $prettyPrinter,
+                    new FunctionName($className, $classStmt->name->toString()),
+                    $flags,
+                    $classStmt,
+                    $cond
+                );
             }
 
             $classInfos[] = new ClassInfo($className, $methodInfos);
@@ -746,7 +913,8 @@ function funcInfoToCode(FuncInfo $funcInfo): string {
     return $code . "\n";
 }
 
-function findEquivalentFuncInfo(array $generatedFuncInfos, $funcInfo): ?FuncInfo {
+/** @param FuncInfo[] $generatedFuncInfos */
+function findEquivalentFuncInfo(array $generatedFuncInfos, FuncInfo $funcInfo): ?FuncInfo {
     foreach ($generatedFuncInfos as $generatedFuncInfo) {
         if ($generatedFuncInfo->equalsApartFromName($funcInfo)) {
             return $generatedFuncInfo;
@@ -755,7 +923,7 @@ function findEquivalentFuncInfo(array $generatedFuncInfos, $funcInfo): ?FuncInfo
     return null;
 }
 
-/** @param FuncInfo[] $funcInfos */
+/** @param iterable<FuncInfo> $funcInfos */
 function generateCodeWithConditions(
         iterable $funcInfos, string $separator, Closure $codeGenerator): string {
     $code = "";
@@ -778,13 +946,11 @@ function generateCodeWithConditions(
 }
 
 function generateArgInfoCode(FileInfo $fileInfo): string {
-    $funcInfos = $fileInfo->funcInfos;
-
     $code = "/* This is a generated file, edit the .stub.php file instead. */\n";
     $generatedFuncInfos = [];
     $code .= generateCodeWithConditions(
         $fileInfo->getAllFuncInfos(), "\n",
-        function(FuncInfo $funcInfo) use(&$generatedFuncInfos) {
+        function (FuncInfo $funcInfo) use(&$generatedFuncInfos) {
             /* If there already is an equivalent arginfo structure, only emit a #define */
             if ($generatedFuncInfo = findEquivalentFuncInfo($generatedFuncInfos, $funcInfo)) {
                 $code = sprintf(
@@ -802,36 +968,46 @@ function generateArgInfoCode(FileInfo $fileInfo): string {
 
     if ($fileInfo->generateFunctionEntries) {
         $code .= "\n\n";
-        $generatedDeclarations = [];
-        $code .= generateCodeWithConditions($funcInfos, "", function(FuncInfo $funcInfo) use (&$generatedDeclarations) {
-            $name = $funcInfo->alias ?? $funcInfo->name;
-            $key = "$name|$funcInfo->cond";
-            if (isset($generatedDeclarations[$key])) {
-                return null;
+
+        $generatedFunctionDeclarations = [];
+        $code .= generateCodeWithConditions(
+            $fileInfo->getAllFuncInfos(), "",
+            function (FuncInfo $funcInfo) use(&$generatedFunctionDeclarations) {
+                $key = $funcInfo->getDeclarationKey();
+                if (isset($generatedFunctionDeclarations[$key])) {
+                    return null;
+                }
+
+                $generatedFunctionDeclarations[$key] = true;
+
+                return $funcInfo->getDeclaration();
             }
+        );
 
-            $generatedDeclarations[$key] = true;
-            return "ZEND_FUNCTION($name);\n";
-        });
+        $code .= "\n\n";
 
-        $code .= "\n\nstatic const zend_function_entry ext_functions[] = {\n";
-        $code .= generateCodeWithConditions($fileInfo->funcInfos, "", function(FuncInfo $funcInfo) {
-            if ($funcInfo->alias) {
-                return sprintf(
-                    "\tZEND_FALIAS(%s, %s, %s)\n",
-                    $funcInfo->name, $funcInfo->alias, $funcInfo->getArgInfoName()
-                );
-            }
+        $code .= generateFunctionEntries(null, $fileInfo->funcInfos);
 
-            if ($funcInfo->isDeprecated) {
-                return sprintf("\tZEND_DEP_FE(%s, %s)\n", $funcInfo->name, $funcInfo->getArgInfoName());
-            }
-
-            return sprintf("\tZEND_FE(%s, %s)\n", $funcInfo->name, $funcInfo->getArgInfoName());
-        });
-        $code .= "\tZEND_FE_END\n";
-        $code .= "};\n";
+        foreach ($fileInfo->classInfos as $classInfo) {
+            $code .= generateFunctionEntries($classInfo->name, $classInfo->funcInfos);
+        }
     }
+
+    return $code;
+}
+
+/** @param FuncInfo[] $funcInfos */
+function generateFunctionEntries(?string $className, array $funcInfos): string {
+    $code = "";
+
+    $functionEntryName = $className ? "class_{$className}_methods" : "ext_functions";
+
+    $code .= "\n\nstatic const zend_function_entry {$functionEntryName}[] = {\n";
+    $code .= generateCodeWithConditions($funcInfos, "", function (FuncInfo $funcInfo) {
+        return $funcInfo->getFunctionEntry();
+    });
+    $code .= "\tZEND_FE_END\n";
+    $code .= "};\n";
 
     return $code;
 }

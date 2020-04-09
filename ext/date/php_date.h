@@ -26,44 +26,6 @@
 extern zend_module_entry date_module_entry;
 #define phpext_date_ptr &date_module_entry
 
-/* Advanced Interface */
-PHP_METHOD(DateTime, __construct);
-PHP_METHOD(DateTime, __wakeup);
-PHP_METHOD(DateTime, __set_state);
-PHP_METHOD(DateTime, createFromImmutable);
-PHP_METHOD(DateTime, createFromInterface);
-
-PHP_METHOD(DateTimeImmutable, __construct);
-PHP_METHOD(DateTimeImmutable, __set_state);
-PHP_METHOD(DateTimeImmutable, modify);
-PHP_METHOD(DateTimeImmutable, add);
-PHP_METHOD(DateTimeImmutable, sub);
-PHP_METHOD(DateTimeImmutable, setTimezone);
-PHP_METHOD(DateTimeImmutable, setTime);
-PHP_METHOD(DateTimeImmutable, setDate);
-PHP_METHOD(DateTimeImmutable, setISODate);
-PHP_METHOD(DateTimeImmutable, setTimestamp);
-PHP_METHOD(DateTimeImmutable, createFromMutable);
-PHP_METHOD(DateTimeImmutable, createFromInterface);
-
-PHP_METHOD(DateTimeZone, __construct);
-PHP_METHOD(DateTimeZone, __wakeup);
-PHP_METHOD(DateTimeZone, __set_state);
-
-PHP_METHOD(DateInterval, __construct);
-PHP_METHOD(DateInterval, __wakeup);
-PHP_METHOD(DateInterval, __set_state);
-PHP_FUNCTION(date_interval_format);
-PHP_FUNCTION(date_interval_create_from_date_string);
-
-PHP_METHOD(DatePeriod, __construct);
-PHP_METHOD(DatePeriod, __wakeup);
-PHP_METHOD(DatePeriod, __set_state);
-PHP_METHOD(DatePeriod, getStartDate);
-PHP_METHOD(DatePeriod, getEndDate);
-PHP_METHOD(DatePeriod, getDateInterval);
-PHP_METHOD(DatePeriod, getRecurrences);
-
 PHP_RINIT_FUNCTION(date);
 PHP_RSHUTDOWN_FUNCTION(date);
 PHP_MINIT_FUNCTION(date);
