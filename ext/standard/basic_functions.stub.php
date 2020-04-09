@@ -1175,7 +1175,7 @@ function proc_open($cmd, array $descriptorspec, &$pipes, ?string $cwd = null, ?a
 function proc_close($process): int {}
 
 /** @param resource $process */
-function proc_terminate($process, int $signal = SIGTERM): bool {}
+function proc_terminate($process, int $signal = 15): bool {}
 
 /** @param resource $process */
 function proc_get_status($process): array {}
