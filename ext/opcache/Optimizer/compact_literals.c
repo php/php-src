@@ -92,19 +92,14 @@ static uint32_t add_static_slot(HashTable     *hash,
                                 int           *cache_size)
 {
 	uint32_t ret;
-	zend_string *key;
-	size_t key_len;
 	zval *class_name = &op_array->literals[op1];
 	zval *prop_name = &op_array->literals[op2];
 	zval *pos, tmp;
 
-	key_len = Z_STRLEN_P(class_name) + sizeof("::") - 1 + Z_STRLEN_P(prop_name);
-	key = zend_string_alloc(key_len, 0);
-	memcpy(ZSTR_VAL(key), Z_STRVAL_P(class_name), Z_STRLEN_P(class_name));
-	memcpy(ZSTR_VAL(key) + Z_STRLEN_P(class_name), "::", sizeof("::") - 1);
-	memcpy(ZSTR_VAL(key) + Z_STRLEN_P(class_name) + sizeof("::") - 1,
-		Z_STRVAL_P(prop_name),
-		Z_STRLEN_P(prop_name) + 1);
+	zend_string *key = zend_string_concat3(
+		Z_STRVAL_P(class_name), Z_STRLEN_P(class_name),
+		"::", sizeof("::") - 1,
+		Z_STRVAL_P(prop_name), Z_STRLEN_P(prop_name));
 
 	ZSTR_H(key) = zend_string_hash_func(key);
 	ZSTR_H(key) += kind;

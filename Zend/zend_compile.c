@@ -852,21 +852,8 @@ uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 }
 /* }}} */
 
-zend_string *zend_concat3(char *str1, size_t str1_len, char *str2, size_t str2_len, char *str3, size_t str3_len) /* {{{ */
-{
-	size_t len = str1_len + str2_len + str3_len;
-	zend_string *res = zend_string_alloc(len, 0);
-
-	memcpy(ZSTR_VAL(res), str1, str1_len);
-	memcpy(ZSTR_VAL(res) + str1_len, str2, str2_len);
-	memcpy(ZSTR_VAL(res) + str1_len + str2_len, str3, str3_len);
-	ZSTR_VAL(res)[len] = '\0';
-
-	return res;
-}
-
 zend_string *zend_concat_names(char *name1, size_t name1_len, char *name2, size_t name2_len) {
-	return zend_concat3(name1, name1_len, "\\", 1, name2, name2_len);
+	return zend_string_concat3(name1, name1_len, "\\", 1, name2, name2_len);
 }
 
 zend_string *zend_prefix_with_ns(zend_string *name) {
@@ -7173,7 +7160,7 @@ static zend_bool zend_try_ct_eval_magic_const(zval *zv, zend_ast *ast) /* {{{ */
 			}
 			if (op_array && op_array->function_name) {
 				if (op_array->scope) {
-					ZVAL_NEW_STR(zv, zend_concat3(
+					ZVAL_NEW_STR(zv, zend_string_concat3(
 						ZSTR_VAL(op_array->scope->name), ZSTR_LEN(op_array->scope->name),
 						"::", 2,
 						ZSTR_VAL(op_array->function_name), ZSTR_LEN(op_array->function_name)));
@@ -8566,7 +8553,7 @@ void zend_compile_const_expr_class_const(zend_ast **ast_ptr) /* {{{ */
 		zend_string_addref(class_name);
 	}
 
-	name = zend_concat3(
+	name = zend_string_concat3(
 		ZSTR_VAL(class_name), ZSTR_LEN(class_name), "::", 2, ZSTR_VAL(const_name), ZSTR_LEN(const_name));
 
 	zend_ast_destroy(ast);

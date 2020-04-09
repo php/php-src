@@ -461,3 +461,19 @@ ZEND_API zend_bool ZEND_FASTCALL I_WRAP_SONAME_FNNAME_ZU(NONE,zend_string_equal_
 #endif
 
 #endif
+
+ZEND_API zend_string *zend_string_concat3(
+		const char *str1, size_t str1_len,
+		const char *str2, size_t str2_len,
+		const char *str3, size_t str3_len)
+{
+	size_t len = str1_len + str2_len + str3_len;
+	zend_string *res = zend_string_alloc(len, 0);
+
+	memcpy(ZSTR_VAL(res), str1, str1_len);
+	memcpy(ZSTR_VAL(res) + str1_len, str2, str2_len);
+	memcpy(ZSTR_VAL(res) + str1_len + str2_len, str3, str3_len);
+	ZSTR_VAL(res)[len] = '\0';
+
+	return res;
+}

@@ -30,7 +30,6 @@
 #include "zend_closures.h"
 #include "zend_inheritance.h"
 #include "zend_ini.h"
-#include "zend_smart_str.h"
 
 #include <stdarg.h>
 
@@ -4315,14 +4314,11 @@ static int get_default_via_ast(zval *default_value_zval, const char *default_val
 	zend_ast *ast;
 	zend_arena *ast_arena;
 
-	smart_str code = {0};
-	smart_str_appends(&code, "<?php ");
-	smart_str_appends(&code, default_value);
-	smart_str_appendc(&code, ';');
-	smart_str_0(&code);
+	zend_string *code = zend_string_concat3(
+		"<?php ", sizeof("<?php ") - 1, default_value, strlen(default_value), ";", 1);
 
-	ast = zend_compile_string_to_ast(code.s, &ast_arena, "");
-	smart_str_free(&code);
+	ast = zend_compile_string_to_ast(code, &ast_arena, "");
+	zend_string_release(code);
 
 	if (!ast) {
 		return FAILURE;
