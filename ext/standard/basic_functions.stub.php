@@ -120,9 +120,9 @@ function min($arg, ...$args) {}
 /** @return mixed */
 function max($arg, ...$args) {}
 
-function array_walk(array|object &$input, callable $funcname, $userdata = null): bool {}
+function array_walk(array|object &$input, callable $funcname, $userdata = UNKNOWN): bool {}
 
-function array_walk_recursive(array|object &$input, callable $funcname, $userdata = null): bool {}
+function array_walk_recursive(array|object &$input, callable $funcname, $userdata = UNKNOWN): bool {}
 
 function in_array($needle, array $haystack, bool $strict = false): bool {}
 

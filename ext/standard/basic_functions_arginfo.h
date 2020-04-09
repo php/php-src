@@ -140,7 +140,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_array_walk, 0, 2, _IS_BOOL, 0)
 	ZEND_ARG_TYPE_MASK(1, input, MAY_BE_ARRAY|MAY_BE_OBJECT, NULL)
 	ZEND_ARG_TYPE_INFO(0, funcname, IS_CALLABLE, 0)
-	ZEND_ARG_INFO_WITH_DEFAULT_VALUE(0, userdata, "null")
+	ZEND_ARG_INFO(0, userdata)
 ZEND_END_ARG_INFO()
 
 #define arginfo_array_walk_recursive arginfo_array_walk
