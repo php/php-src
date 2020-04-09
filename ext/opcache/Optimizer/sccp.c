@@ -300,10 +300,15 @@ static zend_bool try_replace_op1(
 			switch (opline->opcode) {
 				case ZEND_CASE:
 					opline->opcode = ZEND_IS_EQUAL;
-					/* break missing intentionally */
+					goto replace_op1_simple;
+				case ZEND_CASE_STRICT:
+					opline->opcode = ZEND_IS_IDENTICAL;
+					goto replace_op1_simple;
 				case ZEND_FETCH_LIST_R:
 				case ZEND_SWITCH_STRING:
 				case ZEND_SWITCH_LONG:
+				case ZEND_MATCH:
+replace_op1_simple:
 					if (Z_TYPE(zv) == IS_STRING) {
 						zend_string_hash_val(Z_STR(zv));
 					}
@@ -1460,6 +1465,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		case ZEND_BW_XOR:
 		case ZEND_BOOL_XOR:
 		case ZEND_CASE:
+		case ZEND_CASE_STRICT:
 			SKIP_IF_TOP(op1);
 			SKIP_IF_TOP(op2);
 
@@ -1986,29 +1992,23 @@ static void sccp_mark_feasible_successors(
 			s = zend_hash_num_elements(Z_ARR_P(op1)) != 0;
 			break;
 		case ZEND_SWITCH_LONG:
-			if (Z_TYPE_P(op1) == IS_LONG) {
-				zend_op_array *op_array = scdf->op_array;
-				zend_ssa *ssa = scdf->ssa;
-				HashTable *jmptable = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, opline->op2.constant));
-				zval *jmp_zv = zend_hash_index_find(jmptable, Z_LVAL_P(op1));
-				int target;
-
-				if (jmp_zv) {
-					target = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(jmp_zv))];
-				} else {
-					target = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)];
-				}
-				scdf_mark_edge_feasible(scdf, block_num, target);
-				return;
-			}
-			s = 0;
-			break;
 		case ZEND_SWITCH_STRING:
-			if (Z_TYPE_P(op1) == IS_STRING) {
+		case ZEND_MATCH:
+		{
+			zend_bool strict_comparison = opline->opcode == ZEND_MATCH;
+			zend_uchar type = Z_TYPE_P(op1);
+			zend_bool correct_type =
+				(opline->opcode == ZEND_SWITCH_LONG && type == IS_LONG)
+				|| (opline->opcode == ZEND_SWITCH_STRING && type == IS_STRING)
+				|| (opline->opcode == ZEND_MATCH && (type == IS_LONG || type == IS_STRING));
+
+			if (correct_type) {
 				zend_op_array *op_array = scdf->op_array;
 				zend_ssa *ssa = scdf->ssa;
 				HashTable *jmptable = Z_ARRVAL_P(CT_CONSTANT_EX(op_array, opline->op2.constant));
-				zval *jmp_zv = zend_hash_find(jmptable, Z_STR_P(op1));
+				zval *jmp_zv = type == IS_LONG
+					? zend_hash_index_find(jmptable, Z_LVAL_P(op1))
+					: zend_hash_find(jmptable, Z_STR_P(op1));
 				int target;
 
 				if (jmp_zv) {
@@ -2018,9 +2018,16 @@ static void sccp_mark_feasible_successors(
 				}
 				scdf_mark_edge_feasible(scdf, block_num, target);
 				return;
+			} else if (strict_comparison) {
+				zend_op_array *op_array = scdf->op_array;
+				zend_ssa *ssa = scdf->ssa;
+				int target = ssa->cfg.map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)];
+				scdf_mark_edge_feasible(scdf, block_num, target);
+				return;
 			}
 			s = 0;
 			break;
+		}
 		default:
 			for (s = 0; s < block->successors_count; s++) {
 				scdf_mark_edge_feasible(scdf, block_num, block->successors[s]);

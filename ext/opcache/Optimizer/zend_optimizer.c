@@ -293,6 +293,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			 * zend_optimizer_replace_by_const() supports this. */
 			return 0;
 		case ZEND_CASE:
+		case ZEND_CASE_STRICT:
 		case ZEND_FETCH_LIST_R:
 		case ZEND_COPY_TMP:
 		case ZEND_FETCH_CLASS_NAME:
@@ -558,7 +559,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 					break;
 				/* In most cases IS_TMP_VAR operand may be used only once.
 				 * The operands are usually destroyed by the opcode handler.
-				 * ZEND_CASE and ZEND_FETCH_LIST_R are exceptions, they keeps operand
+				 * ZEND_CASE[_STRICT] and ZEND_FETCH_LIST_R are exceptions, they keeps operand
 				 * unchanged, and allows its reuse. these instructions
 				 * usually terminated by ZEND_FREE that finally kills the value.
 				 */
@@ -587,17 +588,25 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 				}
 				case ZEND_SWITCH_LONG:
 				case ZEND_SWITCH_STRING:
-				case ZEND_CASE: {
+				case ZEND_MATCH:
+				case ZEND_CASE:
+				case ZEND_CASE_STRICT: {
 					zend_op *end = op_array->opcodes + op_array->last;
 					while (opline < end) {
 						if (opline->op1_type == type && opline->op1.var == var) {
-							if (opline->opcode == ZEND_CASE
-									|| opline->opcode == ZEND_SWITCH_LONG
-									|| opline->opcode == ZEND_SWITCH_STRING) {
+							if (
+								opline->opcode == ZEND_CASE
+								|| opline->opcode == ZEND_CASE_STRICT
+								|| opline->opcode == ZEND_SWITCH_LONG
+								|| opline->opcode == ZEND_SWITCH_STRING
+								|| opline->opcode == ZEND_MATCH
+							) {
 								zval v;
 
 								if (opline->opcode == ZEND_CASE) {
 									opline->opcode = ZEND_IS_EQUAL;
+								} else if (opline->opcode == ZEND_CASE_STRICT) {
+									opline->opcode = ZEND_IS_IDENTICAL;
 								}
 								ZVAL_COPY(&v, val);
 								if (Z_TYPE(v) == IS_STRING) {
@@ -687,6 +696,7 @@ void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, z
 			break;
 		case ZEND_SWITCH_LONG:
 		case ZEND_SWITCH_STRING:
+		case ZEND_MATCH:
 		{
 			HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
 			zval *zv;
@@ -731,6 +741,7 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 			break;
 		case ZEND_SWITCH_LONG:
 		case ZEND_SWITCH_STRING:
+		case ZEND_MATCH:
 		{
 			HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
 			zval *zv;
@@ -1105,6 +1116,7 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 			case ZEND_FE_FETCH_RW:
 			case ZEND_SWITCH_LONG:
 			case ZEND_SWITCH_STRING:
+			case ZEND_MATCH:
 				/* relative extended_value don't have to be changed */
 				break;
 #endif
@@ -1115,6 +1127,7 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 			case ZEND_IS_SMALLER:
 			case ZEND_IS_SMALLER_OR_EQUAL:
 			case ZEND_CASE:
+			case ZEND_CASE_STRICT:
 			case ZEND_ISSET_ISEMPTY_CV:
 			case ZEND_ISSET_ISEMPTY_VAR:
 			case ZEND_ISSET_ISEMPTY_DIM_OBJ:
@@ -1225,6 +1238,7 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 			case ZEND_FE_FETCH_RW:
 			case ZEND_SWITCH_LONG:
 			case ZEND_SWITCH_STRING:
+			case ZEND_MATCH:
 				/* relative extended_value don't have to be changed */
 				break;
 #endif
@@ -1235,6 +1249,7 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 			case ZEND_IS_SMALLER:
 			case ZEND_IS_SMALLER_OR_EQUAL:
 			case ZEND_CASE:
+			case ZEND_CASE_STRICT:
 			case ZEND_ISSET_ISEMPTY_CV:
 			case ZEND_ISSET_ISEMPTY_VAR:
 			case ZEND_ISSET_ISEMPTY_DIM_OBJ:

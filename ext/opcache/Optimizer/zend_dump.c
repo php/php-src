@@ -615,7 +615,11 @@ void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *b, cons
 
 	if (opline->op2_type == IS_CONST) {
 		zval *op = CRT_CONSTANT(opline->op2);
-		if (opline->opcode == ZEND_SWITCH_LONG || opline->opcode == ZEND_SWITCH_STRING) {
+		if (
+			opline->opcode == ZEND_SWITCH_LONG
+			|| opline->opcode == ZEND_SWITCH_STRING
+			|| opline->opcode == ZEND_MATCH
+		) {
 			HashTable *jumptable = Z_ARRVAL_P(op);
 			zend_string *key;
 			zend_ulong num_key;
