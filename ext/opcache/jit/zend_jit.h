@@ -105,12 +105,24 @@ struct _zend_life_range {
 	zend_life_range *next;
 };
 
+#define ZREG_FLAGS_SHIFT    8
+
+#define ZREG_STORE          (1<<0)
+#define ZREG_LOAD           (1<<1)
+#define ZREG_LAST_USE       (1<<2)
+#define ZREG_SPLIT          (1<<3)
+
 struct _zend_lifetime_interval {
 	int                     ssa_var;
-	int8_t                  reg;
-	zend_bool               split;
-	zend_bool               store;
-	zend_bool               load;
+	union {
+		struct {
+		ZEND_ENDIAN_LOHI_3(
+			int8_t          reg,
+			uint8_t			flags,
+			uint16_t		reserved
+		)};
+		uint32_t            reg_flags;
+	};
 	zend_life_range         range;
 	zend_lifetime_interval *hint;
 	zend_lifetime_interval *used_as_hint;

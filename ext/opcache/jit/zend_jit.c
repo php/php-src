@@ -133,6 +133,19 @@ static zend_bool zend_ssa_is_last_use(const zend_op_array *op_array, const zend_
 	return use < 0 || zend_ssa_is_no_val_use(op_array->opcodes + use, ssa->ops + use, var);
 }
 
+static zend_bool zend_ival_is_last_use(const zend_lifetime_interval *ival, int use)
+{
+	if (ival->flags & ZREG_LAST_USE) {
+		const zend_life_range *range = &ival->range;
+
+		while (range->next) {
+			range = range->next;
+		}
+		return range->end == use;
+	}
+	return 0;
+}
+
 static zend_bool zend_is_commutative(zend_uchar opcode)
 {
 	return
@@ -702,9 +715,7 @@ static int zend_jit_add_range(zend_lifetime_interval **intervals, int var, uint3
 		}
 		ival->ssa_var = var;
 		ival->reg = ZREG_NONE;
-		ival->split = 0;
-		ival->store = 0;
-		ival->load = 0;
+		ival->flags = 0;
 		ival->range.start = from;
 		ival->range.end = to;
 		ival->range.next = NULL;
@@ -831,13 +842,12 @@ static int zend_jit_split_interval(zend_lifetime_interval *current, uint32_t pos
 		}
 	}
 
-	current->store = 1;
+	current->flags |= ZREG_STORE;
 
 	ival->ssa_var = current->ssa_var;
 	ival->reg     = ZREG_NONE;
-	ival->split   = 1;
-	ival->store   = 0;
-	ival->load    = 1;
+	ival->flags  |= ZREG_SPLIT | ZREG_LOAD;
+	ival->flags  &= ZREG_STORE;
 	ival->hint    = NULL;
 
 	do {
@@ -1431,7 +1441,7 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, zend_ss
 
 	/* See "Linear Scan Register Allocation on SSA Form", Christian Wimmer and
 	   Michael Franz, CGO'10 (2010), Figure 6. */
-	if (current->split) {
+	if (current->flags & ZREG_SPLIT) {
 		/* for each interval it in inactive intersecting with current do */
 		/*   freeUntilPos[it.reg] = next intersection of it with current */
 		it = inactive;
@@ -1451,9 +1461,13 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, zend_ss
 	range = &current->range;
 	do {
 		uint32_t line = range->start;
+		uint32_t last_use_line = (uint32_t)-1;
 		zend_regset regset;
 		zend_reg reg;
 
+		if ((current->flags & ZREG_LAST_USE) && !range->next) {
+			last_use_line = range->end;
+		}
 		if (ssa->ops[line].op1_def == current->ssa_var ||
 		    ssa->ops[line].op2_def == current->ssa_var ||
 		    ssa->ops[line].result_def == current->ssa_var) {
@@ -1463,7 +1477,7 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, zend_ss
 			regset = zend_jit_get_scratch_regset(
 				op_array->opcodes + line,
 				ssa->ops + line,
-				op_array, ssa, current->ssa_var);
+				op_array, ssa, current->ssa_var, line == last_use_line);
 			ZEND_REGSET_FOREACH(regset, reg) {
 				if (line < freeUntilPos[reg]) {
 					freeUntilPos[reg] = line;
@@ -1718,6 +1732,22 @@ static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array 
 	}
 
 	if (list) {
+		/* Set ZREG_LAST_USE flags */
+		ival = list;
+		while (ival) {
+			zend_life_range *range = &ival->range;
+
+			while (range->next) {
+				range = range->next;
+			}
+			if (zend_ssa_is_last_use(op_array, ssa, ival->ssa_var, range->end)) {
+				ival->flags |= ZREG_LAST_USE;
+			}
+			ival = ival->list_next;
+		}
+	}
+
+	if (list) {
 		if (ZCG(accel_directives).jit_debug & ZEND_JIT_DEBUG_REG_ALLOC) {
 			fprintf(stderr, "Live Ranges \"%s\"\n", op_array->function_name ? ZSTR_VAL(op_array->function_name) : "[main]");
 			ival = list;
@@ -1733,10 +1763,10 @@ static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array 
 					fprintf(stderr, ", %u-%u", range->start, range->end);
 					range = range->next;
 				}
-				if (ival->load) {
+				if (ival->flags & ZREG_LOAD) {
 					fprintf(stderr, " load");
 				}
-				if (ival->store) {
+				if (ival->flags & ZREG_STORE) {
 					fprintf(stderr, " store");
 				}
 				if (ival->hint) {
@@ -1781,13 +1811,13 @@ static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array 
 								src = phi->sources[0];
 								if (intervals[i]) {
 									if (!intervals[src]) {
-										intervals[i]->load = 1;
+										intervals[i]->flags |= ZREG_LOAD;
 									} else if (intervals[i]->reg != intervals[src]->reg) {
-										intervals[i]->load = 1;
-										intervals[src]->store = 1;
+										intervals[i]->flags |= ZREG_LOAD;
+										intervals[src]->flags |= ZREG_STORE;
 									}
 								} else if (intervals[src]) {
-									intervals[src]->store = 1;
+									intervals[src]->flags |= ZREG_STORE;
 								}
 							}
 						} else {
@@ -1815,7 +1845,7 @@ static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array 
 							}
 							if (need_move) {
 								if (intervals[i]) {
-									intervals[i]->load = 1;
+									intervals[i]->flags |= ZREG_LOAD;
 								}
 								for (k = 0; k < ssa->cfg.blocks[phi->block].predecessors_count; k++) {
 									src = phi->sources[k];
@@ -1827,7 +1857,7 @@ static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array 
 											src = ssa->vars[src].definition_phi->sources[0];
 										}
 										if (intervals[src]) {
-											intervals[src]->store = 1;
+											intervals[src]->flags |= ZREG_STORE;
 										}
 									}
 								}
@@ -1838,15 +1868,15 @@ static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array 
 				/* Remove useless register allocation */
 				for (i = 0; i < ssa->vars_count; i++) {
 					if (intervals[i] &&
-					    (intervals[i]->load ||
-					     (intervals[i]->store && ssa->vars[i].definition >= 0)) &&
+					    ((intervals[i]->flags & ZREG_LOAD) ||
+					     ((intervals[i]->flags & ZREG_STORE) && ssa->vars[i].definition >= 0)) &&
 					    ssa->vars[i].use_chain < 0) {
 					    zend_bool may_remove = 1;
 						zend_ssa_phi *phi = ssa->vars[i].phi_use_chain;
 
 						while (phi) {
 							if (intervals[phi->ssa_var] &&
-							    !intervals[phi->ssa_var]->load) {
+							    !(intervals[phi->ssa_var]->flags & ZREG_LOAD)) {
 								may_remove = 0;
 								break;
 							}
@@ -1860,8 +1890,8 @@ static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array 
 				/* Remove intervals used once */
 				for (i = 0; i < ssa->vars_count; i++) {
 					if (intervals[i] &&
-					    intervals[i]->load &&
-					    intervals[i]->store &&
+					    (intervals[i]->flags & ZREG_LOAD) &&
+					    (intervals[i]->flags & ZREG_STORE) &&
 					    (ssa->vars[i].use_chain < 0 ||
 					     zend_ssa_next_use(ssa->ops, i, ssa->vars[i].use_chain) < 0)) {
 						zend_bool may_remove = 1;
@@ -1869,7 +1899,7 @@ static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array 
 
 						while (phi) {
 							if (intervals[phi->ssa_var] &&
-							    !intervals[phi->ssa_var]->load) {
+							    !(intervals[phi->ssa_var]->flags & ZREG_LOAD)) {
 								may_remove = 0;
 								break;
 							}
@@ -1899,10 +1929,10 @@ static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array 
 							range = range->next;
 						}
 						fprintf(stderr, " (%s)", zend_reg_name[ival->reg]);
-						if (ival->load) {
+						if (ival->flags & ZREG_LOAD) {
 							fprintf(stderr, " load");
 						}
-						if (ival->store) {
+						if (ival->flags & ZREG_STORE) {
 							fprintf(stderr, " store");
 						}
 						if (ival->hint) {
@@ -2131,13 +2161,13 @@ static int zend_jit(const zend_op_array *op_array, zend_ssa *ssa, const zend_op 
 				zend_lifetime_interval *ival = ra[phi->ssa_var];
 
 				if (ival) {
-					if (ival->load) {
+					if (ival->flags & ZREG_LOAD) {
 						ZEND_ASSERT(ival->reg != ZREG_NONE);
 
 						if (!zend_jit_load_var(&dasm_state, ssa->var_info[phi->ssa_var].type, ssa->vars[phi->ssa_var].var, ival->reg)) {
 							goto jit_failure;
 						}
-					} else if (ival->store) {
+					} else if (ival->flags & ZREG_STORE) {
 						ZEND_ASSERT(ival->reg != ZREG_NONE);
 
 						if (!zend_jit_store_var(&dasm_state, ssa->var_info[phi->ssa_var].type, ssa->vars[phi->ssa_var].var, ival->reg)) {

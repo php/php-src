@@ -249,9 +249,9 @@ typedef uintptr_t zend_jit_addr;
 #define OP_REG(ssa_op, op) \
 	(ra && ssa_op->op >= 0 && ra[ssa_op->op] ? \
 		OP_REG_EX(ra[ssa_op->op]->reg, \
-			ra[ssa_op->op]->store, \
-			ra[ssa_op->op]->load, \
-			zend_ssa_is_last_use(op_array, ssa, ssa_op->op, ssa_op - ssa->ops) \
+			(ra[ssa_op->op]->flags & ZREG_STORE), \
+			(ra[ssa_op->op]->flags & ZREG_LOAD), \
+			zend_ival_is_last_use(ra[ssa_op->op], ssa_op - ssa->ops) \
 		) : ZREG_NONE)
 
 static zend_always_inline zend_jit_addr _zend_jit_decode_op(zend_uchar op_type, znode_op op, const zend_op *opline, zend_reg reg)
