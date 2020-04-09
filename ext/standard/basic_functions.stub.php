@@ -1194,9 +1194,9 @@ function mt_srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
 /** @alias mt_srand */
 function srand(int $seed = 0, int $mode = MT_RAND_MT19937): void {}
 
-function rand(int $min = 0, int $max = PHP_INT_MAX): int {}
+function rand(int $min = UNKNOWN, int $max = UNKNOWN): int {}
 
-function mt_rand(int $min = 0, int $max = PHP_INT_MAX): int {}
+function mt_rand(int $min = UNKNOWN, int $max = UNKNOWN): int {}
 
 function mt_getrandmax(): int {}
 
