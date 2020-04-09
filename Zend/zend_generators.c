@@ -610,6 +610,7 @@ void zend_generator_yield_from(zend_generator *generator, zend_generator *from)
 	generator->node.parent = from;
 	zend_generator_get_current(generator);
 	GC_DELREF(&from->std);
+	generator->flags |= ZEND_GENERATOR_DO_INIT;
 }
 
 ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator, zend_generator *leaf)
@@ -786,6 +787,7 @@ try_again:
 
 	if (UNEXPECTED((orig_generator->flags & ZEND_GENERATOR_DO_INIT) != 0 && !Z_ISUNDEF(generator->value))) {
 		/* We must not advance Generator if we yield from a Generator being currently run */
+		orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
 		return;
 	}
 
@@ -865,15 +867,15 @@ try_again:
 			goto try_again;
 		}
 	}
+
+	orig_generator->flags &= ~ZEND_GENERATOR_DO_INIT;
 }
 /* }}} */
 
 static inline void zend_generator_ensure_initialized(zend_generator *generator) /* {{{ */
 {
 	if (UNEXPECTED(Z_TYPE(generator->value) == IS_UNDEF) && EXPECTED(generator->execute_data) && EXPECTED(generator->node.parent == NULL)) {
-		generator->flags |= ZEND_GENERATOR_DO_INIT;
 		zend_generator_resume(generator);
-		generator->flags &= ~ZEND_GENERATOR_DO_INIT;
 		generator->flags |= ZEND_GENERATOR_AT_FIRST_YIELD;
 	}
 }
