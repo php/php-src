@@ -360,7 +360,7 @@ function mysqli_get_client_stats(): array {}
 
 function mysqli_get_charset(mysqli $mysqli_link): ?object {}
 
-function mysqli_get_client_info(?mysqli $mysqli_link = null): ?string {}
+function mysqli_get_client_info(mysqli $mysqli_link = UNKNOWN): ?string {}
 
 function mysqli_get_client_version(): int {}
 
