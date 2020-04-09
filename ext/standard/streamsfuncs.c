@@ -1495,7 +1495,7 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 		Z_PARAM_BOOL(enable)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG_OR_NULL(cryptokind, cryptokindnull)
-		Z_PARAM_RESOURCE(zsessstream)
+		Z_PARAM_RESOURCE_OR_NULL(zsessstream)
 	ZEND_PARSE_PARAMETERS_END();
 
 	php_stream_from_zval(stream, zstream);
