@@ -15,7 +15,7 @@ function spl_autoload_extensions(string $file_extensions = UNKNOWN): string {}
 
 function spl_autoload_functions(): array|false {}
 
-function spl_autoload_register($autoload_function = null, bool $throw = true, bool $prepend = false): bool {}
+function spl_autoload_register($autoload_function = UNKNOWN, bool $throw = true, bool $prepend = false): bool {}
 
 function spl_autoload_unregister($autoload_function): bool {}
 
