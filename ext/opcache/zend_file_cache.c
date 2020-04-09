@@ -547,6 +547,7 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_FE_FETCH_RW:
 				case ZEND_SWITCH_LONG:
 				case ZEND_SWITCH_STRING:
+				case ZEND_MATCH:
 					/* relative extended_value don't have to be changed */
 					break;
 			}

@@ -130,6 +130,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ident> T_ENDSWITCH     "endswitch (T_ENDSWITCH)"
 %token <ident> T_CASE          "case (T_CASE)"
 %token <ident> T_DEFAULT       "default (T_DEFAULT)"
+%token <ident> T_MATCH         "match (T_MATCH)"
 %token <ident> T_BREAK         "break (T_BREAK)"
 %token <ident> T_CONTINUE      "continue (T_CONTINUE)"
 %token <ident> T_GOTO          "goto (T_GOTO)"
@@ -261,6 +262,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> inline_function union_type
 %type <ast> attributed_statement attributed_class_statement attributed_parameter
 %type <ast> attribute_decl attribute attributes
+%type <ast> match match_arm_list non_empty_match_arm_list match_arm match_arm_cond_list
 
 %type <num> returns_ref function fn is_reference is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier optional_visibility_modifier
@@ -284,7 +286,7 @@ reserved_non_modifiers:
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
 	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
-	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN
+	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_FN | T_MATCH
 ;
 
 semi_reserved:
@@ -621,6 +623,34 @@ case_list:
 case_separator:
 		':'
 	|	';'
+;
+
+
+match:
+		T_MATCH '(' expr ')' '{' match_arm_list '}'
+			{ $$ = zend_ast_create(ZEND_AST_MATCH, $3, $6); };
+;
+
+match_arm_list:
+		%empty { $$ = zend_ast_create_list(0, ZEND_AST_MATCH_ARM_LIST); }
+	|	non_empty_match_arm_list possible_comma { $$ = $1; }
+;
+
+non_empty_match_arm_list:
+		match_arm { $$ = zend_ast_create_list(1, ZEND_AST_MATCH_ARM_LIST, $1); }
+	|	non_empty_match_arm_list ',' match_arm { $$ = zend_ast_list_add($1, $3); }
+;
+
+match_arm:
+		match_arm_cond_list possible_comma T_DOUBLE_ARROW expr
+			{ $$ = zend_ast_create(ZEND_AST_MATCH_ARM, $1, $4); }
+	|	T_DEFAULT possible_comma T_DOUBLE_ARROW expr
+			{ $$ = zend_ast_create(ZEND_AST_MATCH_ARM, NULL, $4); }
+;
+
+match_arm_cond_list:
+		expr { $$ = zend_ast_create_list(1, ZEND_AST_EXPR_LIST, $1); }
+	|	match_arm_cond_list ',' expr { $$ = zend_ast_list_add($1, $3); }
 ;
 
 
@@ -1079,6 +1109,7 @@ expr:
 	|	T_STATIC inline_function { $$ = $2; ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
 	|	attributes T_STATIC inline_function
 			{ $$ = zend_ast_with_attributes($3, $1); ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
+	|	match { $$ = $1; }
 ;
 
 

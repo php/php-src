@@ -279,6 +279,7 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 		case ZEND_FE_FETCH_RW:
 		case ZEND_SWITCH_LONG:
 		case ZEND_SWITCH_STRING:
+		case ZEND_MATCH:
 			/* branch opcodes */
 			return 1;
 		case ZEND_NEW:
@@ -296,6 +297,7 @@ static int zend_jit_trace_may_exit(const zend_op_array *op_array, const zend_op 
 		case ZEND_YIELD:
 		case ZEND_YIELD_FROM:
 		case ZEND_INCLUDE_OR_EVAL:
+		case ZEND_MATCH_ERROR:
 			/* unsupported */
 			return 1;
 		case ZEND_DO_FCALL:
@@ -3943,6 +3945,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 #if 0
 					case ZEND_SWITCH_LONG:
 					case ZEND_SWITCH_STRING:
+					case ZEND_MATCH:
 						if (!zend_jit_switch(&dasm_state, opline, op_array, op_array_ssa)) {
 							goto jit_failure;
 						}

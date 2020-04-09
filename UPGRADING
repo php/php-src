@@ -571,6 +571,8 @@ PHP 8.0 UPGRADE NOTES
   . Added support for constructor property promotion (declaring properties in
     the constructor signature).
     RFC: https://wiki.php.net/rfc/constructor_promotion
+  . Added support for `match` expression.
+    RFC: https://wiki.php.net/rfc/match_expression_v2
 
 - Date:
   . Added DateTime::createFromInterface() and

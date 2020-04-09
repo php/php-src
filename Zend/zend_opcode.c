@@ -763,7 +763,9 @@ static zend_bool keeps_op1_alive(zend_op *opline) {
 	/* These opcodes don't consume their OP1 operand,
 	 * it is later freed by something else. */
 	if (opline->opcode == ZEND_CASE
+	 || opline->opcode == ZEND_CASE_STRICT
 	 || opline->opcode == ZEND_SWITCH_LONG
+	 || opline->opcode == ZEND_MATCH
 	 || opline->opcode == ZEND_FETCH_LIST_R
 	 || opline->opcode == ZEND_COPY_TMP) {
 		return 1;
@@ -1039,6 +1041,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 				break;
 			case ZEND_SWITCH_LONG:
 			case ZEND_SWITCH_STRING:
+			case ZEND_MATCH:
 			{
 				/* absolute indexes to relative offsets */
 				HashTable *jumptable = Z_ARRVAL_P(CT_CONSTANT(opline->op2));
@@ -1108,6 +1111,7 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 		case ZEND_CONCAT:
 			return (binary_op_type) concat_function;
 		case ZEND_IS_IDENTICAL:
+		case ZEND_CASE_STRICT:
 			return (binary_op_type) is_identical_function;
 		case ZEND_IS_NOT_IDENTICAL:
 			return (binary_op_type) is_not_identical_function;

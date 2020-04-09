@@ -457,6 +457,20 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(16, ZEND_IS_IDENTICAL, CONST|TMP|VAR|CV, CONST|T
 	ZEND_VM_SMART_BRANCH(result, 1);
 }
 
+ZEND_VM_HANDLER(196, ZEND_CASE_STRICT, TMP|VAR, CONST|TMP|VAR|CV)
+{
+	USE_OPLINE
+	zval *op1, *op2;
+	zend_bool result;
+
+	SAVE_OPLINE();
+	op1 = GET_OP1_ZVAL_PTR_DEREF(BP_VAR_R);
+	op2 = GET_OP2_ZVAL_PTR_DEREF(BP_VAR_R);
+	result = fast_is_identical_function(op1, op2);
+	FREE_OP2();
+	ZEND_VM_SMART_BRANCH(result, 1);
+}
+
 ZEND_VM_COLD_CONSTCONST_HANDLER(17, ZEND_IS_NOT_IDENTICAL, CONST|TMP|VAR|CV, CONST|TMP|VAR|CV, SPEC(COMMUTATIVE))
 {
 	USE_OPLINE
@@ -8392,6 +8406,58 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(188, ZEND_SWITCH_STRING, CONST|TMPVARCV, CONST, 
 		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
 		ZEND_VM_CONTINUE();
 	}
+}
+
+ZEND_VM_COLD_CONSTCONST_HANDLER(195, ZEND_MATCH, CONST|TMPVARCV, CONST, JMP_ADDR)
+{
+	USE_OPLINE
+	zval *op, *jump_zv;
+	HashTable *jumptable;
+
+	op = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	jumptable = Z_ARRVAL_P(GET_OP2_ZVAL_PTR(BP_VAR_R));
+
+ZEND_VM_C_LABEL(match_try_again):
+	if (Z_TYPE_P(op) == IS_LONG) {
+		jump_zv = zend_hash_index_find(jumptable, Z_LVAL_P(op));
+	} else if (Z_TYPE_P(op) == IS_STRING) {
+		jump_zv = zend_hash_find_ex(jumptable, Z_STR_P(op), OP1_TYPE == IS_CONST);
+	} else if (Z_TYPE_P(op) == IS_REFERENCE) {
+		op = Z_REFVAL_P(op);
+		ZEND_VM_C_GOTO(match_try_again);
+	} else {
+		if (UNEXPECTED((OP1_TYPE & IS_CV) && Z_TYPE_P(op) == IS_UNDEF)) {
+			SAVE_OPLINE();
+			op = ZVAL_UNDEFINED_OP1();
+			if (UNEXPECTED(EG(exception))) {
+				HANDLE_EXCEPTION();
+			}
+			ZEND_VM_C_GOTO(match_try_again);
+		}
+
+		ZEND_VM_C_GOTO(default_branch);
+	}
+
+	if (jump_zv != NULL) {
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, Z_LVAL_P(jump_zv));
+		ZEND_VM_CONTINUE();
+	} else {
+ZEND_VM_C_LABEL(default_branch):
+		/* default */
+		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+		ZEND_VM_CONTINUE();
+	}
+}
+
+ZEND_VM_COLD_CONST_HANDLER(197, ZEND_MATCH_ERROR, CONST|TMPVARCV, UNUSED)
+{
+	USE_OPLINE
+	zval *op;
+
+	SAVE_OPLINE();
+	op = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	zend_throw_exception_ex(zend_ce_unhandled_match_error, 0, "Unhandled match value of type %s", zend_zval_type_name(op));
+	HANDLE_EXCEPTION();
 }
 
 ZEND_VM_COLD_CONSTCONST_HANDLER(189, ZEND_IN_ARRAY, CONST|TMP|VAR|CV, CONST, NUM)

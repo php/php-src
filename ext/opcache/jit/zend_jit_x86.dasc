@@ -11377,6 +11377,13 @@ static int zend_jit_switch(dasm_State **Dst, const zend_op *opline, const zend_o
 {
 	HashTable *jumptable = Z_ARRVAL_P(RT_CONSTANT(opline, opline->op2));
 
+	// TODO: Implement for match instructions
+	if (opline->opcode == ZEND_MATCH) {
+		// Since the match expression doesn't have a IS_IDENTICAL/JMPNZ chain
+		// we can't skip the jumptable and thus can't JIT the function
+		return 0;
+	}
+
 	if (opline->op1_type == IS_CONST) {
 		zval *zv = RT_CONSTANT(opline, opline->op1);
 		zval *jump_zv;

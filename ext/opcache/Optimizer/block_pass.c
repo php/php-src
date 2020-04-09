@@ -115,6 +115,10 @@ static int get_const_switch_target(zend_cfg *cfg, zend_op_array *op_array, zend_
 		/* fallback to next block */
 		return block->successors[block->successors_count - 1];
 	}
+	if (opline->opcode == ZEND_MATCH && Z_TYPE_P(val) != IS_LONG && Z_TYPE_P(val) != IS_STRING) {
+		/* always jump to the default arm */
+		return block->successors[block->successors_count - 1];
+	}
 	if (Z_TYPE_P(val) == IS_LONG) {
 		zv = zend_hash_index_find(jumptable, Z_LVAL_P(val));
 	} else {
@@ -123,7 +127,7 @@ static int get_const_switch_target(zend_cfg *cfg, zend_op_array *op_array, zend_
 	}
 	if (!zv) {
 		/* default */
-		return block->successors[block->successors_count - 2];
+		return block->successors[block->successors_count - (opline->opcode == ZEND_MATCH ? 1 : 2)];
 	}
 	return cfg->map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv))];
 }
@@ -369,6 +373,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 
 			case ZEND_SWITCH_LONG:
 			case ZEND_SWITCH_STRING:
+			case ZEND_MATCH:
 				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
 					/* SWITCH variable will be deleted later by FREE, so we can't optimize it */
 					Tsource[VAR_NUM(opline->op1.var)] = NULL;
@@ -387,6 +392,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				break;
 
 			case ZEND_CASE:
+			case ZEND_CASE_STRICT:
 			case ZEND_COPY_TMP:
 				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
 					/* Variable will be deleted later by FREE, so we can't optimize it */
@@ -1046,11 +1052,12 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 				break;
 			case ZEND_SWITCH_LONG:
 			case ZEND_SWITCH_STRING:
+			case ZEND_MATCH:
 			{
 				HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
 				zval *zv;
 				uint32_t s = 0;
-				ZEND_ASSERT(b->successors_count == 2 + zend_hash_num_elements(jumptable));
+				ZEND_ASSERT(b->successors_count == (opline->opcode == ZEND_MATCH ? 1 : 2) + zend_hash_num_elements(jumptable));
 
 				ZEND_HASH_FOREACH_VAL(jumptable, zv) {
 					Z_LVAL_P(zv) = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[s++]].start);
