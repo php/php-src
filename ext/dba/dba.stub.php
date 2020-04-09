@@ -22,7 +22,7 @@ function dba_exists($key, $handle): bool {}
  * @param int|resource $skip actually this parameter is optional, not $handle
  * @param resource $handle
  */
-function dba_fetch($key, $skip, $handle = UNKOWN): string|false {}
+function dba_fetch($key, $skip, $handle = UNKNOWN): string|false {}
 
 function dba_key_split(string $key): array|false {}
 
