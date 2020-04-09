@@ -1517,6 +1517,9 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_argument_value_error(uint32_t arg_num
 #define Z_PARAM_RESOURCE(dest) \
 	Z_PARAM_RESOURCE_EX(dest, 0, 0)
 
+#define Z_PARAM_RESOURCE_OR_NULL(dest) \
+	Z_PARAM_RESOURCE_EX(dest, 1, 0)
+
 /* old "s" */
 #define Z_PARAM_STRING_EX2(dest, dest_len, check_null, deref, separate) \
 		Z_PARAM_PROLOGUE(deref, separate); \
