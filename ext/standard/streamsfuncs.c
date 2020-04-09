@@ -109,7 +109,7 @@ PHP_FUNCTION(stream_socket_client)
 		Z_PARAM_ZVAL(zerrstr)
 		Z_PARAM_DOUBLE(timeout)
 		Z_PARAM_LONG(flags)
-		Z_PARAM_RESOURCE(zcontext)
+		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
@@ -194,7 +194,7 @@ PHP_FUNCTION(stream_socket_server)
 		Z_PARAM_ZVAL(zerrno)
 		Z_PARAM_ZVAL(zerrstr)
 		Z_PARAM_LONG(flags)
-		Z_PARAM_RESOURCE(zcontext)
+		Z_PARAM_RESOURCE_OR_NULL(zcontext)
 	ZEND_PARSE_PARAMETERS_END();
 
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);

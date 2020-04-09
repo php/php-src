@@ -1260,13 +1260,13 @@ function stream_filter_append($stream, string $filtername, int $read_write = 0, 
 function stream_filter_remove($stream_filter): bool {}
 
 /**
- * @param resource $context
+ * @param resource|null $context
  * @return resource|false
  */
 function stream_socket_client(string $remote_socket, &$errno = null, &$errstr = null, float $timeout = STREAM_CLIENT_CONNECT, int $flags = UNKNOWN, $context = null) {}
 
 /**
- * @param resource $context
+ * @param resource|null $context
  * @return resource|false
  */
 function stream_socket_server(string $local_socket, &$errno = null, &$errstr = null, int $flags = STREAM_SERVER_BIND | STREAM_SERVER_LISTEN, $context = null) {}
