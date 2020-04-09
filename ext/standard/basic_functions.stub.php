@@ -942,7 +942,7 @@ function lchgrp(string $filename, $group): bool {}
 function chmod(string $filename, int $mode): bool {}
 
 #if HAVE_UTIME
-function touch(string $filename, int $time = 0, int $atime = UNKNOWN): bool {}
+function touch(string $filename, int $time = UNKNOWN, int $atime = UNKNOWN): bool {}
 #endif
 
 function clearstatcache(bool $clear_realpath_cache = false, string $filename = ""): void {}
