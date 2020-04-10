@@ -245,7 +245,7 @@ function grapheme_strrpos(string $haystack, string $needle, int $offset = 0): in
 
 function grapheme_strripos(string $haystack, string $needle, int $offset = 0): int|false {}
 
-function grapheme_substr(string $string, int $start, ?int $length = 0): string|false {}
+function grapheme_substr(string $string, int $start, ?int $length = null): string|false {}
 
 function grapheme_strstr(string $haystack, string $needle, bool $before_needle = false): string|false {}
 
