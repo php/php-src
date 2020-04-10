@@ -1692,6 +1692,42 @@ static zend_lifetime_interval* zend_jit_linear_scan(const zend_op_array *op_arra
 	return handled;
 }
 
+static void zend_jit_dump_lifetime_interval(const zend_op_array *op_array, const zend_ssa *ssa, const zend_lifetime_interval *ival)
+{
+	zend_life_range *range;
+	int var_num = ssa->vars[ival->ssa_var].var;
+
+	fprintf(stderr, "#%d.", ival->ssa_var);
+	zend_dump_var(op_array, (var_num < op_array->last_var ? IS_CV : 0), var_num);
+	fprintf(stderr, ": %u-%u", ival->range.start, ival->range.end);
+	range = ival->range.next;
+	while (range) {
+		fprintf(stderr, ", %u-%u", range->start, range->end);
+		range = range->next;
+	}
+	if (ival->reg != ZREG_NONE) {
+		fprintf(stderr, " (%s)", zend_reg_name[ival->reg]);
+	}
+	if (ival->flags & ZREG_LAST_USE) {
+		fprintf(stderr, " last_use");
+	}
+	if (ival->flags & ZREG_LOAD) {
+		fprintf(stderr, " load");
+	}
+	if (ival->flags & ZREG_STORE) {
+		fprintf(stderr, " store");
+	}
+	if (ival->hint) {
+		var_num = ssa->vars[ival->hint->ssa_var].var;
+		fprintf(stderr, " hint=#%d.", ival->hint->ssa_var);
+		zend_dump_var(op_array, (var_num < op_array->last_var ? IS_CV : 0), var_num);
+		if (ival->hint->reg != ZREG_NONE) {
+			fprintf(stderr, " (%s)", zend_reg_name[ival->hint->reg]);
+		}
+	}
+	fprintf(stderr, "\n");
+}
+
 static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array *op_array, zend_ssa *ssa)
 {
 	void *checkpoint;
@@ -1752,29 +1788,7 @@ static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array 
 			fprintf(stderr, "Live Ranges \"%s\"\n", op_array->function_name ? ZSTR_VAL(op_array->function_name) : "[main]");
 			ival = list;
 			while (ival) {
-				zend_life_range *range;
-				int var_num = ssa->vars[ival->ssa_var].var;
-
-				fprintf(stderr, "#%d.", ival->ssa_var);
-				zend_dump_var(op_array, (var_num < op_array->last_var ? IS_CV : 0), var_num);
-				fprintf(stderr, ": %u-%u", ival->range.start, ival->range.end);
-				range = ival->range.next;
-				while (range) {
-					fprintf(stderr, ", %u-%u", range->start, range->end);
-					range = range->next;
-				}
-				if (ival->flags & ZREG_LOAD) {
-					fprintf(stderr, " load");
-				}
-				if (ival->flags & ZREG_STORE) {
-					fprintf(stderr, " store");
-				}
-				if (ival->hint) {
-					var_num = ssa->vars[ival->hint->ssa_var].var;
-					fprintf(stderr, " hint=#%d.", ival->hint->ssa_var);
-					zend_dump_var(op_array, (var_num < op_array->last_var ? IS_CV : 0), var_num);
-				}
-				fprintf(stderr, "\n");
+				zend_jit_dump_lifetime_interval(op_array, ssa, ival);
 				ival = ival->list_next;
 			}
 			fprintf(stderr, "\n");
@@ -1917,33 +1931,7 @@ static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array 
 				for (i = 0; i < ssa->vars_count; i++) {
 					ival = intervals[i];
 					while (ival) {
-						zend_life_range *range;
-						int var_num = ssa->vars[ival->ssa_var].var;
-
-						fprintf(stderr, "#%d.", ival->ssa_var);
-						zend_dump_var(op_array, (var_num < op_array->last_var ? IS_CV : 0), var_num);
-						fprintf(stderr, ": %u-%u", ival->range.start, ival->range.end);
-						range = ival->range.next;
-						while (range) {
-							fprintf(stderr, ", %u-%u", range->start, range->end);
-							range = range->next;
-						}
-						fprintf(stderr, " (%s)", zend_reg_name[ival->reg]);
-						if (ival->flags & ZREG_LOAD) {
-							fprintf(stderr, " load");
-						}
-						if (ival->flags & ZREG_STORE) {
-							fprintf(stderr, " store");
-						}
-						if (ival->hint) {
-							var_num = ssa->vars[ival->hint->ssa_var].var;
-							fprintf(stderr, " hint=#%d.", ival->hint->ssa_var);
-							zend_dump_var(op_array, (var_num < op_array->last_var ? IS_CV : 0), var_num);
-							if (ival->hint->reg != ZREG_NONE) {
-								fprintf(stderr, " (%s)", zend_reg_name[ival->hint->reg]);
-							}
-						}
-						fprintf(stderr, "\n");
+						zend_jit_dump_lifetime_interval(op_array, ssa, ival);
 						ival = ival->list_next;
 					}
 				}
