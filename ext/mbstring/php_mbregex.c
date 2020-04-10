@@ -1059,8 +1059,12 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 			syntax = MBREX(regex_default_syntax);
 		}
 	}
-	if (eval && !is_callable) {
-		php_error_docref(NULL, E_WARNING, "The 'e' option is no longer supported, use mb_ereg_replace_callback instead");
+	if (eval) {
+		if (is_callable) {
+			php_error_docref(NULL, E_WARNING, "Option 'e' cannot be used with replacement callback");
+		} else {
+			php_error_docref(NULL, E_WARNING, "The 'e' option is no longer supported, use mb_ereg_replace_callback instead");
+		}
 		RETURN_FALSE;
 	}
 
@@ -1070,19 +1074,12 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 		RETURN_FALSE;
 	}
 
-	if (eval || is_callable) {
+	if (is_callable) {
 		pbuf = &eval_buf;
 		description = zend_make_compiled_string_description("mbregex replace");
 	} else {
 		pbuf = &out_buf;
 		description = NULL;
-	}
-
-	if (is_callable) {
-		if (eval) {
-			php_error_docref(NULL, E_WARNING, "Option 'e' cannot be used with replacement callback");
-			RETURN_FALSE;
-		}
 	}
 
 	/* do the actual work */
@@ -1106,35 +1103,7 @@ static void _php_mb_regex_ereg_replace_exec(INTERNAL_FUNCTION_PARAMETERS, OnigOp
 				mb_regex_substitute(pbuf, string, string_len, replace, replace_len, re, regs, enc);
 			}
 
-			if (eval) {
-				zval v;
-				zend_string *eval_str;
-				/* null terminate buffer */
-				smart_str_0(&eval_buf);
-
-				if (eval_buf.s) {
-					eval_str = eval_buf.s;
-				} else {
-					eval_str = ZSTR_EMPTY_ALLOC();
-				}
-
-				/* do eval */
-				if (zend_eval_stringl(ZSTR_VAL(eval_str), ZSTR_LEN(eval_str), &v, description) == FAILURE) {
-					efree(description);
-					zend_throw_error(NULL, "Failed evaluating code: %s%s", PHP_EOL, ZSTR_VAL(eval_str));
-					onig_region_free(regs, 1);
-					smart_str_free(&out_buf);
-					smart_str_free(&eval_buf);
-					RETURN_FALSE;
-				}
-
-				/* result of eval */
-				convert_to_string(&v);
-				smart_str_appendl(&out_buf, Z_STRVAL(v), Z_STRLEN(v));
-				/* Clean up */
-				smart_str_free(&eval_buf);
-				zval_ptr_dtor_str(&v);
-			} else if (is_callable) {
+			if (is_callable) {
 				zval args[1];
 				zval subpats, retval;
 				int i;
