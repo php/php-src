@@ -1263,7 +1263,7 @@ function stream_filter_remove($stream_filter): bool {}
  * @param resource|null $context
  * @return resource|false
  */
-function stream_socket_client(string $remote_socket, &$errno = null, &$errstr = null, float $timeout = STREAM_CLIENT_CONNECT, int $flags = UNKNOWN, $context = null) {}
+function stream_socket_client(string $remote_socket, &$errno = null, &$errstr = null, float $timeout = UNKNOWN, int $flags = STREAM_CLIENT_CONNECT, $context = null) {}
 
 /**
  * @param resource|null $context
