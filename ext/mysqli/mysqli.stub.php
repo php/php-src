@@ -414,6 +414,7 @@ function mysqli_real_connect(
     ?string $password = null,
     ?string $database = null,
     ?int $port = null,
+    ?string $socket = null,
     int $flags = 0
 ): bool {}
 
