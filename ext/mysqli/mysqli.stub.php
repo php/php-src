@@ -203,7 +203,7 @@ class mysqli_result
     public function fetch_assoc();
 
     /** @return object|null */
-    public function fetch_object(string $class_name = 'stdClass', array $params = []);
+    public function fetch_object(string $class_name = UNKNOWN, array $params = []);
 
     /** @return array|null */
     public function fetch_row();
@@ -340,7 +340,7 @@ function mysqli_fetch_assoc(mysqli_result $mysql_result): ?array {}
 
 function mysqli_fetch_object(
     mysqli_result $mysqli_result,
-    string $class_name = 'stdClass',
+    string $class_name = UNKNOWN,
     array $params = []
 ): ?object {}
 
