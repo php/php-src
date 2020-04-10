@@ -37,7 +37,7 @@ function session_register_shutdown(): void {}
 /** @alias session_write_close */
 function session_commit(): bool {}
 
-function session_set_save_handler($open, $close = null, $read = null, $write = null, $destroy = null, $gc = null, $create_sid = null, $validate_sid = null, $update_timestamp = null): bool {}
+function session_set_save_handler($open, $close = UNKNOWN, $read = UNKNOWN, $write = UNKNOWN, $destroy = UNKNOWN, $gc = UNKNOWN, $create_sid = UNKNOWN, $validate_sid = UNKNOWN, $update_timestamp = UNKNOWN): bool {}
 
 function session_cache_limiter(string $cache_limiter = UNKNOWN): string|false {}
 
