@@ -1796,7 +1796,7 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_set)(MYSQLND_STMT * const s,
 			break;
 		}
 		case STMT_ATTR_CURSOR_TYPE: {
-			unsigned int ival = *(unsigned int *) value;
+			zend_ulong ival = *(zend_ulong *) value;
 			if (ival > (zend_ulong) CURSOR_TYPE_READ_ONLY) {
 				SET_CLIENT_ERROR(stmt->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "Not implemented");
 				DBG_INF("FAIL");

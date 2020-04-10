@@ -1660,7 +1660,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option)(MYSQLND_CONN_DATA * const c
 			break;
 #endif
 		case MYSQL_OPT_LOCAL_INFILE:
-			if (value && (*(unsigned int*) value) ? 1 : 0) {
+			if (value && (*(zend_long *) value) ? 1 : 0) {
 				conn->options->flags |= CLIENT_LOCAL_FILES;
 			} else {
 				conn->options->flags &= ~CLIENT_LOCAL_FILES;
