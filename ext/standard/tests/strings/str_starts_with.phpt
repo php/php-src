@@ -10,6 +10,7 @@ var_dump(str_starts_with($testStr, "beginning"));
 var_dump(str_starts_with($testStr, "Beginning"));
 var_dump(str_starts_with($testStr, "eginning"));
 var_dump(str_starts_with($testStr, $testStr));
+var_dump(str_starts_with($testStr, $testStr.$testStr));
 var_dump(str_starts_with($testStr, ""));
 var_dump(str_starts_with("", ""));
 var_dump(str_starts_with("", " "));
@@ -28,6 +29,7 @@ bool(true)
 bool(false)
 bool(false)
 bool(true)
+bool(false)
 bool(true)
 bool(true)
 bool(false)
