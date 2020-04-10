@@ -1899,8 +1899,8 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_set)(MYSQLND_STMT * const s,
 			break;
 		}
 		case STMT_ATTR_CURSOR_TYPE: {
-			unsigned int ival = *(unsigned int *) value;
-			if (ival > (zend_ulong) CURSOR_TYPE_READ_ONLY) {
+			unsigned long ival = *(unsigned long *) value;
+			if (ival > (unsigned long) CURSOR_TYPE_READ_ONLY) {
 				SET_CLIENT_ERROR(stmt->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "Not implemented");
 				DBG_INF("FAIL");
 				DBG_RETURN(FAIL);
@@ -1909,7 +1909,7 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_set)(MYSQLND_STMT * const s,
 			break;
 		}
 		case STMT_ATTR_PREFETCH_ROWS: {
-			unsigned int ival = *(unsigned int *) value;
+			unsigned long ival = *(unsigned long *) value;
 			if (ival == 0) {
 				ival = MYSQLND_DEFAULT_PREFETCH_ROWS;
 			} else if (ival > 1) {
@@ -1948,10 +1948,10 @@ MYSQLND_METHOD(mysqlnd_stmt, attr_get)(const MYSQLND_STMT * const s,
 			*(zend_bool *) value= stmt->update_max_length;
 			break;
 		case STMT_ATTR_CURSOR_TYPE:
-			*(zend_ulong *) value= stmt->flags;
+			*(unsigned long *) value= stmt->flags;
 			break;
 		case STMT_ATTR_PREFETCH_ROWS:
-			*(zend_ulong *) value= stmt->prefetch_rows;
+			*(unsigned long *) value= stmt->prefetch_rows;
 			break;
 		default:
 			DBG_RETURN(FAIL);

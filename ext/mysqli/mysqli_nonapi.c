@@ -305,8 +305,8 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 #if !defined(MYSQLI_USE_MYSQLND)
 	mysql->mysql->reconnect = MyG(reconnect);
 #endif
-
-	mysql_options(mysql->mysql, MYSQL_OPT_LOCAL_INFILE, (char *)&MyG(allow_local_infile));
+	unsigned int allow_local_infile = MyG(allow_local_infile);
+	mysql_options(mysql->mysql, MYSQL_OPT_LOCAL_INFILE, (char *)&allow_local_infile);
 
 end:
 	if (!mysqli_resource) {

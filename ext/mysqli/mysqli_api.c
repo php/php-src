@@ -2327,7 +2327,7 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 #if MYSQL_VERSION_ID >= 50107
 	my_bool	mode_b;
 #endif
-	zend_ulong	mode;
+	unsigned long	mode;
 	zend_long	attr;
 	void	*mode_p;
 
@@ -2370,7 +2370,7 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 {
 	MY_STMT	*stmt;
 	zval	*mysql_stmt;
-	zend_ulong	value = 0;
+	unsigned long	value = 0;
 	zend_long	attr;
 	int		rc;
 
@@ -2387,7 +2387,7 @@ PHP_FUNCTION(mysqli_stmt_attr_get)
 	if (attr == STMT_ATTR_UPDATE_MAX_LENGTH)
 		value = *((my_bool *)&value);
 #endif
-	RETURN_LONG((zend_ulong)value);
+	RETURN_LONG((unsigned long)value);
 }
 /* }}} */
 
