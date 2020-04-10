@@ -19,7 +19,7 @@ class mysqli
     public function autocommit(bool $mode);
 
     /** @return bool */
-    public function begin_transaction(int $flags = -1, string $name = UNKNOWN);
+    public function begin_transaction(int $flags = 0, string $name = UNKNOWN);
 
     /** @return bool */
     public function change_user(string $user, string $password, ?string $database);
@@ -284,7 +284,7 @@ function mysqli_affected_rows(mysqli $mysql_link): int|string {}
 
 function mysqli_autocommit(mysqli $mysql_link, bool $mode): bool {}
 
-function mysqli_begin_transaction(mysqli $mysql_link, int $flags = -1, string $name = UNKNOWN): bool {}
+function mysqli_begin_transaction(mysqli $mysql_link, int $flags = 0, string $name = UNKNOWN): bool {}
 
 function mysqli_change_user(mysqli $mysql_link, string $user, string $password, ?string $database): bool {}
 
