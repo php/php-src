@@ -3411,10 +3411,14 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, const zend_
 		|	LONG_OP_WITH_CONST sub, op1_def_addr, Z_L(1)
 	}
 
-	if (may_overflow && (op1_def_info & MAY_BE_GUARD)) {
+	if (may_overflow && ((op1_def_info & MAY_BE_GUARD) || (opline->result_type != IS_UNUSED && (res_info & MAY_BE_GUARD)))) {
 		int32_t exit_point = zend_jit_trace_get_exit_point(opline, opline, NULL);
 		const void *exit_addr = zend_jit_trace_get_exit_addr(exit_point);
 		|	jo &exit_addr
+		if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
+		    opline->result_type != IS_UNUSED) {
+			|	ZVAL_COPY_VALUE res_addr, res_use_info, op1_def_addr, MAY_BE_LONG, ZREG_R0, ZREG_R1
+		}
 	} else if (may_overflow) {
 		|	jo >1
 		if ((opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_PRE_DEC) &&
