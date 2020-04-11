@@ -22,6 +22,7 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_xsl.h"
+#include "php_xsl_arginfo.h"
 
 zend_class_entry *xsl_xsltprocessor_class_entry;
 static zend_object_handlers xsl_object_handlers;
@@ -129,7 +130,7 @@ PHP_MINIT_FUNCTION(xsl)
 	xsl_object_handlers.clone_obj = NULL;
 	xsl_object_handlers.free_obj = xsl_objects_free_storage;
 
-	REGISTER_XSL_CLASS(ce, "XSLTProcessor", NULL, php_xsl_xsltprocessor_class_functions, xsl_xsltprocessor_class_entry);
+	REGISTER_XSL_CLASS(ce, "XSLTProcessor", NULL, class_XSLTProcessor_methods, xsl_xsltprocessor_class_entry);
 #if HAVE_XSL_EXSLT
 	exsltRegisterAll();
 #endif
