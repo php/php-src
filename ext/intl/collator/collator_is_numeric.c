@@ -69,7 +69,7 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
 		char buf[64], *numbuf, *bufpos;
 		size_t length = u - nstart;
 		double value;
-		ALLOCA_FLAG(use_heap);
+		ALLOCA_FLAG(use_heap = 0);
 
 		if (length < sizeof(buf)) {
 			numbuf = buf;
