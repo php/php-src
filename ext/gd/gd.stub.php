@@ -98,28 +98,28 @@ function imagecreatefromtga(string $filename): GdImage|false {}
 
 function imagexbm(GdImage $im, ?string $filename, int $foreground = UNKNOWN): bool {}
 
-function imagegif(GdImage $im, $to = NULL): bool {}
+function imagegif(GdImage $im, $to = null): bool {}
 
 #ifdef HAVE_GD_PNG
-function imagepng(GdImage $im, $to = NULL, int $quality = UNKNOWN, int $filters = UNKNOWN): bool {}
+function imagepng(GdImage $im, $to = null, int $quality = UNKNOWN, int $filters = UNKNOWN): bool {}
 #endif
 
 #ifdef HAVE_GD_WEBP
-function imagewebp(GdImage $im, $to = NULL, int $quality = UNKNOWN): bool {}
+function imagewebp(GdImage $im, $to = null, int $quality = UNKNOWN): bool {}
 #endif
 
 #ifdef HAVE_GD_JPG
-function imagejpeg(GdImage $im, $to = NULL, int $quality = UNKNOWN): bool {}
+function imagejpeg(GdImage $im, $to = null, int $quality = UNKNOWN): bool {}
 #endif
 
-function imagewbmp(GdImage $im, $to = NULL, int $foreground = UNKNOWN): bool {}
+function imagewbmp(GdImage $im, $to = null, int $foreground = UNKNOWN): bool {}
 
 function imagegd(GdImage $im, $to = UNKNOWN): bool {}
 
 function imagegd2(GdImage $im, $to = UNKNOWN, int $chunk_size = UNKNOWN, int $type = UNKNOWN): bool {}
 
 #ifdef HAVE_GD_BMP
-function imagebmp(GdImage $im, $to = NULL, int $compressed = 1): bool {}
+function imagebmp(GdImage $im, $to = null, int $compressed = 1): bool {}
 #endif
 
 function imagedestroy(GdImage $im): bool {}
