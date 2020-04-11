@@ -922,6 +922,7 @@ ZEND_API zend_string *zend_type_to_string(zend_type type);
 /* These should not clash with ZEND_ACC_(PUBLIC|PROTECTED|PRIVATE) */
 #define ZEND_PARAM_REF      (1<<3)
 #define ZEND_PARAM_VARIADIC (1<<4)
+#define ZEND_CALL_SYNTAX_PIPE (1u << 2u)
 
 #define ZEND_NAME_FQ       0
 #define ZEND_NAME_NOT_FQ   1

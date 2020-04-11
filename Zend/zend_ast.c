@@ -1871,10 +1871,17 @@ simple_list:
 			zend_ast_export_var(str, ast->child[1], 0, indent);
 			break;
 		case ZEND_AST_CALL:
-			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
-			smart_str_appendc(str, '(');
-			zend_ast_export_ex(str, ast->child[1], 0, indent);
-			smart_str_appendc(str, ')');
+			if (ast->attr & ZEND_CALL_SYNTAX_PIPE) {
+				zend_ast_export_ex(str, ast->child[1], 0, indent);
+				smart_str_appends(str, " |> ");
+				zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+			}
+			else {
+				zend_ast_export_ns_name(str, ast->child[0], 0, indent);
+				smart_str_appendc(str, '(');
+				zend_ast_export_ex(str, ast->child[1], 0, indent);
+				smart_str_appendc(str, ')');
+			}
 			break;
 		case ZEND_AST_CLASS_CONST:
 			zend_ast_export_ns_name(str, ast->child[0], 0, indent);
