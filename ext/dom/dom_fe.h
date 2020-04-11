@@ -33,7 +33,6 @@ extern const zend_function_entry php_dom_element_class_functions[];
 extern const zend_function_entry php_dom_text_class_functions[];
 extern const zend_function_entry php_dom_comment_class_functions[];
 extern const zend_function_entry php_dom_cdatasection_class_functions[];
-extern const zend_function_entry php_dom_documenttype_class_functions[];
 extern const zend_function_entry php_dom_notation_class_functions[];
 extern const zend_function_entry php_dom_entity_class_functions[];
 extern const zend_function_entry php_dom_entityreference_class_functions[];

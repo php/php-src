@@ -4,21 +4,27 @@
 
 class finfo
 {
+    /** @alias finfo_open */
     public function __construct(int $options = FILEINFO_NONE, string $arg = "") {}
 
     /**
      * @param ?resource $context
      * @return string|false
+     * @alias finfo_file
      */
     public function file(string $file_name, int $options = FILEINFO_NONE, $context = null) {}
 
     /**
      * @param ?resource $context
      * @return string|false
+     * @alias finfo_buffer
      */
     public function buffer(string $string, int $options = FILEINFO_NONE, $context = null) {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias finfo_set_flags
+     */
     public function set_flags(int $options) {}
 }
 

@@ -504,8 +504,6 @@ ZEND_METHOD(DatePeriod, __wakeup);
 ZEND_METHOD(DatePeriod, __set_state);
 
 
-
-
 static const zend_function_entry ext_functions[] = {
 	ZEND_FE(strtotime, arginfo_strtotime)
 	ZEND_FE(date, arginfo_date)
@@ -560,12 +558,12 @@ static const zend_function_entry ext_functions[] = {
 
 
 static const zend_function_entry class_DateTimeInterface_methods[] = {
-	ZEND_ABSTRACT_ME(DateTimeInterface, format, arginfo_class_DateTimeInterface_format)
-	ZEND_ABSTRACT_ME(DateTimeInterface, getTimezone, arginfo_class_DateTimeInterface_getTimezone)
-	ZEND_ABSTRACT_ME(DateTimeInterface, getOffset, arginfo_class_DateTimeInterface_getOffset)
-	ZEND_ABSTRACT_ME(DateTimeInterface, getTimestamp, arginfo_class_DateTimeInterface_getTimestamp)
-	ZEND_ABSTRACT_ME(DateTimeInterface, diff, arginfo_class_DateTimeInterface_diff)
-	ZEND_ABSTRACT_ME(DateTimeInterface, __wakeup, arginfo_class_DateTimeInterface___wakeup)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(DateTimeInterface, format, arginfo_class_DateTimeInterface_format, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(DateTimeInterface, getTimezone, arginfo_class_DateTimeInterface_getTimezone, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(DateTimeInterface, getOffset, arginfo_class_DateTimeInterface_getOffset, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(DateTimeInterface, getTimestamp, arginfo_class_DateTimeInterface_getTimestamp, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(DateTimeInterface, diff, arginfo_class_DateTimeInterface_diff, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_ABSTRACT_ME_WITH_FLAGS(DateTimeInterface, __wakeup, arginfo_class_DateTimeInterface___wakeup, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
 	ZEND_FE_END
 };
 

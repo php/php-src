@@ -887,16 +887,11 @@ PHP_FUNCTION(hash_equals)
 /* }}} */
 
 /* {{{ proto HashContext::__construct() */
-static PHP_METHOD(HashContext, __construct) {
+PHP_METHOD(HashContext, __construct) {
 	/* Normally unreachable as private/final */
 	zend_throw_exception(zend_ce_error, "Illegal call to private/final constructor", 0);
 }
 /* }}} */
-
-static const zend_function_entry php_hashcontext_methods[] = {
-	PHP_ME(HashContext, __construct, arginfo_class_HashContext___construct, ZEND_ACC_PRIVATE)
-	PHP_FE_END
-};
 
 /* Module Housekeeping */
 
@@ -1242,7 +1237,7 @@ PHP_MINIT_FUNCTION(hash)
 
 	REGISTER_LONG_CONSTANT("HASH_HMAC",		PHP_HASH_HMAC,	CONST_CS | CONST_PERSISTENT);
 
-	INIT_CLASS_ENTRY(ce, "HashContext", php_hashcontext_methods);
+	INIT_CLASS_ENTRY(ce, "HashContext", class_HashContext_methods);
 	php_hashcontext_ce = zend_register_internal_class(&ce);
 	php_hashcontext_ce->ce_flags |= ZEND_ACC_FINAL;
 	php_hashcontext_ce->create_object = php_hashcontext_create;

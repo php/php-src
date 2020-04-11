@@ -68,3 +68,12 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(mime_content_type, arginfo_mime_content_type)
 	ZEND_FE_END
 };
+
+
+static const zend_function_entry class_finfo_methods[] = {
+	ZEND_ME_MAPPING(__construct, finfo_open, arginfo_class_finfo___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(file, finfo_file, arginfo_class_finfo_file, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(buffer, finfo_buffer, arginfo_class_finfo_buffer, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(set_flags, finfo_set_flags, arginfo_class_finfo_set_flags, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
