@@ -21,31 +21,7 @@
 
 #include "php.h"
 #include "php_xsl.h"
-#include "xsltprocessor_arginfo.h"
 #include "ext/libxml/php_libxml.h"
-
-/*
-* class xsl_xsltprocessor
-*
-* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#
-* Since:
-*/
-
-const zend_function_entry php_xsl_xsltprocessor_class_functions[] = {
-	PHP_ME(XSLTProcessor, importStylesheet,		arginfo_class_XSLTProcessor_importStylesheet,	ZEND_ACC_PUBLIC)
-	PHP_ME(XSLTProcessor, transformToDoc,		arginfo_class_XSLTProcessor_transformToDoc,		ZEND_ACC_PUBLIC)
-	PHP_ME(XSLTProcessor, transformToUri,		arginfo_class_XSLTProcessor_transformToUri,		ZEND_ACC_PUBLIC)
-	PHP_ME(XSLTProcessor, transformToXml,		arginfo_class_XSLTProcessor_transformToXml,		ZEND_ACC_PUBLIC)
-	PHP_ME(XSLTProcessor, setParameter,			arginfo_class_XSLTProcessor_setParameter,		ZEND_ACC_PUBLIC)
-	PHP_ME(XSLTProcessor, getParameter,			arginfo_class_XSLTProcessor_getParameter,		ZEND_ACC_PUBLIC)
-	PHP_ME(XSLTProcessor, removeParameter,		arginfo_class_XSLTProcessor_removeParameter,	ZEND_ACC_PUBLIC)
-	PHP_ME(XSLTProcessor, hasExsltSupport,		arginfo_class_XSLTProcessor_hasExsltSupport,	ZEND_ACC_PUBLIC)
-	PHP_ME(XSLTProcessor, registerPHPFunctions,	arginfo_class_XSLTProcessor_registerPHPFunctions, ZEND_ACC_PUBLIC)
-	PHP_ME(XSLTProcessor, setProfiling,			arginfo_class_XSLTProcessor_setProfiling,		ZEND_ACC_PUBLIC)
-	PHP_ME(XSLTProcessor, setSecurityPrefs,		arginfo_class_XSLTProcessor_setSecurityPrefs,	ZEND_ACC_PUBLIC)
-	PHP_ME(XSLTProcessor, getSecurityPrefs,		arginfo_class_XSLTProcessor_getSecurityPrefs,	ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
 
 /* {{{ php_xsl_xslt_string_to_xpathexpr()
    Translates a string to a XPath Expression */

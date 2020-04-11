@@ -38,7 +38,6 @@ extern zend_module_entry xsl_module_entry;
 #endif
 
 #include "../dom/xml_common.h"
-#include "xsl_fe.h"
 
 #include <libxslt/extensions.h>
 #include <libxml/xpathInternals.h>

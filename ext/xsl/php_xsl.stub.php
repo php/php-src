@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class XSLTProcessor
 {
     /** @return bool */
