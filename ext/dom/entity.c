@@ -31,10 +31,6 @@
 * Since:
 */
 
-const zend_function_entry php_dom_entity_class_functions[] = {
-	PHP_FE_END
-};
-
 /* {{{ publicId	string
 readonly=yes
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-D7303025

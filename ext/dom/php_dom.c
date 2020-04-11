@@ -24,7 +24,7 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "ext/standard/php_rand.h"
 #include "php_dom.h"
-#include "dom_arginfo.h"
+#include "php_dom_arginfo.h"
 #include "dom_properties.h"
 #include "zend_interfaces.h"
 
@@ -578,20 +578,20 @@ PHP_MINIT_FUNCTION(dom)
 
 	zend_hash_init(&classes, 0, NULL, NULL, 1);
 
-	INIT_CLASS_ENTRY(ce, "DOMException", php_dom_domexception_class_functions);
+	INIT_CLASS_ENTRY(ce, "DOMException", class_DOMException_methods);
 	dom_domexception_class_entry = zend_register_internal_class_ex(&ce, zend_ce_exception);
 	dom_domexception_class_entry->ce_flags |= ZEND_ACC_FINAL;
 	zend_declare_property_long(dom_domexception_class_entry, "code", sizeof("code")-1, 0, ZEND_ACC_PUBLIC);
 
-	INIT_CLASS_ENTRY(ce, "DOMParentNode", php_dom_parent_node_class_functions);
+	INIT_CLASS_ENTRY(ce, "DOMParentNode", class_DOMParentNode_methods);
 	dom_parentnode_class_entry = zend_register_internal_interface(&ce);
 
-	INIT_CLASS_ENTRY(ce, "DOMChildNode", php_dom_child_node_class_functions);
+	INIT_CLASS_ENTRY(ce, "DOMChildNode", class_DOMChildNode_methods);
 	dom_childnode_class_entry = zend_register_internal_interface(&ce);
 
-	REGISTER_DOM_CLASS(ce, "DOMImplementation", NULL, php_dom_domimplementation_class_functions, dom_domimplementation_class_entry);
+	REGISTER_DOM_CLASS(ce, "DOMImplementation", NULL, class_DOMImplementation_methods, dom_domimplementation_class_entry);
 
-	REGISTER_DOM_CLASS(ce, "DOMNode", NULL, php_dom_node_class_functions, dom_node_class_entry);
+	REGISTER_DOM_CLASS(ce, "DOMNode", NULL, class_DOMNode_methods, dom_node_class_entry);
 
 	zend_hash_init(&dom_node_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_node_prop_handlers, "nodeName", sizeof("nodeName")-1, dom_node_node_name_read, NULL);
@@ -625,7 +625,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_namespace_node_prop_handlers, "parentNode", sizeof("parentNode")-1, dom_node_parent_node_read, NULL);
 	zend_hash_add_ptr(&classes, ce.name, &dom_namespace_node_prop_handlers);
 
-	REGISTER_DOM_CLASS(ce, "DOMDocumentFragment", dom_node_class_entry, php_dom_documentfragment_class_functions, dom_documentfragment_class_entry);
+	REGISTER_DOM_CLASS(ce, "DOMDocumentFragment", dom_node_class_entry, class_DOMDocumentFragment_methods, dom_documentfragment_class_entry);
 	zend_hash_init(&dom_documentfragment_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 
 	dom_register_prop_handler(&dom_documentfragment_prop_handlers, "firstElementChild", sizeof("firstElementChild")-1, dom_parent_node_first_element_child_read, NULL);
@@ -636,7 +636,7 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_add_ptr(&classes, ce.name, &dom_documentfragment_prop_handlers);
 	zend_class_implements(dom_documentfragment_class_entry, 1, dom_parentnode_class_entry);
 
-	REGISTER_DOM_CLASS(ce, "DOMDocument", dom_node_class_entry, php_dom_document_class_functions, dom_document_class_entry);
+	REGISTER_DOM_CLASS(ce, "DOMDocument", dom_node_class_entry, class_DOMDocument_methods, dom_document_class_entry);
 	zend_hash_init(&dom_document_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_document_prop_handlers, "doctype", sizeof("doctype")-1, dom_document_doctype_read, NULL);
 	dom_register_prop_handler(&dom_document_prop_handlers, "implementation", sizeof("implementation")-1, dom_document_implementation_read, NULL);
@@ -666,7 +666,7 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_add_ptr(&classes, ce.name, &dom_document_prop_handlers);
 	zend_class_implements(dom_document_class_entry, 1, dom_parentnode_class_entry);
 
-	INIT_CLASS_ENTRY(ce, "DOMNodeList", php_dom_nodelist_class_functions);
+	INIT_CLASS_ENTRY(ce, "DOMNodeList", class_DOMNodeList_methods);
 	ce.create_object = dom_nnodemap_objects_new;
 	dom_nodelist_class_entry = zend_register_internal_class_ex(&ce, NULL);
 	dom_nodelist_class_entry->get_iterator = php_dom_get_iterator;
@@ -676,7 +676,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_nodelist_prop_handlers, "length", sizeof("length")-1, dom_nodelist_length_read, NULL);
 	zend_hash_add_ptr(&classes, ce.name, &dom_nodelist_prop_handlers);
 
-	INIT_CLASS_ENTRY(ce, "DOMNamedNodeMap", php_dom_namednodemap_class_functions);
+	INIT_CLASS_ENTRY(ce, "DOMNamedNodeMap", class_DOMNamedNodeMap_methods);
 	ce.create_object = dom_nnodemap_objects_new;
 	dom_namednodemap_class_entry = zend_register_internal_class_ex(&ce, NULL);
 	dom_namednodemap_class_entry->get_iterator = php_dom_get_iterator;
@@ -686,7 +686,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_register_prop_handler(&dom_namednodemap_prop_handlers, "length", sizeof("length")-1, dom_namednodemap_length_read, NULL);
 	zend_hash_add_ptr(&classes, ce.name, &dom_namednodemap_prop_handlers);
 
-	REGISTER_DOM_CLASS(ce, "DOMCharacterData", dom_node_class_entry, php_dom_characterdata_class_functions, dom_characterdata_class_entry);
+	REGISTER_DOM_CLASS(ce, "DOMCharacterData", dom_node_class_entry, class_DOMCharacterData_methods, dom_characterdata_class_entry);
 
 	zend_hash_init(&dom_characterdata_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_characterdata_prop_handlers, "data", sizeof("data")-1, dom_characterdata_data_read, dom_characterdata_data_write);
@@ -698,7 +698,7 @@ PHP_MINIT_FUNCTION(dom)
 
 	zend_class_implements(dom_characterdata_class_entry, 1, dom_childnode_class_entry);
 
-	REGISTER_DOM_CLASS(ce, "DOMAttr", dom_node_class_entry, php_dom_attr_class_functions, dom_attr_class_entry);
+	REGISTER_DOM_CLASS(ce, "DOMAttr", dom_node_class_entry, class_DOMAttr_methods, dom_attr_class_entry);
 
 	zend_hash_init(&dom_attr_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_attr_prop_handlers, "name", sizeof("name")-1, dom_attr_name_read, NULL);
@@ -709,7 +709,7 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_merge(&dom_attr_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
 	zend_hash_add_ptr(&classes, ce.name, &dom_attr_prop_handlers);
 
-	REGISTER_DOM_CLASS(ce, "DOMElement", dom_node_class_entry, php_dom_element_class_functions, dom_element_class_entry);
+	REGISTER_DOM_CLASS(ce, "DOMElement", dom_node_class_entry, class_DOMElement_methods, dom_element_class_entry);
 
 	zend_hash_init(&dom_element_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_element_prop_handlers, "tagName", sizeof("tagName")-1, dom_element_tag_name_read, NULL);
@@ -724,17 +724,17 @@ PHP_MINIT_FUNCTION(dom)
 
 	zend_class_implements(dom_element_class_entry, 2, dom_parentnode_class_entry, dom_childnode_class_entry);
 
-	REGISTER_DOM_CLASS(ce, "DOMText", dom_characterdata_class_entry, php_dom_text_class_functions, dom_text_class_entry);
+	REGISTER_DOM_CLASS(ce, "DOMText", dom_characterdata_class_entry, class_DOMText_methods, dom_text_class_entry);
 
 	zend_hash_init(&dom_text_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_text_prop_handlers, "wholeText", sizeof("wholeText")-1, dom_text_whole_text_read, NULL);
 	zend_hash_merge(&dom_text_prop_handlers, &dom_characterdata_prop_handlers, dom_copy_prop_handler, 0);
 	zend_hash_add_ptr(&classes, ce.name, &dom_text_prop_handlers);
 
-	REGISTER_DOM_CLASS(ce, "DOMComment", dom_characterdata_class_entry, php_dom_comment_class_functions, dom_comment_class_entry);
+	REGISTER_DOM_CLASS(ce, "DOMComment", dom_characterdata_class_entry, class_DOMComment_methods, dom_comment_class_entry);
 	zend_hash_add_ptr(&classes, ce.name, &dom_characterdata_prop_handlers);
 
-	REGISTER_DOM_CLASS(ce, "DOMCdataSection", dom_text_class_entry, php_dom_cdatasection_class_functions, dom_cdatasection_class_entry);
+	REGISTER_DOM_CLASS(ce, "DOMCdataSection", dom_text_class_entry, class_DOMCdataSection_methods, dom_cdatasection_class_entry);
 	zend_hash_add_ptr(&classes, ce.name, &dom_text_prop_handlers);
 
 	REGISTER_DOM_CLASS(ce, "DOMDocumentType", dom_node_class_entry, class_DOMDocumentType_methods, dom_documenttype_class_entry);
@@ -749,7 +749,7 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_merge(&dom_documenttype_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
 	zend_hash_add_ptr(&classes, ce.name, &dom_documenttype_prop_handlers);
 
-	REGISTER_DOM_CLASS(ce, "DOMNotation", dom_node_class_entry, php_dom_notation_class_functions, dom_notation_class_entry);
+	REGISTER_DOM_CLASS(ce, "DOMNotation", dom_node_class_entry, class_DOMNotation_methods, dom_notation_class_entry);
 
 	zend_hash_init(&dom_notation_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_notation_prop_handlers, "publicId", sizeof("publicId")-1, dom_notation_public_id_read, NULL);
@@ -757,7 +757,7 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_merge(&dom_notation_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
 	zend_hash_add_ptr(&classes, ce.name, &dom_notation_prop_handlers);
 
-	REGISTER_DOM_CLASS(ce, "DOMEntity", dom_node_class_entry, php_dom_entity_class_functions, dom_entity_class_entry);
+	REGISTER_DOM_CLASS(ce, "DOMEntity", dom_node_class_entry, class_DOMEntity_methods, dom_entity_class_entry);
 
 	zend_hash_init(&dom_entity_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_entity_prop_handlers, "publicId", sizeof("publicId")-1, dom_entity_public_id_read, NULL);
@@ -769,10 +769,10 @@ PHP_MINIT_FUNCTION(dom)
 	zend_hash_merge(&dom_entity_prop_handlers, &dom_node_prop_handlers, dom_copy_prop_handler, 0);
 	zend_hash_add_ptr(&classes, ce.name, &dom_entity_prop_handlers);
 
-	REGISTER_DOM_CLASS(ce, "DOMEntityReference", dom_node_class_entry, php_dom_entityreference_class_functions, dom_entityreference_class_entry);
+	REGISTER_DOM_CLASS(ce, "DOMEntityReference", dom_node_class_entry, class_DOMEntityReference_methods, dom_entityreference_class_entry);
 	zend_hash_add_ptr(&classes, ce.name, &dom_node_prop_handlers);
 
-	REGISTER_DOM_CLASS(ce, "DOMProcessingInstruction", dom_node_class_entry, php_dom_processinginstruction_class_functions, dom_processinginstruction_class_entry);
+	REGISTER_DOM_CLASS(ce, "DOMProcessingInstruction", dom_node_class_entry, class_DOMProcessingInstruction_methods, dom_processinginstruction_class_entry);
 
 	zend_hash_init(&dom_processinginstruction_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_processinginstruction_prop_handlers, "target", sizeof("target")-1, dom_processinginstruction_target_read, NULL);
@@ -785,7 +785,7 @@ PHP_MINIT_FUNCTION(dom)
 	dom_xpath_object_handlers.offset = XtOffsetOf(dom_xpath_object, dom) + XtOffsetOf(dom_object, std);
 	dom_xpath_object_handlers.free_obj = dom_xpath_objects_free_storage;
 
-	INIT_CLASS_ENTRY(ce, "DOMXPath", php_dom_xpath_class_functions);
+	INIT_CLASS_ENTRY(ce, "DOMXPath", class_DOMXPath_methods);
 	ce.create_object = dom_xpath_objects_new;
 	dom_xpath_class_entry = zend_register_internal_class_ex(&ce, NULL);
 

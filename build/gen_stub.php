@@ -421,7 +421,7 @@ class FuncInfo {
                 if ($this->alias->className) {
                     return sprintf(
                         "\tZEND_MALIAS(%s, %s, %s, %s, %s)\n",
-                        $this->alias->className, $this->name, $this->alias->name, $this->getArgInfoName(), $this->getFlagsAsString()
+                        $this->alias->className, $this->name->name, $this->alias->name, $this->getArgInfoName(), $this->getFlagsAsString()
                     );
                 } else {
                     return sprintf(

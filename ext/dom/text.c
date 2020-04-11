@@ -23,7 +23,6 @@
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
 #include "dom_ce.h"
-#include "text_arginfo.h"
 
 /*
 * class DOMText extends DOMCharacterData
@@ -32,16 +31,8 @@
 * Since:
 */
 
-const zend_function_entry php_dom_text_class_functions[] = {
-	PHP_ME(domtext, splitText, arginfo_class_DOMText_splitText, ZEND_ACC_PUBLIC)
-	PHP_ME(domtext, isWhitespaceInElementContent, arginfo_class_DOMText_isWhitespaceInElementContent, ZEND_ACC_PUBLIC)
-	PHP_MALIAS(domtext, isElementContentWhitespace, isWhitespaceInElementContent, arginfo_class_DOMText_isElementContentWhitespace, ZEND_ACC_PUBLIC)
-	PHP_ME(domtext, __construct, arginfo_class_DOMText___construct, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 /* {{{ proto DOMText::__construct([string value]); */
-PHP_METHOD(domtext, __construct)
+PHP_METHOD(DOMText, __construct)
 {
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
@@ -114,7 +105,7 @@ int dom_text_whole_text_read(dom_object *obj, zval *retval)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-38853C1D
 Since:
 */
-PHP_METHOD(domtext, splitText)
+PHP_METHOD(DOMText, splitText)
 {
 	zval       *id;
 	xmlChar    *cur;
@@ -176,7 +167,7 @@ PHP_METHOD(domtext, splitText)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-isWhitespaceInElementContent
 Since: DOM Level 3
 */
-PHP_METHOD(domtext, isWhitespaceInElementContent)
+PHP_METHOD(DOMText, isWhitespaceInElementContent)
 {
 	zval       *id;
 	xmlNodePtr  node;

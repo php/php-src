@@ -15,49 +15,35 @@
    +----------------------------------------------------------------------+
 */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ifndef DOM_EXCEPTION_H
+#define DOM_EXCEPTION_H
 
-#include "php.h"
-#if HAVE_LIBXML && HAVE_DOM
-#include "php_dom.h"
+/* domexception errors */
+typedef enum {
+/* PHP_ERR is non-spec code for PHP errors: */
+	PHP_ERR                        = 0,
+	INDEX_SIZE_ERR                 = 1,
+	DOMSTRING_SIZE_ERR             = 2,
+	HIERARCHY_REQUEST_ERR          = 3,
+	WRONG_DOCUMENT_ERR             = 4,
+	INVALID_CHARACTER_ERR          = 5,
+	NO_DATA_ALLOWED_ERR            = 6,
+	NO_MODIFICATION_ALLOWED_ERR    = 7,
+	NOT_FOUND_ERR                  = 8,
+	NOT_SUPPORTED_ERR              = 9,
+	INUSE_ATTRIBUTE_ERR            = 10,
+/* Introduced in DOM Level 2: */
+	INVALID_STATE_ERR              = 11,
+/* Introduced in DOM Level 2: */
+	SYNTAX_ERR                     = 12,
+/* Introduced in DOM Level 2: */
+	INVALID_MODIFICATION_ERR       = 13,
+/* Introduced in DOM Level 2: */
+	NAMESPACE_ERR                  = 14,
+/* Introduced in DOM Level 2: */
+	INVALID_ACCESS_ERR             = 15,
+/* Introduced in DOM Level 3: */
+	VALIDATION_ERR                 = 16
+} dom_exception_code;
 
-/*
-* class DOMComment extends DOMCharacterData
-*
-* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1728279322
-* Since:
-*/
-
-/* {{{ proto DOMComment::__construct([string value]); */
-PHP_METHOD(DOMComment, __construct)
-{
-	xmlNodePtr nodep = NULL, oldnode = NULL;
-	dom_object *intern;
-	char *value = NULL;
-	size_t value_len;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &value, &value_len) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	nodep = xmlNewComment((xmlChar *) value);
-
-	if (!nodep) {
-		php_dom_throw_error(INVALID_STATE_ERR, 1);
-		return;
-	}
-
-	intern = Z_DOMOBJ_P(ZEND_THIS);
-	if (intern != NULL) {
-		oldnode = dom_object_get_node(intern);
-		if (oldnode != NULL) {
-			php_libxml_node_free_resource(oldnode );
-		}
-		php_libxml_increment_node_ptr((php_libxml_node_object *)intern, (xmlNodePtr)nodep, (void *)intern);
-	}
-}
-/* }}} end DOMComment::__construct */
-
-#endif
+#endif /* DOM_EXCEPTION_H */

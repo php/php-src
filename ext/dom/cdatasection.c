@@ -22,7 +22,6 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-#include "cdatasection_arginfo.h"
 
 /*
 * class DOMCdataSection extends DOMText
@@ -31,13 +30,8 @@
 * Since:
 */
 
-const zend_function_entry php_dom_cdatasection_class_functions[] = {
-	PHP_ME(domcdatasection, __construct, arginfo_class_DOMCdataSection___construct, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 /* {{{ proto DOMCdataSection::__construct(string value); */
-PHP_METHOD(domcdatasection, __construct)
+PHP_METHOD(DOMCdataSection, __construct)
 {
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;

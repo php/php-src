@@ -22,7 +22,6 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-#include "domimplementation_arginfo.h"
 
 /*
 * class DOMImplementation
@@ -31,19 +30,11 @@
 * Since:
 */
 
-const zend_function_entry php_dom_domimplementation_class_functions[] = {
-	PHP_ME(domimplementation, getFeature, arginfo_class_DOMImplementation_getFeature, ZEND_ACC_PUBLIC)
-	PHP_ME(domimplementation, hasFeature, arginfo_class_DOMImplementation_hasFeature, ZEND_ACC_PUBLIC)
-	PHP_ME(domimplementation, createDocumentType, arginfo_class_DOMImplementation_createDocumentType, ZEND_ACC_PUBLIC)
-	PHP_ME(domimplementation, createDocument, arginfo_class_DOMImplementation_createDocument, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 /* {{{ proto bool dom_domimplementation_has_feature(string feature, string version);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-5CED94D7
 Since:
 */
-PHP_METHOD(domimplementation, hasFeature)
+PHP_METHOD(DOMImplementation, hasFeature)
 {
 	size_t feature_len, version_len;
 	char *feature, *version;
@@ -64,7 +55,7 @@ PHP_METHOD(domimplementation, hasFeature)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Level-2-Core-DOM-createDocType
 Since: DOM Level 2
 */
-PHP_METHOD(domimplementation, createDocumentType)
+PHP_METHOD(DOMImplementation, createDocumentType)
 {
 	xmlDtd *doctype;
 	int ret;
@@ -126,7 +117,7 @@ PHP_METHOD(domimplementation, createDocumentType)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Level-2-Core-DOM-createDocument
 Since: DOM Level 2
 */
-PHP_METHOD(domimplementation, createDocument)
+PHP_METHOD(DOMImplementation, createDocument)
 {
 	zval *node = NULL;
 	xmlDoc *docp;
@@ -231,7 +222,7 @@ PHP_METHOD(domimplementation, createDocument)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementation3-getFeature
 Since: DOM Level 3
 */
-PHP_METHOD(domimplementation, getFeature)
+PHP_METHOD(DOMImplementation, getFeature)
 {
 	size_t feature_len, version_len;
 	char *feature, *version;

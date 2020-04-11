@@ -24,7 +24,6 @@
 #if HAVE_LIBXML && HAVE_DOM
 
 #include "php_dom.h"
-#include "attr_arginfo.h"
 
 /*
 * class DOMAttr extends DOMNode
@@ -33,14 +32,8 @@
 * Since:
 */
 
-const zend_function_entry php_dom_attr_class_functions[] = {
-	PHP_ME(domattr, isId, arginfo_class_DOMAttr_isId, ZEND_ACC_PUBLIC)
-	PHP_ME(domattr, __construct, arginfo_class_DOMAttr___construct, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 /* {{{ proto DOMAttr::__construct(string name, [string value]) */
-PHP_METHOD(domattr, __construct)
+PHP_METHOD(DOMAttr, __construct)
 {
 	xmlAttrPtr nodep = NULL;
 	xmlNodePtr oldnode = NULL;
@@ -213,7 +206,7 @@ int dom_attr_schema_type_info_read(dom_object *obj, zval *retval)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-isId
 Since: DOM Level 3
 */
-PHP_METHOD(domattr, isId)
+PHP_METHOD(DOMAttr, isId)
 {
 	zval *id;
 	dom_object *intern;
