@@ -31,7 +31,7 @@ class DOMNode
     /** @return int */
     public function getLineNo() {}
 
-    /** @return ?string */
+    /** @return string|null */
     public function getNodePath() {}
 
     /** @return bool */
@@ -52,10 +52,10 @@ class DOMNode
     /** @return bool */
     public function isSupported(string $feature, string $version) {}
 
-    /** @return ?string */
+    /** @return string|null */
     public function lookupNamespaceUri(?string $prefix) {}
 
-    /** @return ?string */
+    /** @return string|null */
     public function lookupPrefix(string $namespaceURI) {}
 
     /** @return void */

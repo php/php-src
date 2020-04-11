@@ -8,13 +8,13 @@ class Locale
     /** @return bool */
     public static function setDefault(string $locale) {}
 
-    /** @return ?string */
+    /** @return string|null */
     public static function getPrimaryLanguage(string $locale) {}
 
-    /** @return ?string */
+    /** @return string|null */
     public static function getScript(string $locale) {}
 
-    /** @return ?string */
+    /** @return string|null */
     public static function getRegion(string $locale) {}
 
     /** @return array|false|null */
@@ -38,19 +38,19 @@ class Locale
     /** @return string|false */
     public static function composeLocale(array $subtags) {}
 
-    /** @return ?array */
+    /** @return array|null */
     public static function parseLocale(string $locale) {}
 
-    /** @return ?array */
+    /** @return array|null */
     public static function getAllVariants(string $locale) {}
 
-    /** @return ?bool */
+    /** @return bool|null */
     public static function filterMatches(string $langtag, string $locale, bool $canonicalize = false) {}
 
-    /** @return ?string */
+    /** @return string|null */
     public static function lookup(array $langtag, string $locale, bool $canonicalize = false, ?string $def = null) {}
 
-    /** @return ?string */
+    /** @return string|null */
     public static function canonicalize(string $locale) {}
 
     /** @return string|false */

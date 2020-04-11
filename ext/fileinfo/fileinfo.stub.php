@@ -8,14 +8,14 @@ class finfo
     public function __construct(int $options = FILEINFO_NONE, string $arg = "") {}
 
     /**
-     * @param ?resource $context
+     * @param resource|null $context
      * @return string|false
      * @alias finfo_file
      */
     public function file(string $file_name, int $options = FILEINFO_NONE, $context = null) {}
 
     /**
-     * @param ?resource $context
+     * @param resource|null $context
      * @return string|false
      * @alias finfo_buffer
      */
@@ -43,13 +43,13 @@ function finfo_set_flags($finfo, int $options): bool {}
 
 /**
  * @param resource $finfo
- * @param ?resource $context
+ * @param resource|null $context
  */
 function finfo_file($finfo, string $file_name, int $options = FILEINFO_NONE, $context = null): string|false {}
 
 /**
  * @param resource $finfo
- * @param ?resource $context
+ * @param resource|null $context
  */
 function finfo_buffer($finfo, string $string, int $options = FILEINFO_NONE, $context = null): string|false {}
 

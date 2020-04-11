@@ -34,7 +34,7 @@ class DOMDocument implements DOMParentNode
     /** @return DOMText|false */
     public function createTextNode(string $data) {}
 
-    /** @return ?DOMElement */
+    /** @return DOMElement|null */
     public function getElementById(string $elementId) {}
 
     /** @return DOMNodeList */

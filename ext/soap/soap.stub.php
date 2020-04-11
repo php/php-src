@@ -71,19 +71,19 @@ class SoapClient
     /** @return array|null */
     public function __getTypes();
 
-    /** @return ?string */
+    /** @return string|null */
     public function __getLastRequest();
 
-    /** @return ?string */
+    /** @return string|null */
     public function __getLastResponse();
 
-    /** @return ?string */
+    /** @return string|null */
     public function __getLastRequestHeaders();
 
-    /** @return ?string */
+    /** @return string|null */
     public function __getLastResponseHeaders();
 
-    /** @return ?string */
+    /** @return string|null */
     public function __doRequest(string $request, string $location, string $action, int $version, int $one_way = 0);
 
     /** @return void */
@@ -95,6 +95,6 @@ class SoapClient
     /** @return bool */
     public function __setSoapHeaders($soapheaders = null);
 
-    /** @return ?string */
+    /** @return string|null */
     public function __setLocation(string $new_location = "");
 }

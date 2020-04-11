@@ -27,16 +27,16 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     /** @return bool */
     public function decompressFiles() {}
 
-    /** @return ?Phar */
+    /** @return Phar|null */
     public function compress(int $compression_type, string $file_ext = UNKNOWN) {}
 
-    /** @return ?Phar */
+    /** @return Phar|null */
     public function decompress(string $file_ext = UNKNOWN) {}
 
-    /** @return ?Phar */
+    /** @return Phar|null */
     public function convertToExecutable(int $format = 9021976, int $compression_type = 9021976, string $file_ext = UNKNOWN) {}
 
-    /** @return ?Phar */
+    /** @return Phar|null */
     public function convertToData(int $format = 9021976, int $compression_type = 9021976, string $file_ext = UNKNOWN) {}
 
     /** @return bool */
@@ -54,7 +54,7 @@ class Phar extends RecursiveDirectoryIterator implements Countable, ArrayAccess
     /** @return bool */
     public function extractTo(string $pathto, $files = null, bool $overwrite = false) {}
 
-    /** @return ?string */
+    /** @return string|null */
     public function getAlias() {}
 
     /** @return string */
@@ -204,16 +204,16 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     /** @return bool */
     public function decompressFiles() {}
 
-    /** @return ?Phar */
+    /** @return Phar|null */
     public function compress(int $compression_type, string $file_ext = UNKNOWN) {}
 
-    /** @return ?Phar */
+    /** @return Phar|null */
     public function decompress(string $file_ext = UNKNOWN) {}
 
-    /** @return ?Phar */
+    /** @return Phar|null */
     public function convertToExecutable(int $format = 9021976, int $compression_type = 9021976, string $file_ext = UNKNOWN) {}
 
-    /** @return ?Phar */
+    /** @return Phar|null */
     public function convertToData(int $format = 9021976, int $compression_type = 9021976, string $file_ext = UNKNOWN) {}
 
     /** @return bool */
@@ -231,7 +231,7 @@ class PharData extends RecursiveDirectoryIterator implements Countable, ArrayAcc
     /** @return bool */
     public function extractTo(string $pathto, $files = null, bool $overwrite = false) {}
 
-    /** @return ?string */
+    /** @return string|null */
     public function getAlias() {}
 
     /** @return string */

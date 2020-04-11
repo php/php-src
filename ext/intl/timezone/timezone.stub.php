@@ -16,13 +16,13 @@ class IntlTimeZone
      */
     public static function createEnumeration($countryOrRawOffset = null) {}
 
-    /** @return ?IntlTimeZone */
+    /** @return IntlTimeZone|null */
     public static function createTimeZone(string $zoneId) {}
 
     /** @return IntlIterator|false */
     public static function createTimeZoneIDEnumeration(int $zoneType, ?string $region = null, ?int $rawOffset = null) {}
 
-    /** @return ?IntlTimeZone */
+    /** @return IntlTimeZone|null */
     public static function fromDateTimeZone(DateTimeZone $zone) {}
 
     /** @return string|false */

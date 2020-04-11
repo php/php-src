@@ -8,7 +8,7 @@ class XMLReader
     /** @return string|null|false */
     public function getAttribute(string $name) {}
 
-    /** @return ?string */
+    /** @return string|null */
     public function getAttributeNo(int $index) {}
 
     /** @return string|null|false */

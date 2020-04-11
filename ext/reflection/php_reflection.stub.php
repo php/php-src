@@ -39,10 +39,10 @@ abstract class ReflectionFunctionAbstract implements Reflector
     /** @return bool */
     public function isVariadic() {}
 
-    /** @return ?object */
+    /** @return object|null */
     public function getClosureThis() {}
 
-    /** @return ?ReflectionClass */
+    /** @return ReflectionClass|null */
     public function getClosureScopeClass() {}
 
     /** @return string|false */
@@ -51,7 +51,7 @@ abstract class ReflectionFunctionAbstract implements Reflector
     /** @return int|false */
     public function getEndLine() {}
 
-    /** @return ?ReflectionExtension */
+    /** @return ReflectionExtension|null */
     public function getExtension() {}
 
     /** @return string|false */
@@ -90,7 +90,7 @@ abstract class ReflectionFunctionAbstract implements Reflector
     /** @return bool */
     public function hasReturnType() {}
 
-    /** @return ?ReflectionType */
+    /** @return ReflectionType|null */
     public function getReturnType() {}
 }
 
@@ -130,7 +130,7 @@ class ReflectionGenerator
     /** @return ReflectionFunctionAbstract */
     public function getFunction() {}
 
-    /** @return ?object */
+    /** @return object|null */
     public function getThis() {}
 
     /** @return Generator */
@@ -229,7 +229,7 @@ class ReflectionClass implements Reflector
     /** @return string|false */
     public function getDocComment() {}
 
-    /** @return ?ReflectionMethod */
+    /** @return ReflectionMethod|null */
     public function getConstructor() {}
 
     /** @return bool */
@@ -253,7 +253,7 @@ class ReflectionClass implements Reflector
     /** @return bool */
     public function hasConstant(string $name) {}
 
-    /** @return ?array */
+    /** @return array|null */
     public function getConstants() {}
 
     /** @return ReflectionClassConstant[] */
@@ -316,7 +316,7 @@ class ReflectionClass implements Reflector
      */
     public function isSubclassOf($class) {}
 
-    /** @return ?array */
+    /** @return array|null */
     public function getStaticProperties() {}
 
     /** @return mixed */
@@ -340,7 +340,7 @@ class ReflectionClass implements Reflector
      */
     public function implementsInterface($interface) {}
 
-    /** @return ?ReflectionExtension */
+    /** @return ReflectionExtension|null */
     public function getExtension() {}
 
     /** @return string|false */
@@ -409,7 +409,7 @@ class ReflectionProperty implements Reflector
     /** @return void */
     public function setAccessible(bool $visible) {}
 
-    /** @return ?ReflectionType */
+    /** @return ReflectionType|null */
     public function getType() {}
 
     /** @return bool */
@@ -479,16 +479,16 @@ class ReflectionParameter implements Reflector
     /** @return ReflectionFunctionAbstract */
     public function getDeclaringFunction() {}
 
-    /** @return ?ReflectionClass */
+    /** @return ReflectionClass|null */
     public function getDeclaringClass() {}
 
-    /** @return ?ReflectionClass */
+    /** @return ReflectionClass|null */
     public function getClass() {}
 
     /** @return bool */
     public function hasType() {}
 
-    /** @return ?ReflectionType */
+    /** @return ReflectionType|null */
     public function getType() {}
 
     /** @return bool */
@@ -515,7 +515,7 @@ class ReflectionParameter implements Reflector
     /** @return bool */
     public function isDefaultValueConstant() {}
 
-    /** @return ?string */
+    /** @return string|null */
     public function getDefaultValueConstantName() {}
 
     /** @return bool */
@@ -557,7 +557,7 @@ class ReflectionExtension implements Reflector
     /** @return string */
     public function getName() {}
 
-    /** @return ?string */
+    /** @return string|null */
     public function getVersion() {}
 
     /** @return ReflectionFunction[] */

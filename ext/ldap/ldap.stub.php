@@ -223,7 +223,7 @@ function ldap_rename_ext($link_identifier, string $dn, string $newrdn, string $n
 /** @param resource $link_identifier */
 function ldap_get_option($link_identifier, int $option, &$retval = null): bool {}
 
-/** @param ?resource $link_identifier */
+/** @param resource|null $link_identifier */
 function ldap_set_option($link_identifier, int $option, $newval): bool {}
 
 /**

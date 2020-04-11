@@ -2,13 +2,13 @@
 
 class DOMNamedNodeMap
 {
-    /** @return ?DOMNode */
+    /** @return DOMNode|null */
     public function getNamedItem(string $name) {}
 
-    /** @return ?DOMNode */
+    /** @return DOMNode|null */
     public function getNamedItemNS(?string $namespaceURI, string $localName) {}
 
-    /** @return ?DOMNode */
+    /** @return DOMNode|null */
     public function item(int $index) {}
 
     /** @return int|false */
