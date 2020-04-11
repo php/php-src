@@ -142,7 +142,7 @@ prof-clean:
 prof-use:
 	CCACHE_DISABLE=1 $(MAKE) PROF_FLAGS=-fprofile-use all
 
-# olny php above 7.1.0 supports nullable return type
+# only php above 7.1.0 supports nullable return type
 %_arginfo.h: %.stub.php
 	@if test -e "$(top_srcdir)/build/gen_stub.php"; then \
 		if test ! -z "$(PHP_EXECUTABLE)" && test -x "$(PHP_EXECUTABLE)"; then \
