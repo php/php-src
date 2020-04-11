@@ -5,59 +5,59 @@ interface Traversable {}
 interface IteratorAggregate extends Traversable
 {
     /** @return Traversable */
-    function getIterator();
+    public function getIterator();
 }
 
 interface Iterator extends Traversable
 {
     /** @return mixed */
-    function current();
+    public function current();
 
     /** @return void */
-    function next();
+    public function next();
 
     /** @return mixed */
-    function key();
+    public function key();
 
     /** @return bool */
-    function valid();
+    public function valid();
 
     /** @return void */
-    function rewind();
+    public function rewind();
 }
 
 interface ArrayAccess
 {
     /** @return bool */
-    function offsetExists($offset);
+    public function offsetExists($offset);
 
     /* actually this should be return by ref but atm cannot be */
     /** @return mixed */
-    function offsetGet($offset);
+    public function offsetGet($offset);
 
     /** @return void */
-    function offsetSet($offset, $value);
+    public function offsetSet($offset, $value);
 
     /** @return void */
-    function offsetUnset($offset);
+    public function offsetUnset($offset);
 }
 
 interface Serializable
 {
     /** @return string */
-    function serialize();
+    public function serialize();
 
     /** @return void */
-    function unserialize(string $serialized);
+    public function unserialize(string $serialized);
 }
 
 interface Countable
 {
     /** @return int */
-    function count();
+    public function count();
 }
 
 interface Stringable
 {
-    function __toString(): string;
+    public function __toString(): string;
 }

@@ -4,22 +4,22 @@
 
 class finfo
 {
-    function __construct(int $options = FILEINFO_NONE, string $arg = "") {}
+    public function __construct(int $options = FILEINFO_NONE, string $arg = "") {}
 
     /**
      * @param ?resource $context
      * @return string|false
      */
-    function file(string $file_name, int $options = FILEINFO_NONE, $context = null) {}
+    public function file(string $file_name, int $options = FILEINFO_NONE, $context = null) {}
 
     /**
      * @param ?resource $context
      * @return string|false
      */
-    function buffer(string $string, int $options = FILEINFO_NONE, $context = null) {}
+    public function buffer(string $string, int $options = FILEINFO_NONE, $context = null) {}
 
     /** @return bool */
-    function set_flags(int $options) {}
+    public function set_flags(int $options) {}
 }
 
 /** @return resource|false */

@@ -50,35 +50,35 @@ function session_start(array $options = []): bool {}
 interface SessionHandlerInterface
 {
     /** @return bool */
-    function open(string $save_path, string $session_name);
+    public function open(string $save_path, string $session_name);
 
     /** @return bool */
-    function close();
+    public function close();
 
     /** @return string */
-    function read(string $key);
+    public function read(string $key);
 
     /** @return bool */
-    function write(string $key, string $val);
+    public function write(string $key, string $val);
 
     /** @return bool */
-    function destroy(string $key);
+    public function destroy(string $key);
 
     /** @return int|bool */
-    function gc(int $maxlifetime);
+    public function gc(int $maxlifetime);
 }
 
 interface SessionIdInterface
 {
     /** @return string */
-    function create_sid();
+    public function create_sid();
 }
 
 interface SessionUpdateTimestampHandlerInterface
 {
     /** @return bool */
-    function validateId(string $key);
+    public function validateId(string $key);
 
     /** @return bool */
-    function updateTimestamp(string $key, string $val);
+    public function updateTimestamp(string $key, string $val);
 }

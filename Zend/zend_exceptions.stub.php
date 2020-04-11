@@ -3,63 +3,63 @@
 interface Throwable extends Stringable
 {
     /** @return string */
-    function getMessage();
+    public function getMessage();
 
     /** @return int */
-    function getCode();
+    public function getCode();
 
     /** @return string */
-    function getFile();
+    public function getFile();
 
     /** @return int */
-    function getLine();
+    public function getLine();
 
     /** @return array */
-    function getTrace();
+    public function getTrace();
 
     /** @return ?Throwable */
-    function getPrevious();
+    public function getPrevious();
 
     /** @return string */
-    function getTraceAsString();
+    public function getTraceAsString();
 }
 
 class Exception implements Throwable
 {
     final private function __clone() {}
 
-    function __construct(string $message = UNKNOWN, int $code = 0, ?Throwable $previous = null) {}
+    public function __construct(string $message = UNKNOWN, int $code = 0, ?Throwable $previous = null) {}
 
-    function __wakeup() {}
-
-    /** @return string */
-    final function getMessage() {}
-
-    /** @return int */
-    final function getCode() {}
+    public function __wakeup() {}
 
     /** @return string */
-    final function getFile() {}
+    final public function getMessage() {}
 
     /** @return int */
-    final function getLine() {}
+    final public function getCode() {}
+
+    /** @return string */
+    final public function getFile() {}
+
+    /** @return int */
+    final public function getLine() {}
 
     /** @return array */
-    final function getTrace() {}
+    final public function getTrace() {}
 
     /** @return ?Throwable */
-    final function getPrevious() {}
+    final public function getPrevious() {}
 
     /** @return string */
-    final function getTraceAsString() {}
+    final public function getTraceAsString() {}
 
-    function __toString(): string {}
+    public function __toString(): string {}
 }
 
 class ErrorException extends Exception
 {
-    function __construct(string $message = UNKNOWN, int $code = 0, int $severity = E_ERROR, string $filename = UNKNOWN, int $lineno = 0, ?Throwable $previous = null) {}
+    public function __construct(string $message = UNKNOWN, int $code = 0, int $severity = E_ERROR, string $filename = UNKNOWN, int $lineno = 0, ?Throwable $previous = null) {}
 
     /** @return int */
-    final function getSeverity() {}
+    final public function getSeverity() {}
 }

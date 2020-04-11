@@ -86,87 +86,87 @@ function xmlwriter_flush(XMLWriter $xmlwriter, bool $empty = true): string|int {
 
 class XMLWriter
 {
-    function openUri(string $uri): bool {}
+    public function openUri(string $uri): bool {}
 
-    function openMemory(): bool {}
+    public function openMemory(): bool {}
 
-    function setIndent(bool $indent): bool {}
+    public function setIndent(bool $indent): bool {}
 
-    function setIdentString(string $indentString): bool {}
+    public function setIdentString(string $indentString): bool {}
 
-    function startComment(): bool {}
+    public function startComment(): bool {}
 
-    function endComment(): bool {}
+    public function endComment(): bool {}
 
-    function startAttribute(string $name): bool {}
+    public function startAttribute(string $name): bool {}
 
-    function endAttribute(): bool {}
+    public function endAttribute(): bool {}
 
-    function writeAttribute(string $name, string $value): bool {}
+    public function writeAttribute(string $name, string $value): bool {}
 
-    function startAttributeNs(string $prefix, string $name, ?string $uri): bool {}
+    public function startAttributeNs(string $prefix, string $name, ?string $uri): bool {}
 
-    function writeAttributeNs(string $prefix, string $name, ?string $uri, string $content): bool {}
+    public function writeAttributeNs(string $prefix, string $name, ?string $uri, string $content): bool {}
 
-    function startElement(string $name): bool {}
+    public function startElement(string $name): bool {}
 
-    function endElement(): bool {}
+    public function endElement(): bool {}
 
-    function fullEndElement(): bool {}
+    public function fullEndElement(): bool {}
 
-    function startElementNs(?string $prefix, string $name, ?string $uri): bool {}
+    public function startElementNs(?string $prefix, string $name, ?string $uri): bool {}
 
-    function writeElement(string $name, ?string $content = null): bool {}
+    public function writeElement(string $name, ?string $content = null): bool {}
 
-    function writeElementNs(?string $prefix, string $name, ?string $uri, ?string $content = null): bool {}
+    public function writeElementNs(?string $prefix, string $name, ?string $uri, ?string $content = null): bool {}
 
-    function startPi(string $target): bool {}
+    public function startPi(string $target): bool {}
 
-    function endPi(): bool {}
+    public function endPi(): bool {}
 
-    function writePi(string $target, string $content): bool {}
+    public function writePi(string $target, string $content): bool {}
 
-    function startCdata(): bool {}
+    public function startCdata(): bool {}
 
-    function endCdata(): bool {}
+    public function endCdata(): bool {}
 
-    function writeCdata(string $content): bool {}
+    public function writeCdata(string $content): bool {}
 
-    function text(string $content): bool {}
+    public function text(string $content): bool {}
 
-    function writeRaw(string $content): bool {}
+    public function writeRaw(string $content): bool {}
 
-    function startDocument(?string $version = '1.0', ?string $encoding = null, ?string $standalone = null): bool {}
+    public function startDocument(?string $version = '1.0', ?string $encoding = null, ?string $standalone = null): bool {}
 
-    function endDocument(): bool {}
+    public function endDocument(): bool {}
 
-    function writeComment(string $content): bool {}
+    public function writeComment(string $content): bool {}
 
-    function startDtd(string $qualifiedName, ?string $publicId = null, ?string $systemId = null): bool {}
+    public function startDtd(string $qualifiedName, ?string $publicId = null, ?string $systemId = null): bool {}
 
-    function endDtd(): bool {}
+    public function endDtd(): bool {}
 
-    function writeDtd(string $name, ?string $publicId = null, ?string $systemId = null, ?string $subset = null): bool {}
+    public function writeDtd(string $name, ?string $publicId = null, ?string $systemId = null, ?string $subset = null): bool {}
 
-    function startDtdElement(string $qualifiedName): bool {}
+    public function startDtdElement(string $qualifiedName): bool {}
 
-    function endDtdElement(): bool {}
+    public function endDtdElement(): bool {}
 
-    function writeDtdElement(string $name, string $content): bool {}
+    public function writeDtdElement(string $name, string $content): bool {}
 
-    function startDtdAttlist(string $name): bool {}
+    public function startDtdAttlist(string $name): bool {}
 
-    function endDtdAttlist(): bool {}
+    public function endDtdAttlist(): bool {}
 
-    function writeDtdAttlist(string $name, string $content): bool {}
+    public function writeDtdAttlist(string $name, string $content): bool {}
 
-    function startDtdEntity(string $name, bool $isparam): bool {}
+    public function startDtdEntity(string $name, bool $isparam): bool {}
 
-    function endDtdEntity(): bool {}
+    public function endDtdEntity(): bool {}
 
-    function writeDtdEntity(string $name, string $content, bool $isparam, string $publicId = UNKNOWN, string $systemId = UNKNOWN, string $ndataid = UNKNOWN): bool {}
+    public function writeDtdEntity(string $name, string $content, bool $isparam, string $publicId = UNKNOWN, string $systemId = UNKNOWN, string $ndataid = UNKNOWN): bool {}
 
-    function outputMemory(bool $flush = true): string {}
+    public function outputMemory(bool $flush = true): string {}
 
-    function flush(bool $empty = true): string|int {}
+    public function flush(bool $empty = true): string|int {}
 }

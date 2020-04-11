@@ -82,31 +82,31 @@ function snmp_read_mib(string $filename): bool {}
 
 class SNMP
 {
-    function __construct(int $version, string $host, string $community, int $timeout = UNKNOWN, int $retries = UNKNOWN) {}
+    public function __construct(int $version, string $host, string $community, int $timeout = UNKNOWN, int $retries = UNKNOWN) {}
 
     /** @return bool */
-    function close() {}
+    public function close() {}
 
     /** @return bool */
-    function setSecurity(string $sec_level, string $auth_protocol = '', string $auth_passphrase = '', string $priv_protocol = '', string $priv_passphrase = '', string $contextName = '', string $contextEngineID = '') {}
+    public function setSecurity(string $sec_level, string $auth_protocol = '', string $auth_passphrase = '', string $priv_protocol = '', string $priv_passphrase = '', string $contextName = '', string $contextEngineID = '') {}
 
     /**
      * @param array|string $object_id
      * @return array|bool
      */
-    function get($object_id, bool $use_orignames = false) {}
+    public function get($object_id, bool $use_orignames = false) {}
 
     /**
      * @param array|string $object_id
      * @return array|bool
      */
-    function getnext($object_id) {}
+    public function getnext($object_id) {}
 
     /**
      * @param array|string $object_id
      * @return array|bool
      */
-    function walk($object_id, bool $suffix_keys = false, int $max_repetitions = UNKNOWN, int $non_repeaters = UNKNOWN) {}
+    public function walk($object_id, bool $suffix_keys = false, int $max_repetitions = UNKNOWN, int $non_repeaters = UNKNOWN) {}
 
     /**
      * @param array|string $object_id
@@ -114,11 +114,11 @@ class SNMP
      * @param array|string $value
      * @return array|bool
      */
-    function set($object_id, $type, $value) {}
+    public function set($object_id, $type, $value) {}
 
     /** @return int */
-    function getErrno() {}
+    public function getErrno() {}
 
     /** @return string */
-    function getError() {}
+    public function getError() {}
 }
