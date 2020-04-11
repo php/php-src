@@ -30,10 +30,6 @@
 * Since:
 */
 
-const zend_function_entry php_dom_notation_class_functions[] = {
-	PHP_FE_END
-};
-
 /* {{{ attribute protos, not implemented yet */
 
 /* {{{ publicId	string

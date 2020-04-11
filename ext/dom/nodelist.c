@@ -22,7 +22,6 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-#include "nodelist_arginfo.h"
 
 /*
 * class DOMNodeList
@@ -30,12 +29,6 @@
 * URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-536297177
 * Since:
 */
-
-const zend_function_entry php_dom_nodelist_class_functions[] = {
-	PHP_ME(domnodelist, item, arginfo_class_DOMNodeList_item, ZEND_ACC_PUBLIC)
-	PHP_ME(domnodelist, count, arginfo_class_DOMNodeList_count, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
 
 /* {{{ length	int
 readonly=yes
@@ -90,7 +83,7 @@ int dom_nodelist_length_read(dom_object *obj, zval *retval)
 
 /* {{{ proto int|bool dom_nodelist_count();
 */
-PHP_METHOD(domnodelist, count)
+PHP_METHOD(DOMNodeList, count)
 {
 	zval *id;
 	dom_object *intern;
@@ -113,7 +106,7 @@ PHP_METHOD(domnodelist, count)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-844377136
 Since:
 */
-PHP_METHOD(domnodelist, item)
+PHP_METHOD(DOMNodeList, item)
 {
 	zval *id;
 	zend_long index;

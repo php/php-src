@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 #if defined(LIBXML_XPATH_ENABLED)
 class DOMXPath
 {

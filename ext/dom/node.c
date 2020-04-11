@@ -22,7 +22,6 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-#include "node_arginfo.h"
 
 /*
 * class DOMNode
@@ -30,36 +29,6 @@
 * URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1950641247
 * Since:
 */
-
-const zend_function_entry php_dom_node_class_functions[] = { /* {{{ */
-	PHP_ME(domnode, insertBefore, arginfo_class_DOMNode_insertBefore, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, replaceChild, arginfo_class_DOMNode_replaceChild, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, removeChild, arginfo_class_DOMNode_removeChild, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, appendChild, arginfo_class_DOMNode_appendChild, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, hasChildNodes, arginfo_class_DOMNode_hasChildNodes, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, cloneNode, arginfo_class_DOMNode_cloneNode, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, normalize, arginfo_class_DOMNode_normalize, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, isSupported, arginfo_class_DOMNode_isSupported, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, hasAttributes, arginfo_class_DOMNode_hasAttributes, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, isSameNode, arginfo_class_DOMNode_isSameNode, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, lookupPrefix, arginfo_class_DOMNode_lookupPrefix, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, isDefaultNamespace, arginfo_class_DOMNode_isDefaultNamespace, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, lookupNamespaceURI, arginfo_class_DOMNode_lookupNamespaceUri, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, getNodePath, arginfo_class_DOMNode_getNodePath, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, getLineNo, arginfo_class_DOMNode_getLineNo, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, C14N, arginfo_class_DOMNode_C14N, ZEND_ACC_PUBLIC)
-	PHP_ME(domnode, C14NFile, arginfo_class_DOMNode_C14NFile, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-/* }}} */
-
-const zend_function_entry php_dom_child_node_class_functions[] = { /* {{{ */
-	PHP_ABSTRACT_ME(DOMChildNode, remove, arginfo_class_DOMChildNode_remove)
-	PHP_ABSTRACT_ME(DOMChildNode, after, arginfo_class_DOMChildNode_after)
-	PHP_ABSTRACT_ME(DOMChildNode, before, arginfo_class_DOMChildNode_before)
-	PHP_FE_END
-};
-/* }}} */
 
 /* {{{ nodeName	string
 readonly=yes
@@ -866,7 +835,7 @@ static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib,
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-952280727
 Since:
 */
-PHP_METHOD(domnode, insertBefore)
+PHP_METHOD(DOMNode, insertBefore)
 {
 	zval *id, *node, *ref = NULL;
 	xmlNodePtr child, new_child, parentp, refp;
@@ -1028,7 +997,7 @@ PHP_METHOD(domnode, insertBefore)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-785887307
 Since:
 */
-PHP_METHOD(domnode, replaceChild)
+PHP_METHOD(DOMNode, replaceChild)
 {
 	zval *id, *newnode, *oldnode;
 	xmlNodePtr children, newchild, oldchild, nodep;
@@ -1117,7 +1086,7 @@ PHP_METHOD(domnode, replaceChild)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1734834066
 Since:
 */
-PHP_METHOD(domnode, removeChild)
+PHP_METHOD(DOMNode, removeChild)
 {
 	zval *id, *node;
 	xmlNodePtr children, child, nodep;
@@ -1169,7 +1138,7 @@ PHP_METHOD(domnode, removeChild)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-184E7107
 Since:
 */
-PHP_METHOD(domnode, appendChild)
+PHP_METHOD(DOMNode, appendChild)
 {
 	zval *id, *node;
 	xmlNodePtr child, nodep, new_child = NULL;
@@ -1271,7 +1240,7 @@ PHP_METHOD(domnode, appendChild)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-810594187
 Since:
 */
-PHP_METHOD(domnode, hasChildNodes)
+PHP_METHOD(DOMNode, hasChildNodes)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -1300,7 +1269,7 @@ PHP_METHOD(domnode, hasChildNodes)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3A0ED0A4
 Since:
 */
-PHP_METHOD(domnode, cloneNode)
+PHP_METHOD(DOMNode, cloneNode)
 {
 	zval *id;
 	xmlNode *n, *node;
@@ -1362,7 +1331,7 @@ PHP_METHOD(domnode, cloneNode)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-normalize
 Since:
 */
-PHP_METHOD(domnode, normalize)
+PHP_METHOD(DOMNode, normalize)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -1384,7 +1353,7 @@ PHP_METHOD(domnode, normalize)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Level-2-Core-Node-supports
 Since: DOM Level 2
 */
-PHP_METHOD(domnode, isSupported)
+PHP_METHOD(DOMNode, isSupported)
 {
 	size_t feature_len, version_len;
 	char *feature, *version;
@@ -1405,7 +1374,7 @@ PHP_METHOD(domnode, isSupported)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeHasAttrs
 Since: DOM Level 2
 */
-PHP_METHOD(domnode, hasAttributes)
+PHP_METHOD(DOMNode, hasAttributes)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -1433,7 +1402,7 @@ PHP_METHOD(domnode, hasAttributes)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isSameNode
 Since: DOM Level 3
 */
-PHP_METHOD(domnode, isSameNode)
+PHP_METHOD(DOMNode, isSameNode)
 {
 	zval *id, *node;
 	xmlNodePtr nodeotherp, nodep;
@@ -1460,7 +1429,7 @@ PHP_METHOD(domnode, isSameNode)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-lookupNamespacePrefix
 Since: DOM Level 3
 */
-PHP_METHOD(domnode, lookupPrefix)
+PHP_METHOD(DOMNode, lookupPrefix)
 {
 	zval *id;
 	xmlNodePtr nodep, lookupp = NULL;
@@ -1512,7 +1481,7 @@ PHP_METHOD(domnode, lookupPrefix)
 URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-isDefaultNamespace
 Since: DOM Level 3
 */
-PHP_METHOD(domnode, isDefaultNamespace)
+PHP_METHOD(DOMNode, isDefaultNamespace)
 {
 	zval *id;
 	xmlNodePtr nodep;
@@ -1546,7 +1515,7 @@ PHP_METHOD(domnode, isDefaultNamespace)
 URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-lookupNamespaceURI
 Since: DOM Level 3
 */
-PHP_METHOD(domnode, lookupNamespaceURI)
+PHP_METHOD(DOMNode, lookupNamespaceURI)
 {
 	zval *id;
 	xmlNodePtr nodep;
@@ -1754,7 +1723,7 @@ static void dom_canonicalization(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ 
 
 /* {{{ proto string DOMNode::C14N([bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]])
    Canonicalize nodes to a string */
-PHP_METHOD(domnode, C14N)
+PHP_METHOD(DOMNode, C14N)
 {
 	dom_canonicalization(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
@@ -1762,7 +1731,7 @@ PHP_METHOD(domnode, C14N)
 
 /* {{{ proto int DOMNode::C14NFile(string uri [, bool exclusive [, bool with_comments [, array xpath [, array ns_prefixes]]]])
    Canonicalize nodes to a file */
-PHP_METHOD(domnode, C14NFile)
+PHP_METHOD(DOMNode, C14NFile)
 {
 	dom_canonicalization(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
@@ -1770,7 +1739,7 @@ PHP_METHOD(domnode, C14NFile)
 
 /* {{{ proto string|null DOMNode::getNodePath()
    Gets an xpath for a node */
-PHP_METHOD(domnode, getNodePath)
+PHP_METHOD(DOMNode, getNodePath)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -1795,7 +1764,7 @@ PHP_METHOD(domnode, getNodePath)
 
 /* {{{ proto int DOMNode::getLineNo()
    Gets line number for a node */
-PHP_METHOD(domnode, getLineNo)
+PHP_METHOD(DOMNode, getLineNo)
 {
 	zval *id;
 	xmlNode *nodep;

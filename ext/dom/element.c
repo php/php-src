@@ -22,7 +22,6 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-#include "element_arginfo.h"
 
 /*
 * class DOMElement extends DOMNode
@@ -31,38 +30,8 @@
 * Since:
 */
 
-const zend_function_entry php_dom_element_class_functions[] = { /* {{{ */
-	PHP_ME(domelement, getAttribute, arginfo_class_DOMElement_getAttribute, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, setAttribute, arginfo_class_DOMElement_setAttribute, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, removeAttribute, arginfo_class_DOMElement_removeAttribute, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, getAttributeNode, arginfo_class_DOMElement_getAttributeNode, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, setAttributeNode, arginfo_class_DOMElement_setAttributeNode, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, removeAttributeNode, arginfo_class_DOMElement_removeAttributeNode, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, getElementsByTagName, arginfo_class_DOMElement_getElementsByTagName, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, getAttributeNS, arginfo_class_DOMElement_getAttributeNS, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, setAttributeNS, arginfo_class_DOMElement_setAttributeNS, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, removeAttributeNS, arginfo_class_DOMElement_removeAttributeNS, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, getAttributeNodeNS, arginfo_class_DOMElement_getAttributeNodeNS, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, setAttributeNodeNS, arginfo_class_DOMElement_setAttributeNodeNS, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, getElementsByTagNameNS, arginfo_class_DOMElement_getElementsByTagNameNS, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, hasAttribute, arginfo_class_DOMElement_hasAttribute, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, hasAttributeNS, arginfo_class_DOMElement_hasAttributeNS, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, setIdAttribute, arginfo_class_DOMElement_setIdAttribute, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, setIdAttributeNS, arginfo_class_DOMElement_setIdAttributeNS, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, setIdAttributeNode, arginfo_class_DOMElement_setIdAttributeNode, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, __construct, arginfo_class_DOMElement___construct, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, remove, arginfo_class_DOMElement_remove, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, after, arginfo_class_DOMElement_after, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, before, arginfo_class_DOMElement_before, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, replaceWith, arginfo_class_DOMElement_replaceWith, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, append, arginfo_class_DOMElement_append, ZEND_ACC_PUBLIC)
-	PHP_ME(domelement, prepend, arginfo_class_DOMElement_prepend, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ proto DOMElement::__construct(string name, [string value], [string uri]) */
-PHP_METHOD(domelement, __construct)
+PHP_METHOD(DOMElement, __construct)
 {
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
@@ -228,7 +197,7 @@ static xmlNodePtr dom_get_dom1_attribute(xmlNodePtr elem, xmlChar *name) /* {{{ 
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-666EE0F9
 Since:
 */
-PHP_METHOD(domelement, getAttribute)
+PHP_METHOD(DOMElement, getAttribute)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -272,7 +241,7 @@ PHP_METHOD(domelement, getAttribute)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68F082
 Since:
 */
-PHP_METHOD(domelement, setAttribute)
+PHP_METHOD(DOMElement, setAttribute)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -340,7 +309,7 @@ PHP_METHOD(domelement, setAttribute)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6D6AC0F9
 Since:
 */
-PHP_METHOD(domelement, removeAttribute)
+PHP_METHOD(DOMElement, removeAttribute)
 {
 	zval *id;
 	xmlNodePtr nodep, attrp;
@@ -389,7 +358,7 @@ PHP_METHOD(domelement, removeAttribute)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-217A91B8
 Since:
 */
-PHP_METHOD(domelement, getAttributeNode)
+PHP_METHOD(DOMElement, getAttributeNode)
 {
 	zval *id;
 	xmlNodePtr nodep, attrp;
@@ -437,7 +406,7 @@ PHP_METHOD(domelement, getAttributeNode)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-887236154
 Since:
 */
-PHP_METHOD(domelement, setAttributeNode)
+PHP_METHOD(DOMElement, setAttributeNode)
 {
 	zval *id, *node;
 	xmlNode *nodep;
@@ -504,7 +473,7 @@ PHP_METHOD(domelement, setAttributeNode)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D589198
 Since:
 */
-PHP_METHOD(domelement, removeAttributeNode)
+PHP_METHOD(DOMElement, removeAttributeNode)
 {
 	zval *id, *node;
 	xmlNode *nodep;
@@ -542,7 +511,7 @@ PHP_METHOD(domelement, removeAttributeNode)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1938918D
 Since:
 */
-PHP_METHOD(domelement, getElementsByTagName)
+PHP_METHOD(DOMElement, getElementsByTagName)
 {
 	zval *id;
 	xmlNodePtr elemp;
@@ -569,7 +538,7 @@ PHP_METHOD(domelement, getElementsByTagName)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElGetAttrNS
 Since: DOM Level 2
 */
-PHP_METHOD(domelement, getAttributeNS)
+PHP_METHOD(DOMElement, getAttributeNS)
 {
 	zval *id;
 	xmlNodePtr elemp;
@@ -650,7 +619,7 @@ static xmlNsPtr _dom_new_reconNs(xmlDocPtr doc, xmlNodePtr tree, xmlNsPtr ns) /*
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetAttrNS
 Since: DOM Level 2
 */
-PHP_METHOD(domelement, setAttributeNS)
+PHP_METHOD(DOMElement, setAttributeNS)
 {
 	zval *id;
 	xmlNodePtr elemp, nodep = NULL;
@@ -779,7 +748,7 @@ PHP_METHOD(domelement, setAttributeNS)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElRemAtNS
 Since: DOM Level 2
 */
-PHP_METHOD(domelement, removeAttributeNS)
+PHP_METHOD(DOMElement, removeAttributeNS)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -837,7 +806,7 @@ PHP_METHOD(domelement, removeAttributeNS)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElGetAtNodeNS
 Since: DOM Level 2
 */
-PHP_METHOD(domelement, getAttributeNodeNS)
+PHP_METHOD(DOMElement, getAttributeNodeNS)
 {
 	zval *id;
 	xmlNodePtr elemp, fakeAttrp;
@@ -893,7 +862,7 @@ PHP_METHOD(domelement, getAttributeNodeNS)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetAtNodeNS
 Since: DOM Level 2
 */
-PHP_METHOD(domelement, setAttributeNodeNS)
+PHP_METHOD(DOMElement, setAttributeNodeNS)
 {
 	zval *id, *node;
 	xmlNode *nodep;
@@ -967,7 +936,7 @@ PHP_METHOD(domelement, setAttributeNodeNS)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-A6C90942
 Since: DOM Level 2
 */
-PHP_METHOD(domelement, getElementsByTagNameNS)
+PHP_METHOD(DOMElement, getElementsByTagNameNS)
 {
 	zval *id;
 	xmlNodePtr elemp;
@@ -996,7 +965,7 @@ PHP_METHOD(domelement, getElementsByTagNameNS)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElHasAttr
 Since: DOM Level 2
 */
-PHP_METHOD(domelement, hasAttribute)
+PHP_METHOD(DOMElement, hasAttribute)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -1025,7 +994,7 @@ PHP_METHOD(domelement, hasAttribute)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElHasAttrNS
 Since: DOM Level 2
 */
-PHP_METHOD(domelement, hasAttributeNS)
+PHP_METHOD(DOMElement, hasAttributeNS)
 {
 	zval *id;
 	xmlNodePtr elemp;
@@ -1083,7 +1052,7 @@ static void php_set_attribute_id(xmlAttrPtr attrp, zend_bool is_id) /* {{{ */
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttr
 Since: DOM Level 3
 */
-PHP_METHOD(domelement, setIdAttribute)
+PHP_METHOD(DOMElement, setIdAttribute)
 {
 	zval *id;
 	xmlNode *nodep;
@@ -1120,7 +1089,7 @@ PHP_METHOD(domelement, setIdAttribute)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttrNS
 Since: DOM Level 3
 */
-PHP_METHOD(domelement, setIdAttributeNS)
+PHP_METHOD(DOMElement, setIdAttributeNS)
 {
 	zval *id;
 	xmlNodePtr elemp;
@@ -1157,7 +1126,7 @@ PHP_METHOD(domelement, setIdAttributeNS)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttrNode
 Since: DOM Level 3
 */
-PHP_METHOD(domelement, setIdAttributeNode)
+PHP_METHOD(DOMElement, setIdAttributeNode)
 {
 	zval *id, *node;
 	xmlNode *nodep;
@@ -1193,7 +1162,7 @@ PHP_METHOD(domelement, setIdAttributeNode)
 URL:
 Since:
 */
-PHP_METHOD(domelement, remove)
+PHP_METHOD(DOMElement, remove)
 {
 	zval *id;
 	xmlNodePtr child;
@@ -1210,7 +1179,7 @@ PHP_METHOD(domelement, remove)
 }
 /* }}} end DOMElement::remove */
 
-PHP_METHOD(domelement, after)
+PHP_METHOD(DOMElement, after)
 {
 	int argc;
 	zval *args, *id;
@@ -1227,7 +1196,7 @@ PHP_METHOD(domelement, after)
 	dom_parent_node_after(intern, args, argc);
 }
 
-PHP_METHOD(domelement, before)
+PHP_METHOD(DOMElement, before)
 {
 	int argc;
 	zval *args, *id;
@@ -1248,7 +1217,7 @@ PHP_METHOD(domelement, before)
 URL: https://dom.spec.whatwg.org/#dom-parentnode-append
 Since: DOM Living Standard (DOM4)
 */
-PHP_METHOD(domelement, append)
+PHP_METHOD(DOMElement, append)
 {
 	int argc;
 	zval *args, *id;
@@ -1270,7 +1239,7 @@ PHP_METHOD(domelement, append)
 URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
 Since: DOM Living Standard (DOM4)
 */
-PHP_METHOD(domelement, prepend)
+PHP_METHOD(DOMElement, prepend)
 {
 	int argc;
 	zval *args, *id;
@@ -1292,7 +1261,7 @@ PHP_METHOD(domelement, prepend)
 URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
 Since: DOM Living Standard (DOM4)
 */
-PHP_METHOD(domelement, replaceWith)
+PHP_METHOD(DOMElement, replaceWith)
 {
 	int argc;
 	zval *args, *id;

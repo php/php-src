@@ -22,7 +22,6 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-#include "processinginstruction_arginfo.h"
 
 /*
 * class DOMProcessingInstruction extends DOMNode
@@ -31,13 +30,8 @@
 * Since:
 */
 
-const zend_function_entry php_dom_processinginstruction_class_functions[] = {
-	PHP_ME(domprocessinginstruction, __construct, arginfo_class_DOMProcessingInstruction___construct, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 /* {{{ proto DOMProcessingInstruction::__construct(string name, [string value]); */
-PHP_METHOD(domprocessinginstruction, __construct)
+PHP_METHOD(DOMProcessingInstruction, __construct)
 {
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;

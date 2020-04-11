@@ -22,7 +22,6 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-#include "comment_arginfo.h"
 
 /*
 * class DOMComment extends DOMCharacterData
@@ -31,13 +30,8 @@
 * Since:
 */
 
-const zend_function_entry php_dom_comment_class_functions[] = {
-	PHP_ME(domcomment, __construct, arginfo_class_DOMComment___construct, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 /* {{{ proto DOMComment::__construct([string value]); */
-PHP_METHOD(domcomment, __construct)
+PHP_METHOD(DOMComment, __construct)
 {
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;

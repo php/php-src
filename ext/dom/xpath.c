@@ -22,7 +22,6 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-#include "xpath_arginfo.h"
 
 #define PHP_DOM_XPATH_QUERY 0
 #define PHP_DOM_XPATH_EVALUATE 1
@@ -32,16 +31,6 @@
 */
 
 #if defined(LIBXML_XPATH_ENABLED)
-
-const zend_function_entry php_dom_xpath_class_functions[] = {
-	PHP_ME(domxpath, __construct, arginfo_class_DOMXPath___construct, ZEND_ACC_PUBLIC)
-	PHP_ME(domxpath, registerNamespace, arginfo_class_DOMXPath_registerNamespace, ZEND_ACC_PUBLIC)
-	PHP_ME(domxpath, query, arginfo_class_DOMXPath_query, ZEND_ACC_PUBLIC)
-	PHP_ME(domxpath, evaluate, arginfo_class_DOMXPath_evaluate, ZEND_ACC_PUBLIC)
-	PHP_ME(domxpath, registerPhpFunctions, arginfo_class_DOMXPath_registerPhpFunctions, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 
 static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int type) /* {{{ */
 {
@@ -221,7 +210,7 @@ static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt, int
 /* }}} */
 
 /* {{{ proto DOMXPath::__construct(DOMDocument doc) U */
-PHP_METHOD(domxpath, __construct)
+PHP_METHOD(DOMXPath, __construct)
 {
 	zval *doc;
 	zend_bool register_node_ns = 1;
@@ -302,7 +291,7 @@ int dom_xpath_register_node_ns_write(dom_object *obj, zval *newval)
 /* }}} */
 
 /* {{{ proto bool dom_xpath_register_ns(string prefix, string uri) */
-PHP_METHOD(domxpath, registerNamespace)
+PHP_METHOD(DOMXPath, registerNamespace)
 {
 	zval *id;
 	xmlXPathContextPtr ctxp;
@@ -487,21 +476,21 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 /* }}} */
 
 /* {{{ proto DOMNodeList dom_xpath_query(string expr [,DOMNode context [, bool registerNodeNS]]) */
-PHP_METHOD(domxpath, query)
+PHP_METHOD(DOMXPath, query)
 {
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_QUERY);
 }
 /* }}} end dom_xpath_query */
 
 /* {{{ proto mixed dom_xpath_evaluate(string expr [,DOMNode context [, bool registerNodeNS]]) */
-PHP_METHOD(domxpath, evaluate)
+PHP_METHOD(DOMXPath, evaluate)
 {
 	php_xpath_eval(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_DOM_XPATH_EVALUATE);
 }
 /* }}} end dom_xpath_evaluate */
 
 /* {{{ proto void dom_xpath_register_php_functions() */
-PHP_METHOD(domxpath, registerPhpFunctions)
+PHP_METHOD(DOMXPath, registerPhpFunctions)
 {
 	zval *id = ZEND_THIS;
 	dom_xpath_object *intern;

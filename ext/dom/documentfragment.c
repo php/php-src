@@ -22,7 +22,6 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-#include "documentfragment_arginfo.h"
 
 /*
 * class DOMDocumentFragment extends DOMNode
@@ -31,16 +30,8 @@
 * Since:
 */
 
-const zend_function_entry php_dom_documentfragment_class_functions[] = {
-	PHP_ME(domdocumentfragment, __construct, arginfo_class_DOMDocumentFragment___construct, ZEND_ACC_PUBLIC)
-	PHP_ME(domdocumentfragment, appendXML, arginfo_class_DOMDocumentFragment_appendXML, ZEND_ACC_PUBLIC)
-	PHP_ME(domdocumentfragment, append, arginfo_class_DOMDocumentFragment_append, ZEND_ACC_PUBLIC)
-	PHP_ME(domdocumentfragment, prepend, arginfo_class_DOMDocumentFragment_prepend, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 /* {{{ proto DOMDocumentFragment::__construct() */
-PHP_METHOD(domdocumentfragment, __construct)
+PHP_METHOD(DOMDocumentFragment, __construct)
 {
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
@@ -101,7 +92,7 @@ static void php_dom_xmlSetTreeDoc(xmlNodePtr tree, xmlDocPtr doc) /* {{{ */
 /* }}} */
 
 /* {{{ proto void DOMDocumentFragment::appendXML(string data) */
-PHP_METHOD(domdocumentfragment, appendXML) {
+PHP_METHOD(DOMDocumentFragment, appendXML) {
 	zval *id;
 	xmlNode *nodep;
 	dom_object *intern;
@@ -143,7 +134,7 @@ PHP_METHOD(domdocumentfragment, appendXML) {
 URL: https://dom.spec.whatwg.org/#dom-parentnode-append
 Since: DOM Living Standard (DOM4)
 */
-PHP_METHOD(domdocumentfragment, append)
+PHP_METHOD(DOMDocumentFragment, append)
 {
 	int argc;
 	zval *args, *id;
@@ -165,7 +156,7 @@ PHP_METHOD(domdocumentfragment, append)
 URL: https://dom.spec.whatwg.org/#dom-parentnode-prepend
 Since: DOM Living Standard (DOM4)
 */
-PHP_METHOD(domdocumentfragment, prepend)
+PHP_METHOD(DOMDocumentFragment, prepend)
 {
 	int argc;
 	zval *args, *id;

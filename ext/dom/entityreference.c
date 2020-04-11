@@ -22,7 +22,6 @@
 #include "php.h"
 #if HAVE_LIBXML && HAVE_DOM
 #include "php_dom.h"
-#include "entityreference_arginfo.h"
 
 /*
 * class DOMEntityReference extends DOMNode
@@ -31,13 +30,8 @@
 * Since:
 */
 
-const zend_function_entry php_dom_entityreference_class_functions[] = {
-	PHP_ME(domentityreference, __construct, arginfo_class_DOMEntityReference___construct, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 /* {{{ proto DOMEntityReference::__construct(string name) */
-PHP_METHOD(domentityreference, __construct)
+PHP_METHOD(DOMEntityReference, __construct)
 {
 	xmlNode *node;
 	xmlNodePtr oldnode = NULL;
