@@ -73,19 +73,20 @@ typedef struct _zend_fcall_info_cache {
 #define ZEND_RAW_FENTRY(zend_name, name, arg_info, flags)   { zend_name, name, arg_info, (uint32_t) (sizeof(arg_info)/sizeof(struct _zend_internal_arg_info)-1), flags },
 
 /* Same as ZEND_NAMED_FE */
-#define ZEND_RAW_NAMED_FE(zend_name, name, arg_info) ZEND_RAW_FENTRY(#zend_name, name, arg_info, 0)
+#define ZEND_RAW_NAMED_FE(zend_name, name, arg_info) 				ZEND_RAW_FENTRY(#zend_name, name, arg_info, 0)
 
-#define ZEND_NAMED_FE(zend_name, name, arg_info)	ZEND_RAW_FENTRY(#zend_name, name, arg_info, 0)
-#define ZEND_FE(name, arg_info)						ZEND_RAW_FENTRY(#name, zif_##name, arg_info, 0)
-#define ZEND_DEP_FE(name, arg_info)                 ZEND_RAW_FENTRY(#name, zif_##name, arg_info, ZEND_ACC_DEPRECATED)
-#define ZEND_FALIAS(name, alias, arg_info)			ZEND_RAW_FENTRY(#name, zif_##alias, arg_info, 0)
-#define ZEND_DEP_FALIAS(name, alias, arg_info)		ZEND_RAW_FENTRY(#name, zif_##alias, arg_info, ZEND_ACC_DEPRECATED)
-#define ZEND_NAMED_ME(zend_name, name, arg_info, flags)	ZEND_FENTRY(zend_name, name, arg_info, flags)
-#define ZEND_ME(classname, name, arg_info, flags)	ZEND_RAW_FENTRY(#name, zim_##classname##_##name, arg_info, flags)
-#define ZEND_DEP_ME(classname, name, arg_info, flags) ZEND_RAW_FENTRY(#name, zim_##classname##_##name, arg_info, flags | ZEND_ACC_DEPRECATED)
-#define ZEND_ABSTRACT_ME(classname, name, arg_info)	ZEND_RAW_FENTRY(#name, NULL, arg_info, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
-#define ZEND_MALIAS(classname, name, alias, arg_info, flags) ZEND_RAW_FENTRY(#name, zim_##classname##_##alias, arg_info, flags)
-#define ZEND_ME_MAPPING(name, func_name, arg_info, flags) ZEND_RAW_FENTRY(#name, zif_##func_name, arg_info, flags)
+#define ZEND_NAMED_FE(zend_name, name, arg_info)						ZEND_RAW_FENTRY(#zend_name, name, arg_info, 0)
+#define ZEND_FE(name, arg_info)											ZEND_RAW_FENTRY(#name, zif_##name, arg_info, 0)
+#define ZEND_DEP_FE(name, arg_info)										ZEND_RAW_FENTRY(#name, zif_##name, arg_info, ZEND_ACC_DEPRECATED)
+#define ZEND_FALIAS(name, alias, arg_info)								ZEND_RAW_FENTRY(#name, zif_##alias, arg_info, 0)
+#define ZEND_DEP_FALIAS(name, alias, arg_info)							ZEND_RAW_FENTRY(#name, zif_##alias, arg_info, ZEND_ACC_DEPRECATED)
+#define ZEND_NAMED_ME(zend_name, name, arg_info, flags)					ZEND_FENTRY(zend_name, name, arg_info, flags)
+#define ZEND_ME(classname, name, arg_info, flags)						ZEND_RAW_FENTRY(#name, zim_##classname##_##name, arg_info, flags)
+#define ZEND_DEP_ME(classname, name, arg_info, flags)					ZEND_RAW_FENTRY(#name, zim_##classname##_##name, arg_info, flags | ZEND_ACC_DEPRECATED)
+#define ZEND_ABSTRACT_ME(classname, name, arg_info)						ZEND_RAW_FENTRY(#name, NULL, arg_info, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+#define ZEND_ABSTRACT_ME_WITH_FLAGS(classname, name, arg_info, flags)	ZEND_RAW_FENTRY(#name, NULL, arg_info, flags)
+#define ZEND_MALIAS(classname, name, alias, arg_info, flags)			ZEND_RAW_FENTRY(#name, zim_##classname##_##alias, arg_info, flags)
+#define ZEND_ME_MAPPING(name, func_name, arg_info, flags)				ZEND_RAW_FENTRY(#name, zif_##func_name, arg_info, flags)
 
 #define ZEND_NS_FENTRY(ns, zend_name, name, arg_info, flags)		ZEND_RAW_FENTRY(ZEND_NS_NAME(ns, #zend_name), name, arg_info, flags)
 

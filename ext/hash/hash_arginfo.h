@@ -148,6 +148,7 @@ ZEND_FUNCTION(mhash_count);
 #if defined(PHP_MHASH_BC)
 ZEND_FUNCTION(mhash);
 #endif
+ZEND_METHOD(HashContext, __construct);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -181,5 +182,11 @@ static const zend_function_entry ext_functions[] = {
 #if defined(PHP_MHASH_BC)
 	ZEND_FE(mhash, arginfo_mhash)
 #endif
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_HashContext_methods[] = {
+	ZEND_ME(HashContext, __construct, arginfo_class_HashContext___construct, ZEND_ACC_PRIVATE)
 	ZEND_FE_END
 };

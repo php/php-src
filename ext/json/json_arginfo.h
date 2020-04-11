@@ -36,3 +36,9 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(json_last_error_msg, arginfo_json_last_error_msg)
 	ZEND_FE_END
 };
+
+
+static const zend_function_entry class_JsonSerializable_methods[] = {
+	ZEND_ABSTRACT_ME_WITH_FLAGS(JsonSerializable, jsonSerialize, arginfo_class_JsonSerializable_jsonSerialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT)
+	ZEND_FE_END
+};

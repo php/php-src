@@ -163,6 +163,11 @@ ZEND_FUNCTION(com_event_sink);
 ZEND_FUNCTION(com_print_typeinfo);
 ZEND_FUNCTION(com_message_pump);
 ZEND_FUNCTION(com_load_typelib);
+ZEND_METHOD(variant, __construct);
+ZEND_METHOD(com, __construct);
+#if HAVE_MSCOREE_H
+ZEND_METHOD(dotnet, __construct);
+#endif
 
 
 static const zend_function_entry ext_functions[] = {
@@ -198,5 +203,25 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(com_print_typeinfo, arginfo_com_print_typeinfo)
 	ZEND_FE(com_message_pump, arginfo_com_message_pump)
 	ZEND_FE(com_load_typelib, arginfo_com_load_typelib)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_variant_methods[] = {
+	ZEND_ME(variant, __construct, arginfo_class_variant___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_com_methods[] = {
+	ZEND_ME(com, __construct, arginfo_class_com___construct, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_dotnet_methods[] = {
+#if HAVE_MSCOREE_H
+	ZEND_ME(dotnet, __construct, arginfo_class_dotnet___construct, ZEND_ACC_PUBLIC)
+#endif
 	ZEND_FE_END
 };

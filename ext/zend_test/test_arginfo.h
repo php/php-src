@@ -45,6 +45,9 @@ ZEND_FUNCTION(zend_create_unterminated_string);
 ZEND_FUNCTION(zend_terminate_string);
 ZEND_FUNCTION(zend_leak_variable);
 ZEND_FUNCTION(zend_leak_bytes);
+ZEND_METHOD(_ZendTestClass, is_object);
+ZEND_METHOD(_ZendTestClass, __toString);
+ZEND_METHOD(_ZendTestTrait, testMethod);
 
 
 static const zend_function_entry ext_functions[] = {
@@ -56,5 +59,18 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(zend_terminate_string, arginfo_zend_terminate_string)
 	ZEND_FE(zend_leak_variable, arginfo_zend_leak_variable)
 	ZEND_FE(zend_leak_bytes, arginfo_zend_leak_bytes)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class__ZendTestClass_methods[] = {
+	ZEND_ME(_ZendTestClass, is_object, arginfo_class__ZendTestClass_is_object, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(_ZendTestClass, __toString, arginfo_class__ZendTestClass___toString, ZEND_ACC_PUBLIC|ZEND_ACC_DEPRECATED)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class__ZendTestTrait_methods[] = {
+	ZEND_ME(_ZendTestTrait, testMethod, arginfo_class__ZendTestTrait_testMethod, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
 };

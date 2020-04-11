@@ -12,3 +12,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(dom_import_simplexml, arginfo_dom_import_simplexml)
 	ZEND_FE_END
 };
+
+
+static const zend_function_entry class_DOMDocumentType_methods[] = {
+	ZEND_FE_END
+};

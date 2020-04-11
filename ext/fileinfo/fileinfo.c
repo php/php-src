@@ -107,17 +107,6 @@ PHP_FILEINFO_API zend_object *finfo_objects_new(zend_class_entry *class_type)
 }
 /* }}} */
 
-/* {{{ finfo_class_functions
- */
-static const zend_function_entry finfo_class_functions[] = {
-	ZEND_ME_MAPPING(__construct,    finfo_open,     arginfo_class_finfo___construct, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_class_finfo_set_flags, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_class_finfo_file, ZEND_ACC_PUBLIC)
-	ZEND_ME_MAPPING(buffer,         finfo_buffer,   arginfo_class_finfo_buffer, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-/* }}} */
-
 #define FINFO_SET_OPTION(magic, options) \
 	if (magic_setflags(magic, options) == -1) { \
 		php_error_docref(NULL, E_WARNING, "Failed to set option '" ZEND_LONG_FMT "' %d:%s", \
@@ -145,7 +134,7 @@ void finfo_resource_destructor(zend_resource *rsrc) /* {{{ */
 PHP_MINIT_FUNCTION(finfo)
 {
 	zend_class_entry _finfo_class_entry;
-	INIT_CLASS_ENTRY(_finfo_class_entry, "finfo", finfo_class_functions);
+	INIT_CLASS_ENTRY(_finfo_class_entry, "finfo", class_finfo_methods);
 	_finfo_class_entry.create_object = finfo_objects_new;
 	finfo_class_entry = zend_register_internal_class(&_finfo_class_entry);
 

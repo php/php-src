@@ -3,13 +3,14 @@
 /** @generate-function-entries */
 
 class _ZendTestClass {
-    public static function is_object(): int;
+    public static function is_object(): int {}
 
-    public function __toString(): string;
+    /** @deprecated */
+    public function __toString(): string {}
 }
 
 trait _ZendTestTrait {
-    public function testMethod(): bool;
+    public function testMethod(): bool {}
 }
 
 function zend_test_array_return(): array {}

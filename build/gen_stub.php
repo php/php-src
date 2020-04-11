@@ -447,8 +447,8 @@ class FuncInfo {
             } else {
                 if ($this->flags & Class_::MODIFIER_ABSTRACT) {
                     return sprintf(
-                        "\tZEND_ABSTRACT_ME(%s, %s, %s)\n",
-                        $this->name->className, $this->name->name, $this->getArgInfoName()
+                        "\tZEND_ABSTRACT_ME_WITH_FLAGS(%s, %s, %s, %s)\n",
+                        $this->name->className, $this->name->name, $this->getArgInfoName(), $this->getFlagsAsString()
                     );
                 }
 
@@ -797,8 +797,8 @@ function parseStubFile(string $fileName): FileInfo {
                     $flags |= Class_::MODIFIER_ABSTRACT;
                 }
 
-                if ($flags & Class_::MODIFIER_ABSTRACT && !($flags & Class_::MODIFIER_PUBLIC)) {
-                    throw new Exception("Abstract non-public methods are not supported");
+                if (!($flags & Class_::VISIBILITY_MODIFIER_MASK)) {
+                    throw new Exception("Method visibility modifier is required");
                 }
 
                 $methodInfos[] = parseFunctionLike(
@@ -984,9 +984,9 @@ function generateArgInfoCode(FileInfo $fileInfo): string {
             }
         );
 
-        $code .= "\n\n";
-
-        $code .= generateFunctionEntries(null, $fileInfo->funcInfos);
+        if (empty($fileInfo->funcInfos) === false) {
+            $code .= generateFunctionEntries(null, $fileInfo->funcInfos);
+        }
 
         foreach ($fileInfo->classInfos as $classInfo) {
             $code .= generateFunctionEntries($classInfo->name, $classInfo->funcInfos);

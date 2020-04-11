@@ -37,13 +37,6 @@ PHP_JSON_API zend_class_entry *php_json_exception_ce;
 
 PHP_JSON_API ZEND_DECLARE_MODULE_GLOBALS(json)
 
-/* {{{ JsonSerializable methods */
-static const zend_function_entry json_serializable_interface[] = {
-	PHP_ABSTRACT_ME(JsonSerializable, jsonSerialize, arginfo_class_JsonSerializable_jsonSerialize)
-	PHP_FE_END
-};
-/* }}} */
-
 /* Register constant for options and errors */
 #define PHP_JSON_REGISTER_CONSTANT(_name, _value) \
 	REGISTER_LONG_CONSTANT(_name,  _value, CONST_CS | CONST_PERSISTENT);
@@ -53,7 +46,7 @@ static PHP_MINIT_FUNCTION(json)
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "JsonSerializable", json_serializable_interface);
+	INIT_CLASS_ENTRY(ce, "JsonSerializable", class_JsonSerializable_methods);
 	php_json_serializable_ce = zend_register_internal_interface(&ce);
 
 	INIT_CLASS_ENTRY(ce, "JsonException", NULL);

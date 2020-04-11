@@ -37,21 +37,6 @@ zend_class_entry
    	*php_com_exception_class_entry,
 	*php_com_saproxy_class_entry;
 
-static const zend_function_entry com_variant_funcs[] = {
-	PHP_ME(variant, __construct, arginfo_class_variant___construct, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
-static const zend_function_entry com_com_funcs[] = {
-	PHP_ME(com, __construct, arginfo_class_com___construct, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
-static const zend_function_entry com_dotnet_funcs[] = {
-	PHP_ME(dotnet, __construct, arginfo_class_dotnet___construct, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 /* {{{ com_dotnet_module_entry
  */
 zend_module_entry com_dotnet_module_entry = {
@@ -196,14 +181,14 @@ PHP_MINIT_FUNCTION(com_dotnet)
 /*	php_com_saproxy_class_entry->constructor->common.fn_flags |= ZEND_ACC_PROTECTED; */
 	php_com_saproxy_class_entry->get_iterator = php_com_saproxy_iter_get;
 
-	INIT_CLASS_ENTRY(ce, "variant", com_variant_funcs);
+	INIT_CLASS_ENTRY(ce, "variant", class_variant_methods);
 	ce.create_object = php_com_object_new;
 	php_com_variant_class_entry = zend_register_internal_class(&ce);
 	php_com_variant_class_entry->get_iterator = php_com_iter_get;
 	php_com_variant_class_entry->serialize = zend_class_serialize_deny;
 	php_com_variant_class_entry->unserialize = zend_class_unserialize_deny;
 
-	INIT_CLASS_ENTRY(ce, "com", com_com_funcs);
+	INIT_CLASS_ENTRY(ce, "com", class_com_methods);
 	ce.create_object = php_com_object_new;
 	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry);
 	tmp->get_iterator = php_com_iter_get;
@@ -211,7 +196,7 @@ PHP_MINIT_FUNCTION(com_dotnet)
 	tmp->unserialize = zend_class_unserialize_deny;
 
 #if HAVE_MSCOREE_H
-	INIT_CLASS_ENTRY(ce, "dotnet", com_dotnet_funcs);
+	INIT_CLASS_ENTRY(ce, "dotnet", class_dotnet_methods);
 	ce.create_object = php_com_object_new;
 	tmp = zend_register_internal_class_ex(&ce, php_com_variant_class_entry);
 	tmp->get_iterator = php_com_iter_get;

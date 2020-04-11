@@ -737,7 +737,7 @@ PHP_MINIT_FUNCTION(dom)
 	REGISTER_DOM_CLASS(ce, "DOMCdataSection", dom_text_class_entry, php_dom_cdatasection_class_functions, dom_cdatasection_class_entry);
 	zend_hash_add_ptr(&classes, ce.name, &dom_text_prop_handlers);
 
-	REGISTER_DOM_CLASS(ce, "DOMDocumentType", dom_node_class_entry, php_dom_documenttype_class_functions, dom_documenttype_class_entry);
+	REGISTER_DOM_CLASS(ce, "DOMDocumentType", dom_node_class_entry, class_DOMDocumentType_methods, dom_documenttype_class_entry);
 
 	zend_hash_init(&dom_documenttype_prop_handlers, 0, NULL, dom_dtor_prop_handler, 1);
 	dom_register_prop_handler(&dom_documenttype_prop_handlers, "name", sizeof("name")-1, dom_documenttype_name_read, NULL);
