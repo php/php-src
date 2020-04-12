@@ -345,7 +345,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 
 /* {{{ proto bool PDOStatement::execute([array $bound_input_params])
    Execute a prepared statement, optionally binding parameters */
-static PHP_METHOD(PDOStatement, execute)
+PHP_METHOD(PDOStatement, execute)
 {
 	zval *input_params = NULL;
 	int ret = 1;
@@ -1168,7 +1168,7 @@ static int pdo_stmt_verify_mode(pdo_stmt_t *stmt, zend_long mode, int fetch_all)
 
 /* {{{ proto mixed PDOStatement::fetch([int $how = PDO_FETCH_BOTH [, int $orientation [, int $offset]]])
    Fetches the next row and returns it, or false if there are no more rows */
-static PHP_METHOD(PDOStatement, fetch)
+PHP_METHOD(PDOStatement, fetch)
 {
 	zend_long how = PDO_FETCH_USE_DEFAULT;
 	zend_long ori = PDO_FETCH_ORI_NEXT;
@@ -1197,7 +1197,7 @@ static PHP_METHOD(PDOStatement, fetch)
 
 /* {{{ proto mixed PDOStatement::fetchObject([string class_name [, NULL|array ctor_args]])
    Fetches the next row and returns it as an object. */
-static PHP_METHOD(PDOStatement, fetchObject)
+PHP_METHOD(PDOStatement, fetchObject)
 {
 	zend_long how = PDO_FETCH_CLASS;
 	zend_long ori = PDO_FETCH_ORI_NEXT;
@@ -1264,7 +1264,7 @@ static PHP_METHOD(PDOStatement, fetchObject)
 
 /* {{{ proto string PDOStatement::fetchColumn([int column_number])
    Returns a data of the specified column in the result set. */
-static PHP_METHOD(PDOStatement, fetchColumn)
+PHP_METHOD(PDOStatement, fetchColumn)
 {
 	zend_long col_n = 0;
 	PHP_STMT_GET_OBJ;
@@ -1287,7 +1287,7 @@ static PHP_METHOD(PDOStatement, fetchColumn)
 
 /* {{{ proto array PDOStatement::fetchAll([int $how = PDO_FETCH_BOTH [, string class_name [, NULL|array ctor_args]]])
    Returns an array of all of the results. */
-static PHP_METHOD(PDOStatement, fetchAll)
+PHP_METHOD(PDOStatement, fetchAll)
 {
 	zend_long how = PDO_FETCH_USE_DEFAULT;
 	zval data, *return_all;
@@ -1493,7 +1493,7 @@ static int register_bound_param(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, 
 
 /* {{{ proto bool PDOStatement::bindValue(mixed $paramno, mixed $param [, int $type ])
    bind an input parameter to the value of a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  It should be called prior to execute(). */
-static PHP_METHOD(PDOStatement, bindValue)
+PHP_METHOD(PDOStatement, bindValue)
 {
 	struct pdo_bound_param_data param;
 	zend_long param_type = PDO_PARAM_STR;
@@ -1534,7 +1534,7 @@ static PHP_METHOD(PDOStatement, bindValue)
 
 /* {{{ proto bool PDOStatement::bindParam(mixed $paramno, mixed &$param [, int $type [, int $maxlen [, mixed $driverdata]]])
    bind a parameter to a PHP variable.  $paramno is the 1-based position of the placeholder in the SQL statement (but can be the parameter name for drivers that support named placeholders).  This isn't supported by all drivers.  It should be called prior to execute(). */
-static PHP_METHOD(PDOStatement, bindParam)
+PHP_METHOD(PDOStatement, bindParam)
 {
 	PHP_STMT_GET_OBJ;
 	RETURN_BOOL(register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, TRUE));
@@ -1543,7 +1543,7 @@ static PHP_METHOD(PDOStatement, bindParam)
 
 /* {{{ proto bool PDOStatement::bindColumn(mixed $column, mixed &$param [, int $type [, int $maxlen [, mixed $driverdata]]])
    bind a column to a PHP variable.  On each row fetch $param will contain the value of the corresponding column.  $column is the 1-based offset of the column, or the column name.  For portability, don't call this before execute(). */
-static PHP_METHOD(PDOStatement, bindColumn)
+PHP_METHOD(PDOStatement, bindColumn)
 {
 	PHP_STMT_GET_OBJ;
 	RETURN_BOOL(register_bound_param(INTERNAL_FUNCTION_PARAM_PASSTHRU, stmt, 0));
@@ -1552,7 +1552,7 @@ static PHP_METHOD(PDOStatement, bindColumn)
 
 /* {{{ proto int PDOStatement::rowCount()
    Returns the number of rows in a result set, or the number of rows affected by the last execute().  It is not always meaningful. */
-static PHP_METHOD(PDOStatement, rowCount)
+PHP_METHOD(PDOStatement, rowCount)
 {
 	PHP_STMT_GET_OBJ;
 
@@ -1564,7 +1564,7 @@ static PHP_METHOD(PDOStatement, rowCount)
 
 /* {{{ proto string PDOStatement::errorCode()
    Fetch the error code associated with the last operation on the statement handle */
-static PHP_METHOD(PDOStatement, errorCode)
+PHP_METHOD(PDOStatement, errorCode)
 {
 	PHP_STMT_GET_OBJ;
 
@@ -1580,7 +1580,7 @@ static PHP_METHOD(PDOStatement, errorCode)
 
 /* {{{ proto array PDOStatement::errorInfo()
    Fetch extended error information associated with the last operation on the statement handle */
-static PHP_METHOD(PDOStatement, errorInfo)
+PHP_METHOD(PDOStatement, errorInfo)
 {
 	int error_count;
 	int error_count_diff     = 0;
@@ -1612,7 +1612,7 @@ static PHP_METHOD(PDOStatement, errorInfo)
 
 /* {{{ proto bool PDOStatement::setAttribute(long attribute, mixed value)
    Set an attribute */
-static PHP_METHOD(PDOStatement, setAttribute)
+PHP_METHOD(PDOStatement, setAttribute)
 {
 	zend_long attr;
 	zval *value = NULL;
@@ -1655,7 +1655,7 @@ static int generic_stmt_attr_get(pdo_stmt_t *stmt, zval *return_value, zend_long
 	return 0;
 }
 
-static PHP_METHOD(PDOStatement, getAttribute)
+PHP_METHOD(PDOStatement, getAttribute)
 {
 	zend_long attr;
 	PHP_STMT_GET_OBJ;
@@ -1696,7 +1696,7 @@ static PHP_METHOD(PDOStatement, getAttribute)
 
 /* {{{ proto int PDOStatement::columnCount()
    Returns the number of columns in the result set */
-static PHP_METHOD(PDOStatement, columnCount)
+PHP_METHOD(PDOStatement, columnCount)
 {
 	PHP_STMT_GET_OBJ;
 
@@ -1708,7 +1708,7 @@ static PHP_METHOD(PDOStatement, columnCount)
 
 /* {{{ proto array PDOStatement::getColumnMeta(int $column)
    Returns meta data for a numbered column */
-static PHP_METHOD(PDOStatement, getColumnMeta)
+PHP_METHOD(PDOStatement, getColumnMeta)
 {
 	zend_long colno;
 	struct pdo_column_data *col;
@@ -1917,7 +1917,7 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 	return retval;
 }
 
-static PHP_METHOD(PDOStatement, setFetchMode)
+PHP_METHOD(PDOStatement, setFetchMode)
 {
 	PHP_STMT_GET_OBJ;
 
@@ -1959,7 +1959,7 @@ static int pdo_stmt_do_next_rowset(pdo_stmt_t *stmt)
 	return 1;
 }
 
-static PHP_METHOD(PDOStatement, nextRowset)
+PHP_METHOD(PDOStatement, nextRowset)
 {
 	PHP_STMT_GET_OBJ;
 
@@ -1983,7 +1983,7 @@ static PHP_METHOD(PDOStatement, nextRowset)
 
 /* {{{ proto bool PDOStatement::closeCursor()
    Closes the cursor, leaving the statement ready for re-execution. */
-static PHP_METHOD(PDOStatement, closeCursor)
+PHP_METHOD(PDOStatement, closeCursor)
 {
 	PHP_STMT_GET_OBJ;
 
@@ -2020,7 +2020,7 @@ static PHP_METHOD(PDOStatement, closeCursor)
 
 /* {{{ proto void PDOStatement::debugDumpParams()
    A utility for internals hackers to debug parameter internals */
-static PHP_METHOD(PDOStatement, debugDumpParams)
+PHP_METHOD(PDOStatement, debugDumpParams)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -2078,28 +2078,6 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 	php_stream_close(out);
 }
 /* }}} */
-const zend_function_entry pdo_dbstmt_functions[] = {
-	PHP_ME(PDOStatement, execute,		arginfo_class_PDOStatement_execute,			ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, fetch,			arginfo_class_PDOStatement_fetch,			ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, bindParam,		arginfo_class_PDOStatement_bindParam,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, bindColumn,	arginfo_class_PDOStatement_bindColumn,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, bindValue,		arginfo_class_PDOStatement_bindValue,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, rowCount,		arginfo_class_PDOStatement_rowCount,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, fetchColumn,	arginfo_class_PDOStatement_fetchColumn,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, fetchAll,		arginfo_class_PDOStatement_fetchAll,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, fetchObject,	arginfo_class_PDOStatement_fetchObject,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, errorCode,		arginfo_class_PDOStatement_errorCode,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, errorInfo,		arginfo_class_PDOStatement_errorInfo,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, setAttribute,	arginfo_class_PDOStatement_setAttribute,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, getAttribute,	arginfo_class_PDOStatement_getAttribute,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, columnCount,	arginfo_class_PDOStatement_columnCount,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, getColumnMeta,	arginfo_class_PDOStatement_getColumnMeta,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, setFetchMode,	arginfo_class_PDOStatement_setFetchMode,	ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, nextRowset,	arginfo_class_PDOStatement_nextRowset,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, closeCursor,	arginfo_class_PDOStatement_closeCursor,		ZEND_ACC_PUBLIC)
-	PHP_ME(PDOStatement, debugDumpParams, arginfo_class_PDOStatement_debugDumpParams, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
 
 /* {{{ overloaded handlers for PDOStatement class */
 static zval *dbstmt_prop_write(zend_object *object, zend_string *name, zval *value, void **cache_slot)
@@ -2357,10 +2335,6 @@ zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int 
 
 /* {{{ overloaded handlers for PDORow class (used by PDO_FETCH_LAZY) */
 
-const zend_function_entry pdo_row_functions[] = {
-	PHP_FE_END
-};
-
 static zval *row_prop_read(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv)
 {
 	pdo_row_t *row = (pdo_row_t *)object;
@@ -2610,7 +2584,7 @@ void pdo_stmt_init(void)
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "PDOStatement", pdo_dbstmt_functions);
+	INIT_CLASS_ENTRY(ce, "PDOStatement", class_PDOStatement_methods);
 	pdo_dbstmt_ce = zend_register_internal_class(&ce);
 	pdo_dbstmt_ce->get_iterator = pdo_stmt_iter_get;
 	pdo_dbstmt_ce->create_object = pdo_dbstmt_new;
@@ -2629,7 +2603,7 @@ void pdo_stmt_init(void)
 	pdo_dbstmt_object_handlers.compare = dbstmt_compare;
 	pdo_dbstmt_object_handlers.clone_obj = NULL;
 
-	INIT_CLASS_ENTRY(ce, "PDORow", pdo_row_functions);
+	INIT_CLASS_ENTRY(ce, "PDORow", class_PDORow_methods);
 	pdo_row_ce = zend_register_internal_class(&ce);
 	pdo_row_ce->ce_flags |= ZEND_ACC_FINAL; /* when removing this a lot of handlers need to be redone */
 	pdo_row_ce->create_object = pdo_row_new;

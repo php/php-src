@@ -20,3 +20,22 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_CURLFile_setPostFilename, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, postname, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+
+ZEND_METHOD(CURLFile, __construct);
+ZEND_METHOD(CURLFile, getFilename);
+ZEND_METHOD(CURLFile, getMimeType);
+ZEND_METHOD(CURLFile, getPostFilename);
+ZEND_METHOD(CURLFile, setMimeType);
+ZEND_METHOD(CURLFile, setPostFilename);
+
+
+static const zend_function_entry class_CURLFile_methods[] = {
+	ZEND_ME(CURLFile, __construct, arginfo_class_CURLFile___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(CURLFile, getFilename, arginfo_class_CURLFile_getFilename, ZEND_ACC_PUBLIC)
+	ZEND_ME(CURLFile, getMimeType, arginfo_class_CURLFile_getMimeType, ZEND_ACC_PUBLIC)
+	ZEND_ME(CURLFile, getPostFilename, arginfo_class_CURLFile_getPostFilename, ZEND_ACC_PUBLIC)
+	ZEND_ME(CURLFile, setMimeType, arginfo_class_CURLFile_setMimeType, ZEND_ACC_PUBLIC)
+	ZEND_ME(CURLFile, setPostFilename, arginfo_class_CURLFile_setPostFilename, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};

@@ -80,3 +80,53 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDOStatement_setFetchMode, 0, 0, 1)
 	ZEND_ARG_INFO(0, param1)
 	ZEND_ARG_INFO(0, param2)
 ZEND_END_ARG_INFO()
+
+
+ZEND_METHOD(PDOStatement, bindColumn);
+ZEND_METHOD(PDOStatement, bindParam);
+ZEND_METHOD(PDOStatement, bindValue);
+ZEND_METHOD(PDOStatement, closeCursor);
+ZEND_METHOD(PDOStatement, columnCount);
+ZEND_METHOD(PDOStatement, debugDumpParams);
+ZEND_METHOD(PDOStatement, errorCode);
+ZEND_METHOD(PDOStatement, errorInfo);
+ZEND_METHOD(PDOStatement, execute);
+ZEND_METHOD(PDOStatement, fetch);
+ZEND_METHOD(PDOStatement, fetchAll);
+ZEND_METHOD(PDOStatement, fetchColumn);
+ZEND_METHOD(PDOStatement, fetchObject);
+ZEND_METHOD(PDOStatement, getAttribute);
+ZEND_METHOD(PDOStatement, getColumnMeta);
+ZEND_METHOD(PDOStatement, nextRowset);
+ZEND_METHOD(PDOStatement, rowCount);
+ZEND_METHOD(PDOStatement, setAttribute);
+ZEND_METHOD(PDOStatement, setFetchMode);
+
+
+static const zend_function_entry class_PDOStatement_methods[] = {
+	ZEND_ME(PDOStatement, bindColumn, arginfo_class_PDOStatement_bindColumn, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, bindParam, arginfo_class_PDOStatement_bindParam, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, bindValue, arginfo_class_PDOStatement_bindValue, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, closeCursor, arginfo_class_PDOStatement_closeCursor, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, columnCount, arginfo_class_PDOStatement_columnCount, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, debugDumpParams, arginfo_class_PDOStatement_debugDumpParams, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, errorCode, arginfo_class_PDOStatement_errorCode, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, errorInfo, arginfo_class_PDOStatement_errorInfo, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, execute, arginfo_class_PDOStatement_execute, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, fetch, arginfo_class_PDOStatement_fetch, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, fetchAll, arginfo_class_PDOStatement_fetchAll, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, fetchColumn, arginfo_class_PDOStatement_fetchColumn, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, fetchObject, arginfo_class_PDOStatement_fetchObject, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, getAttribute, arginfo_class_PDOStatement_getAttribute, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, getColumnMeta, arginfo_class_PDOStatement_getColumnMeta, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, nextRowset, arginfo_class_PDOStatement_nextRowset, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, rowCount, arginfo_class_PDOStatement_rowCount, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, setAttribute, arginfo_class_PDOStatement_setAttribute, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDOStatement, setFetchMode, arginfo_class_PDOStatement_setFetchMode, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_PDORow_methods[] = {
+	ZEND_FE_END
+};
