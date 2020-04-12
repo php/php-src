@@ -18,7 +18,6 @@
 
 #include "php_intl.h"
 #include "msgformat_class.h"
-#include "msgformat_attr.h"
 #include "msgformat_data.h"
 #include "intl_convert.h"
 

@@ -18,9 +18,6 @@
 #include "php_intl.h"
 #include "formatter_data.h"
 #include "formatter_format.h"
-#include "formatter_parse.h"
-#include "formatter_main.h"
-#include "formatter_attr.h"
 #include "formatter_arginfo.h"
 
 #include <zend_exceptions.h>
@@ -92,31 +89,6 @@ zend_object *NumberFormatter_object_clone(zend_object *object)
  * 'NumberFormatter' class registration structures & functions
  */
 
-/* {{{ NumberFormatter_class_functions
- * Every 'NumberFormatter' class method has an entry in this table
- */
-static const zend_function_entry NumberFormatter_class_functions[] = {
-	PHP_ME( NumberFormatter, __construct, arginfo_class_NumberFormatter___construct, ZEND_ACC_PUBLIC )
-	ZEND_FENTRY( create, ZEND_FN( numfmt_create ), arginfo_class_NumberFormatter_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
-	PHP_NAMED_FE( format, ZEND_FN( numfmt_format ), arginfo_class_NumberFormatter_format )
-	PHP_NAMED_FE( parse, ZEND_FN( numfmt_parse ), arginfo_class_NumberFormatter_parse )
-	PHP_NAMED_FE( formatCurrency, ZEND_FN( numfmt_format_currency ), arginfo_class_NumberFormatter_formatCurrency )
-	PHP_NAMED_FE( parseCurrency, ZEND_FN( numfmt_parse_currency ), arginfo_class_NumberFormatter_parseCurrency )
-	PHP_NAMED_FE( setAttribute, ZEND_FN( numfmt_set_attribute ), arginfo_class_NumberFormatter_setAttribute )
-	PHP_NAMED_FE( getAttribute, ZEND_FN( numfmt_get_attribute ), arginfo_class_NumberFormatter_getAttribute )
-	PHP_NAMED_FE( setTextAttribute, ZEND_FN( numfmt_set_text_attribute ), arginfo_class_NumberFormatter_setTextAttribute )
-	PHP_NAMED_FE( getTextAttribute, ZEND_FN( numfmt_get_text_attribute ), arginfo_class_NumberFormatter_getTextAttribute )
-	PHP_NAMED_FE( setSymbol, ZEND_FN( numfmt_set_symbol ), arginfo_class_NumberFormatter_setSymbol )
-	PHP_NAMED_FE( getSymbol, ZEND_FN( numfmt_get_symbol ), arginfo_class_NumberFormatter_getSymbol )
-	PHP_NAMED_FE( setPattern, ZEND_FN( numfmt_set_pattern ), arginfo_class_NumberFormatter_setPattern )
-	PHP_NAMED_FE( getPattern, ZEND_FN( numfmt_get_pattern ), arginfo_class_NumberFormatter_getPattern )
-	PHP_NAMED_FE( getLocale, ZEND_FN( numfmt_get_locale ), arginfo_class_NumberFormatter_getLocale )
-	PHP_NAMED_FE( getErrorCode, ZEND_FN( numfmt_get_error_code ), arginfo_class_NumberFormatter_getErrorCode )
-	PHP_NAMED_FE( getErrorMessage, ZEND_FN( numfmt_get_error_message ), arginfo_class_NumberFormatter_getErrorMessage )
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ formatter_register_class
  * Initialize 'NumberFormatter' class
  */
@@ -125,7 +97,7 @@ void formatter_register_class( void )
 	zend_class_entry ce;
 
 	/* Create and register 'NumberFormatter' class. */
-	INIT_CLASS_ENTRY( ce, "NumberFormatter", NumberFormatter_class_functions );
+	INIT_CLASS_ENTRY( ce, "NumberFormatter", class_NumberFormatter_methods );
 	ce.create_object = NumberFormatter_object_create;
 	NumberFormatter_ce_ptr = zend_register_internal_class( &ce );
 	NumberFormatter_ce_ptr->serialize = zend_class_serialize_deny;

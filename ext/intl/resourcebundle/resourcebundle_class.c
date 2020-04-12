@@ -368,21 +368,6 @@ PHP_FUNCTION( resourcebundle_get_error_message )
 }
 /* }}} */
 
-/* {{{ ResourceBundle_class_functions
- * Every 'ResourceBundle' class method has an entry in this table
- */
-static const zend_function_entry ResourceBundle_class_functions[] = {
-	PHP_ME( ResourceBundle, __construct, arginfo_class_ResourceBundle___construct, ZEND_ACC_PUBLIC )
-	ZEND_NAMED_ME( create, ZEND_FN( resourcebundle_create ), arginfo_class_ResourceBundle_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
-	ZEND_NAMED_ME( get, ZEND_FN(resourcebundle_get), arginfo_class_ResourceBundle_get, ZEND_ACC_PUBLIC )
-	ZEND_NAMED_ME( count, ZEND_FN(resourcebundle_count), arginfo_class_ResourceBundle_count, ZEND_ACC_PUBLIC )
-	ZEND_NAMED_ME( getLocales, ZEND_FN(resourcebundle_locales), arginfo_class_ResourceBundle_getLocales, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC )
-	ZEND_NAMED_ME( getErrorCode, ZEND_FN(resourcebundle_get_error_code), arginfo_class_ResourceBundle_getErrorCode, ZEND_ACC_PUBLIC )
-	ZEND_NAMED_ME( getErrorMessage, ZEND_FN(resourcebundle_get_error_message), arginfo_class_ResourceBundle_getErrorMessage, ZEND_ACC_PUBLIC )
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ resourcebundle_register_class
  * Initialize 'ResourceBundle' class
  */
@@ -390,7 +375,7 @@ void resourcebundle_register_class( void )
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY( ce, "ResourceBundle", ResourceBundle_class_functions );
+	INIT_CLASS_ENTRY( ce, "ResourceBundle", class_ResourceBundle_methods );
 
 	ce.create_object = ResourceBundle_object_create;
 	ce.get_iterator = resourcebundle_get_iterator;

@@ -25,7 +25,6 @@
 #include "../common/common_date.h"
 #include "dateformat.h"
 #include "dateformat_class.h"
-#include "dateformat_format.h"
 #include "dateformat_data.h"
 
 /* {{{

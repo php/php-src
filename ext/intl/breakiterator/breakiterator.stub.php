@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class IntlBreakIterator implements Traversable
 {
     /** @return IntlBreakIterator|null */

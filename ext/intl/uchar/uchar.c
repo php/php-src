@@ -617,77 +617,10 @@ IC_CHAR_METHOD_CHAR(getBidiPairedBracket)
 #undef IC_CHAR_METHOD_CHAR
 /* }}} */
 
-static const zend_function_entry intlchar_methods[] = {
-#define IC_ME(mname) PHP_ME(IntlChar, mname, arginfo_class_IntlChar_##mname, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
-	IC_ME(chr)
-	IC_ME(ord)
-	IC_ME(hasBinaryProperty)
-	IC_ME(isUAlphabetic)
-	IC_ME(isULowercase)
-	IC_ME(isUUppercase)
-	IC_ME(isUWhiteSpace)
-	IC_ME(getIntPropertyValue)
-	IC_ME(getIntPropertyMinValue)
-	IC_ME(getIntPropertyMaxValue)
-	IC_ME(getNumericValue)
-	IC_ME(islower)
-	IC_ME(isupper)
-	IC_ME(istitle)
-	IC_ME(isdigit)
-	IC_ME(isalpha)
-	IC_ME(isalnum)
-	IC_ME(isxdigit)
-	IC_ME(ispunct)
-	IC_ME(isgraph)
-	IC_ME(isblank)
-	IC_ME(isdefined)
-	IC_ME(isspace)
-	IC_ME(isJavaSpaceChar)
-	IC_ME(isWhitespace)
-	IC_ME(iscntrl)
-	IC_ME(isISOControl)
-	IC_ME(isprint)
-	IC_ME(isbase)
-	IC_ME(charDirection)
-	IC_ME(isMirrored)
-	IC_ME(charMirror)
-#if U_ICU_VERSION_MAJOR_NUM >= 52
-	IC_ME(getBidiPairedBracket)
-#endif /* ICU >= 52 */
-	IC_ME(charType)
-	IC_ME(enumCharTypes)
-	IC_ME(getCombiningClass)
-	IC_ME(charDigitValue)
-	IC_ME(getBlockCode)
-	IC_ME(charName)
-	IC_ME(charFromName)
-	IC_ME(enumCharNames)
-	IC_ME(getPropertyName)
-	IC_ME(getPropertyEnum)
-	IC_ME(getPropertyValueName)
-	IC_ME(getPropertyValueEnum)
-	IC_ME(isIDStart)
-	IC_ME(isIDPart)
-	IC_ME(isIDIgnorable)
-	IC_ME(isJavaIDStart)
-	IC_ME(isJavaIDPart)
-	IC_ME(tolower)
-	IC_ME(toupper)
-	IC_ME(totitle)
-	IC_ME(foldCase)
-	IC_ME(digit)
-	IC_ME(forDigit)
-	IC_ME(charAge)
-	IC_ME(getUnicodeVersion)
-	IC_ME(getFC_NFKC_Closure)
-#undef IC_ME
-	PHP_FE_END
-};
-
 int php_uchar_minit(INIT_FUNC_ARGS) {
 	zend_class_entry tmp, *ce;
 
-	INIT_CLASS_ENTRY(tmp, "IntlChar", intlchar_methods);
+	INIT_CLASS_ENTRY(tmp, "IntlChar", class_IntlChar_methods);
 	ce = zend_register_internal_class(&tmp);
 
 #define IC_CONSTL(name, val) \

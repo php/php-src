@@ -18,7 +18,6 @@
 #include <php.h>
 
 #include "intl_common.h"
-#include "spoofchecker_create.h"
 #include "intl_error.h"
 #include "intl_data.h"
 

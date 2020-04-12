@@ -24,7 +24,6 @@
 #include "php_intl.h"
 #include "locale.h"
 #include "locale_class.h"
-#include "locale_methods.h"
 #include "intl_convert.h"
 #include "intl_data.h"
 

@@ -286,17 +286,12 @@ U_CFUNC PHP_METHOD(IntlPartsIterator, getBreakIterator)
 	ZVAL_COPY_DEREF(return_value, biter_zval);
 }
 
-static const zend_function_entry IntlPartsIterator_class_functions[] = {
-	PHP_ME(IntlPartsIterator,	getBreakIterator,	arginfo_class_IntlPartsIterator_getBreakIterator,	ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 U_CFUNC void breakiterator_register_IntlPartsIterator_class(void)
 {
 	zend_class_entry ce;
 
 	/* Create and register 'BreakIterator' class. */
-	INIT_CLASS_ENTRY(ce, "IntlPartsIterator", IntlPartsIterator_class_functions);
+	INIT_CLASS_ENTRY(ce, "IntlPartsIterator", class_IntlPartsIterator_methods);
 	IntlPartsIterator_ce_ptr = zend_register_internal_class_ex(&ce,
 			IntlIterator_ce_ptr);
 	IntlPartsIterator_ce_ptr->create_object = IntlPartsIterator_object_create;

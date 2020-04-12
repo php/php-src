@@ -18,7 +18,6 @@
 
 #include "php_intl.h"
 #include "formatter_class.h"
-#include "formatter_attr.h"
 #include "intl_convert.h"
 
 #include <unicode/ustring.h>

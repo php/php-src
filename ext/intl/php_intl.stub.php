@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 /* calendar */
 
 /** @param IntlTimeZone|DateTimeZone|string|null $timeZone */
@@ -42,8 +44,6 @@ function intlcal_get_actual_minimum(IntlCalendar $calendar, int $field): int|fal
 function intlcal_get_day_of_week_type(IntlCalendar $calendar, int $dayOfWeek): int|false {}
 
 function intlcal_get_first_day_of_week(IntlCalendar $calendar): int|false {}
-
-function intlcal_greatest_minimum(IntlCalendar $calendar, int $field): int|false {}
 
 function intlcal_get_least_maximum(IntlCalendar $calendar, int $field): int|false {}
 

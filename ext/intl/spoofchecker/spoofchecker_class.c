@@ -13,8 +13,6 @@
  */
 
 #include "spoofchecker_class.h"
-#include "spoofchecker_main.h"
-#include "spoofchecker_create.h"
 #include "spoofchecker_arginfo.h"
 #include "php_intl.h"
 #include "intl_error.h"
@@ -63,19 +61,6 @@ zend_object *Spoofchecker_object_create(zend_class_entry *ce)
  * Every 'Spoofchecker' class method has an entry in this table
  */
 
-static const zend_function_entry Spoofchecker_class_functions[] = {
-	PHP_ME(Spoofchecker, __construct, arginfo_class_Spoofchecker___construct, ZEND_ACC_PUBLIC)
-	PHP_ME(Spoofchecker, isSuspicious, arginfo_class_Spoofchecker_isSuspicious, ZEND_ACC_PUBLIC)
-	PHP_ME(Spoofchecker, areConfusable, arginfo_class_Spoofchecker_areConfusable, ZEND_ACC_PUBLIC)
-	PHP_ME(Spoofchecker, setAllowedLocales, arginfo_class_Spoofchecker_setAllowedLocales, ZEND_ACC_PUBLIC)
-	PHP_ME(Spoofchecker, setChecks, arginfo_class_Spoofchecker_setChecks, ZEND_ACC_PUBLIC)
-#if U_ICU_VERSION_MAJOR_NUM >= 58
-	PHP_ME(Spoofchecker, setRestrictionLevel, arginfo_class_Spoofchecker_setRestrictionLevel, ZEND_ACC_PUBLIC)
-#endif
-	PHP_FE_END
-};
-/* }}} */
-
 static zend_object *spoofchecker_clone_obj(zend_object *object) /* {{{ */
 {
 	zend_object *new_obj_val;
@@ -108,7 +93,7 @@ void spoofchecker_register_Spoofchecker_class(void)
 	zend_class_entry ce;
 
 	/* Create and register 'Spoofchecker' class. */
-	INIT_CLASS_ENTRY(ce, "Spoofchecker", Spoofchecker_class_functions);
+	INIT_CLASS_ENTRY(ce, "Spoofchecker", class_Spoofchecker_methods);
 	ce.create_object = Spoofchecker_object_create;
 	Spoofchecker_ce_ptr = zend_register_internal_class(&ce);
 

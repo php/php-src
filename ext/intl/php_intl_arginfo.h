@@ -89,8 +89,6 @@ ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_intlcal_get_first_day_of_week, 0
 	ZEND_ARG_OBJ_INFO(0, calendar, IntlCalendar, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_intlcal_greatest_minimum arginfo_intlcal_get
-
 #define arginfo_intlcal_get_least_maximum arginfo_intlcal_get
 
 #define arginfo_intlcal_get_greatest_minimum arginfo_intlcal_get
@@ -773,3 +771,384 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_MASK_EX(arginfo_transliterator_get_error_message, 0, 1, MAY_BE_STRING|MAY_BE_FALSE)
 	ZEND_ARG_OBJ_INFO(0, trans, Transliterator, 0)
 ZEND_END_ARG_INFO()
+
+
+ZEND_FUNCTION(intlcal_create_instance);
+ZEND_FUNCTION(intlcal_get_keyword_values_for_locale);
+ZEND_FUNCTION(intlcal_get_now);
+ZEND_FUNCTION(intlcal_get_available_locales);
+ZEND_FUNCTION(intlcal_get);
+ZEND_FUNCTION(intlcal_get_time);
+ZEND_FUNCTION(intlcal_set_time);
+ZEND_FUNCTION(intlcal_add);
+ZEND_FUNCTION(intlcal_set_time_zone);
+ZEND_FUNCTION(intlcal_after);
+ZEND_FUNCTION(intlcal_before);
+ZEND_FUNCTION(intlcal_set);
+ZEND_FUNCTION(intlcal_roll);
+ZEND_FUNCTION(intlcal_clear);
+ZEND_FUNCTION(intlcal_field_difference);
+ZEND_FUNCTION(intlcal_get_actual_maximum);
+ZEND_FUNCTION(intlcal_get_actual_minimum);
+ZEND_FUNCTION(intlcal_get_day_of_week_type);
+ZEND_FUNCTION(intlcal_get_first_day_of_week);
+ZEND_FUNCTION(intlcal_get_least_maximum);
+ZEND_FUNCTION(intlcal_get_greatest_minimum);
+ZEND_FUNCTION(intlcal_get_locale);
+ZEND_FUNCTION(intlcal_get_maximum);
+ZEND_FUNCTION(intlcal_get_minimal_days_in_first_week);
+ZEND_FUNCTION(intlcal_set_minimal_days_in_first_week);
+ZEND_FUNCTION(intlcal_get_minimum);
+ZEND_FUNCTION(intlcal_get_time_zone);
+ZEND_FUNCTION(intlcal_get_type);
+ZEND_FUNCTION(intlcal_get_weekend_transition);
+ZEND_FUNCTION(intlcal_in_daylight_time);
+ZEND_FUNCTION(intlcal_is_lenient);
+ZEND_FUNCTION(intlcal_is_set);
+ZEND_FUNCTION(intlcal_is_equivalent_to);
+ZEND_FUNCTION(intlcal_is_weekend);
+ZEND_FUNCTION(intlcal_set_first_day_of_week);
+ZEND_FUNCTION(intlcal_set_lenient);
+ZEND_FUNCTION(intlcal_get_repeated_wall_time_option);
+ZEND_FUNCTION(intlcal_equals);
+ZEND_FUNCTION(intlcal_get_skipped_wall_time_option);
+ZEND_FUNCTION(intlcal_set_repeated_wall_time_option);
+ZEND_FUNCTION(intlcal_set_skipped_wall_time_option);
+ZEND_FUNCTION(intlcal_from_date_time);
+ZEND_FUNCTION(intlcal_to_date_time);
+ZEND_FUNCTION(intlcal_get_error_code);
+ZEND_FUNCTION(intlcal_get_error_message);
+ZEND_FUNCTION(intlgregcal_create_instance);
+ZEND_FUNCTION(intlgregcal_set_gregorian_change);
+ZEND_FUNCTION(intlgregcal_get_gregorian_change);
+ZEND_FUNCTION(intlgregcal_is_leap_year);
+ZEND_FUNCTION(collator_create);
+ZEND_FUNCTION(collator_compare);
+ZEND_FUNCTION(collator_get_attribute);
+ZEND_FUNCTION(collator_set_attribute);
+ZEND_FUNCTION(collator_get_strength);
+ZEND_FUNCTION(collator_set_strength);
+ZEND_FUNCTION(collator_sort);
+ZEND_FUNCTION(collator_sort_with_sort_keys);
+ZEND_FUNCTION(collator_asort);
+ZEND_FUNCTION(collator_get_locale);
+ZEND_FUNCTION(collator_get_error_code);
+ZEND_FUNCTION(collator_get_error_message);
+ZEND_FUNCTION(collator_get_sort_key);
+ZEND_FUNCTION(intl_get_error_code);
+ZEND_FUNCTION(intl_get_error_message);
+ZEND_FUNCTION(intl_is_failure);
+ZEND_FUNCTION(intl_error_name);
+ZEND_FUNCTION(datefmt_create);
+ZEND_FUNCTION(datefmt_get_datetype);
+ZEND_FUNCTION(datefmt_get_timetype);
+ZEND_FUNCTION(datefmt_get_calendar);
+ZEND_FUNCTION(datefmt_set_calendar);
+ZEND_FUNCTION(datefmt_get_timezone_id);
+ZEND_FUNCTION(datefmt_get_calendar_object);
+ZEND_FUNCTION(datefmt_get_timezone);
+ZEND_FUNCTION(datefmt_set_timezone);
+ZEND_FUNCTION(datefmt_set_pattern);
+ZEND_FUNCTION(datefmt_get_pattern);
+ZEND_FUNCTION(datefmt_get_locale);
+ZEND_FUNCTION(datefmt_set_lenient);
+ZEND_FUNCTION(datefmt_is_lenient);
+ZEND_FUNCTION(datefmt_format);
+ZEND_FUNCTION(datefmt_format_object);
+ZEND_FUNCTION(datefmt_parse);
+ZEND_FUNCTION(datefmt_localtime);
+ZEND_FUNCTION(datefmt_get_error_code);
+ZEND_FUNCTION(datefmt_get_error_message);
+ZEND_FUNCTION(numfmt_create);
+ZEND_FUNCTION(numfmt_format);
+ZEND_FUNCTION(numfmt_parse);
+ZEND_FUNCTION(numfmt_format_currency);
+ZEND_FUNCTION(numfmt_parse_currency);
+ZEND_FUNCTION(numfmt_set_attribute);
+ZEND_FUNCTION(numfmt_get_attribute);
+ZEND_FUNCTION(numfmt_set_text_attribute);
+ZEND_FUNCTION(numfmt_get_text_attribute);
+ZEND_FUNCTION(numfmt_set_symbol);
+ZEND_FUNCTION(numfmt_get_symbol);
+ZEND_FUNCTION(numfmt_set_pattern);
+ZEND_FUNCTION(numfmt_get_pattern);
+ZEND_FUNCTION(numfmt_get_locale);
+ZEND_FUNCTION(numfmt_get_error_code);
+ZEND_FUNCTION(numfmt_get_error_message);
+ZEND_FUNCTION(grapheme_strlen);
+ZEND_FUNCTION(grapheme_strpos);
+ZEND_FUNCTION(grapheme_stripos);
+ZEND_FUNCTION(grapheme_strrpos);
+ZEND_FUNCTION(grapheme_strripos);
+ZEND_FUNCTION(grapheme_substr);
+ZEND_FUNCTION(grapheme_strstr);
+ZEND_FUNCTION(grapheme_stristr);
+ZEND_FUNCTION(grapheme_extract);
+ZEND_FUNCTION(idn_to_ascii);
+ZEND_FUNCTION(idn_to_utf8);
+ZEND_FUNCTION(locale_get_default);
+ZEND_FUNCTION(locale_set_default);
+ZEND_FUNCTION(locale_get_primary_language);
+ZEND_FUNCTION(locale_get_script);
+ZEND_FUNCTION(locale_get_region);
+ZEND_FUNCTION(locale_get_keywords);
+ZEND_FUNCTION(locale_get_display_script);
+ZEND_FUNCTION(locale_get_display_region);
+ZEND_FUNCTION(locale_get_display_name);
+ZEND_FUNCTION(locale_get_display_language);
+ZEND_FUNCTION(locale_get_display_variant);
+ZEND_FUNCTION(locale_compose);
+ZEND_FUNCTION(locale_parse);
+ZEND_FUNCTION(locale_get_all_variants);
+ZEND_FUNCTION(locale_filter_matches);
+ZEND_FUNCTION(locale_canonicalize);
+ZEND_FUNCTION(locale_lookup);
+ZEND_FUNCTION(locale_accept_from_http);
+ZEND_FUNCTION(msgfmt_create);
+ZEND_FUNCTION(msgfmt_format);
+ZEND_FUNCTION(msgfmt_format_message);
+ZEND_FUNCTION(msgfmt_parse);
+ZEND_FUNCTION(msgfmt_parse_message);
+ZEND_FUNCTION(msgfmt_set_pattern);
+ZEND_FUNCTION(msgfmt_get_pattern);
+ZEND_FUNCTION(msgfmt_get_locale);
+ZEND_FUNCTION(msgfmt_get_error_code);
+ZEND_FUNCTION(msgfmt_get_error_message);
+ZEND_FUNCTION(normalizer_normalize);
+ZEND_FUNCTION(normalizer_is_normalized);
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+ZEND_FUNCTION(normalizer_get_raw_decomposition);
+#endif
+ZEND_FUNCTION(resourcebundle_create);
+ZEND_FUNCTION(resourcebundle_get);
+ZEND_FUNCTION(resourcebundle_count);
+ZEND_FUNCTION(resourcebundle_locales);
+ZEND_FUNCTION(resourcebundle_get_error_code);
+ZEND_FUNCTION(resourcebundle_get_error_message);
+ZEND_FUNCTION(intltz_count_equivalent_ids);
+ZEND_FUNCTION(intltz_create_default);
+ZEND_FUNCTION(intltz_create_enumeration);
+ZEND_FUNCTION(intltz_create_time_zone);
+ZEND_FUNCTION(intltz_create_time_zone_id_enumeration);
+ZEND_FUNCTION(intltz_from_date_time_zone);
+ZEND_FUNCTION(intltz_get_canonical_id);
+ZEND_FUNCTION(intltz_get_display_name);
+ZEND_FUNCTION(intltz_get_dst_savings);
+ZEND_FUNCTION(intltz_get_equivalent_id);
+ZEND_FUNCTION(intltz_get_error_code);
+ZEND_FUNCTION(intltz_get_error_message);
+ZEND_FUNCTION(intltz_get_gmt);
+ZEND_FUNCTION(intltz_get_id);
+ZEND_FUNCTION(intltz_get_offset);
+ZEND_FUNCTION(intltz_get_raw_offset);
+ZEND_FUNCTION(intltz_get_region);
+ZEND_FUNCTION(intltz_get_tz_data_version);
+ZEND_FUNCTION(intltz_get_unknown);
+#if U_ICU_VERSION_MAJOR_NUM >= 52
+ZEND_FUNCTION(intltz_get_windows_id);
+#endif
+#if U_ICU_VERSION_MAJOR_NUM >= 52
+ZEND_FUNCTION(intltz_get_id_for_windows_id);
+#endif
+ZEND_FUNCTION(intltz_has_same_rules);
+ZEND_FUNCTION(intltz_to_date_time_zone);
+ZEND_FUNCTION(intltz_use_daylight_time);
+ZEND_FUNCTION(transliterator_create);
+ZEND_FUNCTION(transliterator_create_from_rules);
+ZEND_FUNCTION(transliterator_list_ids);
+ZEND_FUNCTION(transliterator_create_inverse);
+ZEND_FUNCTION(transliterator_transliterate);
+ZEND_FUNCTION(transliterator_get_error_code);
+ZEND_FUNCTION(transliterator_get_error_message);
+
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_FE(intlcal_create_instance, arginfo_intlcal_create_instance)
+	ZEND_FE(intlcal_get_keyword_values_for_locale, arginfo_intlcal_get_keyword_values_for_locale)
+	ZEND_FE(intlcal_get_now, arginfo_intlcal_get_now)
+	ZEND_FE(intlcal_get_available_locales, arginfo_intlcal_get_available_locales)
+	ZEND_FE(intlcal_get, arginfo_intlcal_get)
+	ZEND_FE(intlcal_get_time, arginfo_intlcal_get_time)
+	ZEND_FE(intlcal_set_time, arginfo_intlcal_set_time)
+	ZEND_FE(intlcal_add, arginfo_intlcal_add)
+	ZEND_FE(intlcal_set_time_zone, arginfo_intlcal_set_time_zone)
+	ZEND_FE(intlcal_after, arginfo_intlcal_after)
+	ZEND_FE(intlcal_before, arginfo_intlcal_before)
+	ZEND_FE(intlcal_set, arginfo_intlcal_set)
+	ZEND_FE(intlcal_roll, arginfo_intlcal_roll)
+	ZEND_FE(intlcal_clear, arginfo_intlcal_clear)
+	ZEND_FE(intlcal_field_difference, arginfo_intlcal_field_difference)
+	ZEND_FE(intlcal_get_actual_maximum, arginfo_intlcal_get_actual_maximum)
+	ZEND_FE(intlcal_get_actual_minimum, arginfo_intlcal_get_actual_minimum)
+	ZEND_FE(intlcal_get_day_of_week_type, arginfo_intlcal_get_day_of_week_type)
+	ZEND_FE(intlcal_get_first_day_of_week, arginfo_intlcal_get_first_day_of_week)
+	ZEND_FE(intlcal_get_least_maximum, arginfo_intlcal_get_least_maximum)
+	ZEND_FE(intlcal_get_greatest_minimum, arginfo_intlcal_get_greatest_minimum)
+	ZEND_FE(intlcal_get_locale, arginfo_intlcal_get_locale)
+	ZEND_FE(intlcal_get_maximum, arginfo_intlcal_get_maximum)
+	ZEND_FE(intlcal_get_minimal_days_in_first_week, arginfo_intlcal_get_minimal_days_in_first_week)
+	ZEND_FE(intlcal_set_minimal_days_in_first_week, arginfo_intlcal_set_minimal_days_in_first_week)
+	ZEND_FE(intlcal_get_minimum, arginfo_intlcal_get_minimum)
+	ZEND_FE(intlcal_get_time_zone, arginfo_intlcal_get_time_zone)
+	ZEND_FE(intlcal_get_type, arginfo_intlcal_get_type)
+	ZEND_FE(intlcal_get_weekend_transition, arginfo_intlcal_get_weekend_transition)
+	ZEND_FE(intlcal_in_daylight_time, arginfo_intlcal_in_daylight_time)
+	ZEND_FE(intlcal_is_lenient, arginfo_intlcal_is_lenient)
+	ZEND_FE(intlcal_is_set, arginfo_intlcal_is_set)
+	ZEND_FE(intlcal_is_equivalent_to, arginfo_intlcal_is_equivalent_to)
+	ZEND_FE(intlcal_is_weekend, arginfo_intlcal_is_weekend)
+	ZEND_FE(intlcal_set_first_day_of_week, arginfo_intlcal_set_first_day_of_week)
+	ZEND_FE(intlcal_set_lenient, arginfo_intlcal_set_lenient)
+	ZEND_FE(intlcal_get_repeated_wall_time_option, arginfo_intlcal_get_repeated_wall_time_option)
+	ZEND_FE(intlcal_equals, arginfo_intlcal_equals)
+	ZEND_FE(intlcal_get_skipped_wall_time_option, arginfo_intlcal_get_skipped_wall_time_option)
+	ZEND_FE(intlcal_set_repeated_wall_time_option, arginfo_intlcal_set_repeated_wall_time_option)
+	ZEND_FE(intlcal_set_skipped_wall_time_option, arginfo_intlcal_set_skipped_wall_time_option)
+	ZEND_FE(intlcal_from_date_time, arginfo_intlcal_from_date_time)
+	ZEND_FE(intlcal_to_date_time, arginfo_intlcal_to_date_time)
+	ZEND_FE(intlcal_get_error_code, arginfo_intlcal_get_error_code)
+	ZEND_FE(intlcal_get_error_message, arginfo_intlcal_get_error_message)
+	ZEND_FE(intlgregcal_create_instance, arginfo_intlgregcal_create_instance)
+	ZEND_FE(intlgregcal_set_gregorian_change, arginfo_intlgregcal_set_gregorian_change)
+	ZEND_FE(intlgregcal_get_gregorian_change, arginfo_intlgregcal_get_gregorian_change)
+	ZEND_FE(intlgregcal_is_leap_year, arginfo_intlgregcal_is_leap_year)
+	ZEND_FE(collator_create, arginfo_collator_create)
+	ZEND_FE(collator_compare, arginfo_collator_compare)
+	ZEND_FE(collator_get_attribute, arginfo_collator_get_attribute)
+	ZEND_FE(collator_set_attribute, arginfo_collator_set_attribute)
+	ZEND_FE(collator_get_strength, arginfo_collator_get_strength)
+	ZEND_FE(collator_set_strength, arginfo_collator_set_strength)
+	ZEND_FE(collator_sort, arginfo_collator_sort)
+	ZEND_FE(collator_sort_with_sort_keys, arginfo_collator_sort_with_sort_keys)
+	ZEND_FE(collator_asort, arginfo_collator_asort)
+	ZEND_FE(collator_get_locale, arginfo_collator_get_locale)
+	ZEND_FE(collator_get_error_code, arginfo_collator_get_error_code)
+	ZEND_FE(collator_get_error_message, arginfo_collator_get_error_message)
+	ZEND_FE(collator_get_sort_key, arginfo_collator_get_sort_key)
+	ZEND_FE(intl_get_error_code, arginfo_intl_get_error_code)
+	ZEND_FE(intl_get_error_message, arginfo_intl_get_error_message)
+	ZEND_FE(intl_is_failure, arginfo_intl_is_failure)
+	ZEND_FE(intl_error_name, arginfo_intl_error_name)
+	ZEND_FE(datefmt_create, arginfo_datefmt_create)
+	ZEND_FE(datefmt_get_datetype, arginfo_datefmt_get_datetype)
+	ZEND_FE(datefmt_get_timetype, arginfo_datefmt_get_timetype)
+	ZEND_FE(datefmt_get_calendar, arginfo_datefmt_get_calendar)
+	ZEND_FE(datefmt_set_calendar, arginfo_datefmt_set_calendar)
+	ZEND_FE(datefmt_get_timezone_id, arginfo_datefmt_get_timezone_id)
+	ZEND_FE(datefmt_get_calendar_object, arginfo_datefmt_get_calendar_object)
+	ZEND_FE(datefmt_get_timezone, arginfo_datefmt_get_timezone)
+	ZEND_FE(datefmt_set_timezone, arginfo_datefmt_set_timezone)
+	ZEND_FE(datefmt_set_pattern, arginfo_datefmt_set_pattern)
+	ZEND_FE(datefmt_get_pattern, arginfo_datefmt_get_pattern)
+	ZEND_FE(datefmt_get_locale, arginfo_datefmt_get_locale)
+	ZEND_FE(datefmt_set_lenient, arginfo_datefmt_set_lenient)
+	ZEND_FE(datefmt_is_lenient, arginfo_datefmt_is_lenient)
+	ZEND_FE(datefmt_format, arginfo_datefmt_format)
+	ZEND_FE(datefmt_format_object, arginfo_datefmt_format_object)
+	ZEND_FE(datefmt_parse, arginfo_datefmt_parse)
+	ZEND_FE(datefmt_localtime, arginfo_datefmt_localtime)
+	ZEND_FE(datefmt_get_error_code, arginfo_datefmt_get_error_code)
+	ZEND_FE(datefmt_get_error_message, arginfo_datefmt_get_error_message)
+	ZEND_FE(numfmt_create, arginfo_numfmt_create)
+	ZEND_FE(numfmt_format, arginfo_numfmt_format)
+	ZEND_FE(numfmt_parse, arginfo_numfmt_parse)
+	ZEND_FE(numfmt_format_currency, arginfo_numfmt_format_currency)
+	ZEND_FE(numfmt_parse_currency, arginfo_numfmt_parse_currency)
+	ZEND_FE(numfmt_set_attribute, arginfo_numfmt_set_attribute)
+	ZEND_FE(numfmt_get_attribute, arginfo_numfmt_get_attribute)
+	ZEND_FE(numfmt_set_text_attribute, arginfo_numfmt_set_text_attribute)
+	ZEND_FE(numfmt_get_text_attribute, arginfo_numfmt_get_text_attribute)
+	ZEND_FE(numfmt_set_symbol, arginfo_numfmt_set_symbol)
+	ZEND_FE(numfmt_get_symbol, arginfo_numfmt_get_symbol)
+	ZEND_FE(numfmt_set_pattern, arginfo_numfmt_set_pattern)
+	ZEND_FE(numfmt_get_pattern, arginfo_numfmt_get_pattern)
+	ZEND_FE(numfmt_get_locale, arginfo_numfmt_get_locale)
+	ZEND_FE(numfmt_get_error_code, arginfo_numfmt_get_error_code)
+	ZEND_FE(numfmt_get_error_message, arginfo_numfmt_get_error_message)
+	ZEND_FE(grapheme_strlen, arginfo_grapheme_strlen)
+	ZEND_FE(grapheme_strpos, arginfo_grapheme_strpos)
+	ZEND_FE(grapheme_stripos, arginfo_grapheme_stripos)
+	ZEND_FE(grapheme_strrpos, arginfo_grapheme_strrpos)
+	ZEND_FE(grapheme_strripos, arginfo_grapheme_strripos)
+	ZEND_FE(grapheme_substr, arginfo_grapheme_substr)
+	ZEND_FE(grapheme_strstr, arginfo_grapheme_strstr)
+	ZEND_FE(grapheme_stristr, arginfo_grapheme_stristr)
+	ZEND_FE(grapheme_extract, arginfo_grapheme_extract)
+	ZEND_FE(idn_to_ascii, arginfo_idn_to_ascii)
+	ZEND_FE(idn_to_utf8, arginfo_idn_to_utf8)
+	ZEND_FE(locale_get_default, arginfo_locale_get_default)
+	ZEND_FE(locale_set_default, arginfo_locale_set_default)
+	ZEND_FE(locale_get_primary_language, arginfo_locale_get_primary_language)
+	ZEND_FE(locale_get_script, arginfo_locale_get_script)
+	ZEND_FE(locale_get_region, arginfo_locale_get_region)
+	ZEND_FE(locale_get_keywords, arginfo_locale_get_keywords)
+	ZEND_FE(locale_get_display_script, arginfo_locale_get_display_script)
+	ZEND_FE(locale_get_display_region, arginfo_locale_get_display_region)
+	ZEND_FE(locale_get_display_name, arginfo_locale_get_display_name)
+	ZEND_FE(locale_get_display_language, arginfo_locale_get_display_language)
+	ZEND_FE(locale_get_display_variant, arginfo_locale_get_display_variant)
+	ZEND_FE(locale_compose, arginfo_locale_compose)
+	ZEND_FE(locale_parse, arginfo_locale_parse)
+	ZEND_FE(locale_get_all_variants, arginfo_locale_get_all_variants)
+	ZEND_FE(locale_filter_matches, arginfo_locale_filter_matches)
+	ZEND_FE(locale_canonicalize, arginfo_locale_canonicalize)
+	ZEND_FE(locale_lookup, arginfo_locale_lookup)
+	ZEND_FE(locale_accept_from_http, arginfo_locale_accept_from_http)
+	ZEND_FE(msgfmt_create, arginfo_msgfmt_create)
+	ZEND_FE(msgfmt_format, arginfo_msgfmt_format)
+	ZEND_FE(msgfmt_format_message, arginfo_msgfmt_format_message)
+	ZEND_FE(msgfmt_parse, arginfo_msgfmt_parse)
+	ZEND_FE(msgfmt_parse_message, arginfo_msgfmt_parse_message)
+	ZEND_FE(msgfmt_set_pattern, arginfo_msgfmt_set_pattern)
+	ZEND_FE(msgfmt_get_pattern, arginfo_msgfmt_get_pattern)
+	ZEND_FE(msgfmt_get_locale, arginfo_msgfmt_get_locale)
+	ZEND_FE(msgfmt_get_error_code, arginfo_msgfmt_get_error_code)
+	ZEND_FE(msgfmt_get_error_message, arginfo_msgfmt_get_error_message)
+	ZEND_FE(normalizer_normalize, arginfo_normalizer_normalize)
+	ZEND_FE(normalizer_is_normalized, arginfo_normalizer_is_normalized)
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+	ZEND_FE(normalizer_get_raw_decomposition, arginfo_normalizer_get_raw_decomposition)
+#endif
+	ZEND_FE(resourcebundle_create, arginfo_resourcebundle_create)
+	ZEND_FE(resourcebundle_get, arginfo_resourcebundle_get)
+	ZEND_FE(resourcebundle_count, arginfo_resourcebundle_count)
+	ZEND_FE(resourcebundle_locales, arginfo_resourcebundle_locales)
+	ZEND_FE(resourcebundle_get_error_code, arginfo_resourcebundle_get_error_code)
+	ZEND_FE(resourcebundle_get_error_message, arginfo_resourcebundle_get_error_message)
+	ZEND_FE(intltz_count_equivalent_ids, arginfo_intltz_count_equivalent_ids)
+	ZEND_FE(intltz_create_default, arginfo_intltz_create_default)
+	ZEND_FE(intltz_create_enumeration, arginfo_intltz_create_enumeration)
+	ZEND_FE(intltz_create_time_zone, arginfo_intltz_create_time_zone)
+	ZEND_FE(intltz_create_time_zone_id_enumeration, arginfo_intltz_create_time_zone_id_enumeration)
+	ZEND_FE(intltz_from_date_time_zone, arginfo_intltz_from_date_time_zone)
+	ZEND_FE(intltz_get_canonical_id, arginfo_intltz_get_canonical_id)
+	ZEND_FE(intltz_get_display_name, arginfo_intltz_get_display_name)
+	ZEND_FE(intltz_get_dst_savings, arginfo_intltz_get_dst_savings)
+	ZEND_FE(intltz_get_equivalent_id, arginfo_intltz_get_equivalent_id)
+	ZEND_FE(intltz_get_error_code, arginfo_intltz_get_error_code)
+	ZEND_FE(intltz_get_error_message, arginfo_intltz_get_error_message)
+	ZEND_FE(intltz_get_gmt, arginfo_intltz_get_gmt)
+	ZEND_FE(intltz_get_id, arginfo_intltz_get_id)
+	ZEND_FE(intltz_get_offset, arginfo_intltz_get_offset)
+	ZEND_FE(intltz_get_raw_offset, arginfo_intltz_get_raw_offset)
+	ZEND_FE(intltz_get_region, arginfo_intltz_get_region)
+	ZEND_FE(intltz_get_tz_data_version, arginfo_intltz_get_tz_data_version)
+	ZEND_FE(intltz_get_unknown, arginfo_intltz_get_unknown)
+#if U_ICU_VERSION_MAJOR_NUM >= 52
+	ZEND_FE(intltz_get_windows_id, arginfo_intltz_get_windows_id)
+#endif
+#if U_ICU_VERSION_MAJOR_NUM >= 52
+	ZEND_FE(intltz_get_id_for_windows_id, arginfo_intltz_get_id_for_windows_id)
+#endif
+	ZEND_FE(intltz_has_same_rules, arginfo_intltz_has_same_rules)
+	ZEND_FE(intltz_to_date_time_zone, arginfo_intltz_to_date_time_zone)
+	ZEND_FE(intltz_use_daylight_time, arginfo_intltz_use_daylight_time)
+	ZEND_FE(transliterator_create, arginfo_transliterator_create)
+	ZEND_FE(transliterator_create_from_rules, arginfo_transliterator_create_from_rules)
+	ZEND_FE(transliterator_list_ids, arginfo_transliterator_list_ids)
+	ZEND_FE(transliterator_create_inverse, arginfo_transliterator_create_inverse)
+	ZEND_FE(transliterator_transliterate, arginfo_transliterator_transliterate)
+	ZEND_FE(transliterator_get_error_code, arginfo_transliterator_get_error_code)
+	ZEND_FE(transliterator_get_error_message, arginfo_transliterator_get_error_message)
+	ZEND_FE_END
+};
