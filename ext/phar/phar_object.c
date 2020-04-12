@@ -5158,152 +5158,6 @@ PHP_METHOD(PharFileInfo, decompress)
 
 /* {{{ phar methods */
 
-static const zend_function_entry php_archive_methods[] = {
-	PHP_ME(Phar, __construct,           arginfo_class_Phar___construct,              ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, __destruct,            arginfo_class_Phar___destruct,               ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, addEmptyDir,           arginfo_class_Phar_addEmptyDir,              ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, addFile,               arginfo_class_Phar_addFile,                  ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, addFromString,         arginfo_class_Phar_addFromString,            ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, buildFromDirectory,    arginfo_class_Phar_buildFromDirectory,       ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, buildFromIterator,     arginfo_class_Phar_buildFromIterator,        ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, compressFiles,         arginfo_class_Phar_compressFiles,            ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, decompressFiles,       arginfo_class_Phar_decompressFiles,          ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, compress,              arginfo_class_Phar_compress,                 ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, decompress,            arginfo_class_Phar_decompress,               ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, convertToExecutable,   arginfo_class_Phar_convertToExecutable,      ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, convertToData,         arginfo_class_Phar_convertToData,            ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, copy,                  arginfo_class_Phar_copy,                     ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, count,                 arginfo_class_Phar_count,                    ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, delete,                arginfo_class_Phar_delete,                   ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, delMetadata,           arginfo_class_Phar_delMetadata,              ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, extractTo,             arginfo_class_Phar_extractTo,                ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, getAlias,              arginfo_class_Phar_getAlias,                 ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, getPath,               arginfo_class_Phar_getPath,                  ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, getMetadata,           arginfo_class_Phar_getMetadata,              ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, getModified,           arginfo_class_Phar_getModified,              ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, getSignature,          arginfo_class_Phar_getSignature,             ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, getStub,               arginfo_class_Phar_getStub,                  ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, getVersion,            arginfo_class_Phar_getVersion,               ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, hasMetadata,           arginfo_class_Phar_hasMetadata,              ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, isBuffering,           arginfo_class_Phar_isBuffering,              ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, isCompressed,          arginfo_class_Phar_isCompressed,             ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, isFileFormat,          arginfo_class_Phar_isFileFormat,             ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, isWritable,            arginfo_class_Phar_isWritable,               ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, offsetExists,          arginfo_class_Phar_offsetExists,             ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, offsetGet,             arginfo_class_Phar_offsetGet,                ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, offsetSet,             arginfo_class_Phar_offsetSet,                ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, offsetUnset,           arginfo_class_Phar_offsetUnset,              ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, setAlias,              arginfo_class_Phar_setAlias,                 ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, setDefaultStub,        arginfo_class_Phar_setDefaultStub,     	     ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, setMetadata,           arginfo_class_Phar_setMetadata,              ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, setSignatureAlgorithm, arginfo_class_Phar_setSignatureAlgorithm,    ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, setStub,               arginfo_class_Phar_setStub,                  ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, startBuffering,        arginfo_class_Phar_startBuffering,           ZEND_ACC_PUBLIC)
-	PHP_ME(Phar, stopBuffering,         arginfo_class_Phar_stopBuffering,            ZEND_ACC_PUBLIC)
-	/* static member functions */
-	PHP_ME(Phar, apiVersion,            arginfo_class_Phar_apiVersion,               ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, canCompress,           arginfo_class_Phar_canCompress,              ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, canWrite,              arginfo_class_Phar_canWrite,                 ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, createDefaultStub,     arginfo_class_Phar_createDefaultStub,        ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, getSupportedCompression,arginfo_class_Phar_getSupportedCompression, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, getSupportedSignatures,arginfo_class_Phar_getSupportedSignatures,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, interceptFileFuncs,    arginfo_class_Phar_interceptFileFuncs,       ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, isValidPharFilename,   arginfo_class_Phar_isValidPharFilename,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, loadPhar,              arginfo_class_Phar_loadPhar,                 ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, mapPhar,               arginfo_class_Phar_mapPhar,                  ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, running,               arginfo_class_Phar_running,                  ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, mount,                 arginfo_class_Phar_mount,                    ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, mungServer,            arginfo_class_Phar_mungServer,               ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, unlinkArchive,         arginfo_class_Phar_unlinkArchive,            ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_ME(Phar, webPhar,               arginfo_class_Phar_webPhar,                  ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-	PHP_FE_END
-};
-
-static const zend_function_entry php_data_methods[] = {
-    PHP_ME(Phar, __construct,           arginfo_class_PharData___construct,              ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, __destruct,            arginfo_class_PharData___destruct,               ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, addEmptyDir,           arginfo_class_PharData_addEmptyDir,              ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, addFile,               arginfo_class_PharData_addFile,                  ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, addFromString,         arginfo_class_PharData_addFromString,            ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, buildFromDirectory,    arginfo_class_PharData_buildFromDirectory,       ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, buildFromIterator,     arginfo_class_PharData_buildFromIterator,        ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, compressFiles,         arginfo_class_PharData_compressFiles,            ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, decompressFiles,       arginfo_class_PharData_decompressFiles,          ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, compress,              arginfo_class_PharData_compress,                 ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, decompress,            arginfo_class_PharData_decompress,               ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, convertToExecutable,   arginfo_class_PharData_convertToExecutable,      ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, convertToData,         arginfo_class_PharData_convertToData,            ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, copy,                  arginfo_class_PharData_copy,                     ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, count,                 arginfo_class_PharData_count,                    ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, delete,                arginfo_class_PharData_delete,                   ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, delMetadata,           arginfo_class_PharData_delMetadata,              ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, extractTo,             arginfo_class_PharData_extractTo,                ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, getAlias,              arginfo_class_PharData_getAlias,                 ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, getPath,               arginfo_class_PharData_getPath,                  ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, getMetadata,           arginfo_class_PharData_getMetadata,              ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, getModified,           arginfo_class_PharData_getModified,              ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, getSignature,          arginfo_class_PharData_getSignature,             ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, getStub,               arginfo_class_PharData_getStub,                  ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, getVersion,            arginfo_class_PharData_getVersion,               ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, hasMetadata,           arginfo_class_PharData_hasMetadata,              ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, isBuffering,           arginfo_class_PharData_isBuffering,              ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, isCompressed,          arginfo_class_PharData_isCompressed,             ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, isFileFormat,          arginfo_class_PharData_isFileFormat,             ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, isWritable,            arginfo_class_PharData_isWritable,               ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, offsetExists,          arginfo_class_PharData_offsetExists,             ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, offsetGet,             arginfo_class_PharData_offsetGet,                ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, offsetSet,             arginfo_class_PharData_offsetSet,                ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, offsetUnset,           arginfo_class_PharData_offsetUnset,              ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, setAlias,              arginfo_class_PharData_setAlias,                 ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, setDefaultStub,        arginfo_class_PharData_setDefaultStub,           ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, setMetadata,           arginfo_class_PharData_setMetadata,              ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, setSignatureAlgorithm, arginfo_class_PharData_setSignatureAlgorithm,    ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, setStub,               arginfo_class_PharData_setStub,                  ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, startBuffering,        arginfo_class_PharData_startBuffering,           ZEND_ACC_PUBLIC)
-    PHP_ME(Phar, stopBuffering,         arginfo_class_PharData_stopBuffering,            ZEND_ACC_PUBLIC)
-    /* static member functions */
-    PHP_ME(Phar, apiVersion,            arginfo_class_PharData_apiVersion,               ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-    PHP_ME(Phar, canCompress,           arginfo_class_PharData_canCompress,              ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-    PHP_ME(Phar, canWrite,              arginfo_class_PharData_canWrite,                 ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-    PHP_ME(Phar, createDefaultStub,     arginfo_class_PharData_createDefaultStub,        ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-    PHP_ME(Phar, getSupportedCompression,arginfo_class_PharData_getSupportedCompression, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-    PHP_ME(Phar, getSupportedSignatures,arginfo_class_PharData_getSupportedSignatures,   ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-    PHP_ME(Phar, interceptFileFuncs,    arginfo_class_PharData_interceptFileFuncs,       ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-    PHP_ME(Phar, isValidPharFilename,   arginfo_class_PharData_isValidPharFilename,      ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-    PHP_ME(Phar, loadPhar,              arginfo_class_PharData_loadPhar,                 ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-    PHP_ME(Phar, mapPhar,               arginfo_class_PharData_mapPhar,                  ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-    PHP_ME(Phar, running,               arginfo_class_PharData_running,                  ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-    PHP_ME(Phar, mount,                 arginfo_class_PharData_mount,                    ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-    PHP_ME(Phar, mungServer,            arginfo_class_PharData_mungServer,               ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-    PHP_ME(Phar, unlinkArchive,         arginfo_class_PharData_unlinkArchive,            ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-    PHP_ME(Phar, webPhar,               arginfo_class_PharData_webPhar,                  ZEND_ACC_PUBLIC|ZEND_ACC_STATIC|ZEND_ACC_FINAL)
-    PHP_FE_END
-};
-
-static const zend_function_entry php_entry_methods[] = {
-	PHP_ME(PharFileInfo, __construct,        arginfo_class_PharFileInfo___construct,       ZEND_ACC_PUBLIC)
-	PHP_ME(PharFileInfo, __destruct,         arginfo_class_PharFileInfo___destruct,        ZEND_ACC_PUBLIC)
-	PHP_ME(PharFileInfo, chmod,              arginfo_class_PharFileInfo_chmod,             ZEND_ACC_PUBLIC)
-	PHP_ME(PharFileInfo, compress,           arginfo_class_PharFileInfo_compress,          ZEND_ACC_PUBLIC)
-	PHP_ME(PharFileInfo, decompress,         arginfo_class_PharFileInfo_decompress,        ZEND_ACC_PUBLIC)
-	PHP_ME(PharFileInfo, delMetadata,        arginfo_class_PharFileInfo_delMetadata,       ZEND_ACC_PUBLIC)
-	PHP_ME(PharFileInfo, getCompressedSize,  arginfo_class_PharFileInfo_getCompressedSize, ZEND_ACC_PUBLIC)
-	PHP_ME(PharFileInfo, getCRC32,           arginfo_class_PharFileInfo_getCRC32,          ZEND_ACC_PUBLIC)
-	PHP_ME(PharFileInfo, getContent,         arginfo_class_PharFileInfo_getContent,        ZEND_ACC_PUBLIC)
-	PHP_ME(PharFileInfo, getMetadata,        arginfo_class_PharFileInfo_getMetadata,       ZEND_ACC_PUBLIC)
-	PHP_ME(PharFileInfo, getPharFlags,       arginfo_class_PharFileInfo_getPharFlags,      ZEND_ACC_PUBLIC)
-	PHP_ME(PharFileInfo, hasMetadata,        arginfo_class_PharFileInfo_hasMetadata,       ZEND_ACC_PUBLIC)
-	PHP_ME(PharFileInfo, isCompressed,       arginfo_class_PharFileInfo_isCompressed,      ZEND_ACC_PUBLIC)
-	PHP_ME(PharFileInfo, isCRCChecked,       arginfo_class_PharFileInfo_isCRCChecked,      ZEND_ACC_PUBLIC)
-	PHP_ME(PharFileInfo, setMetadata,        arginfo_class_PharFileInfo_setMetadata,       ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
-static const zend_function_entry phar_exception_methods[] = {
-	PHP_FE_END
-};
-/* }}} */
-
 #define REGISTER_PHAR_CLASS_CONST_LONG(class_name, const_name, value) \
 	zend_declare_class_constant_long(class_name, const_name, sizeof(const_name)-1, (zend_long)value);
 
@@ -5311,20 +5165,20 @@ void phar_object_init(void) /* {{{ */
 {
 	zend_class_entry ce;
 
-	INIT_CLASS_ENTRY(ce, "PharException", phar_exception_methods);
+	INIT_CLASS_ENTRY(ce, "PharException", class_PharException_methods);
 	phar_ce_PharException = zend_register_internal_class_ex(&ce, zend_ce_exception);
 
-	INIT_CLASS_ENTRY(ce, "Phar", php_archive_methods);
+	INIT_CLASS_ENTRY(ce, "Phar", class_Phar_methods);
 	phar_ce_archive = zend_register_internal_class_ex(&ce, spl_ce_RecursiveDirectoryIterator);
 
 	zend_class_implements(phar_ce_archive, 2, zend_ce_countable, zend_ce_arrayaccess);
 
-	INIT_CLASS_ENTRY(ce, "PharData", php_data_methods);
+	INIT_CLASS_ENTRY(ce, "PharData", class_PharData_methods);
 	phar_ce_data = zend_register_internal_class_ex(&ce, spl_ce_RecursiveDirectoryIterator);
 
 	zend_class_implements(phar_ce_data, 2, zend_ce_countable, zend_ce_arrayaccess);
 
-	INIT_CLASS_ENTRY(ce, "PharFileInfo", php_entry_methods);
+	INIT_CLASS_ENTRY(ce, "PharFileInfo", class_PharFileInfo_methods);
 	phar_ce_entry = zend_register_internal_class_ex(&ce, spl_ce_SplFileInfo);
 
 	REGISTER_PHAR_CLASS_CONST_LONG(phar_ce_archive, "BZ2", PHAR_ENT_COMPRESSED_BZ2)

@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class CURLFile
 {
     public function __construct(
