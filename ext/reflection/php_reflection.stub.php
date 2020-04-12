@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class ReflectionException extends Exception
 {
 }
@@ -16,6 +18,7 @@ interface Reflector extends Stringable
 
 abstract class ReflectionFunctionAbstract implements Reflector
 {
+    /** @alias ReflectionClass::__clone */
     final private function __clone() {}
 
     /** @return bool */
@@ -296,7 +299,7 @@ class ReflectionClass implements Reflector
     public function getModifiers() {}
 
     /** @return bool */
-    public function isIntance(object $object) {}
+    public function isInstance(object $object) {}
 
     /** @return object */
     public function newInstance(...$args) {}
@@ -331,7 +334,10 @@ class ReflectionClass implements Reflector
     /** @return bool */
     public function isIterable() {}
 
-    /** @return bool */
+    /**
+     * @return bool
+     * @alias ReflectionClass::isIterable
+     */
     public function isIterateable() {}
 
     /**
@@ -363,6 +369,7 @@ class ReflectionObject extends ReflectionClass
 
 class ReflectionProperty implements Reflector
 {
+    /** @alias ReflectionClass::__clone */
     final private function __clone() {}
 
     /** @param string|object $class */
@@ -423,6 +430,7 @@ class ReflectionProperty implements Reflector
 
 class ReflectionClassConstant implements Reflector
 {
+    /** @alias ReflectionClass::__clone */
     final private function __clone() {}
 
     /** @return string|object */
@@ -457,6 +465,7 @@ class ReflectionClassConstant implements Reflector
 
 class ReflectionParameter implements Reflector
 {
+    /** @alias ReflectionClass::__clone */
     final private function __clone() {}
 
     /**
@@ -524,6 +533,7 @@ class ReflectionParameter implements Reflector
 
 abstract class ReflectionType implements Stringable
 {
+    /** @alias ReflectionClass::__clone */
     final private function __clone() {}
 
     /** @return bool */
@@ -548,6 +558,7 @@ class ReflectionUnionType extends ReflectionType
 
 class ReflectionExtension implements Reflector
 {
+    /** @alias ReflectionClass::__clone */
     final private function __clone() {}
 
     public function __construct(string $name) {}
@@ -590,6 +601,7 @@ class ReflectionExtension implements Reflector
 
 class ReflectionZendExtension implements Reflector
 {
+    /** @alias ReflectionClass::__clone */
     final private function __clone() {}
 
     public function __construct(string $name) {}
@@ -619,6 +631,7 @@ final class ReflectionReference
 
     public function getId(): string {}
 
+    /** @alias ReflectionClass::__clone */
     private function __clone() {}
 
     private function __construct() {}

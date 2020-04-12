@@ -2669,80 +2669,6 @@ PHP_FUNCTION(session_register_shutdown)
 }
 /* }}} */
 
-/* {{{ session_functions[]
- */
-static const zend_function_entry session_functions[] = {
-	PHP_FE(session_name,              arginfo_session_name)
-	PHP_FE(session_module_name,       arginfo_session_module_name)
-	PHP_FE(session_save_path,         arginfo_session_save_path)
-	PHP_FE(session_id,                arginfo_session_id)
-	PHP_FE(session_create_id,         arginfo_session_create_id)
-	PHP_FE(session_regenerate_id,     arginfo_session_regenerate_id)
-	PHP_FE(session_decode,            arginfo_session_decode)
-	PHP_FE(session_encode,            arginfo_session_encode)
-	PHP_FE(session_start,             arginfo_session_start)
-	PHP_FE(session_destroy,           arginfo_session_destroy)
-	PHP_FE(session_unset,             arginfo_session_unset)
-	PHP_FE(session_gc,                arginfo_session_gc)
-	PHP_FE(session_set_save_handler,  arginfo_session_set_save_handler)
-	PHP_FE(session_cache_limiter,     arginfo_session_cache_limiter)
-	PHP_FE(session_cache_expire,      arginfo_session_cache_expire)
-	PHP_FE(session_set_cookie_params, arginfo_session_set_cookie_params)
-	PHP_FE(session_get_cookie_params, arginfo_session_get_cookie_params)
-	PHP_FE(session_write_close,       arginfo_session_write_close)
-	PHP_FE(session_abort,             arginfo_session_abort)
-	PHP_FE(session_reset,             arginfo_session_reset)
-	PHP_FE(session_status,            arginfo_session_status)
-	PHP_FE(session_register_shutdown, arginfo_session_register_shutdown)
-	PHP_FALIAS(session_commit, session_write_close, arginfo_session_commit)
-	PHP_FE_END
-};
-/* }}} */
-
-/* {{{ SessionHandlerInterface functions[]
-*/
-static const zend_function_entry php_session_iface_functions[] = {
-	PHP_ABSTRACT_ME(SessionHandlerInterface, open, arginfo_class_SessionHandlerInterface_open)
-	PHP_ABSTRACT_ME(SessionHandlerInterface, close, arginfo_class_SessionHandlerInterface_close)
-	PHP_ABSTRACT_ME(SessionHandlerInterface, read, arginfo_class_SessionHandlerInterface_read)
-	PHP_ABSTRACT_ME(SessionHandlerInterface, write, arginfo_class_SessionHandlerInterface_write)
-	PHP_ABSTRACT_ME(SessionHandlerInterface, destroy, arginfo_class_SessionHandlerInterface_destroy)
-	PHP_ABSTRACT_ME(SessionHandlerInterface, gc, arginfo_class_SessionHandlerInterface_gc)
-	PHP_FE_END
-};
-/* }}} */
-
-/* {{{ SessionIdInterface functions[]
-*/
-static const zend_function_entry php_session_id_iface_functions[] = {
-	PHP_ABSTRACT_ME(SessionIdInterface, create_sid, arginfo_class_SessionIdInterface_create_sid)
-	PHP_FE_END
-};
-/* }}} */
-
-/* {{{ SessionUpdateTimestampHandler functions[]
- */
-static const zend_function_entry php_session_update_timestamp_iface_functions[] = {
-	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, validateId, arginfo_class_SessionUpdateTimestampHandlerInterface_validateId)
-	PHP_ABSTRACT_ME(SessionUpdateTimestampHandlerInterface, updateTimestamp, arginfo_class_SessionUpdateTimestampHandlerInterface_updateTimestamp)
-	PHP_FE_END
-};
-/* }}} */
-
-/* {{{ SessionHandler functions[]
- */
-static const zend_function_entry php_session_class_functions[] = {
-	PHP_ME(SessionHandler, open, arginfo_class_SessionHandlerInterface_open, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionHandler, close, arginfo_class_SessionHandlerInterface_close, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionHandler, read, arginfo_class_SessionHandlerInterface_read, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionHandler, write, arginfo_class_SessionHandlerInterface_write, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionHandler, destroy, arginfo_class_SessionHandlerInterface_destroy, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionHandler, gc, arginfo_class_SessionHandlerInterface_gc, ZEND_ACC_PUBLIC)
-	PHP_ME(SessionHandler, create_sid, arginfo_class_SessionIdInterface_create_sid, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-/* }}} */
-
 /* ********************************
    * Module Setup and Destruction *
    ******************************** */
@@ -2857,20 +2783,20 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 	php_rfc1867_callback = php_session_rfc1867_callback;
 
 	/* Register interfaces */
-	INIT_CLASS_ENTRY(ce, PS_IFACE_NAME, php_session_iface_functions);
+	INIT_CLASS_ENTRY(ce, PS_IFACE_NAME, class_SessionHandlerInterface_methods);
 	php_session_iface_entry = zend_register_internal_class(&ce);
 	php_session_iface_entry->ce_flags |= ZEND_ACC_INTERFACE;
 
-	INIT_CLASS_ENTRY(ce, PS_SID_IFACE_NAME, php_session_id_iface_functions);
+	INIT_CLASS_ENTRY(ce, PS_SID_IFACE_NAME, class_SessionIdInterface_methods);
 	php_session_id_iface_entry = zend_register_internal_class(&ce);
 	php_session_id_iface_entry->ce_flags |= ZEND_ACC_INTERFACE;
 
-	INIT_CLASS_ENTRY(ce, PS_UPDATE_TIMESTAMP_IFACE_NAME, php_session_update_timestamp_iface_functions);
+	INIT_CLASS_ENTRY(ce, PS_UPDATE_TIMESTAMP_IFACE_NAME, class_SessionUpdateTimestampHandlerInterface_methods);
 	php_session_update_timestamp_iface_entry = zend_register_internal_class(&ce);
 	php_session_update_timestamp_iface_entry->ce_flags |= ZEND_ACC_INTERFACE;
 
 	/* Register base class */
-	INIT_CLASS_ENTRY(ce, PS_CLASS_NAME, php_session_class_functions);
+	INIT_CLASS_ENTRY(ce, PS_CLASS_NAME, class_SessionHandler_methods);
 	php_session_class_entry = zend_register_internal_class(&ce);
 	zend_class_implements(php_session_class_entry, 1, php_session_iface_entry);
 	zend_class_implements(php_session_class_entry, 1, php_session_id_iface_entry);
@@ -3251,7 +3177,7 @@ zend_module_entry session_module_entry = {
 	NULL,
 	session_deps,
 	"session",
-	session_functions,
+	ext_functions,
 	PHP_MINIT(session), PHP_MSHUTDOWN(session),
 	PHP_RINIT(session), PHP_RSHUTDOWN(session),
 	PHP_MINFO(session),

@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 function session_name(string $name = UNKNOWN): string|false {}
 
 function session_module_name(string $module = UNKNOWN): string|false {}
@@ -81,4 +83,28 @@ interface SessionUpdateTimestampHandlerInterface
 
     /** @return bool */
     public function updateTimestamp(string $key, string $val);
+}
+
+class SessionHandler implements SessionHandlerInterface, SessionIdInterface
+{
+    /** @return bool */
+    public function open(string $save_path, string $session_name) {}
+
+    /** @return bool */
+    public function close() {}
+
+    /** @return string */
+    public function read(string $key) {}
+
+    /** @return bool */
+    public function write(string $key, string $val) {}
+
+    /** @return bool */
+    public function destroy(string $key) {}
+
+    /** @return int|bool */
+    public function gc(int $maxlifetime) {}
+
+    /** @return string */
+    public function create_sid() {}
 }
