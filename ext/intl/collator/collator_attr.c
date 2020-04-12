@@ -20,7 +20,6 @@
 #include "php_intl.h"
 #include "collator_class.h"
 #include "collator_convert.h"
-#include "collator_attr.h"
 
 #include <unicode/ustring.h>
 

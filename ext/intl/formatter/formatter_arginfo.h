@@ -64,3 +64,44 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_NumberFormatter_getErrorCode arginfo_class_NumberFormatter_getPattern
 
 #define arginfo_class_NumberFormatter_getErrorMessage arginfo_class_NumberFormatter_getPattern
+
+
+ZEND_METHOD(NumberFormatter, __construct);
+ZEND_FUNCTION(numfmt_create);
+ZEND_FUNCTION(numfmt_format);
+ZEND_FUNCTION(numfmt_parse);
+ZEND_FUNCTION(numfmt_format_currency);
+ZEND_FUNCTION(numfmt_parse_currency);
+ZEND_FUNCTION(numfmt_set_attribute);
+ZEND_FUNCTION(numfmt_get_attribute);
+ZEND_FUNCTION(numfmt_set_text_attribute);
+ZEND_FUNCTION(numfmt_get_text_attribute);
+ZEND_FUNCTION(numfmt_set_symbol);
+ZEND_FUNCTION(numfmt_get_symbol);
+ZEND_FUNCTION(numfmt_set_pattern);
+ZEND_FUNCTION(numfmt_get_pattern);
+ZEND_FUNCTION(numfmt_get_locale);
+ZEND_FUNCTION(numfmt_get_error_code);
+ZEND_FUNCTION(numfmt_get_error_message);
+
+
+static const zend_function_entry class_NumberFormatter_methods[] = {
+	ZEND_ME(NumberFormatter, __construct, arginfo_class_NumberFormatter___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(create, numfmt_create, arginfo_class_NumberFormatter_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME_MAPPING(format, numfmt_format, arginfo_class_NumberFormatter_format, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(parse, numfmt_parse, arginfo_class_NumberFormatter_parse, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(formatCurrency, numfmt_format_currency, arginfo_class_NumberFormatter_formatCurrency, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(parseCurrency, numfmt_parse_currency, arginfo_class_NumberFormatter_parseCurrency, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(setAttribute, numfmt_set_attribute, arginfo_class_NumberFormatter_setAttribute, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getAttribute, numfmt_get_attribute, arginfo_class_NumberFormatter_getAttribute, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(setTextAttribute, numfmt_set_text_attribute, arginfo_class_NumberFormatter_setTextAttribute, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getTextAttribute, numfmt_get_text_attribute, arginfo_class_NumberFormatter_getTextAttribute, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(setSymbol, numfmt_set_symbol, arginfo_class_NumberFormatter_setSymbol, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getSymbol, numfmt_get_symbol, arginfo_class_NumberFormatter_getSymbol, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(setPattern, numfmt_set_pattern, arginfo_class_NumberFormatter_setPattern, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getPattern, numfmt_get_pattern, arginfo_class_NumberFormatter_getPattern, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getLocale, numfmt_get_locale, arginfo_class_NumberFormatter_getLocale, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getErrorCode, numfmt_get_error_code, arginfo_class_NumberFormatter_getErrorCode, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getErrorMessage, numfmt_get_error_message, arginfo_class_NumberFormatter_getErrorMessage, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};

@@ -19,7 +19,6 @@
 
 #include "php_intl.h"
 #include "collator_class.h"
-#include "collator_create.h"
 #include "intl_data.h"
 
 /* {{{ */

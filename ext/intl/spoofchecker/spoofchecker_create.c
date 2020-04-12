@@ -18,7 +18,6 @@
 
 #include "php_intl.h"
 #include "spoofchecker_class.h"
-#include "spoofchecker_create.h"
 #include "intl_data.h"
 
 /* {{{ proto Spoofchecker::__construct()

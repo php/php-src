@@ -17,10 +17,6 @@
 #include "msgformat_class.h"
 #include "php_intl.h"
 #include "msgformat_data.h"
-#include "msgformat_format.h"
-#include "msgformat_parse.h"
-#include "msgformat.h"
-#include "msgformat_attr.h"
 #include "msgformat_arginfo.h"
 
 #include <zend_exceptions.h>
@@ -92,25 +88,6 @@ zend_object *MessageFormatter_object_clone(zend_object *object)
  * 'MessageFormatter' class registration structures & functions
  */
 
-/* {{{ MessageFormatter_class_functions
- * Every 'MessageFormatter' class method has an entry in this table
- */
-static const zend_function_entry MessageFormatter_class_functions[] = {
-	PHP_ME( MessageFormatter, __construct, arginfo_class_MessageFormatter___construct, ZEND_ACC_PUBLIC )
-	ZEND_FENTRY(  create, ZEND_FN( msgfmt_create ), arginfo_class_MessageFormatter_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
-	PHP_NAMED_FE( format, ZEND_FN( msgfmt_format ), arginfo_class_MessageFormatter_format )
-	ZEND_FENTRY(  formatMessage, ZEND_FN( msgfmt_format_message ), arginfo_class_MessageFormatter_formatMessage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
-	PHP_NAMED_FE( parse, ZEND_FN( msgfmt_parse ), arginfo_class_MessageFormatter_parse )
-	ZEND_FENTRY(  parseMessage, ZEND_FN( msgfmt_parse_message ), arginfo_class_MessageFormatter_parseMessage, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
-	PHP_NAMED_FE( setPattern, ZEND_FN( msgfmt_set_pattern ), arginfo_class_MessageFormatter_setPattern )
-	PHP_NAMED_FE( getPattern, ZEND_FN( msgfmt_get_pattern ), arginfo_class_MessageFormatter_getPattern )
-	PHP_NAMED_FE( getLocale, ZEND_FN( msgfmt_get_locale ), arginfo_class_MessageFormatter_getLocale )
-	PHP_NAMED_FE( getErrorCode, ZEND_FN( msgfmt_get_error_code ), arginfo_class_MessageFormatter_getErrorCode )
-	PHP_NAMED_FE( getErrorMessage, ZEND_FN( msgfmt_get_error_message ), arginfo_class_MessageFormatter_getErrorMessage )
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ msgformat_register_class
  * Initialize 'MessageFormatter' class
  */
@@ -119,7 +96,7 @@ void msgformat_register_class( void )
 	zend_class_entry ce;
 
 	/* Create and register 'MessageFormatter' class. */
-	INIT_CLASS_ENTRY( ce, "MessageFormatter", MessageFormatter_class_functions );
+	INIT_CLASS_ENTRY( ce, "MessageFormatter", class_MessageFormatter_methods );
 	ce.create_object = MessageFormatter_object_create;
 	MessageFormatter_ce_ptr = zend_register_internal_class( &ce );
 

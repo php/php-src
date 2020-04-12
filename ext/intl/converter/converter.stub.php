@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class UConverter
 {
     public function __construct(?string $destination_encoding = null, ?string $source_encoding = null) {}

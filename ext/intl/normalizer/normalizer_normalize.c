@@ -24,7 +24,6 @@
 #endif
 #include "normalizer.h"
 #include "normalizer_class.h"
-#include "normalizer_normalize.h"
 #include "intl_convert.h"
 #include <unicode/utf8.h>
 

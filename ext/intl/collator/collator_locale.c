@@ -19,7 +19,6 @@
 
 #include "php_intl.h"
 #include "collator_class.h"
-#include "collator_locale.h"
 #include "intl_convert.h"
 
 #include <zend_API.h>

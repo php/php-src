@@ -19,7 +19,6 @@
 #include "php_intl.h"
 #include "transliterator.h"
 #include "transliterator_class.h"
-#include "transliterator_methods.h"
 #include "intl_data.h"
 #include "intl_convert.h"
 

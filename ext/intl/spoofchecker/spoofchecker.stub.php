@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class Spoofchecker
 {
     public function __construct() {}

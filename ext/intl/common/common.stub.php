@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class IntlIterator implements Iterator
 {
     /** @return mixed */

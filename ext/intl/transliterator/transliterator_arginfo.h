@@ -26,3 +26,26 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_Transliterator_getErrorCode arginfo_class_Transliterator___construct
 
 #define arginfo_class_Transliterator_getErrorMessage arginfo_class_Transliterator___construct
+
+
+ZEND_METHOD(Transliterator, __construct);
+ZEND_FUNCTION(transliterator_create);
+ZEND_FUNCTION(transliterator_create_from_rules);
+ZEND_FUNCTION(transliterator_create_inverse);
+ZEND_FUNCTION(transliterator_list_ids);
+ZEND_FUNCTION(transliterator_transliterate);
+ZEND_FUNCTION(transliterator_get_error_code);
+ZEND_FUNCTION(transliterator_get_error_message);
+
+
+static const zend_function_entry class_Transliterator_methods[] = {
+	ZEND_ME(Transliterator, __construct, arginfo_class_Transliterator___construct, ZEND_ACC_PRIVATE|ZEND_ACC_FINAL)
+	ZEND_ME_MAPPING(create, transliterator_create, arginfo_class_Transliterator_create, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME_MAPPING(createFromRules, transliterator_create_from_rules, arginfo_class_Transliterator_createFromRules, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME_MAPPING(createInverse, transliterator_create_inverse, arginfo_class_Transliterator_createInverse, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(listIDs, transliterator_list_ids, arginfo_class_Transliterator_listIDs, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME_MAPPING(transliterate, transliterator_transliterate, arginfo_class_Transliterator_transliterate, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getErrorCode, transliterator_get_error_code, arginfo_class_Transliterator_getErrorCode, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getErrorMessage, transliterator_get_error_message, arginfo_class_Transliterator_getErrorMessage, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};

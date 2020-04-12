@@ -23,7 +23,6 @@
 
 #include "formatter_class.h"
 #include "formatter_format.h"
-#include "formatter_parse.h"
 #include "intl_convert.h"
 
 #define ICU_LOCALE_BUG 1

@@ -21,7 +21,6 @@
 extern "C" {
 #include "../php_intl.h"
 #include "dateformat_class.h"
-#include "dateformat_attrcpp.h"
 #define USE_TIMEZONE_POINTER 1
 #include "../timezone/timezone_class.h"
 #define USE_CALENDAR_POINTER 1

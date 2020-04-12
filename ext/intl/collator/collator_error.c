@@ -19,7 +19,6 @@
 
 #include "php_intl.h"
 #include "collator_class.h"
-#include "collator_error.h"
 
 /* {{{ proto int Collator::getErrorCode( Collator $coll )
  * Get collator's last error code. }}} */

@@ -19,7 +19,6 @@
 #include "dateformat_class.h"
 #include "../intl_convert.h"
 #include "dateformat_class.h"
-#include "dateformat_attr.h"
 
 #include <unicode/ustring.h>
 #include <unicode/udat.h>
