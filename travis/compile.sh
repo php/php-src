@@ -9,6 +9,11 @@ if [[ "$ENABLE_DEBUG" == 1 ]]; then
 else
 	DEBUG="";
 fi
+if [[ "$S390X" == 1 ]]; then
+	S390X_CONFIG="--without-pcre-jit";
+else
+	S390X_CONFIG="";
+fi
 
 if [[ -z "$CONFIG_LOG_FILE" ]]; then
 	CONFIG_QUIET="--quiet"
@@ -32,6 +37,7 @@ MAKE_JOBS=${MAKE_JOBS:-$(nproc)}
 $CONFIG_QUIET \
 $DEBUG \
 $TS \
+$S390X_CONFIG \
 --enable-phpdbg \
 --enable-fpm \
 --with-pdo-mysql=mysqlnd \
