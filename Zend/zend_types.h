@@ -302,6 +302,7 @@ typedef union _zend_value {
 struct _zval_struct {
 	zend_value        value;			/* value */
 	union {
+		uint32_t type_info;
 		struct {
 			ZEND_ENDIAN_LOHI_3(
 				zend_uchar    type,			/* active type */
@@ -310,7 +311,6 @@ struct _zval_struct {
 					uint16_t  extra;        /* not further specified */
 				} u)
 		} v;
-		uint32_t type_info;
 	} u1;
 	union {
 		uint32_t     next;                 /* hash collision chain */
