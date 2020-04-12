@@ -93,7 +93,7 @@ typedef struct {
 	HashPosition pos;
 } php_dom_iterator;
 
-#include "dom_fe.h"
+#include "domexception.h"
 
 dom_object *dom_object_get_data(xmlNodePtr obj);
 dom_doc_propsptr dom_get_doc_props(php_libxml_ref_obj *document);

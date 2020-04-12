@@ -27,9 +27,6 @@
 #include "php_dom_arginfo.h"
 #include "dom_properties.h"
 #include "zend_interfaces.h"
-#if defined(LIBXML_XPATH_ENABLED)
-#include "xpath_arginfo.h"
-#endif
 
 #include "ext/standard/info.h"
 #define PHP_XPATH 1

@@ -15,8 +15,8 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef DOM_FE_H
-#define DOM_FE_H
+#ifndef DOM_EXCEPTION_H
+#define DOM_EXCEPTION_H
 
 /* domexception errors */
 typedef enum {
@@ -46,4 +46,4 @@ typedef enum {
 	VALIDATION_ERR                 = 16
 } dom_exception_code;
 
-#endif /* DOM_FE_H */
+#endif /* DOM_EXCEPTION_H */
