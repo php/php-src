@@ -43,13 +43,6 @@ PHP_FUNCTION(user_filter_nop)
 {
 }
 
-static const zend_function_entry user_filter_class_funcs[] = {
-	PHP_NAMED_FE(filter,	PHP_FN(user_filter_nop),		arginfo_class_php_user_filter_filter)
-	PHP_NAMED_FE(onCreate,	PHP_FN(user_filter_nop),		arginfo_class_php_user_filter_onCreate)
-	PHP_NAMED_FE(onClose,	PHP_FN(user_filter_nop),		arginfo_class_php_user_filter_onClose)
-	PHP_FE_END
-};
-
 static zend_class_entry user_filter_class_entry;
 
 static ZEND_RSRC_DTOR_FUNC(php_bucket_dtor)
@@ -65,7 +58,7 @@ PHP_MINIT_FUNCTION(user_filters)
 {
 	zend_class_entry *php_user_filter;
 	/* init the filter class ancestor */
-	INIT_CLASS_ENTRY(user_filter_class_entry, "php_user_filter", user_filter_class_funcs);
+	INIT_CLASS_ENTRY(user_filter_class_entry, "php_user_filter", class_php_user_filter_methods);
 	if ((php_user_filter = zend_register_internal_class(&user_filter_class_entry)) == NULL) {
 		return FAILURE;
 	}

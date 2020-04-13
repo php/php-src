@@ -87,13 +87,6 @@ static zend_class_entry *dir_class_entry_ptr;
 		} \
 	}
 
-static const zend_function_entry php_dir_class_functions[] = {
-	PHP_FALIAS(close,	closedir,		arginfo_class_Directory_close)
-	PHP_FALIAS(rewind,	rewinddir,		arginfo_class_Directory_rewind)
-	PHP_FALIAS(read,	readdir,		arginfo_class_Directory_read)
-	PHP_FE_END
-};
-
 
 static void php_set_default_dir(zend_resource *res)
 {
@@ -119,7 +112,7 @@ PHP_MINIT_FUNCTION(dir)
 	static char dirsep_str[2], pathsep_str[2];
 	zend_class_entry dir_class_entry;
 
-	INIT_CLASS_ENTRY(dir_class_entry, "Directory", php_dir_class_functions);
+	INIT_CLASS_ENTRY(dir_class_entry, "Directory", class_Directory_methods);
 	dir_class_entry_ptr = zend_register_internal_class(&dir_class_entry);
 
 #ifdef ZTS

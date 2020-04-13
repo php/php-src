@@ -33,3 +33,31 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_PhpToken___toString, 0, 0, IS_STRING, 0)
 ZEND_END_ARG_INFO()
+
+
+ZEND_FUNCTION(token_get_all);
+ZEND_FUNCTION(token_name);
+ZEND_METHOD(PhpToken, getAll);
+ZEND_METHOD(PhpToken, __construct);
+ZEND_METHOD(PhpToken, is);
+ZEND_METHOD(PhpToken, isIgnorable);
+ZEND_METHOD(PhpToken, getTokenName);
+ZEND_METHOD(PhpToken, __toString);
+
+
+static const zend_function_entry ext_functions[] = {
+	ZEND_FE(token_get_all, arginfo_token_get_all)
+	ZEND_FE(token_name, arginfo_token_name)
+	ZEND_FE_END
+};
+
+
+static const zend_function_entry class_PhpToken_methods[] = {
+	ZEND_ME(PhpToken, getAll, arginfo_class_PhpToken_getAll, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
+	ZEND_ME(PhpToken, __construct, arginfo_class_PhpToken___construct, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
+	ZEND_ME(PhpToken, is, arginfo_class_PhpToken_is, ZEND_ACC_PUBLIC)
+	ZEND_ME(PhpToken, isIgnorable, arginfo_class_PhpToken_isIgnorable, ZEND_ACC_PUBLIC)
+	ZEND_ME(PhpToken, getTokenName, arginfo_class_PhpToken_getTokenName, ZEND_ACC_PUBLIC)
+	ZEND_ME(PhpToken, __toString, arginfo_class_PhpToken___toString, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};

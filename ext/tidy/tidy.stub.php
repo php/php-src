@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 /** @param array|string $config_options */
 function tidy_parse_string(string $input, $config_options = UNKNOWN, string $encoding = UNKNOWN): tidy|false {}
 
@@ -44,6 +46,7 @@ function tidy_access_count(tidy $object): int {}
 
 function tidy_config_count(tidy $object): int {}
 
+/** @alias tidy_getopt */
 function tidy_getopt(tidy $object, string $option): string|int|bool {}
 
 function tidy_get_root(tidy $object): ?tidyNode {}
@@ -59,9 +62,13 @@ class tidy
     /** @param array|string $config_options */
     public function __construct(string $filename = UNKNOWN, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false) {}
 
-    /** @return string|int|bool */
+    /**
+     * @return string|int|bool
+     * @alias tidy_getopt
+     */
     public function getOpt(string $option) {}
 
+    /** @alias tidy_clean_repair */
     public function cleanRepair(): bool {}
 
     /** @param array|string $config_options */
@@ -70,41 +77,61 @@ class tidy
     /** @param array|string $config_options */
     public function parseString(string $input, $config_options = UNKNOWN, string $encoding = UNKNOWN): bool {}
 
-    /** @param array|string $config_options */
+    /**
+     * @param array|string $config_options
+     * @alias tidy_repair_string
+     */
     public function repairString(string $data, $config_options = UNKNOWN, string $encoding = UNKNOWN): bool {}
 
-    /** @param array|string $config_options */
+    /**
+     * @param array|string $config_options
+     * @alias tidy_repair_file
+     */
     public function repairFile(string $filename, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false): bool {}
 
+    /** @alias tidy_diagnose */
     public function diagnose(): bool {}
 
+    /** @alias tidy_get_release */
     public function getRelease(): string {}
 
+    /** @alias tidy_get_config */
     public function getConfig(): array {}
 
+    /** @alias tidy_get_status */
     public function getStatus(): int {}
 
+    /** @alias tidy_get_html_ver */
     public function getHtmlVer(): int {}
 
 #if HAVE_TIDYOPTGETDOC
-    /** @return string|false */
+    /**
+     * @return string|false
+     * @alias tidy_get_opt_doc
+     */
     public function getOptDoc(string $optname) {}
 #endif
 
+    /** @alias tidy_is_xhtml */
     public function isXhtml(): bool {}
 
+    /** @alias tidy_is_xml */
     public function isXml(): bool {}
 
+    /** @alias tidy_get_root */
     public function root(): ?tidyNode {}
 
+    /** @alias tidy_get_head */
     public function head(): ?tidyNode {}
 
+    /** @alias tidy_get_html */
     public function html(): ?tidyNode {}
 
+    /** @alias tidy_get_body */
     public function body(): ?tidyNode {}
 }
 
-class tidyNode
+final class tidyNode
 {
     private function __construct() {}
 

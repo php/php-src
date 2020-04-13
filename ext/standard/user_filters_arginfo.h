@@ -11,3 +11,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_php_user_filter_onCreate, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 #define arginfo_class_php_user_filter_onClose arginfo_class_php_user_filter_onCreate
+
+
+ZEND_FUNCTION(user_filter_nop);
+
+
+static const zend_function_entry class_php_user_filter_methods[] = {
+	ZEND_ME_MAPPING(filter, user_filter_nop, arginfo_class_php_user_filter_filter, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(onCreate, user_filter_nop, arginfo_class_php_user_filter_onCreate, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(onClose, user_filter_nop, arginfo_class_php_user_filter_onClose, ZEND_ACC_PUBLIC)
+	ZEND_FE_END
+};
