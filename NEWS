@@ -14,6 +14,10 @@ PHP                                                                        NEWS
   . Fixed bug #79441 (Segfault in mb_chr() if internal encoding is unsupported).
     (Girgias)
 
+- Standard:
+  . Fixed bug #79468 (SIGSEGV when closing stream handle with a stream filter
+    appended). (dinosaur)
+
 16 Apr 2020, PHP 7.3.17
 
 - Core:
