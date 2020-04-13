@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? 2020, PHP 7.2.30
 
 - Standard:
+  . Fixed bug #79468 (SIGSEGV when closing stream handle with a stream filter
+    appended). (dinosaur)
   . Fixed bug #79330 (shell_exec() silently truncates after a null byte). (stas)
   . Fixed bug #79465 (OOB Read in urldecode()). (stas)
 
