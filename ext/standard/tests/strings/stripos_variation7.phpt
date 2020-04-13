@@ -31,7 +31,7 @@ echo "*** Done ***";
 *** Testing stripos() function: with heredoc strings ***
 -- With empty heredoc string --
 int(0)
-Offset not contained in string
+stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 int(0)
 int(0)
 *** Done ***

@@ -46,15 +46,15 @@ DONE
 *** Testing array_column() : error conditions ***
 
 -- Testing array_column() column key parameter should be a string or an integer (testing bool) --
-The column key should be either a string or an integer
+array_column(): Argument #2 ($column_key) must be of type string|int, bool given
 
 -- Testing array_column() column key parameter should be a string or integer (testing array) --
-The column key should be either a string or an integer
+array_column(): Argument #2 ($column_key) must be of type string|int, array given
 
 -- Testing array_column() index key parameter should be a string or an integer (testing bool) --
-The index key should be either a string or an integer
+array_column(): Argument #3 ($index_key) must be of type string|int, bool given
 
 -- Testing array_column() index key parameter should be a string or integer (testing array) --
-The index key should be either a string or an integer
+array_column(): Argument #3 ($index_key) must be of type string|int, array given
 
 DONE

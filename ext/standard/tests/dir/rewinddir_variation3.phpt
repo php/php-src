@@ -38,7 +38,7 @@ if ($result1 === $result2) {
 
 -- Open a file using fopen --
 resource(%d) of type (stream)
-%d is not a valid Directory resource
+rewinddir(): Argument #1 ($dir_handle) must be a valid Directory resource
 
 -- Check if rewinddir() has repositioned the file pointer --
 rewinddir() does not work on file pointers

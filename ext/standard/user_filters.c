@@ -423,7 +423,7 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (NULL == (pzbucket = zend_hash_str_find(Z_OBJPROP_P(zobject), "bucket", sizeof("bucket")-1))) {
-		zend_value_error("Object has no bucket property");
+		zend_argument_value_error(2, "must be an object that has a 'bucket' property");
 		RETURN_THROWS();
 	}
 

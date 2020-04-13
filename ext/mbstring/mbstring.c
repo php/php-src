@@ -1986,10 +1986,10 @@ static void handle_strpos_error(size_t error) {
 		php_error_docref(NULL, E_WARNING, "Conversion error");
 		break;
 	case MBFL_ERROR_OFFSET:
-		zend_value_error("Offset not contained in string");
+		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		break;
 	default:
-		zend_value_error("Unknown error in mb_strpos");
+		zend_value_error("mb_strpos(): Unknown error");
 		break;
 	}
 }

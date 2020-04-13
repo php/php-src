@@ -54,18 +54,18 @@ bool(false)
 
 -- Offset is 22 --
 --Multibyte String:--
-Offset not contained in string
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --ASCII String:--
-Offset not contained in string
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 -- Offset is 53 --
 --Multibyte String:--
-Offset not contained in string
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --ASCII String:--
-Offset not contained in string
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 -- Offset is 54 --
 --Multibyte String:--
-Offset not contained in string
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --ASCII String:--
-Offset not contained in string
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)

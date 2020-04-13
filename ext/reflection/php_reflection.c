@@ -5335,7 +5335,7 @@ ZEND_METHOD(reflection_property, getValue)
 		zval rv;
 
 		if (!object) {
-			zend_type_error("No object provided for getValue() on instance property");
+			zend_argument_type_error(1, "must be provided for instance properties");
 			RETURN_THROWS();
 		}
 
@@ -5428,7 +5428,7 @@ ZEND_METHOD(reflection_property, isInitialized)
 		int retval;
 
 		if (!object) {
-			zend_type_error("No object provided for isInitialized() on instance property");
+			zend_argument_type_error(1, "must be provided for instance properties");
 			RETURN_THROWS();
 		}
 

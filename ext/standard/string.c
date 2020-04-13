@@ -1889,7 +1889,7 @@ PHP_FUNCTION(strpos)
 		offset += (zend_long)ZSTR_LEN(haystack);
 	}
 	if (offset < 0 || (size_t)offset > ZSTR_LEN(haystack)) {
-		zend_value_error("Offset not contained in string");
+		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		RETURN_THROWS();
 	}
 
@@ -1925,7 +1925,7 @@ PHP_FUNCTION(stripos)
 		offset += (zend_long)ZSTR_LEN(haystack);
 	}
 	if (offset < 0 || (size_t)offset > ZSTR_LEN(haystack)) {
-		zend_value_error("Offset not contained in string");
+		zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 		RETURN_THROWS();
 	}
 
@@ -1967,14 +1967,14 @@ PHP_FUNCTION(strrpos)
 
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
-			zend_value_error("Offset not contained in string");
+			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 			RETURN_THROWS();
 		}
 		p = ZSTR_VAL(haystack) + (size_t)offset;
 		e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack);
 	} else {
 		if (offset < -ZEND_LONG_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
-			zend_value_error("Offset not contained in string");
+			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 			RETURN_THROWS();
 		}
 
@@ -2017,7 +2017,7 @@ PHP_FUNCTION(strripos)
 		char lowered;
 		if (offset >= 0) {
 			if ((size_t)offset > ZSTR_LEN(haystack)) {
-				zend_value_error("Offset not contained in string");
+				zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 				RETURN_THROWS();
 			}
 			p = ZSTR_VAL(haystack) + (size_t)offset;
@@ -2025,7 +2025,7 @@ PHP_FUNCTION(strripos)
 		} else {
 			p = ZSTR_VAL(haystack);
 			if (offset < -ZEND_LONG_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
-				zend_value_error("Offset not contained in string");
+				zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 				RETURN_THROWS();
 			}
 			e = ZSTR_VAL(haystack) + (ZSTR_LEN(haystack) + (size_t)offset);
@@ -2045,7 +2045,7 @@ PHP_FUNCTION(strripos)
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
 			zend_string_release_ex(haystack_dup, 0);
-			zend_value_error("Offset not contained in string");
+			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 			RETURN_THROWS();
 		}
 		p = ZSTR_VAL(haystack_dup) + offset;
@@ -2053,7 +2053,7 @@ PHP_FUNCTION(strripos)
 	} else {
 		if (offset < -ZEND_LONG_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
 			zend_string_release_ex(haystack_dup, 0);
-			zend_value_error("Offset not contained in string");
+			zend_argument_value_error(3, "must be contained in argument #1 ($haystack)");
 			RETURN_THROWS();
 		}
 
@@ -5273,7 +5273,7 @@ PHP_FUNCTION(str_repeat)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mult < 0) {
-		zend_value_error("Second argument has to be greater than or equal to 0");
+		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -5331,7 +5331,7 @@ PHP_FUNCTION(count_chars)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mymode < 0 || mymode > 4) {
-		zend_value_error("Unknown mode");
+		zend_argument_value_error(2, "must be between 1 and 4 (inclusive)");
 		RETURN_THROWS();
 	}
 

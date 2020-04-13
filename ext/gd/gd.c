@@ -3545,7 +3545,7 @@ PHP_FUNCTION(imageflip)
 			break;
 
 		default:
-			zend_argument_value_error(2, "must be a valid mode");
+			zend_argument_value_error(2, "must be either GD_FLIP_VERTICAL, GD_FLIP_HORINZONTAL, or GD_FLIP_BOTH");
 			RETURN_THROWS();
 	}
 

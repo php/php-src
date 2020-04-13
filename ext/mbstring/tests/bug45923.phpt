@@ -44,7 +44,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-Offset not contained in string
+strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 > Offset: -1
 bool(false)
 > Offset: -3
@@ -52,7 +52,7 @@ int(8)
 > Offset: -6
 int(8)
 > Offset: -20
-Offset not contained in string
+strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 ------- mb_strpos -----------
 
@@ -67,7 +67,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-Offset not contained in string
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 > Offset: -1
 bool(false)
 > Offset: -3
@@ -75,7 +75,7 @@ int(8)
 > Offset: -6
 int(8)
 > Offset: -20
-Offset not contained in string
+mb_strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 ------- stripos -----------
 
@@ -90,7 +90,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-Offset not contained in string
+stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 > Offset: -1
 bool(false)
 > Offset: -3
@@ -98,7 +98,7 @@ int(8)
 > Offset: -6
 int(8)
 > Offset: -20
-Offset not contained in string
+stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 ------- mb_stripos -----------
 
@@ -113,7 +113,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-Offset not contained in string
+mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 > Offset: -1
 bool(false)
 > Offset: -3
@@ -121,7 +121,7 @@ int(8)
 > Offset: -6
 int(8)
 > Offset: -20
-Offset not contained in string
+mb_stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 ------- strrpos -----------
 
@@ -136,7 +136,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-Offset not contained in string
+strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 > Offset: -1
 int(8)
 > Offset: -3
@@ -144,7 +144,7 @@ int(8)
 > Offset: -6
 int(4)
 > Offset: -20
-Offset not contained in string
+strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 ------- mb_strrpos -----------
 
@@ -159,7 +159,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-Offset not contained in string
+mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 > Offset: -1
 int(8)
 > Offset: -3
@@ -167,7 +167,7 @@ int(8)
 > Offset: -6
 int(4)
 > Offset: -20
-Offset not contained in string
+mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 ------- strripos -----------
 
@@ -182,7 +182,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-Offset not contained in string
+strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 > Offset: -1
 int(8)
 > Offset: -3
@@ -190,7 +190,7 @@ int(8)
 > Offset: -6
 int(4)
 > Offset: -20
-Offset not contained in string
+strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 ------- mb_strripos -----------
 
@@ -205,7 +205,7 @@ bool(false)
 > Offset: 11
 bool(false)
 > Offset: 12
-Offset not contained in string
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 > Offset: -1
 int(8)
 > Offset: -3
@@ -213,4 +213,4 @@ int(8)
 > Offset: -6
 int(4)
 > Offset: -20
-Offset not contained in string
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)

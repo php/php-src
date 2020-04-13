@@ -29,9 +29,9 @@ int(0)
 int(0)
 int(0)
 int(0)
-count(): Argument #2 ($mode) must be a valid mode
-count(): Argument #2 ($mode) must be a valid mode
-count(): Argument #2 ($mode) must be a valid mode
+count(): Argument #2 ($mode) must be either COUNT_NORMAL or COUNT_RECURSIVE
+count(): Argument #2 ($mode) must be either COUNT_NORMAL or COUNT_RECURSIVE
+count(): Argument #2 ($mode) must be either COUNT_NORMAL or COUNT_RECURSIVE
 int(0)
 int(0)
 int(0)

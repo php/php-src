@@ -47,21 +47,21 @@ foreach ($offsets as $i) {
 --EXPECT--
 -- Offset is -25 --
 Multibyte String:
-Offset not contained in string
+mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 ASCII String:
 mb_strrpos:
-Offset not contained in string
+mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 strrpos:
-Offset not contained in string
+strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 -- Offset is -24 --
 Multibyte String:
-Offset not contained in string
+mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 ASCII String:
 mb_strrpos:
-Offset not contained in string
+mb_strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 strrpos:
-Offset not contained in string
+strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 -- Offset is -13 --
 Multibyte String:
