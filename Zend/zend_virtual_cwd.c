@@ -38,10 +38,6 @@
 #  define IO_REPARSE_TAG_SYMLINK 0xA000000C
 # endif
 
-# ifndef IO_REPARSE_TAG_DEDUP
-#  define IO_REPARSE_TAG_DEDUP   0x80000013
-# endif
-
 # ifndef IO_REPARSE_TAG_CLOUD
 #  define IO_REPARSE_TAG_CLOUD    (0x9000001AL)
 # endif
@@ -49,10 +45,6 @@
    to 0x9000F01AL, they can be checked against the mask. */
 #ifndef IO_REPARSE_TAG_CLOUD_MASK
 #define IO_REPARSE_TAG_CLOUD_MASK (0x0000F000L)
-#endif
-
-#ifndef IO_REPARSE_TAG_ONEDRIVE
-#define IO_REPARSE_TAG_ONEDRIVE   (0x80000021L)
 #endif
 
 # ifndef VOLUME_NAME_NT
@@ -998,11 +990,7 @@ retry:
 					FREE_PATHW()
 					return (size_t)-1;
 				}
-			}
-			else if (pbuffer->ReparseTag == IO_REPARSE_TAG_DEDUP ||
-					/* Starting with 1709. */
-					(pbuffer->ReparseTag & ~IO_REPARSE_TAG_CLOUD_MASK) == IO_REPARSE_TAG_CLOUD ||
-					IO_REPARSE_TAG_ONEDRIVE == pbuffer->ReparseTag) {
+			} else {
 				isabsolute = 1;
 				substitutename = malloc((len + 1) * sizeof(char));
 				if (!substitutename) {
@@ -1013,12 +1001,6 @@ retry:
 				}
 				memcpy(substitutename, path, len + 1);
 				substitutename_len = len;
-			} else {
-				/* XXX this might be not the end, restart handling with REPARSE_GUID_DATA_BUFFER should be implemented. */
-				free_alloca(pbuffer, use_heap_large);
-				free_alloca(tmp, use_heap);
-				FREE_PATHW()
-				return (size_t)-1;
 			}
 
 			if(isabsolute && substitutename_len > 4) {
