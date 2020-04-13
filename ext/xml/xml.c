@@ -251,14 +251,10 @@ static void php_xml_free_wrapper(void *ptr)
 	}
 }
 
-static const zend_function_entry xml_parser_methods[] = {
-	PHP_FE_END
-};
-
 PHP_MINIT_FUNCTION(xml)
 {
 	zend_class_entry ce;
-	INIT_CLASS_ENTRY(ce, "XmlParser", xml_parser_methods);
+	INIT_CLASS_ENTRY(ce, "XmlParser", class_XMLParser_methods);
 	xml_parser_ce = zend_register_internal_class(&ce);
 	xml_parser_ce->create_object = xml_parser_create_object;
 	xml_parser_ce->ce_flags |= ZEND_ACC_FINAL;

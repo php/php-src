@@ -89,7 +89,7 @@
 #define REGISTER_TIDY_CLASS(classname, name, parent, __flags) \
 	{ \
 		zend_class_entry ce; \
-		INIT_CLASS_ENTRY(ce, # classname, tidy_funcs_ ## name); \
+		INIT_CLASS_ENTRY(ce, # classname, class_ ## classname ## _methods); \
 		ce.create_object = tidy_object_new_ ## name; \
 		tidy_ce_ ## name = zend_register_internal_class_ex(&ce, parent); \
 		tidy_ce_ ## name->ce_flags |= __flags;  \
@@ -229,125 +229,12 @@ static PHP_MSHUTDOWN_FUNCTION(tidy);
 static PHP_RINIT_FUNCTION(tidy);
 static PHP_MINFO_FUNCTION(tidy);
 
-static PHP_FUNCTION(tidy_getopt);
-static PHP_FUNCTION(tidy_parse_string);
-static PHP_FUNCTION(tidy_parse_file);
-static PHP_FUNCTION(tidy_clean_repair);
-static PHP_FUNCTION(tidy_repair_string);
-static PHP_FUNCTION(tidy_repair_file);
-static PHP_FUNCTION(tidy_diagnose);
-static PHP_FUNCTION(tidy_get_output);
-static PHP_FUNCTION(tidy_get_error_buffer);
-static PHP_FUNCTION(tidy_get_release);
-static PHP_FUNCTION(tidy_get_config);
-static PHP_FUNCTION(tidy_get_status);
-static PHP_FUNCTION(tidy_get_html_ver);
-#if HAVE_TIDYOPTGETDOC
-static PHP_FUNCTION(tidy_get_opt_doc);
-#endif
-static PHP_FUNCTION(tidy_is_xhtml);
-static PHP_FUNCTION(tidy_is_xml);
-static PHP_FUNCTION(tidy_error_count);
-static PHP_FUNCTION(tidy_warning_count);
-static PHP_FUNCTION(tidy_access_count);
-static PHP_FUNCTION(tidy_config_count);
-
-static PHP_FUNCTION(tidy_get_root);
-static PHP_FUNCTION(tidy_get_html);
-static PHP_FUNCTION(tidy_get_head);
-static PHP_FUNCTION(tidy_get_body);
-
-static TIDY_DOC_METHOD(__construct);
-static TIDY_DOC_METHOD(parseFile);
-static TIDY_DOC_METHOD(parseString);
-
-static TIDY_NODE_METHOD(hasChildren);
-static TIDY_NODE_METHOD(hasSiblings);
-static TIDY_NODE_METHOD(isComment);
-static TIDY_NODE_METHOD(isHtml);
-static TIDY_NODE_METHOD(isText);
-static TIDY_NODE_METHOD(isJste);
-static TIDY_NODE_METHOD(isAsp);
-static TIDY_NODE_METHOD(isPhp);
-static TIDY_NODE_METHOD(getParent);
-static TIDY_NODE_METHOD(__construct);
-/* }}} */
-
 ZEND_DECLARE_MODULE_GLOBALS(tidy)
 
 PHP_INI_BEGIN()
 STD_PHP_INI_ENTRY("tidy.default_config",	"",		PHP_INI_SYSTEM,		OnUpdateString,				default_config,		zend_tidy_globals,	tidy_globals)
 STD_PHP_INI_ENTRY("tidy.clean_output",		"0",	PHP_INI_USER,		php_tidy_set_clean_output,	clean_output,		zend_tidy_globals,	tidy_globals)
 PHP_INI_END()
-
-static const zend_function_entry tidy_functions[] = {
-	PHP_FE(tidy_getopt,             arginfo_tidy_getopt)
-	PHP_FE(tidy_parse_string,       arginfo_tidy_parse_string)
-	PHP_FE(tidy_parse_file,         arginfo_tidy_parse_file)
-	PHP_FE(tidy_get_output,         arginfo_tidy_get_output)
-	PHP_FE(tidy_get_error_buffer,   arginfo_tidy_get_error_buffer)
-	PHP_FE(tidy_clean_repair,       arginfo_tidy_clean_repair)
-	PHP_FE(tidy_repair_string,	arginfo_tidy_repair_string)
-	PHP_FE(tidy_repair_file,	arginfo_tidy_repair_file)
-	PHP_FE(tidy_diagnose,           arginfo_tidy_diagnose)
-	PHP_FE(tidy_get_release,	arginfo_tidy_get_release)
-	PHP_FE(tidy_get_config,		arginfo_tidy_get_config)
-	PHP_FE(tidy_get_status,		arginfo_tidy_get_status)
-	PHP_FE(tidy_get_html_ver,	arginfo_tidy_get_html_ver)
-	PHP_FE(tidy_is_xhtml,		arginfo_tidy_is_xhtml)
-	PHP_FE(tidy_is_xml,		arginfo_tidy_is_xml)
-	PHP_FE(tidy_error_count,	arginfo_tidy_error_count)
-	PHP_FE(tidy_warning_count,	arginfo_tidy_warning_count)
-	PHP_FE(tidy_access_count,	arginfo_tidy_access_count)
-	PHP_FE(tidy_config_count,	arginfo_tidy_config_count)
-#if HAVE_TIDYOPTGETDOC
-	PHP_FE(tidy_get_opt_doc,	arginfo_tidy_get_opt_doc)
-#endif
-	PHP_FE(tidy_get_root,		arginfo_tidy_get_root)
-	PHP_FE(tidy_get_head,		arginfo_tidy_get_head)
-	PHP_FE(tidy_get_html,		arginfo_tidy_get_html)
-	PHP_FE(tidy_get_body,		arginfo_tidy_get_body)
-	PHP_FE_END
-};
-
-static const zend_function_entry tidy_funcs_doc[] = {
-	TIDY_METHOD_MAP(getOpt, tidy_getopt, arginfo_class_tidy_getOpt)
-	TIDY_METHOD_MAP(cleanRepair, tidy_clean_repair, arginfo_class_tidy_cleanRepair)
-	TIDY_DOC_ME(parseFile, arginfo_class_tidy_parseFile)
-	TIDY_DOC_ME(parseString, arginfo_class_tidy_parseString)
-	TIDY_METHOD_MAP(repairString, tidy_repair_string, arginfo_class_tidy_repairString)
-	TIDY_METHOD_MAP(repairFile, tidy_repair_file, arginfo_class_tidy_repairFile)
-	TIDY_METHOD_MAP(diagnose, tidy_diagnose, arginfo_class_tidy_diagnose)
-	TIDY_METHOD_MAP(getRelease, tidy_get_release, arginfo_class_tidy_getRelease)
-	TIDY_METHOD_MAP(getConfig, tidy_get_config, arginfo_class_tidy_getConfig)
-	TIDY_METHOD_MAP(getStatus, tidy_get_status, arginfo_class_tidy_getStatus)
-	TIDY_METHOD_MAP(getHtmlVer, tidy_get_html_ver, arginfo_class_tidy_getHtmlVer)
-#if HAVE_TIDYOPTGETDOC
-	TIDY_METHOD_MAP(getOptDoc, tidy_get_opt_doc, arginfo_class_tidy_getOptDoc)
-#endif
-	TIDY_METHOD_MAP(isXhtml, tidy_is_xhtml, arginfo_class_tidy_isXhtml)
-	TIDY_METHOD_MAP(isXml, tidy_is_xml, arginfo_class_tidy_isXml)
-	TIDY_METHOD_MAP(root, tidy_get_root, arginfo_class_tidy_root)
-	TIDY_METHOD_MAP(head, tidy_get_head, arginfo_class_tidy_head)
-	TIDY_METHOD_MAP(html, tidy_get_html, arginfo_class_tidy_html)
-	TIDY_METHOD_MAP(body, tidy_get_body, arginfo_class_tidy_body)
-	TIDY_DOC_ME(__construct, arginfo_class_tidy___construct)
-	PHP_FE_END
-};
-
-static const zend_function_entry tidy_funcs_node[] = {
-	TIDY_NODE_ME(hasChildren, arginfo_class_tidyNode_hasChildren)
-	TIDY_NODE_ME(hasSiblings, arginfo_class_tidyNode_hasSiblings)
-	TIDY_NODE_ME(isComment, arginfo_class_tidyNode_isComment)
-	TIDY_NODE_ME(isHtml, arginfo_class_tidyNode_isHtml)
-	TIDY_NODE_ME(isText, arginfo_class_tidyNode_isText)
-	TIDY_NODE_ME(isJste, arginfo_class_tidyNode_isJste)
-	TIDY_NODE_ME(isAsp, arginfo_class_tidyNode_isAsp)
-	TIDY_NODE_ME(isPhp, arginfo_class_tidyNode_isPhp)
-	TIDY_NODE_ME(getParent, arginfo_class_tidyNode_getParent)
-	TIDY_NODE_PRIVATE_ME(__construct, arginfo_class_tidyNode___construct)
-	PHP_FE_END
-};
 
 static zend_class_entry *tidy_ce_doc, *tidy_ce_node;
 
@@ -357,7 +244,7 @@ static zend_object_handlers tidy_object_handlers_node;
 zend_module_entry tidy_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"tidy",
-	tidy_functions,
+	ext_functions,
 	PHP_MINIT(tidy),
 	PHP_MSHUTDOWN(tidy),
 	PHP_RINIT(tidy),
@@ -1099,7 +986,7 @@ static int php_tidy_output_handler(void **nothing, php_output_context *output_co
 
 /* {{{ proto bool tidy_parse_string(string input [, mixed config_options [, string encoding]])
    Parse a document stored in a string */
-static PHP_FUNCTION(tidy_parse_string)
+PHP_FUNCTION(tidy_parse_string)
 {
 	char *enc = NULL;
 	size_t enc_len = 0;
@@ -1130,7 +1017,7 @@ static PHP_FUNCTION(tidy_parse_string)
 
 /* {{{ proto string tidy_get_error_buffer()
    Return warnings and errors which occurred parsing the specified document*/
-static PHP_FUNCTION(tidy_get_error_buffer)
+PHP_FUNCTION(tidy_get_error_buffer)
 {
 	TIDY_FETCH_OBJECT;
 
@@ -1144,7 +1031,7 @@ static PHP_FUNCTION(tidy_get_error_buffer)
 
 /* {{{ proto string tidy_get_output(tidy tidy)
    Return a string representing the parsed tidy markup */
-static PHP_FUNCTION(tidy_get_output)
+PHP_FUNCTION(tidy_get_output)
 {
 	TidyBuffer output;
 	TIDY_FETCH_OBJECT;
@@ -1159,7 +1046,7 @@ static PHP_FUNCTION(tidy_get_output)
 
 /* {{{ proto bool tidy_parse_file(string file [, mixed config_options [, string encoding [, bool use_include_path]]])
    Parse markup in file or URI */
-static PHP_FUNCTION(tidy_parse_file)
+PHP_FUNCTION(tidy_parse_file)
 {
 	char *enc = NULL;
 	size_t enc_len = 0;
@@ -1200,7 +1087,7 @@ static PHP_FUNCTION(tidy_parse_file)
 
 /* {{{ proto bool tidy_clean_repair(tidy tidy)
    Execute configured cleanup and repair operations on parsed markup */
-static PHP_FUNCTION(tidy_clean_repair)
+PHP_FUNCTION(tidy_clean_repair)
 {
 	TIDY_FETCH_OBJECT;
 
@@ -1215,7 +1102,7 @@ static PHP_FUNCTION(tidy_clean_repair)
 
 /* {{{ proto bool tidy_repair_string(string data [, mixed config_file [, string encoding]])
    Repair a string using an optionally provided configuration file */
-static PHP_FUNCTION(tidy_repair_string)
+PHP_FUNCTION(tidy_repair_string)
 {
 	php_tidy_quick_repair(INTERNAL_FUNCTION_PARAM_PASSTHRU, FALSE);
 }
@@ -1223,7 +1110,7 @@ static PHP_FUNCTION(tidy_repair_string)
 
 /* {{{ proto bool tidy_repair_file(string filename [, mixed config_file [, string encoding [, bool use_include_path]]])
    Repair a file using an optionally provided configuration file */
-static PHP_FUNCTION(tidy_repair_file)
+PHP_FUNCTION(tidy_repair_file)
 {
 	php_tidy_quick_repair(INTERNAL_FUNCTION_PARAM_PASSTHRU, TRUE);
 }
@@ -1231,7 +1118,7 @@ static PHP_FUNCTION(tidy_repair_file)
 
 /* {{{ proto bool tidy_diagnose()
    Run configured diagnostics on parsed and repaired markup. */
-static PHP_FUNCTION(tidy_diagnose)
+PHP_FUNCTION(tidy_diagnose)
 {
 	TIDY_FETCH_OBJECT;
 
@@ -1246,7 +1133,7 @@ static PHP_FUNCTION(tidy_diagnose)
 
 /* {{{ proto string tidy_get_release()
    Get release date (version) for Tidy library */
-static PHP_FUNCTION(tidy_get_release)
+PHP_FUNCTION(tidy_get_release)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
@@ -1264,7 +1151,7 @@ static PHP_FUNCTION(tidy_get_release)
 #if HAVE_TIDYOPTGETDOC
 /* {{{ proto string tidy_get_opt_doc(tidy resource, string optname)
    Returns the documentation for the given option name */
-static PHP_FUNCTION(tidy_get_opt_doc)
+PHP_FUNCTION(tidy_get_opt_doc)
 {
 	PHPTidyObj *obj;
 	char *optval, *optname;
@@ -1297,7 +1184,7 @@ static PHP_FUNCTION(tidy_get_opt_doc)
 
 /* {{{ proto array tidy_get_config(tidy tidy)
    Get current Tidy configuration */
-static PHP_FUNCTION(tidy_get_config)
+PHP_FUNCTION(tidy_get_config)
 {
 	TidyIterator itOpt;
 	char *opt_name;
@@ -1336,7 +1223,7 @@ static PHP_FUNCTION(tidy_get_config)
 
 /* {{{ proto int tidy_get_status(tidy tidy)
    Get status of specified document. */
-static PHP_FUNCTION(tidy_get_status)
+PHP_FUNCTION(tidy_get_status)
 {
 	TIDY_FETCH_OBJECT;
 
@@ -1346,7 +1233,7 @@ static PHP_FUNCTION(tidy_get_status)
 
 /* {{{ proto int tidy_get_html_ver(tidy tidy)
    Get the Detected HTML version for the specified document. */
-static PHP_FUNCTION(tidy_get_html_ver)
+PHP_FUNCTION(tidy_get_html_ver)
 {
 	TIDY_FETCH_OBJECT;
 
@@ -1356,7 +1243,7 @@ static PHP_FUNCTION(tidy_get_html_ver)
 
 /* {{{ proto bool tidy_is_xhtml(tidy tidy)
    Indicates if the document is a XHTML document. */
-static PHP_FUNCTION(tidy_is_xhtml)
+PHP_FUNCTION(tidy_is_xhtml)
 {
 	TIDY_FETCH_OBJECT;
 
@@ -1366,7 +1253,7 @@ static PHP_FUNCTION(tidy_is_xhtml)
 
 /* {{{ proto bool tidy_is_xml(tidy tidy)
    Indicates if the document is a generic (non HTML/XHTML) XML document. */
-static PHP_FUNCTION(tidy_is_xml)
+PHP_FUNCTION(tidy_is_xml)
 {
 	TIDY_FETCH_OBJECT;
 
@@ -1376,7 +1263,7 @@ static PHP_FUNCTION(tidy_is_xml)
 
 /* {{{ proto int tidy_error_count(tidy tidy)
    Returns the Number of Tidy errors encountered for specified document. */
-static PHP_FUNCTION(tidy_error_count)
+PHP_FUNCTION(tidy_error_count)
 {
 	TIDY_FETCH_OBJECT;
 
@@ -1386,7 +1273,7 @@ static PHP_FUNCTION(tidy_error_count)
 
 /* {{{ proto int tidy_warning_count(tidy tidy)
    Returns the Number of Tidy warnings encountered for specified document. */
-static PHP_FUNCTION(tidy_warning_count)
+PHP_FUNCTION(tidy_warning_count)
 {
 	TIDY_FETCH_OBJECT;
 
@@ -1396,7 +1283,7 @@ static PHP_FUNCTION(tidy_warning_count)
 
 /* {{{ proto int tidy_access_count(tidy tidy)
    Returns the Number of Tidy accessibility warnings encountered for specified document. */
-static PHP_FUNCTION(tidy_access_count)
+PHP_FUNCTION(tidy_access_count)
 {
 	TIDY_FETCH_OBJECT;
 
@@ -1406,7 +1293,7 @@ static PHP_FUNCTION(tidy_access_count)
 
 /* {{{ proto int tidy_config_count(tidy tidy)
    Returns the Number of Tidy configuration errors encountered for specified document. */
-static PHP_FUNCTION(tidy_config_count)
+PHP_FUNCTION(tidy_config_count)
 {
 	TIDY_FETCH_OBJECT;
 
@@ -1416,7 +1303,7 @@ static PHP_FUNCTION(tidy_config_count)
 
 /* {{{ proto mixed tidy_getopt(string option)
    Returns the value of the specified configuration option for the tidy document. */
-static PHP_FUNCTION(tidy_getopt)
+PHP_FUNCTION(tidy_getopt)
 {
 	PHPTidyObj *obj;
 	char *optname;
@@ -1466,7 +1353,7 @@ static PHP_FUNCTION(tidy_getopt)
 }
 /* }}} */
 
-static TIDY_DOC_METHOD(__construct)
+PHP_METHOD(tidy, __construct)
 {
 	char *enc = NULL;
 	size_t enc_len = 0;
@@ -1503,7 +1390,7 @@ static TIDY_DOC_METHOD(__construct)
 	}
 }
 
-static TIDY_DOC_METHOD(parseFile)
+PHP_METHOD(tidy, parseFile)
 {
 	char *enc = NULL;
 	size_t enc_len = 0;
@@ -1542,7 +1429,7 @@ static TIDY_DOC_METHOD(parseFile)
 	zend_string_release_ex(contents, 0);
 }
 
-static TIDY_DOC_METHOD(parseString)
+PHP_METHOD(tidy, parseString)
 {
 	char *enc = NULL;
 	size_t enc_len = 0;
@@ -1575,7 +1462,7 @@ static TIDY_DOC_METHOD(parseString)
 
 /* {{{ proto TidyNode tidy_get_root()
    Returns a TidyNode Object representing the root of the tidy parse tree */
-static PHP_FUNCTION(tidy_get_root)
+PHP_FUNCTION(tidy_get_root)
 {
 	php_tidy_create_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, is_root_node);
 }
@@ -1583,7 +1470,7 @@ static PHP_FUNCTION(tidy_get_root)
 
 /* {{{ proto TidyNode tidy_get_html()
    Returns a TidyNode Object starting from the <HTML> tag of the tidy parse tree */
-static PHP_FUNCTION(tidy_get_html)
+PHP_FUNCTION(tidy_get_html)
 {
 	php_tidy_create_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, is_html_node);
 }
@@ -1591,7 +1478,7 @@ static PHP_FUNCTION(tidy_get_html)
 
 /* {{{ proto TidyNode tidy_get_head()
    Returns a TidyNode Object starting from the <HEAD> tag of the tidy parse tree */
-static PHP_FUNCTION(tidy_get_head)
+PHP_FUNCTION(tidy_get_head)
 {
 	php_tidy_create_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, is_head_node);
 }
@@ -1599,7 +1486,7 @@ static PHP_FUNCTION(tidy_get_head)
 
 /* {{{ proto TidyNode tidy_get_body(tidy tidy)
    Returns a TidyNode Object starting from the <BODY> tag of the tidy parse tree */
-static PHP_FUNCTION(tidy_get_body)
+PHP_FUNCTION(tidy_get_body)
 {
 	php_tidy_create_node(INTERNAL_FUNCTION_PARAM_PASSTHRU, is_body_node);
 }
@@ -1607,7 +1494,7 @@ static PHP_FUNCTION(tidy_get_body)
 
 /* {{{ proto bool tidyNode::hasChildren()
    Returns true if this node has children */
-static TIDY_NODE_METHOD(hasChildren)
+PHP_METHOD(tidyNode, hasChildren)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
@@ -1621,7 +1508,7 @@ static TIDY_NODE_METHOD(hasChildren)
 
 /* {{{ proto bool tidyNode::hasSiblings()
    Returns true if this node has siblings */
-static TIDY_NODE_METHOD(hasSiblings)
+PHP_METHOD(tidyNode, hasSiblings)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
@@ -1635,7 +1522,7 @@ static TIDY_NODE_METHOD(hasSiblings)
 
 /* {{{ proto bool tidyNode::isComment()
    Returns true if this node represents a comment */
-static TIDY_NODE_METHOD(isComment)
+PHP_METHOD(tidyNode, isComment)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
@@ -1649,7 +1536,7 @@ static TIDY_NODE_METHOD(isComment)
 
 /* {{{ proto bool tidyNode::isHtml()
    Returns true if this node is part of a HTML document */
-static TIDY_NODE_METHOD(isHtml)
+PHP_METHOD(tidyNode, isHtml)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
@@ -1663,7 +1550,7 @@ static TIDY_NODE_METHOD(isHtml)
 
 /* {{{ proto bool tidyNode::isText()
    Returns true if this node represents text (no markup) */
-static TIDY_NODE_METHOD(isText)
+PHP_METHOD(tidyNode, isText)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
@@ -1677,7 +1564,7 @@ static TIDY_NODE_METHOD(isText)
 
 /* {{{ proto bool tidyNode::isJste()
    Returns true if this node is JSTE */
-static TIDY_NODE_METHOD(isJste)
+PHP_METHOD(tidyNode, isJste)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
@@ -1691,7 +1578,7 @@ static TIDY_NODE_METHOD(isJste)
 
 /* {{{ proto bool tidyNode::isAsp()
    Returns true if this node is ASP */
-static TIDY_NODE_METHOD(isAsp)
+PHP_METHOD(tidyNode, isAsp)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
@@ -1705,7 +1592,7 @@ static TIDY_NODE_METHOD(isAsp)
 
 /* {{{ proto bool tidyNode::isPhp()
    Returns true if this node is PHP */
-static TIDY_NODE_METHOD(isPhp)
+PHP_METHOD(tidyNode, isPhp)
 {
 	TIDY_FETCH_ONLY_OBJECT;
 
@@ -1719,7 +1606,7 @@ static TIDY_NODE_METHOD(isPhp)
 
 /* {{{ proto tidyNode tidyNode::getParent()
    Returns the parent node if available or NULL */
-static TIDY_NODE_METHOD(getParent)
+PHP_METHOD(tidyNode, getParent)
 {
 	TidyNode	parent_node;
 	PHPTidyObj *newobj;
@@ -1743,7 +1630,7 @@ static TIDY_NODE_METHOD(getParent)
 
 /* {{{ proto tidyNode::__construct()
          __constructor for tidyNode. */
-static TIDY_NODE_METHOD(__construct)
+PHP_METHOD(tidyNode, __construct)
 {
 	zend_throw_error(NULL, "You should not create a tidyNode manually");
 }

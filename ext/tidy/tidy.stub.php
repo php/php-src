@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 /** @param array|string $config_options */
 function tidy_parse_string(string $input, $config_options = UNKNOWN, string $encoding = UNKNOWN): tidy|false {}
 
@@ -59,52 +61,120 @@ class tidy
     /** @param array|string $config_options */
     public function __construct(string $filename = UNKNOWN, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false) {}
 
-    /** @return string|int|bool */
+    /**
+     * @return string|int|bool
+     * @alias tidy_getopt
+     */
     public function getOpt(string $option) {}
 
-    public function cleanRepair(): bool {}
+    /**
+     * @return bool
+     * @alias tidy_clean_repair
+     */
+    public function cleanRepair() {}
 
-    /** @param array|string $config_options */
-    public function parseFile(string $file, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false): bool {}
+    /**
+     * @param array|string $config_options
+     * @return bool
+     */
+    public function parseFile(string $file, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false) {}
 
-    /** @param array|string $config_options */
-    public function parseString(string $input, $config_options = UNKNOWN, string $encoding = UNKNOWN): bool {}
+    /**
+     * @param array|string $config_options
+     * @return bool
+     */
+    public function parseString(string $input, $config_options = UNKNOWN, string $encoding = UNKNOWN) {}
 
-    /** @param array|string $config_options */
-    public function repairString(string $data, $config_options = UNKNOWN, string $encoding = UNKNOWN): bool {}
+    /**
+     * @param array|string $config_options
+     * @return bool
+     * @alias tidy_repair_string
+     */
+    public function repairString(string $data, $config_options = UNKNOWN, string $encoding = UNKNOWN) {}
 
-    /** @param array|string $config_options */
-    public function repairFile(string $filename, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false): bool {}
+    /**
+     * @param array|string $config_options
+     * @return bool
+     * @alias tidy_repair_file
+     */
+    public function repairFile(string $filename, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false) {}
 
-    public function diagnose(): bool {}
+    /**
+     * @return bool
+     * @alias tidy_diagnose
+     */
+    public function diagnose() {}
 
-    public function getRelease(): string {}
+    /**
+     * @return string
+     * @alias tidy_get_release
+     */
+    public function getRelease() {}
 
-    public function getConfig(): array {}
+    /**
+     * @return array
+     * @alias tidy_get_config
+     */
+    public function getConfig() {}
 
-    public function getStatus(): int {}
+    /**
+     * @return int
+     * @alias tidy_get_status
+     */
+    public function getStatus() {}
 
-    public function getHtmlVer(): int {}
+    /**
+     * @return int
+     * @alias tidy_get_html_ver
+     */
+    public function getHtmlVer() {}
 
 #if HAVE_TIDYOPTGETDOC
-    /** @return string|false */
+    /**
+     * @return string|false
+     * @alias tidy_get_opt_doc
+     */
     public function getOptDoc(string $optname) {}
 #endif
 
-    public function isXhtml(): bool {}
+    /**
+     * @return bool
+     * @alias tidy_is_xhtml
+     */
+    public function isXhtml() {}
 
-    public function isXml(): bool {}
+    /**
+     * @return bool
+     * @alias tidy_is_xml
+     */
+    public function isXml() {}
 
-    public function root(): ?tidyNode {}
+    /**
+     * @return tidyNode|null
+     * @alias tidy_get_root
+     */
+    public function root() {}
 
-    public function head(): ?tidyNode {}
+    /**
+     * @return tidyNode|null
+     * @alias tidy_get_head
+     */
+    public function head() {}
 
-    public function html(): ?tidyNode {}
+    /**
+     * @return tidyNode|null
+     * @alias tidy_get_html
+     */
+    public function html() {}
 
-    public function body(): ?tidyNode {}
+    /**
+     * @return tidyNode|null
+     * @alias tidy_get_body
+     */
+    public function body() {}
 }
 
-class tidyNode
+final class tidyNode
 {
     private function __construct() {}
 

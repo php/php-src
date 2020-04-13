@@ -131,3 +131,8 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(xml_parser_get_option, arginfo_xml_parser_get_option)
 	ZEND_FE_END
 };
+
+
+static const zend_function_entry class_XMLParser_methods[] = {
+	ZEND_FE_END
+};

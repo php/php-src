@@ -1,5 +1,7 @@
 <?php
 
+/** @generate-function-entries */
+
 class XMLReader
 {
     /** @return bool */
@@ -48,7 +50,7 @@ class XMLReader
     public function next(string $localname = UNKNOWN) {}
 
     /** @return bool|XMLReader */
-    public function open(string $URI, ?string $encoding = null, int $options = 0) {}
+    public static function open(string $URI, ?string $encoding = null, int $options = 0) {}
 
     /** @return string */
     public function readInnerXml() {}
@@ -72,7 +74,7 @@ class XMLReader
     public function setRelaxNGSchemaSource(?string $source) {}
 
     /** @return bool|XMLReader */
-    public function XML(string $source, ?string $encoding = null, int $options = 0) {}
+    public static function XML(string $source, ?string $encoding = null, int $options = 0) {}
 
     /** @return DOMNode|bool */
     public function expand(?DOMNode $basenode = null) {}

@@ -44,23 +44,12 @@ void tokenizer_token_get_all_register_constants(INIT_FUNC_ARGS) {
 	REGISTER_LONG_CONSTANT("TOKEN_PARSE", TOKEN_PARSE, CONST_CS|CONST_PERSISTENT);
 }
 
-/* {{{ tokenizer_functions[]
- *
- * Every user visible function must have an entry in tokenizer_functions[].
- */
-static const zend_function_entry tokenizer_functions[] = {
-	PHP_FE(token_get_all,	arginfo_token_get_all)
-	PHP_FE(token_name,		arginfo_token_name)
-	PHP_FE_END
-};
-/* }}} */
-
 /* {{{ tokenizer_module_entry
  */
 zend_module_entry tokenizer_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"tokenizer",
-	tokenizer_functions,
+	ext_functions,
 	PHP_MINIT(tokenizer),
 	NULL,
 	NULL,
@@ -260,16 +249,6 @@ PHP_METHOD(PhpToken, __toString)
 	RETURN_STR_COPY(text);
 }
 
-static const zend_function_entry php_token_methods[] = {
-	PHP_ME(PhpToken, getAll, arginfo_class_PhpToken_getAll, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-	PHP_ME(PhpToken, __construct, arginfo_class_PhpToken___construct, ZEND_ACC_PUBLIC|ZEND_ACC_FINAL)
-	PHP_ME(PhpToken, is, arginfo_class_PhpToken_is, ZEND_ACC_PUBLIC)
-	PHP_ME(PhpToken, isIgnorable, arginfo_class_PhpToken_isIgnorable, ZEND_ACC_PUBLIC)
-	PHP_ME(PhpToken, getTokenName, arginfo_class_PhpToken_getTokenName, ZEND_ACC_PUBLIC)
-	PHP_ME(PhpToken, __toString, arginfo_class_PhpToken___toString, ZEND_ACC_PUBLIC)
-	PHP_FE_END
-};
-
 /* {{{ PHP_MINIT_FUNCTION
  */
 PHP_MINIT_FUNCTION(tokenizer)
@@ -282,7 +261,7 @@ PHP_MINIT_FUNCTION(tokenizer)
 	tokenizer_register_constants(INIT_FUNC_ARGS_PASSTHRU);
 	tokenizer_token_get_all_register_constants(INIT_FUNC_ARGS_PASSTHRU);
 
-	INIT_CLASS_ENTRY(ce, "PhpToken", php_token_methods);
+	INIT_CLASS_ENTRY(ce, "PhpToken", class_PhpToken_methods);
 	php_token_ce = zend_register_internal_class(&ce);
 	zend_class_implements(php_token_ce, 1, zend_ce_stringable);
 
