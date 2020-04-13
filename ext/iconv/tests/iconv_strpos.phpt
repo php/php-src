@@ -36,12 +36,12 @@ var_dump(iconv_strpos("string", ""));
 var_dump(iconv_strpos("", "string"));
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 int(5)
 int(5)
-Offset not contained in string
+strpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 bool(false)
 int(7)
 int(7)

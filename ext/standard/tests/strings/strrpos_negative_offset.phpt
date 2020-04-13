@@ -32,11 +32,11 @@ int(7)
 bool(false)
 int(5)
 int(1)
-Offset not contained in string
+strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 int(0)
 int(0)
 int(7)
 bool(false)
 int(5)
 int(1)
-Offset not contained in string
+strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)

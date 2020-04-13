@@ -81,24 +81,24 @@ int(20)
 
 **-- Offset is: 30 --**
 -- ASCII String --
-Offset not contained in string
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-Offset not contained in string
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 40 --**
 -- ASCII String --
-Offset not contained in string
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-Offset not contained in string
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 50 --**
 -- ASCII String --
-Offset not contained in string
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-Offset not contained in string
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 **-- Offset is: 60 --**
 -- ASCII String --
-Offset not contained in string
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 --Multibyte String --
-Offset not contained in string
+mb_strripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)

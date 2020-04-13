@@ -345,7 +345,7 @@ PHP_FUNCTION(bzopen)
 	}
 
 	if (mode_len != 1 || (mode[0] != 'r' && mode[0] != 'w')) {
-		zend_argument_value_error(2, "must be a valid mode. Only 'w' and 'r' are supported");
+		zend_argument_value_error(2, "must be either 'r' or 'w'");
 		RETURN_THROWS();
 	}
 

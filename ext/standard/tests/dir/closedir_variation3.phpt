@@ -37,7 +37,7 @@ if(is_resource($fp)) {
 resource(%d) of type (stream)
 
 -- Try to close the file pointer using closedir() --
-%d is not a valid Directory resource
+closedir(): Argument #1 ($dir_handle) must be a valid Directory resource
 
 -- Check file pointer: --
 resource(%d) of type (stream)

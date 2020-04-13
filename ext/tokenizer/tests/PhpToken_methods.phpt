@@ -108,8 +108,8 @@ bool(false)
 bool(false)
 
 Error:
-Kind must be of type int, string or array
-Kind array must have elements of type int or string
+PhpToken::is(): Argument #1 ($kind) must be of type string|int|array, float given
+PhpToken::is(): Argument #1 ($kind) must only have elements of type string|int, float given
 Typed property PhpToken::$id must not be accessed before initialization
 Typed property PhpToken::$text must not be accessed before initialization
 Typed property PhpToken::$id must not be accessed before initialization

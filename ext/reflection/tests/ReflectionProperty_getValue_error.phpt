@@ -66,4 +66,4 @@ Invalid instance:
 Given object is not an instance of the class this property was declared in
 
 Missing instance:
-No object provided for getValue() on instance property
+ReflectionProperty::getValue(): Argument #1 ($object) must be provided for instance properties

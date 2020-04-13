@@ -29,8 +29,8 @@ echo "*** Done ***";
 *** Testing stripos() function: error conditions ***
 
 -- Offset beyond the end of the string --
-Offset not contained in string
+stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 
 -- Offset before the start of the string --
-Offset not contained in string
+stripos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 *** Done ***

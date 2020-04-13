@@ -704,7 +704,7 @@ PHP_FUNCTION(count)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (mode != COUNT_NORMAL && mode != COUNT_RECURSIVE) {
-		zend_argument_value_error(2, "must be a valid mode");
+		zend_argument_value_error(2, "must be either COUNT_NORMAL or COUNT_RECURSIVE");
 		RETURN_THROWS();
 	}
 
@@ -4087,8 +4087,7 @@ PHP_FUNCTION(array_count_values)
  * Specialized conversion rules for array_column() function
  */
 static inline
-zend_bool array_column_param_helper(zval *param,
-                                    const char *name) {
+zend_bool array_column_param_helper(zval *param, int parameter_number) {
 	switch (Z_TYPE_P(param)) {
 		case IS_DOUBLE:
 			convert_to_long_ex(param);
@@ -4105,7 +4104,7 @@ zend_bool array_column_param_helper(zval *param,
 			return 1;
 
 		default:
-			zend_type_error("The %s key should be either a string or an integer", name);
+			zend_argument_type_error(parameter_number, "must be of type string|int, %s given", zend_zval_type_name(param));
 			return 0;
 	}
 }
@@ -4166,9 +4165,9 @@ PHP_FUNCTION(array_column)
 		Z_PARAM_ZVAL_EX(index, 1, 0)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if ((column && !array_column_param_helper(column, "column")) ||
-	    (index && !array_column_param_helper(index, "index"))) {
-		return;
+	if ((column && !array_column_param_helper(column, 2)) ||
+	    (index && !array_column_param_helper(index, 3))) {
+		RETURN_THROWS();
 	}
 
 	array_init_size(return_value, zend_hash_num_elements(input));

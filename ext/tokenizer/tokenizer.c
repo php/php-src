@@ -192,13 +192,13 @@ PHP_METHOD(PhpToken, is)
 					RETURN_TRUE;
 				}
 			} else {
-				zend_type_error("Kind array must have elements of type int or string");
+				zend_argument_type_error(1, "must only have elements of type string|int, %s given", zend_zval_type_name(entry));
 				RETURN_THROWS();
 			}
 		} ZEND_HASH_FOREACH_END();
 		RETURN_FALSE;
 	} else {
-		zend_type_error("Kind must be of type int, string or array");
+		zend_argument_type_error(1, "must be of type string|int|array, %s given", zend_zval_type_name(kind));
 		RETURN_THROWS();
 	}
 }

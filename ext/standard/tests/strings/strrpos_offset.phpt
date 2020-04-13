@@ -37,8 +37,8 @@ echo "Done\n";
 ?>
 --EXPECT--
 strrpos(): Argument #3 ($offset) must be of type int, float given
-Offset not contained in string
-Offset not contained in string
-Offset not contained in string
-Offset not contained in string
+strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
+strrpos(): Argument #3 ($offset) must be contained in argument #1 ($haystack)
 Done
