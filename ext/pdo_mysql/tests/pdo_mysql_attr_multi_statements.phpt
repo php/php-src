@@ -19,6 +19,7 @@ error_reporting=E_ALL
 
     $table = sprintf("test_%s", md5(mt_rand(0, PHP_INT_MAX)));
     $db = new PDO($dsn, $user, $pass);
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
     $create = sprintf('CREATE TABLE %s(id INT)', $table);
     $db->exec($create);
@@ -35,6 +36,7 @@ error_reporting=E_ALL
 
     // New connection, does not allow multiple statements.
     $db = new PDO($dsn, $user, $pass, array(PDO::MYSQL_ATTR_MULTI_STATEMENTS => false));
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_WARNING);
     $stmt = $db->query(sprintf('SELECT * FROM %s; INSERT INTO %s(id) VALUES (3)', $table, $table));
     var_dump($stmt);
     $info = $db->errorInfo();
@@ -49,7 +51,7 @@ error_reporting=E_ALL
     $db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
     print "done!";
 ?>
---EXPECT--
+--EXPECTF--
 string(5) "00000"
 array(2) {
   [0]=>
@@ -70,6 +72,8 @@ array(1) {
     string(1) "1"
   }
 }
+
+Warning: PDO::query(): SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'INSERT INTO %s(id) VALUES (3)' at line 1 in %s on line %d
 bool(false)
 string(5) "42000"
 array(2) {
