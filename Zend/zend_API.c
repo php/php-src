@@ -3136,21 +3136,12 @@ try_again:
 		}
 		case IS_OBJECT:
 		{
-			zend_class_entry *calling_scope;
-			zend_function *fptr;
-			zend_object *object;
-			zend_object *zobj = Z_OBJ_P(callable);
-
-			if (zobj->handlers->get_closure
-					&& zobj->handlers->get_closure(zobj, &calling_scope, &fptr, &object, 1) == SUCCESS) {
-				zend_class_entry *ce = zobj->ce;
-				zend_string *callable_name = zend_string_alloc(
-					ZSTR_LEN(ce->name) + sizeof("::__invoke") - 1, 0);
-				memcpy(ZSTR_VAL(callable_name), ZSTR_VAL(ce->name), ZSTR_LEN(ce->name));
-				memcpy(ZSTR_VAL(callable_name) + ZSTR_LEN(ce->name), "::__invoke", sizeof("::__invoke"));
-				return callable_name;
-			}
-			return zval_get_string_func(callable);
+			zend_class_entry *ce = Z_OBJCE_P(callable);
+			zend_string *callable_name = zend_string_alloc(
+				ZSTR_LEN(ce->name) + sizeof("::__invoke") - 1, 0);
+			memcpy(ZSTR_VAL(callable_name), ZSTR_VAL(ce->name), ZSTR_LEN(ce->name));
+			memcpy(ZSTR_VAL(callable_name) + ZSTR_LEN(ce->name), "::__invoke", sizeof("::__invoke"));
+			return callable_name;
 		}
 		case IS_REFERENCE:
 			callable = Z_REFVAL_P(callable);
