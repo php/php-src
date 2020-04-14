@@ -531,6 +531,15 @@ PHP_FUNCTION(shell_exec)
 		Z_PARAM_STRING(command, command_len)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (!command_len) {
+		php_error_docref(NULL, E_WARNING, "Cannot execute a blank command");
+		RETURN_FALSE;
+	}
+	if (strlen(command) != command_len) {
+		php_error_docref(NULL, E_WARNING, "NULL byte detected. Possible attack");
+		RETURN_FALSE;
+	}
+
 #ifdef PHP_WIN32
 	if ((in=VCWD_POPEN(command, "rt"))==NULL) {
 #else
