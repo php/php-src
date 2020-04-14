@@ -13,7 +13,7 @@ skip_if_wrong_cp(950, "ansi");
 --CONFLICTS--
 file_big5
 --INI--
-defalut_charset=cp950
+default_charset=cp950
 --FILE--
 <?php
 /*
