@@ -1,7 +1,5 @@
 --TEST--
 Bug #48770 (call_user_func_array() fails to call parent from inheriting class)
---XFAIL--
-See Bug #48770
 --FILE--
 <?php
 
@@ -13,9 +11,6 @@ class A {
         var_dump(__METHOD__ .': '. $str);
     }
     protected function func3($str) {
-        var_dump(__METHOD__ .': '. $str);
-    }
-    private function func22($str) {
         var_dump(__METHOD__ .': '. $str);
     }
 }
@@ -52,4 +47,4 @@ $c->func('This should work!');
 --EXPECT--
 string(27) "B::func2: This should work!"
 string(27) "B::func3: This should work!"
-call_user_func_array(): Argument #1 ($function) must be a valid callback, class 'B' does not have a method 'inexistent'
+call_user_func_array(): Argument #1 ($function) must be a valid callback, class 'C' does not have a method 'inexistent'
