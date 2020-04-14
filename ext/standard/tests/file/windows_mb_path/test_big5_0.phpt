@@ -11,7 +11,7 @@ skip_if_wrong_cp(950, "ansi");
 
 ?>
 --INI--
-defalut_charset=big5
+default_charset=big5
 --FILE--
 <?php
 /*
