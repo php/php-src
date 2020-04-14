@@ -160,7 +160,7 @@ MySQLPDOTest::skip();
         printf("[001] %s, [%s] %s Line: %s\n",
             $e->getMessage(),
             (is_object($db)) ? $db->errorCode() : 'n/a',
-            (is_object($db)) ? implode(' ', $db->errorInfo()) : 'n/a'
+            (is_object($db)) ? implode(' ', $db->errorInfo()) : 'n/a',
             $e->getLine());
     }
 
