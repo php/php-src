@@ -302,12 +302,18 @@ PHP_FUNCTION(socket_cmsg_space)
 		return;
 	}
 
-	if (entry->var_el_size > 0 && n > (zend_long)((ZEND_LONG_MAX - entry->size -
-			CMSG_SPACE(0) - 15L) / entry->var_el_size)) {
-		/* the -15 is to account for any padding CMSG_SPACE may add after the data */
-		php_error_docref(NULL, E_WARNING, "The value for the "
+	if (entry->var_el_size > 0) {
+		size_t rem_size = ZEND_LONG_MAX - entry->size;
+		size_t n_max = rem_size / entry->var_el_size;
+		size_t size = entry->size + n * entry->var_el_size;
+		size_t total_size = CMSG_SPACE(size);
+		if (n > n_max /* zend_long overflow */
+			|| total_size > ZEND_LONG_MAX
+			|| total_size < size /* align overflow */) {
+			php_error_docref(NULL, E_WARNING, "The value for the "
 				"third argument (" ZEND_LONG_FMT ") is too large", n);
-		return;
+			return;
+		}
 	}
 
 	RETURN_LONG((zend_long)CMSG_SPACE(entry->size + n * entry->var_el_size));
