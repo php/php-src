@@ -1,7 +1,5 @@
 --TEST--
 Bug #48770 (call_user_func_array() fails to call parent from inheriting class)
---XFAIL--
-See Bug #48770
 --FILE--
 <?php
 
@@ -56,7 +54,7 @@ $c->func('This should work!');
 
 ?>
 --EXPECT--
-string(27) "A::func2: This should work!"
-string(27) "A::func3: This should work!"
-call_user_func_array(): Argument #1 ($function) must be a valid callback, cannot access private method A::func22()
-call_user_func_array(): Argument #1 ($function) must be a valid callback, class 'A' does not have a method 'inexistent'
+string(27) "B::func2: This should work!"
+string(27) "B::func3: This should work!"
+call_user_func_array(): Argument #1 ($function) must be a valid callback, cannot access private method B::func22()
+call_user_func_array(): Argument #1 ($function) must be a valid callback, class 'B' does not have a method 'inexistent'
