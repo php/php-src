@@ -41,7 +41,7 @@ function socket_getpeername($socket, &$addr, &$port = UNKNOWN): bool {}
 function socket_create(int $domain, int $type, int $protocol) {}
 
 /** @param resource $socket */
-function socket_connect($socket, string $addr, int $port = 0): bool {}
+function socket_connect($socket, string $addr, int $port = UNKNOWN): bool {}
 
 function socket_strerror(int $errno): string {}
 
