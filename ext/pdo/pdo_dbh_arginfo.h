@@ -52,7 +52,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_PDO_setAttribute, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 
-ZEND_METHOD(PDO, dbh_constructor);
+ZEND_METHOD(PDO, __construct);
 ZEND_METHOD(PDO, beginTransaction);
 ZEND_METHOD(PDO, commit);
 ZEND_METHOD(PDO, errorCode);
@@ -70,7 +70,7 @@ ZEND_METHOD(PDO, setAttribute);
 
 
 static const zend_function_entry class_PDO_methods[] = {
-	ZEND_MALIAS(PDO, __construct, dbh_constructor, arginfo_class_PDO___construct, ZEND_ACC_PUBLIC)
+	ZEND_ME(PDO, __construct, arginfo_class_PDO___construct, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, beginTransaction, arginfo_class_PDO_beginTransaction, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, commit, arginfo_class_PDO_commit, ZEND_ACC_PUBLIC)
 	ZEND_ME(PDO, errorCode, arginfo_class_PDO_errorCode, ZEND_ACC_PUBLIC)

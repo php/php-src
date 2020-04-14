@@ -190,9 +190,8 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto PDO::__construct(string dsn[, string username[, string passwd [, array options]]])
-   */
-PHP_METHOD(PDO, dbh_constructor)
+/* {{{ proto PDO::__construct(string dsn[, string username[, string passwd [, array options]]]) */
+PHP_METHOD(PDO, __construct)
 {
 	zval *object = ZEND_THIS;
 	pdo_dbh_t *dbh = NULL;

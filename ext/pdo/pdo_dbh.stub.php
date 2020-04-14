@@ -4,7 +4,6 @@
 
 class PDO
 {
-    /** @alias PDO::dbh_constructor */
     public function __construct(string $dsn, ?string $username = null, ?string $passwd = null, ?array $options = null) {}
 
     /** @return bool */
