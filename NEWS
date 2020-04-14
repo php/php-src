@@ -17,6 +17,10 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #69264 (__debugInfo() ignored while extending SPL classes). (cmb)
 
+- Standard:
+  . Fixed bug #79468 (SIGSEGV when closing stream handle with a stream filter
+    appended). (dinosaur)
+
 ?? ??? ????, PHP 7.4.5
 
 - Core:
