@@ -26,7 +26,7 @@ function socket_listen($socket, int $backlog = 0): bool {}
 function socket_close($socket): void {}
 
 /** @param resource $socket */
-function socket_write($socket, string $buf, int $length = 0): int|false {}
+function socket_write($socket, string $buf, int $length = UNKNOWN): int|false {}
 
 /** @param resource $socket */
 function socket_read($socket, int $length, int $type = PHP_BINARY_READ): string|false {}
