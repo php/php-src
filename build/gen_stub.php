@@ -293,29 +293,55 @@ class ArgInfo {
 }
 
 class FunctionName {
-    /** @var string|null */
-    public $className;
+    /** @var PhpParser\Node\Name|null */
+    public $namespace;
     /** @var string */
     public $name;
 
-    public function __construct(?string $className, string $name)
+    public function __construct(?PhpParser\Node\Name $namespace, string $name)
     {
-        $this->className = $className;
+        $this->namespace = $namespace;
         $this->name = $name;
     }
 
     public function getDeclaration(): string
     {
-        if ($this->className) {
-            return "ZEND_METHOD($this->className, $this->name);\n";
-        }
-
         return "ZEND_FUNCTION($this->name);\n";
+    }
+
+    public function getArgInfoName(): string {
+        return 'arginfo_' . $this->name;
     }
 
     public function __toString()
     {
-        return $this->className ? "$this->className::$this->name" : $this->name;
+        return $this->name;
+    }
+}
+
+class MethodName extends FunctionName
+{
+    /** @var string|null */
+    public $className;
+
+    public function __construct(?PhpParser\Node\Name $namespace, ?string $className, string $name)
+    {
+        parent::__construct($namespace, $name);
+        $this->className = $className;
+    }
+
+    public function getDeclaration(): string
+    {
+        return "ZEND_METHOD($this->className, $this->name);\n";
+    }
+
+    public function getArgInfoName(): string {
+        return 'arginfo_class_' . $this->className . '_' . $this->name;
+    }
+
+    public function __toString()
+    {
+        return $this->className. '::'. $this->name;
     }
 }
 
@@ -391,10 +417,7 @@ class FuncInfo {
     }
 
     public function getArgInfoName(): string {
-        if ($this->name->className) {
-            return 'arginfo_class_' . $this->name->className . '_' . $this->name->name;
-        }
-        return 'arginfo_' . $this->name->name;
+        return $this->name->getArgInfoName();
     }
 
     public function getDeclarationKey(): string
@@ -416,9 +439,9 @@ class FuncInfo {
     }
 
     public function getFunctionEntry(): string {
-        if ($this->name->className) {
+        if ($this->name instanceof MethodName) {
             if ($this->alias) {
-                if ($this->alias->className) {
+                if ($this->alias instanceof MethodName) {
                     return sprintf(
                         "\tZEND_MALIAS(%s, %s, %s, %s, %s)\n",
                         $this->alias->className, $this->name->name, $this->alias->name, $this->getArgInfoName(), $this->getFlagsAsString()
@@ -595,7 +618,7 @@ function parseFunctionLike(
                 if (count($aliasParts) === 1) {
                     $alias = new FunctionName(null, $aliasParts[0]);
                 } else {
-                    $alias = new FunctionName($aliasParts[0], $aliasParts[1]);
+                    $alias = new MethodName(null, $aliasParts[0], $aliasParts[1]);
                 }
             } else if ($tag->name === 'deprecated') {
                 $isDeprecated = true;
@@ -788,7 +811,7 @@ function parseStubFile(string $fileName): FileInfo {
 
                 $methodInfos[] = parseFunctionLike(
                     $prettyPrinter,
-                    new FunctionName($className, $classStmt->name->toString()),
+                    new MethodName(null, $className, $classStmt->name->toString()),
                     $flags,
                     $classStmt,
                     $cond
