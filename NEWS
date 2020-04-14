@@ -36,6 +36,7 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #79330 (shell_exec() silently truncates after a null byte). (stas)
+  . Fixed bug #79465 (OOB Read in urldecode()). (stas)
   . Fixed bug #79410 (system() swallows last chunk if it is exactly 4095 bytes
     without newline). (Christian Schneider)
 
