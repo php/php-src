@@ -2378,12 +2378,7 @@ ZEND_VM_C_LABEL(assign_object):
 					}
 					ZEND_VM_C_GOTO(free_and_exit_assign_obj);
 				} else {
-ZEND_VM_C_LABEL(fast_assign_obj):
-					value = zend_assign_to_variable(property_val, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					ZEND_VM_C_GOTO(exit_assign_obj);
+					ZEND_VM_C_GOTO(fast_assign_obj);
 				}
 			}
 		} else {
@@ -2396,7 +2391,12 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					ZEND_VM_C_GOTO(fast_assign_obj);
+ZEND_VM_C_LABEL(fast_assign_obj):
+					value = zend_assign_to_variable(property_val, value, OP_DATA_TYPE, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					ZEND_VM_C_GOTO(exit_assign_obj);
 				}
 			}
 

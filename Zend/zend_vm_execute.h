@@ -21534,12 +21534,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -21552,7 +21547,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -21679,12 +21679,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -21697,7 +21692,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -21824,12 +21824,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -21842,7 +21837,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -21969,12 +21969,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -21987,7 +21982,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -23804,12 +23804,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -23822,7 +23817,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -23949,12 +23949,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -23967,7 +23962,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -24094,12 +24094,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -24112,7 +24107,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -24239,12 +24239,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -24257,7 +24252,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -27255,12 +27255,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -27273,7 +27268,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -27400,12 +27400,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -27418,7 +27413,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -27545,12 +27545,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -27563,7 +27558,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -27690,12 +27690,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -27708,7 +27703,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -29752,12 +29752,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -29770,7 +29765,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -29897,12 +29897,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -29915,7 +29910,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -30042,12 +30042,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -30060,7 +30055,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -30187,12 +30187,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -30205,7 +30200,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -31619,12 +31619,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -31637,7 +31632,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -31764,12 +31764,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -31782,7 +31777,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -31909,12 +31909,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -31927,7 +31922,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -32054,12 +32054,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -32072,7 +32067,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -34014,12 +34014,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -34032,7 +34027,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -34159,12 +34159,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -34177,7 +34172,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -34304,12 +34304,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -34322,7 +34317,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -34449,12 +34449,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -34467,7 +34462,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -38326,12 +38326,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -38344,7 +38339,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -38471,12 +38471,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -38489,7 +38484,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -38616,12 +38616,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -38634,7 +38629,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -38761,12 +38761,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -38779,7 +38774,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -41803,12 +41803,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -41821,7 +41816,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -41948,12 +41948,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -41966,7 +41961,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -42093,12 +42093,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -42111,7 +42106,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -42238,12 +42238,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -42256,7 +42251,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -46611,12 +46611,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -46629,7 +46624,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CONST, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -46756,12 +46756,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -46774,7 +46769,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_TMP_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -46901,12 +46901,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -46919,7 +46914,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_VAR, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
@@ -47046,12 +47046,7 @@ assign_object:
 					}
 					goto free_and_exit_assign_obj;
 				} else {
-fast_assign_obj:
-					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
-					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-						ZVAL_COPY(EX_VAR(opline->result.var), value);
-					}
-					goto exit_assign_obj;
+					goto fast_assign_obj;
 				}
 			}
 		} else {
@@ -47064,7 +47059,12 @@ fast_assign_obj:
 				}
 				property_val = zend_hash_find_ex(zobj->properties, Z_STR_P(property), 1);
 				if (property_val) {
-					goto fast_assign_obj;
+fast_assign_obj:
+					value = zend_assign_to_variable(property_val, value, IS_CV, EX_USES_STRICT_TYPES());
+					if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+						ZVAL_COPY(EX_VAR(opline->result.var), value);
+					}
+					goto exit_assign_obj;
 				}
 			}
 
