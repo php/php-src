@@ -560,8 +560,8 @@ function parseDocComment(DocComment $comment): array {
     $tags = [];
     foreach (explode("\n", $commentText) as $commentLine) {
         $regex = '/^\*\s*@([a-z-]+)(?:\s+(.+))?$/';
-        if (preg_match($regex, trim($commentLine), $matches, PREG_UNMATCHED_AS_NULL)) {
-            $tags[] = new DocCommentTag($matches[1], $matches[2]);
+        if (preg_match($regex, trim($commentLine), $matches)) {
+            $tags[] = new DocCommentTag($matches[1], $matches[2] ?? null);
         }
     }
 
