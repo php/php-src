@@ -847,7 +847,7 @@ static int zend_jit_split_interval(zend_lifetime_interval *current, uint32_t pos
 	ival->ssa_var = current->ssa_var;
 	ival->reg     = ZREG_NONE;
 	ival->flags  |= ZREG_SPLIT | ZREG_LOAD;
-	ival->flags  &= ZREG_STORE;
+	ival->flags  &= ~ZREG_STORE;
 	ival->hint    = NULL;
 
 	do {
