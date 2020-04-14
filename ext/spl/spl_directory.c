@@ -516,6 +516,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 			}
 			break;
 		case SPL_FS_FILE:
+		{
 			ce = ce ? ce : source->file_class;
 
 			if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
@@ -563,6 +564,7 @@ static spl_filesystem_object *spl_filesystem_object_create_type(int num_args, sp
 				}
 			}
 			break;
+		}
 		case SPL_FS_DIR:
 			zend_restore_error_handling(&error_handling);
 			zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Operation not supported");
