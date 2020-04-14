@@ -3137,11 +3137,9 @@ try_again:
 		case IS_OBJECT:
 		{
 			zend_class_entry *ce = Z_OBJCE_P(callable);
-			zend_string *callable_name = zend_string_alloc(
-				ZSTR_LEN(ce->name) + sizeof("::__invoke") - 1, 0);
-			memcpy(ZSTR_VAL(callable_name), ZSTR_VAL(ce->name), ZSTR_LEN(ce->name));
-			memcpy(ZSTR_VAL(callable_name) + ZSTR_LEN(ce->name), "::__invoke", sizeof("::__invoke"));
-			return callable_name;
+			return zend_string_concat2(
+				ZSTR_VAL(ce->name), ZSTR_LEN(ce->name),
+				"::__invoke", sizeof("::__invoke") - 1);
 		}
 		case IS_REFERENCE:
 			callable = Z_REFVAL_P(callable);

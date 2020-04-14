@@ -1605,12 +1605,8 @@ static zend_string *zend_ffi_get_class_name(zend_string *prefix, const zend_ffi_
 	if (!zend_ffi_ctype_name(&buf, type)) {
 		return zend_string_copy(prefix);
 	} else {
-		zend_string *name = zend_string_alloc(ZSTR_LEN(prefix) + 1 + buf.end - buf.start, 0);
-		memcpy(ZSTR_VAL(name), ZSTR_VAL(prefix), ZSTR_LEN(prefix));
-		ZSTR_VAL(name)[ZSTR_LEN(prefix)] = ':';
-		memcpy(ZSTR_VAL(name) + ZSTR_LEN(prefix) + 1, buf.start, buf.end - buf.start);
-		ZSTR_VAL(name)[ZSTR_LEN(name)] = 0;
-		return name;
+		return zend_string_concat3(
+			ZSTR_VAL(prefix), ZSTR_LEN(prefix), ":", 1, buf.start, buf.end - buf.start);
 	}
 }
 /* }}} */

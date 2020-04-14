@@ -34,6 +34,9 @@ ZEND_API zend_ulong ZEND_FASTCALL zend_string_hash_func(zend_string *str);
 ZEND_API zend_ulong ZEND_FASTCALL zend_hash_func(const char *str, size_t len);
 ZEND_API zend_string* ZEND_FASTCALL zend_interned_string_find_permanent(zend_string *str);
 
+ZEND_API zend_string *zend_string_concat2(
+	const char *str1, size_t str1_len,
+	const char *str2, size_t str2_len);
 ZEND_API zend_string *zend_string_concat3(
 	const char *str1, size_t str1_len,
 	const char *str2, size_t str2_len,
