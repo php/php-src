@@ -157,11 +157,11 @@ static int php_do_mcast_opt(php_socket *php_sock, int level, int optname, zval *
 		goto mcast_req_fun;
 	case PHP_MCAST_LEAVE_GROUP:
 		{
+			mcast_req_fun = &php_mcast_leave;
+mcast_req_fun: ;
 			php_sockaddr_storage	group = {0};
 			socklen_t				glen;
 
-			mcast_req_fun = &php_mcast_leave;
-mcast_req_fun:
 			convert_to_array_ex(arg4);
 			opt_ht = Z_ARRVAL_P(arg4);
 
@@ -191,13 +191,13 @@ mcast_req_fun:
 		goto mcast_sreq_fun;
 	case PHP_MCAST_LEAVE_SOURCE_GROUP:
 		{
+			mcast_sreq_fun = &php_mcast_leave_source;
+		mcast_sreq_fun: ;
 			php_sockaddr_storage	group = {0},
 									source = {0};
 			socklen_t				glen,
 									slen;
 
-			mcast_sreq_fun = &php_mcast_leave_source;
-		mcast_sreq_fun:
 			convert_to_array_ex(arg4);
 			opt_ht = Z_ARRVAL_P(arg4);
 
