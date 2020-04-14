@@ -768,6 +768,7 @@ static inline void mb_regex_substitute(
 				p++;
 				break;
 			case 'k':
+			{
 				clen = (int) php_mb_mbchar_bytes_ex(++p, enc);
 				if (clen != 1 || p == eos || (p[0] != '<' && p[0] != '\'')) {
 					/* not a backref delimiter */
@@ -817,6 +818,7 @@ static inline void mb_regex_substitute(
 				}
 				no = onig_name_to_backref_number(regexp, (OnigUChar *)name, (OnigUChar *)name_end, regs);
 				break;
+			}
 			default:
 				/* We're not treating \ as an escape character and will interpret something like
 				 * \\1 as \ followed by \1, rather than \\ followed by 1. This is because this
