@@ -682,7 +682,8 @@ static void emit_live_range(
 				/* Trivial live-range, no need to store it. */
 				return;
 			}
-			/* break missing intentionally */
+		}
+		/* explicit fallthrough */
 		default:
 			start++;
 			kind = ZEND_LIVE_TMPVAR;
@@ -693,7 +694,6 @@ static void emit_live_range(
 				return;
 			}
 			break;
-		}
 		case ZEND_COPY_TMP:
 		{
 			/* COPY_TMP has a split live-range: One from the definition until the use in
