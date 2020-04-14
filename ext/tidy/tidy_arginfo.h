@@ -100,29 +100,29 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy_getOpt, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, option, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_tidy_cleanRepair, 0, 0, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy_cleanRepair, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_tidy_parseFile, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy_parseFile, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, file, IS_STRING, 0)
 	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 	ZEND_ARG_TYPE_INFO_WITH_DEFAULT_VALUE(0, use_include_path, _IS_BOOL, 0, "false")
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_tidy_parseString, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy_parseString, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, input, IS_STRING, 0)
 	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_tidy_repairString, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy_repairString, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, data, IS_STRING, 0)
 	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_tidy_repairFile, 0, 1, _IS_BOOL, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy_repairFile, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, filename, IS_STRING, 0)
 	ZEND_ARG_INFO(0, config_options)
 	ZEND_ARG_TYPE_INFO(0, encoding, IS_STRING, 0)
@@ -131,15 +131,13 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_tidy_diagnose arginfo_class_tidy_cleanRepair
 
-#define arginfo_class_tidy_getRelease arginfo_tidy_get_release
+#define arginfo_class_tidy_getRelease arginfo_class_tidy_cleanRepair
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_tidy_getConfig, 0, 0, IS_ARRAY, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_tidy_getConfig arginfo_class_tidy_cleanRepair
 
-ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_tidy_getStatus, 0, 0, IS_LONG, 0)
-ZEND_END_ARG_INFO()
+#define arginfo_class_tidy_getStatus arginfo_class_tidy_cleanRepair
 
-#define arginfo_class_tidy_getHtmlVer arginfo_class_tidy_getStatus
+#define arginfo_class_tidy_getHtmlVer arginfo_class_tidy_cleanRepair
 
 #if HAVE_TIDYOPTGETDOC
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidy_getOptDoc, 0, 0, 1)
@@ -151,35 +149,35 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_tidy_isXml arginfo_class_tidy_cleanRepair
 
-ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_tidy_root, 0, 0, tidyNode, 1)
+#define arginfo_class_tidy_root arginfo_class_tidy_cleanRepair
+
+#define arginfo_class_tidy_head arginfo_class_tidy_cleanRepair
+
+#define arginfo_class_tidy_html arginfo_class_tidy_cleanRepair
+
+#define arginfo_class_tidy_body arginfo_class_tidy_cleanRepair
+
+#define arginfo_class_tidyNode___construct arginfo_class_tidy_cleanRepair
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_class_tidyNode_hasChildren, 0, 0, _IS_BOOL, 0)
 ZEND_END_ARG_INFO()
 
-#define arginfo_class_tidy_head arginfo_class_tidy_root
+#define arginfo_class_tidyNode_hasSiblings arginfo_class_tidyNode_hasChildren
 
-#define arginfo_class_tidy_html arginfo_class_tidy_root
+#define arginfo_class_tidyNode_isComment arginfo_class_tidyNode_hasChildren
 
-#define arginfo_class_tidy_body arginfo_class_tidy_root
+#define arginfo_class_tidyNode_isHtml arginfo_class_tidyNode_hasChildren
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_tidyNode___construct, 0, 0, 0)
+#define arginfo_class_tidyNode_isText arginfo_class_tidyNode_hasChildren
+
+#define arginfo_class_tidyNode_isJste arginfo_class_tidyNode_hasChildren
+
+#define arginfo_class_tidyNode_isAsp arginfo_class_tidyNode_hasChildren
+
+#define arginfo_class_tidyNode_isPhp arginfo_class_tidyNode_hasChildren
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_class_tidyNode_getParent, 0, 0, tidyNode, 1)
 ZEND_END_ARG_INFO()
-
-#define arginfo_class_tidyNode_hasChildren arginfo_class_tidy_cleanRepair
-
-#define arginfo_class_tidyNode_hasSiblings arginfo_class_tidy_cleanRepair
-
-#define arginfo_class_tidyNode_isComment arginfo_class_tidy_cleanRepair
-
-#define arginfo_class_tidyNode_isHtml arginfo_class_tidy_cleanRepair
-
-#define arginfo_class_tidyNode_isText arginfo_class_tidy_cleanRepair
-
-#define arginfo_class_tidyNode_isJste arginfo_class_tidy_cleanRepair
-
-#define arginfo_class_tidyNode_isAsp arginfo_class_tidy_cleanRepair
-
-#define arginfo_class_tidyNode_isPhp arginfo_class_tidy_cleanRepair
-
-#define arginfo_class_tidyNode_getParent arginfo_class_tidy_root
 
 
 ZEND_FUNCTION(tidy_parse_string);
@@ -245,7 +243,7 @@ static const zend_function_entry ext_functions[] = {
 	ZEND_FE(tidy_warning_count, arginfo_tidy_warning_count)
 	ZEND_FE(tidy_access_count, arginfo_tidy_access_count)
 	ZEND_FE(tidy_config_count, arginfo_tidy_config_count)
-	ZEND_FALIAS(tidy_getopt, tidy_getopt, arginfo_tidy_getopt)
+	ZEND_FE(tidy_getopt, arginfo_tidy_getopt)
 	ZEND_FE(tidy_get_root, arginfo_tidy_get_root)
 	ZEND_FE(tidy_get_html, arginfo_tidy_get_html)
 	ZEND_FE(tidy_get_head, arginfo_tidy_get_head)

@@ -23,13 +23,13 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 #include "php_xmlreader.h"
+#include "php_xmlreader_arginfo.h"
 #ifdef HAVE_DOM
 #include "ext/dom/xml_common.h"
 #include "ext/dom/dom_ce.h"
 #endif
 #include <libxml/xmlreader.h>
 #include <libxml/uri.h>
-#include "xmlreader_arginfo.h"
 
 zend_class_entry *xmlreader_class_entry;
 

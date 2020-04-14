@@ -46,7 +46,6 @@ function tidy_access_count(tidy $object): int {}
 
 function tidy_config_count(tidy $object): int {}
 
-/** @alias tidy_getopt */
 function tidy_getopt(tidy $object, string $option): string|int|bool {}
 
 function tidy_get_root(tidy $object): ?tidyNode {}
@@ -68,41 +67,67 @@ class tidy
      */
     public function getOpt(string $option) {}
 
-    /** @alias tidy_clean_repair */
-    public function cleanRepair(): bool {}
-
-    /** @param array|string $config_options */
-    public function parseFile(string $file, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false): bool {}
-
-    /** @param array|string $config_options */
-    public function parseString(string $input, $config_options = UNKNOWN, string $encoding = UNKNOWN): bool {}
+    /**
+     * @return bool
+     * @alias tidy_clean_repair
+     */
+    public function cleanRepair() {}
 
     /**
      * @param array|string $config_options
+     * @return bool
+     */
+    public function parseFile(string $file, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false) {}
+
+    /**
+     * @param array|string $config_options
+     * @return bool
+     */
+    public function parseString(string $input, $config_options = UNKNOWN, string $encoding = UNKNOWN) {}
+
+    /**
+     * @param array|string $config_options
+     * @return bool
      * @alias tidy_repair_string
      */
-    public function repairString(string $data, $config_options = UNKNOWN, string $encoding = UNKNOWN): bool {}
+    public function repairString(string $data, $config_options = UNKNOWN, string $encoding = UNKNOWN) {}
 
     /**
      * @param array|string $config_options
+     * @return bool
      * @alias tidy_repair_file
      */
-    public function repairFile(string $filename, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false): bool {}
+    public function repairFile(string $filename, $config_options = UNKNOWN, string $encoding = UNKNOWN, bool $use_include_path = false) {}
 
-    /** @alias tidy_diagnose */
-    public function diagnose(): bool {}
+    /**
+     * @return bool
+     * @alias tidy_diagnose
+     */
+    public function diagnose() {}
 
-    /** @alias tidy_get_release */
-    public function getRelease(): string {}
+    /**
+     * @return string
+     * @alias tidy_get_release
+     */
+    public function getRelease() {}
 
-    /** @alias tidy_get_config */
-    public function getConfig(): array {}
+    /**
+     * @return array
+     * @alias tidy_get_config
+     */
+    public function getConfig() {}
 
-    /** @alias tidy_get_status */
-    public function getStatus(): int {}
+    /**
+     * @return int
+     * @alias tidy_get_status
+     */
+    public function getStatus() {}
 
-    /** @alias tidy_get_html_ver */
-    public function getHtmlVer(): int {}
+    /**
+     * @return int
+     * @alias tidy_get_html_ver
+     */
+    public function getHtmlVer() {}
 
 #if HAVE_TIDYOPTGETDOC
     /**
@@ -112,23 +137,41 @@ class tidy
     public function getOptDoc(string $optname) {}
 #endif
 
-    /** @alias tidy_is_xhtml */
-    public function isXhtml(): bool {}
+    /**
+     * @return bool
+     * @alias tidy_is_xhtml
+     */
+    public function isXhtml() {}
 
-    /** @alias tidy_is_xml */
-    public function isXml(): bool {}
+    /**
+     * @return bool
+     * @alias tidy_is_xml
+     */
+    public function isXml() {}
 
-    /** @alias tidy_get_root */
-    public function root(): ?tidyNode {}
+    /**
+     * @return tidyNode|null
+     * @alias tidy_get_root
+     */
+    public function root() {}
 
-    /** @alias tidy_get_head */
-    public function head(): ?tidyNode {}
+    /**
+     * @return tidyNode|null
+     * @alias tidy_get_head
+     */
+    public function head() {}
 
-    /** @alias tidy_get_html */
-    public function html(): ?tidyNode {}
+    /**
+     * @return tidyNode|null
+     * @alias tidy_get_html
+     */
+    public function html() {}
 
-    /** @alias tidy_get_body */
-    public function body(): ?tidyNode {}
+    /**
+     * @return tidyNode|null
+     * @alias tidy_get_body
+     */
+    public function body() {}
 }
 
 final class tidyNode
