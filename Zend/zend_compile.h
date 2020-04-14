@@ -783,6 +783,7 @@ ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce);
 ZEND_API void zend_cleanup_internal_classes(void);
 ZEND_API void zend_type_release(zend_type type, zend_bool persistent);
+ZEND_API zend_string *zend_create_member_string(zend_string *class_name, zend_string *member_name);
 
 
 ZEND_API ZEND_COLD void zend_user_exception_handler(void);

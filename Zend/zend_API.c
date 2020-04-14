@@ -3102,25 +3102,13 @@ get_function_via_handler:
 }
 /* }}} */
 
-static zend_string *zend_create_method_string(zend_string *class_name, zend_string *method_name) {
-	zend_string *callable_name = zend_string_alloc(
-		ZSTR_LEN(class_name) + ZSTR_LEN(method_name) + sizeof("::") - 1, 0);
-	char *ptr = ZSTR_VAL(callable_name);
-	memcpy(ptr, ZSTR_VAL(class_name), ZSTR_LEN(class_name));
-	ptr += ZSTR_LEN(class_name);
-	memcpy(ptr, "::", sizeof("::") - 1);
-	ptr += sizeof("::") - 1;
-	memcpy(ptr, ZSTR_VAL(method_name), ZSTR_LEN(method_name) + 1);
-	return callable_name;
-}
-
 ZEND_API zend_string *zend_get_callable_name_ex(zval *callable, zend_object *object) /* {{{ */
 {
 try_again:
 	switch (Z_TYPE_P(callable)) {
 		case IS_STRING:
 			if (object) {
-				return zend_create_method_string(object->ce->name, Z_STR_P(callable));
+				return zend_create_member_string(object->ce->name, Z_STR_P(callable));
 			}
 			return zend_string_copy(Z_STR_P(callable));
 
@@ -3139,9 +3127,9 @@ try_again:
 			}
 
 			if (Z_TYPE_P(obj) == IS_STRING) {
-				return zend_create_method_string(Z_STR_P(obj), Z_STR_P(method));
+				return zend_create_member_string(Z_STR_P(obj), Z_STR_P(method));
 			} else if (Z_TYPE_P(obj) == IS_OBJECT) {
-				return zend_create_method_string(Z_OBJCE_P(obj)->name, Z_STR_P(method));
+				return zend_create_member_string(Z_OBJCE_P(obj)->name, Z_STR_P(method));
 			} else {
 				return ZSTR_KNOWN(ZEND_STR_ARRAY_CAPITALIZED);
 			}

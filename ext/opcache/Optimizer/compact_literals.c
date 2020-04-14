@@ -96,11 +96,7 @@ static uint32_t add_static_slot(HashTable     *hash,
 	zval *prop_name = &op_array->literals[op2];
 	zval *pos, tmp;
 
-	zend_string *key = zend_string_concat3(
-		Z_STRVAL_P(class_name), Z_STRLEN_P(class_name),
-		"::", sizeof("::") - 1,
-		Z_STRVAL_P(prop_name), Z_STRLEN_P(prop_name));
-
+	zend_string *key = zend_create_member_string(Z_STR_P(class_name), Z_STR_P(prop_name));
 	ZSTR_H(key) = zend_string_hash_func(key);
 	ZSTR_H(key) += kind;
 
