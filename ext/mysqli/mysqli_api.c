@@ -1715,7 +1715,7 @@ static int mysqli_options_get_option_zval_type(int option)
 		case MYSQL_OPT_LOCAL_INFILE:
 		case MYSQL_OPT_NAMED_PIPE:
 #ifdef MYSQL_OPT_PROTOCOL
-                case MYSQL_OPT_PROTOCOL:
+		case MYSQL_OPT_PROTOCOL:
 #endif /* MySQL 4.1.0 */
 		case MYSQL_OPT_READ_TIMEOUT:
 		case MYSQL_OPT_WRITE_TIMEOUT:
