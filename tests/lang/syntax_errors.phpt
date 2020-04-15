@@ -1,7 +1,7 @@
 --TEST--
 Detailed reporting on specific types of syntax errors
 --FILE--
-<?
+<?php
 $badCode = [
   "if(1 > 2",                   /* unclosed ( */
   "[1, 2,",                     /* unclosed [ */
