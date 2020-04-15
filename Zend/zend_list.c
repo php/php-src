@@ -51,13 +51,10 @@ ZEND_API int ZEND_FASTCALL zend_list_delete(zend_resource *res)
 	}
 }
 
-ZEND_API int ZEND_FASTCALL zend_list_free(zend_resource *res)
+ZEND_API void ZEND_FASTCALL zend_list_free(zend_resource *res)
 {
-	if (GC_REFCOUNT(res) <= 0) {
-		return zend_hash_index_del(&EG(regular_list), res->handle);
-	} else {
-		return SUCCESS;
-	}
+	ZEND_ASSERT(GC_REFCOUNT(res) == 0);
+	zend_hash_index_del(&EG(regular_list), res->handle);
 }
 
 static void zend_resource_dtor(zend_resource *res)
@@ -82,7 +79,7 @@ static void zend_resource_dtor(zend_resource *res)
 ZEND_API int ZEND_FASTCALL zend_list_close(zend_resource *res)
 {
 	if (GC_REFCOUNT(res) <= 0) {
-		return zend_list_free(res);
+		zend_list_free(res);
 	} else if (res->type >= 0) {
 		zend_resource_dtor(res);
 	}
