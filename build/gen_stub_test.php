@@ -38,7 +38,7 @@ array_walk($dir2, function (&$file) use (&$files2){
 foreach ($files1 as $filename => $path) {
 
     if (!isset($files2[$filename])) {
-        echo "\e[0;31m${filename}\e[0m not exists in ${path2}";
+        echo "\e[0;31m${filename}\e[0m not exists in ${path2}".PHP_EOL;
         continue;
     }
 
