@@ -742,34 +742,22 @@ function getFileDocComment(array $stmts): ?DocComment {
     return null;
 }
 
-function parseStubFile(string $fileName): FileInfo {
-    if (!file_exists($fileName)) {
-        throw new Exception("File $fileName does not exist");
-    }
+function parseStmts(array $stmts, PhpParser\Node\Name $namespace = null) {
 
-    $code = file_get_contents($fileName);
-
-    $lexer = new PhpParser\Lexer();
-    $parser = new PhpParser\Parser\Php7($lexer);
-    $nodeTraverser = new PhpParser\NodeTraverser;
-    $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\NameResolver);
     $prettyPrinter = new CustomPrettyPrinter();
-
-    $stmts = $parser->parse($code);
-    $nodeTraverser->traverse($stmts);
-
-    $generateFunctionEntries = false;
-    $fileDocComment = getFileDocComment($stmts);
-    if ($fileDocComment) {
-        if (strpos($fileDocComment->getText(), '@generate-function-entries') !== false) {
-            $generateFunctionEntries = true;
-        }
-    }
-
     $funcInfos = [];
     $classInfos = [];
     $conds = [];
+
     foreach ($stmts as $stmt) {
+
+        if ($stmt instanceof Stmt\Namespace_) {
+            $result = parseStmts($stmt->stmts, $stmt->name);
+            $funcInfos = array_merge($funcInfos, $result[0]);
+            $classInfos = array_merge($classInfos, $result[1]);
+            continue;
+        }
+
         $cond = handlePreprocessorConditions($conds, $stmt);
         if ($stmt instanceof Stmt\Nop) {
             continue;
@@ -825,7 +813,35 @@ function parseStubFile(string $fileName): FileInfo {
         throw new Exception("Unexpected node {$stmt->getType()}");
     }
 
-    return new FileInfo($funcInfos, $classInfos, $generateFunctionEntries);
+    unset($conds);
+    return [$funcInfos, $classInfos];
+}
+
+function parseStubFile(string $fileName): FileInfo {
+    if (!file_exists($fileName)) {
+        throw new Exception("File $fileName does not exist");
+    }
+
+    $code = file_get_contents($fileName);
+
+    $lexer = new PhpParser\Lexer();
+    $parser = new PhpParser\Parser\Php7($lexer);
+    $nodeTraverser = new PhpParser\NodeTraverser;
+    $nodeTraverser->addVisitor(new PhpParser\NodeVisitor\NameResolver);
+
+    $stmts = $parser->parse($code);
+    $nodeTraverser->traverse($stmts);
+
+    $generateFunctionEntries = false;
+    $fileDocComment = getFileDocComment($stmts);
+    if ($fileDocComment) {
+        if (strpos($fileDocComment->getText(), '@generate-function-entries') !== false) {
+            $generateFunctionEntries = true;
+        }
+    }
+
+    $result = parseStmts($stmts);
+    return new FileInfo($result[0], $result[1], $generateFunctionEntries);
 }
 
 function funcInfoToCode(FuncInfo $funcInfo): string {
