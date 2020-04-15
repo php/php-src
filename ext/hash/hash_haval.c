@@ -278,7 +278,7 @@ PHP_HASH_HAVAL_INIT(5,256)
 
 /* {{{ PHP_HAVALUpdate
  */
-PHP_HASH_API void PHP_HAVALUpdate(PHP_HAVAL_CTX *context, const unsigned char *input, unsigned int inputLen)
+PHP_HASH_API void PHP_HAVALUpdate(PHP_HAVAL_CTX *context, const unsigned char *input, size_t inputLen)
 {
 	unsigned int i, index, partLen;
 
