@@ -292,56 +292,93 @@ class ArgInfo {
     }
 }
 
-class FunctionName {
-    /** @var PhpParser\Node\Name|null */
-    public $namespace;
-    /** @var string */
-    public $name;
+interface FunctionNameInterface {
+    public function getNamespace(): array;
+    public function getName(): string;
+    public function getDeclaration(): string;
+    public function getArgInfoName(): string;
+    public function getFullyQualifiedNamespace(): string;
+}
 
-    public function __construct(?PhpParser\Node\Name $namespace, string $name)
+class FunctionName implements FunctionNameInterface {
+    /** @var string[] */
+    protected $namespace;
+    /** @var string */
+    protected $name;
+
+    public function __construct(?array $namespace, string $name)
     {
-        $this->namespace = $namespace;
+        $this->namespace = $namespace?? [];
         $this->name = $name;
     }
 
-    public function getDeclaration(): string
-    {
-        return "ZEND_FUNCTION($this->name);\n";
+    public function getNamespace(): array {
+        return $this->namespace;
+    }
+
+    public function getFullyQualifiedNamespace(): string {
+        return join('_', $this->namespace);
+    }
+
+    public function getName(): string {
+        return $this->name;
+    }
+
+    public function getFullyQualifiedName(): string {
+        $ns = $this->getNamespace();
+        $ns[] = $this->getName();
+
+        return join('_', $ns);
+    }
+
+    public function getDeclaration(): string {
+        return sprintf("ZEND_FUNCTION(%s);\n", $this->getFullyQualifiedName());
     }
 
     public function getArgInfoName(): string {
-        return 'arginfo_' . $this->name;
+        return sprintf('arginfo_%s', $this->getFullyQualifiedName());
     }
 
     public function __toString()
     {
-        return $this->name;
+        return $this->getName();
     }
 }
 
 class MethodName extends FunctionName
 {
     /** @var string|null */
-    public $className;
+    protected $className;
 
-    public function __construct(?PhpParser\Node\Name $namespace, ?string $className, string $name)
+    public function __construct(?array $namespace, ?string $className, string $name)
     {
         parent::__construct($namespace, $name);
         $this->className = $className;
     }
 
-    public function getDeclaration(): string
-    {
-        return "ZEND_METHOD($this->className, $this->name);\n";
+    public function getClassName(): string {
+        return $this->className;
+    }
+
+    public function getFullyQualifiedClassName(): string {
+        $ns = $this->getNamespace();
+        $ns[] = $this->getClassName();
+
+        return join('_', $ns);
+    }
+
+    public function getDeclaration(): string {
+        return sprintf("ZEND_METHOD(%s, %s);\n", $this->getFullyQualifiedClassName(), $this->getName());
     }
 
     public function getArgInfoName(): string {
-        return 'arginfo_class_' . $this->className . '_' . $this->name;
+        return sprintf('arginfo_class_%s_%s', $this->getFullyQualifiedClassName(), $this->getName());
     }
 
     public function __toString()
     {
-        return $this->className. '::'. $this->name;
+        // FIXME: remove this (used by FuncInfo::getDeclarationKey())
+        return $this->getFullyQualifiedClassName(). '::'. $this->getName();
     }
 }
 
@@ -444,40 +481,40 @@ class FuncInfo {
                 if ($this->alias instanceof MethodName) {
                     return sprintf(
                         "\tZEND_MALIAS(%s, %s, %s, %s, %s)\n",
-                        $this->alias->className, $this->name->name, $this->alias->name, $this->getArgInfoName(), $this->getFlagsAsString()
+                        $this->alias->getFullyQualifiedClassName(), $this->name->getFullyQualifiedName(), $this->alias->getFullyQualifiedName(), $this->getArgInfoName(), $this->getFlagsAsString()
                     );
                 } else {
                     return sprintf(
                         "\tZEND_ME_MAPPING(%s, %s, %s, %s)\n",
-                        $this->name->name, $this->alias->name, $this->getArgInfoName(), $this->getFlagsAsString()
+                        $this->name->getFullyQualifiedName(), $this->alias->getFullyQualifiedName(), $this->getArgInfoName(), $this->getFlagsAsString()
                     );
                 }
             } else {
                 if ($this->flags & Class_::MODIFIER_ABSTRACT) {
                     return sprintf(
                         "\tZEND_ABSTRACT_ME_WITH_FLAGS(%s, %s, %s, %s)\n",
-                        $this->name->className, $this->name->name, $this->getArgInfoName(), $this->getFlagsAsString()
+                        $this->name->getFullyQualifiedClassName(), $this->name->getName(), $this->getArgInfoName(), $this->getFlagsAsString()
                     );
                 }
 
                 return sprintf(
                     "\tZEND_ME(%s, %s, %s, %s)\n",
-                    $this->name->className, $this->name->name, $this->getArgInfoName(), $this->getFlagsAsString()
+                    $this->name->getFullyQualifiedClassName(), $this->name->getName(), $this->getArgInfoName(), $this->getFlagsAsString()
                 );
             }
         } else {
             if ($this->alias) {
                 return sprintf(
                     "\tZEND_FALIAS(%s, %s, %s)\n",
-                    $this->name, $this->alias->name, $this->getArgInfoName()
+                    $this->name->getFullyQualifiedName(), $this->alias->getFullyQualifiedName(), $this->getArgInfoName()
                 );
             }
 
             if ($this->isDeprecated) {
-                return sprintf("\tZEND_DEP_FE(%s, %s)\n", $this->name, $this->getArgInfoName());
+                return sprintf("\tZEND_DEP_FE(%s, %s)\n", $this->name->getFullyQualifiedName(), $this->getArgInfoName());
             }
 
-            return sprintf("\tZEND_FE(%s, %s)\n", $this->name, $this->getArgInfoName());
+            return sprintf("\tZEND_FE(%s, %s)\n", $this->name->getFullyQualifiedName(), $this->getArgInfoName());
         }
     }
 
@@ -616,9 +653,9 @@ function parseFunctionLike(
             } else if ($tag->name === 'alias') {
                 $aliasParts = explode("::", $tag->getValue());
                 if (count($aliasParts) === 1) {
-                    $alias = new FunctionName(null, $aliasParts[0]);
+                    $alias = new FunctionName($name->getNamespace(), $aliasParts[0]);
                 } else {
-                    $alias = new MethodName(null, $aliasParts[0], $aliasParts[1]);
+                    $alias = new MethodName($name->getNamespace(), $aliasParts[0], $aliasParts[1]);
                 }
             } else if ($tag->name === 'deprecated') {
                 $isDeprecated = true;
@@ -676,7 +713,7 @@ function parseFunctionLike(
     }
 
     $returnType = $func->getReturnType();
-    if ($returnType === null && !$haveDocReturnType && strpos($name->name, '__') !== 0) {
+    if ($returnType === null && !$haveDocReturnType && strpos($name->getName(), '__') !== 0) {
         throw new Exception("Missing return type for function $name()");
     }
 
@@ -742,7 +779,7 @@ function getFileDocComment(array $stmts): ?DocComment {
     return null;
 }
 
-function parseStmts(array $stmts, PhpParser\Node\Name $namespace = null) {
+function parseStmts(array $stmts, array $namespace = null) {
 
     $prettyPrinter = new CustomPrettyPrinter();
     $funcInfos = [];
@@ -752,7 +789,8 @@ function parseStmts(array $stmts, PhpParser\Node\Name $namespace = null) {
     foreach ($stmts as $stmt) {
 
         if ($stmt instanceof Stmt\Namespace_) {
-            $result = parseStmts($stmt->stmts, $stmt->name);
+            $namespace = $stmt->name ? $stmt->name->parts : null;
+            $result = parseStmts($stmt->stmts, $namespace);
             $funcInfos = array_merge($funcInfos, $result[0]);
             $classInfos = array_merge($classInfos, $result[1]);
             continue;
@@ -766,7 +804,7 @@ function parseStmts(array $stmts, PhpParser\Node\Name $namespace = null) {
         if ($stmt instanceof Stmt\Function_) {
             $funcInfos[] = parseFunctionLike(
                 $prettyPrinter,
-                new FunctionName(null, $stmt->name->toString()),
+                new FunctionName($namespace, $stmt->name->toString()),
                 0,
                 $stmt,
                 $cond
@@ -799,7 +837,7 @@ function parseStmts(array $stmts, PhpParser\Node\Name $namespace = null) {
 
                 $methodInfos[] = parseFunctionLike(
                     $prettyPrinter,
-                    new MethodName(null, $className, $classStmt->name->toString()),
+                    new MethodName($namespace, $className, $classStmt->name->toString()),
                     $flags,
                     $classStmt,
                     $cond
