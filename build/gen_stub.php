@@ -557,6 +557,19 @@ class ClassInfo {
         $this->name = $name;
         $this->funcInfos = $funcInfos;
     }
+
+    public function generateFunctionEntries(): string {
+        $code = "";
+
+        $code .= "\n\nstatic const zend_function_entry class_{$this->name}_methods[] = {\n";
+        $code .= generateCodeWithConditions($this->funcInfos, "", function (FuncInfo $funcInfo) {
+            return $funcInfo->getFunctionEntry();
+        });
+        $code .= "\tZEND_FE_END\n";
+        $code .= "};\n";
+
+        return $code;
+    }
 }
 
 class FileInfo {
@@ -572,6 +585,27 @@ class FileInfo {
         $this->funcInfos = $funcInfos;
         $this->classInfos = $classInfos;
         $this->generateFunctionEntries = $generateFunctionEntries;
+    }
+
+    public function getFunctionEntries(): string {
+
+        $code = "";
+
+        if (!empty($this->funcInfos)) {
+            $code .= "\n\nstatic const zend_function_entry ext_functions[] = {\n";
+            $code .= generateCodeWithConditions($this->funcInfos, "", function (FuncInfo $funcInfo) {
+                return $funcInfo->getFunctionEntry();
+            });
+            $code .= "\tZEND_FE_END\n";
+            $code .= "};\n";
+            // $code .= $this->generateFunctionEntries(null, $this->funcInfos);
+        }
+
+        foreach ($this->classInfos as $classInfo) {
+            $code .= $classInfo->generateFunctionEntries();
+        }
+
+        return $code;
     }
 
     /**
@@ -1046,30 +1080,8 @@ function generateArgInfoCode(FileInfo $fileInfo): string {
             }
         );
 
-        if (!empty($fileInfo->funcInfos)) {
-            $code .= generateFunctionEntries(null, $fileInfo->funcInfos);
-        }
-
-        foreach ($fileInfo->classInfos as $classInfo) {
-            $code .= generateFunctionEntries($classInfo->name, $classInfo->funcInfos);
-        }
+        $code .= $fileInfo->getFunctionEntries();
     }
-
-    return $code;
-}
-
-/** @param FuncInfo[] $funcInfos */
-function generateFunctionEntries(?string $className, array $funcInfos): string {
-    $code = "";
-
-    $functionEntryName = $className ? "class_{$className}_methods" : "ext_functions";
-
-    $code .= "\n\nstatic const zend_function_entry {$functionEntryName}[] = {\n";
-    $code .= generateCodeWithConditions($funcInfos, "", function (FuncInfo $funcInfo) {
-        return $funcInfo->getFunctionEntry();
-    });
-    $code .= "\tZEND_FE_END\n";
-    $code .= "};\n";
 
     return $code;
 }
