@@ -578,6 +578,10 @@ PHP 8.0 UPGRADE NOTES
 - MBString:
   . The Unicode data tables have been updated to version 13.0.0.
 
+- MySQLi / PDO MySQL:
+  . When mysqlnd is not used (which is the default and recommended option),
+    the minimum supported libmysqlclient version is now 5.1.
+
 ========================================
 10. New Global Constants
 ========================================

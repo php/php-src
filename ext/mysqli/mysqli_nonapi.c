@@ -1035,7 +1035,6 @@ PHP_FUNCTION(mysqli_stmt_get_warnings)
 }
 /* }}} */
 
-#ifdef HAVE_MYSQLI_SET_CHARSET
 /* {{{ proto bool mysqli_set_charset(object link, string csname)
    sets client character set */
 PHP_FUNCTION(mysqli_set_charset)
@@ -1056,9 +1055,7 @@ PHP_FUNCTION(mysqli_set_charset)
 	RETURN_TRUE;
 }
 /* }}} */
-#endif
 
-#ifdef HAVE_MYSQLI_GET_CHARSET
 /* {{{ proto object mysqli_get_charset(object link) U
    returns a character set object */
 PHP_FUNCTION(mysqli_get_charset)
@@ -1115,7 +1112,6 @@ PHP_FUNCTION(mysqli_get_charset)
 	add_property_string(return_value, "comment", (comment) ? (char *)comment : "");
 }
 /* }}} */
-#endif
 
 #if !defined(MYSQLI_USE_MYSQLND)
 extern char * mysqli_escape_string_for_tx_name_in_comment(const char * const name);

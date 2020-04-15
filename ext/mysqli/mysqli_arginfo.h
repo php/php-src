@@ -458,10 +458,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_debug, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, debug_options, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#if defined(HAVE_MYSQLI_GET_CHARSET)
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_get_charset, 0, 0, 0)
-ZEND_END_ARG_INFO()
-#endif
+#define arginfo_class_mysqli_get_charset arginfo_class_mysqli_character_set_name
 
 #define arginfo_class_mysqli_get_client_info arginfo_class_mysqli_character_set_name
 
@@ -544,11 +541,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_select_db, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, database, IS_STRING, 0)
 ZEND_END_ARG_INFO()
 
-#if defined(HAVE_MYSQLI_SET_CHARSET)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_set_charset, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, charset, IS_STRING, 0)
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_mysqli_options, 0, 0, 2)
 	ZEND_ARG_TYPE_INFO(0, option, IS_LONG, 0)
@@ -796,9 +791,6 @@ ZEND_FUNCTION(mysqli_use_result);
 ZEND_FUNCTION(mysqli_warning_count);
 ZEND_FUNCTION(mysqli_refresh);
 ZEND_FUNCTION(mysqli_link_construct);
-#if defined(HAVE_MYSQLI_GET_CHARSET)
-ZEND_FUNCTION(mysqli_get_charset);
-#endif
 #if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_get_connection_stats);
 #endif
@@ -808,9 +800,6 @@ ZEND_FUNCTION(mysqli_poll);
 #endif
 #if defined(MYSQLI_USE_MYSQLND)
 ZEND_FUNCTION(mysqli_reap_async_query);
-#endif
-#if defined(HAVE_MYSQLI_SET_CHARSET)
-ZEND_FUNCTION(mysqli_set_charset);
 #endif
 ZEND_FUNCTION(mysqli_result_construct);
 #if defined(MYSQLI_USE_MYSQLND)
@@ -955,9 +944,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_ME_MAPPING(connect, mysqli_connect, arginfo_class_mysqli_connect, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(dump_debug_info, mysqli_dump_debug_info, arginfo_class_mysqli_dump_debug_info, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(debug, mysqli_debug, arginfo_class_mysqli_debug, ZEND_ACC_PUBLIC)
-#if defined(HAVE_MYSQLI_GET_CHARSET)
 	ZEND_ME_MAPPING(get_charset, mysqli_get_charset, arginfo_class_mysqli_get_charset, ZEND_ACC_PUBLIC)
-#endif
 	ZEND_ME_MAPPING(get_client_info, mysqli_get_client_info, arginfo_class_mysqli_get_client_info, ZEND_ACC_PUBLIC)
 #if defined(MYSQLI_USE_MYSQLND)
 	ZEND_ME_MAPPING(get_connection_stats, mysqli_get_connection_stats, arginfo_class_mysqli_get_connection_stats, ZEND_ACC_PUBLIC)
@@ -986,9 +973,7 @@ static const zend_function_entry class_mysqli_methods[] = {
 	ZEND_ME_MAPPING(rollback, mysqli_rollback, arginfo_class_mysqli_rollback, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(savepoint, mysqli_savepoint, arginfo_class_mysqli_savepoint, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(select_db, mysqli_select_db, arginfo_class_mysqli_select_db, ZEND_ACC_PUBLIC)
-#if defined(HAVE_MYSQLI_SET_CHARSET)
 	ZEND_ME_MAPPING(set_charset, mysqli_set_charset, arginfo_class_mysqli_set_charset, ZEND_ACC_PUBLIC)
-#endif
 	ZEND_ME_MAPPING(options, mysqli_options, arginfo_class_mysqli_options, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(set_opt, mysqli_options, arginfo_class_mysqli_set_opt, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(ssl_set, mysqli_ssl_set, arginfo_class_mysqli_ssl_set, ZEND_ACC_PUBLIC)

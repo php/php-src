@@ -79,13 +79,11 @@ class mysqli
      */
     public function debug(string $debug_options) {}
 
-#ifdef HAVE_MYSQLI_GET_CHARSET
     /**
      * @return object|null
      * @alias mysqli_get_charset
      */
     public function get_charset() {}
-#endif
 
     /**
      * @return string|null
@@ -233,13 +231,11 @@ class mysqli
      */
     public function select_db(string $database) {}
 
-#ifdef HAVE_MYSQLI_SET_CHARSET
     /**
      * @return bool
      * @alias mysqli_set_charset
      */
     public function set_charset(string $charset) {}
-#endif
 
     /**
      * @param mixed $value
