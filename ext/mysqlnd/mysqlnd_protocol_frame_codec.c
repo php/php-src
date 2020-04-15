@@ -368,7 +368,8 @@ MYSQLND_METHOD(mysqlnd_pfc, set_client_option)(MYSQLND_PFC * const pfc, enum_mys
 			}
 			pfc->data->sha256_server_public_key = value? mnd_pestrdup(value, pers) : NULL;
 			break;
-		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE:
+		}
+		case MYSQLND_OPT_NET_CMD_BUFFER_SIZE: {
 			DBG_INF("MYSQLND_OPT_NET_CMD_BUFFER_SIZE");
 			if (*(unsigned int*) value < MYSQLND_NET_CMD_BUFFER_MIN_SIZE) {
 				DBG_RETURN(FAIL);
