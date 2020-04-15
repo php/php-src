@@ -601,6 +601,9 @@ PHP 8.0 UPGRADE NOTES
 13. Other Changes
 ========================================
 
+- EBCDIC targets are no longer supported, though it's unlikely that they were
+  still working in the first place.
+
 ========================================
 14. Performance Improvements
 ========================================

@@ -23,12 +23,6 @@
 
 #include "url.h"
 #include "file.h"
-#ifdef _OSD_POSIX
-# ifndef CHARSET_EBCDIC
-#  define CHARSET_EBCDIC /* this machine uses EBCDIC, not ASCII! */
-# endif
-# include "ebcdic.h"
-#endif /*_OSD_POSIX*/
 
 /* {{{ free_url
  */
@@ -469,7 +463,6 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 
 		if (c == ' ') {
 			*to++ = '+';
-#ifndef CHARSET_EBCDIC
 		} else if ((c < '0' && c != '-' && c != '.') ||
 				   (c < 'A' && c > '9') ||
 				   (c > 'Z' && c < 'a' && c != '_') ||
@@ -478,14 +471,6 @@ PHPAPI zend_string *php_url_encode(char const *s, size_t len)
 			to[1] = hexchars[c >> 4];
 			to[2] = hexchars[c & 15];
 			to += 3;
-#else /*CHARSET_EBCDIC*/
-		} else if (!isalnum(c) && strchr("_-.", c) == NULL) {
-			/* Allow only alphanumeric chars and '_', '-', '.'; escape the rest */
-			to[0] = '%';
-			to[1] = hexchars[os_toascii[c] >> 4];
-			to[2] = hexchars[os_toascii[c] & 15];
-			to += 3;
-#endif /*CHARSET_EBCDIC*/
 		} else {
 			*to++ = c;
 		}
@@ -542,11 +527,7 @@ PHPAPI size_t php_url_decode(char *str, size_t len)
 		}
 		else if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1))
 				 && isxdigit((int) *(data + 2))) {
-#ifndef CHARSET_EBCDIC
 			*dest = (char) php_htoi(data + 1);
-#else
-			*dest = os_toebcdic[(unsigned char) php_htoi(data + 1)];
-#endif
 			data += 2;
 			len -= 2;
 		} else {
@@ -574,7 +555,6 @@ PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 		char c = s[x];
 
 		ret[y] = c;
-#ifndef CHARSET_EBCDIC
 		if ((c < '0' && c != '-' &&  c != '.') ||
 			(c < 'A' && c > '9') ||
 			(c > 'Z' && c < 'a' && c != '_') ||
@@ -582,12 +562,6 @@ PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 			ret[y++] = '%';
 			ret[y++] = hexchars[(unsigned char) c >> 4];
 			ret[y] = hexchars[(unsigned char) c & 15];
-#else /*CHARSET_EBCDIC*/
-		if (!isalnum(c) && strchr("_-.~", c) != NULL) {
-			ret[y++] = '%';
-			ret[y++] = hexchars[os_toascii[(unsigned char) c] >> 4];
-			ret[y] = hexchars[os_toascii[(unsigned char) c] & 15];
-#endif /*CHARSET_EBCDIC*/
 		}
 	}
 	ret[y] = '\0';
@@ -638,11 +612,7 @@ PHPAPI size_t php_raw_url_decode(char *str, size_t len)
 	while (len--) {
 		if (*data == '%' && len >= 2 && isxdigit((int) *(data + 1))
 			&& isxdigit((int) *(data + 2))) {
-#ifndef CHARSET_EBCDIC
 			*dest = (char) php_htoi(data + 1);
-#else
-			*dest = os_toebcdic[(unsigned char) php_htoi(data + 1)];
-#endif
 			data += 2;
 			len -= 2;
 		} else {
