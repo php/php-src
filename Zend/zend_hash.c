@@ -2722,7 +2722,7 @@ convert:
 	{
 		HashTable *new_ht = zend_new_array(zend_hash_num_elements(ht));
 
-		ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
+		ZEND_HASH_FOREACH_KEY_VAL_IND(ht, num_key, str_key, zv) {
 			do {
 				if (Z_OPT_REFCOUNTED_P(zv)) {
 					if (Z_ISREF_P(zv) && Z_REFCOUNT_P(zv) == 1) {

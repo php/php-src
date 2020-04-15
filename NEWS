@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #79434 (PHP 7.3 and PHP-7.4 crash with NULL-pointer dereference
     on !CS constant). (Nikita)
+  . Fixed bug #79477 (casting object into array creates references). (Nikita)
 
 - DOM:
   . Fixed bug #78221 (DOMNode::normalize() doesn't remove empty text nodes).
