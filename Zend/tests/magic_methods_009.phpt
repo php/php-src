@@ -10,4 +10,4 @@ class a {
 
 ?>
 --EXPECTF--
-Warning: The magic method __callStatic() must have public visibility and be static in %s on line %d
+Warning: The magic method a::__callStatic() must have public visibility and be static in %s on line %d
