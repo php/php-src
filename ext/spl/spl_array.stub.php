@@ -1,6 +1,6 @@
 <?php
 
-class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Countable
+class ArrayObject implements IteratorAggregate, ArrayAccess, Countable
 {
     /** @param array|object $input */
     public function __construct($input = [], int $flags = 0, string $iterator_class = ArrayIterator::class) {}
@@ -78,12 +78,6 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
     /** @return bool */
     public function natcasesort() {}
 
-    /** @return void */
-    public function unserialize(string $serialized) {}
-
-    /** @return string */
-    public function serialize() {}
-
     /** @return array */
     public function __serialize() {}
 
@@ -109,7 +103,7 @@ class ArrayObject implements IteratorAggregate, ArrayAccess, Serializable, Count
     public function __debugInfo() {}
 }
 
-class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Countable
+class ArrayIterator implements SeekableIterator, ArrayAccess, Countable
 {
     /** @param array|object $array */
     public function __construct($array = [], int $flags = 0) {}
@@ -186,12 +180,6 @@ class ArrayIterator implements SeekableIterator, ArrayAccess, Serializable, Coun
 
     /** @return bool */
     public function natcasesort() {}
-
-    /** @return void */
-    public function unserialize(string $serialized) {}
-
-    /** @return string */
-    public function serialize() {}
 
     /** @return array */
     public function __serialize() {}

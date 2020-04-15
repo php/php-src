@@ -11,10 +11,10 @@ class A extends \ArrayObject
         $this->foo = 'bar';
     }
 
-    public function serialize()
+    public function __serialize()
     {
         unset($this->foo);
-        $result = parent::serialize();
+        $result = parent::__serialize();
         $this->foo = 'bar';
         return $result;
     }
@@ -24,8 +24,7 @@ $a = new A();
 $a->append('item1');
 $a->append('item2');
 $a->append('item3');
-$b = new A();
-$b->unserialize($a->serialize());
+$b = unserialize(serialize($a));
 var_dump($b);
 ?>
 --EXPECTF--

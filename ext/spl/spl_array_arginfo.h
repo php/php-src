@@ -50,12 +50,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_ArrayObject_natcasesort arginfo_class_ArrayObject_getArrayCopy
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject_unserialize, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, serialized, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_ArrayObject_serialize arginfo_class_ArrayObject_getArrayCopy
-
 #define arginfo_class_ArrayObject___serialize arginfo_class_ArrayObject_getArrayCopy
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_ArrayObject___unserialize, 0, 0, 1)
@@ -110,10 +104,6 @@ ZEND_END_ARG_INFO()
 #define arginfo_class_ArrayIterator_natsort arginfo_class_ArrayObject_getArrayCopy
 
 #define arginfo_class_ArrayIterator_natcasesort arginfo_class_ArrayObject_getArrayCopy
-
-#define arginfo_class_ArrayIterator_unserialize arginfo_class_ArrayObject_unserialize
-
-#define arginfo_class_ArrayIterator_serialize arginfo_class_ArrayObject_getArrayCopy
 
 #define arginfo_class_ArrayIterator___serialize arginfo_class_ArrayObject_getArrayCopy
 

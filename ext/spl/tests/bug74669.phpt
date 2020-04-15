@@ -75,9 +75,7 @@ foreach($arObj as $key => $value) {
     echo $key . ' => ' . $value . PHP_EOL;
 }
 
-$payload = 'x:i:33554432;O:8:"stdClass":0:{};m:a:0:{}';
-$str = 'C:11:"ArrayObject":' . strlen($payload) . ':{' . $payload . '}';
-
+$str = serialize(new ArrayObject(array(new stdClass())));
 $ao = unserialize($str);
 var_dump($ao['foo']);
 
@@ -100,12 +98,12 @@ var_dump($selfArray['foo']);
 
 Notice: Undefined index: foo in %s on line %d
 NULL
-object(SelfArray)#9 (1) {
+object(SelfArray)#%d (1) {
   ["foo"]=>
   string(3) "bar"
 }
 string(71) "O:9:"SelfArray":3:{i:0;i:16777216;i:1;N;i:2;a:1:{s:3:"foo";s:3:"bar";}}"
-object(SelfArray)#9 (1) {
+object(SelfArray)#%d (1) {
   ["foo"]=>
   string(3) "bar"
 }
