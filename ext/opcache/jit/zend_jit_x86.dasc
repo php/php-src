@@ -11105,7 +11105,7 @@ static zend_bool zend_jit_may_be_in_reg(const zend_op_array *op_array, zend_ssa 
 	return 1;
 }
 
-static zend_bool zend_needs_extra_reg_for_const(const zend_op_array *op_array, const zend_op *opline, zend_uchar op_type, znode_op op)
+static zend_bool zend_needs_extra_reg_for_const(const zend_op *opline, zend_uchar op_type, znode_op op)
 {
 |.if X64
 ||	if (op_type == IS_CONST) {
@@ -11259,8 +11259,8 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 						ZEND_REGSET_INCL(regset, ZREG_XMM0);
 					}
 				}
-				if (zend_needs_extra_reg_for_const(op_array, opline, opline->op1_type, opline->op1) ||
-				    zend_needs_extra_reg_for_const(op_array, opline, opline->op1_type, opline->op2)) {
+				if (zend_needs_extra_reg_for_const(opline, opline->op1_type, opline->op1) ||
+				    zend_needs_extra_reg_for_const(opline, opline->op1_type, opline->op2)) {
 					ZEND_REGSET_INCL(regset, ZREG_R0);
 				}
 			}
@@ -11345,8 +11345,8 @@ static zend_regset zend_jit_get_scratch_regset(const zend_op *opline, const zend
 						ZEND_REGSET_INCL(regset, ZREG_XMM0);
 					}
 				}
-				if (zend_needs_extra_reg_for_const(op_array, opline, opline->op1_type, opline->op1) ||
-				    zend_needs_extra_reg_for_const(op_array, opline, opline->op1_type, opline->op2)) {
+				if (zend_needs_extra_reg_for_const(opline, opline->op1_type, opline->op1) ||
+				    zend_needs_extra_reg_for_const(opline, opline->op1_type, opline->op2)) {
 					ZEND_REGSET_INCL(regset, ZREG_R0);
 				}
 			}

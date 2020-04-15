@@ -49,7 +49,7 @@ Sigfunc *php_signal4(int signo, Sigfunc *func, int restart, int mask_all)
 #endif
 	}
 	if (zend_sigaction(signo, &act, &oact) < 0) {
-		return (Sigfunc*)SIG_ERR;
+		return (void*)SIG_ERR;
 	}
 
 #ifdef HAVE_STRUCT_SIGINFO_T

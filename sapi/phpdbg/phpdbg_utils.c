@@ -710,7 +710,6 @@ head_done:
 					ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 						element_dump_func(val, key, num);
 					} ZEND_HASH_FOREACH_END();
-					zend_hash_apply_with_arguments(myht, (apply_func_args_t) element_dump_func, 0);
 					GC_UNPROTECT_RECURSION(myht);
 					if (Z_TYPE_P(zv) == IS_OBJECT) {
 						zend_release_properties(myht);

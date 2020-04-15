@@ -1674,11 +1674,10 @@ ZEND_FUNCTION(get_resources)
 }
 /* }}} */
 
-static int add_zendext_info(zend_extension *ext, void *arg) /* {{{ */
+static void add_zendext_info(zend_extension *ext, void *arg) /* {{{ */
 {
 	zval *name_array = (zval *)arg;
 	add_next_index_string(name_array, ext->name);
-	return 0;
 }
 /* }}} */
 
@@ -1695,7 +1694,7 @@ ZEND_FUNCTION(get_loaded_extensions)
 	array_init(return_value);
 
 	if (zendext) {
-		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t)add_zendext_info, return_value);
+		zend_llist_apply_with_argument(&zend_extensions, (llist_apply_with_arg_func_t) add_zendext_info, return_value);
 	} else {
 		zend_module_entry *module;
 

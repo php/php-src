@@ -418,11 +418,10 @@ php_libxml_output_buffer_create_filename(const char *URI,
 	return(ret);
 }
 
-static int _php_libxml_free_error(xmlErrorPtr error)
+static void _php_libxml_free_error(void *ptr)
 {
 	/* This will free the libxml alloc'd memory */
-	xmlResetError(error);
-	return 1;
+	xmlResetError((xmlErrorPtr) ptr);
 }
 
 static void _php_list_set_error_structure(xmlErrorPtr error, const char *msg)
@@ -943,7 +942,7 @@ PHP_FUNCTION(libxml_use_internal_errors)
 		xmlSetStructuredErrorFunc(NULL, php_libxml_structured_error_handler);
 		if (LIBXML(error_list) == NULL) {
 			LIBXML(error_list) = (zend_llist *) emalloc(sizeof(zend_llist));
-			zend_llist_init(LIBXML(error_list), sizeof(xmlError), (llist_dtor_func_t) _php_libxml_free_error, 0);
+			zend_llist_init(LIBXML(error_list), sizeof(xmlError), _php_libxml_free_error, 0);
 		}
 	}
 	RETURN_BOOL(retval);

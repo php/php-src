@@ -80,6 +80,11 @@ static int le_gd_font;
 #define M_PI 3.14159265358979323846
 #endif
 
+/* workaround typo in system libgd 2.3.0 */
+#if defined(GD_FLIP_HORINZONTAL) && !defined(GD_FLIP_HORIZONTAL)
+#define GD_FLIP_HORIZONTAL GD_FLIP_HORINZONTAL
+#endif
+
 #ifdef HAVE_GD_FREETYPE
 static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int, int);
 #endif

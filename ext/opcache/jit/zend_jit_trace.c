@@ -1952,8 +1952,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						res_info = RES_INFO();
 						if (!zend_jit_long_math(&dasm_state, opline, op_array,
-								op1_info, OP1_RANGE_EX(), OP1_REG_ADDR(),
-								op2_info, OP2_RANGE_EX(), OP2_REG_ADDR(),
+								op1_info, OP1_RANGE(), OP1_REG_ADDR(),
+								op2_info, OP2_RANGE(), OP2_REG_ADDR(),
 								res_use_info, res_info, res_addr,
 								send_result,
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
@@ -2106,8 +2106,8 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						}
 						op1_def_info = OP1_DEF_INFO();
 						if (!zend_jit_assign_op(&dasm_state, opline, op_array,
-								op1_info, op1_def_info, OP1_RANGE_EX(),
-								op2_info, OP2_RANGE_EX(),
+								op1_info, op1_def_info, OP1_RANGE(),
+								op2_info, OP2_RANGE(),
 								(op1_def_info & MAY_BE_LONG) && (op1_def_info & (MAY_BE_DOUBLE|MAY_BE_GUARD)) && zend_may_overflow_ex(opline, ssa_op, op_array, ssa),
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;

@@ -1228,9 +1228,8 @@ static int add_module_info(zend_module_entry *module) /* {{{ */ {
 }
 /* }}} */
 
-static int add_zendext_info(zend_extension *ext) /* {{{ */ {
+static void add_zendext_info(zend_extension *ext) /* {{{ */ {
 	phpdbg_write("extension", "name=\"%s\"", "%s\n", ext->name);
-	return 0;
 }
 /* }}} */
 

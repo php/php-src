@@ -161,22 +161,15 @@ static zend_bool zend_long_is_power_of_two(zend_long x)
 	return (x > 0) && !(x & (x - 1));
 }
 
-#define OP_RANGE_EX(ssa_op, opN) \
+#define OP_RANGE(ssa_op, opN) \
 	(((opline->opN##_type & (IS_TMP_VAR|IS_VAR|IS_CV)) && \
 	  (ssa_op)->opN##_use >= 0 && \
 	  ssa->var_info[(ssa_op)->opN##_use].has_range) ? \
 	 &ssa->var_info[(ssa_op)->opN##_use].range : NULL)
 
-#define OP_RANGE(line, opN) \
-	(ssa->var_info ? OP_RANGE_EX(ssa->ops + (line), opN) : NULL)
-
-#define OP1_RANGE()      OP_RANGE(opline - op_array->opcodes, op1)
-#define OP2_RANGE()      OP_RANGE(opline - op_array->opcodes, op2)
-#define OP1_DATA_RANGE() OP_RANGE(opline - op_array->opcodes + 1, op1)
-
-#define OP1_RANGE_EX()      OP_RANGE_EX(ssa_op, op1)
-#define OP2_RANGE_EX()      OP_RANGE_EX(ssa_op, op2)
-#define OP1_DATA_RANGE_EX() OP_RANGE_EX(ssa_op + 1, op1)
+#define OP1_RANGE()      OP_RANGE(ssa_op, op1)
+#define OP2_RANGE()      OP_RANGE(ssa_op, op2)
+#define OP1_DATA_RANGE() OP_RANGE(ssa_op + 1, op1)
 
 #include "dynasm/dasm_x86.h"
 #include "jit/zend_jit_helpers.c"

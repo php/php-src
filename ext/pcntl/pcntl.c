@@ -979,7 +979,7 @@ PHP_FUNCTION(pcntl_signal)
 			php_error_docref(NULL, E_WARNING, "Invalid value for handle argument specified");
 			RETURN_FALSE;
 		}
-		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls) == (Sigfunc *)SIG_ERR) {
+		if (php_signal(signo, (Sigfunc *) Z_LVAL_P(handle), (int) restart_syscalls) == (void *)SIG_ERR) {
 			PCNTL_G(last_error) = errno;
 			php_error_docref(NULL, E_WARNING, "Error assigning signal");
 			RETURN_FALSE;
@@ -1002,7 +1002,7 @@ PHP_FUNCTION(pcntl_signal)
 	handle = zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle);
 	Z_TRY_ADDREF_P(handle);
 
-	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == (Sigfunc *)SIG_ERR) {
+	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == (void *)SIG_ERR) {
 		PCNTL_G(last_error) = errno;
 		php_error_docref(NULL, E_WARNING, "Error assigning signal");
 		RETURN_FALSE;
