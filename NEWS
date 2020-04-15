@@ -6,6 +6,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #78434 (Generator yields no items after valid() call). (Nikita)
   . Fixed bug #79477 (casting object into array creates references). (Nikita)
+  . Fixed bug #79447 (Serializing uninitialized typed properties with __sleep should not throw). (nicolas-grekas)
 
 - DOM:
   . Fixed bug #78221 (DOMNode::normalize() doesn't remove empty text nodes).
