@@ -262,6 +262,7 @@ NO_PROC_OPEN_ERROR;
         'opcache.revalidate_freq=0',
         'zend.assertions=1',
         'zend.exception_ignore_args=0',
+        'short_open_tag=0',
     );
 
     $no_file_cache = '-d opcache.file_cache= -d opcache.file_cache_only=0';
