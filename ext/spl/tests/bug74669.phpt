@@ -104,7 +104,7 @@ object(SelfArray)#9 (1) {
   ["foo"]=>
   string(3) "bar"
 }
-string(71) "O:9:"SelfArray":3:{i:0;i:16777216;i:1;N;i:2;a:1:{s:3:"foo";s:3:"bar";}}"
+string(77) "O:9:"SelfArray":4:{i:0;i:16777216;i:1;N;i:2;a:1:{s:3:"foo";s:3:"bar";}i:3;N;}"
 object(SelfArray)#9 (1) {
   ["foo"]=>
   string(3) "bar"
