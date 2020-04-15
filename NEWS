@@ -40,6 +40,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #79468 (SIGSEGV when closing stream handle with a stream filter
     appended). (dinosaur)
+  . Fixed bug #79447 (Serializing uninitialized typed properties with __sleep
+    should not throw). (nicolas-grekas)
 
 ?? ??? ????, PHP 7.4.5
 

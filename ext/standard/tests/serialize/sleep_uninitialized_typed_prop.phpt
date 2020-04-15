@@ -1,5 +1,5 @@
 --TEST--
-Referencing an uninitialized typed property in __sleep() should result in Error
+Referencing an uninitialized typed property in __sleep() should be skipped
 --FILE--
 <?php
 
@@ -18,39 +18,27 @@ class Test {
 }
 
 $t = new Test;
-try {
-    serialize($t);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
+var_dump(serialize($t));
+var_dump(unserialize(serialize($t)) == $t);
 
 $t->x = 1;
-try {
-    serialize($t);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
+var_dump(unserialize(serialize($t)) == $t);
 
 $t->y = 2;
-try {
-    serialize($t);
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
+var_dump(unserialize(serialize($t)) == $t);
 
 $t->z = 3;
-try {
-    var_dump(unserialize(serialize($t)));
-} catch (Error $e) {
-    echo $e->getMessage(), "\n";
-}
+var_dump(unserialize(serialize($t)) == $t);
 
+var_dump($t);
 ?>
 --EXPECT--
-Typed property Test::$x must not be accessed before initialization (in __sleep)
-Typed property Test::$y must not be accessed before initialization (in __sleep)
-Typed property Test::$z must not be accessed before initialization (in __sleep)
-object(Test)#3 (3) {
+string(15) "O:4:"Test":0:{}"
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+object(Test)#1 (3) {
   ["x"]=>
   int(1)
   ["y":protected]=>
