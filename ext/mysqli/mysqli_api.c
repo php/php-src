@@ -459,9 +459,7 @@ mysqli_stmt_bind_result_do_bind(MY_STMT *stmt, zval *args, unsigned int argc)
 				break;
 
 			case MYSQL_TYPE_LONGLONG:
-#if MYSQL_VERSION_ID > 50002 || defined(MYSQLI_USE_MYSQLND)
 			case MYSQL_TYPE_BIT:
-#endif
 				stmt->result.buf[ofs].type = IS_STRING;
 				stmt->result.buf[ofs].buflen = sizeof(my_ulonglong);
 				stmt->result.buf[ofs].val = (char *)emalloc(stmt->result.buf[ofs].buflen);
@@ -611,7 +609,7 @@ PHP_FUNCTION(mysqli_change_user)
 	char		*user, *password, *dbname;
 	size_t			user_len, password_len, dbname_len;
 	zend_ulong		rc;
-#if !defined(MYSQLI_USE_MYSQLND) && defined(HAVE_MYSQLI_SET_CHARSET)
+#if !defined(MYSQLI_USE_MYSQLND)
 	const		CHARSET_INFO * old_charset;
 #endif
 
@@ -620,7 +618,7 @@ PHP_FUNCTION(mysqli_change_user)
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
 
-#if !defined(MYSQLI_USE_MYSQLND) && defined(HAVE_MYSQLI_SET_CHARSET)
+#if !defined(MYSQLI_USE_MYSQLND)
 	old_charset = mysql->mysql->charset;
 #endif
 
@@ -634,7 +632,7 @@ PHP_FUNCTION(mysqli_change_user)
 	if (rc) {
 		RETURN_FALSE;
 	}
-#if !defined(MYSQLI_USE_MYSQLND) && defined(HAVE_MYSQLI_SET_CHARSET)
+#if !defined(MYSQLI_USE_MYSQLND)
 	if (mysql_get_server_version(mysql->mysql) < 50123L) {
 		/*
 		  Request the current charset, or it will be reset to the system one.
@@ -1024,12 +1022,9 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 					}
 					case IS_STRING:
 						if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_LONGLONG
-#if MYSQL_VERSION_ID > 50002
 						 || stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_BIT
-#endif
 						 ) {
 							my_bool uns = (stmt->stmt->fields[i].flags & UNSIGNED_FLAG)? 1:0;
-#if MYSQL_VERSION_ID > 50002
 							if (stmt->stmt->bind[i].buffer_type == MYSQL_TYPE_BIT) {
 								switch (stmt->result.buf[i].output_len) {
 									case 8:llval = (my_ulonglong)  bit_uint8korr(stmt->result.buf[i].val);break;
@@ -1041,9 +1036,7 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 									case 2:llval = (my_ulonglong)  bit_uint2korr(stmt->result.buf[i].val);break;
 									case 1:llval = (my_ulonglong)  uint1korr(stmt->result.buf[i].val);break;
 								}
-							} else
-#endif
-							{
+							} else {
 								llval= *(my_ulonglong *) stmt->result.buf[i].val;
 							}
 #if SIZEOF_ZEND_LONG==8
@@ -1065,14 +1058,10 @@ void mysqli_stmt_fetch_libmysql(INTERNAL_FUNCTION_PARAMETERS)
 								ZEND_TRY_ASSIGN_REF_LONG(result, llval);
 							}
 						} else {
-#if defined(MYSQL_DATA_TRUNCATED) && MYSQL_VERSION_ID > 50002
 							if (ret == MYSQL_DATA_TRUNCATED && *(stmt->stmt->bind[i].error) != 0) {
 								/* result was truncated */
 								ZEND_TRY_ASSIGN_REF_STRINGL(result, stmt->result.buf[i].val, stmt->stmt->bind[i].buffer_length);
 							} else {
-#else
-							{
-#endif
 								ZEND_TRY_ASSIGN_REF_STRINGL(result, stmt->result.buf[i].val, stmt->result.buf[i].output_len);
 							}
 						}

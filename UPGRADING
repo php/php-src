@@ -601,6 +601,10 @@ PHP 8.0 UPGRADE NOTES
 13. Other Changes
 ========================================
 
+- MySQL:
+  . The minimum support MySQL version is now MySQL 5.1. This means that charset
+    functionality is now guaranteed to always be available.
+
 ========================================
 14. Performance Improvements
 ========================================

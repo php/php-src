@@ -83,9 +83,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_get_connection_stats,					arginfo_mysqli_get_connection_stats)
 	PHP_FE(mysqli_get_client_stats,						arginfo_mysqli_get_client_stats)
 #endif
-#ifdef HAVE_MYSQLI_GET_CHARSET
 	PHP_FE(mysqli_get_charset,							arginfo_mysqli_get_charset)
-#endif
 	PHP_FE(mysqli_get_client_info,						arginfo_mysqli_get_client_info)
 	PHP_FE(mysqli_get_client_version,					arginfo_mysqli_get_client_version)
 	PHP_FE(mysqli_get_links_stats,						arginfo_mysqli_get_links_stats)
@@ -121,9 +119,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_rollback,								arginfo_mysqli_rollback)
 	PHP_FE(mysqli_savepoint,							arginfo_mysqli_savepoint)
 	PHP_FE(mysqli_select_db,							arginfo_mysqli_select_db)
-#ifdef HAVE_MYSQLI_SET_CHARSET
 	PHP_FE(mysqli_set_charset,							arginfo_mysqli_set_charset)
-#endif
 	PHP_FE(mysqli_stmt_affected_rows,					arginfo_mysqli_stmt_affected_rows)
 	PHP_FE(mysqli_stmt_attr_get,						arginfo_mysqli_stmt_attr_get)
 	PHP_FE(mysqli_stmt_attr_set,						arginfo_mysqli_stmt_attr_set)
@@ -188,9 +184,7 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_ME_MAPPING(connect, mysqli_connect, arginfo_class_mysqli_connect, ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(dump_debug_info, mysqli_dump_debug_info, arginfo_class_mysqli_dump_debug_info, ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(debug, mysqli_debug, arginfo_class_mysqli_debug, ZEND_ACC_PUBLIC)
-#ifdef HAVE_MYSQLI_GET_CHARSET
 	PHP_ME_MAPPING(get_charset, mysqli_get_charset, arginfo_class_mysqli_get_charset, ZEND_ACC_PUBLIC)
-#endif
 	PHP_ME_MAPPING(get_client_info, mysqli_get_client_info, arginfo_class_mysqli_get_client_info, ZEND_ACC_PUBLIC)
 #if defined(MYSQLI_USE_MYSQLND)
 	PHP_ME_MAPPING(get_connection_stats, mysqli_get_connection_stats, arginfo_class_mysqli_get_connection_stats, ZEND_ACC_PUBLIC)
@@ -221,9 +215,7 @@ const zend_function_entry mysqli_link_methods[] = {
 	PHP_ME_MAPPING(rollback, mysqli_rollback, arginfo_class_mysqli_rollback, ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(savepoint, mysqli_savepoint, arginfo_class_mysqli_savepoint, ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(select_db, mysqli_select_db, arginfo_class_mysqli_select_db, ZEND_ACC_PUBLIC)
-#ifdef HAVE_MYSQLI_SET_CHARSET
 	PHP_ME_MAPPING(set_charset, mysqli_set_charset, arginfo_class_mysqli_set_charset, ZEND_ACC_PUBLIC)
-#endif
 	PHP_ME_MAPPING(set_opt, mysqli_options, arginfo_class_mysqli_set_opt, ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(ssl_set, mysqli_ssl_set, arginfo_class_mysqli_ssl_set, ZEND_ACC_PUBLIC)
 	PHP_ME_MAPPING(stat, mysqli_stat, arginfo_class_mysqli_stat, ZEND_ACC_PUBLIC)
