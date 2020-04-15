@@ -6138,25 +6138,25 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 	} else if (zend_string_equals_literal(lcname, ZEND_CLONE_FUNC_NAME)) {
 		ce->clone = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, ZEND_CALL_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__call", 0);
+		zend_check_magic_method_attr(fn_flags, ZEND_CALL_FUNC_NAME, 0);
 		ce->__call = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, ZEND_CALLSTATIC_FUNC_NAME)) {
 		zend_check_magic_method_attr(fn_flags, "__callStatic", 1);
 		ce->__callstatic = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, ZEND_GET_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__get", 0);
+		zend_check_magic_method_attr(fn_flags, ZEND_GET_FUNC_NAME, 0);
 		ce->__get = (zend_function *) op_array;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (zend_string_equals_literal(lcname, ZEND_SET_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__set", 0);
+		zend_check_magic_method_attr(fn_flags, ZEND_SET_FUNC_NAME, 0);
 		ce->__set = (zend_function *) op_array;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (zend_string_equals_literal(lcname, ZEND_UNSET_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__unset", 0);
+		zend_check_magic_method_attr(fn_flags, ZEND_UNSET_FUNC_NAME, 0);
 		ce->__unset = (zend_function *) op_array;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (zend_string_equals_literal(lcname, ZEND_ISSET_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__isset", 0);
+		zend_check_magic_method_attr(fn_flags, ZEND_ISSET_FUNC_NAME, 0);
 		ce->__isset = (zend_function *) op_array;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
@@ -6164,7 +6164,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 		ce->__tostring = (zend_function *) op_array;
 		add_stringable_interface(ce);
 	} else if (zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__invoke", 0);
+		zend_check_magic_method_attr(fn_flags, ZEND_INVOKE_FUNC_NAME, 0);
 	} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
 		zend_check_magic_method_attr(fn_flags, "__debugInfo", 0);
 		ce->__debugInfo = (zend_function *) op_array;
