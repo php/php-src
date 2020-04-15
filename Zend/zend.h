@@ -205,7 +205,7 @@ typedef struct _zend_utility_values {
 	zend_bool html_errors;
 } zend_utility_values;
 
-typedef int (*zend_write_func_t)(const char *str, size_t str_length);
+typedef size_t (*zend_write_func_t)(const char *str, size_t str_length);
 
 #define zend_bailout()		_zend_bailout(__FILE__, __LINE__)
 

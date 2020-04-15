@@ -820,7 +820,7 @@ int zend_startup(zend_utility_functions *utility_functions) /* {{{ */
 	/* Set up utility functions and values */
 	zend_error_cb = utility_functions->error_function;
 	zend_printf = utility_functions->printf_function;
-	zend_write = (zend_write_func_t) utility_functions->write_function;
+	zend_write = utility_functions->write_function;
 	zend_fopen = utility_functions->fopen_function;
 	if (!zend_fopen) {
 		zend_fopen = zend_fopen_wrapper;

@@ -17,7 +17,7 @@ opcache.jit=0
 <?php
 require_once('utils.inc');
 $zend = FFI::cdef("
-    typedef int (*zend_write_func_t)(const char *str, size_t str_length);
+    typedef size_t (*zend_write_func_t)(const char *str, size_t str_length);
     extern zend_write_func_t zend_write;
 ", ffi_get_php_dll_name());
 
