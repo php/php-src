@@ -2,7 +2,7 @@
 <?php declare(strict_types=1);
 
 if($argc < 3) {
-    echo "Usage: $argv[0] new original\n";
+    echo "Usage: $argv[0] original new\n";
     exit(1);
 }
 
@@ -45,7 +45,10 @@ foreach ($files1 as $filename => $path) {
     exec(sprintf('diff %s %s', $path.DIRECTORY_SEPARATOR.$filename, $path2.DIRECTORY_SEPARATOR.$filename), $output, $ret);
     if ($ret !== 0) {
         echo "\e[1;33m${filename}\e[0m not equal".PHP_EOL;
-        array_walk($output, function (&$line) { $line = "\t".$line; });
+        array_walk($output, function (&$line) {
+            $color = (substr($line, 0, 1) == '<')? "0;32":"0;31";
+            $line = "\t\e[${color}m${line}\e[0m";
+        });
         echo "\e[1;37m" . join(PHP_EOL, $output)."\e[0m".PHP_EOL;
     }
 }
