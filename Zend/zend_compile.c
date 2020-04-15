@@ -6049,16 +6049,18 @@ static void zend_compile_implicit_closure_uses(closure_info *info)
 	ZEND_HASH_FOREACH_END();
 }
 
-static void zend_check_magic_method_attr(uint32_t attr, const char* method, zend_bool is_static) /* {{{ */
+static void zend_check_magic_method_attr(uint32_t attr, zend_class_entry *ce, const char* method, zend_bool is_static) /* {{{ */
 {
 	if (is_static) {
 		if (!(attr & ZEND_ACC_PUBLIC) || !(attr & ZEND_ACC_STATIC)) {
-			zend_error(E_WARNING, "The magic method %s() must have public visibility and be static", method);
+			zend_error(E_WARNING,
+				"The magic method %s::%s() must have public visibility and be static",
+				ZSTR_VAL(ce->name), method);
 		}
 	} else if (!(attr & ZEND_ACC_PUBLIC) || (attr & ZEND_ACC_STATIC)) {
 		zend_error(E_WARNING,
-				"The magic method %s() must have public visibility and cannot be static",
-				method);
+				"The magic method %s::%s() must have public visibility and cannot be static",
+				ZSTR_VAL(ce->name), method);
 	}
 }
 /* }}} */
@@ -6138,35 +6140,35 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 	} else if (zend_string_equals_literal(lcname, ZEND_CLONE_FUNC_NAME)) {
 		ce->clone = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, ZEND_CALL_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__call", 0);
+		zend_check_magic_method_attr(fn_flags, ce, "__call", 0);
 		ce->__call = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, ZEND_CALLSTATIC_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__callStatic", 1);
+		zend_check_magic_method_attr(fn_flags, ce, "__callStatic", 1);
 		ce->__callstatic = (zend_function *) op_array;
 	} else if (zend_string_equals_literal(lcname, ZEND_GET_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__get", 0);
+		zend_check_magic_method_attr(fn_flags, ce, "__get", 0);
 		ce->__get = (zend_function *) op_array;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (zend_string_equals_literal(lcname, ZEND_SET_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__set", 0);
+		zend_check_magic_method_attr(fn_flags, ce, "__set", 0);
 		ce->__set = (zend_function *) op_array;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (zend_string_equals_literal(lcname, ZEND_UNSET_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__unset", 0);
+		zend_check_magic_method_attr(fn_flags, ce, "__unset", 0);
 		ce->__unset = (zend_function *) op_array;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (zend_string_equals_literal(lcname, ZEND_ISSET_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__isset", 0);
+		zend_check_magic_method_attr(fn_flags, ce, "__unset", 0);
 		ce->__isset = (zend_function *) op_array;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__toString", 0);
+		zend_check_magic_method_attr(fn_flags, ce, "__toString", 0);
 		ce->__tostring = (zend_function *) op_array;
 		add_stringable_interface(ce);
 	} else if (zend_string_equals_literal(lcname, ZEND_INVOKE_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__invoke", 0);
+		zend_check_magic_method_attr(fn_flags, ce, "__invoke", 0);
 	} else if (zend_string_equals_literal(lcname, ZEND_DEBUGINFO_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, "__debugInfo", 0);
+		zend_check_magic_method_attr(fn_flags, ce, "__debugInfo", 0);
 		ce->__debugInfo = (zend_function *) op_array;
 	}
 
