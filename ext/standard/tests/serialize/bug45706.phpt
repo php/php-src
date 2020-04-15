@@ -15,7 +15,7 @@ var_dump($y);
 --EXPECTF--
 array(2) {
   [0]=>
-  object(__PHP_Incomplete_Class)#3 (4) {
+  object(__PHP_Incomplete_Class)#3 (5) {
     ["__PHP_Incomplete_Class_Name"]=>
     string(4) "Bar1"
     ["0"]=>
@@ -26,6 +26,8 @@ array(2) {
     ["2"]=>
     array(0) {
     }
+    ["3"]=>
+    NULL
   }
   [1]=>
   object(__PHP_Incomplete_Class)#4 (1) {

@@ -28,6 +28,8 @@ PHP                                                                        NEWS
 
 - SPL:
   . Fixed bug #69264 (__debugInfo() ignored while extending SPL classes). (cmb)
+  . Fixed bug #67369 (ArrayObject serialization drops the iterator class).
+    (Alex Dowad)
 
 - Standard:
   . Fixed bug #79468 (SIGSEGV when closing stream handle with a stream filter
