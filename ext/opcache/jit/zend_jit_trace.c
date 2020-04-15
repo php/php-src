@@ -2137,7 +2137,7 @@ static const void *zend_jit_trace(zend_jit_trace_rec *trace_buffer, uint32_t par
 						op1_def_info = OP1_DEF_INFO();
 						if (!zend_jit_assign_dim_op(&dasm_state, opline, op_array,
 								op1_info, op1_def_info, op2_info,
-								op1_data_info, OP1_DATA_RANGE(),
+								op1_data_info, OP1_DATA_RANGE_EX(),
 								zend_may_throw(opline, ssa_op, op_array, ssa))) {
 							goto jit_failure;
 						}
