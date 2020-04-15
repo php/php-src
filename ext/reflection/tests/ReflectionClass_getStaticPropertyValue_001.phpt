@@ -47,7 +47,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Retrieving static values from A:
 string(13) "default value"
 string(16) "original private"

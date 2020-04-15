@@ -3872,7 +3872,7 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 ZEND_METHOD(reflection_class, setStaticPropertyValue)
 {
 	reflection_object *intern;
-	zend_class_entry *ce;
+	zend_class_entry *ce, *old_scope;
 	zend_string *name;
 	zval *variable_ptr, *value;
 
@@ -3885,7 +3885,10 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 		return;
 	}
+	old_scope = EG(fake_scope);
+	EG(fake_scope) = ce;
 	variable_ptr = zend_std_get_static_property(ce, name, 1);
+	EG(fake_scope) = old_scope;
 	if (!variable_ptr) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Class %s does not have a property named %s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
