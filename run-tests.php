@@ -2748,10 +2748,24 @@ COMMAND $cmd
         }
 
         // write .sh
-        if (strpos($log_format, 'S') !== false && file_put_contents($sh_filename, "#!/bin/sh
+        if (strpos($log_format, 'S') !== false && file_put_contents($sh_filename, <<<SH
+#!/bin/sh
 
-{$cmd}
-", FILE_BINARY) === false) {
+case "$1" in
+"gdb")
+    gdb --args {$cmd}
+    ;;
+"valgrind")
+    USE_ZEND_ALLOC=0 valgrind $2 ${cmd}
+    ;;
+"rr")
+    rr record $2 ${cmd}
+    ;;
+*)
+    {$cmd}
+    ;;
+esac
+SH, FILE_BINARY) === false) {
             error("Cannot create test shell script - $sh_filename");
         }
         chmod($sh_filename, 0755);
