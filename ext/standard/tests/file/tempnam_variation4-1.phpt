@@ -20,7 +20,7 @@ require __DIR__ . '/../skipif_root.inc';
 
 echo "*** Testing tempnam() with dir of permissions from 0351 to 0777 ***\n";
 $file_path = __DIR__;
-$dir_name = $file_path."/tempnam_variation4";
+$dir_name = $file_path."/tempnam_variation4-1";
 $prefix = "tempnamVar4.";
 
 mkdir($dir_name);
