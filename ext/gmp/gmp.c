@@ -186,26 +186,49 @@ static void gmp_cmp(zval *return_value, zval *a_arg, zval *b_arg);
  * include parameter parsing.
  */
 typedef void (*gmp_unary_op_t)(mpz_ptr, mpz_srcptr);
-typedef int (*gmp_unary_opl_t)(mpz_srcptr);
+typedef mp_bitcnt_t (*gmp_unary_opl_t)(mpz_srcptr);
 
 typedef void (*gmp_unary_ui_op_t)(mpz_ptr, gmp_ulong);
 
 typedef void (*gmp_binary_op_t)(mpz_ptr, mpz_srcptr, mpz_srcptr);
-typedef int (*gmp_binary_opl_t)(mpz_srcptr, mpz_srcptr);
 
 typedef void (*gmp_binary_ui_op_t)(mpz_ptr, mpz_srcptr, gmp_ulong);
 typedef void (*gmp_binary_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, mpz_srcptr);
-typedef void (*gmp_binary_ui_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, gmp_ulong);
+typedef gmp_ulong (*gmp_binary_ui_op2_t)(mpz_ptr, mpz_ptr, mpz_srcptr, gmp_ulong);
 
 static inline void gmp_zval_binary_ui_op(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op_t gmp_op, gmp_binary_ui_op_t gmp_ui_op, int check_b_zero);
 static inline void gmp_zval_binary_ui_op2(zval *return_value, zval *a_arg, zval *b_arg, gmp_binary_op2_t gmp_op, gmp_binary_ui_op2_t gmp_ui_op, int check_b_zero);
 static inline void gmp_zval_unary_op(zval *return_value, zval *a_arg, gmp_unary_op_t gmp_op);
 static inline void gmp_zval_unary_ui_op(zval *return_value, zval *a_arg, gmp_unary_ui_op_t gmp_op);
 
+static void gmp_mpz_tdiv_q_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
+	mpz_tdiv_q_ui(a, b, c);
+}
+static void gmp_mpz_tdiv_r_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
+	mpz_tdiv_r_ui(a, b, c);
+}
+static void gmp_mpz_fdiv_q_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
+	mpz_fdiv_q_ui(a, b, c);
+}
+static void gmp_mpz_fdiv_r_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
+	mpz_fdiv_r_ui(a, b, c);
+}
+static void gmp_mpz_cdiv_r_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
+	mpz_cdiv_r_ui(a, b, c);
+}
+static void gmp_mpz_cdiv_q_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
+	mpz_cdiv_q_ui(a, b, c);
+}
+static void gmp_mpz_mod_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
+	mpz_mod_ui(a, b, c);
+}
+static void gmp_mpz_gcd_ui(mpz_ptr a, mpz_srcptr b, gmp_ulong c) {
+	mpz_gcd_ui(a, b, c);
+}
+
 /* Binary operations */
 #define gmp_binary_ui_op(op, uop) _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op, uop, 0)
 #define gmp_binary_op(op)         _gmp_binary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op, NULL, 0)
-#define gmp_binary_opl(op) _gmp_binary_opl(INTERNAL_FUNCTION_PARAM_PASSTHRU, op)
 #define gmp_binary_ui_op_no_zero(op, uop) \
 	_gmp_binary_ui_op(INTERNAL_FUNCTION_PARAM_PASSTHRU, op, uop, 1)
 
@@ -328,8 +351,7 @@ static void shift_operator_helper(gmp_binary_ui_op_t op, zval *return_value, zva
 
 #define DO_BINARY_UI_OP_EX(op, uop, check_b_zero)       \
 	gmp_zval_binary_ui_op(                              \
-		result, op1, op2, op, (gmp_binary_ui_op_t) uop, \
-		check_b_zero                          \
+		result, op1, op2, op, uop, check_b_zero         \
 	);                                                  \
 	return SUCCESS;
 
@@ -353,9 +375,9 @@ static int gmp_do_operation_ex(zend_uchar opcode, zval *result, zval *op1, zval 
 		shift_operator_helper(mpz_pow_ui, result, op1, op2);
 		return SUCCESS;
 	case ZEND_DIV:
-		DO_BINARY_UI_OP_EX(mpz_tdiv_q, mpz_tdiv_q_ui, 1);
+		DO_BINARY_UI_OP_EX(mpz_tdiv_q, gmp_mpz_tdiv_q_ui, 1);
 	case ZEND_MOD:
-		DO_BINARY_UI_OP_EX(mpz_mod, mpz_mod_ui, 1);
+		DO_BINARY_UI_OP_EX(mpz_mod, gmp_mpz_mod_ui, 1);
 	case ZEND_SL:
 		shift_operator_helper(mpz_mul_2exp, result, op1, op2);
 		return SUCCESS;
@@ -836,28 +858,6 @@ static inline void _gmp_unary_opl(INTERNAL_FUNCTION_PARAMETERS, gmp_unary_opl_t 
 }
 /* }}} */
 
-/* {{{ _gmp_binary_opl
- */
-static inline void _gmp_binary_opl(INTERNAL_FUNCTION_PARAMETERS, gmp_binary_opl_t gmp_op)
-{
-	zval *a_arg, *b_arg;
-	mpz_ptr gmpnum_a, gmpnum_b;
-	gmp_temp_t temp_a, temp_b;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a_arg, &b_arg) == FAILURE){
-		RETURN_THROWS();
-	}
-
-	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
-	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
-
-	RETVAL_LONG(gmp_op(gmpnum_a, gmpnum_b));
-
-	FREE_GMP_TEMP(temp_a);
-	FREE_GMP_TEMP(temp_b);
-}
-/* }}} */
-
 /* {{{ proto GMP gmp_init(mixed number [, int base])
    Initializes GMP number */
 ZEND_FUNCTION(gmp_init)
@@ -1077,13 +1077,13 @@ ZEND_FUNCTION(gmp_div_qr)
 
 	switch (round) {
 	case GMP_ROUND_ZERO:
-		gmp_zval_binary_ui_op2(return_value, a_arg, b_arg, mpz_tdiv_qr, (gmp_binary_ui_op2_t) mpz_tdiv_qr_ui, 1);
+		gmp_zval_binary_ui_op2(return_value, a_arg, b_arg, mpz_tdiv_qr, mpz_tdiv_qr_ui, 1);
 		break;
 	case GMP_ROUND_PLUSINF:
-		gmp_zval_binary_ui_op2(return_value, a_arg, b_arg, mpz_cdiv_qr, (gmp_binary_ui_op2_t) mpz_cdiv_qr_ui, 1);
+		gmp_zval_binary_ui_op2(return_value, a_arg, b_arg, mpz_cdiv_qr, mpz_cdiv_qr_ui, 1);
 		break;
 	case GMP_ROUND_MINUSINF:
-		gmp_zval_binary_ui_op2(return_value, a_arg, b_arg, mpz_fdiv_qr, (gmp_binary_ui_op2_t) mpz_fdiv_qr_ui, 1);
+		gmp_zval_binary_ui_op2(return_value, a_arg, b_arg, mpz_fdiv_qr, mpz_fdiv_qr_ui, 1);
 		break;
 	default:
 		php_error_docref(NULL, E_WARNING, "Invalid rounding mode");
@@ -1105,13 +1105,13 @@ ZEND_FUNCTION(gmp_div_r)
 
 	switch (round) {
 	case GMP_ROUND_ZERO:
-		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_tdiv_r, (gmp_binary_ui_op_t) mpz_tdiv_r_ui, 1);
+		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_tdiv_r, gmp_mpz_tdiv_r_ui, 1);
 		break;
 	case GMP_ROUND_PLUSINF:
-		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_cdiv_r, (gmp_binary_ui_op_t) mpz_cdiv_r_ui, 1);
+		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_cdiv_r, gmp_mpz_cdiv_r_ui, 1);
 		break;
 	case GMP_ROUND_MINUSINF:
-		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_fdiv_r, (gmp_binary_ui_op_t) mpz_fdiv_r_ui, 1);
+		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_fdiv_r, gmp_mpz_fdiv_r_ui, 1);
 		break;
 	default:
 		php_error_docref(NULL, E_WARNING, "Invalid rounding mode");
@@ -1133,13 +1133,13 @@ ZEND_FUNCTION(gmp_div_q)
 
 	switch (round) {
 	case GMP_ROUND_ZERO:
-		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_tdiv_q, (gmp_binary_ui_op_t) mpz_tdiv_q_ui, 1);
+		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_tdiv_q, gmp_mpz_tdiv_q_ui, 1);
 		break;
 	case GMP_ROUND_PLUSINF:
-		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_cdiv_q, (gmp_binary_ui_op_t) mpz_cdiv_q_ui, 1);
+		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_cdiv_q, gmp_mpz_cdiv_q_ui, 1);
 		break;
 	case GMP_ROUND_MINUSINF:
-		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_fdiv_q, (gmp_binary_ui_op_t) mpz_fdiv_q_ui, 1);
+		gmp_zval_binary_ui_op(return_value, a_arg, b_arg, mpz_fdiv_q, gmp_mpz_fdiv_q_ui, 1);
 		break;
 	default:
 		php_error_docref(NULL, E_WARNING, "Invalid rounding mode");
@@ -1153,7 +1153,7 @@ ZEND_FUNCTION(gmp_div_q)
    Computes a modulo b */
 ZEND_FUNCTION(gmp_mod)
 {
-	gmp_binary_ui_op_no_zero(mpz_mod, (gmp_binary_ui_op_t) mpz_mod_ui);
+	gmp_binary_ui_op_no_zero(mpz_mod, gmp_mpz_mod_ui);
 }
 /* }}} */
 
@@ -1529,7 +1529,7 @@ ZEND_FUNCTION(gmp_prob_prime)
    Computes greatest common denominator (gcd) of a and b */
 ZEND_FUNCTION(gmp_gcd)
 {
-	gmp_binary_ui_op(mpz_gcd, (gmp_binary_ui_op_t) mpz_gcd_ui);
+	gmp_binary_ui_op(mpz_gcd, gmp_mpz_gcd_ui);
 }
 /* }}} */
 
@@ -1537,7 +1537,7 @@ ZEND_FUNCTION(gmp_gcd)
    Computes least common multiple (lcm) of a and b */
 ZEND_FUNCTION(gmp_lcm)
 {
-	gmp_binary_ui_op(mpz_lcm, (gmp_binary_ui_op_t) mpz_lcm_ui);
+	gmp_binary_ui_op(mpz_lcm, mpz_lcm_ui);
 }
 /* }}} */
 
@@ -1603,7 +1603,21 @@ ZEND_FUNCTION(gmp_invert)
    Computes Jacobi symbol */
 ZEND_FUNCTION(gmp_jacobi)
 {
-	gmp_binary_opl(mpz_jacobi);
+	zval *a_arg, *b_arg;
+	mpz_ptr gmpnum_a, gmpnum_b;
+	gmp_temp_t temp_a, temp_b;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a_arg, &b_arg) == FAILURE){
+		RETURN_THROWS();
+	}
+
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
+
+	RETVAL_LONG(mpz_jacobi(gmpnum_a, gmpnum_b));
+
+	FREE_GMP_TEMP(temp_a);
+	FREE_GMP_TEMP(temp_b);
 }
 /* }}} */
 
@@ -1611,7 +1625,21 @@ ZEND_FUNCTION(gmp_jacobi)
    Computes Legendre symbol */
 ZEND_FUNCTION(gmp_legendre)
 {
-	gmp_binary_opl(mpz_legendre);
+	zval *a_arg, *b_arg;
+	mpz_ptr gmpnum_a, gmpnum_b;
+	gmp_temp_t temp_a, temp_b;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a_arg, &b_arg) == FAILURE){
+		RETURN_THROWS();
+	}
+
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
+
+	RETVAL_LONG(mpz_legendre(gmpnum_a, gmpnum_b));
+
+	FREE_GMP_TEMP(temp_a);
+	FREE_GMP_TEMP(temp_b);
 }
 /* }}} */
 
@@ -1946,7 +1974,7 @@ ZEND_FUNCTION(gmp_testbit)
    Calculates the population count of a */
 ZEND_FUNCTION(gmp_popcount)
 {
-	gmp_unary_opl((gmp_unary_opl_t) mpz_popcount);
+	gmp_unary_opl(mpz_popcount);
 }
 /* }}} */
 
@@ -1954,7 +1982,21 @@ ZEND_FUNCTION(gmp_popcount)
    Calculates hamming distance between a and b */
 ZEND_FUNCTION(gmp_hamdist)
 {
-	gmp_binary_opl((gmp_binary_opl_t) mpz_hamdist);
+	zval *a_arg, *b_arg;
+	mpz_ptr gmpnum_a, gmpnum_b;
+	gmp_temp_t temp_a, temp_b;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a_arg, &b_arg) == FAILURE){
+		RETURN_THROWS();
+	}
+
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
+
+	RETVAL_LONG(mpz_hamdist(gmpnum_a, gmpnum_b));
+
+	FREE_GMP_TEMP(temp_a);
+	FREE_GMP_TEMP(temp_b);
 }
 /* }}} */
 
