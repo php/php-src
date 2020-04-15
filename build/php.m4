@@ -1384,7 +1384,7 @@ int main(void) {
   ac_cv_ebcdic=no
 ])])
   if test "$ac_cv_ebcdic" = "yes"; then
-    AC_DEFINE(CHARSET_EBCDIC,1, [Define if system uses EBCDIC])
+    AC_MSG_ERROR([PHP does not support EBCDIC targets])
   fi
 ])
 
