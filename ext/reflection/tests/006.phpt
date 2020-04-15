@@ -88,16 +88,28 @@ TestDerived::testing();
 string(3) "pub"
 string(3) "pub"
 string(7) "updated"
-EXCEPTION
-EXCEPTION
+string(3) "pro"
+string(3) "pro"
+string(7) "updated"
+string(3) "pri"
+string(3) "pri"
 string(7) "updated"
 string(7) "updated"
 string(7) "updated"
-EXCEPTION
-EXCEPTION
 string(7) "updated"
 string(7) "updated"
 string(7) "updated"
-EXCEPTION
-EXCEPTION
+string(7) "updated"
+string(7) "updated"
+string(7) "updated"
+string(7) "updated"
+string(7) "updated"
+string(7) "updated"
+string(7) "updated"
+string(7) "updated"
+string(7) "updated"
+string(7) "updated"
+string(7) "updated"
+string(7) "updated"
+string(7) "updated"
 ===DONE===

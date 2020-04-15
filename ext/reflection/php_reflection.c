@@ -3814,7 +3814,7 @@ ZEND_METHOD(reflection_class, getStaticProperties)
 ZEND_METHOD(reflection_class, getStaticPropertyValue)
 {
 	reflection_object *intern;
-	zend_class_entry *ce;
+	zend_class_entry *ce, *old_scope;
 	zend_string *name;
 	zval *prop, *def_value = NULL;
 
@@ -3827,7 +3827,12 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 		return;
 	}
+
+	old_scope = EG(fake_scope);
+	EG(fake_scope) = ce;
 	prop = zend_std_get_static_property(ce, name, BP_VAR_IS);
+	EG(fake_scope) = old_scope;
+
 	if (!prop) {
 		if (def_value) {
 			ZVAL_COPY(return_value, def_value);
@@ -3847,7 +3852,7 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 ZEND_METHOD(reflection_class, setStaticPropertyValue)
 {
 	reflection_object *intern;
-	zend_class_entry *ce;
+	zend_class_entry *ce, *old_scope;
 	zend_property_info *prop_info;
 	zend_string *name;
 	zval *variable_ptr, *value;
@@ -3861,7 +3866,10 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 		return;
 	}
-	variable_ptr = zend_std_get_static_property_with_info(ce, name, BP_VAR_W, &prop_info);
+	old_scope = EG(fake_scope);
+	EG(fake_scope) = ce;
+	variable_ptr =  zend_std_get_static_property_with_info(ce, name, BP_VAR_W, &prop_info);
+	EG(fake_scope) = old_scope;
 	if (!variable_ptr) {
 		zend_clear_exception();
 		zend_throw_exception_ex(reflection_exception_ptr, 0,

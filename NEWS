@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 - Reflection:
   . Fixed bug #79487 (::getStaticProperties() ignores property modifications).
     (cmb, Nikita)
+  . Fixed bug #69804 ()::getStaticPropertyValue() throws on protected props).
+    (cmb, Nikita)
 
 ?? ??? 2020, PHP 7.4.8
 
