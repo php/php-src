@@ -2082,7 +2082,7 @@ PHP_METHOD(DOMDocument, registerNodeClass)
 		RETURN_TRUE;
 	}
 
-	zend_throw_error(NULL, "Class %s is not derived from %s.", ZSTR_VAL(ce->name), ZSTR_VAL(basece->name));
+	zend_argument_error(NULL, 2, "must reference a class derived from %s", ZSTR_VAL(basece->name));
 }
 /* }}} */
 

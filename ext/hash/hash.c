@@ -410,9 +410,9 @@ PHP_FUNCTION(hash_init)
 }
 /* }}} */
 
-#define PHP_HASHCONTEXT_VERIFY(func, hash) { \
+#define PHP_HASHCONTEXT_VERIFY(hash) { \
 	if (!hash->context) { \
-		zend_throw_error(NULL, "%s(): supplied resource is not a valid Hash Context resource", func); \
+		zend_argument_type_error(1, "must be a valid Hash Context resource"); \
 		RETURN_THROWS(); \
 	} \
 }
@@ -430,7 +430,7 @@ PHP_FUNCTION(hash_update)
 	}
 
 	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
-	PHP_HASHCONTEXT_VERIFY("hash_update", hash);
+	PHP_HASHCONTEXT_VERIFY(hash);
 	hash->ops->hash_update(hash->context, (unsigned char *) ZSTR_VAL(data), ZSTR_LEN(data));
 
 	RETURN_TRUE;
@@ -451,7 +451,7 @@ PHP_FUNCTION(hash_update_stream)
 	}
 
 	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
-	PHP_HASHCONTEXT_VERIFY("hash_update_stream", hash);
+	PHP_HASHCONTEXT_VERIFY(hash);
 	php_stream_from_zval(stream, zstream);
 
 	while (length) {
@@ -492,7 +492,7 @@ PHP_FUNCTION(hash_update_file)
 	}
 
 	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
-	PHP_HASHCONTEXT_VERIFY("hash_update_file", hash);
+	PHP_HASHCONTEXT_VERIFY(hash);
 	context = php_stream_context_from_zval(zcontext, 0);
 
 	stream = php_stream_open_wrapper_ex(ZSTR_VAL(filename), "rb", REPORT_ERRORS, NULL, context);
@@ -525,7 +525,7 @@ PHP_FUNCTION(hash_final)
 	}
 
 	hash = php_hashcontext_from_object(Z_OBJ_P(zhash));
-	PHP_HASHCONTEXT_VERIFY("hash_final", hash);
+	PHP_HASHCONTEXT_VERIFY(hash);
 
 	digest_len = hash->ops->digest_size;
 	digest = zend_string_alloc(digest_len, 0);

@@ -3333,7 +3333,7 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 	/* conversion map */
 	i = zend_hash_num_elements(target_hash);
 	if (i % 4 != 0) {
-		zend_value_error("count($convmap) must be a multiple of 4");
+		zend_argument_value_error(2, "must have a multiple of 4 elements");
 		RETURN_THROWS();
 	}
 	convmap = (int *)safe_emalloc(i, sizeof(int), 0);

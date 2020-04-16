@@ -325,7 +325,7 @@ PHP_FUNCTION(mt_rand)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (UNEXPECTED(max < min)) {
-		zend_value_error("max (" ZEND_LONG_FMT ") is smaller than min (" ZEND_LONG_FMT ")", max, min);
+		zend_argument_value_error(2, "must be greater than or equal to argument #1 ($min)");
 		RETURN_THROWS();
 	}
 
