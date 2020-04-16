@@ -601,7 +601,9 @@ class MethodInfo extends AbstractFunction {
 
         $name = $this->alias ?? $this->name;
 
-        if ($name instanceof AliasInterface) {
+        if ($name instanceof FunctionAlias) {
+            return sprintf("ZEND_FUNCTION(%s);\n", $name->getFullyQualifiedName());
+        } elseif ($name instanceof MethodAlias) {
             return null;
         }
 
