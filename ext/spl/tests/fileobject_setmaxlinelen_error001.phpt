@@ -14,4 +14,4 @@ catch (\ValueError $e) {
 
 ?>
 --EXPECT--
-Maximum line length must be greater than or equal zero
+SplFileObject::setMaxLineLen(): Argument #1 ($max_len) must be greater than or equal to 0

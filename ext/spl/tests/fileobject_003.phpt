@@ -30,14 +30,14 @@ function test($name, $lc, $lp)
         var_dump($f->getPath());
         $l = substr($f->getPath(), -1);
         var_dump($l != '/' && $l != '\\' && $l == $lp);
-    } catch (LogicException $e) {
-        echo "LogicException: ".$e->getMessage()."\n";
+    } catch (\Error $e) {
+        echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
     }
     try {
         $fo = $o->openFile();
         var_dump($fo->getPathName(), $fo->getFileName(), $fo->getPath());
-    } catch (LogicException $e) {
-        echo "LogicException: ".$e->getMessage()."\n";
+    } catch (\Error $e) {
+        echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
     }
 }
 
@@ -89,8 +89,8 @@ object(SplFileInfo)#%d (2) {
 bool(false)
 bool(true)
 bool(true)
-LogicException: Cannot use SplFileObject with directories
-LogicException: Cannot use SplFileObject with directories
+Error: Cannot use SplFileObject with directories
+Error: Cannot use SplFileObject with directories
 ===2===
 object(SplFileInfo)#%d (2) {
   ["pathName":"SplFileInfo":private]=>
@@ -107,5 +107,5 @@ object(SplFileInfo)#%d (2) {
 bool(false)
 bool(true)
 bool(true)
-LogicException: Cannot use SplFileObject with directories
-LogicException: Cannot use SplFileObject with directories
+Error: Cannot use SplFileObject with directories
+Error: Cannot use SplFileObject with directories

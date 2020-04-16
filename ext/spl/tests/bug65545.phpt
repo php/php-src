@@ -6,7 +6,12 @@ $obj = new SplFileObject(__FILE__, 'r');
 $data = $obj->fread(5);
 var_dump($data);
 
-$data = $obj->fread(0);
+
+try {
+    $data = $obj->fread(0);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 var_dump($data);
 
 // read more data than is available
@@ -14,9 +19,8 @@ $data = $obj->fread(filesize(__FILE__) + 32);
 var_dump(strlen($data) === filesize(__FILE__) - 5);
 
 ?>
---EXPECTF--
+--EXPECT--
 string(5) "<?php"
-
-Warning: SplFileObject::fread(): Length parameter must be greater than 0 in %s on line %d
-bool(false)
+SplFileObject::fread(): Argument #1 ($length) must be greater than 0
+string(5) "<?php"
 bool(true)

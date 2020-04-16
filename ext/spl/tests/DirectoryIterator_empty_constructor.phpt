@@ -7,11 +7,11 @@ Havard Eide <nucleuz@gmail.com>
 <?php
 
 try {
-    new DirectoryIterator("");
+    new DirectoryIterator('');
 } catch (\ValueError $ex) {
     echo $ex->getMessage() . PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Directory name must not be empty
+DirectoryIterator::__construct(): Argument #1 ($path) cannot be empty

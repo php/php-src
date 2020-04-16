@@ -44,7 +44,7 @@ var_dump($n !== $m, $m === $o, $p === 0);
 With seek(2) we get %d
 With seek(0) we get %d
 Without seek we get %d
-Seek position %d is out of range
+DirectoryIterator::seek(): Argument #1 ($position) position %d is out of range
 bool(true)
 bool(true)
 bool(true)

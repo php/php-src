@@ -206,7 +206,7 @@ static inline void spl_filesystem_object_get_file_name(spl_filesystem_object *in
 		case SPL_FS_INFO:
 		case SPL_FS_FILE:
 			if (!intern->file_name) {
-				php_error_docref(NULL, E_ERROR, "Object not initialized");
+				zend_throw_error(NULL, "Object not initialized");
 			}
 			break;
 		case SPL_FS_DIR:
@@ -290,7 +290,7 @@ static int spl_filesystem_file_open(spl_filesystem_object *intern, int use_inclu
 	if (Z_TYPE(tmp) == IS_TRUE) {
 		intern->u.file.open_mode = NULL;
 		intern->file_name = NULL;
-		zend_throw_exception_ex(spl_ce_LogicException, 0, "Cannot use SplFileObject with directories");
+		zend_throw_error(NULL, "Cannot use SplFileObject with directories");
 		return FAILURE;
 	}
 
@@ -428,7 +428,8 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path,
 	intern->_path = estrndup(path, intern->_path_len);
 } /* }}} */
 
-static spl_filesystem_object *spl_filesystem_object_create_info(spl_filesystem_object *source, char *file_path, size_t file_path_len, int use_copy, zend_class_entry *ce, zval *return_value) /* {{{ */
+static spl_filesystem_object *spl_filesystem_object_create_info(spl_filesystem_object *source,
+	char *file_path, size_t file_path_len, int use_copy, zend_class_entry *ce, zval *return_value) /* {{{ */
 {
 	spl_filesystem_object *intern;
 	zval arg1;
@@ -436,10 +437,11 @@ static spl_filesystem_object *spl_filesystem_object_create_info(spl_filesystem_o
 
 	if (!file_path || !file_path_len) {
 #if defined(PHP_WIN32)
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Cannot create SplFileInfo for empty path");
+		zend_value_error("Path cannot be empty");
 		if (file_path && !use_copy) {
 			efree(file_path);
 		}
+		return NULL;
 #else
 		if (file_path && !use_copy) {
 			efree(file_path);
@@ -714,18 +716,18 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 		flags |= SPL_FILE_DIR_UNIXPATHS;
 	}
 	if (parsed == FAILURE) {
-		return;
+		RETURN_THROWS();
 	}
 
 	if (!len) {
-		zend_value_error("Directory name must not be empty");
+		zend_argument_value_error(1, "cannot be empty");
 		return;
 	}
 
 	intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	if (intern->_path) {
 		/* object is already initialized */
-		php_error_docref(NULL, E_WARNING, "Directory object is already initialized");
+		zend_throw_error(NULL, "Directory object is already initialized");
 		return;
 	}
 	intern->flags = flags;
@@ -850,7 +852,7 @@ SPL_METHOD(DirectoryIterator, seek)
 		valid = zend_is_true(&retval);
 		zval_ptr_dtor(&retval);
 		if (!valid) {
-			zend_value_error("Seek position " ZEND_LONG_FMT " is out of range", pos);
+			zend_argument_value_error(1, "position " ZEND_LONG_FMT " is out of range", pos);
 			RETURN_THROWS();
 		}
 		zend_call_method_with_0_params(Z_OBJ_P(ZEND_THIS), Z_OBJCE_P(ZEND_THIS), &intern->u.dir.func_next, "next", NULL);
@@ -1239,21 +1241,18 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 	ssize_t ret;
 	char buff[MAXPATHLEN];
-	zend_error_handling error_handling;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		RETURN_THROWS();
 	}
-
-	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
 
 	if (intern->file_name == NULL) {
 		spl_filesystem_object_get_file_name(intern);
 	}
 #if defined(PHP_WIN32) || HAVE_SYMLINK
 	if (intern->file_name == NULL) {
-		php_error_docref(NULL, E_WARNING, "Empty filename");
-		RETURN_FALSE;
+		zend_value_error("Filename cannot be empty");
+		RETURN_THROWS();
 	} else if (!IS_ABSOLUTE_PATH(intern->file_name, intern->file_name_len)) {
 		char expanded_path[MAXPATHLEN];
 		if (!expand_filepath_with_mode(intern->file_name, expanded_path, NULL, 0, CWD_EXPAND )) {
@@ -1277,8 +1276,6 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
 
 		RETVAL_STRINGL(buff, ret);
 	}
-
-	zend_restore_error_handling(&error_handling);
 }
 /* }}} */
 
@@ -1605,7 +1602,7 @@ SPL_METHOD(GlobIterator, count)
 		RETURN_LONG(php_glob_stream_get_count(intern->u.dir.dirp, NULL));
 	} else {
 		/* should not happen */
-		php_error_docref(NULL, E_ERROR, "GlobIterator lost glob state");
+		zend_throw_error(NULL, "GlobIterator lost glob state");
 	}
 }
 /* }}} */
@@ -2180,7 +2177,7 @@ static int spl_filesystem_file_read_line(zval * this_ptr, spl_filesystem_object 
 static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *intern) /* {{{ */
 {
 	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		zend_throw_error(NULL, "Object not initialized");
 		return;
 	}
 	if (-1 == php_stream_rewind(intern->u.file.stream)) {
@@ -2312,7 +2309,7 @@ SPL_METHOD(SplFileObject, eof)
 	}
 
 	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		zend_throw_error(NULL, "Object not initialized");
 		RETURN_THROWS();
 	}
 
@@ -2350,7 +2347,7 @@ SPL_METHOD(SplFileObject, fgets)
 	}
 
 	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		zend_throw_error(NULL, "Object not initialized");
 		RETURN_THROWS();
 	}
 
@@ -2371,7 +2368,7 @@ SPL_METHOD(SplFileObject, current)
 	}
 
 	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		zend_throw_error(NULL, "Object not initialized");
 		RETURN_THROWS();
 	}
 
@@ -2460,7 +2457,7 @@ SPL_METHOD(SplFileObject, setMaxLineLen)
 	}
 
 	if (max_len < 0) {
-		zend_value_error("Maximum line length must be greater than or equal zero");
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -2523,7 +2520,7 @@ SPL_METHOD(SplFileObject, fgetcsv)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|sss", &delim, &d_len, &enclo, &e_len, &esc, &esc_len) == SUCCESS) {
 
 		if(!intern->u.file.stream) {
-			zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+			zend_throw_error(NULL, "Object not initialized");
 			RETURN_THROWS();
 		}
 
@@ -2531,29 +2528,29 @@ SPL_METHOD(SplFileObject, fgetcsv)
 		{
 		case 3:
 			if (esc_len > 1) {
-				php_error_docref(NULL, E_WARNING, "escape must be empty or a single character");
-				RETURN_FALSE;
+				zend_argument_value_error(3, "must be empty or a single character");
+				RETURN_THROWS();
 			}
 			if (esc_len == 0) {
 				escape = PHP_CSV_NO_ESCAPE;
 			} else {
 				escape = (unsigned char) esc[0];
 			}
-			/* no break */
+			/* explicit fallthrough */
 		case 2:
 			if (e_len != 1) {
-				php_error_docref(NULL, E_WARNING, "enclosure must be a character");
-				RETURN_FALSE;
+				zend_argument_value_error(2, "must be a character");
+				RETURN_THROWS();
 			}
 			enclosure = enclo[0];
-			/* no break */
+			/* explicit fallthrough */
 		case 1:
 			if (d_len != 1) {
-				php_error_docref(NULL, E_WARNING, "delimiter must be a character");
-				RETURN_FALSE;
+				zend_argument_value_error(1, "must be a character");
+				RETURN_THROWS();
 			}
 			delimiter = delim[0];
-			/* no break */
+			/* explicit fallthrough */
 		case 0:
 			break;
 		}
@@ -2586,24 +2583,24 @@ SPL_METHOD(SplFileObject, fputcsv)
 					escape = (unsigned char) esc[0];
 					break;
 				default:
-					php_error_docref(NULL, E_WARNING, "escape must be empty or a single character");
-					RETURN_FALSE;
+					zend_argument_value_error(3, "must be empty or a single character");
+					RETURN_THROWS();
 			}
-			/* no break */
+			/* explicit fallthrough */
 		case 3:
 			if (e_len != 1) {
-				php_error_docref(NULL, E_WARNING, "enclosure must be a character");
-				RETURN_FALSE;
+				zend_argument_value_error(3, "must be a character");
+				RETURN_THROWS();
 			}
 			enclosure = enclo[0];
-			/* no break */
+			/* explicit fallthrough */
 		case 2:
 			if (d_len != 1) {
-				php_error_docref(NULL, E_WARNING, "delimiter must be a character");
-				RETURN_FALSE;
+				zend_argument_value_error(2, "must be a character");
+				RETURN_THROWS();
 			}
 			delimiter = delim[0];
-			/* no break */
+			/* explicit fallthrough */
 		case 1:
 		case 0:
 			break;
@@ -2639,24 +2636,24 @@ SPL_METHOD(SplFileObject, setCsvControl)
 					escape = (unsigned char) esc[0];
 					break;
 				default:
-					php_error_docref(NULL, E_WARNING, "escape must be empty or a single character");
-					RETURN_FALSE;
+					zend_argument_value_error(3, "must be empty or a single character");
+					RETURN_THROWS();
 			}
-			/* no break */
+			/* explicit fallthrough */
 		case 2:
 			if (e_len != 1) {
-				php_error_docref(NULL, E_WARNING, "enclosure must be a character");
-				RETURN_FALSE;
+				zend_argument_value_error(2, "must be a character");
+				RETURN_THROWS();
 			}
 			enclosure = enclo[0];
-			/* no break */
+			/* explicit fallthrough */
 		case 1:
 			if (d_len != 1) {
-				php_error_docref(NULL, E_WARNING, "delimiter must be a character");
-				RETURN_FALSE;
+				zend_argument_value_error(1, "must be a character");
+				RETURN_THROWS();
 			}
 			delimiter = delim[0];
-			/* no break */
+			/* explicit fallthrough */
 		case 0:
 			break;
 		}
@@ -2705,7 +2702,7 @@ SPL_METHOD(SplFileObject, fflush)
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 
 	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		zend_throw_error(NULL, "Object not initialized");
 		RETURN_THROWS();
 	}
 
@@ -2720,7 +2717,7 @@ SPL_METHOD(SplFileObject, ftell)
 	zend_long ret;
 
 	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		zend_throw_error(NULL, "Object not initialized");
 		RETURN_THROWS();
 	}
 
@@ -2745,7 +2742,7 @@ SPL_METHOD(SplFileObject, fseek)
 	}
 
 	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		zend_throw_error(NULL, "Object not initialized");
 		RETURN_THROWS();
 	}
 
@@ -2762,7 +2759,7 @@ SPL_METHOD(SplFileObject, fgetc)
 	int result;
 
 	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		zend_throw_error(NULL, "Object not initialized");
 		RETURN_THROWS();
 	}
 
@@ -2790,7 +2787,7 @@ SPL_METHOD(SplFileObject, fpassthru)
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 
 	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		zend_throw_error(NULL, "Object not initialized");
 		RETURN_THROWS();
 	}
 
@@ -2804,7 +2801,7 @@ SPL_METHOD(SplFileObject, fscanf)
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(ZEND_THIS);
 
 	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		zend_throw_error(NULL, "Object not initialized");
 		RETURN_THROWS();
 	}
 
@@ -2830,7 +2827,7 @@ SPL_METHOD(SplFileObject, fwrite)
 	}
 
 	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		zend_throw_error(NULL, "Object not initialized");
 		RETURN_THROWS();
 	}
 
@@ -2864,13 +2861,13 @@ SPL_METHOD(SplFileObject, fread)
 	}
 
 	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		zend_throw_error(NULL, "Object not initialized");
 		RETURN_THROWS();
 	}
 
 	if (length <= 0) {
-		php_error_docref(NULL, E_WARNING, "Length parameter must be greater than 0");
-		RETURN_FALSE;
+		zend_argument_value_error(1, "must be greater than 0");
+		RETURN_THROWS();
 	}
 
 	str = php_stream_read_to_str(intern->u.file.stream, length);
@@ -2897,7 +2894,7 @@ SPL_METHOD(SplFileObject, ftruncate)
 	}
 
 	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		zend_throw_error(NULL, "Object not initialized");
 		RETURN_THROWS();
 	}
 
@@ -2920,7 +2917,7 @@ SPL_METHOD(SplFileObject, seek)
 		RETURN_THROWS();
 	}
 	if(!intern->u.file.stream) {
-		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Object not initialized");
+		zend_throw_error(NULL, "Object not initialized");
 		RETURN_THROWS();
 	}
 

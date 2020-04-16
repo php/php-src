@@ -19,5 +19,5 @@ try {
 echo "Is valid? " . (int) $di->valid() . PHP_EOL;
 ?>
 --EXPECTF--
-Seek position %d is out of range
+DirectoryIterator::seek(): Argument #1 ($position) position %d is out of range
 Is valid? 0
