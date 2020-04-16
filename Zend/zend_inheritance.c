@@ -810,6 +810,14 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(z
 	uint32_t parent_flags = parent->common.fn_flags;
 	zend_function *proto;
 
+	if (UNEXPECTED((parent_flags & ZEND_ACC_PRIVATE) && !(parent_flags & ZEND_ACC_ABSTRACT) && !(parent_flags & ZEND_ACC_CTOR))) {
+		if (!check_only) {
+			child->common.fn_flags |= ZEND_ACC_CHANGED;
+		}
+		/* The parent method is private and not an abstract so we don't need to check any inheritance rules */
+		return INHERITANCE_SUCCESS;
+	}
+
 	if (!checked && UNEXPECTED(parent_flags & ZEND_ACC_FINAL)) {
 		if (check_only) {
 			return INHERITANCE_ERROR;
@@ -849,10 +857,6 @@ static zend_always_inline inheritance_status do_inheritance_check_on_method_ex(z
 
 	if (!check_only && (parent_flags & (ZEND_ACC_PRIVATE|ZEND_ACC_CHANGED))) {
 		child->common.fn_flags |= ZEND_ACC_CHANGED;
-	}
-
-	if ((parent_flags & ZEND_ACC_PRIVATE) && !(parent_flags & ZEND_ACC_ABSTRACT)) {
-		return INHERITANCE_SUCCESS;
 	}
 
 	proto = parent->common.prototype ?

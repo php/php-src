@@ -6091,6 +6091,10 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 
 	zend_string *lcname;
 
+	if ((fn_flags & ZEND_ACC_PRIVATE) && (fn_flags & ZEND_ACC_FINAL) && !zend_is_constructor(name)) {
+		zend_error(E_COMPILE_WARNING, "Private methods cannot be final as they are never overridden by other classes");
+	}
+
 	if (in_interface) {
 		if (!(fn_flags & ZEND_ACC_PUBLIC) || (fn_flags & (ZEND_ACC_FINAL|ZEND_ACC_ABSTRACT))) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Access type for interface method "

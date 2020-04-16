@@ -24,7 +24,7 @@ class C extends B {
 (new C)->test();
 
 class D {
-    private final function method(&$x) {
+    private function method(&$x) {
         ++$x;
     }
 }
