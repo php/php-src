@@ -6158,7 +6158,7 @@ void zend_begin_method_decl(zend_op_array *op_array, zend_string *name, zend_boo
 		ce->__unset = (zend_function *) op_array;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (zend_string_equals_literal(lcname, ZEND_ISSET_FUNC_NAME)) {
-		zend_check_magic_method_attr(fn_flags, ce, "__unset", 0);
+		zend_check_magic_method_attr(fn_flags, ce, "__isset", 0);
 		ce->__isset = (zend_function *) op_array;
 		ce->ce_flags |= ZEND_ACC_USE_GUARDS;
 	} else if (zend_string_equals_literal(lcname, ZEND_TOSTRING_FUNC_NAME)) {
