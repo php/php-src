@@ -1487,7 +1487,7 @@ static signed short php_ifd_get16s(void *value, int motorola_intel)
 }
 /* }}} */
 
-/* {{{ php_ifd_get32s
+/* {{{ php_ifd_get32u
  * Convert a 32 bit unsigned value from file's native byte order */
 static unsigned php_ifd_get32u(void *void_value, int motorola_intel)
 {
@@ -1502,6 +1502,33 @@ static unsigned php_ifd_get32u(void *void_value, int motorola_intel)
 			  | ((unsigned)value[2] << 16)
 			  | ((unsigned)value[1] << 8 )
 			  | ((unsigned)value[0]      );
+	}
+}
+/* }}} */
+
+/* {{{ php_ifd_get64u
+ * Convert a 64 bit unsigned value from file's native byte order */
+static uint64_t php_ifd_get64u(void *void_value, int motorola_intel)
+{
+	uchar *value = (uchar *) void_value;
+	if (motorola_intel) {
+		return ((uint64_t)value[0] << 56)
+			| ((uint64_t)value[1] << 48)
+			| ((uint64_t)value[2] << 40)
+			| ((uint64_t)value[3] << 32)
+			| ((uint64_t)value[4] << 24)
+			| ((uint64_t)value[5] << 16)
+			| ((uint64_t)value[6] << 8 )
+			| ((uint64_t)value[7]      );
+	} else {
+		return ((uint64_t)value[7] << 56)
+			| ((uint64_t)value[6] << 48)
+			| ((uint64_t)value[5] << 40)
+			| ((uint64_t)value[4] << 32)
+			| ((uint64_t)value[3] << 24)
+			| ((uint64_t)value[2] << 16)
+			| ((uint64_t)value[1] << 8 )
+			| ((uint64_t)value[0]      );
 	}
 }
 /* }}} */
@@ -1547,17 +1574,15 @@ static void php_ifd_set32u(char *data, size_t value, int motorola_intel)
 /* }}} */
 
 static float php_ifd_get_float(char *data) {
-	/* Copy to avoid alignment issues */
-	float f;
-	memcpy(&f, data, sizeof(float));
-	return f;
+	union { uint32_t i; float f; } u;
+	u.i = php_ifd_get32u(data, 0);
+	return u.f;
 }
 
 static double php_ifd_get_double(char *data) {
-	/* Copy to avoid alignment issues */
-	double f;
-	memcpy(&f, data, sizeof(double));
-	return f;
+	union { uint64_t i; double f; } u;
+	u.i = php_ifd_get64u(data, 0);
+	return u.f;
 }
 
 #ifdef EXIF_DEBUG
