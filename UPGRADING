@@ -194,6 +194,9 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/locale_independent_float_to_string
   . Removed support for deprecated curly braces for offset access
     RFC: https://wiki.php.net/rfc/deprecate_curly_braces_array_access
+  . Applying the final modifier on a private method will now produce a warning
+    unless that method is the constructor.
+    RFC: https://wiki.php.net/rfc/inheritance_private_methods
 
 - COM:
   . Removed the ability to import case-insensitive constants from type
@@ -584,6 +587,10 @@ PHP 8.0 UPGRADE NOTES
     RFC: https://wiki.php.net/rfc/constructor_promotion
   . Added support for `match` expression.
     RFC: https://wiki.php.net/rfc/match_expression_v2
+  . Private methods declared on a parent class no longer enforce any
+    inheritance rules on the methods of a child class. (with the exception of
+    final private constructors)
+    RFC: https://wiki.php.net/rfc/inheritance_private_methods
 
 - Date:
   . Added DateTime::createFromInterface() and
