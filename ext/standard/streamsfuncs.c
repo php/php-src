@@ -1508,7 +1508,7 @@ PHP_FUNCTION(stream_socket_enable_crypto)
 			zval *val;
 
 			if (!GET_CTX_OPT(stream, "ssl", "crypto_method", val)) {
-				zend_value_error("When enabling encryption you must specify the crypto type");
+				zend_argument_value_error(3, "must be specified when enabling encryption");
 				RETURN_THROWS();
 			}
 

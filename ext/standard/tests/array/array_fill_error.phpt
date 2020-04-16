@@ -24,4 +24,4 @@ try {
 ?>
 --EXPECT--
 *** Testing array_fill() : error conditions ***
-Number of elements can't be negative
+array_fill(): Argument #2 ($num) must be greater than or equal to 0

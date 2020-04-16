@@ -1005,11 +1005,11 @@ PHP_FUNCTION(base_convert)
 	}
 
 	if (frombase < 2 || frombase > 36) {
-		zend_value_error("Invalid `from base' (" ZEND_LONG_FMT ")", frombase);
+		zend_argument_value_error(2, "must be between 2 and 36 (inclusive)");
 		RETURN_THROWS();
 	}
 	if (tobase < 2 || tobase > 36) {
-		zend_value_error("Invalid `to base' (" ZEND_LONG_FMT ")", tobase);
+		zend_argument_value_error(3, "must be between 2 and 36 (inclusive)");
 		RETURN_THROWS();
 	}
 

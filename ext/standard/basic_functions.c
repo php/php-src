@@ -2477,7 +2477,7 @@ PHP_FUNCTION(register_tick_function)
 
 	if (!zend_is_callable(&tick_fe.arguments[0], 0, &function_name)) {
 		efree(tick_fe.arguments);
-		zend_type_error("Invalid tick callback '%s' passed", ZSTR_VAL(function_name));
+		zend_argument_type_error(1, "must be a valid tick callback, '%s' given", ZSTR_VAL(function_name));
 		zend_string_release_ex(function_name, 0);
 		RETURN_THROWS();
 	} else if (function_name) {

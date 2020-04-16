@@ -993,7 +993,7 @@ static zval *zend_ffi_cdata_get(zend_object *obj, zend_string *member, int read_
 #endif
 
 	if (UNEXPECTED(!zend_string_equals_literal(member, "cdata"))) {
-		zend_throw_error(zend_ffi_exception_ce, "only 'cdata' property may be read");
+		zend_throw_error(zend_ffi_exception_ce, "Only 'cdata' property may be read");
 		return &EG(uninitialized_zval);;
 	}
 

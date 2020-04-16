@@ -34,6 +34,6 @@ try {
 ?>
 --EXPECT--
 *** Testing base_convert() : error conditions ***
-Invalid `from base' (1)
-Invalid `to base' (37)
+base_convert(): Argument #2 ($frombase) must be between 2 and 36 (inclusive)
+base_convert(): Argument #3 ($tobase) must be between 2 and 36 (inclusive)
 Object of class classA could not be converted to string

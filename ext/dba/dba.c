@@ -107,7 +107,7 @@ static size_t php_dba_make_key(zval *key, char **key_str, char **key_free)
 		size_t len;
 
 		if (zend_hash_num_elements(Z_ARRVAL_P(key)) != 2) {
-			zend_throw_error(NULL, "Key does not have exactly two elements: (key, name)");
+			zend_argument_error(NULL, 1, "must have exactly two elements: 'key' and 'name'");
 			return 0;
 		}
 		zend_hash_internal_pointer_reset_ex(Z_ARRVAL_P(key), &pos);

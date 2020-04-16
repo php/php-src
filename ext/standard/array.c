@@ -2396,7 +2396,7 @@ PHP_FUNCTION(extract)
 
 	if (prefix) {
 		if (ZSTR_LEN(prefix) && !php_valid_var_name(ZSTR_VAL(prefix), ZSTR_LEN(prefix))) {
-			zend_value_error("Prefix is not a valid identifier");
+			zend_argument_value_error(3, "must be a valid identifier");
 			RETURN_THROWS();
 		}
 	}
@@ -2553,7 +2553,7 @@ PHP_FUNCTION(array_fill)
 
 	if (EXPECTED(num > 0)) {
 		if (sizeof(num) > 4 && UNEXPECTED(EXPECTED(num > 0x7fffffff))) {
-			zend_value_error("Too many elements");
+			zend_argument_value_error(2, "is too large");
 			RETURN_THROWS();
 		} else if (UNEXPECTED(start_key > ZEND_LONG_MAX - num + 1)) {
 			zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
@@ -2602,7 +2602,7 @@ PHP_FUNCTION(array_fill)
 	} else if (EXPECTED(num == 0)) {
 		RETURN_EMPTY_ARRAY();
 	} else {
-		zend_value_error("Number of elements can't be negative");
+		zend_argument_value_error(2, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 }
@@ -2843,7 +2843,7 @@ long_str:
 	}
 err:
 	if (err) {
-		zend_value_error("Step exceeds the specified range");
+		zend_argument_value_error(3, "must not exceed the specified range");
 		RETURN_THROWS();
 	}
 }
@@ -4322,7 +4322,7 @@ PHP_FUNCTION(array_pad)
 	input_size = zend_hash_num_elements(Z_ARRVAL_P(input));
 	pad_size_abs = ZEND_ABS(pad_size);
 	if (pad_size_abs < 0 || pad_size_abs - input_size > Z_L(1048576)) {
-		zend_value_error("You may only pad up to 1048576 elements at a time");
+		zend_argument_value_error(2, "must be less than or equal to 1048576");
 		RETURN_THROWS();
 	}
 
@@ -5790,7 +5790,7 @@ PHP_FUNCTION(array_rand)
 	num_avail = zend_hash_num_elements(Z_ARRVAL_P(input));
 
 	if (num_avail == 0) {
-		zend_value_error("Array is empty");
+		zend_argument_value_error(1, "cannot be empty");
 		RETURN_THROWS();
 	}
 
@@ -5831,7 +5831,7 @@ PHP_FUNCTION(array_rand)
 	}
 
 	if (num_req <= 0 || num_req > num_avail) {
-		zend_value_error("Second argument has to be between 1 and the number of elements in the array");
+		zend_argument_value_error(2, "must be between 1 and the number of elements in argument #1 ($arg)");
 		RETURN_THROWS();
 	}
 
@@ -6318,7 +6318,7 @@ PHP_FUNCTION(array_chunk)
 
 	/* Do bounds checking for size parameter. */
 	if (size < 1) {
-		zend_value_error("Size parameter expected to be greater than 0");
+		zend_argument_value_error(2, "must be greater than 0");
 		RETURN_THROWS();
 	}
 
@@ -6387,7 +6387,7 @@ PHP_FUNCTION(array_combine)
 	num_values = zend_hash_num_elements(values);
 
 	if (num_keys != num_values) {
-		zend_value_error("Both parameters should have an equal number of elements");
+		zend_argument_value_error(1, "and argument #2 ($values) must have the same number of elements");
 		RETURN_THROWS();
 	}
 

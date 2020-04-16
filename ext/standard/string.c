@@ -931,12 +931,12 @@ PHP_FUNCTION(wordwrap)
 	}
 
 	if (breakchar_len == 0) {
-		zend_value_error("Break string cannot be empty");
+		zend_argument_value_error(3, "cannot be empty");
 		RETURN_THROWS();
 	}
 
 	if (linelength == 0 && docut) {
-		zend_value_error("Can't force cut when width is zero");
+		zend_argument_value_error(4, "cannot be true when argument #2 ($width) is 0");
 		RETURN_THROWS();
 	}
 
@@ -1143,7 +1143,7 @@ PHP_FUNCTION(explode)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(delim) == 0) {
-		zend_value_error("Empty delimiter");
+		zend_argument_value_error(1, "cannot be empty");
 		RETURN_THROWS();
 	}
 

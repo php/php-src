@@ -98,15 +98,15 @@ var_dump( explode("b", $obj) );
 --EXPECT--
 *** Testing explode() for basic operations ***
 -- Iteration 1 --
-Empty delimiter
-Empty delimiter
-Empty delimiter
-Empty delimiter
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
 -- Iteration 2 --
-Empty delimiter
-Empty delimiter
-Empty delimiter
-Empty delimiter
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
 -- Iteration 3 --
 array(1) {
   [0]=>
@@ -208,10 +208,10 @@ array(2) {
   string(56) "234NULL23abcd00000TRUEFALSE-11.234444true-11.24%PHP%ZEND"
 }
 -- Iteration 7 --
-Empty delimiter
-Empty delimiter
-Empty delimiter
-Empty delimiter
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
+explode(): Argument #1 ($separator) cannot be empty
 -- Iteration 8 --
 array(2) {
   [0]=>

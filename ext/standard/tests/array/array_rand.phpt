@@ -38,11 +38,11 @@ var_dump(array_rand(array(1,2,3), 2));
 
 ?>
 --EXPECTF--
-Array is empty
-Array is empty
-Second argument has to be between 1 and the number of elements in the array
-Second argument has to be between 1 and the number of elements in the array
-Second argument has to be between 1 and the number of elements in the array
+array_rand(): Argument #1 ($arg) cannot be empty
+array_rand(): Argument #1 ($arg) cannot be empty
+array_rand(): Argument #2 ($num_req) must be between 1 and the number of elements in argument #1 ($arg)
+array_rand(): Argument #2 ($num_req) must be between 1 and the number of elements in argument #1 ($arg)
+array_rand(): Argument #2 ($num_req) must be between 1 and the number of elements in argument #1 ($arg)
 array(3) {
   [0]=>
   int(%d)

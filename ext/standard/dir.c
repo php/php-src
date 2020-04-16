@@ -387,7 +387,7 @@ PHP_FUNCTION(readdir)
 	FETCH_DIRP();
 
 	if (!(dirp->flags & PHP_STREAM_FLAG_IS_DIR)) {
-		zend_type_error("%d is not a valid Directory resource", dirp->res->handle);
+		zend_argument_type_error(1, "must be a valid Directory resource");
 		RETURN_THROWS();
 	}
 
