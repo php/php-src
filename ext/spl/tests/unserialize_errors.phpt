@@ -114,17 +114,17 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 ArrayObject:
 Incomplete or ill-typed serialization data
 Incomplete or ill-typed serialization data
 Incomplete or ill-typed serialization data
-Passed variable is not an array or object
+Passed variable must be array|object, int given
 ArrayIterator:
 Incomplete or ill-typed serialization data
 Incomplete or ill-typed serialization data
 Incomplete or ill-typed serialization data
-Passed variable is not an array or object
+Passed variable must be array|object, int given
 SplDoublyLinkedList:
 Incomplete or ill-typed serialization data
 Incomplete or ill-typed serialization data

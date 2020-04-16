@@ -13,4 +13,4 @@ try {
 
 ?>
 --EXPECT--
-Overloaded object of type DateInterval is not compatible with ArrayObject
+Overloaded object of type DateInterval must be compatible with ArrayObject

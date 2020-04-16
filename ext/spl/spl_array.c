@@ -298,7 +298,7 @@ static zval *spl_array_get_dimension_ptr(int check_inherited, spl_array_object *
 	}
 
 	if ((type == BP_VAR_W || type == BP_VAR_RW) && intern->nApplyCount > 0) {
-		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
 		return &EG(error_zval);
 	}
 
@@ -386,9 +386,8 @@ num_index:
 		ZVAL_DEREF(offset);
 		goto try_again;
 	default:
-		zend_error(E_WARNING, "Illegal offset type");
-		return (type == BP_VAR_W || type == BP_VAR_RW) ?
-			&EG(error_zval) : &EG(uninitialized_zval);
+		zend_type_error("Must be int|string, %s given", zend_zval_type_name(offset));
+		return NULL;
 	}
 } /* }}} */
 
@@ -446,7 +445,8 @@ static zval *spl_array_read_dimension(zend_object *object, zval *offset, int typ
 	return spl_array_read_dimension_ex(1, object, offset, type, rv);
 } /* }}} */
 
-static void spl_array_write_dimension_ex(int check_inherited, zend_object *object, zval *offset, zval *value) /* {{{ */
+static void spl_array_write_dimension_ex(int check_inherited, zend_object *object,
+	zval *offset, zval *value, uint32_t offset_arg_num) /* {{{ */
 {
 	spl_array_object *intern = spl_array_from_obj(object);
 	zend_long index;
@@ -467,7 +467,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zend_object *objec
 	}
 
 	if (intern->nApplyCount > 0) {
-		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
 		return;
 	}
 
@@ -510,15 +510,23 @@ num_index:
 			ZVAL_DEREF(offset);
 			goto try_again;
 		default:
-			zend_error(E_WARNING, "Illegal offset type");
 			zval_ptr_dtor(value);
+			/* If offset_arg_num is 0 this mean the offset comes from an index use in [offset] */
+			if (offset_arg_num == 0) {
+				zend_type_error("Offsets must be int|string, %s given",
+					zend_zval_type_name(offset));
+			} else {
+				zend_argument_type_error(offset_arg_num, "must be int|string, %s given",
+					zend_zval_type_name(offset));
+			}
 			return;
 	}
 } /* }}} */
 
 static void spl_array_write_dimension(zend_object *object, zval *offset, zval *value) /* {{{ */
 {
-	spl_array_write_dimension_ex(1, object, offset, value);
+	/* Pass 0 as offset arg position to inform it comes from this handler */
+	spl_array_write_dimension_ex(1, object, offset, value, 0);
 } /* }}} */
 
 static void spl_array_unset_dimension_ex(int check_inherited, zend_object *object, zval *offset) /* {{{ */
@@ -535,7 +543,7 @@ static void spl_array_unset_dimension_ex(int check_inherited, zend_object *objec
 	}
 
 	if (intern->nApplyCount > 0) {
-		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
 		return;
 	}
 
@@ -596,7 +604,7 @@ num_index:
 		ZVAL_DEREF(offset);
 		goto try_again;
 	default:
-		zend_error(E_WARNING, "Illegal offset type");
+		zend_type_error("Must be int|string, %s given", zend_zval_type_name(offset));
 		return;
 	}
 } /* }}} */
@@ -672,7 +680,7 @@ num_index:
 				ZVAL_DEREF(offset);
 				goto try_again;
 			default:
-				zend_error(E_WARNING, "Illegal offset type");
+				zend_type_error("Must be int|string, %s given", zend_zval_type_name(offset));
 				return 0;
 		}
 
@@ -733,7 +741,7 @@ SPL_METHOD(Array, offsetSet)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &index, &value) == FAILURE) {
 		RETURN_THROWS();
 	}
-	spl_array_write_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, value);
+	spl_array_write_dimension_ex(0, Z_OBJ_P(ZEND_THIS), index, value, 1);
 } /* }}} */
 
 void spl_array_iterator_append(zval *object, zval *append_value) /* {{{ */
@@ -1103,9 +1111,14 @@ static void spl_array_it_rewind(zend_object_iterator *iter) /* {{{ */
 /* }}} */
 
 /* {{{ spl_array_set_array */
-static void spl_array_set_array(zval *object, spl_array_object *intern, zval *array, zend_long ar_flags, int just_array) {
+static void spl_array_set_array(zval *object, spl_array_object *intern, zval *array,
+	zend_long ar_flags, int just_array, uint32_t arg_num) {
 	if (Z_TYPE_P(array) != IS_OBJECT && Z_TYPE_P(array) != IS_ARRAY) {
-		zend_type_error("Passed variable is not an array or object");
+		if (arg_num == 0) {
+			zend_type_error("Passed variable must be array|object, %s given", zend_zval_type_name(array));
+		} else {
+			zend_argument_type_error(arg_num, "must be array|object, %s given", zend_zval_type_name(array));
+		}
 		return;
 	}
 
@@ -1134,8 +1147,13 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 		} else {
 			zend_object_get_properties_t handler = Z_OBJ_HANDLER_P(array, get_properties);
 			if (handler != zend_std_get_properties) {
-				zend_type_error("Overloaded object of type %s is not compatible with %s",
-					ZSTR_VAL(Z_OBJCE_P(array)->name), ZSTR_VAL(intern->std.ce->name));
+				if (arg_num == 0) {
+					zend_type_error("Overloaded object of type %s must be compatible with %s",
+						ZSTR_VAL(Z_OBJCE_P(array)->name), ZSTR_VAL(intern->std.ce->name));
+				} else {
+					zend_argument_type_error(arg_num, "must be compatible with %s",
+						ZSTR_VAL(intern->std.ce->name));
+				}
 				return;
 			}
 			zval_ptr_dtor(&intern->array);
@@ -1166,7 +1184,7 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 	spl_array_object *array_object = Z_SPLARRAY_P(object);
 
 	if (by_ref && (array_object->ar_flags & SPL_ARRAY_OVERLOADED_CURRENT)) {
-		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0);
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
 		return NULL;
 	}
 
@@ -1210,7 +1228,7 @@ SPL_METHOD(Array, __construct)
 
 	ar_flags &= ~SPL_ARRAY_INT_MASK;
 
-	spl_array_set_array(object, intern, array, ar_flags, ZEND_NUM_ARGS() == 1);
+	spl_array_set_array(object, intern, array, ar_flags, ZEND_NUM_ARGS() == 1, 1);
 }
  /* }}} */
 
@@ -1235,7 +1253,7 @@ SPL_METHOD(ArrayIterator, __construct)
 
 	ar_flags &= ~SPL_ARRAY_INT_MASK;
 
-	spl_array_set_array(object, intern, array, ar_flags, ZEND_NUM_ARGS() == 1);
+	spl_array_set_array(object, intern, array, ar_flags, ZEND_NUM_ARGS() == 1, 1);
 }
  /* }}} */
 
@@ -1314,12 +1332,12 @@ SPL_METHOD(Array, exchangeArray)
 	}
 
 	if (intern->nApplyCount > 0) {
-		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
 		return;
 	}
 
 	RETVAL_ARR(zend_array_dup(spl_array_get_hash_table(intern)));
-	spl_array_set_array(object, intern, array, 0L, 1);
+	spl_array_set_array(object, intern, array, 0L, 1, 1);
 }
 /* }}} */
 
@@ -1379,7 +1397,8 @@ SPL_METHOD(Array, seek)
 			return; /* ok */
 		}
 	}
-	zend_value_error("Seek position " ZEND_LONG_FMT " is out of range", opos);
+	zend_argument_value_error(1, "position " ZEND_LONG_FMT " is out of range", opos);
+	RETURN_THROWS();
 } /* }}} */
 
 static zend_long spl_array_object_count_elements_helper(spl_array_object *intern) /* {{{ */
@@ -1731,7 +1750,7 @@ SPL_METHOD(Array, unserialize)
 	}
 
 	if (intern->nApplyCount > 0) {
-		zend_error(E_WARNING, "Modification of ArrayObject during sorting is prohibited");
+		zend_throw_error(NULL, "Modification of ArrayObject during sorting is prohibited");
 		return;
 	}
 
@@ -1787,7 +1806,7 @@ SPL_METHOD(Array, unserialize)
 			ZVAL_NULL(array);
 			SEPARATE_ARRAY(&intern->array);
 		} else {
-			spl_array_set_array(object, intern, array, 0L, 1);
+			spl_array_set_array(object, intern, array, 0L, 1, 0);
 		}
 
 		if (*p != ';') {
@@ -1816,6 +1835,7 @@ SPL_METHOD(Array, unserialize)
 
 outexcept:
 	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
+	/* TODO Use standard Error? */
 	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Error at offset " ZEND_LONG_FMT " of %zd bytes", (zend_long)((char*)p - buf), buf_len);
 	RETURN_THROWS();
 
@@ -1883,7 +1903,7 @@ SPL_METHOD(Array, __unserialize)
 		zval_ptr_dtor(&intern->array);
 		ZVAL_UNDEF(&intern->array);
 	} else {
-		spl_array_set_array(ZEND_THIS, intern, storage_zv, 0L, 1);
+		spl_array_set_array(ZEND_THIS, intern, storage_zv, 0L, 1, 0);
 	}
 
 	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));

@@ -9,7 +9,10 @@ function badsort($a, $b) {
         $GLOBALS['it']->unserialize($GLOBALS['it']->serialize());
         return TRUE;
 }
-
-$it->uksort('badsort');
---EXPECTF--
-Warning: Modification of ArrayObject during sorting is prohibited in %sbug67539.php on line %d
+try {
+    $it->uksort('badsort');
+} catch (\Error $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
+--EXPECT--
+Modification of ArrayObject during sorting is prohibited

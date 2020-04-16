@@ -103,7 +103,7 @@ NULL
 
 
 --> exchangeArray() with bad arg type:
-Passed variable is not an array or object
+ArrayObject::exchangeArray(): Argument #1 ($input) must be array|object, null given
 
 Warning: Undefined variable $copy in %s on line %d
 object(ArrayObject)#3 (1) {

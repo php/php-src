@@ -16,17 +16,16 @@ class ArrayIteratorEx extends ArrayIterator
 }
 
 $ar = new ArrayIteratorEx(array(4)); foreach($ar as $v) var_dump($v);
-$ar = new ArrayIteratorEx(array(5)); foreach($ar as &$v) var_dump($v);
+try {
+    $ar = new ArrayIteratorEx(array(5)); foreach($ar as &$v) var_dump($v);
+} catch (\Error $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
-===DONE===
---EXPECTF--
+--EXPECT--
 int(1)
 int(2)
 int(3)
 int(4)
-
-Fatal error: Uncaught RuntimeException: An iterator cannot be used with foreach by reference in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+An iterator cannot be used with foreach by reference

@@ -4,8 +4,12 @@ Assignments to illegal ArrayObject offsets shouldn't leak
 <?php
 
 $ao = new ArrayObject([1, 2, 3]);
-$ao[[]] = new stdClass;
+try {
+    $ao[[]] = new stdClass;
+} catch (\TypeError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Warning: Illegal offset type in %s on line %d
+--EXPECT--
+Offsets must be int|string, array given

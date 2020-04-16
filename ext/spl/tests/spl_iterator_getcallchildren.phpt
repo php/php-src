@@ -30,4 +30,4 @@ try {
   int(9)
 }
 int(7)
-Passed variable is not an array or object
+ArrayIterator::__construct(): Argument #1 ($array) must be array|object, int given

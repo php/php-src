@@ -37,8 +37,8 @@ foreach($it as $v)
 int(11)
 int(5)
 int(4)
-Seek position -1 is out of range
-Seek position 12 is out of range
+ArrayIterator::seek(): Argument #1 ($position) position -1 is out of range
+ArrayIterator::seek(): Argument #1 ($position) position 12 is out of range
 int(0)
 int(1)
 int(2)

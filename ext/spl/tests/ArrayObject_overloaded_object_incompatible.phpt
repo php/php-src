@@ -13,7 +13,7 @@ var_dump($ao);
 
 ?>
 --EXPECT--
-Overloaded object of type SplFixedArray is not compatible with ArrayObject
+ArrayObject::exchangeArray(): Argument #1 ($input) must be compatible with ArrayObject
 object(ArrayObject)#1 (1) {
   ["storage":"ArrayObject":private]=>
   array(3) {
