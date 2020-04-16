@@ -457,7 +457,6 @@ ZEND_END_ARG_INFO()
 
 
 ZEND_METHOD(Reflection, getModifierNames);
-ZEND_METHOD(ReflectionClass, __clone);
 ZEND_METHOD(ReflectionFunctionAbstract, inNamespace);
 ZEND_METHOD(ReflectionFunctionAbstract, isClosure);
 ZEND_METHOD(ReflectionFunctionAbstract, isDeprecated);
@@ -513,6 +512,7 @@ ZEND_METHOD(ReflectionMethod, invokeArgs);
 ZEND_METHOD(ReflectionMethod, getDeclaringClass);
 ZEND_METHOD(ReflectionMethod, getPrototype);
 ZEND_METHOD(ReflectionMethod, setAccessible);
+ZEND_METHOD(ReflectionClass, __clone);
 ZEND_METHOD(ReflectionClass, __construct);
 ZEND_METHOD(ReflectionClass, __toString);
 ZEND_METHOD(ReflectionClass, getName);
