@@ -42,4 +42,4 @@ aŒbœcŠdše€fg
 &#100000000000
 &#000000000000
 f&ouml;o
-count($convmap) must be a multiple of 4
+mb_decode_numericentity(): Argument #2 ($convmap) must have a multiple of 4 elements

@@ -14,5 +14,5 @@ echo "Done.\n";
 ?>
 --EXPECTF--
 int(%d)
-max (3) is smaller than min (8)
+mt_rand(): Argument #2 ($max) must be greater than or equal to argument #1 ($min)
 Done.

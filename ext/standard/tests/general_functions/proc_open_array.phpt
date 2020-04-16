@@ -68,7 +68,7 @@ proc_close($proc);
 ?>
 --EXPECT--
 Empty command array:
-Command array must have at least one element
+proc_open(): Argument #1 ($cmd) must have at least one element
 
 Nul byte in program name:
 Command array element 1 contains a null byte

@@ -49,9 +49,9 @@ foreach ($sizes as $size){
 *** Testing array_chunk() : usage variations ***
 
 -- Testing array_chunk() when size = -1 --
-Size parameter expected to be greater than 0
-Size parameter expected to be greater than 0
-Size parameter expected to be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
 
 -- Testing array_chunk() when size = 4 --
 array(1) {
@@ -89,9 +89,9 @@ array(1) {
 }
 
 -- Testing array_chunk() when size = 0 --
-Size parameter expected to be greater than 0
-Size parameter expected to be greater than 0
-Size parameter expected to be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
+array_chunk(): Argument #2 ($size) must be greater than 0
 
 -- Testing array_chunk() when size = 1.5 --
 array(3) {

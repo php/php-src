@@ -25,4 +25,4 @@ try {
 --EXPECTF--
 *** Testing readdir() : usage variations ***
 resource(%d) of type (stream)
-%d is not a valid Directory resource
+readdir(): Argument #1 ($dir_handle) must be a valid Directory resource
