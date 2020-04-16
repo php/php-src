@@ -630,7 +630,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	/* handle MySQL options */
 	if (driver_options) {
 		zend_long connect_timeout = pdo_attr_lval(driver_options, PDO_ATTR_TIMEOUT, 30);
-		zend_long local_infile = pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0);
+		unsigned int local_infile = (unsigned int) pdo_attr_lval(driver_options, PDO_MYSQL_ATTR_LOCAL_INFILE, 0);
 		zend_string *init_cmd = NULL;
 #ifndef PDO_USE_MYSQLND
 		zend_string *default_file = NULL, *default_group = NULL;
@@ -781,7 +781,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	} else {
 #if defined(MYSQL_OPT_LOCAL_INFILE) || defined(PDO_USE_MYSQLND)
 		// in case there are no driver options disable 'local infile' explicitly
-		zend_long local_infile = 0;
+		unsigned int local_infile = 0;
 		if (mysql_options(H->server, MYSQL_OPT_LOCAL_INFILE, (const char *)&local_infile)) {
 			pdo_mysql_error(dbh);
 			goto cleanup;
