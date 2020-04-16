@@ -3470,6 +3470,13 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 		}
 	}
 
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_CTOR) != 0)) {
+		zend_throw_error(NULL, "Cannot call the constructor on an object instance");
+		FREE_OP2();
+		FREE_OP1();
+		HANDLE_EXCEPTION();
+	}
+
 	if (OP2_TYPE != IS_CONST) {
 		FREE_OP2();
 	}

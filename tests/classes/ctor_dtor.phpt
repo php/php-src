@@ -22,7 +22,6 @@ class late {
 }
 
 $t = new early();
-$t->__construct();
 unset($t);
 $t = new late();
 //unset($t); delay to end of script
@@ -30,7 +29,6 @@ $t = new late();
 echo "Done\n";
 ?>
 --EXPECT--
-early::__construct
 early::__construct
 early::__destruct
 late::__construct

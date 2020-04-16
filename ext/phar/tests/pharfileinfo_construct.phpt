@@ -34,12 +34,6 @@ echo $e->getMessage() . "\n";
 }
 
 try {
-$b->__construct('oops');
-} catch (Exception $e) {
-echo $e->getMessage() . "\n";
-}
-
-try {
 $a = new PharFileInfo(__FILE__);
 } catch (Exception $e) {
 echo $e->getMessage() . "\n";
@@ -51,5 +45,4 @@ echo $e->getMessage() . "\n";
 Cannot open phar file 'phar://%spharfileinfo_construct.phar/oops': internal corruption of phar "%spharfileinfo_construct.phar" (truncated entry)
 PharFileInfo::__construct(): Argument #1 ($filename) must be a valid path, array given
 Cannot access phar file entry '%s' in archive '%s'
-Cannot call constructor twice
 '%s' is not a valid phar archive URL (must have at least phar://filename.phar)

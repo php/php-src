@@ -16,9 +16,13 @@ class Z extends Y {
       function __construct() {
           return ++$this->x;
       }
+
+      function another() {
+          self::__construct();
+      }
 }
 $a = new Z();
-$a->__construct();
+$a->another();
 echo "DONE";
 ?>
 --EXPECTF--

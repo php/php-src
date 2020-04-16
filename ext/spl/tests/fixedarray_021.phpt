@@ -24,10 +24,6 @@ try {
     var_dump($e->getMessage());
 }
 
-/* calling __construct() twice */
-$c = new SplFixedArray(0);
-var_dump($c->__construct());
-
 /* fromArray() from empty array */
 $d = new SplFixedArray();
 $d->fromArray(array());
@@ -65,7 +61,6 @@ int(0)
 int(0)
 string(35) "array size cannot be less than zero"
 string(35) "array size cannot be less than zero"
-NULL
 int(0)
 int(0)
 object(SplFixedArray)#%d (0) {

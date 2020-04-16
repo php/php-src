@@ -14,9 +14,6 @@ if (defined("pass3")) {
   class TestClass {
     function __construct() {
     }
-    function TestClass() {
-      $this->__construct();
-    }
   }
 
 } else {

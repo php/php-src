@@ -5678,6 +5678,13 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 		}
 	}
 
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_CTOR) != 0)) {
+		zend_throw_error(NULL, "Cannot call the constructor on an object instance");
+
+
+		HANDLE_EXCEPTION();
+	}
+
 	if (IS_CONST != IS_CONST) {
 
 	}
@@ -7851,6 +7858,13 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
+	}
+
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_CTOR) != 0)) {
+		zend_throw_error(NULL, "Cannot call the constructor on an object instance");
+		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+
+		HANDLE_EXCEPTION();
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
@@ -10107,6 +10121,13 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
+	}
+
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_CTOR) != 0)) {
+		zend_throw_error(NULL, "Cannot call the constructor on an object instance");
+
+
+		HANDLE_EXCEPTION();
 	}
 
 	if (IS_CV != IS_CONST) {
@@ -14400,6 +14421,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 		}
 	}
 
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_CTOR) != 0)) {
+		zend_throw_error(NULL, "Cannot call the constructor on an object instance");
+
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+		HANDLE_EXCEPTION();
+	}
+
 	if (IS_CONST != IS_CONST) {
 
 	}
@@ -15781,6 +15809,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 		}
 	}
 
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_CTOR) != 0)) {
+		zend_throw_error(NULL, "Cannot call the constructor on an object instance");
+		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+		HANDLE_EXCEPTION();
+	}
+
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
 		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
 	}
@@ -17054,6 +17089,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
+	}
+
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_CTOR) != 0)) {
+		zend_throw_error(NULL, "Cannot call the constructor on an object instance");
+
+		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+		HANDLE_EXCEPTION();
 	}
 
 	if (IS_CV != IS_CONST) {
@@ -30533,6 +30575,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 		}
 	}
 
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_CTOR) != 0)) {
+		zend_throw_error(NULL, "Cannot call the constructor on an object instance");
+
+
+		HANDLE_EXCEPTION();
+	}
+
 	if (IS_CONST != IS_CONST) {
 
 	}
@@ -32399,6 +32448,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
+	}
+
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_CTOR) != 0)) {
+		zend_throw_error(NULL, "Cannot call the constructor on an object instance");
+		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+
+		HANDLE_EXCEPTION();
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
@@ -34793,6 +34849,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
+	}
+
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_CTOR) != 0)) {
+		zend_throw_error(NULL, "Cannot call the constructor on an object instance");
+
+
+		HANDLE_EXCEPTION();
 	}
 
 	if (IS_CV != IS_CONST) {
@@ -39644,6 +39707,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 		}
 	}
 
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_CTOR) != 0)) {
+		zend_throw_error(NULL, "Cannot call the constructor on an object instance");
+
+
+		HANDLE_EXCEPTION();
+	}
+
 	if (IS_CONST != IS_CONST) {
 
 	}
@@ -43079,6 +43149,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
+	}
+
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_CTOR) != 0)) {
+		zend_throw_error(NULL, "Cannot call the constructor on an object instance");
+		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+
+		HANDLE_EXCEPTION();
 	}
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
@@ -47961,6 +48038,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!RUN_TIME_CACHE(&fbc->op_array))) {
 			init_func_run_time_cache(&fbc->op_array);
 		}
+	}
+
+	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_CTOR) != 0)) {
+		zend_throw_error(NULL, "Cannot call the constructor on an object instance");
+
+
+		HANDLE_EXCEPTION();
 	}
 
 	if (IS_CV != IS_CONST) {

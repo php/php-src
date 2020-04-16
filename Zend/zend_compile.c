@@ -4101,6 +4101,12 @@ void zend_compile_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 }
 /* }}} */
 
+static zend_bool zend_is_constructor(zend_string *name) /* {{{ */
+{
+	return zend_string_equals_literal_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME);
+}
+/* }}} */
+
 void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{{ */
 {
 	zend_ast *obj_ast = ast->child[0];
@@ -4130,6 +4136,10 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 			zend_error_noreturn(E_COMPILE_ERROR, "Method name must be a string");
 		}
 
+		if (zend_is_constructor(Z_STR_P(&method_node.u.constant))) {
+			zend_error_noreturn(E_COMPILE_ERROR, "Cannot call the constructor on an object instance");
+		}
+
 		opline->op2_type = IS_CONST;
 		opline->op2.constant = zend_add_func_name_literal(
 			Z_STR(method_node.u.constant));
@@ -4152,12 +4162,6 @@ void zend_compile_method_call(znode *result, zend_ast *ast, uint32_t type) /* {{
 	}
 
 	zend_compile_call_common(result, args_ast, fbc);
-}
-/* }}} */
-
-static zend_bool zend_is_constructor(zend_string *name) /* {{{ */
-{
-	return zend_string_equals_literal_ci(name, ZEND_CONSTRUCTOR_FUNC_NAME);
 }
 /* }}} */
 

@@ -6,10 +6,13 @@ class foo {
   function __construct($n=0) {
     if($n) throw new Exception("new");
   }
+  function another() {
+    return self::__construct(1);
+  }
 }
 $x = new foo();
 try {
-  $y=$x->__construct(1);
+  $y=$x->another();
 } catch (Exception $e) {
   var_dump($x);
 }
