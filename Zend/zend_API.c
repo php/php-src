@@ -2019,10 +2019,10 @@ ZEND_API void zend_check_magic_method_implementation(const zend_class_entry *ce,
  	} else if (name_len == sizeof(ZEND_TOSTRING_FUNC_NAME) - 1 &&
  		!memcmp(lcname, ZEND_TOSTRING_FUNC_NAME, sizeof(ZEND_TOSTRING_FUNC_NAME)-1) && fptr->common.num_args != 0
 	) {
-		zend_error(error_type, "Method %s::%s() cannot take arguments", ZSTR_VAL(ce->name), ZEND_TOSTRING_FUNC_NAME);
+		zend_error(error_type, "Method %s::__toString() cannot take arguments", ZSTR_VAL(ce->name));
 	} else if (name_len == sizeof(ZEND_DEBUGINFO_FUNC_NAME) - 1 &&
 		!memcmp(lcname, ZEND_DEBUGINFO_FUNC_NAME, sizeof(ZEND_DEBUGINFO_FUNC_NAME)-1) && fptr->common.num_args != 0) {
-		zend_error(error_type, "Method %s::%s() cannot take arguments", ZSTR_VAL(ce->name), ZEND_DEBUGINFO_FUNC_NAME);
+		zend_error(error_type, "Method %s::__debugInfo() cannot take arguments", ZSTR_VAL(ce->name));
 	}
 }
 /* }}} */
