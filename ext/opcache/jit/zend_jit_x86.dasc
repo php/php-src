@@ -10947,7 +10947,7 @@ static zend_bool zend_jit_verify_return_type(dasm_State **Dst, const zend_op *op
 
 static zend_bool zend_jit_may_reuse_reg(const zend_op *opline, const zend_ssa_op *ssa_op, zend_ssa *ssa, int def_var, int use_var)
 {
-	if (ssa->var_info[def_var].type != ssa->var_info[use_var].type) {
+	if ((ssa->var_info[def_var].type & ~MAY_BE_GUARD) != (ssa->var_info[use_var].type & ~MAY_BE_GUARD)) {
 		return 0;
 	}
 

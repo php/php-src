@@ -1391,10 +1391,6 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, zend_ss
 	 */
 	available = ZEND_REGSET_DIFFERENCE(available, ZEND_REGSET_PRESERVED);
 
-	if (ZEND_REGSET_IS_EMPTY(available)) {
-		return 0;
-	}
-
 	/* Set freeUntilPos of all physical registers to maxInt */
 	for (i = 0; i < ZREG_NUM; i++) {
 		freeUntilPos[i] = 0xffffffff;
@@ -1430,6 +1426,10 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, zend_ss
 		if (hint != ZREG_NONE && current->hint->used_as_hint == current) {
 			ZEND_REGSET_EXCL(*hints, hint);
 		}
+	}
+
+	if (hint == ZREG_NONE && ZEND_REGSET_IS_EMPTY(available)) {
+		return 0;
 	}
 
 	/* See "Linear Scan Register Allocation on SSA Form", Christian Wimmer and
@@ -1518,6 +1518,10 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, zend_ss
 		}
 		return 1;
     }
+
+	if (ZEND_REGSET_IS_EMPTY(available)) {
+		return 0;
+	}
 
 	pos = 0; reg = ZREG_NONE;
 	pos2 = 0; reg2 = ZREG_NONE;
