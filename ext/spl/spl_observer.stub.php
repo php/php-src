@@ -18,7 +18,7 @@ interface SplSubject
     public function notify();
 }
 
-class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
+class SplObjectStorage implements Countable, Iterator, ArrayAccess
 {
     /**
      * @param mixed $info
@@ -67,12 +67,6 @@ class SplObjectStorage implements Countable, Iterator, Serializable, ArrayAccess
 
     /** @return void */
     public function next() {}
-
-    /** @return void */
-    public function unserialize(string $serialized) {}
-
-    /** @return string */
-    public function serialize() {}
 
     /**
      * @param object $object

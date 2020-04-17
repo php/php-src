@@ -669,186 +669,6 @@ SPL_METHOD(SplObjectStorage, next)
 	intern->index++;
 } /* }}} */
 
-/* {{{ proto string SplObjectStorage::serialize()
- Serializes storage */
-SPL_METHOD(SplObjectStorage, serialize)
-{
-	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
-
-	spl_SplObjectStorageElement *element;
-	zval members, flags;
-	HashPosition      pos;
-	php_serialize_data_t var_hash;
-	smart_str buf = {0};
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	PHP_VAR_SERIALIZE_INIT(var_hash);
-
-	/* storage */
-	smart_str_appendl(&buf, "x:", 2);
-	ZVAL_LONG(&flags, zend_hash_num_elements(&intern->storage));
-	php_var_serialize(&buf, &flags, &var_hash);
-
-	zend_hash_internal_pointer_reset_ex(&intern->storage, &pos);
-
-	while (zend_hash_has_more_elements_ex(&intern->storage, &pos) == SUCCESS) {
-		if ((element = zend_hash_get_current_data_ptr_ex(&intern->storage, &pos)) == NULL) {
-			smart_str_free(&buf);
-			PHP_VAR_SERIALIZE_DESTROY(var_hash);
-			RETURN_NULL();
-		}
-		php_var_serialize(&buf, &element->obj, &var_hash);
-		smart_str_appendc(&buf, ',');
-		php_var_serialize(&buf, &element->inf, &var_hash);
-		smart_str_appendc(&buf, ';');
-		zend_hash_move_forward_ex(&intern->storage, &pos);
-	}
-
-	/* members */
-	smart_str_appendl(&buf, "m:", 2);
-
-	ZVAL_ARR(&members, zend_array_dup(zend_std_get_properties(Z_OBJ_P(ZEND_THIS))));
-	php_var_serialize(&buf, &members, &var_hash); /* finishes the string */
-	zval_ptr_dtor(&members);
-
-	/* done */
-	PHP_VAR_SERIALIZE_DESTROY(var_hash);
-
-	RETURN_NEW_STR(buf.s);
-} /* }}} */
-
-/* {{{ proto void SplObjectStorage::unserialize(string serialized)
- Unserializes storage */
-SPL_METHOD(SplObjectStorage, unserialize)
-{
-	spl_SplObjectStorage *intern = Z_SPLOBJSTORAGE_P(ZEND_THIS);
-
-	char *buf;
-	size_t buf_len;
-	const unsigned char *p, *s;
-	php_unserialize_data_t var_hash;
-	zval entry, inf;
-	zval *pcount, *pmembers;
-	spl_SplObjectStorageElement *element;
-	zend_long count;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &buf, &buf_len) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if (buf_len == 0) {
-		return;
-	}
-
-	/* storage */
-	s = p = (const unsigned char*)buf;
-	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-
-	if (*p!= 'x' || *++p != ':') {
-		goto outexcept;
-	}
-	++p;
-
-	pcount = var_tmp_var(&var_hash);
-	if (!php_var_unserialize(pcount, &p, s + buf_len, &var_hash) || Z_TYPE_P(pcount) != IS_LONG) {
-		goto outexcept;
-	}
-
-	--p; /* for ';' */
-	count = Z_LVAL_P(pcount);
-	if (count < 0) {
-		goto outexcept;
-	}
-
-	ZVAL_UNDEF(&entry);
-	ZVAL_UNDEF(&inf);
-
-	while (count-- > 0) {
-		spl_SplObjectStorageElement *pelement;
-		zend_hash_key key;
-
-		if (*p != ';') {
-			goto outexcept;
-		}
-		++p;
-		if(*p != 'O' && *p != 'C' && *p != 'r') {
-			goto outexcept;
-		}
-		/* store reference to allow cross-references between different elements */
-		if (!php_var_unserialize(&entry, &p, s + buf_len, &var_hash)) {
-			zval_ptr_dtor(&entry);
-			goto outexcept;
-		}
-		if (*p == ',') { /* new version has inf */
-			++p;
-			if (!php_var_unserialize(&inf, &p, s + buf_len, &var_hash)) {
-				zval_ptr_dtor(&entry);
-				zval_ptr_dtor(&inf);
-				goto outexcept;
-			}
-		}
-		if (Z_TYPE(entry) != IS_OBJECT) {
-			zval_ptr_dtor(&entry);
-			zval_ptr_dtor(&inf);
-			goto outexcept;
-		}
-
-		if (spl_object_storage_get_hash(&key, intern, &entry) == FAILURE) {
-			zval_ptr_dtor(&entry);
-			zval_ptr_dtor(&inf);
-			goto outexcept;
-		}
-		pelement = spl_object_storage_get(intern, &key);
-		spl_object_storage_free_hash(intern, &key);
-		if (pelement) {
-			if (!Z_ISUNDEF(pelement->inf)) {
-				var_push_dtor(&var_hash, &pelement->inf);
-			}
-			if (!Z_ISUNDEF(pelement->obj)) {
-				var_push_dtor(&var_hash, &pelement->obj);
-			}
-		}
-		element = spl_object_storage_attach(intern, &entry, Z_ISUNDEF(inf)?NULL:&inf);
-		var_replace(&var_hash, &entry, &element->obj);
-		var_replace(&var_hash, &inf, &element->inf);
-		zval_ptr_dtor(&entry);
-		ZVAL_UNDEF(&entry);
-		zval_ptr_dtor(&inf);
-		ZVAL_UNDEF(&inf);
-	}
-
-	if (*p != ';') {
-		goto outexcept;
-	}
-	++p;
-
-	/* members */
-	if (*p!= 'm' || *++p != ':') {
-		goto outexcept;
-	}
-	++p;
-
-	pmembers = var_tmp_var(&var_hash);
-	if (!php_var_unserialize(pmembers, &p, s + buf_len, &var_hash) || Z_TYPE_P(pmembers) != IS_ARRAY) {
-		goto outexcept;
-	}
-
-	/* copy members */
-	object_properties_load(&intern->std, Z_ARRVAL_P(pmembers));
-
-	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	return;
-
-outexcept:
-	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Error at offset %zd of %zd bytes", ((char*)p - buf), buf_len);
-	RETURN_THROWS();
-
-} /* }}} */
-
 /* {{{ proto auto SplObjectStorage::__serialize() */
 SPL_METHOD(SplObjectStorage, __serialize)
 {
@@ -951,16 +771,14 @@ static const zend_function_entry spl_funcs_SplObjectStorage[] = {
 	SPL_ME(SplObjectStorage,  key,         arginfo_class_SplObjectStorage_key,0)
 	SPL_ME(SplObjectStorage,  current,     arginfo_class_SplObjectStorage_current,0)
 	SPL_ME(SplObjectStorage,  next,        arginfo_class_SplObjectStorage_next,0)
-	/* Serializable */
-	SPL_ME(SplObjectStorage,  unserialize, arginfo_class_SplObjectStorage_unserialize,    0)
-	SPL_ME(SplObjectStorage,  serialize,   arginfo_class_SplObjectStorage_serialize,0)
-	SPL_ME(SplObjectStorage,  __unserialize, arginfo_class_SplObjectStorage___unserialize,    0)
-	SPL_ME(SplObjectStorage,  __serialize,   arginfo_class_SplObjectStorage___serialize,0)
 	/* ArrayAccess */
 	SPL_MA(SplObjectStorage, offsetExists, SplObjectStorage, contains, arginfo_class_SplObjectStorage_offsetExists, 0)
 	SPL_MA(SplObjectStorage, offsetSet,    SplObjectStorage, attach,   arginfo_class_SplObjectStorage_offsetSet, 0)
 	SPL_MA(SplObjectStorage, offsetUnset,  SplObjectStorage, detach,   arginfo_class_SplObjectStorage_offsetUnset, 0)
 	SPL_ME(SplObjectStorage, offsetGet,    arginfo_class_SplObjectStorage_offsetGet,     0)
+	/* serialization */
+	SPL_ME(SplObjectStorage,  __unserialize, arginfo_class_SplObjectStorage___unserialize,    0)
+	SPL_ME(SplObjectStorage,  __serialize,   arginfo_class_SplObjectStorage___serialize,0)
 	PHP_FE_END
 };
 
@@ -1304,7 +1122,6 @@ PHP_MINIT_FUNCTION(spl_observer)
 
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Countable);
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Iterator);
-	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, Serializable);
 	REGISTER_SPL_IMPLEMENTS(SplObjectStorage, ArrayAccess);
 
 	REGISTER_SPL_STD_CLASS_EX(MultipleIterator, spl_SplObjectStorage_new, spl_funcs_MultipleIterator);

@@ -52,12 +52,6 @@ ZEND_END_ARG_INFO()
 
 #define arginfo_class_SplObjectStorage_next arginfo_class_SplSubject_notify
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObjectStorage_unserialize, 0, 0, 1)
-	ZEND_ARG_TYPE_INFO(0, serialized, IS_STRING, 0)
-ZEND_END_ARG_INFO()
-
-#define arginfo_class_SplObjectStorage_serialize arginfo_class_SplSubject_notify
-
 ZEND_BEGIN_ARG_INFO_EX(arginfo_class_SplObjectStorage_offsetExists, 0, 0, 1)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
