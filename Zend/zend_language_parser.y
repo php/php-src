@@ -1021,6 +1021,7 @@ expr:
 	|	T_YIELD_FROM expr { $$ = zend_ast_create(ZEND_AST_YIELD_FROM, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	inline_function { $$ = $1; }
 	|	T_STATIC inline_function { $$ = $2; ((zend_ast_decl *) $$)->flags |= ZEND_ACC_STATIC; }
+	|	'{' inner_statement_list expr '}' { $$ = zend_ast_create(ZEND_AST_BLOCK_EXPR, $2, $3); }
 ;
 
 
@@ -1036,6 +1037,15 @@ inline_function:
 				  zend_ast_create(ZEND_AST_RETURN, $11), $6);
 				  ((zend_ast_decl *) $$)->lex_pos = $10;
 				  CG(extra_fn_flags) = $9; }
+	|	fn returns_ref '(' parameter_list ')' return_type backup_doc_comment T_DOUBLE_ARROW backup_fn_flags backup_lex_pos '{' inner_statement_list '}' backup_fn_flags {
+			zval zv; ZVAL_NULL(&zv);
+			zend_ast *null_ast = zend_ast_create_zval(&zv);
+			$$ = zend_ast_create_decl(ZEND_AST_ARROW_FUNC, $2 | $14, $1, $7,
+				zend_string_init("{closure}", sizeof("{closure}") - 1, 0), $4, NULL,
+				zend_ast_create(ZEND_AST_RETURN, zend_ast_create(ZEND_AST_BLOCK_EXPR, $12, null_ast)), $6);
+			((zend_ast_decl *) $$)->lex_pos = $10;
+			CG(extra_fn_flags) = $9;
+		}
 ;
 
 fn:

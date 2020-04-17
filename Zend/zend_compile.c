@@ -8334,6 +8334,16 @@ void zend_compile_class_name(znode *result, zend_ast *ast) /* {{{ */
 }
 /* }}} */
 
+void zend_compile_block_expr(znode *result, zend_ast *ast) /* {{{ */
+{
+	zend_ast *statement_list = ast->child[0];
+	zend_ast *expr_ast = ast->child[1];
+
+	zend_compile_stmt(statement_list);
+	zend_compile_expr(result, expr_ast);
+}
+/* }}} */
+
 static zend_op *zend_compile_rope_add_ex(zend_op *opline, znode *result, uint32_t num, znode *elem_node) /* {{{ */
 {
 	if (num == 0) {
@@ -8953,6 +8963,9 @@ void zend_compile_expr(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_CLOSURE:
 		case ZEND_AST_ARROW_FUNC:
 			zend_compile_func_decl(result, ast, 0);
+			return;
+		case ZEND_AST_BLOCK_EXPR:
+			zend_compile_block_expr(result, ast);
 			return;
 		default:
 			ZEND_ASSERT(0 /* not supported */);
