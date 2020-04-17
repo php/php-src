@@ -5,7 +5,6 @@ Bug #63762 - Sigsegv when Exception::$trace is changed by user
 $e = new Exception();
 
 $ref = new ReflectionProperty($e, 'trace');
-$ref->setAccessible(TRUE);
 
 echo "Array of NULL:\n";
 $ref->setValue($e, array(NULL));

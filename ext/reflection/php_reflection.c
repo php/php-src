@@ -1259,7 +1259,7 @@ static void reflection_property_factory(zend_class_entry *ce, zend_string *name,
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_PROPERTY;
 	intern->ce = ce;
-	intern->ignore_visibility = 0;
+	intern->ignore_visibility = 1;
 	ZVAL_STR_COPY(reflection_prop_name(object), name);
 	ZVAL_STR_COPY(reflection_prop_class(object), prop ? prop->ce->name : ce->name);
 }
@@ -1282,7 +1282,7 @@ static void reflection_class_constant_factory(zend_string *name_str, zend_class_
 	intern->ptr = constant;
 	intern->ref_type = REF_TYPE_CLASS_CONSTANT;
 	intern->ce = constant->ce;
-	intern->ignore_visibility = 0;
+	intern->ignore_visibility = 1;
 
 	ZVAL_STR_COPY(reflection_prop_name(object), name_str);
 	ZVAL_STR_COPY(reflection_prop_class(object), constant->ce->name);
@@ -3472,7 +3472,7 @@ ZEND_METHOD(ReflectionClassConstant, __construct)
 	intern->ptr = constant;
 	intern->ref_type = REF_TYPE_CLASS_CONSTANT;
 	intern->ce = constant->ce;
-	intern->ignore_visibility = 0;
+	intern->ignore_visibility = 1;
 	ZVAL_STR_COPY(reflection_prop_name(object), constname);
 	ZVAL_STR_COPY(reflection_prop_class(object), constant->ce->name);
 }
@@ -5188,7 +5188,7 @@ ZEND_METHOD(ReflectionProperty, __construct)
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_PROPERTY;
 	intern->ce = ce;
-	intern->ignore_visibility = 0;
+	intern->ignore_visibility = 1;
 }
 /* }}} */
 

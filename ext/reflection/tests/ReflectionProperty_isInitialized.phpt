@@ -49,7 +49,6 @@ try {
 } catch (ReflectionException $e) {
     echo $e->getMessage(), "\n";
 }
-$rp->setAccessible(true);
 var_dump($rp->isInitialized($a));
 
 echo "Object type:\n";

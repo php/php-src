@@ -32,7 +32,6 @@ class B2 extends A2 {
 
 $b2 = new ReflectionClass('B2');
 $prop = $b2->getProperty('a');
-$prop->setAccessible(true);
 var_dump($prop->getValue(new b2));
 
 ?>

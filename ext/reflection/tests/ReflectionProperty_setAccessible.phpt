@@ -17,6 +17,26 @@ $protectedStatic = new ReflectionProperty('A', 'protectedStatic');
 $private         = new ReflectionProperty($a, 'private');
 $privateStatic   = new ReflectionProperty('A', 'privateStatic');
 
+var_dump($protected->getValue($a));
+var_dump($protectedStatic->getValue());
+var_dump($private->getValue($a));
+var_dump($privateStatic->getValue());
+
+$protected->setValue($a, 'e');
+$protectedStatic->setValue('f');
+$private->setValue($a, 'g');
+$privateStatic->setValue('h');
+
+var_dump($protected->getValue($a));
+var_dump($protectedStatic->getValue());
+var_dump($private->getValue($a));
+var_dump($privateStatic->getValue());
+
+$protected->setAccessible(FALSE);
+$protectedStatic->setAccessible(FALSE);
+$private->setAccessible(FALSE);
+$privateStatic->setAccessible(FALSE);
+
 try {
     var_dump($protected->getValue($a));
 }
@@ -49,31 +69,27 @@ catch (ReflectionException $e) {
     var_dump($e->getMessage());
 }
 
-$protected->setAccessible(TRUE);
-$protectedStatic->setAccessible(TRUE);
-$private->setAccessible(TRUE);
-$privateStatic->setAccessible(TRUE);
-
-var_dump($protected->getValue($a));
-var_dump($protectedStatic->getValue());
-var_dump($private->getValue($a));
-var_dump($privateStatic->getValue());
-
-$protected->setValue($a, 'e');
-$protectedStatic->setValue('f');
-$private->setValue($a, 'g');
-$privateStatic->setValue('h');
-
-var_dump($protected->getValue($a));
-var_dump($protectedStatic->getValue());
-var_dump($private->getValue($a));
-var_dump($privateStatic->getValue());
-
 $a               = new A;
 $b               = new B;
 $protected       = new ReflectionProperty($b, 'protected');
 $protectedStatic = new ReflectionProperty('B', 'protectedStatic');
 $private         = new ReflectionProperty($a, 'private');
+
+var_dump($protected->getValue($b));
+var_dump($protectedStatic->getValue());
+var_dump($private->getValue($b));
+
+$protected->setValue($b, 'e');
+$protectedStatic->setValue('f');
+$private->setValue($b, 'g');
+
+var_dump($protected->getValue($b));
+var_dump($protectedStatic->getValue());
+var_dump($private->getValue($b));
+
+$protected->setAccessible(FALSE);
+$protectedStatic->setAccessible(FALSE);
+$private->setAccessible(FALSE);
 
 try {
     var_dump($protected->getValue($b));
@@ -98,28 +114,8 @@ try {
 catch (ReflectionException $e) {
     var_dump($e->getMessage());
 }
-
-$protected->setAccessible(TRUE);
-$protectedStatic->setAccessible(TRUE);
-$private->setAccessible(TRUE);
-
-var_dump($protected->getValue($b));
-var_dump($protectedStatic->getValue());
-var_dump($private->getValue($b));
-
-$protected->setValue($b, 'e');
-$protectedStatic->setValue('f');
-$private->setValue($b, 'g');
-
-var_dump($protected->getValue($b));
-var_dump($protectedStatic->getValue());
-var_dump($private->getValue($b));
 ?>
 --EXPECT--
-string(45) "Cannot access non-public member A::$protected"
-string(51) "Cannot access non-public member A::$protectedStatic"
-string(43) "Cannot access non-public member A::$private"
-string(49) "Cannot access non-public member A::$privateStatic"
 string(1) "a"
 string(1) "b"
 string(1) "c"
@@ -128,12 +124,16 @@ string(1) "e"
 string(1) "f"
 string(1) "g"
 string(1) "h"
-string(45) "Cannot access non-public member B::$protected"
-string(51) "Cannot access non-public member B::$protectedStatic"
+string(45) "Cannot access non-public member A::$protected"
+string(51) "Cannot access non-public member A::$protectedStatic"
 string(43) "Cannot access non-public member A::$private"
+string(49) "Cannot access non-public member A::$privateStatic"
 string(1) "a"
 string(1) "f"
 string(1) "c"
 string(1) "e"
 string(1) "f"
 string(1) "g"
+string(45) "Cannot access non-public member B::$protected"
+string(51) "Cannot access non-public member B::$protectedStatic"
+string(43) "Cannot access non-public member A::$private"
