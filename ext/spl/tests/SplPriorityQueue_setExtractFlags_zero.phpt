@@ -4,12 +4,12 @@ Setting SplPriorityQueue extract flags to zero generates an exception
 <?php
 
 $queue = new SplPriorityQueue();
-$queue->setExtractFlags(0);
+try {
+    $queue->setExtractFlags(0);
+} catch (\ValueError $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Fatal error: Uncaught RuntimeException: Must specify at least one extract flag in %s:%d
-Stack trace:
-#0 %s(%d): SplPriorityQueue->setExtractFlags(0)
-#1 {main}
-  thrown in %s on line %d
+--EXPECT--
+SplPriorityQueue::setExtractFlags(): Argument #1 ($flags) must specify at least one extract flag

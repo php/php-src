@@ -24,18 +24,18 @@ try {
 try {
     $h->insert(4, 1);
     echo "inserted 4\n";
-} catch(Exception $e) {
+} catch(Error $e) {
     echo "Exception: ".$e->getMessage()."\n";
 }
 
 try {
     var_dump($h->extract());
-} catch(Exception $e) {
+} catch(Error $e) {
     echo "Exception: ".$e->getMessage()."\n";
 }
 try {
     var_dump($h->extract());
-} catch(Exception $e) {
+} catch(Error $e) {
     echo "Exception: ".$e->getMessage()."\n";
 }
 
@@ -56,9 +56,9 @@ try {
 --EXPECT--
 inserted 1
 Exception: foo
-Exception: Heap is corrupted, heap properties are no longer ensured.
-Exception: Heap is corrupted, heap properties are no longer ensured.
-Exception: Heap is corrupted, heap properties are no longer ensured.
+Exception: Heap is corrupted, heap properties are no longer ensured
+Exception: Heap is corrupted, heap properties are no longer ensured
+Exception: Heap is corrupted, heap properties are no longer ensured
 Recovering..
 int(1)
 int(2)

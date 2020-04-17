@@ -54,7 +54,7 @@ catch (Exception $e) {
 try {
     $heap->top();
 }
-catch (Exception $e) {
+catch (Error $e) {
     echo "Corruption Exception: " . $e->getMessage() . PHP_EOL;
 }
 
@@ -65,6 +65,6 @@ var_dump($heap->isCorrupted());
 --EXPECT--
 bool(false)
 Compare Exception: Compare exception
-Corruption Exception: Heap is corrupted, heap properties are no longer ensured.
+Corruption Exception: Heap is corrupted, heap properties are no longer ensured
 bool(true)
 bool(false)

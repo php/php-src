@@ -5,13 +5,13 @@ Thomas Koch <thomas@koch.ro>
 #Hackday Webtuesday 2008-05-24
 --FILE--
 <?php
-function testForException( $heap )
+function testForeachReferenceError( $heap )
 {
     try
     {
         foreach( $heap as &$item );
     }
-    catch( RuntimeException $e )
+    catch( Error $e )
     {
         echo $e->getMessage(),"\n";
     }
@@ -19,30 +19,30 @@ function testForException( $heap )
 
 // 1. SplMinHeap empty
 $heap = new SplMinHeap;
-testForException( $heap );
+testForeachReferenceError( $heap );
 
 // 2. SplMinHeap non-empty
 $heap = new SplMinHeap;
 $heap->insert( 1 );
-testForException( $heap );
+testForeachReferenceError( $heap );
 
 // 3. SplMaxHeap empty
 $heap = new SplMaxHeap;
-testForException( $heap );
+testForeachReferenceError( $heap );
 
 // 4. SplMaxHeap non-empty
 $heap = new SplMaxHeap;
 $heap->insert( 1 );
-testForException( $heap );
+testForeachReferenceError( $heap );
 
 // 5. SplPriorityQueue empty
 $heap = new SplPriorityQueue;
-testForException( $heap );
+testForeachReferenceError( $heap );
 
 // 6. SplPriorityQueue non-empty
 $heap = new SplPriorityQueue;
 $heap->insert( 1, 2 );
-testForException( $heap );
+testForeachReferenceError( $heap );
 
 ?>
 --EXPECT--

@@ -29,10 +29,10 @@ try {
 
 try {
     $priorityQueue->top();
-} catch (RuntimeException $e) {
+} catch (Error $e) {
   echo "Exception: ".$e->getMessage().PHP_EOL;
 }
 
 ?>
 --EXPECT--
-Exception: Heap is corrupted, heap properties are no longer ensured.
+Exception: Heap is corrupted, heap properties are no longer ensured

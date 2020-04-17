@@ -18,14 +18,17 @@ $h = new SplMinHeap2();
 $h->insert(4);
 try {
     $h->insert(5);
-} catch (Exception $e) {}
+} catch (Exception $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 // call top, should fail with corrupted heap
 try {
     $h->top();
-} catch (Exception $e) {
+} catch (Error $e) {
     echo $e->getMessage();
 }
 ?>
 --EXPECT--
-Heap is corrupted, heap properties are no longer ensured.
+Corrupt heap
+Heap is corrupted, heap properties are no longer ensured
