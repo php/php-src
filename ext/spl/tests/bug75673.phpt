@@ -6,11 +6,11 @@ $stack = new SplStack();
 $stack->push("one");
 $stack->push("two");
 
-$serialized = $stack->serialize();
+$serialized = serialize($stack);
 var_dump($stack->count());
-$stack->unserialize($serialized);
+$stack = unserialize($serialized);
 var_dump($stack->count());
-$stack->unserialize($serialized);
+$stack = unserialize($serialized);
 var_dump($stack->count());
 ?>
 --EXPECT--

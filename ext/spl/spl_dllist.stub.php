@@ -1,6 +1,6 @@
 <?php
 
-class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializable
+class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess
 {
     /**
      * @param mixed $index
@@ -90,12 +90,6 @@ class SplDoublyLinkedList implements Iterator, Countable, ArrayAccess, Serializa
 
     /** @return bool */
     public function valid() {}
-
-    /** @return void */
-    public function unserialize(string $serialized) {}
-
-    /** @return string */
-    public function serialize() {}
 
     /** @return array */
     public function __serialize() {}

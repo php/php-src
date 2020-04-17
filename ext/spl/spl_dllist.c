@@ -1114,106 +1114,6 @@ SPL_METHOD(SplDoublyLinkedList, current)
 }
 /* }}} */
 
-/* {{{ proto string SplDoublyLinkedList::serialize()
- Serializes storage */
-SPL_METHOD(SplDoublyLinkedList, serialize)
-{
-	spl_dllist_object     *intern   = Z_SPLDLLIST_P(ZEND_THIS);
-	smart_str              buf      = {0};
-	spl_ptr_llist_element *current  = intern->llist->head, *next;
-	zval                   flags;
-	php_serialize_data_t   var_hash;
-
-	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	PHP_VAR_SERIALIZE_INIT(var_hash);
-
-	/* flags */
-	ZVAL_LONG(&flags, intern->flags);
-	php_var_serialize(&buf, &flags, &var_hash);
-
-	/* elements */
-	while (current) {
-		smart_str_appendc(&buf, ':');
-		next = current->next;
-
-		php_var_serialize(&buf, &current->data, &var_hash);
-
-		current = next;
-	}
-
-	smart_str_0(&buf);
-
-	/* done */
-	PHP_VAR_SERIALIZE_DESTROY(var_hash);
-
-	RETURN_NEW_STR(buf.s);
-} /* }}} */
-
-/* {{{ proto void SplDoublyLinkedList::unserialize(string serialized)
- Unserializes storage */
-SPL_METHOD(SplDoublyLinkedList, unserialize)
-{
-	spl_dllist_object *intern = Z_SPLDLLIST_P(ZEND_THIS);
-	zval *flags, *elem;
-	char *buf;
-	size_t buf_len;
-	const unsigned char *p, *s;
-	php_unserialize_data_t var_hash;
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &buf, &buf_len) == FAILURE) {
-		RETURN_THROWS();
-	}
-
-	if (buf_len == 0) {
-		return;
-	}
-
-	while (intern->llist->count > 0) {
-		zval tmp;
-		spl_ptr_llist_pop(intern->llist, &tmp);
-		zval_ptr_dtor(&tmp);
-	}
-
-	s = p = (const unsigned char*)buf;
-	PHP_VAR_UNSERIALIZE_INIT(var_hash);
-
-	/* flags */
-	flags = var_tmp_var(&var_hash);
-	if (!php_var_unserialize(flags, &p, s + buf_len, &var_hash) || Z_TYPE_P(flags) != IS_LONG) {
-		goto error;
-	}
-
-	intern->flags = (int)Z_LVAL_P(flags);
-
-	/* elements */
-	while(*p == ':') {
-		++p;
-		elem = var_tmp_var(&var_hash);
-		if (!php_var_unserialize(elem, &p, s + buf_len, &var_hash)) {
-			goto error;
-		}
-		var_push_dtor(&var_hash, elem);
-
-		spl_ptr_llist_push(intern->llist, elem);
-	}
-
-	if (*p != '\0') {
-		goto error;
-	}
-
-	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	return;
-
-error:
-	PHP_VAR_UNSERIALIZE_DESTROY(var_hash);
-	zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Error at offset %zd of %zd bytes", ((char*)p - buf), buf_len);
-	RETURN_THROWS();
-
-} /* }}} */
-
 /* {{{ proto array SplDoublyLinkedList::__serialize() */
 SPL_METHOD(SplDoublyLinkedList, __serialize)
 {
@@ -1414,9 +1314,7 @@ static const zend_function_entry spl_funcs_SplDoublyLinkedList[] = {
 	SPL_ME(SplDoublyLinkedList, next,            arginfo_class_SplDoublyLinkedList_next,            ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, prev,            arginfo_class_SplDoublyLinkedList_prev,            ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList, valid,           arginfo_class_SplDoublyLinkedList_valid,            ZEND_ACC_PUBLIC)
-	/* Serializable */
-	SPL_ME(SplDoublyLinkedList,  unserialize,    arginfo_class_SplDoublyLinkedList_unserialize,      ZEND_ACC_PUBLIC)
-	SPL_ME(SplDoublyLinkedList,  serialize,      arginfo_class_SplDoublyLinkedList_serialize,            ZEND_ACC_PUBLIC)
+	/* serialization */
 	SPL_ME(SplDoublyLinkedList,  __unserialize,    arginfo_class_SplDoublyLinkedList___unserialize,    ZEND_ACC_PUBLIC)
 	SPL_ME(SplDoublyLinkedList,  __serialize,      arginfo_class_SplDoublyLinkedList___serialize,          ZEND_ACC_PUBLIC)
 	PHP_FE_END
@@ -1443,7 +1341,6 @@ PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 	REGISTER_SPL_IMPLEMENTS(SplDoublyLinkedList, Iterator);
 	REGISTER_SPL_IMPLEMENTS(SplDoublyLinkedList, Countable);
 	REGISTER_SPL_IMPLEMENTS(SplDoublyLinkedList, ArrayAccess);
-	REGISTER_SPL_IMPLEMENTS(SplDoublyLinkedList, Serializable);
 
 	spl_ce_SplDoublyLinkedList->get_iterator = spl_dllist_get_iterator;
 
