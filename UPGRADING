@@ -371,6 +371,12 @@ PHP 8.1 UPGRADE NOTES
   . PDO::getAttributes() with PDO::ATTR_SERVER_INFO and PDO::ATTR_SERVER_VERSION
     now return values instead of throwing PDOException.
 
+- Reflection:
+  . ReflectionProperty::setAccessible() and ReflectionMethod::setAccessible()
+    no longer have an effect. Properties and methods are always considered
+    accessible through reflection.
+    RFC: https://wiki.php.net/rfc/make-reflection-setaccessible-no-op
+
 ========================================
 6. New Functions
 ========================================
