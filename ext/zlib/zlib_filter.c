@@ -90,6 +90,7 @@ static php_stream_filter_status_t php_zlib_inflate_filter(
 				exit_status = PSFS_PASS_ON;
 			} else if (status != Z_OK) {
 				/* Something bad happened */
+				php_error_docref(NULL, E_NOTICE, "zlib inflate failed");
 				php_stream_bucket_delref(bucket);
 				/* reset these because despite the error the filter may be used again */
 				data->strm.next_in = data->inbuf;
