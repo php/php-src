@@ -1112,11 +1112,15 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		ZEND_HASH_FILL_NEXT(); \
 	} while (0)
 
-#define ZEND_HASH_FILL_END() \
+#define ZEND_HASH_FILL_FINISH() do { \
 		__fill_ht->nNumUsed = __fill_idx; \
 		__fill_ht->nNumOfElements = __fill_idx; \
 		__fill_ht->nNextFreeElement = __fill_idx; \
 		__fill_ht->nInternalPointer = 0; \
+	} while (0)
+
+#define ZEND_HASH_FILL_END() \
+		ZEND_HASH_FILL_FINISH(); \
 	} while (0)
 
 static zend_always_inline zval *_zend_hash_append_ex(HashTable *ht, zend_string *key, zval *zv, int interned)
