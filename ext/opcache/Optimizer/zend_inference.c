@@ -3465,7 +3465,7 @@ static zend_always_inline int _zend_update_type_info(
 			UPDATE_SSA_TYPE(MAY_BE_LONG, ssa_op->result_def);
 			break;
 		case ZEND_FUNC_GET_ARGS:
-			UPDATE_SSA_TYPE(MAY_BE_RC1| MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ANY, ssa_op->result_def);
+			UPDATE_SSA_TYPE(MAY_BE_RC1|MAY_BE_RCN| MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ANY, ssa_op->result_def);
 			break;
 		case ZEND_GET_CLASS:
 		case ZEND_GET_CALLED_CLASS:
