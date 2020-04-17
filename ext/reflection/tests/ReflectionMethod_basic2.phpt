@@ -126,7 +126,7 @@ string(%d) "Method [ <internal:Reflection, ctor> public method __construct ] {
 Reflecting on method TestClass::__destruct()
 
 __toString():
-string(%d) "Method [ <user, dtor> public method __destruct ] {
+string(%d) "Method [ <user> public method __destruct ] {
   @@ %s 28 - 28
 }
 "

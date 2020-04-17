@@ -275,7 +275,7 @@ typedef struct _zend_oparray_context {
 /* Whether this class was used in its unlinked state.     |     |     |     */
 #define ZEND_ACC_HAS_UNLINKED_USES       (1 << 23) /*  X  |     |     |     */
 /*                                                        |     |     |     */
-/* Function Flags (unused: 17, 23, 26)                    |     |     |     */
+/* Function Flags (unused: 17, 23, 26, 29)                |     |     |     */
 /* ==============                                         |     |     |     */
 /*                                                        |     |     |     */
 /* deprecation flag                                       |     |     |     */
@@ -327,9 +327,6 @@ typedef struct _zend_oparray_context {
 /*                                                        |     |     |     */
 /* functions is a constructor                             |     |     |     */
 #define ZEND_ACC_CTOR                    (1 << 28) /*     |  X  |     |     */
-/*                                                        |     |     |     */
-/* function is a destructor                               |     |     |     */
-#define ZEND_ACC_DTOR                    (1 << 29) /*     |  X  |     |     */
 /*                                                        |     |     |     */
 /* closure uses $this                                     |     |     |     */
 #define ZEND_ACC_USES_THIS               (1 << 30) /*     |  X  |     |     */

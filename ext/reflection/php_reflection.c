@@ -767,9 +767,6 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 	if (fptr->common.fn_flags & ZEND_ACC_CTOR) {
 		smart_str_appends(str, ", ctor");
 	}
-	if (fptr->common.fn_flags & ZEND_ACC_DTOR) {
-		smart_str_appends(str, ", dtor");
-	}
 	smart_str_appends(str, "> ");
 
 	if (fptr->common.fn_flags & ZEND_ACC_ABSTRACT) {
@@ -3341,7 +3338,7 @@ ZEND_METHOD(ReflectionMethod, isConstructor)
 /* }}} */
 
 /* {{{ proto public bool ReflectionMethod::isDestructor()
-   Returns whether this method is static */
+   Returns whether this method is a destructor */
 ZEND_METHOD(ReflectionMethod, isDestructor)
 {
 	reflection_object *intern;
@@ -3351,7 +3348,8 @@ ZEND_METHOD(ReflectionMethod, isDestructor)
 		RETURN_THROWS();
 	}
 	GET_REFLECTION_OBJECT_PTR(mptr);
-	RETURN_BOOL(mptr->common.fn_flags & ZEND_ACC_DTOR);
+	RETURN_BOOL(zend_string_equals_literal_ci(
+		mptr->common.function_name, ZEND_DESTRUCTOR_FUNC_NAME));
 }
 /* }}} */
 
