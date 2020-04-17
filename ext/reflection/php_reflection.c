@@ -171,7 +171,6 @@ typedef struct {
 	void *ptr;
 	zend_class_entry *ce;
 	reflection_type_t ref_type;
-	unsigned int ignore_visibility:1;
 	zend_object zo;
 } reflection_object;
 
@@ -1440,7 +1439,6 @@ static void reflection_property_factory(zend_class_entry *ce, zend_string *name,
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_PROPERTY;
 	intern->ce = ce;
-	intern->ignore_visibility = 0;
 	ZVAL_STR_COPY(reflection_prop_name(object), name);
 	ZVAL_STR_COPY(reflection_prop_class(object), prop ? prop->ce->name : ce->name);
 }
@@ -1463,7 +1461,6 @@ static void reflection_class_constant_factory(zend_string *name_str, zend_class_
 	intern->ptr = constant;
 	intern->ref_type = REF_TYPE_CLASS_CONSTANT;
 	intern->ce = constant->ce;
-	intern->ignore_visibility = 0;
 
 	ZVAL_STR_COPY(reflection_prop_name(object), name_str);
 	ZVAL_STR_COPY(reflection_prop_class(object), constant->ce->name);
@@ -1482,7 +1479,6 @@ static void reflection_enum_case_factory(zend_class_entry *ce, zend_string *name
 	intern->ptr = constant;
 	intern->ref_type = REF_TYPE_CLASS_CONSTANT;
 	intern->ce = constant->ce;
-	intern->ignore_visibility = 0;
 
 	ZVAL_STR_COPY(reflection_prop_name(object), name_str);
 	ZVAL_STR_COPY(reflection_prop_class(object), constant->ce->name);
@@ -3313,15 +3309,6 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 		RETURN_THROWS();
 	}
 
-	if (!(mptr->common.fn_flags & ZEND_ACC_PUBLIC) && intern->ignore_visibility == 0) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Trying to invoke %s method %s::%s() from scope %s",
-			mptr->common.fn_flags & ZEND_ACC_PROTECTED ? "protected" : "private",
-			ZSTR_VAL(mptr->common.scope->name), ZSTR_VAL(mptr->common.function_name),
-			ZSTR_VAL(Z_OBJCE_P(ZEND_THIS)->name));
-		RETURN_THROWS();
-	}
-
 	if (variadic) {
 		ZEND_PARSE_PARAMETERS_START(1, -1)
 			Z_PARAM_OBJECT_OR_NULL(object)
@@ -3696,16 +3683,11 @@ ZEND_METHOD(ReflectionMethod, getPrototype)
 /* {{{ Sets whether non-public methods can be invoked */
 ZEND_METHOD(ReflectionMethod, setAccessible)
 {
-	reflection_object *intern;
 	bool visible;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &visible) == FAILURE) {
 		RETURN_THROWS();
 	}
-
-	intern = Z_REFLECTION_P(ZEND_THIS);
-
-	intern->ignore_visibility = visible;
 }
 /* }}} */
 
@@ -3745,7 +3727,6 @@ ZEND_METHOD(ReflectionClassConstant, __construct)
 	intern->ptr = constant;
 	intern->ref_type = REF_TYPE_CLASS_CONSTANT;
 	intern->ce = constant->ce;
-	intern->ignore_visibility = 0;
 	ZVAL_STR_COPY(reflection_prop_name(object), constname);
 	ZVAL_STR_COPY(reflection_prop_class(object), constant->ce->name);
 }
@@ -5453,7 +5434,6 @@ ZEND_METHOD(ReflectionProperty, __construct)
 	intern->ptr = reference;
 	intern->ref_type = REF_TYPE_PROPERTY;
 	intern->ce = ce;
-	intern->ignore_visibility = 0;
 }
 /* }}} */
 
@@ -5580,13 +5560,6 @@ ZEND_METHOD(ReflectionProperty, getValue)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (!(prop_get_flags(ref) & ZEND_ACC_PUBLIC) && intern->ignore_visibility == 0) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Cannot access non-public property %s::$%s",
-			ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->unmangled_name));
-		RETURN_THROWS();
-	}
-
 	if (prop_get_flags(ref) & ZEND_ACC_STATIC) {
 		member_p = zend_read_static_property_ex(intern->ce, ref->unmangled_name, 0);
 		if (member_p) {
@@ -5630,13 +5603,6 @@ ZEND_METHOD(ReflectionProperty, setValue)
 
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	if (!(prop_get_flags(ref) & ZEND_ACC_PUBLIC) && intern->ignore_visibility == 0) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Cannot access non-public property %s::$%s",
-			ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->unmangled_name));
-		RETURN_THROWS();
-	}
-
 	if (prop_get_flags(ref) & ZEND_ACC_STATIC) {
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "z", &value) == FAILURE) {
 			if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &tmp, &value) == FAILURE) {
@@ -5668,13 +5634,6 @@ ZEND_METHOD(ReflectionProperty, isInitialized)
 	}
 
 	GET_REFLECTION_OBJECT_PTR(ref);
-
-	if (!(prop_get_flags(ref) & ZEND_ACC_PUBLIC) && intern->ignore_visibility == 0) {
-		zend_throw_exception_ex(reflection_exception_ptr, 0,
-			"Cannot access non-public property %s::$%s",
-			ZSTR_VAL(intern->ce->name), ZSTR_VAL(ref->unmangled_name));
-		RETURN_THROWS();
-	}
 
 	if (prop_get_flags(ref) & ZEND_ACC_STATIC) {
 		member_p = zend_read_static_property_ex(intern->ce, ref->unmangled_name, 1);
@@ -5762,16 +5721,11 @@ ZEND_METHOD(ReflectionProperty, getAttributes)
 /* {{{ Sets whether non-public properties can be requested */
 ZEND_METHOD(ReflectionProperty, setAccessible)
 {
-	reflection_object *intern;
 	bool visible;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "b", &visible) == FAILURE) {
 		RETURN_THROWS();
 	}
-
-	intern = Z_REFLECTION_P(ZEND_THIS);
-
-	intern->ignore_visibility = visible;
 }
 /* }}} */
 
