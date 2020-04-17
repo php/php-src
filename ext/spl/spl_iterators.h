@@ -25,7 +25,6 @@
 #define spl_ce_Iterator      zend_ce_iterator
 #define spl_ce_Aggregate     zend_ce_aggregate
 #define spl_ce_ArrayAccess   zend_ce_arrayaccess
-#define spl_ce_Serializable  zend_ce_serializable
 #define spl_ce_Countable     zend_ce_countable
 #define spl_ce_Stringable    zend_ce_stringable
 
