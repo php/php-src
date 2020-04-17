@@ -2553,7 +2553,7 @@ PHP_FUNCTION(array_fill)
 
 	if (EXPECTED(num > 0)) {
 		if (sizeof(num) > 4 && UNEXPECTED(EXPECTED(num > 0x7fffffff))) {
-			zend_argument_value_error(2, "is too big");
+			zend_argument_value_error(2, "is too large");
 			RETURN_THROWS();
 		} else if (UNEXPECTED(start_key > ZEND_LONG_MAX - num + 1)) {
 			zend_throw_error(NULL, "Cannot add element to the array as the next element is already occupied");
