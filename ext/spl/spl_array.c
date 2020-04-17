@@ -1891,7 +1891,7 @@ SPL_METHOD(Array, __unserialize)
 
 	object_properties_load(&intern->std, Z_ARRVAL_P(members_zv));
 
-	if (iterator_class_zv && Z_TYPE_P(iterator_class_zv) != IS_NULL) {
+	if (iterator_class_zv && Z_TYPE_P(iterator_class_zv) == IS_STRING) {
 		zend_class_entry *ce = zend_lookup_class(Z_STR_P(iterator_class_zv));
 
 		if (!ce) {
