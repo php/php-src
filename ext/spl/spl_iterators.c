@@ -881,6 +881,7 @@ static zend_function *spl_recursive_it_get_method(zend_object **zobject, zend_st
 	if (!object->iterators) {
 		zend_throw_error(NULL, "The %s instance wasn't initialized properly",
 			ZSTR_VAL((*zobject)->ce->name));
+		return NULL;
 	}
 	zobj = &object->iterators[level].zobject;
 
