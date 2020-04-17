@@ -9,9 +9,9 @@ $splArray = new SplFixedArray();
 
 try {
   $splArray->fromArray($array);
-} catch (Exception $e) {
+} catch (Error $e) {
   echo $e->getMessage();
 }
 ?>
 --EXPECT--
-integer overflow detected
+Integer overflow detected

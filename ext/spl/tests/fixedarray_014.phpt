@@ -4,12 +4,12 @@ SPL: FixedArray: Trying to access nonexistent item
 <?php
 
 try {
-	$a = new SplFixedArray(NULL);
+	$a = new SplFixedArray(1);
 	echo $a[0]++;
 } catch (\ValueError $e) {
 	echo $e->getMessage();
 }
 
 ?>
---EXPECT--
-Index invalid or out of range
+--EXPECTF--
+Notice: Indirect modification of overloaded element of SplFixedArray has no effect in %s on line %d

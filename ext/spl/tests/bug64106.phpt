@@ -12,6 +12,4 @@ $array[][1] = 10;
 
 ?>
 --EXPECTF--
-NULL
-
 Notice: Indirect modification of overloaded element of MyFixedArray has no effect in %s on line %d

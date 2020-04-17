@@ -70,11 +70,11 @@ var_dump(count($a), $a->getSize(), count($a) == $a->getSize());
 ?>
 --EXPECT--
 A::offsetSet
-Index invalid or out of range
+SplFixedArray::offsetSet(): Argument #1 ($index) is out of range
 A::offsetGet
-Index invalid or out of range
+SplFixedArray::offsetGet(): Argument #1 ($index) must be numeric
 A::offsetUnset
-Index invalid or out of range
+SplFixedArray::offsetUnset(): Argument #1 ($index) is out of range
 A::offsetSet
 A::offsetSet
 A::offsetSet

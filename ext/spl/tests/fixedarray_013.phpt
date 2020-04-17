@@ -12,10 +12,11 @@ function test(SplFixedArray &$arr) {
 
 try {
 	test($a[]);
-} catch (\ValueError $e) {
+} catch (\TypeError $e) {
 	echo $e->getMessage(), "\n";
 }
 
 ?>
---EXPECT--
-Index invalid or out of range
+--EXPECTF--
+Notice: Indirect modification of overloaded element of SplFixedArray has no effect in %s on line %d
+test(): Argument #1 ($arr) must be of type SplFixedArray, null given, called in %s on line %d

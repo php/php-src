@@ -10,10 +10,10 @@ try {
 	for ($i = 0; $i < 100; $i++) {
 		$a[] = new stdClass;
 	}
-} catch (\ValueError $e) {
+} catch (\Error $e) {
 	echo $e->getMessage(), "\n";
 }
 
 ?>
 --EXPECT--
-Index invalid or out of range
+Dynamic allocation is forbidden

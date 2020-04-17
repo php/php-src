@@ -237,7 +237,7 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 	}
 
 	if (!parent) { /* this must never happen */
-		php_error_docref(NULL, E_COMPILE_ERROR, "Internal compiler error, Class is not child of SplFixedArray");
+		zend_throw_error(NULL, "Internal compiler error, Class is not child of SplFixedArray");
 	}
 
 	funcs_ptr = class_type->iterator_funcs_ptr;
@@ -307,25 +307,37 @@ static zend_object *spl_fixedarray_object_clone(zend_object *old_object) /* {{{ 
 }
 /* }}} */
 
-static inline zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_object *intern, zval *offset) /* {{{ */
+static inline zval *spl_fixedarray_object_read_dimension_helper(spl_fixedarray_object *intern,
+	zval *offset, uint32_t offset_arg_num) /* {{{ */
 {
 	zend_long index;
 
 	/* we have to return NULL on error here to avoid memleak because of
 	 * ZE duplicating uninitialized_zval_ptr */
 	if (!offset) {
-		zend_value_error("Index invalid or out of range");
+		zend_throw_error(NULL, "Must provided an index to read");
 		return NULL;
 	}
 
 	if (Z_TYPE_P(offset) != IS_LONG) {
 		index = spl_offset_convert_to_long(offset);
+		if (index == -1) {
+			if (offset_arg_num == 0) {
+				zend_value_error("Offset must be numeric");
+			} else {
+				zend_argument_value_error(offset_arg_num, "must be numeric");
+			}
+		}
 	} else {
 		index = Z_LVAL_P(offset);
 	}
 
 	if (index < 0 || index >= intern->array.size) {
-		zend_value_error("Index invalid or out of range");
+		if (offset_arg_num == 0) {
+			zend_value_error("Offset is out of range");
+		} else {
+			zend_argument_value_error(offset_arg_num, "is out of range");
+		}
 		return NULL;
 	} else {
 		return &intern->array.elements[index];
@@ -339,6 +351,12 @@ static zval *spl_fixedarray_object_read_dimension(zend_object *object, zval *off
 {
 	spl_fixedarray_object *intern;
 
+	if (!offset) {
+		/* This emits a Notice
+			Indirect modification of overloaded element of SplFixedArray has no effect */
+		return &EG(uninitialized_zval);
+    }
+
 	intern = spl_fixed_array_from_obj(object);
 
 	if (type == BP_VAR_IS && !spl_fixedarray_object_has_dimension(object, offset, 0)) {
@@ -346,13 +364,7 @@ static zval *spl_fixedarray_object_read_dimension(zend_object *object, zval *off
 	}
 
 	if (intern->fptr_offset_get) {
-		zval tmp;
-		if (!offset) {
-			ZVAL_NULL(&tmp);
-			offset = &tmp;
-		} else {
-			SEPARATE_ARG_IF_REF(offset);
-		}
+		SEPARATE_ARG_IF_REF(offset);
 		zend_call_method_with_1_params(object, intern->std.ce, &intern->fptr_offset_get, "offsetGet", rv, offset);
 		zval_ptr_dtor(offset);
 		if (!Z_ISUNDEF_P(rv)) {
@@ -361,19 +373,16 @@ static zval *spl_fixedarray_object_read_dimension(zend_object *object, zval *off
 		return &EG(uninitialized_zval);
 	}
 
-	return spl_fixedarray_object_read_dimension_helper(intern, offset);
+	return spl_fixedarray_object_read_dimension_helper(intern, offset, 0);
 }
 /* }}} */
 
-static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_object *intern, zval *offset, zval *value) /* {{{ */
+static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_object *intern,
+	zval *offset, zval *value, uint32_t offset_arg_num) /* {{{ */
 {
 	zend_long index;
 
-	if (!offset) {
-		/* '$array[] = value' syntax is not supported */
-		zend_value_error("Index invalid or out of range");
-		return;
-	}
+	ZEND_ASSERT(offset != NULL);
 
 	if (Z_TYPE_P(offset) != IS_LONG) {
 		index = spl_offset_convert_to_long(offset);
@@ -382,7 +391,11 @@ static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_o
 	}
 
 	if (index < 0 || index >= intern->array.size) {
-		zend_value_error("Index invalid or out of range");
+		if (offset_arg_num == 0) {
+			zend_value_error("Offset is out of range");
+		} else {
+			zend_argument_value_error(offset_arg_num, "is out of range");
+		}
 		return;
 	} else {
 		zval_ptr_dtor(&(intern->array.elements[index]));
@@ -394,17 +407,17 @@ static inline void spl_fixedarray_object_write_dimension_helper(spl_fixedarray_o
 static void spl_fixedarray_object_write_dimension(zend_object *object, zval *offset, zval *value) /* {{{ */
 {
 	spl_fixedarray_object *intern;
-	zval tmp;
+
+	/* '$array[] = value' syntax is not supported */
+	if (!offset) {
+		zend_throw_error(NULL, "Dynamic allocation is forbidden");
+		return;
+	}
 
 	intern = spl_fixed_array_from_obj(object);
 
 	if (intern->fptr_offset_set) {
-		if (!offset) {
-			ZVAL_NULL(&tmp);
-			offset = &tmp;
-		} else {
-			SEPARATE_ARG_IF_REF(offset);
-		}
+		SEPARATE_ARG_IF_REF(offset);
 		SEPARATE_ARG_IF_REF(value);
 		zend_call_method_with_2_params(object, intern->std.ce, &intern->fptr_offset_set, "offsetSet", NULL, offset, value);
 		zval_ptr_dtor(value);
@@ -412,11 +425,12 @@ static void spl_fixedarray_object_write_dimension(zend_object *object, zval *off
 		return;
 	}
 
-	spl_fixedarray_object_write_dimension_helper(intern, offset, value);
+	spl_fixedarray_object_write_dimension_helper(intern, offset, value, 0);
 }
 /* }}} */
 
-static inline void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_object *intern, zval *offset) /* {{{ */
+static inline void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_object *intern,
+	zval *offset, uint32_t offset_arg_num) /* {{{ */
 {
 	zend_long index;
 
@@ -427,7 +441,11 @@ static inline void spl_fixedarray_object_unset_dimension_helper(spl_fixedarray_o
 	}
 
 	if (index < 0 || index >= intern->array.size) {
-		zend_value_error("Index invalid or out of range");
+		if (offset_arg_num == 0) {
+			zend_value_error("Offset is out of range");
+		} else {
+			zend_argument_value_error(offset_arg_num, "is out of range");
+		}
 		return;
 	} else {
 		zval_ptr_dtor(&(intern->array.elements[index]));
@@ -449,7 +467,7 @@ static void spl_fixedarray_object_unset_dimension(zend_object *object, zval *off
 		return;
 	}
 
-	spl_fixedarray_object_unset_dimension_helper(intern, offset);
+	spl_fixedarray_object_unset_dimension_helper(intern, offset, 0);
 }
 /* }}} */
 
@@ -534,7 +552,7 @@ SPL_METHOD(SplFixedArray, __construct)
 	}
 
 	if (size < 0) {
-		zend_value_error("array size cannot be less than zero");
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -645,6 +663,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 
 		ZEND_HASH_FOREACH_KEY(Z_ARRVAL_P(data), num_index, str_index) {
 			if (str_index != NULL || (zend_long)num_index < 0) {
+				/* TODO Better error message? */
 				zend_value_error("array must contain only positive integer keys");
 				RETURN_THROWS();
 			}
@@ -656,7 +675,7 @@ SPL_METHOD(SplFixedArray, fromArray)
 
 		tmp = max_index + 1;
 		if (tmp <= 0) {
-			zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "integer overflow detected");
+			zend_throw_error(NULL, "Integer overflow detected");
 			RETURN_THROWS();
 		}
 		spl_fixedarray_init(&array, tmp);
@@ -715,7 +734,7 @@ SPL_METHOD(SplFixedArray, setSize)
 	}
 
 	if (size < 0) {
-		zend_value_error("array size cannot be less than zero");
+		zend_argument_value_error(1, "must be greater than or equal to 0");
 		RETURN_THROWS();
 	}
 
@@ -754,7 +773,7 @@ SPL_METHOD(SplFixedArray, offsetGet)
 	}
 
 	intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
-	value = spl_fixedarray_object_read_dimension_helper(intern, zindex);
+	value = spl_fixedarray_object_read_dimension_helper(intern, zindex, 1);
 
 	if (value) {
 		ZVAL_COPY_DEREF(return_value, value);
@@ -775,7 +794,7 @@ SPL_METHOD(SplFixedArray, offsetSet)
 	}
 
 	intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
-	spl_fixedarray_object_write_dimension_helper(intern, zindex, value);
+	spl_fixedarray_object_write_dimension_helper(intern, zindex, value, 1);
 
 } /* }}} */
 
@@ -791,7 +810,7 @@ SPL_METHOD(SplFixedArray, offsetUnset)
 	}
 
 	intern = Z_SPLFIXEDARRAY_P(ZEND_THIS);
-	spl_fixedarray_object_unset_dimension_helper(intern, zindex);
+	spl_fixedarray_object_unset_dimension_helper(intern, zindex, 1);
 
 } /* }}} */
 
@@ -844,7 +863,7 @@ static zval *spl_fixedarray_it_get_current_data(zend_object_iterator *iter) /* {
 
 		ZVAL_LONG(&zindex, object->current);
 
-		data = spl_fixedarray_object_read_dimension_helper(object, &zindex);
+		data = spl_fixedarray_object_read_dimension_helper(object, &zindex, 0);
 
 		if (data == NULL) {
 			data = &EG(uninitialized_zval);
@@ -948,7 +967,7 @@ SPL_METHOD(SplFixedArray, current)
 
 	ZVAL_LONG(&zindex, intern->current);
 
-	value = spl_fixedarray_object_read_dimension_helper(intern, &zindex);
+	value = spl_fixedarray_object_read_dimension_helper(intern, &zindex, 0);
 
 	if (value) {
 		ZVAL_COPY_DEREF(return_value, value);
@@ -974,7 +993,7 @@ zend_object_iterator *spl_fixedarray_get_iterator(zend_class_entry *ce, zval *ob
 	spl_fixedarray_it *iterator;
 
 	if (by_ref) {
-		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0);
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
 		return NULL;
 	}
 

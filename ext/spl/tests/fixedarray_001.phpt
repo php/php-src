@@ -19,7 +19,6 @@ try {
 } catch (\ValueError $e) {
     echo $e->getMessage() . PHP_EOL;
 }
-
 $a->setSize(10);
 
 
@@ -46,9 +45,9 @@ $a[0] = "valueNew";
 var_dump($b[0]);
 ?>
 --EXPECT--
-Index invalid or out of range
-Index invalid or out of range
-Index invalid or out of range
+Offset is out of range
+Offset is out of range
+Offset is out of range
 string(6) "value0"
 string(6) "value2"
 string(6) "value3"
