@@ -119,7 +119,7 @@ try
         echo "$k=>$v\n";
     }
 }
-catch(UnexpectedValueException $e)
+catch(TypeError $e)
 {
     echo $e->getMessage() . "\n";
 }
@@ -180,4 +180,4 @@ MyRecursiveArrayIterator::valid = false
 RecursiveArrayIteratorIterator::endChildren(1)
 RecursiveArrayIteratorIterator::callHasChildren(0) = yes/yes
 RecursiveArrayIteratorIterator::callGetChildren(skip)
-Objects returned by RecursiveIterator::getChildren() must implement RecursiveIterator
+Return value of RecursiveIterator::getChildren() must be of type RecursiveIterator, null returned

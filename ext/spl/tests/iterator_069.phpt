@@ -10,11 +10,12 @@ $recArrIt = new RecursiveArrayIterator($arrOb->getIterator());
 
 $recItIt = new RecursiveIteratorIterator($recArrIt);
 
-foreach ($recItIt as &$val) echo "$val\n";
+try {
+    foreach ($recItIt as &$val) echo "$val\n";
+} catch (\Error $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Fatal error: Uncaught RuntimeException: An iterator cannot be used with foreach by reference in %s:%d
-Stack trace:
-#0 {main}
-  thrown in %s on line %d
+--EXPECT--
+An iterator cannot be used with foreach by reference

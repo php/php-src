@@ -12,10 +12,12 @@ class foo extends RecursiveIteratorIterator {
 }
 
 $foo = new foo("This is bar");
-echo $foo->bar();
+try {
+    echo $foo->bar();
+} catch (Error $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
-==DONE==
-<?php exit(0); ?>
---EXPECTF--
-Fatal error: main(): The foo instance wasn't initialized properly in %s on line %d
+--EXPECT--
+The foo instance wasn't initialized properly

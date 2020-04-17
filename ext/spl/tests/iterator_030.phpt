@@ -15,7 +15,7 @@ try
 {
     var_dump($it->key());
 }
-catch(BadMethodCallException $e)
+catch(Error $e)
 {
     echo $e->getMessage() . "\n";
 }
@@ -24,7 +24,7 @@ try
 {
     var_dump($it->current());
 }
-catch(BadMethodCallException $e)
+catch(Error $e)
 {
     echo $e->getMessage() . "\n";
 }

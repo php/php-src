@@ -20,4 +20,4 @@ try {
 
 ?>
 --EXPECT--
-Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
+CachingIterator::__construct(): Argument #2 ($flags) must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER

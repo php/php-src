@@ -23,8 +23,8 @@ try {
 var_dump(new LimitIterator($arrayIterator, 0, -1));
 
 ?>
---EXPECTF--
-Parameter offset must be >= 0
-Parameter count must either be -1 or a value greater than or equal 0
-object(LimitIterator)#%d (%d) {
+--EXPECT--
+LimitIterator::__construct(): Argument #1 ($iterator) must be greater or equal to 0
+LimitIterator::__construct(): Argument #2 ($offset) must be greater or equal to 0
+object(LimitIterator)#3 (0) {
 }

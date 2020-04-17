@@ -15,15 +15,11 @@ function test($ar, $flags)
 		return;
     }
 	var_dump($it->getFlags());
-	try
-	{
-		foreach($it as $v)
-		{
+	try {
+		foreach($it as $v) {
 			var_dump((string)$it);
 		}
-	}
-	catch (Exception $e)
-	{
+	} catch (Exception $e) {
 		echo 'Exception: ' . $e->getMessage() . "\n";
 	}
 }
@@ -69,19 +65,14 @@ try
 {
     $it = new CachingIterator($ar, CachingIterator::CALL_TOSTRING);
     $it->setFlags(0);
+} catch (\ValueError $e) {
+    echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
 }
-catch (Exception $e)
-{
-    echo 'Exception: ' . $e->getMessage() . "\n";
-}
-try
-{
+try {
     $it = new CachingIterator($ar, CachingIterator::TOSTRING_USE_INNER);
     $it->setFlags(0);
-}
-catch (Exception $e)
-{
-    echo 'Exception: ' . $e->getMessage() . "\n";
+} catch (\ValueError $e) {
+    echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
 }
 
 ?>
@@ -107,20 +98,20 @@ string(3) "0:1"
 string(3) "1:2"
 string(3) "2:3"
 ===3===
-Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
+CachingIterator::setFlags(): Argument #1 ($flags) must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
 int(0)
 ===5===
-Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
+CachingIterator::setFlags(): Argument #1 ($flags) must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
 int(0)
 ===9===
-Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
+CachingIterator::setFlags(): Argument #1 ($flags) must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
 int(0)
 ===6===
-Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
+CachingIterator::setFlags(): Argument #1 ($flags) must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
 int(0)
 ===10===
-Flags must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
+CachingIterator::setFlags(): Argument #1 ($flags) must contain only one of CALL_TOSTRING, TOSTRING_USE_KEY, TOSTRING_USE_CURRENT, TOSTRING_USE_INNER
 int(0)
 ===X===
-Exception: Unsetting flag CALL_TO_STRING is not possible
-Exception: Unsetting flag TOSTRING_USE_INNER is not possible
+ValueError: CachingIterator::setFlags(): Argument #1 ($flags) cannot unset flag CALL_TO_STRING
+ValueError: CachingIterator::setFlags(): Argument #1 ($flags) cannot unset flag TOSTRING_USE_INNER

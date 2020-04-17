@@ -7,8 +7,8 @@ function test($f) {
     try {
         $f();
         echo "ran normally (unexpected)\n\n";
-    } catch (LogicException $e) {
-        echo "exception (expected)\n";
+    } catch (\Error|\LogicException $e) {
+        echo get_class($e) . " (expected)\n";
     }
 }
 
@@ -153,18 +153,18 @@ echo $a,"\n";
 }
 } );
 --EXPECT--
-IteratorIterator... exception (expected)
-FilterIterator... exception (expected)
-RecursiveFilterIterator... exception (expected)
-ParentIterator... exception (expected)
-LimitIterator... exception (expected)
-CachingIterator... exception (expected)
-RecursiveCachingIterator... exception (expected)
-NoRewindIterator... exception (expected)
-RegexIterator... exception (expected)
-RecursiveRegexIterator... exception (expected)
-GlobIterator... exception (expected)
-SplFileObject... exception (expected)
-SplTempFileObject... exception (expected)
-AppendIterator... exception (expected)
-InfiniteIterator... exception (expected)
+IteratorIterator... Error (expected)
+FilterIterator... Error (expected)
+RecursiveFilterIterator... Error (expected)
+ParentIterator... Error (expected)
+LimitIterator... Error (expected)
+CachingIterator... Error (expected)
+RecursiveCachingIterator... Error (expected)
+NoRewindIterator... Error (expected)
+RegexIterator... Error (expected)
+RecursiveRegexIterator... Error (expected)
+GlobIterator... LogicException (expected)
+SplFileObject... LogicException (expected)
+SplTempFileObject... LogicException (expected)
+AppendIterator... Error (expected)
+InfiniteIterator... Error (expected)

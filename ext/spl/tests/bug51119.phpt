@@ -29,4 +29,4 @@ try {
 a
 b
 c
-Parameter offset must be >= 0
+LimitIterator::__construct(): Argument #1 ($iterator) must be greater or equal to 0

@@ -36,5 +36,5 @@ try {
 [0] => 0145b
 [c] => 045Array
 [0] => 0245d
-Use RecursiveTreeIterator::PREFIX_* constant
-Use RecursiveTreeIterator::PREFIX_* constant
+RecursiveTreeIterator::setPrefixPart(): Argument #2 ($value) must be one of RecursiveTreeIterator::PREFIX_*
+RecursiveTreeIterator::setPrefixPart(): Argument #2 ($value) must be one of RecursiveTreeIterator::PREFIX_*

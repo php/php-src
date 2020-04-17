@@ -11,25 +11,19 @@ foreach($it as $k=>$v)
     var_dump($it->getPosition());
 }
 
-try
-{
+try {
     $it->seek(0);
-}
-catch(OutOfBoundsException $e)
-{
-    echo $e->getMessage() . "\n";
+} catch (\ValueError $e) {
+    echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
 }
 
 $it->seek(2);
 var_dump($it->current());
 
-try
-{
+try {
     $it->seek(3);
-}
-catch(OutOfBoundsException $e)
-{
-    echo $e->getMessage() . "\n";
+} catch (\ValueError $e) {
+    echo get_class($e) . ': ' . $e->getMessage() . \PHP_EOL;
 }
 
 $it->next();
@@ -41,7 +35,7 @@ var_dump($it->valid());
 int(1)
 2=>3
 int(2)
-Cannot seek to 0 which is below the offset 1
+ValueError: Seek position is out of bounds
 int(3)
-Cannot seek to 3 which is behind offset 1 plus count 2
+ValueError: Seek position is out of bounds
 bool(false)

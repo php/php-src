@@ -14,7 +14,7 @@ try
 {
     foreach(new RecursiveIteratorIterator(new ArrayObject($ar)) as $v) echo "$v\n";
 }
-catch (InvalidArgumentException $e)
+catch (Error $e)
 {
     echo $e->getMessage() . "\n";
 }

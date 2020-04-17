@@ -8,12 +8,12 @@ class RecursiveArrayIteratorIterator extends RecursiveIteratorIterator {
 }
 $it = new RecursiveArrayIteratorIterator(new RecursiveArrayIterator(array()), 2);
 
-foreach($it as $k=>$v) { }
+try {
+    foreach($it as $k=>$v) { }
+} catch (\Error $e) {
+    echo $e->getMessage() . \PHP_EOL;
+}
 
 ?>
---EXPECTF--
-Fatal error: Uncaught LogicException: The object is in an invalid state as the parent constructor was not called in %s:%d
-Stack trace:
-#0 %s%ebug54281.php(8): RecursiveIteratorIterator->rewind()
-#1 {main}
-  thrown in %s%ebug54281.php on line 8
+--EXPECT--
+The object is in an invalid state as the parent constructor was not called

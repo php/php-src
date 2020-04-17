@@ -103,5 +103,5 @@ int(0)
 0: 4
 ===-1===
 bool(false)
-Parameter max_depth must be greater or equal than -1
+RecursiveIteratorIterator::setMaxDepth(): Argument #1 ($max_depth) must be greater or equal than -1
 int(4)
