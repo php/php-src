@@ -34,4 +34,16 @@ $(srcdir)/zend_ini_scanner.c: $(srcdir)/zend_ini_scanner.l
 
 $(builddir)/zend_highlight.lo $(builddir)/zend_compile.lo: $(srcdir)/zend_language_parser.h
 
+$(srcdir)/zend_vm_execute.h $(srcdir)/zend_vm_opcodes.h $(srcdir)/zend_vm_opcodes.c: vm.gen.intermediate ;
+
+.INTERMEDIATE: vm.gen.intermediate
+vm.gen.intermediate: $(srcdir)/zend_vm_def.h $(srcdir)/zend_vm_execute.skl $(srcdir)/zend_vm_gen.php
+	@if test ! -z "$(PHP_EXECUTABLE)" && test -x "$(PHP_EXECUTABLE)"; then \
+		$(PHP_EXECUTABLE) $(srcdir)/zend_vm_gen.php; \
+	elif type php >/dev/null 2>/dev/null; then \
+		if test `php -v | head -n1 | cut -d" " -f 2 | sed "s/$$/\n7.0.99/" | sort -rV | head -n1` != "7.0.99"; then \
+			php $(srcdir)/zend_vm_gen.php; \
+		fi; \
+	fi;
+
 Zend/zend_execute.lo: $(srcdir)/zend_vm_execute.h $(srcdir)/zend_vm_opcodes.h

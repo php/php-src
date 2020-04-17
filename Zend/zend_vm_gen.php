@@ -43,8 +43,9 @@ const HEADER_TEXT = <<< DATA
 DATA;
 
 /*
-    This script creates zend_vm_execute.h and zend_vm_opcodes.h
-    from existing zend_vm_def.h and zend_vm_execute.skl
+    This script creates zend_vm_execute.h, zend_vm_opcodes.h
+    and zend_vm_opcodes.c from existing zend_vm_def.h and 
+    zend_vm_execute.skl
 */
 
 error_reporting(E_ALL);
