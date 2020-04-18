@@ -2418,8 +2418,6 @@ static zend_always_inline int _zend_update_type_info(
 			break;
 		case ZEND_BOOL_NOT:
 		case ZEND_BOOL_XOR:
-		case ZEND_IS_IDENTICAL:
-		case ZEND_IS_NOT_IDENTICAL:
 		case ZEND_IS_EQUAL:
 		case ZEND_IS_NOT_EQUAL:
 		case ZEND_IS_SMALLER:
@@ -3513,7 +3511,37 @@ static zend_always_inline int _zend_update_type_info(
 			UPDATE_SSA_TYPE(MAY_BE_STRING|MAY_BE_RC1|MAY_BE_RCN, ssa_op->result_def);
 			break;
 		case ZEND_TYPE_CHECK:
+			/* Often redundant since there's already a check in sccp that also leads to dead code elimination.
+			if (t1 & MAY_BE_UNDEF) {
+				t1 |= MAY_BE_NULL;
+			}
+
+			if ((MAY_BE_ANY & opline->extended_value & t1) == 0) {
+				UPDATE_SSA_TYPE(MAY_BE_FALSE, ssa_op->result_def);
+			} else if ((MAY_BE_ANY & (opline->extended_value ^ MAY_BE_ANY) & t1) == 0 &&
+					!(t1 & opline->extended_value & MAY_BE_RESOURCE)) {
+				UPDATE_SSA_TYPE(MAY_BE_TRUE, ssa_op->result_def);
+			} else {
+				UPDATE_SSA_TYPE(MAY_BE_FALSE|MAY_BE_TRUE, ssa_op->result_def);
+			}
+			break;
+			*/
 		case ZEND_DEFINED:
+			UPDATE_SSA_TYPE(MAY_BE_FALSE|MAY_BE_TRUE, ssa_op->result_def);
+			break;
+		case ZEND_IS_IDENTICAL:
+		case ZEND_IS_NOT_IDENTICAL:
+			if (t1 & MAY_BE_UNDEF) {
+				t1 |= MAY_BE_NULL;
+			}
+			if (t2 & MAY_BE_UNDEF) {
+				t2 |= MAY_BE_NULL;
+			}
+			if ((t1 & t2 & MAY_BE_ANY) == 0) {
+				/* Other parts of opcache check if ZEND_IS_IDENTICAL is safe to eliminate (it frees operands and warns for undefined variables) */
+				UPDATE_SSA_TYPE(opline->opcode == ZEND_IS_IDENTICAL ? MAY_BE_FALSE : MAY_BE_TRUE, ssa_op->result_def);
+				break;
+			}
 			UPDATE_SSA_TYPE(MAY_BE_FALSE|MAY_BE_TRUE, ssa_op->result_def);
 			break;
 		case ZEND_VERIFY_RETURN_TYPE:
