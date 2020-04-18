@@ -27,7 +27,7 @@
  |.define FP,      r14
  |.define IP,      r15
  |.define IPl,     r15d
- |.define RX,      r15       // the same as VM IP reused as a general purpos reg
+ |.define RX,      r15       // the same as VM IP reused as a general purpose reg
  |.define CARG1,   rcx       // x64/POSIX C call arguments.
  |.define CARG2,   rdx
  |.define CARG3,   r8
@@ -51,7 +51,7 @@
  |.define FP,      r14
  |.define IP,      r15
  |.define IPl,     r15d
- |.define RX,      r15       // the same as VM IP reused as a general purpos reg
+ |.define RX,      r15       // the same as VM IP reused as a general purpose reg
  |.define CARG1,   rdi       // x64/POSIX C call arguments.
  |.define CARG2,   rsi
  |.define CARG3,   rdx
@@ -77,7 +77,7 @@
  |.define FP,      esi
  |.define IP,      edi
  |.define IPl,     edi
- |.define RX,      edi       // the same as VM IP reused as a general purpos reg
+ |.define RX,      edi       // the same as VM IP reused as a general purpose reg
  |.define FCARG1a, ecx       // x86 fastcall arguments.
  |.define FCARG2a, edx
  |.define FCARG1d, ecx
@@ -286,7 +286,7 @@ static void* dasm_labels[zend_lb_MAX];
 
 /* In 64-bit build we compare only low 32-bits.
  * x86_64 cmp instruction doesn't support immediate 64-bit operand, and full
- * comparison would require additinal load of 64-bit address into register.
+ * comparison would require an additional load of 64-bit address into register.
  * This is not a problem at all, while JIT buffer size is less than 4GB.
  */
 |.macro CMP_IP, addr
@@ -2382,7 +2382,7 @@ static int zend_jit_trace_exit_stub(dasm_State **Dst)
 	|.else
 	|	add r4, 8*4+8*8 /* CPU regs + SSE regs */
 	|.endif
-	|	// execute_data = EG(current_excute_data)
+	|	// execute_data = EG(current_execute_data)
 	|	MEM_OP2_2_ZTS mov, FP, aword, executor_globals, current_execute_data, r0
 	|	test eax, eax
 	|	jl ->trace_halt
@@ -7969,7 +7969,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		}
 	}
 	if (!func) {
-		/* resolve function ar run time */
+		/* resolve function at run time */
 	} else if (func->type == ZEND_USER_FUNCTION) {
 		ZEND_ASSERT(opline->opcode != ZEND_DO_ICALL);
 		call_num_args = call_info->num_args;
@@ -7978,7 +7978,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		call_num_args = call_info->num_args;
 #if ZEND_DEBUG
 		if (func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) {
-			// TODO: Mow most internal functions have type hints ???
+			// TODO: Now most internal functions have type hints ???
 			if (!trace) {
 				goto fallback;
 			}
@@ -8391,7 +8391,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, const zend
 		}
 
 		if (trace) {
-			// TODO: This is a qucik dirty fix ??????
+			// TODO: This is a quick dirty fix ??????
 			//
 			// Internal function may call another trace that,
 			// replaces EG(trace_id) and the following side exit
@@ -10298,7 +10298,7 @@ static uint32_t zend_get_known_property_offset(zend_class_entry *ce, zend_string
 	}
 
 	if (ce->info.user.filename != filename) {
-		/* class declaration might be changed infdependently */
+		/* class declaration might be changed independently */
 		return ZEND_WRONG_PROPERTY_OFFSET;
 	}
 
@@ -10309,7 +10309,7 @@ static uint32_t zend_get_known_property_offset(zend_class_entry *ce, zend_string
 			if (parent->type == ZEND_INTERNAL_CLASS) {
 				break;
 			} else if (parent->info.user.filename != filename) {
-				/* some of parents class declarations might be changed infdependently */
+				/* some of parents class declarations might be changed independently */
 				/* TODO: this check may be not enough, because even
 				 * in the same it's possible to conditionally define
 				 * few classes with the same name, and "parent" may
@@ -10345,7 +10345,7 @@ static zend_bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string 
 	}
 
 	if (ce->info.user.filename != filename) {
-		/* class declaration might be changed infdependently */
+		/* class declaration might be changed independently */
 		return 1;
 	}
 
@@ -11052,7 +11052,7 @@ static zend_bool zend_jit_var_supports_reg(zend_ssa *ssa, int var)
 
 	if (zend_jit_reg_alloc < ZEND_JIT_REG_ALLOC_GLOBAL) {
 		/* Disable global register allocation,
-		 * register allocation forSAA variables connected through Phi functions
+		 * register allocation for SSA variables connected through Phi functions
 		 */
 		if (ssa->vars[var].definition_phi) {
 			return 0;

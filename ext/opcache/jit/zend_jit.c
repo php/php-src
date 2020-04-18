@@ -1241,7 +1241,7 @@ static int zend_jit_compute_liveness(const zend_op_array *op_array, zend_ssa *ss
 								if (ssa->vars[src].definition_phi
 								 && ssa->vars[src].definition_phi->pi >= 0
 								 && phi->block == ssa->vars[src].definition_phi->block) {
-									/* Skip zero-lenght interval for Pi variable */
+									/* Skip zero-length interval for Pi variable */
 									src = ssa->vars[src].definition_phi->sources[0];
 								}
 								if (intervals[src]) {
@@ -1387,7 +1387,7 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, zend_ss
 	}
 
 	/* TODO: Allow usage of preserved registers ???
-	 * Their values have to be stored in prologuee and restored in epilogue
+	 * Their values have to be stored in prologue and restored in epilogue
 	 */
 	available = ZEND_REGSET_DIFFERENCE(available, ZEND_REGSET_PRESERVED);
 
@@ -1482,7 +1482,7 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, zend_ss
 	} while (range);
 
 #if 0
-	/* Coalesing */
+	/* Coalescing */
 	if (ssa->vars[current->ssa_var].definition == current->start) {
 		zend_op *opline = op_array->opcodes + current->start;
 		int hint = -1;
@@ -1565,7 +1565,7 @@ static int zend_jit_try_allocate_free_reg(const zend_op_array *op_array, zend_ss
 		}
 		return 1;
 #if 0
-	// TODO: allow low prioirity register usage
+	// TODO: allow low priority register usage
 	} else if (reg2 != ZREG_NONE && zend_interval_end(current) < pos2) {
 		/* register available for the whole interval */
 		current->reg = reg2;
@@ -1840,7 +1840,7 @@ static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array 
 									if (ssa->vars[src].definition_phi
 									 && ssa->vars[src].definition_phi->pi >= 0
 									 && phi->block == ssa->vars[src].definition_phi->block) {
-										/* Skip zero-lenght interval for Pi variable */
+										/* Skip zero-length interval for Pi variable */
 										src = ssa->vars[src].definition_phi->sources[0];
 									}
 									if (intervals[i]) {
@@ -1864,7 +1864,7 @@ static zend_lifetime_interval** zend_jit_allocate_registers(const zend_op_array 
 										if (ssa->vars[src].definition_phi
 										 && ssa->vars[src].definition_phi->pi >= 0
 										 && phi->block == ssa->vars[src].definition_phi->block) {
-											/* Skip zero-lenght interval for Pi variable */
+											/* Skip zero-length interval for Pi variable */
 											src = ssa->vars[src].definition_phi->sources[0];
 										}
 										if (intervals[src]) {
