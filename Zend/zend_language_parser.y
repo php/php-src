@@ -28,13 +28,9 @@
 #include "zend_language_scanner.h"
 #include "zend_exceptions.h"
 
-#define YYSIZE_T size_t
-#define yytnamerr zend_yytnamerr
-static YYSIZE_T zend_yytnamerr(char*, const char*);
-
 #ifdef _MSC_VER
-#define YYMALLOC malloc
-#define YYFREE free
+# define YYMALLOC malloc
+# define YYFREE free
 #endif
 }
 
@@ -45,7 +41,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %define api.prefix {zend}
 %define api.pure full
 %define api.value.type {zend_parser_stack_elem}
-%define parse.error verbose
+%define parse.error custom
 %expect 0
 
 %destructor { zend_ast_destroy($$); } <ast>
@@ -1349,85 +1345,94 @@ isset_variable:
 
 %%
 
-/* Copy to YYRES the contents of YYSTR after stripping away unnecessary
-   quotes and backslashes, so that it's suitable for yyerror.  The
-   heuristic is that double-quoting is unnecessary unless the string
-   contains an apostrophe, a comma, or backslash (other than
-   backslash-backslash).  YYSTR is taken from yytname.  If YYRES is
-   null, do not copy; instead, return the length of what the result
-   would have been.  */
-static YYSIZE_T zend_yytnamerr(char *yyres, const char *yystr)
+static unsigned int umin (unsigned int a, unsigned int b)
 {
-	/* CG(parse_error) states:
-	 * 0 => yyres = NULL, yystr is the unexpected token
-	 * 1 => yyres = NULL, yystr is one of the expected tokens
-	 * 2 => yyres != NULL, yystr is the unexpected token
-	 * 3 => yyres != NULL, yystr is one of the expected tokens
-	 */
-	if (yyres && CG(parse_error) < 2) {
-		CG(parse_error) = 2;
-	}
+  return a < b ? a : b;
+}
 
-	if (CG(parse_error) % 2 == 0) {
-		/* The unexpected token */
-		char buffer[120];
-		const unsigned char *end, *str, *tok1 = NULL, *tok2 = NULL;
-		unsigned int len = 0, toklen = 0, yystr_len;
+int
+yyreport_syntax_error (const yypcontext_t *ctx)
+{
+  int res = 0;
 
-		CG(parse_error)++;
+  // Report the unexpected token.
+  char unexpected[120];
+  {
+    yysymbol_kind_t unexp = yypcontext_token (ctx);
+    if (unexp == YYSYMBOL_YYEOF) {
+      strncpy(unexpected, yysymbol_name (unexp), sizeof(unexpected));
+    } else if (unexp != YYSYMBOL_YYEMPTY) {
+      // Include the lexeme.
+      const unsigned char *str = LANG_SCNG(yy_text);
+      const unsigned char *end = memchr(str, '\n', LANG_SCNG(yy_leng));
+      const unsigned int len =
+        umin(30, end != NULL ? end - str : LANG_SCNG(yy_leng));
 
-		if (LANG_SCNG(yy_text)[0] == 0 &&
-			LANG_SCNG(yy_leng) == 1 &&
-			strcmp(yystr, "\"end of file\"") == 0) {
-			if (yyres) {
-				yystpcpy(yyres, "end of file");
-			}
-			return sizeof("end of file")-1;
-		}
+      // Maybe include the token name.
+      // Strings are like "<<= (T_SL_EQUAL)": extract the part in parens.
+      const char *unexp_str = yysymbol_name (unexp);
+      const unsigned int unexp_len = (unsigned int)strlen(unexp_str);
+      const unsigned char *tok1 = memchr(unexp_str, '(', unexp_len);
+      const unsigned char *tok2 = zend_memrchr(unexp_str, ')', unexp_len);
+      const unsigned int toklen = tok1 != NULL && tok2 != NULL ? tok2 - tok1 + 1 : 0;
 
-		str = LANG_SCNG(yy_text);
-		end = memchr(str, '\n', LANG_SCNG(yy_leng));
-		yystr_len = (unsigned int)strlen(yystr);
+      if (toklen) {
+        snprintf(unexpected, sizeof(unexpected), "'%.*s' %.*s", len, str, toklen, tok1);
+      } else {
+        snprintf(unexpected, sizeof(unexpected), "'%.*s'", len, str);
+      }
+    }
+  }
 
-		if ((tok1 = memchr(yystr, '(', yystr_len)) != NULL
-			&& (tok2 = zend_memrchr(yystr, ')', yystr_len)) != NULL) {
-			toklen = (tok2 - tok1) + 1;
-		} else {
-			tok1 = tok2 = NULL;
-			toklen = 0;
-		}
+  enum { TOKENMAX = 4 };
+  const char *expected[TOKENMAX];
+  unsigned int num_expected = 0;
+  {
+    yysymbol_kind_t exp[TOKENMAX];
+    int n = yypcontext_expected_tokens (ctx, exp, TOKENMAX);
+    if (n < 0)
+      // Forward errors to yyparse.
+      res = n;
+    else
+      {
+        num_expected = n;
+        for (int i = 0; i < num_expected; ++i)
+          expected[i] = yysymbol_name (exp[i]);
+      }
+  }
 
-		if (end == NULL) {
-			len = LANG_SCNG(yy_leng) > 30 ? 30 : LANG_SCNG(yy_leng);
-		} else {
-			len = (end - str) > 30 ? 30 : (end - str);
-		}
-		if (yyres) {
-			if (toklen) {
-				snprintf(buffer, sizeof(buffer), "'%.*s' %.*s", len, str, toklen, tok1);
-			} else {
-				snprintf(buffer, sizeof(buffer), "'%.*s'", len, str);
-			}
-			yystpcpy(yyres, buffer);
-		}
-		return len + (toklen ? toklen + 1 : 0) + 2;
-	}
+  char buff[1024];
+  switch (num_expected)
+    {
+    case 0:
+      snprintf(buff, sizeof buff,
+               "syntax error, unexpected %s", unexpected);
+      break;
 
-	/* One of the expected tokens */
-	if (!yyres) {
-		return strlen(yystr) - (*yystr == '"' ? 2 : 0);
-	}
+    case 1:
+      snprintf(buff, sizeof buff,
+               "syntax error, unexpected %s, expecting %s",
+               unexpected, expected[0]);
+      break;
 
-	if (*yystr == '"') {
-		YYSIZE_T yyn = 0;
-		const char *yyp = yystr;
+    case 2:
+      snprintf(buff, sizeof buff,
+               "syntax error, unexpected %s, expecting %s or %s",
+               unexpected, expected[0], expected[1]);
+      break;
 
-		for (; *++yyp != '"'; ++yyn) {
-			yyres[yyn] = *yyp;
-		}
-		yyres[yyn] = '\0';
-		return yyn;
-	}
-	yystpcpy(yyres, yystr);
-	return strlen(yystr);
+    case 3:
+      snprintf(buff, sizeof buff,
+               "syntax error, unexpected %s, expecting %s or %s or %s",
+               unexpected, expected[0], expected[1], expected[2]);
+      break;
+
+    case 4:
+      snprintf(buff, sizeof buff,
+               "syntax error, unexpected %s, expecting %s or %s or %s or %s",
+               unexpected, expected[0], expected[1], expected[2], expected[3]);
+      break;
+    }
+  yyerror (buff);
+  return res;
 }
