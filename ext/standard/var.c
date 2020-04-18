@@ -861,7 +861,6 @@ static int php_var_serialize_get_sleep_props(
 
 		php_error_docref(NULL, E_NOTICE,
 			"\"%s\" returned as member variable from __sleep() but does not exist", ZSTR_VAL(name));
-		zend_hash_add(ht, name, &EG(uninitialized_zval));
 		zend_tmp_string_release(tmp_name);
 	} ZEND_HASH_FOREACH_END();
 

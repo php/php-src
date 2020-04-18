@@ -27,10 +27,8 @@ var_dump($t);
 __sleep called
 
 Notice: serialize(): "b" returned as member variable from __sleep() but does not exist in %sbug14293.php on line %d
-O:1:"t":2:{s:1:"a";s:5:"hello";s:1:"b";N;}
-object(t)#%d (2) {
+O:1:"t":1:{s:1:"a";s:5:"hello";}
+object(t)#%d (1) {
   ["a"]=>
   string(5) "hello"
-  ["b"]=>
-  NULL
 }

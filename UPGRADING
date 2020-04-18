@@ -391,6 +391,9 @@ PHP 8.0 UPGRADE NOTES
     using serialize_precision rather than precision. In a default configuration,
     this means that floating-point numbers are now printed with full accuracy
     by these debugging functions.
+  . If the array returned by __sleep() contains non-existing properties, these
+    are now silently ignored. Previously, such properties would have been
+    serialized as if they had the value NULL.
 
 - tidy:
   . The $use_include_path parameter, which was not used internally, has been
