@@ -35,17 +35,13 @@ var_dump(unserialize($ss));
 var_dump(unserialize($si));
 ?>
 --EXPECT--
-O:10:"testString":2:{s:1:"a";b:1;s:1:"1";N;}
-O:11:"testInteger":2:{s:1:"a";b:1;s:1:"1";N;}
-object(testString)#3 (2) {
+O:10:"testString":1:{s:1:"a";b:1;}
+O:11:"testInteger":1:{s:1:"a";b:1;}
+object(testString)#3 (1) {
   ["a"]=>
   bool(true)
-  ["1"]=>
-  NULL
 }
-object(testInteger)#3 (2) {
+object(testInteger)#3 (1) {
   ["a"]=>
   bool(true)
-  ["1"]=>
-  NULL
 }
